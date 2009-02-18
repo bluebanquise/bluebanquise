@@ -15,7 +15,7 @@ You should get something like this ::
 
   # HELP ha_cluster_corosync_member_votes How many votes each member node has contributed with to the current quorum
   # TYPE ha_cluster_corosync_member_votes gauge
-  ha_cluster_corosync_member_votes{local="true",node="isma1-2",node_id="1"} 1
+  ha_cluster_corosync_member_votes{local="true",node="mgmt1-2",node_id="1"} 1
   # HELP ha_cluster_corosync_quorate Whether or not the cluster is quorate
   # TYPE ha_cluster_corosync_quorate gauge
   ha_cluster_corosync_quorate 1
@@ -33,12 +33,12 @@ You should get something like this ::
   ha_cluster_pacemaker_config_last_change 1.593617322e+09
   # HELP ha_cluster_pacemaker_fail_count The Fail count number per node and resource id
   # TYPE ha_cluster_pacemaker_fail_count gauge
-  ha_cluster_pacemaker_fail_count{node="isma1-2",resource="fs-conman"} 0
-  ha_cluster_pacemaker_fail_count{node="isma1-2",resource="fs-data-http"} 0
-  ha_cluster_pacemaker_fail_count{node="isma1-2",resource="fs-data-pgsql"} 0
-  ha_cluster_pacemaker_fail_count{node="isma1-2",resource="fs-grafana-database"} 0
-  ha_cluster_pacemaker_fail_count{node="isma1-2",resource="fs-prometheus-database"} 0
-  ha_cluster_pacemaker_fail_count{node="isma1-2",resource="fs-rsyslog"} 0
+  ha_cluster_pacemaker_fail_count{node="mgmt1-2",resource="fs-conman"} 0
+  ha_cluster_pacemaker_fail_count{node="mgmt1-2",resource="fs-data-http"} 0
+  ha_cluster_pacemaker_fail_count{node="mgmt1-2",resource="fs-data-pgsql"} 0
+  ha_cluster_pacemaker_fail_count{node="mgmt1-2",resource="fs-grafana-database"} 0
+  ha_cluster_pacemaker_fail_count{node="mgmt1-2",resource="fs-prometheus-database"} 0
+  ha_cluster_pacemaker_fail_count{node="mgmt1-2",resource="fs-rsyslog"} 0
 
 
 Some of the information given are the following:
@@ -94,7 +94,7 @@ here is what they show:
 •       Etc...
 
  
-To access the dashboard: access the isma, port 3000::
+To access the dashboard: access the management, port 3000::
 
   172.16.0.2:3000
 
