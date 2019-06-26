@@ -1,0 +1,4 @@
+The PXE specification defined multicast TFTP knowed as MTFTP. This
+is not the same as RFC2090 and is defined in this document:
+
+ftp://download.intel.com/labs/manage/wfm/download/pxespec.pdf

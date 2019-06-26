@@ -1,0 +1,31 @@
+File name mangling with PCRE in atftpd
+======================================
+
+Here is an attempt at using PCRE (Perl Compatible Regular Expressions)
+with a TFTP server. The first question on your mind is most likely "Why in
+blazes would anyone want to use a regular expression with a TFTP server?"
+Imagine you have a network of machines that all download an identical
+config file, but each machine requests its file as <serialno>.conf where
+<serialno> is the serial number of the machine. This set up is useful when
+you wish each machine to have custom configs. When you which to have
+identical configurations on each box this is annoying. The solution is to
+map all requested files ending in .conf to one master.conf file via a
+regex. The exact expression I use is
+
+^\w*\.conf$     master.conf
+
+The left hand side is the expression to match, the right hand side is the
+substitution. This is equivalent to perls s/// statement. One or more of these
+expressions can be stored in a file (one per line) and feed to atftpd via a
+--pcre <filename> switch on the command line. For example,
+
+./atftpd --daemon --pcre ./test/pcre_pattern.txt /tftpboot/
+
+Also included is a test program using the --pcre-test <filename> option. You
+can interactively (or via redirection) feed file name to atftpd and look at
+the substitution to verify your rules. for example,
+
+./atftpd --pcre-test ./test/pcre_pattern.txt
+
+Jeff.
+(jeffm@ghostgun.com)

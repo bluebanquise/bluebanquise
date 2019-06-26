@@ -1,0 +1,31 @@
+---
+
+- name: Install required packages
+  package:
+    name: "{{item}}"
+    state: present
+  with_items:
+    - NetworkManager-glib
+#    - libnm-qt-devel.x86_64 # Don't seems to be required, package not available in Centos 7.6 Everything
+    - nm-connection-editor.x86_64
+    - libsemanage-python
+    - policycoreutils-python
+
+- name: Set NIC configuration
+  nmcli:
+    conn_name: "{{network_connections[item].ifname}}"
+    type: ethernet
+#    ifname: "{{network_connections[item].ifname}}"
+    ip4: "{{network_connections[item].ip4}}/{{networks[item].prefix}}"
+    state: present
+  with_items: "{{network_connections}}"
+
+
+- name: ansible bug fix for static ip
+  replace:
+     path: "/etc/sysconfig/network-scripts/ifcfg-{{network_connections[item].ifname}}"
+     regexp: 'BOOTPROTO=dhcp'
+     replace: 'BOOTPROTO=none'
+     backup: no
+  with_items: "{{network_connections}}"
+

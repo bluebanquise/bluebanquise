@@ -1,0 +1,249 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.TH ATFTPD 8 "December 27, 2000"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+
+.SH NAME
+atftpd \- Trivial File Transfer Protocol Server.
+.SH SYNOPSIS
+.B atftpd
+.RI [ options ] " directory"
+
+.SH DESCRIPTION
+.B atftpd
+is a TFTP (RFC1350) server. By default it is started by inetd on most
+sytems, but may run as a stand alone daemon. This server is
+multi-threaded and supports all options described in RFC2347 (option
+extension), RFC2348 (blksize), RFC2349 (tsize and timeout) and RFC2090
+(multicast option). It also supports mtftp as defined in the PXE
+specification.
+
+.SH OPTIONS
+This program supports both the usual GNU command line syntax, with
+long options starting with two dashes ('-') as well as short
+options. A description of the options is included below.
+
+.TP
+.B \-t, \-\-tftpd\-timeout <value>
+Number of seconds of inactivity before the server exits. This value
+has meaning only when the server is started by inetd. In daemon mode,
+the server never exits. Default is 300 seconds.
+
+.TP
+.B \-r, \-\-retry\-timeout <value>
+How many seconds to wait for a reply before retransmitting a
+packet. Default is 5 seconds. This can be overridden by the TFTP
+client with the 'timeout' option.
+
+.TP
+.B \-m, \-\-maxthread <value>
+Maximum number of concurrent threads allowed. Default is 100.
+
+.TP
+.B \-v, \-\-verbose[=value]
+Increase or set the logging level. No arguments will increase by one
+the current value. Default is LOG_NOTICE, see syslog(3) for log
+level. Valid value range from 0 (LOG_EMERG) to 7 (LOG_DEBUG).
+
+.TP
+.B \-\-trace
+When verbose level is set to 7, this will output debug information for
+each packet sent or received from the network.
+
+.TP
+.B \-\-no\-timeout
+disable 'timeout' from RFC2349. This will prevent the server from
+acknowledging the 'timeout' option requested by the client.
+
+.TP
+.B \-\-no\-tsize
+disable 'tsize' from RFC2349. This will prevent the server from
+acknowledging the 'tsize' option requested by the client.
+
+.TP
+.B \-\-no\-blksize
+disable 'blksize' from RFC2348. This will prevent the server from
+acknowledging the 'blksize' request by the client.
+
+.TP
+.B \-\-no\-multicast
+disable 'multicast' from RFC2090. This will prevent the server from
+acknowledging the 'multicast' request by the client.
+
+.TP
+.B \-\-logfile <logfile>
+Log to a specific file instead of only syslog. 'nobody' (or any user
+used to run the server) must have permissions on the given
+file. Assuming the file is /var/log/atftpd.log, simply run: "touch
+/var/log/atftpd.log" and then "chown nobody.nogroup
+/var/log/atftpd.log". When the server is run in daemon mode,
+/dev/stdout or /dev/stderr can be used.  Specifying a single dash as
+the filename will send logs to stdout (file descriptor 1).
+
+.TP
+.B \-\-pidfile
+Write the PID of the server to the specified file. This may be useful
+when automatically starting and stopping one or more instance of the
+server.
+
+.TP
+.B \-\-daemon
+Run as a daemon. Do not use this option if atftpd is started by inetd.
+
+.TP
+.B \-\-no-fork
+When \-\-daemon is specified, this option will prevent the server from
+forking to background. It is useful for debugging purpose or
+specialized usage.
+
+.TP
+.B \-\-user <user[.group]>
+By default, the server change identity to the user nobody and group
+nogroup. Specify an alternate user.group with this option.
+
+.TP
+.B \-\-group <group>
+Alternate way of specifying the group. If group is specified with
+\-\-user and \-\-group, the last option will be used.
+
+.TP
+.B \-\-port <number>
+Specify the port on which atftpd listens. Useful when \-\-daemon is
+specified. Default is standard tftp port as determined 
+by \fIgetservbyname\fR\|(3).
+
+.TP
+.B \-\-bind\-address <IP address>
+Specify the IP address which atftpd binds to. Useful when \-\-daemon is
+specified. Default is to bind to all interfaces. Only one address can
+be specified, the server can only listen to one or all interfaces.
+
+.TP
+.B \-\-mcast\-ttl
+Specify the TTL to be used for multicast datagram. By default a value
+of 1 is used. Note that TTL has a special meaning in multicast as it
+is used to determine the scope of the packets. The value of 1 means
+the packets don't leave the local network, see ip(4). Scope may also
+be determine by the address as described RFC2365.
+
+
+.TP
+.B \-\-mcast\-addr
+Specify the IP address range to be used for multicast transfer. Format
+string may comprise range and list of values:
+"239.255.0.0-31,128-132,200".
+Default value is "239.255.0.0-255". This address range is proposed in
+RFC2365 for local scope.
+
+.TP
+.B \-\-mcast\-port
+Specify the UDP port to use for multicast transfer. Format string may
+contain range and list of port number: "1758-2000,8000-9000". default
+value is "1758".
+
+.TP
+.B \-\-pcre <file>
+Specify a pattern/replacement file to use. This allow to replace
+requested file name based on Perl Compatible Regular Expression. See
+README.PCRE.
+
+.TP
+.B \-\-pcre\-test <file>
+Test a pattern/replacement file. When using this option, the server
+will not start as usual but just read file name from stdin and
+printout the substitution.
+
+.TP
+.B \-\-mtftp <file>
+This will start a mtftp server thread for each valid entry in the
+supplied file. See PXE specification for detail about mtftp. An
+example file is provided in the source distribution.
+
+.TP
+.B \-\-mtftp\-port <port>
+Port the mtftp server shall listen to for incomming request.
+
+.TP
+.B \-\-no\-source\-port\-checking
+In some specific cases of networks using load balancer or other
+equipment performing NAT (network address translation), some needs to
+disable source port checking because port number as been translated. If
+you want to use this feature, you must know why you need it and the
+implication. Be aware that this option violate the RFC1350. This
+option has effect only for non-multicast transfer.
+
+.TP
+.B \-\-mcast\-switch\-client
+This option allow the server to proceed with the next multicast client
+as soon as the current client timeout. When the current master client
+fails to send an acknowledge (ACK) to the server, the server will send
+an option acknowledge (OACK) to the master client with the field MC
+(master client) set to false and send an OACK to the next multicast
+client with MC set to true. Without this option, the server will retry
+the current master client up to 5 times and then mark it done,
+proceding with the next one.
+
+.TP
+.B \-V, \-\-version
+Show version of program.
+
+.TP
+.B \-h, \-\-help
+Show summary of options.
+
+.TP
+.B path
+This is the root directory used by the TFTP server. All requested
+files from a TFTP client must reside in this directory. If not
+specified, the directory defaults to /tftpboot. Since
+atftpd run as the nobody user, the permission of the directory
+must be set properly to allow file reading and writing.
+
+.SH STATS
+Starting with release 0.2, the server collects some statistics.
+Currently the server compute system load, time between connections and
+some thread statistics like number of file sent, received, number of
+abort... To see those stats in the logs, you need to set --verbose=6
+(LOG_NOTICE) or higher.
+
+.SH SECURITY
+TFTP by itself has no provision for security. There is no user
+authentication and TFTP clients get access to all files within the
+specified root directory for which the server has permission.
+
+Some level of security can be gained using atftp libwrap
+support. Adding proper entry to /etc/hosts.allow and /etc/hosts.deny
+will restrict access to trusted hosts. Daemon name to use in these
+files is in.tftpd.
+
+.SH PCRE
+The atftpd server provides a way to dynamically replace requested file
+name by a new one based on Perl compatible regular expression. Pairs
+of pattern/replacement are read from the specified files. Upon
+reception of a read request, the server will first try to open the
+file name requested. If it fails, then it will search for a
+replacement based on the content of the pattern file. If this still
+fails, then an error will be sent to the client. This feature is
+available only for read request. It makes no sense doing this
+substitution for client writing files to the server.
+
+.SH MTFTP
+The mtftp name refer to multicasrt tftp as define by the PXE
+specification. See pxespec.txt for the source of the
+specification. Note that this is not the same as RFC2090. PXE
+compliant boot implements mtftp, not RFC2090.
+
+.SH SEE ALSO
+.BR inetd (8), hosts_access (5), libpcre (7),
+RFC1350, RFC2090, RFC2347, RFC2348, RFC2349 and pxespec.pdf.
+.SH AUTHOR
+This manual page was written by Remi Lefebvre <remi@debian.org> and Jean-Pierre
+Lefebvre <helix@step.polymtl.ca>.

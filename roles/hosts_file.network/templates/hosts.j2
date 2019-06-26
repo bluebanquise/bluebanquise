@@ -1,0 +1,16 @@
+#### Blue Banquise file ####
+## {{ansible_managed}}
+
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+
+{% for network in networks %}
+
+######## {{network}}
+
+{% for host in groups['all'] %}
+{% if (hostvars[host]['network_connections'] is defined) and (hostvars[host]['network_connections'][network] is defined) and (hostvars[host]['network_connections'][network]['ip4'] is defined and not none) %}
+{{hostvars[host]['network_connections'][network]['ip4']}} {{host}}
+{% endif %}
+{% endfor %}
+{% endfor %}

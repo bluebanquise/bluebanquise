@@ -1,0 +1,442 @@
+# translation of atftp_0.7.dfsg-1_ru.po to Russian
+#
+#    Translators, if you are not familiar with the PO format, gettext
+#    documentation is worth reading, especially sections dedicated to
+#    this format, e.g. by running:
+#         info -n '(gettext)PO Files'
+#         info -n '(gettext)Header Entry'
+#    Some information specific to po-debconf are available at
+#            /usr/share/doc/po-debconf/README-trans
+#         or http://www.debian.org/intl/l10n/po-debconf/README-trans#
+#    Developers do not need to manually edit POT or PO files.
+#
+# Yuri Kozlov <kozlov.y@gmail.com>, 2006.
+msgid ""
+msgstr ""
+"Project-Id-Version: 0.7.dfsg-1\n"
+"Report-Msgid-Bugs-To: ldrolez@debian.org\n"
+"POT-Creation-Date: 2006-10-02 00:46+0200\n"
+"PO-Revision-Date: 2006-12-24 21:11+0300\n"
+"Last-Translator: Yuri Kozlov <kozlov.y@gmail.com>\n"
+"Language-Team: Russian <debian-l10n-russian@lists.debian.org>\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: KBabel 1.11.4\n"
+"Plural-Forms:  nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:1001
+msgid "Should the server be started by inetd?"
+msgstr "Запускать сервер с помощью inetd?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:1001
+msgid ""
+"atftpd can be started by the inetd superserver or as a daemon and handle "
+"incoming connections by itself. The latter is only recommend for very high "
+"usage server."
+msgstr ""
+"atftpd может запускаться с помощью суперсервера inetd или постоянно работать "
+"в режиме демона, принимая входящие соединения самостоятельно. Последнее "
+"рекомендуется только в случае очень большой нагрузки на сервер."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:2001
+msgid "Server timeout:"
+msgstr "Время ожидания сервером:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:2001
+msgid "How many seconds the main thread waits before exiting."
+msgstr "Количество секунд, которые будет ждать главный поток перед выходом."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:3001
+msgid "Retry timeout:"
+msgstr "Время ожидания перед повтором:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:3001
+msgid "How many seconds to wait for a reply before retransmitting a packet."
+msgstr ""
+"Количество секунд, в течении которых нужно ждать ответа перед тем как "
+"повторить отправку пакета."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:4001
+msgid "Maximum number of threads:"
+msgstr "Максимальное число потоков:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:4001
+msgid "Maximum number of concurrent threads that can be running."
+msgstr ""
+"Максимальное число одновременно работающих потоков, которые могут быть "
+"запущены."
+
+#. Type: select
+#. Description
+#: ../atftpd.templates:5001
+msgid "Verbosity level:"
+msgstr "Уровень детализации:"
+
+#. Type: select
+#. Description
+#: ../atftpd.templates:5001
+msgid ""
+"Level of logging. 7 logs everything including debug logs. 1 will log only "
+"the system critical logs. 5 (LOG_NOTICE) is the default value."
+msgstr ""
+"Подробность журнальных сообщений. 7 -- записывается всё, включая отладочные "
+"сообщения. 1 -- записываются только системные критические ошибки. По "
+"умолчанию установлено 5 (LOG_NOTICE)."
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:6001
+msgid "Enable 'timeout' support?"
+msgstr "Включить поддержку 'timeout'?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:7001
+msgid "Enable 'tsize' support?"
+msgstr "Включить поддержку 'tsize'?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:8001
+msgid "Enable 'block size' support?"
+msgstr "Включить поддержку 'block size'?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:9001
+msgid "Enable multicast support?"
+msgstr "Включить поддержку широковещания?"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:10001
+msgid "TTL for multicast packets:"
+msgstr "TTL для широковещательных пакетов:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:11001
+msgid "Port to listen for tftp request:"
+msgstr "Номер порта, с которого ожидаются tftp запросы:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:12001
+msgid "Port range for multicast file transfer:"
+msgstr "Диапазон портов для широковещательной файловой передачи:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:12001
+msgid ""
+"Multicast transfer will use any available port in a given set. For example, "
+"\"2000-2003, 3000\" allow atftpd to use port 2000 to 2003 and 3000."
+msgstr ""
+"При широковещательной передаче будет использоваться любой доступный порт из "
+"указанного набора. Например, \"2000-2003, 3000\" позволяет atftpd "
+"использовать порты от 2000 до 2003 и 3000."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:13001
+msgid "Address range for multicast transfer:"
+msgstr "Диапазон адресов для широковещательной передачи:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:13001
+msgid ""
+"Multicast transfer will use any available addresses from a given set of "
+"addresses. Syntax is \"a.b.c.d-d,a.b.c.d,...\""
+msgstr ""
+"При широковещательной передаче будут использованы любые доступные адреса из "
+"заданного набора. Синтаксис -- \"a.b.c.d-d,a.b.c.d,...\""
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:14001
+msgid "Log to file instead of syslog?"
+msgstr "Сохранять сообщения в файл вместо использования syslog?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:14001
+msgid ""
+"If your server does intensive tftp file serving, it is a good idea to  "
+"accept here. That will avoid cluttering your syslog with tftpd logs."
+msgstr ""
+"Если сервер оперирует с большим количеством файлов, лучше ответить "
+"утвердительно. Это поможет избежать заполнения syslog системы сообщениями от "
+"tftpd."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:15001
+msgid "Log file:"
+msgstr "Файл журнала:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:15001
+msgid ""
+"A file where atftpd will write its logs. This file will be made writable for "
+"the user 'nobody' and group 'nogroup'."
+msgstr ""
+"Имя файла для сохранения сообщений от atftpd. Этот файл будет создан с "
+"правами записи пользователю 'nobody' и группе 'nogroup'."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:16001
+msgid "Base directory:"
+msgstr "Базовый каталог:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:16001
+msgid ""
+"The directory tree from where atftpd can serve files. That directory must be "
+"world readable."
+msgstr ""
+"Начальный каталог, в котором atftpd работает с файлами. Этот каталог должен "
+"быть доступен всем на чтение."
+# translation of atftp_0.7.dfsg-1_ru.po to Russian
+#
+#    Translators, if you are not familiar with the PO format, gettext
+#    documentation is worth reading, especially sections dedicated to
+#    this format, e.g. by running:
+#         info -n '(gettext)PO Files'
+#         info -n '(gettext)Header Entry'
+#    Some information specific to po-debconf are available at
+#            /usr/share/doc/po-debconf/README-trans
+#         or http://www.debian.org/intl/l10n/po-debconf/README-trans#
+#    Developers do not need to manually edit POT or PO files.
+#
+# Yuri Kozlov <kozlov.y@gmail.com>, 2006.
+msgid ""
+msgstr ""
+"Project-Id-Version: 0.7.dfsg-1\n"
+"Report-Msgid-Bugs-To: ldrolez@debian.org\n"
+"POT-Creation-Date: 2006-10-02 00:46+0200\n"
+"PO-Revision-Date: 2006-12-24 21:11+0300\n"
+"Last-Translator: Yuri Kozlov <kozlov.y@gmail.com>\n"
+"Language-Team: Russian <debian-l10n-russian@lists.debian.org>\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: KBabel 1.11.4\n"
+"Plural-Forms:  nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:1001
+msgid "Should the server be started by inetd?"
+msgstr "Запускать сервер с помощью inetd?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:1001
+msgid ""
+"atftpd can be started by the inetd superserver or as a daemon and handle "
+"incoming connections by itself. The latter is only recommend for very high "
+"usage server."
+msgstr ""
+"atftpd может запускаться с помощью суперсервера inetd или постоянно работать "
+"в режиме демона, принимая входящие соединения самостоятельно. Последнее "
+"рекомендуется только в случае очень большой нагрузки на сервер."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:2001
+msgid "Server timeout:"
+msgstr "Время ожидания сервером:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:2001
+msgid "How many seconds the main thread waits before exiting."
+msgstr "Количество секунд, которые будет ждать главный поток перед выходом."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:3001
+msgid "Retry timeout:"
+msgstr "Время ожидания перед повтором:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:3001
+msgid "How many seconds to wait for a reply before retransmitting a packet."
+msgstr ""
+"Количество секунд, в течении которых нужно ждать ответа перед тем как "
+"повторить отправку пакета."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:4001
+msgid "Maximum number of threads:"
+msgstr "Максимальное число потоков:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:4001
+msgid "Maximum number of concurrent threads that can be running."
+msgstr ""
+"Максимальное число одновременно работающих потоков, которые могут быть "
+"запущены."
+
+#. Type: select
+#. Description
+#: ../atftpd.templates:5001
+msgid "Verbosity level:"
+msgstr "Уровень детализации:"
+
+#. Type: select
+#. Description
+#: ../atftpd.templates:5001
+msgid ""
+"Level of logging. 7 logs everything including debug logs. 1 will log only "
+"the system critical logs. 5 (LOG_NOTICE) is the default value."
+msgstr ""
+"Подробность журнальных сообщений. 7 -- записывается всё, включая отладочные "
+"сообщения. 1 -- записываются только системные критические ошибки. По "
+"умолчанию установлено 5 (LOG_NOTICE)."
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:6001
+msgid "Enable 'timeout' support?"
+msgstr "Включить поддержку 'timeout'?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:7001
+msgid "Enable 'tsize' support?"
+msgstr "Включить поддержку 'tsize'?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:8001
+msgid "Enable 'block size' support?"
+msgstr "Включить поддержку 'block size'?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:9001
+msgid "Enable multicast support?"
+msgstr "Включить поддержку широковещания?"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:10001
+msgid "TTL for multicast packets:"
+msgstr "TTL для широковещательных пакетов:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:11001
+msgid "Port to listen for tftp request:"
+msgstr "Номер порта, с которого ожидаются tftp запросы:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:12001
+msgid "Port range for multicast file transfer:"
+msgstr "Диапазон портов для широковещательной файловой передачи:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:12001
+msgid ""
+"Multicast transfer will use any available port in a given set. For example, "
+"\"2000-2003, 3000\" allow atftpd to use port 2000 to 2003 and 3000."
+msgstr ""
+"При широковещательной передаче будет использоваться любой доступный порт из "
+"указанного набора. Например, \"2000-2003, 3000\" позволяет atftpd "
+"использовать порты от 2000 до 2003 и 3000."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:13001
+msgid "Address range for multicast transfer:"
+msgstr "Диапазон адресов для широковещательной передачи:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:13001
+msgid ""
+"Multicast transfer will use any available addresses from a given set of "
+"addresses. Syntax is \"a.b.c.d-d,a.b.c.d,...\""
+msgstr ""
+"При широковещательной передаче будут использованы любые доступные адреса из "
+"заданного набора. Синтаксис -- \"a.b.c.d-d,a.b.c.d,...\""
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:14001
+msgid "Log to file instead of syslog?"
+msgstr "Сохранять сообщения в файл вместо использования syslog?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:14001
+msgid ""
+"If your server does intensive tftp file serving, it is a good idea to  "
+"accept here. That will avoid cluttering your syslog with tftpd logs."
+msgstr ""
+"Если сервер оперирует с большим количеством файлов, лучше ответить "
+"утвердительно. Это поможет избежать заполнения syslog системы сообщениями от "
+"tftpd."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:15001
+msgid "Log file:"
+msgstr "Файл журнала:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:15001
+msgid ""
+"A file where atftpd will write its logs. This file will be made writable for "
+"the user 'nobody' and group 'nogroup'."
+msgstr ""
+"Имя файла для сохранения сообщений от atftpd. Этот файл будет создан с "
+"правами записи пользователю 'nobody' и группе 'nogroup'."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:16001
+msgid "Base directory:"
+msgstr "Базовый каталог:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:16001
+msgid ""
+"The directory tree from where atftpd can serve files. That directory must be "
+"world readable."
+msgstr ""
+"Начальный каталог, в котором atftpd работает с файлами. Этот каталог должен "
+"быть доступен всем на чтение."

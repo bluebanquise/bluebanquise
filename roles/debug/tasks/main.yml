@@ -1,0 +1,11 @@
+---
+
+- name: "  ✎ Template: /tmp/debug"
+  template:
+    src: "debug.j2"
+    dest: /tmp/debug
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - template

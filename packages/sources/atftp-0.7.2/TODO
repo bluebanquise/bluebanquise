@@ -1,0 +1,38 @@
+Client
+------
+
+Server
+------
+
+* Use mmap instead of read/write. This way, we'll benefit from zero copy
+  networking in 2.4.x
+* number_of_timeout should be per client
+* Get ICMP error message
+* add maximum number of client for a multicast server thread. Use new thread
+  to server the file if needed?
+* It may be necessary to free client structure when client is done to make
+  sure a long lasting multicast server never build up a huge list of done
+  client
+* Rate control not working yet.
+
+Both
+----
+* revise man pages
+* add statistics mor mtftp
+* Verify the whole logging thing
+* Support IPv6
+* Decide what to do when we got memory allocation failure (other than exit)
+* There is a problem when using block size around 56000 up to 65464. (56944 for
+  Glenn McGrath, 64546 for me on linux 2.4 with Debian unstable). Server send
+  packets (they are fragmented), client machine receive packet but not the
+  application. On an other setup, (linux 2.2.19, Debian 2.2) it work fine up
+  to the maximum of 65464.
+* When receiving error packet, buffer not beeing initilised with 0 seems to
+  create error. String sended by peer to not have proper 0 termination??? Not
+  confirmed.
+
+Generic
+-------
+- Redhat/atftp.spec and test/Makefile are included in make dist and should
+  not.
+

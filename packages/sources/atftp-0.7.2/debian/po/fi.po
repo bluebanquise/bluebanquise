@@ -1,0 +1,209 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Esko Arajärvi <edu@iki.fi>, 2011.
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: ldrolez@debian.org\n"
+"POT-Creation-Date: 2006-10-02 00:46+0200\n"
+"PO-Revision-Date: 2011-04-05 22:11+0300\n"
+"Last-Translator: Esko Arajärvi <edu@iki.fi>\n"
+"Language-Team: debian-10n-finnish@lists.debian.org\n"
+"Language: fi\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Virtaal 0.6.1\n"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:1001
+msgid "Should the server be started by inetd?"
+msgstr "Käynnistetäänkö palvelin inetdin avulla?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:1001
+msgid ""
+"atftpd can be started by the inetd superserver or as a daemon and handle "
+"incoming connections by itself. The latter is only recommend for very high "
+"usage server."
+msgstr ""
+"atftp voidaan käynnistää inetd-superpalvelimen avulla tai ajaa itsenäisenä "
+"taustaohjelmana, joka käsittelee yhteydenotot itse. Jälkimmäistä "
+"suositellaan vain hyvin raskaassa käytössä."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:2001
+msgid "Server timeout:"
+msgstr "Palvelimen aikakatkaisu:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:2001
+msgid "How many seconds the main thread waits before exiting."
+msgstr ""
+"Valitse kuinka monta sekuntia ohjelma odottaa ennen kuin se sulkee itsensä."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:3001
+msgid "Retry timeout:"
+msgstr "Uudelleenyrityksen aikakatkaisu:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:3001
+msgid "How many seconds to wait for a reply before retransmitting a packet."
+msgstr ""
+"Valitse montako sekuntia vastausta odotetaan ennen paketin "
+"uudelleenlähetystä."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:4001
+msgid "Maximum number of threads:"
+msgstr "Säikeiden enimmäismäärä:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:4001
+msgid "Maximum number of concurrent threads that can be running."
+msgstr "Valitse montako säiettä voi yhtä aikaa olla ajossa."
+
+#. Type: select
+#. Description
+#: ../atftpd.templates:5001
+msgid "Verbosity level:"
+msgstr "Yksityiskohtien määrä lokissa:"
+
+#. Type: select
+#. Description
+#: ../atftpd.templates:5001
+msgid ""
+"Level of logging. 7 logs everything including debug logs. 1 will log only "
+"the system critical logs. 5 (LOG_NOTICE) is the default value."
+msgstr ""
+"Valitse lokituksen taso. 7 kirjoittaa lokiin kaiken, mukaan lukien "
+"virheidenjäljitysviestit. 1 kirjoittaa lokiin vain järjestelmän kannalta "
+"kriittiset viestit. Oletusarvo on 5 (LOG_NOTICE)."
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:6001
+msgid "Enable 'timeout' support?"
+msgstr "Otetaanko aikakatkaisun (timeout) tuki käyttöön?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:7001
+msgid "Enable 'tsize' support?"
+msgstr "Otetaanko tiedoston koon kyselyn (tsize) tuki käyttöön?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:8001
+msgid "Enable 'block size' support?"
+msgstr "Otetaanko lohkokoon (block size) määrittelyn tuki käyttöön?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:9001
+msgid "Enable multicast support?"
+msgstr "Otetaanko multicast-lähetysten tuki käyttöön?"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:10001
+msgid "TTL for multicast packets:"
+msgstr "Multicast-pakettien TTL:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:11001
+msgid "Port to listen for tftp request:"
+msgstr "Portti, jossa ohjelma kuuntelee tftp-pyyntöjä:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:12001
+msgid "Port range for multicast file transfer:"
+msgstr "Multicast-tiedostosiirron porttiavaruus:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:12001
+msgid ""
+"Multicast transfer will use any available port in a given set. For example, "
+"\"2000-2003, 3000\" allow atftpd to use port 2000 to 2003 and 3000."
+msgstr ""
+"Multicast-siirto käyttää mitä tahansa vapaata porttia annetusta joukosta. "
+"Esimerkiksi määrittely ”2000-2003, 3000” sallii atftpd:n käyttää portteja "
+"välillä 2000-2003 ja porttia 3000."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:13001
+msgid "Address range for multicast transfer:"
+msgstr "Multicast-siirtojen osoiteavaruus:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:13001
+msgid ""
+"Multicast transfer will use any available addresses from a given set of "
+"addresses. Syntax is \"a.b.c.d-d,a.b.c.d,...\""
+msgstr ""
+"Multicast-lähetys käyttää mitä tahansa vapaata osoitetta annetusta joukosta. "
+"Syntaksi on ”a.b.c.d-d,a.b.c.d,...”"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:14001
+msgid "Log to file instead of syslog?"
+msgstr "Kirjoitetaanko loki tiedostoon syslogin sijaan?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:14001
+msgid ""
+"If your server does intensive tftp file serving, it is a good idea to  "
+"accept here. That will avoid cluttering your syslog with tftpd logs."
+msgstr ""
+"Jos palvelimelle tulee paljon tftp-tiedostopyyntöjä, on tämän valitseminen "
+"hyvä idea. Tällä vältetään syslogin täyttäminen tftpd:n riveillä."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:15001
+msgid "Log file:"
+msgstr "Lokitiedosto:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:15001
+msgid ""
+"A file where atftpd will write its logs. This file will be made writable for "
+"the user 'nobody' and group 'nogroup'."
+msgstr ""
+"Tiedosto, johon atftpd kirjoittaa lokinsa. Käyttäjälle ”nobody” ja ryhmälle "
+"”nogroup” annetaan kirjoitusoikeudet tähän tiedostoon."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:16001
+msgid "Base directory:"
+msgstr "Juurihakemisto:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:16001
+msgid ""
+"The directory tree from where atftpd can serve files. That directory must be "
+"world readable."
+msgstr ""
+"Hakemistopuu, josta atftpd voi jakaa tiedostoja. Hakemiston tulee olla "
+"kaikkien luettavissa."

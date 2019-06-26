@@ -1,0 +1,18 @@
+atftpd for Debian
+-----------------
+
+atftpd uses /srv/tftp by default as base directory. You can change
+that by editing /etc/inetd.conf or with 'dpkg-reconfigure atftpd'. 
+
+Please note that inetd.conf will not be modified by a dpkg-reconfigure, if
+there's already an entry.
+Also, /etc/default/atftpd will be created if it does not exist. So if
+you want 'dpkg-reconfigure atftpd' to create /etc/default/atftpd or 
+/etc/inetd.conf you should remove the file or delete the tftp line.
+
+Remember that you must give the directory appropriate permissions in order 
+to be able to read/write files according to your needs (owner=nobody).
+
+The /srv/tftp directory is not created by the package. You need to
+create it and give appropriate permissions by hand.
+

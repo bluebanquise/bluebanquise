@@ -1,0 +1,2 @@
+TESTS = test.sh
+CLEANFILES = *~

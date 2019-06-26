@@ -1,0 +1,414 @@
+# Italian (it) translation of debconf templates for atftp
+# Copyright (C) 2007 Free Software Foundation, Inc.
+# This file is distributed under the same license as the atftp package.
+# Luca Monducci <luca.mo@tiscali.it>, 2007.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: atftp 0.7 italian debconf templates\n"
+"Report-Msgid-Bugs-To: ldrolez@debian.org\n"
+"POT-Creation-Date: 2006-10-02 00:46+0200\n"
+"PO-Revision-Date: 2007-05-04 20:31+0200\n"
+"Last-Translator: Luca Monducci <luca.mo@tiscali.it>\n"
+"Language-Team: Italian <debian-l10n-italian@lists.debian.org>\n"
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:1001
+msgid "Should the server be started by inetd?"
+msgstr "Avviare il server per mezzo di inetd?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:1001
+msgid ""
+"atftpd can be started by the inetd superserver or as a daemon and handle "
+"incoming connections by itself. The latter is only recommend for very high "
+"usage server."
+msgstr ""
+"È possibile avviare atftpd per mezzo del superserver inetd oppure come un "
+"demone per gestire in modo autonomo le proprie connessioni. La seconda "
+"opzione è raccomandata solo per server con un carico elevato."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:2001
+msgid "Server timeout:"
+msgstr "Timeout del server:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:2001
+msgid "How many seconds the main thread waits before exiting."
+msgstr ""
+"Quanti secondi attendere la chiusura del thread principale prima di uscire."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:3001
+msgid "Retry timeout:"
+msgstr "Timeout di ritrasmissione:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:3001
+msgid "How many seconds to wait for a reply before retransmitting a packet."
+msgstr ""
+"Quanti secondi attendere una risposta prima di ritrasmettere un pacchetto."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:4001
+msgid "Maximum number of threads:"
+msgstr "Numero massimo di thread:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:4001
+msgid "Maximum number of concurrent threads that can be running."
+msgstr "Numero massimo di thread concorrenti che possono essere in esecuzione."
+
+#. Type: select
+#. Description
+#: ../atftpd.templates:5001
+msgid "Verbosity level:"
+msgstr "Livello di verbosità:"
+
+#. Type: select
+#. Description
+#: ../atftpd.templates:5001
+msgid ""
+"Level of logging. 7 logs everything including debug logs. 1 will log only "
+"the system critical logs. 5 (LOG_NOTICE) is the default value."
+msgstr ""
+"Livello di log. Con 7 è registrato tutto, comprese le voci per il debug. Con "
+"1 sono registrati solo gli eventi critici per il sistema. Il valore "
+"predefinito è 5 (LOG_NOTICE)."
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:6001
+msgid "Enable 'timeout' support?"
+msgstr "Attivare il supporto per \"timeout\"?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:7001
+msgid "Enable 'tsize' support?"
+msgstr "Attivare il supporto per \"tsize\"?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:8001
+msgid "Enable 'block size' support?"
+msgstr "Attivare il supporto per \"block size\"?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:9001
+msgid "Enable multicast support?"
+msgstr "Attivare il supporto per il multicast?"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:10001
+msgid "TTL for multicast packets:"
+msgstr "TTL per i pacchetti in multicast:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:11001
+msgid "Port to listen for tftp request:"
+msgstr "Porta su cui stare in ascolto di richieste tftp:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:12001
+msgid "Port range for multicast file transfer:"
+msgstr "Intervallo di porte per trasferimenti di file in multicast:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:12001
+msgid ""
+"Multicast transfer will use any available port in a given set. For example, "
+"\"2000-2003, 3000\" allow atftpd to use port 2000 to 2003 and 3000."
+msgstr ""
+"I trasferimenti in multicast usano tutte le porte disponibili "
+"nell'intervallo. Per esempio \"2000-2003, 3000\" indica a atftpd di usare le "
+"porte dalla 2000 alla 2003 e la porta 3000."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:13001
+msgid "Address range for multicast transfer:"
+msgstr "Intervallo di indirizzi per trasferimenti di file in multicast:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:13001
+msgid ""
+"Multicast transfer will use any available addresses from a given set of "
+"addresses. Syntax is \"a.b.c.d-d,a.b.c.d,...\""
+msgstr ""
+"I trasferimenti in multicast usano tutti gli indirizzi disponibili "
+"nell'intervallo specificato. La sintassi da usare è \"a.b.c.d-d,a.b.c.d,...\""
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:14001
+msgid "Log to file instead of syslog?"
+msgstr "Crare un file di log al posto del syslog?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:14001
+msgid ""
+"If your server does intensive tftp file serving, it is a good idea to  "
+"accept here. That will avoid cluttering your syslog with tftpd logs."
+msgstr ""
+"Se il proprio server serve intensivamente dei file via tftp, è consigliabile "
+"accettare. Questo evita di fare disordine nel syslog con i log di tftp."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:15001
+msgid "Log file:"
+msgstr "File di log:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:15001
+msgid ""
+"A file where atftpd will write its logs. This file will be made writable for "
+"the user 'nobody' and group 'nogroup'."
+msgstr ""
+"File su cui atftpd scrive il proprio log; è necessario che su questo file "
+"abbiano permessi di scrittura l'utente \"noboby\" e il gruppo \"nogroup\"."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:16001
+msgid "Base directory:"
+msgstr "Directory di base:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:16001
+msgid ""
+"The directory tree from where atftpd can serve files. That directory must be "
+"world readable."
+msgstr ""
+"L'albero di directory dal quale atftpd può servire i file. Chiunque deve "
+"poter leggere in questa directory."
+# Italian (it) translation of debconf templates for atftp
+# Copyright (C) 2007 Free Software Foundation, Inc.
+# This file is distributed under the same license as the atftp package.
+# Luca Monducci <luca.mo@tiscali.it>, 2007.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: atftp 0.7 italian debconf templates\n"
+"Report-Msgid-Bugs-To: ldrolez@debian.org\n"
+"POT-Creation-Date: 2006-10-02 00:46+0200\n"
+"PO-Revision-Date: 2007-05-04 20:31+0200\n"
+"Last-Translator: Luca Monducci <luca.mo@tiscali.it>\n"
+"Language-Team: Italian <debian-l10n-italian@lists.debian.org>\n"
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:1001
+msgid "Should the server be started by inetd?"
+msgstr "Avviare il server per mezzo di inetd?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:1001
+msgid ""
+"atftpd can be started by the inetd superserver or as a daemon and handle "
+"incoming connections by itself. The latter is only recommend for very high "
+"usage server."
+msgstr ""
+"È possibile avviare atftpd per mezzo del superserver inetd oppure come un "
+"demone per gestire in modo autonomo le proprie connessioni. La seconda "
+"opzione è raccomandata solo per server con un carico elevato."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:2001
+msgid "Server timeout:"
+msgstr "Timeout del server:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:2001
+msgid "How many seconds the main thread waits before exiting."
+msgstr ""
+"Quanti secondi attendere la chiusura del thread principale prima di uscire."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:3001
+msgid "Retry timeout:"
+msgstr "Timeout di ritrasmissione:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:3001
+msgid "How many seconds to wait for a reply before retransmitting a packet."
+msgstr ""
+"Quanti secondi attendere una risposta prima di ritrasmettere un pacchetto."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:4001
+msgid "Maximum number of threads:"
+msgstr "Numero massimo di thread:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:4001
+msgid "Maximum number of concurrent threads that can be running."
+msgstr "Numero massimo di thread concorrenti che possono essere in esecuzione."
+
+#. Type: select
+#. Description
+#: ../atftpd.templates:5001
+msgid "Verbosity level:"
+msgstr "Livello di verbosità:"
+
+#. Type: select
+#. Description
+#: ../atftpd.templates:5001
+msgid ""
+"Level of logging. 7 logs everything including debug logs. 1 will log only "
+"the system critical logs. 5 (LOG_NOTICE) is the default value."
+msgstr ""
+"Livello di log. Con 7 è registrato tutto, comprese le voci per il debug. Con "
+"1 sono registrati solo gli eventi critici per il sistema. Il valore "
+"predefinito è 5 (LOG_NOTICE)."
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:6001
+msgid "Enable 'timeout' support?"
+msgstr "Attivare il supporto per \"timeout\"?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:7001
+msgid "Enable 'tsize' support?"
+msgstr "Attivare il supporto per \"tsize\"?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:8001
+msgid "Enable 'block size' support?"
+msgstr "Attivare il supporto per \"block size\"?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:9001
+msgid "Enable multicast support?"
+msgstr "Attivare il supporto per il multicast?"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:10001
+msgid "TTL for multicast packets:"
+msgstr "TTL per i pacchetti in multicast:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:11001
+msgid "Port to listen for tftp request:"
+msgstr "Porta su cui stare in ascolto di richieste tftp:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:12001
+msgid "Port range for multicast file transfer:"
+msgstr "Intervallo di porte per trasferimenti di file in multicast:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:12001
+msgid ""
+"Multicast transfer will use any available port in a given set. For example, "
+"\"2000-2003, 3000\" allow atftpd to use port 2000 to 2003 and 3000."
+msgstr ""
+"I trasferimenti in multicast usano tutte le porte disponibili "
+"nell'intervallo. Per esempio \"2000-2003, 3000\" indica a atftpd di usare le "
+"porte dalla 2000 alla 2003 e la porta 3000."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:13001
+msgid "Address range for multicast transfer:"
+msgstr "Intervallo di indirizzi per trasferimenti di file in multicast:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:13001
+msgid ""
+"Multicast transfer will use any available addresses from a given set of "
+"addresses. Syntax is \"a.b.c.d-d,a.b.c.d,...\""
+msgstr ""
+"I trasferimenti in multicast usano tutti gli indirizzi disponibili "
+"nell'intervallo specificato. La sintassi da usare è \"a.b.c.d-d,a.b.c.d,...\""
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:14001
+msgid "Log to file instead of syslog?"
+msgstr "Crare un file di log al posto del syslog?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:14001
+msgid ""
+"If your server does intensive tftp file serving, it is a good idea to  "
+"accept here. That will avoid cluttering your syslog with tftpd logs."
+msgstr ""
+"Se il proprio server serve intensivamente dei file via tftp, è consigliabile "
+"accettare. Questo evita di fare disordine nel syslog con i log di tftp."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:15001
+msgid "Log file:"
+msgstr "File di log:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:15001
+msgid ""
+"A file where atftpd will write its logs. This file will be made writable for "
+"the user 'nobody' and group 'nogroup'."
+msgstr ""
+"File su cui atftpd scrive il proprio log; è necessario che su questo file "
+"abbiano permessi di scrittura l'utente \"noboby\" e il gruppo \"nogroup\"."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:16001
+msgid "Base directory:"
+msgstr "Directory di base:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:16001
+msgid ""
+"The directory tree from where atftpd can serve files. That directory must be "
+"world readable."
+msgstr ""
+"L'albero di directory dal quale atftpd può servire i file. Chiunque deve "
+"poter leggere in questa directory."

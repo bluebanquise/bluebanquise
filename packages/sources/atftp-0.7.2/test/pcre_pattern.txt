@@ -1,0 +1,8 @@
+^[p]?pxelinux.cfg/[0-9A-F]{1,6}$      pxelinux.cfg/default
+^[p]?pxelinux.0$                      pxelinux.0
+linux				      linux
+^str$				      replaced1
+^str				      replaced2
+str$				      replaced3
+repl(ace)			      m$1
+^\w*\.conf$			      master.conf

@@ -1,0 +1,151 @@
+#!/bin/sh -e
+#
+# TODO:
+#  - error checking on values provided by debconf frontend
+
+BASEDIR=/srv/tftp
+DAEMON="--daemon"
+
+. /usr/share/debconf/confmodule
+db_version 2.0
+
+# Do not ask if we want to configure it
+#db_get atftpd/configure
+#if [ "$RET" = "true" ]; then
+
+    db_get atftpd/use_inetd
+    if [ "$RET" ]; then
+	if [ "$RET" = "true" ]; then
+	    USE_INETD=true
+	else
+	    USE_INETD=false
+	fi
+    else
+	USE_INETD=true
+    fi
+
+    db_get atftpd/port
+    if [ "$RET" ]; then
+	TFTPD_PORT="--port $RET"
+    fi
+
+    db_get atftpd/tftpd-timeout
+    if [ "$RET" ]; then
+        TFTPD_TIMEOUT="--tftpd-timeout $RET"
+    fi
+
+    db_get atftpd/retry-timeout
+    if [ "$RET" ]; then
+        RETRY_TIMEOUT="--retry-timeout $RET"
+    fi
+
+    db_get atftpd/maxthread
+    if [ "$RET" ]; then
+        MAXTHREAD="--maxthread $RET"
+    fi
+
+    db_get atftpd/timeout
+    if [ "$RET" != "true" ]; then
+	NOTIMEOUT="--no-timeout"
+    fi
+
+    db_get atftpd/tsize
+    if [ "$RET" != "true" ]; then
+	NOTSIZE="--no-tsize"
+    fi
+
+    db_get atftpd/blksize
+    if [ "$RET" != "true" ]; then
+	NOBLKSIZE="--no-blksize"
+    fi
+
+    db_get atftpd/multicast
+    if [ "$RET" != "true" ]; then
+	NOMCAST="--no-multicast"
+    else
+	db_get atftpd/mcast_port
+	if [ "$RET" ]; then
+	    MCASTPORT="--mcast-port $RET"
+	fi
+	db_get atftpd/mcast_addr
+	if [ "$RET" ]; then
+	    MCASTADDR="--mcast-addr $RET"
+	fi
+	db_get atftpd/ttl
+	if [ "$RET" ]; then
+	    MCASTTTL="--mcast-ttl $RET"
+	fi	
+    fi
+
+    db_get atftpd/verbosity
+    if [ "$RET" ]; then
+	RET=`echo $RET | cut -f1 -d ' '`
+        VERBOSITY="--verbose=$RET"
+    fi
+
+    db_get atftpd/logtofile
+    if [ "$RET" = "true" ]; then
+	db_get atftpd/logfile
+	if [ "$RET" ]; then
+	    LOGFILE="--logfile $RET"
+	    # if the file doesn't exist, create it
+	    if [ ! -f $RET ]; then
+		touch $RET
+		chown nobody:nogroup $RET
+		chmod 640 $RET
+	    fi
+	    # modify the logrotate file
+	    cat >/etc/logrotate.d/atftpd <<EOF
+$RET {
+    daily
+    rotate 5
+    compress
+    copytruncate
+    missingok
+}
+EOF
+	fi
+    else
+	LOGFILE=""
+	# remove the logrotate file
+	rm -f /etc/logrotate.d/atftpd
+    fi
+
+    db_get atftpd/basedir
+    if [ "$RET" ]; then
+        BASEDIR="$RET"
+	if [ ! -d $BASEDIR ]; then
+	    mkdir $BASEDIR
+	    chown nobody $BASEDIR
+	fi
+    fi
+
+#fi
+
+# Make sure atftpd is stoped. Needed for dpkg-reconfigure.
+if [ -e "/etc/init.d/atftpd" ]; then
+        /etc/init.d/atftpd stop
+fi
+
+if [ "$USE_INETD" = "false" ]; then
+    if [ ! -f /etc/default/atftpd ]; then
+	echo "USE_INETD=false" > /etc/default/atftpd
+	echo "OPTIONS=\"$DAEMON $TFTPD_PORT $RETRY_TIMEOUT $NOTIMEOUT $NOTSIZE $NOBLKSIZE $NOMCAST \
+$MCASTPORT $MCASTADDR $MCASTTTL $MAXTHREAD $VERBOSITY $LOGFILE $BASEDIR\""|tr -s " " >> /etc/default/atftpd
+    fi
+    update-inetd --disable tftp
+else
+    INETOPTS=`echo "$TFTPD_TIMEOUT $RETRY_TIMEOUT $NOTIMEOUT $NOTSIZE $NOBLKSIZE $NOMCAST $MCASTPORT $MCASTADDR $MCASTTTL $MAXTHREAD $VERBOSITY $LOGFILE $BASEDIR"|tr -s " "`
+    update-inetd --group BOOT --add "tftp		dgram	udp4	wait	nobody /usr/sbin/tcpd /usr/sbin/in.tftpd $INETOPTS"
+    if [ ! -f /etc/default/atftpd ]; then
+	echo "USE_INETD=true" > /etc/default/atftpd
+	echo "OPTIONS=\"$INETOPTS\""|tr -s " " >> /etc/default/atftpd
+    fi
+fi
+
+#DEBHELPER#
+
+# tell debconf we are done. otherwise, it hangs waiting for the daemon.
+db_stop;
+
+exit 0;

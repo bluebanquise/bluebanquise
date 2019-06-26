@@ -1,0 +1,36 @@
+atftp-0.7.1 and later
+=====================
+
+Development of atftp has switched over to a sourceforge project. 
+A git repository is used for the source code.
+
+A copy of the repository can be fetched with the command
+
+  git clone git://atftp.git.sourceforge.net/gitroot/atftp/atftp
+
+Please read the file INSTALL for further instructions.
+
+
+
+
+
+
+
+atftp-0.7
+=========
+
+
+The development for atftp is done using CVS. It is possible to access the
+repository read-only by using the following CVSROOT with a null password:
+
+ :pserver:anonymous@heimlich.syspark.com:/var/cvs/atftp
+
+It is also possible to grant write access to the CVS repository for people
+wishing to participate in the development. Please address such requests to
+either of us.
+
+Thanks
+
+--
+Remi Lefebvre <remi@debian.org>
+Jean-Pierre Lefebvre <helix@step.polymtl.ca>

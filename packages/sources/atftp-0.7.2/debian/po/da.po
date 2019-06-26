@@ -1,0 +1,418 @@
+# Danish translation for atftp.
+# Copyright (C) 2010 atftp og nedenstående oversættere.
+# This file is distributed under the same license as the atftp package.
+# Morten Brix Pedersen <morten@wtf.dk>, 2005.
+# Joe Hansen (joedalton2@yahoo.dk), 2010.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: atftp\n"
+"Report-Msgid-Bugs-To: ldrolez@debian.org\n"
+"POT-Creation-Date: 2006-10-02 00:46+0200\n"
+"PO-Revision-Date: 2010-12-30 19:25+0200\n"
+"Last-Translator: Joe Hansen <joedalton2@yahoo.dk>\n"
+"Language-Team: Danish <debian-l10n-danish@lists.debian.org>\n"
+"Language: da\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:1001
+msgid "Should the server be started by inetd?"
+msgstr "Skal serveren startes af inetd?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:1001
+msgid ""
+"atftpd can be started by the inetd superserver or as a daemon and handle "
+"incoming connections by itself. The latter is only recommend for very high "
+"usage server."
+msgstr ""
+"atftpd kan startes af inetd superserveren eller som en dæmon, der håndterer "
+"indgående forbindelser selv. Sidstnævnte er kun anbefalet for maskiner med "
+"meget stort forbrug."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:2001
+msgid "Server timeout:"
+msgstr "Servertidsudløb:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:2001
+msgid "How many seconds the main thread waits before exiting."
+msgstr "Hovr mange sekunder hovedtråden venter før den afslutter."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:3001
+msgid "Retry timeout:"
+msgstr "Tidsudløb for prøv igen:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:3001
+msgid "How many seconds to wait for a reply before retransmitting a packet."
+msgstr "Hvor mange sekunder skal der ventes på svar, før en pakke gensendes."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:4001
+msgid "Maximum number of threads:"
+msgstr "Maks antal tråde:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:4001
+msgid "Maximum number of concurrent threads that can be running."
+msgstr "Maks antal samtidige tråde der kan køre."
+
+#. Type: select
+#. Description
+#: ../atftpd.templates:5001
+msgid "Verbosity level:"
+msgstr "Uddybningsniveau:"
+
+#. Type: select
+#. Description
+#: ../atftpd.templates:5001
+msgid ""
+"Level of logging. 7 logs everything including debug logs. 1 will log only "
+"the system critical logs. 5 (LOG_NOTICE) is the default value."
+msgstr ""
+"Niveau til logning. 7 logger alt inklusive fejlsøgningslogge. 1 vil kun "
+"logge systemkritiske logge. 5 (LOG_NOTICE) er standardværdien."
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:6001
+msgid "Enable 'timeout' support?"
+msgstr "Aktiver understøttelse af tidsudløb (»timeout«)?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:7001
+msgid "Enable 'tsize' support?"
+msgstr "Aktiver understøttelse af »tsize«?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:8001
+msgid "Enable 'block size' support?"
+msgstr "Aktiver understøttelse af blokstørrelse (»block size«)?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:9001
+msgid "Enable multicast support?"
+msgstr "Aktiver understøttelse af »multicast«?"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:10001
+msgid "TTL for multicast packets:"
+msgstr "TTL for multicastpakker:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:11001
+msgid "Port to listen for tftp request:"
+msgstr "Port der skal lyttes på for tftp-forespørgsel:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:12001
+msgid "Port range for multicast file transfer:"
+msgstr "Portområde for multicast-filoverførsel:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:12001
+msgid ""
+"Multicast transfer will use any available port in a given set. For example, "
+"\"2000-2003, 3000\" allow atftpd to use port 2000 to 2003 and 3000."
+msgstr ""
+"Multicastoverførsler vil kun bruge en tilgængelig port i et givent område. F."
+"eks. »2000-2003, 3000« vil tillade aftftpd at bruge port 2000 til 2003, og "
+"3000."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:13001
+msgid "Address range for multicast transfer:"
+msgstr "Adresseområde for multicast-overførsel:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:13001
+msgid ""
+"Multicast transfer will use any available addresses from a given set of "
+"addresses. Syntax is \"a.b.c.d-d,a.b.c.d,...\""
+msgstr ""
+"Multicast-overførsler vil bruge tilgængelige adresser fra et givent område "
+"af adresser. Syntaksen er »a.b.c.d-d,a.b.c.d,...«"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:14001
+msgid "Log to file instead of syslog?"
+msgstr "Log til en fil i stedet for syslog?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:14001
+msgid ""
+"If your server does intensive tftp file serving, it is a good idea to  "
+"accept here. That will avoid cluttering your syslog with tftpd logs."
+msgstr ""
+"Hvis din server laver intensiv tftp-fildeling, er det en god ide at svare ja "
+"her. Det vil undgå at fylde din syslog for meget op med tftpd-beskeder."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:15001
+msgid "Log file:"
+msgstr "Logfil:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:15001
+msgid ""
+"A file where atftpd will write its logs. This file will be made writable for "
+"the user 'nobody' and group 'nogroup'."
+msgstr ""
+"En fil hvor atftpd skriver sine logge. Denne fil vil blive gjort skrivbar "
+"for brugeren »nobody« og gruppen »nogroup«."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:16001
+msgid "Base directory:"
+msgstr "Basismappe:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:16001
+msgid ""
+"The directory tree from where atftpd can serve files. That directory must be "
+"world readable."
+msgstr ""
+"Mappetræet hvorfra atftpd kan betjene filer. Denne mappe skal være læsbar af "
+"alle."
+#
+#    Translators, if you are not familiar with the PO format, gettext
+#    documentation is worth reading, especially sections dedicated to
+#    this format, e.g. by running:
+#         info -n '(gettext)PO Files'
+#         info -n '(gettext)Header Entry'
+#
+#    Some information specific to po-debconf are available at
+#            /usr/share/doc/po-debconf/README-trans
+#         or http://www.debian.org/intl/l10n/po-debconf/README-trans
+#
+#    Developers do not need to manually edit POT or PO files.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: atftp 0.7-4\n"
+"Report-Msgid-Bugs-To: ldrolez@debian.org\n"
+"POT-Creation-Date: 2006-10-02 00:46+0200\n"
+"PO-Revision-Date: 2005-01-01 20:10+0200\n"
+"Last-Translator: Morten Brix Pedersen <morten@wtf.dk>\n"
+"Language-Team: Danish <dansk@klid.dk>\n"
+"Language: da\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:1001
+msgid "Should the server be started by inetd?"
+msgstr "Skal serveren startes af inetd?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:1001
+msgid ""
+"atftpd can be started by the inetd superserver or as a daemon and handle "
+"incoming connections by itself. The latter is only recommend for very high "
+"usage server."
+msgstr ""
+"atftpd kan startes af inetd superserveren eller som en dæmon der håndterer "
+"indgående forbindelser selv. Sidstnævnte er kun anbefalet for maskiner med "
+"meget stort forbrug."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:2001
+msgid "Server timeout:"
+msgstr "Server tidsgrænseudløb:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:2001
+msgid "How many seconds the main thread waits before exiting."
+msgstr "Hovr mange sekunder hoved-tråden venter før den afslutter."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:3001
+msgid "Retry timeout:"
+msgstr "Prøv-igen tidsgrænse:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:3001
+msgid "How many seconds to wait for a reply before retransmitting a packet."
+msgstr "Hvor mange sekunder skal der ventes på svar, før en pakke gensendes."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:4001
+msgid "Maximum number of threads:"
+msgstr "Maks antal tråde:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:4001
+msgid "Maximum number of concurrent threads that can be running."
+msgstr "Maks antal samtidige tråde der kan køre."
+
+#. Type: select
+#. Description
+#: ../atftpd.templates:5001
+msgid "Verbosity level:"
+msgstr "Detalje-niveau:"
+
+#. Type: select
+#. Description
+#: ../atftpd.templates:5001
+msgid ""
+"Level of logging. 7 logs everything including debug logs. 1 will log only "
+"the system critical logs. 5 (LOG_NOTICE) is the default value."
+msgstr ""
+"Niveau til logning. 7 logger alt inklusive fejlsøgningslogs. 1 vil kun logge "
+"system kritiske logs. 5 (LOG_NOTICE) er standardværdien."
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:6001
+msgid "Enable 'timeout' support?"
+msgstr "Aktivér 'timeout'-understøttelse?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:7001
+msgid "Enable 'tsize' support?"
+msgstr "Aktivér 'tsize'-understøttelse?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:8001
+msgid "Enable 'block size' support?"
+msgstr "Aktivér 'block size'-understøttelse?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:9001
+msgid "Enable multicast support?"
+msgstr "Aktivér 'multicast'-understøttelse?"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:10001
+#, fuzzy
+msgid "TTL for multicast packets:"
+msgstr "TTL for multicast-pakker"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:11001
+msgid "Port to listen for tftp request:"
+msgstr "Port der skal lyttes på for tftp-efterspørgsler:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:12001
+msgid "Port range for multicast file transfer:"
+msgstr "Port-område for multicast fil-overførsler:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:12001
+msgid ""
+"Multicast transfer will use any available port in a given set. For example, "
+"\"2000-2003, 3000\" allow atftpd to use port 2000 to 2003 and 3000."
+msgstr ""
+"Multicast-overførsler vil kun bruge en tilgængelig port i et givent område. "
+"F.eks. \"2000-2003, 3000\" vil tillade aftftpd at bruge port 2000 til 2003, "
+"og 3000."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:13001
+msgid "Address range for multicast transfer:"
+msgstr "Adresse-område for multicast overførsler:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:13001
+msgid ""
+"Multicast transfer will use any available addresses from a given set of "
+"addresses. Syntax is \"a.b.c.d-d,a.b.c.d,...\""
+msgstr ""
+"Multicast-overførsler vil bruge tilgængelige adresser fra et givent område "
+"af adresser. Syntaksen er \"a.b.c.d-d,a.b.c.d,...\""
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:14001
+msgid "Log to file instead of syslog?"
+msgstr "Log til en fil i stedet for syslog?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:14001
+msgid ""
+"If your server does intensive tftp file serving, it is a good idea to  "
+"accept here. That will avoid cluttering your syslog with tftpd logs."
+msgstr ""
+"Hvis din server laver intensivt tftp fil-deling, er det en god idé at svare "
+"ja her. Det vil undgå at fylde din syslog for meget op med tftpd beskeder."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:15001
+msgid "Log file:"
+msgstr "Logfil:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:15001
+msgid ""
+"A file where atftpd will write its logs. This file will be made writable for "
+"the user 'nobody' and group 'nogroup'."
+msgstr ""
+"En fil hvor atftpd skriver sine logs. Denne fil vil blive gjort skrivbar for "
+"brugeren 'nobody' og gruppen 'nogroup'."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:16001
+msgid "Base directory:"
+msgstr "Base-mappe:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:16001
+msgid ""
+"The directory tree from where atftpd can serve files. That directory must be "
+"world readable."
+msgstr ""
+"Mappe-træet hvor atftpd kan servere sine filer. Denne mappe skal være læsbar "
+"af alle."

@@ -1,0 +1,127 @@
+1) What are the best values for --tftpd-timeout, --retry-timeout and
+    --max-thread ?
+
+There is no absolute answer to that question. It is highly dependent
+of your personnal setup. Here's an explanation of what they mean and
+how to tune them.
+
+--tftpd-timeout controls how much time the server will wait for an
+incomming connection before killing the main thread. If you use small
+number, the server will be respawned by inetd when a new query
+arrives. If number is high, atftpd will behave more like a standalone
+server in that it will always receive queries directly. When booting a
+whole cluster, the first tftp request will start the daemon and have
+higher latency. All other clients will be handled directly by the tftp
+server. It is a good idea to set the timeout high enough so that the
+main thread won't hog your system killing itself and respawning all
+the time.
+
+--retry-timeout controls how much time the server waits before
+retransmitting a packet. If you expect some lag on the network (when
+the network is under high load), it is a good idea to increase that
+value. Note that the client's delay must be taken into
+consideration. The client can set the server delay too, and it
+overides the --retry-timeout value.
+
+--max-thread controls how many simultaneous client may be served. This
+limit depends on your server's performance. It also depends on the
+maximum load you are willing to put on the server. For exemple, this
+server may have other things to do, and you want to limit the number
+of clients booting at the same time to 10. The maximum number of
+threads is also throttled by the available bandwidth of the network
+and server, because packet cannot be processed fast enough and there is
+a maximum rate at which servers may be started. But this is not a desirable
+condition and --maxthread should be set to avoid that.
+
+2) Why do I get "recvfrom: Connection refused" in my log file?
+
+That indicates that either your server or network can't handle all the
+packets fast enough. What happens is the following:
+	- client sends a RRQ (read request)
+	- server starts a thread (A) that sends a DATA packet
+	- the client times out and sends a second RRQ
+	- server A sends the whole file
+	- client and server thread A both exit normally
+	- server finally starts a second thread (B) for the second RRQ
+	- the server thread sends a DATA packet to the client
+	- the client isn't listenning anymore, we got a connection refused.
+
+Solution:
+	a) increase timeout on client and server side
+	b) reduce the number of concurrent thread allowed
+	c) do nothing, it's not harmfull at all.
+
+3) How can I boot a simple image from the network?
+
+A boot from LAN setup requires the following on the server side: a dhcp 
+server, a tftp server (atftpd), a working pxelinux config, a kernel image
+and a root file system image.
+
+You can get documentation on how to configure the dhcp server to work with
+pxelinux from the pxelinux and dhcp documentation.
+
+For atftp to work out of the box, be sure to have the following line in your
+inetd.conf and to restart the inetd daemon:
+    tftp dgram udp wait nobody /usr/sbin/tcpd /usr/sbin/in.tftpd /tftpboot
+
+You also need to have /tftpboot world readable.
+
+The pxelinux configuration is the same as syslinux. Documentation for it can
+be found in the syslinux package.
+
+The configuration file for pxelinux will tell it the name of the kernel and
+file system images to download. It is very important that you tell the kernel
+image where to get its root file system with rdev like this for example:
+
+    rdev image /dev/ramdisk
+
+You can find detailed information on how to create a filesystem image in the
+Bootdisk HOWTO (www.linuxdoc.org).
+
+On the client side, you need to have a boot ROM. Have a look at Etherboot
+(www.etherboot.org), NetTools and Nilo (www.nilo.org) to find out more
+information about this if you need to burn one.
+
+After you got all of these setup, you should see the client attempt to get
+an IP address on boot, download pxelinux.bin, then download the kernel and
+filesystem images and boot from it.
+
+
+4) I followed the above steps and it still fails to boot!
+
+Try putting log verbosity at high in the concerned programs on the server side
+and see if something fails or if you get the requests at all. You should see
+dhcpd give a lease to the client, if it doesn't, your dhcp configuration is
+faulty. You can also monitor the activity on the network to track down the
+problem using tools like tcpdump or ethereal.
+
+5) How do I setup multicast stuff?
+
+ - Make sure your client and server support multicast.
+ - Make sure you server routing table know what to do with multicast addresses.
+   You need to do something like this:
+	route add -net 224.0.0.0 netmask 240.0.0.0 dev eth0
+ - Make sure your network is working by testing with atftp client against
+   atftpd server
+
+That's currently all that I've made working folks. I've never tried a multicast
+boot ROM or boot loader yet.
+
+6) What inetd or xinetd configuration should I use?
+
+Something like that for inetd in /etc/inetd.conf:
+tftp dgram udp wait nobody /usr/sbin/tcpd /usr/sbin/in.tftpd <insert options>
+
+For xinetd, in /etc/xinetd.conf:
+service tftp
+{
+        socket_type = dgram
+        protocol = udp
+        wait = no
+        user = nobody
+        server = /usr/sbin/in.tftpd
+        server_args = <insert atftpd options>
+}
+
+This is the basic stuff. Read inetd or xinetd man page for more specialised
+configuration.

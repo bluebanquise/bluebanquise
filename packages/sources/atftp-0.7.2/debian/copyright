@@ -1,0 +1,21 @@
+This package was debianized by Remi Lefebvre <remi@debian.org> on
+Fri, 30 Jun 2000 14:32:15 -0400.
+
+It was downloaded from ftp://ftp.mamalinux.com/pub/atftp/
+
+Upstream Authors: Jean-Pierre Lefebvre <helix@step.polymtl.ca>
+                  Remi Lefebvre <remi@debian.org>
+
+Copyright:
+
+Copyright (c) 2000 Jean-Pierre Lefebvre <helix@step.polymtl.ca>
+            	   and Remi Lefebvre <remi@debian.org>
+
+License:
+
+atftp is free software; you can redistribute them and/or modify them under
+the terms of the GNU General Public License as published by the Free Software
+Foundation; either version 2 of the License, or (at your option) any later
+version.
+
+You can find a copy of the GPL at /usr/share/common-licenses/GPL

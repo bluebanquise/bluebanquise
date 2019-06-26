@@ -1,2 +1,2 @@
-# bluebanquise
-Ansible based cluster stack
+# blue-banquise
+Banquise on Ansible

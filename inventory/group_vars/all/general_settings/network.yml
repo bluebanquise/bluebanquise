@@ -1,0 +1,9 @@
+### Network related settings
+
+## DNS
+domain_name: sphen.local
+
+## DHCP
+dhcp_settings:
+  default_lease_time: 600
+  max_lease_time: 7200

@@ -1,0 +1,426 @@
+#
+#    Translators, if you are not familiar with the PO format, gettext
+#    documentation is worth reading, especially sections dedicated to
+#    this format, e.g. by running:
+#         info -n '(gettext)PO Files'
+#         info -n '(gettext)Header Entry'
+#
+#    Some information specific to po-debconf are available at
+#            /usr/share/doc/po-debconf/README-trans
+#         or http://www.debian.org/intl/l10n/po-debconf/README-trans
+#
+#    Developers do not need to manually edit POT or PO files.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: atftp\n"
+"Report-Msgid-Bugs-To: ldrolez@debian.org\n"
+"POT-Creation-Date: 2006-10-02 00:46+0200\n"
+"PO-Revision-Date: 2009-06-27 12:30+0200\n"
+"Last-Translator: Miroslav Kure <kurem@debian.cz>\n"
+"Language-Team: Czech <debian-l10n-czech@lists.debian.org>\n"
+"Language: cs\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:1001
+msgid "Should the server be started by inetd?"
+msgstr "Má se server spouštět přes inetd?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:1001
+msgid ""
+"atftpd can be started by the inetd superserver or as a daemon and handle "
+"incoming connections by itself. The latter is only recommend for very high "
+"usage server."
+msgstr ""
+"atftpd může běžet jako samostatný daemon a sám zpracovávat příchozí "
+"požadavky, nebo může být spouštěn z metaserveru inetd. První možnost je "
+"doporučená pouze pro velmi vytížené servery."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:2001
+msgid "Server timeout:"
+msgstr "Časový limit serveru:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:2001
+msgid "How many seconds the main thread waits before exiting."
+msgstr "Kolik sekund má hlavní vlákno čekat, než se ukončí."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:3001
+msgid "Retry timeout:"
+msgstr "Časový limit opakování:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:3001
+msgid "How many seconds to wait for a reply before retransmitting a packet."
+msgstr "Kolik sekund má server čekat na odpověď, než paket odešle znovu."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:4001
+msgid "Maximum number of threads:"
+msgstr "Maximální počet vláken:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:4001
+msgid "Maximum number of concurrent threads that can be running."
+msgstr "Maximální počet současně běžících vláken."
+
+#. Type: select
+#. Description
+#: ../atftpd.templates:5001
+msgid "Verbosity level:"
+msgstr "Míra upovídanosti:"
+
+#. Type: select
+#. Description
+#: ../atftpd.templates:5001
+msgid ""
+"Level of logging. 7 logs everything including debug logs. 1 will log only "
+"the system critical logs. 5 (LOG_NOTICE) is the default value."
+msgstr ""
+"7 zaznamená vše včetně ladicích hlášení. 1 zaznamená pouze kritické záznamy, "
+"5 (LOG_NOTICE) je výchozí hodnota."
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:6001
+msgid "Enable 'timeout' support?"
+msgstr "Povolit podporu „timeout“?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:7001
+msgid "Enable 'tsize' support?"
+msgstr "Povolit podporu  „tsize“?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:8001
+msgid "Enable 'block size' support?"
+msgstr "Povolit podporu „block size“?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:9001
+msgid "Enable multicast support?"
+msgstr "Povolit podporu multicastu?"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:10001
+msgid "TTL for multicast packets:"
+msgstr "TTL pro multicastové pakety:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:11001
+msgid "Port to listen for tftp request:"
+msgstr "Port, na kterém se má naslouchat tftp požadavkům:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:12001
+msgid "Port range for multicast file transfer:"
+msgstr "Rozsah portů pro hromadný (multicast) přenos souborů:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:12001
+msgid ""
+"Multicast transfer will use any available port in a given set. For example, "
+"\"2000-2003, 3000\" allow atftpd to use port 2000 to 2003 and 3000."
+msgstr ""
+"Pro hromadný přenos použijí libovolné porty ze zadané množiny. Například "
+"„2000-2003, 3000“ dovolí atftpd použít porty 2000 až 2003 a port 3000."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:13001
+msgid "Address range for multicast transfer:"
+msgstr "Rozsah adres pro hromadné přenosy:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:13001
+msgid ""
+"Multicast transfer will use any available addresses from a given set of "
+"addresses. Syntax is \"a.b.c.d-d,a.b.c.d,...\""
+msgstr ""
+"Pro hromadný přenos použijí libovolné adresy ze zadané množiny adres. "
+"Syntaxe je následující: „a.b.c.d-d,a.b.c.d,...“"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:14001
+msgid "Log to file instead of syslog?"
+msgstr "Nepoužívat pro záznamy syslog, ale samostatný soubor?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:14001
+msgid ""
+"If your server does intensive tftp file serving, it is a good idea to  "
+"accept here. That will avoid cluttering your syslog with tftpd logs."
+msgstr ""
+"Pokud bude váš server nabízet tftp soubory mnoha klientům, je dobré tuto "
+"možnost povolit, protože se pak záznamy tftpd nebudou míchat se záznamy "
+"syslogu."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:15001
+msgid "Log file:"
+msgstr "Soubor pro záznamy:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:15001
+msgid ""
+"A file where atftpd will write its logs. This file will be made writable for "
+"the user 'nobody' and group 'nogroup'."
+msgstr ""
+"Soubor, do kterého bude atftpd zapisovat své záznamy. Práva souboru budou "
+"nastavena tak, aby do něj mohl zapisovat uživatel „nobody“ a skupina "
+"„nogroup“."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:16001
+msgid "Base directory:"
+msgstr "Základní adresář:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:16001
+msgid ""
+"The directory tree from where atftpd can serve files. That directory must be "
+"world readable."
+msgstr ""
+"Adresářový strom, ze kterého atftpd nabízí soubory. Adresář musí být čitelný "
+"pro všechny."
+#
+#    Translators, if you are not familiar with the PO format, gettext
+#    documentation is worth reading, especially sections dedicated to
+#    this format, e.g. by running:
+#         info -n '(gettext)PO Files'
+#         info -n '(gettext)Header Entry'
+#
+#    Some information specific to po-debconf are available at
+#            /usr/share/doc/po-debconf/README-trans
+#         or http://www.debian.org/intl/l10n/po-debconf/README-trans
+#
+#    Developers do not need to manually edit POT or PO files.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: atftp\n"
+"Report-Msgid-Bugs-To: ldrolez@debian.org\n"
+"POT-Creation-Date: 2006-10-02 00:46+0200\n"
+"PO-Revision-Date: 2009-06-27 12:30+0200\n"
+"Last-Translator: Miroslav Kure <kurem@debian.cz>\n"
+"Language-Team: Czech <debian-l10n-czech@lists.debian.org>\n"
+"Language: cs\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:1001
+msgid "Should the server be started by inetd?"
+msgstr "Má se server spouštět přes inetd?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:1001
+msgid ""
+"atftpd can be started by the inetd superserver or as a daemon and handle "
+"incoming connections by itself. The latter is only recommend for very high "
+"usage server."
+msgstr ""
+"atftpd může běžet jako samostatný daemon a sám zpracovávat příchozí "
+"požadavky, nebo může být spouštěn z metaserveru inetd. První možnost je "
+"doporučená pouze pro velmi vytížené servery."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:2001
+msgid "Server timeout:"
+msgstr "Časový limit serveru:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:2001
+msgid "How many seconds the main thread waits before exiting."
+msgstr "Kolik sekund má hlavní vlákno čekat, než se ukončí."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:3001
+msgid "Retry timeout:"
+msgstr "Časový limit opakování:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:3001
+msgid "How many seconds to wait for a reply before retransmitting a packet."
+msgstr "Kolik sekund má server čekat na odpověď, než paket odešle znovu."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:4001
+msgid "Maximum number of threads:"
+msgstr "Maximální počet vláken:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:4001
+msgid "Maximum number of concurrent threads that can be running."
+msgstr "Maximální počet současně běžících vláken."
+
+#. Type: select
+#. Description
+#: ../atftpd.templates:5001
+msgid "Verbosity level:"
+msgstr "Míra upovídanosti:"
+
+#. Type: select
+#. Description
+#: ../atftpd.templates:5001
+msgid ""
+"Level of logging. 7 logs everything including debug logs. 1 will log only "
+"the system critical logs. 5 (LOG_NOTICE) is the default value."
+msgstr ""
+"7 zaznamená vše včetně ladicích hlášení. 1 zaznamená pouze kritické záznamy, "
+"5 (LOG_NOTICE) je výchozí hodnota."
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:6001
+msgid "Enable 'timeout' support?"
+msgstr "Povolit podporu „timeout“?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:7001
+msgid "Enable 'tsize' support?"
+msgstr "Povolit podporu  „tsize“?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:8001
+msgid "Enable 'block size' support?"
+msgstr "Povolit podporu „block size“?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:9001
+msgid "Enable multicast support?"
+msgstr "Povolit podporu multicastu?"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:10001
+msgid "TTL for multicast packets:"
+msgstr "TTL pro multicastové pakety:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:11001
+msgid "Port to listen for tftp request:"
+msgstr "Port, na kterém se má naslouchat tftp požadavkům:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:12001
+msgid "Port range for multicast file transfer:"
+msgstr "Rozsah portů pro hromadný (multicast) přenos souborů:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:12001
+msgid ""
+"Multicast transfer will use any available port in a given set. For example, "
+"\"2000-2003, 3000\" allow atftpd to use port 2000 to 2003 and 3000."
+msgstr ""
+"Pro hromadný přenos použijí libovolné porty ze zadané množiny. Například "
+"„2000-2003, 3000“ dovolí atftpd použít porty 2000 až 2003 a port 3000."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:13001
+msgid "Address range for multicast transfer:"
+msgstr "Rozsah adres pro hromadné přenosy:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:13001
+msgid ""
+"Multicast transfer will use any available addresses from a given set of "
+"addresses. Syntax is \"a.b.c.d-d,a.b.c.d,...\""
+msgstr ""
+"Pro hromadný přenos použijí libovolné adresy ze zadané množiny adres. "
+"Syntaxe je následující: „a.b.c.d-d,a.b.c.d,...“"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:14001
+msgid "Log to file instead of syslog?"
+msgstr "Nepoužívat pro záznamy syslog, ale samostatný soubor?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:14001
+msgid ""
+"If your server does intensive tftp file serving, it is a good idea to  "
+"accept here. That will avoid cluttering your syslog with tftpd logs."
+msgstr ""
+"Pokud bude váš server nabízet tftp soubory mnoha klientům, je dobré tuto "
+"možnost povolit, protože se pak záznamy tftpd nebudou míchat se záznamy "
+"syslogu."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:15001
+msgid "Log file:"
+msgstr "Soubor pro záznamy:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:15001
+msgid ""
+"A file where atftpd will write its logs. This file will be made writable for "
+"the user 'nobody' and group 'nogroup'."
+msgstr ""
+"Soubor, do kterého bude atftpd zapisovat své záznamy. Práva souboru budou "
+"nastavena tak, aby do něj mohl zapisovat uživatel „nobody“ a skupina "
+"„nogroup“."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:16001
+msgid "Base directory:"
+msgstr "Základní adresář:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:16001
+msgid ""
+"The directory tree from where atftpd can serve files. That directory must be "
+"world readable."
+msgstr ""
+"Adresářový strom, ze kterého atftpd nabízí soubory. Adresář musí být čitelný "
+"pro všechny."

@@ -1,0 +1,29 @@
+Source: atftp
+Section: net
+Priority: extra
+Maintainer: Ludovic Drolez <ldrolez@debian.org>
+Build-Depends: libreadline-dev, debhelper (>= 5), po-debconf, libwrap0-dev, libpcre3-dev
+Standards-Version: 3.8.4
+
+Package: atftp
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: advanced TFTP client
+ Interactive client for the Trivial File Transfer Protocol (TFTP). Its
+ usage is mainly for testing and debugging the Atftp server. TFTP client 
+ is usually implemented in BIOS and bootstraps programs like pxelinux when
+ booting from LAN. Atftp also supports non-interactive invocation for
+ easy use in scripts.
+
+Package: atftpd
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, update-inetd
+Recommends: inet-superserver
+Conflicts: tftpd
+Suggests: logrotate
+Description: advanced TFTP server
+ Multi-threaded TFTP server implementing all options (option extension and
+ multicast) as specified in RFC1350, RFC2090, RFC2347, RFC2348 and RFC2349.
+ Atftpd also supports multicast protocol known as mtftp, defined in the PXE
+ specification. The server supports being started from inetd(8) as well as
+ in daemon mode using init scripts.

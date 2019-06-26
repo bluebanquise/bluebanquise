@@ -1,0 +1,70 @@
+Name: atftp
+Summary: Advanced Trivial File Transfer Protocol (ATFTP) - TFTP server
+Group: System Environment/Daemons
+Version: @VERSION@
+Release: 1
+Copyright: GPL
+Vendor: Linux Networx Inc.
+Source: /usr/src/redhat/SOURCES/atftp-%{version}.tar.gz
+Buildroot: /var/tmp/atftp-buildroot
+Packager: Allen Reese <areese@lnxi.com>
+
+
+%description
+Multithreaded TFTP server implementing all options (option extension and
+multicast) as specified in RFC1350, RFC2090, RFC2347, RFC2348 and RFC2349.
+Atftpd also support multicast protocol knowed as mtftp, defined in the PXE
+specification. The server supports being started from inetd(8) as well as
+a deamon using init scripts.
+
+
+%package client
+Summary: Advanced Trivial File Transfer Protocol (ATFTP) - TFTP client
+Group: Applications/Internet
+
+
+%description client
+Advanced Trivial File Transfer Protocol client program for requesting
+files using the TFTP protocol.
+
+
+%prep
+%setup
+
+
+%build
+%configure
+make
+
+
+%install
+[ -n "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != '/' ] && rm -rf $RPM_BUILD_ROOT
+%makeinstall
+
+
+%files
+%{_mandir}/man8/atftpd.8.gz
+%{_sbindir}/atftpd
+%{_mandir}/man8/in.tftpd.8.gz
+%{_sbindir}/in.tftpd
+
+
+%files client
+%{_mandir}/man1/atftp.1.gz
+%{_bindir}/atftp
+
+
+%preun
+
+
+%post
+
+
+%clean
+[ -n "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != '/' ] && rm -rf $RPM_BUILD_ROOT
+
+
+%changelog
+
+* Tue Jan 07 2003 Thayne Harbaugh <thayne@plug.org>
+- put client in sub-rpm

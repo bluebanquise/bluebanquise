@@ -1,0 +1,49 @@
+    Jean-Pierre Lefebvre <helix@step.polymtl.ca>
+    August 20th, 2000
+    -----------------
+
+atftp stands for Advanced Trivial File Transfer Protocol. It is called
+"advanced", by contrast to others TFTP servers, for two reasons.
+Firstly, it is intended to be fully compliant with all related
+RFCs. This include RFC1350, RFC2090, RFC2347, RFC2348 and RFC2349. To
+my knowledge, there is no TFTP server currently available in the
+public domain that fulfills this requirement. Secondly, atftp is
+intended for serving boot files to large clusters. It is
+multi-threaded and support multicast (RFC2090 and PXE), allowing
+faster boot of hundreds of machine simultaneously.
+
+I started writing the atftp server after trying to boot Debian from
+the LAN using pxelinux (distributed with syslinux). Since pxelinux
+needs support for the "tsize" option defined in RFC2349, I looked for
+different TFTP servers but found none that fulfilled my needs.
+
+With atftp, I have successfully used pxelinux and dhcpd to boot from
+the LAN. Unfortunately, new development will slow down since I do it
+on my spare time and atftp now does what I need.  However, atftp is
+actively maintained. Comments, bug reports and patches are welcome.
+
+Great thanks to my brother Remi who works on the client and server
+implementation and the debian packaging.
+
+
+    Authors
+    -------
+
+Jean-Pierre Lefebvre	<helix@step.polymtl.ca>
+Remi Lefebvre		<remi@debian.org>
+
+
+    Contributors
+    ------------
+
+Jeff Miller		<jeff.miller@transact.com.au>
+Leif Lindholm		<leif.lindholm@i3micro.com>
+Jens Schmidt		<Jens.A.Schmidt@dxd.ericsson.se>
+Svend Odgaard		<Svend.Odgaard@dxd.ericsson.se>
+Joshua Aune		<luken@linuxnetworx.com>
+Mario Lorenz		<Mario.Lorenz@km3.de>
+Allen Reese		<areese@lnxi.com>
+Thayne Harbaugh		<tharbaugh@lnxi.com>
+Thomas Anders		<thomas.anders@blue-cable.de>
+Michał Rzechonek	<m.rzechonek@kelvatek.com>
+Florian Fainelli	<f.fainelli@gmail.com>

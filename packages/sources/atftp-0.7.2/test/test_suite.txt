@@ -1,0 +1,5 @@
+1) test get, put
+2) test blksize
+3) test tsize
+4) test timeout
+5) 

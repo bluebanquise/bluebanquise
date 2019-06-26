@@ -1,0 +1,33 @@
+#!/bin/sh -e
+
+
+if [ "$1" = "purge" ]; then
+    # If netbase is not installed, then we don't need to do the remove.
+    if command -v update-inetd >/dev/null 2>&1;
+    then
+	    update-inetd --group BOOT --remove "tftp.*/usr/sbin/in.tftpd.*"
+    fi
+    
+    BASEDIR="/var/lib/tftpd"
+    if [ -f /usr/share/debconf/confmodule ]; then
+        . /usr/share/debconf/confmodule
+        db_get atftpd/basedir
+        if [ "$RET" ]; then
+            BASEDIR="$RET"
+        fi
+    fi
+
+    if [ -d $BASEDIR ]; then
+	rmdir --ignore-fail-on-non-empty $BASEDIR
+    fi
+
+    # logrotate 
+    rm -f /etc/logorotate.d/atftpd
+
+    # init.d config file
+    if [ -r /etc/default/atftpd ]; then
+	rm -f /etc/default/atftpd
+    fi
+fi
+
+#DEBHELPER#

@@ -1,0 +1,336 @@
+atftp (0.7.dfsg-9.3) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Apply patch listen on requested port when in daemon mode.  
+    Thanks to Len Sorensen.  (Closes: #609813)
+
+ -- tony mancill <tmancill@debian.org>  Wed, 12 Jan 2011 20:58:05 -0800
+
+atftp (0.7.dfsg-9.2) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Fixed use of sendto() over a connected datagram socket on FreeBSD
+    (closes: #598474).
+
+ -- Giovanni Mascellani <gio@debian.org>  Mon, 04 Oct 2010 16:46:32 +0200
+
+atftp (0.7.dfsg-9.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Apply IPv6 support patch by Ben Hutchings. Closes: #580473
+  * Add AC_GNU_SOURCE to configure.ac to address FTBFS.
+    - Patches applied directly to sources to minimize changes for NMU,
+      as the current Debian packaging does not include a patch system.
+
+ -- tony mancill <tmancill@debian.org>  Wed, 15 Sep 2010 21:24:52 -0700
+
+atftp (0.7.dfsg-9) unstable; urgency=medium
+
+  * urgency=medium RC bug.
+  * use rmdir instead of rm in postrm. Closes: #573992, #574211
+  * added $remote_fs in Required-Start
+
+ -- Ludovic Drolez <ldrolez@debian.org>  Mon, 29 Mar 2010 18:55:55 +0200
+
+atftp (0.7.dfsg-8) unstable; urgency=low
+
+  * depends on libreadline-dev. Closes: #553729
+  * Purge empty dir. Closes: #531282
+  * /srv/tftp is now the default tftp root data directory. Closes: #537642
+  * Updated cs.po. Closes: #534959
+  * Updated config.sub .guess. Closes: #536295
+  * Fixed a typo in the help screen. Closes: #537405
+  * Make sure we have the --daemon option before starting atftpd. 
+    Closes: #535604
+
+ -- Ludovic Drolez <ldrolez@debian.org>  Tue, 21 Aug 2009 17:03:24 +0200
+
+atftp (0.7.dfsg-7) unstable; urgency=low
+
+  * Crash fix. Closes: #514521
+  * Updated sv.po. Closes: #503348
+  * Added support for logging to stdout. Closes: #484739
+  * Added the --listen-local patch. Closes: #366632
+  * Recommends inet-superserver. Closes: #516407
+
+ -- Ludovic Drolez <ldrolez@debian.org>  Wed, 01 Apr 2009 17:03:07 +0200
+
+atftp (0.7.dfsg-6) unstable; urgency=medium
+
+  * Urgency = medium because of a grave bug
+  * Now generate a cleaner /etc/default/atftpd file. Closes: #489757
+  * Do not overwrite /etc/default/atftpd and inetd.conf. Closes: #490152
+  * The basedir is now created with proper permissions. Upload
+    feature tested. Closes: #489757
+  * Updated sv.po. Closes: #491757
+
+ -- Ludovic Drolez <ldrolez@debian.org>  Tue, 22 Jul 2008 19:07:56 +0200
+
+atftp (0.7.dfsg-5) unstable; urgency=medium
+
+  * inetd.conf: change udp to udp4. Closes: #484932
+  * fixed pcre substitutions. Closes: #473777
+
+ -- Ludovic Drolez <ldrolez@debian.org>  Fri, 13 Jun 2008 16:00:57 +0200
+
+atftp (0.7.dfsg-4) unstable; urgency=medium
+
+  * Urgency=medium because of RC bug fixed
+  * Choosed /var/lib/tftpboot as default tftp directory, and removed
+    the provides field. Closes: #455263, #411322
+  * Moved the watch file. Closes: #449674
+  * Fixed incorrect options handling thanks to Hollis Blanchard. 
+    Closes: #332621
+  * Updated pt.po. Closes: #443653
+
+ -- Ludovic Drolez <ldrolez@debian.org>  Tue, 18 Dec 2007 18:49:33 +0100
+
+atftp (0.7.dfsg-3) unstable; urgency=high
+
+  * Removed the inetd dependency.
+  * Added Leo Weppelman select patch. Closes: #411456
+  * Fixed the FTBFS. Closes: #436310
+
+ -- Ludovic Drolez <ldrolez@debian.org>  Mon,  6 Aug 2007 20:52:06 +0200
+
+atftp (0.7.dfsg-2) unstable; urgency=medium
+
+  * Use CLOCKS_PER_SEC instead of CLK_TCK. Fixed a FTBFS. Closes: #420900
+  * Re-added a kFreeBSD patch lost by a NMU !!! Closes: #404063, #402700
+  * New debconf translations. Closes: #410212, #414112, #422416
+
+ -- Ludovic Drolez <ldrolez@debian.org>  Fri, 18 May 2007 17:59:01 +0200
+
+atftp (0.7.dfsg-1.2) unstable; urgency=low
+
+  * Non-maintainer upload to fix a pending l10n issues that affects the
+    experimental Debian i18n server.
+  * Debconf translations:
+    - Japanese fixed. Closes: #410525
+
+ -- Christian Perrier <bubulle@debian.org>  Sun, 11 Feb 2007 15:08:39 +0100
+
+atftp (0.7.dfsg-1.1) unstable; urgency=low
+
+  * Non-maintainer upload to fix longstanding l10n issues
+  * Debconf templates translations:
+    - German updated. Closes: #399964
+    - Japanense updated. Closes: #402616
+    - Dutch updated. Closes: #392215
+    - French updated. Closes: #393740
+    - Russian updated. Closes: #404426
+    - Spanish updated. Closes: #402098
+
+ -- Christian Perrier <bubulle@debian.org>  Sat, 20 Jan 2007 12:48:31 +0100
+
+atftp (0.7.dfsg-1) unstable; urgency=medium
+
+  * Integrated the NMUs. Closes: #382683, #365188, #389830
+  * If netbase is not installed, then we don't need to use update-inetd.
+    Closes: #388295
+  * Bump Standards-Version to 3.7.2.
+  * Add debconf-updatepo to the rules.
+  * Russian translation of debconf messages thanks to Yuri Kozlov. 
+    Closes: #368498
+
+ -- Ludovic Drolez <ldrolez@debian.org>  Mon,  2 Oct 2006 00:31:23 +0200
+
+atftp (0.7.dfsg-0.2) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * debian/control: Remove netkit-inetd recommends, and make the netbase
+    dependency versioned.  netbase provides the appropriate inetd
+    dependency.  Closes: #382683.
+
+ -- Roger Leigh <rleigh@debian.org>  Sun, 20 Aug 2006 17:11:26 +0100
+
+atftp (0.7.dfsg-0.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Repackage upstream without RFC (Closes: #365188)
+
+ -- Julien Danjou <acid@debian.org>  Thu,  1 Jun 2006 15:53:11 +0200
+
+atftp (0.7-11) unstable; urgency=low
+
+  * added a patch for freebsd. Closes: #342391
+  * added debconf Portuguese translation. Closes: #342284
+
+ -- Ludovic Drolez <ldrolez@debian.org>  Tue, 13 Dec 2005 16:29:05 +0100
+
+atftp (0.7-10) unstable; urgency=low
+
+  * DH_COMPAT=4 and added ${misc:Depends}. Closes: #331747
+  * Debconf Swedish translation update. Closes: #330263
+
+ -- Ludovic Drolez <ldrolez@debian.org>  Fri,  7 Oct 2005 15:00:35 +0200
+
+atftp (0.7-9) unstable; urgency=medium
+
+  * Random segfaults fixed. Closes: #271816
+  * Now only recommend netkid-inetd. Closes: #313208
+  * Updated the Vietnamese debconf translation. Closes: #313122
+
+ -- Ludovic Drolez <ldrolez@debian.org>  Tue, 21 Jun 2005 21:51:23 +0200
+
+atftp (0.7-8) unstable; urgency=low
+
+  * Typos removed from atftpd.templates. Closes: #309468
+  * Added the Vietnamese translation for debconf. Closes: #309461
+  * Thanks to Clytie Siddall for submitting the two bugs above.
+
+ -- Ludovic Drolez <ldrolez@debian.org>  Tue,  7 Jun 2005 21:31:25 +0200
+
+atftp (0.7-7) unstable; urgency=low
+
+  * Fixed a FTBFS on amd64. Closes: #297549
+  * Added Japanese and Brazilian debconf translations. Closes: #304280,#297038
+
+ -- Ludovic Drolez <ldrolez@debian.org>  Tue, 12 Apr 2005 12:55:47 +0200
+
+atftp (0.7-6) unstable; urgency=low
+
+  * Segfault fixed on AMD64. Closes: Bug#291829
+  * debian 'watch' file added.
+
+ -- Ludovic Drolez <ldrolez@debian.org>  Wed, 26 Jan 2005 19:12:44 +0100
+
+atftp (0.7-5) unstable; urgency=high
+
+  * Ugency=high because of a RC bug fixed.
+  * Removed a bashism in the postinst. Closes: #289633
+  * Czech po-debconf translation added by Miroslav Kure. Closes: #288014
+  * Danish po-debconf translation added by Morten Brix Pedersen. 
+    Closes: #288133
+  * Copyright fixed. Closes: #290062
+
+ -- Ludovic Drolez <ldrolez@debian.org>  Tue, 11 Jan 2005 12:19:27 +0100
+
+atftp (0.7-4) unstable; urgency=low
+
+  * updated all po-debconf translations. Closes: #281561
+  * polish debconf translation added. Thanks to Bartosz Fenski.
+  * added debconf support for setting the multicast TTL value
+  * default mcast subnet changed to 239.239.239.0/24 since some routers
+    do not seem to like 239.255.0.0/24
+
+ -- Ludovic Drolez <ldrolez@debian.org>  Mon, 28 Dec 2004 19:11:57 +0100
+
+atftp (0.7-3) unstable; urgency=low
+
+  * /etc/default/atftpd removed on purge. Closes: #279707
+  * purging stops atftpd. Closes: #275258
+  * punctuation modified. Closes: #275692
+  * updated the German debconf translation. Closes: #275691
+
+ -- Ludovic Drolez <ldrolez@debian.org>  Fri,  5 Nov 2004 14:32:57 +0100
+
+atftp (0.7-2) unstable; urgency=medium
+
+  * Patched tftp.c, to have an exit status !=0 when an error occurs
+  * Data corruption bug in multicast mode fixed. Closes: #275052
+    Urgency set to medium because of this bug.
+  * Typos in description corrected. Closes: #272565
+  * Dutch debconf translation added. Closes: #245913
+  * Debconf: removed the initial question and changed priority 
+    levels. Closes: #266329
+
+ -- Ludovic Drolez <ldrolez@debian.org>  Sun, 26 Sep 2004 14:25:40 +0200
+
+atftp (0.7-1) unstable; urgency=low
+
+  * New maintainer. Closes: Bug#227258.
+  * New release. Closes: Bug#263221, Bug#155300, Bug#180461, Bug#238196.
+
+ -- Ludovic Drolez <ldrolez@debian.org>  Tue, 14 Sep 2004 18:50:20 +0200
+
+atftp (0.6.2) unstable; urgency=low
+
+  * Fixed local and remote buffer overflow (Closes: #196304)
+
+ -- Remi Lefebvre <remi@debian.org>  Sun, 15 Jun 2003 16:26:13 -0400
+
+atftp (0.6.1.1) unstable; urgency=low
+
+  * NMU
+  * New config.guess, config.sub.  Add libwrap-dev to build-depends.
+    Closes: #142949
+
+ -- LaMont Jones <lamont@debian.org>  Wed, 24 Apr 2002 00:23:52 -0600
+
+atftp (0.6.1) unstable; urgency=low
+
+  * Fixed French translations for real this time (Closes: #136339).
+
+ -- Remi Lefebvre <remi@debian.org>  Sun, 13 Apr 2002 14:09:23 -0500
+ 
+atftp (0.6) unstable; urgency=low
+
+  * Update of German translations (Thanks to Christian Neumair)
+    (Closes: #139080)
+  * Update of French translations (Thanks to Denis Barbier) (Closes: #136339).
+  * Fix autoconf issue related to RedHat
+  * Fix bug associated with very small value of blksize
+  * Fix server to allow logging to stdout and stderr in daemon mode
+  * Add --no-fork option for use in conjonction with --daemon
+  * Add command line option to overide the default nobody.nogroup user
+  * Fix bug where server segfault if nobody.nogroup doesn't exist
+  * Fix grave bug with libwrap support causing server to segfault
+
+ -- Remi Lefebvre <remi@debian.org>  Sun, 31 Mar 2002 13:55:54 -0500
+
+atftp (0.5) unstable; urgency=low
+
+  * Filename length limit increased (Closes: #124052).
+  * General bug fixes.
+  * Autoconf enhancement.
+  * Libwrap support (for spawned thread).
+  * Multicast support (not tested thoroughly).
+  * Be less picky about removing existing tftp entries in inetd.conf
+    (Closes: #107053).
+  * General spelling fixes in the english templates (Closes: #109475).
+  * Swedish templates (Thanks to Martin Sjogren) (Closes: #109523).
+  * Portuguese templates (Thanks to Andre Luis Lopes) (Closes: #107042).
+
+ -- Remi Lefebvre <remi@debian.org>  Sat, 18 Aug 2001 23:13:25 -0400
+
+atftp (0.4) unstable; urgency=low
+
+  * Now handle SIGINT and SIGTERM in the client and server.
+  * Improved readline support.
+  * Added status info in the client.
+  * Added daemon mode.
+  * Added spanish templates (Thanks to Carlos Valdivia Yague) (Closes: #103043).
+  * Added "Provides: tftpd" (Closes: #100676).
+  * Added french templates.
+  * Added german templates (Thanks to Sebastian Feltel) (Closes: #100066).
+  * Fixed config script (Closes: #93398).
+  * Moved over to autoconf (Thanks to Jeffrey Fulmer).
+
+ -- Remi Lefebvre <remi@debian.org>  Sat, 16 Jun 2001 01:27:27 -0500
+
+atftp (0.3) unstable; urgency=low
+
+  * Fixed format string bug.
+  * Fixed an uninitialised variable bug.
+  * Fixed name resolution.
+
+ -- Remi Lefebvre <remi@debian.org>  Sun, 11 Feb 2001 13:08:34 -0500
+
+atftp (0.2) unstable; urgency=low
+
+  * Add statistics collecting functions to the server.
+  * Added support for debconf.
+  * Bugfixes.
+
+ -- Remi Lefebvre <remi@debian.org>  Wed, 27 Dec 2000 11:44:02 -0500
+
+atftp (0.1) unstable; urgency=low
+
+  * Initial Release (Closes: #69486).
+
+ -- Remi Lefebvre <remi@debian.org>  Fri, 30 Jun 2000 14:32:15 -0400
+
+Local variables:
+mode: debian-changelog
+End:

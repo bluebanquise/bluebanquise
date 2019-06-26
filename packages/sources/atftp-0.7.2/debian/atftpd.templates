@@ -1,0 +1,98 @@
+Template: atftpd/use_inetd
+Type: boolean
+Default: true
+_Description: Should the server be started by inetd?
+ atftpd can be started by the inetd superserver or as a daemon and handle
+ incoming connections by itself. The latter is only recommend for very high
+ usage server.
+
+Template: atftpd/tftpd-timeout
+Type: string
+Default: 300
+_Description: Server timeout:
+ How many seconds the main thread waits before exiting.
+
+Template: atftpd/retry-timeout
+Type: string
+Default: 5
+_Description: Retry timeout:
+ How many seconds to wait for a reply before retransmitting a packet.
+
+Template: atftpd/maxthread
+Type: string
+Default: 100
+_Description: Maximum number of threads:
+ Maximum number of concurrent threads that can be running.
+
+Template: atftpd/verbosity
+Type: select
+Choices: 7 (LOG_DEBUG), 6 (LOG_INFO), 5 (LOG_NOTICE), 4 (LOG_WARNING), 1 (LOG_ALERT)
+Default: 5 (LOG_NOTICE)
+_Description: Verbosity level:
+ Level of logging. 7 logs everything including debug logs. 1 will log only
+ the system critical logs. 5 (LOG_NOTICE) is the default value.
+
+Template: atftpd/timeout
+Type: boolean
+Default: true
+_Description: Enable 'timeout' support?
+
+Template: atftpd/tsize
+Type: boolean
+Default: true
+_Description: Enable 'tsize' support?
+
+Template: atftpd/blksize
+Type: boolean
+Default: true
+_Description: Enable 'block size' support?
+
+Template: atftpd/multicast
+Type: boolean
+Default: true
+_Description: Enable multicast support?
+
+Template: atftpd/ttl
+Type: string
+Default: 1
+_Description: TTL for multicast packets:
+
+Template: atftpd/port
+Type: string
+Default: 69
+_Description: Port to listen for tftp request:
+
+Template: atftpd/mcast_port
+Type: string
+Default: 1758
+_Description: Port range for multicast file transfer:
+ Multicast transfer will use any available port in a given set. For
+ example, "2000-2003, 3000" allow atftpd to use port 2000 to 2003 and 3000.
+
+Template: atftpd/mcast_addr
+Type: string
+Default: 239.239.239.0-255
+_Description: Address range for multicast transfer:
+ Multicast transfer will use any available addresses from a given set of
+ addresses. Syntax is "a.b.c.d-d,a.b.c.d,..."
+
+Template: atftpd/logtofile
+Type: boolean
+Default: false
+_Description: Log to file instead of syslog?
+ If your server does intensive tftp file serving, it is a good idea to 
+ accept here. That will avoid cluttering your syslog with tftpd logs.
+
+Template: atftpd/logfile
+Type: string
+Default: /var/log/atftpd.log
+_Description: Log file:
+ A file where atftpd will write its logs. This file will be made writable for
+ the user 'nobody' and group 'nogroup'.
+
+Template: atftpd/basedir
+Type: string
+Default: /srv/tftp
+_Description: Base directory:
+ The directory tree from where atftpd can serve files. That directory must
+ be world readable.

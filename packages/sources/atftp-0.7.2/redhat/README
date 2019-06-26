@@ -1,0 +1,8 @@
+The spec file provided in this directory was provided by Allen Reese
+<areese@lnxi.com>. For support/requests regarding the rpm packages,
+please contact him. The rpm packages aren't officially supported by the
+project and we do not test them. The spec file is provided as a conveniance
+to redhat users.
+
+--
+Remi Lefebvre <remi@debian.org>  Sat Jul 14 20:34:41 EST 2001

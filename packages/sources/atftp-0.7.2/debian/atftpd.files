@@ -1,0 +1,4 @@
+usr/sbin/atftpd
+usr/sbin/in.tftpd
+usr/share/man/man8/atftpd.8
+usr/share/man/man8/in.tftpd.8

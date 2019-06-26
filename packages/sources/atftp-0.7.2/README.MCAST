@@ -1,0 +1,38 @@
+Atftp supports multicast transfer. This feature allows the server to
+send a file to many clients at once. There are two ways of doing
+multicast TFTP. One is documented in RFC2090 and the other is known
+as MTFTP and documented in Intel's PXE specification. Atftp supports
+both protocols.
+
+RFC2090
+-------
+
+Multicast using RFC2090 is very similar to any other TFTP transfer. The
+read request sent by the client contains an option to inform the server to
+use multicast. The server will send configuration information (IP and
+port) through the option acknowledge mechanism. The initial read
+request is done at the same port as without multicast (port 69 in most
+configuration). Data transfer is done at IP and port chosen by the
+server.
+
+When more clients connect to the server, atftpd tries to find a thread
+currently sending the same file. If it exists, this thread will take
+care of the new client. If not, a new thread is started for that new
+client. It is possible to send many different files to many clients
+when using multicast. Each file transfer uses a unique IP and port.
+
+MTFTP
+-----
+
+The PXE specification uses a completely different (and incompatible
+with RFC2090) way of doing things. Basically, the TFTP
+request is sent at a different port than a normal TFTP request. Various
+options like IP address, port and timeout value are fetched by the client
+from a DHCP server. Server configuration is done with command line
+arguments and a configuration file. It is much less flexible than
+RFC2090 since configuration of the DHCP server must match the configuration
+of atftpd. See the file mtftp.conf as an example. Most boot ROMs use this
+method for multicast transfer since it is part of the PXE specification
+(ftp://download.intel.com/labs/manage/wfm/download/pxespec.pdf).
+
+Note: mtftp support starting in atftp 0.7 is experimental.

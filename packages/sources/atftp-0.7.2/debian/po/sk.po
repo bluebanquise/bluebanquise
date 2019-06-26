@@ -1,0 +1,208 @@
+# Slovak translations for atftp package
+# Slovenské preklady pre balík atftp.
+# Copyright (C) 2011 THE atftp'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the atftp package.
+# Automatically generated, 2011.
+# Slavko <linux@slavino.sk>, 2011.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: atftp 0.7.dfsg-10\n"
+"Report-Msgid-Bugs-To: ldrolez@debian.org\n"
+"POT-Creation-Date: 2006-10-02 00:46+0200\n"
+"PO-Revision-Date: 2011-03-30 19:22+0200\n"
+"Last-Translator: Slavko <linux@slavino.sk>\n"
+"Language-Team: Slovak <nomail>\n"
+"Language: sk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:1001
+msgid "Should the server be started by inetd?"
+msgstr "Má byť server spúšťaný prostredníctvom inetd?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:1001
+msgid ""
+"atftpd can be started by the inetd superserver or as a daemon and handle "
+"incoming connections by itself. The latter is only recommend for very high "
+"usage server."
+msgstr ""
+"atftpd môže byť spúšťaný pomocou superservera inetd alebo môže bežať ako "
+"démon a spracovávať prichádzajúce požiadavky sám. Druhá možnosť je "
+"odporúčaná len pre veľmi vyťažený server."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:2001
+msgid "Server timeout:"
+msgstr "Časový limit servera:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:2001
+msgid "How many seconds the main thread waits before exiting."
+msgstr "Koľko sekúnd má hlavné vlákno čakať, kým skončí."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:3001
+msgid "Retry timeout:"
+msgstr "Časový limit opakovania:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:3001
+msgid "How many seconds to wait for a reply before retransmitting a packet."
+msgstr "Koľko sekúnd má server čakať na odpoveď, kým znova prenesie paket."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:4001
+msgid "Maximum number of threads:"
+msgstr "Maximálny počet vlákien:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:4001
+msgid "Maximum number of concurrent threads that can be running."
+msgstr "Maximálny počet súčasne bežiacich vlákien."
+
+#. Type: select
+#. Description
+#: ../atftpd.templates:5001
+msgid "Verbosity level:"
+msgstr "Úroveň výrečnosti:"
+
+#. Type: select
+#. Description
+#: ../atftpd.templates:5001
+msgid ""
+"Level of logging. 7 logs everything including debug logs. 1 will log only "
+"the system critical logs. 5 (LOG_NOTICE) is the default value."
+msgstr ""
+"Úroveň zaznamenávania. Úroveň 7 zaznamenáva všetko, vrátane ladiacich "
+"informácií. Úroveň 1 zaznamenáva len kritické systémové udalosti. "
+"Východisková hodnota je 5 (LOG_NOTICE)."
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:6001
+msgid "Enable 'timeout' support?"
+msgstr "Zapnúť podporu „timeout”?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:7001
+msgid "Enable 'tsize' support?"
+msgstr "Zapnúť podporu „tsize”?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:8001
+msgid "Enable 'block size' support?"
+msgstr "Zapnúť podporu „block size”?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:9001
+msgid "Enable multicast support?"
+msgstr "Zapnúť podporu multicast?"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:10001
+msgid "TTL for multicast packets:"
+msgstr "TTL multicastových paketov:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:11001
+msgid "Port to listen for tftp request:"
+msgstr "Port, na ktorom má tftp prijímať požiadavky:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:12001
+msgid "Port range for multicast file transfer:"
+msgstr "Rozsah portov multicastového prenosu súborov:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:12001
+msgid ""
+"Multicast transfer will use any available port in a given set. For example, "
+"\"2000-2003, 3000\" allow atftpd to use port 2000 to 2003 and 3000."
+msgstr ""
+"Multicastový prenos bude používať všetky dostupné porty zo zadanej množiny. "
+"Napríklad \"2000-2003, 3000\" dovolí atftpd používať porty od 2000 do 2003 a "
+"3000."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:13001
+msgid "Address range for multicast transfer:"
+msgstr "Rozsah adries multicastového prenosu:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:13001
+msgid ""
+"Multicast transfer will use any available addresses from a given set of "
+"addresses. Syntax is \"a.b.c.d-d,a.b.c.d,...\""
+msgstr ""
+"Multicastový prenos bude používať všetky dostupné adresy zo zadanej množiny "
+"adries. Formát je \"a.b.c.d-d,a.b.c.d,...\""
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:14001
+msgid "Log to file instead of syslog?"
+msgstr "Zaznamenávať do súboru, namiesto do syslog?"
+
+#. Type: boolean
+#. Description
+#: ../atftpd.templates:14001
+msgid ""
+"If your server does intensive tftp file serving, it is a good idea to  "
+"accept here. That will avoid cluttering your syslog with tftpd logs."
+msgstr ""
+"Ak TFTP server intenzívne poskytuje súbory, je dobrým nápadom povoliť túto "
+"možnosť. Takto sa vyhnete zaplňovaniu svojho syslog záznamami tftpd."
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:15001
+msgid "Log file:"
+msgstr "Súbor záznamov:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:15001
+msgid ""
+"A file where atftpd will write its logs. This file will be made writable for "
+"the user 'nobody' and group 'nogroup'."
+msgstr ""
+"Súbor, do ktorého bude atftpd zapisovať svoje záznamy. Tento súbor musí byť "
+"zapisovateľný pre používateľa „nobody” a skupinu „nogroup”"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:16001
+msgid "Base directory:"
+msgstr "Základný adresár:"
+
+#. Type: string
+#. Description
+#: ../atftpd.templates:16001
+msgid ""
+"The directory tree from where atftpd can serve files. That directory must be "
+"world readable."
+msgstr ""
+"Adresárový strom, z ktorého bude atftpd poskytovať súbory. Tento adresár "
+"musí byť zapisovateľný pre všetkých."

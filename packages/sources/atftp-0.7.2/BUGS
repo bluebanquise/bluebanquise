@@ -1,0 +1,12 @@
+If you find some bugs, please send us a detailed description of the
+problem observed. Please include the logfile and a full description of
+your setup.
+
+To get a detailed log, use --verbose=7 and --logfile /var/log/tftpd to
+generate a separate logfile. Please include the number of machines
+that were booting of the server, the type of server (single or dual
+processor, processor speed, etc.) and the type of network you have
+(10Mbit, 100Mbit or 1Gbit).
+
+Jean-Pierre Lefebvre <helix@step.polymtl.ca>
+Remi Lefebvre <remi@step.polymtl.ca>

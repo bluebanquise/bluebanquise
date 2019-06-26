@@ -1,0 +1,103 @@
+#!/usr/bin/make -f
+# Sample debian/rules that uses debhelper. 
+# GNU copyright 1997 by Joey Hess.
+#
+# This version is for a hypothetical package that builds an
+# architecture-dependant package, as well as an architecture-independent
+# package.
+
+# Uncomment this to turn on verbose mode. 
+export DH_VERBOSE=1
+
+# This has to be exported to make some magic below work.
+export DH_OPTIONS
+
+configure: configure-stamp
+
+configure-stamp:
+	dh_testdir
+	# Add here commands to configure the package.
+	./configure --prefix=/usr --mandir=/usr/share/man
+
+	touch configure-stamp
+
+build: configure-stamp build-stamp
+build-stamp:
+	dh_testdir
+
+	# Add here commands to compile the package.
+	$(MAKE)
+	# For the woody backport
+	#$(MAKE) LDFLAGS="--static" LIBREADLINE="-lreadline -lncurses -lpthread" LIBWRAP="-lwrap -lnsl"
+	touch build-stamp
+
+clean: clean-patched
+
+clean-patched:
+	dh_testdir
+	dh_testroot
+	debconf-updatepo
+	rm -f build-stamp configure-stamp
+	# Add here commands to clean up after the build process.
+	[ ! -f Makefile ] || $(MAKE) clean
+	[ ! -f Makefile ] || $(MAKE) distclean
+
+
+	dh_clean
+
+install: DH_OPTIONS=
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	# Add here commands to install the package into debian/tmp.
+	$(MAKE) install prefix=`pwd`/debian/tmp/usr \
+			mandir=`pwd`/debian/tmp/usr/share/man
+
+	dh_movefiles
+	dh_installdocs -patftp
+	dh_installdocs -patftpd
+
+# Build architecture-independent files here.
+# Pass -i to all debhelper commands in this target to reduce clutter.
+binary-indep: build install
+
+# Build architecture-dependent files here.
+# Pass -a to all debhelper commands in this target to reduce clutter.
+binary-arch: DH_OPTIONS=-a
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_installdebconf
+	dh_installinit
+#	dh_installexamples
+#	dh_installcron
+#	dh_installmanpages
+#	dh_installinfo
+	dh_installchangelogs  Changelog
+	dh_strip
+	dh_link
+	dh_compress
+	dh_fixperms
+	# You may want to make some executables suid here.
+	#dh_suidregister
+	dh_installdeb
+	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+
+#patch: patch-stamp
+#patch-stamp:
+#	dpatch apply-all
+#	dpatch call-all -a=pkg-info >patch-stamp
+#
+#unpatch:
+#	dpatch deapply-all
+#	rm -rf patch-stamp debian/patched
+
+.PHONY: build clean binary-indep binary-arch binary install
