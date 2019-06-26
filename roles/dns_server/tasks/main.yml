@@ -1,0 +1,46 @@
+---
+
+- name: Package
+  package:
+    name: bind
+    state: present
+
+- name: Template >> /etc/named.conf
+  template:
+    src: named.conf.j2
+    dest: /etc/named.conf
+    owner: root
+    group: root
+    mode: 0644
+#  notify: Restart dns_server services
+  tags:
+    - templates
+
+- name: Template >> /var/named/forward
+  template:
+    src: forward.j2
+    dest: /var/named/forward
+    owner: root
+    group: root
+    mode: 0644
+#  notify: Restart dns_server services
+  tags:
+    - templates
+
+- name: Template >> /var/named/reverse
+  template:
+    src: reverse.j2
+    dest: /var/named/reverse
+    owner: root
+    group: root
+    mode: 0644
+#  notify: Restart dns_server services
+  tags:
+    - templates
+    - toto
+
+- name: Start services
+  service:
+    name: named
+    state: started
+    enabled: yes

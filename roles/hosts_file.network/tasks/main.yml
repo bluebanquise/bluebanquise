@@ -1,0 +1,12 @@
+---
+
+- name: Template >> /etc/hosts
+  template:
+    src: "hosts.j2"
+    dest: /etc/hosts
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - templates
+

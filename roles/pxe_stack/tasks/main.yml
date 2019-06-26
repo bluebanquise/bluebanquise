@@ -1,0 +1,51 @@
+---
+
+- name: Install minimum packages for PXE
+  package:
+    name: "{{item}}" 
+    state: present
+  with_items:
+    - atftp
+    - bluebanquise_ipxe
+    - httpd
+    - policycoreutils-python
+
+- name: Create pxe directories structure
+  file:
+   path: "{{item}}"
+   state: directory
+   mode: 0755
+  with_items:
+   - /var/www/cgi-bin
+   - /var/www/html/preboot_execution_environment
+   - /var/www/html/preboot_execution_environment/bin
+   - /var/www/html/preboot_execution_environment/nodes
+   - /var/www/html/preboot_execution_environment/configurations
+   - /var/www/html/preboot_execution_environment/ipxe_configurations
+
+- name: Templates >> menu and convergence
+  template:
+    src: "{{item}}.ipxe.j2"
+    dest: "/var/www/html/preboot_execution_environment/{{item}}.ipxe"
+    mode: 0644
+  with_items:
+    - convergence
+    - menu
+
+- name: Templates >> kickstarts
+  template:
+    src: "kickstart.cfg.j2"
+    dest: /var/www/html/preboot_execution_environment/configurations/kickstart.{{item | replace('equipment_','') | trim}}.cfg
+    mode: 0644
+  with_items: "{{equipment_groups_list}}"
+  when: "hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'"
+
+- name: Templates >> ipxe_configurations
+  template:
+    src: "configuration.ipxe.j2"
+    dest: /var/www/html/preboot_execution_environment/ipxe_configurations/{{item | replace('equipment_','') | trim}}.ipxe
+    mode: 0644
+  with_items: "{{equipment_groups_list}}"
+  when: "hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'"
+
+  

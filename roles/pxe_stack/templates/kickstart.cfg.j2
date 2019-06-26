@@ -1,0 +1,126 @@
+#### Blue Banquise file ####
+## {{ansible_managed}}
+
+
+##### General settings
+
+# Do not use GUI
+text
+
+# Run the Setup Agent on first boot
+firstboot --enable
+
+# System keyboard layout
+keyboard --vckeymap={{hostvars[groups[item][0]]['equipment_profile']['configuration']['keyboard_layout']}} --xlayouts='{{hostvars[groups[item][0]]['equipment_profile']['configuration']['keyboard_layout']}}'
+
+# System language
+lang {{hostvars[groups[item][0]]['equipment_profile']['configuration']['system_language']}}
+
+# System timezone
+timezone {{time_zone}} --isUtc
+
+# Reboot after installation
+reboot
+
+
+##### Authentication settings
+
+# Define authentication method (sha512)
+auth --enableshadow --passalgo=sha512
+
+# Root password (sha512)
+rootpw --iscrypted {{hostvars[groups[item][0]]['authentication']['root_password_sha512']}}
+
+
+##### Network
+
+# Network settings
+network --bootproto=dhcp --ipv6=auto --activate
+network --hostname=localhost.localdomain
+
+
+##### Security
+
+# SELinux
+{% if hostvars[groups[item][0]]['equipment_profile']['access_control'] is defined and hostvars[groups[item][0]]['equipment_profile']['access_control'] == true %}
+selinux --enforcing
+{% else %}
+selinux --disabled
+{% endif %}
+
+# Firwalld
+{% if hostvars[groups[item][0]]['equipment_profile']['firewall'] is defined and hostvars[groups[item][0]]['equipment_profile']['firewall'] == true %}
+firewall --enabled
+{% else %}
+firewall --disabled
+{% endif %}
+
+
+##### Partitionning
+
+# Bootloader configuration
+bootloader --append="{{hostvars[groups[item][0]]['equipment_profile']['kernel_parameters']}}" --location=mbr
+
+# Partitioning
+{{hostvars[groups[item][0]]['equipment_profile']['partitioning']}}
+
+
+##### Packages
+
+%packages
+@core
+curl
+%end
+
+
+# This EFI first boot order restoration trick is from stacky, not from me.
+{% if hostvars[groups[item][0]]['equipment_profile']['preserve_efi_first_boot_device'] == true %}
+%pre
+set -x
+if [ -d /sys/firmware/efi ]; then
+    netboot=`efibootmgr | awk '/^BootCurrent:/{print $2;}'`
+    [ ! -z $netboot ] && echo $netboot > /tmp/uefi_netboot
+    efibootmgr > /tmp/uefiall
+fi
+set +x
+%end
+
+%post --nochroot --log /mnt/sysimage/root/efirestore_post-install.log
+set -x
+if [ -d /sys/firmware/efi ]; then
+    echo "Restoring EFI first boot device..."
+    netboot=$(cat /tmp/uefi_netboot)
+    currentorder=`efibootmgr | awk '/^BootOrder:/{print $2;}'`
+    efibootmgr -o $netboot,$(echo $currentorder | sed "s/$netboot//" | sed 's/^,//' | sed 's/,$//' | sed 's/,,/,/')
+    echo " End."
+fi
+set +x
+%end
+{% endif %}
+
+
+# Replace here the ssh-key by the one in your id_rsa.pub
+%post --interpreter /bin/bash --log /root/post-install.log
+set -x
+
+# Add ssh keys into authorized_keys
+mkdir /root/.ssh
+cat << xxEOFxx >> /root/.ssh/authorized_keys
+{% for ssh_key in hostvars[groups[item][0]]['authentication']['ssh_keys'] %}
+{{ssh_key}}
+{% endfor %}
+xxEOFxx
+# Ensure SELinux tags are ok
+restorecon -R -v /root/.ssh
+
+# Turn the kernel parameters into variables
+# We are looking for next_server value
+set -- `cat /proc/cmdline`
+for I in $*; do case "$I" in *=*) eval $I;; esac; done
+
+echo "All went well, we can inform next-server we succeeded"
+curl -s -k http://$next_server/cgi-bin/boot_changer.py --data "hostname=$(hostname -s)"
+
+set +x
+%end
+

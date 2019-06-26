@@ -1,0 +1,21 @@
+#### Blue Banquise file ####
+## {{ansible_managed}}
+
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+
+{% for host in groups['all'] %}
+{% if hostvars[host]['network_interfaces'] is defined and not none %}
+{% for interface, interface_vars in hostvars[host]['network_interfaces'].items() %}
+{% if interface_vars.ip4 is defined and not none %}
+{{interface_vars.ip4}} {{host}}
+{% endif %}
+{% endfor %}
+{% if hostvars[host]['bmc'] is defined %}
+{% set bmc_args = hostvars[host]['bmc'] %}
+{% if (bmc_args.name is defined and not none) and (bmc_args.ip4 is defined and not none) %}
+{{bmc_args.ip4}} {{bmc_args.name}}
+{% endif %}
+{% endif %}
+{% endif %}
+{% endfor %}

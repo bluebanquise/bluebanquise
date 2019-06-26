@@ -1,0 +1,48 @@
+---
+
+- name: Package
+  package:
+    name: dhcp
+    state: present
+
+- name: Template >> /etc/dhcp/dhcpd.conf
+  template:
+    src: dhcpd.conf.j2
+    dest: /etc/dhcp/dhcpd.conf
+    owner: root
+    group: root
+    mode: 0644
+#  notify: Restart dhcp_server services
+  tags:
+    - templates
+
+- name: Template >> /etc/dhcp/dhcpd.networks.conf
+  template:
+    src: dhcpd.networks.conf.j2
+    dest: /etc/dhcp/dhcpd.networks.conf
+    owner: root
+    group: root
+    mode: 0644
+#  notify: Restart dhcp_server services
+  tags:
+    - templates
+
+- name: Template >> /etc/dhcp/dhcpd.{{item}}.conf
+  template:
+    src: dhcpd.subnet.conf.j2
+    dest: /etc/dhcp/dhcpd.{{item}}.conf
+    owner: root
+    group: root
+    mode: 0644
+  with_items: "{{networks}}"
+  when:
+    - networks[item].is_in_dhcp == true
+#  notify: Restart dhcp_server services
+  tags:
+    - templates
+
+- name: Start services
+  service:
+    name: dhcpd
+    state: started
+    enabled: yes

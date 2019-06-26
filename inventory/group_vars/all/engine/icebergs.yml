@@ -1,0 +1,13 @@
+### Icebergs dynamic variables
+
+## Get host current iceberg
+current_iceberg: "{{ group_names | select('match','^'+iceberg_naming+'[0-9]+') | list | unique | sort | first | join}}"
+current_iceberg_number: "{{ current_iceberg | replace(iceberg_naming,' ') | trim }}"
+
+## Network related
+current_iceberg_network: "{{management_networks_naming + (current_iceberg_number|string)}}"
+
+## General data
+icebergs_groups_list: "{{ groups | select('match','^'+iceberg_naming+'[0-9]+') | list }}"
+number_of_icebergs: "{{ groups | select('match','^'+iceberg_naming+'[0-9]+') | list | length }}"
+
