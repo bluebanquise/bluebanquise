@@ -49,7 +49,7 @@ goto start
 
 :bootosdeploy
 
-chain http://${next-server}/preboot_execution_environment/nodes/${hostname}_deploy_os.ipxe || shell
+chain http://${next-server}/preboot_execution_environment/nodes/${hostname}_bootosdeploy.ipxe || shell
 
 :bootdisk
 
