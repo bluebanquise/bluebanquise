@@ -1,0 +1,4 @@
+{% for host in groups['all'] %}
+{{host}}:
+  equipment_profile: "{{ hostvars[host]['group_names'] | select('match','^'+equipment_naming+'_.*') | list | unique | sort | first | join | replace('equipment_','') | trim }}"
+{% endfor %}

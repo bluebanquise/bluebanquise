@@ -9,6 +9,9 @@
     - bluebanquise_ipxe
     - httpd
     - policycoreutils-python
+    - python36
+    - python36-PyYAML
+    - python36-clustershell
 
 - name: Create pxe directories structure
   file:
@@ -22,6 +25,30 @@
    - /var/www/html/preboot_execution_environment/nodes
    - /var/www/html/preboot_execution_environment/configurations
    - /var/www/html/preboot_execution_environment/ipxe_configurations
+   - /etc/bluebanquise
+   - /etc/bluebanquise/pxe
+
+- name: Configure access on directory /var/www/html/preboot_execution_environment"
+  file:
+    path: /var/www/html/preboot_execution_environment
+    state: directory
+    mode: 0755
+    owner: apache
+    group: apache
+    recurse: yes
+
+- name: SELinux /var/www/html/preboot_execution_environment/nodes
+  sefcontext:
+    target: '/var/www/html/preboot_execution_environment/nodes(/.*)?'
+    setype: httpd_sys_rw_content_t
+    state: present
+  when: ansible_selinux.status == "enabled"
+
+- name: Templates >> nodes parameters
+  template:
+    src: "nodes_parameters.yml.j2"
+    dest: "/etc/bluebanquise/pxe/nodes_parameters.yml"
+    mode: 0644
 
 - name: Templates >> menu and convergence
   template:
@@ -48,4 +75,37 @@
   with_items: "{{equipment_groups_list}}"
   when: "hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'"
 
-  
+- name: bootset tool
+  copy:
+    src: bootset.py
+    dest: /usr/bin/bootset
+    mode: 0700 
+
+- name: httpd cgi module
+  apache2_module:
+    state: present
+    name: cgi
+
+- name: cgi configuration file
+  copy:
+    src: cgi.conf
+    dest: /etc/httpd/conf.d/cgi.conf
+    mode: 0644
+
+- name: cgi script
+  copy:
+    src: bootswitch.cgi
+    dest: /var/www/cgi-bin/bootswitch.cgi
+    mode: 0744
+    owner: apache
+    group: apache
+  tags: tyty
+
+- name: Start services
+  service:
+    name: "{{item}}"
+    state: started
+    enabled: yes
+  with_items:
+    - httpd
+    - atftpd
