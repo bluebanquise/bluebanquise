@@ -4,11 +4,21 @@
 127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
 ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
 
-{% for host in groups['all'] %}
+{% if hosts_file['range'] == 'all' %}
+{% set range = 'all' %}
+{% elif hosts_file['range'] == 'iceberg' %}
+{% set range = (current_iceberg|string) %}
+{% endif %}
+
+{% for host in groups[range] %}
 {% if hostvars[host]['network_interfaces'] is defined and not none %}
 {% for interface, interface_vars in hostvars[host]['network_interfaces'].items() %}
-{% if interface_vars.ip4 is defined and not none %}
-{{interface_vars.ip4}} {{host}}
+{% if interface_vars.ip4 is defined and not none and interface_vars.network is defined and not none %}
+{% if interface == hostvars[host]['node_main_network_interface'] %}
+{{interface_vars.ip4}} {{host}} {{host}}-{{interface_vars.network}}
+{% else %}
+{{interface_vars.ip4}} {{host}}-{{interface_vars.network}}
+{% endif %}
 {% endif %}
 {% endfor %}
 {% if hostvars[host]['bmc'] is defined %}
