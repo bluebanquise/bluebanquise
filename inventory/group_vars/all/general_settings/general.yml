@@ -4,4 +4,4 @@ time_zone: Europe/Paris
 
 # /etc/hosts
 hosts_file:
-  range: all # can be all (all hosts) or local (iceberg only)
+  range: all # can be all (all hosts) or iceberg (iceberg only)
