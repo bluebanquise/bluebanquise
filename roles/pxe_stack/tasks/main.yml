@@ -1,6 +1,6 @@
 ---
 
-- name: Install minimum packages for PXE
+- name: Install minimum packages for PXE (Centos 7)
   package:
     name: "{{item}}" 
     state: present
@@ -12,6 +12,9 @@
     - python36
     - python36-PyYAML
     - python36-clustershell
+  when:
+    - (equipment_profile['operating_system']['distribution']|lower) == 'centos'
+    - (equipment_profile['operating_system']['distribution_major_version']|string) == '7'
 
 - name: Create pxe directories structure
   file:
@@ -42,7 +45,9 @@
     target: '/var/www/html/preboot_execution_environment/nodes(/.*)?'
     setype: httpd_sys_rw_content_t
     state: present
-  when: ansible_selinux.status == "enabled"
+  when:
+    - ansible_os_family == "RedHat"
+    - ansible_selinux.status == "enabled"
 
 - name: Templates >> nodes parameters
   template:
@@ -59,21 +64,81 @@
     - convergence
     - menu
 
-- name: Templates >> kickstarts
+##### Centos
+
+- name: Templates >> kickstarts for Centos
   template:
     src: "kickstart.cfg.j2"
     dest: /var/www/html/preboot_execution_environment/configurations/kickstart.{{item | replace('equipment_','') | trim}}.cfg
     mode: 0644
   with_items: "{{equipment_groups_list}}"
-  when: "hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'"
+  when:
+    - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
+    - (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) == 'centos'
 
-- name: Templates >> ipxe_configurations
+- name: Templates >> ipxe_configurations for Centos
   template:
-    src: "configuration.ipxe.j2"
+    src: "configuration_centos.ipxe.j2"
     dest: /var/www/html/preboot_execution_environment/ipxe_configurations/{{item | replace('equipment_','') | trim}}.ipxe
     mode: 0644
   with_items: "{{equipment_groups_list}}"
-  when: "hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'"
+  when:
+    - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
+    - (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) == 'centos'
+
+##### Ubuntu
+
+- name: Templates >> preseeds for Ubuntu
+  template:
+    src: "preseed.cfg.j2"
+    dest: /var/www/html/preboot_execution_environment/configurations/preseed.{{item | replace('equipment_','') | trim}}.cfg
+    mode: 0644
+  with_items: "{{equipment_groups_list}}"
+  when:
+    - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
+    - (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) == 'ubuntu'
+
+- name: Templates >> ipxe_configurations for Ubuntu
+  template:
+    src: "configuration_ubuntu.ipxe.j2"
+    dest: /var/www/html/preboot_execution_environment/ipxe_configurations/{{item | replace('equipment_','') | trim}}.ipxe
+    mode: 0644
+  with_items: "{{equipment_groups_list}}"
+  when:
+    - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
+    - (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) == 'ubuntu'
+
+##### OpenSuse
+
+- name: Templates >> autoyasts for OpenSuse
+  template:
+    src: "autoyast.xml.j2"
+    dest: /var/www/html/preboot_execution_environment/configurations/autoyast.{{item | replace('equipment_','') | trim}}.xml
+    mode: 0644
+  with_items: "{{equipment_groups_list}}"
+  when:
+    - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
+    - (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) == 'opensuse'
+
+- name: Templates >> ipxe_configurations for OpenSuse
+  template:
+    src: "configuration_opensuse.ipxe.j2"
+    dest: /var/www/html/preboot_execution_environment/ipxe_configurations/{{item | replace('equipment_','') | trim}}.ipxe
+    mode: 0644
+  with_items: "{{equipment_groups_list}}"
+  when:
+    - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
+    - (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) == 'opensuse'
+
+##### Minimal, specific
+
+- name: Templates >> ipxe_configuration for Minimal Live Linux
+  template:
+    src: "configuration_minimal.ipxe.j2"
+    dest: /var/www/html/preboot_execution_environment/ipxe_configurations/minimal.ipxe
+    mode: 0644
+
+##### END
 
 - name: bootset tool
   copy:

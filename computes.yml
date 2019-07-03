@@ -1,6 +1,6 @@
 ---
-- name: toto
-  hosts: "management1"
+- name: computes
+  hosts: "{{target}}"
   roles:
 
     - role: set_hostname
