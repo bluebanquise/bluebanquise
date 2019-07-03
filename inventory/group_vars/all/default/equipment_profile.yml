@@ -26,7 +26,7 @@ equipment_profile:
   equipment_type: server # If server, a pxe profile will be generated
 
   configuration:
-    keyboard_layout: fr # us, fr, etc.
+    keyboard_layout: us # us, fr, etc.
     system_language: en_US.UTF-8 # You should not update this if you want to google issues...
 
   hardware:

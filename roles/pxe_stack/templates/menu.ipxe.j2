@@ -1,8 +1,8 @@
 #!ipxe
 
 # Set graphics mode and configure colours
-#console --x 200 --y 200 --picture http://10.10.0.1/texture.png #--left 32 --right 32 --top 32 --bottom 48
-#console --x 200 --y 200 --picture riddick.png
+#console --x 800 --y 600 --picture http://10.10.0.1/texture.png #--left 32 --right 32 --top 32 --bottom 48
+#console --picture http://${next-server}/riddick.png
 
 ###################### MAIN MENU ####################################
 
@@ -31,28 +31,50 @@ item --gap                Main boot
 item bootosdeploy         Deploy OS (This will deploy/redeploy operating system)
 item bootdisk             Boot on disk (This will boot on local disk)
 item --gap                Tools
+item minimal_live_linux   Minimal Live Linux
 item memtest              Memtest (To check Memory)
 item --gap                Other
 item startshell           iPXE shell (Go to an iPXE shell)
+item showinfo             Display system infos
 choose --timeout ${menu-timeout} --default ${menu-default} selected || goto cancel
 set menu-timeout 0
 goto ${selected}
 
+############ MAIN MENU ITEMS ############
+
 :startshell
-echo Type 'exit' to get the back to the menu
+echo Type 'exit' to get the back to the menu.
 shell
 set menu-timeout 0
 set submenu-timeout 0
 goto start
 
-############ MAIN MENU ITEMS ############
+:showinfo
+echo
+echo +---------------- System information ----------------+
+echo |
+echo | hostname:     ${hostname}
+echo | platform:     ${platform}
+echo | mac:          ${net0/mac}
+echo | ip:           ${net0.dhcp/ip:ipv4}
+echo | netmask:      ${net0.dhcp/netmask:ipv4}
+echo | dhcp-server:  ${net0.dhcp/dhcp-server:ipv4}
+echo | gateway:      ${net0.dhcp/gateway:ipv4}
+echo | dns-server:   ${net0.dhcp/dns:ipv4}
+echo | domain:       ${net0.dhcp/domain:string}
+echo | next-server:  ${net0.dhcp/next-server:ipv4}
+echo |
+echo +----------------------------------------------------+
+echo
+prompt Press any key to continue
+set menu-timeout 0
+set submenu-timeout 0
+goto start
 
 :bootosdeploy
-
 chain http://${next-server}/preboot_execution_environment/nodes/${hostname}_bootosdeploy.ipxe || shell
 
 :bootdisk
-
 iseq ${platform} efi && goto bootdisk-efi || goto bootdisk-legacy
 
     :bootdisk-legacy
@@ -68,6 +90,10 @@ iseq ${platform} efi && goto bootdisk-efi || goto bootdisk-legacy
 :memtest
 echo Booting Memtest86+
 boot http://${next-server}/preboot_execution_environment/bin/memtest86+-5.01.bin || shell
+
+:minimal_live_linux
+echo Booting Minimal Live Linux
+chain http://${next-server}/preboot_execution_environment/ipxe_configurations/minimal.ipxe
 
 
 

@@ -5,6 +5,7 @@ networks:
     netmask: 255.255.0.0
     broadcast: 10.10.255.255
     dhcp_unknown_range: 10.10.254.1 10.10.254.254
+    gateway: 10.10.0.1
     is_in_dhcp: true
     is_in_dns: true
     is_in_shared_network: false
