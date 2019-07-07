@@ -11,7 +11,7 @@ text
 firstboot --enable
 
 # System keyboard layout
-keyboard --vckeymap={{hostvars[groups[item][0]]['equipment_profile']['configuration']['keyboard_layout']}} --xlayouts='{{hostvars[groups[item][0]]['equipment_profile']['configuration']['keyboard_layout']}}'
+keyboard --vckeymap={{hostvars[groups[item][0]]['equipment_profile']['configuration']['keyboard_layout']|lower}} --xlayouts='{{hostvars[groups[item][0]]['equipment_profile']['configuration']['keyboard_layout']|lower}}'
 
 # System language
 lang {{hostvars[groups[item][0]]['equipment_profile']['configuration']['system_language']}}

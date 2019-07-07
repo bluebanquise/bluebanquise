@@ -1,0 +1,23 @@
+---
+
+- name: Package
+  package:
+    name: nfs-utils
+    state: present
+
+- name: Exports configuration (/etc/exports)
+  lineinfile:
+    path: /etc/exports
+    regexp: ' # export name: {{item}}$'
+    line: "{{ nfs[item]['export']}} {{networks[nfs[item]['take_over_network']]['subnet']}}/{{networks[nfs[item]['take_over_network']]['prefix']}}({{nfs[item]['export_arguments']}}) # export name: {{item}}"
+  when: inventory_hostname == nfs[item]['server']
+  with_items: "{{nfs}}"
+
+- name: Start services
+  service:
+    name: "{{item}}"
+    state: started
+    enabled: yes
+  with_items:
+    - nfs-server
+    - rpcbind

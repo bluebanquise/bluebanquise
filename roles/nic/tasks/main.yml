@@ -1,6 +1,6 @@
 ---
 
-- name: Install required packages
+- name: Install required packages for Centos
   package:
     name: "{{item}}"
     state: present
@@ -10,6 +10,22 @@
     - nm-connection-editor.x86_64
     - libsemanage-python
     - policycoreutils-python
+  when:
+    - ansible_distribution_major_version == "7"
+    - ansible_os_family == "RedHat"
+
+- name: Install required packages for Ubuntu
+  package:
+    name: "{{item}}"
+    state: present
+  with_items:
+    - network-manager
+    - python-dbus
+    - libnm-glib-dev
+  when:
+    - ansible_distribution_version == "18.04"
+    - (ansible_distribution|lower) == "ubuntu"
+
 
 - name: Set NIC configuration
   nmcli:
@@ -28,4 +44,7 @@
      replace: 'BOOTPROTO=none'
      backup: no
   with_items: "{{network_interfaces}}"
+  when:
+    - ansible_distribution_major_version == "7"
+    - ansible_os_family == "RedHat"
 
