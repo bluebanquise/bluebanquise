@@ -59,7 +59,7 @@
   template:
     src: "{{item}}.ipxe.j2"
     dest: "/var/www/html/preboot_execution_environment/{{item}}.ipxe"
-    mode: 0644
+    mode: 0755
   with_items:
     - convergence
     - menu

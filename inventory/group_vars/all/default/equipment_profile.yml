@@ -32,6 +32,7 @@ equipment_profile:
   hardware:
     cpu:
       architecture: x86_64
+      cores: 1
 
   equipment_authentication: # login/password for BMC, storage bay controller, switch, etc.
     user: ADMIN
