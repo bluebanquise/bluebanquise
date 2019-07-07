@@ -1,0 +1,42 @@
+---
+
+#- debug:
+#    msg: "{{nfs[item]['clients_groups']}} {% if groups[nfs[item]['clients_groups']] is defined and not none %}coucou{% if {% endif %}"
+#  with_items: "{{nfs}}"
+
+- name: Package
+  package:
+    name: nfs-utils
+    state: present
+
+- name: Create NFS directories
+  file:
+    path: "{{item.0.mount}}"
+    state: directory
+  with_subelements:
+    - "{{nfs}}"
+    - clients_groups
+  when:
+    - groups[item.1] is defined and not none
+    - inventory_hostname in groups[item.1]
+
+- name: Start services
+  service:
+    name: rpcbind
+    state: started
+    enabled: yes
+
+- name: Mount experted NFS into directories
+  mount:
+    path: "{{item.0.mount}}"
+    src: "{{item.0.server}}{% if item.0.take_over_network is defined and not none %}-{{item.0.take_over_network}}{% endif %}:{{item.0.export}}"
+    fstype: nfs
+    opts: "{{item.0.mount_arguments}}"
+    state: mounted
+  with_subelements:
+    - "{{nfs}}"
+    - clients_groups
+  when:
+    - groups[item.1] is defined and not none
+    - inventory_hostname in groups[item.1]
+

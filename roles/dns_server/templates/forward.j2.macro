@@ -1,6 +1,10 @@
 ;#### Blue Banquise file ####
 ;## {{ansible_managed}}
 
+{% import "./macros/network.j2" as network_macros %}
+{% set node_main_network = network_macros.get_node_network_info(network_interfaces,current_iceberg_network).split(',')[1] %}
+{% set node_main_network_interface = network_macros.get_node_network_info(network_interfaces,current_iceberg_network).split(',')[2] %}
+
 $TTL 86400
 @ IN SOA  {{inventory_hostname}}.{{domain_name}}. root.{{domain_name}}. (
   2011071001  ;Serial
@@ -16,10 +20,12 @@ $TTL 86400
 
 {% for host in groups['all'] %}
 {% if hostvars[host]['network_interfaces'] is defined and not none %}
-{% set host_network_interfaces = hostvars[host]['network_interfaces'] %}{# Buffer for better performances #}
+{% set host_network_interfaces = hostvars[host]['network_interfaces'] %} {# Buffer for better performances #}
+{% set node_main_network = network_macros.get_node_network_info(host_network_interfaces,hostvars[host]['current_iceberg_network']).split(',')[1] %}
+
 {% for interface, interface_vars in host_network_interfaces.items() %}
 {% if interface_vars.ip4 is defined and not none %}
-{% if (interface_vars.network is defined and not none) and (interface_vars.network == hostvars[host]['node_main_network']) %}
+{% if (interface_vars.network is defined and not none) and (interface_vars.network == node_main_network) %}
 {{host}} IN A {{interface_vars.ip4}}
 {{host}}-{{interface_vars.network}} IN A {{interface_vars.ip4}}
 {% elif interface_vars.network is defined and not none %}
