@@ -1,3 +1,3 @@
 # blue-banquise
 Banquise on Ansible
-![BlueBanquise Logo](pictures/BlueBanquise_logo.svg =150x)
+![BlueBanquise Logo](pictures/BlueBanquise_logo.svg | width=100)
