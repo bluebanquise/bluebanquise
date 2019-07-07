@@ -19,3 +19,13 @@
       tags: dhcp_server
     - role: dns_server
       tags: dns_server
+    - role: dns_client
+      tags: dns_client
+    - role: time_server
+      tags: time_server
+    - role: nfs_server
+      tags: nfs_server
+    - role: nfs_client
+      tags: nfs_client
+    - role: HPC_slurm
+      tags: HPC_slurm

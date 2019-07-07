@@ -1,0 +1,22 @@
+---
+
+- name: Package
+  package:
+    name: chrony
+    state: present
+
+- name: Template >> /etc/chrony.conf
+  template:
+    src: chrony.conf.j2
+    dest: /etc/chrony.conf
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - templates
+
+- name: Start services
+  service:
+    name: chronyd
+    state: started
+    enabled: yes
