@@ -44,7 +44,7 @@ for node in NodeSet(passed_arguments.nodes):
             file.write("exit\n")
             file.close()
         if str(os.path.exists('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'_bootosdeploy.ipxe')) == 'False':
-            print(bcolors.OKBLUE+'[INFO] Creating file /var/www/html/preboot_execution_environment/nodes/'+str(node)+'_bootosdeploy..ipxe'+bcolors.ENDC)
+            print(bcolors.OKBLUE+'[INFO] Creating file /var/www/html/preboot_execution_environment/nodes/'+str(node)+'_bootosdeploy.ipxe'+bcolors.ENDC)
             print(bcolors.OKBLUE+'[INFO] Copy from /var/www/html/preboot_execution_environment/ipxe_configurations/'+nodes_parameters[str(node)]["equipment_profile"]+'.ipxe'+bcolors.ENDC)
             copy2('/var/www/html/preboot_execution_environment/ipxe_configurations/'+nodes_parameters[str(node)]["equipment_profile"]+'.ipxe', '/var/www/html/preboot_execution_environment/nodes/'+str(node)+'_bootosdeploy.ipxe')
         print(bcolors.OKGREEN+'[OK] Done.'+bcolors.ENDC)

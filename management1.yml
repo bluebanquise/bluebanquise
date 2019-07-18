@@ -3,6 +3,10 @@
   hosts: "management1"
   roles:
 
+    - role: openldap_server
+      tags: openldap_server
+    - role: openldap_client
+      tags: openldap_client
     - role: set_hostname
       tags: set_hostname
     - role: repositories_client
@@ -29,3 +33,5 @@
       tags: nfs_client
     - role: HPC_slurm
       tags: HPC_slurm
+      vars:
+        slurm_profile: controler

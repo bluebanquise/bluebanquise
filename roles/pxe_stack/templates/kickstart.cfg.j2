@@ -119,7 +119,7 @@ set -- `cat /proc/cmdline`
 for I in $*; do case "$I" in *=*) eval $I;; esac; done
 
 echo "All went well, we can inform next-server we succeeded"
-curl -s -k http://$next_server/cgi-bin/bootswitch.cgi --data "node=$(hostname -s)&boot=disk"
+curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$(hostname -s)&boot=disk"
 set +x
 %end
 
