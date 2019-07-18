@@ -2,13 +2,58 @@
 
 - name: Package
   package:
-    name: "{{item}}#
+    name: "{{item}}"
     state: present
   with_items:
     - munge
+    - munge-libs
     - slurm
     - slurm-slurmctld
   when: slurm_profile == 'controler'
+
+- name: Package
+  package:
+    name: "{{item}}"
+    state: present
+  with_items:
+    - munge
+    - munge-libs
+    - slurm
+    - slurm-slurmd
+  when: slurm_profile == 'node'
+
+#### MUNGE
+
+- name: File >> /etc/munge/munge.key
+  copy:
+    src: munge.key
+    dest: /etc/munge/munge.key
+    owner: munge
+    group: munge
+    mode: 0400
+
+- name: Start services >> munge
+  service:
+    name: munge
+    state: started
+    enabled: yes
+
+#### SLURM
+
+- name: Add group >> slurm
+  group:
+    name: slurm
+    gid: 777
+    state: present
+
+- name: Add user >> slurm
+  user:
+    name: slurm
+    shell: /bin/false
+    uid: 777
+    group: slurm
+    home: /etc/slurm
+    state: present
 
 - name: Template >> /etc/slurm/slurm.conf
   template:
@@ -20,7 +65,18 @@
   tags:
     - templates
 
-
+- name: Create directories
+  file:
+    path: "{{item}}"
+    state: directory
+    owner: slurm
+    group: slurm
+    mode: 0755
+  with_items:
+    - /var/log/slurm
+    - /var/spool/slurmd
+    - /var/spool/slurmd/StateSave
+    - /var/spool/slurmd/slurmd
 
 - name: Start services
   service:
@@ -28,3 +84,11 @@
     state: started
     enabled: no         # Dangerous to enable slurm controller...
   when: slurm_profile == 'controler'
+
+- name: Start services
+  service:
+    name: slurmd
+    state: started
+    enabled: yes
+  when: slurm_profile == 'node'
+

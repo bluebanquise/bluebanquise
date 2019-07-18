@@ -3,3 +3,6 @@
 
 search {{domain_name}}
 nameserver {{networks[node_main_network]['services_ip']['dns_ip']}} 
+{% for external_server in dns_settings.external_dns_servers %}
+nameserver {{external_server}}
+{% endfor %} 

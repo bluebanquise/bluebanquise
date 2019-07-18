@@ -1,0 +1,3 @@
+ldap_settings:
+  manager_password_hash: '{SSHA}VhOAYNMM9UczGgn6CB1W1YLSowAdamXA'
+  manager_password: root

@@ -14,4 +14,5 @@ networks:
       ntp_ip: 10.10.0.1
       dns_ip: 10.10.0.1
       repository_ip: 10.10.0.1
-
+      authentication_ip: 10.10.0.1
+      time_ip: 10.10.0.1
