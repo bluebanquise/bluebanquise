@@ -35,3 +35,5 @@
       tags: HPC_slurm
       vars:
         slurm_profile: controler
+    - role: prometheus_server
+      tags: prometheus_server

@@ -1,0 +1,56 @@
+---
+
+- name: Package
+  package:
+    name: "{{item}}"
+    state: present
+  with_items:
+    - prometheus
+    - alertmanager
+
+- name: Create pxe directories structure
+  file:
+   path: "{{item}}"
+   state: directory
+   mode: 0750
+   owner: prometheus
+   group: prometheus
+  with_items:
+   - /etc/prometheus/alerts/
+
+- name: Template >> /etc/prometheus/prometheus.yml
+  template:
+    src: prometheus.yml.j2
+    dest: /etc/prometheus/prometheus.yml
+    owner: prometheus
+    group: prometheus
+    mode: 0640
+  tags:
+    - templates
+
+- name: Template >> /etc/prometheus/alerts/general.yml
+  copy:
+    src: alerts_general.yml
+    dest: /etc/prometheus/alerts/general.yml
+    owner: prometheus
+    group: prometheus
+    mode: 0640
+
+- name: Template >> /etc/alertmanager/alertmanager.yml
+  template:
+    src: alertmanager.yml.j2
+    dest: /etc/alertmanager/alertmanager.yml
+    owner: alertmanager
+    group: alertmanager
+    mode: 0640
+  tags:
+    - templates
+
+- name: Start services
+  service:
+    name: "{{item}}"
+    state: started
+    enabled: yes
+  with_items:
+    - prometheus
+    - alertmanager

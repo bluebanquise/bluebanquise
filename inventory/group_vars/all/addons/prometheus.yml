@@ -1,0 +1,8 @@
+prometheus:
+  # More info: https://www.robustperception.io/whats-the-difference-between-group_interval-group_wait-and-repeat_interval
+  scrape_interval: 15s
+  evaluation_interval: 30s
+  alertmanager:
+    group_wait: 30s
+    group_interval: 1m
+    repeat_interval: 2m 

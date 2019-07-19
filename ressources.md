@@ -2,6 +2,10 @@
 
 Kind of a bibliography...
 
+## Ansible
+
+https://gryzli.info/2019/02/21/tuning-ansible-for-maximum-performance/
+
 ## PXE
 
 https://forum.ipxe.org/showthread.php?tid=7879
@@ -52,14 +56,31 @@ http://ipxe.org/appnote/debian_preseed
 https://gist.github.com/simonjgreen/a7f65558515bb501adf5
 http://ftp.debian.org/debian/dists/stretch/main/installer-amd64/current/images/netboot/
 
+### Minimal Live Linux
+https://github.com/ivandavidov/minimal
+http://minimal.linux-bg.org/#download
 
 ### Memtest
 http://ipxe.org/err/460381
+https://www.kernel.org/doc/Documentation/admin-guide/kernel-parameters.txt
 
 ### ATFTP
 https://askubuntu.com/questions/130231/tftp-server-atftpd-fails-to-start
 https://www.archlinux.org/packages/community/x86_64/atftp/
 https://sourceforge.net/projects/atftp/
+
+## Slurm
+https://slurm.schedmd.com/slurm_ug_2011/Basic_Configuration_Usage.pdf
+
+## Chrony
+https://www.server-world.info/en/note?os=CentOS_7&p=ntp&f=3
+https://www.tecmint.com/install-chrony-in-centos-ubuntu-linux/
+https://www.thegeekdiary.com/centos-rhel-7-configuring-ntp-using-chrony/?PageSpeed=noscript
+https://blogging.dragon.org.uk/using-chrony-on-ubuntu-18-04/
+https://www.thegeekdiary.com/centos-rhel-7-chrony-how-to-sync-to-local-clock/?PageSpeed=noscript
+https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.qb.server.doc/doc/t0070360.html
+https://opensource.com/article/18/12/manage-ntp-chrony
+
 
 ## DHCP
 
@@ -69,3 +90,22 @@ https://forum.ipxe.org/showthread.php?tid=7879&pid=12084#pid12084
 
 https://github.com/fboender/ansible-cmdb/releases
 
+## Cockpit
+https://cockpit-project.org/
+
+## Prometheus
+https://www.robustperception.io/alerting-on-down-instances
+https://www.robustperception.io/whats-the-difference-between-group_interval-group_wait-and-repeat_interval
+https://stackoverflow.com/questions/53295711/multiple-targets-on-prometheus
+https://prometheus.io/docs/prometheus/latest/federation/
+https://github.com/prometheus/pushgateway
+https://medium.com/@rdavix/how-to-export-alerts-from-prometheus-to-grafana-8f1de059a8c8
+https://github.com/soundcloud/ipmi_exporter
+https://awesome-prometheus-alerts.grep.to/rules.html
+https://grafana.com/grafana/plugins/camptocamp-prometheus-alertmanager-datasource
+https://github.com/MiteshSharma/PrometheusAlertManagerWithAnsible
+https://www.digitalocean.com/community/tutorials/how-to-use-alertmanager-and-blackbox-exporter-to-monitor-your-web-server-on-ubuntu-16-04
+https://prometheus.io/docs/concepts/jobs_instances/
+https://www.fosslinux.com/10398/how-to-install-and-configure-prometheus-on-centos-7.htm
+https://www.scaleway.com/en/docs/configure-prometheus-monitoring-with-grafana/
+https://grafana.com/grafana/dashboards/9578

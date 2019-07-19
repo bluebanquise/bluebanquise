@@ -64,6 +64,12 @@
     - convergence
     - menu
 
+- name: Templates >> nohostname
+  template:
+    src: "nohostname.ipxe.j2"
+    dest: "/var/www/html/preboot_execution_environment/nodes/.ipxe"
+    mode: 0755
+
 ##### Centos
 
 - name: Templates >> kickstarts for Centos
