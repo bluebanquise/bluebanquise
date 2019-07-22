@@ -1,0 +1,11 @@
+---
+
+- name: Setting repositories
+  zypper_repository:
+    name: "{{item}}"
+    description: "{{item}} gen by Ansible"
+    repo: "http://{{networks[node_main_network]['services_ip']['repository_ip']}}/repositories/{{equipment_profile['operating_system']['distribution']}}/{{equipment_profile['operating_system']['distribution_version']}}/{{equipment_profile['hardware']['cpu']['architecture']}}/{{item}}"
+    #    repo: "http://{{networks[node_main_network]['services_ip']['repository_ip']}}/repositories/{{equipment_profile['operating_system']['distribution']}}/{{equipment_profile['operating_system']['distribution_version']}}/{{equipment_profile['hardware']['cpu']['architecture']}}/{{item}}"
+    disable_gpg_check: yes
+    state: present
+  with_items: "{{system_repositories}}"

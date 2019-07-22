@@ -9,6 +9,8 @@
       tags: openldap_client
     - role: set_hostname
       tags: set_hostname
+    - role: repositories_server
+      tags: repositories_server
     - role: repositories_client
       tags: repositories_client
     - role: pxe_stack

@@ -1,6 +1,6 @@
 mg_managements:
   children:
-    equipment_management1:
+    equipment_management:
       hosts:
         management1:
           bmc:
