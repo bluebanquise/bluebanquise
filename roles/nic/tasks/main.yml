@@ -1,31 +1,33 @@
 ---
 
-- name: Install required packages for Centos
-  package:
-    name: "{{item}}"
-    state: present
-  with_items:
-    - NetworkManager-glib
-#    - libnm-qt-devel.x86_64 # Don't seems to be required, package not available in Centos 7.6 Everything
-    - nm-connection-editor.x86_64
-    - libsemanage-python
-    - policycoreutils-python
-  when:
-    - ansible_distribution_major_version == "7"
-    - ansible_os_family == "RedHat"
+- name: Import packages OS dedicated task
+  include_tasks: "{{(ansible_distribution|lower)}}_{{ansible_distribution_major_version}}.yml"
 
-- name: Install required packages for Ubuntu
-  package:
-    name: "{{item}}"
-    state: present
-  with_items:
-    - network-manager
-    - python-dbus
-    - libnm-glib-dev
-  when:
-    - ansible_distribution_version == "18.04"
-    - (ansible_distribution|lower) == "ubuntu"
+#- name: Install required packages for Centos
+#  package:
+#    name: "{{item}}"
+#    state: present
+#  with_items:
+#    - NetworkManager-glib
+##    - libnm-qt-devel.x86_64 # Don't seems to be required, package not available in Centos 7.6 Everything
+#    - nm-connection-editor.x86_64
+#    - libsemanage-python
+#    - policycoreutils-python
+#  when:
+#    - ansible_distribution_major_version == "7"
+#    - ansible_os_family == "RedHat"
 
+#- name: Install required packages for Ubuntu
+#  package:
+#    name: "{{item}}"
+#    state: present
+#  with_items:
+#    - network-manager
+#    - python-dbus
+#    - libnm-glib-dev
+#  when:
+#    - ansible_distribution_version == "18.04"
+#    - (ansible_distribution|lower) == "ubuntu"
 
 - name: Set NIC configuration
   nmcli:
@@ -35,7 +37,6 @@
     ip4: "{{network_interfaces[item].ip4}}/{{networks[network_interfaces[item].network].prefix}}"
     state: present
   with_items: "{{network_interfaces}}"
-
 
 - name: ansible bug fix for static ip
   replace:

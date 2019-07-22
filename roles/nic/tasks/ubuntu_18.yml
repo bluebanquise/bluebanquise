@@ -1,0 +1,15 @@
+# Tested on:
+#   - Ubuntu 18.04
+
+- name: Install required packages for Ubuntu
+  package:
+    name: "{{item}}"
+    state: present
+  with_items:
+    - network-manager
+    - python-dbus
+    - libnm-glib-dev
+#  when:
+#    - ansible_distribution_version == "18.04"
+#    - (ansible_distribution|lower) == "ubuntu"
+

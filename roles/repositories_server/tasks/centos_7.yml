@@ -1,0 +1,12 @@
+---
+
+- name: Package
+  package:
+    name: httpd
+    state: present
+
+- name: Start services
+  service:
+    name: httpd
+    state: started
+    enabled: yes

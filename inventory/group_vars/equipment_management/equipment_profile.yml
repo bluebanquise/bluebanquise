@@ -1,0 +1,20 @@
+equipment_profile:
+
+  access_control: false # Selinux, AppArmor, etc. Selinux: true = enforcing, false = disabled
+  firewall: false # Enable or disable native firewall
+
+  operating_system:
+    distribution: opensuse  # centos, ubuntu, opensuse
+    distribution_major_version: 15.1-leap
+    distribution_version: 15.1-leap
+
+  equipment_type: server # If server, a pxe profile will be generated
+
+  configuration:
+    keyboard_layout: fr # us, fr, etc.
+    system_language: en_US.UTF-8 # You should not update this if you want to google issues...
+
+  hardware:
+    cpu:
+      architecture: x86_64
+
