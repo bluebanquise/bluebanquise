@@ -15,7 +15,7 @@ Debian 9 and 10 are dropped for now because too much issues with the netboot par
 
 Ansible >=2.8.2 is mandatory for BlueBanquise to run properly.
 
-BlueBanquise is part of the **Algoric** Project from the **Fabrique du Loch** FabLab.
+BlueBanquise is part of the **Algoric** Project from the [**Fabrique du Loch**](https://www.lafabriqueduloch.org/fr/accueil/) FabLab.
 
 ![BlueBanquise Logo](pictures/FabriqueDuLochAlgoric_logo_large.svg)
 
