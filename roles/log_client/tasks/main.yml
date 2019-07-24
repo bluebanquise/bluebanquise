@@ -2,25 +2,21 @@
 
 - name: Package
   package:
-    name: chrony
+    name: rsyslog
     state: present
 
-- name: Template >> /etc/chrony.conf
+- name: Template >> /etc/rsyslog.conf
   template:
-    src: chrony.conf.j2
-    dest: /etc/chrony.conf
+    src: rsyslog.conf.j2
+    dest: /etc/rsyslog.conf
     owner: root
     group: root
     mode: 0644
   tags:
     - templates
 
-- name: Set timezone
-  timezone:
-    name: "{{time_zone}}"
-
 - name: Start services
   service:
-    name: chronyd
+    name: rsyslog
     state: started
     enabled: yes

@@ -81,6 +81,9 @@ https://www.thegeekdiary.com/centos-rhel-7-chrony-how-to-sync-to-local-clock/?Pa
 https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.qb.server.doc/doc/t0070360.html
 https://opensource.com/article/18/12/manage-ntp-chrony
 
+## Rsyslog logrotate
+https://www.tecmint.com/install-rsyslog-centralized-logging-in-centos-ubuntu/
+
 
 ## DHCP
 

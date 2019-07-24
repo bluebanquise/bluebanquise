@@ -3,6 +3,11 @@
   hosts: "management1"
   roles:
 
+    - role: log_server
+      tags: log_server
+    - role: clustershell
+      tags: clustershell
+
     - role: openldap_server
       tags: openldap_server
     - role: openldap_client

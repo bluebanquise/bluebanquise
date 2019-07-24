@@ -1,0 +1,17 @@
+- name: Package
+  package:
+    name: clustershell
+    state: present
+
+- name: Template >> /etc/clustershell/groups.d/cluster.cfg
+  template:
+    src: cluster.cfg.j2
+    dest: /etc/clustershell/groups.d/cluster.cfg
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - templates
+
+
+

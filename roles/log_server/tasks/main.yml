@@ -1,0 +1,59 @@
+---
+
+- name: Package
+  package:
+    name: "{{item}}"
+    state: present
+  with_items:
+    - rsyslog
+    - logrotate
+    - xz
+
+- name: Template >> /etc/rsyslog.conf
+  template:
+    src: rsyslog.conf.j2
+    dest: /etc/rsyslog.conf
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - templates
+
+- name: Allow syslog port into SELinux
+  seport:
+    ports: 514
+    proto: "{{item}}"
+    setype: syslogd_port_t
+    state: present
+  when:
+    - ansible_os_family == "RedHat"
+    - ansible_selinux.status == "enabled"
+  with_items:
+    - tcp
+    - udp
+
+- name: Template >> /etc/logrotate.d/rsyslog
+  template:
+    src: rsyslog_logrotate.j2
+    dest: /etc/logrotate.d/rsyslog
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - templates
+
+- name: Configure logrotate to use xz
+  lineinfile:
+    path: /etc/logrotate.conf
+    regexp: "{{item}}"
+    line: "{{item}}"
+  with_items:
+    - compresscmd /usr/bin/xz
+    - uncompresscmd /usr/bin/unxz
+    - compressext .xz
+
+- name: Start services
+  service:
+    name: rsyslog
+    state: started
+    enabled: yes

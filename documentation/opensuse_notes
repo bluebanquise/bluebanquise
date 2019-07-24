@@ -1,3 +1,5 @@
+yum install yum-utils
+
 zypper addrepo file:///var/www/html/repositories/opensuse/15.1-leap/x86_64/os os
 zypper modifyrepo --disable repo-non-oss
 zypper modifyrepo --disable repo-oss
