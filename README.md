@@ -1,6 +1,8 @@
 # BlueBanquise
 ![BlueBanquise Logo](pictures/BlueBanquise_logo_large.svg)
 
+## The stack
+
 **BlueBanquise** is an **Ansible** based stack, designed to deploy and manage large group of hosts.
 
 Main target is Hight Performance Computing, but stack is generic and can adapt to any kind of cluster architecture (University or Enterprise network, render farm, etc).
@@ -20,3 +22,7 @@ BlueBanquise is part of the **Algoric** Project from the [**Fabrique du Loch**](
 ![BlueBanquise Logo](pictures/FabriqueDuLochAlgoric_logo_large.svg)
 
 BlueBanquise is a revamping of the old stack Banquise, based on Salt.
+
+## Thanks
+
+Special thanks to [CINES](https://www.cines.fr/en/) who provided Algoric team with hardware.
