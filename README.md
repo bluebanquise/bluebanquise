@@ -15,7 +15,7 @@ Currently supported OS are:
 
 Debian 9 and 10 are dropped for now because too much issues with the netboot part.
 
-Ansible >=2.8.2 is mandatory for BlueBanquise to run properly.
+Ansible **>= 2.8.2 is mandatory** for BlueBanquise to run properly.
 
 BlueBanquise is part of the **Algoric** Project from the [**Fabrique du Loch**](https://www.lafabriqueduloch.org/fr/accueil/) FabLab.
 
