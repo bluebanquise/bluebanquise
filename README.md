@@ -1,7 +1,7 @@
 # BlueBanquise
 ![BlueBanquise Logo](pictures/BlueBanquise_logo_large.svg)
 
-**BlueBanquise* is an **Ansible** based stack, designed to deploy and manage large group of hosts.
+**BlueBanquise** is an **Ansible** based stack, designed to deploy and manage large group of hosts.
 
 Main target is Hight Performance Computing, but stack is generic and can adapt to any kind of cluster architecture (University or Enterprise network, render farm, etc).
 
