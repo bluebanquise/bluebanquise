@@ -15,6 +15,10 @@
   tags:
     - templates
 
+- name: Set timezone
+  timezone:
+    name: "{{time_zone}}"
+
 - name: Start services
   service:
     name: chronyd
