@@ -55,6 +55,11 @@ https://debian-administration.org/article/708/Automating_the_Debian_installer_wi
 http://ipxe.org/appnote/debian_preseed
 https://gist.github.com/simonjgreen/a7f65558515bb501adf5
 http://ftp.debian.org/debian/dists/stretch/main/installer-amd64/current/images/netboot/
+https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=872410
+https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=737750
+http://forums.debian.net/viewtopic.php?f=17&t=142827&p=703573#p703573
+
+
 
 ### Minimal Live Linux
 https://github.com/ivandavidov/minimal
@@ -83,7 +88,8 @@ https://opensource.com/article/18/12/manage-ntp-chrony
 
 ## Rsyslog logrotate
 https://www.tecmint.com/install-rsyslog-centralized-logging-in-centos-ubuntu/
-
+https://www.tecmint.com/install-logrotate-to-manage-log-rotation-in-linux/
+http://notes.zerodogg.org/GNU-slash-Linux_-general-/use-xz-for-logrotate/
 
 ## DHCP
 
@@ -112,3 +118,4 @@ https://prometheus.io/docs/concepts/jobs_instances/
 https://www.fosslinux.com/10398/how-to-install-and-configure-prometheus-on-centos-7.htm
 https://www.scaleway.com/en/docs/configure-prometheus-monitoring-with-grafana/
 https://grafana.com/grafana/dashboards/9578
+
