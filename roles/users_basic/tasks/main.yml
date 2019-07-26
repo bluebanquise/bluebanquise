@@ -1,0 +1,26 @@
+---
+
+- name: Add users groups
+  group:
+    name: "{{item}}"
+    gid: "{{users_basic['active_users'][item]['gid']}}"
+    state: present
+  with_items: "{{users_basic.active_users}}"
+
+
+- name: Add users
+  user:
+    name: "{{item}}"
+    comment: "{% if users_basic['active_users'][item]['comment'] is defined and not none %}{{users_basic['active_users'][item]['comment']}}{% endif %}"
+    uid: "{{users_basic['active_users'][item]['uid']}}"
+    group: "{{item}}"
+    update_password: on_create
+    shell: "{{users_basic.general_parameters.shell}}"
+    home: "{{users_basic.general_parameters.home}}/{{item}}"
+    password: "{{users_basic['active_users'][item]['password']}}"
+    generate_ssh_key: yes
+    ssh_key_bits: 2048
+    ssh_key_file: .ssh/id_rsa
+    state: present
+  with_items: "{{users_basic.active_users}}"
+
