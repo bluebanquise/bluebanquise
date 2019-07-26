@@ -2,6 +2,8 @@
 - name: toto
   hosts: "management1"
   roles:
+    - role: users_basic
+      tags: users_basic
 
     - role: log_server
       tags: log_server
