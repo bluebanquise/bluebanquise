@@ -18,6 +18,10 @@ https://github.com/Teradata/stacki
 https://perlmaven.com/hello-world-with-plain-cgi
 https://stackoverflow.com/questions/45375693/apache2-response-header-name-contains-invalid-characters-aborting-reque
 
+### RHEL 8
+Personnal Red Hat Developer Subscription and Red Hat Beta Access
+https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/
+
 ### OpenSuse
 https://www.suse.com/documentation/sles-15/singlehtml/book_autoyast/book_autoyast.html#CreateProfile.Reporting
 https://www.suse.com/documentation/sles-15/book_autoyast/data/configuration_security_users_and_groups.html
