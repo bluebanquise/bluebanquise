@@ -1,17 +1,6 @@
-#### Blue Banquise file ####
-## {{ansible_managed}}
-
-127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
-::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
-
-{% if hosts_file['range'] == 'all' %}
-{% set range = 'all' %}
-{% elif hosts_file['range'] == 'iceberg' %}
-{% set range = (current_iceberg|string) %}
-{% endif %}
-
-{% for host in groups[range] %}
-{% if hostvars[host]['network_interfaces'] is defined and not none %}
+{# Macro to avoid redundancy #}
+{% macro write_host(host) %}
+{% if hostvars[host]['network_interfaces'] is defined and not none %}{# This part are clone #}
 {% for interface, interface_vars in hostvars[host]['network_interfaces'].items() %}
 {% if interface_vars.ip4 is defined and not none and interface_vars.network is defined and not none %}
 {% if interface == hostvars[host]['node_main_network_interface'] %}
@@ -28,4 +17,41 @@
 {% endif %}
 {% endif %}
 {% endif %}
+{% endmacro %}
+
+#### Blue Banquise file ####
+## {{ansible_managed}}
+
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+
+{% if hosts_file['range'] == 'all' %}
+{% set range = 'all' %}
+{% elif hosts_file['range'] == 'iceberg' %}
+{% set range = (current_iceberg|string) %}
+{% endif %}
+
+## Internal hosts
+
+# All or iceberg hosts
+
+{% for host in groups[range] %}{{write_host(host)}}{% endfor %}
+
+# Under iceberg {{managements_group_name}}
+
+{% if hosts_file['range'] == 'iceberg' %}
+{% for under_icb in under_icebergs %}
+{% for host in groups[managements_group_name] %}
+{% if (groups[under_icb] is defined and not none) and (host in groups[under_icb]) %}
+{{write_host(host)}}
+{% endif %}
+{% endfor %}
+{% endfor %}
+{% endif %}
+
+
+## External hosts
+
+{% for host in external_hosts %}
+{{external_hosts[host]}} {{host}}
 {% endfor %}

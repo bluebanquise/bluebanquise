@@ -1,4 +1,4 @@
-mg_managements:
+managements:
   children:
     equipment_management:
       hosts:

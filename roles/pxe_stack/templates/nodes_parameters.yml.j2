@@ -1,7 +1,17 @@
 #### Blue Banquise file ####
 ## {{ansible_managed}}
 
-{% for host in groups['all'] %}
+{% for host in groups[current_iceberg] %}
 {{host}}:
   equipment_profile: "{{ hostvars[host]['group_names'] | select('match','^'+equipment_naming+'_.*') | list | unique | sort | first | join | replace('equipment_','') | trim }}"
 {% endfor %}
+
+{% for under_icb in under_icebergs %}
+{% for host in groups[managements_group_name] %}
+{% if (groups[under_icb] is defined and not none) and (host in groups[under_icb]) %}
+{{host}}:
+  equipment_profile: "{{ hostvars[host]['group_names'] | select('match','^'+equipment_naming+'_.*') | list | unique | sort | first | join | replace('equipment_','') | trim }}"
+{% endif %}
+{% endfor %}
+{% endfor %}
+

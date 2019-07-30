@@ -11,3 +11,9 @@ dns_settings:
 dhcp_settings:
   default_lease_time: 600
   max_lease_time: 7200
+
+global_network_settings:
+#  enable_global_network: True
+  global_network: interconnect1
+  impacted_groups:
+    - computes
