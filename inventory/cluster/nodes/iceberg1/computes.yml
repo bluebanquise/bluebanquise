@@ -1,4 +1,4 @@
-mg_computes:
+computes:
   children:
     equipment_supermicro_blade_sandybridge:
       hosts:
