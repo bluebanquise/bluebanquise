@@ -3,6 +3,8 @@ BlueBanquise Documentation
 
 Welcome on BlueBanquise documentation.
 
+
+
 .. toctree::
    :maxdepth: 3
    :caption: Contents:

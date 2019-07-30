@@ -38,3 +38,10 @@ $TTL 86400
 {% endif %}
 {% endif %}
 {% endfor %}
+
+;## External hosts
+
+{% for host in external_hosts %}
+{{host}} IN A {{external_hosts[host]}}
+{% endfor %}
+

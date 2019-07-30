@@ -1,5 +1,5 @@
 # BlueBanquise
-![BlueBanquise Logo](pictures/BlueBanquise_logo_large.svg)
+![BlueBanquise Logo](resources/pictures/BlueBanquise_logo_large.svg)
 
 ## The stack
 
@@ -19,7 +19,7 @@ Ansible **>= 2.8.2 is mandatory** for BlueBanquise to run properly.
 
 BlueBanquise is part of the **Algoric** Project from the [**Fabrique du Loch**](https://www.lafabriqueduloch.org/fr/accueil/) FabLab.
 
-![BlueBanquise Logo](pictures/FabriqueDuLochAlgoric_logo_large.svg)
+![BlueBanquise Logo](resources/pictures/FabriqueDuLochAlgoric_logo_large.svg)
 
 BlueBanquise is a revamping of the old stack Banquise, based on Salt.
 
