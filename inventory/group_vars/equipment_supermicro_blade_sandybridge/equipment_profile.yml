@@ -4,14 +4,14 @@ equipment_profile:
   firewall: false # Enable or disable native firewall
 
   operating_system:
-    distribution: redhat  # centos, ubuntu, opensuse
+    distribution: redhat # centos, ubuntu, opensuse
     distribution_major_version: 8
     distribution_version: 8.0
 
   equipment_type: server # If server, a pxe profile will be generated
 
   configuration:
-    keyboard_layout: fr # us, fr, etc.
+    keyboard_layout: us # us, fr, etc.
     system_language: en_US.UTF-8 # You should not update this if you want to google issues...
 
   hardware:

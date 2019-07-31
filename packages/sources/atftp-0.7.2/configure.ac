@@ -69,28 +69,33 @@ AC_GNU_SOURCE
 dnl Check for AIX
 AC_AIX
 
-CFLAGS="$CFLAGS -g -Wall -D_REENTRANT"
+#CFLAGS="$CFLAGS -g -Wall -D_REENTRANT"
 
-if test x$debug = xtrue; then
-   CFLAGS="$CFLAGS -O0 -DDEBUG"
-else
-  if test -n "$auto_cflags"; then
-    if test -n "$GCC"; then
-      CFLAGS="$CFLAGS -g -O2 -Wall -Wno-implicit"
-    else
-      case "$host_os" in
-        *hpux*)  CFLAGS="$CFLAGS +O3"
-	  ;;
-        *ultrix* | *osf*) CFLAGS="$CFLAGS -O -Olimit 2000"
-	  ;;
-        *)       CFLAGS="$CFLAGS -O2"
-	  ;;
-      esac
-    fi
-  else
-    CFLAGS="$CFLAGS -O2"
-  fi
-fi
+## JohnnyKeats fix to prevend gcc > 5.2 build crash
+
+CFLAGS="$CFLAGS -std=gnu89 -fPIC -g -O2"
+CFLAGS+=" -std=gnu89 -fPIC -g -O2"
+
+#if test x$debug = xtrue; then
+#   CFLAGS="$CFLAGS -O0 -DDEBUG"
+#else
+#  if test -n "$auto_cflags"; then
+#    if test -n "$GCC"; then
+#      CFLAGS="$CFLAGS -g -O2 -Wall -Wno-implicit"
+#    else
+#      case "$host_os" in
+#        *hpux*)  CFLAGS="$CFLAGS +O3"
+#	  ;;
+#        *ultrix* | *osf*) CFLAGS="$CFLAGS -O -Olimit 2000"
+#	  ;;
+#        *)       CFLAGS="$CFLAGS -O2"
+#	  ;;
+#      esac
+#    fi
+#  else
+#    CFLAGS="$CFLAGS -O2"
+#  fi
+#fi
 
 AC_PROG_MAKE_SET
 AC_PROG_INSTALL

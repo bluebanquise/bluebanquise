@@ -1,20 +1,7 @@
 ---
 
-- name: Install minimum packages for PXE (Centos 7)
-  package:
-    name: "{{item}}" 
-    state: present
-  with_items:
-    - atftp
-    - bluebanquise_ipxe
-    - httpd
-    - policycoreutils-python
-    - python36
-    - python36-PyYAML
-    - python36-clustershell
-  when:
-    - (equipment_profile['operating_system']['distribution']|lower) == 'centos'
-    - (equipment_profile['operating_system']['distribution_major_version']|string) == '7'
+- name: Use OS dedicated task
+  include_tasks: "{{(ansible_distribution|lower|replace(' ','_'))}}_{{ansible_distribution_major_version}}.yml"
 
 - name: Create pxe directories structure
   file:
@@ -80,7 +67,7 @@
   with_items: "{{equipment_groups_list}}"
   when:
     - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
-    - (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) == 'centos'
+    - (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) == 'centos' or (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) == 'redhat'
 
 - name: Templates >> ipxe_configurations for Centos
   template:
@@ -90,7 +77,7 @@
   with_items: "{{equipment_groups_list}}"
   when:
     - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
-    - (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) == 'centos'
+    - (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) == 'centos' or (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) == 'redhat'
 
 ##### Ubuntu
 
@@ -155,7 +142,7 @@
 - name: httpd cgi module
   apache2_module:
     state: present
-    name: cgi
+    name: cgid
 
 - name: cgi configuration file
   copy:

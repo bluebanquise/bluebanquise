@@ -1,9 +1,12 @@
 ---
 
-- name: Package
-  package:
-    name: chrony
-    state: present
+- name: Use OS dedicated task
+  include_tasks: "{{(ansible_distribution|lower|replace(' ','_'))}}_{{ansible_distribution_major_version}}.yml"
+
+#- name: Package
+#  package:
+#    name: chrony
+#    state: present
 
 - name: Template >> /etc/chrony.conf
   template:

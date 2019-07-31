@@ -1,0 +1,9 @@
+---
+
+- name: Setting repositories
+  yum_repository:
+    name: "{{item}}"
+    description: "{{item}} gen by Ansible"
+    baseurl: "http://{{networks[node_main_network]['services_ip']['repository_ip']}}/repositories/{{equipment_profile['operating_system']['distribution']}}/{{equipment_profile['operating_system']['distribution_version']}}/{{equipment_profile['hardware']['cpu']['architecture']}}/{{item}}"
+    gpgcheck: no
+  with_items: "{{system_repositories}}"
