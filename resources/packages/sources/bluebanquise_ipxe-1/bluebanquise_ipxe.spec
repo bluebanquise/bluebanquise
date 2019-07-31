@@ -20,6 +20,12 @@ iPXE roms or iso for the BlueBanquise stack
 %build
 
 %install
+
+mkdir ipxe
+git clone https://github.com/ipxe/ipxe.git ipxe/.
+
+cp 
+
 cd src
 mkdir -p $RPM_BUILD_ROOT/var/lib/tftpboot/
 #make -j 2 DEBUG=intel,dhcp

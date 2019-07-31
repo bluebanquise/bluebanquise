@@ -1,0 +1,12 @@
+---
+
+- name: Template >> /root/.ssh/config
+  template:
+    src: "config.j2"
+    dest: /root/.ssh/config
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - templates
+

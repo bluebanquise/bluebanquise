@@ -1,0 +1,39 @@
+---
+
+- name: Create pxe directories structure
+  file:
+   path: "{{item}}"
+   state: directory
+   mode: 0755
+  with_items:
+   - /var/www/html/report/
+   - /var/www/html/report/pictures
+   - /var/www/html/report/css
+
+- name: Template >> /var/www/html/report/index.html
+  template:
+    src: "index.html.j2"
+    dest: /var/www/html/report/index.html
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - templates
+
+- name: Template >> /var/www/html/report/css/main.css
+  template:
+    src: "main.css.j2"
+    dest: /var/www/html/report/css/main.css
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - templates
+
+
+- name: Copy >> bluebanquise logo white
+  copy:
+    src: bluebanquise_logo_white.svg
+    dest: /var/www/html/report/pictures/bluebanquise_logo_white.svg
+    mode: 0644
+
