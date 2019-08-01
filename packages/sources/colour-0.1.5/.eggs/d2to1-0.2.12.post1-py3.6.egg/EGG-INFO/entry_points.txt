@@ -1,0 +1,12 @@
+[distutils.setup_keywords]
+d2to1 = d2to1.core:d2to1
+
+[zest.releaser.postreleaser.before]
+d2to1_dev_version = d2to1.zestreleaser:postreleaser_before
+
+[zest.releaser.prereleaser.before]
+d2to1_version = d2to1.zestreleaser:prereleaser_before
+
+[zest.releaser.releaser.middle]
+d2to1_git_tag = d2to1.zestreleaser:prereleaser_middle
+

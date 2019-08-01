@@ -1,0 +1,14 @@
+CHANGELOG.rst
+LICENSE
+MANIFEST.in
+README.rst
+TODO.rst
+colour.py
+setup.cfg
+setup.py
+colour.egg-info/PKG-INFO
+colour.egg-info/SOURCES.txt
+colour.egg-info/dependency_links.txt
+colour.egg-info/not-zip-safe
+colour.egg-info/requires.txt
+colour.egg-info/top_level.txt

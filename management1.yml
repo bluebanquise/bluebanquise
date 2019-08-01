@@ -22,8 +22,6 @@
       tags: repositories_client
     - role: pxe_stack
       tags: pxe_stack
-    - role: debug
-      tags: debug
     - role: nic
       tags: nic
     - role: hosts_file

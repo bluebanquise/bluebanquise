@@ -1,0 +1,18 @@
+.node:hover, .edge:hover, path:hover, path + polygon:hover {
+    cursor: pointer;
+    stroke-width: 3;
+    font-weight: bolder;
+}
+
+.my_hover {
+    cursor: pointer;
+    stroke-width: 3;
+    font-weight: bolder;
+}
+
+/**
+Each element whose id ends with "not_tagged"
+ */
+[id$=not_tagged] {
+    opacity: 0.3;
+}

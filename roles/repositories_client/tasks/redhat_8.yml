@@ -7,3 +7,20 @@
     baseurl: "http://{{networks[node_main_network]['services_ip']['repository_ip']}}/repositories/{{equipment_profile['operating_system']['distribution']}}/{{equipment_profile['operating_system']['distribution_version']}}/{{equipment_profile['hardware']['cpu']['architecture']}}/{{item}}"
     gpgcheck: no
   with_items: "{{system_repositories}}"
+  when: item != 'os'
+
+- name: Setting repositories os (BaseOS)
+  yum_repository:
+    name: BaseOS
+    description: "BaseOS gen by Ansible"
+    baseurl: "http://{{networks[node_main_network]['services_ip']['repository_ip']}}/repositories/{{equipment_profile['operating_system']['distribution']}}/{{equipment_profile['operating_system']['distribution_version']}}/{{equipment_profile['hardware']['cpu']['architecture']}}/os/BaseOS"
+    gpgcheck: no
+  when: "'os' in system_repositories"
+
+- name: Setting repositories os (AppStream)
+  yum_repository:
+    name: AppStream
+    description: "AppStream gen by Ansible"
+    baseurl: "http://{{networks[node_main_network]['services_ip']['repository_ip']}}/repositories/{{equipment_profile['operating_system']['distribution']}}/{{equipment_profile['operating_system']['distribution_version']}}/{{equipment_profile['hardware']['cpu']['architecture']}}/os/AppStream"
+    gpgcheck: no
+  when: "'os' in system_repositories"

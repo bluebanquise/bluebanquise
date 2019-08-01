@@ -1,0 +1,393 @@
+Metadata-Version: 1.1
+Name: d2to1
+Version: 0.2.12.post1
+Summary: Allows using distutils2-like setup.cfg files for a package's metadata with a distribute/setuptools setup.py
+Home-page: https://github.com/embray/d2to1
+Author: Erik M. Bray
+Author-email: embray@stsci.edu
+License: UNKNOWN
+Description: Introduction
+        ==============
+        .. image:: https://travis-ci.org/embray/d2to1.png?branch=master
+           :alt: travis build status
+           :target: https://travis-ci.org/embray/d2to1
+        
+        d2to1 (the 'd' is for 'distutils') allows using distutils2-like setup.cfg files
+        for a package's metadata with a distribute/setuptools setup.py script.  It
+        works by providing a distutils2-formatted setup.cfg file containing all of a
+        package's metadata, and a very minimal setup.py which will slurp its arguments
+        from the setup.cfg.
+        
+        Note: distutils2 has been merged into the CPython standard library, where it is
+        now known as 'packaging'.  This project was started before that change was
+        finalized.  So all references to distutils2 should also be assumed to refer to
+        packaging.
+        
+        Rationale
+        ===========
+        I'm currently in the progress of redoing the packaging of a sizeable number of
+        projects.  I wanted to use distutils2-like setup.cfg files for all these
+        projects, as they will hopefully be the future, and I much prefer them overall
+        to using an executable setup.py.  So forward-support for distutils2 is
+        appealing both as future-proofing, and simply the aesthetics of using a flat text file to describe a project's metadata.
+        
+        However, I did not want any of these projects to require distutils2 for
+        installation yet--it is too unstable, and not widely installed.  So projects
+        should still be installable using the familiar `./setup.py install`, for
+        example.  Furthermore, not all use cases required by some of the packages I
+        support are fully supported by distutils2 yet.  Hopefully they will be
+        eventually, either through the distutils2 core or through extensions.  But in
+        the meantime d2to1 will try to keep up with the state of the art and "best
+        practices" for distutils2 distributions, while adding support in areas that
+        it's lacking.
+        
+        Usage
+        =======
+        d2to1 requires a distribution to use distribute or setuptools.  Your
+        distribution must include a distutils2-like setup.cfg file, and a minimal
+        setup.py script.  For details on writing the setup.cfg, see the `distutils2
+        documentation`_.  A simple sample can be found in d2to1's own setup.cfg (it
+        uses its own machinery to install itself)::
+        
+            [metadata]
+            name = d2to1
+            version = 0.2.12
+            author = Erik M. Bray
+            author-email = embray@stsci.edu
+            summary = Allows using distutils2-like setup.cfg files for a package's metadata with a distribute/setuptools setup.py
+            description-file =
+                README.rst
+                CHANGES.rst
+            home-page = http://pypi.python.org/pypi/d2to1
+            requires-dist = setuptools
+            classifier = 
+                Development Status :: 5 - Production/Stable
+                Environment :: Plugins
+                Framework :: Setuptools Plugin
+                Intended Audience :: Developers
+                License :: OSI Approved :: BSD License
+                Operating System :: OS Independent
+                Programming Language :: Python
+                Programming Language :: Python :: 3
+                Topic :: Software Development :: Build Tools
+                Topic :: Software Development :: Libraries :: Python Modules
+                Topic :: System :: Archiving :: Packaging
+        
+            [files]
+            packages =
+                d2to1
+                d2to1.extern
+            extra_files =
+                CHANGES.rst
+                LICENSE
+                ez_setup.py
+        
+            [backwards_compat]
+            zip-safe = False
+            tests-require = nose
+        
+            [entry_points]
+            distutils.setup_keywords = 
+                d2to1 = d2to1.core:d2to1
+            zest.releaser.prereleaser.middle = 
+                d2_version = d2to1.zestreleaser:prereleaser_middle
+            zest.releaser.postreleaser.middle = 
+                d2_version = d2to1.zestreleaser:postreleaser_middle
+        
+        The minimal setup.py should look something like this::
+        
+         #!/usr/bin/env python
+        
+         try:
+             from setuptools import setup
+         except ImportError:
+             from distribute_setup import use_setuptools
+             use_setuptools()
+             from setuptools import setup
+        
+         setup(
+             setup_requires=['d2to1'],
+             d2to1=True
+         )
+        
+        Note that it's important to specify d2to1=True or else the d2to1 functionality
+        will not be enabled.  It is also possible to set d2to1='some_file.cfg' to
+        specify the (relative) path of the setup.cfg file to use.  But in general this
+        functionality should not be necessary.
+        
+        It should also work fine if additional arguments are passed to `setup()`,
+        but it should be noted that they will be clobbered by any options in the
+        setup.cfg file.
+        
+        Caveats
+        =======
+        - The requires-dist option in setup.cfg is implemented through the
+          distribute/setuptools install_requires option, rather than the broken
+          "requires" keyword in normal distutils.
+        - Not all features of distutils2 are supported yet.  If something doesn't seem
+          to be working, it's probably not implemented yet.
+        - Does not support distutils2 resources, and probably won't since it relies
+          heavily on the sysconfig module only available in Python 3.2 and up.  This is
+          one area in which d2to1 should really be seen as a transitional tool.  I
+          don't really want to include a backport like distutils2 does.  In the
+          meantime, package_data and data_files may still be used under the [files]
+          section of setup.cfg.
+        
+        .. _distutils2 documentation: http://alexis.notmyidea.org/distutils2/setupcfg.html
+        
+        Changes
+        =========
+        
+        0.2.12 (2015-07-16)
+        -------------------
+        
+        - Fixed a corner case where depending on the order of events when installing
+          multiple packages (i.e. when installing packages with dependencies, some
+          of which might also use d2to1) we would end up calling the incorrect
+          Distribution class (the patched version from setuptools, where d2to1
+          needs to get to the unpatched version from distutils for some cases).
+        
+        - Upgraded bundled copy of the ``six`` module to the current version
+          (1.9.0).  This fixes incompatibility between d2to1 and other packages
+          that import different versions of ``six`` during their setup (the older
+          version of ``six`` had a habit of fighting with other ``six`` instances
+          over ``sys.modules``, which is fixed in newer versions).
+        
+        - Upgraded to latest ``ez_setup.py`` so that the most up to date version
+          of setuptools will be correctly bootstrapped in the rare cases that it
+          is needed.
+        
+        - Included some miscellaneous hacks to keep d2to1 working, nominally, with
+          Python 2.5 despite the broad move away from Python 2.5 support in the
+          Python community.  The d2to1 v0.2.x releases will be the last to continue
+          Python 2.5 support, given that testing it has become more difficult (and
+          the overhead is probably no longer worth it).
+        
+        
+        0.2.11 (2013-08-29)
+        -------------------
+        
+        - Replaced ``distribute_setup.py`` with ``ez_setup.py`` in order to bootstrap
+          with modern setuptools when necessary.
+        
+        - Fixed a couple minor Python 3-specific issues. In particular the
+          ``data_files`` option could be passed to ``setup()`` as a ``dict_items``
+          object instead of a ``list`` which is what would normally be expected.
+        
+        - Added a tox.ini (frankly I thought there already was one).
+        
+        
+        0.2.10 (2013-04-10)
+        -------------------
+        
+        - Added support for the ``setup-requires-dist`` option in the ``[metadata]``
+          section of setup.cfg.  This is analogous to the Setup-Requires-Dist metadata
+          field supported by PEP-426 and uses the ``setup_requires`` argument to
+          setuptools' ``setup()`` to implement it.
+        
+        - Added support for the ``dependency_links`` and ``include_package_data``
+          arguments to setuptools' ``setup()`` in the ``[backwards_compat]`` section of
+          setup.cfg.
+        
+        - When a setup_hook calls sys.exit() don't show a traceback for the
+          SystemExit exception.
+        
+        - Fixed a bug in the exception formatting when exceptions occur in setup.cfg
+          handling.
+        
+        
+        0.2.9 (2013-03-05)
+        ------------------
+        
+        - Fixed a bug in the extra-files supported added in 0.2.8.  Makes sure that
+          monkey-patches can't be installed more than once and that the log
+          reference is properly encapsulated.
+        
+        
+        0.2.8 (2013-03-05)
+        ------------------
+        
+        - Improved handling of packages where the packages_root option is set. That is,
+          the Python package is not directly in the root of the source tree, but is in
+          some sub-directory.  Now the packages_root directory is prepended to
+          sys.path while processing the setup.cfg and running setup hooks.
+        
+        - Added support for the Keywords metadata field via the keywords option in the
+          ``[metadata]`` section of setup.cfg.
+        
+        - Fixed a missing import that caused a misleading exception when setup.cfg is
+          missing.
+        
+        - Upgraded the shipped distribute_setup.py to the latest for distribute 0.6.28
+        
+        - Added a few basic functional tests, along with an infrastructure to add more
+          as needed.  They can be run with nose and possibly with py.test though the
+          latter hasn't been tested.
+        
+        - Improved hook imports to work better with namespace packages.
+        
+        - Added support for the extra_files option of the ``[files]`` section in
+          setup.cfg.  This was a feature from distutils2 that provided an alternative
+          to MANIFEST.in for including additional files in source distributions (it
+          does not yet support wildcard patterns but maybe it should?)
+        
+        - Added support for the tests_require setup argument from setuptools via
+          the [backwards_compat] section in setup.cfg.
+        
+        - Supports Python 3 natively without 2to3.  This makes Python 3 testing of
+          d2to1 easier to support.
+        
+        
+        0.2.7 (2012-02-20)
+        ------------------
+        
+        - If no extension modules or entry points are defined in the setup.cfg, don't
+          clobber any extension modules/entry points that may be defined in setup.py.
+        
+        
+        0.2.6 (2012-02-17)
+        ------------------
+        
+        - Added support for setuptools entry points in an ``[entry_points]`` section of
+          setup.cfg--this is just for backwards-compatibility purposes, as
+          packaging/distutils2 does not yet have a standard replacement for the entry
+          points system.
+        
+        - Added a [backwards_compat] section for setup.cfg for other options that are
+          supported by setuptools/distribute, but that aren't part of the distutils2
+          standard.  So far the only options supported here are zip_safe and use_2to3.
+          (Note: packaging does support a use-2to3 option to the build command, but if
+          we tried to use that, distutils would not recognize it as a valid build
+          option.)
+        
+        - Added support for the new (and presumably final) extension section format
+          used by packaging.  In this format, extensions should be specified in config
+          sections of the format ``[extension: ext_mod_name]``, where any whitespace is
+          optional.  The old format used an ``=`` instead of ``:`` and is still
+          supported, but should be considered deprecated.
+        
+        - Added support for the new syntax used by packaging for the package_data
+          option (which is deprecated in packaging in favor of the resources system,
+          but still supported).  The new syntax is like::
+        
+              package_data =
+                  packagename = pattern1 pattern2 pattern3
+                  packagename.subpack = 
+                      pattern1
+                      pattern2
+                      pattern3
+        
+          That is, after ``package_data =``, give the name of a package, followed by
+          an ``=``, followed by any number of whitespace separated wildcard patterns (or
+          actual filenames relative to the package).  Under this scheme, whitespace is
+          not allowed in the patterns themselves.
+        
+        
+        0.2.5 (2011-07-21)
+        ------------------
+        
+        - Made the call to pkg_resources.get_distribution() to set __version__ more
+          robust, so that it doesn't fail on, for example, VersionConflict errors
+        
+        
+        0.2.4 (2011-07-05)
+        ------------------
+        
+        - Fixed some bugs with installation on Python 3
+        
+        
+        0.2.3 (2011-06-23)
+        ------------------
+        
+        - Renamed 'setup_hook' to 'setup_hooks' as is now the case in the packaging
+          module.  Added support for multiple setup_hooks
+        
+        
+        0.2.2 (2011-06-15)
+        ------------------
+        
+        - Fixed a bug in DefaultGetDict where it didn't actually save the returned
+          default in the dictionary--so any command options would get lost
+        - Fixed a KeyError when the distribution does not have any custom commands
+          specified
+        
+        
+        0.2.1 (2011-06-15)
+        ------------------
+        
+        - Reimplemented command hooks without monkey-patching and more reliably in
+          general (though it's still a flaming hack).  The previous monkey patch-based
+          solution would break if d2to1 were entered multiple times, which could happen
+          in some scenarios
+        
+        
+        0.2.0 (2011-06-14)
+        ------------------
+        
+        - Version bump to start using micro-version numbers for bug fixes only, now
+          that the my primary feature goals are complete
+        
+        
+        0.1.5 (2011-06-02)
+        ------------------
+        
+        - Adds support for the data_files option under [files].  Though this is
+          considered deprecated and may go away at some point, it can be useful in the
+          absence of resources support
+        - Adds support for command pre/post-hooks.  Warning: this monkey-patches
+          distutils.dist.Distribution a little bit... :(
+        - Adds (slightly naive) support for PEP 345-style version specifiers in
+          requires-dist (environment markers not supported yet)
+        - Fixed a bug where not enough newlines were inserted between description files
+        
+        
+        0.1.4 (2011-05-24)
+        ------------------
+        
+        - Adds support for custom command classes specified in the 'commands' option
+          under the [global] section in setup.cfg
+        - Adds preliminary support for custom compilers specified in the 'compilers'
+          option under the [global] section in setup.cfg.  This functionality doesn't
+          exist in distutils/setuptools/distribute, so adding support for it is a
+          flaming hack.  It hasn't really been tested beyond seeing that the custom
+          compilers come up in `setup.py build_ext --help-compiler`, so any real-world
+          testing of this feature would be appreciated
+        
+        
+        0.1.3 (2011-04-20)
+        ------------------
+        
+        - Adds zest.releaser entry points for updating the version number in a
+          setup.cfg file; only useful if you use zest.releaser--otherwise harmless
+          (might eventually move this functionality out into a separate product)
+        - Though version 0.1.2 worked in Python3, use_2to3 wasn't added to the setup.py
+          so 2to3 had to be run manually
+        - Fixed a crash on projects that don't have a description-file option
+        
+        0.1.2 (2011-04-13)
+        ------------------
+        
+        - Fixed the self-installation--it did not work if a d2to1 version was not
+          already installed, due to the use of `pkg_resources.require()`
+        - Adds nominal Python3 support
+        - Fixes the 'classifier' option in setup.cfg
+        
+        0.1.1 (2011-04-12)
+        ------------------
+        
+        - Fixed an unhelpful error message when a setup_hook fails to import
+        - Made d2to1 able to use its own machinery to install itself
+        
+        
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Plugins
+Classifier: Framework :: Setuptools Plugin
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Topic :: Software Development :: Build Tools
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: System :: Archiving :: Packaging

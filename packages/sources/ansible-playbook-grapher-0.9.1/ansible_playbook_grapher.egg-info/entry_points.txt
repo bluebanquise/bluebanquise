@@ -1,0 +1,3 @@
+[console_scripts]
+ansible-playbook-grapher = ansibleplaybookgrapher.cli:main
+

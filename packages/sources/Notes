@@ -1,0 +1,3 @@
+Build python packages:
+python setup.py bdist_rpm --spec-only
+python setup.py bdist_rpm
