@@ -1,0 +1,38 @@
+{% for host in groups['all'] %}
+
+{# Check if node is part of an equipment or an iceberg #}
+{% if not (hostvars[host]['group_names'] | select('match','^'+equipment_naming+'_.*') | list ) %}
+  <br><div id="warning">WARNING</div>: host {{host}} is not part of any equipment_profile. This may be on purpose.
+{% endif %}
+{% if not (hostvars[host]['group_names'] | select('match','^'+iceberg_naming+'[0-9]+') | list ) %}
+  <br><div id="warning">WARNING</div>: host {{host}} is not part of any iceberg. This may be on purpose.
+{% endif %}
+
+{# Check if node has a main network and a main network interface.
+Also check the main network exists and that all linked network exists #}
+{% if hostvars[host]['node_main_network'] is not defined or none %}
+  <br><div id="warning">WARNING</div>: host {{host}} doesn't have a main network. This may be on purpose.
+{% else %}
+  {% if hostvars[host]['node_main_network_interface'] is not defined or none %}
+  <br><div id="warning">WARNING</div>: host {{host}} doesn't have a main network interface. This may be on purpose.
+  {% else %}
+
+  {% endif %}
+{% endif %}
+
+{% if hostvars[host]['network_interfaces'] is not defined or none %}
+  <br><div id="warning">WARNING</div>: host {{host}} doesn't have any network interfaces defined.
+{#or ( is not (hostvars[host]['network_interfaces'] | list)) %}#}
+{% else %}
+  {% for interface in hostvars[host]['network_interfaces'] %}
+    {% if hostvars[host]['network_interfaces'][interface]['network'] is defined and not none %}
+      {% if hostvars[host]['network_interfaces'][interface]['network'] not in networks %}
+        <br><div id="error">ERROR</div>: host {{host}} interface {{interface}} has a network ({{hostvars[host]['network_interfaces'][interface]['network']}}) not defined in the configuration, please check.
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+{% endfor %}
+
+

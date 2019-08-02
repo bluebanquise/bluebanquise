@@ -1,0 +1,62 @@
+digraph prod_web_server_1a {
+  rankdir=TB;
+
+  all [shape=record label=<
+<table border="0" cellborder="0">
+  <tr><td><b>
+  <font face="Times New Roman, Bold" point-size="16">all</font>
+  </b></td></tr>
+<hr/><tr><td><font face="Times New Roman, Bold" point-size="14">customerdb_dbname<br/>image<br/>region<br/>sshkey<br/>storedb_dbname<br/></font></td></tr></table>
+>]
+  prod_web_server_1a [shape=record style=rounded label=<
+<table border="0" cellborder="0">
+  <tr><td><b>
+  <font face="Times New Roman, Bold" point-size="16">prod-web-server-1a</font>
+  </b></td></tr>
+</table>
+>]
+  production [shape=record label=<
+<table border="0" cellborder="0">
+  <tr><td><b>
+  <font face="Times New Roman, Bold" point-size="16">production</font>
+  </b></td></tr>
+<hr/><tr><td><font face="Times New Roman, Bold" point-size="14">customerdb_host<br/>customerdb_port<br/>databases<br/>env<br/>security_group<br/>storedb_host<br/>storedb_port<br/></font></td></tr></table>
+>]
+  production_az_a [shape=record label=<
+<table border="0" cellborder="0">
+  <tr><td><b>
+  <font face="Times New Roman, Bold" point-size="16">production-az-a</font>
+  </b></td></tr>
+<hr/><tr><td><font face="Times New Roman, Bold" point-size="14">subnet<br/>zone<br/></font></td></tr></table>
+>]
+  production_web [shape=record label=<
+<table border="0" cellborder="0">
+  <tr><td><b>
+  <font face="Times New Roman, Bold" point-size="16">production-web</font>
+  </b></td></tr>
+<hr/><tr><td><font face="Times New Roman, Bold" point-size="14">instance_type<br/></font></td></tr></table>
+>]
+  production_web_a [shape=record label=<
+<table border="0" cellborder="0">
+  <tr><td><b>
+  <font face="Times New Roman, Bold" point-size="16">production-web-a</font>
+  </b></td></tr>
+</table>
+>]
+  web [shape=record label=<
+<table border="0" cellborder="0">
+  <tr><td><b>
+  <font face="Times New Roman, Bold" point-size="16">web</font>
+  </b></td></tr>
+<hr/><tr><td><font face="Times New Roman, Bold" point-size="14">customerdb_user<br/>databases<br/>storedb_user<br/></font></td></tr></table>
+>]
+
+  all -> web;
+  all -> production;
+  production -> production_web;
+  production -> production_az_a;
+  production_az_a -> production_web_a;
+  production_web -> production_web_a;
+  production_web_a -> prod_web_server_1a;
+  web -> production_web;
+}
