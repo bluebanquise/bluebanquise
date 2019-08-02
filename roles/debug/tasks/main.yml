@@ -1,6 +1,6 @@
 ---
 
-- name: "  ✎ Template: /tmp/debug"
+- name: Template >> /tmp/debug
   template:
     src: "debug.j2"
     dest: /tmp/debug
