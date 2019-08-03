@@ -40,6 +40,7 @@
   with_items: "{{networks}}"
   when:
     - networks[item].is_in_dhcp == true
+    - current_iceberg_network in item
 #  notify: Restart dhcp_server services
   tags:
     - templates

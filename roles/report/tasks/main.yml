@@ -1,0 +1,103 @@
+---
+
+- name: Create pxe directories structure
+  file:
+   path: "{{item}}"
+   state: directory
+   mode: 0755
+  with_items:
+   - /var/www/html/report/
+   - /var/www/html/report/pictures
+   - /var/www/html/report/css
+   - /var/www/html/report/debug
+
+- name: Template >> /var/www/html/report/index.html
+  template:
+    src: "index.html.j2"
+    dest: /var/www/html/report/index.html
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - templates
+
+- name: Template >> /var/www/html/report/css/main.css
+  template:
+    src: "main.css.j2"
+    dest: /var/www/html/report/css/main.css
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - templates
+
+- name: Copy >> bluebanquise logo white
+  copy:
+    src: bluebanquise_logo_white.svg
+    dest: /var/www/html/report/pictures/bluebanquise_logo_white.svg
+    mode: 0644
+
+- name: Template >> /var/www/html/report/debug_report.html
+  template:
+    src: "debug_report.html.j2"
+    dest: /var/www/html/report/debug_report.html
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - templates
+
+- name: Template >> /var/www/html/report/debug/debug_groups.html
+  template:
+    src: "debug_groups.html.j2"
+    dest: /var/www/html/report/debug/debug_groups.html
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - templates
+
+- name: Template >> /var/www/html/report/debug/debug_nodes.html
+  template:
+    src: "debug_nodes.html.j2"
+    dest: /var/www/html/report/debug/debug_nodes.html
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - templates
+
+- name: Ansible find file examples
+  find:
+    paths: /etc/ansible/playbooks
+    patterns: "*.yml"
+  register: files_matched
+  tags: test
+
+- debug:
+    msg: "{{ item.path }}"
+  tags: test
+  with_items: "{{files_matched.files}}"
+
+- name: Render playbooks diagrams
+  shell: ansible-playbook-grapher --include-role-tasks {{item.path}} -o /dev/shm/{{item.path | replace('/etc/ansible/playbooks/','') | replace('.yml','')}} -vvv
+  with_items: "{{files_matched.files}}"
+  tags: test
+
+- name: Render all diagram
+  shell: ansible-inventory-grapher all -d /dev/shm/ --format "all.dot"
+  tags: test2
+
+- name: Convert all diagram
+  shell: dot -Tpng /dev/shm/all.dot -o /dev/shm/all.png
+  tags: test2
+
+- name: Convert all diagram
+  shell: ansible -m setup --tree /dev/shm/out/ all
+  tags: test3
+  ignore_errors: yes
+
+- name: Convert all diagram
+  shell: ansible-cmdb /dev/shm/out > /dev/shm/overview.html
+  tags: test3
+

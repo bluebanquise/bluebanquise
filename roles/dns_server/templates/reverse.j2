@@ -36,3 +36,9 @@ $TTL 86400
 {% endif %}
 {% endif %}
 {% endfor %}
+
+;## External hosts
+
+{% for host in external_hosts %}
+{{external_hosts[host].split('.')[3]}}.{{external_hosts[host].split('.')[2]}}.{{external_hosts[host].split('.')[1]}}.{{external_hosts[host].split('.')[0]}} IN PTR {{host}}.
+{% endfor %}

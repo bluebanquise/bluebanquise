@@ -2,6 +2,14 @@
 - name: toto
   hosts: "management1"
   roles:
+    - role: report
+      tags: report
+
+    - role: ssh_slave
+      tags: ssh_slave
+    - role: ssh_master
+      tags: ssh_master
+
     - role: users_basic
       tags: users_basic
 

@@ -1,14 +1,10 @@
-{% set ntw = [] %}
-{% for nic in network_interfaces %}
-{% if network_interfaces[nic].network is defined and not none %}{{ ntw.append(network_interfaces[nic].network|string) }}{% endif %}{% endfor %}{{ntw | select('match',(current_iceberg_network+'-[0-9]+')) | list | unique | sort| first | join | trim}}
+{% for icb in 
 
-{{node_main_network}}
-{{node_main_network_interface}}
+{% for network in networks %}
+{{network}}
+{{current_iceberg_network}}
+{% if (network | select('match',(current_iceberg_network+'-[0-9]+'))) is defined and not none %} toto {% endif %}
+{% if current_iceberg_network in network %} tata {% endif %}
 
-coucou{{hostvars['management1']['node_main_network']}}tata
-coucou{{hostvars['management1']['node_main_network_interface']}}tata
-
-{{hostvars['c001']['node_main_network']}}
-{{hostvars['c001']['node_main_network_interface']}}
-
+{% endfor %}
 

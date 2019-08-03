@@ -11,3 +11,8 @@ current_iceberg_network: "{{management_networks_naming + (current_iceberg_number
 icebergs_groups_list: "{{ groups | select('match','^'+iceberg_naming+'[0-9]+') | list }}"
 number_of_icebergs: "{{ groups | select('match','^'+iceberg_naming+'[0-9]+') | list | length }}"
 
+## Get management_hosts of under icebergs (if exist, else None)
+under_icebergs: "{% for lvl1, lvl1_args in icebergs_topology.items() %}{% if current_iceberg == lvl1 %}{{icebergs_topology[lvl1]}}{% else %}{% for lvl2, lvl2_args in lvl1_args.items() %}{% if current_iceberg == lvl2 %}{{icebergs_topology[lvl1][lvl2]}}{% endif %}{% endfor %}{% endif %}{% endfor %}"
+above_iceberg: "{% for lvl1, lvl1_args in icebergs_topology.items() %}{% if current_iceberg == lvl1 %}top{% else %}{% for lvl2, lvl2_args in lvl1_args.items() %}{% if current_iceberg == lvl2 %}{{lvl1}}{% endif %}{% endfor %}{% endif %}{% endfor %}"
+
+

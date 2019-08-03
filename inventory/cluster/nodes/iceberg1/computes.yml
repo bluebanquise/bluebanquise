@@ -1,4 +1,4 @@
-mg_computes:
+computes:
   children:
     equipment_supermicro_blade_sandybridge:
       hosts:
@@ -9,17 +9,17 @@ mg_computes:
               mac: 08:00:27:0d:44:90
               network: ice1-1
         c002:
-          network_interfaces:
-            enp0s9:
-              ip4: 10.10.3.2
-              mac: 08:00:27:0d:54:90
-              network: ice1-1
+#          network_interfaces:
+#            enp0s9:
+#              ip4: 10.10.3.2
+#              mac: 08:00:27:0d:54:90
+#              network: ice1-1
         c003:
           network_interfaces:
             enp0s9:
               ip4: 10.10.3.3
               mac: 08:00:27:0d:45:90
-              network: ice1-1
+              network: ice1-3
 
     equipment_hp_gpu_nehalem:
       hosts:
