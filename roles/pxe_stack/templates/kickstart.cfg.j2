@@ -22,11 +22,12 @@ timezone {{time_zone}} --isUtc
 # Reboot after installation
 reboot
 
-
 ##### Authentication settings
 
+{% if hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution_major_version'] < 8 %}
 # Define authentication method (sha512)
 auth --enableshadow --passalgo=sha512
+{% endif %}
 
 # Root password (sha512)
 rootpw --iscrypted {{hostvars[groups[item][0]]['authentication']['root_password_sha512']}}
