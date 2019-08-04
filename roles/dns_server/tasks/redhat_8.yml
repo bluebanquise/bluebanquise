@@ -1,0 +1,6 @@
+## Tested on RedHat 8.0
+
+- name: Package
+  package:
+    name: bind
+    state: present
