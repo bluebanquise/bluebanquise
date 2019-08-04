@@ -1,0 +1,7 @@
+## Tested on RedHat 8.0
+
+- name: Package
+  package:
+    name: chrony
+    state: present
+
