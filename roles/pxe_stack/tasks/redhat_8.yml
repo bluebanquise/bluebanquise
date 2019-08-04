@@ -1,0 +1,14 @@
+## Tested on RedHat 8.0
+
+- name: Install minimum packages for PXE (Centos 7)
+  package:
+    name: "{{item}}"
+    state: present
+  with_items:
+    - atftp
+    - bluebanquise_ipxe
+    - httpd
+    - python3-policycoreutils
+    - clustershell
+    - python3-clustershell
+    - policycoreutils
