@@ -1,0 +1,20 @@
+---
+
+- name: Use OS dedicated task
+  include_tasks: "{{(ansible_distribution|lower|replace(' ','_'))}}_{{ansible_distribution_major_version}}.yml"
+
+- name: Template >> /etc/conman.conf
+  template:
+    src: conman.conf.j2
+    dest: /etc/conman.conf
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - templates
+
+- name: Start services
+  service:
+    name: conman
+    state: started
+    enabled: yes
