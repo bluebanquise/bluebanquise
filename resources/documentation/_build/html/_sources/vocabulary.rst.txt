@@ -185,9 +185,9 @@ For example, values can be set by default, and then redefined for some groups of
 Inventory can be seen as a giant pizza, in 3D then flatten.
 
 * *Paste* is the variable in /etc/ansible/inventory/group_vars/all
-* Then large ingredients comes from /etc/ansible/inventory/group_vars/equipment_myequipment
-* Then small ingredients above are the /etc/ansible/inventory/cluster/nodes/
-* And pepper (last layer) is the extra-vars at call.
+* Then *large ingredients* comes from /etc/ansible/inventory/group_vars/equipment_myequipment
+* Then *small ingredients* above are the /etc/ansible/inventory/cluster/nodes/
+* And *pepper and tomatoes* (last layer) is the extra-vars at call.
 
 .. image:: images/pizza_example.svg
 
@@ -246,11 +246,10 @@ For advanced systems, (large HPC clusters needing load spreading with unified ne
 Equipment profiles
 ------------------
 
+In **BlueBanquise**, nodes are nearly always part of a group starting with prefix **equipment_**. These groups are called equipment profiles.
 
+They are used to provide hosts of this group the **equipment_profile** dictionarry, and other variables if nedeed. This doctionarry defines hosts operating system parameters, kernel parameters, partitionning, etc.
 
+These are key groups of the stack.
 
-
-
-
-
-
+**It is important to note that equipment_profiles dictionarry cannot be used at an upper level than group_vars**. It can, but you must NOT.

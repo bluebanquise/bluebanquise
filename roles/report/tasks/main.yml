@@ -10,6 +10,8 @@
    - /var/www/html/report/pictures
    - /var/www/html/report/css
    - /var/www/html/report/debug
+   - /var/www/html/report/graphs
+
 
 - name: Template >> /var/www/html/report/index.html
   template:
@@ -71,33 +73,56 @@
   find:
     paths: /etc/ansible/playbooks
     patterns: "*.yml"
-  register: files_matched
+  register: playbook_files_matched
   tags: test
 
 - debug:
     msg: "{{ item.path }}"
   tags: test
-  with_items: "{{files_matched.files}}"
+  with_items: "{{playbook_files_matched.files}}"
 
 - name: Render playbooks diagrams
-  shell: ansible-playbook-grapher --include-role-tasks {{item.path}} -o /dev/shm/{{item.path | replace('/etc/ansible/playbooks/','') | replace('.yml','')}} -vvv
-  with_items: "{{files_matched.files}}"
+  shell: ansible-playbook-grapher --include-role-tasks {{item.path}} -o /var/www/html/report/graphs/{{item.path | replace('/etc/ansible/playbooks/','') | replace('.yml','')}} -vvv
+  with_items: "{{playbook_files_matched.files}}"
   tags: test
 
 - name: Render all diagram
-  shell: ansible-inventory-grapher all -d /dev/shm/ --format "all.dot"
+  shell: ansible-inventory-grapher all -d /dev/shm/ --format "inventory_all.dot"
   tags: test2
 
 - name: Convert all diagram
-  shell: dot -Tpng /dev/shm/all.dot -o /dev/shm/all.png
+  shell: dot -Tpng /dev/shm/inventory_all.dot -o /var/www/html/report/graphs/inventory_all.png
   tags: test2
 
-- name: Convert all diagram
+- name: Gather all facts
   shell: ansible -m setup --tree /dev/shm/out/ all
   tags: test3
   ignore_errors: yes
 
-- name: Convert all diagram
-  shell: ansible-cmdb /dev/shm/out > /dev/shm/overview.html
+- name: Generate facts report
+  shell: ansible-cmdb /dev/shm/out > /var/www/html/report/overview.html
   tags: test3
+
+- name: Generate graph-tool network report
+  template:
+    src: "graph-tool.py.j2"
+    dest: /var/www/html/report/graphs/graph-tool.py
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - templates
+
+- name: Template >> /var/www/html/report/graphs_report.html
+  template:
+    src: "graphs_report.html.j2"
+    dest: /var/www/html/report/graphs_report.html
+    owner: root
+    group: root
+    mode: 0644
+  vars:
+    playbook_paths: "{% for playbook in playbook_files_matched.files %}{% if not loop.first %},{% endif %}{{playbook.path | replace('/etc/ansible/playbooks/','') | replace('.yml','')}}{% endfor %}"
+  tags:
+    - templates
+    - test4
 

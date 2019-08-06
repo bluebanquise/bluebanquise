@@ -15,6 +15,8 @@ https://www.vrt.com.au/downloads/vrt-network-equipment
 
    introduction
    vocabulary
+   install_first_management
+   roles
    roles/users_basic/readme.rst
 
 Indices and tables
