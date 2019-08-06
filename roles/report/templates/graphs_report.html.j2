@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>BlueBanquise - Report</title>
+    <link rel="stylesheet" href="css/main.css" />
+  </head>
+<body>
+
+<div id="logo">
+  <img src="pictures/bluebanquise_logo_white.svg" alt="BlueBanquise logo" height="120px">
+</div>
+
+<div id="Shadowall">
+  <div id="banner">
+    <div id="banner_item_padding">
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="debug_report.html">Debug report</a></li>
+        <li><a href="cluster_configuration_report.html">Cluster configuration report</a></li>
+        <li><a href="graphs_report.html" class="selected">Graphs reports</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div id="content">
+<br>
+<h1>BlueBanquise Graphs Report</h1>
+<br>
+This report has been generated at:<br>
+{{ansible_managed}}<br>
+<br>
+<h2> Ansible Inventory Grapher </h2>
+<a href="graphs/inventory_all.png">All inventory</a>
+<h2> Ansible Playbook Grapher </h2>
+{% for path in playbook_paths.split(',') %}
+<a href="graphs/{{path}}.svg">{{path}}</a>
+{% endfor %}
+<h2> Ansible CMDB (fact gathering) </h2>
+You need to download and open this file localy (Right click, and save to disk).<br>
+<a href="overview.html">Ansible CMDB report</a>
+<h2> Graph-tool </h2>
+You need to download and execute this file on a system with python graph-tool installed.<br>
+Instructions to install graph-tool can be found <a href="https://git.skewed.de/count0/graph-tool/wikis/installation-instructions">here</a>.
+<a href="graphs/graph-tool.py">Graph-tool report</a>
+<br>
+</div>
+
+</body>
+
+</html>

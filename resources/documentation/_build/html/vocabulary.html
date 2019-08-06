@@ -16,7 +16,7 @@
     <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="toto" href="roles/users_basic/readme.html" />
+    <link rel="next" title="Users basic" href="roles/users_basic/readme.html" />
     <link rel="prev" title="Introduction" href="introduction.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -171,9 +171,9 @@ bob
 <p>Inventory can be seen as a giant pizza, in 3D then flatten.</p>
 <ul class="simple">
 <li><em>Paste</em> is the variable in /etc/ansible/inventory/group_vars/all</li>
-<li>Then large ingredients comes from /etc/ansible/inventory/group_vars/equipment_myequipment</li>
-<li>Then small ingredients above are the /etc/ansible/inventory/cluster/nodes/</li>
-<li>And pepper (last layer) is the extra-vars at call.</li>
+<li>Then <em>large ingredients</em> comes from /etc/ansible/inventory/group_vars/equipment_myequipment</li>
+<li>Then <em>small ingredients</em> above are the /etc/ansible/inventory/cluster/nodes/</li>
+<li>And <em>pepper and tomatoes</em> (last layer) is the extra-vars at call.</li>
 </ul>
 <img alt="_images/pizza_example.svg" src="_images/pizza_example.svg" /></div>
 <div class="section" id="merge">
@@ -210,6 +210,10 @@ bob
 </div>
 <div class="section" id="equipment-profiles">
 <h3>Equipment profiles<a class="headerlink" href="#equipment-profiles" title="Permalink to this headline">¶</a></h3>
+<p>In <strong>BlueBanquise</strong>, nodes are nearly always part of a group starting with prefix <strong>equipment_</strong>. These groups are called equipment profiles.</p>
+<p>They are used to provide hosts of this group the <strong>equipment_profile</strong> dictionarry, and other variables if nedeed. This doctionarry defines hosts operating system parameters, kernel parameters, partitionning, etc.</p>
+<p>These are key groups of the stack.</p>
+<p><strong>It is important to note that equipment_profiles dictionarry cannot be used at an upper level than group_vars</strong>. It can, but you must NOT.</p>
 </div>
 </div>
 </div>
@@ -257,7 +261,7 @@ bob
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="roles/users_basic/readme.html">toto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roles/users_basic/readme.html">Users basic</a></li>
 </ul>
 
 <div class="relations">
@@ -265,7 +269,7 @@ bob
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="introduction.html" title="previous chapter">Introduction</a></li>
-      <li>Next: <a href="roles/users_basic/readme.html" title="next chapter">toto</a></li>
+      <li>Next: <a href="roles/users_basic/readme.html" title="next chapter">Users basic</a></li>
   </ul></li>
 </ul>
 </div>

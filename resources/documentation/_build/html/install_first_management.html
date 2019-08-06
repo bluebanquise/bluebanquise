@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Introduction &#8212; BlueBanquise_Documentation 1.0.0 documentation</title>
+    <title>Install first management &#8212; BlueBanquise_Documentation 1.0.0 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -16,8 +16,8 @@
     <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Vocabulary" href="vocabulary.html" />
-    <link rel="prev" title="BlueBanquise Documentation" href="index.html" />
+    <link rel="next" title="Roles" href="roles.html" />
+    <link rel="prev" title="Vocabulary" href="vocabulary.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -34,14 +34,35 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="introduction">
-<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
-<p><strong>BlueBanquise</strong> is a generic stack based on Ansible to deploy and manage clusters of hosts.
-These clusters can be from few workstations in enterprise to very large HPC or servers farm clusters.</p>
-<p><strong>BlueBanquise</strong> is the result of a need. A need for a very simple task, not based on multi languages scripts difficults to maintain, that can keep simplicity while managing very complex architecture.</p>
-<p>Ansible was chosen for its simplicity and its security. The Ansible inventory groups/variables mechanism can cover from very simple to very sophisticated configurations. Ansible is not the fastest tool, nor the simpliest to debug. However, it is widely used today.</p>
-<p>This documentation is structured as a training. If you encounter any bugs/issues or have any commentes, please inform us.</p>
-<p>We hope you will enjoy this stack as much as we do.</p>
+  <div class="section" id="install-first-management">
+<h1>Install first management<a class="headerlink" href="#install-first-management" title="Permalink to this headline">¶</a></h1>
+<p>First step to deploy <strong>BlueBanquise</strong> is to install first management node manually.</p>
+<div class="section" id="install-operating-system">
+<h2>Install operating system<a class="headerlink" href="#install-operating-system" title="Permalink to this headline">¶</a></h2>
+<p>Install Centos 7.6 using parameters you need.</p>
+<p>The following parameters are recommended:</p>
+<ul class="simple">
+<li>&gt;= 2 CPU/vCPU</li>
+<li>&gt;= 2 Gb RAM</li>
+<li>&gt;= 16Gb HDD</li>
+</ul>
+<p>And the following parameters are the stricti minimal if you whish to test the stack in VMs:</p>
+<ul class="simple">
+<li>&gt;= 1 vCPU</li>
+<li>&gt;= 512 Mb RAM</li>
+<li>&gt;= 6Gb HDD</li>
+</ul>
+<p>In this last configuration, DVD iso will be mounted from /dev/cdrom instead of being copied to save space.</p>
+<p>It is recommanded to only choose minimal install during packages selections. Also, it is recommanded to let system in English, and only set your keyboard and time zone to your contry.</p>
+</div>
+<div class="section" id="prepare-system-for-ansible">
+<h2>Prepare system for Ansible<a class="headerlink" href="#prepare-system-for-ansible" title="Permalink to this headline">¶</a></h2>
+<p>Once system is installed and rebooted, login, and disable firewall. Current stack do not support firewall configuration (but it is scheduled for later released).</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>systemctl stop firewalld
+systemctl disable firewalld
+</pre></div>
+</div>
+</div>
 </div>
 
 
@@ -68,8 +89,14 @@ These clusters can be from few workstations in enterprise to very large HPC or s
 <h3>Navigation</h3>
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vocabulary.html">Vocabulary</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Install first management</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#install-operating-system">Install operating system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#prepare-system-for-ansible">Prepare system for Ansible</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="roles.html">Roles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roles/users_basic/readme.html">Users basic</a></li>
 </ul>
 
@@ -77,8 +104,8 @@ These clusters can be from few workstations in enterprise to very large HPC or s
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="index.html" title="previous chapter">BlueBanquise Documentation</a></li>
-      <li>Next: <a href="vocabulary.html" title="next chapter">Vocabulary</a></li>
+      <li>Previous: <a href="vocabulary.html" title="previous chapter">Vocabulary</a></li>
+      <li>Next: <a href="roles.html" title="next chapter">Roles</a></li>
   </ul></li>
 </ul>
 </div>
@@ -114,7 +141,7 @@ These clusters can be from few workstations in enterprise to very large HPC or s
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
-      <a href="_sources/introduction.rst.txt"
+      <a href="_sources/install_first_management.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

@@ -1,0 +1,40 @@
+========================
+Install first management
+========================
+
+First step to deploy **BlueBanquise** is to install first management node manually.
+
+Install operating system
+========================
+
+Install Centos 7.6 using parameters you need.
+
+The following parameters are recommended:
+
+* >= 2 CPU/vCPU
+* >= 2 Gb RAM
+* >= 16Gb HDD
+
+And the following parameters are the stricti minimal if you whish to test the stack in VMs:
+
+* >= 1 vCPU
+* >= 512 Mb RAM
+* >= 6Gb HDD
+
+In this last configuration, DVD iso will be mounted from /dev/cdrom instead of being copied to save space.
+
+It is recommanded to only choose minimal install during packages selections. Also, it is recommanded to let system in English, and only set your keyboard and time zone to your contry.
+
+Prepare system for Ansible
+==========================
+
+Once system is installed and rebooted, login, and disable firewall. Current stack do not support firewall configuration (but it is scheduled for later released).
+
+.. code-block:: bash
+
+  systemctl stop firewalld
+  systemctl disable firewalld
+
+
+
+
