@@ -2,11 +2,14 @@
 Introduction
 ============
 
-Lvl1
-====
+**BlueBanquise** is a generic stack based on Ansible to deploy and manage clusters of hosts.
+These clusters can be from few workstations in enterprise to very large HPC or servers farm clusters.
 
-Lvl2
-----
+**BlueBanquise** is the result of a need. A need for a very simple task, not based on multi languages scripts difficults to maintain, that can keep simplicity while managing very complex architecture.
 
-Lvl3
-^^^^
+Ansible was chosen for its simplicity and its security. The Ansible inventory groups/variables mechanism can cover from very simple to very sophisticated configurations. Ansible is not the fastest tool, nor the simpliest to debug. However, it is widely used today.
+
+This documentation is structured as a training. If you encounter any bugs/issues or have any commentes, please inform us.
+
+We hope you will enjoy this stack as much as we do.
+

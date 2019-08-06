@@ -2,59 +2,54 @@ computes:
   children:
     equipment_supermicro_blade_sandybridge:
       hosts:
-        c001:
+        c006:
           network_interfaces:
             enp0s9:
-              ip4: 10.10.3.1
+              ip4: 10.11.3.1
               mac: 08:00:27:0d:44:90
-              network: ice1-1
+              network: ice1-2
             enp0s8:
-              ip4: 10.20.3.1
+              ip4: 10.20.13.1
               network: interconnect1
 
-        c002:
+        c007:
           network_interfaces:
             enp0s9:
-              ip4: 10.10.3.2
+              ip4: 10.11.3.2
               mac: 08:00:27:0d:54:90
-              network: ice1-1
+              network: ice1-2
             enp0s8:
-              ip4: 10.20.3.2
+              ip4: 10.20.13.2
               network: interconnect1
 
-        c003:
+        c008:
           network_interfaces:
             enp0s9:
-              ip4: 10.10.3.3
+              ip4: 10.11.3.3
               mac: 08:00:27:0d:45:90
-              network: ice1-1
+              network: ice1-2
             enp0s8:
-              ip4: 10.20.3.3
+              ip4: 10.20.13.3
               network: interconnect1
 
-
-    equipment_hp_gpu_nehalem:
-      hosts:
-        c004:
+        c009:
           network_interfaces:
             enp0s9:
-              ip4: 10.10.3.4
+              ip4: 10.11.3.4
               mac: 08:00:27:0d:45:91
-              network: ice1-1
+              network: ice1-2
             enp0s8:
-              ip4: 10.20.3.4
+              ip4: 10.20.13.4
               network: interconnect1
 
-    equipment_cines_smp_sandybridge:
-      hosts:
-        c005:
+        c010:
           network_interfaces:
             enp0s9:
-              ip4: 10.10.3.5
+              ip4: 10.11.3.5
               mac: 08:00:27:0d:45:92
-              network: ice1-1
+              network: ice1-2
             enp0s8:
-              ip4: 10.20.3.5
+              ip4: 10.20.13.5
               network: interconnect1
 
 
