@@ -16,8 +16,9 @@ https://www.vrt.com.au/downloads/vrt-network-equipment
    introduction
    vocabulary
    install_first_management
+   learn_ansible
+   deploy_bluebanquise
    roles
-   roles/users_basic/readme.rst
 
 Indices and tables
 ==================
