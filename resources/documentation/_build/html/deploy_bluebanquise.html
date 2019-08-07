@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Roles &#8212; BlueBanquise_Documentation 1.0.0 documentation</title>
+    <title>Deploy BlueBanquise &#8212; BlueBanquise_Documentation 1.0.0 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -16,7 +16,8 @@
     <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="Install first management" href="install_first_management.html" />
+    <link rel="next" title="Roles" href="roles.html" />
+    <link rel="prev" title="Learn Ansible" href="learn_ansible.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -33,18 +34,36 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="roles">
-<h1>Roles<a class="headerlink" href="#roles" title="Permalink to this headline">¶</a></h1>
-<p>This part is an agregations of all the <strong>BlueBanquise</strong> roles readme.</p>
-<div class="section" id="users-basic">
-<h2>Users basic<a class="headerlink" href="#users-basic" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="description">
-<h3>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h3>
-<p>This roles provides a very basic users management, for simple clusters.</p>
+  <div class="section" id="deploy-bluebanquise">
+<h1>Deploy BlueBanquise<a class="headerlink" href="#deploy-bluebanquise" title="Permalink to this headline">¶</a></h1>
+<p>At this point, you should have an operating system with Ansible installed on it, and basic OS repositories.</p>
+<div class="section" id="get-bluebanquise">
+<h2>Get BlueBanquise<a class="headerlink" href="#get-bluebanquise" title="Permalink to this headline">¶</a></h2>
+<p>Install needed basic packages:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>yum install wget http createrepo git
+</pre></div>
 </div>
-<div class="section" id="changelog">
-<h3>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h3>
-<p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p>
+<p>Once done, grab files from the web:</p>
+<p>TOBEDONE</p>
+<p>Now, backup and clean your previous Ansible configuration:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tar cvzf /root/my_old_ansible.tar.gz /etc/ansible
+rm -Rf /etc/ansible/*
+</pre></div>
+</div>
+<p>And download <strong>BlueBanquise</strong> into Ansible directory:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> /etc/ansible
+git clone https://github.com/oxedions/bluebanquise.git .
+</pre></div>
+</div>
+<p>It is time to configure the inventory to match cluster needs.</p>
+</div>
+<div class="section" id="configure-inventory">
+<h2>Configure inventory<a class="headerlink" href="#configure-inventory" title="Permalink to this headline">¶</a></h2>
+<p>This documentation will cover the configuration of a very simple cluster:</p>
+<img alt="_images/example_cluster_small.svg" src="_images/example_cluster_small.svg" /><div class="section" id="important-before-we-start">
+<h3>Important before we start<a class="headerlink" href="#important-before-we-start" title="Permalink to this headline">¶</a></h3>
+<p>Ansible will read <strong>ALL</strong> files in the inventory. <strong>NEVER do a backup of a file here!</strong></p>
+<p>Backup in another location, outside of /etc/ansible/inventory.</p>
 </div>
 </div>
 </div>
@@ -76,21 +95,24 @@
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vocabulary.html">Vocabulary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="install_first_management.html">Install first management</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Roles</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#users-basic">Users basic</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#description">Description</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#changelog">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="learn_ansible.html">Learn Ansible</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Deploy BlueBanquise</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#get-bluebanquise">Get BlueBanquise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configure-inventory">Configure inventory</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#important-before-we-start">Important before we start</a></li>
 </ul>
 </li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="roles.html">Roles</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="install_first_management.html" title="previous chapter">Install first management</a></li>
+      <li>Previous: <a href="learn_ansible.html" title="previous chapter">Learn Ansible</a></li>
+      <li>Next: <a href="roles.html" title="next chapter">Roles</a></li>
   </ul></li>
 </ul>
 </div>
@@ -126,7 +148,7 @@
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
-      <a href="_sources/roles.rst.txt"
+      <a href="_sources/deploy_bluebanquise.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

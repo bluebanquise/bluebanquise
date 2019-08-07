@@ -1,0 +1,690 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Learn Ansible &#8212; BlueBanquise_Documentation 1.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Roles" href="roles.html" />
+    <link rel="prev" title="Install first management" href="install_first_management.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="learn-ansible">
+<h1>Learn Ansible<a class="headerlink" href="#learn-ansible" title="Permalink to this headline">¶</a></h1>
+<p>To understand how <strong>BlueBanquise</strong> works, it is essential to learn basis of Ansible.</p>
+<p>This sections try to provide key knowledge to at least be able to manipulate and edit the stack to your needs.</p>
+<p>It is assumed here that your system is already installed, and that Ansible has also been installed. It is also assumed that <strong>BlueBanquise</strong> stack has not been installed yet, and so ANsible is freshly installed without modifications.</p>
+<p>All work will be done on the current host.</p>
+<div class="section" id="minimal-inventory">
+<h2>Minimal inventory<a class="headerlink" href="#minimal-inventory" title="Permalink to this headline">¶</a></h2>
+<p>Edit /etc/hosts file, and add “management1” on localhost line:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4 management1
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+</pre></div>
+</div>
+<p>Then, create some needed directories and files:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir /etc/ansible/inventory
+mkdir /etc/ansible/inventory/group_vars
+mkdir /etc/ansible/inventory/group_vars/all
+mkdir /etc/ansible/roles
+mkdir /etc/ansible/playbooks
+</pre></div>
+</div>
+<p>And edit /etc/ansible/ansible.cfg line to fix /etc/ansible/inventory as default inventory folder:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[defaults]
+inventory      = /etc/ansible/inventory
+</pre></div>
+</div>
+<p>Also set, in this same file /etc/ansible/ansible.cfg, the roles_path value to /etc/ansible/roles:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>roles_path    = /etc/ansible/roles
+</pre></div>
+</div>
+<p>And also change hash_behaviour to merge, as this is the most interesting algorithm:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>hash_behaviour = merge
+</pre></div>
+</div>
+<p>Finally, add management1 host into the inventory. Create a file called /etc/ansible/inventory/myhost.yml with the following content:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">management1</span>
+</pre></div>
+</div>
+<p>Our very basic Ansibe configuration is done. But one thing remain: we need to ensure our host (management1) can ssh to itself without password, as Ansible relies fully on the ssh to connecte to remote hosts.</p>
+<p>Let’s generate an ssh key (press enter multiple time):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ssh-keygen -N <span class="s2">&quot;&quot;</span>
+</pre></div>
+</div>
+<p>Ensure you can ssh on management1 using a password:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>root@management1 <span class="o">]</span><span class="c1"># ssh management1</span>
+The authenticity of host <span class="s1">&#39;management1 (10.10.0.1)&#39;</span> can<span class="s1">&#39;t be established.</span>
+<span class="s1">ECDSA key fingerprint is SHA256:XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX</span>
+<span class="s1">ECDSA key fingerprint is MD5:XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.</span>
+<span class="s1">Are you sure you want to continue connecting (yes/no)? yes</span>
+<span class="s1">Warning: Permanently added &#39;</span>management1,10.10.0.1<span class="s1">&#39; (ECDSA) to the list of known hosts.</span>
+<span class="s1">root@management1&#39;</span>s password:
+<span class="o">[</span>root@management1 ~<span class="o">]</span><span class="c1">#</span>
+</pre></div>
+</div>
+<p>If ok, then deploy ssh public key to allow password less authentication, and ensure you can now ssh with the key:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[root@management1 ~]#  ssh-copy-id management1
+/usr/bin/ssh-copy-id: INFO: Source of key(s) to be installed: &quot;/root/.ssh/id_rsa.pub&quot;
+root@management1&#39;s password:
+Number of key(s) added: 1
+[root@management1 ~]# ssh management1
+[root@management1 ~]#
+</pre></div>
+</div>
+<p>Finally, check Ansible to try to connect to management1, and report hosts is up:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>root@management1 ~<span class="o">]</span><span class="c1"># ansible all -m ping</span>
+management1 <span class="p">|</span> <span class="nv">SUCCESS</span> <span class="o">=</span>&gt; <span class="o">{</span>
+    <span class="s2">&quot;changed&quot;</span>: false,
+    <span class="s2">&quot;ping&quot;</span>: <span class="s2">&quot;pong&quot;</span>
+<span class="o">}</span>
+<span class="o">[</span>root@management1 ~<span class="o">]</span><span class="c1">#</span>
+</pre></div>
+</div>
+<p>Let’s see the available and useful commands now.</p>
+</div>
+<div class="section" id="ansible-commands">
+<h2>Ansible commands<a class="headerlink" href="#ansible-commands" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="ansible">
+<h3>ansible<a class="headerlink" href="#ansible" title="Permalink to this headline">¶</a></h3>
+<p>The <strong>ansible</strong> command provides few interesting features.</p>
+<div class="section" id="version">
+<h4>Version<a class="headerlink" href="#version" title="Permalink to this headline">¶</a></h4>
+<p>First command is to check current Ansible version. It should be &gt;= 2.8.2:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ansible --version
+</pre></div>
+</div>
+</div>
+<div class="section" id="ping-an-host-or-all-hosts">
+<h4>Ping an host or all hosts<a class="headerlink" href="#ping-an-host-or-all-hosts" title="Permalink to this headline">¶</a></h4>
+<p>Use the following command to check if Ansible can contact a specific registered host:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ansible management1 -m ping
+</pre></div>
+</div>
+<p>Or all hosts:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ansible all -m ping
+</pre></div>
+</div>
+<p>Also, it is possible to gather <strong>facts</strong>. Facts are dynamic variables, accessible only when Ansible is running on the target. Facts provides live information about the target: it’s running kernel, it’s linux distrubution, network or cpu information, etc.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ansible -m setup --tree /dev/shm/ management1
+</pre></div>
+</div>
+<p>Then, open file /dev/shm/management1 to check it’s content and the result of facts gathering.</p>
+</div>
+</div>
+<div class="section" id="ansible-inventory">
+<h3>ansible-inventory<a class="headerlink" href="#ansible-inventory" title="Permalink to this headline">¶</a></h3>
+<p>Ansible inventory command is extremly useful can will be massively used on this documentation.</p>
+<p>This commands allows to gather information from your inventory and check the expected output.</p>
+<div class="section" id="groups-and-hosts">
+<h4>Groups and hosts<a class="headerlink" href="#groups-and-hosts" title="Permalink to this headline">¶</a></h4>
+<p>The command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ansible-inventory --graph
+</pre></div>
+</div>
+<p>Provide information about groups and hosts inside each groups:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>@all:
+  <span class="p">|</span>--@ungrouped:
+  <span class="p">|</span>  <span class="p">|</span>--management1
+</pre></div>
+</div>
+<p>It is possible to see here that management1 is member of group &#64;ungrouped, which is part of group &#64;all.
+More will be seen later in this documentation.</p>
+</div>
+<div class="section" id="host-variables">
+<h4>Host variables<a class="headerlink" href="#host-variables" title="Permalink to this headline">¶</a></h4>
+<p>To ouput variables for a specific host, and check for example your variable precedence mechanism provided what is expected, use:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ansible-inventory --yaml --host management1
+</pre></div>
+</div>
+<p>For now, there are no available variables in the inventories, so output will be {}.</p>
+</div>
+</div>
+<div class="section" id="ansible-playbook">
+<h3>ansible-playbook<a class="headerlink" href="#ansible-playbook" title="Permalink to this headline">¶</a></h3>
+<p>This command is used to launch playbooks, and ask Ansible to execute tasks on desired host(s). This is the most used command when using <strong>BlueBanquise</strong>.</p>
+<p>Important parameters are:</p>
+<ul class="simple">
+<li>-e or –extra-vars, which allows to provide additional variables for execution (keep in mind that variables set here win the whole precedence)</li>
+<li>-t or –tags, which allows to execute only specific tasks or part of tasks (seen later)</li>
+<li>-s or –skip-tags, which allows to not execute some specific tasks or part of tasks (seen later)</li>
+</ul>
+</div>
+<div class="section" id="debug">
+<h3>Debug<a class="headerlink" href="#debug" title="Permalink to this headline">¶</a></h3>
+<p>All of these commands accept verbose flags with -v, -vv, -vvv, etc. The more v, the more verbose.</p>
+<p>Also, it is possible to execute all of them with the variable ANSIBLE_DEBUG=1 set, which will dramatically increase output information (but infortunately not always relevant to our needs…).</p>
+<p>For example, a very verbose execution would be:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">ANSIBLE_DEBUG</span><span class="o">=</span><span class="m">1</span> ansible -m ping management1 -vvv
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="variables-and-groups">
+<h2>Variables and groups<a class="headerlink" href="#variables-and-groups" title="Permalink to this headline">¶</a></h2>
+<p>Now that all important commands have been seen, it is time to add some variables inside the inventory, and play with groups.</p>
+<p>#####However, for more fun and understand all the process, we will also create a very minimal playbook that will execute a simple task (no need for a role here): rendering a file with these variables as content, on the target hosts.
+#####Create a minimal playbook
+————————-
+######Create a file /etc/ansible/minimal_playbook.yml with the follwing content:</p>
+<div class="section" id="adding-variables">
+<h3>Adding variables<a class="headerlink" href="#adding-variables" title="Permalink to this headline">¶</a></h3>
+<p>We are going to add few variables, at different positions in the inventories.</p>
+<p>Create file /etc/ansible/inventory/group_vars/all/my_ship.yml with the following content:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">my_ship</span><span class="p">:</span>
+  <span class="nt">model</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">USP Talon Light Fighter</span>
+  <span class="nt">price</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">6000</span> <span class="c1"># in cr</span>
+  <span class="nt">equipment</span><span class="p">:</span>
+    <span class="nt">generator</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Advanced MicroFusion</span>
+    <span class="nt">shield</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Structural Integrity Field</span>
+    <span class="nt">front_gun</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Pulse-Cannon</span>
+    <span class="nt">sidekicks</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">Plasma Storm</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">Zica SuperCharger</span>
+  <span class="nt">destination</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Deliani</span>
+</pre></div>
+</div>
+<p>Now, ensure management1 can see these variables:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>root@ ~<span class="o">]</span><span class="c1"># ansible-inventory --yaml --host management1</span>
+my_ship:
+  destination: Deliani
+  equipment:
+    front_gun: Pulse-Cannon
+    generator: Advanced MicroFusion
+    shield: Structural Integrity Field
+    sidekicks:
+    - Plasma Storm
+    - Zica SuperCharger
+  model: USP Talon Light Fighter
+  price: <span class="m">6000</span>
+<span class="o">[</span>root@ ~<span class="o">]</span><span class="c1">#</span>
+</pre></div>
+</div>
+<p>Nice, we can now use these varibles for management1 when working on it.</p>
+<p>Let’s add 2 other hosts: login1 and nfs1.</p>
+<p>Edit file /etc/ansible/inventory/myhost.yml to obtain:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>management1
+login1
+nfs1
+</pre></div>
+</div>
+<p>And now let’s check login1 (when will exist) can access these variables also:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>root@ ~<span class="o">]</span><span class="c1"># ansible-inventory --yaml --host login1</span>
+my_ship:
+  destination: Deliani
+  equipment:
+    front_gun: Pulse-Cannon
+    generator: Advanced MicroFusion
+    shield: Structural Integrity Field
+    sidekicks:
+    - Plasma Storm
+    - Zica SuperCharger
+  model: USP Talon Light Fighter
+  price: <span class="m">6000</span>
+<span class="o">[</span>root@ ~<span class="o">]</span><span class="c1">#</span>
+</pre></div>
+</div>
+<p>Perfect. It is time to play with groups, before comming back to variables to work on variables precedence.</p>
+</div>
+<div class="section" id="configuring-groups">
+<h3>Configuring groups<a class="headerlink" href="#configuring-groups" title="Permalink to this headline">¶</a></h3>
+<p>Lets check current groups:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>root@ ~<span class="o">]</span><span class="c1"># ansible-inventory --graph</span>
+@all:
+  <span class="p">|</span>--@ungrouped:
+  <span class="p">|</span>  <span class="p">|</span>--login1
+  <span class="p">|</span>  <span class="p">|</span>--management1
+  <span class="p">|</span>  <span class="p">|</span>--nfs1
+<span class="o">[</span>root@ ~<span class="o">]</span><span class="c1">#</span>
+</pre></div>
+</div>
+<p>All our hosts belongs to the ungrouped group and to the all group. But we want to be able to assign specific variables to each kind of equipments. We need to create groups.</p>
+<p>There are two ways to create groups. In YAML, directly in the hosts files, or using specific Ansible syntax in separate files. Both are useful, and we will combine them.</p>
+<div class="section" id="in-yaml">
+<h4>In YAML<a class="headerlink" href="#in-yaml" title="Permalink to this headline">¶</a></h4>
+<p>Edit again the /etc/ansible/inventory/myhost.yml file, and this time let’s use real YAML:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">master</span><span class="p">:</span>
+  <span class="nt">hosts</span><span class="p">:</span>
+    <span class="nt">management1</span><span class="p">:</span>
+<span class="nt">slaves</span><span class="p">:</span>
+  <span class="nt">hosts</span><span class="p">:</span>
+    <span class="nt">login1</span><span class="p">:</span>
+    <span class="nt">nfs1</span><span class="p">:</span>
+</pre></div>
+</div>
+<p>Now, let’s check again groups:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>root@ ~<span class="o">]</span><span class="c1"># ansible-inventory --graph</span>
+@all:
+  <span class="p">|</span>--@master:
+  <span class="p">|</span>  <span class="p">|</span>--management1
+  <span class="p">|</span>--@slaves:
+  <span class="p">|</span>  <span class="p">|</span>--login1
+  <span class="p">|</span>  <span class="p">|</span>--nfs1
+  <span class="p">|</span>--@ungrouped:
+<span class="o">[</span>root@ ~<span class="o">]</span><span class="c1">#</span>
+</pre></div>
+</div>
+<p>We can see that management1 is now member of group master, and that login1 and nfs1 are member of group slaves.</p>
+<p>The special string <strong>hosts</strong> in this file define that the string above is a group, and that strings bellow are hosts member of this group.</p>
+<p>It is also possibe to set groups in a group in this same file. Edit it again:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">my_nodes</span><span class="p">:</span>
+  <span class="nt">children</span><span class="p">:</span>
+    <span class="nt">master</span><span class="p">:</span>
+      <span class="nt">hosts</span><span class="p">:</span>
+        <span class="nt">management1</span><span class="p">:</span>
+    <span class="nt">slaves</span><span class="p">:</span>
+      <span class="nt">hosts</span><span class="p">:</span>
+        <span class="nt">login1</span><span class="p">:</span>
+        <span class="nt">nfs1</span><span class="p">:</span>
+</pre></div>
+</div>
+<p>And result:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>root@ ~<span class="o">]</span><span class="c1"># ansible-inventory --graph</span>
+@all:
+  <span class="p">|</span>--@my_nodes:
+  <span class="p">|</span>  <span class="p">|</span>--@master:
+  <span class="p">|</span>  <span class="p">|</span>  <span class="p">|</span>--management1
+  <span class="p">|</span>  <span class="p">|</span>--@slaves:
+  <span class="p">|</span>  <span class="p">|</span>  <span class="p">|</span>--login1
+  <span class="p">|</span>  <span class="p">|</span>  <span class="p">|</span>--nfs1
+  <span class="p">|</span>--@ungrouped:
+<span class="o">[</span>root@ ~<span class="o">]</span><span class="c1">#</span>
+</pre></div>
+</div>
+<p>The <strong>children</strong> string define that string above is a group that contains bellow group(s).</p>
+</div>
+<div class="section" id="in-ansible-syntax">
+<h4>In Ansible syntax<a class="headerlink" href="#in-ansible-syntax" title="Permalink to this headline">¶</a></h4>
+<p>The second way to create groups is to use the Ansible native syntax, which can be simpler in some cases.</p>
+<p>Create a file /etc/ansible/inventory/mygroups and set the following content:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[colors:children]
+blue
+red
+
+[blue]
+management1
+login1
+
+[red]
+nfs1
+</pre></div>
+</div>
+<p>And check the result:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>root@ ~<span class="o">]</span><span class="c1"># ansible-inventory --graph</span>
+@all:
+  <span class="p">|</span>--@colors:
+  <span class="p">|</span>  <span class="p">|</span>--@blue:
+  <span class="p">|</span>  <span class="p">|</span>  <span class="p">|</span>--login1
+  <span class="p">|</span>  <span class="p">|</span>  <span class="p">|</span>--management1
+  <span class="p">|</span>  <span class="p">|</span>--@red:
+  <span class="p">|</span>  <span class="p">|</span>  <span class="p">|</span>--nfs1
+  <span class="p">|</span>--@my_nodes:
+  <span class="p">|</span>  <span class="p">|</span>--@master:
+  <span class="p">|</span>  <span class="p">|</span>  <span class="p">|</span>--management1
+  <span class="p">|</span>  <span class="p">|</span>--@slaves:
+  <span class="p">|</span>  <span class="p">|</span>  <span class="p">|</span>--login1
+  <span class="p">|</span>  <span class="p">|</span>  <span class="p">|</span>--nfs1
+  <span class="p">|</span>--@ungrouped:
+<span class="o">[</span>root@ ~<span class="o">]</span><span class="c1">#</span>
+</pre></div>
+</div>
+<p>Same concept apply here, with different syntax.</p>
+<p>You can find more information and examples here: <a class="reference external" href="https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html">https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html</a></p>
+</div>
+</div>
+<div class="section" id="variables-precedence">
+<h3>Variables precedence<a class="headerlink" href="#variables-precedence" title="Permalink to this headline">¶</a></h3>
+<p>Time to use all these groups.</p>
+<p>If you remember precedence system in Vocabulary section (see <a class="reference external" href="https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html#variable-precedence-where-should-i-put-a-variable">https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html#variable-precedence-where-should-i-put-a-variable</a>) group_vars/all is in position 4 in the precedence. This is where we set our spaceship variables.</p>
+<p>Let’s say now we whish to change our ship destination for management1 node only.</p>
+<p>Check current destination for all hosts:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>root@ ~<span class="o">]</span><span class="c1"># ansible-inventory --yaml --host management1 | grep destination</span>
+  destination: Deliani
+<span class="o">[</span>root@ ~<span class="o">]</span><span class="c1"># ansible-inventory --yaml --host login1 | grep destination</span>
+  destination: Deliani
+<span class="o">[</span>root@ ~<span class="o">]</span><span class="c1"># ansible-inventory --yaml --host nfs1 | grep destination</span>
+  destination: Deliani
+<span class="o">[</span>root@ ~<span class="o">]</span><span class="c1">#</span>
+</pre></div>
+</div>
+<p>We can redefine the variable in group_vars/all (that apply to all hosts in the &#64;all group, so everyone), but we only want to impact management1 node.</p>
+<p>In the precedence list, you can see that inventory host_vars are in position 9, so they will win against position 4 of group_vars/all. Lets use this.</p>
+<p>Edit file /etc/ansible/inventory/myhost.yml and add a destination variable under management1:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">my_nodes</span><span class="p">:</span>
+  <span class="nt">children</span><span class="p">:</span>
+    <span class="nt">master</span><span class="p">:</span>
+      <span class="nt">hosts</span><span class="p">:</span>
+        <span class="nt">management1</span><span class="p">:</span>
+          <span class="nt">destination</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Ixmucane</span>
+    <span class="nt">slaves</span><span class="p">:</span>
+      <span class="nt">hosts</span><span class="p">:</span>
+        <span class="nt">login1</span><span class="p">:</span>
+        <span class="nt">nfs1</span><span class="p">:</span>
+</pre></div>
+</div>
+<p>And check destinations again:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>root@ ~<span class="o">]</span><span class="c1">#  ansible-inventory --yaml --host management1 | grep destination</span>
+destination: Ixmucane
+  destination: Deliani
+<span class="o">[</span>root@ ~<span class="o">]</span><span class="c1">#</span>
+</pre></div>
+</div>
+<p>OOPS ! We made a mistake. Indeed, if you check again content of file /etc/ansible/inventory/group_vars/all/my_ship.yml, you can see destination is not at the top, but under <em>my_ship</em>.</p>
+<p>Edit again /etc/ansible/inventory/myhost.yml and fix it:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">my_nodes</span><span class="p">:</span>
+  <span class="nt">children</span><span class="p">:</span>
+    <span class="nt">master</span><span class="p">:</span>
+      <span class="nt">hosts</span><span class="p">:</span>
+        <span class="nt">management1</span><span class="p">:</span>
+          <span class="nt">my_ship</span><span class="p">:</span>
+            <span class="nt">destination</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Ixmucane</span>
+    <span class="nt">slaves</span><span class="p">:</span>
+      <span class="nt">hosts</span><span class="p">:</span>
+        <span class="nt">login1</span><span class="p">:</span>
+        <span class="nt">nfs1</span><span class="p">:</span>
+</pre></div>
+</div>
+<p>And check destinations again:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>root@ ~<span class="o">]</span><span class="c1"># ansible-inventory --yaml --host management1 | grep destination</span>
+  destination: Ixmucane
+<span class="o">[</span>root@ ~<span class="o">]</span><span class="c1"># ansible-inventory --yaml --host login1 | grep destination</span>
+  destination: Deliani
+<span class="o">[</span>root@ ~<span class="o">]</span><span class="c1"># ansible-inventory --yaml --host nfs1 | grep destination</span>
+  destination: Deliani
+<span class="o">[</span>root@ ~<span class="o">]</span><span class="c1">#</span>
+</pre></div>
+</div>
+<p>Perfect. Setting a variable in the host definition file is equivalent to using host_vars folder. But host_vars folder is difficult to use when having a very large number of hosts, which is why in <strong>BlueBanquise</strong> we are using directly the host file.</p>
+<p>Let’s say now we want to change the model of spaceship of all the slaves nodes. So not a single host, but all slaves members hosts.</p>
+<p>We are going to use level 6 in variables precedence: group_vars/. Create a directory called slave in group_vars:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir /etc/ansible/inventory/group_vars/slaves
+</pre></div>
+</div>
+<p>Then, create file /etc/ansible/inventory/group_vars/slave/myship.yml with the following content:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">my_ship</span><span class="p">:</span>
+  <span class="nt">model</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Gencore Maelstrom</span>
+</pre></div>
+</div>
+<p>And check variables of hosts:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>root@ ~<span class="o">]</span><span class="c1"># ansible-inventory --yaml --host management1 | grep model</span>
+  model: USP Talon Light Fighter
+<span class="o">[</span>root@ ~<span class="o">]</span><span class="c1"># ansible-inventory --yaml --host login1 | grep model</span>
+  model: Gencore Maelstrom
+<span class="o">[</span>root@ ~<span class="o">]</span><span class="c1"># ansible-inventory --yaml --host nfs1 | grep model</span>
+  model: Gencore Maelstrom
+<span class="o">[</span>root@ ~<span class="o">]</span><span class="c1">#</span>
+</pre></div>
+</div>
+<p>Prefect. Remember the pizza in Vocabulary section. Ansible just flatten the whole inventory, using precedence, and you obtain variables.</p>
+<p>Last point for this part, remember that in variables precedences, extra_vars is level 22 and always win, so adding extra vars when executing Ansible later will allow us to force variables at execution time for testing purposes or just because we need it.</p>
+</div>
+</div>
+<div class="section" id="roles-and-playbooks">
+<h2>Roles and playbooks<a class="headerlink" href="#roles-and-playbooks" title="Permalink to this headline">¶</a></h2>
+<p>Time to apply some configuration on our target host.</p>
+<p>We are going to create a role that install a web server package, create a very basic web page with our ships information, and start the web server service.</p>
+<div class="section" id="role">
+<h3>Role<a class="headerlink" href="#role" title="Permalink to this headline">¶</a></h3>
+<p>Create a role called “shipyard”, with needed folders:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir /etc/ansible/roles/shipyard
+mkdir /etc/ansible/roles/shipyard/tasks
+mkdir /etc/ansible/roles/shipyard/templates
+</pre></div>
+</div>
+<p>Tasks folder contains tasks to perform, and main.yml file inside will be the starting point for Ansible. Templates folder will contains our templates (configuration files) in Jinja2 language.</p>
+<div class="section" id="task">
+<h4>Task<a class="headerlink" href="#task" title="Permalink to this headline">¶</a></h4>
+<p>Create file /etc/ansible/roles/shipyard/tasks/main.yml with the following content:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nn">---</span>
+
+<span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Package</span>
+  <span class="nt">package</span><span class="p">:</span>
+    <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">httpd</span>
+    <span class="nt">state</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">present</span>
+
+<span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Template &gt;&gt; /var/www/html/index.html</span>
+  <span class="nt">template</span><span class="p">:</span>
+    <span class="nt">src</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">index.html.j2</span>
+    <span class="nt">dest</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">/var/www/html/index.html</span>
+    <span class="nt">owner</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">root</span>
+    <span class="nt">group</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">root</span>
+    <span class="nt">mode</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">0644</span>
+  <span class="nt">tags</span><span class="p">:</span>
+    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">templates</span>
+
+<span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Start services</span>
+  <span class="nt">service</span><span class="p">:</span>
+    <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">httpd</span>
+    <span class="nt">state</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">started</span>
+    <span class="nt">enabled</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">yes</span>
+</pre></div>
+</div>
+<p>Content is pretty simple:</p>
+<ul class="simple">
+<li>Ansible installs httpd package (or do nothing if present)</li>
+<li>Then Ansible render the template index.html.j2 and write the result in /var/www/html/index.html</li>
+<li>Then Ansible ensure httpd service is started and enabled at boot</li>
+</ul>
+<p>You can find all Ansible modules here in the official documentation: <a class="reference external" href="https://docs.ansible.com/ansible/latest/modules/modules_by_category.html">https://docs.ansible.com/ansible/latest/modules/modules_by_category.html</a></p>
+</div>
+<div class="section" id="template">
+<h4>Template<a class="headerlink" href="#template" title="Permalink to this headline">¶</a></h4>
+<p>Templates are probably the key feature of Ansible and all automation tools.</p>
+<p>The idea is simple: you provide Ansible with a copy of your desired configuration file, with variables to replace to fill some dynamic parts of the file.</p>
+<p>Let’s do this with a simple html page, and first with a static page.</p>
+<p>Create the template /etc/ansible/roles/shipyard/templates/index.html.j2 with the following static content:</p>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">header</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>This is title<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">header</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+  Hello world
+<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<p>The current template is static, we will make it dynamic later.</p>
+</div>
+</div>
+<div class="section" id="playbook">
+<h3>Playbook<a class="headerlink" href="#playbook" title="Permalink to this headline">¶</a></h3>
+<p>Lets create our playbook, which will contains a list of roles to apply on management1 host.</p>
+<p>Create file /etc/ansible/playbooks/myplaybook.yml with the following content:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nn">---</span>
+<span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">myplaybook</span>
+  <span class="nt">hosts</span><span class="p">:</span> <span class="s">&quot;management1&quot;</span>
+  <span class="nt">roles</span><span class="p">:</span>
+    <span class="p p-Indicator">-</span> <span class="nt">role</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">shipyard</span>
+      <span class="nt">tags</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">shipyard</span>
+</pre></div>
+</div>
+<p>Simply put, target of the playbook is host management1, and role to apply is shipyard.</p>
+<p>Skip the tags for now.</p>
+<p>Note that hosts can be a list of hosts (comma separated: management1,login1,nfs1), or a group of hosts (all, slaves, color, etc).</p>
+<p>Now, execute the playbook, and let Ansible do it’s job:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ansible-playbook myplaybook.yml
+</pre></div>
+</div>
+<p>If all goes well, you should now have the file /var/www/html/index.html generated on management1, and using a web browser you can check the result.</p>
+<img alt="_images/capture_index_1.png" src="_images/capture_index_1.png" />
+<p>But this is not very interesting, let’s add some dynamic part into our template.</p>
+</div>
+<div class="section" id="jinja2">
+<h3>Jinja2<a class="headerlink" href="#jinja2" title="Permalink to this headline">¶</a></h3>
+<p>Edit file /etc/ansible/roles/shipyard/templates/index.html.j2 to make it this way:</p>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span>&lt;html&gt;
+&lt;header&gt;
+  &lt;title&gt;Shipyard&lt;/title&gt;
+&lt;/header&gt;
+&lt;body&gt;
+  &lt;h1&gt;I am {{inventory_hostname}} &lt;&lt; this is me, the current target&lt;/h1&gt;
+  &lt;h2&gt;Variables access&lt;/h2&gt;
+  Ship list: {{groups[&#39;all&#39;]}} &lt;&lt; this is an access to a group members list &lt;br&gt;
+  management1 ship model: {{hostvars[&#39;management1&#39;][&#39;my_ship&#39;][&#39;model&#39;]}} &lt;&lt; this is an access to an host specific variable &lt;br&gt;
+  login1 ship model: {{hostvars[&#39;login1&#39;][&#39;my_ship&#39;][&#39;model&#39;]}} &lt;br&gt;
+  nfs1 ship model: {{hostvars[&#39;nfs1&#39;][&#39;my_ship&#39;][&#39;model&#39;]}} &lt;br&gt;
+  My ship model: {{hostvars[inventory_hostname][&#39;my_ship&#39;][&#39;model&#39;]}} &lt;br&gt;
+  Or a better way to get my ship model: {{my_ship.model}} &lt;br&gt;
+  &lt;h2&gt;Loops&lt;/h2&gt;
+  {% for ship in groups[&#39;all&#39;] %}
+  Ship {{ship}} is in the shipyard, and has destination {{hostvars[ship][&#39;my_ship&#39;][&#39;destination&#39;]}}. &lt;br&gt;
+  {% endfor %}
+&lt;/body&gt;
+&lt;/html&gt;
+</pre></div>
+</div>
+<p>And let’s reexecute the playbook. But we have already installed the package and started the service, so let’s ask Ansible to only work on the tags ‘templates’ to fasten the execution:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ansible-playbook myplaybook.yml -t templates
+</pre></div>
+</div>
+<p>And check again our web page.</p>
+<img alt="_images/capture_index_2.png" src="_images/capture_index_2.png" />
+<p>You can see multiple things:</p>
+<ul class="simple">
+<li>We executed the task on management1, so inventory_hostname variable content is ‘management1’. This is an Ansible reserved variable that contains the target hostname.</li>
+<li>groups[‘mygroup’] allows to get a list with all the hosts member of the group.</li>
+<li>hostvars[‘myhost’] allows to access variables of this host, using the variable precedence mechanism.</li>
+<li>hostvars[inventory_hostname] is equivalent to a direct variables access has we are accessing our current target variables.</li>
+</ul>
+<p>Now regarding to Jinja2:</p>
+<ul class="simple">
+<li>{{ }} allows to insert a variable in the destination file.</li>
+<li>{% %} are Jinja2 instructions (for, if, etc).</li>
+<li>{# #} are Jinja2 commentaries.</li>
+<li>The reamining is put in the destination file “as is”.</li>
+</ul>
+<p>You can experiment with this template to understand the whole mechanism. The whole Jinja2 documentation can be found here: <a class="reference external" href="https://jinja.palletsprojects.com/en/2.10.x/templates/">https://jinja.palletsprojects.com/en/2.10.x/templates/</a></p>
+<p>You should now understand the very basis of Ansible.
+If you feel something is missing in this quick Ansible training, please do not hesitate to ask us to add elements.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="index.html">
+    <img class="logo" src="_static/logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vocabulary.html">Vocabulary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install_first_management.html">Install first management</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Learn Ansible</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#minimal-inventory">Minimal inventory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ansible-commands">Ansible commands</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ansible">ansible</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ansible-inventory">ansible-inventory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ansible-playbook">ansible-playbook</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#debug">Debug</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#variables-and-groups">Variables and groups</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#adding-variables">Adding variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configuring-groups">Configuring groups</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#variables-precedence">Variables precedence</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#roles-and-playbooks">Roles and playbooks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#role">Role</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#playbook">Playbook</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#jinja2">Jinja2</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="roles.html">Roles</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="install_first_management.html" title="previous chapter">Install first management</a></li>
+      <li>Next: <a href="roles.html" title="next chapter">Roles</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Oxedions.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/learn_ansible.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

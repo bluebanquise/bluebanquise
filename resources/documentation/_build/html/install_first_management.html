@@ -16,7 +16,7 @@
     <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Roles" href="roles.html" />
+    <link rel="next" title="Learn Ansible" href="learn_ansible.html" />
     <link rel="prev" title="Vocabulary" href="vocabulary.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -37,6 +37,7 @@
   <div class="section" id="install-first-management">
 <h1>Install first management<a class="headerlink" href="#install-first-management" title="Permalink to this headline">¶</a></h1>
 <p>First step to deploy <strong>BlueBanquise</strong> is to install first management node manually.</p>
+<p>We will then learn how to use Ansible, and then only focus on the stack itself.</p>
 <div class="section" id="install-operating-system">
 <h2>Install operating system<a class="headerlink" href="#install-operating-system" title="Permalink to this headline">¶</a></h2>
 <p>Install Centos 7.6 using parameters you need.</p>
@@ -55,12 +56,67 @@
 <p>In this last configuration, DVD iso will be mounted from /dev/cdrom instead of being copied to save space.</p>
 <p>It is recommanded to only choose minimal install during packages selections. Also, it is recommanded to let system in English, and only set your keyboard and time zone to your contry.</p>
 </div>
-<div class="section" id="prepare-system-for-ansible">
-<h2>Prepare system for Ansible<a class="headerlink" href="#prepare-system-for-ansible" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="prepare-for-ansible">
+<h2>Prepare for Ansible<a class="headerlink" href="#prepare-for-ansible" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="repositories">
+<h3>Repositories<a class="headerlink" href="#repositories" title="Permalink to this headline">¶</a></h3>
 <p>Once system is installed and rebooted, login, and disable firewall. Current stack do not support firewall configuration (but it is scheduled for later released).</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>systemctl stop firewalld
 systemctl disable firewalld
 </pre></div>
+</div>
+<p>Then prepare repositories.</p>
+<p>Download Centos 7.6 Everything DVD iso from <a class="reference external" href="http://isoredirect.centos.org/centos/7/isos/x86_64/">http://isoredirect.centos.org/centos/7/isos/x86_64/</a> . Iso name is CentOS-7-x86_64-Everything-1810.iso.</p>
+<p><strong>If on standard system:</strong></p>
+<p>Mount iso and copy content to web server directory:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir -p /var/www/html/repositories/centos/7.6/x86_64/os/
+mount CentOS-7-x86_64-Everything-1810.iso /mnt
+cp -a /mnt/* /var/www/html/repositories/centos/5.6/x86_64/os/
+umount /mnt
+restorecon -Rv /var/www/html/repositories/centos/7.6/x86_64/os
+</pre></div>
+</div>
+<p><strong>If in test VM:</strong></p>
+<p>Simply mount iso from /dev/cdrom to save space:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir -p /var/www/html/repositories/centos/7.6/x86_64/os/
+mount /dev/cdrom /var/www/html/repositories/centos/7.6/x86_64/os/
+</pre></div>
+</div>
+<p>Now, create first repository manually. Create file <em>/etc/yum.repos.d/os.repo</em> with the following content:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[os]
+name=os
+baseurl=file:///var/www/html/repositories/centos/7.6/x86_64/os/
+gpgcheck=0
+enabled=1
+</pre></div>
+</div>
+<p>And ensure rpeository is available:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>yum repolist
+</pre></div>
+</div>
+<p>Repositories structure follows a specific pattern:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>           Distribution    Version   Architecture    Repository
+                 +             +       +               +
+                 <span class="p">|</span>             +---+   <span class="p">|</span>               <span class="p">|</span>
+                 +-----------+     <span class="p">|</span>   <span class="p">|</span>      +--------+
+                             <span class="p">|</span>     <span class="p">|</span>   <span class="p">|</span>      <span class="p">|</span>
+                             v     v   v      v
+/var/www/html/repositories/centos/7.6/x86_64/os
+</pre></div>
+</div>
+</div>
+<div class="section" id="install-ansible">
+<h3>Install Ansible<a class="headerlink" href="#install-ansible" title="Permalink to this headline">¶</a></h3>
+<p>Time to install Ansible.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>yum install ansible
+</pre></div>
+</div>
+<p>And check Ansible is working:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ansible --version
+</pre></div>
+</div>
+<p>It is now time, if you do not know how Ansible works, to learn basis of Ansible.</p>
+<p>If you already know Ansible, or want to skip this recommended training, directly go to the Deploy BlueBanquise section.</p>
 </div>
 </div>
 </div>
@@ -93,11 +149,16 @@ systemctl disable firewalld
 <li class="toctree-l1"><a class="reference internal" href="vocabulary.html">Vocabulary</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Install first management</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#install-operating-system">Install operating system</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#prepare-system-for-ansible">Prepare system for Ansible</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#prepare-for-ansible">Prepare for Ansible</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#repositories">Repositories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#install-ansible">Install Ansible</a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="learn_ansible.html">Learn Ansible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deploy_bluebanquise.html">Deploy BlueBanquise</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roles.html">Roles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="roles/users_basic/readme.html">Users basic</a></li>
 </ul>
 
 <div class="relations">
@@ -105,7 +166,7 @@ systemctl disable firewalld
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="vocabulary.html" title="previous chapter">Vocabulary</a></li>
-      <li>Next: <a href="roles.html" title="next chapter">Roles</a></li>
+      <li>Next: <a href="learn_ansible.html" title="next chapter">Learn Ansible</a></li>
   </ul></li>
 </ul>
 </div>
