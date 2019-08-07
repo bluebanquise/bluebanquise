@@ -9,7 +9,8 @@ Main target is Hight Performance Computing, but stack is generic and can adapt t
 
 Currently supported OS are:
 
-* Centos 7.6 (Full)
+* RedHat/Centos 7.6 (Full)
+* RedHat 8.0 (Partial, in dev)
 * Ubuntu 18.04 (Partial, in dev)
 * OpenSuse Leap 15.1 (Partial, in dev)
 
