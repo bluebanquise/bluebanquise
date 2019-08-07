@@ -4,6 +4,8 @@ Install first management
 
 First step to deploy **BlueBanquise** is to install first management node manually.
 
+We will then learn how to use Ansible, and then only focus on the stack itself.
+
 Install operating system
 ========================
 
@@ -25,8 +27,11 @@ In this last configuration, DVD iso will be mounted from /dev/cdrom instead of b
 
 It is recommanded to only choose minimal install during packages selections. Also, it is recommanded to let system in English, and only set your keyboard and time zone to your contry.
 
-Prepare system for Ansible
-==========================
+Prepare for Ansible
+===================
+
+Repositories
+------------
 
 Once system is installed and rebooted, login, and disable firewall. Current stack do not support firewall configuration (but it is scheduled for later released).
 
@@ -76,59 +81,33 @@ And ensure rpeository is available:
 
   yum repolist
 
-Then install needed packages to boostrap **BlueBanquise**:
+Repositories structure follows a specific pattern:
 
 .. code-block:: bash
 
-  yum install wget http createrepo git
+                  Distribution    Version   Architecture    Repository
+                        +             +       +               +
+                        |             +---+   |               |
+                        +-----------+     |   |      +--------+
+                                    |     |   |      |
+                                    v     v   v      v
+       /var/www/html/repositories/centos/7.6/x86_64/os
 
-Once done, grab files from the web:
+Install Ansible
+---------------
 
-TOBEDONE
-
-Install Ansible and BlueBanquise
-================================
-
-Time to install ansible.
+Time to install Ansible.
 
 .. code-block:: bash
 
   yum install ansible
 
-Then clean default Ansible files:
+And check Ansible is working:
 
 .. code-block:: bash
 
-  rm -Rf /etc/ansible/*
+  ansible --version
 
-Now, download **BlueBanquise** into Ansible directory:
+It is now time, if you do not know how Ansible works, to learn basis of Ansible.
 
-.. code-block:: bash
-
-  cd /etc/ansible
-  git clone https://github.com/oxedions/bluebanquise.git .
-
-It is time to configure the inventory to match cluster needs.
-
-Configure inventory
-===================
-
-This documentation will cover the configuration of a very simple cluster:
-
-IMAGE
-
-Important before we start
--------------------------
-
-Ansible will read **ALL** files in the inventory. **NEVER do a backup of a file here!**
-
-Backup in another location, outside of /etc/ansible/inventor
-
-
-
-
-
-
-
-
-
+If you already know Ansible, or want to skip this recommended training, directly go to the Deploy BlueBanquise section.
