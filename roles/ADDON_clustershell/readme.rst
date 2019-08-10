@@ -4,7 +4,7 @@ ClusterShell
 Description
 ^^^^^^^^^^^
 
-This roles provides clustershell and groups for clustershell (based on Ansible groups).
+This role provides clustershell and groups for clustershell (based on Ansible groups).
 
 Instructions
 ^^^^^^^^^^^^
@@ -23,6 +23,6 @@ Tree execution mode is missing.
 Changelog
 ^^^^^^^^^
 
-1.0.1: Fixed bad template. Documentation. johnnykeats <johnny.keats@outlook.com>
-1.0.0: Role creation. oxedions <oxedions@gmail.com>
+* 1.0.1: Fixed bad template. Documentation. johnnykeats <johnny.keats@outlook.com>
+* 1.0.0: Role creation. oxedions <oxedions@gmail.com>
  

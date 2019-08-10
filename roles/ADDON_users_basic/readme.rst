@@ -4,7 +4,7 @@ Users basic
 Description
 ^^^^^^^^^^^
 
-This roles provides a very basic users management, for simple clusters.
+This role provides a very basic users management, for simple clusters.
 
 Instructions
 ^^^^^^^^^^^^
@@ -28,5 +28,5 @@ Or (python 2):
 Changelog
 ^^^^^^^^^
 
-1.0.1: Documentation and ressources. johnnykeats <johnny.keats@outlook.com>
-1.0.0: Role creation. oxedions <oxedions@gmail.com>
+* 1.0.1: Documentation and ressources. johnnykeats <johnny.keats@outlook.com>
+* 1.0.0: Role creation. oxedions <oxedions@gmail.com>

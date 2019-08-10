@@ -4,7 +4,7 @@ NIC - Network Interface Controler
 Description
 ^^^^^^^^^^^
 
-This roles configure network interfaces to provide desired ip, prefix, gateway, etc.
+This role configure network interfaces to provide desired ip, prefix, gateway, etc.
 
 This role is still under work, as nmcli is not supported in RHEL 8 for now, and that this role need to handle much more features.
 
@@ -26,6 +26,6 @@ Add more features, as nmcli Ansible module can do much more.
 Changelog
 ^^^^^^^^^
 
-1.0.1: Documentation. johnnykeats <johnny.keats@outlook.com>
-1.0.0: Role creation. oxedions <oxedions@gmail.com>
+* 1.0.1: Documentation. johnnykeats <johnny.keats@outlook.com>
+* 1.0.0: Role creation. oxedions <oxedions@gmail.com>
  

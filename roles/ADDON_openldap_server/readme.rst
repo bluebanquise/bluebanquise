@@ -4,7 +4,7 @@ OpenLDAP server
 Description
 ^^^^^^^^^^^
 
-This roles provides a basic but UNSECURE ldap server. It also provides phpldapadmin configuration to manage LDAP.
+This role provides a basic but UNSECURE ldap server. It also provides phpldapadmin configuration to manage LDAP.
 
 Instructions
 ^^^^^^^^^^^^
@@ -21,6 +21,6 @@ Enable encryption to secure this role.
 Changelog
 ^^^^^^^^^
 
-1.0.1: Fixed bad template. Documentation. johnnykeats <johnny.keats@outlook.com>
-1.0.0: Role creation. oxedions <oxedions@gmail.com>
+* 1.0.1: Fixed bad template. Documentation. johnnykeats <johnny.keats@outlook.com>
+* 1.0.0: Role creation. oxedions <oxedions@gmail.com>
  

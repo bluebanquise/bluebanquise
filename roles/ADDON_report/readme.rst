@@ -4,7 +4,7 @@ Report
 Description
 ^^^^^^^^^^^
 
-This roles try to provide sys admin few useful tools.
+This role try to provide sys admin few useful tools.
 
 * An automatic known issue paterns checker for the stack
 * Many visual reports (inventory, playbooks, network, facts)
@@ -22,6 +22,6 @@ Many things...
 Changelog
 ^^^^^^^^^
 
-1.0.1: Documentation. johnnykeats <johnny.keats@outlook.com>
-1.0.0: Role creation. oxedions <oxedions@gmail.com>
+* 1.0.1: Documentation. johnnykeats <johnny.keats@outlook.com>
+* 1.0.0: Role creation. oxedions <oxedions@gmail.com>
  

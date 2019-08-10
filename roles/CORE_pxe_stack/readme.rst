@@ -4,7 +4,7 @@ PXE Stack
 Description
 ^^^^^^^^^^^
 
-This roles provides the whole PXE stack. It is a key feature of the stack.
+This role provides the whole PXE stack. It is a key feature of the stack.
 
 Instructions
 ^^^^^^^^^^^^
@@ -21,6 +21,6 @@ Full EFI support is missing (how to boot on disk via PXE ?)
 Changelog
 ^^^^^^^^^
 
-1.0.1: Documentation. johnnykeats <johnny.keats@outlook.com>
-1.0.0: Role creation. oxedions <oxedions@gmail.com>
+* 1.0.1: Documentation. johnnykeats <johnny.keats@outlook.com>
+* 1.0.0: Role creation. oxedions <oxedions@gmail.com>
  

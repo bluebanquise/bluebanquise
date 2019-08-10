@@ -23,6 +23,6 @@ Allow groups alerts selection.
 Changelog
 ^^^^^^^^^
 
-1.0.1: Documentation. johnnykeats <johnny.keats@outlook.com>
-1.0.0: Role creation. oxedions <oxedions@gmail.com>
+* 1.0.1: Documentation. johnnykeats <johnny.keats@outlook.com>
+* 1.0.0: Role creation. oxedions <oxedions@gmail.com>
  
