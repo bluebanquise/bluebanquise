@@ -1,0 +1,6 @@
+slurm:
+  cluster_name: bluebanquise
+  control_machine: management1
+  nodes_equipment_groups:
+    - equipment_compute1
+    - equipment_compute2
