@@ -4,5 +4,6 @@ networks:
     prefix: 16
     netmask: 255.255.0.0
     broadcast: 10.20.255.255
+    is_in_dhcp: false
     is_in_dns: true
 

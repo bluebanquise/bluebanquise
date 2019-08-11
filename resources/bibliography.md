@@ -17,10 +17,18 @@ https://github.com/mbirth/ipxe-config
 https://github.com/Teradata/stacki
 https://perlmaven.com/hello-world-with-plain-cgi
 https://stackoverflow.com/questions/45375693/apache2-response-header-name-contains-invalid-characters-aborting-reque
+http://forum.ipxe.org/showthread.php?tid=3728&pid=7616#pid7616
+http://forum.ipxe.org/showthread.php?tid=6879
+https://forum.ipxe.org/showthread.php?tid=8080
 
 ### RHEL 8
-Personnal Red Hat Developer Subscription and Red Hat Beta Access
+
+https://askubuntu.com/questions/683126/1404-your-mpm-seems-to-be-threaded-selecting-cgid-instead-of-cgi-module-cgid
 https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/
+https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/installation_guide/sect-kickstart-syntax
+https://bugzilla.redhat.com/show_bug.cgi?id=1618865
+https://gist.github.com/H0neyBadger/f1138794d54056628bb6b89359c961fb
+https://access.redhat.com/discussions/3815241
 
 ### OpenSuse
 https://www.suse.com/documentation/sles-15/singlehtml/book_autoyast/book_autoyast.html#CreateProfile.Reporting
@@ -78,10 +86,27 @@ https://askubuntu.com/questions/130231/tftp-server-atftpd-fails-to-start
 https://www.archlinux.org/packages/community/x86_64/atftp/
 https://sourceforge.net/projects/atftp/
 
+## Report
+
+https://stackoverflow.com/questions/52505606/python-dot-file-to-png-file-not-found-error
+https://stackoverflow.com/questions/41565614/ansible-how-to-register-output-from-find-module-and-use-in-other
+https://www.w3schools.com/howto/howto_html_include.asp
+https://blog.teamtreehouse.com/introduction-html-imports
+https://git.skewed.de/count0/graph-tool/wikis/installation-instructions#debian-ubuntu
+https://graph-tool.skewed.de/static/doc/draw.html
+http://docs.opennebula.org/5.8/_images/groupadmin_topology.png
+
+## Clustershell
+
+https://github.com/cea-hpc/clustershell
+
 ## Slurm
+
 https://slurm.schedmd.com/slurm_ug_2011/Basic_Configuration_Usage.pdf
 
 ## Chrony
+
+https://chrony.tuxfamily.org/faq.html
 https://www.server-world.info/en/note?os=CentOS_7&p=ntp&f=3
 https://www.tecmint.com/install-chrony-in-centos-ubuntu-linux/
 https://www.thegeekdiary.com/centos-rhel-7-configuring-ntp-using-chrony/?PageSpeed=noscript
@@ -91,6 +116,7 @@ https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.qb.ser
 https://opensource.com/article/18/12/manage-ntp-chrony
 
 ## Rsyslog logrotate
+
 https://www.tecmint.com/install-rsyslog-centralized-logging-in-centos-ubuntu/
 https://www.tecmint.com/install-logrotate-to-manage-log-rotation-in-linux/
 http://notes.zerodogg.org/GNU-slash-Linux_-general-/use-xz-for-logrotate/
@@ -104,9 +130,11 @@ https://forum.ipxe.org/showthread.php?tid=7879&pid=12084#pid12084
 https://github.com/fboender/ansible-cmdb/releases
 
 ## Cockpit
+
 https://cockpit-project.org/
 
 ## Prometheus
+
 https://www.robustperception.io/alerting-on-down-instances
 https://www.robustperception.io/whats-the-difference-between-group_interval-group_wait-and-repeat_interval
 https://stackoverflow.com/questions/53295711/multiple-targets-on-prometheus
@@ -122,4 +150,9 @@ https://prometheus.io/docs/concepts/jobs_instances/
 https://www.fosslinux.com/10398/how-to-install-and-configure-prometheus-on-centos-7.htm
 https://www.scaleway.com/en/docs/configure-prometheus-monitoring-with-grafana/
 https://grafana.com/grafana/dashboards/9578
+
+## Islands
+
+https://wiki.gentoo.org/wiki/SSH_jump_host
+https://www.linuxquestions.org/questions/linux-newbie-8/kernel-without-initrd-739920/
 
