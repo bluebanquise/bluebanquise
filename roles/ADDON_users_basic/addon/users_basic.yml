@@ -6,8 +6,8 @@ users_basic:
 
   active_users: # Active users
     johnnykeats:
-      uid: 1077
-      gid: 1077
+      uid: 1078
+      gid: 1078
       comment: dream all the day # optional
       password: $6$M3crarMVoUV3rALd$ZTre2CIyss7zOb4lkLoG23As9OAkYPw2BM88Y1F43n8CCyV5XWwAYEwBOrS8bcCBIMjIPdJG.ndOfzWyAVR4j0 # Only set the first time, when user does not exist, then ignored
 
