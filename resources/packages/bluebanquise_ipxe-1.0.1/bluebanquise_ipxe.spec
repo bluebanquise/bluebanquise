@@ -40,6 +40,12 @@ make -j 2 bin/undionly.kpxe EMBED=bluebanquise_standard.ipxe DEBUG=intel,dhcp,ve
 cp bin-x86_64-efi/ipxe.efi $RPM_BUILD_ROOT/var/lib/tftpboot/bluebanquise_standard_ipxe.efi
 cp bin/undionly.kpxe $RPM_BUILD_ROOT/var/lib/tftpboot/bluebanquise_standard_undionly.kpxe
 
+# Need to install syslinux-nonlinux syslinux-tftpboot syslinux
+make -j 2 EMBED=bluebanquise_standard.ipxe DEBUG=intel,dhcp bin/ipxe.iso
+make -j 2 EMBED=bluebanquise_standard.ipxe DEBUG=intel,dhcp bin/ipxe.usb
+cp bin/ipxe.iso $RPM_BUILD_ROOT/var/lib/tftpboot/ipxe.iso
+cp bin/ipxe.usb $RPM_BUILD_ROOT/var/lib/tftpboot/ipxe.usb
+
 %files
 %defattr(-,root,root,-)
 /*
