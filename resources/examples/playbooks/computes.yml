@@ -1,0 +1,20 @@
+---
+- name: computes
+  hosts: "{{target}}"
+  roles:
+
+    - role: CORE_set_hostname
+      tags: CORE_set_hostname
+    - role: CORE_repositories_client
+      tags: CORE_repositories_client
+    - role: CORE_nic
+      tags: CORE_nic
+    - role: CORE_hosts_file
+      tags: CORE_hosts_file
+    - role: CORE_dns_client
+      tags: CORE_dns_client
+    - role: CORE_time_client
+      tags: CORE_time_client
+    - role: CORE_nfs_client
+      tags: CORE_nfs_client
+
