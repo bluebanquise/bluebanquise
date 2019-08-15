@@ -17,6 +17,7 @@ https://www.vrt.com.au/downloads/vrt-network-equipment
    vocabulary
    install_first_management
    learn_ansible
+   configure_bluebanquise
    deploy_bluebanquise
    roles
 

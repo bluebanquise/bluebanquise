@@ -2,336 +2,137 @@
 Deploy BlueBanquise
 ===================
 
-At this point, you should have an operating system with Ansible installed on it, and basic OS repositories.
+At this point, **BlueBanquise** configuration is done. We are ready to deploy the cluster.
 
-Get BlueBanquise
-================
+First step is to deploy configuration on management1 node, and then deploy OS on the others system. Last step will be to deploy configuration on the other systems.
 
-Install needed basic packages:
+Management configuration
+========================
 
-.. code-block:: bash
-
-  yum install wget http createrepo git
-
-Once done, grab files from the web:
-
-TOBEDONE
-
-Now, backup and clean your previous Ansible configuration:
-
-.. code-block:: bash
-
-  tar cvzf /root/my_old_ansible.tar.gz /etc/ansible
-  rm -Rf /etc/ansible/*
-
-And download **BlueBanquise** into Ansible directory:
-
-.. code-block:: bash
-
-  cd /etc/ansible
-  git clone https://github.com/oxedions/bluebanquise.git .
-
-It is time to configure the inventory to match cluster needs.
-
-Configure inventory
-===================
-
-This documentation will cover the configuration of a very simple cluster:
-
-.. image:: images/example_cluster_small.svg
-
-Important before we start
--------------------------
-
-Ansible will read **ALL** files in the inventory. **NEVER do a backup of a file here!**
-
-Backup in another location, outside of /etc/ansible/inventory.
-
-Pickup example inventory
+Get management1 playbook
 ------------------------
 
-Copy example inventory as a base for our work. This example is based on the picture provided just above.
+We are going to use the provided default playbook. This playbook will install most of the CORE roles. Enough to deploy first stage of the cluster.
+
+Copy example playbook management1 to /etc/ansible/playbooks/:
 
 .. code-block:: bash
 
-  cp -a /etc/ansible/resources/examples/simple_cluster /etc/ansible/inventory
-
-Review nodes
-------------
-
-Time to review the provided example configuration, and adapt it to your configuration.
-
-First, the nodes.
-
-Management node
-^^^^^^^^^^^^^^^
-
-Open file cluster/nodes/iceberg1/managements.yml:
-
-.. code-block:: yaml
-
-  managements:
-    children:
-      equipment_typeM:
-        hosts:
-          management1:
-            bmc:
-              name: bmanagement1
-              ip4: 10.10.100.1
-              mac: 08:00:27:dc:f8:f6
-              network: ice1-1
-            network_interfaces:
-              enp0s3:
-                ip4: 10.10.0.1
-                mac: 08:00:27:dc:f8:f5
-                network: ice1-1
-              enp0s8:
-                ip4: 10.20.0.1
-                network: interconnect1
-
-This file contains our management node configuration. Lets review it, to understand it.
+  cp -a /etc/ansible/resources/examples/playbooks/management1.yml /etc/ansible/playbooks/
 
-First, the groups:
+Then, we will ask Ansible to read this playbook, and execute all roles listed inside on management1 node (check hosts target at top of the file).
 
-.. code-block:: yaml
+To do so, we are going to use the ansible-playbook command.
 
-  managements:            # This is the main group, it is very useful with advanced configuration
-    children:             # This is an Ansible instruction, telling the below group is included in managements group
-      equipment_typeM:    # This is the equipment group of the management node. It always start by 'equipment_'
-        hosts:            # This is an Ansible instruction, to list below the hosts member of this group
-          management1:    # This is the hostname
+Ansible-playbook
+----------------
 
-Now the BMC (if exist):
+Ansible playbook is the command used to ask Ansible to execute a playbook.
 
-.. code-block:: yaml
+We are going to use 2 parameters frequently:
 
-  managements:
-    children:
-      equipment_typeM:
-        hosts:
-          management1:
-            bmc:                      # This instruction define an attached BMC
-              name: bmanagement1      # This is the hostname of the BMC
-              ip4: 10.10.100.1        # This is the ipv4 of the BMC
-              mac: 08:00:27:dc:f8:f6  # This is te MAC hardware address of the BMC (for DHCP)
-              network: ice1-1         # This is the logical network this interface is connected to. Logical networks will be seen later.
-
-Then the network interfaces and their associated networks:
-
-.. code-block:: yaml
-
-  managements:
-    children:
-      equipment_typeM:
-        hosts:
-          management1:
-            bmc:
-              name: bmanagement1
-              ip4: 10.10.100.1
-              mac: 08:00:27:dc:f8:f6
-              network: ice1-1
-            network_interfaces:         # This is an instruction, to define bellow NIC
-              enp0s3:                   # This is the NIC name ('ip a' command to get NIC list)
-                ip4: 10.10.0.1          # This is the expected ipv4 for this NIC
-                mac: 08:00:27:dc:f8:f5  # This is the NIC MAC address, for the DHCP
-                network: ice1-1         # This is the logical network this interface is linked to
-              enp0s8:                   # This is another interface, not in the dhcp so no MAC is provided
-                ip4: 10.20.0.1
-                network: interconnect1
+Tags / Skip tags
+^^^^^^^^^^^^^^^^
 
-It should not be too difficult to understand this file.
+As you can notice, some tags are set inside the playbook, or even in some roles for specific tasks. The idea of tags is simple: you can tag a role/a task, and then when using ansible-playbook, only play related tags role/task. Or do the opposit: play all, and skip a role/task.
 
-Other nodes
-^^^^^^^^^^^
+To so, use with Ansible playbook:
 
-Now, review computes nodes and logins nodes in respectively files cluster/nodes/iceberg1/computes.yml and cluster/nodes/iceberg1/logins.yml. Sames rules apply. You can also add more nodes, or if you have for example multiple type of equipments for computes nodes or login nodes, add another equipment group this way:
+* **--tags** with tags listed with comma separator: mytag1,mytag2,mytag3
+* **--skip-tags** with same pattern
 
-.. code-block:: yaml
+More can be found here on tags: https://docs.ansible.com/ansible/latest/user_guide/playbooks_tags.html
 
-  computes:
-    children:
-      equipment_typeC:
-        hosts:
-          c001:
-          [...]
-      equipment_typeD:
-        hosts:
-          c005:
-          [...]
-      equipment_typeE:
-        hosts:
-          c010:
-          [...]
+Extra vars
+^^^^^^^^^^
 
-Register nodes into an iceberg
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Extra vars allows to pass variables with maximum precedence at execution time, for any purpose (debug, test, or simply need).
 
-BlueBanquise have advanced features. We are not going to use them at this stage, but we still need to at least register our nodes into an *iceberg* to use them.
+To do so, use:
 
-In this example, configuration is simple and based on a single iceberg, so all nodes will be registered into iceberg1.
+* **--extra-vars** with " " and space separated variables: --extra-vars "myvar1=true myvar2=77 myvar3=hello"
 
-Get the full list of all nodes you configured, and edit file cluster/groups/iceberg1 to ensure they are all here. Note that you can use ranges of numbers using **:** symbol:
+Apply management1 configuration
+-------------------------------
 
-.. code-block:: text
-
-  [iceberg1]
-  management1
-  login1
-  c[001:004]
-
-All of this means for Ansible: all these nodes are part of group iceberg1. If you plan to use multi-iceberg configuration later, you will need to manage these files. If not, you will only need to ensure your nodes are all registered in this single file.
-
-Now, let's have a look at the logical networks.
-
-Review logical networks
------------------------
-
-In **BlueBanquise**, nodes are connected together through logical network. Most of the time, logical networks will match your physical network, but for advanced networking, it can be different.
-
-All networks are defined in group_vars/all/networks directory, with one file per network. In this current example inventory, there are two networks provided: ice1-1 and interconnect1.
-
-Before reviewing the file, please read this **IMPORTANT** information: in **BlueBanquise** there are two kind of networks, which are administration networks, and the others.
-
-An administration network is used to deploy and manage the nodes. It will be for example used to deploy an DHCP, the PXE stack, etc. Administration networks have a strict naming convention, which by default is: **iceX-Y** with X the iceberg number, and Y the subnet number in this iceberg. In our case, we are working on iceberg1, and we only have one subnet, so our administration network will be ice1-1. If we would need another subnet, it's name would have been ice1-2, etc.
-
-Open file group_vars/all/networks/ice1-1.yml and let's check it's content:
-
-.. code-block:: yaml
-
-  networks:                                             # This defines a new network
-    ice1-1:                                             # Network name
-      subnet: 10.10.0.0                                 # Network subnet
-      prefix: 16                                        # Network prefix
-      netmask: 255.255.0.0                              # Network netmask, must comply with prefix
-      broadcast: 10.10.255.255                          # Broadcast, deduced from subnet and prefix
-      dhcp_unknown_range: 10.10.254.1 10.10.254.254     # This is the range of ip where unknown nodes (i.e. not in the inventory) will be placed if asking for an ip
-      gateway: 10.10.0.1                                # Optional, define a gateway
-      is_in_dhcp: true                                  # If you want this network to be in the dhcp (only apply to management networks)
-      is_in_dns: true                                   # If you want this network to be in the dns
-      services_ip:                                      # IPs or virtual IPs to bind to for each service. In our case, all services will be running on management1
-        pxe_ip: 10.10.0.1
-        ntp_ip: 10.10.0.1
-        dns_ip: 10.10.0.1
-        repository_ip: 10.10.0.1
-        authentication_ip: 10.10.0.1
-        time_ip: 10.10.0.1
-        log_ip: 10.10.0.1
-
-All explanations are give above.
-
-One note for services_ip. It is used if services are spread over multiple managements, or in case of High Availability with virtual IPs. Ansible is not able to gather this information alone (it could, but this would end up with a way too much big stack), and so we have to provide it manually. You can also set here an IP from another subnet if your system has routing tables.
-
-Then check content of file group_vars/all/networks/interconnect1.yml . As this is **not** an administration network, it's configuration is easy.
-
-That is all for basic networking. General network parameters are set in group_vars/all/networks/ files, and nodes parameters are defined in the nodes files.
-
-Now, let's have a look at the general configuration.
-
-Review general configuration
-----------------------------
-
-General configuration is made in group_vars/all/general_settings.
-
-We are going to skip icebergs.yml file for now.
-
-External hosts
-^^^^^^^^^^^^^^
-
-File group_vars/all/general_settings/external_hosts.yml allows to add external hosts to the stack. These hosts will not be managed by the stack, but all nodes will know them (from /etc/hosts and DNS).
-
-Network
-^^^^^^^
-
-File group_vars/all/general_settings/network.yml allows to configure few network related parameters:
-
-* Some external DNS, that will be added into the /etc/resolv.conf file
-* DHCP lease parameters
-
-Do not care about the other parameters for now.
-
-Repositories
-^^^^^^^^^^^^
-
-File group_vars/all/general_settings/repositories.yml configure repositories to use for all nodes (using groups and variable precedence, repositories can be tuned for each group of nodes, or even each node).
-
-Right now, only os and bluebanquise are set. This means two repositories will be added to nodes, and they will bind to repository_ip in ice1-1.yml .
-
-NFS
-^^^
-
-File group_vars/all/general_settings/nfs.yml allows to set NFS shared foldes inside the cluster. Comments in the file should be enough to understand this file.
-
-General
-^^^^^^^
-
-File group_vars/all/general_settings/general.yml configure few main parameters:
-
-* Time zone (very important)
-
-Do not bother about the other parameters.
-
-And that is all for general configuration. Finally, lets check the default parameters.
-
-Review Default parameters
--------------------------
-
-Last part, and probably the most complicated, are default parameters.
-
-Remember Ansible precedence mechanism. All variables in group_vars/all/ have less priority, while variables in group_vars/* have an higher priority.
-
-The idea here is the following: group_vars/all/default/ folder contains all the default parameters for all nodes. Here authentication, and equipment_profile. You have to tune these parameters to match your exact "global" need, and then for each equipment group, tune parameters.
-
-Equipment profile
-^^^^^^^^^^^^^^^^^
-
-For example, open file /etc/ansible/inventory/group_vars/all/default/equipment_profile.yml, and check access_control variable. It is set to true:
-
-.. code-block:: yaml
-
-  equipment_profile:
-    access_control: true
-
-Ok, but so all nodes will herit this value. Let's check computes nodes, that are in equipment_typeC group. Let's check c001:
+Lets apply now the whole configuration on management1. It can takes some time depending of your CPU and your hard drive.
 
 .. code-block:: bash
 
-  [root@]# ansible-inventory --host c001 --yaml | grep access_control
-    access_control: true
-  [root@]#
+  ansible-playbook /etc/ansible/management1.yml
 
-Not good. We need to change that.
+And wait...
 
-Open file group_vars/equipment_typeC/equipment_profile.yml and set access_control to false (line is juste commented).
-
-Now check again:
+If all goes well, you can check that all services are up and running:
 
 .. code-block:: bash
 
-  [root@]# ansible-inventory --host c001 --yaml | grep access_control
-    access_control: false
-  [root@]#
+  systemctl status httpd
+  systemctl status dhcpd
+  systemctl status named
 
-Same apply for all equipment_profile parameters. You define a global one in default, and then tune it for each equipment group.
+You can replay the same ansible-playbook command over and over, Ansible will just update/correct what is needed, and do nothing for all that is at an expected state.
 
-**IMPORTANT**: equipment_profile variable is not standard. It is **STRICTLY FORBIDDEN** to tune it outside default or an equipment group. For example you cannot createa custom group and define some equipment_profile parameters for this group. If you really need to do that, add more equipment groups and tune this way. If you do not respect this rule, unexpected behavior will happen during configuration apply.
+Now that management1 is up and running, it is time to deploy the other nodes.
 
-Authentication
-^^^^^^^^^^^^^^
+PXE
+===
 
-Authentication file allows to define default root password for all nodes, and default public ssh keys lists.
+Next step is to deploy the other nodes using PXE process.
 
-We need to ensure our management1 node ssh public key is set here.
+NOTE: it is assumed here you know how to have your other nodes / VM / servers / workstation to boot on LAN.
+If your device cannot boot on LAN, use provided iso or usb image provided on management1 in /var/lib/tftpboot. These images will start a LAN boot automatically.
 
-Get the content of /root/.ssh/id_ras.pub and add it in this file. At the same time, remove the ssh key provided here.
+bootset
+-------
 
-Review groups parameters
-------------------------
+Before booting remote nodes in PXE, we need to ask management1 to activate remote nodes deployment. If not, remote nodes will boot on disk, even when booting over LAN.
 
-Last step is to check and review example of equipment_profile tuning in each of the group_vars/equipment_XXXXXX folders. Adapt them to your needs.
+To manipulate nodes PXE boot, a command, bootset is available.
 
-If you prefer, you can copy the whole group_vars/all/default/equipment_profile.yml file into these folders, or simply adjust the parameters you wish to change from default.
+We are going to deploy login1 and c001, c002, c003 and c004.
 
-Once done, configuration is ready, we will check addons later.
+Let's use bootset to ask them to deploy OS at next PXE boot:
 
-It is time to deploy configuration on management1.
+.. code-block:: bash
+
+  bootset -n login1,c[001-004] -b osdeploy
+
+Note that this osdeploy state will be autoamtically updated once OS is deployed on remote nodes, and set to disk.
+
+You can also force nodes that boot on PXE to boot on disk using *-b disk* instead of *-b osdeploy*.
+
+Note also that if you update configuration on management1, it is recommanded to force the update of files when using bootset. To do so, add *-u true*.
+
+OS deployment
+-------------
+
+Power on now the remote nodes, have them boot over LAN, and follow the installation procedure. It should take around 15-20 minutes depeding of your hardware.
+
+Once done, proceed to next part.
+
+Apply other nodes configuration
+===============================
+
+Applying configuration on other nodes is simple.
+
+Ensure first you can ssh passwordless on each of the freshly deployed nodes.
+
+If yes, copy example playbooks: 
+
+.. code-block:: bash
+
+  cp -a /etc/ansible/resources/examples/playbooks/computes.yml /etc/ansible/playbooks/
+  cp -a /etc/ansible/resources/examples/playbooks/logins.yml /etc/ansible/playbooks/
+
+And execute them, using extra var target to target them:
+
+.. code-block:: bash
+
+  ansible-playbook /etc/ansible/logins.yml --extra-vars "target=login1"
+  ansible-playbook /etc/ansible/computes.yml --extra-vars "target=c001,c002,c003,c004"
+
+You can see that Ansible will work on computes nodes in parallel, using more CPU on the management1 node.
+
+Your cluster should now be fully deployed. It is time to use some ADDONs to add specific features to the cluster.
 

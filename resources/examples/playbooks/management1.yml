@@ -1,0 +1,30 @@
+---
+- name: management1
+  hosts: "management1"
+  roles:
+
+    - role: CORE_set_hostname
+      tags: CORE_set_hostname
+    - role: CORE_repositories_server
+      tags: CORE_repositories_server
+    - role: CORE_repositories_client
+      tags: CORE_repositories_client
+    - role: CORE_nic
+      tags: CORE_nic
+    - role: CORE_hosts_file
+      tags: CORE_hosts_file
+    - role: CORE_dhcp_server
+      tags: CORE_dhcp_server
+    - role: CORE_dns_server
+      tags: CORE_dns_server
+    - role: CORE_dns_client
+      tags: CORE_dns_client
+    - role: CORE_time_server
+      tags: CORE_time_server
+    - role: CORE_pxe_stack
+      tags: CORE_pxe_stack
+    - role: CORE_nfs_server
+      tags: CORE_nfs_server
+    - role: CORE_nfs_client
+      tags: CORE_nfs_client
+
