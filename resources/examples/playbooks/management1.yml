@@ -5,14 +5,16 @@
 
     - role: CORE_set_hostname
       tags: CORE_set_hostname
+    - role: CORE_nic
+      tags: CORE_nic
     - role: CORE_repositories_server
       tags: CORE_repositories_server
     - role: CORE_repositories_client
       tags: CORE_repositories_client
-    - role: CORE_nic
-      tags: CORE_nic
     - role: CORE_hosts_file
       tags: CORE_hosts_file
+    - role: CORE_ssh_master
+      tags: CORE_ssh_master
     - role: CORE_dhcp_server
       tags: CORE_dhcp_server
     - role: CORE_dns_server

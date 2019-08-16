@@ -6,7 +6,7 @@
     name: "{{item}}"
     state: present
   with_items:
-#    - NetworkManager-glib
+    - NetworkManager-libnm
 #    - libnm-qt-devel.x86_64 # Don't seems to be required, package not available in Centos 7.6 Everything
     - nm-connection-editor.x86_64
     - python3-libsemanage

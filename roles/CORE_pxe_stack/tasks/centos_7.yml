@@ -12,3 +12,9 @@
     - python36
     - python36-PyYAML
     - python36-clustershell
+
+- name: httpd cgi module
+  apache2_module:
+    state: present
+    name: cgi
+
