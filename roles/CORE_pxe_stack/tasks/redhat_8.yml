@@ -12,3 +12,9 @@
     - clustershell
     - python3-clustershell
     - policycoreutils
+
+- name: httpd cgi module
+  apache2_module:
+    state: present
+    name: cgid
+

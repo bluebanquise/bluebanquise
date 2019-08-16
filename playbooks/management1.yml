@@ -1,56 +1,32 @@
 ---
-- name: toto
+- name: management1
   hosts: "management1"
   roles:
-    - role: report
-      tags: report
 
-    - role: ssh_slave
-      tags: ssh_slave
-    - role: ssh_master
-      tags: ssh_master
+    - role: CORE_set_hostname
+      tags: CORE_set_hostname
+    - role: CORE_nic
+      tags: CORE_nic
+    - role: CORE_repositories_server
+      tags: CORE_repositories_server
+    - role: CORE_repositories_client
+      tags: CORE_repositories_client
+    - role: CORE_hosts_file
+      tags: CORE_hosts_file
+    - role: CORE_ssh_master
+      tags: CORE_ssh_master
+    - role: CORE_dhcp_server
+      tags: CORE_dhcp_server
+    - role: CORE_dns_server
+      tags: CORE_dns_server
+    - role: CORE_dns_client
+      tags: CORE_dns_client
+    - role: CORE_time_server
+      tags: CORE_time_server
+    - role: CORE_pxe_stack
+      tags: CORE_pxe_stack
+    - role: CORE_nfs_server
+      tags: CORE_nfs_server
+    - role: CORE_nfs_client
+      tags: CORE_nfs_client
 
-    - role: users_basic
-      tags: users_basic
-
-    - role: log_server
-      tags: log_server
-    - role: clustershell
-      tags: clustershell
-
-    - role: openldap_server
-      tags: openldap_server
-    - role: openldap_client
-      tags: openldap_client
-    - role: set_hostname
-      tags: set_hostname
-    - role: repositories_server
-      tags: repositories_server
-    - role: repositories_client
-      tags: repositories_client
-    - role: pxe_stack
-      tags: pxe_stack
-    - role: debug
-      tags: debug
-    - role: nic
-      tags: nic
-    - role: hosts_file
-      tags: hosts_file
-    - role: dhcp_server
-      tags: dhcp_server
-    - role: dns_server
-      tags: dns_server
-    - role: dns_client
-      tags: dns_client
-    - role: time_server
-      tags: time_server
-    - role: nfs_server
-      tags: nfs_server
-    - role: nfs_client
-      tags: nfs_client
-    - role: HPC_slurm
-      tags: HPC_slurm
-      vars:
-        slurm_profile: controler
-    - role: prometheus_server
-      tags: prometheus_server

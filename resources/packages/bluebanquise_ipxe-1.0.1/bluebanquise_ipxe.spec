@@ -27,6 +27,10 @@ git clone https://github.com/ipxe/ipxe.git ipxe/.
 cp bluebanquise_standard.ipxe ipxe/src/bluebanquise_standard.ipxe
 
 cd ipxe/src
+
+sed -i 's/#undef\	DOWNLOAD_PROTO_HTTPS/#define\	DOWNLOAD_PROTO_HTTPS/g' config/general.h
+sed -i 's/\/\/#define\	CONSOLE_FRAMEBUFFER/#define\  CONSOLE_FRAMEBUFFER/g' config/console.h
+
 mkdir -p $RPM_BUILD_ROOT/var/lib/tftpboot/
 #make -j 2 DEBUG=intel,dhcp
 
