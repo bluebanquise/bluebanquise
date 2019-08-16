@@ -139,10 +139,10 @@
     dest: /usr/bin/bootset
     mode: 0700 
 
-- name: httpd cgi module
-  apache2_module:
-    state: present
-    name: cgid
+#- name: httpd cgi module
+#  apache2_module:
+#    state: present
+#    name: cgid
 
 - name: cgi configuration file
   copy:
