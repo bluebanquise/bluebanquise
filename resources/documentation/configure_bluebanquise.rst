@@ -11,11 +11,7 @@ Install needed basic packages:
 
 .. code-block:: bash
 
-  yum install wget http createrepo git
-
-Once done, grab files from the web:
-
-TOBEDONE
+  yum install wget createrepo git
 
 Now, backup and clean your previous Ansible configuration:
 
@@ -30,6 +26,13 @@ And download **BlueBanquise** into Ansible directory:
 
   cd /etc/ansible
   git clone https://github.com/oxedions/bluebanquise.git .
+
+Finally, edit /etc/hosts file, and add "management1" on localhost line:
+
+.. code-block:: text
+
+  127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4 management1
+  ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
 
 It is time to configure the inventory to match cluster needs.
 
@@ -113,7 +116,7 @@ Now the BMC (if exist):
             bmc:                      # This instruction define an attached BMC
               name: bmanagement1      # This is the hostname of the BMC
               ip4: 10.10.100.1        # This is the ipv4 of the BMC
-              mac: 08:00:27:dc:f8:f6  # This is te MAC hardware address of the BMC (for DHCP)
+              mac: 08:00:27:dc:f8:f6  # This is the MAC hardware address of the BMC (for DHCP)
               network: ice1-1         # This is the logical network this interface is connected to. Logical networks will be seen later.
 
 Then the network interfaces and their associated networks:
@@ -144,7 +147,7 @@ It should not be too difficult to understand this file.
 Other nodes
 ^^^^^^^^^^^
 
-Now, review computes nodes and logins nodes in respectively files cluster/nodes/iceberg1/computes.yml and cluster/nodes/iceberg1/logins.yml. Sames rules apply. You can also add more nodes, or if you have for example multiple type of equipments for computes nodes or login nodes, add another equipment group this way:
+Now, review computes nodes and logins nodes in respectively files cluster/nodes/iceberg1/computes.yml and cluster/nodes/iceberg1/logins.yml. Same rules apply. You can also add more nodes, or if you have for example multiple type of equipments for computes nodes or login nodes, add another equipment group this way:
 
 .. code-block:: yaml
 
@@ -166,7 +169,7 @@ Now, review computes nodes and logins nodes in respectively files cluster/nodes/
 Register nodes into an iceberg
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-BlueBanquise have advanced features. We are not going to use them at this stage, but we still need to at least register our nodes into an *iceberg* to use them.
+**BlueBanquise** have advanced features. We are not going to use them at this stage, but we still need to at least register our nodes into an *iceberg* to use them.
 
 In this example, configuration is simple and based on a single iceberg, so all nodes will be registered into iceberg1.
 
@@ -259,7 +262,7 @@ Right now, only os and bluebanquise are set. This means two repositories will be
 NFS
 ^^^
 
-File group_vars/all/general_settings/nfs.yml allows to set NFS shared foldes inside the cluster. Comments in the file should be enough to understand this file.
+File group_vars/all/general_settings/nfs.yml allows to set NFS shared folders inside the cluster. Comments in the file should be enough to understand this file.
 
 General
 ^^^^^^^
@@ -291,7 +294,7 @@ For example, open file /etc/ansible/inventory/group_vars/all/default/equipment_p
   equipment_profile:
     access_control: true
 
-Ok, but so all nodes will herit this value. Let's check computes nodes, that are in equipment_typeC group. Let's check c001:
+Ok, but so all nodes will get this value. Let's check computes nodes, that are in equipment_typeC group. Let's check c001:
 
 .. code-block:: bash
 
@@ -301,7 +304,7 @@ Ok, but so all nodes will herit this value. Let's check computes nodes, that are
 
 Not good. We need to change that.
 
-Open file group_vars/equipment_typeC/equipment_profile.yml and set access_control to false (line is juste commented).
+Open file group_vars/equipment_typeC/equipment_profile.yml and set access_control to false (line is just commented).
 
 Now check again:
 
@@ -313,7 +316,7 @@ Now check again:
 
 Same apply for all equipment_profile parameters. You define a global one in default, and then tune it for each equipment group.
 
-**IMPORTANT**: equipment_profile variable is not standard. It is **STRICTLY FORBIDDEN** to tune it outside default or an equipment group. For example you cannot createa custom group and define some equipment_profile parameters for this group. If you really need to do that, add more equipment groups and tune this way. If you do not respect this rule, unexpected behavior will happen during configuration apply.
+**IMPORTANT**: equipment_profile variable is not standard. It is **STRICTLY FORBIDDEN** to tune it outside default or an equipment group. For example you cannot create a custom group and define some equipment_profile parameters for this group. If you really need to do that, add more equipment groups and tune this way. If you do not respect this rule, unexpected behavior will happen during configuration apply.
 
 Authentication
 ^^^^^^^^^^^^^^
@@ -334,4 +337,3 @@ If you prefer, you can copy the whole group_vars/all/default/equipment_profile.y
 Once done, configuration is ready, we will check addons later.
 
 It is time to deploy configuration on management1.
-
