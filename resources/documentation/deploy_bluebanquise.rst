@@ -18,6 +18,7 @@ Copy example playbook management1 to /etc/ansible/playbooks/:
 
 .. code-block:: bash
 
+  mkdir /etc/ansible/playbooks/
   cp -a /etc/ansible/resources/examples/playbooks/management1.yml /etc/ansible/playbooks/
 
 Then, we will ask Ansible to read this playbook, and execute all roles listed inside on management1 node (check hosts target at top of the file).
@@ -57,9 +58,23 @@ Apply management1 configuration
 
 Lets apply now the whole configuration on management1. It can takes some time depending of your CPU and your hard drive.
 
+We first ensure our NI are up, so the repositories part is working.
+
 .. code-block:: bash
 
-  ansible-playbook /etc/ansible/management1.yml
+  ansible-playbook /etc/ansible/playbooks/management1.yml --tags CORE_set_hostname,CORE_nic
+
+Then start your main interface manually. Here enp0s3:
+
+.. code-block:: bash
+
+  ifup enp0s3
+
+Once interface is up (check using ip a command), replay the whole playbook:
+
+.. code-block:: bash
+
+  ansible-playbook /etc/ansible/playbooks/management1.yml
 
 And wait...
 
@@ -118,7 +133,7 @@ Applying configuration on other nodes is simple.
 
 Ensure first you can ssh passwordless on each of the freshly deployed nodes.
 
-If yes, copy example playbooks: 
+If yes, copy example playbooks:
 
 .. code-block:: bash
 
@@ -135,4 +150,3 @@ And execute them, using extra var target to target them:
 You can see that Ansible will work on computes nodes in parallel, using more CPU on the management1 node.
 
 Your cluster should now be fully deployed. It is time to use some ADDONs to add specific features to the cluster.
-
