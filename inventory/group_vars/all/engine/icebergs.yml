@@ -1,18 +1,17 @@
 ### Icebergs dynamic variables
 
 ## Get host current iceberg
-current_iceberg: "{{ group_names | select('match','^'+iceberg_naming+'[0-9]+') | list | unique | sort | first | join}}"
-current_iceberg_number: "{{ current_iceberg | replace(iceberg_naming,' ') | trim }}"
+#j2_current_iceberg: "{% if icebergs_system == 'false' }{{iceberg_naming+'0'}}{% else %}{{ group_names | select('match','^'+iceberg_naming+'[0-9]+') | list | unique | sort | first | join}}{% endif %}"
+j2_current_iceberg: "(iceberg_naming+'0') if icebergs_system == 'false' else (group_names | select('match','^'+iceberg_naming+'[0-9]+') | list | unique | sort | first | join)"
+j2_current_iceberg_number: "{{ current_iceberg | replace(iceberg_naming,' ') | trim }}"
 
 ## Network related
-current_iceberg_network: "{{management_networks_naming + (current_iceberg_number|string)}}"
+j2_current_iceberg_network: "{{management_networks_naming + (current_iceberg_number|string)}}"
 
 ## General data
-icebergs_groups_list: "{{ groups | select('match','^'+iceberg_naming+'[0-9]+') | list }}"
-number_of_icebergs: "{{ groups | select('match','^'+iceberg_naming+'[0-9]+') | list | length }}"
+j2_icebergs_groups_list: "{{ groups | select('match','^'+iceberg_naming+'[0-9]+') | list }}"
+j2_number_of_icebergs: "{{ groups | select('match','^'+iceberg_naming+'[0-9]+') | list | length }}"
 
 ## Get management_hosts of under icebergs (if exist, else None)
-under_icebergs: "{% for lvl1, lvl1_args in icebergs_topology.items() %}{% if current_iceberg == lvl1 %}{{icebergs_topology[lvl1]}}{% else %}{% for lvl2, lvl2_args in lvl1_args.items() %}{% if current_iceberg == lvl2 %}{{icebergs_topology[lvl1][lvl2]}}{% endif %}{% endfor %}{% endif %}{% endfor %}"
-above_iceberg: "{% for lvl1, lvl1_args in icebergs_topology.items() %}{% if current_iceberg == lvl1 %}top{% else %}{% for lvl2, lvl2_args in lvl1_args.items() %}{% if current_iceberg == lvl2 %}{{lvl1}}{% endif %}{% endfor %}{% endif %}{% endfor %}"
-
-
+j2_under_icebergs: "{% for lvl1, lvl1_args in icebergs_topology.items() %}{% if current_iceberg == lvl1 %}{{icebergs_topology[lvl1]}}{% else %}{% for lvl2, lvl2_args in lvl1_args.items() %}{% if current_iceberg == lvl2 %}{{icebergs_topology[lvl1][lvl2]}}{% endif %}{% endfor %}{% endif %}{% endfor %}"
+j2_above_iceberg: "{% for lvl1, lvl1_args in icebergs_topology.items() %}{% if current_iceberg == lvl1 %}top{% else %}{% for lvl2, lvl2_args in lvl1_args.items() %}{% if current_iceberg == lvl2 %}{{lvl1}}{% endif %}{% endfor %}{% endif %}{% endfor %}"
