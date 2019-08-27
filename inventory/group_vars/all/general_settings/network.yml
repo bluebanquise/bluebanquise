@@ -9,8 +9,8 @@ dns_settings:
 
 ## DHCP
 dhcp_settings:
-  default_lease_time: 600
-  max_lease_time: 7200
+  default_lease_time: 600 # Cnnsider to increase once in production
+  max_lease_time: 7200 # Same
 
 global_network_settings:
 #  enable_global_network: True
