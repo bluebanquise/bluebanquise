@@ -1,5 +1,7 @@
 # Roadmap
 
+Current status: 1.0 alpha
+
 ## 1.0: Marauder
 * Stable
   * Centos 7.6 -> lvl 1, lvl 3, lvl 4
