@@ -96,10 +96,10 @@ Note also that to check if a list is empty, it is possible to check the list its
   the list is empty %}
   {% endif %}
 
-Dictionarry
+Dictionary
 ^^^^^^^^^^^
 
-A dictionarry is simply a pack of other variables, defined under it (some kind of variables tree):
+A dictionary is simply a pack of other variables, defined under it (some kind of variables tree):
 
 .. code-block:: yaml
 
@@ -111,7 +111,7 @@ A dictionarry is simply a pack of other variables, defined under it (some kind o
       - alice
       - henry
 
-In Jinja2, dictionarry can be access two ways:
+In Jinja2, dictionary can be access two ways:
 
 .. code-block:: text
 
@@ -136,6 +136,19 @@ Output will be:
   bob
 
 Jinja2 will be discussed later, do not worry about this point for now.
+
+j2 Variables
+^^^^^^^^^^^^
+
+These are **BlueBanquise** specific variables. All variables with name starting by **j2_** are j2 variables.
+
+These variables are all stored in group_vars/all/engine directory, and are used for the internal purpose of the stack.
+
+You can consider these variables as "functions" that takes as argument the current running host (or the host provided in hostvars if loaded using hostvars call).
+
+These variables are here to simplify templates writing, by removing ugly and redundant things from them, and provided a direct access to values.
+
+To clarify your mind, you can consider that these variables contains a simple value. In reality, they contains Jinja2 code as a string, that will be interpreted by Ansible, which is why these are more functions/API than pure variables.
 
 Inventory, roles, and playbooks
 -------------------------------

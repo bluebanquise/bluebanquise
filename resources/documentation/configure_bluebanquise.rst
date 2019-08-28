@@ -57,7 +57,7 @@ Copy example inventory as a base for our work. This example is based on the pict
 
 .. code-block:: bash
 
-  cp -a /etc/ansible/resources/examples/simple_cluster /etc/ansible/inventory
+  cp -a /etc/ansible/resources/examples/simple_cluster/* /etc/ansible/inventory
 
 Review nodes
 ------------
@@ -69,7 +69,7 @@ First, the nodes.
 Management node
 ^^^^^^^^^^^^^^^
 
-Open file cluster/nodes/iceberg1/managements.yml:
+Open file cluster/nodes/managements.yml:
 
 .. code-block:: yaml
 
@@ -147,7 +147,7 @@ It should not be too difficult to understand this file.
 Other nodes
 ^^^^^^^^^^^
 
-Now, review computes nodes and logins nodes in respectively files cluster/nodes/iceberg1/computes.yml and cluster/nodes/iceberg1/logins.yml. Same rules apply. You can also add more nodes, or if you have for example multiple type of equipments for computes nodes or login nodes, add another equipment group this way:
+Now, review computes nodes and logins nodes in respectively files cluster/nodes/computes.yml and cluster/nodes/logins.yml. Same rules apply. You can also add more nodes, or if you have for example multiple type of equipments for computes nodes or login nodes, add another equipment group this way:
 
 .. code-block:: yaml
 
@@ -165,24 +165,6 @@ Now, review computes nodes and logins nodes in respectively files cluster/nodes/
         hosts:
           c010:
           [...]
-
-Register nodes into an iceberg
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-**BlueBanquise** have advanced features. We are not going to use them at this stage, but we still need to at least register our nodes into an *iceberg* to use them.
-
-In this example, configuration is simple and based on a single iceberg, so all nodes will be registered into iceberg1.
-
-Get the full list of all nodes you configured, and edit file cluster/groups/iceberg1 to ensure they are all here. Note that you can use ranges of numbers using **:** symbol:
-
-.. code-block:: text
-
-  [iceberg1]
-  management1
-  login1
-  c[001:004]
-
-All of this means for Ansible: all these nodes are part of group iceberg1. If you plan to use multi-iceberg configuration later, you will need to manage these files. If not, you will only need to ensure your nodes are all registered in this single file.
 
 Now, let's have a look at the logical networks.
 
