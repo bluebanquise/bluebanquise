@@ -6,7 +6,7 @@
 {# SHARED NETWORKS GATHERING #}
 {% set sn = [] %}
 {% for network in networks %}
-{% if current_iceberg_network in network %}{# check if this network is part of the current iceberg #}
+{% if j2_current_iceberg_network in network %}{# check if this network is part of the current iceberg #}
 {% if networks[network]['shared_network'] is defined and not none %}
 {{ sn.append(networks[network]['shared_network']|string) }}
 {% endif %}
@@ -50,7 +50,7 @@ subnet {{networks[network]['subnet']}} netmask {{networks[network]['netmask']}} 
 ## NON SHARED NETWORKS SUBNETS
 
 {% for network in networks %}
-{% if current_iceberg_network in network %}
+{% if j2_current_iceberg_network in network %}
 {% if (networks[network]['shared_network'] is not defined or none) and (networks[network]['is_in_dhcp'] == true) %}
 
 subnet {{networks[network]['subnet']}} netmask {{networks[network]['netmask']}} {

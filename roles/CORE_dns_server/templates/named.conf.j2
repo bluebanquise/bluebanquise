@@ -8,13 +8,13 @@
 {{ ntw.append(network_interfaces[nic].network|string) }}
 {% endif %}
 {% endfor %}
-{% set ntw = (ntw | select('match',(current_iceberg_network+'-[0-9]+')) | list | unique | sort ) %}
+{% set ntw = (ntw | select('match',(j2_current_iceberg_network+'-[0-9]+')) | list | unique | sort ) %}
 {% set main_ntw = (ntw | first | join | trim) %}
 
 options {
   listen-on port 53 {
     127.0.0.1;
-{% for network in (networks | select('match',(current_iceberg_network+'-[0-9]+')) | list | unique | sort) %}
+{% for network in (networks | select('match',(j2_current_iceberg_network+'-[0-9]+')) | list | unique | sort) %}
 {% if networks[network]['is_in_dns'] is defined and networks[network]['is_in_dns'] == true %}
     {{networks[network]['services_ip']['dns_ip']}};
 {% endif %}
@@ -29,7 +29,7 @@ options {
 
   allow-query {
     localhost;
-{% for network in (networks | select('match',(current_iceberg_network+'-[0-9]+')) | list | unique | sort) %}
+{% for network in (networks | select('match',(j2_current_iceberg_network+'-[0-9]+')) | list | unique | sort) %}
 {% if (networks[network]['is_in_dns'] is defined and not none) and (networks[network]['is_in_dns'] == true) %}
     {{networks[network]['subnet']}}/{{networks[network]['prefix']}};
 {% endif %}

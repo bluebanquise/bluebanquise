@@ -6,7 +6,7 @@ auth_provider = ldap
 #access_provider = ldap
 access_provider = permit
 chpass_provider = ldap
-ldap_uri = ldap://{{networks[node_main_network]['services_ip']['authentication_ip']}}/
+ldap_uri = ldap://{{networks[j2_node_main_network]['services_ip']['authentication_ip']}}/
 ldap_search_base = {% for dc in domain_name.split('.') %}{% if not loop.first %},{% endif %}dc={{dc}}{% endfor %}
 
 ldap_tls_reqcert = never

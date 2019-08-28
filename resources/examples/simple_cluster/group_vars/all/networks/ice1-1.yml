@@ -6,9 +6,9 @@ networks:
     broadcast: 10.10.255.255
     dhcp_unknown_range: 10.10.254.1 10.10.254.254
     gateway: 10.10.0.1
-    is_in_dhcp: true
+    is_in_dhcp: true # Only considered for networks complying with iceX-Y
     is_in_dns: true
-    services_ip:
+    services_ip:     # You can spread services from here, even on external networks if routing
       pxe_ip: 10.10.0.1
       ntp_ip: 10.10.0.1
       dns_ip: 10.10.0.1
