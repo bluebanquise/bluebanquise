@@ -8,9 +8,13 @@
   * Prototype RHEL 8.0 -> lvl 1, lvl 3
   * Prototype Ubuntu 18.04 and OpenSuse Leap 15.1 -> lvl 1
   * Limited support of multi icebergs
-  * report role
+  * Report role
 
-## 1.1: Unreachable
+## 1.1: HyperDriver
+* Stable
+  * RHEL 8.0 -> lvl 1, lvl 3, lvl 4
+  * Report role
+  * Icerbergs system
 
-## 1.2: Turbo Knight
-
+* Prototype
+  * Accelerated mode
