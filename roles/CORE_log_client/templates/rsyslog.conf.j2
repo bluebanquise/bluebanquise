@@ -90,5 +90,5 @@ local7.*                                                /var/log/boot.log
 #$ActionQueueType LinkedList   # run asynchronously
 #$ActionResumeRetryCount -1    # infinite retries if host is down
 # remote host is: name/ip:port, e.g. 192.168.0.1:514, port optional
-*.* @@{{networks[node_main_network]['services_ip']['log_ip']}}:514
+*.* @@{{networks[j2_node_main_network]['services_ip']['log_ip']}}:514
 # ### end of the forwarding rule ###

@@ -1,17 +1,19 @@
-### Icebergs dynamic variables
+## Icebergs engine file
+# To comply with KISS, all iceberg variables must depend of j2_current_iceberg when possible
 
-## Get host current iceberg
-#j2_current_iceberg: "{% if icebergs_system == 'false' }{{iceberg_naming+'0'}}{% else %}{{ group_names | select('match','^'+iceberg_naming+'[0-9]+') | list | unique | sort | first | join}}{% endif %}"
-j2_current_iceberg: "(iceberg_naming+'0') if icebergs_system == 'false' else (group_names | select('match','^'+iceberg_naming+'[0-9]+') | list | unique | sort | first | join)"
-j2_current_iceberg_number: "{{ current_iceberg | replace(iceberg_naming,' ') | trim }}"
+# Get host current iceberg
+j2_current_iceberg: "{% if icebergs_system == false %}{{iceberg_naming+'1'}}{% else %}{{ group_names | select('match','^'+iceberg_naming+'[0-9]+') | list | unique | sort | first | join}}{% endif %}"
+#j2_current_iceberg: "(iceberg_naming+'0') if icebergs_system == 'false' else (group_names | select('match','^'+iceberg_naming+'[0-9]+') | list | unique | sort | first | join)"
+j2_current_iceberg_number: "{{ j2_current_iceberg | replace(iceberg_naming,' ') | trim }}"
 
-## Network related
-j2_current_iceberg_network: "{{management_networks_naming + (current_iceberg_number|string)}}"
+# Network related
+j2_current_iceberg_network: "{{management_networks_naming + (j2_current_iceberg_number|string)}}"
 
-## General data
+# General data
 j2_icebergs_groups_list: "{{ groups | select('match','^'+iceberg_naming+'[0-9]+') | list }}"
 j2_number_of_icebergs: "{{ groups | select('match','^'+iceberg_naming+'[0-9]+') | list | length }}"
 
-## Get management_hosts of under icebergs (if exist, else None)
-j2_under_icebergs: "{% for lvl1, lvl1_args in icebergs_topology.items() %}{% if current_iceberg == lvl1 %}{{icebergs_topology[lvl1]}}{% else %}{% for lvl2, lvl2_args in lvl1_args.items() %}{% if current_iceberg == lvl2 %}{{icebergs_topology[lvl1][lvl2]}}{% endif %}{% endfor %}{% endif %}{% endfor %}"
-j2_above_iceberg: "{% for lvl1, lvl1_args in icebergs_topology.items() %}{% if current_iceberg == lvl1 %}top{% else %}{% for lvl2, lvl2_args in lvl1_args.items() %}{% if current_iceberg == lvl2 %}{{lvl1}}{% endif %}{% endfor %}{% endif %}{% endfor %}"
+# Get management_hosts of under icebergs (if exist, else None)
+# Only 2 lvl right now, can easily expand to more
+j2_under_icebergs: "{% for lvl1, lvl1_args in icebergs_topology.items() %}{% if j2_current_iceberg == lvl1 %}{{icebergs_topology[lvl1]}}{% else %}{% for lvl2, lvl2_args in lvl1_args.items() %}{% if j2_current_iceberg == lvl2 %}{{icebergs_topology[lvl1][lvl2]}}{% endif %}{% endfor %}{% endif %}{% endfor %}"
+j2_above_iceberg: "{% for lvl1, lvl1_args in icebergs_topology.items() %}{% if j2_current_iceberg == lvl1 %}top{% else %}{% for lvl2, lvl2_args in lvl1_args.items() %}{% if j2_current_iceberg == lvl2 %}{{lvl1}}{% endif %}{% endfor %}{% endif %}{% endfor %}"

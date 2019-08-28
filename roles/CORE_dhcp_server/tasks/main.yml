@@ -34,7 +34,7 @@
     mode: 0644
   with_items: "{{networks}}"
   when:
-    - current_iceberg_network in item
+    - j2_current_iceberg_network in item
     - networks[item].is_in_dhcp == true
 #  notify: Restart dhcp_server services
   tags:

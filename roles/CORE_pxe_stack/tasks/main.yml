@@ -64,7 +64,7 @@
     src: "kickstart.cfg.j2"
     dest: /var/www/html/preboot_execution_environment/configurations/kickstart.{{item | replace('equipment_','') | trim}}.cfg
     mode: 0644
-  with_items: "{{equipment_groups_list}}"
+  with_items: "{{j2_equipment_groups_list}}"
   when:
     - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
     - (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) == 'centos' or (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) == 'redhat'
@@ -74,7 +74,7 @@
     src: "configuration_centos.ipxe.j2"
     dest: /var/www/html/preboot_execution_environment/ipxe_configurations/{{item | replace('equipment_','') | trim}}.ipxe
     mode: 0644
-  with_items: "{{equipment_groups_list}}"
+  with_items: "{{j2_equipment_groups_list}}"
   when:
     - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
     - (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) == 'centos' or (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) == 'redhat'
@@ -86,7 +86,7 @@
     src: "preseed.cfg.j2"
     dest: /var/www/html/preboot_execution_environment/configurations/preseed.{{item | replace('equipment_','') | trim}}.cfg
     mode: 0644
-  with_items: "{{equipment_groups_list}}"
+  with_items: "{{j2_equipment_groups_list}}"
   when:
     - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
     - (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) == 'ubuntu'
@@ -96,7 +96,7 @@
     src: "configuration_ubuntu.ipxe.j2"
     dest: /var/www/html/preboot_execution_environment/ipxe_configurations/{{item | replace('equipment_','') | trim}}.ipxe
     mode: 0644
-  with_items: "{{equipment_groups_list}}"
+  with_items: "{{j2_equipment_groups_list}}"
   when:
     - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
     - (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) == 'ubuntu'
@@ -108,7 +108,7 @@
     src: "autoyast.xml.j2"
     dest: /var/www/html/preboot_execution_environment/configurations/autoyast.{{item | replace('equipment_','') | trim}}.xml
     mode: 0644
-  with_items: "{{equipment_groups_list}}"
+  with_items: "{{j2_equipment_groups_list}}"
   when:
     - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
     - (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) == 'opensuse'
@@ -118,7 +118,7 @@
     src: "configuration_opensuse.ipxe.j2"
     dest: /var/www/html/preboot_execution_environment/ipxe_configurations/{{item | replace('equipment_','') | trim}}.ipxe
     mode: 0644
-  with_items: "{{equipment_groups_list}}"
+  with_items: "{{j2_equipment_groups_list}}"
   when:
     - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
     - (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) == 'opensuse'

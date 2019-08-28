@@ -1,3 +1,0 @@
-equipment_groups_list: "{{ groups | select('match','^'+equipment_naming+'_.*') | list | unique | sort }}"
-
-

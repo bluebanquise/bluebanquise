@@ -1,7 +1,0 @@
-authentication:
-  # Root password to be used on deployed hosts
-  root_password_sha512: $6$M3crarMVoUV3rALd$ZTre2CIyss7zOb4lkLoG23As9OAkYPw2BM88Y1F43n8CCyV5XWwAYEwBOrS8bcCBIMjIPdJG.ndOfzWyAVR4j0
-
-  # SSH public keys to be added as authorized keys on deployed/managed hosts
-  ssh_keys:
-    - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDC0up5nSQ1sZQO2W+pb3UrczB7i2V3/N+52EoM6uoB4B/MfFDzH8ALt9hH5z01zDG39NrdFhp0vuEbVcyzVfhCcStM5V/2pt6B+EC2jPBn0TeQMQZqTL/TAd8J9Pg2b9qDqLrhnL0u6LNjUpxW395WyzfhfTNqCV5OFnohh0eQVTbaExJ0QL59AzWn96BZ24lT+fQOGgj/g5WiibyycKtTeBpeJQ18h4JxCG631E9w/VgMK6G3MLGyhjmxZ1yuLPbQUw0I0zg3rcfzc/Rxn/fEsWMiArGOt49Ponm8qG/hrU08xfnbEVIz1n/PyxwHVkwVM0ZtemSbbxcdTCMdQcG1 root@localhost.localdomain 

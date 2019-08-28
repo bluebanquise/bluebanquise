@@ -1,0 +1,9 @@
+---
+- name: management1
+  hosts: "management1"
+  roles:
+
+#    - role: ADDON_prometheus_client
+#    - role: ADDON_prometheus_server
+#    - role: ADDON_report
+    - role: ADDON_slurm

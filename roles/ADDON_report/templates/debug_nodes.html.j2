@@ -10,10 +10,10 @@
 
 {# Check if node has a main network and a main network interface.
 Also check the main network exists and that all linked network exists #}
-{% if hostvars[host]['node_main_network'] is not defined or none %}
+{% if hostvars[host]['j2_node_main_network'] is not defined or none %}
   <br><div id="warning">WARNING</div>: host {{host}} doesn't have a main network. This may be on purpose.
 {% else %}
-  {% if hostvars[host]['node_main_network_interface'] is not defined or none %}
+  {% if hostvars[host]['j2_node_main_network_interface'] is not defined or none %}
   <br><div id="warning">WARNING</div>: host {{host}} doesn't have a main network interface. This may be on purpose.
   {% else %}
 

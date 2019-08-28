@@ -1,5 +1,0 @@
-# Warning, this value is direct access only, if needed in hostvars, please use the relative macro
-
-node_main_network: "{% set main_ntw = [] %}{% for nic in network_interfaces %}{% if network_interfaces[nic].network is defined and not none %}{{ main_ntw.append(network_interfaces[nic].network|string) }}{% endif %}{% endfor %}{{main_ntw | select('match',(current_iceberg_network+'-[0-9]+')) | list | unique | sort| first | join | trim}}"
-
-node_main_network_interface: "{% set main_ntw_nic = [] %}{% for nic in network_interfaces %}{% if network_interfaces[nic].network is defined and not none %}{% if network_interfaces[nic].network == node_main_network %}{{ main_ntw_nic.append(nic|string) }}{% endif %}{% endif %}{% endfor %}{{main_ntw_nic | unique | join | trim}}"
