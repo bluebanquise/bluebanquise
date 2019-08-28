@@ -1,7 +1,7 @@
 equipment_profile:
 
-  access_control: false
-  firewall: false
+  access_control: true
+  firewall: true
 
   console: #console=tty0 console=ttyS1,115200n8
   kernel_parameters: nomodeset

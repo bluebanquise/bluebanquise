@@ -3,7 +3,7 @@
 {% if hostvars[host]['network_interfaces'] is defined and not none %}{# This part are clone #}
 {% for interface, interface_vars in hostvars[host]['network_interfaces'].items() %}
 {% if interface_vars.ip4 is defined and not none and interface_vars.network is defined and not none %}
-{% if interface == hostvars[host]['node_main_network_interface'] %}
+{% if interface == hostvars[host]['j2_node_main_network_interface'] %}
 {{interface_vars.ip4}} {{host}} {{host}}.{{domain_name}} {{host}}-{{interface_vars.network}}
 {% else %}
 {{interface_vars.ip4}} {{host}}-{{interface_vars.network}}

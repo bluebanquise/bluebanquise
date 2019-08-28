@@ -10,16 +10,16 @@ $TTL 86400
   86400       ;Minimum TTL
 )
 @ IN NS {{inventory_hostname}}.{{domain_name}}.
-@ IN A {{network_interfaces[node_main_network_interface]['ip4']}}
+@ IN A {{network_interfaces[j2_node_main_network_interface]['ip4']}}
 
-{{inventory_hostname}} IN A {{network_interfaces[node_main_network_interface]['ip4']}}
+{{inventory_hostname}} IN A {{network_interfaces[j2_node_main_network_interface]['ip4']}}
 
 {% for host in groups['all'] %}
 {% if hostvars[host]['network_interfaces'] is defined and not none %}
 {% set host_network_interfaces = hostvars[host]['network_interfaces'] %}{# Buffer for better performances #}
 {% for interface, interface_vars in host_network_interfaces.items() %}
 {% if interface_vars.ip4 is defined and not none %}
-{% if (interface_vars.network is defined and not none) and (interface_vars.network == hostvars[host]['node_main_network']) %}
+{% if (interface_vars.network is defined and not none) and (interface_vars.network == hostvars[host]['j2_node_main_network']) %}
 {{host}} IN A {{interface_vars.ip4}}
 {{host}}-{{interface_vars.network}} IN A {{interface_vars.ip4}}
 {% elif interface_vars.network is defined and not none %}

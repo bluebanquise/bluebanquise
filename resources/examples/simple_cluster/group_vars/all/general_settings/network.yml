@@ -1,7 +1,7 @@
 ### Network related settings
 
 ## DNS
-domain_name: sphen.local
+domain_name: bluebanquise.local
 dns_settings:
   external_dns_servers:
     - 208.67.222.222
@@ -9,8 +9,8 @@ dns_settings:
 
 ## DHCP
 dhcp_settings:
-  default_lease_time: 600
-  max_lease_time: 7200
+  default_lease_time: 600 # Consider to increase once in production
+  max_lease_time: 7200 # Same
 
 global_network_settings:
 #  enable_global_network: True
