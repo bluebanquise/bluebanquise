@@ -1,11 +1,9 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
     <title>Deploy BlueBanquise &#8212; BlueBanquise_Documentation 1.0.0 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -17,7 +15,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Roles" href="roles.html" />
-    <link rel="prev" title="Deploy BlueBanquise" href="configure_bluebanquise.html" />
+    <link rel="prev" title="Configure BlueBanquise" href="configure_bluebanquise.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -44,7 +42,8 @@
 <h3>Get management1 playbook<a class="headerlink" href="#get-management1-playbook" title="Permalink to this headline">¶</a></h3>
 <p>We are going to use the provided default playbook. This playbook will install most of the CORE roles. Enough to deploy first stage of the cluster.</p>
 <p>Copy example playbook management1 to /etc/ansible/playbooks/:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cp -a /etc/ansible/resources/examples/playbooks/management1.yml /etc/ansible/playbooks/
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir /etc/ansible/playbooks/
+cp -a /etc/ansible/resources/examples/playbooks/management1.yml /etc/ansible/playbooks/
 </pre></div>
 </div>
 <p>Then, we will ask Ansible to read this playbook, and execute all roles listed inside on management1 node (check hosts target at top of the file).</p>
@@ -59,8 +58,8 @@
 <p>As you can notice, some tags are set inside the playbook, or even in some roles for specific tasks. The idea of tags is simple: you can tag a role/a task, and then when using ansible-playbook, only play related tags role/task. Or do the opposit: play all, and skip a role/task.</p>
 <p>To so, use with Ansible playbook:</p>
 <ul class="simple">
-<li><strong>–tags</strong> with tags listed with comma separator: mytag1,mytag2,mytag3</li>
-<li><strong>–skip-tags</strong> with same pattern</li>
+<li><p><strong>–tags</strong> with tags listed with comma separator: mytag1,mytag2,mytag3</p></li>
+<li><p><strong>–skip-tags</strong> with same pattern</p></li>
 </ul>
 <p>More can be found here on tags: <a class="reference external" href="https://docs.ansible.com/ansible/latest/user_guide/playbooks_tags.html">https://docs.ansible.com/ansible/latest/user_guide/playbooks_tags.html</a></p>
 </div>
@@ -69,14 +68,23 @@
 <p>Extra vars allows to pass variables with maximum precedence at execution time, for any purpose (debug, test, or simply need).</p>
 <p>To do so, use:</p>
 <ul class="simple">
-<li><strong>–extra-vars</strong> with ” ” and space separated variables: –extra-vars “myvar1=true myvar2=77 myvar3=hello”</li>
+<li><p><strong>–extra-vars</strong> with ” ” and space separated variables: –extra-vars “myvar1=true myvar2=77 myvar3=hello”</p></li>
 </ul>
 </div>
 </div>
 <div class="section" id="apply-management1-configuration">
 <h3>Apply management1 configuration<a class="headerlink" href="#apply-management1-configuration" title="Permalink to this headline">¶</a></h3>
 <p>Lets apply now the whole configuration on management1. It can takes some time depending of your CPU and your hard drive.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ansible-playbook /etc/ansible/management1.yml
+<p>We first ensure our NI are up, so the repositories part is working.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ansible-playbook /etc/ansible/playbooks/management1.yml --tags CORE_set_hostname,CORE_nic
+</pre></div>
+</div>
+<p>Then start your main interface manually. Here enp0s3:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ifup enp0s3
+</pre></div>
+</div>
+<p>Once interface is up (check using ip a command), replay the whole playbook:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ansible-playbook /etc/ansible/playbooks/management1.yml
 </pre></div>
 </div>
 <p>And wait…</p>
@@ -94,7 +102,10 @@ systemctl status named
 <h2>PXE<a class="headerlink" href="#pxe" title="Permalink to this headline">¶</a></h2>
 <p>Next step is to deploy the other nodes using PXE process.</p>
 <p>NOTE: it is assumed here you know how to have your other nodes / VM / servers / workstation to boot on LAN.
-If your device cannot boot on LAN, use provided iso or usb image provided on management1 in /var/lib/tftpboot. These images will start a LAN boot automatically.</p>
+If your device cannot boot on LAN, use iso or usb image provided on management1 in /var/lib/tftpboot. These images will start a LAN boot automatically.</p>
+<p>In <strong>BlueBanquise</strong>, PXE process has been made so that any kind of hardware able to boot PXE, USB or CDrom can start deployment.</p>
+<p>The following schema provides a macroscopic map of the process:</p>
+<img alt="_images/iPXE_process.svg" src="_images/iPXE_process.svg" /><p>Whatever the boot source, and whatever Legacy Bios or uEFI, all converge to <a class="reference external" href="http://nextserver/convergence.ipxe">http://nextserver/convergence.ipxe</a>. Then this file chain to node specific file in nodes (this file is generated using bootset command). The node specific file contains the default entry for the iPXE menu, and chain to menu.ipxe file. The menu file display a simple menu, and wait 10s for user before starting the default entry (which can be os deployment, or boot to disk).</p>
 <div class="section" id="bootset">
 <h3>bootset<a class="headerlink" href="#bootset" title="Permalink to this headline">¶</a></h3>
 <p>Before booting remote nodes in PXE, we need to ask management1 to activate remote nodes deployment. If not, remote nodes will boot on disk, even when booting over LAN.</p>
@@ -161,7 +172,7 @@ ansible-playbook /etc/ansible/computes.yml --extra-vars <span class="s2">&quot;t
 <li class="toctree-l1"><a class="reference internal" href="vocabulary.html">Vocabulary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="install_first_management.html">Install first management</a></li>
 <li class="toctree-l1"><a class="reference internal" href="learn_ansible.html">Learn Ansible</a></li>
-<li class="toctree-l1"><a class="reference internal" href="configure_bluebanquise.html">Deploy BlueBanquise</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configure_bluebanquise.html">Configure BlueBanquise</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Deploy BlueBanquise</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#management-configuration">Management configuration</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#get-management1-playbook">Get management1 playbook</a></li>
@@ -184,19 +195,17 @@ ansible-playbook /etc/ansible/computes.yml --extra-vars <span class="s2">&quot;t
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="configure_bluebanquise.html" title="previous chapter">Deploy BlueBanquise</a></li>
+      <li>Previous: <a href="configure_bluebanquise.html" title="previous chapter">Configure BlueBanquise</a></li>
       <li>Next: <a href="roles.html" title="next chapter">Roles</a></li>
   </ul></li>
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
@@ -217,7 +226,7 @@ ansible-playbook /etc/ansible/computes.yml --extra-vars <span class="s2">&quot;t
       &copy;2019, Oxedions.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

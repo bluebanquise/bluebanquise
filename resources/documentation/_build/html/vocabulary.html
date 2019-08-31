@@ -1,11 +1,9 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
     <title>Vocabulary &#8212; BlueBanquise_Documentation 1.0.0 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -50,8 +48,8 @@
 <p><strong>Groups</strong> allow Ansible to provide dedicated <strong>variables</strong> to related hosts or execute tasks on a set of hosts.</p>
 <p>Note: an host can be part of multiple groups.</p>
 </div>
-<div class="section" id="variable">
-<h3>Variable<a class="headerlink" href="#variable" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="variables">
+<h3>Variables<a class="headerlink" href="#variables" title="Permalink to this headline">¶</a></h3>
 <p>Variables in Ansible follow the YAML structure.</p>
 <p>A variable is like in any programming language: an variable name, and a data related.</p>
 <p>Multiple kind of variables exist in YAML:</p>
@@ -104,9 +102,9 @@ the list is empty %}
 </pre></div>
 </div>
 </div>
-<div class="section" id="dictionarry">
-<h4>Dictionarry<a class="headerlink" href="#dictionarry" title="Permalink to this headline">¶</a></h4>
-<p>A dictionarry is simply a pack of other variables, defined under it (some kind of variables tree):</p>
+<div class="section" id="dictionary">
+<h4>Dictionary<a class="headerlink" href="#dictionary" title="Permalink to this headline">¶</a></h4>
+<p>A dictionary is simply a pack of other variables, defined under it (some kind of variables tree):</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">my_dictionarry_1</span><span class="p">:</span>
   <span class="nt">my_variable_1</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">hello!</span>
   <span class="nt">my_variable_2</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">7777</span>
@@ -116,7 +114,7 @@ the list is empty %}
     <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">henry</span>
 </pre></div>
 </div>
-<p>In Jinja2, dictionarry can be access two ways:</p>
+<p>In Jinja2, dictionary can be access two ways:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>{% for i in my_dictionarry_1.my_names_list %}
 {{i}}
 {% endfor %}
@@ -137,6 +135,14 @@ bob
 </pre></div>
 </div>
 <p>Jinja2 will be discussed later, do not worry about this point for now.</p>
+</div>
+<div class="section" id="j2-variables">
+<h4>j2 Variables<a class="headerlink" href="#j2-variables" title="Permalink to this headline">¶</a></h4>
+<p>These are <strong>BlueBanquise</strong> specific variables. All variables with name starting by <strong>j2_</strong> are j2 variables.</p>
+<p>These variables are all stored in group_vars/all/engine directory, and are used for the internal purpose of the stack.</p>
+<p>You can consider these variables as “functions” that takes as argument the current running host (or the host provided in hostvars if loaded using hostvars call).</p>
+<p>These variables are here to simplify templates writing, by removing ugly and redundant things from them, and providing a direct access to values.</p>
+<p>To clarify your mind, you can consider that these variables contains a simple value. In reality, they contain Jinja2 code as a string, that will be interpreted by Ansible, which is why these are more functions/API than pure variables.</p>
 </div>
 </div>
 <div class="section" id="inventory-roles-and-playbooks">
@@ -170,10 +176,10 @@ bob
 <p>For example, values can be set by default, and then redefined for some groups of hosts without changing the default for all others. Or it is simply possible to fix a dynamic variable to the desired value in hosts definitions if dynamic value is not the one expected. Etc.</p>
 <p>Inventory can be seen as a giant pizza, in 3D then flatten.</p>
 <ul class="simple">
-<li><em>Paste</em> is the variable in /etc/ansible/inventory/group_vars/all</li>
-<li>Then <em>large ingredients</em> comes from /etc/ansible/inventory/group_vars/equipment_myequipment</li>
-<li>Then <em>small ingredients</em> above are the /etc/ansible/inventory/cluster/nodes/</li>
-<li>And <em>pepper and tomatoes</em> (last layer) is the extra-vars at call.</li>
+<li><p><em>Paste</em> is the variable in /etc/ansible/inventory/group_vars/all</p></li>
+<li><p>Then <em>large ingredients</em> comes from /etc/ansible/inventory/group_vars/equipment_myequipment</p></li>
+<li><p>Then <em>small ingredients</em> above are the /etc/ansible/inventory/cluster/nodes/</p></li>
+<li><p>And <em>pepper and tomatoes</em> (last layer) is the extra-vars at call.</p></li>
 </ul>
 <img alt="_images/pizza_example.svg" src="_images/pizza_example.svg" /></div>
 <div class="section" id="merge">
@@ -194,8 +200,8 @@ bob
 <h3>Icebergs<a class="headerlink" href="#icebergs" title="Permalink to this headline">¶</a></h3>
 <p>Icebergs are logical (and often physical) isolation of ethernet management networks. Most of the time, icebergs are use to:</p>
 <ul class="simple">
-<li>Spread load over multiple managements servers (for very large clusters). Icebergs are also often called “islands” in these cases.</li>
-<li>Secure cluster by dividing specific usages, to prevent compromised system to access all the network.</li>
+<li><p>Spread load over multiple managements servers (for very large clusters). Icebergs are also often called “islands” in these cases.</p></li>
+<li><p>Secure cluster by dividing specific usages, to prevent compromised system to access all the network.</p></li>
 </ul>
 <p>One Iceberg is composed of one or multiple managements servers, <strong>in charge of the same pool of nodes</strong>.</p>
 <p><strong>BlueBanquise</strong> support many kind of configurations, but most common are:</p>
@@ -247,7 +253,7 @@ bob
 <li class="toctree-l2"><a class="reference internal" href="#ansible-vocabulary">Ansible vocabulary</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#host">Host</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#group">Group</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#variable">Variable</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#variables">Variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#inventory-roles-and-playbooks">Inventory, roles, and playbooks</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#variables-precedence">Variables precedence</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#merge">Merge</a></li>
@@ -263,7 +269,7 @@ bob
 </li>
 <li class="toctree-l1"><a class="reference internal" href="install_first_management.html">Install first management</a></li>
 <li class="toctree-l1"><a class="reference internal" href="learn_ansible.html">Learn Ansible</a></li>
-<li class="toctree-l1"><a class="reference internal" href="configure_bluebanquise.html">Deploy BlueBanquise</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configure_bluebanquise.html">Configure BlueBanquise</a></li>
 <li class="toctree-l1"><a class="reference internal" href="deploy_bluebanquise.html">Deploy BlueBanquise</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roles.html">Roles</a></li>
 </ul>
@@ -278,13 +284,11 @@ bob
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
@@ -305,7 +309,7 @@ bob
       &copy;2019, Oxedions.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
