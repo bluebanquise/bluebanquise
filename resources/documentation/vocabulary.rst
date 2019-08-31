@@ -23,8 +23,8 @@ An Ansible **group** is a logical aggregation of hosts. For example, system admi
 
 Note: an host can be part of multiple groups.
 
-Variable
---------
+Variables
+---------
 
 Variables in Ansible follow the YAML structure.
 
@@ -146,9 +146,9 @@ These variables are all stored in group_vars/all/engine directory, and are used 
 
 You can consider these variables as "functions" that takes as argument the current running host (or the host provided in hostvars if loaded using hostvars call).
 
-These variables are here to simplify templates writing, by removing ugly and redundant things from them, and provided a direct access to values.
+These variables are here to simplify templates writing, by removing ugly and redundant things from them, and providing a direct access to values.
 
-To clarify your mind, you can consider that these variables contains a simple value. In reality, they contains Jinja2 code as a string, that will be interpreted by Ansible, which is why these are more functions/API than pure variables.
+To clarify your mind, you can consider that these variables contains a simple value. In reality, they contain Jinja2 code as a string, that will be interpreted by Ansible, which is why these are more functions/API than pure variables.
 
 Inventory, roles, and playbooks
 -------------------------------
