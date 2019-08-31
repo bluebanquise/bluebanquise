@@ -17,7 +17,7 @@ The following parameters are recommended:
 * >= 2 Gb RAM
 * >= 16Gb HDD
 
-And the following parameters are the stricti minimal if you whish to test the stack in VMs:
+And the following parameters are the strict minimal if you whish to test the stack in VMs:
 
 * >= 1 vCPU
 * >= 512 Mb RAM
@@ -25,7 +25,7 @@ And the following parameters are the stricti minimal if you whish to test the st
 
 In this last configuration, DVD iso will be mounted from /dev/cdrom instead of being copied to save space.
 
-It is recommanded to only choose minimal install during packages selections. Also, it is recommanded to let system in English, and only set your keyboard and time zone to your contry.
+It is recommended to only choose minimal install during packages selections. Also, it is recommended to let system in English, and only set your keyboard and time zone to your country.
 
 Prepare for Ansible
 ===================
@@ -42,17 +42,20 @@ Once system is installed and rebooted, login, and disable firewall. Current stac
 
 Then prepare repositories.
 
+OS
+^^
+
 Download Centos 7.6 Everything DVD iso from http://isoredirect.centos.org/centos/7/isos/x86_64/ . Iso name is CentOS-7-x86_64-Everything-1810.iso.
 
 **If on standard system:**
 
-Mount iso and copy content to web server directory:
+Mount iso and copy content to web server directory: (replace centos/7.6 by redhat/8.0 for RHEL 8.0)
 
 .. code-block:: bash
 
   mkdir -p /var/www/html/repositories/centos/7.6/x86_64/os/
   mount CentOS-7-x86_64-Everything-1810.iso /mnt
-  cp -a /mnt/* /var/www/html/repositories/centos/5.6/x86_64/os/
+  cp -a /mnt/* /var/www/html/repositories/centos/7.6/x86_64/os/
   umount /mnt
   restorecon -Rv /var/www/html/repositories/centos/7.6/x86_64/os
 
@@ -65,7 +68,11 @@ Simply mount iso from /dev/cdrom to save space:
   mkdir -p /var/www/html/repositories/centos/7.6/x86_64/os/
   mount /dev/cdrom /var/www/html/repositories/centos/7.6/x86_64/os/
 
-Now, create first repository manually. Create file */etc/yum.repos.d/os.repo* with the following content:
+Now, create first repository manually.
+
+**Centos/RHEL 7:**
+
+Create file */etc/yum.repos.d/os.repo* with the following content:
 
 .. code-block:: text
 
@@ -75,7 +82,29 @@ Now, create first repository manually. Create file */etc/yum.repos.d/os.repo* wi
   gpgcheck=0
   enabled=1
 
-And ensure rpeository is available:
+**RHEL 8:**
+
+Create file */etc/yum.repos.d/BaseOS.repo* with the following content:
+
+.. code-block:: text
+
+  [BaseOS]
+  name=BaseOS
+  baseurl=file:///var/www/html/repositories/redhat/8.0/x86_64/os/BaseOS
+  gpgcheck=0
+  enabled=1
+
+Then create file */etc/yum.repos.d/AppStream.repo* with the following content:
+
+.. code-block:: text
+
+  [AppStream]
+  name=AppStream
+  baseurl=file:///var/www/html/repositories/redhat/8.0/x86_64/os/AppStream
+  gpgcheck=0
+  enabled=1
+
+And ensure repository is available:
 
 .. code-block:: bash
 
@@ -92,6 +121,29 @@ Repositories structure follows a specific pattern:
                                     |     |   |      |
                                     v     v   v      v
        /var/www/html/repositories/centos/7.6/x86_64/os
+
+BlueBanquise
+^^^^^^^^^^^^
+
+Copy content of bluebanquise_repository_el7_1.0.0.iso into desired folder:
+
+.. code-block:: bash
+
+  mkdir -p /var/www/html/repositories/centos/7.6/x86_64/bluebanquise/
+  mount bluebanquise_repository_el7_1.0.0.iso /mnt
+  cp -a /mnt/* /var/www/html/repositories/centos/5.6/x86_64/bluebanquise/
+  umount /mnt
+  restorecon -Rv /var/www/html/repositories/centos/7.6/x86_64/bluebanquise
+
+And create file */etc/yum.repos.d/bluebanquise.repo* with the following content:
+
+.. code-block:: text
+
+  [bluebanquise]
+  name=bluebanquise
+  baseurl=file:///var/www/html/repositories/centos/7.6/x86_64/bluebanquise/
+  gpgcheck=0
+  enabled=1
 
 Install Ansible
 ---------------

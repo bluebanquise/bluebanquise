@@ -1,11 +1,9 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
     <title>Install first management &#8212; BlueBanquise_Documentation 1.0.0 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -43,18 +41,18 @@
 <p>Install Centos 7.6 using parameters you need.</p>
 <p>The following parameters are recommended:</p>
 <ul class="simple">
-<li>&gt;= 2 CPU/vCPU</li>
-<li>&gt;= 2 Gb RAM</li>
-<li>&gt;= 16Gb HDD</li>
+<li><p>&gt;= 2 CPU/vCPU</p></li>
+<li><p>&gt;= 2 Gb RAM</p></li>
+<li><p>&gt;= 16Gb HDD</p></li>
 </ul>
-<p>And the following parameters are the stricti minimal if you whish to test the stack in VMs:</p>
+<p>And the following parameters are the strict minimal if you whish to test the stack in VMs:</p>
 <ul class="simple">
-<li>&gt;= 1 vCPU</li>
-<li>&gt;= 512 Mb RAM</li>
-<li>&gt;= 6Gb HDD</li>
+<li><p>&gt;= 1 vCPU</p></li>
+<li><p>&gt;= 512 Mb RAM</p></li>
+<li><p>&gt;= 6Gb HDD</p></li>
 </ul>
 <p>In this last configuration, DVD iso will be mounted from /dev/cdrom instead of being copied to save space.</p>
-<p>It is recommanded to only choose minimal install during packages selections. Also, it is recommanded to let system in English, and only set your keyboard and time zone to your contry.</p>
+<p>It is recommended to only choose minimal install during packages selections. Also, it is recommended to let system in English, and only set your keyboard and time zone to your country.</p>
 </div>
 <div class="section" id="prepare-for-ansible">
 <h2>Prepare for Ansible<a class="headerlink" href="#prepare-for-ansible" title="Permalink to this headline">¶</a></h2>
@@ -66,12 +64,14 @@ systemctl disable firewalld
 </pre></div>
 </div>
 <p>Then prepare repositories.</p>
+<div class="section" id="os">
+<h4>OS<a class="headerlink" href="#os" title="Permalink to this headline">¶</a></h4>
 <p>Download Centos 7.6 Everything DVD iso from <a class="reference external" href="http://isoredirect.centos.org/centos/7/isos/x86_64/">http://isoredirect.centos.org/centos/7/isos/x86_64/</a> . Iso name is CentOS-7-x86_64-Everything-1810.iso.</p>
 <p><strong>If on standard system:</strong></p>
-<p>Mount iso and copy content to web server directory:</p>
+<p>Mount iso and copy content to web server directory: (replace centos/7.6 by redhat/8.0 for RHEL 8.0)</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir -p /var/www/html/repositories/centos/7.6/x86_64/os/
 mount CentOS-7-x86_64-Everything-1810.iso /mnt
-cp -a /mnt/* /var/www/html/repositories/centos/5.6/x86_64/os/
+cp -a /mnt/* /var/www/html/repositories/centos/7.6/x86_64/os/
 umount /mnt
 restorecon -Rv /var/www/html/repositories/centos/7.6/x86_64/os
 </pre></div>
@@ -82,7 +82,9 @@ restorecon -Rv /var/www/html/repositories/centos/7.6/x86_64/os
 mount /dev/cdrom /var/www/html/repositories/centos/7.6/x86_64/os/
 </pre></div>
 </div>
-<p>Now, create first repository manually. Create file <em>/etc/yum.repos.d/os.repo</em> with the following content:</p>
+<p>Now, create first repository manually.</p>
+<p><strong>Centos/RHEL 7:</strong></p>
+<p>Create file <em>/etc/yum.repos.d/os.repo</em> with the following content:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[os]
 name=os
 baseurl=file:///var/www/html/repositories/centos/7.6/x86_64/os/
@@ -90,7 +92,24 @@ gpgcheck=0
 enabled=1
 </pre></div>
 </div>
-<p>And ensure rpeository is available:</p>
+<p><strong>RHEL 8:</strong></p>
+<p>Create file <em>/etc/yum.repos.d/BaseOS.repo</em> with the following content:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[BaseOS]
+name=BaseOS
+baseurl=file:///var/www/html/repositories/redhat/8.0/x86_64/os/BaseOS
+gpgcheck=0
+enabled=1
+</pre></div>
+</div>
+<p>Then create file <em>/etc/yum.repos.d/AppStream.repo</em> with the following content:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[AppStream]
+name=AppStream
+baseurl=file:///var/www/html/repositories/redhat/8.0/x86_64/os/AppStream
+gpgcheck=0
+enabled=1
+</pre></div>
+</div>
+<p>And ensure repository is available:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>yum repolist
 </pre></div>
 </div>
@@ -103,6 +122,26 @@ enabled=1
                              v     v   v      v
 /var/www/html/repositories/centos/7.6/x86_64/os
 </pre></div>
+</div>
+</div>
+<div class="section" id="bluebanquise">
+<h4>BlueBanquise<a class="headerlink" href="#bluebanquise" title="Permalink to this headline">¶</a></h4>
+<p>Copy content of bluebanquise_repository_el7_1.0.0.iso into desired folder:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir -p /var/www/html/repositories/centos/7.6/x86_64/bluebanquise/
+mount bluebanquise_repository_el7_1.0.0.iso /mnt
+cp -a /mnt/* /var/www/html/repositories/centos/5.6/x86_64/bluebanquise/
+umount /mnt
+restorecon -Rv /var/www/html/repositories/centos/7.6/x86_64/bluebanquise
+</pre></div>
+</div>
+<p>And create file <em>/etc/yum.repos.d/bluebanquise.repo</em> with the following content:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[bluebanquise]
+name=bluebanquise
+baseurl=file:///var/www/html/repositories/centos/7.6/x86_64/bluebanquise/
+gpgcheck=0
+enabled=1
+</pre></div>
+</div>
 </div>
 </div>
 <div class="section" id="install-ansible">
@@ -157,7 +196,7 @@ enabled=1
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="learn_ansible.html">Learn Ansible</a></li>
-<li class="toctree-l1"><a class="reference internal" href="configure_bluebanquise.html">Deploy BlueBanquise</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configure_bluebanquise.html">Configure BlueBanquise</a></li>
 <li class="toctree-l1"><a class="reference internal" href="deploy_bluebanquise.html">Deploy BlueBanquise</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roles.html">Roles</a></li>
 </ul>
@@ -172,13 +211,11 @@ enabled=1
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
@@ -199,7 +236,7 @@ enabled=1
       &copy;2019, Oxedions.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

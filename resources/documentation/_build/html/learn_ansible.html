@@ -1,11 +1,9 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
     <title>Learn Ansible &#8212; BlueBanquise_Documentation 1.0.0 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +14,7 @@
     <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Deploy BlueBanquise" href="configure_bluebanquise.html" />
+    <link rel="next" title="Configure BlueBanquise" href="configure_bluebanquise.html" />
     <link rel="prev" title="Install first management" href="install_first_management.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -170,9 +168,9 @@ More will be seen later in this documentation.</p>
 <p>This command is used to launch playbooks, and ask Ansible to execute tasks on desired host(s). This is the most used command when using <strong>BlueBanquise</strong>.</p>
 <p>Important parameters are:</p>
 <ul class="simple">
-<li>-e or –extra-vars, which allows to provide additional variables for execution (keep in mind that variables set here win the whole precedence)</li>
-<li>-t or –tags, which allows to execute only specific tasks or part of tasks (seen later)</li>
-<li>-s or –skip-tags, which allows to not execute some specific tasks or part of tasks (seen later)</li>
+<li><p>-e or –extra-vars, which allows to provide additional variables for execution (keep in mind that variables set here win the whole precedence)</p></li>
+<li><p>-t or –tags, which allows to execute only specific tasks or part of tasks (seen later)</p></li>
+<li><p>-s or –skip-tags, which allows to not execute some specific tasks or part of tasks (seen later)</p></li>
 </ul>
 </div>
 <div class="section" id="debug">
@@ -486,9 +484,9 @@ mkdir /etc/ansible/roles/shipyard/templates
 </div>
 <p>Content is pretty simple:</p>
 <ul class="simple">
-<li>Ansible installs httpd package (or do nothing if present)</li>
-<li>Then Ansible render the template index.html.j2 and write the result in /var/www/html/index.html</li>
-<li>Then Ansible ensure httpd service is started and enabled at boot</li>
+<li><p>Ansible installs httpd package (or do nothing if present)</p></li>
+<li><p>Then Ansible render the template index.html.j2 and write the result in /var/www/html/index.html</p></li>
+<li><p>Then Ansible ensure httpd service is started and enabled at boot</p></li>
 </ul>
 <p>You can find all Ansible modules here in the official documentation: <a class="reference external" href="https://docs.ansible.com/ansible/latest/modules/modules_by_category.html">https://docs.ansible.com/ansible/latest/modules/modules_by_category.html</a></p>
 </div>
@@ -566,17 +564,17 @@ mkdir /etc/ansible/roles/shipyard/templates
 <img alt="_images/capture_index_2.png" src="_images/capture_index_2.png" />
 <p>You can see multiple things:</p>
 <ul class="simple">
-<li>We executed the task on management1, so inventory_hostname variable content is ‘management1’. This is an Ansible reserved variable that contains the target hostname.</li>
-<li>groups[‘mygroup’] allows to get a list with all the hosts member of the group.</li>
-<li>hostvars[‘myhost’] allows to access variables of this host, using the variable precedence mechanism.</li>
-<li>hostvars[inventory_hostname] is equivalent to a direct variables access has we are accessing our current target variables.</li>
+<li><p>We executed the task on management1, so inventory_hostname variable content is ‘management1’. This is an Ansible reserved variable that contains the target hostname.</p></li>
+<li><p>groups[‘mygroup’] allows to get a list with all the hosts member of the group.</p></li>
+<li><p>hostvars[‘myhost’] allows to access variables of this host, using the variable precedence mechanism.</p></li>
+<li><p>hostvars[inventory_hostname] is equivalent to a direct variables access has we are accessing our current target variables.</p></li>
 </ul>
 <p>Now regarding to Jinja2:</p>
 <ul class="simple">
-<li>{{ }} allows to insert a variable in the destination file.</li>
-<li>{% %} are Jinja2 instructions (for, if, etc).</li>
-<li>{# #} are Jinja2 commentaries.</li>
-<li>The reamining is put in the destination file “as is”.</li>
+<li><p>{{ }} allows to insert a variable in the destination file.</p></li>
+<li><p>{% %} are Jinja2 instructions (for, if, etc).</p></li>
+<li><p>{# #} are Jinja2 commentaries.</p></li>
+<li><p>The reamining is put in the destination file “as is”.</p></li>
 </ul>
 <p>You can experiment with this template to understand the whole mechanism. The whole Jinja2 documentation can be found here: <a class="reference external" href="https://jinja.palletsprojects.com/en/2.10.x/templates/">https://jinja.palletsprojects.com/en/2.10.x/templates/</a></p>
 <p>You should now understand the very basis of Ansible.
@@ -635,7 +633,7 @@ If you feel something is missing in this quick Ansible training, please do not h
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="configure_bluebanquise.html">Deploy BlueBanquise</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configure_bluebanquise.html">Configure BlueBanquise</a></li>
 <li class="toctree-l1"><a class="reference internal" href="deploy_bluebanquise.html">Deploy BlueBanquise</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roles.html">Roles</a></li>
 </ul>
@@ -645,18 +643,16 @@ If you feel something is missing in this quick Ansible training, please do not h
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="install_first_management.html" title="previous chapter">Install first management</a></li>
-      <li>Next: <a href="configure_bluebanquise.html" title="next chapter">Deploy BlueBanquise</a></li>
+      <li>Next: <a href="configure_bluebanquise.html" title="next chapter">Configure BlueBanquise</a></li>
   </ul></li>
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
@@ -677,7 +673,7 @@ If you feel something is missing in this quick Ansible training, please do not h
       &copy;2019, Oxedions.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

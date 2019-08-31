@@ -96,7 +96,15 @@ PXE
 Next step is to deploy the other nodes using PXE process.
 
 NOTE: it is assumed here you know how to have your other nodes / VM / servers / workstation to boot on LAN.
-If your device cannot boot on LAN, use provided iso or usb image provided on management1 in /var/lib/tftpboot. These images will start a LAN boot automatically.
+If your device cannot boot on LAN, use iso or usb image provided on management1 in /var/lib/tftpboot. These images will start a LAN boot automatically.
+
+In **BlueBanquise**, PXE process has been made so that any kind of hardware able to boot PXE, USB or CDrom can start deployment.
+
+The following schema provides a macroscopic map of the process:
+
+.. image:: images/iPXE_process.svg
+
+Whatever the boot source, and whatever Legacy Bios or uEFI, all converge to http://nextserver/convergence.ipxe. Then this file chain to node specific file in nodes (this file is generated using bootset command). The node specific file contains the default entry for the iPXE menu, and chain to menu.ipxe file. The menu file display a simple menu, and wait 10s for user before starting the default entry (which can be os deployment, or boot to disk).
 
 bootset
 -------
