@@ -20,6 +20,7 @@ https://www.vrt.com.au/downloads/vrt-network-equipment
    configure_bluebanquise
    deploy_bluebanquise
    roles
+   references
 
 Indices and tables
 ==================
