@@ -4,7 +4,7 @@ Release:  1%{?dist}
 Version:  1.0.2
 License:  GPL
 Group:    System Environment/Base
-Source:   https://github.com/oxedions/blue-banquise/bluebanquise_ipxe-1.0.1.tar.gz
+Source:   https://github.com/oxedions/blue-banquise/bluebanquise_ipxe-1.0.2.tar.gz
 URL:      https://github.com/ipxe/ipxe
 Packager: Oxedions <oxedions@gmail.com>
 
