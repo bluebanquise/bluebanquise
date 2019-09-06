@@ -13,3 +13,14 @@
 #    - ansible_distribution_version == "18.04"
 #    - (ansible_distribution|lower) == "ubuntu"
 
+- name: Solve possible issue (unmanaged)
+  file:
+    path: /etc/NetworkManager/conf.d/10-globally-managed-devices.conf
+    state: touch
+
+- name: Start services
+  service:
+    name: network-manager
+    state: started
+    enabled: yes
+

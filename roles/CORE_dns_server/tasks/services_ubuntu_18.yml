@@ -1,0 +1,5 @@
+- name: Start services
+  service:
+    name: bind9
+    state: started
+    enabled: yes
