@@ -1,0 +1,7 @@
+## Tested on Centos 7.6
+
+- name: Package
+  package:
+    name: isc-dhcp-server
+    state: present
+

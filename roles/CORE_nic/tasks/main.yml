@@ -36,6 +36,7 @@
 #    ifname: "{{network_connections[item].ifname}}"
     ip4: "{{network_interfaces[item].ip4}}/{{networks[network_interfaces[item].network].prefix}}"
     state: present
+    autoconnect: yes
   with_items: "{{network_interfaces}}"
 
 - name: ansible bug fix for static ip

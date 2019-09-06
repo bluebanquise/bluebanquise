@@ -1,0 +1,6 @@
+- name: Start services
+  service:
+    name: dhcpd
+    state: started
+    enabled: yes
+
