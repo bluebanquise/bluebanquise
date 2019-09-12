@@ -16,11 +16,12 @@ See main documentation about this role.
 To be done
 ^^^^^^^^^^
 
-Full EFI support is missing (how to boot on disk via PXE ?)
+- Issue when deploying ubuntu 18.04. Very long hang after packages check. Install continue after like 10 minutes of hang. Not blocking but boring...
 
 Changelog
 ^^^^^^^^^
 
+* 1.0.2: Add Ubuntu 18.04 compatibility. johnnykeats <johnny.keats@outlook.com>
 * 1.0.1: Documentation. johnnykeats <johnny.keats@outlook.com>
 * 1.0.0: Role creation. oxedions <oxedions@gmail.com>
  

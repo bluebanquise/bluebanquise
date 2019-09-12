@@ -1,0 +1,22 @@
+role_version: 1.0.2
+packages_to_install:
+  ubuntu:
+    _18:
+      - isc-dhcp-server
+  redhat:
+    _8:
+      - dhcp-server
+  centos:
+    _7:
+      - dhcp
+services_to_start:
+  ubuntu:
+    _18:
+      - isc-dhcp-server
+  redhat:
+    _8:
+      - dhcpd
+  centos:
+    _7:
+      - dhcpd
+
