@@ -1,0 +1,25 @@
+role_version: 1.0.2
+
+packages_to_install:
+  ubuntu:
+    _18:
+      - nfs-kernel-server
+  centos:
+    _7:
+      - nfs-utils 
+  redhat:
+    _8:
+      - nfs-utils
+services_to_start:
+  ubuntu:
+    _18:
+      - nfs-kernel-server
+  centos:
+    _7:
+      - nfs-server
+      - rpcbind
+  redhat:
+    _8:
+      - nfs-server
+      - rpcbind
+

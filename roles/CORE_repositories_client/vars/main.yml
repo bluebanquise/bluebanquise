@@ -1,0 +1,4 @@
+role_version: 1.0.2
+
+ubuntu_versions:
+  _18: bionic
