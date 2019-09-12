@@ -22,7 +22,7 @@ BlueBanquise is part of the **Algoric** Project from the [**Fabrique du Loch**](
 
 ![BlueBanquise Logo](resources/pictures/FabriqueDuLochAlgoric_logo_large.svg)
 
-BlueBanquise is a revamping of the old stack Banquise, based on Salt.
+BlueBanquise is a revamping of the old stack [Banquise](https://github.com/oxedions/banquise), based on Salt.
 
 ## Thanks
 
