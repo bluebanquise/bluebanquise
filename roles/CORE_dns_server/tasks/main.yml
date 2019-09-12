@@ -1,7 +1,16 @@
 ---
 
-- name: Use OS dedicated task
-  include_tasks: "packages_{{(ansible_distribution|lower|replace(' ','_'))}}_{{ansible_distribution_major_version}}.yml"
+- name: Package
+  package:
+    name: "{{item}}"
+    state: present
+  loop: "{{packages_to_install[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
+
+- name: Create needed directory >> /var/named
+  file:
+   path: /var/named
+   state: directory
+   mode: 0755
 
 - name: Template >> /etc/named.conf
   template:
@@ -35,13 +44,12 @@
 #  notify: Restart dns_server services
   tags:
     - templates
-    - toto
 
-- name: Use OS dedicated task
-  include_tasks: "services_{{(ansible_distribution|lower|replace(' ','_'))}}_{{ansible_distribution_major_version}}.yml"
+- name: Start services
+  service:
+    name: "{{item}}"
+    state: started
+    enabled: yes
+  loop: "{{services_to_start[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
 
-  #- name: Start services
-  #service:
-  #  name: named
-  #  state: started
-  #  enabled: yes
+

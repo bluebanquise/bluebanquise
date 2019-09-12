@@ -1,34 +1,16 @@
 ---
 
-- name: Import packages OS dedicated task
-  include_tasks: "{{(ansible_distribution|lower)}}_{{ansible_distribution_major_version}}.yml"
+- name: Package
+  package:
+    name: "{{item}}"
+    state: present
+  loop: "{{packages_to_install[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
 
-#- name: Install required packages for Centos
-#  package:
-#    name: "{{item}}"
-#    state: present
-#  with_items:
-#    - NetworkManager-glib
-##    - libnm-qt-devel.x86_64 # Don't seems to be required, package not available in Centos 7.6 Everything
-#    - nm-connection-editor.x86_64
-#    - libsemanage-python
-#    - policycoreutils-python
-#  when:
-#    - ansible_distribution_major_version == "7"
-#    - ansible_os_family == "RedHat"
+#- name: Import packages OS dedicated task
+#  include_tasks: "{{(ansible_distribution|lower)}}_{{ansible_distribution_major_version}}.yml"
 
-#- name: Install required packages for Ubuntu
-#  package:
-#    name: "{{item}}"
-#    state: present
-#  with_items:
-#    - network-manager
-#    - python-dbus
-#    - libnm-glib-dev
-#  when:
-#    - ansible_distribution_version == "18.04"
-#    - (ansible_distribution|lower) == "ubuntu"
-
+# Note from JK
+# We could add so much more features here, like VLAN, LACP, MTU, etc. Easy to add.
 - name: Set NIC configuration
   nmcli:
     conn_name: "{{item}}"
@@ -39,7 +21,7 @@
     autoconnect: yes
   with_items: "{{network_interfaces}}"
 
-- name: ansible bug fix for static ip
+- name: Bug fix for static ip (RedHat/Centos only)
   replace:
      path: "/etc/sysconfig/network-scripts/ifcfg-{{item}}"
      regexp: 'BOOTPROTO=dhcp'
@@ -49,4 +31,20 @@
   when:
     - ansible_distribution_major_version == "7"
     - ansible_os_family == "RedHat"
+
+- name: Solve possible unmanaged (Ubuntu only)
+  file:
+    path: /etc/NetworkManager/conf.d/10-globally-managed-devices.conf
+    state: touch
+  when:
+    - ansible_distribution_major_version == "18"
+    - ansible_os_family == "Ubuntu"
+
+- name: Start services
+  service:
+    name: "{{item}}"
+    state: restarted
+    enabled: yes
+  loop: "{{services_to_start[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
+
 

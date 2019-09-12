@@ -1,7 +1,10 @@
 ---
 
-- name: Use OS dedicated task
-  include_tasks: "packages_{{(ansible_distribution|lower|replace(' ','_'))}}_{{ansible_distribution_major_version}}.yml"
+- name: Package
+  package:
+    name: "{{item}}"
+    state: present
+  loop: "{{packages_to_install[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
 
 - name: Template >> /etc/dhcp/dhcpd.conf
   template:
@@ -40,11 +43,10 @@
   tags:
     - templates
 
-- name: Use OS dedicated task
-  include_tasks: "services_{{(ansible_distribution|lower|replace(' ','_'))}}_{{ansible_distribution_major_version}}.yml"
+- name: Start services
+  service:
+    name: "{{item}}"
+    state: started
+    enabled: yes
+  loop: "{{services_to_start[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
 
-  #- name: Start services
-  #  service:
-  #    name: dhcpd
-  #    state: started
-  #    enabled: yes

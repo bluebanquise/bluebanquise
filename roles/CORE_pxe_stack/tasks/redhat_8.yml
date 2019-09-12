@@ -1,20 +1,29 @@
 ## Tested on RedHat 8.0
 
-- name: Install minimum packages for PXE (Centos 7)
-  package:
-    name: "{{item}}"
-    state: present
-  with_items:
-    - atftp
-    - bluebanquise_ipxe
-    - httpd
-    - python3-policycoreutils
-    - clustershell
-    - python3-clustershell
-    - policycoreutils
+#- name: Install minimum packages for PXE (Centos 7)
+#  package:
+#    name: "{{item}}"
+#    state: present
+#  with_items:
+#    - atftp
+#    - bluebanquise_ipxe
+#    - httpd
+#    - python3-policycoreutils
+#    - clustershell
+#    - python3-clustershell
+#    - policycoreutils
+#
+#- name: httpd cgi module
+#  apache2_module:
+#    state: present
+#    name: cgid
 
-- name: httpd cgi module
-  apache2_module:
+- name: SELinux /var/www/html/preboot_execution_environment/nodes
+  sefcontext:
+    target: '/var/www/html/preboot_execution_environment/nodes(/.*)?'
+    setype: httpd_sys_rw_content_t
     state: present
-    name: cgid
+  when:
+    - ansible_os_family == "RedHat"
+    - ansible_selinux.status == "enabled"
 

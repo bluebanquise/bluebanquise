@@ -1,6 +1,0 @@
-## Tested on Centos 7
-
-- name: Package
-  package:
-    name: bind
-    state: present
