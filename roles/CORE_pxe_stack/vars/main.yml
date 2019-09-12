@@ -1,0 +1,64 @@
+role_version: 1.0.2
+
+apache_user:
+  ubuntu:
+    _18: www-data
+  redhat:
+    _8: apache
+  centos:
+    _7: apache
+apache_conf_path:
+  ubuntu:
+    _18: /etc/apache2/conf-enabled
+  redhat:
+    _8: /etc/httpd/conf.d
+  centos:
+    _7: /etc/httpd/conf.d
+apache_cgi_module:
+  ubuntu:
+    _18: cgid
+  redhat:
+    _8: cgid
+  centos:
+    _7: cgi
+packages_to_install:
+  ubuntu:
+    _18:
+      - atftpd
+      - bluebanquiseipxe
+      - apache2
+      - python3
+      - python3-yaml
+      - python3-clustershell
+  redhat:
+    _8:
+      - atftp
+      - bluebanquise_ipxe
+      - httpd
+      - python3-policycoreutils
+      - clustershell
+      - python3-clustershell
+      - policycoreutils
+  centos:
+    _7:
+      - atftp
+      - bluebanquise_ipxe
+      - httpd
+      - policycoreutils-python
+      - python36
+      - python36-PyYAML
+      - python36-clustershell
+services_to_start:
+  ubuntu:
+    _18:
+      - atftpd
+      - apache2
+  redhat:
+    _8:
+      - atftpd
+      - httpd
+  centos:
+    _7:
+      - atftpd
+      - httpd
+

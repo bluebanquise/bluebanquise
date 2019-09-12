@@ -1,20 +1,27 @@
 ## Tested on Centos 7.6
 
-- name: Install minimum packages for PXE (Centos 7)
-  package:
-    name: "{{item}}"
+#- name: Install minimum packages for PXE (Centos 7)
+#  package:
+#    name: "{{item}}"
+#    state: present
+#  with_items:
+#    - atftp
+#    - bluebanquise_ipxe
+#    - httpd
+#    - policycoreutils-python
+#    - python36
+#    - python36-PyYAML
+#    - python36-clustershell
+#
+#- name: httpd cgi module
+#  apache2_module:
+#    state: present
+#    name: cgi
+- name: SELinux /var/www/html/preboot_execution_environment/nodes
+  sefcontext:
+    target: '/var/www/html/preboot_execution_environment/nodes(/.*)?'
+    setype: httpd_sys_rw_content_t
     state: present
-  with_items:
-    - atftp
-    - bluebanquise_ipxe
-    - httpd
-    - policycoreutils-python
-    - python36
-    - python36-PyYAML
-    - python36-clustershell
-
-- name: httpd cgi module
-  apache2_module:
-    state: present
-    name: cgi
+  when:
+    - ansible_selinux.status == "enabled"
 

@@ -1,0 +1,22 @@
+role_version: 1.0.2
+packages_to_install:
+  ubuntu:
+    _18:
+      - bind9
+  redhat:
+    _8:
+      - bind
+  centos:
+    _7:
+      - bind
+services_to_start:
+  ubuntu:
+    _18:
+      - bind9
+  redhat:
+    _8:
+      - named
+  centos:
+    _7:
+      - named
+
