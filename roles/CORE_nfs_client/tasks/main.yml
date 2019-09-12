@@ -1,13 +1,10 @@
 ---
 
-#- debug:
-#    msg: "{{nfs[item]['clients_groups']}} {% if groups[nfs[item]['clients_groups']] is defined and not none %}coucou{% if {% endif %}"
-#  with_items: "{{nfs}}"
-
 - name: Package
   package:
-    name: nfs-utils
+    name: "{{item}}"
     state: present
+  loop: "{{packages_to_install[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
 
 - name: Create NFS directories
   file:
@@ -25,6 +22,7 @@
     name: rpcbind
     state: started
     enabled: yes
+  when: (ansible_distribution|lower|replace(' ','_')) == 'centos' or (ansible_distribution|lower|replace(' ','_')) == 'redhat'
 
 - name: Mount experted NFS into directories
   mount:
