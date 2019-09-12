@@ -1,6 +1,0 @@
-- name: Start services
-  service:
-    name: isc-dhcp-server
-    state: started
-    enabled: yes
-

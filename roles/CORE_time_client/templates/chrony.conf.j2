@@ -3,7 +3,7 @@
 
 # Use public servers from the pool.ntp.org project.
 # Please consider joining the pool (http://www.pool.ntp.org/join.html).
-server {{networks[node_main_network]['services_ip']['time_ip']}}
+server {{networks[j2_node_main_network]['services_ip']['time_ip']}}
 #server 0.centos.pool.ntp.org iburst
 #server 1.centos.pool.ntp.org iburst
 #server 2.centos.pool.ntp.org iburst

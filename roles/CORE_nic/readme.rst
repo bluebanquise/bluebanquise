@@ -26,6 +26,7 @@ Add more features, as nmcli Ansible module can do much more.
 Changelog
 ^^^^^^^^^
 
+* 1.0.2: Adding Ubuntu 18.04 compatibility. johnnykeats <johnny.keats@outlook.com>
 * 1.0.1: Documentation. johnnykeats <johnny.keats@outlook.com>
 * 1.0.0: Role creation. oxedions <oxedions@gmail.com>
  

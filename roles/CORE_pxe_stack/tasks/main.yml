@@ -1,7 +1,13 @@
 ---
 
-- name: Use OS dedicated task
-  include_tasks: "{{(ansible_distribution|lower|replace(' ','_'))}}_{{ansible_distribution_major_version}}.yml"
+#- name: Use OS dedicated task
+#  include_tasks: "{{(ansible_distribution|lower|replace(' ','_'))}}_{{ansible_distribution_major_version}}.yml"
+
+- name: Install minimum packages for PXE
+  package:
+    name: "{{item}}"
+    state: present
+  loop: "{{packages_to_install[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
 
 - name: Create pxe directories structure
   file:
@@ -23,18 +29,21 @@
     path: /var/www/html/preboot_execution_environment
     state: directory
     mode: 0755
-    owner: apache
-    group: apache
+    owner: "{{apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
+    group: "{{apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
     recurse: yes
 
-- name: SELinux /var/www/html/preboot_execution_environment/nodes
-  sefcontext:
-    target: '/var/www/html/preboot_execution_environment/nodes(/.*)?'
-    setype: httpd_sys_rw_content_t
-    state: present
-  when:
-    - ansible_os_family == "RedHat"
-    - ansible_selinux.status == "enabled"
+    #- name: SELinux /var/www/html/preboot_execution_environment/nodes
+    #  sefcontext:
+    #    target: '/var/www/html/preboot_execution_environment/nodes(/.*)?'
+    #    setype: httpd_sys_rw_content_t
+    #    state: present
+    #  when:
+    #    - ansible_os_family == "RedHat"
+    #    - ansible_selinux.status == "enabled"
+
+- name: Use OS dedicated task
+  include_tasks: "{{(ansible_distribution|lower|replace(' ','_'))}}_{{ansible_distribution_major_version}}.yml"
 
 - name: Templates >> nodes parameters
   template:
@@ -139,15 +148,15 @@
     dest: /usr/bin/bootset
     mode: 0700 
 
-#- name: httpd cgi module
-#  apache2_module:
-#    state: present
-#    name: cgid
+- name: httpd cgi module
+  apache2_module:
+    state: present
+    name: "{{apache_cgi_module[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
 
 - name: cgi configuration file
   copy:
     src: cgi.conf
-    dest: /etc/httpd/conf.d/cgi.conf
+    dest: "{{apache_conf_path[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}/cgi.conf"
     mode: 0644
 
 - name: cgi script
@@ -155,15 +164,13 @@
     src: bootswitch.cgi
     dest: /var/www/cgi-bin/bootswitch.cgi
     mode: 0744
-    owner: apache
-    group: apache
+    owner: "{{apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
+    group: "{{apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
   tags: tyty
 
 - name: Start services
   service:
     name: "{{item}}"
-    state: started
+    state: restarted
     enabled: yes
-  with_items:
-    - httpd
-    - atftpd
+  loop: "{{services_to_start[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
