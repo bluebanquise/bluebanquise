@@ -1,8 +1,8 @@
 ---
 
-- name: Template >> /etc/hosts
+- name: "Template >> /etc/hosts {% if accelerated_mode == true %} >>>A>C>C>E>L>E>R>A>T>E>D>>> {% endif %}"
   template:
-    src: "hosts.j2"
+    src: "hosts{% if accelerated_mode == true %}_accelerated_mode{% endif %}.j2"
     dest: /etc/hosts
     owner: root
     group: root
