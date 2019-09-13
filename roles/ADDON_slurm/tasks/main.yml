@@ -4,23 +4,7 @@
   package:
     name: "{{item}}"
     state: present
-  with_items:
-    - munge
-    - munge-libs
-    - slurm
-    - slurm-slurmctld
-  when: slurm_profile == 'controler'
-
-- name: Package
-  package:
-    name: "{{item}}"
-    state: present
-  with_items:
-    - munge
-    - munge-libs
-    - slurm
-    - slurm-slurmd
-  when: slurm_profile == 'node'
+  loop: "{{packages_to_install[slurm.slurm_packaging][slurm_profile][(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
 
 #### MUNGE
 
