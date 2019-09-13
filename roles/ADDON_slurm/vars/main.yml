@@ -1,0 +1,107 @@
+role_version: 1.0.2
+
+packages_to_install:
+  before_17:
+    controller:
+      ubuntu:
+        _18:
+      centos:
+        _7:
+          - munge
+          - munge-libs
+          - slurm
+          - slurm-devel
+          - slurm-munge
+      redhat:
+        _8:
+          - munge
+          - munge-libs
+          - slurm
+          - slurm-devel
+          - slurm-munge
+    node:
+      ubuntu:
+        _18:
+      centos:
+        _7:
+          - munge
+          - munge-libs
+          - slurm
+          - slurm-devel
+          - slurm-munge
+      redhat:
+        _8:
+          - munge
+          - munge-libs
+          - slurm
+          - slurm-devel
+          - slurm-munge
+    passive:
+      ubuntu:
+        _18:
+      centos:
+        _7:
+          - munge
+          - munge-libs
+          - slurm
+          - slurm-devel
+          - slurm-munge
+      redhat:
+        _8:
+          - munge
+          - munge-libs
+          - slurm
+          - slurm-devel
+          - slurm-munge
+
+  after_17:
+    controller:
+      ubuntu:
+        _18:
+      centos:
+        _7:
+          - munge
+          - munge-libs
+          - slurm
+          - slurm-devel
+          - slurm-slurmctld
+      redhat:
+        _8:
+          - munge
+          - munge-libs
+          - slurm
+          - slurm-devel
+          - slurm-slurmctld
+    node:
+      ubuntu:
+        _18:
+      centos:
+        _7:
+          - munge
+          - munge-libs
+          - slurm
+          - slurm-devel
+          - slurm-slurmd
+      redhat:
+        _8:
+          - munge
+          - munge-libs
+          - slurm
+          - slurm-devel
+          - slurm-slurmd
+    passive:
+      ubuntu:
+        _18:
+      centos:
+        _7:
+          - munge
+          - munge-libs
+          - slurm
+          - slurm-devel
+      redhat:
+        _8:
+          - munge
+          - munge-libs
+          - slurm
+          - slurm-devel
+
