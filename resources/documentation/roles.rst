@@ -29,13 +29,13 @@ CORE
 ADDONS
 ======
 
-.. include:: roles/ADDON_clustershell/readme.rst
-.. include:: roles/ADDON_openldap_client/readme.rst
-.. include:: roles/ADDON_openldap_server/readme.rst
-.. include:: roles/ADDON_prometheus_server/readme.rst
-.. include:: roles/ADDON_prometheus_client/readme.rst
-.. include:: roles/ADDON_report/readme.rst
-.. include:: roles/ADDON_slurm/readme.rst
-.. include:: roles/ADDON_users_basic/readme.rst
+.. include:: roles/addons/clustershell/readme.rst
+.. include:: roles/addons/openldap_client/readme.rst
+.. include:: roles/addons/openldap_server/readme.rst
+.. include:: roles/addons/prometheus_server/readme.rst
+.. include:: roles/addons/prometheus_client/readme.rst
+.. include:: roles/addons/report/readme.rst
+.. include:: roles/addons/slurm/readme.rst
+.. include:: roles/addons/users_basic/readme.rst
 
 
