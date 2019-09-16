@@ -3,7 +3,6 @@
 :construction_worker: Many thanks for considering contributing to **BlueBanquise**. :construction_worker:
 
 Please do not hesitate to contact us using issues, we will be glad to help you! :raising_hand:
-Consider we are always open to discus, even to constructive criticism.
 
 The stack is still young, and some aspects are not clearly defined yet. But here are some basic guidelines:
 
@@ -48,7 +47,8 @@ If you provide a new role, please try to make it autonomous, so that it can be m
 Also, consider that some variables are specific in BlueBanquise, and do not fully follow the standard rules of Ansible:
 * Equipment_profile
 * Authentication
-These dictionaries **MUST** be set in group_vars/equipment_profile folders or in group_vars/all . Any other usage (for example at host_vars level or extra_vars level) will result in a dangerous situation. We will refuse any attempt to break this rule as this is one of the foundations of the stack in its current architecture.
+
+These dictionaries **MUST** be set in group_vars/equipment_profile folders or in group_vars/all . Any other usage (for example at host_vars level or extra_vars level) will result in a dangerous situation.
 
 ## Writing, naming :page_with_curl:
 
@@ -63,11 +63,13 @@ If you are working on Microsoft Windows, please check you do not submit ^M at th
 ## Ownership
 
 By default, each contributing physical person will be added to a “Contributors” list in the main stack README file. This is important for us.
+
 If you do not wish so, please inform us.
 
 ## License
 
 The stack is under MIT. This choice is based on a wish to allow everyone to use it. Please consider using the same license if you wish to Pull Request some code into the main project.
+
 If you do not wish so, but you still wish to contribute, please contact us.
 
 
