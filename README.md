@@ -10,11 +10,11 @@ Main target is High Performance Computing, but stack is generic and can adapt to
 Currently supported OS are:
 
 * RedHat/Centos 7.6 (Full)
-* RedHat 8.0 (Partial, in dev)
+* RedHat/Centos 8.0 (Partial, in dev)
 * Ubuntu 18.04 (Partial, in dev)
 * OpenSuse Leap 15.1 (Partial, in dev)
 
-Debian 9 and 10 are dropped for now because too much issues with the netboot part.
+Debian 9 and 10 are dropped for now because we had too much issues with the netboot part.
 
 Ansible >= 2.8.2 is mandatory for BlueBanquise to run properly.
 
