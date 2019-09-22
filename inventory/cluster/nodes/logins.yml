@@ -1,0 +1,24 @@
+mg_logins:                             # Master group
+  children:
+    supermicro_sandy_login:            # Equipment profile
+      hosts:
+        freya:                         # Hostname
+          bmc:                         # BMC
+            name: bfreya
+            ip4: 10.10.102.1
+            mac: 08:00:27:dc:f8:b6
+            network: ice1-1
+          network_interfaces:
+            enp0s3:
+              ip4: 10.10.2.1
+              mac: 08:00:27:dc:f8:f6
+              network: ice1-1          # Logical network connected to
+            enp0s8:
+              ip4: 192.168.1.2
+              mac: 08:00:27:dc:f8:f7
+              network: external-1  
+            enp0s0f1:
+              ip: 10.20.2.1
+              mac:  08:00:27:dc:f8:f8
+              network: interconnect-1
+            

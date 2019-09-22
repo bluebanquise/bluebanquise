@@ -20,7 +20,7 @@ Now, backup and clean your previous Ansible configuration:
   tar cvzf /root/my_old_ansible.tar.gz /etc/ansible
   rm -Rf /etc/ansible/*
 
-And download **BlueBanquise** into Ansible directory:
+And download latest **BlueBanquise** version from git into Ansible directory:
 
 .. code-block:: bash
 
@@ -92,7 +92,7 @@ Open file cluster/nodes/managements.yml:
                 ip4: 10.20.0.1
                 network: interconnect1
 
-This file contains our management node configuration. Lets review it, to understand it.
+This file contains our management node configuration. Let’s review it, to understand it.
 
 First, the groups:
 
@@ -100,7 +100,7 @@ First, the groups:
 
   managements:            # This is the main group, it is very useful with advanced configuration
     children:             # This is an Ansible instruction, telling the below group is included in managements group
-      equipment_typeM:    # This is the equipment group of the management node. It always start by 'equipment_'
+      equipment_typeM:    # This is the equipment group of the management node. It always starts by 'equipment_'
         hosts:            # This is an Ansible instruction, to list below the hosts member of this group
           management1:    # This is the hostname
 
@@ -147,7 +147,7 @@ It should not be too difficult to understand this file.
 Other nodes
 ^^^^^^^^^^^
 
-Now, review computes nodes and logins nodes in respectively files cluster/nodes/computes.yml and cluster/nodes/logins.yml. Same rules apply. You can also add more nodes, or if you have for example multiple type of equipments for computes nodes or login nodes, add another equipment group this way:
+Now, review computes nodes and logins nodes in respectively files cluster/nodes/computes.yml and cluster/nodes/logins.yml. Same rules apply. You can also add more nodes, or if you have for example multiple type of equipment for computes nodes or login nodes, add another equipment group this way:
 
 .. code-block:: yaml
 
@@ -177,9 +177,9 @@ All networks are defined in group_vars/all/networks directory, with one file per
 
 Before reviewing the file, please read this **IMPORTANT** information: in **BlueBanquise** there are two kind of networks, which are administration networks, and the others.
 
-An administration network is used to deploy and manage the nodes. It will be for example used to deploy an DHCP, the PXE stack, etc. Administration networks have a strict naming convention, which by default is: **iceX-Y** with X the iceberg number, and Y the subnet number in this iceberg. In our case, we are working on iceberg1, and we only have one subnet, so our administration network will be ice1-1. If we would need another subnet, it's name would have been ice1-2, etc.
+An administration network is used to deploy and manage the nodes. It will be for example used to deploy an DHCP, the PXE stack, etc. Administration networks have a strict naming convention, which by default is: **iceX-Y** with X the iceberg number, and Y the subnet number in this iceberg. In our case, we are working on iceberg1, and we only have one subnet, so our administration network will be ice1-1. If we would need another subnet, its name would have been ice1-2, etc.
 
-Open file group_vars/all/networks/ice1-1.yml and let's check it's content:
+Open file group_vars/all/networks/ice1-1.yml and let's check its content:
 
 .. code-block:: yaml
 
@@ -202,13 +202,13 @@ Open file group_vars/all/networks/ice1-1.yml and let's check it's content:
         time_ip: 10.10.0.1
         log_ip: 10.10.0.1
 
-All explanations are give above.
+All explanations are given above.
 
 One note for services_ip. It is used if services are spread over multiple managements, or in case of High Availability with virtual IPs. Ansible is not able to gather this information alone (it could, but this would end up with a way too much big stack), and so we have to provide it manually. You can also set here an IP from another subnet if your system has routing tables.
 
-Then check content of file group_vars/all/networks/interconnect1.yml . As this is **not** an administration network, it's configuration is easy.
+Then check content of file group_vars/all/networks/interconnect1.yml . As this is **not** an administration network, its configuration is easy.
 
-That is all for basic networking. General network parameters are set in group_vars/all/networks/ files, and nodes parameters are defined in the nodes files.
+That is all for basic networking. General network parameters are set in group_vars/all/networks/ files, and nodes parameters are defined in the node’s files.
 
 Now, let's have a look at the general configuration.
 
@@ -239,7 +239,7 @@ Repositories
 
 File group_vars/all/general_settings/repositories.yml configure repositories to use for all nodes (using groups and variable precedence, repositories can be tuned for each group of nodes, or even each node).
 
-Right now, only os and bluebanquise are set. This means two repositories will be added to nodes, and they will bind to repository_ip in ice1-1.yml .
+Right now, only *os* and *bluebanquise* are set. This means two repositories will be added to nodes, and they will bind to repository_ip in ice1-1.yml .
 
 NFS
 ^^^
@@ -255,14 +255,14 @@ File group_vars/all/general_settings/general.yml configure few main parameters:
 
 Do not bother about the other parameters.
 
-And that is all for general configuration. Finally, lets check the default parameters.
+And that is all for general configuration. Finally, let’s check the default parameters.
 
 Review Default parameters
 -------------------------
 
 Last part, and probably the most complicated, are default parameters.
 
-Remember Ansible precedence mechanism. All variables in group_vars/all/ have less priority, while variables in group_vars/* have an higher priority.
+Remember Ansible precedence mechanism. All variables in group_vars/all/ have less priority, while variables in group_vars/* have a higher priority.
 
 The idea here is the following: group_vars/all/default/ folder contains all the default parameters for all nodes. Here authentication, and equipment_profile. You have to tune these parameters to match your exact "global" need, and then for each equipment group, tune parameters.
 
@@ -298,7 +298,7 @@ Now check again:
 
 Same apply for all equipment_profile parameters. You define a global one in default, and then tune it for each equipment group.
 
-**IMPORTANT**: equipment_profile variable is not standard. It is **STRICTLY FORBIDDEN** to tune it outside default or an equipment group. For example you cannot create a custom group and define some equipment_profile parameters for this group. If you really need to do that, add more equipment groups and tune this way. If you do not respect this rule, unexpected behavior will happen during configuration apply.
+**IMPORTANT**: equipment_profile variable is not standard. It is **STRICTLY FORBIDDEN** to tune it outside default or an equipment group. For example, you cannot create a custom group and define some equipment_profile parameters for this group. If you really need to do that, add more equipment groups and tune this way. If you do not respect this rule, unexpected behavior will happen during configuration apply.
 
 Authentication
 ^^^^^^^^^^^^^^
@@ -319,3 +319,4 @@ If you prefer, you can copy the whole group_vars/all/default/equipment_profile.y
 Once done, configuration is ready, we will check addons later.
 
 It is time to deploy configuration on management1.
+
