@@ -8,7 +8,7 @@
     - prometheus
     - alertmanager
 
-- name: Create pxe directories structure
+- name: Create directories structure
   file:
    path: "{{item}}"
    state: directory
@@ -29,12 +29,20 @@
     - templates
 
 - name: Template >> /etc/prometheus/alerts/general.yml
-  copy:
-    src: alerts_general.yml
+  template:
+    src: alerts_general.yml.j2
     dest: /etc/prometheus/alerts/general.yml
     owner: prometheus
     group: prometheus
     mode: 0640
+
+#- name: Template >> /etc/prometheus/alerts/general.yml
+#  copy:
+#    src: alerts_general.yml
+#    dest: /etc/prometheus/alerts/general.yml
+#    owner: prometheus
+#    group: prometheus
+#    mode: 0640
 
 - name: Template >> /etc/alertmanager/alertmanager.yml
   template:

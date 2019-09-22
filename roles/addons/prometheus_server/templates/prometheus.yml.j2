@@ -19,7 +19,7 @@ scrape_configs:
     scrape_interval: 10s
     static_configs:
       - targets: ['localhost:9090']
-{% for equipment in equipment_groups_list %}
+{% for equipment in j2_equipment_groups_list %}
   - job_name: '{{equipment}}'
     static_configs:
 {% for node in groups[equipment] %}
