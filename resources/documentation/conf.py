@@ -20,13 +20,13 @@
 # -- Project information -----------------------------------------------------
 
 project = u'BlueBanquise_Documentation'
-copyright = u'2019, Oxedions'
-author = u'Oxedions'
+copyright = u'2019, Oxedions, Johnny Keats'
+author = u'Oxedions, Johnny Keats'
 
 # The short X.Y version
 version = u''
 # The full version, including alpha/beta/rc tags
-release = u'1.0.0'
+release = u'1.0.1'
 
 
 # -- General configuration ---------------------------------------------------

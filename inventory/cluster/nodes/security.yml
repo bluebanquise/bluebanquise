@@ -1,0 +1,9 @@
+mg_security:
+  children:
+    valkyrie:
+      hosts:
+        lenneth:
+          network_interfaces:
+            eth0:
+              ip4: 10.10.0.2
+              network: ice1-1 

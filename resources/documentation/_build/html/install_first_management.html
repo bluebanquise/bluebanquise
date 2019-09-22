@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>Install first management &#8212; BlueBanquise_Documentation 1.0.0 documentation</title>
+    <title>Install first management &#8212; BlueBanquise_Documentation 1.0.1 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -45,7 +45,7 @@
 <li><p>&gt;= 2 Gb RAM</p></li>
 <li><p>&gt;= 16Gb HDD</p></li>
 </ul>
-<p>And the following parameters are the strict minimal if you whish to test the stack in VMs:</p>
+<p>And the following parameters are the strict minimal if you wish to test the stack in VMs:</p>
 <ul class="simple">
 <li><p>&gt;= 1 vCPU</p></li>
 <li><p>&gt;= 512 Mb RAM</p></li>
@@ -58,7 +58,7 @@
 <h2>Prepare for Ansible<a class="headerlink" href="#prepare-for-ansible" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="repositories">
 <h3>Repositories<a class="headerlink" href="#repositories" title="Permalink to this headline">¶</a></h3>
-<p>Once system is installed and rebooted, login, and disable firewall. Current stack do not support firewall configuration (but it is scheduled for later released).</p>
+<p>Once system is installed and rebooted, login, and disable firewall. Current stack does not support firewall configuration (but it is scheduled for later released).</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>systemctl stop firewalld
 systemctl disable firewalld
 </pre></div>
@@ -126,11 +126,11 @@ enabled=1
 </div>
 <div class="section" id="bluebanquise">
 <h4>BlueBanquise<a class="headerlink" href="#bluebanquise" title="Permalink to this headline">¶</a></h4>
-<p>Copy content of bluebanquise_repository_el7_1.0.0.iso into desired folder:</p>
+<p>Download BlueBanquise rpms from official repository. Ansible is included if not provided in the distribution.</p>
+<p>Go to <a class="reference external" href="http://raphael.sphenisc.com/bluebanquise/repositories/centos/7.6/x86_64/bluebanquise">http://raphael.sphenisc.com/bluebanquise/repositories/centos/7.6/x86_64/bluebanquise</a> and get the content of the whole directory.</p>
+<p>Then copy this content into /var/www/html/repositories/centos/7.6/x86_64/bluebanquise/ locally.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir -p /var/www/html/repositories/centos/7.6/x86_64/bluebanquise/
-mount bluebanquise_repository_el7_1.0.0.iso /mnt
-cp -a /mnt/* /var/www/html/repositories/centos/5.6/x86_64/bluebanquise/
-umount /mnt
+cp -a /root/bluebanquise_from_web/* /var/www/html/repositories/centos/7.6/x86_64/bluebanquise/
 restorecon -Rv /var/www/html/repositories/centos/7.6/x86_64/bluebanquise
 </pre></div>
 </div>
@@ -154,8 +154,9 @@ enabled=1
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ansible --version
 </pre></div>
 </div>
+<p>It must be <strong>&gt;= 2.8.2</strong> .</p>
 <p>It is now time, if you do not know how Ansible works, to learn basis of Ansible.</p>
-<p>If you already know Ansible, or want to skip this recommended training, directly go to the Deploy BlueBanquise section.</p>
+<p>If you already know Ansible, or want to skip this recommended training, directly go to the Configure BlueBanquise section.</p>
 </div>
 </div>
 </div>
@@ -199,6 +200,7 @@ enabled=1
 <li class="toctree-l1"><a class="reference internal" href="configure_bluebanquise.html">Configure BlueBanquise</a></li>
 <li class="toctree-l1"><a class="reference internal" href="deploy_bluebanquise.html">Deploy BlueBanquise</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roles.html">Roles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
 </ul>
 
 <div class="relations">
@@ -233,7 +235,7 @@ enabled=1
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2019, Oxedions.
+      &copy;2019, Oxedions, Johnny Keats.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>

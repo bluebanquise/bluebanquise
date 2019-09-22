@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>Configure BlueBanquise &#8212; BlueBanquise_Documentation 1.0.0 documentation</title>
+    <title>Configure BlueBanquise &#8212; BlueBanquise_Documentation 1.0.1 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -46,7 +46,7 @@
 rm -Rf /etc/ansible/*
 </pre></div>
 </div>
-<p>And download <strong>BlueBanquise</strong> into Ansible directory:</p>
+<p>And download latest <strong>BlueBanquise</strong> version from git into Ansible directory:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> /etc/ansible
 git clone https://github.com/oxedions/bluebanquise.git .
 </pre></div>
@@ -100,11 +100,11 @@ git clone https://github.com/oxedions/bluebanquise.git .
               <span class="nt">network</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">interconnect1</span>
 </pre></div>
 </div>
-<p>This file contains our management node configuration. Lets review it, to understand it.</p>
+<p>This file contains our management node configuration. Let’s review it, to understand it.</p>
 <p>First, the groups:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">managements</span><span class="p">:</span>            <span class="c1"># This is the main group, it is very useful with advanced configuration</span>
   <span class="nt">children</span><span class="p">:</span>             <span class="c1"># This is an Ansible instruction, telling the below group is included in managements group</span>
-    <span class="nt">equipment_typeM</span><span class="p">:</span>    <span class="c1"># This is the equipment group of the management node. It always start by &#39;equipment_&#39;</span>
+    <span class="nt">equipment_typeM</span><span class="p">:</span>    <span class="c1"># This is the equipment group of the management node. It always starts by &#39;equipment_&#39;</span>
       <span class="nt">hosts</span><span class="p">:</span>            <span class="c1"># This is an Ansible instruction, to list below the hosts member of this group</span>
         <span class="nt">management1</span><span class="p">:</span>    <span class="c1"># This is the hostname</span>
 </pre></div>
@@ -147,7 +147,7 @@ git clone https://github.com/oxedions/bluebanquise.git .
 </div>
 <div class="section" id="other-nodes">
 <h4>Other nodes<a class="headerlink" href="#other-nodes" title="Permalink to this headline">¶</a></h4>
-<p>Now, review computes nodes and logins nodes in respectively files cluster/nodes/computes.yml and cluster/nodes/logins.yml. Same rules apply. You can also add more nodes, or if you have for example multiple type of equipments for computes nodes or login nodes, add another equipment group this way:</p>
+<p>Now, review computes nodes and logins nodes in respectively files cluster/nodes/computes.yml and cluster/nodes/logins.yml. Same rules apply. You can also add more nodes, or if you have for example multiple type of equipment for computes nodes or login nodes, add another equipment group this way:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">computes</span><span class="p">:</span>
   <span class="nt">children</span><span class="p">:</span>
     <span class="nt">equipment_typeC</span><span class="p">:</span>
@@ -172,8 +172,8 @@ git clone https://github.com/oxedions/bluebanquise.git .
 <p>In <strong>BlueBanquise</strong>, nodes are connected together through logical network. Most of the time, logical networks will match your physical network, but for advanced networking, it can be different.</p>
 <p>All networks are defined in group_vars/all/networks directory, with one file per network. In this current example inventory, there are two networks provided: ice1-1 and interconnect1.</p>
 <p>Before reviewing the file, please read this <strong>IMPORTANT</strong> information: in <strong>BlueBanquise</strong> there are two kind of networks, which are administration networks, and the others.</p>
-<p>An administration network is used to deploy and manage the nodes. It will be for example used to deploy an DHCP, the PXE stack, etc. Administration networks have a strict naming convention, which by default is: <strong>iceX-Y</strong> with X the iceberg number, and Y the subnet number in this iceberg. In our case, we are working on iceberg1, and we only have one subnet, so our administration network will be ice1-1. If we would need another subnet, it’s name would have been ice1-2, etc.</p>
-<p>Open file group_vars/all/networks/ice1-1.yml and let’s check it’s content:</p>
+<p>An administration network is used to deploy and manage the nodes. It will be for example used to deploy an DHCP, the PXE stack, etc. Administration networks have a strict naming convention, which by default is: <strong>iceX-Y</strong> with X the iceberg number, and Y the subnet number in this iceberg. In our case, we are working on iceberg1, and we only have one subnet, so our administration network will be ice1-1. If we would need another subnet, its name would have been ice1-2, etc.</p>
+<p>Open file group_vars/all/networks/ice1-1.yml and let’s check its content:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">networks</span><span class="p">:</span>                                             <span class="c1"># This defines a new network</span>
   <span class="nt">ice1-1</span><span class="p">:</span>                                             <span class="c1"># Network name</span>
     <span class="nt">subnet</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.10.0.0</span>                                 <span class="c1"># Network subnet</span>
@@ -194,10 +194,10 @@ git clone https://github.com/oxedions/bluebanquise.git .
       <span class="nt">log_ip</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.10.0.1</span>
 </pre></div>
 </div>
-<p>All explanations are give above.</p>
+<p>All explanations are given above.</p>
 <p>One note for services_ip. It is used if services are spread over multiple managements, or in case of High Availability with virtual IPs. Ansible is not able to gather this information alone (it could, but this would end up with a way too much big stack), and so we have to provide it manually. You can also set here an IP from another subnet if your system has routing tables.</p>
-<p>Then check content of file group_vars/all/networks/interconnect1.yml . As this is <strong>not</strong> an administration network, it’s configuration is easy.</p>
-<p>That is all for basic networking. General network parameters are set in group_vars/all/networks/ files, and nodes parameters are defined in the nodes files.</p>
+<p>Then check content of file group_vars/all/networks/interconnect1.yml . As this is <strong>not</strong> an administration network, its configuration is easy.</p>
+<p>That is all for basic networking. General network parameters are set in group_vars/all/networks/ files, and nodes parameters are defined in the node’s files.</p>
 <p>Now, let’s have a look at the general configuration.</p>
 </div>
 <div class="section" id="review-general-configuration">
@@ -220,7 +220,7 @@ git clone https://github.com/oxedions/bluebanquise.git .
 <div class="section" id="repositories">
 <h4>Repositories<a class="headerlink" href="#repositories" title="Permalink to this headline">¶</a></h4>
 <p>File group_vars/all/general_settings/repositories.yml configure repositories to use for all nodes (using groups and variable precedence, repositories can be tuned for each group of nodes, or even each node).</p>
-<p>Right now, only os and bluebanquise are set. This means two repositories will be added to nodes, and they will bind to repository_ip in ice1-1.yml .</p>
+<p>Right now, only <em>os</em> and <em>bluebanquise</em> are set. This means two repositories will be added to nodes, and they will bind to repository_ip in ice1-1.yml .</p>
 </div>
 <div class="section" id="nfs">
 <h4>NFS<a class="headerlink" href="#nfs" title="Permalink to this headline">¶</a></h4>
@@ -233,13 +233,13 @@ git clone https://github.com/oxedions/bluebanquise.git .
 <li><p>Time zone (very important)</p></li>
 </ul>
 <p>Do not bother about the other parameters.</p>
-<p>And that is all for general configuration. Finally, lets check the default parameters.</p>
+<p>And that is all for general configuration. Finally, let’s check the default parameters.</p>
 </div>
 </div>
 <div class="section" id="review-default-parameters">
 <h3>Review Default parameters<a class="headerlink" href="#review-default-parameters" title="Permalink to this headline">¶</a></h3>
 <p>Last part, and probably the most complicated, are default parameters.</p>
-<p>Remember Ansible precedence mechanism. All variables in group_vars/all/ have less priority, while variables in group_vars/* have an higher priority.</p>
+<p>Remember Ansible precedence mechanism. All variables in group_vars/all/ have less priority, while variables in group_vars/* have a higher priority.</p>
 <p>The idea here is the following: group_vars/all/default/ folder contains all the default parameters for all nodes. Here authentication, and equipment_profile. You have to tune these parameters to match your exact “global” need, and then for each equipment group, tune parameters.</p>
 <div class="section" id="equipment-profile">
 <h4>Equipment profile<a class="headerlink" href="#equipment-profile" title="Permalink to this headline">¶</a></h4>
@@ -263,7 +263,7 @@ git clone https://github.com/oxedions/bluebanquise.git .
 </pre></div>
 </div>
 <p>Same apply for all equipment_profile parameters. You define a global one in default, and then tune it for each equipment group.</p>
-<p><strong>IMPORTANT</strong>: equipment_profile variable is not standard. It is <strong>STRICTLY FORBIDDEN</strong> to tune it outside default or an equipment group. For example you cannot create a custom group and define some equipment_profile parameters for this group. If you really need to do that, add more equipment groups and tune this way. If you do not respect this rule, unexpected behavior will happen during configuration apply.</p>
+<p><strong>IMPORTANT</strong>: equipment_profile variable is not standard. It is <strong>STRICTLY FORBIDDEN</strong> to tune it outside default or an equipment group. For example, you cannot create a custom group and define some equipment_profile parameters for this group. If you really need to do that, add more equipment groups and tune this way. If you do not respect this rule, unexpected behavior will happen during configuration apply.</p>
 </div>
 <div class="section" id="authentication">
 <h4>Authentication<a class="headerlink" href="#authentication" title="Permalink to this headline">¶</a></h4>
@@ -326,6 +326,7 @@ git clone https://github.com/oxedions/bluebanquise.git .
 </li>
 <li class="toctree-l1"><a class="reference internal" href="deploy_bluebanquise.html">Deploy BlueBanquise</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roles.html">Roles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
 </ul>
 
 <div class="relations">
@@ -360,7 +361,7 @@ git clone https://github.com/oxedions/bluebanquise.git .
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2019, Oxedions.
+      &copy;2019, Oxedions, Johnny Keats.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>

@@ -17,7 +17,7 @@ The following parameters are recommended:
 * >= 2 Gb RAM
 * >= 16Gb HDD
 
-And the following parameters are the strict minimal if you whish to test the stack in VMs:
+And the following parameters are the strict minimal if you wish to test the stack in VMs:
 
 * >= 1 vCPU
 * >= 512 Mb RAM
@@ -33,7 +33,7 @@ Prepare for Ansible
 Repositories
 ------------
 
-Once system is installed and rebooted, login, and disable firewall. Current stack do not support firewall configuration (but it is scheduled for later released).
+Once system is installed and rebooted, login, and disable firewall. Current stack does not support firewall configuration (but it is scheduled for later released).
 
 .. code-block:: bash
 
@@ -125,14 +125,16 @@ Repositories structure follows a specific pattern:
 BlueBanquise
 ^^^^^^^^^^^^
 
-Copy content of bluebanquise_repository_el7_1.0.0.iso into desired folder:
+Download BlueBanquise rpms from official repository. Ansible is included if not provided in the distribution.
+
+Go to http://raphael.sphenisc.com/bluebanquise/repositories/centos/7.6/x86_64/bluebanquise and get the content of the whole directory.
+
+Then copy this content into /var/www/html/repositories/centos/7.6/x86_64/bluebanquise/ locally.
 
 .. code-block:: bash
 
   mkdir -p /var/www/html/repositories/centos/7.6/x86_64/bluebanquise/
-  mount bluebanquise_repository_el7_1.0.0.iso /mnt
-  cp -a /mnt/* /var/www/html/repositories/centos/5.6/x86_64/bluebanquise/
-  umount /mnt
+  cp -a /root/bluebanquise_from_web/* /var/www/html/repositories/centos/7.6/x86_64/bluebanquise/
   restorecon -Rv /var/www/html/repositories/centos/7.6/x86_64/bluebanquise
 
 And create file */etc/yum.repos.d/bluebanquise.repo* with the following content:
@@ -160,6 +162,9 @@ And check Ansible is working:
 
   ansible --version
 
+It must be **>= 2.8.2** .
+
 It is now time, if you do not know how Ansible works, to learn basis of Ansible.
 
-If you already know Ansible, or want to skip this recommended training, directly go to the Deploy BlueBanquise section.
+If you already know Ansible, or want to skip this recommended training, directly go to the Configure BlueBanquise section.
+

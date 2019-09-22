@@ -102,7 +102,7 @@ In **BlueBanquise**, PXE process has been made so that any kind of hardware able
 
 The following schema provides a macroscopic map of the process:
 
-.. image:: images/iPXE_process.svg
+.. image:: images/iPXE_process_v3.svg
 
 Whatever the boot source, and whatever Legacy Bios or uEFI, all converge to http://nextserver/convergence.ipxe. Then this file chain to node specific file in nodes (this file is generated using bootset command). The node specific file contains the default entry for the iPXE menu, and chain to menu.ipxe file. The menu file display a simple menu, and wait 10s for user before starting the default entry (which can be os deployment, or boot to disk).
 

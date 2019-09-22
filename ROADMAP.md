@@ -26,7 +26,7 @@ Current status: 1.0 alpha
 * Stable
   * Ubuntu 18.04 -> lvl 1, lvl 3, lvl 4
 
-## 1.1: HyperDriver
+## 1.1: HyperDrive
 * Stable
   * Report role
   * Icerbergs system

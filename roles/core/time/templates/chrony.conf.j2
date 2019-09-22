@@ -1,0 +1,37 @@
+#### Blue Banquise file ####
+## {{ansible_managed}}
+
+{% if time_profile == 'client' %}
+server {{networks[j2_node_main_network]['services_ip']['time_ip']}}
+{% endif %}
+
+# Record the rate at which the system clock gains/losses time.
+driftfile /var/lib/chrony/drift
+
+# Allow the system clock to be stepped in the first three updates
+# if its offset is larger than 1 second.
+makestep 1.0 3
+
+# Enable kernel synchronization of the real-time clock (RTC).
+rtcsync
+
+{% if time_profile == 'server' %}
+
+# Allow NTP client access from local network.
+{% for nic in network_interfaces %}
+{% if network_interfaces[nic]['network'] is defined and not none %}
+allow {{networks[network_interfaces[nic]['network']]['subnet']}}/{{networks[network_interfaces[nic]['network']]['prefix']}}
+{% endif %}
+{% endfor %}
+
+# Serve time even if not synchronized to a time source.
+# Listen to local clock
+server 127.127.1.0
+# Very bad time source
+local stratum 14
+
+{% endif %}
+
+# Specify directory for log files.
+logdir /var/log/chrony
+

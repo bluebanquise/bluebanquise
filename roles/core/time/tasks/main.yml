@@ -1,0 +1,24 @@
+---
+
+- name: Use OS dedicated task
+  include_tasks: "{{(ansible_distribution|lower|replace(' ','_'))}}_{{ansible_distribution_major_version}}.yml"
+
+- name: Template >> /etc/chrony.conf
+  template:
+    src: chrony.conf.j2
+    dest: /etc/chrony.conf
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - templates
+
+- name: Set timezone
+  timezone:
+    name: "{{time_zone}}"
+
+- name: Start services
+  service:
+    name: chronyd
+    state: started
+    enabled: yes

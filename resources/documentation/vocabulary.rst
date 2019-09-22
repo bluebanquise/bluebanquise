@@ -17,18 +17,18 @@ Host are defined in */etc/ansible/inventory/cluster/nodes*.
 Group
 -----
 
-An Ansible **group** is a logical aggregation of hosts. For example, system administrator can define a group "data_base_servers" that would contains hosts "database1" and "database2".
+An Ansible **group** is a logical aggregation of hosts. For example, system administrator can define a group "data_base_servers" that would contain hosts "database1" and "database2".
 
 **Groups** allow Ansible to provide dedicated **variables** to related hosts or execute tasks on a set of hosts.
 
-Note: an host can be part of multiple groups.
+Note: a host can be part of multiple groups.
 
 Variables
 ---------
 
 Variables in Ansible follow the YAML structure.
 
-A variable is like in any programming language: an variable name, and a data related.
+A variable is like in any programming language: a variable name, and a data related.
 
 Multiple kind of variables exist in YAML:
 
@@ -163,7 +163,7 @@ Inventory is the **data**.
 Roles
 ^^^^^
 
-An Ansible role is a list of task to do to achieve a purpose. For example, there will be a role called dhcp_server, that contains task to install, configure and start the dhcp server.
+An Ansible role is a list of tasks to do to achieve a purpose. For example, there will be a role called dhcp_server, that contains task to install, configure and start the dhcp server.
 
 In **BlueBanquise**, default path is /etc/ansible/roles.
 
@@ -172,7 +172,7 @@ Roles are the **automation logic**.
 Playbooks
 ^^^^^^^^^
 
-An Ansible playbook is simply a list of roles to apply, on a specific host or group of hosts. It is a yml file.
+An Ansible playbook is simply a list of roles to apply, on a specific host or group of hosts. It is an yml file.
 
 In **BlueBanquise**, default path is /etc/ansible/playbooks.
 
@@ -185,13 +185,13 @@ We are reaching the very important part of the stack.
 
 Ansible has an internal mechanism called **Variables precedence**.
 
-When a variable is defined in a yml file, the position of the file in the ansible inventory is critical and very important.
+When a variable is defined in an yml file, the position of the file in the ansible inventory is critical and very important.
 
-For example, a variable defined in /etc/ansible/inventory/group_vars/all/ will have the less precedence, and a variable defined in /etc/ansible/inventory/cluster will have an higher precedence, and so win if loaded.
+For example, a variable defined in /etc/ansible/inventory/group_vars/all/ will have the less precedence, and a variable defined in /etc/ansible/inventory/cluster will have a higher precedence, and so win if loaded.
 
 The full list of available variables precedence is provided in Ansible documentation: https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html#variable-precedence-where-should-i-put-a-variable
 
-This feature is key to the stack and key for system administrator to manipulate the **BlueBanquise** stack they way he/she wants.
+This feature is key to the stack and key for system administrator to manipulate the **BlueBanquise** stack the way he/she wants.
 
 For example, values can be set by default, and then redefined for some groups of hosts without changing the default for all others. Or it is simply possible to fix a dynamic variable to the desired value in hosts definitions if dynamic value is not the one expected. Etc.
 
@@ -209,16 +209,16 @@ Merge
 
 Ansible default hash_behaviour is replace. **BlueBanquise** is using merge.
 
-When using replace, when a dictionarry is impacted by the variables precedence mechanism, Ansible overwrite the full dictionarry if a variable has an higher precedence somewhere.
+When using replace, when a dictionary is impacted by the variable’s precedence mechanism, Ansible overwrite the full dictionary if a variable has a higher precedence somewhere.
 
-When using replace, Ansible will only update the related variable, and keep the original dictionarry and values for all other variables in this doctionarry.
+When using replace, Ansible will only update the related variable, and keep the original dictionary and values for all other variables in this dictionary.
 
 Jinja2
 ------
 
-Jinja2 is the templating language used by Ansible to render templates in roles. It is heavily used in the stack, and learing Jinja2 will often be needed to create custom roles. (But Jinja2 is very simple).
+Jinja2 is the templating language used by Ansible to render templates in roles. It is heavily used in the stack, and learning Jinja2 will often be needed to create custom roles. (But Jinja2 is very simple).
 
-Full documentation is available in a single page: https://jinja.palletsprojects.com/en/2.10.x/templates/
+Full documentation is available in a single page: `Jinja2 template designer <https://jinja.palletsprojects.com/en/2.10.x/templates/>`_
 
 Stack vocabulary
 ================
@@ -226,21 +226,21 @@ Stack vocabulary
 Icebergs
 --------
 
-Icebergs are logical (and often physical) isolation of ethernet management networks. Most of the time, icebergs are use to:
+Icebergs are logical (and often physical) isolation of ethernet management networks. Most of the time, icebergs are used to:
 
 * Spread load over multiple managements servers (for very large clusters). Icebergs are also often called "islands" in these cases.
 * Secure cluster by dividing specific usages, to prevent compromised system to access all the network.
 
 One Iceberg is composed of one or multiple managements servers, **in charge of the same pool of nodes**.
 
-**BlueBanquise** support many kind of configurations, but most common are:
+**BlueBanquise** support many kinds of configurations, but most common are:
 
 One iceberg
 ^^^^^^^^^^^
 
 .. image:: images/one_iceberg.svg
 
-For simple systems (small/medium HPC cluster, small enterprise network, university IT practical session room, etc), one iceberg scenario is the standard. One or multiple management will reach the sames ethernet administration networks, and federate the same pool of nodes.
+For simple systems (small/medium HPC cluster, small enterprise network, university IT practical session room, etc.), one iceberg scenario is the standard. One or multiple management will reach the same ethernet administration networks, and federate the same pool of nodes.
 
 .. image:: images/one_iceberg_example_1.svg
 
@@ -252,7 +252,7 @@ Multiple icebergs
 
 .. image:: images/multiple_icebergs.svg
 
-For advanced systems, (large HPC clusters needing load spreading with unified network, entreprise network, etc), multiple incebergs can be required. **BlueBanquise** allows multiple levels of icebergs, for complex needs. Also, a global_network can be defined so all nodes from all icebergs can communicate through this unified network (most of the time an Interconnect network).
+For advanced systems, (large HPC clusters needing load spreading with unified network, enterprise network, etc.), multiple icebergs can be required. **BlueBanquise** allows multiple levels of icebergs, for complex needs. Also, a global_network can be defined so all nodes from all icebergs can communicate through this unified network (most of the time an Interconnect network).
 
 .. image:: images/multiple_icebergs_example_1.svg
 
@@ -261,8 +261,9 @@ Equipment profiles
 
 In **BlueBanquise**, nodes are nearly always part of a group starting with prefix **equipment_**. These groups are called equipment profiles.
 
-They are used to provide hosts of this group the **equipment_profile** dictionarry, and other variables if nedeed. This doctionarry defines hosts operating system parameters, kernel parameters, partitionning, etc.
+They are used to provide hosts of this group the **equipment_profile** dictionary, and other variables if needed. This dictionary defines hosts operating system parameters, kernel parameters, partitioning, etc.
 
 These are key groups of the stack.
 
-**It is important to note that equipment_profiles dictionarry cannot be used at an upper level than group_vars**. It can, but you must NOT.
+**It is important to note that equipment_profiles dictionary cannot be used at an upper level than group_vars**. It can, but you must NOT.
+

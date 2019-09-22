@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>BlueBanquise Documentation &#8212; BlueBanquise_Documentation 1.0.0 documentation</title>
+    <title>BlueBanquise Documentation &#8212; BlueBanquise_Documentation 1.0.1 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -36,7 +36,6 @@
 <p>Welcome on BlueBanquise documentation.</p>
 <p>This documentation describes how to deploy, configure, and maintain BlueBanquise on different scenario clusters.</p>
 <p>Details are also given for each Ansible role of the stack, and how to build your own.</p>
-<p><a class="reference external" href="https://www.vrt.com.au/downloads/vrt-network-equipment">https://www.vrt.com.au/downloads/vrt-network-equipment</a></p>
 <div class="toctree-wrapper compound">
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
@@ -121,8 +120,42 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="roles.html">Roles</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="roles.html#core">CORE</a></li>
-<li class="toctree-l2"><a class="reference internal" href="roles.html#addons">ADDONS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="roles.html#core">CORE</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#conman">Conman</a></li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#dhcp-server">DHCP server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#dns-server">DNS server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#dns-client">DNS client</a></li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#hosts-file">Hosts file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#log-server">Log server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#log-client">Log client</a></li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#nfs-server">NFS server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#nfs-client">NFS client</a></li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#nic-network-interface-controler">NIC - Network Interface Controler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#pxe-stack">PXE Stack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#repositories-server">Repositories server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#repositories-client">Repositories client</a></li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#set-hostname">Set Hostname</a></li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#ssh-master">SSH master</a></li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#ssh-slave">SSH slave</a></li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#time-server">Time server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#time-client">Time client</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="roles.html#addons">ADDONS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#clustershell">ClusterShell</a></li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#openldap-client">OpenLDAP client</a></li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#openldap-server">OpenLDAP server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#prometheus-server">Prometheus server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#prometheus-client">Prometheus client</a></li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#report">Report</a></li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#slurm">Slurm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#users-basic">Users basic</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="references.html#graphics">Graphics</a></li>
 </ul>
 </li>
 </ul>
@@ -168,6 +201,7 @@
 <li class="toctree-l1"><a class="reference internal" href="configure_bluebanquise.html">Configure BlueBanquise</a></li>
 <li class="toctree-l1"><a class="reference internal" href="deploy_bluebanquise.html">Deploy BlueBanquise</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roles.html">Roles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
 </ul>
 
 <div class="relations">
@@ -201,7 +235,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2019, Oxedions.
+      &copy;2019, Oxedions, Johnny Keats.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>

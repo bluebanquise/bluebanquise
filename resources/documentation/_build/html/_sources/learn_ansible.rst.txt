@@ -4,9 +4,9 @@ Learn Ansible
 
 To understand how **BlueBanquise** works, it is essential to learn basis of Ansible.
 
-This sections try to provide key knowledge to at least be able to manipulate and edit the stack to your needs.
+This section tries to provide key knowledge to at least be able to manipulate and edit the stack to your needs.
 
-It is assumed here that your system is already installed, and that Ansible has also been installed. It is also assumed that **BlueBanquise** stack has not been installed yet, and so ANsible is freshly installed without modifications.
+It is assumed here that your system is already installed, and that Ansible has also been installed. It is also assumed that **BlueBanquise** stack has not been installed yet, and so Ansible is freshly installed without modifications.
 
 All work will be done on the current host.
 
@@ -55,9 +55,9 @@ Finally, add management1 host into the inventory. Create a file called /etc/ansi
 
   management1
 
-Our very basic Ansibe configuration is done. But one thing remain: we need to ensure our host (management1) can ssh to itself without password, as Ansible relies fully on the ssh to connecte to remote hosts.
+Our very basic Ansibe configuration is done. But one thing remains: we need to ensure our host (management1) can ssh to itself without password, as Ansible relies fully on the ssh to connect to remote hosts.
 
-Let's generate an ssh key (press enter multiple time):
+Let's generate a ssh key (press enter multiple time):
 
 .. code-block:: bash
 
@@ -132,20 +132,20 @@ Or all hosts:
 
   ansible all -m ping
 
-Also, it is possible to gather **facts**. Facts are dynamic variables, accessible only when Ansible is running on the target. Facts provides live information about the target: it's running kernel, it's linux distrubution, network or cpu information, etc.
+Also, it is possible to gather **facts**. Facts are dynamic variables, accessible only when Ansible is running on the target. Facts provides live information about the target: it's running kernel, it's linux distribution, network or cpu information, etc.
 
 .. code-block:: bash
 
   ansible -m setup --tree /dev/shm/ management1
 
-Then, open file /dev/shm/management1 to check it's content and the result of facts gathering.
+Then, open file /dev/shm/management1 to check its content and the result of facts gathering.
 
 ansible-inventory
 -----------------
 
-Ansible inventory command is extremly useful can will be massively used on this documentation.
+Ansible inventory command is extremely useful can will be massively used on this documentation.
 
-This commands allows to gather information from your inventory and check the expected output.
+This command allows to gather information from your inventory and check the expected output.
 
 Groups and hosts
 ^^^^^^^^^^^^^^^^
@@ -156,7 +156,7 @@ The command:
 
   ansible-inventory --graph
 
-Provide information about groups and hosts inside each groups:
+Provide information about groups and hosts inside each group:
 
 .. code-block:: bash
 
@@ -170,7 +170,7 @@ More will be seen later in this documentation.
 Host variables
 ^^^^^^^^^^^^^^
 
-To ouput variables for a specific host, and check for example your variable precedence mechanism provided what is expected, use:
+To output variables for a specific host, and check for example your variable precedence mechanism provided what is expected, use:
 
 .. code-block:: bash
 
@@ -194,7 +194,7 @@ Debug
 
 All of these commands accept verbose flags with -v, -vv, -vvv, etc. The more v, the more verbose.
 
-Also, it is possible to execute all of them with the variable ANSIBLE_DEBUG=1 set, which will dramatically increase output information (but infortunately not always relevant to our needs...).
+Also, it is possible to execute all of them with the variable ANSIBLE_DEBUG=1 set, which will dramatically increase output information (but unfortunately not always relevant to our needs...).
 
 For example, a very verbose execution would be:
 
@@ -210,7 +210,7 @@ Now that all important commands have been seen, it is time to add some variables
 #####However, for more fun and understand all the process, we will also create a very minimal playbook that will execute a simple task (no need for a role here): rendering a file with these variables as content, on the target hosts.
 #####Create a minimal playbook
 -------------------------
-######Create a file /etc/ansible/minimal_playbook.yml with the follwing content:
+######Create a file /etc/ansible/minimal_playbook.yml with the following content:
 
 Adding variables
 ----------------
@@ -251,7 +251,7 @@ Now, ensure management1 can see these variables:
     price: 6000
   [root@ ~]#
 
-Nice, we can now use these varibles for management1 when working on it.
+Nice, we can now use these variables for management1 when working on it.
 
 Let's add 2 other hosts: login1 and nfs1.
 
@@ -281,7 +281,7 @@ And now let's check login1 (when will exist) can access these variables also:
     price: 6000
   [root@ ~]#
 
-Perfect. It is time to play with groups, before comming back to variables to work on variables precedence.
+Perfect. It is time to play with groups, before coming back to variables to work on variables precedence.
 
 Configuring groups
 ------------------
@@ -298,7 +298,7 @@ Lets check current groups:
     |  |--nfs1
   [root@ ~]#
 
-All our hosts belongs to the ungrouped group and to the all group. But we want to be able to assign specific variables to each kind of equipments. We need to create groups.
+All our hosts belong to the ungrouped group and to the all group. But we want to be able to assign specific variables to each kind of equipment. We need to create groups.
 
 There are two ways to create groups. In YAML, directly in the hosts files, or using specific Ansible syntax in separate files. Both are useful, and we will combine them.
 
@@ -335,7 +335,7 @@ We can see that management1 is now member of group master, and that login1 and n
 
 The special string **hosts** in this file define that the string above is a group, and that strings bellow are hosts member of this group.
 
-It is also possibe to set groups in a group in this same file. Edit it again:
+It is also possible to set groups in a group in this same file. Edit it again:
 
 .. code-block:: yaml
 
@@ -407,7 +407,7 @@ And check the result:
     |--@ungrouped:
   [root@ ~]#
 
-Same concept apply here, with different syntax.
+Same concept applies here, with different syntax.
 
 You can find more information and examples here: https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 
@@ -418,7 +418,7 @@ Time to use all these groups.
 
 If you remember precedence system in Vocabulary section (see https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html#variable-precedence-where-should-i-put-a-variable) group_vars/all is in position 4 in the precedence. This is where we set our spaceship variables.
 
-Let's say now we whish to change our ship destination for management1 node only.
+Let's say now we wish to change our ship destination for management1 node only.
 
 Check current destination for all hosts:
 
@@ -434,7 +434,7 @@ Check current destination for all hosts:
 
 We can redefine the variable in group_vars/all (that apply to all hosts in the @all group, so everyone), but we only want to impact management1 node.
 
-In the precedence list, you can see that inventory host_vars are in position 9, so they will win against position 4 of group_vars/all. Lets use this.
+In the precedence list, you can see that inventory host_vars are in position 9, so they will win against position 4 of group_vars/all. Let’s use this.
 
 Edit file /etc/ansible/inventory/myhost.yml and add a destination variable under management1:
 
@@ -492,7 +492,7 @@ And check destinations again:
 
 Perfect. Setting a variable in the host definition file is equivalent to using host_vars folder. But host_vars folder is difficult to use when having a very large number of hosts, which is why in **BlueBanquise** we are using directly the host file.
 
-Let's say now we want to change the model of spaceship of all the slaves nodes. So not a single host, but all slaves members hosts.
+Let's say now we want to change the model of spaceship of all the slave nodes. So not a single host, but all slave members hosts.
 
 We are going to use level 6 in variables precedence: group_vars/. Create a directory called slave in group_vars:
 
@@ -521,7 +521,7 @@ And check variables of hosts:
 
 Prefect. Remember the pizza in Vocabulary section. Ansible just flatten the whole inventory, using precedence, and you obtain variables.
 
-Last point for this part, remember that in variables precedences, extra_vars is level 22 and always win, so adding extra vars when executing Ansible later will allow us to force variables at execution time for testing purposes or just because we need it.
+Last point for this part, remember that in variable’s precedence, extra_vars is level 22 and always win, so adding extra vars when executing Ansible later will allow us to force variables at execution time for testing purposes or just because we need it.
 
 
 Roles and playbooks
@@ -529,7 +529,7 @@ Roles and playbooks
 
 Time to apply some configuration on our target host.
 
-We are going to create a role that install a web server package, create a very basic web page with our ships information, and start the web server service.
+We are going to create a role that install a web server package, create a very basic web page with our ship’s information, and start the web server service.
 
 Role
 ----
@@ -542,7 +542,7 @@ Create a role called "shipyard", with needed folders:
   mkdir /etc/ansible/roles/shipyard/tasks
   mkdir /etc/ansible/roles/shipyard/templates
 
-Tasks folder contains tasks to perform, and main.yml file inside will be the starting point for Ansible. Templates folder will contains our templates (configuration files) in Jinja2 language.
+Tasks folder contains tasks to perform, and main.yml file inside will be the starting point for Ansible. Templates folder will contain our templates (configuration files) in Jinja2 language.
 
 Task
 ^^^^
@@ -552,12 +552,12 @@ Create file /etc/ansible/roles/shipyard/tasks/main.yml with the following conten
 .. code-block:: yaml
 
   ---
-  
+
   - name: Package
     package:
       name: httpd
       state: present
-  
+
   - name: Template >> /var/www/html/index.html
     template:
       src: index.html.j2
@@ -567,7 +567,7 @@ Create file /etc/ansible/roles/shipyard/tasks/main.yml with the following conten
       mode: 0644
     tags:
       - templates
-  
+
   - name: Start services
     service:
       name: httpd
@@ -626,9 +626,9 @@ Simply put, target of the playbook is host management1, and role to apply is shi
 
 Skip the tags for now.
 
-Note that hosts can be a list of hosts (comma separated: management1,login1,nfs1), or a group of hosts (all, slaves, color, etc).
+Note that hosts can be a list of hosts (comma separated: management1,login1,nfs1), or a group of hosts (all, slaves, color, etc.).
 
-Now, execute the playbook, and let Ansible do it's job:
+Now, execute the playbook, and let Ansible do its job:
 
 .. code-block:: bash
 
@@ -667,7 +667,7 @@ Edit file /etc/ansible/roles/shipyard/templates/index.html.j2 to make it this wa
   </body>
   </html>
 
-And let's reexecute the playbook. But we have already installed the package and started the service, so let's ask Ansible to only work on the tags 'templates' to fasten the execution:
+And let's re-execute the playbook. But we have already installed the package and started the service, so let's ask Ansible to only work on the tags 'templates' to fasten the execution:
 
 .. code-block:: bash
 
@@ -687,11 +687,12 @@ You can see multiple things:
 Now regarding to Jinja2:
 
 * {{ }} allows to insert a variable in the destination file.
-* {% %} are Jinja2 instructions (for, if, etc).
+* {% %} are Jinja2 instructions (for, if, etc.).
 * {# #} are Jinja2 commentaries.
-* The reamining is put in the destination file "as is".
+* The remaining is put in the destination file "as is".
 
-You can experiment with this template to understand the whole mechanism. The whole Jinja2 documentation can be found here: https://jinja.palletsprojects.com/en/2.10.x/templates/
+You can experiment with this template to understand the whole mechanism. The whole Jinja2 documentation can be found here: `Jinja2 template designer <https://jinja.palletsprojects.com/en/2.10.x/templates/>`_
 
 You should now understand the very basis of Ansible.
 If you feel something is missing in this quick Ansible training, please do not hesitate to ask us to add elements.
+

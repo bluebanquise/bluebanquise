@@ -7,24 +7,24 @@ This part is an agregations of all the **BlueBanquise** roles readme.
 CORE
 ====
 
-.. include:: roles/CORE_conman/readme.rst
-.. include:: roles/CORE_dhcp_server/readme.rst
-.. include:: roles/CORE_dns_server/readme.rst
-.. include:: roles/CORE_dns_client/readme.rst
-.. include:: roles/CORE_hosts_file/readme.rst
-.. include:: roles/CORE_log_server/readme.rst
-.. include:: roles/CORE_log_client/readme.rst
-.. include:: roles/CORE_nfs_server/readme.rst
-.. include:: roles/CORE_nfs_client/readme.rst
-.. include:: roles/CORE_nic/readme.rst
-.. include:: roles/CORE_pxe_stack/readme.rst
-.. include:: roles/CORE_repositories_server/readme.rst
-.. include:: roles/CORE_repositories_client/readme.rst
-.. include:: roles/CORE_set_hostname/readme.rst
-.. include:: roles/CORE_ssh_master/readme.rst
-.. include:: roles/CORE_ssh_slave/readme.rst
-.. include:: roles/CORE_time_server/readme.rst
-.. include:: roles/CORE_time_client/readme.rst
+.. include:: roles/core/conman/readme.rst
+.. include:: roles/core/dhcp_server/readme.rst
+.. include:: roles/core/dns_server/readme.rst
+.. include:: roles/core/dns_client/readme.rst
+.. include:: roles/core/hosts_file/readme.rst
+.. include:: roles/core/log_server/readme.rst
+.. include:: roles/core/log_client/readme.rst
+.. include:: roles/core/nfs_server/readme.rst
+.. include:: roles/core/nfs_client/readme.rst
+.. include:: roles/core/nic/readme.rst
+.. include:: roles/core/pxe_stack/readme.rst
+.. include:: roles/core/repositories_server/readme.rst
+.. include:: roles/core/repositories_client/readme.rst
+.. include:: roles/core/set_hostname/readme.rst
+.. include:: roles/core/ssh_master/readme.rst
+.. include:: roles/core/ssh_slave/readme.rst
+.. include:: roles/core/time_server/readme.rst
+.. include:: roles/core/time_client/readme.rst
 
 ADDONS
 ======

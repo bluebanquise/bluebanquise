@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>Deploy BlueBanquise &#8212; BlueBanquise_Documentation 1.0.0 documentation</title>
+    <title>Deploy BlueBanquise &#8212; BlueBanquise_Documentation 1.0.1 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -105,7 +105,7 @@ systemctl status named
 If your device cannot boot on LAN, use iso or usb image provided on management1 in /var/lib/tftpboot. These images will start a LAN boot automatically.</p>
 <p>In <strong>BlueBanquise</strong>, PXE process has been made so that any kind of hardware able to boot PXE, USB or CDrom can start deployment.</p>
 <p>The following schema provides a macroscopic map of the process:</p>
-<img alt="_images/iPXE_process.svg" src="_images/iPXE_process.svg" /><p>Whatever the boot source, and whatever Legacy Bios or uEFI, all converge to <a class="reference external" href="http://nextserver/convergence.ipxe">http://nextserver/convergence.ipxe</a>. Then this file chain to node specific file in nodes (this file is generated using bootset command). The node specific file contains the default entry for the iPXE menu, and chain to menu.ipxe file. The menu file display a simple menu, and wait 10s for user before starting the default entry (which can be os deployment, or boot to disk).</p>
+<img alt="_images/iPXE_process_v3.svg" src="_images/iPXE_process_v3.svg" /><p>Whatever the boot source, and whatever Legacy Bios or uEFI, all converge to <a class="reference external" href="http://nextserver/convergence.ipxe">http://nextserver/convergence.ipxe</a>. Then this file chain to node specific file in nodes (this file is generated using bootset command). The node specific file contains the default entry for the iPXE menu, and chain to menu.ipxe file. The menu file display a simple menu, and wait 10s for user before starting the default entry (which can be os deployment, or boot to disk).</p>
 <div class="section" id="bootset">
 <h3>bootset<a class="headerlink" href="#bootset" title="Permalink to this headline">¶</a></h3>
 <p>Before booting remote nodes in PXE, we need to ask management1 to activate remote nodes deployment. If not, remote nodes will boot on disk, even when booting over LAN.</p>
@@ -189,6 +189,7 @@ ansible-playbook /etc/ansible/computes.yml --extra-vars <span class="s2">&quot;t
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="roles.html">Roles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
 </ul>
 
 <div class="relations">
@@ -223,7 +224,7 @@ ansible-playbook /etc/ansible/computes.yml --extra-vars <span class="s2">&quot;t
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2019, Oxedions.
+      &copy;2019, Oxedions, Johnny Keats.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>

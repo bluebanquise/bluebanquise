@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>Roles &#8212; BlueBanquise_Documentation 1.0.0 documentation</title>
+    <title>Roles &#8212; BlueBanquise_Documentation 1.0.1 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -14,6 +14,7 @@
     <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="References" href="references.html" />
     <link rel="prev" title="Deploy BlueBanquise" href="deploy_bluebanquise.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -36,9 +37,633 @@
 <p>This part is an agregations of all the <strong>BlueBanquise</strong> roles readme.</p>
 <div class="section" id="core">
 <h2>CORE<a class="headerlink" href="#core" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="conman">
+<h3>Conman<a class="headerlink" href="#conman" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="description">
+<h4>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h4>
+<p>This role provides a conman daemon that logs ipmi serial consols.</p>
+<p>Validated on:</p>
+<ul class="simple">
+<li><p>Centos 7.6</p></li>
+<li><p>Ubuntu 18.04</p></li>
+</ul>
+</div>
+<div class="section" id="instructions">
+<h4>Instructions<a class="headerlink" href="#instructions" title="Permalink to this headline">¶</a></h4>
+<p>To login into a console, use:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conman mynode
+</pre></div>
+</div>
+<p>To exit, simply press <strong>&amp;</strong> then <strong>.</strong> .</p>
+</div>
+<div class="section" id="changelog">
+<h4>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>1.0.2: Tested on ubuntu 18.04 and validated. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>1.0.1: Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="dhcp-server">
+<h3>DHCP server<a class="headerlink" href="#dhcp-server" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id1">
+<h4>Description<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h4>
+<p>This role provides a standard dhcp server combined with the iPXE roms of BlueBanquise.</p>
+</div>
+<div class="section" id="id2">
+<h4>Instructions<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h4>
+<p>Dhcp will only take into account networks from the current iceberg, and with naming related to administration network (by default iceX-Y).</p>
+<p>Also, ensure dhcp is set to tru for your network.</p>
+<p>It is possible to combine networks into shared-networks when multiple subnets are on the same NIC.
+To do so, add a variable in the network definition.</p>
+<p>For example to add ice1-1 and ice1-2 into the same shared network, define them this way:</p>
+<p>Ice1-1:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">networks</span><span class="p">:</span>
+  <span class="nt">ice1-1</span><span class="p">:</span>
+    <span class="nt">subnet</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.10.0.0</span>
+    <span class="nt">prefix</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">16</span>
+    <span class="nt">shared_network</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">wolf</span>
+    <span class="l l-Scalar l-Scalar-Plain">...</span>
+</pre></div>
+</div>
+<p>And ice1-2:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">networks</span><span class="p">:</span>
+  <span class="nt">ice1-2</span><span class="p">:</span>
+    <span class="nt">subnet</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.30.0.0</span>
+    <span class="nt">prefix</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">16</span>
+    <span class="nt">shared_network</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">wolf</span>
+    <span class="l l-Scalar l-Scalar-Plain">...</span>
+</pre></div>
+</div>
+<p>shared_network variable is optional and is simply ignored if not set.</p>
+</div>
+<div class="section" id="id3">
+<h4>Changelog<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>1.0.2: Added Ubuntu 18.04 compatibility. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>1.0.1: Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="dns-server">
+<h3>DNS server<a class="headerlink" href="#dns-server" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id4">
+<h4>Description<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h4>
+<p>This role provides a basic dns server based on bind.</p>
+</div>
+<div class="section" id="id5">
+<h4>Instructions<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h4>
+<p>External hosts in /etc/ansible/all/general_settings/external_hosts.yml are added automatically into this DNS.</p>
+</div>
+<div class="section" id="id6">
+<h4>Changelog<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>1.0.2: Added Ubuntu 18.04 compatibility. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>1.0.1: Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="dns-client">
+<h3>DNS client<a class="headerlink" href="#dns-client" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id7">
+<h4>Description<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h4>
+<p>This role provides a basic /etc/resolv.conf file.</p>
+</div>
+<div class="section" id="id8">
+<h4>Instructions<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h4>
+<p>Configuration is made in group_vars/all/general_settings/network.yml.</p>
+<p>It is possible to add here external DNS servers for clients.</p>
+</div>
+<div class="section" id="id9">
+<h4>Changelog<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>1.0.2: Added variable for role version. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>1.0.1: Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="hosts-file">
+<h3>Hosts file<a class="headerlink" href="#hosts-file" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id10">
+<h4>Description<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h4>
+<p>This role provides a basic /etc/hosts files.</p>
+</div>
+<div class="section" id="id11">
+<h4>Instructions<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h4>
+<p>External hosts in /etc/ansible/all/general_settings/external_hosts.yml are added automatically into this hosts file.</p>
+</div>
+<div class="section" id="id12">
+<h4>Changelog<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>1.0.3: Accelerated mode. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>1.0.2: Added role version. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>1.0.1: Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="log-server">
+<h3>Log server<a class="headerlink" href="#log-server" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id13">
+<h4>Description<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h4>
+<p>This role provides an rsyslog server to gather logs of all hosts.</p>
+</div>
+<div class="section" id="id14">
+<h4>Instructions<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h4>
+<p>All logs are separated by systemd instances into /var/log/rsyslog/ .</p>
+</div>
+<div class="section" id="id15">
+<h4>Changelog<a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>1.0.1: Fixed bad template. Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="log-client">
+<h3>Log client<a class="headerlink" href="#log-client" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id16">
+<h4>Description<a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h4>
+<p>This role provides an rsyslog client.</p>
+</div>
+<div class="section" id="id17">
+<h4>Instructions<a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h4>
+<p>NA</p>
+</div>
+<div class="section" id="to-be-done">
+<h4>To be done<a class="headerlink" href="#to-be-done" title="Permalink to this headline">¶</a></h4>
+<p>Ensure all logs are get, and if possible try to keep local login at the same time.</p>
+</div>
+<div class="section" id="id18">
+<h4>Changelog<a class="headerlink" href="#id18" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>1.0.1: Fixed bad template. Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="nfs-server">
+<h3>NFS server<a class="headerlink" href="#nfs-server" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id19">
+<h4>Description<a class="headerlink" href="#id19" title="Permalink to this headline">¶</a></h4>
+<p>This role provides an automatic nfs server that export on good networks desired directories.</p>
+</div>
+<div class="section" id="id20">
+<h4>Instructions<a class="headerlink" href="#id20" title="Permalink to this headline">¶</a></h4>
+<p>All configuration is done in group_vars/all/general_settings/nfs.yml .</p>
+</div>
+<div class="section" id="id21">
+<h4>Changelog<a class="headerlink" href="#id21" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>1.0.2: Added Ubuntu 18.04 compatibility. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>1.0.1: Fixed bad template. Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="nfs-client">
+<h3>NFS client<a class="headerlink" href="#nfs-client" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id22">
+<h4>Description<a class="headerlink" href="#id22" title="Permalink to this headline">¶</a></h4>
+<p>This role provides an automatic nfs client that mount targets and create local directories if needed.</p>
+</div>
+<div class="section" id="id23">
+<h4>Instructions<a class="headerlink" href="#id23" title="Permalink to this headline">¶</a></h4>
+<p>All configuration is done in group_vars/all/general_settings/nfs.yml .</p>
+</div>
+<div class="section" id="id24">
+<h4>Changelog<a class="headerlink" href="#id24" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>1.0.2: Added Ubuntu 18.04 compatibility. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>1.0.1: Fixed bad template. Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="nic-network-interface-controler">
+<h3>NIC - Network Interface Controler<a class="headerlink" href="#nic-network-interface-controler" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id25">
+<h4>Description<a class="headerlink" href="#id25" title="Permalink to this headline">¶</a></h4>
+<p>This role configure network interfaces to provide desired ip, prefix, gateway, etc.</p>
+<p>This role is still under work, as nmcli is not supported in RHEL 8 for now, and that this role need to handle much more features.</p>
+</div>
+<div class="section" id="id26">
+<h4>Instructions<a class="headerlink" href="#id26" title="Permalink to this headline">¶</a></h4>
+<p>NA</p>
+</div>
+<div class="section" id="id27">
+<h4>To be done<a class="headerlink" href="#id27" title="Permalink to this headline">¶</a></h4>
+<p>Add more features, as nmcli Ansible module can do much more.</p>
+<ul class="simple">
+<li><p>VLANs</p></li>
+<li><p>LACP/Bond</p></li>
+<li><p>Non network linked NIC</p></li>
+<li><p>Multi IP</p></li>
+</ul>
+</div>
+<div class="section" id="id28">
+<h4>Changelog<a class="headerlink" href="#id28" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>1.0.2: Adding Ubuntu 18.04 compatibility. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>1.0.1: Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="pxe-stack">
+<h3>PXE Stack<a class="headerlink" href="#pxe-stack" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id29">
+<h4>Description<a class="headerlink" href="#id29" title="Permalink to this headline">¶</a></h4>
+<p>This role provides the whole PXE stack. It is a key feature of the stack.</p>
+</div>
+<div class="section" id="id30">
+<h4>Instructions<a class="headerlink" href="#id30" title="Permalink to this headline">¶</a></h4>
+<p>All files are located in /var/www/html/preboot_execution_environment</p>
+<p>See main documentation about this role.</p>
+</div>
+<div class="section" id="id31">
+<h4>To be done<a class="headerlink" href="#id31" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>Issue when deploying ubuntu 18.04. Very long hang after packages check. Install continue after like 10 minutes of hang. Not blocking but boring…</p></li>
+</ul>
+</div>
+<div class="section" id="id32">
+<h4>Changelog<a class="headerlink" href="#id32" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>1.0.2: Add Ubuntu 18.04 compatibility. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>1.0.1: Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="repositories-server">
+<h3>Repositories server<a class="headerlink" href="#repositories-server" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id33">
+<h4>Description<a class="headerlink" href="#id33" title="Permalink to this headline">¶</a></h4>
+<p>This role simply configure repositories server (only install and start web server).</p>
+</div>
+<div class="section" id="id34">
+<h4>Instructions<a class="headerlink" href="#id34" title="Permalink to this headline">¶</a></h4>
+<p>NA.</p>
+</div>
+<div class="section" id="id35">
+<h4>Changelog<a class="headerlink" href="#id35" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>1.0.2: Regrouped all distribs into a main file. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>1.0.1: Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="repositories-client">
+<h3>Repositories client<a class="headerlink" href="#repositories-client" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id36">
+<h4>Description<a class="headerlink" href="#id36" title="Permalink to this headline">¶</a></h4>
+<p>This role simply configure repositories for client hosts.</p>
+</div>
+<div class="section" id="id37">
+<h4>Instructions<a class="headerlink" href="#id37" title="Permalink to this headline">¶</a></h4>
+<p>NA.</p>
+</div>
+<div class="section" id="id38">
+<h4>To be done<a class="headerlink" href="#id38" title="Permalink to this headline">¶</a></h4>
+<p>Need to clear up the Ubuntu repositories process, still not clear how to handle own made repos and officials repos as Ubuntu add local repos everywhere in the sources.list file.</p>
+</div>
+<div class="section" id="id39">
+<h4>Changelog<a class="headerlink" href="#id39" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>1.0.2: Added Ubuntu 18.04 compatibility. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>1.0.1: Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="set-hostname">
+<h3>Set Hostname<a class="headerlink" href="#set-hostname" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id40">
+<h4>Description<a class="headerlink" href="#id40" title="Permalink to this headline">¶</a></h4>
+<p>This role simply set a node hostname.</p>
+</div>
+<div class="section" id="id41">
+<h4>Instructions<a class="headerlink" href="#id41" title="Permalink to this headline">¶</a></h4>
+<p>NA.</p>
+</div>
+<div class="section" id="id42">
+<h4>Changelog<a class="headerlink" href="#id42" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>1.0.1: Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="ssh-master">
+<h3>SSH master<a class="headerlink" href="#ssh-master" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id43">
+<h4>Description<a class="headerlink" href="#id43" title="Permalink to this headline">¶</a></h4>
+<p>This role configure the ssh access of know hosts to make this access through nodes main network.</p>
+</div>
+<div class="section" id="id44">
+<h4>Instructions<a class="headerlink" href="#id44" title="Permalink to this headline">¶</a></h4>
+<p>Configuration is done in /root/.ssh/config</p>
+</div>
+<div class="section" id="id45">
+<h4>To be done<a class="headerlink" href="#id45" title="Permalink to this headline">¶</a></h4>
+<p>Add ProxyJump for icebergs</p>
+</div>
+<div class="section" id="id46">
+<h4>Changelog<a class="headerlink" href="#id46" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>1.0.1: Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="ssh-slave">
+<h3>SSH slave<a class="headerlink" href="#ssh-slave" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id47">
+<h4>Description<a class="headerlink" href="#id47" title="Permalink to this headline">¶</a></h4>
+<p>This role configure the ssh client authorized public key.</p>
+</div>
+<div class="section" id="id48">
+<h4>Instructions<a class="headerlink" href="#id48" title="Permalink to this headline">¶</a></h4>
+<p>NA</p>
+</div>
+<div class="section" id="id49">
+<h4>Changelog<a class="headerlink" href="#id49" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>1.0.1: Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="time-server">
+<h3>Time server<a class="headerlink" href="#time-server" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id50">
+<h4>Description<a class="headerlink" href="#id50" title="Permalink to this headline">¶</a></h4>
+<p>This role provides a time server based on Chrony.</p>
+</div>
+<div class="section" id="id51">
+<h4>Instructions<a class="headerlink" href="#id51" title="Permalink to this headline">¶</a></h4>
+<p>To force time synchronisation, use:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>chronyc -a makestep
+</pre></div>
+</div>
+</div>
+<div class="section" id="id52">
+<h4>To be done<a class="headerlink" href="#id52" title="Permalink to this headline">¶</a></h4>
+<p>Icebergs with stratums levels.</p>
+</div>
+<div class="section" id="id53">
+<h4>Changelog<a class="headerlink" href="#id53" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>1.0.1: Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="time-client">
+<h3>Time client<a class="headerlink" href="#time-client" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id54">
+<h4>Description<a class="headerlink" href="#id54" title="Permalink to this headline">¶</a></h4>
+<p>This role provides a time client based on Chrony.</p>
+</div>
+<div class="section" id="id55">
+<h4>Instructions<a class="headerlink" href="#id55" title="Permalink to this headline">¶</a></h4>
+<p>To force time synchronisation, use:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>chronyc -a makestep
+</pre></div>
+</div>
+</div>
+<div class="section" id="id56">
+<h4>Changelog<a class="headerlink" href="#id56" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>1.0.1: Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
+</ul>
+</div>
+</div>
 </div>
 <div class="section" id="addons">
 <h2>ADDONS<a class="headerlink" href="#addons" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="clustershell">
+<h3>ClusterShell<a class="headerlink" href="#clustershell" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id57">
+<h4>Description<a class="headerlink" href="#id57" title="Permalink to this headline">¶</a></h4>
+<p>This role provides clustershell and groups for clustershell (based on Ansible groups).</p>
+</div>
+<div class="section" id="id58">
+<h4>Instructions<a class="headerlink" href="#id58" title="Permalink to this headline">¶</a></h4>
+<p>Check groups using:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>nodeset -LL
+</pre></div>
+</div>
+</div>
+<div class="section" id="id59">
+<h4>To be done<a class="headerlink" href="#id59" title="Permalink to this headline">¶</a></h4>
+<p>Tree execution mode is missing.</p>
+</div>
+<div class="section" id="id60">
+<h4>Changelog<a class="headerlink" href="#id60" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>1.0.1: Fixed bad template. Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="openldap-client">
+<h3>OpenLDAP client<a class="headerlink" href="#openldap-client" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id61">
+<h4>Description<a class="headerlink" href="#id61" title="Permalink to this headline">¶</a></h4>
+<p>This role provides a basic but UNSECURE ldap client based on SSSD.</p>
+</div>
+<div class="section" id="id62">
+<h4>Instructions<a class="headerlink" href="#id62" title="Permalink to this headline">¶</a></h4>
+<p>NA</p>
+</div>
+<div class="section" id="id63">
+<h4>To be done<a class="headerlink" href="#id63" title="Permalink to this headline">¶</a></h4>
+<p>Enable encryption to secure this role.</p>
+</div>
+<div class="section" id="id64">
+<h4>Changelog<a class="headerlink" href="#id64" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>1.0.1: Fixed bad template. Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="openldap-server">
+<h3>OpenLDAP server<a class="headerlink" href="#openldap-server" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id65">
+<h4>Description<a class="headerlink" href="#id65" title="Permalink to this headline">¶</a></h4>
+<p>This role provides a basic but UNSECURE ldap server. It also provides phpldapadmin configuration to manage LDAP.</p>
+</div>
+<div class="section" id="id66">
+<h4>Instructions<a class="headerlink" href="#id66" title="Permalink to this headline">¶</a></h4>
+<p>Login into <a class="reference external" href="http://localhost/phpldapadmin">http://localhost/phpldapadmin</a> to manage LDAP.</p>
+<p>Keep in mind this role is for the time being unsecure.</p>
+</div>
+<div class="section" id="id67">
+<h4>To be done<a class="headerlink" href="#id67" title="Permalink to this headline">¶</a></h4>
+<p>Enable encryption to secure this role.</p>
+</div>
+<div class="section" id="id68">
+<h4>Changelog<a class="headerlink" href="#id68" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>1.0.1: Fixed bad template. Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="prometheus-server">
+<h3>Prometheus server<a class="headerlink" href="#prometheus-server" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id69">
+<h4>Description<a class="headerlink" href="#id69" title="Permalink to this headline">¶</a></h4>
+<p>This role deploy prometheus server with alertmanager.</p>
+</div>
+<div class="section" id="id70">
+<h4>Instructions<a class="headerlink" href="#id70" title="Permalink to this headline">¶</a></h4>
+<p>Prometheus is available at <a class="reference external" href="http://localhost:9090">http://localhost:9090</a></p>
+<p>Alertmanager is available at <a class="reference external" href="http://localhost:9093">http://localhost:9093</a></p>
+<p>Node_exporter is available at <a class="reference external" href="http://localhost:9100">http://localhost:9100</a></p>
+</div>
+<div class="section" id="id71">
+<h4>To be done<a class="headerlink" href="#id71" title="Permalink to this headline">¶</a></h4>
+<p>Allow groups alerts selection.</p>
+</div>
+<div class="section" id="id72">
+<h4>Changelog<a class="headerlink" href="#id72" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>1.0.1: Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="prometheus-client">
+<h3>Prometheus client<a class="headerlink" href="#prometheus-client" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id73">
+<h4>Description<a class="headerlink" href="#id73" title="Permalink to this headline">¶</a></h4>
+<p>This role deploy node_exporter for Prometheus queries.</p>
+</div>
+<div class="section" id="id74">
+<h4>Instructions<a class="headerlink" href="#id74" title="Permalink to this headline">¶</a></h4>
+<p>Node_exporter is available at <a class="reference external" href="http://localhost:9100">http://localhost:9100</a></p>
+</div>
+<div class="section" id="id75">
+<h4>To be done<a class="headerlink" href="#id75" title="Permalink to this headline">¶</a></h4>
+<p>Allow groups alerts selection.</p>
+</div>
+<div class="section" id="id76">
+<h4>Changelog<a class="headerlink" href="#id76" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>1.0.0: Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>1.0.0: Role creation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="report">
+<h3>Report<a class="headerlink" href="#report" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id77">
+<h4>Description<a class="headerlink" href="#id77" title="Permalink to this headline">¶</a></h4>
+<p>This role try to provide sys admin few useful tools.</p>
+<ul class="simple">
+<li><p>An automatic known issue paterns checker for the stack</p></li>
+<li><p>Many visual reports (inventory, playbooks, network, facts)</p></li>
+</ul>
+</div>
+<div class="section" id="id78">
+<h4>Instructions<a class="headerlink" href="#id78" title="Permalink to this headline">¶</a></h4>
+<p>Report is available at <a class="reference external" href="http://localhost/report/index.html">http://localhost/report/index.html</a></p>
+</div>
+<div class="section" id="id79">
+<h4>To be done<a class="headerlink" href="#id79" title="Permalink to this headline">¶</a></h4>
+<p>Many things…</p>
+</div>
+<div class="section" id="id80">
+<h4>Changelog<a class="headerlink" href="#id80" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>1.0.1: Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="slurm">
+<h3>Slurm<a class="headerlink" href="#slurm" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id81">
+<h4>Description<a class="headerlink" href="#id81" title="Permalink to this headline">¶</a></h4>
+<p>This role provides slurm configuration for server, client and login nodes.</p>
+</div>
+<div class="section" id="id82">
+<h4>Instructions<a class="headerlink" href="#id82" title="Permalink to this headline">¶</a></h4>
+<p>To use this role for all 3 types of nodes, simply add a vars in the playbook when loading the role. Extra vers is <strong>slurm_profile</strong>.</p>
+<p>For a controler (server), use:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span> <span class="nt">role</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">HPC_slurm</span>
+  <span class="nt">tags</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">HPC_slurm</span>
+  <span class="nt">vars</span><span class="p">:</span>
+    <span class="nt">slurm_profile</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">controler</span>
+</pre></div>
+</div>
+<p>For a compute node (client), use:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span> <span class="nt">role</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">HPC_slurm</span>
+  <span class="nt">tags</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">HPC_slurm</span>
+  <span class="nt">vars</span><span class="p">:</span>
+    <span class="nt">slurm_profile</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">node</span>
+</pre></div>
+</div>
+<p>And for a login (passive client), use:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span> <span class="nt">role</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">HPC_slurm</span>
+  <span class="nt">tags</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">HPC_slurm</span>
+  <span class="nt">vars</span><span class="p">:</span>
+    <span class="nt">slurm_profile</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">passive</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id83">
+<h4>To be done<a class="headerlink" href="#id83" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>slurmdbd + mariadb</p></li>
+<li><p>static file</p></li>
+</ul>
+</div>
+<div class="section" id="id84">
+<h4>Changelog<a class="headerlink" href="#id84" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>1.0.1: Documentation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="users-basic">
+<h3>Users basic<a class="headerlink" href="#users-basic" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id85">
+<h4>Description<a class="headerlink" href="#id85" title="Permalink to this headline">¶</a></h4>
+<p>This role provides a very basic users management, for simple clusters.</p>
+</div>
+<div class="section" id="id86">
+<h4>Instructions<a class="headerlink" href="#id86" title="Permalink to this headline">¶</a></h4>
+<p>Copy addon/users_basic.yml into /etc/ansible/inventory/group_vars/all/addons folder.</p>
+<p>Then edit this file according to your needs, and play this role on all hosts with users.</p>
+<p>To generate an sha512 password, use the following command (python &gt;3.3):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python -c <span class="s1">&#39;import crypt,getpass; print(crypt.crypt(getpass.getpass(), crypt.mksalt(crypt.METHOD_SHA512)))&#39;</span>
+</pre></div>
+</div>
+<p>Or (python 2):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python -c <span class="s2">&quot;import crypt,random,string; print crypt.crypt(raw_input(&#39;clear-text password: &#39;), &#39;\$6\$&#39; + &#39;&#39;.join([random.choice(string.ascii_letters + string.digits) for _ in range(16)]))&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id87">
+<h4>Changelog<a class="headerlink" href="#id87" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>1.0.1: Documentation and ressources. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
+</ul>
+</div>
+</div>
 </div>
 </div>
 
@@ -73,10 +698,41 @@
 <li class="toctree-l1"><a class="reference internal" href="configure_bluebanquise.html">Configure BlueBanquise</a></li>
 <li class="toctree-l1"><a class="reference internal" href="deploy_bluebanquise.html">Deploy BlueBanquise</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Roles</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#core">CORE</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#addons">ADDONS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#core">CORE</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#conman">Conman</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dhcp-server">DHCP server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dns-server">DNS server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dns-client">DNS client</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hosts-file">Hosts file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#log-server">Log server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#log-client">Log client</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nfs-server">NFS server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nfs-client">NFS client</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nic-network-interface-controler">NIC - Network Interface Controler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pxe-stack">PXE Stack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#repositories-server">Repositories server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#repositories-client">Repositories client</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#set-hostname">Set Hostname</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ssh-master">SSH master</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ssh-slave">SSH slave</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#time-server">Time server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#time-client">Time client</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#addons">ADDONS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#clustershell">ClusterShell</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#openldap-client">OpenLDAP client</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#openldap-server">OpenLDAP server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#prometheus-server">Prometheus server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#prometheus-client">Prometheus client</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#report">Report</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#slurm">Slurm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#users-basic">Users basic</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
 </ul>
 
 <div class="relations">
@@ -84,6 +740,7 @@
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="deploy_bluebanquise.html" title="previous chapter">Deploy BlueBanquise</a></li>
+      <li>Next: <a href="references.html" title="next chapter">References</a></li>
   </ul></li>
 </ul>
 </div>
@@ -110,7 +767,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2019, Oxedions.
+      &copy;2019, Oxedions, Johnny Keats.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.0</a>
