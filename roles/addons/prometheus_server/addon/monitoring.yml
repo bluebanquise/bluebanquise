@@ -1,0 +1,4 @@
+monitoring:
+  alerts:
+    - ExporterDown
+    - OutOfDiskSpace

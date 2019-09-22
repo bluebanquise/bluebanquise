@@ -1,0 +1,15 @@
+{# The graal: https://awesome-prometheus-alerts.grep.to/rules.html #}
+
+groups:
+- name: General alerts
+  rules:
+  - alert: ExporterDown
+    expr: up{job=~"{% for equipment in j2_equipment_groups_list %}{% if (hostvars[groups[equipment][0]]['monitoring'] is defined and not none) and (hostvars[groups[equipment][0]]['monitoring']['alerts'] is defined and not none) and (hostvars[groups[equipment][0]]['monitoring']['alerts'] is iterable) and ('ExporterDown' in hostvars[groups[equipment][0]]['monitoring']['alerts']) %}{{equipment}}|{% endif %}{% endfor %}"} == 0
+#    expr: up{job=~"equipment_typeC"} == 0
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Exporter down (instance {{'{{ $labels.instance }}'}})"
+      description: "Prometheus exporter down\n  VALUE = {{'{{ $value }}'}}\n  LABELS: {{'{{ $labels }}'}}"
+
