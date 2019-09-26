@@ -1,4 +1,5 @@
 role_version: 1.0.2
+
 packages_to_install:
   opensuse_leap:
     _15:
@@ -7,11 +8,16 @@ packages_to_install:
     _18:
       - apache2
   redhat:
+    _7:
+      - httpd
     _8:
       - httpd
   centos:
     _7:
       - httpd
+    _8:
+      - httpd
+
 services_to_start:
   opensuse_leap:
     _15:
@@ -20,9 +26,14 @@ services_to_start:
     _18:
       - apache2
   redhat:
+    _7:
+      - httpd
     _8:
       - httpd
   centos:
     _7:
       - httpd
+    _8:
+      - httpd
+
 

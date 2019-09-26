@@ -4,36 +4,53 @@ apache_user:
   ubuntu:
     _18: www-data
   redhat:
+    _7: apache
     _8: apache
   centos:
     _7: apache
+    _8: apache
+
 apache_conf_path:
   ubuntu:
     _18: /etc/apache2/conf-enabled
   redhat:
+    _7: /etc/httpd/conf.d
     _8: /etc/httpd/conf.d
   centos:
     _7: /etc/httpd/conf.d
+    _8: /etc/httpd/conf.d
+
 apache_cgi_module:
   ubuntu:
     _18: cgid
   redhat:
+    _7: cgi
     _8: cgid
   centos:
     _7: cgi
+    _8: cgid
+
 packages_to_install:
   ubuntu:
     _18:
       - atftpd
-      - bluebanquiseipxe
+      - ipxe-bluebanquise
       - apache2
       - python3
       - python3-yaml
       - python3-clustershell
   redhat:
+    _7:
+      - atftp
+      - ipxe-bluebanquise
+      - httpd
+      - policycoreutils-python
+      - python36
+      - python36-PyYAML
+      - python36-clustershell
     _8:
       - atftp
-      - bluebanquise_ipxe
+      - ipxe-bluebanquise
       - httpd
       - python3-policycoreutils
       - clustershell
@@ -42,23 +59,39 @@ packages_to_install:
   centos:
     _7:
       - atftp
-      - bluebanquise_ipxe
+      - ipxe-bluebanquise
       - httpd
       - policycoreutils-python
       - python36
       - python36-PyYAML
       - python36-clustershell
+    _8:
+      - atftp
+      - ipxe-bluebanquise
+      - httpd
+      - python3-policycoreutils
+      - clustershell
+      - python3-clustershell
+      - policycoreutils
+
+
 services_to_start:
   ubuntu:
     _18:
       - atftpd
       - apache2
   redhat:
+    _7:
+      - atftpd
+      - httpd
     _8:
       - atftpd
       - httpd
   centos:
     _7:
+      - atftpd
+      - httpd
+    _8:
       - atftpd
       - httpd
 

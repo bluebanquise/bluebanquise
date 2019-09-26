@@ -4,19 +4,29 @@ packages_to_install:
     _18:
       - isc-dhcp-server
   redhat:
+    _7:
+      - dhcp
     _8:
       - dhcp-server
   centos:
     _7:
       - dhcp
+    _8:
+      - dhcp-server
+
 services_to_start:
   ubuntu:
     _18:
       - isc-dhcp-server
   redhat:
+    _7:
+      - dhcpd
     _8:
       - dhcpd
   centos:
     _7:
       - dhcpd
+    _8:
+      - dhcpd
+
 

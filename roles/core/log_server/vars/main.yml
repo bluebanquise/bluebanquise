@@ -1,0 +1,38 @@
+role_version: 1.0.2
+
+packages_to_install:
+  ubuntu:
+    _18:
+  centos:
+    _7:
+      - rsyslog
+      - logrotate
+      - xz
+    _8:
+      - rsyslog
+      - logrotate
+      - xz
+  redhat:
+    _7:
+      - rsyslog
+      - logrotate
+      - xz
+    _8:
+      - rsyslog
+      - logrotate
+      - xz
+
+services_to_start:
+  ubuntu:
+    _18:
+  centos:
+    _7:
+      - rsyslog
+    _8:
+      - rsyslog
+  redhat:
+    _7:
+      - rsyslog
+    _8:
+      - rsyslog
+

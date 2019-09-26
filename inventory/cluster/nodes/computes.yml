@@ -1,7 +1,7 @@
 mg_computes:                           # Master group
   children:
 
-    supermicro_sandy_SMP:              # Equipment profile
+    equipment_supermicro_sandy_SMP:              # Equipment profile
       hosts:
         arngrim:                       # Hostname
           bmc:                         # BMC
@@ -19,7 +19,7 @@ mg_computes:                           # Master group
               mac:  08:00:27:dc:f8:a2
               network: interconnect-1
 
-    supermicro_sandy_compute:          # Equipment profile
+    equipment_supermicro_sandy_compute:          # Equipment profile
       hosts:
         einherjar1:
           bmc:

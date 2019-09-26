@@ -9,10 +9,13 @@ Main target is High Performance Computing, but stack is generic and can adapt to
 
 Currently supported OS are:
 
-* RedHat/Centos 7.6 (Full)
-* RedHat/Centos 8.0 (Partial, in dev)
-* Ubuntu 18.04 (Partial, in dev)
-* OpenSuse Leap 15.1 (Partial, in dev)
+* Full:
+  * RedHat/Centos 7.6
+
+* Partial/in dev:
+  * RedHat/Centos 8.0
+  * Ubuntu 18.04
+  * OpenSuse Leap 15.1
 
 Debian 9 and 10 are dropped for now because we had too much issues with the netboot part.
 
@@ -30,3 +33,4 @@ BlueBanquise is a revamping of the old stack [Banquise](https://github.com/oxedi
 ## Thanks
 
 Special thanks to [CINES](https://www.cines.fr/en/) who provided Algoric team with hardware.
+

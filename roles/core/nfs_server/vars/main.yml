@@ -6,10 +6,15 @@ packages_to_install:
       - nfs-kernel-server
   centos:
     _7:
-      - nfs-utils 
-  redhat:
+      - nfs-utils
     _8:
       - nfs-utils
+  redhat:
+    _7:
+      - nfs-utils
+    _8:
+      - nfs-utils
+
 services_to_start:
   ubuntu:
     _18:
@@ -18,7 +23,13 @@ services_to_start:
     _7:
       - nfs-server
       - rpcbind
+    _8:
+      - nfs-server
+      - rpcbind
   redhat:
+    _7:
+      - nfs-server
+      - rpcbind
     _8:
       - nfs-server
       - rpcbind
