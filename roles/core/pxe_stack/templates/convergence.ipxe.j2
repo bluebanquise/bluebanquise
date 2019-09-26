@@ -1,5 +1,8 @@
 #!ipxe
 
+echo
+echo convergence.ipxe file.
+echo
 echo Chain to node hostname file
 #chain http://${next-server}/preboot_execution_environment/nodes/mynode.ipxe || shell
 chain http://${next-server}/preboot_execution_environment/nodes/${hostname}.ipxe || shell

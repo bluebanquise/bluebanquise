@@ -1,0 +1,32 @@
+---
+- name: odin
+  hosts: "odin"
+  roles:
+
+    - role: set_hostname
+      tags: set_hostname
+    - role: nic
+      tags: nic
+    - role: repositories_server
+      tags: repositories_server
+    - role: repositories_client
+      tags: repositories_client
+    - role: hosts_file
+      tags: hosts_file
+    - role: ssh_master
+      tags: ssh_master
+    - role: dhcp_server
+      tags: dhcp_server
+    - role: dns_server
+      tags: dns_server
+    - role: dns_client
+      tags: dns_client
+    - role: time_server
+      tags: time_server
+    - role: pxe_stack
+      tags: pxe_stack
+    - role: nfs_server
+      tags: nfs_server
+    - role: nfs_client
+      tags: nfs_client
+

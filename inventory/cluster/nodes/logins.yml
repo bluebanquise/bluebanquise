@@ -1,6 +1,6 @@
 mg_logins:                             # Master group
   children:
-    supermicro_sandy_login:            # Equipment profile
+    equipment_supermicro_sandy_login:            # Equipment profile
       hosts:
         freya:                         # Hostname
           bmc:                         # BMC

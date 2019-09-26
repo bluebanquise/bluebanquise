@@ -7,7 +7,11 @@ packages_to_install:
   centos:
     _7:
       - nfs-utils 
+    _8:
+      - nfs-utils
   redhat:
+    _7:
+      - nfs-utils
     _8:
       - nfs-utils
 

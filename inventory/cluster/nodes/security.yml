@@ -1,6 +1,6 @@
 mg_security:
   children:
-    valkyrie:
+    equipment_valkyrie:
       hosts:
         lenneth:
           network_interfaces:
