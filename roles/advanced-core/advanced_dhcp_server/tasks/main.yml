@@ -1,0 +1,52 @@
+---
+
+- name: Package
+  package:
+    name: "{{item}}"
+    state: present
+  loop: "{{packages_to_install[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
+
+- name: Template >> /etc/dhcp/dhcpd.conf
+  template:
+    src: dhcpd.conf.j2
+    dest: /etc/dhcp/dhcpd.conf
+    owner: root
+    group: root
+    mode: 0644
+#  notify: Restart dhcp_server services
+  tags:
+    - templates
+
+- name: Template >> /etc/dhcp/dhcpd.networks.conf
+  template:
+    src: dhcpd.networks.conf.j2
+    dest: /etc/dhcp/dhcpd.networks.conf
+    owner: root
+    group: root
+    mode: 0644
+#  notify: Restart dhcp_server services
+  tags:
+    - templates
+
+- name: Template >> /etc/dhcp/dhcpd.{{item}}.conf
+  template:
+    src: dhcpd.subnet.conf.j2
+    dest: /etc/dhcp/dhcpd.{{item}}.conf
+    owner: root
+    group: root
+    mode: 0644
+  with_items: "{{networks}}"
+  when:
+    - j2_current_iceberg_network in item
+    - networks[item].is_in_dhcp == true
+#  notify: Restart dhcp_server services
+  tags:
+    - templates
+
+- name: Start services
+  service:
+    name: "{{item}}"
+    state: started
+    enabled: yes
+  loop: "{{services_to_start[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
+
