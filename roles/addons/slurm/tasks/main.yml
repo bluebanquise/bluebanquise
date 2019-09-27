@@ -36,13 +36,13 @@
     shell: /bin/false
     uid: 777
     group: slurm
-    home: /etc/slurm
+    home: "{{slurm_home_path[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
     state: present
 
-- name: Template >> /etc/slurm/slurm.conf
+- name: Template >> slurm.conf
   template:
     src: slurm.conf.j2
-    dest: /etc/slurm/slurm.conf
+    dest: "{{slurm_home_path[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}/slurm.conf"
     owner: root
     group: root
     mode: 0644
