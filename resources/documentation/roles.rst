@@ -26,6 +26,11 @@ CORE
 .. include:: roles/core/time_server/readme.rst
 .. include:: roles/core/time_client/readme.rst
 
+ADVANCED CORE
+=============
+
+.. include:: roles/advanced-core/advanced_dhcp_server/readme.rst
+
 ADDONS
 ======
 

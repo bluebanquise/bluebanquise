@@ -44,6 +44,19 @@
    }
  }
 
+# class "UEFI-64" {
+#   match if (
+#   substring(option vendor-class-identifier, 0, 20) = "PXEClient:Arch:00007" or
+#   substring(option vendor-class-identifier, 0, 20) = "PXEClient:Arch:00008" or
+#   substring(option vendor-class-identifier, 0, 20) = "PXEClient:Arch:00009"
+#   );
+#   filename "bluebanquise_standard_ipxe.efi";
+# }
+# class "Legacy" {
+#   match if substring(option vendor-class-identifier, 0, 20) = "PXEClient:Arch:00000";
+#   filename "bluebanquise_standard_undionly.kpxe";
+# }
+
 ## NETWORKS AND NODES
 
 include "/etc/dhcp/dhcpd.networks.conf";
