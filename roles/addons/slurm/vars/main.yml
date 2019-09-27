@@ -1,10 +1,24 @@
 role_version: 1.0.2
 
+slurm_home_path:
+  ubuntu:
+    _18: /etc/slurm-llnl/
+  centos:
+    _7: /etc/slurm/
+  redhat:
+    _8: /etc/slurm/
+
+
 packages_to_install:
   before_17:
     controller:
       ubuntu:
         _18:
+          - libmunge2
+          - munge
+          - slurm-wlm
+          - slurmctld
+          - slurm-wlm-basic-plugins
       centos:
         _7:
           - munge
@@ -22,6 +36,11 @@ packages_to_install:
     node:
       ubuntu:
         _18:
+          - libmunge2
+          - munge
+          - slurm-wlm
+          - slurmd
+          - slurm-wlm-basic-plugins
       centos:
         _7:
           - munge
@@ -39,6 +58,10 @@ packages_to_install:
     passive:
       ubuntu:
         _18:
+          - libmunge2
+          - munge
+          - slurm-wlm
+          - slurm-wlm-basic-plugins
       centos:
         _7:
           - munge
@@ -58,6 +81,11 @@ packages_to_install:
     controller:
       ubuntu:
         _18:
+          - libmunge2
+          - munge
+          - slurm-wlm
+          - slurmctld
+          - slurm-wlm-basic-plugins
       centos:
         _7:
           - munge
@@ -75,6 +103,11 @@ packages_to_install:
     node:
       ubuntu:
         _18:
+          - libmunge2
+          - munge
+          - slurm-wlm
+          - slurmd
+          - slurm-wlm-basic-plugins
       centos:
         _7:
           - munge
@@ -92,6 +125,10 @@ packages_to_install:
     passive:
       ubuntu:
         _18:
+          - libmunge2
+          - munge
+          - slurm-wlm
+          - slurm-wlm-basic-plugins
       centos:
         _7:
           - munge
