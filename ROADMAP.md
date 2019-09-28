@@ -5,7 +5,7 @@ Current status: 1.0 alpha
 ## 1.0: Marauder
 ### 1.0.0:
 * Stable
-  * Centos 7.6 -> lvl 1, lvl 3, lvl 4
+  * RedHat/Centos 7.6 -> lvl 1, lvl 3, lvl 4
 
 * Prototype/limited
   * Ubuntu 18.04 -> lvl 1, lvl 3
@@ -20,7 +20,7 @@ Current status: 1.0 alpha
   
 ### 1.0.1:
 * Stable
-  * Centos 8.0 -> lvl 1, lvl 3, lvl 4
+  * RedHat/Centos 8.0 -> lvl 1, lvl 3, lvl 4
   
 ### 1.0.2:
 * Stable
