@@ -1,7 +1,7 @@
 ### Network related settings
 
 ## DNS
-domain_name: bluebanquise.local
+domain_name: tumulus.local
 dns_settings:
   external_dns_servers:
     - 208.67.222.222

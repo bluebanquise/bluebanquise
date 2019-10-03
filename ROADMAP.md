@@ -1,6 +1,6 @@
 # Roadmap
 
-Current status: 1.0 alpha
+Current status: 1.0.0 RC
 
 ## 1.0: Marauder
 ### 1.0.0:

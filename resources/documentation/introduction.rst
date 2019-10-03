@@ -7,7 +7,7 @@ These clusters can be from few workstations in enterprise to very large HPC or s
 
 **BlueBanquise** is the result of a need. A need for a very simple task, not based on multi languages scripts difficult to maintain, that can keep simplicity while managing very complex architecture.
 
-Ansible was chosen for its simplicity and its security. The Ansible inventory groups/variables mechanism can cover from very simple to very sophisticated configurations. Ansible is not the fastest tool, nor the simplest to debug. However, it is widely used today.
+Ansible was chosen for its simplicity and its security. The Ansible inventory groups/variables mechanism can cover from very simple to very sophisticated configurations. Ansible is not the fastest tool, nor the simplest to debug. However, it is widely used today with an active community.
 
 This documentation is structured as a training. If you encounter any bugs/issues or have any comments, please inform us.
 

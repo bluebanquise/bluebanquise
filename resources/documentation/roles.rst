@@ -23,8 +23,7 @@ CORE
 .. include:: roles/core/set_hostname/readme.rst
 .. include:: roles/core/ssh_master/readme.rst
 .. include:: roles/core/ssh_slave/readme.rst
-.. include:: roles/core/time_server/readme.rst
-.. include:: roles/core/time_client/readme.rst
+.. include:: roles/core/time/readme.rst
 
 ADVANCED CORE
 =============

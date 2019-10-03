@@ -36,7 +36,15 @@ options {
 {% endfor %}
   };
 
+{% if external_dns.dns_server is defined and not none and external_dns.dns_server %}
+  forwarders {
+{% for forwarder in external_dns.dns_server %}
+    {{forwarder}};
+{% endfor %}
+  };
+{% else %}
   recursion no;
+{% endif %}
 
   dnssec-enable yes;
   dnssec-validation yes;

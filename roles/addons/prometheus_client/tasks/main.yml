@@ -2,11 +2,11 @@
 
 - name: Package
   package:
-    name: node_exported
+    name: node_exporter-bluebanquise
     state: present
 
 - name: Start services
   service:
-    name: node_exported
+    name: node_exporter
     state: started
     enabled: yes

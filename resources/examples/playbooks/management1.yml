@@ -1,6 +1,6 @@
 ---
-- name: odin
-  hosts: "odin"
+- name: management1
+  hosts: "management1"
   roles:
 
     - role: set_hostname
@@ -21,12 +21,14 @@
       tags: dns_server
     - role: dns_client
       tags: dns_client
-    - role: time_server
-      tags: time_server
+    - role: time
+      tags: time
+      vars:
+        time_profile: server
     - role: pxe_stack
       tags: pxe_stack
     - role: nfs_server
       tags: nfs_server
-    - role: nfs_client
-      tags: nfs_client
+#    - role: nfs_client
+#      tags: nfs_client
 

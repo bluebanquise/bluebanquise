@@ -1,0 +1,4 @@
+This patch is for Ansible on Fedora >= 23 and RedHat/Centos >= 8.
+Refer to:
+https://github.com/ansible/ansible/pull/48870
+https://github.com/ansible/ansible/issues/48055

@@ -20,6 +20,11 @@ $TTL 86400
 {% for interface, interface_vars in host_network_interfaces.items() %}
 {% if interface_vars.ip4 is defined and not none %}
 {% if (interface_vars.network is defined and not none) and (interface_vars.network == hostvars[host]['j2_node_main_network']) %}
+{% if hostvars[host]['alias'] is defined and not none %}
+{% for alias in hostvars[host]['alias'] %}
+{{alias}} IN A {{interface_vars.ip4}}
+{% endfor %}
+{% endif %}
 {{host}} IN A {{interface_vars.ip4}}
 {{host}}-{{interface_vars.network}} IN A {{interface_vars.ip4}}
 {% elif interface_vars.network is defined and not none %}

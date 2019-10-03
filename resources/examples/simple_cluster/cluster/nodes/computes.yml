@@ -1,4 +1,4 @@
-computes:
+mg_computes:
   children:
     equipment_typeC:
       hosts:

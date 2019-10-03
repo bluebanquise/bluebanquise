@@ -1,5 +1,3 @@
-# Icebergs topology. Only needed for advanced clusters. Do not care if not used.
-
 icebergs_topology:
   iceberg1:
     iceberg2:
