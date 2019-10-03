@@ -12,7 +12,7 @@ Host {{host}}
 # All or Iceberg hosts
 
 {% if icebergs_system == 'true' and hosts_file['range'] == 'iceberg' %}
-{% set range = (current_iceberg|string) %}
+{% set range = (j2_current_iceberg|string) %}
 {% else %}
 {% set range = 'all' %}
 {% endif %}
@@ -21,6 +21,7 @@ Host {{host}}
 {{write_host(host)}}
 {% endfor %}
 
+{#
 # Under iceberg {{managements_group_name}}
 
 {% for under_icb in j2_under_icebergs %}
@@ -30,4 +31,4 @@ Host {{host}}
 {% endif %}
 {% endfor %}
 {% endfor %}
-
+#}
