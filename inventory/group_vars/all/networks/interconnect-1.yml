@@ -1,5 +1,5 @@
 networks:
-  external-1:
+  interconnect-1:
     subnet: 10.20.0.0
     prefix: 16
     netmask: 255.255.0.0

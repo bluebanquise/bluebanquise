@@ -5,8 +5,8 @@
     name: "{{item}}"
     state: present
   with_items:
-    - prometheus
-    - alertmanager
+    - prometheus-bluebanquise
+    - alertmanager-bluebanquise
 
 - name: Create directories structure
   file:
@@ -17,6 +17,7 @@
    group: prometheus
   with_items:
    - /etc/prometheus/alerts/
+   - /var/lib/prometheus
 
 - name: Template >> /etc/prometheus/prometheus.yml
   template:
@@ -43,6 +44,16 @@
 #    owner: prometheus
 #    group: prometheus
 #    mode: 0640
+
+- name: Create directories structure for alertmanager
+  file:
+   path: "{{item}}"
+   state: directory
+   mode: 0750
+   owner: alertmanager
+   group: alertmanager
+  with_items:
+   - /etc/alertmanager
 
 - name: Template >> /etc/alertmanager/alertmanager.yml
   template:

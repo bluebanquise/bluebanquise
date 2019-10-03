@@ -1,6 +1,20 @@
 ---
 
-- name: Create pxe directories structure
+- name: Package
+  package:
+    name: "{{item}}"
+    state: present
+  loop:
+    - graphviz
+    - python3-colour
+    - python3-lxml
+    - python3-pyparsing
+    - python3-packaging
+    - ansible-cmdb-bluebanquise
+    - ansible-inventory-grapher-bluebanquise
+    - ansible-playbook-grapher-bluebanquise
+
+- name: Create report directories structure
   file:
    path: "{{item}}"
    state: directory
@@ -81,10 +95,10 @@
   tags: test
   with_items: "{{playbook_files_matched.files}}"
 
-- name: Render playbooks diagrams
-  shell: ansible-playbook-grapher --include-role-tasks {{item.path}} -o /var/www/html/report/graphs/{{item.path | replace('/etc/ansible/playbooks/','') | replace('.yml','')}} -vvv
-  with_items: "{{playbook_files_matched.files}}"
-  tags: test
+#- name: Render playbooks diagrams
+#  shell: ansible-playbook-grapher --include-role-tasks {{item.path}} -o /var/www/html/report/graphs/{{item.path | replace('/etc/ansible/playbooks/','') | replace('.yml','')}} -vvv
+#  with_items: "{{playbook_files_matched.files}}"
+#  tags: test
 
 - name: Render all diagram
   shell: ansible-inventory-grapher all -d /dev/shm/ --format "inventory_all.dot"

@@ -102,14 +102,14 @@ systemctl status named
 <h2>PXE<a class="headerlink" href="#pxe" title="Permalink to this headline">¶</a></h2>
 <p>Next step is to deploy the other nodes using PXE process.</p>
 <p>NOTE: it is assumed here you know how to have your other nodes / VM / servers / workstation to boot on LAN.
-If your device cannot boot on LAN, use iso or usb image provided on management1 in /var/lib/tftpboot. These images will start a LAN boot automatically.</p>
+If your device cannot boot on LAN, use iso or usb image provided on management1 in /var/www/html/preboot_execution_environment/bin/[x86_64|arm64]. These images will start a LAN boot automatically.</p>
 <p>In <strong>BlueBanquise</strong>, PXE process has been made so that any kind of hardware able to boot PXE, USB or CDrom can start deployment.</p>
 <p>The following schema provides a macroscopic map of the process:</p>
 <img alt="_images/iPXE_process_v3.svg" src="_images/iPXE_process_v3.svg" /><p>Whatever the boot source, and whatever Legacy Bios or uEFI, all converge to <a class="reference external" href="http://nextserver/convergence.ipxe">http://nextserver/convergence.ipxe</a>. Then this file chain to node specific file in nodes (this file is generated using bootset command). The node specific file contains the default entry for the iPXE menu, and chain to menu.ipxe file. The menu file display a simple menu, and wait 10s for user before starting the default entry (which can be os deployment, or boot to disk).</p>
 <div class="section" id="bootset">
 <h3>bootset<a class="headerlink" href="#bootset" title="Permalink to this headline">¶</a></h3>
 <p>Before booting remote nodes in PXE, we need to ask management1 to activate remote nodes deployment. If not, remote nodes will boot on disk, even when booting over LAN.</p>
-<p>To manipulate nodes PXE boot, a command, bootset is available.</p>
+<p>To manipulate nodes PXE boot, a command, <em>bootset</em>, is available.</p>
 <p>We are going to deploy login1 and c001, c002, c003 and c004.</p>
 <p>Let’s use bootset to ask them to deploy OS at next PXE boot:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>bootset -n login1,c<span class="o">[</span><span class="m">001</span>-004<span class="o">]</span> -b osdeploy

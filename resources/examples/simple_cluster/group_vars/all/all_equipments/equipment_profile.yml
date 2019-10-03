@@ -2,7 +2,7 @@ equipment_profile:
 
   # iPXE network driver
   # default should be good for most of NIC, but some need SNP
-  ipxe_network_driver: default # default or SNP
+  ipxe_network_driver: default # default or snp or snponly
 
   # When installing in EFI, grub2 break the boot order and set next boot to disk (seriously, why??!)
   # In most case, you prefer system to continue to boot on PXE, and so the stack can restore first boot device after grub2 installation
@@ -14,7 +14,7 @@ equipment_profile:
   access_control: true # Selinux, AppArmor, etc. Selinux: true = enforcing, false = disabled
   firewall: true # Enable or disable native firewall
 
-  partitioning: | # Please provide native distribution partitioning
+  partitioning: | # Please provide native distribution partitioning. This example is for Centos/RedHat systems.
     clearpart --all --initlabel
     autopart --type=plain --fstype=ext4 --nohome
 
@@ -23,7 +23,7 @@ equipment_profile:
     distribution_major_version: 7
     distribution_version: 7.6
 
-  equipment_type: none # If server, a pxe profile will be generated
+  equipment_type: none  # If server, a pxe profile will be generated
 
   configuration:
     keyboard_layout: us # us, fr, etc.
@@ -34,7 +34,7 @@ equipment_profile:
       architecture: x86_64
       cores: 1
 
-  equipment_authentication: # login/password for BMC, storage bay controller, switch, etc. ADMIN/ADMIN by defaut for SuperMicro boards for example.
+  equipment_authentication: # login/password for BMC, storage bay controller, switch, etc.
     user: ADMIN
     password: ADMIN
 

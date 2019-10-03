@@ -1,5 +1,5 @@
-Name:     prometheus
-Summary:  prometheus
+Name:     prometheus-bluebanquise
+Summary:  prometheus-bluebanquise
 Release:  1%{?dist}
 Version:  2.11.1
 License:  apache-2.0

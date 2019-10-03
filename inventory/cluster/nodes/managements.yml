@@ -1,6 +1,6 @@
 mg_managements:                        # Master group
   children:
-    equipment_raspberry_pi_3_arm64:              # Equipment profile
+    equipment_raspberry_pi_3_arm64:    # Equipment profile
       hosts:
         odin:                          # Hostname
           network_interfaces:

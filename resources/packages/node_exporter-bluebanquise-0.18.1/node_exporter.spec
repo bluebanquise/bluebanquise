@@ -1,5 +1,5 @@
-Name:     node_exporter
-Summary:  node_exporter
+Name:     node_exporter-bluebanquise
+Summary:  node_exporter-bluebanquise
 Release:  1%{?dist}
 Version:  0.18.1
 License:  apache-2.0

@@ -2,7 +2,7 @@
 Vocabulary
 ==========
 
-Some words are important in **BlueBanquise**.
+Some words are important in **BlueBanquise**. Most of them are described here.
 
 Ansible vocabulary
 ==================
@@ -10,16 +10,16 @@ Ansible vocabulary
 Host
 ----
 
-An Ansible **host** is a remote host managed by Ansible. An **host** can be a physical server, but also a VM or something else.
+An Ansible **host** (also often refered as a **node**) is a remote host managed by Ansible. An **host** can be a physical server, but also a VM or something else.
 
-Host are defined in */etc/ansible/inventory/cluster/nodes*.
+Hosts are defined in */etc/ansible/inventory/cluster/nodes*.
 
 Group
 -----
 
-An Ansible **group** is a logical aggregation of hosts. For example, system administrator can define a group "data_base_servers" that would contain hosts "database1" and "database2".
+An Ansible **group** is a logical aggregation of hosts. For example, system administrator can define a group "database_servers" that would contain hosts "database1" and "database2".
 
-**Groups** allow Ansible to provide dedicated **variables** to related hosts or execute tasks on a set of hosts.
+**Groups** allow Ansible to provide dedicated **variables** to member hosts or execute tasks on a set of hosts.
 
 Note: a host can be part of multiple groups.
 
@@ -30,7 +30,7 @@ Variables in Ansible follow the YAML structure.
 
 A variable is like in any programming language: a variable name, and a data related.
 
-Multiple kind of variables exist in YAML:
+Multiple kind of variables exist in Ansible:
 
 Simple
 ^^^^^^
@@ -66,7 +66,7 @@ A list is like an array, and can be iterated over:
     - alice
     - henry
 
-In Jinja2, variable can be iterated over, or a specific value can be used:
+In Jinja2, variable can be iterated over, or a specific value of the list can be used (like an array):
 
 .. code-block:: text
 
@@ -121,7 +121,10 @@ In Jinja2, dictionary can be access two ways:
   {% for i in my_dictionarry_1['my_names_list'] %}
   {{i}}
   {% endfor %}
+
   {{my_dictionarry_1.my_names_list[0]}}
+  {{my_dictionarry_1['my_names_list'][0]}}
+
 
 Output will be:
 
@@ -133,7 +136,10 @@ Output will be:
   bob
   alice
   henry
+
   bob
+  bob
+
 
 Jinja2 will be discussed later, do not worry about this point for now.
 
@@ -142,13 +148,14 @@ j2 Variables
 
 These are **BlueBanquise** specific variables. All variables with name starting by **j2_** are j2 variables.
 
-These variables are all stored in group_vars/all/engine directory, and are used for the internal purpose of the stack.
+These variables are all stored in group_vars/all/j2_variables directory, and are used for the internal purpose of the stack.
 
+These variables are here to simplify tasks and templates writing, by removing ugly and redundant things from them, and providing a direct access to values.
 You can consider these variables as "functions" that takes as argument the current running host (or the host provided in hostvars if loaded using hostvars call).
 
-These variables are here to simplify templates writing, by removing ugly and redundant things from them, and providing a direct access to values.
+To clarify your mind, you can consider that these variables contains a simple value. In reality, they contain Jinja2 code as a string, that will be interpreted by Ansible during tasks/templates execution, which is why these are more functions/API than pure variables.
 
-To clarify your mind, you can consider that these variables contains a simple value. In reality, they contain Jinja2 code as a string, that will be interpreted by Ansible, which is why these are more functions/API than pure variables.
+Last point, for developers, these j2 variables should be considered as a way to keep compatibility with roles, while upgrading the logic of the stack.
 
 Inventory, roles, and playbooks
 -------------------------------
@@ -158,7 +165,7 @@ Inventory
 
 The Ansible inventory is the directory that contains Ansible variables and hosts definitions. In **BlueBanquise**, default path is /etc/ansible/inventory.
 
-Inventory is the **data**.
+Inventory is the **DATA**.
 
 Roles
 ^^^^^
@@ -167,16 +174,18 @@ An Ansible role is a list of tasks to do to achieve a purpose. For example, ther
 
 In **BlueBanquise**, default path is /etc/ansible/roles.
 
-Roles are the **automation logic**.
+Note that /etc/ansible/roles is splitted in multiple directories, but ansible.cfg file is configured to use roles in all of them.
+
+Roles are the **AUTOMATION LOGIC**.
 
 Playbooks
 ^^^^^^^^^
 
-An Ansible playbook is simply a list of roles to apply, on a specific host or group of hosts. It is an yml file.
+An Ansible playbook is simply a list of roles to apply, on a specific host or group of hosts. It is a yaml file.
 
 In **BlueBanquise**, default path is /etc/ansible/playbooks.
 
-Playbooks are simply your **list of roles to apply on your hosts**.
+Playbooks are simply your **LIST OF ROLES TO APPLY on your hosts/targets**.
 
 Variables precedence
 --------------------
@@ -189,11 +198,11 @@ When a variable is defined in an yml file, the position of the file in the ansib
 
 For example, a variable defined in /etc/ansible/inventory/group_vars/all/ will have the less precedence, and a variable defined in /etc/ansible/inventory/cluster will have a higher precedence, and so win if loaded.
 
-The full list of available variables precedence is provided in Ansible documentation: https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html#variable-precedence-where-should-i-put-a-variable
+The full list of available variables precedence is provided in Ansible documentation: `variable precedence list <https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html#variable-precedence-where-should-i-put-a-variable>`_
 
-This feature is key to the stack and key for system administrator to manipulate the **BlueBanquise** stack the way he/she wants.
+This feature is key to the stack and key for system administrator to manipulate the **BlueBanquise** stack the way he/she/(it ?) wants.
 
-For example, values can be set by default, and then redefined for some groups of hosts without changing the default for all others. Or it is simply possible to fix a dynamic variable to the desired value in hosts definitions if dynamic value is not the one expected. Etc.
+For example, values can be set by default, and then redefined for some groups of hosts without changing the default for all others. Or it can be used to simply fix a dynamic j2 variable to the desired value in hosts definitions if dynamic value is not the one expected. Etc.
 
 Inventory can be seen as a giant pizza, in 3D then flatten.
 
@@ -207,16 +216,16 @@ Inventory can be seen as a giant pizza, in 3D then flatten.
 Merge
 -----
 
-Ansible default hash_behaviour is replace. **BlueBanquise** is using merge.
+Ansible default hash_behaviour is *replace*. **BlueBanquise** is using *merge*.
 
-When using replace, when a dictionary is impacted by the variable’s precedence mechanism, Ansible overwrite the full dictionary if a variable has a higher precedence somewhere.
+If using *replace*, when a dictionary is impacted by the variable’s precedence mechanism, Ansible overwrite the full dictionary if a variable has a higher precedence somewhere.
 
-When using replace, Ansible will only update the related variable, and keep the original dictionary and values for all other variables in this dictionary.
+If using *merge*, Ansible will only update the related variable, and keep the original dictionary and values for all other variables in this dictionary.
 
 Jinja2
 ------
 
-Jinja2 is the templating language used by Ansible to render templates in roles. It is heavily used in the stack, and learning Jinja2 will often be needed to create custom roles. (But Jinja2 is very simple).
+Jinja2 is the templating language used by Ansible to render templates in roles. It is heavily used in the stack, and learning Jinja2 will often be needed to create custom roles. (But Jinja2 is simple if you are use to code or, better, to bash).
 
 Full documentation is available in a single page: `Jinja2 template designer <https://jinja.palletsprojects.com/en/2.10.x/templates/>`_
 
@@ -235,8 +244,8 @@ One Iceberg is composed of one or multiple managements servers, **in charge of t
 
 **BlueBanquise** support many kinds of configurations, but most common are:
 
-One iceberg
-^^^^^^^^^^^
+One iceberg configuration
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. image:: images/one_iceberg.svg
 
@@ -247,23 +256,23 @@ For simple systems (small/medium HPC cluster, small enterprise network, universi
 .. image:: images/one_iceberg_example_2.svg
 
 
-Multiple icebergs
-^^^^^^^^^^^^^^^^^
+Multiple icebergs configuration
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. image:: images/multiple_icebergs.svg
 
-For advanced systems, (large HPC clusters needing load spreading with unified network, enterprise network, etc.), multiple icebergs can be required. **BlueBanquise** allows multiple levels of icebergs, for complex needs. Also, a global_network can be defined so all nodes from all icebergs can communicate through this unified network (most of the time an Interconnect network).
+For advanced systems, (large HPC clusters needing load spreading with unified network, enterprise network, etc.), multiple icebergs scenario can be required. **BlueBanquise** allows multiple levels of icebergs, for complex needs. Also, a global_network can be defined so all nodes from all icebergs can communicate through this unified network (most of the time an Interconnect network).
 
 .. image:: images/multiple_icebergs_example_1.svg
 
 Equipment profiles
 ------------------
 
-In **BlueBanquise**, nodes are nearly always part of a group starting with prefix **equipment_**. These groups are called equipment profiles.
+In **BlueBanquise**, nodes are nearly always part of a group starting with prefix **equipment_**. These groups are called *equipment profiles*.
 
-They are used to provide hosts of this group the **equipment_profile** dictionary, and other variables if needed. This dictionary defines hosts operating system parameters, kernel parameters, partitioning, etc.
+They are used to provide hosts of this group the **equipment_profile** dictionary (this dictionary defines hosts operating system parameters, kernel parameters, partitioning, etc.), and other variables if needed like dedicated authentication parameters.
 
 These are key groups of the stack.
 
-**It is important to note that equipment_profiles dictionary cannot be used at an upper level than group_vars**. It can, but you must NOT.
+**It is important** to note that equipment_profiles dictionary **must not** be used at an upper level than group_vars in variables precedence. **It can, but you must NOT**.
 

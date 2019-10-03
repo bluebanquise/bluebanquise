@@ -1,4 +1,4 @@
-Name: atftp
+Name: atftp-bluebanquise
 Summary: Advanced Trivial File Transfer Protocol (ATFTP) - TFTP server
 Group: System Environment/Daemons
 Version: 0.7.2

@@ -51,7 +51,7 @@ rm -Rf /etc/ansible/*
 git clone https://github.com/oxedions/bluebanquise.git .
 </pre></div>
 </div>
-<p>Finally, edit /etc/hosts file, and add “management1” on localhost line:</p>
+<p>Finally, edit /etc/hosts file, and add “management1” (or whatever your current management node hostname) on localhost line:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4 management1
 ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
 </pre></div>
@@ -66,12 +66,10 @@ git clone https://github.com/oxedions/bluebanquise.git .
 <p>Ansible will read <strong>ALL</strong> files in the inventory. <strong>NEVER do a backup of a file here!</strong></p>
 <p>Backup in another location, outside of /etc/ansible/inventory.</p>
 </div>
-<div class="section" id="pickup-example-inventory">
-<h3>Pickup example inventory<a class="headerlink" href="#pickup-example-inventory" title="Permalink to this headline">¶</a></h3>
-<p>Copy example inventory as a base for our work. This example is based on the picture provided just above.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cp -a /etc/ansible/resources/examples/simple_cluster/* /etc/ansible/inventory
-</pre></div>
-</div>
+<div class="section" id="check-example-inventory">
+<h3>Check example inventory<a class="headerlink" href="#check-example-inventory" title="Permalink to this headline">¶</a></h3>
+<p>An inventory example is provided in /etc/ansible/resources/examples/simple_cluster/ as a base for our work.</p>
+<p>This example is based on the picture provided just above.</p>
 </div>
 <div class="section" id="review-nodes">
 <h3>Review nodes<a class="headerlink" href="#review-nodes" title="Permalink to this headline">¶</a></h3>
@@ -240,10 +238,10 @@ git clone https://github.com/oxedions/bluebanquise.git .
 <h3>Review Default parameters<a class="headerlink" href="#review-default-parameters" title="Permalink to this headline">¶</a></h3>
 <p>Last part, and probably the most complicated, are default parameters.</p>
 <p>Remember Ansible precedence mechanism. All variables in group_vars/all/ have less priority, while variables in group_vars/* have a higher priority.</p>
-<p>The idea here is the following: group_vars/all/default/ folder contains all the default parameters for all nodes. Here authentication, and equipment_profile. You have to tune these parameters to match your exact “global” need, and then for each equipment group, tune parameters.</p>
+<p>The idea here is the following: group_vars/all/all_equipment/ folder contains all the default parameters for all nodes. Here authentication, and equipment_profile. You have to tune these parameters to match your exact “global” need, and then for each equipment group, tune parameters.</p>
 <div class="section" id="equipment-profile">
 <h4>Equipment profile<a class="headerlink" href="#equipment-profile" title="Permalink to this headline">¶</a></h4>
-<p>For example, open file /etc/ansible/inventory/group_vars/all/default/equipment_profile.yml, and check access_control variable. It is set to true:</p>
+<p>For example, open file /etc/ansible/inventory/group_vars/all/all_equipment/equipment_profile.yml, and check access_control variable. It is set to true:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">equipment_profile</span><span class="p">:</span>
   <span class="nt">access_control</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
 </pre></div>
@@ -275,7 +273,7 @@ git clone https://github.com/oxedions/bluebanquise.git .
 <div class="section" id="review-groups-parameters">
 <h3>Review groups parameters<a class="headerlink" href="#review-groups-parameters" title="Permalink to this headline">¶</a></h3>
 <p>Last step is to check and review example of equipment_profile tuning in each of the group_vars/equipment_XXXXXX folders. Adapt them to your needs.</p>
-<p>If you prefer, you can copy the whole group_vars/all/default/equipment_profile.yml file into these folders, or simply adjust the parameters you wish to change from default.</p>
+<p>If you prefer, you can copy the whole group_vars/all/all_equipment/equipment_profile.yml file into these folders, or simply adjust the parameters you wish to change from default.</p>
 <p>Once done, configuration is ready, we will check addons later.</p>
 <p>It is time to deploy configuration on management1.</p>
 </div>
@@ -314,7 +312,7 @@ git clone https://github.com/oxedions/bluebanquise.git .
 <li class="toctree-l2"><a class="reference internal" href="#get-bluebanquise">Get BlueBanquise</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#configure-inventory">Configure inventory</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#important-before-we-start">Important before we start</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pickup-example-inventory">Pickup example inventory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#check-example-inventory">Check example inventory</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#review-nodes">Review nodes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#review-logical-networks">Review logical networks</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#review-general-configuration">Review general configuration</a></li>

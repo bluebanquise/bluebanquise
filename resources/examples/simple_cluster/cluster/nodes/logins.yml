@@ -1,4 +1,4 @@
-logins:
+mg_logins:
   children:
     equipment_typeL:
       hosts:

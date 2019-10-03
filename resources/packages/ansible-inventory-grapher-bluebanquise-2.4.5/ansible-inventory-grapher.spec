@@ -1,4 +1,4 @@
-%define name ansible-inventory-grapher
+%define name ansible-inventory-grapher-bluebanquise
 %define version 2.4.5
 %define unmangled_version 2.4.5
 %define unmangled_version 2.4.5
@@ -24,10 +24,10 @@ UNKNOWN
 %setup -n %{name}-%{unmangled_version} -n %{name}-%{unmangled_version}
 
 %build
-python setup.py build
+python3 setup.py build
 
 %install
-python setup.py install --single-version-externally-managed -O1 --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
+python3 setup.py install --single-version-externally-managed -O1 --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
 
 %clean
 rm -rf $RPM_BUILD_ROOT

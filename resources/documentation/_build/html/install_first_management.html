@@ -34,11 +34,11 @@
             
   <div class="section" id="install-first-management">
 <h1>Install first management<a class="headerlink" href="#install-first-management" title="Permalink to this headline">¶</a></h1>
-<p>First step to deploy <strong>BlueBanquise</strong> is to install first management node manually.</p>
+<p>First step is to install first management node manually.</p>
 <p>We will then learn how to use Ansible, and then only focus on the stack itself.</p>
 <div class="section" id="install-operating-system">
 <h2>Install operating system<a class="headerlink" href="#install-operating-system" title="Permalink to this headline">¶</a></h2>
-<p>Install Centos 7.6 using parameters you need.</p>
+<p>Install Centos 7 or 8 using parameters you need.</p>
 <p>The following parameters are recommended:</p>
 <ul class="simple">
 <li><p>&gt;= 2 CPU/vCPU</p></li>
@@ -64,11 +64,15 @@ systemctl disable firewalld
 </pre></div>
 </div>
 <p>Then prepare repositories.</p>
-<div class="section" id="os">
-<h4>OS<a class="headerlink" href="#os" title="Permalink to this headline">¶</a></h4>
-<p>Download Centos 7.6 Everything DVD iso from <a class="reference external" href="http://isoredirect.centos.org/centos/7/isos/x86_64/">http://isoredirect.centos.org/centos/7/isos/x86_64/</a> . Iso name is CentOS-7-x86_64-Everything-1810.iso.</p>
+<div class="section" id="operating-system">
+<h4>Operating system<a class="headerlink" href="#operating-system" title="Permalink to this headline">¶</a></h4>
+<p>Download:</p>
+<ul class="simple">
+<li><p>Centos 7 Everything DVD iso from <a class="reference external" href="http://isoredirect.centos.org/centos/7/isos/x86_64/">http://isoredirect.centos.org/centos/7/isos/x86_64/</a> . Iso name is CentOS-7-x86_64-Everything-1810.iso.</p></li>
+<li><p>Or Centos 8 DVD 1 iso from <a class="reference external" href="http://isoredirect.centos.org/centos/8/isos/x86_64/">http://isoredirect.centos.org/centos/8/isos/x86_64/</a> . Iso name is CentOS-8-x86_64-1905-dvd1.iso.</p></li>
+</ul>
 <p><strong>If on standard system:</strong></p>
-<p>Mount iso and copy content to web server directory: (replace centos/7.6 by redhat/8.0 for RHEL 8.0)</p>
+<p>Mount iso and copy content to web server directory: (replace centos/7.6 by centos/8.0, redhat/8.0, redhat/7.7, etc depending of your system)</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir -p /var/www/html/repositories/centos/7.6/x86_64/os/
 mount CentOS-7-x86_64-Everything-1810.iso /mnt
 cp -a /mnt/* /var/www/html/repositories/centos/7.6/x86_64/os/
@@ -82,7 +86,7 @@ restorecon -Rv /var/www/html/repositories/centos/7.6/x86_64/os
 mount /dev/cdrom /var/www/html/repositories/centos/7.6/x86_64/os/
 </pre></div>
 </div>
-<p>Now, create first repository manually.</p>
+<p>Now, create first repository manually. Procedure is different between Centos 7 and 8.</p>
 <p><strong>Centos/RHEL 7:</strong></p>
 <p>Create file <em>/etc/yum.repos.d/os.repo</em> with the following content:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[os]
@@ -92,7 +96,7 @@ gpgcheck=0
 enabled=1
 </pre></div>
 </div>
-<p><strong>RHEL 8:</strong></p>
+<p><strong>Centos/RHEL 8:</strong></p>
 <p>Create file <em>/etc/yum.repos.d/BaseOS.repo</em> with the following content:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[BaseOS]
 name=BaseOS
@@ -109,7 +113,8 @@ gpgcheck=0
 enabled=1
 </pre></div>
 </div>
-<p>And ensure repository is available:</p>
+<p><strong>Both:</strong></p>
+<p>Now ensure repository is available:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>yum repolist
 </pre></div>
 </div>
@@ -123,6 +128,7 @@ enabled=1
 /var/www/html/repositories/centos/7.6/x86_64/os
 </pre></div>
 </div>
+<p>Note: this patern parameters (distribution, version, architecture) must match the one provided in the equipment_profile file seen later.</p>
 </div>
 <div class="section" id="bluebanquise">
 <h4>BlueBanquise<a class="headerlink" href="#bluebanquise" title="Permalink to this headline">¶</a></h4>

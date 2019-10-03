@@ -5,7 +5,9 @@ slurm_home_path:
     _18: /etc/slurm-llnl/
   centos:
     _7: /etc/slurm/
+    _8: /etc/slurm/
   redhat:
+    _7: /etc/slurm/
     _8: /etc/slurm/
 
 
@@ -26,7 +28,19 @@ packages_to_install:
           - slurm
           - slurm-devel
           - slurm-munge
+        _8:
+          - munge
+          - munge-libs
+          - slurm
+          - slurm-devel
+          - slurm-munge
       redhat:
+        _7:
+          - munge
+          - munge-libs
+          - slurm
+          - slurm-devel
+          - slurm-munge
         _8:
           - munge
           - munge-libs
@@ -48,7 +62,19 @@ packages_to_install:
           - slurm
           - slurm-devel
           - slurm-munge
+        _8:
+          - munge
+          - munge-libs
+          - slurm
+          - slurm-devel
+          - slurm-munge
       redhat:
+        _7:
+          - munge
+          - munge-libs
+          - slurm
+          - slurm-devel
+          - slurm-munge
         _8:
           - munge
           - munge-libs
@@ -69,7 +95,19 @@ packages_to_install:
           - slurm
           - slurm-devel
           - slurm-munge
+        _8:
+          - munge
+          - munge-libs
+          - slurm
+          - slurm-devel
+          - slurm-munge
       redhat:
+        _7:
+          - munge
+          - munge-libs
+          - slurm
+          - slurm-devel
+          - slurm-munge
         _8:
           - munge
           - munge-libs
@@ -93,7 +131,19 @@ packages_to_install:
           - slurm
           - slurm-devel
           - slurm-slurmctld
+        _8:
+          - munge
+          - munge-libs
+          - slurm
+          - slurm-devel
+          - slurm-slurmctld
       redhat:
+        _7:
+          - munge
+          - munge-libs
+          - slurm
+          - slurm-devel
+          - slurm-slurmctld
         _8:
           - munge
           - munge-libs
@@ -115,7 +165,19 @@ packages_to_install:
           - slurm
           - slurm-devel
           - slurm-slurmd
+        _8:
+          - munge
+          - munge-libs
+          - slurm
+          - slurm-devel
+          - slurm-slurmd
       redhat:
+        _7:
+          - munge
+          - munge-libs
+          - slurm
+          - slurm-devel
+          - slurm-slurmd
         _8:
           - munge
           - munge-libs
@@ -135,7 +197,17 @@ packages_to_install:
           - munge-libs
           - slurm
           - slurm-devel
+        _8:
+          - munge
+          - munge-libs
+          - slurm
+          - slurm-devel
       redhat:
+        _7:
+          - munge
+          - munge-libs
+          - slurm
+          - slurm-devel
         _8:
           - munge
           - munge-libs

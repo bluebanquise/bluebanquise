@@ -1,5 +1,5 @@
-Name:     ansible-cmdb
-Summary:  ansible-cmdb
+Name:     ansible-cmdb-bluebanquise
+Summary:  ansible-cmdb-bluebanquise
 Release:  1%{?dist}
 Version:  1.30
 License:  GPLv3

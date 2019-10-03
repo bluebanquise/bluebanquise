@@ -39,33 +39,12 @@
 <div class="section" id="instructions">
 <h2>Instructions<a class="headerlink" href="#instructions" title="Permalink to this headline">¶</a></h2>
 <p>Dhcp will only take into account networks from the current iceberg, and with naming related to administration network (by default iceX-Y).</p>
-<p>Also, ensure dhcp is set to tru for your network.</p>
-<p>It is possible to combine networks into shared-networks when multiple subnets are on the same NIC.
-To do so, add a variable in the network definition.</p>
-<p>For example to add ice1-1 and ice1-2 into the same shared network, define them this way:</p>
-<p>Ice1-1:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">networks</span><span class="p">:</span>
-  <span class="nt">ice1-1</span><span class="p">:</span>
-    <span class="nt">subnet</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.10.0.0</span>
-    <span class="nt">prefix</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">16</span>
-    <span class="nt">shared_network</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">wolf</span>
-    <span class="l l-Scalar l-Scalar-Plain">...</span>
-</pre></div>
-</div>
-<p>And ice1-2:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">networks</span><span class="p">:</span>
-  <span class="nt">ice1-2</span><span class="p">:</span>
-    <span class="nt">subnet</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.30.0.0</span>
-    <span class="nt">prefix</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">16</span>
-    <span class="nt">shared_network</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">wolf</span>
-    <span class="l l-Scalar l-Scalar-Plain">...</span>
-</pre></div>
-</div>
-<p>shared_network variable is optional and is simply ignored if not set.</p>
+<p>Also, ensure dhcp is set to true for your network.</p>
 </div>
 <div class="section" id="changelog">
 <h2>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
+<li><p>1.0.3: Simplify standard dhcp, create advanced dhcp for complex configurations. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
 <li><p>1.0.2: Added Ubuntu 18.04 compatibility. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
 <li><p>1.0.1: Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
 <li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>

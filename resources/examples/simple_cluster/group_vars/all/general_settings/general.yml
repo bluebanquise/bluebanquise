@@ -1,12 +1,12 @@
 ### General settings file
 
 # Localisation
-time_zone: Europe/Paris
+time_zone: Europe/Brussels
 
-# Internal mechanisms, use with care
-icebergs_system: false # Activate or deactivate icebergs topology system
-accelerated_mode: false
+# Internal mechanisms
+icebergs_system: false # Activate or deactivate icebergs topology system. Experimental.
+accelerated_mode: false # Activate or deactivate accelerated mode. Experimental.
 
 # /etc/hosts
 hosts_file:
-  range: all # can be all (all hosts) or iceberg (iceberg only if you want to isolate icebergs)
+  range: all # can be all (all hosts) or iceberg (iceberg only)

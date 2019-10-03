@@ -1,4 +1,4 @@
-%define name ansible-playbook-grapher
+%define name ansible-playbook-grapher-bluebanquise
 %define version 0.9.1
 %define unmangled_version 0.9.1
 %define unmangled_version 0.9.1

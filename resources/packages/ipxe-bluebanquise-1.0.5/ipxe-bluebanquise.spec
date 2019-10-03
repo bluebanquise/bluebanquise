@@ -1,10 +1,10 @@
 Name:     ipxe-bluebanquise
 Summary:  ipxe-bluebanquise
-Release:  el8
-Version:  1.0.4
+Release:  1%{dist}
+Version:  1.0.5
 License:  MIT and GPL
 Group:    System Environment/Base
-Source:   https://github.com/oxedions/bluebanquise/ipxe-bluebanquise-1.0.4.tar.gz
+Source:   https://github.com/oxedions/bluebanquise/ipxe-bluebanquise-1.0.5.tar.gz
 URL:      https://github.com/oxedions/
 Packager: Oxedions <oxedions@gmail.com>
 
@@ -40,9 +40,14 @@ mkdir -p $RPM_BUILD_ROOT/var/lib/tftpboot/x86_64
 cp /root/build/bin/tftp/x86_64/standard_ipxe.efi $RPM_BUILD_ROOT/var/lib/tftpboot/x86_64/standard_ipxe.efi
 cp /root/build/bin/tftp/x86_64/standard_undionly.kpxe $RPM_BUILD_ROOT/var/lib/tftpboot/x86_64/standard_undionly.kpxe
 cp /root/build/bin/tftp/x86_64/standard_snponly_ipxe.efi $RPM_BUILD_ROOT/var/lib/tftpboot/x86_64/standard_snponly_ipxe.efi
+cp /root/build/bin/tftp/x86_64/standard_snp_ipxe.efi $RPM_BUILD_ROOT/var/lib/tftpboot/x86_64/standard_snp_ipxe.efi
 
 # arm64
-# need a cpu
+mkdir -p $RPM_BUILD_ROOT/var/lib/tftpboot/arm64
+cp /root/build/bin/tftp/arm64/standard_ipxe.efi $RPM_BUILD_ROOT/var/lib/tftpboot/arm64/standard_ipxe.efi
+cp /root/build/bin/tftp/arm64/standard_snponly_ipxe.efi $RPM_BUILD_ROOT/var/lib/tftpboot/arm64/standard_snponly_ipxe.efi
+cp /root/build/bin/tftp/arm64/standard_snp_ipxe.efi $RPM_BUILD_ROOT/var/lib/tftpboot/arm64/standard_snp_ipxe.efi
+
 
 %files
 %defattr(-,root,root,-)
@@ -54,5 +59,9 @@ cp /root/build/bin/tftp/x86_64/standard_snponly_ipxe.efi $RPM_BUILD_ROOT/var/lib
 /var/lib/tftpboot/x86_64/standard_ipxe.efi
 /var/lib/tftpboot/x86_64/standard_undionly.kpxe
 /var/lib/tftpboot/x86_64/standard_snponly_ipxe.efi
+/var/lib/tftpboot/x86_64/standard_snp_ipxe.efi
+/var/lib/tftpboot/arm64/standard_ipxe.efi
+/var/lib/tftpboot/arm64/standard_snponly_ipxe.efi
+/var/lib/tftpboot/arm64/standard_snp_ipxe.efi
 
 

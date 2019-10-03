@@ -1,5 +1,5 @@
-Name:     alertmanager
-Summary:  alertmanager
+Name:     alertmanager-bluebanquise
+Summary:  alertmanager-bluebanquise
 Release:  1%{?dist}
 Version:  0.18.0
 License:  apache-2.0

@@ -2,14 +2,14 @@
 Install first management
 ========================
 
-First step to deploy **BlueBanquise** is to install first management node manually.
+First step is to install first management node manually.
 
 We will then learn how to use Ansible, and then only focus on the stack itself.
 
 Install operating system
 ========================
 
-Install Centos 7.6 using parameters you need.
+Install Centos 7 or 8 using parameters you need.
 
 The following parameters are recommended:
 
@@ -42,14 +42,17 @@ Once system is installed and rebooted, login, and disable firewall. Current stac
 
 Then prepare repositories.
 
-OS
-^^
+Operating system
+^^^^^^^^^^^^^^^^
 
-Download Centos 7.6 Everything DVD iso from http://isoredirect.centos.org/centos/7/isos/x86_64/ . Iso name is CentOS-7-x86_64-Everything-1810.iso.
+Download:
+
+* Centos 7 Everything DVD iso from http://isoredirect.centos.org/centos/7/isos/x86_64/ . Iso name is CentOS-7-x86_64-Everything-1810.iso.
+* Or Centos 8 DVD 1 iso from http://isoredirect.centos.org/centos/8/isos/x86_64/ . Iso name is CentOS-8-x86_64-1905-dvd1.iso.
 
 **If on standard system:**
 
-Mount iso and copy content to web server directory: (replace centos/7.6 by redhat/8.0 for RHEL 8.0)
+Mount iso and copy content to web server directory: (replace centos/7.6 by centos/8.0, redhat/8.0, redhat/7.7, etc depending of your system)
 
 .. code-block:: bash
 
@@ -68,7 +71,7 @@ Simply mount iso from /dev/cdrom to save space:
   mkdir -p /var/www/html/repositories/centos/7.6/x86_64/os/
   mount /dev/cdrom /var/www/html/repositories/centos/7.6/x86_64/os/
 
-Now, create first repository manually.
+Now, create first repository manually. Procedure is different between Centos 7 and 8.
 
 **Centos/RHEL 7:**
 
@@ -82,7 +85,7 @@ Create file */etc/yum.repos.d/os.repo* with the following content:
   gpgcheck=0
   enabled=1
 
-**RHEL 8:**
+**Centos/RHEL 8:**
 
 Create file */etc/yum.repos.d/BaseOS.repo* with the following content:
 
@@ -104,7 +107,9 @@ Then create file */etc/yum.repos.d/AppStream.repo* with the following content:
   gpgcheck=0
   enabled=1
 
-And ensure repository is available:
+**Both:**
+
+Now ensure repository is available:
 
 .. code-block:: bash
 
@@ -121,6 +126,8 @@ Repositories structure follows a specific pattern:
                                     |     |   |      |
                                     v     v   v      v
        /var/www/html/repositories/centos/7.6/x86_64/os
+
+Note: this patern parameters (distribution, version, architecture) must match the one provided in the equipment_profile file seen later.
 
 BlueBanquise
 ^^^^^^^^^^^^

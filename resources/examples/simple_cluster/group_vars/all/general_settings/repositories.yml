@@ -1,6 +1,3 @@
-# Liste here all repositories to be used by default.
-# Consider that you can create groups or use equipment_profile / icebergs groups to fine-tune repositories instead of using this file.
-
 system_repositories:
   - bluebanquise
   - os

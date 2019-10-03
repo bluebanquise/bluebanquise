@@ -34,25 +34,25 @@
             
   <div class="section" id="vocabulary">
 <h1>Vocabulary<a class="headerlink" href="#vocabulary" title="Permalink to this headline">¶</a></h1>
-<p>Some words are important in <strong>BlueBanquise</strong>.</p>
+<p>Some words are important in <strong>BlueBanquise</strong>. Most of them are described here.</p>
 <div class="section" id="ansible-vocabulary">
 <h2>Ansible vocabulary<a class="headerlink" href="#ansible-vocabulary" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="host">
 <h3>Host<a class="headerlink" href="#host" title="Permalink to this headline">¶</a></h3>
-<p>An Ansible <strong>host</strong> is a remote host managed by Ansible. An <strong>host</strong> can be a physical server, but also a VM or something else.</p>
-<p>Host are defined in <em>/etc/ansible/inventory/cluster/nodes</em>.</p>
+<p>An Ansible <strong>host</strong> (also often refered as a <strong>node</strong>) is a remote host managed by Ansible. An <strong>host</strong> can be a physical server, but also a VM or something else.</p>
+<p>Hosts are defined in <em>/etc/ansible/inventory/cluster/nodes</em>.</p>
 </div>
 <div class="section" id="group">
 <h3>Group<a class="headerlink" href="#group" title="Permalink to this headline">¶</a></h3>
-<p>An Ansible <strong>group</strong> is a logical aggregation of hosts. For example, system administrator can define a group “data_base_servers” that would contain hosts “database1” and “database2”.</p>
-<p><strong>Groups</strong> allow Ansible to provide dedicated <strong>variables</strong> to related hosts or execute tasks on a set of hosts.</p>
+<p>An Ansible <strong>group</strong> is a logical aggregation of hosts. For example, system administrator can define a group “database_servers” that would contain hosts “database1” and “database2”.</p>
+<p><strong>Groups</strong> allow Ansible to provide dedicated <strong>variables</strong> to member hosts or execute tasks on a set of hosts.</p>
 <p>Note: a host can be part of multiple groups.</p>
 </div>
 <div class="section" id="variables">
 <h3>Variables<a class="headerlink" href="#variables" title="Permalink to this headline">¶</a></h3>
 <p>Variables in Ansible follow the YAML structure.</p>
 <p>A variable is like in any programming language: a variable name, and a data related.</p>
-<p>Multiple kind of variables exist in YAML:</p>
+<p>Multiple kind of variables exist in Ansible:</p>
 <div class="section" id="simple">
 <h4>Simple<a class="headerlink" href="#simple" title="Permalink to this headline">¶</a></h4>
 <p>A simple variable is defined this way:</p>
@@ -78,7 +78,7 @@
   <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">henry</span>
 </pre></div>
 </div>
-<p>In Jinja2, variable can be iterated over, or a specific value can be used:</p>
+<p>In Jinja2, variable can be iterated over, or a specific value of the list can be used (like an array):</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>{% for i in my_names_list %}
 {{i}}
 {% endfor %}
@@ -121,7 +121,9 @@ the list is empty %}
 {% for i in my_dictionarry_1[&#39;my_names_list&#39;] %}
 {{i}}
 {% endfor %}
+
 {{my_dictionarry_1.my_names_list[0]}}
+{{my_dictionarry_1[&#39;my_names_list&#39;][0]}}
 </pre></div>
 </div>
 <p>Output will be:</p>
@@ -131,6 +133,8 @@ henry
 bob
 alice
 henry
+
+bob
 bob
 </pre></div>
 </div>
@@ -139,10 +143,11 @@ bob
 <div class="section" id="j2-variables">
 <h4>j2 Variables<a class="headerlink" href="#j2-variables" title="Permalink to this headline">¶</a></h4>
 <p>These are <strong>BlueBanquise</strong> specific variables. All variables with name starting by <strong>j2_</strong> are j2 variables.</p>
-<p>These variables are all stored in group_vars/all/engine directory, and are used for the internal purpose of the stack.</p>
-<p>You can consider these variables as “functions” that takes as argument the current running host (or the host provided in hostvars if loaded using hostvars call).</p>
-<p>These variables are here to simplify templates writing, by removing ugly and redundant things from them, and providing a direct access to values.</p>
-<p>To clarify your mind, you can consider that these variables contains a simple value. In reality, they contain Jinja2 code as a string, that will be interpreted by Ansible, which is why these are more functions/API than pure variables.</p>
+<p>These variables are all stored in group_vars/all/j2_variables directory, and are used for the internal purpose of the stack.</p>
+<p>These variables are here to simplify tasks and templates writing, by removing ugly and redundant things from them, and providing a direct access to values.
+You can consider these variables as “functions” that takes as argument the current running host (or the host provided in hostvars if loaded using hostvars call).</p>
+<p>To clarify your mind, you can consider that these variables contains a simple value. In reality, they contain Jinja2 code as a string, that will be interpreted by Ansible during tasks/templates execution, which is why these are more functions/API than pure variables.</p>
+<p>Last point, for developers, these j2 variables should be considered as a way to keep compatibility with roles, while upgrading the logic of the stack.</p>
 </div>
 </div>
 <div class="section" id="inventory-roles-and-playbooks">
@@ -150,19 +155,20 @@ bob
 <div class="section" id="inventory">
 <h4>Inventory<a class="headerlink" href="#inventory" title="Permalink to this headline">¶</a></h4>
 <p>The Ansible inventory is the directory that contains Ansible variables and hosts definitions. In <strong>BlueBanquise</strong>, default path is /etc/ansible/inventory.</p>
-<p>Inventory is the <strong>data</strong>.</p>
+<p>Inventory is the <strong>DATA</strong>.</p>
 </div>
 <div class="section" id="roles">
 <h4>Roles<a class="headerlink" href="#roles" title="Permalink to this headline">¶</a></h4>
 <p>An Ansible role is a list of tasks to do to achieve a purpose. For example, there will be a role called dhcp_server, that contains task to install, configure and start the dhcp server.</p>
 <p>In <strong>BlueBanquise</strong>, default path is /etc/ansible/roles.</p>
-<p>Roles are the <strong>automation logic</strong>.</p>
+<p>Note that /etc/ansible/roles is splitted in multiple directories, but ansible.cfg file is configured to use roles in all of them.</p>
+<p>Roles are the <strong>AUTOMATION LOGIC</strong>.</p>
 </div>
 <div class="section" id="playbooks">
 <h4>Playbooks<a class="headerlink" href="#playbooks" title="Permalink to this headline">¶</a></h4>
-<p>An Ansible playbook is simply a list of roles to apply, on a specific host or group of hosts. It is an yml file.</p>
+<p>An Ansible playbook is simply a list of roles to apply, on a specific host or group of hosts. It is a yaml file.</p>
 <p>In <strong>BlueBanquise</strong>, default path is /etc/ansible/playbooks.</p>
-<p>Playbooks are simply your <strong>list of roles to apply on your hosts</strong>.</p>
+<p>Playbooks are simply your <strong>LIST OF ROLES TO APPLY on your hosts/targets</strong>.</p>
 </div>
 </div>
 <div class="section" id="variables-precedence">
@@ -171,9 +177,9 @@ bob
 <p>Ansible has an internal mechanism called <strong>Variables precedence</strong>.</p>
 <p>When a variable is defined in an yml file, the position of the file in the ansible inventory is critical and very important.</p>
 <p>For example, a variable defined in /etc/ansible/inventory/group_vars/all/ will have the less precedence, and a variable defined in /etc/ansible/inventory/cluster will have a higher precedence, and so win if loaded.</p>
-<p>The full list of available variables precedence is provided in Ansible documentation: <a class="reference external" href="https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html#variable-precedence-where-should-i-put-a-variable">https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html#variable-precedence-where-should-i-put-a-variable</a></p>
-<p>This feature is key to the stack and key for system administrator to manipulate the <strong>BlueBanquise</strong> stack the way he/she wants.</p>
-<p>For example, values can be set by default, and then redefined for some groups of hosts without changing the default for all others. Or it is simply possible to fix a dynamic variable to the desired value in hosts definitions if dynamic value is not the one expected. Etc.</p>
+<p>The full list of available variables precedence is provided in Ansible documentation: <a class="reference external" href="https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html#variable-precedence-where-should-i-put-a-variable">variable precedence list</a></p>
+<p>This feature is key to the stack and key for system administrator to manipulate the <strong>BlueBanquise</strong> stack the way he/she/(it ?) wants.</p>
+<p>For example, values can be set by default, and then redefined for some groups of hosts without changing the default for all others. Or it can be used to simply fix a dynamic j2 variable to the desired value in hosts definitions if dynamic value is not the one expected. Etc.</p>
 <p>Inventory can be seen as a giant pizza, in 3D then flatten.</p>
 <ul class="simple">
 <li><p><em>Paste</em> is the variable in /etc/ansible/inventory/group_vars/all</p></li>
@@ -184,13 +190,13 @@ bob
 <img alt="_images/pizza_example.svg" src="_images/pizza_example.svg" /></div>
 <div class="section" id="merge">
 <h3>Merge<a class="headerlink" href="#merge" title="Permalink to this headline">¶</a></h3>
-<p>Ansible default hash_behaviour is replace. <strong>BlueBanquise</strong> is using merge.</p>
-<p>When using replace, when a dictionary is impacted by the variable’s precedence mechanism, Ansible overwrite the full dictionary if a variable has a higher precedence somewhere.</p>
-<p>When using replace, Ansible will only update the related variable, and keep the original dictionary and values for all other variables in this dictionary.</p>
+<p>Ansible default hash_behaviour is <em>replace</em>. <strong>BlueBanquise</strong> is using <em>merge</em>.</p>
+<p>If using <em>replace</em>, when a dictionary is impacted by the variable’s precedence mechanism, Ansible overwrite the full dictionary if a variable has a higher precedence somewhere.</p>
+<p>If using <em>merge</em>, Ansible will only update the related variable, and keep the original dictionary and values for all other variables in this dictionary.</p>
 </div>
 <div class="section" id="jinja2">
 <h3>Jinja2<a class="headerlink" href="#jinja2" title="Permalink to this headline">¶</a></h3>
-<p>Jinja2 is the templating language used by Ansible to render templates in roles. It is heavily used in the stack, and learning Jinja2 will often be needed to create custom roles. (But Jinja2 is very simple).</p>
+<p>Jinja2 is the templating language used by Ansible to render templates in roles. It is heavily used in the stack, and learning Jinja2 will often be needed to create custom roles. (But Jinja2 is simple if you are use to code or, better, to bash).</p>
 <p>Full documentation is available in a single page: <a class="reference external" href="https://jinja.palletsprojects.com/en/2.10.x/templates/">Jinja2 template designer</a></p>
 </div>
 </div>
@@ -205,21 +211,21 @@ bob
 </ul>
 <p>One Iceberg is composed of one or multiple managements servers, <strong>in charge of the same pool of nodes</strong>.</p>
 <p><strong>BlueBanquise</strong> support many kinds of configurations, but most common are:</p>
-<div class="section" id="one-iceberg">
-<h4>One iceberg<a class="headerlink" href="#one-iceberg" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="one-iceberg-configuration">
+<h4>One iceberg configuration<a class="headerlink" href="#one-iceberg-configuration" title="Permalink to this headline">¶</a></h4>
 <img alt="_images/one_iceberg.svg" src="_images/one_iceberg.svg" /><p>For simple systems (small/medium HPC cluster, small enterprise network, university IT practical session room, etc.), one iceberg scenario is the standard. One or multiple management will reach the same ethernet administration networks, and federate the same pool of nodes.</p>
 <img alt="_images/one_iceberg_example_1.svg" src="_images/one_iceberg_example_1.svg" /><img alt="_images/one_iceberg_example_2.svg" src="_images/one_iceberg_example_2.svg" /></div>
-<div class="section" id="multiple-icebergs">
-<h4>Multiple icebergs<a class="headerlink" href="#multiple-icebergs" title="Permalink to this headline">¶</a></h4>
-<img alt="_images/multiple_icebergs.svg" src="_images/multiple_icebergs.svg" /><p>For advanced systems, (large HPC clusters needing load spreading with unified network, enterprise network, etc.), multiple icebergs can be required. <strong>BlueBanquise</strong> allows multiple levels of icebergs, for complex needs. Also, a global_network can be defined so all nodes from all icebergs can communicate through this unified network (most of the time an Interconnect network).</p>
+<div class="section" id="multiple-icebergs-configuration">
+<h4>Multiple icebergs configuration<a class="headerlink" href="#multiple-icebergs-configuration" title="Permalink to this headline">¶</a></h4>
+<img alt="_images/multiple_icebergs.svg" src="_images/multiple_icebergs.svg" /><p>For advanced systems, (large HPC clusters needing load spreading with unified network, enterprise network, etc.), multiple icebergs scenario can be required. <strong>BlueBanquise</strong> allows multiple levels of icebergs, for complex needs. Also, a global_network can be defined so all nodes from all icebergs can communicate through this unified network (most of the time an Interconnect network).</p>
 <img alt="_images/multiple_icebergs_example_1.svg" src="_images/multiple_icebergs_example_1.svg" /></div>
 </div>
 <div class="section" id="equipment-profiles">
 <h3>Equipment profiles<a class="headerlink" href="#equipment-profiles" title="Permalink to this headline">¶</a></h3>
-<p>In <strong>BlueBanquise</strong>, nodes are nearly always part of a group starting with prefix <strong>equipment_</strong>. These groups are called equipment profiles.</p>
-<p>They are used to provide hosts of this group the <strong>equipment_profile</strong> dictionary, and other variables if needed. This dictionary defines hosts operating system parameters, kernel parameters, partitioning, etc.</p>
+<p>In <strong>BlueBanquise</strong>, nodes are nearly always part of a group starting with prefix <strong>equipment_</strong>. These groups are called <em>equipment profiles</em>.</p>
+<p>They are used to provide hosts of this group the <strong>equipment_profile</strong> dictionary (this dictionary defines hosts operating system parameters, kernel parameters, partitioning, etc.), and other variables if needed like dedicated authentication parameters.</p>
 <p>These are key groups of the stack.</p>
-<p><strong>It is important to note that equipment_profiles dictionary cannot be used at an upper level than group_vars</strong>. It can, but you must NOT.</p>
+<p><strong>It is important</strong> to note that equipment_profiles dictionary <strong>must not</strong> be used at an upper level than group_vars in variables precedence. <strong>It can, but you must NOT</strong>.</p>
 </div>
 </div>
 </div>

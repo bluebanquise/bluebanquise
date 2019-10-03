@@ -86,7 +86,7 @@ iseq ${platform} efi && goto bootdisk-efi || goto bootdisk-legacy
     :bootdisk-efi
     echo Booting on disk in EFI way
     sleep 2
-    chain http://${next-server}/preboot_execution_environment/bin/grub2-efi-autofind.img || shell
+    chain http://${next-server}/preboot_execution_environment/bin/grub2_efi_autofind.img || shell
     exit 1
 
 :memtest

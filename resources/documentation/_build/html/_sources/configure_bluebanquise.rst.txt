@@ -27,7 +27,7 @@ And download latest **BlueBanquise** version from git into Ansible directory:
   cd /etc/ansible
   git clone https://github.com/oxedions/bluebanquise.git .
 
-Finally, edit /etc/hosts file, and add "management1" on localhost line:
+Finally, edit /etc/hosts file, and add "management1" (or whatever your current management node hostname) on localhost line:
 
 .. code-block:: text
 
@@ -50,14 +50,12 @@ Ansible will read **ALL** files in the inventory. **NEVER do a backup of a file 
 
 Backup in another location, outside of /etc/ansible/inventory.
 
-Pickup example inventory
-------------------------
+Check example inventory
+-----------------------
 
-Copy example inventory as a base for our work. This example is based on the picture provided just above.
+An inventory example is provided in /etc/ansible/resources/examples/simple_cluster/ as a base for our work.
 
-.. code-block:: bash
-
-  cp -a /etc/ansible/resources/examples/simple_cluster/* /etc/ansible/inventory
+This example is based on the picture provided just above.
 
 Review nodes
 ------------
@@ -264,12 +262,12 @@ Last part, and probably the most complicated, are default parameters.
 
 Remember Ansible precedence mechanism. All variables in group_vars/all/ have less priority, while variables in group_vars/* have a higher priority.
 
-The idea here is the following: group_vars/all/default/ folder contains all the default parameters for all nodes. Here authentication, and equipment_profile. You have to tune these parameters to match your exact "global" need, and then for each equipment group, tune parameters.
+The idea here is the following: group_vars/all/all_equipment/ folder contains all the default parameters for all nodes. Here authentication, and equipment_profile. You have to tune these parameters to match your exact "global" need, and then for each equipment group, tune parameters.
 
 Equipment profile
 ^^^^^^^^^^^^^^^^^
 
-For example, open file /etc/ansible/inventory/group_vars/all/default/equipment_profile.yml, and check access_control variable. It is set to true:
+For example, open file /etc/ansible/inventory/group_vars/all/all_equipment/equipment_profile.yml, and check access_control variable. It is set to true:
 
 .. code-block:: yaml
 
@@ -314,7 +312,7 @@ Review groups parameters
 
 Last step is to check and review example of equipment_profile tuning in each of the group_vars/equipment_XXXXXX folders. Adapt them to your needs.
 
-If you prefer, you can copy the whole group_vars/all/default/equipment_profile.yml file into these folders, or simply adjust the parameters you wish to change from default.
+If you prefer, you can copy the whole group_vars/all/all_equipment/equipment_profile.yml file into these folders, or simply adjust the parameters you wish to change from default.
 
 Once done, configuration is ready, we will check addons later.
 

@@ -96,7 +96,7 @@ PXE
 Next step is to deploy the other nodes using PXE process.
 
 NOTE: it is assumed here you know how to have your other nodes / VM / servers / workstation to boot on LAN.
-If your device cannot boot on LAN, use iso or usb image provided on management1 in /var/lib/tftpboot. These images will start a LAN boot automatically.
+If your device cannot boot on LAN, use iso or usb image provided on management1 in /var/www/html/preboot_execution_environment/bin/[x86_64|arm64]. These images will start a LAN boot automatically.
 
 In **BlueBanquise**, PXE process has been made so that any kind of hardware able to boot PXE, USB or CDrom can start deployment.
 
@@ -111,7 +111,7 @@ bootset
 
 Before booting remote nodes in PXE, we need to ask management1 to activate remote nodes deployment. If not, remote nodes will boot on disk, even when booting over LAN.
 
-To manipulate nodes PXE boot, a command, bootset is available.
+To manipulate nodes PXE boot, a command, *bootset*, is available.
 
 We are going to deploy login1 and c001, c002, c003 and c004.
 

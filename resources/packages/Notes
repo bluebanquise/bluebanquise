@@ -4,4 +4,4 @@ python setup.py bdist_rpm
 
 Atftp needs automake and autoconf
 
-bluebanquise_ipxe needs genisoimage and xz / xz-devel
+ipxe-bluebanquise needs genisoimage and xz / xz-devel
