@@ -217,10 +217,10 @@ General configuration is made in group_vars/all/general_settings.
 
 We are going to skip icebergs.yml file for now.
 
-External hosts
-^^^^^^^^^^^^^^
+Externals
+^^^^^^^^^
 
-File group_vars/all/general_settings/external_hosts.yml allows to add external hosts to the stack. These hosts will not be managed by the stack, but all nodes will know them (from /etc/hosts and DNS).
+File group_vars/all/general_settings/external.yml allows to connect cluster to the external world or network.
 
 Network
 ^^^^^^^
