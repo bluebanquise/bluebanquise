@@ -1,4 +1,0 @@
-# Hosts defined here will be automatically added into /etc/hosts and into DNS configuration
-
-external_hosts:
-  sphenisc.com: 213.186.33.3
