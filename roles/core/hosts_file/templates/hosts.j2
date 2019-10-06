@@ -1,12 +1,15 @@
 {# Macro to avoid redundancy #}
 {% macro write_host(host) %}
-{% if hostvars[host]['network_interfaces'] is defined and not none %}{# This part are clone #}
+{% if hostvars[host]['network_interfaces'] is defined and not none %}{# These part are clone #}
 {% for interface, interface_vars in hostvars[host]['network_interfaces'].items() %}
 {% if interface_vars.ip4 is defined and not none and interface_vars.network is defined and not none %}
 {% if interface == hostvars[host]['j2_node_main_network_interface'] %}
 {% set alias_list = [] %}
 {% if hostvars[host]['alias'] is defined and not none %}
 {% for alias in hostvars[host]['alias'] %}{{ alias_list.append(alias) }}{% endfor %}
+{% endif %}
+{% if hostvars[host]['iceberg_alias'] is defined and not none and hostvars[host]['j2_current_iceberg'] == j2_current_iceberg %}
+{% for alias in hostvars[host]['iceberg_alias'] %}{{ alias_list.append(alias) }}{% endfor %}
 {% endif %}
 {{interface_vars.ip4}} {{host}} {{host}}.{{domain_name}} {{host}}-{{interface_vars.network}} {{alias_list|join(' ')}}
 {% else %}
@@ -51,8 +54,8 @@
 {% endif %}
 {% endfor %}
 {% endfor %}
-{% endif %}
 
+{% endif %}
 
 ## External hosts
 
