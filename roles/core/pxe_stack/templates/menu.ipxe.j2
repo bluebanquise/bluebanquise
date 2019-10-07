@@ -72,7 +72,8 @@ set submenu-timeout 0
 goto start
 
 :bootosdeploy
-chain http://${next-server}/preboot_execution_environment/nodes/${hostname}_bootosdeploy.ipxe || shell
+chain http://${next-server}/preboot_execution_environment/equipment_ipxe_configurations/${equipment-ipxe-configuration} || shell
+#chain http://${next-server}/preboot_execution_environment/nodes/${hostname}_bootosdeploy.ipxe || shell
 
 :bootdisk
 iseq ${platform} efi && goto bootdisk-efi || goto bootdisk-legacy

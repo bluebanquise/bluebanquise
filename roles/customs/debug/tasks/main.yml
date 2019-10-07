@@ -1,5 +1,10 @@
 ---
 
+- name: Package
+  dnf:
+    name: wget
+    state: present
+
 - name: Template >> /tmp/debug
   template:
     src: "debug.j2"

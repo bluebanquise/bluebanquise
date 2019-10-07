@@ -41,6 +41,7 @@
     src: "nodes_parameters.yml.j2"
     dest: "/etc/bluebanquise/pxe/nodes_parameters.yml"
     mode: 0644
+  tags: parameters
 
 - name: Templates >> menu and convergence
   template:
