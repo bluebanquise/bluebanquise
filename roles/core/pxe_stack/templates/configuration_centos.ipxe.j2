@@ -25,6 +25,7 @@ initrd http://${next-server}/repositories/{{hostvars[groups[item][0]]['equipment
 echo ALL DONE! We are ready.
 echo
 echo Console is: {{hostvars[groups[item][0]]['equipment_profile']['console']}}
+echo Dedicated parameters: ${dedicated-parameters}
 echo Deployment server is: ${next-server}
 echo Kickstart used is: kickstart.{{item | replace('equipment_','') | trim}}.cfg
 echo
