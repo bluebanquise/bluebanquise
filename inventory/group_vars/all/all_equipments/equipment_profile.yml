@@ -2,7 +2,7 @@ equipment_profile:
 
   # iPXE network driver
   # default should be good for most of NIC, but some need SNP
-  ipxe_network_driver: default # default or snp or snponly
+  ipxe_network_driver: snp #default # default or SNP
 
   # When installing in EFI, grub2 break the boot order and set next boot to disk (seriously, why??!)
   # In most case, you prefer system to continue to boot on PXE, and so the stack can restore first boot device after grub2 installation

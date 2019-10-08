@@ -1,5 +1,19 @@
-icebergs_topology:
+icebergs_system: true # Activate or deactivate icebergs topology system. Experimental.
+
+icebergs:
   iceberg1:
-    iceberg2:
-    iceberg3:
-    iceberg4:
+    level: auto
+    slaves:
+      iceberg2:
+        level: auto
+        allow_ssh_jump_from_master: yes
+      iceberg3:
+        level: auto
+        allow_ssh_jump_from_master: no
+      iceberg4:
+        level: auto
+        allow_ssh_jump_from_master: yes
+        slaves: 
+          iceberg5:
+            level: auto
+            allow_ssh_jump_from_master: no
