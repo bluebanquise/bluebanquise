@@ -1,12 +1,21 @@
 #### Blue Banquise file ####
 ## {{ansible_managed}}
 
-{% set range = 'all' %}
+{% if icebergs_system == 'true' %}
+{% set range = groups[j2_current_iceberg] %}
+{% for host in groups[managements_group_name] %}
+{% if hostvars[host]['iceberg_master'] == j2_current_iceberg %}
+{{ range.append(host) }}
+{% endif %}
+{% endfor %}
+{% else %}
+{% set range = groups['all'] %}
+{% endif %}
 
-{% for host in groups[range] %}
+{% for host in range %}
 {% if hostvars[host]['network_interfaces'] is defined %}
 {% for nic, nic_args in hostvars[host]['network_interfaces'].items() %}
-{% if (nic_args.network == item) and (nic_args.network == hostvars[host]['j2_node_main_network']) and (nic_args.ip4 is defined and not none) and (nic_args.mac is defined and not none) %}
+{% if (nic_args.network == item) and (nic_args.ip4 is defined and not none) and (nic_args.mac is defined and not none) %}
 
 host {{host}} { 
   option host-name "{{host}}";

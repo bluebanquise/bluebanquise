@@ -1,0 +1,8 @@
+[iceberg2:vars]
+iceberg_master = iceberg1
+iceberg_level = 1
+
+[iceberg2]
+thor
+einherjar5
+

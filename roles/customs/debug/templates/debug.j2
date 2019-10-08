@@ -1,39 +1,4 @@
-
-{#{% for lvl1 in icebergs_topology %}
-  {% if j2_current_iceberg == lvl1 %}
-    {{icebergs_topology[lvl1]}}
-  {% else %}
-    {% for lvl2 in icebergs_topology[lvl1] %}
-      {% if j2_current_iceberg == lvl2 %}
-        {{icebergs_topology[lvl1][lvl2]}}
-      {% endif %}
-    {% endfor %}
-  {% endif %}
-{% endfor %}
-
-{% for lvl1, lvl1_args in icebergs_topology.items() recursive %}
-  {% if j2_current_iceberg == lvl1 %}
-    {{lvl1_args}}
-  {% else %}
-    {{loop(lvl1_args)}}
-  {% endif %}
-{% endfor %}#}
-
-## B
-{% for iceberg in icebergs recursive %}
-  {{iceberg}}
-  {% if iceberg.slaves %}
-    {{ loop(iceberg.slaves) }}
-  {% endif %}
-
-{% endfor %}
-## E
-
-{#
 {{j2_current_iceberg}}
 {{j2_current_iceberg_number}}
 {{j2_current_iceberg_network}}
 
-{% for toto in j2_under_icebergs %}{{toto}}{% endfor %}
-{{j2_above_iceberg}}
-{{j2_current_iceberg_level}}#}
