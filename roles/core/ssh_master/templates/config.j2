@@ -1,34 +1,27 @@
+{% import "macros/network.j2" as macro_network with context %}
 {# Macro to avoid redundancy #}
-{% macro write_host(host) %}
+{% macro write_host(host,macro_node_main_network) %}
 Host {{host}}
     StrictHostKeyChecking no
     UserKnownHostsFile=/dev/null
-    Hostname %h-{{hostvars[host]['j2_node_main_network']}}
+    Hostname %h-{{macro_node_main_network}}
 {% endmacro %}
-
 #### Blue Banquise file ####
 ## {{ansible_managed}}
 
-# All or Iceberg hosts
-
-{% if icebergs_system == 'true' and hosts_file['range'] == 'iceberg' %}
-{% set range = (j2_current_iceberg|string) %}
-{% else %}
-{% set range = 'all' %}
-{% endif %}
-
-{% for host in groups[range] %}
-{{write_host(host)}}
-{% endfor %}
-
-{#
-# Under iceberg {{managements_group_name}}
-
-{% for under_icb in j2_under_icebergs %}
+{% if icebergs_system == true %}
+# Icebergs system is on
+{% set range = groups[j2_current_iceberg] %}
 {% for host in groups[managements_group_name] %}
-{% if (groups[under_icb] is defined and not none) and (host in groups[under_icb]) %}
-{{write_host(host)}}
+{% if hostvars[host]['iceberg_master'] == j2_current_iceberg %}
+{{ range.append(host) }}
 {% endif %}
 {% endfor %}
+{% else %}
+{% set range = groups['all'] %}
+{% endif %}
+
+{% for host in range %}
+{{write_host(host,(macro_network.node_main_network(hostvars[host]['network_interfaces'],j2_current_iceberg_network)| trim))}}
 {% endfor %}
-#}
+

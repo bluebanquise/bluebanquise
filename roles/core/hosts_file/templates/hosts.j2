@@ -32,7 +32,7 @@
 127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
 ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
 
-{% if icebergs_system == 'true' and hosts_file['range'] == 'iceberg' %}
+{% if icebergs_system == true and hosts_file['range'] == 'iceberg' %}
 {% set range = groups[j2_current_iceberg] %}
 {% for host in groups[managements_group_name] %}
 {% if hostvars[host]['iceberg_master'] == j2_current_iceberg %}

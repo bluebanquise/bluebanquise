@@ -1,30 +1,30 @@
+{% import "macros/network.j2" as macro_network with context %}
 #### Blue Banquise file ####
 ## {{ansible_managed}}
 
-{% if icebergs_system == 'true' and hosts_file['range'] == 'iceberg' %}
-{% set range = (current_iceberg|string) %}
+{% if icebergs_system == true %}
+# Iceberg system is on
+{% set range = groups[j2_current_iceberg] %}
+{% for host in groups[managements_group_name] %}
+{% if hostvars[host]['iceberg_master'] == j2_current_iceberg %}
+{{ range.append(host) }}
+{% endif %}
+{% endfor %}
 {% else %}
-{% set range = 'all' %}
+{% set range = groups['all'] %}
 {% endif %}
 
-{% for host in groups[range] %}
+{% for host in range %}
 {{host}}:
   equipment_profile: {{ hostvars[host]['group_names'] | select('match','^'+equipment_naming+'_.*') | list | unique | sort | first | join | replace('equipment_','') | trim }}
   network:
-    node_main_network_interface: {{ hostvars[host]['j2_node_main_network_interface'] }}
-    node_main_network_netmask: {{ networks[hostvars[host]['j2_node_main_network']]['netmask'] }}
-    node_main_network_gateway: {% if networks[hostvars[host]['j2_node_main_network']]['gateway'] is defined and not none %}{{ networks[hostvars[host]['j2_node_main_network']]['gateway'] }}{% endif %}
+{% set host_node_main_network = (macro_network.node_main_network(hostvars[host]['network_interfaces'],j2_current_iceberg_network)| trim) %}
+{% set host_node_main_network_interface = (macro_network.node_main_network_interface(hostvars[host]['network_interfaces'],host_node_main_network) | trim) %}
+    node_main_network_interface: {{ host_node_main_network_interface }}
+    node_main_network_netmask: {{ networks[host_node_main_network]['netmask'] }}
+    node_main_network_gateway: {% if networks[host_node_main_network]['gateway'] is defined and not none %}{{ networks[host_node_main_network]['gateway'] }}{% endif %}
 
-    node_main_network_interface_ip: {{ hostvars[host]['network_interfaces'][hostvars[host]['j2_node_main_network_interface']]['ip4'] }}
+    node_main_network_interface_ip: {{ hostvars[host]['network_interfaces'][host_node_main_network_interface]['ip4'] }}
+
 {% endfor %}
 
-{#
-{% for under_icb in j2_under_icebergs %}
-{% for host in groups[managements_group_name] %}
-{% if (groups[under_icb] is defined and not none) and (host in groups[under_icb]) %}
-{{host}}:
-  equipment_profile: {{ hostvars[host]['group_names'] | select('match','^'+equipment_naming+'_.*') | list | unique | sort | first | join | replace('equipment_','') | trim }}
-{% endif %}
-{% endfor %}
-{% endfor %}
-#}

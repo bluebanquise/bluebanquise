@@ -16,13 +16,22 @@
    mode: 0755
   with_items:
    - /var/www/cgi-bin
+   - /etc/bluebanquise
+   - /etc/bluebanquise/pxe
+
+- name: Create pxe directories structure
+  file:
+   path: "{{item}}"
+   state: directory
+   mode: 0755
+   owner: "{{apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
+   group: "{{apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
+  with_items:
    - /var/www/html/preboot_execution_environment
    - /var/www/html/preboot_execution_environment/bin
    - /var/www/html/preboot_execution_environment/nodes
    - /var/www/html/preboot_execution_environment/equipment_os_configurations
    - /var/www/html/preboot_execution_environment/equipment_ipxe_configurations
-   - /etc/bluebanquise
-   - /etc/bluebanquise/pxe
 
 - name: Configure access on directory /var/www/html/preboot_execution_environment"
   file:

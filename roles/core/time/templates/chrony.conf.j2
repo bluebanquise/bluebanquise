@@ -1,31 +1,12 @@
+{% import "macros/network.j2" as macro_network with context %}
 #### Blue Banquise file ####
 ## {{ansible_managed}}
-
-# External servers/pool if asked
-{% if external_time.time_server.server and time_profile == 'server' %}
-{% for external_server in external_time.time_server.server %}
-server {{external_server}}
-{% endfor %}
-{% endif %}
-{% if external_time.time_server.pool and time_profile == 'server' %}
-{% for external_pool in external_time.time_server.pool %}
-pool {{external_pool}} iburst maxsources 3
-{% endfor %}
-{% endif %}
-{% if external_time.time_client.server and time_profile == 'client' %}
-{% for external_server in external_time.time_client.server %}
-server {{external_server}}
-{% endfor %}
-{% endif %}
-{% if external_time.time_client.pool and time_profile == 'client' %}
-{% for external_pool in external_time.time_client.pool %}
-pool {{external_pool}} iburst maxsources 3
-{% endfor %}
-{% endif %}
 
 {% if time_profile == 'client' %}
 # Server to bind to
 server {{networks[j2_node_main_network]['services_ip']['time_ip']}}
+{% elif time_profile == 'server' and icebergs_system == true and iceberg_master != 'top' %}{# We need here to get master island ntp ip, depending of the subnet this node is member of.#}
+server {{networks[(macro_network.node_main_network(network_interfaces,management_networks_naming+(iceberg_master|replace(iceberg_naming,' ')| trim | string))| trim)]['services_ip']['time_ip']}}
 {% endif %}
 
 # Record the rate at which the system clock gains/losses time.
@@ -51,7 +32,11 @@ allow {{networks[network_interfaces[nic]['network']]['subnet']}}/{{networks[netw
 # Listen to local clock
 server 127.127.1.0
 # Very bad time source
-local stratum 14
+{% if iceberg_level is defined and not none %}
+local stratum {{ 12+(iceberg_level|int) }}
+{% else %}
+local stratum 12
+{% endif %}
 
 {% endif %}
 
