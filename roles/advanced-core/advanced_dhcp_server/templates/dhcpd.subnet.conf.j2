@@ -56,15 +56,15 @@ group {
     host_identifier {{nic_args.host-identifier}};
     fixed-address {{nic_args.ip4}};
   }
-{% elif nic_args.option_82_match is defined and not none %}{# Warning, only works in a shared network!! #}
-  class "option_82_match_{{host}}" {
+{% elif nic_args.option_match is defined and not none %}{# Warning, only works in a shared network!! #}
+  class "option_match_{{host}}" {
     match if (
-      {{nic_args.option_82_match}}
+      {{nic_args.option_match}}
     );
   }
   pool {
     option host-name "{{host}}";
-    allow members of "option_82_match_{{host}}";
+    allow members of "option_match_{{host}}";
     range {{nic_args.ip4}};
   }
 {% endif %}
@@ -91,15 +91,15 @@ group {
     host_identifier {{bmc_args.host-identifier}};
     fixed-address {{bmc_args.ip4}};
   }
-{% elif nic_args.option_82_match is defined and not none %}{# Warning, only works in a shared network!! #}
-  class "option_82_match_{{bmc_args.name}}" {
+{% elif nic_args.option_match is defined and not none %}{# Warning, only works in a shared network!! #}
+  class "option_match_{{bmc_args.name}}" {
     match if (
-      {{bmc_args.option_82_match}}
+      {{bmc_args.option_match}}
     );
   }
   pool {
     option host-name "{{bmc_args.name}}";
-    allow members of "option_82_match_{{bmc_args.name}}";
+    allow members of "option_match_{{bmc_args.name}}";
     range {{bmc_args.ip4}};
   }
 {% endif %}
