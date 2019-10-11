@@ -5,7 +5,7 @@
 
 {% for network in networks %}
 {% if j2_current_iceberg_network in network %}
-{% if (networks[network]['shared_network'] is not defined or none) and (networks[network]['is_in_dhcp'] == true) %}
+{% if networks[network]['is_in_dhcp'] == true %}
 
 subnet {{networks[network]['subnet']}} netmask {{networks[network]['netmask']}} {
 

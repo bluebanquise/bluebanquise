@@ -21,3 +21,22 @@ nfs:
     export_arguments: rw,no_root_squash,sync
     mount_arguments: rw,intr,rsize=32768,wsize=32768,nfsvers=4.2,bg
 
+  ansible:
+    mount: /etc/ansible
+    export: /etc/ansible
+    server: odin
+    clients_groups:
+      - equipment_supermicro_management
+    take_over_network: ice1-1
+    export_arguments: ro,no_root_squash,sync
+    mount_arguments: ro,intr,nfsvers=4.2,bg
+
+  repositories:
+    mount: /var/www/html/repositories
+    export: /var/www/html/repositories
+    server: odin
+    clients_groups:
+      - equipment_supermicro_management
+    take_over_network: ice1-1
+    export_arguments: ro,no_root_squash,sync
+    mount_arguments: ro,intr,rsize=32768,wsize=32768,nfsvers=4.2,bg

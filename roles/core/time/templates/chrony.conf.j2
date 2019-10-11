@@ -2,6 +2,28 @@
 #### Blue Banquise file ####
 ## {{ansible_managed}}
 
+# External servers/pool if asked
+{% if external_time.time_server.server and time_profile == 'server' %}
+{% for external_server in external_time.time_server.server %}
+server {{external_server}}
+{% endfor %}
+{% endif %}
+{% if external_time.time_server.pool and time_profile == 'server' %}
+{% for external_pool in external_time.time_server.pool %}
+pool {{external_pool}} iburst maxsources 3
+{% endfor %}
+{% endif %}
+{% if external_time.time_client.server and time_profile == 'client' %}
+{% for external_server in external_time.time_client.server %}
+server {{external_server}}
+{% endfor %}
+{% endif %}
+{% if external_time.time_client.pool and time_profile == 'client' %}
+{% for external_pool in external_time.time_client.pool %}
+pool {{external_pool}} iburst maxsources 3
+{% endfor %}
+{% endif %}
+
 {% if time_profile == 'client' %}
 # Server to bind to
 server {{networks[j2_node_main_network]['services_ip']['time_ip']}}

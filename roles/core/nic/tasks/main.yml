@@ -33,7 +33,7 @@
 #    ifname: "{{network_connections[item].ifname}}"
     ip4: "{{network_interfaces[item].ip4}}/{{networks[network_interfaces[item].network].prefix}}"
     state: present
-    mtu: "{% if network_interfaces[item].mtu is defined and not none %}{{network_interfaces[item].mtu}}{% endif %}"
+#    mtu: "{% if network_interfaces[item].mtu is defined and not none %}{{network_interfaces[item].mtu}}{% endif %}"
     autoconnect: yes
     gw4: "{% if networks[network_interfaces[item].network].gateway is defined and not none %}{{networks[network_interfaces[item].network].gateway}}{% endif %}"
   with_items: "{{network_interfaces}}"

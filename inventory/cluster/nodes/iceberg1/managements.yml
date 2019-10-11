@@ -1,0 +1,15 @@
+mg_managements:                        # Master group
+  children:
+    equipment_MSI_X99A_SLI:            # Equipment profile
+      hosts:
+        odin:                          # Hostname
+          global_alias:                # Global alias is present on all icebergs
+            - management1
+          alias:                       # Alias is present inside host iceberg
+            - odin1
+          network_interfaces:
+            enp0s3:
+              ip4: 10.11.0.1
+              mac: 08:00:27:de:42:22
+              network: ice1-1          # Logical network connected to
+
