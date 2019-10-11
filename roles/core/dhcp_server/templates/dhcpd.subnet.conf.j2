@@ -17,7 +17,7 @@
 {% for nic, nic_args in hostvars[host]['network_interfaces'].items() %}
 {% if (nic_args.network == item) and (nic_args.ip4 is defined and not none) and (nic_args.mac is defined and not none) %}
 
-host {{host}} { 
+host {{host}}-{{item}} { 
   option host-name "{{host}}";
   hardware ethernet {{nic_args.mac}}; 
   fixed-address {{nic_args.ip4}};

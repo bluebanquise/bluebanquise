@@ -3,6 +3,7 @@ iceberg_master = iceberg1
 iceberg_level = 2
 
 [iceberg2]
-thor
-einherjar5
+ancel
+arngrim
+einherjar[1:10]
 

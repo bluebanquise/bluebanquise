@@ -7,27 +7,27 @@ vcprop_int = g.new_vertex_property("int")
 ecprop_int = g.new_edge_property("int")
 
 {% for network in networks %}
-{% if network not in report_settings.graph_tool.exlude_network %}
 {{network|replace('-','_')}} = g.add_vertex()
 v_prop[{{network|replace('-','_')}}] = '{{network|replace('-','_')}}'
 vcprop_int[{{network|replace('-','_')}}] = 1
-{% endif %}
 {% endfor %}
 
 {% for host in groups['all'] %}
 {{host}} = g.add_vertex()
 v_prop[{{host}}] = '{{host}}'
-vcprop_int[{{host}}] = {% for eq in (groups | select('match','^'+equipment_naming+'_.*') | list | unique | sort) %}{% if host in groups[eq] %}{{loop.index}}{% endif %}{% endfor %}
+vcprop_int[{{host}}] = {% for eq in j2_equipment_groups_list %}{% if host in groups[eq] %}{{loop.index}}{% endif %}{% endfor %}
 
+{% if hostvars[host]['network_interfaces'] is defined and not none and hostvars[host]['network_interfaces'] is iterable %}
 {% for interface in hostvars[host]['network_interfaces'] %}
 {% if hostvars[host]['network_interfaces'][interface]['network'] is defined and not none %}
-{% if hostvars[host]['network_interfaces'][interface]['network'] in networks and hostvars[host]['network_interfaces'][interface]['network'] not in report_settings.graph_tool.exlude_network %}
+{% if hostvars[host]['network_interfaces'][interface]['network'] in networks %}
 {{host}}_{{hostvars[host]['network_interfaces'][interface]['network']|replace('-','_')}} = g.add_edge({{host}},{{hostvars[host]['network_interfaces'][interface]['network']|replace('-','_')}})
 ecprop_int[{{host}}_{{hostvars[host]['network_interfaces'][interface]['network']|replace('-','_')}}] = {% for net in networks %}{% if hostvars[host]['network_interfaces'][interface]['network'] == net %}{{loop.index}}{% endif %}{% endfor %}
 
 {% endif %}
 {% endif %}
 {% endfor %}
+{% endif %}
 {% endfor %}
 
 gt.graph_draw(
