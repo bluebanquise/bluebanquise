@@ -1,5 +1,5 @@
 {% for grp in groups %}
-{% if not groups[grp] %}
+{% if not groups[grp] and (grp|string) != 'ungrouped' %}
 <br><div id="warning">WARNING</div>: group {{grp}} is declared but empty, consider removing it.
 {% endif %}
 {% endfor %}

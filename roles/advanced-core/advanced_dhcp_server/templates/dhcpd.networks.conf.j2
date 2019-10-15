@@ -56,11 +56,13 @@ subnet {{networks[network]['subnet']}} netmask {{networks[network]['netmask']}} 
 subnet {{networks[network]['subnet']}} netmask {{networks[network]['netmask']}} {
 
   {% if networks[network]['dhcp_unknown_range'] is defined and not none %}range {{networks[network]['dhcp_unknown_range']}};{% endif %}
+
   option domain-name "{{domain_name}}";
   option domain-name-servers {{networks[network]['services_ip']['dns_ip']}};
   option broadcast-address {{networks[network]['broadcast']}};
   option ntp-servers {{networks[network]['services_ip']['ntp_ip']}};
   {% if networks[network]['gateway'] is defined and not none %}option routers {{networks[network]['gateway']}};{% endif %}
+
   default-lease-time {{dhcp_settings['default_lease_time']}};
   max-lease-time {{dhcp_settings['max_lease_time']}};
   {% if networks[network]['services_ip']['pxe_ip'] is defined and not none %}next-server {{networks[network]['services_ip']['pxe_ip']}};{% endif %}

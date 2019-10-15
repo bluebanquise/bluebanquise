@@ -3,18 +3,13 @@
 ## DNS
 domain_name: tumulus.local
 
-dns_settings:
-#  external_dns_servers:
-#    - 208.67.222.222
-#    - 208.67.220.220
-
 ## DHCP
 dhcp_settings:
   default_lease_time: 600 # Consider to increase once in production
   max_lease_time: 7200 # Same
 
-global_network_settings:
+#global_network_settings:
 #  enable_global_network: True
-  global_network: interconnect1
-  impacted_groups:
-    - computes
+#  global_network: interconnect1
+#  impacted_groups:
+#    - computes
