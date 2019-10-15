@@ -6,16 +6,10 @@ equipment_profile:
   console: console=tty0 console=ttyS1,115200n8
   kernel_parameters:
 
-  partitioning: |
-    d-i partman-auto/disk string /dev/sda
-    d-i partman-auto/method string regular
-    d-i partman-auto/choose_recipe select atomic
-    d-i partman-auto/init_automatically_partition select Guided - use entire disk
-
   operating_system:
-    distribution: ubuntu
-    distribution_major_version: 18
-    distribution_version: 18.04
+    distribution: centos
+    distribution_major_version: 8
+    distribution_version: 8.0
 
   equipment_type: server
 
@@ -26,5 +20,5 @@ equipment_profile:
   hardware:
     cpu:
       architecture: x86_64
-      cores: 24
+      cores: 32
 

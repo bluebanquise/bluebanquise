@@ -27,8 +27,9 @@ parser.add_argument("-n", "--nodes", dest="nodes",
                     help="Target node(s). Use nodeset format for ranges.", metavar="NODE")
 parser.add_argument("-b", "--boot", dest="boot",
                     help="Next pxe boot: can be osdeploy or disk.")
-parser.add_argument("-u", "--update", dest="update", default=False,
-                    help="Force update of node files (for example if you changed a parameter and played Ansible again).")
+parser.add_argument("-f", "--force", dest="force", default=" ",
+                    help="Force. 'update' = files update, 'network' = static ip. Combine using comma separator.")
+
 passed_arguments = parser.parse_args()
 
 # Get apache user
@@ -51,22 +52,38 @@ for node in NodeSet(passed_arguments.nodes):
         print(bcolors.OKGREEN+'[OK] Working on node '+str(node)+' ...'+bcolors.ENDC)
         # Check if we need to create or update files
         print('    ├── '+bcolors.OKBLUE+'[INFO] Checking '+str(node)+' files...'+bcolors.ENDC)
-        if str(os.path.exists('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe')) == 'False' or str(passed_arguments.update) == 'True':
+        if str(os.path.exists('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe')) == 'False' or 'update' in passed_arguments.force:
             print('    ├── '+bcolors.OKBLUE+'[INFO] Creating file /var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe'+bcolors.ENDC)
+            dedicated_parameters = str('')
+            if 'network' in passed_arguments.force:
+                dedicated_parameters = str('ip='+nodes_parameters[str(node)]["network"]["node_main_network_interface_ip"]+'::'+nodes_parameters[str(node)]["network"]["node_main_network_gateway"]+':'+nodes_parameters[str(node)]["network"]["node_main_network_netmask"]+':'+str(node)+':'+nodes_parameters[str(node)]["network"]["node_main_network_interface"]+':none')
             file = open('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe','w')
             file.write("#!ipxe\n\n")
-            file.write("# Current default action\n\n")
+            file.write("# Current default action\n")
             file.write("set menu-default bootdisk\n\n")
-            file.write("# Now chain to menu menu\n\n")
+            file.write("# Current node parameters:\n")
+            file.write('set equipment-ipxe-configuration '+nodes_parameters[str(node)]["equipment_profile"]+'.ipxe\n')
+            file.write('set dedicated-parameters '+dedicated_parameters+'\n\n')
+            file.write("# Display\n")
+#            file.write("echo\n")
+            file.write("echo +---------------- PXE configuration -----------------+\n")
+            file.write("echo |\n")
+            file.write("echo | Equipment OS Configurations: ${equipment-ipxe-configuration}\n")
+            file.write("echo | Dedicated parameters: ${dedicated-parameters}\n")
+            file.write("echo |\n")
+            file.write("echo +----------------------------------------------------+\n\n")
+#            file.write("echo\n")
+            file.write("# Now chain to menu menu\n")
+            file.write("sleep 2\n")
             file.write("chain http://${next-server}/preboot_execution_environment/menu.ipxe || shell\n\n")
             file.write("exit\n")
             file.close()
             os.chown('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe',apache_uid,apache_gid)
-        if str(os.path.exists('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'_bootosdeploy.ipxe')) == 'False' or str(passed_arguments.update) == 'True':
-            print('    ├── '+bcolors.OKBLUE+'[INFO] Creating file /var/www/html/preboot_execution_environment/nodes/'+str(node)+'_bootosdeploy.ipxe'+bcolors.ENDC)
-            print('    ├── '+bcolors.OKBLUE+'[INFO] Copy from /var/www/html/preboot_execution_environment/equipment_ipxe_configurations/'+nodes_parameters[str(node)]["equipment_profile"]+'.ipxe'+bcolors.ENDC)
-            copy2('/var/www/html/preboot_execution_environment/equipment_ipxe_configurations/'+nodes_parameters[str(node)]["equipment_profile"]+'.ipxe', '/var/www/html/preboot_execution_environment/nodes/'+str(node)+'_bootosdeploy.ipxe')
-            os.chown('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'_bootosdeploy.ipxe',apache_uid,apache_gid)
+#        if str(os.path.exists('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'_bootosdeploy.ipxe')) == 'False' or 'update' in passed_arguments.force:
+#            print('    ├── '+bcolors.OKBLUE+'[INFO] Creating file /var/www/html/preboot_execution_environment/nodes/'+str(node)+'_bootosdeploy.ipxe'+bcolors.ENDC)
+#            print('    ├── '+bcolors.OKBLUE+'[INFO] Copy from /var/www/html/preboot_execution_environment/equipment_ipxe_configurations/'+nodes_parameters[str(node)]["equipment_profile"]+'.ipxe'+bcolors.ENDC)
+#            copy2('/var/www/html/preboot_execution_environment/equipment_ipxe_configurations/'+nodes_parameters[str(node)]["equipment_profile"]+'.ipxe', '/var/www/html/preboot_execution_environment/nodes/'+str(node)+'_bootosdeploy.ipxe')
+#            os.chown('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'_bootosdeploy.ipxe',apache_uid,apache_gid)
         print('    ├── '+bcolors.OKGREEN+'[OK] Done.'+bcolors.ENDC)
 
         # Set boot to disk

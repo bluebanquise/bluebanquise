@@ -6,11 +6,8 @@ j2_icebergs_groups_list: "{{ groups | select('match','^'+iceberg_naming+'[0-9]+'
 j2_number_of_icebergs: "{{ groups | select('match','^'+iceberg_naming+'[0-9]+') | list | length }}"
 
 # Get host current iceberg
-# This is MAIN variable, and must remain
+# This is MAIN variable, and must remain as the chain is simple
 j2_current_iceberg: "{% if icebergs_system == false %}{{iceberg_naming+'1'}}{% else %}{{ group_names | select('match','^'+iceberg_naming+'[0-9]+') | list | unique | sort | first | join}}{% endif %}"
-
-#j2_current_iceberg: "(iceberg_naming+'0') if icebergs_system == 'false' else (group_names | select('match','^'+iceberg_naming+'[0-9]+') | list | unique | sort | first | join)"
-#j2_current_iceberg: "{{ icebergs_system == 'false' | ternary(iceberg_naming+'0',(group_names | select('match','^'+iceberg_naming+'[0-9]+') | list | unique | sort | first | join)) }}
 
 # Now deduced from j2_current_iceberg
 
@@ -30,22 +27,5 @@ j2_current_iceberg_number: "{{ j2_current_iceberg | replace(iceberg_naming,' ') 
 
 # Network related
 j2_current_iceberg_network: "{{management_networks_naming + (j2_current_iceberg_number|string)}}"
-
-# Get get linked icebergs (if exist, else empty)
-# Only 2 lvl right now, can easily expand to more
-# This part of the code may be improved, but API remains.
-
-
-j2_under_icebergs: "{% for lvl1 in icebergs_topology %}{% if j2_current_iceberg == lvl1 %}{{icebergs_topology[lvl1]}}{% else %}{% for lvl2 in icebergs_topology[lvl1] %}{% if j2_current_iceberg == lvl2 %}{{icebergs_topology[lvl1][lvl2]}}{% endif %}{% endfor %}{% endif %}{% endfor %}"
-
-#j2_under_icebergs: "{% for lvl1, lvl1_args in icebergs_topology.items() %}{% if j2_current_iceberg == lvl1 %}{{icebergs_topology[lvl1]}}{% else %}{% for lvl2, lvl2_args in lvl1_args.items() %}{% if j2_current_iceberg == lvl2 %}{{icebergs_topology[lvl1][lvl2]}}{% endif %}{% endfor %}{% endif %}{% endfor %}"
-
-j2_above_iceberg: "{% for lvl1 in icebergs_topology %}{% if j2_current_iceberg == lvl1 %}{% else %}{% for lvl2 in icebergs_topology[lvl1] %}{% if j2_current_iceberg == lvl2 %}{{lvl1}}{% endif %}{% endfor %}{% endif %}{% endfor %}"
-
-#j2_above_iceberg: "{% for lvl1, lvl1_args in icebergs_topology.items() %}{% if j2_current_iceberg == lvl1 %}top{% else %}{% for lvl2, lvl2_args in lvl1_args.items() %}{% if j2_current_iceberg == lvl2 %}{{lvl1}}{% endif %}{% endfor %}{% endif %}{% endfor %}"
-
-j2_current_iceberg_level: "{% for lvl1 in icebergs_topology %}{% if j2_current_iceberg == lvl1 %}1{% else %}{% for lvl2 in icebergs_topology[lvl1] %}{% if j2_current_iceberg == lvl2 %}2{% endif %}{% endfor %}{% endif %}{% endfor %}"
-
-#j2_current_iceberg_level: "{% for lvl1, lvl1_args in icebergs_topology.items() %}{% if j2_current_iceberg == lvl1 %}1{% else %}{% for lvl2, lvl2_args in lvl1_args.items() %}{% if j2_current_iceberg == lvl2 %}2{% endif %}{% endfor %}{% endif %}{% endfor %}"
 
 

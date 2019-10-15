@@ -1,0 +1,8 @@
+[iceberg1:vars]
+iceberg_master = top
+iceberg_level = 1
+
+[iceberg1]
+odin
+freya
+lenneth

@@ -126,6 +126,7 @@
     mode: 0644
   tags:
     - templates
+    - graphtool
 
 - name: Template >> /var/www/html/report/graphs_report.html
   template:
