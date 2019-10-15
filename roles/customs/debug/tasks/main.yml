@@ -1,9 +1,9 @@
 ---
 
-- name: Package
-  dnf:
-    name: wget
-    state: present
+#- name: Package
+#  dnf:
+#    name: wget
+#    state: present
 
 - name: Template >> /tmp/debug
   template:
