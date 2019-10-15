@@ -1,0 +1,49 @@
+---
+
+- name: Load VLAN module if needed
+  modprobe:
+    name: 8021q
+    state: present
+do it once
+  loop: "{{network_interfaces}}"
+  when: (network_interfaces[item]['vlan'] is defined and not none) and (network_interfaces[item]['vlan'] == true)
+
+- name: Load bonding module if needed
+  modprobe:
+    name: bonding
+    state: present
+  run_once: true
+  when: (network_interfaces[item]['type'] is defined and not none) and (network_interfaces[item]['type'] == 'bond')
+
+- name: Set NIC configuration
+  template:
+    src: ifcfg.j2
+    dest: /etc/sysconfig/network-scripts/ifcfg-{{item}}
+    owner: root
+    group: root
+    mode: 0644
+  loop: "{{network_interfaces}}"
+
+
+
+  when: (network_interfaces[item]['type'] is not defined or not) or (network_interfaces[item]['type'] == 'ethernet')
+
+- name: Set NIC configuration - Slaves interfaces
+  template:
+    src: ifcfg_slave.j2
+    dest: /etc/sysconfig/network-scripts/ifcfg-{{item}}
+    owner: root
+    group: root
+    mode: 0644
+  loop: "{{network_interfaces}}"
+  when: network_interfaces[item]['type'] == 'infiniband'
+
+- name: Set NIC configuration - Vlan Ethernet
+  template:
+    src: ifcfg_vlan_ethernet.j2
+    dest: /etc/sysconfig/network-scripts/ifcfg-{{item}}
+    owner: root
+    group: root
+    mode: 0644
+  loop: "{{network_interfaces}}"
+  when: network_interfaces[item]['type'] == 'vlan'
