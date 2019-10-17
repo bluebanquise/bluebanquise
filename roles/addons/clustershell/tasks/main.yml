@@ -3,10 +3,10 @@
     name: clustershell
     state: present
 
-- name: Template >> /etc/clustershell/groups.d/cluster.cfg
+- name: Template >> /etc/clustershell/groups.d/cluster.yaml
   template:
-    src: cluster.cfg.j2
-    dest: /etc/clustershell/groups.d/cluster.cfg
+    src: cluster.yaml.j2
+    dest: /etc/clustershell/groups.d/cluster.yaml
     owner: root
     group: root
     mode: 0644
