@@ -79,6 +79,9 @@ for node in NodeSet(passed_arguments.nodes):
             file.write("exit\n")
             file.close()
             os.chown('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe',apache_uid,apache_gid)
+{% if ansible_selinux.status == "enabled" %}
+            os.system('restorecon -v /var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe')
+{% endif %}
 #        if str(os.path.exists('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'_bootosdeploy.ipxe')) == 'False' or 'update' in passed_arguments.force:
 #            print('    ├── '+bcolors.OKBLUE+'[INFO] Creating file /var/www/html/preboot_execution_environment/nodes/'+str(node)+'_bootosdeploy.ipxe'+bcolors.ENDC)
 #            print('    ├── '+bcolors.OKBLUE+'[INFO] Copy from /var/www/html/preboot_execution_environment/equipment_ipxe_configurations/'+nodes_parameters[str(node)]["equipment_profile"]+'.ipxe'+bcolors.ENDC)
