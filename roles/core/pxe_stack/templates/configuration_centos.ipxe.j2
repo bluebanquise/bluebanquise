@@ -1,3 +1,13 @@
+{% set eq_group         = item | replace(equipment_naming + '_', '') | trim %}
+{% set eq_profile       = hostvars[groups[item][0]]['equipment_profile'] %}
+{% set eq_architecture  = eq_profile['hardware']['cpu']['architecture'] %}
+
+{% set eq_distribution         = eq_profile['operating_system']['distribution'] %}
+{% set eq_distribution_version = eq_profile['operating_system']['distribution_version'] %}
+
+{% set repository_root = 'http://${next-server}/repositories/' + eq_distribution|string + '/' + eq_distribution_version|string + '/' + eq_architecture|string + '/' %}
+{% set kickstart_path  = 'http://${next-server}/preboot_execution_environment/equipment_os_configurations/' %}
+
 #!ipxe
 
 echo
@@ -7,27 +17,28 @@ echo
 
 echo Loading linux ...
 
-{# Difference between RHEL/Centos 8 and previous versions, due to AppStream in the iso #}
-{% if hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution_major_version'] < 8 %}
 
-kernel http://${next-server}/repositories/{{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']}}/{{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution_version']}}/{{hostvars[groups[item][0]]['equipment_profile']['hardware']['cpu']['architecture']}}/os/images/pxeboot/vmlinuz initrd=initrd.img inst.repo=http://${next-server}/repositories/{{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']}}/{{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution_version']}}/{{hostvars[groups[item][0]]['equipment_profile']['hardware']['cpu']['architecture']}}/os ks=http://${next-server}/preboot_execution_environment/equipment_os_configurations/kickstart.{{item | replace('equipment_','') | trim}}.cfg {{hostvars[groups[item][0]]['equipment_profile']['kernel_parameters']}} {{hostvars[groups[item][0]]['equipment_profile']['console']}} ${dedicated-parameters} ipxe_next_server=${next-server}
+{# Difference between RHEL/Centos 8 and previous versions, due to AppStream in the iso #}
+{% if eq_profile['operating_system']['distribution_major_version'] < 8 %}
+
+kernel {{ repository_root }}/os/images/pxeboot/vmlinuz initrd=initrd.img inst.repo={{ repository_root }}/os ks={{ kickstart_path }}/kickstart.{{ eq_group }}.cfg {{ eq_profile['kernel_parameters'] }} {{ eq_profile['console'] }} ${dedicated-parameters} ipxe_next_server=${next-server}
 
 {% else %}
 
-kernel http://${next-server}/repositories/{{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']}}/{{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution_version']}}/{{hostvars[groups[item][0]]['equipment_profile']['hardware']['cpu']['architecture']}}/os/images/pxeboot/vmlinuz initrd=initrd.img inst.stage2=http://${next-server}/repositories/{{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']}}/{{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution_version']}}/{{hostvars[groups[item][0]]['equipment_profile']['hardware']['cpu']['architecture']}}/os inst.repo=http://${next-server}/repositories/{{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']}}/{{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution_version']}}/{{hostvars[groups[item][0]]['equipment_profile']['hardware']['cpu']['architecture']}}/os/BaseOS ks=http://${next-server}/preboot_execution_environment/equipment_os_configurations/kickstart.{{item | replace('equipment_','') | trim}}.cfg {{hostvars[groups[item][0]]['equipment_profile']['kernel_parameters']}} {{hostvars[groups[item][0]]['equipment_profile']['console']}} ${dedicated-parameters} ipxe_next_server=${next-server}
+kernel {{ repository_root }}/os/images/pxeboot/vmlinuz initrd=initrd.img inst.stage2={{ repository_root }}/os inst.repo={{ repository_root }}/os/BaseOS ks={{ kickstart_path }}/kickstart.{{ eq_group }}.cfg {{ eq_profile['kernel_parameters'] }} {{ eq_profile['console'] }} ${dedicated-parameters} ipxe_next_server=${next-server}
 
 {% endif %}
 
 echo Loading initial ramdisk ...
 
-initrd http://${next-server}/repositories/{{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']}}/{{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution_version']}}/{{hostvars[groups[item][0]]['equipment_profile']['hardware']['cpu']['architecture']}}/os/images/pxeboot/initrd.img
+initrd {{ repository_root }}/os/images/pxeboot/initrd.img
 
 echo ALL DONE! We are ready.
 echo
-echo Console is: {{hostvars[groups[item][0]]['equipment_profile']['console']}}
+echo Console is: {{ eq_profile['console'] }}
 echo Dedicated parameters: ${dedicated-parameters}
 echo Deployment server is: ${next-server}
-echo Kickstart used is: kickstart.{{item | replace('equipment_','') | trim}}.cfg
+echo Kickstart used is: kickstart.{{ eq_group }}.cfg
 echo
 echo Booting in 2 s ...
 sleep 2
