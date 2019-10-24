@@ -1,14 +1,12 @@
 ---
 
-- name: Install conman and ipmitool
+- name: Package
   package:
-    name: "{{item}}"
+    name: "{{item}"
     state: present
-  loop:
+  with_items:
     - conman
     - ipmitool
-  tags:
-    - install
 
 - name: Template >> /etc/conman.conf
   template:
@@ -17,7 +15,6 @@
     owner: root
     group: root
     mode: 0644
-#  notify: Restart conman
   tags:
     - templates
 
@@ -26,5 +23,3 @@
     name: conman
     state: started
     enabled: yes
-  tags:
-    - service
