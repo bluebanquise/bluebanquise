@@ -15,7 +15,7 @@ mg_computes:
               mac: 08:00:27:0d:f8:a1
               network: ice2-1
             enp0s0f1:
-              ip: 10.20.3.1
+              ip4: 10.20.3.1
               network: interconnect-1
 
     equipment_supermicro_sandy_compute: # Blender / ffmpeg farm, OpenFoam farm
