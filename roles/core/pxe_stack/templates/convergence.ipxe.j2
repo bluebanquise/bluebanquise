@@ -1,10 +1,11 @@
 #!ipxe
 
-echo
-echo convergence.ipxe file.
-echo
-echo Chain to node hostname file
+echo +----------------------------------------------------+
+echo |
+echo | Entering convergence.ipxe file.
+echo |
+echo | Now chaining to --> nodes/${hostname}.ipxe
+echo |
 sleep 1
-#chain http://${next-server}/preboot_execution_environment/nodes/mynode.ipxe || shell
 chain http://${next-server}/preboot_execution_environment/nodes/${hostname}.ipxe || shell
 

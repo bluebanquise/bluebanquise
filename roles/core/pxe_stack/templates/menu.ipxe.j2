@@ -26,9 +26,10 @@ cpuid --ext 29 && set archb 64 || set archb 32
 cpuid --ext 29 && set archl x86_64 || set archl i386
 
 :start
-menu BlueBanquise iPXE boot menu for ${manufacturer} ${product} (${archb}bit)
+menu BlueBanquise iPXE boot menu for ${manufacturer} ${product} (${buildarch}bit)
 item --gap                Main boot
 item bootosdeploy         Deploy OS (This will deploy/redeploy operating system)
+item bootdiskless         Start a diskless OS (Configured using diskless tool)
 item bootdisk             Boot on disk (This will boot on local disk)
 #item --gap                Tools
 #item minimal_live_linux   Minimal Live Linux
@@ -72,8 +73,7 @@ set submenu-timeout 0
 goto start
 
 :bootosdeploy
-chain http://${next-server}/preboot_execution_environment/equipment_ipxe_configurations/${equipment-ipxe-configuration} || shell
-#chain http://${next-server}/preboot_execution_environment/nodes/${hostname}_bootosdeploy.ipxe || shell
+chain http://${next-server}/preboot_execution_environment/equipment_profiles/${equipment-profile}.ipxe || shell
 
 :bootdisk
 iseq ${platform} efi && goto bootdisk-efi || goto bootdisk-legacy
