@@ -30,8 +30,7 @@
    - /var/www/html/preboot_execution_environment
    - /var/www/html/preboot_execution_environment/bin
    - /var/www/html/preboot_execution_environment/nodes
-   - /var/www/html/preboot_execution_environment/equipment_os_configurations
-   - /var/www/html/preboot_execution_environment/equipment_ipxe_configurations
+   - /var/www/html/preboot_execution_environment/equipment_profiles
 
 - name: Configure access on directory /var/www/html/preboot_execution_environment"
   file:
@@ -72,17 +71,17 @@
 - name: Templates >> kickstarts for Centos
   template:
     src: "kickstart.cfg.j2"
-    dest: /var/www/html/preboot_execution_environment/equipment_os_configurations/kickstart.{{item | replace('equipment_','') | trim}}.cfg
+    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{item | replace('equipment_','') | trim}}.kickstart.cfg
     mode: 0644
   with_items: "{{j2_equipment_groups_list}}"
   when:
     - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
     - (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) == 'centos' or (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) == 'redhat'
 
-- name: Templates >> equipment_ipxe_configurations for Centos
+- name: Templates >> equipment_profiles for Centos
   template:
     src: "configuration_centos.ipxe.j2"
-    dest: /var/www/html/preboot_execution_environment/equipment_ipxe_configurations/{{item | replace('equipment_','') | trim}}.ipxe
+    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{item | replace('equipment_','') | trim}}.ipxe
     mode: 0644
   with_items: "{{j2_equipment_groups_list}}"
   when:
@@ -94,17 +93,17 @@
 - name: Templates >> preseeds for Ubuntu
   template:
     src: "preseed.cfg.j2"
-    dest: /var/www/html/preboot_execution_environment/equipment_os_configurations/preseed.{{item | replace('equipment_','') | trim}}.cfg
+    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{item | replace('equipment_','') | trim}}.preseed.cfg
     mode: 0644
   with_items: "{{j2_equipment_groups_list}}"
   when:
     - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
     - (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) == 'ubuntu'
 
-- name: Templates >> equipment_ipxe_configurations for Ubuntu
+- name: Templates >> equipment_profiles for Ubuntu
   template:
     src: "configuration_ubuntu.ipxe.j2"
-    dest: /var/www/html/preboot_execution_environment/equipment_ipxe_configurations/{{item | replace('equipment_','') | trim}}.ipxe
+    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{item | replace('equipment_','') | trim}}.ipxe
     mode: 0644
   with_items: "{{j2_equipment_groups_list}}"
   when:
@@ -116,17 +115,17 @@
 - name: Templates >> autoyasts for OpenSuse
   template:
     src: "autoyast.xml.j2"
-    dest: /var/www/html/preboot_execution_environment/equipment_os_configurations/autoyast.{{item | replace('equipment_','') | trim}}.xml
+    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{item | replace('equipment_','') | trim}}.autoyast.xml
     mode: 0644
   with_items: "{{j2_equipment_groups_list}}"
   when:
     - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
     - (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) == 'opensuse'
 
-- name: Templates >> equipment_ipxe_configurations for OpenSuse
+- name: Templates >> equipment_profiles for OpenSuse
   template:
     src: "configuration_opensuse.ipxe.j2"
-    dest: /var/www/html/preboot_execution_environment/equipment_ipxe_configurations/{{item | replace('equipment_','') | trim}}.ipxe
+    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{item | replace('equipment_','') | trim}}.ipxe
     mode: 0644
   with_items: "{{j2_equipment_groups_list}}"
   when:
@@ -138,7 +137,7 @@
 - name: Templates >> equipment_ipxe_configuration for Minimal Live Linux
   template:
     src: "configuration_minimal.ipxe.j2"
-    dest: /var/www/html/preboot_execution_environment/equipment_ipxe_configurations/minimal.ipxe
+    dest: /var/www/html/preboot_execution_environment/equipment_profiles/minimal.ipxe
     mode: 0644
 
 ##### END

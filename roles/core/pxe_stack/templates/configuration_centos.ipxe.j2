@@ -1,37 +1,55 @@
 #!ipxe
 
-echo
-echo Now starting os deployment process.
-echo Centos or RedHat ipxe configuration.
-echo
+echo |
+echo | Entering equipment_profiles/{{item}}.ipxe file.
+echo |
 
-echo Loading linux ...
+# Ansible variables
+set eq-equipment-profile {{item}}
+set eq-architecture {{hostvars[groups[item][0]]['equipment_profile']['hardware']['cpu']['architecture']}}
+set eq-distribution {{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']}}
+set eq-distribution-version {{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution_version']}}
+set eq-console {{hostvars[groups[item][0]]['equipment_profile']['console']}}
+set eq-kernel-parameters {{hostvars[groups[item][0]]['equipment_profile']['kernel_parameters']}}
+
+# Dynamic variables
+set repository-root http://${next-server}/repositories/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/
+set kickstart-path http://${next-server}/preboot_execution_environment/equipment_profiles/${eq-equipment-profile}.kickstart.cfg
+
+echo | Now starting os deployment process.
+echo | Centos or RedHat ipxe configuration.
+echo |
+echo | Parameters used:
+echo | > Operating system target: ${eq-distribution} ${eq-distribution-version} ${eq-architecture}
+echo | > Console: ${eq-console}
+echo | > Additional kernel parameters: ${eq-kernel-parameters} ${dedicated-kernel-parameters}
+echo | > Deployment server: ${next-server}
+echo | > Target repos/images: repositories/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/
+echo | > Target kickstart: ${eq-equipment-profile}.kickstart.cfg
+echo |
+echo | Loading linux ...
 
 {# Difference between RHEL/Centos 8 and previous versions, due to AppStream in the iso #}
 {% if hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution_major_version'] < 8 %}
 
-kernel http://${next-server}/repositories/{{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']}}/{{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution_version']}}/{{hostvars[groups[item][0]]['equipment_profile']['hardware']['cpu']['architecture']}}/os/images/pxeboot/vmlinuz initrd=initrd.img inst.repo=http://${next-server}/repositories/{{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']}}/{{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution_version']}}/{{hostvars[groups[item][0]]['equipment_profile']['hardware']['cpu']['architecture']}}/os ks=http://${next-server}/preboot_execution_environment/equipment_os_configurations/kickstart.{{item | replace('equipment_','') | trim}}.cfg {{hostvars[groups[item][0]]['equipment_profile']['kernel_parameters']}} {{hostvars[groups[item][0]]['equipment_profile']['console']}} ${dedicated-parameters} ipxe_next_server=${next-server}
+kernel ${repository-root}/os/images/pxeboot/vmlinuz initrd=initrd.img inst.repo=${repository-root}/os/BaseOS ks=${kickstart-path} ${eq-console} ${eq-kernel-parameters} ${dedicated-kernel-parameters} ipxe_next_server=${next-server}
 
 {% else %}
 
-kernel http://${next-server}/repositories/{{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']}}/{{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution_version']}}/{{hostvars[groups[item][0]]['equipment_profile']['hardware']['cpu']['architecture']}}/os/images/pxeboot/vmlinuz initrd=initrd.img inst.stage2=http://${next-server}/repositories/{{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']}}/{{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution_version']}}/{{hostvars[groups[item][0]]['equipment_profile']['hardware']['cpu']['architecture']}}/os inst.repo=http://${next-server}/repositories/{{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']}}/{{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution_version']}}/{{hostvars[groups[item][0]]['equipment_profile']['hardware']['cpu']['architecture']}}/os/BaseOS ks=http://${next-server}/preboot_execution_environment/equipment_os_configurations/kickstart.{{item | replace('equipment_','') | trim}}.cfg {{hostvars[groups[item][0]]['equipment_profile']['kernel_parameters']}} {{hostvars[groups[item][0]]['equipment_profile']['console']}} ${dedicated-parameters} ipxe_next_server=${next-server}
+kernel ${repository-root}/os/images/pxeboot/vmlinuz initrd=initrd.img inst.stage2=${repository-root}/os inst.repo=${repository-root}/os/BaseOS ks=${kickstart-path} ${eq-console} ${eq-kernel-parameters} ${dedicated-kernel-parameters} ipxe_next_server=${next-server}
 
 {% endif %}
 
-echo Loading initial ramdisk ...
+echo | Loading initial ramdisk ...
 
-initrd http://${next-server}/repositories/{{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']}}/{{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution_version']}}/{{hostvars[groups[item][0]]['equipment_profile']['hardware']['cpu']['architecture']}}/os/images/pxeboot/initrd.img
+initrd ${repository-root}/os/images/pxeboot/initrd.img
 
-echo ALL DONE! We are ready.
-echo
-echo Console is: {{hostvars[groups[item][0]]['equipment_profile']['console']}}
-echo Dedicated parameters: ${dedicated-parameters}
-echo Deployment server is: ${next-server}
-echo Kickstart used is: kickstart.{{item | replace('equipment_','') | trim}}.cfg
-echo
-echo Booting in 2 s ...
-sleep 2
+echo | ALL DONE! We are ready.
+echo | Booting in 4s ...
+echo |
+echo +----------------------------------------------------+
+
+sleep 4
 
 boot
-
 
