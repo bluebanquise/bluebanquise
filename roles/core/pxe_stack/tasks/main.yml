@@ -31,6 +31,7 @@
    - /var/www/html/preboot_execution_environment/bin
    - /var/www/html/preboot_execution_environment/nodes
    - /var/www/html/preboot_execution_environment/equipment_profiles
+   - /var/www/html/preboot_execution_environment/osdeploy
 
 - name: Configure access on directory /var/www/html/preboot_execution_environment"
   file:
@@ -68,6 +69,20 @@
 
 ##### Centos
 
+- name: osdeploy files (redhat)
+  copy:
+    src: osdeploy/redhat_{{item}}.ipxe
+    dest: "/var/www/html/preboot_execution_environment/osdeploy/redhat_{{item}}.ipxe"
+    mode: 0644
+  with_items: "{{supported_os.redhat}}"
+
+- name: osdeploy files (centos)
+  copy:
+    src: osdeploy/centos_{{item}}.ipxe
+    dest: "/var/www/html/preboot_execution_environment/osdeploy/centos_{{item}}.ipxe"
+    mode: 0644
+  with_items: "{{supported_os.centos}}"
+
 - name: Templates >> kickstarts for Centos
   template:
     src: "kickstart.cfg.j2"
@@ -80,7 +95,7 @@
 
 - name: Templates >> equipment_profiles for Centos
   template:
-    src: "configuration_centos.ipxe.j2"
+    src: "equipment_profile.ipxe.j2"
     dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{item | replace('equipment_','') | trim}}.ipxe
     mode: 0644
   with_items: "{{j2_equipment_groups_list}}"
