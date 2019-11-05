@@ -1,5 +1,13 @@
 role_version: 1.0.2
 
+supported_os:
+  centos:
+    - 7
+    - 8
+  redhat:
+    - 7
+    - 8
+
 apache_user:
   ubuntu:
     _18: www-data
