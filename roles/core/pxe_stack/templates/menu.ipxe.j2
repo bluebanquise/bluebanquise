@@ -75,6 +75,9 @@ goto start
 :bootosdeploy
 chain http://${next-server}/preboot_execution_environment/osdeploy/${eq-distribution}_${eq-distribution-major-version}.ipxe || shell
 
+:bootdiskless
+chain http://${next-server}/preboot_execution_environment/diskless/images/${diskless-image}/boot.ipxe || shell
+
 :bootdisk
 iseq ${platform} efi && goto bootdisk-efi || goto bootdisk-legacy
 
@@ -87,7 +90,7 @@ iseq ${platform} efi && goto bootdisk-efi || goto bootdisk-legacy
     :bootdisk-efi
     echo Booting on disk in EFI way
     sleep 2
-    chain http://${next-server}/preboot_execution_environment/bin/grub2_efi_autofind.img || shell
+    chain http://${next-server}/preboot_execution_environment/bin/${buildarch}/grub2_efi_autofind.img || shell
     exit 1
 
 :memtest
