@@ -50,7 +50,12 @@
     src: "nodes_parameters.yml.j2"
     dest: "/etc/bluebanquise/pxe/nodes_parameters.yml"
     mode: 0644
-  tags: parameters
+
+- name: Templates >> pxe parameters
+  template:
+    src: "pxe_parameters.yml.j2"
+    dest: "/etc/bluebanquise/pxe/pxe_parameters.yml"
+    mode: 0644
 
 - name: Templates >> menu and convergence
   template:
@@ -158,8 +163,8 @@
 ##### END
 
 - name: bootset tool
-  template:
-    src: bootset.py.j2
+  copy:
+    src: bootset.py
     dest: /usr/bin/bootset
     mode: 0700 
 
