@@ -9,9 +9,17 @@ This role provides a basic /etc/resolv.conf file.
 Instructions
 ^^^^^^^^^^^^
 
-Configuration is made in group_vars/all/general_settings/network.yml.
+Configuration is made in *group_vars/all/general_settings/external.yml*.
 
-It is possible to add here external DNS servers for clients.
+It is possible to add here external DNS servers for clients:
+
+.. code-block:: yaml
+
+  external_dns:
+    dns_client:  <<<<<<<<<<
+      - 208.67.220.220
+
+Note that this/these external(s) dns will be placed after the cluster internal dns in resolution order.
 
 Changelog
 ^^^^^^^^^

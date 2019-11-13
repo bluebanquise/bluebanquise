@@ -9,7 +9,11 @@ This role provides an automatic nfs client that mount targets and create local d
 Instructions
 ^^^^^^^^^^^^
 
-All configuration is done in group_vars/all/general_settings/nfs.yml .
+All configuration is done in *group_vars/all/general_settings/nfs.yml*.
+
+See the **nfs_server** role isntructions for more details.
+
+Simply note that path that should be mounted will be automatically created by this role if they do not exist.
 
 Changelog
 ^^^^^^^^^
