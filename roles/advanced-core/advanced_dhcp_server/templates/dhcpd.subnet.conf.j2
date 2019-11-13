@@ -88,13 +88,13 @@
     option dhcp_client_identifier {{bmc_args.dhcp-client-identifier}};
     fixed-address {{bmc_args.ip4}};
   }
-        {% elif nic_args.host_identifier is defined and not none %}
+        {% elif bmc_args.host_identifier is defined and not none %}
   host {{bmc_args.name}} {
     option host-name "{{bmc_args.name}}";
     host_identifier {{bmc_args.host-identifier}};
     fixed-address {{bmc_args.ip4}};
   }
-        {% elif nic_args.option_match is defined and not none %}{# Warning, only works in a shared network!! #}
+        {% elif bmc_args.option_match is defined and not none %}{# Warning, only works in a shared network!! #}
   class "option_match_{{bmc_args.name}}" {
     match if (
       {{bmc_args.option_match}}
