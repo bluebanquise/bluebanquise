@@ -1,10 +1,9 @@
 ---
 
-- name: Package
+- name: Install packages
   package:
-    name: "{{ item }}"
+    name: "{{ packages_to_install[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
     state: present
-  loop: "{{ packages_to_install[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
   tags:
     - package
 
@@ -15,10 +14,11 @@
     owner: root
     group: root
     mode: 0644
-  notify: Restart rsyslog
+  notify: Restart rsyslog services
   tags:
     - template
 
+- meta: flush_handlers
 - name: Start services
   service:
     name: "{{ item }}"
