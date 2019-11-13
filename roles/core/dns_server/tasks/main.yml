@@ -1,10 +1,10 @@
 ---
-
-- name: Package
+- name: Install packages
   package:
-    name: "{{item}}"
+    name: "{{packages_to_install[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
     state: present
-  loop: "{{packages_to_install[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
+  tags:
+    - package
 
 - name: Create needed directory >> /var/named
   file:
@@ -19,9 +19,9 @@
     owner: root
     group: root
     mode: 0644
-#  notify: Restart dns_server services
+  notify: Restart dns services
   tags:
-    - templates
+    - template
 
 - name: Template >> /var/named/forward
   template:
@@ -30,9 +30,9 @@
     owner: root
     group: root
     mode: 0644
-#  notify: Restart dns_server services
+  notify: Restart dns services
   tags:
-    - templates
+    - template
 
 - name: Template >> /var/named/reverse
   template:
@@ -41,15 +41,16 @@
     owner: root
     group: root
     mode: 0644
-#  notify: Restart dns_server services
+  notify: Restart dns services
   tags:
-    - templates
+    - template
 
+- meta: flush_handlers
 - name: Start services
   service:
-    name: "{{item}}"
+    name: "{{ item }}"
     state: started
-    enabled: yes
-  loop: "{{services_to_start[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
-
-
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+  loop: "{{ services_to_start[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
+  tags:
+    - service
