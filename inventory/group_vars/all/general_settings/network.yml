@@ -10,6 +10,6 @@ dhcp_settings:
 
 ## Global network
 global_network_settings:
-  enable_global_network: true
+#  enable_global_network: true
   global_network: interconnect-1
   global_network_group: mg_computes

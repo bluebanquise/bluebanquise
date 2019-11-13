@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>Configure BlueBanquise &#8212; BlueBanquise_Documentation 1.0.1 documentation</title>
+    <title>5. Configure BlueBanquise &#8212; BlueBanquise_Documentation 1.0.1 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -14,8 +14,8 @@
     <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Deploy BlueBanquise" href="deploy_bluebanquise.html" />
-    <link rel="prev" title="Learn Ansible" href="learn_ansible.html" />
+    <link rel="next" title="6. Deploy BlueBanquise" href="deploy_bluebanquise.html" />
+    <link rel="prev" title="4. Learn Ansible" href="learn_ansible.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -33,10 +33,10 @@
           <div class="body" role="main">
             
   <div class="section" id="configure-bluebanquise">
-<h1>Configure BlueBanquise<a class="headerlink" href="#configure-bluebanquise" title="Permalink to this headline">¶</a></h1>
+<h1>5. Configure BlueBanquise<a class="headerlink" href="#configure-bluebanquise" title="Permalink to this headline">¶</a></h1>
 <p>At this point, you should have an operating system with Ansible installed on it, and basic OS repositories.</p>
 <div class="section" id="get-bluebanquise">
-<h2>Get BlueBanquise<a class="headerlink" href="#get-bluebanquise" title="Permalink to this headline">¶</a></h2>
+<h2>5.1. Get BlueBanquise<a class="headerlink" href="#get-bluebanquise" title="Permalink to this headline">¶</a></h2>
 <p>Install needed basic packages:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>yum install wget createrepo git
 </pre></div>
@@ -59,24 +59,24 @@ git clone https://github.com/oxedions/bluebanquise.git .
 <p>It is time to configure the inventory to match cluster needs.</p>
 </div>
 <div class="section" id="configure-inventory">
-<h2>Configure inventory<a class="headerlink" href="#configure-inventory" title="Permalink to this headline">¶</a></h2>
+<h2>5.2. Configure inventory<a class="headerlink" href="#configure-inventory" title="Permalink to this headline">¶</a></h2>
 <p>This documentation will cover the configuration of a very simple cluster:</p>
 <img alt="_images/example_cluster_small.svg" src="_images/example_cluster_small.svg" /><div class="section" id="important-before-we-start">
-<h3>Important before we start<a class="headerlink" href="#important-before-we-start" title="Permalink to this headline">¶</a></h3>
+<h3>5.2.1. Important before we start<a class="headerlink" href="#important-before-we-start" title="Permalink to this headline">¶</a></h3>
 <p>Ansible will read <strong>ALL</strong> files in the inventory. <strong>NEVER do a backup of a file here!</strong></p>
 <p>Backup in another location, outside of /etc/ansible/inventory.</p>
 </div>
 <div class="section" id="check-example-inventory">
-<h3>Check example inventory<a class="headerlink" href="#check-example-inventory" title="Permalink to this headline">¶</a></h3>
+<h3>5.2.2. Check example inventory<a class="headerlink" href="#check-example-inventory" title="Permalink to this headline">¶</a></h3>
 <p>An inventory example is provided in /etc/ansible/resources/examples/simple_cluster/ as a base for our work.</p>
 <p>This example is based on the picture provided just above.</p>
 </div>
 <div class="section" id="review-nodes">
-<h3>Review nodes<a class="headerlink" href="#review-nodes" title="Permalink to this headline">¶</a></h3>
+<h3>5.2.3. Review nodes<a class="headerlink" href="#review-nodes" title="Permalink to this headline">¶</a></h3>
 <p>Time to review the provided example configuration, and adapt it to your configuration.</p>
 <p>First, the nodes.</p>
 <div class="section" id="management-node">
-<h4>Management node<a class="headerlink" href="#management-node" title="Permalink to this headline">¶</a></h4>
+<h4>5.2.3.1. Management node<a class="headerlink" href="#management-node" title="Permalink to this headline">¶</a></h4>
 <p>Open file cluster/nodes/managements.yml:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">managements</span><span class="p">:</span>
   <span class="nt">children</span><span class="p">:</span>
@@ -144,7 +144,7 @@ git clone https://github.com/oxedions/bluebanquise.git .
 <p>It should not be too difficult to understand this file.</p>
 </div>
 <div class="section" id="other-nodes">
-<h4>Other nodes<a class="headerlink" href="#other-nodes" title="Permalink to this headline">¶</a></h4>
+<h4>5.2.3.2. Other nodes<a class="headerlink" href="#other-nodes" title="Permalink to this headline">¶</a></h4>
 <p>Now, review computes nodes and logins nodes in respectively files cluster/nodes/computes.yml and cluster/nodes/logins.yml. Same rules apply. You can also add more nodes, or if you have for example multiple type of equipment for computes nodes or login nodes, add another equipment group this way:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">computes</span><span class="p">:</span>
   <span class="nt">children</span><span class="p">:</span>
@@ -166,7 +166,7 @@ git clone https://github.com/oxedions/bluebanquise.git .
 </div>
 </div>
 <div class="section" id="review-logical-networks">
-<h3>Review logical networks<a class="headerlink" href="#review-logical-networks" title="Permalink to this headline">¶</a></h3>
+<h3>5.2.4. Review logical networks<a class="headerlink" href="#review-logical-networks" title="Permalink to this headline">¶</a></h3>
 <p>In <strong>BlueBanquise</strong>, nodes are connected together through logical network. Most of the time, logical networks will match your physical network, but for advanced networking, it can be different.</p>
 <p>All networks are defined in group_vars/all/networks directory, with one file per network. In this current example inventory, there are two networks provided: ice1-1 and interconnect1.</p>
 <p>Before reviewing the file, please read this <strong>IMPORTANT</strong> information: in <strong>BlueBanquise</strong> there are two kind of networks, which are administration networks, and the others.</p>
@@ -199,15 +199,15 @@ git clone https://github.com/oxedions/bluebanquise.git .
 <p>Now, let’s have a look at the general configuration.</p>
 </div>
 <div class="section" id="review-general-configuration">
-<h3>Review general configuration<a class="headerlink" href="#review-general-configuration" title="Permalink to this headline">¶</a></h3>
+<h3>5.2.5. Review general configuration<a class="headerlink" href="#review-general-configuration" title="Permalink to this headline">¶</a></h3>
 <p>General configuration is made in group_vars/all/general_settings.</p>
 <p>We are going to skip icebergs.yml file for now.</p>
 <div class="section" id="externals">
-<h4>Externals<a class="headerlink" href="#externals" title="Permalink to this headline">¶</a></h4>
+<h4>5.2.5.1. Externals<a class="headerlink" href="#externals" title="Permalink to this headline">¶</a></h4>
 <p>File group_vars/all/general_settings/external.yml allows to connect cluster to the external world or network.</p>
 </div>
 <div class="section" id="network">
-<h4>Network<a class="headerlink" href="#network" title="Permalink to this headline">¶</a></h4>
+<h4>5.2.5.2. Network<a class="headerlink" href="#network" title="Permalink to this headline">¶</a></h4>
 <p>File group_vars/all/general_settings/network.yml allows to configure few network related parameters:</p>
 <ul class="simple">
 <li><p>Some external DNS, that will be added into the /etc/resolv.conf file</p></li>
@@ -216,16 +216,16 @@ git clone https://github.com/oxedions/bluebanquise.git .
 <p>Do not care about the other parameters for now.</p>
 </div>
 <div class="section" id="repositories">
-<h4>Repositories<a class="headerlink" href="#repositories" title="Permalink to this headline">¶</a></h4>
+<h4>5.2.5.3. Repositories<a class="headerlink" href="#repositories" title="Permalink to this headline">¶</a></h4>
 <p>File group_vars/all/general_settings/repositories.yml configure repositories to use for all nodes (using groups and variable precedence, repositories can be tuned for each group of nodes, or even each node).</p>
 <p>Right now, only <em>os</em> and <em>bluebanquise</em> are set. This means two repositories will be added to nodes, and they will bind to repository_ip in ice1-1.yml .</p>
 </div>
 <div class="section" id="nfs">
-<h4>NFS<a class="headerlink" href="#nfs" title="Permalink to this headline">¶</a></h4>
+<h4>5.2.5.4. NFS<a class="headerlink" href="#nfs" title="Permalink to this headline">¶</a></h4>
 <p>File group_vars/all/general_settings/nfs.yml allows to set NFS shared folders inside the cluster. Comments in the file should be enough to understand this file.</p>
 </div>
 <div class="section" id="general">
-<h4>General<a class="headerlink" href="#general" title="Permalink to this headline">¶</a></h4>
+<h4>5.2.5.5. General<a class="headerlink" href="#general" title="Permalink to this headline">¶</a></h4>
 <p>File group_vars/all/general_settings/general.yml configure few main parameters:</p>
 <ul class="simple">
 <li><p>Time zone (very important)</p></li>
@@ -235,12 +235,12 @@ git clone https://github.com/oxedions/bluebanquise.git .
 </div>
 </div>
 <div class="section" id="review-default-parameters">
-<h3>Review Default parameters<a class="headerlink" href="#review-default-parameters" title="Permalink to this headline">¶</a></h3>
+<h3>5.2.6. Review Default parameters<a class="headerlink" href="#review-default-parameters" title="Permalink to this headline">¶</a></h3>
 <p>Last part, and probably the most complicated, are default parameters.</p>
 <p>Remember Ansible precedence mechanism. All variables in group_vars/all/ have less priority, while variables in group_vars/* have a higher priority.</p>
 <p>The idea here is the following: group_vars/all/all_equipment/ folder contains all the default parameters for all nodes. Here authentication, and equipment_profile. You have to tune these parameters to match your exact “global” need, and then for each equipment group, tune parameters.</p>
 <div class="section" id="equipment-profile">
-<h4>Equipment profile<a class="headerlink" href="#equipment-profile" title="Permalink to this headline">¶</a></h4>
+<h4>5.2.6.1. Equipment profile<a class="headerlink" href="#equipment-profile" title="Permalink to this headline">¶</a></h4>
 <p>For example, open file /etc/ansible/inventory/group_vars/all/all_equipment/equipment_profile.yml, and check access_control variable. It is set to true:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">equipment_profile</span><span class="p">:</span>
   <span class="nt">access_control</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
@@ -264,14 +264,14 @@ git clone https://github.com/oxedions/bluebanquise.git .
 <p><strong>IMPORTANT</strong>: equipment_profile variable is not standard. It is <strong>STRICTLY FORBIDDEN</strong> to tune it outside default or an equipment group. For example, you cannot create a custom group and define some equipment_profile parameters for this group. If you really need to do that, add more equipment groups and tune this way. If you do not respect this rule, unexpected behavior will happen during configuration apply.</p>
 </div>
 <div class="section" id="authentication">
-<h4>Authentication<a class="headerlink" href="#authentication" title="Permalink to this headline">¶</a></h4>
+<h4>5.2.6.2. Authentication<a class="headerlink" href="#authentication" title="Permalink to this headline">¶</a></h4>
 <p>Authentication file allows to define default root password for all nodes, and default public ssh keys lists.</p>
 <p>We need to ensure our management1 node ssh public key is set here.</p>
 <p>Get the content of /root/.ssh/id_ras.pub and add it in this file. At the same time, remove the ssh key provided here.</p>
 </div>
 </div>
 <div class="section" id="review-groups-parameters">
-<h3>Review groups parameters<a class="headerlink" href="#review-groups-parameters" title="Permalink to this headline">¶</a></h3>
+<h3>5.2.7. Review groups parameters<a class="headerlink" href="#review-groups-parameters" title="Permalink to this headline">¶</a></h3>
 <p>Last step is to check and review example of equipment_profile tuning in each of the group_vars/equipment_XXXXXX folders. Adapt them to your needs.</p>
 <p>If you prefer, you can copy the whole group_vars/all/all_equipment/equipment_profile.yml file into these folders, or simply adjust the parameters you wish to change from default.</p>
 <p>Once done, configuration is ready, we will check addons later.</p>
@@ -304,35 +304,50 @@ git clone https://github.com/oxedions/bluebanquise.git .
 <h3>Navigation</h3>
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="vocabulary.html">Vocabulary</a></li>
-<li class="toctree-l1"><a class="reference internal" href="install_first_management.html">Install first management</a></li>
-<li class="toctree-l1"><a class="reference internal" href="learn_ansible.html">Learn Ansible</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Configure BlueBanquise</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#get-bluebanquise">Get BlueBanquise</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#configure-inventory">Configure inventory</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#important-before-we-start">Important before we start</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#check-example-inventory">Check example inventory</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#review-nodes">Review nodes</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#review-logical-networks">Review logical networks</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#review-general-configuration">Review general configuration</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#review-default-parameters">Review Default parameters</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#review-groups-parameters">Review groups parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vocabulary.html">2. Vocabulary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install_first_management.html">3. Install first management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="learn_ansible.html">4. Learn Ansible</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">5. Configure BlueBanquise</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#get-bluebanquise">5.1. Get BlueBanquise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configure-inventory">5.2. Configure inventory</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#important-before-we-start">5.2.1. Important before we start</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#check-example-inventory">5.2.2. Check example inventory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#review-nodes">5.2.3. Review nodes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#management-node">5.2.3.1. Management node</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#other-nodes">5.2.3.2. Other nodes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#review-logical-networks">5.2.4. Review logical networks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#review-general-configuration">5.2.5. Review general configuration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#externals">5.2.5.1. Externals</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#network">5.2.5.2. Network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#repositories">5.2.5.3. Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nfs">5.2.5.4. NFS</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#general">5.2.5.5. General</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#review-default-parameters">5.2.6. Review Default parameters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#equipment-profile">5.2.6.1. Equipment profile</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#authentication">5.2.6.2. Authentication</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#review-groups-parameters">5.2.7. Review groups parameters</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="deploy_bluebanquise.html">Deploy BlueBanquise</a></li>
-<li class="toctree-l1"><a class="reference internal" href="roles.html">Roles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deploy_bluebanquise.html">6. Deploy BlueBanquise</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roles.html">7. Roles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">8. References</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="learn_ansible.html" title="previous chapter">Learn Ansible</a></li>
-      <li>Next: <a href="deploy_bluebanquise.html" title="next chapter">Deploy BlueBanquise</a></li>
+      <li>Previous: <a href="learn_ansible.html" title="previous chapter">4. Learn Ansible</a></li>
+      <li>Next: <a href="deploy_bluebanquise.html" title="next chapter">6. Deploy BlueBanquise</a></li>
   </ul></li>
 </ul>
 </div>

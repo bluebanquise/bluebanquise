@@ -34,12 +34,45 @@
 <h1>DHCP server<a class="headerlink" href="#dhcp-server" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="description">
 <h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
-<p>This role provides a standard dhcp server combined with the iPXE roms of BlueBanquise.</p>
+<p>This role provides a standard and simple dhcp server combined with the iPXE roms of BlueBanquise. It should be enough for most networks.</p>
+<p>Please use advanced version if you need advanced features like shared-networks, opt61/82 match, or need to force iPXE roms to be used or use advanced iPXE driver.</p>
 </div>
 <div class="section" id="instructions">
 <h2>Instructions<a class="headerlink" href="#instructions" title="Permalink to this headline">¶</a></h2>
-<p>Dhcp will only take into account networks from the current iceberg, and with naming related to administration network (by default iceX-Y).</p>
-<p>Also, ensure dhcp is set to true for your network.</p>
+<p>This role provides basic features for network relying on MAC only (or range of unknown hosts).</p>
+<p>The role will only take into account networks from the current iceberg, and with naming related to administration network (by default iceX-Y). In single iceberg configuration, i.e. default, it will consider ice1-X networks.</p>
+<p>For a network to be integrated in the dhcp, the variable <strong>is_in_dhcp</strong> must be set to true in network related.</p>
+<p>Note also that dhcp role will use the following optional parameters if they exist in network:</p>
+<ul class="simple">
+<li><p>dhcp_unknown_range: define the range of the subnet, for unregistered hosts. Can be useful for temporary connections (laptops, etc) or to detect if an hardware is missing in the inventory.</p></li>
+<li><p>gateway: define router in the subnet, and so gateway provided by the dhcp server.</p></li>
+</ul>
+<p>Resulting example network could be:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">networks</span><span class="p">:</span>
+  <span class="nt">ice1-1</span><span class="p">:</span>
+    <span class="nt">subnet</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.11.0.0</span>
+    <span class="nt">prefix</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">16</span>
+    <span class="nt">netmask</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">255.255.0.0</span>
+    <span class="nt">broadcast</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.11.255.255</span>
+    <span class="nt">dhcp_unknown_range</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.11.254.1 10.11.254.254</span>  <span class="c1"># Is optional</span>
+    <span class="nt">gateway</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.11.2.1</span>  <span class="c1"># Is optional</span>
+    <span class="nt">is_in_dhcp</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>  <span class="c1"># Must be set to true for dhcp role to integrate this network</span>
+    <span class="nt">is_in_dns</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+    <span class="nt">services_ip</span><span class="p">:</span>
+      <span class="nt">pxe_ip</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.11.0.1</span>  <span class="c1"># Will be used by dhcp for next server</span>
+      <span class="nt">dns_ip</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.11.0.1</span>  <span class="c1"># Will be used by dhcp for dns server</span>
+      <span class="nt">repository_ip</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.11.0.1</span>
+      <span class="nt">authentication_ip</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.11.0.1</span>
+      <span class="nt">time_ip</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.11.0.1</span>  <span class="c1"># Will be used by dhcp for time server</span>
+      <span class="nt">log_ip</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.11.0.1</span>
+</pre></div>
+</div>
+<p>Finaly, note that the following parameters can be set in the inventory (group_vars/all/general_settings/network.yml):</p>
+<ul class="simple">
+<li><p>default_lease_time</p></li>
+<li><p>max_lease_time</p></li>
+</ul>
+<p>Consider increasing the default values once your network is production ready.</p>
 </div>
 <div class="section" id="changelog">
 <h2>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h2>

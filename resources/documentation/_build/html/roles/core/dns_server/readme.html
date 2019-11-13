@@ -38,7 +38,33 @@
 </div>
 <div class="section" id="instructions">
 <h2>Instructions<a class="headerlink" href="#instructions" title="Permalink to this headline">¶</a></h2>
-<p>External hosts in /etc/ansible/all/general_settings/external_hosts.yml are added automatically into this DNS.</p>
+<p>This DNS role will automatically add all networks of the cluster, assuming their variable <strong>is_in_dns</strong> is set to true:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">networks</span><span class="p">:</span>
+  <span class="nt">ice1-1</span><span class="p">:</span>
+    <span class="nt">subnet</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.11.0.0</span>
+    <span class="nt">prefix</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">16</span>
+    <span class="nt">netmask</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">255.255.0.0</span>
+    <span class="nt">broadcast</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.11.255.255</span>
+    <span class="nt">is_in_dhcp</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+    <span class="nt">is_in_dns</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true  &lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</span>
+    <span class="nt">services_ip</span><span class="p">:</span>
+      <span class="nt">dns_ip</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.11.0.1</span>
+</pre></div>
+</div>
+<p>It will generate 3 files:</p>
+<ul class="simple">
+<li><p>/etc/named.conf that contains main configuration, and that will try to bind to all networks defined on the host it is deployed on, using <strong>services_ip.dns_ip</strong> variable ip of the network.</p></li>
+<li><p>/var/named/forward that contains forward resolution of hosts</p></li>
+<li><p>/var/named/reverse that contains reverse resolution of hosts</p></li>
+</ul>
+<p>External hosts defined in <em>group_vars/all/general_settings/external.yml</em> at variable <strong>external_hosts</strong> will be automatically added in the dns configuration.</p>
+<p>To configure forwarding and intergrate this dns server into an existing IT configuration, use file <em>group_vars/all/general_settings/external.yml</em>.
+It is possible to add here an external dns to bind to for this internal dns, as a relay.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">external_dns</span><span class="p">:</span>
+  <span class="nt">dns_server</span><span class="p">:</span>  <span class="l l-Scalar l-Scalar-Plain">&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</span>
+    <span class="l l-Scalar l-Scalar-Plain">- 208.67.222.222</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="changelog">
 <h2>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h2>

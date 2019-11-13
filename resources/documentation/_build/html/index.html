@@ -14,7 +14,7 @@
     <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Introduction" href="introduction.html" />
+    <link rel="next" title="1. Introduction" href="introduction.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -40,126 +40,335 @@
 <div class="toctree-wrapper compound">
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="vocabulary.html">Vocabulary</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="vocabulary.html#ansible-vocabulary">Ansible vocabulary</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="vocabulary.html#host">Host</a></li>
-<li class="toctree-l3"><a class="reference internal" href="vocabulary.html#group">Group</a></li>
-<li class="toctree-l3"><a class="reference internal" href="vocabulary.html#variables">Variables</a></li>
-<li class="toctree-l3"><a class="reference internal" href="vocabulary.html#inventory-roles-and-playbooks">Inventory, roles, and playbooks</a></li>
-<li class="toctree-l3"><a class="reference internal" href="vocabulary.html#variables-precedence">Variables precedence</a></li>
-<li class="toctree-l3"><a class="reference internal" href="vocabulary.html#merge">Merge</a></li>
-<li class="toctree-l3"><a class="reference internal" href="vocabulary.html#jinja2">Jinja2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vocabulary.html">2. Vocabulary</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="vocabulary.html#ansible-vocabulary">2.1. Ansible vocabulary</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="vocabulary.html#host">2.1.1. Host</a></li>
+<li class="toctree-l3"><a class="reference internal" href="vocabulary.html#group">2.1.2. Group</a></li>
+<li class="toctree-l3"><a class="reference internal" href="vocabulary.html#variables">2.1.3. Variables</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="vocabulary.html#simple">2.1.3.1. Simple</a></li>
+<li class="toctree-l4"><a class="reference internal" href="vocabulary.html#list">2.1.3.2. List</a></li>
+<li class="toctree-l4"><a class="reference internal" href="vocabulary.html#dictionary">2.1.3.3. Dictionary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="vocabulary.html#j2-variables">2.1.3.4. j2 Variables</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="vocabulary.html#stack-vocabulary">Stack vocabulary</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="vocabulary.html#icebergs">Icebergs</a></li>
-<li class="toctree-l3"><a class="reference internal" href="vocabulary.html#equipment-profiles">Equipment profiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="vocabulary.html#inventory-roles-and-playbooks">2.1.4. Inventory, roles, and playbooks</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="vocabulary.html#inventory">2.1.4.1. Inventory</a></li>
+<li class="toctree-l4"><a class="reference internal" href="vocabulary.html#roles">2.1.4.2. Roles</a></li>
+<li class="toctree-l4"><a class="reference internal" href="vocabulary.html#playbooks">2.1.4.3. Playbooks</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="vocabulary.html#variables-precedence">2.1.5. Variables precedence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="vocabulary.html#merge">2.1.6. Merge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="vocabulary.html#jinja2">2.1.7. Jinja2</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="install_first_management.html">Install first management</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="install_first_management.html#install-operating-system">Install operating system</a></li>
-<li class="toctree-l2"><a class="reference internal" href="install_first_management.html#prepare-for-ansible">Prepare for Ansible</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="install_first_management.html#repositories">Repositories</a></li>
-<li class="toctree-l3"><a class="reference internal" href="install_first_management.html#install-ansible">Install Ansible</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vocabulary.html#stack-vocabulary">2.2. Stack vocabulary</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="vocabulary.html#icebergs">2.2.1. Icebergs</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="vocabulary.html#one-iceberg-configuration">2.2.1.1. One iceberg configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="vocabulary.html#multiple-icebergs-configuration">2.2.1.2. Multiple icebergs configuration</a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="learn_ansible.html">Learn Ansible</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="learn_ansible.html#minimal-inventory">Minimal inventory</a></li>
-<li class="toctree-l2"><a class="reference internal" href="learn_ansible.html#ansible-commands">Ansible commands</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="learn_ansible.html#ansible">ansible</a></li>
-<li class="toctree-l3"><a class="reference internal" href="learn_ansible.html#ansible-inventory">ansible-inventory</a></li>
-<li class="toctree-l3"><a class="reference internal" href="learn_ansible.html#ansible-playbook">ansible-playbook</a></li>
-<li class="toctree-l3"><a class="reference internal" href="learn_ansible.html#debug">Debug</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="learn_ansible.html#variables-and-groups">Variables and groups</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="learn_ansible.html#adding-variables">Adding variables</a></li>
-<li class="toctree-l3"><a class="reference internal" href="learn_ansible.html#configuring-groups">Configuring groups</a></li>
-<li class="toctree-l3"><a class="reference internal" href="learn_ansible.html#variables-precedence">Variables precedence</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="learn_ansible.html#roles-and-playbooks">Roles and playbooks</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="learn_ansible.html#role">Role</a></li>
-<li class="toctree-l3"><a class="reference internal" href="learn_ansible.html#playbook">Playbook</a></li>
-<li class="toctree-l3"><a class="reference internal" href="learn_ansible.html#jinja2">Jinja2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="vocabulary.html#equipment-profiles">2.2.2. Equipment profiles</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="configure_bluebanquise.html">Configure BlueBanquise</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="configure_bluebanquise.html#get-bluebanquise">Get BlueBanquise</a></li>
-<li class="toctree-l2"><a class="reference internal" href="configure_bluebanquise.html#configure-inventory">Configure inventory</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="configure_bluebanquise.html#important-before-we-start">Important before we start</a></li>
-<li class="toctree-l3"><a class="reference internal" href="configure_bluebanquise.html#check-example-inventory">Check example inventory</a></li>
-<li class="toctree-l3"><a class="reference internal" href="configure_bluebanquise.html#review-nodes">Review nodes</a></li>
-<li class="toctree-l3"><a class="reference internal" href="configure_bluebanquise.html#review-logical-networks">Review logical networks</a></li>
-<li class="toctree-l3"><a class="reference internal" href="configure_bluebanquise.html#review-general-configuration">Review general configuration</a></li>
-<li class="toctree-l3"><a class="reference internal" href="configure_bluebanquise.html#review-default-parameters">Review Default parameters</a></li>
-<li class="toctree-l3"><a class="reference internal" href="configure_bluebanquise.html#review-groups-parameters">Review groups parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install_first_management.html">3. Install first management</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="install_first_management.html#install-operating-system">3.1. Install operating system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install_first_management.html#prepare-for-ansible">3.2. Prepare for Ansible</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="install_first_management.html#repositories">3.2.1. Repositories</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="install_first_management.html#operating-system">3.2.1.1. Operating system</a></li>
+<li class="toctree-l4"><a class="reference internal" href="install_first_management.html#bluebanquise">3.2.1.2. BlueBanquise</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="install_first_management.html#install-ansible">3.2.2. Install Ansible</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="deploy_bluebanquise.html">Deploy BlueBanquise</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="deploy_bluebanquise.html#management-configuration">Management configuration</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="deploy_bluebanquise.html#get-management1-playbook">Get management1 playbook</a></li>
-<li class="toctree-l3"><a class="reference internal" href="deploy_bluebanquise.html#ansible-playbook">Ansible-playbook</a></li>
-<li class="toctree-l3"><a class="reference internal" href="deploy_bluebanquise.html#apply-management1-configuration">Apply management1 configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="learn_ansible.html">4. Learn Ansible</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="learn_ansible.html#minimal-inventory">4.1. Minimal inventory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="learn_ansible.html#ansible-commands">4.2. Ansible commands</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="learn_ansible.html#ansible">4.2.1. ansible</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="learn_ansible.html#version">4.2.1.1. Version</a></li>
+<li class="toctree-l4"><a class="reference internal" href="learn_ansible.html#ping-an-host-or-all-hosts">4.2.1.2. Ping an host or all hosts</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="deploy_bluebanquise.html#pxe">PXE</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="deploy_bluebanquise.html#bootset">bootset</a></li>
-<li class="toctree-l3"><a class="reference internal" href="deploy_bluebanquise.html#os-deployment">OS deployment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="learn_ansible.html#ansible-inventory">4.2.2. ansible-inventory</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="learn_ansible.html#groups-and-hosts">4.2.2.1. Groups and hosts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="learn_ansible.html#host-variables">4.2.2.2. Host variables</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="deploy_bluebanquise.html#apply-other-nodes-configuration">Apply other nodes configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="learn_ansible.html#ansible-playbook">4.2.3. ansible-playbook</a></li>
+<li class="toctree-l3"><a class="reference internal" href="learn_ansible.html#debug">4.2.4. Debug</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="roles.html">Roles</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="roles.html#core">CORE</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="roles.html#conman">Conman</a></li>
-<li class="toctree-l3"><a class="reference internal" href="roles.html#dhcp-server">DHCP server</a></li>
-<li class="toctree-l3"><a class="reference internal" href="roles.html#dns-server">DNS server</a></li>
-<li class="toctree-l3"><a class="reference internal" href="roles.html#dns-client">DNS client</a></li>
-<li class="toctree-l3"><a class="reference internal" href="roles.html#hosts-file">Hosts file</a></li>
-<li class="toctree-l3"><a class="reference internal" href="roles.html#log-server">Log server</a></li>
-<li class="toctree-l3"><a class="reference internal" href="roles.html#log-client">Log client</a></li>
-<li class="toctree-l3"><a class="reference internal" href="roles.html#nfs-server">NFS server</a></li>
-<li class="toctree-l3"><a class="reference internal" href="roles.html#nfs-client">NFS client</a></li>
-<li class="toctree-l3"><a class="reference internal" href="roles.html#nic-network-interface-controler">NIC - Network Interface Controler</a></li>
-<li class="toctree-l3"><a class="reference internal" href="roles.html#pxe-stack">PXE Stack</a></li>
-<li class="toctree-l3"><a class="reference internal" href="roles.html#repositories-server">Repositories server</a></li>
-<li class="toctree-l3"><a class="reference internal" href="roles.html#repositories-client">Repositories client</a></li>
-<li class="toctree-l3"><a class="reference internal" href="roles.html#set-hostname">Set Hostname</a></li>
-<li class="toctree-l3"><a class="reference internal" href="roles.html#ssh-master">SSH master</a></li>
-<li class="toctree-l3"><a class="reference internal" href="roles.html#ssh-slave">SSH slave</a></li>
-<li class="toctree-l3"><a class="reference internal" href="roles.html#time-server">Time server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="learn_ansible.html#variables-and-groups">4.3. Variables and groups</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="learn_ansible.html#adding-variables">4.3.1. Adding variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="learn_ansible.html#configuring-groups">4.3.2. Configuring groups</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="learn_ansible.html#in-yaml">4.3.2.1. In YAML</a></li>
+<li class="toctree-l4"><a class="reference internal" href="learn_ansible.html#in-ansible-syntax">4.3.2.2. In Ansible syntax</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="roles.html#advanced-core">ADVANCED CORE</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="roles.html#advanced-dhcp-server">Advanced DHCP server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="learn_ansible.html#variables-precedence">4.3.3. Variables precedence</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="roles.html#addons">ADDONS</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="roles.html#clustershell">ClusterShell</a></li>
-<li class="toctree-l3"><a class="reference internal" href="roles.html#openldap-client">OpenLDAP client</a></li>
-<li class="toctree-l3"><a class="reference internal" href="roles.html#openldap-server">OpenLDAP server</a></li>
-<li class="toctree-l3"><a class="reference internal" href="roles.html#prometheus-server">Prometheus server</a></li>
-<li class="toctree-l3"><a class="reference internal" href="roles.html#prometheus-client">Prometheus client</a></li>
-<li class="toctree-l3"><a class="reference internal" href="roles.html#report">Report</a></li>
-<li class="toctree-l3"><a class="reference internal" href="roles.html#slurm">Slurm</a></li>
-<li class="toctree-l3"><a class="reference internal" href="roles.html#users-basic">Users basic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="learn_ansible.html#roles-and-playbooks">4.4. Roles and playbooks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="learn_ansible.html#role">4.4.1. Role</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="learn_ansible.html#task">4.4.1.1. Task</a></li>
+<li class="toctree-l4"><a class="reference internal" href="learn_ansible.html#template">4.4.1.2. Template</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="learn_ansible.html#playbook">4.4.2. Playbook</a></li>
+<li class="toctree-l3"><a class="reference internal" href="learn_ansible.html#jinja2">4.4.3. Jinja2</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="references.html">References</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="references.html#graphics">Graphics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configure_bluebanquise.html">5. Configure BlueBanquise</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="configure_bluebanquise.html#get-bluebanquise">5.1. Get BlueBanquise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configure_bluebanquise.html#configure-inventory">5.2. Configure inventory</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="configure_bluebanquise.html#important-before-we-start">5.2.1. Important before we start</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configure_bluebanquise.html#check-example-inventory">5.2.2. Check example inventory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configure_bluebanquise.html#review-nodes">5.2.3. Review nodes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="configure_bluebanquise.html#management-node">5.2.3.1. Management node</a></li>
+<li class="toctree-l4"><a class="reference internal" href="configure_bluebanquise.html#other-nodes">5.2.3.2. Other nodes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="configure_bluebanquise.html#review-logical-networks">5.2.4. Review logical networks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configure_bluebanquise.html#review-general-configuration">5.2.5. Review general configuration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="configure_bluebanquise.html#externals">5.2.5.1. Externals</a></li>
+<li class="toctree-l4"><a class="reference internal" href="configure_bluebanquise.html#network">5.2.5.2. Network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="configure_bluebanquise.html#repositories">5.2.5.3. Repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="configure_bluebanquise.html#nfs">5.2.5.4. NFS</a></li>
+<li class="toctree-l4"><a class="reference internal" href="configure_bluebanquise.html#general">5.2.5.5. General</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="configure_bluebanquise.html#review-default-parameters">5.2.6. Review Default parameters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="configure_bluebanquise.html#equipment-profile">5.2.6.1. Equipment profile</a></li>
+<li class="toctree-l4"><a class="reference internal" href="configure_bluebanquise.html#authentication">5.2.6.2. Authentication</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="configure_bluebanquise.html#review-groups-parameters">5.2.7. Review groups parameters</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="deploy_bluebanquise.html">6. Deploy BlueBanquise</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="deploy_bluebanquise.html#management-configuration">6.1. Management configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="deploy_bluebanquise.html#get-management1-playbook">6.1.1. Get management1 playbook</a></li>
+<li class="toctree-l3"><a class="reference internal" href="deploy_bluebanquise.html#ansible-playbook">6.1.2. Ansible-playbook</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="deploy_bluebanquise.html#tags-skip-tags">6.1.2.1. Tags / Skip tags</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deploy_bluebanquise.html#extra-vars">6.1.2.2. Extra vars</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="deploy_bluebanquise.html#apply-management1-configuration">6.1.3. Apply management1 configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="deploy_bluebanquise.html#pxe">6.2. PXE</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="deploy_bluebanquise.html#bootset">6.2.1. bootset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="deploy_bluebanquise.html#os-deployment">6.2.2. OS deployment</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="deploy_bluebanquise.html#apply-other-nodes-configuration">6.3. Apply other nodes configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="roles.html">7. Roles</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="roles.html#core">7.1. CORE</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#conman">7.1.1. Conman</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#description">7.1.1.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#instructions">7.1.1.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#changelog">7.1.1.3. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#display-tuning">7.1.2. Display_tuning</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id1">7.1.2.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id2">7.1.2.2. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#dhcp-server">7.1.3. DHCP server</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id3">7.1.3.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id4">7.1.3.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id5">7.1.3.3. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#dns-server">7.1.4. DNS server</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id6">7.1.4.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id7">7.1.4.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id8">7.1.4.3. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#dns-client">7.1.5. DNS client</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id9">7.1.5.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id10">7.1.5.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id11">7.1.5.3. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#hosts-file">7.1.6. Hosts file</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id12">7.1.6.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id13">7.1.6.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id14">7.1.6.3. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#log-server">7.1.7. Log server</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id15">7.1.7.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id16">7.1.7.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id17">7.1.7.3. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#log-client">7.1.8. Log client</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id18">7.1.8.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id19">7.1.8.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#to-be-done">7.1.8.3. To be done</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id20">7.1.8.4. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#nfs-server">7.1.9. NFS server</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id21">7.1.9.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id22">7.1.9.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id23">7.1.9.3. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#nfs-client">7.1.10. NFS client</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id24">7.1.10.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id25">7.1.10.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id26">7.1.10.3. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#nic-network-interface-controler">7.1.11. NIC - Network Interface Controler</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id27">7.1.11.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id28">7.1.11.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id29">7.1.11.3. To be done</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id30">7.1.11.4. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#pxe-stack">7.1.12. PXE Stack</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id31">7.1.12.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id32">7.1.12.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id33">7.1.12.3. To be done</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id34">7.1.12.4. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#repositories-server">7.1.13. Repositories server</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id35">7.1.13.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id36">7.1.13.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id37">7.1.13.3. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#repositories-client">7.1.14. Repositories client</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id38">7.1.14.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id39">7.1.14.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id40">7.1.14.3. To be done</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id41">7.1.14.4. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#set-hostname">7.1.15. Set Hostname</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id42">7.1.15.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id43">7.1.15.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id44">7.1.15.3. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#ssh-master">7.1.16. SSH master</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id45">7.1.16.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id46">7.1.16.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id47">7.1.16.3. To be done</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id48">7.1.16.4. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#ssh-slave">7.1.17. SSH slave</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id49">7.1.17.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id50">7.1.17.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id51">7.1.17.3. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#time-server">7.1.18. Time server</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id52">7.1.18.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id53">7.1.18.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id54">7.1.18.3. To be done</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id55">7.1.18.4. Changelog</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="roles.html#advanced-core">7.2. ADVANCED CORE</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#advanced-dhcp-server">7.2.1. Advanced DHCP server</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id56">7.2.1.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id57">7.2.1.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id58">7.2.1.3. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#advanced-nic">7.2.2. Advanced NIC</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id59">7.2.2.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id60">7.2.2.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id61">7.2.2.3. To be done</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id62">7.2.2.4. Changelog</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="roles.html#addons">7.3. ADDONS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#clustershell">7.3.1. ClusterShell</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id63">7.3.1.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id64">7.3.1.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id65">7.3.1.3. To be done</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id66">7.3.1.4. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#openldap-client">7.3.2. OpenLDAP client</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id67">7.3.2.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id68">7.3.2.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id69">7.3.2.3. To be done</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id70">7.3.2.4. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#openldap-server">7.3.3. OpenLDAP server</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id71">7.3.3.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id72">7.3.3.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id73">7.3.3.3. To be done</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id74">7.3.3.4. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#prometheus-server">7.3.4. Prometheus server</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id75">7.3.4.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id76">7.3.4.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id77">7.3.4.3. To be done</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id78">7.3.4.4. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#prometheus-client">7.3.5. Prometheus client</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id79">7.3.5.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id80">7.3.5.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id81">7.3.5.3. To be done</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id82">7.3.5.4. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#report">7.3.6. Report</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id83">7.3.6.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id84">7.3.6.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id85">7.3.6.3. To be done</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id86">7.3.6.4. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#slurm">7.3.7. Slurm</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id87">7.3.7.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id88">7.3.7.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id89">7.3.7.3. To be done</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id90">7.3.7.4. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#users-basic">7.3.8. Users basic</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id91">7.3.8.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id92">7.3.8.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="roles.html#id93">7.3.8.3. Changelog</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">8. References</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="references.html#graphics">8.1. Graphics</a></li>
 </ul>
 </li>
 </ul>
@@ -198,21 +407,21 @@
 <h3>Navigation</h3>
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="vocabulary.html">Vocabulary</a></li>
-<li class="toctree-l1"><a class="reference internal" href="install_first_management.html">Install first management</a></li>
-<li class="toctree-l1"><a class="reference internal" href="learn_ansible.html">Learn Ansible</a></li>
-<li class="toctree-l1"><a class="reference internal" href="configure_bluebanquise.html">Configure BlueBanquise</a></li>
-<li class="toctree-l1"><a class="reference internal" href="deploy_bluebanquise.html">Deploy BlueBanquise</a></li>
-<li class="toctree-l1"><a class="reference internal" href="roles.html">Roles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vocabulary.html">2. Vocabulary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install_first_management.html">3. Install first management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="learn_ansible.html">4. Learn Ansible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configure_bluebanquise.html">5. Configure BlueBanquise</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deploy_bluebanquise.html">6. Deploy BlueBanquise</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roles.html">7. Roles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">8. References</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="#">Documentation overview</a><ul>
-      <li>Next: <a href="introduction.html" title="next chapter">Introduction</a></li>
+      <li>Next: <a href="introduction.html" title="next chapter">1. Introduction</a></li>
   </ul></li>
 </ul>
 </div>

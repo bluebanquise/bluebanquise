@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>Learn Ansible &#8212; BlueBanquise_Documentation 1.0.1 documentation</title>
+    <title>4. Learn Ansible &#8212; BlueBanquise_Documentation 1.0.1 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -14,8 +14,8 @@
     <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Configure BlueBanquise" href="configure_bluebanquise.html" />
-    <link rel="prev" title="Install first management" href="install_first_management.html" />
+    <link rel="next" title="5. Configure BlueBanquise" href="configure_bluebanquise.html" />
+    <link rel="prev" title="3. Install first management" href="install_first_management.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -33,13 +33,13 @@
           <div class="body" role="main">
             
   <div class="section" id="learn-ansible">
-<h1>Learn Ansible<a class="headerlink" href="#learn-ansible" title="Permalink to this headline">¶</a></h1>
+<h1>4. Learn Ansible<a class="headerlink" href="#learn-ansible" title="Permalink to this headline">¶</a></h1>
 <p>To understand how <strong>BlueBanquise</strong> works, it is essential to learn basis of Ansible.</p>
 <p>This section tries to provide key knowledge to at least be able to manipulate and edit the stack to your needs.</p>
 <p>It is assumed here that your system is already installed, and that Ansible has also been installed. It is also assumed that <strong>BlueBanquise</strong> stack has not been installed yet, and so Ansible is freshly installed without modifications.</p>
 <p>All work will be done on the current host.</p>
 <div class="section" id="minimal-inventory">
-<h2>Minimal inventory<a class="headerlink" href="#minimal-inventory" title="Permalink to this headline">¶</a></h2>
+<h2>4.1. Minimal inventory<a class="headerlink" href="#minimal-inventory" title="Permalink to this headline">¶</a></h2>
 <p>Edit /etc/hosts file, and add “management1” on localhost line:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4 management1
 ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
@@ -107,19 +107,19 @@ management1 <span class="p">|</span> <span class="nv">SUCCESS</span> <span class
 <p>Let’s see the available and useful commands now.</p>
 </div>
 <div class="section" id="ansible-commands">
-<h2>Ansible commands<a class="headerlink" href="#ansible-commands" title="Permalink to this headline">¶</a></h2>
+<h2>4.2. Ansible commands<a class="headerlink" href="#ansible-commands" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="ansible">
-<h3>ansible<a class="headerlink" href="#ansible" title="Permalink to this headline">¶</a></h3>
+<h3>4.2.1. ansible<a class="headerlink" href="#ansible" title="Permalink to this headline">¶</a></h3>
 <p>The <strong>ansible</strong> command provides few interesting features.</p>
 <div class="section" id="version">
-<h4>Version<a class="headerlink" href="#version" title="Permalink to this headline">¶</a></h4>
+<h4>4.2.1.1. Version<a class="headerlink" href="#version" title="Permalink to this headline">¶</a></h4>
 <p>First command is to check current Ansible version. It should be &gt;= 2.8.2:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ansible --version
 </pre></div>
 </div>
 </div>
 <div class="section" id="ping-an-host-or-all-hosts">
-<h4>Ping an host or all hosts<a class="headerlink" href="#ping-an-host-or-all-hosts" title="Permalink to this headline">¶</a></h4>
+<h4>4.2.1.2. Ping an host or all hosts<a class="headerlink" href="#ping-an-host-or-all-hosts" title="Permalink to this headline">¶</a></h4>
 <p>Use the following command to check if Ansible can contact a specific registered host:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ansible management1 -m ping
 </pre></div>
@@ -136,11 +136,11 @@ management1 <span class="p">|</span> <span class="nv">SUCCESS</span> <span class
 </div>
 </div>
 <div class="section" id="ansible-inventory">
-<h3>ansible-inventory<a class="headerlink" href="#ansible-inventory" title="Permalink to this headline">¶</a></h3>
+<h3>4.2.2. ansible-inventory<a class="headerlink" href="#ansible-inventory" title="Permalink to this headline">¶</a></h3>
 <p>Ansible inventory command is extremely useful can will be massively used on this documentation.</p>
 <p>This command allows to gather information from your inventory and check the expected output.</p>
 <div class="section" id="groups-and-hosts">
-<h4>Groups and hosts<a class="headerlink" href="#groups-and-hosts" title="Permalink to this headline">¶</a></h4>
+<h4>4.2.2.1. Groups and hosts<a class="headerlink" href="#groups-and-hosts" title="Permalink to this headline">¶</a></h4>
 <p>The command:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ansible-inventory --graph
 </pre></div>
@@ -155,7 +155,7 @@ management1 <span class="p">|</span> <span class="nv">SUCCESS</span> <span class
 More will be seen later in this documentation.</p>
 </div>
 <div class="section" id="host-variables">
-<h4>Host variables<a class="headerlink" href="#host-variables" title="Permalink to this headline">¶</a></h4>
+<h4>4.2.2.2. Host variables<a class="headerlink" href="#host-variables" title="Permalink to this headline">¶</a></h4>
 <p>To output variables for a specific host, and check for example your variable precedence mechanism provided what is expected, use:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ansible-inventory --yaml --host management1
 </pre></div>
@@ -164,7 +164,7 @@ More will be seen later in this documentation.</p>
 </div>
 </div>
 <div class="section" id="ansible-playbook">
-<h3>ansible-playbook<a class="headerlink" href="#ansible-playbook" title="Permalink to this headline">¶</a></h3>
+<h3>4.2.3. ansible-playbook<a class="headerlink" href="#ansible-playbook" title="Permalink to this headline">¶</a></h3>
 <p>This command is used to launch playbooks, and ask Ansible to execute tasks on desired host(s). This is the most used command when using <strong>BlueBanquise</strong>.</p>
 <p>Important parameters are:</p>
 <ul class="simple">
@@ -174,7 +174,7 @@ More will be seen later in this documentation.</p>
 </ul>
 </div>
 <div class="section" id="debug">
-<h3>Debug<a class="headerlink" href="#debug" title="Permalink to this headline">¶</a></h3>
+<h3>4.2.4. Debug<a class="headerlink" href="#debug" title="Permalink to this headline">¶</a></h3>
 <p>All of these commands accept verbose flags with -v, -vv, -vvv, etc. The more v, the more verbose.</p>
 <p>Also, it is possible to execute all of them with the variable ANSIBLE_DEBUG=1 set, which will dramatically increase output information (but unfortunately not always relevant to our needs…).</p>
 <p>For example, a very verbose execution would be:</p>
@@ -184,14 +184,14 @@ More will be seen later in this documentation.</p>
 </div>
 </div>
 <div class="section" id="variables-and-groups">
-<h2>Variables and groups<a class="headerlink" href="#variables-and-groups" title="Permalink to this headline">¶</a></h2>
+<h2>4.3. Variables and groups<a class="headerlink" href="#variables-and-groups" title="Permalink to this headline">¶</a></h2>
 <p>Now that all important commands have been seen, it is time to add some variables inside the inventory, and play with groups.</p>
 <p>#####However, for more fun and understand all the process, we will also create a very minimal playbook that will execute a simple task (no need for a role here): rendering a file with these variables as content, on the target hosts.
 #####Create a minimal playbook
 ————————-
 ######Create a file /etc/ansible/minimal_playbook.yml with the following content:</p>
 <div class="section" id="adding-variables">
-<h3>Adding variables<a class="headerlink" href="#adding-variables" title="Permalink to this headline">¶</a></h3>
+<h3>4.3.1. Adding variables<a class="headerlink" href="#adding-variables" title="Permalink to this headline">¶</a></h3>
 <p>We are going to add few variables, at different positions in the inventories.</p>
 <p>Create file /etc/ansible/inventory/group_vars/all/my_ship.yml with the following content:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">my_ship</span><span class="p">:</span>
@@ -250,7 +250,7 @@ my_ship:
 <p>Perfect. It is time to play with groups, before coming back to variables to work on variables precedence.</p>
 </div>
 <div class="section" id="configuring-groups">
-<h3>Configuring groups<a class="headerlink" href="#configuring-groups" title="Permalink to this headline">¶</a></h3>
+<h3>4.3.2. Configuring groups<a class="headerlink" href="#configuring-groups" title="Permalink to this headline">¶</a></h3>
 <p>Lets check current groups:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>root@ ~<span class="o">]</span><span class="c1"># ansible-inventory --graph</span>
 @all:
@@ -264,7 +264,7 @@ my_ship:
 <p>All our hosts belong to the ungrouped group and to the all group. But we want to be able to assign specific variables to each kind of equipment. We need to create groups.</p>
 <p>There are two ways to create groups. In YAML, directly in the hosts files, or using specific Ansible syntax in separate files. Both are useful, and we will combine them.</p>
 <div class="section" id="in-yaml">
-<h4>In YAML<a class="headerlink" href="#in-yaml" title="Permalink to this headline">¶</a></h4>
+<h4>4.3.2.1. In YAML<a class="headerlink" href="#in-yaml" title="Permalink to this headline">¶</a></h4>
 <p>Edit again the /etc/ansible/inventory/myhost.yml file, and this time let’s use real YAML:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">master</span><span class="p">:</span>
   <span class="nt">hosts</span><span class="p">:</span>
@@ -317,7 +317,7 @@ my_ship:
 <p>The <strong>children</strong> string define that string above is a group that contains bellow group(s).</p>
 </div>
 <div class="section" id="in-ansible-syntax">
-<h4>In Ansible syntax<a class="headerlink" href="#in-ansible-syntax" title="Permalink to this headline">¶</a></h4>
+<h4>4.3.2.2. In Ansible syntax<a class="headerlink" href="#in-ansible-syntax" title="Permalink to this headline">¶</a></h4>
 <p>The second way to create groups is to use the Ansible native syntax, which can be simpler in some cases.</p>
 <p>Create a file /etc/ansible/inventory/mygroups and set the following content:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[colors:children]
@@ -356,7 +356,7 @@ nfs1
 </div>
 </div>
 <div class="section" id="variables-precedence">
-<h3>Variables precedence<a class="headerlink" href="#variables-precedence" title="Permalink to this headline">¶</a></h3>
+<h3>4.3.3. Variables precedence<a class="headerlink" href="#variables-precedence" title="Permalink to this headline">¶</a></h3>
 <p>Time to use all these groups.</p>
 <p>If you remember precedence system in Vocabulary section (see <a class="reference external" href="https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html#variable-precedence-where-should-i-put-a-variable">https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html#variable-precedence-where-should-i-put-a-variable</a>) group_vars/all is in position 4 in the precedence. This is where we set our spaceship variables.</p>
 <p>Let’s say now we wish to change our ship destination for management1 node only.</p>
@@ -443,11 +443,11 @@ destination: Ixmucane
 </div>
 </div>
 <div class="section" id="roles-and-playbooks">
-<h2>Roles and playbooks<a class="headerlink" href="#roles-and-playbooks" title="Permalink to this headline">¶</a></h2>
+<h2>4.4. Roles and playbooks<a class="headerlink" href="#roles-and-playbooks" title="Permalink to this headline">¶</a></h2>
 <p>Time to apply some configuration on our target host.</p>
 <p>We are going to create a role that install a web server package, create a very basic web page with our ship’s information, and start the web server service.</p>
 <div class="section" id="role">
-<h3>Role<a class="headerlink" href="#role" title="Permalink to this headline">¶</a></h3>
+<h3>4.4.1. Role<a class="headerlink" href="#role" title="Permalink to this headline">¶</a></h3>
 <p>Create a role called “shipyard”, with needed folders:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir /etc/ansible/roles/shipyard
 mkdir /etc/ansible/roles/shipyard/tasks
@@ -456,7 +456,7 @@ mkdir /etc/ansible/roles/shipyard/templates
 </div>
 <p>Tasks folder contains tasks to perform, and main.yml file inside will be the starting point for Ansible. Templates folder will contain our templates (configuration files) in Jinja2 language.</p>
 <div class="section" id="task">
-<h4>Task<a class="headerlink" href="#task" title="Permalink to this headline">¶</a></h4>
+<h4>4.4.1.1. Task<a class="headerlink" href="#task" title="Permalink to this headline">¶</a></h4>
 <p>Create file /etc/ansible/roles/shipyard/tasks/main.yml with the following content:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nn">---</span>
 
@@ -491,7 +491,7 @@ mkdir /etc/ansible/roles/shipyard/templates
 <p>You can find all Ansible modules here in the official documentation: <a class="reference external" href="https://docs.ansible.com/ansible/latest/modules/modules_by_category.html">https://docs.ansible.com/ansible/latest/modules/modules_by_category.html</a></p>
 </div>
 <div class="section" id="template">
-<h4>Template<a class="headerlink" href="#template" title="Permalink to this headline">¶</a></h4>
+<h4>4.4.1.2. Template<a class="headerlink" href="#template" title="Permalink to this headline">¶</a></h4>
 <p>Templates are probably the key feature of Ansible and all automation tools.</p>
 <p>The idea is simple: you provide Ansible with a copy of your desired configuration file, with variables to replace to fill some dynamic parts of the file.</p>
 <p>Let’s do this with a simple html page, and first with a static page.</p>
@@ -510,7 +510,7 @@ mkdir /etc/ansible/roles/shipyard/templates
 </div>
 </div>
 <div class="section" id="playbook">
-<h3>Playbook<a class="headerlink" href="#playbook" title="Permalink to this headline">¶</a></h3>
+<h3>4.4.2. Playbook<a class="headerlink" href="#playbook" title="Permalink to this headline">¶</a></h3>
 <p>Lets create our playbook, which will contains a list of roles to apply on management1 host.</p>
 <p>Create file /etc/ansible/playbooks/myplaybook.yml with the following content:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nn">---</span>
@@ -533,7 +533,7 @@ mkdir /etc/ansible/roles/shipyard/templates
 <p>But this is not very interesting, let’s add some dynamic part into our template.</p>
 </div>
 <div class="section" id="jinja2">
-<h3>Jinja2<a class="headerlink" href="#jinja2" title="Permalink to this headline">¶</a></h3>
+<h3>4.4.3. Jinja2<a class="headerlink" href="#jinja2" title="Permalink to this headline">¶</a></h3>
 <p>Edit file /etc/ansible/roles/shipyard/templates/index.html.j2 to make it this way:</p>
 <div class="highlight-html notranslate"><div class="highlight"><pre><span></span>&lt;html&gt;
 &lt;header&gt;
@@ -607,44 +607,60 @@ If you feel something is missing in this quick Ansible training, please do not h
 <h3>Navigation</h3>
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="vocabulary.html">Vocabulary</a></li>
-<li class="toctree-l1"><a class="reference internal" href="install_first_management.html">Install first management</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Learn Ansible</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#minimal-inventory">Minimal inventory</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#ansible-commands">Ansible commands</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#ansible">ansible</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ansible-inventory">ansible-inventory</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ansible-playbook">ansible-playbook</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#debug">Debug</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vocabulary.html">2. Vocabulary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install_first_management.html">3. Install first management</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">4. Learn Ansible</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#minimal-inventory">4.1. Minimal inventory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ansible-commands">4.2. Ansible commands</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ansible">4.2.1. ansible</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#version">4.2.1.1. Version</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ping-an-host-or-all-hosts">4.2.1.2. Ping an host or all hosts</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#variables-and-groups">Variables and groups</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#adding-variables">Adding variables</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#configuring-groups">Configuring groups</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#variables-precedence">Variables precedence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ansible-inventory">4.2.2. ansible-inventory</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#groups-and-hosts">4.2.2.1. Groups and hosts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#host-variables">4.2.2.2. Host variables</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#roles-and-playbooks">Roles and playbooks</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#role">Role</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#playbook">Playbook</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#jinja2">Jinja2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ansible-playbook">4.2.3. ansible-playbook</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#debug">4.2.4. Debug</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#variables-and-groups">4.3. Variables and groups</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#adding-variables">4.3.1. Adding variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configuring-groups">4.3.2. Configuring groups</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#in-yaml">4.3.2.1. In YAML</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#in-ansible-syntax">4.3.2.2. In Ansible syntax</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#variables-precedence">4.3.3. Variables precedence</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#roles-and-playbooks">4.4. Roles and playbooks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#role">4.4.1. Role</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#task">4.4.1.1. Task</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#template">4.4.1.2. Template</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#playbook">4.4.2. Playbook</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#jinja2">4.4.3. Jinja2</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="configure_bluebanquise.html">Configure BlueBanquise</a></li>
-<li class="toctree-l1"><a class="reference internal" href="deploy_bluebanquise.html">Deploy BlueBanquise</a></li>
-<li class="toctree-l1"><a class="reference internal" href="roles.html">Roles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configure_bluebanquise.html">5. Configure BlueBanquise</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deploy_bluebanquise.html">6. Deploy BlueBanquise</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roles.html">7. Roles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">8. References</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="install_first_management.html" title="previous chapter">Install first management</a></li>
-      <li>Next: <a href="configure_bluebanquise.html" title="next chapter">Configure BlueBanquise</a></li>
+      <li>Previous: <a href="install_first_management.html" title="previous chapter">3. Install first management</a></li>
+      <li>Next: <a href="configure_bluebanquise.html" title="next chapter">5. Configure BlueBanquise</a></li>
   </ul></li>
 </ul>
 </div>

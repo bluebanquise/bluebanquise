@@ -38,8 +38,14 @@
 </div>
 <div class="section" id="instructions">
 <h2>Instructions<a class="headerlink" href="#instructions" title="Permalink to this headline">¶</a></h2>
-<p>Configuration is made in group_vars/all/general_settings/network.yml.</p>
-<p>It is possible to add here external DNS servers for clients.</p>
+<p>Configuration is made in <em>group_vars/all/general_settings/external.yml</em>.</p>
+<p>It is possible to add here external DNS servers for clients:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">external_dns</span><span class="p">:</span>
+  <span class="nt">dns_client</span><span class="p">:</span>  <span class="l l-Scalar l-Scalar-Plain">&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</span>
+    <span class="l l-Scalar l-Scalar-Plain">- 208.67.220.220</span>
+</pre></div>
+</div>
+<p>Note that this/these external(s) dns will be placed after the cluster internal dns in resolution order.</p>
 </div>
 <div class="section" id="changelog">
 <h2>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h2>

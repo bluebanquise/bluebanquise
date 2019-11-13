@@ -38,7 +38,22 @@
 </div>
 <div class="section" id="instructions">
 <h2>Instructions<a class="headerlink" href="#instructions" title="Permalink to this headline">¶</a></h2>
-<p>All configuration is done in group_vars/all/general_settings/nfs.yml .</p>
+<p>All configuration is done in <em>group_vars/all/general_settings/nfs.yml</em>:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">nfs</span><span class="p">:</span>
+  <span class="nt">softwares</span><span class="p">:</span>                                    <span class="c1"># Internal name of the nfs share</span>
+    <span class="nt">mount</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">/opt/softwares</span>                       <span class="c1"># What path server should export</span>
+    <span class="nt">export</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">/opt/softwares</span>                      <span class="c1"># Which path clients should mount this NFS (will be automatically created by client role)</span>
+    <span class="nt">server</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">arngrim</span>                             <span class="c1"># The server that export this storage space</span>
+    <span class="nt">clients_groups</span><span class="p">:</span>                             <span class="c1"># Group of hosts that will mount it. Can be an equipment group, or a main group (mg), or any other ansible group</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">mg_computes</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">mg_logins</span>
+    <span class="nt">take_over_network</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ice1-1</span>                   <span class="c1"># Network used to share this storage space</span>
+    <span class="nt">export_arguments</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ro,no_root_squash,async</span>   <span class="c1"># Arguments for the server (export)</span>
+    <span class="nt">mount_arguments</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ro,intr,nfsvers=4.2,bg</span>     <span class="c1"># Arguments for the client (mount)</span>
+</pre></div>
+</div>
+<p>This role will not modify default nfs server configuration (number of threads, nfs v4.2 force, etc).</p>
+<p>Do not forget to restart nfs server service when you update configuration for changes to take effect.</p>
 </div>
 <div class="section" id="changelog">
 <h2>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h2>
@@ -74,14 +89,14 @@
 <h3>Navigation</h3>
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../vocabulary.html">Vocabulary</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../install_first_management.html">Install first management</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../learn_ansible.html">Learn Ansible</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../configure_bluebanquise.html">Configure BlueBanquise</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../deploy_bluebanquise.html">Deploy BlueBanquise</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../roles.html">Roles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../vocabulary.html">2. Vocabulary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install_first_management.html">3. Install first management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../learn_ansible.html">4. Learn Ansible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../configure_bluebanquise.html">5. Configure BlueBanquise</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../deploy_bluebanquise.html">6. Deploy BlueBanquise</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../roles.html">7. Roles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../references.html">8. References</a></li>
 </ul>
 
 <div class="relations">

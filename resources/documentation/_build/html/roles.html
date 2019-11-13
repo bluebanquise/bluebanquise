@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>Roles &#8212; BlueBanquise_Documentation 1.0.1 documentation</title>
+    <title>7. Roles &#8212; BlueBanquise_Documentation 1.0.1 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -14,8 +14,8 @@
     <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="References" href="references.html" />
-    <link rel="prev" title="Deploy BlueBanquise" href="deploy_bluebanquise.html" />
+    <link rel="next" title="8. References" href="references.html" />
+    <link rel="prev" title="6. Deploy BlueBanquise" href="deploy_bluebanquise.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -33,14 +33,14 @@
           <div class="body" role="main">
             
   <div class="section" id="roles">
-<h1>Roles<a class="headerlink" href="#roles" title="Permalink to this headline">¶</a></h1>
+<h1>7. Roles<a class="headerlink" href="#roles" title="Permalink to this headline">¶</a></h1>
 <p>This part is an agregations of all the <strong>BlueBanquise</strong> roles readme.</p>
 <div class="section" id="core">
-<h2>CORE<a class="headerlink" href="#core" title="Permalink to this headline">¶</a></h2>
+<h2>7.1. CORE<a class="headerlink" href="#core" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="conman">
-<h3>Conman<a class="headerlink" href="#conman" title="Permalink to this headline">¶</a></h3>
+<h3>7.1.1. Conman<a class="headerlink" href="#conman" title="Permalink to this headline">¶</a></h3>
 <div class="section" id="description">
-<h4>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h4>
+<h4>7.1.1.1. Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h4>
 <p>This role provides a conman daemon that logs ipmi serial consols.</p>
 <p>Validated on:</p>
 <ul class="simple">
@@ -49,7 +49,7 @@
 </ul>
 </div>
 <div class="section" id="instructions">
-<h4>Instructions<a class="headerlink" href="#instructions" title="Permalink to this headline">¶</a></h4>
+<h4>7.1.1.2. Instructions<a class="headerlink" href="#instructions" title="Permalink to this headline">¶</a></h4>
 <p>To login into a console, use:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conman mynode
 </pre></div>
@@ -57,7 +57,7 @@
 <p>To exit, simply press <strong>&amp;</strong> then <strong>.</strong> .</p>
 </div>
 <div class="section" id="changelog">
-<h4>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h4>
+<h4>7.1.1.3. Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
 <li><p>1.0.2: Tested on ubuntu 18.04 and validated. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
 <li><p>1.0.1: Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
@@ -65,19 +65,69 @@
 </ul>
 </div>
 </div>
-<div class="section" id="dhcp-server">
-<h3>DHCP server<a class="headerlink" href="#dhcp-server" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="display-tuning">
+<h3>7.1.2. Display_tuning<a class="headerlink" href="#display-tuning" title="Permalink to this headline">¶</a></h3>
 <div class="section" id="id1">
-<h4>Description<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h4>
-<p>This role provides a standard dhcp server combined with the iPXE roms of BlueBanquise.</p>
+<h4>7.1.2.1. Description<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h4>
+<p>This role provides some nice colors and screenrc.</p>
+<p>Validated on:</p>
+<ul class="simple">
+<li><p>Centos 8.0</p></li>
+</ul>
 </div>
 <div class="section" id="id2">
-<h4>Instructions<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h4>
-<p>Dhcp will only take into account networks from the current iceberg, and with naming related to administration network (by default iceX-Y).</p>
-<p>Also, ensure dhcp is set to true for your network.</p>
+<h4>7.1.2.2. Changelog<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
+</ul>
 </div>
+</div>
+<div class="section" id="dhcp-server">
+<h3>7.1.3. DHCP server<a class="headerlink" href="#dhcp-server" title="Permalink to this headline">¶</a></h3>
 <div class="section" id="id3">
-<h4>Changelog<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h4>
+<h4>7.1.3.1. Description<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h4>
+<p>This role provides a standard and simple dhcp server combined with the iPXE roms of BlueBanquise. It should be enough for most networks.</p>
+<p>Please use advanced version if you need advanced features like shared-networks, opt61/82 match, or need to force iPXE roms to be used or use advanced iPXE driver.</p>
+</div>
+<div class="section" id="id4">
+<h4>7.1.3.2. Instructions<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h4>
+<p>This role provides basic features for network relying on MAC only (or range of unknown hosts).</p>
+<p>The role will only take into account networks from the current iceberg, and with naming related to administration network (by default iceX-Y). In single iceberg configuration, i.e. default, it will consider ice1-X networks.</p>
+<p>For a network to be integrated in the dhcp, the variable <strong>is_in_dhcp</strong> must be set to true in network related.</p>
+<p>Note also that dhcp role will use the following optional parameters if they exist in network:</p>
+<ul class="simple">
+<li><p>dhcp_unknown_range: define the range of the subnet, for unregistered hosts. Can be useful for temporary connections (laptops, etc) or to detect if an hardware is missing in the inventory.</p></li>
+<li><p>gateway: define router in the subnet, and so gateway provided by the dhcp server.</p></li>
+</ul>
+<p>Resulting example network could be:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">networks</span><span class="p">:</span>
+  <span class="nt">ice1-1</span><span class="p">:</span>
+    <span class="nt">subnet</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.11.0.0</span>
+    <span class="nt">prefix</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">16</span>
+    <span class="nt">netmask</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">255.255.0.0</span>
+    <span class="nt">broadcast</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.11.255.255</span>
+    <span class="nt">dhcp_unknown_range</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.11.254.1 10.11.254.254</span>  <span class="c1"># Is optional</span>
+    <span class="nt">gateway</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.11.2.1</span>  <span class="c1"># Is optional</span>
+    <span class="nt">is_in_dhcp</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>  <span class="c1"># Must be set to true for dhcp role to integrate this network</span>
+    <span class="nt">is_in_dns</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+    <span class="nt">services_ip</span><span class="p">:</span>
+      <span class="nt">pxe_ip</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.11.0.1</span>  <span class="c1"># Will be used by dhcp for next server</span>
+      <span class="nt">dns_ip</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.11.0.1</span>  <span class="c1"># Will be used by dhcp for dns server</span>
+      <span class="nt">repository_ip</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.11.0.1</span>
+      <span class="nt">authentication_ip</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.11.0.1</span>
+      <span class="nt">time_ip</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.11.0.1</span>  <span class="c1"># Will be used by dhcp for time server</span>
+      <span class="nt">log_ip</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.11.0.1</span>
+</pre></div>
+</div>
+<p>Finaly, note that the following parameters can be set in the inventory (group_vars/all/general_settings/network.yml):</p>
+<ul class="simple">
+<li><p>default_lease_time</p></li>
+<li><p>max_lease_time</p></li>
+</ul>
+<p>Consider increasing the default values once your network is production ready.</p>
+</div>
+<div class="section" id="id5">
+<h4>7.1.3.3. Changelog<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
 <li><p>1.0.3: Simplify standard dhcp, create advanced dhcp for complex configurations. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
 <li><p>1.0.2: Added Ubuntu 18.04 compatibility. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
@@ -87,17 +137,43 @@
 </div>
 </div>
 <div class="section" id="dns-server">
-<h3>DNS server<a class="headerlink" href="#dns-server" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="id4">
-<h4>Description<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h4>
+<h3>7.1.4. DNS server<a class="headerlink" href="#dns-server" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id6">
+<h4>7.1.4.1. Description<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h4>
 <p>This role provides a basic dns server based on bind.</p>
 </div>
-<div class="section" id="id5">
-<h4>Instructions<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h4>
-<p>External hosts in /etc/ansible/all/general_settings/external_hosts.yml are added automatically into this DNS.</p>
+<div class="section" id="id7">
+<h4>7.1.4.2. Instructions<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h4>
+<p>This DNS role will automatically add all networks of the cluster, assuming their variable <strong>is_in_dns</strong> is set to true:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">networks</span><span class="p">:</span>
+  <span class="nt">ice1-1</span><span class="p">:</span>
+    <span class="nt">subnet</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.11.0.0</span>
+    <span class="nt">prefix</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">16</span>
+    <span class="nt">netmask</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">255.255.0.0</span>
+    <span class="nt">broadcast</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.11.255.255</span>
+    <span class="nt">is_in_dhcp</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+    <span class="nt">is_in_dns</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true  &lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</span>
+    <span class="nt">services_ip</span><span class="p">:</span>
+      <span class="nt">dns_ip</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10.11.0.1</span>
+</pre></div>
 </div>
-<div class="section" id="id6">
-<h4>Changelog<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h4>
+<p>It will generate 3 files:</p>
+<ul class="simple">
+<li><p>/etc/named.conf that contains main configuration, and that will try to bind to all networks defined on the host it is deployed on, using <strong>services_ip.dns_ip</strong> variable ip of the network.</p></li>
+<li><p>/var/named/forward that contains forward resolution of hosts</p></li>
+<li><p>/var/named/reverse that contains reverse resolution of hosts</p></li>
+</ul>
+<p>External hosts defined in <em>group_vars/all/general_settings/external.yml</em> at variable <strong>external_hosts</strong> will be automatically added in the dns configuration.</p>
+<p>To configure forwarding and intergrate this dns server into an existing IT configuration, use file <em>group_vars/all/general_settings/external.yml</em>.
+It is possible to add here an external dns to bind to for this internal dns, as a relay.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">external_dns</span><span class="p">:</span>
+  <span class="nt">dns_server</span><span class="p">:</span>  <span class="l l-Scalar l-Scalar-Plain">&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</span>
+    <span class="l l-Scalar l-Scalar-Plain">- 208.67.222.222</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id8">
+<h4>7.1.4.3. Changelog<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
 <li><p>1.0.2: Added Ubuntu 18.04 compatibility. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
 <li><p>1.0.1: Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
@@ -106,18 +182,24 @@
 </div>
 </div>
 <div class="section" id="dns-client">
-<h3>DNS client<a class="headerlink" href="#dns-client" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="id7">
-<h4>Description<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h4>
+<h3>7.1.5. DNS client<a class="headerlink" href="#dns-client" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id9">
+<h4>7.1.5.1. Description<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h4>
 <p>This role provides a basic /etc/resolv.conf file.</p>
 </div>
-<div class="section" id="id8">
-<h4>Instructions<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h4>
-<p>Configuration is made in group_vars/all/general_settings/network.yml.</p>
-<p>It is possible to add here external DNS servers for clients.</p>
+<div class="section" id="id10">
+<h4>7.1.5.2. Instructions<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h4>
+<p>Configuration is made in <em>group_vars/all/general_settings/external.yml</em>.</p>
+<p>It is possible to add here external DNS servers for clients:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">external_dns</span><span class="p">:</span>
+  <span class="nt">dns_client</span><span class="p">:</span>  <span class="l l-Scalar l-Scalar-Plain">&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</span>
+    <span class="l l-Scalar l-Scalar-Plain">- 208.67.220.220</span>
+</pre></div>
 </div>
-<div class="section" id="id9">
-<h4>Changelog<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h4>
+<p>Note that this/these external(s) dns will be placed after the cluster internal dns in resolution order.</p>
+</div>
+<div class="section" id="id11">
+<h4>7.1.5.3. Changelog<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
 <li><p>1.0.2: Added variable for role version. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
 <li><p>1.0.1: Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
@@ -126,17 +208,32 @@
 </div>
 </div>
 <div class="section" id="hosts-file">
-<h3>Hosts file<a class="headerlink" href="#hosts-file" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="id10">
-<h4>Description<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h4>
+<h3>7.1.6. Hosts file<a class="headerlink" href="#hosts-file" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id12">
+<h4>7.1.6.1. Description<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h4>
 <p>This role provides a basic /etc/hosts files.</p>
 </div>
-<div class="section" id="id11">
-<h4>Instructions<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h4>
-<p>External hosts in /etc/ansible/all/general_settings/external_hosts.yml are added automatically into this hosts file.</p>
+<div class="section" id="id13">
+<h4>7.1.6.2. Instructions<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h4>
+<p>This role will gather all hosts from the inventory, and add them, using all their known internal network connections ip, into <em>/etc/hosts</em> file.</p>
+<p>System administrator can reduce the scope of this gathering using <strong>hosts_file.range</strong> variable in <em>/etc/ansible/inventory/group_vars/all/general_settings/general.yml</em>.
+Setting <strong>range</strong> to <em>all</em> will use all Ansible inventory hosts, while setting <strong>range</strong> to <em>iceberg</em> will reduce the gathering to the current host iceberg.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hosts_file</span><span class="p">:</span>  <span class="l l-Scalar l-Scalar-Plain">&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</span>
+  <span class="l l-Scalar l-Scalar-Plain">range</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">all</span> <span class="c1"># can be all (all hosts) or iceberg (iceberg only)</span>
+</pre></div>
 </div>
-<div class="section" id="id12">
-<h4>Changelog<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h4>
+<p>Another feature is available in this hosts role. In case of multiple icebergs, system administrator may need to define a global network, shared by all nodes of a specific group. This is especially needed in HPC for computational nodes to communicates through an interconnect network.</p>
+<p>If using such global network, it is possible to ask this role to define <strong>direct</strong> hosts resolutions of a specific Ansible group to be not on their regular management network, but be set directly on the global network (mostly used in combinaison with slurm and mpi stacks).</p>
+<p>To do so, uncomment and edit variable <strong>global_network_settings</strong> in file <em>/etc/ansible/inventory/group_vars/all/general_settings/network.yml</em>. Note that the role will ignore this variable if it is commented, and will try to use it if not commented.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">global_network_settings</span><span class="p">:</span>  <span class="l l-Scalar l-Scalar-Plain">&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</span>
+  <span class="l l-Scalar l-Scalar-Plain">global_network</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">interconnect-1</span>  <span class="c1"># Define the global network, must exist in networks files</span>
+  <span class="nt">global_network_group</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">mg_computes</span>  <span class="c1"># Define which group of nodes should use global_network direct resolution</span>
+</pre></div>
+</div>
+<p>Last point, external hosts defined in <em>group_vars/all/general_settings/external.yml</em> at variable <strong>external_hosts</strong> will be automatically added in the <em>/etc/hosts</em> file.</p>
+</div>
+<div class="section" id="id14">
+<h4>7.1.6.3. Changelog<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
 <li><p>1.0.3: Accelerated mode. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
 <li><p>1.0.2: Added role version. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
@@ -146,17 +243,17 @@
 </div>
 </div>
 <div class="section" id="log-server">
-<h3>Log server<a class="headerlink" href="#log-server" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="id13">
-<h4>Description<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h4>
+<h3>7.1.7. Log server<a class="headerlink" href="#log-server" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id15">
+<h4>7.1.7.1. Description<a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h4>
 <p>This role provides an rsyslog server to gather logs of all hosts.</p>
 </div>
-<div class="section" id="id14">
-<h4>Instructions<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id16">
+<h4>7.1.7.2. Instructions<a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h4>
 <p>All logs are separated by systemd instances into /var/log/rsyslog/ .</p>
 </div>
-<div class="section" id="id15">
-<h4>Changelog<a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id17">
+<h4>7.1.7.3. Changelog<a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
 <li><p>1.0.1: Fixed bad template. Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
 <li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
@@ -164,21 +261,21 @@
 </div>
 </div>
 <div class="section" id="log-client">
-<h3>Log client<a class="headerlink" href="#log-client" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="id16">
-<h4>Description<a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h4>
-<p>This role provides an rsyslog client.</p>
+<h3>7.1.8. Log client<a class="headerlink" href="#log-client" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id18">
+<h4>7.1.8.1. Description<a class="headerlink" href="#id18" title="Permalink to this headline">¶</a></h4>
+<p>This role provides an rsyslog client, to be used in combinaison with the log_server role.</p>
 </div>
-<div class="section" id="id17">
-<h4>Instructions<a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id19">
+<h4>7.1.8.2. Instructions<a class="headerlink" href="#id19" title="Permalink to this headline">¶</a></h4>
 <p>NA</p>
 </div>
 <div class="section" id="to-be-done">
-<h4>To be done<a class="headerlink" href="#to-be-done" title="Permalink to this headline">¶</a></h4>
-<p>Ensure all logs are get, and if possible try to keep local login at the same time.</p>
+<h4>7.1.8.3. To be done<a class="headerlink" href="#to-be-done" title="Permalink to this headline">¶</a></h4>
+<p>Integrate journalctl logging instead of rsyslog.</p>
 </div>
-<div class="section" id="id18">
-<h4>Changelog<a class="headerlink" href="#id18" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id20">
+<h4>7.1.8.4. Changelog<a class="headerlink" href="#id20" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
 <li><p>1.0.1: Fixed bad template. Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
 <li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
@@ -186,17 +283,32 @@
 </div>
 </div>
 <div class="section" id="nfs-server">
-<h3>NFS server<a class="headerlink" href="#nfs-server" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="id19">
-<h4>Description<a class="headerlink" href="#id19" title="Permalink to this headline">¶</a></h4>
+<h3>7.1.9. NFS server<a class="headerlink" href="#nfs-server" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id21">
+<h4>7.1.9.1. Description<a class="headerlink" href="#id21" title="Permalink to this headline">¶</a></h4>
 <p>This role provides an automatic nfs server that export on good networks desired directories.</p>
 </div>
-<div class="section" id="id20">
-<h4>Instructions<a class="headerlink" href="#id20" title="Permalink to this headline">¶</a></h4>
-<p>All configuration is done in group_vars/all/general_settings/nfs.yml .</p>
+<div class="section" id="id22">
+<h4>7.1.9.2. Instructions<a class="headerlink" href="#id22" title="Permalink to this headline">¶</a></h4>
+<p>All configuration is done in <em>group_vars/all/general_settings/nfs.yml</em>:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">nfs</span><span class="p">:</span>
+  <span class="nt">softwares</span><span class="p">:</span>                                    <span class="c1"># Internal name of the nfs share</span>
+    <span class="nt">mount</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">/opt/softwares</span>                       <span class="c1"># What path server should export</span>
+    <span class="nt">export</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">/opt/softwares</span>                      <span class="c1"># Which path clients should mount this NFS (will be automatically created by client role)</span>
+    <span class="nt">server</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">arngrim</span>                             <span class="c1"># The server that export this storage space</span>
+    <span class="nt">clients_groups</span><span class="p">:</span>                             <span class="c1"># Group of hosts that will mount it. Can be an equipment group, or a main group (mg), or any other ansible group</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">mg_computes</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">mg_logins</span>
+    <span class="nt">take_over_network</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ice1-1</span>                   <span class="c1"># Network used to share this storage space</span>
+    <span class="nt">export_arguments</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ro,no_root_squash,async</span>   <span class="c1"># Arguments for the server (export)</span>
+    <span class="nt">mount_arguments</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ro,intr,nfsvers=4.2,bg</span>     <span class="c1"># Arguments for the client (mount)</span>
+</pre></div>
 </div>
-<div class="section" id="id21">
-<h4>Changelog<a class="headerlink" href="#id21" title="Permalink to this headline">¶</a></h4>
+<p>This role will not modify default nfs server configuration (number of threads, nfs v4.2 force, etc).</p>
+<p>Do not forget to restart nfs server service when you update configuration for changes to take effect.</p>
+</div>
+<div class="section" id="id23">
+<h4>7.1.9.3. Changelog<a class="headerlink" href="#id23" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
 <li><p>1.0.2: Added Ubuntu 18.04 compatibility. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
 <li><p>1.0.1: Fixed bad template. Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
@@ -205,17 +317,19 @@
 </div>
 </div>
 <div class="section" id="nfs-client">
-<h3>NFS client<a class="headerlink" href="#nfs-client" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="id22">
-<h4>Description<a class="headerlink" href="#id22" title="Permalink to this headline">¶</a></h4>
+<h3>7.1.10. NFS client<a class="headerlink" href="#nfs-client" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id24">
+<h4>7.1.10.1. Description<a class="headerlink" href="#id24" title="Permalink to this headline">¶</a></h4>
 <p>This role provides an automatic nfs client that mount targets and create local directories if needed.</p>
 </div>
-<div class="section" id="id23">
-<h4>Instructions<a class="headerlink" href="#id23" title="Permalink to this headline">¶</a></h4>
-<p>All configuration is done in group_vars/all/general_settings/nfs.yml .</p>
+<div class="section" id="id25">
+<h4>7.1.10.2. Instructions<a class="headerlink" href="#id25" title="Permalink to this headline">¶</a></h4>
+<p>All configuration is done in <em>group_vars/all/general_settings/nfs.yml</em>.</p>
+<p>See the <strong>nfs_server</strong> role isntructions for more details.</p>
+<p>Simply note that path that should be mounted will be automatically created by this role if they do not exist.</p>
 </div>
-<div class="section" id="id24">
-<h4>Changelog<a class="headerlink" href="#id24" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id26">
+<h4>7.1.10.3. Changelog<a class="headerlink" href="#id26" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
 <li><p>1.0.2: Added Ubuntu 18.04 compatibility. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
 <li><p>1.0.1: Fixed bad template. Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
@@ -224,18 +338,18 @@
 </div>
 </div>
 <div class="section" id="nic-network-interface-controler">
-<h3>NIC - Network Interface Controler<a class="headerlink" href="#nic-network-interface-controler" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="id25">
-<h4>Description<a class="headerlink" href="#id25" title="Permalink to this headline">¶</a></h4>
+<h3>7.1.11. NIC - Network Interface Controler<a class="headerlink" href="#nic-network-interface-controler" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id27">
+<h4>7.1.11.1. Description<a class="headerlink" href="#id27" title="Permalink to this headline">¶</a></h4>
 <p>This role configure network interfaces to provide desired ip, prefix, gateway, etc.</p>
 <p>This role is still under work, as nmcli is not supported in RHEL 8 for now, and that this role need to handle much more features.</p>
 </div>
-<div class="section" id="id26">
-<h4>Instructions<a class="headerlink" href="#id26" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id28">
+<h4>7.1.11.2. Instructions<a class="headerlink" href="#id28" title="Permalink to this headline">¶</a></h4>
 <p>NA</p>
 </div>
-<div class="section" id="id27">
-<h4>To be done<a class="headerlink" href="#id27" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id29">
+<h4>7.1.11.3. To be done<a class="headerlink" href="#id29" title="Permalink to this headline">¶</a></h4>
 <p>Add more features, as nmcli Ansible module can do much more.</p>
 <ul class="simple">
 <li><p>VLANs</p></li>
@@ -244,8 +358,8 @@
 <li><p>Multi IP</p></li>
 </ul>
 </div>
-<div class="section" id="id28">
-<h4>Changelog<a class="headerlink" href="#id28" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id30">
+<h4>7.1.11.4. Changelog<a class="headerlink" href="#id30" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
 <li><p>1.0.2: Adding Ubuntu 18.04 compatibility. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
 <li><p>1.0.1: Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
@@ -254,24 +368,125 @@
 </div>
 </div>
 <div class="section" id="pxe-stack">
-<h3>PXE Stack<a class="headerlink" href="#pxe-stack" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="id29">
-<h4>Description<a class="headerlink" href="#id29" title="Permalink to this headline">¶</a></h4>
-<p>This role provides the whole PXE stack. It is a key feature of the stack.</p>
-</div>
-<div class="section" id="id30">
-<h4>Instructions<a class="headerlink" href="#id30" title="Permalink to this headline">¶</a></h4>
-<p>All files are located in /var/www/html/preboot_execution_environment</p>
-<p>See main documentation about this role.</p>
-</div>
+<h3>7.1.12. PXE Stack<a class="headerlink" href="#pxe-stack" title="Permalink to this headline">¶</a></h3>
 <div class="section" id="id31">
-<h4>To be done<a class="headerlink" href="#id31" title="Permalink to this headline">¶</a></h4>
+<h4>7.1.12.1. Description<a class="headerlink" href="#id31" title="Permalink to this headline">¶</a></h4>
+<p>This role provides the whole PXE stack. It is a key feature of the stack (and we are prood of it :-D).</p>
+</div>
+<div class="section" id="id32">
+<h4>7.1.12.2. Instructions<a class="headerlink" href="#id32" title="Permalink to this headline">¶</a></h4>
+<p>This role will deploy all the needed files, binaries, and scripts to deploy remote hosts using PXE (or even USB and CD boot).</p>
+<p>The role take place just after the dhcp in the PXE deployment, and will configure all the iPXE chain needed after dhcp provided hosts with next-server ip and filename to use.</p>
+<div class="section" id="files-location">
+<h5>7.1.12.2.1. <strong>Files location</strong><a class="headerlink" href="#files-location" title="Permalink to this headline">¶</a></h5>
+<ul class="simple">
+<li><p>PXE boot files are located in /var/www/html/preboot_execution_environment/.
+* <em>bin/</em> directory contains some needed bin files, typically grub2 files for EFI boot.
+* <em>equipment_profiles/</em> directory contains equipment_profiles related files, i.e. ipxe file with group variables, and os configuration files (kickstart, preseed, autoyast).
+* <em>nodes/</em> directory contains hosts dedicated files, i.e. ipxe file with hosts dedicated variables.
+* <em>osdeploy/</em> directory contains static files, with paterns to boot each kind of supported distributions.</p></li>
+<li><p>Basic configuration files are located in /etc/bluebanquise/pxe/.
+* <em>nodes_parameters.yml</em> contains all nodes PXE needed parameters.
+* <em>pxe_parameters.yml</em> contains needed values for scripts to adapt to <strong>current pxe server host</strong> (these parameters do not apply to PXE booted hosts !!).</p></li>
+<li><p>Scripts are located in /usr/bin/.</p></li>
+</ul>
+</div>
+<div class="section" id="inventory-configuration">
+<h5>7.1.12.2.2. <strong>Inventory configuration</strong><a class="headerlink" href="#inventory-configuration" title="Permalink to this headline">¶</a></h5>
+<p>This role will rely on multiple parts of the inventory, and is probably the most “invasive” role of the whole stack.</p>
+<ul class="simple">
+<li><p>equipment_profile dictionarries are used for each equipment_profile group. All boot confiuration is made relying on it (operating system, cpu architecture, console, kernel parameters, etc.). It is recommanded to ensure coherency of the equipment_profile files.</p></li>
+<li><p>authentication dictionarry is used to provide root password and default ssh authorized key.</p></li>
+<li><p>hosts <strong>network_interfaces</strong> dedicated variables, to be able to force static ip at kernel boot.</p></li>
+</ul>
+</div>
+<div class="section" id="bootset-usage">
+<h5>7.1.12.2.3. <strong>bootset usage</strong><a class="headerlink" href="#bootset-usage" title="Permalink to this headline">¶</a></h5>
+<p>Once the role is deployed, and hosts gathered into <em>/etc/bluebanquise/pxe/nodes_parameters.yml</em>, the bootset tool can be used to manipulate remote hosts PXE boot. By default, 3 states can be defined for each host:</p>
+<ul class="simple">
+<li><p>osdeploy: the remote host will deploy/redeploy its operating system, using inventory equipment_profile parameters of its equipment profile group.</p></li>
+<li><p>disk: the remote host will boot on disk. This parameter is automatically set after a sucessful <strong>osdeploy</strong>.</p></li>
+<li><p>diskless: the remote host will boot using a diskless mechanism. This diskless boot is generic, and is handled by an optional external role.</p></li>
+</ul>
+<p>Again, consider that if you set an host to osdeploy, and that it suceed its deployment, stack will automatically set the host into disk boot for next boot, to avoid infinite reinstallation loop.</p>
+<p>To get bootset help, use:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>bootset -h
+</pre></div>
+</div>
+<p>To ask an host to deploy/redeploy its operating system, use:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>bootset -n c001 -b osdeploy
+</pre></div>
+</div>
+<p>With c001 the target host to be redeployed.</p>
+<p>To set this host to boot on disk, use:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>bootset -n c001 -b disk
+</pre></div>
+</div>
+<p>It is also possible to work on a range of host, using nodeset formating:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>bootset -n c001,c002,c[010-020],login1 -b disk
+</pre></div>
+</div>
+<p>If some inventory parameters related to the host have been updated recently, it may be required to force files regeneration instead of simply modifying them. To do so, use:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>bootset -n c001 -b osdeploy -f update
+</pre></div>
+</div>
+<p>Also, on some “difficult” networks, system administrator may require to force static ip at boot. This can be achieved using:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>bootset -n c001 -b osdeploy -f network
+</pre></div>
+</div>
+<p>Or in combinaison with update, using comma separated:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>bootset -n c001 -b osdeploy -f update,network
+</pre></div>
+</div>
+<p>The tool is relatively verbose, and should provide all needed information on the fly on what it is doing.</p>
+<p>Last part, regarding diskless. An image name need to be provided:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>bootset -n c001 -b diskless -i myimage
+</pre></div>
+</div>
+<p>This part should be covered in a diskless related role, and is not in the scope of this role.</p>
+</div>
+<div class="section" id="ipxe-chain">
+<h5>7.1.12.2.4. <strong>iPXE chain</strong><a class="headerlink" href="#ipxe-chain" title="Permalink to this headline">¶</a></h5>
+<p>PXE part of the <strong>BlueBanquise</strong> stack relies heavily on iPXE, and its chain mechanism. This chain has multiple purposes:</p>
+<ul class="simple">
+<li><p>Most important, it is verbose, and can be manually manipulated or followed (watching http server logs).</p></li>
+<li><p>It is flexible, and can adapt to nearly any configuration (disk boot, os deployment, diskless, …).</p></li>
+<li><p>It can operate on all hardware, from server to laptop. It can even be started from USB or CD image for non PXE able systems.</p></li>
+</ul>
+<p>Some steps may seems weird or unnecessary, but are here on purpose: verbosity and debug, as PXE part is always the trickiest.</p>
+<p>Some vocabulary: in the following document, <strong>chain* or **chaining</strong> refers to the iPXE mechanism that download and execute a new file, after the current one.</p>
+<p>Also, all files root is assumed <em>/var/www/html/preboot_execution_environnement</em> on the next-server (the server on which this pxe_stack role has been deployed).</p>
+<p>The whole process can be resumed in one detailed schema:</p>
+<img alt="_images/iPXE_chain.svg" src="_images/iPXE_chain.svg" /><p>To be macroscopic:</p>
+<ol class="arabic simple">
+<li><p>The remote host boot over PXE, in EFI/legacy-bios, using its own PXE/iPXE rom.</p></li>
+<li><p>The dhcp deployed by BlueBanquise will provide the host with the <strong>BlueBanquise</strong> iPXE rom. This iPXE rom contains an EMBED script that will display the logo, get an ip from the dhcp server, show some information, and chain to file <em>convergence.ipxe</em>.</p></li>
+<li><p><em>convergence.ipxe</em> will simply get the current architecture. This operation cannot be done into the EMBED script has it needs some logic, that could bug. Sys admin need to easily debug this whithout the need to rebuild iPXE roms. Then iPXE chain to <em>nodes/${hostname}.ipxe</em> with <em>hostname</em> the hostname provided by the dhcp server.</p></li>
+<li><p><em>nodes/${hostname}.ipxe</em> will define all host dedicated parameters, and also what host should do: boot on disk, deploy os, or boot in diskless. Then iPXE chain to <em>equipment_profiles/${equipment-profile}.ipxe</em>, with <em>equipment-profile</em> a variable defined in the current file.</p></li>
+<li><p><em>equipment_profiles/${equipment-profile}.ipxe</em> contains the host equipment profile group parameters, like operating system, console, kernel parameters, etc. Then iPXE chain to <em>menu.ipxe</em>.</p></li>
+<li><p><em>menu.ipxe</em> will display a basic menu on screen, with default set to what node is expected to do (this was gathered in <em>nodes/${hostname}.ipxe</em>). Timeout is 10s by default before host execute the expected action. Then, iPXE chain to:</p></li>
+</ol>
+<blockquote>
+<div><ul class="simple">
+<li><p><em>osdeploy/${eq-distribution}_${eq-distribution-major-version}.ipxe</em> if host needs to deploy/redeploy its operating system. These osdeploy files are dynamic, and adapt to parameters gathered in host dedicated file and host equipment_profile file.</p></li>
+<li><p><em>diskless/images/${diskless-image}/boot.ipxe</em> if host needs to boot in diskless.</p></li>
+<li><p><em>sanboot –no-describe –drive 0x80</em> if host is legacy/bios/pcbios based. This is a simple command that boot on disk.</p></li>
+<li><p><em>bin/${arch}/grub2_efi_autofind.img</em> if host is EFI based. This grub2 image will look for a disk with a know operating system, and boot on it.</p></li>
+</ul>
+</div></blockquote>
+<p>In case of an OS deployment, if this deployment succeed, in the post install script section, remote host will ask, using a curl command on its side and an CGI python script on server side (<em>/var/www/cgi-bin/bootswitch.cgi</em>), to boot next to disk. This CGI python script will simply edit <em>node/${hostname}.ipxe</em> file and change its default boot to <strong>bootdisk</strong>.</p>
+<p>All files are manually editable. Also, note that an unregistered host (so no hostnames provided by the dhcp) will try to load <em>nodes/.ipxe</em> file. By default, this file will simply provide an iPXE shell, but system administrator can tune this file to specific purposes.</p>
+<p>To follow the deployment process, simply tail -f logs of http server, and see the whole process occuring.</p>
+</div>
+</div>
+<div class="section" id="id33">
+<h4>7.1.12.3. To be done<a class="headerlink" href="#id33" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
 <li><p>Issue when deploying ubuntu 18.04. Very long hang after packages check. Install continue after like 10 minutes of hang. Not blocking but boring…</p></li>
 </ul>
 </div>
-<div class="section" id="id32">
-<h4>Changelog<a class="headerlink" href="#id32" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id34">
+<h4>7.1.12.4. Changelog<a class="headerlink" href="#id34" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
 <li><p>1.0.2: Add Ubuntu 18.04 compatibility. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
 <li><p>1.0.1: Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
@@ -280,17 +495,30 @@
 </div>
 </div>
 <div class="section" id="repositories-server">
-<h3>Repositories server<a class="headerlink" href="#repositories-server" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="id33">
-<h4>Description<a class="headerlink" href="#id33" title="Permalink to this headline">¶</a></h4>
+<h3>7.1.13. Repositories server<a class="headerlink" href="#repositories-server" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id35">
+<h4>7.1.13.1. Description<a class="headerlink" href="#id35" title="Permalink to this headline">¶</a></h4>
 <p>This role simply configure repositories server (only install and start web server).</p>
 </div>
-<div class="section" id="id34">
-<h4>Instructions<a class="headerlink" href="#id34" title="Permalink to this headline">¶</a></h4>
-<p>NA.</p>
+<div class="section" id="id36">
+<h4>7.1.13.2. Instructions<a class="headerlink" href="#id36" title="Permalink to this headline">¶</a></h4>
+<p>This role simply install an http server. Repositories files manupulations have to be done manually by system administrator.</p>
+<p>Note that repositories structure follows a specific pattern:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>           Distribution    Version   Architecture    Repository
+                 +             +       +               +
+                 <span class="p">|</span>             +---+   <span class="p">|</span>               <span class="p">|</span>
+                 +-----------+     <span class="p">|</span>   <span class="p">|</span>      +--------+
+                             <span class="p">|</span>     <span class="p">|</span>   <span class="p">|</span>      <span class="p">|</span>
+                             v     v   v      v
+/var/www/html/repositories/centos/7.6/x86_64/os
+</pre></div>
 </div>
-<div class="section" id="id35">
-<h4>Changelog<a class="headerlink" href="#id35" title="Permalink to this headline">¶</a></h4>
+<p>System administrator should create these directories manually, and put packages inside.</p>
+<p>Then, repositories that will be setup on clients are stored by default in <em>/etc/ansible/inventory/group_vars/all/general_settings/repositories.yml</em>.</p>
+<p>Keep in mind that it is possible to precedence this file in equipment_profiles groupes, and so put a repository file in for example <em>/etc/ansible/inventory/group_vars/equipment_supermicro_sandy_compute</em> that will be considered by these nodes over the default one. This can be useful to define diferent repositories for diferent equipments.</p>
+</div>
+<div class="section" id="id37">
+<h4>7.1.13.3. Changelog<a class="headerlink" href="#id37" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
 <li><p>1.0.2: Regrouped all distribs into a main file. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
 <li><p>1.0.1: Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
@@ -299,21 +527,21 @@
 </div>
 </div>
 <div class="section" id="repositories-client">
-<h3>Repositories client<a class="headerlink" href="#repositories-client" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="id36">
-<h4>Description<a class="headerlink" href="#id36" title="Permalink to this headline">¶</a></h4>
+<h3>7.1.14. Repositories client<a class="headerlink" href="#repositories-client" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id38">
+<h4>7.1.14.1. Description<a class="headerlink" href="#id38" title="Permalink to this headline">¶</a></h4>
 <p>This role simply configure repositories for client hosts.</p>
 </div>
-<div class="section" id="id37">
-<h4>Instructions<a class="headerlink" href="#id37" title="Permalink to this headline">¶</a></h4>
-<p>NA.</p>
+<div class="section" id="id39">
+<h4>7.1.14.2. Instructions<a class="headerlink" href="#id39" title="Permalink to this headline">¶</a></h4>
+<p>See repositries_server role instructions for more details.</p>
 </div>
-<div class="section" id="id38">
-<h4>To be done<a class="headerlink" href="#id38" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id40">
+<h4>7.1.14.3. To be done<a class="headerlink" href="#id40" title="Permalink to this headline">¶</a></h4>
 <p>Need to clear up the Ubuntu repositories process, still not clear how to handle own made repos and officials repos as Ubuntu add local repos everywhere in the sources.list file.</p>
 </div>
-<div class="section" id="id39">
-<h4>Changelog<a class="headerlink" href="#id39" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id41">
+<h4>7.1.14.4. Changelog<a class="headerlink" href="#id41" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
 <li><p>1.0.2: Added Ubuntu 18.04 compatibility. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
 <li><p>1.0.1: Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
@@ -322,17 +550,17 @@
 </div>
 </div>
 <div class="section" id="set-hostname">
-<h3>Set Hostname<a class="headerlink" href="#set-hostname" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="id40">
-<h4>Description<a class="headerlink" href="#id40" title="Permalink to this headline">¶</a></h4>
+<h3>7.1.15. Set Hostname<a class="headerlink" href="#set-hostname" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id42">
+<h4>7.1.15.1. Description<a class="headerlink" href="#id42" title="Permalink to this headline">¶</a></h4>
 <p>This role simply set a node hostname.</p>
 </div>
-<div class="section" id="id41">
-<h4>Instructions<a class="headerlink" href="#id41" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id43">
+<h4>7.1.15.2. Instructions<a class="headerlink" href="#id43" title="Permalink to this headline">¶</a></h4>
 <p>NA.</p>
 </div>
-<div class="section" id="id42">
-<h4>Changelog<a class="headerlink" href="#id42" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id44">
+<h4>7.1.15.3. Changelog<a class="headerlink" href="#id44" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
 <li><p>1.0.1: Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
 <li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
@@ -340,21 +568,49 @@
 </div>
 </div>
 <div class="section" id="ssh-master">
-<h3>SSH master<a class="headerlink" href="#ssh-master" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="id43">
-<h4>Description<a class="headerlink" href="#id43" title="Permalink to this headline">¶</a></h4>
+<h3>7.1.16. SSH master<a class="headerlink" href="#ssh-master" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id45">
+<h4>7.1.16.1. Description<a class="headerlink" href="#id45" title="Permalink to this headline">¶</a></h4>
 <p>This role configure the ssh access of know hosts to make this access through nodes main network.</p>
 </div>
-<div class="section" id="id44">
-<h4>Instructions<a class="headerlink" href="#id44" title="Permalink to this headline">¶</a></h4>
-<p>Configuration is done in /root/.ssh/config</p>
+<div class="section" id="id46">
+<h4>7.1.16.2. Instructions<a class="headerlink" href="#id46" title="Permalink to this headline">¶</a></h4>
+<p>This role will generate a Configuration file in <em>/root/.ssh/config</em>.</p>
+<p>This file will contains all hosts of the Ansible inventory (or all hosts of the current iceberg if using icebergs mode), with the following parameters:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Host freya
+    StrictHostKeyChecking no
+    UserKnownHostsFile=/dev/null
+    Hostname %h-ice1-1
+</pre></div>
 </div>
-<div class="section" id="id45">
-<h4>To be done<a class="headerlink" href="#id45" title="Permalink to this headline">¶</a></h4>
+<p>This ensure no issues when redeploying an hosts.</p>
+<p>Also, note that for this example host, <strong>freya</strong>, the target hostname for ssh is %h-ice1-1, which means <strong>freya-ice1-1</strong>. This can be seen when invoking ssh with verbosity:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[root@odin ]# ssh freya -vvv
+OpenSSH_7.8p1, OpenSSL 1.1.1 FIPS  11 Sep 2018
+debug1: Reading configuration data /root/.ssh/config
+debug1: /root/.ssh/config line 10: Applying options for freya
+debug1: Reading configuration data /etc/ssh/ssh_config
+debug3: /etc/ssh/ssh_config line 52: Including file /etc/ssh/ssh_config.d/05-redhat.conf depth 0
+debug1: Reading configuration data /etc/ssh/ssh_config.d/05-redhat.conf
+debug3: /etc/ssh/ssh_config.d/05-redhat.conf line 2: Including file /etc/crypto-policies/back-ends/openssh.config depth 1
+debug1: Reading configuration data /etc/crypto-policies/back-ends/openssh.config
+debug3: gss kex names ok: [gss-gex-sha1-,gss-group14-sha1-]
+debug3: kex names ok: [curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256,diffie-hellman-group14-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,diffie-hellman-group-exchange-sha1,diffie-hellman-group14-sha1]
+debug1: /etc/ssh/ssh_config.d/05-redhat.conf line 8: Applying options for *
+debug2: resolving &quot;freya-ice1-1&quot; port 22
+debug2: ssh_connect_direct
+debug1: Connecting to freya-ice1-1 [10.11.2.1] port 22.
+</pre></div>
+</div>
+<p>You can see here ssh is not trying to reach <strong>freya</strong> but is using <strong>freya-ice-1-1</strong>. This has been made to ensure whatever the direct resolution is in /etc/hosts file or DNS, ssh and so Ansible will always use the management network of the target host.</p>
+<p>Note that this file generation is kind of “sensible”, and will surely be the first one to break in case of uncoherent inventory. If this happens, check your inventory, fix it, and remove manually /root/.ssh/config and relaunch its generation.</p>
+</div>
+<div class="section" id="id47">
+<h4>7.1.16.3. To be done<a class="headerlink" href="#id47" title="Permalink to this headline">¶</a></h4>
 <p>Add ProxyJump for icebergs</p>
 </div>
-<div class="section" id="id46">
-<h4>Changelog<a class="headerlink" href="#id46" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id48">
+<h4>7.1.16.4. Changelog<a class="headerlink" href="#id48" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
 <li><p>1.0.1: Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
 <li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
@@ -362,17 +618,19 @@
 </div>
 </div>
 <div class="section" id="ssh-slave">
-<h3>SSH slave<a class="headerlink" href="#ssh-slave" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="id47">
-<h4>Description<a class="headerlink" href="#id47" title="Permalink to this headline">¶</a></h4>
+<h3>7.1.17. SSH slave<a class="headerlink" href="#ssh-slave" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id49">
+<h4>7.1.17.1. Description<a class="headerlink" href="#id49" title="Permalink to this headline">¶</a></h4>
 <p>This role configure the ssh client authorized public key.</p>
 </div>
-<div class="section" id="id48">
-<h4>Instructions<a class="headerlink" href="#id48" title="Permalink to this headline">¶</a></h4>
-<p>NA</p>
+<div class="section" id="id50">
+<h4>7.1.17.2. Instructions<a class="headerlink" href="#id50" title="Permalink to this headline">¶</a></h4>
+<p>This role will ensure remote hosts is having currently defined ssh authorized public keys in their <em>/root/.ssh/authorized_keys</em> file.</p>
+<p>These keys are set in file <em>/etc/ansible/inventory/group_vars/all/all_equipments/authentication.yml</em>.</p>
+<p>Keep in mind that this file can be precedenced with equipment_profiles groups or iceberg groups.</p>
 </div>
-<div class="section" id="id49">
-<h4>Changelog<a class="headerlink" href="#id49" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id51">
+<h4>7.1.17.3. Changelog<a class="headerlink" href="#id51" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
 <li><p>1.0.1: Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
 <li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
@@ -380,24 +638,39 @@
 </div>
 </div>
 <div class="section" id="time-server">
-<h3>Time server<a class="headerlink" href="#time-server" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="id50">
-<h4>Description<a class="headerlink" href="#id50" title="Permalink to this headline">¶</a></h4>
-<p>This role provides a time server based on Chrony.</p>
+<h3>7.1.18. Time server<a class="headerlink" href="#time-server" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id52">
+<h4>7.1.18.1. Description<a class="headerlink" href="#id52" title="Permalink to this headline">¶</a></h4>
+<p>This role provides a time server/client based on Chrony.</p>
 </div>
-<div class="section" id="id51">
-<h4>Instructions<a class="headerlink" href="#id51" title="Permalink to this headline">¶</a></h4>
-<p>To force time synchronisation, use:</p>
+<div class="section" id="id53">
+<h4>7.1.18.2. Instructions<a class="headerlink" href="#id53" title="Permalink to this headline">¶</a></h4>
+<p>This role will react diffrently if in multi icebergs mode or not.</p>
+<p>By default, in non multiple icebergs, server will be the time source reference. If using multiple icebergs hierarchy, then server can be a time reference if at top of the icebergs hierarchy, or simply a time relay with an higher stratum, if not a top server. This stratum calculation is done using <strong>iceberg_level</strong> variable defined in <strong>/etc/ansible/inventory/cluster/icebergs/icebergX</strong> files.</p>
+<p>It is possible to use file <em>/etc/ansible/inventory/group_vars/all/general_settings/external.yml</em> to connect client or server to external time sources (server or pool or servers):</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">external_time</span><span class="p">:</span>  <span class="l l-Scalar l-Scalar-Plain">&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</span>
+  <span class="l l-Scalar l-Scalar-Plain">time_server</span><span class="p p-Indicator">:</span>
+    <span class="nt">server</span><span class="p">:</span> <span class="c1"># List of possible time servers</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">0.fr.pool.ntp.org</span>
+    <span class="nt">pool</span><span class="p">:</span> <span class="c1"># List of possible time pools</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">pool.ntp.org</span>
+<span class=" -Error">  </span><span class="nt">time_client</span><span class="p">:</span>
+    <span class="nt">server</span><span class="p">:</span>
+    <span class="nt">pool</span><span class="p">:</span>
+</pre></div>
+</div>
+<p>If set to <strong>time_server</strong>, server/pool will be added in the server configuration. Of set to <strong>time_client</strong>, these will be added in client configuration. It is possible for example to not install a time server and simply bind to an external server/pool using this file.</p>
+<p>In case of a need, to force time synchronisation on client side, use:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>chronyc -a makestep
 </pre></div>
 </div>
 </div>
-<div class="section" id="id52">
-<h4>To be done<a class="headerlink" href="#id52" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id54">
+<h4>7.1.18.3. To be done<a class="headerlink" href="#id54" title="Permalink to this headline">¶</a></h4>
 <p>Icebergs with stratums levels.</p>
 </div>
-<div class="section" id="id53">
-<h4>Changelog<a class="headerlink" href="#id53" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id55">
+<h4>7.1.18.4. Changelog<a class="headerlink" href="#id55" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
 <li><p>1.0.1: Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
 <li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
@@ -406,16 +679,16 @@
 </div>
 </div>
 <div class="section" id="advanced-core">
-<h2>ADVANCED CORE<a class="headerlink" href="#advanced-core" title="Permalink to this headline">¶</a></h2>
+<h2>7.2. ADVANCED CORE<a class="headerlink" href="#advanced-core" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="advanced-dhcp-server">
-<h3>Advanced DHCP server<a class="headerlink" href="#advanced-dhcp-server" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="id54">
-<h4>Description<a class="headerlink" href="#id54" title="Permalink to this headline">¶</a></h4>
+<h3>7.2.1. Advanced DHCP server<a class="headerlink" href="#advanced-dhcp-server" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id56">
+<h4>7.2.1.1. Description<a class="headerlink" href="#id56" title="Permalink to this headline">¶</a></h4>
 <p>This role provides an advanced dhcp server combined with the iPXE roms of BlueBanquise.
 Features like shared_network, opt82, opt61 or snp/snponly roms are provided here for very specific configurations or needs.</p>
 </div>
-<div class="section" id="id55">
-<h4>Instructions<a class="headerlink" href="#id55" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id57">
+<h4>7.2.1.2. Instructions<a class="headerlink" href="#id57" title="Permalink to this headline">¶</a></h4>
 <p>Dhcp will only take into account networks from the current iceberg, and with naming related to administration network (by default iceX-Y).</p>
 <p>Also, ensure dhcp is set to true for your network.</p>
 <p>It is possible to combine networks into shared-networks when multiple subnets are on the same NIC.
@@ -441,8 +714,8 @@ To do so, add a variable in the network definition.</p>
 </div>
 <p>shared_network variable is optional and is simply ignored if not set.</p>
 </div>
-<div class="section" id="id56">
-<h4>Changelog<a class="headerlink" href="#id56" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id58">
+<h4>7.2.1.3. Changelog<a class="headerlink" href="#id58" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
 <li><p>1.0.2: Added Ubuntu 18.04 compatibility. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
 <li><p>1.0.1: Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
@@ -450,28 +723,48 @@ To do so, add a variable in the network definition.</p>
 </ul>
 </div>
 </div>
+<div class="section" id="advanced-nic">
+<h3>7.2.2. Advanced NIC<a class="headerlink" href="#advanced-nic" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id59">
+<h4>7.2.2.1. Description<a class="headerlink" href="#id59" title="Permalink to this headline">¶</a></h4>
+<p>This role configure network interfaces to provide desired ip, prefix, gateway, etc.</p>
+</div>
+<div class="section" id="id60">
+<h4>7.2.2.2. Instructions<a class="headerlink" href="#id60" title="Permalink to this headline">¶</a></h4>
+<p>NA</p>
+</div>
+<div class="section" id="id61">
+<h4>7.2.2.3. To be done<a class="headerlink" href="#id61" title="Permalink to this headline">¶</a></h4>
+</div>
+<div class="section" id="id62">
+<h4>7.2.2.4. Changelog<a class="headerlink" href="#id62" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
+</ul>
+</div>
+</div>
 </div>
 <div class="section" id="addons">
-<h2>ADDONS<a class="headerlink" href="#addons" title="Permalink to this headline">¶</a></h2>
+<h2>7.3. ADDONS<a class="headerlink" href="#addons" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="clustershell">
-<h3>ClusterShell<a class="headerlink" href="#clustershell" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="id57">
-<h4>Description<a class="headerlink" href="#id57" title="Permalink to this headline">¶</a></h4>
+<h3>7.3.1. ClusterShell<a class="headerlink" href="#clustershell" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id63">
+<h4>7.3.1.1. Description<a class="headerlink" href="#id63" title="Permalink to this headline">¶</a></h4>
 <p>This role provides clustershell and groups for clustershell (based on Ansible groups).</p>
 </div>
-<div class="section" id="id58">
-<h4>Instructions<a class="headerlink" href="#id58" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id64">
+<h4>7.3.1.2. Instructions<a class="headerlink" href="#id64" title="Permalink to this headline">¶</a></h4>
 <p>Check groups using:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>nodeset -LL
 </pre></div>
 </div>
 </div>
-<div class="section" id="id59">
-<h4>To be done<a class="headerlink" href="#id59" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id65">
+<h4>7.3.1.3. To be done<a class="headerlink" href="#id65" title="Permalink to this headline">¶</a></h4>
 <p>Tree execution mode is missing.</p>
 </div>
-<div class="section" id="id60">
-<h4>Changelog<a class="headerlink" href="#id60" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id66">
+<h4>7.3.1.4. Changelog<a class="headerlink" href="#id66" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
 <li><p>1.0.1: Fixed bad template. Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
 <li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
@@ -479,21 +772,21 @@ To do so, add a variable in the network definition.</p>
 </div>
 </div>
 <div class="section" id="openldap-client">
-<h3>OpenLDAP client<a class="headerlink" href="#openldap-client" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="id61">
-<h4>Description<a class="headerlink" href="#id61" title="Permalink to this headline">¶</a></h4>
+<h3>7.3.2. OpenLDAP client<a class="headerlink" href="#openldap-client" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id67">
+<h4>7.3.2.1. Description<a class="headerlink" href="#id67" title="Permalink to this headline">¶</a></h4>
 <p>This role provides a basic but UNSECURE ldap client based on SSSD.</p>
 </div>
-<div class="section" id="id62">
-<h4>Instructions<a class="headerlink" href="#id62" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id68">
+<h4>7.3.2.2. Instructions<a class="headerlink" href="#id68" title="Permalink to this headline">¶</a></h4>
 <p>NA</p>
 </div>
-<div class="section" id="id63">
-<h4>To be done<a class="headerlink" href="#id63" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id69">
+<h4>7.3.2.3. To be done<a class="headerlink" href="#id69" title="Permalink to this headline">¶</a></h4>
 <p>Enable encryption to secure this role.</p>
 </div>
-<div class="section" id="id64">
-<h4>Changelog<a class="headerlink" href="#id64" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id70">
+<h4>7.3.2.4. Changelog<a class="headerlink" href="#id70" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
 <li><p>1.0.1: Fixed bad template. Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
 <li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
@@ -501,22 +794,22 @@ To do so, add a variable in the network definition.</p>
 </div>
 </div>
 <div class="section" id="openldap-server">
-<h3>OpenLDAP server<a class="headerlink" href="#openldap-server" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="id65">
-<h4>Description<a class="headerlink" href="#id65" title="Permalink to this headline">¶</a></h4>
+<h3>7.3.3. OpenLDAP server<a class="headerlink" href="#openldap-server" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id71">
+<h4>7.3.3.1. Description<a class="headerlink" href="#id71" title="Permalink to this headline">¶</a></h4>
 <p>This role provides a basic but UNSECURE ldap server. It also provides phpldapadmin configuration to manage LDAP.</p>
 </div>
-<div class="section" id="id66">
-<h4>Instructions<a class="headerlink" href="#id66" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id72">
+<h4>7.3.3.2. Instructions<a class="headerlink" href="#id72" title="Permalink to this headline">¶</a></h4>
 <p>Login into <a class="reference external" href="http://localhost/phpldapadmin">http://localhost/phpldapadmin</a> to manage LDAP.</p>
 <p>Keep in mind this role is for the time being unsecure.</p>
 </div>
-<div class="section" id="id67">
-<h4>To be done<a class="headerlink" href="#id67" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id73">
+<h4>7.3.3.3. To be done<a class="headerlink" href="#id73" title="Permalink to this headline">¶</a></h4>
 <p>Enable encryption to secure this role.</p>
 </div>
-<div class="section" id="id68">
-<h4>Changelog<a class="headerlink" href="#id68" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id74">
+<h4>7.3.3.4. Changelog<a class="headerlink" href="#id74" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
 <li><p>1.0.1: Fixed bad template. Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
 <li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
@@ -524,23 +817,23 @@ To do so, add a variable in the network definition.</p>
 </div>
 </div>
 <div class="section" id="prometheus-server">
-<h3>Prometheus server<a class="headerlink" href="#prometheus-server" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="id69">
-<h4>Description<a class="headerlink" href="#id69" title="Permalink to this headline">¶</a></h4>
+<h3>7.3.4. Prometheus server<a class="headerlink" href="#prometheus-server" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id75">
+<h4>7.3.4.1. Description<a class="headerlink" href="#id75" title="Permalink to this headline">¶</a></h4>
 <p>This role deploy prometheus server with alertmanager.</p>
 </div>
-<div class="section" id="id70">
-<h4>Instructions<a class="headerlink" href="#id70" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id76">
+<h4>7.3.4.2. Instructions<a class="headerlink" href="#id76" title="Permalink to this headline">¶</a></h4>
 <p>Prometheus is available at <a class="reference external" href="http://localhost:9090">http://localhost:9090</a></p>
 <p>Alertmanager is available at <a class="reference external" href="http://localhost:9093">http://localhost:9093</a></p>
 <p>Node_exporter is available at <a class="reference external" href="http://localhost:9100">http://localhost:9100</a></p>
 </div>
-<div class="section" id="id71">
-<h4>To be done<a class="headerlink" href="#id71" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id77">
+<h4>7.3.4.3. To be done<a class="headerlink" href="#id77" title="Permalink to this headline">¶</a></h4>
 <p>Allow groups alerts selection.</p>
 </div>
-<div class="section" id="id72">
-<h4>Changelog<a class="headerlink" href="#id72" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id78">
+<h4>7.3.4.4. Changelog<a class="headerlink" href="#id78" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
 <li><p>1.0.1: Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
 <li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
@@ -548,21 +841,21 @@ To do so, add a variable in the network definition.</p>
 </div>
 </div>
 <div class="section" id="prometheus-client">
-<h3>Prometheus client<a class="headerlink" href="#prometheus-client" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="id73">
-<h4>Description<a class="headerlink" href="#id73" title="Permalink to this headline">¶</a></h4>
+<h3>7.3.5. Prometheus client<a class="headerlink" href="#prometheus-client" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id79">
+<h4>7.3.5.1. Description<a class="headerlink" href="#id79" title="Permalink to this headline">¶</a></h4>
 <p>This role deploy node_exporter for Prometheus queries.</p>
 </div>
-<div class="section" id="id74">
-<h4>Instructions<a class="headerlink" href="#id74" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id80">
+<h4>7.3.5.2. Instructions<a class="headerlink" href="#id80" title="Permalink to this headline">¶</a></h4>
 <p>Node_exporter is available at <a class="reference external" href="http://localhost:9100">http://localhost:9100</a></p>
 </div>
-<div class="section" id="id75">
-<h4>To be done<a class="headerlink" href="#id75" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id81">
+<h4>7.3.5.3. To be done<a class="headerlink" href="#id81" title="Permalink to this headline">¶</a></h4>
 <p>Allow groups alerts selection.</p>
 </div>
-<div class="section" id="id76">
-<h4>Changelog<a class="headerlink" href="#id76" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id82">
+<h4>7.3.5.4. Changelog<a class="headerlink" href="#id82" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
 <li><p>1.0.0: Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
 <li><p>1.0.0: Role creation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
@@ -570,25 +863,25 @@ To do so, add a variable in the network definition.</p>
 </div>
 </div>
 <div class="section" id="report">
-<h3>Report<a class="headerlink" href="#report" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="id77">
-<h4>Description<a class="headerlink" href="#id77" title="Permalink to this headline">¶</a></h4>
+<h3>7.3.6. Report<a class="headerlink" href="#report" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id83">
+<h4>7.3.6.1. Description<a class="headerlink" href="#id83" title="Permalink to this headline">¶</a></h4>
 <p>This role try to provide sys admin few useful tools.</p>
 <ul class="simple">
 <li><p>An automatic known issue paterns checker for the stack</p></li>
 <li><p>Many visual reports (inventory, playbooks, network, facts)</p></li>
 </ul>
 </div>
-<div class="section" id="id78">
-<h4>Instructions<a class="headerlink" href="#id78" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id84">
+<h4>7.3.6.2. Instructions<a class="headerlink" href="#id84" title="Permalink to this headline">¶</a></h4>
 <p>Report is available at <a class="reference external" href="http://localhost/report/index.html">http://localhost/report/index.html</a></p>
 </div>
-<div class="section" id="id79">
-<h4>To be done<a class="headerlink" href="#id79" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id85">
+<h4>7.3.6.3. To be done<a class="headerlink" href="#id85" title="Permalink to this headline">¶</a></h4>
 <p>Many things…</p>
 </div>
-<div class="section" id="id80">
-<h4>Changelog<a class="headerlink" href="#id80" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id86">
+<h4>7.3.6.4. Changelog<a class="headerlink" href="#id86" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
 <li><p>1.0.1: Documentation. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
 <li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
@@ -596,13 +889,13 @@ To do so, add a variable in the network definition.</p>
 </div>
 </div>
 <div class="section" id="slurm">
-<h3>Slurm<a class="headerlink" href="#slurm" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="id81">
-<h4>Description<a class="headerlink" href="#id81" title="Permalink to this headline">¶</a></h4>
+<h3>7.3.7. Slurm<a class="headerlink" href="#slurm" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id87">
+<h4>7.3.7.1. Description<a class="headerlink" href="#id87" title="Permalink to this headline">¶</a></h4>
 <p>This role provides slurm configuration for server, client and login nodes.</p>
 </div>
-<div class="section" id="id82">
-<h4>Instructions<a class="headerlink" href="#id82" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id88">
+<h4>7.3.7.2. Instructions<a class="headerlink" href="#id88" title="Permalink to this headline">¶</a></h4>
 <p>To use this role for all 3 types of nodes, simply add a vars in the playbook when loading the role. Extra vers is <strong>slurm_profile</strong>.</p>
 <p>For a controler (server), use:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span> <span class="nt">role</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">HPC_slurm</span>
@@ -626,15 +919,15 @@ To do so, add a variable in the network definition.</p>
 </pre></div>
 </div>
 </div>
-<div class="section" id="id83">
-<h4>To be done<a class="headerlink" href="#id83" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id89">
+<h4>7.3.7.3. To be done<a class="headerlink" href="#id89" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
 <li><p>slurmdbd + mariadb</p></li>
 <li><p>static file</p></li>
 </ul>
 </div>
-<div class="section" id="id84">
-<h4>Changelog<a class="headerlink" href="#id84" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id90">
+<h4>7.3.7.4. Changelog<a class="headerlink" href="#id90" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
 <li><p>1.0.1: Documentation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
 <li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
@@ -642,13 +935,13 @@ To do so, add a variable in the network definition.</p>
 </div>
 </div>
 <div class="section" id="users-basic">
-<h3>Users basic<a class="headerlink" href="#users-basic" title="Permalink to this headline">¶</a></h3>
-<div class="section" id="id85">
-<h4>Description<a class="headerlink" href="#id85" title="Permalink to this headline">¶</a></h4>
+<h3>7.3.8. Users basic<a class="headerlink" href="#users-basic" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id91">
+<h4>7.3.8.1. Description<a class="headerlink" href="#id91" title="Permalink to this headline">¶</a></h4>
 <p>This role provides a very basic users management, for simple clusters.</p>
 </div>
-<div class="section" id="id86">
-<h4>Instructions<a class="headerlink" href="#id86" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id92">
+<h4>7.3.8.2. Instructions<a class="headerlink" href="#id92" title="Permalink to this headline">¶</a></h4>
 <p>Copy addon/users_basic.yml into /etc/ansible/inventory/group_vars/all/addons folder.</p>
 <p>Then edit this file according to your needs, and play this role on all hosts with users.</p>
 <p>To generate an sha512 password, use the following command (python &gt;3.3):</p>
@@ -660,8 +953,8 @@ To do so, add a variable in the network definition.</p>
 </pre></div>
 </div>
 </div>
-<div class="section" id="id87">
-<h4>Changelog<a class="headerlink" href="#id87" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id93">
+<h4>7.3.8.3. Changelog<a class="headerlink" href="#id93" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
 <li><p>1.0.1: Documentation and ressources. johnnykeats &lt;<a class="reference external" href="mailto:johnny&#46;keats&#37;&#52;&#48;outlook&#46;com">johnny<span>&#46;</span>keats<span>&#64;</span>outlook<span>&#46;</span>com</a>&gt;</p></li>
 <li><p>1.0.0: Role creation. oxedions &lt;<a class="reference external" href="mailto:oxedions&#37;&#52;&#48;gmail&#46;com">oxedions<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p></li>
@@ -695,59 +988,214 @@ To do so, add a variable in the network definition.</p>
 <h3>Navigation</h3>
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="vocabulary.html">Vocabulary</a></li>
-<li class="toctree-l1"><a class="reference internal" href="install_first_management.html">Install first management</a></li>
-<li class="toctree-l1"><a class="reference internal" href="learn_ansible.html">Learn Ansible</a></li>
-<li class="toctree-l1"><a class="reference internal" href="configure_bluebanquise.html">Configure BlueBanquise</a></li>
-<li class="toctree-l1"><a class="reference internal" href="deploy_bluebanquise.html">Deploy BlueBanquise</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Roles</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#core">CORE</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#conman">Conman</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dhcp-server">DHCP server</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dns-server">DNS server</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dns-client">DNS client</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#hosts-file">Hosts file</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#log-server">Log server</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#log-client">Log client</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#nfs-server">NFS server</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#nfs-client">NFS client</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#nic-network-interface-controler">NIC - Network Interface Controler</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pxe-stack">PXE Stack</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#repositories-server">Repositories server</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#repositories-client">Repositories client</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#set-hostname">Set Hostname</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ssh-master">SSH master</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ssh-slave">SSH slave</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#time-server">Time server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vocabulary.html">2. Vocabulary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install_first_management.html">3. Install first management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="learn_ansible.html">4. Learn Ansible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configure_bluebanquise.html">5. Configure BlueBanquise</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deploy_bluebanquise.html">6. Deploy BlueBanquise</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">7. Roles</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#core">7.1. CORE</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#conman">7.1.1. Conman</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#description">7.1.1.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#instructions">7.1.1.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#changelog">7.1.1.3. Changelog</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#advanced-core">ADVANCED CORE</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#advanced-dhcp-server">Advanced DHCP server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#display-tuning">7.1.2. Display_tuning</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">7.1.2.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">7.1.2.2. Changelog</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#addons">ADDONS</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#clustershell">ClusterShell</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#openldap-client">OpenLDAP client</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#openldap-server">OpenLDAP server</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#prometheus-server">Prometheus server</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#prometheus-client">Prometheus client</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#report">Report</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#slurm">Slurm</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#users-basic">Users basic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dhcp-server">7.1.3. DHCP server</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id3">7.1.3.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">7.1.3.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">7.1.3.3. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#dns-server">7.1.4. DNS server</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id6">7.1.4.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id7">7.1.4.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id8">7.1.4.3. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#dns-client">7.1.5. DNS client</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id9">7.1.5.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id10">7.1.5.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id11">7.1.5.3. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#hosts-file">7.1.6. Hosts file</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id12">7.1.6.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id13">7.1.6.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id14">7.1.6.3. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#log-server">7.1.7. Log server</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id15">7.1.7.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id16">7.1.7.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id17">7.1.7.3. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#log-client">7.1.8. Log client</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id18">7.1.8.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id19">7.1.8.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#to-be-done">7.1.8.3. To be done</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id20">7.1.8.4. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#nfs-server">7.1.9. NFS server</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id21">7.1.9.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id22">7.1.9.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id23">7.1.9.3. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#nfs-client">7.1.10. NFS client</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id24">7.1.10.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id25">7.1.10.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id26">7.1.10.3. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#nic-network-interface-controler">7.1.11. NIC - Network Interface Controler</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id27">7.1.11.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id28">7.1.11.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id29">7.1.11.3. To be done</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id30">7.1.11.4. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pxe-stack">7.1.12. PXE Stack</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id31">7.1.12.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id32">7.1.12.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id33">7.1.12.3. To be done</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id34">7.1.12.4. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#repositories-server">7.1.13. Repositories server</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id35">7.1.13.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id36">7.1.13.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id37">7.1.13.3. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#repositories-client">7.1.14. Repositories client</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id38">7.1.14.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id39">7.1.14.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id40">7.1.14.3. To be done</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id41">7.1.14.4. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#set-hostname">7.1.15. Set Hostname</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id42">7.1.15.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id43">7.1.15.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id44">7.1.15.3. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#ssh-master">7.1.16. SSH master</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id45">7.1.16.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id46">7.1.16.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id47">7.1.16.3. To be done</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id48">7.1.16.4. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#ssh-slave">7.1.17. SSH slave</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id49">7.1.17.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id50">7.1.17.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id51">7.1.17.3. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#time-server">7.1.18. Time server</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id52">7.1.18.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id53">7.1.18.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id54">7.1.18.3. To be done</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id55">7.1.18.4. Changelog</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#advanced-core">7.2. ADVANCED CORE</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#advanced-dhcp-server">7.2.1. Advanced DHCP server</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id56">7.2.1.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id57">7.2.1.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id58">7.2.1.3. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#advanced-nic">7.2.2. Advanced NIC</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id59">7.2.2.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id60">7.2.2.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id61">7.2.2.3. To be done</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id62">7.2.2.4. Changelog</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#addons">7.3. ADDONS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#clustershell">7.3.1. ClusterShell</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id63">7.3.1.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id64">7.3.1.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id65">7.3.1.3. To be done</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id66">7.3.1.4. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#openldap-client">7.3.2. OpenLDAP client</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id67">7.3.2.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id68">7.3.2.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id69">7.3.2.3. To be done</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id70">7.3.2.4. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#openldap-server">7.3.3. OpenLDAP server</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id71">7.3.3.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id72">7.3.3.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id73">7.3.3.3. To be done</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id74">7.3.3.4. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#prometheus-server">7.3.4. Prometheus server</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id75">7.3.4.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id76">7.3.4.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id77">7.3.4.3. To be done</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id78">7.3.4.4. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#prometheus-client">7.3.5. Prometheus client</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id79">7.3.5.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id80">7.3.5.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id81">7.3.5.3. To be done</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id82">7.3.5.4. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#report">7.3.6. Report</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id83">7.3.6.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id84">7.3.6.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id85">7.3.6.3. To be done</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id86">7.3.6.4. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#slurm">7.3.7. Slurm</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id87">7.3.7.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id88">7.3.7.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id89">7.3.7.3. To be done</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id90">7.3.7.4. Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#users-basic">7.3.8. Users basic</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id91">7.3.8.1. Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id92">7.3.8.2. Instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id93">7.3.8.3. Changelog</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">8. References</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="deploy_bluebanquise.html" title="previous chapter">Deploy BlueBanquise</a></li>
-      <li>Next: <a href="references.html" title="next chapter">References</a></li>
+      <li>Previous: <a href="deploy_bluebanquise.html" title="previous chapter">6. Deploy BlueBanquise</a></li>
+      <li>Next: <a href="references.html" title="next chapter">8. References</a></li>
   </ul></li>
 </ul>
 </div>

@@ -9,7 +9,7 @@ This role simply configure repositories for client hosts.
 Instructions
 ^^^^^^^^^^^^
 
-NA.
+See repositries_server role instructions for more details.
 
 To be done
 ^^^^^^^^^^
