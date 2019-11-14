@@ -38,4 +38,3 @@
   when:
     - groups[item.1] is defined and not none
     - inventory_hostname in groups[item.1]
-
