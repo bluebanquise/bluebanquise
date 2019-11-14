@@ -83,7 +83,7 @@
   with_items: "{{ j2_equipment_groups_list }}"
   when:
     - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
-    - hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) in ['redhat','centos']
+    - (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) in ['redhat','centos']
   tags:
     - template
 
@@ -95,7 +95,7 @@
   with_items: "{{j2_equipment_groups_list}}"
   when:
     - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
-    - hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) in ['redhat','centos']
+    - (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) in ['redhat','centos']
   tags:
     - template
 

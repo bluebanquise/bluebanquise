@@ -1,22 +1,23 @@
+#jinja2: lstrip_blocks: "True"
 {% import "macros/network.j2" as macro_network with context %}
 #### Blue Banquise file ####
 ## {{ansible_managed}}
 
 {% if icebergs_system == true %}
 # Iceberg system is on
-{% set range = groups[j2_current_iceberg] %}
-{% for host in groups[managements_group_name] %}
-{% if hostvars[host]['iceberg_master'] == j2_current_iceberg %}
-{{ range.append(host) }}
-{% endif %}
-{% endfor %}
+  {% set range = groups[j2_current_iceberg] %}
+  {% for host in groups[managements_group_name] %}
+    {% if hostvars[host]['iceberg_master'] == j2_current_iceberg %}
+      {% set _ = range.append(host) %}
+    {% endif %}
+  {% endfor %}
 {% else %}
-{% set range = groups['all'] %}
+  {% set range = groups['all'] %}
 {% endif %}
 
 {% for host in range %}
 {{host}}:
-  equipment_profile: {{ hostvars[host]['group_names'] | select('match','^'+equipment_naming+'_.*') | list | unique | sort | first | join | replace('equipment_','') | trim }}
+  equipment_profile: {{ hostvars[host]['group_names'] | select('match','^'+equipment_naming+'_.*') | list | unique | sort | first | join | replace(equipment_naming + '_','') | trim }}
   network:
 {% set host_node_main_network = (macro_network.node_main_network(hostvars[host]['network_interfaces'],j2_current_iceberg_network)| trim) %}
 {% set host_node_main_network_interface = (macro_network.node_main_network_interface(hostvars[host]['network_interfaces'],host_node_main_network) | trim) %}
@@ -27,4 +28,3 @@
     node_main_network_interface_ip: {{ hostvars[host]['network_interfaces'][host_node_main_network_interface]['ip4'] }}
 
 {% endfor %}
-
