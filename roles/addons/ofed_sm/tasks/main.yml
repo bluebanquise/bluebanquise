@@ -1,0 +1,15 @@
+---
+
+- name: Package
+  package:
+    name: "{{item}"
+    state: present
+  with_items:
+    - opensm
+    - opensm-libs
+
+- name: Start services
+  service:
+    name: opensm
+    state: started
+    enabled: yes
