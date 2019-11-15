@@ -20,7 +20,7 @@
 # -- Project information -----------------------------------------------------
 
 project = u'BlueBanquise_Documentation'
-copyright = u'2019, Oxedions, Johnny Keats'
+copyright = u'2019, Benoît Leveugle, Oxedions, Johnny Keats'
 author = u'Oxedions, Johnny Keats'
 
 # The short X.Y version

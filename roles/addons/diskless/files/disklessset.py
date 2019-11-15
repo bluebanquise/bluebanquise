@@ -8,7 +8,7 @@
 # ╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚══▀▀═╝  ╚═════╝ ╚═╝╚══════╝╚══════╝
 #
 # disklessset tool, to generate and manage diskless images in bluebanquise
-# 2019 - oxedions <oxedions@gmail.com>
+# 2019 - Benoît Leveugle <benoit.leveugle@sphenisc.com>
 # https://github.com/oxedions/bluebanquise - MIT license
 
 # Import dependances
