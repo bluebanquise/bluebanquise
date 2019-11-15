@@ -22,7 +22,8 @@ echo . . $R@i.~~.!. . .:. .~$$$$$B$$en:``. . . . . . . . ..
 echo . . ?MXT@Wx.~. . :. . .~"##*$$$$M~. . . . . . . . . ..
 echo
 echo +----------------------------------------------------+
-echo | . . . . . . . BlueBanquise iPXE boot . . . . . . . |
+echo | . . . . . . . . . iPXE embed boot. . . . . . . . . |
+echo | . . . . . BlueBanquise - Benoit Leveugle . . . . . |
 echo +----------------------------------------------------+
 
 sleep 2
