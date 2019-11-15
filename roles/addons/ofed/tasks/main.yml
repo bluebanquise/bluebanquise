@@ -1,0 +1,18 @@
+---
+
+- name: Package
+  package:
+    name: "{{item}"
+    state: present
+  with_items:
+    - rdma-core
+    - libibverbs
+    - libibverbs-devel
+    - libibumad
+    - infiniband-diags
+
+- name: Start services
+  service:
+    name: rdma
+    state: started
+    enabled: yes
