@@ -26,7 +26,7 @@ echo | . . . . . . . . . iPXE embed boot. . . . . . . . . |
 echo | . . . . . BlueBanquise - Benoit Leveugle . . . . . |
 echo +----------------------------------------------------+
 
-sleep 2
+sleep 4
 
 ifconf --configurator dhcp || shell
 
