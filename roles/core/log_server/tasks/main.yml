@@ -1,20 +1,11 @@
 ---
 
-- name: Package
+- name: Install packages
   package:
-    name: "{{item}}"
+    name: "{{ packages_to_install[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
     state: present
-  loop: "{{packages_to_install[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
-
-
-#- name: Package
-#  package:
-#    name: "{{item}}"
-#    state: present
-#  with_items:
-#    - rsyslog
-#    - logrotate
-#    - xz
+  tags:
+    - package
 
 - name: Template >> /etc/rsyslog.conf
   template:
@@ -23,21 +14,23 @@
     owner: root
     group: root
     mode: 0644
+  notify: Restart rsyslog services
   tags:
-    - templates
+    - template
 
 - name: Allow syslog port into SELinux
   seport:
     ports: 514
-    proto: "{{item}}"
+    proto: "{{ item }}"
     setype: syslogd_port_t
     state: present
   when:
     - ansible_os_family == "RedHat"
     - ansible_selinux.status == "enabled"
-  with_items:
+  loop:
     - tcp
     - udp
+  notify: Restart rsyslog services
 
 - name: Template >> /etc/logrotate.d/rsyslog
   template:
@@ -46,29 +39,38 @@
     owner: root
     group: root
     mode: 0644
+  notify: Restart rsyslog services
   tags:
-    - templates
+    - template
 
 - name: Configure logrotate to use xz
   lineinfile:
     path: /etc/logrotate.conf
-    regexp: "{{item}}"
-    line: "{{item}}"
-  with_items:
+    regexp: "{{ item }}"
+    line: "{{ item }}"
+  loop:
     - compresscmd /usr/bin/xz
     - uncompresscmd /usr/bin/unxz
     - compressext .xz
+  notify: Restart rsyslog services
+  tags:
+    - template
+
+- meta: flush_handlers
+
+- name: Enable/disable services
+  service:
+    name: "{{ item }}"
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+  loop: "{{ services_to_start[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
+  tags:
+    - service
 
 - name: Start services
   service:
-    name: "{{item}}"
+    name: "{{ item }}"
     state: started
-    enabled: yes
-  loop: "{{services_to_start[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
-
-
-#- name: Start services
-#  service:
-#    name: rsyslog
-#    state: started
-#    enabled: yes
+  loop: "{{ services_to_start[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
+  when: (start_services | bool)
+  tags:
+    - service

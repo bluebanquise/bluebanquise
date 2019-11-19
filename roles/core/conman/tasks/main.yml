@@ -1,14 +1,12 @@
 ---
-
 - name: Install conman and ipmitool
   package:
-    name: "{{item}}"
+    name:
+      - conman
+      - ipmitool
     state: present
-  loop:
-    - conman
-    - ipmitool
   tags:
-    - install
+    - package
 
 - name: Template >> /etc/conman.conf
   template:
@@ -19,12 +17,21 @@
     mode: 0644
   notify: Restart conman
   tags:
-    - templates
+    - template
+
+- meta: flush_handlers
+
+- name: Enable/disable services
+  service:
+    name: conman
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+  tags:
+    - service
 
 - name: Start services
   service:
     name: conman
     state: started
-    enabled: yes
+  when: (start_services | bool)
   tags:
     - service

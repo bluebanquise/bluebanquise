@@ -1,10 +1,10 @@
 ---
-
-- name: Package
+- name: Install packages
   package:
-    name: "{{item}}"
+    name: "{{ packages_to_install[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
     state: present
-  loop: "{{packages_to_install[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
+  tags:
+    - package
 
 - name: Template >> /etc/dhcp/dhcpd.conf
   template:
@@ -13,9 +13,9 @@
     owner: root
     group: root
     mode: 0644
-#  notify: Restart dhcp_server services
+  notify: Restart dhcp services
   tags:
-    - templates
+    - template
 
 - name: Template >> /etc/dhcp/dhcpd.networks.conf
   template:
@@ -24,29 +24,40 @@
     owner: root
     group: root
     mode: 0644
-#  notify: Restart dhcp_server services
+  notify: Restart dhcp services
   tags:
-    - templates
+    - template
 
-- name: Template >> /etc/dhcp/dhcpd.{{item}}.conf
+- name: "Template >> /etc/dhcp/dhcpd.{{ item }}.conf"
   template:
     src: dhcpd.subnet.conf.j2
-    dest: /etc/dhcp/dhcpd.{{item}}.conf
+    dest: "/etc/dhcp/dhcpd.{{ item }}.conf"
     owner: root
     group: root
     mode: 0644
-  with_items: "{{networks}}"
+  with_items: "{{ networks }}"
   when:
     - j2_current_iceberg_network in item
     - networks[item].is_in_dhcp == true
-#  notify: Restart dhcp_server services
+  notify: Restart dhcp services
   tags:
-    - templates
+    - template
+
+- meta: flush_handlers
+
+- name: Enable/disable services
+  service:
+    name: "{{ item }}"
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+  loop: "{{ services_to_start[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
+  tags:
+    - service
 
 - name: Start services
   service:
-    name: "{{item}}"
+    name: "{{ item }}"
     state: started
-    enabled: yes
-  loop: "{{services_to_start[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
-
+  loop: "{{ services_to_start[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
+  when: (start_services | bool)
+  tags:
+    - service
