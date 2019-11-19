@@ -1,5 +1,6 @@
 ---
-- name: Restart dhcp services
+
+- name: Restart time services
   service:
     name: "{{ item }}"
     state: restarted
