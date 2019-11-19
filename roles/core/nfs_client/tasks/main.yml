@@ -1,17 +1,18 @@
 ---
 
-- name: Package
+- name: Install packages
   package:
-    name: "{{item}}"
+    name: "{{ packages_to_install[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
     state: present
-  loop: "{{packages_to_install[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
+  tags:
+    - package
 
 - name: Create NFS directories
   file:
-    path: "{{item.0.mount}}"
+    path: "{{ item.0.mount }}"
     state: directory
   with_subelements:
-    - "{{nfs}}"
+    - "{{ nfs }}"
     - clients_groups
   when:
     - groups[item.1] is defined and not none
@@ -22,19 +23,20 @@
     name: rpcbind
     state: started
     enabled: yes
-  when: (ansible_distribution|lower|replace(' ','_')) == 'centos' or (ansible_distribution|lower|replace(' ','_')) == 'redhat'
+  when: (ansible_distribution|lower|replace(' ','_')) in ['centos','redhat']
+  tags:
+    - service
 
-- name: Mount experted NFS into directories
+- name: Mount exported NFS into directories
   mount:
-    path: "{{item.0.mount}}"
-    src: "{{item.0.server}}{% if item.0.take_over_network is defined and not none %}-{{item.0.take_over_network}}{% endif %}:{{item.0.export}}"
+    path: "{{ item.0.mount }}"
+    src: "{{ item.0.server }}{% if item.0.take_over_network is defined and not none %}-{{item.0.take_over_network}}{% endif %}:{{item.0.export}}"
     fstype: nfs
-    opts: "{{item.0.mount_arguments}}"
+    opts: "{{ item.0.mount_arguments }}"
     state: mounted
   with_subelements:
-    - "{{nfs}}"
+    - "{{ nfs }}"
     - clients_groups
   when:
     - groups[item.1] is defined and not none
     - inventory_hostname in groups[item.1]
-

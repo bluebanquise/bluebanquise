@@ -1,0 +1,8 @@
+---
+- name: Restart conman
+  service:
+    name: conman
+    state: restarted
+  when: (start_services | bool)
+  tags:
+    - service
