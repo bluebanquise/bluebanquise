@@ -24,15 +24,6 @@
     - ansible_distribution_major_version == "18"
     - ansible_os_family == "Ubuntu"
 
-- debug:
-    msg: "coucou {{item| type_debug}} coucou {% if network_interfaces[item].mtu is defined and not none %}{{network_interfaces[item].mtu}}{% endif %}coucou"
-  with_items: "{{network_interfaces}}"
-  tags:
-    - identify
-    - nmcli
-
-
-
 # Note from JK
 # We could add so much more features here, like VLAN, LACP, MTU, etc. Easy to add.
 - name: Set NIC configuration
@@ -42,10 +33,7 @@
 #    ifname: "{{network_connections[item].ifname}}"
     ip4: "{{network_interfaces[item].ip4}}/{{networks[network_interfaces[item].network].prefix}}"
     state: present
-#    mtu: "{{ mtu | default('1500') | string }}"
     mtu: 1500
-#    mtu: "{{mtu}}"
-#    mtu: "{% if network_interfaces[item].mtu is defined and not none %}{{network_interfaces[item].mtu}}{% else %}1500{% endif %}"
     autoconnect: yes
     gw4: "{% if networks[network_interfaces[item].network].gateway is defined and not none %}{{networks[network_interfaces[item].network].gateway}}{% endif %}"
   with_items: "{{network_interfaces}}"
@@ -72,5 +60,3 @@
     state: restarted
     enabled: yes
   loop: "{{services_to_start[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
-
-

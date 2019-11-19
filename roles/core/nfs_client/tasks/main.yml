@@ -24,6 +24,8 @@
     state: started
     enabled: yes
   when: (ansible_distribution|lower|replace(' ','_')) in ['centos','redhat']
+  tags:
+    - service
 
 - name: Mount exported NFS into directories
   mount:
