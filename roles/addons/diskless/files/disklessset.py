@@ -156,27 +156,21 @@ elif main_action == '3':
             os.system('rm -Rf /diskless/images/'+selected_image_name)
             os.system('mkdir /diskless/images/'+selected_image_name)
             os.system('mkdir /diskless/images/'+selected_image_name+'/staging')
-            os.system('mkdir /diskless/images/'+selected_image_name+'/golden')
-            os.system('mkdir /diskless/images/'+selected_image_name+'/nodes')
+#            os.system('mkdir /diskless/images/'+selected_image_name+'/golden')
+#            os.system('mkdir /diskless/images/'+selected_image_name+'/nodes')
             os.system('rm -Rf /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
             os.system('mkdir /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
             print('Done.')
             print('Generating new ipxe boot file...')
             boot_file_content = '''#!ipxe
 
-# This file is shared between main image (staging -> golden) and its clones
 echo |
 echo | Entering diskless/images/{image_name}/boot.ipxe
 echo |
 
-set image-state staging # can be staging or golden
-
 set image-kernel {image_kernel}
 set image-initramfs {image_initramfs}
 
-iseq ${{image-state}} staging && goto staging || goto golden
-
-:staging
 echo | Now starting staging nfs image boot.
 echo |
 echo | Parameters used:
@@ -187,33 +181,7 @@ echo | > Additional kernel parameters: ${{eq-kernel-parameters}} ${{dedicated-ke
 echo |
 echo | Loading linux ...
 
-kernel http://${{next-server}}/preboot_execution_environment/diskless/kernels/${{image-kernel}} initrd=${{image-initramfs}} text=1 root=nfs:${{next-server}}:/diskless/images/{image_name}/staging/,vers=4.2,rw rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}}
-
-echo | Loading initial ramdisk ...
-
-initrd http://${{next-server}}/preboot_execution_environment/diskless/kernels/${{image-initramfs}}
-
-echo | ALL DONE! We are ready.
-echo | Booting in 4s ...
-echo |
-echo +----------------------------------------------------+
-
-sleep 4
-
-boot
-
-:golden
-echo | Now starting golden nfs image boot.
-echo |
-echo | Parameters used:
-echo | > Image target: {image_name}
-echo | > Image type: nfs in golden shared mode
-echo | > Console: ${{eq-console}}
-echo | > Additional kernel parameters: ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}}
-echo |
-echo | Loading linux ...
-
-kernel http://${{next-server}}/preboot_execution_environment/diskless/kernels/${{image-kernel}} initrd=${{image-initramfs}} text=1 root=nfs:${{next-server}}:/diskless/images/{image_name}/nodes/${{hostname}},vers=4.2,rw rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}}
+kernel http://${{next-server}}/preboot_execution_environment/diskless/kernels/${{image-kernel}} initrd=${{image-initramfs}} selinux=0 text=1 root=nfs:${{next-server}}:/diskless/images/{image_name}/staging/,vers=4.2,rw rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}}
 
 echo | Loading initial ramdisk ...
 
@@ -245,6 +213,8 @@ boot
   image_name: {image_name}
   image_kernel: {image_kernel}
   image_creation_date: {image_date}
+  image_type: nfs
+  image_status: staging
 '''.format(image_name=selected_image_name,image_kernel=kernel_list[int(selected_kernel)],image_date=datetime.today().strftime('%Y-%m-%d'))
             with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml', "w") as ff:
                 ff.write(file_content)
@@ -363,8 +333,7 @@ boot
   image_name: {image_name}
   image_kernel: {image_kernel}
   image_creation_date: {image_date}
-  image_type: nfs
-  image_status: staging
+  image_type: livenet
 '''.format(image_name=selected_image_name,image_kernel=kernel_list[int(selected_kernel)],image_date=datetime.today().strftime('%Y-%m-%d'))
             with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml', "w") as ff:
                 ff.write(file_content)
@@ -376,7 +345,8 @@ elif main_action == '4':
     print('Manage images.')
     print(' 1 - List available images')
     print(' 2 - Manage kernel of an image')
-    print(' 3 - Manage nfs image')
+    print(' 3 - Create a golden from a staging NFS image')
+    print(' 4 - Manage hosts of an NFS image')
 
     sub_main_action = str(input('-->: ').lower().strip())
 
@@ -386,11 +356,11 @@ elif main_action == '4':
             print('  Image name: '+str(i))
             with open('/var/www/html/preboot_execution_environment/diskless/images/'+str(i)+'/image_data.yml', 'r') as f:
                 image_dict = yaml.load(f)
-            print('    ├── Kernel linked: '+str(image_dict['image_kernel']))
-            print('    ├── Image type: '+str(image_dict['image_type']))
-            if str(image_dict['image_type']) == 'nfs':
-                print('    ├── image status: '+str(image_dict['image_status']))
-            print('    └── Image creation date: '+str(image_dict['image_creation_date']))
+            print('    ├── Kernel linked: '+str(image_dict['image_data']['image_kernel']))
+            print('    ├── Image type: '+str(image_dict['image_data']['image_type']))
+            if str(image_dict['image_data']['image_type']) == 'nfs':
+                print('    ├── image status: '+str(image_dict['image_data']['image_status']))
+            print('    └── Image creation date: '+str(image_dict['image_data']['image_creation_date']))
 
     elif sub_main_action == '2':
         print('Manage kernels of an image.')
@@ -401,7 +371,7 @@ elif main_action == '4':
         selected_image = images_list[int(input('-->: ').lower().strip())-1]
         with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image+'/image_data.yml', 'r') as f:
             image_dict = yaml.load(f)
-        print('Current kernel is: '+str(image_dict['image_kernel']))
+        print('Current kernel is: '+str(image_dict['image_data']['image_kernel']))
         print('Please select a new kernel to use in the available kernels list:')
         file_list = os.listdir('/var/www/html/preboot_execution_environment/diskless/kernels/')
         nb_kernels = 0
@@ -413,22 +383,170 @@ elif main_action == '4':
         if kernel_list[0] != None:
             for index, i in enumerate(kernel_list):
                 print(' '+str(index+1)+' - '+i)
-        selected_kernel = str(int(input('-->: ').lower().strip())-1)
+        selected_kernel = kernel_list[int(input('-->: ').lower().strip())-1]
         print('Updating image files...')
-            file = open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image+'/boot.ipxe','r')
-            filebuffer = file.readlines()
-            for i in range(len(filebuffer)):
-                if 'image-kernel' in filebuffer[i]:
-                    filebuffer[i] = 'set image-kernel '++'\n'
-                if 'image-initramfs' in filebuffer[i]:
-                    filebuffer[i] = 'set image-initramfs \n'
-            file.close
-            file = open('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe','w')
-            file.writelines(filebuffer)
-            file.close
-
+        file = open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image+'/boot.ipxe','r')
+        filebuffer = file.readlines()
+        for i in range(len(filebuffer)):
+            if 'image-kernel' in filebuffer[i]:
+                filebuffer[i] = 'set image-kernel '+selected_kernel+'\n'
+            if 'image-initramfs' in filebuffer[i]:
+                filebuffer[i] = 'set image-initramfs '+'initramfs-kernel-'+kernel_list[int(selected_kernel)].strip('vmlinuz-')+'\n'
+        file.close
+        file = open('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe','w')
+        file.writelines(filebuffer)
+        file.close
+        file = open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml','r')
+        filebuffer = file.readlines()
+        for i in range(len(filebuffer)):
+            if 'image_kernel' in filebuffer[i]:
+                filebuffer[i] = 'image_kernel: '+selected_kernel+'\n'
+        file.close
+        file = open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml','w')
+        file.writelines(filebuffer)
+        file.close
         print('Done.')
         print('You will need to restart your running nodes for changes to take effect.')
+
+    elif sub_main_action == '3':
+        print('Please select image to work with')
+        images_list = os.listdir('/var/www/html/preboot_execution_environment/diskless/images/')
+        for i in range(0,len(images_list)):
+            print(' '+str(i+1)+' - '+str(images_list[i]))
+        selected_image = images_list[int(input('-->: ').lower().strip())-1]
+        with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image+'/image_data.yml', 'r') as f:
+            image_dict = yaml.load(f)
+
+        if image_dict['image_data']['image_status'] == 'staging':
+            print('Image is a staging image. Create a new golden with it?')
+            answer = str(input('Enter yes or no: ').lower().strip())
+            if answer == "yes":
+                print('New golden image name ?')
+                selected_image_name = str(input('-->: ').lower().strip())
+
+                print('Creating directories...')
+                os.system('rm -Rf /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
+                os.system('mkdir /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
+                os.system('rm -Rf /diskless/images/'+selected_image_name)
+                os.system('mkdir /diskless/images/'+selected_image_name)
+#                os.system('mkdir /diskless/images/'+selected_image_name+'/golden')
+                os.system('mkdir /diskless/images/'+selected_image_name+'/nodes')
+                print('Done.')
+                print('Cloning staging image to golden...')
+                os.system('cp -a /diskless/images/'+selected_image+'/staging /diskless/images/'+selected_image_name+'/golden')
+                print('Done.')
+                print('Generating related files...')
+                file_content = '''image_data:
+  image_name: {image_name}
+  image_kernel: {image_kernel}
+  image_creation_date: {image_date}
+  image_type: nfs
+  image_status: golden
+'''.format(image_name=selected_image_name,image_kernel=image_dict['image_data']['image_kernel'],image_date=datetime.today().strftime('%Y-%m-%d'))
+                with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml', "w") as ff:
+                    ff.write(file_content)
+                print('Done.')
+                boot_file_content = '''#!ipxe
+
+# This file is shared between main image (staging -> golden) and its clones
+echo |
+echo | Entering diskless/images/{image_name}/boot.ipxe
+echo |
+
+set image-kernel {image_kernel}
+set image-initramfs {image_initramfs}
+
+echo | Now starting golden nfs image boot.
+echo |
+echo | Parameters used:
+echo | > Image target: {image_name}
+echo | > Image type: nfs in golden shared mode
+echo | > Console: ${{eq-console}}
+echo | > Additional kernel parameters: ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}}
+echo |
+echo | Loading linux ...
+
+kernel http://${{next-server}}/preboot_execution_environment/diskless/kernels/${{image-kernel}} initrd=${{image-initramfs}} selinux=0 text=1 root=nfs:${{next-server}}:/diskless/images/{image_name}/nodes/${{hostname}},vers=4.2,rw rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}}
+
+echo | Loading initial ramdisk ...
+
+initrd http://${{next-server}}/preboot_execution_environment/diskless/kernels/${{image-initramfs}}
+
+echo | ALL DONE! We are ready.
+echo | Booting in 4s ...
+echo |
+echo +----------------------------------------------------+
+
+sleep 4
+
+boot
+'''.format(image_name=selected_image_name,image_kernel=image_dict['image_data']['image_kernel'],image_initramfs='initramfs-kernel-'+image_dict['image_data']['image_kernel'].strip('vmlinuz-'))
+                with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/boot.ipxe', "w") as ff:
+                    ff.write(boot_file_content)
+                print('Done.')
+
+#        elif image_dict['image_status'] == 'golden':
+#            print('Image is a golden. Switch to staging ?')
+#            answer = str(input('Enter yes or no: ').lower().strip())
+#            if answer == "yes":
+#                file = open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml','r')
+#                filebuffer = file.readlines()
+#                for i in range(len(filebuffer)):
+#                    if 'image_status' in filebuffer[i]:
+#                        filebuffer[i] = 'image_status: staging\n'
+#                file.close
+#                file = open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml','w')
+#                file.writelines(filebuffer)
+#                file.close
+#                file = open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image+'/boot.ipxe','r')
+#                filebuffer = file.readlines()
+#                for i in range(len(filebuffer)):
+#                    if 'image-state' in filebuffer[i]:
+#                        filebuffer[i] = 'set image-state staging\n'
+#                file = open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml','w')
+#                file.writelines(filebuffer)
+#                file.close
+
+    elif sub_main_action == '4':
+        print('Please select image to work with')
+        images_list = os.listdir('/var/www/html/preboot_execution_environment/diskless/images/')
+        for i in range(0,len(images_list)):
+            print(' '+str(i+1)+' - '+str(images_list[i]))
+        selected_image = images_list[int(input('-->: ').lower().strip())-1]
+        with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image+'/image_data.yml', 'r') as f:
+            image_dict = yaml.load(f)
+        if image_dict['image_data']['image_type'] == 'nfs' and image_dict['image_data']['image_status'] == 'golden':
+            
+
+            print('Manages nodes of image '+selected_image)
+            print(' 1 - List nodes with the image')
+            print(' 2 - Add nodes with the image')
+            print(' 3 - Remove nodes with the image')
+
+            sub_sub_main_action = str(input('-->: ').lower().strip())
+
+            if sub_sub_main_action == '1':
+                images_nodes_list = os.listdir('/diskless/images/'+selected_image+'/nodes/')
+                print('Nodes available with this image:')
+                for i in images_nodes_list:
+                    print(' - '+i)
+            elif sub_sub_main_action == '2':
+                print('Please enter nodes range to add:')
+                nodes_range = str(input('-->: ').lower().strip())
+                print('Cloning, this may take some time...')
+                for node in NodeSet(nodes_range):
+                    print("Working on node: "+str(node))
+                    os.system('cp -a /diskless/images/'+selected_image+'/golden /diskless/images/'+selected_image+'/nodes/'+node)
+            elif sub_sub_main_action == '3':
+                print('Please enter nodes range to remove:')
+                nodes_range = str(input('-->: ').lower().strip())
+                print('Deleting, this may take some time...')
+                for node in NodeSet(nodes_range):
+                    print("Working on node: "+str(node))
+                    os.system('rm -Rf /diskless/images/'+selected_image+'/nodes/'+node)
+
+
+
 
 
 quit()
