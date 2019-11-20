@@ -19,8 +19,8 @@
 
 # -- Project information -----------------------------------------------------
 
-project = u'BlueBanquise_Documentation'
-copyright = u'2019, Benoît Leveugle, Oxedions, Johnny Keats'
+project = u'BlueBanquise Documentation'
+copyright = u'2019, Benoît Leveugle, Johnny Keats'
 author = u'Oxedions, Johnny Keats'
 
 # The short X.Y version
@@ -77,11 +77,14 @@ pygments_style = None
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
-html_theme_options = {
-    'logo': 'logo.png',
-    'logo_name': 'Training',
-    }
+#html_theme = 'alabaster'
+#html_theme_options = {
+#    'logo': 'logo.png',
+#    'logo_name': 'Training',
+#    }
+html_logo = "logo.png"
+html_theme = "sphinx_rtd_theme"
+html_theme_path = ["_themes", ]
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
