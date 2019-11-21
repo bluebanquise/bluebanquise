@@ -1,3 +1,4 @@
+This file is to be removed shortly...
 # Roadmap
 
 Current status: **1.1.0 RC - HYPERDRIVE**

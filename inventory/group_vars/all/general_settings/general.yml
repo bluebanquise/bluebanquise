@@ -1,5 +1,7 @@
 ### General settings file
 
+cluster_name: algoric
+
 # Localisation
 time_zone: Europe/Brussels
 

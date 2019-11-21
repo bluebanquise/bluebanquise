@@ -1,29 +1,38 @@
+#jinja2: lstrip_blocks: "True"
 {# Macro to avoid redundancy #}
 {% macro write_host(host) %}
-{% if hostvars[host]['network_interfaces'] is defined and not none %}{# These part are clone #}
-{% for interface, interface_vars in hostvars[host]['network_interfaces'].items() %}
-{% if interface_vars.ip4 is defined and not none and interface_vars.network is defined and not none %}
-{% if interface == hostvars[host]['j2_node_main_network_interface'] %}
-{% set alias_list = [] %}
-{% if hostvars[host]['global_alias'] is defined and not none %}
-{% for alias in hostvars[host]['global_alias'] %}{{ alias_list.append(alias) }}{% endfor %}
-{% endif %}
-{% if hostvars[host]['alias'] is defined and not none and hostvars[host]['j2_current_iceberg'] == j2_current_iceberg %}
-{% for alias in hostvars[host]['alias'] %}{{ alias_list.append(alias) }}{% endfor %}
-{% endif %}
+  {% if hostvars[host]['network_interfaces'] is defined and not none %}{# These part are clone #}
+    {% set alias_list = [] %}
+    {% if hostvars[host]['global_alias'] is defined and not none %}
+      {% for alias in hostvars[host]['global_alias'] %}{{ alias_list.append(alias) }}{% endfor %}
+    {% endif %}
+    {% if hostvars[host]['alias'] is defined and not none and hostvars[host]['j2_current_iceberg'] == j2_current_iceberg %}
+      {% for alias in hostvars[host]['alias'] %}{{ alias_list.append(alias) }}{% endfor %}
+    {% endif %}
+    {% for interface, interface_vars in hostvars[host]['network_interfaces'].items() %}
+      {% if interface_vars.ip4 is defined and not none and interface_vars.network is defined and not none %}
+        {% if (global_network_settings is defined and not none) and (global_network_settings.enable_global_network is defined and not none) and (global_network_settings.global_network_group is defined and not none) and (host in groups[global_network_settings.global_network_group]) %}
+          {% if interface_vars.network == global_network_settings.global_network %}
 {{interface_vars.ip4}} {{host}} {{host}}.{{domain_name}} {{host}}-{{interface_vars.network}} {{alias_list|join(' ')}}
-{% else %}
+          {% else %}
 {{interface_vars.ip4}} {{host}}-{{interface_vars.network}}
-{% endif %}
-{% endif %}
-{% endfor %}
-{% if hostvars[host]['bmc'] is defined %}
-{% set bmc_args = hostvars[host]['bmc'] %}
-{% if (bmc_args.name is defined and not none) and (bmc_args.ip4 is defined and not none) %}
+          {% endif %}
+        {% else %}
+          {% if interface == hostvars[host]['j2_node_main_network_interface'] %}
+{{interface_vars.ip4}} {{host}} {{host}}.{{domain_name}} {{host}}-{{interface_vars.network}} {{alias_list|join(' ')}}
+          {% else %}
+{{interface_vars.ip4}} {{host}}-{{interface_vars.network}}
+          {% endif %}
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+    {% if hostvars[host]['bmc'] is defined %}
+      {% set bmc_args = hostvars[host]['bmc'] %}
+      {% if (bmc_args.name is defined and not none) and (bmc_args.ip4 is defined and not none) %}
 {{bmc_args.ip4}} {{bmc_args.name}}
-{% endif %}
-{% endif %}
-{% endif %}
+      {% endif %}
+    {% endif %}
+  {% endif %}
 {% endmacro %}
 
 #### Blue Banquise file ####

@@ -1,0 +1,4 @@
+pxe_parameters:
+  apache_uid: {{apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}
+  apache_gid: {{apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}
+  ansible_selinux_status: {{ansible_selinux.status}} 

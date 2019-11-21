@@ -21,14 +21,15 @@ set resetbold ${esc:string}[22m
 set reset ${esc:string}[0m
 
 # Figure out if client is 64-bit capable
-cpuid --ext 29 && set arch x86_64 || set arch x86
-cpuid --ext 29 && set archb 64 || set archb 32
-cpuid --ext 29 && set archl x86_64 || set archl i386
+#cpuid --ext 29 && set arch x86_64 || set arch x86
+#cpuid --ext 29 && set archb 64 || set archb 32
+#cpuid --ext 29 && set archl x86_64 || set archl i386
 
 :start
-menu BlueBanquise iPXE boot menu for ${manufacturer} ${product} (${archb}bit)
+menu BlueBanquise iPXE boot menu for ${manufacturer} ${product} (${arch}bit) - Benoit Leveugle
 item --gap                Main boot
 item bootosdeploy         Deploy OS (This will deploy/redeploy operating system)
+item bootdiskless         Start a diskless OS (Configured using diskless tool)
 item bootdisk             Boot on disk (This will boot on local disk)
 #item --gap                Tools
 #item minimal_live_linux   Minimal Live Linux
@@ -72,8 +73,10 @@ set submenu-timeout 0
 goto start
 
 :bootosdeploy
-chain http://${next-server}/preboot_execution_environment/equipment_ipxe_configurations/${equipment-ipxe-configuration} || shell
-#chain http://${next-server}/preboot_execution_environment/nodes/${hostname}_bootosdeploy.ipxe || shell
+chain http://${next-server}/preboot_execution_environment/osdeploy/${eq-distribution}_${eq-distribution-major-version}.ipxe || shell
+
+:bootdiskless
+chain http://${next-server}/preboot_execution_environment/diskless/images/${diskless-image}/boot.ipxe || shell
 
 :bootdisk
 iseq ${platform} efi && goto bootdisk-efi || goto bootdisk-legacy
@@ -87,7 +90,7 @@ iseq ${platform} efi && goto bootdisk-efi || goto bootdisk-legacy
     :bootdisk-efi
     echo Booting on disk in EFI way
     sleep 2
-    chain http://${next-server}/preboot_execution_environment/bin/grub2_efi_autofind.img || shell
+    chain http://${next-server}/preboot_execution_environment/bin/${arch}/grub2_efi_autofind.img || shell
     exit 1
 
 :memtest
