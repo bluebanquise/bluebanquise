@@ -4,7 +4,7 @@ Log client
 Description
 ^^^^^^^^^^^
 
-This role provides an rsyslog client.
+This role provides an rsyslog client, to be used in combinaison with the log_server role.
 
 Instructions
 ^^^^^^^^^^^^
@@ -14,7 +14,7 @@ NA
 To be done
 ^^^^^^^^^^
 
-Ensure all logs are get, and if possible try to keep local login at the same time.
+Integrate journalctl logging instead of rsyslog.
 
 Changelog
 ^^^^^^^^^

@@ -6,6 +6,14 @@ Please do not hesitate to contact us using issues, we will be glad to help you! 
 
 The stack is still young, and some aspects are not clearly defined yet. But here are some basic guidelines:
 
+## Conventions
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html),
+and commits adheres to [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
+
+If possible, we try to comply with these conventions.
+
 ## Reporting bugs :beetle:
 
 If you encounter any bug (and you will probably do), please provide the following details:

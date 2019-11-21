@@ -20,17 +20,6 @@ mg_computes:
 
     equipment_supermicro_sandy_compute: # Blender / ffmpeg farm, OpenFoam farm
       hosts:
-        einherjar1:
-          bmc:
-            name: beinherjar1
-            ip4: 10.12.104.1
-            mac: 08:00:27:0d:44:91
-            network: ice2-1
-          network_interfaces:
-            enp0s3:
-              ip4: 10.12.4.1
-              mac: 08:00:27:0d:44:90
-              network: ice2-1
         einherjar2:
           bmc:
             name: beinherjar2

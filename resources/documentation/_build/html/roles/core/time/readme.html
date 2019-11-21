@@ -34,11 +34,26 @@
 <h1>Time server<a class="headerlink" href="#time-server" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="description">
 <h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
-<p>This role provides a time server based on Chrony.</p>
+<p>This role provides a time server/client based on Chrony.</p>
 </div>
 <div class="section" id="instructions">
 <h2>Instructions<a class="headerlink" href="#instructions" title="Permalink to this headline">¶</a></h2>
-<p>To force time synchronisation, use:</p>
+<p>This role will react diffrently if in multi icebergs mode or not.</p>
+<p>By default, in non multiple icebergs, server will be the time source reference. If using multiple icebergs hierarchy, then server can be a time reference if at top of the icebergs hierarchy, or simply a time relay with an higher stratum, if not a top server. This stratum calculation is done using <strong>iceberg_level</strong> variable defined in <strong>/etc/ansible/inventory/cluster/icebergs/icebergX</strong> files.</p>
+<p>It is possible to use file <em>/etc/ansible/inventory/group_vars/all/general_settings/external.yml</em> to connect client or server to external time sources (server or pool or servers):</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">external_time</span><span class="p">:</span>  <span class="l l-Scalar l-Scalar-Plain">&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</span>
+  <span class="l l-Scalar l-Scalar-Plain">time_server</span><span class="p p-Indicator">:</span>
+    <span class="nt">server</span><span class="p">:</span> <span class="c1"># List of possible time servers</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">0.fr.pool.ntp.org</span>
+    <span class="nt">pool</span><span class="p">:</span> <span class="c1"># List of possible time pools</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">pool.ntp.org</span>
+<span class=" -Error">  </span><span class="nt">time_client</span><span class="p">:</span>
+    <span class="nt">server</span><span class="p">:</span>
+    <span class="nt">pool</span><span class="p">:</span>
+</pre></div>
+</div>
+<p>If set to <strong>time_server</strong>, server/pool will be added in the server configuration. Of set to <strong>time_client</strong>, these will be added in client configuration. It is possible for example to not install a time server and simply bind to an external server/pool using this file.</p>
+<p>In case of a need, to force time synchronisation on client side, use:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>chronyc -a makestep
 </pre></div>
 </div>
@@ -80,14 +95,14 @@
 <h3>Navigation</h3>
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../vocabulary.html">Vocabulary</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../install_first_management.html">Install first management</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../learn_ansible.html">Learn Ansible</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../configure_bluebanquise.html">Configure BlueBanquise</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../deploy_bluebanquise.html">Deploy BlueBanquise</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../roles.html">Roles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../vocabulary.html">2. Vocabulary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install_first_management.html">3. Install first management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../learn_ansible.html">4. Learn Ansible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../configure_bluebanquise.html">5. Configure BlueBanquise</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../deploy_bluebanquise.html">6. Deploy BlueBanquise</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../roles.html">7. Roles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../references.html">8. References</a></li>
 </ul>
 
 <div class="relations">

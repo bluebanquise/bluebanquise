@@ -38,7 +38,35 @@
 </div>
 <div class="section" id="instructions">
 <h2>Instructions<a class="headerlink" href="#instructions" title="Permalink to this headline">¶</a></h2>
-<p>Configuration is done in /root/.ssh/config</p>
+<p>This role will generate a Configuration file in <em>/root/.ssh/config</em>.</p>
+<p>This file will contains all hosts of the Ansible inventory (or all hosts of the current iceberg if using icebergs mode), with the following parameters:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Host freya
+    StrictHostKeyChecking no
+    UserKnownHostsFile=/dev/null
+    Hostname %h-ice1-1
+</pre></div>
+</div>
+<p>This ensure no issues when redeploying an hosts.</p>
+<p>Also, note that for this example host, <strong>freya</strong>, the target hostname for ssh is %h-ice1-1, which means <strong>freya-ice1-1</strong>. This can be seen when invoking ssh with verbosity:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[root@odin ]# ssh freya -vvv
+OpenSSH_7.8p1, OpenSSL 1.1.1 FIPS  11 Sep 2018
+debug1: Reading configuration data /root/.ssh/config
+debug1: /root/.ssh/config line 10: Applying options for freya
+debug1: Reading configuration data /etc/ssh/ssh_config
+debug3: /etc/ssh/ssh_config line 52: Including file /etc/ssh/ssh_config.d/05-redhat.conf depth 0
+debug1: Reading configuration data /etc/ssh/ssh_config.d/05-redhat.conf
+debug3: /etc/ssh/ssh_config.d/05-redhat.conf line 2: Including file /etc/crypto-policies/back-ends/openssh.config depth 1
+debug1: Reading configuration data /etc/crypto-policies/back-ends/openssh.config
+debug3: gss kex names ok: [gss-gex-sha1-,gss-group14-sha1-]
+debug3: kex names ok: [curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256,diffie-hellman-group14-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,diffie-hellman-group-exchange-sha1,diffie-hellman-group14-sha1]
+debug1: /etc/ssh/ssh_config.d/05-redhat.conf line 8: Applying options for *
+debug2: resolving &quot;freya-ice1-1&quot; port 22
+debug2: ssh_connect_direct
+debug1: Connecting to freya-ice1-1 [10.11.2.1] port 22.
+</pre></div>
+</div>
+<p>You can see here ssh is not trying to reach <strong>freya</strong> but is using <strong>freya-ice-1-1</strong>. This has been made to ensure whatever the direct resolution is in /etc/hosts file or DNS, ssh and so Ansible will always use the management network of the target host.</p>
+<p>Note that this file generation is kind of “sensible”, and will surely be the first one to break in case of uncoherent inventory. If this happens, check your inventory, fix it, and remove manually /root/.ssh/config and relaunch its generation.</p>
 </div>
 <div class="section" id="to-be-done">
 <h2>To be done<a class="headerlink" href="#to-be-done" title="Permalink to this headline">¶</a></h2>
@@ -77,14 +105,14 @@
 <h3>Navigation</h3>
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../vocabulary.html">Vocabulary</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../install_first_management.html">Install first management</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../learn_ansible.html">Learn Ansible</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../configure_bluebanquise.html">Configure BlueBanquise</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../deploy_bluebanquise.html">Deploy BlueBanquise</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../roles.html">Roles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../vocabulary.html">2. Vocabulary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install_first_management.html">3. Install first management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../learn_ansible.html">4. Learn Ansible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../configure_bluebanquise.html">5. Configure BlueBanquise</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../deploy_bluebanquise.html">6. Deploy BlueBanquise</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../roles.html">7. Roles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../references.html">8. References</a></li>
 </ul>
 
 <div class="relations">

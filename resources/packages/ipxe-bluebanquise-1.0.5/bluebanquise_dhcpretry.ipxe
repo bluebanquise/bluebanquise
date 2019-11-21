@@ -1,0 +1,55 @@
+#!ipxe
+
+echo . . . . . . . . . . . . . :::!~!!!!!:. . . . . . . . .
+echo . . . . . . . . . . . .xUHWH!!.!!?M88WHX:. . . . . . .
+echo . . . . . . . . . . .X*#M@$!!. !X!M$$$$$$WWx:. . . . .
+echo . . . . . . . . . .:!!!!!!?H!.:!$!$$$$$$$$$$8X:. . . .
+echo . . . . . . . . . !!~. ~:~!!.:~!$!#$$$$$$$$$$8X:. . ..
+echo . . . . . . . . .:!~::!H!<. .~.U$X!?R$$$$$$$$MM!. . ..
+echo . . . . . . . . .~!~!!!!~~. :XW$$$U!!?$$$$$$RMM!. . ..
+echo . . . . . . . . . .!:~~~. :!M"T#$$$$WX??#MRRMMM!. . ..
+echo . . . . . . . . . .~?WuxiW*`. .`"#$$$$8!!!!??!!!. . ..
+echo . . . . . . . . .:X-.M$$$$. . . .`"T#$T~!8$WUXU~. . ..
+echo . . . . . . . . :%`. ~#$$$m:. . . . ~!~.?$$$$$$. . . .
+echo . . . . . . . :!`.-. .~T$$$$8xx. . xWW-.~""##*". . . .
+echo . . . . . . -~~:<`.!. . ~?T#$$@@W@*?$$. . . /`. . . ..
+echo . . W$@@M!!!. !~~.!!. . . :XUW$W!~.`"~:. . :. . . . ..
+echo . . M"~~`.:x%`!!. !H:. .!WM$$$$Ti.:. !WUn+!`. . . . ..
+echo . . :::~:!!`:X~. :.?H.!u."$$$B$$$!W:U!T$$M~. . . . . .
+echo . . .~~. .:X@!.-~. .?@WTWo("*$$$W$TH$!.`. . . . . . ..
+echo . . Wi.~!X$?!-~. . :.?$$$B$Wu("**$RM!. . . . . . . . .
+echo . . $R@i.~~.!. . .:. .~$$$$$B$$en:``. . . . . . . . ..
+echo . . ?MXT@Wx.~. . :. . .~"##*$$$$M~. . . . . . . . . ..
+echo
+echo +----------------------------------------------------+
+echo | . . . . . . . BlueBanquise iPXE boot . . . . . . . |
+echo +----------------------------------------------------+
+
+sleep 2
+
+:retry
+echo Trying to get an ip from DHCP, looping until get one...
+ifconf --configurator dhcp || goto retry
+
+echo
+echo +---------------- System information ----------------+
+echo |
+echo | hostname:     ${hostname}
+echo | platform:     ${platform}
+echo | mac:          ${net0/mac}
+echo | ip:           ${net0.dhcp/ip:ipv4}
+echo | netmask:      ${net0.dhcp/netmask:ipv4}
+echo | dhcp-server:  ${net0.dhcp/dhcp-server:ipv4}
+echo | gateway:      ${net0.dhcp/gateway:ipv4}
+echo | dns-server:   ${net0.dhcp/dns:ipv4}
+echo | domain:       ${net0.dhcp/domain:string}
+echo | next-server:  ${net0.dhcp/next-server:ipv4}
+echo |
+echo +----------------------------------------------------+
+echo
+echo (waiting 5s and chain...)
+sleep 5
+
+chain http://${next-server}/preboot_execution_environment/convergence.ipxe || shell
+
+

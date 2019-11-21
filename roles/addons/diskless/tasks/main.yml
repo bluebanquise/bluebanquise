@@ -1,0 +1,6 @@
+- name: disklessset tool
+  copy:
+    src: disklessset.py
+    dest: /usr/bin/disklessset
+    mode: 0700
+

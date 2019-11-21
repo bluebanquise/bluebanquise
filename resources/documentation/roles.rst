@@ -8,6 +8,7 @@ CORE
 ====
 
 .. include:: roles/core/conman/readme.rst
+.. include:: roles/core/display_tuning/readme.rst
 .. include:: roles/core/dhcp_server/readme.rst
 .. include:: roles/core/dns_server/readme.rst
 .. include:: roles/core/dns_client/readme.rst
@@ -29,11 +30,14 @@ ADVANCED CORE
 =============
 
 .. include:: roles/advanced-core/advanced_dhcp_server/readme.rst
+.. include:: roles/advanced-core/advanced_nic/readme.rst
 
 ADDONS
 ======
 
 .. include:: roles/addons/clustershell/readme.rst
+.. include:: roles/addons/ofed/readme.rst
+.. include:: roles/addons/ofed_sm/readme.rst
 .. include:: roles/addons/openldap_client/readme.rst
 .. include:: roles/addons/openldap_server/readme.rst
 .. include:: roles/addons/prometheus_server/readme.rst

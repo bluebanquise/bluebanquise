@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>Deploy BlueBanquise &#8212; BlueBanquise_Documentation 1.0.1 documentation</title>
+    <title>6. Deploy BlueBanquise &#8212; BlueBanquise_Documentation 1.0.1 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -14,8 +14,8 @@
     <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Roles" href="roles.html" />
-    <link rel="prev" title="Configure BlueBanquise" href="configure_bluebanquise.html" />
+    <link rel="next" title="7. Roles" href="roles.html" />
+    <link rel="prev" title="5. Configure BlueBanquise" href="configure_bluebanquise.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -33,13 +33,13 @@
           <div class="body" role="main">
             
   <div class="section" id="deploy-bluebanquise">
-<h1>Deploy BlueBanquise<a class="headerlink" href="#deploy-bluebanquise" title="Permalink to this headline">¶</a></h1>
+<h1>6. Deploy BlueBanquise<a class="headerlink" href="#deploy-bluebanquise" title="Permalink to this headline">¶</a></h1>
 <p>At this point, <strong>BlueBanquise</strong> configuration is done. We are ready to deploy the cluster.</p>
 <p>First step is to deploy configuration on management1 node, and then deploy OS on the others system. Last step will be to deploy configuration on the other systems.</p>
 <div class="section" id="management-configuration">
-<h2>Management configuration<a class="headerlink" href="#management-configuration" title="Permalink to this headline">¶</a></h2>
+<h2>6.1. Management configuration<a class="headerlink" href="#management-configuration" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="get-management1-playbook">
-<h3>Get management1 playbook<a class="headerlink" href="#get-management1-playbook" title="Permalink to this headline">¶</a></h3>
+<h3>6.1.1. Get management1 playbook<a class="headerlink" href="#get-management1-playbook" title="Permalink to this headline">¶</a></h3>
 <p>We are going to use the provided default playbook. This playbook will install most of the CORE roles. Enough to deploy first stage of the cluster.</p>
 <p>Copy example playbook management1 to /etc/ansible/playbooks/:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir /etc/ansible/playbooks/
@@ -50,11 +50,11 @@ cp -a /etc/ansible/resources/examples/playbooks/management1.yml /etc/ansible/pla
 <p>To do so, we are going to use the ansible-playbook command.</p>
 </div>
 <div class="section" id="ansible-playbook">
-<h3>Ansible-playbook<a class="headerlink" href="#ansible-playbook" title="Permalink to this headline">¶</a></h3>
+<h3>6.1.2. Ansible-playbook<a class="headerlink" href="#ansible-playbook" title="Permalink to this headline">¶</a></h3>
 <p>Ansible playbook is the command used to ask Ansible to execute a playbook.</p>
 <p>We are going to use 2 parameters frequently:</p>
 <div class="section" id="tags-skip-tags">
-<h4>Tags / Skip tags<a class="headerlink" href="#tags-skip-tags" title="Permalink to this headline">¶</a></h4>
+<h4>6.1.2.1. Tags / Skip tags<a class="headerlink" href="#tags-skip-tags" title="Permalink to this headline">¶</a></h4>
 <p>As you can notice, some tags are set inside the playbook, or even in some roles for specific tasks. The idea of tags is simple: you can tag a role/a task, and then when using ansible-playbook, only play related tags role/task. Or do the opposit: play all, and skip a role/task.</p>
 <p>To so, use with Ansible playbook:</p>
 <ul class="simple">
@@ -64,7 +64,7 @@ cp -a /etc/ansible/resources/examples/playbooks/management1.yml /etc/ansible/pla
 <p>More can be found here on tags: <a class="reference external" href="https://docs.ansible.com/ansible/latest/user_guide/playbooks_tags.html">https://docs.ansible.com/ansible/latest/user_guide/playbooks_tags.html</a></p>
 </div>
 <div class="section" id="extra-vars">
-<h4>Extra vars<a class="headerlink" href="#extra-vars" title="Permalink to this headline">¶</a></h4>
+<h4>6.1.2.2. Extra vars<a class="headerlink" href="#extra-vars" title="Permalink to this headline">¶</a></h4>
 <p>Extra vars allows to pass variables with maximum precedence at execution time, for any purpose (debug, test, or simply need).</p>
 <p>To do so, use:</p>
 <ul class="simple">
@@ -73,7 +73,7 @@ cp -a /etc/ansible/resources/examples/playbooks/management1.yml /etc/ansible/pla
 </div>
 </div>
 <div class="section" id="apply-management1-configuration">
-<h3>Apply management1 configuration<a class="headerlink" href="#apply-management1-configuration" title="Permalink to this headline">¶</a></h3>
+<h3>6.1.3. Apply management1 configuration<a class="headerlink" href="#apply-management1-configuration" title="Permalink to this headline">¶</a></h3>
 <p>Lets apply now the whole configuration on management1. It can takes some time depending of your CPU and your hard drive.</p>
 <p>We first ensure our NI are up, so the repositories part is working.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ansible-playbook /etc/ansible/playbooks/management1.yml --tags CORE_set_hostname,CORE_nic
@@ -99,7 +99,7 @@ systemctl status named
 </div>
 </div>
 <div class="section" id="pxe">
-<h2>PXE<a class="headerlink" href="#pxe" title="Permalink to this headline">¶</a></h2>
+<h2>6.2. PXE<a class="headerlink" href="#pxe" title="Permalink to this headline">¶</a></h2>
 <p>Next step is to deploy the other nodes using PXE process.</p>
 <p>NOTE: it is assumed here you know how to have your other nodes / VM / servers / workstation to boot on LAN.
 If your device cannot boot on LAN, use iso or usb image provided on management1 in /var/www/html/preboot_execution_environment/bin/[x86_64|arm64]. These images will start a LAN boot automatically.</p>
@@ -107,7 +107,7 @@ If your device cannot boot on LAN, use iso or usb image provided on management1 
 <p>The following schema provides a macroscopic map of the process:</p>
 <img alt="_images/iPXE_process_v3.svg" src="_images/iPXE_process_v3.svg" /><p>Whatever the boot source, and whatever Legacy Bios or uEFI, all converge to <a class="reference external" href="http://nextserver/convergence.ipxe">http://nextserver/convergence.ipxe</a>. Then this file chain to node specific file in nodes (this file is generated using bootset command). The node specific file contains the default entry for the iPXE menu, and chain to menu.ipxe file. The menu file display a simple menu, and wait 10s for user before starting the default entry (which can be os deployment, or boot to disk).</p>
 <div class="section" id="bootset">
-<h3>bootset<a class="headerlink" href="#bootset" title="Permalink to this headline">¶</a></h3>
+<h3>6.2.1. bootset<a class="headerlink" href="#bootset" title="Permalink to this headline">¶</a></h3>
 <p>Before booting remote nodes in PXE, we need to ask management1 to activate remote nodes deployment. If not, remote nodes will boot on disk, even when booting over LAN.</p>
 <p>To manipulate nodes PXE boot, a command, <em>bootset</em>, is available.</p>
 <p>We are going to deploy login1 and c001, c002, c003 and c004.</p>
@@ -120,13 +120,13 @@ If your device cannot boot on LAN, use iso or usb image provided on management1 
 <p>Note also that if you update configuration on management1, it is recommanded to force the update of files when using bootset. To do so, add <em>-u true</em>.</p>
 </div>
 <div class="section" id="os-deployment">
-<h3>OS deployment<a class="headerlink" href="#os-deployment" title="Permalink to this headline">¶</a></h3>
+<h3>6.2.2. OS deployment<a class="headerlink" href="#os-deployment" title="Permalink to this headline">¶</a></h3>
 <p>Power on now the remote nodes, have them boot over LAN, and follow the installation procedure. It should take around 15-20 minutes depeding of your hardware.</p>
 <p>Once done, proceed to next part.</p>
 </div>
 </div>
 <div class="section" id="apply-other-nodes-configuration">
-<h2>Apply other nodes configuration<a class="headerlink" href="#apply-other-nodes-configuration" title="Permalink to this headline">¶</a></h2>
+<h2>6.3. Apply other nodes configuration<a class="headerlink" href="#apply-other-nodes-configuration" title="Permalink to this headline">¶</a></h2>
 <p>Applying configuration on other nodes is simple.</p>
 <p>Ensure first you can ssh passwordless on each of the freshly deployed nodes.</p>
 <p>If yes, copy example playbooks:</p>
@@ -168,36 +168,40 @@ ansible-playbook /etc/ansible/computes.yml --extra-vars <span class="s2">&quot;t
 <h3>Navigation</h3>
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="vocabulary.html">Vocabulary</a></li>
-<li class="toctree-l1"><a class="reference internal" href="install_first_management.html">Install first management</a></li>
-<li class="toctree-l1"><a class="reference internal" href="learn_ansible.html">Learn Ansible</a></li>
-<li class="toctree-l1"><a class="reference internal" href="configure_bluebanquise.html">Configure BlueBanquise</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Deploy BlueBanquise</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#management-configuration">Management configuration</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#get-management1-playbook">Get management1 playbook</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ansible-playbook">Ansible-playbook</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#apply-management1-configuration">Apply management1 configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vocabulary.html">2. Vocabulary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install_first_management.html">3. Install first management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="learn_ansible.html">4. Learn Ansible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configure_bluebanquise.html">5. Configure BlueBanquise</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">6. Deploy BlueBanquise</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#management-configuration">6.1. Management configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#get-management1-playbook">6.1.1. Get management1 playbook</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ansible-playbook">6.1.2. Ansible-playbook</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#tags-skip-tags">6.1.2.1. Tags / Skip tags</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#extra-vars">6.1.2.2. Extra vars</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#pxe">PXE</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#bootset">bootset</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#os-deployment">OS deployment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#apply-management1-configuration">6.1.3. Apply management1 configuration</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#apply-other-nodes-configuration">Apply other nodes configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pxe">6.2. PXE</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#bootset">6.2.1. bootset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#os-deployment">6.2.2. OS deployment</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="roles.html">Roles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#apply-other-nodes-configuration">6.3. Apply other nodes configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="roles.html">7. Roles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">8. References</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="configure_bluebanquise.html" title="previous chapter">Configure BlueBanquise</a></li>
-      <li>Next: <a href="roles.html" title="next chapter">Roles</a></li>
+      <li>Previous: <a href="configure_bluebanquise.html" title="previous chapter">5. Configure BlueBanquise</a></li>
+      <li>Next: <a href="roles.html" title="next chapter">7. Roles</a></li>
   </ul></li>
 </ul>
 </div>

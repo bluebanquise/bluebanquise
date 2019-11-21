@@ -38,7 +38,20 @@
 </div>
 <div class="section" id="instructions">
 <h2>Instructions<a class="headerlink" href="#instructions" title="Permalink to this headline">¶</a></h2>
-<p>NA.</p>
+<p>This role simply install an http server. Repositories files manupulations have to be done manually by system administrator.</p>
+<p>Note that repositories structure follows a specific pattern:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>           Distribution    Version   Architecture    Repository
+                 +             +       +               +
+                 <span class="p">|</span>             +---+   <span class="p">|</span>               <span class="p">|</span>
+                 +-----------+     <span class="p">|</span>   <span class="p">|</span>      +--------+
+                             <span class="p">|</span>     <span class="p">|</span>   <span class="p">|</span>      <span class="p">|</span>
+                             v     v   v      v
+/var/www/html/repositories/centos/7.6/x86_64/os
+</pre></div>
+</div>
+<p>System administrator should create these directories manually, and put packages inside.</p>
+<p>Then, repositories that will be setup on clients are stored by default in <em>/etc/ansible/inventory/group_vars/all/general_settings/repositories.yml</em>.</p>
+<p>Keep in mind that it is possible to precedence this file in equipment_profiles groupes, and so put a repository file in for example <em>/etc/ansible/inventory/group_vars/equipment_supermicro_sandy_compute</em> that will be considered by these nodes over the default one. This can be useful to define diferent repositories for diferent equipments.</p>
 </div>
 <div class="section" id="changelog">
 <h2>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h2>
@@ -74,14 +87,14 @@
 <h3>Navigation</h3>
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../vocabulary.html">Vocabulary</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../install_first_management.html">Install first management</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../learn_ansible.html">Learn Ansible</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../configure_bluebanquise.html">Configure BlueBanquise</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../deploy_bluebanquise.html">Deploy BlueBanquise</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../roles.html">Roles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../vocabulary.html">2. Vocabulary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install_first_management.html">3. Install first management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../learn_ansible.html">4. Learn Ansible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../configure_bluebanquise.html">5. Configure BlueBanquise</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../deploy_bluebanquise.html">6. Deploy BlueBanquise</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../roles.html">7. Roles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../references.html">8. References</a></li>
 </ul>
 
 <div class="relations">

@@ -10,8 +10,9 @@ Details are also given for each Ansible role of the stack, and how to build your
 Use <-- left <-- menu to navigate between sections.
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 4
    :caption: Contents:
+   :numbered:
 
    introduction
    vocabulary

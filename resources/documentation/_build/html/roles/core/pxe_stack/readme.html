@@ -34,12 +34,113 @@
 <h1>PXE Stack<a class="headerlink" href="#pxe-stack" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="description">
 <h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
-<p>This role provides the whole PXE stack. It is a key feature of the stack.</p>
+<p>This role provides the whole PXE stack. It is a key feature of the stack (and we are prood of it :-D).</p>
 </div>
 <div class="section" id="instructions">
 <h2>Instructions<a class="headerlink" href="#instructions" title="Permalink to this headline">¶</a></h2>
-<p>All files are located in /var/www/html/preboot_execution_environment</p>
-<p>See main documentation about this role.</p>
+<p>This role will deploy all the needed files, binaries, and scripts to deploy remote hosts using PXE (or even USB and CD boot).</p>
+<p>The role take place just after the dhcp in the PXE deployment, and will configure all the iPXE chain needed after dhcp provided hosts with next-server ip and filename to use.</p>
+<div class="section" id="files-location">
+<h3><strong>Files location</strong><a class="headerlink" href="#files-location" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>PXE boot files are located in /var/www/html/preboot_execution_environment/.
+* <em>bin/</em> directory contains some needed bin files, typically grub2 files for EFI boot.
+* <em>equipment_profiles/</em> directory contains equipment_profiles related files, i.e. ipxe file with group variables, and os configuration files (kickstart, preseed, autoyast).
+* <em>nodes/</em> directory contains hosts dedicated files, i.e. ipxe file with hosts dedicated variables.
+* <em>osdeploy/</em> directory contains static files, with paterns to boot each kind of supported distributions.</p></li>
+<li><p>Basic configuration files are located in /etc/bluebanquise/pxe/.
+* <em>nodes_parameters.yml</em> contains all nodes PXE needed parameters.
+* <em>pxe_parameters.yml</em> contains needed values for scripts to adapt to <strong>current pxe server host</strong> (these parameters do not apply to PXE booted hosts !!).</p></li>
+<li><p>Scripts are located in /usr/bin/.</p></li>
+</ul>
+</div>
+<div class="section" id="inventory-configuration">
+<h3><strong>Inventory configuration</strong><a class="headerlink" href="#inventory-configuration" title="Permalink to this headline">¶</a></h3>
+<p>This role will rely on multiple parts of the inventory, and is probably the most “invasive” role of the whole stack.</p>
+<ul class="simple">
+<li><p>equipment_profile dictionarries are used for each equipment_profile group. All boot confiuration is made relying on it (operating system, cpu architecture, console, kernel parameters, etc.). It is recommanded to ensure coherency of the equipment_profile files.</p></li>
+<li><p>authentication dictionarry is used to provide root password and default ssh authorized key.</p></li>
+<li><p>hosts <strong>network_interfaces</strong> dedicated variables, to be able to force static ip at kernel boot.</p></li>
+</ul>
+</div>
+<div class="section" id="bootset-usage">
+<h3><strong>bootset usage</strong><a class="headerlink" href="#bootset-usage" title="Permalink to this headline">¶</a></h3>
+<p>Once the role is deployed, and hosts gathered into <em>/etc/bluebanquise/pxe/nodes_parameters.yml</em>, the bootset tool can be used to manipulate remote hosts PXE boot. By default, 3 states can be defined for each host:</p>
+<ul class="simple">
+<li><p>osdeploy: the remote host will deploy/redeploy its operating system, using inventory equipment_profile parameters of its equipment profile group.</p></li>
+<li><p>disk: the remote host will boot on disk. This parameter is automatically set after a sucessful <strong>osdeploy</strong>.</p></li>
+<li><p>diskless: the remote host will boot using a diskless mechanism. This diskless boot is generic, and is handled by an optional external role.</p></li>
+</ul>
+<p>Again, consider that if you set an host to osdeploy, and that it suceed its deployment, stack will automatically set the host into disk boot for next boot, to avoid infinite reinstallation loop.</p>
+<p>To get bootset help, use:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>bootset -h
+</pre></div>
+</div>
+<p>To ask an host to deploy/redeploy its operating system, use:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>bootset -n c001 -b osdeploy
+</pre></div>
+</div>
+<p>With c001 the target host to be redeployed.</p>
+<p>To set this host to boot on disk, use:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>bootset -n c001 -b disk
+</pre></div>
+</div>
+<p>It is also possible to work on a range of host, using nodeset formating:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>bootset -n c001,c002,c[010-020],login1 -b disk
+</pre></div>
+</div>
+<p>If some inventory parameters related to the host have been updated recently, it may be required to force files regeneration instead of simply modifying them. To do so, use:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>bootset -n c001 -b osdeploy -f update
+</pre></div>
+</div>
+<p>Also, on some “difficult” networks, system administrator may require to force static ip at boot. This can be achieved using:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>bootset -n c001 -b osdeploy -f network
+</pre></div>
+</div>
+<p>Or in combinaison with update, using comma separated:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>bootset -n c001 -b osdeploy -f update,network
+</pre></div>
+</div>
+<p>The tool is relatively verbose, and should provide all needed information on the fly on what it is doing.</p>
+<p>Last part, regarding diskless. An image name need to be provided:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>bootset -n c001 -b diskless -i myimage
+</pre></div>
+</div>
+<p>This part should be covered in a diskless related role, and is not in the scope of this role.</p>
+</div>
+<div class="section" id="ipxe-chain">
+<h3><strong>iPXE chain</strong><a class="headerlink" href="#ipxe-chain" title="Permalink to this headline">¶</a></h3>
+<p>PXE part of the <strong>BlueBanquise</strong> stack relies heavily on iPXE, and its chain mechanism. This chain has multiple purposes:</p>
+<ul class="simple">
+<li><p>Most important, it is verbose, and can be manually manipulated or followed (watching http server logs).</p></li>
+<li><p>It is flexible, and can adapt to nearly any configuration (disk boot, os deployment, diskless, …).</p></li>
+<li><p>It can operate on all hardware, from server to laptop. It can even be started from USB or CD image for non PXE able systems.</p></li>
+</ul>
+<p>Some steps may seems weird or unnecessary, but are here on purpose: verbosity and debug, as PXE part is always the trickiest.</p>
+<p>Some vocabulary: in the following document, <strong>chain* or **chaining</strong> refers to the iPXE mechanism that download and execute a new file, after the current one.</p>
+<p>Also, all files root is assumed <em>/var/www/html/preboot_execution_environnement</em> on the next-server (the server on which this pxe_stack role has been deployed).</p>
+<p>The whole process can be resumed in one detailed schema:</p>
+<img alt="roles/core/pxe_stack/roles/core/pxe_stack/images/iPXE_chain.svg" src="roles/core/pxe_stack/roles/core/pxe_stack/images/iPXE_chain.svg" /><p>To be macroscopic:</p>
+<ol class="arabic simple">
+<li><p>The remote host boot over PXE, in EFI/legacy-bios, using its own PXE/iPXE rom.</p></li>
+<li><p>The dhcp deployed by BlueBanquise will provide the host with the <strong>BlueBanquise</strong> iPXE rom. This iPXE rom contains an EMBED script that will display the logo, get an ip from the dhcp server, show some information, and chain to file <em>convergence.ipxe</em>.</p></li>
+<li><p><em>convergence.ipxe</em> will simply get the current architecture. This operation cannot be done into the EMBED script has it needs some logic, that could bug. Sys admin need to easily debug this whithout the need to rebuild iPXE roms. Then iPXE chain to <em>nodes/${hostname}.ipxe</em> with <em>hostname</em> the hostname provided by the dhcp server.</p></li>
+<li><p><em>nodes/${hostname}.ipxe</em> will define all host dedicated parameters, and also what host should do: boot on disk, deploy os, or boot in diskless. Then iPXE chain to <em>equipment_profiles/${equipment-profile}.ipxe</em>, with <em>equipment-profile</em> a variable defined in the current file.</p></li>
+<li><p><em>equipment_profiles/${equipment-profile}.ipxe</em> contains the host equipment profile group parameters, like operating system, console, kernel parameters, etc. Then iPXE chain to <em>menu.ipxe</em>.</p></li>
+<li><p><em>menu.ipxe</em> will display a basic menu on screen, with default set to what node is expected to do (this was gathered in <em>nodes/${hostname}.ipxe</em>). Timeout is 10s by default before host execute the expected action. Then, iPXE chain to:</p></li>
+</ol>
+<blockquote>
+<div><ul class="simple">
+<li><p><em>osdeploy/${eq-distribution}_${eq-distribution-major-version}.ipxe</em> if host needs to deploy/redeploy its operating system. These osdeploy files are dynamic, and adapt to parameters gathered in host dedicated file and host equipment_profile file.</p></li>
+<li><p><em>diskless/images/${diskless-image}/boot.ipxe</em> if host needs to boot in diskless.</p></li>
+<li><p><em>sanboot –no-describe –drive 0x80</em> if host is legacy/bios/pcbios based. This is a simple command that boot on disk.</p></li>
+<li><p><em>bin/${arch}/grub2_efi_autofind.img</em> if host is EFI based. This grub2 image will look for a disk with a know operating system, and boot on it.</p></li>
+</ul>
+</div></blockquote>
+<p>In case of an OS deployment, if this deployment succeed, in the post install script section, remote host will ask, using a curl command on its side and an CGI python script on server side (<em>/var/www/cgi-bin/bootswitch.cgi</em>), to boot next to disk. This CGI python script will simply edit <em>node/${hostname}.ipxe</em> file and change its default boot to <strong>bootdisk</strong>.</p>
+<p>All files are manually editable. Also, note that an unregistered host (so no hostnames provided by the dhcp) will try to load <em>nodes/.ipxe</em> file. By default, this file will simply provide an iPXE shell, but system administrator can tune this file to specific purposes.</p>
+<p>To follow the deployment process, simply tail -f logs of http server, and see the whole process occuring.</p>
+</div>
 </div>
 <div class="section" id="to-be-done">
 <h2>To be done<a class="headerlink" href="#to-be-done" title="Permalink to this headline">¶</a></h2>
@@ -81,14 +182,14 @@
 <h3>Navigation</h3>
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../vocabulary.html">Vocabulary</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../install_first_management.html">Install first management</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../learn_ansible.html">Learn Ansible</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../configure_bluebanquise.html">Configure BlueBanquise</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../deploy_bluebanquise.html">Deploy BlueBanquise</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../roles.html">Roles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../vocabulary.html">2. Vocabulary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install_first_management.html">3. Install first management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../learn_ansible.html">4. Learn Ansible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../configure_bluebanquise.html">5. Configure BlueBanquise</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../deploy_bluebanquise.html">6. Deploy BlueBanquise</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../roles.html">7. Roles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../references.html">8. References</a></li>
 </ul>
 
 <div class="relations">
