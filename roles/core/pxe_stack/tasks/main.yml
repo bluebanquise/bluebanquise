@@ -5,28 +5,29 @@
 
 - name: Install minimum packages for PXE
   package:
-    name: "{{item}}"
+    name: "{{ packages_to_install[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
     state: present
-  loop: "{{packages_to_install[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
+  tags:
+    - package
 
 - name: Create pxe directories structure
   file:
-   path: "{{item}}"
-   state: directory
-   mode: 0755
-  with_items:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+  loop:
    - /var/www/cgi-bin
    - /etc/bluebanquise
    - /etc/bluebanquise/pxe
 
 - name: Create pxe directories structure
   file:
-   path: "{{item}}"
-   state: directory
-   mode: 0755
-   owner: "{{apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
-   group: "{{apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
-  with_items:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+    owner: "{{ apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
+    group: "{{ apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
+  loop:
    - /var/www/html/preboot_execution_environment
    - /var/www/html/preboot_execution_environment/bin
    - /var/www/html/preboot_execution_environment/nodes
@@ -38,8 +39,8 @@
     path: /var/www/html/preboot_execution_environment
     state: directory
     mode: 0755
-    owner: "{{apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
-    group: "{{apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
+    owner: "{{ apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
+    group: "{{ apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
     recurse: yes
 
 - name: Use OS dedicated task
@@ -47,9 +48,11 @@
 
 - name: Templates >> nodes parameters
   template:
-    src: "nodes_parameters.yml.j2"
-    dest: "/etc/bluebanquise/pxe/nodes_parameters.yml"
+    src: nodes_parameters.yml.j2
+    dest: /etc/bluebanquise/pxe/nodes_parameters.yml
     mode: 0644
+  tags:
+    - template
 
 - name: Templates >> pxe parameters
   template:
@@ -62,15 +65,19 @@
     src: "{{item}}.ipxe.j2"
     dest: "/var/www/html/preboot_execution_environment/{{item}}.ipxe"
     mode: 0755
-  with_items:
+  loop:
     - convergence
     - menu
+  tags:
+    - template
 
 - name: Templates >> nohostname
   template:
-    src: "nohostname.ipxe.j2"
-    dest: "/var/www/html/preboot_execution_environment/nodes/.ipxe"
+    src: nohostname.ipxe.j2
+    dest: /var/www/html/preboot_execution_environment/nodes/.ipxe
     mode: 0755
+  tags:
+    - template
 
 ##### Centos
 
@@ -91,66 +98,78 @@
 - name: Templates >> kickstarts for Centos
   template:
     src: "kickstart.cfg.j2"
-    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{item | replace('equipment_','') | trim}}.kickstart.cfg
+    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{item | replace(equipment_naming,'') | trim}}.kickstart.cfg
     mode: 0644
-  with_items: "{{j2_equipment_groups_list}}"
+  with_items: "{{ j2_equipment_groups_list }}"
   when:
     - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
-    - (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) == 'centos' or (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) == 'redhat'
+    - (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) in ['redhat','centos']
+  tags:
+    - template
 
 - name: Templates >> equipment_profiles for Centos
   template:
     src: "equipment_profile.ipxe.j2"
-    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{item | replace('equipment_','') | trim}}.ipxe
+    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{item | replace(equipment_naming,'') | trim}}.ipxe
     mode: 0644
   with_items: "{{j2_equipment_groups_list}}"
   when:
     - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
-    - (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) == 'centos' or (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) == 'redhat'
+    - (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) in ['redhat','centos']
+  tags:
+    - template
 
 ##### Ubuntu
 
 - name: Templates >> preseeds for Ubuntu
   template:
     src: "preseed.cfg.j2"
-    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{item | replace('equipment_','') | trim}}.preseed.cfg
+    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{item | replace(equipment_naming,'') | trim}}.preseed.cfg
     mode: 0644
   with_items: "{{j2_equipment_groups_list}}"
   when:
     - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
     - (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) == 'ubuntu'
+  tags:
+    - template
 
 - name: Templates >> equipment_profiles for Ubuntu
   template:
     src: "configuration_ubuntu.ipxe.j2"
-    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{item | replace('equipment_','') | trim}}.ipxe
+    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{item | replace(equipment_naming,'') | trim}}.ipxe
     mode: 0644
   with_items: "{{j2_equipment_groups_list}}"
   when:
     - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
     - (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) == 'ubuntu'
+  tags:
+    - template
 
 ##### OpenSuse
 
 - name: Templates >> autoyasts for OpenSuse
   template:
     src: "autoyast.xml.j2"
-    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{item | replace('equipment_','') | trim}}.autoyast.xml
+    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{item | replace(equipment_naming,'') | trim}}.autoyast.xml
     mode: 0644
   with_items: "{{j2_equipment_groups_list}}"
   when:
     - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
     - (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) == 'opensuse'
+  tags:
+    - template
 
 - name: Templates >> equipment_profiles for OpenSuse
   template:
     src: "configuration_opensuse.ipxe.j2"
-    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{item | replace('equipment_','') | trim}}.ipxe
+    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{item | replace(equipment_naming,'') | trim}}.ipxe
     mode: 0644
   with_items: "{{j2_equipment_groups_list}}"
   when:
     - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
     - (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) == 'opensuse'
+  tags:
+    - template
 
 ##### Minimal, specific
 
@@ -159,6 +178,8 @@
     src: "configuration_minimal.ipxe.j2"
     dest: /var/www/html/preboot_execution_environment/equipment_profiles/minimal.ipxe
     mode: 0644
+  tags:
+    - template
 
 ##### END
 
@@ -167,17 +188,21 @@
     src: bootset.py
     dest: /usr/bin/bootset
     mode: 0700 
+  tags:
+    - template
 
 - name: httpd cgi module
   apache2_module:
     state: present
     name: "{{apache_cgi_module[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
+  notify: Restart pxe services
 
 - name: cgi configuration file
   copy:
     src: cgi.conf
     dest: "{{apache_conf_path[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}/cgi.conf"
     mode: 0644
+  notify: Restart pxe services
 
 - name: cgi script
   copy:
@@ -186,11 +211,22 @@
     mode: 0744
     owner: "{{apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
     group: "{{apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
-  tags: tyty
+
+- meta: flush_handlers
+
+- name: Enable/disable services
+  service:
+    name: "{{ item }}"
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+  loop: "{{ services_to_start[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
+  tags:
+    - service
 
 - name: Start services
   service:
-    name: "{{item}}"
-    state: restarted
-    enabled: yes
-  loop: "{{services_to_start[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
+    name: "{{ item }}"
+    state: started
+  loop: "{{ services_to_start[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
+  when: (start_services | bool)
+  tags:
+    - service

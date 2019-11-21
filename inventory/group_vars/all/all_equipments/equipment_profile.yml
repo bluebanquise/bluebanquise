@@ -1,8 +1,9 @@
 equipment_profile:
 
   # iPXE network driver
-  # default should be good for most of NIC, but some need SNP
-  ipxe_network_driver: snp #default # default or snp or snponly
+  # default should be good for most of NIC, but some need SNP. Refer to http://ipxe.org/appnote/buildtargets for more information.
+  ipxe_driver: default # default or snp or snponly
+  ipxe_platform: pcbios # can be pcbios (for legacy/bios) or efi
 
   # When installing in EFI, grub2 break the boot order and set next boot to disk (seriously, why??!)
   # In most case, you prefer system to continue to boot on PXE, and so the stack can restore first boot device after grub2 installation
@@ -31,8 +32,12 @@ equipment_profile:
 
   hardware:
     cpu:
-      architecture: x86_64
-      cores: 1
+      architecture: x86_64 # Can be x86_64 or arm64
+      cores: 1             # Mainly for slurm, but optional. You can define here detailed information on the CPUs.
+      cores_per_socket: 1
+      sockets: 1
+      threads_per_core: 1
+    gpu:
 
   equipment_authentication: # login/password for BMC, storage bay controller, switch, etc.
     user: ADMIN

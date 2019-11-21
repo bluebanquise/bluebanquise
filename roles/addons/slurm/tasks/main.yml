@@ -49,6 +49,14 @@
   tags:
     - templates
 
+- name: File >> /etc/slurm/cgroup.conf
+  copy:
+    src: cgroup.conf
+    dest: /etc/slurm/cgroup.conf
+    owner: root
+    group: root
+    mode: 0644
+
 - name: Create directories
   file:
     path: "{{item}}"

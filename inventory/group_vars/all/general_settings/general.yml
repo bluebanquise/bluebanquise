@@ -9,6 +9,10 @@ time_zone: Europe/Brussels
 icebergs_system: true # Activate or deactivate icebergs topology system. Experimental.
 accelerated_mode: false # Activate or deactivate accelerated mode. Experimental.
 
+# Services handling
+enable_services: true # Enable or disable services on startup (set to false when using high availability)
+start_services: true # Handle start/restart of the services (set to false when using high availability)
+
 # /etc/hosts
 hosts_file:
   range: all # can be all (all hosts) or iceberg (iceberg only)

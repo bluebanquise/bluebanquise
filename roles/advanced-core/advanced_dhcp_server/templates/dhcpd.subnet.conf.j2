@@ -1,71 +1,63 @@
+#jinja2: lstrip_blocks: "True"
 #### Blue Banquise file ####
 ## {{ansible_managed}}
 
 {% if icebergs_system == true %}
-{% set range = groups[j2_current_iceberg] %}
-{% for host in groups[managements_group_name] %}
-{% if hostvars[host]['iceberg_master'] == j2_current_iceberg %}
+  {% set range = groups[j2_current_iceberg] %}
+  {% for host in groups[managements_group_name] %}
+    {% if hostvars[host]['iceberg_master'] == j2_current_iceberg %}
 {{ range.append(host) }}
-{% endif %}
-{% endfor %}
+    {% endif %}
+  {% endfor %}
 {% else %}
-{% set range = groups['all'] %}
+  {% set range = groups['all'] %}
 {% endif %}
 
-{% for equipment in j2_equipment_groups_list %}
-##### START {{equipment}} #####
-group {
+{% for host in range %}
+  {% if hostvars[host]['network_interfaces'] is defined %}
+    {# Define iPXE rom to use #}
+    {% if hostvars[host]['equipment_profile']['ipxe_driver'] == 'snponly' %}
+      {% set ipxe_driver = 'snponly_' %}
+    {% elif hostvars[host]['equipment_profile']['ipxe_driver'] == 'snp' %}
+      {% set ipxe_driver = 'snp_' %}
+    {% else %}  {# Assume everything else is default driver #}
+      {% set ipxe_driver = '' %}
+    {% endif %}
+    {% if hostvars[host]['equipment_profile']['hardware']['cpu']['architecture'] == 'arm64' %}
+      {% set ipxe_architecture = 'arm64' %}
+    {% else %}  {# Assume everything else is x86_64 #}
+      {% set ipxe_architecture = 'x86_64' %}
+    {% endif %}
+    {% if hostvars[host]['equipment_profile']['ipxe_platform'] == 'efi' %}
+      {% set ipxe_rom_filename = (ipxe_architecture + '/standard_' + ipxe_driver + 'ipxe.efi') %}
+    {% else %}  {# Assume everything else is pcbios #}
+      {% set ipxe_rom_filename = (ipxe_architecture + '/standard_undionly.kpxe') %}
+    {% endif %}
 
-{# can be merged into one using variable #}
-{% if hostvars[groups[equipment][0]]['equipment_profile']['ipxe_network_driver'] == 'snponly' %}
-{% set ipxe_rom = 'snponly_' %}
-{% elif hostvars[groups[equipment][0]]['equipment_profile']['ipxe_network_driver'] == 'snp' %}
-{% set ipxe_rom = 'snp_' %}
-{% else %}
-{% set ipxe_rom = '' %}
-{% endif %}
- if exists client-arch {
-   if option client-arch = 00:00 {
-     filename "x86_64/standard_undionly.kpxe";
-   } elsif option client-arch = 00:06 {
-     filename "x86/standard_{{ipxe_rom}}ipxe.efi";
-   } elsif option client-arch = 00:07 {
-     filename "x86_64/standard_{{ipxe_rom}}ipxe.efi";
-   } elsif option client-arch = 00:08 {
-     filename "x86_64/standard_{{ipxe_rom}}ipxe.efi";
-   } elsif option client-arch = 00:09 {
-     filename "x86_64/standard_{{ipxe_rom}}ipxe.efi";
-   } elsif option client-arch = 00:0a {
-     filename "arm32/standard_{{ipxe_rom}}ipxe.efi";
-   } elsif option client-arch = 00:0b {
-     filename "arm64/standard_{{ipxe_rom}}ipxe.efi";
-   }
- }
-
-{% for host in groups[equipment] %}
-{% if host in range %}
-{% if hostvars[host]['network_interfaces'] is defined %}
-{% for nic, nic_args in hostvars[host]['network_interfaces'].items() %}
-{% if (nic_args.network is defined and not none) and (nic_args.network == item) and (nic_args.ip4 is defined and not none) %}
-{% if nic_args.mac is defined and not none %}
+    {% for nic, nic_args in hostvars[host]['network_interfaces'].items() %}
+      {% if (nic_args.network is defined and not none) and (nic_args.network == item) and (nic_args.ip4 is defined and not none) %}
+        {% if nic_args.mac is defined and not none %}
   host {{host}} { 
     option host-name "{{host}}";
     hardware ethernet {{nic_args.mac}}; 
     fixed-address {{nic_args.ip4}};
+    filename "{{ipxe_rom_filename}}";
   }
-{% elif nic_args.dhcp_client_identifier is defined and not none %}
+        {% elif nic_args.dhcp_client_identifier is defined and not none %}
   host {{host}} {
     option host-name "{{host}}";
     option dhcp_client_identifier {{nic_args.dhcp-client-identifier}};
     fixed-address {{nic_args.ip4}};
+    filename "{{ipxe_rom_filename}}";
   }
-{% elif nic_args.host_identifier is defined and not none %}
+        {% elif nic_args.host_identifier is defined and not none %}
   host {{host}} {
     option host-name "{{host}}";
     host_identifier {{nic_args.host-identifier}};
     fixed-address {{nic_args.ip4}};
+    filename "{{ipxe_rom_filename}}";
   }
-{% elif nic_args.option_match is defined and not none %}{# Warning, only works in a shared network!! #}
+        {% elif nic_args.option_match is defined and not none %}{# Warning, only works in a shared network!! #}
   class "option_match_{{host}}" {
     match if (
       {{nic_args.option_match}}
@@ -75,32 +67,34 @@ group {
     option host-name "{{host}}";
     allow members of "option_match_{{host}}";
     range {{nic_args.ip4}};
+    filename "{{ipxe_rom_filename}}";
   }
-{% endif %}
-{% endif %}
-{% endfor %}
-{% if hostvars[host]['bmc'] is defined %}
-{% set bmc_args = hostvars[host]['bmc'] %}
-{% if (bmc_args.network is defined and not none) and (bmc_args.network == item) and (bmc_args.name is defined and not none) and (bmc_args.ip4 is defined and not none) %}
-{% if bmc_args.mac is defined and not none %}
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+
+    {% if hostvars[host]['bmc'] is defined %}
+      {% set bmc_args = hostvars[host]['bmc'] %}
+      {% if (bmc_args.network is defined and not none) and (bmc_args.network == item) and (bmc_args.name is defined and not none) and (bmc_args.ip4 is defined and not none) %}
+        {% if bmc_args.mac is defined and not none %}
     host {{bmc_args.name}} {
       option host-name "{{bmc_args.name}}";
       hardware ethernet {{bmc_args.mac}};
       fixed-address {{bmc_args.ip4}};
     }
-{% elif bmc_args.dhcp_client_identifier is defined and not none %}
+        {% elif bmc_args.dhcp_client_identifier is defined and not none %}
   host {{bmc_args.name}} {
     option host-name "{{bmc_args.name}}";
     option dhcp_client_identifier {{bmc_args.dhcp-client-identifier}};
     fixed-address {{bmc_args.ip4}};
   }
-{% elif nic_args.host_identifier is defined and not none %}
+        {% elif bmc_args.host_identifier is defined and not none %}
   host {{bmc_args.name}} {
     option host-name "{{bmc_args.name}}";
     host_identifier {{bmc_args.host-identifier}};
     fixed-address {{bmc_args.ip4}};
   }
-{% elif nic_args.option_match is defined and not none %}{# Warning, only works in a shared network!! #}
+        {% elif bmc_args.option_match is defined and not none %}{# Warning, only works in a shared network!! #}
   class "option_match_{{bmc_args.name}}" {
     match if (
       {{bmc_args.option_match}}
@@ -111,15 +105,9 @@ group {
     allow members of "option_match_{{bmc_args.name}}";
     range {{bmc_args.ip4}};
   }
-{% endif %}
-{% endif %}
-{% endif %}
-{% endif %}
-{% endif %}
+        {% endif %}
+      {% endif %}
+    {% endif %}
+  {% endif %}
 {% endfor %}
 
-}
-##### End {{equipment}} #####
-
-
-{% endfor %}
