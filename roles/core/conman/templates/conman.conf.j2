@@ -9,13 +9,13 @@ SERVER timestamp=1h
 GLOBAL logopts="timestamp"
 
 {% for host in groups[j2_current_iceberg] %}
-console name="{{host}}" dev="ipmitool.exp {{hostvars[host]['bmc']['ip4'] {{hostvars[host]['equipment_profile']['authentication']['equipment_user']}} {{hostvars[host]['equipment_profile']['authentication']['equipment_password']}}"
+console name="{{host}}" dev="ipmitool.exp {{hostvars[host]['bmc']['ip4']}} {{hostvars[host]['equipment_profile']['authentication']['equipment_user']}} {{hostvars[host]['equipment_profile']['authentication']['equipment_password']}}"
 {% endfor %}
 
 {% for under_icb in j2_under_icebergs %}
 {% for host in groups[managements_group_name] %}
 {% if (groups[under_icb] is defined and not none) and (host in groups[under_icb]) %}
-console name="{{host}}" dev="ipmitool.exp {{hostvars[host]['bmc']['ip4'] {{hostvars[host]['equipment_profile']['authentication']['equipment_user']}} {{hostvars[host]['equipment_profile']['authentication']['equipment_password']}}"
+console name="{{host}}" dev="ipmitool.exp {{hostvars[host]['bmc']['ip4']}} {{hostvars[host]['equipment_profile']['authentication']['equipment_user']}} {{hostvars[host]['equipment_profile']['authentication']['equipment_password']}}"
 {% endif %}
 {% endfor %}
 {% endfor %}
