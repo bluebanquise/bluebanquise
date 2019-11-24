@@ -19,5 +19,5 @@ Need to add support for Ubuntu and OpenSuse if exist.
 Changelog
 ^^^^^^^^^
 
-* 1.0.0: Role creation. oxedions <oxedions@gmail.com>
+* 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
  

@@ -36,8 +36,8 @@ Last point, external hosts defined in *group_vars/all/general_settings/external.
 Changelog
 ^^^^^^^^^
 
-* 1.0.3: Accelerated mode. oxedions <oxedions@gmail.com>
+* 1.0.3: Accelerated mode. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.2: Added role version. johnnykeats <johnny.keats@outlook.com>
 * 1.0.1: Documentation. johnnykeats <johnny.keats@outlook.com>
-* 1.0.0: Role creation. oxedions <oxedions@gmail.com>
+* 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
  

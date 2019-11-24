@@ -8,21 +8,27 @@ and commits adheres to [Conventional Commits](https://www.conventionalcommits.or
 
 ## [Unreleased]
 
-- Map hostname direct resolution to a specific global network
 - Full report role:
   - Cluster inventory map
   - Network automatic map
   - Icebergs debug patterns
 
-## [1.2.0] - ??
+## [1.2.0]
+### Feat
+- Diskless
+- iPXE new chain
+- Map hostname direct resolution to a specific global network
 
-## [1.1.1] - ??
+## [1.1.1]
+### Fix
+- Many small fixs
+- Added services management
 
 ## [1.1.0] - 2019-10-19
-### Added
+### Feat
 - Icebergs system
 
-### Changed
+### Fix
 - Main network system
 - Fixed clustershell role bug
 - Fixed bootset tool SELinux compatibility

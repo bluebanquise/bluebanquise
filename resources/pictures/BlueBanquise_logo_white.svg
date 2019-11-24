@@ -15,7 +15,10 @@
    version="1.1"
    id="svg8"
    inkscape:version="0.92.3 (2405546, 2018-03-11)"
-   sodipodi:docname="BlueBanquise_logo.svg">
+   sodipodi:docname="BlueBanquise_logo_white.svg"
+   inkscape:export-filename="C:\Users\sphen\Documents\Personnel\Algoric\BBWeb\pictures\BlueBanquise_logo_white.png"
+   inkscape:export-xdpi="125.92863"
+   inkscape:export-ydpi="125.92863">
   <defs
      id="defs2" />
   <sodipodi:namedview
@@ -26,7 +29,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.0698111"
-     inkscape:cx="246.70051"
+     inkscape:cx="64.892712"
      inkscape:cy="265.40766"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
@@ -48,7 +51,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -177,7 +180,7 @@
          x="58.287643"
          y="91.440544"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:16.93333244px;font-family:Lato;-inkscape-font-specification:Lato;fill:#565656;fill-opacity:1;stroke-width:0.26458332"><tspan
-           style="fill:#108bde;fill-opacity:1"
+           style="fill:#efad21;fill-opacity:1"
            id="tspan1112">Blue</tspan><tspan
            style="fill:#ffffff;fill-opacity:1"
            id="tspan873">Banquise</tspan></tspan></text>

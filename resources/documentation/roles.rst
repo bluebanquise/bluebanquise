@@ -30,7 +30,6 @@ ADVANCED CORE
 =============
 
 .. include:: roles/advanced-core/advanced_dhcp_server/readme.rst
-.. include:: roles/advanced-core/advanced_nic/readme.rst
 
 ADDONS
 ======
@@ -40,6 +39,7 @@ ADDONS
 .. include:: roles/addons/ofed_sm/readme.rst
 .. include:: roles/addons/openldap_client/readme.rst
 .. include:: roles/addons/openldap_server/readme.rst
+.. include:: roles/addons/nic_nmcli/readme.rst
 .. include:: roles/addons/prometheus_server/readme.rst
 .. include:: roles/addons/prometheus_client/readme.rst
 .. include:: roles/addons/report/readme.rst

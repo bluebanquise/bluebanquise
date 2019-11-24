@@ -11,9 +11,9 @@ Currently supported OS are:
 
 * Full:
   * RedHat/Centos 7.6
+  * RedHat/Centos 8.0
 
 * Partial/in dev:
-  * RedHat/Centos 8.0
   * Ubuntu 18.04
   * OpenSuse Leap 15.1
 

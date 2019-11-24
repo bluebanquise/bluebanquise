@@ -47,6 +47,6 @@ To be done
 Changelog
 ^^^^^^^^^
 
-* 1.0.1: Documentation. oxedions <oxedions@gmail.com>
-* 1.0.0: Role creation. oxedions <oxedions@gmail.com>
+* 1.0.1: Documentation. Benoit Leveugle <benoit.leveugle@gmail.com>
+* 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
  

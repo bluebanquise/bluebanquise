@@ -27,5 +27,5 @@ Changelog
 
 * 1.0.2: Tested on ubuntu 18.04 and validated. johnnykeats <johnny.keats@outlook.com>
 * 1.0.1: Documentation. johnnykeats <johnny.keats@outlook.com>
-* 1.0.0: Role creation. oxedions <oxedions@gmail.com>
+* 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
  

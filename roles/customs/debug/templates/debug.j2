@@ -1,8 +1,1 @@
-{#{{network_interfaces| map(attribute='vlan') | list  | unique | sort | first | join }}#}
-{{lookup('dict',network_interfaces)}}
-{{network_interfaces}}
-{{lookup('flattened',network_interfaces)}}
-{% if 'vlan' in lookup('dict',network_interfaces) %}1{% endif %}
-{% if 'vlan' in lookup('flattened',network_interfaces) %}2{% endif %}
-{% if 'vlan' in network_interfaces %}3{% endif %}
-
+coucou
