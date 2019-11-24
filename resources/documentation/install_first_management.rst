@@ -25,7 +25,7 @@ And the following parameters are the strict minimal if you wish to test the stac
 
 In this last configuration, DVD iso will be mounted from /dev/cdrom instead of being copied to save space.
 
-It is recommended to only choose minimal install during packages selections. Also, it is recommended to let system in English, and only set your keyboard and time zone to your country.
+It is recommended to only choose minimal install during packages selections (core or minimal server). Also, it is recommended to let system in English, and only set your keyboard and time zone to your country.
 
 Prepare for Ansible
 ===================
@@ -33,7 +33,7 @@ Prepare for Ansible
 Repositories
 ------------
 
-Once system is installed and rebooted, login, and disable firewall. Current stack does not support firewall configuration (but it is scheduled for later released).
+Once system is installed and rebooted, login, and disable firewall. Current stack does not support firewall configuration on management nodes (but it is scheduled for later releases).
 
 .. code-block:: bash
 
@@ -132,9 +132,9 @@ Note: this patern parameters (distribution, version, architecture) must match th
 BlueBanquise
 ^^^^^^^^^^^^
 
-Download BlueBanquise rpms from official repository. Ansible is included if not provided in the distribution.
+Download BlueBanquise rpms from official repository.
 
-Go to http://raphael.sphenisc.com/bluebanquise/repositories/centos/7.6/x86_64/bluebanquise and get the content of the whole directory.
+Go to https://bluebanquise.com, go to repositories/download, and get the content of the whole directory corresponding to your distribution and architecture.
 
 Then copy this content into /var/www/html/repositories/centos/7.6/x86_64/bluebanquise/ locally.
 
@@ -158,6 +158,15 @@ Install Ansible
 ---------------
 
 Time to install Ansible.
+
+Install epel first, to get Ansible:
+
+.. code-block:: bash
+
+  yum install epel-release
+  yum repolist
+
+Then install Ansible:
 
 .. code-block:: bash
 

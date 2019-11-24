@@ -1,5 +1,0 @@
-## Network related engine
-
-j2_node_main_network: "{% set main_ntw = [] %}{% for nic in network_interfaces %}{% if network_interfaces[nic].network is defined and not none %}{{ main_ntw.append(network_interfaces[nic].network|string) }}{% endif %}{% endfor %}{{main_ntw | select('match',(j2_current_iceberg_network+'-[0-9]+')) | list | unique | sort| first | join | trim}}"
-
-j2_node_main_network_interface: "{% set main_ntw_nic = [] %}{% for nic in network_interfaces %}{% if network_interfaces[nic].network is defined and not none %}{% if network_interfaces[nic].network == j2_node_main_network %}{{ main_ntw_nic.append(nic|string) }}{% endif %}{% endif %}{% endfor %}{{main_ntw_nic | unique | join | trim}}"

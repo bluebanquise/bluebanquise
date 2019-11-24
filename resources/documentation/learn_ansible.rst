@@ -80,14 +80,14 @@ If ok, then deploy ssh public key to allow password less authentication, and ens
 
 .. code-block:: text
 
-  [root@management1 ~]#  ssh-copy-id management1
+  [root@management1 ~]# ssh-copy-id management1
   /usr/bin/ssh-copy-id: INFO: Source of key(s) to be installed: "/root/.ssh/id_rsa.pub"
   root@management1's password:
   Number of key(s) added: 1
   [root@management1 ~]# ssh management1
   [root@management1 ~]#
 
-Finally, check Ansible to try to connect to management1, and report hosts is up:
+Finally, check Ansible can connect to management1, and report hosts is up:
 
 .. code-block:: bash
 
@@ -143,7 +143,7 @@ Then, open file /dev/shm/management1 to check its content and the result of fact
 ansible-inventory
 -----------------
 
-Ansible inventory command is extremely useful can will be massively used on this documentation.
+Ansible inventory command is extremely useful and will be massively used on this documentation.
 
 This command allows to gather information from your inventory and check the expected output.
 

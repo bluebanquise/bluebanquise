@@ -1,0 +1,14 @@
+### Network related settings
+
+## DNS
+domain_name: tumulus.local
+
+## DHCP
+dhcp_settings:
+  default_lease_time: 600 # Consider to increase once in production
+  max_lease_time: 7200 # Same
+
+## Global network
+global_network_settings:
+  global_network:
+  global_network_group:

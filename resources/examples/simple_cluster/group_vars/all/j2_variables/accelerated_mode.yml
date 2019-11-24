@@ -1,1 +1,0 @@
-j2_master_groups_list: "{{ groups | select('match','^'+master_groups_naming+'_.*') | list | unique | sort }}"

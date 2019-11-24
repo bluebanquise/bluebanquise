@@ -1,0 +1,5 @@
+# BlueBanquise internal j2_ variables.
+# Accelerated mode
+# (c) 2019 Benoit Leveugle
+
+j2_master_groups_list: "{{ groups | select('match','^'+master_groups_naming+'_.*') | list | unique | sort }}"
