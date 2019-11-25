@@ -35,6 +35,7 @@ ADDONS
 ======
 
 .. include:: roles/addons/clustershell/readme.rst
+.. include:: roles/addons/diskless/readme.rst
 .. include:: roles/addons/ofed/readme.rst
 .. include:: roles/addons/ofed_sm/readme.rst
 .. include:: roles/addons/openldap_client/readme.rst
