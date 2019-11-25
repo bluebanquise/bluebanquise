@@ -207,11 +207,6 @@ Variables and groups
 
 Now that all important commands have been seen, it is time to add some variables inside the inventory, and play with groups.
 
-#####However, for more fun and understand all the process, we will also create a very minimal playbook that will execute a simple task (no need for a role here): rendering a file with these variables as content, on the target hosts.
-#####Create a minimal playbook
--------------------------
-######Create a file /etc/ansible/minimal_playbook.yml with the following content:
-
 Adding variables
 ----------------
 
@@ -263,7 +258,7 @@ Edit file /etc/ansible/inventory/myhost.yml to obtain:
   login1
   nfs1
 
-And now let's check login1 (when will exist) can access these variables also:
+And now let's check login1 (when will exist) can also access these variables:
 
 .. code-block:: bash
 
@@ -409,14 +404,16 @@ And check the result:
 
 Same concept applies here, with different syntax.
 
-You can find more information and examples here: https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+Note that an host can be part of multiple groups.
+
+You can find more information and examples `here on intro_inventory <https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html>`_ .
 
 Variables precedence
 --------------------
 
-Time to use all these groups.
+Time to use all these groups and make full usage of the inventory structure.
 
-If you remember precedence system in Vocabulary section (see https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html#variable-precedence-where-should-i-put-a-variable) group_vars/all is in position 4 in the precedence. This is where we set our spaceship variables.
+If you remember precedence system in Vocabulary section (more `here on Ansible dedicated page <https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html#variable-precedence-where-should-i-put-a-variable>`_ ) group_vars/all is in position 4 in the precedence. This is where we set our spaceship variables.
 
 Let's say now we wish to change our ship destination for management1 node only.
 
@@ -460,7 +457,7 @@ And check destinations again:
     destination: Deliani
   [root@ ~]#
 
-OOPS ! We made a mistake. Indeed, if you check again content of file /etc/ansible/inventory/group_vars/all/my_ship.yml, you can see destination is not at the top, but under *my_ship*.
+**OOPS ! We made a mistake**. Indeed, if you check again content of file /etc/ansible/inventory/group_vars/all/my_ship.yml, you can see destination is not at the top, but under *my_ship*.
 
 Edit again /etc/ansible/inventory/myhost.yml and fix it:
 
@@ -494,7 +491,7 @@ Perfect. Setting a variable in the host definition file is equivalent to using h
 
 Let's say now we want to change the model of spaceship of all the slave nodes. So not a single host, but all slave members hosts.
 
-We are going to use level 6 in variables precedence: group_vars/. Create a directory called slave in group_vars:
+We are going to use level 6 in variables precedence: group_vars/. Create a directory called *slave* (same name than the group we want to work with) in group_vars:
 
 .. code-block:: bash
 
@@ -580,14 +577,14 @@ Content is pretty simple:
 * Then Ansible render the template index.html.j2 and write the result in /var/www/html/index.html
 * Then Ansible ensure httpd service is started and enabled at boot
 
-You can find all Ansible modules here in the official documentation: https://docs.ansible.com/ansible/latest/modules/modules_by_category.html
+You can find all Ansible modules here in the `official documentation <https://docs.ansible.com/ansible/latest/modules/modules_by_category.html>`_ .
 
 Template
 ^^^^^^^^
 
 Templates are probably the key feature of Ansible and all automation tools.
 
-The idea is simple: you provide Ansible with a copy of your desired configuration file, with variables to replace to fill some dynamic parts of the file.
+The idea is simple: you provide Ansible with a copy of your desired configuration file, with variables to be dynamnicaly replaced in order to fill on the fly some parts of the file.
 
 Let's do this with a simple html page, and first with a static page.
 
@@ -667,7 +664,7 @@ Edit file /etc/ansible/roles/shipyard/templates/index.html.j2 to make it this wa
   </body>
   </html>
 
-And let's re-execute the playbook. But we have already installed the package and started the service, so let's ask Ansible to only work on the tags 'templates' to fasten the execution:
+And let's re-execute the playbook. But we have already installed the package and started the service, so let's ask Ansible to only work on the tags 'templates' to fasten the execution (this tag was defined in the tasks/mail.yml file previsouly seen):
 
 .. code-block:: bash
 

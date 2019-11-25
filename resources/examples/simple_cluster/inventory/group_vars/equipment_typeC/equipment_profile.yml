@@ -1,6 +1,6 @@
 equipment_profile:
 
-  access_control: false # equivalent to selinux=0
+#  access_control: false # equivalent to selinux=0
   firewall: false
 
   console: console=tty0 console=ttyS1,115200n8

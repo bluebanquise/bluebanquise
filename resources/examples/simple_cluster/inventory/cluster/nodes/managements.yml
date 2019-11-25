@@ -13,8 +13,8 @@ mg_managements:
               ip4: 10.10.0.1
               mac: 08:00:27:dc:f8:f5 
               network: ice1-1
-            enp0s8:
+            ib0:
               ip4: 10.20.0.1
-              network: interconnect1
+              network: interconnect-1
 
             
