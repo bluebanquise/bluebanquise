@@ -98,7 +98,7 @@
 - name: Templates >> kickstarts for Centos
   template:
     src: "kickstart.cfg.j2"
-    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{item | replace(equipment_naming,'') | trim}}.kickstart.cfg
+    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{item | replace(equipment_naming+'_','') | trim}}.kickstart.cfg
     mode: 0644
   with_items: "{{ j2_equipment_groups_list }}"
   when:
@@ -110,7 +110,7 @@
 - name: Templates >> equipment_profiles for Centos
   template:
     src: "equipment_profile.ipxe.j2"
-    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{item | replace(equipment_naming,'') | trim}}.ipxe
+    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{item | replace(equipment_naming+'_','') | trim}}.ipxe
     mode: 0644
   with_items: "{{j2_equipment_groups_list}}"
   when:
@@ -124,7 +124,7 @@
 - name: Templates >> preseeds for Ubuntu
   template:
     src: "preseed.cfg.j2"
-    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{item | replace(equipment_naming,'') | trim}}.preseed.cfg
+    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{item | replace(equipment_naming+'_','') | trim}}.preseed.cfg
     mode: 0644
   with_items: "{{j2_equipment_groups_list}}"
   when:
@@ -136,7 +136,7 @@
 - name: Templates >> equipment_profiles for Ubuntu
   template:
     src: "configuration_ubuntu.ipxe.j2"
-    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{item | replace(equipment_naming,'') | trim}}.ipxe
+    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{item | replace(equipment_naming+'_','') | trim}}.ipxe
     mode: 0644
   with_items: "{{j2_equipment_groups_list}}"
   when:
@@ -150,7 +150,7 @@
 - name: Templates >> autoyasts for OpenSuse
   template:
     src: "autoyast.xml.j2"
-    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{item | replace(equipment_naming,'') | trim}}.autoyast.xml
+    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{item | replace(equipment_naming+'_','') | trim}}.autoyast.xml
     mode: 0644
   with_items: "{{j2_equipment_groups_list}}"
   when:
@@ -162,7 +162,7 @@
 - name: Templates >> equipment_profiles for OpenSuse
   template:
     src: "configuration_opensuse.ipxe.j2"
-    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{item | replace(equipment_naming,'') | trim}}.ipxe
+    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{item | replace(equipment_naming+'_','') | trim}}.ipxe
     mode: 0644
   with_items: "{{j2_equipment_groups_list}}"
   when:
