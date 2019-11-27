@@ -39,6 +39,9 @@ $TTL 86400
 
 ;## External hosts
 
+{% if external_hosts is defined and external_hosts is not none and external_hosts %}
 {% for host in external_hosts %}
 {{external_hosts[host].split('.')[3]}}.{{external_hosts[host].split('.')[2]}}.{{external_hosts[host].split('.')[1]}}.{{external_hosts[host].split('.')[0]}} IN PTR {{host}}.
 {% endfor %}
+{% endif %}
+

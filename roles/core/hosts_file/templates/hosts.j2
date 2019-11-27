@@ -58,6 +58,8 @@
 
 ## External hosts
 
+{% if external_hosts is defined and external_hosts is not none and external_hosts %}
 {% for host in external_hosts %}
 {{external_hosts[host]}} {{host}}
 {% endfor %}
+{% endif %}
