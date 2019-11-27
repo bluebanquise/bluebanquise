@@ -3,6 +3,10 @@
 
 search {{domain_name}}
 nameserver {{networks[j2_node_main_network]['services_ip']['dns_ip']}} 
+{% if external_dns is defined and external_dns is not none %}
+{% if external_dns.dns_client is defined and external_dns.dns_client is not none and external_dns.dns_client %}
 {% for external_server in external_dns.dns_client %}
 nameserver {{external_server}}
 {% endfor %} 
+{% endif %}
+{% endif %}
