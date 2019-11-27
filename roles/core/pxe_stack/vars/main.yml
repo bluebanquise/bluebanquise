@@ -42,23 +42,26 @@ packages_to_install:
   ubuntu:
     _18:
       - atftpd
-      - ipxe-bluebanquise
+      - ipxe-x86_64-bluebanquise
+      - ipxe-arm64-bluebanquise
       - apache2
       - python3
       - python3-yaml
       - python3-clustershell
   redhat:
     _7:
-      - atftp-bluebanquise
-      - ipxe-bluebanquise
+      - atftp
+      - ipxe-x86_64-bluebanquise
+      - ipxe-arm64-bluebanquise
       - httpd
       - policycoreutils-python
       - python36
       - python36-PyYAML
       - python36-clustershell
     _8:
-      - atftp-bluebanquise
-      - ipxe-bluebanquise
+      - atftp
+      - ipxe-x86_64-bluebanquise
+      - ipxe-arm64-bluebanquise
       - httpd
       - python3-policycoreutils
       - clustershell
@@ -66,16 +69,18 @@ packages_to_install:
       - policycoreutils
   centos:
     _7:
-      - atftp-bluebanquise
-      - ipxe-bluebanquise
+      - atftp
+      - ipxe-x86_64-bluebanquise
+      - ipxe-arm64-bluebanquise
       - httpd
       - policycoreutils-python
       - python36
       - python36-PyYAML
       - python36-clustershell
     _8:
-      - atftp-bluebanquise
-      - ipxe-bluebanquise
+      - atftp
+      - ipxe-x86_64-bluebanquise
+#      - ipxe-arm64-bluebanquise
       - httpd
       - python3-policycoreutils
       - clustershell
