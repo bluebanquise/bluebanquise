@@ -1,7 +1,7 @@
 #!ipxe
 
 echo |
-echo | Entering osdeploy/centos_8.ipxe file.
+echo | Entering osdeploy/centos_7.ipxe file.
 echo |
 
 echo | Now starting os deployment process.
@@ -17,11 +17,11 @@ echo | > Target kickstart: ${eq-equipment-profile}.kickstart.cfg
 echo |
 echo | Loading linux ...
 
-kernel ${repository-root}/os/images/pxeboot/vmlinuz initrd=initrd.img inst.repo=${repository-root}/os/BaseOS ks=${kickstart-path} ${eq-console} ${eq-kernel-parameters} ${dedicated-kernel-parameters} ipxe_next_server=${next-server}
+kernel ${repository-root}/os/images/pxeboot/vmlinuz initrd=initrd.img inst.repo=${repository-root}/os/ ks=${kickstart-path} ${eq-console} ${eq-kernel-parameters} ${dedicated-kernel-parameters} ipxe_next_server=${next-server}
 
 echo | Loading initial ramdisk ...
 
-initrd http://${next-server}/repositories/centos/8.0/x86_64/os/images/pxeboot/initrd.img
+initrd ${repository-root}/os/images/pxeboot/initrd.img
 
 echo | ALL DONE! We are ready.
 echo | Booting in 4s ...
