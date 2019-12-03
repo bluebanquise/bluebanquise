@@ -147,6 +147,7 @@ To be done
 Changelog
 ^^^^^^^^^
 
+* 1.1.1: bootset.py refactoring. Adrien Ribeiro <adrien.ribeiro@atos.net>
 * 1.1.0: Rewamped the whole role. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.2: Add Ubuntu 18.04 compatibility. johnnykeats <johnny.keats@outlook.com>
 * 1.0.1: Documentation. johnnykeats <johnny.keats@outlook.com>
