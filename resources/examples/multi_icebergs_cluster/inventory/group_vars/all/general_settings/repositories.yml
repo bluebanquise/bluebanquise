@@ -1,3 +1,10 @@
 system_repositories:
   - bluebanquise
   - os
+
+# Uncomment this variable if you need additionnal repositories on your clients
+# Be aware that, at this level, theses repositories will be exported on all hosts without 
+# any architecture or distribution check.
+
+#external_repositories:
+#  - { name: epel, url: 'https://dl.fedoraproject.org/pub/epel/7/x86_64/'}

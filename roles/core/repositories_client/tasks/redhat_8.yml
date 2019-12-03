@@ -2,25 +2,28 @@
 
 - name: Setting repositories
   yum_repository:
-    name: "{{item}}"
-    description: "{{item}} gen by Ansible"
+    name: "{{ item }}"
+    description: "{{ item }} gen by Ansible"
     baseurl: "http://{{networks[j2_node_main_network]['services_ip']['repository_ip']}}/repositories/{{equipment_profile['operating_system']['distribution']}}/{{equipment_profile['operating_system']['distribution_version']}}/{{equipment_profile['hardware']['cpu']['architecture']}}/{{item}}"
     gpgcheck: no
-  with_items: "{{system_repositories}}"
+  loop: "{{ system_repositories }}"
   when: item != 'os'
 
-- name: Setting repositories os (BaseOS)
+- name: "Setting repositories os ({{ item }})"
   yum_repository:
-    name: BaseOS
-    description: "BaseOS gen by Ansible"
-    baseurl: "http://{{networks[j2_node_main_network]['services_ip']['repository_ip']}}/repositories/{{equipment_profile['operating_system']['distribution']}}/{{equipment_profile['operating_system']['distribution_version']}}/{{equipment_profile['hardware']['cpu']['architecture']}}/os/BaseOS"
+    name: "{{ item }}"
+    description: "{{ item }} gen by Ansible"
+    baseurl: "http://{{networks[j2_node_main_network]['services_ip']['repository_ip']}}/repositories/{{equipment_profile['operating_system']['distribution']}}/{{equipment_profile['operating_system']['distribution_version']}}/{{equipment_profile['hardware']['cpu']['architecture']}}/os/{{ item }}"
     gpgcheck: no
+  loop:
+    - BaseOS
+    - AppStream
   when: "'os' in system_repositories"
 
-- name: Setting repositories os (AppStream)
+- name: "Setting external repository ({{ item }})"
   yum_repository:
-    name: AppStream
-    description: "AppStream gen by Ansible"
-    baseurl: "http://{{networks[j2_node_main_network]['services_ip']['repository_ip']}}/repositories/{{equipment_profile['operating_system']['distribution']}}/{{equipment_profile['operating_system']['distribution_version']}}/{{equipment_profile['hardware']['cpu']['architecture']}}/os/AppStream"
+    name: "{{ item.name }}"
+    description: "{{ item.name }} gen by Ansible"
+    baseurl: "{{ item.url }}"
     gpgcheck: no
-  when: "'os' in system_repositories"
+  loop: "{{ external_repositories | default([]) }}"
