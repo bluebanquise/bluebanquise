@@ -32,7 +32,7 @@ class bcolors:
 def load_file(filename):
     print(bcolors.OKBLUE+'[INFO] Loading '+ filename + bcolors.ENDC)
     with open(filename, 'r') as f:
-        return yaml.load(f)
+        return yaml.load(f, Loader=yaml.FullLoader)
 
 def set_default_boot(node, boot, diskless_image=None):
     print('    ├── '+bcolors.OKBLUE+'[INFO] Switching boot to '+ boot + bcolors.ENDC)
