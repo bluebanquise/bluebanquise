@@ -15,3 +15,9 @@
     dest: /root/.screenrc
     mode: 0644
 
+- name: Add vimrc configuration
+  copy:
+    src: vimrc
+    dest: /root/.vimrc
+    mode: 0644
+
