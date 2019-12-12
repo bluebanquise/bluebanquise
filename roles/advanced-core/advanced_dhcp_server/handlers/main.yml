@@ -1,0 +1,6 @@
+---
+
+- name: Restart dhcp_server services
+  service:
+    name: dhcpd
+    state: restarted
