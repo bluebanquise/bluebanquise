@@ -46,7 +46,7 @@
         {% elif nic_args.dhcp_client_identifier is defined and not none %}
   host {{host}} {
     option host-name "{{host}}";
-    option dhcp_client_identifier {{nic_args.dhcp-client-identifier}};
+    option dhcp-client-identifier {{nic_args.dhcp_client_identifier}};
     fixed-address {{nic_args.ip4}};
     filename "{{ipxe_rom_filename}}";
   }
@@ -85,7 +85,7 @@
         {% elif bmc_args.dhcp_client_identifier is defined and not none %}
   host {{bmc_args.name}} {
     option host-name "{{bmc_args.name}}";
-    option dhcp_client_identifier {{bmc_args.dhcp-client-identifier}};
+    option dhcp-client-identifier {{bmc_args.dhcp_client_identifier}};
     fixed-address {{bmc_args.ip4}};
   }
         {% elif bmc_args.host_identifier is defined and not none %}
