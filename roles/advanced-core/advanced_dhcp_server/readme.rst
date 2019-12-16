@@ -56,9 +56,9 @@ It is possible to use advanced dhcp features to identify an host. The following 
 - mac: identify based on MAC address. Same than standard dhcp server.
 - dhcp_client_identifier: identify based on a patern (string, etc) to recognise an host. Also known as option 61.
 - host_identifier: identify based on an option (agent.circuit-id, agent.remote-id, etc) to recognise an host. Also known as option 82.
-- option_match: identify based on multiple options in combinaison to recognise an host. Also known as option 82 with hack.
+- match: identify based on multiple options in combinaison to recognise an host. Also known as option 82 with hack.
 
-If using option_match, because this features is using a specific 'hack' in the dhcp server, you **must** define this host in a shared network, even if this shared network contains a single network (see this very well made page for more information: http://www.miquels.cistron.nl/isc-dhcpd/).
+If using match, because this features is using a specific 'hack' in the dhcp server, you **must** define this host in a shared network, even if this shared network contains a single network (see this very well made page for more information: http://www.miquels.cistron.nl/isc-dhcpd/).
 
 Changelog
 ^^^^^^^^^

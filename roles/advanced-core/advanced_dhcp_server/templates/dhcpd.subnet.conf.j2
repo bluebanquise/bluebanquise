@@ -62,10 +62,10 @@
     fixed-address {{nic_args.ip4}};
     filename "{{ipxe_rom_filename}}";
   }
-        {% elif nic_args.option_match is defined and not none %}{# Warning, only works in a shared network!! #}
+        {% elif nic_args.match is defined and not none %}{# Warning, only works in a shared network!! #}
   class "option_match_{{host}}" {
     match if (
-      {{nic_args.option_match}}
+      {{nic_args.match}}
     );
   }
   pool {
@@ -99,10 +99,10 @@
     host_identifier {{bmc_args.host-identifier}};
     fixed-address {{bmc_args.ip4}};
   }
-        {% elif bmc_args.option_match is defined and not none %}{# Warning, only works in a shared network!! #}
+        {% elif bmc_args.match is defined and not none %}{# Warning, only works in a shared network!! #}
   class "option_match_{{bmc_args.name}}" {
     match if (
-      {{bmc_args.option_match}}
+      {{bmc_args.match}}
     );
   }
   pool {
