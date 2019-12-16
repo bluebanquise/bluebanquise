@@ -30,12 +30,6 @@
 This report has been generated at:<br>
 {{ansible_managed}}<br>
 <br>
-<h2> Ansible Inventory Grapher </h2>
-<a href="graphs/inventory_all.png">All inventory</a>
-<h2> Ansible Playbook Grapher </h2>
-{% for path in playbook_paths.split(',') %}
-<a href="graphs/{{path}}.svg">{{path}}</a>
-{% endfor %}
 <h2> Ansible CMDB (fact gathering) </h2>
 You need to download and open this file localy (Right click, and save to disk).<br>
 <a href="overview.html">Ansible CMDB report</a>

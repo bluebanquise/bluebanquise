@@ -1,19 +1,10 @@
 ---
 
-- name: Package
+- name: Ansible CMDB
   package:
-    name: "{{item}}"
+    name: "ansible-cmdb"
     state: present
-  loop:
-    - graphviz
-    - python3-colour
-    - python3-lxml
-    - python3-pyparsing
-    - python3-packaging
-    - ansible-cmdb-bluebanquise
-    - ansible-inventory-grapher-bluebanquise
-    - ansible-playbook-grapher-bluebanquise
-  when: report_settings.enable_graphtool == true or report_settings.enable_ansible_cmdb == true or report_settings.enable_inventory_grapher == true or report_settings.enable_playbook_grapher == true
+  when: report_settings.enable_ansible_cmdb == true
 
 - name: Create report directories structure
   file:
@@ -24,7 +15,7 @@
    - /var/www/html/report/
    - /var/www/html/report/pictures
    - /var/www/html/report/css
-   - /var/www/html/report/debug
+   - /var/www/html/report/inventory_checker
    - /var/www/html/report/graphs
 
 - name: Template >> /var/www/html/report/index.html
@@ -53,71 +44,68 @@
     dest: /var/www/html/report/pictures/bluebanquise_logo_white.svg
     mode: 0644
 
-- name: Template >> /var/www/html/report/debug_report.html
+- name: Template >> /var/www/html/report/inventory_checker.html
   template:
-    src: "debug_report.html.j2"
-    dest: /var/www/html/report/debug_report.html
+    src: "inventory_checker.html.j2"
+    dest: /var/www/html/report/inventory_checker.html
     owner: root
     group: root
     mode: 0644
   tags:
     - templates
-  when: report_settings.enable_debug == true 
+  when:
+    - report_settings.inventory_checker is defined
+    - report_settings.inventory_checker is not none
+    - report_settings.inventory_checker
+    - report_settings.inventory_checker is iterable
 
-- name: Template >> /var/www/html/report/debug/debug_groups.html
+- name: Template >> /var/www/html/report/inventory_checker/groups.html
   template:
-    src: "debug_groups.html.j2"
-    dest: /var/www/html/report/debug/debug_groups.html
+    src: "inventory_checker_groups.html.j2"
+    dest: /var/www/html/report/inventory_checker/groups.html
     owner: root
     group: root
     mode: 0644
   tags:
     - templates
-  when: report_settings.enable_debug == true
+  when:
+    - report_settings.inventory_checker is defined
+    - report_settings.inventory_checker is not none
+    - report_settings.inventory_checker
+    - report_settings.inventory_checker is iterable
+    - "'groups' in report_settings.inventory_checker"
 
-- name: Template >> /var/www/html/report/debug/debug_nodes.html
+- name: Template >> /var/www/html/report/inventory_checker/hosts.html
   template:
-    src: "debug_nodes.html.j2"
-    dest: /var/www/html/report/debug/debug_nodes.html
+    src: "inventory_checker_hosts.html.j2"
+    dest: /var/www/html/report/inventory_checker/hosts.html
     owner: root
     group: root
     mode: 0644
   tags:
     - templates
-  when: report_settings.enable_debug == true
+  when:
+    - report_settings.inventory_checker is defined
+    - report_settings.inventory_checker is not none
+    - report_settings.inventory_checker
+    - report_settings.inventory_checker is iterable
+    - "'hosts' in report_settings.inventory_checker"
 
-- name: Ansible find file examples
-  find:
-    paths: /etc/ansible/playbooks
-    patterns: "*.yml"
-  register: playbook_files_matched
-  when: report_settings.enable_playbook_grapher == true
-
-#- debug:
-#    msg: "{{ item.path }}"
-#  tags: test
-#  with_items: "{{playbook_files_matched.files}}"
-
-- name: Render playbooks diagrams
-  shell: ansible-playbook-grapher --include-role-tasks {{item.path}} -o /var/www/html/report/graphs/{{item.path | replace('/etc/ansible/playbooks/','') | replace('.yml','')}} -vvv
-  with_items: "{{playbook_files_matched.files}}"
-  when: report_settings.enable_playbook_grapher == true
-
-- name: Render all diagram
-  shell: ansible-inventory-grapher all -d /dev/shm/ --format "inventory_all.dot"
-  when: report_settings.enable_inventory_grapher == true
-
-- name: Convert all diagram
-  shell: dot -Tpng /dev/shm/inventory_all.dot -o /var/www/html/report/graphs/inventory_all.png
-  when: report_settings.enable_inventory_grapher == true
+- name: Create report directories structure
+  file:
+   path: "{{item}}"
+   state: directory
+   mode: 0755
+  with_items:
+   - /dev/shm/ansible-cmdb/
 
 - name: Gather all facts
-  shell: ansible -m setup --tree /dev/shm/out/ all
+  shell: ansible -m setup --tree /dev/shm/ansible-cmdb/ all
   ignore_errors: yes
   when: report_settings.enable_ansible_cmdb == true
 
 - name: Generate facts report
-  shell: ansible-cmdb /dev/shm/out > /var/www/html/report/overview.html
+  shell: ansible-cmdb /dev/shm/ansible-cmdb > /var/www/html/report/overview.html
   when: report_settings.enable_ansible_cmdb == true
 
 - name: Generate graph-tool network report
@@ -139,10 +127,7 @@
     owner: root
     group: root
     mode: 0644
-  vars:
-    playbook_paths: "{% for playbook in playbook_files_matched.files %}{% if not loop.first %},{% endif %}{{playbook.path | replace('/etc/ansible/playbooks/','') | replace('.yml','')}}{% endfor %}"
   tags:
     - templates
-  when: report_settings.enable_graphtool == true or report_settings.enable_ansible_cmdb == true or report_settings.enable_inventory_grapher == true or report_settings.enable_playbook_grapher == true
-
+  when: report_settings.enable_graphtool == true
 
