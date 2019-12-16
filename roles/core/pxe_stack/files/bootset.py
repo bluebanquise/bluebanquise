@@ -2,8 +2,8 @@
 
 # ██████╗ ██╗     ██╗   ██╗███████╗██████╗  █████╗ ███╗   ██╗ ██████╗ ██╗   ██╗██╗███████╗███████╗
 # ██╔══██╗██║     ██║   ██║██╔════╝██╔══██╗██╔══██╗████╗  ██║██╔═══██╗██║   ██║██║██╔════╝██╔════╝
-# ██████╔╝██║     ██║   ██║█████╗  ██████╔╝███████║██╔██╗ ██║██║   ██║██║   ██║██║███████╗█████╗  
-# ██╔══██╗██║     ██║   ██║██╔══╝  ██╔══██╗██╔══██║██║╚██╗██║██║▄▄ ██║██║   ██║██║╚════██║██╔══╝  
+# ██████╔╝██║     ██║   ██║█████╗  ██████╔╝███████║██╔██╗ ██║██║   ██║██║   ██║██║███████╗█████╗
+# ██╔══██╗██║     ██║   ██║██╔══╝  ██╔══██╗██╔══██║██║╚██╗██║██║▄▄ ██║██║   ██║██║╚════██║██╔══╝
 # ██████╔╝███████╗╚██████╔╝███████╗██████╔╝██║  ██║██║ ╚████║╚██████╔╝╚██████╔╝██║███████║███████╗
 # ╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚══▀▀═╝  ╚═════╝ ╚═╝╚══════╝╚══════╝
 #
@@ -33,7 +33,9 @@ class bcolors:
 def load_file(filename):
     print(bcolors.OKBLUE+'[INFO] Loading '+ filename + bcolors.ENDC)
     with open(filename, 'r') as f:
-        return yaml.load(f, Loader=yaml.FullLoader)
+#        return yaml.load(f, Loader=yaml.FullLoader) ## Waiting for PyYaml 5.1
+        return yaml.load(f)
+
 
 def set_default_boot(node, boot, diskless_image=None):
     print('    ├── '+bcolors.OKBLUE+'[INFO] Switching boot to '+ boot + bcolors.ENDC)
@@ -84,6 +86,8 @@ for node in NodeSet(passed_arguments.nodes):
             dedicated_parameters = str('')
             if 'network' in passed_arguments.force:
                 dedicated_parameters = str('ip='+nodes_parameters[str(node)]["network"]["node_main_network_interface_ip"]+'::'+nodes_parameters[str(node)]["network"]["node_main_network_gateway"]+':'+nodes_parameters[str(node)]["network"]["node_main_network_netmask"]+':'+str(node)+':'+nodes_parameters[str(node)]["network"]["node_main_network_interface"]+':none')
+            if 'dhcp' in passed_arguments.force:
+                dedicated_parameters = dedicated_parameters + ' rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4 '
 
             generic_node_ipxe = '\n'.join(('#!ipxe',
                 'echo | Entering {}.ipxe file.'.format(node),
@@ -93,7 +97,7 @@ for node in NodeSet(passed_arguments.nodes):
                 'set menu-default bootdiskless',
                 '# Current node parameters:',
                 'set equipment-profile {}'.format(nodes_parameters[str(node)]['equipment_profile']),
-                'set dedicated-kernel-parameters',
+                'set dedicated-kernel-parameters {}'.format(dedicated_parameters),
                 'set diskless-image none',
                 'echo |',
                 '# Now chain to menu menu',
