@@ -1,3 +1,7 @@
+nfs_settings:
+  selinux:
+    use_nfs_home_dirs: true                     # Will automatically set this boolean to true if /home is mounted on client side
+
 nfs:
   softwares:
     mount: /opt/softwares                       # What path server should export
