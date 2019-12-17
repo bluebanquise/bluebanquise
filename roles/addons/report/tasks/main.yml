@@ -16,7 +16,11 @@
    - /var/www/html/report/pictures
    - /var/www/html/report/css
    - /var/www/html/report/inventory_checker
+   - /var/www/html/report/cluster_configuration
    - /var/www/html/report/graphs
+  tags:
+    - hex
+
 
 - name: Template >> /var/www/html/report/index.html
   template:
@@ -37,6 +41,7 @@
     mode: 0644
   tags:
     - templates
+    - hex
 
 - name: Copy >> bluebanquise logo white
   copy:
@@ -90,6 +95,28 @@
     - report_settings.inventory_checker
     - report_settings.inventory_checker is iterable
     - "'hosts' in report_settings.inventory_checker"
+
+- name: Template >> /var/www/html/report/cluster_configuration.html
+  template:
+    src: "cluster_configuration.html.j2"
+    dest: /var/www/html/report/cluster_configuration.html
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - templates
+    - hex
+
+- name: Template >> /var/www/html/report/cluster_configuration/equipment_profiles.html
+  template:
+    src: "equipment_profiles.html.j2"
+    dest: /var/www/html/report/cluster_configuration/equipment_profiles.html
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - templates
+    - hex
 
 - name: Create report directories structure
   file:
