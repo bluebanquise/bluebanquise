@@ -26,8 +26,8 @@ nfs:
     mount_arguments: rw,intr,rsize=32768,wsize=32768,nfsvers=4.2,bg
 
   ansible:
-    mount: /etc/ansible
-    export: /etc/ansible
+    mount: /etc/bluebanquise
+    export: /etc/bluebanquise
     server: odin
     clients_groups:
       - equipment_supermicro_management

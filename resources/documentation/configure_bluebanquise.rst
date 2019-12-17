@@ -13,19 +13,20 @@ Install needed basic packages:
 
   yum install wget createrepo git
 
-Now, backup and clean your previous Ansible configuration:
+Now, download latest **BlueBanquise** version from git:
 
 .. code-block:: bash
 
-  tar cvzf /root/my_old_ansible.tar.gz /etc/ansible
-  rm -Rf /etc/ansible/*
+  git clone https://github.com/oxedions/bluebanquise.git /etc/bluebanquise
 
-And download latest **BlueBanquise** version from git into Ansible directory:
+ansible will read ANSIBLE_CONFIG, ansible.cfg in the current working directory, .ansible.cfg in the home directory or /etc/ansible/ansible.cfg, whichever it finds first.
+
+To use /etc/bluebanquise/ansible.cfg, either change the current working directory or set ANSIBLE_CONFIG:
 
 .. code-block:: bash
 
-  cd /etc/ansible
-  git clone https://github.com/oxedions/bluebanquise.git .
+  export ANSIBLE_CONFIG=/etc/bluebanquise/ansible.cfg
+  cd /etc/bluebanquise
 
 Finally, edit /etc/hosts file, and add "management1" (or whatever your current management node hostname) on localhost line:
 
@@ -48,12 +49,12 @@ Important before we start
 
 Ansible will read **ALL** files in the inventory. **NEVER do a backup of a file here!**
 
-Backup in another location, outside of /etc/ansible/inventory.
+Backup in another location, outside of /etc/bluebanquise/inventory.
 
 Check example inventory
 -----------------------
 
-An inventory example is provided in /etc/ansible/resources/examples/simple_cluster/ as a base for our work.
+An inventory example is provided in /etc/bluebanquise/resources/examples/simple_cluster/ as a base for our work.
 
 This example is based on the picture provided just above.
 
@@ -61,7 +62,7 @@ Lets copy it to use it as our new inventory:
 
 .. code-block:: bash
 
-  cp -a /etc/ansible/resources/examples/simple_cluster/inventory /etc/ansible/inventory
+  cp -a /etc/bluebanquise/resources/examples/simple_cluster/inventory /etc/bluebanquise/inventory
 
 Review nodes
 ------------
@@ -266,7 +267,7 @@ The idea here is the following: group_vars/all/all_equipment/ folder contains al
 Equipment profile
 ^^^^^^^^^^^^^^^^^
 
-For example, open file /etc/ansible/inventory/group_vars/all/all_equipment/equipment_profile.yml, and check access_control variable. It is set to true:
+For example, open file /etc/bluebanquise/inventory/group_vars/all/all_equipment/equipment_profile.yml, and check access_control variable. It is set to true:
 
 .. code-block:: yaml
 

@@ -14,12 +14,12 @@ Get management1 playbook
 
 We are going to use the provided default playbook. This playbook will install most of the CORE roles. Enough to deploy first stage of the cluster.
 
-Copy example playbook management1 to /etc/ansible/playbooks/:
+Copy example playbook management1 to /etc/bluebanquise/playbooks/:
 
 .. code-block:: bash
 
-  mkdir /etc/ansible/playbooks/
-  cp -a /etc/ansible/resources/examples/simple_cluster/playbooks/management1.yml /etc/ansible/playbooks/
+  mkdir /etc/bluebanquise/playbooks/
+  cp -a /etc/bluebanquise/resources/examples/simple_cluster/playbooks/management1.yml /etc/bluebanquise/playbooks/
 
 Then, we will ask Ansible to read this playbook, and execute all roles listed inside on management1 node (check hosts target at top of the file).
 
@@ -62,7 +62,7 @@ We first ensure our NIC are up, so the repositories part is working.
 
 .. code-block:: bash
 
-  ansible-playbook /etc/ansible/playbooks/management1.yml --tags set_hostname,nic
+  ansible-playbook /etc/bluebanquise/playbooks/management1.yml --tags set_hostname,nic
 
 Then start your main interface manually. Here enp0s3:
 
@@ -74,7 +74,7 @@ Once interface is up (check using *ip a* command), replay the whole playbook:
 
 .. code-block:: bash
 
-  ansible-playbook /etc/ansible/playbooks/management1.yml
+  ansible-playbook /etc/bluebanquise/playbooks/management1.yml
 
 And wait...
 
@@ -166,15 +166,15 @@ If yes, copy example playbooks:
 
 .. code-block:: bash
 
-  cp -a /etc/ansible/resources/examples/simple_cluster/playbooks/computes.yml /etc/ansible/playbooks/
-  cp -a /etc/ansible/resources/examples/simple_cluster/playbooks/login1.yml /etc/ansible/playbooks/
+  cp -a /etc/bluebanquise/resources/examples/simple_cluster/playbooks/computes.yml /etc/bluebanquise/playbooks/
+  cp -a /etc/bluebanquise/resources/examples/simple_cluster/playbooks/login1.yml /etc/bluebanquise/playbooks/
 
 And execute them, using extra var target to target them:
 
 .. code-block:: bash
 
-  ansible-playbook /etc/ansible/login1.yml
-  ansible-playbook /etc/ansible/computes.yml --extra-vars "target=c001,c002,c003,c004"
+  ansible-playbook /etc/bluebanquise/login1.yml
+  ansible-playbook /etc/bluebanquise/computes.yml --extra-vars "target=c001,c002,c003,c004"
 
 You can see that Ansible will work on computes nodes in parallel, using more CPU on the management1 node.
 

@@ -14,7 +14,7 @@ Host
 
 An Ansible **host** (also often refered as a **node**) is a remote host managed by Ansible. An **host** can be a physical server, but also a VM or something else.
 
-Hosts are defined in */etc/ansible/inventory/cluster/nodes*.
+Hosts are defined in */etc/bluebanquise/inventory/cluster/nodes*.
 
 Please do a difference between an Ansible managed host, and a host. All equipment that can have an ip on the network are considered "host", but only those with an ssh + python capability and on which we will use Ansible to deploy a configuration are considered "Ansible managed host". They are declared the same way in the stack inventory.
 
@@ -169,7 +169,7 @@ Inventory, roles, and playbooks
 Inventory
 ^^^^^^^^^
 
-The Ansible inventory is the directory that contains Ansible variables and hosts definitions. In **BlueBanquise**, default path is /etc/ansible/inventory.
+The Ansible inventory is the directory that contains Ansible variables and hosts definitions. In **BlueBanquise**, default path is /etc/bluebanquise/inventory.
 
 Inventory is the **DATA**.
 
@@ -178,9 +178,9 @@ Roles
 
 An Ansible role is a list of tasks to do to achieve a purpose. For example, there will be a role called dhcp_server, that contains task to install, configure and start the dhcp server.
 
-In **BlueBanquise**, default path is /etc/ansible/roles.
+In **BlueBanquise**, default path is /etc/bluebanquise/roles.
 
-Note that /etc/ansible/roles is splitted in multiple directories, but ansible.cfg file is configured to use roles in all of them.
+Note that /etc/bluebanquise/roles is splitted in multiple directories, but ansible.cfg file is configured to use roles in all of them.
 
 Roles are the **AUTOMATION LOGIC**.
 
@@ -189,7 +189,7 @@ Playbooks
 
 An Ansible playbook is simply a list of roles to apply, on a specific host or group of hosts. It is a yaml file.
 
-In **BlueBanquise**, default path is /etc/ansible/playbooks.
+In **BlueBanquise**, default path is /etc/bluebanquise/playbooks.
 
 Playbooks are your **LIST OF ROLES TO APPLY on your hosts/targets**.
 
@@ -202,7 +202,7 @@ Ansible has an internal mechanism called **Variables precedence**. Simply put: y
 
 When a variable is defined in a yml file, the position of the file in the ansible inventory is key.
 
-For example, a variable defined in /etc/ansible/inventory/group_vars/all/ will have the less precedence, and a variable defined in /etc/ansible/inventory/cluster will have a higher precedence, and so win if loaded.
+For example, a variable defined in /etc/bluebanquise/inventory/group_vars/all/ will have the less precedence, and a variable defined in /etc/bluebanquise/inventory/cluster will have a higher precedence, and so win if loaded.
 
 The full list of available variables precedence is provided in Ansible documentation: `variable precedence list <https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html#variable-precedence-where-should-i-put-a-variable>`_
 
@@ -212,9 +212,9 @@ For example, values can be set by default, and then redefined for some groups of
 
 Inventory can be seen as a giant pizza, in 3D then flatten.
 
-* *Paste* is the variable in /etc/ansible/inventory/group_vars/all
-* Then *large ingredients* comes from /etc/ansible/inventory/group_vars/equipment_myequipment
-* Then *small ingredients* above are the /etc/ansible/inventory/cluster/nodes/
+* *Paste* is the variable in /etc/bluebanquise/inventory/group_vars/all
+* Then *large ingredients* comes from /etc/bluebanquise/inventory/group_vars/equipment_myequipment
+* Then *small ingredients* above are the /etc/bluebanquise/inventory/cluster/nodes/
 * And *pepper and tomatoes* (last layer) is the extra-vars at call.
 
 .. image:: images/pizza_example.svg
