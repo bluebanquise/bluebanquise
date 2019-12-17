@@ -6,7 +6,7 @@
     description: "{{ item }} gen by Ansible"
     baseurl: "http://{{networks[j2_node_main_network]['services_ip']['repository_ip']}}/repositories/{{equipment_profile['operating_system']['distribution']}}/{{equipment_profile['operating_system']['distribution_version']}}/{{equipment_profile['hardware']['cpu']['architecture']}}/{{item}}"
     gpgcheck: no
-  loop: "{{ system_repositories }}"
+  loop: "{{ repositories }}"
   when: item != 'os'
 
 - name: "Setting repositories os ({{ item }})"
@@ -18,7 +18,7 @@
   loop:
     - BaseOS
     - AppStream
-  when: "'os' in system_repositories"
+  when: "'os' in repositories"
 
 - name: "Setting external repository ({{ item }})"
   yum_repository:
