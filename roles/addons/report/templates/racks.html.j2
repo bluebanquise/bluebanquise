@@ -1,0 +1,11 @@
+{% for rack in (groups | select('match','^rack_.*') | list | unique | sort) %}
+<br>
+<div class="{{rack}}_container">
+<div class="{{rack}}">
+{% for host in groups[rack] %}
+  <div class="{{host}}">{{host}}</div>
+{% endfor %}
+</div>
+</div>
+{% endfor %}
+

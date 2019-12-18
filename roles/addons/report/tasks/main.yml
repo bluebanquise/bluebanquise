@@ -105,7 +105,7 @@
     mode: 0644
   tags:
     - templates
-    - hex
+    - hex1
 
 - name: Template >> /var/www/html/report/cluster_configuration/equipment_profiles.html
   template:
@@ -117,6 +117,29 @@
   tags:
     - templates
     - hex
+
+- name: Template >> /var/www/html/report/css/hosts.css
+  template:
+    src: "hosts.css.j2"
+    dest: /var/www/html/report/css/hosts.css
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - templates
+    - hex1
+
+- name: Template >> /var/www/html/report/cluster_configuration/racks.html
+  template:
+    src: "racks.html.j2"
+    dest: /var/www/html/report/cluster_configuration/racks.html
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - templates
+    - hex1
+
 
 - name: Create report directories structure
   file:
