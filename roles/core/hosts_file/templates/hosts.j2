@@ -85,7 +85,7 @@
 {% endif %}
 
 ## Internal hosts
-{#
+
 {% for host in range %}
 {% set alias_list = [] %}
 {% if hostvars[host]['global_alias'] is defined and not none %}
@@ -96,8 +96,8 @@
 {% endif %}
 {{write_host_2(host,hostvars[host]['network_interfaces'],hostvars[host]['j2_node_main_network_interface'],alias_list,hostvars[host]['bmc'])}}
 {% endfor %}
-#}
 
+{#
 {% set main_host = hostvars[inventory_hostname] %}
 {% for host in range %}
 {% set host_icb = (macro_accelerated.node_current_iceberg(host)|trim) %}
@@ -118,7 +118,7 @@
 {% endif %}
 {{write_host_2(host,host_nic,host_node_main_network_interface,alias_list,host_bmc)}}
 {% endfor %}
-
+#}
 ## External hosts
 
 {% if external_hosts is defined and external_hosts is not none and external_hosts %}
