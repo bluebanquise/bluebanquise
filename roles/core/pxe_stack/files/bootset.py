@@ -101,9 +101,9 @@ for node in NodeSet(passed_arguments.nodes):
                 'set diskless-image none',
                 'echo |',
                 '# Now chain to menu menu',
-                'echo | Now chaining to --> equipment_profiles/${{equipment-profile}}.ipxe',
+                'echo | Now chaining to --> equipment_profiles/${equipment-profile}.ipxe',
                 'sleep 2',
-                'chain http://${{next-server}}/preboot_execution_environment/equipment_profiles/${{equipment-profile}}.ipxe || shell'))
+                'chain http://${next-server}/preboot_execution_environment/equipment_profiles/${equipment-profile}.ipxe || shell'))
 
             with open('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe','w') as ff:
                 ff.write(generic_node_ipxe)
