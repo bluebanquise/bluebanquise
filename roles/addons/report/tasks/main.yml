@@ -21,6 +21,27 @@
   tags:
     - hex
 
+#- debug: msg="{{groups[item]|list|join(',')}}"
+#  tags:
+#    - hex3
+#  with_items: "{{j2_equipment_groups_list}}"
+
+- name: gather equipment groups
+  shell: "nodeset -r {{groups[item]|list|join(',')}}"
+  register: "eq_groups"
+  with_items: "{{j2_equipment_groups_list}}"
+  tags:
+    - hex3
+
+#- debug: msg="eq_groups"
+#  tags:
+#    - hex3
+#- debug: msg="{{item.item}} {{item.stdout}}"
+#  tags:
+#    - hex3
+#  with_items: "{{eq_groups.results}}"
+
+
 
 - name: Template >> /var/www/html/report/index.html
   template:
