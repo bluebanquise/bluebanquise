@@ -26,5 +26,9 @@
     description: "{{ item.name }} gen by Ansible"
     baseurl: "{{ item.url }}"
     gpgcheck: no
-  loop: "{{ external_repositories | default([]) }}"
-  when: external_repositories is defined and external_repositories is not none and external_repositories
+  with_items: "{{ external_repositories }}"
+  when:
+    - external_repositories is defined
+    - external_repositories is not none
+    - external_repositories
+    - external_repositories is iterable
