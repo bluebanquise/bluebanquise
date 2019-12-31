@@ -1,45 +1,76 @@
+#https://graph-tool.skewed.de/static/doc/draw.html
+# Benoit Leveugle 2020
+
 import graph_tool.all as gt
+
+{% set equipment_colors=['0.965,0.824,0.345','0.047,0.298,0.541','0.533,0.694,0.294','0.82,0.188,0.463','0.937,0.337,0.176','0.937,0.808,0.773','0.82,0.686,0.58','0.592,0.835,0.878'] %}
+{% set networks_colors=['0.965,0.824,0.345','0.047,0.298,0.541','0.533,0.694,0.294','0.82,0.188,0.463','0.937,0.337,0.176','0.937,0.808,0.773','0.82,0.686,0.58','0.592,0.835,0.878'] %}
 
 g = gt.Graph(directed=False)
 
-v_prop = g.new_vertex_property("string")
-vcprop_int = g.new_vertex_property("int")
-ecprop_int = g.new_edge_property("int")
+vertex_shape = g.new_vertex_property("string")
+vertex_text = g.new_vertex_property("string")
+vertex_fill_color = g.new_vertex_property("vector<float>")
+edge_color = g.new_edge_property("vector<float>")
+edge_text = g.new_edge_property("string")
 
 {% for network in networks %}
+{% if network not in report_settings.graph_tool_settings.excluded_networks %} 
 {{network|replace('-','_')}} = g.add_vertex()
-v_prop[{{network|replace('-','_')}}] = '{{network|replace('-','_')}}'
-vcprop_int[{{network|replace('-','_')}}] = 1
+vertex_text[{{network|replace('-','_')}}] = '{{network|replace('-','_')}}'
+vertex_fill_color[{{network|replace('-','_')}}] = {% for net in networks %}{% if network == net %}[{{networks_colors[loop.index-1]}},1.0]{% endif %}{% endfor %}
+
+vertex_shape[{{network|replace('-','_')}}] = "square"
+{% endif %}
 {% endfor %}
 
 {% for host in groups['all'] %}
 {{host}} = g.add_vertex()
-v_prop[{{host}}] = '{{host}}'
-vcprop_int[{{host}}] = {% for eq in j2_equipment_groups_list %}{% if host in groups[eq] %}{{loop.index}}{% endif %}{% endfor %}
+vertex_text[{{host}}] = '{{host}}'
+vertex_fill_color[{{host}}] = {% for eq in j2_equipment_groups_list %}{% if host in groups[eq] %}[{{equipment_colors[loop.index-1]}},1.0]{% endif %}{% endfor %}
 
+{% if host in groups[managements_group_name] %}
+vertex_shape[{{host}}] = "double_circle"
+{% else %}
+vertex_shape[{{host}}] = "circle"
+{% endif %}
 {% if hostvars[host]['network_interfaces'] is defined and not none and hostvars[host]['network_interfaces'] is iterable %}
 {% for interface in hostvars[host]['network_interfaces'] %}
 {% if hostvars[host]['network_interfaces'][interface]['network'] is defined and not none %}
-{% if hostvars[host]['network_interfaces'][interface]['network'] in networks %}
+{% if hostvars[host]['network_interfaces'][interface]['network'] in networks and hostvars[host]['network_interfaces'][interface]['network'] not in report_settings.graph_tool_settings.excluded_networks %}
 {{host}}_{{hostvars[host]['network_interfaces'][interface]['network']|replace('-','_')}} = g.add_edge({{host}},{{hostvars[host]['network_interfaces'][interface]['network']|replace('-','_')}})
-ecprop_int[{{host}}_{{hostvars[host]['network_interfaces'][interface]['network']|replace('-','_')}}] = {% for net in networks %}{% if hostvars[host]['network_interfaces'][interface]['network'] == net %}{{loop.index}}{% endif %}{% endfor %}
+edge_color[{{host}}_{{hostvars[host]['network_interfaces'][interface]['network']|replace('-','_')}}] = {% for net in networks %}{% if hostvars[host]['network_interfaces'][interface]['network'] == net %}[{{networks_colors[loop.index-1]}},1.0]{% endif %}{% endfor %}
 
+edge_text[{{host}}_{{hostvars[host]['network_interfaces'][interface]['network']|replace('-','_')}}] = "{{hostvars[host]['network_interfaces'][interface]['ip4']}}"
 {% endif %}
 {% endif %}
 {% endfor %}
 {% endif %}
 {% endfor %}
+
+pos = gt.sfdp_layout(g)
+#pos = gt.planar_layout(g)
+#pos = gt.fruchterman_reingold_layout(g, n_iter=1000)
 
 gt.graph_draw(
         g,
-        vertex_text=v_prop,
-        edge_color=ecprop_int,
-        vertex_fill_color=vcprop_int,
-        edge_pen_width=1.8,
+        pos=pos,
+        vertex_shape=vertex_shape,
+        vertex_text=vertex_text,
+        vertex_fill_color=vertex_fill_color,
         vertex_color=[0.1,0.1,0.1,1],
-        vertex_font_size=14,
+        vertex_aspect=1,
+        vertex_size=10,
+        vertex_font_family='sans',
+        vertex_font_size=11,
+        vertex_font_weight=cairo.FONT_WEIGHT_NORMAL,
+        edge_color=edge_color,
+        edge_text=edge_text,
+        edge_pen_width=1.8,
+        edge_font_size=11,
+        edge_font_family='sans',
+        edge_font_weight=cairo.FONT_WEIGHT_NORMAL,
         output_size=(2000, 2000),
-        output="cluster_map.png"
+        output="cluster_map.svg"
 )
-
 
