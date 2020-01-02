@@ -20,6 +20,12 @@
 
 - meta: flush_handlers
 
+- name: Create directory                                                                                                                                                                                             file:
+    path: "{{ nfs[item]['export'] }}"
+    state: directory
+    mode: '0755'
+  with_items: "{{ nfs }}"
+  
 - name: Enable/disable services
   service:
     name: "{{ item }}"
