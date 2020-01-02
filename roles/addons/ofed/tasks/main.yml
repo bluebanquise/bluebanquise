@@ -2,7 +2,7 @@
 
 - name: Package
   package:
-    name: "{{item}"
+    name: "{{item}}"
     state: present
   with_items:
     - rdma-core
