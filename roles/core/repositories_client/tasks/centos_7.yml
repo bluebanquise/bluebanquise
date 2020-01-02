@@ -7,3 +7,8 @@
     baseurl: "http://{{networks[j2_node_main_network]['services_ip']['repository_ip']}}/repositories/{{equipment_profile['operating_system']['distribution']}}/{{equipment_profile['operating_system']['distribution_version']}}/{{equipment_profile['hardware']['cpu']['architecture']}}/{{item}}"
     gpgcheck: no
   with_items: "{{ repositories }}"
+  
+- name: Remove repository
+  shell: rm -rf /etc/yum.repos.d/centOS*
+  args:
+    warn: false
