@@ -15,9 +15,14 @@ and commits adheres to [Conventional Commits](https://www.conventionalcommits.or
 
 ## [1.2.0]
 ### Feat
-- Diskless
+- Documentation
 - iPXE new chain
+- Alias for hostnames
+- Accelerated mode POC for hosts file
+- External interfaces (DNS/Repositories/hosts/Time, etc.)
 - Map hostname direct resolution to a specific global network
+- Diskless
+- Clone
 
 ## [1.1.1]
 ### Fix
