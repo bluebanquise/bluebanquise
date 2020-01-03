@@ -29,8 +29,12 @@ set reset ${esc:string}[0m
 menu BlueBanquise iPXE boot menu for ${manufacturer} ${product} (${arch}bit) - Benoit Leveugle
 item --gap                Main boot
 item bootosdeploy         Deploy OS (This will deploy/redeploy operating system)
-item bootdiskless         Start a diskless OS (Configured using diskless tool)
 item bootdisk             Boot on disk (This will boot on local disk)
+item --gap                Diskless
+item bootdiskless         Start a diskless OS (Configured using diskless tool)
+item --gap                Cloning
+item bootclone            Clone OS
+item bootdeployclone      Deploy already made clone
 #item --gap                Tools
 #item minimal_live_linux   Minimal Live Linux
 #item memtest              Memtest (To check Memory)
@@ -76,7 +80,13 @@ goto start
 chain http://${next-server}/preboot_execution_environment/osdeploy/${eq-distribution}_${eq-distribution-major-version}.ipxe || shell
 
 :bootdiskless
-chain http://${next-server}/preboot_execution_environment/diskless/images/${diskless-image}/boot.ipxe || shell
+chain http://${next-server}/preboot_execution_environment/diskless/images/${node-image}/boot.ipxe || shell
+
+:bootclone
+chain http://${next-server}/preboot_execution_environment/cloning/clone.ipxe
+
+:bootdeployclone
+chain http://${next-server}/preboot_execution_environment/cloning/deploy_clone.ipxe
 
 :bootdisk
 iseq ${platform} efi && goto bootdisk-efi || goto bootdisk-legacy

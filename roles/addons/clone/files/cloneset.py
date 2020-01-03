@@ -2,8 +2,8 @@
 
 # ██████╗ ██╗     ██╗   ██╗███████╗██████╗  █████╗ ███╗   ██╗ ██████╗ ██╗   ██╗██╗███████╗███████╗
 # ██╔══██╗██║     ██║   ██║██╔════╝██╔══██╗██╔══██╗████╗  ██║██╔═══██╗██║   ██║██║██╔════╝██╔════╝
-# ██████╔╝██║     ██║   ██║█████╗  ██████╔╝███████║██╔██╗ ██║██║   ██║██║   ██║██║███████╗█████╗
-# ██╔══██╗██║     ██║   ██║██╔══╝  ██╔══██╗██╔══██║██║╚██╗██║██║▄▄ ██║██║   ██║██║╚════██║██╔══╝
+# ██████╔╝██║     ██║   ██║█████╗  ██████╔╝███████║██╔██╗ ██║██║   ██║██║   ██║██║███████╗█████╗  
+# ██╔══██╗██║     ██║   ██║██╔══╝  ██╔══██╗██╔══██║██║╚██╗██║██║▄▄ ██║██║   ██║██║╚════██║██╔══╝  
 # ██████╔╝███████╗╚██████╔╝███████╗██████╔╝██║  ██║██║ ╚████║╚██████╔╝╚██████╔╝██║███████║███████╗
 # ╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚══▀▀═╝  ╚═════╝ ╚═╝╚══════╝╚══════╝
 #
@@ -33,11 +33,9 @@ class bcolors:
 def load_file(filename):
     print(bcolors.OKBLUE+'[INFO] Loading '+ filename + bcolors.ENDC)
     with open(filename, 'r') as f:
-#        return yaml.load(f, Loader=yaml.FullLoader) ## Waiting for PyYaml 5.1
-        return yaml.load(f)
+        return yaml.load(f, Loader=yaml.FullLoader)
 
-
-def set_default_boot(node, boot, node_image=None):
+def set_default_boot(node, boot, diskless_image=None):
     print('    ├── '+bcolors.OKBLUE+'[INFO] Switching boot to '+ boot + bcolors.ENDC)
     print('    ├── '+bcolors.OKBLUE+'[INFO] Editing file /var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe'+bcolors.ENDC)
     with open('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe','r') as f:
@@ -45,8 +43,8 @@ def set_default_boot(node, boot, node_image=None):
     for i in range(len(filebuffer)):
         if 'menu-default' in filebuffer[i]:
             filebuffer[i] = 'set menu-default boot{}\n'.format(boot)
-        if ('node-image' in filebuffer[i]) and (node_image is not None):
-            filebuffer[i] = 'set node-image {}\n'.format(node_image)
+        if ('diskless-image' in filebuffer[i]) and (diskless_image is not None):
+            filebuffer[i] = 'set diskless-image {}\n'.format(diskless_image)
     with open('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe','w') as f:
         f.writelines(filebuffer)
     print('    └── '+bcolors.OKGREEN+'[OK] Done.'+bcolors.ENDC)
@@ -56,11 +54,11 @@ parser = ArgumentParser()
 parser.add_argument("-n", "--nodes", dest="nodes",
                     help="Target node(s). Use nodeset format for ranges.", metavar="NODE")
 parser.add_argument("-b", "--boot", dest="boot",
-                    help="Next pxe boot: can be osdeploy, diskless, clone, clonedeploy, or disk.")
+                    help="Next pxe boot: can be clone or clonedeploy.")
 parser.add_argument("-f", "--force", dest="force", default=" ",
                     help="Force. 'update' = files update, 'network' = static ip. Combine using comma separator.")
 parser.add_argument("-i", "--image", dest="image", default="none",
-                    help="Specify diskless or clone image to be used, if using diskless/clone/clonedeploy boot.")
+                    help="Specify diskless image to be used, if using diskless boot.")
 
 passed_arguments = parser.parse_args()
 
@@ -86,24 +84,22 @@ for node in NodeSet(passed_arguments.nodes):
             dedicated_parameters = str('')
             if 'network' in passed_arguments.force:
                 dedicated_parameters = str('ip='+nodes_parameters[str(node)]["network"]["node_main_network_interface_ip"]+'::'+nodes_parameters[str(node)]["network"]["node_main_network_gateway"]+':'+nodes_parameters[str(node)]["network"]["node_main_network_netmask"]+':'+str(node)+':'+nodes_parameters[str(node)]["network"]["node_main_network_interface"]+':none')
-            if 'dhcp' in passed_arguments.force:
-                dedicated_parameters = dedicated_parameters + ' rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4 '
 
             generic_node_ipxe = '\n'.join(('#!ipxe',
                 'echo | Entering {}.ipxe file.'.format(node),
                 'echo |',
                 'echo | Getting host specific variables...',
                 '# Current default action',
-                'set menu-default bootdisk',
+                'set menu-default bootdiskless',
                 '# Current node parameters:',
                 'set equipment-profile {}'.format(nodes_parameters[str(node)]['equipment_profile']),
-                'set dedicated-kernel-parameters {}'.format(dedicated_parameters),
-                'set node-image none',
+                'set dedicated-kernel-parameters',
+                'set diskless-image none',
                 'echo |',
                 '# Now chain to menu menu',
-                'echo | Now chaining to --> equipment_profiles/${equipment-profile}.ipxe',
+                'echo | Now chaining to --> equipment_profiles/${{equipment-profile}}.ipxe',
                 'sleep 2',
-                'chain http://${next-server}/preboot_execution_environment/equipment_profiles/${equipment-profile}.ipxe || shell'))
+                'chain http://${{next-server}}/preboot_execution_environment/equipment_profiles/${{equipment-profile}}.ipxe || shell'))
 
             with open('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe','w') as ff:
                 ff.write(generic_node_ipxe)
@@ -112,7 +108,7 @@ for node in NodeSet(passed_arguments.nodes):
                 os.system('restorecon -v /var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe')
         print('    ├── '+bcolors.OKGREEN+'[OK] Done.'+bcolors.ENDC)
 
-        set_default_boot(node=node, boot=passed_arguments.boot, node_image=passed_arguments.image)
+        set_default_boot(node=node, boot=passed_arguments.boot, diskless_image=passed_arguments.image)
 
     else:
         print(bcolors.WARNING+'[WARNING] Node '+str(node)+' do not exist. Skipping.'+bcolors.ENDC)
