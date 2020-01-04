@@ -16,6 +16,8 @@ Two type of images are available:
 * Livenet images are full ram images, without persistance but need less infrastructure.
 * NFS images are full nfs rw images, with psersistance, very simple to use, but need more infrastructure.
 
+It is important to understand that this role is independant of the pxe_stack core role, and so each tools do not communicate.
+
 To be done
 ^^^^^^^^^^
 

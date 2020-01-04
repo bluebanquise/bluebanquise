@@ -34,6 +34,7 @@ ADVANCED CORE
 ADDONS
 ======
 
+.. include:: roles/addons/clone/readme.rst
 .. include:: roles/addons/clustershell/readme.rst
 .. include:: roles/addons/diskless/readme.rst
 .. include:: roles/addons/ofed/readme.rst
