@@ -8,8 +8,9 @@ groups:
 #    expr: up{job=~"equipment_typeC"} == 0
     for: 1m
     labels:
-      severity: warning
+      severity: critical # warning
     annotations:
       summary: "Exporter down (instance {{'{{ $labels.instance }}'}})"
       description: "Prometheus exporter down\n  VALUE = {{'{{ $value }}'}}\n  LABELS: {{'{{ $labels }}'}}"
+
 
