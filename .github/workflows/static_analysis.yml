@@ -1,0 +1,33 @@
+name: Static code analysis
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - '**.md'
+  pull_request:
+    paths-ignore:
+      - '**.md'
+
+jobs:
+  check:
+    name: Run static code analysis tools
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup python environment
+        uses: actions/setup-python@v1
+
+      - name: Install packages
+        run: pip install ansible ansible-lint flake8
+
+      - name: Check python code
+        run: flake8 . --statistics
+
+      - name: Run linter on core and advanced-core roles
+        run: ansible-lint -v roles/{core,advanced-core}/*
+
+      - name: Run linter on example playbooks
+        run: ansible-lint -v resources/examples/simple_cluster/playbooks/*.yml
