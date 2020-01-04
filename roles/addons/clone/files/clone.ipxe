@@ -11,14 +11,25 @@ echo | > Console: ${eq-console}
 echo | > Additional kernel parameters: ${eq-kernel-parameters} ${dedicated-kernel-parameters}
 echo | > Deployment and cloning server: ${next-server}
 echo | > Target image name: ${node-image}
+
+iseq ${extra-parameters} none && goto generic || goto custom
+:generic
+set clone-parameters ocs-sr -q2 -batch -j2 -z1 -i 2096 -fsck-src-part-y -senc -p reboot savedisk ${node-image}.img sda 
+goto kernel-line
+:custom
+set clone-parameters ${extra-parameters}
+echo | > Custom parameters: ${clone-parameters}
+goto kernel-line
+
 echo |
 echo | Loading linux ...
 
-kernel http://${next-server}/clonezilla/live/vmlinuz initrd=initrd.img boot=live union=overlay username=user hostname=wily config components noswap edd=on nomodeset nodmraid noeject noprompt locales=en_US.UTF-8 keyboard-layouts=NONE ocs_prerun1="dhclient -v eth0" ocs_prerun2="sleep 2" ocs_prerun3="sudo mount -t nfs ${next-server}:/clonezilla /home/partimag" ocs_postrun1="curl -s -k http://${next-server}/cgi-bin/bootswitch.cgi --data 'node=${hostname}&boot=disk'" ocs_live_run="ocs-sr -q2 -batch -j2 -z1 -i 2096 -fsck-src-part-y -senc -p reboot savedisk ${node-image}.img sda" ocs_live_extra_param="" ocs_live_batch="yes" vga=788 ip= net.ifnames=0 splash i915.blacklist=yes radeonhd.blacklist=yes nouveau.blacklist=yes vmwgfx.enable_fbdev=1 fetch=http://${next-server}/clonezilla/live/filesystem.squashfs ${eq-kernel-parameters} ${dedicated-kernel-parameters} ${eq-console}
+:kernel-line
+kernel http://${next-server}/preboot_execution_environment/clone/clonezilla/live/vmlinuz initrd=initrd.img boot=live union=overlay username=user hostname=wily config components noswap edd=on nomodeset nodmraid noeject noprompt locales=en_US.UTF-8 keyboard-layouts=NONE ocs_prerun1="dhclient -v eth0" ocs_prerun2="sleep 2" ocs_prerun3="sudo mount -t nfs ${next-server}:/cloned_images /home/partimag" ocs_postrun1="curl -s -k http://${next-server}/cgi-bin/bootswitch.cgi --data 'node=${hostname}&boot=disk'" ocs_live_run="${clone-parameters}" ocs_live_extra_param="" ocs_live_batch="yes" vga=788 ip= net.ifnames=0 splash i915.blacklist=yes radeonhd.blacklist=yes nouveau.blacklist=yes vmwgfx.enable_fbdev=1 fetch=http://${next-server}/preboot_execution_environment/clone/clonezilla/live/filesystem.squashfs ${eq-kernel-parameters} ${dedicated-kernel-parameters} ${eq-console}
 
 echo | Loading initial ramdisk ...
 
-initrd  http://${next-server}/clonezilla/live/initrd.img
+initrd  http://${next-server}/preboot_execution_environment/clone/clonezilla/live/initrd.img
 
 echo | ALL DONE! We are ready.
 echo | Booting in 4s ...
