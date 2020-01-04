@@ -39,7 +39,7 @@ def load_file(filename):
         return yaml.load(f)
 
 
-def set_default_boot(node, boot, node_image=None):
+def set_default_boot(node, boot, node_image=None, extra_parameters=None):
     print('    ├── '+bcolors.OKBLUE+'[INFO] Switching boot to '+boot+bcolors.ENDC)
     print('    ├── '+bcolors.OKBLUE+'[INFO] Editing file /var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe'+bcolors.ENDC)
     with open('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe', 'r') as f:
@@ -49,6 +49,8 @@ def set_default_boot(node, boot, node_image=None):
             filebuffer[i] = 'set menu-default boot{}\n'.format(boot)
         if ('node-image' in filebuffer[i]) and (node_image is not None):
             filebuffer[i] = 'set node-image {}\n'.format(node_image)
+        if ('extra-parameters' in filebuffer[i]) and (extra_parameters is not None):
+            filebuffer[i] = 'set extra-parameters {}\n'.format(extra_parameters)
     with open('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe', 'w') as f:
         f.writelines(filebuffer)
     print('    └── '+bcolors.OKGREEN+'[OK] Done.'+bcolors.ENDC)
@@ -64,6 +66,8 @@ parser.add_argument("-f", "--force", dest="force", default=" ",
                     help="Force. 'update' = files update, 'network' = static ip. Combine using comma separator.")
 parser.add_argument("-i", "--image", dest="image", default="none",
                     help="Specify diskless or clone image to be used, if using diskless/clone/clonedeploy boot.")
+parser.add_argument("-e", "--extra-parameters", dest="extra_parameters", default="none",
+                    help="Add extra parameters for boot chain, some addons may need some.")
 
 passed_arguments = parser.parse_args()
 
@@ -73,6 +77,11 @@ pxe_parameters = load_file('/etc/bluebanquise/pxe/pxe_parameters.yml')
 
 apache_uid = pwd.getpwnam(pxe_parameters["pxe_parameters"]["apache_uid"]).pw_uid
 apache_gid = grp.getgrnam(pxe_parameters["pxe_parameters"]["apache_gid"]).gr_gid
+
+# Ensure passed boot argument exists
+if 'osdeploy' not in passed_arguments.boot and 'diskless' not in passed_arguments.boot and 'clone' not in passed_arguments.boot and 'clonedeploy' not in passed_arguments.boot and 'disk' not in passed_arguments.boot:
+    print(bcolors.FAIL+'[ERROR] Passed argument "'+passed_arguments.boot+'" for boot not know. Please check syntax.'+bcolors.ENDC)
+    quit()
 
 # Iteration on nodes
 for node in NodeSet(passed_arguments.nodes):
@@ -103,6 +112,7 @@ for node in NodeSet(passed_arguments.nodes):
                 'set equipment-profile {}'.format(nodes_parameters[str(node)]['equipment_profile']),
                 'set dedicated-kernel-parameters {}'.format(dedicated_parameters),
                 'set node-image none',
+                'set extra-parameters none',
                 'echo |',
                 '# Now chain to menu menu',
                 'echo | Now chaining to --> equipment_profiles/${equipment-profile}.ipxe',
@@ -116,7 +126,7 @@ for node in NodeSet(passed_arguments.nodes):
                 os.system('restorecon -v /var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe')
         print('    ├── '+bcolors.OKGREEN+'[OK] Done.'+bcolors.ENDC)
 
-        set_default_boot(node=node, boot=passed_arguments.boot, node_image=passed_arguments.image)
+        set_default_boot(node=node, boot=passed_arguments.boot, node_image=passed_arguments.image, extra_parameters=passed_arguments.extra_parameters)
 
     else:
         print(bcolors.WARNING+'[WARNING] Node '+str(node)+' do not exist. Skipping.'+bcolors.ENDC)
