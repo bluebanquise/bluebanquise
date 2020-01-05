@@ -19,6 +19,7 @@ import os
 import pwd
 import grp
 
+
 # Colors, from https://stackoverflow.com/questions/287871/how-to-print-colored-text-in-terminal-in-python
 class bcolors:
     HEADER = '\033[95m'
@@ -30,26 +31,28 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
+
 def load_file(filename):
-    print(bcolors.OKBLUE+'[INFO] Loading '+ filename + bcolors.ENDC)
+    print(bcolors.OKBLUE+'[INFO] Loading '+filename+bcolors.ENDC)
     with open(filename, 'r') as f:
-#        return yaml.load(f, Loader=yaml.FullLoader) ## Waiting for PyYaml 5.1
+        # return yaml.load(f, Loader=yaml.FullLoader) ## Waiting for PyYaml 5.1
         return yaml.load(f)
 
 
 def set_default_boot(node, boot, node_image=None):
-    print('    ├── '+bcolors.OKBLUE+'[INFO] Switching boot to '+ boot + bcolors.ENDC)
+    print('    ├── '+bcolors.OKBLUE+'[INFO] Switching boot to '+boot+bcolors.ENDC)
     print('    ├── '+bcolors.OKBLUE+'[INFO] Editing file /var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe'+bcolors.ENDC)
-    with open('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe','r') as f:
+    with open('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe', 'r') as f:
         filebuffer = f.readlines()
     for i in range(len(filebuffer)):
         if 'menu-default' in filebuffer[i]:
             filebuffer[i] = 'set menu-default boot{}\n'.format(boot)
         if ('node-image' in filebuffer[i]) and (node_image is not None):
             filebuffer[i] = 'set node-image {}\n'.format(node_image)
-    with open('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe','w') as f:
+    with open('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe', 'w') as f:
         f.writelines(filebuffer)
     print('    └── '+bcolors.OKGREEN+'[OK] Done.'+bcolors.ENDC)
+
 
 # Get arguments passed to bootset
 parser = ArgumentParser()
@@ -66,7 +69,7 @@ passed_arguments = parser.parse_args()
 
 # Load and extract configuration files
 nodes_parameters = load_file('/etc/bluebanquise/pxe/nodes_parameters.yml')
-pxe_parameters   = load_file('/etc/bluebanquise/pxe/pxe_parameters.yml')
+pxe_parameters = load_file('/etc/bluebanquise/pxe/pxe_parameters.yml')
 
 apache_uid = pwd.getpwnam(pxe_parameters["pxe_parameters"]["apache_uid"]).pw_uid
 apache_gid = grp.getgrnam(pxe_parameters["pxe_parameters"]["apache_gid"]).gr_gid
@@ -89,7 +92,8 @@ for node in NodeSet(passed_arguments.nodes):
             if 'dhcp' in passed_arguments.force:
                 dedicated_parameters = dedicated_parameters + ' rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4 '
 
-            generic_node_ipxe = '\n'.join(('#!ipxe',
+            generic_node_ipxe = '\n'.join((
+                '#!ipxe',
                 'echo | Entering {}.ipxe file.'.format(node),
                 'echo |',
                 'echo | Getting host specific variables...',
@@ -105,9 +109,9 @@ for node in NodeSet(passed_arguments.nodes):
                 'sleep 2',
                 'chain http://${next-server}/preboot_execution_environment/equipment_profiles/${equipment-profile}.ipxe || shell'))
 
-            with open('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe','w') as ff:
+            with open('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe', 'w') as ff:
                 ff.write(generic_node_ipxe)
-            os.chown('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe',apache_uid,apache_gid)
+            os.chown('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe', apache_uid, apache_gid)
             if pxe_parameters["pxe_parameters"]["ansible_selinux_status"] == "enabled":
                 os.system('restorecon -v /var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe')
         print('    ├── '+bcolors.OKGREEN+'[OK] Done.'+bcolors.ENDC)
