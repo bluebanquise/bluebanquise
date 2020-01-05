@@ -7,6 +7,7 @@
   command: grep "USESSSDAUTH=yes" /etc/sysconfig/authconfig
   register: sssd
   failed_when: sssd.rc != 0 and sssd.rc != 1
+  changed_when: False
 
 - name: Enable SSSD
   command: authconfig --enablesssd --enablesssdauth --enablelocauthorize --enablemkhomedir --update

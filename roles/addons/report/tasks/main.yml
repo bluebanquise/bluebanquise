@@ -26,12 +26,13 @@
 #    - hex3
 #  with_items: "{{ j2_equipment_groups_list }}"
 
-- name: gather equipment groups
+- name: Gather equipment groups
   shell: "nodeset -r {{ groups[item]|list|join(',') }}"
   register: "eq_groups"
   with_items: "{{ j2_equipment_groups_list }}"
   tags:
     - hex3
+  changed_when: False
 
 #- debug: msg="eq_groups"
 #  tags:
