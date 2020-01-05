@@ -83,7 +83,7 @@
     - chdomain.rc == 1
 
 - name: Checking Manager is present in configuration
-  shell: ldapsearch -b "{% for dc in domain_name.split('.') %}{% if not loop.first %},{% endif %}dc={{ dc }}{% endfor %}" -x -LLL -s sub "objectClass=organizationalRole" cn | grep "^cn" | grep Manager
+  shell: set -o pipefail && ldapsearch -b "{% for dc in domain_name.split('.') %}{% if not loop.first %},{% endif %}dc={{ dc }}{% endfor %}" -x -LLL -s sub "objectClass=organizationalRole" cn | grep "^cn" | grep Manager
   register: basedomain
   failed_when: basedomain.rc != 0 and basedomain.rc != 1
   changed_when: False

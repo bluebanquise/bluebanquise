@@ -27,7 +27,7 @@
 #  with_items: "{{ j2_equipment_groups_list }}"
 
 - name: Gather equipment groups
-  shell: "nodeset -r {{ groups[item]|list|join(',') }}"
+  command: "nodeset -r {{ groups[item]|list|join(',') }}"
   register: "eq_groups"
   with_items: "{{ j2_equipment_groups_list }}"
   tags:
@@ -172,7 +172,7 @@
    - /dev/shm/ansible-cmdb/
 
 - name: Gather all facts
-  shell: ansible -m setup --tree /dev/shm/ansible-cmdb/ all
+  command: ansible -m setup --tree /dev/shm/ansible-cmdb/ all
   ignore_errors: yes
   when: report_settings.enable_ansible_cmdb == true
 
