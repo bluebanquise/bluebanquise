@@ -4,7 +4,7 @@
   yum_repository:
     name: "{{ item }}"
     description: "{{ item }} gen by Ansible"
-    baseurl: "http://{{networks[j2_node_main_network]['services_ip']['repository_ip']}}/repositories/{{equipment_profile['operating_system']['distribution']}}/{{equipment_profile['operating_system']['distribution_version']}}/{{equipment_profile['hardware']['cpu']['architecture']}}/{{item}}"
+    baseurl: "http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/{{ equipment_profile['operating_system']['distribution'] }}/{{ equipment_profile['operating_system']['distribution_version'] }}/{{ equipment_profile['hardware']['cpu']['architecture'] }}/{{ item }}"
     gpgcheck: no
   loop: "{{ repositories }}"
   when: item != 'os'
@@ -13,7 +13,7 @@
   yum_repository:
     name: "{{ item }}"
     description: "{{ item }} gen by Ansible"
-    baseurl: "http://{{networks[j2_node_main_network]['services_ip']['repository_ip']}}/repositories/{{equipment_profile['operating_system']['distribution']}}/{{equipment_profile['operating_system']['distribution_version']}}/{{equipment_profile['hardware']['cpu']['architecture']}}/os/{{ item }}"
+    baseurl: "http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/{{ equipment_profile['operating_system']['distribution'] }}/{{ equipment_profile['operating_system']['distribution_version'] }}/{{ equipment_profile['hardware']['cpu']['architecture'] }}/os/{{ item }}"
     gpgcheck: no
   loop:
     - BaseOS

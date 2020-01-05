@@ -10,8 +10,8 @@
 - name: Exports configuration (/etc/exports)
   lineinfile:
     path: /etc/exports
-    regexp: ' # export name: {{item}}$'
-    line: "{{ nfs[item]['export']}} {{networks[nfs[item]['take_over_network']]['subnet']}}/{{networks[nfs[item]['take_over_network']]['prefix']}}({{nfs[item]['export_arguments']}}) # export name: {{item}}"
+    regexp: ' # export name: {{ item }}$'
+    line: "{{ nfs[item]['export'] }} {{ networks[nfs[item]['take_over_network']]['subnet'] }}/{{ networks[nfs[item]['take_over_network']]['prefix'] }}({{ nfs[item]['export_arguments'] }}) # export name: {{ item }}"
   when: inventory_hostname == nfs[item]['server']
   with_items: "{{ nfs }}"
   notify: Restart nfs services

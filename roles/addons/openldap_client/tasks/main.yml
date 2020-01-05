@@ -3,7 +3,7 @@
     name: sssd
     state: present
 
-- name: Checking if SSSD is already activated 
+- name: Checking if SSSD is already activated
   command: grep "USESSSDAUTH=yes" /etc/sysconfig/authconfig
   register: sssd
   failed_when: sssd.rc != 0 and sssd.rc != 1
@@ -21,7 +21,7 @@
 
 - name: Start services
   service:
-    name: "{{item}}"
+    name: "{{ item }}"
     state: started
     enabled: yes
   with_items:

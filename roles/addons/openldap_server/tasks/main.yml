@@ -1,6 +1,6 @@
 - name: Package
   package:
-    name: "{{item}}"
+    name: "{{ item }}"
     state: present
   with_items:
     - openldap-servers
@@ -82,7 +82,7 @@
     - chdomain.rc == 1
 
 - name: Checking Manager is present in configuration
-  shell: ldapsearch -b "{% for dc in domain_name.split('.') %}{% if not loop.first %},{% endif %}dc={{dc}}{% endfor %}" -x -LLL -s sub "objectClass=organizationalRole" cn | grep "^cn" | grep Manager
+  shell: ldapsearch -b "{% for dc in domain_name.split('.') %}{% if not loop.first %},{% endif %}dc={{ dc }}{% endfor %}" -x -LLL -s sub "objectClass=organizationalRole" cn | grep "^cn" | grep Manager
   register: basedomain
   failed_when: basedomain.rc != 0 and basedomain.rc != 1
 
@@ -91,13 +91,13 @@
 #  register: basedomain
 
 - name: Add basedomain.ldif to ldap
-  command: ldapadd -x -D cn=Manager{% for dc in domain_name.split('.') %},dc={{dc}}{% endfor %} -w {{ ldap_settings.manager_password }} -f /dev/shm/basedomain.ldif
+  command: ldapadd -x -D cn=Manager{% for dc in domain_name.split('.') %},dc={{ dc }}{% endfor %} -w {{ ldap_settings.manager_password }} -f /dev/shm/basedomain.ldif
   when:
     - basedomain.rc == 1
 
 - name: Package
   package:
-    name: "{{item}}"
+    name: "{{ item }}"
     state: present
   with_items:
     - httpd
@@ -123,7 +123,7 @@
 
 - name: Restart services
   service:
-    name: "{{item}}"
+    name: "{{ item }}"
     state: restarted
     enabled: yes
   with_items:

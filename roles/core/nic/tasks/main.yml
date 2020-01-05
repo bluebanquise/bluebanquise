@@ -4,22 +4,22 @@
   modprobe:
     name: 8021q
     state: present
-  with_items: "{{network_interfaces}}"
+  with_items: "{{ network_interfaces }}"
   when: (network_interfaces[item]['vlan'] is defined and not none) and (network_interfaces[item]['vlan'] == true)
 
 - name: Load bonding module if needed
   modprobe:
     name: bonding
     state: present
-  with_items: "{{network_interfaces}}"
+  with_items: "{{ network_interfaces }}"
   when: (network_interfaces[item]['type'] is defined and not none) and (network_interfaces[item]['type'] == 'bond' or network_interfaces[item]['type'] == 'bond-slave')
 
 - name: Set NIC configuration
   template:
     src: ifcfg.j2
-    dest: /etc/sysconfig/network-scripts/ifcfg-{{item}}
+    dest: /etc/sysconfig/network-scripts/ifcfg-{{ item }}
     owner: root
     group: root
     mode: 0644
-  with_items: "{{network_interfaces}}"
+  with_items: "{{ network_interfaces }}"
 

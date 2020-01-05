@@ -6,7 +6,7 @@ packages_to_install:
       - nfs-common
   centos:
     _7:
-      - nfs-utils 
+      - nfs-utils
     _8:
       - nfs-utils
   redhat:
