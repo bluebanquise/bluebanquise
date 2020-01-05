@@ -4,7 +4,7 @@
   package:
     name: "ansible-cmdb"
     state: present
-  when: report_settings.enable_ansible_cmdb == true
+  when: report_settings.enable_ansible_cmdb
 
 - name: Create report directories structure
   file:
@@ -174,11 +174,11 @@
 - name: Gather all facts
   command: ansible -m setup --tree /dev/shm/ansible-cmdb/ all
   ignore_errors: yes
-  when: report_settings.enable_ansible_cmdb == true
+  when: report_settings.enable_ansible_cmdb
 
 - name: Generate facts report
   shell: ansible-cmdb /dev/shm/ansible-cmdb > /var/www/html/report/overview.html
-  when: report_settings.enable_ansible_cmdb == true
+  when: report_settings.enable_ansible_cmdb
 
 - name: Generate graph-tool network report
   template:
@@ -190,7 +190,7 @@
   tags:
     - templates
     - graphtool
-  when: report_settings.enable_graphtool == true
+  when: report_settings.enable_graphtool
 
 - name: Template >> /var/www/html/report/graphs_report.html
   template:
@@ -201,5 +201,5 @@
     mode: 0644
   tags:
     - templates
-  when: report_settings.enable_graphtool == true
+  when: report_settings.enable_graphtool
 

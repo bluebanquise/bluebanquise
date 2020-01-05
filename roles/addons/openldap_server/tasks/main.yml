@@ -18,8 +18,7 @@
     dest: /var/lib/ldap/DB_CONFIG
     owner: ldap
     group: ldap
-  when:
-    - db_config.stat.exists == False
+  when: not db_config.stat.exists
 
 - name: Start ldap
   service:
@@ -48,8 +47,7 @@
 
 - name: Add cosine.ldif to ldap
   command: ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/cosine.ldif
-  when:
-    - cosine.stat.exists == False
+  when: not cosine.stat.exists
 
 - name: Checking nis.ldif was already pushed
   stat:
@@ -58,8 +56,7 @@
 
 - name: Add nis.ldif to ldap
   command: ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/nis.ldif
-  when:
-    - nis.stat.exists == False
+  when: not nis.stat.exists
 
 - name: Checking inetorgperson.ldif was already pushed
   stat:
@@ -68,8 +65,7 @@
 
 - name: Add inetorgperson.ldif to ldap
   command: ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/inetorgperson.ldif
-  when:
-    - inetorgperson.stat.exists == False
+  when: not inetorgperson.stat.exists
 
 - name: Checking chdomain.ldif was already pushed
   command: grep RootPW /etc/openldap/slapd.d/cn=config/olcDatabase={2}hdb.ldif
