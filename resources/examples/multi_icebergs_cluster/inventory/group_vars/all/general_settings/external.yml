@@ -22,7 +22,8 @@ external_hosts:
 # Be aware that, at this level, theses repositories will be exported on all hosts without
 # any architecture or distribution check.
 
-external_repositories:
+#external_repositories:
 #  - name: epel
-#    url: 'https://dl.fedoraproject.org/pub/epel/7/x86_64/'
+#    baseurl: 'https://dl.fedoraproject.org/pub/epel/$releasever/$basearch/'
+#    proxy: 'https://proxy:8080'
 

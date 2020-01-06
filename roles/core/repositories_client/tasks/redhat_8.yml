@@ -1,29 +1,29 @@
 ---
 
+- name: Set baseurl prefix
+  set_fact:
+    baseurl_prefix: "http://{{networks[j2_node_main_network]['services_ip']['repository_ip']}}/repositories/{{equipment_profile['operating_system']['distribution']}}/{{equipment_profile['operating_system']['distribution_version']}}/{{equipment_profile['hardware']['cpu']['architecture']}}/"
+
 - name: Setting repositories
   yum_repository:
-    name: "{{ item }}"
-    description: "{{ item }} gen by Ansible"
-    baseurl: "http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/{{ equipment_profile['operating_system']['distribution'] }}/{{ equipment_profile['operating_system']['distribution_version'] }}/{{ equipment_profile['hardware']['cpu']['architecture'] }}/{{ item }}"
-    gpgcheck: no
-  loop: "{{ repositories }}"
-  when: item != 'os'
+    name: "{{ item.name | default(item) }}"
+    description: "{{ item.name | default(item) }} gen by Ansible"
+    baseurl: "{{ item.baseurl | default(baseurl_prefix + item.name | default(item)) }}"
+    enabled: "{{ item.enabled | default(1) }}"
+    gpgcheck: "{{ item.gpgcheck | default(0) }}"
+    gpgkey: "{{ item.gpgkey | default(omit) }}"
+    proxy: "{{ item.proxy | default(omit) }}"
+  with_items: "{{ repositories | union(external_repositories|default([])) }}"
+  when: ( item != 'os' ) and ( item.name is not defined or item.name != 'os' )
 
-- name: "Setting repositories os ({{ item }})"
+- name: "Setting repositories os ({{ item.1 }})"
   yum_repository:
-    name: "{{ item }}"
-    description: "{{ item }} gen by Ansible"
-    baseurl: "http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/{{ equipment_profile['operating_system']['distribution'] }}/{{ equipment_profile['operating_system']['distribution_version'] }}/{{ equipment_profile['hardware']['cpu']['architecture'] }}/os/{{ item }}"
-    gpgcheck: no
-  loop:
-    - BaseOS
-    - AppStream
-  when: "'os' in repositories"
-
-- name: "Setting external repository ({{ item }})"
-  yum_repository:
-    name: "{{ item.name }}"
-    description: "{{ item.name }} gen by Ansible"
-    baseurl: "{{ item.url }}"
-    gpgcheck: no
-  loop: "{{ external_repositories | default([]) }}"
+    name: "{{ item.1 }}"
+    description: "{{ item.1 }} gen by Ansible"
+    baseurl: "{{ item.0.baseurl | default(baseurl_prefix + 'os/' + item.1) }}"
+    enabled: "{{ item.0.enabled | default(1) }}"
+    gpgcheck: "{{ item.0.gpgcheck | default(0) }}"
+    gpgkey: "{{ item.0.gpgkey | default(omit) }}"
+    proxy: "{{ item.0.proxy | default(omit) }}"
+  loop: "{{ repositories | product(['AppStream', 'BaseOS']) | list }}"
+  when: ( item.0 == 'os' ) or ( item.0.name is defined and item.0.name == 'os' )
