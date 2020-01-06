@@ -27,6 +27,7 @@ from base64 import urlsafe_b64decode as decode
 from getpass import getpass
 from datetime import datetime
 
+
 # Colors, from https://stackoverflow.com/questions/287871/how-to-print-colored-text-in-terminal-in-python
 class bcolors:
     HEADER = '\033[95m'
@@ -38,14 +39,16 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
+
 def load_file(filename):
-    print(bcolors.OKBLUE+'[INFO] Loading '+ filename + bcolors.ENDC)
+    print(bcolors.OKBLUE+'[INFO] Loading '+filename+bcolors.ENDC)
     with open(filename, 'r') as f:
-#        return yaml.load(f, Loader=yaml.FullLoader) ## Waiting for PyYaml 5.1
+        # return yaml.load(f, Loader=yaml.FullLoader) ## Waiting for PyYaml 5.1
         return yaml.load(f)
 
+
 def load_kernel_list(kernels_path):
-    print(bcolors.OKBLUE+'[INFO] Loading kernels from '+ kernels_path + bcolors.ENDC)
+    print(bcolors.OKBLUE+'[INFO] Loading kernels from '+kernels_path+bcolors.ENDC)
     file_list = os.listdir(kernels_path)
     nb_kernels = 0
     kernel_list = [None]
@@ -55,15 +58,17 @@ def load_kernel_list(kernels_path):
             nb_kernels = nb_kernels + 1
     return kernel_list
 
-def select_from_list(list_from,list_name,index_modifier):
+
+def select_from_list(list_from, list_name, index_modifier):
     print('\nSelect '+list_name+':')
-    if list_from[0] != None and len(list_from) != 0:
+    if list_from[0] is not None and len(list_from) != 0:
         for index, i in enumerate(list_from):
             print(' '+str(index+1)+' - '+i)
     selected_item = str(int(input('-->: ').lower().strip())+index_modifier)
     return selected_item
 
-def generate_ipxe_boot_file(image_type,image_name,image_kernel,image_initramfs):
+
+def generate_ipxe_boot_file(image_type, image_name, image_kernel, image_initramfs):
     if image_type == 'nfs_staging':
         boot_file_content = '''#!ipxe
 
@@ -97,7 +102,7 @@ echo +----------------------------------------------------+
 sleep 4
 
 boot
-'''.format(image_name=image_name,image_kernel=image_kernel,image_initramfs=image_initramfs)
+'''.format(image_name=image_name, image_kernel=image_kernel, image_initramfs=image_initramfs)
         return boot_file_content
     elif image_type == 'nfs_golden':
         boot_file_content = '''#!ipxe
@@ -133,7 +138,7 @@ echo +----------------------------------------------------+
 sleep 4
 
 boot
-'''.format(image_name=image_name,image_kernel=image_kernel,image_initramfs=image_initramfs)
+'''.format(image_name=image_name, image_kernel=image_kernel, image_initramfs=image_initramfs)
         return boot_file_content
     elif image_type == 'livenet':
         boot_file_content = '''#!ipxe
@@ -168,7 +173,7 @@ echo +----------------------------------------------------+
 sleep 4
 
 boot
-'''.format(image_name=image_name,image_kernel=image_kernel,image_initramfs=image_initramfs)
+'''.format(image_name=image_name, image_kernel=image_kernel, image_initramfs=image_initramfs)
         return boot_file_content
 
 
@@ -176,7 +181,7 @@ boot
 parser = ArgumentParser()
 passed_arguments = parser.parse_args()
 
-dnf_cache_directory = '/root/dnf' #'/dev/shm/'
+dnf_cache_directory = '/root/dnf'  # '/dev/shm/'
 image_working_directory = '/root/diskless/workdir/'
 kernels_path = '/var/www/html/preboot_execution_environment/diskless/kernels/'
 
@@ -196,7 +201,7 @@ if main_action == '1':
     print('')
     print('Available kernels:')
     print("    │")
-    if kernel_list[0] != None:
+    if kernel_list[0] is not None:
         for i in kernel_list:
             if os.path.exists(kernels_path+'/initramfs-kernel-'+(i.strip('vmlinuz-'))):
                 initramfs_status = bcolors.OKGREEN+'initramfs present'+bcolors.ENDC
@@ -214,11 +219,11 @@ elif main_action == '2':
 
     kernel_list = load_kernel_list(kernels_path)
 
-    selected_kernel = select_from_list(kernel_list,'kernel',-1)
+    selected_kernel = select_from_list(kernel_list, 'kernel', -1)
 
-    print (bcolors.OKBLUE+'[INFO] Now generating initramfs... May take some time.'+bcolors.ENDC)
+    print(bcolors.OKBLUE+'[INFO] Now generating initramfs... May take some time.'+bcolors.ENDC)
     os.system('dracut --xz -v -m "network base nfs" --add "livenet" --add-drivers xfs --no-hostonly --nolvmconf '+kernels_path+'/initramfs-kernel-'+(kernel_list[int(selected_kernel)].strip('vmlinuz-'))+' --force')
-    os.chmod(kernels_path+'/initramfs-kernel-'+(kernel_list[int(selected_kernel)].strip('vmlinuz-')),0o644)
+    os.chmod(kernels_path+'/initramfs-kernel-'+(kernel_list[int(selected_kernel)].strip('vmlinuz-')), 0o644)
     print(bcolors.OKGREEN+'\n[OK] Done.'+bcolors.ENDC)
 
 elif main_action == '3':
@@ -228,10 +233,10 @@ elif main_action == '3':
 
     image_types = ["nfs", "livenet"]
 
-    selected_image_type = select_from_list(image_types,'image type',-1)
+    selected_image_type = select_from_list(image_types, 'image type', -1)
 
     kernel_list = load_kernel_list(kernels_path)
-    selected_kernel = select_from_list(kernel_list,'kernel',-1)
+    selected_kernel = select_from_list(kernel_list, 'kernel', -1)
 
     print('Please enter image name ?')
     selected_image_name = str(input('-->: ').lower().strip())
@@ -239,7 +244,7 @@ elif main_action == '3':
     password_raw = str(input('Please enter clear root password of the new image: '))
     password_hash = crypt.crypt(password_raw, crypt.METHOD_SHA512)
 
-    if selected_image_type == '0': # BASIC NFS
+    if selected_image_type == '0':  # BASIC NFS
 
         print(bcolors.OKBLUE+'[INFO] Entering nfs dedicated part.'+bcolors.ENDC)
 
@@ -259,14 +264,14 @@ elif main_action == '3':
             os.system('rm -Rf /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
             os.system('mkdir /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
             print(bcolors.OKBLUE+'[INFO] Generating new ipxe boot file.'+bcolors.ENDC)
-            boot_file_content = generate_ipxe_boot_file('nfs_staging',selected_image_name,kernel_list[int(selected_kernel)],'initramfs-kernel-'+kernel_list[int(selected_kernel)].strip('vmlinuz-'))
+            boot_file_content = generate_ipxe_boot_file('nfs_staging', selected_image_name, kernel_list[int(selected_kernel)], 'initramfs-kernel-'+kernel_list[int(selected_kernel)].strip('vmlinuz-'))
             with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/boot.ipxe', "w") as ff:
                 ff.write(boot_file_content)
             print(bcolors.OKBLUE+'[INFO] Installing new system image... May take some time.'+bcolors.ENDC)
             os.system('dnf groupinstall -y "core" --releasever=8 --setopt=module_platform_id=platform:el8 --installroot=/diskless/images/'+selected_image_name+'/staging')
             print(bcolors.OKBLUE+'[INFO] Setting password into image.'+bcolors.ENDC)
             with open('/diskless/images/'+selected_image_name+'/staging/etc/shadow') as ff:
-                newText=ff.read().replace('root:*', 'root:'+password_hash)
+                newText = ff.read().replace('root:*', 'root:'+password_hash)
             with open('/diskless/images/'+selected_image_name+'/staging/etc/shadow', "w") as ff:
                 ff.write(newText)
             print(bcolors.OKBLUE+'[INFO] Registering new image.'+bcolors.ENDC)
@@ -276,12 +281,12 @@ elif main_action == '3':
   image_creation_date: {image_date}
   image_type: nfs
   image_status: staging
-'''.format(image_name=selected_image_name,image_kernel=kernel_list[int(selected_kernel)],image_date=datetime.today().strftime('%Y-%m-%d'))
+'''.format(image_name=selected_image_name, image_kernel=kernel_list[int(selected_kernel)], image_date=datetime.today().strftime('%Y-%m-%d'))
             with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml', "w") as ff:
                 ff.write(file_content)
             print(bcolors.OKGREEN+'\n[OK] Done creating image.'+bcolors.ENDC)
 
-    if selected_image_type == '1': # LIVENET
+    if selected_image_type == '1':  # LIVENET
 
         print(bcolors.OKBLUE+'[INFO] Entering livenet dedicated part.'+bcolors.ENDC)
 
@@ -309,7 +314,7 @@ elif main_action == '3':
             os.system('rm -Rf /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
             os.system('mkdir /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
             print(bcolors.OKBLUE+'[INFO] Generating new ipxe boot file.'+bcolors.ENDC)
-            boot_file_content = generate_ipxe_boot_file('livenet',selected_image_name,kernel_list[int(selected_kernel)],'initramfs-kernel-'+kernel_list[int(selected_kernel)].strip('vmlinuz-'))
+            boot_file_content = generate_ipxe_boot_file('livenet', selected_image_name, kernel_list[int(selected_kernel)], 'initramfs-kernel-'+kernel_list[int(selected_kernel)].strip('vmlinuz-'))
             with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/boot.ipxe', "w") as ff:
                 ff.write(boot_file_content)
             print(bcolors.OKBLUE+'[INFO] Creating empty image file, format and mount it.'+bcolors.ENDC)
@@ -332,7 +337,7 @@ elif main_action == '3':
                 os.system('dnf groupinstall -y "core" --releasever=8 --setopt=module_platform_id=platform:el8 --installroot=/mnt')
             print(bcolors.OKBLUE+'[INFO] Setting password into image.'+bcolors.ENDC)
             with open('/mnt/etc/shadow') as ff:
-                newText=ff.read().replace('root:*', 'root:'+password_hash)
+                newText = ff.read().replace('root:*', 'root:'+password_hash)
             with open('/mnt/etc/shadow', "w") as ff:
                 ff.write(newText)
             print(bcolors.OKBLUE+'[INFO] Packaging and moving files... May take some time.'+bcolors.ENDC)
@@ -347,7 +352,7 @@ elif main_action == '3':
   image_kernel: {image_kernel}
   image_creation_date: {image_date}
   image_type: livenet
-'''.format(image_name=selected_image_name,image_kernel=kernel_list[int(selected_kernel)],image_date=datetime.today().strftime('%Y-%m-%d'))
+'''.format(image_name=selected_image_name, image_kernel=kernel_list[int(selected_kernel)], image_date=datetime.today().strftime('%Y-%m-%d'))
             with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml', "w") as ff:
                 ff.write(file_content)
             print(bcolors.OKGREEN+'\n[OK] Done creating image.'+bcolors.ENDC)
@@ -378,17 +383,17 @@ elif main_action == '4':
         print('Manage kernels of an image.')
 
         images_list = os.listdir('/var/www/html/preboot_execution_environment/diskless/images/')
-        selected_image = select_from_list(images_list,'image to work with',-1)
+        selected_image = select_from_list(images_list, 'image to work with', -1)
 
         with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image+'/image_data.yml', 'r') as f:
             image_dict = yaml.load(f)
         print('Current kernel is: '+str(image_dict['image_data']['image_kernel']))
 
         kernel_list = load_kernel_list(kernels_path)
-        selected_kernel = select_from_list(kernel_list,'a new kernel to use in the available kernels list',-1)
+        selected_kernel = select_from_list(kernel_list, 'a new kernel to use in the available kernels list', -1)
 
         print(bcolors.OKBLUE+'[INFO] Updating image files.'+bcolors.ENDC)
-        file = open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image+'/boot.ipxe','r')
+        file = open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image+'/boot.ipxe', 'r')
         filebuffer = file.readlines()
         for i in range(len(filebuffer)):
             if 'image-kernel' in filebuffer[i]:
@@ -396,16 +401,16 @@ elif main_action == '4':
             if 'image-initramfs' in filebuffer[i]:
                 filebuffer[i] = 'set image-initramfs '+'initramfs-kernel-'+kernel_list[int(selected_kernel)].strip('vmlinuz-')+'\n'
         file.close
-        file = open('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe','w')
+        file = open('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe', 'w')
         file.writelines(filebuffer)
         file.close
-        file = open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml','r')
+        file = open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml', 'r')
         filebuffer = file.readlines()
         for i in range(len(filebuffer)):
             if 'image_kernel' in filebuffer[i]:
                 filebuffer[i] = 'image_kernel: '+selected_kernel+'\n'
         file.close
-        file = open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml','w')
+        file = open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml', 'w')
         file.writelines(filebuffer)
         file.close
         print(bcolors.OKGREEN+'\n[OK] Done.\nYou will need to restart your running nodes for changes to take effect.'+bcolors.ENDC)
@@ -413,7 +418,7 @@ elif main_action == '4':
     elif sub_main_action == '3':
 
         images_list = os.listdir('/var/www/html/preboot_execution_environment/diskless/images/')
-        selected_image = select_from_list(images_list,'image to work with',-1)
+        selected_image = select_from_list(images_list, 'image to work with', -1)
 
         with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image+'/image_data.yml', 'r') as f:
             image_dict = yaml.load(f)
@@ -441,18 +446,18 @@ elif main_action == '4':
   image_creation_date: {image_date}
   image_type: nfs
   image_status: golden
-'''.format(image_name=selected_image_name,image_kernel=image_dict['image_data']['image_kernel'],image_date=datetime.today().strftime('%Y-%m-%d'))
+'''.format(image_name=selected_image_name, image_kernel=image_dict['image_data']['image_kernel'], image_date=datetime.today().strftime('%Y-%m-%d'))
                 with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml', "w") as ff:
                     ff.write(file_content)
                 print(bcolors.OKBLUE+'[INFO] Generating new ipxe boot file.'+bcolors.ENDC)
-                boot_file_content = generate_ipxe_boot_file('nfs_golden',selected_image_name,image_dict['image_data']['image_kernel'],'initramfs-kernel-'+image_dict['image_data']['image_kernel'].strip('vmlinuz-'))
+                boot_file_content = generate_ipxe_boot_file('nfs_golden', selected_image_name, image_dict['image_data']['image_kernel'], 'initramfs-kernel-'+image_dict['image_data']['image_kernel'].strip('vmlinuz-'))
             with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/boot.ipxe', "w") as ff:
                 ff.write(boot_file_content)
 
     elif sub_main_action == '4':
         print('Please select image to work with')
         images_list = os.listdir('/var/www/html/preboot_execution_environment/diskless/images/')
-        for i in range(0,len(images_list)):
+        for i in range(0, len(images_list)):
             print(' '+str(i+1)+' - '+str(images_list[i]))
         selected_image = images_list[int(input('-->: ').lower().strip())-1]
         with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image+'/image_data.yml', 'r') as f:
@@ -485,9 +490,6 @@ elif main_action == '4':
                 for node in NodeSet(nodes_range):
                     print("Working on node: "+str(node))
                     os.system('rm -Rf /diskless/images/'+selected_image+'/nodes/'+node)
-
-
-
 
 
 quit()

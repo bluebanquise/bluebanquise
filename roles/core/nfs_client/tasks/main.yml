@@ -30,7 +30,7 @@
 - name: Mount exported NFS into directories
   mount:
     path: "{{ item.0.mount }}"
-    src: "{{ item.0.server }}{% if item.0.take_over_network is defined and not none %}-{{item.0.take_over_network}}{% endif %}:{{item.0.export}}"
+    src: "{{ item.0.server }}{% if item.0.take_over_network is defined and not none %}-{{ item.0.take_over_network }}{% endif %}:{{ item.0.export }}"
     fstype: nfs
     opts: "{{ item.0.mount_arguments }}"
     state: mounted

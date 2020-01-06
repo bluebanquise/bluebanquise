@@ -4,11 +4,11 @@
   package:
     name: "ansible-cmdb"
     state: present
-  when: report_settings.enable_ansible_cmdb == true
+  when: report_settings.enable_ansible_cmdb
 
 - name: Create report directories structure
   file:
-   path: "{{item}}"
+   path: "{{ item }}"
    state: directory
    mode: 0755
   with_items:
@@ -21,25 +21,26 @@
   tags:
     - hex
 
-#- debug: msg="{{groups[item]|list|join(',')}}"
+#- debug: msg="{{ groups[item]|list|join(',') }}"
 #  tags:
 #    - hex3
-#  with_items: "{{j2_equipment_groups_list}}"
+#  with_items: "{{ j2_equipment_groups_list }}"
 
-- name: gather equipment groups
-  shell: "nodeset -r {{groups[item]|list|join(',')}}"
+- name: Gather equipment groups
+  command: "nodeset -r {{ groups[item]|list|join(',') }}"
   register: "eq_groups"
-  with_items: "{{j2_equipment_groups_list}}"
+  with_items: "{{ j2_equipment_groups_list }}"
   tags:
     - hex3
+  changed_when: False
 
 #- debug: msg="eq_groups"
 #  tags:
 #    - hex3
-#- debug: msg="{{item.item}} {{item.stdout}}"
+#- debug: msg="{{ item.item }} {{ item.stdout }}"
 #  tags:
 #    - hex3
-#  with_items: "{{eq_groups.results}}"
+#  with_items: "{{ eq_groups.results }}"
 
 
 
@@ -164,20 +165,20 @@
 
 - name: Create report directories structure
   file:
-   path: "{{item}}"
+   path: "{{ item }}"
    state: directory
    mode: 0755
   with_items:
    - /dev/shm/ansible-cmdb/
 
 - name: Gather all facts
-  shell: ansible -m setup --tree /dev/shm/ansible-cmdb/ all
+  command: ansible -m setup --tree /dev/shm/ansible-cmdb/ all
   ignore_errors: yes
-  when: report_settings.enable_ansible_cmdb == true
+  when: report_settings.enable_ansible_cmdb
 
 - name: Generate facts report
   shell: ansible-cmdb /dev/shm/ansible-cmdb > /var/www/html/report/overview.html
-  when: report_settings.enable_ansible_cmdb == true
+  when: report_settings.enable_ansible_cmdb
 
 - name: Generate graph-tool network report
   template:
@@ -189,7 +190,7 @@
   tags:
     - templates
     - graphtool
-  when: report_settings.enable_graphtool == true
+  when: report_settings.enable_graphtool
 
 - name: Template >> /var/www/html/report/graphs_report.html
   template:
@@ -200,5 +201,5 @@
     mode: 0644
   tags:
     - templates
-  when: report_settings.enable_graphtool == true
+  when: report_settings.enable_graphtool
 

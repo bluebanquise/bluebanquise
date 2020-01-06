@@ -2,7 +2,7 @@
 
 - name: Package
   package:
-    name: "{{item}}"
+    name: "{{ item }}"
     state: present
   with_items:
     - prometheus-bluebanquise
@@ -10,7 +10,7 @@
 
 - name: Create directories structure
   file:
-   path: "{{item}}"
+   path: "{{ item }}"
    state: directory
    mode: 0750
    owner: prometheus
@@ -47,7 +47,7 @@
 
 - name: Create directories structure for alertmanager
   file:
-   path: "{{item}}"
+   path: "{{ item }}"
    state: directory
    mode: 0750
    owner: alertmanager
@@ -67,7 +67,7 @@
 
 - name: Start services
   service:
-    name: "{{item}}"
+    name: "{{ item }}"
     state: started
     enabled: yes
   with_items:
