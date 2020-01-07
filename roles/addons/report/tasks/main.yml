@@ -52,7 +52,7 @@
     group: root
     mode: 0644
   tags:
-    - templates
+    - template
 
 - name: Template >> /var/www/html/report/css/main.css
   template:
@@ -62,7 +62,7 @@
     group: root
     mode: 0644
   tags:
-    - templates
+    - template
     - hex
 
 - name: Copy >> bluebanquise logo white
@@ -79,7 +79,7 @@
     group: root
     mode: 0644
   tags:
-    - templates
+    - template
   when:
     - report_settings.inventory_checker is defined
     - report_settings.inventory_checker is not none
@@ -94,7 +94,7 @@
     group: root
     mode: 0644
   tags:
-    - templates
+    - template
   when:
     - report_settings.inventory_checker is defined
     - report_settings.inventory_checker is not none
@@ -110,7 +110,7 @@
     group: root
     mode: 0644
   tags:
-    - templates
+    - template
   when:
     - report_settings.inventory_checker is defined
     - report_settings.inventory_checker is not none
@@ -126,7 +126,7 @@
     group: root
     mode: 0644
   tags:
-    - templates
+    - template
     - hex1
 
 - name: Template >> /var/www/html/report/cluster_configuration/equipment_profiles.html
@@ -137,7 +137,7 @@
     group: root
     mode: 0644
   tags:
-    - templates
+    - template
     - hex
 
 - name: Template >> /var/www/html/report/css/hosts.css
@@ -148,7 +148,7 @@
     group: root
     mode: 0644
   tags:
-    - templates
+    - template
     - hex1
 
 - name: Template >> /var/www/html/report/cluster_configuration/racks.html
@@ -159,7 +159,7 @@
     group: root
     mode: 0644
   tags:
-    - templates
+    - template
     - hex1
 
 
@@ -188,7 +188,7 @@
     group: root
     mode: 0644
   tags:
-    - templates
+    - template
     - graphtool
   when: report_settings.enable_graphtool
 
@@ -200,6 +200,6 @@
     group: root
     mode: 0644
   tags:
-    - templates
+    - template
   when: report_settings.enable_graphtool
 
