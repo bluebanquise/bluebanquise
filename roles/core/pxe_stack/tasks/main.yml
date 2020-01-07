@@ -19,6 +19,8 @@
    - /var/www/cgi-bin
    - /etc/bluebanquise
    - /etc/bluebanquise/pxe
+  tags:
+    - directory
 
 - name: Create pxe directories structure
   file:
@@ -33,6 +35,8 @@
    - /var/www/html/preboot_execution_environment/nodes
    - /var/www/html/preboot_execution_environment/equipment_profiles
    - /var/www/html/preboot_execution_environment/osdeploy
+  tags:
+    - directory
 
 - name: Configure access on directory /var/www/html/preboot_execution_environment"
   file:
@@ -211,6 +215,8 @@
     mode: 0744
     owner: "{{ apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
     group: "{{ apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
+  tags:
+    - script
 
 - meta: flush_handlers
 
