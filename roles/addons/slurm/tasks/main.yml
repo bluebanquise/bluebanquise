@@ -47,7 +47,7 @@
     group: root
     mode: 0644
   tags:
-    - templates
+    - template
 
 - name: File >> /etc/slurm/cgroup.conf
   copy:
