@@ -15,7 +15,7 @@
     mode: 0644
   notify: Restart dhcp services
   tags:
-    - templates
+    - template
 
 - name: Template >> /etc/dhcp/dhcpd.networks.conf
   template:
@@ -26,7 +26,7 @@
     mode: 0644
   notify: Restart dhcp services
   tags:
-    - templates
+    - template
 
 - name: Template >> /etc/dhcp/dhcpd.{{ item }}.conf
   template:
@@ -41,7 +41,7 @@
     - networks[item].is_in_dhcp
   notify: Restart dhcp services
   tags:
-    - templates
+    - template
 
 - name: Start services
   service:
