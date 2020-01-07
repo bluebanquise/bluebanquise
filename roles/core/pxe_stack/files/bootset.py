@@ -63,7 +63,7 @@ parser.add_argument("-n", "--nodes", dest="nodes",
 parser.add_argument("-b", "--boot", dest="boot",
                     help="Next pxe boot: can be osdeploy, diskless, clone, clonedeploy, or disk.")
 parser.add_argument("-f", "--force", dest="force", default=" ",
-                    help="Force. 'update' = files update, 'network' = static ip. Combine using comma separator.")
+                    help="Force. 'update' = files update, 'dhcp' = better dracut dhcp, 'network' = static ip. Combine using comma separator.")
 parser.add_argument("-i", "--image", dest="image", default="none",
                     help="Specify diskless or clone image to be used, if using diskless/clone/clonedeploy boot.")
 parser.add_argument("-e", "--extra-parameters", dest="extra_parameters", default="none",
