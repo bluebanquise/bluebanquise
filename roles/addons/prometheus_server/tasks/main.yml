@@ -27,7 +27,7 @@
     group: prometheus
     mode: 0640
   tags:
-    - templates
+    - template
 
 - name: Template >> /etc/prometheus/alerts/general.yml
   template:
@@ -63,7 +63,7 @@
     group: alertmanager
     mode: 0640
   tags:
-    - templates
+    - template
 
 - name: Start services
   service:
