@@ -9,7 +9,7 @@ This role provides a very basic users management, for simple clusters.
 Instructions
 ^^^^^^^^^^^^
 
-Copy addon/users_basic.yml into /etc/ansible/inventory/group_vars/all/addons folder.
+Copy addon/users_basic.yml into /etc/bluebanquise/inventory/group_vars/all/addons folder.
 
 Then edit this file according to your needs, and play this role on all hosts with users.
 

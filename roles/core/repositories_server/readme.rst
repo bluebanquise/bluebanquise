@@ -25,9 +25,9 @@ Note that repositories structure follows a specific pattern:
 
 System administrator should create these directories manually, and put packages inside.
 
-Then, repositories that will be setup on clients are stored by default in */etc/ansible/inventory/group_vars/all/general_settings/repositories.yml*.
+Then, repositories that will be setup on clients are stored by default in */etc/bluebanquise/inventory/group_vars/all/general_settings/repositories.yml*.
 
-Keep in mind that it is possible to precedence this file in equipment_profiles groupes, and so put a repository file in for example */etc/ansible/inventory/group_vars/equipment_supermicro_sandy_compute* that will be considered by these nodes over the default one. This can be useful to define diferent repositories for diferent equipments.
+Keep in mind that it is possible to precedence this file in equipment_profiles groupes, and so put a repository file in for example */etc/bluebanquise/inventory/group_vars/equipment_supermicro_sandy_compute* that will be considered by these nodes over the default one. This can be useful to define diferent repositories for diferent equipments.
 
 
 Changelog

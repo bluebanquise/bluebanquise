@@ -11,9 +11,9 @@ Instructions
 
 This role will react diffrently if in multi icebergs mode or not.
 
-By default, in non multiple icebergs, server will be the time source reference. If using multiple icebergs hierarchy, then server can be a time reference if at top of the icebergs hierarchy, or simply a time relay with an higher stratum, if not a top server. This stratum calculation is done using **iceberg_level** variable defined in **/etc/ansible/inventory/cluster/icebergs/icebergX** files.
+By default, in non multiple icebergs, server will be the time source reference. If using multiple icebergs hierarchy, then server can be a time reference if at top of the icebergs hierarchy, or simply a time relay with an higher stratum, if not a top server. This stratum calculation is done using **iceberg_level** variable defined in **/etc/bluebanquise/inventory/cluster/icebergs/icebergX** files.
 
-It is possible to use file */etc/ansible/inventory/group_vars/all/general_settings/external.yml* to connect client or server to external time sources (server or pool or servers):
+It is possible to use file */etc/bluebanquise/inventory/group_vars/all/general_settings/external.yml* to connect client or server to external time sources (server or pool or servers):
 
 .. code-block:: yaml
 

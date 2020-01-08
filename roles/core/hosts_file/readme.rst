@@ -11,7 +11,7 @@ Instructions
 
 This role will gather all hosts from the inventory, and add them, using all their known internal network connections ip, into */etc/hosts* file.
 
-System administrator can reduce the scope of this gathering using **hosts_file.range** variable in */etc/ansible/inventory/group_vars/all/general_settings/general.yml*.
+System administrator can reduce the scope of this gathering using **hosts_file.range** variable in */etc/bluebanquise/inventory/group_vars/all/general_settings/general.yml*.
 Setting **range** to *all* will use all Ansible inventory hosts, while setting **range** to *iceberg* will reduce the gathering to the current host iceberg.
 
 .. code-block:: yaml
@@ -23,7 +23,7 @@ Another feature is available in this hosts role. In case of multiple icebergs, s
 
 If using such global network, it is possible to ask this role to define **direct** hosts resolutions of a specific Ansible group to be not on their regular management network, but be set directly on the global network (mostly used in combinaison with slurm and mpi stacks).
 
-To do so, uncomment and edit variable **global_network_settings** in file */etc/ansible/inventory/group_vars/all/general_settings/network.yml*. Note that the role will ignore this variable if it is commented, and will try to use it if not commented.
+To do so, uncomment and edit variable **global_network_settings** in file */etc/bluebanquise/inventory/group_vars/all/general_settings/network.yml*. Note that the role will ignore this variable if it is commented, and will try to use it if not commented.
 
 .. code-block:: yaml
 
