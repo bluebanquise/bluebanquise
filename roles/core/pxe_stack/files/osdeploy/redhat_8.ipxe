@@ -1,0 +1,35 @@
+#!ipxe
+
+echo |
+echo | Entering osdeploy/centos_8.ipxe file.
+echo |
+
+echo | Now starting os deployment process.
+echo | Centos or RedHat ipxe configuration.
+echo |
+echo | Parameters used:
+echo | > Operating system target: ${eq-distribution} ${eq-distribution-version} ${eq-architecture}
+echo | > Console: ${eq-console}
+echo | > Additional kernel parameters: ${eq-kernel-parameters} ${dedicated-kernel-parameters}
+echo | > Deployment server: ${next-server}
+echo | > Target repos/images: repositories/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/
+echo | > Target kickstart: ${eq-equipment-profile}.kickstart.cfg
+echo |
+echo | Loading linux ...
+
+kernel ${repository-root}/os/images/pxeboot/vmlinuz initrd=initrd.img inst.stage2=${repository-root}/os inst.repo=${repository-root}/os/BaseOS ks=${kickstart-path} ${eq-console} ${eq-kernel-parameters} ${dedicated-kernel-parameters} ipxe_next_server=${next-server}
+
+echo | Loading initial ramdisk ...
+
+initrd ${repository-root}/os/images/pxeboot/initrd.img
+
+echo | ALL DONE! We are ready.
+echo | Booting in 4s ...
+echo |
+echo +----------------------------------------------------+
+
+sleep 4
+
+boot
+
+
