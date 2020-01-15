@@ -1,4 +1,4 @@
 ---
 
 - name: Use OS dedicated task
-  include_tasks: "{{(ansible_distribution|lower|replace(' ','_'))}}_{{ansible_distribution_major_version}}.yml"
+  include_tasks: "{{ (ansible_distribution|lower|replace(' ','_')) }}_{{ ansible_distribution_major_version }}.yml"

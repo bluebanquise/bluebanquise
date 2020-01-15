@@ -29,9 +29,4 @@
       tags: pxe_stack
     - role: nfs_server
       tags: nfs_server
-<<<<<<< HEAD:resources/examples/playbooks/management1.yml
-#    - role: nfs_client
-#      tags: nfs_client
-=======
->>>>>>> 1.2.0:resources/examples/simple_cluster/playbooks/management1.yml
 

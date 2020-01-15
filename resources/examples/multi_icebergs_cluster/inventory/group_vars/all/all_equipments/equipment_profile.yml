@@ -1,15 +1,10 @@
 equipment_profile:
 
   # iPXE network driver
-<<<<<<< HEAD:resources/examples/simple_cluster/group_vars/all/all_equipments/equipment_profile.yml
-  # default should be good for most of NIC, but some need SNP
-  ipxe_network_driver: default # default or snp or snponly
-=======
   # default should be good for most of NIC, but some need SNP. Refer to http://ipxe.org/appnote/buildtargets for more information.
   ipxe_driver: default # default or snp or snponly
   ipxe_platform: pcbios # can be pcbios (for legacy/bios) or efi
   ipxe_embed: standard # can be standard or dhcpretry
->>>>>>> 1.2.0:resources/examples/multi_icebergs_cluster/inventory/group_vars/all/all_equipments/equipment_profile.yml
 
   # When installing in EFI, grub2 break the boot order and set next boot to disk (seriously, why??!)
   # In most case, you prefer system to continue to boot on PXE, and so the stack can restore first boot device after grub2 installation
