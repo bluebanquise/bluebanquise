@@ -1,0 +1,47 @@
+
+<h1>Cluster {{cluster_name}} report</h1>
+
+<h2>General parameters</h2>
+
+Cluster name: {{cluster_name}}
+Cluster time zone: {{time_zone}}
+Cluster domain name: {{domain_name}}
+
+<h2>Equipments<h2>
+
+
+
+<h2>Icebergs</h2>
+
+{% if icebergs_system == true %}
+Icebergs system is activated.
+
+XXXXXXXXXXX
+
+{% else %}
+Icebergs system is deactivated.
+{% endif %}
+
+
+
+<h2>Networks</h2>
+
+Available logical networks:
+
+{% for network in networks %}
+<h3>{{network}}</h3>
+subnet: {{networks[network]['subnet']}}
+prefix: {{networks[network]['prefix']}}
+netmask: {{networks[network]['netmask']}}
+gateway: {{networks[network]['gateway']}}
+services ip:
+{% for service in networks[network]['services_ip'] %}
+  {{ service }} : {{ networks[network]['services_ip'][service] }}
+{% endfor %}
+
+
+{% endfor %}
+
+NFS:
+
+

@@ -2,7 +2,7 @@
 
 #- name: Install minimum packages for PXE (ubuntu 18)
 #  package:
-#    name: "{{item}}"
+#    name: "{{ item }}"
 #    state: present
 #  loop: "{{packages_to_install['ubuntu']}}"
     #  with_items:

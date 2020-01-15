@@ -46,7 +46,8 @@ $TTL 86400
 
 ;## External hosts
 
+{% if external_hosts is defined and external_hosts is not none and external_hosts %}
 {% for host in external_hosts %}
 {{host}} IN A {{external_hosts[host]}}
 {% endfor %}
-
+{% endif %}

@@ -2,7 +2,7 @@
 
 - name: Package
   package:
-    name: "{{item}}"
+    name: "{{ item }}"
     state: present
   with_items:
     - prometheus-bluebanquise
@@ -10,7 +10,7 @@
 
 - name: Create directories structure
   file:
-   path: "{{item}}"
+   path: "{{ item }}"
    state: directory
    mode: 0750
    owner: prometheus
@@ -27,7 +27,7 @@
     group: prometheus
     mode: 0640
   tags:
-    - templates
+    - template
 
 - name: Template >> /etc/prometheus/alerts/general.yml
   template:
@@ -47,7 +47,7 @@
 
 - name: Create directories structure for alertmanager
   file:
-   path: "{{item}}"
+   path: "{{ item }}"
    state: directory
    mode: 0750
    owner: alertmanager
@@ -63,11 +63,11 @@
     group: alertmanager
     mode: 0640
   tags:
-    - templates
+    - template
 
 - name: Start services
   service:
-    name: "{{item}}"
+    name: "{{ item }}"
     state: started
     enabled: yes
   with_items:

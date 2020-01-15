@@ -1,0 +1,5 @@
+# BlueBanquise internal j2_ variables.
+# Equipment
+# (c) 2019 Benoit Leveugle
+
+j2_equipment_groups_list: "{{ groups | select('match','^'+equipment_naming+'_.*') | list | unique | sort }}"

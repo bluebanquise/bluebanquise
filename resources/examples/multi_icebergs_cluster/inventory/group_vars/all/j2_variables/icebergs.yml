@@ -1,0 +1,35 @@
+# BlueBanquise internal j2_ variables.
+# Icebergs
+# (c) 2019 Benoit Leveugle
+
+## Icebergs engine file
+# To comply with KISS, all iceberg variables must depend of j2_current_iceberg when possible
+
+# General data
+j2_icebergs_groups_list: "{{ groups | select('match','^'+iceberg_naming+'[0-9]+') | list }}"
+j2_number_of_icebergs: "{{ groups | select('match','^'+iceberg_naming+'[0-9]+') | list | length }}"
+
+# Get host current iceberg
+# This is MAIN variable, and must remain as the chain is simple
+j2_current_iceberg: "{% if not icebergs_system %}{{ iceberg_naming+'1' }}{% else %}{{ group_names | select('match','^'+iceberg_naming+'[0-9]+') | list | unique | sort | first | join }}{% endif %}"
+
+# Now deduced from j2_current_iceberg
+
+#      _____
+#     |     |
+#     |     |
+#     |     |
+#   __|     |__
+#   \         /
+#    \       /
+#     \     /
+#      \   /
+#       \ /
+#        '
+
+j2_current_iceberg_number: "{{ j2_current_iceberg | replace(iceberg_naming,' ') | trim }}"
+
+# Network related
+j2_current_iceberg_network: "{{ management_networks_naming + (j2_current_iceberg_number|string) }}"
+
+

@@ -2,9 +2,9 @@
 
 - name: Package
   package:
-    name: "{{item}}"
+    name: "{{ item }}"
     state: present
-  loop: "{{packages_to_install[slurm.slurm_packaging][slurm_profile][(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
+  loop: "{{ packages_to_install[slurm.slurm_packaging][slurm_profile][(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
 
 #### MUNGE
 
@@ -36,18 +36,18 @@
     shell: /bin/false
     uid: 777
     group: slurm
-    home: "{{slurm_home_path[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
+    home: "{{ slurm_home_path[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
     state: present
 
 - name: Template >> slurm.conf
   template:
     src: slurm.conf.j2
-    dest: "{{slurm_home_path[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}/slurm.conf"
+    dest: "{{ slurm_home_path[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}/slurm.conf"
     owner: root
     group: root
     mode: 0644
   tags:
-    - templates
+    - template
 
 - name: File >> /etc/slurm/cgroup.conf
   copy:
@@ -59,7 +59,7 @@
 
 - name: Create directories
   file:
-    path: "{{item}}"
+    path: "{{ item }}"
     state: directory
     owner: slurm
     group: slurm

@@ -1,0 +1,23 @@
+equipment_profile:
+
+  access_control: true
+  firewall: true
+
+  console: console=tty0 console=ttyS1,115200n8
+  kernel_parameters:
+
+  operating_system:
+    distribution: centos
+    distribution_major_version: 7
+    distribution_version: 7.6
+
+  equipment_type: server
+
+  configuration:
+    keyboard_layout: us
+    system_language: en_US.UTF-8
+
+  hardware:
+    cpu:
+      architecture: x86_64
+

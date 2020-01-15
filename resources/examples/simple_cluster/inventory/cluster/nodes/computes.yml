@@ -1,0 +1,64 @@
+mg_computes:
+  children:
+    equipment_typeC:
+      hosts:
+        c001:
+          network_interfaces:
+            enp0s9:
+              ip4: 10.10.3.1
+              mac: 08:00:27:0d:44:90
+              network: ice1-1
+<<<<<<< HEAD:resources/examples/simple_cluster/cluster/nodes/computes.yml
+            enp0s8:
+              ip4: 10.20.3.1
+              network: interconnect1
+=======
+            ib0:
+              ip4: 10.20.3.1
+              network: interconnect-1
+>>>>>>> 1.2.0:resources/examples/simple_cluster/inventory/cluster/nodes/computes.yml
+        c002:
+          network_interfaces:
+            enp0s9:
+              ip4: 10.10.3.2
+              mac: 08:00:27:0d:54:90
+              network: ice1-1
+<<<<<<< HEAD:resources/examples/simple_cluster/cluster/nodes/computes.yml
+            enp0s8:
+              ip4: 10.20.3.2
+              network: interconnect1
+=======
+            ib0:
+              ip4: 10.20.3.2
+              network: interconnect-1
+>>>>>>> 1.2.0:resources/examples/simple_cluster/inventory/cluster/nodes/computes.yml
+        c003:
+          network_interfaces:
+            enp0s9:
+              ip4: 10.10.3.3
+              mac: 08:00:27:0d:45:90
+              network: ice1-1
+<<<<<<< HEAD:resources/examples/simple_cluster/cluster/nodes/computes.yml
+            enp0s8:
+              ip4: 10.20.3.3
+              network: interconnect1
+=======
+            ib0:
+              ip4: 10.20.3.3
+              network: interconnect-1
+>>>>>>> 1.2.0:resources/examples/simple_cluster/inventory/cluster/nodes/computes.yml
+        c004:
+          network_interfaces:
+            enp0s9:
+              ip4: 10.10.3.4
+              mac: 08:00:27:0d:45:91
+              network: ice1-1
+<<<<<<< HEAD:resources/examples/simple_cluster/cluster/nodes/computes.yml
+            enp0s8:
+              ip4: 10.20.3.4
+              network: interconnect1
+=======
+            ib0:
+              ip4: 10.20.3.4
+              network: interconnect-1
+>>>>>>> 1.2.0:resources/examples/simple_cluster/inventory/cluster/nodes/computes.yml

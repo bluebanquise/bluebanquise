@@ -3,15 +3,20 @@ BlueBanquise Documentation
 
 Welcome on BlueBanquise documentation.
 
-This documentation describes how to deploy, configure, and maintain BlueBanquise on different scenario clusters.
+This documentation provides information on:
 
-Details are also given for each Ansible role of the stack, and how to build your own.
+* How to use Ansible (generic, not related to the stack)
+* How to deploy, configure, and maintain BlueBanquise on different scenario clusters
+* How to develop your own roles for the stack
 
-Use <-- left <-- menu to navigate between sections.
+Details are also given for each Ansible role of the stack.
+
+Please report us any issues in this documentation.
 
 .. toctree::
    :maxdepth: 3
    :caption: Contents:
+   :numbered:
 
    introduction
    vocabulary

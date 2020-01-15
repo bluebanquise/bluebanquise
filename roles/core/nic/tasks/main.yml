@@ -1,62 +1,25 @@
 ---
 
-- name: Package
-  package:
-    name: "{{item}}"
+- name: Load VLAN module if needed
+  modprobe:
+    name: 8021q
     state: present
-  loop: "{{packages_to_install[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
+  with_items: "{{ network_interfaces }}"
+  when: (network_interfaces[item]['vlan'] is defined and not none) and network_interfaces[item]['vlan']
 
-#- name: Import packages OS dedicated task
-#  include_tasks: "{{(ansible_distribution|lower)}}_{{ansible_distribution_major_version}}.yml"
+- name: Load bonding module if needed
+  modprobe:
+    name: bonding
+    state: present
+  with_items: "{{ network_interfaces }}"
+  when: (network_interfaces[item]['type'] is defined and not none) and (network_interfaces[item]['type'] == 'bond' or network_interfaces[item]['type'] == 'bond-slave')
 
-- name: Start services
-  service:
-    name: "{{item}}"
-    state: started
-    enabled: yes
-  loop: "{{services_to_start[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
-
-- name: Solve possible unmanaged (Ubuntu only)
-  file:
-    path: /etc/NetworkManager/conf.d/10-globally-managed-devices.conf
-    state: touch
-  when:
-    - ansible_distribution_major_version == "18"
-    - ansible_os_family == "Ubuntu"
-
-# Note from JK
-# We could add so much more features here, like VLAN, LACP, MTU, etc. Easy to add.
 - name: Set NIC configuration
-  nmcli:
-    conn_name: "{{item|string}}"
-    type: "{% if network_interfaces[item].type is defined and not none %}{{network_interfaces[item].type}}{% else %}ethernet{% endif %}"
-#    ifname: "{{network_connections[item].ifname}}"
-    ip4: "{{network_interfaces[item].ip4}}/{{networks[network_interfaces[item].network].prefix}}"
-    state: present
-    mtu: 1500
-    autoconnect: yes
-    gw4: "{% if networks[network_interfaces[item].network].gateway is defined and not none %}{{networks[network_interfaces[item].network].gateway}}{% endif %}"
-  with_items: "{{network_interfaces}}"
-  tags:
-    - identify
-    - nmcli
+  template:
+    src: ifcfg.j2
+    dest: /etc/sysconfig/network-scripts/ifcfg-{{ item }}
+    owner: root
+    group: root
+    mode: 0644
+  with_items: "{{ network_interfaces }}"
 
-- name: Bug fix for static ip (RedHat/Centos only)
-  replace:
-     path: "/etc/sysconfig/network-scripts/ifcfg-{{item}}"
-     regexp: 'BOOTPROTO=dhcp'
-     replace: 'BOOTPROTO=none'
-     backup: no
-  with_items: "{{network_interfaces}}"
-  when:
-    - ansible_distribution_major_version == "7"
-    - ansible_os_family == "RedHat"
-  tags:
-    - identify
-
-- name: Start services
-  service:
-    name: "{{item}}"
-    state: restarted
-    enabled: yes
-  loop: "{{services_to_start[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"

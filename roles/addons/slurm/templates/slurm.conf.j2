@@ -56,3 +56,6 @@ PartitionName={{equipment_group}} MaxTime=INFINITE State=UP Nodes={% for node in
 
 {% endif %}
 {% endfor %}
+
+## Partition for all
+PartitionName=all MaxTime=INFINITE State=UP Default=YES Nodes={% for equipment_group in slurm['nodes_equipment_groups'] %}{% if groups[equipment_group] is defined and not none %}{% for node in groups[equipment_group] %},{{node}}{% endfor %}{% endif %}{% endfor %}

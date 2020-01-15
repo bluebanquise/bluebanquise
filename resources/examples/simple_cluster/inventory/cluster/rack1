@@ -1,0 +1,10 @@
+[rack_1:vars]
+rack_z_span=10
+rack_x_span=4
+
+[rack_1]
+c001 z_p=1 x_p=1
+c002 z_p=2 x_p=1
+c003 z_p=3 x_p=1
+c004 z_p=4 x_p=1
+login1 z_p=5 x_p=2

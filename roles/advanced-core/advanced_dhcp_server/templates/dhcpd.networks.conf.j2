@@ -36,7 +36,16 @@ subnet {{networks[network]['subnet']}} netmask {{networks[network]['netmask']}} 
   default-lease-time {{dhcp_settings['default_lease_time']}};
   max-lease-time {{dhcp_settings['max_lease_time']}};
 {% if networks[network]['services_ip']['pxe_ip'] is defined and not none %}
+{% if (networks[network]['services_ip']['pxe_http_ip'] is defined and not none)
+    and (networks[network]['services_ip']['pxe_http_ip'] != networks[network]['services_ip']['pxe_ip']) %}
+  if exists user-class and option user-class = "BlueBanquise" {
+    next-server {{networks[network]['services_ip']['pxe_http_ip']}};
+  } else {
+    next-server {{networks[network]['services_ip']['pxe_ip']}};
+  }
+{% else %}
   next-server {{networks[network]['services_ip']['pxe_ip']}};
+{% endif %}
 {% endif %}
 
   include "/etc/dhcp/dhcpd.{{network}}.conf";
@@ -65,7 +74,18 @@ subnet {{networks[network]['subnet']}} netmask {{networks[network]['netmask']}} 
 
   default-lease-time {{dhcp_settings['default_lease_time']}};
   max-lease-time {{dhcp_settings['max_lease_time']}};
-  {% if networks[network]['services_ip']['pxe_ip'] is defined and not none %}next-server {{networks[network]['services_ip']['pxe_ip']}};{% endif %}
+{% if networks[network]['services_ip']['pxe_ip'] is defined and not none %}
+{% if (networks[network]['services_ip']['pxe_http_ip'] is defined and not none)
+    and (networks[network]['services_ip']['pxe_http_ip'] != networks[network]['services_ip']['pxe_ip']) %}
+  if exists user-class and option user-class = "BlueBanquise" {
+    next-server {{networks[network]['services_ip']['pxe_http_ip']}};
+  } else {
+    next-server {{networks[network]['services_ip']['pxe_ip']}};
+  }
+{% else %}
+  next-server {{networks[network]['services_ip']['pxe_ip']}};
+{% endif %}
+{% endif %}
 
   include "/etc/dhcp/dhcpd.{{network}}.conf";
 
