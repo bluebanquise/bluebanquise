@@ -24,10 +24,10 @@ jobs:
         run: pip install ansible ansible-lint flake8
 
       - name: Check python code
-        run: flake8 . --statistics
+        run: flake8 . --statistics --ignore E501,E226
 
       - name: Run linter on core and advanced-core roles
-        run: ansible-lint -v roles/{core,advanced-core}/*
+        run: ansible-lint -v roles/{core,advanced-core}/* -x 204
 
       - name: Run linter on example playbooks
         run: ansible-lint -v resources/examples/simple_cluster/playbooks/*.yml
