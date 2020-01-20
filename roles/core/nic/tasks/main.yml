@@ -5,6 +5,8 @@
     name: "{{item}}"
     state: present
   loop: "{{packages_to_install[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
+  tags:
+    - package
 
 #- name: Import packages OS dedicated task
 #  include_tasks: "{{(ansible_distribution|lower)}}_{{ansible_distribution_major_version}}.yml"
@@ -15,6 +17,8 @@
     state: started
     enabled: yes
   loop: "{{services_to_start[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
+  tags:
+    - service
 
 - name: Solve possible unmanaged (Ubuntu only)
   file:
@@ -60,3 +64,5 @@
     state: restarted
     enabled: yes
   loop: "{{services_to_start[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
+  tags:
+    - service
