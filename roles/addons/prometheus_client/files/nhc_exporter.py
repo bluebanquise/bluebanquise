@@ -4,6 +4,7 @@ import sys
 from prometheus_client.core import GaugeMetricFamily, REGISTRY
 from prometheus_client import start_http_server
 
+
 class CustomCollector(object):
     def __init__(self):
         pass
@@ -20,6 +21,7 @@ class CustomCollector(object):
         g = GaugeMetricFamily("nhc", 'Node Health Checker')
         g.add_metric(["nhc_exit_code"], retcode)
         yield g
+
 
 if __name__ == '__main__':
     start_http_server(8777)
