@@ -2,7 +2,7 @@
 
 - name: Package
   package:
-    name: node_exporter-bluebanquise
+    name: node_exporter
     state: present
 
 - name: Start services
