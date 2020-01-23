@@ -385,8 +385,9 @@ elif main_action == '4':
 
         images_list = os.listdir('/var/www/html/preboot_execution_environment/diskless/images/')
         selected_image = select_from_list(images_list, 'image to work with', -1)
+        selected_image_name = images_list[selected_image]
 
-        with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image+'/image_data.yml', 'r') as f:
+        with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml', 'r') as f:
             image_dict = yaml.load(f)
         print('Current kernel is: '+str(image_dict['image_data']['image_kernel']))
 
@@ -394,7 +395,7 @@ elif main_action == '4':
         selected_kernel = select_from_list(kernel_list, 'a new kernel to use in the available kernels list', -1)
 
         print(bcolors.OKBLUE+'[INFO] Updating image files.'+bcolors.ENDC)
-        file = open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image+'/boot.ipxe', 'r')
+        file = open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/boot.ipxe', 'r')
         filebuffer = file.readlines()
         for i in range(len(filebuffer)):
             if 'image-kernel' in filebuffer[i]:
@@ -402,7 +403,7 @@ elif main_action == '4':
             if 'image-initramfs' in filebuffer[i]:
                 filebuffer[i] = 'set image-initramfs '+'initramfs-kernel-'+kernel_list[int(selected_kernel)].strip('vmlinuz-')+'\n'
         file.close
-        file = open('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe', 'w')
+        file = open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/boot.ipxe', 'w')
         file.writelines(filebuffer)
         file.close
         file = open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml', 'r')
@@ -420,8 +421,9 @@ elif main_action == '4':
 
         images_list = os.listdir('/var/www/html/preboot_execution_environment/diskless/images/')
         selected_image = select_from_list(images_list, 'image to work with', -1)
+        selected_image_name_copy = images_list[selected_image]
 
-        with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image+'/image_data.yml', 'r') as f:
+        with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name_copy+'/image_data.yml', 'r') as f:
             image_dict = yaml.load(f)
 
         if image_dict['image_data']['image_status'] == 'staging':
@@ -439,7 +441,7 @@ elif main_action == '4':
 #                os.system('mkdir /diskless/images/'+selected_image_name+'/golden')
                 os.system('mkdir /diskless/images/'+selected_image_name+'/nodes')
                 print(bcolors.OKBLUE+'[INFO] Cloning staging image to golden.'+bcolors.ENDC)
-                os.system('cp -a /diskless/images/'+selected_image+'/staging /diskless/images/'+selected_image_name+'/golden')
+                os.system('cp -a /diskless/images/'+selected_image_copy+'/staging /diskless/images/'+selected_image_name+'/golden')
                 print(bcolors.OKBLUE+'[INFO] Generating related files.'+bcolors.ENDC)
                 file_content = '''image_data:
   image_name: {image_name}
