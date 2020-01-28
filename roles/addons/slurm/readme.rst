@@ -11,14 +11,14 @@ Instructions
 
 To use this role for all 3 types of nodes, simply add a vars in the playbook when loading the role. Extra vers is **slurm_profile**.
 
-For a controler (server), use:
+For a controller (server), use:
 
 .. code-block:: yaml
 
   - role: HPC_slurm
     tags: HPC_slurm
     vars:
-      slurm_profile: controler
+      slurm_profile: controller
 
 For a compute node (client), use:
 

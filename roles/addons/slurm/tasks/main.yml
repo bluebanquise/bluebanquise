@@ -75,7 +75,7 @@
     name: slurmctld
     state: started
     enabled: no         # Dangerous to enable slurm controller...
-  when: slurm_profile == 'controler'
+  when: slurm_profile == 'controller'
 
 - name: Start services
   service:
