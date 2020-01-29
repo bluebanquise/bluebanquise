@@ -318,7 +318,7 @@ elif main_action == '3':
             print(bcolors.OKBLUE+'[INFO] Generating cache link for dnf.'+bcolors.ENDC)
             os.system('mkdir /mnt/var/cache/ -p')
             os.system('rm -Rf '+dnf_cache_directory+'/dnfcache')
-            os.system('mkdir '+dnf_cache_directory+'/dnfcache')
+            os.system('mkdir -p '+dnf_cache_directory+'/dnfcache')
             os.system('ln -s '+dnf_cache_directory+'/dnfcache/ /mnt/var/cache/dnf')
             print(bcolors.OKBLUE+'[INFO] Installing system into image.'+bcolors.ENDC)
             if selected_livenet_type == '3':
@@ -376,7 +376,7 @@ elif main_action == '4':
         print('Manage kernels of an image.')
 
         images_list = os.listdir('/var/www/html/preboot_execution_environment/diskless/images/')
-        selected_image = select_from_list(images_list, 'image to work with', -1)
+        selected_image = int(select_from_list(images_list, 'image to work with', -1))
         selected_image_name = images_list[selected_image]
 
         with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml', 'r') as f:
@@ -412,13 +412,15 @@ elif main_action == '4':
     elif sub_main_action == '3':
 
         images_list = os.listdir('/var/www/html/preboot_execution_environment/diskless/images/')
-        selected_image = select_from_list(images_list, 'image to work with', -1)
+        selected_image = int(select_from_list(images_list, 'image to work with', -1))
         selected_image_name_copy = images_list[selected_image]
 
         with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name_copy+'/image_data.yml', 'r') as f:
             image_dict = yaml.load(f)
 
-        if image_dict['image_data']['image_status'] == 'staging':
+        if image_dict['image_data']['image_type'] != 'nfs':
+            print('Error: This is not an NFS image.')
+        elif image_dict['image_data']['image_status'] == 'staging':
             print('Image is a staging image. Create a new golden with it?')
             answer = str(input('Enter yes or no: ').lower().strip())
             if answer == "yes":
@@ -457,7 +459,10 @@ elif main_action == '4':
         selected_image = images_list[int(input('-->: ').lower().strip())-1]
         with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image+'/image_data.yml', 'r') as f:
             image_dict = yaml.load(f)
-        if image_dict['image_data']['image_type'] == 'nfs' and image_dict['image_data']['image_status'] == 'golden':
+
+        if image_dict['image_data']['image_type'] != 'nfs':
+            print('Error: This is not an NFS image.')
+        elif image_dict['image_data']['image_status'] == 'golden':
 
             print('Manages nodes of image '+selected_image)
             print(' 1 - List nodes with the image')
