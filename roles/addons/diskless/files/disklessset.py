@@ -14,17 +14,9 @@
 # Import dependances
 from ClusterShell.NodeSet import NodeSet
 from argparse import ArgumentParser
-from shutil import copy2
 import yaml
 import os
-import pwd
-import grp
-import re
-import hashlib
 import crypt
-from base64 import urlsafe_b64encode as encode
-from base64 import urlsafe_b64decode as decode
-from getpass import getpass
 from datetime import datetime
 
 
@@ -441,7 +433,7 @@ elif main_action == '4':
 #                os.system('mkdir /diskless/images/'+selected_image_name+'/golden')
                 os.system('mkdir /diskless/images/'+selected_image_name+'/nodes')
                 print(bcolors.OKBLUE+'[INFO] Cloning staging image to golden.'+bcolors.ENDC)
-                os.system('cp -a /diskless/images/'+selected_image_copy+'/staging /diskless/images/'+selected_image_name+'/golden')
+                os.system('cp -a /diskless/images/'+selected_image_name+'/staging /diskless/images/'+selected_image_name+'/golden')
                 print(bcolors.OKBLUE+'[INFO] Generating related files.'+bcolors.ENDC)
                 file_content = '''image_data:
   image_name: {image_name}
