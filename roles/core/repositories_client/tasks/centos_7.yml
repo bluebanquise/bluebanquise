@@ -1,5 +1,16 @@
 ---
 
+- name: Disable CentOS-Base distro repositories
+  ini_file:
+    path: "/etc/yum.repos.d/CentOS-Base.repo"
+    section: "{{ item }}"
+    option: enabled
+    value: '0'
+    no_extra_spaces: yes
+  loop: [ 'base', 'updates', 'extras' ]
+  when: remove_distro_repositories is defined and remove_distro_repositories
+  notify: yum-clean-metadata
+
 - name: Set baseurl prefix
   set_fact:
     baseurl_prefix: "http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/{{ equipment_profile['operating_system']['distribution'] }}/{{ equipment_profile['operating_system']['distribution_version'] }}/{{ equipment_profile['hardware']['cpu']['architecture'] }}/"

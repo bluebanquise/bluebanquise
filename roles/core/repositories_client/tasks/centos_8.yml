@@ -1,5 +1,19 @@
 ---
 
+- name: Disable CentOS distro repositories
+  ini_file:
+    path: "/etc/yum.repos.d/{{ item.file }}.repo"
+    section: "{{ item.section }}"
+    option: enabled
+    value: '0'
+    no_extra_spaces: yes
+  with_items:
+    - { file: CentOS-AppStream, section: AppStream }
+    - { file: CentOS-Base, section: BaseOS }
+    - { file: CentOS-Extras, section: extras }
+  when: remove_distro_repositories is defined and remove_distro_repositories
+  notify: yum-clean-metadata
+
 - name: Set baseurl prefix
   set_fact:
     baseurl_prefix: "http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/{{ equipment_profile['operating_system']['distribution'] }}/{{ equipment_profile['operating_system']['distribution_version'] }}/{{ equipment_profile['hardware']['cpu']['architecture'] }}/"
