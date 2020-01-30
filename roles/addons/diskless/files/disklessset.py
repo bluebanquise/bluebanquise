@@ -398,15 +398,11 @@ elif main_action == '4':
         file = open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/boot.ipxe', 'w')
         file.writelines(filebuffer)
         file.close
-        file = open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml', 'r')
-        filebuffer = file.readlines()
-        for i in range(len(filebuffer)):
-            if 'image_kernel' in filebuffer[i]:
-                filebuffer[i] = 'image_kernel: '+selected_kernel+'\n'
-        file.close
-        file = open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml', 'w')
-        file.writelines(filebuffer)
-        file.close
+        with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml', 'r') as f:
+            image_dict = yaml.safe_load(f)
+            image_dict['image_data']['image_kernel'] = selected_kernel
+        with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml', 'w') as f:
+            content = yaml.dump(image_dict, f, default_flow_style=False)
         print(bcolors.OKGREEN+'\n[OK] Done.\nYou will need to restart your running nodes for changes to take effect.'+bcolors.ENDC)
 
     elif sub_main_action == '3':
