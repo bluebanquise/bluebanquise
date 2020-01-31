@@ -34,15 +34,6 @@
    - /var/www/html/preboot_execution_environment/equipment_profiles
    - /var/www/html/preboot_execution_environment/osdeploy
 
-- name: Configure access on directory /var/www/html/preboot_execution_environment"
-  file:
-    path: /var/www/html/preboot_execution_environment
-    state: directory
-    mode: 0755
-    owner: "{{ apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
-    group: "{{ apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
-    recurse: yes
-
 - name: Use OS dedicated task
   include_tasks: "{{ (ansible_distribution|lower|replace(' ','_')) }}_{{ ansible_distribution_major_version }}.yml"
 
@@ -65,6 +56,8 @@
     src: "{{ item }}.ipxe.j2"
     dest: "/var/www/html/preboot_execution_environment/{{ item }}.ipxe"
     mode: 0755
+    owner: "{{ apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
+    group: "{{ apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
   loop:
     - convergence
     - menu
@@ -76,6 +69,8 @@
     src: nohostname.ipxe.j2
     dest: /var/www/html/preboot_execution_environment/nodes/.ipxe
     mode: 0755
+    owner: "{{ apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
+    group: "{{ apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
   tags:
     - template
 
@@ -86,6 +81,8 @@
     src: osdeploy/redhat_{{ item }}.ipxe
     dest: "/var/www/html/preboot_execution_environment/osdeploy/redhat_{{ item }}.ipxe"
     mode: 0644
+    owner: "{{ apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
+    group: "{{ apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
   with_items: "{{ supported_os.redhat }}"
 
 - name: osdeploy files (centos)
@@ -93,6 +90,8 @@
     src: osdeploy/centos_{{ item }}.ipxe
     dest: "/var/www/html/preboot_execution_environment/osdeploy/centos_{{ item }}.ipxe"
     mode: 0644
+    owner: "{{ apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
+    group: "{{ apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
   with_items: "{{ supported_os.centos }}"
 
 - name: Templates >> kickstarts for Centos
@@ -100,6 +99,8 @@
     src: "kickstart.cfg.j2"
     dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.kickstart.cfg
     mode: 0644
+    owner: "{{ apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
+    group: "{{ apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
   with_items: "{{ j2_equipment_groups_list }}"
   when:
     - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
@@ -112,6 +113,8 @@
     src: "equipment_profile.ipxe.j2"
     dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.ipxe
     mode: 0644
+    owner: "{{ apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
+    group: "{{ apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
   with_items: "{{ j2_equipment_groups_list }}"
   when:
     - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
@@ -126,6 +129,8 @@
     src: "preseed.cfg.j2"
     dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.preseed.cfg
     mode: 0644
+    owner: "{{ apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
+    group: "{{ apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
   with_items: "{{ j2_equipment_groups_list }}"
   when:
     - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
@@ -138,6 +143,8 @@
     src: "configuration_ubuntu.ipxe.j2"
     dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.ipxe
     mode: 0644
+    owner: "{{ apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
+    group: "{{ apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
   with_items: "{{ j2_equipment_groups_list }}"
   when:
     - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
@@ -152,6 +159,8 @@
     src: "autoyast.xml.j2"
     dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.autoyast.xml
     mode: 0644
+    owner: "{{ apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
+    group: "{{ apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
   with_items: "{{ j2_equipment_groups_list }}"
   when:
     - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
@@ -164,6 +173,8 @@
     src: "configuration_opensuse.ipxe.j2"
     dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.ipxe
     mode: 0644
+    owner: "{{ apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
+    group: "{{ apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
   with_items: "{{ j2_equipment_groups_list }}"
   when:
     - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
@@ -178,6 +189,8 @@
     src: "configuration_minimal.ipxe.j2"
     dest: /var/www/html/preboot_execution_environment/equipment_profiles/minimal.ipxe
     mode: 0644
+    owner: "{{ apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
+    group: "{{ apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
   tags:
     - template
 
