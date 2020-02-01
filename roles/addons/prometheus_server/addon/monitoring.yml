@@ -1,4 +1,23 @@
 monitoring:
+
+  exporters:
+#    node_exporter:
+#      port: 9100
+    bb_exporter:
+      port: 9777
+      collectors:
+        cpu:
+        ram:
+        mounted:
+          - /scratch
+          - /home
+        services:
+          - slurmd.service
+        
+  # Define alerts related to selected exporters
   alerts:
-    - ExporterDown
-    - OutOfDiskSpace
+    Exporter_down:
+#      severity: critical
+    bb_exporter_service:
+      -  slurmd
+

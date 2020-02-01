@@ -1,0 +1,10 @@
+plugins_path: /usr/lib/python3.6/site-packages/bb_exporter_plugins 
+collectors:
+{% for plugin, plugin_vars in monitoring.exporters.bb_exporter.collectors.items() %}
+  {{plugin}}:
+{% if plugin_vars is defined and plugin_vars is not none and plugin_vars is iterable %}
+{% for parameter in plugin_vars %}
+    - {{parameter}}
+{% endfor %}
+{% endif %}
+{% endfor %}
