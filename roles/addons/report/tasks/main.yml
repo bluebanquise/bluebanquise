@@ -192,10 +192,10 @@
     - graphtool
   when: report_settings.enable_graphtool
 
-- name: Template >> /var/www/html/report/graphs_report.html
+- name: Template >> /var/www/html/report/graphs.html
   template:
-    src: "graphs_report.html.j2"
-    dest: /var/www/html/report/graphs_report.html
+    src: "graphs.html.j2"
+    dest: /var/www/html/report/graphs.html
     owner: root
     group: root
     mode: 0644

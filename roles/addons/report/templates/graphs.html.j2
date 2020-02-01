@@ -16,25 +16,29 @@
   </head>
 <body>
 
+
 <ul class="top">
   <li><a class="logo" href="index.html"><span style="color: #108bde">Blue</span>Banquise</a></li>
-  <li><a href="index.html" class="active">Home</a></li>
+  <li><a href="index.html">Home</a></li>
   <li><a href="inventory_checker.html">Inventory Checker</a></li>
   <li><a href="cluster_configuration.html">Cluster configuration</a></li>
-  <li><a href="graphs.html">Graphs</a></li>
+  <li><a href="graphs.html" class="active">Graphs</a></li>
 </ul>
 
 <div style="padding:2% 1%; max-width: 900px; margin: auto;">
 
-<h1>BlueBanquise Report</h1>
+<h1>BlueBanquise Graphs Report</h1>
 <br>
 This report has been generated at:<br>
 {{ansible_managed}}<br>
 <br>
-<b>Debug report</b> contains debugging internal system output, to find issues in your configuration.
-<br>
-<br>
-<b>Cluster configuration report</b> tries to provide a human readable diagram of the cluster.
+<h2> Ansible CMDB (fact gathering) </h2>
+You need to download and open this file localy (Right click, and save to disk).<br>
+<a href="overview.html">Ansible CMDB report</a>
+<h2> Graph-tool </h2>
+You need to download and execute this file on a system with python graph-tool installed.<br>
+Instructions to install graph-tool can be found <a href="https://git.skewed.de/count0/graph-tool/wikis/installation-instructions">here</a>.
+<a href="graphs/graph-tool.py">Graph-tool report</a>
 <br>
 </div>
 
