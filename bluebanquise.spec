@@ -33,6 +33,7 @@ hash_behaviour and groups.
 mkdir -p %{buildroot}%{_sysconfdir}/%{name}/roles
 cp -a roles/core %{buildroot}%{_sysconfdir}/%{name}/roles/
 cp -a roles/advanced-core %{buildroot}%{_sysconfdir}/%{name}/roles/
+cp -a roles/addons %{buildroot}%{_sysconfdir}/%{name}/roles/
 mkdir -p %{buildroot}%{_sysconfdir}/%{name}/roles/customs
 
 
@@ -43,6 +44,29 @@ mkdir -p %{buildroot}%{_sysconfdir}/%{name}/roles/customs
 %{_sysconfdir}/%{name}/roles/core/
 %{_sysconfdir}/%{name}/roles/advanced-core/
 %{_sysconfdir}/%{name}/roles/customs/
+
+
+# Create subpackages for each addon role
+%{lua:
+local name = rpm.expand("%{name}")
+local version = rpm.expand("%{version}")
+local sysconfdir = rpm.expand("%{_sysconfdir}")
+local addonspath = sysconfdir .. "/" .. name .. "/"
+
+for i,role in ipairs(posix.dir("roles/addons"))
+do
+  local rolepath = "roles/addons/" .. role
+  if (posix.stat(rolepath, 'type') == 'directory') and (role:match('[^.]')) then
+    print("%package addons-" .. role .. "\n")
+    print("Summary: Addon " .. role .. " for BlueBanquise\n")
+    print("Requires: " .. name .. " == " .. version .. "\n")
+    print("%description addons-" .. role .. "\n")
+    print("%files addons-" .. role .. "\n")
+    print("%exclude " .. addonspath .. rolepath .. "/readme.rst\n")
+    print("%doc " .. rolepath .. "/readme.rst\n")
+    print(addonspath .. rolepath .. "/\n")
+  end
+end}
 
 
 %changelog
