@@ -31,6 +31,7 @@ hash_behaviour and groups.
 
 %install
 mkdir -p %{buildroot}%{_sysconfdir}/%{name}/roles
+cp -a ansible.cfg %{buildroot}%{_sysconfdir}/%{name}/
 cp -a roles/core %{buildroot}%{_sysconfdir}/%{name}/roles/
 cp -a roles/advanced-core %{buildroot}%{_sysconfdir}/%{name}/roles/
 cp -a roles/addons %{buildroot}%{_sysconfdir}/%{name}/roles/
@@ -41,6 +42,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/%{name}/roles/customs
 %license LICENSE
 %doc README.md
 %dir %{_sysconfdir}/%{name}/
+%{_sysconfdir}/%{name}/ansible.cfg
 %{_sysconfdir}/%{name}/roles/core/
 %{_sysconfdir}/%{name}/roles/advanced-core/
 %{_sysconfdir}/%{name}/roles/customs/
