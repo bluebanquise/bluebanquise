@@ -26,14 +26,14 @@ hash_behaviour and groups.
 %autosetup
 
 # Define content of roles/<role>/vars/ as configuration
-find roles/{core,advanced-core} -type f -path 'roles/*/vars/*' \
+find -L roles/{core,advanced-core} -type f -path 'roles/*/vars/*' \
  | xargs -l1 -i{} echo '%config %{_sysconfdir}/%{name}/{}' > rolesfiles.txt
 
 # Define content of roles/<role>/{files,templates}/ as non replaceable configuration
-find roles/{core,advanced-core} -type f -path 'roles/*/files/*' \
+find -L roles/{core,advanced-core} -type f -path 'roles/*/files/*' \
  | xargs -l1 -i{} echo '%config(noreplace) %{_sysconfdir}/%{name}/{}' >> rolesfiles.txt
 
-find roles/{core,advanced-core} -type f -path 'roles/*/templates/*' \
+find -L roles/{core,advanced-core} -type f -path 'roles/*/templates/*' \
  | xargs -l1 -i{} echo '%config(noreplace) %{_sysconfdir}/%{name}/{}' >> rolesfiles.txt
 
 # Define readme.rst as documentation
@@ -56,9 +56,9 @@ find roles/{core,advanced-core} -type f ! -name readme.rst \
 %install
 mkdir -p %{buildroot}%{_sysconfdir}/%{name}/roles
 cp -a ansible.cfg %{buildroot}%{_sysconfdir}/%{name}/
-cp -a roles/core %{buildroot}%{_sysconfdir}/%{name}/roles/
-cp -a roles/advanced-core %{buildroot}%{_sysconfdir}/%{name}/roles/
-cp -a roles/addons %{buildroot}%{_sysconfdir}/%{name}/roles/
+cp -aL roles/core %{buildroot}%{_sysconfdir}/%{name}/roles/
+cp -aL roles/advanced-core %{buildroot}%{_sysconfdir}/%{name}/roles/
+cp -aL roles/addons %{buildroot}%{_sysconfdir}/%{name}/roles/
 mkdir -p %{buildroot}%{_sysconfdir}/%{name}/roles/customs
 
 
