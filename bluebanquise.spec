@@ -40,7 +40,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/%{name}/roles/customs
 
 %files
 %license LICENSE
-%doc README.md
+%doc README.md resources/documentation/ resources/examples/
 %dir %{_sysconfdir}/%{name}/
 %{_sysconfdir}/%{name}/ansible.cfg
 %{_sysconfdir}/%{name}/roles/core/
@@ -64,8 +64,7 @@ do
     print("Requires: " .. name .. " == " .. version .. "\n")
     print("%description addons-" .. role .. "\n")
     print("%files addons-" .. role .. "\n")
-    print("%exclude " .. addonspath .. rolepath .. "/readme.rst\n")
-    print("%doc " .. rolepath .. "/readme.rst\n")
+    print("%doc " .. addonspath .. rolepath .. "/readme.rst\n")
     print(addonspath .. rolepath .. "/\n")
   end
 end}
