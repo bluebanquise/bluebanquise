@@ -49,6 +49,9 @@ find roles/{core,advanced-core} -type f ! -name readme.rst \
  ! -path 'roles/*/templates/*' ! -path 'roles/*/files/*' ! -path 'roles/*/vars/*' \
  | xargs -l1 -i{} echo %{_sysconfdir}/%{name}/{} >> rolesfiles.txt
 
+# Workaround 1.2.0: remove execution mod to skip brp-mangle-shebangs
+chmod -x roles/addons/clone/files/clone.ipxe roles/addons/clone/files/deploy_clone.ipxe
+
 
 %build
 
