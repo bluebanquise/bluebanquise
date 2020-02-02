@@ -12,7 +12,12 @@ Source0:        %{name}-%{version}.tar.gz
 BuildArch:      noarch
 # BuildRequires:  
 Requires:       ansible
-Requires:       python >= 3.6
+
+%if 0%{?el8}
+Requires:       python36
+%else
+Requires:       python3 >= 3.6
+%endif
 
 %description
 BlueBanquise is an opensource project, based on the wish to provide a simple
