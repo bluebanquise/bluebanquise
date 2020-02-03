@@ -1,5 +1,9 @@
 %{!?version: %define version 1.2.0}
 
+%define roles_addons clone clustershell diskless nic_nmcli ofed ofed_sm \
+openldap_client openldap_server prometheus_client prometheus_server report \
+slurm users_basic
+
 Name:           bluebanquise
 Version:        %{version}
 Release:        1%{?dist}
@@ -86,18 +90,15 @@ local version = rpm.expand("%{version}")
 local sysconfdir = rpm.expand("%{_sysconfdir}")
 local addonspath = sysconfdir .. "/" .. name .. "/"
 
-for i,role in ipairs(posix.dir("roles/addons"))
+for role in string.gmatch(rpm.expand("%{roles_addons}"), "[%w_-]+")
 do
-  local rolepath = "roles/addons/" .. role
-  if (posix.stat(rolepath, 'type') == 'directory') and (role:match('[^.]')) then
-    print("%package addons-" .. role .. "\n")
-    print("Summary: Addon " .. role .. " for BlueBanquise\n")
-    print("Requires: " .. name .. " == " .. version .. "\n")
-    print("%description addons-" .. role .. "\n")
-    print("%files addons-" .. role .. "\n")
-    print("%doc " .. addonspath .. rolepath .. "/readme.rst\n")
-    print(addonspath .. rolepath .. "/\n")
-  end
+  print("%package addons-" .. role .. "\n")
+  print("Summary: Addon " .. role .. " for BlueBanquise\n")
+  print("Requires: " .. name .. " == " .. version .. "\n")
+  print("%description addons-" .. role .. "\n")
+  print("%files addons-" .. role .. "\n")
+  print("%doc " .. addonspath .. "roles/addons/" .. role .. "/readme.rst\n")
+  print(addonspath .. "roles/addons/" .. role .. "/\n")
 end}
 
 
