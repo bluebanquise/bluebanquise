@@ -1,0 +1,60 @@
+#!/usr/bin/bash
+
+export ANSIBLE_CONFIG=/etc/bluebanquise
+
+usage() {
+    echo "Usage:
+ $(basename $0) -l
+ $(basename $0) -p <playbook> [-n <nodeset>]
+
+Options:
+ -l              list available playbooks
+ -p <playbook>   run the playbook
+ -n <nodeset>    list of target nodes, accept nodeset(1) patterns
+"
+}
+
+while getopts 'n:p:lh' p
+do
+    case $p in
+        n) nodeset=$OPTARG ;;
+        p) playbook=$OPTARG ;;
+        l) list=1 ;;
+        h) usage ; exit 0 ;;
+    esac
+done
+
+if [[ -n $list ]]; then
+    echo "List of playbooks available:"
+    ls -1 "${ANSIBLE_CONFIG}/playbooks/" | sed -n -e 's/\(.*\).yml/ - \1/p'
+    exit 0
+fi
+
+if [[ -z "$playbook" ]]; then
+    echo 'Error: You need to specify the playbook to run with `-p <playbook>`.'
+    usage
+    exit 1
+elif [[ ! -f "${ANSIBLE_CONFIG}/playbooks/${playbook}.yml" ]]; then
+    echo "Error: Playbook ${playbook} not found."
+    usage
+    exit 1
+fi
+
+ansbook_cmd=$(which ansible-playbook)
+if [[ $? -ne 0 ]]; then
+    echo 'Error: Cannot find command `ansible-playbook`.'
+    exit 1
+fi
+
+nodeset_cmd=$(which nodeset)
+if [[ $? -ne 0 ]]; then
+    echo 'Error: Cannot find command `nodeset`.'
+    exit 1
+fi
+
+if [[ -n "$nodeset" ]]; then
+    target="--extra-vars target=$(${nodeset_cmd} -e -S, ${nodeset})"
+fi
+
+echo $ansbook_cmd ${ANSIBLE_CONFIG}/playbooks/${playbook}.yml ${target}
+$ansbook_cmd ${ANSIBLE_CONFIG}/playbooks/${playbook}.yml ${target}
