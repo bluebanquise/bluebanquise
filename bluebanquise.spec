@@ -35,28 +35,37 @@ hash_behaviour and groups.
 %autosetup
 
 # Define content of roles/<role>/vars/ as configuration
-find -L roles/{core,advanced-core} -type f -path 'roles/*/vars/*' \
+find -L roles/{core,advanced-core,addons} -type f -path 'roles/*/vars/*' \
  | xargs -l1 -i{} echo '%config %{_sysconfdir}/%{name}/{}' > rolesfiles.txt
 
 # Define content of roles/<role>/{files,templates}/ as non replaceable configuration
-find -L roles/{core,advanced-core} -type f -path 'roles/*/files/*' \
+find -L roles/{core,advanced-core,addons} -type f -path 'roles/*/files/*' \
  | xargs -l1 -i{} echo '%config(noreplace) %{_sysconfdir}/%{name}/{}' >> rolesfiles.txt
 
-find -L roles/{core,advanced-core} -type f -path 'roles/*/templates/*' \
+find -L roles/{core,advanced-core,addons} -type f -path 'roles/*/templates/*' \
  | xargs -l1 -i{} echo '%config(noreplace) %{_sysconfdir}/%{name}/{}' >> rolesfiles.txt
 
 # Define readme.rst as documentation
-find roles/{core,advanced-core} -type f -name readme.rst \
+find roles/{core,advanced-core,addons} -type f -name readme.rst \
  | xargs -l1 -i{} echo '%doc %{_sysconfdir}/%{name}/{}' >> rolesfiles.txt
 
 # Manage the directories
-find roles/{core,advanced-core} -type d \
+find roles/{core,advanced-core,addons} -type d \
  | xargs -l1 -i{} echo '%dir %{_sysconfdir}/%{name}/{}' >> rolesfiles.txt
 
 # All other files in roles subdirectory are standard
-find roles/{core,advanced-core} -type f ! -name readme.rst \
+find roles/{core,advanced-core,addons} -type f ! -name readme.rst \
  ! -path 'roles/*/templates/*' ! -path 'roles/*/files/*' ! -path 'roles/*/vars/*' \
  | xargs -l1 -i{} echo %{_sysconfdir}/%{name}/{} >> rolesfiles.txt
+
+# Build list of files for each addon role
+ROLES_ADDONS="%{roles_addons}"
+for role in ${ROLES_ADDONS//$'\n'/}; do
+    grep "roles/addons/${role}/" rolesfiles.txt > rolesfiles.addons.${role} ;
+done
+
+# Build list of files for other roles
+grep -v 'roles/addons/' rolesfiles.txt > rolesfiles.cores
 
 # Workaround 1.2.0: remove execution mod to skip brp-mangle-shebangs
 chmod -x roles/addons/clone/files/clone.ipxe roles/addons/clone/files/deploy_clone.ipxe
@@ -74,7 +83,7 @@ cp -aL roles/addons %{buildroot}%{_sysconfdir}/%{name}/roles/
 mkdir -p %{buildroot}%{_sysconfdir}/%{name}/roles/customs
 
 
-%files -f rolesfiles.txt
+%files -f rolesfiles.cores
 %defattr(-,root,root,-)
 %license LICENSE
 %doc README.md resources/documentation/ resources/examples/
@@ -87,8 +96,6 @@ mkdir -p %{buildroot}%{_sysconfdir}/%{name}/roles/customs
 %{lua:
 local name = rpm.expand("%{name}")
 local version = rpm.expand("%{version}")
-local sysconfdir = rpm.expand("%{_sysconfdir}")
-local addonspath = sysconfdir .. "/" .. name .. "/"
 
 for role in string.gmatch(rpm.expand("%{roles_addons}"), "[%w_-]+")
 do
@@ -96,9 +103,7 @@ do
   print("Summary: Addon " .. role .. " for BlueBanquise\n")
   print("Requires: " .. name .. " == " .. version .. "\n")
   print("%description addons-" .. role .. "\n")
-  print("%files addons-" .. role .. "\n")
-  print("%doc " .. addonspath .. "roles/addons/" .. role .. "/readme.rst\n")
-  print(addonspath .. "roles/addons/" .. role .. "/\n")
+  print("%files addons-" .. role .. " -f rolesfiles.addons." .. role .. "\n")
 end}
 
 
