@@ -3,13 +3,12 @@
 # 2020 - Benoît Leveugle <benoit.leveugle@sphenisc.com>
 # https://github.com/oxedions/bluebanquise - MIT license
 
-import time
 import subprocess
-import sys
-from prometheus_client.core import GaugeMetricFamily, REGISTRY
+from prometheus_client.core import GaugeMetricFamily
 
-class collector(object):
-    def __init__(self,empty):
+
+class Collector(object):
+    def __init__(self, empty):
         pass
 
     def collect(self):
@@ -17,7 +16,7 @@ class collector(object):
 
         # Gather down nodes, and exclude unknown status nodes (down*)
         try:
-            stdout,stderr = subprocess.Popen("sinfo --format='%T %D' | grep down | grep -v '*' |awk -F ' ' '{print $2}'", stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True).communicate()
+            stdout, stderr = subprocess.Popen("sinfo --format='%T %D' | grep down | grep -v '*' |awk -F ' ' '{print $2}'", stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True).communicate()
             try:
                 nb_nodes_down = float(stdout)
             except ValueError:
@@ -39,7 +38,7 @@ class collector(object):
 
         # Gather drain nodes, and exclude unknown status nodes (drain*)
         try:
-            stdout,stderr = subprocess.Popen("sinfo --format='%T %D' | grep drain | grep -v '*' |awk -F ' ' '{print $2}'", stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True).communicate()
+            stdout, stderr = subprocess.Popen("sinfo --format='%T %D' | grep drain | grep -v '*' |awk -F ' ' '{print $2}'", stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True).communicate()
             try:
                 nb_nodes_drain = float(stdout)
             except ValueError:
@@ -51,7 +50,7 @@ class collector(object):
 
         # Gather idle nodes, and exclude unknown status nodes (idle*)
         try:
-            stdout,stderr = subprocess.Popen("sinfo --format='%T %D' | grep idle | grep -v '*' |awk -F ' ' '{print $2}'", stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True).communicate()
+            stdout, stderr = subprocess.Popen("sinfo --format='%T %D' | grep idle | grep -v '*' |awk -F ' ' '{print $2}'", stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True).communicate()
             try:
                 nb_nodes_idle = float(stdout)
             except ValueError:
@@ -63,7 +62,7 @@ class collector(object):
 
         # Gather alloc nodes, and exclude unknown status nodes (alloc*)
         try:
-            stdout,stderr = subprocess.Popen("sinfo --format='%T %D' | grep alloc | grep -v '*' |awk -F ' ' '{print $2}'", stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True).communicate()
+            stdout, stderr = subprocess.Popen("sinfo --format='%T %D' | grep alloc | grep -v '*' |awk -F ' ' '{print $2}'", stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True).communicate()
             try:
                 nb_nodes_alloc = float(stdout)
             except ValueError:
@@ -75,15 +74,14 @@ class collector(object):
 
         # Deduce remaining nodes, and assume they are unknown state
         try:
-            stdout,stderr = subprocess.Popen("sinfo --format=%D | grep -v NODES", stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True).communicate()
+            stdout, stderr = subprocess.Popen("sinfo --format=%D | grep -v NODES", stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True).communicate()
             try:
                 nb_nodes = float(stdout)
             except ValueError:
                 nb_nodes = 0.0
-            print("Slurm Exporter. nb_nodes: "+str(nb_nodes))
+            print("Slurm Exporter. nb_nodes_unk: "+str(nb_nodes-(nb_nodes_alloc+nb_nodes_idle+nb_nodes_drain+nb_nodes_down)))
             gauge_nodes_states_total.add_metric(["unk"], nb_nodes-(nb_nodes_alloc+nb_nodes_idle+nb_nodes_drain+nb_nodes_down))
         except OSError as e:
             print("Execution failed:", e, file=stderr)
 
         yield gauge_nodes_states_total
-

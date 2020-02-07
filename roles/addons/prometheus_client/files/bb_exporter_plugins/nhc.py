@@ -2,13 +2,13 @@
 # 2020 - Benoît Leveugle <benoit.leveugle@sphenisc.com>
 # https://github.com/oxedions/bluebanquise - MIT license
 
-import time
 import subprocess
 import sys
-from prometheus_client.core import GaugeMetricFamily, REGISTRY
+from prometheus_client.core import GaugeMetricFamily
 
-class collector(object):
-    def __init__(self,empty):
+
+class Collector(object):
+    def __init__(self, empty):
         pass
 
     def collect(self):
@@ -22,7 +22,5 @@ class collector(object):
             print("Execution failed:", e, file=sys.stderr)
         g = GaugeMetricFamily("system_nhc_status", 'Node Health Checker exit code')
         print('NHC collector. retcode = '+str(retcode))
-        #retcode = 1
         g.add_metric(["nhc_exit_code"], retcode)
         yield g
-

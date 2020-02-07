@@ -24,6 +24,7 @@ scrape_configs:
 
   # All equipment profiles and their exporters
 {% for equipment in j2_equipment_groups_list %}
+{% if hostvars[groups[equipment][0]]['monitoring'] is defined and hostvars[groups[equipment][0]]['monitoring'] is not none and hostvars[groups[equipment][0]]['monitoring']['exporters'] is defined and hostvars[groups[equipment][0]]['monitoring']['exporters'] is not none and hostvars[groups[equipment][0]]['monitoring']['exporters'] is iterable %}
 {% for exporter, exporter_vars in hostvars[groups[equipment][0]]['monitoring']['exporters'].items() %} 
   - job_name: '{{equipment}}_{{exporter}}'
     static_configs:
@@ -32,6 +33,7 @@ scrape_configs:
 {% endfor %}
 
 {% endfor %}
+{% endif %}
 {% endfor %}
 
   # All BMC

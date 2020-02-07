@@ -5,9 +5,10 @@
 import psutil
 from prometheus_client.core import GaugeMetricFamily
 
-class collector(object):
 
-    def __init__(self,empty):
+class Collector(object):
+
+    def __init__(self, empty):
         pass
 
     def collect(self):
@@ -16,4 +17,3 @@ class collector(object):
         print('RAM collector. RAM load: '+str(ram_load))
         g.add_metric(['ram_load'], ram_load)
         yield g
-

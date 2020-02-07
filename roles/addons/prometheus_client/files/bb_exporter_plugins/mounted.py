@@ -5,11 +5,12 @@
 import os.path
 from prometheus_client.core import GaugeMetricFamily
 
-class collector(object):
+
+class Collector(object):
 
     mounted_points = {}
 
-    def __init__(self,parameters):
+    def __init__(self, parameters):
         self.mounted_points = parameters
         print('Mounted points exporter. To watch:')
         for point_to_check in self.mounted_points:
@@ -20,11 +21,10 @@ class collector(object):
 
         for point_to_check in self.mounted_points:
             result = os.path.ismount(point_to_check)
-            if result == True:
+            if result:  # result is True
                 print('Mounted collector. Point '+point_to_check+' state: Mounted')
                 gauge_mounted_points.add_metric([point_to_check], 1.0)
             else:
                 print('Mounted collector. Point '+point_to_check+' state: Not Mounted')
                 gauge_mounted_points.add_metric([point_to_check], 0.0)
         yield gauge_mounted_points
-

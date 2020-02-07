@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.6
 
 # ██████╗ ██╗     ██╗   ██╗███████╗██████╗  █████╗ ███╗   ██╗ ██████╗ ██╗   ██╗██╗███████╗███████╗
 # ██╔══██╗██║     ██║   ██║██╔════╝██╔══██╗██╔══██╗████╗  ██║██╔═══██╗██║   ██║██║██╔════╝██╔════╝
@@ -12,18 +12,13 @@
 # https://github.com/oxedions/bluebanquise - MIT license
 
 import os
-import re
 import importlib.util
-
 import time
-import subprocess
-import sys
-#import psutil
-
 import yaml
 
-from prometheus_client.core import GaugeMetricFamily, REGISTRY
 from prometheus_client import start_http_server
+from prometheus_client.core import REGISTRY
+
 
 # Colors, from https://stackoverflow.com/questions/287871/how-to-print-colored-text-in-terminal-in-python
 class bcolors:
@@ -36,11 +31,13 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
+
 def load_file(filename):
     print(bcolors.OKBLUE+'[INFO] Loading '+filename+bcolors.ENDC)
     with open(filename, 'r') as f:
         # return yaml.load(f, Loader=yaml.FullLoader) ## Waiting for PyYaml 5.1
         return yaml.load(f)
+
 
 if __name__ == '__main__':
 
@@ -52,8 +49,8 @@ if __name__ == '__main__':
     print(bcolors.OKBLUE+'[INFO] Loading plugins'+bcolors.ENDC)
     modules = {}
     for f in os.listdir(plugins_path+'/'):
-        if os.path.isfile(plugins_path+'/'+f) and f.endswith('.py') and f != 'main.py':
-            modname = f[:-3] # remove '.py' extension
+        if os.path.isfile(plugins_path+'/'+f) and f.endswith('.py') and f != 'main.py' and f[:-3] in exporter_configuration['collectors']:
+            modname = f[:-3]  # remove '.py' extension
             spec = importlib.util.spec_from_file_location(modname, plugins_path+'/'+f)
             modules[modname] = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(modules[modname])
@@ -69,7 +66,7 @@ if __name__ == '__main__':
     for coll in exporter_configuration['collectors']:
         if coll in modules:
             print(bcolors.OKBLUE+'    - Registering '+coll+bcolors.ENDC)
-            REGISTRY.register(modules[coll].collector(exporter_configuration['collectors'][coll]))
+            REGISTRY.register(modules[coll].Collector(exporter_configuration['collectors'][coll]))
         else:
             print('Collector '+coll+' was defined in configuration file but could not be found.')
 
