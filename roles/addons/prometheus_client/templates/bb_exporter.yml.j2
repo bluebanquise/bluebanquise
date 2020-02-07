@@ -1,10 +1,23 @@
+#jinja2: lstrip_blocks: "True"
+{% macro yamlexpand(dict,ident) %}
+  {% for key, value in dict.items() %}
+    {% if value is mapping %}{# This is a dict, go deeper #}
+{% for space in range(ident) %} {% endfor %}{{key}}:
+{{yamlexpand(value,ident+2)}}
+    {% else %}
+      {% if value is iterable %}{# This is a list #}
+{% for space in range(ident) %} {% endfor %}{{key}}:
+        {% for item in value %}
+{% for space in range(ident+2) %} {% endfor %}- {{item}}
+        {% endfor %}
+      {% else %}
+{% for space in range(ident) %} {% endfor %}{{ key }}: {{ value }}
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+{% endmacro %}
+
 plugins_path: /usr/lib/python3.6/site-packages/bb_exporter_plugins 
 collectors:
-{% for plugin, plugin_vars in monitoring.exporters.bb_exporter.collectors.items() %}
-  {{plugin}}:
-{% if plugin_vars is defined and plugin_vars is not none and plugin_vars is iterable %}
-{% for parameter in plugin_vars %}
-    - {{parameter}}
-{% endfor %}
-{% endif %}
-{% endfor %}
+{{ yamlexpand(monitoring.exporters.bb_exporter.collectors,2) }}
+

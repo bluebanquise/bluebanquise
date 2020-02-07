@@ -5,12 +5,13 @@
 from pystemd.systemd1 import Unit
 from prometheus_client.core import GaugeMetricFamily
 
-class collector(object):
+
+class Collector(object):
 
     services = {}
     services_status = []
 
-    def __init__(self,parameters):
+    def __init__(self, parameters):
         self.services = parameters
         print('Services collector. Loading services status:')
         for idx, service in enumerate(self.services):
@@ -31,4 +32,3 @@ class collector(object):
                 gauge_services.add_metric([service], 0.0)
 
         yield gauge_services
-
