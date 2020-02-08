@@ -84,12 +84,25 @@
   tags:
     - template
 
-- name: Start services
+- name: Enable/disable services
   service:
     name: "{{ item }}"
-    state: started
-    enabled: yes
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
   with_items:
     - prometheus
     - alertmanager
     - ipmi_exporter
+  tags:
+    - service
+
+- name: Start services
+  service:
+    name: "{{ item }}"
+    state: started
+  with_items:
+    - prometheus
+    - alertmanager
+    - ipmi_exporter
+  when: (start_services | bool)
+  tags:
+    - service
