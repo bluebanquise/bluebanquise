@@ -81,6 +81,8 @@ cp -aL roles/core %{buildroot}%{_sysconfdir}/%{name}/roles/
 cp -aL roles/advanced-core %{buildroot}%{_sysconfdir}/%{name}/roles/
 cp -aL roles/addons %{buildroot}%{_sysconfdir}/%{name}/roles/
 mkdir -p %{buildroot}%{_sysconfdir}/%{name}/roles/customs
+mkdir -p %{buildroot}%{_sbindir}
+cp -a tools/bluebanquise-playbook %{buildroot}%{_sbindir}/
 
 
 %files -f rolesfiles.cores
@@ -90,6 +92,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/%{name}/roles/customs
 %dir %{_sysconfdir}/%{name}/
 %config(noreplace) %{_sysconfdir}/%{name}/ansible.cfg
 %{_sysconfdir}/%{name}/roles/customs/
+%attr(750,root,root) %{_sbindir}/bluebanquise-playbook
 
 
 # Create subpackages for each addon role
