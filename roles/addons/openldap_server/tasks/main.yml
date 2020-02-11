@@ -20,11 +20,20 @@
     group: ldap
   when: not db_config.stat.exists
 
+- name: Enable/disable services
+  service:
+    name: slapd
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+  tags:
+    - service
+
 - name: Start ldap
   service:
     name: slapd
     state: started
-    enabled: yes
+  when: (start_services | bool)
+  tags:
+    - service
 
 - name: Template >> chdomain.ldif
   template:
@@ -119,12 +128,23 @@
     state: yes
     persistent: yes
 
+- name: Enable/disable services
+  service:
+    name: "{{ item }}"
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+  with_items:
+    - slapd
+    - httpd
+  tags:
+    - service
+
 - name: Restart services
   service:
     name: "{{ item }}"
     state: restarted
-    enabled: yes
   with_items:
     - slapd
     - httpd
-
+  when: (start_services | bool)
+  tags:
+    - service

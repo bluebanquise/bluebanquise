@@ -9,12 +9,22 @@
 #- name: Import packages OS dedicated task
 #  include_tasks: "{{ (ansible_distribution|lower) }}_{{ ansible_distribution_major_version }}.yml"
 
+- name: Enable/disable services
+  service:
+    name: "{{ item }}"
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+  loop: "{{ services_to_start[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
+  tags:
+    - service
+
 - name: Start services
   service:
     name: "{{ item }}"
     state: started
-    enabled: yes
   loop: "{{ services_to_start[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
+  when: (start_services | bool)
+  tags:
+    - service
 
 - name: Solve possible unmanaged (Ubuntu only)
   file:
@@ -54,9 +64,19 @@
   tags:
     - identify
 
+- name: Enable/disable services
+  service:
+    name: "{{ item }}"
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+  loop: "{{ services_to_start[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
+  tags:
+    - service
+
 - name: Start services
   service:
     name: "{{ item }}"
     state: restarted
-    enabled: yes
   loop: "{{ services_to_start[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
+  when: (start_services | bool)
+  tags:
+    - service

@@ -8,8 +8,17 @@
     - opensm
     - opensm-libs
 
+- name: Enable/disable services
+  service:
+    name: opensm
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+  tags:
+    - service
+
 - name: Start services
   service:
     name: opensm
     state: started
-    enabled: yes
+  when: (start_services | bool)
+  tags:
+    - service

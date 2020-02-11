@@ -1,5 +1,14 @@
+- name: Enable/disable services
+  service:
+    name: named
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+  tags:
+    - service
+
 - name: Start services
   service:
     name: named
     state: started
-    enabled: yes
+  when: (start_services | bool)
+  tags:
+    - service

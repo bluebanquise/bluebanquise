@@ -6,12 +6,23 @@
     state: present
   when: "'node_exporter' in monitoring.exporters"
 
+- name: Enable/disable services
+  service:
+    name: node_exporter
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+  when: "'node_exporter' in monitoring.exporters"
+  tags:
+    - service
+
 - name: Start services node_exporter
   service:
     name: node_exporter
     state: started
-    enabled: yes
-  when: "'node_exporter' in monitoring.exporters"
+  when:
+    - (start_services | bool)
+    - "'node_exporter' in monitoring.exporters"
+  tags:
+    - service
 
 - name: Package bb_exporter
   package:
