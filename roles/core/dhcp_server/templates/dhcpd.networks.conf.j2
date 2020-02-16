@@ -1,5 +1,7 @@
+#jinja2: lstrip_blocks: True
 #### Blue Banquise file ####
 ## {{ansible_managed}}
+{% set nameservers = networks[j2_node_main_network]['services_ip']['dns_ip'] | ipaddr %}
 
 #### SUBNETS
 
@@ -9,17 +11,25 @@
 
 subnet {{networks[network]['subnet']}} netmask {{networks[network]['netmask']}} {
 
-  {% if networks[network]['dhcp_unknown_range'] is defined and not none %}range {{networks[network]['dhcp_unknown_range']}};{% endif %}
-
+{% if networks[network]['dhcp_unknown_range'] is defined and not none %}
+  range {{networks[network]['dhcp_unknown_range']}};
+{% endif %}
   option domain-name "{{domain_name}}";
-  option domain-name-servers {{networks[network]['services_ip']['dns_ip']}};
+{% if nameservers is string %}
+  option domain-name-servers {{nameservers}};
+{% else %}
+  option domain-name-servers {{nameservers | join(', ')}};
+{% endif %}
   option broadcast-address {{networks[network]['broadcast']}};
   option ntp-servers {{networks[network]['services_ip']['time_ip']}};
-  {% if networks[network]['gateway'] is defined and not none %}option routers {{networks[network]['gateway']}};{% endif %}
-
+{% if networks[network]['gateway'] is defined and not none %}
+  option routers {{networks[network]['gateway']}};
+{% endif %}
   default-lease-time {{dhcp_settings['default_lease_time']}};
   max-lease-time {{dhcp_settings['max_lease_time']}};
-  {% if networks[network]['services_ip']['pxe_ip'] is defined and not none %}next-server {{networks[network]['services_ip']['pxe_ip']}};{% endif %}
+{% if networks[network]['services_ip']['pxe_ip'] is defined and not none %}
+  next-server {{networks[network]['services_ip']['pxe_ip']}};
+{% endif %}
 
   include "/etc/dhcp/dhcpd.{{network}}.conf";
 
