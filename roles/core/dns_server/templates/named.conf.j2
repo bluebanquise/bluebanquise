@@ -1,16 +1,6 @@
 #### Blue Banquise file ####
 ## {{ansible_managed}}
 
-{# Define for current host: network list, and main network #}
-{% set ntw = [] %}
-{% for nic in network_interfaces %}
-{% if network_interfaces[nic].network is defined and not none %}
-{{ ntw.append(network_interfaces[nic].network|string) }}
-{% endif %}
-{% endfor %}
-{% set ntw = (ntw | select('match',(j2_current_iceberg_network+'-[0-9]+')) | list | unique | sort ) %}
-{% set main_ntw = (ntw | first | join | trim) %}
-
 options {
   listen-on port 53 {
     127.0.0.1;
