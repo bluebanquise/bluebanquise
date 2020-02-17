@@ -5,6 +5,8 @@
     name: "{{item}}"
     state: present
   loop: "{{packages_to_install[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
+  tags:
+    - package
 
 - name: Template >> /etc/dhcp/dhcpd.conf
   template:
@@ -15,7 +17,7 @@
     mode: 0644
   notify: Restart dhcp_server services
   tags:
-    - templates
+    - template
 
 - name: Template >> /etc/dhcp/dhcpd.networks.conf
   template:
@@ -26,7 +28,7 @@
     mode: 0644
   notify: Restart dhcp_server services
   tags:
-    - templates
+    - template
 
 - name: Template >> /etc/dhcp/dhcpd.{{item}}.conf
   template:
@@ -41,7 +43,7 @@
     - networks[item].is_in_dhcp == true
   notify: Restart dhcp_server services
   tags:
-    - templates
+    - template
 
 - name: Start services
   service:
@@ -49,4 +51,5 @@
     state: started
     enabled: yes
   loop: "{{services_to_start[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version]}}"
-
+  tags:
+    - service
