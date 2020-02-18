@@ -19,8 +19,10 @@ Requires:       ansible
 
 %if 0%{?el8}
 Requires:       python36
+Requires:       python3-clustershell
 %else
 Requires:       python3 >= 3.6
+Requires:       python36-clustershell
 %endif
 
 %description
