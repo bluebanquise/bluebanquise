@@ -82,6 +82,7 @@
       {% set bmc_args = hostvars[host]['bmc'] %}
       {% if (bmc_args.network is defined and not none) and (bmc_args.network == item) and (bmc_args.name is defined and not none) and (bmc_args.ip4 is defined and not none) %}
         {% if bmc_args.mac is defined and not none %}
+
     host {{bmc_args.name}} {
       option host-name "{{bmc_args.name}}";
       hardware ethernet {{bmc_args.mac}};
