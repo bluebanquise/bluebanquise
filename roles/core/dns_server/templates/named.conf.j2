@@ -1,3 +1,4 @@
+#jinja2: lstrip_blocks: True
 #### Blue Banquise file ####
 ## {{ansible_managed}}
 
@@ -5,9 +6,16 @@ options {
   listen-on port 53 {
     127.0.0.1;
 {% for network in (networks | select('match',(j2_current_iceberg_network+'-[0-9]+')) | list | unique | sort) %}
-{% if networks[network]['is_in_dns'] is defined and networks[network]['is_in_dns'] == true %}
-    {{networks[network]['services_ip']['dns_ip']}};
-{% endif %}
+  {% if networks[network]['is_in_dns'] is defined and networks[network]['is_in_dns'] == true %}
+    {% set addresses = networks[network]['services_ip']['dns_ip'] | ipaddr %}
+    {% if addresses is string and addresses in ansible_all_ipv4_addresses %}
+    {{ addresses }};
+    {% else %}
+      {% for address in (addresses|intersect(ansible_all_ipv4_addresses)) %}
+    {{ address }};
+      {% endfor %}
+    {% endif %}
+  {% endif %}
 {% endfor %}
   };
 
