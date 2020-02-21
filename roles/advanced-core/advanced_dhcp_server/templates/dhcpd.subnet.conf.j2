@@ -38,21 +38,21 @@
       {% if (nic_args.network is defined and not none) and (nic_args.network == item) and (nic_args.ip4 is defined and not none) %}
 
         {% if nic_args.mac is defined and not none %}
-  host {{host}} {
+  host {{host}}-{{item}} { 
     option host-name "{{host}}";
     hardware ethernet {{nic_args.mac}};
     fixed-address {{nic_args.ip4}};
     filename "{{ipxe_rom_filename}}";
   }
         {% elif nic_args.dhcp_client_identifier is defined and not none %}
-  host {{host}} {
+  host {{host}}-{{item}} {
     option host-name "{{host}}";
     option dhcp-client-identifier {{nic_args.dhcp_client_identifier}};
     fixed-address {{nic_args.ip4}};
     filename "{{ipxe_rom_filename}}";
   }
         {% elif nic_args.host_identifier is defined and not none %}
-  host {{host}} {
+  host {{host}}-{{item}} {
     option host-name "{{host}}";
     host_identifier {{nic_args.host-identifier}};
     fixed-address {{nic_args.ip4}};
