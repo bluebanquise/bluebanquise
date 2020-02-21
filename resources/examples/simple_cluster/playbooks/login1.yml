@@ -1,6 +1,6 @@
 ---
 - name: login1
-  hosts: login1
+  hosts: "{{ target | default('login1') }}"
   roles:
 
     - role: set_hostname
