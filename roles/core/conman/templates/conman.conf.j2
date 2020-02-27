@@ -2,7 +2,11 @@
 #### Blue Banquise file ####
 ## {{ansible_managed}}
 
+{% if (equipment_profile['operating_system']['distribution'] | lower) in ['redhat', 'centos'] and equipment_profile['operating_system']['distribution_major_version'] < 8 %}
+SERVER execpath="/usr/share/conman/exec"
+{% else %}
 SERVER execpath="/usr/lib/conman/exec"
+{% endif %}
 SERVER syslog="daemon"
 SERVER logdir="/var/log/conman"
 GLOBAL log="/var/log/conman/%N.log"
