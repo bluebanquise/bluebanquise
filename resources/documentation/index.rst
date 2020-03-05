@@ -24,6 +24,7 @@ Please report us any issues in this documentation.
    learn_ansible
    configure_bluebanquise
    deploy_bluebanquise
+   multiple_icebergs
    roles
    references
 

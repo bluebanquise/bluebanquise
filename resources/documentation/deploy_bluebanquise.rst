@@ -178,8 +178,6 @@ And execute them, using extra var target to target them:
 
 You can see that Ansible will work on computes nodes in parallel, using more CPU on the management1 node.
 
-Your cluster should now be fully deployed. It is time to use some ADDONs to add specific features to the cluster.
-
-Please refer to each addon roles dedicated documentation to get instructions on how to use them.
+Your cluster should now be fully deployed. It is time to use some ADDONs to add specific features to the cluster (Please refer to each addon roles dedicated documentation to get instructions on how to use them), or continue this documentation to enable and deploy multi icebergs configuration if cluster needs it.
 
 Thank your for following this training. We really hope you will enjoy our stack. Please report us any bad or good feedback.
