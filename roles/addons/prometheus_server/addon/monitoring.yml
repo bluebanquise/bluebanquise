@@ -13,11 +13,9 @@ monitoring:
           - /home
         services:
           - slurmd.service
-        
+
   # Define alerts related to selected exporters
   alerts:
     Exporter_down:
-#      severity: critical
     bb_exporter_service:
       -  slurmd
-
