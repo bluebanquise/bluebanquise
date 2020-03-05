@@ -5,6 +5,6 @@
     name: "{{ item }}"
     state: restarted
   loop: "{{ services_to_start[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
-  when: (start_services | bool)
-  tags:
-    - service
+  when:
+    - "'service' not in ansible_skip_tags"
+    - (start_services | bool)

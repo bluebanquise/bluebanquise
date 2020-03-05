@@ -21,17 +21,10 @@
 
 - meta: flush_handlers
 
-- name: Enable/disable services
+- name: Manage services state
   service:
     name: conman
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
-  tags:
-    - service
-
-- name: Start services
-  service:
-    name: conman
-    state: started
-  when: (start_services | bool)
+    state: "{{ (start_services | bool) | ternary('started', omit) }}"
   tags:
     - service
