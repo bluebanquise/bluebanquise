@@ -17,7 +17,7 @@ Now, download latest **BlueBanquise** version from git:
 
 .. code-block:: bash
 
-  git clone https://github.com/oxedions/bluebanquise.git /etc/bluebanquise
+  git clone https://github.com/bluebanquise/bluebanquise.git /etc/bluebanquise
 
 ansible will read ANSIBLE_CONFIG, ansible.cfg in the current working directory, .ansible.cfg in the home directory or /etc/ansible/ansible.cfg, whichever it finds first.
 
