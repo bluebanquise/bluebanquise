@@ -5,8 +5,9 @@
     name: "{{ item }}"
     state: present
   with_items:
-    - prometheus-bluebanquise
-    - alertmanager-bluebanquise
+    - prometheus
+    - alertmanager
+    - ipmi_exporter
 
 - name: Create directories structure
   file:
@@ -31,8 +32,16 @@
 
 - name: Template >> /etc/prometheus/alerts/general.yml
   template:
-    src: alerts_general.yml.j2
+    src: alerts/general.yml.j2
     dest: /etc/prometheus/alerts/general.yml
+    owner: prometheus
+    group: prometheus
+    mode: 0640
+
+- name: Template >> /etc/prometheus/alerts/bb_exporter.yml
+  template:
+    src: alerts/bb_exporter.yml.j2
+    dest: /etc/prometheus/alerts/bb_exporter.yml
     owner: prometheus
     group: prometheus
     mode: 0640
@@ -65,11 +74,35 @@
   tags:
     - template
 
+- name: Template >> /etc/ipmi_exporter/ipmi_config.yml
+  template:
+    src: ipmi_config.yml.j2
+    dest: /etc/ipmi_exporter/ipmi_config.yml
+    owner: root
+    group: root
+    mode: 0640
+  tags:
+    - template
+
+- name: Enable/disable services
+  service:
+    name: "{{ item }}"
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+  with_items:
+    - prometheus
+    - alertmanager
+    - ipmi_exporter
+  tags:
+    - service
+
 - name: Start services
   service:
     name: "{{ item }}"
     state: started
-    enabled: yes
   with_items:
     - prometheus
     - alertmanager
+    - ipmi_exporter
+  when: (start_services | bool)
+  tags:
+    - service

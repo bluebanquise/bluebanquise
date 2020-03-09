@@ -14,17 +14,9 @@
 # Import dependances
 from ClusterShell.NodeSet import NodeSet
 from argparse import ArgumentParser
-from shutil import copy2
 import yaml
 import os
-import pwd
-import grp
-import re
-import hashlib
 import crypt
-from base64 import urlsafe_b64encode as encode
-from base64 import urlsafe_b64decode as decode
-from getpass import getpass
 from datetime import datetime
 
 
@@ -326,7 +318,7 @@ elif main_action == '3':
             print(bcolors.OKBLUE+'[INFO] Generating cache link for dnf.'+bcolors.ENDC)
             os.system('mkdir /mnt/var/cache/ -p')
             os.system('rm -Rf '+dnf_cache_directory+'/dnfcache')
-            os.system('mkdir '+dnf_cache_directory+'/dnfcache')
+            os.system('mkdir -p '+dnf_cache_directory+'/dnfcache')
             os.system('ln -s '+dnf_cache_directory+'/dnfcache/ /mnt/var/cache/dnf')
             print(bcolors.OKBLUE+'[INFO] Installing system into image.'+bcolors.ENDC)
             if selected_livenet_type == '3':
@@ -384,9 +376,10 @@ elif main_action == '4':
         print('Manage kernels of an image.')
 
         images_list = os.listdir('/var/www/html/preboot_execution_environment/diskless/images/')
-        selected_image = select_from_list(images_list, 'image to work with', -1)
+        selected_image = int(select_from_list(images_list, 'image to work with', -1))
+        selected_image_name = images_list[selected_image]
 
-        with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image+'/image_data.yml', 'r') as f:
+        with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml', 'r') as f:
             image_dict = yaml.load(f)
         print('Current kernel is: '+str(image_dict['image_data']['image_kernel']))
 
@@ -394,7 +387,7 @@ elif main_action == '4':
         selected_kernel = select_from_list(kernel_list, 'a new kernel to use in the available kernels list', -1)
 
         print(bcolors.OKBLUE+'[INFO] Updating image files.'+bcolors.ENDC)
-        file = open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image+'/boot.ipxe', 'r')
+        file = open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/boot.ipxe', 'r')
         filebuffer = file.readlines()
         for i in range(len(filebuffer)):
             if 'image-kernel' in filebuffer[i]:
@@ -402,29 +395,28 @@ elif main_action == '4':
             if 'image-initramfs' in filebuffer[i]:
                 filebuffer[i] = 'set image-initramfs '+'initramfs-kernel-'+kernel_list[int(selected_kernel)].strip('vmlinuz-')+'\n'
         file.close
-        file = open('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe', 'w')
+        file = open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/boot.ipxe', 'w')
         file.writelines(filebuffer)
         file.close
-        file = open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml', 'r')
-        filebuffer = file.readlines()
-        for i in range(len(filebuffer)):
-            if 'image_kernel' in filebuffer[i]:
-                filebuffer[i] = 'image_kernel: '+selected_kernel+'\n'
-        file.close
-        file = open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml', 'w')
-        file.writelines(filebuffer)
-        file.close
+        with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml', 'r') as f:
+            image_dict = yaml.safe_load(f)
+            image_dict['image_data']['image_kernel'] = selected_kernel
+        with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml', 'w') as f:
+            content = yaml.dump(image_dict, f, default_flow_style=False)
         print(bcolors.OKGREEN+'\n[OK] Done.\nYou will need to restart your running nodes for changes to take effect.'+bcolors.ENDC)
 
     elif sub_main_action == '3':
 
         images_list = os.listdir('/var/www/html/preboot_execution_environment/diskless/images/')
-        selected_image = select_from_list(images_list, 'image to work with', -1)
+        selected_image = int(select_from_list(images_list, 'image to work with', -1))
+        selected_image_name_copy = images_list[selected_image]
 
-        with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image+'/image_data.yml', 'r') as f:
+        with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name_copy+'/image_data.yml', 'r') as f:
             image_dict = yaml.load(f)
 
-        if image_dict['image_data']['image_status'] == 'staging':
+        if image_dict['image_data']['image_type'] != 'nfs':
+            print('Error: This is not an NFS image.')
+        elif image_dict['image_data']['image_status'] == 'staging':
             print('Image is a staging image. Create a new golden with it?')
             answer = str(input('Enter yes or no: ').lower().strip())
             if answer == "yes":
@@ -439,7 +431,7 @@ elif main_action == '4':
 #                os.system('mkdir /diskless/images/'+selected_image_name+'/golden')
                 os.system('mkdir /diskless/images/'+selected_image_name+'/nodes')
                 print(bcolors.OKBLUE+'[INFO] Cloning staging image to golden.'+bcolors.ENDC)
-                os.system('cp -a /diskless/images/'+selected_image+'/staging /diskless/images/'+selected_image_name+'/golden')
+                os.system('cp -a /diskless/images/'+selected_image_name+'/staging /diskless/images/'+selected_image_name+'/golden')
                 print(bcolors.OKBLUE+'[INFO] Generating related files.'+bcolors.ENDC)
                 file_content = '''image_data:
   image_name: {image_name}
@@ -463,7 +455,10 @@ elif main_action == '4':
         selected_image = images_list[int(input('-->: ').lower().strip())-1]
         with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image+'/image_data.yml', 'r') as f:
             image_dict = yaml.load(f)
-        if image_dict['image_data']['image_type'] == 'nfs' and image_dict['image_data']['image_status'] == 'golden':
+
+        if image_dict['image_data']['image_type'] != 'nfs':
+            print('Error: This is not an NFS image.')
+        elif image_dict['image_data']['image_status'] == 'golden':
 
             print('Manages nodes of image '+selected_image)
             print(' 1 - List nodes with the image')

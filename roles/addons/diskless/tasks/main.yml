@@ -4,3 +4,22 @@
     dest: /usr/bin/disklessset
     mode: 0700
 
+- name: Create diskless directories structure
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+    owner: "{{ apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
+    group: "{{ apache_user[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
+  loop:
+   - /var/www/html/preboot_execution_environment
+   - /var/www/html/preboot_execution_environment/diskless
+   - /var/www/html/preboot_execution_environment/diskless/images
+   - /var/www/html/preboot_execution_environment/diskless/kernels
+
+- name: Install dracut-live
+  package:
+    name: dracut-live
+    state: present
+  tags:
+    - package

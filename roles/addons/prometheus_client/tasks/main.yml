@@ -1,12 +1,54 @@
 ---
 
-- name: Package
+- name: Package node_exporter
   package:
     name: node_exporter
     state: present
+  when: "'node_exporter' in monitoring.exporters"
 
-- name: Start services
+- name: Enable/disable services
+  service:
+    name: node_exporter
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+  when: "'node_exporter' in monitoring.exporters"
+  tags:
+    - service
+
+- name: Start services node_exporter
   service:
     name: node_exporter
     state: started
-    enabled: yes
+  when:
+    - (start_services | bool)
+    - "'node_exporter' in monitoring.exporters"
+  tags:
+    - service
+
+- name: Package bb_exporter
+  package:
+    name: bb_exporter
+    state: present
+  when: "'bb_exporter' in monitoring.exporters"
+
+- name: Create directories structure bb_exporter
+  file:
+   path: /etc/bb_exporter/
+   state: directory
+   mode: 0750
+   owner: root
+   group: root
+  when: "'bb_exporter' in monitoring.exporters"
+
+- name: Template bb_exporter
+  template:
+    src: bb_exporter.yml.j2
+    dest: /etc/bb_exporter/bb_exporter.yml
+    owner: root
+    group: root
+    mode: 0640
+  tags:
+    - template
+  when: "'bb_exporter' in monitoring.exporters"
+
+
+

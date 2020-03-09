@@ -1,0 +1,18 @@
+# Configuration file for ipmi_exporter
+# https://github.com/soundcloud/ipmi_exporter/blob/master/ipmi_remote.yml
+
+modules:
+{% for equipment in j2_equipment_groups_list %}
+  {{equipment}}:
+    user: {{hostvars[groups[equipment][0]]['equipment_profile']['equipment_authentication']['user']}}
+    pass: {{hostvars[groups[equipment][0]]['equipment_profile']['equipment_authentication']['password']}}
+    driver: "LAN_2_0"
+    privilege: "user"
+    timeout: 10000
+    collectors:
+    - bmc
+    - ipmi
+    - chassis
+    exclude_sensor_ids:
+
+{% endfor %}

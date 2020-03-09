@@ -21,7 +21,7 @@
 
 project = u'BlueBanquise Documentation'
 copyright = u'2019, Benoît Leveugle, Johnny Keats'
-author = u'Oxedions, Johnny Keats'
+author = u'Benoît Leveugle, Johnny Keats'
 
 # The short X.Y version
 version = u''

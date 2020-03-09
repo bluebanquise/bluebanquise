@@ -9,15 +9,15 @@ Main target is High Performance Computing, but stack is generic and can adapt to
 
 Currently supported OS are:
 
-* Full:
+* Fully supported:
   * RedHat/Centos 7.6
   * RedHat/Centos 8.0
 
-* Partial/in dev:
+* Ready to be included if demand (PXE ready):
   * Ubuntu 18.04
   * OpenSuse Leap 15.1
 
-Debian is dropped for now because we had too much issues with the netboot part (modules conflicts).
+Debian is dropped for now because we fail to install it through PXE (modules conflicts).
 
 Ansible >= 2.8.2 is mandatory for BlueBanquise to run properly.
 
@@ -42,4 +42,5 @@ Special thanks:
 
 * to [CINES](https://www.cines.fr/en/) who provided Algoric team with hardware to develop this stack.
 * to [@remyd1](https://github.com/remyd1) for his help on [Banquise](https://github.com/oxedions/banquise) original stack.
-
+* to [@bouriquet15](https://github.com/bouriquet15) for his active help on the stack.
+* to [@actatux](https://github.com/actatux) for his active help on the stack.
