@@ -58,8 +58,7 @@
     name: "{{ item }}"
     state: started
   loop: "{{ services_to_start[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
-  tags:
-    - service
   when: (start_services | bool)
   tags:
     - service
+
