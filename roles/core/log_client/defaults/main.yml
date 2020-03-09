@@ -28,3 +28,12 @@ services_to_start:
     _8:
       - rsyslog
 
+rsyslog_conf_path:
+  ubuntu:
+    _18: /etc/rsyslog.conf
+  redhat:
+    _7: /etc/rsyslog.conf
+    _8: /etc/rsyslog.conf
+  centos:
+    _7: /etc/rsyslog.conf
+    _8: /etc/rsyslog.conf
