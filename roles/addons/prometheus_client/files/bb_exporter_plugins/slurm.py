@@ -3,6 +3,8 @@
 # 2020 - Benoît Leveugle <benoit.leveugle@sphenisc.com>
 # https://github.com/oxedions/bluebanquise - MIT license
 
+# Should be replaced by https://github.com/vpenso/prometheus-slurm-exporter
+
 import subprocess
 from prometheus_client.core import GaugeMetricFamily
 

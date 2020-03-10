@@ -25,7 +25,7 @@ scrape_configs:
   # All equipment profiles and their exporters
 {% for equipment in j2_equipment_groups_list %}
 {% if hostvars[groups[equipment][0]]['monitoring'] is defined and hostvars[groups[equipment][0]]['monitoring'] is not none and hostvars[groups[equipment][0]]['monitoring']['exporters'] is defined and hostvars[groups[equipment][0]]['monitoring']['exporters'] is not none and hostvars[groups[equipment][0]]['monitoring']['exporters'] is iterable %}
-{% for exporter, exporter_vars in hostvars[groups[equipment][0]]['monitoring']['exporters'].items() %} 
+{% for exporter, exporter_vars in hostvars[groups[equipment][0]]['monitoring']['exporters'].items() %}
   - job_name: '{{equipment}}_{{exporter}}'
     static_configs:
 {% for node in groups[equipment] %}
@@ -41,8 +41,8 @@ scrape_configs:
   - job_name: ipmi_{{equipment}}
     params:
       module: [{{equipment}}]
-    scrape_interval: 30s
-    scrape_timeout: 15s
+#    scrape_interval: 30s
+    scrape_timeout: 30s
     metrics_path: /ipmi
     scheme: http
     static_configs:
@@ -70,4 +70,3 @@ scrape_configs:
       replacement: localhost:9290  ## IPMI exporter is considered on the same host for know
       action: replace
 {% endfor %}
-
