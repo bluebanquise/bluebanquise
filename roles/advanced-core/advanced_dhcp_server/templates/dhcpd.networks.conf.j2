@@ -29,7 +29,7 @@ subnet {{networks[network]['subnet']}} netmask {{networks[network]['netmask']}} 
   option domain-name "{{domain_name}}";
   option domain-name-servers {{networks[network]['services_ip']['dns_ip']}};
   option broadcast-address {{networks[network]['broadcast']}};
-  option ntp-servers {{networks[network]['services_ip']['ntp_ip']}};
+  option ntp-servers {{networks[network]['services_ip']['time_ip']}};
 {% if networks[network]['gateway'] is defined and not none %}
   option routers {{networks[network]['gateway']}};
 {% endif %}
