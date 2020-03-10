@@ -18,21 +18,12 @@
     - groups[item.1] is defined and not none
     - inventory_hostname in groups[item.1]
 
-- name: Enable/disable services
+- name: Manage services state
   service:
     name: rpcbind
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+    state: "{{ (start_services | bool) | ternary('started', omit) }}"
   when: (ansible_distribution|lower|replace(' ','_')) in ['centos','redhat']
-  tags:
-    - service
-
-- name: Start services
-  service:
-    name: rpcbind
-    state: started
-  when:
-    - (start_services | bool)
-    - (ansible_distribution|lower|replace(' ','_')) in ['centos','redhat']
   tags:
     - service
 
