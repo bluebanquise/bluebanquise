@@ -78,8 +78,8 @@
   template:
     src: ipmi_config.yml.j2
     dest: /etc/ipmi_exporter/ipmi_config.yml
-    owner: root
-    group: root
+    owner: ipmiexporter
+    group: ipmiexporter
     mode: 0640
   tags:
     - template

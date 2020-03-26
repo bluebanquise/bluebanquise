@@ -1,6 +1,6 @@
 # Services plugin for bb exporter
 # 2020 - Benoît Leveugle <benoit.leveugle@sphenisc.com>
-# https://github.com/oxedions/bluebanquise - MIT license
+# https://github.com/bluebanquise/bluebanquise - MIT license
 
 from pystemd.systemd1 import Unit
 from prometheus_client.core import GaugeMetricFamily

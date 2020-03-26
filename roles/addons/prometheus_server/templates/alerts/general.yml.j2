@@ -7,9 +7,7 @@ groups:
     expr: up == 0
     for: 1m
     labels:
-      severity: critical # warning
+      severity: critical
     annotations:
       summary: "Exporter down (instance {{'{{ $labels.instance }}'}})"
       description: "Prometheus exporter down\n  VALUE = {{'{{ $value }}'}}\n  LABELS: {{'{{ $labels }}'}}"
-
-

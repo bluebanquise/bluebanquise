@@ -10,7 +10,7 @@
 - name: Template >> /etc/rsyslog.conf
   template:
     src: rsyslog.conf.j2
-    dest: /etc/rsyslog.conf
+    dest: "{{ rsyslog_conf_path[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
     owner: root
     group: root
     mode: 0644
@@ -58,19 +58,11 @@
 
 - meta: flush_handlers
 
-- name: Enable/disable services
+- name: Manage services state
   service:
     name: "{{ item }}"
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+    state: "{{ (start_services | bool) | ternary('started', omit) }}"
   loop: "{{ services_to_start[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
-  tags:
-    - service
-
-- name: Start services
-  service:
-    name: "{{ item }}"
-    state: started
-  loop: "{{ services_to_start[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
-  when: (start_services | bool)
   tags:
     - service

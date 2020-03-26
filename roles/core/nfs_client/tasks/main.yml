@@ -18,28 +18,19 @@
     - groups[item.1] is defined and not none
     - inventory_hostname in groups[item.1]
 
-- name: Enable/disable services
+- name: Manage services state
   service:
     name: rpcbind
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+    state: "{{ (start_services | bool) | ternary('started', omit) }}"
   when: (ansible_distribution|lower|replace(' ','_')) in ['centos','redhat']
-  tags:
-    - service
-
-- name: Start services
-  service:
-    name: rpcbind
-    state: started
-  when:
-    - (start_services | bool)
-    - (ansible_distribution|lower|replace(' ','_')) in ['centos','redhat']
   tags:
     - service
 
 - name: Mount exported NFS into directories
   mount:
     path: "{{ item.0.mount }}"
-    src: "{{ item.0.server }}{% if item.0.take_over_network is defined and not none %}-{{ item.0.take_over_network }}{% endif %}:{{ item.0.export }}"
+    src: "{{ item.0.server }}{% if item.0.take_over_network is defined and item.0.take_over_network is not none %}-{{ item.0.take_over_network }}{% endif %}:{{ item.0.export }}"
     fstype: nfs
     opts: "{{ item.0.mount_arguments }}"
     state: mounted

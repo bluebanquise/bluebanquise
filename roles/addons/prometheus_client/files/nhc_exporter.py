@@ -1,3 +1,5 @@
+# This is a minimal exporter, to be used as a reference.
+
 import time
 import subprocess
 import sys
