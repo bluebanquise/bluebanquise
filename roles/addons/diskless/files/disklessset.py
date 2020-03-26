@@ -9,7 +9,7 @@
 #
 # disklessset tool, to generate and manage diskless images in bluebanquise
 # 2019 - Benoît Leveugle <benoit.leveugle@sphenisc.com>
-# https://github.com/oxedions/bluebanquise - MIT license
+# https://github.com/bluebanquise/bluebanquise - MIT license
 
 # Import dependances
 from ClusterShell.NodeSet import NodeSet
