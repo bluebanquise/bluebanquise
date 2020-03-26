@@ -15,36 +15,36 @@
 
 {% for host in range %}
   {% if hostvars[host]['network_interfaces'] is defined %}
-    {# Define iPXE rom to use #}
+    {#- Define iPXE rom to use #}
     {% if hostvars[host]['equipment_profile']['ipxe_driver'] == 'snponly' %} {# Select driver first #}
       {% set ipxe_driver = 'snponly_' %}
     {% elif hostvars[host]['equipment_profile']['ipxe_driver'] == 'snp' %}
       {% set ipxe_driver = 'snp_' %}
-    {% else %}  {# Assume everything else is default driver #}
+    {% else %}{# Assume everything else is default driver #}
       {% set ipxe_driver = '' %}
     {% endif %}
     {% if hostvars[host]['equipment_profile']['hardware']['cpu']['architecture'] == 'arm64' %} {# Now select architecture #}
       {% set ipxe_architecture = 'arm64' %}
-    {% else %}  {# Assume everything else is x86_64 #}
+    {% else %}{# Assume everything else is x86_64 #}
       {% set ipxe_architecture = 'x86_64' %}
     {% endif %}
-    {% if hostvars[host]['equipment_profile']['ipxe_embed'] == 'dhcpretry' %} {# Now select embed script #}
+    {% if hostvars[host]['equipment_profile']['ipxe_embed'] == 'dhcpretry' %}{# Now select embed script #}
       {% set ipxe_embed = 'dhcpretry' %}
     {% else %}
       {% set ipxe_embed = 'standard' %}
     {% endif %}
     {% if hostvars[host]['equipment_profile']['ipxe_platform'] == 'efi' %} {# Finally, build file name depending of platform and previous parameters #}
       {% set ipxe_rom_filename = (ipxe_architecture + '/' + ipxe_embed + '_' + ipxe_driver + 'ipxe.efi') %}
-    {% else %}  {# Assume everything else is pcbios #}
+    {% else %}{# Assume everything else is pcbios #}
       {% set ipxe_rom_filename = (ipxe_architecture + '/' + ipxe_embed + '_undionly.kpxe') %}
-    {% endif %}
+    {% endif -%}
 
-    {% for nic, nic_args in hostvars[host]['network_interfaces'].items() %}
+    {%- for nic, nic_args in hostvars[host]['network_interfaces'].items() %}
       {% if (nic_args.network is defined and not none) and (nic_args.network == item) and (nic_args.ip4 is defined and not none) %}
         {% if nic_args.mac is defined and not none %}
-  host {{host}}-{{item}} { 
+  host {{host}}-{{item}} {
     option host-name "{{host}}";
-    hardware ethernet {{nic_args.mac}}; 
+    hardware ethernet {{nic_args.mac}};
     fixed-address {{nic_args.ip4}};
     filename "{{ipxe_rom_filename}}";
   }
@@ -76,9 +76,9 @@
   }
         {% endif %}
       {% endif %}
-    {% endfor %}
+    {% endfor -%}
 
-    {% if hostvars[host]['bmc'] is defined %}
+    {%- if hostvars[host]['bmc'] is defined %}
       {% set bmc_args = hostvars[host]['bmc'] %}
       {% if (bmc_args.network is defined and not none) and (bmc_args.network == item) and (bmc_args.name is defined and not none) and (bmc_args.ip4 is defined and not none) %}
         {% if bmc_args.mac is defined and not none %}
@@ -115,4 +115,3 @@
     {% endif %}
   {% endif %}
 {% endfor %}
-
