@@ -15,22 +15,22 @@
 
 {% for host in range %}
   {% if hostvars[host]['network_interfaces'] is defined %}
-    {# Define iPXE rom to use #}
+    {#- Define iPXE rom to use #}
     {% if hostvars[host]['equipment_profile']['ipxe_driver'] == 'snponly' %}
       {% set ipxe_driver = 'snponly_' %}
     {% elif hostvars[host]['equipment_profile']['ipxe_driver'] == 'snp' %}
       {% set ipxe_driver = 'snp_' %}
-    {% else %}  {# Assume everything else is default driver #}
+    {% else %}{# Assume everything else is default driver #}
       {% set ipxe_driver = '' %}
     {% endif %}
     {% if hostvars[host]['equipment_profile']['hardware']['cpu']['architecture'] == 'arm64' %}
       {% set ipxe_architecture = 'arm64' %}
-    {% else %}  {# Assume everything else is x86_64 #}
+    {% else %}{# Assume everything else is x86_64 #}
       {% set ipxe_architecture = 'x86_64' %}
     {% endif %}
     {% if hostvars[host]['equipment_profile']['ipxe_platform'] == 'efi' %}
       {% set ipxe_rom_filename = (ipxe_architecture + '/standard_' + ipxe_driver + 'ipxe.efi') %}
-    {% else %}  {# Assume everything else is pcbios #}
+    {% else %}{# Assume everything else is pcbios #}
       {% set ipxe_rom_filename = (ipxe_architecture + '/standard_undionly.kpxe') %}
     {% endif -%}
 
