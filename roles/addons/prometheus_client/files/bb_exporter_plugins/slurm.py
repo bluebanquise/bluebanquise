@@ -1,7 +1,7 @@
 # Slurm plugin for bb exporter
 # To export sinfo metrics, not slurmd or slurmctld daemons. If you need to watch these, use services plugin.
 # 2020 - Benoît Leveugle <benoit.leveugle@sphenisc.com>
-# https://github.com/oxedions/bluebanquise - MIT license
+# https://github.com/bluebanquise/bluebanquise - MIT license
 
 # Should be replaced by https://github.com/vpenso/prometheus-slurm-exporter
 

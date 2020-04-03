@@ -10,7 +10,7 @@
 # booset tool, to manage nodes PXE boot
 # 2019 - Benoît Leveugle <benoit.leveugle@sphenisc.com>
 #        Adrien Ribeiro <adrien.ribeiro@atos.net>
-# https://github.com/oxedions/bluebanquise - MIT license
+# https://github.com/bluebanquise/bluebanquise - MIT license
 
 from ClusterShell.NodeSet import NodeSet
 from argparse import ArgumentParser
