@@ -9,10 +9,10 @@ The stack is still young, and some aspects are not clearly defined yet. But here
 ## Conventions
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html),
+this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 and commits adheres to [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
 
-If possible, we try to comply with these conventions.
+Whenever possible, we try to comply with these conventions.
 
 ## Reporting bugs :beetle:
 
@@ -47,6 +47,27 @@ All contributions must pass through a Pull Request, to ensure easy reviewing of 
 There are currently no automatic tests done after a Pull Request.
 
 We will then do our best to answer you and test your contribution as soon as possible, before merging it. We may iterate with you to converge before merging to master branch.
+
+### Backports
+
+For backports, we use a workflow similar to the [Ansible Development
+Cycle](https://docs.ansible.com/ansible/latest/community/development_process.html#backporting-merged-prs).
+
+All PRs must be merged to the **master** branch first. Once merged, you can
+create a new PR to backport the change to a previous stable branch.
+
+Whenever possible, please cherry-pick the commit using the `-x` flag to indicate
+which commit this change was cherry-picked from.
+
+```bash
+git fetch upstream
+git checkout -b backport/1.2/<pr_number_from_master> upstream/stable-1.2
+git cherry-pick -x <commit_from_master>
+git push origin backport/1.2/<pr_number_from_master>
+```
+
+Submit the PR for `backport/1.2/<pr_number_from_master>` against the
+`stable-1.2` branch.
 
 ## Architecture :octopus:
 
