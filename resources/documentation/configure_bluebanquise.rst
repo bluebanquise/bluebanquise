@@ -193,7 +193,6 @@ Open file group_vars/all/networks/ice1-1.yml and let's check its content:
       is_in_dns: true                                   # If you want this network to be in the dns
       services_ip:                                      # IPs or virtual IPs to bind to for each service. In our case, all services will be running on management1
         pxe_ip: 10.10.0.1
-        ntp_ip: 10.10.0.1
         dns_ip: 10.10.0.1
         repository_ip: 10.10.0.1
         authentication_ip: 10.10.0.1
