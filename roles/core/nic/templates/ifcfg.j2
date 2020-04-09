@@ -9,7 +9,7 @@ ONBOOT=no
 {% else %}
 ONBOOT=yes
 {% endif %}
-NM_MANAGED=yes
+NM_CONTROLLED={{nic_nm_controlled | ternary('yes','no')}}
 BOOTPROTO=none
 
 {# 2. Let's get the type. Default is Ethernet. #}
