@@ -1,5 +1,7 @@
 ---
 
+- include_tasks: deprecation.yml
+
 - name: Disable CentOS-Base distro repositories
   ini_file:
     path: "/etc/yum.repos.d/CentOS-Base.repo"
@@ -8,7 +10,7 @@
     value: '0'
     no_extra_spaces: yes
   loop: [ 'base', 'updates', 'extras' ]
-  when: remove_distro_repositories is defined and remove_distro_repositories
+  when: disable_distro_repositories
   notify: yum-clean-metadata
 
 - name: Set baseurl prefix

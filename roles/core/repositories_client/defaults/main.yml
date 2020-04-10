@@ -1,0 +1,3 @@
+# Disable the CentOS repositories enabled by default after the installation of
+# the OS. (boolean)
+disable_distro_repositories: False
