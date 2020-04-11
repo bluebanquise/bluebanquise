@@ -3,29 +3,21 @@
 ## {{ansible_managed}}
 
 # External servers/pool if asked
-{% if external_time is defined and external_time.time_server is defined and time_profile == 'server' %}
-{% if external_time.time_server.server %}
+{% if time_profile == 'server' %}
 {% for external_server in external_time.time_server.server %}
 server {{external_server}}
 {% endfor %}
-{% endif %}
-{% if external_time.time_server.pool %}
 {% for external_pool in external_time.time_server.pool %}
 pool {{external_pool}} iburst maxsources 3
 {% endfor %}
 {% endif %}
-{% endif %}
-{% if external_time is defined and external_time.time_client is defined and time_profile == 'client' %}
-{% if external_time.time_client.server %}
+{% if time_profile == 'client' %}
 {% for external_server in external_time.time_client.server %}
 server {{external_server}}
 {% endfor %}
-{% endif %}
-{% if external_time.time_client.pool %}
 {% for external_pool in external_time.time_client.pool %}
 pool {{external_pool}} iburst maxsources 3
 {% endfor %}
-{% endif %}
 {% endif %}
 
 {% if time_profile == 'client' %}
@@ -48,13 +40,11 @@ rtcsync
 {% if time_profile == 'server' %}
 
 # Allow NTP client access from local network.*
-{% if network_interfaces is defined %}
 {% for nic in network_interfaces %}
 {% if network_interfaces[nic]['network'] is defined and not none %}
 allow {{networks[network_interfaces[nic]['network']]['subnet']}}/{{networks[network_interfaces[nic]['network']]['prefix']}}
 {% endif %}
 {% endfor %}
-{% endif %}
 
 # Serve time even if not synchronized to a time source.
 # Listen to local clock
