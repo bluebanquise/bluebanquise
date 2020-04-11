@@ -50,11 +50,15 @@ We will then do our best to answer you and test your contribution as soon as pos
 
 ### Backports
 
+All PRs must be merged to the **master** branch first. Once merged, you can
+create a new PR to backport the change to a previous stable branch.
+
 For backports, we use a workflow similar to the [Ansible Development
 Cycle](https://docs.ansible.com/ansible/latest/community/development_process.html#backporting-merged-prs).
 
-All PRs must be merged to the **master** branch first. Once merged, you can
-create a new PR to backport the change to a previous stable branch.
+We do **not** backport features.
+
+Note: The default branch of Ansible is named `devel`. Ours is named `master`.
 
 Whenever possible, please cherry-pick the commit using the `-x` flag to indicate
 which commit this change was cherry-picked from.
