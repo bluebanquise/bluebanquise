@@ -1,0 +1,19 @@
+---
+# This is an example playbook to execute Ansible tests.
+
+- name: Verify
+  hosts: all
+  vars:
+    contents: "{{ lookup('file', '/etc/timezone') }}"
+
+  tasks:
+    - name: Check if chronyd is installed
+      package_facts:
+        manager: auto
+    - name: Assert chrony is installed
+      assert:
+        that: "'chrony' in ansible_facts.packages"
+
+    - name: check timezone to Europe/Paris
+      assert:
+        that: "'Europe/Paris' in contents"

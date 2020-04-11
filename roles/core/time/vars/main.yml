@@ -1,3 +1,4 @@
+---
 role_version: 1.0.2
 
 packages_to_install:
@@ -39,5 +40,3 @@ chrony_conf_path:
   centos:
     _7: /etc/chrony.conf
     _8: /etc/chrony.conf
-
-
