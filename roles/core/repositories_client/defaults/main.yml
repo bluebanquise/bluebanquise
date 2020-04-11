@@ -1,3 +1,28 @@
+# System repositories, internal to the cluster
+#
+# It can be expanded to change settings for a repo with a dict, using
+# YAML's flow styles or block styles:
+#
+#   repositories:
+#     - bluebanquise
+#     - { name: 'os', gpgcheck: 1 }  # Flow style
+#     - name: epel                   # Block style
+#       gpgcheck: 1
+#
+# Available settings: name, baseurl, enabled, gpgcheck, gpgkey and proxy.
+#
+repositories:
+  - bluebanquise
+  - os
+
+# Additional repositories can be added to the external.yml configuration files
+# to logically segregate internal and external repositories in the inventory.
+#
+# external_repositories:
+#   - name: epel
+#     baseurl: 'https://dl.fedoraproject.org/pub/epel/$releasever/$basearch/'
+#     proxy: 'https://proxy:8080'
+
 # Disable the CentOS repositories enabled by default after the installation of
 # the OS. (boolean)
 disable_distro_repositories: False
