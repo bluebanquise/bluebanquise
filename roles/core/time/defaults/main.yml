@@ -1,0 +1,21 @@
+---
+# Those defaults values should be overwriten by your inventory
+# Start the services by default
+start_services: true
+enable_services: true
+# Default NTP configuration
+external_time:
+  time_server:
+    server:
+      - 0.fr.pool.ntp.org
+      - 1.fr.pool.ntp.org
+      - 2.fr.pool.ntp.org
+      - 3.fr.pool.ntp.org
+    pool:
+      - pool.ntp.org
+time_zone: Europe/Paris
+
+# Default server configuration
+time_profile: 'server'
+icebergs_system: false
+network_interfaces: []

@@ -40,21 +40,3 @@ chrony_conf_path:
   centos:
     _7: /etc/chrony.conf
     _8: /etc/chrony.conf
-
-start_services: true
-enable_services: true
-
-external_time:
-  time_server:
-    server:
-      - 0.fr.pool.ntp.org
-      - 1.fr.pool.ntp.org
-      - 2.fr.pool.ntp.org
-      - 3.fr.pool.ntp.org
-    pool:
-      - pool.ntp.org
-
-time_profile: 'server'
-icebergs_system: false
-time_zone: Europe/Paris
-network_interfaces: []

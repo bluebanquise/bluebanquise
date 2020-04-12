@@ -39,7 +39,7 @@ rtcsync
 
 {% if time_profile == 'server' %}
 
-# Allow NTP client access from local network.*
+# Allow NTP client access from local network.
 {% for nic in network_interfaces %}
 {% if network_interfaces[nic]['network'] is defined and not none %}
 allow {{networks[network_interfaces[nic]['network']]['subnet']}}/{{networks[network_interfaces[nic]['network']]['prefix']}}

@@ -3,8 +3,6 @@
 
 - name: Verify
   hosts: all
-  vars:
-    contents: "{{ lookup('file', '/etc/timezone') }}"
 
   tasks:
     - name: Check if chronyd is installed
@@ -14,6 +12,10 @@
       assert:
         that: "'chrony' in ansible_facts.packages"
 
-    - name: check timezone to Europe/Paris
+    - name: Ansible fact - ansible_date_time.iso8601
+      debug:
+        msg: "Timestamp format: {{ ansible_date_time }}"
+
+    - name: assert timezone to Europe/Paris
       assert:
-        that: "'Europe/Paris' in contents"
+        that: "'CEST' in ansible_date_time.tz"
