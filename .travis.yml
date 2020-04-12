@@ -11,7 +11,6 @@ env:
     - MOLECULE_DISTRO: ubi8
     - MOLECULE_DISTRO: ubuntu1804
     - MOLECULE_DISTRO: fedora31
-  jobs:
     - TEST_DIR: roles/core/time
     - TEST_DIR: roles/core/dns_server
 
