@@ -28,6 +28,7 @@ jobs:
           - core/dns_server
           - core/log_client
           - core/log_server
+          - core/repositories_client
           - core/time
           - addons/clustershell
           - addons/users_basic
