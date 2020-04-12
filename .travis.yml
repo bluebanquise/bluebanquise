@@ -10,7 +10,6 @@ env:
     - MOLECULE_DISTRO: centos7
     - MOLECULE_DISTRO: ubi8
     - MOLECULE_DISTRO: ubuntu1804
-    - MOLECULE_DISTRO: fedora31
 
 install:
   # Install test dependencies.

@@ -21,7 +21,6 @@
 - name: Set timezone
   timezone:
     name: "{{ time_zone }}"
-  when: time_zone is defined
 
 - meta: flush_handlers
 

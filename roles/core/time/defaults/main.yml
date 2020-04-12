@@ -13,6 +13,9 @@ external_time:
       - 3.fr.pool.ntp.org
     pool:
       - pool.ntp.org
+  time_client:
+    server: []
+    pool: []
 time_zone: Europe/Paris
 
 # Default server configuration
