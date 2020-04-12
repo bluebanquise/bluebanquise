@@ -11,8 +11,6 @@ env:
     - MOLECULE_DISTRO: ubi8
     - MOLECULE_DISTRO: ubuntu1804
     - MOLECULE_DISTRO: fedora31
-    - TEST_DIR: roles/core/time
-    - TEST_DIR: roles/core/dns_server
 
 install:
   # Install test dependencies.
@@ -20,4 +18,6 @@ install:
 
 script:
   # Run tests.
-  - cd $TEST_DIR && molecule test && molecule idempotence
+  - cd roles/core
+  - cd time && molecule test && molecule idempotence
+  - cd ../dns_server && molecule test && molecule idempotence
