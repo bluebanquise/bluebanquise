@@ -23,6 +23,7 @@ jobs:
           - centos7
           - centos8
         role:
+          - core/conman
           - core/display_tuning
           - core/dns_client
           - core/dns_server
