@@ -13,7 +13,7 @@ env:
     - MOLECULE_DISTRO: fedora31
   jobs:
     - TEST_DIR: roles/core/time
-    - TEST_FOR: roles/core/dns_server
+    - TEST_DIR: roles/core/dns_server
 
 install:
   # Install test dependencies.
