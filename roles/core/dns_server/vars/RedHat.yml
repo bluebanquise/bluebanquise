@@ -1,0 +1,5 @@
+---
+packages_to_install:
+  - bind
+services_to_start:
+  - named

@@ -1,0 +1,5 @@
+---
+packages_to_install:
+  - bind9
+services_to_start:
+  - bind9
