@@ -3,8 +3,8 @@
 {# Macro to avoid redundancy #}
 {% macro write_host(host,macro_node_main_network) %}
 Host {{host}}
-    {% if ssh_master_disable_hosts_check is defined and
-          ssh_master_disable_hosts_check == true %}
+    {% if security.ssh.hostkey_checking is not defined or
+          security.ssh.hostkey_checking == false %}
     StrictHostKeyChecking no
     UserKnownHostsFile=/dev/null
     {% endif %}

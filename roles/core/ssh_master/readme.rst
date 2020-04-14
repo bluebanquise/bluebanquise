@@ -57,10 +57,18 @@ new key. It is possible to achieve this with the commands below:
   done
   # clush -o '-o StrictHostKeyChecking=no' -w $NODES dmidecode -s system-uuid
 
-It is possible to disable the strict host key checking with the parameter
-*ssh_master_disable_hosts_check: true* in the inventory. This was the default
-behaviour prior BlueBanquise 1.3. The ssh configuration file will include the
-following parameters:
+It is possible to disable the strict host key checking in the inventory with the
+configuration below:
+
+.. code-block:: yaml
+
+   ---
+   security:
+     ssh:
+       hostkey_checking: false
+
+This was the default behaviour prior BlueBanquise 1.3. The ssh configuration
+file will include the following parameters:
 
 .. code-block:: text
 
