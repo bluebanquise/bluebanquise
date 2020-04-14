@@ -11,9 +11,12 @@
     command: grep {{ item }} -q /etc/passwd
 
   - name: Check if user exists
-    shell: /usr/bin/getent group | awk -F":" '{print $1}'
+    shell: |
+      set -o pipefail
+      /usr/bin/getent group | awk -F":" '{print $1}'
     register: etc_groups
     changed_when: false
 
   - name: assert group exists
-    assert: 'johnnykeats in etc_groups.stdout_lines'
+    assert:
+      that: "johnnykeats in etc_groups.stdout_lines"
