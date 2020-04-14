@@ -1,0 +1,10 @@
+---
+# This is an example playbook to execute Ansible tests.
+
+- name: Verify
+  hosts: all
+  tasks:
+
+  - name: assert True
+    assert:
+      that: true
