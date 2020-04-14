@@ -13,3 +13,7 @@
             ip4: 127.0.0.1
         start_services: false
         enable_services: false
+        j2_current_iceberg_network: ice-0
+        external_dns: []
+        networks: []
+        domain_name: .localhost

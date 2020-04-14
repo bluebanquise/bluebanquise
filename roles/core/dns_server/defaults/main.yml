@@ -1,9 +1,0 @@
----
-# implement more default values which will come from inventory
-j2_current_iceberg_network: ice-0
-external_dns: []
-networks: []
-domain_name: .localhost
-
-start_services: true
-enable_services: true
