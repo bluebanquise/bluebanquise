@@ -9,7 +9,6 @@ networks:
     is_in_dns: true
     services_ip:
       pxe_ip: 10.13.0.1
-      ntp_ip: 10.13.0.1
       dns_ip: 10.13.0.1
       repository_ip: 10.13.0.1
       authentication_ip: 10.13.0.1
