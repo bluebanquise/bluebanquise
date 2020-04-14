@@ -2,18 +2,19 @@
 - name: Converge
   hosts: all
 
+  vars:
+    j2_node_main_network_interface: en0
+    network_interfaces:
+      en0:
+        ip4: 127.0.0.1
+    j2_current_iceberg_network: ice-1
+    external_dns: []
+    networks: []
+    domain_name: .localhost
+    start_services: false
+    enable_services: false
+
   tasks:
     - name: "Include dns_server"
       include_role:
         name: "dns_server"
-      vars:
-        j2_node_main_network_interface: en0
-        network_interfaces:
-          en0:
-            ip4: 127.0.0.1
-        start_services: false
-        enable_services: false
-        j2_current_iceberg_network: ice-0
-        external_dns: []
-        networks: []
-        domain_name: .localhost

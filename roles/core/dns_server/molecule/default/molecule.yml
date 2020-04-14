@@ -30,6 +30,6 @@ scenario:
     # - dependency
     - syntax
     - create
-    # - prepare
+    - prepare
     - converge
-    # - verify
+    - verify
