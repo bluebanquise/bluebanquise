@@ -1,0 +1,16 @@
+---
+- name: Converge
+  hosts: all
+
+  vars:
+    domain_name: .localhost
+    j2_node_main_network: en0
+    networks:
+      en0:
+        services_ip:
+          dns_ip: 127.0.0.1
+
+  tasks:
+    - name: "Include dns_client"
+      include_role:
+        name: "dns_client"

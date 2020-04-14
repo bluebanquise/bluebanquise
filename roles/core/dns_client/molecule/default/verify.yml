@@ -1,0 +1,15 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Check that files exists
+      stat:
+        path: "{{ item }}"
+      register: stat_results
+      with_items:
+        - /etc/resolv.conf
+
+    - name: assert files exist
+      assert:
+        that: "{{ item }}.stat.exists"
+      loop: "{{ stat_results.results }}"

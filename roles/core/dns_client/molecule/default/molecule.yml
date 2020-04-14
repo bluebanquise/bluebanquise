@@ -10,7 +10,7 @@ lint:  |
   flake8
 platforms:
   - name: instance
-    image: "geerlingguy/docker-${MOLECULE_DISTRO:-ubi8}-ansible:latest"
+    image: "geerlingguy/docker-${MOLECULE_DISTRO:-centos8}-ansible:latest"
     command: "/lib/systemd/systemd"
     capabilities:
       - "SYS_ADMIN"
@@ -28,8 +28,8 @@ scenario:
     - lint
     - destroy
     # - dependency
-    # - syntax
-    # - create
-    # - prepare
-    # - converge
-    # - verify
+    - syntax
+    - create
+    - prepare
+    - converge
+    - verify
