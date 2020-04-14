@@ -3,11 +3,11 @@
   name: prepare the environment
 
   tasks:
-  - name: "update cache apt"
-    apt: update_cache=yes
-    when: ansible_os_family == "Debian"
+    - name: "update cache apt"
+      apt: update_cache=yes
+      when: ansible_facts.os_family == "Debian"
 
-  - name: "install openssh"
-    package:
-      name: openssh-*
-      state: latest
+    - name: "make sure openssh is installed"
+      package:
+        name: openssh
+        state: present
