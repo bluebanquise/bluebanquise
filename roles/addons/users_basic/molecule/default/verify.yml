@@ -17,6 +17,10 @@
     register: etc_groups
     changed_when: false
 
+  - name: debug
+    debug:
+      var: etc_groups
+
   - name: assert group exists
     assert:
-      that: "johnnykeats in etc_groups.stdout_lines"
+      that: "'johnnykeats' in etc_groups.stdout_lines"

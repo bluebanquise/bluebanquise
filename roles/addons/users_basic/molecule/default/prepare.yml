@@ -12,3 +12,8 @@
       name: '*'
       state: latest
     when: ansible_os_family == "RedHat"
+
+  - name: "install openssh"
+    package:
+      name: openssh-*
+      state: latest
