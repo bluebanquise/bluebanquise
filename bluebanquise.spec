@@ -37,7 +37,7 @@ hash_behaviour and groups.
 %autosetup
 
 # Delete CICD files
-find roles/{core,advanced-core,addons} \( -name 'molecule' -o -name '.ansible-lint' -o -name '.yamllint' \) -print0 \
+find roles/{core,advanced-core,addons} -maxdepth 2 \( -name 'molecule' -o -name '.ansible-lint' -o -name '.yamllint' \) -print0 \
  | xargs -0 rm -rf
 
 # Define content of roles/<role>/vars/ as configuration
