@@ -7,12 +7,6 @@
     apt: update_cache=yes
     when: ansible_os_family == "Debian"
 
-  - name: "update cache yum"
-    yum:
-      name: '*'
-      state: latest
-    when: ansible_os_family == "RedHat"
-
   - name: "install openssh"
     package:
       name: openssh-*
