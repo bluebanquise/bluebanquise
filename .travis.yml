@@ -10,7 +10,7 @@ env:
     - MOLECULE_DISTRO: centos7
     # Need a RHEL subscription - MOLECULE_DISTRO: ubi8
     # Need a RHEL subscription - MOLECULE_DISTRO: ubi7
-    - MOLECULE_DISTRO: ubuntu1804
+    # Need updates in the code of BB - MOLECULE_DISTRO: ubuntu1804
 
 install:
   # Install test dependencies.
