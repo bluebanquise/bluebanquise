@@ -119,5 +119,5 @@ end}
 
 %changelog
 * Sun Feb  2 2020 Bruno Travouillon <devel@travouillon.fr>
-* Fri Apr 14 2020 strus38 <indigoping4cgmi@gmail.com>
+* Tue Apr 14 2020 strus38 <indigoping4cgmi@gmail.com>
 - 
