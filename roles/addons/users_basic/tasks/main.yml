@@ -23,4 +23,3 @@
     ssh_key_file: .ssh/id_rsa
     state: present
   with_items: "{{ users_basic.active_users }}"
-

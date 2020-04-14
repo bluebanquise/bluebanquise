@@ -1,0 +1,14 @@
+---
+- hosts: all
+  name: prepare the environment
+
+  tasks:
+  - name: "update cache apt"
+    apt: update_cache=yes
+    when: ansible_os_family == "Debian"
+
+  - name: "update cache yum"
+    yum:
+      name: '*'
+      state: latest
+    when: ansible_os_family == "RedHat"
