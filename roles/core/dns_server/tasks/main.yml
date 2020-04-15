@@ -8,9 +8,9 @@
 
 - name: Create needed directory >> /var/named
   file:
-   path: /var/named
-   state: directory
-   mode: 0755
+    path: /var/named
+    state: directory
+    mode: 0755
 
 - name: Template >> /etc/named.conf
   template:

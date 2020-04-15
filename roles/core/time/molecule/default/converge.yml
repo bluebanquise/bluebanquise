@@ -1,0 +1,30 @@
+---
+- name: Converge
+  hosts: all
+
+  vars:
+    # Start the services by default
+    start_services: true
+    enable_services: true
+    # Default server configuration
+    time_profile: 'server'
+    icebergs_system: false
+    network_interfaces: []
+    external_time:
+      time_server:
+        server:
+          - 0.fr.pool.ntp.org
+          - 1.fr.pool.ntp.org
+          - 2.fr.pool.ntp.org
+          - 3.fr.pool.ntp.org
+        pool:
+          - pool.ntp.org
+      time_client:
+        server: []
+        pool: []
+    time_zone: Europe/Paris
+
+  tasks:
+    - name: "Include time for servers"
+      include_role:
+        name: "time"
