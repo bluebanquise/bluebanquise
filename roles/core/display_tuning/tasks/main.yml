@@ -20,4 +20,3 @@
     src: vimrc
     dest: /root/.vimrc
     mode: 0644
-
