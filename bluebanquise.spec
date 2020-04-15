@@ -36,6 +36,10 @@ hash_behaviour and groups.
 %prep
 %autosetup
 
+# Delete CICD files
+find roles/{core,advanced-core,addons} -maxdepth 2 \( -name 'molecule' -o -name '.ansible-lint' -o -name '.yamllint' \) -print0 \
+ | xargs -0 rm -rf
+
 # Define content of roles/<role>/vars/ as configuration
 find -L roles/{core,advanced-core,addons} -type f -path 'roles/*/vars/*' \
  | xargs -l1 -i{} echo '%config %{_sysconfdir}/%{name}/{}' > rolesfiles.txt
@@ -115,4 +119,5 @@ end}
 
 %changelog
 * Sun Feb  2 2020 Bruno Travouillon <devel@travouillon.fr>
+* Tue Apr 14 2020 strus38 <indigoping4cgmi@gmail.com>
 - 
