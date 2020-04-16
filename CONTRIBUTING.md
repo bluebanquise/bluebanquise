@@ -85,7 +85,7 @@ Do not hesitate to add url to your references, or to tutorials, etc.
 
 3. Tools, scripts, wrappers, are made to simplify system usage (Shell commands, Ansible, Linux tools, etc.). However, when possible, manual way should always be documented side by side with the automated way, to allow easy debug and simply understand scripts, as the stack also has a teaching objective.
 
-4. If a WebUI is available (and it is planed), manual deployment and usage will remains the default way.
+4. If a WebUI is available (and it is planed), manual deployment and usage will remain the default way.
 
 ### Variables
 
