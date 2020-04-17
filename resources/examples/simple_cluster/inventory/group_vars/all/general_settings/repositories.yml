@@ -2,4 +2,14 @@ repositories:
   - bluebanquise
   - os
 
-remove_distro_repositories: True
+repositories_settings:
+  remove_distro_repositories: True
+
+  # versionning of repositories
+  #
+  # minor: eg. /repositories/redhat/8.1/x86_64/os on pxe server and client
+  # major: eg. /repositories/redhat/8/x86_64/os on pxe server and client
+  # major_dynamic: eg. /repositories/redhat/8/x86_64/os on pxe server and /repositories/redhat/$releasever/$basearch/os on client
+  # custom: use custom server and client path, provided in the equipment_profile
+
+  versionning: minor # minor, major, major_dynamic, custom

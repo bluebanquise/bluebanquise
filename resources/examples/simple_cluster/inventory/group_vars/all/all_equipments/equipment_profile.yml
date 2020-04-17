@@ -25,6 +25,10 @@ equipment_profile:
     distribution_major_version: 8
     distribution_version: 8.0
 
+#  repositories: # Optional
+#    custom_server_path: /redhat/8/x86_64/production/
+#    custom_client_path: /redhat/$releasever/$basearch/production/
+
   equipment_type: none  # If server, a pxe profile will be generated
 
   configuration:
@@ -43,4 +47,3 @@ equipment_profile:
   equipment_authentication: # login/password for BMC, storage bay controller, switch, etc.
     user: ADMIN
     password: ADMIN
-
