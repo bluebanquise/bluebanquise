@@ -1,6 +1,8 @@
 ---
-
 - name: Disable CentOS-Base distro repositories
+  # In BlueBanquise, the CentOS 7 system repository is installed with the
+  # special repository 'os', thus we disable default repositories if 'os' is
+  # configured.
   ini_file:
     path: "/etc/yum.repos.d/CentOS-Base.repo"
     section: "{{ item }}"
@@ -8,7 +10,7 @@
     value: '0'
     no_extra_spaces: yes
   loop: [ 'base', 'updates', 'extras' ]
-  when: remove_distro_repositories is defined and remove_distro_repositories
+  when: ( 'os' in repositories ) or ( item.name is defined and item.name == 'os' )
   notify: yum-clean-metadata
 
 - name: Set baseurl prefix
