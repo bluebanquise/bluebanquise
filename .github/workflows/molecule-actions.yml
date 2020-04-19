@@ -26,11 +26,12 @@ jobs:
           - core/display_tuning
           - core/dns_client
           - core/dns_server
+          - core/log_client
+          - core/log_server
           - core/time
           - addons/clustershell
           - addons/users_basic
-          - core/log_client
-          - core/log_server
+
     env:
       MOLECULE_DISTRO: ${{ matrix.distro }}
     steps:
