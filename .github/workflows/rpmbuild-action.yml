@@ -1,0 +1,42 @@
+name: Test RPM build
+on: push
+  # push:
+  #   branches:
+  #     - master
+  #       tags:
+  #         - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10 
+
+jobs:
+  build:
+    name: Test RPM build
+    runs-on: ubuntu-latest
+    steps:
+    - name: install the needed packages
+      run: sudo apt-get install rpm bash
+
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: get Commit_id
+      id: get_commit_id
+      run: |
+        COMMIT_ID=$(git rev-parse --short "$GITHUB_SHA")
+        echo ::set-output name=commit_id::${COMMIT_ID}
+
+    - name: Prepare and Build
+      id: rpmbuild
+      run: |
+        sudo ln -sf /bin/bash /bin/sh
+        COMMIT_ID=${{ steps.get_commit_id.outputs.commit_id }}
+        mkdir -p $BUILD_ENV/rpmbuild/bluebanquise-${COMMIT_ID}
+        mv $(ls | grep -v bluebanquise-) $BUILD_ENV/rpmbuild/bluebanquise-${COMMIT_ID}/.
+        cd $BUILD_ENV/rpmbuild
+        tar zcf bluebanquise-${COMMIT_ID}.tar.gz bluebanquise-${COMMIT_ID}
+        rm -rf bluebanquise-${COMMIT_ID} ../bluebanquise
+        mkdir -p {SOURCES,SRPMS,RPMS,BUILD,SPECS}
+        tar zxf bluebanquise-${COMMIT_ID}.tar.gz bluebanquise-${COMMIT_ID}/bluebanquise.spec -O > SPECS/bluebanquise.spec 
+        mv bluebanquise-$COMMIT_ID.tar.gz SOURCES/.
+        rpmbuild -ba --define "version ${COMMIT_ID}" SPECS/bluebanquise.spec
+        tar zcf bluebanquise-${COMMIT_ID}.tar.gz RPMS/noarch/*
+      env:
+        BUILD_ENV: ../../..
