@@ -110,7 +110,7 @@ These dictionaries **must** be set in group_vars/equipment_profile/ folders or i
 
 3. We try to not use tabulations, but instead double space for indentation.
 
-4. If you are working on Microsoft Windows, please check you do not submit CRLF (seen sometime as ^M at the end of your lines). See https://www.git-scm.com/book/en/v2/Customizing-Git-Git-Configuration#_code_core_autocrlf_code.
+4. If you are working on Microsoft Windows, please check you do not submit CRLF (seen sometime as ^M at the end of your lines). See [Customizing-Git-Git-Configuration](https://www.git-scm.com/book/en/v2/Customizing-Git-Git-Configuration#_code_core_autocrlf_code].
 
 ## Ownership
 
