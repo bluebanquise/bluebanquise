@@ -85,7 +85,7 @@ Do not hesitate to add url to your references, or to tutorials, etc.
 
 3. Tools, scripts, wrappers, are made to simplify system usage (Shell commands, Ansible, Linux tools, etc.). However, when possible, manual way should always be documented side by side with the automated way, to allow easy debug and simply understand scripts, as the stack also has a teaching objective.
 
-4. If a WebUI is available (and it is planed), manual deployment and usage will remain the default way.
+4. If a WebUI is available (and it is planed), standard inventory editing, standard deployment using ansible-playbook, and standard usage will remain the default way.
 
 ### Variables
 
@@ -110,7 +110,7 @@ These dictionaries **must** be set in group_vars/equipment_profile/ folders or i
 
 3. We try to not use tabulations, but instead double space for indentation.
 
-4. If you are working on Microsoft Windows, please check you do not submit ^M at the end of your lines.
+4. If you are working on Microsoft Windows, please check you do not submit CRLF (seen sometime as ^M at the end of your lines). See https://www.git-scm.com/book/en/v2/Customizing-Git-Git-Configuration#_code_core_autocrlf_code.
 
 ## Ownership
 
