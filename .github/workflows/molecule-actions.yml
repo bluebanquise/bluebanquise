@@ -26,6 +26,7 @@ jobs:
           - core/display_tuning
           - core/dns_client
           - core/dns_server
+          - core/nic
           - core/time
           - addons/clustershell
           - addons/users_basic

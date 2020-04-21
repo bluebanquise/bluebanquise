@@ -1,0 +1,33 @@
+---
+- name: Verify
+  hosts: all
+
+  tasks:
+  - name: check all files have been generated
+    find:
+      paths: /etc/sysconfig/network-scripts
+      patterns: "ifcfg-eth*"
+    register: ifcfg_list
+
+  - name: assert we have 3 eth files
+    assert:
+      that: ifcfg_list.matched == 3
+
+  - name: assert eth0
+    lineinfile:
+      path: /etc/sysconfig/network-scripts/ifcfg-eth0
+      line: "IPADDR={{ hostvars[inventory_hostname]['ansible_eth0'].ipv4.address }}"
+      state: present
+  - name: assert eth1
+    lineinfile:
+      path: /etc/sysconfig/network-scripts/ifcfg-eth1
+      line: "IPADDR={{ hostvars[inventory_hostname]['ansible_eth1'].ipv4.address }}"
+      state: present
+  - name: assert eth2
+    lineinfile:
+      path: /etc/sysconfig/network-scripts/ifcfg-eth2
+      line: "{{ item }}"
+      state: present
+    with_items:
+      - IPADDR="{{ hostvars[inventory_hostname]['ansible_eth0'].ipv4.address }}"
+      - NETMASK="{{ hostvars[inventory_hostname]['ansible_eth0'].ipv4.netmask }}"
