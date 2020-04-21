@@ -43,7 +43,7 @@ Also set, in this same file /etc/ansible/ansible.cfg, the roles_path value to /e
 
   roles_path    = /etc/ansible/roles
 
-And also change hash_behaviour to merge, as this is the most interesting algorithm:
+And also change hash_behaviour to merge, as this is the most interesting and mandatory algorithm for us:
 
 .. code-block:: text
 
@@ -55,7 +55,7 @@ Finally, add management1 host into the inventory. Create a file called /etc/ansi
 
   management1
 
-Our very basic Ansibe configuration is done. But one thing remains: we need to ensure our host (management1) can ssh to itself without password, as Ansible relies fully on the ssh to connect to remote hosts.
+Our very basic Ansible configuration is done. But one thing remains: we need to ensure our host (management1) can ssh to itself without password, as Ansible relies fully on the ssh to connect to remote hosts.
 
 Let's generate a ssh key (press enter multiple time):
 
@@ -132,7 +132,7 @@ Or all hosts:
 
   ansible all -m ping
 
-Also, it is possible to gather **facts**. Facts are dynamic variables, accessible only when Ansible is running on the target. Facts provides live information about the target: it's running kernel, it's linux distribution, network or cpu information, etc.
+Also, it is possible to gather **facts**. Facts are dynamic variables, accessible only when Ansible is running on the target. Facts provides live information about the target: it's running kernel, it's Linux distribution, network or cpu information, etc.
 
 .. code-block:: bash
 
@@ -404,7 +404,7 @@ And check the result:
 
 Same concept applies here, with different syntax.
 
-Note that an host can be part of multiple groups.
+Note that a host can be part of multiple groups.
 
 You can find more information and examples `here on intro_inventory <https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html>`_ .
 
@@ -584,7 +584,7 @@ Template
 
 Templates are probably the key feature of Ansible and all automation tools.
 
-The idea is simple: you provide Ansible with a copy of your desired configuration file, with variables to be dynamnicaly replaced in order to fill on the fly some parts of the file.
+The idea is simple: you provide Ansible with a copy of your desired configuration file, with variables to be dynamically replaced in order to fill on the fly some parts of the file.
 
 Let's do this with a simple html page, and first with a static page.
 
@@ -664,7 +664,7 @@ Edit file /etc/ansible/roles/shipyard/templates/index.html.j2 to make it this wa
   </body>
   </html>
 
-And let's re-execute the playbook. But we have already installed the package and started the service, so let's ask Ansible to only work on the tags 'templates' to fasten the execution (this tag was defined in the tasks/mail.yml file previsouly seen):
+And let's re-execute the playbook. But we have already installed the package and started the service, so let's ask Ansible to only work on the tags 'templates' to fasten the execution (this tag was defined in the tasks/mail.yml file previously seen):
 
 .. code-block:: bash
 
@@ -691,5 +691,390 @@ Now regarding to Jinja2:
 You can experiment with this template to understand the whole mechanism. The whole Jinja2 documentation can be found here: `Jinja2 template designer <https://jinja.palletsprojects.com/en/2.10.x/templates/>`_
 
 You should now understand the very basis of Ansible.
+
+Time to investigate tasks advanced elements.
+
+Task again
+----------
+
+As discussed before, all task available modules can be found in the `Ansible documentation <https://docs.ansible.com/ansible/latest/modules/modules_by_category.html>`_ .
+
+Each of these modules can be combined with general tasks actions. But first, let's define the basic debug module and registers, that will allow us to play more easily with tasks.
+
+Debug module
+^^^^^^^^^^^^
+
+This is a very simple module, to display a message in the shell.
+
+For example:
+
+.. code-block:: yaml
+
+  - name: My message module
+    debug:
+      msg: "Hello world ! I am the debug module. You will use me a lot."
+
+You can also display variables this way:
+
+.. code-block:: yaml
+
+  - name: My message module
+    debug:
+      msg: "Hello world ! I am host {{ inventory_hostname }}"
+
+Registers
+^^^^^^^^^
+
+Create a file /tmp/valkyrie, and add the string "lenneth" inside, using:
+
+.. code-block:: text
+
+  echo "lenneth" > /tmp/valkyrie
+
+Now, lets use a register to gather this content. Registers are a way to gather data about executed modules. Input data, output data, etc.
+One of the main usages is registers combined with shell or commands, to gather very specific data from the system.
+
+Try:
+
+.. code-block:: yaml
+
+  - name: Get output from a shell command
+    shell: "cat /tmp/valkyrie"
+    register: my_result
+    ignore_errors: True
+
+  - name: Display content of the register
+    debug:
+      msg: "{{ my_result }}"
+
+And when running, output is:
+
+.. code-block:: text
+
+  TASK [debug : Get output from a shell command] **********************************************************************************************************************************************************************************************
+  changed: [management1]
+
+  TASK [debug : My message module] ************************************************************************************************************************************************************************************************************
+  ok: [management1] =>
+    msg:
+      changed: true
+      cmd: cat /tmp/valkyrie
+      delta: '0:00:00.016261'
+      end: '2020-04-17 14:46:04.490684'
+      failed: false
+      rc: 0
+      start: '2020-04-17 14:46:04.474423'
+      stderr: ''
+      stderr_lines: []
+      stdout: lenneth
+      stdout_lines:
+      - lenneth
+
+So, you can use the register to get status (changed: true, so something happens), to get return code (*rc: 0* here), stderr and stdout, if it failed, etc.
+
+For example:
+
+.. code-block:: yaml
+
+  - name: My message module
+    debug:
+      msg: "{{ my_result.stdout }}"
+
+Will display "lenneth".
+
+We are going to use register and debug module to learn generic tasks actions.
+
+Loops
+^^^^^
+
+It is possible to make modules iterate. All possibilities are available here in `loop documentation <https://docs.ansible.com/ansible/latest/user_guide/playbooks_loops.html>`_ .
+
+BlueBanquise rely on two methods: *with_items* and *loop*. *with_items* is considered deprecated by the Ansible team. *loop*, the replacement, is progressively being added into the stack.
+
+First example is with loop:
+
+.. code-block:: yaml
+
+  - name: My message module
+    debug:
+      msg: "Values: {{ item }}"
+    loop:
+       - Blue
+       - Red
+       - Green
+       - Yellow
+
+This will execute this module 4 times, with each time an element of the list given to loop. When using loops in ansible, the variable **item** stores the value of the current loop index.
+
+It is also possible to provide the loop with a list from the inventory, like the one we wrote before:
+
+.. code-block:: yaml
+
+  - name: My message module
+    debug:
+      msg: "Values: {{ item }}"
+    loop: "{{ my_ship.equipment.sidekicks }}"
+
+Loop action can accept advanced filters or patterns. Refer to the Ansible documentation.
+
+with_items works the same way:
+
+.. code-block:: yaml
+
+  - name: My message module
+    debug:
+      msg: "Values: {{ item }}"
+    with_items:
+       - Blue
+       - Red
+       - Green
+       - Yellow
+
+  - name: My message module
+    debug:
+      msg: "Values: {{ item }}"
+    with_items: "{{ my_ship.equipment.sidekicks }}"
+
+
+Conditionals
+^^^^^^^^^^^^
+
+Conditionals are used to skip some modules when not required or optional (or just don't meet a specific condition).
+All information can be found in `conditionals documentation <https://docs.ansible.com/ansible/latest/user_guide/playbooks_conditionals.html>`_ .
+
+Let's re-use our previous register, and display a message only if content is "lenneth":
+
+.. code-block:: yaml
+
+  - name: Get output from a shell command
+    shell: "cat /tmp/valkyrie"
+    register: my_result
+    ignore_errors: True
+
+  - name: Display content of the register
+    debug:
+      msg: "Profile"
+    when:
+      - my_result.stdout == "lenneth"
+
+If content is not "lenneth", you will see:
+
+.. code-block:: text
+
+  TASK [debug : Display content of the register] **********************************************************************************************************************************************************************************************
+  skipping: [management1]
+
+So this part of the task was skipped, because our my_result.stdout does not meet the condition.
+
+Now, let’s combine loop and conditions.
+
+Fill /tmp/valkyrie file with multiple lines:
+
+.. code-block:: text
+
+  echo "freya" > /tmp/valkyrie
+  echo "lenneth" >> /tmp/valkyrie
+  echo "odin" >> /tmp/valkyrie
+  echo "loki" >> /tmp/valkyrie
+
+We are now going to use the stdout_lines of our register, as it is a list containing line by line the output of stdout, so here the content of our file.
+
+.. code-block:: yaml
+
+  - name: Get output from a shell command
+    shell: "cat /tmp/valkyrie"
+    register: my_result
+    ignore_errors: True
+
+  - name: Display content of the register
+    debug:
+      msg: "Profile"
+    loop: "{{my_result.stdout_lines}}"
+    when:
+      - item == "lenneth"
+
+And result should be:
+
+.. code-block:: text
+
+  TASK [debug : Display content of the register] **********************************************************************************************************************************************************************************************
+  skipping: [management1] => (item=freya)
+  ok: [management1] => (item=lenneth) =>
+    msg: Profile
+  skipping: [management1] => (item=odin)
+  skipping: [management1] => (item=loki)
+
+Note that all the items are displayed here.
+
+Last part is to combine conditions. It is possible to stack conditions, considering that the list is interpreted as AND conditions by Ansible.
+
+For example:
+
+.. code-block:: yaml
+
+  - name: Get output from a shell command
+    shell: "cat /tmp/valkyrie"
+    register: my_result
+    ignore_errors: True
+
+  - name: Display content of the register
+    debug:
+      msg: "Profile"
+    loop: "{{my_result.stdout_lines}}"
+    when:
+      - item == "lenneth"
+      - sys_admin_is_master == "yes"  # <<< this is added as an AND with first condition
+
+Now execute playbook with an additional variable as extra vars, first with "no", then with "yes":
+
+.. code-block:: text
+
+  ansible-playbook ... -e sys_admin_is_master=no
+  ansible-playbook ... -e sys_admin_is_master=yes
+
+First time, you get:
+
+.. code-block:: text
+
+  TASK [debug : Display content of the register] **********************************************************************************************************************************************************************************************
+  skipping: [management1] => (item=freya)
+  skipping: [management1] => (item=lenneth)
+  skipping: [management1] => (item=odin)
+  skipping: [management1] => (item=loki)
+
+And second time:
+
+.. code-block:: text
+
+  TASK [debug : Display content of the register] **********************************************************************************************************************************************************************************************
+  skipping: [management1] => (item=freya)
+  ok: [management1] => (item=lenneth) =>
+    msg: Profile
+  skipping: [management1] => (item=odin)
+  skipping: [management1] => (item=loki)
+
+So it acted as a logical AND.
+
+Tags
+^^^^
+
+Tags act like the name: they tag part of the task, or role, so you can execute only this part, or skip it.
+
+For example:
+
+.. code-block:: yaml
+
+  - name: Display content of the register
+    debug:
+      msg: "Les sanglots longs"
+    tags:
+      - first
+
+  - name: Display content of the register
+    debug:
+      msg: "des violons de l'automne"
+    tags:
+      - second
+
+And at execution, use *--tags first,second* to execute both, *--tags second* to execute second only, or *--skip-tags first* that will skip the first one.
+
+Notify
+^^^^^^
+
+Sometime, you may wish that some actions take place at the end of each role, if a module returned a **changed** status.
+Best example: your role is dedicated to a service, and Ansible generate the configuration file using a template.
+You may want that this service is restarted if Ansible detect changes in the file when executing.
+
+Notify will be your friend for such cases.
+
+Create a new directory at root of your role, called **handlers**, and then inside a file called **main.yml**, with the following content:
+
+.. code-block:: yaml
+
+  - name: There was a change
+    debug:
+      msg: "THE FILE WAS CHANGED!! HOW DARE YOU!!"
+
+Note that the name of this task (There was a change) is important and will be targeted by the notify.
+
+Create also a template, called our_file.j2 in templates folder (like handlers above), with the following content:
+
+.. code-block:: text
+
+  {{ my_value }}
+
+Now, in the main task, use this code:
+
+.. code-block:: yaml
+
+  - name: Display message
+    debug:
+      msg: "Hello world"
+
+  - name: Template /tmp/out
+    template:
+      src: "our_file.j2"
+      dest: /tmp/out
+      owner: root
+      group: root
+      mode: 0644
+    notify: There was a change
+
+  - name: Display another message
+    debug:
+      msg: "Hello world again. How do you do by the way ?"
+
+And execute adding an extra var:
+
+.. code-block:: text
+
+  ansible-playbook ... -e my_value=kirk
+
+First time execution, of course, you will see both:
+
+.. code-block:: text
+
+  TASK [debug : Template /tmp/out] ************************************************************************************************************************************************************************************************************
+  changed: [management1]
+
+  ...
+
+  RUNNING HANDLER [debug : There was a change] ************************************************************************************************************************************************************************************************
+  ok: [management1] =>
+    msg: THE FILE WAS CHANGED!! HOW DARE YOU!!
+
+As expected, because there was a change, so the handler was called **at the end of the role**.
+
+Now do the exact same command again.
+
+.. code-block:: text
+
+  TASK [debug : Template /tmp/out] ************************************************************************************************************************************************************************************************************
+  ok: [management1]
+
+Handler was not activated, because there was no changes.
+
+Last test, change captain of the enterprise, Kirk is on a mission.
+
+.. code-block:: text
+
+  ansible-playbook ... -e my_value=spock
+
+And again:
+
+.. code-block:: text
+
+  TASK [debug : Template /tmp/out] ************************************************************************************************************************************************************************************************************
+  changed: [management1]
+
+  ...
+
+  RUNNING HANDLER [debug : There was a change] ************************************************************************************************************************************************************************************************
+  ok: [management1] =>
+    msg: THE FILE WAS CHANGED!! HOW DARE YOU!!
+
+Handler was activated.
+
 If you feel something is missing in this quick Ansible training, please do not hesitate to ask us to add elements.
 
+Time to move on to BlueBanquise stack itself.
