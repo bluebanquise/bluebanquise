@@ -111,11 +111,11 @@ This is not the Ansible standard, but a need for a unified stack.
 2. Internal roles variables, means under the hood variables that user should not consider modifying,
 can be defined in the role vars. Example: packages names, services names, paths, etc.
 
-3. General variables, i.e. not related to an equipment, can be defined in group_vars/all/general_settings/,
+3. General variables, i.e. not related to an equipment_profile, can be defined in group_vars/all/general_settings/,
 in dedicated files or if needed in a new one. When possible, variables should be optional.
 In any cases, they must be documented in the role readme (and if needed provided commented in the example inventories).
 
-4. All variables related to an equipment should go in group_vars/all/all_equipment/.
+4. All variables related to an equipment_profile should go in group_vars/all/all_equipment/ (global) or in group_vars/equipment_X/ with X the equipment profile name (dedicated).
 
 5. All variables containing jinja2 code must be prefix with *j2_* and stored in group_vars/all/j2_variables/.
 j2_ variables are core of the stack, and should be manipulated with care.
@@ -123,8 +123,8 @@ These are intended to be precedence by user only. If needed, theses variables ca
 
 6. Also, consider that some variables are specific in BlueBanquise,
 and do not fully follow the standard rules of Ansible: *Equipment_profile* and *Authentication* dictionaries are good example.
-These dictionaries **must** be set in group_vars/equipment_profile/ folders or in group_vars/all/.
-Any other usage (for example at host_vars level or extra_vars level) will result in a unpredictable situation.
+As stated in 4, these dictionaries **must** be set in group_vars/equipment_X/ folders or in group_vars/all/all_equipment/.
+Any other usage (for example at host_vars level or extra_vars level) will result in a unpredictable situation, as the stack use a random host of these groups to gather equipment_profile data.
 
 ### Miscellaneous
 
