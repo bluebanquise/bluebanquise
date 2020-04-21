@@ -1,0 +1,17 @@
+---
+- name: Converge
+  hosts: all
+
+  vars:
+    enable_services: true
+    start_services: true
+    j2_node_main_network: en0
+    networks:
+        en0:
+          services_ip:
+            log_ip: 127.0.0.1
+
+  tasks:
+    - name: "Include log_client"
+      include_role:
+        name: "log_client"
