@@ -697,7 +697,7 @@ Time to investigate tasks advanced elements.
 Task again
 ----------
 
-As discussed before, all task available modules can be found in the `official documentation <https://docs.ansible.com/ansible/latest/modules/modules_by_category.html>`_ .
+As discussed before, all task available modules can be found in the `Ansible documentation <https://docs.ansible.com/ansible/latest/modules/modules_by_category.html>`_ .
 
 Each of these modules can be combined with general tasks actions. But first, let's define the basic debug module and registers, that will allow us to play more easily with tasks.
 
@@ -720,7 +720,7 @@ You can also display variables this way:
 
   - name: My message module
     debug:
-      msg: "Hello world ! I am the hosts {{ inventory_hostname }}"
+      msg: "Hello world ! I am host {{ inventory_hostname }}"
 
 Registers
 ^^^^^^^^^
@@ -770,7 +770,7 @@ And when running, output is:
       stdout_lines:
       - lenneth
 
-So, you can use the register to get status (changed: true, so something happens), to get return code (rc at 0 here), stderr and stdout, if it failed, etc.
+So, you can use the register to get status (changed: true, so something happens), to get return code (*rc: 0* here), stderr and stdout, if it failed, etc.
 
 For example:
 
@@ -782,14 +782,14 @@ For example:
 
 Will display "lenneth".
 
-We are going to uses register and debug module to learn generic tasks actions.
+We are going to use register and debug module to learn generic tasks actions.
 
 Loops
 ^^^^^
 
 It is possible to make modules iterate. All possibilities are available here in `loop documentation <https://docs.ansible.com/ansible/latest/user_guide/playbooks_loops.html>`_ .
 
-BlueBanquise rely on two methods: *with_items* and *loop*. *with_items* is considered replaced by the Ansible team, but since *loop*, the replacement, does not cover all the abilities of *with_items*, it is still widely used.
+BlueBanquise rely on two methods: *with_items* and *loop*. *with_items* is considered deprecated by the Ansible team. *loop*, the replacement, is progressively being added into the stack.
 
 First example is with loop:
 
@@ -804,9 +804,9 @@ First example is with loop:
        - Green
        - Yellow
 
-This will execute this module 4 times, with each time an element of the list gives to loop. When using loops in ansible, the variable **item** store the value of the current loop index.
+This will execute this module 4 times, with each time an element of the list given to loop. When using loops in ansible, the variable **item** stores the value of the current loop index.
 
-It is also possible to provide loop a list from the inventory, like the one we made before:
+It is also possible to provide the loop with a list from the inventory, like the one we wrote before:
 
 .. code-block:: yaml
 
@@ -815,7 +815,7 @@ It is also possible to provide loop a list from the inventory, like the one we m
       msg: "Values: {{ item }}"
     loop: "{{ my_ship.equipment.sidekicks }}"
 
-Loop action can accept advanced filters or patterns. Have a look in the official documentation.
+Loop action can accept advanced filters or patterns. Refer to the Ansible documentation.
 
 with_items works the same way:
 
@@ -835,11 +835,6 @@ with_items works the same way:
       msg: "Values: {{ item }}"
     with_items: "{{ my_ship.equipment.sidekicks }}"
 
-So why not using loop all the time?
-
-Issue is when you need to use a conditional (see below) and that condition is used to check if the variable is defined.
-with_items will execute after the when, while loop execute before, and so could fail.
-There are ways to bypass this issue (using default([])), and BlueBanquise is now considering to upgrade to loop.
 
 Conditionals
 ^^^^^^^^^^^^
@@ -958,7 +953,7 @@ And second time:
   skipping: [management1] => (item=odin)
   skipping: [management1] => (item=loki)
 
-So it acted as an AND.
+So it acted as a logical AND.
 
 Tags
 ^^^^
@@ -1002,7 +997,7 @@ Create a new directory at root of your role, called **handlers**, and then insid
 
 Note that the name of this task (There was a change) is important and will be targeted by the notify.
 
-Create also a template, called our_file.j2 in templates folder, with the following content:
+Create also a template, called our_file.j2 in templates folder (like handlers above), with the following content:
 
 .. code-block:: text
 
@@ -1012,7 +1007,7 @@ Now, in the main task, use this code:
 
 .. code-block:: yaml
 
-  - name: Display content of the register
+  - name: Display message
     debug:
       msg: "Hello world"
 
@@ -1025,7 +1020,7 @@ Now, in the main task, use this code:
       mode: 0644
     notify: There was a change
 
-  - name: Display content of the register
+  - name: Display another message
     debug:
       msg: "Hello world again. How do you do by the way ?"
 
