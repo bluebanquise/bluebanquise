@@ -1,0 +1,12 @@
+---
+- name: Converge
+  hosts: all
+
+  vars:
+    enable_services: true
+    start_services: true
+
+  tasks:
+    - name: "Include log_server"
+      include_role:
+        name: "log_server"
