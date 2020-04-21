@@ -1,0 +1,24 @@
+---
+- name: Converge
+  hosts: all
+
+  vars:
+    users_basic:
+      general_parameters:
+        home: /home
+        shell: /bin/bash
+      active_users: # Active users
+        johnnykeats:
+          uid: 1078
+          gid: 1078
+          comment: dream all the day
+          password: $6$UMam7yZ5oa0w9Q22$vM1KCPNH98EbQpX4P0n7SqEv8CQSO3OsQVztkQ82eXZaYCZzVhqWdelawqPVVcf8nThhFc7nwG6Hn8zO1DXT11
+      deactivated_users: # Old users that should not be on the cluster anymore
+        oxedions:
+          uid: 1077
+          gid: 1077
+          password: $6$UMam7yZ5oa0w9Q22$vM1KCPNH98EbQpX4P0n7SqEv8CQSO3OsQVztkQ82eXZaYCZzVhqWdelawqPVVcf8nThhFc7nwG6Hn8zO1DXT11
+  tasks:
+    - name: "Include users_basic"
+      include_role:
+        name: "users_basic"

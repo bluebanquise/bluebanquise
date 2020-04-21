@@ -1,0 +1,21 @@
+---
+# This is an example playbook to execute Ansible tests.
+
+- name: Verify
+  hosts: all
+
+  tasks:
+    - name: Check if chronyd is installed
+      package_facts:
+        manager: auto
+    - name: Assert chrony is installed
+      assert:
+        that: "'chrony' in ansible_facts.packages"
+
+    - name: Ansible fact - ansible_date_time.iso8601
+      debug:
+        msg: "Timestamp format: {{ ansible_date_time }}"
+
+    - name: assert timezone to Europe/Paris
+      assert:
+        that: "'CEST' in ansible_date_time.tz"

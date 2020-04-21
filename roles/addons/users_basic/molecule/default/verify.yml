@@ -1,0 +1,26 @@
+---
+# This is an example playbook to execute Ansible tests.
+
+- name: Verify
+  hosts: all
+  tasks:
+  - name: Check for users
+    with_items:
+      - johnnykeats
+    changed_when: false
+    command: grep {{ item }} -q /etc/passwd
+
+  - name: Check if user exists
+    shell: |
+      set -o pipefail
+      /usr/bin/getent group | awk -F":" '{print $1}'
+    register: etc_groups
+    changed_when: false
+
+  - name: debug
+    debug:
+      var: etc_groups
+
+  - name: assert group exists
+    assert:
+      that: "'johnnykeats' in etc_groups.stdout_lines"

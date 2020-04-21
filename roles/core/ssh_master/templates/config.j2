@@ -1,9 +1,13 @@
+#jinja2: lstrip_blocks: "True"
 {% import "macros/network.j2" as macro_network with context %}
 {# Macro to avoid redundancy #}
 {% macro write_host(host,macro_node_main_network) %}
 Host {{host}}
+    {% if security.ssh.hostkey_checking is not defined or
+          security.ssh.hostkey_checking == false %}
     StrictHostKeyChecking no
     UserKnownHostsFile=/dev/null
+    {% endif %}
     Hostname %h-{{macro_node_main_network}}
 {% endmacro %}
 #### Blue Banquise file ####
