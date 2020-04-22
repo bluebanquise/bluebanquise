@@ -18,6 +18,25 @@
   set_fact:
     baseurl_prefix: "http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/{{ equipment_profile['operating_system']['distribution'] }}/$releasever/$basearch/"
 
+- name: Force $releasever
+  template:
+    src: releasever.j2
+    dest: /etc/dnf/vars/releasever
+    owner: root
+    group: root
+    mode: 0644
+  when: equipment_profile.operating_system.repositories_releasever is defined
+  tags:
+    - template
+
+- name: Cleanup $releasever
+  file:
+    path: /etc/dnf/vars/releasever
+    state: absent
+  when: equipment_profile.operating_system.repositories_releasever is not defined
+  tags:
+    - template
+
 - name: Setting repositories
   yum_repository:
     name: "{{ item.name | default(item) }}"
