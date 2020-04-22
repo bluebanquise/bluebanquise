@@ -21,9 +21,25 @@ equipment_profile:
     autopart --type=plain --fstype=ext4 --nohome
 
   operating_system:
-    distribution: centos # centos, redhat, debian, ubuntu, opensuse, etc.
-    distribution_major_version: 8
-    distribution_version: 8.0
+    # Repositories and PXE roles will rely on these data.
+    #
+    # distribution and distribution_major_version are mandatory, as of hardware.cpu.architecture below.
+    # distribution_version, environment, server_repository_path and client_repository_path are optionals.
+    # All repositories start with http://ip/repositories/
+    # Second part of the path is calculated this way:
+    # If {client|server}_repository_path is defined, it will be used above all.
+    # Else path will be:
+    #   / environment / distribution / distribution_(major_)version / hardware.cpu.architecture /
+    #   1. environment is optional, and will only be added if defined
+    #   2. if distribution_version is defined, it will be used
+    #   3. if distribution_version is not defined, distribution_major_version will be used
+
+    distribution: centos            # (mandatory) centos, redhat, debian, ubuntu, opensuse, etc.
+    distribution_major_version: 8   # (mandatory) major version
+    distribution_version: 8.0       # (optional)  minor version
+    environment:                    # (optional)  environment (production, test, etc.)
+    server_repository_path:         # (optional)  manual override
+    client_repository_path:         # (optional)  manual override
 
   equipment_type: none  # If server, a pxe profile will be generated
 
