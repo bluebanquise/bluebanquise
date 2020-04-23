@@ -148,6 +148,18 @@ Note also that if you update configuration on management1, it is recommanded to 
 
 Please refer to the pxe_stack role dedicated section in this documentation for more information on the bootset usage.
 
+SSH public key
+--------------
+
+In order to log into the remote nodes without giving the password, check that
+the ssh public key defined in authentication.yml in your inventory match your
+management1 public key. If not, update it. Remember to run the pxe_stack role
+after updating the configuration.
+
+.. code-block:: bash
+
+  ansible-playbook /etc/bluebanquise/playbooks/management1.yml --tags pxe_stack
+
 OS deployment
 -------------
 
@@ -160,9 +172,8 @@ Apply other nodes configuration
 
 Applying configuration on other nodes is simple.
 
-Ensure first you can ssh passwordless on each of the freshly deployed nodes. If not, check your ssh public key in authentication.yml in the inventory match your management1 public key, update it, and manually spread your key for this time on remote hosts using ssh-copy-id.
-
-If yes, copy example playbooks:
+Ensure first you can ssh passwordless on each of the freshly deployed nodes. If
+yes, copy example playbooks:
 
 .. code-block:: bash
 
