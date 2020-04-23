@@ -14,9 +14,11 @@ set eq-distribution-major-version {{hostvars[groups[item][0]]['equipment_profile
 set eq-distribution-version {{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution_version']}}
 set eq-console {{hostvars[groups[item][0]]['equipment_profile']['console']}}
 set eq-kernel-parameters {{hostvars[groups[item][0]]['equipment_profile']['kernel_parameters']}}
+set eq-repositories-releasever {{hostvars[groups[item][0]]['equipment_profile']['operating_system']['repositories_releasever'] | default('${eq-distribution-major-version}')}}
 
 # Dynamic variables
-set repository-root http://${next-server}/repositories/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/
+set images-root http://${next-server}/repositories/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/
+set repository-root http://${next-server}/repositories/${eq-distribution}/${eq-repositories-releasever}/${eq-architecture}/
 set kickstart-path http://${next-server}/preboot_execution_environment/equipment_profiles//${eq-equipment-profile}.kickstart.cfg
 
 echo |
