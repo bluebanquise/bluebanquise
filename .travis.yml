@@ -18,6 +18,12 @@ install:
 
 script:
   # Run tests.
-  - cd roles/core
-  - cd time && molecule test && molecule idempotence
-  - cd ../dns_server && molecule test && molecule idempotence
+  - cd roles/core/display_tuning && molecule test
+  - cd ../dns_client && molecule test
+  - cd ../dns_server && molecule test
+  - cd ../log_client && molecule test
+  - cd ../log_server && molecule test
+  - cd ../nic && molecule test
+  - cd ../time && molecule test
+  - cd ../../addons/clustershell && molecule test
+  - cd ../users_basic && molecule test
