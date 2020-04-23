@@ -3,21 +3,22 @@
   hosts: all
 
   vars:
-    - network_interfaces:
-        eth0:
-          ip4: "{{ hostvars[inventory_hostname]['ansible_eth0'].ipv4.address }}"
-        eth1:
-          ip4: "{{ hostvars[inventory_hostname]['ansible_eth1'].ipv4.address }}"
-        eth2:
-          ip4: "{{ hostvars[inventory_hostname]['ansible_eth2'].ipv4.address }}"
-          network:
-            netmask: "{{ hostvars[inventory_hostname]['ansible_eth2'].ipv4.netmask }}"
+    network_interfaces:
+      eth0:
+        ip4: "{{ hostvars[inventory_hostname]['ansible_eth0'].ipv4.address }}"
+      eth1:
+        ip4: "{{ hostvars[inventory_hostname]['ansible_eth1'].ipv4.address }}"
+        network: testprefix
+      eth2:
+        ip4: "{{ hostvars[inventory_hostname]['ansible_eth2'].ipv4.address }}"
+        network: testnetmask
+    networks:
+      testprefix:
+        prefix: 16
+      testnetmask:
+        netmask: "{{ hostvars[inventory_hostname]['ansible_eth2'].ipv4.netmask }}"
 
   tasks:
-    - name: debug network_interfaces for information
-      debug:
-        var: network_interfaces
-
     - name: "Include nic"
       include_role:
         name: "nic"

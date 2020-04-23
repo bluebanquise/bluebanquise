@@ -13,29 +13,24 @@
     assert:
       that: ifcfg_list.matched == 3
 
-  - name: cat /etc/sysconfig/network-scripts/ifcfg-XX files
-    command: cat /etc/sysconfig/network-scripts/ifcfg-eth0
-    changed_when: false
-    register: cat_out
-    with_items:
-      - eth0
-      - eth1
-      - eth2
-
-  - name: debug
-    debug:
-      var: cat_out
-
-  - name: assert eth0 and eth1
+  - name: assert eth0
     lineinfile:
-      path: "/etc/sysconfig/network-scripts/ifcfg-{{ item }}"
-      line: "IPADDR={{ hostvars[inventory_hostname]['ansible_' + item].ipv4.address }}"
+      path: "/etc/sysconfig/network-scripts/ifcfg-eth0"
+      line: "IPADDR={{ hostvars[inventory_hostname]['ansible_eth0'].ipv4.address }}"
+      state: absent
+    register: presence
+    failed_when: presence is changed
+
+  - name: assert eth1
+    lineinfile:
+      path: /etc/sysconfig/network-scripts/ifcfg-eth1
+      line: "{{ item }}"
       state: present
     register: presence
     failed_when: presence is changed
     with_items:
-      - eth0
-      - eth1
+      - 'IPADDR={{ hostvars[inventory_hostname]["ansible_eth1"].ipv4.address }}'
+      - 'PREFIX=16'
 
   - name: assert eth2
     lineinfile:
@@ -45,5 +40,5 @@
     register: presence
     failed_when: presence is changed
     with_items:
-      - IPADDR="{{ hostvars[inventory_hostname]['ansible_eth0'].ipv4.address }}"
-      - NETMASK="{{ hostvars[inventory_hostname]['ansible_eth0'].ipv4.netmask }}"
+      - 'IPADDR={{ hostvars[inventory_hostname]["ansible_eth2"].ipv4.address }}'
+      - 'NETMASK={{ hostvars[inventory_hostname]["ansible_eth2"].ipv4.netmask }}'
