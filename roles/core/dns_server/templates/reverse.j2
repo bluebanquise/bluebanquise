@@ -2,6 +2,7 @@
 ;## {{ansible_managed}}
 
 $TTL 86400
+$ORIGIN in-addr.arpa.
 @ IN SOA  {{inventory_hostname}}.{{domain_name}}. root.{{domain_name}}. (
   2011071001  ;Serial
   3600        ;Refresh
@@ -10,7 +11,6 @@ $TTL 86400
   86400       ;Minimum TTL
 )
 @ IN NS {{inventory_hostname}}.{{domain_name}}.
-@ IN PTR {{domain_name}}.
 
 {% for host in groups['all'] %}
 {% if hostvars[host]['network_interfaces'] is defined and not none %}
@@ -36,12 +36,3 @@ $TTL 86400
 {% endif %}
 {% endif %}
 {% endfor %}
-
-;## External hosts
-
-{% if external_hosts is defined and external_hosts is not none and external_hosts %}
-{% for host in external_hosts %}
-{{external_hosts[host].split('.')[3]}}.{{external_hosts[host].split('.')[2]}}.{{external_hosts[host].split('.')[1]}}.{{external_hosts[host].split('.')[0]}} IN PTR {{host}}.
-{% endfor %}
-{% endif %}
-
