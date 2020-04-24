@@ -4,9 +4,9 @@ nfs_settings:
 
 nfs:
   softwares:
-    mount: /opt/softwares                       # What path server should export
-    export: /opt/softwares                      # Which path clients should mount this NFS
-    server: management1                             # The server that export this storage space
+    mount: /opt/softwares                       # Which path clients should mount this NFS
+    export: /opt/softwares                      # What path server should export
+    server: management1                         # The server that export this storage space
     clients_groups:                             # Can be an equipment group, or a main group (mg), or any other ansible group
       - mg_computes
       - mg_logins
