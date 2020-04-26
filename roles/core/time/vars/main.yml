@@ -5,6 +5,7 @@ packages_to_install:
   ubuntu:
     _18:
       - chrony
+      - tzdata
   redhat:
     _7:
       - chrony
