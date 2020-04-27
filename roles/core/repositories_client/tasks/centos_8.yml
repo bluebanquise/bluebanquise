@@ -1,17 +1,19 @@
 ---
-
-- name: Disable CentOS distro repositories
+- name: Disable CentOS Extras repository
+  # In BlueBanquise, the CentOS 8 system repositories are installed with the
+  # special repository 'os', which splits to BaseOS and AppStream.
+  # The repository Extras is enabled by default in CentOS but is not shipped
+  # with the ISO DVD, thus we disable it if 'os' is configured.
+  # If you need to configure the Extras repository, consider adding it as you
+  # would add any other repository to the configuration. See the documentation
+  # for details on how to proceed.
   ini_file:
-    path: "/etc/yum.repos.d/{{ item.file }}.repo"
-    section: "{{ item.section }}"
+    path: "/etc/yum.repos.d/CentOS-Extras.repo"
+    section: "extras"
     option: enabled
     value: '0'
     no_extra_spaces: yes
-  with_items:
-    - { file: CentOS-AppStream, section: AppStream }
-    - { file: CentOS-Base, section: BaseOS }
-    - { file: CentOS-Extras, section: extras }
-  when: remove_distro_repositories is defined and remove_distro_repositories
+  when: ( 'os' in repositories ) or ( item.name is defined and item.name == 'os' )
   notify: yum-clean-metadata
 
 - name: Set baseurl prefix
@@ -30,14 +32,27 @@
   with_items: "{{ repositories | union(external_repositories|default([])) }}"
   when: ( item != 'os' ) and ( item.name is not defined or item.name != 'os' )
 
-- name: "Setting repositories os ({{ item.1 }})"
+- name: "Setting OS repositories"
+  # CentOS configure BaseOS in /etc/yum.repos.d/CentOS-Base.repo and AppStream
+  # in /etc/yum.repos.d/Centos-AppStream.repo. These are the operating system
+  # repositories, thus installed with the special repository 'os' in
+  # BlueBanquise.
   yum_repository:
-    name: "{{ item.1 }}"
-    description: "{{ item.1 }} gen by Ansible"
-    baseurl: "{{ item.0.baseurl | default(baseurl_prefix + 'os/' + item.1) }}"
-    enabled: "{{ item.0.enabled | default(1) }}"
-    gpgcheck: "{{ item.0.gpgcheck | default(0) }}"
-    gpgkey: "{{ item.0.gpgkey | default(omit) }}"
-    proxy: "{{ item.0.proxy | default(omit) }}"
-  loop: "{{ repositories | product(['AppStream', 'BaseOS']) | list }}"
-  when: ( item.0 == 'os' ) or ( item.0.name is defined and item.0.name == 'os' )
+    name: "{{ item.repoid }}"
+    description: "{{ item.repoid }} gen by Ansible"
+    baseurl: "{{ item.baseurl | default(baseurl_prefix + 'os/' + item.repoid) }}"
+    file: "{{ item.file }}"
+    enabled: "{{ item.enabled | default(1) }}"
+    gpgcheck: "{{ item.gpgcheck | default(0) }}"
+    gpgkey: "{{ item.gpgkey | default(omit) }}"
+    proxy: "{{ item.proxy | default(omit) }}"
+  loop:
+  # Combine BaseOS and AppStream with 'os' parameters if any. Otherwise, this
+  # will configure BaseOS and AppStream with default values.
+    - "{{ repositories|selectattr('name', 'defined')
+          |selectattr('name', 'match', 'os')|list
+          |combine({'file':'CentOS-Base','repoid':'BaseOS'}) }}"
+    - "{{ repositories|selectattr('name', 'defined')
+          |selectattr('name', 'match', 'os')|list
+          |combine({'file':'CentOS-AppStream','repoid':'AppStream'}) }}"
+  when: ( 'os' in repositories ) or ( item.name is defined and item.name == 'os' )

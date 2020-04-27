@@ -1,5 +1,4 @@
 ---
-
 - name: Set baseurl prefix
   set_fact:
     baseurl_prefix: "http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/{{ equipment_profile['operating_system']['distribution'] }}/{{ equipment_profile['operating_system']['distribution_version'] }}/{{ equipment_profile['hardware']['cpu']['architecture'] }}/"
@@ -16,14 +15,22 @@
   with_items: "{{ repositories | union(external_repositories|default([])) }}"
   when: ( item != 'os' ) and ( item.name is not defined or item.name != 'os' )
 
-- name: "Setting repositories os ({{ item.1 }})"
+- name: "Setting OS repositories"
   yum_repository:
-    name: "{{ item.1 }}"
-    description: "{{ item.1 }} gen by Ansible"
-    baseurl: "{{ item.0.baseurl | default(baseurl_prefix + 'os/' + item.1) }}"
-    enabled: "{{ item.0.enabled | default(1) }}"
-    gpgcheck: "{{ item.0.gpgcheck | default(0) }}"
-    gpgkey: "{{ item.0.gpgkey | default(omit) }}"
-    proxy: "{{ item.0.proxy | default(omit) }}"
-  loop: "{{ repositories | product(['AppStream', 'BaseOS']) | list }}"
-  when: ( item.0 == 'os' ) or ( item.0.name is defined and item.0.name == 'os' )
+    name: "{{ item.repoid }}"
+    description: "{{ item.repoid }} gen by Ansible"
+    baseurl: "{{ item.baseurl | default(baseurl_prefix + 'os/' + item.repoid) }}"
+    enabled: "{{ item.enabled | default(1) }}"
+    gpgcheck: "{{ item.gpgcheck | default(0) }}"
+    gpgkey: "{{ item.gpgkey | default(omit) }}"
+    proxy: "{{ item.proxy | default(omit) }}"
+  loop:
+  # Combine BaseOS and AppStream with 'os' parameters if any. Otherwise, this
+  # will configure BaseOS and AppStream with default values.
+    - "{{ repositories|selectattr('name', 'defined')
+          |selectattr('name', 'match', 'os')|list
+          |combine({'repoid':'BaseOS'}) }}"
+    - "{{ repositories|selectattr('name', 'defined')
+          |selectattr('name', 'match', 'os')|list
+          |combine({'repoid':'AppStream'}) }}"
+  when: ( 'os' in repositories ) or ( item.name is defined and item.name == 'os' )
