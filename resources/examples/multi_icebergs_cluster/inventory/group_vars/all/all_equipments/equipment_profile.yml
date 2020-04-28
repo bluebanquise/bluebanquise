@@ -24,6 +24,8 @@ equipment_profile:
     distribution: centos # centos, redhat, debian, ubuntu, opensuse, etc.
     distribution_major_version: 8
     distribution_version: 8.0
+    # Overwrite the default $releasever on the target
+    #repositories_releasever: "8.0"
 
   equipment_type: none  # If server, a pxe profile will be generated
 
