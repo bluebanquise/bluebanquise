@@ -46,21 +46,8 @@ Boot images include the installer system which starts the deployment after PXE
 boot, while packages repositories include the software that will be installed
 on the systems.
 
-Boot images repositories structure follows a specific pattern and includes the
-minor release version in the path:
-
-.. code-block:: bash
-
-                  Distribution    Version   Architecture    Repository
-                        +             +       +               +
-                        |             +--+    |               |
-                        +-----------+    |    |    +----------+
-                                    |    |    |    |
-                                    v    v    v    v
-       /var/www/html/repositories/centos/7.6/x86_64/os/
-
-Packages repositories structure follows a specific pattern, which defaults to
-the major release version in the path:
+Boot images and packages repositories structure follows a specific pattern,
+which defaults to the major release version in the path:
 
 .. code-block:: bash
 
@@ -89,15 +76,15 @@ Download:
 
 **If on standard system:**
 
-Mount iso and copy content to web server directory: (replace centos/7.6 by
-centos/8.0, redhat/8.0, redhat/7.7, etc depending of your system)
+Mount iso and copy content to web server directory: (replace centos/7 by
+centos/8, redhat/8, redhat/7, etc depending of your system)
 
 .. code-block:: bash
 
-  mkdir -p /var/www/html/repositories/centos/7.6/x86_64/os/
+  mkdir -p /var/www/html/repositories/centos/7/x86_64/os/
   mount CentOS-7-x86_64-Everything-1810.iso /mnt
-  cp -a /mnt/* /var/www/html/repositories/centos/7.6/x86_64/os/
-  restorecon -Rv /var/www/html/repositories/centos/7.6/x86_64/os
+  cp -a /mnt/* /var/www/html/repositories/centos/7/x86_64/os/
+  restorecon -Rv /var/www/html/repositories/centos/7/x86_64/os
 
 **If in test VM:**
 
@@ -105,20 +92,12 @@ Simply mount iso from /dev/cdrom to save space:
 
 .. code-block:: bash
 
-  mkdir -p /var/www/html/repositories/centos/7.6/x86_64/os/
-  mount /dev/cdrom /var/www/html/repositories/centos/7.6/x86_64/os/
+  mkdir -p /var/www/html/repositories/centos/7/x86_64/os/
+  mount /dev/cdrom /var/www/html/repositories/centos/7/x86_64/os/
 
 Now, create first repository manually. Procedure is different between Centos 7 and 8.
 
 **Centos/RHEL 7:**
-
-Copy the packages to the web server directory.
-
-.. code-block:: bash
-
-  mkdir -p /var/www/html/repositories/centos/7/x86_64/os/
-  cp -a /mnt/{Packages,repodata} /var/www/html/repositories/centos/7/x86_64/os/
-  restorecon -Rv /var/www/html/repositories/centos/7/x86_64/os/
 
 Create file */etc/yum.repos.d/os.repo* with the following content:
 
@@ -131,14 +110,6 @@ Create file */etc/yum.repos.d/os.repo* with the following content:
   enabled=1
 
 **Centos/RHEL 8:**
-
-Copy the packages to the web server directory.
-
-.. code-block:: bash
-
-  mkdir -p /var/www/html/repositories/centos/8/x86_64/os/
-  cp -a /mnt/{BaseOS,AppStream} /var/www/html/repositories/centos/8/x86_64/os/
-  restorecon -Rv /var/www/html/repositories/centos/8/x86_64/os/
 
 Create file */etc/yum.repos.d/BaseOS.repo* with the following content:
 

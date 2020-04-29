@@ -9,7 +9,6 @@ equipment_profile:
   operating_system:
     distribution: centos
     distribution_major_version: 7
-    distribution_version: 7.6
 
   equipment_type: server
 

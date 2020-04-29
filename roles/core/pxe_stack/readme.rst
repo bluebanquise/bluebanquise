@@ -4,14 +4,18 @@ PXE Stack
 Description
 ^^^^^^^^^^^
 
-This role provides the whole PXE stack. It is a key feature of the stack (and we are prood of it :-D).
+This role provides the whole PXE stack. It is a key feature of the stack (and
+we are proud of it :-D).
 
 Instructions
 ^^^^^^^^^^^^
 
-This role will deploy all the needed files, binaries, and scripts to deploy remote hosts using PXE (or even USB and CD boot).
+This role will deploy all the needed files, binaries, and scripts to deploy
+remote hosts using PXE (or even USB and CD boot).
 
-The role take place just after the dhcp in the PXE deployment, and will configure all the iPXE chain needed after dhcp provided hosts with next-server ip and filename to use.
+The role takes place just after the dhcp in the PXE deployment, and will
+configure all the iPXE chain needed after dhcp provided hosts with next-server
+ip address and filename to use.
 
 **Files location**
 """"""""""""""""""
@@ -31,9 +35,14 @@ The role take place just after the dhcp in the PXE deployment, and will configur
 
 This role will rely on multiple parts of the inventory, and is probably the most "invasive" role of the whole stack.
 
-* equipment_profile dictionarries are used for each equipment_profile group. All boot confiuration is made relying on it (operating system, cpu architecture, console, kernel parameters, etc.). It is recommanded to ensure coherency of the equipment_profile files.
-* authentication dictionarry is used to provide root password and default ssh authorized key.
-* hosts **network_interfaces** dedicated variables, to be able to force static ip at kernel boot.
+* equipment_profile dictionaries are used for each equipment_profile group. All
+  boot configuration is made relying on it (operating system, cpu architecture,
+  console, kernel parameters, etc.). It is recommanded to ensure coherency of
+  the equipment_profile files.
+* authentication dictionary is used to provide root password and default ssh
+  authorized key.
+* hosts **network_interfaces** dedicated variables, to be able to force static
+  ip address at kernel boot.
 
 **bootset usage**
 """""""""""""""""
@@ -147,6 +156,7 @@ To be done
 Changelog
 ^^^^^^^^^
 
+* 1.1.2: Add support of major distribution version. Bruno <devel@travouillon.fr>
 * 1.1.1: bootset.py refactoring. Adrien Ribeiro <adrien.ribeiro@atos.net>
 * 1.1.0: Rewamped the whole role. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.2: Add Ubuntu 18.04 compatibility. johnnykeats <johnny.keats@outlook.com>
