@@ -14,7 +14,6 @@ equipment_profile:
   operating_system:
     distribution: centos
     distribution_major_version: 8
-    distribution_version: 8.0
 
   equipment_type: server
 
