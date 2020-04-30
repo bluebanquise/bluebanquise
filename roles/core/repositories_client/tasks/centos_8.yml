@@ -18,7 +18,7 @@
 
 - name: Set baseurl prefix
   set_fact:
-    baseurl_prefix: "http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/{{ equipment_profile['operating_system']['distribution'] }}/$releasever/$basearch/"
+    baseurl_prefix: "http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/$environment/{{ equipment_profile['operating_system']['distribution'] }}/$releasever/$basearch/"
 
 - name: Force $releasever
   template:
@@ -36,6 +36,16 @@
     path: /etc/dnf/vars/releasever
     state: absent
   when: equipment_profile.operating_system.repositories_releasever is not defined
+  tags:
+    - template
+
+- name: Set $environment
+  template:
+    src: environment.j2
+    dest: /etc/yum/vars/environment
+    owner: root
+    group: root
+    mode: 0644
   tags:
     - template
 

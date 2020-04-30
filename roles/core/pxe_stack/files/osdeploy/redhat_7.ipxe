@@ -12,8 +12,8 @@ echo | > Operating system target: ${eq-distribution} ${eq-distribution-version} 
 echo | > Console: ${eq-console}
 echo | > Additional kernel parameters: ${eq-kernel-parameters} ${dedicated-kernel-parameters}
 echo | > Deployment server: ${next-server}
-echo | > Target images: repositories/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/
-echo | > Target repos: repositories/${eq-distribution}/${eq-repositories-releasever}/${eq-architecture}/
+echo | > Target images: repositories/${eq-repositories-environment}/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/
+echo | > Target repos: repositories/${eq-repositories-environment}/${eq-distribution}/${eq-repositories-releasever}/${eq-architecture}/
 echo | > Target kickstart: ${eq-equipment-profile}.kickstart.cfg
 echo |
 echo | Loading linux ...
