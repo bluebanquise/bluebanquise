@@ -26,6 +26,31 @@
   tags:
     - package
 
+# Master DNS is the dns_ip of primary management network
+# (management_network_naming + '1-1')
+- name: Set master DNS server - Get DNS IP
+  set_fact:
+    dns_master: "{{ networks[management_network_naming+'1-1'].services_ip.dns_ip }}"
+  when:
+    - "dns_master is not defined"
+    - "networks[j2_node_main_network].services_ip.dns_ip is defined"
+
+- name: Assert dns_master is defined
+  assert:
+    that:
+      - dns_master is defined
+    fail_msg: "'dns_master' must be defined. Please ensure that either 'dns_master' or
+              networks[{{ management_network_naming }}1-1].services_ip.dns_ip is
+              defined and contains a valid IP address."
+
+# If dns_ip is a list, pick the first value as master DNS
+- name: Set master DNS server - Pick first element of dns_ip
+  set_fact:
+    dns_master: "{{ dns_master | first }}"
+  when:
+    - "dns_master is iterable"
+    - "dns_master is not string"
+
 - name: Create needed directory >> /var/named
   file:
     path: /var/named
@@ -43,25 +68,9 @@
   tags:
     - template
 
-- name: Template >> /var/named/forward
-  template:
-    src: forward.j2
-    dest: /var/named/forward
-    owner: root
-    group: root
-    mode: 0644
-  notify: Restart dns services
-  tags:
-    - template
-
-- name: Template >> /var/named/reverse
-  template:
-    src: reverse.j2
-    dest: /var/named/reverse
-    owner: root
-    group: root
-    mode: 0644
-  notify: Restart dns services
+- name: Configure Master DNS
+  include_tasks: master.yml
+  when: "dns_master in ansible_all_ipv4_addresses"
   tags:
     - template
 
