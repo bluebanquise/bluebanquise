@@ -295,16 +295,22 @@ Now check again:
 
 Same apply for all equipment_profile parameters. You define a global one in default, and then tune it for each equipment group.
 
-**IMPORTANT**: equipment_profile variable is not standard. It is **STRICTLY FORBIDDEN** to tune it outside default (group_vars/all/all_equipments/equipment_profile.yml) or an equipment group (group_vars/equipment_*). For example, you cannot create a custom group and define some equipment_profile parameters for this group. If you really need to do that, add more equipment groups and tune this way. If you do not respect this rule, unexpected behavior will happen during configuration deployment.
+**IMPORTANT**: equipment_profile variable is not standard. It is **STRICTLY FORBIDDEN** to tune it outside default (group_vars/all/all_equipment/equipment_profile.yml) or an equipment group (group_vars/equipment_*). For example, you cannot create a custom group and define some equipment_profile parameters for this group. If you really need to do that, add more equipment groups and tune this way. If you do not respect this rule, unexpected behavior will happen during configuration deployment.
 
 Authentication
 ^^^^^^^^^^^^^^
 
 Authentication file allows to define default root password for all nodes, and default public ssh keys lists.
 
+To generate an sha512 password, use the following command (python >3.3):
+
+.. code-block:: text
+
+  python -c 'import crypt,getpass; print(crypt.crypt(getpass.getpass(), crypt.mksalt(crypt.METHOD_SHA512)))'
+
 We need to ensure our management1 node ssh public key is set here.
 
-Get the content of /root/.ssh/id_ras.pub and add it in this file. At the same time, **remove the ssh key provided here as example**.
+Get the content of /root/.ssh/id_rsa.pub and add it in this file. At the same time, **remove the ssh key provided here as example**.
 
 Review groups parameters
 ------------------------
@@ -316,4 +322,3 @@ If you prefer, you can copy the whole group_vars/all/all_equipment/equipment_pro
 Once done, configuration is ready.
 
 It is time to deploy configuration on management1.
-
