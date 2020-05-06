@@ -70,7 +70,7 @@
 
 - name: Configure Master DNS
   include_tasks: master.yml
-  when: "dns_master in ansible_all_ipv4_addresses"
+  when: "dns_master in (network_interfaces | json_query('*.ip4'))"
   tags:
     - template
 

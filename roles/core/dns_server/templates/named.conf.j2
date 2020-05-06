@@ -2,6 +2,8 @@
 #### Blue Banquise file ####
 ## {{ansible_managed}}
 
+{% set inventory_all_ipv4_addresses = network_interfaces | json_query('*.ip4') %}
+
 options {
   listen-on port 53 {
     127.0.0.1;
@@ -11,10 +13,10 @@ options {
     {% if dns_slaves is defined %}
       {% set addresses = addresses|union(dns_slaves) %}
     {% endif %}
-    {% if addresses is string and addresses in ansible_all_ipv4_addresses %}
+    {% if addresses is string and addresses in inventory_all_ipv4_addresses %}
     {{ addresses }};
     {% else %}
-      {% for address in (addresses|intersect(ansible_all_ipv4_addresses)) %}
+      {% for address in (addresses|intersect(inventory_all_ipv4_addresses)) %}
     {{ address }};
       {% endfor %}
     {% endif %}
@@ -73,7 +75,7 @@ zone "." IN {
 };
 
 {# Is the host the master DNS? #}
-{% if dns_master in ansible_all_ipv4_addresses %}
+{% if dns_master in inventory_all_ipv4_addresses %}
 zone "{{ domain_name }}" IN {
   type master;
   file "forward";
