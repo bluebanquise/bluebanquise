@@ -129,13 +129,13 @@ set +x
 # Custom scripts
 {% if hostvars[groups[item][0]]['equipment_profile']['autoinstall_pre_script'] is defined and hostvars[groups[item][0]]['equipment_profile']['autoinstall_pre_script'] is not none %}
 %pre --log /root/custom_pre.log
-hostvars[groups[item][0]]['equipment_profile']['autoinstall_pre_script']
+{{hostvars[groups[item][0]]['equipment_profile']['autoinstall_pre_script']}}
 %end
 {% endif %}
 
 {% if hostvars[groups[item][0]]['equipment_profile']['autoinstall_post_script'] is defined and hostvars[groups[item][0]]['equipment_profile']['autoinstall_post_script'] is not none %}
 %post --log /root/custom_post.log
-hostvars[groups[item][0]]['equipment_profile']['autoinstall_post_script']
+{{hostvars[groups[item][0]]['equipment_profile']['autoinstall_post_script']}}
 %end
 {% endif %}
 
