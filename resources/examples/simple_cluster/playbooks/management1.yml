@@ -3,6 +3,8 @@
   hosts: "{{ target | default('management1') }}"
   roles:
 
+    - role: ansible
+      tags: ansible
     - role: set_hostname
       tags: set_hostname
     - role: nic
