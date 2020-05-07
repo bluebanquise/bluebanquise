@@ -20,6 +20,9 @@ equipment_profile:
     clearpart --all --initlabel
     autopart --type=plain --fstype=ext4 --nohome
 
+  autoinstall_pre_script: # Add optional pre script in auto installer file (kickstart, preseed, autoyast)
+  autoinstall_post_script: # Add optional post script in auto installer file (kickstart, preseed, autoyast)
+
   operating_system:
     distribution: centos # centos, redhat, debian, ubuntu, opensuse, etc.
     distribution_major_version: 8

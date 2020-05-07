@@ -101,6 +101,7 @@ set +x
 {% endif %}
 
 
+# Main post, ssh keys and inform server auto install is done
 %post --interpreter /bin/bash --log /root/main_post-install.log
 set -x
 
@@ -123,4 +124,18 @@ echo "All went well, we can inform next-server we succeeded"
 curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$(hostname -s)&boot=disk"
 set +x
 %end
+
+
+# Custom scripts
+{% if hostvars[groups[item][0]]['equipment_profile']['autoinstall_pre_script'] is defined and hostvars[groups[item][0]]['equipment_profile']['autoinstall_pre_script'] is not none %}
+%pre --log /root/custom_pre.log
+{{hostvars[groups[item][0]]['equipment_profile']['autoinstall_pre_script']}}
+%end
+{% endif %}
+
+{% if hostvars[groups[item][0]]['equipment_profile']['autoinstall_post_script'] is defined and hostvars[groups[item][0]]['equipment_profile']['autoinstall_post_script'] is not none %}
+%post --log /root/custom_post.log
+{{hostvars[groups[item][0]]['equipment_profile']['autoinstall_post_script']}}
+%end
+{% endif %}
 
