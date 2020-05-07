@@ -1,4 +1,6 @@
 ---
+role_version: 1.0.1
+
 packages_to_install:
   Ubuntu:
     _18:
