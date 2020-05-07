@@ -54,8 +54,10 @@ To configure a vlan, simply set vlan to true:
 .. code-block:: yaml
 
   network_interfaces:
-    eth2.100:
+    vlan100:
       vlan: true
+      vlan_id: 100
+      physical_device: eth2
       ip4: 10.100.0.1
       network: net-100
 
