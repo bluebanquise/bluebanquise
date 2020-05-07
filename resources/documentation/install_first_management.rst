@@ -93,7 +93,7 @@ Create file */etc/yum.repos.d/BaseOS.repo* with the following content:
 
   [BaseOS]
   name=BaseOS
-  baseurl=file:///var/www/html/repositories/redhat/8.0/x86_64/os/BaseOS
+  baseurl=file:///var/www/html/repositories/centos/8.0/x86_64/os/BaseOS
   gpgcheck=0
   enabled=1
 
@@ -103,7 +103,7 @@ Then create file */etc/yum.repos.d/AppStream.repo* with the following content:
 
   [AppStream]
   name=AppStream
-  baseurl=file:///var/www/html/repositories/redhat/8.0/x86_64/os/AppStream
+  baseurl=file:///var/www/html/repositories/centos/8.0/x86_64/os/AppStream
   gpgcheck=0
   enabled=1
 
@@ -183,4 +183,3 @@ It must be **>= 2.8.2** .
 It is now time, if you do not know how Ansible works, to learn basis of Ansible.
 
 If you already know Ansible, or want to skip this recommended training, directly go to the Configure BlueBanquise section.
-

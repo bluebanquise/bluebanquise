@@ -261,12 +261,12 @@ Last part, and probably the most complicated, are default parameters.
 
 Remember Ansible precedence mechanism. All variables in group_vars/all/ have less priority, while variables in group_vars/* have a higher priority.
 
-The idea here is the following: group_vars/all/all_equipment/ folder contains all the default parameters for all nodes. Here authentication, and equipment_profile. You have to tune these parameters to match your exact "global" need, and then tune dedicated parameters for each equipment group.
+The idea here is the following: group_vars/all/all_equipments/ folder contains all the default parameters for all nodes. Here authentication, and equipment_profile. You have to tune these parameters to match your exact "global" need, and then tune dedicated parameters for each equipment group.
 
 Equipment profile
 ^^^^^^^^^^^^^^^^^
 
-For example, open file /etc/bluebanquise/inventory/group_vars/all/all_equipment/equipment_profile.yml, and check access_control variable. It is set to true:
+For example, open file /etc/bluebanquise/inventory/group_vars/all/all_equipments/equipment_profile.yml, and check access_control variable. It is set to true:
 
 .. code-block:: yaml
 
@@ -302,18 +302,32 @@ Authentication
 
 Authentication file allows to define default root password for all nodes, and default public ssh keys lists.
 
+To generate an sha512 password, use the following command (python >3.3):
+
+.. code-block:: text
+
+  python -c 'import crypt,getpass; print(crypt.crypt(getpass.getpass(), crypt.mksalt(crypt.METHOD_SHA512)))'
+
 We need to ensure our management1 node ssh public key is set here.
 
-Get the content of /root/.ssh/id_ras.pub and add it in this file. At the same time, **remove the ssh key provided here as example**.
+Get the content of /root/.ssh/id_rsa.pub and add it in this file.
+ At the same time, **remove the ssh key provided here as example**.
+
+It is possible to do it automatically using the following command:
+
+.. code-block:: text
+
+  # Copy public key of the mgmt to the inventory
+  /usr/bin/sed -i -e "s#- ssh-rsa.*#- $(cat /root/.ssh/id_rsa.pub)#" \
+    /etc/bluebanquise/inventory/group_vars/all/all_equipments/authentication.yml
 
 Review groups parameters
 ------------------------
 
 Last step is to check and review example of equipment_profile tuning in each of the group_vars/equipment_XXXXXX folders. Adapt them to your needs.
 
-If you prefer, you can copy the whole group_vars/all/all_equipment/equipment_profile.yml file into these folders, or simply adjust the parameters you wish to change from default.
+If you prefer, you can copy the whole group_vars/all/all_equipments/equipment_profile.yml file into these folders, or simply adjust the parameters you wish to change from default.
 
 Once done, configuration is ready.
 
 It is time to deploy configuration on management1.
-
