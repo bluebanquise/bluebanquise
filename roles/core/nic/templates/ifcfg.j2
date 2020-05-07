@@ -21,6 +21,9 @@ BOOTPROTO=none
 {% set nic_type = 'Infiniband' %}
 {% endif %}
 {% endif %}
+{% if (network_interfaces[item]['vlan'] is defined) and (network_interfaces[item]['vlan'] == true) %}
+{% set nic_type = 'Vlan' %}
+{% endif %}
 TYPE={{nic_type}}
 
 {# 3. Now basic network parameters, if exist. #}
@@ -67,6 +70,8 @@ MTU={{network_interfaces[item]['mtu']}}
 {# 6. Is it a VLAN ? #}
 {% if (network_interfaces[item]['vlan'] is defined and not none) and (network_interfaces[item]['vlan'] == true) %}
 VLAN=yes
+PHYSDEV={{network_interfaces[item]['physical_device']}}
+VLAN_ID={{network_interfaces[item]['vlan_id']}}
 {% endif %}
 
 {# 7. Is it a bonding (bond) or a bonding-slave (bond-slave) ? #}
@@ -82,4 +87,3 @@ BONDING_OPTS={{network_interfaces[item]['bond_options']}}
 SLAVE=yes
 MASTER={{network_interfaces[item]['master']}}
 {% endif %}
-
