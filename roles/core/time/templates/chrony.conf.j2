@@ -3,14 +3,17 @@
 #### Blue Banquise file ####
 ## {{ansible_managed}}
 
+{% set external = false %}
 {% if external_time['time_'+time_profile]['pool'] is defined and
       external_time['time_'+time_profile]['pool'] is iterable %}
+  {% set external = true %}
 # External pool
   {% for external_pool in external_time['time_'+time_profile]['pool'] %}
 pool {{external_pool}} iburst maxsources 3
   {% endfor %}
 {% elif external_time['time_'+time_profile]['server'] is defined and
         external_time['time_'+time_profile]['server'] is iterable %}
+  {% set external = true %}
 # External servers
   {% for external_server in external_time['time_'+time_profile]['server'] %}
 server {{external_server}}
@@ -24,10 +27,10 @@ server {{external_server}}
   {% set time_sources = networks[(macro_network.node_main_network(network_interfaces,management_networks_naming+(iceberg_master|replace(iceberg_naming,' ')| trim | string))| trim)]['services_ip']['time_ip'] %}
 {% endif -%}
 
-{% if time_sources is defined and time_sources is string %}
+{% if not external and time_sources is defined and time_sources is string %}
 # Source server to bind to
 server {{ time_sources }}
-{% elif time_sources is defined and time_sources is iterable %}
+{% elif not external and time_sources is defined and time_sources is iterable %}
 # Source servers to bind to
   {% for time_ip in time_sources %}
 server {{ time_ip }}
