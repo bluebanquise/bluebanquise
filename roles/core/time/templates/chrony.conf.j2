@@ -54,11 +54,13 @@ allow {{networks[network_interfaces[nic]['network']]['subnet']}}/{{networks[netw
   {% endfor %}
 
 # Serve time even if not synchronized to a time source.
-# Listen to local clock
-server 127.127.1.0
-# Very bad time source
+# Fairly unreliable time source
   {% if iceberg_level is defined and iceberg_level is not none %}
+    {% if (iceberg_level|int) is gt 3 %}
+local stratum 15
+    {% else %}
 local stratum {{ 12+(iceberg_level|int) }}
+    {% endif %}
   {% else %}
 local stratum 12
   {% endif %}
