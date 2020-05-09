@@ -6,5 +6,5 @@
     setype: httpd_sys_rw_content_t
     state: present
   when:
-    - ansible_selinux.status == "enabled"
+    - ansible_facts.selinux.status == "enabled"
 
