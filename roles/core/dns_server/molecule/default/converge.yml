@@ -3,14 +3,18 @@
   hosts: all
 
   vars:
-    j2_node_main_network_interface: en0
-    network_interfaces:
-      en0:
-        ip4: 127.0.0.1
-    j2_current_iceberg_network: ice-1
+    management_network_naming: "ice"
     external_dns: []
-    networks: []
-    domain_name: .localhost
+    networks:
+      ice1-1:
+        subnet: 10.10.0.0
+        prefix: 16
+        netmask: 255.255.0.0
+        broadcast: 10.10.255.255
+        is_in_dns: true
+        services_ip:
+          dns_ip: 10.10.0.1
+    domain_name: example.com
     start_services: false
     enable_services: false
 
