@@ -1,8 +1,7 @@
 ---
-- name: Install Ansible
+- name: Install Ansible and dependencies for filters
   package:
-    name:
-      - ansible
+    name: "{{ packages_to_install[(ansible_facts.distribution | replace(' ','_'))]['_'+ansible_facts.distribution_major_version] }}"
     state: present
   tags:
     - package

@@ -199,4 +199,3 @@ It must be **>= 2.8.2** .
 It is now time, if you do not know how Ansible works, to learn basis of Ansible.
 
 If you already know Ansible, or want to skip this recommended training, directly go to the Configure BlueBanquise section.
-

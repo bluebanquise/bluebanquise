@@ -9,7 +9,7 @@ lint: |
   ansible-lint
   flake8
 platforms:
-  - name: instance
+  - name: mgmt0
     image: "geerlingguy/docker-${MOLECULE_DISTRO:-centos8}-ansible:latest"
     command: "/lib/systemd/systemd"
     capabilities:
@@ -20,16 +20,15 @@ platforms:
     pre_build_image: true
 provisioner:
   name: ansible
+  inventory:
+    host_vars:
+      mgmt0:
+        j2_current_iceberg_network: ice1
+        j2_node_main_network: ice1-1
+        j2_node_main_network_interface: en0
+        network_interfaces:
+          en0:
+            ip4: 10.10.0.1
+            network: ice1-1
 verifier:
   name: ansible
-scenario:
-  name: default
-  test_sequence:
-    - lint
-    - destroy
-    # - dependency
-    - syntax
-    - create
-    - prepare
-    - converge
-    - verify

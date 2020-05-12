@@ -1,3 +1,4 @@
+#jinja2: lstrip_blocks: True
 #### Blue Banquise file ####
 ## {{ansible_managed}}
 
@@ -20,33 +21,38 @@
 shared-network {{shared_network}} {
 {% for network in networks %}
 {% if (networks[network]['shared_network'] is defined and not none) and (networks[network]['shared_network'] == shared_network) and (networks[network]['is_in_dhcp'] == true) %}
+  {% set nameservers = networks[network]['services_ip']['dns_ip'] | ipaddr %}
 
 subnet {{networks[network]['subnet']}} netmask {{networks[network]['netmask']}} {
 
-{% if networks[network]['dhcp_unknown_range'] is defined and not none %}
+  {% if networks[network]['dhcp_unknown_range'] is defined and not none %}
   range {{networks[network]['dhcp_unknown_range']}};
-{% endif %}
+  {% endif %}
   option domain-name "{{domain_name}}";
-  option domain-name-servers {{networks[network]['services_ip']['dns_ip']}};
+  {% if nameservers is string %}
+  option domain-name-servers {{nameservers}};
+  {% else %}
+  option domain-name-servers {{nameservers | join(', ')}};
+  {% endif %}
   option broadcast-address {{networks[network]['broadcast']}};
   option ntp-servers {{networks[network]['services_ip']['time_ip']}};
-{% if networks[network]['gateway'] is defined and not none %}
+  {% if networks[network]['gateway'] is defined and not none %}
   option routers {{networks[network]['gateway']}};
-{% endif %}
+  {% endif %}
   default-lease-time {{dhcp_settings['default_lease_time']}};
   max-lease-time {{dhcp_settings['max_lease_time']}};
-{% if networks[network]['services_ip']['pxe_ip'] is defined and not none %}
-{% if (networks[network]['services_ip']['pxe_http_ip'] is defined and not none)
-    and (networks[network]['services_ip']['pxe_http_ip'] != networks[network]['services_ip']['pxe_ip']) %}
+  {% if networks[network]['services_ip']['pxe_ip'] is defined and not none %}
+    {% if (networks[network]['services_ip']['pxe_http_ip'] is defined and not none)
+      and (networks[network]['services_ip']['pxe_http_ip'] != networks[network]['services_ip']['pxe_ip']) %}
   if exists user-class and option user-class = "BlueBanquise" {
     next-server {{networks[network]['services_ip']['pxe_http_ip']}};
   } else {
     next-server {{networks[network]['services_ip']['pxe_ip']}};
   }
-{% else %}
+    {% else %}
   next-server {{networks[network]['services_ip']['pxe_ip']}};
-{% endif %}
-{% endif %}
+    {% endif %}
+  {% endif %}
 
   include "/etc/dhcp/dhcpd.{{network}}.conf";
 
@@ -61,31 +67,38 @@ subnet {{networks[network]['subnet']}} netmask {{networks[network]['netmask']}} 
 {% for network in networks %}
 {% if j2_current_iceberg_network in network %}
 {% if (networks[network]['shared_network'] is not defined or none) and (networks[network]['is_in_dhcp'] == true) %}
+  {% set nameservers = networks[network]['services_ip']['dns_ip'] | ipaddr %}
 
 subnet {{networks[network]['subnet']}} netmask {{networks[network]['netmask']}} {
 
-  {% if networks[network]['dhcp_unknown_range'] is defined and not none %}range {{networks[network]['dhcp_unknown_range']}};{% endif %}
-
+  {% if networks[network]['dhcp_unknown_range'] is defined and not none %}
+  range {{networks[network]['dhcp_unknown_range']}};
+  {% endif %}
   option domain-name "{{domain_name}}";
-  option domain-name-servers {{networks[network]['services_ip']['dns_ip']}};
+  {% if nameservers is string %}
+  option domain-name-servers {{nameservers}};
+  {% else %}
+  option domain-name-servers {{nameservers | join(', ')}};
+  {% endif %}
   option broadcast-address {{networks[network]['broadcast']}};
   option ntp-servers {{networks[network]['services_ip']['time_ip']}};
-  {% if networks[network]['gateway'] is defined and not none %}option routers {{networks[network]['gateway']}};{% endif %}
-
+  {% if networks[network]['gateway'] is defined and not none %}
+  option routers {{networks[network]['gateway']}};
+  {% endif %}
   default-lease-time {{dhcp_settings['default_lease_time']}};
   max-lease-time {{dhcp_settings['max_lease_time']}};
-{% if networks[network]['services_ip']['pxe_ip'] is defined and not none %}
-{% if (networks[network]['services_ip']['pxe_http_ip'] is defined and not none)
-    and (networks[network]['services_ip']['pxe_http_ip'] != networks[network]['services_ip']['pxe_ip']) %}
+  {% if networks[network]['services_ip']['pxe_ip'] is defined and not none %}
+    {% if (networks[network]['services_ip']['pxe_http_ip'] is defined and not none)
+      and (networks[network]['services_ip']['pxe_http_ip'] != networks[network]['services_ip']['pxe_ip']) %}
   if exists user-class and option user-class = "BlueBanquise" {
     next-server {{networks[network]['services_ip']['pxe_http_ip']}};
   } else {
     next-server {{networks[network]['services_ip']['pxe_ip']}};
   }
-{% else %}
+    {% else %}
   next-server {{networks[network]['services_ip']['pxe_ip']}};
-{% endif %}
-{% endif %}
+    {% endif %}
+  {% endif %}
 
   include "/etc/dhcp/dhcpd.{{network}}.conf";
 

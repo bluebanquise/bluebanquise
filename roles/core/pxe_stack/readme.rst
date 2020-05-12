@@ -81,6 +81,12 @@ It is also possible to work on a range of host, using nodeset formating:
 
   bootset -n c001,c002,c[010-020],login1 -b disk
 
+Also, if combined with **clustershell** addon role, it is possible to use Ansible inventory groups:
+
+.. code-block:: text
+
+  bootset -n @mg_computes -b disk
+
 If some inventory parameters related to the host have been updated recently, it may be required to force files regeneration instead of simply modifying them. To do so, use:
 
 .. code-block:: text
@@ -162,4 +168,3 @@ Changelog
 * 1.0.2: Add Ubuntu 18.04 compatibility. johnnykeats <johnny.keats@outlook.com>
 * 1.0.1: Documentation. johnnykeats <johnny.keats@outlook.com>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
- 

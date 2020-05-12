@@ -1,0 +1,27 @@
+---
+role_version: 1.0.1
+
+packages_to_install:
+  Ubuntu:
+    _18:
+      - ansible
+      - python-jmespath
+      - python-netaddr
+  CentOS:
+    _7:
+      - ansible          # available in EPEL 7
+      - python2-jmespath # available in EPEL 7
+      - python-netaddr
+    _8:
+      - ansible
+      - python3-jmespath
+      - python3-netaddr
+  RedHat:
+    _7:
+      - ansible          # available in RHEL 7 Server - Extras or EPEL 7
+      - python2-jmespath # available in RHEL 7 Server - Extras or EPEL 7
+      - python-netaddr
+    _8:
+      - ansible
+      - python3-jmespath
+      - python3-netaddr

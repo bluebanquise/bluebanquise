@@ -97,7 +97,7 @@ Note also that to check if a list is empty, it is possible to check the list its
   {% if my_names_list %}
   the list is not empty
   {% else %}
-  the list is empty %}
+  the list is empty
   {% endif %}
 
 Dictionary

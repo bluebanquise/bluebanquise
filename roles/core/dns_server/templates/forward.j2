@@ -3,13 +3,7 @@
 
 $TTL 86400
 $ORIGIN {{domain_name}}.
-@ IN SOA  {{inventory_hostname}}.{{domain_name}}. root.{{domain_name}}. (
-  2011071001  ;Serial
-  3600        ;Refresh
-  1800        ;Retry
-  604800      ;Expire
-  86400       ;Minimum TTL
-)
+$INCLUDE "/var/named/forward.soa"
 @ IN NS {{inventory_hostname}}.{{domain_name}}.
 
 {% for host in groups['all'] %}

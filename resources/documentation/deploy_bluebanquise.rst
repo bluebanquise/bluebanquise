@@ -101,7 +101,7 @@ If your device cannot boot on LAN, use iso or usb image provided on management1 
 
 In **BlueBanquise**, PXE process has been made so that any kind of hardware able to boot PXE, USB or CDrom can start deployment.
 
-You can get more information and a detailed schema in the pxe_stack role section of this documentation. Simply put, the PXE chain is the following (files are in /var/www/html/preboot_execution_environment):
+You can get more information and a detailed schema in the pxe_stack role section of this documentation. Simply explained, the PXE chain is the following (files are in /var/www/html/preboot_execution_environment):
 
 .. code-block:: text
 

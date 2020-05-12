@@ -188,6 +188,9 @@ Important parameters are:
 * -e or --extra-vars, which allows to provide additional variables for execution (keep in mind that variables set here win the whole precedence)
 * -t or --tags, which allows to execute only specific tasks or part of tasks (seen later)
 * -s or --skip-tags, which allows to not execute some specific tasks or part of tasks (seen later)
+* --list-tasks, which allows to list all tasks related to roles used in the playbook, and order they will be executed
+* --start-at-task, which allows to start/restart playbook at a desired task (to be combined with --list-tasks)
+* --list-tags, which allows to list all tags seen during this playbook execution
 
 Debug
 -----
@@ -497,7 +500,7 @@ We are going to use level 6 in variables precedence: group_vars/. Create a direc
 
   mkdir /etc/ansible/inventory/group_vars/slaves
 
-Then, create file /etc/ansible/inventory/group_vars/slave/myship.yml with the following content:
+Then, create file /etc/ansible/inventory/group_vars/slaves/myship.yml with the following content:
 
 .. code-block:: yaml
 
@@ -516,7 +519,7 @@ And check variables of hosts:
     model: Gencore Maelstrom
   [root@ ~]#
 
-Prefect. Remember the pizza in Vocabulary section. Ansible just flatten the whole inventory, using precedence, and you obtain variables.
+Perfect. Remember the pizza in Vocabulary section. Ansible just flatten the whole inventory, using precedence, and you obtain variables.
 
 Last point for this part, remember that in variable’s precedence, extra_vars is level 22 and always win, so adding extra vars when executing Ansible later will allow us to force variables at execution time for testing purposes or just because we need it.
 
@@ -629,9 +632,22 @@ Now, execute the playbook, and let Ansible do its job:
 
 .. code-block:: bash
 
-  ansible-playbook myplaybook.yml
+  ansible-playbook /path/to/myplaybook.yml
+
+Note that you need to provide full path to the playbook, as there are no default folder for playbooks in Ansible.
+Also note that if your shell is currently in the playbook folder, you can skip full path as relative path are accepted.
 
 If all goes well, you should now have the file /var/www/html/index.html generated on management1, and using a web browser you can check the result.
+
+Note that if you cannot reach the web browser, for example you are working in a VM or a server without screen attached,
+ you can use ssh forwarding. From you current computer, open a new terminal and use:
+
+.. code-block:: bash
+
+  ssh root@my_vm_or_my_server -L 9999:localhost:80
+
+And then open a local web browser and open http://localhost:9999 .
+ Check the web for more on ssh port forwarding.
 
 .. image:: images/capture_index_1.png
 
@@ -700,6 +716,8 @@ Task again
 As discussed before, all task available modules can be found in the `Ansible documentation <https://docs.ansible.com/ansible/latest/modules/modules_by_category.html>`_ .
 
 Each of these modules can be combined with general tasks actions. But first, let's define the basic debug module and registers, that will allow us to play more easily with tasks.
+
+At this point, use previously created task, or create a new role to add following tasks.
 
 Debug module
 ^^^^^^^^^^^^
