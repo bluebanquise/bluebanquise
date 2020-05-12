@@ -2,6 +2,9 @@
 role_version: 1.0.2
 
 packages_to_install:
+  opensuse_leap:
+    _15:
+      - chrony
   ubuntu:
     _18:
       - chrony
@@ -18,6 +21,9 @@ packages_to_install:
       - chrony
 
 services_to_start:
+  opensuse_leap:
+    _15:
+      - chronyd
   ubuntu:
     _18:
       - chronyd
@@ -33,6 +39,8 @@ services_to_start:
       - chronyd
 
 chrony_conf_path:
+  opensuse_leap:
+    _15: /etc/chrony.conf
   ubuntu:
     _18: /etc/chrony/chrony.conf
   redhat:
