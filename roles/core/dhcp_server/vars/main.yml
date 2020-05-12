@@ -1,7 +1,21 @@
 ---
 role_version: 1.0.4
 
+configuration_path:
+  opensuse_leap:
+    _15: /etc
+  redhat:
+    _7: /etc/dhcp
+    _8: /etc/dhcp
+  centos:
+    _7: /etc/dhcp
+    _8: /etc/dhcp
+
 packages_to_install:
+  opensuse_leap:
+    _15:
+      - dhcp-server
+      - python3-netaddr
   ubuntu:
     _18:
       - isc-dhcp-server
@@ -17,6 +31,9 @@ packages_to_install:
       - dhcp-server
 
 services_to_start:
+  opensuse_leap:
+    _15:
+      - dhcpd
   ubuntu:
     _18:
       - isc-dhcp-server

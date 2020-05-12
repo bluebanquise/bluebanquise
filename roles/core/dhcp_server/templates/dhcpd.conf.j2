@@ -46,5 +46,5 @@
 
 ## NETWORKS AND NODES
 
-include "/etc/dhcp/dhcpd.networks.conf";
+include "{{ configuration_path[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}/dhcpd.networks.conf";
 

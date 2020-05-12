@@ -6,10 +6,10 @@
   tags:
     - package
 
-- name: Template >> /etc/dhcp/dhcpd.conf
+- name: "Template >> {{ configuration_path[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}/dhcpd.conf"
   template:
     src: dhcpd.conf.j2
-    dest: /etc/dhcp/dhcpd.conf
+    dest: "{{ configuration_path[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}/dhcpd.conf"
     owner: root
     group: root
     mode: 0644
@@ -17,10 +17,10 @@
   tags:
     - template
 
-- name: Template >> /etc/dhcp/dhcpd.networks.conf
+- name: "Template >> {{ configuration_path[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}/dhcpd.networks.conf"
   template:
     src: dhcpd.networks.conf.j2
-    dest: /etc/dhcp/dhcpd.networks.conf
+    dest: "{{ configuration_path[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}/dhcpd.networks.conf"
     owner: root
     group: root
     mode: 0644
@@ -28,10 +28,10 @@
   tags:
     - template
 
-- name: "Template >> /etc/dhcp/dhcpd.{{ item }}.conf"
+- name: "Template >> {{ configuration_path[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}/dhcpd.{{ item }}.conf"
   template:
     src: dhcpd.subnet.conf.j2
-    dest: "/etc/dhcp/dhcpd.{{ item }}.conf"
+    dest: "{{ configuration_path[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}/dhcpd.{{ item }}.conf"
     owner: root
     group: root
     mode: 0644
@@ -42,6 +42,15 @@
   notify: Restart dhcp services
   tags:
     - template
+
+- name: Disable Chroot on OpenSuse Leap, and enable all interfaces
+  lineinfile:
+    path: /etc/sysconfig/dhcpd
+    regexp: "^{{ item.split('=')[0] }}"
+    line: "{{ item }}"
+  with_items:
+    - DHCPD_INTERFACE="ANY"
+    - DHCPD_RUN_CHROOTED="no" 
 
 - meta: flush_handlers
 

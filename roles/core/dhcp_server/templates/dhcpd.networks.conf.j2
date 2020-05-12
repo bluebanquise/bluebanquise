@@ -31,7 +31,7 @@ subnet {{networks[network]['subnet']}} netmask {{networks[network]['netmask']}} 
   next-server {{networks[network]['services_ip']['pxe_ip']}};
 {% endif %}
 
-  include "/etc/dhcp/dhcpd.{{network}}.conf";
+  include "{{ configuration_path[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}/dhcpd.{{network}}.conf";
 
 }
 {% endif %}
