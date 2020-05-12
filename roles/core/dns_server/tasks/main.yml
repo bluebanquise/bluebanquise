@@ -27,10 +27,10 @@
     - package
 
 # Master DNS is the dns_ip of primary management network
-# (management_network_naming + '1-1')
+# (management_networks_naming + '1-1')
 - name: Set master DNS server - Get DNS IP
   set_fact:
-    dns_master: "{{ networks[management_network_naming+'1-1'].services_ip.dns_ip }}"
+    dns_master: "{{ networks[management_networks_naming+'1-1'].services_ip.dns_ip }}"
   when:
     - "dns_master is not defined"
     - "networks[j2_node_main_network].services_ip.dns_ip is defined"
@@ -40,7 +40,7 @@
     that:
       - dns_master is defined
     fail_msg: "'dns_master' must be defined. Please ensure that either 'dns_master' or
-              networks[{{ management_network_naming }}1-1].services_ip.dns_ip is
+              networks[{{ management_networks_naming }}1-1].services_ip.dns_ip is
               defined and contains a valid IP address."
 
 # If dns_ip is a list, pick the first value as master DNS
