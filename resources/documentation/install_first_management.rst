@@ -117,7 +117,7 @@ Create file */etc/yum.repos.d/BaseOS.repo* with the following content:
 
   [BaseOS]
   name=BaseOS
-  baseurl=file:///var/www/html/repositories/redhat/8/x86_64/os/BaseOS/
+  baseurl=file:///var/www/html/repositories/centos/8/x86_64/os/BaseOS/
   gpgcheck=0
   enabled=1
 
@@ -127,7 +127,7 @@ Then create file */etc/yum.repos.d/AppStream.repo* with the following content:
 
   [AppStream]
   name=AppStream
-  baseurl=file:///var/www/html/repositories/redhat/8/x86_64/os/AppStream/
+  baseurl=file:///var/www/html/repositories/centos/8/x86_64/os/AppStream/
   gpgcheck=0
   enabled=1
 
