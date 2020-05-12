@@ -40,7 +40,31 @@ Once system is installed and rebooted, login, and disable firewall. Current stac
   systemctl stop firewalld
   systemctl disable firewalld
 
-Then prepare repositories.
+Then prepare boot images and packages repositories.
+
+Boot images include the installer system which starts the deployment after PXE
+boot, while packages repositories include the software that will be installed
+on the systems.
+
+Boot images and packages repositories structure follows a specific pattern,
+which defaults to the major release version in the path:
+
+.. code-block:: bash
+
+                  Distribution    Version   Architecture    Repository
+                        +             +       +               +
+                        |             +--+    |               |
+                        +-----------+    |    |    +----------+
+                                    |    |    |    |
+                                    v    v    v    v
+       /var/www/html/repositories/centos/7/x86_64/os/
+
+Note: this patern parameters (distribution, version, architecture) must match
+the one provided in the equipment_profile file seen later.
+
+Note: we recommend to use the same directory path to later sync the Errata
+published by upstream operating system vendor.
+
 
 Operating system
 ^^^^^^^^^^^^^^^^
@@ -52,15 +76,15 @@ Download:
 
 **If on standard system:**
 
-Mount iso and copy content to web server directory: (replace centos/7.6 by centos/8.0, redhat/8.0, redhat/7.7, etc depending of your system)
+Mount iso and copy content to web server directory: (replace centos/7 by
+centos/8, redhat/8, redhat/7, etc depending of your system)
 
 .. code-block:: bash
 
-  mkdir -p /var/www/html/repositories/centos/7.6/x86_64/os/
+  mkdir -p /var/www/html/repositories/centos/7/x86_64/os/
   mount CentOS-7-x86_64-Everything-1810.iso /mnt
-  cp -a /mnt/* /var/www/html/repositories/centos/7.6/x86_64/os/
-  umount /mnt
-  restorecon -Rv /var/www/html/repositories/centos/7.6/x86_64/os
+  cp -a /mnt/* /var/www/html/repositories/centos/7/x86_64/os/
+  restorecon -Rv /var/www/html/repositories/centos/7/x86_64/os
 
 **If in test VM:**
 
@@ -68,8 +92,8 @@ Simply mount iso from /dev/cdrom to save space:
 
 .. code-block:: bash
 
-  mkdir -p /var/www/html/repositories/centos/7.6/x86_64/os/
-  mount /dev/cdrom /var/www/html/repositories/centos/7.6/x86_64/os/
+  mkdir -p /var/www/html/repositories/centos/7/x86_64/os/
+  mount /dev/cdrom /var/www/html/repositories/centos/7/x86_64/os/
 
 Now, create first repository manually. Procedure is different between Centos 7 and 8.
 
@@ -81,7 +105,7 @@ Create file */etc/yum.repos.d/os.repo* with the following content:
 
   [os]
   name=os
-  baseurl=file:///var/www/html/repositories/centos/7.6/x86_64/os/
+  baseurl=file:///var/www/html/repositories/centos/7/x86_64/os/
   gpgcheck=0
   enabled=1
 
@@ -93,7 +117,7 @@ Create file */etc/yum.repos.d/BaseOS.repo* with the following content:
 
   [BaseOS]
   name=BaseOS
-  baseurl=file:///var/www/html/repositories/centos/8.0/x86_64/os/BaseOS
+  baseurl=file:///var/www/html/repositories/centos/8/x86_64/os/BaseOS/
   gpgcheck=0
   enabled=1
 
@@ -103,31 +127,23 @@ Then create file */etc/yum.repos.d/AppStream.repo* with the following content:
 
   [AppStream]
   name=AppStream
-  baseurl=file:///var/www/html/repositories/centos/8.0/x86_64/os/AppStream
+  baseurl=file:///var/www/html/repositories/centos/8/x86_64/os/AppStream/
   gpgcheck=0
   enabled=1
 
 **Both:**
+
+If you don't need the DVD iso anymore, umount it:
+
+.. code-block:: bash
+
+  umount /mnt
 
 Now ensure repository is available:
 
 .. code-block:: bash
 
   yum repolist
-
-Repositories structure follows a specific pattern:
-
-.. code-block:: bash
-
-                  Distribution    Version   Architecture    Repository
-                        +             +       +               +
-                        |             +---+   |               |
-                        +-----------+     |   |      +--------+
-                                    |     |   |      |
-                                    v     v   v      v
-       /var/www/html/repositories/centos/7.6/x86_64/os
-
-Note: this patern parameters (distribution, version, architecture) must match the one provided in the equipment_profile file seen later.
 
 BlueBanquise
 ^^^^^^^^^^^^
@@ -136,13 +152,13 @@ Download BlueBanquise rpms from official repository.
 
 Go to https://bluebanquise.com, go to repositories/download, and get the content of the whole directory corresponding to your distribution and architecture.
 
-Then copy this content into /var/www/html/repositories/centos/7.6/x86_64/bluebanquise/ locally.
+Then copy this content into /var/www/html/repositories/centos/7/x86_64/bluebanquise/ locally.
 
 .. code-block:: bash
 
-  mkdir -p /var/www/html/repositories/centos/7.6/x86_64/bluebanquise/
-  cp -a /root/bluebanquise_from_web/* /var/www/html/repositories/centos/7.6/x86_64/bluebanquise/
-  restorecon -Rv /var/www/html/repositories/centos/7.6/x86_64/bluebanquise
+  mkdir -p /var/www/html/repositories/centos/7/x86_64/bluebanquise/
+  cp -a /root/bluebanquise_from_web/* /var/www/html/repositories/centos/7/x86_64/bluebanquise/
+  restorecon -Rv /var/www/html/repositories/centos/7/x86_64/bluebanquise
 
 And create file */etc/yum.repos.d/bluebanquise.repo* with the following content:
 
@@ -150,7 +166,7 @@ And create file */etc/yum.repos.d/bluebanquise.repo* with the following content:
 
   [bluebanquise]
   name=bluebanquise
-  baseurl=file:///var/www/html/repositories/centos/7.6/x86_64/bluebanquise/
+  baseurl=file:///var/www/html/repositories/centos/7/x86_64/bluebanquise/
   gpgcheck=0
   enabled=1
 
