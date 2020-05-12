@@ -3,7 +3,7 @@
   hosts: all
 
   vars:
-    management_network_naming: "ice"
+    management_networks_naming: "ice"
     external_dns: []
     networks:
       ice1-1:
