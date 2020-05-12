@@ -1,47 +1,10 @@
+---
 role_version: 1.0.2
 
-packages_to_install:
-  ubuntu:
-    _18:
-  centos:
-    _7:
-      - rsyslog
-      - logrotate
-      - xz
-    _8:
-      - rsyslog
-      - logrotate
-      - xz
-  redhat:
-    _7:
-      - rsyslog
-      - logrotate
-      - xz
-    _8:
-      - rsyslog
-      - logrotate
-      - xz
-
-services_to_start:
-  ubuntu:
-    _18:
-  centos:
-    _7:
-      - rsyslog
-    _8:
-      - rsyslog
-  redhat:
-    _7:
-      - rsyslog
-    _8:
-      - rsyslog
-
-rsyslog_conf_path:
-  ubuntu:
-    _18: /etc/rsyslog.conf
-  redhat:
-    _7: /etc/rsyslog.conf
-    _8: /etc/rsyslog.conf
-  centos:
-    _7: /etc/rsyslog.conf
-    _8: /etc/rsyslog.conf
+log_server_packages_to_install:
+  - rsyslog
+  - logrotate
+  - xz
+log_server_services_to_start:
+  - rsyslog
+log_server_rsyslog_conf_path: /etc/rsyslog.conf

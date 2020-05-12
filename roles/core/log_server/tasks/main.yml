@@ -1,8 +1,27 @@
 ---
+- name: Gathering OS specific variables
+  # This task gathers variables defined in OS specific files.
+  #
+  # Search vars in:
+  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
+  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
+  #  - <distribution>.yml            # eg. CentOS.yml
+  #  - <os_family>.yml               # eg. RedHat.yml
+  #
+  # If no OS specific file is found, the role will default to vars/main.yml
+  #
+  include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family }}.yml"
+      skip: true
 
 - name: Install packages
   package:
-    name: "{{ packages_to_install[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
+    name: "{{ log_server_packages_to_install }}"
     state: present
   tags:
     - package
@@ -10,7 +29,7 @@
 - name: Template >> /etc/rsyslog.conf
   template:
     src: rsyslog.conf.j2
-    dest: "{{ rsyslog_conf_path[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
+    dest: "{{ log_server_rsyslog_conf_path }}"
     owner: root
     group: root
     mode: 0644
@@ -25,8 +44,8 @@
     setype: syslogd_port_t
     state: present
   when:
-    - ansible_os_family == "RedHat"
-    - ansible_selinux.status == "enabled"
+    - ansible_facts.os_family == "RedHat"
+    - ansible_facts.selinux.status == "enabled"
   loop:
     - tcp
     - udp
@@ -63,6 +82,6 @@
     name: "{{ item }}"
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
     state: "{{ (start_services | bool) | ternary('started', omit) }}"
-  loop: "{{ services_to_start[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
+  loop: "{{ log_server_services_to_start }}"
   tags:
     - service

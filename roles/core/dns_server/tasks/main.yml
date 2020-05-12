@@ -21,7 +21,7 @@
 
 - name: Install packages
   package:
-    name: "{{ packages_to_install }}"
+    name: "{{ dns_server_packages_to_install }}"
     state: present
   tags:
     - package
@@ -81,6 +81,6 @@
     name: "{{ item }}"
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
     state: "{{ (start_services | bool) | ternary('started', omit) }}"
-  loop: "{{ services_to_start }}"
+  loop: "{{ dns_server_services_to_start }}"
   tags:
     - service
