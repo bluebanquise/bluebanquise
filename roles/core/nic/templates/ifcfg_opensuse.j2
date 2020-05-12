@@ -1,0 +1,8 @@
+#### Blue Banquise file ####
+## {{ansible_managed}}
+
+BOOTPROTO='static'
+IPADDR='{{network_interfaces[item]['ip4']}}/{{networks[network_interfaces[item]['network']]['prefix']}}'
+NAME='{{item}}'
+STARTMODE='auto'
+

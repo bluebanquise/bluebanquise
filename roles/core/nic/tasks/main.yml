@@ -1,25 +1,4 @@
 ---
 
-- name: Load VLAN module if needed
-  modprobe:
-    name: 8021q
-    state: present
-  with_items: "{{ network_interfaces }}"
-  when: (network_interfaces[item]['vlan'] is defined and not none) and network_interfaces[item]['vlan']
-
-- name: Load bonding module if needed
-  modprobe:
-    name: bonding
-    state: present
-  with_items: "{{ network_interfaces }}"
-  when: (network_interfaces[item]['type'] is defined and not none) and (network_interfaces[item]['type'] == 'bond' or network_interfaces[item]['type'] == 'bond-slave')
-
-- name: Set NIC configuration
-  template:
-    src: ifcfg.j2
-    dest: /etc/sysconfig/network-scripts/ifcfg-{{ item }}
-    owner: root
-    group: root
-    mode: 0644
-  with_items: "{{ network_interfaces }}"
-  when: (network_interfaces[item]['ip4'] is defined and network_interfaces[item]['ip4'] is not none) or ((network_interfaces[item]['type'] is defined and not none) and (network_interfaces[item]['type'] == 'bond-slave'))
+- name: Use OS dedicated task
+  include_tasks: "{{ (ansible_distribution|lower|replace(' ','_')) }}_{{ ansible_distribution_major_version }}.yml"
