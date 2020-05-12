@@ -1,4 +1,8 @@
 pxe
 
+## Don't track inventory and playbooks ##
+inventory/
+playbooks/
+
 ## VirtualEnv ##
 venv-molecule/
