@@ -1,0 +1,38 @@
+---
+name: core/bluebanquise unit testing
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'roles/core/bluebanquise/**'
+      - '.github/workflows/molecule-actions-core-bluebanquise.yml'
+  pull_request:
+    paths:
+      - 'roles/core/bluebanquise/**'
+      - '.github/workflows/molecule-actions-core-bluebanquise.yml'
+
+jobs:
+  molecule_test:
+    name: core/bluebanquise - ${{ matrix.distro }} - molecule test
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        distro:
+          - centos7
+          - centos8
+
+    env:
+      MOLECULE_DISTRO: ${{ matrix.distro }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Setup python environment
+        uses: actions/setup-python@v1
+      - name: Install packages
+        run: |
+          pip install 'molecule[docker]>3' ansible-lint flake8 jmespath netaddr
+      - name: Run molecule test for core/bluebanquise
+        run: |
+          cd roles/core/bluebanquise && molecule test
