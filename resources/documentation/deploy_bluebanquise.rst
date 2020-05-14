@@ -70,7 +70,13 @@ Then start your main interface manually. Here enp0s3:
 
   ifup enp0s3
 
-Once interface is up (check using *ip a* command), replay the whole playbook:
+Once interface is up (check using *ip a* command), setup the BlueBanquise controller:
+
+.. code-block:: bash
+
+  ansible-playbook /etc/bluebanquise/playbooks/management1.yml --tags bluebanquise
+
+Then play the whole playbook:
 
 .. code-block:: bash
 

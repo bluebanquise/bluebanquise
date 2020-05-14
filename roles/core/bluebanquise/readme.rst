@@ -1,10 +1,10 @@
-Ansible
--------
+BlueBanquise
+------------
 
 Description
 ^^^^^^^^^^^
 
-This role simply install Ansible on a remote target.
+This role install Ansible and dependencies on BlueBanquise controllers.
 Mainly used for multi iceberg.
 
 Instructions
