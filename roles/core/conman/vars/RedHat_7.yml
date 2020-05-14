@@ -1,1 +1,1 @@
-execpath: "/usr/share/conman/exec"
+conman_execpath: "/usr/share/conman/exec"

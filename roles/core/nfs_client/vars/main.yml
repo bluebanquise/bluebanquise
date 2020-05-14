@@ -1,17 +1,2 @@
+---
 role_version: 1.0.2
-
-packages_to_install:
-  ubuntu:
-    _18:
-      - nfs-common
-  centos:
-    _7:
-      - nfs-utils
-    _8:
-      - nfs-utils
-  redhat:
-    _7:
-      - nfs-utils
-    _8:
-      - nfs-utils
-

@@ -1,5 +1,5 @@
 ---
-packages_to_install:
+dns_server_packages_to_install:
   - bind
-services_to_start:
+dns_server_services_to_start:
   - named
