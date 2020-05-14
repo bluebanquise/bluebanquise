@@ -1,12 +1,13 @@
 external_time:
   time_server:
-    server: # List of possible time servers
-      - 0.fr.pool.ntp.org
     pool: # List of possible time pools
       - pool.ntp.org
+    server: # List of possible time servers
+      - 0.pool.ntp.org
+      - 1.pool.ntp.org
   time_client:
-    server:
     pool:
+    server:
 
 external_dns:
   dns_server: # set as forwarders in named.conf
