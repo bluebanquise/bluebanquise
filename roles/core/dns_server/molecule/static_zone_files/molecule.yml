@@ -1,0 +1,34 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: docker
+lint: |
+  set -e
+  yamllint .
+  ansible-lint
+  flake8
+platforms:
+  - name: mgmt0
+    image: "geerlingguy/docker-${MOLECULE_DISTRO:-centos8}-ansible:latest"
+    command: "/lib/systemd/systemd"
+    capabilities:
+      - "SYS_ADMIN"
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    pre_build_image: true
+provisioner:
+  name: ansible
+  inventory:
+    host_vars:
+      mgmt0:
+        j2_current_iceberg_network: ice1
+        j2_node_main_network: ice1-1
+        j2_node_main_network_interface: en0
+        network_interfaces:
+          en0:
+            ip4: 10.10.0.1
+            network: ice1-1
+verifier:
+  name: ansible

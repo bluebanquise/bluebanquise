@@ -1,0 +1,43 @@
+---
+name: core/dns_server unit testing
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'roles/core/dns_server/**'
+      - '.github/workflows/molecule-actions-core-dns_server.yml'
+  pull_request:
+    paths:
+      - 'roles/core/dns_server/**'
+      - '.github/workflows/molecule-actions-core-dns_server.yml'
+
+jobs:
+  molecule_test:
+    name: core/dns_server - ${{ matrix.distro }} - molecule test
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        distro:
+          - centos7
+          - centos8
+          - ubuntu1804
+          - ubuntu2004
+
+    env:
+      MOLECULE_DISTRO: ${{ matrix.distro }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Setup python environment
+        uses: actions/setup-python@v1
+      - name: Install packages
+        run: |
+          pip install 'molecule[docker]>3' ansible-lint flake8 jmespath netaddr
+      - name: Run molecule default scenario for core/dns_server
+        run: |
+          cd roles/core/dns_server && molecule test
+      - name: Run molecule static_zone_files scenario for core/dns_server
+        run: |
+          cd roles/core/dns_server && molecule test -s static_zone_files

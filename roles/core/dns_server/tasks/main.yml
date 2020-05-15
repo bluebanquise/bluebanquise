@@ -68,11 +68,28 @@
   tags:
     - template
 
-- name: Configure Master DNS
+- name: Generate Master DNS' zone files
   include_tasks: master.yml
-  when: "dns_master in (network_interfaces | json_query('*.ip4'))"
+  when:
+    - dns_master in (network_interfaces | json_query('*.ip4'))
+    - dns_server_zone_files is not defined or dns_server_zone_files != "static"
   tags:
     - template
+
+- name: Copy Master DNS' zone files
+  copy:
+    src: "{{ item }}"
+    dest: "/var/named/{{ item }}"
+    owner: root
+    group: root
+    mode: 0644
+  loop:
+    - forward
+    - reverse
+  notify: Restart dns services
+  when:
+    - dns_master in (network_interfaces | json_query('*.ip4'))
+    - dns_server_zone_files is defined and dns_server_zone_files == "static"
 
 - meta: flush_handlers
 

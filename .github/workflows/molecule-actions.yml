@@ -27,7 +27,6 @@ jobs:
           - core/conman
           - core/display_tuning
           - core/dns_client
-          - core/dns_server
           - core/log_client
           - core/log_server
           - core/repositories_client

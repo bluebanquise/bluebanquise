@@ -4,12 +4,13 @@ DNS server
 Description
 ^^^^^^^^^^^
 
-This role provides a basic dns server based on bind.
+This role provides a basic DNS server based on bind.
 
 Instructions
 ^^^^^^^^^^^^
 
-This DNS role will automatically add all networks of the cluster, assuming their variable **is_in_dns** is set to true:
+By default, this DNS role will automatically add all networks of the cluster,
+assuming their variable **is_in_dns** is set to true:
 
 .. code-block:: yaml
 
@@ -26,14 +27,34 @@ This DNS role will automatically add all networks of the cluster, assuming their
 
 It will generate 3 files:
 
-* /etc/named.conf that contains main configuration, and that will try to bind to all networks defined on the host it is deployed on, using **services_ip.dns_ip** variable ip of the network.
+* /etc/named.conf that contains main configuration, and that will try to bind
+  to all networks defined on the host it is deployed on, using
+  **services_ip.dns_ip** variable ip of the network.
 * /var/named/forward that contains forward resolution of hosts
 * /var/named/reverse that contains reverse resolution of hosts
 
-External hosts defined in *group_vars/all/general_settings/external.yml* at variable **external_hosts** will be automatically added in the dns configuration.
+You can change this behaviour and use custom forward and reverse files by
+setting the parameter **dns_server_zone_files** to **static** in your
+inventory:
 
-To configure forwarding and intergrate this dns server into an existing IT configuration, use file *group_vars/all/general_settings/external.yml*.
-It is possible to add here an external dns to bind to for this internal dns, as a relay.
+.. code-block:: yaml
+
+  dns_server_zone_files: static
+
+With static, it is possible to install tailor made zone files in
+roles/core/dns_server/files/{forward,reverse}. The role will copy these files
+to the /var/named/ directory on the master DNS. This allows to add any record
+type (CNAME, SRV, TXT, etc.) or define your zone files with an external tool.
+FIXME DRAFT: need a documentation of the mandatory entries (hostname, hostname-net).
+
+External hosts defined in *group_vars/all/general_settings/external.yml* in
+variable **external_hosts** will be automatically added to the DNS
+configuration.
+
+To configure forwarding and intergrate this DNS server into an existing IT
+configuration, use file *group_vars/all/general_settings/external.yml*. It is
+possible to add here an external DNS to bind to for this internal DNS, as a
+relay.
 
 .. code-block:: yaml
 

@@ -3,6 +3,13 @@
 ## DNS
 domain_name: tumulus.local
 
+# DNS zone files management
+#  - auto: the zone files are created from templates
+#  - static: the zone files 'forward' and 'reverse' are copied from
+#    roles/core/dns_server/files/{forward,reverse}. You have to create the
+#    files by yourself. See readme of role dns_server.
+#dns_server_zone_files: auto
+
 ## DHCP
 dhcp_settings:
   default_lease_time: 600 # Consider to increase once in production

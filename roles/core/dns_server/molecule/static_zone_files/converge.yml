@@ -17,6 +17,7 @@
     domain_name: example.com
     start_services: true
     enable_services: true
+    dns_server_zone_files: static
 
   tasks:
     - name: "Include dns_server"

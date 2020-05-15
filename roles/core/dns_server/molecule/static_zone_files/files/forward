@@ -1,0 +1,35 @@
+;Example forward file for molecule unit test static_zone_files
+
+$TTL 86400
+$ORIGIN example.com.
+@ IN SOA  management1.example.com. root.example.com. (
+  1589322572  ;Serial
+  3600        ;Refresh
+  1800        ;Retry
+  604800      ;Expire
+  86400       ;Minimum TTL
+)
+@                          IN NS management1.example.com.
+
+management1                IN A 10.10.0.1
+management1-ice1-1         IN A 10.10.0.1
+management1-interconnect-1 IN A 10.20.0.1
+bmanagement1               IN A 10.10.100.1
+bmanagement1-ice1-1        IN A 10.10.100.1
+login1                     IN A 10.10.2.1
+login1-ice1-1              IN A 10.10.2.1
+login1-interconnect-1      IN A 10.20.2.1
+blogin1                    IN A 10.10.102.1
+blogin1-ice1-1             IN A 10.10.102.1
+c001                       IN A 10.10.3.1
+c001-ice1-1                IN A 10.10.3.1
+c001-interconnect-1        IN A 10.20.3.1
+c002                       IN A 10.10.3.2
+c002-ice1-1                IN A 10.10.3.2
+c002-interconnect-1        IN A 10.20.3.2
+c003                       IN A 10.10.3.3
+c003-ice1-1                IN A 10.10.3.3
+c003-interconnect-1        IN A 10.20.3.3
+c004                       IN A 10.10.3.4
+c004-ice1-1                IN A 10.10.3.4
+c004-interconnect-1        IN A 10.20.3.4
