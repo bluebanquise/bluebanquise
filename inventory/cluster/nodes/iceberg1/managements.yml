@@ -24,6 +24,10 @@ mg_managements:                        # Master group
               type: bond-slave
               master: bond0
 
-            eth2.100:
+            eth2.100:                       # To define an interface in a VLAN
+              ip4: 10.100.0.1
+              mac: a0:36:9f:2e:c1:41
+              physical_device: eth2
+              vlan_id: 100
               vlan: true
-
+              network: ice1-100
