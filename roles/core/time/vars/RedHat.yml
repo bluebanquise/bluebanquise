@@ -1,0 +1,6 @@
+---
+time_packages_to_install:
+  - chrony
+time_services_to_start:
+  - chronyd
+time_chrony_conf_path: /etc/chrony.conf
