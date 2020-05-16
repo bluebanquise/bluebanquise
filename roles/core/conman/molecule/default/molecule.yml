@@ -26,9 +26,9 @@ provisioner:
         start_services: true
         equipment_profile:
           equipment_type: server
-          authentication:
-            equipment_user: 'ADMIN'
-            equipment_password: 'ADMIN'
+          equipment_authentication:
+            user: 'ADMIN'
+            password: 'ADMIN'
         bmc:
           ip4: 10.10.102.1
           mac: 08:00:27:dc:f8:a7

@@ -23,6 +23,6 @@ GLOBAL logopts="timestamp"
 
 {% for host in range %}
   {% if hostvars[host]['equipment_profile']['equipment_type'] == "server" %}
-console name="{{host}}" dev="ipmitool.exp {{hostvars[host]['bmc']['ip4']}} {{hostvars[host]['equipment_profile']['authentication']['equipment_user']}} {{hostvars[host]['equipment_profile']['authentication']['equipment_password']}}"
+console name="{{host}}" dev="ipmitool.exp {{hostvars[host]['bmc']['ip4']}} {{hostvars[host]['equipment_profile']['equipment_authentication']['user']}} {{hostvars[host]['equipment_profile']['equipment_authentication']['password']}}"
   {% endif %}
 {% endfor %}
