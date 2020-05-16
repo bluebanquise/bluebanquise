@@ -21,7 +21,7 @@
 
 - name: Install Ansible and dependencies for filters
   package:
-    name: "{{ ansible_packages_to_install }}"
+    name: "{{ bluebanquise_packages_to_install }}"
     state: present
   tags:
     - package
