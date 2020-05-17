@@ -18,11 +18,34 @@ platforms:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
     privileged: true
     pre_build_image: true
+  - name: mgmt0-firewall
+    groups:
+      - equipment_typeM
+    image: "geerlingguy/docker-${MOLECULE_DISTRO:-centos8}-ansible:latest"
+    command: "/lib/systemd/systemd"
+    capabilities:
+      - "SYS_ADMIN"
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    pre_build_image: true
 provisioner:
   name: ansible
   inventory:
+    group_vars:
+      equipment_typeM:
+        equipment_profile:
+          firewall: true
     host_vars:
       mgmt0:
+        j2_current_iceberg_network: ice1
+        j2_node_main_network: ice1-1
+        j2_node_main_network_interface: en0
+        network_interfaces:
+          en0:
+            ip4: 10.10.0.1
+            network: ice1-1
+      mgmt0-firewall:
         j2_current_iceberg_network: ice1
         j2_node_main_network: ice1-1
         j2_node_main_network_interface: en0

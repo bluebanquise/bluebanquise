@@ -6,3 +6,17 @@
     - name: "update cache apt"
       apt: update_cache=yes
       when: ansible_facts.os_family == "Debian"
+
+- name: Setup mgmt0 with firewall
+  hosts: mgmt0-firewall
+  tasks:
+    - name: Install firewalld
+      package:
+        name: firewalld
+        state: present
+      when: ansible_facts.os_family == "RedHat"
+    - name: Start firewalld
+      service:
+        name: firewalld
+        state: started
+      when: ansible_facts.os_family == "RedHat"

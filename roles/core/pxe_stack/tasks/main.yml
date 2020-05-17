@@ -19,6 +19,18 @@
         - "vars/{{ ansible_facts.os_family }}.yml"
       skip: true
 
+- name: Add services to firewall's internal zone
+  firewalld:
+    zone: internal
+    service: "{{ item }}"
+    immediate: "yes"
+    permanent: "yes"
+    state: enabled
+  when:
+    - ansible_facts.os_family == "RedHat"
+    - equipment_profile['firewall'] | default(false) | bool
+  loop: "{{ pxe_stack_firewall_services_to_add }}"
+
 - name: Install minimum packages for PXE
   package:
     name: "{{ pxe_stack_packages_to_install }}"
