@@ -1,0 +1,21 @@
+---
+- name: "Check presence of required parameters"
+  fail:
+    msg: "Bailing out.
+  This play requires networks[{{ network_interfaces[item['key']]['network'] }}]['is_in_firewall']=true|false"
+  when: networks[network_interfaces[item['key']]['network']]['is_in_firewall'] is not defined
+  loop: "{{ network_interfaces | dict2items }}"
+  loop_control:
+    label: "{{ item['key'] }}"
+
+- name: "Configure firewall zone: internal sources"
+  firewalld:
+    zone: internal
+    source: "{{ networks[item]['subnet'] }}/{{ networks[item]['prefix'] }}"
+    immediate: yes
+    permanent: yes
+    state: enabled
+  when: networks[item]['is_in_firewall'] | bool
+  loop: "{{ (network_interfaces | json_query('*.network')) }}"
+  loop_control:
+    label: "Add source '{{ networks[item]['subnet'] }}/{{ networks[item]['prefix'] }}' to zone 'internal'"

@@ -13,8 +13,11 @@ equipment_profile:
   console:
   kernel_parameters:
 
-  access_control: true # Selinux, AppArmor, etc. Selinux: true = enforcing, false = disabled
-  firewall: true # Enable or disable native firewall
+  # Selinux, AppArmor, etc. Selinux: true = enforcing, false = disabled
+  access_control: true
+  # Enable or disable native firewall
+  # If enabled, you must add the role firewall to your playbook
+  firewall: true
 
   partitioning: | # Please provide native distribution partitioning. This example is for Centos/RedHat systems.
     clearpart --all --initlabel

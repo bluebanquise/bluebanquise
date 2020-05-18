@@ -9,6 +9,8 @@
       tags: repositories_client
     - role: nic
       tags: nic
+    - role: firewall
+      tags: firewall
     - role: hosts_file
       tags: hosts_file
     - role: dns_client
