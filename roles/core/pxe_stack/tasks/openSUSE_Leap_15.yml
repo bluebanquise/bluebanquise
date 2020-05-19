@@ -1,3 +1,7 @@
-## Tested on RedHat 8.0
+- name: atftpd service file
+  copy:
+    src: opensuse/atftpd.service
+    dest: /usr/lib/systemd/system/atftpd.service 
+
 
 

@@ -2,6 +2,8 @@
 role_version: 1.1.2
 
 pxe_stack_supported_os:
+  opensuse:
+    - 15
   centos:
     - 7
     - 8

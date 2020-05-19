@@ -20,7 +20,11 @@ set eq-repositories-environment {{hostvars[groups[item][0]]['equipment_profile']
 # Dynamic variables
 set images-root http://${next-server}/repositories/${eq-repositories-environment}/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/
 set repository-root http://${next-server}/repositories/${eq-repositories-environment}/${eq-distribution}/${eq-repositories-releasever}/${eq-architecture}/
+{% if distribution == "opensuse" %}
+set autoyast-path http://${next-server}/preboot_execution_environment/equipment_profiles//${eq-equipment-profile}.autoyast.xml
+{% else %}
 set kickstart-path http://${next-server}/preboot_execution_environment/equipment_profiles//${eq-equipment-profile}.kickstart.cfg
+{% endif %}
 
 echo |
 

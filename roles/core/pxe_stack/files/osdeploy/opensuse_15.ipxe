@@ -1,0 +1,35 @@
+#!ipxe
+
+echo |
+echo | Entering osdeploy/opensuse_15.ipxe file.
+echo |
+
+echo | Now starting os deployment process.
+echo | OpenSUSE ipxe configuration.
+echo |
+echo | Parameters used:
+echo | > Operating system target: ${eq-distribution} ${eq-distribution-version} ${eq-architecture}
+echo | > Console: ${eq-console}
+echo | > Additional kernel parameters: ${eq-kernel-parameters} ${dedicated-kernel-parameters}
+echo | > Deployment server: ${next-server}
+echo | > Target images: repositories/${eq-repositories-environment}/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/
+echo | > Target repos: repositories/${eq-repositories-environment}/${eq-distribution}/${eq-repositories-releasever}/${eq-architecture}/
+echo | > Target autoyast: ${eq-equipment-profile}.autoyast.xml
+echo |
+echo | Loading linux ...
+
+kernel ${images-root}/netboot/linux initrd=initrd inst.stage2=${images-root}/os/ install=${repository-root}/os/ autoyast=${autoyast-path} ${eq-console} ${eq-kernel-parameters} ${dedicated-kernel-parameters} ipxe_next_server=${next-server}
+
+echo | Loading initial ramdisk ...
+
+initrd ${images-root}/netboot/initrd
+
+echo | ALL DONE! We are ready.
+echo | Booting in 4s ...
+echo |
+echo +----------------------------------------------------+
+
+sleep 4
+
+boot
+

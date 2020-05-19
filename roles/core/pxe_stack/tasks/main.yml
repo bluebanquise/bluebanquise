@@ -132,6 +132,8 @@
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_user }}"
   with_items: "{{ j2_equipment_groups_list }}"
+  vars:
+    distribution: "{{(hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower)}}"
   when:
     - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
     - (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) in ['redhat','centos']
@@ -170,6 +172,15 @@
 
 ##### OpenSuse
 
+- name: osdeploy files (opensuse leap)
+  copy:
+    src: "osdeploy/opensuse_{{ item }}.ipxe"
+    dest: "{{ pxe_stack_apache_html_path }}/preboot_execution_environment/osdeploy/opensuse_{{ item }}.ipxe"
+    mode: 0644
+    owner: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_user }}"
+  with_items: "{{ pxe_stack_supported_os.opensuse }}"
+
 - name: Templates >> autoyasts for OpenSuse
   template:
     src: "autoyast.xml.j2"
@@ -186,17 +197,20 @@
 
 - name: Templates >> equipment_profiles for OpenSuse
   template:
-    src: "configuration_opensuse.ipxe.j2"
+    src: "equipment_profile.ipxe.j2"
     dest: "{{ pxe_stack_apache_html_path }}/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.ipxe"
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_user }}"
+  vars:
+    distribution: opensuse
   with_items: "{{ j2_equipment_groups_list }}"
   when:
     - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
     - (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) == 'opensuse'
   tags:
     - template
+
 
 ##### Minimal, specific
 
