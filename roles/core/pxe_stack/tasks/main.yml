@@ -32,23 +32,23 @@
     state: directory
     mode: 0755
   loop:
-   - /var/www/cgi-bin
+   - "{{ pxe_stack_apache_cgi_path }}"
    - /etc/bluebanquise
    - /etc/bluebanquise/pxe
 
 - name: Create pxe directories structure
   file:
-    path: "{{ item }}"
+    path: "{{ pxe_stack_apache_html_path }}{{ item }}"
     state: directory
     mode: 0755
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_user }}"
   loop:
-   - /var/www/html/preboot_execution_environment
-   - /var/www/html/preboot_execution_environment/bin
-   - /var/www/html/preboot_execution_environment/nodes
-   - /var/www/html/preboot_execution_environment/equipment_profiles
-   - /var/www/html/preboot_execution_environment/osdeploy
+   - /preboot_execution_environment
+   - /preboot_execution_environment/bin
+   - /preboot_execution_environment/nodes
+   - /preboot_execution_environment/equipment_profiles
+   - /preboot_execution_environment/osdeploy
 
 - name: Use OS dedicated task
   include_tasks: "{{ (ansible_facts.distribution|replace(' ','_')) }}_{{ ansible_facts.distribution_major_version }}.yml"
@@ -70,7 +70,7 @@
 - name: Templates >> menu and convergence
   template:
     src: "{{ item }}.ipxe.j2"
-    dest: "/var/www/html/preboot_execution_environment/{{ item }}.ipxe"
+    dest: "{{ pxe_stack_apache_html_path }}/preboot_execution_environment/{{ item }}.ipxe"
     mode: 0755
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_user }}"
@@ -83,7 +83,7 @@
 - name: Templates >> nohostname
   template:
     src: nohostname.ipxe.j2
-    dest: /var/www/html/preboot_execution_environment/nodes/.ipxe
+    dest: "{{ pxe_stack_apache_html_path }}/preboot_execution_environment/nodes/.ipxe"
     mode: 0755
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_user }}"
@@ -95,7 +95,7 @@
 - name: osdeploy files (redhat)
   copy:
     src: osdeploy/redhat_{{ item }}.ipxe
-    dest: "/var/www/html/preboot_execution_environment/osdeploy/redhat_{{ item }}.ipxe"
+    dest: "{{ pxe_stack_apache_html_path }}/preboot_execution_environment/osdeploy/redhat_{{ item }}.ipxe"
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_user }}"
@@ -104,7 +104,7 @@
 - name: osdeploy files (centos)
   copy:
     src: osdeploy/centos_{{ item }}.ipxe
-    dest: "/var/www/html/preboot_execution_environment/osdeploy/centos_{{ item }}.ipxe"
+    dest: "{{ pxe_stack_apache_html_path }}/preboot_execution_environment/osdeploy/centos_{{ item }}.ipxe"
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_user }}"
@@ -113,7 +113,7 @@
 - name: Templates >> kickstarts for Centos
   template:
     src: "kickstart.cfg.j2"
-    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.kickstart.cfg
+    dest: "{{ pxe_stack_apache_html_path }}/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.kickstart.cfg"
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_user }}"
@@ -127,7 +127,7 @@
 - name: Templates >> equipment_profiles for Centos
   template:
     src: "equipment_profile.ipxe.j2"
-    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.ipxe
+    dest: "{{ pxe_stack_apache_html_path }}/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.ipxe"
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_user }}"
@@ -143,7 +143,7 @@
 - name: Templates >> preseeds for Ubuntu
   template:
     src: "preseed.cfg.j2"
-    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.preseed.cfg
+    dest: "{{ pxe_stack_apache_html_path }}/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.preseed.cfg"
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_user }}"
@@ -157,7 +157,7 @@
 - name: Templates >> equipment_profiles for Ubuntu
   template:
     src: "configuration_ubuntu.ipxe.j2"
-    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.ipxe
+    dest: "{{ pxe_stack_apache_html_path }}/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.ipxe"
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_user }}"
@@ -173,7 +173,7 @@
 - name: Templates >> autoyasts for OpenSuse
   template:
     src: "autoyast.xml.j2"
-    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.autoyast.xml
+    dest: "{{ pxe_stack_apache_html_path }}/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.autoyast.xml"
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_user }}"
@@ -187,7 +187,7 @@
 - name: Templates >> equipment_profiles for OpenSuse
   template:
     src: "configuration_opensuse.ipxe.j2"
-    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.ipxe
+    dest: "{{ pxe_stack_apache_html_path }}/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.ipxe"
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_user }}"
@@ -203,7 +203,7 @@
 - name: Templates >> equipment_ipxe_configuration for Minimal Live Linux
   template:
     src: "configuration_minimal.ipxe.j2"
-    dest: /var/www/html/preboot_execution_environment/equipment_profiles/minimal.ipxe
+    dest: "{{ pxe_stack_apache_html_path }}/preboot_execution_environment/equipment_profiles/minimal.ipxe"
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_user }}"
@@ -236,7 +236,7 @@
 - name: cgi script
   copy:
     src: bootswitch.cgi
-    dest: /var/www/cgi-bin/bootswitch.cgi
+    dest: "{{ pxe_stack_apache_cgi_path }}/bootswitch.cgi"
     mode: 0744
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_user }}"

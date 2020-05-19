@@ -1,0 +1,18 @@
+---
+pxe_stack_apache_cgi_module: cgi
+pxe_stack_apache_conf_path: /etc/apache2/conf.d
+pxe_stack_apache_html_path: /srv/www/htdocs/
+pxe_stack_apache_cgi_path: /srv/www/cgi-bin/
+pxe_stack_apache_user: wwwrun
+pxe_stack_packages_to_install:
+  - atftp
+  - ipxe-x86_64-bluebanquise
+    #  - ipxe-arm64-bluebanquise
+  - apache2
+    #  - python3-policycoreutils
+  - clustershell
+  - python3-clustershell
+    #  - policycoreutils
+pxe_stack_services_to_start:
+  - atftpd
+  - httpd
