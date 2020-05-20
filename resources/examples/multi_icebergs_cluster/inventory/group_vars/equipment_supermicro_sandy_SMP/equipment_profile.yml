@@ -1,4 +1,4 @@
-equipment_profile:
+equipment_profile_override:
 
   access_control: false
   firewall: false

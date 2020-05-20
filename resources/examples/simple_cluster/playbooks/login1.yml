@@ -3,6 +3,8 @@
   hosts: "{{ target | default('login1') }}"
   roles:
 
+    - role: common
+      tags: common
     - role: set_hostname
       tags: set_hostname
     - role: repositories_client

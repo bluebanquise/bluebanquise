@@ -1,0 +1,4 @@
+---
+- name: Merge equipment profile
+  set_fact:
+    equipment_profile: "{{ equipment_profile | combine(equipment_profile_override, recursive=True) }}"
