@@ -2,10 +2,6 @@
 - name: Verify
   hosts: all
 
-  vars:
-    content_orig: "{{ lookup('file', '/etc/rsyslog.conf') }}"
-    expected_content: "{{ lookup('file', 'expected_rsyslog.conf') }}"
-
   tasks:
   - name: populate service facts
     service_facts:
@@ -15,17 +11,3 @@
       that:
         - ansible_facts.services['rsyslog.service'].status == 'enabled'
         - ansible_facts.services['rsyslog.service'].state == 'running'
-
-  - name: difference with expected content of rsyslog.conf
-    set_fact:
-      file_diff: "{{ expected_content .split('\n') | difference(content_orig.split('\n')) | list }}"
-  - name: debug
-    debug:
-      var: content_orig
-  - name: debug
-    debug:
-      var: file_diff
-
-  - name: assert rsyslog file has the right content
-    assert:
-      that: file_diff|length == 0
