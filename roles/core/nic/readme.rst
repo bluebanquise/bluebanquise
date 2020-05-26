@@ -48,6 +48,8 @@ To configure an LACP bonding, specify slave interfaces, and then create the bond
       type: bond
       vlan: false
       bond_options: "mode=4 xmit_hash_policy=layer3+4 miimon=100 lacp_rate=1"
+      ip4: 10.100.0.1
+      network: ice1-1
 
 To configure a vlan, simply set vlan to true:
 
@@ -60,6 +62,52 @@ To configure a vlan, simply set vlan to true:
       physical_device: eth2
       ip4: 10.100.0.1
       network: net-100
+
+A full example with vlan over bond would be:
+
+.. code-block:: yaml
+
+  network_interfaces:
+    eth3:
+      network: lk1
+      ip4: 172.16.0.2
+    bond0:
+      type: bond
+      bond_options: "mode=4 xmit_hash_policy=layer3+4 miimon=100 lacp_rate=1"
+      network: ice1-1
+      ip4: 172.21.2.102
+    bond0.100:
+      type: vlan
+      network: ice1-2
+      ip4: 10.100.0.1
+      vlan: true
+      vlan_id: 100
+      physical_device: bond0
+    bond0.1:
+      type: vlan
+      network: ice1-3
+      ip4: 10.1.0.1
+      vlan: true
+      vlan_id: 1
+      physical_device: bond0
+    enp136s0f0:
+      type: bond-slave
+      master: bond0
+    enp136s0f1:
+      type: bond-slave
+      master: bond0
+
+It is also possible to configure multiple ip per interface, using:
+
+.. code-block:: yaml
+
+  network_interfaces:
+    eth3:
+      network: lk1
+      ip4_multi:
+        - 172.16.0.2/16
+        - 172.16.0.3/16
+        - 192.168.1.117/24
 
 MTU and/or Gateway can be set in the network file, and will be applyed to NIC linked to this network.
 
@@ -93,5 +141,5 @@ Add Ubuntu and Opensuse compatiblity if asked for.
 Changelog
 ^^^^^^^^^
 
+* 1.0.1: Fix VLAN and BOND. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
- 
