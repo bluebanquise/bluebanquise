@@ -23,5 +23,5 @@
     mode: 0644
   with_items: "{{ network_interfaces }}"
   when: >
-      ( network_interfaces[item]['ip4'] is defined and network_interfaces[item]['ip4'] is not none ) or 
-      ( network_interfaces[item]['type'] is defined and network_interfaces[item]['type'] is not none and network_interfaces[item]['type'] == 'bond-slave')
+      ( network_interfaces[item]['ip4'] is defined and network_interfaces[item]['ip4'] is not none ) or
+      ( network_interfaces[item]['type'] is defined and network_interfaces[item]['type'] is not none and network_interfaces[item]['type'] == 'bond-slave' )
