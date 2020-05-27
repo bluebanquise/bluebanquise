@@ -1,93 +1,87 @@
+#jinja2: lstrip_blocks: "True"
 #### Blue Banquise file ####
 ## {{ansible_managed}}
 
 {# 1. First the name and default parameters. #}
 NAME={{item}}
 DEVICE={{item}}
-{% if (network_interfaces[item]['autoconnect'] is defined and not none) and (network_interfaces[item]['autoconnect'] == false) %}
+{% if (network_interfaces[item]['autoconnect'] is defined and network_interfaces[item]['autoconnect'] is not none) and (network_interfaces[item]['autoconnect'] == false) %}
 ONBOOT=no
 {% else %}
 ONBOOT=yes
 {% endif %}
+{% if ansible_facts.distribution_major_version|int < 8 %}
 NM_MANAGED=yes
+{% endif %}
 BOOTPROTO=none
 
 {# 2. Let's get the type. Default is Ethernet. #}
-{% set nic_type = 'Ethernet' %}
-{% if network_interfaces[item]['type'] is defined and not none %}
-{% if network_interfaces[item]['type'] == 'bond' %}
-{% set nic_type = 'Bond' %}
-{% elif network_interfaces[item]['type'] == 'infiniband' %}
-{% set nic_type = 'Infiniband' %}
+{% if (network_interfaces[item]['type'] is defined and network_interfaces[item]['type'] is not none) %}
+  {% if (network_interfaces[item]['type'] | lower) in ['infiniband', 'bond', 'vlan'] %}
+TYPE={{ network_interfaces[item]['type'] | lower }}
+  {% endif %}
+{% else %}
+TYPE=ethernet
 {% endif %}
-{% endif %}
-TYPE={{nic_type}}
 
 {# 3. Now basic network parameters, if exist. #}
 {# 3.1 Lets check if we need to set a simple ip, or multiple. #}
-{% if network_interfaces[item]['ip4'] is defined and not none %}
+{% if network_interfaces[item]['ip4'] is defined and network_interfaces[item]['ip4'] is not none %}
 {# 3.1.1 Ok, now lets check we have a prefix or a netmask for this ip. Can come from network or directly set in network_interfaces. #}
-{% if (network_interfaces[item]['network'] is defined and not none) and (networks[network_interfaces[item]['network']] is defined and not none) %}
-{% if networks[network_interfaces[item]['network']]['prefix'] is defined and not none %}
-{# 3.1.2 Ok, go for prefix from network. #}
+  {% if (network_interfaces[item]['network'] is defined and network_interfaces[item]['network'] is not none) and (networks[network_interfaces[item]['network']] is defined and networks[network_interfaces[item]['network']] is not none) %}
+    {% if networks[network_interfaces[item]['network']]['prefix'] is defined and networks[network_interfaces[item]['network']]['prefix'] is not none %}
+    {# 3.1.2 Ok, go for prefix from network. #}
 IPADDR={{network_interfaces[item]['ip4']}}
 PREFIX={{networks[network_interfaces[item]['network']]['prefix']}}
-{% elif  networks[network_interfaces[item]['network']]['netmask'] is defined and not none %}
-{# 3.1.3 Ok, go for netmask from network. #}
+    {% elif networks[network_interfaces[item]['network']]['netmask'] is defined and networks[network_interfaces[item]['network']]['netmask'] is not none %}
+    {# 3.1.3 Ok, go for netmask from network. #}
 IPADDR={{network_interfaces[item]['ip4']}}
 NETMASK={{networks[network_interfaces[item]['network']]['netmask']}}
-{% endif %}
-{% endif %}
+    {% endif %}
+  {% endif %}
 {% endif %}
 
 {# 3.1.4 Maybe prefix was set directly on ip4 line. This is allowed in ip4_multi #}
-{% if network_interfaces[item]['ip4_multi'] is defined and not none and network_interfaces[item]['ip4_multi'] is iterable %}
-{% for ip in network_interfaces[item]['ip4_multi'] %}
-{% if '/' in ip %}
+{% if network_interfaces[item]['ip4_multi'] is defined and network_interfaces[item]['ip4_multi'] is not none and network_interfaces[item]['ip4_multi'] is iterable %}
+  {% for ip in network_interfaces[item]['ip4_multi'] %}
+    {% if '/' in ip %}
 IPADDR{{loop.index}}={{ip.split('/')[0]}}
 PREFIX{{loop.index}}={{ip.split('/')[1]}}
-{% endif %}
-{% endfor %}
+    {% endif %}
+  {% endfor %}
 {% endif %}
 
 {# 4. Do we have a gateway ? #}
-{% if (network_interfaces[item]['network'] is defined and not none) and (networks[network_interfaces[item]['network']]['gateway'] is defined and not none) %}
+{% if (network_interfaces[item]['network'] is defined and network_interfaces[item]['network'] is not none) and (networks[network_interfaces[item]['network']]['gateway'] is defined and networks[network_interfaces[item]['network']]['gateway'] is not none) %}
 GATEWAY={{networks[network_interfaces[item]['network']]['gateway']}}
-{% elif network_interfaces[item]['gw4'] is defined and not none %}
+{% elif network_interfaces[item]['gw4'] is defined and network_interfaces[item]['gw4'] is not none %}
 GATEWAY={{network_interfaces[item]['gw4']}}
 {% endif %}
 
 {# 5. Do we have an MTU defined ? #}
-{% if (network_interfaces[item]['network'] is defined and not none) and (networks[network_interfaces[item]['network']]['mtu'] is defined and not none) %}
+{% if (network_interfaces[item]['network'] is defined and network_interfaces[item]['network'] is not none) and (networks[network_interfaces[item]['network']]['mtu'] is defined and networks[network_interfaces[item]['network']]['mtu'] is not none) %}
 MTU={{networks[network_interfaces[item]['network']]['mtu']}}
-{% elif network_interfaces[item]['mtu'] is defined and not none %}
+{% elif network_interfaces[item]['mtu'] is defined and network_interfaces[item]['mtu'] is not none %}
 MTU={{network_interfaces[item]['mtu']}}
 {% endif %}
 
 {# 6. Is it a VLAN ? #}
-{% if (network_interfaces[item]['vlan'] is defined and not none) and (network_interfaces[item]['vlan'] == true) %}
+{% if (network_interfaces[item]['vlan'] is defined and network_interfaces[item]['vlan'] is not none) and (network_interfaces[item]['vlan'] == true) %}
 VLAN=yes
-{% set vlan_itf = item.split('.') %}
-{% if vlan_itf | length == 2 %}
-PHYSDEV={{vlan_itf[0]}}
-VLAN_ID={{vlan_itf[1]}}
-{% else %}
 PHYSDEV={{network_interfaces[item]['physical_device']}}
 VLAN_ID={{network_interfaces[item]['vlan_id']}}
-{% endif %}
 {% endif %}
 
 {# 7. Is it a bonding (bond) or a bonding-slave (bond-slave) ? #}
 {# 7.1 Master first. #}
-{% if (network_interfaces[item]['type'] is defined and not none) and (network_interfaces[item]['type'] == 'bond') %}
+{% if (network_interfaces[item]['type'] is defined and network_interfaces[item]['type'] is not none) and (network_interfaces[item]['type'] == 'bond') %}
 BONDING_MASTER=yes
-{% if network_interfaces[item]['bond_options'] is defined and not none %}
-BONDING_OPTS={{network_interfaces[item]['bond_options']}}
-{% endif %}
+  {% if network_interfaces[item]['bond_options'] is defined and network_interfaces[item]['bond_options'] is not none %}
+BONDING_OPTS="{{network_interfaces[item]['bond_options']}}"
+  {% endif %}
 {% endif %}
 {# 7.2 Now slave. #}
-{% if (network_interfaces[item]['type'] is defined and not none) and (network_interfaces[item]['type'] == 'bond-slave') %}
+{% if (network_interfaces[item]['type'] is defined and network_interfaces[item]['type'] is not none) and (network_interfaces[item]['type'] == 'bond-slave') %}
 SLAVE=yes
 MASTER={{network_interfaces[item]['master']}}
 {% endif %}
-
