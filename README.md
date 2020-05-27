@@ -1,6 +1,10 @@
 # BlueBanquise
 ![BlueBanquise Logo](resources/pictures/BlueBanquise_logo_large.svg)
 
+<p align="center">
+  Web site: <a href="https://bluebanquise.com"><b>https://bluebanquise.com</b></a>
+</p>
+
 ## The stack
 
 **BlueBanquise** is an **Ansible** based stack, designed to deploy and manage large group of hosts.
@@ -10,14 +14,15 @@ Main target is High Performance Computing, but stack is generic and can adapt to
 Currently supported OS are:
 
 * Fully supported:
-  * RedHat/Centos 7.6
-  * RedHat/Centos 8.0
+  * RedHat/Centos 7
+  * RedHat/Centos 8
 
-* Ready to be included if demand (PXE ready):
-  * Ubuntu 18.04
+* In development:
   * OpenSuse Leap 15.1
 
-Debian is dropped for now because we fail to install it through PXE (modules conflicts).
+* To be included if demand:
+  * Ubuntu
+  * Debian
 
 Ansible >= 2.8.2 is mandatory for BlueBanquise to run properly.
 
