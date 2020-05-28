@@ -14,3 +14,6 @@ pxe_stack_packages_to_install:
 pxe_stack_services_to_start:
   - atftpd
   - httpd
+pxe_stack_firewall_services_to_add:
+  - http
+  - tftp
