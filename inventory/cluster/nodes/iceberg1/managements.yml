@@ -12,18 +12,31 @@ mg_managements:                        # Master group
               ip4: 10.11.0.1
               mac: 08:00:27:de:42:22
               network: ice1-1          # Logical network connected to
-            bond0:
-              type: bond
-              vlan: false
-              bond_options: "mode=4 xmit_hash_policy=layer3+4 miimon=100 lacp_rate=1"
-            eth0:
-              type: bond-slave
-              master: bond0
-
-            eth1:
-              type: bond-slave
-              master: bond0
-
-            eth2.100:
-              vlan: true
-
+            # eth3:
+            #   network: lk1
+            #   ip4: 172.16.0.2
+            # bond0:
+            #   type: bond
+            #   bond_options: "mode=4 xmit_hash_policy=layer3+4 miimon=100 lacp_rate=1"
+            #   network: ice1-4
+            #   ip4: 172.21.2.102
+            # bond0.100:
+            #   type: vlan
+            #   network: ice1-2
+            #   ip4: 10.100.0.1
+            #   vlan: true
+            #   vlan_id: 100
+            #   physical_device: bond0
+            # bond0.1:
+            #   type: vlan
+            #   network: ice1-3
+            #   ip4: 10.1.0.1
+            #   vlan: true
+            #   vlan_id: 1
+            #   physical_device: bond0
+            # enp136s0f0:
+            #   type: bond-slave
+            #   master: bond0
+            # enp136s0f1:
+            #   type: bond-slave
+            #   master: bond0

@@ -14,4 +14,3 @@
     gpgkey: "{{ item.gpgkey | default(omit) }}"
     proxy: "{{ item.proxy | default(omit) }}"
   with_items: "{{ repositories | union(external_repositories|default([])) }}"
-
