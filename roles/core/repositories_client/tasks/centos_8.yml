@@ -27,4 +27,3 @@
     proxy: "{{ item.0.proxy | default(omit) }}"
   loop: "{{ repositories | product(['AppStream', 'BaseOS']) | list }}"
   when: ( item.0 == 'os' ) or ( item.0.name is defined and item.0.name == 'os' )
-
