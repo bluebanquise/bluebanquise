@@ -19,6 +19,20 @@
         - "vars/{{ ansible_facts.os_family }}.yml"
       skip: true
 
+- name: "Add services to firewall's {{ advanced_dhcp_server_firewall_zone | default('public') }} zone"
+  firewalld:
+    zone: "{{ advanced_dhcp_server_firewall_zone | default('public') }}"
+    service: "{{ item }}"
+    immediate: "yes"
+    permanent: "yes"
+    state: enabled
+  when:
+    - ansible_facts.os_family == "RedHat"
+    - equipment_profile['firewall'] | default(false) | bool
+  loop: "{{ advanced_dhcp_server_firewall_services_to_add }}"
+  tags:
+    - firewall
+
 - name: Package
   package:
     name: "{{ item }}"
