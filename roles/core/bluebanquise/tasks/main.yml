@@ -1,5 +1,5 @@
 ---
-- name: Gathering OS specific variables
+- name: include_vars █ Gather OS specific variables
   # This task gathers variables defined in OS specific files.
   #
   # Search vars in:
@@ -18,11 +18,12 @@
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
         - "vars/{{ ansible_facts.os_family }}.yml"
       skip: true
+  tags:
+    - internal
 
-- name: Install Ansible and dependencies for filters
+- name: package █ Install Ansible and dependencies for filters
   package:
     name: "{{ bluebanquise_packages_to_install }}"
     state: present
   tags:
     - package
-
