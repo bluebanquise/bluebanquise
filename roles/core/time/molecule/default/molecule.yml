@@ -12,7 +12,7 @@ platforms:
   - name: server-ext-pool
     groups:
       - server
-    image: "geerlingguy/docker-${MOLECULE_DISTRO:-centos8}-ansible:latest"
+    image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
     command: "/lib/systemd/systemd"
     capabilities:
       - "SYS_ADMIN"
@@ -23,7 +23,7 @@ platforms:
   - name: server-ext-servers
     groups:
       - server
-    image: "geerlingguy/docker-${MOLECULE_DISTRO:-centos8}-ansible:latest"
+    image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
     command: "/lib/systemd/systemd"
     capabilities:
       - "SYS_ADMIN"
@@ -34,7 +34,7 @@ platforms:
   - name: client-ext-pool
     groups:
       - client
-    image: "geerlingguy/docker-${MOLECULE_DISTRO:-centos8}-ansible:latest"
+    image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
     command: "/lib/systemd/systemd"
     capabilities:
       - "SYS_ADMIN"
@@ -45,7 +45,7 @@ platforms:
   - name: client-ext-servers
     groups:
       - client
-    image: "geerlingguy/docker-${MOLECULE_DISTRO:-centos8}-ansible:latest"
+    image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
     command: "/lib/systemd/systemd"
     capabilities:
       - "SYS_ADMIN"
@@ -56,7 +56,7 @@ platforms:
   - name: client-single-source
     groups:
       - client
-    image: "geerlingguy/docker-${MOLECULE_DISTRO:-centos8}-ansible:latest"
+    image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
     command: "/lib/systemd/systemd"
     capabilities:
       - "SYS_ADMIN"
@@ -67,7 +67,7 @@ platforms:
   - name: client-multi-sources
     groups:
       - client
-    image: "geerlingguy/docker-${MOLECULE_DISTRO:-centos8}-ansible:latest"
+    image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
     command: "/lib/systemd/systemd"
     capabilities:
       - "SYS_ADMIN"
