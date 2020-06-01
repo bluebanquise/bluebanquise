@@ -4,7 +4,7 @@ dependency:
 driver:
   name: docker
 platforms:
-  - name: instance-${MOLECULE_DISTRO:-centos8}
+  - name: instance-${INSTANCE_DISTRO:-centos8}
     image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
     override_command: false
     capabilities:
