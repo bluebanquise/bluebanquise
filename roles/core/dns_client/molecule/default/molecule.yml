@@ -11,7 +11,7 @@ lint:  |
 platforms:
   - name: instance
     image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
-    command: "/lib/systemd/systemd"
+    override_command: false
     capabilities:
       - "SYS_ADMIN"
     volumes:

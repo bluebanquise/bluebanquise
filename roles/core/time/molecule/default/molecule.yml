@@ -13,7 +13,7 @@ platforms:
     groups:
       - server
     image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
-    command: "/lib/systemd/systemd"
+    override_command: false
     capabilities:
       - "SYS_ADMIN"
     volumes:
@@ -24,7 +24,7 @@ platforms:
     groups:
       - server
     image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
-    command: "/lib/systemd/systemd"
+    override_command: false
     capabilities:
       - "SYS_ADMIN"
     volumes:
@@ -35,7 +35,7 @@ platforms:
     groups:
       - client
     image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
-    command: "/lib/systemd/systemd"
+    override_command: false
     capabilities:
       - "SYS_ADMIN"
     volumes:
@@ -46,7 +46,7 @@ platforms:
     groups:
       - client
     image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
-    command: "/lib/systemd/systemd"
+    override_command: false
     capabilities:
       - "SYS_ADMIN"
     volumes:
@@ -57,7 +57,7 @@ platforms:
     groups:
       - client
     image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
-    command: "/lib/systemd/systemd"
+    override_command: false
     capabilities:
       - "SYS_ADMIN"
     volumes:
@@ -68,7 +68,7 @@ platforms:
     groups:
       - client
     image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
-    command: "/lib/systemd/systemd"
+    override_command: false
     capabilities:
       - "SYS_ADMIN"
     volumes:
