@@ -20,8 +20,8 @@ jobs:
       fail-fast: false
       matrix:
         distro:
-          - centos7
-          - centos8
+          - centos:7
+          - centos:8
 
     env:
       MOLECULE_DISTRO: ${{ matrix.distro }}
