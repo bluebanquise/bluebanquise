@@ -20,10 +20,11 @@ jobs:
       fail-fast: false
       matrix:
         distro:
-          - centos7
-          - centos8
-          - ubuntu1804
-          - ubuntu2004
+          - centos:7
+          - centos:8
+          - opensuseleap:15.1
+          - ubuntu:18.04
+          - ubuntu:20.04
 
     env:
       MOLECULE_DISTRO: ${{ matrix.distro }}
