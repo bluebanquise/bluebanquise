@@ -1,62 +1,64 @@
 ---
-- name: Template >> Forward zone file on Master DNS
+- name: template █ Generate Forward zone file on Master DNS /var/named/forward
   template:
     src: forward.j2
     dest: /var/named/forward
     owner: root
     group: root
     mode: 0644
-  notify: Restart dns services
+  notify: service █ Restart dns services
   register: zoneconf
   tags:
     - template
 
-- name: Set SOA Serial for forward zone
+- name: set_fact ░ Set SOA Serial for forward zone
   set_fact:
     serial: "{{ lookup('pipe', 'date +%s') }}"
   when: zoneconf.changed  # noqa 503
   tags:
     - template
+    - internal
 
-- name: Template >> SOA for forward zone file /var/named/forward.soa
+- name: template █ Generate SOA for forward zone file /var/named/forward.soa
   template:
     src: forward.soa.j2
     dest: /var/named/forward.soa
     owner: root
     group: root
     mode: 0644
-  notify: Restart dns services
+  notify: service █ Restart dns services
   when: zoneconf.changed  # noqa 503
   tags:
     - template
 
-- name: Template >> Reverse zone file on Master DNS
+- name: template █ Generate Reverse zone file on Master DNS /var/named/reverse
   template:
     src: reverse.j2
     dest: /var/named/reverse
     owner: root
     group: root
     mode: 0644
-  notify: Restart dns services
+  notify: service █ Restart dns services
   register: zoneconf
   tags:
     - template
 
-- name: Set SOA Serial for reverse zone
+- name: set_fact ░ Set SOA Serial for reverse zone
   set_fact:
     serial: "{{ lookup('pipe', 'date +%s') }}"
   when: zoneconf.changed  # noqa 503
   tags:
     - template
+    - internal
 
-- name: Template >> SOA for reverse zone file /var/named/reverse.soa
+- name: template █ Generate SOA for reverse zone file /var/named/reverse.soa
   template:
     src: reverse.soa.j2
     dest: /var/named/reverse.soa
     owner: root
     group: root
     mode: 0644
-  notify: Restart dns services
+  notify: service █ Restart dns services
   when: zoneconf.changed  # noqa 503
   tags:
     - template

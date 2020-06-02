@@ -1,6 +1,6 @@
 #jinja2: lstrip_blocks: True
 #### Blue Banquise file ####
-## {{ansible_managed}}
+## {{ ansible_managed }}
 
 {% set inventory_all_ipv4_addresses = network_interfaces | json_query('*.ip4') %}
 
@@ -33,17 +33,17 @@ options {
   allow-query {
     localhost;
 {% for network in (networks | select('match',(j2_current_iceberg_network+'-[0-9]+')) | list | unique | sort) %}
-{% if (networks[network]['is_in_dns'] is defined and not none) and (networks[network]['is_in_dns'] == true) %}
-    {{networks[network]['subnet']}}/{{networks[network]['prefix']}};
-{% endif %}
+  {% if (networks[network]['is_in_dns'] is defined and networks[network]['is_in_dns'] is not none) and (networks[network]['is_in_dns'] == true) %}
+    {{ networks[network]['subnet'] }}/{{ networks[network]['prefix'] }};
+  {% endif %}
 {% endfor %}
   };
 
-{% if external_dns.dns_server is defined and not none and external_dns.dns_server %}
+{% if external_dns.dns_server is defined and external_dns.dns_server is not none and external_dns.dns_server %}
   forwarders {
-{% for forwarder in external_dns.dns_server %}
-    {{forwarder}};
-{% endfor %}
+  {% for forwarder in external_dns.dns_server %}
+    {{ forwarder }};
+  {% endfor %}
   };
 {% else %}
   recursion no;

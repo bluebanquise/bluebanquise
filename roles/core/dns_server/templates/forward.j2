@@ -1,37 +1,38 @@
+#jinja2: lstrip_blocks: True
 ;#### Blue Banquise file ####
-;## {{ansible_managed}}
+;## {{ ansible_managed }}
 
 $TTL 86400
-$ORIGIN {{domain_name}}.
+$ORIGIN {{ domain_name }}.
 $INCLUDE "/var/named/forward.soa"
-@ IN NS {{inventory_hostname}}.{{domain_name}}.
+@ IN NS {{ inventory_hostname }}.{{ domain_name }}.
 
 {% for host in groups['all'] %}
-{% if hostvars[host]['network_interfaces'] is defined and not none %}
-{% set host_network_interfaces = hostvars[host]['network_interfaces'] %}{# Buffer for better performances #}
-{% for interface, interface_vars in host_network_interfaces.items() %}
-{% if interface_vars.ip4 is defined and not none %}
-{% if (interface_vars.network is defined and not none) and (interface_vars.network == hostvars[host]['j2_node_main_network']) %}
-{% if hostvars[host]['alias'] is defined and not none %}
-{% for alias in hostvars[host]['alias'] %}
-{{alias}} IN A {{interface_vars.ip4}}
-{% endfor %}
-{% endif %}
-{{host}} IN A {{interface_vars.ip4}}
-{{host}}-{{interface_vars.network}} IN A {{interface_vars.ip4}}
-{% elif interface_vars.network is defined and not none %}
-{{host}}-{{interface_vars.network}} IN A {{interface_vars.ip4}}
-{% else %}
+  {% if hostvars[host]['network_interfaces'] is defined and hostvars[host]['network_interfaces'] is not none %}
+    {% set host_network_interfaces = hostvars[host]['network_interfaces'] %}{# Buffer for better performances #}
+    {% for interface, interface_vars in host_network_interfaces.items() %}
+      {% if interface_vars.ip4 is defined and interface_vars.ip4 is not none %}
+        {% if (interface_vars.network is defined and interface_vars.network is not none) and (interface_vars.network == hostvars[host]['j2_node_main_network']) %}
+          {% if hostvars[host]['alias'] is defined and hostvars[host]['alias'] is not none %}
+            {% for alias in hostvars[host]['alias'] %}
+{{ alias }} IN A {{ interface_vars.ip4 }}
+            {% endfor %}
+          {% endif %}
+{{ host }} IN A {{ interface_vars.ip4 }}
+{{ host }}-{{ interface_vars.network }} IN A {{ interface_vars.ip4 }}
+        {% elif interface_vars.network is defined and interface_vars.network is not none %}
+{{ host }}-{{ interface_vars.network }} IN A {{ interface_vars.ip4 }}
+        {% else %}
 {# Do nothing, not in registered network #}
-{% endif %}
-{% endif %}
-{% endfor %}
-{% if hostvars[host]['bmc'] is defined %}
-{% set bmc_args = hostvars[host]['bmc'] %}
-{% if (bmc_args.name is defined and not none) and (bmc_args.ip4 is defined and not none) and (bmc_args.network is defined and not none) %}
-{{bmc_args.name}} IN A {{bmc_args.ip4}}
-{{bmc_args.name}}-{{bmc_args.network}} IN A {{bmc_args.ip4}}
-{% endif %}
-{% endif %}
-{% endif %}
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+    {% if hostvars[host]['bmc'] is defined %}
+    {% set bmc_args = hostvars[host]['bmc'] %}
+      {% if (bmc_args.name is defined and bmc_args.name is not none) and (bmc_args.ip4 is defined and bmc_args.ip4 is not none) and (bmc_args.network is defined and bmc_args.network is not none) %}
+{{ bmc_args.name }} IN A {{ bmc_args.ip4 }}
+{{ bmc_args.name }}-{{ bmc_args.network }} IN A {{ bmc_args.ip4 }}
+      {% endif %}
+    {% endif %}
+  {% endif %}
 {% endfor %}
