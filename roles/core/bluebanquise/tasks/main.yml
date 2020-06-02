@@ -1,5 +1,5 @@
 ---
-- name: include_vars █ Gather OS specific variables
+- name: include_vars ░ Gather OS specific variables
   # This task gathers variables defined in OS specific files.
   #
   # Search vars in:

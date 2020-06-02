@@ -1,5 +1,5 @@
 ---
-- name: include_vars █ Gather OS specific variables
+- name: include_vars ░ Gather OS specific variables
   # This task gathers variables defined in OS specific files.
   #
   # Search vars in:
@@ -21,7 +21,7 @@
   tags:
     - internal
 
-- name: firewalld █ "Add services to firewall's {{ dhcp_server_firewall_zone | default('public') }} zone"
+- name: "firewalld █ Add services to firewall's {{ dhcp_server_firewall_zone | default('public') }} zone"
   firewalld:
     zone: "{{ dhcp_server_firewall_zone | default('public') }}"
     service: "{{ item }}"
@@ -35,7 +35,7 @@
   tags:
     - firewall
 
-- name: package █ "Install {{ dhcp_server_packages_to_install }}"
+- name: "package █ Install {{ dhcp_server_packages_to_install }}"
   package:
     name: "{{ dhcp_server_packages_to_install }}"
     state: present
@@ -49,7 +49,7 @@
     owner: root
     group: root
     mode: 0644
-  notify: Restart dhcp services
+  notify: service █ Restart dhcp server
   tags:
     - template
 
@@ -60,11 +60,11 @@
     owner: root
     group: root
     mode: 0644
-  notify: Restart dhcp services
+  notify: service █ Restart dhcp server
   tags:
     - template
 
-- name: template █ "Generate /etc/dhcp/dhcpd.{{ item }}.conf"
+- name: "template █ Generate /etc/dhcp/dhcpd.{{ item }}.conf"
   template:
     src: dhcpd.subnet.conf.j2
     dest: "/etc/dhcp/dhcpd.{{ item }}.conf"
@@ -75,13 +75,13 @@
   when:
     - j2_current_iceberg_network in item
     - networks[item].is_in_dhcp
-  notify: Restart dhcp services
+  notify: service █ Restart dhcp server
   tags:
     - template
 
 - meta: flush_handlers
 
-- name: service █ "Manage {{ dhcp_server_services_to_start }} state"
+- name: "service █ Manage {{ dhcp_server_services_to_start }} state"
   service:
     name: "{{ item }}"
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
