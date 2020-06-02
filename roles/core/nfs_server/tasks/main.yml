@@ -1,5 +1,5 @@
 ---
-- name: Gathering OS specific variables
+- name: include_vars ░ Gather OS specific variables
   # This task gathers variables defined in OS specific files.
   #
   # Search vars in:
@@ -18,8 +18,10 @@
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
         - "vars/{{ ansible_facts.os_family }}.yml"
       skip: true
+  tags:
+    - internal
 
-- name: "Add services to firewall's {{ nfs_server_firewall_zone | default('public') }} zone"
+- name: firewalld █ "Add services to firewall's {{ nfs_server_firewall_zone | default('public') }} zone"
   firewalld:
     zone: "{{ nfs_server_firewall_zone | default('public') }}"
     service: "{{ item }}"
@@ -33,27 +35,27 @@
   tags:
     - firewall
 
-- name: Install packages
+- name: package █ Install nfs server packages
   package:
     name: "{{ nfs_server_packages_to_install }}"
     state: present
   tags:
     - package
 
-- name: Exports configuration (/etc/exports)
+- name: lineinfile █ Edit file /etc/exports to add exported FS
   lineinfile:
     path: /etc/exports
     regexp: ' # export name: {{ item }}$'
     line: "{{ nfs[item]['export'] }} {{ networks[nfs[item]['take_over_network']]['subnet'] }}/{{ networks[nfs[item]['take_over_network']]['prefix'] }}({{ nfs[item]['export_arguments'] }}) # export name: {{ item }}"
   when: inventory_hostname == nfs[item]['server']
   with_items: "{{ nfs }}"
-  notify: Restart nfs services
+  notify: service █ Restart nfs server services
   tags:
     - template
 
 - meta: flush_handlers
 
-- name: Manage services state
+- name: service █ Manage nfs server services state
   service:
     name: "{{ item }}"
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
