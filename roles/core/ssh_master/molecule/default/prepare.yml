@@ -1,0 +1,12 @@
+---
+- name: Prepare
+  hosts: molecule_platform
+
+  tasks:
+    - name: "Ensure /root/.ssh exists"
+      file:
+        path: "/root/.ssh"
+        state: directory
+        owner: root
+        group: root
+        mode: 700
