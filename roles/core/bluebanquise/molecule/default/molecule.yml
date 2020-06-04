@@ -5,8 +5,8 @@ driver:
   name: docker
 platforms:
   - name: ansiblectrl
-    image: "geerlingguy/docker-${MOLECULE_DISTRO:-centos8}-ansible:latest"
-    command: "/lib/systemd/systemd"
+    image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
+    override_command: false
     capabilities:
       - "SYS_ADMIN"
     volumes:

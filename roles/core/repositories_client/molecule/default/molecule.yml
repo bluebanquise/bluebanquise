@@ -4,9 +4,9 @@ dependency:
 driver:
   name: docker
 platforms:
-  - name: instance-${MOLECULE_DISTRO:-centos8}
-    image: "geerlingguy/docker-${MOLECULE_DISTRO:-centos8}-ansible:latest"
-    command: "/lib/systemd/systemd"
+  - name: instance-${INSTANCE_DISTRO:-centos8}
+    image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
+    override_command: false
     capabilities:
       - "SYS_ADMIN"
     volumes:

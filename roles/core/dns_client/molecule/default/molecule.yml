@@ -10,8 +10,8 @@ lint:  |
   flake8
 platforms:
   - name: instance
-    image: "geerlingguy/docker-${MOLECULE_DISTRO:-centos8}-ansible:latest"
-    command: "/lib/systemd/systemd"
+    image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
+    override_command: false
     capabilities:
       - "SYS_ADMIN"
     volumes:

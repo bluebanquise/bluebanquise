@@ -21,8 +21,8 @@ jobs:
       fail-fast: false
       matrix:
         distro:
-          - centos7
-          - centos8
+          - centos:7
+          - centos:8
         role:
           - core/conman
           - core/display_tuning
@@ -30,7 +30,6 @@ jobs:
           - core/dns_server
           - core/log_client
           - core/log_server
-          - core/repositories_client
           - addons/clustershell
           - addons/users_basic
 

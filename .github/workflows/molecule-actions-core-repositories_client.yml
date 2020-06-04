@@ -1,20 +1,20 @@
 ---
-name: core/time unit testing
+name: core/repositories_client unit testing
 on:
   push:
     branches:
       - master
     paths:
-      - 'roles/core/time/**'
-      - '.github/workflows/molecule-actions-core-time.yml'
+      - 'roles/core/repositories_client/**'
+      - '.github/workflows/molecule-actions-core-repositories_client.yml'
   pull_request:
     paths:
-      - 'roles/core/time/**'
-      - '.github/workflows/molecule-actions-core-time.yml'
+      - 'roles/core/repositories_client/**'
+      - '.github/workflows/molecule-actions-core-repositories_client.yml'
 
 jobs:
   molecule_test:
-    name: core/time - ${{ matrix.distro }} - molecule test
+    name: ${{ matrix.distro }} - molecule test
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -26,6 +26,8 @@ jobs:
     env:
       MOLECULE_DISTRO: ${{ matrix.distro }}
     steps:
+      - name: Set INSTANCE_DISTRO variable
+        run: echo "::set-env name=INSTANCE_DISTRO::${MOLECULE_DISTRO/:/}"
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Setup python environment
@@ -33,6 +35,6 @@ jobs:
       - name: Install packages
         run: |
           pip install 'molecule[docker]>3' ansible-lint flake8
-      - name: Run molecule test for core/time
+      - name: Run molecule test for core/repositories_client
         run: |
-          cd roles/core/time && molecule test
+          cd roles/core/repositories_client && molecule test
