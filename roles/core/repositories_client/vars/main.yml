@@ -1,4 +1,5 @@
-role_version: 1.0.3
+---
+repositories_client_role_version: 1.0.4
 
 ubuntu_versions:
   _18: bionic
