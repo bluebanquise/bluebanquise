@@ -4,7 +4,7 @@ on: push
   #   branches:
   #     - master
   #       tags:
-  #         - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10 
+  #         - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
 
 jobs:
   build:
@@ -27,16 +27,10 @@ jobs:
       id: rpmbuild
       run: |
         sudo ln -sf /bin/bash /bin/sh
+        mkdir -p $HOME/rpmbuild/{SOURCES,SRPMS,RPMS,BUILD,SPECS}
         COMMIT_ID=${{ steps.get_commit_id.outputs.commit_id }}
-        mkdir -p $BUILD_ENV/rpmbuild/bluebanquise-${COMMIT_ID}
-        mv $(ls | grep -v bluebanquise-) $BUILD_ENV/rpmbuild/bluebanquise-${COMMIT_ID}/.
-        cd $BUILD_ENV/rpmbuild
-        tar zcf bluebanquise-${COMMIT_ID}.tar.gz bluebanquise-${COMMIT_ID}
-        rm -rf bluebanquise-${COMMIT_ID} ../bluebanquise
-        mkdir -p {SOURCES,SRPMS,RPMS,BUILD,SPECS}
-        tar zxf bluebanquise-${COMMIT_ID}.tar.gz bluebanquise-${COMMIT_ID}/bluebanquise.spec -O > SPECS/bluebanquise.spec 
-        mv bluebanquise-$COMMIT_ID.tar.gz SOURCES/.
-        rpmbuild -ba --define "version ${COMMIT_ID}" SPECS/bluebanquise.spec
-        tar zcf bluebanquise-${COMMIT_ID}.tar.gz RPMS/noarch/*
-      env:
-        BUILD_ENV: ../../..
+        git archive $COMMIT_ID --prefix=bluebanquise-$COMMIT_ID/ --output=$HOME/rpmbuild/SOURCES/bluebanquise-$COMMIT_ID.tar
+        gzip $HOME/rpmbuild/SOURCES/bluebanquise-$COMMIT_ID.tar
+        tar xvf $HOME/rpmbuild/SOURCES/bluebanquise-$COMMIT_ID.tar.gz bluebanquise-$COMMIT_ID/bluebanquise.spec -O > $HOME/rpmbuild/SPECS/bluebanquise.spec
+        rpmbuild -ba --define "version $COMMIT_ID" $HOME/rpmbuild/SPECS/bluebanquise.spec
+        tar zcf bluebanquise-${COMMIT_ID}.tar.gz -C $HOME/rpmbuild/ RPMS/noarch/ SRPMS/
