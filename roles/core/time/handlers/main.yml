@@ -1,6 +1,6 @@
 ---
 
-- name: Restart time services
+- name: service █ Restart time services
   service:
     name: "{{ item }}"
     state: restarted

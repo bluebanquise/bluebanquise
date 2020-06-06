@@ -1,5 +1,5 @@
 ---
-- name: Gathering OS specific variables
+- name: include_vars ░ Gathering OS specific variables
   # This task gathers variables defined in OS specific files.
   #
   # Search vars in:
@@ -18,8 +18,10 @@
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
         - "vars/{{ ansible_facts.os_family }}.yml"
       skip: true
+  tags:
+    - internal
 
-- name: "Add services to firewall's {{ time_firewall_zone | default('public') }} zone"
+- name: firewalld █ "Add services to firewall's {{ time_firewall_zone | default('public') }} zone"
   firewalld:
     zone: "{{ time_firewall_zone | default('public') }}"
     service: "{{ item }}"
@@ -40,24 +42,24 @@
   tags:
     - package
 
-- name: Template >> /etc/chrony.conf
+- name: template █ Generate /etc/chrony.conf
   template:
     src: chrony.conf.j2
     dest: "{{ time_chrony_conf_path }}"
     owner: root
     group: root
     mode: 0644
-  notify: Restart time services
+  notify: service █ Restart time services
   tags:
     - template
 
-- name: Set timezone
+- name: "timezone █ Set system to {{ time_zone }} timezone"
   timezone:
     name: "{{ time_zone }}"
 
 - meta: flush_handlers
 
-- name: Manage services state
+- name: "service █ Manage {{ time_services_to_start }} services state"
   service:
     name: "{{ item }}"
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"

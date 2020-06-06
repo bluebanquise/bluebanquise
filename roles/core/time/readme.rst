@@ -48,6 +48,30 @@ In case of a need, to force time synchronization on client side, use:
 
   chronyc -a makestep
 
+Input
+^^^^^
+
+Mandatory inventory vars:
+
+**hostvars[inventory_hostname]**
+
+* network_interfaces[item]
+* networks[item].prefix
+
+Optional inventory vars:
+
+**hostvars[inventory_hostname]**
+
+* external_time
+* external_pool
+
+Output
+^^^^^^
+
+* /etc/chrony.conf file
+* chrony package
+* time zone set from inventory
+
 To be done
 ^^^^^^^^^^
 
@@ -56,6 +80,6 @@ Icebergs with stratum levels.
 Changelog
 ^^^^^^^^^
 
+* 1.0.2: Clean. johnnykeats <johnny.keats@outlook.com>
 * 1.0.1: Documentation. johnnykeats <johnny.keats@outlook.com>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
- 

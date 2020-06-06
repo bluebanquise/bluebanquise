@@ -9,13 +9,13 @@
       assert:
         that: "'chrony' in ansible_facts.packages"
 
-    - name: Ansible fact - ansible_date_time.iso8601
+    - name: Ansible fact - ansiblefacts._date_time.iso8601
       debug:
-        msg: "Timestamp format: {{ ansible_date_time }}"
+        msg: "Timestamp format: {{ ansible_facts.date_time }}"
 
     - name: assert timezone to Europe/Paris
       assert:
-        that: "'CEST' in ansible_date_time.tz"
+        that: "'CEST' in ansible_facts.date_time.tz"
 
     - name: Set chrony.conf path for RedHat OS family
       set_fact:
