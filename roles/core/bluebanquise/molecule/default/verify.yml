@@ -6,14 +6,14 @@
   tasks:
   - name: Test ipaddr filter in molecule controller
     assert:
-      that: ansible_all_ipv4_addresses | ipaddr
+      that: ansible_facts.all_ipv4_addresses | ipaddr
 
   - name: Test json_query filter in molecule controller
     assert:
       that: network_interfaces | json_query('*.ip4')
 
   - name: Test ipaddr filter in ansible controller
-    command: ansible localhost -c local -m assert -a "that={{ ansible_all_ipv4_addresses }}|ipaddr"
+    command: ansible localhost -c local -m assert -a "that={{ ansible_facts.all_ipv4_addresses }}|ipaddr"
     changed_when: false
 
   - name: Test json_query filter in ansible controller

@@ -53,7 +53,7 @@
     {% endif %}
 
     {%- if (host_dict['bmc'].name is defined and host_dict['bmc'].name is not none) and (host_dict['bmc'].ip4 is defined and host_dict['bmc'].ip4 is not none) %}
- {{ host_dict['bmc'].ip4 }} {{ host_dict['bmc'].name }} {{ bmc_alias_list|join(' ') }}
+{{ host_dict['bmc'].ip4 }} {{ host_dict['bmc'].name }} {{ bmc_alias_list|join(' ') }}
     {% endif %}
   {% endif -%}
 
