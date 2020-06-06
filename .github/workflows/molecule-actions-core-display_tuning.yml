@@ -1,16 +1,16 @@
 ---
-name: core/time unit testing
+name: core/display_tuning unit testing
 on:
   push:
     branches:
       - master
     paths:
-      - 'roles/core/time/**'
-      - '.github/workflows/molecule-actions-core-time.yml'
+      - 'roles/core/display_tuning/**'
+      - '.github/workflows/molecule-actions-core-display_tuning.yml'
   pull_request:
     paths:
-      - 'roles/core/time/**'
-      - '.github/workflows/molecule-actions-core-time.yml'
+      - 'roles/core/display_tuning/**'
+      - '.github/workflows/molecule-actions-core-display_tuning.yml'
 
 jobs:
   molecule_test:
@@ -35,6 +35,6 @@ jobs:
       - name: Install packages
         run: |
           pip install 'molecule[docker]>3' ansible-lint flake8
-      - name: Run molecule test for core/time
+      - name: Run molecule test for core/display_tuning
         run: |
-          cd roles/core/time && molecule test
+          cd roles/core/display_tuning && molecule test

@@ -1,16 +1,16 @@
 ---
-name: core/time unit testing
+name: core/dns_server unit testing
 on:
   push:
     branches:
       - master
     paths:
-      - 'roles/core/time/**'
-      - '.github/workflows/molecule-actions-core-time.yml'
+      - 'roles/core/dns_server/**'
+      - '.github/workflows/molecule-actions-core-dns_server.yml'
   pull_request:
     paths:
-      - 'roles/core/time/**'
-      - '.github/workflows/molecule-actions-core-time.yml'
+      - 'roles/core/dns_server/**'
+      - '.github/workflows/molecule-actions-core-dns_server.yml'
 
 jobs:
   molecule_test:
@@ -23,7 +23,6 @@ jobs:
           - centos:7
           - centos:8
           - ubuntu:18.04
-          - ubuntu:20.04
 
     env:
       MOLECULE_DISTRO: ${{ matrix.distro }}
@@ -34,7 +33,7 @@ jobs:
         uses: actions/setup-python@v1
       - name: Install packages
         run: |
-          pip install 'molecule[docker]>3' ansible-lint flake8
-      - name: Run molecule test for core/time
+          pip install 'molecule[docker]>3' ansible-lint flake8 jmespath netaddr
+      - name: Run molecule test for core/dns_server
         run: |
-          cd roles/core/time && molecule test
+          cd roles/core/dns_server && molecule test

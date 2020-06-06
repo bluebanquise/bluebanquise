@@ -1,16 +1,16 @@
 ---
-name: core/time unit testing
+name: addons/clustershell unit testing
 on:
   push:
     branches:
       - master
     paths:
-      - 'roles/core/time/**'
-      - '.github/workflows/molecule-actions-core-time.yml'
+      - 'roles/addons/clustershell/**'
+      - '.github/workflows/molecule-actions-addons-clustershell.yml'
   pull_request:
     paths:
-      - 'roles/core/time/**'
-      - '.github/workflows/molecule-actions-core-time.yml'
+      - 'roles/addons/clustershell/**'
+      - '.github/workflows/molecule-actions-addons-clustershell.yml'
 
 jobs:
   molecule_test:
@@ -22,6 +22,7 @@ jobs:
         distro:
           - centos:7
           - centos:8
+          - opensuseleap:15.1
           - ubuntu:18.04
           - ubuntu:20.04
 
@@ -35,6 +36,6 @@ jobs:
       - name: Install packages
         run: |
           pip install 'molecule[docker]>3' ansible-lint flake8
-      - name: Run molecule test for core/time
+      - name: Run molecule test for addons/clustershell
         run: |
-          cd roles/core/time && molecule test
+          cd roles/addons/clustershell && molecule test
