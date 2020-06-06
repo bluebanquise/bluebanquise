@@ -4,8 +4,7 @@ PXE Stack
 Description
 ^^^^^^^^^^^
 
-This role provides the whole PXE stack. It is a key feature of the stack (and
-we are proud of it :-D).
+This role provides the whole PXE stack. It is a key feature of the stack.
 
 Instructions
 ^^^^^^^^^^^^
@@ -20,7 +19,8 @@ ip address and filename to use.
 **Files location**
 """"""""""""""""""
 
-* PXE boot files are located in /var/www/html/preboot_execution_environment/.
+* PXE boot files are located in {/var/www/html|/srv/www/htdocs}/preboot_execution_environment/,
+ with path depending of the operating system.
   * *bin/* directory contains some needed bin files, typically grub2 files for EFI boot.
   * *equipment_profiles/* directory contains equipment_profiles related files, i.e. ipxe file with group variables, and os configuration files (kickstart, preseed, autoyast).
   * *nodes/* directory contains hosts dedicated files, i.e. ipxe file with hosts dedicated variables.
@@ -162,6 +162,7 @@ To be done
 Changelog
 ^^^^^^^^^
 
+* 1.1.3: Clean. johnnykeats <johnny.keats@outlook.com>
 * 1.1.2: Add support of major distribution version. Bruno <devel@travouillon.fr>
 * 1.1.1: bootset.py refactoring. Adrien Ribeiro <adrien.ribeiro@atos.net>
 * 1.1.0: Rewamped the whole role. Benoit Leveugle <benoit.leveugle@gmail.com>

@@ -1,5 +1,5 @@
 #### Blue Banquise file ####
-## {{ansible_managed}}
+## {{ ansible_managed }}
 
 
 ##### General settings
@@ -11,26 +11,26 @@ text
 firstboot --enable
 
 # System keyboard layout
-keyboard --vckeymap={{hostvars[groups[item][0]]['equipment_profile']['configuration']['keyboard_layout']|lower}} --xlayouts='{{hostvars[groups[item][0]]['equipment_profile']['configuration']['keyboard_layout']|lower}}'
+keyboard --vckeymap={{ hostvars[groups[item][0]]['equipment_profile']['configuration']['keyboard_layout']|lower }} --xlayouts='{{ hostvars[groups[item][0]]['equipment_profile']['configuration']['keyboard_layout']|lower }}'
 
 # System language
-lang {{hostvars[groups[item][0]]['equipment_profile']['configuration']['system_language']}}
+lang {{ hostvars[groups[item][0]]['equipment_profile']['configuration']['system_language'] }}
 
 # System timezone
-timezone {{time_zone}} --isUtc
+timezone {{ time_zone }} --isUtc
 
 # Reboot after installation
 reboot
 
 ##### Authentication settings
 
-{% if hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution_major_version'] < 8 %}
+{% if hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution_major_version']|int < 8 %}
 # Define authentication method (sha512)
 auth --enableshadow --passalgo=sha512
 {% endif %}
 
 # Root password (sha512)
-rootpw --iscrypted {{hostvars[groups[item][0]]['authentication']['root_password_sha512']}}
+rootpw --iscrypted {{ hostvars[groups[item][0]]['authentication']['root_password_sha512'] }}
 
 
 ##### Network
@@ -60,10 +60,10 @@ firewall --disabled
 ##### Partitionning
 
 # Bootloader configuration
-bootloader --append="{{hostvars[groups[item][0]]['equipment_profile']['kernel_parameters']}}" --location=mbr
+bootloader --append="{{ hostvars[groups[item][0]]['equipment_profile']['kernel_parameters'] }}" --location=mbr
 
 # Partitioning
-{{hostvars[groups[item][0]]['equipment_profile']['partitioning']}}
+{{ hostvars[groups[item][0]]['equipment_profile']['partitioning'] }}
 
 
 ##### Packages
@@ -109,7 +109,7 @@ set -x
 mkdir /root/.ssh
 cat << xxEOFxx >> /root/.ssh/authorized_keys
 {% for ssh_key in hostvars[groups[item][0]]['authentication']['ssh_keys'] %}
-{{ssh_key}}
+{{ ssh_key }}
 {% endfor %}
 xxEOFxx
 # Ensure SELinux configuration is ok
@@ -129,13 +129,12 @@ set +x
 # Custom scripts
 {% if hostvars[groups[item][0]]['equipment_profile']['autoinstall_pre_script'] is defined and hostvars[groups[item][0]]['equipment_profile']['autoinstall_pre_script'] is not none %}
 %pre --log /root/custom_pre.log
-{{hostvars[groups[item][0]]['equipment_profile']['autoinstall_pre_script']}}
+{{ hostvars[groups[item][0]]['equipment_profile']['autoinstall_pre_script'] }}
 %end
 {% endif %}
 
 {% if hostvars[groups[item][0]]['equipment_profile']['autoinstall_post_script'] is defined and hostvars[groups[item][0]]['equipment_profile']['autoinstall_post_script'] is not none %}
 %post --log /root/custom_post.log
-{{hostvars[groups[item][0]]['equipment_profile']['autoinstall_post_script']}}
+{{ hostvars[groups[item][0]]['equipment_profile']['autoinstall_post_script'] }}
 %end
 {% endif %}
-
