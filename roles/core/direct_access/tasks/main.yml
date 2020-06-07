@@ -1,0 +1,11 @@
+---
+
+- name: "include vars █ Include vars from {{ nodes_path }}"
+  include_vars:
+    # Cannot use dir as dir do not merge files, only replace.
+    # Using file with with_filetree lookup instead.
+    file: "{{ nodes_path }}/{{ item.path }}"
+    name: direct_access
+  with_filetree: "{{ nodes_path }}"
+  when: item.state == 'file'
+

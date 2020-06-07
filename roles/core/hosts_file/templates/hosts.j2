@@ -1,12 +1,11 @@
 #jinja2: lstrip_blocks: "True"
-{# Hosts file, Accelerated mode compatible #}
+{# Hosts file, with direct_access #}
 {# Benoit Leveugle 2020 #}
 {% import "macros/network.j2" as macro_network with context %}
-{% import "macros/accelerated.j2" as macro_accelerated with context %}
+{% import "macros/groups.j2" as macro_groups with context %}
 
-{# Macro to avoid redundancy #}
-{# This macro should cover all technical part, and be compatible with both normal and accelerated mode #}
-{% macro write_host_3(host,host_dict,host_node_main_network_interface,host_iceberg) %}
+{# -- Macro shared by both standard and direct_access methods. -- #}
+{% macro write_host(host,host_dict,host_node_main_network_interface,host_iceberg) %}
 
   {#- Write host #}
   {% if host_dict['network_interfaces'] is defined and not none and host_dict['network_interfaces'] and host_dict['network_interfaces'] is iterable %}
@@ -59,6 +58,7 @@
 
 {% endmacro %}
 
+
 #### Blue Banquise file ####
 ## {{ansible_managed}}
 
@@ -66,48 +66,57 @@
 ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
 
 {% if icebergs_system == true and hosts_file['range'] == 'iceberg' %}
-{% set range = groups[j2_current_iceberg] %}
-{% for host in groups[managements_group_name] %}
-{% if hostvars[host]['iceberg_master'] == j2_current_iceberg %}
+  {% set range = groups[j2_current_iceberg] %}
+  {% for host in groups[managements_group_name] %}
+    {% if hostvars[host]['iceberg_master'] == j2_current_iceberg %}
 {{ range.append(host) }}
-{% endif %}
-{% endfor %}
+    {% endif %}
+  {% endfor %}
 {% else %}
-{% set range = groups['all'] %}
+  {% set range = groups['all'] %}
 {% endif %}
 
 ## Internal hosts
 
-{% for host in range %}
-{{write_host_3(host,hostvars[host],hostvars[host]['j2_node_main_network_interface'],hostvars[host]['j2_current_iceberg'])}}
-{% endfor %}
+{% if direct_access is not defined %}
+{# -- Standard method. Rely on hostvars. -- #}
 
-{#
-{% set main_host = hostvars[inventory_hostname] %}
-{% for host in range %}
-{% set host_icb = (macro_accelerated.node_current_iceberg(host)|trim) %}
-{% set host_mg = (macro_accelerated.node_master_group(host)|trim) %}
-{% set host_eqg = (macro_accelerated.node_equipment_group(host)|trim) %}
-{% set host_definition = main_host[host_mg]['children'][host_eqg]['hosts'][host] %}
-{% set host_nic = host_definition['network_interfaces'] %}
-{% set host_bmc = host_definition['bmc'] %}
-{% set host_icb_net = (management_networks_naming + (host_icb | replace(iceberg_naming,' ') | trim | string)) %}
-{% set host_node_main_network = (macro_network.node_main_network(host_nic,host_icb_net) | trim) %}
-{% set host_node_main_network_interface = (macro_network.node_main_network_interface(host_nic,host_node_main_network) | trim) %}
-{% set alias_list = [] %}
-{% if host_definition['global_alias'] is defined and not none %}
-  {% for alias in host_definition['global_alias'] %}{{ alias_list.append(alias) }}{% endfor %}
+  {% for host in range %}
+{{ write_host(host,hostvars[host],hostvars[host]['j2_node_main_network_interface'],hostvars[host]['j2_current_iceberg']) }}
+  {% endfor %}
+
+{% else %}
+{# -- Direct access method. Rely on direct_access content. -- #}
+
+  {% for mg, mg_vars in direct_access.items() %}
+    {% for eqg, eqg_vars in mg_vars.children.items() %}
+      {% for host, host_vars in eqg_vars.hosts.items() %}
+        {% if host in range %}
+          {# Get host iceberg, from groups #}
+          {% set host_icb = (macro_groups.node_current_iceberg(host)|trim) %}
+          {# Check if user forced main network. #}
+          {% if host_vars.j2_node_main_network is defined %}
+            {% set host_node_main_network = host_vars.j2_node_main_network %}
+            {% set host_node_main_network_interface = (macro_network.node_main_network_interface(host_vars.network_interfaces,host_node_main_network) | trim) %}
+          {% elif host_vars.j2_node_main_network_interface is defined %}
+            {% set host_node_main_network_interface = host_vars.j2_node_main_network_interface %}
+          {% else %}
+            {% set host_icb_net = (management_networks_naming + (host_icb | replace(iceberg_naming,' ') | trim | string)) %}
+            {% set host_node_main_network = (macro_network.node_main_network(host_vars.network_interfaces,host_icb_net) | trim) %}
+            {% set host_node_main_network_interface = (macro_network.node_main_network_interface(host_vars.network_interfaces,host_node_main_network) | trim) %}
+          {% endif %}
+{{ write_host(host,host_vars,host_node_main_network_interface,host_icb) }}
+        {% endif %}
+      {% endfor %}
+    {% endfor %}
+  {% endfor %}
+
 {% endif %}
-{% if host_definition['alias'] is defined and not none and host_icb == j2_current_iceberg %}
-  {% for alias in host_definition['alias'] %}{{ alias_list.append(alias) }}{% endfor %}
-{% endif %}
-{{write_host_2(host,host_nic,host_node_main_network_interface,alias_list,host_bmc)}}
-{% endfor %}
-#}
+
 ## External hosts
 
 {% if external_hosts is defined and external_hosts is not none and external_hosts %}
-{% for host in external_hosts %}
+  {% for host in external_hosts %}
 {{external_hosts[host]}} {{host}}
-{% endfor %}
+  {% endfor %}
 {% endif %}
