@@ -1,7 +1,11 @@
 ---
 
+- name: set_fact ░ Set main network
+  set_fact:
+    node_main_network: "{{ network_interfaces | selectattr("network","match","^"+ice1-[0-9]$") | map(attribute="network") | list | first }}"
+
 - name: Setting repositories
   apt_repository:
-    repo: "deb http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/{{ equipment_profile['operating_system']['distribution'] }}/{{ equipment_profile['operating_system']['distribution_version'] }}/{{ equipment_profile['hardware']['cpu']['architecture'] }}/{{ item }} bionic main"
+    repo: "deb http://{{ networks[node_main_network]['services_ip']['repository_ip'] }}/repositories/{{ equipment_profile['operating_system']['distribution'] }}/{{ equipment_profile['operating_system']['distribution_version'] }}/{{ equipment_profile['hardware']['cpu']['architecture'] }}/{{ item }} bionic main"
     state: present
   with_items: "{{ repositories }}"

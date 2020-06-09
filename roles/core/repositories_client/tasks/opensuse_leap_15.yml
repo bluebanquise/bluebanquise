@@ -1,5 +1,9 @@
 ---
 
+- name: set_fact ░ Set main network
+  set_fact:
+    node_main_network: "{{ network_interfaces | selectattr("network","match","^"+ice1-[0-9]$") | map(attribute="network") | list | first }}"
+
 - name: Setting repositories
   zypper_repository:
     name: "{{ item }}"

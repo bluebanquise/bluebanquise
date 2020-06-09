@@ -113,6 +113,7 @@ sources.list file.
 Changelog
 ^^^^^^^^^
 
+* 1.0.6: Remove j2_variables dependencies. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.5: Added support for excluding packages from CentOS and RHEL repositories. Neil Munday <neil@mundayweb.com>
 * 1.0.4: Clean. johnnykeats <johnny.keats@outlook.com>
 * 1.0.3: Add support of major release version. Bruno <devel@travouillon.fr>

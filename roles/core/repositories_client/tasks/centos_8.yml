@@ -16,9 +16,13 @@
   when: ( 'os' in repositories ) or ( item.name is defined and item.name == 'os' )
   notify: command █ yum clean metadata
 
+- name: set_fact ░ Set main network
+  set_fact:
+    node_main_network: "{{ network_interfaces | selectattr("network","match","^"+ice1-[0-9]$") | map(attribute="network") | list | first }}"
+
 - name: set_fact ░ Set baseurl prefix
   set_fact:
-    baseurl_prefix: "http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/$environment/{{ equipment_profile['operating_system']['distribution'] }}/$releasever/$basearch/"
+    baseurl_prefix: "http://{{ networks[node_main_network]['services_ip']['repository_ip'] }}/repositories/$environment/{{ equipment_profile['operating_system']['distribution'] }}/$releasever/$basearch/"
 
 - name: template █ Generate /etc/dnf/vars/releasever to force $releasever
   template:
