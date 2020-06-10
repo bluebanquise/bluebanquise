@@ -60,8 +60,8 @@ sources.list file.
 Changelog
 ^^^^^^^^^
 
+* 1.0.4: Added support for excluding packages from CentOS and RHEL repositories. Neil Munday <neil@mundayweb.com>
 * 1.0.3: Add support of major release version. Bruno <devel@travouillon.fr>
 * 1.0.2: Added Ubuntu 18.04 compatibility. johnnykeats <johnny.keats@outlook.com>
 * 1.0.1: Documentation. johnnykeats <johnny.keats@outlook.com>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
- 

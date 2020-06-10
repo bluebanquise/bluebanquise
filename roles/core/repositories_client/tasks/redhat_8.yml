@@ -38,6 +38,7 @@
     description: "{{ item.name | default(item) }} gen by Ansible"
     baseurl: "{{ item.baseurl | default(baseurl_prefix + item.name | default(item)) }}/"
     enabled: "{{ item.enabled | default(1) }}"
+    exclude: "{{ item.exclude | default(omit) }}"
     gpgcheck: "{{ item.gpgcheck | default(0) }}"
     gpgkey: "{{ item.gpgkey | default(omit) }}"
     proxy: "{{ item.proxy | default(omit) }}"
