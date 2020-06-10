@@ -1,26 +1,19 @@
 ---
-# This is an example playbook to execute Ansible tests.
-
 - name: Verify
   hosts: all
   tasks:
   - name: Check for users
+    command: grep {{ item }} -q /etc/passwd
     with_items:
       - johnnykeats
     changed_when: false
-    command: grep {{ item }} -q /etc/passwd
 
-  - name: Check if user exists
-    shell: |
-      set -o pipefail
-      /usr/bin/getent group | awk -F":" '{print $1}'
-    register: etc_groups
-    changed_when: false
+  - name: Check if group exists
+    group:
+      name: johnnykeats
+      state: present
+    register: group_result
 
-  - name: debug
-    debug:
-      var: etc_groups
-
-  - name: assert group exists
+  - name: Assert group already existed
     assert:
-      that: "'johnnykeats' in etc_groups.stdout_lines"
+      that: not group_result.changed

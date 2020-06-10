@@ -14,7 +14,7 @@ on:
 
 jobs:
   molecule_test:
-    name: core/bluebanquise - ${{ matrix.distro }} - molecule test
+    name: ${{ matrix.distro }} - molecule test
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
