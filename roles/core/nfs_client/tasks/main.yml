@@ -21,7 +21,7 @@
   tags:
     - internal
 
-- name: package █ Install nfs client packages
+- name: "package █ Install {{ nfs_client_packages_to_install | join(' ') }} packages"
   package:
     name: "{{ nfs_client_packages_to_install }}"
     state: present
@@ -39,7 +39,7 @@
     - groups[item.1] is defined and groups[item.1] is not none
     - inventory_hostname in groups[item.1]
 
-- name: service █ Manage services state
+- name: service █ Manage rpcbind state
   service:
     name: rpcbind
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"

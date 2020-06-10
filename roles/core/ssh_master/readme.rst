@@ -4,7 +4,7 @@ SSH master
 Description
 ^^^^^^^^^^^
 
-This role configure the ssh access of inventory know hosts to ensure ssh access through nodes main network.
+This role configures the ssh access of inventory known hosts to ensure ssh access through nodes main network.
 
 Instructions
 ^^^^^^^^^^^^
@@ -101,6 +101,12 @@ Mandatory inventory vars:
 **hostvars[hosts]**
 
 * network_interfaces[item]
+
+Optional inventory vars:
+
+**hostvars[inventory_hostname]**
+
+* security.ssh.hostkey_checking
 
 Output
 ^^^^^^

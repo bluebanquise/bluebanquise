@@ -29,11 +29,11 @@ Mandatory inventory vars:
 **hostvars[hosts]**
 
 * equipment_profile
-  * .equipment_type (triggers if == "server")
-  * .equipment_authentication.user
-  * .equipment_authentication.password
+   * .equipment_type (triggers if == "server")
+   * .equipment_authentication.user
+   * .equipment_authentication.password
 * bmc
-  * .ip4
+   * .ip4
 
 Output
 ^^^^^^

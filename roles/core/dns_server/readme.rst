@@ -49,17 +49,17 @@ Mandatory inventory vars:
 
 * domain_name
 * network[item]
-  * .services_ip.dns_ip
-  * .subnet
-  * .prefix
+   * .services_ip.dns_ip
+   * .subnet
+   * .prefix
 * network_interfaces
-  * .ip4
+   * .ip4
 
 **hostvars[host]**
 
 * network_interfaces
-  * .ip4
-  * .mac
+   * .ip4
+   * .mac
 
 Optional inventory vars:
 
@@ -73,9 +73,9 @@ Optional inventory vars:
 
 * alias
 * bmc
-  * .ip4
-  * .mac
-  * .name
+   * .ip4
+   * .mac
+   * .name
 
 Output
 ^^^^^^

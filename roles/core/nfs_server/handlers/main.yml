@@ -1,5 +1,4 @@
 ---
-
 - name: service █ Restart nfs server services
   service:
     name: "{{ item }}"

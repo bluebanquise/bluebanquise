@@ -35,7 +35,7 @@
   tags:
     - firewall
 
-- name: "package █ Install {{ dns_server_packages_to_install }} packages"
+- name: "package █ Install {{ dns_server_packages_to_install | join(' ') }} packages"
   package:
     name: "{{ dns_server_packages_to_install }}"
     state: present
@@ -99,7 +99,7 @@
 
 - meta: flush_handlers
 
-- name: "service █ Manage {{ dns_server_services_to_start }} state"
+- name: "service █ Manage {{ dns_server_services_to_start | join(' ') }} state"
   service:
     name: "{{ item }}"
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"

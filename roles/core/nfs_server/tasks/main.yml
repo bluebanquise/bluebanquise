@@ -35,7 +35,7 @@
   tags:
     - firewall
 
-- name: package █ Install nfs server packages
+- name: "package █ Install {{ nfs_server_packages_to_install | join(' ') }} packages"
   package:
     name: "{{ nfs_server_packages_to_install }}"
     state: present
@@ -55,7 +55,7 @@
 
 - meta: flush_handlers
 
-- name: service █ Manage nfs server services state
+- name: "service █ Manage {{ nfs_server_services_to_start | join(' ') }} state"
   service:
     name: "{{ item }}"
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"

@@ -35,7 +35,7 @@
   tags:
     - firewall
 
-- name: package █ Install minimum packages for PXE
+- name: "package █ Install {{ pxe_stack_packages_to_install | join(' ') }} packages"
   package:
     name: "{{ pxe_stack_packages_to_install }}"
     state: present
@@ -263,7 +263,7 @@
 
 - meta: flush_handlers
 
-- name: service █ Manage services state
+- name: "service █ Manage {{ pxe_stack_services_to_start | join(' ') }} state"
   service:
     name: "{{ item }}"
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"

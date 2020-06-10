@@ -1,5 +1,4 @@
 ---
-
 - name: service █ Restart pxe services
   service:
     name: "{{ item }}"

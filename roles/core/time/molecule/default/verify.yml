@@ -9,7 +9,7 @@
       assert:
         that: "'chrony' in ansible_facts.packages"
 
-    - name: Ansible fact - ansiblefacts._date_time.iso8601
+    - name: Ansible fact - ansible_facts._date_time.iso8601
       debug:
         msg: "Timestamp format: {{ ansible_facts.date_time }}"
 

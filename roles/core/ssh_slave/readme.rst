@@ -11,9 +11,9 @@ Instructions
 
 This role will ensure remote hosts is having currently defined ssh authorized public keys in their */root/.ssh/authorized_keys* file.
 
-These keys are set in file */etc/bluebanquise/inventory/group_vars/all/all_equipments/authentication.yml*.
+These keys are set in file *group_vars/all/all_equipments/authentication.yml*.
 
-Keep in mind that this file can be precedenced with equipment_profiles groups.
+Keep in mind that this file can be preceded with equipment_profiles groups.
 
 Input
 ^^^^^

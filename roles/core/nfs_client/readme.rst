@@ -14,7 +14,7 @@ All configuration is done in *group_vars/all/general_settings/nfs.yml*.
 
 See the **nfs_server** role instructions for more details.
 
-Simply note that path that should be mounted will be automatically created by
+Simply note that paths that should be mounted will be automatically created by
 this role if they do not exist.
 
 Input
@@ -25,18 +25,18 @@ Mandatory inventory vars:
 **hostvars[inventory_hostname]**
 
 * nfs[item]
-  * .mount
-  * .export
-  * .server
-  * .clients_groups
-  * .mount_arguments
+   * .mount
+   * .export
+   * .server
+   * .clients_groups
+   * .mount_arguments
 
 Optional inventory vars:
 
 **hostvars[inventory_hostname]**
 
 * nfs[item]
-  * .take_over_network
+   * .take_over_network
 
 Output
 ^^^^^^

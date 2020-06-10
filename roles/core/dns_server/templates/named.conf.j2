@@ -33,13 +33,13 @@ options {
   allow-query {
     localhost;
 {% for network in (networks | select('match',(j2_current_iceberg_network+'-[0-9]+')) | list | unique | sort) %}
-  {% if (networks[network]['is_in_dns'] is defined and networks[network]['is_in_dns'] is not none) and (networks[network]['is_in_dns'] == true) %}
+  {% if networks[network]['is_in_dns'] is defined and networks[network]['is_in_dns'] == true %}
     {{ networks[network]['subnet'] }}/{{ networks[network]['prefix'] }};
   {% endif %}
 {% endfor %}
   };
 
-{% if external_dns.dns_server is defined and external_dns.dns_server is not none and external_dns.dns_server %}
+{% if external_dns.dns_server is defined and external_dns.dns_server %}
   forwarders {
   {% for forwarder in external_dns.dns_server %}
     {{ forwarder }};

@@ -31,7 +31,7 @@ Mandatory inventory vars:
 
 * domain_name
 * network[item]
-  * .services_ip.dns_ip
+   * .services_ip.dns_ip
 
 Optional inventory vars:
 

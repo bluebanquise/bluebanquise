@@ -13,7 +13,7 @@ This role will gather all hosts from the inventory, and add them, using all thei
 known internal network connections ip, into */etc/hosts* file.
 
 System administrator can reduce the scope of this gathering using **hosts_file.range**
-variable in */etc/bluebanquise/inventory/group_vars/all/general_settings/general.yml*.
+variable in *group_vars/all/general_settings/general.yml*.
 Setting **range** to *all* will use all Ansible inventory hosts, while setting **range**
 to *iceberg* will reduce the gathering to the current host iceberg.
 
@@ -28,10 +28,10 @@ a specific group. This is especially needed in HPC for computational nodes to co
 
 If using such global network, it is possible to ask this role to define **direct**
 hosts resolutions of a specific Ansible group to be not on their regular management network,
-but be set directly on the global network (mostly used in combinaison with slurm and mpi stacks).
+but be set directly on the global network (mostly used in combination with slurm and mpi stacks).
 
 To do so, uncomment and edit variable **global_network_settings** in file
-*/etc/bluebanquise/inventory/group_vars/all/general_settings/network.yml*.
+*group_vars/all/general_settings/network.yml*.
 Note that the role will ignore this variable if it is commented, and will try to use it if not commented.
 
 .. code-block:: yaml
@@ -51,8 +51,8 @@ Mandatory inventory vars:
 **hostvars[host]**
 
 * network_interfaces
-  * .ip4
-  * .mac
+   * .ip4
+   * .mac
 
 Optional inventory vars:
 
@@ -61,9 +61,9 @@ Optional inventory vars:
 * alias
 * global_alias
 * bmc
-  * .ip4
-  * .mac
-  * .name
+   * .ip4
+   * .mac
+   * .name
 
 Output
 ^^^^^^

@@ -9,7 +9,7 @@
 {% macro write_host_3(host,host_dict,host_node_main_network_interface,host_iceberg) %}
 
   {#- Write host #}
-  {% if host_dict['network_interfaces'] is defined and host_dict['network_interfaces'] is not none and host_dict['network_interfaces'] and host_dict['network_interfaces'] is iterable %}
+  {% if host_dict['network_interfaces'] is defined and host_dict['network_interfaces'] is iterable %}
 
     {#- Gather global alias and alias (icebergs related) #}
     {% set alias_list = [] %}

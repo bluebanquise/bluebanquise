@@ -1,5 +1,4 @@
 ---
-
 - name: set_fact ░ Set baseurl prefix
   set_fact:
     baseurl_prefix: "http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/$environment/{{ equipment_profile['operating_system']['distribution'] }}/$releasever/$basearch/"

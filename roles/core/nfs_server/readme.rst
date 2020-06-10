@@ -35,18 +35,18 @@ Mandatory inventory vars:
 **hostvars[inventory_hostname]**
 
 * nfs[item]
-  * .mount
-  * .export
-  * .server
-  * .clients_groups
-  * .export_arguments
+   * .mount
+   * .export
+   * .server
+   * .clients_groups
+   * .export_arguments
 
 Optional inventory vars:
 
 **hostvars[inventory_hostname]**
 
 * nfs[item]
-  * .take_over_network
+   * .take_over_network
 
 Output
 ^^^^^^

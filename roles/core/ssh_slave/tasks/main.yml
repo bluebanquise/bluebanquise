@@ -1,5 +1,4 @@
 ---
-
 - name: authorized_key █ Add authorized key
   authorized_key:
     user: root

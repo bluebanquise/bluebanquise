@@ -6,7 +6,6 @@
     owner: root
     group: root
     mode: 0644
-  notify: service █ Restart dns services
   register: zoneconf
   tags:
     - template
@@ -38,7 +37,6 @@
     owner: root
     group: root
     mode: 0644
-  notify: service █ Restart dns services
   register: zoneconf
   tags:
     - template

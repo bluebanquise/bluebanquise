@@ -19,8 +19,8 @@ The role will only take into account networks from the current iceberg,
 and with naming related to administration network (by default iceX-Y).
 In single iceberg configuration, i.e. default, it will consider ice1-X networks.
 
-For a network to be integrated in the dhcp,
-the variable **is_in_dhcp** must be set to true in network related.
+For a network to be included in the dhcp,
+the variable **is_in_dhcp** must be set to true in the related network configuration.
 
 Note also that dhcp role will use the following optional parameters if they exist in network:
 
@@ -68,37 +68,37 @@ Mandatory inventory vars:
 * icebergs_system
 * domain_name
 * network[item]
-  * .is_in_dhcp (triggers if == "true")
-  * .subnet
-  * .netmask
-  * .broadcast
-  * .services_ip.pxe_ip
-  * .services_ip.dns_ip
-  * .services_ip.time_ip
+   * .is_in_dhcp (triggers if == "true")
+   * .subnet
+   * .netmask
+   * .broadcast
+   * .services_ip.pxe_ip
+   * .services_ip.dns_ip
+   * .services_ip.time_ip
 * dhcp_settings
-  * .default_lease_time
-  * .max_lease_time
+   * .default_lease_time
+   * .max_lease_time
 
 **hostvars[hosts]**
 
 * network_interfaces
-  * .ip4
-  * .mac
+   * .ip4
+   * .mac
 
 Optional inventory vars:
 
 **hostvars[inventory_hostname]**
 
 * network[item]
-  * .dhcp_unknown_range
-  * .gateway
+   * .dhcp_unknown_range
+   * .gateway
 
 **hostvars[hosts]**
 
 * bmc
-  * .ip4
-  * .mac
-  * .name
+   * .ip4
+   * .mac
+   * .name
 
 Output
 ^^^^^^

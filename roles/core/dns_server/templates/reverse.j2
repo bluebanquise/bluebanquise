@@ -9,10 +9,9 @@ $INCLUDE "/var/named/reverse.soa"
 
 {% for host in groups['all'] %}
   {% if hostvars[host]['network_interfaces'] is defined and hostvars[host]['network_interfaces'] is not none %}
-    {% set host_network_interfaces = hostvars[host]['network_interfaces'] %}{# Buffer for better performances #}
-    {% for interface, interface_vars in host_network_interfaces.items() %}
+    {% for interface, interface_vars in hostvars[host]['network_interfaces'].items() %}
       {% if interface_vars.ip4 is defined and interface_vars.ip4 is not none %}
-        {% if (interface_vars.network is defined and interface_vars.network is not none) and (interface_vars.network == hostvars[host]['j2_node_main_network']) %}
+        {% if interface_vars.network is defined and interface_vars.network == hostvars[host]['j2_node_main_network'] %}
 {{ interface_vars.ip4.split('.')[3] }}.{{ interface_vars.ip4.split('.')[2] }}.{{ interface_vars.ip4.split('.')[1] }}.{{ interface_vars.ip4.split('.')[0] }} IN PTR {{ host }}.{{ domain_name }}.
 {{ interface_vars.ip4.split('.')[3] }}.{{ interface_vars.ip4.split('.')[2] }}.{{ interface_vars.ip4.split('.')[1] }}.{{ interface_vars.ip4.split('.')[0] }} IN PTR {{ host }}-{{ interface_vars.network }}.{{ domain_name }}.
         {% elif interface_vars.network is defined and interface_vars.network is not none %}
