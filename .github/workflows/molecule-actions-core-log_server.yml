@@ -1,16 +1,16 @@
 ---
-name: core/time unit testing
+name: core/log_server unit testing
 on:
   push:
     branches:
       - master
     paths:
-      - 'roles/core/time/**'
-      - '.github/workflows/molecule-actions-core-time.yml'
+      - 'roles/core/log_server/**'
+      - '.github/workflows/molecule-actions-core-log_server.yml'
   pull_request:
     paths:
-      - 'roles/core/time/**'
-      - '.github/workflows/molecule-actions-core-time.yml'
+      - 'roles/core/log_server/**'
+      - '.github/workflows/molecule-actions-core-log_server.yml'
 
 jobs:
   molecule_test:
@@ -22,8 +22,7 @@ jobs:
         distro:
           - centos:7
           - centos:8
-          - ubuntu:18.04
-          - ubuntu:20.04
+          - opensuseleap:15.1
 
     env:
       MOLECULE_DISTRO: ${{ matrix.distro }}
@@ -35,6 +34,6 @@ jobs:
       - name: Install packages
         run: |
           pip install 'molecule[docker]>3' ansible-lint flake8
-      - name: Run molecule test for core/time
+      - name: Run molecule test for core/log_server
         run: |
-          cd roles/core/time && molecule test
+          cd roles/core/log_server && molecule test
