@@ -39,6 +39,7 @@ Available advanced variables are:
 * name
 * baseurl
 * enabled
+* exclude
 * gpgcheck
 * gpgkey
 * proxy
@@ -112,6 +113,7 @@ sources.list file.
 Changelog
 ^^^^^^^^^
 
+* 1.0.5: Added support for excluding packages from CentOS and RHEL repositories. Neil Munday <neil@mundayweb.com>
 * 1.0.4: Clean. johnnykeats <johnny.keats@outlook.com>
 * 1.0.3: Add support of major release version. Bruno <devel@travouillon.fr>
 * 1.0.2: Added Ubuntu 18.04 compatibility. johnnykeats <johnny.keats@outlook.com>
