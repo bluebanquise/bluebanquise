@@ -1,5 +1,5 @@
 ---
-- name: Gathering OS specific variables
+- name: include_vars ░ Gather OS specific variables
   # This task gathers variables defined in OS specific files.
   #
   # Search vars in:
@@ -18,8 +18,10 @@
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
         - "vars/{{ ansible_facts.os_family }}.yml"
       skip: true
+  tags:
+    - internal
 
-- name: Template >> /etc/resolv.conf
+- name: template █ Generate /etc/resolv.conf
   template:
     src: resolv.conf.j2
     dest: /etc/resolv.conf

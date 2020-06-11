@@ -6,6 +6,43 @@ Description
 
 This role simply configure repositories for client hosts.
 
+Instructions
+^^^^^^^^^^^^
+
+See repositories_server role instructions for general repositories path details.
+
+Repositories are set in **repositories** variable. Two shapes are available: a
+simple one and an advanced one.
+
+Simple one:
+
+.. code-block:: yaml
+
+  repositories:
+    - os
+    - bluebanquise
+    - myrepo
+
+Advanced one, to be combined with simple one as desired:
+
+.. code-block:: yaml
+
+  repositories:
+    - os
+    - bluebanquise
+    - name: epel
+      baseurl: 'https://dl.fedoraproject.org/pub/epel/$releasever/$basearch/'
+      proxy: 'https://proxy:8080'
+
+Available advanced variables are:
+
+* name
+* baseurl
+* enabled
+* gpgcheck
+* gpgkey
+* proxy
+
 CentOS
 """"""
 
@@ -45,10 +82,25 @@ inventory. Please consider using the mirror closest to your location.
 Note that the `update repository does not exist anymore in CentOS 8
 <https://wiki.centos.org/FAQ/CentOS8#I_don.27t_see_the_updates_repo_for_CentOS-8>`_.
 
-Instructions
-^^^^^^^^^^^^
+Input
+^^^^^
 
-See repositories_server role instructions for more details.
+Mandatory inventory vars:
+
+**hostvars[inventory_hostname]**
+
+* repositories[item]
+
+Optional inventory vars:
+
+**hostvars[inventory_hostname]**
+
+* external_repositories[item]
+
+Output
+^^^^^^
+
+Repositories are set.
 
 To be done
 ^^^^^^^^^^
@@ -60,8 +112,8 @@ sources.list file.
 Changelog
 ^^^^^^^^^
 
+* 1.0.4: Clean. johnnykeats <johnny.keats@outlook.com>
 * 1.0.3: Add support of major release version. Bruno <devel@travouillon.fr>
 * 1.0.2: Added Ubuntu 18.04 compatibility. johnnykeats <johnny.keats@outlook.com>
 * 1.0.1: Documentation. johnnykeats <johnny.keats@outlook.com>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
- 

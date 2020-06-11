@@ -1,5 +1,5 @@
 ---
-- name: Disable CentOS Extras repository
+- name: ini_file █ Disable CentOS Extras repository
   # In BlueBanquise, the CentOS 8 system repositories are installed with the
   # special repository 'os', which splits to BaseOS and AppStream.
   # The repository Extras is enabled by default in CentOS but is not shipped
@@ -14,13 +14,13 @@
     value: '0'
     no_extra_spaces: yes
   when: ( 'os' in repositories ) or ( item.name is defined and item.name == 'os' )
-  notify: yum-clean-metadata
+  notify: command █ yum clean metadata
 
-- name: Set baseurl prefix
+- name: set_fact ░ Set baseurl prefix
   set_fact:
     baseurl_prefix: "http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/$environment/{{ equipment_profile['operating_system']['distribution'] }}/$releasever/$basearch/"
 
-- name: Force $releasever
+- name: template █ Generate /etc/dnf/vars/releasever to force $releasever
   template:
     src: releasever.j2
     dest: /etc/dnf/vars/releasever
@@ -31,7 +31,7 @@
   tags:
     - template
 
-- name: Cleanup $releasever
+- name: file █ Cleanup $releasever
   file:
     path: /etc/dnf/vars/releasever
     state: absent
@@ -39,7 +39,7 @@
   tags:
     - template
 
-- name: Set $environment
+- name: template █ Generate /etc/yum/vars/environment to set $environment
   template:
     src: environment.j2
     dest: /etc/yum/vars/environment
@@ -49,7 +49,7 @@
   tags:
     - template
 
-- name: Setting repositories
+- name: yum_repository █ Setting repositories
   yum_repository:
     name: "{{ item.name | default(item) }}"
     description: "{{ item.name | default(item) }} gen by Ansible"
@@ -61,7 +61,7 @@
   with_items: "{{ repositories | union(external_repositories|default([])) }}"
   when: ( item != 'os' ) and ( item.name is not defined or item.name != 'os' )
 
-- name: "Setting OS repositories"
+- name: yum_repository █ Setting OS repositories
   # CentOS configure BaseOS in /etc/yum.repos.d/CentOS-Base.repo and AppStream
   # in /etc/yum.repos.d/Centos-AppStream.repo. These are the operating system
   # repositories, thus installed with the special repository 'os' in

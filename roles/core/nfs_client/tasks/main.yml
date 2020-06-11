@@ -1,5 +1,5 @@
 ---
-- name: Gathering OS specific variables
+- name: include_vars ░ Gather OS specific variables
   # This task gathers variables defined in OS specific files.
   #
   # Search vars in:
@@ -18,15 +18,17 @@
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
         - "vars/{{ ansible_facts.os_family }}.yml"
       skip: true
+  tags:
+    - internal
 
-- name: Install packages
+- name: "package █ Install {{ nfs_client_packages_to_install | join(' ') }} packages"
   package:
     name: "{{ nfs_client_packages_to_install }}"
     state: present
   tags:
     - package
 
-- name: Create NFS directories
+- name: file █ Create NFS directories
   file:
     path: "{{ item.0.mount }}"
     state: directory
@@ -34,10 +36,10 @@
     - "{{ nfs }}"
     - clients_groups
   when:
-    - groups[item.1] is defined and not none
+    - groups[item.1] is defined and groups[item.1] is not none
     - inventory_hostname in groups[item.1]
 
-- name: Manage services state
+- name: service █ Manage rpcbind state
   service:
     name: rpcbind
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
@@ -46,7 +48,16 @@
   tags:
     - service
 
-- name: Mount exported NFS into directories
+- name: seboolean █ Enable selinux /home dir boolean if needed
+  seboolean:
+    name: use_nfs_home_dirs
+    state: yes
+    persistent: yes
+  when:
+    - ansible_facts.selinux.status == "enabled"
+    - nfs_settings.selinux.use_nfs_home_dirs == "true"
+
+- name: mount █ Mount exported NFS into directories
   mount:
     path: "{{ item.0.mount }}"
     src: "{{ item.0.server }}{% if item.0.take_over_network is defined and item.0.take_over_network is not none %}-{{ item.0.take_over_network }}{% endif %}:{{ item.0.export }}"
@@ -59,13 +70,3 @@
   when:
     - groups[item.1] is defined and not none
     - inventory_hostname in groups[item.1]
-
-- name: Enable selinux /home dir boolean of needed
-  seboolean:
-    name: use_nfs_home_dirs
-    state: yes
-    persistent: yes
-  when:
-    - ansible_facts.selinux.status == "enabled"
-    - nfs_settings.selinux.use_nfs_home_dirs == "true"
-
