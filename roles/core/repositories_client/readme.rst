@@ -44,7 +44,6 @@ Available advanced variables are:
 * gpgkey
 * proxy
 
-
 CentOS
 """"""
 
