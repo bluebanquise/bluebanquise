@@ -1,0 +1,7 @@
+[rack_1]
+management1
+c[001:004]
+login1
+
+[rack_1:vars]
+rack_number=1

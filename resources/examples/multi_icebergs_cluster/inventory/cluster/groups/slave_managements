@@ -1,0 +1,4 @@
+# Slaves managements, to mount /etc/bluebanquise and repositories from top iceberg
+[slave_managements]
+management2
+management3
