@@ -1,6 +1,5 @@
 ---
-
-- name: Restart pxe services
+- name: service █ Restart pxe services
   service:
     name: "{{ item }}"
     state: restarted

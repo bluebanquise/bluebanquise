@@ -1,6 +1,5 @@
 ---
-
-- name: Restart nfs services
+- name: service █ Restart nfs server services
   service:
     name: "{{ item }}"
     state: restarted

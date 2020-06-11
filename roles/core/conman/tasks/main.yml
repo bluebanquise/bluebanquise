@@ -1,5 +1,5 @@
 ---
-- name: Gathering OS specific variables
+- name: include_vars ░ Gather OS specific variables
   # This task gathers variables defined in OS specific files.
   #
   # Search vars in:
@@ -18,8 +18,10 @@
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
         - "vars/{{ ansible_facts.os_family }}.yml"
       skip: True
+  tags:
+    - internal
 
-- name: Install conman and ipmitool
+- name: package █ Install conman and ipmitool
   package:
     name:
       - conman
@@ -28,20 +30,20 @@
   tags:
     - package
 
-- name: Template >> /etc/conman.conf
+- name: template █ Generate /etc/conman.conf
   template:
     src: conman.conf.j2
     dest: /etc/conman.conf
     owner: root
     group: root
     mode: 0644
-  notify: Restart conman
+  notify: service █ Restart conman
   tags:
     - template
 
 - meta: flush_handlers
 
-- name: Manage services state
+- name: service █ Manage conman state
   service:
     name: conman
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
