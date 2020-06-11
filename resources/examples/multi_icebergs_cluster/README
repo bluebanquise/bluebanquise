@@ -1,0 +1,26 @@
+This examples is composed of 3 icebergs.
+
+One top iceberg, iceberg1, composed of:
+
+* 1 management node
+* 1 storage node
+* 2 login nodes
+* 1 security node
+
+Two slaves icebergs.
+
+iceberg2 with:
+
+* 1 management node
+* 4 compute nodes
+
+iceberg3 with:
+
+* 1 management node
+* 2 compute nodes on ice3-1 network
+* 2 gpu compute nodes on ice3-2 network
+
+Each iceberg as an isolated ethernet network. Each slave iceberg management have
+on nic on its iceberg network, and one nic on its top iceberg network.
+
+All nodes are connected through a shared interconnect.
