@@ -39,10 +39,11 @@ Available advanced variables are:
 * name
 * baseurl
 * enabled
+* exclude
 * gpgcheck
 * gpgkey
 * proxy
-* exclude
+
 
 CentOS
 """"""
