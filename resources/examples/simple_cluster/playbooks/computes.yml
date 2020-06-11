@@ -1,6 +1,6 @@
 ---
 - name: computes
-  hosts: "{{ target }}"
+  hosts: "mg_computes" # Will deploy on all mg_computes group nodes
   roles:
 
     - role: set_hostname
@@ -19,4 +19,3 @@
         time_profile: client
     - role: nfs_client
       tags: nfs_client
-

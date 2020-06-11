@@ -1,14 +1,26 @@
 equipment_profile:
 
-  access_control: true
-  firewall: true
+  ipxe_driver: default
+  ipxe_platform: pcbios
+  ipxe_embed: standard
+  preserve_efi_first_boot_device: true
 
   console: console=tty0 console=ttyS1,115200n8
   kernel_parameters:
 
+  access_control: true
+  firewall: true
+
+  partitioning: |
+    clearpart --all --initlabel
+    autopart --type=plain --fstype=ext4 --nohome
+
+  autoinstall_pre_script:
+  autoinstall_post_script:
+
   operating_system:
     distribution: centos
-    distribution_major_version: 7
+    distribution_major_version: 8
 
   equipment_type: server
 
@@ -19,4 +31,12 @@ equipment_profile:
   hardware:
     cpu:
       architecture: x86_64
+      cores: 24
+      cores_per_socket: 12
+      sockets: 2
+      threads_per_core: 1
+    gpu:
 
+  equipment_authentication:
+    user: ADMIN
+    password: ADMIN

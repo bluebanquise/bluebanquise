@@ -4,8 +4,8 @@ nfs_settings:
 
 nfs:
   softwares:
-    mount: /opt/softwares                       # Which path clients should mount this NFS
-    export: /opt/softwares                      # What path server should export
+    mount: /opt/software                        # Which path clients should mount this NFS
+    export: /opt/software                       # What path server should export
     server: management1                         # The server that export this storage space
     clients_groups:                             # Can be an equipment group, or a main group (mg), or any other ansible group
       - mg_computes
@@ -24,4 +24,3 @@ nfs:
     take_over_network: ice1-1
     export_arguments: rw,no_root_squash,sync
     mount_arguments: rw,intr,rsize=32768,wsize=32768,nfsvers=4.2,bg
-

@@ -1,7 +1,9 @@
 This examples is composed of:
 
-1 management node
-1 login node
-4 computes nodes
+* 1 management node
+* 1 login node
+* 4 computes nodes
 
 All of them are link with a single ethernet management network, and with an interconnect.
+
+Management node exports /opt/softwares and /home to the others nodes through NFS.

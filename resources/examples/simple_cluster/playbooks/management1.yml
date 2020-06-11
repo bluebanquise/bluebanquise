@@ -1,6 +1,6 @@
 ---
 - name: management1
-  hosts: "{{ target | default('management1') }}"
+  hosts: "management1"
   roles:
 
     - role: bluebanquise
@@ -31,4 +31,3 @@
       tags: pxe_stack
     - role: nfs_server
       tags: nfs_server
-

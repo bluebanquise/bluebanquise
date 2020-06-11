@@ -1,6 +1,6 @@
 ---
 - name: login1
-  hosts: "{{ target | default('login1') }}"
+  hosts: "login1"
   roles:
 
     - role: set_hostname
@@ -19,4 +19,3 @@
         time_profile: client
     - role: nfs_client
       tags: nfs_client
-
