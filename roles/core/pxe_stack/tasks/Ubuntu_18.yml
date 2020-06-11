@@ -1,11 +1,12 @@
----
-- name: Remove inetd
-  package:
-    name: inetutils-inetd
-    state: absent
-
-- name: atftpd config file
-  copy:
-    src: atftpd
-    dest: /etc/default/atftpd
-    mode: 0644
+# OUTDATED, need review
+# ---
+# - name: Remove inetd
+#   package:
+#     name: inetutils-inetd
+#     state: absent
+#
+# - name: atftpd config file
+#   copy:
+#     src: atftpd
+#     dest: /etc/default/atftpd
+#     mode: 0644

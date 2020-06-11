@@ -1,32 +1,32 @@
+#jinja2: lstrip_blocks: True
 ;#### Blue Banquise file ####
-;## {{ansible_managed}}
+;## {{ ansible_managed }}
 
 $TTL 86400
 $ORIGIN in-addr.arpa.
 $INCLUDE "/var/named/reverse.soa"
-@ IN NS {{inventory_hostname}}.{{domain_name}}.
+@ IN NS {{ inventory_hostname }}.{{ domain_name }}.
 
 {% for host in groups['all'] %}
-{% if hostvars[host]['network_interfaces'] is defined and not none %}
-{% set host_network_interfaces = hostvars[host]['network_interfaces'] %}{# Buffer for better performances #}
-{% for interface, interface_vars in host_network_interfaces.items() %}
-{% if interface_vars.ip4 is defined and not none %}
-{% if (interface_vars.network is defined and not none) and (interface_vars.network == hostvars[host]['j2_node_main_network']) %}
-{{interface_vars.ip4.split('.')[3]}}.{{interface_vars.ip4.split('.')[2]}}.{{interface_vars.ip4.split('.')[1]}}.{{interface_vars.ip4.split('.')[0]}} IN PTR {{host}}.{{domain_name}}.
-{{interface_vars.ip4.split('.')[3]}}.{{interface_vars.ip4.split('.')[2]}}.{{interface_vars.ip4.split('.')[1]}}.{{interface_vars.ip4.split('.')[0]}} IN PTR {{host}}-{{interface_vars.network}}.{{domain_name}}.
-{% elif interface_vars.network is defined and not none %}
-{{interface_vars.ip4.split('.')[3]}}.{{interface_vars.ip4.split('.')[2]}}.{{interface_vars.ip4.split('.')[1]}}.{{interface_vars.ip4.split('.')[0]}} IN PTR {{host}}-{{interface_vars.network}}.{{domain_name}}.
-{% else %}
+  {% if hostvars[host]['network_interfaces'] is defined and hostvars[host]['network_interfaces'] is not none %}
+    {% for interface, interface_vars in hostvars[host]['network_interfaces'].items() %}
+      {% if interface_vars.ip4 is defined and interface_vars.ip4 is not none %}
+        {% if interface_vars.network is defined and interface_vars.network == hostvars[host]['j2_node_main_network'] %}
+{{ interface_vars.ip4.split('.')[3] }}.{{ interface_vars.ip4.split('.')[2] }}.{{ interface_vars.ip4.split('.')[1] }}.{{ interface_vars.ip4.split('.')[0] }} IN PTR {{ host }}.{{ domain_name }}.
+{{ interface_vars.ip4.split('.')[3] }}.{{ interface_vars.ip4.split('.')[2] }}.{{ interface_vars.ip4.split('.')[1] }}.{{ interface_vars.ip4.split('.')[0] }} IN PTR {{ host }}-{{ interface_vars.network }}.{{ domain_name }}.
+        {% elif interface_vars.network is defined and interface_vars.network is not none %}
+{{ interface_vars.ip4.split('.')[3] }}.{{ interface_vars.ip4.split('.')[2] }}.{{ interface_vars.ip4.split('.')[1] }}.{{ interface_vars.ip4.split('.')[0] }} IN PTR {{ host }}-{{ interface_vars.network }}.{{ domain_name }}.
+        {% else %}
 {# Do nothing, not in registered network #}
-{% endif %}
-{% endif %}
-{% endfor %}
-{% if hostvars[host]['bmc'] is defined %}
-{% set bmc_args = hostvars[host]['bmc'] %}
-{% if (bmc_args.name is defined and not none) and (bmc_args.ip4 is defined and not none) and (bmc_args.network is defined and not none) %}
-{{bmc_args.ip4.split('.')[3]}}.{{bmc_args.ip4.split('.')[2]}}.{{bmc_args.ip4.split('.')[1]}}.{{bmc_args.ip4.split('.')[0]}} IN PTR {{bmc_args.name}}.{{domain_name}}.
-{{bmc_args.ip4.split('.')[3]}}.{{bmc_args.ip4.split('.')[2]}}.{{bmc_args.ip4.split('.')[1]}}.{{bmc_args.ip4.split('.')[0]}} IN PTR {{bmc_args.name}}-{{bmc_args.network}}.{{domain_name}}.
-{% endif %}
-{% endif %}
-{% endif %}
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+    {% if hostvars[host]['bmc'] is defined %}
+      {% set bmc_args = hostvars[host]['bmc'] %}
+      {% if (bmc_args.name is defined and bmc_args.name is not none) and (bmc_args.ip4 is defined and bmc_args.ip4 is not none) and (bmc_args.network is defined and bmc_args.network is not none) %}
+{{ bmc_args.ip4.split('.')[3] }}.{{ bmc_args.ip4.split('.')[2] }}.{{ bmc_args.ip4.split('.')[1] }}.{{ bmc_args.ip4.split('.')[0] }} IN PTR {{ bmc_args.name }}.{{ domain_name }}.
+{{ bmc_args.ip4.split('.')[3] }}.{{ bmc_args.ip4.split('.')[2] }}.{{ bmc_args.ip4.split('.')[1] }}.{{ bmc_args.ip4.split('.')[0] }} IN PTR {{ bmc_args.name }}-{{ bmc_args.network }}.{{ domain_name }}.
+      {% endif %}
+    {% endif %}
+  {% endif %}
 {% endfor %}

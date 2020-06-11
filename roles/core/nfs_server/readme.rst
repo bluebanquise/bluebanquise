@@ -27,12 +27,40 @@ All configuration is done in *group_vars/all/general_settings/nfs.yml*:
 
 This role will not modify default nfs server configuration (number of threads, nfs v4.2 force, etc).
 
-Do not forget to restart nfs server service when you update configuration for changes to take effect.
+Input
+^^^^^
+
+Mandatory inventory vars:
+
+**hostvars[inventory_hostname]**
+
+* nfs[item]
+   * .mount
+   * .export
+   * .server
+   * .clients_groups
+   * .export_arguments
+
+Optional inventory vars:
+
+**hostvars[inventory_hostname]**
+
+* nfs[item]
+   * .take_over_network
+
+Output
+^^^^^^
+
+Add exported folder into /etc/exports .
+
+Packages installed:
+
+* nfs server utils
 
 Changelog
 ^^^^^^^^^
 
+* 1.0.3: Clean. johnnykeats <johnny.keats@outlook.com>
 * 1.0.2: Added Ubuntu 18.04 compatibility. johnnykeats <johnny.keats@outlook.com>
 * 1.0.1: Fixed bad template. Documentation. johnnykeats <johnny.keats@outlook.com>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
- 

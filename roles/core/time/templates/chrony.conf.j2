@@ -1,7 +1,7 @@
 #jinja2: lstrip_blocks: "True"
 {% import "macros/network.j2" as macro_network with context %}
 #### Blue Banquise file ####
-## {{ansible_managed}}
+## {{ ansible_managed }}
 
 {% set external = false %}
 {% if external_time['time_'+time_profile]['pool'] is defined and
@@ -9,14 +9,14 @@
   {% set external = true %}
 # External pool
   {% for external_pool in external_time['time_'+time_profile]['pool'] %}
-pool {{external_pool}} iburst maxsources 3
+pool {{ external_pool }} iburst maxsources 3
   {% endfor %}
 {% elif external_time['time_'+time_profile]['server'] is defined and
         external_time['time_'+time_profile]['server'] is iterable %}
   {% set external = true %}
 # External servers
   {% for external_server in external_time['time_'+time_profile]['server'] %}
-server {{external_server}}
+server {{ external_server }}
   {% endfor %}
 {% endif -%}
 
@@ -52,7 +52,7 @@ rtcsync
   {% for nic in network_interfaces %}
     {% if network_interfaces[nic]['network'] is defined and
           network_interfaces[nic]['network'] is not none %}
-allow {{networks[network_interfaces[nic]['network']]['subnet']}}/{{networks[network_interfaces[nic]['network']]['prefix']}}
+allow {{ networks[network_interfaces[nic]['network']]['subnet'] }}/{{ networks[network_interfaces[nic]['network']]['prefix'] }}
     {% endif %}
   {% endfor %}
 
@@ -71,4 +71,3 @@ local stratum 12
 
 # Specify directory for log files.
 logdir /var/log/chrony
-

@@ -1,5 +1,5 @@
 ---
-- name: Disable CentOS-Base distro repositories
+- name: ini_file █ Disable CentOS-Base distro repositories
   # In BlueBanquise, the CentOS 7 system repository is installed with the
   # special repository 'os', thus we disable default repositories if 'os' is
   # configured.
@@ -11,13 +11,13 @@
     no_extra_spaces: yes
   loop: [ 'base', 'updates', 'extras' ]
   when: ( 'os' in repositories ) or ( item.name is defined and item.name == 'os' )
-  notify: yum-clean-metadata
+  notify: command █ yum clean metadata
 
-- name: Set baseurl prefix
+- name: set_fact ░ Set baseurl prefix
   set_fact:
     baseurl_prefix: "http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/$environment/{{ equipment_profile['operating_system']['distribution'] }}/$releasever/$basearch/"
 
-- name: Force $releasever
+- name: template █ Generate /etc/yum/vars/releasever to force $releasever
   template:
     src: releasever.j2
     dest: /etc/yum/vars/releasever
@@ -28,7 +28,7 @@
   tags:
     - template
 
-- name: Cleanup $releasever
+- name: file █ Cleanup $releasever
   file:
     path: /etc/yum/vars/releasever
     state: absent
@@ -36,7 +36,7 @@
   tags:
     - template
 
-- name: Set $environment
+- name: template █ Generate /etc/yum/vars/environment to set $environment
   template:
     src: environment.j2
     dest: /etc/yum/vars/environment
@@ -46,7 +46,7 @@
   tags:
     - template
 
-- name: Setting repositories
+- name: yum_repository █ Setting repositories
   yum_repository:
     name: "{{ item.name | default(item) }}"
     description: "{{ item.name | default(item) }} gen by Ansible"
