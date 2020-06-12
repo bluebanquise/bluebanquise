@@ -5,14 +5,14 @@ nfs_settings:
 nfs:
 
   ansible:
-    mount: /etc/bluebanquise
-    export: /etc/bluebanquise
-    server: management1
-    clients_groups:
+    mount: /etc/bluebanquise                    # Which path clients should mount this NFS
+    export: /etc/bluebanquise                   # What path server should export
+    server: management1                         # The server that export this storage space
+    clients_groups:                             # Can be an equipment group, or a main group (mg), or any other ansible group
       - slave_managements
-    take_over_network: ice1-1
-    export_arguments: ro,no_root_squash,sync
-    mount_arguments: ro,intr,nfsvers=4.2,bg
+    take_over_network: ice1-1                   # Network used to share this storage space
+    export_arguments: ro,no_root_squash,sync    # Arguments for the server (export)
+    mount_arguments: ro,intr,nfsvers=4.2,bg     # Arguments for the client (mount)
 
   repositories:
     mount: /var/www/html/repositories

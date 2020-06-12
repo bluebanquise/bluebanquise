@@ -1,6 +1,8 @@
 ---
-- name: login1
-  hosts: "login1"
+# use '--limit login1' to restrict playbook to
+# login1 if mg_logins contains multiple login nodes
+- name: logins playbook
+  hosts: "mg_logins"
   roles:
 
     - role: set_hostname

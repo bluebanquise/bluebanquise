@@ -6,4 +6,4 @@ This examples is composed of:
 
 All of them are link with a single ethernet management network, and with an interconnect.
 
-Management node exports /opt/softwares and /home to the others nodes through NFS.
+Management node exports /opt/software and /home to the others nodes through NFS.
