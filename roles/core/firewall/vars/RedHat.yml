@@ -1,0 +1,5 @@
+---
+firewall_packages_to_install:
+  - firewalld
+firewall_services_to_start:
+  - firewalld

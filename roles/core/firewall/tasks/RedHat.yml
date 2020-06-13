@@ -1,0 +1,90 @@
+---
+- name: fail ░ Check presence of required parameters
+  fail:
+    msg: "Bailing out.
+  This role requires networks[{{ item['network'] }}]['firewall']['zone']"
+  when: networks[item['network']]['firewall']['zone'] is not defined
+  loop: "{{ network_interfaces }}"
+  loop_control:
+    label: "{{ item['interface'] }}"
+  tags:
+    - internal
+
+- name: "firewalld █ Configure firewall zones"
+  firewalld:
+    zone: "{{ networks[item]['firewall']['zone'] }}"
+    source: "{{ networks[item]['subnet'] }}/{{ networks[item]['prefix'] }}"
+    immediate: yes
+    permanent: yes
+    state: enabled
+  when: networks[item]['firewall']['zone'] is defined
+  loop: "{{ (network_interfaces | map(attribute='network') | list) }}"
+  loop_control:
+    label: "Add source '{{ networks[item]['subnet'] }}/{{ networks[item]['prefix'] }}'
+            to zone '{{ networks[item]['firewall']['zone'] }}'"
+
+- name: "firewalld █ Add services to firewall's zones"
+  firewalld:
+    zone: "{{ item.0.zone }}"
+    service: "{{ item.1 }}"
+    immediate: "yes"
+    permanent: "yes"
+    state: enabled
+  loop: "{{ firewall.zones | default({}) | subelements('services_enabled', skip_missing=True) }}"
+  loop_control:
+    label: "Enable service {{ item.1 }} in zone {{ item.0.zone }}"
+
+- name: "firewalld █ Remove services from firewall's zones"
+  firewalld:
+    zone: "{{ item.0.zone }}"
+    service: "{{ item.1 }}"
+    immediate: "yes"
+    permanent: "yes"
+    state: disabled
+  loop: "{{ firewall.zones | default({}) | subelements('services_disabled', skip_missing=True) }}"
+  loop_control:
+    label: "Disable service {{ item.1 }} in zone {{ item.0.zone }}"
+
+- name: "firewalld █ Add ports to firewall's zones"
+  firewalld:
+    zone: "{{ item.0.zone }}"
+    port: "{{ item.1 }}"
+    immediate: "yes"
+    permanent: "yes"
+    state: enabled
+  loop: "{{ firewall.zones | default({}) | subelements('ports_enabled', skip_missing=True) }}"
+  loop_control:
+    label: "Enable port {{ item.1 }} in zone {{ item.0.zone }}"
+
+- name: "firewalld █ Remove ports from firewall's zones"
+  firewalld:
+    zone: "{{ item.0.zone }}"
+    port: "{{ item.1 }}"
+    immediate: "yes"
+    permanent: "yes"
+    state: disabled
+  loop: "{{ firewall.zones | default({}) | subelements('ports_disabled', skip_missing=True) }}"
+  loop_control:
+    label: "Disable port {{ item.1 }} in zone {{ item.0.zone }}"
+
+- name: "firewalld █ Add rich rules to firewall's zones"
+  firewalld:
+    zone: "{{ item.0.zone }}"
+    rich_rule: "{{ item.1 }}"
+    immediate: "yes"
+    permanent: "yes"
+    state: enabled
+  loop: "{{ firewall.zones | default({}) | subelements('rich_rules_enabled', skip_missing=True) }}"
+  loop_control:
+    label: "Enable rich rule '{{ item.1 }}' in zone {{ item.0.zone }}"
+
+- name: "firewalld █ Remove rich rules from firewall's zones"
+  firewalld:
+    zone: "{{ item.0.zone }}"
+    rich_rule: "{{ item.1 }}"
+    immediate: "yes"
+    permanent: "yes"
+    state: disabled
+  loop: "{{ firewall.zones | default({}) | subelements('rich_rules_disabled', skip_missing=True) }}"
+  loop_control:
+    label: "Disable rich rule '{{ item.1 }}' in zone {{ item.0.zone }}"
