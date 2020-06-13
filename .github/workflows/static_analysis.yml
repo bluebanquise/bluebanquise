@@ -32,4 +32,4 @@ jobs:
         run: ansible-lint -v roles/{core,advanced-core}/* -x 204
 
       - name: Run linter on example playbooks
-        run: ansible-lint -v resources/examples/simple_cluster/playbooks/*.yml
+        run: ansible-lint -v --exclude . resources/examples/*/playbooks/*.yml
