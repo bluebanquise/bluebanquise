@@ -25,6 +25,8 @@ jobs:
 
     env:
       MOLECULE_DISTRO: ${{ matrix.distro }}
+      PY_COLORS: 1
+      ANSIBLE_FORCE_COLOR: 1
     steps:
       - name: Set INSTANCE_DISTRO variable
         run: echo "::set-env name=INSTANCE_DISTRO::${MOLECULE_DISTRO/:/}"

@@ -26,6 +26,8 @@ jobs:
 
     env:
       MOLECULE_DISTRO: ${{ matrix.distro }}
+      PY_COLORS: 1
+      ANSIBLE_FORCE_COLOR: 1
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
