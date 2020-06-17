@@ -2,12 +2,12 @@
 #### Blue Banquise file ####
 ## {{ ansible_managed }}
 
-{% set inventory_all_ipv4_addresses = network_interfaces | json_query('*.ip4') %}
+{% set inventory_all_ipv4_addresses = network_interfaces | map(attribute='ip4') | list %}
 
 options {
   listen-on port 53 {
     127.0.0.1;
-{% for network in (networks | select('match',(j2_current_iceberg_network+'-[0-9]+')) | list | unique | sort) %}
+{% for network in j2_management_networks %}
   {% if networks[network]['is_in_dns'] is defined and networks[network]['is_in_dns'] == true %}
     {% set addresses = networks[network]['services_ip']['dns_ip'] | ipaddr %}
     {% if dns_slaves is defined %}
@@ -32,7 +32,7 @@ options {
 
   allow-query {
     localhost;
-{% for network in (networks | select('match',(j2_current_iceberg_network+'-[0-9]+')) | list | unique | sort) %}
+{% for network in j2_management_networks %}
   {% if networks[network]['is_in_dns'] is defined and networks[network]['is_in_dns'] == true %}
     {{ networks[network]['subnet'] }}/{{ networks[network]['prefix'] }};
   {% endif %}
