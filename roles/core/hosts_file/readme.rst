@@ -75,6 +75,7 @@ Files generated:
 Changelog
 ^^^^^^^^^
 
+* 1.0.6: Update to new network_interfaces syntax. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.5: Clean. johnnykeats <johnny.keats@outlook.com>
 * 1.0.4: Rewrite whole macro, add BMC alias. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.3: Accelerated mode. Benoit Leveugle <benoit.leveugle@gmail.com>
