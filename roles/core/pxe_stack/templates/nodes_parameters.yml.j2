@@ -1,7 +1,18 @@
 #jinja2: lstrip_blocks: "True"
-{% import "macros/network.j2" as macro_network with context %}
 #### Blue Banquise file ####
 ## {{ ansible_managed }}
+
+{% macro node_main_network(macro_network_interfaces,macro_current_iceberg_network) %}
+{{ macro_network_interfaces | selectattr('network','match','^'+macro_current_iceberg_network+'-[a-zA-Z0-9]+') | map(attribute='network') | list | first }}
+{% endmacro %}
+
+{% macro node_main_network_interface(macro_network_interfaces,macro_current_iceberg_network) %}
+{{ macro_network_interfaces | selectattr('network','match','^'+macro_current_iceberg_network+'-[a-zA-Z0-9]+') | map(attribute='interface') | list | first }}
+{% endmacro %}
+
+{% macro node_main_network_ip4(macro_network_interfaces,macro_current_iceberg_network) %}
+{{ macro_network_interfaces | selectattr('network','match','^'+macro_current_iceberg_network+'-[a-zA-Z0-9]+') | map(attribute='ip4') | list | first }}
+{% endmacro %}
 
 {% if icebergs_system == true %}
 # Iceberg system is on
@@ -19,15 +30,14 @@
   {% if hostvars[host]['equipment_profile']['equipment_type'] == "server" %}
     {% if hostvars[host]['network_interfaces'] is defined and hostvars[host]['network_interfaces'] is not none %}
 {{ host }}:
-  equipment_profile: {{ hostvars[host]['group_names'] | select('match','^'+equipment_naming+'_.*') | list | unique | sort | first | join | replace(equipment_naming + '_','') | trim }}
+  equipment_profile: {{ hostvars[host]['group_names'] | select('match','^'+equipment_naming+'_.*') | list | unique | sort | first | replace(equipment_naming + '_','') | trim }}
   network:
-{% set host_node_main_network = (macro_network.node_main_network(hostvars[host]['network_interfaces'],j2_current_iceberg_network)| trim) %}
-{% set host_node_main_network_interface = (macro_network.node_main_network_interface(hostvars[host]['network_interfaces'],host_node_main_network) | trim) %}
-    node_main_network_interface: {{ host_node_main_network_interface }}
+{% set host_node_main_network = node_main_network(hostvars[host]['network_interfaces'],j2_current_iceberg_network) | trim %}
+    node_main_network_interface: {{ node_main_network_interface(hostvars[host]['network_interfaces'],j2_current_iceberg_network) | trim }}
     node_main_network_netmask: {{ networks[host_node_main_network]['netmask'] }}
     node_main_network_gateway: {% if networks[host_node_main_network]['gateway'] is defined and not none %}{{ networks[host_node_main_network]['gateway'] }}{% endif %}
 
-    node_main_network_interface_ip: {{ hostvars[host]['network_interfaces'][host_node_main_network_interface]['ip4'] }}
+    node_main_network_interface_ip: {{ node_main_network_ip4(hostvars[host]['network_interfaces'],j2_current_iceberg_network) | trim }}
 
     {% endif %}
   {% endif %}
