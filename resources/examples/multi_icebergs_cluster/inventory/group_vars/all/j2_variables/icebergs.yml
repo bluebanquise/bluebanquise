@@ -1,6 +1,6 @@
 # BlueBanquise internal j2_ variables.
 # Icebergs
-# (c) 2019 Benoit Leveugle
+# (c) 2019-2020 Benoit Leveugle
 
 ## Icebergs engine file
 # To comply with KISS, all iceberg variables must depend of j2_current_iceberg when possible
@@ -11,7 +11,8 @@ j2_number_of_icebergs: "{{ groups | select('match','^'+iceberg_naming+'[0-9]+') 
 
 # Get host current iceberg
 # This is MAIN variable, and must remain as the chain is simple
-j2_current_iceberg: "{% if not icebergs_system %}{{ iceberg_naming+'1' }}{% else %}{{ group_names | select('match','^'+iceberg_naming+'[0-9]+') | list | unique | sort | first | join }}{% endif %}"
+
+j2_current_iceberg: "{{ icebergs_system | ternary( group_names | select('match','^'+iceberg_naming+'[0-9]+') | list | unique | sort | first , iceberg_naming+'1') }}"
 
 # Now deduced from j2_current_iceberg
 
