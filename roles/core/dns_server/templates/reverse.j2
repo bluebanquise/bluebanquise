@@ -8,7 +8,7 @@ $INCLUDE "/var/named/reverse.soa"
 @ IN NS {{ inventory_hostname }}.{{ domain_name }}.
 
 {% for host in groups['all'] %}
-  {% if hostvars[host]['network_interfaces'] is defined and hostvars[host]['network_interfaces'] is not none and hostvars[host]['network_interfaces'] is iterable %}
+  {% if hostvars[host]['network_interfaces'] is defined and hostvars[host]['network_interfaces'] is iterable %}
     {% for nic in hostvars[host]['network_interfaces'] %}
       {% if nic.ip4 is defined and nic.ip4 is not none %}
         {% if nic.network is defined and nic.network == hostvars[host]['j2_node_main_network'] %}

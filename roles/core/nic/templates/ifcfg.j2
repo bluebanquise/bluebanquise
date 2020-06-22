@@ -5,7 +5,7 @@
 {# 1. First the name and default parameters. #}
 NAME={{ item.interface }}
 DEVICE={{ item.interface }}
-{% if (item.autoconnect is defined and item.autoconnect is not none) and (item.autoconnect == false) %}
+{% if item.autoconnect is defined and item.autoconnect == false %}
 ONBOOT=no
 {% else %}
 ONBOOT=yes
@@ -42,7 +42,7 @@ NETMASK={{ networks[item.network]['netmask'] }}
 {% endif %}
 
 {# 3.1.4 Maybe prefix was set directly on ip4 line. This is allowed in ip4_multi #}
-{% if item.ip4_multi is defined and item.ip4_multi is not none and item.ip4_multi is iterable %}
+{% if item.ip4_multi is defined and item.ip4_multi is iterable %}
   {% for ip in item.ip4_multi %}
     {% if '/' in ip %}
 IPADDR{{ loop.index }}={{ ip.split('/')[0] }}
@@ -66,7 +66,7 @@ MTU={{ item.mtu }}
 {% endif %}
 
 {# 6. Is it a VLAN ? #}
-{% if (item.vlan is defined and item.vlan is not none) and (item.vlan == true) %}
+{% if item.vlan is defined and item.vlan == true %}
 VLAN=yes
 PHYSDEV={{ item.physical_device }}
 VLAN_ID={{ item.vlan_id }}
@@ -74,14 +74,14 @@ VLAN_ID={{ item.vlan_id }}
 
 {# 7. Is it a bonding (bond) or a bonding-slave (bond-slave) ? #}
 {# 7.1 Master first. #}
-{% if (item.type is defined and item.type is not none) and (item.type == 'bond') %}
+{% if item.type is defined and item.type == 'bond' %}
 BONDING_MASTER=yes
   {% if item.bond_options is defined and item.bond_options is not none %}
 BONDING_OPTS="{{ item.bond_options }}"
   {% endif %}
 {% endif %}
 {# 7.2 Now slave. #}
-{% if (item.type is defined and item.type is not none) and (item.type == 'bond-slave') %}
+{% if item.type is defined and item.type == 'bond-slave' %}
 SLAVE=yes
 MASTER={{ item.master }}
 {% endif %}

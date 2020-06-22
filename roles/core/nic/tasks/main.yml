@@ -5,14 +5,14 @@
     name: 8021q
     state: present
   with_items: "{{ network_interfaces }}"
-  when: (item.vlan is defined and item.vlan is not none) and item.vlan
+  when: item.vlan is defined and item.vlan is not none
 
 - name: Load bonding module if needed
   modprobe:
     name: bonding
     state: present
   with_items: "{{ network_interfaces }}"
-  when: (item.type is defined and item.type is not none) and (item.type == 'bond' or item.type == 'bond-slave')
+  when: item.type is defined and (item.type == 'bond' or item.type == 'bond-slave')
 
 - name: Set NIC configuration
   template:
@@ -22,6 +22,6 @@
     group: root
     mode: 0644
   with_items: "{{ network_interfaces }}"
-  when: >
-      ( item.ip4 is defined and item.ip4 is not none ) or
-      ( item.type is defined and item.type is not none and item.type == 'bond-slave' )
+  when: 
+    - ( item.ip4 is defined and item.ip4 is not none ) or ( item.type is defined and item.type == 'bond-slave' )
+    - item.interface is defined and item.interface is not none
