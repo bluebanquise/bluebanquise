@@ -27,7 +27,7 @@ provisioner:
         j2_node_main_network: ice1-1
         j2_node_main_network_interface: en0
         network_interfaces:
-          en0:
+          - interface: en0
             ip4: 10.10.0.1
             network: ice1-1
 verifier:
