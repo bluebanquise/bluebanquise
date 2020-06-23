@@ -2,11 +2,15 @@
 Learn Ansible
 =============
 
-To understand how **BlueBanquise** works, it is essential to learn basis of Ansible.
+To understand how **BlueBanquise** works, it is essential to learn basis of
+Ansible.
 
-This section tries to provide key knowledge to at least be able to manipulate and edit the stack to your needs.
+This section tries to provide key knowledge to at least be able to manipulate
+and edit the stack to your needs.
 
-It is assumed here that your system is already installed, and that Ansible has also been installed. It is also assumed that **BlueBanquise** stack has not been installed yet, and so Ansible is freshly installed without modifications.
+It is assumed here that your system is already installed, and that Ansible has
+also been installed. It is also assumed that **BlueBanquise** stack has not been
+installed yet, and so Ansible is freshly installed without modifications.
 
 All work will be done on the current host.
 
@@ -30,32 +34,31 @@ Then, create some needed directories and files:
   mkdir /etc/ansible/roles
   mkdir /etc/ansible/playbooks
 
-And edit /etc/ansible/ansible.cfg line to fix /etc/ansible/inventory as default inventory folder:
+And edit /etc/ansible/ansible.cfg line to fix /etc/ansible/inventory as default
+inventory folder:
 
 .. code-block:: text
 
   [defaults]
   inventory      = /etc/ansible/inventory
 
-Also set, in this same file /etc/ansible/ansible.cfg, the roles_path value to /etc/ansible/roles:
+Also set, in this same file /etc/ansible/ansible.cfg, the roles_path value to
+/etc/ansible/roles:
 
 .. code-block:: text
 
   roles_path    = /etc/ansible/roles
 
-And also change hash_behaviour to merge, as this is the most interesting and mandatory algorithm for us:
-
-.. code-block:: text
-
-  hash_behaviour = merge
-
-Finally, add management1 host into the inventory. Create a file called /etc/ansible/inventory/myhost.yml with the following content:
+Finally, add management1 host into the inventory. Create a file called
+/etc/ansible/inventory/myhost.yml with the following content:
 
 .. code-block:: yaml
 
   management1
 
-Our very basic Ansible configuration is done. But one thing remains: we need to ensure our host (management1) can ssh to itself without password, as Ansible relies fully on the ssh to connect to remote hosts.
+Our very basic Ansible configuration is done. But one thing remains: we need to
+ensure our host (management1) can ssh to itself without password, as Ansible
+relies fully on the ssh to connect to remote hosts.
 
 Let's generate a ssh key (press enter multiple time):
 
@@ -76,7 +79,8 @@ Ensure you can ssh on management1 using a password:
   root@management1's password:
   [root@management1 ~]#
 
-If ok, then deploy ssh public key to allow password less authentication, and ensure you can now ssh with the key:
+If ok, then deploy ssh public key to allow password less authentication, and
+ensure you can now ssh with the key:
 
 .. code-block:: text
 
@@ -120,7 +124,8 @@ First command is to check current Ansible version. It should be >= 2.8.2:
 Ping an host or all hosts
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Use the following command to check if Ansible can contact a specific registered host:
+Use the following command to check if Ansible can contact a specific registered
+host:
 
 .. code-block:: bash
 
@@ -132,20 +137,26 @@ Or all hosts:
 
   ansible all -m ping
 
-Also, it is possible to gather **facts**. Facts are dynamic variables, accessible only when Ansible is running on the target. Facts provides live information about the target: it's running kernel, it's Linux distribution, network or cpu information, etc.
+Also, it is possible to gather **facts**. Facts are dynamic variables,
+accessible only when Ansible is running on the target. Facts provides live
+information about the target: it's running kernel, it's Linux distribution,
+network or cpu information, etc.
 
 .. code-block:: bash
 
   ansible -m setup --tree /dev/shm/ management1
 
-Then, open file /dev/shm/management1 to check its content and the result of facts gathering.
+Then, open file /dev/shm/management1 to check its content and the result of
+facts gathering.
 
 ansible-inventory
 -----------------
 
-Ansible inventory command is extremely useful and will be massively used on this documentation.
+Ansible inventory command is extremely useful and will be massively used on this
+documentation.
 
-This command allows to gather information from your inventory and check the expected output.
+This command allows to gather information from your inventory and check the
+expected output.
 
 Groups and hosts
 ^^^^^^^^^^^^^^^^
@@ -164,24 +175,28 @@ Provide information about groups and hosts inside each group:
     |--@ungrouped:
     |  |--management1
 
-It is possible to see here that management1 is member of group @ungrouped, which is part of group @all.
+It is possible to see here that management1 is member of group @ungrouped,
+which is part of group @all.
 More will be seen later in this documentation.
 
 Host variables
 ^^^^^^^^^^^^^^
 
-To output variables for a specific host, and check for example your variable precedence mechanism provided what is expected, use:
+To output variables for a specific host, and check for example your variable
+precedence mechanism provided what is expected, use:
 
 .. code-block:: bash
 
   ansible-inventory --yaml --host management1
 
-For now, there are no available variables in the inventories, so output will be {}.
+For now, there are no available variables in the inventories, so output will
+be {}.
 
 ansible-playbook
 ----------------
 
-This command is used to launch playbooks, and ask Ansible to execute tasks on desired host(s). This is the most used command when using **BlueBanquise**.
+This command is used to launch playbooks, and ask Ansible to execute tasks on
+desired host(s). This is the most used command when using **BlueBanquise**.
 
 Important parameters are:
 
@@ -191,13 +206,17 @@ Important parameters are:
 * --list-tasks, which allows to list all tasks related to roles used in the playbook, and order they will be executed
 * --start-at-task, which allows to start/restart playbook at a desired task (to be combined with --list-tasks)
 * --list-tags, which allows to list all tags seen during this playbook execution
+* --limit, which limit the playbook execution to a specific list of hosts (if using a group has default host for example)
 
 Debug
 -----
 
-All of these commands accept verbose flags with -v, -vv, -vvv, etc. The more v, the more verbose.
+All of these commands accept verbose flags with -v, -vv, -vvv, etc. The more v,
+the more verbose.
 
-Also, it is possible to execute all of them with the variable ANSIBLE_DEBUG=1 set, which will dramatically increase output information (but unfortunately not always relevant to our needs...).
+Also, it is possible to execute all of them with the variable ANSIBLE_DEBUG=1
+set, which will dramatically increase output information (but unfortunately not
+always relevant to our needs...).
 
 For example, a very verbose execution would be:
 
@@ -208,17 +227,20 @@ For example, a very verbose execution would be:
 Variables and groups
 ====================
 
-Now that all important commands have been seen, it is time to add some variables inside the inventory, and play with groups.
+Now that all important commands have been seen, it is time to add some variables
+inside the inventory, and play with groups.
 
 Adding variables
 ----------------
 
 We are going to add few variables, at different positions in the inventories.
 
-Create file /etc/ansible/inventory/group_vars/all/my_ship.yml with the following content:
+Create file /etc/ansible/inventory/group_vars/all/my_ship.yml with the following
+content:
 
 .. code-block:: yaml
 
+  destination: Deliani
   my_ship:
     model: USP Talon Light Fighter
     price: 6000 # in cr
@@ -229,15 +251,14 @@ Create file /etc/ansible/inventory/group_vars/all/my_ship.yml with the following
       sidekicks:
         - Plasma Storm
         - Zica SuperCharger
-    destination: Deliani
 
 Now, ensure management1 can see these variables:
 
 .. code-block:: bash
 
   [root@ ~]# ansible-inventory --yaml --host management1
+  destination: Deliani
   my_ship:
-    destination: Deliani
     equipment:
       front_gun: Pulse-Cannon
       generator: Advanced MicroFusion
@@ -266,8 +287,8 @@ And now let's check login1 (when will exist) can also access these variables:
 .. code-block:: bash
 
   [root@ ~]# ansible-inventory --yaml --host login1
+  destination: Deliani
   my_ship:
-    destination: Deliani
     equipment:
       front_gun: Pulse-Cannon
       generator: Advanced MicroFusion
@@ -279,7 +300,8 @@ And now let's check login1 (when will exist) can also access these variables:
     price: 6000
   [root@ ~]#
 
-Perfect. It is time to play with groups, before coming back to variables to work on variables precedence.
+Perfect. It is time to play with groups, before coming back to variables to work
+on variables precedence.
 
 Configuring groups
 ------------------
@@ -296,14 +318,19 @@ Lets check current groups:
     |  |--nfs1
   [root@ ~]#
 
-All our hosts belong to the ungrouped group and to the all group. But we want to be able to assign specific variables to each kind of equipment. We need to create groups.
+All our hosts belong to the ungrouped group and to the all group. But we want to
+be able to assign specific variables to each kind of equipment. We need to
+create groups.
 
-There are two ways to create groups. In YAML, directly in the hosts files, or using specific Ansible syntax in separate files. Both are useful, and we will combine them.
+There are two ways to create groups. In YAML, directly in the hosts files, or
+using specific Ansible syntax in separate files. Both are useful, and we will
+combine them.
 
 In YAML
 ^^^^^^^
 
-Edit again the /etc/ansible/inventory/myhost.yml file, and this time let's use real YAML:
+Edit again the /etc/ansible/inventory/myhost.yml file, and this time let's use
+real YAML:
 
 .. code-block:: yaml
 
@@ -329,9 +356,11 @@ Now, let's check again groups:
     |--@ungrouped:
   [root@ ~]#
 
-We can see that management1 is now member of group master, and that login1 and nfs1 are member of group slaves.
+We can see that management1 is now member of group master, and that login1 and
+nfs1 are member of group slaves.
 
-The special string **hosts** in this file define that the string above is a group, and that strings bellow are hosts member of this group.
+The special string **hosts** in this file define that the string above is a
+group, and that strings bellow are hosts member of this group.
 
 It is also possible to set groups in a group in this same file. Edit it again:
 
@@ -362,12 +391,14 @@ And result:
     |--@ungrouped:
   [root@ ~]#
 
-The **children** string define that string above is a group that contains bellow group(s).
+The **children** string define that string above is a group that contains bellow
+group(s).
 
 In Ansible syntax
 ^^^^^^^^^^^^^^^^^
 
-The second way to create groups is to use the Ansible native syntax, which can be simpler in some cases.
+The second way to create groups is to use the Ansible native syntax, which can
+be simpler in some cases.
 
 Create a file /etc/ansible/inventory/mygroups and set the following content:
 
@@ -409,14 +440,18 @@ Same concept applies here, with different syntax.
 
 Note that a host can be part of multiple groups.
 
-You can find more information and examples `here on intro_inventory <https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html>`_ .
+You can find more information and examples
+`here on intro_inventory <https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html>`_ .
 
 Variables precedence
 --------------------
 
 Time to use all these groups and make full usage of the inventory structure.
 
-If you remember precedence system in Vocabulary section (more `here on Ansible dedicated page <https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html#variable-precedence-where-should-i-put-a-variable>`_ ) group_vars/all is in position 4 in the precedence. This is where we set our spaceship variables.
+If you remember precedence system in Vocabulary section
+(more `here on Ansible dedicated page <https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html#variable-precedence-where-should-i-put-a-variable>`_ )
+group_vars/all is in position 4 in the precedence. This is where we set our
+spaceship variables.
 
 Let's say now we wish to change our ship destination for management1 node only.
 
@@ -432,11 +467,14 @@ Check current destination for all hosts:
     destination: Deliani
   [root@ ~]#
 
-We can redefine the variable in group_vars/all (that apply to all hosts in the @all group, so everyone), but we only want to impact management1 node.
+We can redefine the dict in group_vars/all (that apply to all hosts in the @all
+group, so everyone), but we only want to impact management1 node.
 
-In the precedence list, you can see that inventory host_vars are in position 9, so they will win against position 4 of group_vars/all. Let’s use this.
+In the precedence list, you can see that inventory host_vars are in position 9,
+so they will win against position 4 of group_vars/all. Let’s use this.
 
-Edit file /etc/ansible/inventory/myhost.yml and add a destination variable under management1:
+Edit file /etc/ansible/inventory/myhost.yml and add a destination
+variable under management1:
 
 .. code-block:: yaml
 
@@ -455,33 +493,6 @@ And check destinations again:
 
 .. code-block:: bash
 
-  [root@ ~]#  ansible-inventory --yaml --host management1 | grep destination
-  destination: Ixmucane
-    destination: Deliani
-  [root@ ~]#
-
-**OOPS ! We made a mistake**. Indeed, if you check again content of file /etc/ansible/inventory/group_vars/all/my_ship.yml, you can see destination is not at the top, but under *my_ship*.
-
-Edit again /etc/ansible/inventory/myhost.yml and fix it:
-
-.. code-block:: yaml
-
-  my_nodes:
-    children:
-      master:
-        hosts:
-          management1:
-            my_ship:
-              destination: Ixmucane
-      slaves:
-        hosts:
-          login1:
-          nfs1:
-
-And check destinations again:
-
-.. code-block:: bash
-
   [root@ ~]# ansible-inventory --yaml --host management1 | grep destination
     destination: Ixmucane
   [root@ ~]# ansible-inventory --yaml --host login1 | grep destination
@@ -490,22 +501,37 @@ And check destinations again:
     destination: Deliani
   [root@ ~]#
 
-Perfect. Setting a variable in the host definition file is equivalent to using host_vars folder. But host_vars folder is difficult to use when having a very large number of hosts, which is why in **BlueBanquise** we are using directly the host file.
+Perfect. Setting a variable in the host definition file is equivalent to using
+host_vars folder. But host_vars folder is difficult to use when having a very
+large number of hosts, which is why in **BlueBanquise** we are often using
+directly the host file.
 
-Let's say now we want to change the model of spaceship of all the slave nodes. So not a single host, but all slave members hosts.
+Let's say now we want to change the model of spaceship of all the slave nodes.
+So not a single host, but all slave members hosts.
 
-We are going to use level 6 in variables precedence: group_vars/. Create a directory called *slave* (same name than the group we want to work with) in group_vars:
+We are going to use level 6 in variables precedence: group_vars/. Create a
+directory called *slave* (same name than the group we want to work with) in
+group_vars:
 
 .. code-block:: bash
 
   mkdir /etc/ansible/inventory/group_vars/slaves
 
-Then, create file /etc/ansible/inventory/group_vars/slaves/myship.yml with the following content:
+Then, create file /etc/ansible/inventory/group_vars/slaves/myship.yml with the
+following content:
 
 .. code-block:: yaml
 
   my_ship:
+    equipment:
+      front_gun: Pulse-Cannon
+      generator: Advanced MicroFusion
+      shield: Structural Integrity Field
+      sidekicks:
+      - Plasma Storm
+      - Zica SuperCharger
     model: Gencore Maelstrom
+    price: 6000
 
 And check variables of hosts:
 
@@ -519,9 +545,17 @@ And check variables of hosts:
     model: Gencore Maelstrom
   [root@ ~]#
 
-Perfect. Remember the pizza in Vocabulary section. Ansible just flatten the whole inventory, using precedence, and you obtain variables.
+Note that here, we had to add the whole dictionary in group_vars/slaves/myship.yml.
+This is due to the **replace** hash_behaviour of Ansible, as the **merge**
+version is deprecated.
 
-Last point for this part, remember that in variable’s precedence, extra_vars is level 22 and always win, so adding extra vars when executing Ansible later will allow us to force variables at execution time for testing purposes or just because we need it.
+Perfect. Remember the pizza in Vocabulary section. Ansible just flatten the
+whole inventory, using precedence, and you obtain variables.
+
+Last point for this part, remember that in variable’s precedence, extra_vars is
+level 22 and always win, so adding extra vars when executing Ansible later will
+allow us to force variables at execution time for testing purposes or just
+because we need it.
 
 
 Roles and playbooks
@@ -529,7 +563,8 @@ Roles and playbooks
 
 Time to apply some configuration on our target host.
 
-We are going to create a role that install a web server package, create a very basic web page with our ship’s information, and start the web server service.
+We are going to create a role that install a web server package, create a very
+basic web page with our ship’s information, and start the web server service.
 
 Role
 ----
@@ -542,7 +577,9 @@ Create a role called "shipyard", with needed folders:
   mkdir /etc/ansible/roles/shipyard/tasks
   mkdir /etc/ansible/roles/shipyard/templates
 
-Tasks folder contains tasks to perform, and main.yml file inside will be the starting point for Ansible. Templates folder will contain our templates (configuration files) in Jinja2 language.
+Tasks folder contains tasks to perform, and main.yml file inside will be the
+starting point for Ansible. Templates folder will contain our templates
+(configuration files) in Jinja2 language.
 
 Task
 ^^^^
@@ -580,18 +617,22 @@ Content is pretty simple:
 * Then Ansible render the template index.html.j2 and write the result in /var/www/html/index.html
 * Then Ansible ensure httpd service is started and enabled at boot
 
-You can find all Ansible modules here in the `official documentation <https://docs.ansible.com/ansible/latest/modules/modules_by_category.html>`_ .
+You can find all Ansible modules here in the
+`official documentation <https://docs.ansible.com/ansible/latest/modules/modules_by_category.html>`_ .
 
 Template
 ^^^^^^^^
 
 Templates are probably the key feature of Ansible and all automation tools.
 
-The idea is simple: you provide Ansible with a copy of your desired configuration file, with variables to be dynamically replaced in order to fill on the fly some parts of the file.
+The idea is simple: you provide Ansible with a copy of your desired
+configuration file, with variables to be dynamically replaced in order to fill
+on the fly some parts of the file.
 
 Let's do this with a simple html page, and first with a static page.
 
-Create the template /etc/ansible/roles/shipyard/templates/index.html.j2 with the following static content:
+Create the template /etc/ansible/roles/shipyard/templates/index.html.j2 with the
+following static content:
 
 .. code-block:: html
 
@@ -609,7 +650,8 @@ The current template is static, we will make it dynamic later.
 Playbook
 --------
 
-Lets create our playbook, which will contains a list of roles to apply on management1 host.
+Lets create our playbook, which will contains a list of roles to apply on
+management1 host.
 
 Create file /etc/ansible/playbooks/myplaybook.yml with the following content:
 
@@ -622,11 +664,13 @@ Create file /etc/ansible/playbooks/myplaybook.yml with the following content:
       - role: shipyard
         tags: shipyard
 
-Simply put, target of the playbook is host management1, and role to apply is shipyard.
+Simply put, target of the playbook is host management1, and role to apply is
+shipyard.
 
 Skip the tags for now.
 
-Note that hosts can be a list of hosts (comma separated: management1,login1,nfs1), or a group of hosts (all, slaves, color, etc.).
+Note that hosts can be a list of hosts (comma separated:
+management1,login1,nfs1), or a group of hosts (all, slaves, color, etc.).
 
 Now, execute the playbook, and let Ansible do its job:
 
@@ -634,20 +678,24 @@ Now, execute the playbook, and let Ansible do its job:
 
   ansible-playbook /path/to/myplaybook.yml
 
-Note that you need to provide full path to the playbook, as there are no default folder for playbooks in Ansible.
-Also note that if your shell is currently in the playbook folder, you can skip full path as relative path are accepted.
+Note that you need to provide full path to the playbook, as there are no default
+folder for playbooks in Ansible.
+Also note that if your shell is currently in the playbook folder, you can skip
+full path as relative path are accepted.
 
-If all goes well, you should now have the file /var/www/html/index.html generated on management1, and using a web browser you can check the result.
+If all goes well, you should now have the file /var/www/html/index.html
+generated on management1, and using a web browser you can check the result.
 
-Note that if you cannot reach the web browser, for example you are working in a VM or a server without screen attached,
- you can use ssh forwarding. From you current computer, open a new terminal and use:
+Note that if you cannot reach the web browser, for example you are working in a
+VM or a server without screen attached, you can use ssh forwarding. From you
+current computer, open a new terminal and use:
 
 .. code-block:: bash
 
   ssh root@my_vm_or_my_server -L 9999:localhost:80
 
 And then open a local web browser and open http://localhost:9999 .
- Check the web for more on ssh port forwarding.
+Check the web for more on ssh port forwarding.
 
 .. image:: images/capture_index_1.png
 
@@ -656,7 +704,8 @@ But this is not very interesting, let's add some dynamic part into our template.
 Jinja2
 ------
 
-Edit file /etc/ansible/roles/shipyard/templates/index.html.j2 to make it this way:
+Edit file /etc/ansible/roles/shipyard/templates/index.html.j2 to make it this
+way:
 
 .. code-block:: html
 
@@ -680,7 +729,10 @@ Edit file /etc/ansible/roles/shipyard/templates/index.html.j2 to make it this wa
   </body>
   </html>
 
-And let's re-execute the playbook. But we have already installed the package and started the service, so let's ask Ansible to only work on the tags 'templates' to fasten the execution (this tag was defined in the tasks/mail.yml file previously seen):
+And let's re-execute the playbook. But we have already installed the package and
+started the service, so let's ask Ansible to only work on the tags 'templates'
+to fasten the execution (this tag was defined in the tasks/mail.yml file
+previously seen):
 
 .. code-block:: bash
 
@@ -704,7 +756,9 @@ Now regarding to Jinja2:
 * {# #} are Jinja2 commentaries.
 * The remaining is put in the destination file "as is".
 
-You can experiment with this template to understand the whole mechanism. The whole Jinja2 documentation can be found here: `Jinja2 template designer <https://jinja.palletsprojects.com/en/2.10.x/templates/>`_
+You can experiment with this template to understand the whole mechanism. The
+whole Jinja2 documentation can be found here:
+`Jinja2 template designer <https://jinja.palletsprojects.com/en/2.10.x/templates/>`_
 
 You should now understand the very basis of Ansible.
 
@@ -713,11 +767,15 @@ Time to investigate tasks advanced elements.
 Task again
 ----------
 
-As discussed before, all task available modules can be found in the `Ansible documentation <https://docs.ansible.com/ansible/latest/modules/modules_by_category.html>`_ .
+As discussed before, all task available modules can be found in the
+`Ansible documentation <https://docs.ansible.com/ansible/latest/modules/modules_by_category.html>`_ .
 
-Each of these modules can be combined with general tasks actions. But first, let's define the basic debug module and registers, that will allow us to play more easily with tasks.
+Each of these modules can be combined with general tasks actions. But first,
+let's define the basic debug module and registers, that will allow us to play
+more easily with tasks.
 
-At this point, use previously created task, or create a new role to add following tasks.
+At this point, use previously created task, or create a new role to add
+following tasks.
 
 Debug module
 ^^^^^^^^^^^^
@@ -749,8 +807,10 @@ Create a file /tmp/valkyrie, and add the string "lenneth" inside, using:
 
   echo "lenneth" > /tmp/valkyrie
 
-Now, lets use a register to gather this content. Registers are a way to gather data about executed modules. Input data, output data, etc.
-One of the main usages is registers combined with shell or commands, to gather very specific data from the system.
+Now, lets use a register to gather this content. Registers are a way to gather
+data about executed modules. Input data, output data, etc.
+One of the main usages is registers combined with shell or commands, to gather
+very specific data from the system.
 
 Try:
 
@@ -769,10 +829,10 @@ And when running, output is:
 
 .. code-block:: text
 
-  TASK [debug : Get output from a shell command] **********************************************************************************************************************************************************************************************
+  TASK [debug : Get output from a shell command] *******************************
   changed: [management1]
 
-  TASK [debug : My message module] ************************************************************************************************************************************************************************************************************
+  TASK [debug : My message module] *********************************************
   ok: [management1] =>
     msg:
       changed: true
@@ -788,7 +848,9 @@ And when running, output is:
       stdout_lines:
       - lenneth
 
-So, you can use the register to get status (changed: true, so something happens), to get return code (*rc: 0* here), stderr and stdout, if it failed, etc.
+So, you can use the register to get status (changed: true, so something
+happens), to get return code (*rc: 0* here), stderr and stdout, if it failed,
+etc.
 
 For example:
 
@@ -805,9 +867,12 @@ We are going to use register and debug module to learn generic tasks actions.
 Loops
 ^^^^^
 
-It is possible to make modules iterate. All possibilities are available here in `loop documentation <https://docs.ansible.com/ansible/latest/user_guide/playbooks_loops.html>`_ .
+It is possible to make modules iterate. All possibilities are available here in
+`loop documentation <https://docs.ansible.com/ansible/latest/user_guide/playbooks_loops.html>`_ .
 
-BlueBanquise rely on two methods: *with_items* and *loop*. *with_items* is considered deprecated by the Ansible team. *loop*, the replacement, is progressively being added into the stack.
+BlueBanquise rely on two methods: *with_items* and *loop*. *with_items* is
+considered deprecated by the Ansible team. *loop*, the replacement, is
+progressively being added into the stack.
 
 First example is with loop:
 
@@ -822,9 +887,12 @@ First example is with loop:
        - Green
        - Yellow
 
-This will execute this module 4 times, with each time an element of the list given to loop. When using loops in ansible, the variable **item** stores the value of the current loop index.
+This will execute this module 4 times, with each time an element of the list
+given to loop. When using loops in ansible, the variable **item** stores the
+value of the current loop index.
 
-It is also possible to provide the loop with a list from the inventory, like the one we wrote before:
+It is also possible to provide the loop with a list from the inventory, like the
+one we wrote before:
 
 .. code-block:: yaml
 
@@ -833,7 +901,8 @@ It is also possible to provide the loop with a list from the inventory, like the
       msg: "Values: {{ item }}"
     loop: "{{ my_ship.equipment.sidekicks }}"
 
-Loop action can accept advanced filters or patterns. Refer to the Ansible documentation.
+Loop action can accept advanced filters or patterns. Refer to the Ansible
+documentation.
 
 with_items works the same way:
 
@@ -857,10 +926,13 @@ with_items works the same way:
 Conditionals
 ^^^^^^^^^^^^
 
-Conditionals are used to skip some modules when not required or optional (or just don't meet a specific condition).
-All information can be found in `conditionals documentation <https://docs.ansible.com/ansible/latest/user_guide/playbooks_conditionals.html>`_ .
+Conditionals are used to skip some modules when not required or optional (or
+just don't meet a specific condition).
+All information can be found in
+`conditionals documentation <https://docs.ansible.com/ansible/latest/user_guide/playbooks_conditionals.html>`_ .
 
-Let's re-use our previous register, and display a message only if content is "lenneth":
+Let's re-use our previous register, and display a message only if content is
+"lenneth":
 
 .. code-block:: yaml
 
@@ -879,10 +951,11 @@ If content is not "lenneth", you will see:
 
 .. code-block:: text
 
-  TASK [debug : Display content of the register] **********************************************************************************************************************************************************************************************
+  TASK [debug : Display content of the register] *******************************
   skipping: [management1]
 
-So this part of the task was skipped, because our my_result.stdout does not meet the condition.
+So this part of the task was skipped, because our my_result.stdout does not meet
+the condition.
 
 Now, let’s combine loop and conditions.
 
@@ -895,7 +968,8 @@ Fill /tmp/valkyrie file with multiple lines:
   echo "odin" >> /tmp/valkyrie
   echo "loki" >> /tmp/valkyrie
 
-We are now going to use the stdout_lines of our register, as it is a list containing line by line the output of stdout, so here the content of our file.
+We are now going to use the stdout_lines of our register, as it is a list
+containing line by line the output of stdout, so here the content of our file.
 
 .. code-block:: yaml
 
@@ -915,7 +989,7 @@ And result should be:
 
 .. code-block:: text
 
-  TASK [debug : Display content of the register] **********************************************************************************************************************************************************************************************
+  TASK [debug : Display content of the register] *******************************
   skipping: [management1] => (item=freya)
   ok: [management1] => (item=lenneth) =>
     msg: Profile
@@ -924,7 +998,8 @@ And result should be:
 
 Note that all the items are displayed here.
 
-Last part is to combine conditions. It is possible to stack conditions, considering that the list is interpreted as AND conditions by Ansible.
+Last part is to combine conditions. It is possible to stack conditions,
+considering that the list is interpreted as AND conditions by Ansible.
 
 For example:
 
@@ -943,7 +1018,8 @@ For example:
       - item == "lenneth"
       - sys_admin_is_master == "yes"  # <<< this is added as an AND with first condition
 
-Now execute playbook with an additional variable as extra vars, first with "no", then with "yes":
+Now execute playbook with an additional variable as extra vars, first with "no",
+then with "yes":
 
 .. code-block:: text
 
@@ -954,7 +1030,7 @@ First time, you get:
 
 .. code-block:: text
 
-  TASK [debug : Display content of the register] **********************************************************************************************************************************************************************************************
+  TASK [debug : Display content of the register] *******************************
   skipping: [management1] => (item=freya)
   skipping: [management1] => (item=lenneth)
   skipping: [management1] => (item=odin)
@@ -964,7 +1040,7 @@ And second time:
 
 .. code-block:: text
 
-  TASK [debug : Display content of the register] **********************************************************************************************************************************************************************************************
+  TASK [debug : Display content of the register] *******************************
   skipping: [management1] => (item=freya)
   ok: [management1] => (item=lenneth) =>
     msg: Profile
@@ -976,7 +1052,8 @@ So it acted as a logical AND.
 Tags
 ^^^^
 
-Tags act like the name: they tag part of the task, or role, so you can execute only this part, or skip it.
+Tags act like the name: they tag part of the task, or role, so you can execute
+only this part, or skip it.
 
 For example:
 
@@ -994,18 +1071,23 @@ For example:
     tags:
       - second
 
-And at execution, use *--tags first,second* to execute both, *--tags second* to execute second only, or *--skip-tags first* that will skip the first one.
+And at execution, use *--tags first,second* to execute both, *--tags second* to
+execute second only, or *--skip-tags first* that will skip the first one.
 
 Notify
 ^^^^^^
 
-Sometime, you may wish that some actions take place at the end of each role, if a module returned a **changed** status.
-Best example: your role is dedicated to a service, and Ansible generate the configuration file using a template.
-You may want that this service is restarted if Ansible detect changes in the file when executing.
+Sometime, you may wish that some actions take place at the end of each role, if
+a module returned a **changed** status.
+Best example: your role is dedicated to a service, and Ansible generate the
+configuration file using a template.
+You may want that this service is restarted if Ansible detect changes in the
+file when executing.
 
 Notify will be your friend for such cases.
 
-Create a new directory at root of your role, called **handlers**, and then inside a file called **main.yml**, with the following content:
+Create a new directory at root of your role, called **handlers**, and then
+inside a file called **main.yml**, with the following content:
 
 .. code-block:: yaml
 
@@ -1013,9 +1095,11 @@ Create a new directory at root of your role, called **handlers**, and then insid
     debug:
       msg: "THE FILE WAS CHANGED!! HOW DARE YOU!!"
 
-Note that the name of this task (There was a change) is important and will be targeted by the notify.
+Note that the name of this task (There was a change) is important and will be
+targeted by the notify.
 
-Create also a template, called our_file.j2 in templates folder (like handlers above), with the following content:
+Create also a template, called our_file.j2 in templates folder (like handlers
+above), with the following content:
 
 .. code-block:: text
 
@@ -1052,22 +1136,23 @@ First time execution, of course, you will see both:
 
 .. code-block:: text
 
-  TASK [debug : Template /tmp/out] ************************************************************************************************************************************************************************************************************
+  TASK [debug : Template /tmp/out] *********************************************
   changed: [management1]
 
   ...
 
-  RUNNING HANDLER [debug : There was a change] ************************************************************************************************************************************************************************************************
+  RUNNING HANDLER [debug : There was a change] *********************************
   ok: [management1] =>
     msg: THE FILE WAS CHANGED!! HOW DARE YOU!!
 
-As expected, because there was a change, so the handler was called **at the end of the role**.
+As expected, because there was a change, so the handler was called **at the end
+of the role**.
 
 Now do the exact same command again.
 
 .. code-block:: text
 
-  TASK [debug : Template /tmp/out] ************************************************************************************************************************************************************************************************************
+  TASK [debug : Template /tmp/out] *********************************************
   ok: [management1]
 
 Handler was not activated, because there was no changes.
@@ -1082,17 +1167,18 @@ And again:
 
 .. code-block:: text
 
-  TASK [debug : Template /tmp/out] ************************************************************************************************************************************************************************************************************
+  TASK [debug : Template /tmp/out] *********************************************
   changed: [management1]
 
   ...
 
-  RUNNING HANDLER [debug : There was a change] ************************************************************************************************************************************************************************************************
+  RUNNING HANDLER [debug : There was a change] *********************************
   ok: [management1] =>
     msg: THE FILE WAS CHANGED!! HOW DARE YOU!!
 
 Handler was activated.
 
-If you feel something is missing in this quick Ansible training, please do not hesitate to ask us to add elements.
+If you feel something is missing in this quick Ansible training, please do not
+hesitate to ask us to add elements.
 
 Time to move on to BlueBanquise stack itself.
