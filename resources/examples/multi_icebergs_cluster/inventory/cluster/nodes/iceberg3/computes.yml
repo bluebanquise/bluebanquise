@@ -11,11 +11,11 @@ mg_computes:
             mac: 08:00:27:0d:f8:a5
             network: ice3-1
           network_interfaces:
-            enp0s3:
+            - interface: enp0s3
               ip4: 10.3.3.1
               mac: 08:00:27:0d:f8:a6
               network: ice3-1
-            ib0:
+            - interface: ib0
               ip4: 10.20.3.5
               network: interconnect-1
         c006:
@@ -25,11 +25,11 @@ mg_computes:
             mac: 08:00:27:0d:f8:b5
             network: ice3-1
           network_interfaces:
-            enp0s3:
+            - interface: enp0s3
               ip4: 10.3.3.2
               mac: 08:00:27:0d:f8:b6
               network: ice3-1
-            ib0:
+            - interface: ib0
               ip4: 10.20.3.6
               network: interconnect-1
 
@@ -42,11 +42,11 @@ mg_computes:
             mac: 08:00:27:0d:f8:c5
             network: ice4-1
           network_interfaces:
-            enp0s3:
+            - interface: enp0s3
               ip4: 10.4.3.1
               mac: 08:00:27:0d:f8:c6
               network: ice4-1
-            ib0:
+            - interface: ib0
               ip4: 10.20.3.7
               network: interconnect-1
         gpu002:
@@ -56,10 +56,10 @@ mg_computes:
             mac: 08:00:27:0d:f8:d5
             network: ice4-1
           network_interfaces:
-            enp0s3:
+            - interface: enp0s3
               ip4: 10.4.3.2
               mac: 08:00:27:0d:f8:d6
               network: ice4-1
-            ib0:
+            - interface: ib0
               ip4: 10.20.3.8
               network: interconnect-1

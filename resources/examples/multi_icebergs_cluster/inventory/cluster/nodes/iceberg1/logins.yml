@@ -10,13 +10,13 @@ mg_logins:
             mac: 08:00:27:0d:47:95
             network: ice1-1
           network_interfaces:
-            enp0s3:
+            - interface: enp0s3
               ip4: 10.1.2.1
               mac: 08:00:27:de:42:23
               network: ice1-1
-            enp0s8:
+            - interface: enp0s8
               ip4: 192.168.0.57
               network: external-1
-            ib0:
+            - interface: ib0
               ip4: 10.20.2.1
               network: interconnect-1

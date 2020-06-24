@@ -5,6 +5,6 @@ mg_security:
 
         security1:
           network_interfaces:
-            eth0:
+            - interface: eth0
               ip4: 10.1.0.77
               network: ice1-1
