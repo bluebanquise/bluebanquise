@@ -2,7 +2,7 @@
 
 %define roles_addons clone clustershell diskless nic_nmcli ofed ofed_sm \
 openldap_client openldap_server prometheus_client prometheus_server report \
-slurm users_basic
+slurm users_basic powerman
 
 Name:           bluebanquise
 Version:        %{version}
