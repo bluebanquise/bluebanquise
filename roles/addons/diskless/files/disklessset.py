@@ -151,7 +151,7 @@ echo | > Additional kernel parameters: ${{eq-kernel-parameters}} ${{dedicated-ke
 echo |
 echo | Loading linux ...
 
-kernel http://${{next-server}}/preboot_execution_environment/diskless/kernels/${{image-kernel}} initrd=${{image-initramfs}} root=live:http://${{next-server}}/preboot_execution_environment/diskless/images/{image_name}/squashfs.img rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}} rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4
+kernel http://${{next-server}}/preboot_execution_environment/diskless/kernels/${{image-kernel}} initrd=${{image-initramfs}} root=live:http://${{next-server}}/preboot_execution_environment/diskless/images/{image_name}/squashfs.img rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}} rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4 selinux=0
 
 echo | Loading initial ramdisk ...
 
@@ -260,7 +260,7 @@ elif main_action == '3':
             with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/boot.ipxe', "w") as ff:
                 ff.write(boot_file_content)
             print(bcolors.OKBLUE+'[INFO] Installing new system image... May take some time.'+bcolors.ENDC)
-            os.system('dnf groupinstall -y "core" --releasever=8 --setopt=module_platform_id=platform:el8 --installroot=/diskless/images/'+selected_image_name+'/staging')
+            os.system('dnf groupinstall -y "core" --setopt=module_platform_id=platform:el8 --installroot=/diskless/images/'+selected_image_name+'/staging')
             print(bcolors.OKBLUE+'[INFO] Setting password into image.'+bcolors.ENDC)
             with open('/diskless/images/'+selected_image_name+'/staging/etc/shadow') as ff:
                 newText = ff.read().replace('root:*', 'root:'+password_hash)
@@ -317,17 +317,17 @@ elif main_action == '3':
             os.system('mount -o loop '+image_working_directory+'/LiveOS/rootfs.img /mnt')
             print(bcolors.OKBLUE+'[INFO] Generating cache link for dnf.'+bcolors.ENDC)
             os.system('mkdir /mnt/var/cache/ -p')
-            os.system('rm -Rf '+dnf_cache_directory+'/dnfcache')
-            os.system('mkdir -p '+dnf_cache_directory+'/dnfcache')
-            os.system('ln -s '+dnf_cache_directory+'/dnfcache/ /mnt/var/cache/dnf')
+            #os.system('rm -Rf '+dnf_cache_directory+'/dnfcache')
+            #os.system('mkdir -p '+dnf_cache_directory+'/dnfcache')
+            #os.system('ln -s '+dnf_cache_directory+'/dnfcache/ /mnt/var/cache/dnf')
             print(bcolors.OKBLUE+'[INFO] Installing system into image.'+bcolors.ENDC)
             if selected_livenet_type == '3':
-                os.system('dnf install -y iproute procps-ng openssh-server --releasever=8 --installroot=/mnt/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
+                os.system('dnf install -y iproute procps-ng openssh-server  --installroot=/mnt/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
             elif selected_livenet_type == '2':
-                os.system('dnf install -y iproute procps-ng openssh-server NetworkManager --releasever=8 --installroot=/mnt/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
-                os.system('dnf install -y dnf --releasever=8 --installroot=/mnt/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
+                os.system('dnf install -y iproute procps-ng openssh-server NetworkManager  --installroot=/mnt/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
+                os.system('dnf install -y dnf  --installroot=/mnt/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
             elif selected_livenet_type == '1':
-                os.system('dnf groupinstall -y "core" --releasever=8 --setopt=module_platform_id=platform:el8 --installroot=/mnt')
+                os.system('dnf groupinstall -y "core"  --setopt=module_platform_id=platform:el8 --installroot=/mnt')
             print(bcolors.OKBLUE+'[INFO] Setting password into image.'+bcolors.ENDC)
             with open('/mnt/etc/shadow') as ff:
                 newText = ff.read().replace('root:*', 'root:'+password_hash)
@@ -428,10 +428,9 @@ elif main_action == '4':
                 os.system('mkdir /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
                 os.system('rm -Rf /diskless/images/'+selected_image_name)
                 os.system('mkdir /diskless/images/'+selected_image_name)
-#                os.system('mkdir /diskless/images/'+selected_image_name+'/golden')
                 os.system('mkdir /diskless/images/'+selected_image_name+'/nodes')
                 print(bcolors.OKBLUE+'[INFO] Cloning staging image to golden.'+bcolors.ENDC)
-                os.system('cp -a /diskless/images/'+selected_image_name+'/staging /diskless/images/'+selected_image_name+'/golden')
+                os.system('cp -a /diskless/images/'+selected_image_name_copy+'/staging /diskless/images/'+selected_image_name+'/golden')
                 print(bcolors.OKBLUE+'[INFO] Generating related files.'+bcolors.ENDC)
                 file_content = '''image_data:
   image_name: {image_name}
