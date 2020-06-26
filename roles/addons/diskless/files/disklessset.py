@@ -317,9 +317,9 @@ elif main_action == '3':
             os.system('mount -o loop '+image_working_directory+'/LiveOS/rootfs.img /mnt')
             print(bcolors.OKBLUE+'[INFO] Generating cache link for dnf.'+bcolors.ENDC)
             os.system('mkdir /mnt/var/cache/ -p')
-            #os.system('rm -Rf '+dnf_cache_directory+'/dnfcache')
-            #os.system('mkdir -p '+dnf_cache_directory+'/dnfcache')
-            #os.system('ln -s '+dnf_cache_directory+'/dnfcache/ /mnt/var/cache/dnf')
+#            os.system('rm -Rf '+dnf_cache_directory+'/dnfcache')
+#            os.system('mkdir -p '+dnf_cache_directory+'/dnfcache')
+#            os.system('ln -s '+dnf_cache_directory+'/dnfcache/ /mnt/var/cache/dnf')
             print(bcolors.OKBLUE+'[INFO] Installing system into image.'+bcolors.ENDC)
             if selected_livenet_type == '3':
                 os.system('dnf install -y iproute procps-ng openssh-server  --installroot=/mnt/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
