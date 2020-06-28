@@ -5,8 +5,6 @@
   hosts: "mg_managements"
   roles:
 
-    - role: bluebanquise
-      tags: bluebanquise
     - role: set_hostname
       tags: set_hostname
     - role: nic
@@ -15,6 +13,8 @@
       tags: repositories_server
     - role: repositories_client
       tags: repositories_client
+    - role: bluebanquise
+      tags: bluebanquise
     - role: hosts_file
       tags: hosts_file
     - role: ssh_master
