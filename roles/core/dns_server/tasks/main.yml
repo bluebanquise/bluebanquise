@@ -92,7 +92,7 @@
 
 - name: include_tasks ░ Configure Master DNS
   include_tasks: master.yml
-  when: "dns_master in (network_interfaces | json_query('*.ip4'))"
+  when: "dns_master in (network_interfaces | map(attribute='ip4') | list)"
   tags:
     - template
     - internal

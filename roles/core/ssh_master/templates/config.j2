@@ -1,5 +1,9 @@
 #jinja2: lstrip_blocks: "True"
-{% import "macros/network.j2" as macro_network with context %}
+
+{% macro node_main_network(macro_network_interfaces,macro_current_iceberg_network) %}
+{{ macro_network_interfaces | selectattr('network','match','^'+macro_current_iceberg_network+'-[a-zA-Z0-9]+') | map(attribute='network') | list | first }}
+{% endmacro %}
+
 {# Macro to avoid redundancy #}
 {% macro write_host(host,macro_node_main_network) %}
 Host {{ host }}
@@ -26,5 +30,5 @@ Host {{ host }}
 {% endif %}
 
 {% for host in range %}
-{{ write_host(host,(macro_network.node_main_network(hostvars[host]['network_interfaces'],j2_current_iceberg_network)| trim)) }}
+{{ write_host(host,(node_main_network(hostvars[host]['network_interfaces'],j2_current_iceberg_network)| trim)) }}
 {% endfor %}

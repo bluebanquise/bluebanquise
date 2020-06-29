@@ -86,7 +86,7 @@ provisioner:
     host_vars:
       server-ext-pool:
         network_interfaces:
-          en0:
+          - interface: en0
             network: ice1-1
         external_time:
           time_server:
@@ -94,7 +94,7 @@ provisioner:
               - pool.ntp.org
       server-ext-servers:
         network_interfaces:
-          en0:
+          - interface: en0
             network: ice1-1
         external_time:
           time_server:

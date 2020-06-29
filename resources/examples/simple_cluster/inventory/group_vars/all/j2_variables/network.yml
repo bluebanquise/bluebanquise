@@ -1,7 +1,17 @@
 # BlueBanquise internal j2_ variables.
 # Network
-# (c) 2019 Benoit Leveugle
+# (c) 2019-2020 Benoit Leveugle
 
-j2_node_main_network: "{% set main_ntw = [] %}{% for nic in network_interfaces %}{% if network_interfaces[nic].network is defined and not none %}{{ main_ntw.append(network_interfaces[nic].network|string) }}{% endif %}{% endfor %}{{ main_ntw | select('match',(j2_current_iceberg_network+'-[a-zA-Z0-9]+')) | list | unique | sort| first | join | trim }}"
+# Main resolution network. The network on which host can be ping by direct name. (ex: ping c001).
+j2_node_main_resolution_network: "{{ network_interfaces[0].network }}"
 
-j2_node_main_network_interface: "{% set main_ntw_nic = [] %}{% for nic in network_interfaces %}{% if network_interfaces[nic].network is defined and not none %}{% if network_interfaces[nic].network == j2_node_main_network %}{{ main_ntw_nic.append(nic|string) }}{% endif %}{% endif %}{% endfor %}{{ main_ntw_nic | unique | join | trim }}"
+# Main network. The network used by Ansible to deploy configuration (related to ssh).
+# Also the network used by the host to get services ip.
+j2_node_main_network: "{{ network_interfaces | selectattr('network','match','^'+j2_current_iceberg_network+'-[a-zA-Z0-9]+') | map(attribute='network') | list | first }}"
+
+# Main network interface. Same as main network, but provides interface name instead of network.
+j2_node_main_network_interface: "{{ network_interfaces | selectattr('network','match','^'+j2_current_iceberg_network+'-[a-zA-Z0-9]+') | map(attribute='interface') | list | first }}"
+
+# List of management networks.
+j2_management_networks: "{{ networks | select('match','^'+j2_current_iceberg_network+'-[a-zA-Z0-9]+') | list | unique | sort }}"
+

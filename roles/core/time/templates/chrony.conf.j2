@@ -1,7 +1,10 @@
 #jinja2: lstrip_blocks: "True"
-{% import "macros/network.j2" as macro_network with context %}
 #### Blue Banquise file ####
 ## {{ ansible_managed }}
+
+{% macro node_main_network(macro_network_interfaces,macro_current_iceberg_network) %}
+{{ macro_network_interfaces | selectattr('network','match','^'+macro_current_iceberg_network+'-[a-zA-Z0-9]+') | map(attribute='network') | list | first }}
+{% endmacro %}
 
 {% set external = false %}
 {% if external_time['time_'+time_profile]['pool'] is defined and
@@ -24,7 +27,7 @@ server {{ external_server }}
   {% set time_sources = networks[j2_node_main_network]['services_ip']['time_ip'] %}
 {% elif time_profile == 'server' and icebergs_system == true and iceberg_master != 'top' %}
   {# We need here to get master island ntp ip, depending of the subnet this node is member of.#}
-  {% set time_sources = networks[(macro_network.node_main_network(network_interfaces,management_networks_naming+(iceberg_master|replace(iceberg_naming,' ')| trim | string))| trim)]['services_ip']['time_ip'] %}
+  {% set time_sources = networks[(node_main_network(network_interfaces,management_networks_naming+(iceberg_master|replace(iceberg_naming,' ')| trim | string))| trim)]['services_ip']['time_ip'] %}
 {% endif -%}
 
 {% if not external and time_sources is defined and time_sources is string %}
@@ -50,9 +53,8 @@ rtcsync
 {% if time_profile == 'server' %}
 # Allow NTP client access from local network.
   {% for nic in network_interfaces %}
-    {% if network_interfaces[nic]['network'] is defined and
-          network_interfaces[nic]['network'] is not none %}
-allow {{ networks[network_interfaces[nic]['network']]['subnet'] }}/{{ networks[network_interfaces[nic]['network']]['prefix'] }}
+    {% if nic.network is defined and nic.network is not none %}
+allow {{ networks[nic.network]['subnet'] }}/{{ networks[nic.network]['prefix'] }}
     {% endif %}
   {% endfor %}
 

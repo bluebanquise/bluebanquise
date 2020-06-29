@@ -1,5 +1,5 @@
 # BlueBanquise internal j2_ variables.
-# (c) 2019 Benoit Leveugle
+# (c) 2019-2020 Benoit Leveugle
 
 These files contains j2 variables.
 

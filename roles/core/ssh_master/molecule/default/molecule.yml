@@ -48,7 +48,7 @@ provisioner:
         j2_current_iceberg: iceberg1
         j2_current_iceberg_network: ice1
         network_interfaces:
-          en0:
+          - interface: en0
             network: ice1-1
       icebergs-on:
         icebergs_system: true
@@ -57,7 +57,7 @@ provisioner:
         j2_current_iceberg_network: ice1
         managements_group_name: mg_managements
         network_interfaces:
-          en0:
+          - interface: en0
             network: ice1-1
       hostkey_checking:
         security:
@@ -67,7 +67,7 @@ provisioner:
         j2_current_iceberg: iceberg1
         j2_current_iceberg_network: ice1
         network_interfaces:
-          en0:
+          - interface: en0
             network: ice1-1
     # Extra hosts
     hosts:
@@ -77,29 +77,29 @@ provisioner:
             iceberg_master: iceberg1
             j2_current_iceberg_network: ice1
             network_interfaces:
-              en0:
+              - interface: en0
                 network: ice1-1
       computes:
         hosts:
           fake-host1:
             j2_current_iceberg_network: ice1
             network_interfaces:
-              en0:
+              - interface: en0
                 network: ice1-1
           fake-host2:
             j2_current_iceberg_network: ice1
             network_interfaces:
-              en0:
+              - interface: en0
                 network: ice1-1
           fake-host3:
             j2_current_iceberg_network: ice1
             network_interfaces:
-              en0:
+              - interface: en0
                 network: ice1-1
           fake-host4:
             j2_current_iceberg_network: ice1
             network_interfaces:
-              en0:
+              - interface: en0
                 network: ice1-1
 verifier:
   name: ansible
