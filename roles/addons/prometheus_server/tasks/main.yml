@@ -6,8 +6,31 @@
     state: present
   with_items:
     - prometheus
+    - grafana
     - alertmanager
     - ipmi_exporter
+    - freeipmi
+    - snmp_exporter
+
+#pour generateur de oid walk pour snmp_exporter     
+- name: Package
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - gcc
+    - make
+    - net-snmp
+    - net-snmp-utils
+    - net-snmp-libs
+    - net-snmp-devel
+  when:
+    - monitoring.exporters.snmp_exporter.with_generator is defined      
+    - monitoring.exporters.snmp_exporter.with_generator
+
+
+
+
 
 - name: Create directories structure
   file:
@@ -38,22 +61,6 @@
     group: prometheus
     mode: 0640
 
-- name: Template >> /etc/prometheus/alerts/bb_exporter.yml
-  template:
-    src: alerts/bb_exporter.yml.j2
-    dest: /etc/prometheus/alerts/bb_exporter.yml
-    owner: prometheus
-    group: prometheus
-    mode: 0640
-
-#- name: Template >> /etc/prometheus/alerts/general.yml
-#  copy:
-#    src: alerts_general.yml
-#    dest: /etc/prometheus/alerts/general.yml
-#    owner: prometheus
-#    group: prometheus
-#    mode: 0640
-
 - name: Create directories structure for alertmanager
   file:
    path: "{{ item }}"
@@ -78,11 +85,27 @@
   template:
     src: ipmi_config.yml.j2
     dest: /etc/ipmi_exporter/ipmi_config.yml
-    owner: ipmiexporter
-    group: ipmiexporter
+    owner: ipmi_exporter
+    group: ipmi_exporter
     mode: 0640
   tags:
     - template
+
+#- name: Deploy Slurm Exporter Binary files
+#  copy:
+#    src: prometheus-slurm-exporter
+#    dest: /usr/bin/prometheus-slurm-exporter
+#    owner: root
+#    group: root
+#    mode: 0755
+
+#- name: Deploy Slurm Exporter SystemD Unit
+#  copy:
+#    src: prometheus-slurm-exporter.service
+#    dest: /usr/lib/systemd/system/prometheus-slurm-exporter.service
+#    owner: root
+#    group: root
+#    mode: 0644
 
 - name: Enable/disable services
   service:
@@ -92,6 +115,8 @@
     - prometheus
     - alertmanager
     - ipmi_exporter
+    - snmp_exporter
+#    - prometheus-slurm-exporter
   tags:
     - service
 
@@ -103,6 +128,8 @@
     - prometheus
     - alertmanager
     - ipmi_exporter
+    - snmp_exporter    
+#    - prometheus-slurm-exporter
   when: (start_services | bool)
   tags:
     - service
