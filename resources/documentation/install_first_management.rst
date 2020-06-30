@@ -27,7 +27,7 @@ stack in VMs:
 In this last configuration, DVD iso will be mounted from /dev/cdrom instead of
 being copied to save space.
 
-It is recommended to only choose minimal install during packages selections
+It is recommended to only choose minimal install during packages selection
 (core or minimal server). Also, it is recommended to let system in English, and
 only set your keyboard and time zone to your country.
 

@@ -160,10 +160,11 @@ It should not be too difficult to understand this file.
 Other nodes
 ^^^^^^^^^^^
 
-Now, review computes nodes and logins nodes in respectively files
-cluster/nodes/computes.yml and cluster/nodes/logins.yml. Same rules apply. You
-can also add more nodes, or if you have for example multiple type of equipment
-for computes nodes or login nodes, add another equipment group this way:
+Now, review compute and login nodes in their respective
+cluster/nodes/computes.yml and cluster/nodes/logins.yml files. Same rules
+apply. You can also add more nodes, or if you have for example multiple type
+of equipment for computes nodes or login nodes, add another equipment group
+this way:
 
 .. code-block:: yaml
 
@@ -187,7 +188,7 @@ Now, let's have a look at the logical networks.
 Review logical networks
 -----------------------
 
-In **BlueBanquise**, nodes are connected together through logical network. Most
+In **BlueBanquise**, nodes are connected together through logical networks. Most
 of the time, logical networks will match your physical network, but for advanced
 networking, it can be different.
 
@@ -233,19 +234,19 @@ its content:
 
 All explanations are given above.
 
-One note for services_ip. It is used if services are spread over multiple
+One note about *services_ip*: it is used if services are spread over multiple
 managements, or in case of High Availability with virtual IPs. Ansible is not
 able to gather this information alone from playbooks (it could, but this would
-end up with a way too much big stack), and so we have to provide it manually.
-You can also set here an IP from another subnet if your system has network
+end up with a way too much complex stack), and so we have to provide it manually.
+You can also set here an IP address from another subnet if your system has network
 routing.
 
 Then check content of file group_vars/all/networks/interconnect-1.yml . As this
 is **not** an administration network, its configuration is easy.
 
 That is all for basic networking. General network parameters are set in
-group_vars/all/networks/ files, and nodes parameters are defined in the node’s
-files.
+group_vars/all/general_settings/network.yml file, and nodes parameters are
+defined in the node’s files.
 
 Now, let's have a look at the general configuration.
 
@@ -273,8 +274,9 @@ File group_vars/all/general_settings/repositories.yml configure repositories to
 use for all nodes (using groups and variable precedence, repositories can be
 tuned for each group of nodes, or even each node).
 
-Right now, only *os* and *bluebanquise* are set. This means two repositories
-will be added to nodes, and they will bind to repository_ip in ice1-1.yml .
+Right now, only *os* and *bluebanquise* are set. This means two or three
+(depending of the operating system) repositories will be added to nodes, and
+they will bind to repository_ip in ice1-1.yml .
 
 NFS
 ^^^

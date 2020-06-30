@@ -391,8 +391,8 @@ And result:
     |--@ungrouped:
   [root@ ~]#
 
-The **children** string define that string above is a group that contains bellow
-group(s).
+The **children** string defines that the string above is a group that contains
+bellow group(s).
 
 In Ansible syntax
 ^^^^^^^^^^^^^^^^^

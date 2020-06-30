@@ -20,9 +20,9 @@ else.
 Hosts are defined in */etc/bluebanquise/inventory/cluster/nodes*.
 
 Please do a difference between an Ansible managed host, and a host.
-All equipment that can have an ip on the network are considered "host", but only
-those with an ssh + python capability and on which we will use Ansible to deploy
-a configuration are considered "Ansible managed host".
+All equipment that can have an ip address on the network are considered "host",
+but only those with an ssh + python capability and on which we will use Ansible
+to deploy a configuration are considered "Ansible managed host".
 They are declared the same way in the stack inventory.
 
 Group
@@ -170,25 +170,21 @@ j2 Variables
 These are **BlueBanquise** specific variables.
 All variables with name starting by **j2_** are j2 variables.
 
-These variables are all stored in internal/group_vars/all/j2_variables directory, and are
-used for the internal purpose of the stack.
+These variables are all stored in internal/group_vars/all/j2_variables
+directory, and are used for the internal purpose of the stack.
 
-These variables are here to simplify tasks and templates writing, by removing
-ugly and redundant things from them, and providing a direct access to values.
-You can consider these variables as "functions" that takes as argument the
-current running host (or the host provided in hostvars if loaded using hostvars
-call).
-
-To clarify your mind, you can consider that these variables contains a simple
-value. In reality, they contain Jinja2 code as a string, that will be
-interpreted by Ansible during tasks/templates execution, which is why these are
-more functions/API than pure variables.
+These variables are here to simplify tasks and templates writing, and centralize
+main logic of the stack.
+To clarify your mind, you can consider that these variables contain Jinja2 code
+as a string, that will be interpreted by Ansible during tasks/templates
+execution.
 
 Remember that in any case, if these variables are not providing the expected
 value, you can use Ansible variables precedence mechanism to force your values.
 
 Last point, for developers, these j2 variables should be considered as a way to
-keep compatibility with roles, while upgrading the logic of the stack.
+keep compatibility with roles, while upgrading the logic of the stack. Do not
+hesitate to use them in roles, to ensure long term compatibility.
 
 Inventory, roles, and playbooks
 -------------------------------
@@ -248,7 +244,7 @@ documentation:
 `variable precedence list <https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html#variable-precedence-where-should-i-put-a-variable>`_
 
 This feature is key to the stack and key for system administrator to manipulate
-the **BlueBanquise** stack the way he/she/(it ?) wants, and *force* automatic
+the **BlueBanquise** stack the way he/she wants, and *force* automatic
 values if desired.
 
 For example, values can be set by default, and then redefined for some groups of

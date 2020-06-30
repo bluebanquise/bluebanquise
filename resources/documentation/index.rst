@@ -11,7 +11,8 @@ This documentation provides information on:
 
 Details are also given for each Ansible role of the stack.
 
-Please report us any issues in this documentation.
+`Please report us <https://github.com/bluebanquise/bluebanquise/issues>`_ any
+issues in this documentation.
 
 .. toctree::
    :maxdepth: 3
