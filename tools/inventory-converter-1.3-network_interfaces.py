@@ -3,6 +3,7 @@
 import sys
 import yaml
 
+
 # Indent list with PyYAML
 # From https://web.archive.org/web/20170903201521/https://pyyaml.org/ticket/64#comment:5
 class MyDumper(yaml.Dumper):
@@ -14,6 +15,7 @@ class MyDumper(yaml.Dumper):
     # See https://stackoverflow.com/a/52621703/1497385
     def represent_dict_preserve_order(self, data):
         return self.represent_dict(data.items())
+
 
 # Search and convert network_interfaces from dict to list
 #
@@ -40,15 +42,17 @@ def search_network_interfaces(dictionary):
 
     return dictionary
 
-def usage():
-    print(f"Usage: {sys.argv[0]} /etc/bluebanquise/inventory/cluster/nodes/file.yml")
+
+def usage(command):
+    print(f"Usage: {command} /etc/bluebanquise/inventory/cluster/nodes/file.yml")
+
 
 def main():
 
     MyDumper.add_representer(dict, MyDumper.represent_dict_preserve_order)
 
     if len(sys.argv) != 2:
-        usage()
+        usage(sys.argv[0])
         exit(1)
 
     hostsfile = sys.argv[1]
@@ -57,11 +61,7 @@ def main():
     with open(hostsfile, 'r') as fd:
         try:
             inventory = yaml.load(fd, Loader=yaml.FullLoader)
-            #print(yaml.dump(inventory))
-
             new_inventory = search_network_interfaces(inventory)
-            #print(yaml.dump(new_inventory, Dumper=MyDumper))
-
         except yaml.YAMLError as exc:
             print(exc)
 
@@ -71,6 +71,7 @@ def main():
     print(f'''Next steps:
       $ diff -u {hostsfile} {outfile} | less
       $ mv {outfile} {hostsfile}''')
+
 
 if __name__ == "__main__":
     main()
