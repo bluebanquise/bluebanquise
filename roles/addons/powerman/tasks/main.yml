@@ -11,7 +11,7 @@
 - name: template █ Generate /etc/powerman/powerman.conf
   template:
     src: powerman.conf.j2
-    dest: powerman/powerman.conf
+    dest: /etc/powerman/powerman.conf
     owner: root
     group: root
     mode: 0644
