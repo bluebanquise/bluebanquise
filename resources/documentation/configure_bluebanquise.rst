@@ -258,8 +258,8 @@ General configuration is made in group_vars/all/general_settings.
 Externals
 ^^^^^^^^^
 
-File group_vars/all/general_settings/external.yml allows to connect cluster to
-the external world or network. It should be self understandable.
+File group_vars/all/general_settings/external.yml allows to configure external
+resources. It should be self understandable.
 
 Network
 ^^^^^^^
@@ -308,7 +308,9 @@ less priority, while variables in group_vars/* have a higher priority.
 The idea here is the following: group_vars/all/equipment_all/ folder contains
 all the default parameters for all nodes. Here authentication, and
 equipment_profile. You have to tune these parameters to match your exact
-"global" need, and then tune dedicated parameters for each equipment group.
+"global" need, and then copy (if needed) these whole files into dedicated
+group_vars folder for each equipment group, and tune them according to these
+equipment specific parameters.
 
 Equipment profile
 ^^^^^^^^^^^^^^^^^
@@ -320,6 +322,7 @@ and check access_control variable. It is set to true:
 .. code-block:: yaml
 
   equipment_profile:
+    ...
     access_control: true
 
 Ok, but so all nodes will get this value. Let's check computes nodes, that are
@@ -345,7 +348,8 @@ Now check again:
   [root@]#
 
 Same apply for all equipment_profile parameters. You define a global set of
-parameters in default, and then tune it for each equipment group.
+parameters in equipment_all, which act as a global/default set, and then copy
+and tune this set for each equipment group if needed.
 
 **IMPORTANT**: equipment_profile variable is not standard. It is **STRICTLY
 FORBIDDEN** to tune it outside default

@@ -195,7 +195,7 @@ be {}.
 ansible-playbook
 ----------------
 
-This command is used to launch playbooks, and ask Ansible to execute tasks on
+This command is used to run playbooks, and ask Ansible to execute tasks on
 desired host(s). This is the most used command when using **BlueBanquise**.
 
 Important parameters are:
@@ -391,7 +391,7 @@ And result:
     |--@ungrouped:
   [root@ ~]#
 
-The **children** string defines that the string above is a group that contains
+The **children** string define that the string above is a group that contains
 bellow group(s).
 
 In Ansible syntax
