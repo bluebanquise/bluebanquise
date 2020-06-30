@@ -11,8 +11,9 @@
     - ipmi_exporter
     - freeipmi
     - snmp_exporter
+    - karma
 
-#pour generateur de oid walk pour snmp_exporter     
+#for generator of oid walk for snmp_exporter     
 - name: Package
   package:
     name: "{{ item }}"
@@ -27,10 +28,6 @@
   when:
     - monitoring.exporters.snmp_exporter.with_generator is defined      
     - monitoring.exporters.snmp_exporter.with_generator
-
-
-
-
 
 - name: Create directories structure
   file:
@@ -91,22 +88,6 @@
   tags:
     - template
 
-#- name: Deploy Slurm Exporter Binary files
-#  copy:
-#    src: prometheus-slurm-exporter
-#    dest: /usr/bin/prometheus-slurm-exporter
-#    owner: root
-#    group: root
-#    mode: 0755
-
-#- name: Deploy Slurm Exporter SystemD Unit
-#  copy:
-#    src: prometheus-slurm-exporter.service
-#    dest: /usr/lib/systemd/system/prometheus-slurm-exporter.service
-#    owner: root
-#    group: root
-#    mode: 0644
-
 - name: Enable/disable services
   service:
     name: "{{ item }}"
@@ -116,7 +97,6 @@
     - alertmanager
     - ipmi_exporter
     - snmp_exporter
-#    - prometheus-slurm-exporter
   tags:
     - service
 
@@ -129,7 +109,6 @@
     - alertmanager
     - ipmi_exporter
     - snmp_exporter    
-#    - prometheus-slurm-exporter
   when: (start_services | bool)
   tags:
     - service
