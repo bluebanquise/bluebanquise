@@ -46,5 +46,7 @@ provisioner:
         repositories:
           - bluebanquise
           - os
+        external_repositories:
+          - fakerepo
 verifier:
   name: ansible

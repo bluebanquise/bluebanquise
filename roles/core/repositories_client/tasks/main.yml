@@ -1,4 +1,8 @@
 ---
+- name: include_tasks ░ Deprecation messages
+  include_tasks: "deprecation.yml"
+  tags:
+    - internal
 
 - name: include_tasks ░ Use OS dedicated task
   include_tasks: "{{ (ansible_facts.distribution|lower|replace(' ','_')) }}_{{ ansible_facts.distribution_major_version }}.yml"

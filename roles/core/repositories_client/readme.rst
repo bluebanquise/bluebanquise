@@ -69,12 +69,13 @@ any other repository.
 
 There is a use case of people running CentOS 7 with a local clone of the *base*
 repository but still using the online *updates* repository. You can keep this
-behaviour by adding this repo to the external_repositories parameter in your
-inventory. Please consider using the mirror closest to your location.
+behaviour by adding this repo to the repositories parameter in your inventory.
+Please consider using the mirror closest to your location.
 
 .. code-block:: yaml
 
-  external_repositories:
+  repositories:
+    ...
     - name: "CentOS-Updates"
       baseurl: "http://mirror.centos.org/centos/7/updates/x86_64/"
       gpgcheck: 1
@@ -92,12 +93,6 @@ Mandatory inventory vars:
 
 * repositories[item]
 
-Optional inventory vars:
-
-**hostvars[inventory_hostname]**
-
-* external_repositories[item]
-
 Output
 ^^^^^^
 
@@ -113,6 +108,7 @@ sources.list file.
 Changelog
 ^^^^^^^^^
 
+* 1.0.6: Deprecate external_repositories. Bruno Travouillon <devel@travouillon.fr>
 * 1.0.5: Added support for excluding packages from CentOS and RHEL repositories. Neil Munday <neil@mundayweb.com>
 * 1.0.4: Clean. johnnykeats <johnny.keats@outlook.com>
 * 1.0.3: Add support of major release version. Bruno <devel@travouillon.fr>
