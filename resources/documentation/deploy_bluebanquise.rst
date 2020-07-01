@@ -12,18 +12,18 @@ systems.
 Management configuration
 ========================
 
-Get management1 playbook
+Get managements playbook
 ------------------------
 
 We are going to use the provided default playbook. This playbook will install
 most of the **core** roles. Enough to deploy first stage of the cluster.
 
-Copy example playbook management1 to /etc/bluebanquise/playbooks/:
+Copy example playbook managements to /etc/bluebanquise/playbooks/:
 
 .. code-block:: bash
 
   mkdir /etc/bluebanquise/playbooks/
-  cp -a /etc/bluebanquise/resources/examples/simple_cluster/playbooks/management1.yml /etc/bluebanquise/playbooks/
+  cp -a /etc/bluebanquise/resources/examples/simple_cluster/playbooks/managements.yml /etc/bluebanquise/playbooks/
 
 Then, we will ask Ansible to read this playbook, and execute all roles listed
 inside on management1 node (check hosts at top of the file).
@@ -73,7 +73,7 @@ We first ensure our NIC are up, so the repositories part is working.
 
 .. code-block:: bash
 
-  ansible-playbook /etc/bluebanquise/playbooks/management1.yml --tags set_hostname,nic
+  ansible-playbook /etc/bluebanquise/playbooks/managements.yml --limit management1 --tags set_hostname,nic
 
 Then start your main interface manually. Here enp0s3:
 
@@ -86,13 +86,13 @@ controller:
 
 .. code-block:: bash
 
-  ansible-playbook /etc/bluebanquise/playbooks/management1.yml --tags bluebanquise
+  ansible-playbook /etc/bluebanquise/playbooks/managements.yml --limit management1 --tags bluebanquise
 
 Then play the whole playbook:
 
 .. code-block:: bash
 
-  ansible-playbook /etc/bluebanquise/playbooks/management1.yml
+  ansible-playbook /etc/bluebanquise/playbooks/managements.yml --limit management1
 
 And wait...
 
@@ -197,7 +197,7 @@ after updating the configuration.
 
 .. code-block:: bash
 
-  ansible-playbook /etc/bluebanquise/playbooks/management1.yml --tags pxe_stack
+  ansible-playbook /etc/bluebanquise/playbooks/managements.yml --tags pxe_stack
 
 OS deployment
 -------------
@@ -219,13 +219,13 @@ yes, copy example playbooks:
 .. code-block:: bash
 
   cp -a /etc/bluebanquise/resources/examples/simple_cluster/playbooks/computes.yml /etc/bluebanquise/playbooks/
-  cp -a /etc/bluebanquise/resources/examples/simple_cluster/playbooks/login1.yml /etc/bluebanquise/playbooks/
+  cp -a /etc/bluebanquise/resources/examples/simple_cluster/playbooks/logins.yml /etc/bluebanquise/playbooks/
 
 And execute them, using --limit parameter to specify targets them:
 
 .. code-block:: bash
 
-  ansible-playbook /etc/bluebanquise/login1.yml
+  ansible-playbook /etc/bluebanquise/logins.yml
   ansible-playbook /etc/bluebanquise/computes.yml --limit c001,c002,c003,c004
 
 You can see that Ansible will work on computes nodes in parallel, using more CPU
