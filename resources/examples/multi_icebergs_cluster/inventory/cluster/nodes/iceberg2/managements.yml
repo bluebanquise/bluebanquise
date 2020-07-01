@@ -1,21 +1,19 @@
 mg_managements:
   children:
-    equipment_supermicro_management:
+    equipment_typeM:
       hosts:
-        ancel:
+        management2:
           bmc:
-            name: bancel
-            ip4: 10.11.100.2
-            mac: 08:00:27:0d:41:97
+            name: bmanagement2
+            ip4: 10.1.100.2
+            mac: 08:00:27:0d:41:98
             network: ice1-1
           network_interfaces:
-            enp0s3:
-              ip4: 10.11.0.2
-              mac: 08:00:27:de:41:21
-              network: ice1-1
-              type: infiniband
-            enp0s8:
-              ip4: 10.12.0.1
+            - interface: enp0s3
+              ip4: 10.2.0.1
               mac: 08:00:27:de:42:23
               network: ice2-1
-
+            - interface: enp0s8
+              ip4: 10.1.0.2
+              mac: 08:00:27:de:41:21
+              network: ice1-1

@@ -17,15 +17,19 @@ The following parameters are recommended:
 * >= 2 Gb RAM
 * >= 16Gb HDD
 
-And the following parameters are the strict minimal if you wish to test the stack in VMs:
+And the following parameters are the strict minimal if you wish to test the
+stack in VMs:
 
 * >= 1 vCPU
 * >= 512 Mb RAM
 * >= 6Gb HDD
 
-In this last configuration, DVD iso will be mounted from /dev/cdrom instead of being copied to save space.
+In this last configuration, DVD iso will be mounted from /dev/cdrom instead of
+being copied to save space.
 
-It is recommended to only choose minimal install during packages selections (core or minimal server). Also, it is recommended to let system in English, and only set your keyboard and time zone to your country.
+It is recommended to only choose minimal install during packages selection
+(core or minimal server). Also, it is recommended to let system in English, and
+only set your keyboard and time zone to your country.
 
 Prepare for Ansible
 ===================
@@ -33,7 +37,8 @@ Prepare for Ansible
 Repositories
 ------------
 
-Once system is installed and rebooted, login, and disable firewall. Current stack does not support firewall configuration on management nodes (but it is scheduled for later releases).
+Once system is installed and rebooted, login, and disable firewall. Firewall
+will optionally be reactivated later.
 
 .. code-block:: bash
 
@@ -59,7 +64,7 @@ which defaults to the major release version in the path:
                                     v    v    v    v
        /var/www/html/repositories/centos/7/x86_64/os/
 
-Note: this patern parameters (distribution, version, architecture) must match
+Note: this pattern parameters (distribution, version, architecture) must match
 the one provided in the equipment_profile file seen later.
 
 Note: we recommend to use the same directory path to later sync the Errata
@@ -95,7 +100,8 @@ Simply mount iso from /dev/cdrom to save space:
   mkdir -p /var/www/html/repositories/centos/7/x86_64/os/
   mount /dev/cdrom /var/www/html/repositories/centos/7/x86_64/os/
 
-Now, create first repository manually. Procedure is different between Centos 7 and 8.
+Now, create first repository manually. Procedure is different between Centos 7
+and 8.
 
 **Centos/RHEL 7:**
 
@@ -150,9 +156,11 @@ BlueBanquise
 
 Download BlueBanquise rpms from official repository.
 
-Go to https://bluebanquise.com, go to repositories/download, and get the content of the whole directory corresponding to your distribution and architecture.
+Go to https://bluebanquise.com, go to repositories/download, and get the content
+of the whole directory corresponding to your distribution and architecture.
 
-Then copy this content into /var/www/html/repositories/centos/7/x86_64/bluebanquise/ locally.
+Then copy this content into
+/var/www/html/repositories/centos/7/x86_64/bluebanquise/ locally.
 
 .. code-block:: bash
 
@@ -198,4 +206,5 @@ It must be **>= 2.8.2** .
 
 It is now time, if you do not know how Ansible works, to learn basis of Ansible.
 
-If you already know Ansible, or want to skip this recommended training, directly go to the Configure BlueBanquise section.
+If you already know Ansible, or want to skip this recommended training, directly
+go to the Configure BlueBanquise section.

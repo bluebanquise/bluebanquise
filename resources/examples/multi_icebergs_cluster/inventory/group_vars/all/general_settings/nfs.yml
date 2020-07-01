@@ -3,44 +3,23 @@ nfs_settings:
     use_nfs_home_dirs: true                     # Will automatically set this boolean to true if /home is mounted on client side
 
 nfs:
-  softwares:
-    mount: /opt/softwares                       # Which path clients should mount this NFS
-    export: /opt/softwares                      # What path server should export
-    server: odin                                # The server that export this storage space
-    clients_groups:                             # Can be an equipment group, or a main group (mg), or any other ansible group
-      - mg_computes
-      - mg_logins
-    take_over_network: interconnect-1           # Network used to share this storage space
-    export_arguments: ro,no_root_squash,async   # Arguments for the server (export)
-    mount_arguments: ro,intr,nfsvers=4.2,bg     # Arguments for the client (mount)
-
-  home:
-    mount: /home
-    export: /mnt/home
-    server: odin
-    clients_groups:
-      - mg_computes
-      - mg_logins
-    take_over_network: interconnect-1
-    export_arguments: rw,no_root_squash,sync
-    mount_arguments: rw,intr,rsize=32768,wsize=32768,nfsvers=4.2,bg
 
   ansible:
-    mount: /etc/bluebanquise
-    export: /etc/bluebanquise
-    server: odin
-    clients_groups:
-      - equipment_supermicro_management
-    take_over_network: ice1-1
-    export_arguments: ro,no_root_squash,sync
-    mount_arguments: ro,intr,nfsvers=4.2,bg
+    mount: /etc/bluebanquise                    # Which path clients should mount this NFS
+    export: /etc/bluebanquise                   # What path server should export
+    server: management1                         # The server that export this storage space
+    clients_groups:                             # Can be an equipment group, or a main group (mg), or any other ansible group
+      - secondary_managements
+    take_over_network: ice1-1                   # Network used to share this storage space
+    export_arguments: ro,no_root_squash,sync    # Arguments for the server (export)
+    mount_arguments: ro,intr,nfsvers=4.2,bg     # Arguments for the client (mount)
 
   repositories:
     mount: /var/www/html/repositories
     export: /var/www/html/repositories
-    server: odin
+    server: management1
     clients_groups:
-      - equipment_supermicro_management
+      - secondary_managements
     take_over_network: ice1-1
     export_arguments: ro,no_root_squash,sync
     mount_arguments: ro,intr,rsize=32768,wsize=32768,nfsvers=4.2,bg

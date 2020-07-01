@@ -1,94 +1,65 @@
 mg_computes:
   children:
 
-    equipment_HP_rusted:  # GPU nodes
-      hosts:
-        lawfer:
-          bmc:
-            name: blawfer
-            ip4: 10.13.103.2
-            mac: 08:00:27:0d:f8:b3
-            network: ice3-1
-          network_interfaces:
-            enp0s3:
-              ip4: 10.13.3.2
-              mac: 08:00:27:0d:f8:a3
-              network: ice3-1
-            ib0:
-              ip4: 10.20.3.2
-              network: interconnect-1
-        lucian:
-          bmc:
-            name: blucian
-            ip4: 10.13.103.3
-            mac: 08:00:27:0d:f8:b4
-            network: ice3-1
-          network_interfaces:
-            enp0s3:
-              ip4: 10.13.3.3
-              mac: 08:00:27:0d:f8:a4
-              network: ice3-1
-            ib0:
-              ip4: 10.20.3.3
-              network: interconnect-1
+    equipment_typeC:
 
-    equipment_supermicro_sandy_compute:
       hosts:
-        einherjar11:
+        c005:
           bmc:
-            name: beinherjar11
-            ip4: 10.14.104.1
-            mac: 08:00:27:0d:44:91
-            network: ice3-2
-          network_interfaces:
-            enp0s3:
-              ip4: 10.14.4.1
-              mac: 08:00:27:0d:44:90
-              network: ice3-2
-            ib0:
-              ip4: 10.20.4.11
-              network: interconnect-1
-        einherjar12:
-          bmc:
-            name: beinherjar12
-            ip4: 10.14.104.2
+            name: bc005
+            ip4: 10.3.103.1
             mac: 08:00:27:0d:f8:a5
-            network: ice3-2
+            network: ice3-1
           network_interfaces:
-            enp0s3:
-              ip4: 10.14.4.2
+            - interface: enp0s3
+              ip4: 10.3.3.1
               mac: 08:00:27:0d:f8:a6
-              network: ice3-2
-            ib0:
-              ip4: 10.20.4.12
+              network: ice3-1
+            - interface: ib0
+              ip4: 10.20.3.5
               network: interconnect-1
-        einherjar13:
+        c006:
           bmc:
-            name: beinherjar13
-            ip4: 10.14.104.3
-            mac: 08:00:27:0d:f8:a7
-            network: ice3-2
+            name: bc006
+            ip4: 10.3.103.2
+            mac: 08:00:27:0d:f8:b5
+            network: ice3-1
           network_interfaces:
-            enp0s3:
-              ip4: 10.14.4.3
-              mac: 08:00:27:0d:f8:a8
-              network: ice3-2
-            ib0:
-              ip4: 10.20.4.13
-              network: interconnect-1
-        einherjar14:
-          bmc:
-            name: beinherjar14
-            ip4: 10.14.104.4
-            mac: 08:00:27:0d:f8:a9
-            network: ice3-2
-          network_interfaces:
-            enp0s3:
-              ip4: 10.14.4.4
-              mac: 08:00:27:0d:f8:c1
-              network: ice3-2
-            ib0:
-              ip4: 10.20.4.14
+            - interface: enp0s3
+              ip4: 10.3.3.2
+              mac: 08:00:27:0d:f8:b6
+              network: ice3-1
+            - interface: ib0
+              ip4: 10.20.3.6
               network: interconnect-1
 
+    equipment_typeG:
 
+        gpu001:
+          bmc:
+            name: bgpu001
+            ip4: 10.4.103.1
+            mac: 08:00:27:0d:f8:c5
+            network: ice4-1
+          network_interfaces:
+            - interface: enp0s3
+              ip4: 10.4.3.1
+              mac: 08:00:27:0d:f8:c6
+              network: ice4-1
+            - interface: ib0
+              ip4: 10.20.3.7
+              network: interconnect-1
+        gpu002:
+          bmc:
+            name: bgpu002
+            ip4: 10.4.103.2
+            mac: 08:00:27:0d:f8:d5
+            network: ice4-1
+          network_interfaces:
+            - interface: enp0s3
+              ip4: 10.4.3.2
+              mac: 08:00:27:0d:f8:d6
+              network: ice4-1
+            - interface: ib0
+              ip4: 10.20.3.8
+              network: interconnect-1

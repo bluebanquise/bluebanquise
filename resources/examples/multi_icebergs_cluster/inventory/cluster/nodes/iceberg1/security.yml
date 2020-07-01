@@ -1,9 +1,10 @@
 mg_security:
   children:
-    equipment_valkyrie:
+    equipment_typeS:
       hosts:
-        lenneth:                # Autonomous equipment
+
+        security1:
           network_interfaces:
-            eth0:
-              ip4: 10.11.0.77
+            - interface: eth0
+              ip4: 10.1.0.77
               network: ice1-1

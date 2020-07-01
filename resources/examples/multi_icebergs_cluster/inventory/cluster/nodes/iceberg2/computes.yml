@@ -1,150 +1,62 @@
 mg_computes:
   children:
 
-    equipment_supermicro_sandy_SMP:
-      hosts:
-        arngrim: # Alias "the gib fat one", or blender guys "toy"
-          bmc:
-            name: barngrim
-            ip4: 10.12.103.1
-            mac: 08:00:27:0d:f8:b2
-            network: ice2-1
-          network_interfaces:
-            enp0s3:
-              ip4: 10.12.3.1
-              mac: 08:00:27:0d:f8:a1
-              network: ice2-1
-            enp0s0f1:
-              ip4: 10.20.3.1
-              network: interconnect-1
+    equipment_typeC:
 
-    equipment_supermicro_sandy_compute: # Blender / ffmpeg farm, OpenFoam farm
       hosts:
-        einherjar2:
+        c001:
           bmc:
-            name: beinherjar2
-            ip4: 10.12.104.2
+            name: bc001
+            ip4: 10.2.103.1
             mac: 08:00:27:0d:f8:a5
             network: ice2-1
           network_interfaces:
-            enp0s3:
-              ip4: 10.12.4.2
+            - interface: enp0s3
+              ip4: 10.2.3.1
               mac: 08:00:27:0d:f8:a6
               network: ice2-1
-            ib0:
-              ip4: 10.20.4.2
+            - interface: ib0
+              ip4: 10.20.3.1
               network: interconnect-1
-        einherjar3:
+        c002:
           bmc:
-            name: beinherjar3
-            ip4: 10.12.104.3
-            mac: 08:00:27:0d:f8:a7
+            name: bc002
+            ip4: 10.2.103.2
+            mac: 08:00:27:0d:f8:b5
             network: ice2-1
           network_interfaces:
-            enp0s3:
-              ip4: 10.12.4.3
-              mac: 08:00:27:0d:f8:a8
+            - interface: enp0s3
+              ip4: 10.2.3.2
+              mac: 08:00:27:0d:f8:b6
               network: ice2-1
-            ib0:
-              ip4: 10.20.4.3
+            - interface: ib0
+              ip4: 10.20.3.2
               network: interconnect-1
-        einherjar4:
+        c003:
           bmc:
-            name: beinherjar4
-            ip4: 10.12.104.4
-            mac: 08:00:27:0d:f8:a9
+            name: bc003
+            ip4: 10.2.103.3
+            mac: 08:00:27:0d:f8:c5
             network: ice2-1
           network_interfaces:
-            enp0s3:
-              ip4: 10.12.4.4
-              mac: 08:00:27:0d:f8:c1
+            - interface: enp0s3
+              ip4: 10.2.3.3
+              mac: 08:00:27:0d:f8:c6
               network: ice2-1
-            ib0:
-              ip4: 10.20.4.4
+            - interface: ib0
+              ip4: 10.20.3.3
               network: interconnect-1
-        einherjar5:
+        c004:
           bmc:
-            name: beinherjar5
-            ip4: 10.12.104.5
-            mac: 08:00:27:0d:f8:51
+            name: bc004
+            ip4: 10.2.103.4
+            mac: 08:00:27:0d:f8:d5
             network: ice2-1
           network_interfaces:
-            enp0s3:
-              ip4: 10.12.4.5
-              mac: 08:00:27:0d:f8:51
+            - interface: enp0s3
+              ip4: 10.2.3.4
+              mac: 08:00:27:0d:f8:d6
               network: ice2-1
-            ib0:
-              ip4: 10.20.4.5
+            - interface: ib0
+              ip4: 10.20.3.4
               network: interconnect-1
-        einherjar6:
-          bmc:
-            name: beinherjar6
-            ip4: 10.12.104.6
-            mac: 08:00:27:0d:f8:61
-            network: ice2-1
-          network_interfaces:
-            enp0s3:
-              ip4: 10.12.4.6
-              mac: 08:00:27:0d:f8:61
-              network: ice2-1
-            ib0:
-              ip4: 10.20.4.6
-              network: interconnect-1
-        einherjar7:
-          bmc:
-            name: beinherjar7
-            ip4: 10.12.104.7
-            mac: 08:00:27:0d:f8:71
-            network: ice2-1
-          network_interfaces:
-            enp0s3:
-              ip4: 10.12.4.7
-              mac: 08:00:27:0d:f8:71
-              network: ice2-1
-            ib0:
-              ip4: 10.20.4.7
-              network: interconnect-1
-        einherjar8:
-          bmc:
-            name: beinherjar8
-            ip4: 10.12.104.8
-            mac: 08:00:27:0d:f8:81
-            network: ice2-1
-          network_interfaces:
-            enp0s3:
-              ip4: 10.12.4.8
-              mac: 08:00:27:0d:f8:81
-              network: ice2-1
-            ib0:
-              ip4: 10.20.4.8
-              network: interconnect-1
-        einherjar9:
-          bmc:
-            name: beinherjar9
-            ip4: 10.12.104.9
-            mac: 08:00:27:0d:f8:91
-            network: ice2-1
-          network_interfaces:
-            enp0s3:
-              ip4: 10.12.4.9
-              mac: 08:00:27:0d:f8:91
-              network: ice2-1
-            ib0:
-              ip4: 10.20.4.9
-              network: interconnect-1
-        einherjar10:
-          bmc:
-            name: beinherjar10
-            ip4: 10.12.104.10
-            mac: 08:00:27:0d:f8:11
-            network: ice2-1
-          network_interfaces:
-            enp0s3:
-              ip4: 10.12.4.10
-              mac: 08:00:27:0d:f8:11
-              network: ice2-1
-            ib0:
-              ip4: 10.20.4.10
-              network: interconnect-1
-
-

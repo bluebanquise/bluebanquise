@@ -1,45 +1,23 @@
-mg_managements:                        # Master group
+mg_managements:
   children:
-    equipment_MSI_X99A_SLI:            # Equipment profile
+    equipment_typeM:
       hosts:
-        odin:                          # Hostname
+
+        management1:
           global_alias:                # Global alias is present on all icebergs
-            - management1
+            - top-management
           alias:                       # Alias is present inside host iceberg
-            - odin1
+            - management
+          bmc:
+            name: bmanagement1
+            ip4: 10.1.100.1
+            mac: 08:00:27:dc:f8:f6
+            network: ice1-1
           network_interfaces:
-            enp0s3:
-              ip4: 10.11.0.1
-              mac: 08:00:27:de:42:22
-              network: ice1-1          # Logical network connected to
-            ib0:
+            - interface: enp0s3
+              ip4: 10.1.0.1
+              mac: 08:00:27:dc:f8:f5
+              network: ice1-1
+            - interface: ib0
               ip4: 10.20.0.1
               network: interconnect-1
-            # eth3:
-            #   network: lk1
-            #   ip4: 172.16.0.2
-            # bond0:
-            #   type: bond
-            #   bond_options: "mode=4 xmit_hash_policy=layer3+4 miimon=100 lacp_rate=1"
-            #   network: ice1-4
-            #   ip4: 172.21.2.102
-            # bond0.100:
-            #   type: vlan
-            #   network: ice1-2
-            #   ip4: 10.100.0.1
-            #   vlan: true
-            #   vlan_id: 100
-            #   physical_device: bond0
-            # bond0.1:
-            #   type: vlan
-            #   network: ice1-3
-            #   ip4: 10.1.0.1
-            #   vlan: true
-            #   vlan_id: 1
-            #   physical_device: bond0
-            # enp136s0f0:
-            #   type: bond-slave
-            #   master: bond0
-            # enp136s0f1:
-            #   type: bond-slave
-            #   master: bond0

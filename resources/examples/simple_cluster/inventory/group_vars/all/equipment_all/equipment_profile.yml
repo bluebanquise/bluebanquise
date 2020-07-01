@@ -14,7 +14,7 @@ equipment_profile:
   kernel_parameters:
 
   access_control: true # Selinux, AppArmor, etc. Selinux: true = enforcing, false = disabled
-  firewall: true # Enable or disable native firewall
+  firewall: false # Enable or disable native firewall
 
   partitioning: | # Please provide native distribution partitioning. This example is for Centos/RedHat systems.
     clearpart --all --initlabel
@@ -51,4 +51,3 @@ equipment_profile:
   equipment_authentication: # login/password for BMC, storage bay controller, switch, etc.
     user: ADMIN
     password: ADMIN
-

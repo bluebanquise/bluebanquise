@@ -1,10 +1,10 @@
 ---
-- name: management1
-  hosts: "{{ target | default('management1') }}"
+# use '--limit management1' to restrict playbook to
+# management1 if mg_managements contains multiple management nodes
+- name: managements playbook
+  hosts: "mg_managements"
   roles:
 
-    - role: bluebanquise
-      tags: bluebanquise
     - role: set_hostname
       tags: set_hostname
     - role: nic
@@ -13,6 +13,8 @@
       tags: repositories_server
     - role: repositories_client
       tags: repositories_client
+    - role: bluebanquise
+      tags: bluebanquise
     - role: hosts_file
       tags: hosts_file
     - role: ssh_master
@@ -31,4 +33,3 @@
       tags: pxe_stack
     - role: nfs_server
       tags: nfs_server
-

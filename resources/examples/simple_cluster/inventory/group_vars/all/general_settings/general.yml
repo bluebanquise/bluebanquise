@@ -7,7 +7,6 @@ time_zone: Europe/Brussels
 
 # Internal mechanisms
 icebergs_system: false # Activate or deactivate icebergs topology system. Experimental.
-accelerated_mode: false # Activate or deactivate accelerated mode. Experimental.
 
 # Services handling
 enable_services: true # Enable or disable services on startup (set to false when using high availability)
