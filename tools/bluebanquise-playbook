@@ -48,6 +48,13 @@ elif [[ ! -f "${ANSIBLE_CONFIG}/playbooks/${playbook}.yml" ]]; then
     exit 1
 fi
 
+playbook_yml="${ANSIBLE_CONFIG}/playbooks/${playbook}.yml"
+if [[ $(grep -c 'hosts:.*{{.*target.*}}' ${playbook_yml}) -ne 0 ]]; then
+    echo -e "\e[31mERROR: Usage of {{ target }} in hosts is deprecated."\
+         "Please update your playbook.\e[0m"
+    exit 1
+fi
+
 ansbook_cmd=$(which ansible-playbook)
 if [[ $? -ne 0 ]]; then
     echo 'Error: Cannot find command `ansible-playbook`.'
@@ -61,8 +68,8 @@ if [[ $? -ne 0 ]]; then
 fi
 
 if [[ -n "$nodeset" ]]; then
-    target="--extra-vars target=$(${nodeset_cmd} -e -S, ${nodeset})"
+    target="--limit $(${nodeset_cmd} -e -S, ${nodeset})"
 fi
 
-echo "Execute: $ansbook_cmd ${ANSIBLE_CONFIG}/playbooks/${playbook}.yml ${target} ${PARAMS[@]}"
-$ansbook_cmd ${ANSIBLE_CONFIG}/playbooks/${playbook}.yml ${target} ${PARAMS[@]}
+echo "Execute: $ansbook_cmd ${playbook_yml} ${target} ${PARAMS[@]}"
+$ansbook_cmd ${playbook_yml} ${target} ${PARAMS[@]}
