@@ -74,6 +74,8 @@ parameter:
           - "rule family=ipv4 forward-port port=443 protocol=tcp to-port=8443"
         rich_rules_disabled:      <<< list of rich rules to disable
           - 'rule service name="ftp" audit limit value="1/m" accept'
+        icmp_block_inversion: yes
+        masquerade: yes
 
 
 **Integration with other roles**
@@ -111,12 +113,16 @@ Optional inventory vars:
 * firewall
    * zones
       * zone
-      * services_enabled
-      * services_disabled
-      * ports_enabled
-      * ports_disabled
-      * rich_rules_enabled
-      * rich_rules_disabled
+      * services_enabled     (list)
+      * services_disabled    (list)
+      * ports_enabled        (list)
+      * ports_disabled       (list)
+      * rich_rules_enabled   (list)
+      * rich_rules_disabled  (list)
+      * icmp_blocks_enabled  (list)
+      * icmp_blocks_disabled (list)
+      * icmp_block_inversion (bool)
+      * masquerade           (bool)
 
 Output
 ^^^^^^

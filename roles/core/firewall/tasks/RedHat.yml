@@ -32,7 +32,7 @@
     state: enabled
   loop: "{{ firewall.zones | default({}) | subelements('services_enabled', skip_missing=True) }}"
   loop_control:
-    label: "Enable service {{ item.1 }} in zone {{ item.0.zone }}"
+    label: "Add service {{ item.1 }} to zone {{ item.0.zone }}"
 
 - name: "firewalld █ Remove services from firewall's zones"
   firewalld:
@@ -43,7 +43,7 @@
     state: disabled
   loop: "{{ firewall.zones | default({}) | subelements('services_disabled', skip_missing=True) }}"
   loop_control:
-    label: "Disable service {{ item.1 }} in zone {{ item.0.zone }}"
+    label: "Remove service {{ item.1 }} from zone {{ item.0.zone }}"
 
 - name: "firewalld █ Add ports to firewall's zones"
   firewalld:
@@ -54,7 +54,7 @@
     state: enabled
   loop: "{{ firewall.zones | default({}) | subelements('ports_enabled', skip_missing=True) }}"
   loop_control:
-    label: "Enable port {{ item.1 }} in zone {{ item.0.zone }}"
+    label: "Add port {{ item.1 }} to zone {{ item.0.zone }}"
 
 - name: "firewalld █ Remove ports from firewall's zones"
   firewalld:
@@ -65,7 +65,7 @@
     state: disabled
   loop: "{{ firewall.zones | default({}) | subelements('ports_disabled', skip_missing=True) }}"
   loop_control:
-    label: "Disable port {{ item.1 }} in zone {{ item.0.zone }}"
+    label: "Remove port {{ item.1 }} from zone {{ item.0.zone }}"
 
 - name: "firewalld █ Add rich rules to firewall's zones"
   firewalld:
@@ -76,7 +76,7 @@
     state: enabled
   loop: "{{ firewall.zones | default({}) | subelements('rich_rules_enabled', skip_missing=True) }}"
   loop_control:
-    label: "Enable rich rule '{{ item.1 }}' in zone {{ item.0.zone }}"
+    label: "Add rich rule '{{ item.1 }}' to zone {{ item.0.zone }}"
 
 - name: "firewalld █ Remove rich rules from firewall's zones"
   firewalld:
@@ -87,4 +87,50 @@
     state: disabled
   loop: "{{ firewall.zones | default({}) | subelements('rich_rules_disabled', skip_missing=True) }}"
   loop_control:
-    label: "Disable rich rule '{{ item.1 }}' in zone {{ item.0.zone }}"
+    label: "Remove rich rule '{{ item.1 }}' from zone {{ item.0.zone }}"
+
+- name: "firewalld █ Add ICMP blocks to firewall's zones"
+  firewalld:
+    zone: "{{ item.0.zone }}"
+    icmp_block: "{{ item.1 }}"
+    immediate: "yes"
+    permanent: "yes"
+    state: enabled
+  loop: "{{ firewall.zones | default({}) | subelements('icmp_blocks_enabled', skip_missing=True) }}"
+  loop_control:
+    label: "Add ICMP block '{{ item.1 }}' to zone {{ item.0.zone }}"
+
+- name: "firewalld █ Remove ICMP blocks from firewall's zones"
+  firewalld:
+    zone: "{{ item.0.zone }}"
+    icmp_block: "{{ item.1 }}"
+    immediate: "yes"
+    permanent: "yes"
+    state: disabled
+  loop: "{{ firewall.zones | default({}) | subelements('icmp_blocks_disabled', skip_missing=True) }}"
+  loop_control:
+    label: "Remove ICMP block '{{ item.1 }}' from zone {{ item.0.zone }}"
+
+- name: "firewalld █ Define ICMP block inversion in firewall's zones"
+  firewalld:
+    zone: "{{ item.zone }}"
+    icmp_block_inversion: "{{ item.icmp_block_inversion | string }}"
+    immediate: "yes"
+    permanent: "yes"
+    state: "{{ item.icmp_block_inversion | ternary('enabled', 'disabled') }}"
+  loop: "{{ firewall.zones | default([]) }}"
+  when: item.icmp_block_inversion is defined
+  loop_control:
+    label: "{{ item.icmp_block_inversion | default(False) | ternary('Enable', 'Disable') }} ICMP block inversion in zone {{ item.zone }}"
+
+- name: "firewalld █ Define masquerade in firewall's zones"
+  firewalld:
+    zone: "{{ item.zone }}"
+    masquerade: "{{ item.masquerade | string }}"
+    immediate: "yes"
+    permanent: "yes"
+    state: "{{ item.masquerade | ternary('enabled', 'disabled') }}"
+  loop: "{{ firewall.zones | default([]) }}"
+  when: item.masquerade is defined
+  loop_control:
+    label: "{{ item.masquerade | default(False) | ternary('Enable', 'Disable') }} masquerade in zone {{ item.zone }}"
