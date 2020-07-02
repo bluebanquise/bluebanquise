@@ -60,13 +60,13 @@ def main():
 
     with open(hostsfile, 'r') as fd:
         try:
-            inventory = yaml.load(fd, Loader=yaml.FullLoader)
+            inventory = yaml.load(fd, Loader=yaml.SafeLoader)
             new_inventory = search_network_interfaces(inventory)
         except yaml.YAMLError as exc:
             print(exc)
 
     with open(outfile, 'w') as fd:
-        fd.write(yaml.dump(new_inventory, Dumper=MyDumper))
+        fd.write(yaml.dump(new_inventory, Dumper=MyDumper, default_flow_style=False))
 
     print(f'''Next steps:
       $ diff -u {hostsfile} {outfile} | less
