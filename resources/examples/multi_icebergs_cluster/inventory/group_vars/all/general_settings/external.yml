@@ -18,13 +18,3 @@ external_dns:
 # Hosts defined here will be automatically added into /etc/hosts
 external_hosts:
   sphenisc.com: 213.186.33.3
-
-# Uncomment this variable if you need additionnal repositories on your clients
-# Be aware that, at this level, theses repositories will be exported on all hosts without
-# any architecture or distribution check.
-
-#external_repositories:
-#  - name: epel
-#    baseurl: 'https://dl.fedoraproject.org/pub/epel/$releasever/$basearch/'
-#    proxy: 'https://proxy:8080'
-
