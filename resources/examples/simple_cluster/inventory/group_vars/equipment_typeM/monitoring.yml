@@ -1,0 +1,25 @@
+monitoring:
+
+  exporters:
+    node_exporter:
+      package: node_exporter
+      service: node_exporter
+      port: 9100
+    ha_cluster_exporter:
+      package: ha_cluster_exporter
+      service: ha_cluster_exporter     
+      port: 9664
+    sequana_2_exporter:
+      package: sequana_2_exporter
+      service: sequana_2_exporter
+      scrape_interval: 10m
+      scrape_timeout: 4m
+      port: 9765
+    slurm_exporter:
+      package: slurm_exporter
+      service: slurm_exporter
+      port: 9817
+
+  # Define alerts related to selected exporters
+  alerts:
+    Exporter_down:
