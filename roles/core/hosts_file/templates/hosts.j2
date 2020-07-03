@@ -20,7 +20,7 @@
 {% if hostvars[host]['bmc'] is defined %}
 {% set bmc_args = hostvars[host]['bmc'] %}
 {% if (bmc_args.name is defined and not none) and (bmc_args.ip4 is defined and not none) %}
-{{bmc_args.ip4}} {{bmc_args.name}}
+{{bmc_args.ip4}} {{bmc_args.name}}{% if hostvars[host]['bmc']['alias'] is defined %}{% for alias in hostvars[host]['bmc']['alias'] %} {{alias}}{% endfor %}{% endif %}
 {% endif %}
 {% endif %}
 {% endif %}
