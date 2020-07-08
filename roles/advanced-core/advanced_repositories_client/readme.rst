@@ -1,10 +1,10 @@
-Repositories client
--------------------
+Advanced Repositories client
+----------------------------
 
 Description
 ^^^^^^^^^^^
 
-This role simply configure repositories for client hosts.
+This role configure repositories for client hosts.
 
 Instructions
 ^^^^^^^^^^^^

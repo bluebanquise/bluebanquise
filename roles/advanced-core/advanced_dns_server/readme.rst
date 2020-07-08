@@ -1,10 +1,10 @@
-DNS server
-----------
+Advanced DNS server
+-------------------
 
 Description
 ^^^^^^^^^^^
 
-This role provides a basic dns server based on bind.
+This role provides an advanced dns server based on bind.
 
 Instructions
 ^^^^^^^^^^^^
