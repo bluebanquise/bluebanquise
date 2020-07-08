@@ -1,0 +1,16 @@
+---
+- name: set_fact ░ Set static baseurl prefix
+  set_fact:
+    baseurl_prefix: "http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/{{ equipment_profile['operating_system']['distribution'] }}/{{ equipment_profile['operating_system']['repositories_releasever'] | default(equipment_profile['operating_system']['distribution_version']) }}/{{ equipment_profile['hardware']['cpu']['architecture'] }}/"
+
+- name: yum_repository █ Setting repositories
+  yum_repository:
+    name: "{{ item.name | default(item) }}"
+    description: "{{ item.name | default(item) }} gen by Ansible"
+    baseurl: "{{ item.baseurl | default(baseurl_prefix + item.name | default(item)) }}"
+    enabled: "{{ item.enabled | default(1) }}"
+    gpgcheck: "{{ item.gpgcheck | default(0) }}"
+    gpgkey: "{{ item.gpgkey | default(omit) }}"
+    proxy: "{{ item.proxy | default(omit) }}"
+  with_items: "{{ repositories | union(external_repositories|default([])) }}"
+

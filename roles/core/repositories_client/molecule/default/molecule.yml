@@ -1,0 +1,52 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: docker
+platforms:
+  - name: instance-${INSTANCE_DISTRO:-centos8}
+    image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
+    override_command: false
+    capabilities:
+      - "SYS_ADMIN"
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    pre_build_image: true
+provisioner:
+  name: ansible
+  inventory:
+    host_vars:
+      instance-centos7: # platform.name
+        j2_node_main_network: "ice1-1"
+        equipment_profile:
+          operating_system:
+            distribution: centos
+            distribution_major_version: 7
+            distribution_version: 7.7
+          hardware:
+            cpu:
+              architecture: x86_64
+      instance-centos8: # platform.name
+        j2_node_main_network: "ice1-1"
+        equipment_profile:
+          operating_system:
+            distribution: centos
+            distribution_major_version: 8
+            distribution_version: 8.1
+          hardware:
+            cpu:
+              architecture: aarch64
+    group_vars:
+      all:
+        networks:
+          ice1-1:
+            services_ip:
+              repository_ip: "10.10.0.1"
+        repositories:
+          - bluebanquise
+          - os
+        external_repositories:
+          - fakerepo
+verifier:
+  name: ansible

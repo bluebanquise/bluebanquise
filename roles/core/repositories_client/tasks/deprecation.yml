@@ -1,0 +1,10 @@
+---
+- name: fail ░ Deprecate external_repositories - Warning
+  fail:
+    msg: "Variable `external_repositories` is deprecated and will be
+ removed in a future release. Update your inventory to use `repositories`
+ instead."
+  when: external_repositories is defined
+  ignore_errors: yes
+  tags:
+    - internal
