@@ -2,12 +2,34 @@
 
 - name: Package
   package:
-    name: "{{ item }}"
+    name: "{{ packages }}"
     state: present
-  with_items:
+  vars:
+    packages:
     - prometheus
+    - grafana
     - alertmanager
     - ipmi_exporter
+    - freeipmi
+    - snmp_exporter
+    - karma
+
+#for generator of oid walk for snmp_exporter     
+- name: Package
+  package:
+    name: "{{ item }}"
+    state: present
+  vars:
+    packages:
+    - gcc
+    - make
+    - net-snmp
+    - net-snmp-utils
+    - net-snmp-libs
+    - net-snmp-devel
+  when:
+    - monitoring.exporters.snmp_exporter.with_generator is defined      
+    - monitoring.exporters.snmp_exporter.with_generator
 
 - name: Create directories structure
   file:
@@ -16,7 +38,7 @@
    mode: 0750
    owner: prometheus
    group: prometheus
-  with_items:
+  loop:
    - /etc/prometheus/alerts/
    - /var/lib/prometheus
 
@@ -38,22 +60,6 @@
     group: prometheus
     mode: 0640
 
-- name: Template >> /etc/prometheus/alerts/bb_exporter.yml
-  template:
-    src: alerts/bb_exporter.yml.j2
-    dest: /etc/prometheus/alerts/bb_exporter.yml
-    owner: prometheus
-    group: prometheus
-    mode: 0640
-
-#- name: Template >> /etc/prometheus/alerts/general.yml
-#  copy:
-#    src: alerts_general.yml
-#    dest: /etc/prometheus/alerts/general.yml
-#    owner: prometheus
-#    group: prometheus
-#    mode: 0640
-
 - name: Create directories structure for alertmanager
   file:
    path: "{{ item }}"
@@ -61,7 +67,7 @@
    mode: 0750
    owner: alertmanager
    group: alertmanager
-  with_items:
+  loop:
    - /etc/alertmanager
 
 - name: Template >> /etc/alertmanager/alertmanager.yml
@@ -78,8 +84,8 @@
   template:
     src: ipmi_config.yml.j2
     dest: /etc/ipmi_exporter/ipmi_config.yml
-    owner: ipmiexporter
-    group: ipmiexporter
+    owner: ipmi_exporter
+    group: ipmi_exporter
     mode: 0640
   tags:
     - template
@@ -88,10 +94,11 @@
   service:
     name: "{{ item }}"
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
-  with_items:
+  loop:
     - prometheus
     - alertmanager
     - ipmi_exporter
+    - snmp_exporter
   tags:
     - service
 
@@ -99,10 +106,11 @@
   service:
     name: "{{ item }}"
     state: started
-  with_items:
+  loop:
     - prometheus
     - alertmanager
     - ipmi_exporter
+    - snmp_exporter    
   when: (start_services | bool)
   tags:
     - service

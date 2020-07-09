@@ -1,3 +1,4 @@
+#jinja2: lstrip_blocks: "True"
 #### Blue Banquise file ####
 ## {{ansible_managed}}
 
@@ -22,35 +23,68 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:9090']
 
-  # All equipment profiles and their exporters
+
+# GENERIC EXPORTER
+# All equipment profiles and their exporters
 {% for equipment in j2_equipment_groups_list %}
-{% if hostvars[groups[equipment][0]]['monitoring'] is defined and hostvars[groups[equipment][0]]['monitoring'] is not none and hostvars[groups[equipment][0]]['monitoring']['exporters'] is defined and hostvars[groups[equipment][0]]['monitoring']['exporters'] is not none and hostvars[groups[equipment][0]]['monitoring']['exporters'] is iterable %}
-{% for exporter, exporter_vars in hostvars[groups[equipment][0]]['monitoring']['exporters'].items() %}
-  - job_name: '{{equipment}}_{{exporter}}'
+  {% if hostvars[groups[equipment][0]]['monitoring'] is defined and hostvars[groups[equipment][0]]['monitoring'] is not none and hostvars[groups[equipment][0]]['monitoring']['exporters'] is defined and hostvars[groups[equipment][0]]['monitoring']['exporters'] is not none and hostvars[groups[equipment][0]]['monitoring']['exporters'] is iterable %}
+    {% for exporter, exporter_vars in hostvars[groups[equipment][0]]['monitoring']['exporters'].items() %}
+      {% if exporter != "ipmi_exporter" and exporter != "snmp_exporter" %}
+  - job_name: '{{ equipment }}_{{ exporter }}'
+    scrape_interval: {{ exporter_vars.scrape_interval | default('') }}
+    scrape_timeout: {{ exporter_vars.scrape_timeout | default('') }}
     static_configs:
-{% for node in groups[equipment] %}
-      - targets: ['{{node}}:{{exporter_vars.port}}']
+        {% for node in groups[equipment] %}
+      - targets: ['{{ node }}:{{ exporter_vars.port }}']
+        {% endfor %}
+      {% endif %}
+    {% endfor %}
+  {% endif %}
 {% endfor %}
 
-{% endfor %}
-{% endif %}
-{% endfor %}
 
-  # All BMC
+# SNMP_EXPORTER
 {% for equipment in j2_equipment_groups_list %}
+  {% if hostvars[groups[equipment][0]]['monitoring'] is defined and hostvars[groups[equipment][0]]['monitoring'] is not none and hostvars[groups[equipment][0]]['monitoring']['exporters'] is defined and hostvars[groups[equipment][0]]['monitoring']['exporters'] is not none and hostvars[groups[equipment][0]]['monitoring']['exporters'] is iterable and "snmp_exporter" in hostvars[groups[equipment][0]]['monitoring']['exporters'] %}
+  - job_name: 'snmp_{{equipment}}'
+    scrape_interval: {{ hostvars[groups[equipment][0]]['monitoring']['exporters']['snmp_exporter']['scrape_interval'] | default('') }}
+    scrape_timeout: {{ hostvars[groups[equipment][0]]['monitoring']['exporters']['snmp_exporter']['scrape_timeout'] | default('') }}
+    static_configs:
+     - targets:
+    {% for node in groups[equipment] %}
+       - {{ node }}
+    {% endfor %}
+
+    metrics_path: /snmp
+    # params:
+     # module: [if_mib]
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: localhost:{{ hostvars[groups[equipment][0]]['monitoring']['exporters']['snmp_exporter']['port'] | default('9116') }}
+  {% endif %}
+{% endfor %}
+
+
+# BMC - IPMI_EXPORTER
+{% for equipment in j2_equipment_groups_list %}
+  {% if hostvars[groups[equipment][0]]['monitoring'] is defined and hostvars[groups[equipment][0]]['monitoring'] is not none and hostvars[groups[equipment][0]]['monitoring']['exporters'] is defined and hostvars[groups[equipment][0]]['monitoring']['exporters'] is not none and hostvars[groups[equipment][0]]['monitoring']['exporters'] is iterable and "ipmi_exporter" in hostvars[groups[equipment][0]]['monitoring']['exporters'] %}
   - job_name: ipmi_{{equipment}}
     params:
       module: [{{equipment}}]
-#    scrape_interval: 30s
-    scrape_timeout: 30s
+    scrape_interval: {{ hostvars[groups[equipment][0]]['monitoring']['exporters']['ipmi_exporter']['scrape_interval'] | default('') }}
+    scrape_timeout: {{ hostvars[groups[equipment][0]]['monitoring']['exporters']['ipmi_exporter']['scrape_timeout'] | default('') }}
     metrics_path: /ipmi
     scheme: http
     static_configs:
-{% for node in groups[equipment] %}
-{% if hostvars[node]['bmc'] is defined and not none %}
+    {% for node in groups[equipment] %}
+      {% if hostvars[node]['bmc'] is defined and not none %}
       - targets: ['{{hostvars[node]['bmc']['name']}}']
-{% endif %}
-{% endfor %}
+      {% endif %}
+    {% endfor %}
     relabel_configs:
     - source_labels: [__address__]
       separator: ;
@@ -67,6 +101,7 @@ scrape_configs:
     - separator: ;
       regex: .*
       target_label: __address__
-      replacement: localhost:9290  ## IPMI exporter is considered on the same host for know
+      replacement: localhost:{{ hostvars[groups[equipment][0]]['monitoring']['exporters']['ipmi_exporter']['port'] | default('9290') }}
       action: replace
+  {% endif %}
 {% endfor %}
