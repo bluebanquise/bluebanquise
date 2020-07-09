@@ -17,7 +17,8 @@
 
  # For option 82
  stash-agent-options true;
-
+ ignore-client-uids {{ dhcp_settings.ignore_client_uids | default('false') }}; 
+ 
  # Default iPXE files
  # DHCP option 93 Client architecture
  # 0  Standard PC BIOS
