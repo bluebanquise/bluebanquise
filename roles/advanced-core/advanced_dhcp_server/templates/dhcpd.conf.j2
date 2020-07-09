@@ -17,7 +17,7 @@
 
  # For option 82
  stash-agent-options true;
- ignore-client-uids on;
+ ignore-client-uids {{ dhcp_settings.ignore-client-uids | default('false') }};
  
  # Default iPXE files
  # DHCP option 93 Client architecture
