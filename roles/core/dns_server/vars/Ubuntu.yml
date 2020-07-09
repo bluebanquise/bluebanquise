@@ -1,0 +1,5 @@
+---
+dns_server_packages_to_install:
+  - bind9
+dns_server_services_to_start:
+  - bind9

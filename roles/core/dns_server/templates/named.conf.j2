@@ -1,0 +1,80 @@
+#jinja2: lstrip_blocks: True
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+
+options {
+  listen-on port 53 {
+    127.0.0.1;
+{% for network in j2_management_networks %}
+  {% if networks[network]['is_in_dns'] is defined and networks[network]['is_in_dns'] == true %}
+    {% if networks[network]['services_ip']['dns_ip'] is defined and networks[network]['services_ip']['dns_ip'] is not none %}
+    {{networks[network]['services_ip']['dns_ip']}};
+    {% endif %}
+  {% endif %}
+{% endfor %}
+  };
+
+  listen-on-v6 port 53 { ::1; };
+  directory 	"/var/named";
+  dump-file 	"/var/named/data/cache_dump.db";
+  statistics-file "/var/named/data/named_stats.txt";
+  memstatistics-file "/var/named/data/named_mem_stats.txt";
+
+  allow-query {
+    localhost;
+{% for network in j2_management_networks %}
+  {% if networks[network]['is_in_dns'] is defined and networks[network]['is_in_dns'] == true %}
+    {{ networks[network]['subnet'] }}/{{ networks[network]['prefix'] }};
+  {% endif %}
+{% endfor %}
+  };
+
+{% if external_dns.dns_server is defined and external_dns.dns_server %}
+  forwarders {
+  {% for forwarder in external_dns.dns_server %}
+    {{ forwarder }};
+  {% endfor %}
+  };
+{% else %}
+  recursion no;
+{% endif %}
+
+  dnssec-enable yes;
+  dnssec-validation yes;
+  dnssec-lookaside auto;
+
+  /* Path to ISC DLV key */
+  bindkeys-file "/etc/named.iscdlv.key";
+
+  managed-keys-directory "/var/named/dynamic";
+
+  pid-file "/run/named/named.pid";
+  session-keyfile "/run/named/session.key";
+};
+
+logging {
+  channel default_debug {
+    file "data/named.run";
+    severity dynamic;
+  };
+};
+
+zone "." IN {
+  type hint;
+  file "named.ca";
+};
+
+zone "{{ domain_name }}" IN {
+  type master;
+  file "forward";
+  allow-update { none; };
+};
+
+zone "in-addr.arpa" IN {
+  type master;
+  file "reverse";
+  allow-update { none; };
+};
+
+include "/etc/named.rfc1912.zones";
+include "/etc/named.root.key";
