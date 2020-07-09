@@ -44,6 +44,39 @@ Available advanced variables are:
 * gpgkey
 * proxy
 
+Repository final path is computed using variables defined in the equipment_profile.
+
+.. code-block:: yaml
+
+  operating_system:
+    distribution: centos # centos, redhat, debian, ubuntu, opensuse, etc.
+    distribution_major_version: 8
+    # Define a minor distribution version to use for pxe_stack
+    #distribution_version: 8.0
+    # Overwrite the default $releasever on the target
+    #repositories_releasever: 8.0
+    # Add the $environment in the repositories path (eg. production, staging)
+    #repositories_environment: production
+
+If equipment_profile is:
+
+  operating_system:
+    distribution: centos # centos, redhat, debian, ubuntu, opensuse, etc.
+    distribution_major_version: 8
+
+Then path will be: repositories/centos/$releasever/$basearch/ with 
+$releasever = 8
+
+If equipment_profile is:
+
+  operating_system:
+    distribution: centos # centos, redhat, debian, ubuntu, opensuse, etc.
+    distribution_major_version: 8
+    repositories_releasever: 8.1
+
+Then path will be: repositories/centos/$releasever/$basearch/ with
+$releasever = 8.1
+
 CentOS
 """"""
 

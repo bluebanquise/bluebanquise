@@ -18,8 +18,21 @@ include the installer system which starts the deployment after PXE boot, while
 packages repositories include the software that will be installed on the
 systems.
 
-Boot images repositories structure follows a specific pattern and includes the
-minor release version in the path:
+Boot images repositories structure follows a specific pattern and includes 
+possibility for major or minor release version in the path, with major as 
+default:
+
+.. code-block:: bash
+
+                  Distribution    Version   Architecture    Repository
+                        +             +       +               +
+                        |             +--+    |               |
+                        +-----------+    |    |    +----------+
+                                    |    |    |    |
+                                    v    v    v    v
+       /var/www/html/repositories/centos/7/x86_64/os/
+
+Or:
 
 .. code-block:: bash
 
@@ -31,18 +44,10 @@ minor release version in the path:
                                     v    v    v    v
        /var/www/html/repositories/centos/7.6/x86_64/os/
 
-Packages repositories structure follows a specific pattern, which defaults to
-the major release version in the path:
 
-.. code-block:: bash
-
-                  Distribution    Version   Architecture    Repository
-                        +             +       +               +
-                        |             +--+    |               |
-                        +-----------+    |    |    +----------+
-                                    |    |    |    |
-                                    v    v    v    v
-       /var/www/html/repositories/centos/7/x86_64/os/
+Packages repositories structure follows a specific pattern and includes
+possibility for major or minor release version in the path, with major as 
+default.
 
 System administrator should create these directories manually, and put boot
 images and packages inside.
