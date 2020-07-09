@@ -8,6 +8,9 @@
     - prometheus
     - alertmanager
     - ipmi_exporter
+    - freeipmi
+  tags:
+    - package   
 
 - name: Create directories structure
   file:
@@ -78,8 +81,8 @@
   template:
     src: ipmi_config.yml.j2
     dest: /etc/ipmi_exporter/ipmi_config.yml
-    owner: ipmiexporter
-    group: ipmiexporter
+    owner: ipmi_exporter
+    group: ipmi_exporter
     mode: 0640
   tags:
     - template
