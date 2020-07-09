@@ -1,7 +1,7 @@
 ---
 - name: set_fact ░ Set static baseurl prefix
   set_fact:
-    baseurl_prefix: "http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/{{ equipment_profile['operating_system']['distribution'] }}/{{ equipment_profile['operating_system']['repositories_releasever'] | default(equipment_profile['operating_system']['distribution_version']) }}/{{ equipment_profile['hardware']['cpu']['architecture'] }}/"
+    baseurl_prefix: "http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/{{ equipment_profile['operating_system']['distribution'] }}/{{ equipment_profile['operating_system']['repositories_releasever'] | default(equipment_profile['operating_system']['distribution_major_version']) }}/{{ equipment_profile['hardware']['cpu']['architecture'] }}/"
 
 - name: yum_repository █ Setting non OS repositories
   yum_repository:
