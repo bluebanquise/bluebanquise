@@ -12,6 +12,8 @@ monitoring:
     slurm_exporter:
       package: slurm_exporter
       service: slurm_exporter
+      scrape_interval: 5m
+      scrape_timeout: 5m
       port: 9817
 
   # Define alerts related to selected exporters
