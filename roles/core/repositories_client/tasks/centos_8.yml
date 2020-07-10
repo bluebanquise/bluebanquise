@@ -12,6 +12,7 @@
     gpgcheck: "{{ item.gpgcheck | default(0) }}"
     gpgkey: "{{ item.gpgkey | default(omit) }}"
     proxy: "{{ item.proxy | default(omit) }}"
+    exclude: "{{ item.exclude | default(omit) }}"
   with_items: "{{ repositories | union(external_repositories|default([])) }}"
   when: ( item != 'os' ) and ( item.name is not defined or item.name != 'os' )
 
@@ -24,6 +25,7 @@
     gpgcheck: "{{ item.0.gpgcheck | default(0) }}"
     gpgkey: "{{ item.0.gpgkey | default(omit) }}"
     proxy: "{{ item.0.proxy | default(omit) }}"
+    exclude: "{{ item.exclude | default(omit) }}"
   loop: "{{ repositories | product(['AppStream', 'BaseOS']) | list }}"
   when: ( item.0 == 'os' ) or ( item.0.name is defined and item.0.name == 'os' )
 
