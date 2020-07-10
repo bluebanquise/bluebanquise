@@ -9,7 +9,7 @@ modules:
     user: {{hostvars[groups[equipment][0]]['equipment_profile']['equipment_authentication']['user']}}
     pass: {{hostvars[groups[equipment][0]]['equipment_profile']['equipment_authentication']['password']}}
     driver: "LAN_2_0"
-    privilege: "user"
+    privilege: "admin"
     timeout: 10000
     collectors:
     - bmc
