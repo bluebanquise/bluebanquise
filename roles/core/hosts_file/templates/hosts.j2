@@ -45,7 +45,9 @@
 
 ## Internal hosts
 
-{% for host in range %}{{write_host(host)}}{% endfor %}
+{% for host in range %}
+{{ write_host(host) }}
+{% endfor %}
 
 ## External hosts
 
