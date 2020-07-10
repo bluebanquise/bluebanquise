@@ -12,5 +12,6 @@
     gpgcheck: "{{ item.gpgcheck | default(0) }}"
     gpgkey: "{{ item.gpgkey | default(omit) }}"
     proxy: "{{ item.proxy | default(omit) }}"
+    exclude: "{{ item.exclude | default(omit) }}"
   with_items: "{{ repositories | union(external_repositories|default([])) }}"
 
