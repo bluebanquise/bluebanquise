@@ -76,10 +76,41 @@
 
 ## Internal hosts
 
+{% if direct_access is not defined %}
+{# -- Standard method. Rely on hostvars. -- #}
+
 {% set current_iceberg = j2_current_iceberg %}
 {% for host in range %}
 {{ write_host(host,hostvars[host],current_iceberg) }}
 {% endfor %}
+
+{% else %}
+{# -- Direct access method. Rely on direct_access content. -- #}
+
+  {% for mg, mg_vars in direct_access.items() %}
+    {% for eqg, eqg_vars in mg_vars.children.items() %}
+      {% for host, host_vars in eqg_vars.hosts.items() %}
+        {% if host in range %}
+          {# Get host iceberg, from groups #}
+          {% set host_icb = (macro_groups.node_current_iceberg(host)|trim) %}
+          {# Check if user forced main network. #}
+          {% if host_vars.j2_node_main_network is defined %}
+            {% set host_node_main_network = host_vars.j2_node_main_network %}
+            {% set host_node_main_network_interface = (macro_network.node_main_network_interface(host_vars.network_interfaces,host_node_main_network) | trim) %}
+          {% elif host_vars.j2_node_main_network_interface is defined %}
+            {% set host_node_main_network_interface = host_vars.j2_node_main_network_interface %}
+          {% else %}
+            {% set host_icb_net = (management_networks_naming + (host_icb | replace(iceberg_naming,' ') | trim | string)) %}
+            {% set host_node_main_network = (macro_network.node_main_network(host_vars.network_interfaces,host_icb_net) | trim) %}
+            {% set host_node_main_network_interface = (macro_network.node_main_network_interface(host_vars.network_interfaces,host_node_main_network) | trim) %}
+          {% endif %}
+{{ write_host(host,host_vars,host_node_main_network_interface,host_icb) }}
+        {% endif %}
+      {% endfor %}
+    {% endfor %}
+  {% endfor %}
+
+{% endif %}
 
 ## External hosts
 

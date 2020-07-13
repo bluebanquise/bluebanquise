@@ -1,5 +1,5 @@
 ---
-- name: "template █ Generate /etc/hosts"
+- name: "template █ Generate /etc/hosts {% if direct_access is defined %}with direct_access enabled{% endif %}"
   template:
     src: hosts.j2
     dest: /etc/hosts
