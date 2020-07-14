@@ -60,6 +60,7 @@ def select_from_list(list_from, list_name, index_modifier):
     return selected_item
 
 
+{% raw %}
 def generate_ipxe_boot_file(image_type, image_name, image_kernel, image_initramfs):
     if image_type == 'nfs_staging':
         boot_file_content = '''#!ipxe
@@ -168,6 +169,7 @@ boot
 '''.format(image_name=image_name, image_kernel=image_kernel, image_initramfs=image_initramfs)
         return boot_file_content
 
+{% endraw %}
 
 # Get arguments passed
 parser = ArgumentParser()
@@ -251,8 +253,9 @@ elif main_action == '3':
 
             print(bcolors.OKBLUE+'[INFO] Cleaning and creating image folders.'+bcolors.ENDC)
             os.system('rm -Rf /diskless/images/'+selected_image_name)
-            os.system('mkdir /diskless/images/'+selected_image_name)
-            os.system('mkdir /diskless/images/'+selected_image_name+'/staging')
+            os.system('mkdir -p /diskless/images/'+selected_image_name+'/staging/etc/dnf/vars')
+            with open('/diskless/images/'+selected_image_name+'/staging/etc/dnf/vars/environment', "w") as ff:
+                ff.write({{ equipment_profile.operating_system.repositories_environment | default('""') }})
             os.system('rm -Rf /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
             os.system('mkdir /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
             print(bcolors.OKBLUE+'[INFO] Generating new ipxe boot file.'+bcolors.ENDC)
@@ -260,7 +263,8 @@ elif main_action == '3':
             with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/boot.ipxe', "w") as ff:
                 ff.write(boot_file_content)
             print(bcolors.OKBLUE+'[INFO] Installing new system image... May take some time.'+bcolors.ENDC)
-            os.system('dnf groupinstall -y "core" --setopt=module_platform_id=platform:el8 --installroot=/diskless/images/'+selected_image_name+'/staging')
+            os.system('dnf groupinstall -y "core" --releasever={{ equipment_profile.operating_system.repositories_releasever | default('/') }} \
+                --setopt=module_platform_id=platform:el8 --installroot=/diskless/images/'+selected_image_name+'/staging')
             print(bcolors.OKBLUE+'[INFO] Setting password into image.'+bcolors.ENDC)
             with open('/diskless/images/'+selected_image_name+'/staging/etc/shadow') as ff:
                 newText = ff.read().replace('root:*', 'root:'+password_hash)
@@ -320,14 +324,17 @@ elif main_action == '3':
 #            os.system('rm -Rf '+dnf_cache_directory+'/dnfcache')
 #            os.system('mkdir -p '+dnf_cache_directory+'/dnfcache')
 #            os.system('ln -s '+dnf_cache_directory+'/dnfcache/ /mnt/var/cache/dnf')
+            os.system('mkdir -p /mnt/etc/dnf/vars')
+            with open('/mnt/etc/dnf/vars/environment', "w") as ff:
+                ff.write({{ equipment_profile.operating_system.repositories_environment | default('""') }})
             print(bcolors.OKBLUE+'[INFO] Installing system into image.'+bcolors.ENDC)
             if selected_livenet_type == '3':
-                os.system('dnf install -y iproute procps-ng openssh-server  --installroot=/mnt/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
+                os.system('dnf install -y iproute procps-ng openssh-server --releasever={{ equipment_profile.operating_system.repositories_releasever | default('/') }} --installroot=/mnt/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
             elif selected_livenet_type == '2':
-                os.system('dnf install -y iproute procps-ng openssh-server NetworkManager  --installroot=/mnt/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
-                os.system('dnf install -y dnf  --installroot=/mnt/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
+                os.system('dnf install -y iproute procps-ng openssh-server NetworkManager --releasever={{ equipment_profile.operating_system.repositories_releasever | default('/') }} --installroot=/mnt/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
+                os.system('dnf install -y dnf --releasever={{ equipment_profile.operating_system.repositories_releasever | default('/') }} --installroot=/mnt/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
             elif selected_livenet_type == '1':
-                os.system('dnf groupinstall -y "core"  --setopt=module_platform_id=platform:el8 --installroot=/mnt')
+                os.system('dnf groupinstall -y "core" --releasever={{ equipment_profile.operating_system.repositories_releasever | default('/') }} --setopt=module_platform_id=platform:el8 --installroot=/mnt')
             print(bcolors.OKBLUE+'[INFO] Setting password into image.'+bcolors.ENDC)
             with open('/mnt/etc/shadow') as ff:
                 newText = ff.read().replace('root:*', 'root:'+password_hash)

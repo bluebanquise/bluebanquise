@@ -20,8 +20,8 @@
       skip: true
 
 - name: disklessset tool
-  copy:
-    src: disklessset.py
+  template:
+    src: disklessset.py.j2
     dest: /usr/bin/disklessset
     mode: 0700
 
