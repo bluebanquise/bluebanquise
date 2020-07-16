@@ -1,7 +1,6 @@
 #### Blue Banquise file ####
 ## {{ ansible_managed }}
 
-
 ##### General settings
 
 # Do not use GUI
@@ -43,8 +42,10 @@ network --hostname=localhost.localdomain
 ##### Security
 
 # SELinux
-{% if hostvars[groups[item][0]]['equipment_profile']['access_control'] is defined and hostvars[groups[item][0]]['equipment_profile']['access_control'] == true %}
+{% if hostvars[groups[item][0]]['equipment_profile']['access_control'] is defined and hostvars[groups[item][0]]['equipment_profile']['access_control'] == enforcing %}
 selinux --enforcing
+{% if hostvars[groups[item][0]]['equipment_profile']['access_control'] is defined and hostvars[groups[item][0]]['equipment_profile']['access_control'] == permissive %}
+selinux --permissive
 {% else %}
 selinux --disabled
 {% endif %}

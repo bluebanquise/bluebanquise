@@ -14,7 +14,7 @@ set eq-distribution-major-version {{ hostvars[groups[item][0]]['equipment_profil
 set eq-distribution-version {{ hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution_version'] | default('${eq-distribution-major-version}') }}
 set eq-console {{ hostvars[groups[item][0]]['equipment_profile']['console'] }}
 set eq-kernel-parameters {{ hostvars[groups[item][0]]['equipment_profile']['kernel_parameters'] }}
-set eq-repositories-releasever {{ hostvars[groups[item][0]]['equipment_profile']['operating_system']['repositories_releasever'] | default('${eq-distribution-major-version}') }}
+set eq-repositories-releasever {{ hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution_version'] | default('${eq-distribution-major-version}') }}
 set eq-repositories-environment {{ hostvars[groups[item][0]]['equipment_profile']['operating_system']['repositories_environment'] | default('') }}
 
 # Dynamic variables
@@ -22,6 +22,9 @@ set images-root http://${next-server}/repositories/${eq-repositories-environment
 set repository-root http://${next-server}/repositories/${eq-repositories-environment}/${eq-distribution}/${eq-repositories-releasever}/${eq-architecture}/
 set kickstart-path http://${next-server}/preboot_execution_environment/equipment_profiles//${eq-equipment-profile}.kickstart.cfg
 
+echo | images-root: ${images-root}
+echo | repository-root: ${repository-root}
+echo | kickstart-path: ${kickstart-path}
 echo |
 
 # Now chain to menu
