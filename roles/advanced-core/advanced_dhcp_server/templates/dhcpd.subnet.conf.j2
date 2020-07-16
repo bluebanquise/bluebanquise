@@ -63,7 +63,7 @@
     fixed-address {{nic.ip4}};
     filename "{{ipxe_rom_filename}}";
   }
-        {% elif nic.match is defined and not none %}{# Warning, only works in a shared network!! #}
+        {% elif nic.match is defined %}{# Warning, only works in a shared network!! #}
   class "option_match_{{host}}" {
     match if (
       {{nic.match}}
