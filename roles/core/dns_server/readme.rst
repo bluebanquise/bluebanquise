@@ -94,9 +94,5 @@ Files generated:
 Changelog
 ^^^^^^^^^
 
-* 1.1.2: Simplify main role for core. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.1.1: Clean. johnnykeats <johnny.keats@outlook.com>
-* 1.1.0: Added DNS slaves support. Bruno Travouillon <devel@travouillon.fr>
-* 1.0.2: Added Ubuntu 18.04 compatibility. johnnykeats <johnny.keats@outlook.com>
-* 1.0.1: Documentation. johnnykeats <johnny.keats@outlook.com>
+* 1.0.1: Added SOA. Bruno Travouillon <devel@travouillon.fr>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
