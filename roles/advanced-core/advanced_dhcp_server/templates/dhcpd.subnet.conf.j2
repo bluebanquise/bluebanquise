@@ -40,8 +40,8 @@
     {% endif -%}
 
     {%- for nic in hostvars[host]['network_interfaces'] %}
-      {% if (nic.network is defined and not none) and (nic.network == item) and (nic.ip4 is defined and not none) %}
-        {% if nic.mac is defined and not none %}
+      {% if (nic.network is defined and nic.network == item) and nic.ip4 is defined %}
+        {% if nic.mac is defined %}
 
   host {{host}}-{{item}} { 
     option host-name "{{host}}";
