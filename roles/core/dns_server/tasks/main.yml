@@ -42,37 +42,6 @@
   tags:
     - package
 
-# Master DNS is the dns_ip of primary management network
-# (management_networks_naming + '1-1')
-- name: set_fact ░ Set master DNS server - Get DNS IP
-  set_fact:
-    dns_master: "{{ networks[management_networks_naming+'1-1'].services_ip.dns_ip }}"
-  when:
-    - "dns_master is not defined"
-    - "networks[j2_node_main_network].services_ip.dns_ip is defined"
-  tags:
-    - internal
-
-- name: assert ░ Assert dns_master is defined
-  assert:
-    that:
-      - dns_master is defined
-    fail_msg: "'dns_master' must be defined. Please ensure that either 'dns_master' or
-              networks[{{ management_networks_naming }}1-1].services_ip.dns_ip is
-              defined and contains a valid IP address."
-  tags:
-    - internal
-
-# If dns_ip is a list, pick the first value as master DNS
-- name: set_fact ░ Set master DNS server - Pick first element of dns_ip
-  set_fact:
-    dns_master: "{{ dns_master | first }}"
-  when:
-    - "dns_master is iterable"
-    - "dns_master is not string"
-  tags:
-    - internal
-
 - name: file █ Create needed directory /var/named
   file:
     path: /var/named
@@ -90,12 +59,59 @@
   tags:
     - template
 
-- name: include_tasks ░ Configure Master DNS
-  include_tasks: master.yml
-  when: "dns_master in (network_interfaces | map(attribute='ip4') | list)"
+- name: template █ Generate Forward zone file on Master DNS /var/named/forward
+  template:
+    src: forward.j2
+    dest: /var/named/forward
+    owner: root
+    group: root
+    mode: 0644
+  register: zoneconf
+  tags:
+    - template
+
+- name: set_fact ░ Set SOA Serial for reverse zone
+  set_fact:
+    serial: "{{ lookup('pipe', 'date +%s') }}"
+  when: zoneconf.changed  # noqa 503
   tags:
     - template
     - internal
+
+- name: template █ Generate SOA for forward zone file /var/named/forward.soa
+  template:
+    src: forward.soa.j2
+    dest: /var/named/forward.soa
+    owner: root
+    group: root
+    mode: 0644
+  notify: service █ Restart dns services
+  when: zoneconf.changed  # noqa 503
+  tags:
+    - template
+
+- name: template █ Generate Reverse zone file on Master DNS /var/named/reverse
+  template:
+    src: reverse.j2
+    dest: /var/named/reverse
+    owner: root
+    group: root
+    mode: 0644
+  register: zoneconf
+  tags:
+    - template
+
+- name: template █ Generate SOA for reverse zone file /var/named/reverse.soa
+  template:
+    src: reverse.soa.j2
+    dest: /var/named/reverse.soa
+    owner: root
+    group: root
+    mode: 0644
+  notify: service █ Restart dns services
+  when: zoneconf.changed  # noqa 503
+  tags:
+    - template
 
 - meta: flush_handlers
 

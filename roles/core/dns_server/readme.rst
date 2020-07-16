@@ -24,11 +24,13 @@ This DNS role will automatically add all networks of the cluster, assuming their
       services_ip:
         dns_ip: 10.11.0.1
 
-It will generate 3 files:
+It will generate 5 files:
 
 * /etc/named.conf that contains main configuration, and that will try to bind to all networks defined on the host it is deployed on, using **services_ip.dns_ip** variable ip of the network.
 * /var/named/forward that contains forward resolution of hosts
+* /var/named/forward.soa included by /var/named/forward
 * /var/named/reverse that contains reverse resolution of hosts
+* /var/named/reverse.soa included by /var/named/reverse
 
 To configure forwarding and integrate this dns server into an existing IT configuration, use file *group_vars/all/general_settings/external.yml*.
 It is possible to add here an external dns to bind to for this internal dns, as a relay.
@@ -38,7 +40,6 @@ It is possible to add here an external dns to bind to for this internal dns, as 
   external_dns:
     dns_server:  <<<<<<<<<<
       - 208.67.222.222
-
 
 Input
 ^^^^^
@@ -65,8 +66,6 @@ Optional inventory vars:
 
 **hostvars[inventory_hostname]**
 
-* dns_master
-* dns_slaves
 * external_dns.dns_server
 
 **hostvars[hosts]**
@@ -95,6 +94,7 @@ Files generated:
 Changelog
 ^^^^^^^^^
 
+* 1.1.2: Simplify main role for core. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.1: Clean. johnnykeats <johnny.keats@outlook.com>
 * 1.1.0: Added DNS slaves support. Bruno Travouillon <devel@travouillon.fr>
 * 1.0.2: Added Ubuntu 18.04 compatibility. johnnykeats <johnny.keats@outlook.com>

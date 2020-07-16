@@ -1,6 +1,7 @@
 ---
 dns_server_packages_to_install:
   - bind
+  - python-netaddr
 dns_server_services_to_start:
   - named
 dns_server_firewall_services_to_add:
