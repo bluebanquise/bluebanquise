@@ -1,5 +1,5 @@
 ---
-- name: Gathering OS specific variables
+- name: include_vars ░ Gather OS specific variables
   # This task gathers variables defined in OS specific files.
   #
   # Search vars in:
@@ -19,7 +19,7 @@
         - "vars/{{ ansible_facts.os_family }}.yml"
       skip: true
 
-- name: Package
+- name: "package █ Install {{ slurm_packages_to_install[slurm.slurm_packaging][slurm_profile] }}"
   package:
     name: "{{ item }}"
     state: present
@@ -27,7 +27,7 @@
 
 #### MUNGE
 
-- name: File >> /etc/munge/munge.key
+- name: copy █ Copy munge.key to /etc/munge/munge.key
   copy:
     src: munge.key
     dest: /etc/munge/munge.key
@@ -35,30 +35,23 @@
     group: munge
     mode: 0400
 
-- name: Enable/disable services >> munge
+- name: service █ Manage munge state
   service:
     name: munge
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
-  tags:
-    - service
-
-- name: Start services >> munge
-  service:
-    name: munge
-    state: started
-  when: (start_services | bool)
+    state: "{{ (start_services | bool) | ternary('started', omit) }}"
   tags:
     - service
 
 #### SLURM
 
-- name: Add group >> slurm
+- name: group █ Add slurm group
   group:
     name: slurm
     gid: 777
     state: present
 
-- name: Add user >> slurm
+- name: user █ Add slurm user
   user:
     name: slurm
     shell: /bin/false
@@ -67,7 +60,7 @@
     home: "{{ slurm_home_path }}"
     state: present
 
-- name: Template >> slurm.conf
+- name: template █ Generate /etc/slurm/slurm.conf
   template:
     src: slurm.conf.j2
     dest: "{{ slurm_home_path }}/slurm.conf"
@@ -77,7 +70,7 @@
   tags:
     - template
 
-- name: File >> /etc/slurm/cgroup.conf
+- name: copy █ Copy cgroup.conf to /etc/slurm/cgroup.conf
   copy:
     src: cgroup.conf
     dest: /etc/slurm/cgroup.conf
@@ -85,7 +78,7 @@
     group: root
     mode: 0644
 
-- name: Create directories
+- name: file █ Create needed directories
   file:
     path: "{{ item }}"
     state: directory
@@ -98,34 +91,21 @@
     - /var/spool/slurmd/StateSave
     - /var/spool/slurmd/slurmd
 
-- name: Disable slurmctld
+- name: service █ Manage slurmctld state
   service:
     name: slurmctld
-    enabled: no         # Dangerous to enable slurm controller...
-  when: slurm_profile == 'controller'
-
-- name: Start services
-  service:
-    name: slurmctld
-    state: started
-  when:
-    - (start_services | bool)
-    - slurm_profile == 'controller'
-
-- name: Enable/disable services
-  service:
-    name: slurmd
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
-  when: slurm_profile == 'node'
+    state: "{{ (start_services | bool) | ternary('started', omit) }}"
+  when:
+    - slurm_profile == 'controller'
   tags:
     - service
 
-- name: Start services
+- name: service █ Manage slurmd state
   service:
     name: slurmd
+    enabled: yes
     state: started
-  when:
-    - (start_services | bool)
-    - slurm_profile == 'node'
+  when: slurm_profile == 'node'
   tags:
     - service
