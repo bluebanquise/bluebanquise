@@ -18,7 +18,7 @@ Network interfaces configurations are done at host level:
 .. code-block:: yaml
 
   network_interfaces:
-    enp0s3:                    # Interface name on system
+    - name: enp0s3             # Interface name on system
       ip4: 10.11.0.1           # ip v4 to be set
       mac: 08:00:27:de:42:22   # MAC address of this NIC
       network: ice1-1          # Logical network connected to
@@ -28,7 +28,7 @@ By default, connections are of type ethernet. It is possible to specify connecti
 .. code-block:: yaml
 
   network_interfaces:
-    ib0:
+    - name: ib0
       ip4: 10.20.0.1
       network: interconnect-1
       type: infiniband
@@ -38,13 +38,13 @@ To configure an LACP bonding, specify slave interfaces, and then create the bond
 .. code-block:: yaml
 
   network_interfaces:
-    eth0:
+    - name: eth0
       type: bond-slave
       master: bond0
-    eth1:
+    - name: eth1
       type: bond-slave
       master: bond0
-    bond0:
+    - name: bond0
       type: bond
       vlan: false
       bond_options: "mode=4 xmit_hash_policy=layer3+4 miimon=100 lacp_rate=1"
@@ -56,7 +56,7 @@ To configure a vlan, simply set vlan to true:
 .. code-block:: yaml
 
   network_interfaces:
-    vlan100:
+    - name: vlan100
       vlan: true
       vlan_id: 100
       physical_device: eth2
@@ -68,32 +68,32 @@ A full example with vlan over bond would be:
 .. code-block:: yaml
 
   network_interfaces:
-    eth3:
+    - name: eth3
       network: lk1
       ip4: 172.16.0.2
-    bond0:
+    - name: bond0
       type: bond
       bond_options: "mode=4 xmit_hash_policy=layer3+4 miimon=100 lacp_rate=1"
       network: ice1-1
       ip4: 172.21.2.102
-    bond0.100:
+    - name: bond0.100
       type: vlan
       network: ice1-2
       ip4: 10.100.0.1
       vlan: true
       vlan_id: 100
       physical_device: bond0
-    bond0.1:
+    - name: bond0.1
       type: vlan
       network: ice1-3
       ip4: 10.1.0.1
       vlan: true
       vlan_id: 1
       physical_device: bond0
-    enp136s0f0:
+    - name: enp136s0f0
       type: bond-slave
       master: bond0
-    enp136s0f1:
+    - name: enp136s0f1
       type: bond-slave
       master: bond0
 
@@ -102,7 +102,7 @@ It is also possible to configure multiple ip per interface, using:
 .. code-block:: yaml
 
   network_interfaces:
-    eth3:
+    - name: eth3
       network: lk1
       ip4_multi:
         - 172.16.0.2/16
@@ -136,7 +136,7 @@ MTU and/or Gateway can be set in the network file, and will be applyed to NIC li
 To be done
 ^^^^^^^^^^
 
-Add Ubuntu and Opensuse compatiblity if asked for.
+Add Ubuntu and Opensuse compatibility if asked for.
 
 Changelog
 ^^^^^^^^^
