@@ -1,0 +1,5 @@
+---
+- name: selinux █ Set SELinux state
+  selinux:
+    policy: targeted
+    state: "{{ equipment_profile.access_control | default('enforcing')}}"
