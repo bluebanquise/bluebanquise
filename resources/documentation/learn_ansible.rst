@@ -1181,4 +1181,6 @@ Handler was activated.
 If you feel something is missing in this quick Ansible training, please do not
 hesitate to ask us to add elements.
 
-Time to move on to BlueBanquise stack itself.
+Time to move on to BlueBanquise stack itself. But before proceeding, a small
+section is dedicated to containers, and how to simply ask a playbook to execute
+its tasks inside a container.

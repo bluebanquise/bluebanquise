@@ -23,6 +23,7 @@ issues in this documentation.
    vocabulary
    install_first_management
    learn_ansible
+   containers
    configure_bluebanquise
    deploy_bluebanquise
    multiple_icebergs

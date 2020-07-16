@@ -26,11 +26,9 @@ equipment_profile:
   operating_system:
     distribution: centos # centos, redhat, debian, ubuntu, opensuse, etc.
     distribution_major_version: 8
-    # Define a minor distribution version to use for pxe_stack
+    # Optional: define a minor distribution version to force (repositories/PXE)
     #distribution_version: 8.0
-    # Overwrite the default $releasever on the target
-    #repositories_releasever: 8.0
-    # Add the $environment in the repositories path (eg. production, staging)
+    # Optional: add an environment in the repositories path (eg. production, staging) (repositories/PXE)
     #repositories_environment: production
 
   equipment_type: none  # If server, a pxe profile will be generated
@@ -51,4 +49,3 @@ equipment_profile:
   equipment_authentication: # login/password for BMC, storage bay controller, switch, etc.
     user: ADMIN
     password: ADMIN
-
