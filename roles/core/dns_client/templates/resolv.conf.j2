@@ -1,7 +1,7 @@
 #jinja2: lstrip_blocks: True
 #### Blue Banquise file ####
 ## {{ ansible_managed }}
-{% set nameservers = networks[j2_node_main_network]['services_ip']['dns_ip'] | ipaddr %}
+{% set nameservers = networks[j2_node_main_network]['services_ip']['dns_ip'] %}
 
 search {{ domain_name }}
 {% if nameservers is string %}
