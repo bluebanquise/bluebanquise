@@ -4,7 +4,7 @@
 {% if not (hostvars[host]['group_names'] | select('match','^'+equipment_naming+'_.*') | list ) %}
   <br><div id="warning">WARNING</div>: host {{host}} is not part of any equipment_profile. This may be on purpose.
 {% endif %}
-{% if not (hostvars[host]['group_names'] | select('match','^'+iceberg_naming+'[0-9]+') | list ) and icebergs_system == true %}
+{% if not (hostvars[host]['group_names'] | select('match','^'+iceberg_naming+'[a-zA-Z0-9]+') | list ) and icebergs_system == true %}
   <br><div id="warning">WARNING</div>: host {{host}} is not part of any iceberg. This may be on purpose.
 {% endif %}
 
@@ -47,5 +47,3 @@ Also check the main network exists and that all linked network exists #}
 {% endif %}
 
 {% endfor %}
-
-
