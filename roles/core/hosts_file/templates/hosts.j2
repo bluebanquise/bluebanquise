@@ -8,7 +8,7 @@
   {% if icebergs_system == false %}
 {{iceberg_naming+'1'}}
   {% else %}
-    {% for icb_group in ( groups | select('match','^'+iceberg_naming+'[0-9]+') | list | sort ) %}
+    {% for icb_group in ( groups | select('match','^'+iceberg_naming+'[a-zA-Z0-9]+') | list | sort ) %}
       {% if host in groups[icb_group] %}
 {{icb_group | trim}}
         {% break %}
