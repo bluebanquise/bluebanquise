@@ -59,7 +59,7 @@
         {% elif nic.host_identifier is defined %}
   host {{host}}-{{item}} {
     option host-name "{{host}}";
-    host_identifier {{nic.host-identifier}};
+    host_identifier {{nic.host_identifier}};
     fixed-address {{nic.ip4}};
     filename "{{ipxe_rom_filename}}";
   }
