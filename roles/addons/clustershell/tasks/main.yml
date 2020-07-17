@@ -1,4 +1,4 @@
-- name: package █ Install clustershell packages
+- name: package █ Install clustershell package
   package:
     name: clustershell
     state: present
