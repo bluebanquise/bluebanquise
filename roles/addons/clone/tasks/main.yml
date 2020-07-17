@@ -15,7 +15,7 @@
     path: /cloned_images
     state: directory
 
-- name: lineinfile █ Ensure cloned_images is exporter over nfs (/etc/exports)
+- name: lineinfile █ Ensure cloned_images is exported over nfs (/etc/exports)
   lineinfile:
     path: /etc/exports
     regexp: ' # export name: cloned_images$'
