@@ -21,9 +21,10 @@
 
 - name: "package █ Install {{ slurm_packages_to_install[slurm.slurm_packaging][slurm_profile] }}"
   package:
-    name: "{{ item }}"
+    name: "{{ slurm_packages_to_install[slurm.slurm_packaging][slurm_profile] }}"
     state: present
-  loop: "{{ slurm_packages_to_install[slurm.slurm_packaging][slurm_profile] }}"
+  tags:
+    - package
 
 #### MUNGE
 
@@ -60,7 +61,7 @@
     home: "{{ slurm_home_path }}"
     state: present
 
-- name: template █ Generate /etc/slurm/slurm.conf
+- name: "template █ Generate {{ slurm_home_path }}/slurm.conf"
   template:
     src: slurm.conf.j2
     dest: "{{ slurm_home_path }}/slurm.conf"

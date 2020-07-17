@@ -10,8 +10,10 @@
     - libibverbs-devel
     - libibumad
     - infiniband-diags
+  tags:
+    - package
 
-- name: service █ Manage rdma state
+- name: service █ Enforce rdma state
   service:
     name: rdma
     enabled: yes

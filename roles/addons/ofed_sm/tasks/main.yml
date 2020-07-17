@@ -7,6 +7,8 @@
   with_items:
     - opensm
     - opensm-libs
+  tags:
+    - package
 
 - name: service █ Manage opensm state
   service:

@@ -8,7 +8,7 @@ echo |
 
 # Ansible variables
 set eq-equipment-profile {{ item | replace('equipment_','') | trim }}
-set eq-architecture {{ hostvars[groups[item][0]]['equipment_profile']['hardware']['cpu']['architecture'] }}
+set eq-architecture ${arch}
 set eq-distribution {{ hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower }}
 set eq-distribution-major-version {{ hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution_major_version'] }}
 set eq-distribution-version {{ hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution_version'] | default('${eq-distribution-major-version}') }}

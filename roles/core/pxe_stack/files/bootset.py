@@ -89,7 +89,7 @@ pxe_parameters = load_file('/etc/bluebanquise/pxe/pxe_parameters.yml')
 apache_uid = pwd.getpwnam(pxe_parameters["pxe_parameters"]["apache_uid"]).pw_uid
 apache_gid = grp.getgrnam(pxe_parameters["pxe_parameters"]["apache_gid"]).gr_gid
 
-if passed_arguments.status != None:
+if passed_arguments.status is not None:
     # Iteration on nodes
     for node in NodeSet(passed_arguments.nodes):
         # Check if node file exist
@@ -101,9 +101,9 @@ if passed_arguments.status != None:
                 filebuffer = f.readlines()
             for i in range(len(filebuffer)):
                 if 'menu-default' in filebuffer[i]:
-                    print('  - '+str(node)+' : '+filebuffer[i].split(' ')[2].replace('boot',''), end='')
+                    print('  - '+str(node)+' : '+filebuffer[i].split(' ')[2].replace('boot', ''), end='')
 
-elif passed_arguments.boot != None:
+elif passed_arguments.boot is not None:
 
     # Ensure passed boot argument exists
     if passed_arguments.boot is not None and 'osdeploy' not in passed_arguments.boot and 'diskless' not in passed_arguments.boot and 'clone' not in passed_arguments.boot and 'clonedeploy' not in passed_arguments.boot and 'disk' not in passed_arguments.boot:

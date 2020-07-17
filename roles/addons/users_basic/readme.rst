@@ -22,7 +22,7 @@ Create file inventory/group_vars/all/addons/users_basic.yml with the following c
         home: /home
         shell: /bin/bash
         comment: dream all the day # optional
-        password: $6$M3crarMVoUV3rALd$ZTre2CIyss7zOb4lkLoG23As9OAkYPw2BM88Y1F43n8CCyV5XWwAYEwBOrS8bcCBIMjIPdJG.ndOfzWyAVR4j0 # Only set the first time, when user does not exist, then ignored
+        password: $6$M3crarMVoUV3rALd$ZTre2CIyss7zOb4lkLoG23As9OAkYPw2BM88Y1F43n8CCyV5XWwAYEwBOrS8bcCBIMjIPdJG.ndOfzWyAVR4j0
 
 Then edit this file according to your needs, and play this role on all hosts with users, including slurmctld server if using slurm.
 

@@ -13,7 +13,7 @@ equipment_profile:
   console:
   kernel_parameters:
 
-  access_control: true # Selinux, AppArmor, etc. Selinux: true = enforcing, false = disabled
+  access_control: enforcing # Selinux, AppArmor, etc. Selinux: enforcing, permissive, disabled
   firewall: true # Enable or disable native firewall
 
   partitioning: | # Please provide native distribution partitioning. This example is for Centos/RedHat systems.

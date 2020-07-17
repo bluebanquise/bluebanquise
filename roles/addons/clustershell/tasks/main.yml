@@ -2,6 +2,8 @@
   package:
     name: clustershell
     state: present
+  tags:
+    - package
 
 - name: template █ Generate /etc/clustershell/groups.d/local.cfg
   template:
