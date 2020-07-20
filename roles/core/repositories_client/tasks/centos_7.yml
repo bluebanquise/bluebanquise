@@ -1,7 +1,12 @@
 ---
 - name: set_fact ░ Set static baseurl prefix
   set_fact:
-    baseurl_prefix: "http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/{{ equipment_profile['operating_system']['repositories_environment'] | default('') }}/{{ equipment_profile['operating_system']['distribution'] }}/{{ equipment_profile['operating_system']['distribution_version'] | default(equipment_profile['operating_system']['distribution_major_version']) }}/{{ equipment_profile['hardware']['cpu']['architecture'] }}/"
+     baseurl_prefix: >-
+       "http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/
+       {{ equipment_profile['operating_system']['repositories_environment'] | default('') }}/
+       {{ equipment_profile['operating_system']['distribution'] }}/
+       {{ equipment_profile['operating_system']['distribution_version'] | default(equipment_profile['operating_system']['distribution_major_version']) }}/
+       $basearch/"
 
 - name: ini_file █ Disable CentOS-Base distro repositories
   # In BlueBanquise, the CentOS 7 system repository is installed with the
@@ -14,7 +19,7 @@
     value: '0'
     no_extra_spaces: yes
   loop: [ 'base', 'updates', 'extras' ]
-  when: 
+  when:
     - ( 'os' in repositories ) or ( item.name is defined and item.name == 'os' )
     - repositories_client_disable_distro_repos == true
   notify: command █ yum clean metadata

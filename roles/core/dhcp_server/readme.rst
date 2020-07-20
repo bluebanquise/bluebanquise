@@ -75,9 +75,6 @@ Mandatory inventory vars:
    * .services_ip.pxe_ip
    * .services_ip.dns_ip
    * .services_ip.time_ip
-* dhcp_server_settings
-   * .default_lease_time
-   * .max_lease_time
 
 **hostvars[hosts]**
 
@@ -88,6 +85,9 @@ Mandatory inventory vars:
 Optional inventory vars:
 
 **hostvars[inventory_hostname]**
+
+* dhcp_server_default_lease_time
+* dhcp_server_max_lease_time
 
 * network[item]
    * .dhcp_unknown_range

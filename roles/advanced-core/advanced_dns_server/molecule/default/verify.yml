@@ -7,7 +7,7 @@
       stat:
         path: "{{ item }}"
       register: stat_results
-      with_items:
+      loop:
         - /etc/named.conf
         - /var/named/forward
         - /var/named/reverse

@@ -1,7 +1,12 @@
 ---
 - name: set_fact ░ Set static baseurl prefix
   set_fact:
-    baseurl_prefix: "http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/{{ equipment_profile['operating_system']['repositories_environment'] | default('') }}/{{ equipment_profile['operating_system']['distribution'] }}/{{ equipment_profile['operating_system']['distribution_version'] | default(equipment_profile['operating_system']['distribution_major_version']) }}/$basearch/"
+    baseurl_prefix: >-
+      "http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/
+      {{ equipment_profile['operating_system']['repositories_environment'] | default('') }}/
+      {{ equipment_profile['operating_system']['distribution'] }}/
+      {{ equipment_profile['operating_system']['distribution_version'] | default(equipment_profile['operating_system']['distribution_major_version']) }}/
+      $basearch/"
 
 - name: ini_file █ Disable CentOS Extras repository
   # In BlueBanquise, the CentOS 8 system repositories are installed with the
@@ -17,7 +22,7 @@
     option: enabled
     value: '0'
     no_extra_spaces: yes
-  when: 
+  when:
     - ( 'os' in repositories )
     - repositories_client_disable_distro_repos == true
   notify: command █ yum clean metadata
