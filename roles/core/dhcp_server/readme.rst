@@ -116,6 +116,7 @@ Files generated:
 Changelog
 ^^^^^^^^^
 
+* 1.0.7: Set defaults leases. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.6: Update to new network_interfaces syntax. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.5: Clean. johnnykeats <johnny.keats@outlook.com>
 * 1.0.4: Added support of multiple DNS servers. Bruno Travouillon <devel@travouillon.fr>

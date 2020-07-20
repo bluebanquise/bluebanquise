@@ -71,5 +71,6 @@ To be done
 Changelog
 ^^^^^^^^^
 
+* 1.0.2: Update role, remove munge key. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.1: Documentation. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>

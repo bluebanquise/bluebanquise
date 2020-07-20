@@ -97,7 +97,6 @@
     owner: root
     group: root
     mode: 0644
-  register: zoneconf
   tags:
     - template
 

@@ -141,6 +141,7 @@ Add Ubuntu and Opensuse compatibility if asked for.
 Changelog
 ^^^^^^^^^
 
+* 1.0.3: Update readme. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.2: Update to new network_interfaces syntax. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.1: Fix VLAN and BOND. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
