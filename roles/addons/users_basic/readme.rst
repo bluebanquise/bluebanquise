@@ -62,6 +62,6 @@ Or (python 2):
 Changelog
 ^^^^^^^^^
 
-* 1.0.2: Role enhancement. Benoit Leveugle <benoit.leveugle@gmail.com>
+* 1.1.0: Role enhancement. New inventory structure. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.1: Documentation and resources. johnnykeats <johnny.keats@outlook.com>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>

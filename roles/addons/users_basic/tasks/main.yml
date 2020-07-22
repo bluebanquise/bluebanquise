@@ -14,7 +14,7 @@
     uid: "{{ item.uid }}"
     group: "{{ item.name }}"
     groups: "{{ item.groups | default(omit) }}"
-    create_home: "{{item.create_home | default(omit) }}"
+    create_home: "{{ item.create_home | default(omit) }}"
     update_password: "{{ item.update_password | default(omit) }}"
     shell: "{{ item.shell | default(omit) }}"
     home: "{{ item.home | default(omit) }}"
