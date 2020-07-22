@@ -21,7 +21,7 @@
   loop: [ 'base', 'updates', 'extras' ]
   when:
     - ( 'os' in repositories )
-    - repositories_client_disable_distro_repos == true
+    - repositories_client_disable_distro_repos
   notify: command █ yum clean metadata
 
 - name: yum_repository █ Setting repositories
