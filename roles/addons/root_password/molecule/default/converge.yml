@@ -1,0 +1,7 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: "Include root_password"
+      include_role:
+        name: "root_password"

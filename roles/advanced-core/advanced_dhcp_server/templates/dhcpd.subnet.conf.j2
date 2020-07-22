@@ -14,7 +14,7 @@
 {% endif %}
 
 {% for host in range %}
-  {% if hostvars[host]['network_interfaces'] is defined %}
+  {% if hostvars[host]['network_interfaces'] is defined and hostvars[host]['network_interfaces'] is iterable %}
     {#- Define iPXE rom to use #}
     {% if hostvars[host]['equipment_profile']['ipxe_driver'] == 'snponly' %} {# Select driver first #}
       {% set ipxe_driver = 'snponly_' %}
@@ -39,40 +39,40 @@
       {% set ipxe_rom_filename = (ipxe_architecture + '/' + ipxe_embed + '_undionly.kpxe') %}
     {% endif -%}
 
-    {%- for nic, nic_args in hostvars[host]['network_interfaces'].items() %}
-      {% if (nic_args.network is defined and not none) and (nic_args.network == item) and (nic_args.ip4 is defined and not none) %}
-        {% if nic_args.mac is defined and not none %}
+    {%- for nic in hostvars[host]['network_interfaces'] %}
+      {% if (nic.network is defined and nic.network == item) and nic.ip4 is defined %}
+        {% if nic.mac is defined %}
 
   host {{host}}-{{item}} { 
     option host-name "{{host}}";
-    hardware ethernet {{nic_args.mac}};
-    fixed-address {{nic_args.ip4}};
+    hardware ethernet {{nic.mac}};
+    fixed-address {{nic.ip4}};
     filename "{{ipxe_rom_filename}}";
   }
-        {% elif nic_args.dhcp_client_identifier is defined and not none %}
+        {% elif nic.dhcp_client_identifier is defined %}
   host {{host}}-{{item}} {
     option host-name "{{host}}";
-    option dhcp_client_identifier {{nic_args.dhcp-client-identifier}};
-    fixed-address {{nic_args.ip4}};
+    option dhcp_client_identifier {{nic.dhcp_client_identifier}};
+    fixed-address {{nic.ip4}};
     filename "{{ipxe_rom_filename}}";
   }
-        {% elif nic_args.host_identifier is defined and not none %}
+        {% elif nic.host_identifier is defined %}
   host {{host}}-{{item}} {
     option host-name "{{host}}";
-    host_identifier {{nic_args.host-identifier}};
-    fixed-address {{nic_args.ip4}};
+    host_identifier {{nic.host_identifier}};
+    fixed-address {{nic.ip4}};
     filename "{{ipxe_rom_filename}}";
   }
-        {% elif nic_args.match is defined and not none %}{# Warning, only works in a shared network!! #}
+        {% elif nic.match is defined %}{# Warning, only works in a shared network!! #}
   class "option_match_{{host}}" {
     match if (
-      {{nic_args.match}}
+      {{nic.match}}
     );
   }
   pool {
     option host-name "{{host}}";
     allow members of "option_match_{{host}}";
-    range {{nic_args.ip4}};
+    range {{nic.ip4}};
     filename "{{ipxe_rom_filename}}";
   }
         {% endif %}
