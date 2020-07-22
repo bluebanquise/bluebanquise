@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# https://github.com/bluebanquise/bluebanquise - MIT license
 
 from shutil import copyfile
 import cgi

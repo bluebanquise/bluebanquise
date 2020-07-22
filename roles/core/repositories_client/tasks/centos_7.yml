@@ -20,7 +20,7 @@
     no_extra_spaces: yes
   loop: [ 'base', 'updates', 'extras' ]
   when:
-    - ( 'os' in repositories ) or ( item.name is defined and item.name == 'os' )
+    - ( 'os' in repositories )
     - repositories_client_disable_distro_repos == true
   notify: command █ yum clean metadata
 

@@ -6,10 +6,15 @@ Description
 
 This role provides a basic dns server based on bind.
 
+Warning: this dns server is designed to be used as a single dns for the whole
+cluster. If you need multiple dns servers in the same cluster, or replication,
+please use the advanced dns server role instead.
+
 Instructions
 ^^^^^^^^^^^^
 
-This DNS role will automatically add all networks of the cluster, assuming their variable **is_in_dns** is set to true:
+This DNS role will automatically add all networks of the cluster, assuming their
+variable **is_in_dns** is set to true:
 
 .. code-block:: yaml
 
@@ -32,8 +37,10 @@ It will generate 5 files:
 * /var/named/reverse that contains reverse resolution of hosts
 * /var/named/reverse.soa included by /var/named/reverse
 
-To configure forwarding and integrate this dns server into an existing IT configuration, use file *group_vars/all/general_settings/external.yml*.
-It is possible to add here an external dns to bind to for this internal dns, as a relay.
+To configure forwarding and integrate this dns server into an existing IT
+configuration, use file *group_vars/all/general_settings/external.yml*.
+It is possible to add here an external dns to bind to for this internal dns, as
+a relay.
 
 .. code-block:: yaml
 
