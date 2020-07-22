@@ -52,14 +52,14 @@
         {% elif nic.dhcp_client_identifier is defined %}
   host {{host}}-{{item}} {
     option host-name "{{host}}";
-    option dhcp_client_identifier {{nic.dhcp_client_identifier}};
+    option dhcp-client-identifier {{nic.dhcp_client_identifier}};
     fixed-address {{nic.ip4}};
     filename "{{ipxe_rom_filename}}";
   }
         {% elif nic.host_identifier is defined %}
   host {{host}}-{{item}} {
     option host-name "{{host}}";
-    host_identifier {{nic.host_identifier}};
+    host-identifier {{nic.host_identifier}};
     fixed-address {{nic.ip4}};
     filename "{{ipxe_rom_filename}}";
   }
@@ -92,13 +92,13 @@
         {% elif bmc_args.dhcp_client_identifier is defined and not none %}
   host {{bmc_args.name}} {
     option host-name "{{bmc_args.name}}";
-    option dhcp_client_identifier {{bmc_args.dhcp-client-identifier}};
+    option dhcp-client-identifier {{bmc_args.dhcp_client_identifier}};
     fixed-address {{bmc_args.ip4}};
   }
         {% elif bmc_args.host_identifier is defined and not none %}
   host {{bmc_args.name}} {
     option host-name "{{bmc_args.name}}";
-    host_identifier {{bmc_args.host-identifier}};
+    host-identifier {{bmc_args.host_identifier}};
     fixed-address {{bmc_args.ip4}};
   }
         {% elif bmc_args.match is defined and not none %}{# Warning, only works in a shared network!! #}
