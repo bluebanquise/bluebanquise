@@ -40,7 +40,7 @@ The following example configure LDAP secured server *my-ldap-server-1* as first 
 Changelog
 ^^^^^^^^^
 
-* 1.3.0: Support multiple and secured connections to LDAP servers. <mathis.gavillon@atos.net>
+* 1.0.2: Support multiple and secured connections to LDAP servers. <mathis.gavillon@atos.net>
 * 1.0.1: Fixed bad template. Documentation. johnnykeats <johnny.keats@outlook.com>
 * 1.0.0: Role creation. oxedions <oxedions@gmail.com>
  

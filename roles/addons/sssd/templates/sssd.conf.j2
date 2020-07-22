@@ -9,8 +9,6 @@ chpass_provider = ldap
 ldap_uri = {{networks[j2_node_main_network]['services_ip']['authentication_servers']|join(',')}}
 ldap_search_base = {% for dc in domain_name.split('.') %}{% if not loop.first %},{% endif %}dc={{dc}}{% endfor %}
 
-ldap_tls_reqcert = never
-ldap_auth_disable_tls_never_use_in_production = true
 [sssd]
 services = nss, pam
 config_file_version = 2
