@@ -1,0 +1,48 @@
+- name: Package
+  package:
+    name: 
+      - sssd
+      - authconfig
+    state: present
+
+- name: Touch /etc/sysconfig/authconfig file to avoid failure later
+  file:
+    path: /etc/sysconfig/authconfig
+    state: touch
+
+- name: Checking if SSSD is already activated 
+  command: grep "USESSSDAUTH=yes" /etc/sysconfig/authconfig
+  register: sssd
+  failed_when: sssd.rc != 0 and sssd.rc != 1
+
+- name: Enable SSSD
+  command: authconfig --enablesssd --enablesssdauth --enablelocauthorize --enablemkhomedir --update
+  when:
+    - sssd.rc == 1
+
+- name: Template >> /etc/sssd/sssd.conf
+  template:
+    src: sssd.conf.j2
+    dest: /etc/sssd/sssd.conf
+    mode: 0600
+
+- name: Enable/disable services
+  service:
+    name: "{{ item }}"
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+  with_items:
+#    - nscd
+    - sssd
+  tags:
+    - service
+
+- name: Start services
+  service:
+    name: "{{ item }}"
+    state: started
+  with_items:
+#    - nscd
+    - sssd
+  when: (start_services | bool)
+  tags:
+    - service

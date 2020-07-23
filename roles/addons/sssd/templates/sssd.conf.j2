@@ -1,0 +1,28 @@
+[domain/LDAP]
+enumerate = true
+cache_credentials = true
+id_provider = ldap
+auth_provider = ldap
+#access_provider = ldap
+access_provider = permit
+chpass_provider = ldap
+ldap_uri = {{networks[j2_node_main_network]['services_ip']['authentication_servers']|join(',')}}
+ldap_search_base = {% for dc in domain_name.split('.') %}{% if not loop.first %},{% endif %}dc={{dc}}{% endfor %}
+
+[sssd]
+services = nss, pam
+config_file_version = 2
+domains = LDAP
+sbus_timeout = 25
+reconnection_retries = 4
+[nss]
+filter_groups = root
+filter_users = root
+reconnection_retries = 3
+[pam]
+[sudo]
+[autofs]
+[ssh]
+[pac]
+[ifp]
+
