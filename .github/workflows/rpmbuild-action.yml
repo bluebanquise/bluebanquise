@@ -31,6 +31,6 @@ jobs:
         COMMIT_ID=${{ steps.get_commit_id.outputs.commit_id }}
         git archive $COMMIT_ID --prefix=bluebanquise-$COMMIT_ID/ --output=$HOME/rpmbuild/SOURCES/bluebanquise-$COMMIT_ID.tar
         gzip $HOME/rpmbuild/SOURCES/bluebanquise-$COMMIT_ID.tar
-        tar xvf $HOME/rpmbuild/SOURCES/bluebanquise-$COMMIT_ID.tar.gz bluebanquise-$COMMIT_ID/bluebanquise.spec -O > $HOME/rpmbuild/SPECS/bluebanquise.spec
+        tar xvf $HOME/rpmbuild/SOURCES/bluebanquise-$COMMIT_ID.tar.gz bluebanquise-$COMMIT_ID/resources/packaging/bluebanquise.spec -O > $HOME/rpmbuild/SPECS/bluebanquise.spec
         rpmbuild -ba --define "version $COMMIT_ID" $HOME/rpmbuild/SPECS/bluebanquise.spec
         tar zcf bluebanquise-${COMMIT_ID}.tar.gz -C $HOME/rpmbuild/ RPMS/noarch/ SRPMS/

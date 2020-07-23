@@ -8,7 +8,7 @@ equipment_profile:
   console: console=tty0 console=ttyS1,115200n8
   kernel_parameters: nomodeset
 
-  access_control: false
+  access_control: disabled
   firewall: false
 
   partitioning: |

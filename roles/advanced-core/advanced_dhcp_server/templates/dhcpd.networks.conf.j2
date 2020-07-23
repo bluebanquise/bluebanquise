@@ -39,8 +39,8 @@ subnet {{networks[network]['subnet']}} netmask {{networks[network]['netmask']}} 
   {% if networks[network]['gateway'] is defined and not none %}
   option routers {{networks[network]['gateway']}};
   {% endif %}
-  default-lease-time {{dhcp_settings['default_lease_time']}};
-  max-lease-time {{dhcp_settings['max_lease_time']}};
+  default-lease-time {{advanced_dhcp_server_default_lease_time}};
+  max-lease-time {{advanced_dhcp_server_max_lease_time}};
   {% if networks[network]['services_ip']['pxe_ip'] is defined and not none %}
     {% if (networks[network]['services_ip']['pxe_http_ip'] is defined and not none)
       and (networks[network]['services_ip']['pxe_http_ip'] != networks[network]['services_ip']['pxe_ip']) %}
@@ -85,8 +85,8 @@ subnet {{networks[network]['subnet']}} netmask {{networks[network]['netmask']}} 
   {% if networks[network]['gateway'] is defined and not none %}
   option routers {{networks[network]['gateway']}};
   {% endif %}
-  default-lease-time {{dhcp_settings['default_lease_time']}};
-  max-lease-time {{dhcp_settings['max_lease_time']}};
+  default-lease-time {{advanced_dhcp_server_default_lease_time}};
+  max-lease-time {{advanced_dhcp_server_max_lease_time}};
   {% if networks[network]['services_ip']['pxe_ip'] is defined and not none %}
     {% if (networks[network]['services_ip']['pxe_http_ip'] is defined and not none)
       and (networks[network]['services_ip']['pxe_http_ip'] != networks[network]['services_ip']['pxe_ip']) %}

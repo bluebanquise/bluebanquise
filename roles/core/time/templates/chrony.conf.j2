@@ -3,7 +3,7 @@
 ## {{ ansible_managed }}
 
 {% macro node_main_network(macro_network_interfaces,macro_current_iceberg_network) %}
-{{ macro_network_interfaces | selectattr('network','match','^'+macro_current_iceberg_network+'-[a-zA-Z0-9]+') | map(attribute='network') | list | first }}
+{{ macro_network_interfaces | selectattr('network','defined') | selectattr('network','match','^'+macro_current_iceberg_network+'-[a-zA-Z0-9]+') | map(attribute='network') | list | first }}
 {% endmacro %}
 
 {% set external = false %}
@@ -32,11 +32,11 @@ server {{ external_server }}
 
 {% if not external and time_sources is defined and time_sources is string %}
 # Source server to bind to
-server {{ time_sources }}
+server {{ time_sources }} iburst
 {% elif not external and time_sources is defined and time_sources is iterable %}
 # Source servers to bind to
   {% for time_ip in time_sources %}
-server {{ time_ip }}
+server {{ time_ip }} iburst
   {% endfor %}
 {% endif %}
 

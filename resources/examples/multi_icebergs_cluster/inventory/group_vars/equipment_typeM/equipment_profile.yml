@@ -8,7 +8,7 @@ equipment_profile:
   console: console=tty0 console=ttyS1,115200n8
   kernel_parameters:
 
-  access_control: true
+  access_control: enforcing
   firewall: true
 
   partitioning: |

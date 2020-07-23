@@ -37,11 +37,12 @@ Do not provide security related data (ssh key, passwords, etc) in your reports.
 
 We would be happy to provide more possibilities to the stack.
 
-However, please keep in mind we are doing this as a best effort, on our free time :family:.
+However, please keep in mind we are doing this as a **best effort**, on our free time :family:.
 We will do our best to at least acknowledge we got your query.
 
 Also, if we consider this may damage the stack (modifications in the engine or the core roles),
-or break the KISS (Keep it simple) effort we are doing on the stack, we may only provide the feature as an addon.
+or break the KISS (Keep it simple) effort we are doing on the stack, we may only provide the feature as an addon,
+or simply refuse the feature.
 
 ## Pull Requests :arrow_heading_down:
 

@@ -1,5 +1,5 @@
 ---
-pxe_stack_role_version: 1.1.4
+pxe_stack_role_version: 1.1.5
 
 pxe_stack_supported_os:
   centos:

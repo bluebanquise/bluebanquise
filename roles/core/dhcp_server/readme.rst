@@ -17,7 +17,7 @@ This role provides basic features for network relying on MAC only (or range of u
 
 The role will only take into account networks from the current iceberg,
 and with naming related to administration network (by default iceX-Y).
-In single iceberg configuration, i.e. default, it will consider ice1-X networks.
+In single iceberg configuration, i.e. default, it will consider ice1-Y networks.
 
 For a network to be included in the dhcp,
 the variable **is_in_dhcp** must be set to true in the related network configuration.
@@ -75,9 +75,6 @@ Mandatory inventory vars:
    * .services_ip.pxe_ip
    * .services_ip.dns_ip
    * .services_ip.time_ip
-* dhcp_settings
-   * .default_lease_time
-   * .max_lease_time
 
 **hostvars[hosts]**
 
@@ -88,6 +85,9 @@ Mandatory inventory vars:
 Optional inventory vars:
 
 **hostvars[inventory_hostname]**
+
+* dhcp_server_default_lease_time
+* dhcp_server_max_lease_time
 
 * network[item]
    * .dhcp_unknown_range
@@ -116,6 +116,7 @@ Files generated:
 Changelog
 ^^^^^^^^^
 
+* 1.0.7: Set defaults leases. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.6: Update to new network_interfaces syntax. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.5: Clean. johnnykeats <johnny.keats@outlook.com>
 * 1.0.4: Added support of multiple DNS servers. Bruno Travouillon <devel@travouillon.fr>

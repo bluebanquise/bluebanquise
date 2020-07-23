@@ -14,4 +14,3 @@ j2_node_main_network_interface: "{{ network_interfaces | selectattr('network','d
 
 # List of management networks.
 j2_management_networks: "{{ networks | select('match','^'+j2_current_iceberg_network+'-[a-zA-Z0-9]+') | list | unique | sort }}"
-

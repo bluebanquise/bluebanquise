@@ -1,25 +1,27 @@
 ---
 
-- name: Add users groups
+- name: group █ Add users groups
   group:
-    name: "{{ item }}"
-    gid: "{{ users_basic['active_users'][item]['gid'] }}"
-    state: present
-  with_items: "{{ users_basic.active_users }}"
+    name: "{{ item.name }}"
+    gid: "{{ item.gid }}"
+    state: "{{ item.state | default('present') }}"
+  with_items: "{{ users_basic.users }}"
 
-
-- name: Add users
+- name: user █ Add/remove users
   user:
-    name: "{{ item }}"
-    comment: "{% if users_basic['active_users'][item]['comment'] is defined and not none %}{{ users_basic['active_users'][item]['comment'] }}{% endif %}"
-    uid: "{{ users_basic['active_users'][item]['uid'] }}"
-    group: "{{ item }}"
-    update_password: on_create
-    shell: "{{ users_basic.general_parameters.shell }}"
-    home: "{{ users_basic.general_parameters.home }}/{{ item }}"
-    password: "{{ users_basic['active_users'][item]['password'] }}"
-    generate_ssh_key: yes
-    ssh_key_bits: 2048
-    ssh_key_file: .ssh/id_rsa
-    state: present
-  with_items: "{{ users_basic.active_users }}"
+    name: "{{ item.name }}"
+    comment: "{{ item.comment | default(omit) }}"
+    uid: "{{ item.uid }}"
+    group: "{{ item.name }}"
+    groups: "{{ item.groups | default(omit) }}"
+    create_home: "{{ item.create_home | default(omit) }}"
+    update_password: "{{ item.update_password | default(omit) }}"
+    shell: "{{ item.shell | default(omit) }}"
+    home: "{{ item.home | default(omit) }}"
+    password: "{{ item.password }}"
+    generate_ssh_key: "{{ item.generate_ssh_key | default(omit) }}"
+    ssh_key_bits: "{{ item.ssh_key_bits | default(omit) }}"
+    ssh_key_file: "{{ item.ssh_key_file | default(omit) }}"
+    remove: "{{ item.remove | default('no') }}"
+    state: "{{ item.state | default('present') }}"
+  with_items: "{{ users_basic.users }}"

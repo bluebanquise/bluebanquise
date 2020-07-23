@@ -24,7 +24,7 @@ ip address and filename to use.
    * *bin/* directory contains some needed bin files, typically grub2 files for EFI boot.
    * *equipment_profiles/* directory contains equipment_profiles related files, i.e. ipxe file with group variables, and os configuration files (kickstart, preseed, autoyast).
    * *nodes/* directory contains hosts dedicated files, i.e. ipxe file with hosts dedicated variables.
-   * *osdeploy/* directory contains static files, with paterns to boot each kind of supported distributions.
+   * *osdeploy/* directory contains static files, with patterns to boot each kind of supported distributions.
 * Basic configuration files are located in /etc/bluebanquise/pxe/.
    * *nodes_parameters.yml* contains all nodes PXE needed parameters.
    * *pxe_parameters.yml* contains needed values for scripts to adapt to **current pxe server host** (these parameters do not apply to PXE booted hosts !!).
@@ -37,7 +37,7 @@ This role will rely on multiple parts of the inventory, and is probably the most
 
 * equipment_profile dictionaries are used for each equipment_profile group. All
   boot configuration is made relying on it (operating system, cpu architecture,
-  console, kernel parameters, etc.). It is recommanded to ensure coherency of
+  console, kernel parameters, etc.). It is recommended to ensure coherency of
   the equipment_profile files.
 * authentication dictionary is used to provide root password and default ssh
   authorized key.
@@ -50,10 +50,10 @@ This role will rely on multiple parts of the inventory, and is probably the most
 Once the role is deployed, and hosts gathered into */etc/bluebanquise/pxe/nodes_parameters.yml*, the bootset tool can be used to manipulate remote hosts PXE boot. By default, 3 states can be defined for each host:
 
 * osdeploy: the remote host will deploy/redeploy its operating system, using inventory equipment_profile parameters of its equipment profile group.
-* disk: the remote host will boot on disk. This parameter is automatically set after a sucessful **osdeploy**.
+* disk: the remote host will boot on disk. This parameter is automatically set after a successful **osdeploy**.
 * diskless: the remote host will boot using a diskless mechanism. This diskless boot is generic, and is handled by an optional external role.
 
-Again, consider that if you set an host to osdeploy, and that it suceed its deployment, stack will automatically set the host into disk boot for next boot, to avoid infinite reinstallation loop.
+Again, consider that if you set an host to osdeploy, and that it succeed its deployment, stack will automatically set the host into disk boot for next boot, to avoid infinite reinstallation loop.
 
 To get bootset help, use:
 
@@ -75,7 +75,7 @@ To set this host to boot on disk, use:
 
   bootset -n c001 -b disk
 
-It is also possible to work on a range of host, using nodeset formating:
+It is also possible to work on a range of host, using nodeset formatting:
 
 .. code-block:: text
 
@@ -138,7 +138,7 @@ To be macroscopic:
 
 #. The remote host boot over PXE, in EFI/legacy-bios, using its own PXE/iPXE rom.
 #. The dhcp deployed by BlueBanquise will provide the host with the **BlueBanquise** iPXE rom. This iPXE rom contains an EMBED script that will display the logo, get an ip from the dhcp server, show some information, and chain to file *convergence.ipxe*.
-#. *convergence.ipxe* will simply get the current architecture. This operation cannot be done into the EMBED script has it needs some logic, that could bug. Sys admin need to easily debug this whithout the need to rebuild iPXE roms. Then iPXE chain to *nodes/${hostname}.ipxe* with *hostname* the hostname provided by the dhcp server.
+#. *convergence.ipxe* will simply get the current architecture. This operation cannot be done into the EMBED script has it needs some logic, that could bug. Sys admin need to easily debug this without the need to rebuild iPXE roms. Then iPXE chain to *nodes/${hostname}.ipxe* with *hostname* the hostname provided by the dhcp server.
 #. *nodes/${hostname}.ipxe* will define all host dedicated parameters, and also what host should do: boot on disk, deploy os, or boot in diskless. Then iPXE chain to *equipment_profiles/${equipment-profile}.ipxe*, with *equipment-profile* a variable defined in the current file.
 #. *equipment_profiles/${equipment-profile}.ipxe* contains the host equipment profile group parameters, like operating system, console, kernel parameters, etc. Then iPXE chain to *menu.ipxe*.
 #. *menu.ipxe* will display a basic menu on screen, with default set to what node is expected to do (this was gathered in *nodes/${hostname}.ipxe*). Timeout is 10s by default before host execute the expected action. Then, iPXE chain to:
@@ -152,7 +152,7 @@ In case of an OS deployment, if this deployment succeed, in the post install scr
 
 All files are manually editable. Also, note that an unregistered host (so no hostnames provided by the dhcp) will try to load *nodes/.ipxe* file. By default, this file will simply provide an iPXE shell, but system administrator can tune this file to specific purposes.
 
-To follow the deployment process, simply tail -f logs of http server, and see the whole process occuring.
+To follow the deployment process, simply tail -f logs of http server, and see the whole process occurring.
 
 To be done
 ^^^^^^^^^^
@@ -162,6 +162,7 @@ To be done
 Changelog
 ^^^^^^^^^
 
+* 1.1.5: Update role to match $basearch, add status feat to bootset. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.4: Update to new network_interfaces syntax. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.3: Clean. johnnykeats <johnny.keats@outlook.com>
 * 1.1.2: Add support of major distribution version. Bruno <devel@travouillon.fr>

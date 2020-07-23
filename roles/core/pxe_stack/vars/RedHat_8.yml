@@ -5,7 +5,7 @@ pxe_stack_apache_user: apache
 pxe_stack_packages_to_install:
   - atftp
   - ipxe-x86_64-bluebanquise
-  #- ipxe-arm64-bluebanquise
+  - ipxe-arm64-bluebanquise
   - httpd
   - python3-policycoreutils
   - clustershell

@@ -1,4 +1,13 @@
 ---
+- name: set_fact ░ Set static baseurl prefix
+  set_fact:
+    baseurl_prefix: >-
+      "http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/
+      {{ equipment_profile['operating_system']['repositories_environment'] | default('') }}/
+      {{ equipment_profile['operating_system']['distribution'] }}/
+      {{ equipment_profile['operating_system']['distribution_version'] | default(equipment_profile['operating_system']['distribution_major_version']) }}/
+      $basearch/"
+
 - name: ini_file █ Disable CentOS Extras repository
   # In BlueBanquise, the CentOS 8 system repositories are installed with the
   # special repository 'os', which splits to BaseOS and AppStream.
@@ -13,41 +22,10 @@
     option: enabled
     value: '0'
     no_extra_spaces: yes
-  when: ( 'os' in repositories ) or ( item.name is defined and item.name == 'os' )
+  when:
+    - ( 'os' in repositories )
+    - repositories_client_disable_distro_repos
   notify: command █ yum clean metadata
-
-- name: set_fact ░ Set baseurl prefix
-  set_fact:
-    baseurl_prefix: "http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/$environment/{{ equipment_profile['operating_system']['distribution'] }}/$releasever/$basearch/"
-
-- name: template █ Generate /etc/dnf/vars/releasever to force $releasever
-  template:
-    src: releasever.j2
-    dest: /etc/dnf/vars/releasever
-    owner: root
-    group: root
-    mode: 0644
-  when: equipment_profile.operating_system.repositories_releasever is defined
-  tags:
-    - template
-
-- name: file █ Cleanup $releasever
-  file:
-    path: /etc/dnf/vars/releasever
-    state: absent
-  when: equipment_profile.operating_system.repositories_releasever is not defined
-  tags:
-    - template
-
-- name: template █ Generate /etc/yum/vars/environment to set $environment
-  template:
-    src: environment.j2
-    dest: /etc/yum/vars/environment
-    owner: root
-    group: root
-    mode: 0644
-  tags:
-    - template
 
 - name: yum_repository █ Setting repositories
   yum_repository:

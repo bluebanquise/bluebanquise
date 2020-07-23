@@ -1,24 +1,19 @@
 ---
 
-- name: Package
+- name: package █ Install opensm packages
   package:
     name: "{{ item }}"
     state: present
   with_items:
     - opensm
     - opensm-libs
+  tags:
+    - package
 
-- name: Enable/disable services
+- name: service █ Manage opensm state
   service:
     name: opensm
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
-  tags:
-    - service
-
-- name: Start services
-  service:
-    name: opensm
-    state: started
-  when: (start_services | bool)
+    state: "{{ (start_services | bool) | ternary('started', omit) }}"
   tags:
     - service

@@ -2,23 +2,13 @@
 #### Blue Banquise file ####
 ## {{ ansible_managed }}
 
-{% set inventory_all_ipv4_addresses = network_interfaces | map(attribute='ip4') | list %}
-
 options {
   listen-on port 53 {
     127.0.0.1;
 {% for network in j2_management_networks %}
   {% if networks[network]['is_in_dns'] is defined and networks[network]['is_in_dns'] == true %}
-    {% set addresses = networks[network]['services_ip']['dns_ip'] | ipaddr %}
-    {% if dns_slaves is defined %}
-      {% set addresses = addresses|union(dns_slaves) %}
-    {% endif %}
-    {% if addresses is string and addresses in inventory_all_ipv4_addresses %}
-    {{ addresses }};
-    {% else %}
-      {% for address in (addresses|intersect(inventory_all_ipv4_addresses)) %}
-    {{ address }};
-      {% endfor %}
+    {% if networks[network]['services_ip']['dns_ip'] is defined and networks[network]['services_ip']['dns_ip'] is not none %}
+    {{networks[network]['services_ip']['dns_ip']}};
     {% endif %}
   {% endif %}
 {% endfor %}
@@ -74,43 +64,17 @@ zone "." IN {
   file "named.ca";
 };
 
-{# Is the host the master DNS? #}
-{% if dns_master in inventory_all_ipv4_addresses %}
 zone "{{ domain_name }}" IN {
   type master;
   file "forward";
   allow-update { none; };
-  {% if dns_slaves is defined %}
-  allow-transfer { {{ dns_slaves | join('; ') }}; };
-  notify yes;
-  also-notify { {{ dns_slaves | join('; ') }}; };
-  {% endif %}
 };
 
 zone "in-addr.arpa" IN {
   type master;
   file "reverse";
   allow-update { none; };
-  {% if dns_slaves is defined %}
-  allow-transfer { {{ dns_slaves | join('; ') }}; };
-  notify yes;
-  also-notify { {{ dns_slaves | join('; ') }}; };
-  {% endif %}
 };
-{% else %}
-{# slave of dns_master #}
-zone "{{ domain_name }}" IN {
-  type slave;
-  masters { {{ dns_master }}; };
-  file "slaves/forward";
-};
-
-zone "in-addr.arpa" IN {
-  type slave;
-  masters { {{ dns_master }}; };
-  file "slaves/reverse";
-};
-{% endif %}
 
 include "/etc/named.rfc1912.zones";
 include "/etc/named.root.key";

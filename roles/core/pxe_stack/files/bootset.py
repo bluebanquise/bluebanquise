@@ -8,8 +8,8 @@
 # ╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚══▀▀═╝  ╚═════╝ ╚═╝╚══════╝╚══════╝
 #
 # booset tool, to manage nodes PXE boot
-# 2019 - Benoît Leveugle <benoit.leveugle@sphenisc.com>
-#        Adrien Ribeiro <adrien.ribeiro@atos.net>
+# 2019_2020 - Benoît Leveugle <benoit.leveugle@sphenisc.com>
+#             Adrien Ribeiro <adrien.ribeiro@atos.net>
 # https://github.com/bluebanquise/bluebanquise - MIT license
 
 from ClusterShell.NodeSet import NodeSet
@@ -61,10 +61,12 @@ def set_default_boot(node, boot, node_image=None, extra_parameters=None):
 parser = ArgumentParser()
 parser.add_argument("-n", "--nodes", dest="nodes",
                     help="Target node(s). Use nodeset format for ranges.", metavar="NODE")
+parser.add_argument("-s", "--status", dest="status", nargs='?', const='',
+                    help="Display current nodes boot target status.")
 parser.add_argument("-b", "--boot", dest="boot",
                     help="Next pxe boot: can be osdeploy, diskless, clone, clonedeploy, or disk.")
 parser.add_argument("-f", "--force", dest="force", default=" ",
-                    help="Force. 'update' = files update, 'dhcp' = better dracut dhcp, 'network' = static ip. Combine using comma separator.")
+                    help="Force. 'dhcp' = better dracut dhcp, 'network' = static ip. Combine using comma separator.")
 parser.add_argument("-i", "--image", dest="image", default="none",
                     help="Specify diskless or clone image to be used, if using diskless/clone/clonedeploy boot.")
 parser.add_argument("-e", "--extra-parameters", dest="extra_parameters", default="none",
@@ -87,23 +89,41 @@ pxe_parameters = load_file('/etc/bluebanquise/pxe/pxe_parameters.yml')
 apache_uid = pwd.getpwnam(pxe_parameters["pxe_parameters"]["apache_uid"]).pw_uid
 apache_gid = grp.getgrnam(pxe_parameters["pxe_parameters"]["apache_gid"]).gr_gid
 
-# Ensure passed boot argument exists
-if 'osdeploy' not in passed_arguments.boot and 'diskless' not in passed_arguments.boot and 'clone' not in passed_arguments.boot and 'clonedeploy' not in passed_arguments.boot and 'disk' not in passed_arguments.boot:
-    logging.error(bcolors.FAIL+'Passed argument "'+passed_arguments.boot+'" for boot not know. Please check syntax.'+bcolors.ENDC)
-    quit()
+if passed_arguments.status is not None:
+    # Iteration on nodes
+    for node in NodeSet(passed_arguments.nodes):
+        # Check if node file exist
+        if str(os.path.exists('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe')) == 'False':
+            logging.warning(bcolors.WARNING+'File '+'/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe'+' do not exist. Skipping.'+bcolors.ENDC)
+            continue
+        else:
+            with open('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe', 'r') as f:
+                filebuffer = f.readlines()
+            for i in range(len(filebuffer)):
+                if 'menu-default' in filebuffer[i]:
+                    print('  - '+str(node)+' : '+filebuffer[i].split(' ')[2].replace('boot', ''), end='')
 
-# Iteration on nodes
-for node in NodeSet(passed_arguments.nodes):
+elif passed_arguments.boot is not None:
 
-    # Check if node exist in Ansible generated file
-    logging.info(bcolors.OKBLUE+'Cheking if node '+str(node)+' exist...'+bcolors.ENDC)
-    if str(node) in nodes_parameters:
+    # Ensure passed boot argument exists
+    if passed_arguments.boot is not None and 'osdeploy' not in passed_arguments.boot and 'diskless' not in passed_arguments.boot and 'clone' not in passed_arguments.boot and 'clonedeploy' not in passed_arguments.boot and 'disk' not in passed_arguments.boot:
+        logging.error(bcolors.FAIL+'Passed argument "'+passed_arguments.boot+'" for boot not know. Please check syntax.'+bcolors.ENDC)
+        quit()
 
-        logging.info(bcolors.OKGREEN+'[OK] Working on node '+str(node)+' ...'+bcolors.ENDC)
-        # Check if we need to create or update files
-        logging.info('    ├── '+bcolors.OKBLUE+'Checking '+str(node)+' files...'+bcolors.ENDC)
-        if str(os.path.exists('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe')) == 'False' or 'update' in passed_arguments.force:
-            logging.info('    ├── '+bcolors.OKBLUE+'Creating file /var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe'+bcolors.ENDC)
+    # Iteration on nodes
+    for node in NodeSet(passed_arguments.nodes):
+
+        # Check if node exist in Ansible generated file
+        logging.info(bcolors.OKBLUE+'Cheking if node '+str(node)+' exist...'+bcolors.ENDC)
+        if str(node) in nodes_parameters:
+
+            logging.info(bcolors.OKGREEN+'[OK] Working on node '+str(node)+' ...'+bcolors.ENDC)
+            # Check if we need to create or update files
+            logging.info('    ├── '+bcolors.OKBLUE+'Checking '+str(node)+' files...'+bcolors.ENDC)
+            if str(os.path.exists('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe')) == 'False':
+                logging.info('    ├── '+bcolors.OKBLUE+'Creating file /var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe'+bcolors.ENDC)
+            else:
+                logging.info('    ├── '+bcolors.OKBLUE+'Editing file /var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe'+bcolors.ENDC)
             dedicated_parameters = str('')
             if 'network' in passed_arguments.force:
                 dedicated_parameters = str('ip='+nodes_parameters[str(node)]["network"]["node_main_network_interface_ip"]+'::'+nodes_parameters[str(node)]["network"]["node_main_network_gateway"]+':'+nodes_parameters[str(node)]["network"]["node_main_network_netmask"]+':'+str(node)+':'+nodes_parameters[str(node)]["network"]["node_main_network_interface"]+':none')
@@ -133,9 +153,9 @@ for node in NodeSet(passed_arguments.nodes):
             os.chown('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe', apache_uid, apache_gid)
             if pxe_parameters["pxe_parameters"]["ansible_selinux_status"] == "enabled":
                 os.system('restorecon -v /var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe')
-        logging.info('    ├── '+bcolors.OKGREEN+'[OK] Done.'+bcolors.ENDC)
+            logging.info('    ├── '+bcolors.OKGREEN+'[OK] Done.'+bcolors.ENDC)
 
-        set_default_boot(node=node, boot=passed_arguments.boot, node_image=passed_arguments.image, extra_parameters=passed_arguments.extra_parameters)
+            set_default_boot(node=node, boot=passed_arguments.boot, node_image=passed_arguments.image, extra_parameters=passed_arguments.extra_parameters)
 
-    else:
-        logging.warning(bcolors.WARNING+'Node '+str(node)+' do not exist. Skipping.'+bcolors.ENDC)
+        else:
+            logging.warning(bcolors.WARNING+'Node '+str(node)+' do not exist. Skipping.'+bcolors.ENDC)

@@ -28,11 +28,13 @@ SlurmdLogFile=/var/log/slurm/slurmd.log
 SlurmctldTimeout=600
 SlurmdTimeout=600
 
-## We don't want a node to go back in pool without sys admin acknoledgement
+## We don't want a node to go back in pool without sys admin acknowledgement
 ReturnToService=0
 
-## If you are using pmi2 interface for MPI
-#MpiDefault=pmi2
+{% if slurm['MpiDefault'] is defined and slurm['MpiDefault'] is not None %}
+## Using pmi/pmi2/pmix interface for MPI
+MpiDefault={{slurm['MpiDefault']}}
+{% endif %}
 
 ## Basic scheduling based on CPU
 SelectTypeParameters=CR_Core_Memory,CR_CORE_DEFAULT_DIST_BLOCK
