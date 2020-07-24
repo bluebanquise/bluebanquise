@@ -22,7 +22,7 @@
 
   {%- if host_dict['network_interfaces'] is defined and host_dict['network_interfaces'] is iterable %}
     {% set host_iceberg = node_current_iceberg(host) %}
-    {% set host_resolution_network = network_interfaces[0].network %}{# equivalent to j2_node_main_resolution_network, but no need for a macro here #}
+    {% set host_resolution_network = host_dict['network_interfaces'][0].network %}{# equivalent to j2_node_main_resolution_network, but no need for a macro here #}
     {% set alias_list = [] %}
     {% if host_dict['global_alias'] is defined and host_dict['global_alias'] is not none %}
       {% for alias in host_dict['global_alias'] %}{{ alias_list.append(alias) }}{% endfor %}
