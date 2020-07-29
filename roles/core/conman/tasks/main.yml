@@ -32,7 +32,7 @@
 
 - name: file █ Create /var/log/conman directory
   file:
-    path: /var/log/rsyslog
+    path: /var/log/conman
     setype: conman_log_t
     state: directory
     recurse: yes
