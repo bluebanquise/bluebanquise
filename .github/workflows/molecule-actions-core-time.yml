@@ -22,7 +22,6 @@ jobs:
         distro:
           - centos:7
           - centos:8
-          - ubuntu:20.04
 
     env:
       MOLECULE_DISTRO: ${{ matrix.distro }}
