@@ -40,6 +40,16 @@
   tags:
     - package
 
+- name: Create /var/log/rsyslog directory
+  file:
+    path: /var/log/rsyslog
+    setype: var_log_t
+    state: directory
+    recurse: yes
+  when:
+    - ansible_facts.os_family == "RedHat"
+    - ansible_facts.selinux.status == "enabled"
+
 - name: Template >> /etc/rsyslog.conf
   template:
     src: rsyslog.conf.j2

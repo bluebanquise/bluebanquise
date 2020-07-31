@@ -30,6 +30,16 @@
   tags:
     - package
 
+- name: file █ Create /var/log/conman directory
+  file:
+    path: /var/log/conman
+    setype: conman_log_t
+    state: directory
+    recurse: yes
+  when:
+    - ansible_facts.os_family == "RedHat"
+    - ansible_facts.selinux.status == "enabled"
+
 - name: template █ Generate /etc/conman.conf
   template:
     src: conman.conf.j2
