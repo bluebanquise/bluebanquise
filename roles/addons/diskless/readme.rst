@@ -120,7 +120,7 @@ Select the kernel you want to use wit this image from the list of available kern
   Please enter clear root password of the new image: root
   [INFO] Entering livenet dedicated part.
  
-Choose a standard image, and give a size. Warning: 5M means 5Gb.
+Choose a standard image, and give a size.
 
 .. code-block:: text
 
@@ -129,19 +129,20 @@ Choose a standard image, and give a size. Warning: 5M means 5Gb.
    2 - Small: openssh, dnf and NetworkManager (~248Mb)
    3 - Minimal: openssh only (~129Mb)
   -->: 1
-  Please choose image size, considering /1000: 2M for 2Gb, 600K for 600Mb, etc:
-  -->: 5M
+  Please choose image size (e.g. 5G):
+  (supported units: M=1024*1024, G=1024*1024*1024)
+  -->: 5G
 
 Check that everything is alright before continuing:
 
 .. code-block:: text
 
-  Do you want to create a new NFS image with the following parameters:
+  Do you want to create a new livenet image with the following parameters:
     Image name:           livenet1
     Kernel version:       vmlinuz-4.18.0-193.6.3.el8_2.x86_64
     Root password:        root
     Image profile:        1
-    Image size /1000:     5M
+    Image size:           5120M
   Confirm ? Enter yes or no: yes
   [INFO] Cleaning and creating image folders.
   [INFO] Generating new ipxe boot file.
