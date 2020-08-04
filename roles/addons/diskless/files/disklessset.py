@@ -11,13 +11,15 @@
 # 2019 - Benoît Leveugle <benoit.leveugle@sphenisc.com>
 # https://github.com/bluebanquise/bluebanquise - MIT license
 
-# Import dependances
-from ClusterShell.NodeSet import NodeSet
-from argparse import ArgumentParser
-import yaml
+# Import dependencies
 import os
 import crypt
+import shutil
+from argparse import ArgumentParser
 from datetime import datetime
+
+import yaml
+from ClusterShell.NodeSet import NodeSet
 
 
 # Colors, from https://stackoverflow.com/questions/287871/how-to-print-colored-text-in-terminal-in-python
@@ -181,8 +183,7 @@ print('BlueBanquise Diskless manager')
 print(' 1 - List available kernels')
 print(' 2 - Generate a new initramfs')
 print(' 3 - Generate a new diskless image')
-print(' 4 - Manage/list existing diskless images')
-print(' 5 - Remove a diskless image')
+print(' 4 - Manage existing diskless images')
 
 main_action = str(input('-->: ').lower().strip())
 
@@ -358,6 +359,7 @@ elif main_action == '4':
     print(' 2 - Manage kernel of an image')
     print(' 3 - Create a golden from a staging NFS image')
     print(' 4 - Manage hosts of an NFS image')
+    print(' 5 - Remove an image')
     sub_main_action = str(input('-->: ').lower().strip())
 
     if sub_main_action == '1':
@@ -486,5 +488,18 @@ elif main_action == '4':
                     print("Working on node: "+str(node))
                     os.system('rm -Rf /diskless/images/'+selected_image+'/nodes/'+node)
 
+    elif sub_main_action == '5':
+        print('Remove an image.')
+
+        images_list = os.listdir('/var/www/html/preboot_execution_environment/diskless/images/')
+        selected_image = int(select_from_list(images_list, 'image to work with', -1))
+        selected_image_name = images_list[selected_image]
+
+        try:
+            shutil.rmtree('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
+            print("Image "+selected_image_name+" has been deleted.")
+        except Exception as e:
+            print(e)
+            raise
 
 quit()
