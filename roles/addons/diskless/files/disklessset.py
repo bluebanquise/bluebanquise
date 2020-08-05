@@ -285,7 +285,13 @@ elif main_action == '3':
         print(' 1 - Standard: core (~1.2GB)')
         print(' 2 - Small: openssh, dnf and NetworkManager (~248MB)')
         print(' 3 - Minimal: openssh only (~129MB)')
+        print(' 4 - Custom: core + selection of additional packages')
+
         selected_livenet_type = str(int(input('-->: ').lower().strip()))
+
+        if selected_livenet_type == '4':
+            print('Enter list of additional packages to install:')
+            selected_packages_list = str(input('-->: ').strip())
 
         print('Please choose image size:')
         print('(supported units: M=1024*1024, G=1024*1024*1024)')
@@ -341,6 +347,8 @@ elif main_action == '3':
                 os.system('dnf install -y dnf  --installroot=/mnt/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
             elif selected_livenet_type == '1':
                 os.system('dnf groupinstall -y "core"  --setopt=module_platform_id=platform:el8 --installroot=/mnt')
+            elif selected_livenet_type == '4':
+                os.system('dnf install -y @core {0} --setopt=module_platform_id=platform:el8 --installroot=/mnt'.format(selected_packages_list))
             print(bcolors.OKBLUE+'[INFO] Setting password into image.'+bcolors.ENDC)
             with open('/mnt/etc/shadow') as ff:
                 newText = ff.read().replace('root:*', 'root:'+password_hash)
