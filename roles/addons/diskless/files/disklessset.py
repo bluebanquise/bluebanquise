@@ -350,6 +350,11 @@ elif main_action == '3':
                 print(bcolors.OKBLUE+'[INFO] Injecting SSH public key into image.'+bcolors.ENDC)
                 os.mkdir('/mnt/root/.ssh/')
                 shutil.copyfile(selected_ssh_pub_key, '/mnt/root/.ssh/authorized_keys')
+            print(bcolors.OKBLUE+'[INFO] Setting image information.'+bcolors.ENDC)
+            with open('/mnt/etc/os-release', 'a') as ff:
+                ff.writelines(['BLUEBANQUISE_IMAGE_NAME="{0}"\n'.format(selected_image_name),
+                               'BLUEBANQUISE_IMAGE_KERNEL="{0}"\n'.format(kernel_list[int(selected_kernel)]),
+                               'BLUEBANQUISE_IMAGE_DATE="{0}"\n'.format(datetime.today().strftime('%Y-%m-%d'))])
             print(bcolors.OKBLUE+'[INFO] Packaging and moving files... May take some time.'+bcolors.ENDC)
             os.system('umount /mnt')
 #            os.system('rm -Rf /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
