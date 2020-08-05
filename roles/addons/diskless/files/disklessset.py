@@ -295,12 +295,21 @@ elif main_action == '3':
         elif selected_livenet_size[-1] == 'M':
             livenet_size = int(selected_livenet_size[:-1])
 
+        print('Enter path to SSH public key (left empty to disable key injection):')
+        selected_ssh_pub_key = str(input('-->: ').strip())
+        if selected_ssh_pub_key and not os.path.exists(selected_ssh_pub_key):
+            print('SSH public key not found: {0}'.format(selected_ssh_pub_key))
+            exit(1)
+
         print('Do you want to create a new livenet image with the following parameters:')
         print('  Image name: \t\t'+selected_image_name)
         print('  Kernel version: \t'+kernel_list[int(selected_kernel)])
         print('  Root password: \t'+password_raw)
         print('  Image profile: \t'+selected_livenet_type)
         print('  Image size: \t\t'+str(livenet_size)+'M')
+        print('  SSH pubkey: \t\t'+str(selected_ssh_pub_key))
+        if selected_livenet_type == '4':
+            print('  Additional packages: \t'+selected_packages_list)
 
         answer = str(input("Confirm ? Enter yes or no: ").lower().strip())
 
@@ -337,6 +346,10 @@ elif main_action == '3':
                 newText = ff.read().replace('root:*', 'root:'+password_hash)
             with open('/mnt/etc/shadow', "w") as ff:
                 ff.write(newText)
+            if selected_ssh_pub_key:
+                print(bcolors.OKBLUE+'[INFO] Injecting SSH public key into image.'+bcolors.ENDC)
+                os.mkdir('/mnt/root/.ssh/')
+                shutil.copyfile(selected_ssh_pub_key, '/mnt/root/.ssh/authorized_keys')
             print(bcolors.OKBLUE+'[INFO] Packaging and moving files... May take some time.'+bcolors.ENDC)
             os.system('umount /mnt')
 #            os.system('rm -Rf /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
