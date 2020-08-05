@@ -342,7 +342,7 @@ elif main_action == '3':
 #            os.system('rm -Rf /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
 #            os.system('mkdir /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
             os.system('mksquashfs '+image_working_directory+' /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/squashfs.img')
-            os.system('cp -a '+image_working_directory+'  /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/')
+            shutil.rmtree(image_working_directory)
             print(bcolors.OKBLUE+'[INFO] Registering new image.'+bcolors.ENDC)
             file_content = '''image_data:
   image_name: {image_name}
