@@ -44,12 +44,10 @@ def load_file(filename):
 def load_kernel_list(kernels_path):
     print(bcolors.OKBLUE+'[INFO] Loading kernels from '+kernels_path+bcolors.ENDC)
     file_list = os.listdir(kernels_path)
-    nb_kernels = 0
-    kernel_list = [None]
+    kernel_list = list()
     for i in file_list:
         if 'linu' in i:
-            kernel_list[nb_kernels] = i
-            nb_kernels = nb_kernels + 1
+            kernel_list.append(i)
     return kernel_list
 
 
