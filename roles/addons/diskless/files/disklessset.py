@@ -192,7 +192,7 @@ if main_action == '1':
     print('')
     print('Available kernels:')
     print("    │")
-    if kernel_list[0] is not None:
+    if len(kernel_list) > 0:
         for i in kernel_list:
             if os.path.exists(kernels_path+'/initramfs-kernel-'+(i.strip('vmlinuz-'))):
                 initramfs_status = bcolors.OKGREEN+'initramfs present'+bcolors.ENDC
@@ -204,13 +204,17 @@ if main_action == '1':
                 print("    ├── "+str(i)+' - '+initramfs_status)
         print(bcolors.OKGREEN+'\n[OK] Done.'+bcolors.ENDC)
     else:
-        print(bcolors.WARNING+'[WARNING] No kernel founds!'+bcolors.ENDC)
+        print(bcolors.WARNING+'[WARNING] No kernel found!'+bcolors.ENDC)
 
 elif main_action == '2':
 
     kernel_list = load_kernel_list(kernels_path)
 
-    selected_kernel = select_from_list(kernel_list, 'kernel', -1)
+    if len(kernel_list) > 0:
+        selected_kernel = select_from_list(kernel_list, 'kernel', -1)
+    else:
+        print(bcolors.FAIL+'[ERROR] No kernel found!'+bcolors.ENDC)
+        exit(1)
 
     print(bcolors.OKBLUE+'[INFO] Now generating initramfs... May take some time.'+bcolors.ENDC)
     os.system('dracut --xz -v -m "network base nfs" --add "livenet" --add-drivers xfs --no-hostonly --nolvmconf '+kernels_path+'/initramfs-kernel-'+(kernel_list[int(selected_kernel)].strip('vmlinuz-'))+' --force')
@@ -227,7 +231,11 @@ elif main_action == '3':
     selected_image_type = select_from_list(image_types, 'image type', -1)
 
     kernel_list = load_kernel_list(kernels_path)
-    selected_kernel = select_from_list(kernel_list, 'kernel', -1)
+    if len(kernel_list) > 0:
+        selected_kernel = select_from_list(kernel_list, 'kernel', -1)
+    else:
+        print(bcolors.FAIL+'[ERROR] No kernel found!'+bcolors.ENDC)
+        exit(1)
 
     print('Please enter image name ?')
     selected_image_name = str(input('-->: ').lower().strip())
@@ -407,6 +415,10 @@ elif main_action == '4':
         print('Manage kernels of an image.')
 
         images_list = os.listdir('/var/www/html/preboot_execution_environment/diskless/images/')
+        if not images_list:
+            print(bcolors.FAIL+'[ERROR] No image found!'+bcolors.ENDC)
+            exit(1)
+
         selected_image = int(select_from_list(images_list, 'image to work with', -1))
         selected_image_name = images_list[selected_image]
 
@@ -415,7 +427,11 @@ elif main_action == '4':
         print('Current kernel is: '+str(image_dict['image_data']['image_kernel']))
 
         kernel_list = load_kernel_list(kernels_path)
-        selected_kernel = select_from_list(kernel_list, 'a new kernel to use in the available kernels list', -1)
+        if len(kernel_list) > 0:
+            selected_kernel = select_from_list(kernel_list, 'a new kernel to use in the available kernels list', -1)
+        else:
+            print(bcolors.FAIL+'[ERROR] No kernel found!'+bcolors.ENDC)
+            exit(1)
 
         print(bcolors.OKBLUE+'[INFO] Updating image files.'+bcolors.ENDC)
         file = open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/boot.ipxe', 'r')
@@ -439,6 +455,10 @@ elif main_action == '4':
     elif sub_main_action == '3':
 
         images_list = os.listdir('/var/www/html/preboot_execution_environment/diskless/images/')
+        if not images_list:
+            print(bcolors.FAIL+'[ERROR] No image found!'+bcolors.ENDC)
+            exit(1)
+
         selected_image = int(select_from_list(images_list, 'image to work with', -1))
         selected_image_name_copy = images_list[selected_image]
 
@@ -480,6 +500,10 @@ elif main_action == '4':
     elif sub_main_action == '4':
         print('Please select image to work with')
         images_list = os.listdir('/var/www/html/preboot_execution_environment/diskless/images/')
+        if not images_list:
+            print(bcolors.FAIL+'[ERROR] No image found!'+bcolors.ENDC)
+            exit(1)
+
         for i in range(0, len(images_list)):
             print(' '+str(i+1)+' - '+str(images_list[i]))
         selected_image = images_list[int(input('-->: ').lower().strip())-1]
@@ -521,6 +545,10 @@ elif main_action == '4':
         print('Remove an image.')
 
         images_list = os.listdir('/var/www/html/preboot_execution_environment/diskless/images/')
+        if not images_list:
+            print(bcolors.OKGREEN+'[OK] No image found.'+bcolors.ENDC)
+            exit(0)
+
         selected_image = int(select_from_list(images_list, 'image to work with', -1))
         selected_image_name = images_list[selected_image]
 
