@@ -19,12 +19,6 @@
         - "vars/{{ ansible_facts.os_family }}.yml"
       skip: true
 
-- name: disklessset tool
-  copy:
-    src: disklessset.py
-    dest: /usr/bin/disklessset
-    mode: 0700
-
 - name: Create diskless directories structure
   file:
     path: "{{ item }}"
@@ -44,3 +38,9 @@
     state: present
   tags:
     - package
+
+- name: disklessset tool
+  copy:
+    src: disklessset.py
+    dest: /usr/bin/disklessset
+    mode: 0700
