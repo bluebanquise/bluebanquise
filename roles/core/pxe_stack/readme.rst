@@ -19,8 +19,7 @@ ip address and filename to use.
 **Files location**
 """"""""""""""""""
 
-* PXE boot files are located in /var/www/html/preboot_execution_environment/,
- with path depending of the operating system.
+* PXE boot files are located in /var/www/html/preboot_execution_environment/, with path depending of the operating system.
    * *bin/* directory contains some needed bin files, typically grub2 files for EFI boot.
    * *equipment_profiles/* directory contains equipment_profiles related files, i.e. ipxe file with group variables, and os configuration files (kickstart, preseed, autoyast).
    * *nodes/* directory contains hosts dedicated files, i.e. ipxe file with hosts dedicated variables.
@@ -143,10 +142,10 @@ To be macroscopic:
 #. *equipment_profiles/${equipment-profile}.ipxe* contains the host equipment profile group parameters, like operating system, console, kernel parameters, etc. Then iPXE chain to *menu.ipxe*.
 #. *menu.ipxe* will display a basic menu on screen, with default set to what node is expected to do (this was gathered in *nodes/${hostname}.ipxe*). Timeout is 10s by default before host execute the expected action. Then, iPXE chain to:
 
-  * *osdeploy/${eq-distribution}_${eq-distribution-major-version}.ipxe* if host needs to deploy/redeploy its operating system. These osdeploy files are dynamic, and adapt to parameters gathered in host dedicated file and host equipment_profile file.
-  * *diskless/images/${diskless-image}/boot.ipxe* if host needs to boot in diskless.
-  * *sanboot --no-describe --drive 0x80* if host is legacy/bios/pcbios based. This is a simple command that boot on disk.
-  * *bin/${arch}/grub2_efi_autofind.img* if host is EFI based. This grub2 image will look for a disk with a know operating system, and boot on it.
+   * *osdeploy/${eq-distribution}_${eq-distribution-major-version}.ipxe* if host needs to deploy/redeploy its operating system. These osdeploy files are dynamic, and adapt to parameters gathered in host dedicated file and host equipment_profile file.
+   * *diskless/images/${diskless-image}/boot.ipxe* if host needs to boot in diskless.
+   * *sanboot --no-describe --drive 0x80* if host is legacy/bios/pcbios based. This is a simple command that boot on disk.
+   * *bin/${arch}/grub2_efi_autofind.img* if host is EFI based. This grub2 image will look for a disk with a know operating system, and boot on it.
 
 In case of an OS deployment, if this deployment succeed, in the post install script section, remote host will ask, using a curl command on its side and an CGI python script on server side (*/var/www/cgi-bin/bootswitch.cgi*), to boot next to disk. This CGI python script will simply edit *node/${hostname}.ipxe* file and change its default boot to **bootdisk**.
 
