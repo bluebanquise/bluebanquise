@@ -18,7 +18,7 @@ Network interfaces configurations are done at host level:
 .. code-block:: yaml
 
   network_interfaces:
-    - interface: enp0s3             # Interface name on system
+    - interface: enp0s3        # Interface name on system
       ip4: 10.11.0.1           # ip v4 to be set
       mac: 08:00:27:de:42:22   # MAC address of this NIC
       network: ice1-1          # Logical network connected to
