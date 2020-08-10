@@ -327,7 +327,7 @@ elif main_action == '3':
                 os.system('dnf install -y iproute procps-ng openssh-server NetworkManager  --installroot=/mnt/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
                 os.system('dnf install -y dnf  --installroot=/mnt/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
             elif selected_livenet_type == '1':
-                os.system('dnf install -y @core kernel --setopt=module_platform_id=platform:el8 --installroot=/mnt')
+                os.system('dnf install -y @core kernel-core-{} --setopt=module_platform_id=platform:el8 --installroot=/mnt'.format(kernel_list[int(selected_kernel)].strip('vmlinuz-')))
             print(bcolors.OKBLUE+'[INFO] Setting password into image.'+bcolors.ENDC)
             with open('/mnt/etc/shadow') as ff:
                 newText = ff.read().replace('root:*', 'root:'+password_hash)
