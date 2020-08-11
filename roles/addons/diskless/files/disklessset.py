@@ -11,13 +11,15 @@
 # 2019 - Benoît Leveugle <benoit.leveugle@sphenisc.com>
 # https://github.com/bluebanquise/bluebanquise - MIT license
 
-# Import dependances
-from ClusterShell.NodeSet import NodeSet
-from argparse import ArgumentParser
-import yaml
+# Import dependencies
 import os
 import crypt
+import shutil
+from argparse import ArgumentParser
 from datetime import datetime
+
+import yaml
+from ClusterShell.NodeSet import NodeSet
 
 
 # Colors, from https://stackoverflow.com/questions/287871/how-to-print-colored-text-in-terminal-in-python
@@ -42,12 +44,10 @@ def load_file(filename):
 def load_kernel_list(kernels_path):
     print(bcolors.OKBLUE+'[INFO] Loading kernels from '+kernels_path+bcolors.ENDC)
     file_list = os.listdir(kernels_path)
-    nb_kernels = 0
-    kernel_list = [None]
+    kernel_list = list()
     for i in file_list:
         if 'linu' in i:
-            kernel_list[nb_kernels] = i
-            nb_kernels = nb_kernels + 1
+            kernel_list.append(i)
     return kernel_list
 
 
@@ -181,8 +181,7 @@ print('BlueBanquise Diskless manager')
 print(' 1 - List available kernels')
 print(' 2 - Generate a new initramfs')
 print(' 3 - Generate a new diskless image')
-print(' 4 - Manage/list existing diskless images')
-print(' 5 - Remove a diskless image')
+print(' 4 - Manage existing diskless images')
 
 main_action = str(input('-->: ').lower().strip())
 
@@ -193,7 +192,7 @@ if main_action == '1':
     print('')
     print('Available kernels:')
     print("    │")
-    if kernel_list[0] is not None:
+    if len(kernel_list) > 0:
         for i in kernel_list:
             if os.path.exists(kernels_path+'/initramfs-kernel-'+(i.strip('vmlinuz-'))):
                 initramfs_status = bcolors.OKGREEN+'initramfs present'+bcolors.ENDC
@@ -205,13 +204,17 @@ if main_action == '1':
                 print("    ├── "+str(i)+' - '+initramfs_status)
         print(bcolors.OKGREEN+'\n[OK] Done.'+bcolors.ENDC)
     else:
-        print(bcolors.WARNING+'[WARNING] No kernel founds!'+bcolors.ENDC)
+        print(bcolors.WARNING+'[WARNING] No kernel found!'+bcolors.ENDC)
 
 elif main_action == '2':
 
     kernel_list = load_kernel_list(kernels_path)
 
-    selected_kernel = select_from_list(kernel_list, 'kernel', -1)
+    if len(kernel_list) > 0:
+        selected_kernel = select_from_list(kernel_list, 'kernel', -1)
+    else:
+        print(bcolors.FAIL+'[ERROR] No kernel found!'+bcolors.ENDC)
+        exit(1)
 
     print(bcolors.OKBLUE+'[INFO] Now generating initramfs... May take some time.'+bcolors.ENDC)
     os.system('dracut --xz -v -m "network base nfs" --add "livenet" --add-drivers xfs --no-hostonly --nolvmconf '+kernels_path+'/initramfs-kernel-'+(kernel_list[int(selected_kernel)].strip('vmlinuz-'))+' --force')
@@ -228,7 +231,11 @@ elif main_action == '3':
     selected_image_type = select_from_list(image_types, 'image type', -1)
 
     kernel_list = load_kernel_list(kernels_path)
-    selected_kernel = select_from_list(kernel_list, 'kernel', -1)
+    if len(kernel_list) > 0:
+        selected_kernel = select_from_list(kernel_list, 'kernel', -1)
+    else:
+        print(bcolors.FAIL+'[ERROR] No kernel found!'+bcolors.ENDC)
+        exit(1)
 
     print('Please enter image name ?')
     selected_image_name = str(input('-->: ').lower().strip())
@@ -283,20 +290,40 @@ elif main_action == '3':
         print(bcolors.OKBLUE+'[INFO] Entering livenet dedicated part.'+bcolors.ENDC)
 
         print('Please select livenet image generation profile:')
-        print(' 1 - Standard: core (~1.2Gb)')
-        print(' 2 - Small: openssh, dnf and NetworkManager (~248Mb)')
-        print(' 3 - Minimal: openssh only (~129Mb)')
+        print(' 1 - Standard: core (~1.2GB)')
+        print(' 2 - Small: openssh, dnf and NetworkManager (~248MB)')
+        print(' 3 - Minimal: openssh only (~129MB)')
+        print(' 4 - Custom: core + selection of additional packages')
+
         selected_livenet_type = str(int(input('-->: ').lower().strip()))
 
-        print('Please choose image size, considering /1000: 2M for 2Gb, 600K for 600Mb, etc:')
-        selected_livenet_size = str(input('-->: ').strip())
+        if selected_livenet_type == '4':
+            print('Enter list of additional packages to install:')
+            selected_packages_list = str(input('-->: ').strip())
 
-        print('Do you want to create a new NFS image with the following parameters:')
+        print('Please choose image size:')
+        print('(supported units: M=1024*1024, G=1024*1024*1024)')
+        selected_livenet_size = str(input('-->: ').strip())
+        if selected_livenet_size[-1] == 'G':
+            livenet_size = int(selected_livenet_size[:-1])*1024
+        elif selected_livenet_size[-1] == 'M':
+            livenet_size = int(selected_livenet_size[:-1])
+
+        print('Enter path to SSH public key (left empty to disable key injection):')
+        selected_ssh_pub_key = str(input('-->: ').strip())
+        if selected_ssh_pub_key and not os.path.exists(selected_ssh_pub_key):
+            print('SSH public key not found: {0}'.format(selected_ssh_pub_key))
+            exit(1)
+
+        print('Do you want to create a new livenet image with the following parameters:')
         print('  Image name: \t\t'+selected_image_name)
         print('  Kernel version: \t'+kernel_list[int(selected_kernel)])
         print('  Root password: \t'+password_raw)
         print('  Image profile: \t'+selected_livenet_type)
-        print('  Image size /1000: \t'+selected_livenet_size)
+        print('  Image size: \t\t'+str(livenet_size)+'M')
+        print('  SSH pubkey: \t\t'+str(selected_ssh_pub_key))
+        if selected_livenet_type == '4':
+            print('  Additional packages: \t'+selected_packages_list)
 
         answer = str(input("Confirm ? Enter yes or no: ").lower().strip())
 
@@ -312,7 +339,7 @@ elif main_action == '3':
             print(bcolors.OKBLUE+'[INFO] Creating empty image file, format and mount it.'+bcolors.ENDC)
             os.system('rm -Rf '+image_working_directory+'/LiveOS')
             os.system('mkdir -p '+image_working_directory+'/LiveOS')
-            os.system('dd if=/dev/zero of='+image_working_directory+'/LiveOS/rootfs.img bs=1k count='+selected_livenet_size)
+            os.system('dd if=/dev/zero of='+image_working_directory+'/LiveOS/rootfs.img bs=1M count='+str(livenet_size))
             os.system('mkfs.xfs '+image_working_directory+'/LiveOS/rootfs.img')
             os.system('mount -o loop '+image_working_directory+'/LiveOS/rootfs.img /mnt')
             print(bcolors.OKBLUE+'[INFO] Generating cache link for dnf.'+bcolors.ENDC)
@@ -328,17 +355,28 @@ elif main_action == '3':
                 os.system('dnf install -y dnf  --installroot=/mnt/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
             elif selected_livenet_type == '1':
                 os.system('dnf groupinstall -y "core"  --setopt=module_platform_id=platform:el8 --installroot=/mnt')
+            elif selected_livenet_type == '4':
+                os.system('dnf install -y @core {0} --setopt=module_platform_id=platform:el8 --installroot=/mnt'.format(selected_packages_list))
             print(bcolors.OKBLUE+'[INFO] Setting password into image.'+bcolors.ENDC)
             with open('/mnt/etc/shadow') as ff:
                 newText = ff.read().replace('root:*', 'root:'+password_hash)
             with open('/mnt/etc/shadow', "w") as ff:
                 ff.write(newText)
+            if selected_ssh_pub_key:
+                print(bcolors.OKBLUE+'[INFO] Injecting SSH public key into image.'+bcolors.ENDC)
+                os.mkdir('/mnt/root/.ssh/')
+                shutil.copyfile(selected_ssh_pub_key, '/mnt/root/.ssh/authorized_keys')
+            print(bcolors.OKBLUE+'[INFO] Setting image information.'+bcolors.ENDC)
+            with open('/mnt/etc/os-release', 'a') as ff:
+                ff.writelines(['BLUEBANQUISE_IMAGE_NAME="{0}"\n'.format(selected_image_name),
+                               'BLUEBANQUISE_IMAGE_KERNEL="{0}"\n'.format(kernel_list[int(selected_kernel)]),
+                               'BLUEBANQUISE_IMAGE_DATE="{0}"\n'.format(datetime.today().strftime('%Y-%m-%d'))])
             print(bcolors.OKBLUE+'[INFO] Packaging and moving files... May take some time.'+bcolors.ENDC)
             os.system('umount /mnt')
 #            os.system('rm -Rf /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
 #            os.system('mkdir /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
             os.system('mksquashfs '+image_working_directory+' /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/squashfs.img')
-            os.system('cp -a '+image_working_directory+'  /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/')
+            shutil.rmtree(image_working_directory)
             print(bcolors.OKBLUE+'[INFO] Registering new image.'+bcolors.ENDC)
             file_content = '''image_data:
   image_name: {image_name}
@@ -358,6 +396,7 @@ elif main_action == '4':
     print(' 2 - Manage kernel of an image')
     print(' 3 - Create a golden from a staging NFS image')
     print(' 4 - Manage hosts of an NFS image')
+    print(' 5 - Remove an image')
     sub_main_action = str(input('-->: ').lower().strip())
 
     if sub_main_action == '1':
@@ -376,6 +415,10 @@ elif main_action == '4':
         print('Manage kernels of an image.')
 
         images_list = os.listdir('/var/www/html/preboot_execution_environment/diskless/images/')
+        if not images_list:
+            print(bcolors.FAIL+'[ERROR] No image found!'+bcolors.ENDC)
+            exit(1)
+
         selected_image = int(select_from_list(images_list, 'image to work with', -1))
         selected_image_name = images_list[selected_image]
 
@@ -384,7 +427,11 @@ elif main_action == '4':
         print('Current kernel is: '+str(image_dict['image_data']['image_kernel']))
 
         kernel_list = load_kernel_list(kernels_path)
-        selected_kernel = select_from_list(kernel_list, 'a new kernel to use in the available kernels list', -1)
+        if len(kernel_list) > 0:
+            selected_kernel = select_from_list(kernel_list, 'a new kernel to use in the available kernels list', -1)
+        else:
+            print(bcolors.FAIL+'[ERROR] No kernel found!'+bcolors.ENDC)
+            exit(1)
 
         print(bcolors.OKBLUE+'[INFO] Updating image files.'+bcolors.ENDC)
         file = open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/boot.ipxe', 'r')
@@ -408,6 +455,10 @@ elif main_action == '4':
     elif sub_main_action == '3':
 
         images_list = os.listdir('/var/www/html/preboot_execution_environment/diskless/images/')
+        if not images_list:
+            print(bcolors.FAIL+'[ERROR] No image found!'+bcolors.ENDC)
+            exit(1)
+
         selected_image = int(select_from_list(images_list, 'image to work with', -1))
         selected_image_name_copy = images_list[selected_image]
 
@@ -449,6 +500,10 @@ elif main_action == '4':
     elif sub_main_action == '4':
         print('Please select image to work with')
         images_list = os.listdir('/var/www/html/preboot_execution_environment/diskless/images/')
+        if not images_list:
+            print(bcolors.FAIL+'[ERROR] No image found!'+bcolors.ENDC)
+            exit(1)
+
         for i in range(0, len(images_list)):
             print(' '+str(i+1)+' - '+str(images_list[i]))
         selected_image = images_list[int(input('-->: ').lower().strip())-1]
@@ -486,5 +541,22 @@ elif main_action == '4':
                     print("Working on node: "+str(node))
                     os.system('rm -Rf /diskless/images/'+selected_image+'/nodes/'+node)
 
+    elif sub_main_action == '5':
+        print('Remove an image.')
+
+        images_list = os.listdir('/var/www/html/preboot_execution_environment/diskless/images/')
+        if not images_list:
+            print(bcolors.OKGREEN+'[OK] No image found.'+bcolors.ENDC)
+            exit(0)
+
+        selected_image = int(select_from_list(images_list, 'image to work with', -1))
+        selected_image_name = images_list[selected_image]
+
+        try:
+            shutil.rmtree('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
+            print("Image "+selected_image_name+" has been deleted.")
+        except Exception as e:
+            print(e)
+            raise
 
 quit()
