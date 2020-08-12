@@ -341,11 +341,17 @@ elif main_action == '3':
             try:
                 os.makedirs(image_working_directory)
             except FileExistsError:
-                print(bcolors.WARNING+'[WARNING] The directory '+image_working_directory+' already exists. Cleaning.'+bcolors.ENDC)
+                print(bcolors.WARNING + '[WARNING] The directory ' + image_working_directory + ' already exists. Cleaning.' + bcolors.ENDC)
                 shutil.rmtree(image_working_directory)
                 os.makedirs(image_working_directory)
             except OSError:
-                print(bcolors.FAIL+'[ERROR] Cannot create directory '+image_working_directory+bcolors.ENDC)
+                print(bcolors.FAIL + '[ERROR] Cannot create directory ' + image_working_directory + bcolors.ENDC)
+
+            installroot = os.path.join(image_working_directory, 'mnt/')
+            try:
+                os.mkdir(installroot)
+            except OSError:
+                print(bcolors.FAIL + '[ERROR] Cannot create directory ' + installroot + bcolors.ENDC)
 
             print(bcolors.OKBLUE+'[INFO] Cleaning and creating image folders.'+bcolors.ENDC)
             os.system('rm -Rf /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
@@ -360,53 +366,49 @@ elif main_action == '3':
             os.system('dd if=/dev/zero of='+image_working_directory+'/LiveOS/rootfs.img bs=1M count='+str(livenet_size))
             os.system('mkfs.xfs '+image_working_directory+'/LiveOS/rootfs.img')
             if selinux:
-                os.system('mount -o defcontext="system_u:object_r:default_t:s0",loop '+image_working_directory+'/LiveOS/rootfs.img /mnt')
+                os.system('mount -o defcontext="system_u:object_r:default_t:s0",loop ' + image_working_directory+'/LiveOS/rootfs.img ' + installroot)
             else:
-                os.system('mount -o loop '+image_working_directory+'/LiveOS/rootfs.img /mnt')
+                os.system('mount -o loop ' + image_working_directory + '/LiveOS/rootfs.img ' + installroot)
             print(bcolors.OKBLUE+'[INFO] Generating cache link for dnf.'+bcolors.ENDC)
-            os.system('mkdir /mnt/var/cache/ -p')
-#            os.system('rm -Rf '+dnf_cache_directory+'/dnfcache')
-#            os.system('mkdir -p '+dnf_cache_directory+'/dnfcache')
-#            os.system('ln -s '+dnf_cache_directory+'/dnfcache/ /mnt/var/cache/dnf')
             print(bcolors.OKBLUE+'[INFO] Installing system into image.'+bcolors.ENDC)
             if selected_livenet_type == '3':
-                os.system('dnf install -y iproute procps-ng openssh-server  --installroot=/mnt/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
+                os.system('dnf install -y iproute procps-ng openssh-server  --installroot={0} --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest'.format(installroot))
             elif selected_livenet_type == '2':
-                os.system('dnf install -y iproute procps-ng openssh-server NetworkManager  --installroot=/mnt/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
-                os.system('dnf install -y dnf  --installroot=/mnt/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
+                os.system('dnf install -y iproute procps-ng openssh-server NetworkManager  --installroot={0} --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest'.format(installroot))
+                os.system('dnf install -y dnf  --installroot={0} --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest'.format(installroot))
             elif selected_livenet_type == '1':
-                os.system('dnf groupinstall -y "core"  --setopt=module_platform_id=platform:el8 --installroot=/mnt')
+                os.system('dnf groupinstall -y "core"  --setopt=module_platform_id=platform:el8 --installroot={0}'.format(installroot))
             elif selected_livenet_type == '4':
                 try:
-                    if os.system('dnf install -y @core {0} --setopt=module_platform_id=platform:el8 --installroot=/mnt'.format(selected_packages_list)) != 0:
+                    if os.system('dnf install -y @core {0} --setopt=module_platform_id=platform:el8 --installroot={1}'.format(selected_packages_list, installroot)) != 0:
                         raise Exception('dnf install failed')
                 except Exception as e:
                     print(bcolors.FAIL+'[ERROR] '+str(e)+': a package was not found or the repositories are broken.'+bcolors.ENDC)
                     exit(1)
 
             print(bcolors.OKBLUE+'[INFO] Setting password into image.'+bcolors.ENDC)
-            with open('/mnt/etc/shadow') as ff:
+            with open(os.path.join(installroot, 'etc/shadow'), "r+") as ff:
                 newText = ff.read().replace('root:*', 'root:'+password_hash)
-            with open('/mnt/etc/shadow', "w") as ff:
+                ff.seek(0)
                 ff.write(newText)
             if selected_ssh_pub_key:
                 print(bcolors.OKBLUE+'[INFO] Injecting SSH public key into image.'+bcolors.ENDC)
-                os.mkdir('/mnt/root/.ssh/')
-                shutil.copyfile(selected_ssh_pub_key, '/mnt/root/.ssh/authorized_keys')
+                os.mkdir(os.path.join(installroot, 'root/.ssh/'))
+                shutil.copyfile(selected_ssh_pub_key, os.path.join(installroot, 'root/.ssh/authorized_keys'))
             print(bcolors.OKBLUE+'[INFO] Setting image information.'+bcolors.ENDC)
-            with open('/mnt/etc/os-release', 'a') as ff:
+            with open(os.path.join(installroot, 'etc/os-release'), 'a') as ff:
                 ff.writelines(['BLUEBANQUISE_IMAGE_NAME="{0}"\n'.format(selected_image_name),
                                'BLUEBANQUISE_IMAGE_KERNEL="{0}"\n'.format(kernel_list[int(selected_kernel)]),
                                'BLUEBANQUISE_IMAGE_DATE="{0}"\n'.format(datetime.today().strftime('%Y-%m-%d'))])
             print(bcolors.OKBLUE+'[INFO] Packaging and moving files... May take some time.'+bcolors.ENDC)
 
             if selinux:
-                os.system('dnf install -y libselinux-utils policycoreutils selinux-policy-targeted --installroot=/mnt/ --setopt=module_platform_id=platform:el8 --nobest')
-                check_call('mount --bind /proc /mnt/proc', shell=True)
-                check_call('mount --bind /sys /mnt/sys', shell=True)
-                check_call('mount --bind /sys/fs/selinux /mnt/sys/fs/selinux', shell=True)
+                os.system('dnf install -y libselinux-utils policycoreutils selinux-policy-targeted --installroot={0} --setopt=module_platform_id=platform:el8 --nobest'.format(installroot))
+                check_call('mount --bind /proc '+os.path.join(installroot, 'proc'), shell=True)
+                check_call('mount --bind /sys '+os.path.join(installroot, 'sys'), shell=True)
+                check_call('mount --bind /sys/fs/selinux '+os.path.join(installroot, 'sys/fs/selinux'), shell=True)
                 real_root = os.open("/", os.O_RDONLY)
-                os.chroot("/mnt/")
+                os.chroot(installroot)
                 os.chdir("/")
 
                 check_call('restorecon -Rv /', shell=True)
@@ -414,9 +416,10 @@ elif main_action == '3':
                 os.fchdir(real_root)
                 os.chroot(".")
                 os.close(real_root)
-                check_call('umount /mnt/{sys/fs/selinux,sys,proc}', shell=True)
+                check_call('umount ' + installroot + '{sys/fs/selinux,sys,proc}', shell=True)
 
-            os.system('umount /mnt')
+            os.system('umount ' + installroot)
+            os.rmdir(installroot)
 #            os.system('rm -Rf /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
 #            os.system('mkdir /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
             os.system('mksquashfs '+image_working_directory+' /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/squashfs.img')
