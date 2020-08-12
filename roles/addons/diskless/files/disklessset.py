@@ -175,7 +175,7 @@ parser = ArgumentParser()
 passed_arguments = parser.parse_args()
 
 dnf_cache_directory = '/root/dnf'  # '/dev/shm/'
-image_working_directory = '/root/diskless/workdir/'
+image_working_directory_base = '/var/tmp/diskless/workdir/'
 kernels_path = '/var/www/html/preboot_execution_environment/diskless/kernels/'
 
 print('BlueBanquise Diskless manager')
@@ -336,6 +336,16 @@ elif main_action == '3':
         answer = str(input("Confirm ? Enter yes or no: ").lower().strip())
 
         if answer in ['yes', 'y']:
+
+            image_working_directory = os.path.join(image_working_directory_base, selected_image_name)
+            try:
+                os.makedirs(image_working_directory)
+            except FileExistsError:
+                print(bcolors.WARNING+'[WARNING] The directory '+image_working_directory+' already exists. Cleaning.'+bcolors.ENDC)
+                shutil.rmtree(image_working_directory)
+                os.makedirs(image_working_directory)
+            except OSError:
+                print(bcolors.FAIL+'[ERROR] Cannot create directory '+image_working_directory+bcolors.ENDC)
 
             print(bcolors.OKBLUE+'[INFO] Cleaning and creating image folders.'+bcolors.ENDC)
             os.system('rm -Rf /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
