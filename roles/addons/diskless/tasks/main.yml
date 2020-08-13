@@ -19,6 +19,13 @@
         - "vars/{{ ansible_facts.os_family }}.yml"
       skip: true
 
+- name: "package █ Install {{ diskless_packages_to_install | join(' ') }}"
+  package:
+    name: "{{ diskless_packages_to_install }}"
+    state: present
+  tags:
+    - package
+
 - name: Create diskless directories structure
   file:
     path: "{{ item }}"
@@ -31,6 +38,9 @@
    - /var/www/html/preboot_execution_environment/diskless
    - /var/www/html/preboot_execution_environment/diskless/images
    - /var/www/html/preboot_execution_environment/diskless/kernels
+   - /etc/bluebanquise/tools/disklessset/
+   - /etc/bluebanquise/tools/disklessset/inventory/
+   - /var/diskless/
 
 - name: Install dracut-live
   package:

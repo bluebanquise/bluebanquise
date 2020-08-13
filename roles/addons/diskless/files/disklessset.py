@@ -349,10 +349,10 @@ elif main_action == '3':
 #            os.system('ln -s '+dnf_cache_directory+'/dnfcache/ /mnt/var/cache/dnf')
             print(bcolors.OKBLUE+'[INFO] Installing system into image.'+bcolors.ENDC)
             if selected_livenet_type == '3':
-                os.system('dnf install -y iproute procps-ng openssh-server  --installroot=/mnt/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
+                os.system('dnf install -y iproute procps-ng openssh-server  --installroot=/mnt/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --releasever=8 --nobest')
             elif selected_livenet_type == '2':
-                os.system('dnf install -y iproute procps-ng openssh-server NetworkManager  --installroot=/mnt/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
-                os.system('dnf install -y dnf  --installroot=/mnt/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
+                os.system('dnf install -y iproute procps-ng openssh-server NetworkManager  --installroot=/mnt/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --releasever=8 --nobest')
+                os.system('dnf install -y dnf  --installroot=/mnt/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --releasever=8 --nobest')
             elif selected_livenet_type == '1':
                 os.system('dnf groupinstall -y "core"  --setopt=module_platform_id=platform:el8 --installroot=/mnt')
             elif selected_livenet_type == '4':
@@ -396,7 +396,8 @@ elif main_action == '4':
     print(' 2 - Manage kernel of an image')
     print(' 3 - Create a golden from a staging NFS image')
     print(' 4 - Manage hosts of an NFS image')
-    print(' 5 - Remove an image')
+    print(' 5 - Manage livenet images')
+    print(' 6 - Remove an image')
     sub_main_action = str(input('-->: ').lower().strip())
 
     if sub_main_action == '1':
@@ -541,7 +542,7 @@ elif main_action == '4':
                     print("Working on node: "+str(node))
                     os.system('rm -Rf /diskless/images/'+selected_image+'/nodes/'+node)
 
-    elif sub_main_action == '5':
+    elif sub_main_action == '6':
         print('Remove an image.')
 
         images_list = os.listdir('/var/www/html/preboot_execution_environment/diskless/images/')
@@ -558,5 +559,190 @@ elif main_action == '4':
         except Exception as e:
             print(e)
             raise
+
+
+    elif sub_main_action == '5':
+        print('Manages livenet images')
+        print(' 1 - Unsquash and mount')
+        print(' 2 - Unmount and squash')
+        print(' 3 - Resize')
+        sub_sub_main_action = str(input('-->: ').lower().strip())
+
+        if sub_sub_main_action == '1':
+
+            images_list = os.listdir('/var/www/html/preboot_execution_environment/diskless/images/')
+            if not images_list:
+                print(bcolors.OKGREEN+'[OK] No image found.'+bcolors.ENDC)
+                exit(0)
+
+            selected_image = int(select_from_list(images_list, 'image to work with', -1))
+            selected_image_name = images_list[selected_image]
+
+
+            print('Cleaning before process...')
+            try:
+                os.system('rm -Rf '+image_working_directory)
+                os.system('rm -Rf /var/diskless/'+selected_image_name)
+            except Exception as e:
+                print(e)
+                raise
+
+            print('Creating new working dirs')
+            try:
+                os.system('mkdir -p '+image_working_directory)
+                os.system('mkdir -p /var/diskless/'+selected_image_name+'/mnt')
+                os.system('mkdir -p /var/diskless/'+selected_image_name+'/inventory')
+            except Exception as e:
+                print(e)
+                raise
+
+            print('Unsquash image')
+            try:
+                os.system('unsquashfs -d '+image_working_directory+'/squashfs-root /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/squashfs.img')
+            except Exception as e:
+                print(e)
+                raise
+
+            print('Mounting image')
+            try:
+                os.system('mount '+image_working_directory+'/squashfs-root/LiveOS/rootfs.img /var/diskless/'+selected_image_name+'/mnt/')
+                os.system('mount --bind /proc /var/diskless/'+selected_image_name+'/mnt/proc/')
+                os.system('mount --bind /sys /var/diskless/'+selected_image_name+'/mnt/sys/')
+            except Exception as e:
+                print(e)
+                raise
+
+            print('Generating temporary inventory')
+            try:
+                os.system('echo /var/diskless/'+selected_image_name+'/mnt ansible_connection=chroot > /var/diskless/'+selected_image_name+'/inventory/host')
+            except Exception as e:
+                print(e)
+                raise
+
+            print('Done')
+            exit(0)
+
+
+        if sub_sub_main_action == '2':
+
+            images_list = os.listdir('/var/diskless/')
+            if not images_list:
+                print(bcolors.OKGREEN+'[OK] No image found.'+bcolors.ENDC)
+                exit(0)
+
+            selected_image = int(select_from_list(images_list, 'image to work with', -1))
+            selected_image_name = images_list[selected_image]
+
+
+            print('Unmouting image')
+            try:
+                os.system('umount /var/diskless/'+selected_image_name+'/mnt/proc/')
+                os.system('umount /var/diskless/'+selected_image_name+'/mnt/sys/')
+                os.system('umount /var/diskless/'+selected_image_name+'/mnt/')
+            except Exception as e:
+                print(e)
+                raise
+
+            print('Backuping old image and generating new one')
+            print('Backup at /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/squashfs.img.bkp')
+            try:
+                os.system('mv /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/squashfs.img  /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/squashfs.img.bkp')
+                os.system('mksquashfs '+image_working_directory+'/squashfs-root/ /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/squashfs.img')
+            except Exception as e:
+                print(e)
+                raise
+
+            print('Cleaning backup and working dirs')
+            try:
+                os.system('rm -Rf '+image_working_directory)
+                os.system('rm -Rf /var/diskless/'+selected_image_name)
+                os.system('rm -f /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/squashfs.img.bkp')
+            except Exception as e:
+                print(e)
+                raise
+            exit(0)
+
+        if sub_sub_main_action == '3':
+
+            images_list = os.listdir('/var/www/html/preboot_execution_environment/diskless/images/')
+            if not images_list:
+                print(bcolors.OKGREEN+'[OK] No image found.'+bcolors.ENDC)
+                exit(0)
+
+            selected_image = int(select_from_list(images_list, 'image to work with', -1))
+            selected_image_name = images_list[selected_image]
+
+            print('Please choose image new size:')
+            print('(supported units: M=1024*1024, G=1024*1024*1024)')
+            print('Current tool version do NOT check anything, be carefull to choose enough space')
+            selected_livenet_size = str(input('-->: ').strip())
+            if selected_livenet_size[-1] == 'G':
+                livenet_size = int(selected_livenet_size[:-1])*1024
+            elif selected_livenet_size[-1] == 'M':
+                livenet_size = int(selected_livenet_size[:-1])
+
+            print('Cleaning before process...')
+            try:
+                os.system('rm -Rf '+image_working_directory)
+                os.system('rm -Rf '+image_working_directory+'_copy')
+                os.system('rm -Rf /var/diskless/'+selected_image_name)
+            except Exception as e:
+                print(e)
+                raise
+
+            print('Generating and mounting new empty image')
+            try:
+                os.system('mkdir -p '+image_working_directory+'_copy/squashfs-root/LiveOS/')
+                os.system('dd if=/dev/zero of=/'+image_working_directory+'_copy/squashfs-root/LiveOS/rootfs.img bs=1M count='+str(livenet_size))
+                os.system('mkfs.xfs '+image_working_directory+'_copy/squashfs-root/LiveOS/rootfs.img')
+                os.system('mount '+image_working_directory+'_copy/squashfs-root/LiveOS/rootfs.img /mnt')
+            except Exception as e:
+                print(e)
+                raise
+
+            print('Unsquash and mount previous image')
+            try:
+                os.system('mkdir -p '+image_working_directory)
+                os.system('mkdir -p /var/diskless/'+selected_image_name+'/mnt')
+                os.system('unsquashfs -d '+image_working_directory+'/squashfs-root /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/squashfs.img')
+                os.system('mount '+image_working_directory+'/squashfs-root/LiveOS/rootfs.img /var/diskless/'+selected_image_name+'/mnt/')
+            except Exception as e:
+                print(e)
+                raise
+
+            print('Copy old image into new one...')
+            try:
+                os.system('cp -a /var/diskless/'+selected_image_name+'/mnt/* /mnt/')
+                os.system('sync')
+            except Exception as e:
+                print(e)
+                raise
+
+            print('Unmounting both images')
+            try:
+                os.system('umount /mnt')
+                os.system('umount /var/diskless/'+selected_image_name+'/mnt')
+            except Exception as e:
+                print(e)
+                raise
+
+            print('Removing old squashfs and egenrating new one')
+            try:
+                os.system('rm /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/squashfs.img')
+                os.system('mksquashfs '+image_working_directory+'_copy/squashfs-root/ /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/squashfs.img')
+            except Exception as e:
+                print(e)
+                raise
+
+            print('Cleaning')
+            try:
+                os.system('rm -Rf '+image_working_directory)
+                os.system('rm -Rf '+image_working_directory+'_copy')
+                os.system('rm -Rf /var/diskless/'+selected_image_name)
+            except Exception as e:
+                print(e)
+                raise
+
+            exit(0)
 
 quit()
