@@ -14,6 +14,7 @@
 # Import dependencies
 import os
 import crypt
+import hashlib
 import shutil
 from argparse import ArgumentParser
 from datetime import datetime
@@ -435,14 +436,28 @@ elif main_action == '3':
 #            os.system('rm -Rf /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
 #            os.system('mkdir /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
             os.system('mksquashfs '+image_working_directory+' /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/squashfs.img')
+            try:
+                sha256sum = hashlib.sha256(open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/squashfs.img', 'rb').read()).hexdigest()
+            except Exception:
+                print(e)
             shutil.rmtree(image_working_directory)
             print(bcolors.OKBLUE+'[INFO] Registering new image.'+bcolors.ENDC)
             file_content = '''image_data:
   image_name: {image_name}
   image_kernel: {image_kernel}
   image_creation_date: {image_date}
+  image_creation_timestamp: {image_timestamp}
+  image_selinux_enabled: {image_selinux}
+  image_sha256: {image_sha256}
+  image_size: {image_size}
   image_type: livenet
-'''.format(image_name=selected_image_name, image_kernel=kernel_list[int(selected_kernel)], image_date=datetime.today().strftime('%Y-%m-%d'))
+'''.format(image_name=selected_image_name,
+                image_kernel=kernel_list[int(selected_kernel)],
+                image_date=datetime.today().strftime('%Y-%m-%d'),
+                image_timestamp=int(datetime.now().timestamp()),
+                image_selinux=selinux,
+                image_size=livenet_size,  # Size unit: MiB
+                image_sha256=sha256sum)
             with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml', "w") as ff:
                 ff.write(file_content)
             print(bcolors.OKGREEN+'\n[OK] Done creating image.'+bcolors.ENDC)
