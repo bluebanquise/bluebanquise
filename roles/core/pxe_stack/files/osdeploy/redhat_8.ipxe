@@ -25,6 +25,10 @@ echo | Loading initial ramdisk ...
 initrd ${images-root}/os/images/pxeboot/initrd.img
 
 echo | ALL DONE! We are ready.
+echo | Downloaded images report:
+
+imgstat
+
 echo | Booting in 4s ...
 echo |
 echo +----------------------------------------------------+
