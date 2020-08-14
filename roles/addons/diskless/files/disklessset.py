@@ -87,6 +87,10 @@ echo | Loading initial ramdisk ...
 initrd http://${{next-server}}/preboot_execution_environment/diskless/kernels/${{image-initramfs}}
 
 echo | ALL DONE! We are ready.
+echo | Downloaded images report:
+
+imgstat
+
 echo | Booting in 4s ...
 echo |
 echo +----------------------------------------------------+
@@ -123,6 +127,10 @@ echo | Loading initial ramdisk ...
 initrd http://${{next-server}}/preboot_execution_environment/diskless/kernels/${{image-initramfs}}
 
 echo | ALL DONE! We are ready.
+echo | Downloaded images report:
+
+imgstat
+
 echo | Booting in 4s ...
 echo |
 echo +----------------------------------------------------+
@@ -158,6 +166,10 @@ echo | Loading initial ramdisk ...
 initrd http://${{next-server}}/preboot_execution_environment/diskless/kernels/${{image-initramfs}}
 
 echo | ALL DONE! We are ready.
+echo | Downloaded images report:
+
+imgstat
+
 echo | Booting in 4s ...
 echo |
 echo +----------------------------------------------------+
