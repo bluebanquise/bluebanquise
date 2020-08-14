@@ -79,7 +79,7 @@ for example::
 
 simply add to the playbook of your choice (which is for the prometheus clients) your tweaks (hosts, and if you want to start or enable services) ::
 
-  hosts: isma1-1
+  hosts: <your_management>
   vars:
     start_services: false
     enable_services: false
@@ -253,7 +253,7 @@ for example:
 
 will return::
 
-  node_exporter_build_info{branch="HEAD",goversion="go1.12.5",instance="isma1-2:9100",job="equipment_R423_E4m_node_exporter",revision="3db77732e925c08f675d7404a8c46466b2ece83e",version="0.18.1"}
+  node_exporter_build_info{branch="HEAD",goversion="go1.12.5",instance="1-2:9100",job="equipment_R_node_exporter",revision="3db77732e925c08f675d7404a8c46466b2ece83e",version="0.18.1"}
 
 because it has the same instance name and job name as a node_cpu_package_throttles_total
 
@@ -265,9 +265,9 @@ for example:
 
 will return::
 
-  node_exporter_build_info{branch="HEAD",goversion="go1.12.5",instance="isma1-2:9100",job="equipment_R423_E4m_node_exporter",revision="3db77732e925c08f675d7404a8c46466b2ece83e",version="0.18.1"}
-  node_cpu_package_throttles_total{instance="isma1-2:9100",job="equipment_R423_E4m_node_exporter",package="0"}
-  node_cpu_package_throttles_total{instance="isma1-2:9100",job="equipment_R423_E4m_node_exporter",package="1"}
+  node_exporter_build_info{branch="HEAD",goversion="go1.12.5",instance="1-2:9100",job="equipment_R_node_exporter",revision="3db77732e925c08f675d7404a8c46466b2ece83e",version="0.18.1"}
+  node_cpu_package_throttles_total{instance="1-2:9100",job="equipment_R_node_exporter",package="0"}
+  node_cpu_package_throttles_total{instance="1-2:9100",job="equipment_R_node_exporter",package="1"}
 
 
 vector1 unless vector2 results in a vector consisting of the elements of vector1 for which there are no elements in vector2 with exactly matching label sets. All matching elements in both vectors are dropped.
@@ -382,7 +382,7 @@ example of alert::
   - name: Alerts for nodes
     rules:
     - alert: high_RAM_ Usage
-      expr: (1 - (node_memory_MemAvailable_bytes{job=~".*.R423.*"} / (node_memory_MemTotal_bytes{job=~".*.R423.*"})))* 100 > 90
+      expr: (1 - (node_memory_MemAvailable_bytes{job=~".*.R.*"} / (node_memory_MemTotal_bytes{job=~".*.R.*"})))* 100 > 90
       for: 1m
       labels:
         severity: warning
@@ -399,7 +399,7 @@ The annotations section is here to set a summary and description of the alert. y
 Alertmanager
 ^^^^^^^^^^^^
 
-Alertmanager is a plugin for prometheus, used to manage alerts. by default, it's located under under the isma's ip adress, port 9093.
+Alertmanager is a plugin for prometheus, used to manage alerts. by default, it's located under the management node's ip adress, port 9093.
 you can customize alertmanager under /etc/alertmanager/alertmanager.yml.
 by default it looks like this::
 
@@ -464,12 +464,12 @@ This is where all the exporters and the scrape related variables are stored. By 
 
   # GENERIC EXPORTER
   # All equipment profiles and their exporters
-    - job_name: 'equipment_R423_E4m_node_exporter'
+    - job_name: 'equipment_R_node_exporter'
       scrape_interval:
       scrape_timeout:
       static_configs:
-        - targets: ['isma1-1:9100']
-        - targets: ['isma1-2:9100']
+        - targets: ['management1-1:9100']
+        - targets: ['management1-2:9100']
 
 rule_files is where the alert related stuff is located
 

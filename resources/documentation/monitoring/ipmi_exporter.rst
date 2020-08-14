@@ -7,7 +7,7 @@ By default, the ipmi_exporter runs under the port 9290.
 
 To access the metrics, either do::
   
-  curl 'http://172.16.0.2:9290/ipmi?target=isma1-1-bmc&module=equipment_R423_E4m'
+  curl 'http://172.16.0.2:9290/ipmi?target=mgmt1-1-bmc&module=equipment_R_E4m'
 
 .. note::
 
@@ -100,7 +100,7 @@ by default, it should look like this::
     exclude_sensor_ids:
 
 
-  equipment_R423_E4m:
+  equipment_R_E4m:
     user: ADMIN
     pass: ADMIN
     driver: "LAN_2_0"
@@ -131,7 +131,7 @@ They give the following:
 •       Amperes
 •       etc...
 
-To access the dashboard: access the isma, port 3000::
+To access the dashboard: access the management, port 3000::
 
   172.16.0.2:3000
 

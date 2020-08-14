@@ -263,7 +263,7 @@ The dashboard gives the following:
 •       Etc...
 
 
-To access the dashboard: access the isma, port 3000::
+To access the dashboard: access the management, port 3000::
 
   172.16.0.2:3000
 
