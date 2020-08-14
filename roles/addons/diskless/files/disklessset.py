@@ -36,11 +36,15 @@ class bcolors:
     UNDERLINE = '\033[4m'
 
 
-def load_file(filename):
+def read_yaml(filename):
     print(bcolors.OKBLUE+'[INFO] Loading '+filename+bcolors.ENDC)
     with open(filename, 'r') as f:
-        # return yaml.load(f, Loader=yaml.FullLoader) ## Waiting for PyYaml 5.1
-        return yaml.load(f)
+        return yaml.safe_load(f)
+
+
+def write_yaml(filename, content):
+    with open(filename, 'w') as f:
+        return yaml.dump(content, f, default_flow_style=False)
 
 
 def load_kernel_list(kernels_path):
@@ -287,15 +291,17 @@ elif main_action == '3':
             with open('/diskless/images/'+selected_image_name+'/staging/etc/shadow', "w") as ff:
                 ff.write(newText)
             print(bcolors.OKBLUE+'[INFO] Registering new image.'+bcolors.ENDC)
-            file_content = '''image_data:
-  image_name: {image_name}
-  image_kernel: {image_kernel}
-  image_creation_date: {image_date}
-  image_type: nfs
-  image_status: staging
-'''.format(image_name=selected_image_name, image_kernel=kernel_list[int(selected_kernel)], image_date=datetime.today().strftime('%Y-%m-%d'))
-            with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml', "w") as ff:
-                ff.write(file_content)
+
+            metadata = dict()
+            metadata['image_name'] = selected_image_name
+            metadata['image_kernel'] = kernel_list[int(selected_kernel)]
+            metadata['image_creation_date'] = datetime.today().strftime('%Y-%m-%d')
+            metadata['image_type'] = 'nfs'
+            metadata['image_status'] = 'staging'
+            try:
+                write_yaml('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_metadata.yml', metadata)
+            except Exception as e:
+                print(e)
             print(bcolors.OKGREEN+'\n[OK] Done creating image.'+bcolors.ENDC)
 
     if selected_image_type == '1':  # LIVENET
@@ -442,24 +448,19 @@ elif main_action == '3':
                 print(e)
             shutil.rmtree(image_working_directory)
             print(bcolors.OKBLUE+'[INFO] Registering new image.'+bcolors.ENDC)
-            file_content = '''image_data:
-  image_name: {image_name}
-  image_kernel: {image_kernel}
-  image_creation_date: {image_date}
-  image_creation_timestamp: {image_timestamp}
-  image_selinux_enabled: {image_selinux}
-  image_sha256: {image_sha256}
-  image_size: {image_size}
-  image_type: livenet
-'''.format(image_name=selected_image_name,
-                image_kernel=kernel_list[int(selected_kernel)],
-                image_date=datetime.today().strftime('%Y-%m-%d'),
-                image_timestamp=int(datetime.now().timestamp()),
-                image_selinux=selinux,
-                image_size=livenet_size,  # Size unit: MiB
-                image_sha256=sha256sum)
-            with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml', "w") as ff:
-                ff.write(file_content)
+            metadata = dict()
+            metadata['image_name'] = selected_image_name
+            metadata['image_kernel'] = kernel_list[int(selected_kernel)]
+            metadata['image_creation_date'] = datetime.today().strftime('%Y-%m-%d')
+            metadata['image_creation_timestamp'] = int(datetime.now().timestamp())
+            metadata['image_selinux_enabled'] = selinux
+            metadata['image_sha256'] = sha256sum
+            metadata['image_size'] = livenet_size  # Size unit: MiB
+            metadata['image_type'] = 'livenet'
+            try:
+                write_yaml('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_metadata.yml', metadata)
+            except Exception as e:
+                print(e)
             print(bcolors.OKGREEN+'\n[OK] Done creating image.'+bcolors.ENDC)
 
 elif main_action == '4':
@@ -475,15 +476,14 @@ elif main_action == '4':
 
     if sub_main_action == '1':
         for i in os.listdir('/var/www/html/preboot_execution_environment/diskless/images/'):
+            image_info = read_yaml(os.path.join('/var/www/html/preboot_execution_environment/diskless/images/', str(i), 'image_metadata.yml'))
             print('')
             print('  Image name: '+str(i))
-            with open('/var/www/html/preboot_execution_environment/diskless/images/'+str(i)+'/image_data.yml', 'r') as f:
-                image_dict = yaml.load(f)
-            print('    ├── Kernel linked: '+str(image_dict['image_data']['image_kernel']))
-            print('    ├── Image type: '+str(image_dict['image_data']['image_type']))
-            if str(image_dict['image_data']['image_type']) == 'nfs':
-                print('    ├── image status: '+str(image_dict['image_data']['image_status']))
-            print('    └── Image creation date: '+str(image_dict['image_data']['image_creation_date']))
+            print('    ├── Kernel linked: '+str(image_info['image_kernel']))
+            print('    ├── Image type: '+str(image_info['image_type']))
+            if str(image_info['image_type']) == 'nfs':
+                print('    ├── image status: '+str(image_info['image_status']))
+            print('    └── Image creation date: '+str(image_info['image_creation_date']))
 
     elif sub_main_action == '2':
         print('Manage kernels of an image.')
@@ -496,9 +496,8 @@ elif main_action == '4':
         selected_image = int(select_from_list(images_list, 'image to work with', -1))
         selected_image_name = images_list[selected_image]
 
-        with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml', 'r') as f:
-            image_dict = yaml.load(f)
-        print('Current kernel is: '+str(image_dict['image_data']['image_kernel']))
+        image_info = read_yaml('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_metadata.yml')
+        print('Current kernel is: '+str(image_info['image_kernel']))
 
         kernel_list = load_kernel_list(kernels_path)
         if len(kernel_list) > 0:
@@ -512,18 +511,19 @@ elif main_action == '4':
         filebuffer = file.readlines()
         for i in range(len(filebuffer)):
             if 'image-kernel' in filebuffer[i]:
-                filebuffer[i] = 'set image-kernel '+selected_kernel+'\n'
+                filebuffer[i] = 'set image-kernel '+kernel_list[int(selected_kernel)]+'\n'
             if 'image-initramfs' in filebuffer[i]:
                 filebuffer[i] = 'set image-initramfs '+'initramfs-kernel-'+kernel_list[int(selected_kernel)].strip('vmlinuz-')+'\n'
         file.close
         file = open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/boot.ipxe', 'w')
         file.writelines(filebuffer)
         file.close
-        with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml', 'r') as f:
-            image_dict = yaml.safe_load(f)
-            image_dict['image_data']['image_kernel'] = selected_kernel
-        with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml', 'w') as f:
-            content = yaml.dump(image_dict, f, default_flow_style=False)
+        try:
+            image_info = read_yaml('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_metadata.yml')
+            image_info['image_kernel'] = kernel_list[int(selected_kernel)]
+            write_yaml('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_metadata.yml', image_info)
+        except Exception as e:
+            print(e)
         print(bcolors.OKGREEN+'\n[OK] Done.\nYou will need to restart your running nodes for changes to take effect.'+bcolors.ENDC)
 
     elif sub_main_action == '3':
@@ -536,12 +536,11 @@ elif main_action == '4':
         selected_image = int(select_from_list(images_list, 'image to work with', -1))
         selected_image_name_copy = images_list[selected_image]
 
-        with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name_copy+'/image_data.yml', 'r') as f:
-            image_dict = yaml.load(f)
+        image_info = read_yaml('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name_copy+'/image_metadata.yml')
 
-        if image_dict['image_data']['image_type'] != 'nfs':
+        if image_info['image_type'] != 'nfs':
             print('Error: This is not an NFS image.')
-        elif image_dict['image_data']['image_status'] == 'staging':
+        elif image_info['image_status'] == 'staging':
             print('Image is a staging image. Create a new golden with it?')
             answer = str(input('Enter yes or no: ').lower().strip())
             if answer in ['yes', 'y']:
@@ -557,17 +556,19 @@ elif main_action == '4':
                 print(bcolors.OKBLUE+'[INFO] Cloning staging image to golden.'+bcolors.ENDC)
                 os.system('cp -a /diskless/images/'+selected_image_name_copy+'/staging /diskless/images/'+selected_image_name+'/golden')
                 print(bcolors.OKBLUE+'[INFO] Generating related files.'+bcolors.ENDC)
-                file_content = '''image_data:
-  image_name: {image_name}
-  image_kernel: {image_kernel}
-  image_creation_date: {image_date}
-  image_type: nfs
-  image_status: golden
-'''.format(image_name=selected_image_name, image_kernel=image_dict['image_data']['image_kernel'], image_date=datetime.today().strftime('%Y-%m-%d'))
-                with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml', "w") as ff:
-                    ff.write(file_content)
+
+                metadata = dict()
+                metadata['image_name'] = selected_image_name
+                metadata['image_kernel'] = image_info['image_kernel']
+                metadata['image_creation_date'] = datetime.today().strftime('%Y-%m-%d')
+                metadata['image_type'] = 'nfs'
+                metadata['image_status'] = 'golden'
+                try:
+                    write_yaml('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_metadata.yml', metadata)
+                except Exception as e:
+                    print(e)
                 print(bcolors.OKBLUE+'[INFO] Generating new ipxe boot file.'+bcolors.ENDC)
-                boot_file_content = generate_ipxe_boot_file('nfs_golden', selected_image_name, image_dict['image_data']['image_kernel'], 'initramfs-kernel-'+image_dict['image_data']['image_kernel'].strip('vmlinuz-'))
+                boot_file_content = generate_ipxe_boot_file('nfs_golden', selected_image_name, image_info['image_kernel'], 'initramfs-kernel-'+image_info['image_kernel'].strip('vmlinuz-'))
             with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/boot.ipxe', "w") as ff:
                 ff.write(boot_file_content)
 
@@ -581,12 +582,11 @@ elif main_action == '4':
         for i in range(0, len(images_list)):
             print(' '+str(i+1)+' - '+str(images_list[i]))
         selected_image = images_list[int(input('-->: ').lower().strip())-1]
-        with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image+'/image_data.yml', 'r') as f:
-            image_dict = yaml.load(f)
+        image_info = read_yaml('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image+'/image_metadata.yml')
 
-        if image_dict['image_data']['image_type'] != 'nfs':
+        if image_info['image_type'] != 'nfs':
             print('Error: This is not an NFS image.')
-        elif image_dict['image_data']['image_status'] == 'golden':
+        elif image_info['image_status'] == 'golden':
 
             print('Manages nodes of image '+selected_image)
             print(' 1 - List nodes with the image')
