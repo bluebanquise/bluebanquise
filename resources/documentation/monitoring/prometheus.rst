@@ -1,22 +1,19 @@
-**********
 Prometheus
-**********
+==========
 
-In this topic, we will see how to install both grafana_server and grafana_client, using ansible.
-
+In this topic, we will see how to configure and deploy both prometheus_server and prometheus_client Ansible roles.
 
 Prerequisites
 -------------
 
-* have ansible installed.
-* know how to use playbooks
+* Have ansible installed
+* Know how to use playbooks
 
-Also, make sure those packages are present on your system (They should be in the custom repository):
+Also, make sure those packages are present on your system (they should be in the bluebanquise or any other repository):
 
 * prometheus
 * alertmanager
 * grafana
-
 
 Installation
 ------------
@@ -24,7 +21,9 @@ Installation
 Prometheus Server
 ^^^^^^^^^^^^^^^^^
 
-First make sure you have /etc/ansible/inventory/group_vars/all/addons/prometheus.yml it should look like this::
+First create file /etc/bluebanquise/inventory/group_vars/all/addons/prometheus.yml with the following content:
+
+.. code-block:: yaml
 
   prometheus:
   # More info: https://www.robustperception.io/whats-the-difference-between-group_interval-group_wait-and-repeat_interval
@@ -36,72 +35,75 @@ First make sure you have /etc/ansible/inventory/group_vars/all/addons/prometheus
     repeat_interval: 3h
 
 
-Simply add to the playbook of your choice (which is for the prometheus server) ::
+Simply add to the playbook of your choice (which is for the Prometheus server):
+
+.. code-block:: yaml
 
  roles:
      - role: prometheus_server
        tags: prometheus_server
 
-run ::
+Then run:
+
+.. code-block:: text
 
     ansible-playbook /etc/ansible/playbooks/<your playbook> --tags prometheus_server
 
-now ansible_server should be installed.
+Now prometheus_server should be installed.
 
-The configuration file for prometheus is located under /etc/prometheus/prometheus.yml. It contains all the exporters to scrape, and more.
+The configuration file for Prometheus is located under /etc/prometheus/prometheus.yml.
+It contains all the exporters to scrape, and more.
 
 Prometheus Client
 ^^^^^^^^^^^^^^^^^
 
-Add the desired exporters in your monitoring.yml file (generally found under /etc/ansible/inventory/group_vars/equipment_XX/monitoring.yml)
+Create a file called monitoring.yml that contains the desired exporters to be deployed, into equipment_profile folder of your target hosts group.
 
-and don't forget to add the name of the package you want to install and the service name
+For example /etc/ansible/inventory/group_vars/equipment_XX/monitoring.yml.
 
-for example::
+Also don't forget to add the name of the package you want to install and the service name.
+
+For example:
+
+.. code-block:: yaml
 
   monitoring:
+    exporters:
+      node_exporter:
+        package: node_exporter
+        service: node_exporter
+        port: 9100
+      ha_cluster_exporter:
+        package: ha_cluster_exporter
+        service: ha_cluster_exporter
+        scrape_interval: 10m
+        scrape_timeout: 4m
+        port: 9664
 
-  exporters:
-    node_exporter:
-      package: node_exporter
-      service: node_exporter
-      port: 9100
-    ha_cluster_exporter:
-      package: ha_cluster_exporter
-      service: ha_cluster_exporter
-      scrape_interval: 10m
-      scrape_timeout: 4m
-      port: 9664
+.. note:: As you can see, you can also add the scrape_interval (which is how often the metrics get scraped), and the scrape_timeout (which represents how long until a scrape request times out).
 
-.. note:: as you can see, you can also add the scrape_interval (which is how often the metrics get scraped), and the scrape_timeout (which represents how long until a scrape request times out)
+.. note:: If you want to add exporters, make sure your package contains the binary and the .service file, put preferably under /usr/local/bin and /etc/systemd/system.
 
-.. note:: if you want to add exporters, make sure your package contains the binary and the .service file, put preferably under /usr/local/bin and /etc/systemd/system.
+Now simply add to the playbook of your choice (which is for the Prometheus clients) the role:
 
-simply add to the playbook of your choice (which is for the prometheus clients) your tweaks (hosts, and if you want to start or enable services) ::
-
-  hosts: <your_management>
-  vars:
-    start_services: false
-    enable_services: false
-
-and add the role ::
+.. code-block:: yaml
 
  roles:
      - role: prometheus_client
        tags: prometheus_client
 
+Then run:
 
-run ::
+.. code-block:: text
 
     ansible-playbook /etc/ansible/playbooks/<your playbook> --tags prometheus_client
 
-now prometheus_client should be installed.
-
+Now prometheus_client should be installed.
 
 Variables
 ---------
 
-There are 4 types of variable in prometheus
+There are 4 types of variable in Prometheus:
 
 1. Counters
 2. Gauges
@@ -116,11 +118,10 @@ It's an incremental counter, that is used in order to know how rapidly something
 
 .. note::
 
-    for example, it is used for the number of packets that is transmitted by a switch interface.
-    using the irate function of prometheus, we can then tell how many packets were transmitted in a given interval.
+    For example, it is used for the number of packets that is transmitted by a switch interface.
+    Using the irate function of Prometheus, we can then tell how many packets were transmitted in a given interval.
 
 it can also be used for error counts, tasks completed, and so on
-
 
 Gauges
 ^^^^^^
@@ -130,11 +131,11 @@ It gives a specific value for the time set.
 
 .. note::
 
-    for example, it is used for the temperature of the bmcs.
+    For example, it is used for the temperature of the bmcs.
     This way, you have the temperature for any given time.
+    It can also be used for memory usage, number of requests, and so on.
 
-it can also be used for memory usage, number of requests, and so on
-it can be used with function like min,max,average, and so on to get the wanted result.
+It can be used with function like min, max, average, and so on to get the wanted result.
 
 Histograms & Summaries
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -143,88 +144,98 @@ Histograms and summaries are more complex variable types, and are used less ofte
 Histograms and summaries are both used for getting the request durations, or the response sizes.
 Their main goal is to watch for data that fall in a certain category.
 
-you can get more info here: https://prometheus.io/docs/practices/histograms/
-
+You can get more info here: https://prometheus.io/docs/practices/histograms/
 
 Queries
 -------
 
-In order to query a **metric** with prometheus, you have to go to the prometheus web page.
-By default, it is located at 172.16.0.2:9090.
+In order to query a **metric** with Prometheus, you have to go to the Prometheus web page.
+By default, it is located at http://localhost:9090.
 
-To query a metric, simple type in the metrics name. You also have a dropdown list with all the available metrics to query.
+To query a metric, simply type in the metrics name. You also have a dropdown list with all the available metrics to query.
 
-.. image:: capture/prometheus/query1.PNG
+.. image:: monitoring/capture/prometheus/query1.PNG
    :width: 80 %
 
-if you want specific metrics (with one or more specific labels) ::
+if you want specific metrics (with one or more specific labels):
+
+.. code-block:: text
 
   query_name{instance="instance"}
 
-for example:
+For example, ipmi_fan_speed_rpm{name="P-FAN1"} will only return the fan_speed of the fan name "P-FAN-1":
 
-.. note::
-
-    for example, ipmi_fan_speed_rpm{name="P-FAN1"} will only return the fan_speed of the fan name "P-FAN-1"
-
-.. image:: capture/prometheus/query2.PNG
+.. image:: monitoring/capture/prometheus/query2.PNG
    :width: 80 %
 
-in the graph tab, you can also see the variation of the value over time. You can also choose from when to when.
+In the graph tab, you can also see the variation of the value over time. You can also choose from when to when.
 
-.. image:: capture/prometheus/query3.PNG
+.. image:: monitoring/capture/prometheus/query3.PNG
    :width: 80 %
-
-
 
 Regex
 ^^^^^
 
 You can also use the same queries, but with regex.
 
-the global syntax for using this is ::
+The global syntax for using this is :
+
+.. code-block:: text
 
   query{attribute=~"regex_value"}
 
-if you want the attribute to follow the given regex, or ::
+if you want the attribute to follow the given regex, or:
+
+.. code-block:: text
 
   query{attribute!~"regex_value"}
 
-if you dont want the attribute to follow the regex.
-the **tilda** here is very important.
+if you don't want the attribute to follow the regex.
 
-using this syntaxe, you can:
+.. note::
+
+  The **tilda** here is very important.
+
+Using this syntax, you can:
 
 * get the metrics which attribute corresponds to a list
 
-*for example*:
-  **ipmi_fan_speed_rpm{name=~"MB-FAN5|MB-FAN4|S-FAN2"}**
+for example:
+
+.. code-block:: text
+
+  ipmi_fan_speed_rpm{name=~"MB-FAN5|MB-FAN4|S-FAN2"}
 
 will return
 
-.. image:: capture/prometheus/query4.PNG
+.. image:: monitoring/capture/prometheus/query4.PNG
    :width: 50 %
 
 * follow a pattern
 
-*for example* :
-  **ipmi_fan_speed_rpm{name=~".*.FAN.*"}**
+for example:
 
-will return all the ipmi_fan_speed_rpm metrics with the name FAN in its name label
+.. code-block:: text
+
+  ipmi_fan_speed_rpm{name=~".*.FAN.*"}
+
+will return all the ipmi_fan_speed_rpm metrics with the name FAN in its name label.
 
 another example:
-  **{__name__=~"ipmi.*",instance=~"001-bmc"}**
 
-will return all the metrics which name starts with ipmi, and which instance is 001-bmc
+.. code-block:: text
 
-.. image:: capture/prometheus/query5.PNG
+  ipmi_fan_speed_rpm{__name__=~"ipmi.*",instance=~"001-bmc"}
+
+will return all the metrics which name starts with ipmi, and which instance is 001-bmc.
+
+.. image:: monitoring/capture/prometheus/query5.PNG
    :width: 50 %
-
 
 Boolean operators
 ^^^^^^^^^^^^^^^^^
 
-You can also combine different metrics, using boolean operators. There are several operators in prometheus.
+You can also combine different metrics, using boolean operators. There are several operators in Prometheus.
 Some of them are the following:
 
 * == (equal)
@@ -234,49 +245,59 @@ Some of them are the following:
 * >= (greater-or-equal)
 * <= (less-or-equal)
 
-these are used in order to get the results that correspond to the condition.
-for example::
+These are used in order to get the results that correspond to the condition.
+For example:
+
+.. code-block:: text
 
   ipmi_up==1
 
 will only return the instances of the query that are equal to one.
 
+It is also possible to use logic operators:
+
 * and (intersection)
 * or (union)
 * unless (complement)
 
+Vector1 and vector2 results in a vector consisting of the elements of vector1 for which there are elements in vector2 with exactly matching label sets.
+Other elements are dropped. The metric name and values are carried over from the left-hand side vector.
 
-vector1 and vector2 results in a vector consisting of the elements of vector1 for which there are elements in vector2 with exactly matching label sets. Other elements are dropped. The metric name and values are carried over from the left-hand side vector.
+For example:
 
-for example:
-  **node_exporter_build_info and ignoring(revision, version,goversion,branch,package) node_cpu_package_throttles_total**
+.. code-block:: text
 
-will return::
+  node_exporter_build_info and ignoring(revision, version,goversion,branch,package) node_cpu_package_throttles_total
+
+will return:
+
+.. code-block:: text
 
   node_exporter_build_info{branch="HEAD",goversion="go1.12.5",instance="1-2:9100",job="equipment_R_node_exporter",revision="3db77732e925c08f675d7404a8c46466b2ece83e",version="0.18.1"}
 
-because it has the same instance name and job name as a node_cpu_package_throttles_total
+because it has the same instance name and job name as a node_cpu_package_throttles_total.
 
+Vector1 or vector2 results in a vector that contains all original elements (label sets + values) of vector1 and additionally all elements of vector2 which do not have matching label sets in vector1.
 
-vector1 or vector2 results in a vector that contains all original elements (label sets + values) of vector1 and additionally all elements of vector2 which do not have matching label sets in vector1.
+For example:
 
-for example:
-  **node_exporter_build_info or node_cpu_package_throttles_total**
+.. code-block:: text
 
-will return::
+  node_exporter_build_info or node_cpu_package_throttles_total
+
+will return:
+
+.. code-block:: text
 
   node_exporter_build_info{branch="HEAD",goversion="go1.12.5",instance="1-2:9100",job="equipment_R_node_exporter",revision="3db77732e925c08f675d7404a8c46466b2ece83e",version="0.18.1"}
   node_cpu_package_throttles_total{instance="1-2:9100",job="equipment_R_node_exporter",package="0"}
   node_cpu_package_throttles_total{instance="1-2:9100",job="equipment_R_node_exporter",package="1"}
 
+Vector1 unless vector2 results in a vector consisting of the elements of vector1 for which there are no elements in vector2 with exactly matching label sets. All matching elements in both vectors are dropped.
 
-vector1 unless vector2 results in a vector consisting of the elements of vector1 for which there are no elements in vector2 with exactly matching label sets. All matching elements in both vectors are dropped.
-
-There are also other types of boolean operators, like group_left or group_right, you can find more about it here:
+There are also other types of boolean operators, like group_left or group_right, in the online documentation.
 
 .. seealso:: https://prometheus.io/docs/prometheus/latest/querying/operators/
-
-
 
 Functions & aggregations
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -294,13 +315,14 @@ delta
 
 Delta calculates the difference of value between the value from X minutes ago and the current value
 
-ex ::
+Example:
+
+.. code-block:: text
 
   delta(ipmi_current_amperes[5m])
 
-.. image:: capture/prometheus/query6.PNG
+.. image:: monitoring/capture/prometheus/query6.PNG
    :width: 80 %
-
 
 rate & irate
 """"""""""""
@@ -308,7 +330,7 @@ rate & irate
 Rate() gives you the per second average rate of change over your range interval.
 irate() is the per second rate of change at the end of your range interval
 
-the difference between rate and delta, is that rate automatically adjusts for resets. It means that it only works with "counter" vaariables, i.e a variable that can only increase.
+the difference between rate and delta, is that rate automatically adjusts for resets. It means that it only works with "counter" variables, i.e. a variable that can only increase.
 For example, if a metric value changes like this:
 
 * 0
@@ -322,40 +344,42 @@ and resets:
 
 rate will capture the change, and will give take the value of 2 as if it were 12 to get the rate.
 
-
 avg
 """
 
 returns the average value of **all** query results.
-by default, it returns the avg value by job::
-     avg(ipmi_current_amperes)
 
-.. image:: capture/prometheus/query8.PNG
+By default, it returns the avg value by job:
+
+.. code-block:: text
+
+  avg(ipmi_current_amperes)
+
+.. image:: monitoring/capture/prometheus/query8.PNG
    :width: 50 %
 
-but you can also average by any other attribute, using avg(query) by(attribute)
+but you can also average by any other attribute, using avg(query) by(attribute):
 
-.. image:: capture/prometheus/query9.PNG
+.. image:: monitoring/capture/prometheus/query9.PNG
    :width: 80 %
-
 
 avg_over_time
 """""""""""""
 
 Average is self explanatory, it gives you the average value of a metric during the given interval, **for each instance**.
 
+For example if ipmi_current_amperes had the values: 2,4,6 in the last 5m:
 
-for example if ipmi_current_amperes had the values: 2,4,6 in the last 5m::
+.. code-block:: text
 
-     avgi_over_time(ipmi_current_amperes[5m])
+  avgi_over_time(ipmi_current_amperes[5m])
 
 would return 4.
 
 output example:
 
-.. image:: capture/prometheus/query7.PNG
+.. image:: monitoring/capture/prometheus/query7.PNG
    :width: 80 %
-
 
 sum,min,max
 """""""""""
@@ -363,20 +387,21 @@ sum,min,max
 Self explanatory.
 Works the same way as *avg*, and can be used with _over_time too.
 
-
 more
 """"
 
-for more info, check:
+For more info, check:
 
 .. seealso:: https://prometheus.io/docs/prometheus/latest/querying/functions/
 
 Alerts
 ------
 
-Alerts are located in the /etc/prometheus/alerts directory
+Alerts are located in the /etc/prometheus/alerts directory.
 
-example of alert::
+An example of alert:
+
+.. code-block:: yaml
 
   groups:
   - name: Alerts for nodes
@@ -390,18 +415,21 @@ example of alert::
         summary: " (instance {{ $labels.instance }})"
         description: "memory usage greater than 90%  \n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
 
-
-this alert will be seen as *pending* by prometheus when the condition in **expr:** is verified, in this case, when the percentage of used RAM is greater than 90%.
-It will seen as *firing* when the condition is met for X minutes,hours,or days, X being in the **for** field.
+This alert will be seen as *pending* by Prometheus when the condition in **expr:** is verified, in this case, when the percentage of used RAM is greater than 90%.
+It will seen as *firing* when the condition is met for X minutes, hours, or days, X being in the **for** field.
 It will be fired with an extra label called severity, which is set to *warning* in this case.
-The annotations section is here to set a summary and description of the alert. you can acces the variables of the metric by using de global variables {{ $value }} or {{ $labels }}.
+The annotations section is here to set a summary and description of the alert.
+You can access the variables of the metric by using de global variables {{ $value }} or {{ $labels }}.
 
 Alertmanager
 ^^^^^^^^^^^^
 
-Alertmanager is a plugin for prometheus, used to manage alerts. by default, it's located under the management node's ip adress, port 9093.
-you can customize alertmanager under /etc/alertmanager/alertmanager.yml.
-by default it looks like this::
+Alertmanager is an additional tool for Prometheus, used to manage alerts. By default, it's located under the management node's ip address, port 9093.
+You can customize Alertmanager under /etc/alertmanager/alertmanager.yml.
+
+By default it looks like this:
+
+.. code-block:: yaml
 
   global:
     smtp_smarthost: 'localhost:25'
@@ -427,18 +455,20 @@ by default it looks like this::
       severity: 'warning'
     equal: ['alertname', 'cluster', 'service']
 
-you can find more about it here:
+You can find more about it here:
 
 .. seealso:: https://prometheus.io/docs/alerting/latest/configuration/
 
-here are examples of some alerts:
+And here are examples of some alerts:
 
 .. seealso:: https://awesome-prometheus-alerts.grep.to/rules.html
 
 Prometheus.yml
 --------------
 
-This is where all the exporters and the scrape related variables are stored. By default, it looks something like this::
+This is where all the exporters and the scrape related variables are stored. By default, it looks something like this:
+
+.. code-block:: yaml
 
   global:
     scrape_interval: 1m
@@ -471,10 +501,8 @@ This is where all the exporters and the scrape related variables are stored. By 
         - targets: ['management1-1:9100']
         - targets: ['management1-2:9100']
 
-rule_files is where the alert related stuff is located
-
-alerting is where you put alertmanager related stuff
-
-scrape_configs is where you put all the exporters that you want to listen to, with the targets, and so on
+* rule_files is where the alert related stuff is located
+* alerting is where you put alertmanager related stuff
+* scrape_configs is where you put all the exporters that you want to listen to, with the targets, and so on
 
 .. seealso:: https://prometheus.io/docs/prometheus/latest/configuration/configuration/

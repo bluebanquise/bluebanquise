@@ -1,10 +1,8 @@
-*******
+=======
 Grafana
-*******
-
+=======
 
 In this topic, we will see how to install graph_tool, using the provided rpms.
-
 
 Installation
 ============
@@ -26,15 +24,14 @@ manual installation
 
 There is a packet for grafana-7 under /var/www/html/repositories/redhat/8.1/x86_64/custom/Packages/
 
-so by running the following command ::
+so by running the following command:
 
     yum install grafana
 
 it should install grafana-server.
 
-
-Usefull Files
--------------
+Useful Files
+------------
 
 The service is located under /usr/lib/systemd/system/grafana-server.service
 
@@ -61,12 +58,12 @@ metrics field
 This section is where you put prometheus metric queries.
 See the prometheus section of the doc for more info about the metrics (functions, different types of variables, show only certain instances)
 
-.. image:: capture/grafana/supp1.PNG
+.. image:: monitoring/capture/grafana/supp1.PNG
    :width: 80 %
 
 By default, it shows you the requested metric in a graph panel.
 
-.. image:: capture/grafana/supp2.PNG
+.. image:: monitoring/capture/grafana/supp2.PNG
    :width: 80 %
 
 
@@ -84,14 +81,14 @@ by default, it will show the whole metric.
 example:
 
 
-.. image:: capture/grafana/legend_field1.PNG
+.. image:: monitoring/capture/grafana/legend_field1.PNG
    :width: 60 %
 
 
 example : {{instance}}:toto:{{device}}
 you get:
 
-.. image:: capture/grafana/legend_field2.PNG
+.. image:: monitoring/capture/grafana/legend_field2.PNG
    :width: 30 %
 
 
@@ -124,7 +121,7 @@ Transform
     the transform tab is new with grafana7, and is still in development
 
 
-.. image:: capture/grafana/transform1.PNG
+.. image:: monitoring/capture/grafana/transform1.PNG
    :width: 30 %
 
 
@@ -135,14 +132,14 @@ allows you to show the things you want in the table, by reducing, filtering, joi
 for example :
 
 
-.. image:: capture/grafana/transformExmemple.PNG
+.. image:: monitoring/capture/grafana/transformExmemple.PNG
    :width: 50 %
 
 
 here, we have 3 queries, but if you make no transform, it will look like this:
 
 
-.. image:: capture/grafana/transformExmemple3.PNG
+.. image:: monitoring/capture/grafana/transformExmemple3.PNG
    :width: 80 %
 
 so we need to make the following transformations to get the desired table:
@@ -153,12 +150,12 @@ so we need to make the following transformations to get the desired table:
 
 with this transformation:
 
-.. image:: capture/grafana/transformExmemple2.PNG
+.. image:: monitoring/capture/grafana/transformExmemple2.PNG
    :width: 80 %
 
 you get the following result:
 
-.. image:: capture/grafana/supp3.PNG
+.. image:: monitoring/capture/grafana/supp3.PNG
    :width: 80 %
 
 you can find more about the different transformations here: https://grafana.com/docs/grafana/latest/panels/transformations/
@@ -209,7 +206,7 @@ Legend
 
 Legend related options, you can show the legend as a table, add min,max,avg,current values.
 
-.. image:: capture/grafana/LegendExemple.PNG
+.. image:: monitoring/capture/grafana/LegendExemple.PNG
    :width: 80 %
 
 
@@ -218,7 +215,7 @@ Thresholds
 
 The threshold lets you change the background color when the value is less than or greater than the chosen value.
 
-.. image:: capture/grafana/thresholdexemple1.PNG
+.. image:: monitoring/capture/grafana/thresholdexemple1.PNG
    :width: 80 %
 
 
@@ -246,7 +243,7 @@ You can choose between two options in the show option.
 Calculate will show you the result of the calculation (First Value, Last Value, and so on), whereas All Values will show you all the values scraped inthe last XX minutes. you can choose the max number of results in the Limit field.
 You can also choose  the orientation and the display mode (aesthetics)
 
-.. image:: capture/grafana/BarGaugeex1.PNG
+.. image:: monitoring/capture/grafana/BarGaugeex1.PNG
    :width: 80 %
 
 
@@ -262,12 +259,12 @@ If activated, will show the panel X times in the dashboard, with X being the num
 
 for example with the repeat option enabled:
 
-.. image:: capture/grafana/BarGaugeex2.PNG
+.. image:: monitoring/capture/grafana/BarGaugeex2.PNG
    :width: 80 %
 
 without the repeat option enabled:
 
-.. image:: capture/grafana/BarGaugeex3.PNG
+.. image:: monitoring/capture/grafana/BarGaugeex3.PNG
    :width: 50 %
 
 as you can see, in one case, you get the results in different panels, and in the other case you get the results in the same panel.
@@ -289,7 +286,7 @@ Changes the color of the bars according to what is put in the threshold.
 
 Ex:
 
-.. image:: capture/grafana/thresholdexemple2.PNG
+.. image:: monitoring/capture/grafana/thresholdexemple2.PNG
    :width: 80 %
 
 Value mapping
@@ -299,7 +296,7 @@ Transforms the values into text.
 
 Ex:
 
-.. image:: capture/grafana/ValueMappingEx.PNG
+.. image:: monitoring/capture/grafana/ValueMappingEx.PNG
    :width: 80 %
 
 here, we know that if the metric's value is 1, it means that it is up, 2 down, and so on
@@ -329,14 +326,14 @@ Variables
 
 To access get variables like these:
 
-.. image:: capture/grafana/Captureshow.PNG
+.. image:: monitoring/capture/grafana/Captureshow.PNG
    :width: 30 %
 
 
 first, go to the top right corner of grafana:
 
 
-.. image:: capture/grafana/variable.PNG
+.. image:: monitoring/capture/grafana/variable.PNG
    :width: 30 %
 
 
@@ -344,27 +341,27 @@ first, go to the top right corner of grafana:
 go to variable
 
 
-.. image:: capture/grafana/Variable1.PNG
+.. image:: monitoring/capture/grafana/Variable1.PNG
    :width: 20 %
 
 
 Then, enter a query to get the results you want to transform as a variabe.
 For exemple:
 
-.. image:: capture/grafana/variable2.PNG
+.. image:: monitoring/capture/grafana/variable2.PNG
    :width: 30 %
 
 by doing this query you get the different instances of ifOutOctets.
 without the regex used like that
 
-.. image:: capture/grafana/variable3.PNG
+.. image:: monitoring/capture/grafana/variable3.PNG
    :width: 80 %
 
 
 you should get results like that:
 
 
-.. image:: capture/grafana/variable4.PNG
+.. image:: monitoring/capture/grafana/variable4.PNG
    :width: 50 %
 
 however, by using the regex seen above, we get results that can be later used with some queries, like for example ::
@@ -384,14 +381,13 @@ Main Dashboard
 To create a main dashboard, simply create a new dashboard, a choose visualisation style "Dashboard list"
 you should get something like that:
 
-.. image:: capture/grafana/MainDashboard.PNG
+.. image:: monitoring/capture/grafana/MainDashboard.PNG
    :width: 20 %
 
 choose the Search option
 and then simply choose the folder that you want to list.
 
-.. image:: capture/grafana/mainDashboard2.PNG
+.. image:: monitoring/capture/grafana/mainDashboard2.PNG
    :width: 80 %
 
 by clicking on the dashboard links, you get redirected to them.
-

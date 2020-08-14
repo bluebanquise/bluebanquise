@@ -27,6 +27,7 @@ issues in this documentation.
    configure_bluebanquise
    deploy_bluebanquise
    multiple_icebergs
+   monitoring
    roles
    references
 
