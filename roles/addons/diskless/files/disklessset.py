@@ -601,25 +601,6 @@ elif main_action == '4':
                     print("Working on node: "+str(node))
                     os.system('rm -Rf /diskless/images/'+selected_image+'/nodes/'+node)
 
-    elif sub_main_action == '6':
-        print('Remove an image.')
-
-        images_list = os.listdir('/var/www/html/preboot_execution_environment/diskless/images/')
-        if not images_list:
-            print(bcolors.OKGREEN+'[OK] No image found.'+bcolors.ENDC)
-            exit(0)
-
-        selected_image = int(select_from_list(images_list, 'image to work with', -1))
-        selected_image_name = images_list[selected_image]
-
-        try:
-            shutil.rmtree('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
-            print("Image "+selected_image_name+" has been deleted.")
-        except Exception as e:
-            print(e)
-            raise
-
-
     elif sub_main_action == '5':
         print('Manages livenet images')
         print(' 1 - Unsquash and mount')
@@ -682,7 +663,6 @@ elif main_action == '4':
             print(bcolors.OKGREEN + '[OK] Done' + bcolors.ENDC)
             exit(0)
 
-
         if sub_sub_main_action == '2':
 
             images_list = os.listdir(image_working_directory_base)
@@ -704,7 +684,7 @@ elif main_action == '4':
                 print(e)
                 raise
 
-            print(bcolors.OKBLUE + '[INFO] Backing up old image and generating new one.'  + bcolors.ENDC)
+            print(bcolors.OKBLUE + '[INFO] Backing up old image and generating new one.' + bcolors.ENDC)
             print(bcolors.OKBLUE + '[INFO] Backup at /var/www/html/preboot_execution_environment/diskless/images/' + selected_image_name + '/squashfs.img.bkp' + bcolors.ENDC)
             try:
                 os.system('mv /var/www/html/preboot_execution_environment/diskless/images/' + selected_image_name + '/squashfs.img  /var/www/html/preboot_execution_environment/diskless/images/' + selected_image_name + '/squashfs.img.bkp')
@@ -832,5 +812,23 @@ elif main_action == '4':
             print(bcolors.OKGREEN + '[OK] Done' + bcolors.ENDC)
 
             exit(0)
+
+    elif sub_main_action == '6':
+        print('Remove an image.')
+
+        images_list = os.listdir('/var/www/html/preboot_execution_environment/diskless/images/')
+        if not images_list:
+            print(bcolors.OKGREEN+'[OK] No image found.'+bcolors.ENDC)
+            exit(0)
+
+        selected_image = int(select_from_list(images_list, 'image to work with', -1))
+        selected_image_name = images_list[selected_image]
+
+        try:
+            shutil.rmtree('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
+            print("Image "+selected_image_name+" has been deleted.")
+        except Exception as e:
+            print(e)
+            raise
 
 quit()

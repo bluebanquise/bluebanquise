@@ -2,8 +2,7 @@
 diskless_apache_user: apache
 diskless_packages_to_install: 
   - httpd
-  - clustershell
-  - python3-clustershell
+  - python36-clustershell
   - nfs-utils
   - dracut-live
   - xfsdump
