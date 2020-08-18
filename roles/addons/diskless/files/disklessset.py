@@ -189,6 +189,7 @@ passed_arguments = parser.parse_args()
 dnf_cache_directory = '/root/dnf'  # '/dev/shm/'
 image_working_directory_base = '/var/tmp/diskless/workdir/'
 kernels_path = '/var/www/html/preboot_execution_environment/diskless/kernels/'
+images_path = '/var/www/html/preboot_execution_environment/diskless/images/'
 
 print('BlueBanquise Diskless manager')
 print(' 1 - List available kernels')
@@ -639,7 +640,7 @@ elif main_action == '4':
 
             print(bcolors.OKBLUE + '[INFO] Unsquash image' + bcolors.ENDC)
             try:
-                os.system('unsquashfs -d ' + os.path.join(image_working_directory, 'squashfs-root') + ' ' + os.path.join(images_path, selected_image_name, '/squashfs.img'))
+                os.system('unsquashfs -d ' + os.path.join(image_working_directory, 'squashfs-root') + ' ' + os.path.join(images_path, selected_image_name, 'squashfs.img'))
             except Exception as e:
                 print(e)
                 raise
@@ -787,7 +788,7 @@ elif main_action == '4':
             print(bcolors.OKBLUE + '[INFO] Removing old squashfs and generating new one...' + bcolors.ENDC)
             try:
                 os.remove(os.path.join(images_path, selected_image_name, 'squashfs.img'))
-                os.system('mksquashfs ' + image_working_directory + '_copy/squashfs-root/ ' + os.path.join(images_path, selected_image_name, 'squashfs.img')
+                os.system('mksquashfs ' + image_working_directory + '_copy/squashfs-root/ ' + os.path.join(images_path, selected_image_name, 'squashfs.img'))
             except Exception as e:
                 print(e)
                 raise
