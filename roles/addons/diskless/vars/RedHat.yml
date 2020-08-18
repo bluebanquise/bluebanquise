@@ -6,3 +6,4 @@ diskless_packages_to_install:
   - python3-clustershell
   - nfs-utils
   - dracut-live
+  - xfsdump

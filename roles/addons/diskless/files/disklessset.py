@@ -737,9 +737,11 @@ elif main_action == '4':
                 print(e)
                 raise
 
-            print(bcolors.OKBLUE + '[INFO] Copy old image into new one...' + bcolors.ENDC)
+            print(bcolors.OKBLUE + '[INFO] Dumping image: old_image -> cache -> new_image...' + bcolors.ENDC)
             try:
-                os.system('cp -a ' + os.path.join(image_working_directory, 'mnt/') + '* ' + os.path.join(image_working_directory, 'mnt_copy/'))
+                os.system('xfsdump -l 0 -L label -M media -f ' + image_working_directory + 'image.xfsdump ' + os.path.join(image_working_directory, 'mnt'))
+                os.system('xfsrestore -f ' + image_working_directory + 'image.xfsdump ' + os.path.join(image_working_directory, 'mnt_copy'))
+                os.system('rm -f ' + image_working_directory + 'image.xfsdump')
                 os.sync()
             except Exception as e:
                 print(e)
