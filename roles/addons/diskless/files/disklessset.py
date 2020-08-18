@@ -175,6 +175,7 @@ passed_arguments = parser.parse_args()
 
 dnf_cache_directory = '/root/dnf'  # '/dev/shm/'
 image_working_directory = '/root/diskless/workdir/'
+image_working_directory_base = '/var/tmp/diskless/workdir/'
 kernels_path = '/var/www/html/preboot_execution_environment/diskless/kernels/'
 
 print('BlueBanquise Diskless manager')
@@ -572,105 +573,111 @@ elif main_action == '4':
 
             images_list = os.listdir('/var/www/html/preboot_execution_environment/diskless/images/')
             if not images_list:
-                print(bcolors.OKGREEN+'[OK] No image found.'+bcolors.ENDC)
-                exit(0)
+                print(bcolors.FAIL + '[ERROR] No image found.' + bcolors.ENDC)
+                exit(1)
 
             selected_image = int(select_from_list(images_list, 'image to work with', -1))
             selected_image_name = images_list[selected_image]
 
+            image_working_directory = os.path.join(image_working_directory_base, selected_image_name)
 
-            print('Cleaning before process...')
+            print(bcolors.OKBLUE + '[INFO] Creating new working dirs' + bcolors.ENDC)
             try:
-                os.system('rm -Rf '+image_working_directory)
-                os.system('rm -Rf /var/diskless/'+selected_image_name)
+                os.makedirs(image_working_directory)
+            except FileExistsError:
+                print(bcolors.WARNING + '[WARNING] The directory ' + image_working_directory + ' already exists. Cleaning.' + bcolors.ENDC)
+                shutil.rmtree(image_working_directory)
+                os.makedirs(image_working_directory)
+            except OSError:
+                print(bcolors.FAIL + '[ERROR] Cannot create directory ' + image_working_directory + bcolors.ENDC)
+
+            try:
+                os.makedirs(os.path.join(image_working_directory, 'mnt'))
+                os.makedirs(os.path.join(image_working_directory, 'inventory'))
             except Exception as e:
                 print(e)
                 raise
 
-            print('Creating new working dirs')
+            print(bcolors.OKBLUE + '[INFO] Unsquash image' + bcolors.ENDC)
             try:
-                os.system('mkdir -p '+image_working_directory)
-                os.system('mkdir -p /var/diskless/'+selected_image_name+'/mnt')
-                os.system('mkdir -p /var/diskless/'+selected_image_name+'/inventory')
+                os.system('unsquashfs -d ' + image_working_directory + '/squashfs-root /var/www/html/preboot_execution_environment/diskless/images/' + selected_image_name + '/squashfs.img')
             except Exception as e:
                 print(e)
                 raise
 
-            print('Unsquash image')
+            print(bcolors.OKBLUE + '[INFO] Mounting image' + bcolors.ENDC)
             try:
-                os.system('unsquashfs -d '+image_working_directory+'/squashfs-root /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/squashfs.img')
+                os.system('mount ' + image_working_directory + '/squashfs-root/LiveOS/rootfs.img ' + os.path.join(image_working_directory, 'mnt/'))
+                os.system('mount --bind /proc ' + os.path.join(image_working_directory, 'mnt/proc/'))
+                os.system('mount --bind /sys ' + os.path.join(image_working_directory, 'mnt/sys/'))
             except Exception as e:
                 print(e)
                 raise
 
-            print('Mounting image')
+            print(bcolors.OKBLUE + '[INFO] Generating temporary inventory' + bcolors.ENDC)
             try:
-                os.system('mount '+image_working_directory+'/squashfs-root/LiveOS/rootfs.img /var/diskless/'+selected_image_name+'/mnt/')
-                os.system('mount --bind /proc /var/diskless/'+selected_image_name+'/mnt/proc/')
-                os.system('mount --bind /sys /var/diskless/'+selected_image_name+'/mnt/sys/')
+                os.system('echo ' + image_working_directory + '/mnt ansible_connection=chroot > ' + image_working_directory + '/inventory/host')
             except Exception as e:
                 print(e)
                 raise
 
-            print('Generating temporary inventory')
-            try:
-                os.system('echo /var/diskless/'+selected_image_name+'/mnt ansible_connection=chroot > /var/diskless/'+selected_image_name+'/inventory/host')
-            except Exception as e:
-                print(e)
-                raise
-
-            print('Done')
+            print(bcolors.OKGREEN + '[OK] Done' + bcolors.ENDC)
             exit(0)
 
 
         if sub_sub_main_action == '2':
 
-            images_list = os.listdir('/var/diskless/')
+            images_list = os.listdir(image_working_directory_base)
             if not images_list:
-                print(bcolors.OKGREEN+'[OK] No image found.'+bcolors.ENDC)
-                exit(0)
+                print(bcolors.FAIL + '[ERROR] No image found.' + bcolors.ENDC)
+                exit(1)
 
             selected_image = int(select_from_list(images_list, 'image to work with', -1))
             selected_image_name = images_list[selected_image]
 
+            image_working_directory = os.path.join(image_working_directory_base, selected_image_name)
 
-            print('Unmouting image')
+            print(bcolors.OKBLUE + '[INFO] Unmouting image' + bcolors.ENDC)
             try:
-                os.system('umount /var/diskless/'+selected_image_name+'/mnt/proc/')
-                os.system('umount /var/diskless/'+selected_image_name+'/mnt/sys/')
-                os.system('umount /var/diskless/'+selected_image_name+'/mnt/')
+                os.system('umount ' + os.path.join(image_working_directory, 'mnt/proc/'))
+                os.system('umount ' + os.path.join(image_working_directory, 'mnt/sys/'))
+                os.system('umount ' + os.path.join(image_working_directory, 'mnt/'))
             except Exception as e:
                 print(e)
                 raise
 
-            print('Backuping old image and generating new one')
-            print('Backup at /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/squashfs.img.bkp')
+            print(bcolors.OKBLUE + '[INFO] Backing up old image and generating new one.'  + bcolors.ENDC)
+            print(bcolors.OKBLUE + '[INFO] Backup at /var/www/html/preboot_execution_environment/diskless/images/' + selected_image_name + '/squashfs.img.bkp' + bcolors.ENDC)
             try:
-                os.system('mv /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/squashfs.img  /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/squashfs.img.bkp')
-                os.system('mksquashfs '+image_working_directory+'/squashfs-root/ /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/squashfs.img')
+                os.system('mv /var/www/html/preboot_execution_environment/diskless/images/' + selected_image_name + '/squashfs.img  /var/www/html/preboot_execution_environment/diskless/images/' + selected_image_name + '/squashfs.img.bkp')
+                os.system('mksquashfs ' + image_working_directory + '/squashfs-root/ /var/www/html/preboot_execution_environment/diskless/images/' + selected_image_name + '/squashfs.img')
             except Exception as e:
                 print(e)
                 raise
 
-            print('Cleaning backup and working dirs')
+            print(bcolors.OKBLUE + '[INFO] Cleaning backup and working dirs' + bcolors.ENDC)
             try:
-                os.system('rm -Rf '+image_working_directory)
-                os.system('rm -Rf /var/diskless/'+selected_image_name)
-                os.system('rm -f /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/squashfs.img.bkp')
+                shutil.rmtree(image_working_directory)
+                os.system('rm -f /var/www/html/preboot_execution_environment/diskless/images/' + selected_image_name + '/squashfs.img.bkp')
             except Exception as e:
                 print(e)
                 raise
+
+            print(bcolors.OKGREEN + '[OK] Done' + bcolors.ENDC)
+
             exit(0)
 
         if sub_sub_main_action == '3':
 
             images_list = os.listdir('/var/www/html/preboot_execution_environment/diskless/images/')
             if not images_list:
-                print(bcolors.OKGREEN+'[OK] No image found.'+bcolors.ENDC)
-                exit(0)
+                print(bcolors.FAIL + '[ERROR] No image found.' + bcolors.ENDC)
+                exit(1)
 
             selected_image = int(select_from_list(images_list, 'image to work with', -1))
             selected_image_name = images_list[selected_image]
+
+            image_working_directory = os.path.join(image_working_directory_base, selected_image_name)
 
             print('Please choose image new size:')
             print('(supported units: M=1024*1024, G=1024*1024*1024)')
@@ -681,67 +688,88 @@ elif main_action == '4':
             elif selected_livenet_size[-1] == 'M':
                 livenet_size = int(selected_livenet_size[:-1])
 
-            print('Cleaning before process...')
+            print(bcolors.OKBLUE + '[INFO] Creating new working dirs' + bcolors.ENDC)
             try:
-                os.system('rm -Rf '+image_working_directory)
-                os.system('rm -Rf '+image_working_directory+'_copy')
-                os.system('rm -Rf /var/diskless/'+selected_image_name)
+                os.makedirs(image_working_directory)
+            except FileExistsError:
+                print(bcolors.WARNING + '[WARNING] The directory ' + image_working_directory + ' already exists. Cleaning.' + bcolors.ENDC)
+                shutil.rmtree(image_working_directory)
+                os.makedirs(image_working_directory)
+            except OSError:
+                print(bcolors.FAIL + '[ERROR] Cannot create directory ' + image_working_directory + bcolors.ENDC)
+
+            try:
+                os.makedirs(image_working_directory + '_copy')
+            except FileExistsError:
+                print(bcolors.WARNING + '[WARNING] The directory ' + image_working_directory + '_copy' + ' already exists. Cleaning.' + bcolors.ENDC)
+                shutil.rmtree(image_working_directory + '_copy')
+                os.makedirs(image_working_directory + '_copy')
+            except OSError:
+                print(bcolors.FAIL + '[ERROR] Cannot create directory ' + image_working_directory + '_copy' + bcolors.ENDC)
+
+            try:
+                os.makedirs(image_working_directory + '_copy/squashfs-root/LiveOS/')
+            except OSError:
+                print(bcolors.FAIL + '[ERROR] Cannot create directory ' + image_working_directory + '_copy/squashfs-root/LiveOS/' + bcolors.ENDC)
+            try:
+                os.makedirs(os.path.join(image_working_directory, 'mnt'))
+            except OSError:
+                print(bcolors.FAIL + '[ERROR] Cannot create directory ' + os.path.join(image_working_directory, 'mnt') + bcolors.ENDC)
+            try:
+                os.makedirs(os.path.join(image_working_directory, 'mnt_copy'))
+            except OSError:
+                print(bcolors.FAIL + '[ERROR] Cannot create directory ' + os.path.join(image_working_directory, 'mnt_copy') + bcolors.ENDC)
+
+            print(bcolors.OKBLUE + '[INFO] Generating and mounting new empty image' + bcolors.ENDC)
+            try:
+                os.system('dd if=/dev/zero of=/' + image_working_directory + '_copy/squashfs-root/LiveOS/rootfs.img bs=1M count=' + str(livenet_size))
+                os.system('mkfs.xfs ' + image_working_directory + '_copy/squashfs-root/LiveOS/rootfs.img')
+                os.system('mount ' + image_working_directory + '_copy/squashfs-root/LiveOS/rootfs.img ' + os.path.join(image_working_directory, 'mnt_copy/'))
             except Exception as e:
                 print(e)
                 raise
 
-            print('Generating and mounting new empty image')
+            print(bcolors.OKBLUE + '[INFO] Unsquash and mount previous image' + bcolors.ENDC)
             try:
-                os.system('mkdir -p '+image_working_directory+'_copy/squashfs-root/LiveOS/')
-                os.system('dd if=/dev/zero of=/'+image_working_directory+'_copy/squashfs-root/LiveOS/rootfs.img bs=1M count='+str(livenet_size))
-                os.system('mkfs.xfs '+image_working_directory+'_copy/squashfs-root/LiveOS/rootfs.img')
-                os.system('mount '+image_working_directory+'_copy/squashfs-root/LiveOS/rootfs.img /mnt')
+                os.system('unsquashfs -d ' + image_working_directory + '/squashfs-root /var/www/html/preboot_execution_environment/diskless/images/' + selected_image_name + '/squashfs.img')
+                os.system('mount ' + image_working_directory + '/squashfs-root/LiveOS/rootfs.img ' + os.path.join(image_working_directory, 'mnt/'))
             except Exception as e:
                 print(e)
                 raise
 
-            print('Unsquash and mount previous image')
+            print(bcolors.OKBLUE + '[INFO] Copy old image into new one...' + bcolors.ENDC)
             try:
-                os.system('mkdir -p '+image_working_directory)
-                os.system('mkdir -p /var/diskless/'+selected_image_name+'/mnt')
-                os.system('unsquashfs -d '+image_working_directory+'/squashfs-root /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/squashfs.img')
-                os.system('mount '+image_working_directory+'/squashfs-root/LiveOS/rootfs.img /var/diskless/'+selected_image_name+'/mnt/')
+                os.system('cp -a ' + os.path.join(image_working_directory, 'mnt/') + '* ' + os.path.join(image_working_directory, 'mnt_copy/'))
+                os.sync()
             except Exception as e:
                 print(e)
                 raise
 
-            print('Copy old image into new one...')
+            print(bcolors.OKBLUE + '[INFO] Unmounting both images' + bcolors.ENDC)
             try:
-                os.system('cp -a /var/diskless/'+selected_image_name+'/mnt/* /mnt/')
-                os.system('sync')
+                os.system('umount ' + os.path.join(image_working_directory, 'mnt_copy/'))
+                os.system('umount ' + os.path.join(image_working_directory, 'mnt/'))
             except Exception as e:
                 print(e)
                 raise
 
-            print('Unmounting both images')
+            print(bcolors.OKBLUE + '[INFO] Removing old squashfs and generating new one...' + bcolors.ENDC)
             try:
-                os.system('umount /mnt')
-                os.system('umount /var/diskless/'+selected_image_name+'/mnt')
+                os.system('rm /var/www/html/preboot_execution_environment/diskless/images/' + selected_image_name + '/squashfs.img')
+                os.system('mksquashfs ' + image_working_directory + '_copy/squashfs-root/ /var/www/html/preboot_execution_environment/diskless/images/' + selected_image_name + '/squashfs.img')
             except Exception as e:
                 print(e)
                 raise
 
-            print('Removing old squashfs and egenrating new one')
+            print(bcolors.OKBLUE + '[INFO] Cleaning' + bcolors.ENDC)
             try:
-                os.system('rm /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/squashfs.img')
-                os.system('mksquashfs '+image_working_directory+'_copy/squashfs-root/ /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/squashfs.img')
+                shutil.rmtree(image_working_directory)
+                shutil.rmtree(image_working_directory + '_copy')
             except Exception as e:
                 print(e)
                 raise
 
-            print('Cleaning')
-            try:
-                os.system('rm -Rf '+image_working_directory)
-                os.system('rm -Rf '+image_working_directory+'_copy')
-                os.system('rm -Rf /var/diskless/'+selected_image_name)
-            except Exception as e:
-                print(e)
-                raise
+            print(bcolors.OKGREEN + '[OK] Done' + bcolors.ENDC)
 
             exit(0)
 

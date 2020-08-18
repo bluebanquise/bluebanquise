@@ -5,3 +5,4 @@ diskless_packages_to_install:
   - clustershell
   - python3-clustershell
   - nfs-utils
+  - dracut-live

@@ -1,5 +1,5 @@
 ---
-- name: Gathering OS specific variables
+- name: include_vars ░ Gather OS specific variables
   # This task gathers variables defined in OS specific files.
   #
   # Search vars in:
@@ -26,7 +26,7 @@
   tags:
     - package
 
-- name: Create diskless directories structure
+- name: "file █ Create diskless directories structure"
   file:
     path: "{{ item }}"
     state: directory
@@ -38,18 +38,8 @@
    - /var/www/html/preboot_execution_environment/diskless
    - /var/www/html/preboot_execution_environment/diskless/images
    - /var/www/html/preboot_execution_environment/diskless/kernels
-   - /etc/bluebanquise/tools/disklessset/
-   - /etc/bluebanquise/tools/disklessset/inventory/
-   - /var/diskless/
 
-- name: Install dracut-live
-  package:
-    name: dracut-live
-    state: present
-  tags:
-    - package
-
-- name: disklessset tool
+- name: "copy █ disklessset tool"
   copy:
     src: disklessset.py
     dest: /usr/bin/disklessset
