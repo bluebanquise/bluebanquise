@@ -23,7 +23,7 @@ jobs:
         uses: actions/setup-python@v1
 
       - name: Install packages
-        run: pip install 'ansible!=2.9.10' 'ansible-lint<4.3.0' flake8
+        run: pip install ansible ansible-lint flake8
 
       - name: Check python code
         run: flake8 . --statistics --ignore E501,E226
