@@ -14,6 +14,7 @@
 # Import dependencies
 import os
 import crypt
+import hashlib
 import shutil
 from argparse import ArgumentParser
 from datetime import datetime
@@ -35,11 +36,15 @@ class bcolors:
     UNDERLINE = '\033[4m'
 
 
-def load_file(filename):
+def read_yaml(filename):
     print(bcolors.OKBLUE+'[INFO] Loading '+filename+bcolors.ENDC)
     with open(filename, 'r') as f:
-        # return yaml.load(f, Loader=yaml.FullLoader) ## Waiting for PyYaml 5.1
-        return yaml.load(f)
+        return yaml.safe_load(f)
+
+
+def write_yaml(filename, content):
+    with open(filename, 'w') as f:
+        return yaml.dump(content, f, default_flow_style=False)
 
 
 def load_kernel_list(kernels_path):
@@ -189,6 +194,7 @@ passed_arguments = parser.parse_args()
 dnf_cache_directory = '/root/dnf'  # '/dev/shm/'
 image_working_directory_base = '/var/tmp/diskless/workdir/'
 kernels_path = '/var/www/html/preboot_execution_environment/diskless/kernels/'
+images_path = '/var/www/html/preboot_execution_environment/diskless/images/'
 
 print('BlueBanquise Diskless manager')
 print(' 1 - List available kernels')
@@ -269,32 +275,40 @@ elif main_action == '3':
         if answer in ['yes', 'y']:
 
             print(bcolors.OKBLUE+'[INFO] Cleaning and creating image folders.'+bcolors.ENDC)
-            os.system('rm -Rf /diskless/images/'+selected_image_name)
-            os.system('mkdir /diskless/images/'+selected_image_name)
-            os.system('mkdir /diskless/images/'+selected_image_name+'/staging')
-            os.system('rm -Rf /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
-            os.system('mkdir /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
+            try:
+                shutil.rmtree(os.path.join('/diskless/images/', selected_image_name))
+                os.makedirs(os.path.join('/diskless/images/', selected_image_name, 'staging'))
+                shutil.rmtree(os.path.join(images_path, selected_image_name))
+                os.mkdir(os.path.join(images_path, selected_image_name))
+            except OSError as e:
+                print(bcolors.FAIL + '[ERROR] Cannot clean or create image folders: ' + str(e) + bcolors.ENDC)
+
             print(bcolors.OKBLUE+'[INFO] Generating new ipxe boot file.'+bcolors.ENDC)
             boot_file_content = generate_ipxe_boot_file('nfs_staging', selected_image_name, kernel_list[int(selected_kernel)], 'initramfs-kernel-'+kernel_list[int(selected_kernel)].strip('vmlinuz-'))
-            with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/boot.ipxe', "w") as ff:
+            with open(os.path.join(images_path, selected_image_name, 'boot.ipxe'), "w") as ff:
                 ff.write(boot_file_content)
+
             print(bcolors.OKBLUE+'[INFO] Installing new system image... May take some time.'+bcolors.ENDC)
             os.system('dnf groupinstall -y "core" --setopt=module_platform_id=platform:el8 --installroot=/diskless/images/'+selected_image_name+'/staging')
+
             print(bcolors.OKBLUE+'[INFO] Setting password into image.'+bcolors.ENDC)
             with open('/diskless/images/'+selected_image_name+'/staging/etc/shadow') as ff:
                 newText = ff.read().replace('root:*', 'root:'+password_hash)
             with open('/diskless/images/'+selected_image_name+'/staging/etc/shadow', "w") as ff:
                 ff.write(newText)
+
             print(bcolors.OKBLUE+'[INFO] Registering new image.'+bcolors.ENDC)
-            file_content = '''image_data:
-  image_name: {image_name}
-  image_kernel: {image_kernel}
-  image_creation_date: {image_date}
-  image_type: nfs
-  image_status: staging
-'''.format(image_name=selected_image_name, image_kernel=kernel_list[int(selected_kernel)], image_date=datetime.today().strftime('%Y-%m-%d'))
-            with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml', "w") as ff:
-                ff.write(file_content)
+
+            metadata = dict()
+            metadata['image_name'] = selected_image_name
+            metadata['image_kernel'] = kernel_list[int(selected_kernel)]
+            metadata['image_creation_date'] = datetime.today().strftime('%Y-%m-%d')
+            metadata['image_type'] = 'nfs'
+            metadata['image_status'] = 'staging'
+            try:
+                write_yaml(os.path.join(images_path, selected_image_name, 'image_metadata.yml'), metadata)
+            except Exception as e:
+                print(e)
             print(bcolors.OKGREEN+'\n[OK] Done creating image.'+bcolors.ENDC)
 
     if selected_image_type == '1':  # LIVENET
@@ -359,29 +373,36 @@ elif main_action == '3':
             except OSError:
                 print(bcolors.FAIL + '[ERROR] Cannot create directory ' + image_working_directory + bcolors.ENDC)
 
-            installroot = os.path.join(image_working_directory, 'mnt/')
+            installroot = os.path.join(image_working_directory, 'mnt')
             try:
                 os.mkdir(installroot)
             except OSError:
                 print(bcolors.FAIL + '[ERROR] Cannot create directory ' + installroot + bcolors.ENDC)
 
             print(bcolors.OKBLUE+'[INFO] Cleaning and creating image folders.'+bcolors.ENDC)
-            os.system('rm -Rf /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
-            os.system('mkdir /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
+            try:
+                os.mkdir(os.path.join(images_path, selected_image_name))
+            except FileExistsError:
+                print(bcolors.WARNING + '[WARNING] The directory ' + os.path.join(images_path, selected_image_name) + ' already exists. Cleaning.' + bcolors.ENDC)
+                shutil.rmtree(os.path.join(images_path, selected_image_name))
+                os.mkdir(os.path.join(images_path, selected_image_name))
+            except OSError:
+                print(bcolors.FAIL + '[ERROR] Cannot clean or create image folder ' + os.path.join(images_path, selected_image_name) + bcolors.ENDC)
+
             print(bcolors.OKBLUE+'[INFO] Generating new ipxe boot file.'+bcolors.ENDC)
             boot_file_content = generate_ipxe_boot_file('livenet', selected_image_name, kernel_list[int(selected_kernel)], 'initramfs-kernel-'+kernel_list[int(selected_kernel)].strip('vmlinuz-'), selinux)
-            with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/boot.ipxe', "w") as ff:
+            with open(os.path.join(images_path, selected_image_name, 'boot.ipxe'), "w") as ff:
                 ff.write(boot_file_content)
+
             print(bcolors.OKBLUE+'[INFO] Creating empty image file, format and mount it.'+bcolors.ENDC)
-            os.system('rm -Rf '+image_working_directory+'/LiveOS')
-            os.system('mkdir -p '+image_working_directory+'/LiveOS')
-            os.system('dd if=/dev/zero of='+image_working_directory+'/LiveOS/rootfs.img bs=1M count='+str(livenet_size))
-            os.system('mkfs.xfs '+image_working_directory+'/LiveOS/rootfs.img')
+            os.mkdir(os.path.join(image_working_directory, 'LiveOS'))
+            os.system('dd if=/dev/zero of=' + os.path.join(image_working_directory, 'LiveOS/rootfs.img') + ' bs=1M count=' + str(livenet_size))
+            os.system('mkfs.xfs ' + os.path.join(image_working_directory, 'LiveOS/rootfs.img'))
             if selinux:
-                os.system('mount -o defcontext="system_u:object_r:default_t:s0",loop ' + image_working_directory+'/LiveOS/rootfs.img ' + installroot)
+                os.system('mount -o defcontext="system_u:object_r:default_t:s0",loop ' + os.path.join(image_working_directory, 'LiveOS/rootfs.img') + ' ' + installroot)
             else:
-                os.system('mount -o loop ' + image_working_directory + '/LiveOS/rootfs.img ' + installroot)
-            print(bcolors.OKBLUE+'[INFO] Generating cache link for dnf.'+bcolors.ENDC)
+                os.system('mount -o loop ' + os.path.join(image_working_directory, 'LiveOS/rootfs.img') + ' ' + installroot)
+
             print(bcolors.OKBLUE+'[INFO] Installing system into image.'+bcolors.ENDC)
             if selected_livenet_type == '3':
                 os.system('dnf install -y iproute procps-ng openssh-server  --installroot={0} --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest'.format(installroot))
@@ -403,18 +424,20 @@ elif main_action == '3':
                 newText = ff.read().replace('root:*', 'root:'+password_hash)
                 ff.seek(0)
                 ff.write(newText)
+
             if selected_ssh_pub_key:
                 print(bcolors.OKBLUE+'[INFO] Injecting SSH public key into image.'+bcolors.ENDC)
-                os.mkdir(os.path.join(installroot, 'root/.ssh/'))
+                os.mkdir(os.path.join(installroot, 'root/.ssh'))
                 shutil.copyfile(selected_ssh_pub_key, os.path.join(installroot, 'root/.ssh/authorized_keys'))
+
             print(bcolors.OKBLUE+'[INFO] Setting image information.'+bcolors.ENDC)
             with open(os.path.join(installroot, 'etc/os-release'), 'a') as ff:
                 ff.writelines(['BLUEBANQUISE_IMAGE_NAME="{0}"\n'.format(selected_image_name),
                                'BLUEBANQUISE_IMAGE_KERNEL="{0}"\n'.format(kernel_list[int(selected_kernel)]),
                                'BLUEBANQUISE_IMAGE_DATE="{0}"\n'.format(datetime.today().strftime('%Y-%m-%d'))])
-            print(bcolors.OKBLUE+'[INFO] Packaging and moving files... May take some time.'+bcolors.ENDC)
 
             if selinux:
+                print(bcolors.OKBLUE+'[INFO] Enabling SELinux.'+bcolors.ENDC)
                 os.system('dnf install -y libselinux-utils policycoreutils selinux-policy-targeted --installroot={0} --setopt=module_platform_id=platform:el8 --nobest'.format(installroot))
                 check_call('mount --bind /proc '+os.path.join(installroot, 'proc'), shell=True)
                 check_call('mount --bind /sys '+os.path.join(installroot, 'sys'), shell=True)
@@ -428,23 +451,32 @@ elif main_action == '3':
                 os.fchdir(real_root)
                 os.chroot(".")
                 os.close(real_root)
-                check_call('umount ' + installroot + '{sys/fs/selinux,sys,proc}', shell=True)
+                check_call('umount ' + installroot + '/{sys/fs/selinux,sys,proc}', shell=True)
 
+            print(bcolors.OKBLUE+'[INFO] Packaging and cleaning files... May take some time.'+bcolors.ENDC)
             os.system('umount ' + installroot)
             os.rmdir(installroot)
-#            os.system('rm -Rf /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
-#            os.system('mkdir /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
-            os.system('mksquashfs '+image_working_directory+' /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/squashfs.img')
+            os.system('mksquashfs ' + image_working_directory + ' ' + os.path.join(images_path, selected_image_name, 'squashfs.img'))
+            try:
+                sha256sum = hashlib.sha256(open(os.path.join(images_path, selected_image_name, 'squashfs.img'), 'rb').read()).hexdigest()
+            except Exception as e:
+                print(e)
             shutil.rmtree(image_working_directory)
+
             print(bcolors.OKBLUE+'[INFO] Registering new image.'+bcolors.ENDC)
-            file_content = '''image_data:
-  image_name: {image_name}
-  image_kernel: {image_kernel}
-  image_creation_date: {image_date}
-  image_type: livenet
-'''.format(image_name=selected_image_name, image_kernel=kernel_list[int(selected_kernel)], image_date=datetime.today().strftime('%Y-%m-%d'))
-            with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml', "w") as ff:
-                ff.write(file_content)
+            metadata = dict()
+            metadata['image_name'] = selected_image_name
+            metadata['image_kernel'] = kernel_list[int(selected_kernel)]
+            metadata['image_creation_date'] = datetime.today().strftime('%Y-%m-%d')
+            metadata['image_creation_timestamp'] = int(datetime.now().timestamp())
+            metadata['image_selinux_enabled'] = selinux
+            metadata['image_sha256'] = sha256sum
+            metadata['image_size'] = livenet_size  # Size unit: MiB
+            metadata['image_type'] = 'livenet'
+            try:
+                write_yaml(os.path.join(images_path, selected_image_name, 'image_metadata.yml'), metadata)
+            except Exception as e:
+                print(e)
             print(bcolors.OKGREEN+'\n[OK] Done creating image.'+bcolors.ENDC)
 
 elif main_action == '4':
@@ -459,21 +491,20 @@ elif main_action == '4':
     sub_main_action = str(input('-->: ').lower().strip())
 
     if sub_main_action == '1':
-        for i in os.listdir('/var/www/html/preboot_execution_environment/diskless/images/'):
+        for i in os.listdir(images_path):
+            image_info = read_yaml(os.path.join(images_path, str(i), 'image_metadata.yml'))
             print('')
             print('  Image name: '+str(i))
-            with open('/var/www/html/preboot_execution_environment/diskless/images/'+str(i)+'/image_data.yml', 'r') as f:
-                image_dict = yaml.load(f)
-            print('    ├── Kernel linked: '+str(image_dict['image_data']['image_kernel']))
-            print('    ├── Image type: '+str(image_dict['image_data']['image_type']))
-            if str(image_dict['image_data']['image_type']) == 'nfs':
-                print('    ├── image status: '+str(image_dict['image_data']['image_status']))
-            print('    └── Image creation date: '+str(image_dict['image_data']['image_creation_date']))
+            print('    ├── Kernel linked: '+str(image_info['image_kernel']))
+            print('    ├── Image type: '+str(image_info['image_type']))
+            if str(image_info['image_type']) == 'nfs':
+                print('    ├── image status: '+str(image_info['image_status']))
+            print('    └── Image creation date: '+str(image_info['image_creation_date']))
 
     elif sub_main_action == '2':
         print('Manage kernels of an image.')
 
-        images_list = os.listdir('/var/www/html/preboot_execution_environment/diskless/images/')
+        images_list = os.listdir(images_path)
         if not images_list:
             print(bcolors.FAIL+'[ERROR] No image found!'+bcolors.ENDC)
             exit(1)
@@ -481,9 +512,8 @@ elif main_action == '4':
         selected_image = int(select_from_list(images_list, 'image to work with', -1))
         selected_image_name = images_list[selected_image]
 
-        with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml', 'r') as f:
-            image_dict = yaml.load(f)
-        print('Current kernel is: '+str(image_dict['image_data']['image_kernel']))
+        image_info = read_yaml(os.path.join(images_path, selected_image_name, 'image_metadata.yml'))
+        print('Current kernel is: '+str(image_info['image_kernel']))
 
         kernel_list = load_kernel_list(kernels_path)
         if len(kernel_list) > 0:
@@ -493,27 +523,28 @@ elif main_action == '4':
             exit(1)
 
         print(bcolors.OKBLUE+'[INFO] Updating image files.'+bcolors.ENDC)
-        file = open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/boot.ipxe', 'r')
+        file = open(os.path.join(images_path, selected_image_name, 'boot.ipxe'), 'r')
         filebuffer = file.readlines()
         for i in range(len(filebuffer)):
             if 'image-kernel' in filebuffer[i]:
-                filebuffer[i] = 'set image-kernel '+selected_kernel+'\n'
+                filebuffer[i] = 'set image-kernel '+kernel_list[int(selected_kernel)]+'\n'
             if 'image-initramfs' in filebuffer[i]:
                 filebuffer[i] = 'set image-initramfs '+'initramfs-kernel-'+kernel_list[int(selected_kernel)].strip('vmlinuz-')+'\n'
         file.close
-        file = open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/boot.ipxe', 'w')
+        file = open(os.path.join(images_path, selected_image_name, 'boot.ipxe'), 'w')
         file.writelines(filebuffer)
         file.close
-        with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml', 'r') as f:
-            image_dict = yaml.safe_load(f)
-            image_dict['image_data']['image_kernel'] = selected_kernel
-        with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml', 'w') as f:
-            content = yaml.dump(image_dict, f, default_flow_style=False)
+        try:
+            image_info = read_yaml(os.path.join(images_path, selected_image_name, 'image_metadata.yml'))
+            image_info['image_kernel'] = kernel_list[int(selected_kernel)]
+            write_yaml(os.path.join(images_path, selected_image_name, 'image_metadata.yml'), image_info)
+        except Exception as e:
+            print(e)
         print(bcolors.OKGREEN+'\n[OK] Done.\nYou will need to restart your running nodes for changes to take effect.'+bcolors.ENDC)
 
     elif sub_main_action == '3':
 
-        images_list = os.listdir('/var/www/html/preboot_execution_environment/diskless/images/')
+        images_list = os.listdir(images_path)
         if not images_list:
             print(bcolors.FAIL+'[ERROR] No image found!'+bcolors.ENDC)
             exit(1)
@@ -521,12 +552,11 @@ elif main_action == '4':
         selected_image = int(select_from_list(images_list, 'image to work with', -1))
         selected_image_name_copy = images_list[selected_image]
 
-        with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name_copy+'/image_data.yml', 'r') as f:
-            image_dict = yaml.load(f)
+        image_info = read_yaml(os.path.join(images_path, selected_image_name_copy, 'image_metadata.yml'))
 
-        if image_dict['image_data']['image_type'] != 'nfs':
+        if image_info['image_type'] != 'nfs':
             print('Error: This is not an NFS image.')
-        elif image_dict['image_data']['image_status'] == 'staging':
+        elif image_info['image_status'] == 'staging':
             print('Image is a staging image. Create a new golden with it?')
             answer = str(input('Enter yes or no: ').lower().strip())
             if answer in ['yes', 'y']:
@@ -534,31 +564,36 @@ elif main_action == '4':
                 selected_image_name = str(input('-->: ').lower().strip())
 
                 print(bcolors.OKBLUE+'[INFO] Creating directories.'+bcolors.ENDC)
-                os.system('rm -Rf /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
-                os.system('mkdir /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
-                os.system('rm -Rf /diskless/images/'+selected_image_name)
-                os.system('mkdir /diskless/images/'+selected_image_name)
-                os.system('mkdir /diskless/images/'+selected_image_name+'/nodes')
+                try:
+                    shutil.rmtree(os.path.join(images_path, selected_image_name))
+                    os.mkdir(os.path.join(images_path, selected_image_name))
+                    shutil.rmtree(os.path.join('/diskless/images/', selected_image_name))
+                    os.makedirs(os.path.join('/diskless/images/', selected_image_name, 'nodes'))
+                except OSError as e:
+                    print(bcolors.FAIL + '[ERROR] Cannot create directories: ' + str(e) + bcolors.ENDC)
+
                 print(bcolors.OKBLUE+'[INFO] Cloning staging image to golden.'+bcolors.ENDC)
                 os.system('cp -a /diskless/images/'+selected_image_name_copy+'/staging /diskless/images/'+selected_image_name+'/golden')
                 print(bcolors.OKBLUE+'[INFO] Generating related files.'+bcolors.ENDC)
-                file_content = '''image_data:
-  image_name: {image_name}
-  image_kernel: {image_kernel}
-  image_creation_date: {image_date}
-  image_type: nfs
-  image_status: golden
-'''.format(image_name=selected_image_name, image_kernel=image_dict['image_data']['image_kernel'], image_date=datetime.today().strftime('%Y-%m-%d'))
-                with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/image_data.yml', "w") as ff:
-                    ff.write(file_content)
+
+                metadata = dict()
+                metadata['image_name'] = selected_image_name
+                metadata['image_kernel'] = image_info['image_kernel']
+                metadata['image_creation_date'] = datetime.today().strftime('%Y-%m-%d')
+                metadata['image_type'] = 'nfs'
+                metadata['image_status'] = 'golden'
+                try:
+                    write_yaml(os.path.join(images_path, selected_image_name, 'image_metadata.yml'), metadata)
+                except Exception as e:
+                    print(e)
                 print(bcolors.OKBLUE+'[INFO] Generating new ipxe boot file.'+bcolors.ENDC)
-                boot_file_content = generate_ipxe_boot_file('nfs_golden', selected_image_name, image_dict['image_data']['image_kernel'], 'initramfs-kernel-'+image_dict['image_data']['image_kernel'].strip('vmlinuz-'))
-            with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/boot.ipxe', "w") as ff:
+                boot_file_content = generate_ipxe_boot_file('nfs_golden', selected_image_name, image_info['image_kernel'], 'initramfs-kernel-'+image_info['image_kernel'].strip('vmlinuz-'))
+            with open(os.path.join(images_path, selected_image_name, 'boot.ipxe'), "w") as ff:
                 ff.write(boot_file_content)
 
     elif sub_main_action == '4':
         print('Please select image to work with')
-        images_list = os.listdir('/var/www/html/preboot_execution_environment/diskless/images/')
+        images_list = os.listdir(images_path)
         if not images_list:
             print(bcolors.FAIL+'[ERROR] No image found!'+bcolors.ENDC)
             exit(1)
@@ -566,12 +601,11 @@ elif main_action == '4':
         for i in range(0, len(images_list)):
             print(' '+str(i+1)+' - '+str(images_list[i]))
         selected_image = images_list[int(input('-->: ').lower().strip())-1]
-        with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image+'/image_data.yml', 'r') as f:
-            image_dict = yaml.load(f)
+        image_info = read_yaml(os.path.join(images_path, selected_image, 'image_metadata.yml'))
 
-        if image_dict['image_data']['image_type'] != 'nfs':
+        if image_info['image_type'] != 'nfs':
             print('Error: This is not an NFS image.')
-        elif image_dict['image_data']['image_status'] == 'golden':
+        elif image_info['image_status'] == 'golden':
 
             print('Manages nodes of image '+selected_image)
             print(' 1 - List nodes with the image')
@@ -598,12 +632,12 @@ elif main_action == '4':
                 print(bcolors.OKBLUE+'[INFO] Deleting, this may take some time...'+bcolors.ENDC)
                 for node in NodeSet(nodes_range):
                     print("Working on node: "+str(node))
-                    os.system('rm -Rf /diskless/images/'+selected_image+'/nodes/'+node)
+                    shutil.rmtree(os.path.join('/diskless/images/', selected_image, 'nodes', node))
 
     elif sub_main_action == '5':
         print('Remove an image.')
 
-        images_list = os.listdir('/var/www/html/preboot_execution_environment/diskless/images/')
+        images_list = os.listdir(images_path)
         if not images_list:
             print(bcolors.OKGREEN+'[OK] No image found.'+bcolors.ENDC)
             exit(0)
@@ -612,7 +646,7 @@ elif main_action == '4':
         selected_image_name = images_list[selected_image]
 
         try:
-            shutil.rmtree('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
+            shutil.rmtree(os.path.join(images_path, selected_image_name))
             print("Image "+selected_image_name+" has been deleted.")
         except Exception as e:
             print(e)
