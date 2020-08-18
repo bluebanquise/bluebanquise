@@ -71,6 +71,8 @@ parser.add_argument("-i", "--image", dest="image", default="none",
                     help="Specify diskless or clone image to be used, if using diskless/clone/clonedeploy boot.")
 parser.add_argument("-e", "--extra-parameters", dest="extra_parameters", default="none",
                     help="Add extra parameters for boot chain, some addons may need some.")
+parser.add_argument("-k", "--kickstart", action="store_true",
+                    help="Display the kickstart file of a node")
 parser.add_argument("-q", "--quiet", action="store_true",
                     help="Do not print INFO messages.")
 
@@ -159,3 +161,16 @@ elif passed_arguments.boot is not None:
 
         else:
             logging.warning(bcolors.WARNING+'Node '+str(node)+' do not exist. Skipping.'+bcolors.ENDC)
+
+elif passed_arguments.kickstart is not None:
+
+    node = passed_arguments.nodes
+    if len(NodeSet(node)) != 1:
+        logging.error(bcolors.FAIL + 'Specify a single node with -n to display its kickstart file.' + bcolors.ENDC)
+        exit(1)
+
+    # The kickstart.cfg file is created by Ansible role pxe_stack
+    with open(os.path.join('/var/www/html/preboot_execution_environment/equipment_profiles/',
+                           '{profile}.kickstart.cfg'.format(profile=nodes_parameters[node]['equipment_profile'])), "r") as f:
+        for line in f.readlines():
+            print(line.strip())
