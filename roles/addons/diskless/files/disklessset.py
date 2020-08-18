@@ -739,7 +739,7 @@ elif main_action == '4':
 
             print(bcolors.OKBLUE + '[INFO] Dumping image: old_image -> cache -> new_image...' + bcolors.ENDC)
             try:
-                os.system('xfsdump -l 0 -L label -M media -f ' + image_working_directory + 'image.xfsdump ' + os.path.join(image_working_directory, 'mnt'))
+                os.system('xfsdump -l 0 -L ' + selected_image_name + ' -M media -f ' + image_working_directory + 'image.xfsdump ' + os.path.join(image_working_directory, 'mnt'))
                 os.system('xfsrestore -f ' + image_working_directory + 'image.xfsdump ' + os.path.join(image_working_directory, 'mnt_copy'))
                 os.system('rm -f ' + image_working_directory + 'image.xfsdump')
                 os.sync()
