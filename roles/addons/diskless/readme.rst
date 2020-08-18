@@ -15,8 +15,8 @@ It is important to understand that this role is independant of the pxe_stack cor
 
 Validated on RHEL8.
 
-Instructions
-^^^^^^^^^^^^
+Basic instructions
+^^^^^^^^^^^^^^^^^^
 
 1. Apply your playbook with the "diskless" role activated (see *Example playbook* part):
 
@@ -164,6 +164,8 @@ Check that everything is alright before continuing:
   [INFO] Installing system into image.
   ...
 
+Image is now generated. See Customizing image in next section on how to customize
+image before using it.
 
 7. Using the command *bootset*, set the image one node will use. 
    
@@ -176,7 +178,6 @@ The -n parameter can be a nodeset.
 
 8. Reboot the diskless node to make it boot onto the new image.
 
-
 * Example Playbook
 
 .. code-block:: text
@@ -185,6 +186,66 @@ The -n parameter can be a nodeset.
     roles:
       - pxe_stack
       - diskless
+
+Customizing Livenet image
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+It is assume here that image name used is *space_image*.
+
+The disklessset tool allows to customize livenet images before booting them, 
+and especially to execute playbooks inside images.
+
+Start the tool, go into "4 - Manage existing diskless images", then 
+"5 - Manage livenet images".
+
+The next menu allows you to mount, unmount, and resize image.
+
+Mount first the image using the tool. Images are mouted by default in 
+/var/tmp/diskless/workdir/space_image/mnt.
+
+It is now possible to copy files, install rpms, or tune any aspects of the 
+mounted image.
+
+The tool also generated a temporary Ansible inventory in 
+/var/tmp/diskless/workdir/space_image/inventory/ .
+
+To execute an Ansible playbook into the image, generate a new playbook 
+with the following head:
+
+.. code-block:: yaml
+
+  ---
+  
+  - name: computes
+    hosts: /var/tmp/diskless/workdir/space_image/mnt
+    connection: chroot
+    roles:
+
+And add your roles inside.
+
+Then execute it into the mounted image using the following command:
+
+.. code-block:: text
+
+  ansible-playbook computes.yml \
+  -i /etc/bluebanquise/inventory/ -i /etc/bluebanquise/internal/ -i /var/tmp/diskless/workdir/space_image/inventory/ \
+  -e "j2_current_iceberg=iceberg1 j2_node_main_network=ice1-1 start_service=false" \
+  --skip-tags identify
+
+Notes:
+
+* The multiple -i defines Ansible inventories to gather. By default, in BlueBanquise, the first two inventories are used. We simply add the third one, corresponding to the mounting point.
+* The -e (extra vars) are here to sepcify to the stack which iceberg and main network are to be used in the configuration of the node. (System cannot know on which nodes the image will be used).
+* The --skip-tags identify prevent hostname and static ip to be set, since the image should be generic for multiple hosts.
+
+Before closing, also remember to clean dnf cache into the image chroot to save space.
+
+Now, using df command, check used space of the image, to resize it later if whished.
+
+Using disklessset now, choose option 2 to unmount the image and squashfs it again.
+
+It is possible now to use the tool to resize image, to reduce it to the desired value (to save ram on target host).
+Always keep at least 100mb in / for temporary files and few logs generated during run.
 
 To be done
 ^^^^^^^^^^
