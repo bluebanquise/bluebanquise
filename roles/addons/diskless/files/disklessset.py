@@ -737,15 +737,6 @@ elif main_action == '4':
                 print(bcolors.FAIL + '[ERROR] Cannot create directory ' + image_working_directory + bcolors.ENDC)
 
             try:
-                os.makedirs(image_working_directory + '_copy')
-            except FileExistsError:
-                print(bcolors.WARNING + '[WARNING] The directory ' + image_working_directory + '_copy' + ' already exists. Cleaning.' + bcolors.ENDC)
-                shutil.rmtree(image_working_directory + '_copy')
-                os.makedirs(image_working_directory + '_copy')
-            except OSError:
-                print(bcolors.FAIL + '[ERROR] Cannot create directory ' + image_working_directory + '_copy' + bcolors.ENDC)
-
-            try:
                 os.makedirs(image_working_directory + '_copy/squashfs-root/LiveOS/')
             except OSError:
                 print(bcolors.FAIL + '[ERROR] Cannot create directory ' + image_working_directory + '_copy/squashfs-root/LiveOS/' + bcolors.ENDC)
@@ -770,7 +761,7 @@ elif main_action == '4':
             print(bcolors.OKBLUE + '[INFO] Unsquash and mount previous image' + bcolors.ENDC)
             try:
                 os.system('unsquashfs -d ' + os.path.join(image_working_directory, 'squashfs-root') + ' ' + os.path.join(images_path, selected_image_name, 'squashfs.img'))
-                os.system('mount ' + os.path.join(image_working_directory, 'squashfs-root/LiveOS/rootfs.img) + ' ' + os.path.join(image_working_directory, 'mnt/'))
+                os.system('mount ' + os.path.join(image_working_directory, 'squashfs-root/LiveOS/rootfs.img') + ' ' + os.path.join(image_working_directory, 'mnt/'))
             except Exception as e:
                 print(e)
                 raise

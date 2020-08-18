@@ -193,7 +193,8 @@ Customizing Livenet image
 The image name used in the examples below is *space_image*.
 
 The disklessset tool allows to customize livenet images before booting them, 
-and especially to execute playbooks inside images.
+by mounting images and providing simple chroot inventory. System administrator 
+can then tune or execute playbooks inside images.
 
 Start the tool, select menu "4 - Manage existing diskless images", then 
 "5 - Manage livenet images".
@@ -254,5 +255,6 @@ Clean code, add more error detection, and more verbosity.
 Changelog
 ^^^^^^^^^
 
+* 1.1.0: Role update. Benoit Leveugle <benoit.leveugle@gmail.com>, Bruno Travouillon <devel@travouillon.fr>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
  
