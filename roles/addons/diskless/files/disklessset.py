@@ -17,6 +17,7 @@ import crypt
 import shutil
 from argparse import ArgumentParser
 from datetime import datetime
+from subprocess import check_call
 
 import yaml
 from ClusterShell.NodeSet import NodeSet
@@ -60,7 +61,7 @@ def select_from_list(list_from, list_name, index_modifier):
     return selected_item
 
 
-def generate_ipxe_boot_file(image_type, image_name, image_kernel, image_initramfs):
+def generate_ipxe_boot_file(image_type, image_name, image_kernel, image_initramfs, selinux=False):
     if image_type == 'nfs_staging':
         boot_file_content = '''#!ipxe
 
@@ -87,6 +88,10 @@ echo | Loading initial ramdisk ...
 initrd http://${{next-server}}/preboot_execution_environment/diskless/kernels/${{image-initramfs}}
 
 echo | ALL DONE! We are ready.
+echo | Downloaded images report:
+
+imgstat
+
 echo | Booting in 4s ...
 echo |
 echo +----------------------------------------------------+
@@ -116,13 +121,17 @@ echo | > Additional kernel parameters: ${{eq-kernel-parameters}} ${{dedicated-ke
 echo |
 echo | Loading linux ...
 
-kernel http://${{next-server}}/preboot_execution_environment/diskless/kernels/${{image-kernel}} initrd=${{image-initramfs}} selinux=0 text=1 root=nfs:${{next-server}}:/diskless/images/{image_name}/nodes/${{hostname}},vers=4.2,rw rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}} rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4
+kernel http://${{next-server}}/preboot_execution_environment/diskless/kernels/${{image-kernel}} initrd=${{image-initramfs}} selinux={selinux} text=1 root=nfs:${{next-server}}:/diskless/images/{image_name}/nodes/${{hostname}},vers=4.2,rw rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}} rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4
 
 echo | Loading initial ramdisk ...
 
 initrd http://${{next-server}}/preboot_execution_environment/diskless/kernels/${{image-initramfs}}
 
 echo | ALL DONE! We are ready.
+echo | Downloaded images report:
+
+imgstat
+
 echo | Booting in 4s ...
 echo |
 echo +----------------------------------------------------+
@@ -130,7 +139,7 @@ echo +----------------------------------------------------+
 sleep 4
 
 boot
-'''.format(image_name=image_name, image_kernel=image_kernel, image_initramfs=image_initramfs)
+'''.format(image_name=image_name, image_kernel=image_kernel, image_initramfs=image_initramfs, selinux=int(selinux))
         return boot_file_content
     elif image_type == 'livenet':
         boot_file_content = '''#!ipxe
@@ -151,13 +160,17 @@ echo | > Additional kernel parameters: ${{eq-kernel-parameters}} ${{dedicated-ke
 echo |
 echo | Loading linux ...
 
-kernel http://${{next-server}}/preboot_execution_environment/diskless/kernels/${{image-kernel}} initrd=${{image-initramfs}} root=live:http://${{next-server}}/preboot_execution_environment/diskless/images/{image_name}/squashfs.img rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}} rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4 selinux=0
+kernel http://${{next-server}}/preboot_execution_environment/diskless/kernels/${{image-kernel}} initrd=${{image-initramfs}} root=live:http://${{next-server}}/preboot_execution_environment/diskless/images/{image_name}/squashfs.img rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}} rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4 selinux={selinux}
 
 echo | Loading initial ramdisk ...
 
 initrd http://${{next-server}}/preboot_execution_environment/diskless/kernels/${{image-initramfs}}
 
 echo | ALL DONE! We are ready.
+echo | Downloaded images report:
+
+imgstat
+
 echo | Booting in 4s ...
 echo |
 echo +----------------------------------------------------+
@@ -165,7 +178,7 @@ echo +----------------------------------------------------+
 sleep 4
 
 boot
-'''.format(image_name=image_name, image_kernel=image_kernel, image_initramfs=image_initramfs)
+'''.format(image_name=image_name, image_kernel=image_kernel, image_initramfs=image_initramfs, selinux=int(selinux))
         return boot_file_content
 
 
@@ -174,7 +187,6 @@ parser = ArgumentParser()
 passed_arguments = parser.parse_args()
 
 dnf_cache_directory = '/root/dnf'  # '/dev/shm/'
-image_working_directory = '/root/diskless/workdir/'
 image_working_directory_base = '/var/tmp/diskless/workdir/'
 kernels_path = '/var/www/html/preboot_execution_environment/diskless/kernels/'
 
@@ -218,7 +230,7 @@ elif main_action == '2':
         exit(1)
 
     print(bcolors.OKBLUE+'[INFO] Now generating initramfs... May take some time.'+bcolors.ENDC)
-    os.system('dracut --xz -v -m "network base nfs" --add "livenet" --add-drivers xfs --no-hostonly --nolvmconf '+kernels_path+'/initramfs-kernel-'+(kernel_list[int(selected_kernel)].strip('vmlinuz-'))+' --force')
+    os.system('dracut --xz -v -m "network base nfs" --add "livenet" --add-drivers xfs --no-hostonly --nolvmconf '+kernels_path+'/initramfs-kernel-'+(kernel_list[int(selected_kernel)].strip('vmlinuz-'))+' --force --kver={}'.format(kernel_list[int(selected_kernel)].strip('vmlinuz-')))
     os.chmod(kernels_path+'/initramfs-kernel-'+(kernel_list[int(selected_kernel)].strip('vmlinuz-')), 0o644)
     print(bcolors.OKGREEN+'\n[OK] Done.'+bcolors.ENDC)
 
@@ -254,8 +266,7 @@ elif main_action == '3':
         print('  Root password: \t'+password_raw)
 
         answer = str(input("Confirm ? Enter yes or no: ").lower().strip())
-
-        if answer == "yes":
+        if answer in ['yes', 'y']:
 
             print(bcolors.OKBLUE+'[INFO] Cleaning and creating image folders.'+bcolors.ENDC)
             os.system('rm -Rf /diskless/images/'+selected_image_name)
@@ -316,6 +327,13 @@ elif main_action == '3':
             print('SSH public key not found: {0}'.format(selected_ssh_pub_key))
             exit(1)
 
+        print('Do you want to activate SELinux inside the image?')
+        answer_selinux = str(input('Enter yes or no: ').lower().strip())
+        if answer_selinux in ['yes', 'y']:
+            selinux = True
+        else:
+            selinux = False
+
         print('Do you want to create a new livenet image with the following parameters:')
         print('  Image name: \t\t'+selected_image_name)
         print('  Kernel version: \t'+kernel_list[int(selected_kernel)])
@@ -323,18 +341,35 @@ elif main_action == '3':
         print('  Image profile: \t'+selected_livenet_type)
         print('  Image size: \t\t'+str(livenet_size)+'M')
         print('  SSH pubkey: \t\t'+str(selected_ssh_pub_key))
+        print('  Enable SELinux: \t'+str(answer_selinux))
         if selected_livenet_type == '4':
             print('  Additional packages: \t'+selected_packages_list)
 
         answer = str(input("Confirm ? Enter yes or no: ").lower().strip())
 
-        if answer == "yes":
+        if answer in ['yes', 'y']:
+
+            image_working_directory = os.path.join(image_working_directory_base, selected_image_name)
+            try:
+                os.makedirs(image_working_directory)
+            except FileExistsError:
+                print(bcolors.WARNING + '[WARNING] The directory ' + image_working_directory + ' already exists. Cleaning.' + bcolors.ENDC)
+                shutil.rmtree(image_working_directory)
+                os.makedirs(image_working_directory)
+            except OSError:
+                print(bcolors.FAIL + '[ERROR] Cannot create directory ' + image_working_directory + bcolors.ENDC)
+
+            installroot = os.path.join(image_working_directory, 'mnt/')
+            try:
+                os.mkdir(installroot)
+            except OSError:
+                print(bcolors.FAIL + '[ERROR] Cannot create directory ' + installroot + bcolors.ENDC)
 
             print(bcolors.OKBLUE+'[INFO] Cleaning and creating image folders.'+bcolors.ENDC)
             os.system('rm -Rf /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
             os.system('mkdir /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
             print(bcolors.OKBLUE+'[INFO] Generating new ipxe boot file.'+bcolors.ENDC)
-            boot_file_content = generate_ipxe_boot_file('livenet', selected_image_name, kernel_list[int(selected_kernel)], 'initramfs-kernel-'+kernel_list[int(selected_kernel)].strip('vmlinuz-'))
+            boot_file_content = generate_ipxe_boot_file('livenet', selected_image_name, kernel_list[int(selected_kernel)], 'initramfs-kernel-'+kernel_list[int(selected_kernel)].strip('vmlinuz-'), selinux)
             with open('/var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/boot.ipxe', "w") as ff:
                 ff.write(boot_file_content)
             print(bcolors.OKBLUE+'[INFO] Creating empty image file, format and mount it.'+bcolors.ENDC)
@@ -342,38 +377,61 @@ elif main_action == '3':
             os.system('mkdir -p '+image_working_directory+'/LiveOS')
             os.system('dd if=/dev/zero of='+image_working_directory+'/LiveOS/rootfs.img bs=1M count='+str(livenet_size))
             os.system('mkfs.xfs '+image_working_directory+'/LiveOS/rootfs.img')
-            os.system('mount -o loop '+image_working_directory+'/LiveOS/rootfs.img /mnt')
+            if selinux:
+                os.system('mount -o defcontext="system_u:object_r:default_t:s0",loop ' + image_working_directory+'/LiveOS/rootfs.img ' + installroot)
+            else:
+                os.system('mount -o loop ' + image_working_directory + '/LiveOS/rootfs.img ' + installroot)
             print(bcolors.OKBLUE+'[INFO] Generating cache link for dnf.'+bcolors.ENDC)
-            os.system('mkdir /mnt/var/cache/ -p')
-#            os.system('rm -Rf '+dnf_cache_directory+'/dnfcache')
-#            os.system('mkdir -p '+dnf_cache_directory+'/dnfcache')
-#            os.system('ln -s '+dnf_cache_directory+'/dnfcache/ /mnt/var/cache/dnf')
             print(bcolors.OKBLUE+'[INFO] Installing system into image.'+bcolors.ENDC)
             if selected_livenet_type == '3':
-                os.system('dnf install -y iproute procps-ng openssh-server  --installroot=/mnt/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --releasever=8 --nobest')
+                os.system('dnf install -y iproute procps-ng openssh-server  --installroot={0} --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest'.format(installroot))
             elif selected_livenet_type == '2':
-                os.system('dnf install -y iproute procps-ng openssh-server NetworkManager  --installroot=/mnt/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --releasever=8 --nobest')
-                os.system('dnf install -y dnf  --installroot=/mnt/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --releasever=8 --nobest')
+                os.system('dnf install -y iproute procps-ng openssh-server NetworkManager  --installroot={0} --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest'.format(installroot))
+                os.system('dnf install -y dnf  --installroot={0} --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest'.format(installroot))
             elif selected_livenet_type == '1':
-                os.system('dnf groupinstall -y "core"  --setopt=module_platform_id=platform:el8 --installroot=/mnt')
+                os.system('dnf groupinstall -y "core"  --setopt=module_platform_id=platform:el8 --installroot={0}'.format(installroot))
             elif selected_livenet_type == '4':
-                os.system('dnf install -y @core {0} --setopt=module_platform_id=platform:el8 --installroot=/mnt'.format(selected_packages_list))
+                try:
+                    if os.system('dnf install -y @core {0} --setopt=module_platform_id=platform:el8 --installroot={1}'.format(selected_packages_list, installroot)) != 0:
+                        raise Exception('dnf install failed')
+                except Exception as e:
+                    print(bcolors.FAIL+'[ERROR] '+str(e)+': a package was not found or the repositories are broken.'+bcolors.ENDC)
+                    exit(1)
+
             print(bcolors.OKBLUE+'[INFO] Setting password into image.'+bcolors.ENDC)
-            with open('/mnt/etc/shadow') as ff:
+            with open(os.path.join(installroot, 'etc/shadow'), "r+") as ff:
                 newText = ff.read().replace('root:*', 'root:'+password_hash)
-            with open('/mnt/etc/shadow', "w") as ff:
+                ff.seek(0)
                 ff.write(newText)
             if selected_ssh_pub_key:
                 print(bcolors.OKBLUE+'[INFO] Injecting SSH public key into image.'+bcolors.ENDC)
-                os.mkdir('/mnt/root/.ssh/')
-                shutil.copyfile(selected_ssh_pub_key, '/mnt/root/.ssh/authorized_keys')
+                os.mkdir(os.path.join(installroot, 'root/.ssh/'))
+                shutil.copyfile(selected_ssh_pub_key, os.path.join(installroot, 'root/.ssh/authorized_keys'))
             print(bcolors.OKBLUE+'[INFO] Setting image information.'+bcolors.ENDC)
-            with open('/mnt/etc/os-release', 'a') as ff:
+            with open(os.path.join(installroot, 'etc/os-release'), 'a') as ff:
                 ff.writelines(['BLUEBANQUISE_IMAGE_NAME="{0}"\n'.format(selected_image_name),
                                'BLUEBANQUISE_IMAGE_KERNEL="{0}"\n'.format(kernel_list[int(selected_kernel)]),
                                'BLUEBANQUISE_IMAGE_DATE="{0}"\n'.format(datetime.today().strftime('%Y-%m-%d'))])
             print(bcolors.OKBLUE+'[INFO] Packaging and moving files... May take some time.'+bcolors.ENDC)
-            os.system('umount /mnt')
+
+            if selinux:
+                os.system('dnf install -y libselinux-utils policycoreutils selinux-policy-targeted --installroot={0} --setopt=module_platform_id=platform:el8 --nobest'.format(installroot))
+                check_call('mount --bind /proc '+os.path.join(installroot, 'proc'), shell=True)
+                check_call('mount --bind /sys '+os.path.join(installroot, 'sys'), shell=True)
+                check_call('mount --bind /sys/fs/selinux '+os.path.join(installroot, 'sys/fs/selinux'), shell=True)
+                real_root = os.open("/", os.O_RDONLY)
+                os.chroot(installroot)
+                os.chdir("/")
+
+                check_call('restorecon -Rv /', shell=True)
+
+                os.fchdir(real_root)
+                os.chroot(".")
+                os.close(real_root)
+                check_call('umount ' + installroot + '{sys/fs/selinux,sys,proc}', shell=True)
+
+            os.system('umount ' + installroot)
+            os.rmdir(installroot)
 #            os.system('rm -Rf /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
 #            os.system('mkdir /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name)
             os.system('mksquashfs '+image_working_directory+' /var/www/html/preboot_execution_environment/diskless/images/'+selected_image_name+'/squashfs.img')
@@ -472,7 +530,7 @@ elif main_action == '4':
         elif image_dict['image_data']['image_status'] == 'staging':
             print('Image is a staging image. Create a new golden with it?')
             answer = str(input('Enter yes or no: ').lower().strip())
-            if answer == "yes":
+            if answer in ['yes', 'y']:
                 print('New golden image name ?')
                 selected_image_name = str(input('-->: ').lower().strip())
 

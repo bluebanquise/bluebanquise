@@ -12,13 +12,15 @@
 #             Adrien Ribeiro <adrien.ribeiro@atos.net>
 # https://github.com/bluebanquise/bluebanquise - MIT license
 
-from ClusterShell.NodeSet import NodeSet
-from argparse import ArgumentParser
 import grp
 import logging
 import os
 import pwd
+import re
+from argparse import ArgumentParser
+
 import yaml
+from ClusterShell.NodeSet import NodeSet
 
 
 # Colors, from https://stackoverflow.com/questions/287871/how-to-print-colored-text-in-terminal-in-python
@@ -71,6 +73,8 @@ parser.add_argument("-i", "--image", dest="image", default="none",
                     help="Specify diskless or clone image to be used, if using diskless/clone/clonedeploy boot.")
 parser.add_argument("-e", "--extra-parameters", dest="extra_parameters", default="none",
                     help="Add extra parameters for boot chain, some addons may need some.")
+parser.add_argument("-k", "--kickstart", action="store_true",
+                    help="Display the kickstart file of a node")
 parser.add_argument("-q", "--quiet", action="store_true",
                     help="Do not print INFO messages.")
 
@@ -89,19 +93,46 @@ pxe_parameters = load_file('/etc/bluebanquise/pxe/pxe_parameters.yml')
 apache_uid = pwd.getpwnam(pxe_parameters["pxe_parameters"]["apache_uid"]).pw_uid
 apache_gid = grp.getgrnam(pxe_parameters["pxe_parameters"]["apache_gid"]).gr_gid
 
+pxe_nodes_path = '/var/www/html/preboot_execution_environment/nodes/'
+
 if passed_arguments.status is not None:
+    diskfull = NodeSet()
+    diskless = dict()
+    osdeploy = NodeSet()
+
     # Iteration on nodes
     for node in NodeSet(passed_arguments.nodes):
         # Check if node file exist
-        if str(os.path.exists('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe')) == 'False':
-            logging.warning(bcolors.WARNING+'File '+'/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe'+' do not exist. Skipping.'+bcolors.ENDC)
+        ipxe_file = os.path.join(pxe_nodes_path, '{node}.ipxe'.format(node=node))
+        if not os.path.exists(ipxe_file):
+            logging.warning(bcolors.WARNING + 'File ' + ipxe_file + ' does not exist. Skipping.' + bcolors.ENDC)
             continue
         else:
-            with open('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe', 'r') as f:
-                filebuffer = f.readlines()
-            for i in range(len(filebuffer)):
-                if 'menu-default' in filebuffer[i]:
-                    print('  - '+str(node)+' : '+filebuffer[i].split(' ')[2].replace('boot', ''), end='')
+            with open(ipxe_file, 'r') as f:
+                ipxe_conf = f.read()
+                # Search the default boot type in the ipxe file
+                boot = re.search(r"^set menu-default boot(.+)", ipxe_conf, re.MULTILINE).group(1)
+
+                if boot == 'disk':
+                    diskfull.update(node)
+                elif boot == 'osdeploy':
+                    osdeploy.update(node)
+                elif boot == 'diskless':
+                    # If diskless, group nodes per image
+                    image = re.search(r"^set node-image (.+)", ipxe_conf, re.MULTILINE).group(1)
+                    if image not in diskless:
+                        diskless[image] = NodeSet()
+                    diskless[image].update(node)
+
+    # Display NodeSet per boot type
+    if len(diskfull):
+        print('Diskfull: {nodes}'.format(nodes=diskfull))
+    if len(osdeploy):
+        print('Next boot deployment: {nodes}'.format(nodes=osdeploy))
+    if len(diskless):
+        print('Diskless image(s):')
+        for image in diskless:
+            print(' - {image}: {nodes}'.format(image=image, nodes=diskless[image]))
 
 elif passed_arguments.boot is not None:
 
@@ -159,3 +190,16 @@ elif passed_arguments.boot is not None:
 
         else:
             logging.warning(bcolors.WARNING+'Node '+str(node)+' do not exist. Skipping.'+bcolors.ENDC)
+
+elif passed_arguments.kickstart is not None:
+
+    node = passed_arguments.nodes
+    if len(NodeSet(node)) != 1:
+        logging.error(bcolors.FAIL + 'Specify a single node with -n to display its kickstart file.' + bcolors.ENDC)
+        exit(1)
+
+    # The kickstart.cfg file is created by Ansible role pxe_stack
+    with open(os.path.join('/var/www/html/preboot_execution_environment/equipment_profiles/',
+                           '{profile}.kickstart.cfg'.format(profile=nodes_parameters[node]['equipment_profile'])), "r") as f:
+        for line in f.readlines():
+            print(line.strip())
