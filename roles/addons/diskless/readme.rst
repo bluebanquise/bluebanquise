@@ -164,7 +164,7 @@ Check that everything is alright before continuing:
   [INFO] Installing system into image.
   ...
 
-Image is now generated. See Customizing image in next section on how to customize
+Image is now generated. See Customizing Livenet image in next section on how to customize
 image before using it.
 
 7. Using the command *bootset*, set the image one node will use. 
