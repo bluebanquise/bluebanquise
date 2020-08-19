@@ -244,7 +244,7 @@ Now, using df command, check used space of the image, to resize it later if whis
 Using disklessset now, choose option 2 to unmount the image and squashfs it again.
 
 It is possible now to use the tool to resize image, to reduce it to the desired value (to save ram on target host).
-Always keep at least 100mb in / for temporary files and few logs generated during run.
+Always keep at least 100MB in / for temporary files and few logs generated during run.
 
 To be done
 ^^^^^^^^^^
