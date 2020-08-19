@@ -610,7 +610,7 @@ elif main_action == '4':
 
         if sub_sub_main_action == '1':
 
-            images_list = os.listdir('/var/www/html/preboot_execution_environment/diskless/images/')
+            images_list = os.listdir(images_path)
             if not images_list:
                 print(bcolors.FAIL + '[ERROR] No image found.' + bcolors.ENDC)
                 exit(1)
