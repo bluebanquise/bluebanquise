@@ -220,7 +220,7 @@ with the following head:
     connection: chroot
     roles:
 
-And add your roles inside.
+Add any roles to apply to the image to this playbook.
 
 Then execute it into the mounted image using the following command:
 
