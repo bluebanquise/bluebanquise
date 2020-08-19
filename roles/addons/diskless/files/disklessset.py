@@ -696,7 +696,7 @@ elif main_action == '4':
             print(bcolors.OKBLUE + '[INFO] Cleaning backup and working dirs' + bcolors.ENDC)
             try:
                 shutil.rmtree(image_working_directory)
-                os.system('rm -f /var/www/html/preboot_execution_environment/diskless/images/' + selected_image_name + '/squashfs.img.bkp')
+                os.remove(os.path.join(images_path, selected_image_name, 'squashfs.img.bkp'))
             except Exception as e:
                 print(e)
                 raise
