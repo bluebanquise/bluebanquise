@@ -20,8 +20,7 @@ Enable or disable the firewall service in the equipment profile:
 
 .. code-block:: yaml
 
-  equipment_profile:
-    firewall: true
+  ep_firewall: true
 
 To add a network of the host to a zone, define the zone name in
 **firewall.zone** in the network:
@@ -45,37 +44,35 @@ To add a network of the host to a zone, define the zone name in
 
 
 To add or delete custom services that are not handled by any other role, define
-the `firewall.zones` parameter as below:
+the `firewall_zones` parameter as below:
 
 .. code-block:: yaml
 
-  firewall:
-    zones:
-      - zone: internal            <<< zone name
-        services_enabled:         <<< list of service to enable
-          - high-availability
-          - prometheus
-        services_disabled:        <<< list of service to disable
-          - cockpit
+  firewall_zones:
+    - zone: internal            <<< zone name
+      services_enabled:         <<< list of service to enable
+        - high-availability
+        - prometheus
+      services_disabled:        <<< list of service to disable
+        - cockpit
 
 It is possible to add or delete custom ports and rich rules with the same
 parameter:
 
 .. code-block:: yaml
 
-  firewall:
-    zones:
-      - zone: internal            <<< zone name
-        ports_enabled:            <<< list of ports to enable
-          - 1234/tcp
-        ports_disabled:           <<< list of ports to disable
-          - 5678/tcp
-        rich_rules_enabled:       <<< list of rich rules to enable
-          - "rule family=ipv4 forward-port port=443 protocol=tcp to-port=8443"
-        rich_rules_disabled:      <<< list of rich rules to disable
-          - 'rule service name="ftp" audit limit value="1/m" accept'
-        icmp_block_inversion: yes
-        masquerade: yes
+  firewall_zones:
+    - zone: internal            <<< zone name
+      ports_enabled:            <<< list of ports to enable
+        - 1234/tcp
+      ports_disabled:           <<< list of ports to disable
+        - 5678/tcp
+      rich_rules_enabled:       <<< list of rich rules to enable
+        - "rule family=ipv4 forward-port port=443 protocol=tcp to-port=8443"
+      rich_rules_disabled:      <<< list of rich rules to disable
+        - 'rule service name="ftp" audit limit value="1/m" accept'
+      icmp_block_inversion: yes
+      masquerade: yes
 
 
 **Integration with other roles**
@@ -96,8 +93,7 @@ Mandatory inventory vars:
 
 **hostvars[inventory_hostname]**
 
-* equipment_profile
-   * .firewall
+* ep_firewall
 * network[item]
    * .subnet
    * .prefix
@@ -110,19 +106,18 @@ Optional inventory vars:
 
 **hostvars[inventory_hostname]**
 
-* firewall
-   * zones
-      * zone
-      * services_enabled     (list)
-      * services_disabled    (list)
-      * ports_enabled        (list)
-      * ports_disabled       (list)
-      * rich_rules_enabled   (list)
-      * rich_rules_disabled  (list)
-      * icmp_blocks_enabled  (list)
-      * icmp_blocks_disabled (list)
-      * icmp_block_inversion (bool)
-      * masquerade           (bool)
+* firewall_zones
+    * zone
+    * services_enabled     (list)
+    * services_disabled    (list)
+    * ports_enabled        (list)
+    * ports_disabled       (list)
+    * rich_rules_enabled   (list)
+    * rich_rules_disabled  (list)
+    * icmp_blocks_enabled  (list)
+    * icmp_blocks_disabled (list)
+    * icmp_block_inversion (bool)
+    * masquerade           (bool)
 
 Output
 ^^^^^^

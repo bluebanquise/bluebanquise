@@ -26,7 +26,7 @@ include "/etc/powerman/ipmipower.dev"
     {% endif %}
   {% endfor %}
   {% if hosts | length > 0 %}
-device "{{ equipment }}" "ipmipower" "/usr/sbin/ipmipower --wait-until-on --wait-until-off -h {{ bmcs|join(',') }} -u {{ hostvars[hosts[0]]['equipment_profile']['equipment_authentication']['user'] }} -p {{ hostvars[hosts[0]]['equipment_profile']['equipment_authentication']['password'] }} |&"
+device "{{ equipment }}" "ipmipower" "/usr/sbin/ipmipower --wait-until-on --wait-until-off -h {{ bmcs|join(',') }} -u {{ hostvars[hosts[0]]['ep_equipment_authentication']['user'] }} -p {{ hostvars[hosts[0]]['ep_equipment_authentication']['password'] }} |&"
 node "{{ hosts|join(',') }}" "{{ equipment }}" "{{ bmcs|join(',') }}"
   {% endif %}
 {% endfor %}

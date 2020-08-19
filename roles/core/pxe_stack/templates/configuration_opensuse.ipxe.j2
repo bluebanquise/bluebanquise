@@ -7,11 +7,11 @@ echo
 
 echo Loading linux ...
 
-kernel http://${next-server}/repositories/{{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']}}/{{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution_version']}}/{{hostvars[groups[item][0]]['equipment_profile']['hardware']['cpu']['architecture']}}/netboot/linux install=http://${next-server}/repositories/{{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']}}/{{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution_version']}}/{{hostvars[groups[item][0]]['equipment_profile']['hardware']['cpu']['architecture']}}/os autoyast=http://${next-server}/preboot_execution_environment/equipment_os_configurations/autoyast.{{item | replace('equipment_','') | trim}}.xml {{hostvars[groups[item][0]]['equipment_profile']['kernel_parameters']}} {{hostvars[groups[item][0]]['equipment_profile']['console']}} ipxe_next_server=${next-server} ${dedicated-parameters}
+kernel http://${next-server}/repositories/{{hostvars[groups[item][0]]['ep_operating_system']['distribution']}}/{{hostvars[groups[item][0]]['ep_operating_system']['distribution_version']}}/{{hostvars[groups[item][0]]['ep_hardware']['cpu']['architecture']}}/netboot/linux install=http://${next-server}/repositories/{{hostvars[groups[item][0]]['ep_operating_system']['distribution']}}/{{hostvars[groups[item][0]]['ep_operating_system']['distribution_version']}}/{{hostvars[groups[item][0]]['ep_hardware']['cpu']['architecture']}}/os autoyast=http://${next-server}/preboot_execution_environment/equipment_os_configurations/autoyast.{{item | replace('equipment_','') | trim}}.xml {{hostvars[groups[item][0]]['ep_kernel_parameters']}} {{hostvars[groups[item][0]]['ep_console']}} ipxe_next_server=${next-server} ${dedicated-parameters}
 
 echo Loading initial ramdisk ...
 
-initrd http://${next-server}/repositories/{{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']}}/{{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution_version']}}/{{hostvars[groups[item][0]]['equipment_profile']['hardware']['cpu']['architecture']}}/netboot/initrd
+initrd http://${next-server}/repositories/{{hostvars[groups[item][0]]['ep_operating_system']['distribution']}}/{{hostvars[groups[item][0]]['ep_operating_system']['distribution_version']}}/{{hostvars[groups[item][0]]['ep_hardware']['cpu']['architecture']}}/netboot/initrd
 
 echo ALL DONE! We are ready.
 echo Booting in 2 s ...

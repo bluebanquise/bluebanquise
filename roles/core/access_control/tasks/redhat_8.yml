@@ -2,4 +2,4 @@
 - name: selinux █ Set SELinux state
   selinux:
     policy: targeted
-    state: "{{ equipment_profile.access_control | default('enforcing') }}"
+    state: "{{ ep_access_control | default('enforcing') }}"

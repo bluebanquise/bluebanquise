@@ -31,14 +31,14 @@
 - name: "service █ Manage {{ firewall_services_to_start | join(' ') }} state"
   service:
     name: "{{ item }}"
-    enabled: "{{ (equipment_profile['firewall'] | bool) | ternary('yes','no') }}"
-    state: "{{ (equipment_profile['firewall'] | bool) | ternary('started', omit) }}"
+    enabled: "{{ (ep_firewall | bool) | ternary('yes','no') }}"
+    state: "{{ (ep_firewall | bool) | ternary('started', omit) }}"
   loop: "{{ firewall_services_to_start }}"
   tags:
     - service
 
 - name: "include_tasks ░ Configure firewall: {{ ansible_facts.os_family }}"
   include_tasks: "{{ ansible_facts.os_family }}.yml"
-  when: equipment_profile['firewall']
+  when: ep_firewall
   tags:
     - internal

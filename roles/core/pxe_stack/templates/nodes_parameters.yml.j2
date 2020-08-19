@@ -19,7 +19,7 @@
 {% endif %}
 
 {% for host in range %}
-  {% if hostvars[host]['equipment_profile']['equipment_type'] == "server" %}
+  {% if hostvars[host]['ep_equipment_type'] == "server" %}
     {% if hostvars[host]['network_interfaces'] is defined and hostvars[host]['network_interfaces'] is not none %}
 {{ host }}:
   equipment_profile: {{ hostvars[host]['group_names'] | select('match','^'+equipment_naming+'_.*') | list | unique | sort | first | replace(equipment_naming + '_','') | trim }}

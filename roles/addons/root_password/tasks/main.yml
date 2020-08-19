@@ -2,4 +2,4 @@
 - name: user █ Set root password
   user:
     name: root
-    password: "{{ authentication.root_password_sha512 }}"
+    password: "{{ authentication_root_password_sha512 }}"

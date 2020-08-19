@@ -13,8 +13,7 @@ The root password must be defined in the inventory:
 
 .. code-block:: yaml
 
-  authentication:
-    root_password_sha512: $6$M3crarMVoUV3rALd$ZTre2CIyss7zOb4lkLoG23As9OAkYPw2BM88Y1F43n8CCyV5XWwAYEwBOrS8bcCBIMjIPdJG.ndOfzWyAVR4j0
+  authentication_root_password_sha512: $6$M3crarMVoUV3rALd$ZTre2CIyss7zOb4lkLoG23As9OAkYPw2BM88Y1F43n8CCyV5XWwAYEwBOrS8bcCBIMjIPdJG.ndOfzWyAVR4j0
 
 To generate an sha512 password, use the following command (python >3.3):
 
@@ -29,7 +28,7 @@ Mandatory inventory vars:
 
 **hostvars[inventory_hostname]**
 
-* authentication.root_password_sha512
+* authentication_root_password_sha512
 
 Changelog
 ^^^^^^^^^

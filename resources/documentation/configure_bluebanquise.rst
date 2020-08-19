@@ -321,9 +321,7 @@ and check access_control variable. It is set to true:
 
 .. code-block:: yaml
 
-  equipment_profile:
-    ...
-    access_control: true
+  ep_access_control: true
 
 Ok, but so all nodes will get this value. Let's check computes nodes, that are
 in equipment_typeC group. Let's check c001:

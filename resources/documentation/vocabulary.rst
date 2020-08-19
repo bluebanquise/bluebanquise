@@ -342,8 +342,8 @@ In **BlueBanquise**, nodes are nearly always part of a group starting with
 prefix **equipment_**. These groups are called *equipment profiles*.
 
 They are used to provide to hosts of this group the **equipment_profile**
-dictionary (this dictionary defines hosts operating system parameters, kernel
-parameters, partitioning, etc.), and other variables if needed like dedicated
+parameters (this includes hosts operating system parameters, kernel parameters,
+partitioning, etc.), and other variables if needed like dedicated
 authentication parameters.
 
 These are key groups of the stack.

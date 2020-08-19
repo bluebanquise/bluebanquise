@@ -22,7 +22,7 @@ Mandatory inventory vars:
 
 **hostvars[inventory_hostname]**
 
-* authentication.ssh_keys
+* authentication_ssh_keys
 
 Output
 ^^^^^^

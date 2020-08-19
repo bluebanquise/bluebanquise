@@ -10,10 +10,10 @@ text
 firstboot --enable
 
 # System keyboard layout
-keyboard --vckeymap={{ hostvars[groups[item][0]]['equipment_profile']['configuration']['keyboard_layout']|lower }} --xlayouts='{{ hostvars[groups[item][0]]['equipment_profile']['configuration']['keyboard_layout']|lower }}'
+keyboard --vckeymap={{ hostvars[groups[item][0]]['ep_configuration']['keyboard_layout']|lower }} --xlayouts='{{ hostvars[groups[item][0]]['ep_configuration']['keyboard_layout']|lower }}'
 
 # System language
-lang {{ hostvars[groups[item][0]]['equipment_profile']['configuration']['system_language'] }}
+lang {{ hostvars[groups[item][0]]['ep_configuration']['system_language'] }}
 
 # System timezone
 timezone {{ time_zone }} --isUtc
@@ -23,13 +23,13 @@ reboot
 
 ##### Authentication settings
 
-{% if hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution_major_version']|int < 8 %}
+{% if hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version']|int < 8 %}
 # Define authentication method (sha512)
 auth --enableshadow --passalgo=sha512
 {% endif %}
 
 # Root password (sha512)
-rootpw --iscrypted {{ hostvars[groups[item][0]]['authentication']['root_password_sha512'] }}
+rootpw --iscrypted {{ hostvars[groups[item][0]]['authentication_root_password_sha512'] }}
 
 
 ##### Network
@@ -42,15 +42,15 @@ network --hostname=localhost.localdomain
 ##### Security
 
 # SELinux
-{% if hostvars[groups[item][0]]['equipment_profile']['access_control'] is defined and
-   hostvars[groups[item][0]]['equipment_profile']['access_control'] in ['enforcing', 'permissive'] %}
-selinux --{{ hostvars[groups[item][0]]['equipment_profile']['access_control'] }}
+{% if hostvars[groups[item][0]]['ep_access_control'] is defined and
+   hostvars[groups[item][0]]['ep_access_control'] in ['enforcing', 'permissive'] %}
+selinux --{{ hostvars[groups[item][0]]['ep_access_control'] }}
 {% else %}
 selinux --disabled
 {% endif %}
 
 # Firwalld
-{% if hostvars[groups[item][0]]['equipment_profile']['firewall'] is defined and hostvars[groups[item][0]]['equipment_profile']['firewall'] == true %}
+{% if hostvars[groups[item][0]]['ep_firewall'] is defined and hostvars[groups[item][0]]['ep_firewall'] == true %}
 firewall --enabled
 {% else %}
 firewall --disabled
@@ -60,10 +60,10 @@ firewall --disabled
 ##### Partitionning
 
 # Bootloader configuration
-bootloader --append="{{ hostvars[groups[item][0]]['equipment_profile']['kernel_parameters'] }}" --location=mbr
+bootloader --append="{{ hostvars[groups[item][0]]['ep_kernel_parameters'] }}" --location=mbr
 
 # Partitioning
-{{ hostvars[groups[item][0]]['equipment_profile']['partitioning'] }}
+{{ hostvars[groups[item][0]]['ep_partitioning'] }}
 
 
 ##### Packages
@@ -76,7 +76,7 @@ curl
 
 # This EFI first boot order restoration trick is from stacki, not from me.
 # See https://github.com/Teradata/stacki for more details
-{% if hostvars[groups[item][0]]['equipment_profile']['preserve_efi_first_boot_device'] == true %}
+{% if hostvars[groups[item][0]]['ep_preserve_efi_first_boot_device'] == true %}
 %pre
 set -x
 if [ -d /sys/firmware/efi ]; then
@@ -108,7 +108,7 @@ set -x
 # Add ssh keys from ssh_keys list
 mkdir /root/.ssh
 cat << xxEOFxx >> /root/.ssh/authorized_keys
-{% for ssh_key in hostvars[groups[item][0]]['authentication']['ssh_keys'] %}
+{% for ssh_key in hostvars[groups[item][0]]['authentication_ssh_keys'] %}
 {{ ssh_key }}
 {% endfor %}
 xxEOFxx
@@ -127,14 +127,14 @@ set +x
 
 
 # Custom scripts
-{% if hostvars[groups[item][0]]['equipment_profile']['autoinstall_pre_script'] is defined and hostvars[groups[item][0]]['equipment_profile']['autoinstall_pre_script'] is not none %}
+{% if hostvars[groups[item][0]]['ep_autoinstall_pre_script'] is defined and hostvars[groups[item][0]]['ep_autoinstall_pre_script'] is not none %}
 %pre --log /root/custom_pre.log
-{{ hostvars[groups[item][0]]['equipment_profile']['autoinstall_pre_script'] }}
+{{ hostvars[groups[item][0]]['ep_autoinstall_pre_script'] }}
 %end
 {% endif %}
 
-{% if hostvars[groups[item][0]]['equipment_profile']['autoinstall_post_script'] is defined and hostvars[groups[item][0]]['equipment_profile']['autoinstall_post_script'] is not none %}
+{% if hostvars[groups[item][0]]['ep_autoinstall_post_script'] is defined and hostvars[groups[item][0]]['ep_autoinstall_post_script'] is not none %}
 %post --log /root/custom_post.log
-{{ hostvars[groups[item][0]]['equipment_profile']['autoinstall_post_script'] }}
+{{ hostvars[groups[item][0]]['ep_autoinstall_post_script'] }}
 %end
 {% endif %}
