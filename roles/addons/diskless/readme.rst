@@ -215,7 +215,6 @@ with the following head:
 .. code-block:: yaml
 
   ---
-  
   - name: computes
     hosts: /var/tmp/diskless/workdir/space_image/mnt
     connection: chroot
