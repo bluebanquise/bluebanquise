@@ -646,7 +646,7 @@ elif main_action == '4':
 
             print(bcolors.OKBLUE + '[INFO] Mounting image' + bcolors.ENDC)
             try:
-                os.system('mount ' + image_working_directory + '/squashfs-root/LiveOS/rootfs.img ' + os.path.join(image_working_directory, 'mnt/'))
+                os.system('mount ' + os.path.join(image_working_directory, 'squashfs-root/LiveOS/rootfs.img') + ' ' + os.path.join(image_working_directory, 'mnt/'))
                 os.system('mount --bind /proc ' + os.path.join(image_working_directory, 'mnt/proc/'))
                 os.system('mount --bind /sys ' + os.path.join(image_working_directory, 'mnt/sys/'))
             except Exception as e:
