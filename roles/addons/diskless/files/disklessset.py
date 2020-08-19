@@ -688,7 +688,7 @@ elif main_action == '4':
             print(bcolors.OKBLUE + '[INFO] Backup at /var/www/html/preboot_execution_environment/diskless/images/' + selected_image_name + '/squashfs.img.bkp' + bcolors.ENDC)
             try:
                 os.rename(os.path.join(images_path, selected_image_name, 'squashfs.img'), os.path.join(images_path, selected_image_name, 'squashfs.img.bkp'))
-                os.system('mksquashfs ' + image_working_directory + '/squashfs-root/ /var/www/html/preboot_execution_environment/diskless/images/' + selected_image_name + '/squashfs.img')
+                os.system('mksquashfs ' + os.path.join(image_working_directory, 'squashfs-root/') + ' ' + os.path.join(images_path, selected_image_name, 'squashfs.img'))
             except Exception as e:
                 print(e)
                 raise
