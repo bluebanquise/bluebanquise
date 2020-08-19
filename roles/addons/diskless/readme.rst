@@ -200,7 +200,7 @@ Start the tool, select menu "4 - Manage existing diskless images", then
 
 The next menu allows you to mount, unmount, or resize image.
 
-Mount first the image using the tool. Images are mouted by default in 
+Mount the image first. Images are mounted in 
 /var/tmp/diskless/workdir/space_image/mnt.
 
 It is now possible to copy files, install rpms, or tune any aspects of the 
