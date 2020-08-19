@@ -795,7 +795,7 @@ elif main_action == '4':
 
             print(bcolors.OKBLUE + '[INFO] Removing old squashfs and generating new one...' + bcolors.ENDC)
             try:
-                os.system('rm /var/www/html/preboot_execution_environment/diskless/images/' + selected_image_name + '/squashfs.img')
+                os.remove(os.path.join(images_path, selected_image_name, 'squashfs.img'))
                 os.system('mksquashfs ' + image_working_directory + '_copy/squashfs-root/ /var/www/html/preboot_execution_environment/diskless/images/' + selected_image_name + '/squashfs.img')
             except Exception as e:
                 print(e)
