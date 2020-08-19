@@ -769,7 +769,7 @@ elif main_action == '4':
 
             print(bcolors.OKBLUE + '[INFO] Unsquash and mount previous image' + bcolors.ENDC)
             try:
-                os.system('unsquashfs -d ' + image_working_directory + '/squashfs-root /var/www/html/preboot_execution_environment/diskless/images/' + selected_image_name + '/squashfs.img')
+                os.system('unsquashfs -d ' + os.path.join(image_working_directory, 'squashfs-root') + ' ' + os.path.join(images_path, selected_image_name, 'squashfs.img'))
                 os.system('mount ' + image_working_directory + '/squashfs-root/LiveOS/rootfs.img ' + os.path.join(image_working_directory, 'mnt/'))
             except Exception as e:
                 print(e)
