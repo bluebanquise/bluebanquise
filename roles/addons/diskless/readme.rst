@@ -198,7 +198,7 @@ and especially to execute playbooks inside images.
 Start the tool, go into "4 - Manage existing diskless images", then 
 "5 - Manage livenet images".
 
-The next menu allows you to mount, unmount, and resize image.
+The next menu allows you to mount, unmount, or resize image.
 
 Mount first the image using the tool. Images are mouted by default in 
 /var/tmp/diskless/workdir/space_image/mnt.
