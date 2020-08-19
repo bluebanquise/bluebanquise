@@ -190,7 +190,7 @@ The -n parameter can be a nodeset.
 Customizing Livenet image
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-It is assume here that image name used is *space_image*.
+The image name used in the examples below is *space_image*.
 
 The disklessset tool allows to customize livenet images before booting them, 
 and especially to execute playbooks inside images.
