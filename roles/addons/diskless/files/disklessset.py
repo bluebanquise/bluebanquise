@@ -631,8 +631,8 @@ elif main_action == '4':
                 print(bcolors.FAIL + '[ERROR] Cannot create directory ' + image_working_directory + bcolors.ENDC)
 
             try:
-                os.makedirs(os.path.join(image_working_directory, 'mnt'))
-                os.makedirs(os.path.join(image_working_directory, 'inventory'))
+                os.mkdir(os.path.join(image_working_directory, 'mnt'))
+                os.mkdir(os.path.join(image_working_directory, 'inventory'))
             except Exception as e:
                 print(e)
                 raise
