@@ -687,7 +687,7 @@ elif main_action == '4':
             print(bcolors.OKBLUE + '[INFO] Backing up old image and generating new one.' + bcolors.ENDC)
             print(bcolors.OKBLUE + '[INFO] Backup at /var/www/html/preboot_execution_environment/diskless/images/' + selected_image_name + '/squashfs.img.bkp' + bcolors.ENDC)
             try:
-                os.system('mv /var/www/html/preboot_execution_environment/diskless/images/' + selected_image_name + '/squashfs.img  /var/www/html/preboot_execution_environment/diskless/images/' + selected_image_name + '/squashfs.img.bkp')
+                os.rename(os.path.join(images_path, selected_image_name, 'squashfs.img'), os.path.join(images_path, selected_image_name, 'squashfs.img.bkp'))
                 os.system('mksquashfs ' + image_working_directory + '/squashfs-root/ /var/www/html/preboot_execution_environment/diskless/images/' + selected_image_name + '/squashfs.img')
             except Exception as e:
                 print(e)
