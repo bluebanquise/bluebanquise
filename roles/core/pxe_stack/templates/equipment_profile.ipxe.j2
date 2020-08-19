@@ -9,12 +9,12 @@ echo |
 # Ansible variables
 set eq-equipment-profile {{ item | replace('equipment_','') | trim }}
 set eq-architecture ${arch}
-set eq-distribution {{ hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower }}
-set eq-distribution-major-version {{ hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution_major_version'] }}
-set eq-distribution-version {{ hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution_version'] | default('${eq-distribution-major-version}') }}
-set eq-console {{ hostvars[groups[item][0]]['equipment_profile']['console'] }}
-set eq-kernel-parameters {{ hostvars[groups[item][0]]['equipment_profile']['kernel_parameters'] }}
-set eq-repositories-environment {{ hostvars[groups[item][0]]['equipment_profile']['operating_system']['repositories_environment'] | default('') }}
+set eq-distribution {{ hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower }}
+set eq-distribution-major-version {{ hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] }}
+set eq-distribution-version {{ hostvars[groups[item][0]]['ep_operating_system']['distribution_version'] | default('${eq-distribution-major-version}') }}
+set eq-console {{ hostvars[groups[item][0]]['ep_console'] }}
+set eq-kernel-parameters {{ hostvars[groups[item][0]]['ep_kernel_parameters'] }}
+set eq-repositories-environment {{ hostvars[groups[item][0]]['ep_operating_system']['repositories_environment'] | default('') }}
 
 # Dynamic variables
 set images-root http://${next-server}/repositories/${eq-repositories-environment}/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/

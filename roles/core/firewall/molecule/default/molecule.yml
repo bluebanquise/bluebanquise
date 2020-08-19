@@ -36,8 +36,7 @@ provisioner:
   inventory:
     group_vars:
       firewall:
-        equipment_profile:
-          firewall: true
+        ep_firewall: true
     host_vars:
       firewall-stock:
         network_interfaces:

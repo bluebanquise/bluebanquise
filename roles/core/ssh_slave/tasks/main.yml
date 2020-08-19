@@ -5,4 +5,4 @@
     key: "{{ item }}"
     exclusive: no
     state: present
-  with_items: "{{ authentication.ssh_keys }}"
+  with_items: "{{ authentication_ssh_keys }}"

@@ -28,9 +28,8 @@ Mandatory inventory vars:
 
 **hostvars[hosts]**
 
-* equipment_profile
-   * .equipment_authentication.user
-   * .equipment_authentication.password
+* ep_equipment_authentication.user
+* ep_equipment_authentication.password
 * bmc
    * .name
    * .ip4

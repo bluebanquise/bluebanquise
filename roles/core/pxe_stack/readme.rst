@@ -34,11 +34,11 @@ ip address and filename to use.
 
 This role will rely on multiple parts of the inventory, and is probably the most "invasive" role of the whole stack.
 
-* equipment_profile dictionaries are used for each equipment_profile group. All
+* equipment_profile parameters are used for each equipment_profile group. All
   boot configuration is made relying on it (operating system, cpu architecture,
   console, kernel parameters, etc.). It is recommended to ensure coherency of
   the equipment_profile files.
-* authentication dictionary is used to provide root password and default ssh
+* authentication parameters are used to provide root password and default ssh
   authorized key.
 * hosts **network_interfaces** dedicated variables, to be able to force static
   ip address at kernel boot.

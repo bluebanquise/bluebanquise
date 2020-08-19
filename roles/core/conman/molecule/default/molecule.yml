@@ -24,11 +24,10 @@ provisioner:
         icebergs_system: false
         enable_services: true
         start_services: true
-        equipment_profile:
-          equipment_type: server
-          equipment_authentication:
-            user: 'ADMIN'
-            password: 'ADMIN'
+        ep_equipment_type: server
+        ep_equipment_authentication:
+          user: 'ADMIN'
+          password: 'ADMIN'
         bmc:
           ip4: 10.10.102.1
           mac: 08:00:27:dc:f8:a7

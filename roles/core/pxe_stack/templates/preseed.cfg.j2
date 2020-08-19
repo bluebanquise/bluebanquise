@@ -2,8 +2,8 @@
 
 
 ### zone
-d-i debian-installer/locale string {{hostvars[groups[item][0]]['equipment_profile']['configuration']['system_language']}}
-d-i keyboard-configuration/xkb-keymap select {{hostvars[groups[item][0]]['equipment_profile']['configuration']['keyboard_layout']|lower}}
+d-i debian-installer/locale string {{hostvars[groups[item][0]]['ep_configuration']['system_language']}}
+d-i keyboard-configuration/xkb-keymap select {{hostvars[groups[item][0]]['ep_configuration']['keyboard_layout']|lower}}
 #d-i debconf/language string us
 #d-i debian-installer/language string us
 #d-i debian-installer/country string US
@@ -30,7 +30,7 @@ d-i netcfg/no_default_route boolean
 d-i debian-installer/allow_unauthenticated string true # Allow local source
 d-i mirror/country string manual
 #d-i mirror/http/hostname string http://10.10.0.1
-d-i mirror/http/directory string /repositories/{{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']}}/{{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution_version']}}/{{hostvars[groups[item][0]]['equipment_profile']['hardware']['cpu']['architecture']}}/os/
+d-i mirror/http/directory string /repositories/{{hostvars[groups[item][0]]['ep_operating_system']['distribution']}}/{{hostvars[groups[item][0]]['ep_operating_system']['distribution_version']}}/{{hostvars[groups[item][0]]['ep_hardware']['cpu']['architecture']}}/os/
 d-i mirror/http/proxy string
 #d-i pkgsel/update-policy select none
 d-i pkgsel/install-language-support boolean false
@@ -54,7 +54,7 @@ d-i partman/choose_partition select finish
 d-i partman/confirm boolean true
 d-i partman/confirm_nooverwrite boolean true
 
-{{hostvars[groups[item][0]]['equipment_profile']['partitioning']}}
+{{hostvars[groups[item][0]]['ep_partitioning']}}
 
 # Good
 #d-i partman-auto/disk string /dev/sda
@@ -96,7 +96,7 @@ d-i partman/confirm_nooverwrite boolean true
 #d-i passwd/root-password-again password r00tme
 d-i passwd/root-login boolean true
 d-i passwd/make-user boolean false
-id-i passwd/root-password-crypted password {{hostvars[groups[item][0]]['authentication']['root_password_sha512']}}
+id-i passwd/root-password-crypted password {{hostvars[groups[item][0]]['authentication_root_password_sha512']}}
 #d-i passwd/user-fullname string root User
 #d-i passwd/username string root
 #d-i passwd/user-password password insecure

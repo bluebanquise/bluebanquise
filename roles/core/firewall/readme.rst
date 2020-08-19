@@ -20,8 +20,7 @@ Enable or disable the firewall service in the equipment profile:
 
 .. code-block:: yaml
 
-  equipment_profile:
-    firewall: true
+  ep_firewall: true
 
 To add a network of the host to a zone, define the zone name in
 **firewall.zone** in the network:
@@ -94,8 +93,7 @@ Mandatory inventory vars:
 
 **hostvars[inventory_hostname]**
 
-* equipment_profile
-   * .firewall
+* ep_firewall
 * network[item]
    * .subnet
    * .prefix
