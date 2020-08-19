@@ -235,7 +235,7 @@ Notes:
 
 * The multiple -i defines Ansible inventories to gather. By default, in BlueBanquise, the first two inventories are used. We simply add the third one, corresponding to the mounting point.
 * The -e (extra vars) are here to specify to the stack which iceberg and main network are to be used in the configuration of the node. (System cannot know on which nodes the image will be used).
-* The --skip-tags identify prevent hostname and static ip to be set, since the image should be generic for multiple hosts.
+* The `--skip-tags identify` prevents hostname and static ip to be set, since the image should be generic for multiple hosts.
 
 Before closing, also remember to clean dnf cache into the image chroot to save space.
 
