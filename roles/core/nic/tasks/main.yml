@@ -25,3 +25,5 @@
   when:
     - ( item.ip4 is defined and item.ip4 is not none ) or ( item.type is defined and item.type == 'bond-slave' )
     - item.interface is defined and item.interface is not none
+  tags:
+    - identify

@@ -487,7 +487,8 @@ elif main_action == '4':
     print(' 2 - Manage kernel of an image')
     print(' 3 - Create a golden from a staging NFS image')
     print(' 4 - Manage hosts of an NFS image')
-    print(' 5 - Remove an image')
+    print(' 5 - Manage livenet images')
+    print(' 6 - Remove an image')
     sub_main_action = str(input('-->: ').lower().strip())
 
     if sub_main_action == '1':
@@ -635,6 +636,209 @@ elif main_action == '4':
                     shutil.rmtree(os.path.join('/diskless/images/', selected_image, 'nodes', node))
 
     elif sub_main_action == '5':
+        print('Manages livenet images')
+        print(' 1 - Unsquash and mount')
+        print(' 2 - Unmount and squash')
+        print(' 3 - Resize')
+        sub_sub_main_action = str(input('-->: ').lower().strip())
+
+        if sub_sub_main_action == '1':
+
+            images_list = os.listdir(images_path)
+            if not images_list:
+                print(bcolors.FAIL + '[ERROR] No image found.' + bcolors.ENDC)
+                exit(1)
+
+            selected_image = int(select_from_list(images_list, 'image to work with', -1))
+            selected_image_name = images_list[selected_image]
+
+            image_working_directory = os.path.join(image_working_directory_base, selected_image_name)
+
+            print(bcolors.OKBLUE + '[INFO] Creating new working dirs' + bcolors.ENDC)
+            try:
+                os.makedirs(image_working_directory)
+            except FileExistsError:
+                print(bcolors.WARNING + '[WARNING] The directory ' + image_working_directory + ' already exists. Cleaning.' + bcolors.ENDC)
+                shutil.rmtree(image_working_directory)
+                os.makedirs(image_working_directory)
+            except OSError:
+                print(bcolors.FAIL + '[ERROR] Cannot create directory ' + image_working_directory + bcolors.ENDC)
+
+            try:
+                os.mkdir(os.path.join(image_working_directory, 'mnt'))
+                os.mkdir(os.path.join(image_working_directory, 'inventory'))
+            except Exception as e:
+                print(e)
+                raise
+
+            print(bcolors.OKBLUE + '[INFO] Unsquash image' + bcolors.ENDC)
+            try:
+                os.system('unsquashfs -d ' + os.path.join(image_working_directory, 'squashfs-root') + ' ' + os.path.join(images_path, selected_image_name, 'squashfs.img'))
+            except Exception as e:
+                print(e)
+                raise
+
+            print(bcolors.OKBLUE + '[INFO] Mounting image' + bcolors.ENDC)
+            try:
+                os.system('mount ' + os.path.join(image_working_directory, 'squashfs-root/LiveOS/rootfs.img') + ' ' + os.path.join(image_working_directory, 'mnt/'))
+                os.system('mount --bind /proc ' + os.path.join(image_working_directory, 'mnt/proc/'))
+                os.system('mount --bind /sys ' + os.path.join(image_working_directory, 'mnt/sys/'))
+            except Exception as e:
+                print(e)
+                raise
+
+            print(bcolors.OKBLUE + '[INFO] Generating temporary inventory' + bcolors.ENDC)
+            try:
+                os.system('echo ' + image_working_directory + '/mnt ansible_connection=chroot > ' + image_working_directory + '/inventory/host')
+            except Exception as e:
+                print(e)
+                raise
+
+            print(bcolors.OKGREEN + '[OK] Done' + bcolors.ENDC)
+            exit(0)
+
+        if sub_sub_main_action == '2':
+
+            images_list = os.listdir(image_working_directory_base)
+            if not images_list:
+                print(bcolors.FAIL + '[ERROR] No image found.' + bcolors.ENDC)
+                exit(1)
+
+            selected_image = int(select_from_list(images_list, 'image to work with', -1))
+            selected_image_name = images_list[selected_image]
+
+            image_working_directory = os.path.join(image_working_directory_base, selected_image_name)
+
+            print(bcolors.OKBLUE + '[INFO] Unmouting image' + bcolors.ENDC)
+            try:
+                os.system('umount ' + os.path.join(image_working_directory, 'mnt/proc/'))
+                os.system('umount ' + os.path.join(image_working_directory, 'mnt/sys/'))
+                os.system('umount ' + os.path.join(image_working_directory, 'mnt/'))
+            except Exception as e:
+                print(e)
+                raise
+
+            print(bcolors.OKBLUE + '[INFO] Backing up old image and generating new one.' + bcolors.ENDC)
+            print(bcolors.OKBLUE + '[INFO] Backup at /var/www/html/preboot_execution_environment/diskless/images/' + selected_image_name + '/squashfs.img.bkp' + bcolors.ENDC)
+            try:
+                os.rename(os.path.join(images_path, selected_image_name, 'squashfs.img'), os.path.join(images_path, selected_image_name, 'squashfs.img.bkp'))
+                os.system('mksquashfs ' + os.path.join(image_working_directory, 'squashfs-root/') + ' ' + os.path.join(images_path, selected_image_name, 'squashfs.img'))
+            except Exception as e:
+                print(e)
+                raise
+
+            print(bcolors.OKBLUE + '[INFO] Cleaning backup and working dirs' + bcolors.ENDC)
+            try:
+                shutil.rmtree(image_working_directory)
+                os.remove(os.path.join(images_path, selected_image_name, 'squashfs.img.bkp'))
+            except Exception as e:
+                print(e)
+                raise
+
+            print(bcolors.OKGREEN + '[OK] Done' + bcolors.ENDC)
+
+            exit(0)
+
+        if sub_sub_main_action == '3':
+
+            images_list = os.listdir(images_path)
+            if not images_list:
+                print(bcolors.FAIL + '[ERROR] No image found.' + bcolors.ENDC)
+                exit(1)
+
+            selected_image = int(select_from_list(images_list, 'image to work with', -1))
+            selected_image_name = images_list[selected_image]
+
+            image_working_directory = os.path.join(image_working_directory_base, selected_image_name)
+
+            print('Please choose image new size:')
+            print('(supported units: M=1024*1024, G=1024*1024*1024)')
+            print('Current tool version do NOT check anything, be carefull to choose enough space')
+            selected_livenet_size = str(input('-->: ').strip())
+            if selected_livenet_size[-1] == 'G':
+                livenet_size = int(selected_livenet_size[:-1])*1024
+            elif selected_livenet_size[-1] == 'M':
+                livenet_size = int(selected_livenet_size[:-1])
+
+            print(bcolors.OKBLUE + '[INFO] Creating new working dirs' + bcolors.ENDC)
+            try:
+                os.makedirs(image_working_directory)
+            except FileExistsError:
+                print(bcolors.WARNING + '[WARNING] The directory ' + image_working_directory + ' already exists. Cleaning.' + bcolors.ENDC)
+                shutil.rmtree(image_working_directory)
+                os.makedirs(image_working_directory)
+            except OSError:
+                print(bcolors.FAIL + '[ERROR] Cannot create directory ' + image_working_directory + bcolors.ENDC)
+
+            try:
+                os.makedirs(image_working_directory + '_copy/squashfs-root/LiveOS/')
+            except OSError:
+                print(bcolors.FAIL + '[ERROR] Cannot create directory ' + image_working_directory + '_copy/squashfs-root/LiveOS/' + bcolors.ENDC)
+            try:
+                os.makedirs(os.path.join(image_working_directory, 'mnt'))
+            except OSError:
+                print(bcolors.FAIL + '[ERROR] Cannot create directory ' + os.path.join(image_working_directory, 'mnt') + bcolors.ENDC)
+            try:
+                os.makedirs(os.path.join(image_working_directory, 'mnt_copy'))
+            except OSError:
+                print(bcolors.FAIL + '[ERROR] Cannot create directory ' + os.path.join(image_working_directory, 'mnt_copy') + bcolors.ENDC)
+
+            print(bcolors.OKBLUE + '[INFO] Generating and mounting new empty image' + bcolors.ENDC)
+            try:
+                os.system('dd if=/dev/zero of=/' + image_working_directory + '_copy/squashfs-root/LiveOS/rootfs.img bs=1M count=' + str(livenet_size))
+                os.system('mkfs.xfs ' + image_working_directory + '_copy/squashfs-root/LiveOS/rootfs.img')
+                os.system('mount ' + image_working_directory + '_copy/squashfs-root/LiveOS/rootfs.img ' + os.path.join(image_working_directory, 'mnt_copy/'))
+            except Exception as e:
+                print(e)
+                raise
+
+            print(bcolors.OKBLUE + '[INFO] Unsquash and mount previous image' + bcolors.ENDC)
+            try:
+                os.system('unsquashfs -d ' + os.path.join(image_working_directory, 'squashfs-root') + ' ' + os.path.join(images_path, selected_image_name, 'squashfs.img'))
+                os.system('mount ' + os.path.join(image_working_directory, 'squashfs-root/LiveOS/rootfs.img') + ' ' + os.path.join(image_working_directory, 'mnt/'))
+            except Exception as e:
+                print(e)
+                raise
+
+            print(bcolors.OKBLUE + '[INFO] Dumping image: old_image -> cache -> new_image...' + bcolors.ENDC)
+            try:
+                os.system('xfsdump -l 0 -L ' + selected_image_name + ' -M media -f ' + image_working_directory + 'image.xfsdump ' + os.path.join(image_working_directory, 'mnt'))
+                os.system('xfsrestore -f ' + image_working_directory + 'image.xfsdump ' + os.path.join(image_working_directory, 'mnt_copy'))
+                os.system('rm -f ' + image_working_directory + 'image.xfsdump')
+                os.sync()
+            except Exception as e:
+                print(e)
+                raise
+
+            print(bcolors.OKBLUE + '[INFO] Unmounting both images' + bcolors.ENDC)
+            try:
+                os.system('umount ' + os.path.join(image_working_directory, 'mnt_copy/'))
+                os.system('umount ' + os.path.join(image_working_directory, 'mnt/'))
+            except Exception as e:
+                print(e)
+                raise
+
+            print(bcolors.OKBLUE + '[INFO] Removing old squashfs and generating new one...' + bcolors.ENDC)
+            try:
+                os.remove(os.path.join(images_path, selected_image_name, 'squashfs.img'))
+                os.system('mksquashfs ' + image_working_directory + '_copy/squashfs-root/ ' + os.path.join(images_path, selected_image_name, 'squashfs.img'))
+            except Exception as e:
+                print(e)
+                raise
+
+            print(bcolors.OKBLUE + '[INFO] Cleaning' + bcolors.ENDC)
+            try:
+                shutil.rmtree(image_working_directory)
+                shutil.rmtree(image_working_directory + '_copy')
+            except Exception as e:
+                print(e)
+                raise
+
+            print(bcolors.OKGREEN + '[OK] Done' + bcolors.ENDC)
+
+            exit(0)
+
+    elif sub_main_action == '6':
         print('Remove an image.')
 
         images_list = os.listdir(images_path)

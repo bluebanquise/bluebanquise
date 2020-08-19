@@ -2,3 +2,5 @@
 - name: "hostname █ Set {{ inventory_hostname }} hostname"
   hostname:
     name: "{{ inventory_hostname }}"
+  tags:
+    - identify
