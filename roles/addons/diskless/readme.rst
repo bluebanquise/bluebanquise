@@ -195,7 +195,7 @@ The image name used in the examples below is *space_image*.
 The disklessset tool allows to customize livenet images before booting them, 
 and especially to execute playbooks inside images.
 
-Start the tool, go into "4 - Manage existing diskless images", then 
+Start the tool, select menu "4 - Manage existing diskless images", then 
 "5 - Manage livenet images".
 
 The next menu allows you to mount, unmount, or resize image.
