@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.3.0 - 2020-08-xx
+## 1.3.0 RC2 - 2020-08-20
 
 ### Breaking changes:
 
@@ -43,7 +43,7 @@ The rules below apply:
 1. The main resolution network of hosts is the value of the *network* parameter
    of the **first** item of the list (e.g., c001 will be on the same line than
    c001-ice1-1 in the hosts file).
-2. First management network related item in the list will be the ansible mains
+2. First management network related item in the list will be the ansible main
    ssh target interface (from ssh_master role), and also the main management
    network interface for the client (services_ip to target on client side).
 
