@@ -15,15 +15,20 @@ Alertmanager is available at http://localhost:9093
 
 Node_exporter is available at http://localhost:9100
 
-Put the following under your inventory/group_vars/all/addons/monitoring.yml ::
+In order to allow the role to deploy, you need to add the following 
+content under a file inventory/group_vars/all/addons/monitoring.yml :
 
-prometheus:
-  scrape_interval: 1m
-  evaluation_interval: 2m
-  alertmanager:
-    group_wait: 1m
-    group_interval: 10m
-    repeat_interval: 3h
+.. code-block:: yaml
+
+  prometheus:
+    scrape_interval: 1m
+    evaluation_interval: 2m
+    alertmanager:
+      group_wait: 1m
+      group_interval: 10m
+      repeat_interval: 3h
+
+See the main Prometheus documentation if you wish to tune these parameters.
 
 To be done
 ^^^^^^^^^^
