@@ -1,25 +1,25 @@
 authentication:
   basicAuth:
     users:
-      - username: admin
-        password: admin
+      - username: {{ prometheus_server_karma_username }}
+        password: {{ prometheus_server_karma_password }}
 
 alertmanager:
   interval: 10s
   servers:
     - cluster: prometheus
-      name: prometheus1
+      name: {{ prometheus_server_karma_alertmanager_server_name }}
       uri: "http://localhost:9093"
       timeout: 10s
       proxy: false
 
-#filters by default when connected      
+#filters by default when connected
 filters:
   default:
     - "@cluster=prometheus"
 
 karma:
-  name: alertmanager_karma
+  name: {{ prometheus_server_karma_name }}
 
 grid:
   sorting:
@@ -46,8 +46,8 @@ labels:
       "@cluster":
         - value: prometheus
           color: "#70e1e1"
-        
-          
+
+
       severity:
         - value: info
           color: "#87c4e0"
@@ -70,4 +70,3 @@ ui:
   collapseGroups: collapsedOnMobile
   multiGridLabel: severity
   multiGridSortReverse: false
-
