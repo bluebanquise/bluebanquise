@@ -62,6 +62,8 @@ Repository static path is computed using variables defined in the equipment_prof
 
 If equipment_profile is:
 
+.. code-block:: yaml
+
   ep_operating_system:
     distribution: centos
     distribution_major_version: 8
@@ -72,6 +74,8 @@ If equipment_profile is:
 Then path will be: repositories/centos/8/x86_64/
 
 If equipment_profile is:
+
+.. code-block:: yaml
 
   ep_operating_system:
     distribution: centos
@@ -84,6 +88,8 @@ If equipment_profile is:
 Then path will be: repositories/centos/8.1/x86_64/
 
 If equipment_profile is:
+
+.. code-block:: yaml
 
   ep_operating_system:
     distribution: centos
