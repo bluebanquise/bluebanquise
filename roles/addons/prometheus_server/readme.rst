@@ -15,6 +15,16 @@ Alertmanager is available at http://localhost:9093
 
 Node_exporter is available at http://localhost:9100
 
+Put the following under your inventory/group_vars/all/addons/monitoring.yml ::
+
+prometheus:
+  scrape_interval: 1m
+  evaluation_interval: 2m
+  alertmanager:
+    group_wait: 1m
+    group_interval: 10m
+    repeat_interval: 3h
+
 To be done
 ^^^^^^^^^^
 
