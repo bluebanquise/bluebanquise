@@ -14,6 +14,13 @@ Details are also given for each Ansible role of the stack.
 `Please report us <https://github.com/bluebanquise/bluebanquise/issues>`_ any
 issues in this documentation.
 
+Documentation main authors:
+
+* Benoît Leveugle
+* Johnny Keats
+* Bruno Travouillon
+* Tim Gellner
+
 .. toctree::
    :maxdepth: 3
    :caption: Contents:

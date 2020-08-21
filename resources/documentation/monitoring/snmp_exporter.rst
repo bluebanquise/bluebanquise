@@ -1,24 +1,29 @@
 Snmp_exporter
 =============
 
+The snmp_exporter can be found here:
+https://github.com/prometheus/snmp_exporter
 
-The snmp_exporter can be found here: https://github.com/prometheus/snmp_exporter
+By default, the snmp_exorter runs under the port 9116.
 
-By default, the node_exorter runs under the port 9116.
+This exporter, along with the ipmi exporter, is a little special, as it executes
+snmp commands on the targets. So we can get the metrics of all the targets with
+the exporter running locally on our management server.
 
-This exporter, along with the ipmi exporter, is a little special, as it executes snmp commandes on the targets. So we can get the metrics of all the targets with the exporter running locally on our management server.
+To access the metrics, do:
 
-To access the metrics, do::
-
-  curl 'http://172.16.0.2:9116/snmp?target=tor-s05-a04'
+  curl 'http://localhost:9116/snmp?target=switch-001'
 
 .. note::
 
   here, the request is http://<ip address of where the exporter is located>/snmp?target=<ip address of the switch that we want the metrics from>
 
-otherwise we can  access it directly in a browser. However, using curl can be handy, because you can grep the output, and do other nice things with it.
+Otherwise we can  access it directly in a browser. However, using curl can be
+handy, because you can grep the output, and do other nice things with it.
 
-You should get something like this ::
+You should get something like this:
+
+.. code-block:: text
 
   # HELP ifAdminStatus The desired state of the interface - 1.3.6.1.2.1.2.2.1.7
   # TYPE ifAdminStatus gauge
@@ -36,17 +41,22 @@ You should get something like this ::
 Snmp_exporter setup
 ^^^^^^^^^^^^^^^^^^^
 
-The setup of this exporter is a little particuliar.
+The setup of this exporter is a little tricky.
 
-By default, we provide a configuration file for this exporter only for cisco switches.
+By default, we provide a configuration file for this exporter only for cisco
+switches.
 
-This is because snmp needs specific OIDS, in order to query the switches. These OIDS can vary depending on the switch you use.
+This is because snmp needs specific OIDS, in order to query the switches.
+These OIDS can vary depending on the switch you use.
 
-you can have a look at all OIDS available here: https://cric.grenoble.cnrs.fr/Administrateurs/Outils/MIBS/
+You can have a look at all OIDS available here:
+https://cric.grenoble.cnrs.fr/Administrateurs/Outils/MIBS/
 
 You can find this file under /etc/snmp_exporter/snmp.yml
 
-it should look something like this::
+It should look something like this::
+
+.. code-block:: text
 
   if_mib:
   walk:
@@ -72,13 +82,18 @@ it should look something like this::
     help: A unique value, greater than zero, for each interface - 1.3.6.1.2.1.2.2.1.1
     indexes:
 
-If you have another switch you want to query, you can generate another file than the one we provide.
+If you have another switch you want to query, you can generate another file than
+the one we provide.
 
-By installing snmp_exporter, you should have a generator installed under /usr/local/go/src/github.com/prometheus/snmp_exporter/generator
+By installing snmp_exporter, you should have a generator installed under
+/usr/local/go/src/github.com/prometheus/snmp_exporter/generator
 
-here, you have a file, generator.yml that you have to change, according to what you want.
+Here, you have a file, generator.yml that you have to change, according to what
+you want.
 
-by default, it looks like this::
+By default, it looks like this:
+
+.. code-block:: text
 
   modules:
   # Default IF-MIB interfaces table with ifIndex.
@@ -86,7 +101,7 @@ by default, it looks like this::
     walk: [sysUpTime, interfaces,ifXTable]
     version: 1
     auth:
-      community: aion
+      community: cluster
     lookups:
       - source_indexes: [ifIndex]
         lookup: ifAlias
@@ -105,9 +120,11 @@ by default, it looks like this::
       ifType:
         type: EnumAsInfo
 
-.. note:: Notice the auth section, by default, we setup the switches with the aion community with no password required. See the switch setup section for more info.
+.. note:: Notice the auth section, by default, we setup the switches with the cluster community with no password required. See the switch setup section for more info.
 
-you can tune it as you want, as long as you follow this syntax::
+You can tune it as you want, as long as you follow this syntax:
+
+.. code-block:: text
 
   modules:
   module_name:  # The module name. You can have as many modules as you want.
@@ -188,32 +205,37 @@ you can tune it as you want, as long as you follow this syntax::
                              #   Bits: An RFC 2578 BITS construct, which produces a StateSet with a time series per bit.
 
 
-here is a list of MIBS:
+Here is a list of MIBS:
 
 .. seealso:: https://github.com/librenms/librenms/tree/master/mibs
 
-you can get more info here:
+You can get more info here:
 
 .. seealso:: https://github.com/prometheus/snmp_exporter/tree/master/generator
 
-and here:
+And here:
 
 .. seealso:: https://programmer.group/prometheus-prometheus-monitoring-switch-snmp.html
 
-Once you are done tuning the file, simply do::
+Once you are done tuning the file, simply do:
+
+.. code-block:: text
 
   $ export MIBDIRS=mibs
   $ ./generator generate
 
-what you will get is a snmp.yml file. Simply copy the new file ::
+>hat you will get is a snmp.yml file. Simply copy the new file:
+
+.. code-block:: text
 
   $ cp snmp.yml /etc/snmp_exporter/
-
 
 Setup targets
 ^^^^^^^^^^^^^
 
-To setup the targets, simply add ::
+To setup the targets, simply add:
+
+.. code-block:: yaml
 
   monitoring:
 
@@ -222,51 +244,44 @@ To setup the targets, simply add ::
       port: 9116
       with_generator: false
 
-to the /etc/ansible/inventory/group_vars/ you want
+to the /etc/ansible/inventory/group_vars/equipment_profile you desire.
 
 Switch setup
 ^^^^^^^^^^^^
 
 To setup the community on the switch to communicate with the exporter:
-go to the switch via ssh or telnet, and enter the following commands ::
+Go to the switch via ssh or telnet, and enter the following commands:
+
+.. code-block:: text
 
   $ Enable
   $ configure terminal
-  $ snmp-server community aion RO
+  $ snmp-server community cluster RO
   $ exit
   $ write memory
 
-you can change aion to any community name you want, that is written in the snmp.yml file
-
+You can change cluster to any community name you want, that is written in the
+ snmp.yml file
 
 Start service
 ^^^^^^^^^^^^^
 
-To start the service, simply run ::
+To start the service, simply run:
+
+.. code-block:: text
 
   systemctl start snmp_exporter
 
 .. note:: all exporter services are under the /etc/systemd/system directory, and most binaries are under the /usr/local/bin directory
-
-
 
 Dashboard
 ^^^^^^^^^
 
 The dashboard gives the following:
 
-•       Interface thoughput( in and out)
-•       Interface in,out,total in, total out, Bandwidth
-•       Alerts
-•       Percentage of casts (uni,multi,etc) In and Out
-•       Max in, Max out, number of interfaces, Total in,Uptime, Total out
-•       Etc...
-
-
-To access the dashboard: access the management, port 3000::
-
-  172.16.0.2:3000
-
-you can do some "port forwarding"::
-
-  ssh root@10.106.60.78 -L 82:172.16.0.2:3000
+* Interface thoughput( in and out)
+* Interface in,out,total in, total out, Bandwidth
+* Alerts
+* Percentage of casts (uni,multi,etc) In and Out
+* Max in, Max out, number of interfaces, Total in,Uptime, Total out
+* Etc...

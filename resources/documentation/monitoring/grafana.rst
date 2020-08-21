@@ -206,35 +206,35 @@ Axes
 Choose the units of the axes, and relabel them. You can also add mins and maxs.
 You can have more info here:
 
-
 Legend
 ******
 
-Legend related options, you can show the legend as a table, add min,max,avg,current values.
+Legend related options, you can show the legend as a table, add min, max, avg,
+current values.
 
 .. image:: monitoring/capture/grafana/LegendExemple.PNG
    :width: 80 %
 
-
 Thresholds
 **********
 
-The threshold lets you change the background color when the value is less than or greater than the chosen value.
+The threshold lets you change the background color when the value is less than
+or greater than the chosen value.
 
 .. image:: monitoring/capture/grafana/thresholdexemple1.PNG
    :width: 80 %
 
-
 Time regions
 ************
 
-Allows to highlight certain time regions of the graph, not used very often
+Allows to highlight certain time regions of the graph, not used very often.
 
 Data links, links
 *****************
 
 Here, you can add links to different graphs, using the URL.
-For more info, check here: https://grafana.com/docs/grafana/latest/linking/data-links/
+For more info, check here:
+https://grafana.com/docs/grafana/latest/linking/data-links/
 
 Bar gauge
 ^^^^^^^^^
@@ -246,22 +246,24 @@ Display
 *******
 
 You can choose between two options in the show option.
-Calculate will show you the result of the calculation (First Value, Last Value, and so on), whereas All Values will show you all the values scraped inthe last XX minutes. you can choose the max number of results in the Limit field.
+Calculate will show you the result of the calculation (First Value, Last Value,
+and so on), whereas All Values will show you all the values scraped in the last
+XX minutes. You can choose the max number of results in the Limit field.
 You can also choose  the orientation and the display mode (aesthetics)
 
 .. image:: monitoring/capture/grafana/BarGaugeex1.PNG
    :width: 80 %
 
-
 Links
 *****
 
-Cf above
+Cf above.
 
 Repeat options
 **************
 
-If activated, will show the panel X times in the dashboard, with X being the number of results we get.
+If activated, will show the panel X times in the dashboard, with X being the
+number of results we get.
 
 for example with the repeat option enabled:
 
@@ -273,7 +275,8 @@ without the repeat option enabled:
 .. image:: monitoring/capture/grafana/BarGaugeex3.PNG
    :width: 50 %
 
-as you can see, in one case, you get the results in different panels, and in the other case you get the results in the same panel.
+as you can see, in one case, you get the results in different panels, and in the
+other case you get the results in the same panel.
 
 Field
 """""
@@ -288,7 +291,7 @@ Thresholds
 
 Changes the color of the bars according to what is put in the threshold.
 
-Ex:
+Example:
 
 .. image:: monitoring/capture/grafana/thresholdexemple2.PNG
    :width: 80 %
@@ -298,20 +301,19 @@ Value mapping
 
 Transforms the values into text.
 
-Ex:
+Example:
 
 .. image:: monitoring/capture/grafana/ValueMappingEx.PNG
    :width: 80 %
 
-here, we know that if the metric's value is 1, it means that it is up, 2 down, and so on
+Here, we know that if the metric's value is 1, it means that it is up, 2 down,
+and so on.
 So we map those values accordingly.
-
 
 Data links
 **********
 
-See above
-
+See above.
 
 Override
 """"""""
@@ -319,8 +321,7 @@ Override
 Override lets you override some values, by filtering fields.
 However, it is still a beta option.
 
-for more info check above
-
+For more info check above.
 
 Extra
 -----
@@ -333,42 +334,37 @@ To access get variables like these:
 .. image:: monitoring/capture/grafana/Captureshow.PNG
    :width: 30 %
 
-
-first, go to the top right corner of grafana:
-
+first, go to the top right corner of Grafana:
 
 .. image:: monitoring/capture/grafana/variable.PNG
    :width: 30 %
 
-
-
-go to variable
-
+go to variable:
 
 .. image:: monitoring/capture/grafana/Variable1.PNG
    :width: 20 %
 
-
-Then, enter a query to get the results you want to transform as a variabe.
-For exemple:
+Then, enter a query to get the results you want to transform as a variable.
+For example:
 
 .. image:: monitoring/capture/grafana/variable2.PNG
    :width: 30 %
 
-by doing this query you get the different instances of ifOutOctets.
-without the regex used like that
+By doing this query you get the different instances of ifOutOctets.
+Without the regex used like that:
 
 .. image:: monitoring/capture/grafana/variable3.PNG
    :width: 80 %
 
-
 you should get results like that:
-
 
 .. image:: monitoring/capture/grafana/variable4.PNG
    :width: 50 %
 
-however, by using the regex seen above, we get results that can be later used with some queries, like for example ::
+However, by using the regex seen above, we get results that can be later used
+with some queries, like for example:
+
+.. code-block:: text
 
     ifConnectorPresent{ifName=~"$interface"}
 
@@ -376,22 +372,20 @@ with $interface the name of our variable.
 
 .. note::
 
-    here, we use =~ in order to accept special regex caracters, like .* for example. You can see more about that in the prometheus part of the documentation
-
+    Here, we use =~ in order to accept special regex characters, like .* for example. You can see more about that in the Prometheus part of the documentation
 
 Main Dashboard
 ^^^^^^^^^^^^^^
 
-To create a main dashboard, simply create a new dashboard, a choose visualisation style "Dashboard list"
-you should get something like that:
+To create a main dashboard, simply create a new dashboard, and choose
+visualization style "Dashboard list", you should get something like that:
 
 .. image:: monitoring/capture/grafana/MainDashboard.PNG
    :width: 20 %
 
-choose the Search option
-and then simply choose the folder that you want to list.
+Choose the Search option and then simply choose the folder that you want to list.
 
 .. image:: monitoring/capture/grafana/mainDashboard2.PNG
    :width: 80 %
 
-by clicking on the dashboard links, you get redirected to them.
+By clicking on the dashboard links, you get redirected to them.

@@ -1,17 +1,21 @@
 Slurm_exporter
 ==============
 
-The slurm_exporter is an open source exporter for prometheus, and can be found here: https://github.com/vpenso/prometheus-slurm-exporter
+The slurm_exporter is an open source exporter for Prometheus, and can be found
+here: https://github.com/vpenso/prometheus-slurm-exporter
 
 By default, the slurm_exorter runs under the port 9817.
 
 To access the metrics, either do::
-  
-  curl http://172.16.0.2:9817/metrics
 
-or access it directly in a browser. Hower, using curl can be handy, because you can grep the output, and do other nice things with it.
+  curl http://localhost:9817/metrics
 
-You should get something like this ::
+or access it directly in a browser. However, using curl can be handy, because
+you can grep the output, and do other nice things with it.
+
+You should get something like this:
+
+.. code-block:: text
 
   # TYPE promhttp_metric_handler_requests_total counter
   promhttp_metric_handler_requests_total{code="200"} 3029
@@ -43,7 +47,9 @@ You should get something like this ::
 Metrics
 ^^^^^^^
 
-here is an extract from the github page::
+Here is an extract from the github page:
+
+.. code-block:: text
 
   ## Exported Metrics
 
@@ -103,18 +109,18 @@ here is an extract from the github page::
   * **(Backfill) Depth mean**: Mean of processed jobs during backfilling scheduling cycles since last reset.
 
 
-you can see more by looking at the local metrics.
+You can see more by looking at the local metrics.
 
- 
 Start service
 ^^^^^^^^^^^^^
 
-To start the service, simply run ::
+To start the service, simply run:
+
+.. code-block:: text
 
   systemctl start slurm_exporter
 
 .. note:: all exporter services are under the /etc/systemd/system directory, and most binaries are under the /usr/local/bin directory
-
 
 Alerts
 ^^^^^^
@@ -133,15 +139,4 @@ Some of them include :
 Dashboard
 ^^^^^^^^^
 
-To access the dashboard: access the management, port 3000::
-
-  172.16.0.2:3000
-
-you can do some "port forwarding"::
-
-  ssh root@10.106.60.78 -L 82:172.16.0.2:3000
-
-
-
-
- 
+A dashboard is provided on the exporter github page.
