@@ -7,7 +7,6 @@
   vars:
     packages:
     - prometheus
-    - grafana
     - alertmanager
     - ipmi_exporter
     - freeipmi
