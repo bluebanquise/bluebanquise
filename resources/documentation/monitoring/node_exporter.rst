@@ -60,7 +60,7 @@ Some of the information given are the following:
 You can see more by looking at the local metrics.
 
 Alerts
-^^^^^^
+------
 
 All the alerts for the node_exporter are stored under
 /etc/prometheus/alerts/node.yml
@@ -75,7 +75,7 @@ Some of them include :
 * etc...
 
 Start service
-^^^^^^^^^^^^^
+-------------
 
 To start the service, simply run:
 
@@ -86,7 +86,7 @@ To start the service, simply run:
 .. note:: all exporter services are under the /etc/systemd/system directory, and most binaries are under the /usr/local/bin directory
 
 Dashboard
-^^^^^^^^^
+---------
 
 Grafana open source dashboard:
 

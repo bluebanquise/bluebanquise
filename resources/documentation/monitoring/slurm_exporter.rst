@@ -45,7 +45,7 @@ You should get something like this:
 
 
 Metrics
-^^^^^^^
+-------
 
 Here is an extract from the github page:
 
@@ -112,7 +112,7 @@ Here is an extract from the github page:
 You can see more by looking at the local metrics.
 
 Start service
-^^^^^^^^^^^^^
+-------------
 
 To start the service, simply run:
 
@@ -123,7 +123,7 @@ To start the service, simply run:
 .. note:: all exporter services are under the /etc/systemd/system directory, and most binaries are under the /usr/local/bin directory
 
 Alerts
-^^^^^^
+------
 
 All the alerts for the slurm_exporter are stored under /etc/prometheus/alerts/
 
@@ -137,6 +137,6 @@ Some of them include :
 * etc...
 
 Dashboard
-^^^^^^^^^
+---------
 
 A dashboard is provided on the exporter github page.

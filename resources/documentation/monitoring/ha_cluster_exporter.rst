@@ -60,7 +60,7 @@ You can see more by looking at the local metrics, and by checking the github
 page.
 
 Alerts
-^^^^^^
+------
 
 All the alerts for the node_exporter are stored under
 /etc/prometheus/alerts/ha.yml
@@ -76,7 +76,7 @@ Some of them include :
 * Negative location constraints
 
 Start service
-^^^^^^^^^^^^^
+-------------
 
 To start the service, simply run:
 
@@ -84,11 +84,12 @@ To start the service, simply run:
 
   systemctl start ha_cluster_exporter
 
-.. note:: all exporter services are under the /etc/systemd/system directory,
-and most binaries are under the /usr/local/bin directory.
+.. note::
+  All exporter services are under the /etc/systemd/system directory,
+  and most binaries are under the /usr/local/bin directory.
 
 Dashboards
-^^^^^^^^^^
+----------
 
 there are several dashboards for the ha.
 

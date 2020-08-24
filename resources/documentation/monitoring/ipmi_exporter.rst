@@ -62,7 +62,7 @@ Some of the information given are the following:
 You can see more by looking at the local metrics.
 
 Alerts
-^^^^^^
+------
 
 All the alerts for the ipmi_exporter are stored under /etc/prometheus/alerts/ipmi.yml
 
@@ -80,7 +80,7 @@ Some of them include :
 * Voltage too high
 
 Start service
-^^^^^^^^^^^^^
+-------------
 
 To start the service, simply type:
 
@@ -126,7 +126,7 @@ If you modify the BMC username or password, don't forget to check the changes
 in this file.
 
 Dashboard
-^^^^^^^^^
+---------
 
 There are several dashboards for ipmi.
 

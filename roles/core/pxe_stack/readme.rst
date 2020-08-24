@@ -131,7 +131,7 @@ Also, all files root is assumed */var/www/html/preboot_execution_environnement* 
 
 The whole process can be resumed in one detailed schema:
 
-.. image:: roles/core/pxe_stack/images/iPXE_chain.svg
+.. image:: /roles/core/pxe_stack/images/iPXE_chain.svg
 
 To be macroscopic:
 

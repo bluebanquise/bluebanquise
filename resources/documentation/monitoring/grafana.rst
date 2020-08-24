@@ -58,12 +58,12 @@ See the Prometheus section of the doc for more info about the metrics
 (functions, different types of variables, show only certain instances) as both
 tools share the same syntax.
 
-.. image:: monitoring/capture/grafana/supp1.PNG
+.. image:: /monitoring/capture/grafana/supp1.PNG
    :width: 80 %
 
 By default, it shows you the requested metric in a graph panel.
 
-.. image:: monitoring/capture/grafana/supp2.PNG
+.. image:: /monitoring/capture/grafana/supp2.PNG
    :width: 80 %
 
 legend field
@@ -78,7 +78,7 @@ You can choose here what the legend will look like.
 By default, it will show the whole metric.
 Example:
 
-.. image:: monitoring/capture/grafana/legend_field1.PNG
+.. image:: /monitoring/capture/grafana/legend_field1.PNG
    :width: 60 %
 
 By example:
@@ -89,7 +89,7 @@ By example:
 
 Will provides:
 
-.. image:: monitoring/capture/grafana/legend_field2.PNG
+.. image:: /monitoring/capture/grafana/legend_field2.PNG
    :width: 30 %
 
 min step and resolution
@@ -119,7 +119,7 @@ Transform
     The transform tab is new with Grafana 7, and is still in development.
 
 
-.. image:: monitoring/capture/grafana/transform1.PNG
+.. image:: /monitoring/capture/grafana/transform1.PNG
    :width: 30 %
 
 Mainly useful when using graphs. Allows you to show the things you want in the
@@ -127,12 +127,12 @@ table, by reducing, filtering, joining metrics, and organizing fields.
 
 For example :
 
-.. image:: monitoring/capture/grafana/transformExmemple.PNG
+.. image:: /monitoring/capture/grafana/transformExmemple.PNG
    :width: 50 %
 
 Here, we have 3 queries, but if you make no transform, it will look like this:
 
-.. image:: monitoring/capture/grafana/transformExmemple3.PNG
+.. image:: /monitoring/capture/grafana/transformExmemple3.PNG
    :width: 80 %
 
 So we need to make the following transformations to get the desired table:
@@ -143,12 +143,12 @@ So we need to make the following transformations to get the desired table:
 
 With this transformation:
 
-.. image:: monitoring/capture/grafana/transformExmemple2.PNG
+.. image:: /monitoring/capture/grafana/transformExmemple2.PNG
    :width: 80 %
 
 You get the following result:
 
-.. image:: monitoring/capture/grafana/supp3.PNG
+.. image:: /monitoring/capture/grafana/supp3.PNG
    :width: 80 %
 
 You can find more about the different transformations here:
@@ -212,7 +212,7 @@ Legend
 Legend related options, you can show the legend as a table, add min, max, avg,
 current values.
 
-.. image:: monitoring/capture/grafana/LegendExemple.PNG
+.. image:: /monitoring/capture/grafana/LegendExemple.PNG
    :width: 80 %
 
 Thresholds
@@ -221,7 +221,7 @@ Thresholds
 The threshold lets you change the background color when the value is less than
 or greater than the chosen value.
 
-.. image:: monitoring/capture/grafana/thresholdexemple1.PNG
+.. image:: /monitoring/capture/grafana/thresholdexemple1.PNG
    :width: 80 %
 
 Time regions
@@ -251,7 +251,7 @@ and so on), whereas All Values will show you all the values scraped in the last
 XX minutes. You can choose the max number of results in the Limit field.
 You can also choose  the orientation and the display mode (aesthetics)
 
-.. image:: monitoring/capture/grafana/BarGaugeex1.PNG
+.. image:: /monitoring/capture/grafana/BarGaugeex1.PNG
    :width: 80 %
 
 Links
@@ -267,12 +267,12 @@ number of results we get.
 
 for example with the repeat option enabled:
 
-.. image:: monitoring/capture/grafana/BarGaugeex2.PNG
+.. image:: /monitoring/capture/grafana/BarGaugeex2.PNG
    :width: 80 %
 
 without the repeat option enabled:
 
-.. image:: monitoring/capture/grafana/BarGaugeex3.PNG
+.. image:: /monitoring/capture/grafana/BarGaugeex3.PNG
    :width: 50 %
 
 as you can see, in one case, you get the results in different panels, and in the
@@ -293,7 +293,7 @@ Changes the color of the bars according to what is put in the threshold.
 
 Example:
 
-.. image:: monitoring/capture/grafana/thresholdexemple2.PNG
+.. image:: /monitoring/capture/grafana/thresholdexemple2.PNG
    :width: 80 %
 
 Value mapping
@@ -303,7 +303,7 @@ Transforms the values into text.
 
 Example:
 
-.. image:: monitoring/capture/grafana/ValueMappingEx.PNG
+.. image:: /monitoring/capture/grafana/ValueMappingEx.PNG
    :width: 80 %
 
 Here, we know that if the metric's value is 1, it means that it is up, 2 down,
@@ -331,34 +331,34 @@ Variables
 
 To access get variables like these:
 
-.. image:: monitoring/capture/grafana/Captureshow.PNG
+.. image:: /monitoring/capture/grafana/Captureshow.PNG
    :width: 30 %
 
 first, go to the top right corner of Grafana:
 
-.. image:: monitoring/capture/grafana/variable.PNG
+.. image:: /monitoring/capture/grafana/variable.PNG
    :width: 30 %
 
 go to variable:
 
-.. image:: monitoring/capture/grafana/Variable1.PNG
+.. image:: /monitoring/capture/grafana/Variable1.PNG
    :width: 20 %
 
 Then, enter a query to get the results you want to transform as a variable.
 For example:
 
-.. image:: monitoring/capture/grafana/variable2.PNG
+.. image:: /monitoring/capture/grafana/variable2.PNG
    :width: 30 %
 
 By doing this query you get the different instances of ifOutOctets.
 Without the regex used like that:
 
-.. image:: monitoring/capture/grafana/variable3.PNG
+.. image:: /monitoring/capture/grafana/variable3.PNG
    :width: 80 %
 
 you should get results like that:
 
-.. image:: monitoring/capture/grafana/variable4.PNG
+.. image:: /monitoring/capture/grafana/variable4.PNG
    :width: 50 %
 
 However, by using the regex seen above, we get results that can be later used
@@ -380,12 +380,12 @@ Main Dashboard
 To create a main dashboard, simply create a new dashboard, and choose
 visualization style "Dashboard list", you should get something like that:
 
-.. image:: monitoring/capture/grafana/MainDashboard.PNG
+.. image:: /monitoring/capture/grafana/MainDashboard.PNG
    :width: 20 %
 
 Choose the Search option and then simply choose the folder that you want to list.
 
-.. image:: monitoring/capture/grafana/mainDashboard2.PNG
+.. image:: /monitoring/capture/grafana/mainDashboard2.PNG
    :width: 80 %
 
 By clicking on the dashboard links, you get redirected to them.

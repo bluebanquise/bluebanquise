@@ -104,13 +104,15 @@ ha_cluster_exporter.
 Also don't forget to add the name of the package you want to install and the
 service name.
 
-.. note:: As you can see, you can also add the scrape_interval (which is how
-often the metrics get scraped), and the scrape_timeout (which represents how
-long until a scrape request times out).
+.. note::
+  As you can see, you can also add the scrape_interval (which is how
+  often the metrics get scraped), and the scrape_timeout (which represents how
+  long until a scrape request times out).
 
-.. note:: If you want to add exporters, make sure your package contains the
-binary and the .service file, put preferably under /usr/local/bin and
-/etc/systemd/system.
+.. note::
+  If you want to add exporters, make sure your package contains the
+  binary and the .service file, put preferably under /usr/local/bin and
+  /etc/systemd/system.
 
 Now simply add to the playbook of your choice (which is for the Prometheus
 clients) the prometheus_client role:
@@ -246,7 +248,7 @@ By default, it is located at **http://localhost:9090** .
 To query a metric, simply type in the metric name. You also have a dropdown list
 with all the available metrics to query.
 
-.. image:: monitoring/capture/prometheus/query1.PNG
+.. image:: /monitoring/capture/prometheus/query1.PNG
    :width: 80 %
 
 If you want specific metrics (with one or more specific labels):
@@ -258,13 +260,13 @@ If you want specific metrics (with one or more specific labels):
 For example, ipmi_fan_speed_rpm{name="P-FAN1"} will only return the fan_speed of
 the fan name "P-FAN-1":
 
-.. image:: monitoring/capture/prometheus/query2.PNG
+.. image:: /monitoring/capture/prometheus/query2.PNG
    :width: 80 %
 
 In the graph tab, you can also see the variation of the value over time.
 You can also choose from when to when.
 
-.. image:: monitoring/capture/prometheus/query3.PNG
+.. image:: /monitoring/capture/prometheus/query3.PNG
    :width: 80 %
 
 Regex
@@ -300,7 +302,7 @@ For example:
 
 will return:
 
-.. image:: monitoring/capture/prometheus/query4.PNG
+.. image:: /monitoring/capture/prometheus/query4.PNG
    :width: 50 %
 
 * follow a pattern
@@ -323,7 +325,7 @@ Another example:
 will return all the metrics which name starts with ipmi, and which instance is
 001-bmc.
 
-.. image:: monitoring/capture/prometheus/query5.PNG
+.. image:: /monitoring/capture/prometheus/query5.PNG
    :width: 50 %
 
 Boolean operators
@@ -420,7 +422,7 @@ Example:
 
   delta(ipmi_current_amperes[5m])
 
-.. image:: monitoring/capture/prometheus/query6.PNG
+.. image:: /monitoring/capture/prometheus/query6.PNG
    :width: 80 %
 
 rate & irate
@@ -458,12 +460,12 @@ By default, it returns the avg value by job:
 
   avg(ipmi_current_amperes)
 
-.. image:: monitoring/capture/prometheus/query8.PNG
+.. image:: /monitoring/capture/prometheus/query8.PNG
    :width: 50 %
 
 But you can also average by any other attribute, using avg(query) by(attribute):
 
-.. image:: monitoring/capture/prometheus/query9.PNG
+.. image:: /monitoring/capture/prometheus/query9.PNG
    :width: 80 %
 
 avg_over_time
@@ -482,7 +484,7 @@ would return 4.
 
 output example:
 
-.. image:: monitoring/capture/prometheus/query7.PNG
+.. image:: /monitoring/capture/prometheus/query7.PNG
    :width: 80 %
 
 sum, min, max

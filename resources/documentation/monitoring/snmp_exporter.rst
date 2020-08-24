@@ -39,7 +39,7 @@ You should get something like this:
   ifAdminStatus{ifAlias="",ifDescr="",ifIndex="3",ifName="VLAN-1"} 1
 
 Snmp_exporter setup
-^^^^^^^^^^^^^^^^^^^
+-------------------
 
 The setup of this exporter is a little tricky.
 
@@ -56,7 +56,7 @@ You can find this file under /etc/snmp_exporter/snmp.yml
 
 It should look something like this::
 
-.. code-block:: text
+.. code-block:: yaml
 
   if_mib:
   walk:
@@ -231,7 +231,7 @@ Once you are done tuning the file, simply do:
   $ cp snmp.yml /etc/snmp_exporter/
 
 Setup targets
-^^^^^^^^^^^^^
+-------------
 
 To setup the targets, simply add:
 
@@ -247,7 +247,7 @@ To setup the targets, simply add:
 to the /etc/ansible/inventory/group_vars/equipment_profile you desire.
 
 Switch setup
-^^^^^^^^^^^^
+------------
 
 To setup the community on the switch to communicate with the exporter:
 Go to the switch via ssh or telnet, and enter the following commands:
@@ -264,7 +264,7 @@ You can change cluster to any community name you want, that is written in the
  snmp.yml file
 
 Start service
-^^^^^^^^^^^^^
+-------------
 
 To start the service, simply run:
 
@@ -275,7 +275,7 @@ To start the service, simply run:
 .. note:: all exporter services are under the /etc/systemd/system directory, and most binaries are under the /usr/local/bin directory
 
 Dashboard
-^^^^^^^^^
+---------
 
 The dashboard gives the following:
 
