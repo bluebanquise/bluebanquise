@@ -92,6 +92,7 @@ Unsecure but simpler:
 More secure, but less simple (need to specify ports to bind):
 
 .. code-block:: bash
+
   [root@pc-200 ~]# podman run -d -p 80:80 --name repositories centos:centoswp3
   571eb6e50217d8bf6953353350587b37da0e783eb4b2c0893738cfd44f7db8a0
   [root@pc-200 ~]#

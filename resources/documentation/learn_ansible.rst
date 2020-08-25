@@ -467,8 +467,8 @@ Check current destination for all hosts:
     destination: Deliani
   [root@ ~]#
 
-We can redefine the dict in group_vars/all (that apply to all hosts in the @all
-group, so everyone), but we only want to impact management1 node.
+We can redefine the variable in group_vars/all (that apply to all hosts in the
+@all group, so everyone), but we only want to impact management1 node.
 
 In the precedence list, you can see that inventory host_vars are in position 9,
 so they will win against position 4 of group_vars/all. Let’s use this.
@@ -501,10 +501,14 @@ And check destinations again:
     destination: Deliani
   [root@ ~]#
 
-Perfect. Setting a variable in the host definition file is equivalent to using
-host_vars folder. But host_vars folder is difficult to use when having a very
-large number of hosts, which is why in **BlueBanquise** we are often using
-directly the host file.
+Perfect.
+
+.. note::
+  We could also have used a file in inventory/host_vars/management1/new_values..
+  Setting a variable in the host definition file above the host is equivalent to
+  using host_vars folder. But host_vars folder is difficult to use when having a
+  very large number of hosts, which is why in **BlueBanquise** we are often
+  using directly the host file.
 
 Let's say now we want to change the model of spaceship of all the slave nodes.
 So not a single host, but all slave members hosts.
@@ -545,9 +549,11 @@ And check variables of hosts:
     model: Gencore Maelstrom
   [root@ ~]#
 
-Note that here, we had to add the whole dictionary in group_vars/slaves/myship.yml.
-This is due to the **replace** hash_behaviour of Ansible, as the **merge**
-version is deprecated.
+.. note::
+  We had to add the whole dictionary in group_vars/slaves/myship.yml.
+  This is due to the **replace** hash_behaviour of Ansible, as the **merge**
+  version is deprecated. If you wish to avoid having to replace all variables
+  like here, try to avoid massive dictionaries when not needed.
 
 Perfect. Remember the pizza in Vocabulary section. Ansible just flatten the
 whole inventory, using precedence, and you obtain variables.
@@ -556,7 +562,6 @@ Last point for this part, remember that in variable’s precedence, extra_vars i
 level 22 and always win, so adding extra vars when executing Ansible later will
 allow us to force variables at execution time for testing purposes or just
 because we need it.
-
 
 Roles and playbooks
 ===================
@@ -584,7 +589,8 @@ starting point for Ansible. Templates folder will contain our templates
 Task
 ^^^^
 
-Create file /etc/ansible/roles/shipyard/tasks/main.yml with the following content:
+Create file /etc/ansible/roles/shipyard/tasks/main.yml with the following
+content:
 
 .. code-block:: yaml
 
@@ -669,8 +675,9 @@ shipyard.
 
 Skip the tags for now.
 
-Note that hosts can be a list of hosts (comma separated:
-management1,login1,nfs1), or a group of hosts (all, slaves, color, etc.).
+.. note::
+ Hosts can be a list of hosts (comma separated: management1,login1,nfs1), or a
+ group of hosts (all, slaves, color, etc.).
 
 Now, execute the playbook, and let Ansible do its job:
 
@@ -762,6 +769,10 @@ whole Jinja2 documentation can be found here:
 
 You should now understand the very basis of Ansible.
 
+Please note also that Ansible provides some built in filters, to be used with
+Jinja2. A list can be found here:
+`Ansible Filters <https://docs.ansible.com/ansible/latest/user_guide/playbooks_filters.html>`_
+
 Time to investigate tasks advanced elements.
 
 Task again
@@ -809,8 +820,12 @@ Create a file /tmp/valkyrie, and add the string "lenneth" inside, using:
 
 Now, lets use a register to gather this content. Registers are a way to gather
 data about executed modules. Input data, output data, etc.
-One of the main usages is registers combined with shell or commands, to gather
-very specific data from the system.
+A good usage example is combining registers with templates. Register can inform
+later tasks that a template was updated or not, and trigger other tasks if
+needed.
+
+One of the possible usages is registers combined with shell or commands, to
+gather very specific data from the system.
 
 Try:
 
@@ -874,7 +889,7 @@ BlueBanquise rely on two methods: *with_items* and *loop*. *with_items* is
 considered deprecated by the Ansible team. *loop*, the replacement, is
 progressively being added into the stack.
 
-First example is with loop:
+A first loop example can be:
 
 .. code-block:: yaml
 
@@ -888,7 +903,7 @@ First example is with loop:
        - Yellow
 
 This will execute this module 4 times, with each time an element of the list
-given to loop. When using loops in ansible, the variable **item** stores the
+given as item. When using loops in ansible, the variable **item** stores the
 value of the current loop index.
 
 It is also possible to provide the loop with a list from the inventory, like the
@@ -1016,7 +1031,7 @@ For example:
     loop: "{{my_result.stdout_lines}}"
     when:
       - item == "lenneth"
-      - sys_admin_is_master == "yes"  # <<< this is added as an AND with first condition
+      - sys_admin_is_master == "yes"  # <<< this is added as an AND with other conditions
 
 Now execute playbook with an additional variable as extra vars, first with "no",
 then with "yes":
@@ -1071,8 +1086,8 @@ For example:
     tags:
       - second
 
-And at execution, use *--tags first,second* to execute both, *--tags second* to
-execute second only, or *--skip-tags first* that will skip the first one.
+And at execution, use ``--tags first,second`` to execute both, ``--tags second``
+to execute second only, or ``--skip-tags first`` that will skip the first one.
 
 Notify
 ^^^^^^
@@ -1095,8 +1110,8 @@ inside a file called **main.yml**, with the following content:
     debug:
       msg: "THE FILE WAS CHANGED!! HOW DARE YOU!!"
 
-Note that the name of this task (There was a change) is important and will be
-targeted by the notify.
+Note that the name of this task (``There was a change``) is important and will
+be targeted by the notify.
 
 Create also a template, called our_file.j2 in templates folder (like handlers
 above), with the following content:
@@ -1157,7 +1172,7 @@ Now do the exact same command again.
 
 Handler was not activated, because there was no changes.
 
-Last test, change captain of the enterprise, Kirk is on a mission.
+Last test, change captain of the enterprise (Kirk is on a mission).
 
 .. code-block:: text
 
@@ -1177,6 +1192,186 @@ And again:
     msg: THE FILE WAS CHANGED!! HOW DARE YOU!!
 
 Handler was activated.
+
+Other useful modules
+^^^^^^^^^^^^^^^^^^^^
+
+A full list of all Ansible modules can be found on the
+`Ansible documentation <https://docs.ansible.com/ansible/latest/modules/list_of_all_modules.html>`_ .
+
+However, lets review few other often used modules:
+
+Package
+"""""""
+
+This module simply install a list of package. It can be used instead of the yum
+or dnf modules, as it covers both.
+
+Example:
+
+.. code-block:: yaml
+
+  - name: Install wget package
+    package:
+      name: wget
+      state: present
+
+  - name: Install a list of packages
+    package:
+      name: "{{ my_packages_list }}"
+      state: present
+
+.. seealso::
+  https://docs.ansible.com/ansible/latest/modules/package_module.html
+
+Service
+"""""""
+
+Manage services, to start/stop/restart, enable/disable.
+
+Example:
+
+.. code-block:: yaml
+
+  - name: Start and enable httpd service
+    service:
+      name: httpd
+      enabled: yes
+      state: started
+
+.. seealso::
+  https://docs.ansible.com/ansible/latest/modules/service_module.html
+
+File
+""""
+
+This modules allow to create folders.
+
+Example:
+
+.. code-block:: yaml
+
+  - name: Create custom folders
+    file:
+      path: "{{ item }}"
+      state: directory
+      mode: 0755
+    loop:
+     - /etc/my_folder
+     - /var/lib/my_other_folder
+
+.. seealso::
+  https://docs.ansible.com/ansible/latest/modules/file_module.html
+
+Copy
+""""
+
+Act like template, but simply copy file, no rendering.
+Files to be copied must be put into a **files** folder, at root of the role.
+
+For example, create file my_role/files/slurm.conf
+
+.. code-block:: yaml
+
+  - name: Copy slurm static file
+    copy:
+      src: slurm.conf
+      dest: /etc/slurm/slurm.conf
+      mode: 0644
+      owner: slurm
+      group: slurm
+
+.. seealso::
+  https://docs.ansible.com/ansible/latest/modules/copy_module.html
+
+Lineinfile
+""""""""""
+
+This module allows to manipulate files, using regex. For example, set a value to
+0 in a file.
+
+Example:
+
+.. code-block:: yaml
+
+  - name: Add mymanagement string to localhost in /etc/hosts
+    lineinfile:
+      path: /etc/hosts
+      regexp: '^127\.0\.0\.1'
+      line: 127.0.0.1 localhost mymanagement
+      owner: root
+      group: root
+      mode: '0644'
+
+.. seealso::
+  https://docs.ansible.com/ansible/latest/modules/lineinfile_module.html
+
+Include_vars
+""""""""""""
+
+Allow to include vars from a file. Mostly used to allow compatibility with
+multiple architectures / OS versions, etc. To be used when "defaults" cannot be
+used.
+Vars file must be placed in a dedicated vars folder at root of the role
+(myrole/vars/myvars.yml).
+
+Example:
+
+.. code-block:: yaml
+
+  - name: Include vars from file "myvars.yml"
+    include_vars: myvars.yml
+
+.. seealso::
+  https://docs.ansible.com/ansible/latest/modules/include_vars_module.html
+
+Include_tasks
+"""""""""""""
+
+Allows to split the main main.yml task file into multiple chunks (using or not
+conditionals).
+
+Example:
+
+.. code-block:: yaml
+
+  - name: Include addon tasks
+    include_tasks: addon.yml
+    when: my_role_addon == true
+
+.. seealso::
+  https://docs.ansible.com/ansible/latest/modules/include_tasks_module.html
+
+Command and shell
+"""""""""""""""""
+
+Sometime, you need to do things manually. Two modules allows that: command and
+shell.
+
+* Command is to be used when you need to execute a very basic command.
+* Shell is to be used when you need to execute a command inside a shell (to benefit from it).
+
+When using pipes, or output redirections, shell is preferred for example.
+
+.. code-block:: yaml
+
+  - name: Store content of a file into a register
+    command: cat /etc/myfile
+    register: myfile_content
+
+  - name: Execute a script, pipe it, and stdout goes to log.txt on the remote host
+    shell: myscript.sh | grep -E "in|out">> log.txt
+
+.. seealso::
+  https://docs.ansible.com/ansible/latest/modules/shell_module.html#shell-module
+
+.. seealso::
+  https://docs.ansible.com/ansible/latest/modules/command_module
+
+----------
+
+You can find a lot more on the web regarding Ansible. However, this small guide
+should have provided you the very basis of Ansible.
 
 If you feel something is missing in this quick Ansible training, please do not
 hesitate to ask us to add elements.
