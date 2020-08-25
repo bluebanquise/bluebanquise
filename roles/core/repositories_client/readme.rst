@@ -56,10 +56,6 @@ Repository static path is computed using variables defined in the equipment_prof
     # Optional: add an environment in the repositories path (eg. production, staging) (repositories/PXE)
     #repositories_environment: production
 
-  hardware:
-    cpu:
-      architecture: x86_64 # Set system CPU architecture
-
 If equipment_profile is:
 
 .. code-block:: yaml
@@ -67,11 +63,8 @@ If equipment_profile is:
   ep_operating_system:
     distribution: centos
     distribution_major_version: 8
-  ep_hardware:
-    cpu:
-      architecture: x86_64
 
-Then path will be: repositories/centos/8/x86_64/
+Then path will be: repositories/centos/8/$basearch/
 
 If equipment_profile is:
 
@@ -81,11 +74,8 @@ If equipment_profile is:
     distribution: centos
     distribution_major_version: 8
     distribution_version: 8.1
-  ep_hardware:
-    cpu:
-      architecture: x86_64
 
-Then path will be: repositories/centos/8.1/x86_64/
+Then path will be: repositories/centos/8.1/$basearch/
 
 If equipment_profile is:
 
@@ -96,11 +86,8 @@ If equipment_profile is:
     distribution_major_version: 8
     distribution_version: 8.1
     repositories_environment: production
-  ep_hardware:
-    cpu:
-      architecture: aarch64
 
-Then path will be: repositories/production/centos/8.1/aarch64/
+Then path will be: repositories/production/centos/8.1/$basearch/
 
 Input
 ^^^^^
