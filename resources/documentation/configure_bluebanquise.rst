@@ -337,8 +337,8 @@ in equipment_typeC group. Let's check c001:
 
 .. code-block:: bash
 
-  [root@]# ansible-inventory --host c001 --yaml | grep access_control
-    access_control: enforcing
+  [root@]# ansible-inventory --host c001 --yaml | grep ep_access_control
+    ep_access_control: enforcing
   [root@]#
 
 Not good, we want to disable access_control on computes. We need to change that.
@@ -350,8 +350,8 @@ Now check again:
 
 .. code-block:: bash
 
-  [root@]# ansible-inventory --host c001 --yaml | grep access_control
-    access_control: disabled
+  [root@]# ansible-inventory --host c001 --yaml | grep ep_access_control
+    ep_access_control: disabled
   [root@]#
 
 Same apply for all equipment_profile parameters. You define a global set of
