@@ -31,7 +31,7 @@ SlurmdTimeout=600
 ## We don't want a node to go back in pool without sys admin acknowledgement
 ReturnToService=0
 
-{% if slurm['MpiDefault'] is defined and slurm['MpiDefault'] is not None %}
+{% if slurm['MpiDefault'] is defined and slurm['MpiDefault'] is not none %}
 ## Using pmi/pmi2/pmix interface for MPI
 MpiDefault={{slurm['MpiDefault']}}
 {% endif %}
