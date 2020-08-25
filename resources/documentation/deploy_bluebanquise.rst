@@ -81,12 +81,20 @@ Then start your main interface manually. Here enp0s3:
 
   ifup enp0s3
 
+Or on RHEL/CentOS 8:
+
+.. code-block:: bash
+
+  nmcli con up enp0s3
+
 Once interface is up (check using *ip a* command), setup the BlueBanquise
 controller:
 
 .. code-block:: bash
 
   ansible-playbook /etc/bluebanquise/playbooks/managements.yml --limit management1 --tags bluebanquise
+
+This will install the needed few rpms (python filters).
 
 Then play the whole playbook:
 
@@ -118,6 +126,7 @@ Next step is to deploy the other nodes using PXE process.
 
 NOTE: it is assumed here you know how to have your other nodes / VM / servers /
 workstation to boot on LAN.
+
 If your device cannot boot on LAN, use iso or usb image provided on management1
 in /var/www/html/preboot_execution_environment/bin/[x86_64|arm64]. These images
 will start a LAN boot automatically.
@@ -175,14 +184,25 @@ Let's use bootset to ask them to deploy OS at next PXE boot:
 
   bootset -n login1,c[001-004] -b osdeploy
 
+You can check the result using:
+
+.. code-block:: bash
+
+  bootset -n login1,c[001-004] -s
+
+Which should return:
+
+.. code-block:: text
+
+  [INFO] Loading /etc/bluebanquise/pxe/nodes_parameters.yml
+  [INFO] Loading /etc/bluebanquise/pxe/pxe_parameters.yml
+  Next boot deployment: c[001-004],login1
+
 Note that this osdeploy state will be automatically updated once OS is deployed
 on remote nodes, and set to disk.
 
 You can also force nodes that boot on PXE to boot on disk using *-b disk*
 instead of *-b osdeploy*.
-
-Note also that if you update configuration on management1, it is recommended to
-force the update of files when using bootset.
 
 Please refer to the pxe_stack role dedicated section in this documentation for
 more information on the bootset usage.
@@ -192,8 +212,8 @@ SSH public key
 
 In order to log into the remote nodes without giving the password, check that
 the ssh public key defined in authentication.yml in your inventory match your
-management1 public key. If not, update it. Remember to run the pxe_stack role
-after updating the configuration.
+management1 public key. If not, update it. Remember to run again the pxe_stack
+role after updating the configuration.
 
 .. code-block:: bash
 
@@ -230,6 +250,14 @@ And execute them, using --limit parameter to specify targets them:
 
 You can see that Ansible will work on computes nodes in parallel, using more CPU
 on the management1 node.
+
+Diskless
+========
+
+An addon, diskless, allows to deploy diskless nodes. Please see the role related
+documentation to deploy diskless nodes.
+
+-------------
 
 Your cluster should now be fully deployed. It is time to use some addons to add
 specific features to the cluster (Please refer to each addon roles dedicated
