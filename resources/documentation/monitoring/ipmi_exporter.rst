@@ -97,9 +97,9 @@ By default, it should look like this:
 
   modules:
 
-  equipment_compute_SEQ2_CER:
-    user: super
-    pass: pass
+  equipment_compute_C:
+    user: user
+    pass: password
     driver: "LAN_2_0"
     privilege: "user"
     timeout: 10000
