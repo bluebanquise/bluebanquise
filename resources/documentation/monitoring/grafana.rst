@@ -6,18 +6,6 @@ In this topic, we will see how to install Grafana, using the provided rpms.
 Installation
 ------------
 
-Ansible role
-^^^^^^^^^^^^
-
-Using the ansible role prometheus_server, you can install grafana with the
-following command:
-
-Simply run:
-
-.. code-block:: text
-
-  ansible-playbook /etc/bluebanquise/playbooks/<your server playbook> --tags prometheus_server
-
 Manual installation
 ^^^^^^^^^^^^^^^^^^^
 
