@@ -16,7 +16,7 @@ Simply run:
 
 .. code-block:: text
 
-  ansible-playbook /etc/ansible/playbooks/<your server playbook> --tags prometheus_server
+  ansible-playbook /etc/bluebanquise/playbooks/<your server playbook> --tags prometheus_server
 
 Manual installation
 ^^^^^^^^^^^^^^^^^^^
@@ -26,9 +26,10 @@ There should be a package for grafana under the bluebanquise repository.
 By running the following command:
 
 .. code-block:: text
-
-  yum install grafana
-
+  
+  dnf install grafana # (RHEL8)
+  yum install grafana # (RHEL7)
+  
 It should install grafana-server.
 
 Useful Files
@@ -54,7 +55,7 @@ metrics field
 """""""""""""
 
 This section is where you put Prometheus metric queries.
-See the Prometheus section of the doc for more info about the metrics
+See the Prometheus section of the documentation for more info about the metrics
 (functions, different types of variables, show only certain instances) as both
 tools share the same syntax.
 
@@ -127,12 +128,12 @@ table, by reducing, filtering, joining metrics, and organizing fields.
 
 For example :
 
-.. image:: /monitoring/capture/grafana/transformExmemple.PNG
+.. image:: /monitoring/capture/grafana/transformExample.PNG
    :width: 50 %
 
 Here, we have 3 queries, but if you make no transform, it will look like this:
 
-.. image:: /monitoring/capture/grafana/transformExmemple3.PNG
+.. image:: /monitoring/capture/grafana/transformExample3.PNG
    :width: 80 %
 
 So we need to make the following transformations to get the desired table:
@@ -143,7 +144,7 @@ So we need to make the following transformations to get the desired table:
 
 With this transformation:
 
-.. image:: /monitoring/capture/grafana/transformExmemple2.PNG
+.. image:: /monitoring/capture/grafana/transformExample2.PNG
    :width: 80 %
 
 You get the following result:
@@ -158,7 +159,7 @@ Alert
 ^^^^^
 
 You can create alerts in Grafana, by setting up conditions.
-It is pretty much self explanatory, but if you want more info, you can check
+It is pretty much self-explanatory, but if you want more info, you can check
 this link: https://grafana.com/docs/grafana/latest/alerting/create-alerts/
 
 Note that alerts defined in Grafana are not related to alerts defined in
@@ -212,7 +213,7 @@ Legend
 Legend related options, you can show the legend as a table, add min, max, avg,
 current values.
 
-.. image:: /monitoring/capture/grafana/LegendExemple.PNG
+.. image:: /monitoring/capture/grafana/LegendExample.PNG
    :width: 80 %
 
 Thresholds
@@ -221,7 +222,7 @@ Thresholds
 The threshold lets you change the background color when the value is less than
 or greater than the chosen value.
 
-.. image:: /monitoring/capture/grafana/thresholdexemple1.PNG
+.. image:: /monitoring/capture/grafana/thresholdExample1.PNG
    :width: 80 %
 
 Time regions
@@ -293,7 +294,7 @@ Changes the color of the bars according to what is put in the threshold.
 
 Example:
 
-.. image:: /monitoring/capture/grafana/thresholdexemple2.PNG
+.. image:: /monitoring/capture/grafana/thresholdExample2.PNG
    :width: 80 %
 
 Value mapping
