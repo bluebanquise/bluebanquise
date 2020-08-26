@@ -43,7 +43,7 @@ metrics field
 """""""""""""
 
 This section is where you put Prometheus metric queries.
-See the Prometheus section of the documentation for more info about the metrics
+See the Prometheus section of the documentation for more information about the metrics
 (functions, different types of variables, show only certain instances) as both
 tools share the same syntax.
 
