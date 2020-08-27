@@ -11,27 +11,27 @@ Management and main configuration
 Versioning the inventory
 ------------------------
 
-It may be a good idea to version the whole /etc/bluebanquise repository, to keep
-track of all changes made, and be able to revert in case of issues.
+It may be a good idea to version the whole /etc/bluebanquise/inventory/
+folder, to keep track of all changes made, and be able to revert in case of
+issues.
+
+.. note::
+  If used, it may be also a good idea to version the
+  /etc/bluebanquise/playbooks/ and /etc/bluebanquise/roles/custom/ folders.
 
 It may even be better to use an external to the cluster git platform (gitlab,
 etc.) to backup the whole configuration, and be able to push changes from the
 cluster to this platform.
 
 To create a basic git repository, assuming you already have an in place
-configuration inside /etc/bluebanquise, first create a temporary folder in
-/etc/newbluebanquise to generate a fresh git repository.
-Then copy content from /etc/bluebanquise into this new repository, and add it
-into the master branch.
+configuration inside /etc/bluebanquise/inventory/, do:
 
 .. code-block:: text
 
-  mkdir /etc/newbluebanquise
-  cd /etc/newbluebanquise
+  cd /etc/bluebanquise/inventory/
   git init
-  cp -a /etc/bluebanquise/* /etc/newbluebanquise/
   git add --all
-  git commit --author="my_name <my_name@my_mail.org>"
+  git commit --author="my_name <my_name@my_mail.org>" -m "First commit"
 
 It is now possible to commit new changes after each configuration manipulations.
 
@@ -340,7 +340,7 @@ To do so, edit the file that contains the node, for example
 /etc/bluebanquise/inventory/cluster/nodes/computes.yml and simply update the MAC
 address.
 
-Then ensure update the dhcp configuration on the management node:
+Then update the dhcp configuration on the management node:
 
 .. code-block:: text
 
@@ -414,11 +414,23 @@ In a second shell launch:
 This will monitor all the http (apache2) requests: the iPXE chain, and the
 kernel/initrd and packages download.
 
+In a last shell, launch:
+
+.. code-block:: text
+
+  watch -n 10 bootset -n c001 -q -s
+
+You will now be able to follow the whole deployment process, steps by steps.
+
 Apply or update nodes configuration
 -----------------------------------
 
+To be done.
+
 Changing equipment_profile group of some nodes
 ----------------------------------------------
+
+To be done.
 
 Manage multiple distribution versions
 -------------------------------------
@@ -426,14 +438,30 @@ Manage multiple distribution versions
 Allows to boot group of nodes with different distributions versions (major or
 minor), and use different kernel on each group.
 
+To be done.
+
 Roles and playbooks
 ===================
 
 Create a custom role
 --------------------
 
+To be done.
+
 Security
 ========
 
 Update root password
 --------------------
+
+To be done.
+
+Use vault to enhance inventory security
+---------------------------------------
+
+To be done.
+
+Externalize Ansible
+-------------------
+
+To be done.

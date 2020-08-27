@@ -99,6 +99,11 @@ More secure, but less simple (need to specify ports to bind):
 
 Both ways work.
 
+Note: 80:80 means 80 on the main host is mapped by 80 inside the container. If
+you wish to used different ports on the hosts, to avoid conflicts, you can
+choose others, for example 8080:80 would bind the 80 of the container on the
+8080 of the host.
+
 Check the container is running:
 
 .. code-block:: bash

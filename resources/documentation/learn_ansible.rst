@@ -200,13 +200,13 @@ desired host(s). This is the most used command when using **BlueBanquise**.
 
 Important parameters are:
 
-* -e or --extra-vars, which allows to provide additional variables for execution (keep in mind that variables set here win the whole precedence)
-* -t or --tags, which allows to execute only specific tasks or part of tasks (seen later)
-* -s or --skip-tags, which allows to not execute some specific tasks or part of tasks (seen later)
-* --list-tasks, which allows to list all tasks related to roles used in the playbook, and order they will be executed
-* --start-at-task, which allows to start/restart playbook at a desired task (to be combined with --list-tasks)
-* --list-tags, which allows to list all tags seen during this playbook execution
-* --limit, which limit the playbook execution to a specific list of hosts (if using a group has default host for example)
+* `-e` or `--extra-vars`, which allows to provide additional variables for execution (keep in mind that variables set here win the whole precedence)
+* `-t` or `--tags`, which allows to execute only specific tasks or part of tasks (seen later)
+* `-s` or `--skip-tags`, which allows to not execute some specific tasks or part of tasks (seen later)
+* `--list-tasks`, which allows to list all tasks related to roles used in the playbook, and order they will be executed
+* `--start-at-task`, which allows to start/restart playbook at a desired task (to be combined with `--list-tasks`)
+* `--list-tags`, which allows to list all tags seen during this playbook execution
+* `--limit`, which limit the playbook execution to a specific list of hosts (if using a group has default host for example)
 
 Debug
 -----
