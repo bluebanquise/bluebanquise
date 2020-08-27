@@ -50,4 +50,3 @@
   loop: "{{ grafana_services_to_start }}"
   tags:
     - service
-

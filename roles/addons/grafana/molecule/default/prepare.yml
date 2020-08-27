@@ -1,0 +1,25 @@
+---
+- name: Prepare
+  hosts: all
+
+  tasks:
+    - name: "Install firewalld"
+      package:
+        name: firewalld
+      when: ansible_facts.os_family == "RedHat"
+
+    - name: "Start firewalld"
+      service:
+        name: firewalld
+        state: started
+      when: ansible_facts.os_family == "RedHat"
+
+    - name: "Configure Grafana repository for EL7"
+      yum_repository:
+        name: grafana
+        description: Grafana repository
+        baseurl: https://packages.grafana.com/oss/rpm
+        gpgcheck: False
+      when:
+        - ansible_facts.os_family == "RedHat"
+        - ansible_facts.distribution_major_version == "7"
