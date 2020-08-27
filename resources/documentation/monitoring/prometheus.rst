@@ -43,13 +43,17 @@ following content:
 .. seealso:: https://www.robustperception.io/whats-the-difference-between-group_interval-group_wait-and-repeat_interval
 
 Now, simply add to the playbook of your choice (which is for the Prometheus
-server) the prometheus_server role:
+server) the prometheus_server role (change the values of enable_services and start_services accordingly):
 
 .. code-block:: yaml
-
+  
+  vars:
+    - enable_services: true
+    - start_services: true
   roles:
     - role: prometheus_server
       tags: prometheus_server
+
 
 Then run:
 
@@ -115,10 +119,12 @@ service name.
   /etc/systemd/system.
 
 Now simply add to the playbook of your choice (which is for the Prometheus
-clients) the prometheus_client role:
+clients) the prometheus_client role (change the values  of enable_services and start_services accordingly):
 
 .. code-block:: yaml
-
+ vars:
+    - enable_services: true
+    - start_services: true
  roles:
      - role: prometheus_client
        tags: prometheus_client
