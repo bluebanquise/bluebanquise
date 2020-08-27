@@ -47,5 +47,5 @@ ep_hardware:
   gpu:
 
 ep_equipment_authentication: # login/password for BMC, storage bay controller, switch, etc.
-  user: ADMIN
-  password: ADMIN
+  user: user
+  password: password

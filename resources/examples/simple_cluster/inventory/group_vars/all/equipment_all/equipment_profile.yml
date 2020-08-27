@@ -14,7 +14,7 @@ ep_console:
 ep_kernel_parameters:
 
 ep_access_control: enforcing # Selinux, AppArmor, etc. Selinux: enforcing, permissive, disabled
-ep_firewall: false # Enable or disable native firewall
+ep_firewall: true # Enable or disable native firewall
 
 ep_partitioning: | # Please provide native distribution partitioning. This example is for Centos/RedHat systems.
   clearpart --all --initlabel
@@ -47,5 +47,5 @@ ep_hardware:
   gpu:
 
 ep_equipment_authentication: # login/password for BMC, storage bay controller, switch, etc.
-  user: ADMIN
-  password: ADMIN
+  user: user
+  password: password
