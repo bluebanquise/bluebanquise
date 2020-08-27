@@ -33,6 +33,7 @@
 - name: file █ Create /var/log/conman directory
   file:
     path: /var/log/conman
+    mode: 0750
     setype: conman_log_t
     state: directory
     recurse: yes
