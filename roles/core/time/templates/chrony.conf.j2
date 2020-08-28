@@ -61,7 +61,7 @@ allow {{ networks[nic.network]['subnet'] }}/{{ networks[nic.network]['prefix'] }
 # Serve time even if not synchronized to a time source.
 # Fairly unreliable time source
   {% if iceberg_level is defined and iceberg_level is not none %}
-    {% if (iceberg_level|int) is gt 3 %}
+    {% if (iceberg_level|int) > 3 %}
 local stratum 15
     {% else %}
 local stratum {{ 12+(iceberg_level|int) }}
