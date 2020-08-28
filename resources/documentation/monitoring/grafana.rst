@@ -14,10 +14,10 @@ There should be a package for grafana under the bluebanquise repository.
 By running the following command:
 
 .. code-block:: text
-  
+
   dnf install grafana # (RHEL8)
   yum install grafana # (RHEL7)
-  
+
 It should install grafana-server.
 
 Useful Files
@@ -273,7 +273,7 @@ Field
 Unit
 ****
 
-Self explanatory, choose the unit, min, max and the display name for the values.
+Self-explanatory, choose the unit, min, max and the display name for the values.
 
 Thresholds
 **********
