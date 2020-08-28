@@ -51,6 +51,14 @@
   tags:
     - template
 
+- name: seboolean █ Allow all daemons the ability to use unallocated ttys
+  seboolean:
+    name: daemons_use_tty
+    state: yes
+    persistent: yes
+  when:
+    - ansible_facts.selinux.status == "enabled"
+
 - meta: flush_handlers
 
 - name: service █ Manage conman state
