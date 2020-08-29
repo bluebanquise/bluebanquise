@@ -47,7 +47,7 @@ Few useful commands:
 Adding a new repository
 -----------------------
 
-To add a new repository, simply manually create its root folder (if not
+To add a new repository, simply create its root folder (if not
 existing), using the distribution to be used, the major distribution version
 associated, and the architecture:
 
