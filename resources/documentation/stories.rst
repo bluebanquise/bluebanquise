@@ -68,7 +68,7 @@ into the repositories.yml associated with the equipment_profile associated, for
 example in file
 /etc/bluebanquise/inventory/group_vars/equipment_X/repositories.yml .
 
-If needed, it is also possible to defined minor version based repositories. To
+If needed, it is also possible to define minor version based repositories. To
 do so, simply replace the major version by the minor version, and use the
 `ep_operating_system.distribution_version` variable to force usage of a minor
 distribution version for the equipment groups associated with this new
