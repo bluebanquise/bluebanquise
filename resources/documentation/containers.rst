@@ -99,10 +99,11 @@ More secure, but less simple (need to specify ports to bind):
 
 Both ways work.
 
-Note: 80:80 means port 80 on the main host is mapped to port 80 of the 
-container. If you want to use a different port on the host, you can select any
-available port. For example, 8080:80 would map the port 8080 of the host to the
-port 80 of the container.
+.. note::
+  80:80 means port 80 on the main host is mapped to port 80 of the
+  container. If you want to use a different port on the host, you can select any
+  available port. For example, 8080:80 would map the port 8080 of the host to the
+  port 80 of the container.
 
 Check the container is running:
 

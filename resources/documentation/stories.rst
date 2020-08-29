@@ -11,17 +11,17 @@ Management and main configuration
 Versioning the inventory
 ------------------------
 
-It may be a good idea to version the whole /etc/bluebanquise/inventory/
+It is a good practice to version the whole /etc/bluebanquise/inventory/
 folder, to keep track of all changes made, and be able to revert in case of
 issues.
-
-.. note::
-  If used, it may be also a good idea to version the
-  /etc/bluebanquise/playbooks/ and /etc/bluebanquise/roles/custom/ folders.
 
 It may even be better to use an external git platform (gitlab,
 etc.) to backup the whole configuration, and be able to push changes from the
 cluster to this platform.
+
+.. warning::
+  Never use a public repository (like github) to store your inventory, as it
+  contains sensitive data about your infrastructure.
 
 To create a basic git repository, assuming you already have an existing
 configuration in /etc/bluebanquise/inventory/, do:
@@ -43,6 +43,10 @@ Few useful commands:
 
 * `git log`: display recent logs of the current repository
 * `git reset --soft HEAD~1`: undo the last commit
+
+.. note::
+  If used, it may be also a good idea to version the
+  /etc/bluebanquise/playbooks/ and /etc/bluebanquise/roles/custom/ folders.
 
 Adding a new repository
 -----------------------
@@ -133,7 +137,7 @@ For example:
 
   ansible-playbook /etc/bluebanquise/playbooks/managements.yml --limit management1
   ansible-playbook /etc/bluebanquise/playbooks/managements.yml --limit management2
-  ansible-playbook /etc/bluebanquise/playbooks/managements.yml --limit management2
+  ansible-playbook /etc/bluebanquise/playbooks/managements.yml --limit management3
 
 Nodes
 =====
@@ -189,7 +193,6 @@ the configuration and seen by Ansible:
 .. code-block:: text
 
   [root@management1 ~]# ansible-inventory --graph
-  [WARNING]: Unable to parse /etc/bluebanquise/internal as an inventory source
   @all:
     |--@mg_computes:
     |  |--@equipment_typeC:

@@ -1299,9 +1299,6 @@ Example:
       path: /etc/hosts
       regexp: '^127\.0\.0\.1'
       line: 127.0.0.1 localhost mymanagement
-      owner: root
-      group: root
-      mode: '0644'
 
 .. seealso::
   https://docs.ansible.com/ansible/latest/modules/lineinfile_module.html
