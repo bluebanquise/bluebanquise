@@ -1204,7 +1204,7 @@ However, lets review the most commonly used modules:
 Package
 """""""
 
-This module simply install a list of package. It can be used instead of the yum
+This module simply installs a list of packages. It can be used instead of the yum
 or dnf modules, as it covers both.
 
 Example:
