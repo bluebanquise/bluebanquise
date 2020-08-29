@@ -33,7 +33,7 @@ configuration in /etc/bluebanquise/inventory/, do:
   git add --all
   git commit --author="my_name <my_name@my_mail.org>" -m "First commit"
 
-It is now possible to commit new changes after each configuration manipulations.
+It is now possible to commit new changes after each configuration change.
 
 You can find a lot on the web about correct git repository usage, creating
 branches, etc. Also note that the repositories support environments in
