@@ -1245,7 +1245,7 @@ Example:
 File
 """"
 
-This modules allow to create folders.
+This module allows to create folders.
 
 Example:
 
