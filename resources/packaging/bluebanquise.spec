@@ -20,9 +20,13 @@ Requires:       ansible
 %if 0%{?el8}
 Requires:       python36
 Requires:       python3-clustershell
+Requires:       python3-jmespath
+Requires:       python3-netaddr
 %else
 Requires:       python3 >= 3.6
 Requires:       python36-clustershell
+Requires:       python2-jmespath
+Requires:       python-netaddr
 %endif
 
 %description
@@ -83,6 +87,7 @@ chmod -x roles/addons/clone/files/clone.ipxe roles/addons/clone/files/deploy_clo
 %install
 mkdir -p %{buildroot}%{_sysconfdir}/%{name}/roles
 cp -a ansible.cfg %{buildroot}%{_sysconfdir}/%{name}/
+cp -aL internal %{buildroot}%{_sysconfdir}/%{name}/
 cp -aL roles/core %{buildroot}%{_sysconfdir}/%{name}/roles/
 cp -aL roles/advanced-core %{buildroot}%{_sysconfdir}/%{name}/roles/
 cp -aL roles/addons %{buildroot}%{_sysconfdir}/%{name}/roles/
@@ -95,9 +100,10 @@ cp -a tools/bluebanquise-playbook %{buildroot}%{_sbindir}/
 %files -f rolesfiles.cores
 %defattr(-,root,root,-)
 %license LICENSE
-%doc README.md resources/documentation/ resources/examples/
+%doc CHANGELOG.md README.md resources/documentation/ resources/examples/
 %dir %{_sysconfdir}/%{name}/
 %config(noreplace) %{_sysconfdir}/%{name}/ansible.cfg
+%config %{_sysconfdir}/%{name}/internal/
 %{_sysconfdir}/%{name}/roles/customs/
 %attr(750,root,root) %{_sbindir}/bluebanquise-playbook
 
