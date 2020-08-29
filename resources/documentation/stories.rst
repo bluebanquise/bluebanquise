@@ -23,8 +23,8 @@ It may even be better to use an external git platform (gitlab,
 etc.) to backup the whole configuration, and be able to push changes from the
 cluster to this platform.
 
-To create a basic git repository, assuming you already have an in place
-configuration inside /etc/bluebanquise/inventory/, do:
+To create a basic git repository, assuming you already have an existing
+configuration in /etc/bluebanquise/inventory/, do:
 
 .. code-block:: text
 
