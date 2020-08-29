@@ -1328,7 +1328,7 @@ Example:
 Include_tasks
 """""""""""""
 
-Allows to split the main main.yml task file into multiple chunks (using or not
+Allows to split the main.yml task file into multiple chunks (using or not
 conditionals).
 
 Example:
