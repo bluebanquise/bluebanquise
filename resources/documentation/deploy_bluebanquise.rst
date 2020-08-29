@@ -94,7 +94,8 @@ controller:
 
   ansible-playbook /etc/bluebanquise/playbooks/managements.yml --limit management1 --tags bluebanquise
 
-This will install the needed few rpms (python filters).
+This will install the requirements to run BlueBanquise (mostly python filters
+for Ansible).
 
 Then play the whole playbook:
 
