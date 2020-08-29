@@ -277,7 +277,7 @@ content in the file:
 
 .. code-block:: yaml
 
-  mg_switchs:
+  mg_switches:
     children:
 
 The master group is now created.
