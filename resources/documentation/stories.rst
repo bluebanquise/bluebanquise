@@ -19,7 +19,7 @@ issues.
   If used, it may be also a good idea to version the
   /etc/bluebanquise/playbooks/ and /etc/bluebanquise/roles/custom/ folders.
 
-It may even be better to use an external to the cluster git platform (gitlab,
+It may even be better to use an external git platform (gitlab,
 etc.) to backup the whole configuration, and be able to push changes from the
 cluster to this platform.
 
