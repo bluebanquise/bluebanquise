@@ -271,7 +271,7 @@ The stack is fully dynamic regarding groups. The only thing you need is to
 create a new file with the master group name inside of
 /etc/bluebanquise/inventory/cluster/nodes/
 
-For example, if you wish to create a new group "switchs", create file
+For example, if you wish to create a new group "switches", create file
 /etc/bluebanquise/inventory/cluster/nodes/switches.yml and add the following
 content in the file:
 
