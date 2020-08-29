@@ -61,7 +61,7 @@ Then create your new repository folder:
 
   mkdir /var/www/html/repositories/centos/8/x86_64/my_repo
 
-And add it into your global repositories, into file
+And add it to your global repositories, into file
 /etc/bluebanquise/inventory/group_vars/all/general_settings/repositories.yml or
 if this repository is only associated with a specific equipment group, add it
 into the repositories.yml associated with the equipment_profile associated, for
