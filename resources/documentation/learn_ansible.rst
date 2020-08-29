@@ -1199,7 +1199,7 @@ Other useful modules
 A full list of all Ansible modules can be found on the
 `Ansible documentation <https://docs.ansible.com/ansible/latest/modules/list_of_all_modules.html>`_ .
 
-However, lets review few other often used modules:
+However, lets review the most commonly used modules:
 
 Package
 """""""
