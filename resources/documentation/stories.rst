@@ -251,7 +251,7 @@ Create a file /root/gen.sh with the following content:
   EOF
   done
 
-Save, make this script executable, and launch it asking for 4 nodes:
+Save, make this script executable, and run it asking for 4 nodes:
 
 .. code-block:: text
 
