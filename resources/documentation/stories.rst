@@ -123,7 +123,7 @@ For example:
 
   ansible-playbook /etc/bluebanquise/playbooks/managements.yml --diff --check
 
-2. If you have multiple managements nodes, only update them one by one, using
+2. If you have multiple managements nodes, update them one after the other, using
 the `--limit` argument, specifying the nodes each time. This can be combined
 with the dry run seen in 1.
 
