@@ -2,21 +2,21 @@
 ## {{ansible_managed}}
 
 global:
-  smtp_smarthost: 'localhost:25'
-  smtp_from: 'alertmanager@your_domain'
-  smtp_require_tls: false
+  smtp_smarthost: '{{prometheus.alertmanager.global.smtp_smarthost}}'
+  smtp_from: '{{prometheus.alertmanager.global.smtp_sender}}'
+  smtp_require_tls: '{{prometheus.alertmanager.global.smtp_tls}}'
 
 route:
   group_by: ['alertname', 'job']
-  group_wait: {{prometheus.alertmanager.group_wait}}
-  group_interval: {{prometheus.alertmanager.group_interval}}
-  repeat_interval: {{prometheus.alertmanager.repeat_interval}}
-  receiver: sys-admin-team
+  group_wait: {{prometheus.alertmanager.route.group_wait}}
+  group_interval: {{prometheus.alertmanager.route.group_interval}}
+  repeat_interval: {{prometheus.alertmanager.route.repeat_interval}}
+  receiver: {{prometheus.alertmanager.receivers.name}}
 
 receivers:
-  - name: 'sys-admin-team'
+  - name: '{{prometheus.alertmanager.receivers.name}}'
     email_configs:
-      - to: 'sys-admin-team@site.com'
+      - to: '{{prometheus.alertmanager.receivers.email}}'
 
 inhibit_rules:
 - source_match:

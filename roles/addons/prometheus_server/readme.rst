@@ -15,6 +15,28 @@ Alertmanager is available at http://localhost:9093
 
 Node_exporter is available at http://localhost:9100
 
+Here is an example of the prometheus.yml file found under /etc/bluebanquise/inventory/group_vars/all:
+
+.. code-block:: yaml
+
+  
+  prometheus:
+    scrape_interval: 1m
+    evaluation_interval: 2m
+    alertmanager:
+      global:
+        smtp_smarthost: 'localhost:25'
+        smtp_sender: 'alertmanager@your_domain'
+        smtp_tls: false
+      route:
+        group_wait: 1m
+        group_interval: 10m
+        repeat_interval: 3h
+      receivers:
+        name: 'sys-admin-team'
+        email: 'sys-admin-team@site.com'  
+
+
 To be done
 ^^^^^^^^^^
 
