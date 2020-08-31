@@ -3,9 +3,9 @@
   set_fact:
     baseurl_prefix:
       "http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/\
-      {{ equipment_profile['operating_system']['repositories_environment'] | default('') }}/\
-      {{ equipment_profile['operating_system']['distribution'] }}/\
-      {{ equipment_profile['operating_system']['distribution_version'] | default(equipment_profile['operating_system']['distribution_major_version']) }}/\
+      {{ ep_operating_system['repositories_environment'] | default('') }}/\
+      {{ ep_operating_system['distribution'] }}/\
+      {{ ep_operating_system['distribution_version'] | default(ep_operating_system['distribution_major_version']) }}/\
       $basearch/"
 
 - name: yum_repository █ Setting repositories

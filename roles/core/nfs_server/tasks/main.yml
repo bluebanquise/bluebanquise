@@ -30,7 +30,7 @@
     state: enabled
   when:
     - ansible_facts.os_family == "RedHat"
-    - equipment_profile['firewall'] | default(false) | bool
+    - ep_firewall | default(false) | bool
   loop: "{{ nfs_server_firewall_services_to_add }}"
   tags:
     - firewall

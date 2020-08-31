@@ -1,5 +1,5 @@
 ---
-- name: Gathering OS specific variables
+- name: include_vars ░ Gather OS specific variables
   # This task gathers variables defined in OS specific files.
   #
   # Search vars in:
@@ -19,7 +19,14 @@
         - "vars/{{ ansible_facts.os_family }}.yml"
       skip: true
 
-- name: Create diskless directories structure
+- name: "package █ Install {{ diskless_packages_to_install | join(' ') }}"
+  package:
+    name: "{{ diskless_packages_to_install }}"
+    state: present
+  tags:
+    - package
+
+- name: "file █ Create diskless directories structure"
   file:
     path: "{{ item }}"
     state: directory
@@ -32,14 +39,7 @@
    - /var/www/html/preboot_execution_environment/diskless/images
    - /var/www/html/preboot_execution_environment/diskless/kernels
 
-- name: Install dracut-live
-  package:
-    name: dracut-live
-    state: present
-  tags:
-    - package
-
-- name: disklessset tool
+- name: "copy █ disklessset tool"
   copy:
     src: disklessset.py
     dest: /usr/bin/disklessset

@@ -19,24 +19,22 @@ provisioner:
     host_vars:
       instance-centos7: # platform.name
         j2_node_main_network: "ice1-1"
-        equipment_profile:
-          operating_system:
-            distribution: centos
-            distribution_major_version: 7
-            distribution_version: 7.7
-          hardware:
-            cpu:
-              architecture: x86_64
+        ep_operating_system:
+          distribution: centos
+          distribution_major_version: 7
+          distribution_version: 7.7
+        ep_hardware:
+          cpu:
+            architecture: x86_64
       instance-centos8: # platform.name
         j2_node_main_network: "ice1-1"
-        equipment_profile:
-          operating_system:
-            distribution: centos
-            distribution_major_version: 8
-            distribution_version: 8.1
-          hardware:
-            cpu:
-              architecture: aarch64
+        ep_operating_system:
+          distribution: centos
+          distribution_major_version: 8
+          distribution_version: 8.1
+        ep_hardware:
+          cpu:
+            architecture: aarch64
     group_vars:
       all:
         networks:

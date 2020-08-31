@@ -1,10 +1,7 @@
 #jinja2: lstrip_blocks: "True"
+---
 #### Blue Banquise file ####
 ## {{ ansible_managed }}
-
-{% macro node_main_nic(macro_network_interfaces,macro_current_iceberg_network) %}
-{{ macro_network_interfaces | selectattr('network','defined') | selectattr('network','match','^'+macro_current_iceberg_network+'-[a-zA-Z0-9]+') | first }}
-{% endmacro %}
 
 {% if icebergs_system == true %}
 # Iceberg system is on
@@ -19,12 +16,12 @@
 {% endif %}
 
 {% for host in range %}
-  {% if hostvars[host]['equipment_profile']['equipment_type'] == "server" %}
+  {% if hostvars[host]['ep_equipment_type'] == "server" %}
     {% if hostvars[host]['network_interfaces'] is defined and hostvars[host]['network_interfaces'] is not none %}
 {{ host }}:
   equipment_profile: {{ hostvars[host]['group_names'] | select('match','^'+equipment_naming+'_.*') | list | unique | sort | first | replace(equipment_naming + '_','') | trim }}
   network:
-{% set host_node_main_nic = node_main_nic(hostvars[host]['network_interfaces'],j2_current_iceberg_network) | trim | from_yaml %}
+    {% set host_node_main_nic = hostvars[host]['network_interfaces'] | selectattr('network','defined') | selectattr('network','match','^'+j2_current_iceberg_network+'-[a-zA-Z0-9]+') | first %}
     node_main_network_interface: {{ host_node_main_nic['interface'] }}
     node_main_network_netmask: {{ networks[host_node_main_nic['network']]['netmask'] }}
     node_main_network_gateway: {% if networks[host_node_main_nic['network']]['gateway'] is defined and networks[host_node_main_nic['network']]['gateway'] is not none %}{{ networks[host_node_main_nic['network']]['gateway'] }}{% endif %}

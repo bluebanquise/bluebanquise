@@ -22,9 +22,9 @@ GLOBAL logopts="timestamp"
 {% endif %}
 
 {% for host in range %}
-  {% if hostvars[host]['equipment_profile']['equipment_type'] == "server" %}
+  {% if hostvars[host]['ep_equipment_type'] == "server" %}
     {% if hostvars[host]['bmc'] is defined and hostvars[host]['bmc'] is not none and hostvars[host]['bmc']['ip4'] is defined and hostvars[host]['bmc']['ip4'] is not none %}
-console name="{{ host }}" dev="ipmitool.exp {{ hostvars[host]['bmc']['ip4'] }} {{ hostvars[host]['equipment_profile']['equipment_authentication']['user'] }} {{ hostvars[host]['equipment_profile']['equipment_authentication']['password'] }}"
+console name="{{ host }}" dev="ipmitool.exp {{ hostvars[host]['bmc']['ip4'] }} {{ hostvars[host]['ep_equipment_authentication']['user'] }} {{ hostvars[host]['ep_equipment_authentication']['password'] }}"
     {% endif %}
   {% endif %}
 {% endfor %}

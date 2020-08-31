@@ -48,4 +48,4 @@ Special thanks:
 * to [CINES](https://www.cines.fr/en/) who provided Algoric team with hardware to develop this stack.
 * to [@remyd1](https://github.com/remyd1) for his help on [Banquise](https://github.com/oxedions/banquise) original stack.
 * to [@bouriquet15](https://github.com/bouriquet15) for his active help on the stack.
-* to [@actatux](https://github.com/actatux) for his active help on the stack.
+* to [@btravouillon](https://github.com/btravouillon) for his active help on the stack.

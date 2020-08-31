@@ -30,7 +30,7 @@
     immediate: "yes"
     permanent: "yes"
     state: enabled
-  loop: "{{ firewall.zones | default({}) | subelements('services_enabled', skip_missing=True) }}"
+  loop: "{{ firewall_zones | default({}) | subelements('services_enabled', skip_missing=True) }}"
   loop_control:
     label: "Add service {{ item.1 }} to zone {{ item.0.zone }}"
 
@@ -41,7 +41,7 @@
     immediate: "yes"
     permanent: "yes"
     state: disabled
-  loop: "{{ firewall.zones | default({}) | subelements('services_disabled', skip_missing=True) }}"
+  loop: "{{ firewall_zones | default({}) | subelements('services_disabled', skip_missing=True) }}"
   loop_control:
     label: "Remove service {{ item.1 }} from zone {{ item.0.zone }}"
 
@@ -52,7 +52,7 @@
     immediate: "yes"
     permanent: "yes"
     state: enabled
-  loop: "{{ firewall.zones | default({}) | subelements('ports_enabled', skip_missing=True) }}"
+  loop: "{{ firewall_zones | default({}) | subelements('ports_enabled', skip_missing=True) }}"
   loop_control:
     label: "Add port {{ item.1 }} to zone {{ item.0.zone }}"
 
@@ -63,7 +63,7 @@
     immediate: "yes"
     permanent: "yes"
     state: disabled
-  loop: "{{ firewall.zones | default({}) | subelements('ports_disabled', skip_missing=True) }}"
+  loop: "{{ firewall_zones | default({}) | subelements('ports_disabled', skip_missing=True) }}"
   loop_control:
     label: "Remove port {{ item.1 }} from zone {{ item.0.zone }}"
 
@@ -74,7 +74,7 @@
     immediate: "yes"
     permanent: "yes"
     state: enabled
-  loop: "{{ firewall.zones | default({}) | subelements('rich_rules_enabled', skip_missing=True) }}"
+  loop: "{{ firewall_zones | default({}) | subelements('rich_rules_enabled', skip_missing=True) }}"
   loop_control:
     label: "Add rich rule '{{ item.1 }}' to zone {{ item.0.zone }}"
 
@@ -85,7 +85,7 @@
     immediate: "yes"
     permanent: "yes"
     state: disabled
-  loop: "{{ firewall.zones | default({}) | subelements('rich_rules_disabled', skip_missing=True) }}"
+  loop: "{{ firewall_zones | default({}) | subelements('rich_rules_disabled', skip_missing=True) }}"
   loop_control:
     label: "Remove rich rule '{{ item.1 }}' from zone {{ item.0.zone }}"
 
@@ -96,7 +96,7 @@
     immediate: "yes"
     permanent: "yes"
     state: enabled
-  loop: "{{ firewall.zones | default({}) | subelements('icmp_blocks_enabled', skip_missing=True) }}"
+  loop: "{{ firewall_zones | default({}) | subelements('icmp_blocks_enabled', skip_missing=True) }}"
   loop_control:
     label: "Add ICMP block '{{ item.1 }}' to zone {{ item.0.zone }}"
 
@@ -107,7 +107,7 @@
     immediate: "yes"
     permanent: "yes"
     state: disabled
-  loop: "{{ firewall.zones | default({}) | subelements('icmp_blocks_disabled', skip_missing=True) }}"
+  loop: "{{ firewall_zones | default({}) | subelements('icmp_blocks_disabled', skip_missing=True) }}"
   loop_control:
     label: "Remove ICMP block '{{ item.1 }}' from zone {{ item.0.zone }}"
 
@@ -118,7 +118,7 @@
     immediate: "yes"
     permanent: "yes"
     state: "{{ item.icmp_block_inversion | ternary('enabled', 'disabled') }}"
-  loop: "{{ firewall.zones | default([]) }}"
+  loop: "{{ firewall_zones | default([]) }}"
   when: item.icmp_block_inversion is defined
   loop_control:
     label: "{{ item.icmp_block_inversion | default(False) | ternary('Enable', 'Disable') }} ICMP block inversion in zone {{ item.zone }}"
@@ -130,7 +130,7 @@
     immediate: "yes"
     permanent: "yes"
     state: "{{ item.masquerade | ternary('enabled', 'disabled') }}"
-  loop: "{{ firewall.zones | default([]) }}"
+  loop: "{{ firewall_zones | default([]) }}"
   when: item.masquerade is defined
   loop_control:
     label: "{{ item.masquerade | default(False) | ternary('Enable', 'Disable') }} masquerade in zone {{ item.zone }}"

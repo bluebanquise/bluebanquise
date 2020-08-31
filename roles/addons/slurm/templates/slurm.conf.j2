@@ -31,7 +31,7 @@ SlurmdTimeout=600
 ## We don't want a node to go back in pool without sys admin acknowledgement
 ReturnToService=0
 
-{% if slurm['MpiDefault'] is defined and slurm['MpiDefault'] is not None %}
+{% if slurm['MpiDefault'] is defined and slurm['MpiDefault'] is not none %}
 ## Using pmi/pmi2/pmix interface for MPI
 MpiDefault={{slurm['MpiDefault']}}
 {% endif %}
@@ -46,7 +46,7 @@ SelectType=select/cons_res
 {% for equipment_group in slurm['nodes_equipment_groups'] %}
 {% if groups[equipment_group] is defined and not none %}
 {% for node in groups[equipment_group] %}
-NodeName={{node}} Procs={{hostvars[node]['equipment_profile']['hardware']['cpu']['cores']}} State=UNKNOWN
+NodeName={{node}} Procs={{hostvars[node]['ep_hardware']['cpu']['cores']}} State=UNKNOWN
 {% endfor %}
 {% endif %}
 {% endfor %}

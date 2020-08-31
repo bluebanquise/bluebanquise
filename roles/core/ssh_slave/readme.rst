@@ -11,7 +11,7 @@ Instructions
 
 This role will ensure remote hosts is having currently defined ssh authorized public keys in their */root/.ssh/authorized_keys* file.
 
-These keys are set in file *group_vars/all/all_equipments/authentication.yml*.
+These keys are set in file *group_vars/all/equipment_all/authentication.yml*.
 
 Keep in mind that this file can be preceded with equipment_profiles groups.
 
@@ -22,7 +22,7 @@ Mandatory inventory vars:
 
 **hostvars[inventory_hostname]**
 
-* authentication.ssh_keys
+* authentication_ssh_keys
 
 Output
 ^^^^^^

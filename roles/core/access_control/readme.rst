@@ -5,7 +5,7 @@ Description
 ^^^^^^^^^^^
 
 This role ensure the node current status comply with
-equipment_profile.access_control variable.
+ep_access_control variable.
 
 Instructions
 ^^^^^^^^^^^^
@@ -17,7 +17,7 @@ Input
 
 **hostvars[inventory_hostname]**
 
-* equipment_profile.access_control
+* ep_access_control
 
 Output
 ^^^^^^

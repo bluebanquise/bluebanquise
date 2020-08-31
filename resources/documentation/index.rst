@@ -14,12 +14,15 @@ Details are also given for each Ansible role of the stack.
 `Please report us <https://github.com/bluebanquise/bluebanquise/issues>`_ any
 issues in this documentation.
 
-Documentation main authors:
+Documentation authors:
 
-* Benoît Leveugle
-* Johnny Keats
-* Bruno Travouillon
-* Tim Gellner
+* LEVEUGLE Benoît
+* KEATS Johnny
+* TRAVOUILLON Bruno
+* GELLNER Tim
+* RIBEIRO Adrien
+* MERZOUKI Hamid
+* PEROTIN Matthieu
 
 .. toctree::
    :maxdepth: 3
@@ -35,6 +38,7 @@ Documentation main authors:
    deploy_bluebanquise
    multiple_icebergs
    monitoring
+   stories
    roles
    references
 

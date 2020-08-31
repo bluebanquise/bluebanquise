@@ -30,7 +30,7 @@
     state: enabled
   when:
     - ansible_facts.os_family == "RedHat"
-    - equipment_profile['firewall'] | default(false) | bool
+    - ep_firewall | default(false) | bool
   loop: "{{ pxe_stack_firewall_services_to_add }}"
   tags:
     - firewall
@@ -137,8 +137,8 @@
     group: "{{ pxe_stack_apache_user }}"
   with_items: "{{ j2_equipment_groups_list }}"
   when:
-    - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
-    - (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) in ['redhat','centos']
+    - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
+    - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) in ['redhat','centos']
   tags:
     - template
 
@@ -151,8 +151,8 @@
     group: "{{ pxe_stack_apache_user }}"
   with_items: "{{ j2_equipment_groups_list }}"
   when:
-    - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
-    - (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) in ['redhat','centos']
+    - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
+    - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) in ['redhat','centos']
   tags:
     - template
 
@@ -168,8 +168,8 @@
 #     group: "{{ pxe_stack_apache_user }}"
 #   with_items: "{{ j2_equipment_groups_list }}"
 #   when:
-#     - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
-#     - (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) == 'ubuntu'
+#     - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
+#     - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) == 'ubuntu'
 #   tags:
 #     - template
 #
@@ -182,8 +182,8 @@
 #     group: "{{ pxe_stack_apache_user }}"
 #   with_items: "{{ j2_equipment_groups_list }}"
 #   when:
-#     - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
-#     - (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) == 'ubuntu'
+#     - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
+#     - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) == 'ubuntu'
 #   tags:
 #     - template
 
@@ -199,8 +199,8 @@
 #     group: "{{ pxe_stack_apache_user }}"
 #   with_items: "{{ j2_equipment_groups_list }}"
 #   when:
-#     - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
-#     - (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) == 'opensuse'
+#     - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
+#     - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) == 'opensuse'
 #   tags:
 #     - template
 #
@@ -213,8 +213,8 @@
 #     group: "{{ pxe_stack_apache_user }}"
 #   with_items: "{{ j2_equipment_groups_list }}"
 #   when:
-#     - hostvars[groups[item][0]]['equipment_profile']['equipment_type'] == 'server'
-#     - (hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']|lower) == 'opensuse'
+#     - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
+#     - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) == 'opensuse'
 #   tags:
 #     - template
 #

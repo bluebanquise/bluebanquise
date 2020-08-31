@@ -1,42 +1,23 @@
-equipment_profile:
+---
 
-  ipxe_driver: default
-  ipxe_platform: pcbios
-  ipxe_embed: standard
-  preserve_efi_first_boot_device: true
+ep_console: console=tty0 console=ttyS1,115200n8
+ep_kernel_parameters: nomodeset
 
-  console: console=tty0 console=ttyS1,115200n8
-  kernel_parameters: nomodeset
+ep_access_control: disabled
+ep_firewall: false
 
-  access_control: false
-  firewall: false
+ep_equipment_type: server
 
-  partitioning: |
-    clearpart --all --initlabel
-    autopart --type=plain --fstype=ext4 --nohome
+ep_hardware:
+  cpu:
+    architecture: x86_64
+    cores: 24
+    cores_per_socket: 12
+    sockets: 2
+    threads_per_core: 1
+  gpu:
+    - Hercules 3D Prophet 4000 XT
 
-  autoinstall_pre_script:
-  autoinstall_post_script:
-
-  operating_system:
-    distribution: centos
-    distribution_major_version: 8
-
-  equipment_type: server
-
-  configuration:
-    keyboard_layout: us
-    system_language: en_US.UTF-8
-
-  hardware:
-    cpu:
-      architecture: x86_64
-      cores: 24
-      cores_per_socket: 12
-      sockets: 2
-      threads_per_core: 1
-    gpu:
-
-  equipment_authentication:
-    user: ADMIN
-    password: ADMIN
+ep_equipment_authentication:
+  user: ADMIN
+  password: ADMIN

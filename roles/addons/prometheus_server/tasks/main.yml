@@ -7,7 +7,6 @@
   vars:
     packages:
     - prometheus
-    - grafana
     - alertmanager
     - ipmi_exporter
     - freeipmi
@@ -90,6 +89,16 @@
   tags:
     - template
 
+- name: Template >> /etc/karma/karma.yml
+  template:
+    src: karma.yml.j2
+    dest: /etc/karma/karma.yml
+    owner: karma
+    group: karma
+    mode: 0640
+  tags:
+    - template
+
 - name: Enable/disable services
   service:
     name: "{{ item }}"
@@ -99,6 +108,7 @@
     - alertmanager
     - ipmi_exporter
     - snmp_exporter
+    - karma
   tags:
     - service
 
@@ -111,6 +121,7 @@
     - alertmanager
     - ipmi_exporter
     - snmp_exporter    
+    - karma
   when: (start_services | bool)
   tags:
     - service

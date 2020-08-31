@@ -56,45 +56,38 @@ Repository static path is computed using variables defined in the equipment_prof
     # Optional: add an environment in the repositories path (eg. production, staging) (repositories/PXE)
     #repositories_environment: production
 
-  hardware:
-    cpu:
-      architecture: x86_64 # Set system CPU architecture
-
 If equipment_profile is:
 
-  operating_system:
+.. code-block:: yaml
+
+  ep_operating_system:
     distribution: centos
     distribution_major_version: 8
-  hardware:
-    cpu:
-      architecture: x86_64
 
-Then path will be: repositories/centos/8/x86_64/
+Then path will be: repositories/centos/8/$basearch/
 
 If equipment_profile is:
 
-  operating_system:
+.. code-block:: yaml
+
+  ep_operating_system:
     distribution: centos
     distribution_major_version: 8
     distribution_version: 8.1
-  hardware:
-    cpu:
-      architecture: x86_64
 
-Then path will be: repositories/centos/8.1/x86_64/
+Then path will be: repositories/centos/8.1/$basearch/
 
 If equipment_profile is:
 
-  operating_system:
+.. code-block:: yaml
+
+  ep_operating_system:
     distribution: centos
     distribution_major_version: 8
     distribution_version: 8.1
     repositories_environment: production
-  hardware:
-    cpu:
-      architecture: aarch64
 
-Then path will be: repositories/production/centos/8.1/aarch64/
+Then path will be: repositories/production/centos/8.1/$basearch/
 
 Input
 ^^^^^
@@ -104,7 +97,17 @@ Mandatory inventory vars:
 **hostvars[inventory_hostname]**
 
 * repositories[item]
-* equipment_profile (see above)
+* eq_operating_system
+   * distribution
+   * distribution_major_version
+
+Optional inventory vars:
+
+**hostvars[inventory_hostname]**
+
+* eq_operating_system
+   * distribution_version
+   * repositories_environment
 
 Output
 ^^^^^^

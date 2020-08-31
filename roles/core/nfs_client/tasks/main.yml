@@ -29,7 +29,7 @@
     - package
 
 - name: file █ Create NFS directories
-  file:
+  file:  # noqa 208
     path: "{{ item.0.mount }}"
     state: directory
   with_subelements:

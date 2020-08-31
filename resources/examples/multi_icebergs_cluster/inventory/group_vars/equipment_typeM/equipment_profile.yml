@@ -1,44 +1,18 @@
-equipment_profile:
+---
 
-  ipxe_driver: default
-  ipxe_platform: pcbios
-  ipxe_embed: standard
-  preserve_efi_first_boot_device: true
+ep_console: console=tty0 console=ttyS1,115200n8
 
-  console: console=tty0 console=ttyS1,115200n8
-  kernel_parameters:
+ep_access_control: enforcing
+ep_firewall: true
 
-  access_control: enforcing
-  firewall: true
+ep_partitioning: |
+  clearpart --all --initlabel
+  part /boot --fstype=ext4 --size=1024
+  part / --fstype=ext4 --size=60000
+  part /home --fstype=ext4 --size=4096 --grow
 
-  partitioning: |
-    clearpart --all --initlabel
-    part /boot --fstype=ext4 --size=1024
-    part / --fstype=ext4 --size=60000
-    part /home --fstype=ext4 --size=4096 --grow
+ep_equipment_type: server
 
-  autoinstall_pre_script:
-  autoinstall_post_script:
-
-  operating_system:
-    distribution: centos
-    distribution_major_version: 8
-
-  equipment_type: server
-
-  configuration:
-    keyboard_layout: us
-    system_language: en_US.UTF-8
-
-  hardware:
-    cpu:
-      architecture: x86_64
-      cores: 8
-      cores_per_socket: 4
-      sockets: 1
-      threads_per_core: 2
-    gpu:
-
-  equipment_authentication:
-    user: ADMIN
-    password: ADMIN
+ep_equipment_authentication:
+  user: ADMIN
+  password: ADMIN

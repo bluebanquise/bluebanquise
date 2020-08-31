@@ -17,9 +17,8 @@ provisioner:
   inventory:
     host_vars:
       instance:
-        authentication:
-          # password: root
-          # FIXME: https://github.com/ansible-community/molecule/issues/993
-          root_password_sha512: "{{ lookup('file', 'password_hash') }}"
+        # password: root
+        # FIXME: https://github.com/ansible-community/molecule/issues/993
+        authentication_root_password_sha512: "{{ lookup('file', 'password_hash') }}"
 verifier:
   name: ansible

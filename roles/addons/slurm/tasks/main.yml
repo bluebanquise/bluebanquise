@@ -19,7 +19,7 @@
         - "vars/{{ ansible_facts.os_family }}.yml"
       skip: true
 
-- name: "package █ Install {{ slurm_packages_to_install[slurm.slurm_packaging][slurm_profile] }}"
+- name: "package █ Install {{ slurm_packages_to_install[slurm.slurm_packaging][slurm_profile] | join(' ') }}"
   package:
     name: "{{ slurm_packages_to_install[slurm.slurm_packaging][slurm_profile] }}"
     state: present
@@ -60,6 +60,12 @@
     group: slurm
     home: "{{ slurm_home_path }}"
     state: present
+
+- name: "file █ Enforce permissions on {{ slurm_home_path }}"
+  file:
+    path: "{{ slurm_home_path }}"
+    state: directory
+    mode: 0755
 
 - name: "template █ Generate {{ slurm_home_path }}/slurm.conf"
   template:

@@ -3,11 +3,11 @@
 <profile xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http://www.suse.com/1.0/configns">
 
   <keyboard>
-    <keymap>{{hostvars[groups[item][0]]['equipment_profile']['configuration']['keyboard_layout']|lower}}</keymap>
+    <keymap>{{hostvars[groups[item][0]]['ep_configuration']['keyboard_layout']|lower}}</keymap>
   </keyboard>
 
   <language>
-    <language>{{hostvars[groups[item][0]]['equipment_profile']['configuration']['system_language']|replace('.UTF-8','')}}</language>
+    <language>{{hostvars[groups[item][0]]['ep_configuration']['system_language']|replace('.UTF-8','')}}</language>
     <languages/>
   </language>
 
@@ -27,18 +27,18 @@
     </patterns>
   </software> 
 
-{{hostvars[groups[item][0]]['equipment_profile']['partitioning']}}
+{{hostvars[groups[item][0]]['ep_partitioning']}}
 
  <users config:type="list">
   <user>
     <username>root</username>
-    <user_password>{{hostvars[groups[item][0]]['authentication']['root_password_sha512']}}</user_password>
+    <user_password>{{hostvars[groups[item][0]]['authentication_root_password_sha512']}}</user_password>
     <uid>1001</uid>
     <gid>100</gid>
     <encrypted config:type="boolean">true</encrypted>
     <fullname>Root User</fullname>
     <authorized_keys config:type="list">
-{% for ssh_key in hostvars[groups[item][0]]['authentication']['ssh_keys'] %}
+{% for ssh_key in hostvars[groups[item][0]]['authentication_ssh_keys'] %}
       <listentry>{{ssh_key}}</listentry>
 {% endfor %}
     </authorized_keys>
