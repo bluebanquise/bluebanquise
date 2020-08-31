@@ -32,7 +32,7 @@
   service:
     name: "{{ item }}"
     enabled: "{{ (ep_firewall | bool) | ternary('yes','no') }}"
-    state: "{{ (ep_firewall | bool) | ternary('started', omit) }}"
+    state: "{{ (ep_firewall | bool) | ternary('started', 'stopped') }}"
   loop: "{{ firewall_services_to_start }}"
   tags:
     - service
