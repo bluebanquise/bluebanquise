@@ -7,29 +7,42 @@
   vars:
     packages:
     - prometheus
-    - grafana
     - alertmanager
-    - ipmi_exporter
-    - freeipmi
-    - snmp_exporter
     - karma
+
+- name: ipmi_package
+  package:
+    name:
+      - freeipmi
+      - "{{ hostvars[groups[item][0]]['monitoring']['exporters']['ipmi_exporter']['package'] }}"
+    state: present
+  loop: "{{ j2_equipment_groups_list }}"
+  when:
+    - hostvars[groups[item][0]]['monitoring']['exporters']['ipmi_exporter'] is defined
+
+- name: snmp_package
+  package:
+    name:
+      - "{{ hostvars[groups[item][0]]['monitoring']['exporters']['snmp_exporter']['package'] }}"
+    state: present
+  loop: "{{ j2_equipment_groups_list }}"
+  when:
+    - hostvars[groups[item][0]]['monitoring']['exporters']['snmp_exporter'] is defined
 
 #for generator of oid walk for snmp_exporter     
 - name: Package
   package:
-    name: "{{ item }}"
+    name: 
+      - gcc
+      - make
+      - net-snmp
+      - net-snmp-utils
+      - net-snmp-libs
+      - net-snmp-devel
     state: present
-  vars:
-    packages:
-    - gcc
-    - make
-    - net-snmp
-    - net-snmp-utils
-    - net-snmp-libs
-    - net-snmp-devel
+  loop: "{{ j2_equipment_groups_list }}"
   when:
-    - monitoring.exporters.snmp_exporter.with_generator is defined      
-    - monitoring.exporters.snmp_exporter.with_generator
+    - hostvars[groups[item][0]]['monitoring']['exporters']['snmp_exporter']['with_generator'] is defined      
 
 - name: Create directories structure
   file:
@@ -105,7 +118,7 @@
 - name: Start services
   service:
     name: "{{ item }}"
-    state: started
+    state: restarted
   loop:
     - prometheus
     - alertmanager
