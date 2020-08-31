@@ -262,8 +262,13 @@ documentation to deploy diskless nodes.
 Your cluster should now be fully deployed. It is time to use some addons to add
 specific features to the cluster (Please refer to each addon roles dedicated
 documentation to get instructions on how to use them), or continue this
-documentation to enable and deploy multi icebergs configuration if cluster
-needs it.
+documentation to:
+
+* Enable and deploy multi icebergs configuration if cluster needs it.
+* Deploy a Prometheus based monitoring.
+
+You will also find a "stories" section that describes step by step few recurrent
+situation you may face during the life of your cluster.
 
 Thank your for following this training. We really hope you will enjoy our stack.
 Please report us any bad or good feedback.

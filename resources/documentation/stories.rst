@@ -102,6 +102,8 @@ to create a new *production* repository:
       repositories_environment: production
     [root@management1 ~]#
 
+.. _update-management-nodes-configuration:
+
 Update management nodes configuration
 -------------------------------------
 
@@ -137,6 +139,8 @@ For example:
 
 Nodes
 =====
+
+.. _adding-a-new-node:
 
 Adding a new node
 -----------------
@@ -204,9 +208,9 @@ the configuration and seen by Ansible:
   [root@management1 ~]#
 
 Now, since we added a new node, replay the playbooks on management nodes (see
-the related story above) and if you are using the hosts_file role on all the
-cluster nodes, also replay their playbook, maybe limiting the execution to the
-needed roles, using tags. For example:
+:ref:`update-management-nodes-configuration`) and if you are using the
+hosts_file role on all the cluster nodes, also replay their playbook, maybe
+limiting the execution to the needed roles, using tags. For example:
 
 .. code-block:: text
 
@@ -259,8 +263,9 @@ Save, make this script executable, and launch it asking for 4 nodes:
   /root/gen.sh 4
 
 You should now have a file named *computes.yml* inside your current folder with
-the desired content. Refer to single node add story seen above on how now update
-the cluster configuration.
+the desired content. Refer :ref:`adding-a-new-node` and
+:ref:`update-management-nodes-configuration` stories seen above on how now
+update the cluster configuration.
 
 Adding a new master group
 -------------------------
@@ -304,8 +309,7 @@ Ansible precedence mechanism to set your settings.
 You can refer to the example inventories in resources/examples/ to see more of
 these files.
 
-You can now add nodes into this equipment profile. See adding nodes stories
-above.
+You can now add nodes into this equipment profile. See :ref:`adding-a-new-node`.
 
 Adding a custom group
 ---------------------
@@ -351,7 +355,9 @@ some configuration files are updated.
 
 Now ensure you can ping the BMC of the new node (if BMC there is).
 
-Ask for a new deployment using bootset (see story deploying nodes bellow).
+Ask for a new deployment using bootset (see :ref:`deploying-nodes`).
+
+.. _deploying-nodes:
 
 Deploying nodes
 ---------------
