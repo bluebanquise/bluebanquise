@@ -39,7 +39,7 @@ You should get something like this:
   process_max_fds 1024
 
 There are a lot of information given by node_exporter. It is a very heavy
-exporter, so that is why it is not running on the compute nodes.
+exporter, that is generally not running on compute nodes, in order to not loose any computing power.
 
 Some of the information given are the following:
 
