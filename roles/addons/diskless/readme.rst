@@ -215,13 +215,32 @@ with the following head:
 
 .. code-block:: yaml
 
-  ---
-  - name: computes
-    hosts: /var/tmp/diskless/workdir/space_image/mnt
-    connection: chroot
-    roles:
+- name: Computes diskless playbook
+  hosts: /var/tmp/diskless/workdir/space_image/mnt
+  connection: chroot
+  vars:
+    j2_current_iceberg: iceberg1                #<<< UPDATE IF NEEDED
+    j2_node_main_network: ice1-1                #<<< UPDATE
+    start_service: false
+    image_equipment_profile: equipment_typeC    #<<< UPDATE
 
-Add any roles to apply to the image to this playbook.
+  pre_tasks:
+    - name: Add current host to defined equipment_profile
+      add_host:
+        hostname: "{{ inventory_hostname }}"
+        groups: "{{ image_equipment_profile }}"
+
+  roles:
+  # ADD HERE YOUR ROLES
+
+Now, update the needed values in this file:
+
+* **j2_current_iceberg**: Except if you are using multiple icebergs advanced feature, you should let this to `iceberg1`.
+* **j2_node_main_network**: Set here your main network to be used. This will allow the roles to determine the services ip to bind to.
+* **image_equipment_profile**: Set here your equipment_profile to be used. This will allow the roles to determine key values, for example find the repositories path to be used (distribution version, etc).
+
+And add your desired roles under **roles:** in the file, like for 
+any standard playbook.
 
 Then execute it into the mounted image using the following command:
 
@@ -229,13 +248,12 @@ Then execute it into the mounted image using the following command:
 
   ansible-playbook computes.yml \
   -i /etc/bluebanquise/inventory/ -i /etc/bluebanquise/internal/ -i /var/tmp/diskless/workdir/space_image/inventory/ \
-  -e "j2_current_iceberg=iceberg1 j2_node_main_network=ice1-1 start_service=false" \
   --skip-tags identify
 
 Notes:
 
-* The multiple -i defines Ansible inventories to gather. By default, in BlueBanquise, the first two inventories are used. We simply add the third one, corresponding to the mounting point.
-* The -e (extra vars) are here to specify to the stack which iceberg and main network are to be used in the configuration of the node. (System cannot know on which nodes the image will be used).
+* The multiple `-i` defines Ansible inventories to gather. By default, in BlueBanquise, the first two inventories are used. We simply add the third one, corresponding to the mounting point.
+* The `-e` (extra vars) are here to specify to the stack which iceberg and main network are to be used in the configuration of the node. (System cannot know on which nodes the image will be used).
 * The `--skip-tags identify` prevents hostname and static ip to be set, since the image should be generic for multiple hosts.
 
 Before closing, also remember to clean dnf cache into the image chroot to save space.
