@@ -36,8 +36,7 @@ configuration in /etc/bluebanquise/inventory/, do:
 It is now possible to commit new changes after each configuration change.
 
 You can find a lot on the web about correct git repository usage, creating
-branches, etc. Also note that the repositories support environments in
-BlueBanquise. Have a look in the repositories_client role documentation.
+branches, etc.
 
 Few useful commands:
 
