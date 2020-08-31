@@ -34,7 +34,7 @@ jobs:
         uses: actions/setup-python@v1
       - name: Install packages
         run: |
-          pip install 'molecule[docker]>3,!=3.0.7' 'ansible-lint<4.3.0' flake8 jmespath netaddr 'ansible!=2.9.12'
+          pip install 'molecule[docker]>3' ansible-lint flake8 jmespath netaddr
       - name: Run molecule test for core/bluebanquise
         run: |
           cd roles/core/bluebanquise && molecule test
