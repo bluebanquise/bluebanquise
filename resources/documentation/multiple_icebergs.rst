@@ -35,7 +35,7 @@ Few notes about this schema:
 
 * Icebergs can be connected to any administration networks.
 * Managements of a standard iceberg are expected to be connected to both administration network,
-i.e. on of their internal iceberg administration network, but also on one of the administration network of their master iceberg.
+  i.e. on one of their internal iceberg administration network, but also on one of the administration network of their master iceberg.
 * Services will work as a chain. For example, time will come from the top iceberg (or an external source) and each time server will take as source the time server of its master iceberg.
 
 Note that this architecture is flexible, and can be adapted to create isolated icebergs (i.e. having multiple fully isolated clusters in the same BlueBanquise configuration).

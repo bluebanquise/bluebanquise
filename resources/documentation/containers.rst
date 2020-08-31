@@ -92,11 +92,18 @@ Unsecure but simpler:
 More secure, but less simple (need to specify ports to bind):
 
 .. code-block:: bash
+
   [root@pc-200 ~]# podman run -d -p 80:80 --name repositories centos:centoswp3
   571eb6e50217d8bf6953353350587b37da0e783eb4b2c0893738cfd44f7db8a0
   [root@pc-200 ~]#
 
 Both ways work.
+
+.. note::
+  80:80 means port 80 on the main host is mapped to port 80 of the
+  container. If you want to use a different port on the host, you can select any
+  available port. For example, 8080:80 would map the port 8080 of the host to the
+  port 80 of the container.
 
 Check the container is running:
 
