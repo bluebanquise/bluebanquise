@@ -8,7 +8,7 @@ This monitoring documentation has multiple aims:
 * Provide instructions on alerting configuration.
 * Provide an overview of Grafana and the different dashboard.
 
-That is why this documentation will be built around those section:
+This documentation is built around those section:
 
 1. Prometheus
 2. Alerts
