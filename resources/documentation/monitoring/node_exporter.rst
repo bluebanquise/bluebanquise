@@ -38,8 +38,9 @@ You should get something like this:
   # TYPE process_max_fds gauge
   process_max_fds 1024
 
-There are a lot of information given by node_exporter. It is a very heavy
-exporter, that is generally not running on compute nodes, in order to not loose any computing power.
+There are a lot of information given by node_exporter. It is an heavy 
+exporter, that is generally not run on compute nodes, in order to prevent 
+any loss of computational power.
 
 Some of the information given are the following:
 
