@@ -1,8 +1,91 @@
 # Changelog
 
-## 1.3.0 RC2 - 2020-08-20
+## 1.3.0 - 2020-08-31
 
-### Breaking changes:
+### Major changes
+
+#### New roles
+
+  - core/access_control: allow to enforce SELinux configuration
+  - core/bluebanquise: install BlueBanquise requiremens on Ansible controller
+  - core/firewall: allow to configure the firewall service
+  - advanced-core/advanced_dns_server: provide DNS master/slave configuration
+  - addons/powerman: configure [powerman](https://github.com/chaos/powerman)
+  - addons/root_password: allow to update the root password at scale
+  - addons/sssd: provide basic SSSD configuration to connect to an LDAP client
+
+#### Roles improvement
+
+  - core/dhcp_server:
+    - set default lease times
+    - add support of multiple DNS servers
+    - add service to firewall configuration
+  - core/dns_client:
+    - add support of multiple DNS servers
+  - core/dns_server:
+    - update serial in SOA after any change to the DNS map
+    - add service to firewall configuration
+  - core/nfs_server:
+    - add service to firewall configuration
+  - core/nic:
+    - fix VLAN and BOND support
+  - core/pxe_stack:
+    - add support of major distribution version in repository path
+    - add support of $basearch variable (dnf/yum)
+    - add status to bootset command (-s)
+    - get the kickstart file from bootset command (-k)
+    - add services to firewall configuration
+  - core/repositories_client:
+    - add support of major distribution version in repository path
+    - add support of $basearch variable (dnf/yum)
+    - add support for excluding packages from CentOS and RHEL repositories
+  - core/repositories_server:
+    - add service to firewall configuration
+  - core/time:
+    - add iburst to allow faster boot time recovery
+    - add service to firewall configuration
+  - advanced-core/advanced_dhcp_server:
+    - add support of multiple DNS servers
+    - add service to firewall configuration
+  - addons/diskless:
+    - add option to update existing images interactively
+    - add option to remove existing images
+    - add support for SELinux in Livenet images
+    - add SSH public key injection in Livenet images
+  - addons/users_basic:
+    - merge add and remove actions
+
+#### Internal Jinja2 variables move to a dedicated inventory
+
+BlueBanquise implements some core logic with internal Jinja2 variables (j2_*)
+that allow to compute data from the user inventory. Previously, those j2
+variables were defined in the inventory examples and each user was responsible
+to keep them in sync with its own inventory when a new release was made
+available.
+
+Starting with BlueBanquise 1.3, those j2 variables are now defined in a
+dedicated inventory at the root of the project (directory ./internal/). (#269)
+
+The ansible.cfg file is updated accordingly:
+
+  ```
+  inventory      = inventory,internal
+  ```
+
+With this change, you can remove the files below from your inventory:
+
+  - inventory/group_vars/all/j2_variables/accelerated_mode.yml
+  - inventory/group_vars/all/j2_variables/equipment.yml
+  - inventory/group_vars/all/j2_variables/icebergs.yml
+  - inventory/group_vars/all/j2_variables/network.yml
+  - inventory/group_vars/all/j2_variables/README.md
+
+To match with the new inventory layout, you can move the configuration file
+*inventory/group_vars/all/j2_variables/internal_variables.yml* to
+*inventory/group_vars/all/general_settings/* and definitely remove the
+directory *inventory/group_vars/all/j2_variables/*.
+
+### Breaking changes
 
 #### Introduce new network_interfaces format
 
@@ -80,7 +163,7 @@ The `group_vars/all/all_equipment` directory is renamed
 Use the commands below to convert existing inventories:
 
   ```
-  # git mv group_vars/all/all_equipment group_vars/all/equipment_all
+  # git mv inventory/group_vars/all/all_equipments inventory/group_vars/all/equipment_all
   ```
 
 #### Remove the equipment_profile and authentication keys
@@ -122,3 +205,9 @@ Example:
   ```
   ep_access_control: enforcing  # SELinux: enforcing, permissive, disabled
   ```
+
+### Deprecation notice
+
+ - Variable `external_repositories` is deprecated and will be removed in a
+   future release. Update your inventory to use `repositories` instead. (#270)
+ - Jinja2 macros defined in roles/macros/ will be removed in a future release.

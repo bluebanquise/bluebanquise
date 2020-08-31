@@ -1,4 +1,4 @@
-%{!?version: %define version 1.3.0-rc2}
+%{!?version: %define version 1.3.0}
 
 %define roles_addons clone clustershell diskless nic_nmcli ofed ofed_sm \
 openldap_client openldap_server powerman prometheus_client prometheus_server \
