@@ -7,11 +7,14 @@ This part is an agregations of all the **BlueBanquise** roles readme.
 CORE
 ====
 
+.. include:: roles/core/access_control/readme.rst
+.. include:: roles/core/bluebanquise/readme.rst
 .. include:: roles/core/conman/readme.rst
 .. include:: roles/core/display_tuning/readme.rst
 .. include:: roles/core/dhcp_server/readme.rst
 .. include:: roles/core/dns_server/readme.rst
 .. include:: roles/core/dns_client/readme.rst
+.. include:: roles/core/firewall/readme.rst
 .. include:: roles/core/hosts_file/readme.rst
 .. include:: roles/core/log_server/readme.rst
 .. include:: roles/core/log_client/readme.rst
@@ -30,6 +33,7 @@ ADVANCED CORE
 =============
 
 .. include:: roles/advanced-core/advanced_dhcp_server/readme.rst
+.. include:: roles/advanced-core/advanced_dns_server/readme.rst
 
 ADDONS
 ======
@@ -42,10 +46,11 @@ ADDONS
 .. include:: roles/addons/openldap_client/readme.rst
 .. include:: roles/addons/openldap_server/readme.rst
 .. include:: roles/addons/nic_nmcli/readme.rst
+.. include:: roles/addons/powerman/readme.rst
 .. include:: roles/addons/prometheus_server/readme.rst
 .. include:: roles/addons/prometheus_client/readme.rst
 .. include:: roles/addons/report/readme.rst
+.. include:: roles/addons/root_password/readme.rst
+.. include:: roles/addons/sssd/readme.rst
 .. include:: roles/addons/slurm/readme.rst
 .. include:: roles/addons/users_basic/readme.rst
-
-

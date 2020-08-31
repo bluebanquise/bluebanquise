@@ -25,8 +25,8 @@ the variable **is_in_dhcp** must be set to true in the related network configura
 Note also that dhcp role will use the following optional parameters if they exist in network:
 
 * dhcp_unknown_range: define the range of the subnet, for unregistered hosts.
-Can be useful for temporary connections (laptops, etc) or to detect if an
-hardware is missing in the inventory.
+  Can be useful for temporary connections (laptops, etc) or to detect if an
+  hardware is missing in the inventory.
 * gateway: define router in the subnet, and so gateway provided by the dhcp server.
 
 Resulting example network could be:
