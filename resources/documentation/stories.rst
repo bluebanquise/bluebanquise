@@ -11,20 +11,20 @@ Management and main configuration
 Versioning the inventory
 ------------------------
 
-It may be a good idea to version the whole /etc/bluebanquise/inventory/
+It is a good practice to version the whole /etc/bluebanquise/inventory/
 folder, to keep track of all changes made, and be able to revert in case of
 issues.
 
-.. note::
-  If used, it may be also a good idea to version the
-  /etc/bluebanquise/playbooks/ and /etc/bluebanquise/roles/custom/ folders.
-
-It may even be better to use an external to the cluster git platform (gitlab,
+It may even be better to use an external git platform (gitlab,
 etc.) to backup the whole configuration, and be able to push changes from the
 cluster to this platform.
 
-To create a basic git repository, assuming you already have an in place
-configuration inside /etc/bluebanquise/inventory/, do:
+.. warning::
+  Never use a public repository (like github) to store your inventory, as it
+  contains sensitive data about your infrastructure.
+
+To create a basic git repository, assuming you already have an existing
+configuration in /etc/bluebanquise/inventory/, do:
 
 .. code-block:: text
 
@@ -33,7 +33,7 @@ configuration inside /etc/bluebanquise/inventory/, do:
   git add --all
   git commit --author="my_name <my_name@my_mail.org>" -m "First commit"
 
-It is now possible to commit new changes after each configuration manipulations.
+It is now possible to commit new changes after each configuration change.
 
 You can find a lot on the web about correct git repository usage, creating
 branches, etc. Also note that the repositories support environments in
@@ -44,10 +44,14 @@ Few useful commands:
 * `git log`: display recent logs of the current repository
 * `git reset --soft HEAD~1`: undo the last commit
 
+.. note::
+  If used, it may be also a good idea to version the
+  /etc/bluebanquise/playbooks/ and /etc/bluebanquise/roles/custom/ folders.
+
 Adding a new repository
 -----------------------
 
-To add a new repository, simply manually create its root folder (if not
+To add a new repository, simply create its root folder (if not
 existing), using the distribution to be used, the major distribution version
 associated, and the architecture:
 
@@ -61,14 +65,14 @@ Then create your new repository folder:
 
   mkdir /var/www/html/repositories/centos/8/x86_64/my_repo
 
-And add it into your global repositories, into file
+And add it to your global repositories, into file
 /etc/bluebanquise/inventory/group_vars/all/general_settings/repositories.yml or
 if this repository is only associated with a specific equipment group, add it
 into the repositories.yml associated with the equipment_profile associated, for
 example in file
 /etc/bluebanquise/inventory/group_vars/equipment_X/repositories.yml .
 
-If needed, it is also possible to defined minor version based repositories. To
+If needed, it is also possible to define minor version based repositories. To
 do so, simply replace the major version by the minor version, and use the
 `ep_operating_system.distribution_version` variable to force usage of a minor
 distribution version for the equipment groups associated with this new
@@ -125,7 +129,7 @@ For example:
 
   ansible-playbook /etc/bluebanquise/playbooks/managements.yml --diff --check
 
-2. If you have multiple managements nodes, only update them one by one, using
+2. If you have multiple managements nodes, update them one after the other, using
 the `--limit` argument, specifying the nodes each time. This can be combined
 with the dry run seen in 1.
 
@@ -135,7 +139,7 @@ For example:
 
   ansible-playbook /etc/bluebanquise/playbooks/managements.yml --limit management1
   ansible-playbook /etc/bluebanquise/playbooks/managements.yml --limit management2
-  ansible-playbook /etc/bluebanquise/playbooks/managements.yml --limit management2
+  ansible-playbook /etc/bluebanquise/playbooks/managements.yml --limit management3
 
 Nodes
 =====
@@ -193,7 +197,6 @@ the configuration and seen by Ansible:
 .. code-block:: text
 
   [root@management1 ~]# ansible-inventory --graph
-  [WARNING]: Unable to parse /etc/bluebanquise/internal as an inventory source
   @all:
     |--@mg_computes:
     |  |--@equipment_typeC:
@@ -255,7 +258,7 @@ Create a file /root/gen.sh with the following content:
   EOF
   done
 
-Save, make this script executable, and launch it asking for 4 nodes:
+Save, make this script executable, and run it asking for 4 nodes:
 
 .. code-block:: text
 
@@ -276,13 +279,13 @@ The stack is fully dynamic regarding groups. The only thing you need is to
 create a new file with the master group name inside of
 /etc/bluebanquise/inventory/cluster/nodes/
 
-For example, if you wish to create a new group "switchs", create file
+For example, if you wish to create a new group "switches", create file
 /etc/bluebanquise/inventory/cluster/nodes/switches.yml and add the following
 content in the file:
 
 .. code-block:: yaml
 
-  mg_switchs:
+  mg_switches:
     children:
 
 The master group is now created.

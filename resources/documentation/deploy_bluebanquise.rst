@@ -94,7 +94,8 @@ controller:
 
   ansible-playbook /etc/bluebanquise/playbooks/managements.yml --limit management1 --tags bluebanquise
 
-This will install the needed few rpms (python filters).
+This will install the requirements to run BlueBanquise (mostly python filters
+for Ansible).
 
 Then play the whole playbook:
 
@@ -212,8 +213,10 @@ SSH public key
 
 In order to log into the remote nodes without giving the password, check that
 the ssh public key defined in authentication.yml in your inventory match your
-management1 public key. If not, update it. Remember to run again the pxe_stack
-role after updating the configuration.
+management1 public key (the one generated in /root/.ssh/). If not, update the
+key in authentication.yml and remember to run the pxe_stack role (to update PXE
+related files that contains the ssh public key of the management node to be set
+on nodes during deployment).
 
 .. code-block:: bash
 

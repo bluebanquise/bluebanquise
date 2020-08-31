@@ -1199,12 +1199,12 @@ Other useful modules
 A full list of all Ansible modules can be found on the
 `Ansible documentation <https://docs.ansible.com/ansible/latest/modules/list_of_all_modules.html>`_ .
 
-However, lets review few other often used modules:
+However, lets review the most commonly used modules:
 
 Package
 """""""
 
-This module simply install a list of package. It can be used instead of the yum
+This module simply installs a list of packages. It can be used instead of the yum
 or dnf modules, as it covers both.
 
 Example:
@@ -1245,7 +1245,7 @@ Example:
 File
 """"
 
-This modules allow to create folders.
+This module allows to create folders.
 
 Example:
 
@@ -1299,9 +1299,6 @@ Example:
       path: /etc/hosts
       regexp: '^127\.0\.0\.1'
       line: 127.0.0.1 localhost mymanagement
-      owner: root
-      group: root
-      mode: '0644'
 
 .. seealso::
   https://docs.ansible.com/ansible/latest/modules/lineinfile_module.html
@@ -1328,7 +1325,7 @@ Example:
 Include_tasks
 """""""""""""
 
-Allows to split the main main.yml task file into multiple chunks (using or not
+Allows to split the main.yml task file into multiple chunks (using or not
 conditionals).
 
 Example:
