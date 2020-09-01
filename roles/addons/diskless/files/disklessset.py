@@ -329,7 +329,7 @@ elif main_action == '3':
 
         print('Please choose image size:')
         print('(supported units: M=1024*1024, G=1024*1024*1024)')
-        print('(Example: 5000M or 5G)')
+        print('(Example: 5120M or 5G)')
         selected_livenet_size = str(input('-->: ').strip())
         if selected_livenet_size[-1] == 'G':
             livenet_size = int(selected_livenet_size[:-1])*1024
