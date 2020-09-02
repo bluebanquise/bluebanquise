@@ -125,7 +125,7 @@ Choose a standard image, and give a size.
 Notes:
 
 * The size recommended for the Standard or Custom is 5G
-* The size of the final image booted and loaded in RAM is approximately : 1.2GB for Standard image, 250MB for Small image, 130 MB for Minimall image and 1.2GB for Custom image
+* The size of the final image booted and loaded in RAM is approximately : 1.2GB for Standard image, 250MB for Small image, 130MB for Minimall image and 1.2GB for Custom image
 
 Important:
 
