@@ -316,9 +316,9 @@ elif main_action == '3':
         print(bcolors.OKBLUE+'[INFO] Entering livenet dedicated part.'+bcolors.ENDC)
 
         print('Please select livenet image generation profile:')
-        print(' 1 - Standard: core (final livenet image size ~1.2GB)')
-        print(' 2 - Small: openssh, dnf and NetworkManager (~248MB)')
-        print(' 3 - Minimal: openssh only (~129MB)')
+        print(' 1 - Standard: core')
+        print(' 2 - Small: openssh, dnf and NetworkManager')
+        print(' 3 - Minimal: openssh only')
         print(' 4 - Custom: core + selection of additional packages')
 
         selected_livenet_type = str(int(input('-->: ').lower().strip()))
