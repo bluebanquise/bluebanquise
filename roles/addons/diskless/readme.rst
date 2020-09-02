@@ -127,12 +127,18 @@ Notes:
 * The size recommended for the Standard or Custom is 5G
 * The size of the final image booted and loaded in RAM is approximately : 1.2Gb for Standard image, 250Mb for Small image, 130 Mb for Minimall image and 1.2Gb for Custom image
 
+Important:
+
+* The option 4 allows you to install additional packages. For example: drivers, Mellanox OFED, ...
+* If you want to install these elements you must specify the package: kernel-modules
+* Separate packages with spaces, example: kernel-modules kernel kernel-devel nvidia-cuda
+
 .. code-block:: text
 
   Please select livenet image generation profile:
-   1 - Standard: core (~1.2Gb)
-   2 - Small: openssh, dnf and NetworkManager (~248Mb)
-   3 - Minimal: openssh only (~129Mb)
+   1 - Standard: core
+   2 - Small: openssh, dnf and NetworkManager
+   3 - Minimal: openssh only
    4 - Custom: core + selection of additional packages
 
   -->: 1
