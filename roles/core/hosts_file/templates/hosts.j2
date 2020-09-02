@@ -21,7 +21,7 @@
 {% macro write_host(host,host_dict,current_iceberg) %}
 
   {%- if host_dict['network_interfaces'] is defined and host_dict['network_interfaces'] is iterable %}
-    {% set host_iceberg = node_current_iceberg(host) %}
+    {% set host_iceberg = node_current_iceberg(host) | trim %}
     {% set host_resolution_network = host_dict['network_interfaces'][0].network %}{# equivalent to j2_node_main_resolution_network, but no need for a macro here #}
     {% set alias_list = [] %}
     {% if host_dict['global_alias'] is defined and host_dict['global_alias'] is not none %}
