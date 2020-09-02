@@ -159,7 +159,7 @@ Check that everything is alright before continuing:
     Image profile:        1
     Image size:           5120M
     SSH pubkey: 		      /root/.ssh/id_rsa.pub
-    Enable SELinux: 	    no
+    Enable SELinux: 	   no
   Confirm ? Enter yes or no: yes
   [INFO] Cleaning and creating image folders.
   [INFO] Generating new ipxe boot file.
