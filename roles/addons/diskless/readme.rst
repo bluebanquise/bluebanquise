@@ -122,16 +122,31 @@ Select the kernel you want to use wit this image from the list of available kern
  
 Choose a standard image, and give a size.
 
+Notes:
+
+* The size recommended for the Standard or Custom is 5G
+* The size of the final image booted and loaded in RAM is approximately : 1.2Gb for Standard image, 250Mb for Small image, 130 Mb for Minimall image and 1.2Gb for Custom image
+
 .. code-block:: text
 
   Please select livenet image generation profile:
    1 - Standard: core (~1.2Gb)
    2 - Small: openssh, dnf and NetworkManager (~248Mb)
    3 - Minimal: openssh only (~129Mb)
+   4 - Custom: core + selection of additional packages
+
   -->: 1
   Please choose image size (e.g. 5G):
   (supported units: M=1024*1024, G=1024*1024*1024)
-  -->: 5G
+  (Example: 5120M or 5G)
+  -->: 5120M
+
+-->: Enter path to SSH public key (left empty to disable key injection):
+-->: /root/.ssh/id_rsa.pub
+
+-->: Do you want to activate SELinux inside the image?
+Enter yes or no: 
+-->: no
 
 Check that everything is alright before continuing:
 
@@ -143,6 +158,8 @@ Check that everything is alright before continuing:
     Root password:        root
     Image profile:        1
     Image size:           5120M
+    SSH pubkey: 		      /root/.ssh/id_rsa.pub
+    Enable SELinux: 	    no
   Confirm ? Enter yes or no: yes
   [INFO] Cleaning and creating image folders.
   [INFO] Generating new ipxe boot file.
@@ -173,7 +190,6 @@ image before using it.
 
   # bootset -n c001 -b diskless -i livenet1
 
-
 The -n parameter can be a nodeset.
 
 8. Reboot the diskless node to make it boot onto the new image.
@@ -187,6 +203,7 @@ The -n parameter can be a nodeset.
       - pxe_stack
       - diskless
 
+
 Customizing Livenet image
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -195,9 +212,7 @@ The image name used in the examples below is *space_image*.
 The disklessset tool allows to customize livenet images before booting them, 
 by mounting images and providing simple chroot inventory. System administrator 
 can then tune or execute playbooks inside images.
-
-Start the tool, select menu "4 - Manage existing diskless images", then 
-"5 - Manage livenet images".
+This step also saves time on the execution of playbooks on booted diskless nodes.
 
 The next menu allows you to mount, unmount, or resize image.
 
@@ -239,6 +254,10 @@ Notes:
 * The `--skip-tags identify` prevents hostname and static ip to be set, since the image should be generic for multiple hosts.
 
 Before closing, also remember to clean dnf cache into the image chroot to save space.
+
+.. code-block:: text
+
+  # rm -rf /var/tmp/diskless/workdir/space_image/mnt/var/cache/dnf/*
 
 Now, using df command, check used space of the image, to resize it later if whished.
 
