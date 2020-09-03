@@ -43,6 +43,7 @@
   loop:
     - 9090/tcp
     - 9093/tcp
+    - 9100/tcp
   tags:
     - firewall
 
