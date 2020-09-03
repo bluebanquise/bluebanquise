@@ -129,9 +129,10 @@ Notes:
 
 Important:
 
-* The option 4 allows you to install additional packages. For example: drivers, Mellanox OFED, ...
-* If you want to install these elements you must specify the package: kernel-modules
-* Separate packages with spaces, example: kernel-modules kernel kernel-devel nvidia-cuda
+* The option 4 allows you to install additional packages.
+* If you want to install drivers or Interconnect Stack (Nvidia, Mellanox OFED,...) you must use option 4 and specify the package kernel-modules.
+* To specify multiple packages, separate them with spaces, example: kernel-modules kernel kernel-devel nvidia-cuda
+* Precise the kernel version.
 
 .. code-block:: text
 
@@ -187,10 +188,11 @@ Check that everything is alright before continuing:
   [INFO] Installing system into image.
   ...
 
-Image is now generated. See Customizing Livenet image in next section on how to customize
-image before using it.
+Image is now generated.
 
-7. Using the command *bootset*, set the image one node will use. 
+7. (Optionnal) See Customizing Livenet image in next section on how to customize image before using it.
+
+8. Using the command *bootset*, set the image one node will use. 
    
 .. code-block:: text
 
@@ -198,17 +200,9 @@ image before using it.
 
 The -n parameter can be a nodeset.
 
-8. Reboot the diskless node to make it boot onto the new image.
+9. Reboot the diskless node to make it boot onto the new image.
 
-* Example Playbook
-
-.. code-block:: text
-
-  - hosts: mngt0-1
-    roles:
-      - pxe_stack
-      - diskless
-
+10. Once the nodes are booted, run the computes playbook with needed roles (nic, hostname).
 
 Customizing Livenet image
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -272,14 +266,28 @@ Using disklessset now, choose option 2 to unmount the image and squashfs it agai
 It is possible now to use the tool to resize image, to reduce it to the desired value (to save ram on target host).
 Always keep at least 100MB in / for temporary files and few logs generated during run.
 
+
+
+Example Playbook
+^^^^^^^^^^^^^^^^
+
+.. code-block:: text
+
+  - hosts: mngt0-1
+    roles:
+      - pxe_stack
+      - diskless
+
+
+
 To be done
 ^^^^^^^^^^
 
 Clean code, add more error detection, and more verbosity.
+
 
 Changelog
 ^^^^^^^^^
 
 * 1.1.0: Role update. Benoit Leveugle <benoit.leveugle@gmail.com>, Bruno Travouillon <devel@travouillon.fr>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
- 
