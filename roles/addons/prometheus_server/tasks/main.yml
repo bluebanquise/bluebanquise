@@ -30,6 +30,22 @@
     - monitoring.exporters.snmp_exporter.with_generator is defined      
     - monitoring.exporters.snmp_exporter.with_generator
 
+- name: "firewalld █ Add services to firewall's {{ prometheus_server_firewall_zone | default('public') }} zone"
+  firewalld:
+    zone: "{{ prometheus_server_firewall_zone | default('public') }}"
+    service: "{{ item }}"
+    immediate: "yes"
+    permanent: "yes"
+    state: enabled
+  when:
+    - ansible_facts.os_family == "RedHat"
+    - ep_firewall | default(false) | bool
+  loop:
+    - 9090/tcp
+    - 9093/tcp
+  tags:
+    - firewall
+
 - name: Create directories structure
   file:
    path: "{{ item }}"
