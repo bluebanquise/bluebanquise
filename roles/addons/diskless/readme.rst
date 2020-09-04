@@ -122,9 +122,9 @@ Select the kernel you want to use wit this image from the list of available kern
  
 Choose a standard image, and give a size.
 
-Notes:
+Proposal: 
 
-* The size recommended for the Standard or Custom is 5G
+* The size recommended for the Standard or Custom profile is 5G.
 * The size of the final image booted and loaded in RAM is approximately :
   - 1.2GB for Standard image
   - 250MB for Small image
