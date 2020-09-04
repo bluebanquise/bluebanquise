@@ -125,14 +125,17 @@ Choose a standard image, and give a size.
 Notes:
 
 * The size recommended for the Standard or Custom is 5G
-* The size of the final image booted and loaded in RAM is approximately : 1.2GB for Standard image, 250MB for Small image, 130MB for Minimall image and 1.2GB for Custom image
+* The size of the final image booted and loaded in RAM is approximately :
+  - 1.2GB for Standard image
+  - 250MB for Small image
+  - 130MB for Minimal image
 
 Important:
 
 * The option 4 allows you to install additional packages.
 * If you want to install drivers or Interconnect Stack (Nvidia, Mellanox OFED,...) you must use option 4 and specify the package kernel-modules.
 * To specify multiple packages, separate them with spaces, example: kernel-modules kernel kernel-devel nvidia-cuda
-* Precise the kernel version.
+* In option 4, specify the packages version. Example: kernel-modules-4.18.0-193.6.3 kernel-4.18.0-193.6.3 kernel-devel-4.18.0-193.6.3
 
 .. code-block:: text
 
@@ -202,7 +205,8 @@ The -n parameter can be a nodeset.
 
 9. Reboot the diskless node to make it boot onto the new image.
 
-10. Once the nodes are booted, run the computes playbook with needed roles (nic, hostname).
+10. Once the nodes are booted, run the entire computes playbook.
+If you have used Customizing Livenet image, run the playbook with 'nic' and 'set_hostname' roles only.
 
 Customizing Livenet image
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -257,7 +261,7 @@ Before closing, also remember to clean dnf cache into the image chroot to save s
 
 .. code-block:: text
 
-  # rm -rf /var/tmp/diskless/workdir/space_image/mnt/var/cache/dnf/*
+  # dnf clean all --installroot /var/tmp/diskless/workdir/space_image/mnt/
 
 Now, using df command, check used space of the image, to resize it later if whished.
 
@@ -265,7 +269,6 @@ Using disklessset now, choose option 2 to unmount the image and squashfs it agai
 
 It is possible now to use the tool to resize image, to reduce it to the desired value (to save ram on target host).
 Always keep at least 100MB in / for temporary files and few logs generated during run.
-
 
 
 Example Playbook
@@ -277,7 +280,6 @@ Example Playbook
     roles:
       - pxe_stack
       - diskless
-
 
 
 To be done
