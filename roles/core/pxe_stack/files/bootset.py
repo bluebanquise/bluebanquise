@@ -182,14 +182,16 @@ elif passed_arguments.boot is not None:
             with open('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe', 'w') as ff:
                 ff.write(generic_node_ipxe)
             os.chown('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe', apache_uid, apache_gid)
-            if pxe_parameters["pxe_parameters"]["ansible_selinux_status"] == "enabled":
-                os.system('restorecon -v /var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe')
             logging.info('    ├── '+bcolors.OKGREEN+'[OK] Done.'+bcolors.ENDC)
 
             set_default_boot(node=node, boot=passed_arguments.boot, node_image=passed_arguments.image, extra_parameters=passed_arguments.extra_parameters)
 
         else:
             logging.warning(bcolors.WARNING+'Node '+str(node)+' do not exist. Skipping.'+bcolors.ENDC)
+
+    # Ensure SELinux context is correct
+    if pxe_parameters["pxe_parameters"]["ansible_selinux_status"] == "enabled":
+        os.system('restorecon -Rv /var/www/html/preboot_execution_environment/nodes/')
 
 elif passed_arguments.kickstart is not None:
 
