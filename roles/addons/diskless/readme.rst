@@ -135,7 +135,7 @@ Important:
 * The option 4 allows you to install additional packages.
 * If you want to install drivers or Interconnect Stack (Nvidia, Mellanox OFED,...) you must use option 4 and specify the package kernel-modules.
 * To specify multiple packages, separate them with spaces, example: kernel-modules kernel kernel-devel nvidia-cuda
-* In option 4, specify the packages version. Example: kernel-modules-4.18.0-193.6.3 kernel-4.18.0-193.6.3 kernel-devel-4.18.0-193.6.3
+* With option 4, specify the packages version. Example: kernel-modules-4.18.0-193.6.3 kernel-4.18.0-193.6.3 kernel-devel-4.18.0-193.6.3
 
 .. code-block:: text
 
