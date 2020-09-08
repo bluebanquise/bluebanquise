@@ -215,23 +215,23 @@ with the following head:
 
 .. code-block:: yaml
 
-- name: Computes diskless playbook
-  hosts: /var/tmp/diskless/workdir/space_image/mnt
-  connection: chroot
-  vars:
-    j2_current_iceberg: iceberg1                #<<< UPDATE IF NEEDED
-    j2_node_main_network: ice1-1                #<<< UPDATE
-    start_service: false
-    image_equipment_profile: equipment_typeC    #<<< UPDATE
-
-  pre_tasks:
-    - name: Add current host to defined equipment_profile
-      add_host:
-        hostname: "{{ inventory_hostname }}"
-        groups: "{{ image_equipment_profile }}"
-
-  roles:
-  # ADD HERE YOUR ROLES
+  - name: Computes diskless playbook
+    hosts: /var/tmp/diskless/workdir/space_image/mnt
+    connection: chroot
+    vars:
+      j2_current_iceberg: iceberg1                #<<< UPDATE IF NEEDED
+      j2_node_main_network: ice1-1                #<<< UPDATE
+      start_service: false
+      image_equipment_profile: equipment_typeC    #<<< UPDATE
+  
+    pre_tasks:
+      - name: Add current host to defined equipment_profile
+        add_host:
+          hostname: "{{ inventory_hostname }}"
+          groups: "{{ image_equipment_profile }}"
+  
+    roles:
+    # ADD HERE YOUR ROLES
 
 Now, update the needed values in this file:
 
