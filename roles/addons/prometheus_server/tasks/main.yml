@@ -33,7 +33,7 @@
 - name: "copy █ Install firewalld service configuration file"
   copy:
     src: alertmanager.xml
-    dest: /usr/lib/firewalld/services/alertmanager.xml
+    dest: /etc/firewalld/services/alertmanager.xml
     owner: root
     group: root
     mode: 0644
