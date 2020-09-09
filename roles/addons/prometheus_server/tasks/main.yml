@@ -30,6 +30,19 @@
     - monitoring.exporters.snmp_exporter.with_generator is defined      
     - monitoring.exporters.snmp_exporter.with_generator
 
+- name: "copy █ Install firewalld service configuration file"
+  copy:
+    src: alertmanager.xml
+    dest: /usr/lib/firewalld/services/alertmanager.xml
+    owner: root
+    group: root
+    mode: 0644
+  when:
+    - ansible_facts.os_family == "RedHat"
+    - ep_firewall | default(false) | bool
+  tags:
+    - firewall 
+
 - name: "firewalld █ Add services to firewall's {{ prometheus_server_firewall_zone | default('public') }} zone"
   firewalld:
     zone: "{{ prometheus_server_firewall_zone | default('public') }}"
@@ -41,9 +54,8 @@
     - ansible_facts.os_family == "RedHat"
     - ep_firewall | default(false) | bool
   loop:
-    - 9090/tcp
-    - 9093/tcp
-    - 9100/tcp
+    - prometheus
+    - alertmanager
   tags:
     - firewall
 
