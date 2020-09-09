@@ -8,7 +8,7 @@
 - name: "firewalld █ Add services to firewall's {{ prometheus_client_firewall_zone | default('public') }} zone"
   firewalld:
     zone: "{{ prometheus_client_firewall_zone | default('public') }}"
-    service: "{{ item.port }}/tcp"
+    port: "{{ item.port }}/tcp"
     immediate: "yes"
     permanent: "yes"
     state: enabled
