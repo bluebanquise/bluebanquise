@@ -122,10 +122,11 @@ Now simply add to the playbook of your choice (which is for the Prometheus
 clients) the prometheus_client role (change the values  of enable_services and start_services accordingly):
 
 .. code-block:: yaml
- vars:
-    - enable_services: true
-    - start_services: true
- roles:
+
+  vars:
+     - enable_services: true
+     - start_services: true
+  roles:
      - role: prometheus_client
        tags: prometheus_client
 
