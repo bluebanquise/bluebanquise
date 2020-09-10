@@ -779,7 +779,7 @@ Task again
 ----------
 
 As discussed before, all task available modules can be found in the
-`Ansible documentation <https://docs.ansible.com/ansible/latest/modules/modules_by_category.html>`_ .
+`Ansible modules documentation <https://docs.ansible.com/ansible/latest/modules/modules_by_category.html>`_ .
 
 Each of these modules can be combined with general tasks actions. But first,
 let's define the basic debug module and registers, that will allow us to play
