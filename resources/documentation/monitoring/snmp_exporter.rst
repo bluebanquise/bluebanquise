@@ -59,28 +59,26 @@ It should look something like this::
 .. code-block:: yaml
 
   if_mib:
-  walk:
-  - 1.3.6.1.2.1.2
-  - 1.3.6.1.2.1.31.1.1
-  - 1.3.6.1.4.1.25461.2.1.2.3.11.1.2
+    walk:
+      - 1.3.6.1.2.1.2
+      - 1.3.6.1.2.1.31.1.1
+      - 1.3.6.1.4.1.25461.2.1.2.3.11.1.2
   get:
-  - 1.3.6.1.2.1.1.3.0
+    - 1.3.6.1.2.1.1.3.0
   metrics:
-  - name: sysUpTime
-    oid: 1.3.6.1.2.1.1.3
-    type: gauge
-    help: The time (in hundredths of a second) since the network management portion
-      of the system was last re-initialized. - 1.3.6.1.2.1.1.3
-  - name: ifNumber
-    oid: 1.3.6.1.2.1.2.1
-    type: gauge
-    help: The number of network interfaces (regardless of their current state) present
-      on this system. - 1.3.6.1.2.1.2.1
-  - name: ifIndex
-    oid: 1.3.6.1.2.1.2.2.1.1
-    type: gauge
-    help: A unique value, greater than zero, for each interface - 1.3.6.1.2.1.2.2.1.1
-    indexes:
+    - name: sysUpTime
+      oid: 1.3.6.1.2.1.1.3
+      type: gauge
+      help: The time (in hundredths of a second) since the network management portion of the system was last re-initialized. - 1.3.6.1.2.1.1.3
+    - name: ifNumber
+      oid: 1.3.6.1.2.1.2.1
+      type: gauge
+      help: The number of network interfaces (regardless of their current state) present on this system. - 1.3.6.1.2.1.2.1
+    - name: ifIndex
+      oid: 1.3.6.1.2.1.2.2.1.1
+      type: gauge
+      help: A unique value, greater than zero, for each interface - 1.3.6.1.2.1.2.2.1.1
+      indexes:
 
 If you have another switch you want to query, you can generate another file than
 the one we provide.
