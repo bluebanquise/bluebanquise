@@ -1,8 +1,8 @@
 %{!?version: %define version 1.3.0}
 
-%define roles_addons clone clustershell diskless nic_nmcli ofed ofed_sm \
-openldap_client openldap_server powerman prometheus_client prometheus_server \
-report root_password slurm sssd users_basic
+%define roles_addons clone clustershell diskless grafana nic_nmcli ofed \
+ofed_sm openldap_client openldap_server powerman prometheus_client \
+prometheus_server report root_password slurm sssd users_basic
 
 Name:           bluebanquise
 Version:        %{version}
