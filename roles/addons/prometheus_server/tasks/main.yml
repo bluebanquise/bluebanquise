@@ -13,7 +13,7 @@
     - snmp_exporter
     - karma
 
-#for generator of oid walk for snmp_exporter     
+# for generator of oid walk for snmp_exporter     
 - name: Package
   package:
     name: "{{ item }}"
@@ -40,8 +40,11 @@
   when:
     - ansible_facts.os_family == "RedHat"
     - ep_firewall | default(false) | bool
+  notify: reload firewalld
   tags:
     - firewall
+
+- meta: flush_handlers
 
 - name: "firewalld █ Add services to firewall's {{ prometheus_server_firewall_zone | default('public') }} zone"
   firewalld:
