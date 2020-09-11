@@ -126,9 +126,9 @@ Proposal:
 
 * The size recommended for the Standard or Custom profile is 5G.
 * The size of the final image booted and loaded in RAM is approximately :
-  - 1.2GB for Standard image
-  - 250MB for Small image
-  - 130MB for Minimal image
+   - 1.2GB for Standard image
+   - 250MB for Small image
+   - 130MB for Minimal image
 
 Important:
 
@@ -148,8 +148,8 @@ Important:
   -->: 1
   Please choose image size (e.g. 5G):
   (supported units: M=1024*1024, G=1024*1024*1024)
-  (Example: 5120M or 5G)
-  -->: 5120M
+  (Example: 5G or 5120M)
+  -->: 5G
 
 -->: Enter path to SSH public key (left empty to disable key injection):
 -->: /root/.ssh/id_rsa.pub
