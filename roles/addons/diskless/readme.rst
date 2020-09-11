@@ -148,7 +148,7 @@ Important:
   -->: 1
   Please choose image size (e.g. 5G):
   (supported units: M=1024*1024, G=1024*1024*1024)
-  (Example: 5G or 5120M)
+  (Example: 5120M or 5G)
   -->: 5G
 
 -->: Enter path to SSH public key (left empty to disable key injection):
