@@ -62,6 +62,33 @@ And for a login (passive client), use:
     vars:
       slurm_profile: passive
 
+Input
+^^^^^
+
+Mandatory inventory vars:
+
+**hostvars[inventory_hostname]**
+
+* slurm_profile
+* slurm
+   * .cluster_name
+   * .control_machine
+   * .nodes_equipment_groups
+   * .slurm_packaging
+
+**hostvars[hosts]**
+
+* ep_hardware
+   * .cpu
+      * .core
+
+Optional inventory vars:
+
+**hostvars[inventory_hostname]**
+
+* slurm
+   * .MpiDefault
+
 To be done
 ^^^^^^^^^^
 

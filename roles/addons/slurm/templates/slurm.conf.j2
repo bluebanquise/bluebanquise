@@ -44,7 +44,7 @@ SelectType=select/cons_res
 
 ## Nodes list
 {% for equipment_group in slurm['nodes_equipment_groups'] %}
-{% if groups[equipment_group] is defined and not none %}
+{% if groups[equipment_group] is iterable %}
 {% for node in groups[equipment_group] %}
 NodeName={{node}} Procs={{hostvars[node]['ep_hardware']['cpu']['cores']}} State=UNKNOWN
 {% endfor %}
@@ -53,7 +53,7 @@ NodeName={{node}} Procs={{hostvars[node]['ep_hardware']['cpu']['cores']}} State=
 
 ## Partitions list
 {% for equipment_group in slurm['nodes_equipment_groups'] %}
-{% if groups[equipment_group] is defined and not none %}
+{% if groups[equipment_group] is iterable %}
 PartitionName={{equipment_group}} MaxTime=INFINITE State=UP Nodes={% for node in groups[equipment_group] %}{% if loop.first %}{{node}}{% else %},{{node}}{% endif %}{% endfor %}
 
 {% endif %}
