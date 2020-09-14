@@ -1,0 +1,203 @@
+---
+- name: Verify bluebanquise repository configuration file
+  hosts: all
+  tasks:
+    - name: Create distribution groups
+      group_by:
+        key: "{{ ansible_facts.distribution | lower }}{{ ansible_facts.distribution_major_version }}"
+        parents:
+          - "{{ ansible_facts.distribution | lower }}"
+
+    - name: Read /etc/yum.repos.d/bluebanquise.repo
+      slurp:
+        src: /etc/yum.repos.d/bluebanquise.repo
+      register: bb_repo
+    - name: Display /etc/yum.repos.d/bluebanquise.repo
+      debug:
+        msg: "{{ bb_repo['content'] | b64decode }}"
+    - name: Check presence of a single baseurl
+      assert:
+        that: bb_repo['content'] | b64decode |
+                regex_findall(("^baseurl "), multiline=True) | length == 1
+      when: ansible_facts.os_family == "RedHat"
+
+- name: Check simple configuration - repo bluebanquise
+  hosts: simple:&centos
+  tasks:
+    - name: Check baseurl_prefix path
+      assert:
+        that: bb_repo['content'] | b64decode |
+                regex_search(("^baseurl = http://10.10.0.1/repositories//centos/\d/\$basearch/bluebanquise/"), multiline=True)
+
+- name: Check environment configuration - repo bluebanquise - env1
+  hosts: environment:&centos
+  tasks:
+    - name: Check baseurl_prefix path with environment
+      assert:
+        that: bb_repo['content'] | b64decode |
+                regex_search(("^baseurl = http://10.10.0.1/repositories/env1/centos/\d/\$basearch/bluebanquise/"), multiline=True)
+
+- name: Check advanced configuration - repo bluebanquise
+  hosts: advanced:&centos
+  tasks:
+    - name: Check baseurl_prefix path with minor distro version
+      assert:
+        that: bb_repo['content'] | b64decode |
+                regex_search(("^baseurl = http://10.10.0.1/repositories//centos/\d\.\d/\$basearch/bluebanquise/"), multiline=True)
+
+- name: Verify CentOS 7 'os' repository configuration file
+  hosts: centos7:!distrorepos
+  tasks:
+    - name: Read /etc/yum.repos.d/os.repo
+      slurp:
+        src: /etc/yum.repos.d/os.repo
+      register: os_repo
+    - name: Display /etc/yum.repos.d/os.repo
+      debug:
+        msg: "{{ os_repo['content'] | b64decode }}"
+    - name: Check presence of a single baseurl in os.repo
+      assert:
+        that: os_repo['content'] | b64decode |
+                regex_findall(("^baseurl "), multiline=True) | length == 1
+    - name: Check baseurl path os
+      assert:
+        that: os_repo['content'] | b64decode |
+                regex_search(("^baseurl = http://10.10.0.1/repositories/.*/centos/7.*/\$basearch/os/$"), multiline=True)
+
+    # Default base, updates, extras and centosplus must be disabled by default
+    - name: Read /etc/yum.repos.d/CentOS-Base.repo
+      slurp:
+        src: /etc/yum.repos.d/CentOS-Base.repo
+      register: default_centos_repo
+    - name: Display /etc/yum.repos.d/CentOS-Base.repo
+      debug:
+        msg: "{{ default_centos_repo['content'] | b64decode }}"
+    - name: Check all repos are disabled
+      assert:
+        that: default_centos_repo['content'] | b64decode |
+                regex_findall(("^enabled=0$"), multiline=True) | length == 4
+
+- name: Verify gpgcheck is enabled
+  hosts: centos7:&advanced
+  tasks:
+    - name: Check gpgcheck is enabled in os file
+      assert:
+        that: os_repo['content'] | b64decode |
+                regex_search(("^gpgcheck = 1$"), multiline=True)
+
+- name: Verify CentOS 8 'os' repository configuration files
+  hosts: centos8:!distrorepos
+  tasks:
+    # AppStream
+    - name: Read /etc/yum.repos.d/CentOS-AppStream.repo
+      slurp:
+        src: /etc/yum.repos.d/CentOS-AppStream.repo
+      register: appstream_repo
+    - name: Display /etc/yum.repos.d/CentOS-AppStream.repo
+      debug:
+        msg: "{{ appstream_repo['content'] | b64decode }}"
+    - name: Check presence of a single baseurl in CentOS-AppStream.repo
+      assert:
+        that: appstream_repo['content'] | b64decode |
+                regex_findall(("^baseurl "), multiline=True) | length == 1
+    - name: Check baseurl path os/AppStream
+      assert:
+        that: appstream_repo['content'] | b64decode |
+                regex_search(("^baseurl = http://10.10.0.1/repositories/.*/centos/8.*/\$basearch/os/AppStream$"), multiline=True)
+
+    # BaseOS
+    - name: Read /etc/yum.repos.d/CentOS-Base.repo
+      slurp:
+        src: /etc/yum.repos.d/CentOS-Base.repo
+      register: baseos_repo
+    - name: Display /etc/yum.repos.d/CentOS-Base.repo
+      debug:
+        msg: "{{ baseos_repo['content'] | b64decode }}"
+    - name: Check presence of a single baseurl in CentOS-Base.repo
+      assert:
+        that: baseos_repo['content'] | b64decode |
+                regex_findall(("^baseurl "), multiline=True) | length == 1
+    - name: Check baseurl path os/BaseOS
+      assert:
+        that: baseos_repo['content'] | b64decode |
+                regex_search(("^baseurl = http://10.10.0.1/repositories/.*/centos/8.*/\$basearch/os/BaseOS$"), multiline=True)
+
+    # Extras (default repositories_client_disable_distro_repos)
+    - name: Read /etc/yum.repos.d/CentOS-Extras.repo
+      slurp:
+        src: /etc/yum.repos.d/CentOS-Extras.repo
+      register: extras_repo
+    - name: Display /etc/yum.repos.d/CentOS-Extras.repo
+      debug:
+        msg: "{{ extras_repo['content'] | b64decode }}"
+    - name: Check Extras is disabled
+      assert:
+        that: extras_repo['content'] | b64decode |
+                regex_search(("^enabled=0$"), multiline=True)
+
+- name: Verify gpgcheck is enabled
+  hosts: centos8:&advanced
+  tasks:
+    - name: Check gpgcheck is enabled in AppStream file
+      assert:
+        that: appstream_repo['content'] | b64decode |
+                regex_search(("^gpgcheck = 1$"), multiline=True)
+    - name: Check gpgcheck is enabled in BaseOS file
+      assert:
+        that: baseos_repo['content'] | b64decode |
+                regex_search(("^gpgcheck = 1$"), multiline=True)
+
+- name: Verify epel is configured
+  hosts: advanced
+  tasks:
+    - name: Read /etc/yum.repos.d/epel.repo
+      slurp:
+        src: /etc/yum.repos.d/epel.repo
+      register: epel_repo
+    - name: Display /etc/yum.repos.d/epel.repo
+      debug:
+        msg: "{{ epel_repo['content'] | b64decode }}"
+    - name: Check presence of a single baseurl in epel.repo
+      assert:
+        that: epel_repo['content'] | b64decode |
+                regex_findall(("^baseurl "), multiline=True) | length == 1
+    - name: Check baseurl path in epel.repo
+      assert:
+        that: epel_repo['content'] | b64decode |
+                regex_search(("^baseurl = https://dl.fedoraproject.org/pub/epel/\$releasever/\$basearch//$"), multiline=True)
+    - name: Check proxy is configured in epel.repo
+      assert:
+        that: epel_repo['content'] | b64decode |
+                regex_search(("^proxy = https://proxy:8080$"), multiline=True)
+
+- name: Verify CentOS 7 distro repos are enabled
+  hosts: centos7:&distrorepos
+  tasks:
+    # Only centosplus is disabled by default
+    - name: Read /etc/yum.repos.d/CentOS-Base.repo
+      slurp:
+        src: /etc/yum.repos.d/CentOS-Base.repo
+      register: default_centos_repo
+    - name: Display /etc/yum.repos.d/CentOS-Base.repo
+      debug:
+        msg: "{{ default_centos_repo['content'] | b64decode }}"
+    - name: Check only one repo is disabled
+      assert:
+        that: default_centos_repo['content'] | b64decode |
+                regex_findall(("^enabled=0$"), multiline=True) | length == 1
+
+- name: Verify CentOS 8 distro repos are enabled
+  hosts: centos8:&distrorepos
+  tasks:
+    # Extras
+    - name: Read /etc/yum.repos.d/CentOS-Extras.repo
+      slurp:
+        src: /etc/yum.repos.d/CentOS-Extras.repo
+      register: extras_repo
+    - name: Display /etc/yum.repos.d/CentOS-Extras.repo
+      debug:
+        msg: "{{ extras_repo['content'] | b64decode }}"
+    - name: Check Extras is disabled
+      assert:
+        that: extras_repo['content'] | b64decode |
+                regex_search(("^enabled=1$"), multiline=True)
