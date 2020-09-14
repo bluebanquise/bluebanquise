@@ -5,6 +5,21 @@
   loop: "{{ monitoring.exporters |dict2items }}"
   when: item.value.package is defined and item.key != "ipmi_exporter" and item.key != "snmp_exporter"
 
+- name: "firewalld █ Add services to firewall's {{ prometheus_client_firewall_zone | default('public') }} zone"
+  firewalld:
+    zone: "{{ prometheus_client_firewall_zone | default('public') }}"
+    port: "{{ item.port }}/tcp"
+    immediate: "yes"
+    permanent: "yes"
+    state: enabled
+  loop: "{{ monitoring.exporters.values() | list }}"
+  when:
+    - ansible_facts.os_family == "RedHat"
+    - ep_firewall | default(false) | bool
+    - item.port is defined
+  tags:
+    - firewall
+
 - name: set services
   service:
     name: "{{ item.value.service }}"
