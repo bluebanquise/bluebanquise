@@ -97,7 +97,7 @@ Mandatory inventory vars:
 **hostvars[inventory_hostname]**
 
 * repositories[item]
-* eq_operating_system
+* ep_operating_system
    * distribution
    * distribution_major_version
 
@@ -105,7 +105,7 @@ Optional inventory vars:
 
 **hostvars[inventory_hostname]**
 
-* eq_operating_system
+* ep_operating_system
    * distribution_version
    * repositories_environment
 
