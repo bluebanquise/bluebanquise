@@ -731,7 +731,7 @@ way:
     Or a better way to get my ship model: {{my_ship.model}} <br>
     <h2>Loops</h2>
     {% for ship in groups['all'] %}
-    Ship {{ship}} is in the shipyard, and has destination {{hostvars[ship]['my_ship']['destination']}}. <br>
+    Ship {{ship}} is in the shipyard, and has destination {{hostvars[ship]['destination']}}. <br>
     {% endfor %}
   </body>
   </html>
