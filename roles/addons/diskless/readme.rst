@@ -218,6 +218,9 @@ by mounting images and providing simple chroot inventory. System administrator
 can then tune or execute playbooks inside images.
 This step also saves time on the execution of playbooks on booted diskless nodes.
 
+Start the tool, select menu "4 - Manage existing diskless images", then 
+"5 - Manage livenet images".
+
 The next menu allows you to mount, unmount, or resize image.
 
 Mount the image first. Images are mounted in 
