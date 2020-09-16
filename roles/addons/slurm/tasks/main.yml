@@ -77,10 +77,10 @@
   tags:
     - template
 
-- name: copy █ Copy cgroup.conf to /etc/slurm/cgroup.conf
+- name: "copy █ Copy cgroup.conf to {{ slurm_home_path }}/cgroup.conf"
   copy:
     src: cgroup.conf
-    dest: /etc/slurm/cgroup.conf
+    dest: "{{ slurm_home_path }}/cgroup.conf"
     owner: root
     group: root
     mode: 0644

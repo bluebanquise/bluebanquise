@@ -1,5 +1,5 @@
 ---
-slurm_home_path: /etc/slurm/
+slurm_home_path: /etc/slurm
 slurm_packages_to_install:
   before_17:
     controller:
