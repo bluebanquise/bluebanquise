@@ -33,12 +33,12 @@ following content:
 .. code-block:: yaml
 
   prometheus:
-  scrape_interval: 1m
-  evaluation_interval: 2m
-  alertmanager:
-    group_wait: 1m
-    group_interval: 10m
-    repeat_interval: 3h
+    scrape_interval: 1m
+    evaluation_interval: 2m
+    alertmanager:
+      group_wait: 1m
+      group_interval: 10m
+      repeat_interval: 3h
 
 .. seealso:: https://www.robustperception.io/whats-the-difference-between-group_interval-group_wait-and-repeat_interval
 
