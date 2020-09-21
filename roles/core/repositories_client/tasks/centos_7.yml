@@ -18,6 +18,7 @@
     option: enabled
     value: '0'
     no_extra_spaces: yes
+    create: no
   loop: [ 'base', 'updates', 'extras' ]
   when:
     - ( 'os' in repositories ) or
