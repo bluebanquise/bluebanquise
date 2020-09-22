@@ -122,16 +122,41 @@ Select the kernel you want to use wit this image from the list of available kern
  
 Choose a standard image, and give a size.
 
+Proposal: 
+
+* The size recommended for the Standard or Custom profile is 5G.
+* The size of the final image booted and loaded in RAM is approximately :
+   - 1.2GB for Standard image
+   - 250MB for Small image
+   - 130MB for Minimal image
+
+Important:
+
+* The option 4 allows you to install additional packages.
+* If you want to install drivers or Interconnect Stack (Nvidia, Mellanox OFED,...) you must use option 4 and specify the package kernel-modules.
+* To specify multiple packages, separate them with spaces, example: kernel-modules kernel kernel-devel nvidia-cuda
+* With option 4, specify the packages version. Example: kernel-modules-4.18.0-193.6.3 kernel-4.18.0-193.6.3 kernel-devel-4.18.0-193.6.3
+
 .. code-block:: text
 
   Please select livenet image generation profile:
-   1 - Standard: core (~1.2Gb)
-   2 - Small: openssh, dnf and NetworkManager (~248Mb)
-   3 - Minimal: openssh only (~129Mb)
+   1 - Standard: core
+   2 - Small: openssh, dnf and NetworkManager
+   3 - Minimal: openssh only
+   4 - Custom: core + selection of additional packages
+
   -->: 1
   Please choose image size (e.g. 5G):
   (supported units: M=1024*1024, G=1024*1024*1024)
+  (Example: 5120M or 5G)
   -->: 5G
+
+-->: Enter path to SSH public key (left empty to disable key injection):
+-->: /root/.ssh/id_rsa.pub
+
+-->: Do you want to activate SELinux inside the image?
+Enter yes or no: 
+-->: no
 
 Check that everything is alright before continuing:
 
@@ -143,6 +168,8 @@ Check that everything is alright before continuing:
     Root password:        root
     Image profile:        1
     Image size:           5120M
+    SSH pubkey:           /root/.ssh/id_rsa.pub
+    Enable SELinux:       no
   Confirm ? Enter yes or no: yes
   [INFO] Cleaning and creating image folders.
   [INFO] Generating new ipxe boot file.
@@ -164,28 +191,22 @@ Check that everything is alright before continuing:
   [INFO] Installing system into image.
   ...
 
-Image is now generated. See Customizing Livenet image in next section on how to customize
-image before using it.
+Image is now generated.
 
-7. Using the command *bootset*, set the image one node will use. 
+7. (Optionnal) See Customizing Livenet image in next section on how to customize image before using it.
+
+8. Using the command *bootset*, set the image one node will use. 
    
 .. code-block:: text
 
   # bootset -n c001 -b diskless -i livenet1
 
-
 The -n parameter can be a nodeset.
 
-8. Reboot the diskless node to make it boot onto the new image.
+9. Reboot the diskless node to make it boot onto the new image.
 
-* Example Playbook
-
-.. code-block:: text
-
-  - hosts: mngt0-1
-    roles:
-      - pxe_stack
-      - diskless
+10. Once the nodes are booted, run the entire computes playbook.
+If you have used Customizing Livenet image, run the playbook with 'nic' and 'set_hostname' roles only.
 
 Customizing Livenet image
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -195,6 +216,7 @@ The image name used in the examples below is *space_image*.
 The disklessset tool allows to customize livenet images before booting them, 
 by mounting images and providing simple chroot inventory. System administrator 
 can then tune or execute playbooks inside images.
+This step also saves time on the execution of playbooks on booted diskless nodes.
 
 Start the tool, select menu "4 - Manage existing diskless images", then 
 "5 - Manage livenet images".
@@ -258,6 +280,10 @@ Notes:
 
 Before closing, also remember to clean dnf cache into the image chroot to save space.
 
+.. code-block:: text
+
+  # dnf clean all --installroot /var/tmp/diskless/workdir/space_image/mnt/
+
 Now, using df command, check used space of the image, to resize it later if whished.
 
 Using disklessset now, choose option 2 to unmount the image and squashfs it again.
@@ -265,14 +291,26 @@ Using disklessset now, choose option 2 to unmount the image and squashfs it agai
 It is possible now to use the tool to resize image, to reduce it to the desired value (to save ram on target host).
 Always keep at least 100MB in / for temporary files and few logs generated during run.
 
+
+Example Playbook
+^^^^^^^^^^^^^^^^
+
+.. code-block:: text
+
+  - hosts: mngt0-1
+    roles:
+      - pxe_stack
+      - diskless
+
+
 To be done
 ^^^^^^^^^^
 
 Clean code, add more error detection, and more verbosity.
+
 
 Changelog
 ^^^^^^^^^
 
 * 1.1.0: Role update. Benoit Leveugle <benoit.leveugle@gmail.com>, Bruno Travouillon <devel@travouillon.fr>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
- 
