@@ -57,13 +57,23 @@ def load_kernel_list(kernels_path):
     return kernel_list
 
 
-def select_from_list(list_from, list_name, index_modifier):
-    print('\nSelect '+list_name+':')
+def select_from_list(list_from, list_name, index_modifier=-1):
+    print('\nSelect ' + list_name + ':')
     if list_from[0] is not None and len(list_from) != 0:
         for index, i in enumerate(list_from):
             print(' '+str(index+1)+' - '+i)
-    selected_item = str(int(input('-->: ').lower().strip())+index_modifier)
-    return selected_item
+
+    user_input = input('-->: ').strip()
+
+    try:
+        selected_item = int(user_input)
+    except Exception:
+        return select_from_list(list_from, list_name, index_modifier)
+
+    if selected_item < 1 or selected_item > len(list_from):
+        return select_from_list(list_from, list_name, index_modifier)
+
+    return selected_item + index_modifier
 
 
 def generate_ipxe_boot_file(image_type, image_name, image_kernel, image_initramfs, selinux=False):
@@ -230,14 +240,14 @@ elif main_action == '2':
     kernel_list = load_kernel_list(kernels_path)
 
     if len(kernel_list) > 0:
-        selected_kernel = select_from_list(kernel_list, 'kernel', -1)
+        selected_kernel = select_from_list(kernel_list, 'kernel')
     else:
         print(bcolors.FAIL+'[ERROR] No kernel found!'+bcolors.ENDC)
         exit(1)
 
     print(bcolors.OKBLUE+'[INFO] Now generating initramfs... May take some time.'+bcolors.ENDC)
-    os.system('dracut --xz -v -m "network base nfs" --add "livenet" --add-drivers xfs --no-hostonly --nolvmconf '+kernels_path+'/initramfs-kernel-'+(kernel_list[int(selected_kernel)].strip('vmlinuz-'))+' --force --kver={}'.format(kernel_list[int(selected_kernel)].strip('vmlinuz-')))
-    os.chmod(kernels_path+'/initramfs-kernel-'+(kernel_list[int(selected_kernel)].strip('vmlinuz-')), 0o644)
+    os.system('dracut --xz -v -m "network base nfs" --add "livenet" --add-drivers xfs --no-hostonly --nolvmconf ' + kernels_path + '/initramfs-kernel-' + (kernel_list[selected_kernel].strip('vmlinuz-')) + ' --force --kver={}'.format(kernel_list[selected_kernel].strip('vmlinuz-')))
+    os.chmod(kernels_path + '/initramfs-kernel-' + (kernel_list[selected_kernel].strip('vmlinuz-')), 0o644)
     print(bcolors.OKGREEN+'\n[OK] Done.'+bcolors.ENDC)
 
 elif main_action == '3':
@@ -247,11 +257,11 @@ elif main_action == '3':
 
     image_types = ["nfs", "livenet"]
 
-    selected_image_type = select_from_list(image_types, 'image type', -1)
+    selected_image_type = select_from_list(image_types, 'image type')
 
     kernel_list = load_kernel_list(kernels_path)
     if len(kernel_list) > 0:
-        selected_kernel = select_from_list(kernel_list, 'kernel', -1)
+        selected_kernel = select_from_list(kernel_list, 'kernel')
     else:
         print(bcolors.FAIL+'[ERROR] No kernel found!'+bcolors.ENDC)
         exit(1)
@@ -262,19 +272,19 @@ elif main_action == '3':
     password_raw = str(input('Please enter clear root password of the new image: '))
     password_hash = crypt.crypt(password_raw, crypt.METHOD_SHA512)
 
-    if selected_image_type == '0':  # BASIC NFS
+    if selected_image_type == 0:  # BASIC NFS
 
-        print(bcolors.OKBLUE+'[INFO] Entering nfs dedicated part.'+bcolors.ENDC)
+        print(bcolors.OKBLUE + '[INFO] Entering nfs dedicated part.' + bcolors.ENDC)
 
         print('Do you want to create a new NFS image with the following parameters:')
-        print('  Image name: \t\t'+selected_image_name)
-        print('  Kernel version: \t'+kernel_list[int(selected_kernel)])
-        print('  Root password: \t'+password_raw)
+        print('  Image name: \t\t' + selected_image_name)
+        print('  Kernel version: \t' + kernel_list[selected_kernel])
+        print('  Root password: \t' + password_raw)
 
         answer = str(input("Confirm ? Enter yes or no: ").lower().strip())
         if answer in ['yes', 'y']:
 
-            print(bcolors.OKBLUE+'[INFO] Cleaning and creating image folders.'+bcolors.ENDC)
+            print(bcolors.OKBLUE + '[INFO] Cleaning and creating image folders.' + bcolors.ENDC)
             try:
                 shutil.rmtree(os.path.join('/diskless/images/', selected_image_name))
                 os.makedirs(os.path.join('/diskless/images/', selected_image_name, 'staging'))
@@ -284,7 +294,7 @@ elif main_action == '3':
                 print(bcolors.FAIL + '[ERROR] Cannot clean or create image folders: ' + str(e) + bcolors.ENDC)
 
             print(bcolors.OKBLUE+'[INFO] Generating new ipxe boot file.'+bcolors.ENDC)
-            boot_file_content = generate_ipxe_boot_file('nfs_staging', selected_image_name, kernel_list[int(selected_kernel)], 'initramfs-kernel-'+kernel_list[int(selected_kernel)].strip('vmlinuz-'))
+            boot_file_content = generate_ipxe_boot_file('nfs_staging', selected_image_name, kernel_list[selected_kernel], 'initramfs-kernel-' + kernel_list[selected_kernel].strip('vmlinuz-'))
             with open(os.path.join(images_path, selected_image_name, 'boot.ipxe'), "w") as ff:
                 ff.write(boot_file_content)
 
@@ -301,7 +311,7 @@ elif main_action == '3':
 
             metadata = dict()
             metadata['image_name'] = selected_image_name
-            metadata['image_kernel'] = kernel_list[int(selected_kernel)]
+            metadata['image_kernel'] = kernel_list[selected_kernel]
             metadata['image_creation_date'] = datetime.today().strftime('%Y-%m-%d')
             metadata['image_type'] = 'nfs'
             metadata['image_status'] = 'staging'
@@ -311,7 +321,7 @@ elif main_action == '3':
                 print(e)
             print(bcolors.OKGREEN+'\n[OK] Done creating image.'+bcolors.ENDC)
 
-    if selected_image_type == '1':  # LIVENET
+    if selected_image_type == 1:  # LIVENET
 
         print(bcolors.OKBLUE+'[INFO] Entering livenet dedicated part.'+bcolors.ENDC)
 
@@ -349,15 +359,15 @@ elif main_action == '3':
             selinux = False
 
         print('Do you want to create a new livenet image with the following parameters:')
-        print('  Image name: \t\t'+selected_image_name)
-        print('  Kernel version: \t'+kernel_list[int(selected_kernel)])
-        print('  Root password: \t'+password_raw)
-        print('  Image profile: \t'+selected_livenet_type)
-        print('  Image size: \t\t'+str(livenet_size)+'M')
-        print('  SSH pubkey: \t\t'+str(selected_ssh_pub_key))
-        print('  Enable SELinux: \t'+str(answer_selinux))
+        print('  Image name: \t\t' + selected_image_name)
+        print('  Kernel version: \t' + kernel_list[selected_kernel])
+        print('  Root password: \t' + password_raw)
+        print('  Image profile: \t' + selected_livenet_type)
+        print('  Image size: \t\t' + str(livenet_size)+'M')
+        print('  SSH pubkey: \t\t' + str(selected_ssh_pub_key))
+        print('  Enable SELinux: \t' + str(answer_selinux))
         if selected_livenet_type == '4':
-            print('  Additional packages: \t'+selected_packages_list)
+            print('  Additional packages: \t' + selected_packages_list)
 
         answer = str(input("Confirm ? Enter yes or no: ").lower().strip())
 
@@ -389,12 +399,12 @@ elif main_action == '3':
             except OSError:
                 print(bcolors.FAIL + '[ERROR] Cannot clean or create image folder ' + os.path.join(images_path, selected_image_name) + bcolors.ENDC)
 
-            print(bcolors.OKBLUE+'[INFO] Generating new ipxe boot file.'+bcolors.ENDC)
-            boot_file_content = generate_ipxe_boot_file('livenet', selected_image_name, kernel_list[int(selected_kernel)], 'initramfs-kernel-'+kernel_list[int(selected_kernel)].strip('vmlinuz-'), selinux)
+            print(bcolors.OKBLUE + '[INFO] Generating new ipxe boot file.' + bcolors.ENDC)
+            boot_file_content = generate_ipxe_boot_file('livenet', selected_image_name, kernel_list[selected_kernel], 'initramfs-kernel-' + kernel_list[selected_kernel].strip('vmlinuz-'), selinux)
             with open(os.path.join(images_path, selected_image_name, 'boot.ipxe'), "w") as ff:
                 ff.write(boot_file_content)
 
-            print(bcolors.OKBLUE+'[INFO] Creating empty image file, format and mount it.'+bcolors.ENDC)
+            print(bcolors.OKBLUE + '[INFO] Creating empty image file, format and mount it.' + bcolors.ENDC)
             os.mkdir(os.path.join(image_working_directory, 'LiveOS'))
             os.system('dd if=/dev/zero of=' + os.path.join(image_working_directory, 'LiveOS/rootfs.img') + ' bs=1M count=' + str(livenet_size))
             os.system('mkfs.xfs ' + os.path.join(image_working_directory, 'LiveOS/rootfs.img'))
@@ -433,7 +443,7 @@ elif main_action == '3':
             print(bcolors.OKBLUE+'[INFO] Setting image information.'+bcolors.ENDC)
             with open(os.path.join(installroot, 'etc/os-release'), 'a') as ff:
                 ff.writelines(['BLUEBANQUISE_IMAGE_NAME="{0}"\n'.format(selected_image_name),
-                               'BLUEBANQUISE_IMAGE_KERNEL="{0}"\n'.format(kernel_list[int(selected_kernel)]),
+                               'BLUEBANQUISE_IMAGE_KERNEL="{0}"\n'.format(kernel_list[selected_kernel]),
                                'BLUEBANQUISE_IMAGE_DATE="{0}"\n'.format(datetime.today().strftime('%Y-%m-%d'))])
 
             if selinux:
@@ -466,7 +476,7 @@ elif main_action == '3':
             print(bcolors.OKBLUE+'[INFO] Registering new image.'+bcolors.ENDC)
             metadata = dict()
             metadata['image_name'] = selected_image_name
-            metadata['image_kernel'] = kernel_list[int(selected_kernel)]
+            metadata['image_kernel'] = kernel_list[selected_kernel]
             metadata['image_creation_date'] = datetime.today().strftime('%Y-%m-%d')
             metadata['image_creation_timestamp'] = int(datetime.now().timestamp())
             metadata['image_selinux_enabled'] = selinux
@@ -510,7 +520,7 @@ elif main_action == '4':
             print(bcolors.FAIL+'[ERROR] No image found!'+bcolors.ENDC)
             exit(1)
 
-        selected_image = int(select_from_list(images_list, 'image to work with', -1))
+        selected_image = select_from_list(images_list, 'image to work with')
         selected_image_name = images_list[selected_image]
 
         image_info = read_yaml(os.path.join(images_path, selected_image_name, 'image_metadata.yml'))
@@ -518,7 +528,7 @@ elif main_action == '4':
 
         kernel_list = load_kernel_list(kernels_path)
         if len(kernel_list) > 0:
-            selected_kernel = select_from_list(kernel_list, 'a new kernel to use in the available kernels list', -1)
+            selected_kernel = select_from_list(kernel_list, 'a new kernel to use in the available kernels list')
         else:
             print(bcolors.FAIL+'[ERROR] No kernel found!'+bcolors.ENDC)
             exit(1)
@@ -528,16 +538,16 @@ elif main_action == '4':
         filebuffer = file.readlines()
         for i in range(len(filebuffer)):
             if 'image-kernel' in filebuffer[i]:
-                filebuffer[i] = 'set image-kernel '+kernel_list[int(selected_kernel)]+'\n'
+                filebuffer[i] = 'set image-kernel '+kernel_list[selected_kernel]+'\n'
             if 'image-initramfs' in filebuffer[i]:
-                filebuffer[i] = 'set image-initramfs '+'initramfs-kernel-'+kernel_list[int(selected_kernel)].strip('vmlinuz-')+'\n'
+                filebuffer[i] = 'set image-initramfs '+'initramfs-kernel-'+kernel_list[selected_kernel].strip('vmlinuz-')+'\n'
         file.close
         file = open(os.path.join(images_path, selected_image_name, 'boot.ipxe'), 'w')
         file.writelines(filebuffer)
         file.close
         try:
             image_info = read_yaml(os.path.join(images_path, selected_image_name, 'image_metadata.yml'))
-            image_info['image_kernel'] = kernel_list[int(selected_kernel)]
+            image_info['image_kernel'] = kernel_list[selected_kernel]
             write_yaml(os.path.join(images_path, selected_image_name, 'image_metadata.yml'), image_info)
         except Exception as e:
             print(e)
@@ -550,7 +560,7 @@ elif main_action == '4':
             print(bcolors.FAIL+'[ERROR] No image found!'+bcolors.ENDC)
             exit(1)
 
-        selected_image = int(select_from_list(images_list, 'image to work with', -1))
+        selected_image = select_from_list(images_list, 'image to work with')
         selected_image_name_copy = images_list[selected_image]
 
         image_info = read_yaml(os.path.join(images_path, selected_image_name_copy, 'image_metadata.yml'))
@@ -649,7 +659,7 @@ elif main_action == '4':
                 print(bcolors.FAIL + '[ERROR] No image found.' + bcolors.ENDC)
                 exit(1)
 
-            selected_image = int(select_from_list(images_list, 'image to work with', -1))
+            selected_image = select_from_list(images_list, 'image to work with')
             selected_image_name = images_list[selected_image]
 
             image_working_directory = os.path.join(image_working_directory_base, selected_image_name)
@@ -704,7 +714,7 @@ elif main_action == '4':
                 print(bcolors.FAIL + '[ERROR] No image found.' + bcolors.ENDC)
                 exit(1)
 
-            selected_image = int(select_from_list(images_list, 'image to work with', -1))
+            selected_image = select_from_list(images_list, 'image to work with')
             selected_image_name = images_list[selected_image]
 
             image_working_directory = os.path.join(image_working_directory_base, selected_image_name)
@@ -746,7 +756,7 @@ elif main_action == '4':
                 print(bcolors.FAIL + '[ERROR] No image found.' + bcolors.ENDC)
                 exit(1)
 
-            selected_image = int(select_from_list(images_list, 'image to work with', -1))
+            selected_image = select_from_list(images_list, 'image to work with')
             selected_image_name = images_list[selected_image]
 
             image_working_directory = os.path.join(image_working_directory_base, selected_image_name)
@@ -846,7 +856,7 @@ elif main_action == '4':
             print(bcolors.OKGREEN+'[OK] No image found.'+bcolors.ENDC)
             exit(0)
 
-        selected_image = int(select_from_list(images_list, 'image to work with', -1))
+        selected_image = select_from_list(images_list, 'image to work with')
         selected_image_name = images_list[selected_image]
 
         try:
