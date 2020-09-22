@@ -379,6 +379,7 @@ elif main_action == '3':
                 os.makedirs(image_working_directory)
             except FileExistsError:
                 print(bcolors.WARNING + '[WARNING] The directory ' + image_working_directory + ' already exists. Cleaning.' + bcolors.ENDC)
+                os.system('umount ' + os.path.join(image_working_directory, 'LiveOS/rootfs.img'))
                 shutil.rmtree(image_working_directory)
                 os.makedirs(image_working_directory)
             except OSError:
