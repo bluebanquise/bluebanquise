@@ -493,15 +493,18 @@ elif main_action == '4':
     sub_main_action = str(input('-->: ').lower().strip())
 
     if sub_main_action == '1':
-        for i in os.listdir(images_path):
-            image_info = read_yaml(os.path.join(images_path, str(i), 'image_metadata.yml'))
-            print('')
-            print('  Image name: '+str(i))
-            print('    ├── Kernel linked: '+str(image_info['image_kernel']))
-            print('    ├── Image type: '+str(image_info['image_type']))
-            if str(image_info['image_type']) == 'nfs':
-                print('    ├── image status: '+str(image_info['image_status']))
-            print('    └── Image creation date: '+str(image_info['image_creation_date']))
+        for image in os.listdir(images_path):
+            if os.path.exists(os.path.join(images_path, str(image), 'image_metadata.yml')):
+                image_info = read_yaml(os.path.join(images_path, str(image), 'image_metadata.yml'))
+                print('')
+                print('  Image name: '+str(image))
+                print('    ├── Kernel linked: '+str(image_info['image_kernel']))
+                print('    ├── Image type: '+str(image_info['image_type']))
+                if str(image_info['image_type']) == 'nfs':
+                    print('    ├── image status: '+str(image_info['image_status']))
+                print('    └── Image creation date: '+str(image_info['image_creation_date']))
+            else:
+                print(bcolors.WARNING + '[WARNING] The image \'' + image + '\' is incomplete.' + bcolors.ENDC)
 
     elif sub_main_action == '2':
         print('Manage kernels of an image.')
