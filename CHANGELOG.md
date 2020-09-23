@@ -72,18 +72,21 @@ The ansible.cfg file is updated accordingly:
   inventory      = inventory,internal
   ```
 
-With this change, you can remove the files below from your inventory:
+With this change you will need to make the following changes:
 
-  - inventory/group_vars/all/j2_variables/accelerated_mode.yml
-  - inventory/group_vars/all/j2_variables/equipment.yml
-  - inventory/group_vars/all/j2_variables/icebergs.yml
-  - inventory/group_vars/all/j2_variables/network.yml
-  - inventory/group_vars/all/j2_variables/README.md
+Remove the following files from inventory/group_vars/all/j2_variables/ :
 
-To match with the new inventory layout, you can move the configuration file
-*inventory/group_vars/all/j2_variables/internal_variables.yml* to
-*inventory/group_vars/all/general_settings/* and definitely remove the
-directory *inventory/group_vars/all/j2_variables/*.
+  - accelerated_mode.yml
+  - equipment.yml
+  - icebergs.yml
+  - network.yml
+  - README.md
+
+Once deleted, you can then move the configuration file
+inventory/group_vars/all/j2_variables/internal_variables.yml to
+inventory/group_vars/all/general_settings/.
+
+Now delete inventory/group_vars/all/j2_variables/.
 
 ### Breaking changes
 
@@ -155,9 +158,9 @@ Use the commands below to convert existing inventories:
   # rm -r inventory/group_vars/all/networks/
   ```
 
-#### Rename the group_vars/all/all_equipment directory
+#### Rename the group_vars/all/all_equipments directory
 
-The `group_vars/all/all_equipment` directory is renamed
+The `group_vars/all/all_equipments` directory is renamed
 `group_vars/all/equipment_all`.
 
 Use the commands below to convert existing inventories:
@@ -185,14 +188,16 @@ Use the commands below to convert existing inventories:
              -e 's/^  //' \
              -e 's/^\([a-z]\)/ep_\1/' \
   inventory/group_vars/all/equipment_all/equipment_profile.yml \
-  inventory/group_vars/equipment_type*/equipment_profile.yml
+  inventory/group_vars/equipment_*/equipment_profile.yml
 
   # sed -i -e 's/^authentication:$/---/' \
              -e 's/^  //' \
              -e 's/^\([a-z]\)/authentication_\1/' \
   inventory/group_vars/all/equipment_all/authentication.yml \
-  inventory/group_vars/equipment_type*/authentication.yml
+  inventory/group_vars/equipment_*/authentication.yml
   ```
+
+Note: Do not run the sed commands more than once.
 
 #### access_control is not a boolean anymore
 
