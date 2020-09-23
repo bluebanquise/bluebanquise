@@ -1,5 +1,3 @@
 repositories:
   - bluebanquise
   - os
-
-remove_distro_repositories: True

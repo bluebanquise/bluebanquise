@@ -89,6 +89,10 @@ If equipment_profile is:
 
 Then path will be: repositories/production/centos/8.1/$basearch/
 
+For CentOS, the role will disable the default repositories of the distribution.
+If one want to keep the distro repositories, they must define
+`repositories_client_disable_distro_repos: False` in their inventory.
+
 Input
 ^^^^^
 
@@ -108,6 +112,7 @@ Optional inventory vars:
 * ep_operating_system
    * distribution_version
    * repositories_environment
+* repositories_client_disable_distro_repos (CentOS only)
 
 Output
 ^^^^^^
