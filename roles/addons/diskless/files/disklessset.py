@@ -489,6 +489,10 @@ elif main_action == '3':
                 write_yaml(os.path.join(images_path, selected_image_name, 'image_metadata.yml'), metadata)
             except Exception as e:
                 print(e)
+
+            if selinux:
+                os.system('restorecon -Rv {}'.format(os.path.join(images_path, selected_image_name)))
+
             print(bcolors.OKGREEN+'\n[OK] Done creating image.'+bcolors.ENDC)
 
 elif main_action == '4':
