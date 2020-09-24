@@ -28,7 +28,8 @@
     {% else %}{# Assume everything else is x86_64 #}
       {% set ipxe_architecture = 'x86_64' %}
     {% endif %}
-    {% if hostvars[host]['ep_ipxe_embed'] == 'dhcpretry' %} {# Now select embed script #}
+    {% if hostvars[host]['ep_ipxe_embed'] is defined and
+          hostvars[host]['ep_ipxe_embed'] == 'dhcpretry' %} {# Now select embed script #}
       {% set ipxe_embed = 'dhcpretry' %}
     {% else %}
       {% set ipxe_embed = 'standard' %}
