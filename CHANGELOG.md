@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.4.0
+
+### Major changes
+
+#### New roles
+
+  - addons/Lmod: allow to install Lmod and specify custom modulefiles path
+
+
 ## 1.3.0 - 2020-08-31
 
 ### Major changes
