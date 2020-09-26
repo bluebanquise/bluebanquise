@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.4.0
+## 1.4.0 - Next-release
 
 ### Major changes
 
