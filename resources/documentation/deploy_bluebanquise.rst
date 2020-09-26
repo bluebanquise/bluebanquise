@@ -248,8 +248,8 @@ And execute them, using --limit parameter to specify targets them:
 
 .. code-block:: bash
 
-  ansible-playbook /etc/bluebanquise/logins.yml
-  ansible-playbook /etc/bluebanquise/computes.yml --limit c001,c002,c003,c004
+  ansible-playbook /etc/bluebanquise/playbooks/logins.yml
+  ansible-playbook /etc/bluebanquise/playbooks/computes.yml --limit c001,c002,c003,c004
 
 You can see that Ansible will work on computes nodes in parallel, using more CPU
 on the management1 node.
