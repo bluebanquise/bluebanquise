@@ -40,6 +40,7 @@ item bootdeployclone      Deploy already made clone
 #item memtest              Memtest (To check Memory)
 item --gap                Other
 item startshell           iPXE shell (Go to an iPXE shell)
+item startgrubshell       Grub2 shell (Go to a Grub2 shell, EFI only)
 item showinfo             Display system infos
 choose --timeout ${menu-timeout} --default ${menu-default} selected || goto cancel
 set menu-timeout 0
@@ -53,6 +54,12 @@ shell
 set menu-timeout 0
 set submenu-timeout 0
 goto start
+
+:startgrubshell
+echo Booting on a Grub2 shell image...
+sleep 2
+chain http://${next-server}/preboot_execution_environment/bin/${arch}/grub2_shell.img || shell
+exit 1
 
 :showinfo
 echo
