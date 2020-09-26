@@ -9,7 +9,7 @@
   <ul class="lvl2">
     <li>iPXE driver:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['ep_ipxe_driver']}}</span></li>
     <li>iPXE platform:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['ep_ipxe_platform']}}</span></li>
-    <li>iPXE embed script:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['ep_ipxe_embed']}}</span></li>
+    <li>iPXE embed script:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{ hostvars[groups[equipment][0]]['ep_ipxe_embed'] | default('standard') }}</span></li>
     <li>Preserve EFI first boot device during OS deployment:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['ep_preserve_efi_first_boot_device']}}</span></li>
   </ul>
 
