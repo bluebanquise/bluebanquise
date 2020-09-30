@@ -21,11 +21,9 @@
   tags:
     - internal
 
-- name: package █ Install conman and ipmitool
+- name: "package █ Install {{ conman_packages_to_install | join(' ') }} packages"
   package:
-    name:
-      - conman
-      - ipmitool
+    name: "{{ conman_packages_to_install }}"
     state: present
   tags:
     - package
