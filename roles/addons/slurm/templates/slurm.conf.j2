@@ -28,11 +28,13 @@ SlurmdLogFile=/var/log/slurm/slurmd.log
 SlurmctldTimeout=600
 SlurmdTimeout=600
 
-## We don't want a node to go back in pool without sys admin acknoledgement
+## We don't want a node to go back in pool without sys admin acknowledgement
 ReturnToService=0
 
-## If you are using pmi2 interface for MPI
-#MpiDefault=pmi2
+{% if slurm['MpiDefault'] is defined and slurm['MpiDefault'] is not none %}
+## Using pmi/pmi2/pmix interface for MPI
+MpiDefault={{slurm['MpiDefault']}}
+{% endif %}
 
 ## Basic scheduling based on CPU
 SelectTypeParameters=CR_Core_Memory,CR_CORE_DEFAULT_DIST_BLOCK
@@ -42,16 +44,16 @@ SelectType=select/cons_res
 
 ## Nodes list
 {% for equipment_group in slurm['nodes_equipment_groups'] %}
-{% if groups[equipment_group] is defined and not none %}
+{% if groups[equipment_group] is iterable %}
 {% for node in groups[equipment_group] %}
-NodeName={{node}} Procs={{hostvars[node]['equipment_profile']['hardware']['cpu']['cores']}} State=UNKNOWN
+NodeName={{node}} Procs={{hostvars[node]['ep_hardware']['cpu']['cores']}} State=UNKNOWN
 {% endfor %}
 {% endif %}
 {% endfor %}
 
 ## Partitions list
 {% for equipment_group in slurm['nodes_equipment_groups'] %}
-{% if groups[equipment_group] is defined and not none %}
+{% if groups[equipment_group] is iterable %}
 PartitionName={{equipment_group}} MaxTime=INFINITE State=UP Nodes={% for node in groups[equipment_group] %}{% if loop.first %}{{node}}{% else %},{{node}}{% endif %}{% endfor %}
 
 {% endif %}

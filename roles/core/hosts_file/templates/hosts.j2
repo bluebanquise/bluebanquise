@@ -1,113 +1,90 @@
 #jinja2: lstrip_blocks: "True"
-{# Hosts file, Accelerated mode compatible #}
+{# /etc/hosts file template. #}
 {# Benoit Leveugle 2020 #}
-{% import "macros/network.j2" as macro_network with context %}
-{% import "macros/accelerated.j2" as macro_accelerated with context %}
 
-{# Macro to avoid redundancy #}
-{# This macro should cover all technical part, and be compatible with both normal and accelerated mode #}
-{% macro write_host_3(host,host_dict,host_node_main_network_interface,host_iceberg) %}
+{# Macro to provide an host current iceberg #}
+{# Equivalent to j2_current_iceberg, but without hostvars requirement #}
+{% macro node_current_iceberg(host) %}
+  {% if icebergs_system == false %}
+{{iceberg_naming+'1'}}
+  {% else %}
+    {% for icb_group in ( groups | select('match','^'+iceberg_naming+'[a-zA-Z0-9]+') | list | sort ) %}
+      {% if host in groups[icb_group] %}
+{{icb_group | trim}}
+        {% break %}
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+{% endmacro %}
 
-  {#- Write host #}
-  {% if host_dict['network_interfaces'] is defined and not none and host_dict['network_interfaces'] and host_dict['network_interfaces'] is iterable %}
+{# Macro to write host in file #}
+{% macro write_host(host,host_dict,current_iceberg) %}
 
-    {#- Gather global alias and alias (icebergs related) #}
+  {%- if host_dict['network_interfaces'] is defined and host_dict['network_interfaces'] is iterable %}
+    {% set host_iceberg = node_current_iceberg(host) | trim %}
+    {% set host_resolution_network = host_dict['network_interfaces'][0].network %}{# equivalent to j2_node_main_resolution_network, but no need for a macro here #}
     {% set alias_list = [] %}
-    {% if host_dict['global_alias'] is defined and not none %}
+    {% if host_dict['global_alias'] is defined and host_dict['global_alias'] is not none %}
       {% for alias in host_dict['global_alias'] %}{{ alias_list.append(alias) }}{% endfor %}
     {% endif %}
-    {% if host_dict['alias'] is defined and not none and host_iceberg == j2_current_iceberg %}
+    {% if host_dict['alias'] is defined and host_dict['alias'] is not none and host_iceberg == current_iceberg %}
       {% for alias in host_dict['alias'] %}{{ alias_list.append(alias) }}{% endfor %}
     {% endif %}
 
-    {%- for interface, interface_vars in host_dict['network_interfaces'].items() %}
-      {% if interface_vars.ip4 is defined and not none and interface_vars.network is defined and not none %}
-        {# Check if a global network has been defined and host is member of its group #}
-        {% if (global_network_settings is defined and not none) and (global_network_settings.enable_global_network is defined and not none) and (global_network_settings.global_network_group is defined and not none) and (host in groups[global_network_settings.global_network_group]) %}
-          {% if interface_vars.network == global_network_settings.global_network %}
-{{interface_vars.ip4}} {{host}} {{host}}.{{domain_name}} {{host}}-{{interface_vars.network}} {{alias_list|join(' ')}}
-          {% else %}
-{{interface_vars.ip4}} {{host}}-{{interface_vars.network}}
-          {% endif %}
+    {%- for nic in host_dict['network_interfaces'] %}
+      {% if nic.ip4 is defined and nic.ip4 is not none and nic.network is defined and nic.network is not none %}
+        {% if nic.network == host_resolution_network %}
+{{ nic.ip4 }} {{ host }} {{ host }}.{{ domain_name }} {{ host }}-{{ nic.network }} {{ alias_list|join(' ') }}
         {% else %}
-          {% if interface == host_node_main_network_interface %}
-{{interface_vars.ip4}} {{host}} {{host}}.{{domain_name}} {{host}}-{{interface_vars.network}} {{alias_list|join(' ')}}
-          {% else %}
-{{interface_vars.ip4}} {{host}}-{{interface_vars.network}}
-          {% endif %}
+{{ nic.ip4 }} {{ host }}-{{ nic.network }}
         {% endif %}
       {% endif %}
     {% endfor %}
   {% endif %}
 
-  {#- Write BMC #}
-  {% if host_dict['bmc'] is defined and not none %}
-
-  {#- Gather BMC global alias and alias (icebergs related) #}
+  {%- if host_dict['bmc'] is defined and host_dict['bmc'] is not none %}
     {% set bmc_alias_list = [] %}
-    {% if host_dict['bmc']['global_alias'] is defined and not none %}
+    {% if host_dict['bmc']['global_alias'] is defined and host_dict['bmc']['global_alias'] is not none %}
       {% for alias in host_dict['bmc']['global_alias'] %}{{ bmc_alias_list.append(alias) }}{% endfor %}
     {% endif %}
-    {% if host_dict['bmc']['alias'] is defined and not none and host_iceberg == j2_current_iceberg %}
+    {% if host_dict['bmc']['alias'] is defined and host_dict['bmc']['alias'] is not none and host_iceberg == current_iceberg %}
       {% for alias in host_dict['bmc']['alias'] %}{{ bmc_alias_list.append(alias) }}{% endfor %}
     {% endif %}
-
-    {%- if (host_dict['bmc'].name is defined and not none) and (host_dict['bmc'].ip4 is defined and not none) %}
- {{host_dict['bmc'].ip4}} {{host_dict['bmc'].name}} {{bmc_alias_list|join(' ')}}
+    {% if (host_dict['bmc'].name is defined and host_dict['bmc'].name is not none) and (host_dict['bmc'].ip4 is defined and host_dict['bmc'].ip4 is not none) %}
+{{ host_dict['bmc'].ip4 }} {{ host_dict['bmc'].name }} {{ bmc_alias_list|join(' ') }}
     {% endif %}
   {% endif -%}
 
 {% endmacro %}
 
 #### Blue Banquise file ####
-## {{ansible_managed}}
+## {{ ansible_managed }}
 
 127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
 ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
 
 {% if icebergs_system == true and hosts_file['range'] == 'iceberg' %}
-{% set range = groups[j2_current_iceberg] %}
-{% for host in groups[managements_group_name] %}
-{% if hostvars[host]['iceberg_master'] == j2_current_iceberg %}
+  {% set range = groups[j2_current_iceberg] %}
+  {% for host in groups[managements_group_name] %}
+    {% if hostvars[host]['iceberg_master'] == j2_current_iceberg %}
 {{ range.append(host) }}
-{% endif %}
-{% endfor %}
+    {% endif %}
+  {% endfor %}
 {% else %}
-{% set range = groups['all'] %}
+  {% set range = groups['all'] %}
 {% endif %}
 
 ## Internal hosts
 
+{% set current_iceberg = j2_current_iceberg %}
 {% for host in range %}
-{{write_host_3(host,hostvars[host],hostvars[host]['j2_node_main_network_interface'],hostvars[host]['j2_current_iceberg'])}}
+{{ write_host(host,hostvars[host],current_iceberg) }}
 {% endfor %}
 
-{#
-{% set main_host = hostvars[inventory_hostname] %}
-{% for host in range %}
-{% set host_icb = (macro_accelerated.node_current_iceberg(host)|trim) %}
-{% set host_mg = (macro_accelerated.node_master_group(host)|trim) %}
-{% set host_eqg = (macro_accelerated.node_equipment_group(host)|trim) %}
-{% set host_definition = main_host[host_mg]['children'][host_eqg]['hosts'][host] %}
-{% set host_nic = host_definition['network_interfaces'] %}
-{% set host_bmc = host_definition['bmc'] %}
-{% set host_icb_net = (management_networks_naming + (host_icb | replace(iceberg_naming,' ') | trim | string)) %}
-{% set host_node_main_network = (macro_network.node_main_network(host_nic,host_icb_net) | trim) %}
-{% set host_node_main_network_interface = (macro_network.node_main_network_interface(host_nic,host_node_main_network) | trim) %}
-{% set alias_list = [] %}
-{% if host_definition['global_alias'] is defined and not none %}
-  {% for alias in host_definition['global_alias'] %}{{ alias_list.append(alias) }}{% endfor %}
-{% endif %}
-{% if host_definition['alias'] is defined and not none and host_icb == j2_current_iceberg %}
-  {% for alias in host_definition['alias'] %}{{ alias_list.append(alias) }}{% endfor %}
-{% endif %}
-{{write_host_2(host,host_nic,host_node_main_network_interface,alias_list,host_bmc)}}
-{% endfor %}
-#}
 ## External hosts
 
 {% if external_hosts is defined and external_hosts is not none and external_hosts %}
-{% for host in external_hosts %}
-{{external_hosts[host]}} {{host}}
-{% endfor %}
+  {% for host in external_hosts %}
+{{ external_hosts[host] }} {{ host }}
+  {% endfor %}
 {% endif %}

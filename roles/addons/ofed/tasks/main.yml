@@ -1,6 +1,6 @@
 ---
 
-- name: Package
+- name: package █ Install infiniband minimal packages
   package:
     name: "{{ item }}"
     state: present
@@ -10,18 +10,13 @@
     - libibverbs-devel
     - libibumad
     - infiniband-diags
-
-- name: Enable/disable services
-  service:
-    name: rdma
-    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
   tags:
-    - service
+    - package
 
-- name: Start services
+- name: service █ Enforce rdma state
   service:
     name: rdma
+    enabled: yes
     state: started
-  when: (start_services | bool)
   tags:
     - service

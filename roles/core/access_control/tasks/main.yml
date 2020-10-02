@@ -1,0 +1,5 @@
+---
+- name: include_tasks ░ Use OS dedicated task
+  include_tasks: "{{ (ansible_facts.os_family|lower|replace(' ','_')) }}_{{ ansible_facts.distribution_major_version }}.yml"
+  tags:
+    - internal

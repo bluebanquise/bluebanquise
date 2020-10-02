@@ -1,0 +1,3 @@
+---
+dhcp_server_default_lease_time: 600 # Consider to increase once in production
+dhcp_server_max_lease_time: 7200 # Same

@@ -1,0 +1,5 @@
+---
+bluebanquise_packages_to_install:
+  - ansible
+  - python2-jmespath
+  - python-netaddr

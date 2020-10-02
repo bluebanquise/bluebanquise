@@ -63,6 +63,8 @@ If using match, because this features is using a specific 'hack' in the dhcp ser
 Changelog
 ^^^^^^^^^
 
+* 1.0.4: Update to new network_interfaces syntax. Benoit Leveugle <benoit.leveugle@gmail.com>
+* 1.0.3: Added support of multiple DNS servers. Bruno Travouillon <devel@travouillon.fr>
 * 1.0.2: Added Ubuntu 18.04 compatibility. johnnykeats <johnny.keats@outlook.com>
 * 1.0.1: Documentation. johnnykeats <johnny.keats@outlook.com>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>

@@ -1,0 +1,44 @@
+---
+- name: include_vars ░ Gather OS specific variables
+  # This task gathers variables defined in OS specific files.
+  #
+  # Search vars in:
+  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
+  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
+  #  - <distribution>.yml            # eg. CentOS.yml
+  #  - <os_family>.yml               # eg. RedHat.yml
+  #
+  # If no OS specific file is found, the role will default to vars/main.yml
+  #
+  include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family }}.yml"
+      skip: true
+  tags:
+    - internal
+
+- name: "package █ Install {{ firewall_packages_to_install | join(' ') }} packages"
+  package:
+    name: "{{ firewall_packages_to_install }}"
+    state: present
+  tags:
+    - package
+
+- name: "service █ Manage {{ firewall_services_to_start | join(' ') }} state"
+  service:
+    name: "{{ item }}"
+    enabled: "{{ (ep_firewall | bool) | ternary('yes','no') }}"
+    state: "{{ (ep_firewall | bool) | ternary('started', 'stopped') }}"
+  loop: "{{ firewall_services_to_start }}"
+  tags:
+    - service
+
+- name: "include_tasks ░ Configure firewall: {{ ansible_facts.os_family }}"
+  include_tasks: "{{ ansible_facts.os_family }}.yml"
+  when: ep_firewall
+  tags:
+    - internal

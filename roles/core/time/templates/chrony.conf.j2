@@ -1,34 +1,43 @@
-{% import "macros/network.j2" as macro_network with context %}
+#jinja2: lstrip_blocks: "True"
 #### Blue Banquise file ####
-## {{ansible_managed}}
+## {{ ansible_managed }}
 
-# External servers/pool if asked
-{% if external_time.time_server.server and time_profile == 'server' %}
-{% for external_server in external_time.time_server.server %}
-server {{external_server}}
-{% endfor %}
-{% endif %}
-{% if external_time.time_server.pool and time_profile == 'server' %}
-{% for external_pool in external_time.time_server.pool %}
-pool {{external_pool}} iburst maxsources 3
-{% endfor %}
-{% endif %}
-{% if external_time.time_client.server and time_profile == 'client' %}
-{% for external_server in external_time.time_client.server %}
-server {{external_server}}
-{% endfor %}
-{% endif %}
-{% if external_time.time_client.pool and time_profile == 'client' %}
-{% for external_pool in external_time.time_client.pool %}
-pool {{external_pool}} iburst maxsources 3
-{% endfor %}
-{% endif %}
+{% macro node_main_network(macro_network_interfaces,macro_current_iceberg_network) %}
+{{ macro_network_interfaces | selectattr('network','defined') | selectattr('network','match','^'+macro_current_iceberg_network+'-[a-zA-Z0-9]+') | map(attribute='network') | list | first }}
+{% endmacro %}
+
+{% set external = false %}
+{% if external_time['time_'+time_profile]['pool'] is defined and
+      external_time['time_'+time_profile]['pool'] is iterable %}
+  {% set external = true %}
+# External pool
+  {% for external_pool in external_time['time_'+time_profile]['pool'] %}
+pool {{ external_pool }} iburst maxsources 3
+  {% endfor %}
+{% elif external_time['time_'+time_profile]['server'] is defined and
+        external_time['time_'+time_profile]['server'] is iterable %}
+  {% set external = true %}
+# External servers
+  {% for external_server in external_time['time_'+time_profile]['server'] %}
+server {{ external_server }}
+  {% endfor %}
+{% endif -%}
 
 {% if time_profile == 'client' %}
-# Server to bind to
-server {{networks[j2_node_main_network]['services_ip']['time_ip']}}
-{% elif time_profile == 'server' and icebergs_system == true and iceberg_master != 'top' %}{# We need here to get master island ntp ip, depending of the subnet this node is member of.#}
-server {{networks[(macro_network.node_main_network(network_interfaces,management_networks_naming+(iceberg_master|replace(iceberg_naming,' ')| trim | string))| trim)]['services_ip']['time_ip']}}
+  {% set time_sources = networks[j2_node_main_network]['services_ip']['time_ip'] %}
+{% elif time_profile == 'server' and icebergs_system == true and iceberg_master != 'top' %}
+  {# We need here to get master island ntp ip, depending of the subnet this node is member of.#}
+  {% set time_sources = networks[(node_main_network(network_interfaces,management_networks_naming+(iceberg_master|replace(iceberg_naming,' ')| trim | string))| trim)]['services_ip']['time_ip'] %}
+{% endif -%}
+
+{% if not external and time_sources is defined and time_sources is string %}
+# Source server to bind to
+server {{ time_sources }} iburst
+{% elif not external and time_sources is defined and time_sources is iterable %}
+# Source servers to bind to
+  {% for time_ip in time_sources %}
+server {{ time_ip }} iburst
+  {% endfor %}
 {% endif %}
 
 # Record the rate at which the system clock gains/losses time.
@@ -42,26 +51,25 @@ makestep 1.0 3
 rtcsync
 
 {% if time_profile == 'server' %}
-
 # Allow NTP client access from local network.
-{% for nic in network_interfaces %}
-{% if network_interfaces[nic]['network'] is defined and not none %}
-allow {{networks[network_interfaces[nic]['network']]['subnet']}}/{{networks[network_interfaces[nic]['network']]['prefix']}}
-{% endif %}
-{% endfor %}
+  {% for nic in network_interfaces %}
+    {% if nic.network is defined and nic.network is not none %}
+allow {{ networks[nic.network]['subnet'] }}/{{ networks[nic.network]['prefix'] }}
+    {% endif %}
+  {% endfor %}
 
 # Serve time even if not synchronized to a time source.
-# Listen to local clock
-server 127.127.1.0
-# Very bad time source
-{% if iceberg_level is defined and not none %}
+# Fairly unreliable time source
+  {% if iceberg_level is defined and iceberg_level is not none %}
+    {% if (iceberg_level|int) > 3 %}
+local stratum 15
+    {% else %}
 local stratum {{ 12+(iceberg_level|int) }}
-{% else %}
+    {% endif %}
+  {% else %}
 local stratum 12
-{% endif %}
-
+  {% endif %}
 {% endif %}
 
 # Specify directory for log files.
 logdir /var/log/chrony
-

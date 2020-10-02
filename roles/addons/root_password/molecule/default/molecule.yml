@@ -1,0 +1,24 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: docker
+lint: |
+  set -e
+  yamllint .
+  ansible-lint
+  flake8
+platforms:
+  - name: instance
+    image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
+    pre_build_image: true
+provisioner:
+  name: ansible
+  inventory:
+    host_vars:
+      instance:
+        # password: root
+        # FIXME: https://github.com/ansible-community/molecule/issues/993
+        authentication_root_password_sha512: "{{ lookup('file', 'password_hash') }}"
+verifier:
+  name: ansible

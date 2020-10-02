@@ -1,13 +1,16 @@
+#jinja2: lstrip_blocks: True
 #### Blue Banquise file ####
-## {{ansible_managed}}
+## {{ ansible_managed }}
 
 options {
   listen-on port 53 {
     127.0.0.1;
-{% for network in (networks | select('match',(j2_current_iceberg_network+'-[0-9]+')) | list | unique | sort) %}
-{% if networks[network]['is_in_dns'] is defined and networks[network]['is_in_dns'] == true %}
+{% for network in j2_management_networks %}
+  {% if networks[network]['is_in_dns'] is defined and networks[network]['is_in_dns'] == true %}
+    {% if networks[network]['services_ip']['dns_ip'] is defined and networks[network]['services_ip']['dns_ip'] is not none %}
     {{networks[network]['services_ip']['dns_ip']}};
-{% endif %}
+    {% endif %}
+  {% endif %}
 {% endfor %}
   };
 
@@ -19,18 +22,18 @@ options {
 
   allow-query {
     localhost;
-{% for network in (networks | select('match',(j2_current_iceberg_network+'-[0-9]+')) | list | unique | sort) %}
-{% if (networks[network]['is_in_dns'] is defined and not none) and (networks[network]['is_in_dns'] == true) %}
-    {{networks[network]['subnet']}}/{{networks[network]['prefix']}};
-{% endif %}
+{% for network in j2_management_networks %}
+  {% if networks[network]['is_in_dns'] is defined and networks[network]['is_in_dns'] == true %}
+    {{ networks[network]['subnet'] }}/{{ networks[network]['prefix'] }};
+  {% endif %}
 {% endfor %}
   };
 
-{% if external_dns.dns_server is defined and not none and external_dns.dns_server %}
+{% if external_dns.dns_server is defined and external_dns.dns_server %}
   forwarders {
-{% for forwarder in external_dns.dns_server %}
-    {{forwarder}};
-{% endfor %}
+  {% for forwarder in external_dns.dns_server %}
+    {{ forwarder }};
+  {% endfor %}
   };
 {% else %}
   recursion no;
@@ -61,16 +64,16 @@ zone "." IN {
   file "named.ca";
 };
 
-zone"{{domain_name}}" IN {
-type master;
-file "forward";
-allow-update { none; };
+zone "{{ domain_name }}" IN {
+  type master;
+  file "forward";
+  allow-update { none; };
 };
 
-zone"in-addr.arpa" IN {
-type master;
-file "reverse";
-allow-update { none; };
+zone "in-addr.arpa" IN {
+  type master;
+  file "reverse";
+  allow-update { none; };
 };
 
 include "/etc/named.rfc1912.zones";

@@ -3,7 +3,5 @@ iceberg_master = iceberg1
 iceberg_level = 2
 
 [iceberg2]
-ancel
-arngrim
-einherjar[2:10]
-
+management2
+c[001:004]

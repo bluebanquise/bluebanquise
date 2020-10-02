@@ -1,0 +1,16 @@
+# BlueBanquise internal j2_ variables.
+# Network
+# (c) 2019-2020 Benoit Leveugle
+
+# Main resolution network. The network on which host can be ping by direct name. (ex: ping c001).
+j2_node_main_resolution_network: "{{ network_interfaces[0].network }}"
+
+# Main network. The network used by Ansible to deploy configuration (related to ssh).
+# Also the network used by the host to get services ip.
+j2_node_main_network: "{{ network_interfaces | selectattr('network','defined') | selectattr('network','match','^'+j2_current_iceberg_network+'-[a-zA-Z0-9]+') | map(attribute='network') | list | first }}"
+
+# Main network interface. Same as main network, but provides interface name instead of network.
+j2_node_main_network_interface: "{{ network_interfaces | selectattr('network','defined') | selectattr('network','match','^'+j2_current_iceberg_network+'-[a-zA-Z0-9]+') | map(attribute='interface') | list | first }}"
+
+# List of management networks.
+j2_management_networks: "{{ networks | select('match','^'+j2_current_iceberg_network+'-[a-zA-Z0-9]+') | list | unique | sort }}"

@@ -1,0 +1,5 @@
+---
+nfs_client_packages_to_install:
+  - nfs-utils
+  - python3-libselinux
+  - python3-policycoreutils

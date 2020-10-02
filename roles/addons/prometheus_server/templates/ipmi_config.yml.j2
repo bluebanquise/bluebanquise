@@ -3,9 +3,11 @@
 
 modules:
 {% for equipment in j2_equipment_groups_list %}
+{% if hostvars[groups[equipment][0]]['monitoring'] is defined and hostvars[groups[equipment][0]]['monitoring'] is not none and hostvars[groups[equipment][0]]['monitoring']['exporters'] is defined and hostvars[groups[equipment][0]]['monitoring']['exporters'] is not none and hostvars[groups[equipment][0]]['monitoring']['exporters'] is iterable and "ipmi_exporter" in hostvars[groups[equipment][0]]['monitoring']['exporters'] %}
+
   {{equipment}}:
-    user: {{hostvars[groups[equipment][0]]['equipment_profile']['equipment_authentication']['user']}}
-    pass: {{hostvars[groups[equipment][0]]['equipment_profile']['equipment_authentication']['password']}}
+    user: {{hostvars[groups[equipment][0]]['ep_equipment_authentication']['user']}}
+    pass: {{hostvars[groups[equipment][0]]['ep_equipment_authentication']['password']}}
     driver: "LAN_2_0"
     privilege: "user"
     timeout: 10000
@@ -15,4 +17,5 @@ modules:
     - chassis
     exclude_sensor_ids:
 
+{% endif %}
 {% endfor %}

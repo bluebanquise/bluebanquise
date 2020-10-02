@@ -1,9 +1,6 @@
 ---
-# This is an example playbook to execute Ansible tests.
-
 - name: Verify
   hosts: all
-
   tasks:
     - name: Check if chronyd is installed
       package_facts:
@@ -12,10 +9,115 @@
       assert:
         that: "'chrony' in ansible_facts.packages"
 
-    - name: Ansible fact - ansible_date_time.iso8601
+    - name: Ansible fact - ansible_facts._date_time.iso8601
       debug:
-        msg: "Timestamp format: {{ ansible_date_time }}"
+        msg: "Timestamp format: {{ ansible_facts.date_time }}"
 
     - name: assert timezone to Europe/Paris
       assert:
-        that: "'CEST' in ansible_date_time.tz"
+        that: "'CEST' in ansible_facts.date_time.tz"
+
+    - name: Set chrony.conf path for RedHat OS family
+      set_fact:
+        chrony_conf_path: /etc/chrony.conf
+      when: ansible_facts.os_family == "RedHat"
+
+    - name: Set chrony.conf path for Debian OS family
+      set_fact:
+        chrony_conf_path: /etc/chrony/chrony.conf
+      when: ansible_facts.os_family == "Debian"
+
+    - name: Read /etc/chrony.conf
+      slurp:
+        src: "{{ chrony_conf_path }}"
+      register: chrony_conf
+
+    - name: Display /etc/chrony.conf
+      debug:
+        msg: "{{ chrony_conf['content'] | b64decode }}"
+
+- name: Verify client with single source server
+  hosts:
+    - client-single-source
+  tasks:
+    - name: Check presence of 1 server
+      assert:
+        that: chrony_conf['content'] | b64decode |
+                regex_findall(("^server "), multiline=True) | length == 1
+    - name: Check the server
+      assert:
+        that: chrony_conf['content'] | b64decode |
+                regex_search(("^server 10.11.0.1"), multiline=True)
+    - name: Check absence of pool
+      assert:
+        that: chrony_conf['content'] | b64decode |
+                regex_findall(("^pool "), multiline=True) | length == 0
+
+- name: Verify client with multiple source servers
+  hosts:
+    - client-multi-sources
+  tasks:
+    - name: Check presence of 2 servers
+      assert:
+        that: chrony_conf['content'] | b64decode |
+                regex_findall(("^server "), multiline=True) | length == 2
+    - name: Check each server
+      assert:
+        that: chrony_conf['content'] | b64decode |
+                regex_search(("^server {{ item }}"), multiline=True)
+      loop:
+        - 10.12.0.1
+        - 10.12.0.2
+    - name: Check absence of pool
+      assert:
+        that: chrony_conf['content'] | b64decode |
+                regex_findall(("^pool "), multiline=True) | length == 0
+
+- name: Verify host with external pool
+  hosts:
+    - server-ext-pool
+    - client-ext-pool
+  tasks:
+    - name: Check presence of 1 pool
+      assert:
+        that: chrony_conf['content'] | b64decode |
+                regex_findall(("^pool "), multiline=True) | length == 1
+    - name: Check absence of server
+      assert:
+        that: chrony_conf['content'] | b64decode |
+                regex_findall(("^server "), multiline=True) | length == 0
+
+- name: Verify host with external servers
+  hosts:
+    - server-ext-servers
+    - client-ext-servers
+  tasks:
+    - name: Check presence of 3 servers
+      assert:
+        that: chrony_conf['content'] | b64decode |
+                regex_findall(("^server "), multiline=True) | length == 3
+    - name: Check each server
+      assert:
+        that: chrony_conf['content'] | b64decode |
+                regex_search(("^server {{ item }}"), multiline=True)
+      loop:
+        - 0.pool.ntp.org
+        - 1.pool.ntp.org
+        - 2.pool.ntp.org
+    - name: Check absence of pool
+      assert:
+        that: chrony_conf['content'] | b64decode |
+                regex_findall(("^pool "), multiline=True) | length == 0
+
+- name: Verify servers allow and local params
+  hosts:
+    server
+  tasks:
+    - name: Check presence of expected allowed network
+      assert:
+        that: chrony_conf['content'] | b64decode |
+                regex_findall(("^allow 10.11.0.0/16"), multiline=True)
+    - name: Check presence of local stratum
+      assert:
+        that: chrony_conf['content'] | b64decode |
+                regex_findall(("^local stratum"), multiline=True)

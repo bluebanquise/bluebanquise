@@ -1,0 +1,8 @@
+---
+diskless_apache_user: apache
+diskless_packages_to_install: 
+  - httpd
+  - python3-clustershell
+  - nfs-utils
+  - dracut-live
+  - xfsdump

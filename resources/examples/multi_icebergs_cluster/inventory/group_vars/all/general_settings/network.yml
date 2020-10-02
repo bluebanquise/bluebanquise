@@ -3,13 +3,89 @@
 ## DNS
 domain_name: tumulus.local
 
-## DHCP
-dhcp_settings:
-  default_lease_time: 600 # Consider to increase once in production
-  max_lease_time: 7200 # Same
+## Logical networks
+networks:
 
-## Global network
-global_network_settings:
-#  enable_global_network: true
-  global_network: interconnect-1
-  global_network_group: mg_computes
+  external-1:
+    subnet: 192.168.0.0
+    prefix: 16
+    netmask: 255.255.0.0
+    broadcast: 192.168.255.255
+    gateway: 192.168.0.1
+    is_in_dhcp: false
+    is_in_dns: false
+
+  ice1-1:
+    subnet: 10.1.0.0
+    prefix: 16
+    netmask: 255.255.0.0
+    broadcast: 10.1.255.255
+    dhcp_unknown_range: 10.1.254.1 10.1.254.254
+    gateway: 10.1.2.1
+    is_in_dhcp: true
+    is_in_dns: true
+    services_ip:
+      pxe_ip: 10.1.0.1
+      dns_ip:
+        - 10.1.0.1
+#        - 10.1.0.2 # can add a second management in same iceberg
+      repository_ip: 10.1.0.1
+      authentication_ip: 10.1.0.1
+      time_ip: 10.1.0.1
+      log_ip: 10.1.0.1
+
+  ice2-1:
+    subnet: 10.2.0.0
+    prefix: 16
+    netmask: 255.255.0.0
+    broadcast: 10.2.255.255
+    dhcp_unknown_range: 10.2.254.1 10.2.254.254
+    is_in_dhcp: true
+    is_in_dns: true
+    services_ip:
+      pxe_ip: 10.2.0.1
+      dns_ip: 10.2.0.1
+      repository_ip: 10.2.0.1
+      authentication_ip: 10.2.0.1
+      time_ip: 10.2.0.1
+      log_ip: 10.2.0.1
+
+  ice3-1:
+    subnet: 10.3.0.0
+    prefix: 16
+    netmask: 255.255.0.0
+    broadcast: 10.3.255.255
+    dhcp_unknown_range: 10.3.254.1 10.3.254.254
+    is_in_dhcp: true
+    is_in_dns: true
+    services_ip:
+      pxe_ip: 10.3.0.1
+      dns_ip: 10.3.0.1
+      repository_ip: 10.3.0.1
+      authentication_ip: 10.3.0.1
+      time_ip: 10.3.0.1
+      log_ip: 10.3.0.1
+
+  ice3-2:
+    subnet: 10.4.0.0
+    prefix: 16
+    netmask: 255.255.0.0
+    broadcast: 10.4.255.255
+    dhcp_unknown_range: 10.4.254.1 10.4.254.254
+    is_in_dhcp: true
+    is_in_dns: true
+    services_ip:
+      pxe_ip: 10.4.0.1
+      dns_ip: 10.4.0.1
+      repository_ip: 10.4.0.1
+      authentication_ip: 10.4.0.1
+      time_ip: 10.4.0.1
+      log_ip: 10.4.0.1
+
+  interconnect-1:
+    subnet: 10.20.0.0
+    prefix: 16
+    netmask: 255.255.0.0
+    broadcast: 10.20.255.255
+    is_in_dhcp: false
+    is_in_dns: true

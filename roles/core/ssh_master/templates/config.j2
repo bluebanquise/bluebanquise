@@ -1,31 +1,36 @@
 #jinja2: lstrip_blocks: "True"
-{% import "macros/network.j2" as macro_network with context %}
+
+{% macro node_main_network(macro_network_interfaces,macro_current_iceberg_network) %}
+{{ macro_network_interfaces | selectattr('network','defined') | selectattr('network','match','^'+macro_current_iceberg_network+'-[a-zA-Z0-9]+') | map(attribute='network') | list | first }}
+{% endmacro %}
+
 {# Macro to avoid redundancy #}
 {% macro write_host(host,macro_node_main_network) %}
-Host {{host}}
+Host {{ host }}
     {% if security.ssh.hostkey_checking is not defined or
           security.ssh.hostkey_checking == false %}
     StrictHostKeyChecking no
     UserKnownHostsFile=/dev/null
     {% endif %}
-    Hostname %h-{{macro_node_main_network}}
+    Hostname %h-{{ macro_node_main_network }}
 {% endmacro %}
 #### Blue Banquise file ####
-## {{ansible_managed}}
+## {{ ansible_managed }}
 
 {% if icebergs_system == true %}
 # Icebergs system is on
 {% set range = groups[j2_current_iceberg] %}
-{% for host in groups[managements_group_name] %}
-{% if hostvars[host]['iceberg_master'] == j2_current_iceberg %}
+  {% for host in groups[managements_group_name] %}
+    {% if hostvars[host]['iceberg_master'] == j2_current_iceberg %}
 {{ range.append(host) }}
-{% endif %}
-{% endfor %}
+    {% endif %}
+  {% endfor %}
 {% else %}
-{% set range = groups['all'] %}
+  {% set range = groups['all'] %}
 {% endif %}
 
 {% for host in range %}
-{{write_host(host,(macro_network.node_main_network(hostvars[host]['network_interfaces'],j2_current_iceberg_network)| trim))}}
+{% if hostvars[host]['network_interfaces'] is defined and hostvars[host]['network_interfaces'] is iterable %}
+{{ write_host(host,(node_main_network(hostvars[host]['network_interfaces'],j2_current_iceberg_network)| trim)) }}
+{% endif %}
 {% endfor %}
-

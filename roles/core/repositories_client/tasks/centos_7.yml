@@ -1,26 +1,38 @@
 ---
+- name: set_fact ░ Set static baseurl prefix
+  set_fact:
+    baseurl_prefix:
+      "http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/\
+      {{ ep_operating_system['repositories_environment'] | default('') }}/\
+      {{ ep_operating_system['distribution'] }}/\
+      {{ ep_operating_system['distribution_version'] | default(ep_operating_system['distribution_major_version']) }}/\
+      $basearch/"
 
-- name: Disable CentOS-Base distro repositories
+- name: ini_file █ Disable CentOS-Base distro repositories
+  # In BlueBanquise, the CentOS 7 system repository is installed with the
+  # special repository 'os', thus we disable default repositories if 'os' is
+  # configured.
   ini_file:
     path: "/etc/yum.repos.d/CentOS-Base.repo"
     section: "{{ item }}"
     option: enabled
     value: '0'
     no_extra_spaces: yes
+    create: no
   loop: [ 'base', 'updates', 'extras' ]
-  when: remove_distro_repositories is defined and remove_distro_repositories
-  notify: yum-clean-metadata
+  when:
+    - ( 'os' in repositories ) or
+      ( repositories | selectattr('name', 'defined') | selectattr('name','equalto','os') | list | length == 1 )
+    - repositories_client_disable_distro_repos
+  notify: command █ yum clean metadata
 
-- name: Set baseurl prefix
-  set_fact:
-    baseurl_prefix: "http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/{{ equipment_profile['operating_system']['distribution'] }}/{{ equipment_profile['operating_system']['distribution_version'] }}/{{ equipment_profile['hardware']['cpu']['architecture'] }}/"
-
-- name: Setting repositories
+- name: yum_repository █ Setting repositories
   yum_repository:
     name: "{{ item.name | default(item) }}"
     description: "{{ item.name | default(item) }} gen by Ansible"
-    baseurl: "{{ item.baseurl | default(baseurl_prefix + item.name | default(item)) }}"
+    baseurl: "{{ item.baseurl | default(baseurl_prefix + item.name | default(item)) }}/"
     enabled: "{{ item.enabled | default(1) }}"
+    exclude: "{{ item.exclude | default(omit) }}"
     gpgcheck: "{{ item.gpgcheck | default(0) }}"
     gpgkey: "{{ item.gpgkey | default(omit) }}"
     proxy: "{{ item.proxy | default(omit) }}"

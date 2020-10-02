@@ -1,18 +1,18 @@
-equipment_profile:
+---
 
-  partitioning: |
-    <partitioning config:type="list">
-      <drive>
-        <initialize config:type="boolean">true</initialize>
-        <device>/dev/sda</device>
-        <use>all</use>
-      </drive>
-    </partitioning>
+ep_partitioning: |
+  <partitioning config:type="list">
+    <drive>
+      <initialize config:type="boolean">true</initialize>
+      <device>/dev/sda</device>
+      <use>all</use>
+    </drive>
+  </partitioning>
 
-  operating_system:
-    distribution: opensuse_leap
-    distribution_major_version: 15
-    distribution_version: 15.1
+ep_operating_system:
+  distribution: opensuse_leap
+  distribution_major_version: 15
+  distribution_version: 15.1
 
-  equipment_type: server
+ep_equipment_type: server
 

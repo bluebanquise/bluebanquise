@@ -7,11 +7,11 @@ echo
 
 echo Loading linux ...
 
-kernel http://${next-server}/repositories/{{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']}}/{{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution_version']}}/{{hostvars[groups[item][0]]['equipment_profile']['hardware']['cpu']['architecture']}}/os/install/netboot/ubuntu-installer/amd64/linux preseed/url=http://${next-server}/preboot_execution_environment/equipment_os_configurations/preseed.{{item | replace('equipment_','') | trim}}.cfg auto=true priority=critical locale=en_US.UTF-8 console-setup/charmap=UTF-8 console-keymaps-at/keymaps=pc105 console-setup/layoutcode=us console-setup/ask_detect=false netcfg/choose_interface=auto {{hostvars[groups[item][0]]['equipment_profile']['kernel_parameters']}} {{hostvars[groups[item][0]]['equipment_profile']['console']}} ipxe_next_server=${next-server} mirror/http/hostname=http://${next-server} ${dedicated-parameters}
+kernel http://${next-server}/repositories/{{hostvars[groups[item][0]]['ep_operating_system']['distribution']}}/{{hostvars[groups[item][0]]['ep_operating_system']['distribution_version']}}/{{hostvars[groups[item][0]]['ep_hardware']['cpu']['architecture']}}/os/install/netboot/ubuntu-installer/amd64/linux preseed/url=http://${next-server}/preboot_execution_environment/equipment_os_configurations/preseed.{{item | replace('equipment_','') | trim}}.cfg auto=true priority=critical locale=en_US.UTF-8 console-setup/charmap=UTF-8 console-keymaps-at/keymaps=pc105 console-setup/layoutcode=us console-setup/ask_detect=false netcfg/choose_interface=auto {{hostvars[groups[item][0]]['ep_kernel_parameters']}} {{hostvars[groups[item][0]]['ep_console']}} ipxe_next_server=${next-server} mirror/http/hostname=http://${next-server} ${dedicated-parameters}
 
 echo Loading initial ramdisk ...
 
-initrd http://${next-server}/repositories/{{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution']}}/{{hostvars[groups[item][0]]['equipment_profile']['operating_system']['distribution_version']}}/{{hostvars[groups[item][0]]['equipment_profile']['hardware']['cpu']['architecture']}}/os/install/netboot/ubuntu-installer/amd64/initrd.gz
+initrd http://${next-server}/repositories/{{hostvars[groups[item][0]]['ep_operating_system']['distribution']}}/{{hostvars[groups[item][0]]['ep_operating_system']['distribution_version']}}/{{hostvars[groups[item][0]]['ep_hardware']['cpu']['architecture']}}/os/install/netboot/ubuntu-installer/amd64/initrd.gz
 
 echo ALL DONE! We are ready.
 echo Booting in 2 s ...

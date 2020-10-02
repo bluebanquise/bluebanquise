@@ -1,6 +1,0 @@
-slurm:
-  slurm_packaging: after_17 # Can be before_17 or after_17. If using BlueBanquise packages, use after_17. For OpenHPC 1.3, use before_17.
-  cluster_name: bluebanquise
-  control_machine: management1
-  nodes_equipment_groups:
-    - equipment_typeC

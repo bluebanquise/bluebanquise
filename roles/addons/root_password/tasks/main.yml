@@ -1,0 +1,5 @@
+---
+- name: user █ Set root password
+  user:
+    name: root
+    password: "{{ authentication_root_password_sha512 }}"

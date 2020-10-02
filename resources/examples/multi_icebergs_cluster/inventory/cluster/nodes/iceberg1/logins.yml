@@ -1,22 +1,22 @@
 mg_logins:
   children:
-    equipment_supermicro_sandy_login:
+    equipment_typeL:
       hosts:
-        freya:
+
+        login1:
           bmc:
-            name: bfreya
-            ip4: 10.11.102.1
+            name: blogin1
+            ip4: 10.1.102.1
             mac: 08:00:27:0d:47:95
             network: ice1-1
           network_interfaces:
-            enp0s3:
-              ip4: 10.11.2.1
+            - interface: enp0s3
+              ip4: 10.1.2.1
               mac: 08:00:27:de:42:23
               network: ice1-1
-            enp0s8:
+            - interface: enp0s8
               ip4: 192.168.0.57
               network: external-1
-            enp0s0f1:
+            - interface: ib0
               ip4: 10.20.2.1
               network: interconnect-1
-

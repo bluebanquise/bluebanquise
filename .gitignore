@@ -1,1 +1,37 @@
 pxe
+
+## Don't track inventory and playbooks ##
+/inventory/
+/playbooks/
+
+## VirtualEnv ##
+venv-molecule/
+
+# RPM stuff...
+MANIFEST
+dist
+rpm-build
+
+# Emacs backup and autosave files...
+*~
+.\#*
+\#*
+
+# Eclipse/PyDev stuff...
+.project
+.pydevproject
+
+#VSCode stuff..
+.vscode/
+
+# Vim swap files
+*.swp
+*.swo
+
+# test output
+*.retry
+*.out
+.pytest_cache/
+.tox
+.cache
+.pytest_cache

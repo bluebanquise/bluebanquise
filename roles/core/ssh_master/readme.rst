@@ -4,7 +4,7 @@ SSH master
 Description
 ^^^^^^^^^^^
 
-This role configure the ssh access of know hosts to make this access through nodes main network.
+This role configures the ssh access of inventory known hosts to ensure ssh access through nodes main network.
 
 Instructions
 ^^^^^^^^^^^^
@@ -18,6 +18,15 @@ current iceberg if using icebergs mode), with the following parameters:
 
   Host freya
       Hostname %h-ice1-1
+
+And possibly add :
+
+.. code-block:: text
+
+    StrictHostKeyChecking no
+    UserKnownHostsFile=/dev/null
+
+If asked for.
 
 Note that for this example host, **freya**, the target hostname for ssh is
 %h-ice1-1, which translates to **freya-ice1-1**. This can be seen when invoking
@@ -84,15 +93,35 @@ first one to break in case of uncoherent inventory. If this happens, check your
 inventory, fix it, and remove manually /root/.ssh/config and relaunch its
 generation.
 
+Input
+^^^^^
+
+Mandatory inventory vars:
+
+**hostvars[hosts]**
+
+* network_interfaces[item]
+
+Optional inventory vars:
+
+**hostvars[inventory_hostname]**
+
+* security.ssh.hostkey_checking
+
+Output
+^^^^^^
+
+/root/.ssh/config file
+
 To be done
 ^^^^^^^^^^
 
 Add ProxyJump for icebergs
 
-
 Changelog
 ^^^^^^^^^
 
+* 1.0.3: Update to new network_interfaces syntax. Benoit Leveugle <benoit.leveugle@gmail.com>
+* 1.0.2: Clean. johnnykeats <johnny.keats@outlook.com>
 * 1.0.1: Documentation. johnnykeats <johnny.keats@outlook.com>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
- 

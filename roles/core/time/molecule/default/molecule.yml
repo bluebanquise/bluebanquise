@@ -9,9 +9,66 @@ lint: |
   ansible-lint
   flake8
 platforms:
-  - name: instance
-    image: "geerlingguy/docker-${MOLECULE_DISTRO:-centos8}-ansible:latest"
-    command: "/lib/systemd/systemd"
+  - name: server-ext-pool
+    groups:
+      - server
+    image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
+    override_command: false
+    capabilities:
+      - "SYS_ADMIN"
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    pre_build_image: true
+  - name: server-ext-servers
+    groups:
+      - server
+    image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
+    override_command: false
+    capabilities:
+      - "SYS_ADMIN"
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    pre_build_image: true
+  - name: client-ext-pool
+    groups:
+      - client
+    image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
+    override_command: false
+    capabilities:
+      - "SYS_ADMIN"
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    pre_build_image: true
+  - name: client-ext-servers
+    groups:
+      - client
+    image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
+    override_command: false
+    capabilities:
+      - "SYS_ADMIN"
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    pre_build_image: true
+  - name: client-single-source
+    groups:
+      - client
+    image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
+    override_command: false
+    capabilities:
+      - "SYS_ADMIN"
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    pre_build_image: true
+  - name: client-multi-sources
+    groups:
+      - client
+    image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
+    override_command: false
     capabilities:
       - "SYS_ADMIN"
     volumes:
@@ -20,16 +77,48 @@ platforms:
     pre_build_image: true
 provisioner:
   name: ansible
+  inventory:
+    group_vars:
+      server:
+        time_profile: server
+      client:
+        time_profile: client
+    host_vars:
+      server-ext-pool:
+        network_interfaces:
+          - interface: en0
+            network: ice1-1
+        external_time:
+          time_server:
+            pool:
+              - pool.ntp.org
+      server-ext-servers:
+        network_interfaces:
+          - interface: en0
+            network: ice1-1
+        external_time:
+          time_server:
+            server:
+              - 0.pool.ntp.org
+              - 1.pool.ntp.org
+              - 2.pool.ntp.org
+      client-ext-pool:
+        j2_node_main_network: ice1-1
+        external_time:
+          time_client:
+            pool:
+              - pool.ntp.org
+      client-ext-servers:
+        j2_node_main_network: ice2-1
+        external_time:
+          time_client:
+            server:
+              - 0.pool.ntp.org
+              - 1.pool.ntp.org
+              - 2.pool.ntp.org
+      client-single-source:
+        j2_node_main_network: ice1-1
+      client-multi-sources:
+        j2_node_main_network: ice2-1
 verifier:
   name: ansible
-scenario:
-  name: default
-  test_sequence:
-    - lint
-    - destroy
-    # - dependency
-    - syntax
-    - create
-    - prepare
-    - converge
-    - verify

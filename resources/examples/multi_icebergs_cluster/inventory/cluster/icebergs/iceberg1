@@ -3,8 +3,7 @@ iceberg_master = top
 iceberg_level = 1
 
 [iceberg1]
-odin
-freya
-lenneth
-einherjar1
-
+management1
+storage1
+login1
+security1

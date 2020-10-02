@@ -1,0 +1,145 @@
+---
+- name: Verify
+  hosts: firewall
+  tasks:
+    - name: Run verify for Red Hat OS family
+      block:
+        - name: Collect package facts
+          package_facts:
+
+        - name: Check firewalld package
+          assert:
+            that: "'firewalld' in ansible_facts.packages"
+
+        - name: Collect service facts
+          service_facts:
+
+        - name: Check firewalld service is present
+          assert:
+            that: "'firewalld.service' in ansible_facts.services"
+
+        - name: Check firewalld service is running
+          assert:
+            that: "ansible_facts.services['firewalld.service']['state'] == 'running'"
+
+        - name: Check firewalld service is enabled
+          assert:
+            that: "ansible_facts.services['firewalld.service']['status'] == 'enabled'"
+
+        - name: "Zone internal: collect sources"
+          command: firewall-cmd --zone=internal --list-sources
+          register: firewall_cmd_result
+
+        - name: Check ice1-1 (10.11.0.0/16) and ice2-1 (10.11.0.0/16) are in zone internal
+          assert:
+            that: "firewall_cmd_result.stdout == '10.11.0.0/16 10.12.0.0/16'"
+            fail_msg: "Current values: {{ firewall_cmd_result.stdout }}"
+
+        - name: Collect sources of zone trusted
+          command: firewall-cmd --zone=trusted --list-sources
+          register: firewall_cmd_result
+
+        - name: Check interconnect1 (10.21.0.0/16) is in zone trusted
+          assert:
+            that: "firewall_cmd_result.stdout == '10.21.0.0/16'"
+            fail_msg: "Current values: {{ firewall_cmd_result.stdout }}"
+
+        - name: "Zone internal: collect services"
+          command: firewall-cmd --zone=internal --list-services
+          register: internal_services_result
+
+        - name: "Zone internal: collect ports"
+          command: firewall-cmd --zone=internal --list-ports
+          register: internal_ports_result
+
+        - name: "Zone internal: collect rich rules"
+          command: firewall-cmd --zone=internal --list-rich-rules
+          register: internal_rich_rules_result
+
+        - name: "Zone internal: collect ICMP blocks"
+          command: firewall-cmd --zone=internal --list-icmp-blocks
+          register: internal_icmp_blocks_result
+
+      when: ansible_facts.os_family == 'RedHat'
+
+- name: Verify optional firewall.zone parameters
+  hosts:
+    - firewall-custom
+  tasks:
+    - name: Run verify for Red Hat OS family
+      block:
+        - name: "Zone internal: Check presence of services high-availability and rsyncd"
+          assert:
+            that: internal_services_result.stdout |
+                    regex_findall(("high-availability|rsyncd"), multiline=False) | length == 2
+            fail_msg: "Current values: {{ internal_services_result.stdout }}"
+
+        - name: "Zone internal: Check absence of services cockpit and samba-client"
+          assert:
+            that: internal_services_result.stdout |
+                    regex_findall(("cockpit|samba-client"), multiline=False) | length == 0
+            fail_msg: "Current values: {{ internal_services_result.stdout }}"
+
+        - name: "Zone internal: Check presence of port 1234/tcp"
+          assert:
+            that: internal_ports_result.stdout |
+                    regex_findall(("1234/tcp"), multiline=False) | length == 1
+            fail_msg: "Current values: {{ internal_ports_result.stdout }}"
+
+        - name: "Zone internal: Check absence of port 5678/tcp"
+          assert:
+            that: internal_ports_result.stdout |
+                    regex_findall(("5678/tcp"), multiline=False) | length == 0
+            fail_msg: "Current values: {{ internal_ports_result.stdout }}"
+
+        - name: "Zone internal: Check presence of rich rule"
+          assert:
+            that: internal_rich_rules_result.stdout |
+                    regex_findall(('^rule family="ipv4" forward-port port="443" protocol="tcp" to-port="8443"$'), multiline=False) | length == 1
+            fail_msg: "Current values: {{ internal_rich_rules_result.stdout }}"
+
+        - name: "Zone internal: Check absence of rich rule"
+          assert:
+            that: internal_rich_rules_result.stdout |
+                    regex_findall(('^rule service name="ftp" audit limit value="1/m" accept$'), multiline=False) | length == 0
+            fail_msg: "Current values: {{ internal_rich_rules_result.stdout }}"
+
+        - name: "Zone internal: Check presence of ICMP blocks"
+          assert:
+            that: internal_icmp_blocks_result.stdout |
+                    regex_findall(('^echo-request$'), multiline=False) | length == 1
+            fail_msg: "Current values: {{ internal_icmp_blocks_result.stdout }}"
+
+        - name: "Zone internal: Query ICMP block inversion status"
+          command: firewall-cmd --zone=internal --query-icmp-block-inversion
+          # Return whether inversion of icmp blocks has been enabled.
+          # Return 0 if true, 1 otherwise.
+          # Because we set icmp_block_inversion: no, expect rc=1
+          ignore_errors: True
+          register: internal_inversion_result
+
+        - name: "Zone internal: Check ICMP block inversion is disabled"
+          assert:
+            that: internal_inversion_result.rc == 1
+            fail_msg: "Current values: {{ internal_inversion_result.rc }}"
+
+        - name: "Zone internal: Check ICMP block inversion == no"
+          assert:
+            that: internal_inversion_result.stdout |
+                    regex_findall(('^no$'), multiline=False) | length == 1
+            fail_msg: "Current values: {{ internal_inversion_result.stdout }}"
+
+        - name: "Zone internal: Query masquerade status"
+          command: firewall-cmd --zone=internal --query-masquerade
+          register: internal_masquerade_result
+
+        - name: "Zone internal: Check masquerade is enabled"
+          assert:
+            that: internal_masquerade_result.rc == 0
+            fail_msg: "Current values: {{ internal_masquerade_result.rc }}"
+
+        - name: "Zone internal: Check masquerade == yes"
+          assert:
+            that: internal_masquerade_result.stdout |
+                    regex_findall(('^yes$'), multiline=False) | length == 1
+            fail_msg: "Current values: {{ internal_masquerade_result.stdout }}"

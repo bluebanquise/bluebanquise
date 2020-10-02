@@ -7,42 +7,42 @@
 
   <li class="rotate">PXE:</li>
   <ul class="lvl2">
-    <li>iPXE driver:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['equipment_profile']['ipxe_driver']}}</span></li>
-    <li>iPXE platform:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['equipment_profile']['ipxe_platform']}}</span></li>
-    <li>iPXE embed script:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['equipment_profile']['ipxe_embed']}}</span></li>
-    <li>Preserve EFI first boot device during OS deployment:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['equipment_profile']['preserve_efi_first_boot_device']}}</span></li>
+    <li>iPXE driver:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['ep_ipxe_driver']}}</span></li>
+    <li>iPXE platform:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['ep_ipxe_platform']}}</span></li>
+    <li>iPXE embed script:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{ hostvars[groups[equipment][0]]['ep_ipxe_embed'] | default('standard') }}</span></li>
+    <li>Preserve EFI first boot device during OS deployment:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['ep_preserve_efi_first_boot_device']}}</span></li>
   </ul>
 
   <li class="rotate">Security:</li>
   <ul class="lvl2">
-    <li>Access Control:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['equipment_profile']['access_control']}}</span></li>
-    <li>Firewall:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['equipment_profile']['firewall']}}</span></li>
+    <li>Access Control:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['ep_access_control']}}</span></li>
+    <li>Firewall:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['ep_firewall']}}</span></li>
   </ul>
 
   <li class="rotate">Operating system configuration:</li>
   <ul class="lvl2">
-    <li>Distribution:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['equipment_profile']['operating_system']['distribution']}}</span></li>
-    <li>Distribution major version:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['equipment_profile']['operating_system']['distribution_major_version']}}</span></li>
-    <li>Distribution version:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['equipment_profile']['operating_system']['distribution_version']}}</span></li>
-    <li>Partitioning:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['equipment_profile']['partitioning']}}</span></li>
-    <li>System language:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['equipment_profile']['configuration']['system_language']}}</span></li>
-    <li>Keyboard Layout:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['equipment_profile']['configuration']['keyboard_layout']}}</span></li>
+    <li>Distribution:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['ep_operating_system']['distribution']}}</span></li>
+    <li>Distribution major version:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['ep_operating_system']['distribution_major_version']}}</span></li>
+    <li>Distribution version:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['ep_operating_system']['distribution_version']}}</span></li>
+    <li>Partitioning:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['ep_partitioning']}}</span></li>
+    <li>System language:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['ep_configuration']['system_language']}}</span></li>
+    <li>Keyboard Layout:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['ep_configuration']['keyboard_layout']}}</span></li>
   </ul>
 
   <li class="rotate">Hardware:</li>
   <ul class="lvl2">
-    <li>CPU architecture:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['equipment_profile']['hardware']['cpu']['architecture']}}</span></li>
-    <li>CPU count:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['equipment_profile']['hardware']['cpu']['sockets']}} Sockets, {{hostvars[groups[equipment][0]]['equipment_profile']['hardware']['cpu']['cores_per_socket']}} Cores per socket, {{hostvars[groups[equipment][0]]['equipment_profile']['hardware']['cpu']['threads_per_core']}} Threads per core, for a total of {{hostvars[groups[equipment][0]]['equipment_profile']['hardware']['cpu']['cores']}} Cores</span></li>
+    <li>CPU architecture:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['ep_hardware']['cpu']['architecture']}}</span></li>
+    <li>CPU count:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['ep_hardware']['cpu']['sockets']}} Sockets, {{hostvars[groups[equipment][0]]['ep_hardware']['cpu']['cores_per_socket']}} Cores per socket, {{hostvars[groups[equipment][0]]['ep_hardware']['cpu']['threads_per_core']}} Threads per core, for a total of {{hostvars[groups[equipment][0]]['ep_hardware']['cpu']['cores']}} Cores</span></li>
   </ul>
 
   <li class="rotate">Equipment authentication:</li>
   <ul class="lvl2">
-    <li>Hardware user:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['equipment_profile']['equipment_authentication']['user']}}</span></li>
-    <li>Hardware password:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['equipment_profile']['equipment_authentication']['password']}}</span></li>
-    <li>OS root hash:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['authentication']['root_password_sha512']}}</span></li>
+    <li>Hardware user:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['ep_equipment_authentication']['user']}}</span></li>
+    <li>Hardware password:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['ep_equipment_authentication']['password']}}</span></li>
+    <li>OS root hash:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['authentication_root_password_sha512']}}</span></li>
     <li class="rotate">SSH public keys:</li>
     <ul class="lvl3">
-    {% for sshkey in hostvars[groups[equipment][0]]['authentication']['ssh_keys'] %}
+    {% for sshkey in hostvars[groups[equipment][0]]['authentication_ssh_keys'] %}
        <li><span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;">{{sshkey}}</span></li>
     {% endfor %}
     </ul>

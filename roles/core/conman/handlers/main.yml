@@ -1,5 +1,5 @@
 ---
-- name: Restart conman
+- name: service █ Restart conman
   service:
     name: conman
     state: restarted

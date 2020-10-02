@@ -2,12 +2,65 @@
 
 - name: Package
   package:
-    name: "{{ item }}"
+    name: "{{ packages }}"
     state: present
-  with_items:
+  vars:
+    packages:
     - prometheus
     - alertmanager
     - ipmi_exporter
+    - freeipmi
+    - snmp_exporter
+    - karma
+
+# for generator of oid walk for snmp_exporter     
+- name: Package
+  package:
+    name: "{{ item }}"
+    state: present
+  vars:
+    packages:
+    - gcc
+    - make
+    - net-snmp
+    - net-snmp-utils
+    - net-snmp-libs
+    - net-snmp-devel
+  when:
+    - monitoring.exporters.snmp_exporter.with_generator is defined      
+    - monitoring.exporters.snmp_exporter.with_generator
+
+- name: "copy █ Install firewalld service configuration file"
+  copy:
+    src: alertmanager.xml
+    dest: /etc/firewalld/services/alertmanager.xml
+    owner: root
+    group: root
+    mode: 0644
+  when:
+    - ansible_facts.os_family == "RedHat"
+    - ep_firewall | default(false) | bool
+  notify: reload firewalld
+  tags:
+    - firewall
+
+- meta: flush_handlers
+
+- name: "firewalld █ Add services to firewall's {{ prometheus_server_firewall_zone | default('public') }} zone"
+  firewalld:
+    zone: "{{ prometheus_server_firewall_zone | default('public') }}"
+    service: "{{ item }}"
+    immediate: "yes"
+    permanent: "yes"
+    state: enabled
+  when:
+    - ansible_facts.os_family == "RedHat"
+    - ep_firewall | default(false) | bool
+  loop:
+    - prometheus
+    - alertmanager
+  tags:
+    - firewall
 
 - name: Create directories structure
   file:
@@ -16,7 +69,7 @@
    mode: 0750
    owner: prometheus
    group: prometheus
-  with_items:
+  loop:
    - /etc/prometheus/alerts/
    - /var/lib/prometheus
 
@@ -38,22 +91,6 @@
     group: prometheus
     mode: 0640
 
-- name: Template >> /etc/prometheus/alerts/bb_exporter.yml
-  template:
-    src: alerts/bb_exporter.yml.j2
-    dest: /etc/prometheus/alerts/bb_exporter.yml
-    owner: prometheus
-    group: prometheus
-    mode: 0640
-
-#- name: Template >> /etc/prometheus/alerts/general.yml
-#  copy:
-#    src: alerts_general.yml
-#    dest: /etc/prometheus/alerts/general.yml
-#    owner: prometheus
-#    group: prometheus
-#    mode: 0640
-
 - name: Create directories structure for alertmanager
   file:
    path: "{{ item }}"
@@ -61,7 +98,7 @@
    mode: 0750
    owner: alertmanager
    group: alertmanager
-  with_items:
+  loop:
    - /etc/alertmanager
 
 - name: Template >> /etc/alertmanager/alertmanager.yml
@@ -78,8 +115,18 @@
   template:
     src: ipmi_config.yml.j2
     dest: /etc/ipmi_exporter/ipmi_config.yml
-    owner: ipmiexporter
-    group: ipmiexporter
+    owner: ipmi_exporter
+    group: ipmi_exporter
+    mode: 0640
+  tags:
+    - template
+
+- name: Template >> /etc/karma/karma.yml
+  template:
+    src: karma.yml.j2
+    dest: /etc/karma/karma.yml
+    owner: karma
+    group: karma
     mode: 0640
   tags:
     - template
@@ -88,10 +135,12 @@
   service:
     name: "{{ item }}"
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
-  with_items:
+  loop:
     - prometheus
     - alertmanager
     - ipmi_exporter
+    - snmp_exporter
+    - karma
   tags:
     - service
 
@@ -99,10 +148,12 @@
   service:
     name: "{{ item }}"
     state: started
-  with_items:
+  loop:
     - prometheus
     - alertmanager
     - ipmi_exporter
+    - snmp_exporter    
+    - karma
   when: (start_services | bool)
   tags:
     - service

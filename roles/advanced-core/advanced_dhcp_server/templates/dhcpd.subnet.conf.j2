@@ -14,65 +14,66 @@
 {% endif %}
 
 {% for host in range %}
-  {% if hostvars[host]['network_interfaces'] is defined %}
+  {% if hostvars[host]['network_interfaces'] is defined and hostvars[host]['network_interfaces'] is iterable %}
     {#- Define iPXE rom to use #}
-    {% if hostvars[host]['equipment_profile']['ipxe_driver'] == 'snponly' %} {# Select driver first #}
+    {% if hostvars[host]['ep_ipxe_driver'] == 'snponly' %} {# Select driver first #}
       {% set ipxe_driver = 'snponly_' %}
-    {% elif hostvars[host]['equipment_profile']['ipxe_driver'] == 'snp' %}
+    {% elif hostvars[host]['ep_ipxe_driver'] == 'snp' %}
       {% set ipxe_driver = 'snp_' %}
     {% else %}{# Assume everything else is default driver #}
       {% set ipxe_driver = '' %}
     {% endif %}
-    {% if hostvars[host]['equipment_profile']['hardware']['cpu']['architecture'] == 'arm64' %} {# Now select architecture #}
+    {% if hostvars[host]['ep_hardware']['cpu']['architecture'] == 'arm64' %} {# Now select architecture #}
       {% set ipxe_architecture = 'arm64' %}
     {% else %}{# Assume everything else is x86_64 #}
       {% set ipxe_architecture = 'x86_64' %}
     {% endif %}
-    {% if hostvars[host]['equipment_profile']['ipxe_embed'] == 'dhcpretry' %} {# Now select embed script #}
+    {% if hostvars[host]['ep_ipxe_embed'] is defined and
+          hostvars[host]['ep_ipxe_embed'] == 'dhcpretry' %} {# Now select embed script #}
       {% set ipxe_embed = 'dhcpretry' %}
     {% else %}
       {% set ipxe_embed = 'standard' %}
     {% endif %}
-    {% if hostvars[host]['equipment_profile']['ipxe_platform'] == 'efi' %} {# Finally, build file name depending of platform and previous parameters #}
+    {% if hostvars[host]['ep_ipxe_platform'] == 'efi' %} {# Finally, build file name depending of platform and previous parameters #}
       {% set ipxe_rom_filename = (ipxe_architecture + '/' + ipxe_embed + '_' + ipxe_driver + 'ipxe.efi') %}
     {% else %}{# Assume everything else is pcbios #}
       {% set ipxe_rom_filename = (ipxe_architecture + '/' + ipxe_embed + '_undionly.kpxe') %}
     {% endif -%}
 
-    {%- for nic, nic_args in hostvars[host]['network_interfaces'].items() %}
-      {% if (nic_args.network is defined and not none) and (nic_args.network == item) and (nic_args.ip4 is defined and not none) %}
-        {% if nic_args.mac is defined and not none %}
+    {%- for nic in hostvars[host]['network_interfaces'] %}
+      {% if (nic.network is defined and nic.network == item) and nic.ip4 is defined %}
+        {% if nic.mac is defined %}
 
   host {{host}}-{{item}} { 
     option host-name "{{host}}";
-    hardware ethernet {{nic_args.mac}};
-    fixed-address {{nic_args.ip4}};
+    hardware ethernet {{nic.mac}};
+    fixed-address {{nic.ip4}};
     filename "{{ipxe_rom_filename}}";
   }
-        {% elif nic_args.dhcp_client_identifier is defined and not none %}
+        {% elif nic.dhcp_client_identifier is defined %}
   host {{host}}-{{item}} {
     option host-name "{{host}}";
-    option dhcp_client_identifier {{nic_args.dhcp-client-identifier}};
-    fixed-address {{nic_args.ip4}};
+    option dhcp-client-identifier {{nic.dhcp_client_identifier}};
+    fixed-address {{nic.ip4}};
     filename "{{ipxe_rom_filename}}";
   }
-        {% elif nic_args.host_identifier is defined and not none %}
+        {% elif nic.host_identifier is defined %}
   host {{host}}-{{item}} {
     option host-name "{{host}}";
-    host_identifier {{nic_args.host-identifier}};
-    fixed-address {{nic_args.ip4}};
+    host-identifier {{nic.host_identifier}};
+    fixed-address {{nic.ip4}};
     filename "{{ipxe_rom_filename}}";
   }
-        {% elif nic_args.match is defined and not none %}{# Warning, only works in a shared network!! #}
+        {% elif nic.match is defined %}{# Warning, only works in a shared network!! #}
   class "option_match_{{host}}" {
     match if (
-      {{nic_args.match}}
+      {{nic.match}}
     );
   }
   pool {
     option host-name "{{host}}";
     allow members of "option_match_{{host}}";
-    range {{nic_args.ip4}};
+    range {{nic.ip4}};
     filename "{{ipxe_rom_filename}}";
   }
         {% endif %}
@@ -92,13 +93,13 @@
         {% elif bmc_args.dhcp_client_identifier is defined and not none %}
   host {{bmc_args.name}} {
     option host-name "{{bmc_args.name}}";
-    option dhcp_client_identifier {{bmc_args.dhcp-client-identifier}};
+    option dhcp-client-identifier {{bmc_args.dhcp_client_identifier}};
     fixed-address {{bmc_args.ip4}};
   }
         {% elif bmc_args.host_identifier is defined and not none %}
   host {{bmc_args.name}} {
     option host-name "{{bmc_args.name}}";
-    host_identifier {{bmc_args.host-identifier}};
+    host-identifier {{bmc_args.host_identifier}};
     fixed-address {{bmc_args.ip4}};
   }
         {% elif bmc_args.match is defined and not none %}{# Warning, only works in a shared network!! #}

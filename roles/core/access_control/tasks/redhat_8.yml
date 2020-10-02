@@ -1,0 +1,5 @@
+---
+- name: selinux █ Set SELinux state
+  selinux:
+    policy: targeted
+    state: "{{ ep_access_control | default('enforcing') }}"

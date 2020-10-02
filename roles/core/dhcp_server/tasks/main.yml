@@ -1,34 +1,70 @@
 ---
-- name: Install packages
+- name: include_vars ░ Gather OS specific variables
+  # This task gathers variables defined in OS specific files.
+  #
+  # Search vars in:
+  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
+  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
+  #  - <distribution>.yml            # eg. CentOS.yml
+  #  - <os_family>.yml               # eg. RedHat.yml
+  #
+  # If no OS specific file is found, the role will default to vars/main.yml
+  #
+  include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family }}.yml"
+      skip: true
+  tags:
+    - internal
+
+- name: "firewalld █ Add services to firewall's {{ dhcp_server_firewall_zone | default('public') }} zone"
+  firewalld:
+    zone: "{{ dhcp_server_firewall_zone | default('public') }}"
+    service: "{{ item }}"
+    immediate: "yes"
+    permanent: "yes"
+    state: enabled
+  when:
+    - ansible_facts.os_family == "RedHat"
+    - ep_firewall | default(false) | bool
+  loop: "{{ dhcp_server_firewall_services_to_add }}"
+  tags:
+    - firewall
+
+- name: "package █ Install {{ dhcp_server_packages_to_install | join(' ') }}"
   package:
-    name: "{{ packages_to_install[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
+    name: "{{ dhcp_server_packages_to_install }}"
     state: present
   tags:
     - package
 
-- name: Template >> /etc/dhcp/dhcpd.conf
+- name: template █ Generate /etc/dhcp/dhcpd.conf
   template:
     src: dhcpd.conf.j2
     dest: /etc/dhcp/dhcpd.conf
     owner: root
     group: root
     mode: 0644
-  notify: Restart dhcp services
+  notify: service █ Restart dhcp server
   tags:
     - template
 
-- name: Template >> /etc/dhcp/dhcpd.networks.conf
+- name: template █ Generate /etc/dhcp/dhcpd.networks.conf
   template:
     src: dhcpd.networks.conf.j2
     dest: /etc/dhcp/dhcpd.networks.conf
     owner: root
     group: root
     mode: 0644
-  notify: Restart dhcp services
+  notify: service █ Restart dhcp server
   tags:
     - template
 
-- name: "Template >> /etc/dhcp/dhcpd.{{ item }}.conf"
+- name: "template █ Generate /etc/dhcp/dhcpd.{{ item }}.conf"
   template:
     src: dhcpd.subnet.conf.j2
     dest: "/etc/dhcp/dhcpd.{{ item }}.conf"
@@ -39,17 +75,17 @@
   when:
     - j2_current_iceberg_network in item
     - networks[item].is_in_dhcp
-  notify: Restart dhcp services
+  notify: service █ Restart dhcp server
   tags:
     - template
 
 - meta: flush_handlers
 
-- name: Manage services state
+- name: "service █ Manage {{ dhcp_server_services_to_start | join(' ') }} state"
   service:
     name: "{{ item }}"
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
     state: "{{ (start_services | bool) | ternary('started', omit) }}"
-  loop: "{{ services_to_start[(ansible_distribution|lower|replace(' ','_'))]['_'+ansible_distribution_major_version] }}"
+  loop: "{{ dhcp_server_services_to_start }}"
   tags:
     - service

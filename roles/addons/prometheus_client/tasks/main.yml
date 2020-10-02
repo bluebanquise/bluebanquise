@@ -1,54 +1,41 @@
----
-
-- name: Package node_exporter
+- name: install monitoring packages
   package:
-    name: node_exporter
+    name: "{{ item.value.package }}"
     state: present
-  when: "'node_exporter' in monitoring.exporters"
+  loop: "{{ monitoring.exporters |dict2items }}"
+  when: item.value.package is defined and item.key != "ipmi_exporter" and item.key != "snmp_exporter"
 
-- name: Enable/disable services
-  service:
-    name: node_exporter
-    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
-  when: "'node_exporter' in monitoring.exporters"
-  tags:
-    - service
-
-- name: Start services node_exporter
-  service:
-    name: node_exporter
-    state: started
+- name: "firewalld █ Add services to firewall's {{ prometheus_client_firewall_zone | default('public') }} zone"
+  firewalld:
+    zone: "{{ prometheus_client_firewall_zone | default('public') }}"
+    port: "{{ item.port }}/tcp"
+    immediate: "yes"
+    permanent: "yes"
+    state: enabled
+  loop: "{{ monitoring.exporters.values() | list }}"
   when:
-    - (start_services | bool)
-    - "'node_exporter' in monitoring.exporters"
+    - ansible_facts.os_family == "RedHat"
+    - ep_firewall | default(false) | bool
+    - item.port is defined
   tags:
-    - service
+    - firewall
 
-- name: Package bb_exporter
-  package:
-    name: bb_exporter
-    state: present
-  when: "'bb_exporter' in monitoring.exporters"
+- name: set services
+  service:
+    name: "{{ item.value.service }}"
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+    state: "{{ (start_services | bool) | ternary('started', omit) }}"
+  loop: "{{ monitoring.exporters |dict2items }}"
+  when: item.value.service is defined and item.key != "ipmi_exporter" and item.key != "snmp_exporter"
 
-- name: Create directories structure bb_exporter
-  file:
-   path: /etc/bb_exporter/
-   state: directory
-   mode: 0750
-   owner: root
-   group: root
-  when: "'bb_exporter' in monitoring.exporters"
-
-- name: Template bb_exporter
+- name: set templates
   template:
-    src: bb_exporter.yml.j2
-    dest: /etc/bb_exporter/bb_exporter.yml
+    src: "{{ item.value.templates.src }}"
+    dest: "{{ item.value.templates.dest }}"
     owner: root
     group: root
     mode: 0640
   tags:
     - template
-  when: "'bb_exporter' in monitoring.exporters"
-
-
-
+  loop: "{{ monitoring.exporters |dict2items }}"
+  when: item.value.templates.src is defined and item.value.templates.dest is defined

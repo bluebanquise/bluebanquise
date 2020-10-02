@@ -2,26 +2,31 @@
 Deploy BlueBanquise
 ===================
 
-At this point, **BlueBanquise** configuration is done. We are ready to deploy the cluster.
+At this point, **BlueBanquise** configuration is done. We are ready to deploy
+the cluster.
 
-First step is to deploy configuration on management1 node, and then deploy OS on the others system. Last step will be to deploy configuration on the other systems.
+First step is to deploy configuration on management1 node, and then deploy OS on
+the other systems. Last step will be to deploy configuration on the other
+systems.
 
 Management configuration
 ========================
 
-Get management1 playbook
+Get managements playbook
 ------------------------
 
-We are going to use the provided default playbook. This playbook will install most of the CORE roles. Enough to deploy first stage of the cluster.
+We are going to use the provided default playbook. This playbook will install
+most of the **core** roles. Enough to deploy first stage of the cluster.
 
-Copy example playbook management1 to /etc/bluebanquise/playbooks/:
+Copy example playbook managements to /etc/bluebanquise/playbooks/:
 
 .. code-block:: bash
 
   mkdir /etc/bluebanquise/playbooks/
-  cp -a /etc/bluebanquise/resources/examples/simple_cluster/playbooks/management1.yml /etc/bluebanquise/playbooks/
+  cp -a /etc/bluebanquise/resources/examples/simple_cluster/playbooks/managements.yml /etc/bluebanquise/playbooks/
 
-Then, we will ask Ansible to read this playbook, and execute all roles listed inside on management1 node (check hosts target at top of the file).
+Then, we will ask Ansible to read this playbook, and execute all roles listed
+inside on management1 node (check hosts at top of the file).
 
 To do so, we are going to use the ansible-playbook command.
 
@@ -35,19 +40,24 @@ We are going to use 2 parameters frequently:
 Tags / Skip tags
 ^^^^^^^^^^^^^^^^
 
-As you can notice, some tags are set inside the playbook, or even in some roles for specific tasks. The idea of tags is simple: you can tag a role/a task, and then when using ansible-playbook, only play related tags role/task. Or do the opposit: play all, and skip a role/task.
+As you can notice, some tags are set inside the playbook, or even in some roles
+for specific tasks. The idea of tags is simple: you can tag a role/task, and
+then when using ansible-playbook, only play related tags role/task. Or do the
+opposite: play all, and skip a role/task.
 
 To so, use with Ansible playbook:
 
 * **--tags** with tags listed with comma separator: mytag1,mytag2,mytag3
 * **--skip-tags** with same pattern
 
-More can be found `here <https://docs.ansible.com/ansible/latest/user_guide/playbooks_tags.html>`_ on tags.
+Additional documentation about tags usage in playbooks is available
+`here <https://docs.ansible.com/ansible/latest/user_guide/playbooks_tags.html>`_.
 
 Extra vars
 ^^^^^^^^^^
 
-Extra vars allows to pass variables with maximum precedence at execution time, for any purpose (debug, test, or simply need).
+Extra vars allow to pass variables with maximum precedence at execution time,
+for any purpose (debug, test, or simply need).
 
 To do so, use:
 
@@ -56,13 +66,14 @@ To do so, use:
 Apply management1 configuration
 -------------------------------
 
-Lets apply now the whole configuration on management1. It can takes some time depending of your CPU and your hard drive.
+Lets apply now the whole configuration on management1. It can take some time
+depending on your CPU and your hard drive.
 
 We first ensure our NIC are up, so the repositories part is working.
 
 .. code-block:: bash
 
-  ansible-playbook /etc/bluebanquise/playbooks/management1.yml --tags set_hostname,nic
+  ansible-playbook /etc/bluebanquise/playbooks/managements.yml --limit management1 --tags set_hostname,nic
 
 Then start your main interface manually. Here enp0s3:
 
@@ -70,11 +81,27 @@ Then start your main interface manually. Here enp0s3:
 
   ifup enp0s3
 
-Once interface is up (check using *ip a* command), replay the whole playbook:
+Or on RHEL/CentOS 8:
 
 .. code-block:: bash
 
-  ansible-playbook /etc/bluebanquise/playbooks/management1.yml
+  nmcli con up enp0s3
+
+Once interface is up (check using *ip a* command), setup the BlueBanquise
+controller:
+
+.. code-block:: bash
+
+  ansible-playbook /etc/bluebanquise/playbooks/managements.yml --limit management1 --tags bluebanquise
+
+This will install the requirements to run BlueBanquise (mostly python filters
+for Ansible).
+
+Then play the whole playbook:
+
+.. code-block:: bash
+
+  ansible-playbook /etc/bluebanquise/playbooks/managements.yml --limit management1
 
 And wait...
 
@@ -87,7 +114,9 @@ If all goes well, you can check that all services are up and running:
   systemctl status dhcpd
   systemctl status named
 
-You can replay the same ansible-playbook command over and over, Ansible will just update/correct what is needed, and do nothing for all that is at an expected state.
+You can replay the same ansible-playbook command over and over, Ansible will
+just update/correct what is needed, and do nothing for all that is at an
+expected state.
 
 Now that management1 is up and running, it is time to deploy the other nodes.
 
@@ -96,12 +125,19 @@ PXE
 
 Next step is to deploy the other nodes using PXE process.
 
-NOTE: it is assumed here you know how to have your other nodes / VM / servers / workstation to boot on LAN.
-If your device cannot boot on LAN, use iso or usb image provided on management1 in /var/www/html/preboot_execution_environment/bin/[x86_64|arm64]. These images will start a LAN boot automatically.
+NOTE: it is assumed here you know how to have your other nodes / VM / servers /
+workstation to boot on LAN.
 
-In **BlueBanquise**, PXE process has been made so that any kind of hardware able to boot PXE, USB or CDrom can start deployment.
+If your device cannot boot on LAN, use iso or usb image provided on management1
+in /var/www/html/preboot_execution_environment/bin/[x86_64|arm64]. These images
+will start a LAN boot automatically.
 
-You can get more information and a detailed schema in the pxe_stack role section of this documentation. Simply put, the PXE chain is the following (files are in /var/www/html/preboot_execution_environment):
+In **BlueBanquise**, PXE process has been made so that any kind of hardware able
+to boot PXE, USB or CDrom can start deployment.
+
+You can get more information and a detailed schema in the pxe_stack role section
+of this documentation. Simply explained, the PXE chain is the following (files
+are in /var/www/html/preboot_execution_environment):
 
 .. code-block:: text
 
@@ -123,12 +159,21 @@ You can get more information and a detailed schema in the pxe_stack role section
     |
   iPXE chain to task specified in myhostname.ipxe (deploy os, boot on disk, etc)
 
-Whatever the boot source, and whatever Legacy Bios or uEFI, all converge to http://${next-server}/preboot_execution_environment/convergence.ipxe. Then this file chain to node specific file in nodes (this file is generated using bootset command). The node specific file contains the default entry for the iPXE menu, then node chain to its equipment_profile file, to gather group values, and chain again to menu file. The menu file display a simple menu, and wait 10s for user before starting the default entry (which can be os deployment, or boot to disk, or boot diskless).
+Whatever the boot source, and whatever Legacy BIOS or UEFI, all converge to
+http://${next-server}/preboot_execution_environment/convergence.ipxe. Then this
+file chain to node specific file in nodes (this file is generated using *bootset*
+command). The node specific file contains the default entry for the iPXE menu,
+then node chain to its equipment_profile file, to gather group values, and chain
+again to menu file. The menu file display a simple menu, and wait 10s for user
+before starting the default entry (which can be os deployment, or boot to disk,
+or boot diskless).
 
 bootset
 -------
 
-Before booting remote nodes in PXE, we need to ask management1 to activate remote nodes deployment. If not, remote nodes will boot on disk, even when booting over LAN.
+Before booting remote nodes in PXE, we need to ask management1 to activate
+remote nodes deployment. If not, remote nodes will boot on disk, even when
+booting over LAN.
 
 To manipulate nodes PXE boot, a command, *bootset*, is available.
 
@@ -140,18 +185,49 @@ Let's use bootset to ask them to deploy OS at next PXE boot:
 
   bootset -n login1,c[001-004] -b osdeploy
 
-Note that this osdeploy state will be automatically updated once OS is deployed on remote nodes, and set to disk.
+You can check the result using:
 
-You can also force nodes that boot on PXE to boot on disk using *-b disk* instead of *-b osdeploy*.
+.. code-block:: bash
 
-Note also that if you update configuration on management1, it is recommanded to force the update of files when using bootset.
+  bootset -n login1,c[001-004] -s
 
-Please refer to the pxe_stack role dedicated section in this documentation for more information on the bootset usage.
+Which should return:
+
+.. code-block:: text
+
+  [INFO] Loading /etc/bluebanquise/pxe/nodes_parameters.yml
+  [INFO] Loading /etc/bluebanquise/pxe/pxe_parameters.yml
+  Next boot deployment: c[001-004],login1
+
+Note that this osdeploy state will be automatically updated once OS is deployed
+on remote nodes, and set to disk.
+
+You can also force nodes that boot on PXE to boot on disk using *-b disk*
+instead of *-b osdeploy*.
+
+Please refer to the pxe_stack role dedicated section in this documentation for
+more information on the bootset usage.
+
+SSH public key
+--------------
+
+In order to log into the remote nodes without giving the password, check that
+the ssh public key defined in authentication.yml in your inventory match your
+management1 public key (the one generated in /root/.ssh/). If not, update the
+key in authentication.yml and remember to run the pxe_stack role (to update PXE
+related files that contains the ssh public key of the management node to be set
+on nodes during deployment).
+
+.. code-block:: bash
+
+  ansible-playbook /etc/bluebanquise/playbooks/managements.yml --tags pxe_stack
 
 OS deployment
 -------------
 
-Power on now the remote nodes, have them boot over LAN, and follow the installation procedure. It should take around 15-20 minutes depending of your hardware.
+Power on now the remote nodes, have them boot over LAN, and follow the
+installation procedure. It should take around 15-20 minutes depending on your
+hardware.
 
 Once done, proceed to next part.
 
@@ -160,24 +236,42 @@ Apply other nodes configuration
 
 Applying configuration on other nodes is simple.
 
-Ensure first you can ssh passwordless on each of the freshly deployed nodes. If not, check your ssh public key in authentication.yml in the inventory match your management1 public key, update it, and manually spread your key for this time on remote hosts using ssh-copy-id.
-
-If yes, copy example playbooks:
+Ensure first you can ssh passwordless on each of the freshly deployed nodes. If
+yes, copy example playbooks:
 
 .. code-block:: bash
 
   cp -a /etc/bluebanquise/resources/examples/simple_cluster/playbooks/computes.yml /etc/bluebanquise/playbooks/
-  cp -a /etc/bluebanquise/resources/examples/simple_cluster/playbooks/login1.yml /etc/bluebanquise/playbooks/
+  cp -a /etc/bluebanquise/resources/examples/simple_cluster/playbooks/logins.yml /etc/bluebanquise/playbooks/
 
-And execute them, using extra var target to target them:
+And execute them, using --limit parameter to specify targets them:
 
 .. code-block:: bash
 
-  ansible-playbook /etc/bluebanquise/login1.yml
-  ansible-playbook /etc/bluebanquise/computes.yml --extra-vars "target=c001,c002,c003,c004"
+  ansible-playbook /etc/bluebanquise/playbooks/logins.yml
+  ansible-playbook /etc/bluebanquise/playbooks/computes.yml --limit c001,c002,c003,c004
 
-You can see that Ansible will work on computes nodes in parallel, using more CPU on the management1 node.
+You can see that Ansible will work on computes nodes in parallel, using more CPU
+on the management1 node.
 
-Your cluster should now be fully deployed. It is time to use some ADDONs to add specific features to the cluster (Please refer to each addon roles dedicated documentation to get instructions on how to use them), or continue this documentation to enable and deploy multi icebergs configuration if cluster needs it.
+Diskless
+========
 
-Thank your for following this training. We really hope you will enjoy our stack. Please report us any bad or good feedback.
+An addon, diskless, allows to deploy diskless nodes. Please see the role related
+documentation to deploy diskless nodes.
+
+-------------
+
+Your cluster should now be fully deployed. It is time to use some addons to add
+specific features to the cluster (Please refer to each addon roles dedicated
+documentation to get instructions on how to use them), or continue this
+documentation to:
+
+* Enable and deploy multi icebergs configuration if cluster needs it.
+* Deploy a Prometheus based monitoring.
+
+You will also find a "stories" section that describes step by step few recurrent
+situation you may face during the life of your cluster.
+
+Thank your for following this training. We really hope you will enjoy our stack.
+Please report us any bad or good feedback.

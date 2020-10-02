@@ -1,0 +1,23 @@
+---
+
+ep_console: console=tty0 console=ttyS1,115200n8
+ep_kernel_parameters: nomodeset
+
+ep_access_control: disabled
+ep_firewall: false
+
+ep_equipment_type: server
+
+ep_hardware:
+  cpu:
+    architecture: x86_64
+    cores: 24
+    cores_per_socket: 12
+    sockets: 2
+    threads_per_core: 1
+  gpu:
+    - Hercules 3D Prophet 4000 XT
+
+ep_equipment_authentication:
+  user: ADMIN
+  password: ADMIN

@@ -1,23 +1,21 @@
-equipment_profile:
+---
 
-#  access_control: false # equivalent to selinux=0
-  firewall: false
+ep_console: console=tty0 console=ttyS1,115200n8
+ep_kernel_parameters: nomodeset
 
-  console: console=tty0 console=ttyS1,115200n8
-  kernel_parameters: nomodeset
+ep_access_control: disabled
+ep_firewall: false
 
-  operating_system:
-    distribution: centos
-    distribution_major_version: 7
-    distribution_version: 7.6
+ep_equipment_type: server
 
-  equipment_type: server
+ep_hardware:
+  cpu:
+    architecture: x86_64
+    cores: 24
+    cores_per_socket: 12
+    sockets: 2
+    threads_per_core: 1
 
-  configuration:
-    keyboard_layout: us
-    system_language: en_US.UTF-8
-
-  hardware:
-    cpu:
-      architecture: x86_64
-
+ep_equipment_authentication:
+  user: ADMIN
+  password: ADMIN

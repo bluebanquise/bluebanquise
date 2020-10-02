@@ -1,12 +1,14 @@
-- name: Package
+- name: package █ Install clustershell package
   package:
     name: clustershell
     state: present
+  tags:
+    - package
 
-- name: Template >> /etc/clustershell/groups.d/cluster.yaml
+- name: template █ Generate /etc/clustershell/groups.d/local.cfg
   template:
-    src: cluster.yaml.j2
-    dest: /etc/clustershell/groups.d/cluster.yaml
+    src: local.cfg.j2
+    dest: /etc/clustershell/groups.d/local.cfg
     owner: root
     group: root
     mode: 0644

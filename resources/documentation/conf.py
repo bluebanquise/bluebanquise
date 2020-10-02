@@ -21,12 +21,12 @@
 
 project = u'BlueBanquise Documentation'
 copyright = u'2019, Benoît Leveugle, Johnny Keats'
-author = u'Benoît Leveugle, Johnny Keats'
+author = u'Benoît Leveugle, Johnny Keats, Bruno Travouillon, Tim Gellner'
 
 # The short X.Y version
-version = u''
+version = u'1.3'
 # The full version, including alpha/beta/rc tags
-release = u'1.0.1'
+release = u'1.3.0'
 
 
 # -- General configuration ---------------------------------------------------
@@ -66,7 +66,7 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = [u'_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = [u'_build', 'Thumbs.db', '.DS_Store', '**/molecule']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = None

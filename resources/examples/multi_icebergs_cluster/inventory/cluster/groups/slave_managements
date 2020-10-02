@@ -1,0 +1,5 @@
+# Secondary level iceberg's managements, to mount /etc/bluebanquise and
+# repositories from top iceberg
+[secondary_managements]
+management2
+management3

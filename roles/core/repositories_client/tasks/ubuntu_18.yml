@@ -2,6 +2,6 @@
 
 - name: Setting repositories
   apt_repository:
-    repo: "deb http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/{{ equipment_profile['operating_system']['distribution'] }}/{{ equipment_profile['operating_system']['distribution_version'] }}/{{ equipment_profile['hardware']['cpu']['architecture'] }}/{{ item }} bionic main"
+    repo: "deb http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/{{ ep_operating_system['repositories_environment'] | default('') }}/{{ ep_operating_system['distribution'] }}/{{ ep_operating_system['distribution_version'] | default(ep_operating_system['distribution_major_version']) }}/{{ ep_hardware['cpu']['architecture'] }}/{{ item }} bionic main"
     state: present
   with_items: "{{ repositories }}"
