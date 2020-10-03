@@ -1,2 +1,2 @@
 ---
-log_client_rsyslog_port: 514
+log_client_rsyslog_server_port: 514
