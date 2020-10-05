@@ -1,0 +1,7 @@
+---
+log_server_packages_to_install:
+  - libselinux-python
+  - policycoreutils-python
+log_server_services_to_start:
+  - rsyslog
+log_server_rsyslog_conf_path: /etc/rsyslog.conf
