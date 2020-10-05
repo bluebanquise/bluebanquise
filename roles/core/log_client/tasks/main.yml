@@ -39,7 +39,7 @@
 
 - name: Allow syslog port into SELinux
   seport:
-    ports: "{{ log_client_rsyslog_server_port }}"
+    ports: "{{ log_client_server_port }}"
     proto: "{{ item }}"
     setype: syslogd_port_t
     state: present

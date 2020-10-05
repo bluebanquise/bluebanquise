@@ -16,11 +16,11 @@ $ModLoad imjournal # provides access to the systemd journal
 
 # Provides UDP syslog reception
 $ModLoad imudp
-$UDPServerRun {{ log_server_rsyslog_port }}
+$UDPServerRun {{ log_server_port }}
 
 # Provides TCP syslog reception
 $ModLoad imtcp
-$InputTCPServerRun {{ log_server_rsyslog_port }}
+$InputTCPServerRun {{ log_server_port }}
 
 #### GLOBAL DIRECTIVES ####
 

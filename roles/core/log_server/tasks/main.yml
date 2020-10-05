@@ -36,7 +36,7 @@
 - name: "Add custom port to firewall's {{ log_server_firewall_zone | default('public') }} zone"
   firewalld:
     zone: "{{ log_server_firewall_zone | default('public') }}"
-    port: "{{ log_server_rsyslog_port }}/tcp"
+    port: "{{ log_server_port }}/tcp"
     immediate: "yes"
     permanent: "yes"
     state: enabled
@@ -77,7 +77,7 @@
 
 - name: Allow syslog port into SELinux
   seport:
-    ports: "{{ log_server_rsyslog_port }}"
+    ports: "{{ log_server_port }}"
     proto: "{{ item }}"
     setype: syslogd_port_t
     state: present
