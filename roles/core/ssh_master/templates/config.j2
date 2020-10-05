@@ -38,7 +38,7 @@ Host {{ host }}
 {{ write_host(host,(node_main_network(hostvars[host]['network_interfaces'],j2_current_iceberg_network)| trim), None) }}
 {% endfor %}
 
-{% if icebergs_system == true and icebergs_system_enable_ssh_jump == true %}
+{% if icebergs_system == true and ssh_master_enable_jump == true %}
 # Icebergs ssh_jump system is on
 
 {#

@@ -108,7 +108,7 @@ variable:
 
 .. code-block:: yaml
 
-  icebergs_system_enable_ssh_jump: true
+  ssh_master_enable_jump: true
 
 By default, the first management found in the group list of the sub_iceberg 
 will be used as ssh ProxyJump target. It is possible to manually override this, 
@@ -126,7 +126,7 @@ iceberg_ssh_jump_target:
   iceberg_level = 2
   iceberg_ssh_jump_target = 10.10.0.77
 
-In case of issue, try adding verbosity to the ss invocation to investigate (-vvv).
+In case of issue, try adding verbosity to the ssh invocation to investigate (-vvv).
 
 Input
 ^^^^^
