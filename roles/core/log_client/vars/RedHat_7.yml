@@ -3,6 +3,3 @@ log_client_packages_to_install:
   - rsyslog
   - libselinux-python
   - policycoreutils-python
-log_client_services_to_start:
-  - rsyslog
-log_client_rsyslog_conf_path: /etc/rsyslog.conf
