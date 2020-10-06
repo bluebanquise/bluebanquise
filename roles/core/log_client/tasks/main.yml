@@ -37,6 +37,20 @@
   tags:
     - template
 
+- name: Allow syslog port into SELinux
+  seport:
+    ports: "{{ log_client_server_port }}"
+    proto: "{{ item }}"
+    setype: syslogd_port_t
+    state: present
+  when:
+    - ansible_facts.os_family == "RedHat"
+    - ansible_facts.selinux.status == "enabled"
+  loop:
+    - tcp
+    - udp
+  notify: Restart rsyslog services
+
 - meta: flush_handlers
 
 - name: Manage services state

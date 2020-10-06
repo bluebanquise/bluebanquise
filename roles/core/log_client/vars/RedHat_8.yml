@@ -1,0 +1,5 @@
+---
+log_client_packages_to_install:
+  - rsyslog
+  - python3-libselinux
+  - python3-policycoreutils
