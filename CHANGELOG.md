@@ -8,6 +8,10 @@
 
   - addons/Lmod: allow to install Lmod and specify custom modulefiles path
 
+#### Roles improvement
+
+  - core/ssh_master:
+    - add ssh jump capability in multi icebergs context (one level only)
 
 ## 1.3.0 - 2020-08-31
 
