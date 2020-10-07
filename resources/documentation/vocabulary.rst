@@ -29,23 +29,25 @@ Group
 -----
 
 An Ansible **group** is a logical aggregation of hosts.
-For example, system administrator can define a group "database_servers" that
+For example, system administrators could define a group "database_servers" that
 would contain hosts "database1" and "database2".
 
 **Groups** allow Ansible to provide dedicated **variables** to member hosts or
 execute tasks on a set of hosts.
 
-Note: a host can be part of multiple groups.
+Note: a host can be part of several groups.
 
 Variables
 ---------
 
 Variables in Ansible follow the YAML structure.
 
-A variable is like in any programming language: a variable name, and a data
+A variable is like in any programming language: a variable name, and a related data.
 related.
 
-Multiple kind of variables exist in Ansible:
+Multiple kinds of variables exist in Ansible:
+
+Note: Jinja2 will be discussed later.
 
 Simple
 ^^^^^^
@@ -57,13 +59,13 @@ A simple variable is defined this way:
   my_variable_1: hello!
   my_variable_2: 7777
 
-In Jinja2, variables will be accessible directly this way:
+In Jinja2, variables are accessible directly this way:
 
 .. code-block:: text
 
   {{ my_variable_1 }}
 
-Output will be:
+Output:
 
 .. code-block:: text
 
@@ -72,7 +74,7 @@ Output will be:
 List
 ^^^^
 
-A list is like an array, and can be iterated over:
+A list is like an array and can be iterated over:
 
 .. code-block:: yaml
 
@@ -81,7 +83,7 @@ A list is like an array, and can be iterated over:
     - alice
     - henry
 
-In Jinja2, variables in a list can be iterated over, or a specific value of the
+In Jinja2, the variables in a list can be iterated over, or a specific value of the
 list can be used (like an array):
 
 .. code-block:: text
@@ -91,9 +93,9 @@ list can be used (like an array):
   {% endfor %}
   {{ my_names_list[0] }}
 
-Note that index start at 0.
+Note that index starts at 0.
 
-Output will be:
+Output:
 
 .. code-block:: text
 
@@ -102,8 +104,7 @@ Output will be:
   henry
   bob
 
-Note also that to check if a list is empty,
-it is possible to check the list itself:
+To check if a list is empty it is possible to check the list itself:
 
 .. code-block:: text
 
@@ -116,7 +117,7 @@ it is possible to check the list itself:
 Dictionary
 ^^^^^^^^^^^
 
-A dictionary, is simply a pack of other variables, organized as a tree, and
+A dictionary is simply a pack of other variables, organized as a tree, and
 defined under it (some kind of variables tree):
 
 .. code-block:: yaml
@@ -132,7 +133,7 @@ defined under it (some kind of variables tree):
       - alice
       - henry
 
-In Jinja2, dictionary can be access two ways:
+In Jinja2, a dictionary can be accessed two ways:
 
 .. code-block:: text
 
@@ -147,7 +148,7 @@ In Jinja2, dictionary can be access two ways:
   {{ my_dictionarry_1['my_names_list'][0] }}
 
 
-Output will be:
+Output:
 
 .. code-block:: text
 
@@ -162,7 +163,6 @@ Output will be:
   bob
 
 
-Jinja2 will be discussed later, do not worry about this point for now.
 
 j2 Variables
 ^^^^^^^^^^^^
@@ -186,8 +186,8 @@ Last point, for developers, these j2 variables should be considered as a way to
 keep compatibility with roles, while upgrading the logic of the stack. Do not
 hesitate to use them in roles, to ensure long term compatibility.
 
-Inventory, roles, and playbooks
--------------------------------
+Inventory, roles and playbooks
+------------------------------
 
 Inventory
 ^^^^^^^^^
@@ -201,23 +201,23 @@ Roles
 ^^^^^
 
 An Ansible role is a list of tasks to do to achieve a purpose.
-For example, there will be a role called dhcp_server, that contains task to
+For example, the **dhcp_server** role contains the tasks to
 install, configure and start the dhcp server.
 
-In **BlueBanquise**, default path is /etc/bluebanquise/roles.
+In **BlueBanquise** the default path for roles is **/etc/bluebanquise/roles**.
 
-Note that /etc/bluebanquise/roles is split in multiple directories, but
-ansible.cfg file is configured to use roles in all of them.
+Note that /etc/bluebanquise/roles includes multiple directories. 
+The ansible.cfg file is configured to be able to use roles in all of them.
+
 
 Roles are the **AUTOMATION LOGIC**.
 
 Playbooks
 ^^^^^^^^^
 
-An Ansible playbook is simply a list of roles to apply, on a specific host or
-group of hosts. It is a yaml file.
+An Ansible playbook is a list of roles to apply on a specific host or a group of hosts. It is a yaml file.
 
-In **BlueBanquise**, default path is /etc/bluebanquise/playbooks.
+In **BlueBanquise**, the default path for playbooks is **/etc/bluebanquise/playbooks**.
 
 Playbooks are your **LIST OF ROLES TO APPLY on your hosts/targets**.
 
