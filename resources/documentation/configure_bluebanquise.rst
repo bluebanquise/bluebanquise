@@ -161,10 +161,9 @@ Other nodes
 ^^^^^^^^^^^
 
 Now, review compute and login nodes in their respective
-cluster/nodes/computes.yml and cluster/nodes/logins.yml files. Same rules
-apply. You can also add more nodes, or if you have for example multiple type
-of equipment for computes nodes or login nodes, add another equipment group
-this way:
+**cluster/nodes/computes.yml** and **cluster/nodes/logins.yml**. The same rules
+apply. You can add more nodes. You can add equipment groups for exemple if you have multiple types
+of equipment for compute or login nodes, this way:
 
 .. code-block:: yaml
 
@@ -238,7 +237,7 @@ its content:
 
 All explanations are given above.
 
-One note about *services_ip*: it is used if services are spread over multiple
+Note about **services_ip**: it is used if services are spread over multiple
 managements, or in case of High Availability with virtual IPs. Ansible is not
 able to gather this information alone from playbooks (it could, but this would
 end up with a way too much complex stack), and so we have to provide it manually.
@@ -257,24 +256,24 @@ Now, let's have a look at the general configuration.
 Review general configuration
 ----------------------------
 
-General configuration is made in group_vars/all/general_settings.
+General configuration is made in **group_vars/all/general_settings**.
 
 Externals
 ^^^^^^^^^
 
-File group_vars/all/general_settings/external.yml allows to configure external
+The file **group_vars/all/general_settings/external.yml** allows to configure external
 resources. It should be self understandable.
 
 Network
 ^^^^^^^
 
-File group_vars/all/general_settings/network.yml allows to configure network
-related parameters, and detail all networks of the cluster.
+The file **group_vars/all/general_settings/network.yml** details all networks of the cluster and allows to configure network
+related parameters.
 
 Repositories
 ^^^^^^^^^^^^
 
-File group_vars/all/general_settings/repositories.yml configure repositories to
+File **group_vars/all/general_settings/repositories.yml** configures repositories to
 use for all nodes (using groups and variable precedence, repositories can be
 tuned for each group of nodes, or even each node).
 
@@ -288,14 +287,14 @@ configurations.
 NFS
 ^^^
 
-File group_vars/all/general_settings/nfs.yml allows to set NFS shared folders
+The file **group_vars/all/general_settings/nfs.yml** allows to set NFS shared folders
 inside the cluster. Comments in the file should be enough to understand this
 file.
 
 General
 ^^^^^^^
 
-File group_vars/all/general_settings/general.yml configure few main parameters:
+The file **group_vars/all/general_settings/general.yml** configures other main parameters:
 
 * Time zone (very important)
 
