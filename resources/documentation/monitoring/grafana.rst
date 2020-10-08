@@ -1,7 +1,7 @@
 Grafana
 =======
 
-In this topic, we will see how to install Grafana, using the provided rpms.
+This section describes how to install Grafana, using the provided rpms.
 
 Installation
 ------------
@@ -23,12 +23,12 @@ It should install grafana-server.
 Useful Files
 ------------
 
-* The service is located under /usr/lib/systemd/system/grafana-server.service
-* The binary under /usr/sbin/grafana-server
-* Grafana datas (dashboards, and so on) are stored under /var/lib/grafana/grafana.db
-* Grafana default settings under /usr/share/grafana/conf/default.ini
+* The service is located under **/usr/lib/systemd/system/grafana-server.service**
+* The binary is under **/usr/sbin/grafana-server**
+* Grafana data (dashboards and so on) are stored under **/var/lib/grafana/grafana.db**
+* Grafana default settings are under **/usr/share/grafana/conf/default.ini**
 
-Now, log into Grafana at http://localhost:3000, using default credentials
+Log in to Grafana at http://localhost:3000, using default credentials
 admin / admin.
 
 Dashboard
@@ -70,13 +70,13 @@ Example:
 .. image:: /monitoring/capture/grafana/legend_field1.PNG
    :width: 60 %
 
-By example:
+Example:
 
 .. code-block:: text
 
  {{instance}}:toto:{{device}}
 
-Will provides:
+will provide:
 
 .. image:: /monitoring/capture/grafana/legend_field2.PNG
    :width: 30 %
@@ -86,7 +86,7 @@ min step and resolution
 
 .. note::
 
-    It is recommended not to change the min step and Resolution.
+    It is recommended NOT to change the min step and Resolution.
 
 format
 """"""
@@ -111,7 +111,7 @@ Transform
 .. image:: /monitoring/capture/grafana/transform1.PNG
    :width: 30 %
 
-Mainly useful when using graphs. Allows you to show the things you want in the
+Mainly useful when using graphs. Allows you to define what you want to see in the
 table, by reducing, filtering, joining metrics, and organizing fields.
 
 For example :
@@ -119,16 +119,16 @@ For example :
 .. image:: /monitoring/capture/grafana/transformExample.PNG
    :width: 50 %
 
-Here, we have 3 queries, but if you make no transform, it will look like this:
+Make the following transformations to get the desired table:
 
 .. image:: /monitoring/capture/grafana/transformExample3.PNG
    :width: 80 %
 
 So we need to make the following transformations to get the desired table:
 
-1. Filter by name, to only take the values that we want.
-2. Outer Join, to join the query values into one table (query A,query B,query C) here we join on ifName because it's the common value between the queries that we want to use.
-3. Organize field, to put everything where we want, and to rename de fields Value B and Value C (values of the queries)  to show what they represent.
+1. Filter by name, to take only the desired values.
+2. Outer Join, to join the query values into one table (query A,query B,query C). Here we join on ifName because it is the common value between the queries that we want to use.
+3. Organize field, to put everything where we want, and rename fields Value B and Value C (values of the queries) to show what they represent.
 
 With this transformation:
 
@@ -140,15 +140,14 @@ You get the following result:
 .. image:: /monitoring/capture/grafana/supp3.PNG
    :width: 80 %
 
-You can find more about the different transformations here:
+More information about the different transformations:
 https://grafana.com/docs/grafana/latest/panels/transformations/
 
 Alert
 ^^^^^
 
 You can create alerts in Grafana, by setting up conditions.
-It is pretty much self-explanatory, but if you want more info, you can check
-this link: https://grafana.com/docs/grafana/latest/alerting/create-alerts/
+It is pretty much self-explanatory, but for more information: https://grafana.com/docs/grafana/latest/alerting/create-alerts/
 
 Note that alerts defined in Grafana are not related to alerts defined in
 Prometheus.
@@ -164,7 +163,7 @@ more using the plugin list.
 You can find them here:
 https://grafana.com/grafana/plugins?direction=asc&orderBy=weight&type=panel
 
-In this documentation, we will go through 2 of the most used ones, as they have
+In this documentation, we will go through two of the most used ones (Graph and Bar gauge), as they have
 approximately all the options that other types of visualization have.
 
 Graph
@@ -178,7 +177,7 @@ Display
 
 Here, you can choose the design of your graph. You can fidget with the options
 to get your desired graph.
-If you want more info, check
+For more information:
 https://grafana.com/docs/grafana/latest/panels/visualizations/graph-panel/
 
 Series override
@@ -193,12 +192,12 @@ Axes
 ****
 
 Choose the units of the axes, and relabel them. You can also add mins and maxs.
-You can have more info here:
+For more information:
 
 Legend
 ******
 
-Legend related options, you can show the legend as a table, add min, max, avg,
+Legend related options. You can show the legend as a table, add min, max, avg,
 current values.
 
 .. image:: /monitoring/capture/grafana/LegendExample.PNG
@@ -222,7 +221,7 @@ Data links, links
 *****************
 
 Here, you can add links to different graphs, using the URL.
-For more info, check here:
+For more information:
 https://grafana.com/docs/grafana/latest/linking/data-links/
 
 Bar gauge
@@ -235,8 +234,8 @@ Display
 *******
 
 You can choose between two options in the show option.
-Calculate will show you the result of the calculation (First Value, Last Value,
-and so on), whereas All Values will show you all the values scraped in the last
+**Calculate** will show you the result of the calculation (First Value, Last Value,
+and so on), whereas **All Values** will show you all the values scraped in the last
 XX minutes. You can choose the max number of results in the Limit field.
 You can also choose  the orientation and the display mode (aesthetics)
 
@@ -251,20 +250,20 @@ Cf above.
 Repeat options
 **************
 
-If activated, will show the panel X times in the dashboard, with X being the
+If activated, the repeat option will show the panel X times in the dashboard, with X being the
 number of results we get.
 
-for example with the repeat option enabled:
+For example, with the repeat option enabled:
 
 .. image:: /monitoring/capture/grafana/BarGaugeex2.PNG
    :width: 80 %
 
-without the repeat option enabled:
+and without the repeat option enabled:
 
 .. image:: /monitoring/capture/grafana/BarGaugeex3.PNG
    :width: 50 %
 
-as you can see, in one case, you get the results in different panels, and in the
+In one case, you get the results in different panels, and in the
 other case you get the results in the same panel.
 
 Field
@@ -308,9 +307,9 @@ Override
 """"""""
 
 Override lets you override some values, by filtering fields.
-However, it is still a beta option.
+Note: it is still a beta option.
 
-For more info check above.
+For more information check above.
 
 Extra
 -----
@@ -323,17 +322,17 @@ To access get variables like these:
 .. image:: /monitoring/capture/grafana/Captureshow.PNG
    :width: 30 %
 
-first, go to the top right corner of Grafana:
+Go to the top right corner of Grafana:
 
 .. image:: /monitoring/capture/grafana/variable.PNG
    :width: 30 %
 
-go to variable:
+Go to variable:
 
 .. image:: /monitoring/capture/grafana/Variable1.PNG
    :width: 20 %
 
-Then, enter a query to get the results you want to transform as a variable.
+Enter a query to get the results you want to transform as a variable.
 For example:
 
 .. image:: /monitoring/capture/grafana/variable2.PNG
@@ -361,7 +360,7 @@ with $interface the name of our variable.
 
 .. note::
 
-    Here, we use =~ in order to accept special regex characters, like .* for example. You can see more about that in the Prometheus part of the documentation
+    Here, we use =~ in order to accept special regex characters, like .* for example. For more information see the Prometheus section of the documentation.
 
 Main Dashboard
 ^^^^^^^^^^^^^^
@@ -372,7 +371,7 @@ visualization style "Dashboard list", you should get something like that:
 .. image:: /monitoring/capture/grafana/MainDashboard.PNG
    :width: 20 %
 
-Choose the Search option and then simply choose the folder that you want to list.
+Choose the Search option and simply choose the folder that you want to list.
 
 .. image:: /monitoring/capture/grafana/mainDashboard2.PNG
    :width: 80 %
