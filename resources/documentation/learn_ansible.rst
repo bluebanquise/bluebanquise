@@ -8,7 +8,8 @@ Ansible.
 This section provides key knowledge to, at least, be able to manipulate
 and edit the stack to your needs.
 
-It is assumed that your system and Ansible are installed. It is also assumed that the **BlueBanquise** stack is NOT yet
+It is assumed that your system and Ansible are installed. 
+It is also assumed that the **BlueBanquise** stack is NOT yet
 installed, and so Ansible is freshly installed without modifications.
 
 All work will be done on the current host.
@@ -57,7 +58,8 @@ Finally, add management1 host into the inventory. Create a file called
 
 Our very basic Ansible configuration is done. 
 
-As Ansible relies fully on ssh to connect to remote hosts, ensure the management1 host can ssh to itself without password:
+As Ansible relies fully on ssh to connect to remote hosts, 
+ensure the management1 host can ssh to itself without password:
 
 Generate an ssh key (press enter multiple times):
 
@@ -90,7 +92,8 @@ ensure you can now ssh with the key:
   [root@management1 ~]# ssh management1
   [root@management1 ~]#
 
-Finally, check that Ansible can connect to management1, and reports the host is up:
+Finally, check that Ansible can connect to management1,
+and reports the host is up:
 
 .. code-block:: bash
 
@@ -148,7 +151,8 @@ facts gathering.
 ansible-inventory
 -----------------
 
-The **ansible-inventory** command is extremely useful and will be massively used in this
+The **ansible-inventory** command is extremely useful,
+and will be massively used in this
 documentation.
 
 This command allows to gather information from your inventory and check the
@@ -157,7 +161,8 @@ expected output.
 Groups and hosts
 ^^^^^^^^^^^^^^^^
 
-The **ansible-inventory graph** command provides information about groups and hosts inside each group:
+The **ansible-inventory graph** command provides information about groups,
+and hosts inside each group:
 
 .. code-block:: bash
 
@@ -178,21 +183,22 @@ More information later in this documentation.
 Host variables
 ^^^^^^^^^^^^^^
 
-To display the variables for a specific host, and check, for example, that the variable
-precedence mechanism is as expected, use:
+To display the variables for a specific host, and check, for example,
+that the variable precedence mechanism is as expected, use:
 
 .. code-block:: bash
 
   ansible-inventory --yaml --host management1
 
-For now, there are no available variables in the inventories, so the output will
-be {}.
+For now, there are no available variables in the inventories,
+so the output will be {}.
 
 ansible-playbook
 ----------------
 
-The **ansible-playbook** command is used to run playbooks, and ask Ansible to execute tasks on
-desired host(s). This is the most used command when using **BlueBanquise**.
+The **ansible-playbook** command is used to run playbooks,
+and ask Ansible to execute tasks on desired host(s).
+This is the most used command when using **BlueBanquise**.
 
 Important parameters:
 
@@ -231,8 +237,8 @@ Adding variables
 
 We are going to add some variables, at different positions in the inventories.
 
-Create the file /etc/ansible/inventory/group_vars/all/my_ship.yml with the following
-content:
+Create the file /etc/ansible/inventory/group_vars/all/my_ship.yml
+with the following content:
 
 .. code-block:: yaml
 
@@ -358,7 +364,9 @@ nfs1 are members of group **slaves**.
 The special string **hosts** in this file defines that the string above is a
 group, and that the strings below are host members of this group.
 
-It is possible to set groups in a group in the same file /etc/ansible/inventory/myhost.yml. Edit it again:
+It is possible to set groups in a group in the same file:
+/etc/ansible/inventory/myhost.yml 
+Edit it again:
 
 .. code-block:: yaml
 
@@ -387,8 +395,8 @@ Check the groups:
     |--@ungrouped:
   [root@ ~]#
 
-The **children** string defines that the string above is a group that contains the
-below group(s).
+The **children** string defines that the string above is a group that contains
+the below group(s).
 
 In Ansible syntax
 ^^^^^^^^^^^^^^^^^
@@ -442,7 +450,8 @@ You can find more information and examples
 Variables precedence
 --------------------
 
-This section describes how to use all these groups and make full usage of the inventory structure.
+This section describes how to use all these groups,
+and make full usage of the inventory structure.
 
 If you remember precedence system in the Vocabulary section
 (more `here on Ansible dedicated page <https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html#variable-precedence-where-should-i-put-a-variable>`_ )
@@ -501,10 +510,10 @@ Perfect.
 
 .. note::
   We could also use a file in inventory/host_vars/management1/new_values.
-  Setting a variable in the host definition file above the host is equivalent to
-  using the host_vars folder. But the host_vars folder is difficult to use when there is a
-  very large number of hosts, which is why in **BlueBanquise** we often
-  use directly the host file.
+  Setting a variable in the host definition file above the host is equivalent
+  to using the host_vars folder. But the host_vars folder is difficult
+  to use when there is a very large number of hosts, 
+  which is why in **BlueBanquise** we often use directly the host file.
 
 Let's say we want to change the model of spaceship of all the slave nodes.
 So not a single host, but all slave member hosts.
@@ -517,8 +526,8 @@ group_vars:
 
   mkdir /etc/ansible/inventory/group_vars/slaves
 
-Then, create the file /etc/ansible/inventory/group_vars/slaves/myship.yml with the
-following content:
+Then, create the file **/etc/ansible/inventory/group_vars/slaves/myship.yml** 
+with the following content:
 
 .. code-block:: yaml
 
@@ -577,8 +586,9 @@ Create a role called "shipyard", with needed folders:
   mkdir /etc/ansible/roles/shipyard/tasks
   mkdir /etc/ansible/roles/shipyard/templates
 
-The tasks folder contains the tasks to perform, and the main.yml file inside will be the
-starting point for Ansible. The templates folder will contain our templates
+The tasks folder contains the tasks to perform, 
+and the main.yml file inside will be the starting point for Ansible. 
+The templates folder will contain our templates
 (configuration files) in Jinja2 language.
 
 Tasks
@@ -665,8 +675,8 @@ Create file /etc/ansible/playbooks/myplaybook.yml with the following content:
       - role: shipyard
         tags: shipyard
 
-Simply put, the target of the playbook is the management1 host, and the role to apply is
-shipyard.
+Simply put, the target of the playbook is the management1 host,
+and the role to apply is shipyard.
 
 Skip the tags for now.
 
@@ -706,8 +716,8 @@ But this is not very interesting, let's add some dynamic part into our template.
 Jinja2
 ------
 
-Edit the file /etc/ansible/roles/shipyard/templates/index.html.j2 to make it this
-way:
+Edit the file /etc/ansible/roles/shipyard/templates/index.html.j2 
+to make it this way:
 
 .. code-block:: html
 
@@ -1087,8 +1097,8 @@ to execute second only, or ``--skip-tags first`` that will skip the first one.
 Notify
 ^^^^^^
 
-Sometimes, you may wish that some actions take place at the end of each role, if
-a module returned a **changed** status.
+Sometimes, you may wish that some actions take place at the end of each role,
+if a module returned a **changed** status.
 Best example: your role is dedicated to a service, and Ansible generates the
 configuration file using a template.
 You may want that this service is restarted if Ansible detects changes in the
@@ -1198,9 +1208,9 @@ Let's review the most commonly used modules:
 
 Package
 """""""
-
-This module simply installs a list of packages. It can be used instead of the yum
-or dnf modules, as it covers both.
+-------------------------------------------------------------------------------
+This module simply installs a list of packages. 
+It can be used instead of the yum or dnf modules, as it covers both.
 
 Example:
 
@@ -1282,8 +1292,8 @@ For example, create file my_role/files/slurm.conf
 Lineinfile
 """"""""""
 
-This module allows to manipulate files, using regex. For example, set a value to
-0 in a file.
+This module allows to manipulate files, using regex. 
+For example, set a value to 0 in a file.
 
 Example:
 
