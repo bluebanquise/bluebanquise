@@ -1,0 +1,31 @@
+---
+# Enable or not the generation of the singularity.conf file.
+singularity_manage_conf_file: True
+
+# Some basic widely used settings - based on singularity-3.6.3 RPM.
+singularity_allow_setuid: "yes"
+singularity_enable_overlay: "try"
+singularity_enable_underlay: "yes"
+singularity_user_bind_control: "yes"
+singularity_allow_pid_ns: "yes"
+singularity_allow_user_image: "yes"
+singularity_protected_image_mode: "none"
+singularity_config_passwd: "yes"
+singularity_config_group: "yes"
+singularity_config_resolv_conf: "yes"
+singularity_mount_proc: "yes"
+singularity_mount_sys: "yes"
+singularity_mount_dev: "yes"
+singularity_mount_devpts: "yes"
+singularity_mount_home: "yes"
+singularity_mount_tmp: "yes"
+singularity_mount_hostfs: "no"
+singularity_bind_path: "/etc/hosts"
+singularity_mount_slave: "yes"
+singularity_fuse_mount: "yes"
+
+# Enable or not the generation of the singularity init file.
+singularity_manage_init_file: True
+
+singularity_init_log_tag: "singularity"
+singularity_init_log_message: "user=$USER image=${SINGULARITY_IMAGE:-} image_path=${IMAGE_PATH:-} container=${SINGULARITY_CONTAINER:-} rundir=${SINGULARITY_RUNDIR:-} jobid=${SLURM_JOB_ID:-} cmd=$SINGULARITY_COMMAND"
