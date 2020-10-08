@@ -1,14 +1,14 @@
 Introduction
 ============
 
-This monitoring documentation has multiple aims:
+The monitoring documentation provides:
 
-* Provide an overview of Prometheus and the different exporters.
-* Provide instructions on how to add exporters to nodes, and how you could add your own exporters.
-* Provide instructions on alerting configuration.
-* Provide an overview of Grafana and the different dashboard.
+* an overview of Prometheus and the different exporters.
+* instructions on how to add exporters to nodes, and how you could add your own exporters.
+* instructions on alerting configuration.
+* an overview of Grafana and the different dashboards.
 
-This documentation is built around those section:
+It includes the following sections:
 
 1. Prometheus
 2. Alerts
