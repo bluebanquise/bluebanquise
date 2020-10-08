@@ -1,10 +1,10 @@
 Node_exporter
 =============
 
-The node_exporter is an official exporter from Prometheus, and can be found
+**node_exporter** is an official exporter from Prometheus, which can be found
 here: https://github.com/prometheus/node_exporter
 
-By default, the node_exporter runs under the port 9100.
+By default, node_exporter runs under the port 9100.
 
 To access the metrics, either do:
 
@@ -38,11 +38,11 @@ You should get something like this:
   # TYPE process_max_fds gauge
   process_max_fds 1024
 
-There are a lot of information given by node_exporter. It is an heavy 
-exporter, that is generally not run on compute nodes, in order to prevent 
-any loss of computational power.
+node_exporter provides a lot of information. It is an heavy 
+exporter, which is generally not run on compute nodes, in order to prevent 
+any loss of computation power.
 
-Some of the information given are the following:
+The information provided by node_exporter includes:
 
 * Cpu core throttle
 * Cpu max,min,scaled frequency
@@ -64,7 +64,7 @@ Alerts
 ------
 
 All the alerts for the node_exporter are stored under
-/etc/prometheus/alerts/node.yml
+**/etc/prometheus/alerts/node.yml**
 
 Some of them include :
 
@@ -84,7 +84,7 @@ To start the service, simply run:
 
   systemctl start node_exporter
 
-.. note:: all exporter services are under the /etc/systemd/system directory, and most binaries are under the /usr/local/bin directory
+.. note:: all exporter services are under the **/etc/systemd/system** directory, and most binaries are under the **/usr/local/bin directory**
 
 Dashboard
 ---------
@@ -98,6 +98,6 @@ Grafana open source dashboard:
 * System load
 * CPU Basic
 
-To access the dashboard: access the management at http://localhost:3000
+To display the dashboard, access the management at http://localhost:3000
 
 You can also do some "port forwarding" to reach Grafana.
