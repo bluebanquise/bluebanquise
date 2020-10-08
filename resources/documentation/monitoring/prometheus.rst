@@ -1,7 +1,7 @@
 Prometheus
 ==========
 
-In this topic, we will see how to configure and deploy both prometheus_server
+This section describes how to configure and deploy both prometheus_server
 and prometheus_client Ansible roles.
 
 Prerequisites
@@ -26,7 +26,7 @@ Installation
 Prometheus Server
 ^^^^^^^^^^^^^^^^^
 
-First create file
+Create the file
 /etc/bluebanquise/inventory/group_vars/all/addons/prometheus.yml with the
 following content:
 
@@ -42,7 +42,7 @@ following content:
 
 .. seealso:: https://www.robustperception.io/whats-the-difference-between-group_interval-group_wait-and-repeat_interval
 
-Now, simply add to the playbook of your choice (which is for the Prometheus
+Simply add to the playbook of your choice (which is for the Prometheus
 server) the prometheus_server role (change the values of enable_services and start_services accordingly):
 
 .. code-block:: yaml
@@ -55,7 +55,7 @@ server) the prometheus_server role (change the values of enable_services and sta
       tags: prometheus_server
 
 
-Then run:
+Run:
 
 .. code-block:: text
 
@@ -65,10 +65,10 @@ Now prometheus_server should be installed and configured with a minimal
 configuration.
 
 The configuration file for Prometheus is located under
-/etc/prometheus/prometheus.yml.
+**/etc/prometheus/prometheus.yml**.
 It contains all the exporters to scrape, and more.
 
-It is now time to configure client side. Note that while the
+Now, configure the client side. Note that while the
 /etc/bluebanquise/inventory/group_vars/all/addons/prometheus.yml file is only
 used by the prometheus_server role, the client files seen in next section will
 be shared by both server and client role. Server will use it to know which
@@ -78,8 +78,8 @@ install locally.
 Prometheus Client
 ^^^^^^^^^^^^^^^^^
 
-For each *equipment_profile*, create a file called monitoring.yml that contains
-the desired exporters to be deployed, into equipment_profile folder of your
+For each **equipment_profile**, create a file called **monitoring.yml** that contains
+the desired exporters to be deployed, into the equipment_profile folder of your
 target hosts groups.
 
 For example, to set exporters to be scrapped and installed on all hosts of
@@ -105,12 +105,12 @@ following content:
 This will setup here two exporters on these equipments: node_exporter and
 ha_cluster_exporter.
 
-Also don't forget to add the name of the package you want to install and the
+Do not forget to add the name of the package you want to install and the
 service name.
 
 .. note::
-  As you can see, you can also add the scrape_interval (which is how
-  often the metrics get scraped), and the scrape_timeout (which represents how
+  As you can see, you can add scrape_interval (which is how
+  often the metrics get scraped), and scrape_timeout (which represents how
   long until a scrape request times out).
 
 .. note::
@@ -119,7 +119,7 @@ service name.
   /etc/systemd/system.
 
 Now simply add to the playbook of your choice (which is for the Prometheus
-clients) the prometheus_client role (change the values  of enable_services and start_services accordingly):
+clients) the prometheus_client role (change the values of enable_services and start_services accordingly):
 
 .. code-block:: yaml
 
@@ -130,7 +130,7 @@ clients) the prometheus_client role (change the values  of enable_services and s
      - role: prometheus_client
        tags: prometheus_client
 
-Then run:
+Run:
 
 .. code-block:: text
 
@@ -138,7 +138,7 @@ Then run:
 
 Now prometheus_client should be installed.
 
-Also, re-execute the prometheus_server role on the management node hosting the
+Re-execute the prometheus_server role on the management node hosting the
 Prometheus server, to ensure Prometheus is now aware of these new exporters to
 scrape.
 
@@ -149,7 +149,7 @@ scrape.
 Prometheus.yml
 --------------
 
-File /etc/prometheus/prometheus.yml is where all the exporters and the scrape
+The file **/etc/prometheus/prometheus.yml** is where all the exporters and the scrape
 related variables are stored for the Prometheus server to run.
 It looks something like this:
 
@@ -185,20 +185,18 @@ It looks something like this:
         - targets: ['management1-1:9100']
         - targets: ['management1-2:9100']
 
-Few notes:
+Notes:
 
 * **rule_files** is where the alert related configurations are located
 * **alerting** is where Prometheus should send alerts (i.e. Alertmanager)
-* **scrape_configs** is where are defined all the exporters that server need to listen to, with the targets, and so on
+* **scrape_configs** is where are defined all the exporters that server needs to listen to, with the targets, and so on
 
 .. seealso:: https://prometheus.io/docs/prometheus/latest/configuration/configuration/
-
-It is now time to learn variables before using them in the Prometheus interface.
 
 Variables
 ---------
 
-There are 4 types of variable in Prometheus:
+There are four types of variable in Prometheus:
 
 1. Counters
 2. Gauges
@@ -209,7 +207,7 @@ Counters
 ^^^^^^^^
 
 Counters are used for metrics that can only increase.
-It is an incremental counter, that is used in order to know how rapidly
+It is an incremental counter, useful to know how rapidly
 something grows for example.
 
 .. note::
@@ -222,7 +220,7 @@ It can also be used for error counts, tasks completed, and so on.
 Gauges
 ^^^^^^
 
-Gauges are used for metrics that can go up, but can also decrease.
+Gauges are used for metrics that can go up or decrease.
 It gives a specific value for the time set.
 
 .. note::
@@ -231,7 +229,7 @@ It gives a specific value for the time set.
     This way, you have the temperature for any given time.
     It can also be used for memory usage, number of requests, and so on.
 
-It can be used with function like min, max, average, and so on to get the
+It can be used with functions like min, max, average, and so on to get the
 desired result.
 
 Histograms & Summaries
@@ -248,12 +246,12 @@ Their main goal is to watch for data that fall in a certain category.
 Queries
 -------
 
-In order to query a **metric** with Prometheus, you have to go to the Prometheus
+To query a **metric** with Prometheus, go to the Prometheus
 web page.
 By default, it is located at **http://localhost:9090** .
 
-To query a metric, simply type in the metric name. You also have a dropdown list
-with all the available metrics to query.
+To find a metric, simply type in the metric name, or use the dropdown list
+with all the available metrics.
 
 .. image:: /monitoring/capture/prometheus/query1.PNG
    :width: 80 %
@@ -279,7 +277,7 @@ You can also choose from when to when.
 Regex
 ^^^^^
 
-You can also use the same queries, but with regex.
+You can use the same queries with regex.
 
 If you want the attribute to follow the given regex, the global syntax for is:
 
@@ -287,7 +285,7 @@ If you want the attribute to follow the given regex, the global syntax for is:
 
   query{attribute=~"regex_value"}
 
-Or if you don't want the attribute to follow the regex:
+Or if you do not want the attribute to follow the regex:
 
 .. code-block:: text
 
@@ -295,7 +293,7 @@ Or if you don't want the attribute to follow the regex:
 
 .. note::
 
-  The **tilda** here is very important.
+  The **tilda** character (~) is very important.
 
 Using this syntax, you can:
 
@@ -338,8 +336,8 @@ will return all the metrics which name starts with ipmi, and which instance is
 Boolean operators
 ^^^^^^^^^^^^^^^^^
 
-You can also combine different metrics, using boolean operators. There are
-several operators in Prometheus. Some of them are the following:
+You can combine different metrics, using boolean operators. There are
+several operators in Prometheus, including:
 
 * == (equal)
 * != (not-equal)
@@ -348,22 +346,21 @@ several operators in Prometheus. Some of them are the following:
 * >= (greater-or-equal)
 * <= (less-or-equal)
 
-These are used in order to get the results that correspond to the condition.
 For example:
 
 .. code-block:: text
 
   ipmi_up==1
 
-will only return the instances of the query that are equal to one.
+will only return the instances of the query that are equal to 1.
 
-It is also possible to use logic operators:
+You can also use logic operators:
 
 * and (intersection)
 * or (union)
 * unless (complement)
 
-Vector1 and vector2 results in a vector consisting of the elements of vector1
+**vector1 and vector2** results in a vector consisting of the elements of vector1
 for which there are elements in vector2 with exactly matching label sets.
 Other elements are dropped. The metric name and values are carried over from the
 left-hand side vector.
@@ -382,7 +379,7 @@ will return:
 
 because it has the same instance name and job name as a node_cpu_package_throttles_total.
 
-Vector1 or vector2 results in a vector that contains all original elements (label sets + values) of vector1 and additionally all elements of vector2 which do not have matching label sets in vector1.
+**vector1 or vector2** results in a vector that contains all original elements (label sets + values) of vector1 and additionally all elements of vector2 which do not have matching label sets in vector1.
 
 For example:
 
@@ -398,10 +395,11 @@ will return:
   node_cpu_package_throttles_total{instance="1-2:9100",job="equipment_R_node_exporter",package="0"}
   node_cpu_package_throttles_total{instance="1-2:9100",job="equipment_R_node_exporter",package="1"}
 
-Vector1 unless vector2 results in a vector consisting of the elements of vector1 for which there are no elements in vector2 with exactly matching label sets. All matching elements in both vectors are dropped.
+**vector1 unless vector2** results in a vector consisting of the elements of vector1 for which there are no elements in vector2 with exactly matching label sets. All matching elements in both vectors are dropped.
 
-There are also other types of boolean operators, like group_left or group_right,
-in the online documentation.
+There are other boolean operators, like group_left or group_right.
+See the online documentation for details:
+
 
 .. seealso:: https://prometheus.io/docs/prometheus/latest/querying/operators/
 
@@ -420,7 +418,7 @@ of the major ones:
 delta
 """""
 
-*delta()* calculates the difference of value between the value from X minutes
+**delta()** calculates the difference of value between the value from X minutes
 ago and the current value.
 
 Example:
@@ -435,9 +433,9 @@ Example:
 rate & irate
 """"""""""""
 
-*rate()* gives you the per second average rate of change over your range
+**rate()** gives you the per second average rate of change over your range
 interval.
-*irate()* is the per second rate of change at the end of your range interval
+**irate()** is the per second rate of change at the end of your range interval
 
 The difference between rate and delta, is that rate automatically adjusts for
 resets. It means that it only works with "counter" variables, i.e. a variable
@@ -459,7 +457,7 @@ get the rate.
 avg
 """
 
-*avg()* returns the average value of **all** query results.
+**avg()** returns the average value of **all** query results.
 
 By default, it returns the avg value by job:
 
@@ -478,10 +476,10 @@ But you can also average by any other attribute, using avg(query) by(attribute):
 avg_over_time
 """""""""""""
 
-*avg_over_time()* is self explanatory, it gives you the average value of a
+**avg_over_time()** is self explanatory, it gives you the average value of a
 metric during the given interval, **for each instance**.
 
-For example if ipmi_current_amperes had the values: 2, 4, 6 in the last 5m:
+For example, if ipmi_current_amperes had the values: 2, 4, 6 in the last 5m:
 
 .. code-block:: text
 
@@ -498,23 +496,21 @@ sum, min, max
 """""""""""""
 
 Self explanatory.
-Works the same way as *avg*, and can be used with _over_time too.
+Works the same way as **avg**, and can be used with _over_time too.
 
 more
 """"
 
-For *more* info, check:
+For information about **more**, see:
 
 .. seealso:: https://prometheus.io/docs/prometheus/latest/querying/functions/
-
-It is now time to understand how alerts work in Prometheus.
 
 Alerts
 ------
 
 Alerts are located in the /etc/prometheus/alerts/ directory.
 
-An example of alert:
+Example:
 
 .. code-block:: yaml
 
@@ -533,7 +529,7 @@ An example of alert:
 This alert will be seen as *pending* by Prometheus when the condition in
 **expr:** is verified, in this case, when the percentage of used RAM is greater
 than 90%.
-It will seen as *firing* when the condition is met for X minutes, hours, or
+It will be seen as *firing* when the condition is met for X minutes, hours, or
 days, X being in the **for** field.
 It will be fired with an extra label called severity, which is set to *warning*
 in this case.
@@ -555,8 +551,8 @@ Alertmanager is an additional tool for Prometheus, used to manage alerts.
 **Alertmanager DO NOT evaluate alerts**, this is Prometheus task. Alertmanager
 is a tool to manage alerts already fired by Prometheus.
 
-By default, it's located under the management node's ip address, port 9093.
-Configuration file of Alertmanager is under /etc/alertmanager/alertmanager.yml.
+By default, it is located under the management node's ip address, port 9093.
+Configuration file of Alertmanager is under **/etc/alertmanager/alertmanager.yml**.
 
 By default it looks like this:
 
@@ -586,7 +582,7 @@ By default it looks like this:
       severity: 'warning'
     equal: ['alertname', 'cluster', 'service']
 
-You can find more about it here:
+More information:
 
 .. seealso:: https://prometheus.io/docs/alerting/latest/configuration/
 
