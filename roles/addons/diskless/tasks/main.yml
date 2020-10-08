@@ -31,6 +31,7 @@
     path: "{{ item }}"
     state: directory
     mode: 0755
+    setype: "{{ (ansible_facts.os_family == 'RedHat' and ansible_facts.selinux.status == 'enabled') | ternary('httpd_sys_content_t', omit) }}"
     owner: "{{ diskless_apache_user }}"
     group: "{{ diskless_apache_user }}"
   loop:
