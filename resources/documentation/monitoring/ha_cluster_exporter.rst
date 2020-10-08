@@ -1,10 +1,10 @@
 Ha_cluster_exporter
 ===================
 
-The ha_cluster_exporter is an open source exporter, and can be found here:
+**ha_cluster_exporter** is an open source exporter, which can be found here:
 https://github.com/ClusterLabs/ha_cluster_exporter
 
-By default, the ha_cluster_exorter runs under the port 9664.
+By default, ha_cluster_exorter runs under the port 9664.
 
 To access the metrics, either do:
 
@@ -47,7 +47,7 @@ You should get something like this:
   ha_cluster_pacemaker_fail_count{node="mgmt1-2",resource="fs-rsyslog"} 0
 
 
-Some of the information given are the following:
+The information provided by ha_cluster_exporter includes:
 
 * Pacemaker fails
 * Pacemaker constraints
@@ -65,7 +65,7 @@ Alerts
 All the alerts for the node_exporter are stored under
 /etc/prometheus/alerts/ha.yml
 
-Some of them include :
+Some of them include:
 
 * Not quorate
 * Long standby
@@ -85,15 +85,15 @@ To start the service, simply run:
   systemctl start ha_cluster_exporter
 
 .. note::
-  All exporter services are under the /etc/systemd/system directory,
-  and most binaries are under the /usr/local/bin directory.
+  All exporter services are under the **/etc/systemd/system** directory,
+  and most binaries are under the **/usr/local/bin** directory.
 
 Dashboards
 ----------
 
-there are several dashboards for the ha.
+There are several dashboards for HA.
 
-Here is what they show:
+The dashboards show:
 
 * Pacemaker nodes (Total  nodes, online nodes, expected up, DC)
 * Quorum votes (expected votes, highest expected vote, total votes)
@@ -102,4 +102,4 @@ Here is what they show:
 * Last pacemaker change
 * Resources (names, agent,status,…)
 * Alerts (name, severity, instance…)
-* Etc...
+* etc.
