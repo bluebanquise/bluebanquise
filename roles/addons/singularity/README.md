@@ -1,14 +1,14 @@
-# Singularity CE or SingularityPRO Ansible role
+# Singularity Ansible role
 
 ## Description
 
-Install and configure Singularity CE or SingularityPRO
+Install and configure Singularity or SingularityPRO.
 
 ## Pre-requisites
 
-* RPMs of Singulary CE
+* RPMs of Singularity
 Note: RPM is not directly available on Singularity GitHub.
-RHEL8 build instructions (exemple done on management1, but can be done on another RHEL8 server** anywhere)
+RHEL8 build instructions (example done on management1, but can be done on another RHEL8 server** anywhere)
 ```
 dnf groupinstall -y 'Development Tools'
 dnf install openssl-devel libuuid-devel libseccomp-devel wget squashfs-tools cryptsetup golang createrepo

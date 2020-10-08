@@ -22,7 +22,7 @@ singularity_mount_tmp: "yes"
 singularity_mount_hostfs: "no"
 singularity_bind_path: "/etc/hosts"
 singularity_mount_slave: "yes"
-singularity_fuse_mount: "yes"
+singularity_enable_fusemount: "yes"
 
 # Enable or not the generation of the singularity init file.
 singularity_manage_init_file: True
