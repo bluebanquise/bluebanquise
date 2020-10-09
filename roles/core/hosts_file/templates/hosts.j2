@@ -77,9 +77,7 @@
 ## Internal hosts
 
 {% set current_iceberg = j2_current_iceberg %}
-{% for host in range %}
-{{ write_host(host,hostvars[host],current_iceberg) }}
-{% endfor %}
+{% for host in range %}{{ write_host(host,hostvars[host],current_iceberg) }}{% endfor %}
 
 ## External hosts
 
