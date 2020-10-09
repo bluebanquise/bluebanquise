@@ -15,7 +15,7 @@ The following parameters are recommended:
 
 * >= 2 CPU/vCPU
 * >= 2 Gb RAM
-* >= 16Gb HDD
+* >= 24Gb HDD
 
 And the following parameters are the strict minimal if you wish to test the
 stack in VMs:
@@ -37,15 +37,8 @@ Prepare for Ansible
 Repositories
 ------------
 
-Once system is installed and rebooted, login, and disable firewall. Firewall
-will optionally be reactivated later.
-
-.. code-block:: bash
-
-  systemctl stop firewalld
-  systemctl disable firewalld
-
-Then prepare boot images and packages repositories.
+Once system is installed and rebooted, login, then prepare boot images 
+and packages repositories.
 
 Boot images include the installer system which starts the deployment after PXE
 boot, while packages repositories include the software that will be installed
