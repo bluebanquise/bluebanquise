@@ -117,14 +117,14 @@ the desired target.
 
 For example, to force ProxyJump target to be 10.10.0.77 for 
 iceberg3 hosts, in inventory/cluster/icebergs/iceberg3 file, add 
-iceberg_ssh_jump_target:
+ssh_master_iceberg_jump_target:
 
 .. code-block:: text
 
   [iceberg3:vars]
   iceberg_master = iceberg1
   iceberg_level = 2
-  iceberg_ssh_jump_target = 10.10.0.77
+  ssh_master_iceberg_jump_target = 10.10.0.77
 
 In case of issue, try adding verbosity to the ssh invocation to investigate (-vvv).
 
@@ -143,8 +143,8 @@ Optional inventory vars:
 **hostvars[inventory_hostname]**
 
 * security.ssh.hostkey_checking
-* icebergs_system_enable_ssh_jump
-* iceberg_ssh_jump_target 
+* ssh_master_enable_jump
+* ssh_master_iceberg_jump_target
 
 Output
 ^^^^^^

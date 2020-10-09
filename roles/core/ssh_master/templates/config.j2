@@ -51,8 +51,8 @@ before using the first management node found in the group list.
   {% for iceberg in (groups | select('match','^'+iceberg_naming+'.*') | list | unique | sort ) %}
     {% if hostvars[groups[iceberg][0]]['iceberg_master'] == j2_current_iceberg %}
       {% set ssh_jump_target = namespace(value=none) %}
-      {% if hostvars[groups[iceberg][0]]['iceberg_ssh_jump_target'] is defined %}
-        {% set ssh_jump_target.value = hostvars[groups[iceberg][0]]['iceberg_ssh_jump_target'] %}
+      {% if hostvars[groups[iceberg][0]]['ssh_master_iceberg_jump_target'] is defined %}
+        {% set ssh_jump_target.value = hostvars[groups[iceberg][0]]['ssh_master_iceberg_jump_target'] %}
       {% else %}
         {% for host in groups[managements_group_name] %}
           {% if host in groups[iceberg] %}
