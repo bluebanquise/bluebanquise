@@ -1,0 +1,24 @@
+dependency:
+  name: galaxy
+driver:
+  name: docker
+platforms:
+  - name: management1
+    groups:
+      - mg_managements
+    image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
+    override_command: false
+    capabilities:
+      - "SYS_ADMIN"
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    pre_build_image: true
+provisioner:
+  name: ansible
+  inventory:
+    links:
+      group_vars: ../../../../../resources/examples/simple_cluster/inventory/group_vars
+      host_vars: ${PWD}
+verifier:
+  name: ansible

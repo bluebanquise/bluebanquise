@@ -1,0 +1,60 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+
+    - name: Collect package facts
+      package_facts:
+        manager: auto
+
+    - name: Collect services facts
+      service_facts:
+
+    - name: Assert nfs needed packages are installed
+      assert:
+        that: "'{{ item }}' in ansible_facts.packages"
+      loop:
+        - nfs-utils
+        - python3-libselinux
+        - python3-policycoreutils
+
+    - name: Retrieve dir system status
+      stat:
+        path: /opt/software
+      register: register_stat
+
+    - name: Assert dir /etc/software exist
+      assert:
+        that: 
+          - "register_stat.stat.exists"
+          - "register_stat.stat.isdir"
+
+    - name: Retrieve /opt/software in /etc/fstab file
+      lineinfile:
+        path: /etc/fstab
+        regexp: "/opt/software nfs ro,intr,nfsvers=4.2,bg"
+        state: absent
+      check_mode: yes
+      register: export_sw_result
+
+    - name: Check /etc/fstab file contains /opt/software line
+      assert:
+        that: export_sw_result.found
+
+    - name: Retrieve /home in /etc/fstab file
+      lineinfile:
+        path: /etc/fstab
+        regexp: "/home nfs rw,intr,rsize=32768,wsize=32768,nfsvers=4.2,bg"
+        state: absent
+      check_mode: yes
+      register: export_home_result
+
+    - name: Check /etc/exports file contains /home line
+      assert:
+        that: export_home_result.found
+
+    - name: Check rpcbind is enabled/running
+      assert:
+        that:
+          - "ansible_facts.services['rpcbind.service'].status == 'enabled'"
+          - "ansible_facts.services['rpcbind.service'].state == 'running'"
