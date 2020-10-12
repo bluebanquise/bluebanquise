@@ -12,11 +12,7 @@
 
     - name: Assert nfs needed packages are installed
       assert:
-        that: "'{{ item }}' in ansible_facts.packages"
-      loop:
-        - nfs-utils
-        - python3-libselinux
-        - python3-policycoreutils
+        that: "'nfs-utils' in ansible_facts.packages"
 
     - name: Retrieve dir system status
       stat:
