@@ -246,7 +246,7 @@ elif main_action == '2':
         exit(1)
 
     print(bcolors.OKBLUE+'[INFO] Now generating initramfs... May take some time.'+bcolors.ENDC)
-    os.system('dracut --xz -v -m "network base nfs" --add "livenet" --add-drivers xfs --no-hostonly --nolvmconf ' + kernels_path + '/initramfs-kernel-' + (kernel_list[selected_kernel].strip('vmlinuz-')) + ' --force --kver={}'.format(kernel_list[selected_kernel].strip('vmlinuz-')))
+    os.system('dracut --xz -v -m "network base nfs" --add "ifcfg livenet systemd systemd-initrd dracut-systemd" --add-drivers xfs --no-hostonly --nolvmconf ' + kernels_path + '/initramfs-kernel-' + (kernel_list[selected_kernel].strip('vmlinuz-')) + ' --force --kver={}'.format(kernel_list[selected_kernel].strip('vmlinuz-')))
     os.chmod(kernels_path + '/initramfs-kernel-' + (kernel_list[selected_kernel].strip('vmlinuz-')), 0o644)
     print(bcolors.OKGREEN+'\n[OK] Done.'+bcolors.ENDC)
 
