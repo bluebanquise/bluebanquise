@@ -1,0 +1,4 @@
+---
+nfs_client_role_version: 1.0.4
+
+nfs_client_mount_exported_dirs: true # true=mounted, false=present

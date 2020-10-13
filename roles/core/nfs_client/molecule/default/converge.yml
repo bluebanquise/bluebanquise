@@ -1,8 +1,10 @@
 ---
 - name: Converge
   hosts: all
-  tasks:
+  vars:
+    nfs_client_mount_exported_dirs: false
 
+  tasks:
     - name: "Include nfs_client"
       include_role:
         name: "nfs_client"

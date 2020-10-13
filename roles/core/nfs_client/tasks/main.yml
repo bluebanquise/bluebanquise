@@ -63,7 +63,7 @@
     src: "{{ item.0.server }}{% if item.0.take_over_network is defined and item.0.take_over_network is not none %}-{{ item.0.take_over_network }}{% endif %}:{{ item.0.export }}"
     fstype: nfs
     opts: "{{ item.0.mount_arguments }}"
-    state: "{{ (mount_exported_dirs | bool) | ternary('mounted', 'present') }}"
+    state: "{{ (nfs_client_mount_exported_dirs | bool) | ternary('mounted', 'present') }}"
   with_subelements:
     - "{{ nfs }}"
     - clients_groups
