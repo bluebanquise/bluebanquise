@@ -43,14 +43,12 @@
 
 # Note from JK
 # We could add so much more features here, like VLAN, LACP, MTU, etc. Easy to add.
-- name: nmcli █ Set NIC configuration using nmcli
+- name: nmcli █ Set NIC configuration
   nmcli:
     conn_name: "{{ item.name | string }}"
     type: "{% if item.type is defined and item.type is not none %}{{ item.type }}{% else %}ethernet{% endif %}"
-#    ifname: "{{ network_connectionsitem.ifname }}"
     ip4: "{{ item.ip4 }}/{{ networks[item.network].prefix }}"
     state: present
-#    autoconnect: yes
     gw4: "{% if networks[item.network].gateway is defined and networks[item.network].gateway is not none %}{{ networks[item.network].gateway }}{% endif %}"
   loop: "{{ network_interfaces }}"
   tags:
