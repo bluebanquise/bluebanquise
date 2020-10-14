@@ -1,5 +1,5 @@
 ---
-- name: Gathering OS specific variables
+- name: singularity █ Gathering OS specific variables
   # This task gathers variables defined in OS specific files.
   #
   # Search vars in:
@@ -19,45 +19,32 @@
         - "vars/{{ ansible_facts.os_family }}.yml"
       skip: true
 
-- name: Install packages
+- name: singularity █ Install singularity
   package:
-    name: "{{ log_client_packages_to_install }}"
+    name: "{{ item }}"
     state: present
+  with_items: "{{ singularity_packages_to_install }}"
   tags:
     - package
 
-- name: Template >> /etc/rsyslog.conf
+- name: singularity █ Template in singularity.conf
   template:
-    src: rsyslog.conf.j2
-    dest: "{{ log_client_rsyslog_conf_path }}"
+    src: singularity.conf.j2
+    dest: "{{ singularity_config_dir }}/singularity.conf"
+    backup: yes
     owner: root
-    group: root
     mode: 0644
-  notify: Restart rsyslog services
+  when: singularity_manage_conf_file | bool
   tags:
     - template
 
-- name: Allow syslog port into SELinux
-  seport:
-    ports: "{{ log_client_server_port }}"
-    proto: "{{ item }}"
-    setype: syslogd_port_t
-    state: present
-  when:
-    - ansible_facts.os_family == "RedHat"
-    - ansible_facts.selinux.status == "enabled"
-  loop:
-    - tcp
-    - udp
-  notify: Restart rsyslog services
-
-- meta: flush_handlers
-
-- name: Manage services state
-  service:
-    name: "{{ item }}"
-    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
-    state: "{{ (start_services | bool) | ternary('started', omit) }}"
-  loop: "{{ log_client_services_to_start }}"
+- name: singularity █ Template in init if singularity_manage_init_file is True
+  template:
+    src: init.j2
+    dest: "{{ singularity_config_dir }}/init"
+    backup: yes
+    owner: root
+    mode: 0644
+  when: singularity_manage_init_file | bool
   tags:
-    - service
+    - template

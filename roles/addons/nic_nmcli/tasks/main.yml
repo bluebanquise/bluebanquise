@@ -1,5 +1,5 @@
 ---
-- name: Gathering OS specific variables
+- name: include_vars ░ Gather OS specific variables
   # This task gathers variables defined in OS specific files.
   #
   # Search vars in:
@@ -19,79 +19,52 @@
         - "vars/{{ ansible_facts.os_family }}.yml"
       skip: true
 
-- name: Package
+- name: "package █ Install {{ nic_nmcli_packages_to_install | join(' ') }}"
   package:
     name: "{{ nic_nmcli_packages_to_install }}"
     state: present
 
-- name: Enable/disable services
+- name: "service █ Manage {{ nic_nmcli_services_to_start | join(' ') }} state"
   service:
     name: "{{ item }}"
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
-  loop: "{{ nic_nmcli_services_to_start }}"
-  tags:
-    - service
-
-- name: Start services
-  service:
-    name: "{{ item }}"
     state: started
   loop: "{{ nic_nmcli_services_to_start }}"
-  when: (start_services | bool)
   tags:
     - service
 
-- name: Solve possible unmanaged (Ubuntu only)
-  file:
-    path: /etc/NetworkManager/conf.d/10-globally-managed-devices.conf
-    state: touch
-  when:
-    - ansible_facts.distribution_major_version == "18"
-    - ansible_facts.os_family == "Ubuntu"
+#- name: Solve possible unmanaged (Ubuntu only)
+#  file:
+#    path: /etc/NetworkManager/conf.d/10-globally-managed-devices.conf
+#    state: touch
+#  when:
+#    - ansible_facts.distribution_major_version == "18"
+#    - ansible_facts.os_family == "Ubuntu"
 
 # Note from JK
 # We could add so much more features here, like VLAN, LACP, MTU, etc. Easy to add.
-- name: Set NIC configuration
+- name: nmcli █ Set NIC configuration
   nmcli:
-    conn_name: "{{ item|string }}"
-    type: "{% if network_interfaces[item].type is defined and not none %}{{ network_interfaces[item].type }}{% else %}ethernet{% endif %}"
-#    ifname: "{{ network_connections[item].ifname }}"
-    ip4: "{{ network_interfaces[item].ip4 }}/{{ networks[network_interfaces[item].network].prefix }}"
+    conn_name: "{{ item.name | string }}"
+    type: "{% if item.type is defined and item.type is not none %}{{ item.type }}{% else %}ethernet{% endif %}"
+    ip4: "{{ item.ip4 }}/{{ networks[item.network].prefix }}"
     state: present
-    mtu: 1500
-    autoconnect: yes
-    gw4: "{% if networks[network_interfaces[item].network].gateway is defined and not none %}{{ networks[network_interfaces[item].network].gateway }}{% endif %}"
-  with_items: "{{ network_interfaces }}"
-  tags:
-    - identify
-    - nmcli
-
-- name: Bug fix for static ip (RedHat/Centos only)
-  replace:
-     path: "/etc/sysconfig/network-scripts/ifcfg-{{ item }}"
-     regexp: 'BOOTPROTO=dhcp'
-     replace: 'BOOTPROTO=none'
-     backup: no
-  with_items: "{{ network_interfaces }}"
-  when:
-    - ansible_facts.distribution_major_version == "7"
-    - ansible_facts.os_family == "RedHat"
+    gw4: "{% if networks[item.network].gateway is defined and networks[item.network].gateway is not none %}{{ networks[item.network].gateway }}{% endif %}"
+  loop: "{{ network_interfaces }}"
   tags:
     - identify
 
-- name: Enable/disable services
-  service:
-    name: "{{ item }}"
-    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
-  loop: "{{ nic_nmcli_services_to_start }}"
-  tags:
-    - service
+# Should be solved in ansible 2.10
+#- name: Bug fix for static ip (RedHat/Centos only)
+#  replace:
+#     path: "/etc/sysconfig/network-scripts/ifcfg-{{ item }}"
+#     regexp: 'BOOTPROTO=dhcp'
+#     replace: 'BOOTPROTO=none'
+#     backup: no
+#  with_items: "{{ network_interfaces }}"
+#  when:
+#    - ansible_facts.distribution_major_version == "7"
+#    - ansible_facts.os_family == "RedHat"
+#  tags:
+#    - identify
 
-- name: Start services
-  service:
-    name: "{{ item }}"
-    state: restarted
-  loop: "{{ nic_nmcli_services_to_start }}"
-  when: (start_services | bool)
-  tags:
-    - service

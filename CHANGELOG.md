@@ -12,6 +12,8 @@
 
   - core/ssh_master:
     - add ssh jump capability in multi icebergs context (one level only)
+  - addons/nic_nmcli:
+    - adapt to new inventory format
 
 ## 1.3.0 - 2020-08-31
 
