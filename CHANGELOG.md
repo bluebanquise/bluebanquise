@@ -8,6 +8,10 @@
 
   - addons/Lmod: allow to install Lmod and specify custom modulefiles path
 
+#### Roles improvement
+
+  - addons/nic_nmcli:
+    - adapt to new inventory format
 
 ## 1.3.0 - 2020-08-31
 
