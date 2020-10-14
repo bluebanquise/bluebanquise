@@ -1,0 +1,40 @@
+---
+name: core/dhcp_server unit testing
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'roles/core/dhcp_server/**'
+      - '.github/workflows/molecule-actions-core-dhcp_server.yml'
+  pull_request:
+    paths:
+      - 'roles/core/dhcp_server/**'
+      - '.github/workflows/molecule-actions-core-dhcp_server.yml'
+
+jobs:
+  molecule_test:
+    name: ${{ matrix.distro }} - molecule test
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        distro:
+          - centos:7
+          - centos:8
+
+    env:
+      MOLECULE_DISTRO: ${{ matrix.distro }}
+      PY_COLORS: 1
+      ANSIBLE_FORCE_COLOR: 1
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Setup python environment
+        uses: actions/setup-python@v1
+      - name: Install packages
+        run: |
+          pip install 'molecule[docker]>3' ansible-lint flake8 jmespath netaddr
+      - name: Run molecule test for core/dhcp_server
+        run: |
+          cd roles/core/dhcp_server && molecule test

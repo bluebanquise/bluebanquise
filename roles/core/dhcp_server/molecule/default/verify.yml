@@ -1,0 +1,51 @@
+---
+- name: Verify
+  hosts: management1
+  tasks:
+
+    - name: Collect package facts
+      package_facts:
+        manager: auto
+
+    - name: Collect services facts
+      service_facts:
+
+    - name: Collect services of zone public
+      command: firewall-cmd --zone=public --list-all
+      register: firewall_cmd_result
+
+    - name: Firewall zone public check presence of service dhcp
+      assert:
+        that: firewall_cmd_result.stdout |
+                    regex_findall(('dhcp|dhcpv6-client'), multiline=False) | length == 2
+
+    - name: Assert dhcp-server package is installed
+      assert:
+        that: "'dhcp-server' in ansible_facts.packages"
+
+    - name: Retrieve dhcpd.ice1-1.conf system status
+      stat:
+        path: /etc/dhcp/dhcpd.ice1-1.conf
+      register: register_stat_dhcp
+
+    - name: Assert file dhcpd.ice1-1.conf exist
+      assert:
+        that: register_stat_dhcp.stat.exists
+
+    - name: Retrieve c001-ice1-1 in /etc/dhcp/dhcpd.ice1-1.conf file
+      lineinfile:
+        path: /etc/dhcp/dhcpd.ice1-1.conf
+        regexp: "host c001-ice1-1"
+        state: absent
+      check_mode: yes
+      register: register_stat_dhcp_file
+
+    - name: Check /etc/dhcp/dhcpd.ice1-1.conf file contains c001-ice1-1
+      assert:
+        that: register_stat_dhcp_file.found
+
+    - name: Check dhcpd is enabled/running
+      assert:
+        that:
+          - "ansible_facts.services['dhcpd.service'].status == 'enabled'"
+          - "ansible_facts.services['dhcpd.service'].state == 'running'"
