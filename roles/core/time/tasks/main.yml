@@ -56,8 +56,6 @@
 - name: "timezone █ Set system to {{ time_zone }} timezone"
   timezone:
     name: "{{ time_zone }}"
-  tags:
-    - identify
 
 - meta: flush_handlers
 
