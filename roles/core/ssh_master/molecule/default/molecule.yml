@@ -41,6 +41,8 @@ platforms:
     pre_build_image: true
 provisioner:
   name: ansible
+  env:
+    ANSIBLE_CONFIG: "../../../../../ansible.cfg"
   inventory:
     host_vars:
       icebergs-off:

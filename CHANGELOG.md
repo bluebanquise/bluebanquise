@@ -10,6 +10,8 @@
 
 #### Roles improvement
 
+  - core/ssh_master:
+    - add ssh jump capability in multi icebergs context (one level only)
   - addons/nic_nmcli:
     - adapt to new inventory format
 
