@@ -304,7 +304,7 @@ Example Playbook
 
 
 Once the node is started, run your playbook with your roles.
-It is important to synchronize your node's time by running the role time.
+It is important to synchronize your node's time by running the time role.
 
 To be done
 ^^^^^^^^^^
