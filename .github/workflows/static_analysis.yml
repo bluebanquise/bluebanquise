@@ -28,8 +28,5 @@ jobs:
       - name: Check python code
         run: flake8 . --statistics --ignore E501,E226
 
-      - name: Run linter on core and advanced-core roles
-        run: ansible-lint -v roles/{core,advanced-core}/* -x 204
-
-      - name: Run linter on example playbooks
-        run: ansible-lint -v --exclude . resources/examples/*/playbooks/*.yml
+      - name: Run ansible linter
+        run: ansible-lint -v -x 204
