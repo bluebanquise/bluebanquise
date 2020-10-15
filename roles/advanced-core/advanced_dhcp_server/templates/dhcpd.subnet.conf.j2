@@ -16,25 +16,25 @@
 {% for host in range %}
   {% if hostvars[host]['network_interfaces'] is defined and hostvars[host]['network_interfaces'] is iterable %}
     {#- Define iPXE rom to use #}
-    {% if hostvars[host]['ep_ipxe_driver'] == 'snponly' %} {# Select driver first #}
+    {% if hostvars[host]['ep_ipxe_driver'] == 'snponly' %}{# Select driver first #}
       {% set ipxe_driver = 'snponly_' %}
     {% elif hostvars[host]['ep_ipxe_driver'] == 'snp' %}
       {% set ipxe_driver = 'snp_' %}
     {% else %}{# Assume everything else is default driver #}
       {% set ipxe_driver = '' %}
     {% endif %}
-    {% if hostvars[host]['ep_hardware']['cpu']['architecture'] == 'arm64' %} {# Now select architecture #}
+    {% if hostvars[host]['ep_hardware']['cpu']['architecture'] == 'arm64' %}{# Now select architecture #}
       {% set ipxe_architecture = 'arm64' %}
     {% else %}{# Assume everything else is x86_64 #}
       {% set ipxe_architecture = 'x86_64' %}
     {% endif %}
     {% if hostvars[host]['ep_ipxe_embed'] is defined and
-          hostvars[host]['ep_ipxe_embed'] == 'dhcpretry' %} {# Now select embed script #}
+          hostvars[host]['ep_ipxe_embed'] == 'dhcpretry' %}{# Now select embed script #}
       {% set ipxe_embed = 'dhcpretry' %}
     {% else %}
       {% set ipxe_embed = 'standard' %}
     {% endif %}
-    {% if hostvars[host]['ep_ipxe_platform'] == 'efi' %} {# Finally, build file name depending of platform and previous parameters #}
+    {% if hostvars[host]['ep_ipxe_platform'] == 'efi' %}{# Finally, build file name depending of platform and previous parameters #}
       {% set ipxe_rom_filename = (ipxe_architecture + '/' + ipxe_embed + '_' + ipxe_driver + 'ipxe.efi') %}
     {% else %}{# Assume everything else is pcbios #}
       {% set ipxe_rom_filename = (ipxe_architecture + '/' + ipxe_embed + '_undionly.kpxe') %}
