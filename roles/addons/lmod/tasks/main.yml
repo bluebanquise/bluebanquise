@@ -21,9 +21,9 @@
   tags:
     - internal
 
-- name: "package █ Install {{ Lmod_packages_to_install | join(' ') }}"
+- name: "package █ Install {{ lmod_packages_to_install | join(' ') }}"
   package:
-    name: "{{ Lmod_packages_to_install }}"
+    name: "{{ lmod_packages_to_install }}"
     state: present
   tags:
     - package
@@ -37,4 +37,4 @@
     mode: 0644
   tags:
     - template
-  when: Lmod_path is defined and Lmod_path is iterable
+  when: lmod_path is defined and lmod_path is iterable

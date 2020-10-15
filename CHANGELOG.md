@@ -6,7 +6,7 @@
 
 #### New roles
 
-  - addons/Lmod: allow to install Lmod and specify custom modulefiles path
+  - addons/lmod: allow to install Lmod and specify custom modulefiles path
 
 #### Roles improvement
 
