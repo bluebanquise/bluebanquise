@@ -1,6 +1,6 @@
 - name: Package
   package:
-    name: 
+    name:
       - sssd
       - authconfig
     state: present
@@ -9,8 +9,9 @@
   file:
     path: /etc/sysconfig/authconfig
     state: touch
+    mode: 0644
 
-- name: Checking if SSSD is already activated 
+- name: Checking if SSSD is already activated
   command: grep "USESSSDAUTH=yes" /etc/sysconfig/authconfig
   register: sssd
   failed_when: sssd.rc != 0 and sssd.rc != 1
