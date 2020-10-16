@@ -21,7 +21,7 @@
 
     - name: Assert dir /etc/software exist
       assert:
-        that: 
+        that:
           - "register_stat.stat.exists"
           - "register_stat.stat.isdir"
 

@@ -21,7 +21,7 @@
 
     - name: Assert nfs-utils and rpcbind are installed
       assert:
-        that: "'{{item}}' in ansible_facts.packages"
+        that: "'{{ item }}' in ansible_facts.packages"
       loop:
         - nfs-utils
         - rpcbind
