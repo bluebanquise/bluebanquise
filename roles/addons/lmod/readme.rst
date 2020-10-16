@@ -1,4 +1,4 @@
-Lmod
+lmod
 ----
 
 Description
@@ -13,13 +13,13 @@ Instructions
 Note that Lmod is available on EPEL repository, and requires Centos PowerTools to 
 to get all dependencies.
 
-If custom path are needed, define variable Lmod_path, as a list, in the inventory.
+If custom path are needed, define variable lmod_path, as a list, in the inventory.
 
 For example:
 
 .. code-block:: yaml
 
-  Lmod_path:
+  lmod_path:
     - /etc/modulefiles
     - /soft/modules
 
@@ -30,7 +30,7 @@ Optional inventory vars:
 
 **hostvars[inventory_hostname]**
 
-* Lmod (list)
+* lmod_path (list)
 
 Output
 ^^^^^^
