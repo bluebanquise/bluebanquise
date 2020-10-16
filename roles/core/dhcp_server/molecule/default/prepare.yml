@@ -8,7 +8,7 @@
         name: firewalld
         state: present
 
-    - name: Start firewall 
+    - name: Start firewall
       service:
         name: firewalld
         enabled: yes
