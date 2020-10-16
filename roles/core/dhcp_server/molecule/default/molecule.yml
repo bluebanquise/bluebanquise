@@ -24,76 +24,11 @@ platforms:
       - name: bbnet
         ipv4_address: "10.10.0.1"            
 
-  - name: c001
-    image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
-    override_command: false
-    capabilities:
-      - "SYS_ADMIN"
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
-    privileged: true
-    pre_build_image: true    
-    networks:
-      - name: bbnet
-        ipv4_address: '10.10.3.1'    
-
-  - name: c002
-    image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
-    override_command: false
-    capabilities:
-      - "SYS_ADMIN"
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
-    privileged: true
-    pre_build_image: true    
-    networks:
-      - name: bbnet
-        ipv4_address: '10.10.3.2'    
-    
-  - name: c003
-    image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
-    override_command: false
-    capabilities:
-      - "SYS_ADMIN"
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
-    privileged: true
-    pre_build_image: true    
-    networks:
-      - name: bbnet
-        ipv4_address: '10.10.3.3'    
-    
-  - name: c004
-    image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
-    override_command: false
-    capabilities:
-      - "SYS_ADMIN"
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
-    privileged: true
-    pre_build_image: true    
-    networks:
-      - name: bbnet
-        ipv4_address: '10.10.3.4'    
-
-  - name: login1
-    image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
-    override_command: false
-    capabilities:
-      - "SYS_ADMIN"
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
-    privileged: true
-    pre_build_image: true    
-    networks:
-      - name: bbnet
-        ipv4_address: '10.10.2.1'    
-
 provisioner:
   name: ansible
   inventory:
     links:
-      hosts: ../../../../../resources/examples/simple_cluster/inventory/cluster/nodes
+      hosts: ../../../../../resources/examples/simple_cluster/inventory/cluster/nodes/managements.yml
       group_vars: ../../../../../resources/examples/simple_cluster/inventory/group_vars
       host_vars: ${PWD}
 verifier:

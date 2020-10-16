@@ -23,7 +23,7 @@
       assert:
         that: "'dhcp-server' in ansible_facts.packages"
 
-    - name: Retrieve dhcpd.ice1-1.conf system status
+    - name: Retrieve file dhcpd.ice1-1.conf system status
       stat:
         path: /etc/dhcp/dhcpd.ice1-1.conf
       register: register_stat_dhcp
@@ -32,20 +32,22 @@
       assert:
         that: register_stat_dhcp.stat.exists
 
-    - name: Retrieve c001-ice1-1 in /etc/dhcp/dhcpd.ice1-1.conf file
+    - name: Retrieve management1-ice1-1 in /etc/dhcp/dhcpd.ice1-1.conf file
       lineinfile:
         path: /etc/dhcp/dhcpd.ice1-1.conf
-        regexp: "host c001-ice1-1"
+        regexp: "host management1-ice1-1"
         state: absent
       check_mode: yes
       register: register_stat_dhcp_file
 
-    - name: Check /etc/dhcp/dhcpd.ice1-1.conf file contains c001-ice1-1
+    - name: Check /etc/dhcp/dhcpd.ice1-1.conf file contains management1-ice1-1
       assert:
         that: register_stat_dhcp_file.found
 
-    - name: Check dhcpd is enabled/running
+    - name: Check dhcpd is enabled
       assert:
-        that:
-          - "ansible_facts.services['dhcpd.service'].status == 'enabled'"
-          - "ansible_facts.services['dhcpd.service'].state == 'running'"
+        that: "ansible_facts.services['dhcpd.service'].status == 'enabled'"
+
+    - name: Check dhcpd is running
+      assert:
+        that: "ansible_facts.services['dhcpd.service'].state == 'running'"
