@@ -1,6 +1,6 @@
 ---
 - name: Verify
-  hosts: all
+  hosts: management1
   tasks:
 
     - name: Collect package facts

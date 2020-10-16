@@ -1,6 +1,6 @@
 ---
 - name: Prepare
-  hosts: all
+  hosts: management1
   tasks:
     - name: Install firewall package
       package:
