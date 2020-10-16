@@ -1,6 +1,6 @@
 ---
 - name: Verify
-  hosts: management1
+  hosts: all
   tasks:
 
     - name: Collect package facts
@@ -13,6 +13,7 @@
     - name: Collect services of zone public
       command: firewall-cmd --zone=public --list-all
       register: firewall_cmd_result
+      changed_when: False
 
     - name: Firewall zone public check presence of service dhcp
       assert:
@@ -32,15 +33,15 @@
       assert:
         that: register_stat_dhcp.stat.exists
 
-    - name: Retrieve management1-ice1-1 in /etc/dhcp/dhcpd.ice1-1.conf file
+    - name: Retrieve compute1-ice1-1 in /etc/dhcp/dhcpd.ice1-1.conf file
       lineinfile:
         path: /etc/dhcp/dhcpd.ice1-1.conf
-        regexp: "host management1-ice1-1"
+        regexp: "host compute1-ice1-1"
         state: absent
       check_mode: yes
       register: register_stat_dhcp_file
 
-    - name: Check /etc/dhcp/dhcpd.ice1-1.conf file contains management1-ice1-1
+    - name: Check /etc/dhcp/dhcpd.ice1-1.conf file contains compute1-ice1-1
       assert:
         that: register_stat_dhcp_file.found
 

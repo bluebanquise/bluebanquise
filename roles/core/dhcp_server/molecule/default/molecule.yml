@@ -14,7 +14,6 @@ platforms:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
     privileged: true
     pre_build_image: true
-
     docker_networks:
       - name: bbnet
         ipam_config:
@@ -27,9 +26,50 @@ platforms:
 provisioner:
   name: ansible
   inventory:
-    links:
-      hosts: ../../../../../resources/examples/simple_cluster/inventory/cluster/nodes/managements.yml
-      group_vars: ../../../../../resources/examples/simple_cluster/inventory/group_vars
-      host_vars: ${PWD}
+    host_vars:
+      management1:
+
+        network_interfaces:
+          - interface: enp0s3
+            ip4: 10.10.0.1
+            mac: 08:00:27:dc:f8:f5
+            network: ice1-1
+
+        start_services: true
+        enable_services: true
+        ep_firewall: true
+        domain_name: tumulus.local
+        icebergs_system: false
+        j2_node_main_network: ice1-1
+        j2_current_iceberg_network: ice1
+
+        networks:
+          ice1-1:
+            subnet: 10.10.0.0
+            prefix: 16
+            netmask: 255.255.0.0
+            broadcast: 10.10.255.255
+            dhcp_unknown_range: 10.10.254.1 10.10.254.254
+            gateway: 10.10.2.1
+            is_in_dhcp: true
+            is_in_dns: true
+            services_ip:
+              pxe_ip: 10.10.0.1
+              dns_ip: 10.10.0.1
+              repository_ip: 10.10.0.1
+              authentication_ip: 10.10.0.1
+              time_ip: 10.10.0.1
+              log_ip: 10.10.0.1
+
+    hosts:
+      compute:
+        hosts:
+          compute1:
+            j2_current_iceberg_network: ice1
+            network_interfaces:
+            - interface: enp0s3
+              ip4: 10.10.3.1
+              mac: 08:00:27:dc:f8:f6
+              network: ice1-1
 verifier:
   name: ansible

@@ -1,10 +1,6 @@
 ---
 - name: Converge
-  hosts: management1
-  vars:
-    j2_node_main_network: ice1-1
-    j2_current_iceberg_network: ice1
-
+  hosts: all
   tasks:
     - name: "Include dhcp_server"
       include_role:
