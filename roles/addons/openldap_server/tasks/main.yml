@@ -40,6 +40,7 @@
     dest: /var/lib/ldap/DB_CONFIG
     owner: ldap
     group: ldap
+    mode: 0644
   when: not db_config.stat.exists
 
 - name: Enable/disable services
@@ -61,6 +62,7 @@
   template:
     src: chdomain.ldif.j2
     dest: /dev/shm/chdomain.ldif
+    mode: 0644
 #  when:
 #    - db_config.stat.exists == False
 
@@ -68,6 +70,7 @@
   template:
     src: basedomain.ldif.j2
     dest: /dev/shm/basedomain.ldif
+    mode: 0644
 #  when:
 #    - db_config.stat.exists == False
 

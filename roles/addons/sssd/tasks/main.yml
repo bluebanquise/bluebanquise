@@ -1,24 +1,22 @@
 - name: Package
   package:
-    name: 
+    name:
       - sssd
       - authconfig
     state: present
 
-- name: Touch /etc/sysconfig/authconfig file to avoid failure later
-  file:
+- name: Checking if SSSD is already active
+  lineinfile:
     path: /etc/sysconfig/authconfig
-    state: touch
-
-- name: Checking if SSSD is already activated 
-  command: grep "USESSSDAUTH=yes" /etc/sysconfig/authconfig
-  register: sssd
-  failed_when: sssd.rc != 0 and sssd.rc != 1
+    regexp: '^USESSSDAUTH=yes$'
+    state: absent
+  check_mode: yes
+  changed_when: False
+  register: sssd_enabled
 
 - name: Enable SSSD
   command: authconfig --enablesssd --enablesssdauth --enablelocauthorize --enablemkhomedir --update
-  when:
-    - sssd.rc == 1
+  when: sssd_enabled.found is not defined or not sssd_enabled.found
 
 - name: Template >> /etc/sssd/sssd.conf
   template:

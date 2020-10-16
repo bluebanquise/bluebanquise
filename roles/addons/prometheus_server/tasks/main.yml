@@ -27,7 +27,7 @@
     - net-snmp-libs
     - net-snmp-devel
   when:
-    - monitoring.exporters.snmp_exporter.with_generator is defined      
+    - monitoring.exporters.snmp_exporter.with_generator is defined
     - monitoring.exporters.snmp_exporter.with_generator
 
 - name: "copy █ Install firewalld service configuration file"
@@ -152,7 +152,7 @@
     - prometheus
     - alertmanager
     - ipmi_exporter
-    - snmp_exporter    
+    - snmp_exporter
     - karma
   when: (start_services | bool)
   tags:
