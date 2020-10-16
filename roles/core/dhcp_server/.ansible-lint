@@ -1,2 +1,2 @@
-skip_list:
+warn_list:
   - '301'
