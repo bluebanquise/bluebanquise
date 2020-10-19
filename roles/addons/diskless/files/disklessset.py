@@ -15,6 +15,7 @@
 import os
 import crypt
 import hashlib
+import re
 import shutil
 from argparse import ArgumentParser
 from datetime import datetime
@@ -539,17 +540,14 @@ elif main_action == '4':
             exit(1)
 
         print(bcolors.OKBLUE+'[INFO] Updating image files.'+bcolors.ENDC)
-        file = open(os.path.join(images_path, selected_image_name, 'boot.ipxe'), 'r')
-        filebuffer = file.readlines()
-        for i in range(len(filebuffer)):
-            if 'image-kernel' in filebuffer[i]:
-                filebuffer[i] = 'set image-kernel '+kernel_list[selected_kernel]+'\n'
-            if 'image-initramfs' in filebuffer[i]:
-                filebuffer[i] = 'set image-initramfs '+'initramfs-kernel-'+kernel_list[selected_kernel].strip('vmlinuz-')+'\n'
-        file.close
-        file = open(os.path.join(images_path, selected_image_name, 'boot.ipxe'), 'w')
-        file.writelines(filebuffer)
-        file.close
+        with open(os.path.join(images_path, selected_image_name, 'boot.ipxe'), "r+") as ff:
+            filebuffer = ff.read()
+            filebuffer = re.sub('^set image-kernel .+', 'set image-kernel ' + kernel_list[selected_kernel], filebuffer, flags=re.MULTILINE)
+            filebuffer = re.sub('^set image-initramfs .+', 'set image-initramfs initramfs-kernel-' + kernel_list[selected_kernel].strip('vmlinuz-'), filebuffer, flags=re.MULTILINE)
+            ff.seek(0)
+            ff.write(filebuffer)
+            ff.truncate()
+
         try:
             image_info = read_yaml(os.path.join(images_path, selected_image_name, 'image_metadata.yml'))
             image_info['image_kernel'] = kernel_list[selected_kernel]
