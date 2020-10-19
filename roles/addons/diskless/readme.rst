@@ -24,7 +24,8 @@ Basic instructions
 
 .. code-block:: text
 
-  cp /boot/<kernels to use for diskless nodes> /var/www/html/preboot_execution_environment/diskless/kernels/ 
+  cp /boot/vmlinuz-<kernel releases to use for diskless nodes> \
+     /var/www/html/preboot_execution_environment/diskless/kernels/
 
 3. Launch *disklessset* and verify that the kernels are present in the tool, then quit.
 
@@ -35,14 +36,13 @@ Basic instructions
    1 - List available kernels
    2 - Generate a new initramfs
    3 - Generate a new diskless image
-   4 - Manage/list existing diskless images
-   5 - Remove a diskless image
+   4 - Manage existing diskless images
   -->: 1
   [INFO] Loading kernels from /var/www/html/preboot_execution_environment/diskless/kernels/
   
   Available kernels:
     │
-    └── vmlinuz-4.18.0-193.6.3.el8_2.x86_64
+    └── vmlinuz-4.18.0-193.6.3.el8_2.x86_64 - missing initramfs-kernel-4.18.0-193.6.3.el8_2.x86_64
 
 4. Launch *disklessset* and ask an initramfs creation for this kernel
 
@@ -53,8 +53,7 @@ Basic instructions
    1 - List available kernels
    2 - Generate a new initramfs
    3 - Generate a new diskless image
-   4 - Manage/list existing diskless images
-   5 - Remove a diskless image
+   4 - Manage existing diskless images
   -->: 2
   [INFO] Loading kernels from /var/www/html/preboot_execution_environment/diskless/kernels/
   
@@ -71,8 +70,7 @@ Basic instructions
    1 - List available kernels
    2 - Generate a new initramfs
    3 - Generate a new diskless image
-   4 - Manage/list existing diskless images
-   5 - Remove a diskless image
+   4 - Manage existing diskless images
   -->: 1
   [INFO] Loading kernels from /var/www/html/preboot_execution_environment/diskless/kernels/
   
@@ -89,8 +87,7 @@ Basic instructions
    1 - List available kernels
    2 - Generate a new initramfs
    3 - Generate a new diskless image
-   4 - Manage/list existing diskless images
-   5 - Remove a diskless image
+   4 - Manage existing diskless images
   -->: 3
   
   Starting new image creation phase.
@@ -117,7 +114,7 @@ Select the kernel you want to use wit this image from the list of available kern
   -->: 1
   Please enter image name ?
   -->: livenet1
-  Please enter clear root password of the new image: root
+  Please enter clear root password of the new image: <password>
   [INFO] Entering livenet dedicated part.
  
 Choose a standard image, and give a size.
@@ -146,17 +143,14 @@ Important:
    4 - Custom: core + selection of additional packages
 
   -->: 1
-  Please choose image size (e.g. 5G):
+  Please choose image size:
   (supported units: M=1024*1024, G=1024*1024*1024)
   (Example: 5120M or 5G)
   -->: 5G
-
--->: Enter path to SSH public key (left empty to disable key injection):
--->: /root/.ssh/id_rsa.pub
-
--->: Do you want to activate SELinux inside the image?
-Enter yes or no: 
--->: no
+  Enter path to SSH public key (left empty to disable key injection):
+  -->: /root/.ssh/id_rsa.pub
+  Do you want to activate SELinux inside the image?
+  Enter yes or no: no
 
 Check that everything is alright before continuing:
 
@@ -177,7 +171,7 @@ Check that everything is alright before continuing:
   5242880+0 records in
   5242880+0 records out
   5368709120 bytes (5.4 GB, 5.0 GiB) copied, 10.3195 s, 520 MB/s
-  meta-data=/root/diskless/workdir//LiveOS/rootfs.img isize=512    agcount=4, agsize=327680 blks
+  meta-data=/var/tmp/diskless/workdir/livenet1/LiveOS/rootfs.img isize=512    agcount=4, agsize=327680 blks
            =                       sectsz=512   attr=2, projid32bit=1
            =                       crc=1        finobt=1, sparse=1, rmapbt=0
            =                       reflink=1
@@ -206,7 +200,8 @@ The -n parameter can be a nodeset.
 9. Reboot the diskless node to make it boot onto the new image.
 
 10. Once the nodes are booted, run the entire computes playbook.
-If you have used Customizing Livenet image, run the playbook with 'nic' and 'set_hostname' roles only.
+    If you have used **Customizing Livenet image** (see below), run the
+    playbook with 'nic' and 'set_hostname' roles only.
 
 Customizing Livenet image
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -238,7 +233,7 @@ with the following head:
 .. code-block:: yaml
 
   - name: Computes diskless playbook
-    hosts: /var/tmp/diskless/workdir/space_image/mnt
+    hosts: /var/tmp/diskless/workdir/{{ image_name }}/mnt
     connection: chroot
     vars:
       j2_current_iceberg: iceberg1                #<<< UPDATE IF NEEDED
@@ -251,6 +246,8 @@ with the following head:
         add_host:
           hostname: "{{ inventory_hostname }}"
           groups: "{{ image_equipment_profile }}"
+        tags:
+          - always
   
     roles:
     # ADD HERE YOUR ROLES
@@ -270,7 +267,7 @@ Then execute it into the mounted image using the following command:
 
   ansible-playbook computes.yml \
   -i /etc/bluebanquise/inventory/ -i /etc/bluebanquise/internal/ -i /var/tmp/diskless/workdir/space_image/inventory/ \
-  --skip-tags identify
+  --skip-tags identify -e "image_name=space_image"
 
 Notes:
 
