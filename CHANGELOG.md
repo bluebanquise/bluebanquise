@@ -6,14 +6,19 @@
 
 #### New roles
 
-  - addons/lmod: allow to install Lmod and specify custom modulefiles path
-
+  - addons/lmod: allow to install Lmod and specify custom modulefiles path (#390)
+  - addons/singularity: allow to install Singularity (#403)
+  
 #### Roles improvement
 
   - core/ssh_master:
-    - add ssh jump capability in multi icebergs context (one level only)
+    - add ssh jump capability in multi icebergs context (one level only) (#395)
   - addons/nic_nmcli:
-    - adapt to new inventory format
+    - convert to new inventory format (#401)
+  - core/hosts_file:
+    - prevent many blank lines when hosts have no network_interfaces in the inventory (#406)
+ - core/rsyslog_server and core/rsyslog_client:
+    - allow custom server port (#397)
 
 ## 1.3.0 - 2020-08-31
 
