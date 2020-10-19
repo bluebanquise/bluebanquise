@@ -21,7 +21,7 @@
   tags:
     - internal
 
-- name: firewalld █ "Add services to firewall's {{ pxe_stack_firewall_zone | default('public') }} zone"
+- name: "firewalld █ Add services to firewall's {{ pxe_stack_firewall_zone | default('public') }} zone"
   firewalld:
     zone: "{{ pxe_stack_firewall_zone | default('public') }}"
     service: "{{ item }}"

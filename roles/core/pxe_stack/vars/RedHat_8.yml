@@ -3,7 +3,7 @@ pxe_stack_apache_cgi_module: cgid
 pxe_stack_apache_conf_path: /etc/httpd/conf.d
 pxe_stack_apache_user: apache
 pxe_stack_packages_to_install:
-  - atftp
+  - fbtftp_server
   - ipxe-x86_64-bluebanquise
   - ipxe-arm64-bluebanquise
   - httpd
@@ -12,7 +12,7 @@ pxe_stack_packages_to_install:
   - python3-clustershell
   - policycoreutils
 pxe_stack_services_to_start:
-  - atftpd
+  - fbtftp_server
   - httpd
 pxe_stack_firewall_services_to_add:
   - http
