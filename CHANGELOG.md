@@ -16,7 +16,7 @@
   - addons/nic_nmcli:
     - convert to new inventory format (#401)
   - core/hosts_file:
-    - prevent many blank lines when hosts without network_interfaces (#406)
+    - prevent many blank lines when hosts have no network_interfaces in the inventory (#406)
  - core/rsyslog_server and core/rsyslog_client:
     - allow custom server port (#397)
 
