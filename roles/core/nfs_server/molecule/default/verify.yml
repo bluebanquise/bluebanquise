@@ -13,6 +13,7 @@
     - name: Collect services of zone public
       command: firewall-cmd --zone=public --list-all
       register: firewall_cmd_result
+      changed_when: False
 
     - name: Check rpc-bind and nfs are in zone public
       assert:
@@ -26,7 +27,7 @@
         - nfs-utils
         - rpcbind
 
-    - name: Retrieve file system status
+    - name: Retrieve file /etc/exports system status
       stat:
         path: /etc/exports
       register: register_stat

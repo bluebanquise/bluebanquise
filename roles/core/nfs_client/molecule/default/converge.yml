@@ -1,9 +1,6 @@
 ---
 - name: Converge
   hosts: all
-  vars:
-    nfs_client_mount_exported_dirs: present
-
   tasks:
     - name: "Include nfs_client"
       include_role:

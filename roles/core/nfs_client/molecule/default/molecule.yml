@@ -3,7 +3,7 @@ dependency:
 driver:
   name: docker
 platforms:
-  - name: instance
+  - name: compute
     groups:
       - mg_computes
     image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
@@ -17,8 +17,37 @@ platforms:
 provisioner:
   name: ansible
   inventory:
-    links:
-      group_vars: ../../../../../resources/examples/simple_cluster/inventory/group_vars
-      host_vars: ${PWD}
+    host_vars:
+      compute:
+
+        start_services: true
+        enable_services: true
+        ep_firewall: true
+        nfs_client_directories_state: present
+
+        nfs:
+          softwares:
+            mount: /opt/software
+            export: /opt/software
+            server: management1
+            clients_groups:
+              - mg_computes
+            take_over_network: ice1-1
+            export_arguments: ro,no_root_squash,async
+            mount_arguments: ro,intr,nfsvers=4.2,bg
+          home:
+            mount: /home
+            export: /home
+            server: management1
+            clients_groups:
+              - mg_computes
+            take_over_network: ice1-1
+            export_arguments: rw,no_root_squash,sync
+            mount_arguments: rw,intr,rsize=32768,wsize=32768,nfsvers=4.2,bg
+
+        networks:
+          ice1-1:
+            subnet: 10.10.0.0
+            prefix: 16
 verifier:
   name: ansible

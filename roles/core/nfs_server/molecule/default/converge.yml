@@ -1,9 +1,6 @@
 ---
 - name: Converge
   hosts: all
-  vars:
-    start_services: false
-
   tasks:
     - name: "Include nfs_server"
       include_role:

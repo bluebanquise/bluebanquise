@@ -1,2 +1,2 @@
 ---
-nfs_client_mount_exported_dirs: mounted # possible values: mounted, absent, present, unmounted, remounted
+nfs_client_directories_state: mounted # possible values: mounted, absent, present, unmounted, remounted
