@@ -38,18 +38,18 @@ To configure an LACP bonding, specify slave interfaces, and then create the bond
 .. code-block:: yaml
 
   network_interfaces:
-    - interface: eth0
-      type: bond-slave
-      master: bond0
-    - interface: eth1
-      type: bond-slave
-      master: bond0
     - interface: bond0
       type: bond
       vlan: false
       bond_options: "mode=4 xmit_hash_policy=layer3+4 miimon=100 lacp_rate=1"
       ip4: 10.100.0.1
       network: ice1-1
+    - interface: eth0
+      type: bond-slave
+      master: bond0
+    - interface: eth1
+      type: bond-slave
+      master: bond0
 
 To configure a vlan, simply set vlan to true:
 
