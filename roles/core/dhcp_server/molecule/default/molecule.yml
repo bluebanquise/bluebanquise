@@ -17,11 +17,11 @@ platforms:
     docker_networks:
       - name: bbnet
         ipam_config:
-          - subnet: '10.10.0.0/16'
-            gateway: "10.10.0.254"
+          - subnet: '10.11.0.0/16'
+            gateway: "10.11.0.254"
     networks:
       - name: bbnet
-        ipv4_address: "10.10.0.1"            
+        ipv4_address: "10.11.0.1"            
 
 provisioner:
   name: ansible
@@ -31,7 +31,7 @@ provisioner:
 
         network_interfaces:
           - interface: enp0s3
-            ip4: 10.10.0.1
+            ip4: 10.11.0.1
             mac: 08:00:27:dc:f8:f5
             network: ice1-1
 
@@ -45,21 +45,21 @@ provisioner:
 
         networks:
           ice1-1:
-            subnet: 10.10.0.0
+            subnet: 10.11.0.0
             prefix: 16
             netmask: 255.255.0.0
-            broadcast: 10.10.255.255
-            dhcp_unknown_range: 10.10.254.1 10.10.254.254
-            gateway: 10.10.2.1
+            broadcast: 10.11.255.255
+            dhcp_unknown_range: 10.11.254.1 10.11.254.254
+            gateway: 10.11.2.1
             is_in_dhcp: true
             is_in_dns: true
             services_ip:
-              pxe_ip: 10.10.0.1
-              dns_ip: 10.10.0.1
-              repository_ip: 10.10.0.1
-              authentication_ip: 10.10.0.1
-              time_ip: 10.10.0.1
-              log_ip: 10.10.0.1
+              pxe_ip: 10.11.0.1
+              dns_ip: 10.11.0.1
+              repository_ip: 10.11.0.1
+              authentication_ip: 10.11.0.1
+              time_ip: 10.11.0.1
+              log_ip: 10.11.0.1
 
     hosts:
       compute:
@@ -68,7 +68,7 @@ provisioner:
             j2_current_iceberg_network: ice1
             network_interfaces:
             - interface: enp0s3
-              ip4: 10.10.3.1
+              ip4: 10.11.3.1
               mac: 08:00:27:dc:f8:f6
               network: ice1-1
 verifier:
