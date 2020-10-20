@@ -78,7 +78,7 @@ Disabling the SSH strict host key checking
 ------------------------------------------
 
 .. warning::
-   In BlueBanqquise it is possible to disable the strict host key checking in the inventory.
+   In BlueBanquise it is possible to disable the strict host key checking in the inventory.
    **By default it is an activated option.**
 
 As a reminder, if this flag is set to 'yes', ssh will never automatically add host keys to the ``~/.ssh/known_hosts`` file, and refuses to connect to hosts whose host key has changed.
