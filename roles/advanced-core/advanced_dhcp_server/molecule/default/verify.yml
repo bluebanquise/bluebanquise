@@ -97,7 +97,7 @@
     - name: Retrieve subnet 10.11.0.0 configuration in /etc/dhcp/dhcpd.networks.conf file
       lineinfile:
         path: /etc/dhcp/dhcpd.networks.conf
-        regexp: "subnet 10.10.0.0 netmask 255.255.0.0"
+        regexp: "subnet 10.11.0.0 netmask 255.255.0.0"
         state: absent
       check_mode: yes
       register: reg_dhcp_subnet1
