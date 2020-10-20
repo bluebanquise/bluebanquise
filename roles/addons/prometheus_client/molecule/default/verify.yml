@@ -1,0 +1,59 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+
+    - name: Collect package facts
+      package_facts:
+        manager: auto
+
+    - name: Collect services facts
+      service_facts:
+
+    - name: Collect services of zone public
+      command: firewall-cmd --zone=public --list-all
+      register: firewall_cmd_result
+      changed_when: False
+
+    - name: Firewall zone public check presence of service node_exporter = 9100/tcp
+      assert:
+        that: firewall_cmd_result.stdout |
+                    regex_findall(('9100/tcp'), multiline=False) | length == 1
+
+    - name: Firewall zone public check presence of service ha_cluster_exporter = 9664/tcp
+      assert:
+        that: firewall_cmd_result.stdout |
+                    regex_findall(('9664/tcp'), multiline=False) | length == 1
+
+    - name: Assert node_exporter and ha_cluster_exporter packages are installed
+      assert:
+        that: "'{{item}}' in ansible_facts.packages"
+      loop:
+        - node_exporter
+        - ha_cluster_exporter
+
+    - name: Check node_exporter is enabled
+      assert:
+        that: "ansible_facts.services['node_exporter.service'].status == 'enabled'"
+
+    - name: Check node_exporter is running
+      assert:
+        that: "ansible_facts.services['node_exporter.service'].state == 'running'"
+
+    - name: Check ha_cluster_exporter is enabled
+      assert:
+        that: "ansible_facts.services['ha_cluster_exporter.service'].status == 'enabled'"
+
+    - name: Check ha_cluster_exporter is running
+      assert:
+        that: "ansible_facts.services['ha_cluster_exporter.service'].state == 'running'"
+
+    - name: Check that Node_exporter is reachable
+      uri:
+        url: http://localhost:9100
+        return_content: yes
+      register: reg_url
+
+    - name: Assert Node_exporter is available at http://localhost:9100
+      assert:
+        that: "'Node Exporter' in reg_url.content"

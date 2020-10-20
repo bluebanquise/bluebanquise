@@ -1,0 +1,37 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: docker
+platforms:
+  - name: instance
+    image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
+    override_command: false
+    capabilities:
+      - "SYS_ADMIN"
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    pre_build_image: true
+provisioner:
+  name: ansible
+  inventory:
+    host_vars:
+      instance:
+
+        start_services: true
+        enable_services: true
+        ep_firewall: true
+
+        monitoring:
+          exporters:
+            node_exporter:
+              package: node_exporter
+              service: node_exporter
+              port: 9100
+            ha_cluster_exporter:
+              package: ha_cluster_exporter
+              service: ha_cluster_exporter
+              port: 9664
+verifier:
+  name: ansible

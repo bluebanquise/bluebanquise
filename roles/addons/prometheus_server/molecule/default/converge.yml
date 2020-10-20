@@ -1,0 +1,7 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: "Include prometheus_server"
+      include_role:
+        name: "prometheus_server"

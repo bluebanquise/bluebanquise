@@ -1,0 +1,57 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: docker
+platforms:
+  - name: management1
+    groups:
+      - mg_managements
+    children:
+      - equipment_typeM
+    image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
+    override_command: false
+    capabilities:
+      - "SYS_ADMIN"
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    pre_build_image: true
+
+provisioner:
+  name: ansible
+  inventory:
+    host_vars:
+      management1:
+
+        start_services: true
+        enable_services: true 
+        j2_equipment_groups_list:
+          - equipment_typeM
+        ep_firewall: true
+
+        prometheus:
+          scrape_interval: 1m
+          evaluation_interval: 2m
+          alertmanager:
+            group_wait: 1m
+            group_interval: 10m
+            repeat_interval: 3h
+
+verifier:
+  name: ansible
+scenario:
+    test_sequence:
+    - dependency
+    - lint
+    - cleanup
+    - destroy
+    - syntax
+    - create
+    - prepare
+    - converge
+    #- idempotence
+    - side_effect
+    - verify
+    - cleanup
+    - destroy

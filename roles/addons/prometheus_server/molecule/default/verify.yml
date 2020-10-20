@@ -1,0 +1,179 @@
+---
+- name: Verify
+  hosts: management1
+  tasks:
+
+    - name: Collect package facts
+      package_facts:
+        manager: auto
+
+    - name: Collect services facts
+      service_facts:
+
+    - name: Collect services of zone public
+      command: firewall-cmd --zone=public --list-all
+      register: firewall_cmd_result
+
+    - name: Firewall zone public check presence of service prometheus
+      assert:
+        that: firewall_cmd_result.stdout |
+                    regex_findall(('prometheus'), multiline=False) | length == 1
+
+    - name: Firewall zone public check presence of service alertmanager
+      assert:
+        that: firewall_cmd_result.stdout |
+                    regex_findall(('alertmanager'), multiline=False) | length == 1
+
+    - name: Assert monitoring packages are installed
+      assert:
+        that: "'{{ item }}' in ansible_facts.packages"
+      loop:
+        - prometheus
+        - alertmanager
+        - ipmi_exporter
+        - freeipmi
+        - snmp_exporter
+        - karma
+
+    - name: Retrieve directory /etc/prometheus/alerts system status
+      stat:
+        path: /etc/prometheus/alerts
+      register: reg_prometheus
+
+    - name: Assert directory /etc/prometheus/alerts/ exists
+      assert:
+        that:
+          - reg_prometheus.stat.exists
+          - reg_prometheus.stat.isdir
+          - reg_prometheus.stat.mode == '0750'
+          - reg_prometheus.stat.pw_name == 'prometheus'
+          - reg_prometheus.stat.gr_name == 'prometheus'
+
+    - name: Retrieve directory /var/lib/prometheus system status
+      stat:
+        path: /var/lib/prometheus
+      register: reg_var_prometheus
+
+    - name: Assert directory /etc/prometheus/alerts/ exists
+      assert:
+        that:
+          - reg_var_prometheus.stat.exists
+          - reg_var_prometheus.stat.isdir
+          - reg_var_prometheus.stat.mode == '0750'
+          - reg_var_prometheus.stat.pw_name == 'prometheus'
+          - reg_var_prometheus.stat.gr_name == 'prometheus'
+
+    - name: Retrieve file /etc/prometheus/prometheus.yml system status
+      stat:
+        path: /etc/prometheus/prometheus.yml
+      register: reg_file_prometheus
+
+    - name: Assert file /etc/prometheus/prometheus.yml exists
+      assert:
+        that:
+          - reg_file_prometheus.stat.exists
+          - reg_file_prometheus.stat.mode == '0640'
+            
+    - name: Retrieve file /etc/prometheus/alerts/general.yml system status
+      stat:
+        path: /etc/prometheus/alerts/general.yml
+      register: reg_file_prometheus_alerts
+
+    - name: Assert file /etc/prometheus/alerts/general.yml exists
+      assert:
+        that:
+          - reg_file_prometheus_alerts.stat.exists
+          - reg_file_prometheus_alerts.stat.mode == '0640'
+            
+    - name: Retrieve directory /etc/alertmanager system status
+      stat:
+        path: /etc/alertmanager
+      register: reg_alertmanager
+
+    - name: Assert directory /etc/alertmanager exists
+      assert:
+        that:
+          - reg_alertmanager.stat.exists
+          - reg_alertmanager.stat.isdir
+          - reg_alertmanager.stat.mode == '0750'
+          - reg_alertmanager.stat.pw_name == 'alertmanager'
+          - reg_alertmanager.stat.gr_name == 'alertmanager'
+
+    - name: Retrieve file /etc/alertmanager/alertmanager.yml system status
+      stat:
+        path: /etc/alertmanager/alertmanager.yml
+      register: reg_file_alertmanager
+
+    - name: Assert file /etc/alertmanager/alertmanager.yml exists
+      assert:
+        that:
+          - reg_file_alertmanager.stat.exists
+          - reg_file_alertmanager.stat.mode == '0640'
+          - reg_file_alertmanager.stat.pw_name == 'alertmanager'
+          - reg_file_alertmanager.stat.gr_name == 'alertmanager'
+
+    - name: Retrieve file /etc/ipmi_exporter/ipmi_config.yml system status
+      stat:
+        path: /etc/ipmi_exporter/ipmi_config.yml
+      register: reg_file_ipmi_conf
+
+    - name: Assert file /etc/ipmi_exporter/ipmi_config.yml exists
+      assert:
+        that:
+          - reg_file_ipmi_conf.stat.exists
+          - reg_file_ipmi_conf.stat.mode == '0640'
+          - reg_file_ipmi_conf.stat.pw_name == 'ipmi_exporter'
+          - reg_file_ipmi_conf.stat.gr_name == 'ipmi_exporter'
+
+    - name: Retrieve file /etc/karma/karma.yml system status
+      stat:
+        path: /etc/karma/karma.yml
+      register: reg_file_karma
+
+    - name: Assert file /etc/karma/karma.yml exists
+      assert:
+        that:
+          - reg_file_karma.stat.exists
+          - reg_file_karma.stat.mode == '0640'
+          - reg_file_karma.stat.pw_name == 'karma'
+          - reg_file_karma.stat.gr_name == 'karma'
+
+    - name: Check prometheus, alertmanager, ipmi_exporter snmp_exporter are enabled/running
+      assert:
+        that:
+          - "ansible_facts.services['{{ item }}.service'].status == 'enabled'"
+          - "ansible_facts.services['{{ item }}.service'].state == 'running'"
+      loop:
+        - prometheus
+        - alertmanager
+        - ipmi_exporter
+        - karma
+
+    - name: Check that Prometheus is reachable
+      uri:
+        url: http://localhost:9090
+        return_content: yes
+      register: reg_url
+
+    - name: Assert Prometheus is available at http://localhost:9090
+      assert:
+        that: "'Prometheus Time Series Collection and Processing Server' in reg_url.content"
+
+    - name: Check that Alertmanager is reachable
+      uri:
+        url: http://localhost:9093
+        return_content: yes
+      register: reg_url_alert
+
+    - name: Assert Alertmanager is available at http://localhost:9093
+      assert:
+        that: "'Alertmanager' in reg_url_alert.content"
+
+    - name: Check snmp_exporter is enabled/running
+      assert:
+        that:
+          - "ansible_facts.services['snmp_exporter.service'].status == 'enabled'"
+          - "ansible_facts.services['snmp_exporter.service'].state == 'running'"
+        fail_msg: |
+          "Missing file /etc/snmp_exporter/snmp_config.yml
+           Refer to https://github.com/bluebanquise/bluebanquise/issues/366"
