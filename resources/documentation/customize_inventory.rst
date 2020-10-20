@@ -59,7 +59,7 @@ Changing the naming convention
 ------------------------------
 
 .. warning::
-   By default, **BlueBanquise** delivers the naming conventions shown below. **SMC does not change these values**. 
+   By default, **BlueBanquise** delivers the naming conventions shown below. 
    
 But you can change them and update your inventories to match these rules.
 
