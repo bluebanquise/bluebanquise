@@ -4,6 +4,10 @@ Slurm_exporter
 The slurm_exporter is an open source exporter for Prometheus, and can be found
 here: https://github.com/vpenso/prometheus-slurm-exporter
 
+.. note::
+  No packages are provided in the stack for this exporter.
+  You will need to build it yourself.
+
 By default, the slurm_exorter runs under the port 9817.
 
 To access the metrics, either do::

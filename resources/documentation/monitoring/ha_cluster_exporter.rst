@@ -4,6 +4,10 @@ Ha_cluster_exporter
 The ha_cluster_exporter is an open source exporter, and can be found here:
 https://github.com/ClusterLabs/ha_cluster_exporter
 
+.. note::
+  No packages are provided in the stack for this exporter.
+  You will need to build it yourself.
+
 By default, the ha_cluster_exorter runs under the port 9664.
 
 To access the metrics, either do:

@@ -54,6 +54,10 @@ inventory/group_vars/equipment_typeM/monitoring.yml with the following content:
         scrape_timeout: 5m
         port: 9817
 
+.. note::
+  ha_cluster_exporter and slurm_exporter are documented in the stack, but no packages 
+  are provided. See monitoring part of the documentation on where to download them.
+
 You can see here that it is possible to customize the scrape_interval and
 scrape_timeout.
 
