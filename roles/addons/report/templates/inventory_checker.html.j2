@@ -60,7 +60,7 @@ function includeHTML() {
 <br>
 Please consider that this debug tools will not catch all errors in your inventories, but try to provide protection again common mistakes.<br>
 <br>
-This report has been generated at:<br>
+This report has been generated at: {{ ansible_date_time.date}} {{ ansible_date_time.time }} {{ ansible_date_time.tz }}<br>
 {{ansible_managed}}<br>
 <br>
 <h2>Groups checker report</h2>

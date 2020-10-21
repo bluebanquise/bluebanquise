@@ -15,13 +15,13 @@ edge_color = g.new_edge_property("vector<float>")
 edge_text = g.new_edge_property("string")
 
 {% for network in networks %}
-{% if network not in report_settings.graph_tool_settings.excluded_networks %} 
+{#{% if network not in report_graph_tool_settings.excluded_networks %} #}
 {{network|replace('-','_')}} = g.add_vertex()
 vertex_text[{{network|replace('-','_')}}] = '{{network|replace('-','_')}}'
 vertex_fill_color[{{network|replace('-','_')}}] = {% for net in networks %}{% if network == net %}[{{networks_colors[loop.index-1]}},1.0]{% endif %}{% endfor %}
 
 vertex_shape[{{network|replace('-','_')}}] = "square"
-{% endif %}
+{#{% endif %}#}
 {% endfor %}
 
 {% for host in groups['all'] %}

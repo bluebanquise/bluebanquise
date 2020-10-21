@@ -4,7 +4,7 @@
   package:
     name: "ansible-cmdb"
     state: present
-  when: report_settings.enable_ansible_cmdb
+  when: report_enable_ansible_cmdb
 
 - name: Create report directories structure
   file:
@@ -18,31 +18,12 @@
    - /var/www/html/report/inventory_checker
    - /var/www/html/report/cluster_configuration
    - /var/www/html/report/graphs
-  tags:
-    - hex
-
-#- debug: msg="{{ groups[item]|list|join(',') }}"
-#  tags:
-#    - hex3
-#  with_items: "{{ j2_equipment_groups_list }}"
 
 - name: Gather equipment groups
   command: "nodeset -r {{ groups[item]|list|join(',') }}"
   register: "eq_groups"
   with_items: "{{ j2_equipment_groups_list }}"
-  tags:
-    - hex3
   changed_when: False
-
-#- debug: msg="eq_groups"
-#  tags:
-#    - hex3
-#- debug: msg="{{ item.item }} {{ item.stdout }}"
-#  tags:
-#    - hex3
-#  with_items: "{{ eq_groups.results }}"
-
-
 
 - name: Template >> /var/www/html/report/index.html
   template:
@@ -63,7 +44,6 @@
     mode: 0644
   tags:
     - template
-    - hex
 
 - name: Copy >> bluebanquise logo white
   copy:
@@ -81,10 +61,8 @@
   tags:
     - template
   when:
-    - report_settings.inventory_checker is defined
-    - report_settings.inventory_checker is not none
-    - report_settings.inventory_checker
-    - report_settings.inventory_checker is iterable
+    - report_inventory_checker is defined
+    - report_inventory_checker is iterable
 
 - name: Template >> /var/www/html/report/inventory_checker/groups.html
   template:
@@ -96,11 +74,9 @@
   tags:
     - template
   when:
-    - report_settings.inventory_checker is defined
-    - report_settings.inventory_checker is not none
-    - report_settings.inventory_checker
-    - report_settings.inventory_checker is iterable
-    - "'groups' in report_settings.inventory_checker"
+    - report_inventory_checker is defined
+    - report_inventory_checker is iterable
+    - "'groups' in report_inventory_checker"
 
 - name: Template >> /var/www/html/report/inventory_checker/hosts.html
   template:
@@ -112,11 +88,9 @@
   tags:
     - template
   when:
-    - report_settings.inventory_checker is defined
-    - report_settings.inventory_checker is not none
-    - report_settings.inventory_checker
-    - report_settings.inventory_checker is iterable
-    - "'hosts' in report_settings.inventory_checker"
+    - report_inventory_checker is defined
+    - report_inventory_checker is iterable
+    - "'hosts' in report_inventory_checker"
 
 - name: Template >> /var/www/html/report/cluster_configuration.html
   template:
@@ -127,7 +101,6 @@
     mode: 0644
   tags:
     - template
-    - hex1
 
 - name: Template >> /var/www/html/report/cluster_configuration/equipment_profiles.html
   template:
@@ -138,7 +111,6 @@
     mode: 0644
   tags:
     - template
-    - hex
 
 - name: Template >> /var/www/html/report/css/hosts.css
   template:
@@ -149,7 +121,6 @@
     mode: 0644
   tags:
     - template
-    - hex1
 
 - name: Template >> /var/www/html/report/cluster_configuration/racks.html
   template:
@@ -160,8 +131,6 @@
     mode: 0644
   tags:
     - template
-    - hex1
-
 
 - name: Create report directories structure
   file:
@@ -174,11 +143,11 @@
 - name: Gather all facts
   command: ansible -m setup --tree /dev/shm/ansible-cmdb/ all
   ignore_errors: yes
-  when: report_settings.enable_ansible_cmdb
+  when: report_enable_ansible_cmdb
 
 - name: Generate facts report
   shell: ansible-cmdb /dev/shm/ansible-cmdb > /var/www/html/report/overview.html
-  when: report_settings.enable_ansible_cmdb
+  when: report_enable_ansible_cmdb
 
 - name: Generate graph-tool network report
   template:
@@ -190,7 +159,7 @@
   tags:
     - template
     - graphtool
-  when: report_settings.enable_graphtool
+  when: report_enable_graphtool
 
 - name: Template >> /var/www/html/report/graphs.html
   template:
@@ -201,5 +170,5 @@
     mode: 0644
   tags:
     - template
-  when: report_settings.enable_graphtool
+  when: report_enable_graphtool
 

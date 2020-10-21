@@ -1,5 +1,5 @@
 {% for rack in (groups | select('match','^rack_.*') | list | unique | sort) %}
-
+{% if groups[rack][0] is defined and hostvars[groups[rack][0]]['rack_x_span'] is defined and hostvars[groups[rack][0]]['rack_z_span'] is defined %}
 .{{rack}} {
   display: grid;
   grid-template-columns: {% for i in range(hostvars[groups[rack][0]]['rack_x_span']) %}80px {% endfor %};
@@ -24,12 +24,15 @@ padding: 10px 10px;
 }
 
 {% for host in groups[rack] %}
-
+{% if hostvars[host]['x_p'] is defined and hostvars[host]['z_p'] is defined and hostvars[host]['x_span'] is defined and hostvars[host]['z_span'] is defined %}
 .{{host}} {
-  grid-column: {{hostvars[host]['x_p']}} / span {{hostvars[host]['report']['equipment_size']['x_span']}};
-  grid-row: {{hostvars[host]['z_p']}} / span {{hostvars[host]['report']['equipment_size']['z_span']}};
+  grid-column: {{hostvars[host]['x_p']}} / span {{hostvars[host]['x_span']}};
+  grid-row: {{hostvars[host]['z_p']}} / span {{hostvars[host]['z_span']}};
 }
+{% endif %}
 {% endfor %}
+
+{% endif %}
 {% endfor %}
 
 

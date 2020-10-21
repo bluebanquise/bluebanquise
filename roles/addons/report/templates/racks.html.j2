@@ -4,7 +4,9 @@
 <div class="{{rack}}_container">
 <div class="{{rack}}">
 {% for host in groups[rack] %}
+{% if hostvars[host]['x_p'] is defined and hostvars[host]['z_p'] is defined and hostvars[host]['x_span'] is defined and hostvars[host]['z_span'] is defined %}
   <div class="{{host}}">{{host}}</div>
+{% endif %}
 {% endfor %}
 </div>
 </div>

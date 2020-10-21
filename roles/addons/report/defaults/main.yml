@@ -1,0 +1,6 @@
+report_enable_ansible_cmdb: true
+report_enable_graphtool: true
+report_inventory_checker:
+    - groups
+    - hosts
+

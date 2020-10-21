@@ -23,7 +23,9 @@
   <ul class="lvl2">
     <li>Distribution:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['ep_operating_system']['distribution']}}</span></li>
     <li>Distribution major version:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['ep_operating_system']['distribution_major_version']}}</span></li>
+{% if hostvars[groups[equipment][0]]['ep_operating_system']['distribution_version'] is defined and hostvars[groups[equipment][0]]['ep_operating_system']['distribution_version'] is not none %}
     <li>Distribution version:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['ep_operating_system']['distribution_version']}}</span></li>
+{% endif %}
     <li>Partitioning:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['ep_partitioning']}}</span></li>
     <li>System language:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['ep_configuration']['system_language']}}</span></li>
     <li>Keyboard Layout:<span style="font-family: Courier, monospace, Monaco; font-size: 0.9em;"> {{hostvars[groups[equipment][0]]['ep_configuration']['keyboard_layout']}}</span></li>

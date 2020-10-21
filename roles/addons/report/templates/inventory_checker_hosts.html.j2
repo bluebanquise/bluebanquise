@@ -21,13 +21,15 @@ Also check the main network exists and that all linked network exists #}
   <br><div id="warning">WARNING</div>: host {{host}} doesn't have any network interfaces defined.
 {% else %}
   {% for interface in hostvars[host]['network_interfaces'] %}
-    {% if hostvars[host]['network_interfaces'][interface]['network'] is defined and hostvars[host]['network_interfaces'][interface]['network'] is not none %}
-      {% if hostvars[host]['network_interfaces'][interface]['network'] not in networks %}
-        <br><div id="error">ERROR</div>: host {{host}} interface {{interface}} has a network ({{hostvars[host]['network_interfaces'][interface]['network']}}) not defined in the configuration, please check.
+    {% if interface.network is defined and interface.network is not none %}
+      {% if interface.network not in networks %}
+        <br><div id="error">ERROR</div>: host {{ host }} interface {{ interface }} has a network ({{ interface.network }}) not defined in the configuration, please check.
       {% endif %}
     {% endif %}
-    {% if hostvars[host]['network_interfaces'][interface]['ip4'] is not defined or hostvars[host]['network_interfaces'][interface]['ip4'] is none %}
-        <br><div id="error">ERROR</div>: host {{host}} interface {{interface}} has no ip4 value. If you do not need this interface, please comment/erase it.
+    {% if interface.ip4 is not defined or interface.ip4 is none %}
+       {% if interface.type is not defined or interface.type == 'ethernet' %}
+        <br><div id="error">ERROR</div>: host {{ host }} interface {{ interface }} has no ip4 value. If you do not need this interface, please comment/erase it.
+       {% endif %}
     {% endif %}
   {% endfor %}
 {% endif %}
