@@ -18,7 +18,7 @@ platforms:
     privileged: true
     pre_build_image: true
 
-- name: compute1
+  - name: compute1
     groups:
       - mg_computes
     children:
