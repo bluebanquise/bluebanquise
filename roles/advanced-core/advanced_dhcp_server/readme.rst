@@ -16,6 +16,14 @@ Dhcp will only take into account networks from the current iceberg, and with nam
 
 Also, ensure dhcp is set to true for your network.
 
+Finally, note that the following parameters can be set in the inventory, to
+override defaults ones:
+
+* advanced_dhcp_server_default_lease_time (default to 600)
+* advanced_dhcp_server_max_lease_time (default to 7200)
+
+Consider increasing the default values once your network is production ready.
+
 **Shared network**
 """"""""""""""""""
 

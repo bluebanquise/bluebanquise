@@ -51,10 +51,11 @@ Resulting example network could be:
         time_ip: 10.11.0.1                           # Will be used by dhcp for time server
         log_ip: 10.11.0.1
 
-Finally, note that the following parameters can be set in the inventory (group_vars/all/general_settings/network.yml):
+Finally, note that the following parameters can be set in the inventory, to
+override defaults ones:
 
-* default_lease_time
-* max_lease_time
+* dhcp_server_default_lease_time (default to 600)
+* dhcp_server_max_lease_time (default to 7200)
 
 Consider increasing the default values once your network is production ready.
 
