@@ -10,14 +10,14 @@ Features like shared_network, opt82, opt61 or snp/snponly roms are provided here
 Instructions
 ^^^^^^^^^^^^
 
-Please read first documentation of the standard dhcp server role. Advanced dhcp server provides same features than standard dhcp server role, but with more options.
+Please read first documentation of the standard dhcp server role. Advanced dhcp server provides sames features than standard dhcp server role, but with more options.
 
 Dhcp will only take into account networks from the current iceberg, and with naming related to administration network (by default iceX-Y).
 
 Also, ensure dhcp is set to true for your network.
 
 Finally, note that the following parameters can be set in the inventory, to
-override defaults ones:
+override default ones:
 
 * advanced_dhcp_server_default_lease_time (default to 600)
 * advanced_dhcp_server_max_lease_time (default to 7200)

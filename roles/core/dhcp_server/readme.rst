@@ -52,7 +52,7 @@ Resulting example network could be:
         log_ip: 10.11.0.1
 
 Finally, note that the following parameters can be set in the inventory, to
-override defaults ones:
+override default ones:
 
 * dhcp_server_default_lease_time (default to 600)
 * dhcp_server_max_lease_time (default to 7200)
