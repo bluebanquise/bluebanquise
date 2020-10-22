@@ -21,7 +21,7 @@
   tags:
     - internal
 
-- name: firewalld █ "Add services to firewall's {{ pxe_stack_firewall_zone | default('public') }} zone"
+- name: "firewalld █ Add services to firewall's {{ pxe_stack_firewall_zone | default('public') }} zone"
   firewalld:
     zone: "{{ pxe_stack_firewall_zone | default('public') }}"
     service: "{{ item }}"
@@ -35,9 +35,9 @@
   tags:
     - firewall
 
-- name: "package █ Install {{ pxe_stack_packages_to_install | join(' ') }} packages"
+- name: "package █ Install {{ (pxe_stack_packages_to_install + [pxe_stack_tftp_package | default(pxe_stack_default_tftp_package)]) | join(' ') }} packages"
   package:
-    name: "{{ pxe_stack_packages_to_install }}"
+    name: "{{ pxe_stack_packages_to_install + [pxe_stack_tftp_package | default(pxe_stack_default_tftp_package)] }}"
     state: present
   tags:
     - package
@@ -263,11 +263,11 @@
 
 - meta: flush_handlers
 
-- name: "service █ Manage {{ pxe_stack_services_to_start | join(' ') }} state"
+- name: "service █ Manage {{ (pxe_stack_services_to_start + [pxe_stack_tftp_service | default(pxe_stack_default_tftp_service)]) | join(' ') }} state"
   service:
     name: "{{ item }}"
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
     state: "{{ (start_services | bool) | ternary('started', omit) }}"
-  loop: "{{ pxe_stack_services_to_start }}"
+  loop: "{{ pxe_stack_services_to_start + [pxe_stack_tftp_service | default(pxe_stack_default_tftp_service)] }}"
   tags:
     - service
