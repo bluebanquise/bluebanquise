@@ -173,7 +173,7 @@ To be done
 Changelog
 ^^^^^^^^^
 
-* 1.1.6: Add ability to handle other tftp server than atftp. Benoit Leveugle <benoit.leveugle@gmail.com>
+* 1.1.6: Add ability to install other tftp server than atftp. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.5: Update role to match $basearch, add status feat to bootset. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.4: Update to new network_interfaces syntax. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.3: Clean. johnnykeats <johnny.keats@outlook.com>
