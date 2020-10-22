@@ -1,16 +1,16 @@
 ---
-name: core/pxe_server unit testing
+name: core/pxe_stack unit testing
 on:
   push:
     branches:
       - master
     paths:
-      - 'roles/core/pxe_server/**'
-      - '.github/workflows/molecule-actions-core-pxe_server.yml'
+      - 'roles/core/pxe_stack/**'
+      - '.github/workflows/molecule-actions-core-pxe_stack.yml'
   pull_request:
     paths:
-      - 'roles/core/pxe_server/**'
-      - '.github/workflows/molecule-actions-core-pxe_server.yml'
+      - 'roles/core/pxe_stack/**'
+      - '.github/workflows/molecule-actions-core-pxe_stack.yml'
 
 jobs:
   molecule_test:
@@ -35,6 +35,6 @@ jobs:
       - name: Install packages
         run: |
           pip install 'molecule[docker]>3' ansible-lint flake8 jmespath netaddr
-      - name: Run molecule test for core/pxe_server
+      - name: Run molecule test for core/pxe_stack
         run: |
-          cd roles/core/pxe_server && molecule test
+          cd roles/core/pxe_stack && molecule test
