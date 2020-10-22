@@ -28,10 +28,30 @@
         - ipxe-x86_64-bluebanquise
         - ipxe-arm64-bluebanquise
         - httpd
+
+    - name: Assert pxe extra el8 packages are installed
+      assert:
+        that: "'{{ item }}' in ansible_facts.packages"
+      loop:
         - python3-policycoreutils
         - clustershell
         - python3-clustershell
         - policycoreutils
+      when:
+        - ansible_facts.os_family == "RedHat"
+        - ansible_facts.distribution_major_version == "8"
+
+    - name: Assert pxe extra el7 packages are installed
+      assert:
+        that: "'{{ item }}' in ansible_facts.packages"
+      loop:
+        - policycoreutils-python
+        - python36
+        - python36-PyYAML
+        - python36-clustershell
+      when:
+        - ansible_facts.os_family == "RedHat"
+        - ansible_facts.distribution_major_version == "7"
 
     - name: Retrieve directory /var/www/html/preboot_execution_environment system status
       stat:
