@@ -1,0 +1,165 @@
+---
+- name: Verify
+  hosts: management1
+  tasks:
+
+    - name: Collect package facts
+      package_facts:
+        manager: auto
+
+    - name: Collect services facts
+      service_facts:
+
+    - name: Collect services of zone public
+      command: firewall-cmd --zone=public --list-all
+      register: firewall_cmd_result
+      changed_when: False
+
+    - name: Firewall zone public check presence of service http and tftp
+      assert:
+        that: firewall_cmd_result.stdout |
+                    regex_findall(('http|tftp'), multiline=False) | length == 2
+
+    - name: Assert pxe needed packages are installed
+      assert:
+        that: "'{{ item }}' in ansible_facts.packages"
+      loop:
+        - atftp
+        - ipxe-x86_64-bluebanquise
+        - ipxe-arm64-bluebanquise
+        - httpd
+        - python3-policycoreutils
+        - clustershell
+        - python3-clustershell
+        - policycoreutils
+
+    - name: Retrieve directory /var/www/html/preboot_execution_environment system status
+      stat:
+        path: /var/www/html/preboot_execution_environment
+      register: reg_pxe_dir
+      changed_when: False
+
+    - name: Assert directory /var/www/html/preboot_execution_environment exists
+      assert:
+        that:
+          - reg_pxe_dir.stat.exists
+          - reg_pxe_dir.stat.isdir
+          - reg_pxe_dir.stat.mode == '0755'
+          - reg_pxe_dir.stat.pw_name == 'apache'
+          - reg_pxe_dir.stat.gr_name == 'apache'
+
+    - name: Retrieve file nodes_parameters.yml system status
+      stat:
+        path: /etc/bluebanquise/pxe/nodes_parameters.yml
+      register: reg_nodes_param
+      changed_when: False
+
+    - name: Assert file /etc/bluebanquise/pxe/nodes_parameters.yml exist
+      assert:
+        that: reg_nodes_param.stat.exists
+
+    - name: Retrieve file pxe_parameters.yml system status
+      stat:
+        path: /etc/bluebanquise/pxe/pxe_parameters.yml
+      register: reg_pxe_param
+      changed_when: False
+
+    - name: Assert file /etc/bluebanquise/pxe/pxe_parameters.yml exist
+      assert:
+        that: reg_pxe_param.stat.exists
+
+    - name: Retrieve file convergence.ipxe system status
+      stat:
+        path: /var/www/html/preboot_execution_environment/convergence.ipxe
+      register: reg_convergence
+      changed_when: False
+
+    - name: Assert file /var/www/html/preboot_execution_environment/convergence.ipxe exist
+      assert:
+        that: reg_convergence.stat.exists
+
+    - name: Retrieve file menu.ipxe system status
+      stat:
+        path: /var/www/html/preboot_execution_environment/menu.ipxe
+      register: reg_menu
+      changed_when: False
+
+    - name: Assert file /var/www/html/preboot_execution_environment/menu.ipxe exist
+      assert:
+        that: reg_menu.stat.exists
+
+    - name: Retrieve file centos_8.ipxe system status
+      stat:
+        path: /var/www/html/preboot_execution_environment/osdeploy/centos_8.ipxe
+      register: reg_centos8_ipxe
+      changed_when: False
+
+    - name: Assert file /var/www/html/preboot_execution_environment/osdeploy/centos_8.ipxe exist
+      assert:
+        that: reg_centos8_ipxe.stat.exists
+
+    - name: Retrieve file redhat_8.ipxe system status
+      stat:
+        path: /var/www/html/preboot_execution_environment/osdeploy/redhat_8.ipxe
+      register: reg_redhat8_ipxe
+      changed_when: False
+
+    - name: Assert file /var/www/html/preboot_execution_environment/osdeploy/redhat_8.ipxe exist
+      assert:
+        that: reg_redhat8_ipxe.stat.exists
+
+    - name: Retrieve file typeC.ipxe system status
+      stat:
+        path: /var/www/html/preboot_execution_environment/equipment_profiles/typeC.ipxe
+      register: reg_type_ipxe
+      changed_when: False
+
+    - name: Assert file /var/www/html/preboot_execution_environment/equipment_profiles/typeC.ipxe exist
+      assert:
+        that: reg_type_ipxe.stat.exists
+
+    - name: Retrieve file typeC.kickstart.cfg system status
+      stat:
+        path: /var/www/html/preboot_execution_environment/equipment_profiles/typeC.kickstart.cfg
+      register: reg_ks_cfg
+      changed_when: False
+
+    - name: Assert file /var/www/html/preboot_execution_environment/equipment_profiles/typeC.kickstart.cfg exist
+      assert:
+        that: reg_ks_cfg.stat.exists
+
+    - name: Retrieve file /usr/bin/bootset system status
+      stat:
+        path: /usr/bin/bootset
+      register: reg_bootset
+      changed_when: False
+
+    - name: Assert file /usr/bin/bootset exist
+      assert:
+        that: reg_bootset.stat.exists
+
+    - name: Retrieve file /var/www/cgi-bin/bootswitch.cgi system status
+      stat:
+        path: /var/www/cgi-bin/bootswitch.cgi
+      register: reg_bootswitch
+      changed_when: False
+
+    - name: Assert file /var/www/cgi-bin/bootswitch.cgi exist
+      assert:
+        that: reg_bootswitch.stat.exists
+
+    - name: Check services atftpd is enabled
+      assert:
+        that: "ansible_facts.services['atftpd.service'].status == 'enabled'"
+
+    - name: Check services atftpd is running
+      assert:
+        that: "ansible_facts.services['atftpd.service'].state == 'running'"
+
+    - name: Check services httpd is running
+      assert:
+        that: "ansible_facts.services['httpd.service'].state == 'running'"
+
+    - name: Check services httpd is enabled
+      assert:
+        that: "ansible_facts.services['httpd.service'].status == 'enabled'"
