@@ -10,7 +10,8 @@ Features like shared_network, opt82, opt61 or snp/snponly roms are provided here
 Instructions
 ^^^^^^^^^^^^
 
-Please read first documentation of the standard dhcp server role. Advanced dhcp server provides sames features than standard dhcp server role, but with more options.
+Please read first documentation of the standard dhcp server role. Advanced dhcp 
+server provides same features than standard dhcp server role, but with more options.
 
 Dhcp will only take into account networks from the current iceberg, and with naming related to administration network (by default iceX-Y).
 
