@@ -10,7 +10,7 @@ Features like shared_network, opt82, opt61 or snp/snponly roms are provided here
 Instructions
 ^^^^^^^^^^^^
 
-Please read first documentation of the standard dhcp server role. Advanced dhcp server provides sames features than standard dhcp server role, but with more options.
+Please read first documentation of the standard dhcp server role. Advanced dhcp server provides same features than standard dhcp server role, but with more options.
 
 Dhcp will only take into account networks from the current iceberg, and with naming related to administration network (by default iceX-Y).
 
@@ -63,7 +63,7 @@ It is possible to use advanced dhcp features to identify an host. The following 
 
 - mac: identify based on MAC address. Same than standard dhcp server.
 - dhcp_client_identifier: identify based on a patern (string, etc) to recognise an host. Also known as option 61.
-- host_identifier: identify based on an option (agent.circuit-id, agent.remote-id, etc) to recognise an host. Also known as option 82.
+- host_identifier: identify based on an option (agent.circuit-id, agent.remote-id, etc) to recognize an host. Also known as option 82.
 - match: identify based on multiple options in combinaison to recognise an host. Also known as option 82 with hack.
 
 If using match, because this features is using a specific 'hack' in the dhcp server, you **must** define this host in a shared network, even if this shared network contains a single network (see this very well made page for more information: http://www.miquels.cistron.nl/isc-dhcpd/).
