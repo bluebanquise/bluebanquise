@@ -46,7 +46,6 @@
         that: "'{{ item }}' in ansible_facts.packages"
       loop:
         - policycoreutils-python
-        - python36
         - python36-PyYAML
         - python36-clustershell
       when:
