@@ -32,9 +32,11 @@ item bootosdeploy         Deploy OS (This will deploy/redeploy operating system)
 item bootdisk             Boot on disk (This will boot on local disk)
 item --gap                Diskless
 item bootdiskless         Start a diskless OS (Configured using diskless tool)
+{% if pxe_stack_enable_cloning %}
 item --gap                Cloning
 item bootclone            Clone OS
 item bootdeployclone      Deploy already made clone
+{% endif %}
 #item --gap                Tools
 #item minimal_live_linux   Minimal Live Linux
 #item memtest              Memtest (To check Memory)

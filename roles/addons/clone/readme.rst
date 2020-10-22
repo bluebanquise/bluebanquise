@@ -9,6 +9,10 @@ This role provides ipxe files for Clonezilla live usage.
 Instructions
 ^^^^^^^^^^^^
 
+You first need to enable cloning entries in the ipxe menu of the **pxe_stack**
+role. To do so, set variable *pxe_stack_enable_cloning* to **true** in your
+inventory. Then re-execute the pxe_stack role to apply changes.
+
 The Clonezilla Live iso is needed for this role to run properly. The following iso version was used for validating this role: **clonezilla-live-20191024-eoan-amd64.iso**
 
 The iso must be mounted in the *preboot_execution_environment/clone/clonezilla* folder or the content copied inside this directory.
@@ -41,4 +45,3 @@ Changelog
 ^^^^^^^^^
 
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
- 
