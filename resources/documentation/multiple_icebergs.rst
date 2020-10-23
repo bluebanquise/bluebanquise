@@ -48,15 +48,17 @@ Note that this architecture is flexible, and can be adapted to create isolated
 icebergs (i.e. having multiple fully isolated clusters in the same BlueBanquise
 configuration).
 
-Note also that using iceberg related groups, it is possible to define variables
-dedicated to each iceberg (for example, define a different time zone, a
-different domain name, etc.).
-However, and this is **important**, variables defined at *group_vars/equipment_X*
-level (prefixed by **ep_** and **authentication_**) should never be used in
-icebergs groups, i.e. *group_vars/icebergX*, as it is impossible to determine
-the "winner" between both values.
-
 .. warning::
+  Note also that using iceberg related groups, it is possible to define variables
+  dedicated to each iceberg (for example, define a different time zone, a
+  different domain name, etc.).
+  However, and this is **important**, variables defined in *group_vars/equipment_X*
+  (prefixed by **ep_** and **authentication_**) should never be used in icebergs
+  groups, i.e. *group_vars/icebergX*, as this is incompatible with the stack
+  logic: some roles expect all the members of equipment_profile groups to have
+  the same values for each **ep_** and **authentication_** parameters.
+
+.. note::
   As a physician, I start counting at 1 when speaking of physical things, and so
   icebergs are numbered at 1 by default. However, nothing prevents using 0 as a
   start point when activating icebergs mechanism.
@@ -108,12 +110,12 @@ Note also that 2 variables are here to simplify developments of templates:
 * j2_icebergs_groups_list: "{{ groups | select('match','^'+iceberg_naming+'[0-9]+') | list }}"
 * j2_number_of_icebergs: "{{ groups | select('match','^'+iceberg_naming+'[0-9]+') | list | length }}"
 
-Titles are self explaining these variables.
+Variables names are self explaining these variables.
 
 Enabling iceberg mechanism
 --------------------------
 
-.. note::
+.. warning::
   Do not play any role from now, until hosts are in their iceberg group.
 
 To activate icebergs mechanism, open file
@@ -126,7 +128,7 @@ Create iceberg 1
 We now need to create the iceberg1 group, define its variables, and add hosts
 into it.
 
-Create dedicated folder if not exist:
+Create dedicated folder if absent:
 
 .. code-block:: bash
 
@@ -149,7 +151,7 @@ This will create an Ansible group called iceberg1, with 2 associated variables.
 * **iceberg_level** defines the level of this iceberg in the services chain. This is for example used to calculate stratum value of time servers, etc.
 
 .. note::
-  iceberg_level could be automatically calculated. However, having it has a
+  iceberg_level could be automatically calculated. However, having it as a
   variable allows the system administrator to tune it to desired ways.
 
 Let's check current groups status:
@@ -182,7 +184,8 @@ To do so, edit again file *inventory/cluster/icebergs/iceberg1* and under
 
 .. note::
   As you can see, it is possible to add ranges of nodes, like in this example
-  with login[1:2]. This is a different syntax than *nodeset*.
+  with login[1:2]. This is a different syntax than ClusterShell's nodeset or
+  SchedMD's Slurm.
 
 Check groups again:
 
@@ -204,7 +207,8 @@ Check groups again:
     |--@ungrouped:
   [root@mngt1 ~]#
 
-And push again configuration using the default playbook for each host.
+And push this new configuration using your dedicated playbook for each already
+deployed hosts.
 It is possible to see what is going to be modified using *--diff --check* at
 ansible-playbook invocation.
 
@@ -276,12 +280,12 @@ as a pusher (management) on ice2-1.
 .. warning::
   Two important things, related to network.
   First, BMC is connected to ice1-1, as mngt1 is in charge of deploying mngt2.
-  Secondly, here, network_interface on ice2-1 is put **FIRST** in the list. This
-  is key, as you need nodes to reach mngt2 to its main iceberg interface. Only
-  mngt1 should need access to ice1-1 interface of mngt2, and the *ssh_master*
-  role will ensure that Ansible from mngt1 use this one.
+  Secondly, here, network_interface connected to network ice2-1 **MUST BE THE
+  FIRST** in the list. This is key, as you need nodes to reach mngt2 to its main
+  iceberg interface. Only mngt1 should need access to ice1-1 interface of mngt2,
+  and the *ssh_master* role will ensure that Ansible from mngt1 use this one.
 
-And add mngt2 to iceberg2, by editing µinventory/cluster/icebergs/iceberg2µ and
+Add mngt2 to iceberg2, by editing *inventory/cluster/icebergs/iceberg2* and
 adding mngt2 under [iceberg2]:
 
 .. code-block:: text
@@ -329,7 +333,7 @@ content:
   mngt2
 
 Then ensure in file *inventory/group_vars/all/general_settings/nfs.yml* you have
-exactly at least these two exports:
+at least these two exports:
 
 .. code-block:: yaml
 
@@ -390,7 +394,7 @@ iceberg1:
 
 .. code-block:: text
 
-  ansible-playbook /etc/bluebanquise/playbooks/mngt2.yml -t repositories_client --extra-vars j2_current_iceberg=iceberg1
+  mngt1# ansible-playbook /etc/bluebanquise/playbooks/mngt2.yml -t repositories_client --extra-vars j2_current_iceberg=iceberg1
 
 Packages can now be downloaded from mngt1 to mngt2 and installed on mngt2.
 
@@ -401,7 +405,7 @@ repositories locally and distribute them on iceberg2:
 
 .. code-block:: text
 
-  ansible-playbook /etc/bluebanquise/playbooks/mngt2.yml -t nfs_client,repositories_server --extra-vars j2_current_iceberg=iceberg1
+  mngt1# ansible-playbook /etc/bluebanquise/playbooks/mngt2.yml -t nfs_client,repositories_server --extra-vars j2_current_iceberg=iceberg1
 
 */var/www/html/repositories* and */etc/bluebanquise* from mngt1 are now mounted
 on mngt2, and httpd server is running on mngt2.
@@ -413,7 +417,7 @@ Deploy the whole configuration on it:
 
 .. code-block:: text
 
-  ansible-playbook /etc/bluebanquise/playbooks/mngt2.yml
+  mngt1# ansible-playbook /etc/bluebanquise/playbooks/mngt2.yml
 
 And now mngt2 act as iceberg2 management, and can provide packages to its nodes.
 
@@ -445,7 +449,7 @@ But you will also need to ensure direct hostnames resolution of all computes
 nodes is done on the interconnect, and not on the internet. Why ? Simply because
 when parallel computations take places, Slurm will provide to the instance nodes
 hostnames as target, and so if nodes need to reach each other through ethernet,
-nodes from once iceberg will not be able to reach nodes from other icebergs, and
+nodes from one iceberg will not be able to reach nodes from other icebergs, and
 so parallel computations will not initialize.
 
 Example: user job is asking for 100 nodes, the whole cluster is free, and each
@@ -453,8 +457,8 @@ iceberg contains 80 nodes. Slurm will allocate 80 nodes from iceberg1, lets say
 c[001-080] and 20 nodes from iceberg2, c[081-100]. The final mpirun command
 will receive as hosts target c[001-100]. c001 will be able to communicate with
 c002, but not with c081, as iceberg ethernet networks are isolated. But if c081
-means c081 over the interconnect network, then since this network is unified,
-c001 will be able to reach c081 and initialize MPI run.
+resolves to c081 over the interconnect network, then since this network is
+unified, c001 will be able to reach c081 and initialize MPI run.
 
 .. note::
   It is possible to set routing between icebergs over ethernet, but this is not
@@ -462,7 +466,7 @@ c001 will be able to reach c081 and initialize MPI run.
 
 To achieve direct computes hosts resolution over interconnect, ensure the
 interconnect network interface is first in the network_interface list of each
-compute node.
+compute node, which is the preferred network.
 
 For example:
 
@@ -512,5 +516,6 @@ interconnect.
   configuration with Ansible. By default, the ss_master role force the ssh from
   a management to targets to be done on the first management network in the
   target network_interfaces list. In this example, a ping c001 will ping the
-  ib0 interface, so 10.20.3.1, but an ssh c001 will connect to c001 through
-  interface enp0s3, so 10.2.3.1 .
+  ib0 interface connected to the ib0 network, so 10.20.3.1, but an ssh c001 will
+  connect to c001 through interface enp0s3 connected to the ice2-1 network, so
+  10.2.3.1 .
