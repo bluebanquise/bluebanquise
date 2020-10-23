@@ -518,4 +518,4 @@ interconnect.
   target network_interfaces list. In this example, a ping c001 will ping the
   ib0 interface connected to the ib0 network, so 10.20.3.1, but an ssh c001 will
   connect to c001 through interface enp0s3 connected to the ice2-1 network, so
-  10.2.3.1 .
+  10.2.3.1.
