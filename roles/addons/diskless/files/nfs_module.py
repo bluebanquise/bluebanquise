@@ -9,10 +9,12 @@
 #    This module allow contain a class used for creating nfs
 #    images with the diskless images
 #    management script.
-# 
-# 2020 - David Pieters <davidpieters22@gmail.com>
+#
+# 1.2.0: Role update. David Pieters <davidpieters22@gmail.com>
+# 1.1.0: Role update. Benoit Leveugle <benoit.leveugle@gmail.com>, Bruno Travouillon <devel@travouillon.fr>
+# 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
+#
 # https://github.com/bluebanquise/bluebanquise - MIT license
-
 
 # Import base modules
 from ClusterShell.NodeSet import NodeSet

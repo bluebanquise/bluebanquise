@@ -9,7 +9,10 @@
 #    This module allow to manage kernels globaly. It
 #    allow to make basic actions on kernels. 
 #
-# 2020 - David Pieters <davidpieters22@gmail.com>
+# 1.2.0: Role update. David Pieters <davidpieters22@gmail.com>
+# 1.1.0: Role update. Benoit Leveugle <benoit.leveugle@gmail.com>, Bruno Travouillon <devel@travouillon.fr>
+# 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
+#
 # https://github.com/bluebanquise/bluebanquise - MIT license
 
 

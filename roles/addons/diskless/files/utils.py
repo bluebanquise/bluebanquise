@@ -8,8 +8,12 @@
 # utils:
 #    This module allow to create usefull functions
 #
-# 2020 - David Pieters <davidpieters22@gmail.com>
-# https://github.com/bluebanquise/bluebanquise - MIT license2
+# 1.2.0: Role update. David Pieters <davidpieters22@gmail.com>
+# 1.1.0: Role update. Benoit Leveugle <benoit.leveugle@gmail.com>, Bruno Travouillon <devel@travouillon.fr>
+# 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
+#
+# https://github.com/bluebanquise/bluebanquise - MIT license
+
 
 # Colors
 CBLUE = '\033[94m'
