@@ -33,3 +33,6 @@ jobs:
 
       - name: Run linter on example playbooks
         run: ansible-lint -v --exclude . resources/examples/*/playbooks/*.yml
+
+      - name: Check tags of tasks Gather OS variables
+        run: ./tools/gather_vars_checker.py 'roles/*/*/'
