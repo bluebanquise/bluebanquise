@@ -41,15 +41,66 @@
 #    - ansible_facts.distribution_major_version == "18"
 #    - ansible_facts.os_family == "Ubuntu"
 
-# Note from JK
-# We could add so much more features here, like VLAN, LACP, MTU, etc. Easy to add.
 - name: nmcli █ Set NIC configuration
   nmcli:
-    conn_name: "{{ item.name | string }}"
-    type: "{% if item.type is defined and item.type is not none %}{{ item.type }}{% else %}ethernet{% endif %}"
-    ip4: "{{ item.ip4 }}/{{ networks[item.network].prefix }}"
-    state: present
-    gw4: "{% if networks[item.network].gateway is defined and networks[item.network].gateway is not none %}{{ networks[item.network].gateway }}{% endif %}"
+    # Tuned
+    conn_name: "{{ item.conn_name | default(item.interface) | string }}"
+    ifname: "{{ item.ifname | default(item.physical_device) | default(omit) }}"
+    ip4: {{ (item.ip4 is defined) | ternary( ('/' in (item.ip4|default('None')) ) | ternary( (item.ip4|default('None')), ( (item.ip4|default('None')) | string) + '/' + (networks[item.network].prefix4 | default(networks[item.network].prefix) |string)), omit) }}
+    # Equivalent to
+    # {% if item.ip4 is defined %}
+    #   {% if '/' in item.ip4 %}\
+    #     {{ item.ip4 }}
+    #   {% else %}\
+    #     {{ item.ip4 }}/{{ networks[item.network].prefix }}
+    #   {% endif %}
+    # {% else %}
+    #    omit
+    # {% endif %}
+    # Allows to provide a simple ip4, or an ip4/prefix
+    # Also support old prefix format (to be replaced by prefix4)
+    ip6: {{ (item.ip6 is defined) | ternary( ('::' in (item.ip6|default('None')) ) | ternary( (item.ip6|default('None')), ( (item.ip6|default('None')) | string) + '::' + (networks[item.network].prefix6 |string)), omit) }}
+    gw4: "{{ item.gw4 | default(networks[item.network].gateway4) | default(networks[item.network].gateway) | default(omit) }}"
+    gw6: "{{ item.gw6 | default(networks[item.network].gateway6) | default(omit) }}"
+    mtu: "{{ item.mtu | default(networks[item.network].mtu) | default(omit) }}"
+    # Standard
+    state: "{{ item.state | default('present') }}"
+    autoconnect: "{{ item.autoconnect | default(omit) }}"
+    type: "{{ item.type | default(omit) }}"
+    ageingtime: "{{ item.ageingtime | default(omit) }}"
+    arp_interval: "{{ item.arp_interval | default(omit) }}"
+    arp_ip_target: "{{ item.arp_ip_target | default(omit) }}"
+    dhcp_client_id: "{{ item.dhcp_client_id | default(omit) }}"
+    dns4: "{{ item.dns4 | default(omit) }}"
+    dns4_search: "{{ item.dns4_search | default(omit) }}"
+    dns6: "{{ item.dns6 | default(omit) }}"
+    dns6_search: "{{ item.dns6_search | default(omit) }}"
+    downdelay: "{{ item.downdelay | default(omit) }}"
+    egress: "{{ item.egress | default(omit) }}"
+    flags: "{{ item.flags | default(omit) }}"
+    forwarddelay: "{{ item.forwarddelay | default(omit) }}"
+    hairpin: "{{ item.hairpin | default(omit) }}"
+    hellotime: "{{ item.hellotime | default(omit) }}"
+    ingress: "{{ item.ingress | default(omit) }}"
+    ip_tunnel_dev: "{{ item.ip_tunnel_dev | default(omit) }}"
+    ip_tunnel_local: "{{ item.ip_tunnel_local | default(omit) }}"
+    ip_tunnel_remote: "{{ item.ip_tunnel_remote | default(omit) }}"
+    mac: "{{ item.mac | default(omit) }}"
+    master: "{{ item.master | default(omit) }}"
+    maxage: "{{ item.maxage | default(omit) }}"
+    mode: "{{ item.mode | default(omit) }}"
+    miimon: "{{ item.miimon | default(omit) }}"
+    path_cost: "{{ item.path_cost | default(omit) }}"
+    primary: "{{ item.primary | default(omit) }}"
+    priority: "{{ item.priority | default(omit) }}"
+    slavepriority: "{{ item.slavepriority | default(omit) }}"
+    stp: "{{ item.stp | default(omit) }}"
+    updelay: "{{ item.updelay | default(omit) }}"
+    vlandev: "{{ item.vlandev | default(omit) }}"
+    vlanid: "{{ item.vlanid | default(omit) }}"
+    vxlan_id: "{{ item.vxlan_id | default(omit) }}"
+    vxlan_local: "{{ item.vxlan_local | default(omit) }}"
+    vxlan_remote: "{{ item.vxlan_remote | default(omit) }}"
   loop: "{{ network_interfaces }}"
   tags:
     - identify
@@ -67,4 +118,3 @@
 #    - ansible_facts.os_family == "RedHat"
 #  tags:
 #    - identify
-
