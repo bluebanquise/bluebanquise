@@ -6,226 +6,357 @@ Description
 
 This role provides needed tools to deploy a basic diskless cluster.
 
-Two type of images are available:
+Two types of images are available:
 
 * Livenet images are full ram images, without persistance but need less infrastructure.
-* NFS images are full nfs rw images, with psersistance, very simple to use, but need more infrastructure.
+* NFS images are full nfs rw images, with persistance, very simple to use, but need more infrastructure.
 
 It is important to understand that this role is independant of the pxe_stack core role, and so each tools do not communicate.
 
 Validated on RHEL8.
+Python based.
 
-Basic instructions
-^^^^^^^^^^^^^^^^^^
+A technical documentation is available on https://github.com/bluebanquise/bluebanquise/tree/davidpieters/feat/disklessset/resources/documentation/diskless
 
-1. Apply your playbook with the "diskless" role activated (see *Example playbook* part):
+Set up the tool
+^^^^^^^^^^^^^^^
 
-2. Copy the kernels in /boot you want to use for your images.
+1. Apply your playbook with the "diskless" role activated (see *Example playbook* part).
+
+2. Copy from /boot the kernels you want to use for your images:
 
 .. code-block:: text
 
   cp /boot/vmlinuz-<kernel releases to use for diskless nodes> \
      /var/www/html/preboot_execution_environment/diskless/kernels/
 
-3. Launch *disklessset* and verify that the kernels are present in the tool, then quit.
+3. Launch *disklessset* command and check that the software launches correctly:
 
 .. code-block:: text
 
-  # disklessset
-  BlueBanquise Diskless manager
-   1 - List available kernels
-   2 - Generate a new initramfs
-   3 - Generate a new diskless image
-   4 - Manage existing diskless images
-  -->: 1
-  [INFO] Loading kernels from /var/www/html/preboot_execution_environment/diskless/kernels/
-  
-  Available kernels:
-    │
-    └── vmlinuz-4.18.0-193.6.3.el8_2.x86_64 - missing initramfs-kernel-4.18.0-193.6.3.el8_2.x86_64
 
-4. Launch *disklessset* and ask an initramfs creation for this kernel
+    ██████╗ ██╗███████╗██╗  ██╗██╗     ███████╗███████╗███████╗
+    ██╔══██╗██║██╔════╝██║ ██╔╝██║     ██╔════╝██╔════╝██╔════╝
+    ██║  ██║██║███████╗█████╔╝ ██║     █████╗  ███████╗███████╗
+    ██║  ██║██║╚════██║██╔═██╗ ██║     ██╔══╝  ╚════██║╚════██║
+    ██████╔╝██║███████║██║  ██╗███████╗███████╗███████║███████║
+    ╚═════╝ ╚═╝╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝╚══════╝
+
+             Entering BlueBanquise diskless manager
+
+   > Diskless image management
+   1 - Manage and create diskless images (need modules)
+   2 - List available diskless images
+   3 - Remove a diskless image
+   4 - Manage kernel of a diskless image
+
+   > Other actions
+   5 - List available kernels
+   6 - Generate a new initramfs
+
+   7 - Clear a corrupted image
+   8 - Exit
+
+  At any time: (CTRL + c) => Return to this main menu.
+
+   Select an action:
+  -->:
+  
+4. Check that the kernels you previously added are present in the tool:
 
 .. code-block:: text
 
-  # disklessset
-  BlueBanquise Diskless manager
-   1 - List available kernels
-   2 - Generate a new initramfs
-   3 - Generate a new diskless image
-   4 - Manage existing diskless images
-  -->: 2
-  [INFO] Loading kernels from /var/www/html/preboot_execution_environment/diskless/kernels/
-  
-  Select kernel:
-   1 - vmlinuz-4.18.0-193.6.3.el8_2.x86_64
-  -->: 1
+   > Diskless image management
+   1 - Manage and create diskless images (need modules)
+   2 - List available diskless images
+   3 - Remove a diskless image
+   4 - Manage kernel of a diskless image
 
-5. Using *disklessset*, verify that this creation went well: "initiramfs present" must now be present after the kernel.
+   > Other actions
+   5 - List available kernels
+   6 - Generate a new initramfs
 
-.. code-block:: text
+   7 - Clear a corrupted image
+   8 - Exit
 
-  # disklessset
-  BlueBanquise Diskless manager
-   1 - List available kernels
-   2 - Generate a new initramfs
-   3 - Generate a new diskless image
-   4 - Manage existing diskless images
-  -->: 1
-  [INFO] Loading kernels from /var/www/html/preboot_execution_environment/diskless/kernels/
-  
+  At any time: (CTRL + c) => Return to this main menu.
+
+   Select an action:
+  -->: 5
+
   Available kernels:
       │
-      └── vmlinuz-4.18.0-193.6.3.el8_2.x86_64 - initramfs present
+      └── vmlinuz-4.18.0-147.el8.x86_64 - missing initramfs-kernel-4.18.0-147.el8.x86_64
 
-6. Launch *disklessset* and create the livenet image. The command will guide you from here.
-
-.. code-block:: text
-  
-  # disklessset
-  BlueBanquise Diskless manager
-   1 - List available kernels
-   2 - Generate a new initramfs
-   3 - Generate a new diskless image
-   4 - Manage existing diskless images
-  -->: 3
-  
-  Starting new image creation phase.
-  Many questions will be asked, a recap will be provided before starting procedure.
-
-
-Select livenet image:
+5. Generate a new initramfs for your kernel:
 
 .. code-block:: text
 
-  Select image type:
-   1 - nfs
-   2 - livenet
+     > Diskless image management
+   1 - Manage and create diskless images (need modules)
+   2 - List available diskless images
+   3 - Remove a diskless image
+   4 - Manage kernel of a diskless image
+
+   > Other actions
+   5 - List available kernels
+   6 - Generate a new initramfs
+
+   7 - Clear a corrupted image
+   8 - Exit
+
+  At any time: (CTRL + c) => Return to this main menu.
+
+   Select an action:
+  -->: 6
+
+  Select the kernel:
+   1 - vmlinuz-4.18.0-147.el8.x86_64
+  -->: 1
+
+6. After initramfs generation, check that initramfs is present with the kernel:
+
+.. code-block:: text
+
+   > Diskless image management
+   1 - Manage and create diskless images (need modules)
+   2 - List available diskless images
+   3 - Remove a diskless image
+   4 - Manage kernel of a diskless image
+
+   > Other actions
+   5 - List available kernels
+   6 - Generate a new initramfs
+
+   7 - Clear a corrupted image
+   8 - Exit
+
+  At any time: (CTRL + c) => Return to this main menu.
+
+   Select an action:
+  -->: 5
+
+  Available kernels:
+      │
+      └── vmlinuz-4.18.0-147.el8.x86_64 - initramfs present
+
+Now the tool is ready to be used.
+
+Manage and create diskless images with modules
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The diskless tool use modules for image creation. Because the tool is modular, new modules can be added for specific images.
+By default 3 module are provided:
+
+* livenet : Livenet images creation and management
+* demo : A demonstration module to illustrate how the diskless tool works
+* nfs : NFS images creation and management
+
+Each modules has it's own features.
+
+In the diskless main menu you can select the first option and select the module to use:
+
+.. code-block:: text
+
+   > Diskless image management
+   1 - Manage and create diskless images (need modules)
+   2 - List available diskless images
+   3 - Remove a diskless image
+   4 - Manage kernel of a diskless image
+
+   > Other actions
+   5 - List available kernels
+   6 - Generate a new initramfs
+
+   7 - Clear a corrupted image
+   8 - Exit
+
+  At any time: (CTRL + c) => Return to this main menu.
+
+   Select an action:
+  -->: 1
+
+  [+] Select the module you want to use:
+
+   1 - livenet
+   2 - demo
+   3 - nfs
+  -->: 
+
+Livenet module
+""""""""""""""
+
+Entering the livenet module will prompt the following menu:
+
+.. code-block:: text
+
+   == Livenet image module ==
+
+   1 - Generate a new livenet image
+   2 - Mount an existing livenet image
+   3 - Unount an existing livenet image
+   4 - Resize livenet image
+
+   Select an action
+  -->:
+
+In this menu you can do four actions:
+
+* Generate a new livenet image : This will guide you in order to create a new livenet image to boot.
+* Mount an existing livenet image : Mount a livenet image in order to make actions inside (install packages, ...). Livenet images are mounted inside /diskless/mntdir/<image name>/mnt.
+* Unount an existing livenet image : Unmount a mounted livenet image.
+* Resize livenet image : Resize a livenet image operating system in order to adjust space taken into the ram.
+
+When generating a new livenet image with the first options, you will have to give few parameters:
+
+* The name you want for your image
+* The password for your image
+* The kernel to use
+* The type of livenet image, by default there is 3 types of livenet images.
+* The size of the image (It will take this size into ram memory). Please be aware to give enough memory for your operating system.
+
+NFS module
+""""""""""
+
+Entering the livenet module will prompt the following menu:
+
+.. code-block:: text
+
+   == NFS image module ==
+
+   1 - Generate a new nfs staging image
+   2 - Generate a new nfs golden image from a staging image
+   3 - Manage nodes of a golden image
+
+   Select an action
+  -->:
+
+In this menu you can do 3 actions:
+
+* Generate a new nfs staging image : A staging image is the base image. You must not boot onto a stagging image but firsty create a golden image from it and boot on the golden image specific filesystem (Created with option 3).
+* Generate a new nfs golden image from a staging image : Create a golden image from previoulsy created staging image.
+* Manage nodes of a golden image: Create a specific file system for each nodes for a specific golden image. After adding a node to a golden image via this option, you can boot the node onto the golden image.
+
+Demo module
+"""""""""""
+
+You can create demo images to test the diskless tool.
+Corrupt a demo image will allow you to test the cleaning mechanism of the tool. In fact a corrupted demo image will be cleaned when listing images.
+Demo module can also be used by devellopers to understand module creation.
+
+List available diskless images
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This menu will allow you to view created and in creation diskless images with their attributs:
+
+.. code-block:: text
+
+     > Diskless image management
+   1 - Manage and create diskless images (need modules)
+   2 - List available diskless images
+   3 - Remove a diskless image
+   4 - Manage kernel of a diskless image
+
+   > Other actions
+   5 - List available kernels
+   6 - Generate a new initramfs
+
+   7 - Clear a corrupted image
+   8 - Exit
+
+  At any time: (CTRL + c) => Return to this main menu.
+
+   Select an action:
   -->: 2
-  [INFO] Loading kernels from /var/www/html/preboot_execution_environment/diskless/kernels/
 
-Select the kernel you want to use wit this image from the list of available kernels:
+     [IN_CREATION]
+   • Image name: nfsimg1
+     Installation pid: 28716
 
+     [CREATED]
+   • Image name: livenetimg1
+       ├── IMAGE_DIRECTORY: /var/www/html/preboot_execution_environment/diskless/images/livenetimg1
+       ├── kernel: vmlinuz-4.18.0-147.el8.x86_64
+       ├── image: initramfs-kernel-4.18.0-147.el8.x86_64
+       ├── password: $6$fUfb9XQ2RCxHO15O$TubY.EQ44IP1xxbZYdpQl1mDrpyz1SoZ8eW3ApK3IoadfC7KjHCej7UtCjBLTbX9UBZm5rgKFhP1NfQUrIUxZ1
+       ├── livenet_type: Type.STANDARD
+       ├── livenet_size: 1500
+       ├── is_mounted: False
+       ├── image_class: LivenetImage
+       └── creation_date: 2020-10-21
 
-.. code-block:: text
+Remove a diskless image
+^^^^^^^^^^^^^^^^^^^^^^^
 
-  Select kernel:
-   1 - vmlinuz-4.18.0-193.6.3.el8_2.x86_64
-  -->: 1
-  Please enter image name ?
-  -->: livenet1
-  Please enter clear root password of the new image: <password>
-  [INFO] Entering livenet dedicated part.
- 
-Choose a standard image, and give a size.
+Simply choose and remove a previously created diskless image.
 
-Proposal: 
+Manage kernel of a diskless image
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-* The size recommended for the Standard or Custom profile is 5G.
-* The size of the final image booted and loaded in RAM is approximately :
-   - 1.2GB for Standard image
-   - 250MB for Small image
-   - 130MB for Minimal image
+Change the kernel of an existing diskless image.
 
-Important:
+List available kernels
+^^^^^^^^^^^^^^^^^^^^^^
 
-* The option 4 allows you to install additional packages.
-* If you want to install drivers or Interconnect Stack (Nvidia, Mellanox OFED,...) you must use option 4 and specify the package kernel-modules.
-* To specify multiple packages, separate them with spaces, example: kernel-modules kernel kernel-devel nvidia-cuda
-* With option 4, specify the packages version. Example: kernel-modules-4.18.0-193.6.3 kernel-4.18.0-193.6.3 kernel-devel-4.18.0-193.6.3
+Show available kernels for diskless images. Kernels can be added in /var/www/html/preboot_execution_environment/diskless/kernels.
 
-.. code-block:: text
-
-  Please select livenet image generation profile:
-   1 - Standard: core
-   2 - Small: openssh, dnf and NetworkManager
-   3 - Minimal: openssh only
-   4 - Custom: core + selection of additional packages
-
-  -->: 1
-  Please choose image size:
-  (supported units: M=1024*1024, G=1024*1024*1024)
-  (Example: 5120M or 5G)
-  -->: 5G
-  Enter path to SSH public key (left empty to disable key injection):
-  -->: /root/.ssh/id_rsa.pub
-  Do you want to activate SELinux inside the image?
-  Enter yes or no: no
-
-Check that everything is alright before continuing:
+If the kernel has a generated initramfs file (Exemple with one kernel):
 
 .. code-block:: text
 
-  Do you want to create a new livenet image with the following parameters:
-    Image name:           livenet1
-    Kernel version:       vmlinuz-4.18.0-193.6.3.el8_2.x86_64
-    Root password:        root
-    Image profile:        1
-    Image size:           5120M
-    SSH pubkey:           /root/.ssh/id_rsa.pub
-    Enable SELinux:       no
-  Confirm ? Enter yes or no: yes
-  [INFO] Cleaning and creating image folders.
-  [INFO] Generating new ipxe boot file.
-  [INFO] Creating empty image file, format and mount it.
-  5242880+0 records in
-  5242880+0 records out
-  5368709120 bytes (5.4 GB, 5.0 GiB) copied, 10.3195 s, 520 MB/s
-  meta-data=/var/tmp/diskless/workdir/livenet1/LiveOS/rootfs.img isize=512    agcount=4, agsize=327680 blks
-           =                       sectsz=512   attr=2, projid32bit=1
-           =                       crc=1        finobt=1, sparse=1, rmapbt=0
-           =                       reflink=1
-  data     =                       bsize=4096   blocks=1310720, imaxpct=25
-           =                       sunit=0      swidth=0 blks
-  naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
-  log      =internal log           bsize=4096   blocks=2560, version=2
-           =                       sectsz=512   sunit=0 blks, lazy-count=1
-  realtime =none                   extsz=4096   blocks=0, rtextents=0
-  [INFO] Generating cache link for dnf.
-  [INFO] Installing system into image.
-  ...
+  Available kernels:
+      │
+      └── vmlinuz-4.18.0-147.el8.x86_64 - initramfs present
 
-Image is now generated.
+If the kernel hasn't a generated initramfs file:
 
-7. (Optionnal) See Customizing Livenet image in next section on how to customize image before using it.
-
-8. Using the command *bootset*, set the image one node will use. 
-   
 .. code-block:: text
 
-  # bootset -n c001 -b diskless -i livenet1
+  Available kernels:
+      │
+      └── vmlinuz-4.18.0-147.el8.x86_64 - missing initramfs-kernel-4.18.0-147.el8.x86_64
 
-The -n parameter can be a nodeset.
+Generate a new initramfs
+^^^^^^^^^^^^^^^^^^^^^^^^
 
-9. Reboot the diskless node to make it boot onto the new image.
+Generate a new initramfs file for a kernel.
 
-10. Once the nodes are booted, run the entire computes playbook.
-    If you have used **Customizing Livenet image** (see below), run the
-    playbook with 'nic' and 'set_hostname' roles only.
+Clear a corrupted image
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Remove completely a diskless image with a brutal method.
+You must use this option only if the image is corrupted or there are non compliant files.
+
+Exit
+^^^^
+
+Exist the diskless tool.
+
+Boot a diskless image
+^^^^^^^^^^^^^^^^^^^^^
+
+You can use the bootset bluebanquise tool to setup the boot image for a specific machine:
+
+.. code-block:: text
+
+  # bootset -n <machine name> -b diskless -i <diskless image name>
+
+Please refer you to bootset documentation for further information.
 
 Customizing Livenet image
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The image name used in the examples below is *space_image*.
 
-The disklessset tool allows to customize livenet images before booting them, 
+The disklessset tool allows to customize livenet images before booting them,
 by mounting images and providing simple chroot inventory. System administrator 
 can then tune or execute playbooks inside images.
 This step also saves time on the execution of playbooks on booted diskless nodes.
 
-Start the tool, select menu "4 - Manage existing diskless images", then 
-"5 - Manage livenet images".
-
-The next menu allows you to mount, unmount, or resize image.
-
-Mount the image first. Images are mounted in 
-/var/tmp/diskless/workdir/space_image/mnt.
+To mount a livenet image in order to customize it, go to livenet module and select "mount livenet image".
 
 It is now possible to copy files, install rpms, or tune any aspects of the 
 mounted image.
-
-The tool also generated a temporary Ansible inventory in 
-/var/tmp/diskless/workdir/space_image/inventory/ .
 
 To execute an Ansible playbook into the image, generate a new playbook 
 with the following head:
@@ -288,7 +419,6 @@ Using disklessset now, choose option 2 to unmount the image and squashfs it agai
 It is possible now to use the tool to resize image, to reduce it to the desired value (to save ram on target host).
 Always keep at least 100MB in / for temporary files and few logs generated during run.
 
-
 Example Playbook
 ^^^^^^^^^^^^^^^^
 
@@ -306,11 +436,12 @@ It is important to synchronize your node's time by running the time role.
 To be done
 ^^^^^^^^^^
 
-Clean code, add more error detection, and more verbosity.
-
+* Image packages custonisation during creation process
+* Make a livenet image autosizing system (Taken automatically the minimum size for operating system in ram).
+* Make a diskless conf file in /etc in order to configure : Autoclean on/off, Directories location (images, kernels, ...).
 
 Changelog
 ^^^^^^^^^
-
+* 1.2.0: Role update. David Pieters <davidpieters22@gmail.com>
 * 1.1.0: Role update. Benoit Leveugle <benoit.leveugle@gmail.com>, Bruno Travouillon <devel@travouillon.fr>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>

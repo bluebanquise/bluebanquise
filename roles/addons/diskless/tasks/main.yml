@@ -31,7 +31,6 @@
     path: "{{ item }}"
     state: directory
     mode: 0755
-    setype: "{{ (ansible_facts.os_family == 'RedHat' and ansible_facts.selinux.status == 'enabled') | ternary('httpd_sys_content_t', omit) }}"
     owner: "{{ diskless_apache_user }}"
     group: "{{ diskless_apache_user }}"
   loop:
@@ -39,8 +38,28 @@
    - /var/www/html/preboot_execution_environment/diskless
    - /var/www/html/preboot_execution_environment/diskless/images
    - /var/www/html/preboot_execution_environment/diskless/kernels
+   - /diskless
+   - /diskless/modules
+   - /diskless/nfsimages
+   - /diskless/workdir
+   - /diskless/mntdir
+   - /usr/include/diskless
 
-- name: "copy █ disklessset tool"
+- name: "copy █ files"
+  copy: src={{ item.src }} dest={{ item.dest }}
+  with_items:          
+    - { src: 'installations.yml', dest: '/diskless/installations.yml' }
+
+    - { src: 'utils.py', dest: '/usr/include/diskless/utils.py' }
+    - { src: 'image_manager.py', dest: '/usr/include/diskless/image_manager.py' }
+    - { src: 'kernel_manager.py', dest: '/usr/include/diskless/kernel_manager.py' }
+
+    - { src: 'nfs_module.py', dest: '/diskless/modules/nfs_module.py' }
+    - { src: 'base_module.py', dest: '/diskless/modules/base_module.py' }
+    - { src: 'livenet_module.py', dest: '/diskless/modules/livenet_module.py' }      
+    - { src: 'demo_module.py', dest: '/diskless/modules/demo_module.py' }
+
+- name: "copy █ diskless script"
   copy:
     src: disklessset.py
     dest: /usr/bin/disklessset
