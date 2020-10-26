@@ -16,7 +16,7 @@ It is important to understand that this role is independant of the pxe_stack cor
 Validated on RHEL8.
 Python based.
 
-A technical documentation is available on https://github.com/bluebanquise/bluebanquise/tree/davidpieters/feat/disklessset/resources/documentation/diskless
+A technical documentation is available on https://github.com/bluebanquise/bluebanquise/tree/pietersdavid/feat/disklessset/resources/documentation/diskless
 
 Set up the tool
 ^^^^^^^^^^^^^^^
