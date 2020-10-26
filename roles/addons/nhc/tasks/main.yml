@@ -1,0 +1,51 @@
+---
+
+- name: include_vars ░ Gather OS specific variables
+  # This task gathers variables defined in OS specific files.
+  #
+  # Search vars in:
+  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
+  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
+  #  - <distribution>.yml            # eg. CentOS.yml
+  #  - <os_family>.yml               # eg. RedHat.yml
+  #
+  # If no OS specific file is found, the role will default to vars/main.yml
+  #
+  include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family }}.yml"
+      skip: true
+
+- name: "package █ Install {{ nhc_packages_to_install | join(' ') }}"
+  package:
+    name: "{{ nhc_packages_to_install }}"
+    state: present
+
+- name: package █ Install optional custom packages
+  package:
+    name: "{{ nhc_custom_packages_to_install }}"
+    state: present
+  when: nhc_custom_packages_to_install is defined and nhc_custom_packages_to_install
+
+- name: template █ Generate nhc configuration file
+  template:
+    src: nhc.conf.j2
+    dest: /etc/nhc/nhc.conf
+    owner: root
+    group: root
+    mode: 0644
+  when: nhc_use_template == true
+
+- name: copy █ Copy nhc static configuration file
+  copy:
+    src: "{{ item }}"
+    dest: /etc/nhc/"{{ item }}"
+    owner: root
+    group: root
+    mode: 0644
+  loop: "{{ nhc_files | default(['nhc.conf']) }}"
+  when: nhc_use_template == false

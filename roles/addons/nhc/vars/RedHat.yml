@@ -1,0 +1,3 @@
+---
+nhc_packages_to_install:
+  - lbnl-nhc
