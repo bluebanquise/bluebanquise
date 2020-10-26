@@ -229,7 +229,7 @@ on range 10.10.3.[1-4]. Same kind of ranges for their BMC and interconnect.
 
 Create a file /root/gen.sh with the following content:
 
-.. code-block:: bash
+.. code-block:: text
 
   #!/bin/bash
   cat <<EOF > computes.yml
@@ -473,3 +473,394 @@ Externalize Ansible
 -------------------
 
 To be done.
+
+Storage
+=======
+
+LVM mirroring
+-------------
+
+This story explains how to create mirrored volumes using 
+the stack or manually, and how to recover in case of crash.
+It is recommended, before launching production, to try a 
+crash scenario and recover, to ensure procedure work.
+
+Interesting command:
+
+.. code-block:: text
+
+  lsblk -o name,mountpoint,label,size,uuid
+
+This story explains how to create a 2 mirrors LV, then 
+extend it to 3 mirrors, and recover from a crash.
+
+Policies
+^^^^^^^^
+
+First, set policies to *remove*, for both 
+**mirror_log_fault_policy** and **mirror_image_fault_policy** in *lvm.conf*.
+Nothing automatic should occur now. Reboot the system to ensure all is stable.
+
+Create Volume Groupe
+^^^^^^^^^^^^^^^^^^^^
+
+We assume here there are 3 physical disks to be used:
+
+* /dev/sdb1
+* /dev/sdc1
+* /dev/sdd1
+
+Using the stack
+"""""""""""""""
+
+Inside your hosts definition (here mngt1-1), set the following parameters:
+
+.. code-block:: yaml
+
+      hosts:
+        mngt1-1:
+          storage:
+            lvm:
+              - vg: vg1
+                pvs:
+                  - /dev/sdc1
+                  - /dev/sdb1
+                  - /dev/sdd1
+
+And execute the *lvm* role on this host.
+
+Manually
+""""""""
+
+.. code-block:: text
+
+  [root@mngt1-1 ~]# pvcreate /dev/sdc1
+  [root@mngt1-1 ~]# pvcreate /dev/sdb1
+  [root@mngt1-1 ~]# pvcreate /dev/sdd1
+
+  [root@mngt1-1 ~]# pvdisplay
+  --- Physical volume ---
+  PV Name               /dev/sdb1
+  VG Name               vg1
+  PV Size               1023.00 MiB / not usable 3.00 MiB
+  Allocatable           yes
+  PE Size               4.00 MiB
+  Total PE              255
+  Free PE               255
+  Allocated PE          0
+  PV UUID               wc7uAA-VCMc-uL2P-oQv1-o1kd-uxz1-eQWk0v
+
+  --- Physical volume ---
+  PV Name               /dev/sdc1
+  VG Name               vg1
+  PV Size               1023.00 MiB / not usable 3.00 MiB
+  Allocatable           yes
+  PE Size               4.00 MiB
+  Total PE              255
+  Free PE               255
+  Allocated PE          0
+  PV UUID               derqgB-sGVQ-1hQT-Ryuo-grIN-CNID-BxRBvr
+
+  --- Physical volume ---
+  PV Name               /dev/sdd1
+  VG Name               vg1
+  PV Size               1023.00 MiB / not usable 3.00 MiB
+  Allocatable           yes
+  PE Size               4.00 MiB
+  Total PE              255
+  Free PE               255
+  Allocated PE          0
+  PV UUID               J4WnOi-ssJm-yRDA-A2MM-wakz-04Rg-OdMTU2
+
+  [root@mngt1-1 ~]# vgcreate vg1 /dev/sdb1 /dev/sdc1 /dev/sdd1
+
+  [root@mngt1-1 ~]# vgdisplay
+  --- Volume group ---
+  VG Name               vg1
+  System ID
+  Format                lvm2
+  Metadata Areas        3
+  Metadata Sequence No  1
+  VG Access             read/write
+  VG Status             resizable
+  MAX LV                0
+  Cur LV                0
+  Open LV               0
+  Max PV                0
+  Cur PV                3
+  Act PV                3
+  VG Size               <2.99 GiB
+  PE Size               4.00 MiB
+  Total PE              765
+  Alloc PE / Size       0 / 0
+  Free  PE / Size       765 / <2.99 GiB
+  VG UUID               ocl7ts-oYxV-SA8P-pgi0-gO4J-plT1-BKea7B
+
+Create Logical Volume
+^^^^^^^^^^^^^^^^^^^^^
+
+Create a logical volume with 1+1 mirror (so 2 mirrors). Size is 40m for this test.
+
+Using the stack
+"""""""""""""""
+
+Inside your hosts definition (here mngt1-1), add the lvm with mirror options:
+
+.. code-block:: yaml
+
+      hosts:
+        mngt1-1:
+          storage:
+            lvm:
+              - vg: vg1
+                pvs:
+                  - /dev/sdc1
+                  - /dev/sdb1
+                  - /dev/sdd1
+                lvs:
+                  - lv: TEST
+                    size: 40m
+                    opts: -m 1
+
+And execute the *lvm* role on this host.
+
+Manually
+""""""""
+
+.. code-block:: text
+
+  [root@mngt1-1 ~]# lvcreate -L +40m -m 1 -n TEST vg1
+  Logical volume "TEST" created.
+
+  [root@mngt1-1 ~]# lvdisplay
+  --- Logical volume ---
+  LV Path                /dev/vg1/TEST
+  LV Name                TEST
+  VG Name                vg1
+  LV UUID                hprEYi-VsHr-xaPU-ZwnF-vzdT-cTnb-x3evzx
+  LV Write Access        read/write
+  LV Creation host, time mngt1-1
+  LV Status              available
+  # open                 0
+  LV Size                40.00 MiB
+  Current LE             10
+  Mirrored volumes       2
+  Segments               1
+  Allocation             inherit
+  Read ahead sectors     auto
+  - currently set to     8192
+  Block device           253:4
+
+Format and mount the volume
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Now format it, in ext4:
+
+.. code-block:: text
+
+  [root@mngt1-1 ~]# mkfs.ext4 /dev/vg1/TEST
+  mke2fs 1.42.9 (28-Dec-2013)
+  Filesystem label=
+  OS type: Linux
+  Block size=1024 (log=0)
+  Fragment size=1024 (log=0)
+  Stride=0 blocks, Stripe width=0 blocks
+  10240 inodes, 40960 blocks
+  2048 blocks (5.00%) reserved for the super user
+  First data block=1
+  Maximum filesystem blocks=33685504
+  5 block groups
+  8192 blocks per group, 8192 fragments per group
+  2048 inodes per group
+  Superblock backups stored on blocks:
+        8193, 24577
+
+  Allocating group tables: done
+  Writing inode tables: done
+
+  Creating journal (4096 blocks): done
+  Writing superblocks and filesystem accounting information: done
+
+  [root@mngt1-1 ~]# mount /dev/vg1/TEST /mnt
+  [root@mngt1-1 ~]# df
+  Filesystem           1K-blocks    Used Available Use% Mounted on
+  /dev/sda2             10189076 5241004   4407452  55% /
+  devtmpfs                497160       0    497160   0% /dev
+  tmpfs                   507752      24    507728   1% /dev/shm
+  tmpfs                   507752    6908    500844   2% /run
+  tmpfs                   507752       0    507752   0% /sys/fs/cgroup
+  /dev/sda1              1998672  108912   1768520   6% /boot
+  tmpfs                   101552       0    101552   0% /run/user/0
+  /dev/mapper/vg1-TEST     35567     782     31918   3% /mnt
+  [root@mngt1-1 ~]#
+
+Copy a file for testing:
+
+.. code-block:: text
+
+  [root@mngt1-1 mnt]# cp /root/perl-Crypt-DES-2.05-20.el7.x86_64.rpm .
+  [root@mngt1-1 mnt]# ls
+  lost+found  perl-Crypt-DES-2.05-20.el7.x86_64.rpm
+  [root@mngt1-1 mnt]# echo "Ho ! What can I do for you?" > blacksmith
+  [root@mngt1-1 mnt]# ls
+  blacksmith  lost+found  perl-Crypt-DES-2.05-20.el7.x86_64.rpm
+  [root@mngt1-1 mnt]# cat blacksmith
+  Ho ! What can I do for you?
+  [root@mngt1-1 mnt]# md5sum perl-Crypt-DES-2.05-20.el7.x86_64.rpm
+  f7457985634028c28b216c0b2145ecb0  perl-Crypt-DES-2.05-20.el7.x86_64.rpm
+  [root@mngt1-1 mnt]# umount /mnt
+
+Mirrored volume is working fine.
+
+Add a mirror
+^^^^^^^^^^^^
+
+Most of the time, system administrators wish to add more mirrors. 
+To add a third mirror (because in the previous example there was 
+3 physical volumes, so 3 mirrors are possible):
+
+.. code-block:: text
+
+  [root@mngt1-1 ~]# lvconvert -m 2 /dev/mapper/vg1-TEST
+  Are you sure you want to convert raid1 LV vg1/TEST to 3 images enhancing resilience? [y/n]: y
+    Logical volume vg1/TEST successfully converted.
+
+And check now a third mirror is ready. If volume is large, 
+synchronization in bellow table may take some time.
+
+.. code-block:: text
+
+  [root@mngt1-1 ~]# lvs -a -o +devices
+    LV              VG  Attr       LSize  Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert Devices
+    TEST            vg1 rwi-a-r--- 40.00m                                    100.00           TEST_rimage_0(0),TEST_rimage_1(0),TEST_rimage_2(0)
+    [TEST_rimage_0] vg1 iwi-aor--- 40.00m                                                     /dev/sdb1(1)
+    [TEST_rimage_1] vg1 iwi-aor--- 40.00m                                                     /dev/sdc1(1)
+    [TEST_rimage_2] vg1 iwi-aor--- 40.00m                                                     /dev/sdd1(1)
+    [TEST_rmeta_0]  vg1 ewi-aor---  4.00m                                                     /dev/sdb1(0)
+    [TEST_rmeta_1]  vg1 ewi-aor---  4.00m                                                     /dev/sdc1(0)
+    [TEST_rmeta_2]  vg1 ewi-aor---  4.00m                                                     /dev/sdd1(0)
+  [root@mngt1-1 ~]#
+
+Recover from crash
+^^^^^^^^^^^^^^^^^^
+
+In this example, we crashed one disk of the server.
+Now system is unhealthy.
+
+Check status:
+
+.. code-block:: text
+
+  [root@mngt1-1 ~]# lvdisplay -v /dev/mapper/vg1-TEST
+  WARNING: Device for PV wc7uAA-VCMc-uL2P-oQv1-o1kd-uxz1-eQWk0v not found or rejected by a filter.
+    There are 1 physical volumes missing.
+  --- Logical volume ---
+  LV Path                /dev/vg1/TEST
+  LV Name                TEST
+  VG Name                vg1
+  LV UUID                hprEYi-VsHr-xaPU-ZwnF-vzdT-cTnb-x3evzx
+  LV Write Access        read/write
+  LV Creation host, time mngt1-1
+  LV Status              NOT available
+  LV Size                40.00 MiB
+  Current LE             10
+  Mirrored volumes       3
+  Segments               1
+  Allocation             inherit
+  Read ahead sectors     auto
+
+  [root@mngt1-1 ~]#
+
+Note that if system rebooted (like here), LV is set as NOT available.
+
+Add a new disk, and start again:
+
+.. code-block:: text
+
+  [root@mngt1-1 ~]#  lvdisplay
+  WARNING: Device for PV wc7uAA-VCMc-uL2P-oQv1-o1kd-uxz1-eQWk0v not found or rejected by a filter.
+  --- Logical volume ---
+  LV Path                /dev/vg1/TEST
+  LV Name                TEST
+  VG Name                vg1
+  LV UUID                hprEYi-VsHr-xaPU-ZwnF-vzdT-cTnb-x3evzx
+  LV Write Access        read/write
+  LV Creation host, time mngt1-1
+  LV Status              NOT available
+  LV Size                40.00 MiB
+  Current LE             10
+  Mirrored volumes       3
+  Segments               1
+  Allocation             inherit
+  Read ahead sectors     auto
+
+  [root@mngt1-1 ~]#
+
+Still Not Available, because we still haven't configured the new disk.
+
+Activate LV, to use it with only 2 mirrors:
+
+.. code-block:: text
+
+  [root@mngt1-1 ~]# lvchange -a y /dev/mapper/vg1-TEST
+
+System is in production, with only 2 mirrors now.
+
+Now create a new pv /dev/sdb1 with new third disk, and extend vg1:
+
+.. code-block:: text
+
+  [root@mngt1-1 ~]# vgextend vg1 /dev/sdb1
+  WARNING: Device for PV wc7uAA-VCMc-uL2P-oQv1-o1kd-uxz1-eQWk0v not found or rejected by a filter.
+  WARNING: Device for PV wc7uAA-VCMc-uL2P-oQv1-o1kd-uxz1-eQWk0v not found or rejected by a filter.
+  Volume group "vg1" successfully extended
+  [root@mngt1-1 ~]#
+
+Now clean vg1, to remove missing pv (wc7uAA-VCMc-uL2P-oQv1-o1kd-uxz1-eQWk0v).
+
+.. code-block:: text
+
+  [root@mngt1-1 ~]# vgreduce --removemissing vg1 --force
+  WARNING: Device for PV wc7uAA-VCMc-uL2P-oQv1-o1kd-uxz1-eQWk0v not found or rejected by a filter.
+  Wrote out consistent volume group vg1.
+  [root@mngt1-1 ~]#
+
+And repair:
+
+.. code-block:: text
+
+  [root@mngt1-1 ~]# lvconvert -m 2 /dev/mapper/vg1-TEST /dev/sdb1 /dev/sdc1 /dev/sdd1
+  [root@mngt1-1 ~]# lvconvert --repair /dev/mapper/vg1-TEST
+  WARNING: Disabling lvmetad cache for repair command.
+  WARNING: Not using lvmetad because of repair.
+  Attempt to replace failed RAID images (requires full device resync)? [y/n]: y
+  Faulty devices in vg1/TEST successfully replaced.
+
+And check synchronization (may take some time):
+
+.. code-block:: text
+
+  [root@mngt1-1 ~]# lvs -a -o +devices
+  WARNING: Not using lvmetad because a repair command was run.
+  LV              VG  Attr       LSize  Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert Devices
+  TEST            vg1 rwi-a-r--- 40.00m                                    100.00           TEST_rimage_0(0),TEST_rimage_1(0),TEST_rimage_2(0)
+  [TEST_rimage_0] vg1 iwi-aor--- 40.00m                                                     /dev/sdb1(1)
+  [TEST_rimage_1] vg1 iwi-aor--- 40.00m                                                     /dev/sdc1(1)
+  [TEST_rimage_2] vg1 iwi-aor--- 40.00m                                                     /dev/sdd1(1)
+  [TEST_rmeta_0]  vg1 ewi-aor---  4.00m                                                     /dev/sdb1(0)
+  [TEST_rmeta_1]  vg1 ewi-aor---  4.00m                                                     /dev/sdc1(0)
+  [TEST_rmeta_2]  vg1 ewi-aor---  4.00m                                                     /dev/sdd1(0)
+  [root@mngt1-1 ~]#
+
+Test data are ok:
+
+.. code-block:: text
+
+  [root@mngt1-1 ~]# mount /dev/mapper/vg1-TEST /mnt
+  [root@mngt1-1 ~]# cd /mnt
+  [root@mngt1-1 mnt]# ls
+  blacksmith  lost+found  perl-Crypt-DES-2.05-20.el7.x86_64.rpm
+  [root@mngt1-1 mnt]# cat blacksmith
+  Ho ! What can I do for you?
+  [root@mngt1-1 mnt]#
+
