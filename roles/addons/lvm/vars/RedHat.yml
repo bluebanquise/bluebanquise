@@ -1,0 +1,2 @@
+lvm_packages_to_install:
+  - lvm2
