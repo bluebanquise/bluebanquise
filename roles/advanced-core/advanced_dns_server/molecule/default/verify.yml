@@ -14,5 +14,5 @@
 
     - name: assert files exist
       assert:
-        that: "{{ item }}.stat.exists"
+        that: "{{ item.stat.exists }}"
       loop: "{{ stat_results.results }}"
