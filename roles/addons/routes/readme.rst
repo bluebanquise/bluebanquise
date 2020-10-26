@@ -41,7 +41,15 @@ You can define routes at two levels:
                 - 10.11.0.0/24 10.10.0.2
                 - 10.12.0.0/24 10.10.0.2
 
-Note that to define a default route/gateway, use *0.0.0.0/0* as route to be defined.
+.. note::
+  Note that to define a default route/gateway, use *0.0.0.0/0* as route to be defined.
+
+To remove a route later (here *10.12.0.0/24 10.10.0.2* on *enp0s8*), use the nmcli command this way:
+
+.. code-block:: text
+
+  nmcli connection show enp0s8 | grep ipv4.routes
+  nmcli connection modify enp0s8 -ipv4.routes "10.12.0.0/24 10.10.0.2"
 
 To be done
 ^^^^^^^^^^
