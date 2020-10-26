@@ -1,0 +1,9 @@
+---
+routes_packages_to_install:
+  - NetworkManager-glib
+  - nm-connection-editor.x86_64
+  - libsemanage-python
+  - policycoreutils-python
+routes_services_to_start:
+  - NetworkManager
+

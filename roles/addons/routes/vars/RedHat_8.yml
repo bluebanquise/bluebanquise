@@ -1,0 +1,9 @@
+---
+routes_packages_to_install:
+  - NetworkManager-libnm
+  - nm-connection-editor.x86_64
+  - python3-libsemanage
+  - python3-policycoreutils
+routes_services_to_start:
+  - NetworkManager
+
