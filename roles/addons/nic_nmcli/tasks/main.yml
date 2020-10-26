@@ -41,12 +41,12 @@
 #    - ansible_facts.distribution_major_version == "18"
 #    - ansible_facts.os_family == "Ubuntu"
 
-- name: nmcli █ Set NIC configuration
+- name: nmcli █ Set NICs configuration
   nmcli:
     # Tuned
     conn_name: "{{ item.conn_name | default(item.interface) | string }}"
     ifname: "{{ item.ifname | default(item.physical_device) | default(omit) }}"
-    ip4: {{ (item.ip4 is defined) | ternary( ('/' in (item.ip4|default('None')) ) | ternary( (item.ip4|default('None')), ( (item.ip4|default('None')) | string) + '/' + (networks[item.network].prefix4 | default(networks[item.network].prefix) |string)), omit) }}
+    ip4: "{{ (item.ip4 is defined) | ternary( ('/' in (item.ip4|default('None')) ) | ternary( (item.ip4|default('None')), ( (item.ip4|default('None')) | string) + '/' + (networks[item.network]['prefix4'] | default(networks[item.network]['prefix']) | string)), omit) }}"
     # Equivalent to
     # {% if item.ip4 is defined %}
     #   {% if '/' in item.ip4 %}\
@@ -59,14 +59,14 @@
     # {% endif %}
     # Allows to provide a simple ip4, or an ip4/prefix
     # Also support old prefix format (to be replaced by prefix4)
-    ip6: {{ (item.ip6 is defined) | ternary( ('::' in (item.ip6|default('None')) ) | ternary( (item.ip6|default('None')), ( (item.ip6|default('None')) | string) + '::' + (networks[item.network].prefix6 |string)), omit) }}
+    ip6: "{{ (item.ip6 is defined) | ternary( ('::' in (item.ip6|default('None')) ) | ternary( (item.ip6|default('None')), ( (item.ip6|default('None')) | string) + '::' + ((networks[item.network].prefix6|default('None')) |string)), omit) }}"
     gw4: "{{ item.gw4 | default(networks[item.network].gateway4) | default(networks[item.network].gateway) | default(omit) }}"
     gw6: "{{ item.gw6 | default(networks[item.network].gateway6) | default(omit) }}"
     mtu: "{{ item.mtu | default(networks[item.network].mtu) | default(omit) }}"
+    type: "{{ item.type | default('ethernet') }}" # Even if in the documentation type is optional, it is in fact mandatory. Default to ethernet.
     # Standard
     state: "{{ item.state | default('present') }}"
     autoconnect: "{{ item.autoconnect | default(omit) }}"
-    type: "{{ item.type | default(omit) }}"
     ageingtime: "{{ item.ageingtime | default(omit) }}"
     arp_interval: "{{ item.arp_interval | default(omit) }}"
     arp_ip_target: "{{ item.arp_ip_target | default(omit) }}"
@@ -85,7 +85,7 @@
     ip_tunnel_dev: "{{ item.ip_tunnel_dev | default(omit) }}"
     ip_tunnel_local: "{{ item.ip_tunnel_local | default(omit) }}"
     ip_tunnel_remote: "{{ item.ip_tunnel_remote | default(omit) }}"
-    mac: "{{ item.mac | default(omit) }}"
+    mac: "{{ item.force_mac | default(omit) }}"
     master: "{{ item.master | default(omit) }}"
     maxage: "{{ item.maxage | default(omit) }}"
     mode: "{{ item.mode | default(omit) }}"
