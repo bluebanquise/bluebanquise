@@ -90,7 +90,7 @@ class KernelManager:
                         
         printc('[INFO] Now generating initramfs... May take some time', CBLUE)
         # Generate the new initramfs file with dracut command on the kernel
-        os.system('dracut --xz -v -m "network base nfs" --add "livenet" --add-drivers xfs --no-hostonly --nolvmconf '
+        os.system('dracut --xz -v -m "network base nfs" --add "ifcfg livenet systemd systemd-initrd dracut-systemd" --add-drivers xfs --no-hostonly --nolvmconf '
                 + generation_path
                 + ' --force')
 
