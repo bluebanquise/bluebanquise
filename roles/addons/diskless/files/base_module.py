@@ -96,7 +96,6 @@ class Image(ABC):
         # Load existing image
         elif os.path.isdir(self.IMAGE_DIRECTORY):
             logging.debug('Loading existing image')
-            # Use image class method to get image 
             self.get_existing_image()
 
         # If image don't already exist, create it
