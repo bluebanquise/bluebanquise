@@ -80,7 +80,7 @@ class Image(ABC):
         """
 
         # Check name format
-        if len(name.split()) > 1 or not isinstance(name, str):
+        if ((not isinstance(name, str)) or (len(name.split()) > 1)):
             raise ValueError('Invalid name format.')
 
         # Set up image name
@@ -279,4 +279,3 @@ class Image(ABC):
 
         # For the last tuple element of the list
         print('     └── ' + str(list(image_data.keys())[-1]) + ': ' + str(list(image_data.values())[-1]))
-
