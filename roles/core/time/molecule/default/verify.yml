@@ -13,9 +13,14 @@
       debug:
         msg: "Timestamp format: {{ ansible_facts.date_time }}"
 
+    - name: Stat /etc/localtime
+      stat:
+        path: /etc/localtime
+      register: localtime
+
     - name: assert timezone to Europe/Paris
       assert:
-        that: "'CEST' in ansible_facts.date_time.tz"
+        that: localtime.stat.lnk_source == "/usr/share/zoneinfo/Europe/Paris"
 
     - name: Set chrony.conf path for RedHat OS family
       set_fact:
