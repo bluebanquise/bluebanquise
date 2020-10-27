@@ -85,7 +85,6 @@ class Image(ABC):
 
         self.name = name
 
-        # Set up image directory, it is a mandatory directory for all images
         self.IMAGE_DIRECTORY = Image.IMAGES_DIRECTORY + self.name
         
         # If image already exist, and not all other arguments excepts name are None: 
