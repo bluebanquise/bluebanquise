@@ -83,7 +83,6 @@ class Image(ABC):
         if ((not isinstance(name, str)) or (len(name.split()) > 1)):
             raise ValueError('Invalid name format.')
 
-        # Set up image name
         self.name = name
 
         # Set up image directory, it is a mandatory directory for all images
