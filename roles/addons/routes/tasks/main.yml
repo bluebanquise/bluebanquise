@@ -40,8 +40,8 @@
     that:
       - (network_interfaces | selectattr('routes4','defined') | map(attribute='routes4') | select('match', '.*0.0.0.0/0.*') | list | length) <= 1
 
-- name: shell █ Set routes via nmcli
-  shell: "nmcli connection modify {{ item.interface }} +ipv4.routes '{{ item.routes4 | default(networks[item.network]['routes4'] | default([])) | join(',') }}'"
+- name: command █ Set routes via nmcli
+  command: "nmcli connection modify {{ item.interface }} +ipv4.routes '{{ item.routes4 | default(networks[item.network]['routes4'] | default([])) | join(',') }}'"
   loop: "{{ network_interfaces }}"
   when: (item.routes4 is defined and item.routes4) or (networks[item.network]['routes4'] is defined and networks[item.network]['routes4'])
 
