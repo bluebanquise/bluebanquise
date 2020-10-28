@@ -373,6 +373,11 @@ check that mngt1 now export these foldes, using *showmount -e mngt1* command.
 
 Next, we will need a playbook for mngt2. Copy current mngt1 dedicated playbook:
 
+..note ::
+  We assume here mngt1.yml playbook exist. You may have used another name for it:
+  managements.yml, management1.yml, etc. Please adapte these instructions to 
+  your own environment.
+
 .. code-block:: text
 
   cp /etc/bluebanquise/playbooks/mngt1.yml /etc/bluebanquise/playbooks/mngt2.yml
