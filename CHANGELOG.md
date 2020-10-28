@@ -8,6 +8,7 @@
 
   - addons/lmod: allow to install Lmod and specify custom modulefiles path (#390)
   - addons/singularity: allow to install Singularity (#403)
+  - addons/nhc: allow to install and setup nhc (#448)
   
 #### Roles improvement
 
