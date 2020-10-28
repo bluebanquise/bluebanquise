@@ -8,6 +8,7 @@
 
   - addons/lmod: allow to install Lmod and specify custom modulefiles path (#390)
   - addons/singularity: allow to install Singularity (#403)
+  - addons/lvm: allow to configure lvm storage (#446)
   
 #### Roles improvement
 

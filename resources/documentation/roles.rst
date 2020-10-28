@@ -45,6 +45,7 @@ ADDONS
 .. include:: roles/addons/ofed_sm/readme.rst
 .. include:: roles/addons/openldap_client/readme.rst
 .. include:: roles/addons/openldap_server/readme.rst
+.. include:: roles/addons/lvm/readme.rst
 .. include:: roles/addons/nic_nmcli/readme.rst
 .. include:: roles/addons/powerman/readme.rst
 .. include:: roles/addons/prometheus_server/readme.rst
