@@ -51,6 +51,7 @@ ADDONS
 .. include:: roles/addons/prometheus_client/readme.rst
 .. include:: roles/addons/report/readme.rst
 .. include:: roles/addons/root_password/readme.rst
+.. include:: roles/addons/routes/readme.rst
 .. include:: roles/addons/sssd/readme.rst
 .. include:: roles/addons/slurm/readme.rst
 .. include:: roles/addons/users_basic/readme.rst
