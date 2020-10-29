@@ -1,7 +1,7 @@
 %{!?version: %define version 1.3.0}
 
 %define roles_addons clone clustershell diskless grafana lmod nic_nmcli ofed \
-ofed_sm openldap_client openldap_server powerman prometheus_client \
+ofed_sm openldap_client openldap_server powerman prometheus_client system_state\
 prometheus_server report root_password singularity slurm sssd users_basic
 
 Name:           bluebanquise
@@ -14,7 +14,7 @@ URL:            https://www.bluebanquise.com
 Source0:        %{name}-%{version}.tar.gz
 
 BuildArch:      noarch
-# BuildRequires:  
+# BuildRequires:
 Requires:       ansible
 
 %if 0%{?el8}
@@ -126,4 +126,4 @@ end}
 %changelog
 * Sun Feb  2 2020 Bruno Travouillon <devel@travouillon.fr>
 * Tue Apr 14 2020 strus38 <indigoping4cgmi@gmail.com>
-- 
+-

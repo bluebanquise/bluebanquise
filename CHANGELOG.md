@@ -8,7 +8,7 @@
 
   - addons/lmod: allow to install Lmod and specify custom modulefiles path (#390)
   - addons/singularity: allow to install Singularity (#403)
-  
+
 #### Roles improvement
 
   - core/ssh_master:
@@ -16,7 +16,7 @@
   - addons/nic_nmcli:
     - convert to new inventory format (#401)
   - addons/system_state:
-    - add a system last play state to be used as a reference on large clusters
+    - add a system last play state to be used as a reference on large clusters (#453)
   - core/hosts_file:
     - prevent many blank lines when hosts have no network_interfaces in the inventory (#406)
  - core/rsyslog_server and core/rsyslog_client:
