@@ -49,8 +49,10 @@ ADDONS
 .. include:: roles/addons/powerman/readme.rst
 .. include:: roles/addons/prometheus_server/readme.rst
 .. include:: roles/addons/prometheus_client/readme.rst
+.. include:: roles/addons/grafana/readme.rst
 .. include:: roles/addons/report/readme.rst
 .. include:: roles/addons/root_password/readme.rst
+.. include:: roles/addons/singularity/readme.rst
 .. include:: roles/addons/sssd/readme.rst
 .. include:: roles/addons/slurm/readme.rst
 .. include:: roles/addons/users_basic/readme.rst
