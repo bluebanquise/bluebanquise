@@ -14,7 +14,7 @@ URL:            https://www.bluebanquise.com
 Source0:        %{name}-%{version}.tar.gz
 
 BuildArch:      noarch
-# BuildRequires:  
+# BuildRequires:
 Requires:       ansible
 
 %if 0%{?el8}
@@ -60,11 +60,11 @@ find roles/{core,advanced-core,addons} -type f -name readme.rst \
  | xargs -l1 -i{} echo '%doc %{_sysconfdir}/%{name}/{}' >> rolesfiles.txt
 
 # Manage the directories
-find roles/{core,advanced-core,addons,macros} -type d \
+find roles/{core,advanced-core,addons} -type d \
  | xargs -l1 -i{} echo '%dir %{_sysconfdir}/%{name}/{}' >> rolesfiles.txt
 
 # All other files in roles subdirectory are standard
-find roles/{core,advanced-core,addons,macros} -type f ! -name readme.rst \
+find roles/{core,advanced-core,addons} -type f ! -name readme.rst \
  ! -path 'roles/*/templates/*' ! -path 'roles/*/files/*' ! -path 'roles/*/vars/*' \
  | xargs -l1 -i{} echo %{_sysconfdir}/%{name}/{} >> rolesfiles.txt
 
@@ -91,7 +91,6 @@ cp -aL internal %{buildroot}%{_sysconfdir}/%{name}/
 cp -aL roles/core %{buildroot}%{_sysconfdir}/%{name}/roles/
 cp -aL roles/advanced-core %{buildroot}%{_sysconfdir}/%{name}/roles/
 cp -aL roles/addons %{buildroot}%{_sysconfdir}/%{name}/roles/
-cp -aL roles/macros %{buildroot}%{_sysconfdir}/%{name}/roles/
 mkdir -p %{buildroot}%{_sysconfdir}/%{name}/roles/customs
 mkdir -p %{buildroot}%{_sbindir}
 cp -a tools/bluebanquise-playbook %{buildroot}%{_sbindir}/
@@ -126,4 +125,4 @@ end}
 %changelog
 * Sun Feb  2 2020 Bruno Travouillon <devel@travouillon.fr>
 * Tue Apr 14 2020 strus38 <indigoping4cgmi@gmail.com>
-- 
+-
