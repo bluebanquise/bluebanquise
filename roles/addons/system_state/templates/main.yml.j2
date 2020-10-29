@@ -1,0 +1,42 @@
+# Software versions
+
+{% if system_state_ansible_version %}
+## ansible_version
+{{ ansible_version }}
+{% endif %}
+
+{% if system_state_ansible_python_version %}
+## ansible_python_version
+{{ ansible_python_version }}
+{% endif %}
+
+
+# Play context
+
+{% if system_state_ansible_inventory_sources %}
+## ansible_inventory_sources
+{{ ansible_inventory_sources | sort }}
+{% endif %}
+
+{% if system_state_ansible_run_tags %}
+## ansible_run_tags
+{{ ansible_run_tags | sort }}
+{% endif %}
+
+{% if system_state_ansible_skip_tags %}
+## ansible_skip_tags
+{{ ansible_skip_tags | sort }}
+{% endif %}
+
+{% if system_state_role_names %}
+## ansible_role_names
+{{ ansible_role_names | sort }}
+{% endif %}
+
+{% if system_state_roles_versions %}
+## Roles versions
+{% for role in (vars | select('match','.*role_version') | list | sort) %}
+* {{ role }} : {{ vars[role] }}
+{% endfor %}
+{% endif %}
+

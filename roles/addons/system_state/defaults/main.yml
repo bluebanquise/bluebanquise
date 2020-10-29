@@ -1,0 +1,8 @@
+---
+system_state_ansible_version: true
+system_state_ansible_python_version: true
+system_state_ansible_inventory_sources: true
+system_state_ansible_run_tags: true
+system_state_ansible_skip_tags: true
+system_state_role_names: true
+system_state_roles_versions: true

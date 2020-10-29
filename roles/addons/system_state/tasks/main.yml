@@ -1,0 +1,16 @@
+- name: "file █ Create /etc/system_state/ directory"
+  file:
+    path: /etc/system_state/
+    state: directory
+    mode: 0755
+
+- name: "template █ Generate /etc/system_state/main.yml"
+  template:
+    src: main.yml.j2
+    dest: /etc/system_state/main.yml
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - template
+
