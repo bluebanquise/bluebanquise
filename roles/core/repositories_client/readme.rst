@@ -43,6 +43,7 @@ Available advanced variables are:
 * gpgcheck
 * gpgkey
 * proxy
+* state
 
 Repository static path is computed using variables defined in the equipment_profile.
 
@@ -129,6 +130,7 @@ sources.list file.
 Changelog
 ^^^^^^^^^
 
+* 1.0.8: Add state parameter. Bruno Travouillon <devel@travouillon.fr>
 * 1.0.7: Simplified version of the role. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.6: Deprecate external_repositories. Bruno Travouillon <devel@travouillon.fr>
 * 1.0.5: Added support for excluding packages from CentOS and RHEL repositories. Neil Munday <neil@mundayweb.com>
