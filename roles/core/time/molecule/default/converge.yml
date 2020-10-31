@@ -1,6 +1,7 @@
 ---
 - name: Converge
   hosts: all
+  serial: 3
 
   vars:
     # Start the services by default
