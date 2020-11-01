@@ -134,6 +134,7 @@ provisioner:
           - name: epel
             baseurl: 'https://dl.fedoraproject.org/pub/epel/$$releasever/$$basearch/'
             proxy: 'https://proxy:8080'
+          - { name: 'deleteme', state: 'absent' }
         external_repositories:
           - fakerepo
       distrorepos:
