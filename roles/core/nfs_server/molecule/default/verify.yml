@@ -15,7 +15,7 @@
       register: firewall_cmd_result
       changed_when: False
 
-    - name: Check rpc-bind and nfs are in zone public
+    - name: Check rpc-bind and nfs are in firewall zone public
       assert:
         that: firewall_cmd_result.stdout |
                     regex_findall(("rpc-bind|nfs"), multiline=False) | length == 2
@@ -31,6 +31,7 @@
       stat:
         path: /etc/exports
       register: register_stat
+      changed_when: False
 
     - name: Assert file /etc/exports exist
       assert:
@@ -43,6 +44,7 @@
         state: absent
       check_mode: yes
       register: export_sw_result
+      changed_when: False
 
     - name: Check /etc/exports file contains /opt/software line
       assert:
@@ -55,15 +57,68 @@
         state: absent
       check_mode: yes
       register: export_home_result
+      changed_when: False
 
     - name: Check /etc/exports file contains /home line
       assert:
         that: export_home_result.found
 
-    - name: Check nfs-server and rpcbind are enabled
+    - name: Retrieve /opt/software clients in /etc/exports file
+      lineinfile:
+        path: /etc/exports
+        regexp: "^/opt/software.*10.10.0.0/16"
+        state: absent
+      check_mode: yes
+      register: export_sw_result1
+      changed_when: False
+
+    - name: Check /etc/exports file contains 10.10.0.0/16 client for /opt/software
       assert:
-        that:
-          - "ansible_facts.services['{{ item }}.service'].status == 'enabled'"
-      loop:
-        - nfs-server
-        - rpcbind
+        that: export_sw_result1.found
+
+    - name: Retrieve /home clients in /etc/exports file
+      lineinfile:
+        path: /etc/exports
+        regexp: "^/home.*10.10.0.0/16"
+        state: absent
+      check_mode: yes
+      register: export_home_result1
+      changed_when: False
+
+    - name: Check /etc/exports file contains 10.10.0.0/16 client for /home
+      assert:
+        that: export_home_result1.found
+
+    - name: Retrieve /opt/software clients options in /etc/exports file
+      lineinfile:
+        path: /etc/exports
+        regexp: "^/opt/software.*(ro,no_root_squash,async)"
+        state: absent
+      check_mode: yes
+      register: export_sw_opts_result
+      changed_when: False
+
+    - name: Check /etc/exports file contains client options (ro,no_root_squash,async) for /opt/software
+      assert:
+        that: export_sw_opts_result.found
+
+    - name: Retrieve /home clients options in /etc/exports file
+      lineinfile:
+        path: /etc/exports
+        regexp: "^/home.*(rw,no_root_squash,sync)"
+        state: absent
+      check_mode: yes
+      register: export_home_opts_result
+      changed_when: False
+
+    - name: Check /etc/exports file contains client options (rw,no_root_squash,sync) for /home
+      assert:
+        that: export_home_opts_result.found
+
+    - name: Check nfs-server is enabled
+      assert:
+        that: "ansible_facts.services['nfs-server.service'].status == 'enabled'"
+
+    - name: Check rpcbind is enabled
+      assert:
+        that: "ansible_facts.services['rpcbind.service'].status == 'enabled'"

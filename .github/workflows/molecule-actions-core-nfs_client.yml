@@ -34,7 +34,7 @@ jobs:
         uses: actions/setup-python@v1
       - name: Install packages
         run: |
-          pip install 'molecule[docker]>3' ansible-lint flake8 jmespath netaddr
+          pip install tox
       - name: Run molecule test for core/nfs_client
         run: |
-          cd roles/core/nfs_client && molecule test
+          cd roles/core/nfs_client && tox
