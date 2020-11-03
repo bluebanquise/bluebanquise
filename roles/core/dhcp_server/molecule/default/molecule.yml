@@ -1,3 +1,4 @@
+---
 dependency:
   name: galaxy
 driver:
@@ -14,28 +15,13 @@ platforms:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
     privileged: true
     pre_build_image: true
-    docker_networks:
-      - name: bbnet
-        ipam_config:
-          - subnet: '10.11.0.0/16'
-            gateway: "10.11.0.254"
-    networks:
-      - name: bbnet
-        ipv4_address: "10.11.0.1"            
-
 provisioner:
   name: ansible
   inventory:
     host_vars:
       management1:
 
-        network_interfaces:
-          - interface: enp0s3
-            ip4: 10.11.0.1
-            mac: 08:00:27:dc:f8:f5
-            network: ice1-1
-
-        start_services: true
+        start_services: false
         enable_services: true
         ep_firewall: true
         domain_name: tumulus.local

@@ -9,7 +9,7 @@ Molecule unit tests
 |-----------------------------------------------------------------------------------------------------------------------------------------------------|:-:|:-:|:-:|
 |![core/bluebanquise unit testing](https://github.com/bluebanquise/bluebanquise/workflows/core/bluebanquise%20unit%20testing/badge.svg)               | x | x |   |
 |![core/conman unit testing](https://github.com/bluebanquise/bluebanquise/workflows/core/conman%20unit%20testing/badge.svg)                           | x | x | x |
-|![core/dhcp_server unit testing](https://github.com/bluebanquise/bluebanquise/workflows/core/dhcp_server%20unit%20testing/badge.svg)                 | x |   |   |
+|![core/dhcp_server unit testing](https://github.com/bluebanquise/bluebanquise/workflows/core/dhcp_server%20unit%20testing/badge.svg)                 | x | x |   |
 |![core/display_tuning unit testing](https://github.com/bluebanquise/bluebanquise/workflows/core/display_tuning%20unit%20testing/badge.svg)           | x | x |   |
 |![core/dns_client unit testing](https://github.com/bluebanquise/bluebanquise/workflows/core/dns_client%20unit%20testing/badge.svg)                   | x | x | x |
 |![core/dns_server unit testing](https://github.com/bluebanquise/bluebanquise/workflows/core/dns_server%20unit%20testing/badge.svg)                   | x | x |   |

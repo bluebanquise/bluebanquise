@@ -20,14 +20,25 @@
         that: firewall_cmd_result.stdout |
                     regex_findall(('dhcp|dhcpv6-client'), multiline=False) | length == 2
 
+    - name: Assert dhcp package is installed
+      assert:
+        that: "'dhcp' in ansible_facts.packages"
+      when:
+        - ansible_facts.os_family == "RedHat"
+        - ansible_facts.distribution_major_version == "7"
+
     - name: Assert dhcp-server package is installed
       assert:
         that: "'dhcp-server' in ansible_facts.packages"
+      when:
+        - ansible_facts.os_family == "RedHat"
+        - ansible_facts.distribution_major_version == "8"
 
     - name: Retrieve file dhcpd.ice1-1.conf system status
       stat:
         path: /etc/dhcp/dhcpd.ice1-1.conf
       register: register_stat_dhcp
+      changed_when: False
 
     - name: Assert file dhcpd.ice1-1.conf exist
       assert:
@@ -40,15 +51,42 @@
         state: absent
       check_mode: yes
       register: register_stat_dhcp_file
+      changed_when: False
 
     - name: Check /etc/dhcp/dhcpd.ice1-1.conf file contains compute1-ice1-1
       assert:
         that: register_stat_dhcp_file.found
 
+    - name: Retrieve file state of /etc/dhcp/dhcpd.ice1-1.conf file
+      command: dhcpd -t -cf /etc/dhcp/dhcpd.ice1-1.conf
+      register: dhcpd_ice_result
+      changed_when: False
+
+    - name: Check syntax in /etc/dhcp/dhcpd.ice1-1.conf file
+      assert:
+        that: dhcpd_ice_result.stdout |
+                    regex_findall(('Configuration file errors encountered'), multiline=False) | length == 0
+
+    - name: Retrieve file state of dhcpd.networks.conf file
+      command: dhcpd -t -cf /etc/dhcp/dhcpd.networks.conf
+      register: dhcpd_net_result
+      changed_when: False
+
+    - name: Check syntax in dhcpd.networks.conf file
+      assert:
+        that: dhcpd_net_result.stdout |
+                    regex_findall(('Configuration file errors encountered'), multiline=False) | length == 0
+
+    - name: Retrieve file state of /etc/dhcp/dhcpd.conf file
+      command: dhcpd -t -cf /etc/dhcp/dhcpd.conf
+      register: dhcpd_cmd_result
+      changed_when: False
+
+    - name: Check syntax in /etc/dhcp/dhcpd.conf file
+      assert:
+        that: dhcpd_cmd_result.stdout |
+                    regex_findall(('Configuration file errors encountered'), multiline=False) | length == 0
+
     - name: Check dhcpd is enabled
       assert:
         that: "ansible_facts.services['dhcpd.service'].status == 'enabled'"
-
-    - name: Check dhcpd is running
-      assert:
-        that: "ansible_facts.services['dhcpd.service'].state == 'running'"
