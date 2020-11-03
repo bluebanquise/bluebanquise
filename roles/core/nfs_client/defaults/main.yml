@@ -1,0 +1,3 @@
+---
+# To see possible values refer to https://docs.ansible.com/ansible/latest/collections/ansible/posix/mount_module.html#parameter-state
+nfs_client_directories_state: mounted
