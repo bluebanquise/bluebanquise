@@ -375,7 +375,7 @@ Next, we will need a playbook for mngt2. Copy current mngt1 dedicated playbook:
 
 ..note ::
   We assume here mngt1.yml playbook exist. You may have used another name for it:
-  managements.yml, management1.yml, etc. Please adapte these instructions to 
+  managements.yml, management1.yml, etc. Please adapt these instructions to 
   your own environment.
 
 .. code-block:: text
