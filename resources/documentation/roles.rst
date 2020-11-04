@@ -56,3 +56,4 @@ ADDONS
 .. include:: roles/addons/sssd/readme.rst
 .. include:: roles/addons/slurm/readme.rst
 .. include:: roles/addons/users_basic/readme.rst
+.. include:: roles/addons/lmod/readme.rst
