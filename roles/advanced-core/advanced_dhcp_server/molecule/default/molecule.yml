@@ -15,15 +15,6 @@ platforms:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
     privileged: true
     pre_build_image: true
-    docker_networks:
-      - name: bbnet
-        ipam_config:
-          - subnet: '10.11.0.0/16'
-            gateway: "10.11.0.254"
-    networks:
-      - name: bbnet
-        ipv4_address: "10.11.0.1"
-
 provisioner:
   name: ansible
   inventory:
@@ -36,7 +27,7 @@ provisioner:
             mac: 08:00:27:dc:f8:f5
             network: ice1-1
 
-        start_services: true
+        start_services: false
         enable_services: true
         domain_name: tumulus.local
         icebergs_system: false
@@ -57,7 +48,6 @@ provisioner:
             shared_network: wolf
             netmask: 255.255.0.0
             broadcast: 10.11.255.255
-            dhcp_unknown_range: 10.11.254.1 10.11.254.254
             gateway: 10.11.2.1
             is_in_dhcp: true
             is_in_dns: true
@@ -75,7 +65,7 @@ provisioner:
             shared_network: wolf
             netmask: 255.255.0.0
             broadcast: 10.30.255.255
-            dhcp_unknown_range: 10.30.254.1 10.30.254.254
+            dhcp_unknown_range: 10.30.0.2 10.30.0.254
             gateway: 10.30.2.1
             is_in_dhcp: true
             is_in_dns: true
@@ -88,7 +78,7 @@ provisioner:
               log_ip: 10.30.0.1
 
     hosts:
-      computes:
+      fake_computes:
         hosts:
 
           compute1:
@@ -125,7 +115,7 @@ provisioner:
             bmc:
               name: compute2-bmc
               alias:
-                - compute2-bmc
+                - compute2-opt82-bmc
               match: |
                 substring (option agent.remote-id, 0 , 44) = "0"
                 and option agent.circuit-id = 01:00:17
@@ -150,7 +140,7 @@ provisioner:
             bmc:
               name: compute3-bmc
               alias:
-                - compute3-bmc
+                - compute3-opt61-bmc
               dhcp_client_identifier: 00:30:18
               ip4: 10.30.103.3
               network: ice1-2

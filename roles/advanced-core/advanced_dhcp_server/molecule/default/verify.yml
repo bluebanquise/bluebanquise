@@ -20,17 +20,23 @@
         that: firewall_cmd_result.stdout |
                     regex_findall(('dhcp|dhcpv6-client'), multiline=False) | length == 2
 
+    - name: Assert dhcp package is installed
+      assert:
+        that: "'dhcp' in ansible_facts.packages"
+      when:
+        - ansible_facts.os_family == "RedHat"
+        - ansible_facts.distribution_major_version == "7"
+
     - name: Assert dhcp-server package is installed
       assert:
         that: "'dhcp-server' in ansible_facts.packages"
+      when:
+        - ansible_facts.os_family == "RedHat"
+        - ansible_facts.distribution_major_version == "8"
 
     - name: Check dhcpd is enabled
       assert:
         that: "ansible_facts.services['dhcpd.service'].status == 'enabled'"
-
-    - name: Check dhcpd is running
-      assert:
-        that: "ansible_facts.services['dhcpd.service'].state == 'running'"
 
     # Check all conf files
 
@@ -38,6 +44,7 @@
       stat:
         path: /etc/dhcp/dhcpd.conf
       register: reg_dhcp
+      changed_when: False
 
     - name: Assert file dhcpd.conf exist
       assert:
@@ -47,6 +54,7 @@
       stat:
         path: /etc/dhcp/dhcpd.ice1-1.conf
       register: reg_dhcp1
+      changed_when: False
 
     - name: Assert file dhcpd.ice1-1.conf exist
       assert:
@@ -56,6 +64,7 @@
       stat:
         path: /etc/dhcp/dhcpd.ice1-2.conf
       register: reg_dhcp2
+      changed_when: False
 
     - name: Assert file dhcpd.ice1-2.conf exist
       assert:
@@ -65,6 +74,7 @@
       stat:
         path: /etc/dhcp/dhcpd.networks.conf
       register: reg_dhcp_network_file
+      changed_when: False
 
     - name: Assert file dhcpd.networks.conf exist
       assert:
@@ -77,6 +87,7 @@
         state: absent
       check_mode: yes
       register: reg_dhcp_uids
+      changed_when: False
 
     - name: Check /etc/dhcp/dhcpd.conf file contains (ignore-client-uids=False)
       assert:
@@ -89,6 +100,7 @@
         state: absent
       check_mode: yes
       register: reg_dhcp_shared_network
+      changed_when: False
 
     - name: Check /etc/dhcp/dhcpd.networks.conf file contains shared-network
       assert:
@@ -101,6 +113,7 @@
         state: absent
       check_mode: yes
       register: reg_dhcp_subnet1
+      changed_when: False
 
     - name: Check /etc/dhcp/dhcpd.networks.conf file contains subnet 10.11.0.0
       assert:
@@ -113,10 +126,21 @@
         state: absent
       check_mode: yes
       register: reg_dhcp_subnet2
+      changed_when: False
 
     - name: Check /etc/dhcp/dhcpd.networks.conf file contains subnet 10.30.0.0
       assert:
         that: reg_dhcp_subnet2.found
+
+    - name: Retrieve file state of /etc/dhcp/dhcpd.conf file
+      command: dhcpd -t -cf /etc/dhcp/dhcpd.conf
+      register: dhcpd_cmd_result
+      changed_when: False
+
+    - name: Check syntax in /etc/dhcp/dhcpd.conf file
+      assert:
+        that: dhcpd_cmd_result.stdout |
+                    regex_findall(('Configuration file errors encountered'), multiline=False) | length == 0
 
     # Check compute with mac address
 
@@ -127,6 +151,7 @@
         state: absent
       check_mode: yes
       register: register_stat_dhcp_file
+      changed_when: False
 
     - name: Check /etc/dhcp/dhcpd.ice1-1.conf file contains compute1-ice1-1
       assert:
@@ -141,6 +166,7 @@
         state: absent
       check_mode: yes
       register: reg_dhcp_file_opt82
+      changed_when: False
 
     - name: Check /etc/dhcp/dhcpd.ice1-1.conf file contains opt82 configuration for compute2
       assert:
@@ -153,6 +179,7 @@
         state: absent
       check_mode: yes
       register: reg_dhcp_file_opt82_circuit_id
+      changed_when: False
 
     - name: Check /etc/dhcp/dhcpd.ice1-1.conf file contains circuit-id configuration for compute2
       assert:
@@ -165,6 +192,7 @@
         state: absent
       check_mode: yes
       register: reg_dhcp_file_opt82_bmc
+      changed_when: False
 
     - name: Check /etc/dhcp/dhcpd.ice1-1.conf file contains opt82 configuration for bmc in compute2
       assert:
@@ -179,6 +207,7 @@
         state: absent
       check_mode: yes
       register: reg_dhcp_file_opt61
+      changed_when: False
 
     - name: Check /etc/dhcp/dhcpd.ice1-2.conf file contains opt61 configuration for compute3-ice1-2
       assert:
@@ -191,6 +220,7 @@
         state: absent
       check_mode: yes
       register: reg_dhcp_file_opt61_bmc
+      changed_when: False
 
     - name: Check /etc/dhcp/dhcpd.ice1-2.conf file contains opt82 configuration for bmc in compute3-ice1-2
       assert:
