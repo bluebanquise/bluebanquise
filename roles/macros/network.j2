@@ -1,9 +1,0 @@
-# These macro are clone of the network.yml file of the inventory.
-
-{% macro node_main_network(macro_network_interfaces,macro_current_iceberg_network) %}
-{% set main_ntw = [] %}{% for nic in macro_network_interfaces %}{% if macro_network_interfaces[nic].network is defined and not none %}{{ main_ntw.append(macro_network_interfaces[nic].network|string) }}{% endif %}{% endfor %}{{main_ntw | select('match',(macro_current_iceberg_network+'-[a-zA-Z0-9]+')) | list | unique | sort| first | join | trim}}
-{% endmacro %}
-
-{% macro node_main_network_interface(macro_network_interfaces,macro_node_main_network) %}
-{% set main_ntw_nic = [] %}{% for nic in macro_network_interfaces %}{% if macro_network_interfaces[nic].network is defined and not none %}{% if macro_network_interfaces[nic].network == macro_node_main_network %}{{ main_ntw_nic.append(nic|string) }}{% endif %}{% endif %}{% endfor %}{{main_ntw_nic | unique | join | trim}}
-{% endmacro %}
