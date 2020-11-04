@@ -1,0 +1,61 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: docker
+platforms:
+  - name: management1
+    groups:
+      - mg_managements
+    image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
+    override_command: false
+    capabilities:
+      - "SYS_ADMIN"
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    pre_build_image: true
+provisioner:
+  name: ansible
+  inventory:
+    host_vars:
+      management1:
+
+        start_services: false
+        enable_services: true
+        ep_firewall: true
+        domain_name: tumulus.local
+        icebergs_system: false
+        j2_node_main_network: ice1-1
+        j2_current_iceberg_network: ice1
+
+        networks:
+          ice1-1:
+            subnet: 10.11.0.0
+            prefix: 16
+            netmask: 255.255.0.0
+            broadcast: 10.11.255.255
+            dhcp_unknown_range: 10.11.254.1 10.11.254.254
+            gateway: 10.11.2.1
+            is_in_dhcp: true
+            is_in_dns: true
+            services_ip:
+              pxe_ip: 10.11.0.1
+              dns_ip: 10.11.0.1
+              repository_ip: 10.11.0.1
+              authentication_ip: 10.11.0.1
+              time_ip: 10.11.0.1
+              log_ip: 10.11.0.1
+
+    hosts:
+      compute:
+        hosts:
+          compute1:
+            j2_current_iceberg_network: ice1
+            network_interfaces:
+            - interface: enp0s3
+              ip4: 10.11.3.1
+              mac: 08:00:27:dc:f8:f6
+              network: ice1-1
+verifier:
+  name: ansible
