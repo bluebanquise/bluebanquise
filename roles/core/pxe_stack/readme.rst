@@ -153,6 +153,18 @@ All files are manually editable. Also, note that an unregistered host (so no hos
 
 To follow the deployment process, simply tail -f logs of http server, and see the whole process occurring.
 
+Optional parameters
+^^^^^^^^^^^^^^^^^^^
+
+It is possible to use another tftp server than atftp, using variables. By
+default, BlueBanquise relies on atftp, but fbtftp is also provided.
+
+To set the desired tftp server, and override default (atftp), define in the
+inventory or in the playbook the following variables:
+
+* **pxe_stack_tftp_package**: set the package name of the tftp server to be used. Stack propose *atftp* or *fbtftp_server*.
+* **pxe_stack_tftp_service**: set the service name of the tftp server to be used. Stack propose *atftpd* or *fbtftp_server*.
+
 To be done
 ^^^^^^^^^^
 
@@ -161,6 +173,7 @@ To be done
 Changelog
 ^^^^^^^^^
 
+* 1.1.6: Add ability to install other tftp server than atftp. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.5: Update role to match $basearch, add status feat to bootset. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.4: Update to new network_interfaces syntax. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.3: Clean. johnnykeats <johnny.keats@outlook.com>

@@ -15,11 +15,5 @@ platforms:
     pre_build_image: true
 provisioner:
   name: ansible
-  inventory:
-    host_vars:
-      ansiblectrl:
-        network_interfaces:
-          en0:
-            ip4: 10.10.0.1
 verifier:
   name: ansible
