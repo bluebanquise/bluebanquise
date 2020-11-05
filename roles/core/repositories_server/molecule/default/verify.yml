@@ -20,19 +20,9 @@
         that: firewall_cmd_result.stdout |
                     regex_findall(('http'), multiline=False) | length == 1
 
-    - name: Assert pxe needed packages are installed
+    - name: Assert httpd package is installed
       assert:
         that: "'httpd' in ansible_facts.packages"
-
-    - name: Retrieve file /etc/httpd/conf/httpd.conf system status
-      stat:
-        path: /etc/httpd/conf/httpd.conf
-      register: reg_httpd_conf
-      changed_when: False
-
-    - name: Assert file /etc/httpd/conf/httpd.conf exist
-      assert:
-        that: reg_httpd_conf.stat.exists
 
     - name: Check services httpd is enabled
       assert:
