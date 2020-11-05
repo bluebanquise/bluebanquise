@@ -15,7 +15,7 @@ Molecule unit tests
 |![core/firewall unit testing](https://github.com/bluebanquise/bluebanquise/workflows/core/firewall%20unit%20testing/badge.svg)                       | x | x |   |
 |![core/log_client unit testing](https://github.com/bluebanquise/bluebanquise/workflows/core/log_client%20unit%20testing/badge.svg)                   | x | x | x |
 |![core/log_server unit testing](https://github.com/bluebanquise/bluebanquise/workflows/core/log_server%20unit%20testing/badge.svg)                   | x | x | x |
-|![core/pxe_stack unit testing](https://github.com/bluebanquise/bluebanquise/workflows/core/pxe_stack%20unit%20testing/badge.svg)                   | x | x |   |
+|![core/pxe_stack unit testing](https://github.com/bluebanquise/bluebanquise/workflows/core/pxe_stack%20unit%20testing/badge.svg)                     | x | x |   |
 |![core/repositories_client unit testing](https://github.com/bluebanquise/bluebanquise/workflows/core/repositories_client%20unit%20testing/badge.svg) | x | x |   |
 |![core/ssh_master unit testing](https://github.com/bluebanquise/bluebanquise/workflows/core/ssh_master%20unit%20testing/badge.svg)                   | x | x | x |
 |![core/time unit testing](https://github.com/bluebanquise/bluebanquise/workflows/core/time%20unit%20testing/badge.svg)                               | x | x |   |
