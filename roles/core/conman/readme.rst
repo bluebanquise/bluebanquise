@@ -49,6 +49,7 @@ Files generated:
 Changelog
 ^^^^^^^^^
 
+* 1.0.4: Remove alternative Execpath for el7 packages. osmocl <osmocl@osmo.cl>
 * 1.0.3: Clean. johnnykeats <johnny.keats@outlook.com>
 * 1.0.2: Tested on ubuntu 18.04 and validated. johnnykeats <johnny.keats@outlook.com>
 * 1.0.1: Documentation. johnnykeats <johnny.keats@outlook.com>
