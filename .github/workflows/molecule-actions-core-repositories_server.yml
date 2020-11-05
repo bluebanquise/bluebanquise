@@ -5,12 +5,12 @@ on:
     branches:
       - master
     paths:
-      - 'roles/core/repositories_client/**'
-      - '.github/workflows/molecule-actions-core-repositories_client.yml'
+      - 'roles/core/repositories_server/**'
+      - '.github/workflows/molecule-actions-core-repositories_server.yml'
   pull_request:
     paths:
-      - 'roles/core/repositories_client/**'
-      - '.github/workflows/molecule-actions-core-repositories_client.yml'
+      - 'roles/core/repositories_server/**'
+      - '.github/workflows/molecule-actions-core-repositories_server.yml'
 
 jobs:
   molecule_test:
@@ -37,6 +37,6 @@ jobs:
       - name: Install packages
         run: |
           pip install tox
-      - name: Run molecule test for core/repositories_client
+      - name: Run molecule test for core/repositories_server
         run: |
-          cd roles/core/repositories_client && tox
+          cd roles/core/repositories_server && tox
