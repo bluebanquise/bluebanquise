@@ -50,7 +50,7 @@ scenario:
     - create
     - prepare
     - converge
-    #- idempotence
+    #- idempotence # FIXME idempotence disabled because #366
     - side_effect
     - verify
     - cleanup

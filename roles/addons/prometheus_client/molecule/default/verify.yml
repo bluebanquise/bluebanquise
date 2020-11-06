@@ -20,17 +20,9 @@
         that: firewall_cmd_result.stdout |
                     regex_findall(('9100/tcp'), multiline=False) | length == 1
 
-    - name: Firewall zone public check presence of service ha_cluster_exporter = 9664/tcp
+    - name: Assert node_exporter is installed
       assert:
-        that: firewall_cmd_result.stdout |
-                    regex_findall(('9664/tcp'), multiline=False) | length == 1
-
-    - name: Assert node_exporter and ha_cluster_exporter packages are installed
-      assert:
-        that: "'{{item}}' in ansible_facts.packages"
-      loop:
-        - node_exporter
-        - ha_cluster_exporter
+        that: "'node_exporter' in ansible_facts.packages"
 
     - name: Check node_exporter is enabled
       assert:
@@ -39,14 +31,6 @@
     - name: Check node_exporter is running
       assert:
         that: "ansible_facts.services['node_exporter.service'].state == 'running'"
-
-    - name: Check ha_cluster_exporter is enabled
-      assert:
-        that: "ansible_facts.services['ha_cluster_exporter.service'].status == 'enabled'"
-
-    - name: Check ha_cluster_exporter is running
-      assert:
-        that: "ansible_facts.services['ha_cluster_exporter.service'].state == 'running'"
 
     - name: Check that Node_exporter is reachable
       uri:
