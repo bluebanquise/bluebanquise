@@ -13,6 +13,7 @@
     - name: Collect services of zone public
       command: firewall-cmd --zone=public --list-all
       register: firewall_cmd_result
+      changed_when: False
 
     - name: Firewall zone public check presence of service prometheus
       assert:
@@ -39,6 +40,7 @@
       stat:
         path: /etc/prometheus/alerts
       register: reg_prometheus
+      changed_when: False
 
     - name: Assert directory /etc/prometheus/alerts/ exists
       assert:
@@ -53,6 +55,7 @@
       stat:
         path: /var/lib/prometheus
       register: reg_var_prometheus
+      changed_when: False
 
     - name: Assert directory /etc/prometheus/alerts/ exists
       assert:
@@ -67,6 +70,7 @@
       stat:
         path: /etc/prometheus/prometheus.yml
       register: reg_file_prometheus
+      changed_when: False
 
     - name: Assert file /etc/prometheus/prometheus.yml exists
       assert:
@@ -78,6 +82,7 @@
       stat:
         path: /etc/prometheus/alerts/general.yml
       register: reg_file_prometheus_alerts
+      changed_when: False
 
     - name: Assert file /etc/prometheus/alerts/general.yml exists
       assert:
@@ -89,6 +94,7 @@
       stat:
         path: /etc/alertmanager
       register: reg_alertmanager
+      changed_when: False
 
     - name: Assert directory /etc/alertmanager exists
       assert:
@@ -103,6 +109,7 @@
       stat:
         path: /etc/alertmanager/alertmanager.yml
       register: reg_file_alertmanager
+      changed_when: False
 
     - name: Assert file /etc/alertmanager/alertmanager.yml exists
       assert:
@@ -116,6 +123,7 @@
       stat:
         path: /etc/ipmi_exporter/ipmi_config.yml
       register: reg_file_ipmi_conf
+      changed_when: False
 
     - name: Assert file /etc/ipmi_exporter/ipmi_config.yml exists
       assert:
@@ -129,6 +137,7 @@
       stat:
         path: /etc/karma/karma.yml
       register: reg_file_karma
+      changed_when: False
 
     - name: Assert file /etc/karma/karma.yml exists
       assert:
@@ -154,6 +163,7 @@
         url: http://localhost:9090
         return_content: yes
       register: reg_url
+      changed_when: False
 
     - name: Assert Prometheus is available at http://localhost:9090
       assert:
@@ -164,6 +174,7 @@
         url: http://localhost:9093
         return_content: yes
       register: reg_url_alert
+      changed_when: False
 
     - name: Assert Alertmanager is available at http://localhost:9093
       assert:

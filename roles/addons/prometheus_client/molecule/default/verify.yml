@@ -37,6 +37,7 @@
         url: http://localhost:9100
         return_content: yes
       register: reg_url
+      changed_when: False
 
     - name: Assert Node_exporter is available at http://localhost:9100
       assert:
