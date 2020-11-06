@@ -77,7 +77,7 @@
         that:
           - reg_file_prometheus.stat.exists
           - reg_file_prometheus.stat.mode == '0640'
-            
+
     - name: Retrieve file /etc/prometheus/alerts/general.yml system status
       stat:
         path: /etc/prometheus/alerts/general.yml
