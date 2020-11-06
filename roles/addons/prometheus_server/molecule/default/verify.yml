@@ -89,7 +89,7 @@
         that:
           - reg_file_prometheus_alerts.stat.exists
           - reg_file_prometheus_alerts.stat.mode == '0640'
-            
+
     - name: Retrieve directory /etc/alertmanager system status
       stat:
         path: /etc/alertmanager
