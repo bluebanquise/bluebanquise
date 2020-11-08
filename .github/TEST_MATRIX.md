@@ -26,3 +26,4 @@ Molecule unit tests
 |![addons/grafana unit testing](https://github.com/bluebanquise/bluebanquise/workflows/addons/grafana%20unit%20testing/badge.svg)                     | x | x |   |
 |![addons/root_password unit testing](https://github.com/bluebanquise/bluebanquise/workflows/addons/root_password%20unit%20testing/badge.svg)         | x | x | x |
 |![addons/users_basic unit testing](https://github.com/bluebanquise/bluebanquise/workflows/addons/users_basic%20unit%20testing/badge.svg)             | x | x | x |
+|![advanced-core/advanced_dhcp_server unit testing](https://github.com/bluebanquise/bluebanquise/workflows/advanced-core/advanced_dhcp_server%20unit%20testing/badge.svg)                   | x | x |   |
