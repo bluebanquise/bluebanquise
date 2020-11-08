@@ -20,7 +20,9 @@ Molecule unit tests
 |![core/nfs_client unit testing](https://github.com/bluebanquise/bluebanquise/workflows/core/nfs_client%20unit%20testing/badge.svg)                   | x | x |   |
 |![core/nfs_server unit testing](https://github.com/bluebanquise/bluebanquise/workflows/core/nfs_server%20unit%20testing/badge.svg)                   | x | x |   |
 |![core/repositories_client unit testing](https://github.com/bluebanquise/bluebanquise/workflows/core/repositories_client%20unit%20testing/badge.svg) | x | x |   |
+|![core/repositories_server unit testing](https://github.com/bluebanquise/bluebanquise/workflows/core/repositories_server%20unit%20testing/badge.svg) | x | x |   |
 |![core/ssh_master unit testing](https://github.com/bluebanquise/bluebanquise/workflows/core/ssh_master%20unit%20testing/badge.svg)                   | x | x | x |
+|![core/ssh_slave unit testing](https://github.com/bluebanquise/bluebanquise/workflows/core/ssh_slave%20unit%20testing/badge.svg)                     | x | x | x |
 |![core/time unit testing](https://github.com/bluebanquise/bluebanquise/workflows/core/time%20unit%20testing/badge.svg)                               | x | x |   |
 |![advanced_core/advanced_dns_server unit testing](https://github.com/bluebanquise/bluebanquise/workflows/advanced_core/advanced_dns_server%20unit%20testing/badge.svg)                   | x | x |   |
 |![addons/clustershell unit testing](https://github.com/bluebanquise/bluebanquise/workflows/addons/clustershell%20unit%20testing/badge.svg)           | x | x | x |
