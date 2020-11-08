@@ -1,0 +1,80 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: docker
+platforms:
+  - name: management1
+    groups:
+      - mg_managements
+    children:
+      - equipment_typeM
+    image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
+    override_command: false
+    capabilities:
+      - "SYS_ADMIN"
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    pre_build_image: true
+
+  - name: compute1
+    groups:
+      - mg_computes
+    children:
+      - equipment_typeC
+    image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
+    override_command: false
+    capabilities:
+      - "SYS_ADMIN"
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    pre_build_image: true
+
+provisioner:
+  name: ansible
+  inventory:
+    host_vars:
+      management1:
+        networks:
+          ice1-1:
+            netmask: 255.255.0.0
+            gateway: 11.30.2.1
+
+        j2_equipment_groups_list:
+          - equipment_typeM
+          - equipment_typeC
+        j2_node_main_network: ice1-1
+        j2_current_iceberg_network: ice1
+        equipment_naming: equipment
+        ep_equipment_type: none
+
+        time_zone: Europe/Paris
+        icebergs_system: false
+        start_services: true
+        enable_services: true
+        ep_firewall: true
+
+      compute1:
+        equipment_naming: equipment
+        ep_console: console=tty0 console=ttyS1,115200n8
+        ep_kernel_parameters: nomodeset
+        ep_firewall: true
+        ep_preserve_efi_first_boot_device: true
+        ep_partitioning: |
+          clearpart --all --initlabel
+          autopart --type=plain --fstype=ext4 --nohome
+        ep_operating_system:
+          distribution: centos
+          distribution_major_version: 8
+        ep_configuration:
+          keyboard_layout: us
+          system_language: en_US.UTF-8
+        ep_equipment_type: server
+
+        authentication_root_password_sha512: RootPa$$w
+        authentication_ssh_keys:
+          - ssh-rsa fakeAuthKey root@localhost.localdomain
+verifier:
+  name: ansible
