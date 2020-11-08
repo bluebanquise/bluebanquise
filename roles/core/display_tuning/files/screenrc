@@ -4,8 +4,6 @@
 # - ProWi
 # - leo2501
 
-backtick 1 60 60 /usr/bin/free_root_disk
-
 multiuser on
 
 # Allow bold colors - necessary for some reason
@@ -28,7 +26,7 @@ defscrollback 30000
 
 hardstatus alwayslastline
 # Very nice tabbed colored hardstatus line
-hardstatus string '%{= Kd} %{= Kd}%-w%{= Kr}[%{= KW}%n %t%{= Kr}]%{= Kd}%+w %-= %{KG} %H%{KW} - BlueBanquise |%{y}/ %1`%{KW}|%{y}Load %l%{KW}|%D %M %d %Y%{= Kc}%C:%s'
+hardstatus string '%{= Kd} %{= Kd}%-w%{= Kr}[%{= KW}%n %t%{= Kr}]%{= Kd}%+w %-= %{KG} %H%{KW} - BlueBanquise | %D %M %d %Y%{= Kc}'
 
 # change command character from ctrl-a to ctrl-b (emacs users may want this)
 #escape ^Bb
