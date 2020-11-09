@@ -19,6 +19,6 @@
     enable_services: false
 
   tasks:
-    - name: "Include dns_server"
+    - name: "Include advanced_dns_server"
       include_role:
-        name: "dns_server"
+        name: "advanced_dns_server"

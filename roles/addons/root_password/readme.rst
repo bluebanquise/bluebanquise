@@ -17,7 +17,7 @@ The root password must be defined in the inventory:
 
 To generate an sha512 password, use the following command (python >3.3):
 
-.. code-block:: bash
+.. code-block:: text
 
   python -c 'import crypt,getpass; print(crypt.crypt(getpass.getpass(), crypt.mksalt(crypt.METHOD_SHA512)))'
 

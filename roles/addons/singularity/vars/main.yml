@@ -1,5 +1,5 @@
 ---
-role_version: 1.0.0
+singularity_role_version: 1.0.0
 
 singularity_packages_to_install:
   - singularity

@@ -39,6 +39,7 @@
     gpgcheck: "{{ item.gpgcheck | default(0) }}"
     gpgkey: "{{ item.gpgkey | default(omit) }}"
     proxy: "{{ item.proxy | default(omit) }}"
+    state: "{{ item.state | default('present') }}"
   with_items: "{{ repositories | union(external_repositories|default([])) }}"
   when: ( item != 'os' ) and ( item.name is not defined or item.name != 'os' )
 
@@ -57,6 +58,7 @@
     gpgcheck: "{{ item.gpgcheck | default(0) }}"
     gpgkey: "{{ item.gpgkey | default(omit) }}"
     proxy: "{{ item.proxy | default(omit) }}"
+    state: "{{ item.state | default('present') }}"
   loop:
   # Combine BaseOS and AppStream with 'os' parameters if any. Otherwise, this
   # will configure BaseOS and AppStream with default values.

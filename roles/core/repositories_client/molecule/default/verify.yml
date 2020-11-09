@@ -147,7 +147,7 @@
         that: baseos_repo['content'] | b64decode |
                 regex_search(("^gpgcheck = 1$"), multiline=True)
 
-- name: Verify epel is configured
+- name: Verify epel is configured and repo deleteme is absent
   hosts: advanced
   tasks:
     - name: Read /etc/yum.repos.d/epel.repo
@@ -169,6 +169,14 @@
       assert:
         that: epel_repo['content'] | b64decode |
                 regex_search(("^proxy = https://proxy:8080$"), multiline=True)
+
+    - name: Read /etc/yum.repos.d/deleteme.repo
+      stat:
+        path: /etc/yum.repos.d/deleteme.repo
+      register: deleteme_repo
+    - name: Check deleteme.repo is absent
+      assert:
+        that: not deleteme_repo.stat.exists
 
 - name: Verify CentOS 7 distro repos are enabled
   hosts: centos7:&distrorepos
