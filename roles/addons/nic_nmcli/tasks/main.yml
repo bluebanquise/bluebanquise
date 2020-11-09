@@ -23,6 +23,8 @@
   package:
     name: "{{ nic_nmcli_packages_to_install }}"
     state: present
+  tags:
+    - package
 
 - name: "service █ Manage {{ nic_nmcli_services_to_start | join(' ') }} state"
   service:
@@ -59,12 +61,12 @@
     # {% endif %}
     # Allows to provide a simple ip4, or an ip4/prefix
     # Also support old prefix format (to be replaced by prefix4)
-    ip6: "{{ (item.ip6 is defined) | ternary( ('::' in (item.ip6|default('None')) ) | ternary( (item.ip6|default('None')), ( (item.ip6|default('None')) | string) + '::' + ((networks[item.network].prefix6|default('None')) |string)), omit) }}"
     gw4: "{{ item.gw4 | default(networks[item.network].gateway4) | default(networks[item.network].gateway) | default(omit) }}"
-    gw6: "{{ item.gw6 | default(networks[item.network].gateway6) | default(omit) }}"
     mtu: "{{ item.mtu | default(networks[item.network].mtu) | default(omit) }}"
     type: "{{ item.type | default('ethernet') }}" # Even if in the documentation type is optional, it is in fact mandatory. Default to ethernet.
     # Standard
+    ip6: "{{ item.ip6 | default(omit) }}"
+    gw6: "{{ item.gw6 | default(omit) }}"
     state: "{{ item.state | default('present') }}"
     autoconnect: "{{ item.autoconnect | default(omit) }}"
     ageingtime: "{{ item.ageingtime | default(omit) }}"
@@ -101,20 +103,9 @@
     vxlan_id: "{{ item.vxlan_id | default(omit) }}"
     vxlan_local: "{{ item.vxlan_local | default(omit) }}"
     vxlan_remote: "{{ item.vxlan_remote | default(omit) }}"
+  notify: command █ Reload connections
   loop: "{{ network_interfaces }}"
   tags:
     - identify
 
-# Should be solved in ansible 2.10
-#- name: Bug fix for static ip (RedHat/Centos only)
-#  replace:
-#     path: "/etc/sysconfig/network-scripts/ifcfg-{{ item }}"
-#     regexp: 'BOOTPROTO=dhcp'
-#     replace: 'BOOTPROTO=none'
-#     backup: no
-#  with_items: "{{ network_interfaces }}"
-#  when:
-#    - ansible_facts.distribution_major_version == "7"
-#    - ansible_facts.os_family == "RedHat"
-#  tags:
-#    - identify
+- meta: flush_handlers

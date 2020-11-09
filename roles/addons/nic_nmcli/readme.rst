@@ -6,8 +6,8 @@ Description
 
 This role configure network interfaces to provide desired ip, prefix, gateway, etc.
 
-This role provides all features availables in the main nmcli module:
-https://docs.ansible.com/ansible/latest/collections/community/general/nmcli_module.html
+This role provides all features availables in the main nmcli module.
+Please refer to `nmcli module documentation <https://docs.ansible.com/ansible/latest/collections/community/general/nmcli_module.html>`_ .
 
 Instructions
 ^^^^^^^^^^^^
@@ -15,7 +15,7 @@ Instructions
 Stack specific behaviors
 """"""""""""""""""""""""
 
-While all of the nmcli module options are supported, 
+While all of the nmcli module options are supported,
 some provides more integrated features:
 
 * **conn_name**: is equal to **interface**, but has higher precedence over **interface** if both are set.
@@ -49,8 +49,8 @@ Force gateway and MTU
       gw4: 10.10.2.1
       mtu: 9000
 
-Alias / Multiple ip
-"""""""""""""""""""
+Multiple ip
+"""""""""""
 
 In multiple ip modes, you need to set the prefix yourself:
 
@@ -96,11 +96,8 @@ Vlan
     network: net-100
 
 
-Refer to https://docs.ansible.com/ansible/latest/collections/community/general/nmcli_module.html 
+Refer to `nmcli module documentation <https://docs.ansible.com/ansible/latest/collections/community/general/nmcli_module.html>`_
 for more options.
-
-To be done
-^^^^^^^^^^
 
 Changelog
 ^^^^^^^^^
