@@ -6,7 +6,7 @@
     - name: "Configure BlueBanquise repository"
       yum_repository:
         name: bluebanquise
-        description: BlueBanquise 1.3 repository
-        baseurl: https://bluebanquise.com/repository/releases/1.3/el$releasever/$basearch/bluebanquise/
+        description: BlueBanquise repository
+        baseurl: https://bluebanquise.com/repository/releases/latest/el$releasever/$basearch/bluebanquise/
         gpgcheck: False
       when: ansible_facts.os_family == "RedHat"
