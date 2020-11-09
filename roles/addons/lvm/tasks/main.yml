@@ -21,6 +21,7 @@
       skip: True
   tags:
     - internal
+    - package
 
 - name: "package █ Install {{ lvm_packages_to_install | join(' ') }} packages"
   package:
@@ -61,5 +62,3 @@
     - item.0.vg is defined and item.0.vg is not none
     - item.0.lvs is defined and item.0.lvs
     - item.1.lv is defined and item.1.lv is not none
-    - item.1.size is defined and item.1.size is not none
-
