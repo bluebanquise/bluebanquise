@@ -40,8 +40,24 @@
     that:
       - (network_interfaces | selectattr('routes4','defined') | map(attribute='routes4') | select('match', '.*0.0.0.0/0.*') | list | length) <= 1
 
-- name: command █ Set routes via nmcli
-  command: "nmcli connection modify {{ item.interface }} +ipv4.routes '{{ item.routes4 | default(networks[item.network]['routes4'] | default([])) | join(',') }}'"
+- name: Gather routes
+  shell: "nmcli connection show {{item.interface}} | grep ipv4.routes"
+  loop: "{{ network_interfaces }}"
+  when: item.interface is defined and item.ip4 is defined
+  register: current_ipv4_routes
+  changed_when: False
+
+- name: Combine inventory routes
+  set_fact:
+    inventory_routes4: "{{ (inventory_routes4|default({})) | combine( {item.interface: ( '{ ' + (item.routes4 | default(networks[item.network]['routes4'])| join(' }; { ')) + ' }')} ) }}"
   loop: "{{ network_interfaces }}"
   when: (item.routes4 is defined and item.routes4) or (networks[item.network]['routes4'] is defined and networks[item.network]['routes4'])
+
+- name: command █ Set routes via nmcli
+  command: "nmcli connection modify {{ item.0.interface }} +ipv4.routes '{{ item.0.routes4 | default(networks[item.0.network]['routes4']) | join(',') | replace('ip = ','') | replace(', nh = ',' ')}}'"
+  loop: "{{ network_interfaces | product(current_ipv4_routes.results) | list}}"
+  when:
+    - item.0.interface == item.1.item.interface
+    - inventory_routes4[item.0.interface] is defined
+    - inventory_routes4[item.0.interface] not in item.1.stdout
 
