@@ -18,6 +18,9 @@
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
         - "vars/{{ ansible_facts.os_family }}.yml"
       skip: true
+  tags:
+    - internal
+    - package
 
 - name: "package █ Install {{ nic_nmcli_packages_to_install | join(' ') }}"
   package:
