@@ -15,6 +15,7 @@
     - add ssh jump capability in multi icebergs context (one level only) (#395)
   - addons/nic_nmcli:
     - convert to new inventory format (#401)
+    - add all ansible nmcli module capabilities (#444)
   - core/hosts_file:
     - prevent many blank lines when hosts have no network_interfaces in the inventory (#406)
  - core/rsyslog_server and core/rsyslog_client:
