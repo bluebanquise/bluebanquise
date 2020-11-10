@@ -20,6 +20,8 @@
     - prevent many blank lines when hosts have no network_interfaces in the inventory (#406)
  - core/rsyslog_server and core/rsyslog_client:
     - allow custom server port (#397)
+  - core/log_client:
+    - add a new parameter to set rsyslog default verbosity (#466)
 
 ## 1.3.0 - 2020-08-31
 
