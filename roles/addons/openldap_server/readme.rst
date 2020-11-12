@@ -6,6 +6,11 @@ Description
 
 This role provides a basic but UNSECURE ldap server. It also provides phpldapadmin configuration to manage LDAP.
 
+.. warning::
+  While it is theoreticaly possible to use openldap server on RHEL/CentOS 8, 
+  needed packages are no more provided in official or EPEL repositories.
+  This role should only be used on RHEL/CentOS 7 versions.
+
 Instructions
 ^^^^^^^^^^^^
 
