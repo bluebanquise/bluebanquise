@@ -4,22 +4,36 @@ Advanced DHCP server
 Description
 ^^^^^^^^^^^
 
-This role provides an advanced dhcp server combined with the iPXE roms of BlueBanquise.
-Features like shared_network, opt82, opt61 or snp/snponly roms are provided here for very specific configurations or needs.
+This role provides an advanced dhcp server combined with the iPXE roms of
+BlueBanquise.
+Features like shared_network, opt82, opt61 or snp/snponly roms are provided here
+for very specific configurations or needs.
 
 Instructions
 ^^^^^^^^^^^^
 
-Please read first documentation of the standard dhcp server role. Advanced dhcp server provides sames features than standard dhcp server role, but with more options.
+Please read first documentation of the standard dhcp server role. Advanced dhcp
+server provides same features than standard dhcp server role, but with more
+options.
 
-Dhcp will only take into account networks from the current iceberg, and with naming related to administration network (by default iceX-Y).
+Dhcp will only take into account networks from the current iceberg, and with
+naming related to administration network (by default iceX-Y).
 
 Also, ensure dhcp is set to true for your network.
+
+Finally, note that the following parameters can be set in the inventory, to
+override default ones:
+
+* advanced_dhcp_server_default_lease_time (default to 600)
+* advanced_dhcp_server_max_lease_time (default to 7200)
+
+Consider increasing the default values once your network is production ready.
 
 Multiple entries
 """"""""""""""""
 
-It is possible to have multiple entries for an host interface in the configuration.
+It is possible to have multiple entries for an host interface in the
+configuration.
 
 For example, set a mac address and a dhcp_client_identifier this way:
 
@@ -34,15 +48,18 @@ For example, set a mac address and a dhcp_client_identifier this way:
               dhcp_client_identifier: 00:40:1c
               network: ice1-1
 
-This will create an entry related to mac address and one to dhcp client identifier.
+This will create an entry related to mac address and one to dhcp client
+identifier.
 
 Shared network
 """"""""""""""
 
-It is possible to combine networks into shared-networks when multiple subnets are on the same NIC, or when using opt82/option_match parameter.
+It is possible to combine networks into shared-networks when multiple subnets
+are on the same NIC, or when using opt82/option_match parameter.
 To do so, add a variable in the network definition.
 
-For example to add ice1-1 and ice1-2 into the same shared network, define them this way:
+For example to add ice1-1 and ice1-2 into the same shared network, define them
+this way:
 
 Ice1-1:
 
@@ -71,19 +88,25 @@ shared_network variable is optional and is simply ignored if not set.
 opt 61 and opt 82
 """""""""""""""""
 
-It is possible to use advanced dhcp features to identify an host. The following parameters are available, for the host and its BMC. Note that only one of these must be set for an host/BMC at the same time:
+It is possible to use advanced dhcp features to identify an host. The following
+parameters are available, for the host and its BMC. Note that only one of these
+must be set for an host/BMC at the same time:
 
 - mac: identify based on MAC address. Same than standard dhcp server.
-- dhcp_client_identifier: identify based on a patern (string, etc) to recognise an host. Also known as option 61.
-- host_identifier: identify based on an option (agent.circuit-id, agent.remote-id, etc) to recognise an host. Also known as option 82.
-- match: identify based on multiple options in combinaison to recognise an host. Also known as option 82 with hack.
+- dhcp_client_identifier: identify based on a pattern (string, etc) to recognize an host. Also known as option 61.
+- host_identifier: identify based on an option (agent.circuit-id, agent.remote-id, etc) to recognize an host. Also known as option 82.
+- match: identify based on multiple options in combination to recognize an host. Also known as option 82 with hack.
 
-If using match, because this features is using a specific 'hack' in the dhcp server, you **must** define this host in a shared network, even if this shared network contains a single network (see this very well made page for more information: http://www.miquels.cistron.nl/isc-dhcpd/).
+If using match, because this features is using a specific 'hack' in the dhcp
+server, you **must** define this host in a shared network, even if this shared
+network contains a single network (see this very well made page for more
+information: http://www.miquels.cistron.nl/isc-dhcpd/).
 
 Add dhcp options
 """"""""""""""""
 
-It is possible to add specific dhcp options to an host interface, which can be useful in some specific cases.
+It is possible to add specific dhcp options to an host interface, which can be
+useful in some specific cases.
 This is achieved adding a list named dhcp_options inside the NIC definition.
 
 For example:
@@ -104,9 +127,11 @@ For example:
 Use patterns
 """"""""""""
 
-It is possible, for advanced dhcp patterns, to enable capability to use external macros to write hosts configuration into the dhcp configuration.
+It is possible, for advanced dhcp patterns, to enable capability to use external
+macros to write hosts configuration into the dhcp configuration.
 
-Then, adding a pattern variable to an host NIC definition will trigger the associated macro.
+Then, adding a pattern variable to an host NIC definition will trigger the
+associated macro.
 
 For example:
 
@@ -123,13 +148,16 @@ For example:
 
 Will trigger macro called *my_equipment_x*.
 
-To enable this feature, define *advanced_dhcp_server_enable_patterns* to **true**. The role will now look for a file called *patterns.j2* in files folder of the role (and fail if the file do not exist).
+To enable this feature, define *advanced_dhcp_server_enable_patterns* to
+**true**. The role will now look for a file called *patterns.j2* in files folder
+of the role (and fail if the file do not exist).
 
-patterns.j2 file should contains the macro to be used, named like the pattern targetted in the node definition.
+patterns.j2 file should contains the macro to be used, named like the pattern
+targeted in the node definition.
 Each macro have 3 input, in this order:
 
 1. hostname of the host to be written
-2. dictionnary of the nic to be written
+2. dictionary of the nic to be written
 3. filename of the host to be written
 
 An example of macro would be, for the pattern *my_equipment_x* defined above:
@@ -142,7 +170,7 @@ host {{ macro_host }} {
     hardware ethernet {{macro_nic.mac}};
     fixed-address {{macro_nic.ip4}};
     filename "{{macro_filename}}";
-} 
+}
 {% endmacro %}
 
 Changelog
