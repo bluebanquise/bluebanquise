@@ -1,6 +1,6 @@
 %{!?version: %define version 1.3.0}
 
-%define roles_addons clone clustershell diskless grafana lmod nic_nmcli ofed \
+%define roles_addons clone clustershell diskless grafana lmod nhc nic_nmcli ofed \
 ofed_sm openldap_client openldap_server powerman prometheus_client \
 prometheus_server report root_password singularity slurm sssd users_basic
 
