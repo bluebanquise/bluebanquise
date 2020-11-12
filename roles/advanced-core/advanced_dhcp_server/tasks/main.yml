@@ -44,7 +44,7 @@
 - name: Template >> /etc/dhcp/dhcpd.conf
   template:
     src: dhcpd.conf.j2
-    dest: /etc/dhcp/dhcpd.conf
+    dest: /etc/dhcp/dhcpd.conf.new
     owner: root
     group: root
     mode: 0644
@@ -55,7 +55,7 @@
 - name: Template >> /etc/dhcp/dhcpd.networks.conf
   template:
     src: dhcpd.networks.conf.j2
-    dest: /etc/dhcp/dhcpd.networks.conf
+    dest: /etc/dhcp/dhcpd.networks.conf.new
     owner: root
     group: root
     mode: 0644
@@ -66,7 +66,7 @@
 - name: Template >> /etc/dhcp/dhcpd.{{ item }}.conf
   template:
     src: dhcpd.subnet.conf.j2
-    dest: /etc/dhcp/dhcpd.{{ item }}.conf
+    dest: /etc/dhcp/dhcpd.{{ item }}.conf.new
     owner: root
     group: root
     mode: 0644

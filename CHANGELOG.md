@@ -16,9 +16,14 @@
   - addons/nic_nmcli:
     - convert to new inventory format (#401)
     - add all ansible nmcli module capabilities (#444)
+  - advanced_core/advanced_dhcp_server:
+    - add multiple entry per host capability
+    - add custome options definition for each host
+    - add patterns capability to write hosts configuration
+    - improve template rendering time
   - core/hosts_file:
     - prevent many blank lines when hosts have no network_interfaces in the inventory (#406)
- - core/rsyslog_server and core/rsyslog_client:
+  - core/rsyslog_server and core/rsyslog_client:
     - allow custom server port (#397)
 
 ## 1.3.0 - 2020-08-31
