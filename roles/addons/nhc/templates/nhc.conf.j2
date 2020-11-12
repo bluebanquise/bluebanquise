@@ -1,6 +1,12 @@
 #jinja2: lstrip_blocks: True
-#### Blue Banquise file ####
+#### BlueBanquise file ####
 ## {{ ansible_managed }}
+
+{% if nhc_static_configuration is defined and nhc_static_configuration is not none %}
+
+{{ nhc_static_configuration }}
+
+{% else %}
 
 ######################
 ####### STATIC #######
@@ -35,5 +41,7 @@
 * || {{ check }} {{ arguments }}
     {% endif %}
 
-  {% endof %}
+  {% endfor %}
+{% endif %}
+
 {% endif %}

@@ -1,5 +1,4 @@
 ---
-
 - name: include_vars ░ Gather OS specific variables
   # This task gathers variables defined in OS specific files.
   #
@@ -23,16 +22,10 @@
     - internal
     - package
 
-- name: "package █ Install {{ nhc_packages_to_install | join(' ') }}"
+- name: "package █ Install nhc and additional packages"
   package:
-    name: "{{ nhc_packages_to_install }}"
+    name: "{{ nhc_packages_to_install + nhc_custom_packages_to_install }}"
     state: present
-
-- name: package █ Install optional custom packages
-  package:
-    name: "{{ nhc_custom_packages_to_install }}"
-    state: present
-  when: nhc_custom_packages_to_install is defined and nhc_custom_packages_to_install
 
 - name: template █ Generate nhc configuration file
   template:
@@ -41,14 +34,12 @@
     owner: root
     group: root
     mode: 0644
-  when: nhc_use_template
 
-- name: copy █ Copy nhc static configuration file
+- name: copy █ Copy nhc custom files
   copy:
     src: "{{ item }}"
     dest: /etc/nhc/"{{ item }}"
     owner: root
     group: root
     mode: 0644
-  loop: "{{ nhc_files | default(['nhc.conf']) }}"
-  when: not nhc_use_template
+  loop: "{{ nhc_files }}"

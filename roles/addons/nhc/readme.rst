@@ -6,8 +6,13 @@ Description
 
 This role install and configure NHC.
 
+To find more information on NHC or grab latest release, refer to `project github <https://github.com/mej/nhc>`_
+
 Instructions
 ^^^^^^^^^^^^
+
+General usage
+"""""""""""""
 
 To set checks, simply create variable **nhc_checks** and provide all checks with
 check name as key and arguments of this check as value. For example:
@@ -31,20 +36,33 @@ simply provide a list of arguments:
       - -f /home
     ...
 
-You can force usage of a static file instead of a generated one by setting
-**nhc_use_template** to *false*. In this mode, the role will by default look for
-a file called *nhc.conf* in files folder of the role, and copy it to
-*/etc/nhc/nhc.conf* on target host.
-It is possible to force copy of multiple nhc files by setting variable
-*nhc_files* as a list of files names that should be copied from files folder of
-the role to */etc/nhc* on the target host.
+You can force usage of a static file content instead of a generated one by 
+setting **nhc_static_configuration** into inventory.
+**nhc_static_configuration** is a multi lines variable that should contain 
+the full desired content of the target nhc.conf file.
+
+For example:
+
+  nhc_static_configuration: |
+    * || export TS=1
+    * || export DEBUG=0
+    * || export DF_FLAGS="-Tk"
+    * || export DFI_FLAGS="-Ti"
+    * || check_ps_service -u root -S sshd
+    ...   
+
+Advanced usage
+""""""""""""""
+
+It is possible to force copy of multiple nhc files (custom checks, scripts, etc) 
+by setting variable *nhc_files* as a list of files names that should be copied 
+from files folder of the role to */etc/nhc* to the target host.
 
 For example:
 
 .. code-block:: yaml
 
   nhc_files:
-    - nhc.conf
     - my_custom_check.nhc
 
 You can require installation of additional custom packages (for example

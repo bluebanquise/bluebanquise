@@ -41,12 +41,12 @@ ADDONS
 .. include:: roles/addons/clone/readme.rst
 .. include:: roles/addons/clustershell/readme.rst
 .. include:: roles/addons/diskless/readme.rst
+.. include:: roles/addons/nhc/readme.rst
+.. include:: roles/addons/nic_nmcli/readme.rst
 .. include:: roles/addons/ofed/readme.rst
 .. include:: roles/addons/ofed_sm/readme.rst
 .. include:: roles/addons/openldap_client/readme.rst
 .. include:: roles/addons/openldap_server/readme.rst
-.. include:: roles/addons/nhc/readme.rst
-.. include:: roles/addons/nic_nmcli/readme.rst
 .. include:: roles/addons/powerman/readme.rst
 .. include:: roles/addons/prometheus_server/readme.rst
 .. include:: roles/addons/prometheus_client/readme.rst
