@@ -1,3 +1,13 @@
 ---
 - name: reload firewalld
   command: firewall-cmd --reload
+
+- name: service Restart prometheus server
+  service:
+    name: prometheus
+    state: restarted
+  #loop: "{{ dhcp_server_services_to_start }}"
+  #when:
+  #  - "'service' not in ansible_skip_tags"
+  #  - (start_services | bool)
+

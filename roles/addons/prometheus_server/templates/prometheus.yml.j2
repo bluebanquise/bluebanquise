@@ -2,6 +2,12 @@
 #### Blue Banquise file ####
 ## {{ansible_managed}}
 
+{% macro node_main_network(macro_network_interfaces,macro_current_iceberg_network) %}
+{{ macro_network_interfaces | selectattr('network','defined') | selectattr('network','match','^'+macro_current_iceberg_network+'-[a-zA-Z0-9]+') | map(attribute='network') | list | first }}
+{% endmacro %}
+
+{{hostvars[inventory_hostname]}}
+
 global:
   scrape_interval: {{prometheus.scrape_interval}}
   evaluation_interval: {{prometheus.evaluation_interval}}
@@ -13,7 +19,12 @@ alerting:
   alertmanagers:
   - static_configs:
     - targets:
+{% if hostvars[inventory_hostname]['icebergs_system'] and hostvars[inventory_hostname]['prometheus']['federate'] is defined and hostvars[inventory_hostname]['prometheus']['federate'] != inventory_hostname %}
+      - {{hostvars[inventory_hostname]['prometheus']['federate']}}:9093
       - localhost:9093 # Alertmanager is considered on the same host for now
+{% else %}
+      - localhost:9093 # Alertmanager is considered on the same host for now
+{% endif %}
 
 scrape_configs:
 
@@ -23,20 +34,49 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:9090']
 
+{% if hostvars[inventory_hostname]['icebergs_system'] and hostvars[inventory_hostname]['prometheus']['federate'] is defined and hostvars[inventory_hostname]['prometheus']['federate'] == inventory_hostname %}
+# FEDERATE CONFIGURATION
+  - job_name: 'federate'
+    scrape_interval: 15s
+
+    honor_labels: true
+    metrics_path: '/federate'
+
+    params:
+      'match[]':
+        - '{job="prometheus_master"}'
+        - '{__name__=~"node.*"}'
+
+    static_configs:
+      - targets:
+  {% for node in hostvars[inventory_hostname]['groups']['equipment_typeM'] %}
+    {% if node != ansible_host %}
+      {% set ice_network = node_main_network(hostvars[node]['network_interfaces'],j2_current_iceberg_network) %} 
+        - '{{node}}-{{ice_network}}:9090'
+    {% endif %}
+  {% endfor %}
+{% endif %}
 
 # GENERIC EXPORTER
 # All equipment profiles and their exporters
+# If iceberg mechanism is enabled you need to define prometheus.federate to specify the master of prometheus server
 {% for equipment in j2_equipment_groups_list %}
   {% if hostvars[groups[equipment][0]]['monitoring'] is defined and hostvars[groups[equipment][0]]['monitoring'] is not none and hostvars[groups[equipment][0]]['monitoring']['exporters'] is defined and hostvars[groups[equipment][0]]['monitoring']['exporters'] is not none and hostvars[groups[equipment][0]]['monitoring']['exporters'] is iterable %}
     {% for exporter, exporter_vars in hostvars[groups[equipment][0]]['monitoring']['exporters'].items() %}
       {% if exporter != "ipmi_exporter" and exporter != "snmp_exporter" %}
+        # if not hostvars[inventory_hostname]['icebergs_system'] or ( hostvars[inventory_hostname]['prometheus']['federate'] is defined and hostvars[inventory_hostname]['prometheus']['federate'] != inventory_hostname ) %}
   - job_name: '{{ equipment }}_{{ exporter }}'
-    scrape_interval: {{ exporter_vars.scrape_interval | default('') }}
-    scrape_timeout: {{ exporter_vars.scrape_timeout | default('') }}
+    #scrape_interval: {{ exporter_vars.scrape_interval | default('') }}
+    #scrape_timeout: {{ exporter_vars.scrape_timeout | default('') }}
     static_configs:
-        {% for node in groups[equipment] %}
+          {% for node in groups[equipment] %}
+            {% if hostvars[inventory_hostname]['icebergs_system'] and hostvars[inventory_hostname]['j2_current_iceberg'] == hostvars[node]['j2_current_iceberg'] %}
       - targets: ['{{ node }}:{{ exporter_vars.port }}']
-        {% endfor %}
+	    {% elif not hostvars[inventory_hostname]['icebergs_system'] %}
+      - targets: ['{{ node }}:{{ exporter_vars.port }}']
+            {% endif %}
+          {% endfor %}
+        # endif %}
       {% endif %}
     {% endfor %}
   {% endif %}
@@ -46,14 +86,17 @@ scrape_configs:
 # SNMP_EXPORTER
 {% for equipment in j2_equipment_groups_list %}
   {% if hostvars[groups[equipment][0]]['monitoring'] is defined and hostvars[groups[equipment][0]]['monitoring'] is not none and hostvars[groups[equipment][0]]['monitoring']['exporters'] is defined and hostvars[groups[equipment][0]]['monitoring']['exporters'] is not none and hostvars[groups[equipment][0]]['monitoring']['exporters'] is iterable and "snmp_exporter" in hostvars[groups[equipment][0]]['monitoring']['exporters'] %}
+    {% if not hostvars[inventory_hostname]['icebergs_system'] or ( hostvars[inventory_hostname]['prometheus']['federate'] is defined and hostvars[inventory_hostname]['prometheus']['federate'] != inventory_hostname ) %}
   - job_name: 'snmp_{{equipment}}'
     scrape_interval: {{ hostvars[groups[equipment][0]]['monitoring']['exporters']['snmp_exporter']['scrape_interval'] | default('') }}
     scrape_timeout: {{ hostvars[groups[equipment][0]]['monitoring']['exporters']['snmp_exporter']['scrape_timeout'] | default('') }}
     static_configs:
      - targets:
-    {% for node in groups[equipment] %}
+      {% for node in groups[equipment] %}
+        {% if hostvars[inventory_hostname]['icebergs_system'] and hostvars[inventory_hostname]['j2_current_iceberg'] == hostvars[node]['j2_current_iceberg'] %}
        - {{ node }}
-    {% endfor %}
+        {% endif %}
+      {% endfor %}
 
     metrics_path: /snmp
     # params:
@@ -65,6 +108,7 @@ scrape_configs:
         target_label: instance
       - target_label: __address__
         replacement: localhost:{{ hostvars[groups[equipment][0]]['monitoring']['exporters']['snmp_exporter']['port'] | default('9116') }}
+    {% endif %}
   {% endif %}
 {% endfor %}
 
@@ -72,6 +116,7 @@ scrape_configs:
 # BMC - IPMI_EXPORTER
 {% for equipment in j2_equipment_groups_list %}
   {% if hostvars[groups[equipment][0]]['monitoring'] is defined and hostvars[groups[equipment][0]]['monitoring'] is not none and hostvars[groups[equipment][0]]['monitoring']['exporters'] is defined and hostvars[groups[equipment][0]]['monitoring']['exporters'] is not none and hostvars[groups[equipment][0]]['monitoring']['exporters'] is iterable and "ipmi_exporter" in hostvars[groups[equipment][0]]['monitoring']['exporters'] %}
+    {% if not hostvars[inventory_hostname]['icebergs_system'] or ( hostvars[inventory_hostname]['prometheus']['federate'] is defined and hostvars[inventory_hostname]['prometheus']['federate'] != inventory_hostname ) %}
   - job_name: ipmi_{{equipment}}
     params:
       module: [{{equipment}}]
@@ -80,11 +125,13 @@ scrape_configs:
     metrics_path: /ipmi
     scheme: http
     static_configs:
-    {% for node in groups[equipment] %}
-      {% if hostvars[node]['bmc'] is defined and not none %}
+      {% for node in groups[equipment] %}
+        {% if hostvars[node]['bmc'] is defined and not none %}
+          {% if hostvars[inventory_hostname]['icebergs_system'] and hostvars[inventory_hostname]['j2_current_iceberg'] == hostvars[node]['j2_current_iceberg'] %}
       - targets: ['{{hostvars[node]['bmc']['name']}}']
-      {% endif %}
-    {% endfor %}
+          {% endif %}
+        {% endif %}
+      {% endfor %}
     relabel_configs:
     - source_labels: [__address__]
       separator: ;
@@ -103,5 +150,6 @@ scrape_configs:
       target_label: __address__
       replacement: localhost:{{ hostvars[groups[equipment][0]]['monitoring']['exporters']['ipmi_exporter']['port'] | default('9290') }}
       action: replace
+    {% endif %}
   {% endif %}
 {% endfor %}
