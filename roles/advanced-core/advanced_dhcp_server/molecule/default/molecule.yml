@@ -36,6 +36,7 @@ provisioner:
 
         ep_firewall: true
         ep_ipxe_driver: snponly
+        ep_ipxe_embed: standard
         ep_ipxe_platform: pcbios
         ep_hardware:
           cpu:
@@ -94,6 +95,7 @@ provisioner:
               network: ice1-1
 
             ep_ipxe_driver: default
+            ep_ipxe_embed: standard
             ep_ipxe_platform: pcbios
             ep_hardware:
               cpu:
@@ -109,7 +111,7 @@ provisioner:
                 and option agent.circuit-id = 01:00:16
                 and not (substring(option vendor-class-identifier, 0, 15) = "VENDOR_NAME_1" or
                 substring(option vendor-class-identifier, 0, 13) = "VENDOR_NAME_2")) or
-                (option dhcp-message-type = 3 and binary-to-ascii(10, 8, ".", option dhcp-requested-address) = "10.11.3.2" ) 
+                (option dhcp-message-type = 3 and binary-to-ascii(10, 8, ".", option dhcp-requested-address) = "10.11.3.2" )
               ip4: 10.11.3.2
               network: ice1-1
             bmc:
@@ -125,6 +127,7 @@ provisioner:
 
             ep_ipxe_driver: default
             ep_ipxe_platform: efi
+            ep_ipxe_embed: standard
             ep_hardware:
               cpu:
                 architecture: x86_64
@@ -144,9 +147,10 @@ provisioner:
               dhcp_client_identifier: 00:30:18
               ip4: 10.30.103.3
               network: ice1-2
-            
+
             ep_ipxe_driver: snponly
             ep_ipxe_platform: efi
+            ep_ipxe_embed: standard
             ep_hardware:
               cpu:
                 architecture: x86_64
