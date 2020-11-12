@@ -6,8 +6,6 @@
 {{ macro_network_interfaces | selectattr('network','defined') | selectattr('network','match','^'+macro_current_iceberg_network+'-[a-zA-Z0-9]+') | map(attribute='network') | list | first }}
 {% endmacro %}
 
-{{hostvars[inventory_hostname]}}
-
 global:
   scrape_interval: {{prometheus.scrape_interval}}
   evaluation_interval: {{prometheus.evaluation_interval}}
