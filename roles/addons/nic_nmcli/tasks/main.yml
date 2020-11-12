@@ -118,7 +118,7 @@
       - (network_interfaces | selectattr('routes4','defined') | map(attribute='routes4') | select('match', '.*0.0.0.0/0.*') | list | length) <= 1
 
 - name: shell ░ Gather routes
-  shell: "nmcli connection show {{item.interface}} | grep ipv4.routes"
+  shell: "set -o pipefail && nmcli connection show {{ item.interface }} | grep ipv4.routes"
   loop: "{{ network_interfaces }}"
   when: item.interface is defined and item.ip4 is defined
   register: current_ipv4_routes
@@ -131,8 +131,8 @@
   when: (item.routes4 is defined and item.routes4) or (networks[item.network]['routes4'] is defined and networks[item.network]['routes4'])
 
 - name: command █ Set routes via nmcli
-  command: "nmcli connection modify {{ item.0.interface }} +ipv4.routes '{{ item.0.routes4 | default(networks[item.0.network]['routes4']) | join(',') | replace('ip = ','') | replace(', nh = ',' ')}}'"
-  loop: "{{ network_interfaces | product(current_ipv4_routes.results) | list}}"
+  command: "nmcli connection modify {{ item.0.interface }} +ipv4.routes '{{ item.0.routes4 | default(networks[item.0.network]['routes4']) | join(',') | replace('ip = ','') | replace(', nh = ',' ') }}'"
+  loop: "{{ network_interfaces | product(current_ipv4_routes.results) | list }}"
   notify: command █ Reload connections
   when:
     - item.0.interface == item.1.item.interface

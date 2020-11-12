@@ -114,8 +114,8 @@ You can define routes at two levels:
       netmask: 255.255.0.0
       broadcast: 10.10.255.255
       routes4:
-        - 10.11.0.0/24 10.10.0.2
-        - 10.12.0.0/24 10.10.0.2
+        - ip = 10.11.0.0/24, nh = 10.10.0.2
+        - ip = 10.12.0.0/24, nh = 10.10.0.2
 
 * Or under host definition, so in hostvars:
 
@@ -128,8 +128,9 @@ You can define routes at two levels:
               mac: 08:00:27:36:c0:ac
               network: ice1-1
               routes4:
-                - 10.11.0.0/24 10.10.0.2
-                - 10.12.0.0/24 10.10.0.2
+                - ip = 10.11.0.0/24, nh = 10.10.0.2
+                - ip = 10.12.0.0/24, nh = 10.10.0.2
+
 .. note::
   Note that to define a default route/gateway, use *0.0.0.0/0* as route to be defined.
 
