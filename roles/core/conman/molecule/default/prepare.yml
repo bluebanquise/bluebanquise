@@ -1,6 +1,6 @@
 ---
 - name: Prepare
-  hosts: management1
+  hosts: all
 
   tasks:
     - name: "Configure BlueBanquise repository"

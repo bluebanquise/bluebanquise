@@ -1,6 +1,6 @@
 ---
 - name: Verify
-  hosts: management1
+  hosts: all
   tasks:
 
     - name: Collect package facts
@@ -56,7 +56,7 @@
     - name: Retrieve client configuration in /etc/conman.conf file
       lineinfile:
         path: /etc/conman.conf
-        regexp: 'console name="compute1" dev="ipmitool.exp 10.10.102.1 ADMIN ADMIN"'
+        regexp: 'console name="instance" dev="ipmitool.exp 10.10.102.1 ADMIN ADMIN"'
         state: absent
       check_mode: yes
       register: reg_conf_conman
@@ -66,13 +66,13 @@
       assert:
         that: reg_conf_conman.found
 
-    - name: Retrieve file /var/log/conman/compute1.log system status
+    - name: Retrieve file /var/log/conman/instance.log system status
       stat:
         path: /etc/conman.conf
       register: reg_log_conman
       changed_when: false
 
-    - name: Assert log client file /var/log/conman/compute1.log exists
+    - name: Assert log client file /var/log/conman/instance.log exists
       assert:
         that: reg_log_conman.stat.exists
 

@@ -1,6 +1,6 @@
 ---
 - name: Converge
-  hosts: management1
+  hosts: all
   tasks:
     - name: "Include conman"
       include_role:
