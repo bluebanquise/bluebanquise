@@ -32,7 +32,7 @@
 - name: "service █ Manage {{ nic_nmcli_services_to_start | join(' ') }} state"
   service:
     name: "{{ item }}"
-    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+    enabled: yes
     state: started
   loop: "{{ nic_nmcli_services_to_start }}"
   tags:
