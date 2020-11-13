@@ -1,5 +1,5 @@
 ---
-- name: include_vars ░ Gathering OS specific variables
+- name: include_vars ░ Gather OS specific variables
   # This task gathers variables defined in OS specific files.
   #
   # Search vars in:
@@ -19,7 +19,10 @@
         - "vars/{{ ansible_facts.os_family }}.yml"
       skip: true
   tags:
+    - firewall
     - internal
+    - package
+    - service
 
 - name: firewalld █ "Add services to firewall's {{ repositories_server_firewall_zone | default('public') }} zone"
   firewalld:

@@ -20,6 +20,8 @@
       skip: true
   tags:
     - internal
+    - package
+    - service
 
 - name: "package █ Install {{ firewall_packages_to_install | join(' ') }} packages"
   package:
