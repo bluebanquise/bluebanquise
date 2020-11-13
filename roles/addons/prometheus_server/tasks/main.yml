@@ -32,8 +32,8 @@
 
 - name: "copy █ Install firewalld service configuration file"
   copy:
-    src: alertmanager.xml
-    dest: /etc/firewalld/services/alertmanager.xml
+    src: "{{ item }}.xml"
+    dest: "/etc/firewalld/services/{{ item }}.xml"
     owner: root
     group: root
     mode: 0644
@@ -41,6 +41,9 @@
     - ansible_facts.os_family == "RedHat"
     - ep_firewall | default(false) | bool
   notify: reload firewalld
+  loop:
+    - prometheus
+    - alertmanager
   tags:
     - firewall
 
@@ -157,3 +160,4 @@
   when: (start_services | bool)
   tags:
     - service
+    - molecule-idempotence-notest # FIXME idempotence disabled because of (https://github.com/bluebanquise/bluebanquise/issues/366)
