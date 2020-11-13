@@ -20,6 +20,7 @@
       skip: true
   tags:
     - internal
+    - package
 
 - name: package █ Install Ansible and dependencies for filters
   package:
