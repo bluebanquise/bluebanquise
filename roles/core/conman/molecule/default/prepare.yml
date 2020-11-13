@@ -8,5 +8,6 @@
         name: bluebanquise
         description: BlueBanquise 1.2 repository
         baseurl: https://bluebanquise.com/repository/releases/1.2/el$releasever/$basearch/bluebanquise/
+        gpgcheck: False
       when: ansible_facts.os_family == "RedHat"
 
