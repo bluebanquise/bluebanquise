@@ -55,7 +55,7 @@
     persistent: yes
   when:
     - ansible_facts.selinux.status == "enabled"
-    - nfs_settings.selinux.use_nfs_home_dirs == "true"
+    - nfs_settings.selinux.use_nfs_home_dirs
 
 - name: mount █ Mount exported NFS into directories
   mount:
