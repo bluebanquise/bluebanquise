@@ -89,8 +89,7 @@ opt 61 and opt 82
 """""""""""""""""
 
 It is possible to use advanced dhcp features to identify an host. The following
-parameters are available, for the host and its BMC. Note that only one of these
-must be set for an host/BMC at the same time:
+parameters are available, for the host and its BMC:
 
 - mac: identify based on MAC address. Same than standard dhcp server.
 - dhcp_client_identifier: identify based on a pattern (string, etc) to recognize an host. Also known as option 61.

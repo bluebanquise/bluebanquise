@@ -17,7 +17,7 @@
     - convert to new inventory format (#401)
     - add all ansible nmcli module capabilities (#444)
   - advanced_core/advanced_dhcp_server:
-    - add multiple entry per host capability
+    - add multiple entries per host capability
     - add custome options definition for each host
     - add patterns capability to write hosts configuration
     - improve template rendering time
