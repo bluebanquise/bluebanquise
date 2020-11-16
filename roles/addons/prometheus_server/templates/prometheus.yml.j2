@@ -50,7 +50,7 @@ scrape_configs:
   {% for node in hostvars[inventory_hostname]['groups']['equipment_typeM'] %}
     {% if node != ansible_host %}
       {% set ice_network = node_main_network(hostvars[node]['network_interfaces'],j2_current_iceberg_network) %} 
-        - '{{node}}-{{ice_network}}:9090'
+        - '{{node}}-{{ice_network|trim}}:9090'
     {% endif %}
   {% endfor %}
 {% endif %}
@@ -93,6 +93,8 @@ scrape_configs:
       {% for node in groups[equipment] %}
         {% if hostvars[inventory_hostname]['icebergs_system'] and hostvars[inventory_hostname]['j2_current_iceberg'] == hostvars[node]['j2_current_iceberg'] %}
        - {{ node }}
+        {% elif not hostvars[inventory_hostname]['icebergs_system'] %}
+       - {{ node }}
         {% endif %}
       {% endfor %}
 
@@ -127,8 +129,11 @@ scrape_configs:
         {% if hostvars[node]['bmc'] is defined and not none %}
           {% if hostvars[inventory_hostname]['icebergs_system'] and hostvars[inventory_hostname]['j2_current_iceberg'] == hostvars[node]['j2_current_iceberg'] %}
       - targets: ['{{hostvars[node]['bmc']['name']}}']
+          {% elif not hostvars[inventory_hostname]['icebergs_system'] %}
+      - targets: ['{{hostvars[node]['bmc']['name']}}']
           {% endif %}
         {% endif %}
+        #{{hostvars[node]['bmc']['name']}}
       {% endfor %}
     relabel_configs:
     - source_labels: [__address__]
