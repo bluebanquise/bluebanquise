@@ -14,5 +14,4 @@
     value: "{{ item.value }}"
     state: present
     reload: "{{ kernel_config_sysctl_reload | ternary('yes','no') }}"
-  loop: "{{ kernel_config_sysctl }}"
-   
+  loop: "{{ kernel_config_sysctl }}" 
