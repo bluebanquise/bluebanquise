@@ -22,6 +22,7 @@ jobs:
         distro:
           - centos:7
           - centos:8
+          - opensuseleap:15.1
 
     env:
       MOLECULE_DISTRO: ${{ matrix.distro }}

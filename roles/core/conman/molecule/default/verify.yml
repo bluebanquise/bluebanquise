@@ -3,9 +3,18 @@
   hosts: all
   tasks:
 
-    - name: Collect package facts
+    - name: Collect package facts for RedHat
       package_facts:
         manager: auto
+      when:
+        - ansible_facts.os_family == "RedHat"
+
+    - name: Collect package facts for OpenSuse
+      command: rpm -qa | grep "conman|\ipmitool"
+      register: result
+      changed_when: false
+      when:
+        - ansible_facts.os_family == "Suse"
 
     - name: Collect services facts
       service_facts:
@@ -38,6 +47,13 @@
       when:
         - ansible_facts.os_family == "RedHat"
         - ansible_facts.distribution_major_version == "8"
+
+    - name: Assert needed OpenSuse conman packages are installed
+      assert:
+        that: result.stdout |
+                 regex_findall(('conman|ipmitool'), multiline=True) | length == 2
+      when:
+        - ansible_facts.os_family == "Suse"
 
     - name: Retrieve file /etc/conman.conf system status
       stat:
@@ -81,16 +97,12 @@
         path: /usr/lib/conman/exec
       register: reg_dir_conman
       changed_when: false
-      when:
-        - ansible_facts.os_family == "RedHat"
 
     - name: Assert dir conman_execpath /usr/lib/conman/exec exist
       assert:
         that:
           - reg_dir_conman.stat.exists
           - reg_dir_conman.stat.isdir
-      when:
-        - ansible_facts.os_family == "RedHat"
 
     - name: Check conman is enabled
       assert:
