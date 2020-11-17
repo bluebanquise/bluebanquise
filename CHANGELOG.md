@@ -6,6 +6,7 @@
 
 #### New roles
 
+  - addons/kernel_config: set or update kernel parameters and sysctl (#481)
   - addons/lmod: allow to install Lmod and specify custom modulefiles path (#390)
   - addons/nhc: allow to install and setup nhc (#448)
   - addons/singularity: allow to install Singularity (#403)
