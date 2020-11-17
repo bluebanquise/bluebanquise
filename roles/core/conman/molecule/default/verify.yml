@@ -74,8 +74,7 @@
       assert:
         that: reg_log_conman.stat.exists
 
-
-    - name: Retrieve dir system status
+    - name: Retrieve dir /usr/share/conman/exec system status
       stat:
         path: /usr/share/conman/exec
       register: reg_dir_conman
@@ -93,7 +92,7 @@
         - ansible_facts.os_family == "RedHat"
         - ansible_facts.distribution_major_version == "7"
 
-    - name: Retrieve dir system status
+    - name: Retrieve dir /usr/lib/conman/exec system status rhel8
       stat:
         path: /usr/lib/conman/exec
       register: reg_dir_conman
@@ -102,7 +101,7 @@
         - ansible_facts.os_family == "RedHat"
         - ansible_facts.distribution_major_version == "8"
 
-    - name: Assert dir conman_execpath /usr/lib/conman/exec exist
+    - name: Assert dir conman_execpath /usr/lib/conman/exec exist rhel8
       assert:
         that:
           - reg_dir_conman.stat.exists
@@ -110,6 +109,22 @@
       when:
         - ansible_facts.os_family == "RedHat"
         - ansible_facts.distribution_major_version == "8"
+
+    - name: Retrieve dir /usr/lib/conman/exec system status openSuse 15.1
+      stat:
+        path: /usr/lib/conman/exec
+      register: reg_dir_conman
+      changed_when: false
+      when:
+        - ansible_facts.os_family == "Suse"
+
+    - name: Assert dir conman_execpath /usr/lib/conman/exec exist OpenSuse 15.1
+      assert:
+        that:
+          - reg_dir_conman.stat.exists
+          - reg_dir_conman.stat.isdir
+      when:
+        - ansible_facts.os_family == "Suse"
 
     - name: Check conman is enabled
       assert:
