@@ -91,7 +91,6 @@
     owner: prometheus
     group: prometheus
     mode: 0640
-  when: not hostvars[inventory_hostname]['icebergs_system'] or ( hostvars[inventory_hostname]['prometheus']['federate'] is defined and hostvars[inventory_hostname]['prometheus']['federate'] == ansible_host )
 
 - name: Create directories structure for alertmanager
   file:
@@ -102,7 +101,6 @@
    group: alertmanager
   loop:
    - /etc/alertmanager
-  when: not hostvars[inventory_hostname]['icebergs_system'] or ( hostvars[inventory_hostname]['prometheus']['federate'] is defined and hostvars[inventory_hostname]['prometheus']['federate'] == ansible_host )
 
 - name: Template >> /etc/alertmanager/alertmanager.yml
   template:
@@ -113,7 +111,6 @@
     mode: 0640
   tags:
     - template
-  when: not hostvars[inventory_hostname]['icebergs_system'] or ( hostvars[inventory_hostname]['prometheus']['federate'] is defined and hostvars[inventory_hostname]['prometheus']['federate'] == ansible_host )
 
 - name: Template >> /etc/ipmi_exporter/ipmi_config.yml
   template:
