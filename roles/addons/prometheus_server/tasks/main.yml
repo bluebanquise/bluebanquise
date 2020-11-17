@@ -30,10 +30,24 @@
     - monitoring.exporters.snmp_exporter.with_generator is defined
     - monitoring.exporters.snmp_exporter.with_generator
 
-- name: "copy █ Install firewalld service configuration file"
+- name: "copy █ Install alertmanager firewalld service configuration file"
   copy:
     src: alertmanager.xml
     dest: /etc/firewalld/services/alertmanager.xml
+    owner: root
+    group: root
+    mode: 0644
+  when:
+    - ansible_facts.os_family == "RedHat"
+    - ep_firewall | default(false) | bool
+  notify: reload firewalld
+  tags:
+    - firewall
+
+- name: "copy █ Install karma firewalld service configuration file"
+  copy:
+    src: karma.xml
+    dest: /etc/firewalld/services/karma.xml
     owner: root
     group: root
     mode: 0644
@@ -59,6 +73,7 @@
   loop:
     - prometheus
     - alertmanager
+    - karma
   tags:
     - firewall
 
