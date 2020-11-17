@@ -3,11 +3,9 @@
   hosts: all
   tasks:
 
-    - name: Collect package facts for RedHat
+    - name: Collect package facts
       package_facts:
         manager: auto
-      when:
-        - ansible_facts.os_family == "RedHat"
 
     - name: Collect services facts
       service_facts:
@@ -18,8 +16,6 @@
       loop:
         - conman
         - ipmitool
-      when:
-        - ansible_facts.os_family == "RedHat"
 
     - name: Assert needed el7 conman packages are installed
       assert:

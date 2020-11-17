@@ -12,3 +12,10 @@
       when:
         - ansible_facts.os_family == "RedHat"
         - ansible_facts.distribution_major_version == "8"
+
+    - name: Install needed package
+      package:
+        name: python2-rpm
+        state: present
+      when:
+        - ansible_facts.os_family == "Suse"
