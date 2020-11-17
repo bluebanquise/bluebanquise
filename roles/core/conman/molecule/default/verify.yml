@@ -78,17 +78,42 @@
       assert:
         that: reg_log_conman.stat.exists
 
+
+    - name: Retrieve dir system status
+      stat:
+        path: /usr/share/conman/exec
+      register: reg_dir_conman
+      changed_when: false
+      when:
+        - ansible_facts.os_family == "RedHat"
+        - ansible_facts.distribution_major_version == "7"
+
+    - name: Assert dir conman_execpath /usr/share/conman/exec exist
+      assert:
+        that:
+          - reg_dir_conman.stat.exists
+          - reg_dir_conman.stat.isdir
+      when:
+        - ansible_facts.os_family == "RedHat"
+        - ansible_facts.distribution_major_version == "7"
+
     - name: Retrieve dir system status
       stat:
         path: /usr/lib/conman/exec
       register: reg_dir_conman
       changed_when: false
+      when:
+        - ansible_facts.os_family == "RedHat"
+        - ansible_facts.distribution_major_version == "8"
 
     - name: Assert dir conman_execpath /usr/lib/conman/exec exist
       assert:
         that:
           - reg_dir_conman.stat.exists
           - reg_dir_conman.stat.isdir
+      when:
+        - ansible_facts.os_family == "RedHat"
+        - ansible_facts.distribution_major_version == "8"
 
     - name: Check conman is enabled
       assert:
