@@ -1,4 +1,2 @@
 ---
-kernel_config_sysctl: []
 kernel_config_sysctl_reload: true
-kernel_config_parameters: []

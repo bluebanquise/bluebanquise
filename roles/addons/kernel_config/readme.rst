@@ -12,33 +12,21 @@ Instructions
 kernel parameters
 """""""""""""""""
 
-The role uses 2 sources for kernel parameters:
-
-1. *ep_kernel_parameters* from core stack, which is a string
-2. *kernel_config_parameters*, which is an optional list
-
-An example for *kernel_config_parameters* would be:
-
-.. code-block:: yaml
-
-  kernel_config_parameters:
-    - rd.blacklist=mpt3sas
-    - ipv6.disable=1
-    - nopti
-    ...
-
-Role gather both and ensure all parameters set in these variables 
-are set for the current default kernel.
+The role uses the *ep_kernel_parameters* as source. 
 
 sysctl
 """"""
 
-Sysctl parameters to be set are defined in the *kernel_config_sysctl* 
-variable. An example would be:
+Sysctl parameters to be set are defined in the *ep_sysctl* 
+variable. As it is an *ep_* variable, it should only be 
+set for each equipment profiles, and not set at hostvars 
+level.
+
+An example would be:
 
 .. code-block:: yaml
 
-  kernel_config_sysctl:
+  ep_sysctl:
     kernel.panic: absent
     vm.swappiness: 5
     ...
@@ -49,19 +37,12 @@ setting variable *kernel_config_sysctl_reload* to **false**.
 Input
 ^^^^^
 
-Mandatory inventory vars:
-
-**hostvars[inventory_hostname]**
-
-* ep_kernel_parameters
-
 Optional inventory vars:
 
 **hostvars[inventory_hostname]**
 
-* kernel_config_sysctl
+* ep_kernel_parameters
 * kernel_config_sysctl_reload
-* kernel_config_parameters
 
 Changelog
 ^^^^^^^^^
