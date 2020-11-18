@@ -32,7 +32,7 @@
 
 - name: "copy █ Install firewalld service configuration file"
   copy:
-    src: "{{item}}"
+    src: "{{ item }}"
     dest: /etc/firewalld/services/{{ item }}
     owner: root
     group: root
