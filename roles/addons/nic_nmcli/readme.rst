@@ -88,13 +88,12 @@ Vlan
 
 .. code-block:: yaml
 
-  - interface: vlan100
+  - interface: eth2.100
     type: vlan
-    vlan_id: 100
-    ifname: eth2
+    vlanid: 100
+    vlandev: eth2
     ip4: 10.100.0.1
     network: net-100
-
 
 Refer to `nmcli module documentation <https://docs.ansible.com/ansible/latest/collections/community/general/nmcli_module.html>`_
 for more options.
