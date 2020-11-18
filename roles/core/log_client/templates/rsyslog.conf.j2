@@ -45,7 +45,7 @@ $IMJournalStateFile imjournal.state
 
 # Log anything (except mail) of level info or higher.
 # Don't log private authentication messages!
-*.info;mail.none;authpriv.none;cron.none                /var/log/messages
+*.{{ log_client_verbosity }};mail.none;authpriv.none;cron.none                /var/log/messages
 
 # The authpriv file has restricted access.
 authpriv.*                                              /var/log/secure

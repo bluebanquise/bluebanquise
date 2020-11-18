@@ -6,7 +6,9 @@
 
 #### New roles
 
+  - addons/kernel_config: set or update kernel parameters and sysctl (#481)
   - addons/lmod: allow to install Lmod and specify custom modulefiles path (#390)
+  - addons/nhc: allow to install and setup nhc (#448)
   - addons/singularity: allow to install Singularity (#403)
   
 #### Roles improvement
@@ -17,6 +19,8 @@
     - convert to new inventory format (#401)
   - core/hosts_file:
     - prevent many blank lines when hosts have no network_interfaces in the inventory (#406)
+  - core/log_client:
+    - add a new parameter to set rsyslog default verbosity (#466)
   - core/rsyslog_server and core/rsyslog_client:
     - allow custom server port (#397)
   - core/ssh_master:

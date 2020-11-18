@@ -44,6 +44,11 @@ Few notes about this schema:
   (so here, one above, and one bellow).
 * Services will work as a chain. For example, time will come from the top iceberg (or an external source) and each time server will take as source the time server of its master iceberg.
 
+And the following schema summarize scope of each iceberg for the following
+examples:
+
+.. image:: images/multiple_icebergs_1bis.svg
+
 Note that this architecture is flexible, and can be adapted to create isolated
 icebergs (i.e. having multiple fully isolated clusters in the same BlueBanquise
 configuration).
@@ -375,7 +380,7 @@ Next, we will need a playbook for mngt2. Copy current mngt1 dedicated playbook:
 
 ..note ::
   We assume here mngt1.yml playbook exist. You may have used another name for it:
-  managements.yml, management1.yml, etc. Please adapt these instructions to 
+  managements.yml, management1.yml, etc. Please adapt these instructions to
   your own environment.
 
 .. code-block:: text
