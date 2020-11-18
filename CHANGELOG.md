@@ -26,6 +26,15 @@
   - core/ssh_master:
     - add ssh jump capability in multi icebergs context (one level only) (#395)
 
+### Breaking changes
+
+#### Introduce new vlan format
+
+VLAN format now comply with the base Ansible nmcli module.
+
+* **vlan_id** is replaced by **vlanid**
+* **physical_interface** when defining a vlan is replaced by **vlandev**
+
 ## 1.3.0 - 2020-08-31
 
 ### Major changes
