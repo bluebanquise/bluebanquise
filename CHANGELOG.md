@@ -13,17 +13,27 @@
   
 #### Roles improvement
 
-  - core/ssh_master:
-    - add ssh jump capability in multi icebergs context (one level only) (#395)
   - addons/nic_nmcli:
-    - convert to new inventory format (#401)
     - add all ansible nmcli module capabilities (#444)
+    - add routes handling on interfaces (#469)
+    - convert to new inventory format (#401)
   - core/hosts_file:
     - prevent many blank lines when hosts have no network_interfaces in the inventory (#406)
- - core/rsyslog_server and core/rsyslog_client:
-    - allow custom server port (#397)
   - core/log_client:
     - add a new parameter to set rsyslog default verbosity (#466)
+  - core/rsyslog_server and core/rsyslog_client:
+    - allow custom server port (#397)
+  - core/ssh_master:
+    - add ssh jump capability in multi icebergs context (one level only) (#395)
+
+### Breaking changes
+
+#### Introduce new vlan format
+
+VLAN format now comply with the base Ansible nmcli module.
+
+* **vlan_id** is replaced by **vlanid**
+* **physical_interface** when defining a vlan is replaced by **vlandev**
 
 ## 1.3.0 - 2020-08-31
 
