@@ -21,6 +21,7 @@
   tags:
     - internal
     - package
+    - service
 
 - name: "package █ Install {{ nic_nmcli_packages_to_install | join(' ') }}"
   package:
