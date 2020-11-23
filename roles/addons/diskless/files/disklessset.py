@@ -81,7 +81,7 @@ if __name__ == "__main__":
 
             print(' 5 - List available kernels')
             print(' 6 - Generate a new initramfs\n')
-            print(' 7 - Clear a corrupted image')
+            print(' 7 - Clear a corrupted image (Use only as a last resort)')
             print(' 8 - Exit\n')
             
             # When the user press CTRL + c in a sub menu, he returns to main menu
@@ -117,9 +117,18 @@ if __name__ == "__main__":
             elif main_action == '3':
                 # Get image object to remove
                 image = ImageManager.get_created_image(ImageManager.cli_select_created_image())
-                # Remove image
-                ImageManager.remove_image(image)
-                printc('\n[OK] Done.', CGREEN)
+                printc('⚠ Would you realy delete image ' + image.name + ' definitively (yes/no)?', CRED)
+
+                # get confirmation from user
+                confirmation = input('-->: ').replace(" ", "")
+
+                if confirmation == 'yes':
+                    # Remove image
+                    ImageManager.remove_image(image)
+                    printc('\n[OK] Done.', CGREEN)
+
+                elif confirmation == 'no':
+                    printc('\n[+] Image deletion cancelled', CYELLOW)
 
             # Change the kernel of an existing image 
             elif main_action == '4':

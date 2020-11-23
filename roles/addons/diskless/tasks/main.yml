@@ -38,11 +38,14 @@
    - /var/www/html/preboot_execution_environment/diskless
    - /var/www/html/preboot_execution_environment/diskless/images
    - /var/www/html/preboot_execution_environment/diskless/kernels
+
    - /diskless
+   - /diskless/images
+   - /diskless/images/nfsimages
    - /diskless/modules
    - /diskless/nfsimages
-   - /diskless/workdir
-   - /diskless/mntdir
+   
+   - /var/tmp/diskless/workdir/
    - /usr/include/diskless
 
 - name: "copy █ files"

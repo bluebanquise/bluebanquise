@@ -86,13 +86,14 @@ class KernelManager:
         :type kernel: str
         """
         # Create a generation path for the initramfs
-        generation_path = KernelManager.KERNELS_PATH + '/initramfs-kernel-' + kernel.replace('vmlinuz-','')
-                        
+        kernel_version = kernel.replace('vmlinuz-','')
+        generation_path = KernelManager.KERNELS_PATH + '/initramfs-kernel-' + kernel_version
+
         printc('[INFO] Now generating initramfs... May take some time', CBLUE)
         # Generate the new initramfs file with dracut command on the kernel
-        os.system('dracut --xz -v -m "network base nfs" --add "ifcfg livenet systemd systemd-initrd dracut-systemd" --add-drivers xfs --no-hostonly --nolvmconf '
-                + generation_path
-                + ' --force')
+        os.system('dracut --xz -v -m "network base nfs" --add "ifcfg livenet systemd systemd-initrd dracut-systemd" --add-drivers xfs --no-hostonly --nolvmconf --force '
+                  + '-kver' + kernel_version + ' '                # Specify kernel version to use
+                  + generation_path)
 
         # Change the permisssions on the generated file
         os.chmod(generation_path ,0o644)
@@ -151,4 +152,6 @@ class KernelManager:
 
         # If the list of kernels is empty
         else:
-           raise UserWarning('No kernels.')
+           raise UserWarning('No kernels found in /var/www/html/diskless/kernels/\nPlease refer to readme.rst for details on how to obtain kernels.')
+
+        

@@ -18,7 +18,7 @@
 # Colors
 CBLUE = '\033[94m'
 CYELLOW = '\033[93m'
-CRED = '\033[0m'
+CRED = '\033[31m'
 CBLINK = '\033[5m'
 CORANGE_BLINK = '\033[1;33;5m'
 CGREEN = '\033[1;32;40m'

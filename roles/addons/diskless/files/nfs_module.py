@@ -35,6 +35,8 @@ from utils import *
 # Class representing an nfs staging image
 class NfsStagingImage(Image):
 
+    NFS_DIRECTORY = '/diskless/images/nfsimages'
+
     # Class constructor
     def __init__(self, name, password = None, kernel = None):
         super().__init__(name, password, kernel)
@@ -44,7 +46,7 @@ class NfsStagingImage(Image):
 
         # Checking all parameters
         # Check name format
-        if len(password.split()) > 1 or not isinstance(password, str):
+        if not isinstance(password, str) or len(password.split()) > 1:
             raise ValueError('Unexpected password format.')
 
         # Check kernel attribute
@@ -58,6 +60,8 @@ class NfsStagingImage(Image):
        
         # Generate image files 
         self.generate_files()
+
+        self.NFS_DIRECTORY = NfsStagingImage.NFS_DIRECTORY + self.name
         
     # Generate staging image files
     def generate_files(self):
@@ -72,20 +76,20 @@ class NfsStagingImage(Image):
     def remove_files(self):
         super().remove_files()
         # Remove specific nfs staging image directory
-        if os.path.isdir('/diskless/nfsimages/' + self.name):
-            shutil.rmtree('/diskless/nfsimages/' + self.name)
+        if os.path.isdir(self.NFS_DIRECTORY):
+            shutil.rmtree(self.NFS_DIRECTORY)
 
     # Create image base folders
     def create_image_folders(self):
         super().create_image_folders()
         # Create the specific nfs image directory
-        os.makedirs('/diskless/nfsimages/' + self.name + '/staging')
+        os.makedirs(self.NFS_DIRECTORY + '/staging')
 
     # Generate image file system
     def generate_file_system(self):
         super().generate_file_system()
         # create file system with dnf
-        os.system('dnf groupinstall -y "core" --releasever=8 --setopt=module_platform_id=platform:el8 --installroot=/diskless/nfsimages/'+ self.name+ '/staging')
+        os.system('dnf groupinstall -y "core" --releasever=8 --setopt=module_platform_id=platform:el8 --installroot=' + self.NFS_DIRECTORY + '/staging')
 
     # Set a password for the image
     # Staging images need a password
@@ -96,10 +100,10 @@ class NfsStagingImage(Image):
         self.password = crypt.crypt(self.password, crypt.METHOD_SHA512)
         
         # Create new password file content
-        with open('/diskless/nfsimages/' + self.name + '/staging/etc/shadow', 'r') as ff:
+        with open(self.NFS_DIRECTORY + '/staging/etc/shadow', 'r') as ff:
             newText = ff.read().replace('root:*', 'root:' + self.password)
             # Write new passord file content
-        with open('/diskless/nfsimages/' + self.name + '/staging/etc/shadow', "w") as ff:
+        with open(self.NFS_DIRECTORY + '/staging/etc/shadow', "w") as ff:
             ff.write(newText)
 
     # Clean all image files without image object when an image is corrupted
@@ -109,8 +113,8 @@ class NfsStagingImage(Image):
         if os.path.isdir(Image.IMAGES_DIRECTORY + image_name):
             shutil.rmtree(Image.IMAGES_DIRECTORY + image_name)
 
-        if os.path.isdir('/diskless/nfsimages/' + image_name):
-            shutil.rmtree('/diskless/nfsimages/' + image_name)
+        if os.path.isdir(NfsStagingImage.NFS_DIRECTOR + image_name):
+            shutil.rmtree(NfsStagingImage.NFS_DIRECTOR + image_name)
 
     @staticmethod
     def get_boot_file_template():
@@ -130,7 +134,7 @@ echo | > Console: ${{eq-console}}
 echo | > Additional kernel parameters: ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}}
 echo |
 echo | Loading linux ...
-kernel http://${{next-server}}/preboot_execution_environment/diskless/kernels/${{image-kernel}} initrd=${{image-initramfs}} selinux=0 text=1 root=nfs:${{next-server}}:/diskless/nfsimages/{image_name}/staging/,vers=4.2,rw rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}} rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4 
+kernel http://${{next-server}}/preboot_execution_environment/diskless/kernels/${{image-kernel}} initrd=${{image-initramfs}} selinux=0 text=1 root=nfs:${{next-server}}:/diskless/images/nfsimages/{image_name}/staging/,vers=4.2,rw rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}} rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4 
 echo | Loading initial ramdisk ...
 initrd http://${{next-server}}/preboot_execution_environment/diskless/kernels/${{image-initramfs}}
 echo | ALL DONE! We are ready.
@@ -140,7 +144,6 @@ echo +----------------------------------------------------+
 sleep 4
 boot
 '''
-
 
 # Class representing an nfs golden image
 class NfsGoldenImage(Image):
@@ -174,11 +177,11 @@ class NfsGoldenImage(Image):
         self.generate_file_system(staging_image)
 
     def create_image_folders(self):
-        os.makedirs('/diskless/nfsimages/' + self.name + '/nodes')
+        os.makedirs(self.NFS_DIRECTORY + '/nodes')
 
     def generate_file_system(self, staging_image):
         logging.info('Cloning staging image to golden')
-        os.system('cp -a /diskless/nfsimages/' + staging_image.name + '/staging /diskless/nfsimages/' + self.name +'/golden')
+        os.system('cp -a ' + NfsStagingImage.NFS_DIRECTOR + staging_image.name + '/staging ' + self.NFS_DIRECTORY +'/golden')
 
     # List nodes associated with nfs golden image
     def get_nodes(self):
@@ -187,15 +190,27 @@ class NfsGoldenImage(Image):
     # Add nodes to the image
     def add_nodes(self, nodes_range):
 
-        self.nodes.add(nodes_range)
-
         logging.info('Cloning, this may take some time...')
+
         # For each specified node
         for node in NodeSet(nodes_range):
-            logging.info("Working on node: " + str(node))
-            # Copy golden base image for the specified nodes
-            os.system('cp -a /diskless/nfsimages/' + self.name + '/golden '
-                       + '/diskless/nfsimages/' + self.name + '/nodes/' + node)
+            # If the node is not already in the nodeset
+            if str(node) not in self.nodes:
+
+                logging.info("Working on node: " + str(node))
+
+                # Copy golden base image for the specified nodes
+                os.system('cp -a ' + self.NFS_DIRECTORY + '/golden '
+                        + self.NFS_DIRECTORY + '/nodes/' + node)
+
+                # Add node system to nfs exports
+                os.system('echo \'' + self.NFS_DIRECTORY + '/nodes/' + node + ' *(rw,sync)\' >> /etc/exports')
+        
+        # Updatde node list
+        self.nodes.add(nodes_range)
+
+        # Uptade exports
+        os.system('exportfs -ra')
         
         # Register image with new values
         self.register_image()
@@ -210,7 +225,10 @@ class NfsGoldenImage(Image):
             for node in NodeSet(nodes_range):
                 logging.info('Working on node: ' + str(node))
                 # Remove node directory
-                shutil.rmtree('/diskless/nfsimages/' + self.name + '/nodes/' + node)
+                shutil.rmtree(self.NFS_DIRECTORY + '/nodes/' + node)
+
+                # Remove the node from the exports file
+                os.system('sed -i \'/' + node + ' /d\' /etc/exports')
 
             # Register image with new values
             self.register_image()
@@ -222,8 +240,8 @@ class NfsGoldenImage(Image):
     def remove_files(self):
         super().remove_files()
         # Remove specific nfs golden image directory
-        if os.path.isdir('/diskless/nfsimages/' + self.name):
-            shutil.rmtree('/diskless/nfsimages/' + self.name)
+        if os.path.isdir(self.NFS_DIRECTORY):
+            shutil.rmtree(self.NFS_DIRECTORY)
 
     # Clean all image files without image object when an image is corrupted
     @staticmethod
@@ -232,8 +250,8 @@ class NfsGoldenImage(Image):
         if os.path.isdir(Image.IMAGES_DIRECTORY + image_name):
             shutil.rmtree(Image.IMAGES_DIRECTORY + image_name)
 
-        if os.path.isdir('/diskless/nfsimages/' + image_name):
-            shutil.rmtree('/diskless/nfsimages/' + image_name)
+        if os.path.isdir(NfsStagingImage.NFS_DIRECTOR + image_name):
+            shutil.rmtree(NfsStagingImage.NFS_DIRECTOR + image_name)
 
     @staticmethod
     def get_boot_file_template():
@@ -254,7 +272,7 @@ echo | > Console: ${{eq-console}}
 echo | > Additional kernel parameters: ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}}
 echo |
 echo | Loading linux ...
-kernel http://${{next-server}}/preboot_execution_environment/diskless/kernels/${{image-kernel}} initrd=${{image-initramfs}} selinux=0 text=1 root=nfs:${{next-server}}:/diskless/nfsimages/{image_name}/nodes/${{hostname}},vers=4.2,rw rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}} rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4
+kernel http://${{next-server}}/preboot_execution_environment/diskless/kernels/${{image-kernel}} initrd=${{image-initramfs}} selinux=0 text=1 root=nfs:${{next-server}}:/diskless/images/nfsimages/{image_name}/nodes/${{hostname}},vers=4.2,rw rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}} rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4
 echo | Loading initial ramdisk ...
 initrd http://${{next-server}}/preboot_execution_environment/diskless/kernels/${{image-initramfs}}
 echo | ALL DONE! We are ready.
@@ -264,7 +282,7 @@ echo +----------------------------------------------------+
 sleep 4
 boot
 '''
-   
+
 
 ######################
 ## CLI reserved part##
@@ -305,7 +323,7 @@ def cli_create_staging_image():
     # If there are no kernels aise an exception
     if not kernel_list:
         raise UserWarning('No kernel available')
-   
+
     # Condition to test if image name is compliant
     while True:
 
@@ -336,7 +354,7 @@ def cli_create_staging_image():
     confirmation = input('-->: ').replace(" ", "")
 
     if confirmation == 'yes':
-       # Create the image object
+    # Create the image object
         NfsStagingImage(selected_image_name, selected_password, selected_kernel)
         printc('\n[OK] Done.', CGREEN)
 

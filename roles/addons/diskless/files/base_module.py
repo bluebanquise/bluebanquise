@@ -84,7 +84,6 @@ class Image(ABC):
             raise ValueError('Invalid name format.')
 
         self.name = name
-
         self.IMAGE_DIRECTORY = Image.IMAGES_DIRECTORY + self.name
         
         # If image already exist, and not all other arguments excepts name are None: 
@@ -261,18 +260,19 @@ class Image(ABC):
 
     def cli_display_info(self):
         """Display informations about an image"""
-        # Get image_data, it is a dictionary with all the image attributes
-        image_data = self.get_image_data()
-
+        
         # Print image name
-        print(' • Image name: ' + image_data['name'])
+        print(' • Image name: ' + self.name)
 
-        # Remove name element from image_data list
-        del image_data['name']
+        # Get all attributs in a dictionary
+        attributes_dictionary = dict(self.__dict__)
 
-        # For each tuple of list except the last
-        for i in range(0, len(image_data.items()) - 1):
-            print('     ├── ' + str(list(image_data.keys())[i]) + ': ' + str(list(image_data.values())[i]))
+        # Delete name because it was already printed
+        del attributes_dictionary['name']
+
+        # For each element of the dictionary except the last
+        for i in range(0, len(attributes_dictionary.items()) - 1):
+            print('     ├── ' + str(list(attributes_dictionary.keys())[i]) + ': ' + str(list(attributes_dictionary.values())[i]))
 
         # For the last tuple element of the list
-        print('     └── ' + str(list(image_data.keys())[-1]) + ': ' + str(list(image_data.values())[-1]))
+        print('     └── ' + str(list(attributes_dictionary.keys())[-1]) + ': ' + str(list(attributes_dictionary.values())[-1]))

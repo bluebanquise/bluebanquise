@@ -44,8 +44,7 @@ class LivenetImage(Image):
         CORE = auto()
 
     # Image working directory, specific for livenet images
-    WORKING_DIRECTORY = '/diskless/workdir/'
-    MOUNT_DIRECTORY = '/diskless/mntdir/'
+    WORKING_DIRECTORY = '/var/tmp/diskless/workdir/'
 
     # Define the allowed sizes range
     MAX_LIVENET_SIZE = 50000 # 50 Gigas
@@ -59,7 +58,7 @@ class LivenetImage(Image):
 
         # Checking all parameters
         # Check name format
-        if len(password.split()) > 1 or not isinstance(password, str):
+        if not isinstance(password, str) or len(password.split() > 1:
             raise ValueError('Unexpected password format.')
  
         # Check kernel attribute
@@ -89,6 +88,9 @@ class LivenetImage(Image):
         # Generate image files 
         self.generate_files()
 
+        self.WORKING_DIRECTORY = self.WORKING_DIRECTORY + self.name + '/'
+        self.MOUNT_DIRECTORY = self.WORKING_DIRECTORY  + '/mnt/'
+
     def generate_files(self):
         logging.info('Starting generating image files...')
     
@@ -100,7 +102,7 @@ class LivenetImage(Image):
         # Generaéte operating system of the image
         self.generate_operating_system()
         # Set up image password before after generating operating system
-        self.set_image_password(LivenetImage.WORKING_DIRECTORY + self.name)
+        self.set_image_password(self.WORKING_DIRECTORY)
         # Generate image squashfs.img
         self.generate_squashfs()
 
@@ -108,21 +110,22 @@ class LivenetImage(Image):
     def generate_operating_system(self):
         logging.info('Generating operating system')
         # create image personnal working directory
-        os.mkdir(LivenetImage.WORKING_DIRECTORY + self.name)
+        os.makedirs(self.WORKING_DIRECTORY + 'generated_os')
 
         # Generate desired image file system
         if self.livenet_type == LivenetImage.Type.STANDARD:
-            os.system('dnf groupinstall -y "core"  --releasever=8 --setopt=module_platform_id=platform:el8 --installroot=' + LivenetImage.WORKING_DIRECTORY + self.name + ' --exclude selinux-policy-targeted --exclude selinux-policy-mls')
+            os.system('dnf groupinstall -y "core"  --releasever=8 --setopt=module_platform_id=platform:el8 --installroot=' + self.WORKING_DIRECTORY + 'generated_os --exclude selinux-policy-targeted --exclude selinux-policy-mls')
         elif self.livenet_type == LivenetImage.Type.SMALL:
-            os.system('dnf install -y dnf yum iproute procps-ng openssh-server NetworkManager --installroot=' + LivenetImage.WORKING_DIRECTORY + self.name + ' --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --exclude selinux-policy-targeted --exclude selinux-policy-mls --setopt=module_platform_id=platform:el8 --nobest')
+            os.system('dnf install --releasever=8 -y dnf yum iproute procps-ng openssh-server NetworkManager --installroot=' + self.WORKING_DIRECTORY + 'generated_os --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --exclude selinux-policy-targeted --exclude selinux-policy-mls --setopt=module_platform_id=platform:el8 --nobest')
         elif self.livenet_type == LivenetImage.Type.CORE:
-            os.system('dnf install -y iproute procps-ng openssh-server --installroot=' + LivenetImage.WORKING_DIRECTORY + self.name +' --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --exclude selinux-policy-targeted --exclude selinux-policy-mls --setopt=module_platform_id=platform:el8 --nobest')
+            os.system('dnf install --releasever=8 -y iproute procps-ng openssh-server --installroot=' + self.WORKING_DIRECTORY +'generated_os --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --exclude selinux-policy-targeted --exclude selinux-policy-mls --setopt=module_platform_id=platform:el8 --nobest')
 
     # Generate the image squashfs image after creating the image rootfs image
     # The operating system need to be previoulsy created by the 
     # generate_operating_system method.
     def generate_squashfs(self):
         logging.info('Generating squashfs image')
+
         # Create the directory that will contain the rootfs image
         os.makedirs(self.IMAGE_DIRECTORY + '/tosquash/LiveOS')
 
@@ -133,22 +136,22 @@ class LivenetImage(Image):
         os.system('mkfs.xfs ' + self.IMAGE_DIRECTORY + '/tosquash/LiveOS/rootfs.img')
 
         # Create a mounting directory for rootfs.img
-        os.mkdir(LivenetImage.MOUNT_DIRECTORY + self.name)
+        os.makedirs(self.MOUNT_DIRECTORY)
 
         # Mount rootfs.img in order to put inside the operating system
-        os.system('mount -o loop ' + self.IMAGE_DIRECTORY + '/tosquash/LiveOS/rootfs.img ' + LivenetImage.MOUNT_DIRECTORY + self.name)
+        os.system('mount -o loop ' + self.IMAGE_DIRECTORY + '/tosquash/LiveOS/rootfs.img ' + self.MOUNT_DIRECTORY)
 
         # Put the operating system inside rootfs.img
-        os.system('cp -r ' +  LivenetImage.WORKING_DIRECTORY + self.name + '/* ' + LivenetImage.MOUNT_DIRECTORY + self.name)
-        
-        # Removing useless working directory because we don't need it anymore
-        shutil.rmtree(LivenetImage.WORKING_DIRECTORY + self.name)
+        os.system('cp -r ' +  self.WORKING_DIRECTORY + '/generated_os/* ' + self.MOUNT_DIRECTORY)
 
         # Unmount rootfs.img file
-        os.system('umount ' + LivenetImage.MOUNT_DIRECTORY + self.name)
+        os.system('umount ' + self.MOUNT_DIRECTORY)
 
         # Remove mountage directory for rootfs.img
-        shutil.rmtree(LivenetImage.MOUNT_DIRECTORY + self.name)
+        shutil.rmtree(self.MOUNT_DIRECTORY)
+
+        # Removing useless working directory because we don't need it anymore
+        shutil.rmtree(self.WORKING_DIRECTORY)
 
         # Create the squashfs.img that will contains LiveOS/rootfs.img
         os.system('mksquashfs ' + self.IMAGE_DIRECTORY + '/tosquash ' + self.IMAGE_DIRECTORY + '/squashfs.img')
@@ -187,31 +190,22 @@ class LivenetImage(Image):
         """Mounting livenet image"""
         logging.info('Mounting livenet image ' + self.name)
 
+        # Create image working directory
+        os.mkdir(self.WORKING_DIRECTORY)
+        # Unsquash current image inside working directory
+        os.system('unsquashfs -d ' + self.WORKING_DIRECTORY + '/squashfs-root ' + self.IMAGE_DIRECTORY + '/squashfs.img')
+
         # Create image mounting directory
-        os.mkdir(LivenetImage.MOUNT_DIRECTORY + self.name)
-
-        # Create mountage point for squashfs
-        os.mkdir(LivenetImage.MOUNT_DIRECTORY + self.name + '/squashfs')
-
-        # Create mountage point for rootfs.img image
-        os.mkdir(LivenetImage.MOUNT_DIRECTORY + self.name + '/mnt')
-
-        # Create mountage point for system sys
-        os.mkdir(LivenetImage.MOUNT_DIRECTORY + self.name + '/inventory')
-
-        # Mounting squashfs on the squashfs mountage point
-        os.system('mount ' + self.IMAGE_DIRECTORY +'/squashfs.img ' + LivenetImage.MOUNT_DIRECTORY + self.name + '/squashfs')
-
-        # Mounting rootfs.img on /mnt mountage point
-        os.system('mount ' + LivenetImage.MOUNT_DIRECTORY + self.name + '/squashfs/LiveOS/rootfs.img ' + LivenetImage.MOUNT_DIRECTORY + self.name + '/mnt')
-
+        os.makedirs(self.MOUNT_DIRECTORY)
+        os.system('mount ' + self.WORKING_DIRECTORY + '/squashfs-root/LiveOS/rootfs.img ' + self.MOUNT_DIRECTORY)
+        
         # Mount diskless server proc on livenet image proc
-        os.system('mount --bind /proc ' + LivenetImage.MOUNT_DIRECTORY + self.name + '/mnt/proc')
+        os.system('mount --bind /proc ' + self.MOUNT_DIRECTORY) + '/proc')
         # Mount diskless server sys on livenet image sys
-        os.system('mount --bind /sys ' + LivenetImage.MOUNT_DIRECTORY + self.name + '/mnt/sys')
-
+        os.system('mount --bind /sys ' + self.MOUNT_DIRECTORY) + '/sys')
+        
         # Create the ansible connection
-        os.system('echo ' + LivenetImage.MOUNT_DIRECTORY + self.name + '/mnt ansible_connection=chroot > ' + LivenetImage.MOUNT_DIRECTORY + self.name + '/inventory/host')
+        os.system('echo ' + self.MOUNT_DIRECTORY + ' ansible_connection=chroot > ' + self.MOUNT_DIRECTORY + '/inventory/host')
 
         # Changing image mountage status
         self.is_mounted = True
@@ -222,15 +216,16 @@ class LivenetImage(Image):
         """Unmounting livenet image"""
         logging.info('Unmounting livenet image ' + self.name)
 
-        if self.is_mounted:
-            # Unmounting image mounted proc and sys
-            os.system('umount ' + LivenetImage.MOUNT_DIRECTORY + self.name + '/mnt/{proc,sys}')
+        os.system('umount ' + self.MOUNT_DIRECTORY) + '/{proc,sys}')
+        os.system('umount ' + self.MOUNT_DIRECTORY)
 
-            # Unmounting image mounted mnt and squashfs
-            os.system('umount ' + LivenetImage.MOUNT_DIRECTORY + self.name + '/{mnt,squashfs}')
+        shutil.rmtree(self.MOUNT_DIRECTORY)
 
-            # Removing image mount directory
-            shutil.rmtree(LivenetImage.MOUNT_DIRECTORY + self.name)
+        os.system('mv ' + self.IMAGE_DIRECTORY + '/squashfs.img ' + self.IMAGE_DIRECTORY + '/squashfs.img.bkp')
+        os.system('mksquashfs ' + self.WORKING_DIRECTORY + '/squashfs-root/ ' + self.IMAGE_DIRECTORY + '/squashfs.img')
+
+        shutil.rmtree(self.WORKING_DIRECTORY)
+        os.remove(self.IMAGE_DIRECTORY + '/squashfs.img.bkp')
 
         # Changing image mountage status
         self.is_mounted = False
@@ -247,66 +242,44 @@ class LivenetImage(Image):
         # Check livenet size
         if not isinstance(new_size, str) or int(new_size) < LivenetImage.MIN_LIVENET_SIZE or int(new_size) > LivenetImage.MAX_LIVENET_SIZE:
             raise ValueError('Invalid livenet size')
-
-
-        # Creating directories for mountages
-
-        # Create mounting directory for the image
-        os.mkdir(LivenetImage.MOUNT_DIRECTORY + self.name)
-
-        # Create mounting directory for the existing squashfs image
-        os.mkdir(LivenetImage.MOUNT_DIRECTORY + self.name + '/squashfs')
-
-        # Create mounting directory for the existing rootfs image
-        os.mkdir(LivenetImage.MOUNT_DIRECTORY + self.name + '/old_rootfs')
-
-        # Create mounting directory for the new image
-        os.mkdir(LivenetImage.MOUNT_DIRECTORY + self.name + '/rootfs')
-
-
-        # Mount old rootfs on it's mountage point
-
-        # First, mount squashfs inside the image squashfs mount directory
-        os.system('mount ' + self.IMAGE_DIRECTORY +'/squashfs.img ' + LivenetImage.MOUNT_DIRECTORY + self.name + '/squashfs')
-
-        # Then, mount rootfs inside the image rootfs directory
-        os.system('mount ' + LivenetImage.MOUNT_DIRECTORY + self.name + '/squashfs/LiveOS/rootfs.img ' + LivenetImage.MOUNT_DIRECTORY + self.name + '/old_rootfs')
-
-
-        # Create the new rootfs image
-
-        # Create working directory for the image
-        os.makedirs(LivenetImage.WORKING_DIRECTORY + self.name + '/tosquash/LiveOS')
-
-        # Create a new rootfs image
-        os.system('dd if=/dev/zero of=/' + LivenetImage.WORKING_DIRECTORY + self.name + '/tosquash/LiveOS/rootfs.img bs=1M count=' + new_size)
-
-        # Create a new livenet xfs file system
-        os.system('mkfs.xfs ' + LivenetImage.WORKING_DIRECTORY + self.name + '/tosquash/LiveOS/rootfs.img')
         
-        # Mount the new rootfs image on rootfs mounting directory
-        os.system('mount ' + LivenetImage.WORKING_DIRECTORY + self.name + '/tosquash/LiveOS/rootfs.img ' + LivenetImage.MOUNT_DIRECTORY + self.name + '/rootfs')
+        # Create usefull directories for resizement
+        os.makedirs(self.MOUNT_DIRECTORY) + '/mnt_copy')
+        os.makedirs(self.MOUNT_DIRECTORY) + '/mnt') 
+        os.makedirs(self.WORKING_DIRECTORY + '/current')
+        os.makedirs(self.WORKING_DIRECTORY + '/copy/squashfs-root/LiveOS/')
 
-        # Copy old rootfs content into the new rootfs directory
-        os.system('cp -r ' + LivenetImage.MOUNT_DIRECTORY + self.name + '/old_rootfs/* ' + LivenetImage.MOUNT_DIRECTORY + self.name + '/rootfs')
+        # Create a new rootfs image with the new size
+        os.system('dd if=/dev/zero of=' + self.WORKING_DIRECTORY + '/copy/squashfs-root/LiveOS/rootfs.img bs=1M count=' + new_size)
+        # Format the fresh rootfs.img into an xfs system
+        os.system('mkfs.xfs ' + self.WORKING_DIRECTORY + '/copy/squashfs-root/LiveOS/rootfs.img')
+        # Mount the new rootfs.img on it's mount directory
+        os.system('mount ' + self.WORKING_DIRECTORY + '/copy/squashfs-root/LiveOS/rootfs.img '
+                  + self.MOUNT_DIRECTORY) + '/mnt_copy/')
 
-        # Unmounting new image mount directory
-        os.system('umount ' + LivenetImage.MOUNT_DIRECTORY + self.name + '/*' )
+        # Unsquash current image
+        os.system('unsquashfs -d ' + self.WORKING_DIRECTORY + '/current/squashfs-root ' + self.IMAGE_DIRECTORY + '/squashfs.img')
+        # Mount current rootfs.img on it's mount directory
+        os.system('mount ' + self.WORKING_DIRECTORY + '/current/squashfs-root/LiveOS/rootfs.img ' + self.MOUNT_DIRECTORY + '/mnt')
 
-        # Create new squashfs image
-        
-        # Remove old squashfs image
-        os.remove(self.IMAGE_DIRECTORY + '/squashfs.img')
+        # Create image.xfsdump from current image
+        os.system('xfsdump -l 0 -L ' + self.name + ' -M media -f ' + self.WORKING_DIRECTORY 
+                  + '/current/image.xfsdump ' + self.MOUNT_DIRECTORY) + '/mnt')
+        # Restore with new sized rootfs.img mountage
+        os.system('xfsrestore -f ' + self.WORKING_DIRECTORY + '/current/image.xfsdump ' + self.MOUNT_DIRECTORY + '/mnt_copy')
+        os.sync()
 
-        # Create fresh squashfs.img file system with new rootfs.img
-        os.system('mksquashfs ' + LivenetImage.WORKING_DIRECTORY + self.name + '/tosquash ' + self.IMAGE_DIRECTORY +'/squashfs.img')
+        # Umount mnt and mnt_copy
+        os.system('umount ' + self.MOUNT_DIRECTORY) + '/*')
+        shutil.rmtree(self.MOUNT_DIRECTORY)
 
-        # Removing image mount directory
-        shutil.rmtree(LivenetImage.MOUNT_DIRECTORY + self.name)
+        # Remove old squashfs
+        os.remove(self.IMAGE_DIRECTORY +'/squashfs.img')
+        # Generate the new squashfs
+        os.system('mksquashfs ' + self.WORKING_DIRECTORY + '/copy/squashfs-root/ ' + self.IMAGE_DIRECTORY +'/squashfs.img')
 
-        # Removing image working directory
-        shutil.rmtree(LivenetImage.WORKING_DIRECTORY + self.name)
-
+        shutil.rmtree(self.WORKING_DIRECTORY)
+      
         # Update image size attribute value
         self.livenet_size = new_size
         self.register_image()
@@ -327,19 +300,20 @@ class LivenetImage(Image):
     @staticmethod
     def clean(image_name):
 
-        # Try cleaning image base directory
-        if os.path.isdir(LivenetImage.IMAGES_DIRECTORY + image_name):
-            shutil.rmtree(LivenetImage.IMAGES_DIRECTORY + image_name)
+        # Cleanings for mount directories
+        if os.path.isdir(LivenetImage.MOUNT_DIRECTORY + image_name):
+            os.system('umount ' + LivenetImage.MOUNT_DIRECTORY + image_name + '/*')
+            if os.path.ismount(LivenetImage.MOUNT_DIRECTORY + image_name):
+                os.system('umount ' + LivenetImage.MOUNT_DIRECTORY + image_name)
+            shutil.rmtree(LivenetImage.MOUNT_DIRECTORY + image_name)
 
         # Try cleaning image working directory
         if os.path.isdir(LivenetImage.WORKING_DIRECTORY + image_name):
             shutil.rmtree(LivenetImage.WORKING_DIRECTORY + image_name)
 
-        # Cleanings for mount directories
-        if os.path.isdir(LivenetImage.MOUNT_DIRECTORY + image_name):
-            os.system('umount ' + LivenetImage.MOUNT_DIRECTORY + image_name + '/mnt/*')
-            os.system('umount ' + LivenetImage.MOUNT_DIRECTORY + image_name + '/*')
-            shutil.rmtree(LivenetImage.MOUNT_DIRECTORY + image_name)
+        # Try cleaning image base directory
+        if os.path.isdir(LivenetImage.IMAGES_DIRECTORY + image_name):
+            shutil.rmtree(LivenetImage.IMAGES_DIRECTORY + image_name)
             
     @staticmethod
     def get_boot_file_template():
@@ -370,6 +344,34 @@ sleep 4
 boot
 '''
 
+    @override
+    def cli_display_info(self):
+        """Display informations about an image"""
+        
+        # Print image name
+        print(' • Image name: ' + self.name)
+
+        # Get all attributs in a dictionary
+        attributes_dictionary = dict(self.__dict__)
+
+        # Delete name because it was already printed
+        del attributes_dictionary['name']
+        del attributes_dictionary['MOUNT_DIRECTORY']
+        del attributes_dictionary['WORKING_DIRECTORY']
+
+        if self.livenet_size < 1000:
+            attributes_dictionary['livenet_size'] = str(self.livenet_size) + 'M'
+        else:
+            attributes_dictionary['livenet_size'] = str(self.livenet_size/1024) + "G"
+        if self.is_mounted == True:
+            attributes_dictionary['is_mounted'] = 'True, on ' + self.MOUNT_DIRECTORY)
+
+        # For each element of the dictionary except the last
+        for i in range(0, len(attributes_dictionary.items() - 1):
+            print('     ├── ' + str(list(attributes_dictionary.keys()[i]) + ': ' + str(list(attributes_dictionary.values()[i])
+
+        # For the last tuple element of the list
+        print('     └── ' + str(list(attributes_dictionary.keys()[-1]) + ': ' + str(list(attributes_dictionary.values()[-1])
 
 #######################
 ## CLI reserved part ##
@@ -402,6 +404,26 @@ def cli_menu():
     # Bad entry
     else:
         raise UserWarning('\'' + main_action + '\' is not a valid entry. Please enter another value.')
+
+def cli_get_size(size):
+
+    # Check if there is the size unit
+    unit = size[-1]
+
+    if unit != 'G' and unit != 'M':
+        raise UserWarning('\nNot a valid size unit format!')
+
+    # Delete unit from size
+    size = size[:-1]
+
+    # Check if the size is only numerical
+    if not size.isdigit():
+        raise UserWarning('\nNot a valid size format!')
+
+    if unit == 'G':
+        size = str(int(size) * 1024)
+
+    return size 
 
 def cli_create_livenet_image():
 
@@ -446,11 +468,15 @@ def cli_create_livenet_image():
     else:
         raise UserWarning('Not a valid choice !')
     
-     # Select livenet size
-    printc('Please choose image size (in megabytes):', CGREEN)
+    # Select livenet size
+    printc('\nPlease choose image size:\n(supported units: M=1024*1024, G=1024*1024*1024)\n(Examples: 5120M or 5G)', CGREEN)
     selected_size = input('-->: ')
 
-    if int(selected_size) < (LivenetImage.MIN_LIVENET_SIZE) or int(selected_size) > (LivenetImage.MAX_LIVENET_SIZE):
+    # Check and convert the size
+    size = cli_get_size(selected_size)
+    print('size:' + size)
+    # Check size compliance with livenet image expected size limits
+    if int(size) < (LivenetImage.MIN_LIVENET_SIZE) or int(size) > (LivenetImage.MAX_LIVENET_SIZE):
         raise UserWarning('\nInvalid input size !')
 
     # Confirm image creation
@@ -459,15 +485,15 @@ def cli_create_livenet_image():
     print('  ├── Image password : ' + selected_password)
     print('  ├── Image kernel: ' + selected_kernel)
     print('  ├── Image type: ' + get_type)
-    print('  └── Image size: ' + selected_size + ' Mb')
+    print('  └── Image size: ' + selected_size)
 
     confirmation = input('-->: ').replace(" ", "")
 
     if confirmation == 'yes':
         # Create the image object
-        LivenetImage(selected_image_name, selected_password, selected_kernel, selected_type, selected_size)
+        LivenetImage(selected_image_name, selected_password, selected_kernel, selected_type, size)
         printc('\n[OK] Done.', CGREEN)
-   
+
     elif confirmation == 'no':
         printc('\n[+] Image creation cancelled, return to main menu.', CYELLOW)
         return
@@ -541,27 +567,27 @@ def cli_resize_livenet_image():
     unmounted_image = ImageManager.get_created_image(unmounted_image_name)
 
     # Enter new size
-    printc('Please choose your new livenet image size (in megabytes):', CGREEN)
+    printc('Please enter your new image size:\n(supported units: M=1024*1024, G=1024*1024*1024)\n(Examples: 5120M or 5G)', CGREEN)
     selected_size = input('-->: ')
 
-    # Check size compliance
-    if int(selected_size) < (LivenetImage.MIN_LIVENET_SIZE) or int(selected_size) > (LivenetImage.MAX_LIVENET_SIZE):
+    # Check and convert the size
+    size = cli_get_size(selected_size)
+
+    # Check size compliance with livenet image expected size limits
+    if int(size) < (LivenetImage.MIN_LIVENET_SIZE) or int(size) > (LivenetImage.MAX_LIVENET_SIZE):
         raise UserWarning('Invalid input size !')
 
     # Confirm image resizing
     printc('\n[+] Are you sure you want to resize image \'' + unmounted_image.name + '\' with the following size: (yes/no)', CGREEN)
-    print('  └── Image size: ' + selected_size + ' Mb')
+    print('  └── Image size: ' + selected_size)
 
     confirmation = input('-->: ').replace(" ", "")
 
     if confirmation == 'yes':
         # Create the image object
-        unmounted_image.resize(selected_size)
+        unmounted_image.resize(size)
         printc('\n[OK] Done.', CGREEN)
-   
+
     elif confirmation == 'no':
         printc('\n[+] Image resizing cancelled, return to main menu.', CYELLOW)
         return
-
-    
-
