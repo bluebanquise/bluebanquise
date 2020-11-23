@@ -69,3 +69,12 @@
     src: disklessset.py
     dest: /usr/bin/disklessset
     mode: 0700
+
+- name: "Create an entry for nfs share in /etc/exports file"
+  lineinfile:
+        path: /etc/exports
+        line: /diskless/nfsimages *(rw,no_root_squash,sync)
+
+- name: Update exports
+  shell: exportfs -ra
+

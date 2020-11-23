@@ -204,8 +204,10 @@ class LivenetImage(Image):
         # Mount diskless server sys on livenet image sys
         os.system('mount --bind /sys ' + self.MOUNT_DIRECTORY + 'sys')
         
+        # Create an inventory directory
+        os.mkdir(self.WORKING_DIRECTORY + 'inventory')
         # Create the ansible connection
-        os.system('echo ' + self.MOUNT_DIRECTORY + ' ansible_connection=chroot > ' + self.MOUNT_DIRECTORY + '/inventory/host')
+        os.system('echo \'' + self.MOUNT_DIRECTORY + ' ansible_connection=chroot\' > ' + self.WORKING_DIRECTORY + 'inventory/host')
 
         # Changing image mountage status
         self.is_mounted = True
@@ -271,7 +273,7 @@ class LivenetImage(Image):
 
         # Umount mnt and mnt_copy
         os.system('umount ' + self.MOUNT_DIRECTORY + '*')
-        shutil.rmtree(self.MOUNT_DIRECTORY)
+        hutil.rmtree(self.MOUNT_DIRECTORY)
 
         # Remove old squashfs
         os.remove(self.IMAGE_DIRECTORY +'squashfs.img')
