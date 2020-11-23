@@ -117,7 +117,7 @@ if __name__ == "__main__":
             elif main_action == '3':
                 # Get image object to remove
                 image = ImageManager.get_created_image(ImageManager.cli_select_created_image())
-                printc('⚠ Would you realy delete image ' + image.name + ' definitively (yes/no)?', CRED)
+                printc('\n⚠ Would you realy delete image ' + image.name + ' definitively (yes/no) ?', CRED)
 
                 # get confirmation from user
                 confirmation = input('-->: ').replace(" ", "")
@@ -167,10 +167,18 @@ if __name__ == "__main__":
                 # If there is image, select the image
                 image_name = select_from_list(image_names)
 
-                # Clean selected image
-                ImageManager.clean_intallation(image_name)
+                printc('\n⚠ Would you realy clean image ' + image_name + ' definitively (yes/no) ?', CRED)
 
-                printc('\n[OK] Done.', CGREEN)
+                # get confirmation from user
+                confirmation = input('-->: ').replace(" ", "")
+
+                if confirmation == 'yes':
+                   # Clean selected image
+                    ImageManager.clean_intallation(image_name)
+                    printc('\n[OK] Done.', CGREEN)
+
+                elif confirmation == 'no':
+                    printc('\n[+] Image cleaning cancelled', CYELLOW)
 
             # Exit program
             elif main_action == '8':

@@ -35,7 +35,7 @@ from utils import *
 # Class representing an nfs staging image
 class NfsStagingImage(Image):
 
-    NFS_DIRECTORY = '/diskless/images/nfsimages'
+    NFS_DIRECTORY = '/diskless/images/nfsimages/staging/'
 
     # Class constructor
     def __init__(self, name, password = None, kernel = None):
@@ -57,12 +57,12 @@ class NfsStagingImage(Image):
         self.kernel = kernel
         self.image = 'initramfs-kernel-'+ self.kernel.replace('vmlinuz-', '')
         self.password = password
-       
+
+        self.NFS_DIRECTORY = NfsStagingImage.NFS_DIRECTORY + self.name + '/'
+
         # Generate image files 
         self.generate_files()
 
-        self.NFS_DIRECTORY = NfsStagingImage.NFS_DIRECTORY + self.name
-        
     # Generate staging image files
     def generate_files(self):
         logging.info('Generating image files')
@@ -83,13 +83,13 @@ class NfsStagingImage(Image):
     def create_image_folders(self):
         super().create_image_folders()
         # Create the specific nfs image directory
-        os.makedirs(self.NFS_DIRECTORY + '/staging')
+        os.mkdir(self.NFS_DIRECTORY)
 
     # Generate image file system
     def generate_file_system(self):
         super().generate_file_system()
         # create file system with dnf
-        os.system('dnf groupinstall -y "core" --releasever=8 --setopt=module_platform_id=platform:el8 --installroot=' + self.NFS_DIRECTORY + '/staging')
+        os.system('dnf groupinstall -y "core" --releasever=8 --setopt=module_platform_id=platform:el8 --installroot=' + self.NFS_DIRECTORY)
 
     # Set a password for the image
     # Staging images need a password
@@ -100,10 +100,10 @@ class NfsStagingImage(Image):
         self.password = crypt.crypt(self.password, crypt.METHOD_SHA512)
         
         # Create new password file content
-        with open(self.NFS_DIRECTORY + '/staging/etc/shadow', 'r') as ff:
+        with open(self.NFS_DIRECTORY + 'etc/shadow', 'r') as ff:
             newText = ff.read().replace('root:*', 'root:' + self.password)
             # Write new passord file content
-        with open(self.NFS_DIRECTORY + '/staging/etc/shadow', "w") as ff:
+        with open(self.NFS_DIRECTORY + 'etc/shadow', "w") as ff:
             ff.write(newText)
 
     # Clean all image files without image object when an image is corrupted
@@ -113,8 +113,8 @@ class NfsStagingImage(Image):
         if os.path.isdir(Image.IMAGES_DIRECTORY + image_name):
             shutil.rmtree(Image.IMAGES_DIRECTORY + image_name)
 
-        if os.path.isdir(NfsStagingImage.NFS_DIRECTOR + image_name):
-            shutil.rmtree(NfsStagingImage.NFS_DIRECTOR + image_name)
+        if os.path.isdir(NfsStagingImage.NFS_DIRECTORY+ image_name):
+            shutil.rmtree(NfsStagingImage.NFS_DIRECTORY+ image_name)
 
     @staticmethod
     def get_boot_file_template():
@@ -148,7 +148,7 @@ boot
 # Class representing an nfs golden image
 class NfsGoldenImage(Image):
 
-    image_type = 'nfs'
+    NFS_DIRECTORY = '/diskless/images/nfsimages/golden/'
 
     # Class constructor
     def __init__(self, name, staging_image = None):
@@ -161,6 +161,8 @@ class NfsGoldenImage(Image):
         self.kernel = staging_image.kernel
         self.image = 'initramfs-kernel-'+ self.kernel.replace('vmlinuz-', '')
         self.nodes = NodeSet()
+
+        self.NFS_DIRECTORY = NfsGoldenImage.NFS_DIRECTORY + self.name + '/'
 
         # Generate image files
         self.generate_files(staging_image)
@@ -177,11 +179,11 @@ class NfsGoldenImage(Image):
         self.generate_file_system(staging_image)
 
     def create_image_folders(self):
-        os.makedirs(self.NFS_DIRECTORY + '/nodes')
+        os.makedirs(self.NFS_DIRECTORY + 'nodes')
 
     def generate_file_system(self, staging_image):
         logging.info('Cloning staging image to golden')
-        os.system('cp -a ' + NfsStagingImage.NFS_DIRECTOR + staging_image.name + '/staging ' + self.NFS_DIRECTORY +'/golden')
+        os.system('cp -a ' + staging_image.NFS_DIRECTORY + ' ' + self.NFS_DIRECTORY + 'image/')
 
     # List nodes associated with nfs golden image
     def get_nodes(self):
@@ -200,17 +202,10 @@ class NfsGoldenImage(Image):
                 logging.info("Working on node: " + str(node))
 
                 # Copy golden base image for the specified nodes
-                os.system('cp -a ' + self.NFS_DIRECTORY + '/golden '
-                        + self.NFS_DIRECTORY + '/nodes/' + node)
-
-                # Add node system to nfs exports
-                os.system('echo \'' + self.NFS_DIRECTORY + '/nodes/' + node + ' *(rw,sync)\' >> /etc/exports')
+                os.system('cp -a ' + self.NFS_DIRECTORY + 'image/ ' + self.NFS_DIRECTORY + 'nodes/' + node)
         
         # Updatde node list
         self.nodes.add(nodes_range)
-
-        # Uptade exports
-        os.system('exportfs -ra')
         
         # Register image with new values
         self.register_image()
@@ -226,9 +221,6 @@ class NfsGoldenImage(Image):
                 logging.info('Working on node: ' + str(node))
                 # Remove node directory
                 shutil.rmtree(self.NFS_DIRECTORY + '/nodes/' + node)
-
-                # Remove the node from the exports file
-                os.system('sed -i \'/' + node + ' /d\' /etc/exports')
 
             # Register image with new values
             self.register_image()
@@ -250,8 +242,8 @@ class NfsGoldenImage(Image):
         if os.path.isdir(Image.IMAGES_DIRECTORY + image_name):
             shutil.rmtree(Image.IMAGES_DIRECTORY + image_name)
 
-        if os.path.isdir(NfsStagingImage.NFS_DIRECTOR + image_name):
-            shutil.rmtree(NfsStagingImage.NFS_DIRECTOR + image_name)
+        if os.path.isdir(NfsStagingImage.NFS_DIRECTORY+ image_name):
+            shutil.rmtree(NfsStagingImage.NFS_DIRECTORY+ image_name)
 
     @staticmethod
     def get_boot_file_template():

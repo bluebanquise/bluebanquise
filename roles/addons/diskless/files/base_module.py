@@ -84,7 +84,7 @@ class Image(ABC):
             raise ValueError('Invalid name format.')
 
         self.name = name
-        self.IMAGE_DIRECTORY = Image.IMAGES_DIRECTORY + self.name
+        self.IMAGE_DIRECTORY = Image.IMAGES_DIRECTORY + self.name +'/'
         
         # If image already exist, and not all other arguments excepts name are None: 
         # Bad usage of constructor

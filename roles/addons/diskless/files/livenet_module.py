@@ -58,7 +58,7 @@ class LivenetImage(Image):
 
         # Checking all parameters
         # Check name format
-        if not isinstance(password, str) or len(password.split() > 1:
+        if not isinstance(password, str) or len(password.split()) > 1:
             raise ValueError('Unexpected password format.')
  
         # Check kernel attribute
@@ -85,12 +85,12 @@ class LivenetImage(Image):
         # in order to perform actions on it.
         self.is_mounted = False
 
+        self.WORKING_DIRECTORY = self.WORKING_DIRECTORY + self.name + '/'
+        self.MOUNT_DIRECTORY = self.WORKING_DIRECTORY  + 'mnt/'
+
         # Generate image files 
         self.generate_files()
-
-        self.WORKING_DIRECTORY = self.WORKING_DIRECTORY + self.name + '/'
-        self.MOUNT_DIRECTORY = self.WORKING_DIRECTORY  + '/mnt/'
-
+        
     def generate_files(self):
         logging.info('Starting generating image files...')
     
@@ -102,7 +102,7 @@ class LivenetImage(Image):
         # Generaéte operating system of the image
         self.generate_operating_system()
         # Set up image password before after generating operating system
-        self.set_image_password(self.WORKING_DIRECTORY)
+        self.set_image_password(self.WORKING_DIRECTORY + 'generated_os')
         # Generate image squashfs.img
         self.generate_squashfs()
 
@@ -200,9 +200,9 @@ class LivenetImage(Image):
         os.system('mount ' + self.WORKING_DIRECTORY + '/squashfs-root/LiveOS/rootfs.img ' + self.MOUNT_DIRECTORY)
         
         # Mount diskless server proc on livenet image proc
-        os.system('mount --bind /proc ' + self.MOUNT_DIRECTORY) + '/proc')
+        os.system('mount --bind /proc ' + self.MOUNT_DIRECTORY + 'proc')
         # Mount diskless server sys on livenet image sys
-        os.system('mount --bind /sys ' + self.MOUNT_DIRECTORY) + '/sys')
+        os.system('mount --bind /sys ' + self.MOUNT_DIRECTORY + 'sys')
         
         # Create the ansible connection
         os.system('echo ' + self.MOUNT_DIRECTORY + ' ansible_connection=chroot > ' + self.MOUNT_DIRECTORY + '/inventory/host')
@@ -216,7 +216,7 @@ class LivenetImage(Image):
         """Unmounting livenet image"""
         logging.info('Unmounting livenet image ' + self.name)
 
-        os.system('umount ' + self.MOUNT_DIRECTORY) + '/{proc,sys}')
+        os.system('umount ' + self.MOUNT_DIRECTORY + '/{proc,sys}')
         os.system('umount ' + self.MOUNT_DIRECTORY)
 
         shutil.rmtree(self.MOUNT_DIRECTORY)
@@ -244,39 +244,39 @@ class LivenetImage(Image):
             raise ValueError('Invalid livenet size')
         
         # Create usefull directories for resizement
-        os.makedirs(self.MOUNT_DIRECTORY) + '/mnt_copy')
-        os.makedirs(self.MOUNT_DIRECTORY) + '/mnt') 
-        os.makedirs(self.WORKING_DIRECTORY + '/current')
-        os.makedirs(self.WORKING_DIRECTORY + '/copy/squashfs-root/LiveOS/')
+        os.makedirs(self.MOUNT_DIRECTORY + 'mnt_copy')
+        os.makedirs(self.MOUNT_DIRECTORY + 'mnt')
+        os.makedirs(self.WORKING_DIRECTORY + 'current')
+        os.makedirs(self.WORKING_DIRECTORY + 'copy/squashfs-root/LiveOS/')
 
         # Create a new rootfs image with the new size
-        os.system('dd if=/dev/zero of=' + self.WORKING_DIRECTORY + '/copy/squashfs-root/LiveOS/rootfs.img bs=1M count=' + new_size)
+        os.system('dd if=/dev/zero of=' + self.WORKING_DIRECTORY + 'copy/squashfs-root/LiveOS/rootfs.img bs=1M count=' + new_size)
         # Format the fresh rootfs.img into an xfs system
-        os.system('mkfs.xfs ' + self.WORKING_DIRECTORY + '/copy/squashfs-root/LiveOS/rootfs.img')
+        os.system('mkfs.xfs ' + self.WORKING_DIRECTORY + 'copy/squashfs-root/LiveOS/rootfs.img')
         # Mount the new rootfs.img on it's mount directory
-        os.system('mount ' + self.WORKING_DIRECTORY + '/copy/squashfs-root/LiveOS/rootfs.img '
-                  + self.MOUNT_DIRECTORY) + '/mnt_copy/')
+        os.system('mount ' + self.WORKING_DIRECTORY + 'copy/squashfs-root/LiveOS/rootfs.img '
+                  + self.MOUNT_DIRECTORY + 'mnt_copy/')
 
         # Unsquash current image
-        os.system('unsquashfs -d ' + self.WORKING_DIRECTORY + '/current/squashfs-root ' + self.IMAGE_DIRECTORY + '/squashfs.img')
+        os.system('unsquashfs -d ' + self.WORKING_DIRECTORY + 'current/squashfs-root ' + self.IMAGE_DIRECTORY + 'squashfs.img')
         # Mount current rootfs.img on it's mount directory
-        os.system('mount ' + self.WORKING_DIRECTORY + '/current/squashfs-root/LiveOS/rootfs.img ' + self.MOUNT_DIRECTORY + '/mnt')
+        os.system('mount ' + self.WORKING_DIRECTORY + 'current/squashfs-root/LiveOS/rootfs.img ' + self.MOUNT_DIRECTORY + 'mnt')
 
         # Create image.xfsdump from current image
         os.system('xfsdump -l 0 -L ' + self.name + ' -M media -f ' + self.WORKING_DIRECTORY 
-                  + '/current/image.xfsdump ' + self.MOUNT_DIRECTORY) + '/mnt')
+                  + '/current/image.xfsdump ' + self.MOUNT_DIRECTORY + 'mnt')
         # Restore with new sized rootfs.img mountage
-        os.system('xfsrestore -f ' + self.WORKING_DIRECTORY + '/current/image.xfsdump ' + self.MOUNT_DIRECTORY + '/mnt_copy')
+        os.system('xfsrestore -f ' + self.WORKING_DIRECTORY + 'current/image.xfsdump ' + self.MOUNT_DIRECTORY + 'mnt_copy')
         os.sync()
 
         # Umount mnt and mnt_copy
-        os.system('umount ' + self.MOUNT_DIRECTORY) + '/*')
+        os.system('umount ' + self.MOUNT_DIRECTORY + '*')
         shutil.rmtree(self.MOUNT_DIRECTORY)
 
         # Remove old squashfs
-        os.remove(self.IMAGE_DIRECTORY +'/squashfs.img')
+        os.remove(self.IMAGE_DIRECTORY +'squashfs.img')
         # Generate the new squashfs
-        os.system('mksquashfs ' + self.WORKING_DIRECTORY + '/copy/squashfs-root/ ' + self.IMAGE_DIRECTORY +'/squashfs.img')
+        os.system('mksquashfs ' + self.WORKING_DIRECTORY + 'copy/squashfs-root/ ' + self.IMAGE_DIRECTORY +'squashfs.img')
 
         shutil.rmtree(self.WORKING_DIRECTORY)
       
@@ -300,12 +300,14 @@ class LivenetImage(Image):
     @staticmethod
     def clean(image_name):
 
+        MOUNT_DIRECTORY = LivenetImage.WORKING_DIRECTORY + image_name + '/mnt/'
+
         # Cleanings for mount directories
-        if os.path.isdir(LivenetImage.MOUNT_DIRECTORY + image_name):
-            os.system('umount ' + LivenetImage.MOUNT_DIRECTORY + image_name + '/*')
-            if os.path.ismount(LivenetImage.MOUNT_DIRECTORY + image_name):
-                os.system('umount ' + LivenetImage.MOUNT_DIRECTORY + image_name)
-            shutil.rmtree(LivenetImage.MOUNT_DIRECTORY + image_name)
+        if os.path.isdir(MOUNT_DIRECTORY):
+            os.system('umount ' + MOUNT_DIRECTORY + '*')
+            if os.path.ismount(MOUNT_DIRECTORY):
+                os.system('umount ' + MOUNT_DIRECTORY)
+            shutil.rmtree(MOUNT_DIRECTORY)
 
         # Try cleaning image working directory
         if os.path.isdir(LivenetImage.WORKING_DIRECTORY + image_name):
@@ -344,7 +346,6 @@ sleep 4
 boot
 '''
 
-    @override
     def cli_display_info(self):
         """Display informations about an image"""
         
@@ -364,14 +365,14 @@ boot
         else:
             attributes_dictionary['livenet_size'] = str(self.livenet_size/1024) + "G"
         if self.is_mounted == True:
-            attributes_dictionary['is_mounted'] = 'True, on ' + self.MOUNT_DIRECTORY)
+            attributes_dictionary['is_mounted'] = 'True, on ' + self.MOUNT_DIRECTORY
 
-        # For each element of the dictionary except the last
-        for i in range(0, len(attributes_dictionary.items() - 1):
-            print('     ├── ' + str(list(attributes_dictionary.keys()[i]) + ': ' + str(list(attributes_dictionary.values()[i])
+      # For each element of the dictionary except the last
+        for i in range(0, len(attributes_dictionary.items()) - 1):
+            print('     ├── ' + str(list(attributes_dictionary.keys())[i]) + ': ' + str(list(attributes_dictionary.values())[i]))
 
         # For the last tuple element of the list
-        print('     └── ' + str(list(attributes_dictionary.keys()[-1]) + ': ' + str(list(attributes_dictionary.values()[-1])
+        print('     └── ' + str(list(attributes_dictionary.keys())[-1]) + ': ' + str(list(attributes_dictionary.values())[-1]))
 
 #######################
 ## CLI reserved part ##

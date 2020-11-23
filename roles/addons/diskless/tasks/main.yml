@@ -42,6 +42,8 @@
    - /diskless
    - /diskless/images
    - /diskless/images/nfsimages
+   - /diskless/images/nfsimages/golden
+   - /diskless/images/nfsimages/staging
    - /diskless/modules
    - /diskless/nfsimages
    
