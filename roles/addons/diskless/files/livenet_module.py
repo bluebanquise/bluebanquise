@@ -25,6 +25,7 @@ import crypt
 import logging
 from datetime import datetime
 from enum import Enum, auto
+from subprocess import check_call
 
 # Import diskless modules
 from base_module import Image
@@ -51,16 +52,16 @@ class LivenetImage(Image):
     MIN_LIVENET_SIZE = 100 # 100 Megabytes
 
     # Class constructor
-    def __init__(self, name, password = None, kernel = None, livenet_type = None, livenet_size = None):
-        super().__init__(name, password, kernel, livenet_type, livenet_size)
+    def __init__(self, name, password = None, kernel = None, livenet_type = None, livenet_size = None, ssh_pub_key = None, selinux = None):
+        super().__init__(name, password, kernel, livenet_type, livenet_size, ssh_pub_key, selinux)
 
-    def create_new_image(self, password, kernel, livenet_type, livenet_size):
+    def create_new_image(self, password, kernel, livenet_type, livenet_size, ssh_pub_key, selinux):
 
         # Checking all parameters
         # Check name format
         if not isinstance(password, str) or len(password.split()) > 1:
             raise ValueError('Unexpected password format.')
- 
+
         # Check kernel attribute
         if not kernel in KernelManager.get_available_kernels():
             raise ValueError('Invalid kernel.')
@@ -81,6 +82,11 @@ class LivenetImage(Image):
         self.livenet_type = livenet_type
         self.livenet_size = livenet_size
 
+        if ssh_pub_key != '':
+            self.ssh_pub_key = ssh_pub_key
+
+        self.selinux = selinux
+
         # A livenet can be mounted on it's personnal mount directory
         # in order to perform actions on it.
         self.is_mounted = False
@@ -88,21 +94,29 @@ class LivenetImage(Image):
         self.WORKING_DIRECTORY = self.WORKING_DIRECTORY + self.name + '/'
         self.MOUNT_DIRECTORY = self.WORKING_DIRECTORY  + 'mnt/'
 
-        # Generate image files 
+        # Generate image files
         self.generate_files()
-        
+
     def generate_files(self):
         logging.info('Starting generating image files...')
-    
+
         self.generate_file_system()
         self.generate_ipxe_boot_file()
-    
+
     def generate_file_system(self):
         super().generate_file_system()
         # Generaéte operating system of the image
         self.generate_operating_system()
-        # Set up image password before after generating operating system
+        # Setup image password before after generating operating system
         self.set_image_password(self.WORKING_DIRECTORY + 'generated_os')
+        # Setup ssh key
+        if hasattr(self,'ssh_pub_key'):
+            self.set_image_ssh_pub_key()
+        # Setup SELinux
+        if self.selinux:
+            self.set_image_selinux()
+        # Set /etc/os-release meta data
+        self.set_image_release_meta_data()
         # Generate image squashfs.img
         self.generate_squashfs()
 
@@ -121,7 +135,7 @@ class LivenetImage(Image):
             os.system('dnf install --releasever=8 -y iproute procps-ng openssh-server --installroot=' + self.WORKING_DIRECTORY +'generated_os --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --exclude selinux-policy-targeted --exclude selinux-policy-mls --setopt=module_platform_id=platform:el8 --nobest')
 
     # Generate the image squashfs image after creating the image rootfs image
-    # The operating system need to be previoulsy created by the 
+    # The operating system need to be previoulsy created by the
     # generate_operating_system method.
     def generate_squashfs(self):
         logging.info('Generating squashfs image')
@@ -131,7 +145,7 @@ class LivenetImage(Image):
 
         # Create the rootfs image with the image size in Mb
         os.system('dd if=/dev/zero of=' + self.IMAGE_DIRECTORY + '/tosquash/LiveOS/rootfs.img bs=1M count=' + self.livenet_size)
-        
+
         # Format the rootfs.img in mkfs format
         os.system('mkfs.xfs ' + self.IMAGE_DIRECTORY + '/tosquash/LiveOS/rootfs.img')
 
@@ -155,7 +169,7 @@ class LivenetImage(Image):
 
         # Create the squashfs.img that will contains LiveOS/rootfs.img
         os.system('mksquashfs ' + self.IMAGE_DIRECTORY + '/tosquash ' + self.IMAGE_DIRECTORY + '/squashfs.img')
-        
+
         # Removing not squashed LiveOS/rootfs.img, because we don't need it anymore
         # (In fact the rootfs.img is now inside the squashfs.img)
         shutil.rmtree(self.IMAGE_DIRECTORY + '/tosquash')
@@ -167,13 +181,49 @@ class LivenetImage(Image):
 
         # Create hash with clear password
         self.password = crypt.crypt(self.password, crypt.METHOD_SHA512)
-        
+
         # Create new password file content
         with open(mountage_directory + '/etc/shadow', 'r') as ff:
             newText = ff.read().replace('root:*', 'root:' + self.password)
             # Write new passord file content
         with open(mountage_directory + '/etc/shadow', "w") as ff:
             ff.write(newText)
+
+    # Write meta data insod image os-release
+    def set_image_release_meta_data(self):
+        logging.info('Setting image information')
+        with open(self.WORKING_DIRECTORY + 'generated_os/etc/os-release', 'a') as ff:
+            ff.writelines(['BLUEBANQUISE_IMAGE_NAME="{0}"\n'.format(self.name),
+                           'BLUEBANQUISE_IMAGE_KERNEL="{0}"\n'.format(self.kernel),
+                           'BLUEBANQUISE_IMAGE_DATE="{0}"\n'.format(datetime.today().strftime('%Y-%m-%d'))])
+
+    # Inject ssh pub key
+    def set_image_ssh_pub_key(self):
+        logging.info('Injecting SSH public key into image')
+
+        # Create ssh dir and copy pub key to authorized_keys
+        os.mkdir(self.WORKING_DIRECTORY + 'generated_os/root/.ssh')
+        shutil.copyfile(self.ssh_pub_key, self.WORKING_DIRECTORY + 'generated_os/root/.ssh/authorized_keys')
+
+    # Enable SELinux in the image
+    def set_image_selinux(self):
+        logging.info('Setting up SELinux in the image')
+
+        # Install needed packages
+        os.system('dnf install -y libselinux-utils policycoreutils selinux-policy-targeted --installroot=' + self.WORKING_DIRECTORY + 'generated_os --setopt=module_platform_id=platform:el8 --nobest')
+
+        # Chroot inside image to execute main restorecon
+        check_call('mount --bind /proc '+ self.WORKING_DIRECTORY + 'generated_os/proc', shell=True)
+        check_call('mount --bind /sys '+ self.WORKING_DIRECTORY + 'generated_os/sys', shell=True)
+        check_call('mount --bind /sys/fs/selinux '+ self.WORKING_DIRECTORY + 'generated_os/sys/fs/selinux', shell=True)
+        real_root = os.open("/", os.O_RDONLY)
+        os.chroot(self.WORKING_DIRECTORY + 'generated_os/')
+        os.chdir("/")
+        check_call('restorecon -Rv /', shell=True)
+        os.fchdir(real_root)
+        os.chroot(".")
+        os.close(real_root)
+        check_call('umount '+ self.WORKING_DIRECTORY + 'generated_os/{sys/fs/selinux,sys,proc}', shell=True)
 
     # Remove files associated with the NFS image
     def remove_files(self):
@@ -198,12 +248,12 @@ class LivenetImage(Image):
         # Create image mounting directory
         os.makedirs(self.MOUNT_DIRECTORY)
         os.system('mount ' + self.WORKING_DIRECTORY + '/squashfs-root/LiveOS/rootfs.img ' + self.MOUNT_DIRECTORY)
-        
+
         # Mount diskless server proc on livenet image proc
         os.system('mount --bind /proc ' + self.MOUNT_DIRECTORY + 'proc')
         # Mount diskless server sys on livenet image sys
         os.system('mount --bind /sys ' + self.MOUNT_DIRECTORY + 'sys')
-        
+
         # Create the ansible connection
         os.system('echo ' + self.MOUNT_DIRECTORY + ' ansible_connection=chroot > ' + self.MOUNT_DIRECTORY + '/inventory/host')
 
@@ -242,7 +292,7 @@ class LivenetImage(Image):
         # Check livenet size
         if not isinstance(new_size, str) or int(new_size) < LivenetImage.MIN_LIVENET_SIZE or int(new_size) > LivenetImage.MAX_LIVENET_SIZE:
             raise ValueError('Invalid livenet size')
-        
+
         # Create usefull directories for resizement
         os.makedirs(self.MOUNT_DIRECTORY + 'mnt_copy')
         os.makedirs(self.MOUNT_DIRECTORY + 'mnt')
@@ -263,7 +313,7 @@ class LivenetImage(Image):
         os.system('mount ' + self.WORKING_DIRECTORY + 'current/squashfs-root/LiveOS/rootfs.img ' + self.MOUNT_DIRECTORY + 'mnt')
 
         # Create image.xfsdump from current image
-        os.system('xfsdump -l 0 -L ' + self.name + ' -M media -f ' + self.WORKING_DIRECTORY 
+        os.system('xfsdump -l 0 -L ' + self.name + ' -M media -f ' + self.WORKING_DIRECTORY
                   + '/current/image.xfsdump ' + self.MOUNT_DIRECTORY + 'mnt')
         # Restore with new sized rootfs.img mountage
         os.system('xfsrestore -f ' + self.WORKING_DIRECTORY + 'current/image.xfsdump ' + self.MOUNT_DIRECTORY + 'mnt_copy')
@@ -279,7 +329,7 @@ class LivenetImage(Image):
         os.system('mksquashfs ' + self.WORKING_DIRECTORY + 'copy/squashfs-root/ ' + self.IMAGE_DIRECTORY +'squashfs.img')
 
         shutil.rmtree(self.WORKING_DIRECTORY)
-      
+
         # Update image size attribute value
         self.livenet_size = new_size
         self.register_image()
@@ -295,7 +345,7 @@ class LivenetImage(Image):
             self.is_mounted = True
         elif self.is_mounted == 'False':
             self.is_mounted = False
-                
+
     # Clean all image files without image object when an image is corrupted
     @staticmethod
     def clean(image_name):
@@ -316,7 +366,7 @@ class LivenetImage(Image):
         # Try cleaning image base directory
         if os.path.isdir(LivenetImage.IMAGES_DIRECTORY + image_name):
             shutil.rmtree(LivenetImage.IMAGES_DIRECTORY + image_name)
-            
+
     @staticmethod
     def get_boot_file_template():
         """Get the class boot file template.
@@ -335,7 +385,7 @@ echo | > Console: ${{eq-console}}
 echo | > Additional kernel parameters: ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}}
 echo |
 echo | Loading linux ...
-kernel http://${{next-server}}/preboot_execution_environment/diskless/kernels/${{image-kernel}} initrd=${{image-initramfs}} root=live:http://${{next-server}}/preboot_execution_environment/diskless/images/{image_name}/squashfs.img rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}} rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4
+kernel http://${{next-server}}/preboot_execution_environment/diskless/kernels/${{image-kernel}} initrd=${{image-initramfs}} root=live:http://${{next-server}}/preboot_execution_environment/diskless/images/{image_name}/squashfs.img rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}} rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4 selinux={image_selinux}
 echo | Loading initial ramdisk ...
 initrd http://${{next-server}}/preboot_execution_environment/diskless/kernels/${{image-initramfs}}
 echo | ALL DONE! We are ready.
@@ -348,7 +398,7 @@ boot
 
     def cli_display_info(self):
         """Display informations about an image"""
-        
+
         # Print image name
         print(' • Image name: ' + self.name)
 
@@ -391,7 +441,7 @@ def cli_menu():
     print('\n Select an action')
     main_action = input('-->: ')
     print('')
-    
+
     # List available kernels
     if main_action == '1':
         cli_create_livenet_image()
@@ -424,24 +474,24 @@ def cli_get_size(size):
     if unit == 'G':
         size = str(int(size) * 1024)
 
-    return size 
+    return size
 
 def cli_create_livenet_image():
 
     # Get available kernels
     kernel_list = KernelManager.get_available_kernels()
-    
+
     # If there are no kernels aise an exception
     if not kernel_list:
         raise UserWarning('No kernel available')
-        
+
     # Condition to test if image name is compliant
     while True:
 
         printc('[+] Give a name for your image', CGREEN)
         # Get new image name
         selected_image_name = input('-->: ').replace(" ", "")
-        
+
         if not ImageManager.is_image(selected_image_name):
             break
 
@@ -451,7 +501,7 @@ def cli_create_livenet_image():
     # Select the kernel to use
     printc('\n[+] Select your kernel:', CGREEN)
     selected_kernel = select_from_list(kernel_list)
-    
+
     # Manage password
     printc('\n[+] Give a password for your image', CGREEN)
     selected_password = input('Enter clear root password of the new image: ').replace(" ", "")
@@ -459,7 +509,7 @@ def cli_create_livenet_image():
     # Select livenet type
     types_list = ['Standard: core (~1.3Gb)', 'Small: openssh, dnf and NetworkManager (~300Mb)', 'Minimal: openssh only (~270Mb)']
     get_type = select_from_list(types_list)
-    
+
     if get_type == 'Standard: core (~1.3Gb)':
         selected_type = LivenetImage.Type.STANDARD
     elif get_type == 'Small: openssh, dnf and NetworkManager (~300Mb)':
@@ -468,7 +518,7 @@ def cli_create_livenet_image():
         selected_type = LivenetImage.Type.CORE
     else:
         raise UserWarning('Not a valid choice !')
-    
+
     # Select livenet size
     printc('\nPlease choose image size:\n(supported units: M=1024*1024, G=1024*1024*1024)\n(Examples: 5120M or 5G)', CGREEN)
     selected_size = input('-->: ')
@@ -478,21 +528,38 @@ def cli_create_livenet_image():
     print('size:' + size)
     # Check size compliance with livenet image expected size limits
     if int(size) < (LivenetImage.MIN_LIVENET_SIZE) or int(size) > (LivenetImage.MAX_LIVENET_SIZE):
-        raise UserWarning('\nInvalid input size !')
+        raise UserWarning('\nInvalid input size !' + str(size))
+
+    # Inject ssh key or not
+    printc('\nEnter path to SSH public key (left empty to disable key injection)', CGREEN)
+    selected_ssh_pub_key = str(input('-->: ').strip())
+    if selected_ssh_pub_key != '' and not os.path.exists(selected_ssh_pub_key):
+        raise UserWarning('\nSSH public key not found' + selected_ssh_pub_key)
+
+    # Activate SELinux or not
+    printc('\nActivate SELinux inside the image? Enter yes or no.', CGREEN)
+    answer_selinux = str(input('-->: ').lower().strip())
+    if answer_selinux in ['yes', 'y']:
+        selinux = True
+    else:
+        selinux = False
 
     # Confirm image creation
     printc('\n[+] Would you like to create a new livenet image with the following attributes: (yes/no)', CGREEN)
-    print('  ├── Image name: ' + selected_image_name)
-    print('  ├── Image password : ' + selected_password)
-    print('  ├── Image kernel: ' + selected_kernel)
-    print('  ├── Image type: ' + get_type)
-    print('  └── Image size: ' + selected_size)
+    print('  ├── Image name: \t\t' + selected_image_name)
+    print('  ├── Image password : \t\t' + selected_password)
+    print('  ├── Image kernel: \t\t' + selected_kernel)
+    print('  ├── Image type: \t\t' + get_type)
+    print('  ├── Image size: \t\t' + selected_size)
+    if selected_ssh_pub_key != '':
+        print('  ├── SSH pubkey: \t\t' + selected_ssh_pub_key)
+    print('  └── Enable SELinux: \t\t' + str(selinux))
 
     confirmation = input('-->: ').replace(" ", "")
 
     if confirmation == 'yes':
         # Create the image object
-        LivenetImage(selected_image_name, selected_password, selected_kernel, selected_type, size)
+        LivenetImage(selected_image_name, selected_password, selected_kernel, selected_type, size, selected_ssh_pub_key, selinux)
         printc('\n[OK] Done.', CGREEN)
 
     elif confirmation == 'no':

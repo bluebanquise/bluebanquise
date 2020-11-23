@@ -42,7 +42,7 @@ class Image(ABC):
         * clean()                -> Specify what files to remove when image was not properly created (All possible files)
 
     You can redefine the following methods when inherit:
-       
+
         * generate_files()       -> Contains methods to execute to create image
         * create_image_folders() -> Create your image folders
         * generate_file_system() -> Generate your image file system
@@ -65,7 +65,7 @@ class Image(ABC):
         To create a new image you must call this constructor with image 'name' and all other class constructor arguments.
         When you redefine Image class constructor you must define your constructor and create_new_image method as following:
 
-            def __init__(self, name, arg1 = None, arg2 = None, argX = None...): <- You must strictly follow this syntax with your custom args (arg1, arg2, argX ...) 
+            def __init__(self, name, arg1 = None, arg2 = None, argX = None...): <- You must strictly follow this syntax with your custom args (arg1, arg2, argX ...)
                 super().__init__(name, arg1, arg2, argX...)                     <-
                                                                                 <-
             def create_new_image(self, arg1, arg32, argX...):                   <-
@@ -85,8 +85,8 @@ class Image(ABC):
 
         self.name = name
         self.IMAGE_DIRECTORY = Image.IMAGES_DIRECTORY + self.name +'/'
-        
-        # If image already exist, and not all other arguments excepts name are None: 
+
+        # If image already exist, and not all other arguments excepts name are None:
         # Bad usage of constructor
         if os.path.isdir(self.IMAGE_DIRECTORY) and not all(arg is None for arg in args):
             raise ValueError('Bad constructor image: All arguments must be None except name when image already exist')
@@ -165,7 +165,7 @@ class Image(ABC):
     def generate_file_system(self):
         """Generate image file system."""
         logging.info('Installing new system image... May take some time.')
-    
+
     def register_image(self):
         """Register the image data into it's 'image_data' file.
         This file is a save of the image.
@@ -182,7 +182,7 @@ class Image(ABC):
         for attribute, value in self.__dict__.items():
             # Register attribute
             file_content = file_content + '\n    ' + attribute + ': ' + str(value)
-          
+
         # Creating or edit the image_data file that contains image attributes in yaml
         with open(self.IMAGE_DIRECTORY + '/image_data.yml', "w") as ff:
             ff.write(file_content)
@@ -202,7 +202,7 @@ class Image(ABC):
     def get_existing_image(self):
         """Load an existing image. The loading consist of getting all image attributes from it's image_data.yml file."""
         logging.debug("Getting existing image")
-        
+
         # Get image data
         image_data = self.get_image_data()
 
@@ -229,9 +229,10 @@ class Image(ABC):
         """Generate an ipxe boot file for the image."""
         logging.info('Creating IPXE boot file for the image')
         # Format image ipxe boot file template with image attributes
-        file_content = self.__class__.get_boot_file_template().format(image_name=self.name, 
+        file_content = self.__class__.get_boot_file_template().format(image_name=self.name,
                                                                 image_initramfs=self.image,
-                                                                image_kernel=self.kernel)
+                                                                image_kernel=self.kernel,
+                                                                image_selinux=self.selinux)
 
         # Create ipxe boot file
         with open(self.IMAGE_DIRECTORY + '/boot.ipxe', "w") as ff:
@@ -260,7 +261,7 @@ class Image(ABC):
 
     def cli_display_info(self):
         """Display informations about an image"""
-        
+
         # Print image name
         print(' • Image name: ' + self.name)
 
