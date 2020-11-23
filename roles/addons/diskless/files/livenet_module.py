@@ -601,7 +601,6 @@ def cli_mount_livenet_image():
 
     unmounted_image.mount()
 
-
 def cli_unmount_livenet_image():
     livenet_images = LivenetImage.get_images()
 
