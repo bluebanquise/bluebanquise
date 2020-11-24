@@ -26,6 +26,7 @@ class Color():
     # Color to close a colored line
     TAG_END = '\033[0m'
 
+
 # Method to print using color
 def printc(text, color):
     """Print a text in the shell with a color
@@ -36,6 +37,7 @@ def printc(text, color):
     :type color: str
     """
     print(color + text + Color.TAG_END)
+
 
 def select_from_list(_list):
     """Display to the user an interface for selecting an element in a list.

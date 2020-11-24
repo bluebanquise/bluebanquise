@@ -17,7 +17,6 @@
 # https://github.com/bluebanquise/bluebanquise - MIT license
 
 
-
 # Import basic modules
 import os
 import yaml
@@ -297,7 +296,6 @@ class ImageManager:
 
         logging.info('Image ' + image_name + ' cleaned')
 
-
     @classmethod
     def get_image_status(cls, image_name):
         """Get the status of an image
@@ -432,10 +430,10 @@ class ImageManager:
         except FileNotFoundError:
             raise FileNotFoundError('File /diskless/installations.yml cannot be writen.')
 
-
     #####################
     # CLI reserved part #
-    ######################
+    #####################
+
 
     # Use a specific image module
     @staticmethod

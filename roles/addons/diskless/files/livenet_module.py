@@ -264,7 +264,6 @@ class LivenetImage(Image):
 
         check_call('umount ' + self.WORKING_DIRECTORY + 'generated_os/{sys/fs/selinux,sys,proc}', shell=True)
 
-
     # Remove files associated with the NFS image
     def remove_files(self):
 
@@ -353,7 +352,6 @@ class LivenetImage(Image):
         os.system('mkfs.xfs ' + self.WORKING_DIRECTORY + 'copy/squashfs-root/LiveOS/rootfs.img')
         # Mount the new rootfs.img on it's mount directory
         os.system('mount ' + self.WORKING_DIRECTORY + 'copy/squashfs-root/LiveOS/rootfs.img ' + self.MOUNT_DIRECTORY + 'mnt_copy/')
-
 
         # Unsquash current image
         os.system('unsquashfs -d ' + self.WORKING_DIRECTORY + 'current/squashfs-root ' + self.IMAGE_DIRECTORY + 'squashfs.img')
@@ -661,11 +659,11 @@ def cli_create_livenet_image():
         print('  ├── SSH pubkey: \t\t' + selected_ssh_pub_key)
 
     # Print additional packages if there is
-    if additional_packages not None:
+    if additional_packages is not None:
         print('  ├── Additional packages: \t' + str(additional_packages))
 
     # Print release version if there is one
-    if release_version not None:
+    if release_version is not None:
         print('  ├── Release version: \t\t' + release_version)
 
     print('  └── Enable SELinux: \t\t' + str(selinux))
@@ -726,6 +724,7 @@ def cli_unmount_livenet_image():
     mounted_image = ImageManager.get_created_image(mounted_image_name)
 
     mounted_image.unmount()
+
 
 def cli_resize_livenet_image():
     # Get list of livenet images

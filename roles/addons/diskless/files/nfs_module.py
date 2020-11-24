@@ -163,6 +163,7 @@ sleep 4
 boot
 '''
 
+
 # Class representing an nfs golden image
 class NfsGoldenImage(Image):
 

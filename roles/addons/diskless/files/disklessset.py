@@ -23,9 +23,6 @@ import sys
 import logging
 from termios import tcflush, TCIFLUSH
 
-
-
-
 # Import diskless modules from path
 from diskless.utils import Color, printc, select_from_list
 from diskless.kernel_manager import KernelManager

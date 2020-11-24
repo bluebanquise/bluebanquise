@@ -28,12 +28,13 @@ class DemoImage(Image):
     """This module will allow you to understand how to create your own image class.\
        Images created with this class are not real diskless images."""
 
-    # Class constructor    
+    # Class constructor
     # You can see that only name is a mandatory argument. To create an already existing image, call the constructor whith only the image name.
     # To create a new image you must enter all arguments.
     #                                ↴                       ↴
     def __init__(self, name, my_message=None, useless_argument=None):
         super().__init__(name, my_message, useless_argument)
+
     #                               V             V  <- You can see the arguments relation
     # Create demo image             V             V
     def create_new_image(self, my_message, useless_argument):
