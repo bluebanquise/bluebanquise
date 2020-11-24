@@ -27,10 +27,10 @@ from enum import Enum, auto
 from subprocess import check_call
 
 # Import diskless modules
-from base_module import Image
-from kernel_manager import KernelManager
-from image_manager import ImageManager
-from utils import Color, printc, select_from_list
+from diskless.base_module import Image
+from diskless.kernel_manager import KernelManager
+from diskless.image_manager import ImageManager
+from diskless.utils import Color, printc, select_from_list
 
 
 # Class representing a livenet image
@@ -254,7 +254,7 @@ class LivenetImage(Image):
         os.chroot(self.WORKING_DIRECTORY + 'generated_os/')
         os.chdir("/")
 
-        # Restore SELinux values on all file system 
+        # Restore SELinux values on all file system
         check_call('restorecon -Rv /', shell=True)
 
         # Quit chroot
@@ -352,8 +352,8 @@ class LivenetImage(Image):
         # Format the fresh rootfs.img into an xfs system
         os.system('mkfs.xfs ' + self.WORKING_DIRECTORY + 'copy/squashfs-root/LiveOS/rootfs.img')
         # Mount the new rootfs.img on it's mount directory
-        os.system('mount ' + self.WORKING_DIRECTORY + 'copy/squashfs-root/LiveOS/rootfs.img '
-                  + self.MOUNT_DIRECTORY + 'mnt_copy/')
+        os.system('mount ' + self.WORKING_DIRECTORY + 'copy/squashfs-root/LiveOS/rootfs.img ' + self.MOUNT_DIRECTORY + 'mnt_copy/')
+
 
         # Unsquash current image
         os.system('unsquashfs -d ' + self.WORKING_DIRECTORY + 'current/squashfs-root ' + self.IMAGE_DIRECTORY + 'squashfs.img')
@@ -361,15 +361,15 @@ class LivenetImage(Image):
         os.system('mount ' + self.WORKING_DIRECTORY + 'current/squashfs-root/LiveOS/rootfs.img ' + self.MOUNT_DIRECTORY + 'mnt')
 
         # Create image.xfsdump from current image
-        os.system('xfsdump -l 0 -L ' + self.name + ' -M media -f ' + self.WORKING_DIRECTORY
-                  + '/current/image.xfsdump ' + self.MOUNT_DIRECTORY + 'mnt')
+        os.system('xfsdump -l 0 -L ' + self.name + ' -M media -f ' + self.WORKING_DIRECTORY + '/current/image.xfsdump ' + self.MOUNT_DIRECTORY + 'mnt')
+
         # Restore with new sized rootfs.img mountage
         os.system('xfsrestore -f ' + self.WORKING_DIRECTORY + 'current/image.xfsdump ' + self.MOUNT_DIRECTORY + 'mnt_copy')
         os.sync()
 
         # Umount mnt and mnt_copy
         os.system('umount ' + self.MOUNT_DIRECTORY + '*')
-        hutil.rmtree(self.MOUNT_DIRECTORY)
+        shutil.rmtree(self.MOUNT_DIRECTORY)
 
         # Remove old squashfs
         os.remove(self.IMAGE_DIRECTORY + 'squashfs.img')
@@ -606,7 +606,7 @@ def cli_create_livenet_image():
     # Check size compliance with livenet image expected size limits
     if int(size) < (LivenetImage.MIN_LIVENET_SIZE) or int(size) > (LivenetImage.MAX_LIVENET_SIZE):
         raise UserWarning('\nInvalid input size !')
-    
+
     # Inject ssh key or not
     printc('\nEnter path to SSH public key (left empty to disable key injection)', Color.GREEN)
     selected_ssh_pub_key = input('-->: ')
@@ -617,7 +617,7 @@ def cli_create_livenet_image():
     printc('\nActivate SELinux inside the image (yes/no) ?', Color.GREEN)
     answer_selinux = input('-->: ')
     if answer_selinux == 'yes':
-       selinux = True
+        selinux = True
     elif answer_selinux == 'no':
         selinux = False
     else:
@@ -634,7 +634,7 @@ def cli_create_livenet_image():
     elif choice == 'no':
         additional_packages = None
     else:
-        raise UserWarning('\nInvalid entry !')   
+        raise UserWarning('\nInvalid entry !')
 
     # Propose to user to specify a release version
     printc('\nDo you want to specify a installation version (dnf --releasever option) (yes/no)?', Color.GREEN)
@@ -646,7 +646,7 @@ def cli_create_livenet_image():
     elif choice == 'no':
         release_version = None
     else:
-        raise UserWarning('\nInvalid entry !')   
+        raise UserWarning('\nInvalid entry !')
 
     # Confirm image creation
     printc('\n[+] Would you like to create a new livenet image with the following attributes: (yes/no)', Color.GREEN)
@@ -661,11 +661,11 @@ def cli_create_livenet_image():
         print('  ├── SSH pubkey: \t\t' + selected_ssh_pub_key)
 
     # Print additional packages if there is
-    if additional_packages != None:
+    if additional_packages not None:
         print('  ├── Additional packages: \t' + str(additional_packages))
 
     # Print release version if there is one
-    if release_version != None:
+    if release_version not None:
         print('  ├── Release version: \t\t' + release_version)
 
     print('  └── Enable SELinux: \t\t' + str(selinux))
@@ -693,7 +693,7 @@ def cli_mount_livenet_image():
         raise UserWarning('No livenet images.')
 
     # Get staging images names
-    unmounted_images_names = [livenet_image.name for livenet_image in livenet_images if livenet_image.is_mounted == False]
+    unmounted_images_names = [livenet_image.name for livenet_image in livenet_images if livenet_image.is_mounted is False]
 
     # Check if there unmounted images
     if not unmounted_images_names:
@@ -714,7 +714,7 @@ def cli_unmount_livenet_image():
         raise UserWarning('No livenet images.')
 
     # Get staging images names
-    mounted_images_names = [livenet_image.name for livenet_image in livenet_images if livenet_image.is_mounted == True]
+    mounted_images_names = [livenet_image.name for livenet_image in livenet_images if livenet_image.is_mounted is True]
 
     # Check if there unmounted images
     if not mounted_images_names:
@@ -736,7 +736,7 @@ def cli_resize_livenet_image():
         raise UserWarning('No livenet images.')
 
     # Get livenet images names
-    unmounted_images_names = [livenet_image.name for livenet_image in livenet_images if livenet_image.is_mounted == False]
+    unmounted_images_names = [livenet_image.name for livenet_image in livenet_images if livenet_image.is_mounted is False]
 
     # Check if there are unmounted images
     # An image must be unmounted to be resized

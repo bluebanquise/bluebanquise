@@ -7,7 +7,7 @@
 #
 # image_manager:
 #    This module allow to manage images globaly. It
-#    allow to make basic actions on images. It can 
+#    allow to make basic actions on images. It can
 #    manage all types of images.
 #
 # 1.2.0: Role update. David Pieters <davidpieters22@gmail.com>
@@ -15,6 +15,7 @@
 # 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
 #
 # https://github.com/bluebanquise/bluebanquise - MIT license
+
 
 
 # Import basic modules
@@ -27,8 +28,7 @@ import sys
 from enum import Enum, auto
 
 # Import diskless modules
-from utils import *
-from kernel_manager import KernelManager
+from diskless.utils import Color, printc, select_from_list
 
 
 class ImageManager:
@@ -58,7 +58,7 @@ class ImageManager:
         module_file_names = os.listdir(ImageManager.MODULES_PATH)
 
         # Get only module names
-        module_names = [module_name.replace('.py', '') for module_name in module_file_names if not 'base' in module_name and 'module' in module_name]
+        module_names = [module_name.replace('.py', '') for module_name in module_file_names if 'base' not in module_name and 'module' in module_name]
 
         # Search for the class in all modules
         for module_name in module_names:
@@ -195,7 +195,7 @@ class ImageManager:
                     except Exception as e:
                         # Don't add the image to the list and display exception
                         logging.error(e)
-   
+
                 return created_images_list
 
         return None
@@ -448,7 +448,7 @@ class ImageManager:
         # Get only module name to display
         # We have to modif name because module naming convention is:
         #   "<image_type>_module.py"
-        module_names = [module.replace('_module.py', '') for module in modules if not 'base' in module and 'module' in module]
+        module_names = [module.replace('_module.py', '') for module in modules if 'base' not in module and 'module' in module]
 
         # Select desired image type in the list
         printc('[+] Select the module you want to use:\n', Color.BLUE)
@@ -518,5 +518,5 @@ class ImageManager:
 # Add the modules directory path to importation path
 sys.path.append(ImageManager.MODULES_PATH)
 # When import module base_module at the end because we need to add first
-# ImageManager.MODULES_PATH ImageManager attribute to importation path 
+# ImageManager.MODULES_PATH ImageManager attribute to importation path
 from base_module import Image

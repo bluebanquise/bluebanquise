@@ -20,19 +20,19 @@ import os
 import shutil
 
 # Import diskless modules
-from base_module import Image
-from utils import Color, printc, select_from_list
+from diskless.base_module import Image
+from diskless.utils import Color, printc
 
 
 class DemoImage(Image):
     """This module will allow you to understand how to create your own image class.\
        Images created with this class are not real diskless images."""
 
-   # Class constructor      
-   # You can see that only name is a mandatory argument. To create an already existing image, call the constructor whith only the image name.
-   # To create a new image you must enter all arguments.
-   #                                        ↴                       ↴ 
-    def __init__(self, name, my_message = None, useless_argument = None):
+    # Class constructor    
+    # You can see that only name is a mandatory argument. To create an already existing image, call the constructor whith only the image name.
+    # To create a new image you must enter all arguments.
+    #                                ↴                       ↴
+    def __init__(self, name, my_message=None, useless_argument=None):
         super().__init__(name, my_message, useless_argument)
     #                               V             V  <- You can see the arguments relation
     # Create demo image             V             V
@@ -52,7 +52,7 @@ class DemoImage(Image):
     def create_image_folders(self):
         # Create a folder just for the exemple.
         os.makedirs('/diskless/demo_directory_' + self.name)
-    
+
     # This function will help us to understand the difference between clean and remove methods
     def generate_file_system(self):
         # Create a file to remove
@@ -64,8 +64,8 @@ class DemoImage(Image):
         choice = input('-->: ')
         if choice == 'yes':
             exit()  # <- Fake a program crash
-                    # Exiting without removed file_to_remove.txt file.
-                    # Therefore, the file will be removed by the clean method.
+        # Exiting without removed file_to_remove.txt file.
+        # Therefore, the file will be removed by the clean method.
         elif choice != 'no':
             raise UserWarning('Not a valid input.')
 
@@ -92,7 +92,7 @@ class DemoImage(Image):
             shutil.rmtree('/diskless/demo_directory_' + image_name)
 
         # We need to try to delete the demo_file.txt file in the clean method.
-        # In fact the generation of the demo image can be halted before that the 
+        # In fact the generation of the demo image can be halted before that the
         # normal process of DemoImage image creation removed demo_file.txt.
         if os.path.isfile('/diskless/demo_file_to_remove_' + image_name + '.txt'):
             os.remove('/diskless/demo_file_to_remove_' + image_name + '.txt')
@@ -122,13 +122,10 @@ def cli_menu():
 
         printc('Give a message for your demo image:', Color.GREEN)
         demo_message = input('-->: ')
- 
+
         # Create a DemoImage image
         DemoImage(demo_name, demo_message)
 
     # Bad entry
     else:
         raise UserWarning('\'' + main_action + '\' is not a valid entry. Please enter another value.')
-
-
-

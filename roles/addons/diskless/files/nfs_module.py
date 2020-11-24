@@ -24,10 +24,10 @@ import crypt
 import logging
 
 # Import diskless modules
-from base_module import Image
-from kernel_manager import KernelManager
-from image_manager import ImageManager
-from utils import Color, printc, select_from_list
+from diskless.base_module import Image
+from diskless.kernel_manager import KernelManager
+from diskless.image_manager import ImageManager
+from diskless.utils import Color, printc, select_from_list
 
 
 # Class representing an nfs staging image
@@ -327,7 +327,7 @@ def cli_create_staging_image():
 
     # Get available kernels
     kernel_list = KernelManager.get_available_kernels()
-    
+
     # If there are no kernels aise an exception
     if not kernel_list:
         raise UserWarning('No kernel available')

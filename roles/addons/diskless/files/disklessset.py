@@ -23,13 +23,13 @@ import sys
 import logging
 from termios import tcflush, TCIFLUSH
 
-# Add path to files to include
-sys.path.append('/lib/python3.6/site-packages/diskless/')
+
+
 
 # Import diskless modules from path
-from utils import Color, printc, select_from_list
-from kernel_manager import KernelManager
-from image_manager import ImageManager
+from diskless.utils import Color, printc, select_from_list
+from diskless.kernel_manager import KernelManager
+from diskless.image_manager import ImageManager
 
 
 # Main program
@@ -82,7 +82,7 @@ if __name__ == "__main__":
             print(' 8 - Exit\n')
 
             # When the user press CTRL + c in a sub menu, he returns to main menu
-            # When the user press CTRL + c in the main menu he exit program 
+            # When the user press CTRL + c in the main menu he exit program
             printc('At any time: (CTRL + c) => Return to this main menu.\n', Color.BLUE)
 
             # Answer to get the action to execute
@@ -106,7 +106,7 @@ if __name__ == "__main__":
                 ImageManager.cli_use_modules()
 
             # Display already created diskless images
-            elif main_action == '2': 
+            elif main_action == '2':
                 ImageManager.cli_display_images()
                 printc('\n[OK] Done.', Color.GREEN)
 
@@ -127,12 +127,12 @@ if __name__ == "__main__":
                 elif confirmation == 'no':
                     printc('\n[+] Image deletion cancelled', Color.YELLOW)
 
-            # Change the kernel of an existing image 
+            # Change the kernel of an existing image
             elif main_action == '4':
                 # Select the image to change kernel
                 image = ImageManager.get_created_image(ImageManager.cli_select_created_image())
                 print('\nCurrent kernel is: ' + image.kernel)
-                # Select an available kernel 
+                # Select an available kernel
                 new_kernel = KernelManager.cli_select_kernel()
                 # Set image kernel by using image method
                 KernelManager.change_kernel(image, new_kernel)
@@ -170,7 +170,7 @@ if __name__ == "__main__":
                 confirmation = input('-->: ').replace(" ", "")
 
                 if confirmation == 'yes':
-                   # Clean selected image
+                    # Clean selected image
                     ImageManager.clean_intallation(image_name)
                     printc('\n[OK] Done.', Color.GREEN)
 
@@ -188,10 +188,10 @@ if __name__ == "__main__":
         # When user press CTRL + c
         except KeyboardInterrupt:
             # If user is not in main menu, just return to the main menu
-            if in_main_menu == False:
+            if in_main_menu is False:
                 pass
             # If user is already in main menu, exit program
-            elif in_main_menu == True:
+            elif in_main_menu is True:
                 print('')
                 exit()
 
@@ -199,4 +199,3 @@ if __name__ == "__main__":
         except UserWarning as e:
             # Display to the user a warning message
             printc('[WARNING] ' + str(e), Color.YELLOW)
-

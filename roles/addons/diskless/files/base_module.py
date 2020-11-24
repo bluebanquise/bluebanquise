@@ -27,8 +27,8 @@ from abc import ABC, abstractmethod
 import subprocess
 
 # Import diskless modules
-from utils import Color, printc, select_from_list
-from image_manager import ImageManager
+from diskless.utils import Color, printc
+from diskless.image_manager import ImageManager
 
 
 class Image(ABC):

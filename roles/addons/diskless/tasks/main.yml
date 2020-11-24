@@ -96,4 +96,3 @@
 
 - name: Update exports
   shell: exportfs -ra
-

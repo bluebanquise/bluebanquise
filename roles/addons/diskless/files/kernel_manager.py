@@ -18,7 +18,7 @@
 
 # Import basic modules
 import os
-from utils import Color, printc, select_from_list
+from diskless.utils import Color, printc, select_from_list
 
 
 # Class to manage kernels
@@ -56,7 +56,7 @@ class KernelManager:
         # If there are kernels
         if kernel_list:
             # Return only kernels with initramfs-kernel
-            return [kernel for kernel in kernel_list if os.path.exists(KernelManager.KERNELS_PATH+'/initramfs-kernel-'+(kernel.replace('vmlinuz-','')))]
+            return [kernel for kernel in kernel_list if os.path.exists(KernelManager.KERNELS_PATH + '/initramfs-kernel-' + (kernel.replace('vmlinuz-', '')))]
 
         # If there are no kernels
         else:
@@ -134,7 +134,7 @@ class KernelManager:
             # For each kernel
             for kernel in kernel_list:
                 # If the iniramfs file is present
-                if os.path.exists(KernelManager.KERNELS_PATH + '/initramfs-kernel-' + (kernel.replace('vmlinuz-',''))):
+                if os.path.exists(KernelManager.KERNELS_PATH + '/initramfs-kernel-' + (kernel.replace('vmlinuz-', ''))):
                     initramfs_status = Color.GREEN + 'initramfs present'+Color.TAG_END
                 # If the iniramfs file is not present
                 else:

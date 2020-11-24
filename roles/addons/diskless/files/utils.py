@@ -35,7 +35,7 @@ def printc(text, color):
     :param color: The color to print
     :type color: str
     """
-    print (color + text + Color.TAG_END)
+    print(color + text + Color.TAG_END)
 
 def select_from_list(_list):
     """Display to the user an interface for selecting an element in a list.
