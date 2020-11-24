@@ -467,8 +467,10 @@ boot
 
         if self.livenet_size < 1000:
             attributes_dictionary['livenet_size'] = str(self.livenet_size) + 'M'
+        # Division can produce a long size string, we get only the 5 firsts
         else:
-            attributes_dictionary['livenet_size'] = str(self.livenet_size/1024) + "G"
+            attributes_dictionary['livenet_size'] = str(self.livenet_size/1024)[:5] + "G"
+
         if self.is_mounted is True:
             attributes_dictionary['is_mounted'] = 'True, on ' + self.MOUNT_DIRECTORY
 
@@ -526,7 +528,7 @@ def cli_menu():
     else:
         raise UserWarning('\'' + main_action + '\' is not a valid entry. Please enter another value.')
 
-
+# Get a size from the user and check the compliance
 def cli_get_size(size):
 
     # Check if there is the size unit
@@ -538,15 +540,31 @@ def cli_get_size(size):
     # Delete unit from size
     size = size[:-1]
 
-    # Check if the size is only numerical
-    if not size.isdigit():
-        raise UserWarning('\nNot a valid size format!')
-
+    # If the user has entered a Giga value
     if unit == 'G':
-        size = str(int(size) * 1024)
+        # If the giga value has a dot separator
+        if '.' in size:
+            size_array = size.split(".")
+            if len(size_array) != 2 or not size_array[0].isdigit() or not size_array[1].isdigit() or len(size_array[1]) > 3:
+                raise UserWarning('\nNot a valid size format!')
+            
+            while(len(size_array[1]) < 3):
+                size_array[1] = size_array[1] + '0'
+
+            size = size_array[0] + size_array[1]
+
+        # If the giga value has no dot separator
+        else:
+            if not size.isdigit():
+                raise UserWarning('\nNot a valid size format!')
+            size = str(int(size) * 1024)
+
+    elif unit == 'M':
+        # Check if the size is only numerical
+        if not size.isdigit():
+            raise UserWarning('\nNot a valid size format!')
 
     return size
-
 
 def cli_create_livenet_image():
 
@@ -600,7 +618,7 @@ def cli_create_livenet_image():
 
     # Check and convert the size
     size = cli_get_size(selected_size)
-    print('size:' + size)
+
     # Check size compliance with livenet image expected size limits
     if int(size) < (LivenetImage.MIN_LIVENET_SIZE) or int(size) > (LivenetImage.MAX_LIVENET_SIZE):
         raise UserWarning('\nInvalid input size !')

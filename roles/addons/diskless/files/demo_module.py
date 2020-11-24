@@ -20,7 +20,7 @@ import os
 import shutil
 
 # Import diskless modules
-from diskless.base_module import Image
+from diskless.modules.base_module import Image
 from diskless.utils import Color, printc
 
 
@@ -118,10 +118,10 @@ def cli_menu():
 
     if main_action == '1':
 
-        printc('Give a name to your demo image:', Color.GREEN)
+        printc('\nGive a name to your demo image:', Color.GREEN)
         demo_name = input('-->: ').replace(' ', '')
 
-        printc('Give a message for your demo image:', Color.GREEN)
+        printc('\nGive a message for your demo image:', Color.GREEN)
         demo_message = input('-->: ')
 
         # Create a DemoImage image

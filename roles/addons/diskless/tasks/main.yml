@@ -69,7 +69,7 @@
     - { src: 'base_module.py', dest: '/lib/python3.6/site-packages/diskless/modules/base_module.py' }
     - { src: 'livenet_module.py', dest: '/lib/python3.6/site-packages/diskless/modules/livenet_module.py' }  
     - { src: 'demo_module.py', dest: '/lib/python3.6/site-packages/diskless/modules/demo_module.py' }
-    mode: 0755
+    
 
 # We need to check file existance because an image installation can be running yet, we cannot juste replace the file
 - name: Check that the installations.yml exists
