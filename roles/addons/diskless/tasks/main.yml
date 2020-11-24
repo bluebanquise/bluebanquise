@@ -60,16 +60,16 @@
 
 - name: "copy █ files"
   copy: src={{ item.src }} dest={{ item.dest }}
-  with_items:          
-
+  with_items:
     - { src: 'utils.py', dest: '/lib/python3.6/site-packages/diskless/utils.py' }
     - { src: 'image_manager.py', dest: '/lib/python3.6/site-packages/diskless/image_manager.py' }
     - { src: 'kernel_manager.py', dest: '/lib/python3.6/site-packages/diskless/kernel_manager.py' }
 
     - { src: 'nfs_module.py', dest: '/lib/python3.6/site-packages/diskless/modules/nfs_module.py' }
     - { src: 'base_module.py', dest: '/lib/python3.6/site-packages/diskless/modules/base_module.py' }
-    - { src: 'livenet_module.py', dest: '/lib/python3.6/site-packages/diskless/modules/livenet_module.py' }      
+    - { src: 'livenet_module.py', dest: '/lib/python3.6/site-packages/diskless/modules/livenet_module.py' }  
     - { src: 'demo_module.py', dest: '/lib/python3.6/site-packages/diskless/modules/demo_module.py' }
+    mode: 0755
 
 # We need to check file existance because an image installation can be running yet, we cannot juste replace the file
 - name: Check that the installations.yml exists
@@ -81,13 +81,14 @@
   copy:
     src: installations.yml
     dest: /var/lib/diskless/installations.yml
+    mode: 0755
   when: stat_result.stat.exists == False 
 
 - name: "copy █ diskless script"
   copy:
     src: disklessset.py
     dest: /usr/bin/disklessset
-    mode: 0700
+    mode: 0755
 
 - name: "Create an entry for nfs share in /etc/exports file"
   lineinfile:
@@ -95,4 +96,4 @@
     line: /diskless/images/nfsimages *(rw,no_root_squash,sync)
 
 - name: Update exports
-  shell: exportfs -ra
+  command: exportfs -ra
