@@ -29,6 +29,7 @@ from enum import Enum, auto
 # Import diskless modules
 from diskless.utils import Color, printc, select_from_list
 
+
 class ImageManager:
     """Class to manage images of the diskless tool."""
 
@@ -512,8 +513,8 @@ class ImageManager:
         else:
             raise UserWarning('No images.')
 
+
 # Add the modules directory path to importation path
 sys.path.append(ImageManager.MODULES_PATH)
 # When import module base_module at the end because we need to add first
 # ImageManager.MODULES_PATH ImageManager attribute to importation path
-
