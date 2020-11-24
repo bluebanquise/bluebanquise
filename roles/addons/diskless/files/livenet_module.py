@@ -52,10 +52,10 @@ class LivenetImage(Image):
     MIN_LIVENET_SIZE = 100 # 100 Megabytes
 
     # Class constructor
-    def __init__(self, name, password = None, kernel = None, livenet_type = None, livenet_size = None, ssh_pub_key = None, selinux = None):
-        super().__init__(name, password, kernel, livenet_type, livenet_size, ssh_pub_key, selinux)
+    def __init__(self, name, password = None, kernel = None, livenet_type = None, livenet_size = None, additional_packages = None, ssh_pub_key = None, selinux = None, release_version = None):
+        super().__init__(name, password, kernel, livenet_type, livenet_size, additional_packages, ssh_pub_key, selinux, release_version)
 
-    def create_new_image(self, password, kernel, livenet_type, livenet_size, ssh_pub_key, selinux):
+    def create_new_image(self, password, kernel, livenet_type, livenet_size, additional_packages, ssh_pub_key, selinux, release_version):
 
         # Checking all parameters
         # Check name format
@@ -82,10 +82,16 @@ class LivenetImage(Image):
         self.livenet_type = livenet_type
         self.livenet_size = livenet_size
 
+        self.selinux = selinux
+
         if ssh_pub_key != '':
             self.ssh_pub_key = ssh_pub_key
 
-        self.selinux = selinux
+        if additional_packages != None:
+            self.additional_packages = additional_packages
+
+        if release_version != None:
+            self.release_version = release_version
 
         # A livenet can be mounted on it's personnal mount directory
         # in order to perform actions on it.
@@ -132,14 +138,30 @@ class LivenetImage(Image):
         # create image personnal working directory
         os.makedirs(self.WORKING_DIRECTORY + 'generated_os')
 
+        if hasattr(self, 'release_version'):
+            release = '--releasever=' + self.release_version
+        else:
+            release = ''
+
         # Generate desired image file system
         if self.livenet_type == LivenetImage.Type.STANDARD:
-            os.system('dnf groupinstall -y "core"  --releasever=8 --setopt=module_platform_id=platform:el8 --installroot=' + self.WORKING_DIRECTORY + 'generated_os --exclude selinux-policy-targeted --exclude selinux-policy-mls')
+            os.system('dnf groupinstall ' + release + ' -y "core" --setopt=module_platform_id=platform:el8 --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --exclude selinux-policy-targeted --exclude selinux-policy-mls')
         elif self.livenet_type == LivenetImage.Type.SMALL:
-            os.system('dnf install --releasever=8 -y dnf yum iproute procps-ng openssh-server NetworkManager --installroot=' + self.WORKING_DIRECTORY + 'generated_os --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --exclude selinux-policy-targeted --exclude selinux-policy-mls --setopt=module_platform_id=platform:el8 --nobest')
+            os.system('dnf install ' + release + ' -y dnf yum iproute procps-ng openssh-server NetworkManager --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --exclude selinux-policy-targeted --exclude selinux-policy-mls --setopt=module_platform_id=platform:el8 --nobest')
         elif self.livenet_type == LivenetImage.Type.CORE:
-            os.system('dnf install --releasever=8 -y iproute procps-ng openssh-server --installroot=' + self.WORKING_DIRECTORY +'generated_os --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --exclude selinux-policy-targeted --exclude selinux-policy-mls --setopt=module_platform_id=platform:el8 --nobest')
+            os.system('dnf install ' + release + ' -y iproute procps-ng openssh-server --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --exclude selinux-policy-targeted --exclude selinux-policy-mls --setopt=module_platform_id=platform:el8 --nobest')
 
+        # If there are additional packages to install
+        if hasattr(self, 'additional_packages'):
+            # Install additional packages in installroot directory
+
+            packages = ''
+            for package in self.additional_packages:
+                packages = packages + ' ' + package
+
+            os.system('dnf install ' + release + ' -y --installroot=' +  self.WORKING_DIRECTORY + 'generated_os/ ' + packages)
+
+            
     # Generate the image squashfs image after creating the image rootfs image
     # The operating system need to be previoulsy created by the
     # generate_operating_system method.
@@ -432,6 +454,20 @@ boot
         # For the last tuple element of the list
         print('     └── ' + str(list(attributes_dictionary.keys())[-1]) + ': ' + str(list(attributes_dictionary.values())[-1]))
 
+    # Override method because of selinux
+    def generate_ipxe_boot_file(self):
+        """Generate an ipxe boot file for the image."""
+        logging.info('Creating IPXE boot file for the image')
+        # Format image ipxe boot file template with image attributes
+        file_content = self.__class__.get_boot_file_template().format(image_name=self.name,
+                                                                image_initramfs=self.image,
+                                                                image_kernel=self.kernel,
+                                                                image_selinux=self.selinux)
+
+        # Create ipxe boot file
+        with open(self.IMAGE_DIRECTORY + '/boot.ipxe', "w") as ff:
+            ff.write(file_content)
+
 #######################
 ## CLI reserved part ##
 #######################
@@ -545,7 +581,7 @@ def cli_create_livenet_image():
         raise UserWarning('\nSSH public key not found ' + selected_ssh_pub_key)
 
     # Activate SELinux or not
-    printc('\nActivate SELinux inside the image? Enter yes or no.', CGREEN)
+    printc('\nActivate SELinux inside the image (yes/no) ?', CGREEN)
     answer_selinux = input('-->: ')
     if answer_selinux == 'yes':
        selinux = True
@@ -554,22 +590,58 @@ def cli_create_livenet_image():
     else:
         raise UserWarning('\nInvalid input !')
 
+    # Propose to user to install additional packages
+    printc('\nDo you want to customize your image with additional packages (yes/no) ? ', CGREEN)
+    choice = input('-->: ')
+    # Install additional packages
+    if choice == 'yes':
+        # Get package list from user
+        additional_packages = Image.cli_add_packages()
+    # Don't install additional packages
+    elif choice == 'no':
+        additional_packages = None
+    else:
+        raise UserWarning('\nInvalid entry !')   
+
+    # Propose to user to specify a release version
+    printc('\nDo you want to specify a installation version (dnf --releasever option) (yes/no)?', CGREEN)
+    choice = input('-->: ')
+    # Use a specific release
+    if choice == 'yes':
+        printc('\nSpecify the installation release version you want (ex: 8)', CGREEN)
+        release_version = input('-->: ')
+    elif choice == 'no':
+        release_version = None
+    else:
+        raise UserWarning('\nInvalid entry !')   
+
     # Confirm image creation
     printc('\n[+] Would you like to create a new livenet image with the following attributes: (yes/no)', CGREEN)
     print('  ├── Image name: \t\t' + selected_image_name)
-    print('  ├── Image password : \t\t' + selected_password)
+    print('  ├── Image password: \t\t' + selected_password)
     print('  ├── Image kernel: \t\t' + selected_kernel)
     print('  ├── Image type: \t\t' + get_type)
     print('  ├── Image size: \t\t' + selected_size)
+
+    # Print ssh pub key packages if there is one
     if selected_ssh_pub_key != '':
         print('  ├── SSH pubkey: \t\t' + selected_ssh_pub_key)
+
+    # Print additional packages if there is
+    if additional_packages != None:
+        print('  ├── Additional packages: \t' + str(additional_packages))
+
+    # Print release version if there is one
+    if release_version != None:
+        print('  ├── Release version: \t\t' + release_version)
+
     print('  └── Enable SELinux: \t\t' + str(selinux))
 
     confirmation = input('-->: ').replace(" ", "")
 
     if confirmation == 'yes':
         # Create the image object
-        LivenetImage(selected_image_name, selected_password, selected_kernel, selected_type, size, selected_ssh_pub_key, selinux)
+        LivenetImage(selected_image_name, selected_password, selected_kernel, selected_type, size, additional_packages, selected_ssh_pub_key, selinux, release_version)
         printc('\n[OK] Done.', CGREEN)
 
     elif confirmation == 'no':

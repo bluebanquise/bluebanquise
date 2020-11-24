@@ -45,7 +45,6 @@
    - /diskless/images/nfsimages/golden
    - /diskless/images/nfsimages/staging
    - /diskless/modules
-   - /diskless/nfsimages
    
    - /var/tmp/diskless/workdir/
    - /usr/include/diskless

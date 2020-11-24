@@ -24,6 +24,7 @@ from datetime import datetime
 import yaml
 import logging
 from abc import ABC, abstractmethod
+import subprocess
 
 # Import diskless modules
 from utils import *
@@ -231,8 +232,7 @@ class Image(ABC):
         # Format image ipxe boot file template with image attributes
         file_content = self.__class__.get_boot_file_template().format(image_name=self.name,
                                                                 image_initramfs=self.image,
-                                                                image_kernel=self.kernel,
-                                                                image_selinux=self.selinux)
+                                                                image_kernel=self.kernel)
 
         # Create ipxe boot file
         with open(self.IMAGE_DIRECTORY + '/boot.ipxe', "w") as ff:
@@ -277,3 +277,26 @@ class Image(ABC):
 
         # For the last tuple element of the list
         print('     └── ' + str(list(attributes_dictionary.keys())[-1]) + ': ' + str(list(attributes_dictionary.values())[-1]))
+
+
+    @staticmethod
+    def cli_add_packages():
+        """Ask user for a list of packages"""
+        printc('Give a list of packages separated by spaces.', CGREEN)
+        printc('Exemple: \'package1 package2 package3 ...\' ', CGREEN)
+        # Get packages
+        package_list = input('-->: ').split()
+
+        # For each package
+        for package_name in package_list:
+            try:
+                # Check packages availability
+                subprocess.check_output('dnf list ' + package_name + ' | grep ' + package_name , shell=True)
+
+            # If there is not running process for image creator instance pid
+            except subprocess.CalledProcessError:
+                raise UserWarning("Package " + package_name + ' not available')
+        
+        # Return the list of packages
+        return package_list
+      

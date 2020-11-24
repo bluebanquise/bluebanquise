@@ -38,11 +38,11 @@ class NfsStagingImage(Image):
     NFS_DIRECTORY = '/diskless/images/nfsimages/staging/'
 
     # Class constructor
-    def __init__(self, name, password = None, kernel = None):
-        super().__init__(name, password, kernel)
+    def __init__(self, name, password = None, kernel = None, additional_packages = None, release_version = None):
+        super().__init__(name, password, kernel, additional_packages, release_version)
 
     # Create new staging image
-    def create_new_image(self, password, kernel):
+    def create_new_image(self, password, kernel, additional_packages, release_version):
 
         # Checking all parameters
         # Check name format
@@ -57,6 +57,12 @@ class NfsStagingImage(Image):
         self.kernel = kernel
         self.image = 'initramfs-kernel-'+ self.kernel.replace('vmlinuz-', '')
         self.password = password
+
+        if additional_packages != None:
+            self.additional_packages = additional_packages
+
+        if release_version != None:
+            self.release_version = release_version
 
         self.NFS_DIRECTORY = NfsStagingImage.NFS_DIRECTORY + self.name + '/'
 
@@ -88,9 +94,25 @@ class NfsStagingImage(Image):
     # Generate image file system
     def generate_file_system(self):
         super().generate_file_system()
-        # create file system with dnf
-        os.system('dnf groupinstall -y "core" --releasever=8 --setopt=module_platform_id=platform:el8 --installroot=' + self.NFS_DIRECTORY)
 
+        if hasattr(self, 'release_version'):
+            release = '--releasever=' + self.release_version
+        else:
+            release = ''
+
+        # create file system with dnf
+        os.system('dnf groupinstall '+ release + ' -y "core" --releasever=8 --setopt=module_platform_id=platform:el8 --installroot=' + self.NFS_DIRECTORY)
+
+          # If there are additional packages to install
+        if hasattr(self, 'additional_packages'):
+            # Install additional packages in installroot directory
+
+            packages = ''
+            for package in self.additional_packages:
+                packages = packages + ' ' + package
+
+            os.system('dnf install ' + release + ' -y --installroot=' + self.NFS_DIRECTORY + ' ' + packages)
+    
     # Set a password for the image
     # Staging images need a password
     def set_image_password(self):
@@ -337,17 +359,51 @@ def cli_create_staging_image():
     printc('\n[+] Give a password for your image', CGREEN)
     selected_password = input('Please enter clear root password of the new image: ').replace(" ", "")
 
+    # Propose to user to install additional packages
+    printc('\nDo you want to customize your image with additional packages? (yes/no)', CGREEN)
+    choice = input('-->: ')
+    # Install addictional packages
+    if choice == 'yes':
+       # Get package list from user
+       additional_packages = Image.cli_add_packages()
+    # Don't install additional packages
+    elif choice == 'no':
+        additional_packages = None
+    else:
+        raise UserWarning('\nInvalid entry !')   
+
+    # Propose to user to specify a release version
+    printc('\nDo you want to specify a installation version (dnf --releasever option) (yes/no)?', CGREEN)
+    choice = input('-->: ')
+    # Use a specific release
+    if choice == 'yes':
+        printc('\nSpecify the installation release version you want (ex: 8)', CGREEN)
+        release_version = input('-->: ')
+    elif choice == 'no':
+        release_version = None
+    else:
+        raise UserWarning('\nInvalid entry !')   
+
     # Confirm image creation
     printc('\n[+] Would you like to create a new nfs staging image with the following attributes: (yes/no)', CGREEN)
-    print('  ├── Image name: ' + selected_image_name)
-    print('  ├── Image password : ' + selected_password)
-    print('  └── Image kernel: ' + selected_kernel)
+    print('  ├── Image name: \t\t' + selected_image_name)
+    print('  ├── Image password : \t\t' + selected_password)
+
+    # Print additional packages if there is
+    if additional_packages != None:
+        print('  ├── Additional packages: \t' + str(additional_packages))
+
+    # Print release version if there is one
+    if release_version != None:
+        print('  ├── Release version: \t\t' + release_version)
+
+    print('  └── Image kernel: \t\t' + selected_kernel)
 
     confirmation = input('-->: ').replace(" ", "")
 
     if confirmation == 'yes':
     # Create the image object
-        NfsStagingImage(selected_image_name, selected_password, selected_kernel)
+        NfsStagingImage(selected_image_name, selected_password, selected_kernel, additional_packages, release_version)
         printc('\n[OK] Done.', CGREEN)
 
     elif confirmation == 'no':
@@ -390,8 +446,8 @@ def cli_create_golden_image():
 
     # Confirm image creation
     printc('\n[+] Would you like to create a new nfs golden image with the following attributes: (yes/no)', CGREEN)
-    print('  ├── Image name: ' + selected_image_name)
-    print('  └── Staging image from: ' + staging_image.name)
+    print('  ├── Image name: \t\t' + selected_image_name)
+    print('  └── Staging image from: \t\t' + staging_image.name)
 
     confirmation = input('-->: ').replace(" ", "")
 
