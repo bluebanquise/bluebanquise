@@ -148,6 +148,6 @@ class KernelManager:
 
         # If the list of kernels is empty
         else:
-           raise UserWarning('No kernels found in /var/www/html/diskless/kernels/\nPlease refer to readme.rst for details on how to obtain kernels.')
+           raise UserWarning('No kernels found in /var/www/html/preboot_execution_environment/diskless/kernels/\nPlease refer to readme.rst for details on how to obtain kernels.')
 
         

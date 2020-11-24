@@ -27,7 +27,7 @@ import logging
 from termios import tcflush, TCIFLUSH
 
 # Add path to files to include
-sys.path.append('/usr/include/diskless/')
+sys.path.append('/lib/python3.6/site-packages/diskless/')
 
 # Import diskless modules from path
 from utils import *

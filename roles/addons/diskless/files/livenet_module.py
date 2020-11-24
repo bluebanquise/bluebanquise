@@ -97,6 +97,7 @@ class LivenetImage(Image):
         # in order to perform actions on it.
         self.is_mounted = False
 
+        # Set up working and mount image directories
         self.WORKING_DIRECTORY = self.WORKING_DIRECTORY + self.name + '/'
         self.MOUNT_DIRECTORY = self.WORKING_DIRECTORY  + 'mnt/'
 
@@ -161,7 +162,6 @@ class LivenetImage(Image):
 
             os.system('dnf install ' + release + ' -y --installroot=' +  self.WORKING_DIRECTORY + 'generated_os/ ' + packages)
 
-            
     # Generate the image squashfs image after creating the image rootfs image
     # The operating system need to be previoulsy created by the
     # generate_operating_system method.
@@ -217,7 +217,7 @@ class LivenetImage(Image):
         with open(mountage_directory + '/etc/shadow', "w") as ff:
             ff.write(newText)
 
-    # Write meta data insod image os-release
+    # Write meta data inside image os-release file
     def set_image_release_meta_data(self):
         logging.info('Setting image information')
         with open(self.WORKING_DIRECTORY + 'generated_os/etc/os-release', 'a') as ff:
@@ -237,20 +237,32 @@ class LivenetImage(Image):
     def set_image_selinux(self):
         logging.info('Setting up SELinux in the image')
 
-        # Install needed packages
-        os.system('dnf install -y libselinux-utils policycoreutils selinux-policy-targeted --installroot=' + self.WORKING_DIRECTORY + 'generated_os --setopt=module_platform_id=platform:el8 --nobest')
+        if hasattr(self, 'release_version'):
+            release = '--releasever=' + self.release_version
+        else:
+            release = ''
 
-        # Chroot inside image to execute main restorecon
+        # Install needed packages
+        os.system('dnf install ' + release + ' -y libselinux-utils policycoreutils selinux-policy-targeted --installroot=' + self.WORKING_DIRECTORY + 'generated_os --setopt=module_platform_id=platform:el8 --nobest')
+
+        # Moot required directories on the image
         check_call('mount --bind /proc '+ self.WORKING_DIRECTORY + 'generated_os/proc', shell=True)
         check_call('mount --bind /sys '+ self.WORKING_DIRECTORY + 'generated_os/sys', shell=True)
         check_call('mount --bind /sys/fs/selinux '+ self.WORKING_DIRECTORY + 'generated_os/sys/fs/selinux', shell=True)
+
+        # Chroot onto image
         real_root = os.open("/", os.O_RDONLY)
         os.chroot(self.WORKING_DIRECTORY + 'generated_os/')
         os.chdir("/")
+
+        # Restore SELinux values on all file system 
         check_call('restorecon -Rv /', shell=True)
+
+        # Quit chroot
         os.fchdir(real_root)
         os.chroot(".")
         os.close(real_root)
+
         check_call('umount '+ self.WORKING_DIRECTORY + 'generated_os/{sys/fs/selinux,sys,proc}', shell=True)
 
     # Remove files associated with the NFS image
@@ -287,7 +299,7 @@ class LivenetImage(Image):
         # Create the ansible connection
         os.system('echo \'' + self.MOUNT_DIRECTORY + ' ansible_connection=chroot\' > ' + self.WORKING_DIRECTORY + 'inventory/host')
 
-        # Changing image mountage status
+        # Change image mountage status
         self.is_mounted = True
         self.register_image()
 
@@ -296,16 +308,22 @@ class LivenetImage(Image):
         """Unmounting livenet image"""
         logging.info('Unmounting livenet image ' + self.name)
 
+        # Unmount all mountages and delete mountage directory
         os.system('umount ' + self.MOUNT_DIRECTORY + '/{proc,sys}')
         os.system('umount ' + self.MOUNT_DIRECTORY)
-
         shutil.rmtree(self.MOUNT_DIRECTORY)
 
+        # Create a squashfs backup (prevent failure)
         os.system('mv ' + self.IMAGE_DIRECTORY + '/squashfs.img ' + self.IMAGE_DIRECTORY + '/squashfs.img.bkp')
+
+        # Create a new squashfs
         os.system('mksquashfs ' + self.WORKING_DIRECTORY + '/squashfs-root/ ' + self.IMAGE_DIRECTORY + '/squashfs.img')
 
-        shutil.rmtree(self.WORKING_DIRECTORY)
+        # Remove backup squashfs because we have the new squashfs
         os.remove(self.IMAGE_DIRECTORY + '/squashfs.img.bkp')
+
+        # Remove working directory because we don't need it anymore
+        shutil.rmtree(self.WORKING_DIRECTORY)
 
         # Changing image mountage status
         self.is_mounted = False
@@ -376,11 +394,20 @@ class LivenetImage(Image):
         elif self.is_mounted == 'False':
             self.is_mounted = False
 
+        # Convert SELinux string status into boolean
+        if hasattr(self, 'selinux'):
+            if self.selinux == 'True':
+                self.selinux = True
+            elif self.selinux == 'False':
+                self.selinux = False
+
     # Clean all image files without image object when an image is corrupted
     @staticmethod
     def clean(image_name):
 
-        MOUNT_DIRECTORY = LivenetImage.WORKING_DIRECTORY + image_name + '/mnt/'
+        IMAGES_DIRECTORY = LivenetImage.IMAGES_DIRECTORY + image_name + '/'
+        WORKING_DIRECTORY = LivenetImage.WORKING_DIRECTORY + image_name + '/'
+        MOUNT_DIRECTORY = WORKING_DIRECTORY + '/mnt/'
 
         # Cleanings for mount directories
         if os.path.isdir(MOUNT_DIRECTORY):
@@ -390,12 +417,12 @@ class LivenetImage(Image):
             shutil.rmtree(MOUNT_DIRECTORY)
 
         # Try cleaning image working directory
-        if os.path.isdir(LivenetImage.WORKING_DIRECTORY + image_name):
-            shutil.rmtree(LivenetImage.WORKING_DIRECTORY + image_name)
+        if os.path.isdir(WORKING_DIRECTORY):
+            shutil.rmtree(WORKING_DIRECTORY)
 
         # Try cleaning image base directory
-        if os.path.isdir(LivenetImage.IMAGES_DIRECTORY + image_name):
-            shutil.rmtree(LivenetImage.IMAGES_DIRECTORY + image_name)
+        if os.path.isdir(IMAGES_DIRECTORY):
+            shutil.rmtree(IMAGES_DIRECTORY)
 
     @staticmethod
     def get_boot_file_template():
@@ -536,6 +563,9 @@ def cli_create_livenet_image():
         # Get new image name
         selected_image_name = input('-->: ').replace(" ", "")
 
+        if selected_image_name == '':
+            raise UserWarning('Image name cannot be empty !')
+
         if not ImageManager.is_image(selected_image_name):
             break
 
@@ -572,7 +602,7 @@ def cli_create_livenet_image():
     print('size:' + size)
     # Check size compliance with livenet image expected size limits
     if int(size) < (LivenetImage.MIN_LIVENET_SIZE) or int(size) > (LivenetImage.MAX_LIVENET_SIZE):
-        raise UserWarning('\nInvalid input size !' + str(size))
+        raise UserWarning('\nInvalid input size !')
     
     # Inject ssh key or not
     printc('\nEnter path to SSH public key (left empty to disable key injection)', CGREEN)

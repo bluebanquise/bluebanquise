@@ -38,7 +38,7 @@ class ImageManager:
     """Class to manage images of the diskless tool."""
 
     # Modules location
-    MODULES_PATH = '/diskless/modules'
+    MODULES_PATH = '/lib/python3.6/site-packages/diskless/modules'
 
     class ImageStatus(Enum):
         """Enumeration that represents the status of an image. An image can have three status. We don't care about enumaration members values."""
@@ -403,7 +403,7 @@ class ImageManager:
 
         try:
             # For installations.yml file instance
-            with open('/diskless/installations.yml', 'r') as f:
+            with open('/var/lib/diskless/installations.yml', 'r') as f:
                 # Get file content as dictionary
                 ongoing_intallations = yaml.safe_load(f)
 
@@ -427,7 +427,7 @@ class ImageManager:
         """
         try:
             # For installations.yml file instance
-            with open('/diskless/installations.yml', 'w') as f:
+            with open('/var/lib/diskless/installations.yml', 'w') as f:
                 # Write ongoing_intallations dictionary in the installations.yml file
                 yaml.dump(ongoing_intallations, f, default_flow_style=False)
 

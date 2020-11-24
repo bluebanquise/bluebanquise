@@ -58,7 +58,6 @@ class Image(ABC):
     # Each image has it's own base directory in IMAGES_DIRECTORY directory
     IMAGES_DIRECTORY = '/var/www/html/preboot_execution_environment/diskless/images/'
 
-
     def __init__(self, name, *args):
         """Class consructor.
         The constructor take in argument the name of the image, and the creation arguments (in *args).
@@ -237,6 +236,7 @@ class Image(ABC):
         # Create ipxe boot file
         with open(self.IMAGE_DIRECTORY + '/boot.ipxe', "w") as ff:
             ff.write(file_content)
+        
 
     @classmethod
     def get_images(cls):
@@ -253,7 +253,6 @@ class Image(ABC):
 
         # Return all class images
         return class_images
-
 
     ######################
     ## CLI reserved part##
@@ -299,4 +298,5 @@ class Image(ABC):
         
         # Return the list of packages
         return package_list
+
       

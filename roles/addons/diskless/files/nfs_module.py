@@ -81,9 +81,7 @@ class NfsStagingImage(Image):
     # Remove files associated with the NFS image
     def remove_files(self):
         super().remove_files()
-        # Remove specific nfs staging image directory
-        if os.path.isdir(self.NFS_DIRECTORY):
-            shutil.rmtree(self.NFS_DIRECTORY)
+        shutil.rmtree(self.NFS_DIRECTORY)
 
     # Create image base folders
     def create_image_folders(self):
@@ -100,10 +98,10 @@ class NfsStagingImage(Image):
         else:
             release = ''
 
-        # create file system with dnf
+        # Create file system with dnf
         os.system('dnf groupinstall '+ release + ' -y "core" --releasever=8 --setopt=module_platform_id=platform:el8 --installroot=' + self.NFS_DIRECTORY)
 
-          # If there are additional packages to install
+        # If there are additional packages to install
         if hasattr(self, 'additional_packages'):
             # Install additional packages in installroot directory
 
@@ -156,7 +154,7 @@ echo | > Console: ${{eq-console}}
 echo | > Additional kernel parameters: ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}}
 echo |
 echo | Loading linux ...
-kernel http://${{next-server}}/preboot_execution_environment/diskless/kernels/${{image-kernel}} initrd=${{image-initramfs}} selinux=0 text=1 root=nfs:${{next-server}}:/diskless/images/nfsimages/{image_name}/staging/,vers=4.2,rw rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}} rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4 
+kernel http://${{next-server}}/preboot_execution_environment/diskless/kernels/${{image-kernel}} initrd=${{image-initramfs}} selinux=0 text=1 root=nfs:${{next-server}}:/diskless/images/nfsimages/staging/{image_name},vers=4.2,rw rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}} rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4 
 echo | Loading initial ramdisk ...
 initrd http://${{next-server}}/preboot_execution_environment/diskless/kernels/${{image-initramfs}}
 echo | ALL DONE! We are ready.
@@ -253,9 +251,7 @@ class NfsGoldenImage(Image):
     # Remove files associated with the NFS image
     def remove_files(self):
         super().remove_files()
-        # Remove specific nfs golden image directory
-        if os.path.isdir(self.NFS_DIRECTORY):
-            shutil.rmtree(self.NFS_DIRECTORY)
+        shutil.rmtree(self.NFS_DIRECTORY)
 
     # Clean all image files without image object when an image is corrupted
     @staticmethod
@@ -286,7 +282,7 @@ echo | > Console: ${{eq-console}}
 echo | > Additional kernel parameters: ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}}
 echo |
 echo | Loading linux ...
-kernel http://${{next-server}}/preboot_execution_environment/diskless/kernels/${{image-kernel}} initrd=${{image-initramfs}} selinux=0 text=1 root=nfs:${{next-server}}:/diskless/images/nfsimages/{image_name}/nodes/${{hostname}},vers=4.2,rw rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}} rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4
+kernel http://${{next-server}}/preboot_execution_environment/diskless/kernels/${{image-kernel}} initrd=${{image-initramfs}} selinux=0 text=1 root=nfs:${{next-server}}:/diskless/images/nfsimages/golden/{image_name}/nodes/${{hostname}},vers=4.2,rw rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}} rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4
 echo | Loading initial ramdisk ...
 initrd http://${{next-server}}/preboot_execution_environment/diskless/kernels/${{image-initramfs}}
 echo | ALL DONE! We are ready.
@@ -344,6 +340,9 @@ def cli_create_staging_image():
         printc('[+] Give a name for your image', CGREEN)
         # Get new image name
         selected_image_name = input('-->: ').replace(" ", "")
+
+        if selected_image_name == '':
+            raise UserWarning('Image name cannot be empty !')
         
         if not ImageManager.is_image(selected_image_name):
             break
@@ -437,6 +436,9 @@ def cli_create_golden_image():
         printc('\n[+] Give a name for your image', CGREEN)
         # Get new image name
         selected_image_name = input('-->: ').replace(" ", "")
+
+        if selected_image_name == '':
+            raise UserWarning('Image name cannot be empty !')
         
         if not ImageManager.is_image(selected_image_name):
             break
