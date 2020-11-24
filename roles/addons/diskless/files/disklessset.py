@@ -20,9 +20,6 @@
 
 # Import basic modules
 import sys
-import os
-import crypt
-import yaml
 import logging
 from termios import tcflush, TCIFLUSH
 

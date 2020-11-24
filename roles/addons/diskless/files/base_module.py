@@ -222,7 +222,7 @@ class Image(ABC):
         self.kernel = kernel
         # Regenerate ipxe boot file
         self.generate_ipxe_boot_file(self.get_ipxe_boot_file())
-        #Register image with new kernel
+        # Register image with new kernel
         self.register_image()
 
     def generate_ipxe_boot_file(self):
@@ -237,7 +237,6 @@ class Image(ABC):
         with open(self.IMAGE_DIRECTORY + '/boot.ipxe', "w") as ff:
             ff.write(file_content)
         
-
     @classmethod
     def get_images(cls):
         """Get all images that are of this class type."""
