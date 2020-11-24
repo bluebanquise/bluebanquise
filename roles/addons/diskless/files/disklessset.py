@@ -27,7 +27,7 @@ from termios import tcflush, TCIFLUSH
 sys.path.append('/lib/python3.6/site-packages/diskless/')
 
 # Import diskless modules from path
-from utils import *
+from utils import Color, printc, select_from_list
 from kernel_manager import KernelManager
 from image_manager import ImageManager
 
@@ -49,7 +49,7 @@ if __name__ == "__main__":
 """
 
     # Print script banner
-    printc(BANNER + '\n           Entering BlueBanquise diskless manager', CBLUE)
+    printc(BANNER + '\n           Entering BlueBanquise diskless manager', Color.BLUE)
 
     # Create a main_action variable
     main_action = ''
@@ -66,7 +66,7 @@ if __name__ == "__main__":
             # There is two parts in this menu
 
             # The first part is about most used actions
-            printc("\n > Diskless image management", CBLUE)
+            printc("\n > Diskless image management", Color.BLUE)
 
             print(' 1 - Manage and create diskless images (need modules)')
             print(' 2 - List available diskless images')
@@ -74,7 +74,7 @@ if __name__ == "__main__":
             print(' 4 - Manage kernel of a diskless image')
 
             # The second part is about other actions
-            printc("\n > Other actions", CBLUE)
+            printc("\n > Other actions", Color.BLUE)
 
             print(' 5 - List available kernels')
             print(' 6 - Generate a new initramfs\n')
@@ -83,7 +83,7 @@ if __name__ == "__main__":
 
             # When the user press CTRL + c in a sub menu, he returns to main menu
             # When the user press CTRL + c in the main menu he exit program 
-            printc('At any time: (CTRL + c) => Return to this main menu.\n', CBLUE)
+            printc('At any time: (CTRL + c) => Return to this main menu.\n', Color.BLUE)
 
             # Answer to get the action to execute
             print(' Select an action:')
@@ -108,13 +108,13 @@ if __name__ == "__main__":
             # Display already created diskless images
             elif main_action == '2': 
                 ImageManager.cli_display_images()
-                printc('\n[OK] Done.', CGREEN)
+                printc('\n[OK] Done.', Color.GREEN)
 
             # Remove a diskless image
             elif main_action == '3':
                 # Get image object to remove
                 image = ImageManager.get_created_image(ImageManager.cli_select_created_image())
-                printc('\n⚠ Would you realy delete image ' + image.name + ' definitively (yes/no) ?', CRED)
+                printc('\n⚠ Would you realy delete image ' + image.name + ' definitively (yes/no) ?', Color.RED)
 
                 # get confirmation from user
                 confirmation = input('-->: ').replace(" ", "")
@@ -122,10 +122,10 @@ if __name__ == "__main__":
                 if confirmation == 'yes':
                     # Remove image
                     ImageManager.remove_image(image)
-                    printc('\n[OK] Done.', CGREEN)
+                    printc('\n[OK] Done.', Color.GREEN)
 
                 elif confirmation == 'no':
-                    printc('\n[+] Image deletion cancelled', CYELLOW)
+                    printc('\n[+] Image deletion cancelled', Color.YELLOW)
 
             # Change the kernel of an existing image 
             elif main_action == '4':
@@ -136,18 +136,18 @@ if __name__ == "__main__":
                 new_kernel = KernelManager.cli_select_kernel()
                 # Set image kernel by using image method
                 KernelManager.change_kernel(image, new_kernel)
-                printc('\n[OK] Done.', CGREEN)
+                printc('\n[OK] Done.', Color.GREEN)
 
             # Display available kernels for image
             elif main_action == '5':
                 KernelManager.cli_display_kernels()
-                printc('\n[OK] Done.', CGREEN)
+                printc('\n[OK] Done.', Color.GREEN)
 
             # Generate a new initramfs file from an existing kernel
             elif main_action == '6':
                 selected_kernel = KernelManager.cli_select_kernel()
                 KernelManager.generate_initramfs(selected_kernel)
-                printc('\n[OK] Done.', CGREEN)
+                printc('\n[OK] Done.', Color.GREEN)
 
             # Clean an image
             elif main_action == '7':
@@ -164,7 +164,7 @@ if __name__ == "__main__":
                 # If there is image, select the image
                 image_name = select_from_list(image_names)
 
-                printc('\n⚠ Would you realy clean image ' + image_name + ' definitively (yes/no) ?', CRED)
+                printc('\n⚠ Would you realy clean image ' + image_name + ' definitively (yes/no) ?', Color.RED)
 
                 # get confirmation from user
                 confirmation = input('-->: ').replace(" ", "")
@@ -172,10 +172,10 @@ if __name__ == "__main__":
                 if confirmation == 'yes':
                    # Clean selected image
                     ImageManager.clean_intallation(image_name)
-                    printc('\n[OK] Done.', CGREEN)
+                    printc('\n[OK] Done.', Color.GREEN)
 
                 elif confirmation == 'no':
-                    printc('\n[+] Image cleaning cancelled', CYELLOW)
+                    printc('\n[+] Image cleaning cancelled', Color.YELLOW)
 
             # Exit program
             elif main_action == '8':
@@ -183,7 +183,7 @@ if __name__ == "__main__":
 
             # Bad entry
             else:
-                printc('\n[INFO] \'' + main_action + '\' is not a valid entry. Please enter another value.', CYELLOW)
+                printc('\n[INFO] \'' + main_action + '\' is not a valid entry. Please enter another value.', Color.YELLOW)
 
         # When user press CTRL + c
         except KeyboardInterrupt:
@@ -198,5 +198,5 @@ if __name__ == "__main__":
         # Only catch UserWarning type exceptions
         except UserWarning as e:
             # Display to the user a warning message
-            printc('[WARNING] ' + str(e), CYELLOW)
+            printc('[WARNING] ' + str(e), Color.YELLOW)
 

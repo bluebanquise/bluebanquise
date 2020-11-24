@@ -21,7 +21,7 @@ import shutil
 
 # Import diskless modules
 from base_module import Image
-from utils import *
+from utils import Color, printc, select_from_list
 
 
 class DemoImage(Image):
@@ -40,7 +40,7 @@ class DemoImage(Image):
         # Create the 'my_message attribute'
         self.my_message = my_message
         self.generate_files()
-        printc("Image created ! Check images list to look at it.", CRED)
+        printc("Image created ! Check images list to look at it.", Color.RED)
 
     def generate_files(self):
         self.create_image_folders()
@@ -107,7 +107,7 @@ class DemoImage(Image):
 def cli_menu():
     """This method is needed for all diskless module to be available by cli interface."""
 
-    printc('\n == Welcome to demo image module == \n', CGREEN)
+    printc('\n == Welcome to demo image module == \n', Color.GREEN)
 
     print('1 - Create my demo image')
 
@@ -117,10 +117,10 @@ def cli_menu():
 
     if main_action == '1':
 
-        printc('Give a name to your demo image:', CGREEN)
+        printc('Give a name to your demo image:', Color.GREEN)
         demo_name = input('-->: ').replace(' ', '')
 
-        printc('Give a message for your demo image:', CGREEN)
+        printc('Give a message for your demo image:', Color.GREEN)
         demo_message = input('-->: ')
  
         # Create a DemoImage image

@@ -14,16 +14,17 @@
 #
 # https://github.com/bluebanquise/bluebanquise - MIT license
 
-
-# Colors
-CBLUE = '\033[94m'
-CYELLOW = '\033[93m'
-CRED = '\033[31m'
-CBLINK = '\033[5m'
-CORANGE_BLINK = '\033[1;33;5m'
-CGREEN = '\033[1;32;40m'
-# Color to close a colored line
-CEND = '\033[0m'
+# Class that contains colors
+class Color():
+    # Colors
+    BLUE = '\033[94m'
+    YELLOW = '\033[93m'
+    RED = '\033[31m'
+    BLINK = '\033[5m'
+    ORANGE_BLINK = '\033[1;33;5m'
+    GREEN = '\033[1;32;40m'
+    # Color to close a colored line
+    TAG_END = '\033[0m'
 
 # Method to print using color
 def printc(text, color):
@@ -34,7 +35,7 @@ def printc(text, color):
     :param color: The color to print
     :type color: str
     """
-    print (color + text + CEND)
+    print (color + text + Color.TAG_END)
 
 def select_from_list(_list):
     """Display to the user an interface for selecting an element in a list.

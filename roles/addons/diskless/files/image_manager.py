@@ -59,7 +59,7 @@ class ImageManager:
 
         # Get only module names
         module_names = [module_name.replace('.py', '') for module_name in module_file_names if not 'base' in module_name and 'module' in module_name]
-    
+
         # Search for the class in all modules
         for module_name in module_names:
 
@@ -68,7 +68,7 @@ class ImageManager:
 
             # Get only classes of the module
             class_members = inspect.getmembers(module, inspect.isclass)
-        
+
             for member in class_members:
                 if class_name in member:
 
@@ -132,12 +132,12 @@ class ImageManager:
         # Check if it is a created image
         if ImageManager.get_image_status(image_name) is not ImageManager.ImageStatus.CREATED:
             raise ValueError('Image ' + image_name + ' is not a created image.')
-        
+
         # Get image image_data file, this file contain all attributs of the image
         image_data_file = ImageManager.get_image_data_path(image_name)
-        
+
         # Check if the image_data file of the image exists
-        if not image_data_file: 
+        if not image_data_file:
             raise ValueError('No founded image_data file for image ' + image_name)
 
         try:
@@ -157,10 +157,10 @@ class ImageManager:
             # Return constructed image object
             return image
 
-        except FileNotFoundError as err:
+        except FileNotFoundError:
             raise FileNotFoundError('Error loading image_data file for image ' + image_name)
-        except ValueError as err:
-            raise ValueError ('Enable to load image class for image ' + image_name + 'from image data file ' + image_data_file)
+        except ValueError:
+            raise ValueError('Enable to load image class for image ' + image_name + 'from image data file ' + image_data_file)
 
     # Get all images objects
     @staticmethod
@@ -175,13 +175,13 @@ class ImageManager:
 
         # Get all images names
         images_names = ImageManager.get_image_names()
-        
+
         # If there are images
         if images_names:
 
             # Get only created images names
             created_images_names = [image_name for image_name in images_names if ImageManager.get_image_status(image_name) is ImageManager.ImageStatus.CREATED]
-            
+
             # If there are created images
             if created_images_names:
                 for image_name in created_images_names:
@@ -195,9 +195,9 @@ class ImageManager:
                     except Exception as e:
                         # Don't add the image to the list and display exception
                         logging.error(e)
-                
+   
                 return created_images_list
-        
+
         return None
 
     @staticmethod
@@ -209,10 +209,10 @@ class ImageManager:
         """
         # Use image object method to delete all related files
         image.remove_files()
-        
+
     @staticmethod
     def is_image(image_name):
-        """Check if an image_name correspond to an image 
+        """Check if an image_name correspond to an image
 
         :param image_name: A created image object
         :type image_name: str
@@ -224,7 +224,7 @@ class ImageManager:
             # If an image with the same name already exist
             if image_name in ImageManager.get_image_names():
                 return True
-        
+
         return False
 
     @classmethod
@@ -263,7 +263,7 @@ class ImageManager:
         """
 
         # The cleaning method depends on the image status
- 
+
         # Cannot clean an in creation image
         if cls.get_image_status(image_name) == ImageManager.ImageStatus.IN_CREATION:
             raise ValueError('Cannot remove an in creation image')
@@ -285,7 +285,7 @@ class ImageManager:
 
         # Cleaning a created image
         elif cls.get_image_status(image_name) == ImageManager.ImageStatus.CREATED:
-            
+
             # Get the created image
             image = ImageManager.get_created_image(image_name)
 
@@ -297,14 +297,14 @@ class ImageManager:
 
         logging.info('Image ' + image_name + ' cleaned')
 
-        
+
     @classmethod
     def get_image_status(cls, image_name):
         """Get the status of an image
 
         :param image_name: An image name
         :type image_name: str
-        :return: 
+        :return:
         `ImageManager.ImageStatus.IN_CREATION` if the image is currently in creation by a process,
         `ImageManager.ImageStatus.CORRUPTED` if the image is in ongoing_installation dictionary but there is no process to finishing created it,
         `ImageManager.ImageStatus.CREATED` if the image has finished is creation successfully.
@@ -320,23 +320,23 @@ class ImageManager:
             # In fact multiple instance of the diskless program can create image simultaneously.
             # So we need the pid of the program that has create the image
             image_pid = ongoing_intallations[image_name]['pid']
-            
+
             try:
                 # Try to get image creator instance pid
                 subprocess.check_output("ps -A -o pid | grep -w " + str(image_pid), shell=True)
-                # An image is in creation if there is in the ongoing_intallations dictionary 
+                # An image is in creation if there is in the ongoing_intallations dictionary
                 # and there is a process instance to finishing created it.
                 return cls.ImageStatus.IN_CREATION
 
             # If there is not running process for image creator instance pid
             except subprocess.CalledProcessError:
-                # An image is corrupted when it is in the ongoing_intallations dictionary 
+                # An image is corrupted when it is in the ongoing_intallations dictionary
                 # but there is no process instance to finishing created it.
                 return cls.ImageStatus.CORRUPTED
 
         # The not in ongoing installation
         else:
-            # Try to create image 
+            # Try to create image
             return cls.ImageStatus.CREATED
 
     @classmethod
@@ -406,12 +406,12 @@ class ImageManager:
                 ongoing_intallations = yaml.safe_load(f)
 
                 # Replace ongoing_installations if None
-                if ongoing_intallations == None:
+                if ongoing_intallations is None:
                     ongoing_intallations = {}
 
             return ongoing_intallations
 
-        except FileNotFoundError as e:
+        except FileNotFoundError:
             raise FileNotFoundError('Enable to load /diskless/installations.yml file')
 
     # Set ongoing_intallations dictionary content
@@ -429,12 +429,12 @@ class ImageManager:
                 # Write ongoing_intallations dictionary in the installations.yml file
                 yaml.dump(ongoing_intallations, f, default_flow_style=False)
 
-        except FileNotFoundError as e:
+        except FileNotFoundError:
             raise FileNotFoundError('File /diskless/installations.yml cannot be writen.')
 
 
-    ######################
-    ## CLI reserved part##
+    #####################
+    # CLI reserved part #
     ######################
 
     # Use a specific image module
@@ -449,13 +449,13 @@ class ImageManager:
         # We have to modif name because module naming convention is:
         #   "<image_type>_module.py"
         module_names = [module.replace('_module.py', '') for module in modules if not 'base' in module and 'module' in module]
-        
+
         # Select desired image type in the list
-        printc('[+] Select the module you want to use:\n', CBLUE)
+        printc('[+] Select the module you want to use:\n', Color.BLUE)
         selected_module_name = select_from_list(module_names)
 
         # Convert image type into it's corresponding module name
-        selected_module =  selected_module_name + '_module'
+        selected_module = selected_module_name + '_module'
 
         # Import the module
         module = __import__(selected_module)
@@ -466,16 +466,16 @@ class ImageManager:
     @staticmethod
     def cli_select_created_image():
         """Select an image from the list of created images"""
-        # Get created images 
+        # Get created images
         images_list = ImageManager.get_created_images()
-        
+
         if images_list:
             # Get created images names
             images_names_list = [image.name for image in images_list]
-            
+
             # If there are images
             if images_names_list:
-                printc('[+] Select the image:\n', CBLUE)
+                printc('[+] Select the image:\n', Color.BLUE)
                 # Allow the user to select an image name from the list
                 return select_from_list(images_names_list)
 
@@ -496,17 +496,17 @@ class ImageManager:
                 image_status = ImageManager.get_image_status(image_name)
 
                 if image_status == ImageManager.ImageStatus.CREATED:
-                    printc('   [CREATED]', CGREEN)
+                    printc('   [CREATED]', Color.GREEN)
                     image = ImageManager.get_created_image(image_name)
                     image.cli_display_info()
 
                 elif image_status == ImageManager.ImageStatus.IN_CREATION:
-                    printc('   [IN_CREATION]', CORANGE_BLINK)
+                    printc('   [IN_CREATION]', Color.ORANGE_BLINK)
                     pid = ImageManager.get_installation_pid(image_name)
                     print(' • Image name: ' + image_name + '\n   Installation pid: ' + str(pid))
 
                 elif image_status == ImageManager.ImageStatus.CORRUPTED:
-                    printc('   [CORRUPTED]', CRED)
+                    printc('   [CORRUPTED]', Color.RED)
                     print(' • Image name: ' + image_name)
 
                 print('')
@@ -515,17 +515,8 @@ class ImageManager:
             raise UserWarning('No images.')
 
 
-# Add the modules directory path to importation path 
+# Add the modules directory path to importation path
 sys.path.append(ImageManager.MODULES_PATH)
-# When import module base_module at the end because we need to add first 
+# When import module base_module at the end because we need to add first
 # ImageManager.MODULES_PATH ImageManager attribute to importation path 
 from base_module import Image
-
-
-                   
-
-               
- 
-        
-       
-

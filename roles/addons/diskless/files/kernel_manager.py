@@ -7,7 +7,7 @@
 #
 # kernel_manager:
 #    This module allow to manage kernels globaly. It
-#    allow to make basic actions on kernels. 
+#    allow to make basic actions on kernels.
 #
 # 1.2.0: Role update. David Pieters <davidpieters22@gmail.com>
 # 1.1.0: Role update. Benoit Leveugle <benoit.leveugle@gmail.com>, Bruno Travouillon <devel@travouillon.fr>
@@ -18,10 +18,10 @@
 
 # Import basic modules
 import os
-from utils import *
+from utils import Color, printc, select_from_list
 
 
-#Class to manage kernels
+# Class to manage kernels
 class KernelManager:
     """Class to manage kernels of the diskless tool."""
 
@@ -29,7 +29,7 @@ class KernelManager:
     KERNELS_PATH = '/var/www/html/preboot_execution_environment/diskless/kernels'
 
     @staticmethod
-    def get_kernels():    
+    def get_kernels():
         """Get the list of kernels inside KernelManager.KERNELS_PATH.
 
         :return: `kernel_list` if there is at least one kernel, `None` overwise
@@ -40,7 +40,7 @@ class KernelManager:
         # if there are kernels
         if kernel_list:
             # Return kernel names list
-            return kernel_list 
+            return kernel_list
         else:
             return None
 
@@ -56,8 +56,8 @@ class KernelManager:
         # If there are kernels
         if kernel_list:
             # Return only kernels with initramfs-kernel
-            return [kernel for kernel in kernel_list 
-            if os.path.exists(KernelManager.KERNELS_PATH+'/initramfs-kernel-'+(kernel.replace('vmlinuz-','')))]
+            return [kernel for kernel in kernel_list if os.path.exists(KernelManager.KERNELS_PATH+'/initramfs-kernel-'+(kernel.replace('vmlinuz-','')))]
+
         # If there are no kernels
         else:
             return None
@@ -71,8 +71,8 @@ class KernelManager:
         :param kernel: An available kernel
         :type kernel: str
         """
-   
-        # Use image method to set kernel 
+
+        # Use image method to set kernel
         image.kernel = kernel
         # Register image with new kernel
         image.register_image()
@@ -86,18 +86,18 @@ class KernelManager:
         :type kernel: str
         """
         # Create a generation path for the initramfs
-        kernel_version = kernel.replace('vmlinuz-','')
+        kernel_version = kernel.replace('vmlinuz-', '')
         generation_path = KernelManager.KERNELS_PATH + '/initramfs-kernel-' + kernel_version
-        
-        printc('[INFO] Now generating initramfs... May take some time', CBLUE)
+
+        printc('[INFO] Now generating initramfs... May take some time', Color.BLUE)
         # Generate the new initramfs file with dracut command on the kernel
         os.system('dracut --xz -v -m "network base nfs" --add "ifcfg livenet systemd systemd-initrd dracut-systemd" --add-drivers xfs --no-hostonly --nolvmconf --force ' + generation_path + ' --kver ' + kernel_version)
         # Change the permisssions on the generated file
-        os.chmod(generation_path ,0o644)
+        os.chmod(generation_path, 0o644)
 
-    #######################
-    ## CLI reserved part ##
-    #######################
+    #####################
+    # CLI reserved part #
+    #####################
 
     @staticmethod
     def cli_select_kernel():
@@ -134,11 +134,11 @@ class KernelManager:
             # For each kernel
             for kernel in kernel_list:
                 # If the iniramfs file is present
-                if os.path.exists(KernelManager.KERNELS_PATH+'/initramfs-kernel-' + (kernel.replace('vmlinuz-',''))):
-                    initramfs_status = CGREEN + 'initramfs present'+CEND
+                if os.path.exists(KernelManager.KERNELS_PATH + '/initramfs-kernel-' + (kernel.replace('vmlinuz-',''))):
+                    initramfs_status = Color.GREEN + 'initramfs present'+Color.TAG_END
                 # If the iniramfs file is not present
                 else:
-                    initramfs_status = CYELLOW + 'missing initramfs-kernel-' + kernel.replace('vmlinuz-','') + CEND
+                    initramfs_status = Color.YELLOW + 'missing initramfs-kernel-' + kernel.replace('vmlinuz-', '') + Color.TAG_END
                 # If it is the last kernel of the list
                 if kernel == kernel_list[-1]:
                     print("    └── "+str(kernel)+' - ' + initramfs_status)
@@ -148,6 +148,4 @@ class KernelManager:
 
         # If the list of kernels is empty
         else:
-           raise UserWarning('No kernels found in /var/www/html/preboot_execution_environment/diskless/kernels/\nPlease refer to readme.rst for details on how to obtain kernels.')
-
-        
+            raise UserWarning('No kernels found in /var/www/html/preboot_execution_environment/diskless/kernels/\nPlease refer to readme.rst for details on how to obtain kernels.')

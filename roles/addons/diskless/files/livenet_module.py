@@ -20,7 +20,6 @@
 # Import base modules
 import os
 import shutil
-import yaml
 import crypt
 import logging
 from datetime import datetime
@@ -31,7 +30,7 @@ from subprocess import check_call
 from base_module import Image
 from kernel_manager import KernelManager
 from image_manager import ImageManager
-from utils import *
+from utils import Color, printc, select_from_list
 
 
 # Class representing a livenet image
@@ -48,8 +47,8 @@ class LivenetImage(Image):
     WORKING_DIRECTORY = '/var/tmp/diskless/workdir/'
 
     # Define the allowed sizes range
-    MAX_LIVENET_SIZE = 50000 # 50 Gigas
-    MIN_LIVENET_SIZE = 100 # 100 Megabytes
+    MAX_LIVENET_SIZE = 50000  # 50 Gigas
+    MIN_LIVENET_SIZE = 100  # 100 Megabytes
 
     # Class constructor
     def __init__(self, name, password=None, kernel=None, livenet_type=None, livenet_size=None, additional_packages=None, ssh_pub_key=None, selinux=None, release_version=None):
@@ -265,11 +264,12 @@ class LivenetImage(Image):
 
         check_call('umount ' + self.WORKING_DIRECTORY + 'generated_os/{sys/fs/selinux,sys,proc}', shell=True)
 
+
     # Remove files associated with the NFS image
     def remove_files(self):
 
         # If the livenet image is currently mounted
-        if self.is_mounted == True:
+        if self.is_mounted is True:
             # Unmount before removing files
             self.unmount()
 
@@ -293,7 +293,7 @@ class LivenetImage(Image):
         os.system('mount --bind /proc ' + self.MOUNT_DIRECTORY + 'proc')
         # Mount diskless server sys on livenet image sys
         os.system('mount --bind /sys ' + self.MOUNT_DIRECTORY + 'sys')
-        
+
         # Create an inventory directory
         os.mkdir(self.WORKING_DIRECTORY + 'inventory')
         # Create the ansible connection
@@ -372,9 +372,9 @@ class LivenetImage(Image):
         hutil.rmtree(self.MOUNT_DIRECTORY)
 
         # Remove old squashfs
-        os.remove(self.IMAGE_DIRECTORY +'squashfs.img')
+        os.remove(self.IMAGE_DIRECTORY + 'squashfs.img')
         # Generate the new squashfs
-        os.system('mksquashfs ' + self.WORKING_DIRECTORY + 'copy/squashfs-root/ ' + self.IMAGE_DIRECTORY +'squashfs.img')
+        os.system('mksquashfs ' + self.WORKING_DIRECTORY + 'copy/squashfs-root/ ' + self.IMAGE_DIRECTORY + 'squashfs.img')
 
         shutil.rmtree(self.WORKING_DIRECTORY)
 
@@ -471,10 +471,10 @@ boot
             attributes_dictionary['livenet_size'] = str(self.livenet_size) + 'M'
         else:
             attributes_dictionary['livenet_size'] = str(self.livenet_size/1024) + "G"
-        if self.is_mounted == True:
+        if self.is_mounted is True:
             attributes_dictionary['is_mounted'] = 'True, on ' + self.MOUNT_DIRECTORY
 
-      # For each element of the dictionary except the last
+        # For each element of the dictionary except the last
         for i in range(0, len(attributes_dictionary.items()) - 1):
             print('     ├── ' + str(list(attributes_dictionary.keys())[i]) + ': ' + str(list(attributes_dictionary.values())[i]))
 
@@ -487,21 +487,22 @@ boot
         logging.info('Creating IPXE boot file for the image')
         # Format image ipxe boot file template with image attributes
         file_content = self.__class__.get_boot_file_template().format(image_name=self.name,
-                                                                image_initramfs=self.image,
-                                                                image_kernel=self.kernel,
-                                                                image_selinux=self.selinux)
+                                                                      image_initramfs=self.image,
+                                                                      image_kernel=self.kernel,
+                                                                      image_selinux=self.selinux)
 
         # Create ipxe boot file
         with open(self.IMAGE_DIRECTORY + '/boot.ipxe', "w") as ff:
             ff.write(file_content)
 
-#######################
-## CLI reserved part ##
-#######################
+
+#####################
+# CLI reserved part #
+#####################
 
 def cli_menu():
     # Display main livenet menu
-    printc('\n == Livenet image module == \n', CGREEN)
+    printc('\n == Livenet image module == \n', Color.GREEN)
 
     print(' 1 - Generate a new livenet image')
     print(' 2 - Mount an existing livenet image')
@@ -527,6 +528,7 @@ def cli_menu():
     else:
         raise UserWarning('\'' + main_action + '\' is not a valid entry. Please enter another value.')
 
+
 def cli_get_size(size):
 
     # Check if there is the size unit
@@ -547,6 +549,7 @@ def cli_get_size(size):
 
     return size
 
+
 def cli_create_livenet_image():
 
     # Get available kernels
@@ -559,7 +562,7 @@ def cli_create_livenet_image():
     # Condition to test if image name is compliant
     while True:
 
-        printc('[+] Give a name for your image', CGREEN)
+        printc('[+] Give a name for your image', Color.GREEN)
         # Get new image name
         selected_image_name = input('-->: ').replace(" ", "")
 
@@ -573,11 +576,11 @@ def cli_create_livenet_image():
         print('Image ' + selected_image_name + ' already exist, use another image name.')
 
     # Select the kernel to use
-    printc('\n[+] Select your kernel:', CGREEN)
+    printc('\n[+] Select your kernel:', Color.GREEN)
     selected_kernel = select_from_list(kernel_list)
 
     # Manage password
-    printc('\n[+] Give a password for your image', CGREEN)
+    printc('\n[+] Give a password for your image', Color.GREEN)
     selected_password = input('Enter clear root password of the new image: ').replace(" ", "")
 
     # Select livenet type
@@ -594,7 +597,7 @@ def cli_create_livenet_image():
         raise UserWarning('Not a valid choice !')
 
     # Select livenet size
-    printc('\nPlease choose image size:\n(supported units: M=1024*1024, G=1024*1024*1024)\n(Examples: 5120M or 5G)', CGREEN)
+    printc('\nPlease choose image size:\n(supported units: M=1024*1024, G=1024*1024*1024)\n(Examples: 5120M or 5G)', Color.GREEN)
     selected_size = input('-->: ')
 
     # Check and convert the size
@@ -605,13 +608,13 @@ def cli_create_livenet_image():
         raise UserWarning('\nInvalid input size !')
     
     # Inject ssh key or not
-    printc('\nEnter path to SSH public key (left empty to disable key injection)', CGREEN)
+    printc('\nEnter path to SSH public key (left empty to disable key injection)', Color.GREEN)
     selected_ssh_pub_key = input('-->: ')
     if selected_ssh_pub_key != '' and not os.path.exists(selected_ssh_pub_key):
         raise UserWarning('\nSSH public key not found ' + selected_ssh_pub_key)
 
     # Activate SELinux or not
-    printc('\nActivate SELinux inside the image (yes/no) ?', CGREEN)
+    printc('\nActivate SELinux inside the image (yes/no) ?', Color.GREEN)
     answer_selinux = input('-->: ')
     if answer_selinux == 'yes':
        selinux = True
@@ -621,7 +624,7 @@ def cli_create_livenet_image():
         raise UserWarning('\nInvalid input !')
 
     # Propose to user to install additional packages
-    printc('\nDo you want to customize your image with additional packages (yes/no) ? ', CGREEN)
+    printc('\nDo you want to customize your image with additional packages (yes/no) ? ', Color.GREEN)
     choice = input('-->: ')
     # Install additional packages
     if choice == 'yes':
@@ -634,11 +637,11 @@ def cli_create_livenet_image():
         raise UserWarning('\nInvalid entry !')   
 
     # Propose to user to specify a release version
-    printc('\nDo you want to specify a installation version (dnf --releasever option) (yes/no)?', CGREEN)
+    printc('\nDo you want to specify a installation version (dnf --releasever option) (yes/no)?', Color.GREEN)
     choice = input('-->: ')
     # Use a specific release
     if choice == 'yes':
-        printc('\nSpecify the installation release version you want (ex: 8)', CGREEN)
+        printc('\nSpecify the installation release version you want (ex: 8)', Color.GREEN)
         release_version = input('-->: ')
     elif choice == 'no':
         release_version = None
@@ -646,7 +649,7 @@ def cli_create_livenet_image():
         raise UserWarning('\nInvalid entry !')   
 
     # Confirm image creation
-    printc('\n[+] Would you like to create a new livenet image with the following attributes: (yes/no)', CGREEN)
+    printc('\n[+] Would you like to create a new livenet image with the following attributes: (yes/no)', Color.GREEN)
     print('  ├── Image name: \t\t' + selected_image_name)
     print('  ├── Image password: \t\t' + selected_password)
     print('  ├── Image kernel: \t\t' + selected_kernel)
@@ -672,10 +675,10 @@ def cli_create_livenet_image():
     if confirmation == 'yes':
         # Create the image object
         LivenetImage(selected_image_name, selected_password, selected_kernel, selected_type, size, additional_packages, selected_ssh_pub_key, selinux, release_version)
-        printc('\n[OK] Done.', CGREEN)
+        printc('\n[OK] Done.', Color.GREEN)
 
     elif confirmation == 'no':
-        printc('\n[+] Image creation cancelled, return to main menu.', CYELLOW)
+        printc('\n[+] Image creation cancelled, return to main menu.', Color.YELLOW)
         return
 
     else:
@@ -697,7 +700,7 @@ def cli_mount_livenet_image():
         raise UserWarning('No unmounted livenet images.')
 
     # Select a staging image for golden image creation
-    printc('[+] Select the livenet image to mount:', CGREEN)
+    printc('[+] Select the livenet image to mount:', Color.GREEN)
     unmounted_image_name = select_from_list(unmounted_images_names)
     unmounted_image = ImageManager.get_created_image(unmounted_image_name)
 
@@ -718,7 +721,7 @@ def cli_unmount_livenet_image():
         raise UserWarning('No mounted livenet images.')
 
     # Select a staging image for golden image creation
-    printc('[+] Select the livenet image to unmount:', CGREEN)
+    printc('[+] Select the livenet image to unmount:', Color.GREEN)
     mounted_image_name = select_from_list(mounted_images_names)
     mounted_image = ImageManager.get_created_image(mounted_image_name)
 
@@ -741,12 +744,12 @@ def cli_resize_livenet_image():
         raise UserWarning('No unmounted livenet images.')
 
     # Select a livenet to mount
-    printc('[+] Select the livenet image to mount:', CGREEN)
+    printc('[+] Select the livenet image to mount:', Color.GREEN)
     unmounted_image_name = select_from_list(unmounted_images_names)
     unmounted_image = ImageManager.get_created_image(unmounted_image_name)
 
     # Enter new size
-    printc('Please enter your new image size:\n(supported units: M=1024*1024, G=1024*1024*1024)\n(Examples: 5120M or 5G)', CGREEN)
+    printc('Please enter your new image size:\n(supported units: M=1024*1024, G=1024*1024*1024)\n(Examples: 5120M or 5G)', Color.GREEN)
     selected_size = input('-->: ')
 
     # Check and convert the size
@@ -757,7 +760,7 @@ def cli_resize_livenet_image():
         raise UserWarning('Invalid input size !')
 
     # Confirm image resizing
-    printc('\n[+] Are you sure you want to resize image \'' + unmounted_image.name + '\' with the following size: (yes/no)', CGREEN)
+    printc('\n[+] Are you sure you want to resize image \'' + unmounted_image.name + '\' with the following size: (yes/no)', Color.GREEN)
     print('  └── Image size: ' + selected_size)
 
     confirmation = input('-->: ').replace(" ", "")
@@ -765,8 +768,8 @@ def cli_resize_livenet_image():
     if confirmation == 'yes':
         # Create the image object
         unmounted_image.resize(size)
-        printc('\n[OK] Done.', CGREEN)
+        printc('\n[OK] Done.', Color.GREEN)
 
     elif confirmation == 'no':
-        printc('\n[+] Image resizing cancelled, return to main menu.', CYELLOW)
+        printc('\n[+] Image resizing cancelled, return to main menu.', Color.YELLOW)
         return

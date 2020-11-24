@@ -20,16 +20,14 @@
 from ClusterShell.NodeSet import NodeSet
 import os
 import shutil
-import yaml
 import crypt
 import logging
-from datetime import datetime
 
 # Import diskless modules
 from base_module import Image
 from kernel_manager import KernelManager
 from image_manager import ImageManager
-from utils import *
+from utils import Color, printc, select_from_list
 
 
 # Class representing an nfs staging image
@@ -50,7 +48,7 @@ class NfsStagingImage(Image):
             raise ValueError('Unexpected password format.')
 
         # Check kernel attribute
-        if not kernel in KernelManager.get_available_kernels():
+        if kernel not in KernelManager.get_available_kernels():
             raise ValueError('Invalid kernel.')
 
         # Set image attributes before creation
@@ -58,15 +56,15 @@ class NfsStagingImage(Image):
         self.image = 'initramfs-kernel-' + self.kernel.replace('vmlinuz-', '')
         self.password = password
 
-        if additional_packages != None:
+        if additional_packages is not None:
             self.additional_packages = additional_packages
 
-        if release_version != None:
+        if release_version is not None:
             self.release_version = release_version
 
         self.NFS_DIRECTORY = NfsStagingImage.NFS_DIRECTORY + self.name + '/'
 
-        # Generate image files 
+        # Generate image files
         self.generate_files()
 
     # Generate staging image files
@@ -75,7 +73,7 @@ class NfsStagingImage(Image):
         self.create_image_folders()
         self.generate_ipxe_boot_file()
         self.generate_file_system()
-        # Add password set up 
+        # Add password set up
         self.set_image_password()
 
     # Remove files associated with the NFS image
@@ -110,15 +108,15 @@ class NfsStagingImage(Image):
                 packages = packages + ' ' + package
 
             os.system('dnf install ' + release + ' -y --installroot=' + self.NFS_DIRECTORY + ' ' + packages)
-    
+
     # Set a password for the image
     # Staging images need a password
     def set_image_password(self):
         logging.info('Setting up a password for the image')
-        
+
         # Create hash with clear password
         self.password = crypt.crypt(self.password, crypt.METHOD_SHA512)
-        
+
         # Create new password file content
         with open(self.NFS_DIRECTORY + 'etc/shadow', 'r') as ff:
             newText = ff.read().replace('root:*', 'root:' + self.password)
@@ -133,8 +131,8 @@ class NfsStagingImage(Image):
         if os.path.isdir(Image.IMAGES_DIRECTORY + image_name):
             shutil.rmtree(Image.IMAGES_DIRECTORY + image_name)
 
-        if os.path.isdir(NfsStagingImage.NFS_DIRECTORY+ image_name):
-            shutil.rmtree(NfsStagingImage.NFS_DIRECTORY+ image_name)
+        if os.path.isdir(NfsStagingImage.NFS_DIRECTORY + image_name):
+            shutil.rmtree(NfsStagingImage.NFS_DIRECTORY + image_name)
 
     @staticmethod
     def get_boot_file_template():
@@ -154,7 +152,7 @@ echo | > Console: ${{eq-console}}
 echo | > Additional kernel parameters: ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}}
 echo |
 echo | Loading linux ...
-kernel http://${{next-server}}/preboot_execution_environment/diskless/kernels/${{image-kernel}} initrd=${{image-initramfs}} selinux=0 text=1 root=nfs:${{next-server}}:/diskless/images/nfsimages/staging/{image_name},vers=4.2,rw rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}} rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4 
+kernel http://${{next-server}}/preboot_execution_environment/diskless/kernels/${{image-kernel}} initrd=${{image-initramfs}} selinux=0 text=1 root=nfs:${{next-server}}:/diskless/images/nfsimages/staging/{image_name},vers=4.2,rw rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}} rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4
 echo | Loading initial ramdisk ...
 initrd http://${{next-server}}/preboot_execution_environment/diskless/kernels/${{image-initramfs}}
 echo | ALL DONE! We are ready.
@@ -223,10 +221,10 @@ class NfsGoldenImage(Image):
 
                 # Copy golden base image for the specified nodes
                 os.system('cp -a ' + self.NFS_DIRECTORY + 'image/ ' + self.NFS_DIRECTORY + 'nodes/' + node)
-        
+
         # Updatde node list
         self.nodes.add(nodes_range)
-        
+
         # Register image with new values
         self.register_image()
 
@@ -244,8 +242,8 @@ class NfsGoldenImage(Image):
 
             # Register image with new values
             self.register_image()
-        
-        except KeyError as err:
+
+        except KeyError:
             raise KeyError("NodeSet to remove is not in image NodeSet !")
 
     # Remove files associated with the NFS image
@@ -260,8 +258,8 @@ class NfsGoldenImage(Image):
         if os.path.isdir(Image.IMAGES_DIRECTORY + image_name):
             shutil.rmtree(Image.IMAGES_DIRECTORY + image_name)
 
-        if os.path.isdir(NfsStagingImage.NFS_DIRECTORY+ image_name):
-            shutil.rmtree(NfsStagingImage.NFS_DIRECTORY+ image_name)
+        if os.path.isdir(NfsStagingImage.NFS_DIRECTORY + image_name):
+            shutil.rmtree(NfsStagingImage.NFS_DIRECTORY + image_name)
 
     @staticmethod
     def get_boot_file_template():
@@ -294,13 +292,13 @@ boot
 '''
 
 
-######################
-## CLI reserved part##
-######################
+#####################
+# CLI reserved part #
+#####################
 
 def cli_menu():
     # Display main menu
-    printc('\n == NFS image module == \n', CGREEN)
+    printc('\n == NFS image module == \n', Color.GREEN)
 
     print(' 1 - Generate a new nfs staging image')
     print(' 2 - Generate a new nfs golden image from a staging image')
@@ -314,9 +312,9 @@ def cli_menu():
     if main_action == '1':
         cli_create_staging_image()
 
-    elif main_action == '2': 
+    elif main_action == '2':
         cli_create_golden_image()
-    
+
     elif main_action == '3':
         cli_manage_nodes()
 
@@ -337,13 +335,13 @@ def cli_create_staging_image():
     # Condition to test if image name is compliant
     while True:
 
-        printc('[+] Give a name for your image', CGREEN)
+        printc('[+] Give a name for your image', Color.GREEN)
         # Get new image name
         selected_image_name = input('-->: ').replace(" ", "")
 
         if selected_image_name == '':
             raise UserWarning('Image name cannot be empty !')
-        
+
         if not ImageManager.is_image(selected_image_name):
             break
 
@@ -351,49 +349,49 @@ def cli_create_staging_image():
         print('Image ' + selected_image_name + ' already exist, use another image name.')
 
     # Select the kernel to use
-    printc('\n[+] Select your kernel:', CGREEN)
+    printc('\n[+] Select your kernel:', Color.GREEN)
     selected_kernel = select_from_list(kernel_list)
-    
+
     # Manage password
-    printc('\n[+] Give a password for your image', CGREEN)
+    printc('\n[+] Give a password for your image', Color.GREEN)
     selected_password = input('Please enter clear root password of the new image: ').replace(" ", "")
 
     # Propose to user to install additional packages
-    printc('\nDo you want to customize your image with additional packages? (yes/no)', CGREEN)
+    printc('\nDo you want to customize your image with additional packages? (yes/no)', Color.GREEN)
     choice = input('-->: ')
     # Install addictional packages
     if choice == 'yes':
-       # Get package list from user
-       additional_packages = Image.cli_add_packages()
+        # Get package list from user
+        additional_packages = Image.cli_add_packages()
     # Don't install additional packages
     elif choice == 'no':
         additional_packages = None
     else:
-        raise UserWarning('\nInvalid entry !')   
+        raise UserWarning('\nInvalid entry !')
 
     # Propose to user to specify a release version
-    printc('\nDo you want to specify a installation version (dnf --releasever option) (yes/no)?', CGREEN)
+    printc('\nDo you want to specify a installation version (dnf --releasever option) (yes/no)?', Color.GREEN)
     choice = input('-->: ')
     # Use a specific release
     if choice == 'yes':
-        printc('\nSpecify the installation release version you want (ex: 8)', CGREEN)
+        printc('\nSpecify the installation release version you want (ex: 8)', Color.GREEN)
         release_version = input('-->: ')
     elif choice == 'no':
         release_version = None
     else:
-        raise UserWarning('\nInvalid entry !')   
+        raise UserWarning('\nInvalid entry !')
 
     # Confirm image creation
-    printc('\n[+] Would you like to create a new nfs staging image with the following attributes: (yes/no)', CGREEN)
+    printc('\n[+] Would you like to create a new nfs staging image with the following attributes: (yes/no)', Color.GREEN)
     print('  ├── Image name: \t\t' + selected_image_name)
     print('  ├── Image password : \t\t' + selected_password)
 
     # Print additional packages if there is
-    if additional_packages != None:
+    if additional_packages is not None:
         print('  ├── Additional packages: \t' + str(additional_packages))
 
     # Print release version if there is one
-    if release_version != None:
+    if release_version is not None:
         print('  ├── Release version: \t\t' + release_version)
 
     print('  └── Image kernel: \t\t' + selected_kernel)
@@ -401,12 +399,12 @@ def cli_create_staging_image():
     confirmation = input('-->: ').replace(" ", "")
 
     if confirmation == 'yes':
-    # Create the image object
+        # Create the image object
         NfsStagingImage(selected_image_name, selected_password, selected_kernel, additional_packages, release_version)
-        printc('\n[OK] Done.', CGREEN)
+        printc('\n[OK] Done.', Color.GREEN)
 
     elif confirmation == 'no':
-        printc('\n[+] Image creation cancelled, return to main menu.', CYELLOW)
+        printc('\n[+] Image creation cancelled, return to main menu.', Color.YELLOW)
         return
 
     else:
@@ -426,20 +424,20 @@ def cli_create_golden_image():
     staging_images_names = [staging_image.name for staging_image in staging_images]
 
     # Select a staging image for golden image creation
-    printc('[+] Select the nfs image to use for golden image creation:', CGREEN)
+    printc('[+] Select the nfs image to use for golden image creation:', Color.GREEN)
     staging_image_name = select_from_list(staging_images_names)
     staging_image = ImageManager.get_created_image(staging_image_name)
 
     # Condition to test if image name is compliant
     while True:
 
-        printc('\n[+] Give a name for your image', CGREEN)
+        printc('\n[+] Give a name for your image', Color.GREEN)
         # Get new image name
         selected_image_name = input('-->: ').replace(" ", "")
 
         if selected_image_name == '':
             raise UserWarning('Image name cannot be empty !')
-        
+
         if not ImageManager.is_image(selected_image_name):
             break
 
@@ -447,7 +445,7 @@ def cli_create_golden_image():
         print('Image ' + selected_image_name + ' already exist, use another image name.')
 
     # Confirm image creation
-    printc('\n[+] Would you like to create a new nfs golden image with the following attributes: (yes/no)', CGREEN)
+    printc('\n[+] Would you like to create a new nfs golden image with the following attributes: (yes/no)', Color.GREEN)
     print('  ├── Image name: \t\t' + selected_image_name)
     print('  └── Staging image from: \t\t' + staging_image.name)
 
@@ -456,10 +454,10 @@ def cli_create_golden_image():
     if confirmation == 'yes':
         # Create the image object
         NfsGoldenImage(selected_image_name, staging_image)
-        printc('\n[OK] Done.', CGREEN)
+        printc('\n[OK] Done.', Color.GREEN)
 
     elif confirmation == 'no':
-        printc('\nImage creation cancelled, return to main menu.', CYELLOW)
+        printc('\nImage creation cancelled, return to main menu.', Color.YELLOW)
         return
 
     else:
@@ -478,12 +476,12 @@ def cli_manage_nodes():
     golden_images_names = [golden_image.name for golden_image in golden_images]
 
     # Select the golden image to manage from list
-    printc('\n[+] Select the golden image to manage:', CGREEN)
+    printc('\n[+] Select the golden image to manage:', Color.GREEN)
     golden_image_name = select_from_list(golden_images_names)
     golden_image = ImageManager.get_created_image(golden_image_name)
 
     # Choose an action for nodes management
-    printc('\n[+] Manages nodes of image ' + golden_image_name, CGREEN)
+    printc('\n[+] Manages nodes of image ' + golden_image_name, Color.GREEN)
     print(' 1 - List nodes with the image')
     print(' 2 - Add nodes with the image')
     print(' 3 - Remove nodes with the image')
@@ -494,40 +492,34 @@ def cli_manage_nodes():
     if action == '1':
         nodeset = golden_image.get_nodes()
         print(nodeset)
-        printc('\n[OK] Done.', CGREEN)
+        printc('\n[OK] Done.', Color.GREEN)
 
     # Add some nodes to the image
     elif action == '2':
-        printc('\n[+] Actual image NodeSet is:' + str(golden_image.nodes), CGREEN)
-        printc('[+] Please enter nodes range to add:', CGREEN)
+        printc('\n[+] Actual image NodeSet is:' + str(golden_image.nodes), Color.GREEN)
+        printc('[+] Please enter nodes range to add:', Color.GREEN)
 
         nodes_range = input('-->: ').replace(" ", "")
         # Test if nodes_range is a valid range
         try:
             golden_image.add_nodes(nodes_range)
-            printc('\n[OK] Done.', CGREEN)
+            printc('\n[OK] Done.', Color.GREEN)
 
-        except KeyError as err:
+        except KeyError:
             raise UserWarning('The Node you have entered is not compliant.')
-    
+
     # Delete nodes from image
     elif action == '3':
-        printc('\n[+] Please enter nodes range to remove:', CGREEN)
-        
+        printc('\n[+] Please enter nodes range to remove:', Color.GREEN)
+
         nodes_range = input('-->: ').replace(" ", "")
         # Test if nodes_range is a valid range
         try:
             golden_image.remove_nodes(nodes_range)
-            printc('\n[OK] Done.', CGREEN)
+            printc('\n[OK] Done.', Color.GREEN)
 
-        except KeyError as err:
+        except KeyError:
             raise UserWarning('The Node you have entered is not compliant.')
 
     else:
         raise UserWarning('Not a valid entry')
-
-    
-
-
-
-
