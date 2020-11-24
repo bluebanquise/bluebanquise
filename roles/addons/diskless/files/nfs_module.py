@@ -38,7 +38,7 @@ class NfsStagingImage(Image):
     NFS_DIRECTORY = '/diskless/images/nfsimages/staging/'
 
     # Class constructor
-    def __init__(self, name, password = None, kernel = None, additional_packages = None, release_version = None):
+    def __init__(self, name, password=None, kernel=None, additional_packages=None, release_version=None):
         super().__init__(name, password, kernel, additional_packages, release_version)
 
     # Create new staging image
@@ -55,7 +55,7 @@ class NfsStagingImage(Image):
 
         # Set image attributes before creation
         self.kernel = kernel
-        self.image = 'initramfs-kernel-'+ self.kernel.replace('vmlinuz-', '')
+        self.image = 'initramfs-kernel-' + self.kernel.replace('vmlinuz-', '')
         self.password = password
 
         if additional_packages != None:
@@ -99,7 +99,7 @@ class NfsStagingImage(Image):
             release = ''
 
         # Create file system with dnf
-        os.system('dnf groupinstall '+ release + ' -y "core" --releasever=8 --setopt=module_platform_id=platform:el8 --installroot=' + self.NFS_DIRECTORY)
+        os.system('dnf groupinstall ' + release + ' -y "core" --releasever=8 --setopt=module_platform_id=platform:el8 --installroot=' + self.NFS_DIRECTORY)
 
         # If there are additional packages to install
         if hasattr(self, 'additional_packages'):
@@ -171,7 +171,7 @@ class NfsGoldenImage(Image):
     NFS_DIRECTORY = '/diskless/images/nfsimages/golden/'
 
     # Class constructor
-    def __init__(self, name, staging_image = None):
+    def __init__(self, name, staging_image=None):
         super().__init__(name, staging_image)
 
     # Create new golden image
@@ -179,7 +179,7 @@ class NfsGoldenImage(Image):
 
         # Set image attributes before creation
         self.kernel = staging_image.kernel
-        self.image = 'initramfs-kernel-'+ self.kernel.replace('vmlinuz-', '')
+        self.image = 'initramfs-kernel-' + self.kernel.replace('vmlinuz-', '')
         self.nodes = NodeSet()
 
         self.NFS_DIRECTORY = NfsGoldenImage.NFS_DIRECTORY + self.name + '/'

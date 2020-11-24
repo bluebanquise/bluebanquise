@@ -84,7 +84,7 @@ class Image(ABC):
             raise ValueError('Invalid name format.')
 
         self.name = name
-        self.IMAGE_DIRECTORY = Image.IMAGES_DIRECTORY + self.name +'/'
+        self.IMAGE_DIRECTORY = Image.IMAGES_DIRECTORY + self.name + '/'
 
         # If image already exist, and not all other arguments excepts name are None:
         # Bad usage of constructor
@@ -236,7 +236,7 @@ class Image(ABC):
         # Create ipxe boot file
         with open(self.IMAGE_DIRECTORY + '/boot.ipxe', "w") as ff:
             ff.write(file_content)
-        
+
     @classmethod
     def get_images(cls):
         """Get all images that are of this class type."""
@@ -294,8 +294,6 @@ class Image(ABC):
             # If there is not running process for image creator instance pid
             except subprocess.CalledProcessError:
                 raise UserWarning("Package " + package_name + ' not available')
-        
+
         # Return the list of packages
         return package_list
-
-      

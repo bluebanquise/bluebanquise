@@ -110,7 +110,7 @@ def cli_menu():
     printc('\n == Welcome to demo image module == \n', CGREEN)
 
     print('1 - Create my demo image')
-    
+
     print('\n Select an action')
     main_action = input('-->: ')
     print('')
@@ -122,13 +122,13 @@ def cli_menu():
 
         printc('Give a message for your demo image:', CGREEN)
         demo_message = input('-->: ')
-        
+ 
         # Create a DemoImage image
         DemoImage(demo_name, demo_message)
 
     # Bad entry
     else:
         raise UserWarning('\'' + main_action + '\' is not a valid entry. Please enter another value.')
-    
+
 
 

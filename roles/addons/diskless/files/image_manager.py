@@ -19,12 +19,9 @@
 
 # Import basic modules
 import os
-import crypt
 import yaml
 import logging
-import atexit
 import inspect
-import csv
 import subprocess
 import sys
 from enum import Enum, auto
@@ -74,6 +71,7 @@ class ImageManager:
         
             for member in class_members:
                 if class_name in member:
+
                     # Import the image class from the module
                     _class = getattr(module, class_name)
                     return _class

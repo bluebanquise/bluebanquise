@@ -52,7 +52,7 @@ class LivenetImage(Image):
     MIN_LIVENET_SIZE = 100 # 100 Megabytes
 
     # Class constructor
-    def __init__(self, name, password = None, kernel = None, livenet_type = None, livenet_size = None, additional_packages = None, ssh_pub_key = None, selinux = None, release_version = None):
+    def __init__(self, name, password=None, kernel=None, livenet_type=None, livenet_size=None, additional_packages=None, ssh_pub_key=None, selinux=None, release_version=None):
         super().__init__(name, password, kernel, livenet_type, livenet_size, additional_packages, ssh_pub_key, selinux, release_version)
 
     def create_new_image(self, password, kernel, livenet_type, livenet_size, additional_packages, ssh_pub_key, selinux, release_version):
@@ -63,7 +63,7 @@ class LivenetImage(Image):
             raise ValueError('Unexpected password format.')
 
         # Check kernel attribute
-        if not kernel in KernelManager.get_available_kernels():
+        if kernel not in KernelManager.get_available_kernels():
             raise ValueError('Invalid kernel.')
 
         # Check livenet type
@@ -76,7 +76,7 @@ class LivenetImage(Image):
 
         # Set image attributes before creation
         self.kernel = kernel
-        self.image = 'initramfs-kernel-'+ self.kernel.replace('vmlinuz-', '')
+        self.image = 'initramfs-kernel-' + self.kernel.replace('vmlinuz-', '')
         self.password = password
 
         self.livenet_type = livenet_type
@@ -87,10 +87,10 @@ class LivenetImage(Image):
         if ssh_pub_key != '':
             self.ssh_pub_key = ssh_pub_key
 
-        if additional_packages != None:
+        if additional_packages is not None:
             self.additional_packages = additional_packages
 
-        if release_version != None:
+        if release_version is not None:
             self.release_version = release_version
 
         # A livenet can be mounted on it's personnal mount directory
@@ -99,7 +99,7 @@ class LivenetImage(Image):
 
         # Set up working and mount image directories
         self.WORKING_DIRECTORY = self.WORKING_DIRECTORY + self.name + '/'
-        self.MOUNT_DIRECTORY = self.WORKING_DIRECTORY  + 'mnt/'
+        self.MOUNT_DIRECTORY = self.WORKING_DIRECTORY + 'mnt/'
 
         # Generate image files
         self.generate_files()
@@ -120,7 +120,7 @@ class LivenetImage(Image):
         self.set_image_password(self.WORKING_DIRECTORY + 'generated_os')
 
         # Setup ssh key
-        if hasattr(self,'ssh_pub_key'):
+        if hasattr(self, 'ssh_pub_key'):
             self.set_image_ssh_pub_key()
 
         # Setup SELinux
@@ -160,7 +160,7 @@ class LivenetImage(Image):
             for package in self.additional_packages:
                 packages = packages + ' ' + package
 
-            os.system('dnf install ' + release + ' -y --installroot=' +  self.WORKING_DIRECTORY + 'generated_os/ ' + packages)
+            os.system('dnf install ' + release + ' -y --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ ' + packages)
 
     # Generate the image squashfs image after creating the image rootfs image
     # The operating system need to be previoulsy created by the
@@ -184,7 +184,7 @@ class LivenetImage(Image):
         os.system('mount -o loop ' + self.IMAGE_DIRECTORY + '/tosquash/LiveOS/rootfs.img ' + self.MOUNT_DIRECTORY)
 
         # Put the operating system inside rootfs.img
-        os.system('cp -r ' +  self.WORKING_DIRECTORY + '/generated_os/* ' + self.MOUNT_DIRECTORY)
+        os.system('cp -r ' + self.WORKING_DIRECTORY + '/generated_os/* ' + self.MOUNT_DIRECTORY)
 
         # Unmount rootfs.img file
         os.system('umount ' + self.MOUNT_DIRECTORY)
@@ -246,9 +246,9 @@ class LivenetImage(Image):
         os.system('dnf install ' + release + ' -y libselinux-utils policycoreutils selinux-policy-targeted --installroot=' + self.WORKING_DIRECTORY + 'generated_os --setopt=module_platform_id=platform:el8 --nobest')
 
         # Moot required directories on the image
-        check_call('mount --bind /proc '+ self.WORKING_DIRECTORY + 'generated_os/proc', shell=True)
-        check_call('mount --bind /sys '+ self.WORKING_DIRECTORY + 'generated_os/sys', shell=True)
-        check_call('mount --bind /sys/fs/selinux '+ self.WORKING_DIRECTORY + 'generated_os/sys/fs/selinux', shell=True)
+        check_call('mount --bind /proc ' + self.WORKING_DIRECTORY + 'generated_os/proc', shell=True)
+        check_call('mount --bind /sys ' + self.WORKING_DIRECTORY + 'generated_os/sys', shell=True)
+        check_call('mount --bind /sys/fs/selinux ' + self.WORKING_DIRECTORY + 'generated_os/sys/fs/selinux', shell=True)
 
         # Chroot onto image
         real_root = os.open("/", os.O_RDONLY)
@@ -263,7 +263,7 @@ class LivenetImage(Image):
         os.chroot(".")
         os.close(real_root)
 
-        check_call('umount '+ self.WORKING_DIRECTORY + 'generated_os/{sys/fs/selinux,sys,proc}', shell=True)
+        check_call('umount ' + self.WORKING_DIRECTORY + 'generated_os/{sys/fs/selinux,sys,proc}', shell=True)
 
     # Remove files associated with the NFS image
     def remove_files(self):

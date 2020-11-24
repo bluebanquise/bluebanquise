@@ -36,8 +36,8 @@ from image_manager import ImageManager
 if __name__ == "__main__":
 
     # Set logging level to INFO level and change default display format
-    logging.basicConfig(format='%(levelname)s:%(message)s',level=logging.INFO)
-    
+    logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
+
     # Set script banner
     BANNER = """\n
   ██████╗ ██╗███████╗██╗  ██╗██╗     ███████╗███████╗███████╗
@@ -47,7 +47,7 @@ if __name__ == "__main__":
   ██████╔╝██║███████║██║  ██╗███████╗███████╗███████║███████║
   ╚═════╝ ╚═╝╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝╚══════╝
 """
-    
+
     # Print script banner
     printc(BANNER + '\n           Entering BlueBanquise diskless manager', CBLUE)
 
@@ -72,7 +72,7 @@ if __name__ == "__main__":
             print(' 2 - List available diskless images')
             print(' 3 - Remove a diskless image')
             print(' 4 - Manage kernel of a diskless image')
-            
+
             # The second part is about other actions
             printc("\n > Other actions", CBLUE)
 
@@ -80,14 +80,14 @@ if __name__ == "__main__":
             print(' 6 - Generate a new initramfs\n')
             print(' 7 - Clear a corrupted image (Use only as a last resort)')
             print(' 8 - Exit\n')
-            
+
             # When the user press CTRL + c in a sub menu, he returns to main menu
             # When the user press CTRL + c in the main menu he exit program 
             printc('At any time: (CTRL + c) => Return to this main menu.\n', CBLUE)
 
             # Answer to get the action to execute
             print(' Select an action:')
-            
+
             # Prevent old inputs to be taken as current input by cleaning stdin buffer
             tcflush(sys.stdin, TCIFLUSH)
 
@@ -131,7 +131,7 @@ if __name__ == "__main__":
             elif main_action == '4':
                 # Select the image to change kernel
                 image = ImageManager.get_created_image(ImageManager.cli_select_created_image())
-                print('\nCurrent kernel is: '+ image.kernel)
+                print('\nCurrent kernel is: ' + image.kernel)
                 # Select an available kernel 
                 new_kernel = KernelManager.cli_select_kernel()
                 # Set image kernel by using image method
@@ -157,7 +157,7 @@ if __name__ == "__main__":
                 # If there is no images, raise an exception
                 if not images_names:
                     raise UserWarning('No images.')
-                
+
                 # Don't get in creation images
                 image_names = [image_name for image_name in images_names if ImageManager.get_image_status(image_name) != ImageManager.ImageStatus.IN_CREATION]
 

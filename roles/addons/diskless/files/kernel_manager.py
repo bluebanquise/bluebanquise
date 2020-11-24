@@ -134,17 +134,17 @@ class KernelManager:
             # For each kernel
             for kernel in kernel_list:
                 # If the iniramfs file is present
-                if os.path.exists(KernelManager.KERNELS_PATH+'/initramfs-kernel-'+(kernel.replace('vmlinuz-',''))):
-                    initramfs_status = CGREEN +'initramfs present'+CEND
+                if os.path.exists(KernelManager.KERNELS_PATH+'/initramfs-kernel-' + (kernel.replace('vmlinuz-',''))):
+                    initramfs_status = CGREEN + 'initramfs present'+CEND
                 # If the iniramfs file is not present
                 else:
-                    initramfs_status = CYELLOW +'missing initramfs-kernel-'+kernel.replace('vmlinuz-','') + CEND
+                    initramfs_status = CYELLOW + 'missing initramfs-kernel-' + kernel.replace('vmlinuz-','') + CEND
                 # If it is the last kernel of the list
                 if kernel == kernel_list[-1]:
-                    print("    └── "+str(kernel)+' - '+initramfs_status)
+                    print("    └── "+str(kernel)+' - ' + initramfs_status)
                 # If it is not the last kernel of the list
                 else:
-                    print("    ├── "+str(kernel)+' - '+initramfs_status)
+                    print("    ├── "+str(kernel)+' - ' + initramfs_status)
 
         # If the list of kernels is empty
         else:

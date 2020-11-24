@@ -64,6 +64,6 @@ def select_from_list(_list):
             # Get the selected item by it's index
             selected_item = _list[item_index]
             return selected_item
-  
+
     # If one of the previous condition is not True
     raise UserWarning('Not a valid entry !')
