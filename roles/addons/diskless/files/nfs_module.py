@@ -24,7 +24,7 @@ import crypt
 import logging
 
 # Import diskless modules
-from diskless.base_module import Image
+from diskless.modules.base_module import Image
 from diskless.kernel_manager import KernelManager
 from diskless.image_manager import ImageManager
 from diskless.utils import Color, printc, select_from_list

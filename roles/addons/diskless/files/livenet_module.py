@@ -27,7 +27,7 @@ from enum import Enum, auto
 from subprocess import check_call
 
 # Import diskless modules
-from diskless.base_module import Image
+from diskless.modules.base_module import Image
 from diskless.kernel_manager import KernelManager
 from diskless.image_manager import ImageManager
 from diskless.utils import Color, printc, select_from_list
@@ -703,6 +703,7 @@ def cli_mount_livenet_image():
     unmounted_image = ImageManager.get_created_image(unmounted_image_name)
 
     unmounted_image.mount()
+
 
 def cli_unmount_livenet_image():
     livenet_images = LivenetImage.get_images()

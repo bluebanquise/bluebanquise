@@ -29,12 +29,12 @@ from enum import Enum, auto
 # Import diskless modules
 from diskless.utils import Color, printc, select_from_list
 
-
 class ImageManager:
     """Class to manage images of the diskless tool."""
 
     # Modules location
     MODULES_PATH = '/lib/python3.6/site-packages/diskless/modules'
+    IMAGES_DIRECTORY = '/var/www/html/preboot_execution_environment/diskless/images/'
 
     class ImageStatus(Enum):
         """Enumeration that represents the status of an image. An image can have three status. We don't care about enumaration members values."""
@@ -79,13 +79,13 @@ class ImageManager:
 
     @staticmethod
     def get_image_names():
-        """Get the name of all existing images base directories inside the Image.IMAGES_DIRECTORY directory.
+        """Get the name of all existing images base directories inside the IMAGES_DIRECTORY directory.
 
         :return: `image_list` if there is at least one image, `None` overwise
         :rtype: list of str
         """
         # Get images names
-        image_list = [image for image in os.listdir(Image.IMAGES_DIRECTORY)]
+        image_list = [image for image in os.listdir(ImageManager.IMAGES_DIRECTORY)]
 
         # If there are images
         if image_list:
@@ -96,7 +96,7 @@ class ImageManager:
 
     @staticmethod
     def get_image_data_path(image_name):
-        """Get image image_data file path. This file is inside the image base direcrory in Image.IMAGES_DIRECTORY.
+        """Get image image_data file path. This file is inside the image base direcrory in IMAGES_DIRECTORY.
 
         :param image_name: The name of the image
         :type image_name: str
@@ -104,7 +104,7 @@ class ImageManager:
         :rtype: str
         """
         # Set image path with the name
-        image_path = Image.IMAGES_DIRECTORY + '/' + image_name
+        image_path = ImageManager.IMAGES_DIRECTORY + '/' + image_name
         # Get image data file to access image data
         image_data_path = image_path + '/image_data.yml'
 
@@ -434,8 +434,8 @@ class ImageManager:
     # CLI reserved part #
     #####################
 
-
     # Use a specific image module
+
     @staticmethod
     def cli_use_modules():
         """The method for using modules with cli interface"""
@@ -512,9 +512,8 @@ class ImageManager:
         else:
             raise UserWarning('No images.')
 
-
 # Add the modules directory path to importation path
 sys.path.append(ImageManager.MODULES_PATH)
 # When import module base_module at the end because we need to add first
 # ImageManager.MODULES_PATH ImageManager attribute to importation path
-from base_module import Image
+
