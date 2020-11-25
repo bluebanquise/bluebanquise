@@ -17,6 +17,8 @@
     - add all ansible nmcli module capabilities (#444)
     - add routes handling on interfaces (#469)
     - convert to new inventory format (#401)
+  - addons/ofed:
+    - add tunables to set soft/hard memlock limits. Default to unlimited (#492)
   - advanced_core/advanced_dhcp_server:
     - add multiple entries per host capability (#470)
     - add custome options definition for each host (#470)
