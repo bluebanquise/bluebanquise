@@ -371,16 +371,10 @@ def cli_create_staging_image():
         raise UserWarning('\nInvalid entry !')
 
     # Propose to user to specify a release version
-    printc('\nDo you want to specify a installation version (dnf --releasever option) (yes/no)?', Color.GREEN)
-    choice = input('-->: ')
-    # Use a specific release
-    if choice == 'yes':
-        printc('\nSpecify the installation release version you want (ex: 8)', Color.GREEN)
-        release_version = input('-->: ')
-    elif choice == 'no':
+    printc('\nSpecify a release version for installation (left empty to not use the --relasever option)', Color.GREEN)
+    release_version = input('-->: ')
+    if release_version == '':
         release_version = None
-    else:
-        raise UserWarning('\nInvalid entry !')
 
     # Confirm image creation
     printc('\n[+] Would you like to create a new nfs staging image with the following attributes: (yes/no)', Color.GREEN)

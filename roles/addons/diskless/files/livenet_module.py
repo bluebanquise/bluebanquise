@@ -83,7 +83,7 @@ class LivenetImage(Image):
 
         self.selinux = selinux
 
-        if ssh_pub_key != '':
+        if ssh_pub_key is not None:
             self.ssh_pub_key = ssh_pub_key
 
         if additional_packages is not None:
@@ -625,6 +625,8 @@ def cli_create_livenet_image():
     selected_ssh_pub_key = input('-->: ')
     if selected_ssh_pub_key != '' and not os.path.exists(selected_ssh_pub_key):
         raise UserWarning('\nSSH public key not found ' + selected_ssh_pub_key)
+    if selected_ssh_pub_key == '':
+        selected_ssh_pub_key = None
 
     # Activate SELinux or not
     printc('\nActivate SELinux inside the image (yes/no) ?', Color.GREEN)
@@ -650,16 +652,10 @@ def cli_create_livenet_image():
         raise UserWarning('\nInvalid entry !')
 
     # Propose to user to specify a release version
-    printc('\nDo you want to specify a installation version (dnf --releasever option) (yes/no)?', Color.GREEN)
-    choice = input('-->: ')
-    # Use a specific release
-    if choice == 'yes':
-        printc('\nSpecify the installation release version you want (ex: 8)', Color.GREEN)
-        release_version = input('-->: ')
-    elif choice == 'no':
+    printc('\nSpecify a release version for installation (left empty to not use the --relasever option)', Color.GREEN)
+    release_version = input('-->: ')
+    if release_version == '':
         release_version = None
-    else:
-        raise UserWarning('\nInvalid entry !')
 
     # Confirm image creation
     printc('\n[+] Would you like to create a new livenet image with the following attributes: (yes/no)', Color.GREEN)
@@ -670,7 +666,7 @@ def cli_create_livenet_image():
     print('  ├── Image size: \t\t' + selected_size)
 
     # Print ssh pub key packages if there is one
-    if selected_ssh_pub_key != '':
+    if selected_ssh_pub_key is not None:
         print('  ├── SSH pubkey: \t\t' + selected_ssh_pub_key)
 
     # Print additional packages if there is
