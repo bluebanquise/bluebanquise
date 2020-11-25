@@ -548,10 +548,7 @@ def cli_get_size(size):
             if len(size_array) != 2 or not size_array[0].isdigit() or not size_array[1].isdigit() or len(size_array[1]) > 3:
                 raise UserWarning('\nNot a valid size format!')
             
-            while(len(size_array[1]) < 3):
-                size_array[1] = size_array[1] + '0'
-
-            size = size_array[0] + size_array[1]
+            size = int(float(size)*1024)
 
         # If the giga value has no dot separator
         else:
@@ -617,11 +614,11 @@ def cli_create_livenet_image():
     selected_size = input('-->: ')
 
     # Check and convert the size
-    size = cli_get_size(selected_size)
+    image_size = cli_get_size(selected_size)
 
     # Check size compliance with livenet image expected size limits
-    if int(size) < (LivenetImage.MIN_LIVENET_SIZE) or int(size) > (LivenetImage.MAX_LIVENET_SIZE):
-        raise UserWarning('\nInvalid input size !')
+    if int(image_size) < (LivenetImage.MIN_LIVENET_SIZE) or int(image_size) > (LivenetImage.MAX_LIVENET_SIZE):
+        raise UserWarning('\nSize out of limits !')
 
     # Inject ssh key or not
     printc('\nEnter path to SSH public key (left empty to disable key injection)', Color.GREEN)
@@ -690,7 +687,7 @@ def cli_create_livenet_image():
 
     if confirmation == 'yes':
         # Create the image object
-        LivenetImage(selected_image_name, selected_password, selected_kernel, selected_type, size, additional_packages, selected_ssh_pub_key, selinux, release_version)
+        LivenetImage(selected_image_name, selected_password, selected_kernel, selected_type, image_size, additional_packages, selected_ssh_pub_key, selinux, release_version)
         printc('\n[OK] Done.', Color.GREEN)
 
     elif confirmation == 'no':
@@ -771,11 +768,11 @@ def cli_resize_livenet_image():
     selected_size = input('-->: ')
 
     # Check and convert the size
-    size = cli_get_size(selected_size)
+    image_size = cli_get_size(selected_size)
 
     # Check size compliance with livenet image expected size limits
-    if int(size) < (LivenetImage.MIN_LIVENET_SIZE) or int(size) > (LivenetImage.MAX_LIVENET_SIZE):
-        raise UserWarning('Invalid input size !')
+    if int(image_size) < (LivenetImage.MIN_LIVENET_SIZE) or int(image_size) > (LivenetImage.MAX_LIVENET_SIZE):
+        raise UserWarning('\nSize out of limits !')
 
     # Confirm image resizing
     printc('\n[+] Are you sure you want to resize image \'' + unmounted_image.name + '\' with the following size: (yes/no)', Color.GREEN)
@@ -785,7 +782,7 @@ def cli_resize_livenet_image():
 
     if confirmation == 'yes':
         # Create the image object
-        unmounted_image.resize(size)
+        unmounted_image.resize(image_size)
         printc('\n[OK] Done.', Color.GREEN)
 
     elif confirmation == 'no':
