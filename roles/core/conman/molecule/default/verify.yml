@@ -47,7 +47,7 @@
       assert:
         that:
           - reg_file_conman.stat.exists
-          - reg_file_conman.stat.mode == '0644'
+          - reg_file_conman.stat.mode == '0600'
           - reg_file_conman.stat.pw_name == 'root'
           - reg_file_conman.stat.gr_name == 'root'
 

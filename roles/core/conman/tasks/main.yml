@@ -46,7 +46,7 @@
     dest: /etc/conman.conf
     owner: root
     group: root
-    mode: 0644
+    mode: 0600
   notify: service █ Restart conman
   tags:
     - template
