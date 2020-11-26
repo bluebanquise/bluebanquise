@@ -85,3 +85,7 @@ BONDING_OPTS="{{ item.bond_options }}"
 SLAVE=yes
 MASTER={{ item.master }}
 {% endif %}
+{# 8. Do we have a firewall zone defined ? #}
+{% if item.zone is defined and item.zone is not none %}
+ZONE={{ item.zone }}
+{% endif %}
