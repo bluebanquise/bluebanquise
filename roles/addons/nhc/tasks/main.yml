@@ -34,12 +34,16 @@
     owner: root
     group: root
     mode: 0644
+  when: "'nhc.conf' not in (nhc_files | default([]) | selectattr('name','defined') | map(attribute='name') | list)"
 
-- name: copy █ Copy nhc custom files
-  copy:
-    src: "{{ item }}"
-    dest: /etc/nhc/"{{ item }}"
+- name: template █ Copy nhc custom files
+  template:
+    src: nhc_custom_file.j2
+    dest: "/etc/nhc/{{ item.name }}"
     owner: root
     group: root
     mode: 0644
   loop: "{{ nhc_files }}"
+  loop_control:
+    label: "Copy file {{ item.name }}"
+  when: nhc_files is defined and nhc_files is iterable
