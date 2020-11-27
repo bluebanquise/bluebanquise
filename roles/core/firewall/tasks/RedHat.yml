@@ -10,6 +10,17 @@
   tags:
     - internal
 
+- name: "firewalld █ Ensure firewall zones exist"
+  firewalld:
+    zone: "{{ networks[item]['firewall']['zone'] }}"
+    permanent: yes
+    state: present
+  when: networks[item]['firewall']['zone'] is defined
+  loop: "{{ (network_interfaces | map(attribute='network') | list) }}"
+  notify: service █ Restart firewall services
+
+- meta: flush_handlers
+
 - name: "firewalld █ Configure firewall zones"
   firewalld:
     zone: "{{ networks[item]['firewall']['zone'] }}"
