@@ -5,11 +5,32 @@
   Web site: <a href="https://bluebanquise.com"><b>https://bluebanquise.com</b></a>
 </p>
 
-## The stack
+## What is BlueBanquise
 
-**BlueBanquise** is an **Ansible** based stack, designed to deploy and manage large group of hosts.
+**BlueBanquise** is a coherent **Ansible** roles collection, designed to deploy and manage large group of hosts (clusters of nodes).
 
-Main target is High Performance Computing, but stack is generic and can adapt to any kind of architecture (University or Enterprise network, render farm, etc.).
+Main target is High Performance Computing (HPC), but the BlueBanquise stack is generic and can adapt to any kind of architecture (university or enterprise infrastructures, render farm, etc.).
+
+BlueBanquise is part of the **Algoric** Project from the [**Fabrique du Loch**](https://www.lafabriqueduloch.org/fr/accueil/) FabLab.
+
+![BlueBanquise Logo](resources/pictures/FabriqueDuLochAlgoric_logo_large.svg)
+
+It is a revamping of the old stack [Banquise](https://github.com/oxedions/banquise), based on Salt.
+
+## Documentation and files
+
+The stack documentation is available on the BlueBanquise main website, in [documentation subfolder](https://bluebanquise.com/documentation/).
+
+The stack repositories are available in the [repositories subfolder](https://bluebanquise.com/repository/).
+
+## The name
+
+You may wonder where this name comes from:
+
+* [BlueBanquise](https://en.wikipedia.org/wiki/File:Blue_iceberg_in_the_Ilulissat_icefjord.jpg)
+* [Blue Iceberg](https://en.wikipedia.org/wiki/Blue_iceberg)
+
+## Supported software environment
 
 Currently supported OS are:
 
@@ -24,22 +45,9 @@ Currently supported OS are:
   * Ubuntu
   * Debian
 
-Ansible >= 2.8.2 is mandatory for BlueBanquise to run properly.
+Ansible >= 2.9.13 is mandatory for BlueBanquise to run properly.
 
 **[OpenHPC](https://openhpc.community/downloads/)** scientific packages and OpenHPC slurm job scheduler are compatible with the stack.
-
-BlueBanquise is part of the **Algoric** Project from the [**Fabrique du Loch**](https://www.lafabriqueduloch.org/fr/accueil/) FabLab.
-
-![BlueBanquise Logo](resources/pictures/FabriqueDuLochAlgoric_logo_large.svg)
-
-BlueBanquise is a revamping of the old stack [Banquise](https://github.com/oxedions/banquise), based on Salt.
-
-## The name
-
-You may wonder where this name comes from:
-
-* [BlueBanquise](https://en.wikipedia.org/wiki/File:Blue_iceberg_in_the_Ilulissat_icefjord.jpg)
-* [Blue Iceberg](https://en.wikipedia.org/wiki/Blue_iceberg)
 
 ## Thanks
 
