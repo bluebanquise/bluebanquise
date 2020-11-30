@@ -1,3 +1,4 @@
+#jinja2: lstrip_blocks: True
 #### Blue Banquise file ####
 ## {{ansible_managed}}
 
@@ -9,6 +10,12 @@
  option pxelinux.pathprefix code 210 = text;
  option pxelinux.reboottime code 211 = unsigned integer 32;
  option architecture-type code 93 = unsigned integer 16;
+
+{% if advanced_dhcp_server_options %} 
+  {% for option in advanced_dhcp_server_options %}
+ option {{ option }};
+  {% endfor %}
+{% endif %}
 
  allow booting;
  allow bootp;

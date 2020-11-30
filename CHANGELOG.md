@@ -17,6 +17,11 @@
     - add all ansible nmcli module capabilities (#444)
     - add routes handling on interfaces (#469)
     - convert to new inventory format (#401)
+  - advanced_core/advanced_dhcp_server:
+    - add multiple entries per host capability (#470)
+    - add custome options definition for each host (#470)
+    - add patterns capability to write hosts configuration (#470)
+    - improve template rendering time (#470)
   - core/hosts_file:
     - prevent many blank lines when hosts have no network_interfaces in the inventory (#406)
   - core/log_client:
