@@ -117,7 +117,18 @@ It is also possible to configure multiple ip per interface, using:
         - 172.16.0.3/16
         - 192.168.1.117/24
 
-MTU and/or Gateway can be set in the network file, and will be applyed to NIC linked to this network.
+To assign a network interface to a firewall zone:
+
+.. code-block:: yaml
+
+  network_interfaces:
+    - interface: ens5
+      ip4: 192.168.121.124
+      network: bb
+      zone: external
+
+MTU and/or Gateway can be set in the network file, and will be applied to NIC
+linked to this network.
 
 .. code-block:: yaml
 
@@ -140,7 +151,6 @@ MTU and/or Gateway can be set in the network file, and will be applyed to NIC li
         time_ip: 10.10.0.1
         log_ip: 10.10.0.1
 
-
 To be done
 ^^^^^^^^^^
 
@@ -149,6 +159,7 @@ Add Ubuntu and Opensuse compatibility if asked for.
 Changelog
 ^^^^^^^^^
 
+* 1.1.0: Assign a network interface to a firewall zone. Bruno Travouillon <devel@travouillon.fr>
 * 1.0.3: Update readme. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.2: Update to new network_interfaces syntax. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.1: Fix VLAN and BOND. Benoit Leveugle <benoit.leveugle@gmail.com>
