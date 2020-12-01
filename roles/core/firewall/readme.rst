@@ -129,4 +129,5 @@ Package installed:
 Changelog
 ^^^^^^^^^
 
+* 1.1.0: Allow creation of new zones. Bruno Travouillon <devel@travouillon.fr>
 * 1.0.0: Role creation. Bruno Travouillon <devel@travouillon.fr>
