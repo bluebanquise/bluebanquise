@@ -11,7 +11,7 @@ This role provides all features availables in the main nmcli module.
 Please refer to `nmcli module documentation <https://docs.ansible.com/ansible/latest/collections/community/general/nmcli_module.html>`_ .
 
 .. warning:
-  This role needs **latest** nmcli.py module, from
+  This role needs **latest** (2.0.0) nmcli.py module, from
   https://github.com/ansible-collections/community.general/
   ansible-collections:main branch.
 
