@@ -10,6 +10,11 @@ The role also cover routes definitions on interfaces.
 This role provides all features availables in the main nmcli module.
 Please refer to `nmcli module documentation <https://docs.ansible.com/ansible/latest/collections/community/general/nmcli_module.html>`_ .
 
+.. warning:
+  This role needs **latest** nmcli.py module, from
+  https://github.com/ansible-collections/community.general/
+  ansible-collections:main branch.
+
 Instructions
 ^^^^^^^^^^^^
 
@@ -20,12 +25,14 @@ While all of the nmcli module options are supported,
 some provides more integrated features:
 
 * **conn_name**: is equal to **interface**, but has higher precedence over **interface** if both are set.
-* **ifname**: is equal to **physical_device**, but has higher precedence over **ifname**  if both are set.
+* **ifname**: is equal to **physical_device**, but has higher precedence over **ifname** if both are set.
 * **type**: is set to *ethernet* by default if not set.
-* **ip4**: can be set using a simple ipv4, then role will use **networks[item.network]['.prefix4']** or if not exist to **networks[item.network]['.prefix']** to complete address, or force address with prefix if string *'/'* is present.
+* **ip4**: can be set using a simple ipv4, then role will use **networks[item.network]['.prefix4']** or if not exist to **networks[item.network]['.prefix']** to complete address. You can force address with prefix if string *'/'* is present.
 * **mtu**: has higher precedence over **networks[item.network]['mtu']** if both are set.
-* **gw4**: has higher precedence over **networks[item.network]['.gateway4']** which has higher precedence over **networks[item.network]['.gateway']** (if set).
-* **routes4**: is a list, that defines routes to be set on the interface. See examples bellow.
+* **gw4**: has higher precedence over **networks[item.network]['.gateway4']** if set which has higher precedence over **networks[item.network]['.gateway']** if set. Note that gw4 is cannot be set at the same time than never_default4 (mutually exclusives).
+* **routes4**: is a list, that defines routes to be set on the interface. See examples bellow. Has higher precedence over **networks[item.network]['.routes4']** if set.
+* **route_metric4**: is to set general metric for gateway or routes (if not set on route level) for this interface. Has higher precedence over **networks[item.network]['.route_metric4']** if set.
+* **never_default4**: is related to ipv4.never-default nmcli parameter (DEFROUTE). Has higher precedence over **networks[item.network]['.never_default4']** if set.
 
 Basic ipv4
 """"""""""
@@ -113,8 +120,8 @@ You can define routes at two levels:
       netmask: 255.255.0.0
       broadcast: 10.10.255.255
       routes4:
-        - ip = 10.11.0.0/24, nh = 10.10.0.2
-        - ip = 10.12.0.0/24, nh = 10.10.0.2
+        - 10.11.0.0/24 10.10.0.2
+        - 10.12.0.0/24 10.10.0.2 300
 
 * Or under host definition, so in hostvars:
 
@@ -127,22 +134,17 @@ You can define routes at two levels:
               mac: 08:00:27:36:c0:ac
               network: ice1-1
               routes4:
-                - ip = 10.11.0.0/24, nh = 10.10.0.2
-                - ip = 10.12.0.0/24, nh = 10.10.0.2
+                - 10.11.0.0/24 10.10.0.2
+                - 10.12.0.0/24 10.10.0.2 300
 
-.. note::
-  Note that to define a default route/gateway, use *0.0.0.0/0* as route to be defined.
-
-To remove a route later (here *10.12.0.0/24 10.10.0.2* on *enp0s8*), use the nmcli command this way:
-
-.. code-block:: text
-
-  nmcli connection show enp0s8 | grep ipv4.routes
-  nmcli connection modify enp0s8 -ipv4.routes "10.12.0.0/24 10.10.0.2"
+.. note:
+  In route4 list, first element is network to reach (0.0.0.0/0 for all), second
+  is gateway to use, and last optional one is metric to set for this route.
 
 Changelog
 ^^^^^^^^^
 
+* 1.2.0: Add routes4, route_metric4, never_default4 and zone. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.1: Add routes support on NIC. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.0: Rewamp full role to handle all nmcli module features. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.2: Adding Ubuntu 18.04 compatibility. johnnykeats <johnny.keats@outlook.com>
