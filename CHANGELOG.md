@@ -26,6 +26,7 @@
     - prevent many blank lines when hosts have no network_interfaces in the inventory (#406)
   - core/log_client:
     - add a new parameter to set rsyslog default verbosity (#466)
+    - add a new parameter to change default rsyslog configuration (#488)
   - core/rsyslog_server and core/rsyslog_client:
     - allow custom server port (#397)
   - core/ssh_master:
