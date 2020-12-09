@@ -30,22 +30,65 @@
   tags:
     - package
 
+- name: group █ Ensure group conman exists
+  group:
+    name: conman
+    state: present
+    system: yes
+
+- name: user █ Ensure user conman exists
+  user:
+    name: conman
+    state: present
+    comment: "Connection Manager service"
+    group: conman
+    home: /var/run/conman
+    shell: /bin/false
+    system: yes
+
 - name: file █ Create /var/log/conman directory
   file: # noqa 208
     path: /var/log/conman
-    setype: conman_log_t
+    setype: "{{ (ansible_facts.selinux.status == 'enabled') | ternary('conman_log_t', omit) }}"
     state: directory
+    owner: conman
+    group: conman
     recurse: yes
+  notify: service █ Restart conman
   when:
     - ansible_facts.os_family == "RedHat"
-    - ansible_facts.selinux.status == "enabled"
+
+- name: file █ Ensure systemd drop-in directory exists
+  file:
+    path: /etc/systemd/system/conman.service.d
+    mode: 0755
+    state: directory
+    owner: root
+    group: root
+  when:
+    - ansible_facts.os_family == "RedHat"
+
+- name: copy █ Ensure service run with user conman
+  copy:
+    content: |
+      [Service]
+      User=conman
+      Group=conman
+      ExecStart=
+      ExecStart=/usr/sbin/conmand -P /var/run/conman/conmand.pid
+      PIDFile=/var/run/conman/conmand.pid
+    dest: /etc/systemd/system/conman.service.d/user.conf
+    mode: 0644
+  notify: systemd █ Reload systemd configuration
+  when:
+    - ansible_facts.os_family == "RedHat"
 
 - name: template █ Generate /etc/conman.conf
   template:
     src: conman.conf.j2
     dest: /etc/conman.conf
-    owner: root
-    group: root
+    owner: conman
+    group: conman
     mode: 0600
   notify: service █ Restart conman
   tags:

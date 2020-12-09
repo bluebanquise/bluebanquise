@@ -48,8 +48,8 @@
         that:
           - reg_file_conman.stat.exists
           - reg_file_conman.stat.mode == '0600'
-          - reg_file_conman.stat.pw_name == 'root'
-          - reg_file_conman.stat.gr_name == 'root'
+          - reg_file_conman.stat.pw_name == 'conman'
+          - reg_file_conman.stat.gr_name == 'conman'
 
     - name: Retrieve client configuration in /etc/conman.conf file
       lineinfile:
@@ -66,13 +66,16 @@
 
     - name: Retrieve file /var/log/conman/instance.log system status
       stat:
-        path: /etc/conman.conf
+        path: /var/log/conman/instance.log
       register: reg_log_conman
       changed_when: false
 
     - name: Assert log client file /var/log/conman/instance.log exists
       assert:
-        that: reg_log_conman.stat.exists
+        that:
+          - reg_log_conman.stat.exists
+          - reg_log_conman.stat.pw_name == 'conman'
+          - reg_log_conman.stat.gr_name == 'conman'
 
     - name: Retrieve dir /usr/share/conman/exec system status
       stat:
