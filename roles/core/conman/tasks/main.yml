@@ -31,9 +31,8 @@
     - package
 
 - name: file █ Create /var/log/conman directory
-  file:
+  file: # noqa 208
     path: /var/log/conman
-    mode: 0750
     setype: conman_log_t
     state: directory
     recurse: yes

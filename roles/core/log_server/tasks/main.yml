@@ -60,9 +60,8 @@
     - package
 
 - name: Create /var/log/rsyslog directory
-  file:
+  file: # noqa 208
     path: /var/log/rsyslog
-    mode: 0750
     setype: var_log_t
     state: directory
     recurse: yes
