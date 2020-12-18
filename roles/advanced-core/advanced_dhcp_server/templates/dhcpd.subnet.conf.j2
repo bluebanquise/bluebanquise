@@ -85,7 +85,7 @@
 {% if icebergs_system == true %}
   {% set range = groups[j2_current_iceberg] %}
   {% for host in groups[managements_group_name] %}
-    {% if current_hostvars['iceberg_master'] == j2_current_iceberg %}
+    {% if hostvars[host]['iceberg_master'] == j2_current_iceberg %}
 {{ range.append(host) }}
     {% endif %}
   {% endfor %}
