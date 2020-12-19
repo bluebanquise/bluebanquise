@@ -1,0 +1,7 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: "Include set_hostname"
+      include_role:
+        name: "set_hostname"
