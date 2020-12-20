@@ -1,0 +1,170 @@
+---
+- name: Verify
+  hosts: all
+
+  tasks:
+    - name: Read ifcfg-eth0
+      slurp:
+        src: /etc/sysconfig/network-scripts/ifcfg-eth0
+      register: ifcfg_eth0
+
+    - name: Display ifcfg-eth0
+      debug:
+        msg: "{{ ifcfg_eth0['content'] | b64decode }}"
+
+    - name: Check absence of IPADDR in ifcfg-eth0
+      assert:
+        that: not ifcfg_eth0['content'] | b64decode |
+                regex_search('^IPADDR=', multiline=True)
+
+    - name: Check presence of parameters in ifcfg-eth0
+      assert:
+        that: ifcfg_eth0['content'] | b64decode |
+                regex_search('{{ item }}', multiline=True)
+      loop:
+        - '^NAME=eth0$'
+        - '^DEVICE=eth0$'
+        - '^TYPE=ethernet$'
+
+    - name: Check presence of NM_MANAGED for EL7 in ifcfg-eth0
+      assert:
+        that: ifcfg_eth0['content'] | b64decode |
+                regex_search('^NM_MANAGED=yes$', multiline=True)
+      when: ansible_facts.distribution_major_version|int < 8
+
+    - name: Read ifcfg-eth1
+      slurp:
+        src: /etc/sysconfig/network-scripts/ifcfg-eth1
+      register: ifcfg_eth1
+
+    - name: Display ifcfg-eth1
+      debug:
+        msg: "{{ ifcfg_eth1['content'] | b64decode }}"
+
+    - name: Check presence of parameters in ifcfg-eth1
+      assert:
+        that: ifcfg_eth1['content'] | b64decode |
+                regex_search('{{ item }}', multiline=True)
+      loop:
+        - '^NAME=eth1$'
+        - '^DEVICE=eth1$'
+        - '^IPADDR=10.1.0.42$'
+        - '^PREFIX=16$'
+        - '^ONBOOT=yes$'
+        - '^TYPE=ethernet$'
+        - '^GATEWAY=10.1.0.1$'
+        - '^MTU=9000$'
+        - '^ZONE=external$'
+
+    - name: Read ifcfg-bond0
+      slurp:
+        src: /etc/sysconfig/network-scripts/ifcfg-bond0
+      register: ifcfg_bond0
+
+    - name: Display ifcfg-bond0
+      debug:
+        msg: "{{ ifcfg_bond0['content'] | b64decode }}"
+
+    - name: Check presence of parameters in ifcfg-bond0
+      assert:
+        that: ifcfg_bond0['content'] | b64decode |
+                regex_search('{{ item }}', multiline=True)
+      loop:
+        - '^NAME=bond0$'
+        - '^DEVICE=bond0$'
+        - '^IPADDR=10.1.0.100$'
+        - '^PREFIX=16$'
+        - '^ONBOOT=yes$'
+        - '^TYPE=bond$'
+        - '^BONDING_MASTER=yes$'
+        - '^BONDING_OPTS="mode=4 xmit_hash_policy=layer3.4 miimon=100 lacp_rate=1"$'
+
+    - name: Check absence of VLAN in ifcfg-bond0
+      assert:
+        that: not ifcfg_eth0['content'] | b64decode |
+                regex_search('^VLAN', multiline=True)
+
+    - name: Read ifcfg-slave1
+      slurp:
+        src: /etc/sysconfig/network-scripts/ifcfg-slave1
+      register: ifcfg_slave1
+
+    - name: Display ifcfg-slave1
+      debug:
+        msg: "{{ ifcfg_slave1['content'] | b64decode }}"
+
+    - name: Check presence of parameters in ifcfg-slave1
+      assert:
+        that: ifcfg_slave1['content'] | b64decode |
+                regex_search('{{ item }}', multiline=True)
+      loop:
+        - '^NAME=slave1$'
+        - '^DEVICE=slave1$'
+        - '^SLAVE=yes$'
+        - '^MASTER=bond0$'
+
+    - name: Read ifcfg-ib0
+      slurp:
+        src: /etc/sysconfig/network-scripts/ifcfg-ib0
+      register: ifcfg_ib0
+
+    - name: Display ifcfg-ib0
+      debug:
+        msg: "{{ ifcfg_ib0['content'] | b64decode }}"
+
+    - name: Check presence of parameters in ifcfg-ib0
+      assert:
+        that: ifcfg_ib0['content'] | b64decode |
+                regex_search('{{ item }}', multiline=True)
+      loop:
+        - '^NAME=ib0$'
+        - '^DEVICE=ib0$'
+        - '^IPADDR=10.2.0.42$'
+        - '^NETMASK=255.255.0.0$'
+        - '^ONBOOT=no$'
+        - '^TYPE=infiniband$'
+
+    - name: Read ifcfg-eth0.100
+      slurp:
+        src: /etc/sysconfig/network-scripts/ifcfg-eth0.100
+      register: ifcfg_eth0_100
+
+    - name: Display ifcfg-eth0.100
+      debug:
+        msg: "{{ ifcfg_eth0_100['content'] | b64decode }}"
+
+    - name: Check presence of parameters in ifcfg-eth0.100
+      assert:
+        that: ifcfg_eth0_100['content'] | b64decode |
+                regex_search('{{ item }}', multiline=True)
+      loop:
+        - '^NAME=eth0.100$'
+        - '^DEVICE=eth0.100$'
+        - '^IPADDR=10.1.100.42$'
+        - '^PREFIX=16$'
+        - '^VLAN=yes$'
+        - '^VLAN_ID=100$'
+        - '^PHYSDEV=eth0$'
+
+    - name: Read ifcfg-multi0
+      slurp:
+        src: /etc/sysconfig/network-scripts/ifcfg-multi0
+      register: ifcfg_multi0
+
+    - name: Display ifcfg-multi0
+      debug:
+        msg: "{{ ifcfg_multi0['content'] | b64decode }}"
+
+    - name: Check presence of parameters in ifcfg-multi0
+      assert:
+        that: ifcfg_multi0['content'] | b64decode |
+                regex_search('{{ item }}', multiline=True)
+      loop:
+        - '^NAME=multi0$'
+        - '^DEVICE=multi0$'
+        - '^IPADDR0=172.16.0.2$'
+        - '^PREFIX0=16$'
+        - '^IPADDR1=172.16.0.3$'
+        - '^PREFIX1=16$'
+        - '^IPADDR2=191.168.1.117$'
+        - '^PREFIX2=24$'

@@ -1,0 +1,11 @@
+---
+- name: Prepare
+  hosts: all
+
+  tasks:
+    - name: Install core packages missing from container
+      package:
+        name: initscripts
+      when:
+        - ansible_facts.os_family == "RedHat"
+        - ansible_facts.distribution_major_version == "7"

@@ -6,6 +6,8 @@
     state: present
   with_items: "{{ network_interfaces }}"
   when: item.vlan is defined and item.vlan
+  tags:
+    - molecule-notest
 
 - name: Load bonding module if needed
   modprobe:
@@ -13,6 +15,8 @@
     state: present
   with_items: "{{ network_interfaces }}"
   when: item.type is defined and (item.type == 'bond' or item.type == 'bond-slave')
+  tags:
+    - molecule-notest
 
 - name: Set NIC configuration
   template:

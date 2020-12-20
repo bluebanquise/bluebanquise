@@ -1,0 +1,60 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: docker
+lint:  |
+  set -e
+  yamllint .
+platforms:
+  - name: instance
+    image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
+    override_command: false
+    capabilities:
+      - "SYS_ADMIN"
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    pre_build_image: true
+provisioner:
+  name: ansible
+  inventory:
+    host_vars:
+      instance:
+        network_interfaces:
+          - interface: eth0
+            ip4: "10.0.0.42"
+          - interface: eth1
+            ip4: "10.1.0.42"
+            network: testnetwork
+            zone: external
+          - interface: bond0
+            type: bond
+            vlan: false
+            bond_options: "mode=4 xmit_hash_policy=layer3+4 miimon=100 lacp_rate=1"
+            ip4: "10.1.0.100"
+            network: testnetwork
+          - interface: slave0
+            type: bond-slave
+            master: bond0
+          - interface: slave1
+            type: bond-slave
+            master: bond0
+          - interface: ib0
+            ip4: "10.2.0.42"
+            network: interconnect-1
+            autoconnect: False
+            type: infiniband
+          - interface: eth0.100
+            vlan: true
+            vlan_id: 100
+            physical_device: eth0
+            ip4: "10.1.100.42"
+            network: testnetwork
+          - interface: multi0
+            ip4_multi:
+              - 172.16.0.2/16
+              - 172.16.0.3/16
+              - 192.168.1.117/24
+verifier:
+  name: ansible

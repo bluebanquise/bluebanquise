@@ -19,6 +19,7 @@ Molecule unit tests
 |![core/pxe_stack unit testing](https://github.com/bluebanquise/bluebanquise/workflows/core/pxe_stack%20unit%20testing/badge.svg)                     | x | x |   |
 |![core/nfs_client unit testing](https://github.com/bluebanquise/bluebanquise/workflows/core/nfs_client%20unit%20testing/badge.svg)                   | x | x |   |
 |![core/nfs_server unit testing](https://github.com/bluebanquise/bluebanquise/workflows/core/nfs_server%20unit%20testing/badge.svg)                   | x | x |   |
+|![core/nic unit testing](https://github.com/bluebanquise/bluebanquise/workflows/core/nic%20unit%20testing/badge.svg)                                 | x | x |   |
 |![core/repositories_client unit testing](https://github.com/bluebanquise/bluebanquise/workflows/core/repositories_client%20unit%20testing/badge.svg) | x | x |   |
 |![core/repositories_server unit testing](https://github.com/bluebanquise/bluebanquise/workflows/core/repositories_server%20unit%20testing/badge.svg) | x | x |   |
 |![core/ssh_master unit testing](https://github.com/bluebanquise/bluebanquise/workflows/core/ssh_master%20unit%20testing/badge.svg)                   | x | x | x |
