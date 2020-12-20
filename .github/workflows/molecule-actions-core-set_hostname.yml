@@ -1,0 +1,40 @@
+---
+name: core/set_hostname unit testing
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'roles/core/set_hostname/**'
+      - '.github/workflows/molecule-actions-core-set_hostname.yml'
+  pull_request:
+    paths:
+      - 'roles/core/set_hostname/**'
+      - '.github/workflows/molecule-actions-core-set_hostname.yml'
+
+jobs:
+  molecule_test:
+    name: ${{ matrix.distro }} - molecule test
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        distro:
+          - centos:7
+          - centos:8
+
+    env:
+      MOLECULE_DISTRO: ${{ matrix.distro }}
+      PY_COLORS: 1
+      ANSIBLE_FORCE_COLOR: 1
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Setup python environment
+        uses: actions/setup-python@v1
+      - name: Install packages
+        run: |
+          pip install tox
+      - name: Run molecule test for core/set_hostname
+        run: |
+          cd roles/core/set_hostname && tox
