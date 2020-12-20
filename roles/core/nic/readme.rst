@@ -159,6 +159,7 @@ Add Ubuntu and Opensuse compatibility if asked for.
 Changelog
 ^^^^^^^^^
 
+* 1.1.1: vlan parameter is a boolean. Bruno Travouillon <devel@travouillon.fr>
 * 1.1.0: Assign a network interface to a firewall zone. Bruno Travouillon <devel@travouillon.fr>
 * 1.0.3: Update readme. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.2: Update to new network_interfaces syntax. Benoit Leveugle <benoit.leveugle@gmail.com>
