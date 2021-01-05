@@ -11,9 +11,11 @@ This role provides all features availables in the main nmcli module.
 Please refer to `nmcli module documentation <https://docs.ansible.com/ansible/latest/collections/community/general/nmcli_module.html>`_ .
 
 .. warning:
-  This role needs **latest** (2.0.0) nmcli.py module, from
-  https://github.com/ansible-collections/community.general/
-  ansible-collections:main branch.
+  This role needs **latest** (2.0.0) nmcli.py module. If you plan to configure
+  routes or zones with this role, you will have to install the development
+  version of the community.general collection which is available at
+  https://github.com/ansible-collections/community.general/ until the General
+  Availability of the 2.0.0 release.
 
 Instructions
 ^^^^^^^^^^^^
@@ -24,15 +26,30 @@ Stack specific behaviors
 While all of the nmcli module options are supported,
 some provides more integrated features:
 
-* **conn_name**: is equal to **interface**, but has higher precedence over **interface** if both are set.
-* **ifname**: is equal to **physical_device**, but has higher precedence over **ifname** if both are set.
+* **conn_name**: is equal to **interface**, but has higher precedence over
+  **interface** if both are set.
+* **ifname**: is equal to **physical_device**, but has higher precedence over
+  **ifname** if both are set.
 * **type**: is set to *ethernet* by default if not set.
-* **ip4**: can be set using a simple ipv4, then role will use **networks[item.network]['.prefix4']** or if not exist to **networks[item.network]['.prefix']** to complete address. You can force address with prefix if string *'/'* is present.
-* **mtu**: has higher precedence over **networks[item.network]['mtu']** if both are set.
-* **gw4**: has higher precedence over **networks[item.network]['.gateway4']** if set which has higher precedence over **networks[item.network]['.gateway']** if set. Note that gw4 is cannot be set at the same time than never_default4 (mutually exclusives).
-* **routes4**: is a list, that defines routes to be set on the interface. See examples bellow. Has higher precedence over **networks[item.network]['.routes4']** if set.
-* **route_metric4**: is to set general metric for gateway or routes (if not set on route level) for this interface. Has higher precedence over **networks[item.network]['.route_metric4']** if set.
-* **never_default4**: is related to ipv4.never-default nmcli parameter (DEFROUTE). Has higher precedence over **networks[item.network]['.never_default4']** if set.
+* **ip4**: can be set using a simple ipv4, then role will use
+  **networks[item.network]['prefix4']** or default to
+  **networks[item.network]['prefix']** to complete address. You can force
+  address with prefix if string *'/'* is present.
+* **mtu**: has higher precedence over **networks[item.network]['mtu']** if
+  both are set.
+* **gw4**: has higher precedence over **networks[item.network]['.gateway4']**
+  if set which has higher precedence over **networks[item.network]['.gateway']**
+  if set. Note that gw4 is cannot be set at the same time than never_default4
+  (mutually exclusives).
+* **routes4**: is a list, that defines routes to be set on the interface. See
+  examples bellow. Has higher precedence over
+  **networks[item.network]['.routes4']** if set.
+* **route_metric4**: is to set general metric for gateway or routes (if not set
+  on route level) for this interface. Has higher precedence over
+  **networks[item.network]['.route_metric4']** if set.
+* **never_default4**: is related to ipv4.never-default nmcli parameter
+  (DEFROUTE). Has higher precedence over
+  **networks[item.network]['.never_default4']** if set.
 
 Basic ipv4
 """"""""""
@@ -138,8 +155,9 @@ You can define routes at two levels:
                 - 10.12.0.0/24 10.10.0.2 300
 
 .. note:
-  In route4 list, first element is network to reach (0.0.0.0/0 for all), second
-  is gateway to use, and last optional one is metric to set for this route.
+  In route4 list, each element of the list is a tuple with the network
+  destination in first position, gateway in second position and optionally
+  the metric in third position.
 
 Changelog
 ^^^^^^^^^

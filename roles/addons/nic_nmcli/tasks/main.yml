@@ -66,6 +66,7 @@
     # Allows to provide a simple ip4, or an ip4/prefix
     # Also support old prefix format (to be replaced by prefix4)
     gw4: "{{ (item.never_default4 | default(networks[item.network].never_default4) is not defined) | ternary( item.gw4 | default(networks[item.network].gateway4) | default(networks[item.network].gateway) | default(omit), omit) }}"
+    # Check here if never_default4 is set or not. If set, gw4 cannot be used as both are mutually exclusive. If not set, then get gw4 from network_interfaces, then default to network.gateway4 then default to network.gateway then omit.
     routes4: "{{ (item.routes4 is defined or networks[item.network]['routes4'] is defined) |ternary( item.routes4 | default(networks[item.network]['routes4'] | default([]) ), omit) }}"
     route_metric4: "{{ item.route_metric4 | default(networks[item.network].route_metric4) | default(omit) }}"
     never_default4: "{{ item.never_default4 | default(networks[item.network].never_default4) | default(omit) }}"
