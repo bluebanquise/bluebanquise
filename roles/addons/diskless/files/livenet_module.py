@@ -623,6 +623,7 @@ def cli_menu():
 
 # Get a size from the user and check the compliance
 
+
 def cli_get_size(size):
 
     # Check if there is the size unit
