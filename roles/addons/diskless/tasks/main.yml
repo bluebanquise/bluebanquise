@@ -59,8 +59,12 @@
    - /var/tmp/diskless/workdir/
 
 - name: "copy █ files"
-  copy: src={{ item.src }} dest={{ item.dest }}
-  mode: 0755
+  copy: 
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: 0755
   with_items:
     - { src: 'utils.py', dest: '/lib/python3.6/site-packages/diskless/utils.py' }
     - { src: 'image_manager.py', dest: '/lib/python3.6/site-packages/diskless/image_manager.py' }
