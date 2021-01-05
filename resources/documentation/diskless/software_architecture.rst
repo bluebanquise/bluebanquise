@@ -54,25 +54,38 @@ Bellow the gobal hierarchy of the diskless tool files (absolute paths) :
 
 .. code-block:: text
 
-    /diskless 
-    ├── /modules 
-    │   ├── base_module.py 
-    │   ├── livenet_module.py 
-    │   ├── demo_module.py 
-    │   └── nfs_module.py 
-    ├── installations.yml 
-    ├── mntdir 
-    ├── workdir 
-    └── nfsimages 
+    /diskless
+    └── /images
+        └── /nfsimages 
+            ├── /golden
+            └── /staging 
 
-* Inclusions for the diskless tool:
+* Python modules
 
 .. code-block:: text
 
-    /usr/include/diskless  
-    ├── kernel_manager.py  
-    ├── image_manager.py  
-    └── utils.py     
+    /lib/python3.6/site-packages/diskless/
+    ├── utils.py
+    ├── image_manager.py
+    ├── kernel_manager.py
+    └── /modules 
+        ├── base_module.py 
+        ├── livenet_module.py 
+        ├── demo_module.py 
+        └── nfs_module.py 
+
+* Ongoing installations file 
+
+.. code-block:: text
+
+    /var/lib/diskless
+    └── installations.yml 
+
+* Temporary directory to work with images
+
+.. code-block:: text
+
+    /var/tmp/diskless/workdir/
 
 * CLI diskless script:
 

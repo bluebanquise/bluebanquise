@@ -10,7 +10,7 @@
 #    images. This type of image allow to load operating system
 #    in ram.
 #
-# 1.2.0: Role update. David Pieters <davidpieters22@gmail.com>
+# 1.2.0: Role update. David Pieters <davidpieters22@gmail.com>, Benoit Leveugle <benoit.leveugle@gmail.com>
 # 1.1.0: Role update. Benoit Leveugle <benoit.leveugle@gmail.com>, Bruno Travouillon <devel@travouillon.fr>
 # 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
 #
@@ -267,7 +267,7 @@ class LivenetImage(Image):
         logging.debug('Executing \'dnf install ' + release + ' -y libselinux-utils policycoreutils selinux-policy-targeted --installroot=' + self.WORKING_DIRECTORY + 'generated_os --setopt=module_platform_id=platform:el8 --nobest\'')
         os.system('dnf install ' + release + ' -y libselinux-utils policycoreutils selinux-policy-targeted --installroot=' + self.WORKING_DIRECTORY + 'generated_os --setopt=module_platform_id=platform:el8 --nobest')
 
-        # Moot required directories on the image
+        # Mouot required directories on the image
         logging.debug('Executing \'mount --bind /proc ' + self.WORKING_DIRECTORY + 'generated_os/proc\'')
         check_call('mount --bind /proc ' + self.WORKING_DIRECTORY + 'generated_os/proc', shell=True)
 
@@ -276,31 +276,28 @@ class LivenetImage(Image):
 
         logging.debug('Executing \'mount --bind /sys/fs/selinux ' + self.WORKING_DIRECTORY + 'generated_os/sys/fs/selinux\'')
         check_call('mount --bind /sys/fs/selinux ' + self.WORKING_DIRECTORY + 'generated_os/sys/fs/selinux', shell=True)
-
+        
+        logging.debug('Executing \'mount --bind /sys/kernel/tracing ' + self.WORKING_DIRECTORY + 'generated_os/sys/kernel/tracing\'')
+        check_call('mount --bind /sys/kernel/tracing ' + self.WORKING_DIRECTORY + 'generated_os/sys/kernel/tracing', shell=True)
+   
         # Chroot onto image
         real_root = os.open("/", os.O_RDONLY)
         logging.debug('Executing \'chroot ' + self.WORKING_DIRECTORY + 'generated_os/\'')
         os.chroot(self.WORKING_DIRECTORY + 'generated_os/')
-
-        logging.debug('Executing \'cd /\'')
-        os.chdir("/")
 
         # Restore SELinux values on all file system
         logging.debug('Executing \'restorecon -Rv /\'')
         check_call('restorecon -Rv /', shell=True)
 
         # Quit chroot
-        logging.debug('Executing \'cd ' + real_root + '\'')
-        os.fchdir(real_root)
-
-        logging.debug('Executing \'chroot . \'')
-        os.chroot(".")
-
         logging.debug('Executing \'exit\'')
+        os.fchdir(real_root)
+        os.chroot(".")
         os.close(real_root)
 
+        # Unmount all selinux mountages
         logging.debug('Executing \'umount ' + self.WORKING_DIRECTORY + 'generated_os/{sys/fs/selinux,sys,proc}\'')
-        check_call('umount ' + self.WORKING_DIRECTORY + 'generated_os/{sys/fs/selinux,sys,proc}', shell=True)
+        check_call('umount ' + self.WORKING_DIRECTORY + 'generated_os/{sys/fs/selinux,sys/kernel/tracing,sys,proc}', shell=True)
 
     # Remove files associated with the NFS image
     def remove_files(self):
@@ -590,7 +587,7 @@ boot
         # Create ipxe boot file
         with open(self.IMAGE_DIRECTORY + '/boot.ipxe', "w") as ff:
             ff.write(file_content)
-
+            
 
 #####################
 # CLI reserved part #

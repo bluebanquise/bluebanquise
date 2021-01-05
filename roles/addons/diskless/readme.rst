@@ -16,7 +16,7 @@ It is important to understand that this role is independant of the pxe_stack cor
 Validated on RHEL8.
 Python based.
 
-A technical documentation is available on https://github.com/bluebanquise/bluebanquise/tree/pietersdavid/feat/disklessset/resources/documentation/diskless
+A technical documentation is available on https://github.com/bluebanquise/bluebanquise/tree/master/resources/documentation/diskless
 
 Set up the tool
 ^^^^^^^^^^^^^^^
@@ -203,16 +203,16 @@ Entering the livenet module will prompt the following menu:
 In this menu you can do four actions:
 
 * Generate a new livenet image : This will guide you in order to create a new livenet image to boot.
-* Mount an existing livenet image : Mount a livenet image in order to make actions inside (install packages, ...). Livenet images are mounted inside /diskless/mntdir/<image name>/mnt.
+* Mount an existing livenet image : Mount a livenet image in order to make actions inside (install packages, ...). Livenet images are mounted inside /var/tmp/diskless/workdir/<image name>/mnt.
 * Unount an existing livenet image : Unmount a mounted livenet image.
 * Resize livenet image : Resize a livenet image operating system in order to adjust space taken into the ram.
 
-When generating a new livenet image with the first options, you will have to give few parameters:
+When generating a new livenet image with the first option, you will have to give few parameters:
 
 * The name you want for your image
 * The password for your image
 * The kernel to use
-* The type of livenet image, by default there is 3 types of livenet images.
+* The type of livenet image, by default there are 3 types of livenet images.
 * The size of the image (It will take this size into ram memory). Please be aware to give enough memory for your operating system.
 
 NFS module
@@ -324,7 +324,7 @@ Generate a new initramfs file for a kernel.
 Clear a corrupted image
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Remove completely a diskless image with a brutal method.
+Remove totaly a diskless image with a brutal method.
 You must use this option only if the image is corrupted or there are non compliant files.
 
 Exit
@@ -436,12 +436,11 @@ It is important to synchronize your node's time by running the time role.
 To be done
 ^^^^^^^^^^
 
-* Image packages custonisation during creation process
 * Make a livenet image autosizing system (Taken automatically the minimum size for operating system in ram).
 * Make a diskless conf file in /etc in order to configure : Autoclean on/off, Directories location (images, kernels, ...).
 
 Changelog
 ^^^^^^^^^
-* 1.2.0: Role update. David Pieters <davidpieters22@gmail.com>
+* 1.2.0: Role update. David Pieters <davidpieters22@gmail.com>, Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.0: Role update. Benoit Leveugle <benoit.leveugle@gmail.com>, Bruno Travouillon <devel@travouillon.fr>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>

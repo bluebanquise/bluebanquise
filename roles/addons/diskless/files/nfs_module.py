@@ -10,7 +10,7 @@
 #    images with the diskless images
 #    management script.
 #
-# 1.2.0: Role update. David Pieters <davidpieters22@gmail.com>
+# 1.2.0: Role update. David Pieters <davidpieters22@gmail.com>, Benoit Leveugle <benoit.leveugle@gmail.com>
 # 1.1.0: Role update. Benoit Leveugle <benoit.leveugle@gmail.com>, Bruno Travouillon <devel@travouillon.fr>
 # 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
 #

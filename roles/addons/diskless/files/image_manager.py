@@ -10,7 +10,7 @@
 #    allow to make basic actions on images. It can
 #    manage all types of images.
 #
-# 1.2.0: Role update. David Pieters <davidpieters22@gmail.com>
+# 1.2.0: Role update. David Pieters <davidpieters22@gmail.com>, Benoit Leveugle <benoit.leveugle@gmail.com>
 # 1.1.0: Role update. Benoit Leveugle <benoit.leveugle@gmail.com>, Bruno Travouillon <devel@travouillon.fr>
 # 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
 #
@@ -441,7 +441,7 @@ class ImageManager:
     #####################
 
     # Use a specific image module
-
+    
     @staticmethod
     def cli_use_modules():
         """The method for using modules with cli interface"""
