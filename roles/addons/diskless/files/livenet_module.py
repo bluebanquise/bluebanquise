@@ -622,6 +622,7 @@ def cli_menu():
         raise UserWarning('\'' + main_action + '\' is not a valid entry. Please enter another value.')
 
 # Get a size from the user and check the compliance
+
 def cli_get_size(size):
 
     # Check if there is the size unit
@@ -640,7 +641,7 @@ def cli_get_size(size):
             size_array = size.split(".")
             if len(size_array) != 2 or not size_array[0].isdigit() or not size_array[1].isdigit() or len(size_array[1]) > 3:
                 raise UserWarning('\nNot a valid size format!')
-            
+
             size = int(float(size)*1024)
 
         # If the giga value has no dot separator
@@ -655,6 +656,7 @@ def cli_get_size(size):
             raise UserWarning('\nNot a valid size format!')
 
     return size
+
 
 def cli_create_livenet_image():
 
