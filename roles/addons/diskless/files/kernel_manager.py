@@ -71,6 +71,7 @@ class KernelManager:
         :param kernel: An available kernel
         :type kernel: str
         """
+        logging.info('Setting up kernel \'' + kernel + '\' for image \'' + image.name + '\'')
 
         # Use image method to set kernel
         image.kernel = kernel
@@ -85,14 +86,20 @@ class KernelManager:
         :param kernel: A kernel in KernelManager.KERNELS_PATH
         :type kernel: str
         """
+        logging.info('Start generating initramfs for kernel \'' + kernel + '\'')
+
         # Create a generation path for the initramfs
         kernel_version = kernel.replace('vmlinuz-', '')
         generation_path = KernelManager.KERNELS_PATH + '/initramfs-kernel-' + kernel_version
 
         printc('[INFO] Now generating initramfs... May take some time', Color.BLUE)
+        
         # Generate the new initramfs file with dracut command on the kernel
+        logging.info('Executing \'dracut --xz -v -m "network base nfs" --add "ifcfg livenet systemd systemd-initrd dracut-systemd" --add-drivers xfs --no-hostonly --nolvmconf --force ' + generation_path + ' --kver ' + kernel_version +'\'')
         os.system('dracut --xz -v -m "network base nfs" --add "ifcfg livenet systemd systemd-initrd dracut-systemd" --add-drivers xfs --no-hostonly --nolvmconf --force ' + generation_path + ' --kver ' + kernel_version)
+        
         # Change the permisssions on the generated file
+        logging.info('Changing permission to 0o644 on ' + generation_path)
         os.chmod(generation_path, 0o644)
 
     #####################

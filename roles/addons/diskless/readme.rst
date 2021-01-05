@@ -8,7 +8,7 @@ This role provides needed tools to deploy a basic diskless cluster.
 
 Two types of images are available:
 
-* Livenet images are full ram images, without persistance but need less infrastructure.
+* Livenet images are full ram images, without persistance, but need less infrastructure.
 * NFS images are full nfs rw images, with persistance, very simple to use, but need more infrastructure.
 
 It is important to understand that this role is independant of the pxe_stack core role, and so each tools do not communicate.

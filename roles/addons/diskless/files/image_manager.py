@@ -230,7 +230,7 @@ class ImageManager:
     @classmethod
     def clean_intallations(cls):
         """Clean all corrupted images."""
-        logging.debug("Start cleaning images.")
+        logging.debug("Start cleaning images...\n")
 
         # Get ongoing installations dictionary
         ongoing_intallations = cls.get_ongoing_installations()
@@ -295,7 +295,7 @@ class ImageManager:
             # Use class to clean the image
             image_class.clean(image_name)
 
-        logging.info('Image ' + image_name + ' cleaned')
+        logging.info('Image \'' + image_name + '\' cleaned')
 
     @classmethod
     def get_image_status(cls, image_name):
@@ -347,6 +347,7 @@ class ImageManager:
         :return: `pid` If the image is present on the ongoing_intallations dictionary, `None` overwise
         :rtype: str
         """
+
         # Get ongoing_installations dictionary
         ongoing_intallations = cls.get_ongoing_installations()
 
@@ -366,6 +367,8 @@ class ImageManager:
         :param image_class: The class of the image
         :type image_class: str
         """
+        logging.debug('Register ongoing installation of image \'' + image_name + '\' in installation.yml file')
+
         # Get ongoing_intallations dictionary
         ongoing_intallations = cls.get_ongoing_installations()
         # Add image to dictionary
@@ -380,6 +383,8 @@ class ImageManager:
         :param image_name: The image name
         :type image_name: str
         """
+        logging.debug('Unregister ongoing installation of image \'' + image_name + '\' from installation.yml file')
+
         # Get ongoing_intallations dictionary
         ongoing_intallations = cls.get_ongoing_installations()
         # Delete image from dictionary

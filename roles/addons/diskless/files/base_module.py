@@ -61,8 +61,8 @@ class Image(ABC):
     def __init__(self, name, *args):
         """Class consructor.
         The constructor take in argument the name of the image, and the creation arguments (in *args).
-        To get an already existing image you have previously created you must call this constructor whith only image 'name' to load it.
-        To create a new image you must call this constructor with image 'name' and all other class constructor arguments.
+        To get an already existing image that you have previously created, you must call this constructor whith only image 'name' to load it.
+        To create a new image, you must call this constructor with image 'name' and all other requiered class constructor arguments.
         When you redefine Image class constructor you must define your constructor and create_new_image method as following:
 
             def __init__(self, name, arg1 = None, arg2 = None, argX = None...): <- You must strictly follow this syntax with your custom args (arg1, arg2, argX ...)
@@ -71,7 +71,7 @@ class Image(ABC):
             def create_new_image(self, arg1, arg32, argX...):                   <-
                 ...(your code)                                                  <- From here you can custom
 
-        For an exemple look at DemoClass class in demo_module
+        For an exemple look at DemoClass class in demo_module.
 
         :param name: The name of the image
         :type name: str
@@ -94,15 +94,10 @@ class Image(ABC):
         # If the image already exist, and all other arguments excepts name are None:
         # Load existing image
         elif os.path.isdir(self.IMAGE_DIRECTORY):
-            logging.debug('Loading existing image')
             self.get_existing_image()
 
         # If image don't already exist, create it
         else:
-            # Create the base mandatory directory the image
-            os.mkdir(self.IMAGE_DIRECTORY)
-            logging.info('Starting image creation...')
-
             # Register image in ongoing installations file
             ImageManager.register_installation(self.name, self.__class__.__name__)
 
@@ -114,21 +109,23 @@ class Image(ABC):
 
             # After image creation, unregister it from ongoing installations file
             ImageManager.unregister_installation(self.name)
-            logging.info('Image creation complete !')
+            logging.info('Image \'' + self.name + '\' creation complete !')
 
     @abstractmethod
     def create_new_image(self):
         """Create a new image. This method must be redefined in all subclasses."""
-        logging.info('Creating new image' + self.name)
+        logging.info('Starting image \'' + self.name + '\' creation')
 
     @abstractmethod
     def remove_files(self):
         """Remove all files of a created image when the image was properly created.
         This method must be redefined in all subclasses."""
-        logging.info('Removing image ' + self.name + ' files...')
+        logging.info('Removing image \'' + self.name + '\' files')
 
         # Remove image base directory
         if os.path.isdir(self.IMAGE_DIRECTORY):
+            logging.debug('Delating directory ' + self.IMAGE_DIRECTORY)
+            logging.debug('Executing \'rm -rf ' + self.IMAGE_DIRECTORY + '\'')
             shutil.rmtree(self.IMAGE_DIRECTORY)
 
     @staticmethod
@@ -149,28 +146,29 @@ class Image(ABC):
         :param image_name: The name of the image to clean
         :type image_name: str
         """
-        logging.info('Cleaning image ' + image_name + 'files...')
+        logging.info('Cleaning image \'' + image_name + '\' files')
 
     def generate_files(self):
         """Generate image files."""
-        logging.info('Starting generating image files...')
-        self.create_image_folders()
-        self.generate_ipxe_boot_file()
-        self.generate_file_system()
+        logging.info('Start generating image \'' + self.name + '\' stuff...')
 
     def create_image_folders(self):
         """Create image folders."""
-        logging.info('Image folders creation')
+        logging.info('Start generating image \'' + self.name + '\' folders...')
+
+        # Create the base mandatory directory for the image
+        logging.debug('Executing \'mkdir ' + self.IMAGE_DIRECTORY + '\'')
+        os.mkdir(self.IMAGE_DIRECTORY)
 
     def generate_file_system(self):
         """Generate image file system."""
-        logging.info('Installing new system image... May take some time.')
+        logging.info('Start generating image \'' + self.name + '\' file system...')
 
     def register_image(self):
         """Register the image data into it's 'image_data' file.
         This file is a save of the image.
         To load an existing image this file is mandatory because it contains all image attributs."""
-        logging.info('Registering the image')
+        logging.info('Registering image \'' + self.name + '\'')
 
         # Add creation date to image attributes, it is the date of image registering (current date)
         self.image_class = self.__class__.__name__
@@ -184,11 +182,13 @@ class Image(ABC):
             file_content = file_content + '\n    ' + attribute + ': ' + str(value)
 
         # Creating or edit the image_data file that contains image attributes in yaml
+        logging.debug('Writing image attributs inside ' + self.IMAGE_DIRECTORY + 'image_data.yml')
         with open(self.IMAGE_DIRECTORY + '/image_data.yml', "w") as ff:
             ff.write(file_content)
 
     def get_image_data(self):
         """Getting image data that has been writen inside the image image_data.yml during register_image() call."""
+
         # Reading image_data file
         with open(self.IMAGE_DIRECTORY + '/image_data.yml', 'r') as f:
             # Getting all data
@@ -201,7 +201,6 @@ class Image(ABC):
 
     def get_existing_image(self):
         """Load an existing image. The loading consist of getting all image attributes from it's image_data.yml file."""
-        logging.debug("Getting existing image")
 
         # Get image data
         image_data = self.get_image_data()
@@ -217,7 +216,8 @@ class Image(ABC):
         :param kernel: The kernel to set to the image
         :type kernel: str
         """
-        logging.info('Set up image kernel')
+        logging.info('Set up image \'' + self.name + '\' kernel')
+
         # Change image kernel attibute
         self.kernel = kernel
         # Regenerate ipxe boot file
@@ -227,14 +227,16 @@ class Image(ABC):
 
     def generate_ipxe_boot_file(self):
         """Generate an ipxe boot file for the image."""
-        logging.info('Creating IPXE boot file for the image')
+        logging.info('Creating image \'' + self.name + '\' IPXE boot file')
+
         # Format image ipxe boot file template with image attributes
         file_content = self.__class__.get_boot_file_template().format(image_name=self.name,
                                                                       image_initramfs=self.image,
                                                                       image_kernel=self.kernel)
 
         # Create ipxe boot file
-        with open(self.IMAGE_DIRECTORY + '/boot.ipxe', "w") as ff:
+        logging.debug('Creating boot content inside file ' + self.IMAGE_DIRECTORY + 'boot.ipxe')
+        with open(self.IMAGE_DIRECTORY + 'boot.ipxe', "w") as ff:
             ff.write(file_content)
 
     @classmethod
@@ -283,11 +285,13 @@ class Image(ABC):
         printc('Exemple: \'package1 package2 package3 ...\' ', Color.GREEN)
         # Get packages
         package_list = input('-->: ').split()
-
+        
+        logging.debug('Checking that requested packages exists')
         # For each package
         for package_name in package_list:
             try:
                 # Check packages availability
+                logging.debug('Executing \'subprocess.check_output(\'dnf list \'' + package_name + ' | grep ' + package_name + ', shell=True)\'')
                 subprocess.check_output('dnf list ' + package_name + ' | grep ' + package_name, shell=True)
 
             # If there is not running process for image creator instance pid

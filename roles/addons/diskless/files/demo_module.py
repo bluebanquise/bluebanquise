@@ -18,6 +18,7 @@
 # Import base modules
 import os
 import shutil
+import logging
 
 # Import diskless modules
 from diskless.modules.base_module import Image
@@ -38,25 +39,31 @@ class DemoImage(Image):
     #                               V             V  <- You can see the arguments relation
     # Create demo image             V             V
     def create_new_image(self, my_message, useless_argument):
+        super().create_new_image()
         # Create the 'my_message attribute'
         self.my_message = my_message
         self.generate_files()
         printc("Image created ! Check images list to look at it.", Color.RED)
 
     def generate_files(self):
+        super().generate_files()
         self.create_image_folders()
         self.generate_file_system()
         # The 'my_message attribute' will be saved in image_data file when registering.
         # You will see it when listing images after demo image creation.
-        self.register_image()
 
     def create_image_folders(self):
+        super().create_image_folders()
         # Create a folder just for the exemple.
+        logging.debug('Executing \'mkdir -p /diskless/demo_directory_' + self.name + '\'')
         os.makedirs('/diskless/demo_directory_' + self.name)
 
     # This function will help us to understand the difference between clean and remove methods
     def generate_file_system(self):
+        super().generate_file_system()
+
         # Create a file to remove
+        logging.debug('Creating file /diskless/demo_file_to_remove_' + self.name + '.txt')
         f = open('/diskless/demo_file_to_remove_' + self.name + '.txt', 'a')
         f.write("This file will be removed throughout normal image generation !")
         f.close()
@@ -73,29 +80,39 @@ class DemoImage(Image):
         # Else, continue normal process...
 
         # Remove the file_to_remove file is the normal image creation process
+        logging.debug('Executing \'rm -f /diskless/demo_file_to_remove_' + self.name + '.txt\'')
         os.remove('/diskless/demo_file_to_remove_' + self.name + '.txt')
 
     def remove_files(self):
         # Remove the image files when the image was properly created
         super().remove_files()
+
+        logging.debug('Executing \'rm -rf /diskless/demo_directory_' + self.name + '\'')
         shutil.rmtree('/diskless/demo_directory_' + self.name)
 
     # Clean all image files without image object when an image is corrupted
     @staticmethod
     def clean(image_name):
+        Image.clean(image_name)
+
         # Cleaning image base directory
         if os.path.isdir(Image.IMAGES_DIRECTORY + image_name):
+            logging.debug(Image.IMAGES_DIRECTORY + image_name + ' is a directory')
+            logging.debug('Executing \'rm -rf ' + Image.IMAGES_DIRECTORY + image_name + '\'')
             shutil.rmtree(Image.IMAGES_DIRECTORY + image_name)
 
         # Cleaning all other related files and directories...
-
         if os.path.isdir('/diskless/demo_directory_' + image_name):
+            logging.debug('/diskless/demo_directory_' + image_name + ' is a directory')
+            logging.debug('Executing \'rm -rf /diskless/demo_directory_' + image_name + '\'')
             shutil.rmtree('/diskless/demo_directory_' + image_name)
 
         # We need to try to delete the demo_file.txt file in the clean method.
         # In fact the generation of the demo image can be halted before that the
         # normal process of DemoImage image creation removed demo_file.txt.
         if os.path.isfile('/diskless/demo_file_to_remove_' + image_name + '.txt'):
+            logging.debug('/diskless/demo_file_to_remove_' + image_name + '.txt is a file')
+            logging.debug('Executing \'rm -f /diskless/demo_file_to_remove_' + image_name + '.txt\'')
             os.remove('/diskless/demo_file_to_remove_' + image_name + '.txt')
 
     @staticmethod

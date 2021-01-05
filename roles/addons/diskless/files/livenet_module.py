@@ -55,6 +55,7 @@ class LivenetImage(Image):
         super().__init__(name, password, kernel, livenet_type, livenet_size, additional_packages, ssh_pub_key, selinux, release_version)
 
     def create_new_image(self, password, kernel, livenet_type, livenet_size, additional_packages, ssh_pub_key, selinux, release_version):
+        super().create_new_image()
 
         # Checking all parameters
         # Check name format
@@ -104,8 +105,8 @@ class LivenetImage(Image):
         self.generate_files()
 
     def generate_files(self):
-        logging.info('Starting generating image files...')
-
+        super().generate_files()
+        super().create_image_folders()
         self.generate_file_system()
         self.generate_ipxe_boot_file()
 
@@ -134,8 +135,10 @@ class LivenetImage(Image):
 
     # Use dnf command in order to create the image operating system
     def generate_operating_system(self):
-        logging.info('Generating operating system')
+        logging.info('Generating image \'' + self.name + '\' operating system')
+
         # create image personnal working directory
+        logging.debug('Executing \'mkdir -p ' + self.WORKING_DIRECTORY + 'generated_os\'')
         os.makedirs(self.WORKING_DIRECTORY + 'generated_os')
 
         if hasattr(self, 'release_version'):
@@ -145,10 +148,13 @@ class LivenetImage(Image):
 
         # Generate desired image file system
         if self.livenet_type == LivenetImage.Type.STANDARD:
+            logging.debug('Executing \'dnf groupinstall ' + release + ' -y "core" --setopt=module_platform_id=platform:el8 --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --exclude selinux-policy-targeted --exclude selinux-policy-mls\'')
             os.system('dnf groupinstall ' + release + ' -y "core" --setopt=module_platform_id=platform:el8 --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --exclude selinux-policy-targeted --exclude selinux-policy-mls')
         elif self.livenet_type == LivenetImage.Type.SMALL:
+            logging.debug('Executing \'dnf install ' + release + ' -y dnf yum iproute procps-ng openssh-server NetworkManager --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --exclude selinux-policy-targeted --exclude selinux-policy-mls --setopt=module_platform_id=platform:el8 --nobest\'')
             os.system('dnf install ' + release + ' -y dnf yum iproute procps-ng openssh-server NetworkManager --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --exclude selinux-policy-targeted --exclude selinux-policy-mls --setopt=module_platform_id=platform:el8 --nobest')
         elif self.livenet_type == LivenetImage.Type.CORE:
+            logging.debug('Executing \'dnf install ' + release + ' -y iproute procps-ng openssh-server --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --exclude selinux-policy-targeted --exclude selinux-policy-mls --setopt=module_platform_id=platform:el8 --nobest\'')
             os.system('dnf install ' + release + ' -y iproute procps-ng openssh-server --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --exclude selinux-policy-targeted --exclude selinux-policy-mls --setopt=module_platform_id=platform:el8 --nobest')
 
         # If there are additional packages to install
@@ -159,52 +165,64 @@ class LivenetImage(Image):
             for package in self.additional_packages:
                 packages = packages + ' ' + package
 
+            logging.debug('Executing \'dnf install ' + release + ' -y --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ ' + packages + '\'')
             os.system('dnf install ' + release + ' -y --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ ' + packages)
 
     # Generate the image squashfs image after creating the image rootfs image
     # The operating system need to be previoulsy created by the
     # generate_operating_system method.
     def generate_squashfs(self):
-        logging.info('Generating squashfs image')
+        logging.info('Generating image \'' + self.name + '\' squashfs')
 
         # Create the directory that will contain the rootfs image
-        os.makedirs(self.IMAGE_DIRECTORY + '/tosquash/LiveOS')
+        logging.debug('Executing \'mkdir -p ' + self.IMAGE_DIRECTORY + 'tosquash/LiveOS\'')
+        os.makedirs(self.IMAGE_DIRECTORY + 'tosquash/LiveOS')
 
         # Create the rootfs image with the image size in Mb
+        logging.debug('Executing \'dd if=/dev/zero of=' + self.IMAGE_DIRECTORY + '/tosquash/LiveOS/rootfs.img bs=1M count=' + self.livenet_size + '\'')
         os.system('dd if=/dev/zero of=' + self.IMAGE_DIRECTORY + '/tosquash/LiveOS/rootfs.img bs=1M count=' + self.livenet_size)
 
         # Format the rootfs.img in mkfs format
+        logging.debug('Executing \'mkfs.xfs ' + self.IMAGE_DIRECTORY + '/tosquash/LiveOS/rootfs.img\'')
         os.system('mkfs.xfs ' + self.IMAGE_DIRECTORY + '/tosquash/LiveOS/rootfs.img')
 
         # Create a mounting directory for rootfs.img
+        logging.debug('Executing \'mkdir -p ' + self.MOUNT_DIRECTORY + '\'')
         os.makedirs(self.MOUNT_DIRECTORY)
 
         # Mount rootfs.img in order to put inside the operating system
+        logging.debug('Executing \'mount -o loop ' + self.IMAGE_DIRECTORY + '/tosquash/LiveOS/rootfs.img ' + self.MOUNT_DIRECTORY + '\'')
         os.system('mount -o loop ' + self.IMAGE_DIRECTORY + '/tosquash/LiveOS/rootfs.img ' + self.MOUNT_DIRECTORY)
 
         # Put the operating system inside rootfs.img
+        logging.debug('Executing \'cp -r ' + self.WORKING_DIRECTORY + '/generated_os/* ' + self.MOUNT_DIRECTORY + '\'')
         os.system('cp -r ' + self.WORKING_DIRECTORY + '/generated_os/* ' + self.MOUNT_DIRECTORY)
 
         # Unmount rootfs.img file
+        logging.debug('Executing \'umount ' + self.MOUNT_DIRECTORY + '\'')
         os.system('umount ' + self.MOUNT_DIRECTORY)
 
         # Remove mountage directory for rootfs.img
+        logging.debug('Executing \'rm -rf ' + self.MOUNT_DIRECTORY + '\'')
         shutil.rmtree(self.MOUNT_DIRECTORY)
 
         # Removing useless working directory because we don't need it anymore
+        logging.debug('Executing \'rm -rf ' + self.WORKING_DIRECTORY + '\'')
         shutil.rmtree(self.WORKING_DIRECTORY)
 
         # Create the squashfs.img that will contains LiveOS/rootfs.img
+        logging.debug('Executing \'mksquashfs ' + self.IMAGE_DIRECTORY + '/tosquash ' + self.IMAGE_DIRECTORY + 'squashfs.img\'')
         os.system('mksquashfs ' + self.IMAGE_DIRECTORY + '/tosquash ' + self.IMAGE_DIRECTORY + '/squashfs.img')
 
         # Removing not squashed LiveOS/rootfs.img, because we don't need it anymore
         # (In fact the rootfs.img is now inside the squashfs.img)
-        shutil.rmtree(self.IMAGE_DIRECTORY + '/tosquash')
+        logging.debug('Executing \'rm -rf ' + self.IMAGE_DIRECTORY + 'tosquash\'')
+        shutil.rmtree(self.IMAGE_DIRECTORY + 'tosquash')
 
     # Set a password for the image
     # Staging images need a password
     def set_image_password(self, mountage_directory):
-        logging.info('Setting up a password for the image')
+        logging.info('Setting up image \'' + self.name + '\' password')
 
         # Create hash with clear password
         self.password = crypt.crypt(self.password, crypt.METHOD_SHA512)
@@ -218,7 +236,8 @@ class LivenetImage(Image):
 
     # Write meta data inside image os-release file
     def set_image_release_meta_data(self):
-        logging.info('Setting image information')
+        logging.info('Setting image \'' + self.name + '\' meta data')
+
         with open(self.WORKING_DIRECTORY + 'generated_os/etc/os-release', 'a') as ff:
             ff.writelines(['BLUEBANQUISE_IMAGE_NAME="{0}"\n'.format(self.name),
                            'BLUEBANQUISE_IMAGE_KERNEL="{0}"\n'.format(self.kernel),
@@ -226,15 +245,18 @@ class LivenetImage(Image):
 
     # Inject ssh pub key
     def set_image_ssh_pub_key(self):
-        logging.info('Injecting SSH public key into image')
+        logging.info('Injecting image \'' + self.name + '\' SSH public key')
 
         # Create ssh dir and copy pub key to authorized_keys
+        logging.debug('Executing \'mkdir ' + self.WORKING_DIRECTORY + 'generated_os/root/.ssh\'')
         os.mkdir(self.WORKING_DIRECTORY + 'generated_os/root/.ssh')
+
+        logging.debug('Executing \'cp ' + self.ssh_pub_key + ' ' + self.WORKING_DIRECTORY + 'generated_os/root/.ssh/authorized_keys\'')
         shutil.copyfile(self.ssh_pub_key, self.WORKING_DIRECTORY + 'generated_os/root/.ssh/authorized_keys')
 
     # Enable SELinux in the image
     def set_image_selinux(self):
-        logging.info('Setting up SELinux in the image')
+        logging.info('Setting up SELinux for image \'' + self.name + '\'')
 
         if hasattr(self, 'release_version'):
             release = '--releasever=' + self.release_version
@@ -242,26 +264,42 @@ class LivenetImage(Image):
             release = ''
 
         # Install needed packages
+        logging.debug('Executing \'dnf install ' + release + ' -y libselinux-utils policycoreutils selinux-policy-targeted --installroot=' + self.WORKING_DIRECTORY + 'generated_os --setopt=module_platform_id=platform:el8 --nobest\'')
         os.system('dnf install ' + release + ' -y libselinux-utils policycoreutils selinux-policy-targeted --installroot=' + self.WORKING_DIRECTORY + 'generated_os --setopt=module_platform_id=platform:el8 --nobest')
 
         # Moot required directories on the image
+        logging.debug('Executing \'mount --bind /proc ' + self.WORKING_DIRECTORY + 'generated_os/proc\'')
         check_call('mount --bind /proc ' + self.WORKING_DIRECTORY + 'generated_os/proc', shell=True)
+
+        logging.debug('Executing \'mount --bind /sys ' + self.WORKING_DIRECTORY + 'generated_os/sys\'')
         check_call('mount --bind /sys ' + self.WORKING_DIRECTORY + 'generated_os/sys', shell=True)
+
+        logging.debug('Executing \'mount --bind /sys/fs/selinux ' + self.WORKING_DIRECTORY + 'generated_os/sys/fs/selinux\'')
         check_call('mount --bind /sys/fs/selinux ' + self.WORKING_DIRECTORY + 'generated_os/sys/fs/selinux', shell=True)
 
         # Chroot onto image
         real_root = os.open("/", os.O_RDONLY)
+        logging.debug('Executing \'chroot ' + self.WORKING_DIRECTORY + 'generated_os/\'')
         os.chroot(self.WORKING_DIRECTORY + 'generated_os/')
+
+        logging.debug('Executing \'cd /\'')
         os.chdir("/")
 
         # Restore SELinux values on all file system
+        logging.debug('Executing \'restorecon -Rv /\'')
         check_call('restorecon -Rv /', shell=True)
 
         # Quit chroot
+        logging.debug('Executing \'cd ' + real_root + '\'')
         os.fchdir(real_root)
+
+        logging.debug('Executing \'chroot . \'')
         os.chroot(".")
+
+        logging.debug('Executing \'exit\'')
         os.close(real_root)
 
+        logging.debug('Executing \'umount ' + self.WORKING_DIRECTORY + 'generated_os/{sys/fs/selinux,sys,proc}\'')
         check_call('umount ' + self.WORKING_DIRECTORY + 'generated_os/{sys/fs/selinux,sys,proc}', shell=True)
 
     # Remove files associated with the NFS image
@@ -277,25 +315,37 @@ class LivenetImage(Image):
     # Mount the image to edit it
     def mount(self):
         """Mounting livenet image"""
-        logging.info('Mounting livenet image ' + self.name)
+        logging.info('Mounting livenet image \'' + self.name + '\'')
 
         # Create image working directory
+        logging.debug('Executing \'mkdir ' + self.WORKING_DIRECTORY + '\'')
         os.mkdir(self.WORKING_DIRECTORY)
+
         # Unsquash current image inside working directory
-        os.system('unsquashfs -d ' + self.WORKING_DIRECTORY + '/squashfs-root ' + self.IMAGE_DIRECTORY + '/squashfs.img')
+        logging.debug('Executing \'unsquashfs -d ' + self.WORKING_DIRECTORY + 'squashfs-root ' + self.IMAGE_DIRECTORY + 'squashfs.img\'')
+        os.system('unsquashfs -d ' + self.WORKING_DIRECTORY + 'squashfs-root ' + self.IMAGE_DIRECTORY + 'squashfs.img')
 
         # Create image mounting directory
+        logging.debug('Executing \'mkdir -p ' + self.MOUNT_DIRECTORY + '\'')
         os.makedirs(self.MOUNT_DIRECTORY)
-        os.system('mount ' + self.WORKING_DIRECTORY + '/squashfs-root/LiveOS/rootfs.img ' + self.MOUNT_DIRECTORY)
+
+        logging.debug('Executing \'mount ' + self.WORKING_DIRECTORY + 'squashfs-root/LiveOS/rootfs.img ' + self.MOUNT_DIRECTORY + '\'')
+        os.system('mount ' + self.WORKING_DIRECTORY + 'squashfs-root/LiveOS/rootfs.img ' + self.MOUNT_DIRECTORY)
 
         # Mount diskless server proc on livenet image proc
+        logging.debug('Executing \'mount --bind /proc ' + self.MOUNT_DIRECTORY + 'proc\'')
         os.system('mount --bind /proc ' + self.MOUNT_DIRECTORY + 'proc')
+
         # Mount diskless server sys on livenet image sys
+        logging.debug('Executing \'mount --bind /sys ' + self.MOUNT_DIRECTORY + 'sys\'')
         os.system('mount --bind /sys ' + self.MOUNT_DIRECTORY + 'sys')
 
         # Create an inventory directory
+        logging.debug('Executing \'mkdir '+ self.WORKING_DIRECTORY + 'inventory\'')
         os.mkdir(self.WORKING_DIRECTORY + 'inventory')
+
         # Create the ansible connection
+        logging.debug('Executing \'echo \'' + self.MOUNT_DIRECTORY + ' ansible_connection=chroot\' > ' + self.WORKING_DIRECTORY + 'inventory/host\'')
         os.system('echo \'' + self.MOUNT_DIRECTORY + ' ansible_connection=chroot\' > ' + self.WORKING_DIRECTORY + 'inventory/host')
 
         # Change image mountage status
@@ -305,23 +355,32 @@ class LivenetImage(Image):
     # Unmount the image when the editing is finished
     def unmount(self):
         """Unmounting livenet image"""
-        logging.info('Unmounting livenet image ' + self.name)
+        logging.info('Unmounting livenet image \'' + self.name + '\'')
 
         # Unmount all mountages and delete mountage directory
-        os.system('umount ' + self.MOUNT_DIRECTORY + '/{proc,sys}')
+        logging.debug('Executing \'umount ' + self.MOUNT_DIRECTORY + '{proc,sys}\'')
+        os.system('umount ' + self.MOUNT_DIRECTORY + '{proc,sys}')
+
+        logging.debug('Executing \'umount ' + self.MOUNT_DIRECTORY + '\'')
         os.system('umount ' + self.MOUNT_DIRECTORY)
+
+        logging.debug('Executing \'rm -rf ' + self.MOUNT_DIRECTORY + '\'')
         shutil.rmtree(self.MOUNT_DIRECTORY)
 
         # Create a squashfs backup (prevent failure)
-        os.system('mv ' + self.IMAGE_DIRECTORY + '/squashfs.img ' + self.IMAGE_DIRECTORY + '/squashfs.img.bkp')
+        logging.debug('Executing \'mv ' + self.IMAGE_DIRECTORY + 'squashfs.img ' + self.IMAGE_DIRECTORY + 'squashfs.img.bkp\'')
+        os.system('mv ' + self.IMAGE_DIRECTORY + 'squashfs.img ' + self.IMAGE_DIRECTORY + 'squashfs.img.bkp')
 
         # Create a new squashfs
-        os.system('mksquashfs ' + self.WORKING_DIRECTORY + '/squashfs-root/ ' + self.IMAGE_DIRECTORY + '/squashfs.img')
+        logging.debug('Executing \'mksquashfs ' + self.WORKING_DIRECTORY + 'squashfs-root/ ' + self.IMAGE_DIRECTORY + 'squashfs.img\'')
+        os.system('mksquashfs ' + self.WORKING_DIRECTORY + 'squashfs-root/ ' + self.IMAGE_DIRECTORY + 'squashfs.img')
 
         # Remove backup squashfs because we have the new squashfs
-        os.remove(self.IMAGE_DIRECTORY + '/squashfs.img.bkp')
+        logging.debug('Executing \'rm -f ' + self.IMAGE_DIRECTORY + 'squashfs.img.bkp\'')
+        os.remove(self.IMAGE_DIRECTORY + 'squashfs.img.bkp')
 
         # Remove working directory because we don't need it anymore
+        logging.debug('Executing \'rm -rf ' + self.WORKING_DIRECTORY + '\'')
         shutil.rmtree(self.WORKING_DIRECTORY)
 
         # Changing image mountage status
@@ -330,7 +389,7 @@ class LivenetImage(Image):
 
     # Resize the livenet image image size
     def resize(self, new_size):
-        logging.info('Start image resizing')
+        logging.info('Start resizing image \'' + self.name + '\'')
 
         # Image must be unmounted to resize it
         if self.is_mounted:
@@ -341,46 +400,70 @@ class LivenetImage(Image):
             raise ValueError('Invalid livenet size')
 
         # Create usefull directories for resizement
+        logging.debug('Executing \'mkdir -p ' + self.MOUNT_DIRECTORY + 'mnt_copy\'')
         os.makedirs(self.MOUNT_DIRECTORY + 'mnt_copy')
+
+        logging.debug('Executing \'mkdir -p ' + self.MOUNT_DIRECTORY + 'mnt\'')
         os.makedirs(self.MOUNT_DIRECTORY + 'mnt')
+
+        logging.debug('Executing \'mkdir -p ' + self.WORKING_DIRECTORY + 'current\'')
         os.makedirs(self.WORKING_DIRECTORY + 'current')
+        
+        logging.debug('Executing \'mkdir -p ' + self.WORKING_DIRECTORY + 'copy/squashfs-root/LiveOS/\'')
         os.makedirs(self.WORKING_DIRECTORY + 'copy/squashfs-root/LiveOS/')
 
         # Create a new rootfs image with the new size
+        logging.debug('Executing \'dd if=/dev/zero of=' + self.WORKING_DIRECTORY + 'copy/squashfs-root/LiveOS/rootfs.img bs=1M count=' + new_size + '\'')
         os.system('dd if=/dev/zero of=' + self.WORKING_DIRECTORY + 'copy/squashfs-root/LiveOS/rootfs.img bs=1M count=' + new_size)
+
         # Format the fresh rootfs.img into an xfs system
+        logging.debug('Executing \'mkfs.xfs ' + self.WORKING_DIRECTORY + 'copy/squashfs-root/LiveOS/rootfs.img\'')
         os.system('mkfs.xfs ' + self.WORKING_DIRECTORY + 'copy/squashfs-root/LiveOS/rootfs.img')
+
         # Mount the new rootfs.img on it's mount directory
+        logging.debug('Executing \'mount ' + self.WORKING_DIRECTORY + 'copy/squashfs-root/LiveOS/rootfs.img ' + self.MOUNT_DIRECTORY + 'mnt_copy/\'')
         os.system('mount ' + self.WORKING_DIRECTORY + 'copy/squashfs-root/LiveOS/rootfs.img ' + self.MOUNT_DIRECTORY + 'mnt_copy/')
 
         # Unsquash current image
+        logging.debug('Executing \'unsquashfs -d ' + self.WORKING_DIRECTORY + 'current/squashfs-root ' + self.IMAGE_DIRECTORY + 'squashfs.img\'')
         os.system('unsquashfs -d ' + self.WORKING_DIRECTORY + 'current/squashfs-root ' + self.IMAGE_DIRECTORY + 'squashfs.img')
+
         # Mount current rootfs.img on it's mount directory
+        logging.debug('Executing \'mount ' + self.WORKING_DIRECTORY + 'current/squashfs-root/LiveOS/rootfs.img ' + self.MOUNT_DIRECTORY + 'mnt\'')
         os.system('mount ' + self.WORKING_DIRECTORY + 'current/squashfs-root/LiveOS/rootfs.img ' + self.MOUNT_DIRECTORY + 'mnt')
 
         # Create image.xfsdump from current image
+        logging.debug('Executing \'xfsdump -l 0 -L ' + self.name + ' -M media -f ' + self.WORKING_DIRECTORY + '/current/image.xfsdump ' + self.MOUNT_DIRECTORY + 'mnt\'')
         os.system('xfsdump -l 0 -L ' + self.name + ' -M media -f ' + self.WORKING_DIRECTORY + '/current/image.xfsdump ' + self.MOUNT_DIRECTORY + 'mnt')
 
         # Restore with new sized rootfs.img mountage
+        logging.debug('Executing \'xfsrestore -f ' + self.WORKING_DIRECTORY + 'current/image.xfsdump ' + self.MOUNT_DIRECTORY + 'mnt_copy\'')
         os.system('xfsrestore -f ' + self.WORKING_DIRECTORY + 'current/image.xfsdump ' + self.MOUNT_DIRECTORY + 'mnt_copy')
         os.sync()
 
         # Umount mnt and mnt_copy
+        logging.debug('Executing \'umount ' + self.MOUNT_DIRECTORY + '*\'')
         os.system('umount ' + self.MOUNT_DIRECTORY + '*')
+
+        logging.debug('Executing \'rm -rf ' + self.MOUNT_DIRECTORY + '\'')
         shutil.rmtree(self.MOUNT_DIRECTORY)
 
         # Remove old squashfs
+        logging.debug('Executing \'rm -f ' + self.IMAGE_DIRECTORY + 'squashfs.img\'')
         os.remove(self.IMAGE_DIRECTORY + 'squashfs.img')
+
         # Generate the new squashfs
+        logging.debug('Executing \'mksquashfs ' + self.WORKING_DIRECTORY + 'copy/squashfs-root/ ' + self.IMAGE_DIRECTORY + 'squashfs.img\'')
         os.system('mksquashfs ' + self.WORKING_DIRECTORY + 'copy/squashfs-root/ ' + self.IMAGE_DIRECTORY + 'squashfs.img')
 
+        logging.debug('Executing \'rm -rf ' + self.WORKING_DIRECTORY + '\'')
         shutil.rmtree(self.WORKING_DIRECTORY)
 
         # Update image size attribute value
         self.livenet_size = new_size
         self.register_image()
 
-        logging.info('Image was resized to ' + new_size + 'Mb')
+        logging.info('Image has been resized to ' + new_size + 'Mb')
 
     # We must redefine the method because we cannot register attributs as boolean
     def get_existing_image(self):
@@ -402,6 +485,7 @@ class LivenetImage(Image):
     # Clean all image files without image object when an image is corrupted
     @staticmethod
     def clean(image_name):
+        Image.clean(image_name)
 
         IMAGES_DIRECTORY = LivenetImage.IMAGES_DIRECTORY + image_name + '/'
         WORKING_DIRECTORY = LivenetImage.WORKING_DIRECTORY + image_name + '/'
@@ -409,17 +493,28 @@ class LivenetImage(Image):
 
         # Cleanings for mount directories
         if os.path.isdir(MOUNT_DIRECTORY):
+            logging.debug(MOUNT_DIRECTORY + ' is a directory')
+            logging.debug('Executing \'umount ' + MOUNT_DIRECTORY + '*\'')
             os.system('umount ' + MOUNT_DIRECTORY + '*')
+
             if os.path.ismount(MOUNT_DIRECTORY):
+                logging.debug(MOUNT_DIRECTORY + ' is a mount point')
+                logging.debug('Executing \'umount ' + MOUNT_DIRECTORY + '\'')
                 os.system('umount ' + MOUNT_DIRECTORY)
+            
+            logging.debug('Executing \'rm -rf ' + MOUNT_DIRECTORY + '\'')
             shutil.rmtree(MOUNT_DIRECTORY)
 
-        # Try cleaning image working directory
+        # Try logging.debuging image working directory
         if os.path.isdir(WORKING_DIRECTORY):
+            logging.debug(WORKING_DIRECTORY + ' is a directory')
+            logging.debug('Executing \'rm -rf ' + WORKING_DIRECTORY + '\'')
             shutil.rmtree(WORKING_DIRECTORY)
 
-        # Try cleaning image base directory
+        # Try logging.debuging image base directory
         if os.path.isdir(IMAGES_DIRECTORY):
+            logging.debug(IMAGES_DIRECTORY + ' is a directory')
+            logging.debug('Executing \'rm -rf ' + IMAGES_DIRECTORY + '\'')
             shutil.rmtree(IMAGES_DIRECTORY)
 
     @staticmethod
@@ -484,7 +579,8 @@ boot
     # Override method because of selinux
     def generate_ipxe_boot_file(self):
         """Generate an ipxe boot file for the image."""
-        logging.info('Creating IPXE boot file for the image')
+        logging.info('Creating image \'' + self.name + '\' IPXE boot file')
+
         # Format image ipxe boot file template with image attributes
         file_content = self.__class__.get_boot_file_template().format(image_name=self.name,
                                                                       image_initramfs=self.image,

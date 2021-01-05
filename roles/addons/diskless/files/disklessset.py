@@ -32,8 +32,10 @@ from diskless.image_manager import ImageManager
 # Main program
 if __name__ == "__main__":
 
-    # Set logging level to INFO level and change default display format
-    logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
+    # Set logging logs level, you can configure the logging level in order to have more or less logging informations.
+    # You can select one of these levels (sorted by logs number): (lot of logs) DEBUG > INFO (default) > WARNING > ERROR (few logs)
+    # Just change the value of the level on the line bellow.
+    logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
     # Set script banner
     BANNER = """\n

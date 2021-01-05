@@ -41,6 +41,7 @@ class NfsStagingImage(Image):
 
     # Create new staging image
     def create_new_image(self, password, kernel, additional_packages, release_version):
+        super().create_new_image()
 
         # Checking all parameters
         # Check name format
@@ -69,22 +70,25 @@ class NfsStagingImage(Image):
 
     # Generate staging image files
     def generate_files(self):
-        logging.info('Generating image files')
+        super().generate_files()
         self.create_image_folders()
-        self.generate_ipxe_boot_file()
         self.generate_file_system()
         # Add password set up
         self.set_image_password()
+        self.generate_ipxe_boot_file()
 
     # Remove files associated with the NFS image
     def remove_files(self):
         super().remove_files()
+
+        logging.debug('Executing \'rm -rf ' + self.NFS_DIRECTORY + '\'')
         shutil.rmtree(self.NFS_DIRECTORY)
 
     # Create image base folders
     def create_image_folders(self):
         super().create_image_folders()
         # Create the specific nfs image directory
+        logging.debug('Executing \'mkdir ' + self.NFS_DIRECTORY + '\'')
         os.mkdir(self.NFS_DIRECTORY)
 
     # Generate image file system
@@ -97,6 +101,7 @@ class NfsStagingImage(Image):
             release = ''
 
         # Create file system with dnf
+        logging.debug('Executing \'dnf groupinstall ' + release + ' -y "core" --releasever=8 --setopt=module_platform_id=platform:el8 --installroot=' + self.NFS_DIRECTORY + '\'')
         os.system('dnf groupinstall ' + release + ' -y "core" --releasever=8 --setopt=module_platform_id=platform:el8 --installroot=' + self.NFS_DIRECTORY)
 
         # If there are additional packages to install
@@ -107,12 +112,13 @@ class NfsStagingImage(Image):
             for package in self.additional_packages:
                 packages = packages + ' ' + package
 
+            logging.debug('Executing \'dnf install ' + release + ' -y --installroot=' + self.NFS_DIRECTORY + ' ' + packages + '\'')
             os.system('dnf install ' + release + ' -y --installroot=' + self.NFS_DIRECTORY + ' ' + packages)
 
     # Set a password for the image
     # Staging images need a password
     def set_image_password(self):
-        logging.info('Setting up a password for the image')
+        logging.info('Setting up image \'' + self.name + '\' password')
 
         # Create hash with clear password
         self.password = crypt.crypt(self.password, crypt.METHOD_SHA512)
@@ -127,11 +133,16 @@ class NfsStagingImage(Image):
     # Clean all image files without image object when an image is corrupted
     @staticmethod
     def clean(image_name):
+        Image.clean(image_name)
 
         if os.path.isdir(Image.IMAGES_DIRECTORY + image_name):
+            logging.debug(Image.IMAGES_DIRECTORY + image_name + ' is a directory')
+            logging.debug('Executing \'rm -rf ' + Image.IMAGES_DIRECTORY + image_name + '\'')
             shutil.rmtree(Image.IMAGES_DIRECTORY + image_name)
 
         if os.path.isdir(NfsStagingImage.NFS_DIRECTORY + image_name):
+            logging.debug(NfsStagingImage.NFS_DIRECTORY + image_name + ' is a directory')
+            logging.debug('Executing \'rm -rf ' + NfsStagingImage.NFS_DIRECTORY + image_name + '\'')
             shutil.rmtree(NfsStagingImage.NFS_DIRECTORY + image_name)
 
     @staticmethod
@@ -175,12 +186,14 @@ class NfsGoldenImage(Image):
 
     # Create new golden image
     def create_new_image(self, staging_image):
+        super().create_new_image()
 
         # Set image attributes before creation
         self.kernel = staging_image.kernel
         self.image = 'initramfs-kernel-' + self.kernel.replace('vmlinuz-', '')
+        self.password = staging_image.password
+        self.release_version = staging_image.release_version
         self.nodes = NodeSet()
-
         self.NFS_DIRECTORY = NfsGoldenImage.NFS_DIRECTORY + self.name + '/'
 
         # Generate image files
@@ -193,15 +206,20 @@ class NfsGoldenImage(Image):
 
     # Generate golden image files
     def generate_files(self, staging_image):
+        super().generate_files()
         self.create_image_folders()
-        super().generate_ipxe_boot_file()
         self.generate_file_system(staging_image)
+        super().generate_ipxe_boot_file()
 
     def create_image_folders(self):
+        super().create_image_folders()
+        logging.debug('Executing \'mkdir -p ' + self.NFS_DIRECTORY + 'nodes\'')
         os.makedirs(self.NFS_DIRECTORY + 'nodes')
 
     def generate_file_system(self, staging_image):
+        super().generate_file_system()
         logging.info('Cloning staging image to golden')
+        logging.debug('Executing \'cp -a ' + staging_image.NFS_DIRECTORY + ' ' + self.NFS_DIRECTORY + 'image/\'')
         os.system('cp -a ' + staging_image.NFS_DIRECTORY + ' ' + self.NFS_DIRECTORY + 'image/')
 
     # List nodes associated with nfs golden image
@@ -210,8 +228,7 @@ class NfsGoldenImage(Image):
 
     # Add nodes to the image
     def add_nodes(self, nodes_range):
-
-        logging.info('Cloning, this may take some time...')
+        logging.info('Cloning nodes, this may take some time...')
 
         # For each specified node
         for node in NodeSet(nodes_range):
@@ -221,6 +238,7 @@ class NfsGoldenImage(Image):
                 logging.info("Working on node: " + str(node))
 
                 # Copy golden base image for the specified nodes
+                logging.debug('Executing \'cp -a ' + self.NFS_DIRECTORY + 'image/ ' + self.NFS_DIRECTORY + 'nodes/' + node + '\'')
                 os.system('cp -a ' + self.NFS_DIRECTORY + 'image/ ' + self.NFS_DIRECTORY + 'nodes/' + node)
 
         # Updatde node list
@@ -239,6 +257,7 @@ class NfsGoldenImage(Image):
             for node in NodeSet(nodes_range):
                 logging.info('Working on node: ' + str(node))
                 # Remove node directory
+                logging.debug('Executing \'rm -rf ' + self.NFS_DIRECTORY + '/nodes/' + node + '\'')
                 shutil.rmtree(self.NFS_DIRECTORY + '/nodes/' + node)
 
             # Register image with new values
@@ -250,16 +269,23 @@ class NfsGoldenImage(Image):
     # Remove files associated with the NFS image
     def remove_files(self):
         super().remove_files()
+
+        logging.debug('Executing \'rm -rf ' + self.NFS_DIRECTORY + '\'')
         shutil.rmtree(self.NFS_DIRECTORY)
 
     # Clean all image files without image object when an image is corrupted
     @staticmethod
     def clean(image_name):
+        Image.clean(image_name)
 
         if os.path.isdir(Image.IMAGES_DIRECTORY + image_name):
+            logging.debug(Image.IMAGES_DIRECTORY + image_name + ' is a directory')
+            logging.debug('Executing \'rm -rf ' + Image.IMAGES_DIRECTORY + image_name + '\'')
             shutil.rmtree(Image.IMAGES_DIRECTORY + image_name)
 
         if os.path.isdir(NfsStagingImage.NFS_DIRECTORY + image_name):
+            logging.debug(NfsStagingImage.NFS_DIRECTORY + image_name + ' is a directory')
+            logging.debug('Executing \'rm -rf ' + NfsStagingImage.NFS_DIRECTORY + image_name + '\'')
             shutil.rmtree(NfsStagingImage.NFS_DIRECTORY + image_name)
 
     @staticmethod
@@ -442,7 +468,7 @@ def cli_create_golden_image():
     # Confirm image creation
     printc('\n[+] Would you like to create a new nfs golden image with the following attributes: (yes/no)', Color.GREEN)
     print('  ├── Image name: \t\t' + selected_image_name)
-    print('  └── Staging image from: \t\t' + staging_image.name)
+    print('  └── Staging image from: \t' + staging_image.name)
 
     confirmation = input('-->: ').replace(" ", "")
 
