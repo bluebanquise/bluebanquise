@@ -126,4 +126,4 @@
     line: /diskless/images/nfsimages *(rw,no_root_squash,sync)
 
 - name: Update exports
-  command: exportfs -ra
+  shell: exportfs -ra
