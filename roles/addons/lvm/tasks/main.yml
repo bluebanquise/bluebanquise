@@ -1,28 +1,5 @@
 ---
 
-- name: include_vars ░ Gather OS specific variables
-  # This task gathers variables defined in OS specific files.
-  #
-  # Search vars in:
-  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
-  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
-  #  - <distribution>.yml            # eg. CentOS.yml
-  #  - <os_family>.yml               # eg. RedHat.yml
-  #
-  # If no OS specific file is found, the role will default to vars/main.yml
-  #
-  include_vars: "{{ item }}"
-  with_first_found:
-    - files:
-        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
-        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
-        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
-        - "vars/{{ ansible_facts.os_family }}.yml"
-      skip: True
-  tags:
-    - internal
-    - package
-
 - name: "package █ Install {{ lvm_packages_to_install | join(' ') }} packages"
   package:
     name: "{{ lvm_packages_to_install }}"
@@ -39,26 +16,26 @@
     state: "{{ item.state | default(omit) }}"
     pv_options: "{{ item.pv_options | default(omit) }}"
     vg_options: "{{ item.vg_options | default(omit) }}"
-  loop: "{{ storage.lvm }}"
+  loop: "{{ lvm.vgs }}"
   when:
     - item.vg is defined and item.vg is not none
     - item.pvs is defined and item.pvs
 
 - name: lvol █ Creating logical volumes
   lvol:
-    vg: "{{ item.0.vg }}"
-    lv: "{{ item.1.lv }}"
-    size: "{{ item.1.size }}"
-    active: "{{ item.1.active | default(omit) }}"
-    force: "{{ item.1.force | default(omit) }}"
-    opts: "{{ item.1.opts | default(omit) }}"
-    resizefs: "{{ item.1.resizefs | default(omit) }}"
-    shrink: "{{ item.1.shrink | default(omit) }}"
-    snapshot: "{{ item.1.snapshot | default(omit) }}"
-    state: "{{ item.1.state | default(omit) }}"
-    thinpool: "{{ item.1.thinpool | default(omit) }}"
-  loop: "{{ storage.lvm | subelements('lvs') }}"
+    vg: "{{ item.vg }}"
+    lv: "{{ item.lv }}"
+    size: "{{ item.size }}"
+    active: "{{ item.active | default(omit) }}"
+    force: "{{ item.force | default(omit) }}"
+    opts: "{{ item.opts | default(omit) }}"
+    resizefs: "{{ item.resizefs | default(omit) }}"
+    shrink: "{{ item.shrink | default(omit) }}"
+    snapshot: "{{ item.snapshot | default(omit) }}"
+    state: "{{ item.state | default(omit) }}"
+    thinpool: "{{ item.thinpool | default(omit) }}"
+  loop: "{{ lvm.lvs }}"
   when:
-    - item.0.vg is defined and item.0.vg is not none
-    - item.0.lvs is defined and item.0.lvs
-    - item.1.lv is defined and item.1.lv is not none
+    - item.vg is defined and item.vg is not none
+    - item.lv is defined and item.lv is not none
+    - item.size is defined and item.size is not none

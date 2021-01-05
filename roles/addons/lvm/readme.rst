@@ -4,9 +4,9 @@ LVM
 Description
 ^^^^^^^^^^^
 
-This role configure local LVM stack: Physical Volumes, Volume Groups, and Logical Volumes.
+This role configure local LVM storage: Physical Volumes, Volume Groups, and Logical Volumes.
 
-Role assume standard LVM tree, with *vg* at center of it. For example:
+Role assume standard LVM tree. For example:
 
 .. code-block:: text
 
@@ -27,12 +27,12 @@ Role assume standard LVM tree, with *vg* at center of it. For example:
 Instructions
 ^^^^^^^^^^^^
 
-All options from lvg and lvol ansible modules are supported. See: 
+All options from lvg and lvol ansible modules are supported. See:
 
 * lvg: https://docs.ansible.com/ansible/latest/collections/community/general/lvg_module.html
 * lvol: https://docs.ansible.com/ansible/latest/collections/community/general/lvol_module.html
 
-To add LVM to an host, use the following YAML structure:
+To configure LVM on an host, use the following YAML structure:
 
 .. code-block:: yaml
 
@@ -40,34 +40,32 @@ To add LVM to an host, use the following YAML structure:
         management1:
           network_interfaces:
             - interface: enp0s8
-              ip4: 10.10.0.1/16,10.10.0.2/16
+              ip4: 10.10.0.1
               mac: 08:00:27:36:c0:ac
               network: ice1-1
-          storage:
-            lvm:
+          lvm:
+            vgs:
               - vg: data
                 pvs:
                   - /dev/sdb
                   - /dev/sdc
-                lvs:
-                  - lv: test
-                    size: 200M
-                  - lv: test2
-                    size: 10G
               - vg: colors
                 pvs:
                   - /dev/sde
                   - /dev/sdf
-                lvs:
-                  - lv: blue
-                    size: 100M
+            lvs:
+              - lv: test
+                size: 200M
+                vg: data
+              - lv: test2
+                size: 10G
+                vg: data
+              - lv: blue
+                size: 100M
+                vg: colors
 
-At *vg* level, all options from module **lvg** are available.
-At *lv* level, all options from module **lvol** are available.
-
-.. note::
-  Of course, options *vg* and *pvs* of module lvol are not available at *lv* level, 
-  as they are implicitely set here in the yaml structure.
+At *vgs* level, all options from module **lvg** are available.
+At *lvs* level, all options from module **lvol** are available.
 
 For example, you can create a mirrored logical volume using:
 
@@ -75,16 +73,18 @@ For example, you can create a mirrored logical volume using:
 
           storage:
             lvm:
-              - vg: data
-                pvs:
-                  - /dev/sdb
-                  - /dev/sdc
-                lvs:
-                  - lv: test
-                    size: 200M
-                    opts: -m 1
+              vgs:
+                - vg: data
+                  pvs:
+                    - /dev/sdb
+                    - /dev/sdc
+              lvs:
+                - lv: test
+                  size: 200M
+                  vg: data
+                  opts: -m 1
 
-Which will produce a 2 mirrir lv:
+Which will produce a 2 mirror lv:
 
 .. code-block:: text
 
@@ -120,33 +120,44 @@ Mandatory inventory vars:
 
 **hostvars[inventory_hostname]**
 
-* storage[item]
+For pv:
+
+* lvm[vgs]
    * vg
    * pvs
-   * lvs[item]
-      * lv
-      * size
+
+For lv:
+
+* lvm[lvs]
+  * lv
+  * size
+  * vg
 
 Optional inventory vars:
 
 **hostvars[inventory_hostname]**
 
-* storage[item]
+For pv:
+
+* lvm[vgs]
    * force
    * pesize
    * pv_options
    * pvresize
    * state
    * vg_options
-   * lvs[item]
-      * active
-      * force
-      * opts
-      * resizefs
-      * shrink
-      * snapshot
-      * state
-      * thinpool
+
+For lv:
+
+* lvm[lvs]
+   * active
+   * force
+   * opts
+   * resizefs
+   * shrink
+   * snapshot
+   * state
+   * thinpool
 
 ^^^^^^
 
