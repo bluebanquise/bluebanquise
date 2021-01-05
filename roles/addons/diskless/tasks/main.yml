@@ -60,6 +60,7 @@
 
 - name: "copy █ files"
   copy: src={{ item.src }} dest={{ item.dest }}
+  mode: 0755
   with_items:
     - { src: 'utils.py', dest: '/lib/python3.6/site-packages/diskless/utils.py' }
     - { src: 'image_manager.py', dest: '/lib/python3.6/site-packages/diskless/image_manager.py' }
@@ -82,7 +83,7 @@
     src: installations.yml
     dest: /var/lib/diskless/installations.yml
     mode: 0755
-  when: stat_result.stat.exists == False 
+  when: not stat_result.stat.exists
 
 - name: "copy █ diskless script"
   copy:
