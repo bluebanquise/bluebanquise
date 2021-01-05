@@ -120,10 +120,21 @@
     dest: /usr/bin/disklessset
     mode: 0755
 
-- name: "Create an entry for nfs share in /etc/exports file"
+- name: Check if nfs export is already on the exports file
   lineinfile:
     path: /etc/exports
     line: /diskless/images/nfsimages *(rw,no_root_squash,sync)
+    state: absent
+  check_mode: yes
+  changed_when: false
+  register: out
 
-- name: Update exports
-  shell: exportfs -ra
+- name: Add nfs export point if needed
+  lineinfile:
+    dest: /etc/exports
+    line: /diskless/images/nfsimages *(rw,no_root_squash,sync)
+  when: not out.found
+
+- name: Update exports if needed
+  command: exportfs -ra
+  when: not out.found
