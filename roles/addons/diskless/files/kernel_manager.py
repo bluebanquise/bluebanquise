@@ -18,6 +18,7 @@
 
 # Import basic modules
 import os
+import logging
 from diskless.utils import Color, printc, select_from_list
 
 
@@ -93,11 +94,11 @@ class KernelManager:
         generation_path = KernelManager.KERNELS_PATH + '/initramfs-kernel-' + kernel_version
 
         printc('[INFO] Now generating initramfs... May take some time', Color.BLUE)
-        
+
         # Generate the new initramfs file with dracut command on the kernel
-        logging.info('Executing \'dracut --xz -v -m "network base nfs" --add "ifcfg livenet systemd systemd-initrd dracut-systemd" --add-drivers xfs --no-hostonly --nolvmconf --force ' + generation_path + ' --kver ' + kernel_version +'\'')
+        logging.info('Executing \'dracut --xz -v -m "network base nfs" --add "ifcfg livenet systemd systemd-initrd dracut-systemd" --add-drivers xfs --no-hostonly --nolvmconf --force ' + generation_path + ' --kver ' + kernel_version + '\'')
         os.system('dracut --xz -v -m "network base nfs" --add "ifcfg livenet systemd systemd-initrd dracut-systemd" --add-drivers xfs --no-hostonly --nolvmconf --force ' + generation_path + ' --kver ' + kernel_version)
-        
+
         # Change the permisssions on the generated file
         logging.info('Changing permission to 0o644 on ' + generation_path)
         os.chmod(generation_path, 0o644)

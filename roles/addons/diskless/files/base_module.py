@@ -285,7 +285,7 @@ class Image(ABC):
         printc('Exemple: \'package1 package2 package3 ...\' ', Color.GREEN)
         # Get packages
         package_list = input('-->: ').split()
-        
+
         logging.debug('Checking that requested packages exists')
         # For each package
         for package_name in package_list:

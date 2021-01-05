@@ -441,7 +441,7 @@ class ImageManager:
     #####################
 
     # Use a specific image module
-    
+
     @staticmethod
     def cli_use_modules():
         """The method for using modules with cli interface"""

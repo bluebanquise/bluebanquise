@@ -276,10 +276,10 @@ class LivenetImage(Image):
 
         logging.debug('Executing \'mount --bind /sys/fs/selinux ' + self.WORKING_DIRECTORY + 'generated_os/sys/fs/selinux\'')
         check_call('mount --bind /sys/fs/selinux ' + self.WORKING_DIRECTORY + 'generated_os/sys/fs/selinux', shell=True)
-        
+
         logging.debug('Executing \'mount --bind /sys/kernel/tracing ' + self.WORKING_DIRECTORY + 'generated_os/sys/kernel/tracing\'')
         check_call('mount --bind /sys/kernel/tracing ' + self.WORKING_DIRECTORY + 'generated_os/sys/kernel/tracing', shell=True)
-   
+
         # Chroot onto image
         real_root = os.open("/", os.O_RDONLY)
         logging.debug('Executing \'chroot ' + self.WORKING_DIRECTORY + 'generated_os/\'')
@@ -338,7 +338,7 @@ class LivenetImage(Image):
         os.system('mount --bind /sys ' + self.MOUNT_DIRECTORY + 'sys')
 
         # Create an inventory directory
-        logging.debug('Executing \'mkdir '+ self.WORKING_DIRECTORY + 'inventory\'')
+        logging.debug('Executing \'mkdir ' + self.WORKING_DIRECTORY + 'inventory\'')
         os.mkdir(self.WORKING_DIRECTORY + 'inventory')
 
         # Create the ansible connection
@@ -405,7 +405,7 @@ class LivenetImage(Image):
 
         logging.debug('Executing \'mkdir -p ' + self.WORKING_DIRECTORY + 'current\'')
         os.makedirs(self.WORKING_DIRECTORY + 'current')
-        
+
         logging.debug('Executing \'mkdir -p ' + self.WORKING_DIRECTORY + 'copy/squashfs-root/LiveOS/\'')
         os.makedirs(self.WORKING_DIRECTORY + 'copy/squashfs-root/LiveOS/')
 
@@ -498,7 +498,7 @@ class LivenetImage(Image):
                 logging.debug(MOUNT_DIRECTORY + ' is a mount point')
                 logging.debug('Executing \'umount ' + MOUNT_DIRECTORY + '\'')
                 os.system('umount ' + MOUNT_DIRECTORY)
-            
+
             logging.debug('Executing \'rm -rf ' + MOUNT_DIRECTORY + '\'')
             shutil.rmtree(MOUNT_DIRECTORY)
 
@@ -587,7 +587,7 @@ boot
         # Create ipxe boot file
         with open(self.IMAGE_DIRECTORY + '/boot.ipxe', "w") as ff:
             ff.write(file_content)
-            
+
 
 #####################
 # CLI reserved part #
