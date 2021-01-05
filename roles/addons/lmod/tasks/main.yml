@@ -20,6 +20,7 @@
       skip: true
   tags:
     - internal
+    - package
 
 - name: "package █ Install {{ lmod_packages_to_install | join(' ') }}"
   package:

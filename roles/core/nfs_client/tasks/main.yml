@@ -20,6 +20,7 @@
       skip: true
   tags:
     - internal
+    - package
 
 - name: "package █ Install {{ nfs_client_packages_to_install | join(' ') }} packages"
   package:
@@ -55,7 +56,7 @@
     persistent: yes
   when:
     - ansible_facts.selinux.status == "enabled"
-    - nfs_settings.selinux.use_nfs_home_dirs == "true"
+    - nfs_settings.selinux.use_nfs_home_dirs | bool
 
 - name: mount █ Mount exported NFS into directories
   mount:
@@ -63,7 +64,7 @@
     src: "{{ item.0.server }}{% if item.0.take_over_network is defined and item.0.take_over_network is not none %}-{{ item.0.take_over_network }}{% endif %}:{{ item.0.export }}"
     fstype: nfs
     opts: "{{ item.0.mount_arguments }}"
-    state: mounted
+    state: "{{ nfs_client_directories_state }}"
   with_subelements:
     - "{{ nfs }}"
     - clients_groups

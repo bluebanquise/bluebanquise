@@ -13,6 +13,9 @@ This role provide network configuration based on system files (ifcfg files for R
 
 User need to restart network or interfaces one by one for changes to take effect after role execution.
 
+As a reminder, the creation of a new network requires a new entry in the 
+``/etc/bluebanquise/inventory/group_vars/all/general_settings/network.yml`` file.
+
 Network interfaces configurations are done at host level:
 
 .. code-block:: yaml
@@ -51,7 +54,12 @@ To configure an LACP bonding, specify slave interfaces, and then create the bond
       type: bond-slave
       master: bond0
 
-To configure a vlan, simply set vlan to true:
+To configure a VLAN, simply set vlan to true.
+
+In this example we want to use a dedicated subnet for VLAN 100,
+we have created a net-100 network (corresponding to VLAN 100).
+
+Otherwise, you can just use an existing network.
 
 .. code-block:: yaml
 
@@ -63,7 +71,7 @@ To configure a vlan, simply set vlan to true:
       ip4: 10.100.0.1
       network: net-100
 
-A full example with vlan over bond would be:
+A full example with VLAN over bond would be:
 
 .. code-block:: yaml
 
@@ -109,7 +117,18 @@ It is also possible to configure multiple ip per interface, using:
         - 172.16.0.3/16
         - 192.168.1.117/24
 
-MTU and/or Gateway can be set in the network file, and will be applyed to NIC linked to this network.
+To assign a network interface to a firewall zone:
+
+.. code-block:: yaml
+
+  network_interfaces:
+    - interface: ens5
+      ip4: 192.168.121.124
+      network: bb
+      zone: external
+
+MTU and/or Gateway can be set in the network file, and will be applied to NIC
+linked to this network.
 
 .. code-block:: yaml
 
@@ -132,7 +151,6 @@ MTU and/or Gateway can be set in the network file, and will be applyed to NIC li
         time_ip: 10.10.0.1
         log_ip: 10.10.0.1
 
-
 To be done
 ^^^^^^^^^^
 
@@ -141,6 +159,7 @@ Add Ubuntu and Opensuse compatibility if asked for.
 Changelog
 ^^^^^^^^^
 
+* 1.1.0: Assign a network interface to a firewall zone. Bruno Travouillon <devel@travouillon.fr>
 * 1.0.3: Update readme. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.2: Update to new network_interfaces syntax. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.1: Fix VLAN and BOND. Benoit Leveugle <benoit.leveugle@gmail.com>

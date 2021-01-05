@@ -30,3 +30,6 @@ jobs:
 
       - name: Run ansible linter
         run: ansible-lint -v -x 204
+
+      - name: Check tags of tasks Gather OS variables
+        run: ./tools/gather_vars_checker.py 'roles/*/*/'

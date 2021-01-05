@@ -1,0 +1,7 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: "Include repositories_server"
+      include_role:
+        name: "repositories_server"

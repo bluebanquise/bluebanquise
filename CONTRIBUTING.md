@@ -76,6 +76,11 @@ git push origin backport/1.2/<pr_number_from_master>
 Submit the PR for `backport/1.2/<pr_number_from_master>` against the
 `stable-1.2` branch.
 
+### Versioning
+
+By default, each role has a version number, set in vars/main.yml and at the bottom of the readme.rst.
+If your PR brings changes to the tasks, files, templates or vars folders, please increment the version.
+
 ## Development guidelines :octopus:
 
 ### The stack philosophy

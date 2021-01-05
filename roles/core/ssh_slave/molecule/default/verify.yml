@@ -1,0 +1,17 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+
+    - name: Retrieve key in /root/.ssh/authorized_keys file
+      lineinfile:
+        path: /root/.ssh/authorized_keys
+        regexp: "ssh-rsa fakeAuthKey root@localhost.localdomain"
+        state: absent
+      check_mode: yes
+      register: reg_key
+      changed_when: false
+
+    - name: Check /root/.ssh/authorized_keys file contains expected key
+      assert:
+        that: reg_key.found

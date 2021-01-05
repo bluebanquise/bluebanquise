@@ -7,3 +7,11 @@
         name: epel-release
         state: absent
       when: ansible_facts.os_family == "RedHat"
+
+    - name: "Create a repo to delete with the role"
+      yum_repository:
+        name: deleteme
+        baseurl: "https://www.example.tld/repo/"
+        description: "This repo MUST be absent after converge"
+        state: present
+      when: ansible_facts.os_family == "RedHat"

@@ -6,20 +6,43 @@
 
 #### New roles
 
+  - addons/kernel_config: set or update kernel parameters and sysctl (#481)
   - addons/lmod: allow to install Lmod and specify custom modulefiles path (#390)
+  - addons/nhc: allow to install and setup nhc (#448)
   - addons/singularity: allow to install Singularity (#403)
   - addons/lvm: allow to configure lvm storage (#446)
   
 #### Roles improvement
 
-  - core/ssh_master:
-    - add ssh jump capability in multi icebergs context (one level only) (#395)
   - addons/nic_nmcli:
+    - add all ansible nmcli module capabilities (#444)
+    - add routes handling on interfaces (#469)
     - convert to new inventory format (#401)
+  - addons/ofed:
+    - add tunables to set soft/hard memlock limits. Default to unlimited (#492)
+  - advanced_core/advanced_dhcp_server:
+    - add multiple entries per host capability (#470)
+    - add custome options definition for each host (#470)
+    - add patterns capability to write hosts configuration (#470)
+    - improve template rendering time (#470)
   - core/hosts_file:
     - prevent many blank lines when hosts have no network_interfaces in the inventory (#406)
- - core/rsyslog_server and core/rsyslog_client:
+  - core/log_client:
+    - add a new parameter to set rsyslog default verbosity (#466)
+    - add a new parameter to change default rsyslog configuration (#488)
+  - core/rsyslog_server and core/rsyslog_client:
     - allow custom server port (#397)
+  - core/ssh_master:
+    - add ssh jump capability in multi icebergs context (one level only) (#395)
+
+### Breaking changes
+
+#### Introduce new vlan format
+
+VLAN format now comply with the base Ansible nmcli module.
+
+* **vlan_id** is replaced by **vlanid**
+* **physical_interface** when defining a vlan is replaced by **vlandev**
 
 ## 1.3.0 - 2020-08-31
 

@@ -1,5 +1,5 @@
 ---
-- name: Gathering OS specific variables
+- name: include_vars ░ Gather OS specific variables
   # This task gathers variables defined in OS specific files.
   #
   # Search vars in:
@@ -18,6 +18,11 @@
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
         - "vars/{{ ansible_facts.os_family }}.yml"
       skip: true
+  tags:
+    - internal
+    - package
+    - service
+    - template
 
 - name: Install packages
   package:
@@ -34,6 +39,22 @@
     group: root
     mode: 0644
   notify: Restart rsyslog services
+  when: "'rsyslog.conf' not in (log_client_configuration_files | default([]) | selectattr('name','defined') | map(attribute='name') | list)"
+  tags:
+    - template
+
+- name: Add custom rsyslog files
+  template:
+    src: rsyslog.d_custom.conf.j2
+    dest: "{{ item.path | default('/etc/rsyslog.d') }}/{{ item.name }}"
+    owner: root
+    group: root
+    mode: 0644
+  loop: "{{ log_client_configuration_files }}"
+  loop_control:
+    label: "Install configuration file {{ item.name }}"
+  notify: Restart rsyslog services
+  when: log_client_configuration_files is defined and log_client_configuration_files is iterable
   tags:
     - template
 

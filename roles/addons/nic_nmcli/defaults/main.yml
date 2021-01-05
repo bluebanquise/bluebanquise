@@ -1,0 +1,2 @@
+---
+nic_nmcli_reload_connections: false # Reload network connections if changed
