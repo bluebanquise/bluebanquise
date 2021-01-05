@@ -34,29 +34,24 @@
     owner: "{{ diskless_apache_user }}"
     group: "{{ diskless_apache_user }}"
   loop:
-  
-   # Create base directories for images
-   - /var/www/html/preboot_execution_environment
-   - /var/www/html/preboot_execution_environment/diskless
-   - /var/www/html/preboot_execution_environment/diskless/images
-   - /var/www/html/preboot_execution_environment/diskless/kernels
-
-   # Create additional directories for images
-   - /diskless
-   - /diskless/images
-   - /diskless/images/nfsimages
-   - /diskless/images/nfsimages/golden
-   - /diskless/images/nfsimages/staging
-
-   # Create directories for python modules
-   - /lib/python3.6/site-packages/diskless
-   - /lib/python3.6/site-packages/diskless/modules
-
-   # Create directory for 'installations.yml' file
-   - /var/lib/diskless
-
-   # Create working directory for images
-   - /var/tmp/diskless/workdir/
+    # Create base directories for images
+    - /var/www/html/preboot_execution_environment
+    - /var/www/html/preboot_execution_environment/diskless
+    - /var/www/html/preboot_execution_environment/diskless/images
+    - /var/www/html/preboot_execution_environment/diskless/kernels
+    # Create additional directories for images
+    - /diskless
+    - /diskless/images
+    - /diskless/images/nfsimages
+    - /diskless/images/nfsimages/golden
+    - /diskless/images/nfsimages/staging
+    # Create directories for python modules
+    - /lib/python3.6/site-packages/diskless
+    - /lib/python3.6/site-packages/diskless/modules
+    # Create directory for 'installations.yml' file
+    - /var/lib/diskless
+    # Create working directory for images
+    - /var/tmp/diskless/workdir/
 
 # Copy script files with permission
 - name: "copy █ utils.py script"
