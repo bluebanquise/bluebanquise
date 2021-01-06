@@ -56,45 +56,17 @@
 # Copy script files with permission
 - name: "copy █ utils.py script"
   copy:
-    src: utils.py
-    dest: /lib/python3.6/site-packages/diskless/utils.py
+    src: {{ item.src }}
+    dest: {{ item.dest }}
     mode: 0755
-
-- name: "copy █ image_manager.py script"
-  copy:
-    src: image_manager.py
-    dest: /lib/python3.6/site-packages/diskless/image_manager.py
-    mode: 0755
-
-- name: "copy █ kernel_manager.pyscript"
-  copy:
-    src: kernel_manager.py
-    dest: /lib/python3.6/site-packages/diskless/kernel_manager.py
-    mode: 0755
-
-- name: "copy █ nfs_module.py script"
-  copy:
-    src: nfs_module.py
-    dest: /lib/python3.6/site-packages/diskless/modules/nfs_module.py
-    mode: 0755
-
-- name: "copy █ base_module.py script"
-  copy:
-    src: base_module.py
-    dest: /lib/python3.6/site-packages/diskless/modules/base_module.py
-    mode: 0755
-
-- name: "copy █ livenet_module.py script"
-  copy:
-    src: livenet_module.py
-    dest: /lib/python3.6/site-packages/diskless/modules/livenet_module.py
-    mode: 0755
-
-- name: "copy █ demo_module.py script"
-  copy:
-    src: demo_module.py
-    dest: /lib/python3.6/site-packages/diskless/modules/demo_module.py
-    mode: 0755
+  with_items:
+    - { src: 'utils.py', dest: '/lib/python3.6/site-packages/diskless/utils.py' }
+    - { src: 'image_manager.py', dest: '/lib/python3.6/site-packages/diskless/image_manager.py' }
+    - { src: 'kernel_manager.py', dest: '/lib/python3.6/site-packages/diskless/kernel_manager.py' }
+    - { src: 'nfs_module.py', dest: '/lib/python3.6/site-packages/diskless/modules/nfs_module.py' }
+    - { src: 'base_module.py', dest: '/lib/python3.6/site-packages/diskless/modules/base_module.py' }
+    - { src: 'livenet_module.py', dest: '/lib/python3.6/site-packages/diskless/modules/livenet_module.py' }
+    - { src: 'demo_module.py', dest: '/lib/python3.6/site-packages/diskless/modules/demo_module.py' }
 
 # We need to check file existance because an image installation can be running yet, we cannot juste replace the file
 - name: Check that the installations.yml exists
