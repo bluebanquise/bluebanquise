@@ -20,6 +20,7 @@
 import os
 import logging
 from diskless.utils import Color, printc, select_from_list
+from diskless.image_manager import ImageManager
 
 
 # Class to manage kernels
@@ -157,3 +158,34 @@ class KernelManager:
         # If the list of kernels is empty
         else:
             raise UserWarning('No kernels found in /var/www/html/preboot_execution_environment/diskless/kernels/\nPlease refer to readme.rst for details on how to obtain kernels.')
+
+
+    @staticmethod
+    def cli_change_kernel():
+        """Change the kernel of an image
+
+        :raises UserWarning: When there is no image with kernel
+        """
+        # Get all images
+        images_list = ImageManager.get_created_images()
+
+        # Select only images with kernel attribut
+        images_with_kernel = []
+        for image in images_list:
+            if hasattr(image, 'kernel'):
+                images_with_kernel.append(image.name)
+
+        # If there is no image with kernel, raise an exception
+        if not images_with_kernel:
+            raise UserWarning('Not any image with a kernel')
+
+        # Select the image to change kernel
+        image_name = select_from_list(images_with_kernel)
+        image = ImageManager.get_created_image(image_name)
+        print('\nCurrent kernel is: ' + image.kernel + '\n')
+
+        # Select an available kernel
+        new_kernel = KernelManager.cli_select_kernel()
+
+        # Set image kernel by using image method
+        KernelManager.change_kernel(image, new_kernel)

@@ -69,10 +69,10 @@ class LivenetImage(Image):
         # Check livenet type
         if livenet_type is not LivenetImage.Type.STANDARD and livenet_type is not LivenetImage.Type.SMALL and livenet_type is not LivenetImage.Type.CORE:
             raise ValueError('Invalid livenet type.')
-
+   
         # Check livenet size
         if not isinstance(livenet_size, str) or int(livenet_size) < LivenetImage.MIN_LIVENET_SIZE or int(livenet_size) > LivenetImage.MAX_LIVENET_SIZE:
-            raise ValueError('Invalid livenet size.')
+            raise ValueError('Invalid livenet size')
 
         # Set image attributes before creation
         self.kernel = kernel
@@ -179,24 +179,24 @@ class LivenetImage(Image):
         os.makedirs(self.IMAGE_DIRECTORY + 'tosquash/LiveOS')
 
         # Create the rootfs image with the image size in Mb
-        logging.debug('Executing \'dd if=/dev/zero of=' + self.IMAGE_DIRECTORY + '/tosquash/LiveOS/rootfs.img bs=1M count=' + self.livenet_size + '\'')
-        os.system('dd if=/dev/zero of=' + self.IMAGE_DIRECTORY + '/tosquash/LiveOS/rootfs.img bs=1M count=' + self.livenet_size)
+        logging.debug('Executing \'dd if=/dev/zero of=' + self.IMAGE_DIRECTORY + 'tosquash/LiveOS/rootfs.img bs=1M count=' + self.livenet_size + '\'')
+        os.system('dd if=/dev/zero of=' + self.IMAGE_DIRECTORY + 'tosquash/LiveOS/rootfs.img bs=1M count=' + self.livenet_size)
 
         # Format the rootfs.img in mkfs format
-        logging.debug('Executing \'mkfs.xfs ' + self.IMAGE_DIRECTORY + '/tosquash/LiveOS/rootfs.img\'')
-        os.system('mkfs.xfs ' + self.IMAGE_DIRECTORY + '/tosquash/LiveOS/rootfs.img')
+        logging.debug('Executing \'mkfs.xfs ' + self.IMAGE_DIRECTORY + 'tosquash/LiveOS/rootfs.img\'')
+        os.system('mkfs.xfs ' + self.IMAGE_DIRECTORY + 'tosquash/LiveOS/rootfs.img')
 
         # Create a mounting directory for rootfs.img
         logging.debug('Executing \'mkdir -p ' + self.MOUNT_DIRECTORY + '\'')
         os.makedirs(self.MOUNT_DIRECTORY)
 
         # Mount rootfs.img in order to put inside the operating system
-        logging.debug('Executing \'mount -o loop ' + self.IMAGE_DIRECTORY + '/tosquash/LiveOS/rootfs.img ' + self.MOUNT_DIRECTORY + '\'')
-        os.system('mount -o loop ' + self.IMAGE_DIRECTORY + '/tosquash/LiveOS/rootfs.img ' + self.MOUNT_DIRECTORY)
+        logging.debug('Executing \'mount -o loop ' + self.IMAGE_DIRECTORY + 'tosquash/LiveOS/rootfs.img ' + self.MOUNT_DIRECTORY + '\'')
+        os.system('mount -o loop ' + self.IMAGE_DIRECTORY + 'tosquash/LiveOS/rootfs.img ' + self.MOUNT_DIRECTORY)
 
         # Put the operating system inside rootfs.img
-        logging.debug('Executing \'cp -r ' + self.WORKING_DIRECTORY + '/generated_os/* ' + self.MOUNT_DIRECTORY + '\'')
-        os.system('cp -r ' + self.WORKING_DIRECTORY + '/generated_os/* ' + self.MOUNT_DIRECTORY)
+        logging.debug('Executing \'cp -r ' + self.WORKING_DIRECTORY + 'generated_os/* ' + self.MOUNT_DIRECTORY + '\'')
+        os.system('cp -r ' + self.WORKING_DIRECTORY + 'generated_os/* ' + self.MOUNT_DIRECTORY)
 
         # Unmount rootfs.img file
         logging.debug('Executing \'umount ' + self.MOUNT_DIRECTORY + '\'')
@@ -211,8 +211,8 @@ class LivenetImage(Image):
         shutil.rmtree(self.WORKING_DIRECTORY)
 
         # Create the squashfs.img that will contains LiveOS/rootfs.img
-        logging.debug('Executing \'mksquashfs ' + self.IMAGE_DIRECTORY + '/tosquash ' + self.IMAGE_DIRECTORY + 'squashfs.img\'')
-        os.system('mksquashfs ' + self.IMAGE_DIRECTORY + '/tosquash ' + self.IMAGE_DIRECTORY + '/squashfs.img')
+        logging.debug('Executing \'mksquashfs ' + self.IMAGE_DIRECTORY + 'tosquash ' + self.IMAGE_DIRECTORY + 'squashfs.img\'')
+        os.system('mksquashfs ' + self.IMAGE_DIRECTORY + 'tosquash ' + self.IMAGE_DIRECTORY + 'squashfs.img')
 
         # Removing not squashed LiveOS/rootfs.img, because we don't need it anymore
         # (In fact the rootfs.img is now inside the squashfs.img)
@@ -486,7 +486,7 @@ class LivenetImage(Image):
 
         IMAGES_DIRECTORY = LivenetImage.IMAGES_DIRECTORY + image_name + '/'
         WORKING_DIRECTORY = LivenetImage.WORKING_DIRECTORY + image_name + '/'
-        MOUNT_DIRECTORY = WORKING_DIRECTORY + '/mnt/'
+        MOUNT_DIRECTORY = WORKING_DIRECTORY + 'mnt/'
 
         # Cleanings for mount directories
         if os.path.isdir(MOUNT_DIRECTORY):
@@ -643,7 +643,7 @@ def cli_get_size(size):
             if len(size_array) != 2 or not size_array[0].isdigit() or not size_array[1].isdigit() or len(size_array[1]) > 3:
                 raise UserWarning('\nNot a valid size format!')
 
-            size = int(float(size)*1024)
+            size = str(int(float(size)*1024))
 
         # If the giga value has no dot separator
         else:

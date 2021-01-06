@@ -208,6 +208,9 @@ class Image(ABC):
         # Set all image attributes with image data
         for attribute_key, attribute_value in image_data.items():
             setattr(self, attribute_key, attribute_value)
+        
+        # Convert name into a string value, this is necessary because name can be a number
+        self.name = str(self.name)
 
     # Change image kernel
     def set_kernel(self, kernel):
@@ -296,7 +299,7 @@ class Image(ABC):
 
             # If there is not running process for image creator instance pid
             except subprocess.CalledProcessError:
-                raise UserWarning("Package " + package_name + ' not available')
+                raise UserWarning("Package \'" + package_name + '\' not available')
 
         # Return the list of packages
         return package_list

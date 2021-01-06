@@ -33,7 +33,7 @@ from diskless.image_manager import ImageManager
 if __name__ == "__main__":
 
     # Set logging logs level, you can configure the logging level in order to have more or less logging informations.
-    # You can select one of these levels (sorted by logs number): (lot of logs) DEBUG > INFO (default) > WARNING > ERROR (few logs)
+    # You can select one of these levels (sorted by logs number): (lot of logs) DEBUG (default) > INFO > WARNING > ERROR (few logs)
     # Just change the value of the level on the line bellow.
     logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
@@ -113,7 +113,7 @@ if __name__ == "__main__":
             elif main_action == '3':
                 # Get image object to remove
                 image = ImageManager.get_created_image(ImageManager.cli_select_created_image())
-                printc('\n⚠ Would you realy delete image ' + image.name + ' definitively (yes/no) ?', Color.RED)
+                printc('\n⚠ Would you realy delete image \'' + image.name + '\' definitively (yes/no) ?', Color.RED)
 
                 # get confirmation from user
                 confirmation = input('-->: ').replace(" ", "")
@@ -128,13 +128,7 @@ if __name__ == "__main__":
 
             # Change the kernel of an existing image
             elif main_action == '4':
-                # Select the image to change kernel
-                image = ImageManager.get_created_image(ImageManager.cli_select_created_image())
-                print('\nCurrent kernel is: ' + image.kernel)
-                # Select an available kernel
-                new_kernel = KernelManager.cli_select_kernel()
-                # Set image kernel by using image method
-                KernelManager.change_kernel(image, new_kernel)
+                KernelManager.cli_change_kernel()
                 printc('\n[OK] Done.', Color.GREEN)
 
             # Display available kernels for image
@@ -163,7 +157,7 @@ if __name__ == "__main__":
                 # If there is image, select the image
                 image_name = select_from_list(image_names)
 
-                printc('\n⚠ Would you realy clean image ' + image_name + ' definitively (yes/no) ?', Color.RED)
+                printc('\n⚠ Would you realy clean image \'' + image_name + '\' definitively (yes/no) ?', Color.RED)
 
                 # get confirmation from user
                 confirmation = input('-->: ').replace(" ", "")

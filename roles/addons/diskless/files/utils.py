@@ -52,9 +52,9 @@ def select_from_list(_list):
     # If the list is not empty
     if _list:
         # For each element of the list
-        for index, i in enumerate(_list):
-            # Print the index+1 vastaglue of the element and the element
-            print(' ' + str(index+1) + ' - ' + i)
+        for index, element in enumerate(_list):
+            # Print the index+1 value of the element in the list and the value of the element itself
+            print(' ' + str(index+1) + ' - ' + element)
 
     else:
         raise ValueError('Cannot select in an empty list.')

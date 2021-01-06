@@ -283,10 +283,10 @@ class NfsGoldenImage(Image):
             logging.debug('Executing \'rm -rf ' + Image.IMAGES_DIRECTORY + image_name + '\'')
             shutil.rmtree(Image.IMAGES_DIRECTORY + image_name)
 
-        if os.path.isdir(NfsStagingImage.NFS_DIRECTORY + image_name):
-            logging.debug(NfsStagingImage.NFS_DIRECTORY + image_name + ' is a directory')
-            logging.debug('Executing \'rm -rf ' + NfsStagingImage.NFS_DIRECTORY + image_name + '\'')
-            shutil.rmtree(NfsStagingImage.NFS_DIRECTORY + image_name)
+        if os.path.isdir(NfsGoldenImage.NFS_DIRECTORY + image_name):
+            logging.debug(NfsGoldenImage.NFS_DIRECTORY + image_name + ' is a directory')
+            logging.debug('Executing \'rm -rf ' + NfsGoldenImage.NFS_DIRECTORY + image_name + '\'')
+            shutil.rmtree(NfsGoldenImage.NFS_DIRECTORY + image_name)
 
     @staticmethod
     def get_boot_file_template():
@@ -517,7 +517,7 @@ def cli_manage_nodes():
 
     # Add some nodes to the image
     elif action == '2':
-        printc('\n[+] Actual image NodeSet is:' + str(golden_image.nodes), Color.GREEN)
+        printc('\n[+] Actual image NodeSet is: ' + str(golden_image.nodes), Color.GREEN)
         printc('[+] Please enter nodes range to add:', Color.GREEN)
 
         nodes_range = input('-->: ').replace(" ", "")

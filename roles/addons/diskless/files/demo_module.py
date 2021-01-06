@@ -22,6 +22,7 @@ import logging
 
 # Import diskless modules
 from diskless.modules.base_module import Image
+from diskless.image_manager import ImageManager
 from diskless.utils import Color, printc
 
 
@@ -135,14 +136,27 @@ def cli_menu():
 
     if main_action == '1':
 
-        printc('\nGive a name to your demo image:', Color.GREEN)
-        demo_name = input('-->: ').replace(' ', '')
+        # Condition to test if image name is compliant
+        while True:
 
+            printc('[+] Give a name for your demo image', Color.GREEN)
+            # Get new image name
+            selected_image_name = input('-->: ').replace(" ", "")
+
+            if selected_image_name == '':
+                raise UserWarning('Image name cannot be empty !')
+
+            if not ImageManager.is_image(selected_image_name):
+                break
+
+            # Else
+            print('Image ' + selected_image_name + ' already exist, use another image name.')
+        
         printc('\nGive a message for your demo image:', Color.GREEN)
         demo_message = input('-->: ')
 
         # Create a DemoImage image
-        DemoImage(demo_name, demo_message)
+        DemoImage(selected_image_name, demo_message)
 
     # Bad entry
     else:
