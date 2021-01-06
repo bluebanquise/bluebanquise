@@ -69,7 +69,7 @@ class LivenetImage(Image):
         # Check livenet type
         if livenet_type is not LivenetImage.Type.STANDARD and livenet_type is not LivenetImage.Type.SMALL and livenet_type is not LivenetImage.Type.CORE:
             raise ValueError('Invalid livenet type.')
-   
+
         # Check livenet size
         if not isinstance(livenet_size, str) or int(livenet_size) < LivenetImage.MIN_LIVENET_SIZE or int(livenet_size) > LivenetImage.MAX_LIVENET_SIZE:
             raise ValueError('Invalid livenet size')

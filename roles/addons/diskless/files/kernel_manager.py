@@ -159,7 +159,6 @@ class KernelManager:
         else:
             raise UserWarning('No kernels found in /var/www/html/preboot_execution_environment/diskless/kernels/\nPlease refer to readme.rst for details on how to obtain kernels.')
 
-
     @staticmethod
     def cli_change_kernel():
         """Change the kernel of an image

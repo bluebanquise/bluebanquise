@@ -151,7 +151,7 @@ def cli_menu():
 
             # Else
             print('Image ' + selected_image_name + ' already exist, use another image name.')
-        
+
         printc('\nGive a message for your demo image:', Color.GREEN)
         demo_message = input('-->: ')
 

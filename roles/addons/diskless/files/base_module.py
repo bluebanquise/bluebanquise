@@ -208,7 +208,7 @@ class Image(ABC):
         # Set all image attributes with image data
         for attribute_key, attribute_value in image_data.items():
             setattr(self, attribute_key, attribute_value)
-        
+
         # Convert name into a string value, this is necessary because name can be a number
         self.name = str(self.name)
 
