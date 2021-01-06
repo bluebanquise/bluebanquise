@@ -56,8 +56,8 @@
 # Copy script files with permission
 - name: "copy █ utils.py script"
   copy:
-    src: {{ item.src }}
-    dest: {{ item.dest }}
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
     mode: 0755
   with_items:
     - { src: 'utils.py', dest: '/lib/python3.6/site-packages/diskless/utils.py' }
