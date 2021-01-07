@@ -24,7 +24,7 @@ ip address and filename to use.
    * *equipment_profiles/* directory contains equipment_profiles related files, i.e. ipxe file with group variables, and os configuration files (kickstart, preseed, autoyast).
    * *nodes/* directory contains hosts dedicated files, i.e. ipxe file with hosts dedicated variables.
    * *osdeploy/* directory contains static files, with patterns to boot each kind of supported distributions.
-* Basic configuration files are located in /etc/bluebanquise/pxe/.
+* Basic configuration files are located in /etc/bootset/.
    * *nodes_parameters.yml* contains all nodes PXE needed parameters.
    * *pxe_parameters.yml* contains needed values for scripts to adapt to **current pxe server host** (these parameters do not apply to PXE booted hosts !!).
 * Scripts are located in /usr/bin/.
@@ -46,7 +46,7 @@ This role will rely on multiple parts of the inventory, and is probably the most
 **bootset usage**
 """""""""""""""""
 
-Once the role is deployed, and hosts gathered into */etc/bluebanquise/pxe/nodes_parameters.yml*, the bootset tool can be used to manipulate remote hosts PXE boot. By default, 3 states can be defined for each host:
+Once the role is deployed, and hosts gathered into */etc/bootset/nodes_parameters.yml*, the bootset tool can be used to manipulate remote hosts PXE boot. By default, 3 states can be defined for each host:
 
 * osdeploy: the remote host will deploy/redeploy its operating system, using inventory equipment_profile parameters of its equipment profile group.
 * disk: the remote host will boot on disk. This parameter is automatically set after a successful **osdeploy**.
@@ -173,6 +173,7 @@ To be done
 Changelog
 ^^^^^^^^^
 
+* 1.1.7: Update configuration files path, to prevent issues with multiple icebergs. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.6: Add ability to install other tftp server than atftp. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.5: Update role to match $basearch, add status feat to bootset. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.4: Update to new network_interfaces syntax. Benoit Leveugle <benoit.leveugle@gmail.com>

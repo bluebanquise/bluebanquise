@@ -54,7 +54,7 @@
   loop:
    - /var/www/cgi-bin
    - /etc/bluebanquise
-   - /etc/bluebanquise/pxe
+   - /etc/bootset
 
 - name: file █ Create pxe http directories structure
   file:
@@ -75,18 +75,18 @@
   tags:
     - internal
 
-- name: template █ Generate /etc/bluebanquise/pxe/nodes_parameters.yml
+- name: template █ Generate /etc/bootset/nodes_parameters.yml
   template:
     src: nodes_parameters.yml.j2
-    dest: /etc/bluebanquise/pxe/nodes_parameters.yml
+    dest: /etc/bootset/nodes_parameters.yml
     mode: 0644
   tags:
     - template
 
-- name: template █ Generate /etc/bluebanquise/pxe/pxe_parameters.yml
+- name: template █ Generate /etc/bootset/pxe_parameters.yml
   template:
     src: "pxe_parameters.yml.j2"
-    dest: "/etc/bluebanquise/pxe/pxe_parameters.yml"
+    dest: "/etc/bootset/pxe_parameters.yml"
     mode: 0644
 
 - name: template █ Generate /var/www/html/preboot_execution_environment/{menu|convergence}.ipxe

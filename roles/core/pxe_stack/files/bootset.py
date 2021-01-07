@@ -87,8 +87,8 @@ if passed_arguments.quiet:
 logging.basicConfig(format='[%(levelname)s] %(message)s', level=loglevel)
 
 # Load and extract configuration files
-nodes_parameters = load_file('/etc/bluebanquise/pxe/nodes_parameters.yml')
-pxe_parameters = load_file('/etc/bluebanquise/pxe/pxe_parameters.yml')
+nodes_parameters = load_file('/etc/bootset/nodes_parameters.yml')
+pxe_parameters = load_file('/etc/bootset/pxe_parameters.yml')
 
 apache_uid = pwd.getpwnam(pxe_parameters["pxe_parameters"]["apache_uid"]).pw_uid
 apache_gid = grp.getgrnam(pxe_parameters["pxe_parameters"]["apache_gid"]).gr_gid
