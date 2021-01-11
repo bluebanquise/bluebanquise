@@ -1,11 +1,9 @@
-Diskless tool technical documentation
-=====================================
+========
+Diskless
+========
 
-This documentation is about the diskless tool. It is a technical documentation for the developers. It allow to understand the tool internal architecture and functioning.
+This part is about the diskless tool. There are two documentations, a user documentation to understand how to use the diskless tool and a technical documentation for developers.
 
-.. include:: diskless/instroduction.rst
-.. include:: diskless/software_architecture.rst
-.. include:: diskless/about_images.rst
-.. include:: diskless/module_creation.rst
-.. include:: diskless/cleaning_process.rst
-.. include:: diskless/modules.rst
+.. include:: diskless/introduction.rst
+.. include:: diskless/user_documentation.rst
+.. include:: diskless/technical_documentation.rst
