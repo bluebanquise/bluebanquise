@@ -1,0 +1,4 @@
+---
+lvm_role_version: 1.0.0
+lvm_packages_to_install:
+  - lvm2
