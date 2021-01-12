@@ -11,7 +11,7 @@
   - addons/nhc: allow to install and setup nhc (#448)
   - addons/singularity: allow to install Singularity (#403)
   
-#### Roles improvement
+#### Roles improvement or fix
 
   - addons/nic_nmcli:
     - add all ansible nmcli module capabilities (#444)
@@ -29,6 +29,8 @@
   - core/log_client:
     - add a new parameter to set rsyslog default verbosity (#466)
     - add a new parameter to change default rsyslog configuration (#488)
+  - core/pxe_stack:
+    - change bootset configuration files path (issue with multiple icebergs) (#514)
   - core/rsyslog_server and core/rsyslog_client:
     - allow custom server port (#397)
   - core/ssh_master:
