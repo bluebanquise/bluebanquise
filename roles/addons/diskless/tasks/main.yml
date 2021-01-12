@@ -71,21 +71,7 @@
     mode: 0755
   when: not stat_result.stat.exists
 
-- name: Check if nfs export is already on the exports file
-  lineinfile:
-    path: /etc/exports
-    line: /diskless/images/nfsimages *(rw,no_root_squash,sync)
-    state: absent
-  check_mode: yes
-  changed_when: false
-  register: out
-
 - name: Add nfs export point if doesn't already exist
   lineinfile:
     dest: /etc/exports
     line: /diskless/images/nfsimages *(rw,no_root_squash,sync)
-  when: not out.found
-
-- name: Update exports if add nfs export point
-  command: exportfs -ra
-  when: not out.found
