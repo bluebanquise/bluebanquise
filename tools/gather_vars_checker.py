@@ -11,6 +11,15 @@ def usage(command):
     print(f"Usage: {command} main.yml")
 
 
+# Detect Gather OS presence in task
+def detect_gather_vars(task):
+    for k, v in task.items():
+        if k == 'name' and v == 'include_vars ░ Gather OS specific variables':
+            return 1
+
+    return 0
+
+
 # Get tags of the include_vars task that gather OS variables
 def get_gather_vars_tags(task):
     gather_task_tags = list()
@@ -116,6 +125,8 @@ def main():
                 with open(task, 'r') as fd:
                     logging.info(f'Open file: {task}')
                     play = yaml.load(fd, Loader=yaml.SafeLoader)
+                    if detect_gather_vars(play[0]) == 0:
+                        continue
                     gather_vars_tags = get_gather_vars_tags(play[0])
                     tasks_tags = tsk_vars
 
