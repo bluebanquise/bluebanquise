@@ -65,7 +65,11 @@
     # {% endif %}
     # Allows to provide a simple ip4, or an ip4/prefix
     # Also support old prefix format (to be replaced by prefix4)
-    gw4: "{{ item.gw4 | default(networks[item.network].gateway4) | default(networks[item.network].gateway) | default(omit) }}"
+    gw4: "{{ (item.never_default4 | default(networks[item.network].never_default4) is not defined) | ternary( item.gw4 | default(networks[item.network].gateway4) | default(networks[item.network].gateway) | default(omit), omit) }}"
+    # Check here if never_default4 is set or not. If set, gw4 cannot be used as both are mutually exclusive. If not set, then get gw4 from network_interfaces, then default to network.gateway4 then default to network.gateway then omit.
+    routes4: "{{ (item.routes4 is defined or networks[item.network]['routes4'] is defined) |ternary( item.routes4 | default(networks[item.network]['routes4'] | default([]) ), omit) }}"
+    route_metric4: "{{ item.route_metric4 | default(networks[item.network].route_metric4) | default(omit) }}"
+    never_default4: "{{ item.never_default4 | default(networks[item.network].never_default4) | default(omit) }}"
     mtu: "{{ item.mtu | default(networks[item.network].mtu) | default(omit) }}"
     type: "{{ item.type | default('ethernet') }}" # Even if in the documentation type is optional, it is in fact mandatory. Default to ethernet.
     # Standard
@@ -107,37 +111,10 @@
     vxlan_id: "{{ item.vxlan_id | default(omit) }}"
     vxlan_local: "{{ item.vxlan_local | default(omit) }}"
     vxlan_remote: "{{ item.vxlan_remote | default(omit) }}"
+    zone: "{{ item.zone | default(omit) }}"
   notify: command █ Reload connections
   loop: "{{ network_interfaces }}"
   tags:
     - identify
-
-# Check route 0.0.0.0/0 is only set once
-- name: assert ░ Assert there are only one default route
-  assert:
-    that:
-      - (network_interfaces | selectattr('routes4','defined') | map(attribute='routes4') | select('match', '.*0.0.0.0/0.*') | list | length) <= 1
-
-- name: shell ░ Gather routes
-  shell: "set -o pipefail && nmcli connection show {{ item.interface }} | grep ipv4.routes"
-  loop: "{{ network_interfaces }}"
-  when: item.interface is defined and item.ip4 is defined
-  register: current_ipv4_routes
-  changed_when: False
-
-- name: set_fact ░ Combine inventory routes
-  set_fact:
-    inventory_routes4: "{{ (inventory_routes4|default({})) | combine( {item.interface: ( '{ ' + (item.routes4 | default(networks[item.network]['routes4'])| join(' }; { ')) + ' }')} ) }}"
-  loop: "{{ network_interfaces }}"
-  when: (item.routes4 is defined and item.routes4) or (networks[item.network]['routes4'] is defined and networks[item.network]['routes4'])
-
-- name: command █ Set routes via nmcli
-  command: "nmcli connection modify {{ item.0.interface }} +ipv4.routes '{{ item.0.routes4 | default(networks[item.0.network]['routes4']) | join(',') | replace('ip = ','') | replace(', nh = ',' ') }}'"
-  loop: "{{ network_interfaces | product(current_ipv4_routes.results) | list }}"
-  notify: command █ Reload connections
-  when:
-    - item.0.interface == item.1.item.interface
-    - inventory_routes4[item.0.interface] is defined
-    - inventory_routes4[item.0.interface] not in item.1.stdout
 
 - meta: flush_handlers
