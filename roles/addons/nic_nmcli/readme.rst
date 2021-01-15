@@ -130,6 +130,7 @@ You can define routes at two levels:
 * In networks.yml, inside a network. For example:
 
 .. code-block:: yaml
+
   networks:
     ice1-1:
       subnet: 10.10.0.0
@@ -143,6 +144,7 @@ You can define routes at two levels:
 * Or under host definition, so in hostvars:
 
 .. code-block:: yaml
+
       hosts:
         management1:
           network_interfaces:
