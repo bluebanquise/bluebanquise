@@ -27,6 +27,8 @@ All configuration is done in *group_vars/all/general_settings/nfs.yml*:
 
 This role will not modify default nfs server configuration (number of threads, nfs v4.2 force, etc).
 
+Note that exported paths will not be created by the role. They must be created by the administrator before running this playbook.
+
 Input
 ^^^^^
 
