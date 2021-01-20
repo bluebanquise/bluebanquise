@@ -258,15 +258,6 @@ class LivenetImage(Image):
     def set_image_selinux(self):
         logging.info('Setting up SELinux for image \'' + self.name + '\'')
 
-        if hasattr(self, 'release_version'):
-            release = '--releasever=' + self.release_version
-        else:
-            release = ''
-
-        # Install needed packages
-        logging.debug('Executing \'dnf install ' + release + ' -y libselinux-utils policycoreutils selinux-policy-targeted --installroot=' + self.WORKING_DIRECTORY + 'generated_os --setopt=module_platform_id=platform:el8 --nobest\'')
-        os.system('dnf install ' + release + ' -y libselinux-utils policycoreutils selinux-policy-targeted --installroot=' + self.WORKING_DIRECTORY + 'generated_os --setopt=module_platform_id=platform:el8 --nobest')
-
         # Mouot required directories on the image
         logging.debug('Executing \'mount --bind /proc ' + self.WORKING_DIRECTORY + 'generated_os/proc\'')
         check_call('mount --bind /proc ' + self.WORKING_DIRECTORY + 'generated_os/proc', shell=True)
