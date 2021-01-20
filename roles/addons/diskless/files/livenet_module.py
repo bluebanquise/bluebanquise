@@ -284,6 +284,7 @@ class LivenetImage(Image):
         real_root = os.open("/", os.O_RDONLY)
         logging.debug('Executing \'chroot ' + self.WORKING_DIRECTORY + 'generated_os/\'')
         os.chroot(self.WORKING_DIRECTORY + 'generated_os/')
+        os.chdir("/")
 
         # Restore SELinux values on all file system
         logging.debug('Executing \'restorecon -Rv /\'')
