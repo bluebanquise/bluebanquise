@@ -22,9 +22,11 @@
     - add tunables to set soft/hard memlock limits. Default to unlimited (#492)
   - advanced_core/advanced_dhcp_server:
     - add multiple entries per host capability (#470)
-    - add custome options definition for each host (#470)
+    - add custom options definition for each host (#470)
     - add patterns capability to write hosts configuration (#470)
     - improve template rendering time (#470)
+  - core/conman:
+    - run the conman service with user conman (#493, #496)
   - core/hosts_file:
     - prevent many blank lines when hosts have no network_interfaces in the inventory (#406)
   - core/log_client:
