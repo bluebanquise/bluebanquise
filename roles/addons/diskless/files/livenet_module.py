@@ -336,6 +336,14 @@ class LivenetImage(Image):
         # Mount diskless server sys on livenet image sys
         logging.debug('Executing \'mount --bind /sys ' + self.MOUNT_DIRECTORY + 'sys\'')
         os.system('mount --bind /sys ' + self.MOUNT_DIRECTORY + 'sys')
+        
+        self.get_existing_image()
+        if (self.selinux):
+            logging.debug('Executing \'mount --bind /sys/fs/selinux ' + self.MOUNT_DIRECTORY + 'sys/fs/selinux\'')
+            check_call('mount --bind /sys/fs/selinux ' + self.MOUNT_DIRECTORY + 'sys/fs/selinux', shell=True)
+
+            logging.debug('Executing \'mount --bind /sys/kernel/tracing ' + self.MOUNT_DIRECTORY + 'sys/kernel/tracing\'')
+            check_call('mount --bind /sys/kernel/tracing ' + self.MOUNT_DIRECTORY + 'sys/kernel/tracing', shell=True)
 
         # Create an inventory directory
         logging.debug('Executing \'mkdir ' + self.WORKING_DIRECTORY + 'inventory\'')
