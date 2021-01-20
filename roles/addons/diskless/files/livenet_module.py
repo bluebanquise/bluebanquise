@@ -361,6 +361,11 @@ class LivenetImage(Image):
     def unmount(self):
         """Unmounting livenet image"""
         logging.info('Unmounting livenet image \'' + self.name + '\'')
+        
+        self.get_existing_image()
+        if (self.selinux):
+            logging.debug('Executing \'umount ' + self.MOUNT_DIRECTORY + 'sys/{fs/selinux,kernel/tracing}\'')
+            check_call('umount ' + self.MOUNT_DIRECTORY + 'sys/{fs/selinux,kernel/tracing}', shell=True)
 
         # Unmount all mountages and delete mountage directory
         logging.debug('Executing \'umount ' + self.MOUNT_DIRECTORY + '{proc,sys}\'')
