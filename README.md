@@ -1,6 +1,6 @@
 ## Community
 
-![BlueBanquise Community](resources/pictures/BlueBanquise_Community_logo_large.svg)
+![BlueBanquise Community](resources/pictures/BlueBanquise_Community_logo_large.png)
 
 This repository hosts all community driven roles or tools around [**BlueBanquise**](https://github.com/bluebanquise/bluebanquise). These addition roles/tools can be new, or simply forks from the [core stack](https://github.com/bluebanquise/bluebanquise/tree/master/roles).
 
