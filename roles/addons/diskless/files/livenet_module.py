@@ -51,10 +51,10 @@ class LivenetImage(Image):
     MIN_LIVENET_SIZE = 100  # 100 Megabytes
 
     # Class constructor
-    def __init__(self, name, password=None, kernel=None, livenet_type=None, livenet_size=None, additional_packages=None, ssh_pub_key=None, selinux=None, release_version=None):
-        super().__init__(name, password, kernel, livenet_type, livenet_size, additional_packages, ssh_pub_key, selinux, release_version)
+    def __init__(self, name, password=None, kernel=None, livenet_type=None, livenet_size=None, additional_packages=None, ssh_pub_key=None, selinux=None, release_version=None, optimize=None):
+        super().__init__(name, password, kernel, livenet_type, livenet_size, additional_packages, ssh_pub_key, selinux, release_version, optimize)
 
-    def create_new_image(self, password, kernel, livenet_type, livenet_size, additional_packages, ssh_pub_key, selinux, release_version):
+    def create_new_image(self, password, kernel, livenet_type, livenet_size, additional_packages, ssh_pub_key, selinux, release_version, optimize):
         super().create_new_image()
 
         # Checking all parameters
@@ -83,6 +83,8 @@ class LivenetImage(Image):
         self.livenet_size = livenet_size
 
         self.selinux = selinux
+
+        self.optimize = optimize
 
         if ssh_pub_key is not None:
             self.ssh_pub_key = ssh_pub_key
@@ -146,27 +148,52 @@ class LivenetImage(Image):
         else:
             release = ''
 
+        # Populating dnf packages list
+        dnf_packages_list = []
+
         # Generate desired image file system
         if self.livenet_type == LivenetImage.Type.STANDARD:
-            logging.debug('Executing \'dnf groupinstall ' + release + ' -y "core" --setopt=module_platform_id=platform:el8 --installroot=' + self.WORKING_DIRECTORY + 'generated_os/\'')
-            os.system('dnf install ' + release + ' -y @core --setopt=module_platform_id=platform:el8 --installroot=' + self.WORKING_DIRECTORY + 'generated_os/')
+            logging.debug('Standard image requested. Adding "@core" to packages list')
+            dnf_packages_list.append('@core')
         elif self.livenet_type == LivenetImage.Type.SMALL:
-            logging.debug('Executing \'dnf install ' + release + ' -y dnf yum iproute procps-ng openssh-server NetworkManager --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest\'')
-            os.system('dnf install ' + release + ' -y dnf yum iproute procps-ng openssh-server NetworkManager --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
+            logging.debug('Small image requested. Adding "dnf yum iproute procps-ng openssh-server NetworkManager" to packages list')
+            dnf_packages_list.append('dnf yum iproute procps-ng openssh-server NetworkManager')
         elif self.livenet_type == LivenetImage.Type.CORE:
-            logging.debug('Executing \'dnf install ' + release + ' -y iproute procps-ng openssh-server --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest\'')
-            os.system('dnf install ' + release + ' -y iproute procps-ng openssh-server --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
+            logging.debug('Core image requested. Adding "iproute procps-ng openssh-server" to packages list')
+            dnf_packages_list.append('iproute procps-ng openssh-server')
 
         # If there are additional packages to install
         if hasattr(self, 'additional_packages'):
-            # Install additional packages in installroot directory
 
+            # Add additional packages to the dnf packages list
             packages = ''
             for package in self.additional_packages:
                 packages = packages + ' ' + package
+            logging.debug('Additional packages requested. Adding "' + packages + '" to packages list')
+            dnf_packages_list.append(packages)
 
-            logging.debug('Executing \'dnf install ' + release + ' -y --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ ' + packages + '\'')
-            os.system('dnf install ' + release + ' -y --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ ' + packages)
+
+        if self.selinux:
+            # Add needed SELinux packages to the dnf packages list
+            logging.debug('SElinux requested. Adding "install policycoreutils" to packages list')
+            dnf_packages_list.append('selinux-policy-targeted selinux-policy-devel policycoreutils')
+
+        dnf_packages = ' '.join(dnf_packages_list)
+
+        # Execute dnf
+        if self.optimize:
+            if self.selinux:
+                logging.debug('Executing packages install with the following command:')
+                logging.debug('dnf install ' + dnf_packages + ' -y --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
+                os.system('dnf install ' + dnf_packages + ' -y --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
+            else:
+                logging.debug('Executing packages install with the following command:')
+                logging.debug('dnf install ' + dnf_packages + ' -y --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
+                os.system('dnf install ' + dnf_packages + ' -y --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
+        else:
+            logging.debug('Executing packages install with the following command:')
+            logging.debug('dnf install ' + dnf_packages + ' -y --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --setopt=module_platform_id=platform:el8')
+            os.system('dnf install ' + dnf_packages + ' -y --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --setopt=module_platform_id=platform:el8')
 
     # Generate the image squashfs image after creating the image rootfs image
     # The operating system need to be previoulsy created by the
@@ -758,6 +785,18 @@ def cli_create_livenet_image():
     if release_version == '':
         release_version = None
 
+
+    # Propose to optimize image packages
+    printc('\nDo you wish tool try to optimize image by using aggressive packages dependencies parameters ? ', Color.GREEN)
+    printc('Note that this may collide with additional packages if asked for. (yes/no) ? ', Color.GREEN)
+    answer_optimize = input('-->: ')
+    if answer_optimize == 'yes':
+        optimize = True
+    elif answer_optimize == 'no':
+        optimize = False
+    else:
+        raise UserWarning('\nInvalid input !')
+
     # Confirm image creation
     printc('\n[+] Would you like to create a new livenet image with the following attributes: (yes/no)', Color.GREEN)
     print('  ├── Image name: \t\t' + selected_image_name)
@@ -765,6 +804,7 @@ def cli_create_livenet_image():
     print('  ├── Image kernel: \t\t' + selected_kernel)
     print('  ├── Image type: \t\t' + get_type)
     print('  ├── Image size: \t\t' + selected_size)
+    print('  ├── Optimize packages: \t' + str(optimize))
 
     # Print ssh pub key packages if there is one
     if selected_ssh_pub_key is not None:
@@ -784,7 +824,7 @@ def cli_create_livenet_image():
 
     if confirmation == 'yes':
         # Create the image object
-        LivenetImage(selected_image_name, selected_password, selected_kernel, selected_type, image_size, additional_packages, selected_ssh_pub_key, selinux, release_version)
+        LivenetImage(selected_image_name, selected_password, selected_kernel, selected_type, image_size, additional_packages, selected_ssh_pub_key, selinux, release_version, optimize)
         printc('\n[OK] Done.', Color.GREEN)
 
     elif confirmation == 'no':
