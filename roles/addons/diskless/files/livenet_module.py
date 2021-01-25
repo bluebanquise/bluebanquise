@@ -172,7 +172,6 @@ class LivenetImage(Image):
             logging.debug('Additional packages requested. Adding "' + packages + '" to packages list')
             dnf_packages_list.append(packages)
 
-
         if self.selinux:
             # Add needed SELinux packages to the dnf packages list
             logging.debug('SElinux requested. Adding "install policycoreutils" to packages list')
@@ -184,16 +183,16 @@ class LivenetImage(Image):
         if self.optimize:
             if self.selinux:
                 logging.debug('Executing packages install with the following command:')
-                logging.debug('dnf install ' + dnf_packages + ' -y --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
-                os.system('dnf install ' + dnf_packages + ' -y --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
+                logging.debug('dnf install ' + dnf_packages + release + ' -y --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
+                os.system('dnf install ' + dnf_packages + release + ' -y --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
             else:
                 logging.debug('Executing packages install with the following command:')
-                logging.debug('dnf install ' + dnf_packages + ' -y --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
-                os.system('dnf install ' + dnf_packages + ' -y --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
+                logging.debug('dnf install ' + dnf_packages + release + ' -y --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
+                os.system('dnf install ' + dnf_packages + release + ' -y --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
         else:
             logging.debug('Executing packages install with the following command:')
-            logging.debug('dnf install ' + dnf_packages + ' -y --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --setopt=module_platform_id=platform:el8')
-            os.system('dnf install ' + dnf_packages + ' -y --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --setopt=module_platform_id=platform:el8')
+            logging.debug('dnf install ' + dnf_packages + release + ' -y --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --setopt=module_platform_id=platform:el8')
+            os.system('dnf install ' + dnf_packages + release + ' -y --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --setopt=module_platform_id=platform:el8')
 
     # Generate the image squashfs image after creating the image rootfs image
     # The operating system need to be previoulsy created by the
@@ -355,7 +354,7 @@ class LivenetImage(Image):
         # Mount diskless server sys on livenet image sys
         logging.debug('Executing \'mount --bind /sys ' + self.MOUNT_DIRECTORY + 'sys\'')
         os.system('mount --bind /sys ' + self.MOUNT_DIRECTORY + 'sys')
-        
+
         self.get_existing_image()
         if (self.selinux):
             logging.debug('Executing \'mount --bind /sys/fs/selinux ' + self.MOUNT_DIRECTORY + 'sys/fs/selinux\'')
@@ -380,7 +379,7 @@ class LivenetImage(Image):
     def unmount(self):
         """Unmounting livenet image"""
         logging.info('Unmounting livenet image \'' + self.name + '\'')
-        
+
         self.get_existing_image()
         if (self.selinux):
             logging.debug('Executing \'umount ' + self.MOUNT_DIRECTORY + 'sys/{fs/selinux,kernel/tracing}\'')
@@ -784,7 +783,6 @@ def cli_create_livenet_image():
     release_version = input('-->: ')
     if release_version == '':
         release_version = None
-
 
     # Propose to optimize image packages
     printc('\nDo you wish tool try to optimize image by using aggressive packages dependencies parameters ? ', Color.GREEN)
