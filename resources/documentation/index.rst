@@ -23,6 +23,7 @@ Documentation authors:
 * RIBEIRO Adrien
 * MERZOUKI Hamid
 * PEROTIN Matthieu
+* PIETERS David
 
 .. toctree::
    :maxdepth: 3
@@ -37,6 +38,7 @@ Documentation authors:
    configure_bluebanquise
    deploy_bluebanquise
    multiple_icebergs
+   diskless
    monitoring
    stories
    roles

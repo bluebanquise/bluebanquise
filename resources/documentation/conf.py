@@ -21,7 +21,7 @@
 
 project = u'BlueBanquise Documentation'
 copyright = u'2019, Benoît Leveugle, Johnny Keats'
-author = u'Benoît Leveugle, Johnny Keats, Bruno Travouillon, Tim Gellner'
+author = u'Benoît Leveugle, Johnny Keats, Bruno Travouillon, Tim Gellner, David Pieters'
 
 # The short X.Y version
 version = u'1.3'

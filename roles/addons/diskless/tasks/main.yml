@@ -1,15 +1,5 @@
 ---
 - name: include_vars ░ Gather OS specific variables
-  # This task gathers variables defined in OS specific files.
-  #
-  # Search vars in:
-  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
-  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
-  #  - <distribution>.yml            # eg. CentOS.yml
-  #  - <os_family>.yml               # eg. RedHat.yml
-  #
-  # If no OS specific file is found, the role will default to vars/main.yml
-  #
   include_vars: "{{ item }}"
   with_first_found:
     - files:
@@ -29,22 +19,62 @@
   tags:
     - package
 
-- name: "file █ Create diskless directories structure"
+- name: "Create diskless directories structure"
   file:
     path: "{{ item }}"
     state: directory
     mode: 0755
-    setype: "{{ (ansible_facts.os_family == 'RedHat' and ansible_facts.selinux.status == 'enabled') | ternary('httpd_sys_content_t', omit) }}"
-    owner: "{{ diskless_apache_user }}"
-    group: "{{ diskless_apache_user }}"
   loop:
-   - /var/www/html/preboot_execution_environment
-   - /var/www/html/preboot_execution_environment/diskless
-   - /var/www/html/preboot_execution_environment/diskless/images
-   - /var/www/html/preboot_execution_environment/diskless/kernels
+    # Create base directories for images
+    - /var/www/html/preboot_execution_environment
+    - /var/www/html/preboot_execution_environment/diskless
+    - /var/www/html/preboot_execution_environment/diskless/images
+    - /var/www/html/preboot_execution_environment/diskless/kernels
+    # Create additional directories for images
+    - /diskless
+    - /diskless/images
+    - /diskless/images/nfsimages
+    - /diskless/images/nfsimages/golden
+    - /diskless/images/nfsimages/staging
+    # Create directories for python modules
+    - /lib/python3.6/site-packages/diskless
+    - /lib/python3.6/site-packages/diskless/modules
+    # Create directory for 'installations.yml' file
+    - /var/lib/diskless
+    # Create working directory for images
+    - /var/tmp/diskless/workdir/
 
-- name: "copy █ disklessset tool"
+# Copy script files with permission
+- name: "Add diskless scripts"
   copy:
-    src: disklessset.py
-    dest: /usr/bin/disklessset
-    mode: 0700
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: 0755
+  with_items:
+    - { src: 'utils.py', dest: '/lib/python3.6/site-packages/diskless/utils.py' }
+    - { src: 'image_manager.py', dest: '/lib/python3.6/site-packages/diskless/image_manager.py' }
+    - { src: 'kernel_manager.py', dest: '/lib/python3.6/site-packages/diskless/kernel_manager.py' }
+    - { src: 'nfs_module.py', dest: '/lib/python3.6/site-packages/diskless/modules/nfs_module.py' }
+    - { src: 'base_module.py', dest: '/lib/python3.6/site-packages/diskless/modules/base_module.py' }
+    - { src: 'livenet_module.py', dest: '/lib/python3.6/site-packages/diskless/modules/livenet_module.py' }
+    - { src: 'demo_module.py', dest: '/lib/python3.6/site-packages/diskless/modules/demo_module.py' }
+    - { src: 'disklessset.py', dest: '/usr/bin/disklessset' }
+
+# We need to check file existance because an image installation can be running yet, we cannot juste replace the file
+- name: Check if installations.yml file exists
+  stat:
+    path: /var/lib/diskless/installations.yml
+  register: stat_result
+
+# Copy installations.yml file if installations.yml doesnt already exist
+- name: Copy installations.yml file if doesn't already exist
+  copy:
+    src: installations.yml
+    dest: /var/lib/diskless/installations.yml
+    mode: 0755
+  when: not stat_result.stat.exists
+
+- name: Add nfs export point if doesn't already exist
+  lineinfile:
+    dest: /etc/exports
+    line: /diskless/images/nfsimages *(rw,no_root_squash,sync)
