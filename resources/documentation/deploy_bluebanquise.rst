@@ -195,8 +195,8 @@ Which should return:
 
 .. code-block:: text
 
-  [INFO] Loading /etc/bluebanquise/pxe/nodes_parameters.yml
-  [INFO] Loading /etc/bluebanquise/pxe/pxe_parameters.yml
+  [INFO] Loading /etc/bootset/nodes_parameters.yml
+  [INFO] Loading /etc/bootset/pxe_parameters.yml
   Next boot deployment: c[001-004],login1
 
 Note that this osdeploy state will be automatically updated once OS is deployed

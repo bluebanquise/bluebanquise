@@ -69,21 +69,21 @@
 
     - name: Retrieve file nodes_parameters.yml system status
       stat:
-        path: /etc/bluebanquise/pxe/nodes_parameters.yml
+        path: /etc/bootset/nodes_parameters.yml
       register: reg_nodes_param
       changed_when: False
 
-    - name: Assert file /etc/bluebanquise/pxe/nodes_parameters.yml exist
+    - name: Assert file /etc/bootset/nodes_parameters.yml exist
       assert:
         that: reg_nodes_param.stat.exists
 
     - name: Retrieve file pxe_parameters.yml system status
       stat:
-        path: /etc/bluebanquise/pxe/pxe_parameters.yml
+        path: /etc/bootset/pxe_parameters.yml
       register: reg_pxe_param
       changed_when: False
 
-    - name: Assert file /etc/bluebanquise/pxe/pxe_parameters.yml exist
+    - name: Assert file /etc/bootset/pxe_parameters.yml exist
       assert:
         that: reg_pxe_param.stat.exists
 
