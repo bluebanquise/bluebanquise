@@ -11,6 +11,6 @@ Each owner can ask a new release of the repository, as this repository was made 
 While the core stack aims to be multiple Linux distributions ready, each Community role owner is in charge of providing compatibility with Linux distributions (or not) for the additional role.
 
 ## List of available roles/tools
-| Role/tool name        | Description                          | Owner           | Link     |
-| --------------------- | ------------------------------------ | --------------- | -------- |
-| generic_psf           | Generic packages, services and files | johnnykeats     | [link]() |
+| Role/tool name        | Description                                   | Owner           | Link                       |
+| --------------------- | --------------------------------------------- | --------------- | -------------------------- |
+| generic_psf           | Generic packages, services, folders and files | johnnykeats     | [link](roles/generic_psf/) |
