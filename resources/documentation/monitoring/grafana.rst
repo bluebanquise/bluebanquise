@@ -28,7 +28,7 @@ Useful Files
 * Grafana datas (dashboards, and so on) are stored under /var/lib/grafana/grafana.db
 * Grafana default settings under /usr/share/grafana/conf/default.ini
 
-Now, log into Grafana at http://localhost:3000, using default Color.REDentials
+Now, log into Grafana at http://localhost:3000, using default credentials
 admin / admin.
 
 Dashboard
