@@ -42,7 +42,7 @@ platforms:
 provisioner:
   name: ansible
   env:
-    ANSIBLE_CONFIG: "../../../../../ansible.cfg"
+    ANSIBLE_CONFIG: "${MOLECULE_PROJECT_DIRECTORY}/../../../ansible.cfg"
   inventory:
     host_vars:
       icebergs-off:
