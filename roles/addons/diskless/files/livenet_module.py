@@ -368,8 +368,8 @@ class LivenetImage(Image):
         os.mkdir(self.WORKING_DIRECTORY + 'inventory')
 
         # Create the ansible connection
-        logging.debug('Executing \'echo \'' + self.MOUNT_DIRECTORY + ' ansible_connection=chroot\' > ' + self.WORKING_DIRECTORY + 'inventory/host\'')
-        os.system('echo \'' + self.MOUNT_DIRECTORY + ' ansible_connection=chroot\' > ' + self.WORKING_DIRECTORY + 'inventory/host')
+        logging.debug('Executing \'echo \'' + self.MOUNT_DIRECTORY[:-1] + ' ansible_connection=chroot\' > ' + self.WORKING_DIRECTORY + 'inventory/host\'')
+        os.system('echo \'' + self.MOUNT_DIRECTORY[:-1] + ' ansible_connection=chroot\' > ' + self.WORKING_DIRECTORY + 'inventory/host')
 
         # Change image mountage status
         self.is_mounted = True
