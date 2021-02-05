@@ -11,10 +11,12 @@ Each owner can ask a new release of the repository, as this repository was made 
 While the core stack aims to be multiple Linux distributions ready, each Community role owner is in charge of providing compatibility with Linux distributions (or not) for the additional role.
 
 ## List of available roles/tools
+
 | Role/tool name        | Description                                   | Owner           | Link                        |
 | --------------------- | --------------------------------------------- | --------------- | --------------------------- |
 | clone                 | Clone to image and restore HDD                | @johnnykeats    | [link](roles/clone/)        |
 | clustershell          | Generate clustershell groups                  | @oxedions       | [link](roles/clustershell/) |
 | generic_psf           | Generic packages, services, folders and files | @johnnykeats    | [link](roles/generic_psf/)  |
 | lmod                  | Install and configure Lmod                    | @oxedions       | [link](roles/lmod/)         |
+| nhc                   | Install and configure LBNL Node Health Check  | @oxedions       | [link](roles/nhc/)          |
 | users_basic           | Set / remove users                            | @oxedions       | [link](roles/users_basic/)  |

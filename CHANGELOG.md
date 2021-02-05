@@ -8,6 +8,7 @@
   - clone by @oxedions
   - generic_psf by @johnnykeats
   - lmod by @oxedions
+  - nhc by @oxedions
   - users_basic by @oxedions
 
 ### Updated roles
