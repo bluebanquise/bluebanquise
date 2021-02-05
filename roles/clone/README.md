@@ -1,10 +1,10 @@
 # Clone
 
-# Description
+## Description
 
 This role provides ipxe files for Clonezilla live usage.
 
-# Instructions
+## Instructions
 
 You first need to enable cloning entries in the ipxe menu of the **pxe_stack**
 role. To do so, set variable *pxe_stack_enable_cloning* to **true** in your
@@ -48,6 +48,6 @@ ocs-sr -g auto -e1 auto -e2 -r -j2 -batch -p reboot restoredisk myimage.img sda
 It is possible to replace these parameters using extra parameters when invoking
 bootset.
 
-# Changelog
+## Changelog
 
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
