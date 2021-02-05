@@ -4,6 +4,7 @@
 
 ### New roles
 
+  - clustershell by @oxedions
   - clone by @oxedions
   - generic_psf by @johnnykeats
 
