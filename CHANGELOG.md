@@ -4,6 +4,7 @@
 
 ### New roles
 
+  - clone by @oxedions
   - generic_psf by @johnnykeats
 
 ### Updated roles

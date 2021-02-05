@@ -13,4 +13,5 @@ While the core stack aims to be multiple Linux distributions ready, each Communi
 ## List of available roles/tools
 | Role/tool name        | Description                                   | Owner           | Link                       |
 | --------------------- | --------------------------------------------- | --------------- | -------------------------- |
+| clone                 | Clone to image and restore HDD                | johnnykeats     | [link](roles/clone/)       |
 | generic_psf           | Generic packages, services, folders and files | johnnykeats     | [link](roles/generic_psf/) |
