@@ -16,4 +16,5 @@ While the core stack aims to be multiple Linux distributions ready, each Communi
 | clone                 | Clone to image and restore HDD                | @johnnykeats    | [link](roles/clone/)        |
 | clustershell          | Generate clustershell groups                  | @oxedions       | [link](roles/clustershell/) |
 | generic_psf           | Generic packages, services, folders and files | @johnnykeats    | [link](roles/generic_psf/)  |
+| lmod                  | Install and configure Lmod                    | @oxedions       | [link](roles/lmod/)         |
 | users_basic           | Set / remove users                            | @oxedions       | [link](roles/users_basic/)  |
