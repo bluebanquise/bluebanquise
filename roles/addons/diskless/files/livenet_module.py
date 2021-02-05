@@ -609,11 +609,14 @@ boot
         """Generate an ipxe boot file for the image."""
         logging.info('Creating image \'' + self.name + '\' IPXE boot file')
 
+        # selinux should be 0 (False) or 1 (True)
+        image_selinux = '1' if self.selinux else '0'
+
         # Format image ipxe boot file template with image attributes
         file_content = self.__class__.get_boot_file_template().format(image_name=self.name,
                                                                       image_initramfs=self.image,
                                                                       image_kernel=self.kernel,
-                                                                      image_selinux=self.selinux)
+                                                                      image_selinux=image_selinux)
 
         # Create ipxe boot file
         with open(self.IMAGE_DIRECTORY + '/boot.ipxe', "w") as ff:
