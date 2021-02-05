@@ -7,6 +7,7 @@
   - clustershell by @oxedions
   - clone by @oxedions
   - generic_psf by @johnnykeats
+  - users_basic by @oxedions
 
 ### Updated roles
 
