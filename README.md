@@ -12,17 +12,18 @@ While the core stack aims to be multiple Linux distributions ready, each Communi
 
 ## List of available roles/tools
 
-| Role/tool name        | Description                                         | Owner           | Link                                |
-| --------------------- | --------------------------------------------------- | --------------- | ----------------------------------- |
-| advanced_dhcp_server  | Fork of core dhcp_server with advanced features     | @hmeAtos        | [link](roles/advanced_dhcp_server/) |
-| advanced_dns_server   | Fork of core dns_server with advanced features      | @oxedions       | [link](roles/advanced_dns_server/)  |
-| clone                 | Clone to image and restore HDD                      | @johnnykeats    | [link](roles/clone/)                |
-| clustershell          | Generate clustershell groups                        | @oxedions       | [link](roles/clustershell/)         |
-| conman                | Serial Over Lan (IPMI SOL) logging                  | @oxedions       | [link](roles/conman/)               |
-| generic_psf           | Generic packages, services, folders and files       | @johnnykeats    | [link](roles/generic_psf/)          |
-| lmod                  | Install and configure Lmod                          | @oxedions       | [link](roles/lmod/)                 |
-| nhc                   | Install and configure LBNL Node Health Check        | @oxedions       | [link](roles/nhc/)                  |
-| ofed                  | Install OFED OpenFabrics                            | @oxedions       | [link](roles/ofed/)                 |
-| singularity           | Install and configure Singularity or SingularityPRO | @strus38        | [link](roles/singularity/)          |
-| slurm                 | Install and configure Slurm Workload Manager        | @oxedions       | [link](roles/slurm/)                |
-| users_basic           | Set / remove users                                  | @oxedions       | [link](roles/users_basic/)          |
+| Role/tool name        | Description                                              | Owner           | Link                                |
+| --------------------- | -------------------------------------------------------- | --------------- | ----------------------------------- |
+| advanced_dhcp_server  | Fork of core dhcp_server with advanced features          | @hmeAtos        | [link](roles/advanced_dhcp_server/) |
+| advanced_dns_server   | Fork of core dns_server with advanced features           | @oxedions       | [link](roles/advanced_dns_server/)  |
+| clone                 | Clone to image and restore HDD                           | @johnnykeats    | [link](roles/clone/)                |
+| clustershell          | Generate clustershell groups                             | @oxedions       | [link](roles/clustershell/)         |
+| conman                | Serial Over Lan (IPMI SOL) logging                       | @oxedions       | [link](roles/conman/)               |
+| display_tuning        | Provides screenrc configuration and iceberg shell colors | @oxedions       | [link](roles/display_tuning/)       |
+| generic_psf           | Generic packages, services, folders and files            | @johnnykeats    | [link](roles/generic_psf/)          |
+| lmod                  | Install and configure Lmod                               | @oxedions       | [link](roles/lmod/)                 |
+| nhc                   | Install and configure LBNL Node Health Check             | @oxedions       | [link](roles/nhc/)                  |
+| ofed                  | Install OFED OpenFabrics                                 | @oxedions       | [link](roles/ofed/)                 |
+| singularity           | Install and configure Singularity or SingularityPRO      | @strus38        | [link](roles/singularity/)          |
+| slurm                 | Install and configure Slurm Workload Manager             | @oxedions       | [link](roles/slurm/)                |
+| users_basic           | Set / remove users                                       | @oxedions       | [link](roles/users_basic/)          |

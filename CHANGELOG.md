@@ -9,6 +9,7 @@
   - clustershell. Owner: @oxedions
   - clone. Owner: @oxedions
   - conman. Owner: @oxedions
+  - display_tuning. Owner: @oxedions
   - generic_psf. Owner: @johnnykeats
   - lmod. Owner: @oxedions
   - nhc. Owner: @oxedions

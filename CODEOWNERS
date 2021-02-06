@@ -5,6 +5,7 @@ README.md @oxedions @johnnykeats
 /roles/clone @johnnykeats
 /roles/clustershell @oxedions
 /roles/conman @oxedions
+/roles/display_tuning @oxedions
 /roles/generic_psf @johnnykeats
 /roles/lmod @oxedions
 /roles/nhc @oxedions
