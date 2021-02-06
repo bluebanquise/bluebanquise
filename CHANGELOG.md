@@ -8,6 +8,7 @@
   - advanced_dns_server. Owner: @oxedions
   - clustershell. Owner: @oxedions
   - clone. Owner: @oxedions
+  - conman. Owner: @oxedions
   - generic_psf. Owner: @johnnykeats
   - lmod. Owner: @oxedions
   - nhc. Owner: @oxedions

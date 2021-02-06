@@ -18,6 +18,7 @@ While the core stack aims to be multiple Linux distributions ready, each Communi
 | advanced_dns_server   | Fork of core dns_server with advanced features      | @oxedions       | [link](roles/advanced_dns_server/)  |
 | clone                 | Clone to image and restore HDD                      | @johnnykeats    | [link](roles/clone/)                |
 | clustershell          | Generate clustershell groups                        | @oxedions       | [link](roles/clustershell/)         |
+| conman                | Serial Over Lan (IPMI SOL) logging                  | @oxedions       | [link](roles/conman/)               |
 | generic_psf           | Generic packages, services, folders and files       | @johnnykeats    | [link](roles/generic_psf/)          |
 | lmod                  | Install and configure Lmod                          | @oxedions       | [link](roles/lmod/)                 |
 | nhc                   | Install and configure LBNL Node Health Check        | @oxedions       | [link](roles/nhc/)                  |
