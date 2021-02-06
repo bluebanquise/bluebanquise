@@ -12,13 +12,14 @@ While the core stack aims to be multiple Linux distributions ready, each Communi
 
 ## List of available roles/tools
 
-| Role/tool name        | Description                                   | Owner           | Link                        |
-| --------------------- | --------------------------------------------- | --------------- | --------------------------- |
-| clone                 | Clone to image and restore HDD                | @johnnykeats    | [link](roles/clone/)        |
-| clustershell          | Generate clustershell groups                  | @oxedions       | [link](roles/clustershell/) |
-| generic_psf           | Generic packages, services, folders and files | @johnnykeats    | [link](roles/generic_psf/)  |
-| lmod                  | Install and configure Lmod                    | @oxedions       | [link](roles/lmod/)         |
-| nhc                   | Install and configure LBNL Node Health Check  | @oxedions       | [link](roles/nhc/)          |
-| ofed                  | Install OFED OpenFabrics                      | @oxedions       | [link](roles/ofed/)         |
-| slurm                 | Install and configure Slurm Workload Manager  | @oxedions       | [link](roles/slurm/)        |
-| users_basic           | Set / remove users                            | @oxedions       | [link](roles/users_basic/)  |
+| Role/tool name        | Description                                         | Owner           | Link                        |
+| --------------------- | --------------------------------------------------- | --------------- | --------------------------- |
+| clone                 | Clone to image and restore HDD                      | @johnnykeats    | [link](roles/clone/)        |
+| clustershell          | Generate clustershell groups                        | @oxedions       | [link](roles/clustershell/) |
+| generic_psf           | Generic packages, services, folders and files       | @johnnykeats    | [link](roles/generic_psf/)  |
+| lmod                  | Install and configure Lmod                          | @oxedions       | [link](roles/lmod/)         |
+| nhc                   | Install and configure LBNL Node Health Check        | @oxedions       | [link](roles/nhc/)          |
+| ofed                  | Install OFED OpenFabrics                            | @oxedions       | [link](roles/ofed/)         |
+| singularity           | Install and configure Singularity or SingularityPRO | @strus38        | [link](roles/singularity/)  |
+| slurm                 | Install and configure Slurm Workload Manager        | @oxedions       | [link](roles/slurm/)        |
+| users_basic           | Set / remove users                                  | @oxedions       | [link](roles/users_basic/)  |

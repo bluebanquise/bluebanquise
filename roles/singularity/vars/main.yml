@@ -1,0 +1,9 @@
+---
+singularity_role_version: 1.0.0
+
+singularity_packages_to_install:
+  - singularity
+
+singularity_config_dir: "/etc/singularity"
+
+singularity_init_log: '/usr/bin/logger -t {{ singularity_init_log_tag }} "{{ singularity_init_log_message }}"'
