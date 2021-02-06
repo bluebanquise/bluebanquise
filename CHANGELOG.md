@@ -5,6 +5,7 @@
 ### New roles
 
   - advanced_dhcp_server. Owner: @hmeAtos
+  - advanced_dns_server. Owner: @oxedions
   - clustershell. Owner: @oxedions
   - clone. Owner: @oxedions
   - generic_psf. Owner: @johnnykeats

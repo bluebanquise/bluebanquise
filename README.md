@@ -15,6 +15,7 @@ While the core stack aims to be multiple Linux distributions ready, each Communi
 | Role/tool name        | Description                                         | Owner           | Link                                |
 | --------------------- | --------------------------------------------------- | --------------- | ----------------------------------- |
 | advanced_dhcp_server  | Fork of core dhcp_server with advanced features     | @hmeAtos        | [link](roles/advanced_dhcp_server/) |
+| advanced_dns_server   | Fork of core dns_server with advanced features      | @oxedions       | [link](roles/advanced_dns_server/)  |
 | clone                 | Clone to image and restore HDD                      | @johnnykeats    | [link](roles/clone/)                |
 | clustershell          | Generate clustershell groups                        | @oxedions       | [link](roles/clustershell/)         |
 | generic_psf           | Generic packages, services, folders and files       | @johnnykeats    | [link](roles/generic_psf/)          |
