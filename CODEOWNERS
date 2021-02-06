@@ -5,4 +5,5 @@ README.md @oxedions @johnnykeats
 /roles/generic_psf @johnnykeats
 /roles/lmod @oxedions
 /roles/nhc @oxedions
+/roles/ofed @oxedions
 /roles/users_basic @oxedions

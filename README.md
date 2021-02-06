@@ -19,4 +19,5 @@ While the core stack aims to be multiple Linux distributions ready, each Communi
 | generic_psf           | Generic packages, services, folders and files | @johnnykeats    | [link](roles/generic_psf/)  |
 | lmod                  | Install and configure Lmod                    | @oxedions       | [link](roles/lmod/)         |
 | nhc                   | Install and configure LBNL Node Health Check  | @oxedions       | [link](roles/nhc/)          |
+| ofed                  | Install OFED OpenFabrics                      | @oxedions       | [link](roles/ofed/)         |
 | users_basic           | Set / remove users                            | @oxedions       | [link](roles/users_basic/)  |

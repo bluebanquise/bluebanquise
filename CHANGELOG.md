@@ -9,6 +9,7 @@
   - generic_psf by @johnnykeats
   - lmod by @oxedions
   - nhc by @oxedions
+  - ofed by @oxedions
   - users_basic by @oxedions
 
 ### Updated roles
