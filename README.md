@@ -20,4 +20,5 @@ While the core stack aims to be multiple Linux distributions ready, each Communi
 | lmod                  | Install and configure Lmod                    | @oxedions       | [link](roles/lmod/)         |
 | nhc                   | Install and configure LBNL Node Health Check  | @oxedions       | [link](roles/nhc/)          |
 | ofed                  | Install OFED OpenFabrics                      | @oxedions       | [link](roles/ofed/)         |
+| slurm                 | Install and configure Slurm Workload Manager  | @oxedions       | [link](roles/slurm/)        |
 | users_basic           | Set / remove users                            | @oxedions       | [link](roles/users_basic/)  |

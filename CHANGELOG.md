@@ -10,6 +10,7 @@
   - lmod by @oxedions
   - nhc by @oxedions
   - ofed by @oxedions
+  - slurm by @oxedions
   - users_basic by @oxedions
 
 ### Updated roles
