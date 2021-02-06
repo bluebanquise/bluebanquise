@@ -1,5 +1,6 @@
 README.md @oxedions @johnnykeats
 /resources @oxedions @johnnykeats
+/roles/advanced_dhcp_server @hmeAtos
 /roles/clone @johnnykeats
 /roles/clustershell @oxedions
 /roles/generic_psf @johnnykeats

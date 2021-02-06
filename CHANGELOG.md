@@ -4,15 +4,16 @@
 
 ### New roles
 
-  - clustershell by @oxedions
-  - clone by @oxedions
-  - generic_psf by @johnnykeats
-  - lmod by @oxedions
-  - nhc by @oxedions
-  - ofed by @oxedions
-  - singularity by @strus38
-  - slurm by @oxedions
-  - users_basic by @oxedions
+  - advanced_dhcp_server. Owner: @hmeAtos
+  - clustershell. Owner: @oxedions
+  - clone. Owner: @oxedions
+  - generic_psf. Owner: @johnnykeats
+  - lmod. Owner: @oxedions
+  - nhc. Owner: @oxedions
+  - ofed. Owner: @oxedions
+  - singularity. Owner: @strus38
+  - slurm. Owner: @oxedions
+  - users_basic. Owner: @oxedions
 
 ### Updated roles
 
