@@ -26,9 +26,11 @@ iceberg group (default prefix is `iceberg`).
 ## To be defined for each host (hostvars level)
 
 ```yaml
+  # Alias, included in hosts_file
   global_alias: []         # Global alias is present on all icebergs
   alias: []                # Alias is present inside host iceberg
 
+  # BMC configuration
   bmc:
     name:                      # BMC name
     ip4:                       # BMC ip4
@@ -38,6 +40,7 @@ iceberg group (default prefix is `iceberg`).
     match:
     network:                   # BMC logical network
 
+  # Host NIC configuration
   interfaces:              # Example
     - interface: eth1
       ip4: 10.10.3.1
@@ -78,6 +81,18 @@ iceberg group (default prefix is `iceberg`).
       routes4:
         - 10.11.0.0/24 10.10.0.2
         - 10.12.0.0/24 10.10.0.2 300
+
+  # Host LVM configuration
+  lvm:
+    vgs:
+      - vg:
+        pvs: []
+      ...
+    lvs:
+      - lv:
+        size:
+        vg:
+      ...
 ```
 
 More parameters are available for each network interface, see nic_nmcli role
