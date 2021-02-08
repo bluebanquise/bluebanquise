@@ -17,9 +17,21 @@ BlueBanquise is part of the **Algoric** Project from the [**Fabrique du Loch**](
 
 It is a revamping of the old stack [Banquise](https://github.com/oxedions/banquise), based on Salt.
 
-## Documentation and files
+## Ressources
+
+### Files
+
+:globe_with_meridians: Stack core is hosted on github, in this [same repository](https://github.com/bluebanquise/bluebanquise).
+
+:milky_way: Community roles are hosted on github, in the [community repository](https://github.com/bluebanquise/community).
+
+### Documentation
 
 The stack documentation is available on the BlueBanquise main website, in [documentation subfolder](https://bluebanquise.com/documentation/).
+
+Note that each role (core or community) embeds its own readme, with detailed usage description.
+
+### Packages
 
 The stack repositories are available in the [repositories subfolder](https://bluebanquise.com/repository/).
 
@@ -32,18 +44,17 @@ You may wonder where this name comes from:
 
 ## Supported software environment
 
-Currently supported OS are:
-
-* Fully supported:
-  * RedHat/Centos 7
-  * RedHat/Centos 8
-
-* In development:
-  * OpenSuse Leap 15.1
-
-* To be included if demand:
-  * Ubuntu
-  * Debian
+| Operating System / Distribution | Tested versions    | Notes                               |
+| ------------------------------- | ------------------ | ----------------------------------- |
+| RedHat                          | 7.7, 8.1, 8.2, 8.3 | Should work on all 7 and 8 versions |
+| CentOS                          | 8.0, 8.1, 8.2      | Should work on all 7 and 8 versions |
+| CentOS Stream                   | NA                 | In dev, targeted for next release   |
+| Oracle Linux                    | NA                 | In dev, targeted for next release   |
+| Springdale Linux                | NA                 | In dev, targeted for next release   |
+| CloudLinux                      | NA                 | In dev, targeted for next release   |
+| OpenSuse Leap                   | NA                 | In dev, targeted for next release   |
+| Ubuntu                          | NA                 | In dev, targeted for next release   |
+| Debian                          | NA                 | In dev, targeted for next release   |
 
 Ansible >= 2.9.13 is mandatory for BlueBanquise to run properly.
 
