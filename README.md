@@ -35,13 +35,6 @@ Note that each role (core or community) embeds its own readme, with detailed usa
 
 The stack repositories are available in the [repositories subfolder](https://bluebanquise.com/repository/).
 
-## The name
-
-You may wonder where this name comes from:
-
-* [BlueBanquise](https://en.wikipedia.org/wiki/File:Blue_iceberg_in_the_Ilulissat_icefjord.jpg)
-* [Blue Iceberg](https://en.wikipedia.org/wiki/Blue_iceberg)
-
 ## Supported software environment
 
 | Operating System / Distribution | Tested versions    | Notes                               |
@@ -59,6 +52,13 @@ You may wonder where this name comes from:
 Ansible >= 2.9.13 is mandatory for BlueBanquise to run properly.
 
 **[OpenHPC](https://openhpc.community/downloads/)** scientific packages and OpenHPC slurm job scheduler are compatible with the stack.
+
+## The name
+
+You may wonder where this name comes from:
+
+* [BlueBanquise](https://en.wikipedia.org/wiki/File:Blue_iceberg_in_the_Ilulissat_icefjord.jpg)
+* [Blue Iceberg](https://en.wikipedia.org/wiki/Blue_iceberg)
 
 ## Thanks
 
