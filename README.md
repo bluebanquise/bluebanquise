@@ -21,6 +21,7 @@ While the core stack aims to be multiple Linux distributions ready, each Communi
 | conman                | Serial Over Lan (IPMI SOL) logging                       | @oxedions       | [link](roles/conman/)               |
 | display_tuning        | Provides screenrc configuration and iceberg shell colors | @oxedions       | [link](roles/display_tuning/)       |
 | generic_psf           | Generic packages, services, folders and files            | @johnnykeats    | [link](roles/generic_psf/)          |
+| grafana               | Install Grafana                                          | @oxedions       | [link](roles/grafana/)              |
 | lmod                  | Install and configure Lmod                               | @oxedions       | [link](roles/lmod/)                 |
 | nhc                   | Install and configure LBNL Node Health Check             | @oxedions       | [link](roles/nhc/)                  |
 | ofed                  | Install OFED OpenFabrics                                 | @oxedions       | [link](roles/ofed/)                 |
