@@ -21,9 +21,11 @@ It is a revamping of the old stack [Banquise](https://github.com/oxedions/banqui
 
 ### Files
 
-:globe_with_meridians: Stack core is hosted on github, in this [same repository](https://github.com/bluebanquise/bluebanquise).
+The stack is split over multiple repositories:
 
-:milky_way: Community roles are hosted on github, in the [community repository](https://github.com/bluebanquise/community).
+* :globe_with_meridians: **Core:** stack core is hosted on github, in this [same repository](https://github.com/bluebanquise/bluebanquise).
+
+* :star: **Additional roles:** community roles or tools are hosted on github, in the [community repository](https://github.com/bluebanquise/community).
 
 ### Documentation
 
@@ -48,6 +50,7 @@ The stack repositories are available in the [repositories subfolder](https://blu
 |                         | CloudLinux                    | NA                 | Waiting for distribution release    |
 |                         | RockyLinux                    | NA                 | Waiting for distribution release    |
 | Suse                    |                               |                    |                                     |
+|                         | SLES                          | NA                 | In dev, targeted for next release   |
 |                         | OpenSuse Leap                 | NA                 | In dev, targeted for next release   |
 | Debian                  |                               |                    |                                     |
 |                         | Ubuntu                        | NA                 | In dev, targeted for next release   |
