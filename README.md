@@ -37,7 +37,7 @@ The stack repositories are available in the [repositories subfolder](https://blu
 
 ## Supported software environment
 
-| Operating System family | Operating system distribution | Tested versions    | Notes                               |
+| Operating System family | Operating System distribution | Tested versions    | Notes                               |
 | ----------------------- | ----------------------------- | ------------------ | ----------------------------------- |
 | RedHat                  |                               |                    |                                     |
 |                         | RHEL                          | 7.x, 8.x           | Should work on all 7 and 8 versions |
