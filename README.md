@@ -37,17 +37,21 @@ The stack repositories are available in the [repositories subfolder](https://blu
 
 ## Supported software environment
 
-| Operating System / Distribution | Tested versions    | Notes                               |
-| ------------------------------- | ------------------ | ----------------------------------- |
-| RedHat                          | 7.7, 8.1, 8.2, 8.3 | Should work on all 7 and 8 versions |
-| CentOS                          | 8.0, 8.1, 8.2      | Should work on all 7 and 8 versions |
-| CentOS Stream                   | NA                 | In dev, targeted for next release   |
-| Oracle Linux                    | NA                 | In dev, targeted for next release   |
-| Springdale Linux                | NA                 | In dev, targeted for next release   |
-| CloudLinux                      | NA                 | In dev, targeted for next release   |
-| OpenSuse Leap                   | NA                 | In dev, targeted for next release   |
-| Ubuntu                          | NA                 | In dev, targeted for next release   |
-| Debian                          | NA                 | In dev, targeted for next release   |
+| Operating System family | Operating system distribution | Tested versions    | Notes                               |
+| ----------------------- | ----------------------------- | ------------------ | ----------------------------------- |
+| RedHat                  |                               |                    |                                     |
+|                         | RHEL                          | 7.x, 8.x           | Should work on all 7 and 8 versions |
+|                         | CentOS                        | 7.x, 8.x           | Should work on all 7 and 8 versions |
+|                         | CentOS Stream                 | NA                 | In dev, targeted for next release   |
+|                         | Oracle Linux                  | NA                 | In dev, targeted for next release   |
+|                         | Springdale Linux              | NA                 | In dev, targeted for next release   |
+|                         | CloudLinux                    | NA                 | Waiting for distribution release    |
+|                         | RockyLinux                    | NA                 | Waiting for distribution release    |
+| Suse                    |                               |                    |                                     |
+|                         | OpenSuse Leap                 | NA                 | In dev, targeted for next release   |
+| Debian                  |                               |                    |                                     |
+|                         | Ubuntu                        | NA                 | In dev, targeted for next release   |
+|                         | Debian                        | NA                 | In dev, targeted for next release   |
 
 Ansible >= 2.9.13 is mandatory for BlueBanquise to run properly.
 
