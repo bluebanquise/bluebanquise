@@ -115,6 +115,7 @@ ep_preserve_efi_first_boot_device: {true|false}
 
 ep_console:
 ep_kernel_parameters:
+ep_sysctl:
 
 ep_access_control: {enforcing|permissive|disabled|...}
 ep_firewall: {true|false}
