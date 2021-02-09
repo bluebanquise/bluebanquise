@@ -13,6 +13,7 @@ README.md @oxedions @johnnykeats
 /roles/ofed @oxedions
 /roles/powerman @oxedions
 /roles/prometheus @oxedions
+/roles/report @oxedions
 /roles/singularity @strus38
 /roles/slurm @oxedions
 /roles/users_basic @oxedions

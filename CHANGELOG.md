@@ -17,6 +17,7 @@
   - ofed. Owner: @oxedions
   - powerman. Owner: @oxedions
   - prometheus. Owner: @oxedions
+  - report. Owner: @oxedions
   - singularity. Owner: @strus38
   - slurm. Owner: @oxedions
   - users_basic. Owner: @oxedions

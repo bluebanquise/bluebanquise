@@ -1,0 +1,15 @@
+report_settings:
+  inventory_checker:
+    - icebergs
+    - network
+    - groups
+    - hosts
+  cluster_configuration_report:
+    - equipment_profiles
+    - nfs
+    - network
+  enable_ansible_cmdb: true
+  enable_graphtool: true
+  graph_tool_settings:
+    exlude_network:
+      - interconnect1

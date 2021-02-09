@@ -27,6 +27,7 @@ While the core stack aims to be multiple Linux distributions ready, each Communi
 | ofed                  | Install OFED OpenFabrics                                 | @oxedions       | [link](roles/ofed/)                 |
 | powerman              | Install and configure Powerman remote power control      | @oxedions       | [link](roles/powerman/)             |
 | prometheus            | Install and configure Prometheus monitoring and alerting | @oxedions       | [link](roles/prometheus/)           |
+| report                | Check inventory and gather helpful data                  | @oxedions       | [link](roles/report/)               |
 | singularity           | Install and configure Singularity or SingularityPRO      | @strus38        | [link](roles/singularity/)          |
 | slurm                 | Install and configure Slurm Workload Manager             | @oxedions       | [link](roles/slurm/)                |
 | users_basic           | Set / remove users                                       | @oxedions       | [link](roles/users_basic/)          |
