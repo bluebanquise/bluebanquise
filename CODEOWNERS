@@ -11,6 +11,7 @@ README.md @oxedions @johnnykeats
 /roles/lmod @oxedions
 /roles/nhc @oxedions
 /roles/ofed @oxedions
+/roles/prometheus @oxedions
 /roles/singularity @strus38
 /roles/slurm @oxedions
 /roles/users_basic @oxedions
