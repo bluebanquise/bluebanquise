@@ -25,6 +25,7 @@ While the core stack aims to be multiple Linux distributions ready, each Communi
 | lmod                  | Install and configure Lmod                               | @oxedions       | [link](roles/lmod/)                 |
 | nhc                   | Install and configure LBNL Node Health Check             | @oxedions       | [link](roles/nhc/)                  |
 | ofed                  | Install OFED OpenFabrics                                 | @oxedions       | [link](roles/ofed/)                 |
+| powerman              | Install and configure Powerman remote power control      | @oxedions       | [link](roles/powerman/)             |
 | prometheus            | Install and configure Prometheus monitoring and alerting | @oxedions       | [link](roles/prometheus/)           |
 | singularity           | Install and configure Singularity or SingularityPRO      | @strus38        | [link](roles/singularity/)          |
 | slurm                 | Install and configure Slurm Workload Manager             | @oxedions       | [link](roles/slurm/)                |
