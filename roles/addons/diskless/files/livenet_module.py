@@ -368,6 +368,7 @@ class LivenetImage(Image):
         os.mkdir(self.WORKING_DIRECTORY + 'inventory')
 
         # Create the ansible connection
+        # Use of [:-1] to remove last '/' from the MOUNT_DIRECTORY path
         logging.debug('Executing \'echo \'' + self.MOUNT_DIRECTORY[:-1] + ' ansible_connection=chroot\' > ' + self.WORKING_DIRECTORY + 'inventory/host\'')
         os.system('echo \'' + self.MOUNT_DIRECTORY[:-1] + ' ansible_connection=chroot\' > ' + self.WORKING_DIRECTORY + 'inventory/host')
 
