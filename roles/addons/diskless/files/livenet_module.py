@@ -221,8 +221,8 @@ class LivenetImage(Image):
         os.system('mount -o loop ' + self.IMAGE_DIRECTORY + 'tosquash/LiveOS/rootfs.img ' + self.MOUNT_DIRECTORY)
 
         # Put the operating system inside rootfs.img
-        logging.debug('Executing \'cp -r ' + self.WORKING_DIRECTORY + 'generated_os/* ' + self.MOUNT_DIRECTORY + '\'')
-        os.system('cp -r ' + self.WORKING_DIRECTORY + 'generated_os/* ' + self.MOUNT_DIRECTORY)
+        logging.debug('Executing \'cp -a ' + self.WORKING_DIRECTORY + 'generated_os/* ' + self.MOUNT_DIRECTORY + '\'')
+        os.system('cp -a ' + self.WORKING_DIRECTORY + 'generated_os/* ' + self.MOUNT_DIRECTORY)
 
         # Unmount rootfs.img file
         logging.debug('Executing \'umount ' + self.MOUNT_DIRECTORY + '\'')
@@ -368,8 +368,9 @@ class LivenetImage(Image):
         os.mkdir(self.WORKING_DIRECTORY + 'inventory')
 
         # Create the ansible connection
-        logging.debug('Executing \'echo \'' + self.MOUNT_DIRECTORY + ' ansible_connection=chroot\' > ' + self.WORKING_DIRECTORY + 'inventory/host\'')
-        os.system('echo \'' + self.MOUNT_DIRECTORY + ' ansible_connection=chroot\' > ' + self.WORKING_DIRECTORY + 'inventory/host')
+        # Use of [:-1] to remove last '/' from the MOUNT_DIRECTORY path
+        logging.debug('Executing \'echo \'' + self.MOUNT_DIRECTORY[:-1] + ' ansible_connection=chroot\' > ' + self.WORKING_DIRECTORY + 'inventory/host\'')
+        os.system('echo \'' + self.MOUNT_DIRECTORY[:-1] + ' ansible_connection=chroot\' > ' + self.WORKING_DIRECTORY + 'inventory/host')
 
         # Change image mountage status
         self.is_mounted = True
@@ -613,7 +614,7 @@ boot
         file_content = self.__class__.get_boot_file_template().format(image_name=self.name,
                                                                       image_initramfs=self.image,
                                                                       image_kernel=self.kernel,
-                                                                      image_selinux=self.selinux)
+                                                                      image_selinux=int(self.selinux))
 
         # Create ipxe boot file
         with open(self.IMAGE_DIRECTORY + '/boot.ipxe', "w") as ff:
