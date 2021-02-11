@@ -144,7 +144,7 @@ class LivenetImage(Image):
         os.makedirs(self.WORKING_DIRECTORY + 'generated_os')
 
         if hasattr(self, 'release_version'):
-            release = '--releasever=' + self.release_version
+            release = ' --releasever=' + self.release_version
         else:
             release = ''
 
