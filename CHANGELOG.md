@@ -15,6 +15,7 @@
   - lmod. Owner: @oxedions
   - nhc. Owner: @oxedions
   - ofed. Owner: @oxedions
+  - openldap. Owner: @oxedions
   - powerman. Owner: @oxedions
   - prometheus. Owner: @oxedions
   - report. Owner: @oxedions

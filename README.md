@@ -25,6 +25,7 @@ While the core stack aims to be multiple Linux distributions ready, each Communi
 | lmod                  | Install and configure Lmod                               | @oxedions       | [link](roles/lmod/)                 |
 | nhc                   | Install and configure LBNL Node Health Check             | @oxedions       | [link](roles/nhc/)                  |
 | ofed                  | Install OFED OpenFabrics                                 | @oxedions       | [link](roles/ofed/)                 |
+| openldap              | Install and configure OpenLDAP and SSSD (beta)           | @oxedions       | [link](roles/openldap/)             |
 | powerman              | Install and configure Powerman remote power control      | @oxedions       | [link](roles/powerman/)             |
 | prometheus            | Install and configure Prometheus monitoring and alerting | @oxedions       | [link](roles/prometheus/)           |
 | report                | Check inventory and gather helpful data                  | @oxedions       | [link](roles/report/)               |
