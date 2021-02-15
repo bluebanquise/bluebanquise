@@ -9,6 +9,7 @@
 #### Roles improvement or fix
 
   - pxe_stack: fix issues with hostname not set during kickstart on RHEL 8.3 (#522)
+  - diskless:  fix issues with dnf command in the livenet module (#528)
 
 ### Breaking changes
 
