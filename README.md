@@ -35,7 +35,7 @@ Note that each role (core or community) embeds its own readme, with detailed usa
 
 ### Packages
 
-The stack repositories are available in the [repositories subfolder](https://bluebanquise.com/repository/).
+The stack packages are available in the [repositories subfolder](https://bluebanquise.com/repository/).
 
 ## Supported software environment
 
