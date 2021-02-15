@@ -177,7 +177,7 @@ class LivenetImage(Image):
         if self.selinux:
             # Add needed SELinux packages to the dnf packages list
             logging.debug('SElinux requested. Adding "install policycoreutils" to packages list')
-            dnf_packages = dnf_packages + 'selinux-policy-targeted selinux-policy-devel policycoreutils '                                                                
+            dnf_packages = dnf_packages + 'selinux-policy-targeted selinux-policy-devel policycoreutils '
 
         # Execute dnf
         logging.debug('Executing packages install with the following command:')
