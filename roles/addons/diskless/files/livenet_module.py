@@ -155,29 +155,26 @@ class LivenetImage(Image):
         # Get appropriate packages for desired image file system
         if self.livenet_type == LivenetImage.Type.STANDARD:
             logging.debug('Standard image requested. Adding "@core" to packages list')
-            dnf_packages = '@core '
+            dnf_packages = '@core'
 
         elif self.livenet_type == LivenetImage.Type.SMALL:
             logging.debug('Small image requested. Adding "dnf yum iproute procps-ng openssh-server NetworkManager" to packages list')
-            dnf_packages = 'dnf yum iproute procps-ng openssh-server NetworkManager '
+            dnf_packages = 'dnf yum iproute procps-ng openssh-server NetworkManager'
 
         elif self.livenet_type == LivenetImage.Type.CORE:
             logging.debug('Core image requested. Adding "iproute procps-ng openssh-server" to packages list')
-            dnf_packages = 'iproute procps-ng openssh-server '
+            dnf_packages = 'iproute procps-ng openssh-server'
 
         # If there are additional packages to install
         if hasattr(self, 'additional_packages'):
             logging.debug('Additional packages requested. Adding "' + str(self.additional_packages) + '" to dnf packages to install')
-
-            # Add additional packages to the dnf packages list
-            for package in self.additional_packages:
-                dnf_packages = dnf_packages + package + ' '
-
-        # If SELinux is activate
+            dnf_packages += ' ' + ' '.join(self.additional_packages)
+           
+        # If SELinux is activated (or enabled)
         if self.selinux:
             # Add needed SELinux packages to the dnf packages list
             logging.debug('SElinux requested. Adding "install policycoreutils" to packages list')
-            dnf_packages = dnf_packages + 'selinux-policy-targeted selinux-policy-devel policycoreutils '
+            dnf_packages += ' selinux-policy-targeted selinux-policy-devel policycoreutils'
 
         # Execute dnf
         logging.debug('Executing packages install with the following command:')
