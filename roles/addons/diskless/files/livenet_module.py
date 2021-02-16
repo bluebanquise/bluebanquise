@@ -169,7 +169,7 @@ class LivenetImage(Image):
         if hasattr(self, 'additional_packages'):
             logging.debug('Additional packages requested. Adding "' + str(self.additional_packages) + '" to dnf packages to install')
             dnf_packages += ' ' + ' '.join(self.additional_packages)
-           
+
         # If SELinux is activated (or enabled)
         if self.selinux:
             # Add needed SELinux packages to the dnf packages list
