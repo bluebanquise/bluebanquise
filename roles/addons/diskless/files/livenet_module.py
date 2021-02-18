@@ -139,58 +139,53 @@ class LivenetImage(Image):
     def generate_operating_system(self):
         logging.info('Generating image \'' + self.name + '\' operating system')
 
-        # create image personnal working directory
+        # Create os generation directory
         logging.debug('Executing \'mkdir -p ' + self.WORKING_DIRECTORY + 'generated_os\'')
         os.makedirs(self.WORKING_DIRECTORY + 'generated_os')
 
+        # Set up release version
         if hasattr(self, 'release_version'):
-            release = '--releasever=' + self.release_version
+            release = ' --releasever=' + self.release_version
         else:
             release = ''
 
-        # Populating dnf packages list
-        dnf_packages_list = []
+        # Create empty string of packages
+        dnf_packages = ''
 
-        # Generate desired image file system
+        # Get appropriate packages for desired image file system
         if self.livenet_type == LivenetImage.Type.STANDARD:
             logging.debug('Standard image requested. Adding "@core" to packages list')
-            dnf_packages_list.append('@core')
+            dnf_packages = '@core'
+
         elif self.livenet_type == LivenetImage.Type.SMALL:
             logging.debug('Small image requested. Adding "dnf yum iproute procps-ng openssh-server NetworkManager" to packages list')
-            dnf_packages_list.append('dnf yum iproute procps-ng openssh-server NetworkManager')
+            dnf_packages = 'dnf yum iproute procps-ng openssh-server NetworkManager'
+
         elif self.livenet_type == LivenetImage.Type.CORE:
             logging.debug('Core image requested. Adding "iproute procps-ng openssh-server" to packages list')
-            dnf_packages_list.append('iproute procps-ng openssh-server')
+            dnf_packages = 'iproute procps-ng openssh-server'
 
         # If there are additional packages to install
         if hasattr(self, 'additional_packages'):
+            logging.debug('Additional packages requested. Adding "' + str(self.additional_packages) + '" to dnf packages to install')
+            dnf_packages += ' ' + ' '.join(self.additional_packages)
 
-            # Add additional packages to the dnf packages list
-            packages = ''
-            for package in self.additional_packages:
-                packages = packages + ' ' + package
-            logging.debug('Additional packages requested. Adding "' + packages + '" to packages list')
-            dnf_packages_list.append(packages)
-
+        # If SELinux is activated (or enabled)
         if self.selinux:
             # Add needed SELinux packages to the dnf packages list
             logging.debug('SElinux requested. Adding "install policycoreutils" to packages list')
-            dnf_packages_list.append('selinux-policy-targeted selinux-policy-devel policycoreutils')
-
-        dnf_packages = ' '.join(dnf_packages_list)
+            dnf_packages += ' selinux-policy-targeted selinux-policy-devel policycoreutils'
 
         # Execute dnf
+        logging.debug('Executing packages install with the following command:')
         if self.optimize:
             if self.selinux:
-                logging.debug('Executing packages install with the following command:')
                 logging.debug('dnf install ' + dnf_packages + release + ' -y --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
                 os.system('dnf install ' + dnf_packages + release + ' -y --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
             else:
-                logging.debug('Executing packages install with the following command:')
                 logging.debug('dnf install ' + dnf_packages + release + ' -y --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
                 os.system('dnf install ' + dnf_packages + release + ' -y --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --exclude glibc-all-langpacks --exclude cracklib-dicts --exclude grubby --exclude libxkbcommon --exclude pinentry --exclude python3-unbound --exclude unbound-libs --exclude xkeyboard-config --exclude trousers --exclude diffutils --exclude gnupg2-smime --exclude openssl-pkcs11 --exclude rpm-plugin-systemd-inhibit --exclude shared-mime-info --exclude glibc-langpack-* --setopt=module_platform_id=platform:el8 --nobest')
         else:
-            logging.debug('Executing packages install with the following command:')
             logging.debug('dnf install ' + dnf_packages + release + ' -y --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --setopt=module_platform_id=platform:el8')
             os.system('dnf install ' + dnf_packages + release + ' -y --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --setopt=module_platform_id=platform:el8')
 
