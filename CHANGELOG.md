@@ -25,6 +25,9 @@
 
 ### Updated roles
 
+  - advanced_dhcp_server: prevent filename for none server type hosts.
+
+
 ### New tools
 
 ### Updated tools
