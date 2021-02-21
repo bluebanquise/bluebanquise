@@ -1,0 +1,13 @@
+---
+
+- name: include_tasks ░ OpenLDAP client
+  include_tasks: "client.yml"
+  when: openldap_client
+  tags:
+    - internal
+
+- name: include_tasks ░ OpenLDAP server
+  include_tasks: "server.yml"
+  when: openldap_server
+  tags:
+    - internal

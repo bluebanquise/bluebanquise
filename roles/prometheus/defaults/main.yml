@@ -1,0 +1,19 @@
+---
+monitoring:
+  exporters:
+
+prometheus:
+  scrape_interval: 1m
+  evaluation_interval: 2m
+  alertmanager:
+    group_wait: 1m
+    group_interval: 10m
+    repeat_interval: 3h
+
+prometheus_karma_username: admin
+prometheus_karma_password: admin
+prometheus_karma_alertmanager_server_name: prometheus1
+prometheus_karma_name: alertmanager_karma
+
+prometheus_client: false
+prometheus_server: false

@@ -7,9 +7,14 @@ README.md @oxedions @johnnykeats
 /roles/conman @oxedions
 /roles/display_tuning @oxedions
 /roles/generic_psf @johnnykeats
+/roles/grafana @oxedions
 /roles/lmod @oxedions
 /roles/nhc @oxedions
 /roles/ofed @oxedions
+/roles/openldap @oxedions
+/roles/powerman @oxedions
+/roles/prometheus @oxedions
+/roles/report @oxedions
 /roles/singularity @strus38
 /roles/slurm @oxedions
 /roles/users_basic @oxedions
