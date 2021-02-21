@@ -1,20 +1,20 @@
 README.md @oxedions @johnnykeats
-/resources @oxedions @johnnykeats
-/roles/advanced_dhcp_server @hmeAtos
-/roles/advanced_dns_server @oxedions
-/roles/clone @johnnykeats
-/roles/clustershell @oxedions
-/roles/conman @oxedions
-/roles/display_tuning @oxedions
-/roles/generic_psf @johnnykeats
-/roles/grafana @oxedions
-/roles/lmod @oxedions
-/roles/nhc @oxedions
-/roles/ofed @oxedions
-/roles/openldap @oxedions
-/roles/powerman @oxedions
-/roles/prometheus @oxedions
-/roles/report @oxedions
-/roles/singularity @strus38
-/roles/slurm @oxedions
-/roles/users_basic @oxedions
+/resources/ @oxedions @johnnykeats
+/roles/advanced_dhcp_server/ @hmeAtos
+/roles/advanced_dns_server/ @oxedions
+/roles/clone/ @johnnykeats
+/roles/clustershell/ @oxedions
+/roles/conman/ @oxedions
+/roles/display_tuning/ @oxedions
+/roles/generic_psf/ @johnnykeats
+/roles/grafana/ @oxedions
+/roles/lmod/ @oxedions
+/roles/nhc/ @oxedions
+/roles/ofed/ @oxedions
+/roles/openldap/ @oxedions
+/roles/powerman/ @oxedions
+/roles/prometheus/ @oxedions
+/roles/report/ @oxedions
+/roles/singularity/ @strus38
+/roles/slurm/ @oxedions
+/roles/users_basic/ @oxedions
