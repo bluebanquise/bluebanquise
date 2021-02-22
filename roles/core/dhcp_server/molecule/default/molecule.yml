@@ -53,9 +53,9 @@ provisioner:
           compute1:
             j2_current_iceberg_network: ice1
             network_interfaces:
-            - interface: enp0s3
-              ip4: 10.11.3.1
-              mac: 08:00:27:dc:f8:f6
-              network: ice1-1
+              - interface: enp0s3
+                ip4: 10.11.3.1
+                mac: 08:00:27:dc:f8:f6
+                network: ice1-1
 verifier:
   name: ansible

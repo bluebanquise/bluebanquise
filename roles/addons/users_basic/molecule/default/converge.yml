@@ -7,7 +7,7 @@
       general_parameters:
         home: /home
         shell: /bin/bash
-      users: # Active users
+      users:  # Active users
         - name: johnnykeats
           uid: 1078
           gid: 1078

@@ -119,9 +119,9 @@
   failed_when: basedomain.rc != 0 and basedomain.rc != 1
   changed_when: False
 
-#- name: Checking basedomain.ldif was already pushed
-#  shell: test $(($(ldapsearch -x -b "dc=sphen,dc=local" | grep People > /dev/null 2>&1; echo $?) + $(ldapsearch -x -b "dc=sphen,dc=local" | grep Group > /dev/null 2>&1; echo $?) ))
-#  register: basedomain
+# - name: Checking basedomain.ldif was already pushed
+#   shell: test $(($(ldapsearch -x -b "dc=sphen,dc=local" | grep People > /dev/null 2>&1; echo $?) + $(ldapsearch -x -b "dc=sphen,dc=local" | grep Group > /dev/null 2>&1; echo $?) ))
+#   register: basedomain
 
 - name: Add basedomain.ldif to ldap
   command: ldapadd -x -D cn=Manager{% for dc in domain_name.split('.') %},dc={{ dc }}{% endfor %} -w {{ ldap_settings.manager_password }} -f /dev/shm/basedomain.ldif

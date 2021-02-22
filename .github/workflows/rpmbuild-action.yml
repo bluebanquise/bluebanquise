@@ -8,26 +8,26 @@ jobs:
     name: Test RPM build
     runs-on: ubuntu-latest
     steps:
-    - name: install the needed packages
-      run: sudo apt-get install rpm bash
+      - name: install the needed packages
+        run: sudo apt-get install rpm bash
 
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: get Commit_id
-      id: get_commit_id
-      run: |
-        COMMIT_ID=$(git rev-parse --short "$GITHUB_SHA")
-        echo ::set-output name=commit_id::${COMMIT_ID}
+      - name: get Commit_id
+        id: get_commit_id
+        run: |
+          COMMIT_ID=$(git rev-parse --short "$GITHUB_SHA")
+          echo ::set-output name=commit_id::${COMMIT_ID}
 
-    - name: Prepare and Build
-      id: rpmbuild
-      run: |
-        sudo ln -sf /bin/bash /bin/sh
-        mkdir -p $HOME/rpmbuild/{SOURCES,SRPMS,RPMS,BUILD,SPECS}
-        COMMIT_ID=${{ steps.get_commit_id.outputs.commit_id }}
-        git archive $COMMIT_ID --prefix=bluebanquise-$COMMIT_ID/ --output=$HOME/rpmbuild/SOURCES/bluebanquise-$COMMIT_ID.tar
-        gzip $HOME/rpmbuild/SOURCES/bluebanquise-$COMMIT_ID.tar
-        tar xvf $HOME/rpmbuild/SOURCES/bluebanquise-$COMMIT_ID.tar.gz bluebanquise-$COMMIT_ID/resources/packaging/bluebanquise.spec -O > $HOME/rpmbuild/SPECS/bluebanquise.spec
-        rpmbuild -ba --define "version $COMMIT_ID" $HOME/rpmbuild/SPECS/bluebanquise.spec
-        tar zcf bluebanquise-${COMMIT_ID}.tar.gz -C $HOME/rpmbuild/ RPMS/noarch/ SRPMS/
+      - name: Prepare and Build
+        id: rpmbuild
+        run: |
+          sudo ln -sf /bin/bash /bin/sh
+          mkdir -p $HOME/rpmbuild/{SOURCES,SRPMS,RPMS,BUILD,SPECS}
+          COMMIT_ID=${{ steps.get_commit_id.outputs.commit_id }}
+          git archive $COMMIT_ID --prefix=bluebanquise-$COMMIT_ID/ --output=$HOME/rpmbuild/SOURCES/bluebanquise-$COMMIT_ID.tar
+          gzip $HOME/rpmbuild/SOURCES/bluebanquise-$COMMIT_ID.tar
+          tar xvf $HOME/rpmbuild/SOURCES/bluebanquise-$COMMIT_ID.tar.gz bluebanquise-$COMMIT_ID/resources/packaging/bluebanquise.spec -O > $HOME/rpmbuild/SPECS/bluebanquise.spec
+          rpmbuild -ba --define "version $COMMIT_ID" $HOME/rpmbuild/SPECS/bluebanquise.spec
+          tar zcf bluebanquise-${COMMIT_ID}.tar.gz -C $HOME/rpmbuild/ RPMS/noarch/ SRPMS/

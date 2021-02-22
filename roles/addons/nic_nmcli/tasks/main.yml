@@ -39,13 +39,13 @@
   tags:
     - service
 
-#- name: Solve possible unmanaged (Ubuntu only)
-#  file:
-#    path: /etc/NetworkManager/conf.d/10-globally-managed-devices.conf
-#    state: touch
-#  when:
-#    - ansible_facts.distribution_major_version == "18"
-#    - ansible_facts.os_family == "Ubuntu"
+# - name: Solve possible unmanaged (Ubuntu only)
+#   file:
+#     path: /etc/NetworkManager/conf.d/10-globally-managed-devices.conf
+#     state: touch
+#   when:
+#     - ansible_facts.distribution_major_version == "18"
+#     - ansible_facts.os_family == "Ubuntu"
 
 - name: nmcli █ Set NICs configuration
   nmcli:
@@ -71,7 +71,7 @@
     route_metric4: "{{ item.route_metric4 | default(networks[item.network].route_metric4) | default(omit) }}"
     never_default4: "{{ item.never_default4 | default(networks[item.network].never_default4) | default(omit) }}"
     mtu: "{{ item.mtu | default(networks[item.network].mtu) | default(omit) }}"
-    type: "{{ item.type | default('ethernet') }}" # Even if in the documentation type is optional, it is in fact mandatory. Default to ethernet.
+    type: "{{ item.type | default('ethernet') }}"  # Even if in the documentation type is optional, it is in fact mandatory. Default to ethernet.
     # Standard
     ip6: "{{ item.ip6 | default(omit) }}"
     gw6: "{{ item.gw6 | default(omit) }}"

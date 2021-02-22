@@ -8,23 +8,18 @@
 
 - name: Create report directories structure
   file:
-   path: "{{ item }}"
-   state: directory
-   mode: 0755
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
   with_items:
-   - /var/www/html/report/
-   - /var/www/html/report/pictures
-   - /var/www/html/report/css
-   - /var/www/html/report/inventory_checker
-   - /var/www/html/report/cluster_configuration
-   - /var/www/html/report/graphs
+    - /var/www/html/report/
+    - /var/www/html/report/pictures
+    - /var/www/html/report/css
+    - /var/www/html/report/inventory_checker
+    - /var/www/html/report/cluster_configuration
+    - /var/www/html/report/graphs
   tags:
     - hex
-
-#- debug: msg="{{ groups[item]|list|join(',') }}"
-#  tags:
-#    - hex3
-#  with_items: "{{ j2_equipment_groups_list }}"
 
 - name: Gather equipment groups
   command: "nodeset -r {{ groups[item]|list|join(',') }}"
@@ -33,16 +28,6 @@
   tags:
     - hex3
   changed_when: False
-
-#- debug: msg="eq_groups"
-#  tags:
-#    - hex3
-#- debug: msg="{{ item.item }} {{ item.stdout }}"
-#  tags:
-#    - hex3
-#  with_items: "{{ eq_groups.results }}"
-
-
 
 - name: Template >> /var/www/html/report/index.html
   template:
@@ -165,11 +150,11 @@
 
 - name: Create report directories structure
   file:
-   path: "{{ item }}"
-   state: directory
-   mode: 0755
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
   with_items:
-   - /dev/shm/ansible-cmdb/
+    - /dev/shm/ansible-cmdb/
 
 - name: Gather all facts
   command: ansible -m setup --tree /dev/shm/ansible-cmdb/ all
@@ -202,4 +187,3 @@
   tags:
     - template
   when: report_settings.enable_graphtool
-

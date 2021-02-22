@@ -25,7 +25,6 @@
     name: "{{ item }}"
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
   with_items:
-#    - nscd
     - sssd
   tags:
     - service
@@ -35,7 +34,6 @@
     name: "{{ item }}"
     state: started
   with_items:
-#    - nscd
     - sssd
   when: (start_services | bool)
   tags:

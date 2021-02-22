@@ -47,7 +47,7 @@
     system: yes
 
 - name: file █ Create /var/log/conman directory
-  file: # noqa 208
+  file:  # noqa 208
     path: /var/log/conman
     setype: "{{ (ansible_facts.selinux.status == 'enabled') | ternary('conman_log_t', omit) }}"
     state: directory

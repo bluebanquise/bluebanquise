@@ -35,6 +35,7 @@ mg_computes:
 
     equipment_typeG:
 
+      hosts:
         gpu001:
           bmc:
             name: bgpu001
