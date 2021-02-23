@@ -23,7 +23,7 @@ jobs:
         uses: actions/setup-python@v1
 
       - name: Install packages
-        run: pip install ansible ansible-lint flake8 yamllint
+        run: pip install 'ansible<3.0.0' ansible-lint flake8 yamllint
 
       - name: Check python code
         run: flake8 . --statistics --ignore E501,E226
