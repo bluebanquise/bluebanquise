@@ -17,11 +17,48 @@ BlueBanquise is part of the **Algoric** Project from the [**Fabrique du Loch**](
 
 It is a revamping of the old stack [Banquise](https://github.com/oxedions/banquise), based on Salt.
 
-## Documentation and files
+## Ressources
+
+### Files
+
+The stack is split over multiple repositories:
+
+* :globe_with_meridians: **Core:** stack core is hosted on github, in this [same repository](https://github.com/bluebanquise/bluebanquise).
+
+* :star: **Additional roles:** community roles or tools are hosted on github, in the [community repository](https://github.com/bluebanquise/community).
+
+### Documentation
 
 The stack documentation is available on the BlueBanquise main website, in [documentation subfolder](https://bluebanquise.com/documentation/).
 
-The stack repositories are available in the [repositories subfolder](https://bluebanquise.com/repository/).
+Note that each role (core or community) embeds its own readme, with detailed usage description.
+
+### Packages
+
+The stack packages are available in the [repositories subfolder](https://bluebanquise.com/repository/).
+
+## Supported software environment
+
+| Operating System family | Operating System distribution | Tested versions    | Notes                               |
+| ----------------------- | ----------------------------- | ------------------ | ----------------------------------- |
+| RedHat                  |                               |                    |                                     |
+|                         | RHEL                          | 7.x, 8.x           | Should work on all 7 and 8 versions |
+|                         | CentOS                        | 7.x, 8.x           | Should work on all 7 and 8 versions |
+|                         | CentOS Stream                 | NA                 | In dev, targeted for next release   |
+|                         | Oracle Linux                  | NA                 | In dev, targeted for next release   |
+|                         | Springdale Linux              | NA                 | In dev, targeted for next release   |
+|                         | CloudLinux                    | NA                 | Waiting for distribution release    |
+|                         | RockyLinux                    | NA                 | Waiting for distribution release    |
+| Suse                    |                               |                    |                                     |
+|                         | SLES                          | NA                 | In dev, targeted for next release   |
+|                         | OpenSuse Leap                 | NA                 | In dev, targeted for next release   |
+| Debian                  |                               |                    |                                     |
+|                         | Ubuntu                        | NA                 | In dev, targeted for next release   |
+|                         | Debian                        | NA                 | In dev, targeted for next release   |
+
+Ansible >= 2.9.13 is mandatory for BlueBanquise to run properly.
+
+**[OpenHPC](https://openhpc.community/downloads/)** scientific packages and OpenHPC slurm job scheduler are compatible with the stack.
 
 ## The name
 
@@ -29,25 +66,6 @@ You may wonder where this name comes from:
 
 * [BlueBanquise](https://en.wikipedia.org/wiki/File:Blue_iceberg_in_the_Ilulissat_icefjord.jpg)
 * [Blue Iceberg](https://en.wikipedia.org/wiki/Blue_iceberg)
-
-## Supported software environment
-
-Currently supported OS are:
-
-* Fully supported:
-  * RedHat/Centos 7
-  * RedHat/Centos 8
-
-* In development:
-  * OpenSuse Leap 15.1
-
-* To be included if demand:
-  * Ubuntu
-  * Debian
-
-Ansible >= 2.9.13 is mandatory for BlueBanquise to run properly.
-
-**[OpenHPC](https://openhpc.community/downloads/)** scientific packages and OpenHPC slurm job scheduler are compatible with the stack.
 
 ## Thanks
 
