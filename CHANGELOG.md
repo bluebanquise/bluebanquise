@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.1.0 - Next release
+## 1.0.0 - Next release
 
 ### New roles
 
@@ -24,6 +24,9 @@
   - users_basic. Owner: @oxedions
 
 ### Updated roles
+
+  - advanced_dhcp_server: prevent filename for none server type hosts. (#6)
+
 
 ### New tools
 
