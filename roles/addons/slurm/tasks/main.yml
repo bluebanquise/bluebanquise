@@ -19,9 +19,7 @@
         - "vars/{{ ansible_facts.os_family }}.yml"
       skip: true
   tags:
-    - internal
-    - package
-    - template
+    - always
 
 - name: "package █ Install {{ slurm_packages_to_install[slurm.slurm_packaging][slurm_profile] | join(' ') }}"
   package:

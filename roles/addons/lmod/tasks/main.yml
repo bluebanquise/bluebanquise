@@ -19,8 +19,7 @@
         - "vars/{{ ansible_facts.os_family }}.yml"
       skip: true
   tags:
-    - internal
-    - package
+    - always
 
 - name: "package █ Install {{ lmod_packages_to_install | join(' ') }}"
   package:
