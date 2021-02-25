@@ -18,7 +18,7 @@ For example, to list all available time zones in Europe, type:
 
 .. code-block:: shell
 
- timedatectl list-timezones | grep Paris
+ timedatectl list-timezones | grep -i europe
  Europe/Amsterdam
  Europe/Andorra
  Europe/Athens
