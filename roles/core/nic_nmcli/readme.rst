@@ -11,11 +11,7 @@ This role provides all features availables in the main nmcli module.
 Please refer to `nmcli module documentation <https://docs.ansible.com/ansible/latest/collections/community/general/nmcli_module.html>`_ .
 
 .. warning:
-  This role needs **latest** (2.0.0) nmcli.py module. If you plan to configure
-  routes or zones with this role, you will have to install the development
-  version of the community.general collection which is available at
-  https://github.com/ansible-collections/community.general/ until the General
-  Availability of the 2.0.0 release.
+  This role needs **latest** (2.2.0) nmcli.py module.
 
 Instructions
 ^^^^^^^^^^^^
@@ -164,6 +160,7 @@ You can define routes at two levels:
 Changelog
 ^^^^^^^^^
 
+* 1.3.0: Rewrite logic to prevent crashs and ease code reading. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.2.0: Add routes4, route_metric4, never_default4 and zone. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.1: Add routes support on NIC. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.0: Rewamp full role to handle all nmcli module features. Benoit Leveugle <benoit.leveugle@gmail.com>
