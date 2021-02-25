@@ -162,7 +162,7 @@ Other nodes
 
 Now, review compute and login nodes in their respective
 **cluster/nodes/computes.yml** and **cluster/nodes/logins.yml**. The same rules
-apply. You can add more nodes. You can add equipment groups for exemple if you have multiple types
+apply. You can add more nodes. You can add equipment groups for example if you have multiple types
 of equipment for compute or login nodes, this way:
 
 .. code-block:: yaml
