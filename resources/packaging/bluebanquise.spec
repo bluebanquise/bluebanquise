@@ -1,4 +1,4 @@
-%{!?version: %define version 1.3.0}
+%{!?version: %define version 1.5.0}
 
 Name:           bluebanquise
 Version:        %{version}
@@ -63,6 +63,9 @@ find roles/core -type f ! -name readme.rst \
  ! -path 'roles/*/templates/*' ! -path 'roles/*/files/*' ! -path 'roles/*/vars/*' \
  | xargs -l1 -i{} echo %{_sysconfdir}/%{name}/{} >> rolesfiles.txt
 
+# Build list of files for other roles
+grep -v 'roles/addons/' rolesfiles.txt > rolesfiles.cores
+
 %build
 
 
@@ -83,7 +86,7 @@ cp -a tools/bluebanquise-playbook %{buildroot}%{_sbindir}/
 %dir %{_sysconfdir}/%{name}/
 %config(noreplace) %{_sysconfdir}/%{name}/ansible.cfg
 %config %{_sysconfdir}/%{name}/internal/
-%{_sysconfdir}/%{name}/roles/customs/
+%{_sysconfdir}/%{name}/roles/custom/
 %attr(750,root,root) %{_sbindir}/bluebanquise-playbook
 
 %changelog
