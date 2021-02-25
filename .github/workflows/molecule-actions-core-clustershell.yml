@@ -1,16 +1,16 @@
 ---
-name: addons/clustershell unit testing
+name: core/clustershell unit testing
 on:
   push:
     branches:
       - master
     paths:
-      - 'roles/addons/clustershell/**'
-      - '.github/workflows/molecule-actions-addons-clustershell.yml'
+      - 'roles/core/clustershell/**'
+      - '.github/workflows/molecule-actions-core-clustershell.yml'
   pull_request:
     paths:
-      - 'roles/addons/clustershell/**'
-      - '.github/workflows/molecule-actions-addons-clustershell.yml'
+      - 'roles/core/clustershell/**'
+      - '.github/workflows/molecule-actions-core-clustershell.yml'
 
 jobs:
   molecule_test:
@@ -36,6 +36,6 @@ jobs:
       - name: Install packages
         run: |
           pip install tox
-      - name: Run molecule test for addons/clustershell
+      - name: Run molecule test for core/clustershell
         run: |
-          cd roles/addons/clustershell && tox
+          cd roles/core/clustershell && tox
