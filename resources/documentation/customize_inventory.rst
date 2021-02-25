@@ -82,7 +82,7 @@ Disabling the SSH strict host key checking
    **By default it is an activated option.**
 
 As a reminder, if this flag is set to 'yes', ssh will never automatically add host keys to the ``~/.ssh/known_hosts`` file, and refuses to connect to hosts whose host key has changed.
-This provides maximum protection against trojan horse attacks.
+This provides protection against MITM attacks.
 
 To disable the SSH strict host key checking, edit the file ``/etc/bluebanquise/inventory/group_vars/all/general_settings/security.yml`` and change the ``hostkey_checking`` value:
 
