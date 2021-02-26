@@ -1,0 +1,6 @@
+---
+bluebanquise_RedHat_8:
+  packages_to_install:
+    - ansible
+    - python3-jmespath
+    - python3-netaddr
