@@ -1,0 +1,7 @@
+---
+dns_server_Ubuntu:
+  packages_to_install:
+    - bind9
+    - python-netaddr
+  services_to_start:
+    - bind9
