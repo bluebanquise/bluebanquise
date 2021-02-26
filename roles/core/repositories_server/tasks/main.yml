@@ -1,8 +1,8 @@
 ---
 
-- name: firewalld █ "Add services to firewall's {{ j2_role_variables['firewall_zone'] | default('public') }} zone"
+- name: firewalld █ "Add services to firewall's {{ repositories_server_firewall_zone | default('public',true) }} zone"
   firewalld:
-    zone: "{{ j2_role_variables['firewall_zone'] | default('public') }}"
+    zone: "{{ repositories_server_firewall_zone | default('public',true) }}"
     service: "{{ item }}"
     immediate: "yes"
     permanent: "yes"
