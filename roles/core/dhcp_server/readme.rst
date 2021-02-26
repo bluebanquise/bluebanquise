@@ -117,6 +117,7 @@ Files generated:
 Changelog
 ^^^^^^^^^
 
+* 1.1.0: Update role to new vars gathering method. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.7: Set defaults leases. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.6: Update to new network_interfaces syntax. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.5: Clean. johnnykeats <johnny.keats@outlook.com>
