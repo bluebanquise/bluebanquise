@@ -1,0 +1,8 @@
+---
+time_Ubuntu:
+  packages_to_install:
+    - chrony
+    - tzdata
+  services_to_start:
+    - chronyd
+  chrony_conf_path: /etc/chrony/chrony.conf
