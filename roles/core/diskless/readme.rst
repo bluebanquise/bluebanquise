@@ -61,7 +61,7 @@ Set up the tool
 
    Select an action:
   -->:
-  
+
 4. Check that the kernels you previously added are present in the tool:
 
 .. code-block:: text
@@ -181,7 +181,7 @@ In the diskless main menu you can select the first option and select the module 
    1 - livenet
    2 - demo
    3 - nfs
-  -->: 
+  -->:
 
 Livenet module
 """"""""""""""
@@ -349,16 +349,16 @@ Customizing Livenet image
 The image name used in the examples below is *space_image*.
 
 The disklessset tool allows to customize livenet images before booting them,
-by mounting images and providing simple chroot inventory. System administrator 
+by mounting images and providing simple chroot inventory. System administrator
 can then tune or execute playbooks inside images.
 This step also saves time on the execution of playbooks on booted diskless nodes.
 
 To mount a livenet image in order to customize it, go to livenet module and select "mount livenet image".
 
-It is now possible to copy files, install rpms, or tune any aspects of the 
+It is now possible to copy files, install rpms, or tune any aspects of the
 mounted image.
 
-To execute an Ansible playbook into the image, generate a new playbook 
+To execute an Ansible playbook into the image, generate a new playbook
 with the following head:
 
 .. code-block:: yaml
@@ -371,7 +371,7 @@ with the following head:
       j2_node_main_network: ice1-1                #<<< UPDATE
       start_service: false
       image_equipment_profile: equipment_typeC    #<<< UPDATE
-  
+
     pre_tasks:
       - name: Add current host to defined equipment_profile
         add_host:
@@ -379,7 +379,7 @@ with the following head:
           groups: "{{ image_equipment_profile }}"
         tags:
           - always
-  
+
     roles:
     # ADD HERE YOUR ROLES
 
@@ -389,7 +389,7 @@ Now, update the needed values in this file:
 * **j2_node_main_network**: Set here your main network to be used. This will allow the roles to determine the services ip to bind to.
 * **image_equipment_profile**: Set here your equipment_profile to be used. This will allow the roles to determine key values, for example find the repositories path to be used (distribution version, etc).
 
-And add your desired roles under **roles:** in the file, like for 
+And add your desired roles under **roles:** in the file, like for
 any standard playbook.
 
 Then execute it into the mounted image using the following command:
@@ -442,6 +442,7 @@ To be done
 
 Changelog
 ^^^^^^^^^
+* 1.3.0: Update role to new vars gathering method. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.2.0: Role update. David Pieters <davidpieters22@gmail.com>, Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.0: Role update. Benoit Leveugle <benoit.leveugle@gmail.com>, Bruno Travouillon <devel@travouillon.fr>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>

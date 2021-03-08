@@ -1,20 +1,7 @@
 ---
-- name: include_vars ░ Gather OS specific variables
-  include_vars: "{{ item }}"
-  with_first_found:
-    - files:
-        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
-        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
-        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
-        - "vars/{{ ansible_facts.os_family }}.yml"
-      skip: true
-  tags:
-    - internal
-    - package
-
-- name: "package █ Install {{ diskless_packages_to_install | join(' ') }}"
+- name: "package █ Install {{ j2_role_variables['packages_to_install'] | join(' ') }}"
   package:
-    name: "{{ diskless_packages_to_install }}"
+    name: "{{ j2_role_variables['packages_to_install'] }}"
     state: present
   tags:
     - package
