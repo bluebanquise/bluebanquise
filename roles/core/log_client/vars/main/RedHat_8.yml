@@ -1,0 +1,6 @@
+---
+log_client_RedHat_8:
+  packages_to_install:
+    - rsyslog
+    - python3-libselinux
+    - python3-policycoreutils

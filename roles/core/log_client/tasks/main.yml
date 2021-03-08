@@ -1,37 +1,12 @@
 ---
-- name: include_vars ░ Gather OS specific variables
-  # This task gathers variables defined in OS specific files.
-  #
-  # Search vars in:
-  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
-  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
-  #  - <distribution>.yml            # eg. CentOS.yml
-  #  - <os_family>.yml               # eg. RedHat.yml
-  #
-  # If no OS specific file is found, the role will default to vars/main.yml
-  #
-  include_vars: "{{ item }}"
-  with_first_found:
-    - files:
-        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
-        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
-        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
-        - "vars/{{ ansible_facts.os_family }}.yml"
-      skip: true
-  tags:
-    - internal
-    - package
-    - service
-    - template
-
-- name: Install packages
+- name: "package █ Install {{ j2_role_variables['packages_to_install'] | join(' ') }}"
   package:
-    name: "{{ log_client_packages_to_install }}"
+    name: "{{ j2_role_variables['packages_to_install'] }}"
     state: present
   tags:
     - package
 
-- name: Template >> /etc/rsyslog.conf
+- name: "template █ Generate {{ log_client_rsyslog_conf_path }}"
   template:
     src: rsyslog.conf.j2
     dest: "{{ log_client_rsyslog_conf_path }}"
@@ -43,7 +18,7 @@
   tags:
     - template
 
-- name: Add custom rsyslog files
+- name: "template █ Generate custom rsyslog files"
   template:
     src: rsyslog.d_custom.conf.j2
     dest: "{{ item.path | default('/etc/rsyslog.d') }}/{{ item.name }}"
@@ -58,7 +33,7 @@
   tags:
     - template
 
-- name: Allow syslog port into SELinux
+- name: seport █ Allow syslog port into SELinux
   seport:
     ports: "{{ log_client_server_port }}"
     proto: "{{ item }}"
@@ -74,11 +49,11 @@
 
 - meta: flush_handlers
 
-- name: Manage services state
+- name: "service █ Manage {{ j2_role_variables['services_to_start'] | join(' ') }} state"
   service:
     name: "{{ item }}"
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
     state: "{{ (start_services | bool) | ternary('started', omit) }}"
-  loop: "{{ log_client_services_to_start }}"
+  loop: "{{ j2_role_variables['services_to_start'] }}"
   tags:
     - service
