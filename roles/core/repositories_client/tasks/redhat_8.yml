@@ -34,8 +34,8 @@
     proxy: "{{ item.proxy | default(omit) }}"
     state: "{{ item.state | default('present') }}"
   loop:
-  # Combine BaseOS and AppStream with 'os' parameters if any. Otherwise, this
-  # will configure BaseOS and AppStream with default values.
+    # Combine BaseOS and AppStream with 'os' parameters if any. Otherwise, this
+    # will configure BaseOS and AppStream with default values.
     - "{{ repositories|selectattr('name', 'defined')
           |selectattr('name', 'match', 'os')|list
           |combine({'repoid':'BaseOS'}) }}"

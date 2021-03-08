@@ -28,7 +28,7 @@ networks:
       pxe_ip: 10.1.0.1
       dns_ip:
         - 10.1.0.1
-#        - 10.1.0.2 # can add a second management in same iceberg
+        #  - 10.1.0.2  # can add a second management in same iceberg
       repository_ip: 10.1.0.1
       authentication_ip: 10.1.0.1
       time_ip: 10.1.0.1

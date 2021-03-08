@@ -34,7 +34,7 @@ jobs:
         uses: actions/setup-python@v1
       - name: Install packages
         run: |
-          pip install tox 
+          pip install tox
       - name: Run molecule test for core/dhcp_server
         run: |
           cd roles/core/dhcp_server && tox

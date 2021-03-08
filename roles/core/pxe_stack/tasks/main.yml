@@ -26,9 +26,9 @@
     state: directory
     mode: 0755
   loop:
-   - /var/www/cgi-bin
-   - /etc/bluebanquise
-   - /etc/bootset
+    - /var/www/cgi-bin
+    - /etc/bluebanquise
+    - /etc/bootset
 
 - name: file █ Create pxe http directories structure
   file:
@@ -38,11 +38,11 @@
     owner: "{{ j2_role_variables['apache_user'] }}"
     group: "{{ j2_role_variables['apache_user'] }}"
   loop:
-   - /var/www/html/preboot_execution_environment
-   - /var/www/html/preboot_execution_environment/bin
-   - /var/www/html/preboot_execution_environment/nodes
-   - /var/www/html/preboot_execution_environment/equipment_profiles
-   - /var/www/html/preboot_execution_environment/osdeploy
+    - /var/www/html/preboot_execution_environment
+    - /var/www/html/preboot_execution_environment/bin
+    - /var/www/html/preboot_execution_environment/nodes
+    - /var/www/html/preboot_execution_environment/equipment_profiles
+    - /var/www/html/preboot_execution_environment/osdeploy
 
 - name: include_tasks ░ Use OS dedicated task
   include_tasks: "{{ (ansible_facts.distribution|replace(' ','_')) }}_{{ ansible_facts.distribution_major_version }}.yml"
