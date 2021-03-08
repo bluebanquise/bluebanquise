@@ -4,7 +4,7 @@ dependency:
 driver:
   name: docker
 platforms:
-    # For simple configuration
+  # For simple configuration
   - name: simple-${INSTANCE_DISTRO:-centos8}
     groups:
       - simple
@@ -16,7 +16,7 @@ platforms:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
     privileged: true
     pre_build_image: true
-    # Configure environment in repo path
+  # Configure environment in repo path
   - name: environment-${INSTANCE_DISTRO:-centos8}
     groups:
       - environment
@@ -28,7 +28,7 @@ platforms:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
     privileged: true
     pre_build_image: true
-    # For advanced configuration
+  # For advanced configuration
   - name: advanced-${INSTANCE_DISTRO:-centos8}
     groups:
       - advanced
@@ -40,7 +40,7 @@ platforms:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
     privileged: true
     pre_build_image: true
-    # Keep distro repos enabled (CentOS only)
+  # Keep distro repos enabled (CentOS only)
   - name: distrorepos-simple-${INSTANCE_DISTRO:-centos8}
     groups:
       - distrorepos

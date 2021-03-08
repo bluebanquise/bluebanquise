@@ -6,26 +6,26 @@
     state: present
   vars:
     packages:
-    - prometheus
-    - alertmanager
-    - ipmi_exporter
-    - freeipmi
-    - snmp_exporter
-    - karma
+      - prometheus
+      - alertmanager
+      - ipmi_exporter
+      - freeipmi
+      - snmp_exporter
+      - karma
 
-# for generator of oid walk for snmp_exporter     
+# for generator of oid walk for snmp_exporter
 - name: Package
   package:
     name: "{{ item }}"
     state: present
   vars:
     packages:
-    - gcc
-    - make
-    - net-snmp
-    - net-snmp-utils
-    - net-snmp-libs
-    - net-snmp-devel
+      - gcc
+      - make
+      - net-snmp
+      - net-snmp-utils
+      - net-snmp-libs
+      - net-snmp-devel
   when:
     - monitoring.exporters.snmp_exporter.with_generator is defined
     - monitoring.exporters.snmp_exporter.with_generator
@@ -64,14 +64,14 @@
 
 - name: Create directories structure
   file:
-   path: "{{ item }}"
-   state: directory
-   mode: 0750
-   owner: prometheus
-   group: prometheus
+    path: "{{ item }}"
+    state: directory
+    mode: 0750
+    owner: prometheus
+    group: prometheus
   loop:
-   - /etc/prometheus/alerts/
-   - /var/lib/prometheus
+    - /etc/prometheus/alerts/
+    - /var/lib/prometheus
 
 - name: Template >> /etc/prometheus/prometheus.yml
   template:
@@ -93,13 +93,13 @@
 
 - name: Create directories structure for alertmanager
   file:
-   path: "{{ item }}"
-   state: directory
-   mode: 0750
-   owner: alertmanager
-   group: alertmanager
+    path: "{{ item }}"
+    state: directory
+    mode: 0750
+    owner: alertmanager
+    group: alertmanager
   loop:
-   - /etc/alertmanager
+    - /etc/alertmanager
 
 - name: Template >> /etc/alertmanager/alertmanager.yml
   template:
