@@ -50,6 +50,7 @@ Packages installed:
 Changelog
 ^^^^^^^^^
 
+* 1.1.0: Update role to new vars gathering method. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.4: Added new variable to allow all possible mount values in state parameter. Osmocl <osmocl@osmo.cl>
 * 1.0.3: Clean. johnnykeats <johnny.keats@outlook.com>
 * 1.0.2: Added Ubuntu 18.04 compatibility. johnnykeats <johnny.keats@outlook.com>
