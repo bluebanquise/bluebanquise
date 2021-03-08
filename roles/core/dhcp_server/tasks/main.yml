@@ -1,7 +1,7 @@
 ---
 - name: "firewalld █ Add services to firewall's {{ dhcp_server_firewall_zone | default('public',true) }} zone"
   firewalld:
-    zone: "{{ dhcp_server_firewall_zone | default('public') }}"
+    zone: "{{ dhcp_server_firewall_zone | default('public',true) }}"
     service: "{{ item }}"
     immediate: "yes"
     permanent: "yes"
