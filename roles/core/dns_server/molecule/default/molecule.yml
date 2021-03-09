@@ -23,6 +23,7 @@ provisioner:
         j2_node_main_network_interface: en0
         j2_management_networks:
           - ice1-1
+        j2_role_variables: "{{ vars[role_name + '_' + ansible_facts.distribution + '_' + ansible_facts.distribution_version] | default(vars[role_name + '_' + ansible_facts.distribution + '_' + ansible_facts.distribution_major_version]) | default(vars[role_name + '_' + ansible_facts.distribution]) | default(vars[role_name + '_' + ansible_facts.os_family + '_' + ansible_facts.distribution_version]) | default(vars[role_name + '_' + ansible_facts.os_family + '_' + ansible_facts.distribution_major_version]) | default(vars[role_name + '_' + ansible_facts.os_family]) }}"
         network_interfaces:
           - interface: en0
             ip4: 10.10.0.1

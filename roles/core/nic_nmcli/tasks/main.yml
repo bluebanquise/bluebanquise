@@ -1,17 +1,17 @@
 ---
-- name: "package █ Install {{ nic_nmcli_packages_to_install | join(' ') }}"
+- name: "package █ Install {{ j2_role_variables['packages_to_install'] | join(' ') }}"
   package:
-    name: "{{ nic_nmcli_packages_to_install }}"
+    name: "{{ j2_role_variables['packages_to_install'] }}"
     state: present
   tags:
     - package
 
-- name: "service █ Manage {{ nic_nmcli_services_to_start | join(' ') }} state"
+- name: "service █ Manage {{ j2_role_variables['services_to_start'] | join(' ') }} state"
   service:
     name: "{{ item }}"
-    enabled: yes
-    state: started
-  loop: "{{ nic_nmcli_services_to_start }}"
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+    state: "{{ (start_services | bool) | ternary('started', omit) }}"
+  loop: "{{ j2_role_variables['services_to_start'] }}"
   tags:
     - service
 

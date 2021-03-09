@@ -1,5 +1,5 @@
 ---
-nic_nmcli_Ubuntu
+nic_nmcli_Ubuntu:
   packages_to_install:
     - network-manager
     - python-dbus

@@ -42,6 +42,7 @@ provisioner:
             netmask: 255.255.0.0
             gateway: 11.30.2.1
 
+        j2_role_variables: "{{ vars[role_name + '_' + ansible_facts.distribution + '_' + ansible_facts.distribution_version] | default(vars[role_name + '_' + ansible_facts.distribution + '_' + ansible_facts.distribution_major_version]) | default(vars[role_name + '_' + ansible_facts.distribution]) | default(vars[role_name + '_' + ansible_facts.os_family + '_' + ansible_facts.distribution_version]) | default(vars[role_name + '_' + ansible_facts.os_family + '_' + ansible_facts.distribution_major_version]) | default(vars[role_name + '_' + ansible_facts.os_family]) }}"
         j2_equipment_groups_list:
           - equipment_typeM
           - equipment_typeC
