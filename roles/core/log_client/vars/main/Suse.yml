@@ -1,8 +1,6 @@
 ---
-log_client_RedHat_7:
+log_client_Suse:
   packages_to_install:
     - rsyslog
-    - libselinux-python
-    - policycoreutils-python
   services_to_start:
     - rsyslog

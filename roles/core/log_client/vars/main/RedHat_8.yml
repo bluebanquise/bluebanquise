@@ -4,3 +4,5 @@ log_client_RedHat_8:
     - rsyslog
     - python3-libselinux
     - python3-policycoreutils
+  services_to_start:
+    - rsyslog
