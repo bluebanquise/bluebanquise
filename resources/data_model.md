@@ -283,4 +283,6 @@ j2_node_main_resolution_network: Main resolution network. The network on which h
 j2_node_main_network: Main network. The network used by Ansible to deploy configuration (related to ssh).
 j2_node_main_network_interface: Main network interface. Same as main network, but provides interface name instead of network.
 j2_management_networks: List of management networks.
+
+j2_role_variables: Used in core roles. Sort role vars to grab current OS related ones.
 ```
