@@ -61,7 +61,8 @@
   timezone:
     name: "{{ time_zone }}"
 
-- meta: flush_handlers
+- name: meta █ Run handler tasks to restart time services
+  meta: flush_handlers
 
 - name: "service █ Manage {{ time_services_to_start | join(' ') }} services state"
   service:

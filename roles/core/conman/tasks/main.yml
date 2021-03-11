@@ -102,7 +102,8 @@
   when:
     - ansible_facts.selinux.status == "enabled"
 
-- meta: flush_handlers
+- name: meta █ Run handler tasks to restart conman service
+  meta: flush_handlers
 
 - name: service █ Manage conman state
   service:
