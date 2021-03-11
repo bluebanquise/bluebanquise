@@ -50,7 +50,7 @@
     owner: root
     group: root
     mode: 0644
-  notify: Restart rsyslog services
+  notify: service █ Restart rsyslog service
   tags:
     - template
 
@@ -66,7 +66,7 @@
   loop:
     - tcp
     - udp
-  notify: Restart rsyslog services
+  notify: service █ Restart rsyslog service
 
 - name: "template █ Generate /etc/logrotate.d/rsyslog"
   template:
@@ -75,7 +75,7 @@
     owner: root
     group: root
     mode: 0644
-  notify: Restart rsyslog services
+  notify: service █ Restart rsyslog service
   tags:
     - template
 
@@ -88,7 +88,7 @@
     - compresscmd /usr/bin/xz
     - uncompresscmd /usr/bin/unxz
     - compressext .xz
-  notify: Restart rsyslog services
+  notify: service █ Restart rsyslog service
   tags:
     - template
 

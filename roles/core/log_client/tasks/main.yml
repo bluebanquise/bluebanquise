@@ -13,7 +13,7 @@
     owner: root
     group: root
     mode: 0644
-  notify: Restart rsyslog services
+  notify: service █ Restart rsyslog service
   when: "'rsyslog.conf' not in (log_client_configuration_files | default([]) | selectattr('name','defined') | map(attribute='name') | list)"
   tags:
     - template
@@ -28,7 +28,7 @@
   loop: "{{ log_client_configuration_files }}"
   loop_control:
     label: "Install configuration file {{ item.name }}"
-  notify: Restart rsyslog services
+  notify: service █ Restart rsyslog service
   when: log_client_configuration_files is defined and log_client_configuration_files is iterable
   tags:
     - template
@@ -45,7 +45,7 @@
   loop:
     - tcp
     - udp
-  notify: Restart rsyslog services
+  notify: service █ Restart rsyslog service
 
 - meta: flush_handlers
 
