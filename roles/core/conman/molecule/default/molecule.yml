@@ -20,7 +20,6 @@ provisioner:
   inventory:
     host_vars:
       instance:
-        j2_role_variables: "{{ vars[role_name + '_' + ansible_facts.distribution + '_' + ansible_facts.distribution_version] | default(vars[role_name + '_' + ansible_facts.distribution + '_' + ansible_facts.distribution_major_version]) | default(vars[role_name + '_' + ansible_facts.distribution]) | default(vars[role_name + '_' + ansible_facts.os_family + '_' + ansible_facts.distribution_version]) | default(vars[role_name + '_' + ansible_facts.os_family + '_' + ansible_facts.distribution_major_version]) | default(vars[role_name + '_' + ansible_facts.os_family]) }}"
         j2_current_iceberg: iceberg1
         icebergs_system: false
         enable_services: true

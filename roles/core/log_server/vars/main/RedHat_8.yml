@@ -10,4 +10,4 @@ log_server_RedHat_8:
     - rsyslog
   firewall_services_to_add:
     - syslog
-    - rsh # 514/tcp
+    - rsh  # 514/tcp

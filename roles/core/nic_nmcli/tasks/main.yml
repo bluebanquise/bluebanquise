@@ -15,13 +15,13 @@
   tags:
     - service
 
-#- name: Solve possible unmanaged (Ubuntu only)
-#  file:
-#    path: /etc/NetworkManager/conf.d/10-globally-managed-devices.conf
-#    state: touch
-#  when:
-#    - ansible_facts.distribution_major_version == "18"
-#    - ansible_facts.os_family == "Ubuntu"
+# - name: Solve possible unmanaged (Ubuntu only)
+#   file:
+#     path: /etc/NetworkManager/conf.d/10-globally-managed-devices.conf
+#     state: touch
+#   when:
+#     - ansible_facts.distribution_major_version == "18"
+#     - ansible_facts.os_family == "Ubuntu"
 
 - name: nmcli █ Set NICs configuration
   nmcli:
@@ -36,7 +36,7 @@
     ip6: "{{ j2_nic_nmcli_ip6 | trim | default(omit,true) }}"
     gw6: "{{ j2_nic_nmcli_gw6 | trim | default(omit,true) }}"
     mtu: "{{ j2_nic_nmcli_mtu | trim | default(omit,true) }}"
-    type: "{{ item.type | default('ethernet') }}" # Even if in the documentation type is optional, it is in fact mandatory. Default to ethernet.
+    type: "{{ item.type | default('ethernet') }}"  # Even if in the documentation type is optional, it is in fact mandatory. Default to ethernet.
     # Standard
     state: "{{ item.state | default('present') }}"
     autoconnect: "{{ item.autoconnect | default(omit) }}"
