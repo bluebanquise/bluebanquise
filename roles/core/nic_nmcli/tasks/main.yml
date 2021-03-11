@@ -83,4 +83,5 @@
   tags:
     - identify
 
-- meta: flush_handlers
+- name: meta █ Run handler tasks to reload connections
+  meta: flush_handlers

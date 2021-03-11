@@ -90,7 +90,8 @@
   tags:
     - template
 
-- meta: flush_handlers
+- name: meta █ Run handler tasks to restart dns services
+  meta: flush_handlers
 
 - name: "service █ Manage {{ j2_role_variables['services_to_start'] | join(' ') }} state"
   service:

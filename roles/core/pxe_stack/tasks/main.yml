@@ -239,7 +239,8 @@
     owner: "{{ j2_role_variables['apache_user'] }}"
     group: "{{ j2_role_variables['apache_user'] }}"
 
-- meta: flush_handlers
+- name: meta █ Run handler tasks to restart pxe services
+  meta: flush_handlers
 
 - name: "service █ Manage {{ (j2_role_variables['services_to_start'] + [pxe_stack_tftp_service | default(j2_role_variables['default_tftp_service'])]) | join(' ') }} state"
   service:
