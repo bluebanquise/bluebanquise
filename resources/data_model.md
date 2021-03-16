@@ -15,15 +15,15 @@ Each host must be member of at least a unique *master_group* (default prefix is 
 a unique *equipment_profile* group (default prefix is `equipment_`) **children of
 this master_group**.
 
-An *equipment_profile* group cannot be children of multiple *master_group*.
-
 Note: if these requirements are achieved, system administrator is free to manage
 groups the way desired.
 
 In case of multi-icebergs configuration, each host must also be a member of an
 iceberg group (default prefix is `iceberg`).
 
-## To be defined for each host (hostvars level)
+## Available variables for each host (hostvars level)
+
+These variables are optional. Using them depend of Ansible roles used.
 
 ```yaml
   # Alias, included in hosts_file
