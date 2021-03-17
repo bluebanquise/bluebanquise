@@ -15,7 +15,7 @@ on:
 jobs:
   molecule_test:
     name: ${{ matrix.distro }} - molecule test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     strategy:
       fail-fast: false
       matrix:
