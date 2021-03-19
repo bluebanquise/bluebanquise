@@ -4,6 +4,9 @@ pxe
 /inventory/
 /playbooks/
 
+## Don't track possible documentation build ##
+/resources/documentation/_build/
+
 ## VirtualEnv ##
 venv-molecule/
 

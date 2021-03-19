@@ -1,6 +1,6 @@
-========================
-Manage multiple icebergs
-========================
+===============================
+Core - Manage multiple icebergs
+===============================
 
 Now that the simple configuration has been tested and done, it is possible,
 to extend the cluster, to activate the multiple icebergs mechanism.

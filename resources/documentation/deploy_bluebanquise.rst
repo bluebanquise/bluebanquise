@@ -1,6 +1,6 @@
-===================
-Deploy BlueBanquise
-===================
+============================
+[Core] - Deploy BlueBanquise
+============================
 
 At this point, **BlueBanquise** configuration is done. We are ready to deploy
 the cluster.
@@ -73,7 +73,7 @@ We first ensure our NIC are up, so the repositories part is working.
 
 .. code-block:: bash
 
-  ansible-playbook /etc/bluebanquise/playbooks/managements.yml --limit management1 --tags set_hostname,nic
+  ansible-playbook /etc/bluebanquise/playbooks/managements.yml --limit management1 --tags set_hostname,nic_nmcli
 
 Then start your main interface manually. Here enp0s3:
 
@@ -172,14 +172,14 @@ bootset
 -------
 
 Before booting remote nodes in PXE, we need to ask management1 to activate
-remote nodes deployment. If not, remote nodes will boot on disk, even when
-booting over LAN.
+remote nodes deployment. If not, remote nodes will not be able to grab their
+dedicated configuration from management node at boot.
 
 To manipulate nodes PXE boot, a command, *bootset*, is available.
 
 We are going to deploy login1 and c001, c002, c003 and c004.
 
-Let's use bootset to ask them to deploy OS at next PXE boot:
+Let's use bootset to set them to deploy OS at next PXE boot:
 
 .. code-block:: bash
 
@@ -214,9 +214,9 @@ SSH public key
 In order to log into the remote nodes without giving the password, check that
 the ssh public key defined in authentication.yml in your inventory match your
 management1 public key (the one generated in /root/.ssh/). If not, update the
-key in authentication.yml and remember to run the pxe_stack role (to update PXE
-related files that contains the ssh public key of the management node to be set
-on nodes during deployment).
+key in authentication.yml and remember to re-run the pxe_stack role (to update
+PXE related files that contains the ssh public key of the management node to be
+set on nodes during deployment).
 
 .. code-block:: bash
 
@@ -244,7 +244,7 @@ yes, copy example playbooks:
   cp -a /etc/bluebanquise/resources/examples/simple_cluster/playbooks/computes.yml /etc/bluebanquise/playbooks/
   cp -a /etc/bluebanquise/resources/examples/simple_cluster/playbooks/logins.yml /etc/bluebanquise/playbooks/
 
-And execute them, using --limit parameter to specify targets them:
+And execute them, using --limit parameter to specify targets:
 
 .. code-block:: bash
 
@@ -252,23 +252,26 @@ And execute them, using --limit parameter to specify targets them:
   ansible-playbook /etc/bluebanquise/playbooks/computes.yml --limit c001,c002,c003,c004
 
 You can see that Ansible will work on computes nodes in parallel, using more CPU
-on the management1 node.
-
-Diskless
-========
-
-An addon, diskless, allows to deploy diskless nodes. Please see the role related
-documentation to deploy diskless nodes.
+on the management1 node (by spawning multiple forks).
 
 -------------
 
-Your cluster should now be fully deployed. It is time to use some addons to add
-specific features to the cluster (Please refer to each addon roles dedicated
-documentation to get instructions on how to use them), or continue this
-documentation to:
+Your cluster should now be fully deployed the generic way: operating systems are
+deployed on each hosts, and basic services (DNS, repositories, time
+synchronization, etc.) are up and running.
 
-* Enable and deploy multi icebergs configuration if cluster needs it.
-* Deploy a Prometheus based monitoring.
+It is time to use some community roles to add specific features to the cluster
+and/or specialize it.
+(Please refer to each community roles dedicated documentation to get
+instructions on how to use them), or continue this documentation to:
+
+* BlueBanquise generic cluster
+    * (Optional) Deploy diskless nodes
+    * (Optional) Deploy a multi icebergs cluster
+* BlueBanquise specialized cluster
+    * Deploy Prometheus (Monitoring your cluster)
+    * Deploy Slurm (Specialize your cluster for High Performance Computing)
+    * Deploy Nomad and Consul (Deploy containers orchestration on the cluster)
 
 You will also find a "stories" section that describes step by step few recurrent
 situation you may face during the life of your cluster.

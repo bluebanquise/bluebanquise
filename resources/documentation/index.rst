@@ -9,8 +9,6 @@ This documentation provides information on:
 * How to deploy, configure, and maintain BlueBanquise on different scenario clusters
 * Detailed documentation on each roles provided with the stack
 
-Details are also given for each Ansible role of the stack.
-
 `Please report us <https://github.com/bluebanquise/bluebanquise/issues>`_ any
 issues in this documentation.
 
@@ -32,9 +30,9 @@ Documentation authors:
 
    introduction
    vocabulary
-   install_first_management
    learn_ansible
    containers
+   install_first_management
    configure_bluebanquise
    deploy_bluebanquise
    multiple_icebergs

@@ -1,6 +1,6 @@
-======================
-Configure BlueBanquise
-======================
+===============================
+[Core] - Configure BlueBanquise
+===============================
 
 At this point, you should have an operating system with Ansible installed on it,
 and basic OS repositories.
@@ -50,6 +50,9 @@ Configure inventory
 This documentation will cover the configuration of a very simple cluster:
 
 .. image:: images/example_cluster_small.svg
+
+More features are available in the stack. Read roles Readme to learn more about
+each roles capabilities.
 
 Check example inventory
 -----------------------
@@ -157,6 +160,10 @@ Then the network interfaces and their associated networks:
 
 It should not be too difficult to understand this file.
 
+.. note:
+  More network features are available, see the nic_nmcli readme file for more
+  information.
+
 Other nodes
 ^^^^^^^^^^^
 
@@ -245,8 +252,9 @@ end up with a way too much complex stack), and so we have to provide it manually
 You can also set here an IP address from another subnet if your system has network
 routing.
 
-Then check content of file group_vars/all/networks/interconnect-1.yml . As this
-is **not** an administration network, its configuration is easy.
+Then check content the second network, interconnect-1 in file
+group_vars/all/general_settings/network.yml . As this is **not** an
+administration network, its configuration is easy.
 
 That is all for basic networking. General network parameters are set in
 group_vars/all/general_settings/network.yml file, and nodes parameters are
@@ -315,7 +323,7 @@ less priority, while variables in group_vars/* have a higher priority.
 The idea here is the following: group_vars/all/equipment_all/ folder contains
 all the default parameters for all nodes. Here authentication, and
 equipment_profile. You have to tune these parameters to match your exact
-"global" need, and then copy (if needed) these whole files into dedicated
+"global" need, and then copy (if needed) part of these files into dedicated
 group_vars folder for each equipment group, and tune them according to these
 equipment specific parameters.
 
@@ -545,5 +553,10 @@ group_vars/all/equipment_all/equipment_profile.yml file into these folders, or
 simply adjust the parameters you wish to change from default.
 
 Once done, configuration is ready.
+
+Remember that a data model is available in resources/data_model.md on the
+BlueBanquise github.
+
+-------------
 
 It is time to deploy configuration on management1.

@@ -2,8 +2,7 @@
 Vocabulary
 ==========
 
-Lets establish few common terms between us before going deeper in technical
-details.
+Lets establish few common terms before going deeper in technical details.
 
 Some words are important in **BlueBanquise**. Most of them are described here.
 
@@ -14,12 +13,12 @@ Host
 ----
 
 An Ansible **host** (also often referred as a **node**) is a remote host managed
-by Ansible. An **host** can be a physical server, but also a VM or something
-else.
+by Ansible. An **host** can be a physical server, but also a VM, a container or
+something else.
 
 Hosts are defined in */etc/bluebanquise/inventory/cluster/nodes*.
 
-Please do a difference between an Ansible managed host, and a host.
+Please do a difference between an **Ansible managed host**, and a **host**.
 All equipment that can have an ip address on the network are considered "host",
 but only those with an ssh + python capability and on which we will use Ansible
 to deploy a configuration are considered "Ansible managed host".
@@ -170,7 +169,7 @@ j2 Variables
 These are **BlueBanquise** specific variables.
 All variables with name starting by **j2_** are j2 variables.
 
-These variables are all stored in internal/group_vars/all/j2_variables
+Most of these variables are stored in internal/group_vars/all/j2_variables
 directory, and are used for the internal purpose of the stack.
 
 These variables are here to simplify tasks and templates writing, and centralize
@@ -201,7 +200,7 @@ Roles
 ^^^^^
 
 An Ansible role is a list of tasks to do to achieve a purpose.
-For example, there will be a role called dhcp_server, that contains task to
+For example, there will be a role called dhcp_server, that contains tasks to
 install, configure and start the dhcp server.
 
 In **BlueBanquise**, default path is /etc/bluebanquise/roles.
@@ -319,7 +318,6 @@ networks, and federate the same pool of nodes.
 
 .. image:: images/one_iceberg_example_2.svg
 
-
 Multiple icebergs configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -338,16 +336,22 @@ network (most of the time an Interconnect network).
 Equipment profiles
 ------------------
 
-In **BlueBanquise**, nodes are nearly always part of a group starting with
+In **BlueBanquise**, nodes are always part of a group starting with
 prefix **equipment_**. These groups are called *equipment profiles*.
 
 They are used to provide to hosts of this group the **equipment_profile**
 parameters (this includes hosts operating system parameters, kernel parameters,
 partitioning, etc.), and other variables if needed like dedicated
-authentication parameters.
+authentication parameters. These variables are prefixed with **ep_**.
 
 These are key groups of the stack.
 
-**It is important** to note that equipment_profiles dictionary **must not** be
-used at an upper level than group_vars in variables precedence.
-**It can, but you must NOT**.
+**It is important** to note that equipment_profiles variables (**ep_**)
+**must not** be used at an upper level than group_vars in variables precedence.
+**It can, but you must NOT**, due to special usage of them.
+
+-------------
+
+You can now follow the next part, learn Ansible, or if you already know
+Ansible, you can skip this part and jump directly to the deploy BlueBanquise
+part.

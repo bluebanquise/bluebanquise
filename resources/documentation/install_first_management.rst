@@ -1,27 +1,30 @@
-========================
-Install first management
-========================
+=================================
+[Core] - Install first management
+=================================
 
 First step is to install first management node manually.
-
-We will then learn how to use Ansible, and then only focus on the stack itself.
 
 Install operating system
 ========================
 
-Install Centos 7 or 8 using parameters you need.
+Currently supported Linux distribution are:
 
-The following parameters are recommended:
+* RHEL 7, 8
+* CentOS 7, 8
+
+Install manually the operating system using parameters you need.
+
+The following configuration is recommended:
 
 * >= 2 CPU/vCPU
 * >= 2 Gb RAM
 * >= 24Gb HDD
 
-And the following parameters are the strict minimal if you wish to test the
-stack in VMs:
+And the following minimal configuration is the strict minimal if you wish to
+test the stack in VMs:
 
 * >= 1 vCPU
-* >= 512 Mb RAM
+* >= 512 Mb RAM (but >= 2Gb when PXE is occurring)
 * >= 6Gb HDD
 
 In this last configuration, DVD iso will be mounted from /dev/cdrom instead of
@@ -37,8 +40,8 @@ Prepare for Ansible
 Repositories
 ------------
 
-Once system is installed and rebooted, login, then prepare boot images 
-and packages repositories.
+Once system is installed and rebooted, login on it.
+We then need to prepare boot images and packages repositories.
 
 Boot images include the installer system which starts the deployment after PXE
 boot, while packages repositories include the software that will be installed
@@ -63,16 +66,33 @@ the one provided in the equipment_profile file seen later.
 Note: we recommend to use the same directory path to later sync the Errata
 published by upstream operating system vendor.
 
+Obtain isos
+^^^^^^^^^^^
 
-Operating system
-^^^^^^^^^^^^^^^^
+RHEL
+""""
 
-Download:
+Obtain DVD from Red Hat, using your subscription. Target iso are main DVD:
 
-* Centos 7 Everything DVD iso from http://isoredirect.centos.org/centos/7/isos/x86_64/ . Iso name is CentOS-7-x86_64-Everything-1810.iso.
-* Or Centos 8 DVD 1 iso from http://isoredirect.centos.org/centos/8/isos/x86_64/ . Iso name is CentOS-8-x86_64-1905-dvd1.iso.
+* rhel-8.3-x86_64-dvd.iso
+* rhel-server-7.9-x86_64-dvd.iso
+* ...
 
-**If on standard system:**
+CentOS
+""""""
+
+Obtain DVD from one of the CentOS mirrors (for example
+http://centos.crazyfrogs.org/). You need to grab the Everything DVD:
+
+* CentOS-8.3.2011-x86_64-dvd1.iso
+* CentOS-7-x86_64-Everything-2009.iso
+* ...
+
+Copy iso on system
+^^^^^^^^^^^^^^^^^^
+
+If on standard system
+"""""""""""""""""""""
 
 Mount iso and copy content to web server directory: (replace centos/7 by
 centos/8, redhat/8, redhat/7, etc depending of your system)
@@ -80,11 +100,12 @@ centos/8, redhat/8, redhat/7, etc depending of your system)
 .. code-block:: bash
 
   mkdir -p /var/www/html/repositories/centos/7/x86_64/os/
-  mount CentOS-7-x86_64-Everything-1810.iso /mnt
+  mount CentOS-7-x86_64-Everything-2009.iso /mnt
   cp -a /mnt/* /var/www/html/repositories/centos/7/x86_64/os/
   restorecon -Rv /var/www/html/repositories/centos/7/x86_64/os
 
-**If in test VM:**
+If in test VM
+"""""""""""""
 
 Simply mount iso from /dev/cdrom to save space:
 
@@ -93,10 +114,14 @@ Simply mount iso from /dev/cdrom to save space:
   mkdir -p /var/www/html/repositories/centos/7/x86_64/os/
   mount /dev/cdrom /var/www/html/repositories/centos/7/x86_64/os/
 
+Set os repository
+^^^^^^^^^^^^^^^^^
+
 Now, create first repository manually. Procedure is different between Centos 7
 and 8.
 
-**Centos/RHEL 7:**
+Centos/RHEL 7
+"""""""""""""
 
 Create file */etc/yum.repos.d/os.repo* with the following content:
 
@@ -108,7 +133,8 @@ Create file */etc/yum.repos.d/os.repo* with the following content:
   gpgcheck=0
   enabled=1
 
-**Centos/RHEL 8:**
+Centos/RHEL 8
+"""""""""""""
 
 Create file */etc/yum.repos.d/BaseOS.repo* with the following content:
 
@@ -130,7 +156,8 @@ Then create file */etc/yum.repos.d/AppStream.repo* with the following content:
   gpgcheck=0
   enabled=1
 
-**Both:**
+Both
+""""
 
 If you don't need the DVD iso anymore, umount it:
 
@@ -176,6 +203,12 @@ Install Ansible
 
 Time to install Ansible.
 
+RHEL/CentOS
+^^^^^^^^^^^
+
+Centos/RHEL 7
+"""""""""""""
+
 Install epel first, to get Ansible:
 
 .. code-block:: bash
@@ -195,9 +228,32 @@ And check Ansible is working:
 
   ansible --version
 
-It must be **>= 2.8.2** .
+It must be **>= 2.9.13** .
 
-It is now time, if you do not know how Ansible works, to learn basis of Ansible.
+Centos/RHEL 8
+"""""""""""""
 
-If you already know Ansible, or want to skip this recommended training, directly
-go to the Configure BlueBanquise section.
+Install epel first, to get Ansible:
+
+.. code-block:: bash
+
+  dnf install epel-release
+  dnf repolist
+
+Then install Ansible:
+
+.. code-block:: bash
+
+  dnf install ansible
+
+And check Ansible is working:
+
+.. code-block:: bash
+
+  ansible --version
+
+It must be **>= 2.9.13** .
+
+-------------
+
+It is now time to Configure BlueBanquise.
