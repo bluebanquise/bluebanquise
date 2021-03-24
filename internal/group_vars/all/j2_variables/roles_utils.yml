@@ -9,8 +9,9 @@
 # 4. <role_name>_<os_family>_<distribution_version>
 # 5. <role_name>_<os_family>_<distribution_major_version>
 # 6. <role_name>_<os_family>
-# Example, on a CentOS 8.3, order would be: CentOS_8.3 > CentOS_8 > CentOS > RedHat_8.3 > RedHat_8 > RedHat
+# 7. <role_name>_generic
+# Example, on a CentOS 8.3, order would be: CentOS_8.3 > CentOS_8 > CentOS > RedHat_8.3 > RedHat_8 > RedHat > generic
 # Note1: this variable is optional in community roles.
 # Note2: to be simply to use, variable must be keept one line. Multiple lines definition (using | or >) prevents some usages.
 
-j2_role_variables: "{{ vars[role_name + '_' + ansible_facts.distribution + '_' + ansible_facts.distribution_version] | default(vars[role_name + '_' + ansible_facts.distribution + '_' + ansible_facts.distribution_major_version]) | default(vars[role_name + '_' + ansible_facts.distribution]) | default(vars[role_name + '_' + ansible_facts.os_family + '_' + ansible_facts.distribution_version]) | default(vars[role_name + '_' + ansible_facts.os_family + '_' + ansible_facts.distribution_major_version]) | default(vars[role_name + '_' + ansible_facts.os_family]) }}"
+j2_role_variables: "{{ vars[role_name + '_' + ansible_facts.distribution + '_' + ansible_facts.distribution_version] | default(vars[role_name + '_' + ansible_facts.distribution + '_' + ansible_facts.distribution_major_version]) | default(vars[role_name + '_' + ansible_facts.distribution]) | default(vars[role_name + '_' + ansible_facts.os_family + '_' + ansible_facts.distribution_version]) | default(vars[role_name + '_' + ansible_facts.os_family + '_' + ansible_facts.distribution_major_version]) | default(vars[role_name + '_' + ansible_facts.os_family]) | default(vars[role_name + '_generic']) }}"
