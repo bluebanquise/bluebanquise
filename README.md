@@ -7,7 +7,7 @@
 
 ## What is BlueBanquise
 
-**BlueBanquise** is a coherent **Ansible** roles collection, designed to deploy and manage large group of bare metal hosts (clusters of nodes).
+**BlueBanquise** is a coherent **Ansible** roles collection, designed to deploy and manage large group of hosts (clusters of nodes).
 
 Main target is High Performance Computing (HPC), but the BlueBanquise stack is generic and can adapt to any kind of architecture (university or enterprise infrastructures, render farm, etc.).
 
@@ -23,7 +23,7 @@ It is a revamping of the old stack [Banquise](https://github.com/oxedions/banqui
 
 The stack is split over multiple repositories:
 
-* :globe_with_meridians: **Core:** stack CORE roles and tools, dedicated to deploying and configuring bare metal servers, is hosted on github, in this [same repository](https://github.com/bluebanquise/bluebanquise).
+* :globe_with_meridians: **Core:** stack CORE roles and tools, dedicated to deploying and configuring servers, is hosted on github, in this [same repository](https://github.com/bluebanquise/bluebanquise).
 
 * :star: **Community:** stack COMMUNITY roles and tools, dedicated to bring more specialized features on top of CORE, are hosted on github, in the [community repository](https://github.com/bluebanquise/community).
 
