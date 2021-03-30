@@ -6,7 +6,9 @@
 - name: command █ Update kernel parameters
   command: "grubby --args='{{ item }}' --update-kernel=DEFAULT"
   loop: "{{ ep_kernel_parameters.split(' ') | default([]) }}"
-  when: item not in current_kernel_parameters.stdout
+  when: 
+    - ep_kernel_parameters is defined and ep_kernel_parameters is not none
+    - item not in current_kernel_parameters.stdout
 
 - name: sysctl █ Update sysctl parameters
   sysctl:
@@ -15,3 +17,5 @@
     state: present
     reload: "{{ kernel_config_sysctl_reload | ternary('yes','no') }}"
   loop: "{{ ep_sysctl }}"
+  when:
+    - ep_sysctl is defined and ep_sysctl is not none

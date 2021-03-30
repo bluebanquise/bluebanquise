@@ -1,0 +1,13 @@
+---
+log_server_Fedora:
+  packages_to_install:
+    - rsyslog
+    - logrotate
+    - xz
+    - python3-libselinux
+    - python3-policycoreutils
+  services_to_start:
+    - rsyslog
+  firewall_services_to_add:
+    - syslog
+    - rsh  # 514/tcp

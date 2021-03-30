@@ -1,0 +1,8 @@
+---
+log_client_Fedora:
+  packages_to_install:
+    - rsyslog
+    - python3-libselinux
+    - python3-policycoreutils
+  services_to_start:
+    - rsyslog

@@ -20,10 +20,10 @@
   tags:
     - package
 
-- name: "template █ Generate {{ time_chrony_conf_path }}"
+- name: "template █ Generate {{ j2_role_variables['chrony_conf_path'] }}"
   template:
     src: chrony.conf.j2
-    dest: "{{ time_chrony_conf_path }}"
+    dest: "{{ j2_role_variables['chrony_conf_path'] }}"
     owner: root
     group: root
     mode: 0644
