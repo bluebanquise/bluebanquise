@@ -1,0 +1,6 @@
+---
+log_client_Suse:
+  packages_to_install:
+    - rsyslog
+  services_to_start:
+    - rsyslog

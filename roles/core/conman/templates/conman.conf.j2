@@ -2,7 +2,7 @@
 #### Blue Banquise file ####
 ## {{ ansible_managed }}
 
-SERVER execpath="{{ conman_execpath }}"
+SERVER execpath="{{ j2_role_variables['execpath'] }}"
 SERVER syslog="daemon"
 SERVER logdir="/var/log/conman"
 GLOBAL log="/var/log/conman/%N.log"

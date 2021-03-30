@@ -1,0 +1,6 @@
+---
+nfs_client_RedHat_8:
+  packages_to_install:
+    - nfs-utils
+    - python3-libselinux
+    - python3-policycoreutils

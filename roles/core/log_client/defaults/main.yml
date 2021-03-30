@@ -1,3 +1,4 @@
 ---
 log_client_server_port: "{{ log_server_port | default(514) }}"
 log_client_verbosity: "info"
+log_client_rsyslog_conf_path: /etc/rsyslog.conf

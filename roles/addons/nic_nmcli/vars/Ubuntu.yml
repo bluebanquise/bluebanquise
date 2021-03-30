@@ -1,7 +1,0 @@
----
-nic_nmcli_packages_to_install:
-  - network-manager
-  - python-dbus
-  - libnm-glib-dev
-nic_nmcli_services_to_start:
-  - network-manager

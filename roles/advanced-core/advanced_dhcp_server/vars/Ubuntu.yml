@@ -1,5 +1,0 @@
----
-advanced_dhcp_server_packages_to_install:
-  - isc-dhcp-server
-advanced_dhcp_server_services_to_start:
-  - isc-dhcp-server

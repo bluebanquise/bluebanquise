@@ -1,0 +1,4 @@
+---
+nfs_client_Ubuntu:
+  packages_to_install:
+    - nfs-common

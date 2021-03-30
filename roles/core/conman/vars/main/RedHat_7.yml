@@ -1,0 +1,8 @@
+---
+conman_RedHat_7:
+  execpath: "/usr/share/conman/exec"
+  packages_to_install:
+    - conman
+    - ipmitool
+    - libselinux-python
+    - policycoreutils-python

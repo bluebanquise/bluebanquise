@@ -1,0 +1,9 @@
+---
+nic_nmcli_RedHat_7:
+  packages_to_install:
+    - NetworkManager-glib
+    - nm-connection-editor.x86_64
+    - libsemanage-python
+    - policycoreutils-python
+  services_to_start:
+    - NetworkManager

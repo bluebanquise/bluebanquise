@@ -1,33 +1,7 @@
 ---
-- name: include_vars ░ Gather OS specific variables
-  # This task gathers variables defined in OS specific files.
-  #
-  # Search vars in:
-  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
-  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
-  #  - <distribution>.yml            # eg. CentOS.yml
-  #  - <os_family>.yml               # eg. RedHat.yml
-  #
-  # If no OS specific file is found, the role will default to vars/main.yml
-  #
-  include_vars: "{{ item }}"
-  with_first_found:
-    - files:
-        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
-        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
-        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
-        - "vars/{{ ansible_facts.os_family }}.yml"
-      skip: true
-  tags:
-    - firewall
-    - internal
-    - package
-    - service
-    - template
-
-- name: "Add services to firewall's {{ log_server_firewall_zone | default('public') }} zone"
+- name: "firewalld █ Add services to firewall's {{ log_server_firewall_zone | default('public',true) }} zone"
   firewalld:
-    zone: "{{ log_server_firewall_zone | default('public') }}"
+    zone: "{{ log_server_firewall_zone | default('public',true) }}"
     service: "{{ item }}"
     immediate: "yes"
     permanent: "yes"
@@ -35,13 +9,13 @@
   when:
     - ansible_facts.os_family == "RedHat"
     - ep_firewall | default(false) | bool
-  loop: "{{ log_server_firewall_services_to_add }}"
+  loop: "{{ j2_role_variables['firewall_services_to_add'] }}"
   tags:
     - firewall
 
-- name: "Add custom port to firewall's {{ log_server_firewall_zone | default('public') }} zone"
+- name: "firewalld █ Add custom port to firewall's {{ log_server_firewall_zone | default('public',true) }} zone"
   firewalld:
-    zone: "{{ log_server_firewall_zone | default('public') }}"
+    zone: "{{ log_server_firewall_zone | default('public',true) }}"
     port: "{{ log_server_port }}/tcp"
     immediate: "yes"
     permanent: "yes"
@@ -52,14 +26,14 @@
   tags:
     - firewall
 
-- name: Install packages
+- name: "package █ Install {{ j2_role_variables['packages_to_install'] | join(' ') }}"
   package:
-    name: "{{ log_server_packages_to_install }}"
+    name: "{{ j2_role_variables['packages_to_install'] }}"
     state: present
   tags:
     - package
 
-- name: Create /var/log/rsyslog directory
+- name: file █ Create /var/log/rsyslog directory
   file:  # noqa 208
     path: /var/log/rsyslog
     setype: var_log_t
@@ -69,18 +43,18 @@
     - ansible_facts.os_family == "RedHat"
     - ansible_facts.selinux.status == "enabled"
 
-- name: Template >> /etc/rsyslog.conf
+- name: "template █ Generate {{ log_server_rsyslog_conf_path }}"
   template:
     src: rsyslog.conf.j2
     dest: "{{ log_server_rsyslog_conf_path }}"
     owner: root
     group: root
     mode: 0644
-  notify: Restart rsyslog services
+  notify: service █ Restart rsyslog service
   tags:
     - template
 
-- name: Allow syslog port into SELinux
+- name: seport █ Allow syslog port into SELinux
   seport:
     ports: "{{ log_server_port }}"
     proto: "{{ item }}"
@@ -92,20 +66,20 @@
   loop:
     - tcp
     - udp
-  notify: Restart rsyslog services
+  notify: service █ Restart rsyslog service
 
-- name: Template >> /etc/logrotate.d/rsyslog
+- name: "template █ Generate /etc/logrotate.d/rsyslog"
   template:
     src: rsyslog_logrotate.j2
     dest: /etc/logrotate.d/rsyslog
     owner: root
     group: root
     mode: 0644
-  notify: Restart rsyslog services
+  notify: service █ Restart rsyslog service
   tags:
     - template
 
-- name: Configure logrotate to use xz
+- name: lineinfile █ Configure logrotate to use xz
   lineinfile:
     path: /etc/logrotate.conf
     regexp: "{{ item }}"
@@ -114,17 +88,18 @@
     - compresscmd /usr/bin/xz
     - uncompresscmd /usr/bin/unxz
     - compressext .xz
-  notify: Restart rsyslog services
+  notify: service █ Restart rsyslog service
   tags:
     - template
 
-- meta: flush_handlers
+- name: meta █ Run handler tasks to restart rsyslog services
+  meta: flush_handlers
 
-- name: Manage services state
+- name: "service █ Manage {{ j2_role_variables['services_to_start'] | join(' ') }} state"
   service:
     name: "{{ item }}"
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
     state: "{{ (start_services | bool) | ternary('started', omit) }}"
-  loop: "{{ log_server_services_to_start }}"
+  loop: "{{ j2_role_variables['services_to_start'] }}"
   tags:
     - service
