@@ -1,0 +1,20 @@
+---
+pxe_stack_Fedora:
+  apache_cgi_module: cgid
+  apache_conf_path: /etc/httpd/conf.d
+  apache_user: apache
+  packages_to_install:
+    - ipxe-x86_64-bluebanquise
+    - ipxe-arm64-bluebanquise
+    - httpd
+    - python3-policycoreutils
+    - clustershell
+    - python3-clustershell
+    - policycoreutils
+  default_tftp_package: atftp
+  services_to_start:
+    - httpd
+  default_tftp_service: atftpd
+  firewall_services_to_add:
+    - http
+    - tftp

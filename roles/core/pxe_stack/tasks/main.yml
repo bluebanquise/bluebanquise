@@ -86,25 +86,15 @@
   tags:
     - template
 
-##### Centos
-
-- name: copy █ Copy osdeploy files /var/www/html/preboot_execution_environment/osdeploy/redhat_
+- name: copy █ Copy osdeploy files /var/www/html/preboot_execution_environment/osdeploy/
   copy:
-    src: osdeploy/redhat_{{ item }}.ipxe
-    dest: "/var/www/html/preboot_execution_environment/osdeploy/redhat_{{ item }}.ipxe"
+    src: osdeploy/
+    dest: "/var/www/html/preboot_execution_environment/osdeploy/"
     mode: 0644
     owner: "{{ j2_role_variables['apache_user'] }}"
     group: "{{ j2_role_variables['apache_user'] }}"
-  with_items: "{{ pxe_stack_supported_os.redhat }}"
 
-- name: copy █ Copy osdeploy files /var/www/html/preboot_execution_environment/osdeploy/centos_
-  copy:
-    src: osdeploy/centos_{{ item }}.ipxe
-    dest: "/var/www/html/preboot_execution_environment/osdeploy/centos_{{ item }}.ipxe"
-    mode: 0644
-    owner: "{{ j2_role_variables['apache_user'] }}"
-    group: "{{ j2_role_variables['apache_user'] }}"
-  with_items: "{{ pxe_stack_supported_os.centos }}"
+##### RedHat derivated OS
 
 - name: template █ Generate kickstarts /var/www/html/preboot_execution_environment/equipment_profiles/{item}.kickstart.cfg
   template:
@@ -116,7 +106,7 @@
   with_items: "{{ j2_equipment_groups_list }}"
   when:
     - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
-    - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) in ['redhat','centos']
+    - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) in ['redhat','centos','fedora','cloudlinux','oraclelinux']
   tags:
     - template
 
@@ -130,7 +120,7 @@
   with_items: "{{ j2_equipment_groups_list }}"
   when:
     - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
-    - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) in ['redhat','centos']
+    - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) in ['redhat','centos','fedora','cloudlinux','oraclelinux']
   tags:
     - template
 
@@ -223,6 +213,7 @@
     state: present
     name: "{{ j2_role_variables['apache_cgi_module'] }}"
   notify: service █ Restart pxe services
+  when: ansible_facts.distribution != 'Fedora'
 
 - name: "copy █ Copy {{ j2_role_variables['apache_conf_path'] }}/cgi.conf"
   copy:

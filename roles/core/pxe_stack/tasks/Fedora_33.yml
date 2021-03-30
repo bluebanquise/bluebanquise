@@ -1,0 +1,9 @@
+## Tested on Fedora 33
+---
+- name: sefcontext █ Set SELinux context on /var/www/html/preboot_execution_environment/nodes
+  sefcontext:
+    target: '/var/www/html/preboot_execution_environment/nodes(/.*)?'
+    setype: httpd_sys_rw_content_t
+    state: present
+  when:
+    - ansible_facts.selinux.status == "enabled"
