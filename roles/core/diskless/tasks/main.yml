@@ -6,7 +6,7 @@
   tags:
     - package
 
-- name: "Create diskless directories structure"
+- name: file █ Create diskless directories structure
   file:
     path: "{{ item }}"
     state: directory
@@ -24,44 +24,54 @@
     - /diskless/images/nfsimages/golden
     - /diskless/images/nfsimages/staging
     # Create directories for python modules
-    - /lib/python3.6/site-packages/diskless
-    - /lib/python3.6/site-packages/diskless/modules
+    - "/lib/python{{ j2_role_variables['python_version'] }}/site-packages/diskless"
+    - "/lib/python{{ j2_role_variables['python_version'] }}/site-packages/diskless/modules"
     # Create directory for 'installations.yml' file
     - /var/lib/diskless
     # Create working directory for images
     - /var/tmp/diskless/workdir/
+    # Create disklessset configuration directory
+    - /etc/disklessset/
 
 # Copy script files with permission
-- name: "Add diskless scripts"
+- name: copy █ Add diskless scripts
   copy:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
     mode: 0755
   with_items:
-    - { src: 'utils.py', dest: '/lib/python3.6/site-packages/diskless/utils.py' }
-    - { src: 'image_manager.py', dest: '/lib/python3.6/site-packages/diskless/image_manager.py' }
-    - { src: 'kernel_manager.py', dest: '/lib/python3.6/site-packages/diskless/kernel_manager.py' }
-    - { src: 'nfs_module.py', dest: '/lib/python3.6/site-packages/diskless/modules/nfs_module.py' }
-    - { src: 'base_module.py', dest: '/lib/python3.6/site-packages/diskless/modules/base_module.py' }
-    - { src: 'livenet_module.py', dest: '/lib/python3.6/site-packages/diskless/modules/livenet_module.py' }
-    - { src: 'demo_module.py', dest: '/lib/python3.6/site-packages/diskless/modules/demo_module.py' }
+    - { src: 'utils.py', dest: "/lib/python{{ j2_role_variables['python_version'] }}/site-packages/diskless/utils.py" }
+    - { src: 'image_manager.py', dest: "/lib/python{{ j2_role_variables['python_version'] }}/site-packages/diskless/image_manager.py" }
+    - { src: 'kernel_manager.py', dest: "/lib/python{{ j2_role_variables['python_version'] }}/site-packages/diskless/kernel_manager.py" }
+    - { src: 'nfs_module.py', dest: "/lib/python{{ j2_role_variables['python_version'] }}/site-packages/diskless/modules/nfs_module.py" }
+    - { src: 'base_module.py', dest: "/lib/python{{ j2_role_variables['python_version'] }}/site-packages/diskless/modules/base_module.py" }
+    - { src: 'livenet_module.py', dest: "/lib/python{{ j2_role_variables['python_version'] }}/site-packages/diskless/modules/livenet_module.py" }
+    - { src: 'demo_module.py', dest: "/lib/python{{ j2_role_variables['python_version'] }}/site-packages/diskless/modules/demo_module.py" }
     - { src: 'disklessset.py', dest: '/usr/bin/disklessset' }
 
+- name: template █ Generate /etc/disklessset/diskless_parameters.yml
+  template:
+    src: diskless_parameters.yml.j2
+    dest: /etc/disklessset/diskless_parameters.yml
+    mode: 0644
+  tags:
+    - template
+
 # We need to check file existance because an image installation can be running yet, we cannot juste replace the file
-- name: Check if installations.yml file exists
+- name: stat ░ Check if installations.yml file exists
   stat:
     path: /var/lib/diskless/installations.yml
   register: stat_result
 
 # Copy installations.yml file if installations.yml doesnt already exist
-- name: Copy installations.yml file if doesn't already exist
+- name: copy █ Copy installations.yml file if doesn't already exist
   copy:
     src: installations.yml
     dest: /var/lib/diskless/installations.yml
     mode: 0755
   when: not stat_result.stat.exists
 
-- name: Add nfs export point if doesn't already exist
+- name: lineinfile █ Add nfs export point if doesn't already exist
   lineinfile:
     dest: /etc/exports
     line: /diskless/images/nfsimages *(rw,no_root_squash,sync)

@@ -14,6 +14,16 @@
 #
 # https://github.com/bluebanquise/bluebanquise - MIT license
 
+import yaml
+import logging
+
+# Load YAML files
+def load_file(filename):
+    logging.debug('Loading file ' + filename)
+    with open(filename, 'r') as f:
+        # return yaml.load(f, Loader=yaml.FullLoader) ## Waiting for PyYaml 5.1
+        return yaml.load(f)
+
 # Class that contains colors
 class Color():
     # Colors

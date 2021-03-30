@@ -1,10 +1,11 @@
 ---
-diskless_RedHat_8:
+diskless_Fedora:
   apache_user: apache
-  python_version: 3.6
+  python_version: 3.9
   packages_to_install:
     - httpd
     - python3-clustershell
     - nfs-utils
     - dracut-live
     - xfsdump
+    - squashfs-tools
