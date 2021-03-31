@@ -6,3 +6,5 @@ dns_server_RedHat:
     - named
   firewall_services_to_add:
     - dns
+  bind_user: named
+  bind_group: named

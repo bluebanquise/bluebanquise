@@ -1,7 +1,7 @@
 #!ipxe
 
 echo |
-echo | Entering osdeploy/redhat_8.ipxe file.
+echo | Entering osdeploy/redhat_9.ipxe file.
 echo |
 
 echo | Now starting os deployment process.

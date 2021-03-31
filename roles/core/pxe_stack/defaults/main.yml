@@ -1,3 +1,4 @@
 ---
 pxe_stack_enable_cloning: false
 pxe_stack_firewall_zone:
+pxe_stack_sshd_force_PermitRootLogin: true

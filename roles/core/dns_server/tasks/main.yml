@@ -25,13 +25,15 @@
     path: /var/named
     state: directory
     mode: 0755
+    owner: "{{ j2_role_variables['bind_user'] | default('root') }}"
+    group: "{{ j2_role_variables['bind_group'] | default('root') }}"
 
 - name: template █ Generate /etc/named.conf
   template:
     src: named.conf.j2
     dest: /etc/named.conf
-    owner: root
-    group: root
+    owner: "{{ j2_role_variables['bind_user'] | default('root') }}"
+    group: "{{ j2_role_variables['bind_group'] | default('root') }}"
     mode: 0644
   notify: service █ Restart dns services
   tags:
@@ -41,8 +43,8 @@
   template:
     src: forward.j2
     dest: /var/named/forward
-    owner: root
-    group: root
+    owner: "{{ j2_role_variables['bind_user'] | default('root') }}"
+    group: "{{ j2_role_variables['bind_group'] | default('root') }}"
     mode: 0644
   register: zoneconf
   tags:
@@ -60,8 +62,8 @@
   template:
     src: forward.soa.j2
     dest: /var/named/forward.soa
-    owner: root
-    group: root
+    owner: "{{ j2_role_variables['bind_user'] | default('root') }}"
+    group: "{{ j2_role_variables['bind_group'] | default('root') }}"
     mode: 0644
   notify: service █ Restart dns services
   when: zoneconf.changed  # noqa 503
@@ -72,8 +74,8 @@
   template:
     src: reverse.j2
     dest: /var/named/reverse
-    owner: root
-    group: root
+    owner: "{{ j2_role_variables['bind_user'] | default('root') }}"
+    group: "{{ j2_role_variables['bind_group'] | default('root') }}"
     mode: 0644
   tags:
     - template
@@ -82,8 +84,8 @@
   template:
     src: reverse.soa.j2
     dest: /var/named/reverse.soa
-    owner: root
-    group: root
+    owner: "{{ j2_role_variables['bind_user'] | default('root') }}"
+    group: "{{ j2_role_variables['bind_group'] | default('root') }}"
     mode: 0644
   notify: service █ Restart dns services
   when: zoneconf.changed  # noqa 503

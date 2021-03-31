@@ -1,0 +1,8 @@
+---
+conman_RedHat_9:
+  execpath: "/usr/lib/conman/exec"
+  packages_to_install:
+    - conman
+    - ipmitool
+    - python3-libselinux
+    - python3-policycoreutils
