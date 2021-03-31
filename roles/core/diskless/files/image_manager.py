@@ -29,6 +29,7 @@ from enum import Enum, auto
 # Import diskless modules
 from diskless.utils import Color, printc, select_from_list, load_file
 
+
 class ImageManager:
     """Class to manage images of the diskless tool."""
 
