@@ -11,7 +11,8 @@ Instructions
 
 All logs are separated by systemd instances into /var/log/rsyslog/ .
 
-Log server port is set to 514 by default, and can be customized with log_server_port variable.
+Log server port is set to 514 by default, and can be customized with
+log_server_port variable.
 
 Changelog
 ^^^^^^^^^
