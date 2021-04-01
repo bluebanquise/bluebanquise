@@ -75,7 +75,7 @@
 - name: meta █ Run handler tasks to restart rsyslog services
   meta: flush_handlers
 
-- name: "service █ Manage {{ j2_role_variables['services_to_start'] | join(' ') }} state"
+- name: "service █ Manage {{ log_client_services_to_start }} state"
   service:
     name: "{{ item }}"
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"

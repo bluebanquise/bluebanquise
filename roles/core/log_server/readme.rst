@@ -19,4 +19,3 @@ Changelog
 * 1.0.3: Enable log server port customization with log_server_port. strus38
 * 1.0.1: Fixed bad template. Documentation. johnnykeats <johnny.keats@outlook.com>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
- 
