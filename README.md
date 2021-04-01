@@ -23,7 +23,7 @@ It is a revamping of the old stack [Banquise](https://github.com/oxedions/banqui
 
 The stack is split over multiple repositories:
 
-* :globe_with_meridians: **Core:** stack CORE roles and tools, dedicated to deploying and configuring servers, is hosted on github, in this [same repository](https://github.com/bluebanquise/bluebanquise).
+* :globe_with_meridians: **[Core](https://github.com/bluebanquise/bluebanquise):** the CORE of the stack, provides roles and tools to deploy and configure hosts.
 
 * :star: **Community:** stack COMMUNITY roles and tools, dedicated to bring more specialized features on top of CORE, is hosted on github, in the [community repository](https://github.com/bluebanquise/community).
 
