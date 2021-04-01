@@ -1,6 +1,6 @@
 ---
 - name: "hostname █ Set {{ inventory_hostname }} hostname"
   hostname:
-    name: "{{ set_hostname_fully_qualified_domaine_name | ternary( inventory_hostname + '.' + domain_name, inventory_hostname ) }}"
+    name: "{{ set_hostname_fqdn | ternary( inventory_hostname + '.' + domain_name, inventory_hostname ) }}"
   tags:
     - identify
