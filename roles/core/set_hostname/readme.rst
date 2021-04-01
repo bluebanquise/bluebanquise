@@ -9,7 +9,8 @@ This role simply set a node hostname.
 Instructions
 ^^^^^^^^^^^^
 
-NA.
+It is possible to ask for hostname used to be FQDN, by setting variable
+**set_hostname_fully_qualified_domaine_name** variable to *true*.
 
 Changelog
 ^^^^^^^^^
