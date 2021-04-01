@@ -44,7 +44,8 @@
   tags:
     - firewall
 
-- meta: flush_handlers
+- name: meta █ Run handler tasks to restart firewall services
+  meta: flush_handlers
 
 - name: "firewalld █ Add services to firewall's {{ prometheus_server_firewall_zone | default('public') }} zone"
   firewalld:

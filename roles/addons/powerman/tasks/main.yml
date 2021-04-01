@@ -19,7 +19,8 @@
   tags:
     - template
 
-- meta: flush_handlers
+- name: meta █ Run handler tasks to restart powerman service
+  meta: flush_handlers
 
 - name: service █ Manage powerman state
   service:

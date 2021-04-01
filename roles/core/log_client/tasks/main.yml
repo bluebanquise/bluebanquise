@@ -72,7 +72,8 @@
     - udp
   notify: Restart rsyslog services
 
-- meta: flush_handlers
+- name: meta █ Run handler tasks to restart rsyslog services
+  meta: flush_handlers
 
 - name: Manage services state
   service:

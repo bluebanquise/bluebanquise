@@ -265,7 +265,8 @@
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_user }}"
 
-- meta: flush_handlers
+- name: meta █ Run handler tasks to restart pxe services
+  meta: flush_handlers
 
 - name: "service █ Manage {{ (pxe_stack_services_to_start + [pxe_stack_tftp_service | default(pxe_stack_default_tftp_service)]) | join(' ') }} state"
   service:

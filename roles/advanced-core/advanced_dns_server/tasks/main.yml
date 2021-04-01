@@ -100,7 +100,8 @@
     - template
     - internal
 
-- meta: flush_handlers
+- name: meta █ Run handler tasks to restart dns services
+  meta: flush_handlers
 
 - name: "service █ Manage {{ advanced_dns_server_services_to_start | join(' ') }} state"
   service:
