@@ -25,7 +25,7 @@
     - service
     - template
 
-- name:  "firewalld █ Add services to firewall's {{ log_server_firewall_zone | default('public') }} zone"
+- name: "firewalld █ Add services to firewall's {{ log_server_firewall_zone | default('public') }} zone"
   firewalld:
     zone: "{{ log_server_firewall_zone | default('public') }}"
     service: "{{ item }}"
@@ -39,7 +39,7 @@
   tags:
     - firewall
 
-- name:  "firewalld █ Add custom port to firewall's {{ log_server_firewall_zone | default('public') }} zone"
+- name: "firewalld █ Add custom port to firewall's {{ log_server_firewall_zone | default('public') }} zone"
   firewalld:
     zone: "{{ log_server_firewall_zone | default('public') }}"
     port: "{{ log_server_port }}/tcp"
@@ -52,7 +52,7 @@
   tags:
     - firewall
 
-- name:  "package █ Install {{ log_server_packages_to_install }} packages"
+- name: "package █ Install {{ log_server_packages_to_install }} packages"
   package:
     name: "{{ log_server_packages_to_install }}"
     state: present
