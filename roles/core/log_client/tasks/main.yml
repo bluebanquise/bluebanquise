@@ -1,24 +1,49 @@
 ---
-- name: "package █ Install {{ j2_role_variables['packages_to_install'] | join(' ') }}"
+- name: include_vars ░ Gather OS specific variables
+  # This task gathers variables defined in OS specific files.
+  #
+  # Search vars in:
+  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
+  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
+  #  - <distribution>.yml            # eg. CentOS.yml
+  #  - <os_family>.yml               # eg. RedHat.yml
+  #
+  # If no OS specific file is found, the role will default to vars/main.yml
+  #
+  include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family }}.yml"
+      skip: true
+  tags:
+    - internal
+    - package
+    - service
+    - template
+
+- name: Install packages
   package:
-    name: "{{ j2_role_variables['packages_to_install'] }}"
+    name: "{{ log_client_packages_to_install }}"
     state: present
   tags:
     - package
 
-- name: "template █ Generate {{ log_client_rsyslog_conf_path }}"
+- name: Template >> /etc/rsyslog.conf
   template:
     src: rsyslog.conf.j2
     dest: "{{ log_client_rsyslog_conf_path }}"
     owner: root
     group: root
     mode: 0644
-  notify: service █ Restart rsyslog service
+  notify: Restart rsyslog services
   when: "'rsyslog.conf' not in (log_client_configuration_files | default([]) | selectattr('name','defined') | map(attribute='name') | list)"
   tags:
     - template
 
-- name: "template █ Generate custom rsyslog files"
+- name: Add custom rsyslog files
   template:
     src: rsyslog.d_custom.conf.j2
     dest: "{{ item.path | default('/etc/rsyslog.d') }}/{{ item.name }}"
@@ -28,12 +53,12 @@
   loop: "{{ log_client_configuration_files }}"
   loop_control:
     label: "Install configuration file {{ item.name }}"
-  notify: service █ Restart rsyslog service
+  notify: Restart rsyslog services
   when: log_client_configuration_files is defined and log_client_configuration_files is iterable
   tags:
     - template
 
-- name: seport █ Allow syslog port into SELinux
+- name: Allow syslog port into SELinux
   seport:
     ports: "{{ log_client_server_port }}"
     proto: "{{ item }}"
@@ -45,16 +70,15 @@
   loop:
     - tcp
     - udp
-  notify: service █ Restart rsyslog service
+  notify: Restart rsyslog services
 
-- name: meta █ Run handler tasks to restart rsyslog services
-  meta: flush_handlers
+- meta: flush_handlers
 
-- name: "service █ Manage {{ j2_role_variables['services_to_start'] | join(' ') }} state"
+- name: Manage services state
   service:
     name: "{{ item }}"
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
     state: "{{ (start_services | bool) | ternary('started', omit) }}"
-  loop: "{{ j2_role_variables['services_to_start'] }}"
+  loop: "{{ log_client_services_to_start }}"
   tags:
     - service

@@ -1,6 +1,0 @@
----
-repositories_server_SUSE:
-  packages_to_install:
-    - apache2
-  services_to_start:
-    - apache2

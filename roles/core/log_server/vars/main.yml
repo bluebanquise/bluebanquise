@@ -1,0 +1,13 @@
+---
+log_server_role_version: 1.0.3
+
+log_server_packages_to_install:
+  - rsyslog
+  - logrotate
+  - xz
+log_server_services_to_start:
+  - rsyslog
+log_server_firewall_services_to_add:
+  - syslog
+  - rsh  # 514/tcp
+log_server_rsyslog_conf_path: /etc/rsyslog.conf

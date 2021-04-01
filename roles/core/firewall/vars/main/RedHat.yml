@@ -1,6 +1,0 @@
----
-firewall_RedHat:
-  packages_to_install:
-    - firewalld
-  services_to_start:
-    - firewalld

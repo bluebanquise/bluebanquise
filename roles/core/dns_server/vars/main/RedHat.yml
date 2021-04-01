@@ -1,8 +1,0 @@
----
-dns_server_RedHat:
-  packages_to_install:
-    - bind
-  services_to_start:
-    - named
-  firewall_services_to_add:
-    - dns

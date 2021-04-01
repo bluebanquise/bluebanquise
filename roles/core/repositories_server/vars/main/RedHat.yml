@@ -1,8 +1,0 @@
----
-repositories_server_RedHat:
-  packages_to_install:
-    - httpd
-  services_to_start:
-    - httpd
-  firewall_services_to_add:
-    - http

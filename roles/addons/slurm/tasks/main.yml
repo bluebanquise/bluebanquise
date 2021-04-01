@@ -1,0 +1,122 @@
+---
+- name: include_vars ░ Gather OS specific variables
+  # This task gathers variables defined in OS specific files.
+  #
+  # Search vars in:
+  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
+  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
+  #  - <distribution>.yml            # eg. CentOS.yml
+  #  - <os_family>.yml               # eg. RedHat.yml
+  #
+  # If no OS specific file is found, the role will default to vars/main.yml
+  #
+  include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family }}.yml"
+      skip: true
+  tags:
+    - internal
+    - package
+    - template
+
+- name: "package █ Install {{ slurm_packages_to_install[slurm.slurm_packaging][slurm_profile] | join(' ') }}"
+  package:
+    name: "{{ slurm_packages_to_install[slurm.slurm_packaging][slurm_profile] }}"
+    state: present
+  tags:
+    - package
+
+#### MUNGE
+
+- name: copy █ Copy munge.key to /etc/munge/munge.key
+  copy:
+    src: munge.key
+    dest: /etc/munge/munge.key
+    owner: munge
+    group: munge
+    mode: 0400
+
+- name: service █ Manage munge state
+  service:
+    name: munge
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+    state: "{{ (start_services | bool) | ternary('started', omit) }}"
+  tags:
+    - service
+
+#### SLURM
+
+- name: group █ Add slurm group
+  group:
+    name: slurm
+    gid: 777
+    state: present
+
+- name: user █ Add slurm user
+  user:
+    name: slurm
+    shell: /bin/false
+    uid: 777
+    group: slurm
+    home: "{{ slurm_home_path }}"
+    state: present
+
+- name: "file █ Enforce permissions on {{ slurm_home_path }}"
+  file:
+    path: "{{ slurm_home_path }}"
+    state: directory
+    mode: 0755
+
+- name: "template █ Generate {{ slurm_home_path }}/slurm.conf"
+  template:
+    src: slurm.conf.j2
+    dest: "{{ slurm_home_path }}/slurm.conf"
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - template
+
+- name: "copy █ Copy cgroup.conf to {{ slurm_home_path }}/cgroup.conf"
+  copy:
+    src: cgroup.conf
+    dest: "{{ slurm_home_path }}/cgroup.conf"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: file █ Create needed directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: slurm
+    group: slurm
+    mode: 0755
+  with_items:
+    - /var/log/slurm
+    - /var/spool/slurmd
+    - /var/spool/slurmd/StateSave
+    - /var/spool/slurmd/slurmd
+
+- name: service █ Manage slurmctld state
+  service:
+    name: slurmctld
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+    state: "{{ (start_services | bool) | ternary('started', omit) }}"
+  when:
+    - slurm_profile == 'controller'
+  tags:
+    - service
+
+- name: service █ Manage slurmd state
+  service:
+    name: slurmd
+    enabled: yes
+    state: started
+  when: slurm_profile == 'node'
+  tags:
+    - service

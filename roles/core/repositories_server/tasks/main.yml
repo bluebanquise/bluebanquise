@@ -1,8 +1,32 @@
 ---
+- name: include_vars ░ Gather OS specific variables
+  # This task gathers variables defined in OS specific files.
+  #
+  # Search vars in:
+  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
+  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
+  #  - <distribution>.yml            # eg. CentOS.yml
+  #  - <os_family>.yml               # eg. RedHat.yml
+  #
+  # If no OS specific file is found, the role will default to vars/main.yml
+  #
+  include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family }}.yml"
+      skip: true
+  tags:
+    - firewall
+    - internal
+    - package
+    - service
 
-- name: firewalld █ "Add services to firewall's {{ repositories_server_firewall_zone | default('public',true) }} zone"
+- name: firewalld █ "Add services to firewall's {{ repositories_server_firewall_zone | default('public') }} zone"
   firewalld:
-    zone: "{{ repositories_server_firewall_zone | default('public',true) }}"
+    zone: "{{ repositories_server_firewall_zone | default('public') }}"
     service: "{{ item }}"
     immediate: "yes"
     permanent: "yes"
@@ -10,22 +34,22 @@
   when:
     - ansible_facts.os_family == "RedHat"
     - ep_firewall | default(false) | bool
-  loop: "{{ j2_role_variables['firewall_services_to_add'] }}"
+  loop: "{{ repositories_server_firewall_services_to_add }}"
   tags:
     - firewall
 
-- name: "package █ Install {{ j2_role_variables['packages_to_install'] | join(' ') }} packages"
+- name: "package █ Install {{ repositories_server_packages_to_install | join(' ') }} packages"
   package:
-    name: "{{ j2_role_variables['packages_to_install'] }}"
+    name: "{{ repositories_server_packages_to_install }}"
     state: present
   tags:
     - package
 
-- name: "service █ Manage {{ j2_role_variables['services_to_start'] | join(' ') }} services state"
+- name: "service █ Manage {{ repositories_server_services_to_start | join(' ') }} services state"
   service:
     name: "{{ item }}"
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
     state: "{{ (start_services | bool) | ternary('started', omit) }}"
-  loop: "{{ j2_role_variables['services_to_start'] }}"
+  loop: "{{ repositories_server_services_to_start }}"
   tags:
     - service

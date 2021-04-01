@@ -1,6 +1,0 @@
----
-bluebanquise_RedHat_7:
-  packages_to_install:
-    - ansible
-    - python2-jmespath
-    - python-netaddr

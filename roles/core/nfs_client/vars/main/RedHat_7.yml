@@ -1,6 +1,0 @@
----
-nfs_client_RedHat_7:
-  packages_to_install:
-    - nfs-utils
-    - libselinux-python
-    - policycoreutils-python

@@ -1,9 +1,0 @@
----
-time_RedHat:
-  packages_to_install:
-    - chrony
-  services_to_start:
-    - chronyd
-  firewall_services_to_add:
-    - ntp
-  chrony_conf_path: /etc/chrony.conf

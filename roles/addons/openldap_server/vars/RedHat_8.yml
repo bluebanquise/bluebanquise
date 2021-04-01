@@ -1,0 +1,8 @@
+---
+openldap_server_packages_to_install:
+  - openldap-servers
+  - openldap-clients
+  - httpd
+  - phpldapadmin
+  - python3-libselinux
+  - python3-policycoreutils

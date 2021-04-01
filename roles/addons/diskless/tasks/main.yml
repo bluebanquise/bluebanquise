@@ -1,0 +1,80 @@
+---
+- name: include_vars ░ Gather OS specific variables
+  include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family }}.yml"
+      skip: true
+  tags:
+    - internal
+    - package
+
+- name: "package █ Install {{ diskless_packages_to_install | join(' ') }}"
+  package:
+    name: "{{ diskless_packages_to_install }}"
+    state: present
+  tags:
+    - package
+
+- name: "Create diskless directories structure"
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+  loop:
+    # Create base directories for images
+    - /var/www/html/preboot_execution_environment
+    - /var/www/html/preboot_execution_environment/diskless
+    - /var/www/html/preboot_execution_environment/diskless/images
+    - /var/www/html/preboot_execution_environment/diskless/kernels
+    # Create additional directories for images
+    - /diskless
+    - /diskless/images
+    - /diskless/images/nfsimages
+    - /diskless/images/nfsimages/golden
+    - /diskless/images/nfsimages/staging
+    # Create directories for python modules
+    - /lib/python3.6/site-packages/diskless
+    - /lib/python3.6/site-packages/diskless/modules
+    # Create directory for 'installations.yml' file
+    - /var/lib/diskless
+    # Create working directory for images
+    - /var/tmp/diskless/workdir/
+
+# Copy script files with permission
+- name: "Add diskless scripts"
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: 0755
+  with_items:
+    - { src: 'utils.py', dest: '/lib/python3.6/site-packages/diskless/utils.py' }
+    - { src: 'image_manager.py', dest: '/lib/python3.6/site-packages/diskless/image_manager.py' }
+    - { src: 'kernel_manager.py', dest: '/lib/python3.6/site-packages/diskless/kernel_manager.py' }
+    - { src: 'nfs_module.py', dest: '/lib/python3.6/site-packages/diskless/modules/nfs_module.py' }
+    - { src: 'base_module.py', dest: '/lib/python3.6/site-packages/diskless/modules/base_module.py' }
+    - { src: 'livenet_module.py', dest: '/lib/python3.6/site-packages/diskless/modules/livenet_module.py' }
+    - { src: 'demo_module.py', dest: '/lib/python3.6/site-packages/diskless/modules/demo_module.py' }
+    - { src: 'disklessset.py', dest: '/usr/bin/disklessset' }
+
+# We need to check file existance because an image installation can be running yet, we cannot juste replace the file
+- name: Check if installations.yml file exists
+  stat:
+    path: /var/lib/diskless/installations.yml
+  register: stat_result
+
+# Copy installations.yml file if installations.yml doesnt already exist
+- name: Copy installations.yml file if doesn't already exist
+  copy:
+    src: installations.yml
+    dest: /var/lib/diskless/installations.yml
+    mode: 0755
+  when: not stat_result.stat.exists
+
+- name: Add nfs export point if doesn't already exist
+  lineinfile:
+    dest: /etc/exports
+    line: /diskless/images/nfsimages *(rw,no_root_squash,sync)

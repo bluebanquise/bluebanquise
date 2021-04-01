@@ -1,8 +1,6 @@
 ---
 - name: Converge
   hosts: all
-  vars:
-    j2_role_variables: "{{ vars[role_name + '_' + ansible_facts.distribution + '_' + ansible_facts.distribution_version] | default(vars[role_name + '_' + ansible_facts.distribution + '_' + ansible_facts.distribution_major_version]) | default(vars[role_name + '_' + ansible_facts.distribution]) | default(vars[role_name + '_' + ansible_facts.os_family + '_' + ansible_facts.distribution_version]) | default(vars[role_name + '_' + ansible_facts.os_family + '_' + ansible_facts.distribution_major_version]) | default(vars[role_name + '_' + ansible_facts.os_family]) | default(vars[role_name + '_generic']) }}"
   tasks:
     - name: "Include nfs_server"
       include_role:

@@ -1,0 +1,72 @@
+authentication:
+  basicAuth:
+    users:
+      - username: {{ prometheus_server_karma_username }}
+        password: {{ prometheus_server_karma_password }}
+
+alertmanager:
+  interval: 10s
+  servers:
+    - cluster: prometheus
+      name: {{ prometheus_server_karma_alertmanager_server_name }}
+      uri: "http://localhost:9093"
+      timeout: 10s
+      proxy: false
+
+#filters by default when connected
+filters:
+  default:
+    - "@cluster=prometheus"
+
+karma:
+  name: {{ prometheus_server_karma_name }}
+
+grid:
+  sorting:
+    order: label
+    reverse: false
+    label: severity
+    customValues:
+      labels:
+        severity:
+          critical: 1
+          warning: 2
+          info: 3
+
+labels:
+  color:
+    static:
+      - job
+    unique:
+      - cluster
+      - instance
+      - ifName
+      - "@cluster"
+    custom:
+      "@cluster":
+        - value: prometheus
+          color: "#70e1e1"
+
+
+      severity:
+        - value: info
+          color: "#87c4e0"
+        - value: warning
+          color: "#ffae42"
+        - value: critical
+          color: "#ff220c"
+
+alertAcknowledgement:
+  enabled: true
+  duration: 15m0s
+  commentPrefix: silenced for 15 min
+ui:
+  refresh: 10s
+  hideFiltersWhenIdle: true
+  colorTitlebar: false
+  theme: auto
+  minimalGroupWidth: 420
+  alertsPerGroup: 5
+  collapseGroups: collapsedOnMobile
+  multiGridLabel: severity
+  multiGridSortReverse: false

@@ -1,0 +1,25 @@
+---
+- name: file █ Create clone directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+  loop:
+    - /var/www/html/preboot_execution_environment/clone/
+    - /var/www/html/preboot_execution_environment/clone/clonezilla/
+    - /cloned_images
+
+- name: lineinfile █ Ensure cloned_images is exported over nfs (/etc/exports)
+  lineinfile:
+    path: /etc/exports
+    regexp: ' # export name: cloned_images$'
+    line: "/cloned_images *(rw,no_root_squash,sync) # export name: cloned_images"
+
+- name: copy █ Copy clone.ipxe and deploy_clone.ipxe
+  copy:
+    src: "{{ item }}"
+    dest: "/var/www/html/preboot_execution_environment/clone/{{ item }}"
+    mode: 0644
+  loop:
+    - clone.ipxe
+    - deploy_clone.ipxe

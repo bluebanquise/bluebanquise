@@ -129,6 +129,5 @@ Package installed:
 Changelog
 ^^^^^^^^^
 
-* 1.2.0: Update role to new vars gathering method. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.0: Allow creation of new zones. Bruno Travouillon <devel@travouillon.fr>
 * 1.0.0: Role creation. Bruno Travouillon <devel@travouillon.fr>

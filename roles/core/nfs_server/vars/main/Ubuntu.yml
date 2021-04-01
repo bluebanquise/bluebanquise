@@ -1,6 +1,0 @@
----
-nfs_server_Ubuntu:
-  packages_to_install:
-    - nfs-kernel-server
-  services_to_start:
-    - nfs-kernel-server

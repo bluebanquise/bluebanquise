@@ -1,0 +1,44 @@
+- name: Package
+  package:
+    name:
+      - sssd
+      - authconfig
+    state: present
+
+- name: Checking if SSSD is already active
+  lineinfile:
+    path: /etc/sysconfig/authconfig
+    regexp: '^USESSSDAUTH=yes$'
+    state: absent
+  check_mode: yes
+  changed_when: False
+  register: sssd_enabled
+
+- name: Enable SSSD
+  command: authconfig --enablesssd --enablesssdauth --enablelocauthorize --enablemkhomedir --update
+  when: sssd_enabled.found is not defined or not sssd_enabled.found
+
+- name: Template >> /etc/sssd/sssd.conf
+  template:
+    src: sssd.conf.j2
+    dest: /etc/sssd/sssd.conf
+    mode: 0600
+
+- name: Enable/disable services
+  service:
+    name: "{{ item }}"
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+  with_items:
+    - sssd
+  tags:
+    - service
+
+- name: Start services
+  service:
+    name: "{{ item }}"
+    state: started
+  with_items:
+    - sssd
+  when: (start_services | bool)
+  tags:
+    - service

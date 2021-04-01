@@ -1,0 +1,33 @@
+{% for network in networks %}
+
+  {% if networks[network]['subnet'] is not defined or networks[network]['subnet'] is none %}
+    <br><div id="error">ERROR</div>: network {{network}} as no subnet defined.
+  {% endif %}
+  {% if networks[network]['prefix'] is not defined or networks[network]['prefix'] is none %}
+    <br><div id="error">ERROR</div>: network {{network}} as no prefix defined.
+  {% endif %}
+  {% if networks[network]['netmask'] is not defined or networks[network]['netmask'] is none %}
+    <br><div id="error">ERROR</div>: network {{network}} as no netmask defined.
+  {% endif %}
+  {% if networks[network]['is_in_dhcp'] is defined and networks[network]['is_in_dhcp'] == 'true' and networks[network]['dhcp_unknown_range'] is defined and networks[network]['dhcp_unknown_range'] is not none %}
+    <br><div id="warning">WARNING</div>: network {{network}} has a dhcp_unknown_range but is set to false in is_in_dhcp. Consider removing dhcp_unknown_range.
+  {% endif %}
+  {% if networks[network]['is_in_dhcp'] is defined and networks[network]['is_in_dhcp'] == 'true' and management_networks_naming not in network %}
+    <br><div id="warning">WARNING</div>: network {{network}} is set to is_in_dhcp = true, but is not a management network, and so will not be included in dhcp configuration.
+  {% endif %}
+  {% if networks[network]['dhcp_unknown_range'] is defined and networks[network]['dhcp_unknown_range'] is not none and management_networks_naming not in network %}
+    <br><div id="warning">WARNING</div>: network {{network}} has a dhcp_unknown_range but is not a management_network. Consider removing or commenting this value.
+  {% endif %}
+  {% if management_networks_naming in network %}
+    {% if networks[network]['is_in_dhcp'] is defined and networks[network]['is_in_dhcp'] == 'true' %}
+      {% if networks[network]['broadcast'] is not defined or networks[network]['broadcast'] is none %}
+        <br><div id="error">ERROR</div>: network {{network}} is a management network in dhcp but no broadcast is defined.
+      {% endif %}
+      {% if networks[network]['services_ip'] is not defined or networks[network]['services_ip'] is none or networks[network]['services_ip'] is not iterable %}
+        <br><div id="error">ERROR</div>: network {{network}} is a management network in dhcp but services_ip are note defined.
+      {% endif %}
+    {% endif %}
+  {% endif %}
+
+{% endfor %}
+

@@ -1,8 +1,0 @@
----
-dhcp_server_RedHat_8:
-  packages_to_install:
-    - dhcp-server
-  services_to_start:
-    - dhcpd
-  firewall_services_to_add:
-    - dhcp

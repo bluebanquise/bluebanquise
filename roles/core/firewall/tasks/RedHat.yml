@@ -19,8 +19,7 @@
   loop: "{{ (network_interfaces | map(attribute='network') | list) }}"
   notify: service █ Restart firewall services
 
-- name: meta █ Run handler tasks to restart firewall services
-  meta: flush_handlers
+- meta: flush_handlers
 
 - name: "firewalld █ Configure firewall zones"
   firewalld:

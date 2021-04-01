@@ -173,7 +173,6 @@ To be done
 Changelog
 ^^^^^^^^^
 
-* 1.2.0: Update role to new vars gathering method. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.7: Update configuration files path, to prevent issues with multiple icebergs. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.6: Add ability to install other tftp server than atftp. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.5: Update role to match $basearch, add status feat to bootset. Benoit Leveugle <benoit.leveugle@gmail.com>

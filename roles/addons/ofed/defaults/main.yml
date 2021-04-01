@@ -1,0 +1,4 @@
+---
+# defaults file for ofed
+ofed_memlock_soft: 'unlimited'
+ofed_memlock_hard: 'unlimited'

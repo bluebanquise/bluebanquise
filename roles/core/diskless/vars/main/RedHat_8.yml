@@ -1,9 +1,0 @@
----
-diskless_RedHat_8:
-  apache_user: apache
-  packages_to_install:
-    - httpd
-    - python3-clustershell
-    - nfs-utils
-    - dracut-live
-    - xfsdump

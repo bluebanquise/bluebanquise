@@ -1,0 +1,120 @@
+---
+- name: include_vars ░ Gather OS specific variables
+  # This task gathers variables defined in OS specific files.
+  #
+  # Search vars in:
+  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
+  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
+  #  - <distribution>.yml            # eg. CentOS.yml
+  #  - <os_family>.yml               # eg. RedHat.yml
+  #
+  # If no OS specific file is found, the role will default to vars/main.yml
+  #
+  include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family }}.yml"
+      skip: true
+  tags:
+    - internal
+    - package
+    - service
+
+- name: "package █ Install {{ nic_nmcli_packages_to_install | join(' ') }}"
+  package:
+    name: "{{ nic_nmcli_packages_to_install }}"
+    state: present
+  tags:
+    - package
+
+- name: "service █ Manage {{ nic_nmcli_services_to_start | join(' ') }} state"
+  service:
+    name: "{{ item }}"
+    enabled: yes
+    state: started
+  loop: "{{ nic_nmcli_services_to_start }}"
+  tags:
+    - service
+
+# - name: Solve possible unmanaged (Ubuntu only)
+#   file:
+#     path: /etc/NetworkManager/conf.d/10-globally-managed-devices.conf
+#     state: touch
+#   when:
+#     - ansible_facts.distribution_major_version == "18"
+#     - ansible_facts.os_family == "Ubuntu"
+
+- name: nmcli █ Set NICs configuration
+  nmcli:
+    # Tuned
+    conn_name: "{{ item.conn_name | default(item.interface) | string }}"
+    ifname: "{{ item.ifname | default(item.physical_device) | default(omit) }}"
+    ip4: "{{ (item.ip4 is defined) | ternary( ('/' in (item.ip4|default('None')) ) | ternary( (item.ip4|default('None')), ( (item.ip4|default('None')) | string) + '/' + (networks[item.network]['prefix4'] | default(networks[item.network]['prefix']) | string)), omit) }}"
+    # Equivalent to
+    # {% if item.ip4 is defined %}
+    #   {% if '/' in item.ip4 %}\
+    #     {{ item.ip4 }}
+    #   {% else %}\
+    #     {{ item.ip4 }}/{{ networks[item.network].prefix }}
+    #   {% endif %}
+    # {% else %}
+    #    omit
+    # {% endif %}
+    # Allows to provide a simple ip4, or an ip4/prefix
+    # Also support old prefix format (to be replaced by prefix4)
+    gw4: "{{ (item.never_default4 | default(networks[item.network].never_default4) is not defined) | ternary( item.gw4 | default(networks[item.network].gateway4) | default(networks[item.network].gateway) | default(omit), omit) }}"
+    # Check here if never_default4 is set or not. If set, gw4 cannot be used as both are mutually exclusive. If not set, then get gw4 from network_interfaces, then default to network.gateway4 then default to network.gateway then omit.
+    routes4: "{{ (item.routes4 is defined or networks[item.network]['routes4'] is defined) |ternary( item.routes4 | default(networks[item.network]['routes4'] | default([]) ), omit) }}"
+    route_metric4: "{{ item.route_metric4 | default(networks[item.network].route_metric4) | default(omit) }}"
+    never_default4: "{{ item.never_default4 | default(networks[item.network].never_default4) | default(omit) }}"
+    mtu: "{{ item.mtu | default(networks[item.network].mtu) | default(omit) }}"
+    type: "{{ item.type | default('ethernet') }}"  # Even if in the documentation type is optional, it is in fact mandatory. Default to ethernet.
+    # Standard
+    ip6: "{{ item.ip6 | default(omit) }}"
+    gw6: "{{ item.gw6 | default(omit) }}"
+    state: "{{ item.state | default('present') }}"
+    autoconnect: "{{ item.autoconnect | default(omit) }}"
+    ageingtime: "{{ item.ageingtime | default(omit) }}"
+    arp_interval: "{{ item.arp_interval | default(omit) }}"
+    arp_ip_target: "{{ item.arp_ip_target | default(omit) }}"
+    dhcp_client_id: "{{ item.dhcp_client_id | default(omit) }}"
+    dns4: "{{ item.dns4 | default(omit) }}"
+    dns4_search: "{{ item.dns4_search | default(omit) }}"
+    dns6: "{{ item.dns6 | default(omit) }}"
+    dns6_search: "{{ item.dns6_search | default(omit) }}"
+    downdelay: "{{ item.downdelay | default(omit) }}"
+    egress: "{{ item.egress | default(omit) }}"
+    flags: "{{ item.flags | default(omit) }}"
+    forwarddelay: "{{ item.forwarddelay | default(omit) }}"
+    hairpin: "{{ item.hairpin | default(omit) }}"
+    hellotime: "{{ item.hellotime | default(omit) }}"
+    ingress: "{{ item.ingress | default(omit) }}"
+    ip_tunnel_dev: "{{ item.ip_tunnel_dev | default(omit) }}"
+    ip_tunnel_local: "{{ item.ip_tunnel_local | default(omit) }}"
+    ip_tunnel_remote: "{{ item.ip_tunnel_remote | default(omit) }}"
+    mac: "{{ item.force_mac | default(omit) }}"
+    master: "{{ item.master | default(omit) }}"
+    maxage: "{{ item.maxage | default(omit) }}"
+    mode: "{{ item.mode | default(omit) }}"
+    miimon: "{{ item.miimon | default(omit) }}"
+    path_cost: "{{ item.path_cost | default(omit) }}"
+    primary: "{{ item.primary | default(omit) }}"
+    priority: "{{ item.priority | default(omit) }}"
+    slavepriority: "{{ item.slavepriority | default(omit) }}"
+    stp: "{{ item.stp | default(omit) }}"
+    updelay: "{{ item.updelay | default(omit) }}"
+    vlandev: "{{ item.vlandev | default(omit) }}"
+    vlanid: "{{ item.vlanid | default(omit) }}"
+    vxlan_id: "{{ item.vxlan_id | default(omit) }}"
+    vxlan_local: "{{ item.vxlan_local | default(omit) }}"
+    vxlan_remote: "{{ item.vxlan_remote | default(omit) }}"
+    zone: "{{ item.zone | default(omit) }}"
+  notify: command █ Reload connections
+  loop: "{{ network_interfaces }}"
+  tags:
+    - identify
+
+- meta: flush_handlers
