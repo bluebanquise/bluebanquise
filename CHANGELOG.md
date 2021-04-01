@@ -5,13 +5,14 @@
 ### Major changes
 
 #### New roles
-  
+
 #### Roles improvement or fix
 
-  - pxe_stack: fix issues with hostname not set during kickstart on RHEL 8.3 (#522)
-  - diskless: 
+  - diskless:
     - fix issues with dnf command in the livenet module (#528)
     - fix issues preventing access to nodes booting a livenet image (#525)
+  - pxe_stack: fix issues with hostname not set during kickstart on RHEL 8.3 (#522)
+  - set_hostname: add fqdn capability (#543)
 
 ### Breaking changes
 
