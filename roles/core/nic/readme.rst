@@ -1,6 +1,10 @@
 NIC
 ---
 
+.. warning:
+  This role is deprecated and will be removed soon.
+  Please consider using nic_nmcli role instead.
+
 Description
 ^^^^^^^^^^^
 
@@ -13,7 +17,7 @@ This role provide network configuration based on system files (ifcfg files for R
 
 User need to restart network or interfaces one by one for changes to take effect after role execution.
 
-As a reminder, the creation of a new network requires a new entry in the 
+As a reminder, the creation of a new network requires a new entry in the
 ``/etc/bluebanquise/inventory/group_vars/all/general_settings/network.yml`` file.
 
 Network interfaces configurations are done at host level:
