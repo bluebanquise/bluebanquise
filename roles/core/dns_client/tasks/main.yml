@@ -19,7 +19,7 @@
         - "vars/{{ ansible_facts.os_family }}.yml"
       skip: true
   tags:
-    - internal
+    - always
 
 - name: template █ Generate /etc/resolv.conf
   template:

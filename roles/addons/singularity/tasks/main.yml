@@ -19,9 +19,7 @@
         - "vars/{{ ansible_facts.os_family }}.yml"
       skip: true
   tags:
-    - internal
-    - package
-    - template
+    - always
 
 - name: singularity █ Install singularity
   package:

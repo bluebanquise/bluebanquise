@@ -33,6 +33,3 @@ jobs:
         env:
           # Set path to ansible roles to workaround ansible-lint#1375
           ANSIBLE_ROLES_PATH: roles/custom:roles/core:roles/addons:roles/advanced-core
-
-      - name: Check tags of tasks Gather OS variables
-        run: ./tools/gather_vars_checker.py 'roles/*/*/'

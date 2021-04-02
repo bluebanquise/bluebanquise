@@ -19,10 +19,7 @@
         - "vars/{{ ansible_facts.os_family }}.yml"
       skip: true
   tags:
-    - firewall
-    - internal
-    - package
-    - service
+    - always
 
 - name: "Add services to firewall's {{ advanced_dhcp_server_firewall_zone | default('public') }} zone"
   firewalld:
