@@ -9,7 +9,7 @@
 
 **BlueBanquise** is a coherent **Ansible** roles collection, designed to deploy and manage large group of hosts (clusters of nodes).
 
-Main target is High Performance Computing (HPC), but the BlueBanquise stack is generic and can adapt to any kind of architecture (university or enterprise infrastructures, render farm, etc.).
+While main target is High Performance Computing (HPC), the BlueBanquise stack is generic and can adapt to any kind of architecture (university or enterprise infrastructures, render farm, etc.).
 
 BlueBanquise is part of the **Algoric** Project from the [**Fabrique du Loch**](https://www.lafabriqueduloch.org/fr/accueil/) FabLab.
 
@@ -17,11 +17,50 @@ BlueBanquise is part of the **Algoric** Project from the [**Fabrique du Loch**](
 
 It is a revamping of the old stack [Banquise](https://github.com/oxedions/banquise), based on Salt.
 
-## Documentation and files
+## Resources
 
-The stack documentation is available on the BlueBanquise main website, in [documentation subfolder](https://bluebanquise.com/documentation/).
+### Files
 
-The stack repositories are available in the [repositories subfolder](https://bluebanquise.com/repository/).
+The stack is split over multiple repositories:
+
+* :globe_with_meridians: **[Core](https://github.com/bluebanquise/bluebanquise):** the CORE of the stack, provides roles and tools to deploy and configure hosts.
+
+* :star: **[Community](https://github.com/bluebanquise/community):** COMMUNITY roles and tools, provides additional features on top of CORE. The release cycle of COMMUNITY is different than CORE.
+
+### Documentation
+
+The stack documentation is available on the BlueBanquise website, in [documentation subfolder](https://bluebanquise.com/documentation/).
+
+Note that each role (CORE or COMMUNITY) embeds its own readme, with detailed
+usage description.
+
+### Packages
+
+The stack packages are available in the [repositories subfolder](https://bluebanquise.com/repository/).
+
+## Supported software environment
+
+| Operating System family | Operating System distribution | Tested versions    | Notes                               |
+| ----------------------- | ----------------------------- | ------------------ | ----------------------------------- |
+| Red Hat                 |                               |                    |                                     |
+|                         | RHEL                          | 7, 8               | √                                   |
+|                         | CentOS                        | 7, 8               | √                                   |
+|                         | CentOS Stream                 | 8                  | In dev, targeted for next release   |
+|                         | Oracle Linux                  | 8                  | In dev, targeted for next release   |
+|                         | CloudLinux                    | 8                  | In dev, targeted for next release   |
+|                         | AlmaLinux                     | 8                  | In dev, targeted for next release   |
+|                         | RockyLinux                    | NA                 | Waiting for distribution release    |
+|                         | Fedora                        | 33                 | In dev, targeted for next release   |
+| Suse                    |                               |                    |                                     |
+|                         | SLES                          | NA                 | Targeted for future release         |
+|                         | OpenSuse Leap                 | NA                 | Targeted for future release         |
+| Debian                  |                               |                    |                                     |
+|                         | Ubuntu                        | NA                 | Targeted for future release         |
+|                         | Debian                        | NA                 | Targeted for future release         |
+
+Ansible >= 2.9.13 is mandatory for BlueBanquise to run properly.
+
+**[OpenHPC](https://openhpc.community/downloads/)** scientific packages and OpenHPC slurm job scheduler are compatible with the stack.
 
 ## The name
 
@@ -29,25 +68,6 @@ You may wonder where this name comes from:
 
 * [BlueBanquise](https://en.wikipedia.org/wiki/File:Blue_iceberg_in_the_Ilulissat_icefjord.jpg)
 * [Blue Iceberg](https://en.wikipedia.org/wiki/Blue_iceberg)
-
-## Supported software environment
-
-Currently supported OS are:
-
-* Fully supported:
-  * RedHat/Centos 7
-  * RedHat/Centos 8
-
-* In development:
-  * OpenSuse Leap 15.1
-
-* To be included if demand:
-  * Ubuntu
-  * Debian
-
-Ansible >= 2.9.13 is mandatory for BlueBanquise to run properly.
-
-**[OpenHPC](https://openhpc.community/downloads/)** scientific packages and OpenHPC slurm job scheduler are compatible with the stack.
 
 ## Thanks
 
