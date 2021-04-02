@@ -10,7 +10,18 @@ Instructions
 ^^^^^^^^^^^^
 
 It is possible to ask for hostname used to be FQDN, by setting variable
-**set_hostname_fqdn** variable to *true*.
+**set_hostname_fqdn** variable to *true*. If set to *true*, variable 
+**domain_name** must also be defined in the inventory.
+
+Input
+^^^^^
+
+Optional inventory vars:
+
+**hostvars[inventory_hostname]**
+
+* set_hostname_fqdn
+* domain_name
 
 Changelog
 ^^^^^^^^^
