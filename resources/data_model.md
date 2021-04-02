@@ -269,6 +269,8 @@ managements_group_name:
 
 ### j2_ available variables
 
+These are internal stack variables, for developers only.
+
 ```yaml
 j2_master_groups_list: List of master groups.
 j2_equipment_groups_list: List of equipment groups.
@@ -283,6 +285,4 @@ j2_node_main_resolution_network: Main resolution network. The network on which h
 j2_node_main_network: Main network. The network used by Ansible to deploy configuration (related to ssh).
 j2_node_main_network_interface: Main network interface. Same as main network, but provides interface name instead of network.
 j2_management_networks: List of management networks.
-
-j2_role_variables: Used in core roles. Sort role vars to grab current OS related ones.
 ```
