@@ -8,29 +8,28 @@ include "/etc/powerman/ipmipower.dev"
 # Iceberg system is on
   {% set range = groups[j2_current_iceberg] %}
   {% for host in groups[managements_group_name] %}
-    {% if hostvars[host]['iceberg_master'] == j2_current_iceberg %}
+    {%- if hostvars[host]['iceberg_master'] == j2_current_iceberg %}
       {% set _ = range.append(host) %}
-    {% endif %}
+    {%- endif %}
   {% endfor %}
 {% else %}
   {% set range = groups['all'] %}
 {%- endif %}
 
 {%- for equipment in j2_equipment_groups_list %}
-  {%- set hosts = [] -%}
-  {%- set bmcs = [] -%}
-  {%- for host in groups[equipment] %}
+  {% set hosts = [] %}
+  {% set bmcs = [] %}
+  {% for host in groups[equipment] %}
     {%- if host in range and hostvars[host]['bmc']['name'] is defined %}
       {{- hosts.append(host) }}
       {{- bmcs.append(hostvars[host]['bmc']['name']) }}
     {%- endif %}
-  {%- endfor %}
-  {%- if hosts | length > 0 %}
+  {% endfor %}
+  {% if hosts | length > 0 %}
 
 # {{ equipment }}
 device "{{ equipment }}" "ipmipower" "/usr/sbin/ipmipower --wait-until-on --wait-until-off -h {{ bmcs|join(',') }} -u {{ hostvars[hosts[0]]['ep_equipment_authentication']['user'] }} -p {{ hostvars[hosts[0]]['ep_equipment_authentication']['password'] }} |&"
 node "{{ hosts|join(',') }}" "{{ equipment }}" "{{ bmcs|join(',') }}"
 
   {%- endif %}
-{%- endfor %}
-
+{% endfor %}
