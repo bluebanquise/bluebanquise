@@ -36,6 +36,16 @@
     state: present
     system: yes
 
+- name: user █ Ensure user conman can use /var/run/conman
+  copy:
+    content: |
+      D /var/run/conman 0775 conman conman -
+    dest: /usr/lib/tmpfiles.d/conman.conf
+    mode: 0644
+  notify: systemd █ Reload systemd configuration
+  when:
+    - ansible_facts.os_family == "RedHat"
+
 - name: user █ Ensure user conman exists
   user:
     name: conman
