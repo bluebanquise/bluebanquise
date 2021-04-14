@@ -5,7 +5,7 @@
     name: "{{ lvm_packages_to_install }}"
     state: present
   tags:
-    - always
+    - package
 
 - name: lvg █ Creating volume groups
   lvg:
