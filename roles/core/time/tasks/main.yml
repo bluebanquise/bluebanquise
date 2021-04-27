@@ -53,6 +53,16 @@
   tags:
     - template
 
+- name: lineinfile █ Set sysconfig OPTIONS for chronyd
+  lineinfile:
+    path: /etc/sysconfig/chronyd
+    regexp: '^OPTIONS'
+    line: OPTIONS="{{ time_chronyd_options }}"
+  notify: service █ Restart time services
+  when: time_chronyd_options is defined
+  tags:
+    - template
+
 - name: "timezone █ Set system to {{ time_zone }} timezone"
   timezone:
     name: "{{ time_zone }}"
