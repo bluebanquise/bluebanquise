@@ -41,6 +41,15 @@
       debug:
         msg: "{{ chrony_conf['content'] | b64decode }}"
 
+    - name: Read /etc/sysconfig/chronyd
+      slurp:
+        src: /etc/sysconfig/chronyd
+      register: sysconfig
+
+    - name: Display /etc/sysconfig/chronyd
+      debug:
+        msg: "{{ sysconfig['content'] | b64decode }}"
+
 - name: Verify client with single source server
   hosts:
     - client-single-source
@@ -126,3 +135,13 @@
       assert:
         that: chrony_conf['content'] | b64decode |
                 regex_findall(("^local stratum"), multiline=True)
+
+- name: Verify /etc/sysconfig/chronyd
+  hosts:
+    - server
+    - client
+  tasks:
+    - name: Check presence of -x flag in OPTIONS
+      assert:
+        that: sysconfig['content'] | b64decode |
+                regex_findall(("^OPTIONS=\"-x\"$"), multiline=True)

@@ -1,6 +1,6 @@
 ---
 
-- name: Restart rsyslog services
+- name: service █ Restart rsyslog service
   service:
     name: "{{ item }}"
     state: restarted

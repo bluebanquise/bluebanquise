@@ -1,2 +1,0 @@
-#!/bin/bash
-df / | grep '/$' | awk -F ' ' '{print $5}'

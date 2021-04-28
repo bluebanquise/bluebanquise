@@ -19,10 +19,7 @@
         - "vars/{{ ansible_facts.os_family }}.yml"
       skip: true
   tags:
-    - firewall
-    - internal
-    - package
-    - service
+    - always
 
 - name: "firewalld █ Add services to firewall's {{ dhcp_server_firewall_zone | default('public') }} zone"
   firewalld:
@@ -82,7 +79,8 @@
   tags:
     - template
 
-- meta: flush_handlers
+- name: meta █ Run handler tasks to restart dhcp services
+  meta: flush_handlers
 
 - name: "service █ Manage {{ dhcp_server_services_to_start | join(' ') }} state"
   service:
