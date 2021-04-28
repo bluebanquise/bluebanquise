@@ -70,13 +70,24 @@ platforms:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
     privileged: true
     pre_build_image: true
+  - name: client-no-start
+    image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
+    override_command: false
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    pre_build_image: true
 provisioner:
   name: ansible
   inventory:
     group_vars:
       server:
+        start_services: true
+        time_chronyd_options: "-x"
         time_profile: server
       client:
+        start_services: true
+        time_chronyd_options: "-x"
         time_profile: client
     host_vars:
       server-ext-pool:
@@ -115,5 +126,9 @@ provisioner:
         j2_node_main_network: ice1-1
       client-multi-sources:
         j2_node_main_network: ice2-1
+      client-no-start:
+        j2_node_main_network: ice1-1
+        start_services: false
+        time_profile: client
 verifier:
   name: ansible

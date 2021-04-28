@@ -19,9 +19,7 @@
         - "vars/{{ ansible_facts.os_family }}.yml"
       skip: true
   tags:
-    - internal
-    - package
-    - service
+    - always
 
 - name: "package █ Install {{ firewall_packages_to_install | join(' ') }} packages"
   package:

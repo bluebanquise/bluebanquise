@@ -21,9 +21,9 @@
   tags:
     - always
 
-- name: firewalld █ "Add services to firewall's {{ time_firewall_zone | default('public') }} zone"
+- name: "Add services to firewall's {{ advanced_dhcp_server_firewall_zone | default('public') }} zone"
   firewalld:
-    zone: "{{ time_firewall_zone | default('public') }}"
+    zone: "{{ advanced_dhcp_server_firewall_zone | default('public') }}"
     service: "{{ item }}"
     immediate: "yes"
     permanent: "yes"
@@ -31,50 +31,60 @@
   when:
     - ansible_facts.os_family == "RedHat"
     - ep_firewall | default(false) | bool
-  loop: "{{ time_firewall_services_to_add }}"
+  loop: "{{ advanced_dhcp_server_firewall_services_to_add }}"
   tags:
     - firewall
 
-- name: "package █ Install {{ time_packages_to_install | join(' ') }} packages"
+- name: Package
   package:
-    name: "{{ time_packages_to_install }}"
+    name: "{{ item }}"
     state: present
+  loop: "{{ advanced_dhcp_server_packages_to_install }}"
   tags:
     - package
 
-- name: template █ Generate /etc/chrony.conf
+- name: Template >> /etc/dhcp/dhcpd.conf
   template:
-    src: chrony.conf.j2
-    dest: "{{ time_chrony_conf_path }}"
+    src: dhcpd.conf.j2
+    dest: /etc/dhcp/dhcpd.conf
     owner: root
     group: root
     mode: 0644
-  notify: service █ Restart time services
+  notify: Restart dhcp services
   tags:
     - template
 
-- name: lineinfile █ Set sysconfig OPTIONS for chronyd
-  lineinfile:
-    path: /etc/sysconfig/chronyd
-    regexp: '^OPTIONS'
-    line: OPTIONS="{{ time_chronyd_options }}"
-  notify: service █ Restart time services
-  when: time_chronyd_options is defined
+- name: Template >> /etc/dhcp/dhcpd.networks.conf
+  template:
+    src: dhcpd.networks.conf.j2
+    dest: /etc/dhcp/dhcpd.networks.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify: Restart dhcp services
   tags:
     - template
 
-- name: "timezone █ Set system to {{ time_zone }} timezone"
-  timezone:
-    name: "{{ time_zone }}"
+- name: Template >> /etc/dhcp/dhcpd.{{ item }}.conf
+  template:
+    src: dhcpd.subnet.conf.j2
+    dest: /etc/dhcp/dhcpd.{{ item }}.conf
+    owner: root
+    group: root
+    mode: 0644
+  with_items: "{{ networks }}"
+  when:
+    - j2_current_iceberg_network in item
+    - networks[item].is_in_dhcp
+  notify: Restart dhcp services
+  tags:
+    - template
 
-- name: meta █ Run handler tasks to restart time services
-  meta: flush_handlers
-
-- name: "service █ Manage {{ time_services_to_start | join(' ') }} services state"
+- name: Manage services state
   service:
     name: "{{ item }}"
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
     state: "{{ (start_services | bool) | ternary('started', omit) }}"
-  loop: "{{ time_services_to_start }}"
+  loop: "{{ advanced_dhcp_server_services_to_start }}"
   tags:
     - service

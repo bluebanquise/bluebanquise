@@ -1,16 +1,16 @@
 ---
-name: advanced_core/advanced_dns_server unit testing
+name: core/clustershell unit testing
 on:
   push:
     branches:
       - master
     paths:
-      - 'roles/advanced_core/advanced_dns_server/**'
-      - '.github/workflows/molecule-actions-advanced_core-advanced_dns_server.yml'
+      - 'roles/core/clustershell/**'
+      - '.github/workflows/molecule-actions-core-clustershell.yml'
   pull_request:
     paths:
-      - 'roles/advanced_core/advanced_dns_server/**'
-      - '.github/workflows/molecule-actions-advanced_core-advanced_dns_server.yml'
+      - 'roles/core/clustershell/**'
+      - '.github/workflows/molecule-actions-core-clustershell.yml'
 
 jobs:
   molecule_test:
@@ -22,6 +22,7 @@ jobs:
         distro:
           - centos:7
           - centos:8
+          - opensuseleap:15.1
 
     env:
       MOLECULE_DISTRO: ${{ matrix.distro }}
@@ -35,6 +36,6 @@ jobs:
       - name: Install packages
         run: |
           pip install tox
-      - name: Run molecule test for advanced_core/advanced_dns_server
+      - name: Run molecule test for core/clustershell
         run: |
-          cd roles/advanced_core/advanced_dns_server && tox
+          cd roles/core/clustershell && tox

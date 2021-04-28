@@ -19,9 +19,7 @@
         - "vars/{{ ansible_facts.os_family }}.yml"
       skip: true
   tags:
-    - internal
-    - package
-    - template
+    - always
 
 - name: "package █ Install {{ conman_packages_to_install | join(' ') }} packages"
   package:
@@ -112,7 +110,8 @@
   when:
     - ansible_facts.selinux.status == "enabled"
 
-- meta: flush_handlers
+- name: meta █ Run handler tasks to restart conman service
+  meta: flush_handlers
 
 - name: service █ Manage conman state
   service:

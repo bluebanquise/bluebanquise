@@ -1,11 +1,9 @@
 ---
 - name: Converge
   hosts: all
-  serial: 3
+  serial: 4
 
   vars:
-    # Start the services by default
-    start_services: true
     enable_services: true
     icebergs_system: false
     networks:
