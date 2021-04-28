@@ -37,7 +37,7 @@
 - name: user █ Ensure user conman can use /var/run/conman
   copy:
     content: |
-      D /var/run/conman 0775 conman conman -
+      D /var/run/conman 0700 conman conman -
     dest: /etc/tmpfiles.d/conman.conf
     mode: 0644
   notify: systemd █ Reload systemd configuration
