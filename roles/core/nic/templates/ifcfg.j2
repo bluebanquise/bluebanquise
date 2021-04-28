@@ -89,3 +89,9 @@ MASTER={{ item.master }}
 {% if item.zone is defined and item.zone is not none %}
 ZONE={{ item.zone }}
 {% endif %}
+
+{# 9. Check if IPv6 has to be disabled #}
+{% if ipv6_disable is defined %}
+IPV6INIT=no
+IPV6_DISABLED=yes
+{% endif %}

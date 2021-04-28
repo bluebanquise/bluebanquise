@@ -131,6 +131,13 @@ To assign a network interface to a firewall zone:
       network: bb
       zone: external
 
+To disable IPv6 on NIC
+  network_interfaces:
+    - interface: ens5
+      ip4: 192.168.121.124
+      ipv6_disable: true
+      network: bb
+
 MTU and/or Gateway can be set in the network file, and will be applied to NIC
 linked to this network.
 
