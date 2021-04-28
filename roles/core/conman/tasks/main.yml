@@ -38,7 +38,7 @@
   copy:
     content: |
       D /var/run/conman 0775 conman conman -
-    dest: /usr/lib/tmpfiles.d/conman.conf
+    dest: /etc/tmpfiles.d/conman.conf
     mode: 0644
   notify: systemd █ Reload systemd configuration
   when:
