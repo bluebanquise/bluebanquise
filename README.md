@@ -45,12 +45,11 @@ The stack packages are available in the [repositories subfolder](https://blueban
 | Red Hat                 |                               |                    |                                     |
 |                         | RHEL                          | 7, 8               | √                                   |
 |                         | CentOS                        | 7, 8               | √                                   |
-|                         | CentOS Stream                 | 8                  | In dev, targeted for next release   |
-|                         | Oracle Linux                  | 8                  | In dev, targeted for next release   |
-|                         | CloudLinux                    | 8                  | In dev, targeted for next release   |
+|                         | CentOS Stream                 | 8                  | √                                   |
+|                         | Oracle Linux                  | 8                  | √                                   |
+|                         | CloudLinux                    | 8                  | √                                   |
 |                         | AlmaLinux                     | 8                  | In dev, targeted for next release   |
 |                         | RockyLinux                    | NA                 | Waiting for distribution release    |
-|                         | Fedora                        | 33                 | In dev, targeted for next release   |
 | Suse                    |                               |                    |                                     |
 |                         | SLES                          | NA                 | Targeted for future release         |
 |                         | OpenSuse Leap                 | NA                 | Targeted for future release         |
