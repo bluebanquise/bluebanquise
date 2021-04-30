@@ -27,15 +27,18 @@ import sys
 from enum import Enum, auto
 
 # Import diskless modules
-from diskless.utils import Color, printc, select_from_list
+from diskless.utils import Color, printc, select_from_list, load_file
 
 
 class ImageManager:
     """Class to manage images of the diskless tool."""
 
     # Modules location
-    MODULES_PATH = '/lib/python3.6/site-packages/diskless/modules'
-    IMAGES_DIRECTORY = '/var/www/html/preboot_execution_environment/diskless/images/'
+#    MODULES_PATH = '/lib/python3.9/site-packages/diskless/modules'
+#    IMAGES_DIRECTORY = '/var/www/html/preboot_execution_environment/diskless/images/'
+    diskless_parameters = load_file('/etc/disklessset/diskless_parameters.yml')
+    MODULES_PATH = diskless_parameters['modules_path']
+    IMAGES_DIRECTORY = diskless_parameters['images_directory']
 
     class ImageStatus(Enum):
         """Enumeration that represents the status of an image. An image can have three status. We don't care about enumaration members values."""

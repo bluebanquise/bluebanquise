@@ -1,9 +1,10 @@
 ---
 diskless_apache_user: apache
-diskless_python_version: 3.6
+diskless_python_version: 3.9
 diskless_packages_to_install:
   - httpd
   - python3-clustershell
   - nfs-utils
   - dracut-live
   - xfsdump
+  - squashfs-tools

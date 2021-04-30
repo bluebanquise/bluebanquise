@@ -1,4 +1,4 @@
-## Tested on Centos 7.6
+## Tested on RedHat 9.0 alpha
 ---
 - name: sefcontext █ Set SELinux context on /var/www/html/preboot_execution_environment/nodes
   sefcontext:

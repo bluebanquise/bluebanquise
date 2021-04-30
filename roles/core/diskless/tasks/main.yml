@@ -36,8 +36,8 @@
     - /diskless/images/nfsimages/golden
     - /diskless/images/nfsimages/staging
     # Create directories for python modules
-    - /lib/python3.6/site-packages/diskless
-    - /lib/python3.6/site-packages/diskless/modules
+    - /lib/{{ diskless_python_version }}/site-packages/diskless
+    - /lib/{{ diskless_python_version }}/site-packages/diskless/modules
     # Create directory for 'installations.yml' file
     - /var/lib/diskless
     # Create working directory for images
@@ -50,14 +50,22 @@
     dest: "{{ item.dest }}"
     mode: 0755
   with_items:
-    - { src: 'utils.py', dest: '/lib/python3.6/site-packages/diskless/utils.py' }
-    - { src: 'image_manager.py', dest: '/lib/python3.6/site-packages/diskless/image_manager.py' }
-    - { src: 'kernel_manager.py', dest: '/lib/python3.6/site-packages/diskless/kernel_manager.py' }
-    - { src: 'nfs_module.py', dest: '/lib/python3.6/site-packages/diskless/modules/nfs_module.py' }
-    - { src: 'base_module.py', dest: '/lib/python3.6/site-packages/diskless/modules/base_module.py' }
-    - { src: 'livenet_module.py', dest: '/lib/python3.6/site-packages/diskless/modules/livenet_module.py' }
-    - { src: 'demo_module.py', dest: '/lib/python3.6/site-packages/diskless/modules/demo_module.py' }
+    - { src: 'utils.py', dest: '/lib/{{ diskless_python_version }}/site-packages/diskless/utils.py' }
+    - { src: 'image_manager.py', dest: '/lib/{{ diskless_python_version }}/site-packages/diskless/image_manager.py' }
+    - { src: 'kernel_manager.py', dest: '/lib/{{ diskless_python_version }}/site-packages/diskless/kernel_manager.py' }
+    - { src: 'nfs_module.py', dest: '/lib/{{ diskless_python_version }}/site-packages/diskless/modules/nfs_module.py' }
+    - { src: 'base_module.py', dest: '/lib/{{ diskless_python_version }}/site-packages/diskless/modules/base_module.py' }
+    - { src: 'livenet_module.py', dest: '/lib/{{ diskless_python_version }}/site-packages/diskless/modules/livenet_module.py' }
+    - { src: 'demo_module.py', dest: '/lib/{{ diskless_python_version }}/site-packages/diskless/modules/demo_module.py' }
     - { src: 'disklessset.py', dest: '/usr/bin/disklessset' }
+
+- name: template █ Generate /etc/disklessset/diskless_parameters.yml
+  template:
+    src: diskless_parameters.yml.j2
+    dest: /etc/disklessset/diskless_parameters.yml
+    mode: 0644
+  tags:
+    - template
 
 # We need to check file existance because an image installation can be running yet, we cannot juste replace the file
 - name: Check if installations.yml file exists
