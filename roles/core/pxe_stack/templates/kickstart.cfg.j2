@@ -115,6 +115,11 @@ xxEOFxx
 # Ensure SELinux configuration is ok
 restorecon -R -v /root/.ssh
 
+{% if pxe_stack_sshd_force_PermitRootLogin %}
+# Ensure root login is enabled via ssh
+sed -i 's/^.*PermitRootLogin.*$/PermitRootLogin\ yes/' /etc/ssh/sshd_config
+{% endif %}
+
 # Turn the kernel parameters into variables
 # We are looking for next_server value
 set -- `cat /proc/cmdline`
