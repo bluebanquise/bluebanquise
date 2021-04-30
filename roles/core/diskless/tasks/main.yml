@@ -42,6 +42,8 @@
     - /var/lib/diskless
     # Create working directory for images
     - /var/tmp/diskless/workdir/
+    # Create disklessset configuration directory
+    - /etc/disklessset/
 
 # Copy script files with permission
 - name: "Add diskless scripts"
