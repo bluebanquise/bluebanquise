@@ -11,7 +11,7 @@
   - diskless:
     - fix issues with dnf command in the livenet module (#528)
     - fix issues preventing access to nodes booting a livenet image (#525)
-  - kernel_config: prevent crash if variable is None (#559)
+  - kernel_config: prevent crash if variable ep_kernel_parameters is undefined (#559)
   - pxe_stack: fix issues with hostname not set during kickstart on RHEL 8.3 (#522)
   - set_hostname: add fqdn capability (#543)
   - time: allow to set sysconfig OPTIONS for chronyd (#552)
