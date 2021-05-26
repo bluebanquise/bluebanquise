@@ -115,7 +115,7 @@ xxEOFxx
 # Ensure SELinux configuration is ok
 restorecon -R -v /root/.ssh
 
-{% if pxe_stack_sshd_force_PermitRootLogin %}
+{% if pxe_stack_sshd_force_permitrootlogin %}
 # Ensure root login is enabled via ssh
 sed -i 's/^.*PermitRootLogin.*$/PermitRootLogin\ yes/' /etc/ssh/sshd_config
 {% endif %}
