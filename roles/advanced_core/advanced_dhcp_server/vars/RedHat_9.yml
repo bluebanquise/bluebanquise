@@ -1,7 +1,0 @@
----
-advanced_dhcp_server_packages_to_install:
-  - dhcp-server
-advanced_dhcp_server_services_to_start:
-  - dhcpd
-advanced_dhcp_server_firewall_services_to_add:
-  - dhcp

@@ -19,5 +19,3 @@ pxe_stack_supported_os:
     - major: 9
       distributions:
         - redhat
-
-
