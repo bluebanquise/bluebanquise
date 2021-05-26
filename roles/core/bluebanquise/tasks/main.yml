@@ -27,3 +27,11 @@
     state: present
   tags:
     - package
+
+- name: file █ Add nodeset plugin filter
+  copy:
+    src: nodeset.py
+    dest: /usr/share/ansible/plugins/filter/nodeset.py
+    mode: 0644
+    owner: root
+    group: root
