@@ -1,6 +1,0 @@
----
-advanced_dhcp_server_default_lease_time: 600 # Consider to increase once in production
-advanced_dhcp_server_enable_patterns: false
-advanced_dhcp_server_ignore_client_uids: false # If this option is set to true, the UID for clients will not be recorded. default to false
-advanced_dhcp_server_max_lease_time: 7200 # Same
-advanced_dhcp_server_options: []
