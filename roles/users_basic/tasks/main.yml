@@ -25,3 +25,12 @@
     remove: "{{ item.remove | default('no') }}"
     state: "{{ item.state | default('present') }}"
   with_items: "{{ users_basic.users }}"
+
+- name: authorized_key █ Manage user authorized_keys if exist
+  authorized_key:
+    user: "{{ item.name }}"
+    key: "{{ item.ssh_key }}"
+    state: present
+    exclusive: "{{ item.ssh_key_exclusive | default(omit) }}"
+  with_items: "{{ users_basic.users }}"
+  when: item.ssh_key is defined and item.ssh_key
