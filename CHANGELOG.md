@@ -26,6 +26,7 @@
 ### Updated roles
 
   - advanced_dhcp_server: prevent filename for none server type hosts. (#6)
+  - users_basic: add ssh public keys support. (#12)
 
 
 ### New tools
