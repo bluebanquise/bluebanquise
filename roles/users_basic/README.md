@@ -44,6 +44,12 @@ Available arguments for each user are:
 To ensure a user is not on a system, set state to "absent". To also remove its
 home, set remove to "yes".
 
+It is also possible to add ssh public keys for users. The following parameters
+are available for each user:
+
+* ssh_key
+* ssh_key_exclusive
+
 To generate an sha512 password, use the following command (python >3.3):
 
 ```
