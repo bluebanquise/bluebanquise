@@ -1,6 +1,0 @@
----
-advanced_dns_server_packages_to_install:
-  - bind9
-  - python-netaddr
-advanced_dns_server_services_to_start:
-  - bind9

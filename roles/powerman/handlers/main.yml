@@ -1,8 +1,0 @@
----
-- name: service █ Restart powerman
-  service:
-    name: powerman
-    state: restarted
-  when:
-    - "'service' not in ansible_skip_tags"
-    - (start_services | bool)

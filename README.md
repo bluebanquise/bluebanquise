@@ -14,11 +14,7 @@ While the core stack aims to be multiple Linux distributions ready, each Communi
 
 | Role/tool name        | Description                                              | Owner           | Link                                |
 | --------------------- | -------------------------------------------------------- | --------------- | ----------------------------------- |
-| advanced_dhcp_server  | Fork of core dhcp_server with advanced features          | @hmeAtos        | [link](roles/advanced_dhcp_server/) |
-| advanced_dns_server   | Fork of core dns_server with advanced features           | @oxedions       | [link](roles/advanced_dns_server/)  |
 | clone                 | Clone to image and restore HDD                           | @johnnykeats    | [link](roles/clone/)                |
-| clustershell          | Generate clustershell groups                             | @oxedions       | [link](roles/clustershell/)         |
-| conman                | Serial Over Lan (IPMI SOL) logging                       | @oxedions       | [link](roles/conman/)               |
 | display_tuning        | Provides screenrc configuration and iceberg shell colors | @oxedions       | [link](roles/display_tuning/)       |
 | generic_psf           | Generic packages, services, folders and files            | @johnnykeats    | [link](roles/generic_psf/)          |
 | grafana               | Install Grafana                                          | @oxedions       | [link](roles/grafana/)              |
@@ -26,7 +22,6 @@ While the core stack aims to be multiple Linux distributions ready, each Communi
 | nhc                   | Install and configure LBNL Node Health Check             | @oxedions       | [link](roles/nhc/)                  |
 | ofed                  | Install OFED OpenFabrics                                 | @oxedions       | [link](roles/ofed/)                 |
 | openldap              | Install and configure OpenLDAP and SSSD (beta)           | @oxedions       | [link](roles/openldap/)             |
-| powerman              | Install and configure Powerman remote power control      | @oxedions       | [link](roles/powerman/)             |
 | prometheus            | Install and configure Prometheus monitoring and alerting | @oxedions       | [link](roles/prometheus/)           |
 | report                | Check inventory and gather helpful data                  | @oxedions       | [link](roles/report/)               |
 | singularity           | Install and configure Singularity or SingularityPRO      | @strus38        | [link](roles/singularity/)          |

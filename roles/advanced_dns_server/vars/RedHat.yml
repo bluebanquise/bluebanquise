@@ -1,7 +1,0 @@
----
-advanced_dns_server_packages_to_install:
-  - bind
-advanced_dns_server_services_to_start:
-  - named
-advanced_dns_server_firewall_services_to_add:
-  - dns
