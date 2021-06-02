@@ -21,6 +21,7 @@ Need to add support for Ubuntu and OpenSuse if exist.
 
 ## Changelog
 
+* 1.2.1: Replace package list by a group. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.2.0: Merge ofed and ofed_sm roles. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.0: Add tunables to set soft/hard memlock limits.
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>

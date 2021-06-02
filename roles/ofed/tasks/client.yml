@@ -2,14 +2,8 @@
 
 - name: package █ Install infiniband minimal packages
   package:
-    name: "{{ item }}"
+    name: "@Infiniband Support"
     state: present
-  with_items:
-    - rdma-core
-    - libibverbs
-    - libibverbs-devel
-    - libibumad
-    - infiniband-diags
   tags:
     - package
 
