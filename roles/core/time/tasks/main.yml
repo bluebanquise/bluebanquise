@@ -42,7 +42,7 @@
   tags:
     - package
 
-- name: template █ Generate /etc/chrony.conf
+- name: "template █ Generate {{ time_chrony_conf_path }}"
   template:
     src: chrony.conf.j2
     dest: "{{ time_chrony_conf_path }}"
