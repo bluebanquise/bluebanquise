@@ -65,6 +65,7 @@ Optional inventory vars:
 * external_time
 * external_pool
 * time_chronyd_options
+* time_additional_networks_allowed
 
 Output
 ^^^^^^
