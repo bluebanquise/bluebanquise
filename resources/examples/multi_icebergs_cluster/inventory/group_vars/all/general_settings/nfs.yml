@@ -8,6 +8,7 @@ nfs:
     mount: /etc/bluebanquise                    # Which path clients should mount this NFS
     export: /etc/bluebanquise                   # What path server should export
     server: management1                         # The server that export this storage space
+    name_server: management1                    # Conditionnal to apply only on one management server
     clients_groups:                             # Can be an equipment group, or a main group (mg), or any other ansible group
       - secondary_managements
     take_over_network: ice1-1                   # Network used to share this storage space
@@ -18,6 +19,7 @@ nfs:
     mount: /var/www/html/repositories
     export: /var/www/html/repositories
     server: management1
+    name_server: management1
     clients_groups:
       - secondary_managements
     take_over_network: ice1-1

@@ -47,7 +47,7 @@
     path: /etc/exports
     regexp: ' # export name: {{ item }}$'
     line: "{{ nfs[item]['export'] }} {{ networks[nfs[item]['take_over_network']]['subnet'] }}/{{ networks[nfs[item]['take_over_network']]['prefix'] }}({{ nfs[item]['export_arguments'] }}) # export name: {{ item }}"
-  when: inventory_hostname == nfs[item]['server']
+  when: inventory_hostname == nfs[item]['name_server']
   with_items: "{{ nfs }}"
   notify: service █ Restart nfs server services
   tags:
