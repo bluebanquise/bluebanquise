@@ -57,7 +57,7 @@ rtcsync
 allow {{ networks[nic.network]['subnet'] }}/{{ networks[nic.network]['prefix'] }}
     {% endif %}
   {% endfor %}
-  {% if time_additional_networks_allowed is defined and time_additional_networks_allowed is not none %}
+  {% if time_additional_networks_allowed is defined and time_additional_networks_allowed is iterable %}
     {% for addons in time_additional_networks_allowed %}
 allow {{ addons }}
     {% endfor %}
