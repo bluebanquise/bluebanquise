@@ -15,6 +15,7 @@
   - pxe_stack: fix issues with hostname not set during kickstart on RHEL 8.3 (#522)
   - set_hostname: add fqdn capability (#543)
   - time: allow to set sysconfig OPTIONS for chronyd (#552)
+  - dhcp: fix issue with added spaces. Could prevent DHCP to start (#561)
 
 ### Breaking changes
 
