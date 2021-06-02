@@ -16,7 +16,7 @@
 ###############################################################################}
 {% macro write_host(macro_host, macro_nic, macro_filename) %}
 
-{% if macro_nic.dhcp_pattern is defined and macro_nic.dhcp_pattern is not none %}
+{%- if macro_nic.dhcp_pattern is defined and macro_nic.dhcp_pattern is not none %}
 {{ patterns[macro_nic.dhcp_pattern](macro_host, macro_nic, macro_filename) }}
 {% else %}
   {% if macro_nic.mac is defined %}
@@ -76,7 +76,7 @@
   }
 
   {%- endif %}
-{% endif %}
+{%- endif %}
 {%- endmacro %}
 
 {###############################################################################
@@ -108,24 +108,24 @@
   {% set current_hostvars = hostvars[host] %}{# buffer #}
   {% if current_hostvars['network_interfaces'] is defined and current_hostvars['network_interfaces'] is iterable %}
     {#- Define iPXE rom to use #}
-    {% if current_hostvars['ep_ipxe_driver'] == 'snponly' %} {# Select driver first #}
+    {% if current_hostvars['ep_ipxe_driver'] == 'snponly' %}{# Select driver first #}
       {% set ipxe_driver = 'snponly_' %}
     {% elif current_hostvars['ep_ipxe_driver'] == 'snp' %}
       {% set ipxe_driver = 'snp_' %}
     {% else %}{# Assume everything else is default driver #}
       {% set ipxe_driver = '' %}
     {% endif %}
-    {% if current_hostvars['ep_hardware']['cpu']['architecture'] == 'arm64' %} {# Now select architecture #}
+    {% if current_hostvars['ep_hardware']['cpu']['architecture'] == 'arm64' %}{# Now select architecture #}
       {% set ipxe_architecture = 'arm64' %}
     {% else %}{# Assume everything else is x86_64 #}
       {% set ipxe_architecture = 'x86_64' %}
     {% endif %}
-    {% if current_hostvars['ep_ipxe_embed'] == 'dhcpretry' %} {# Now select embed script #}
+    {% if current_hostvars['ep_ipxe_embed'] == 'dhcpretry' %}{# Now select embed script #}
       {% set ipxe_embed = 'dhcpretry' %}
     {% else %}
       {% set ipxe_embed = 'standard' %}
     {% endif %}
-    {% if current_hostvars['ep_ipxe_platform'] == 'efi' %} {# Finally, build file name depending of platform and previous parameters #}
+    {% if current_hostvars['ep_ipxe_platform'] == 'efi' %}{# Finally, build file name depending of platform and previous parameters #}
       {% set ipxe_rom_filename = (ipxe_architecture + '/' + ipxe_embed + '_' + ipxe_driver + 'ipxe.efi') %}
     {% else %}{# Assume everything else is pcbios #}
       {% set ipxe_rom_filename = (ipxe_architecture + '/' + ipxe_embed + '_undionly.kpxe') %}
@@ -134,7 +134,7 @@
     {%- for nic in current_hostvars['network_interfaces'] %}
       {% if (nic.network is defined and nic.network == item) and nic.ip4 is defined %}
 {{ write_host(host, nic, ipxe_rom_filename) }}
-      {% endif %}
+      {%- endif %}
     {% endfor -%}
 
     {%- if current_hostvars['bmc'] is defined %}
