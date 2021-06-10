@@ -1,0 +1,49 @@
+---
+- name: include_tasks ░ Deploy Slurm accounting
+  include_tasks: "accounting.yml"
+  when: slurm_enable_accounting
+
+- name: "firewalld █ Add ports to firewall's {{ slurm_firewall_zone | default('public') }} zone"
+  firewalld:
+    zone: "{{ slurm_firewall_zone | default('public') }}"
+    port: "{{ item }}/tcp"
+    immediate: "yes"
+    permanent: "yes"
+    state: enabled
+  when:
+    - ansible_facts.os_family == "RedHat"
+    - ep_firewall | default(false) | bool
+  loop:
+    - "{{ slurm_SrunPortRange }}"
+    - "{{ slurm_slurmtld_port }}"
+  tags:
+    - firewall
+
+- name: "template █ Generate configuration files in {{ slurm_home_path }}"
+  template:
+    src: "{{ item }}.j2"
+    dest: "{{ slurm_home_path }}/{{ item }}"
+    owner: slurm
+    group: slurm
+    mode: 0644
+  tags:
+    - template
+  loop:
+    - slurm.conf
+
+- name: "copy █ Copy cgroup.conf to {{ slurm_home_path }}/cgroup.conf"
+  copy:
+    src: cgroup.conf
+    dest: "{{ slurm_home_path }}/cgroup.conf"
+    owner: slurm
+    group: slurm
+    mode: 0644
+
+- name: service █ Manage slurmctld state
+  service:
+    name: slurmctld
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+    state: "{{ (start_services | bool) | ternary('started', omit) }}"
+  tags:
+    - service
+

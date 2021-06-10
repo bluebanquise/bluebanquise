@@ -1,0 +1,66 @@
+---
+- name: "package █ Install {{ slurm_packages_to_install['accounting'] | join(' ') }}"
+  package:
+    name: "{{ slurm_packages_to_install['accounting'] }}"
+    state: present
+  tags:
+    - package
+
+- name: "template █ Generate {{ slurm_home_path }}/slurmdbd.conf"
+  template:
+    src: slurmdbd.conf.j2
+    dest: "{{ slurm_home_path }}/slurmdbd.conf"
+    owner: slurm
+    group: slurm
+    mode: 0600
+  tags:
+    - template
+
+- name: "template █ Generate /etc/my.cnf.d/slurmdbd.cnf"
+  template:
+    src: slurmdbd.cnf.j2
+    dest: /etc/my.cnf.d/slurmdbd.cnf
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - template
+
+- name: service █ Manage mariadb state
+  service:
+    name: mariadb
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+    state: "{{ (start_services | bool) | ternary('started', omit) }}"
+  tags:
+    - service
+
+- name: command █ Check if slurm_acct_db database has been created
+  command: mysql -e "SHOW DATABASES  LIKE 'slurm_acct_db'"
+  register: slurm_database_exist
+
+- name: command █ Check if slurm database user has been created
+  command: mysql -e "use mysql; select Host,User from user;"
+  register: slurm_database_user_exist
+
+- name: mysql_db █ Create slurm_acct_db database
+  mysql_db:
+    name: slurm_acct_db
+    state: present
+  when: "'slurm_acct_db' not in slurm_database_exist.stdout_lines"
+
+- name: setup slurm db user
+  mysql_user:
+    name: "{{ slurm_StorageUser }}"
+    password: "{{ slurm_StoragePass }}"
+    priv: 'slurm_acct_db.*:ALL'
+    state: present
+  when: "('localhost\t' + slurm_StorageUser) not in slurm_database_user_exist.stdout_lines"
+
+- name: service █ Manage slurmdbd state
+  service:
+    name: slurmdbd
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+    state: "{{ (start_services | bool) | ternary('started', omit) }}"
+  tags:
+    - service
+

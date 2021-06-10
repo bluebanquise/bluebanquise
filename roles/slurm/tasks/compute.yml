@@ -1,0 +1,24 @@
+---
+- name: "firewalld █ Add services to firewall's {{ slurm_firewall_zone | default('public') }} zone"
+  firewalld:
+    zone: "{{ slurm_firewall_zone | default('public') }}"
+    port: "{{ slurm_slurmd_port }}/tcp"
+    immediate: "yes"
+    permanent: "yes"
+    state: enabled
+  when:
+    - ansible_facts.os_family == "RedHat"
+    - ep_firewall | default(false) | bool
+  tags:
+    - firewall
+
+- name: include_tasks ░ Deploy Slurm compute configuration
+  include_tasks: "compute_{{ slurm_computes_config }}.yml"
+
+- name: service █ Manage slurmd state
+  service:
+    name: slurmd
+    enabled: yes
+    state: started
+  tags:
+    - service

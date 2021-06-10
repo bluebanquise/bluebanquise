@@ -1,0 +1,43 @@
+---
+## Computes configuration way to use (configfull vs configless)
+slurm_computes_config: configfull
+
+## Files path
+slurm_StateSaveLocation: /var/spool/slurmd/StateSave
+slurm_SlurmdSpoolDir: /var/spool/slurmd/slurmd
+slurm_SlurmctldPidFile: /var/run/slurmctld.pid
+slurm_SlurmdPidFile: /var/run/slurmd.pid
+
+## Firewall and ports
+slurm_firewall_zone: public
+slurm_slurmtld_port: 6817
+slurm_slurmd_port: 6818
+slurm_slurmdbd_port: 6819
+slurm_SrunPortRange: 60001-63000
+
+## Logging
+slurm_SlurmctldDebug: 5
+slurm_SlurmctldLogFile: /var/log/slurm/slurmctld.log
+slurm_SlurmdDebug: 5
+slurm_SlurmdLogFile: /var/log/slurm/slurmd.log
+slurm_SlurmdbdDebug: 5
+slurm_SlurmdbdLogFile: /var/log/slurm/slurmdbd.log
+
+## Timeouts
+slurm_SlurmctldTimeout: 600
+slurm_SlurmdTimeout: 600
+
+## Accounting (storage)
+slurm_enable_accounting: true
+slurm_StorageUser: slurm
+slurm_StoragePass: ssaP_Slurm
+### Mariadb
+slurm_innodb_buffer_pool_size: 1024M
+slurm_innodb_log_file_size: 64M
+slurm_innodb_lock_wait_timeout: 900
+
+## Other
+slurm_ReturnToService: 0
+slurm_SchedulerType: sched/backfill
+slurm_SelectType: select/linear
+slurm_MpiDefault: pmi2

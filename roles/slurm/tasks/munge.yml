@@ -1,0 +1,17 @@
+---
+- name: copy █ Copy munge.key to /etc/munge/munge.key
+  copy:
+    src: munge.key
+    dest: /etc/munge/munge.key
+    owner: munge
+    group: munge
+    mode: 0400
+
+- name: service █ Manage munge state
+  service:
+    name: munge
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+    state: "{{ (start_services | bool) | ternary('started', omit) }}"
+  tags:
+    - service
+

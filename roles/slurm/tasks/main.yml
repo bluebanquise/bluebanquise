@@ -19,36 +19,21 @@
         - "vars/{{ ansible_facts.os_family }}.yml"
       skip: true
   tags:
-    - internal
-    - package
-    - template
+    - always
 
-- name: "package █ Install {{ slurm_packages_to_install[slurm.slurm_packaging][slurm_profile] | join(' ') }}"
+- name: "package █ Install {{ slurm_packages_to_install[slurm_profile] | join(' ') }}"
   package:
-    name: "{{ slurm_packages_to_install[slurm.slurm_packaging][slurm_profile] }}"
+    name: "{{ slurm_packages_to_install[slurm_profile] }}"
     state: present
   tags:
     - package
 
-#### MUNGE
+# Install MUNGE, generic part
 
-- name: copy █ Copy munge.key to /etc/munge/munge.key
-  copy:
-    src: munge.key
-    dest: /etc/munge/munge.key
-    owner: munge
-    group: munge
-    mode: 0400
+- name: include_tasks ░ Deploy Munge
+  include_tasks: "munge.yml"
 
-- name: service █ Manage munge state
-  service:
-    name: munge
-    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
-    state: "{{ (start_services | bool) | ternary('started', omit) }}"
-  tags:
-    - service
-
-#### SLURM
+# Setup slurm user/group, generic part
 
 - name: group █ Add slurm group
   group:
@@ -65,29 +50,13 @@
     home: "{{ slurm_home_path }}"
     state: present
 
+# Setup directories, generic part
+
 - name: "file █ Enforce permissions on {{ slurm_home_path }}"
   file:
     path: "{{ slurm_home_path }}"
     state: directory
     mode: 0755
-
-- name: "template █ Generate {{ slurm_home_path }}/slurm.conf"
-  template:
-    src: slurm.conf.j2
-    dest: "{{ slurm_home_path }}/slurm.conf"
-    owner: root
-    group: root
-    mode: 0644
-  tags:
-    - template
-
-- name: "copy █ Copy cgroup.conf to {{ slurm_home_path }}/cgroup.conf"
-  copy:
-    src: cgroup.conf
-    dest: "{{ slurm_home_path }}/cgroup.conf"
-    owner: root
-    group: root
-    mode: 0644
 
 - name: file █ Create needed directories
   file:
@@ -96,27 +65,26 @@
     owner: slurm
     group: slurm
     mode: 0755
-  with_items:
+  loop:
     - /var/log/slurm
-    - /var/spool/slurmd
-    - /var/spool/slurmd/StateSave
-    - /var/spool/slurmd/slurmd
+    - "{{ slurm_SlurmdSpoolDir }}"
+    - "{{ slurm_StateSaveLocation }}"
 
-- name: service █ Manage slurmctld state
-  service:
-    name: slurmctld
-    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
-    state: "{{ (start_services | bool) | ternary('started', omit) }}"
-  when:
-    - slurm_profile == 'controller'
-  tags:
-    - service
+# Setup slurm controller
 
-- name: service █ Manage slurmd state
-  service:
-    name: slurmd
-    enabled: yes
-    state: started
-  when: slurm_profile == 'node'
-  tags:
-    - service
+- name: include_tasks ░ Deploy Slurm controller
+  include_tasks: "controller.yml"
+  when: slurm_profile == 'controller'
+
+# Setup slurm computes
+
+- name: include_tasks ░ Deploy Slurm compute
+  include_tasks: "compute.yml"
+  when: slurm_profile == 'compute'
+
+# Setup slurm submitter
+
+- name: include_tasks ░ Deploy Slurm submitter
+  include_tasks: "submitter.yml"
+  when: slurm_profile == 'submitter'
+
