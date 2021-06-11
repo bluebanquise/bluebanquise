@@ -40,23 +40,22 @@ The stack packages are available in the [repositories subfolder](https://blueban
 
 ## Supported software environment
 
-| Operating System family | Operating System distribution | Tested versions    | Notes                               |
-| ----------------------- | ----------------------------- | ------------------ | ----------------------------------- |
-| Red Hat                 |                               |                    |                                     |
-|                         | RHEL                          | 7, 8               | √                                   |
-|                         | CentOS                        | 7, 8               | √                                   |
-|                         | CentOS Stream                 | 8                  | In dev, targeted for next release   |
-|                         | Oracle Linux                  | 8                  | In dev, targeted for next release   |
-|                         | CloudLinux                    | 8                  | In dev, targeted for next release   |
-|                         | AlmaLinux                     | 8                  | In dev, targeted for next release   |
-|                         | RockyLinux                    | NA                 | Waiting for distribution release    |
-|                         | Fedora                        | 33                 | In dev, targeted for next release   |
-| Suse                    |                               |                    |                                     |
-|                         | SLES                          | NA                 | Targeted for future release         |
-|                         | OpenSuse Leap                 | NA                 | Targeted for future release         |
-| Debian                  |                               |                    |                                     |
-|                         | Ubuntu                        | NA                 | Targeted for future release         |
-|                         | Debian                        | NA                 | Targeted for future release         |
+| Operating System family | Operating System distribution | Tested versions    | Notes                                                       |
+| ----------------------- | ----------------------------- | ------------------ | ----------------------------------------------------------- |
+| Red Hat                 |                               |                    |                                                             |
+|                         | RHEL                          | 7, 8               | √                                                           |
+|                         | CentOS                        | 7, 8               | √                                                           |
+|                         | CentOS Stream                 | 8                  | √                                                           |
+|                         | Oracle Linux                  | 8                  | √                                                           |
+|                         | Cloud Linux                   | 8                  | Base iso not enough, need to bind to external repositories. |
+|                         | Alma Linux                    | 8                  | √                                                           |
+|                         | Rocky Linux                   | 8                  | √                                                           |
+| Suse                    |                               |                    |                                                             |
+|                         | SLES                          | NA                 | Targeted for future release                                 |
+|                         | OpenSuse Leap                 | NA                 | Targeted for future release                                 |
+| Debian                  |                               |                    |                                                             |
+|                         | Ubuntu                        | NA                 | Targeted for future release                                 |
+|                         | Debian                        | NA                 | Targeted for future release                                 |
 
 Ansible >= 2.9.13 is mandatory for BlueBanquise to run properly.
 

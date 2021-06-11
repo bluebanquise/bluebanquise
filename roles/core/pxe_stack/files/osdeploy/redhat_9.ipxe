@@ -1,11 +1,11 @@
 #!ipxe
 
 echo |
-echo | Entering osdeploy/centos_7.ipxe file.
+echo | Entering osdeploy/redhat_9.ipxe file.
 echo |
 
 echo | Now starting os deployment process.
-echo | Centos or RedHat ipxe configuration.
+echo | RedHat 9 Family ipxe configuration.
 echo |
 echo | Parameters used:
 echo | > Operating system target: ${eq-distribution} ${eq-distribution-version} ${eq-architecture}
@@ -18,7 +18,7 @@ echo | > Target kickstart: ${eq-equipment-profile}.kickstart.cfg
 echo |
 echo | Loading linux ...
 
-kernel ${images-root}/os/images/pxeboot/vmlinuz initrd=initrd.img inst.stage2=${images-root}/os/ inst.repo=${repository-root}/os/ ks=${kickstart-path} ${eq-console} ${eq-kernel-parameters} ${dedicated-kernel-parameters} ipxe_next_server=${next-server} node_hostname=${hostname}
+kernel ${images-root}/os/images/pxeboot/vmlinuz initrd=initrd.img inst.stage2=${images-root}/os/ inst.repo=${repository-root}/os/BaseOS/ ks=${kickstart-path} ${eq-console} ${eq-kernel-parameters} ${dedicated-kernel-parameters} ipxe_next_server=${next-server} node_hostname=${hostname}
 
 echo | Loading initial ramdisk ...
 
