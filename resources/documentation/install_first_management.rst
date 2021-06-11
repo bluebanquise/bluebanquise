@@ -2,6 +2,29 @@
 [Core] - Install first management
 =================================
 
+.. raw:: html
+
+  <div style="border: 2px solid; padding: 2px;">
+  RHEL <img src="_static/logo_rhel.png">, CentOS <img src="_static/logo_centos.png">, RockyLinux <img src="_static/logo_rocky.png">, OracleLinux <img src="_static/logo_oraclelinux.png">, CloudLinux <img src="_static/logo_cloudlinux.png">, AlmaLinux <img src="_static/logo_almalinux.png">
+  <div style="border: 1px solid; margin: 10px 3px; padding: 2px;">
+  Versions: <b>8.x</b>
+
+
+ceci est un test
+
+.. code-block:: bash
+
+  mkdir -p /var/www/html/repositories/centos/7/x86_64/os/
+  mount CentOS-7-x86_64-Everything-2009.iso /mnt
+  cp -a /mnt/* /var/www/html/repositories/centos/7/x86_64/os/
+  restorecon -Rv /var/www/html/repositories/centos/7/x86_64/os
+
+.. raw:: html
+
+  </div>
+  </div>
+
+
 First step is to install first management node manually.
 
 Install operating system

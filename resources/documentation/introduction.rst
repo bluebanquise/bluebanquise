@@ -20,23 +20,22 @@ active community.
 The **BlueBanquise** stack is made of two main parts:
 
 * The CORE, aimed to deploy operating system and base services on hosts
-* The COMMUNITY, aimed to provide specialized features over the core (HPC, containers farm, etc.)
+* The COMMUNITY, aimed to provide specialized features over the CORE (HPC, render farm, etc.)
 
 This documentation is structured as the following:
 
 * Few basic vocabulary
 * An Ansible training
 * Few words on how to test the stack into containers
-* Procedure to install BlueBanquise [CORE]
+* Procedure to install BlueBanquise CORE
     * Install first management
     * Configure BlueBanquise
-    * Deploy BlueBanquise
+    * Deploy BlueBanquise configuration and other nodes (PXE)
     * (Optional) Deploy diskless nodes
     * (Optional) Deploy a multi icebergs cluster
-* Procedures to specialize the cluster using BlueBanquise [COMMUNITY] roles
+* Procedures to specialize the cluster using BlueBanquise COMMUNITY
     * Deploy Prometheus (Monitoring your cluster)
-    * Deploy Slurm (Specialize your cluster for High Performance Computing)
-    * Deploy Nomad and Consul (Deploy containers orchestration on the cluster)
+    * Deploy Slurm (Specialize your cluster for High Performance Computing or a Blender render farm)
 
 If you encounter any bugs/issues or have any comments, please inform us.
 
