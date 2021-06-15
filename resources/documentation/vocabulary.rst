@@ -353,5 +353,4 @@ These are key groups of the stack.
 -------------
 
 You can now follow the next part, learn Ansible, or if you already know
-Ansible, you can skip this part and jump directly to the deploy BlueBanquise
-part.
+Ansible, you can skip this part and jump directly to the BlueBanquise part.

@@ -3,36 +3,27 @@
 ===============================
 
 At this point, you should have an operating system with Ansible installed on it,
-and basic OS repositories.
+and basic OS repositories. You also have installed BlueBanquise package.
 
-Get BlueBanquise
-================
+Enable BlueBanquise and ssh
+===========================
 
-Install needed basic packages:
+By default, Ansible will read ANSIBLE_CONFIG, ansible.cfg in the current
+working directory, .ansible.cfg in the home directory or
+/etc/ansible/ansible.cfg, whichever it finds first.
 
-.. code-block:: bash
-
-  yum install wget createrepo git
-
-Now, download latest **BlueBanquise** version from git:
-
-.. code-block:: bash
-
-  git clone https://github.com/bluebanquise/bluebanquise.git /etc/bluebanquise
-
-ansible will read ANSIBLE_CONFIG, ansible.cfg in the current working directory,
-.ansible.cfg in the home directory or /etc/ansible/ansible.cfg, whichever it
-finds first.
-
-To use /etc/bluebanquise/ansible.cfg, either change the current working
-directory or set ANSIBLE_CONFIG:
+To enable BlueBanquise, we need Ansible to use /etc/bluebanquise/ansible.cfg.
+To do so, set ANSIBLE_CONFIG:
 
 .. code-block:: bash
 
   export ANSIBLE_CONFIG=/etc/bluebanquise/ansible.cfg
-  cd /etc/bluebanquise
 
-Finally, edit /etc/hosts file, and add "management1" (or whatever your current
+.. note::
+  You can revert to Ansible default behavior by unsetting this variable. It
+  allows to use both default Ansible and BlueBanquise together.
+
+Edit /etc/hosts file, and add "management1" (or whatever your current
 management node hostname) on localhost line:
 
 .. code-block:: text
@@ -41,6 +32,26 @@ management node hostname) on localhost line:
   ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
 
 This will allow us to bootstrap the management configuration.
+
+Generate now an ssh key for current management1 host, and do not set a
+passphrase (leave empty when asked and press enter):
+
+.. code-block:: text
+
+  ssh-keygen -t ed25519
+
+Then spread this key on the current host so that management1 can ssh on itlsef
+passwordless:
+
+.. code-block:: text
+
+  ssh-copy-id management1
+
+And finally, ensure you can ssh without password now:
+
+.. code-block:: text
+
+  ssh management1
 
 It is time to configure the inventory to match cluster needs.
 
