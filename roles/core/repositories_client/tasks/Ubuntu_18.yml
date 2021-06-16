@@ -1,7 +1,17 @@
 ---
+- name: set_fact ░ Set static baseurl prefix
+  set_fact:
+    baseurl_prefix:
+      "http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/\
+      {{ ep_operating_system['repositories_environment'] | default('') }}/\
+      {{ ep_operating_system['distribution'] }}/\
+      {{ ep_operating_system['distribution_version'] | default(ep_operating_system['distribution_major_version']) }}/\
+      {{ ansible_architecture }}/"
 
 - name: Setting repositories
   apt_repository:
-    repo: "deb http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/{{ ep_operating_system['repositories_environment'] | default('') }}/{{ ep_operating_system['distribution'] }}/{{ ep_operating_system['distribution_version'] | default(ep_operating_system['distribution_major_version']) }}/{{ ep_hardware['cpu']['architecture'] }}/{{ item }} bionic main"
+    repo: "{{ item.repo | default('deb [trusted=yes] ' + baseurl_prefix + ( item.name | default(item) ) + ' ' + ( item.distribution | default('./') )) }}"
     state: "{{ item.state | default('present') }}"
-  with_items: "{{ repositories }}"
+  with_items: "{{ repositories | union(external_repositories|default([])) }}"
+
+
