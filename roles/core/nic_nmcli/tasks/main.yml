@@ -28,6 +28,21 @@
   tags:
     - package
 
+- name: include_tasks ░ Use OS dedicated task
+  include_tasks: "{{ item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}.yml"
+      skip: true
+  tags:
+    - internal
+
+- name: meta █ Run handlers
+  meta: flush_handlers
+
 - name: "service █ Manage {{ nic_nmcli_services_to_start | join(' ') }} state"
   service:
     name: "{{ item }}"
@@ -37,13 +52,9 @@
   tags:
     - service
 
-# - name: Solve possible unmanaged (Ubuntu only)
-#   file:
-#     path: /etc/NetworkManager/conf.d/10-globally-managed-devices.conf
-#     state: touch
-#   when:
-#     - ansible_facts.distribution_major_version == "18"
-#     - ansible_facts.os_family == "Ubuntu"
+- name: wait_for ░ Sleep 4s to let NetworkManager start
+  wait_for:
+    timeout: 4
 
 - name: nmcli █ Set NICs configuration
   nmcli:
