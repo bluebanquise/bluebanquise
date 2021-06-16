@@ -29,8 +29,8 @@ d-i netcfg/no_default_route boolean
 ### Repositories
 d-i debian-installer/allow_unauthenticated string true # Allow local source
 d-i mirror/country string manual
-#d-i mirror/http/hostname string http://10.10.0.1
-d-i mirror/http/directory string /repositories/{{hostvars[groups[item][0]]['ep_operating_system']['distribution']}}/{{hostvars[groups[item][0]]['ep_operating_system']['distribution_version']}}/{{hostvars[groups[item][0]]['ep_hardware']['cpu']['architecture']}}/os/
+#d-i mirror/http/directory string /repositories/ubuntu/18.04/x86_64/os/
+#d-i mirror/http/hostname string 10.10.0.7
 d-i mirror/http/proxy string
 #d-i pkgsel/update-policy select none
 d-i pkgsel/install-language-support boolean false
