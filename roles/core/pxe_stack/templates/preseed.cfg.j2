@@ -113,6 +113,8 @@ d-i finish-install/reboot_in_progress note
 d-i pkgsel/include string openssh-server curl
 d-i preseed/late_command string \
   in-target sh -c 'sed -i "s/^#PermitRootLogin.*\$/PermitRootLogin yes/g" /etc/ssh/sshd_config'; \
+  in-target sh -c 'cat /etc/apt/sources.list | grep "bionic main restricted" | grep -Ev "src|#" > /etc/apt/sources.list'; \
+  in-target sh -c 'apt update'; \
   in-target set -- `cat /proc/cmdline`; for I in $*; do case "$I" in *=*) eval $I;; esac; done; \
   in-target echo Next server is $ipxe_next_server; \
   in-target curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$(hostname -s)&boot=disk";
