@@ -27,3 +27,9 @@ While the core stack aims to be multiple Linux distributions ready, each Communi
 | singularity           | Install and configure Singularity or SingularityPRO      | @strus38        | [link](roles/singularity/)          |
 | slurm                 | Install and configure Slurm Workload Manager             | @oxedions       | [link](roles/slurm/)                |
 | users_basic           | Set / remove users                                       | @oxedions       | [link](roles/users_basic/)          |
+
+## List of external useful roles/tools
+
+| Role/tool name        | Description                                              | Owner               | Link                                                    |
+| --------------------- | -------------------------------------------------------- | ------------------- | ------------------------------------------------------- |
+| System hardening      | Improve system security (os, apache, ssh, etc.)          | https://dev-sec.io/ | https://github.com/dev-sec/ansible-collection-hardening |
