@@ -1,5 +1,5 @@
-## Options to set on the command line
-
+#### Blue Banquise file ####
+## {{ ansible_managed }}
 
 ### zone
 d-i debian-installer/locale string {{hostvars[groups[item][0]]['ep_configuration']['system_language']}}
@@ -27,6 +27,7 @@ d-i netcfg/no_default_route boolean
 
 
 ### Repositories
+d-i apt-setup/use_mirror boolean false
 d-i debian-installer/allow_unauthenticated string true # Allow local source
 d-i mirror/country string manual
 #d-i mirror/http/directory string /repositories/ubuntu/18.04/x86_64/os/
@@ -112,11 +113,19 @@ d-i finish-install/reboot_in_progress note
 ### Specific
 d-i pkgsel/include string openssh-server curl
 d-i preseed/late_command string \
+  in-target sh -c 'mkdir /root/.ssh'; \
+{% for ssh_key in hostvars[groups[item][0]]['authentication_ssh_keys'] %}
+  in-target sh -c 'echo "{{ ssh_key }}" >> /root/.ssh/authorized_keys'; \
+{% endfor %}
+{% if pxe_stack_sshd_force_permitrootlogin %}
   in-target sh -c 'sed -i "s/^#PermitRootLogin.*\$/PermitRootLogin yes/g" /etc/ssh/sshd_config'; \
-  in-target sh -c 'cat /etc/apt/sources.list | grep "bionic main restricted" | grep -Ev "src|#" > /etc/apt/sources.list'; \
+{% endif %}
+{% if pxe_stack_preseed_remove_apt_sources %}
+  in-target sh -c 'echo " " > /etc/apt/sources.list'; \
   in-target sh -c 'apt update'; \
+{% endif %}
   in-target set -- `cat /proc/cmdline`; for I in $*; do case "$I" in *=*) eval $I;; esac; done; \
   in-target echo Next server is $ipxe_next_server; \
-  in-target curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$(hostname -s)&boot=disk";
+  in-target curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$node_hostname&boot=disk";
 
 #d-i preseed/late_command string in-target curl -s -k http://10.10.0.1/cgi-bin/bootswitch.cgi --data "node=$(hostname -s)&boot=disk";  

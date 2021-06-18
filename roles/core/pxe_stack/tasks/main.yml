@@ -49,7 +49,7 @@
     state: directory
     mode: 0755
   loop:
-    - /var/www/cgi-bin
+    - "{{ pxe_stack_apache_cgi_bin_path }}"
     - /etc/bluebanquise
     - /etc/bootset
 
@@ -313,7 +313,7 @@
     mode: 0644
   notify: service █ Restart pxe services
 
-- name: copy █ Copy /var/www/cgi-bin/bootswitch.cgi
+- name: "copy █ Copy {{ pxe_stack_apache_cgi_bin_path }}/bootswitch.cgi"
   copy:
     src: bootswitch.cgi
     dest: "{{ pxe_stack_apache_cgi_bin_path }}/bootswitch.cgi"
