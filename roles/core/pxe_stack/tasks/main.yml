@@ -168,6 +168,8 @@
 
 ##### Ubuntu
 
+## Generic
+
 - name: copy █ Copy osdeploy files /var/www/html/preboot_execution_environment/osdeploy/
   copy:
     src: osdeploy/ubuntu_{{ item.major }}.ipxe
@@ -187,6 +189,8 @@
     state: link
   loop: "{{ pxe_stack_supported_os.ubuntu | subelements('distributions') }}"
   when: item.1 != 'ubuntu'
+
+## 18.04
 
 - name: template █ Generate preseeds /var/www/html/preboot_execution_environment/equipment_profiles/{item}.preseed.cfg
   template:
@@ -213,6 +217,64 @@
   when:
     - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
     - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) in ['ubuntu'] and hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] == 18
+  tags:
+    - template
+
+## 20.04
+
+- name: file █ Create cloud-init paths
+  file:
+    path: "/var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.cloud-init/"
+    state: directory
+    mode: 0755
+    owner: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_user }}"
+  with_items: "{{ j2_equipment_groups_list }}"
+  when:
+    - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
+    - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) in ['ubuntu'] and hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] == 20
+  tags:
+    - file
+
+- name: file █ Create cloud-init empty meta-data
+  file:
+    path: "/var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.cloud-init/meta-data"
+    state: touch
+    mode: 0644
+    owner: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_user }}"
+  with_items: "{{ j2_equipment_groups_list }}"
+  when:
+    - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
+    - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) in ['ubuntu'] and hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] == 20
+  tags:
+    - file
+
+- name: template █ Generate cloud-init user-data
+  template:
+    src: "user-data.j2"
+    dest: "/var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.cloud-init/user-data"
+    mode: 0644
+    owner: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_user }}"
+  with_items: "{{ j2_equipment_groups_list }}"
+  when:
+    - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
+    - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) in ['ubuntu'] and hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] == 20
+  tags:
+    - template
+
+- name: template █ Generate equipment_profiles /var/www/html/preboot_execution_environment/equipment_profiles/{item}.ipxe
+  template:
+    src: "equipment_profile_cloud-init.ipxe.j2"
+    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.ipxe
+    mode: 0644
+    owner: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_user }}"
+  with_items: "{{ j2_equipment_groups_list }}"
+  when:
+    - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
+    - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) in ['ubuntu'] and hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] == 20
   tags:
     - template
 

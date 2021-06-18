@@ -1,0 +1,26 @@
+#cloud-config
+autoinstall:
+  version: 1
+  apt:
+    geoip: true
+    preserve_sources_list: false
+    primary:
+    - arches: [amd64, i386]
+      uri: http://hr.archive.ubuntu.com/ubuntu
+    - arches: [default]
+      uri: http://ports.ubuntu.com/ubuntu-ports
+  identity: {hostname: pxe-client, password: $6$zN/uHJD1rEXD/ETf$q8CoBt3xXmBT37RslyWcpLT1za4RJR3QEtosggRKN5aZAAf6/mYbFEQO66AIPm965glBXB1DGd0Sf.oKi.Rfx/,
+    realname: pxe, username: pxe}
+  keyboard: {layout: hr, toggle: null, variant: ''}
+  locale: en_US
+  network:
+    network:
+      version: 2
+      ethernets:
+        eth0:
+          dhcp4: no
+          dhcp6: no
+  ssh:
+    allow-pw: true
+    install-server: true
+

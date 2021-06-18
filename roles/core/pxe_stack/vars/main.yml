@@ -25,3 +25,6 @@ pxe_stack_supported_os:
     - major: 18
       distributions:
         - ubuntu
+    - major: 20
+      distributions:
+        - ubuntu
