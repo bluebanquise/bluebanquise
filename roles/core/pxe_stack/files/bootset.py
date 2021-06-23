@@ -173,6 +173,7 @@ elif passed_arguments.boot is not None:
                 'set dedicated-kernel-parameters {}'.format(dedicated_parameters),
                 'set node-image none',
                 'set extra-parameters none',
+                'set node-main-network-interface {}'.format(nodes_parameters[str(node)]['network']['node_main_network_interface']),
                 'echo |',
                 '# Now chain to menu menu',
                 'echo | Now chaining to --> equipment_profiles/${equipment-profile}.ipxe',

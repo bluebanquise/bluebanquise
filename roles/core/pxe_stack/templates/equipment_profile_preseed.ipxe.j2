@@ -16,6 +16,11 @@ set eq-console {{ hostvars[groups[item][0]]['ep_console'] }}
 set eq-kernel-parameters {{ hostvars[groups[item][0]]['ep_kernel_parameters'] }}
 set eq-repositories-environment {{ hostvars[groups[item][0]]['ep_operating_system']['repositories_environment'] | default('') }}
 
+# Preseed specific need (known bug with multiple UP/Active NIC)
+{% if hostvars[groups[item][0]]['ep_preseed_auto_main_network_interface'] is defined and hostvars[groups[item][0]]['ep_preseed_auto_main_network_interface'] %}
+set node-main-network-interface auto
+{% endif %}
+
 # Dynamic variables
 set images-root http://${next-server}/repositories/${eq-repositories-environment}/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/
 set repository-root http://${next-server}/repositories/${eq-repositories-environment}/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/

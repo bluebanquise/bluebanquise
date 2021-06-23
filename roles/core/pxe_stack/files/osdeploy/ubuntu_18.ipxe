@@ -20,7 +20,7 @@ echo | Loading linux ...
 
 set mirror-directory /repositories/${eq-repositories-environment}/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/os/
 
-kernel ${images-root}/os/install/netboot/ubuntu-installer/amd64/linux preseed/url=${preseed-path} auto=true priority=critical locale=en_US.UTF-8 console-setup/charmap=UTF-8 console-keymaps-at/keymaps=pc105 console-setup/layoutcode=us console-setup/ask_detect=false netcfg/choose_interface=auto mirror/http/hostname=http://${next-server} mirror/http/directory=${mirror-directory} ${eq-console} ${eq-kernel-parameters} ${dedicated-kernel-parameters} ipxe_next_server=${next-server} node_hostname=${hostname}
+kernel ${images-root}/os/install/netboot/ubuntu-installer/amd64/linux initrd=initrd.gz preseed/url=${preseed-path} auto=true priority=critical locale=en_US.UTF-8 console-setup/charmap=UTF-8 console-keymaps-at/keymaps=pc105 console-setup/layoutcode=us console-setup/ask_detect=false netcfg/choose_interface=${node-main-network-interface} mirror/http/hostname=http://${next-server} mirror/http/directory=${mirror-directory} ${eq-console} ${eq-kernel-parameters} ${dedicated-kernel-parameters} ipxe_next_server=${next-server} node_hostname=${hostname}
 
 echo | Loading initial ramdisk ...
 
