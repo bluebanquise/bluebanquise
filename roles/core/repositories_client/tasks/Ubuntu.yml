@@ -10,8 +10,9 @@
 
 - name: Setting repositories
   apt_repository:
-    repo: "{{ item.repo | default('deb [trusted=yes] ' + baseurl_prefix + ( item.name | default(item) ) + ' ' + ( item.distribution | default('./') )) }}"
+    repo: "{{ item.repo | default('deb [trusted=yes] ' + baseurl_prefix + ( item.name | default(item) | string ) + ' ' + ( item.distribution | default('./') )) }}"
     state: "{{ item.state | default('present') }}"
+    update_cache: no
   with_items: "{{ repositories | union(external_repositories|default([])) }}"
 
 
