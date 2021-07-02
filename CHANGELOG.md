@@ -8,6 +8,8 @@
 
 #### Roles improvement or fix
 
+  - core/log_server
+    - remote logs stored in a similar fashion as the server (#567)
   - all: add compatibility with multiple RHEL like distributions (#560)
   - diskless:
     - fix issues with dnf command in the livenet module (#528)
