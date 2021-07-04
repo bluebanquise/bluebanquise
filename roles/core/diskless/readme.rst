@@ -371,6 +371,7 @@ with the following head:
       j2_node_main_network: ice1-1                #<<< UPDATE
       start_service: false
       image_equipment_profile: equipment_typeC    #<<< UPDATE
+      ep_firewall: false
   
     pre_tasks:
       - name: Add current host to defined equipment_profile
@@ -405,7 +406,7 @@ Notes:
 * The multiple `-i` defines Ansible inventories to gather. By default, in BlueBanquise, the first two inventories are used. We simply add the third one, corresponding to the mounting point.
 * The `-e` (extra vars) are here to specify to the stack which iceberg and main network are to be used in the configuration of the node. (System cannot know on which nodes the image will be used).
 * The `--skip-tags identify` prevents hostname and static ip to be set, since the image should be generic for multiple hosts.
-* By default, diskless images have the firewalld service enabled. Adding the **firewall** BlueBanquise role to this customization playbook will manage the firewalld service per the **ep_firewall** variable in the chosen **image_equipment_profile** (e.g. the default equipment_typeC profile will disable the firewalld service in the diskless image).
+* Firewall does not work properly in a chroot environment, so the variable **ep_firewall** should be set to **false**. If there are firewall related changes to be applied, change the variable and run the playbook with the image booted.
 
 Before closing, also remember to clean dnf cache into the image chroot to save space.
 
