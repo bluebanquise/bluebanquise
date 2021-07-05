@@ -406,7 +406,7 @@ Notes:
 * The multiple `-i` defines Ansible inventories to gather. By default, in BlueBanquise, the first two inventories are used. We simply add the third one, corresponding to the mounting point.
 * The `-e` (extra vars) are here to specify to the stack which iceberg and main network are to be used in the configuration of the node. (System cannot know on which nodes the image will be used).
 * The `--skip-tags identify` prevents hostname and static ip to be set, since the image should be generic for multiple hosts.
-* Firewall does not work properly in a chroot environment, so the variable **ep_firewall** should be set to **false**. If there are firewall related changes to be applied, change the variable and run the playbook with the image booted.
+* Firewall does not work properly in a chroot environment. Variable ep_firewall must be set to false when executing playbook in the chrooted image. If there are firewall related changes to be applied on the image, execute playbook with ep_firewall set to false in the playbook (but keep it true in the inventory) in the chrooted image. Once node is booted in diskless, execute again the playbook with ep_firewall to true (note: you can focus on firewall tasks only at this point using the firewall tag).
 
 Before closing, also remember to clean dnf cache into the image chroot to save space.
 
