@@ -16,4 +16,3 @@ mg_logins:
             - interface: ib0
               ip4: 10.20.2.1
               network: interconnect-1
-

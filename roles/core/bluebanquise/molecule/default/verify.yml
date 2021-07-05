@@ -1,16 +1,14 @@
 ---
-# This is an example playbook to execute Ansible tests.
-
 - name: Verify
   hosts: ansiblectrl
   tasks:
-  - name: Test ipaddr filter in molecule controller
-    assert:
-      that: ansible_facts.all_ipv4_addresses | ipaddr
+    - name: Test ipaddr filter in molecule controller
+      assert:
+        that: ansible_facts.all_ipv4_addresses | ipaddr
 
 - name: Verify filters in Ansible controller
   hosts: localhost
   tasks:
-  - name: Test ipaddr filter in ansible controller
-    assert:
-      that: ansible_facts.all_ipv4_addresses | ipaddr
+    - name: Test ipaddr filter in ansible controller
+      assert:
+        that: ansible_facts.all_ipv4_addresses | ipaddr

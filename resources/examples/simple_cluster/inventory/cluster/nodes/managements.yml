@@ -16,4 +16,3 @@ mg_managements:
             - interface: ib0
               ip4: 10.20.0.1
               network: interconnect-1
-

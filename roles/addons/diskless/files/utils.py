@@ -22,7 +22,7 @@ class Color():
     RED = '\033[31m'
     BLINK = '\033[5m'
     ORANGE_BLINK = '\033[1;33;5m'
-    GREEN = '\033[1;32;40m'
+    GREEN = '\033[32m'
     # Color to close a colored line
     TAG_END = '\033[0m'
 

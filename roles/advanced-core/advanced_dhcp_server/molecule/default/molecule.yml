@@ -84,10 +84,10 @@ provisioner:
 
           compute1:
             network_interfaces:
-            - interface: enp0s3
-              ip4: 10.11.3.1
-              mac: 08:00:27:dc:f8:f6
-              network: ice1-1
+              - interface: enp0s3
+                ip4: 10.11.3.1
+                mac: 08:00:27:dc:f8:f6
+                network: ice1-1
             bmc:
               name: compute1-bmc
               ip4: 10.11.103.1
@@ -105,15 +105,15 @@ provisioner:
             alias:
               - compute2-opt82
             network_interfaces:
-            - interface: enp0s3
-              match: |
-                (substring (option agent.remote-id, 0 , 14) = "0"
-                and option agent.circuit-id = 01:00:16
-                and not (substring(option vendor-class-identifier, 0, 15) = "VENDOR_NAME_1" or
-                substring(option vendor-class-identifier, 0, 13) = "VENDOR_NAME_2")) or
-                (option dhcp-message-type = 3 and binary-to-ascii(10, 8, ".", option dhcp-requested-address) = "10.11.3.2" )
-              ip4: 10.11.3.2
-              network: ice1-1
+              - interface: enp0s3
+                match: |
+                  (substring (option agent.remote-id, 0 , 14) = "0"
+                  and option agent.circuit-id = 01:00:16
+                  and not (substring(option vendor-class-identifier, 0, 15) = "VENDOR_NAME_1" or
+                  substring(option vendor-class-identifier, 0, 13) = "VENDOR_NAME_2")) or
+                  (option dhcp-message-type = 3 and binary-to-ascii(10, 8, ".", option dhcp-requested-address) = "10.11.3.2" )
+                ip4: 10.11.3.2
+                network: ice1-1
             bmc:
               name: compute2-bmc
               alias:
@@ -136,10 +136,10 @@ provisioner:
             alias:
               - compute3-opt61
             network_interfaces:
-            - interface: enp0s3
-              ip4: 10.30.3.3
-              mac: 08:00:27:dc:f8:f7
-              network: ice1-2
+              - interface: enp0s3
+                ip4: 10.30.3.3
+                mac: 08:00:27:dc:f8:f7
+                network: ice1-2
             bmc:
               name: compute3-bmc
               alias:

@@ -60,7 +60,7 @@
     - package
 
 - name: Create /var/log/rsyslog directory
-  file: # noqa 208
+  file:  # noqa 208
     path: /var/log/rsyslog
     setype: var_log_t
     state: directory

@@ -15,4 +15,3 @@
     state: present
     reload: "{{ kernel_config_sysctl_reload | ternary('yes','no') }}"
   loop: "{{ ep_sysctl }}"
-

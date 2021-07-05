@@ -447,7 +447,7 @@ class ImageManager:
         """The method for using modules with cli interface"""
 
         # Get available modules
-        modules = os.listdir(ImageManager.MODULES_PATH)
+        modules = sorted(os.listdir(ImageManager.MODULES_PATH))
 
         # Get only module name to display
         # We have to modif name because module naming convention is:

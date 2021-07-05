@@ -3,9 +3,6 @@ dependency:
   name: galaxy
 driver:
   name: docker
-lint:  |
-  set -e
-  yamllint .
 platforms:
   - name: instance
     image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"

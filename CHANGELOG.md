@@ -1,6 +1,21 @@
 # Changelog
 
-## 1.4.0 - Next-release
+## 1.5.0 - Next-release
+
+### Major changes
+
+#### New roles
+  
+#### Roles improvement or fix
+
+  - pxe_stack: fix issues with hostname not set during kickstart on RHEL 8.3 (#522)
+  - diskless: 
+    - fix issues with dnf command in the livenet module (#528)
+    - fix issues preventing access to nodes booting a livenet image (#525)
+
+### Breaking changes
+
+## 1.4.0
 
 ### Major changes
 
@@ -15,7 +30,7 @@
   - addons/lvm: allow to configure lvm storage (#446)
   - addons/nhc: allow to install and setup nhc (#448)
   - addons/singularity: allow to install Singularity (#403)
-  
+
 #### Roles improvement or fix
 
   - addons/nic_nmcli:

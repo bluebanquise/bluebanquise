@@ -2,7 +2,7 @@
 
 :construction_worker: Many thanks for considering contributing to **BlueBanquise**. :construction_worker:
 
-Please do not hesitate to contact us using issues, we will be glad to help you! :raising_hand:
+Please do not hesitate to contact us using [issues](https://github.com/bluebanquise/bluebanquise/issues) or [discussions](https://github.com/bluebanquise/bluebanquise/discussions), we will be glad to help you! :raising_hand:
 
 The stack is still young, and some aspects are not clearly defined yet. But here are some basic guidelines:
 
@@ -41,8 +41,8 @@ However, please keep in mind we are doing this as a **best effort**, on our free
 We will do our best to at least acknowledge we got your query.
 
 Also, if we consider this may damage the stack (modifications in the engine or the core roles),
-or break the KISS (Keep it simple) effort we are doing on the stack, we may only provide the feature as an addon,
-or simply refuse the feature.
+or break the KISS (Keep it simple) effort we are doing on the stack, we may refuse the feature, 
+or propose to create it in the [community repository](https://github.com/bluebanquise/community) instead.
 
 ## Pull Requests :arrow_heading_down:
 
@@ -78,7 +78,7 @@ Submit the PR for `backport/1.2/<pr_number_from_master>` against the
 
 ### Versioning
 
-By default, each role has a version number, set in vars/main.yml and at the bottom of the readme.rst.
+By default, each role has a version number, set in vars/main.yml and at the bottom of the readme.rst or README.md.
 If your PR brings changes to the tasks, files, templates or vars folders, please increment the version.
 
 ## Development guidelines :octopus:
@@ -98,8 +98,8 @@ like a self-explaining practical session. This is also why documentation covers 
 ### General and architecture
 
 1. Stack was always aimed to **maximum simplicity**, even at the price of non-elegant ways.
-A naïve code is, I think, better than an advanced one. Consider step by step understanding.
-Remember the smart guy who made the ultimate compressed piped command, that nobody, even this guy, can understand after 2 months.
+A naïve code is, we think, better than an advanced one. Consider step by step understanding.
+Remember the smart guy who made the ultimate compressed piped command, that nobody, even this guy, could understand after 2 months.
 We should always consider debugging cost, and think as a non-developer user.
 
 2. Stack was designed to be a ***united*** stack, while focusing on ***modularity***.
@@ -112,7 +112,7 @@ This is the reason why in some key roles, inventory data is used instead of syst
 
 ### Documenting, comments
 
-1. When possible, try to add balanced comments, considering you are teaching to someone.
+1. When possible, we try to add balanced comments, considering teaching to someone.
 Do not hesitate to add url to your references, or to tutorials, etc.
 
 2. **Always document**, if global in main documentation, if role related in role readme.
@@ -140,7 +140,7 @@ to ensure a single location for users to configure all, and non-replication of v
 This is not the Ansible standard, but a need for a unified stack.
 
 2. Internal roles variables, means under the hood variables that user should not consider modifying,
-can be defined in the role vars. Example: packages names, services names, paths, etc.
+can be defined in the role vars or defaults. Example: packages names, services names, paths, etc.
 
 3. General variables, i.e. not related to an equipment_profile, can be defined in group_vars/all/general_settings/,
 in dedicated files or if needed in a new one. When possible, variables should be optional.
@@ -148,7 +148,7 @@ In any cases, they must be documented in the role readme (and if needed provided
 
 4. All variables related to an equipment_profile should go in group_vars/all/equipment_all/ (global) or in group_vars/equipment_X/ with X the equipment profile name (dedicated). These variables must be prefixed by **ep_**.
 
-5. All variables containing jinja2 code must be prefix with *j2_* and stored in group_vars/all/j2_variables/.
+5. All variables containing jinja2 code must be prefix with *j2_* and stored in internal/group_vars/all/j2_variables/.
 j2_ variables are core of the stack, and should be manipulated with care.
 These are intended to be precedence by user only. If needed, theses variables can be fixed.
 
@@ -174,7 +174,7 @@ See [Customizing-Git-Git-Configuration](https://www.git-scm.com/book/en/v2/Custo
 By default, each contributing physical person will be added to a “Contributors” list in the main stack README file.
 This is important for us. Remember to add yourself with first PR.
 
-If you do not wish so, please inform us.
+If you do not wish so, you are free.
 
 ## License
 
