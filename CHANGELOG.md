@@ -4,6 +4,10 @@
 
 ### Major changes
 
+#### Backports
+
+  - Update initramfs in image_data and regenerate boot.ipxe when changing kernel (#571)
+
 #### New roles
 
   - addons/kernel_config: set or update kernel parameters and sysctl (#481)
