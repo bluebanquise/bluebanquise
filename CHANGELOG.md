@@ -19,6 +19,10 @@
 
 ### Major changes
 
+#### Backports from Tools 1.0
+  - Added kernel-modules package to the standard livenet image type (#3)
+  - Update initramfs in image_data and regenerate boot.ipxe when changing kernel (#2)
+
 #### New roles
 
   - addons/kernel_config: set or update kernel parameters and sysctl (#481)

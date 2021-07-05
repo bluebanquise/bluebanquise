@@ -77,6 +77,10 @@ class KernelManager:
 
         # Use image method to set kernel
         image.kernel = kernel
+        # Update initramfs for selected kernel
+        image.image = 'initramfs-kernel-' + kernel.replace('vmlinuz-', '')
+        # Regenarate ipxe boot for the image
+        image.generate_ipxe_boot_file()
         # Register image with new kernel
         image.register_image()
 
