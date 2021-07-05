@@ -4,6 +4,10 @@
 
 ### Major changes
 
+#### Backports
+
+  - Added kernel-modules package to the standard livenet image type (#572)
+
 #### New roles
 
   - addons/kernel_config: set or update kernel parameters and sysctl (#481)
