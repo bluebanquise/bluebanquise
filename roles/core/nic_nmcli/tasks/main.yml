@@ -52,9 +52,13 @@
   tags:
     - service
 
-- name: wait_for ░ Sleep 4s to let NetworkManager start
-  wait_for:
-    timeout: 4
+- name: service_facts ░ Wait for NetworkManager to be running
+  service_facts:
+  register: result
+  until: "result.ansible_facts.services['{{ item }}'].state == 'running'"
+  retries: 10
+  delay: 5
+  loop: "{{ nic_nmcli_services_to_start }}"
 
 - name: nmcli █ Set NICs configuration
   nmcli:
