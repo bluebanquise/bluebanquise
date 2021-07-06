@@ -6,6 +6,12 @@
 
 #### New roles
 
+  - filesystem: set filesystems (#573)
+  - modprobe: load/unload kernel modules (#573)
+  - mount: mount devices (#573)
+  - parted: set partitions (#573)
+  - sudoers: add users or groups to sudoers (#573)
+
 #### Roles improvement or fix
 
   - all: add compatibility with multiple RHEL like distributions (#560)
