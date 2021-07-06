@@ -4,6 +4,10 @@
 
 ### Major changes
 
+#### Backports
+
+  - Update initramfs in image_data and regenerate boot.ipxe when changing kernel (#571)
+
 #### New roles
   
 #### Roles improvement or fix
