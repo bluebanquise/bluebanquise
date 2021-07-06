@@ -1,0 +1,10 @@
+---
+- name: filesystem █ Creating filesystems
+  filesystem:
+    dev: "{{ item.dev }}"
+    force: "{{ item.force | default(omit) }}"
+    fstype: "{{ item.fstype | default(omit) }}"
+    opts: "{{ item.opts | default(omit) }}"
+    resizefs: "{{ item.resizefs | default(omit) }}"
+    state: "{{ item.state | default(omit) }}"
+  loop: "{{ filesystem }}"

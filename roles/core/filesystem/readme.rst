@@ -1,0 +1,31 @@
+Filesystem
+----------
+
+Description
+^^^^^^^^^^^
+
+This role provides simply provides an interface to `**filesystem** Ansible module <https://docs.ansible.com/ansible/latest/collections/community/general/filesystem_module.html>`_ .
+
+Instructions
+^^^^^^^^^^^^
+
+Set needed filesystems using a list:
+
+.. code-block:: yaml
+
+  filesystem:
+    - fstype: ext2
+      dev: /dev/sdb1
+    - fstype: ext4
+      dev: /dev/sdb1
+      opts: -cc
+    - dev: /dev/sde1
+      state: absent
+
+See `**filesystem** Ansible module page <https://docs.ansible.com/ansible/latest/collections/community/general/filesystem_module.html>`_
+for the full list of available parameters.
+
+Changelog
+^^^^^^^^^
+
+* 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
