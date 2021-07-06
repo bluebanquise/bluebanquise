@@ -154,9 +154,8 @@ class LivenetImage(Image):
 
         # Get appropriate packages for desired image file system
         if self.livenet_type == LivenetImage.Type.STANDARD:
-            logging.debug('Standard image requested. Adding "@core" to packages list')
-            dnf_packages = '@core'
-
+            logging.debug('Standard image requested. Adding "@core kernel-modules" to packages list')
+            dnf_packages_list.append('@core kernel-modules')
         elif self.livenet_type == LivenetImage.Type.SMALL:
             logging.debug('Small image requested. Adding "dnf yum iproute procps-ng openssh-server NetworkManager" to packages list')
             dnf_packages = 'dnf yum iproute procps-ng openssh-server NetworkManager'
@@ -720,10 +719,10 @@ def cli_create_livenet_image():
     selected_password = input('Enter clear root password of the new image: ').replace(" ", "")
 
     # Select livenet type
-    types_list = ['Standard: core (~1.3Gb)', 'Small: openssh, dnf and NetworkManager (~300Mb)', 'Minimal: openssh only (~270Mb)']
+    types_list = ['Standard: core and kernel-modules (~1.3Gb)', 'Small: openssh, dnf and NetworkManager (~300Mb)', 'Minimal: openssh only (~270Mb)']
     get_type = select_from_list(types_list)
 
-    if get_type == 'Standard: core (~1.3Gb)':
+    if get_type == 'Standard: core and kernel-modules (~1.3Gb)':
         selected_type = LivenetImage.Type.STANDARD
     elif get_type == 'Small: openssh, dnf and NetworkManager (~300Mb)':
         selected_type = LivenetImage.Type.SMALL
