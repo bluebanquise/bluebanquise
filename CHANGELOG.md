@@ -4,10 +4,6 @@
 
 ### Major changes
 
-#### Backports
-
-  - Update initramfs in image_data and regenerate boot.ipxe when changing kernel (#571)
-
 #### New roles
   
 #### Roles improvement or fix
@@ -26,6 +22,7 @@
 #### Backports
 
   - Added kernel-modules package to the standard livenet image type (#572)
+  - Update initramfs in image_data and regenerate boot.ipxe when changing kernel (#571)
 
 #### New roles
 
