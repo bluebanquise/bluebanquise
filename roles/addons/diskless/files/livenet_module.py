@@ -155,7 +155,7 @@ class LivenetImage(Image):
         # Get appropriate packages for desired image file system
         if self.livenet_type == LivenetImage.Type.STANDARD:
             logging.debug('Standard image requested. Adding "@core kernel-modules" to packages list')
-            dnf_packages_list.append('@core kernel-modules')
+            dnf_packages = '@core kernel-modules'
         elif self.livenet_type == LivenetImage.Type.SMALL:
             logging.debug('Small image requested. Adding "dnf yum iproute procps-ng openssh-server NetworkManager" to packages list')
             dnf_packages = 'dnf yum iproute procps-ng openssh-server NetworkManager'
