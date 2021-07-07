@@ -23,6 +23,7 @@
 
   - Added kernel-modules package to the standard livenet image type (#572)
   - Update initramfs in image_data and regenerate boot.ipxe when changing kernel (#571)
+  - Notify in readme/page that firewall does not work in chroot (#569)
 
 #### New roles
 
