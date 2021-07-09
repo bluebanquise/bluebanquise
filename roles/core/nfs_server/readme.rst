@@ -14,9 +14,9 @@ All configuration is done in *group_vars/all/general_settings/nfs.yml*:
 .. code-block:: yaml
 
   nfs:
-    softwares:                                    # Internal name of the nfs share
-      mount: /opt/softwares                       # What path server should export
-      export: /opt/softwares                      # Which path clients should mount this NFS (will be automatically created by client role)
+    software:                                     # Internal name of the nfs share
+      mount: /opt/software                        # What path server should export
+      export: /opt/software                       # Which path clients should mount this NFS (will be automatically created by client role)
       server: arngrim                             # The server that export this storage space
       clients_groups:                             # Group of hosts that will mount it. Can be an equipment group, or a main group (mg), or any other ansible group
         - mg_computes
