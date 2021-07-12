@@ -16,6 +16,7 @@
   - kernel_config: prevent crash if variable ep_kernel_parameters is undefined (#559)
   - pxe_stack: fix issues with hostname not set during kickstart on RHEL 8.3 (#522)
   - set_hostname: add fqdn capability (#543)
+  - ssh_master: add custom config variable (#579)
   - time: allow to set sysconfig OPTIONS for chronyd (#552)
   - advanced_dhcp_server: fix issue with added spaces. Could prevent DHCP to start (#561)
   - time: allow to add additional networks for server to reply (#555)
