@@ -1,0 +1,7 @@
+- name: ufw █ "Add services to firewall"
+  ufw:
+    rule: allow
+    name: http
+    proto: tcp
+  tags:
+    - firewall
