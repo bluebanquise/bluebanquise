@@ -27,8 +27,8 @@ provisioner:
 
         nfs:
           softwares:
-            mount: /opt/software
-            export: /opt/software
+            mount: /opt/softwares
+            export: /opt/softwares
             server: management1
             clients_groups:
               - mg_computes

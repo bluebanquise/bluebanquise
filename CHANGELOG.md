@@ -8,6 +8,7 @@
 
 #### Roles improvement or fix
 
+  - fix: nfs_export naming consistency between readme/tests/inventory (#)
   - all: add compatibility with multiple RHEL like distributions (#560)
   - diskless:
     - fix issues with dnf command in the livenet module (#528)

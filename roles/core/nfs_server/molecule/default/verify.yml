@@ -37,16 +37,16 @@
       assert:
         that: "register_stat.stat.exists"
 
-    - name: Retrieve /opt/software in /etc/exports file
+    - name: Retrieve /opt/softwares in /etc/exports file
       lineinfile:
         path: /etc/exports
-        regexp: "^/opt/software"
+        regexp: "^/opt/softwares"
         state: absent
       check_mode: yes
       register: export_sw_result
       changed_when: False
 
-    - name: Check /etc/exports file contains /opt/software line
+    - name: Check /etc/exports file contains /opt/softwares line
       assert:
         that: export_sw_result.found
 
@@ -63,16 +63,16 @@
       assert:
         that: export_home_result.found
 
-    - name: Retrieve /opt/software clients in /etc/exports file
+    - name: Retrieve /opt/softwares clients in /etc/exports file
       lineinfile:
         path: /etc/exports
-        regexp: "^/opt/software.*10.10.0.0/16"
+        regexp: "^/opt/softwares.*10.10.0.0/16"
         state: absent
       check_mode: yes
       register: export_sw_result1
       changed_when: False
 
-    - name: Check /etc/exports file contains 10.10.0.0/16 client for /opt/software
+    - name: Check /etc/exports file contains 10.10.0.0/16 client for /opt/softwares
       assert:
         that: export_sw_result1.found
 
@@ -89,16 +89,16 @@
       assert:
         that: export_home_result1.found
 
-    - name: Retrieve /opt/software clients options in /etc/exports file
+    - name: Retrieve /opt/softwares clients options in /etc/exports file
       lineinfile:
         path: /etc/exports
-        regexp: "^/opt/software.*(ro,no_root_squash,async)"
+        regexp: "^/opt/softwares.*(ro,no_root_squash,async)"
         state: absent
       check_mode: yes
       register: export_sw_opts_result
       changed_when: False
 
-    - name: Check /etc/exports file contains client options (ro,no_root_squash,async) for /opt/software
+    - name: Check /etc/exports file contains client options (ro,no_root_squash,async) for /opt/softwares
       assert:
         that: export_sw_opts_result.found
 

@@ -13,8 +13,8 @@
         enabled: yes
         state: started
 
-    - name: Create /opt/software directory
+    - name: Create /opt/softwares directory
       file:
-        path: /opt/software
+        path: /opt/softwares
         state: directory
         mode: 0755

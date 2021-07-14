@@ -16,26 +16,26 @@
 
     - name: Retrieve dir system status
       stat:
-        path: /opt/software
+        path: /opt/softwares
       register: register_stat
       changed_when: false
 
-    - name: Assert dir /etc/software exist
+    - name: Assert dir /etc/softwares exist
       assert:
         that:
           - "register_stat.stat.exists"
           - "register_stat.stat.isdir"
 
-    - name: Retrieve /opt/software in /etc/fstab file
+    - name: Retrieve /opt/softwares in /etc/fstab file
       lineinfile:
         path: /etc/fstab
-        regexp: "/opt/software nfs ro,intr,nfsvers=4.2,bg"
+        regexp: "/opt/softwares nfs ro,intr,nfsvers=4.2,bg"
         state: absent
       check_mode: yes
       register: export_sw_result
       changed_when: false
 
-    - name: Check /etc/fstab file contains /opt/software line
+    - name: Check /etc/fstab file contains /opt/softwares line
       assert:
         that: export_sw_result.found
 
