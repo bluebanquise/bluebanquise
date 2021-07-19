@@ -1,0 +1,15 @@
+---
+- name: preflight █ Check if grafana port is not already in use
+  listen_ports_facts:
+  when: ansible_version.major > 2 and ansible_version.minor >= 9
+
+- name: preflight █ Fail if defined port is already used by another application
+  fail:
+    msg: "Defined Grafana port is already used by another application, please define another port for 'grafana_port' variable"
+  when: tcp_listen is defined and 
+        udp_listen is defined and 
+        tcp_listen in ansible_facts and 
+        udp_listen in ansible_facts and 
+        grafana_port in (ansible_facts.tcp_listen + ansible_facts.udp_listen) | map(attribute='port') | list and
+        not (ansible_facts.tcp_listen + ansible_facts.udp_listen) | map(attribute='name') | list | select('match', 'grafana.*')
+        and ansible_version.major > 2 and ansible_version.minor >= 9

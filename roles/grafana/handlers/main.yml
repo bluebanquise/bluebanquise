@@ -1,0 +1,27 @@
+---
+- name: restart grafana
+  service:
+    name: "{{ item  }}"
+    state: restarted
+    daemon_reload: true
+  with_items: "{{ grafana_services_to_start }}"
+  when:
+    - "'service' not in ansible_skip_tags"
+    - (start_services | bool)
+
+- name: Set privileges on provisioned dashboards
+  file:
+    path: "{{ grafana_data_dir }}/dashboards"
+    recurse: true
+    owner: grafana
+    group: grafana
+    mode: 0640
+  listen: "provisioned dashboards changed"
+
+- name: Set privileges on provisioned dashboards directory
+  file:
+    path: "{{ grafana_data_dir }}/dashboards"
+    state: directory
+    recurse: false
+    mode: 0755
+  listen: "provisioned dashboards changed"

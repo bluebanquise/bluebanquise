@@ -1,0 +1,32 @@
+name: Static code analysis
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+      - '**.rst'
+  pull_request:
+    paths-ignore:
+      - '**.md'
+      - '**.rst'
+
+jobs:
+  check:
+    name: Run static code analysis tools
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup python environment
+        uses: actions/setup-python@v1
+
+      - name: Install packages
+        run: pip install ansible ansible-lint flake8
+
+      - name: Check python code
+        run: cd roles/grafana && flake8 . --statistics --ignore E501,E226
+
+      - name: Run ansible linter
+        run: cd roles/grafana && ansible-lint -v -x 204

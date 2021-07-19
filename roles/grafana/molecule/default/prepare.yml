@@ -1,20 +1,26 @@
 ---
 - name: Prepare
   hosts: all
+  gather_facts: yes
 
   tasks:
-    - name: "Install firewalld"
+    - name: "Install firewalld and net-tools"
       package:
-        name: firewalld
+        name: "{{ item }}"
       when: ansible_facts.os_family == "RedHat"
+      with_items:
+        - firewalld
+        - net-tools
 
     - name: "Start firewalld"
       service:
         name: firewalld
         state: started
-      when: ansible_facts.os_family == "RedHat"
+      when: 
+        - ansible_facts.os_family == "RedHat"
+        - ansible_facts.services['firewalld'] is defined
 
-    - name: "Configure Grafana repository for EL7"
+    - name: "Configure Grafana repository for EL7/8"
       yum_repository:
         name: grafana
         description: Grafana repository
@@ -22,4 +28,4 @@
         gpgcheck: False
       when:
         - ansible_facts.os_family == "RedHat"
-        - ansible_facts.distribution_major_version == "7"
+        # - ansible_facts.distribution_major_version == "7"

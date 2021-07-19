@@ -1,0 +1,22 @@
+---
+- name: "install █ Add services to firewall's {{ grafana_firewall_zone | default('public') }} zone"
+  firewalld:
+    zone: "{{ grafana_firewall_zone | default('public') }}"
+    service: "{{ item }}"
+    immediate: "yes"
+    permanent: "yes"
+    state: enabled
+  when:
+    - ansible_facts.os_family == "RedHat"
+    - ep_firewall | default(false) | bool
+    - ansible_facts.services["{{ item }}"].state == "running"
+  loop: "{{ grafana_firewall_services_to_add }}"
+  tags:
+    - firewall
+
+- name: "install █ Install {{ grafana_packages_to_install | join(' ') }} packages"
+  package:
+    name: "{{ grafana_packages_to_install }}"
+    state: present
+  tags:
+    - install

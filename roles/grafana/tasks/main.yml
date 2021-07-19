@@ -1,5 +1,5 @@
 ---
-- name: include_vars ░ Gather OS specific variables
+- name: include_vars █ Gather OS specific variables
   # This task gathers variables defined in OS specific files.
   #
   # Search vars in:
@@ -19,37 +19,141 @@
         - "vars/{{ ansible_facts.os_family }}.yml"
       skip: true
   tags:
-    - firewall
-    - internal
     - package
     - service
+    - firewall
+    - configure
+    - datasources
+    - notifications
+    - dashboards
+    - plugins
+    - apikeys
 
-- name: "firewalld █ Add services to firewall's {{ grafana_firewall_zone | default('public') }} zone"
-  firewalld:
-    zone: "{{ grafana_firewall_zone | default('public') }}"
-    service: "{{ item }}"
-    immediate: "yes"
-    permanent: "yes"
-    state: enabled
+- include_tasks: preflight.yml
+  tags:
+    - package
+    - service
+    - firewall
+    - configure
+    - datasources
+    - notifications
+    - dashboards
+    - plugins
+    - apikeys
+
+- include_tasks: preflight_ports.yml
+  when: ansible_version.major > 2 and ansible_version.minor >= 9
+  tags:
+    - package
+    - service
+    - firewall
+    - configure
+    - datasources
+    - notifications
+    - dashboards
+    - plugins
+    - apikeys
+
+- include_tasks: install.yml
+  tags:
+    - package
+    - firewall
+
+- include_tasks: configure.yml
+  tags:
+    - service
+    - configure
+
+- include_tasks: plugins.yml
+  when: grafana_plugins != []
+  tags:
+    - plugins
+
+- name: service █ Force all notified handlers to run at this point
+  meta: flush_handlers
+
+- name: service █ Wait for grafana to start (http/s)
+  wait_for:
+    host: "{{ grafana_address }}"
+    port: "{{ grafana_port }}"
+  when: grafana_server.protocol is undefined or grafana_server.protocol in ['http', 'https']
+  tags:
+    - package
+    - service
+    - firewall
+    - configure
+    - datasources
+    - notifications
+    - dashboards
+    - plugins
+
+- name: service █ Wait for grafana to start (socket)
+  wait_for:
+    path: "{{ grafana_server.socket }}"
+  when: grafana_server.protocol is defined and grafana_server.protocol == 'socket'
+  tags:
+    - package
+    - service
+    - firewall
+    - configure
+    - datasources
+    - notifications
+    - dashboards
+    - plugins
+
+- name: grafana █ Ensure password is set to the one in the role variables
+  command: "grafana-cli admin reset-admin-password {{ grafana_security.admin_password }}"
+  changed_when: False
+  no_log: true
+  register: grafana_cli_var
+  ignore_errors: yes
+
+- name: grafana █ Debug grafana-cli when  command is failing
+  debug:
+    msg: "grafana-cli failed to set password {{ grafana_cli_var.stderr }}"
   when:
-    - ansible_facts.os_family == "RedHat"
-    - ep_firewall | default(false) | bool
-  loop: "{{ grafana_firewall_services_to_add }}"
-  tags:
-    - firewall
+    - grafana_cli_var is defined
+    - grafana_cli_var.rc != 0
+  failed_when: grafana_cli_var.rc != 0
+  ignore_errors: yes
 
-- name: "package █ Install {{ grafana_packages_to_install | join(' ') }} packages"
-  package:
-    name: "{{ grafana_packages_to_install }}"
-    state: present
+- include_tasks: api_keys.yml
+  when: grafana_api_keys | length > 0
+  tags:
+    - apikeys
+
+- include_tasks: datasources.yml
+  when: grafana_datasources != []
+  tags:
+    - datasources
+
+- name: "grafana █ Check if there are any dashboards in local {{ grafana_dashboards_dir }}"
+  set_fact:
+    found_dashboards: "{{ lookup('fileglob', grafana_dashboards_dir + '/*.json', wantlist=True) }}"
+  tags:
+    - dashboards
+
+- include_tasks: dashboards.yml
+  when: grafana_dashboards | length > 0 or found_dashboards | length > 0
+  tags:
+    - dashboards
+
+- name: grafana █ UI login information
+  debug:
+    msg:
+      - '###############################################################'
+      - 'Grafana UI access:'
+      - "URL: {{ grafana_address }}:{{ grafana_port }}"
+      - "- login: {{ grafana_security.admin_user }}"
+      - "- password: {{ grafana_security.admin_password }}"
+      - '###############################################################'
   tags:
     - package
-
-- name: "service █ Manage {{ grafana_services_to_start | join(' ') }} services state"
-  service:
-    name: "{{ item }}"
-    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
-    state: "{{ (start_services | bool) | ternary('started', omit) }}"
-  loop: "{{ grafana_services_to_start }}"
-  tags:
     - service
+    - firewall
+    - configure
+    - datasources
+    - notifications
+    - dashboards
+    - plugins
+    - apikeys
