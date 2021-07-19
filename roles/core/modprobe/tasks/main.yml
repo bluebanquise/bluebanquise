@@ -1,0 +1,7 @@
+---
+- name: modprobe █ Load or unload kernel modules
+  modprobe:
+    name: "{{ item.name }}"
+    params: "{{ item.params | default(omit) }}"
+    state: "{{ item.state | default(omit) }}"
+  loop: "{{ modprobe }}"
