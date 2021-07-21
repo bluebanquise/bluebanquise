@@ -95,16 +95,16 @@
         - ansible_facts.os_family == "RedHat"
         - ansible_facts.distribution_major_version == "7"
 
-    - name: Retrieve dir /usr/lib/conman/exec system status rhel8
+    - name: Retrieve dir /usr/share/conman/exec system status rhel8
       stat:
-        path: /usr/lib/conman/exec
+        path: /usr/share/conman/exec
       register: reg_dir_conman
       changed_when: false
       when:
         - ansible_facts.os_family == "RedHat"
         - ansible_facts.distribution_major_version == "8"
 
-    - name: Assert dir conman_execpath /usr/lib/conman/exec exist rhel8
+    - name: Assert dir conman_execpath /usr/share/conman/exec exist rhel8
       assert:
         that:
           - reg_dir_conman.stat.exists

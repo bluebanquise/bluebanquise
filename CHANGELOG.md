@@ -15,6 +15,7 @@
 #### Roles improvement or fix
 
   - all: add compatibility with multiple RHEL like distributions (#560)
+  - conman: fix execpath for RHEL 8 (#584)
   - diskless:
     - fix issues with dnf command in the livenet module (#528)
     - fix issues preventing access to nodes booting a livenet image (#525)
