@@ -99,24 +99,24 @@ generation.
 Multiple iceberg usage
 """"""""""""""""""""""
 
-The ssh_master role allows to enable ssh ProxyJump to ssh from a top iceberg to 
+The ssh_master role allows to enable ssh ProxyJump to ssh from a top iceberg to
 hosts of a sub_iceberg, through one master of the sub_iceberg.
 This allows simple central point to ansible-playbook.
 
-To activate this feature, enable it first by adding in your inventory the 
+To activate this feature, enable it first by adding in your inventory the
 variable:
 
 .. code-block:: yaml
 
   ssh_master_enable_jump: true
 
-By default, the first management found in the group list of the sub_iceberg 
-will be used as ssh ProxyJump target. It is possible to manually override this, 
-in case of HA and virtual IP for example, by defining in the sub_iceberg variables 
+By default, the first management found in the group list of the sub_iceberg
+will be used as ssh ProxyJump target. It is possible to manually override this,
+in case of HA and virtual IP for example, by defining in the sub_iceberg variables
 the desired target.
 
-For example, to force ProxyJump target to be 10.10.0.77 for 
-iceberg3 hosts, in inventory/cluster/icebergs/iceberg3 file, add 
+For example, to force ProxyJump target to be 10.10.0.77 for
+iceberg3 hosts, in inventory/cluster/icebergs/iceberg3 file, add
 ssh_master_iceberg_jump_target:
 
 .. code-block:: text
@@ -145,6 +145,7 @@ Optional inventory vars:
 * security.ssh.hostkey_checking
 * ssh_master_enable_jump
 * ssh_master_iceberg_jump_target
+* ssh_master_custom_config
 
 Output
 ^^^^^^
@@ -155,6 +156,7 @@ Output
 Changelog
 ^^^^^^^^^
 
+* 1.0.5: Add custom config variable. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.4: Add ssh ProxyJump capability for icebergs. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.3: Update to new network_interfaces syntax. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.2: Clean. johnnykeats <johnny.keats@outlook.com>
