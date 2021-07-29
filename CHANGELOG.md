@@ -20,6 +20,9 @@
     - fix issues preventing access to nodes booting a livenet image (#525)
     - notify in readme/page that firewall does not work in chroot (#569)
   - kernel_config: prevent crash if variable ep_kernel_parameters is undefined (#559)
+  - nic_nmcli:
+    - add dns4 and dns4_search vars logic (#585)
+    - improve role capabilities (#558)
   - pxe_stack: fix issues with hostname not set during kickstart on RHEL 8.3 (#522)
   - set_hostname: add fqdn capability (#543)
   - time: allow to set sysconfig OPTIONS for chronyd (#552)
