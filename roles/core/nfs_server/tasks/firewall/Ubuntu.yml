@@ -1,0 +1,6 @@
+- name: ufw █ "Add services to firewall"
+  ufw:
+    rule: allow
+    name: nfs
+  tags:
+    - firewall
