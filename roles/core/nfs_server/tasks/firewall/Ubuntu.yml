@@ -1,6 +1,10 @@
 - name: ufw █ "Add services to firewall"
   ufw:
     rule: allow
-    name: nfs
+    port: '2049'
+    proto: "{{ item }}"
+  loop:
+    - udp
+    - tcp
   tags:
     - firewall

@@ -21,18 +21,17 @@
   tags:
     - always
 
-- name: "firewalld █ Add services to firewall's {{ pxe_stack_firewall_zone | default('public') }} zone"
-  firewalld:
-    zone: "{{ pxe_stack_firewall_zone | default('public') }}"
-    service: "{{ item }}"
-    immediate: "yes"
-    permanent: "yes"
-    state: enabled
-  when:
-    - ansible_facts.os_family == "RedHat"
-    - ep_firewall | default(false) | bool
-  loop: "{{ pxe_stack_firewall_services_to_add }}"
+- name: include_tasks ░ Use OS dedicated firewall task
+  include_tasks: "{{ item }}"
+  with_first_found:
+    - files:
+        - "firewall/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "firewall/{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "firewall/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "firewall/{{ ansible_facts.os_family | replace(' ','_') }}.yml"
+      skip: true
   tags:
+    - internal
     - firewall
 
 - name: "package █ Install {{ (pxe_stack_packages_to_install + [pxe_stack_tftp_package | default(pxe_stack_default_tftp_package)]) | join(' ') }} packages"
