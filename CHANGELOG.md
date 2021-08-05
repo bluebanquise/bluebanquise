@@ -14,6 +14,7 @@
 
 #### Roles improvement or fix
 
+  - pxe_stack: force substitution of files by symlinks in case of an update (#587)
   - all: add compatibility with multiple RHEL like distributions (#560)
   - diskless:
     - fix issues with dnf command in the livenet module (#528)
