@@ -19,6 +19,7 @@
     - fix issues with dnf command in the livenet module (#528)
     - fix issues preventing access to nodes booting a livenet image (#525)
     - notify in readme/page that firewall does not work in chroot (#569)
+    - fix python path of diskless files (#590)
   - kernel_config: prevent crash if variable ep_kernel_parameters is undefined (#559)
   - nic_nmcli:
     - add dns4 and dns4_search vars logic (#585)
