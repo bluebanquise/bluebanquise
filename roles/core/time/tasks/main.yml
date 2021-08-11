@@ -45,7 +45,7 @@
 - name: "template █ Generate {{ time_chrony_conf_path }}"
   template:
     src: chrony.conf.j2
-    dest: "{{ time_chrony_conf_path }}"
+    dest: "{{ time_chrony_custom_conf_path | default(time_chrony_conf_path) }}"
     owner: root
     group: root
     mode: 0644
