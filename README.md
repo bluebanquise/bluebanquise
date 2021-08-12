@@ -15,7 +15,7 @@ The stack is split over multiple repositories:
 
 * :globe_with_meridians: **[Core](https://github.com/bluebanquise/bluebanquise):** the CORE of the stack, provides roles and tools to deploy and configure hosts.
 
-* :star: **[Community](https://github.com/bluebanquise/community):** COMMUNITY roles and tools, provides additional features on top of CORE. The release cycle of COMMUNITY is different than CORE.
+* :globe_with_meridians: **[Community](https://github.com/bluebanquise/community):** COMMUNITY roles and tools, provides additional features on top of CORE. The release cycle of COMMUNITY is different than CORE.
 
 ## Resources
 
