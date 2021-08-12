@@ -17,6 +17,10 @@ The stack is split over multiple repositories:
 
 * :globe_with_meridians: **[Community](https://github.com/bluebanquise/community):** COMMUNITY roles and tools, provides additional features on top of CORE. The release cycle of COMMUNITY is different than CORE.
 
+* :globe_with_meridians: **[Tools](https://github.com/bluebanquise/tools):** Tools repository contains sources of stack tools.
+
+* :globe_with_meridians: **[Infrastructure](https://github.com/bluebanquise/infrastructure):** Infrastructure repository contains needed script and files to build packages.
+
 ## Resources
 
 ### Documentation
