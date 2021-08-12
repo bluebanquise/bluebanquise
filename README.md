@@ -11,21 +11,17 @@
 
 While main target is High Performance Computing (HPC), the BlueBanquise stack is generic and can adapt to any kind of architecture (university or enterprise infrastructures, render farm, etc.).
 
-BlueBanquise is part of the **Algoric** Project from the [**Fabrique du Loch**](https://www.lafabriqueduloch.org/fr/accueil/) FabLab.
-
-![BlueBanquise Logo](resources/pictures/FabriqueDuLochAlgoric_logo_large.svg)
-
-It is a revamping of the old stack [Banquise](https://github.com/oxedions/banquise), based on Salt.
-
-## Resources
-
-### Files
-
 The stack is split over multiple repositories:
 
 * :globe_with_meridians: **[Core](https://github.com/bluebanquise/bluebanquise):** the CORE of the stack, provides roles and tools to deploy and configure hosts.
 
-* :star: **[Community](https://github.com/bluebanquise/community):** COMMUNITY roles and tools, provides additional features on top of CORE. The release cycle of COMMUNITY is different than CORE.
+* :globe_with_meridians: **[Community](https://github.com/bluebanquise/community):** COMMUNITY roles and tools, provides additional features on top of CORE. The release cycle of COMMUNITY is different than CORE.
+
+* :globe_with_meridians: **[Tools](https://github.com/bluebanquise/tools):** Tools repository contains sources of stack tools.
+
+* :globe_with_meridians: **[Infrastructure](https://github.com/bluebanquise/infrastructure):** Infrastructure repository contains needed script and files to build packages.
+
+## Resources
 
 ### Documentation
 
@@ -60,6 +56,14 @@ The stack packages are available in the [repositories subfolder](https://blueban
 Ansible >= 2.9.13 is mandatory for BlueBanquise to run properly.
 
 **[OpenHPC](https://openhpc.community/downloads/)** scientific packages and OpenHPC slurm job scheduler are compatible with the stack.
+
+## Algoric project
+
+BlueBanquise is part of the **Algoric** Project from the [**Fabrique du Loch**](https://www.lafabriqueduloch.org/fr/accueil/) FabLab.
+
+![BlueBanquise Logo](resources/pictures/FabriqueDuLochAlgoric_logo_large.svg)
+
+It is a revamping of the old stack [Banquise](https://github.com/oxedions/banquise), based on Salt.
 
 ## The name
 
