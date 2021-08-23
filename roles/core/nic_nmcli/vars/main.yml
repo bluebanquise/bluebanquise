@@ -1,5 +1,5 @@
 ---
-nic_nmcli_role_version: 1.3.0
+nic_nmcli_role_version: 1.3.1
 
 j2_nic_nmcli_ip4: "
 {% if item.ip4 is defined %}
@@ -75,5 +75,21 @@ j2_nic_nmcli_mtu: "
   {{ item.mtu }}
 {% elif item.network is defined and networks[item.network]['mtu'] is defined %}
   {{ networks[item.network]['mtu'] }}
+{% endif %}
+"
+
+j2_nic_nmcli_dns4: "
+{% if item.dns4 is defined %}
+  {{ item.dns4 }}
+{% elif item.network is defined and networks[item.network]['dns4'] is defined %}
+  {{ networks[item.network]['dns4'] }}
+{% endif %}
+"
+
+j2_nic_nmcli_dns4_search: "
+{% if item.dns4_search is defined %}
+  {{ item.dns4_search }}
+{% elif item.network is defined and networks[item.network]['dns4_search'] is defined %}
+  {{ networks[item.network]['dns4_search'] }}
 {% endif %}
 "
