@@ -12,6 +12,11 @@
   tags:
     - template
 
+- name: file █ Ensure old netplan configuration is erased
+  file:
+    path: /etc/netplan/00-installer-config.yaml
+    state: absent
+
 - name: lineinfile █ Prevent automatic connections
   lineinfile:
     path: /etc/NetworkManager/NetworkManager.conf

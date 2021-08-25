@@ -21,6 +21,13 @@
   tags:
     - always
 
+- name: "package █ Install {{ repositories_server_packages_to_install | join(' ') }} packages"
+  package:
+    name: "{{ repositories_server_packages_to_install }}"
+    state: present
+  tags:
+    - package
+
 - name: include_tasks ░ Use OS dedicated firewall task
   include_tasks: "{{ item }}"
   with_first_found:
@@ -33,13 +40,6 @@
   tags:
     - internal
     - firewall
-
-- name: "package █ Install {{ repositories_server_packages_to_install | join(' ') }} packages"
-  package:
-    name: "{{ repositories_server_packages_to_install }}"
-    state: present
-  tags:
-    - package
 
 - name: "service █ Manage {{ repositories_server_services_to_start | join(' ') }} services state"
   service:

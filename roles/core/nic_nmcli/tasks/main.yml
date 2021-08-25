@@ -52,13 +52,23 @@
   tags:
     - service
 
-- name: service_facts ░ Wait for NetworkManager to be running
-  service_facts:
-  register: result
-  until: "result.ansible_facts.services['{{ item }}'].state == 'running'"
+- name: service █ Ensure Betwork Manager is running
+  service:
+    name: "{{ item }}"
+    state: started
+  register: myserviceDetails
+  until: myserviceDetails.status.ActiveState == "active" and myserviceDetails.state == "started"
   retries: 10
   delay: 5
   loop: "{{ nic_nmcli_services_to_start }}"
+
+    #- name: service_facts ░ Wait for NetworkManager to be running
+    #  service_facts:
+    #  register: result
+    #  until: "result.ansible_facts.services['{{ item }}'].state == 'running'"
+    #  retries: 10
+    #  delay: 5
+    #  loop: "{{ nic_nmcli_services_to_start }}"
 
 - name: nmcli █ Set NICs configuration
   nmcli:
