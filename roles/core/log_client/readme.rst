@@ -89,6 +89,7 @@ Changelog
 ^^^^^^^^^
 
 * 1.2.0: Add Ubuntu support. Benoit Leveugle <benoit.leveugle@gmail.com>
+* 1.1.1: Add custom configuration path. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.0: Enable custom rsyslog configuration with log_client_custom_config <dilassert@gmail.com>
 * 1.0.4: Enable verbosity configuration with log_client_verbosity <dilassert@gmail.com>
 * 1.0.3: Enable log server port customization with log_client_server_port. strus38

@@ -54,7 +54,7 @@
 - name: "template █ Generate {{ log_server_rsyslog_conf_path }}"
   template:
     src: rsyslog.conf.j2
-    dest: "{{ log_server_rsyslog_conf_path }}"
+    dest: "{{ log_server_rsyslog_custom_conf_path | default(log_server_rsyslog_conf_path) }}"
     owner: root
     group: root
     mode: 0644

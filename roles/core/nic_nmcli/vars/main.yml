@@ -77,3 +77,19 @@ j2_nic_nmcli_mtu: "
   {{ networks[item.network]['mtu'] }}
 {% endif %}
 "
+
+j2_nic_nmcli_dns4: "
+{% if item.dns4 is defined %}
+  {{ item.dns4 }}
+{% elif item.network is defined and networks[item.network]['dns4'] is defined %}
+  {{ networks[item.network]['dns4'] }}
+{% endif %}
+"
+
+j2_nic_nmcli_dns4_search: "
+{% if item.dns4_search is defined %}
+  {{ item.dns4_search }}
+{% elif item.network is defined and networks[item.network]['dns4_search'] is defined %}
+  {{ networks[item.network]['dns4_search'] }}
+{% endif %}
+"
