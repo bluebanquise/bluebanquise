@@ -1,5 +1,5 @@
 ---
-log_server_role_version: 1.0.3
+log_server_role_version: 1.1.0
 
 log_server_packages_to_install:
   - rsyslog

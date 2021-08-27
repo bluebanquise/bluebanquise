@@ -17,4 +17,4 @@ pxe_stack_default_tftp_service: atftpd
 pxe_stack_firewall_services_to_add:
   - http
   - tftp
-pxe_stack_apache_cgi-bin_path: /var/www/cgi-bin
+pxe_stack_apache_cgi_bin_path: /var/www/cgi-bin

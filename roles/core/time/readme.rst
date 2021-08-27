@@ -82,6 +82,7 @@ Icebergs with stratum levels.
 Changelog
 ^^^^^^^^^
 
+* 1.2.0: Add Ubuntu support. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.0: Set sysconfig OPTIONS for chronyd. Bruno Travouillon <devel@travouillon.fr>
 * 1.0.4: Add iburst to allow faster boot time recovery, update macro. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.3: Update to new network_interfaces syntax. Benoit Leveugle <benoit.leveugle@gmail.com>

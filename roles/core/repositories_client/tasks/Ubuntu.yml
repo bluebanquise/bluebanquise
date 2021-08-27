@@ -15,4 +15,3 @@
     update_cache: no
   with_items: "{{ repositories | union(external_repositories|default([])) }}"
   notify: command █ apt update cache
-

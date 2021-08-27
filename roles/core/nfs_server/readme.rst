@@ -62,6 +62,7 @@ Packages installed:
 Changelog
 ^^^^^^^^^
 
+* 1.1.0: Add Ubuntu support. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.4: Added molecule tests. osmocl <osmocl@osmo.cl>
 * 1.0.3: Clean. johnnykeats <johnny.keats@outlook.com>
 * 1.0.2: Added Ubuntu 18.04 compatibility. johnnykeats <johnny.keats@outlook.com>

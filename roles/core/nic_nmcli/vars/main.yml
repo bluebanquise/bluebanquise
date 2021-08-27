@@ -1,5 +1,5 @@
 ---
-nic_nmcli_role_version: 1.3.0
+nic_nmcli_role_version: 1.4.0
 
 j2_nic_nmcli_ip4: "
 {% if item.ip4 is defined %}

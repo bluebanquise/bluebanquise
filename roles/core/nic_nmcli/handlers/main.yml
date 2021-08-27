@@ -4,8 +4,7 @@
   when: nic_nmcli_reload_connections
 
 - name: command █ Netplan generate
-  command: netplan generate 
+  command: netplan generate
 
 - name: command █ Netplan apply
   command: netplan apply
-
