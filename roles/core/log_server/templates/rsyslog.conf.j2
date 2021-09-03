@@ -44,63 +44,34 @@ $OmitLocalLogging on
 # File to store the position in the journal
 $IMJournalStateFile imjournal.state
 
-
-#### RULES ####
-
 #### RULES ####
 
 # Everybody gets emergency messages
 *.emerg                                                 :omusrmsg:*
 
-if $fromhost-ip == '127.0.0.1' then {
-    # Log all kernel messages to the console.
-    # Logging much else clutters up the screen.
-    #kern.*                                                 /dev/console
+#kern.*                                                 /dev/console
 
-    # Log anything (except mail) of level info or higher.
-    # Don't log private authentication messages!
-    *.info;mail.none;authpriv.none;cron.none                /var/log/messages
+# Log anything (except mail) of level info or higher.
+# Don't log private authentication messages!
+$template Messages,"/var/log/rsyslog/%HOSTNAME%/messages"
+*.info;mail.none;authpriv.none;cron.none ?Messages
 
-    # The authpriv file has restricted access.
-    authpriv.*                                              /var/log/secure
+# The authpriv file has restricted access.
+$template Secure,"/var/log/rsyslog/%HOSTNAME%/secure"
+authpriv.* ?Secure
 
-    # Log all the mail messages in one place.
-    mail.*                                                  -/var/log/maillog
+# Log all the mail messages in one place.
+$template Mail,"/var/log/rsyslog/%HOSTNAME%/maillog"
+mail.* ?Mail
 
-    # Log cron stuff
-    cron.*                                                  /var/log/cron
+# Log cron stuff
+$template Cron,"/var/log/rsyslog/%HOSTNAME%/cron"
+cron.* ?Cron
 
-    # Save news errors of level crit and higher in a special file.
-    uucp,news.crit                                          /var/log/spooler
+# Save news errors of level crit and higher in a special file.
+$template Spooler,"/var/log/rsyslog/%HOSTNAME%/spooler"
+uucp,news.crit ?Spooler
 
-    # Save boot messages also to boot.log
-    local7.*                                                /var/log/boot.log
-}
-else {
-    # Rules for processing remote logs
-
-    # Log anything (except mail) of level info or higher.
-    # Don't log private authentication messages!
-    $template RemoteMessages,"/var/log/rsyslog/%HOSTNAME%/messages"
-    *.info;mail.none;authpriv.none;cron.none ?RemoteMessages
-
-    # The authpriv file has restricted access.
-    $template RemoteSecure,"/var/log/rsyslog/%HOSTNAME%/secure"
-    authpriv.* ?RemoteSecure
-
-    # Log all the mail messages in one place.
-    $template RemoteMail,"/var/log/rsyslog/%HOSTNAME%/maillog"
-    mail.* ?RemoteMail
-
-    # Log cron stuff
-    $template RemoteCron,"/var/log/rsyslog/%HOSTNAME%/cron"
-    cron.* ?RemoteCron
-
-    # Save news errors of level crit and higher in a special file.
-    $template RemoteSpooler,"/var/log/rsyslog/%HOSTNAME%/spooler"
-    uucp,news.crit ?RemoteSpooler
-
-    # Save boot messages also to boot.log
-    $template RemoteBoot,"/var/log/rsyslog/%HOSTNAME%/boot.log"
-    local7.* ?RemoteBoot
-}
+# Save boot messages also to boot.log
+$template Boot,"/var/log/rsyslog/%HOSTNAME%/boot.log"
+local7.* ?Boot
