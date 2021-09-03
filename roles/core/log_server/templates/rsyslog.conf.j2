@@ -59,22 +59,22 @@ if $fromhost-ip == '127.0.0.1' then {
 
     # Log anything (except mail) of level info or higher.
     # Don't log private authentication messages!
-    *.info;mail.none;authpriv.none;cron.none                /var/log/messages
+    *.info;mail.none;authpriv.none;cron.none                /var/log/rsyslog/%HOSTNAME%/messages
 
     # The authpriv file has restricted access.
-    authpriv.*                                              /var/log/secure
+    authpriv.*                                              /var/log/rsyslog/%HOSTNAME%/secure
 
     # Log all the mail messages in one place.
-    mail.*                                                  -/var/log/maillog
+    mail.*                                                  -/var/log/rsyslog/%HOSTNAME%/maillog
 
     # Log cron stuff
-    cron.*                                                  /var/log/cron
+    cron.*                                                  /var/log/rsyslog/%HOSTNAME%/cron
 
     # Save news errors of level crit and higher in a special file.
-    uucp,news.crit                                          /var/log/spooler
+    uucp,news.crit                                          /var/log/rsyslog/%HOSTNAME%/spooler
 
     # Save boot messages also to boot.log
-    local7.*                                                /var/log/boot.log
+    local7.*                                                /var/log/rsyslog/%HOSTNAME%/boot.log
 }
 else {
     # Rules for processing remote logs
