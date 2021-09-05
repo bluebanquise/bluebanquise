@@ -1,1 +1,7 @@
+if [ -z "$MODULEPATH" ]; then
+export MODULEPATH={% for path in lmod_path %}{% if loop.first %}{{ path }}{% else %}:{{ path }}{% endif %}{% endfor %}
+
+else
 export MODULEPATH=$MODULEPATH{% for path in lmod_path %}:{{ path }}{% endfor %}
+
+fi
