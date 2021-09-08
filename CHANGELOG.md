@@ -6,6 +6,7 @@
 
   - clone. Owner: @oxedions
   - display_tuning. Owner: @oxedions
+  - drbd. Owner: @oxedions
   - generic_psf. Owner: @johnnykeats
   - grafana. Owner: @oxedions
   - lmod. Owner: @oxedions

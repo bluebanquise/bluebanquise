@@ -1,0 +1,106 @@
+- name: "package █ Install packages"
+  package:
+    name:
+      - drbd90-utils
+      - kmod-drbd90
+      - policycoreutils-python-utils
+    state: present
+  tags:
+    - package
+
+- name: selinux_permissive █ Allow drbd
+  selinux_permissive:
+    name: drbd_t
+    permissive: true
+  when:
+    - ansible_facts.selinux.status == "enabled"
+
+- name: template █ Generate /etc/drbd.d/global_common.conf
+  template:
+    src: global_common.conf.j2
+    dest: /etc/drbd.d/global_common.conf
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - template
+
+- name: template █ Generate /etc/drbd.d/resources.res
+  template:
+    src: resource.res.j2
+    dest: "/etc/drbd.d/{{ item.name }}.res"
+    owner: root
+    group: root
+    mode: 0644
+  loop: "{{ drbd_resources }}"
+  tags:
+    - template
+
+- name: command █ Check if resources are created
+  shell: 'cat /var/lib/drbd/*.lkbd'
+  register: drbd_created
+  changed_when: False
+
+- debug:
+    msg: "{{ drbd_created }}"
+
+- name: command █ Create needed resources
+  command: "drbdadm create-md {{ item.name }} "
+  loop: "{{ drbd_resources }}"
+  when:
+    - (drbd_created.stdout_lines | select("match", ".*"+item.disk+"$") | list | length) < 1
+
+- name: command █ Check if resources are up
+  command: 'drbdadm status'
+  register: drbdadm_status
+  changed_when: False
+
+- name: command █ Up needed resources
+  command: "drbdadm up {{ item.name }} "
+  loop: "{{ drbd_resources }}"
+  when:
+    - (drbdadm_status.stdout_lines | select("match", "^"+item.name+".*") | list | length) < 1
+
+- name: pause ░ Wait for resources to be up and used
+  pause:
+    seconds: "{{ drbd_pause_seconds }}"
+
+- name: Format FS if needed
+  run_once: true
+  block:
+
+    - name: command █ Check if resources are not already used
+      shell: "drbdadm status | sed -n '/^{{ item.name }}/,/^$/{p;/^$/q}'"
+      register: drbdadm_status
+      changed_when: False
+      loop: "{{ drbd_resources }}"
+
+    - name: command █ Set localhost as primary device
+      command: "drbdadm primary {{ item.item.name }} --force"
+      loop: "{{ drbdadm_status.results }}"
+      when:
+        - (item.stdout_lines | select("match", ".*Primary$") | list | length) < 1
+
+    - name: pause ░ Wait for resources to be set primary
+      pause:
+        seconds: "{{ drbd_pause_seconds }}"
+
+    - name: filesystem █ Creating filesystems
+      filesystem:
+        dev: "{{ item.item.device }}"
+        force: "{{ item.item.filesystem.force | default(omit) }}"
+        fstype: "{{ item.item.filesystem.fstype | default(omit) }}"
+        opts: "{{ item.item.filesystem.opts | default(omit) }}"
+        resizefs: "{{ item.item.filesystem.resizefs | default(omit) }}"
+        state: "{{ item.item.filesystem.state | default(omit) }}"
+      loop: "{{ drbdadm_status.results }}"
+      when:
+        - (item.stdout_lines | select("match", ".*Primary$") | list | length) < 1
+        - item.item.filesystem is defined and item.item.filesystem is not none
+
+    - name: command █ Release resource
+      command: "drbdadm secondary {{ item.item.name }}"
+      loop: "{{ drbdadm_status.results }}"
+      when:
+        - (item.stdout_lines | select("match", ".*Primary$") | list | length) < 1
+
