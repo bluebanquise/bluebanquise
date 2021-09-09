@@ -27,6 +27,7 @@ While the core stack aims to be multiple Linux distributions ready, each Communi
 | report                | Check inventory and gather helpful data                  | @oxedions       | [link](roles/report/)               |
 | singularity           | Install and configure Singularity or SingularityPRO      | @strus38        | [link](roles/singularity/)          |
 | slurm                 | Install and configure Slurm Workload Manager             | @oxedions       | [link](roles/slurm/)                |
+| update_reboot         | Update all packages and reboot system                    | @oxedions       | [link](roles/update_reboot/)        |
 | users_basic           | Set / remove users                                       | @oxedions       | [link](roles/users_basic/)          |
 
 ## List of external useful roles/tools
