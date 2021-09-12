@@ -1,0 +1,5 @@
+---
+- name: setup █ Install podman packages
+  package:
+    name: "{{ podman_packages_to_install }}"
+    state: present

@@ -1,0 +1,13 @@
+---
+- name: conf █ Configure /etc/container/*.conf
+  template:
+    src: "{{ item }}.j2"
+    dest: "/{{ item }}"
+    owner: root
+    group: root
+    mode: 0644
+    backup: true
+  loop:
+    - etc/containers/libpod.conf
+    - etc/containers/registries.conf
+    - etc/containers/storage.conf

@@ -1,0 +1,22 @@
+---
+- name: Converge
+  hosts: all
+  any_errors_fatal: true
+  vars:
+    start_services: true
+    enable_services: true
+  tasks:
+    - name: "Enable firewall for EL8"
+      set_fact:
+        ep_firewall: true
+      when:
+        - ansible_facts.os_family == "RedHat"
+        - ansible_facts.distribution_major_version == "8"
+        - ansible_facts.services['firewalld'] is defined
+
+    - name: "Include podman"
+      include_role:
+        name: "podman"
+      when:
+        - ansible_facts.os_family == "RedHat"
+        - ansible_facts.distribution_major_version == "8"

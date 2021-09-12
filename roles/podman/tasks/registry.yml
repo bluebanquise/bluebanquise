@@ -1,0 +1,28 @@
+---
+- name: registry █ Create local directory
+  file:
+    path: "{{ podman_local_registry_dir }}"
+    state: directory
+    owner: "{{ podman_local_registry_owner | default(root) }}"
+    group: "{{ podman_local_registry_group | default(root) }}"
+    mode: '0644'
+
+- name: registry █ Check the path of the registry container
+  stat:
+    path: "{{ podman_registry_container_path }}"
+  register: p
+
+- name: registry █ Load local registry container
+  command: "podman load -i {{ podman_registry_container_path }}"
+  changed_when: false
+
+- name: registry █ Find out if registry is already deployed
+  command: "podman container exists {{ podman_registry_container }}"
+  register: cmdout
+  changed_when: false
+  failed_when: false
+
+- name: registry █ Run local registry
+  command: "podman run --privileged -d --name registry -p 5000:{{ podman_local_registry_port }} -v /var/lib/registry:{{ podman_local_registry_dir }} --restart=always {{ podman_registry_container }}:{{ podman_registry_container_tag }}"
+  # yamllint disable-line rule:line-length
+  when: cmdout is not defined | cmdout.rc != 0
