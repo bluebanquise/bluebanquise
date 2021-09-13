@@ -66,7 +66,7 @@ parser.add_argument("-n", "--nodes", dest="nodes",
 parser.add_argument("-s", "--status", dest="status", nargs='?', const='',
                     help="Display current nodes boot target status.")
 parser.add_argument("-b", "--boot", dest="boot",
-                    help="Next pxe boot: can be osdeploy, diskless, clone, clonedeploy, or disk.")
+                    help="Next pxe boot: can be osdeploy, diskless, clone, clonedeploy, next, or disk.")
 parser.add_argument("-f", "--force", dest="force", default=" ",
                     help="Force. 'dhcp' = better dracut dhcp, 'network' = static ip. Combine using comma separator.")
 parser.add_argument("-i", "--image", dest="image", default="none",
@@ -99,6 +99,7 @@ if passed_arguments.status is not None:
     diskfull = NodeSet()
     diskless = dict()
     osdeploy = NodeSet()
+    bootnext = NodeSet()
 
     # Iteration on nodes
     for node in NodeSet(passed_arguments.nodes):
@@ -115,6 +116,8 @@ if passed_arguments.status is not None:
 
                 if boot == 'disk':
                     diskfull.update(node)
+                elif boot == 'next':
+                    bootnext.update(node)
                 elif boot == 'osdeploy':
                     osdeploy.update(node)
                 elif boot == 'diskless':
@@ -127,6 +130,8 @@ if passed_arguments.status is not None:
     # Display NodeSet per boot type
     if len(diskfull):
         print('Diskfull: {nodes}'.format(nodes=diskfull))
+    if len(bootnext):
+        print('Bootnext: {nodes}'.format(nodes=bootnext))
     if len(osdeploy):
         print('Next boot deployment: {nodes}'.format(nodes=osdeploy))
     if len(diskless):
@@ -137,7 +142,7 @@ if passed_arguments.status is not None:
 elif passed_arguments.boot is not None:
 
     # Ensure passed boot argument exists
-    if passed_arguments.boot is not None and 'osdeploy' not in passed_arguments.boot and 'diskless' not in passed_arguments.boot and 'clone' not in passed_arguments.boot and 'clonedeploy' not in passed_arguments.boot and 'disk' not in passed_arguments.boot:
+    if passed_arguments.boot is not None and 'osdeploy' not in passed_arguments.boot and 'diskless' not in passed_arguments.boot and 'clone' not in passed_arguments.boot and 'clonedeploy' not in passed_arguments.boot and 'disk' not in passed_arguments.boot and 'next' not in passed_arguments.boot:
         logging.error(bcolors.FAIL+'Passed argument "'+passed_arguments.boot+'" for boot not know. Please check syntax.'+bcolors.ENDC)
         quit()
 
@@ -178,7 +183,7 @@ elif passed_arguments.boot is not None:
                 '# Now chain to menu menu',
                 'echo | Now chaining to --> equipment_profiles/${equipment-profile}.ipxe',
                 'sleep 2',
-                'chain http://${next-server}/preboot_execution_environment/equipment_profiles/${equipment-profile}.ipxe || shell'))
+                'chain http://${next-server}/preboot_execution_environment/equipment_profiles/${equipment-profile}.ipxe'))
 
             with open('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe', 'w') as ff:
                 ff.write(generic_node_ipxe)

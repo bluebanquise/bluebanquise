@@ -127,6 +127,8 @@
     {% endif %}
     {% if current_hostvars['ep_ipxe_platform'] == 'efi' %}{# Finally, build file name depending of platform and previous parameters #}
       {% set ipxe_rom_filename = (ipxe_architecture + '/' + ipxe_embed + '_' + ipxe_driver + 'ipxe.efi') %}
+    {% elif current_hostvars['ep_ipxe_platform'] == 'none' %}{# Assume no platform #}
+      {% set ipxe_rom_filename=None %}
     {% else %}{# Assume everything else is pcbios #}
       {% set ipxe_rom_filename = (ipxe_architecture + '/' + ipxe_embed + '_undionly.kpxe') %}
     {% endif -%}
