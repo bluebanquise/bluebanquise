@@ -15,9 +15,13 @@
 
 ### Breaking changes
 
-## 1.4.0
+## 1.4.2
 
-### Major changes
+#### Backports
+
+  - advanced_dhcp_server: fix issue with added spaces linked to spaces in comments (#561)
+
+## 1.4.1
 
 #### Backports
 
@@ -26,7 +30,10 @@
   - Update initramfs in image_data and regenerate boot.ipxe when changing kernel (#571)
   - Notify in readme/page that firewall does not work in chroot (#575 (#569))
   - conman: add conman user the authorization to write into /var/run/conman (#551)
-  - advanced_dhcp_server: fix issue with added spaces linked to spaces in comments (#561)
+
+## 1.4.0
+
+### Major changes
 
 #### New roles
 
