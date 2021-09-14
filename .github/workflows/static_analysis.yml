@@ -25,6 +25,9 @@ jobs:
       - name: Install packages
         run: pip install ansible ansible-lint flake8
 
+      - name: Run ansible linter role/flexlm
+        run: cd roles/flexlm && ansible-lint -v -x 204
+
       - name: Check python code role/grafana
         run: cd roles/grafana && flake8 . --statistics --ignore E501,E226
 

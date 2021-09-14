@@ -1,0 +1,115 @@
+---
+# Load vars
+- name: flexlm █ Load specific OS vars
+  include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_distribution|lower }}-{{ ansible_distribution_release }}.yml"
+        - "{{ ansible_distribution|lower }}-{{ ansible_distribution_version }}.yml"
+        - "{{ ansible_distribution_release }}.yml"
+        - "{{ ansible_distribution|lower }}.yml"
+        - "{{ ansible_os_family|lower }}.yml"
+      skip: true
+  tags: always
+
+# Manage required system packages
+- name: flexlm █ Ensure required packages are in there desired state
+  package:
+    name: '{{ item }}'
+    state: '{{ "present" if (flexlm_deploy_state == "present") else "absent" }}'
+  with_flattened:
+    - '{{ flexlm_required_packages | to_nice_json }}'
+  register: flexlm_pkg_result
+  until: flexlm_pkg_result is success
+  tags:
+    - package
+
+# user
+- name: flexlm █ Create flexlm user
+  user:
+    name: '{{ flexlm_user_name }}'
+    createhome: False
+    system: True
+  tags:
+    - configure
+
+# Create a symlink for /tmp
+- name: flexlm █ Symlink /usr/tmp
+  file:
+    src: /tmp
+    dest: /usr/tmp
+    state: link
+  tags:
+    - configure
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+# Create a symlink for libs
+- name: flexlm █ Symlinks to /lib64/ld-linux-x86-64.so.2
+  file:
+    src: /lib64/ld-linux-x86-64.so.2
+    dest: '{{ item }}'
+    state: link
+  with_items:
+    - /lib64/ld-lsb-x86-64.so.2
+    - /lib64/ld-lsb-x86-64.so.3
+  tags:
+    - configure
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+# Vendor and licence
+- name: flexlm █ Add Vendor daemon
+  copy:
+    src: '{{ item.bin_src }}'
+    dest: '{{ item.bin_path | d("/opt/" + item.name + "/bin") }}'
+    owner: '{{ flexlm_user_name }}'
+    group: '{{ flexlm_user_name }}'
+    mode: 0754
+  with_flattened:
+    - '{{ flexlm_licences }}'
+  when: (item.bin_src|d())
+  notify: ['restart flexlm services']
+  tags:
+    - configure
+
+- name: flexlm █ Add licence file
+  copy:
+    src: '{{ item.lic_src }}'
+    dest: '{{ item.lic_path }}'
+    owner: '{{ flexlm_user_name }}'
+    group: '{{ flexlm_user_name }}'
+    mode: 0640
+  with_flattened:
+    - '{{ flexlm_licences }}'
+  when: 
+    - item.lic_src
+    - item.lic_path
+  notify: ['restart flexlm services']
+  tags:
+    - configure
+
+# Manage services
+
+- name: flexlm █ Add systemd unit
+  template:
+    src: '{{ flexlm_service_unit_content }}'
+    dest: '{{ "/etc/systemd/system/flexlm-" + item.name + ".service" }}'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+  with_flattened:
+    - '{{ flexlm_licences }}'
+  when: ( (flexlm_deploy_state == "present") and
+        ( item.service | d(True) ))
+  notify: ['systemd daemon reload', 'restart flexlm services']
+  tags:
+    - service
+
+- name: flexlm █ Manage flexlm services
+  service:
+    name: '{{ "flexlm-" + item.name }}'
+    state: '{{ "started" if (flexlm_deploy_state == "present" and (item.service | d(True) | bool)) else "stopped" }}'
+    enabled: '{{ item.service | d(True) | bool }}'
+  with_flattened:
+    - '{{ flexlm_licences }}'
+  tags:
+    - service

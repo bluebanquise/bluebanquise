@@ -1,0 +1,16 @@
+---
+# handlers file for flexlm
+- name: restart flexlm services
+  service:
+    name: '{{ "flexlm-" + item.name }}'
+    state: '{{ "restarted" if (flexlm_deploy_state == "present" and (item.service | d(True) | bool)) else "stopped" }}'
+    enabled: '{{ item.service | d(True) | bool }}'
+  with_flattened:
+    - '{{ flexlm_licences }}'
+  when:
+    - "'service' not in ansible_skip_tags"
+    - (start_services | bool)
+
+- name: systemd daemon reload
+  systemd:
+    daemon_reload: True

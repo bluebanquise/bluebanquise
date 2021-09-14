@@ -1,0 +1,16 @@
+---
+flexlm_required_packages: []
+flexlm_deploy_state: 'present'
+flexlm_user_name: 'flexlm'
+flexlm_service_manage: True
+flexlm_service_unit_content: 'etc/systemd/system/flexlm.service.j2'
+# Specify the properties of the flexlm licences you have
+# flexlm_licences:
+#   - name: matlab
+#     description: 'flexlm Licence Manager for Matlab'
+#     bin_path: '/opt/matlab/bin'
+#     bin_src: '{{ inventory_dir + "/../resources/service/matlab-lm/bin/" }}'
+#     lic_path: '/opt/matlab/etc/licence.lic'
+#     lic_src: '{{ inventory_dir + "/../resources/host/matlab-lm.domain/etc/licence.lic" }}'
+#     lmgrd_path: '/opt/matlab/bin/lmgrd'
+flexlm_licences: []

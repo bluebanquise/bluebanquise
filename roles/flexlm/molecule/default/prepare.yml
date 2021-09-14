@@ -1,0 +1,21 @@
+---
+- name: Prepare
+  hosts: all
+  gather_facts: yes
+
+  tasks:
+    - name: "Install firewalld and net-tools"
+      package:
+        name: "{{ item }}"
+      when: ansible_facts.os_family == "RedHat"
+      with_items:
+        - firewalld
+        - net-tools
+
+    - name: "Start firewalld"
+      service:
+        name: firewalld
+        state: started
+      when: 
+        - ansible_facts.os_family == "RedHat"
+        - ansible_facts.services['firewalld'] is defined    

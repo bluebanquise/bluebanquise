@@ -1,0 +1,29 @@
+---
+- name: Converge
+  hosts: all
+  any_errors_fatal: true
+  vars:
+    start_services: true
+    enable_services: true
+  tasks:
+    - name: "Enable firewall for EL8"
+      set_fact:
+        ep_firewall: true
+      when:
+        - ansible_facts.os_family == "RedHat"
+        - ansible_facts.distribution_major_version == "8"
+        - ansible_facts.services['firewalld'] is defined
+
+    ###
+    ### Cannot be tested automatically since Flexlm servers and licences have no way to be mocked!
+    ###
+    # - name: "Include flexlm"
+    #   include_role:
+    #     name: "flexlm"
+    #   vars:
+    #     flexlm_licences:
+    #       - name: intel
+    #         description: 'flexlm Licence Manager for Intel'
+    #         bin_path: '/opt/intel/bin'
+    #         lic_path: '/opt/intel/etc/licence.lic'
+    ###
