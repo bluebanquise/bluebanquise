@@ -58,4 +58,4 @@ podman_users:
 #
 # do manual creation of /etc/subuid and /etc/subguid
 # see vars/*.yml files for OS specific settings
-podman_manual_mapping: true
+podman_manual_mapping: false

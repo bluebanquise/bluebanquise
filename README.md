@@ -17,7 +17,7 @@ While the core stack aims to be multiple Linux distributions ready, each Communi
 | clone                 | Clone to image and restore HDD                           | @johnnykeats    | [link](roles/clone/)                |
 | display_tuning        | Provides screenrc configuration and iceberg shell colors | @oxedions       | [link](roles/display_tuning/)       |
 | drbd                  | Setup drbd disk replication on multiple nodes            | @oxedions       | [link](roles/drbd/)                 |
-| flexl                 | Configure flexlm                                         | @strus38        | [link](roles/flexlm/)               |
+| flexlm                | Configure flexlm                                         | @strus38        | [link](roles/flexlm/)               |
 | generic_psf           | Generic packages, services, folders and files            | @johnnykeats    | [link](roles/generic_psf/)          |
 | grafana               | Install Grafana                                          | @strus38        | [link](roles/grafana/)              |
 | lmod                  | Install and configure Lmod                               | @oxedions       | [link](roles/lmod/)                 |
