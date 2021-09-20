@@ -1,6 +1,11 @@
 ---
 grafana_provisioning_synced: false
 
+# RPM is configuring the following user: uid=990(grafana) gid=984(grafana) groups=984(grafana)
+grafana_user_gid: 984
+grafana_user_uid: 990
+grafana_user_home: /usr/share/grafana
+
 grafana_instance: "{{ ansible_fqdn | default(ansible_host) | default(inventory_hostname) }}"
 
 grafana_logs_dir: "/var/log/grafana"

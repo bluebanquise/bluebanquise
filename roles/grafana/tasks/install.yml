@@ -1,4 +1,19 @@
 ---
+- name: install █ Add grafana group
+  group:
+    name: grafana
+    gid: "{{ grafana_user_gid }}"
+    state: present
+
+- name: install █ Add grafana user
+  user:
+    name: grafana
+    shell: /bin/false
+    uid: "{{ grafana_user_uid }}"
+    group: grafana
+    home: "{{ grafana_user_home }}"
+    state: present
+
 - name: "install █ Add services to firewall's {{ grafana_firewall_zone | default('public') }} zone"
   firewalld:
     zone: "{{ grafana_firewall_zone | default('public') }}"
