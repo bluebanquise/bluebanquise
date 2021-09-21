@@ -1,0 +1,48 @@
+---
+- name: package █ Install httpd and haproxy
+  package:
+    name:
+      - httpd
+      - haproxy
+    state: present
+  tags:
+    - package
+
+- name: lineinfile █ Disable default listen on all interfaces
+  lineinfile:
+    path: /etc/httpd/conf/httpd.conf
+    regexp: '^Listen 80'
+    line: '#Listen 80'
+  notify: service █ Restart http server
+
+- name: template █ Set http server ips and ports to listen to
+  template:
+    src: listen.conf.j2
+    dest: /etc/httpd/conf.d/listen.conf
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - template
+  notify: service █ Restart http server
+
+- name: template █ Configure haproxy
+  template:
+    src: haproxy.cfg.j2
+    dest: /etc/haproxy/haproxy.cfg
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - template
+
+- name: meta █ Run handler tasks to restart services
+  meta: flush_handlers
+
+- name: service █ Manage httpd service
+  service:
+    name: httpd
+    enabled: yes
+    state: started
+  tags:
+    - service

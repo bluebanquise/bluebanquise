@@ -1,0 +1,1 @@
+haproxy_restrict_nodes_http_listen: false

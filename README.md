@@ -19,7 +19,8 @@ While the core stack aims to be multiple Linux distributions ready, each Communi
 | drbd                  | Setup drbd disk replication on multiple nodes            | @oxedions       | [link](roles/drbd/)                 |
 | flexlm                | Configure flexlm                                         | @strus38        | [link](roles/flexlm/)               |
 | generic_psf           | Generic packages, services, folders and files            | @johnnykeats    | [link](roles/generic_psf/)          |
-| grafana               | Install Grafana                                          | @strus38        | [link](roles/grafana/)              |
+| grafana               | Install Grafana                                          | @oxedions       | [link](roles/grafana/)              |
+| haproxy               | Install and configure a basic http haproxy               | @oxedions       | [link](roles/haproxy/)              |
 | lmod                  | Install and configure Lmod                               | @oxedions       | [link](roles/lmod/)                 |
 | nhc                   | Install and configure LBNL Node Health Check             | @oxedions       | [link](roles/nhc/)                  |
 | ofed                  | Install OFED OpenFabrics                                 | @oxedions       | [link](roles/ofed/)                 |
@@ -32,8 +33,3 @@ While the core stack aims to be multiple Linux distributions ready, each Communi
 | update_reboot         | Update all packages and reboot system                    | @oxedions       | [link](roles/update_reboot/)        |
 | users_basic           | Set / remove users                                       | @oxedions       | [link](roles/users_basic/)          |
 
-## List of external useful roles/tools
-
-| Role/tool name        | Description                                              | Owner               | Link                                                    |
-| --------------------- | -------------------------------------------------------- | ------------------- | ------------------------------------------------------- |
-| System hardening      | Improve system security (os, apache, ssh, etc.)          | https://dev-sec.io/ | https://github.com/dev-sec/ansible-collection-hardening |

@@ -9,6 +9,7 @@
   - drbd. Owner: @oxedions
   - generic_psf. Owner: @johnnykeats
   - grafana. Owner: @oxedions
+  - haproxy. Owner: @oxedions
   - lmod. Owner: @oxedions
   - nhc. Owner: @oxedions
   - ofed. Owner: @oxedions
