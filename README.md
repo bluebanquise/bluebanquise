@@ -27,6 +27,7 @@ While the core stack aims to be multiple Linux distributions ready, each Communi
 | openldap              | Install and configure OpenLDAP and SSSD (beta)           | @oxedions       | [link](roles/openldap/)             |
 | prometheus            | Install and configure Prometheus monitoring and alerting | @oxedions       | [link](roles/prometheus/)           |
 | podman                | Install and configure Podman container framework         | @strus38        | [link](roles/podman/)               |
+| rasdaemon             | Check system for hardware errors                         | @oxedions       | [link](roles/rasdaemon/)            |
 | report                | Check inventory and gather helpful data                  | @oxedions       | [link](roles/report/)               |
 | singularity           | Install and configure Singularity or SingularityPRO      | @strus38        | [link](roles/singularity/)          |
 | slurm                 | Install and configure Slurm Workload Manager             | @oxedions       | [link](roles/slurm/)                |

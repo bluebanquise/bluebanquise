@@ -15,11 +15,13 @@
   - ofed. Owner: @oxedions
   - openldap. Owner: @oxedions
   - prometheus. Owner: @oxedions
+  - rasdaemon. Owner: @oxedions
   - report. Owner: @oxedions
   - singularity. Owner: @strus38
   - slurm. Owner: @oxedions
   - update_reboot: Owner: @oxedions
   - users_basic. Owner: @oxedions
+
 
 ### Updated roles
 

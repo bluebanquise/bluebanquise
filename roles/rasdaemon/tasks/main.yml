@@ -1,0 +1,14 @@
+---
+- name: "package █ Install rasdaemon"
+  package:
+    name: rasdaemon
+    state: present
+  tags:
+    - package
+
+- name: "service █ Start rasdaemon service"
+  service:
+    name: rasdaemon
+    state: started
+  tags:
+    - service
