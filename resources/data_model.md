@@ -41,7 +41,7 @@ These variables are optional. Using them depend of Ansible roles used.
     network:                   # BMC logical network
 
   # Host NIC configuration
-  interfaces:              # Example
+  network_interfaces:          # Example
     - interface: eth1
       ip4: 10.10.3.1
       mac: 08:00:27:0d:44:90
