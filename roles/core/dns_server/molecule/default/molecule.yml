@@ -21,6 +21,7 @@ provisioner:
         j2_current_iceberg_network: ice1
         j2_node_main_network: ice1-1
         j2_node_main_network_interface: en0
+        j2_node_main_resolution_network: ice1-1
         j2_management_networks:
           - ice1-1
         network_interfaces:
