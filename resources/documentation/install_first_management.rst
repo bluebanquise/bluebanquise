@@ -1,8 +1,24 @@
-=================================
-[Core] - Install first management
-=================================
+==============================
+[Core] - Bootstrap base system
+==============================
 
-The first step is to bootstrap the first management of the cluster.
+
+
+
+This documentation will cover the configuration of a very simple cluster:
+
+.. image:: images/example_cluster_small.svg
+
+The documentation focus on main inventory parameters of the stack. However, more
+features are available in the stack. Read roles Readme to learn more about
+each role capabilities.
+
+
+
+
+
+
+The first step is to bootstrap the first management server of the cluster.
 
 This procedure mainly depend on the Linux distribution chosen. In the following
 section, bordered parts are dedicated to specific distributions or specific

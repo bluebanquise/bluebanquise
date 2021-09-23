@@ -213,7 +213,7 @@ Roles are the **AUTOMATION LOGIC**.
 Playbooks
 ^^^^^^^^^
 
-An Ansible playbook is simply a list of roles to apply, on a specific host or
+An Ansible playbook is simply a list of roles to apply on a specific host or
 group of hosts. It is a yaml file.
 
 In **BlueBanquise**, default path is /etc/bluebanquise/playbooks.
@@ -228,7 +228,7 @@ We are reaching the very important part of the stack.
 Ansible has an internal mechanism called **Variables precedence**.
 Simply put: you can define the same variables (same name) multiple times, and
 using this mechanism, some definitions will have priority above others,
-depending of the situation.
+depending of their position.
 
 When a variable is defined in a yml file, the position of the file in the
 ansible inventory is key.
@@ -236,7 +236,7 @@ ansible inventory is key.
 For example, a variable defined in /etc/bluebanquise/inventory/group_vars/all/
 will have the less precedence, and a variable defined in
 /etc/bluebanquise/inventory/cluster will have a higher precedence, and so win if
-loaded.
+variable is used.
 
 The full list of available variables precedence is provided in Ansible
 documentation:
@@ -249,7 +249,8 @@ values if desired.
 For example, values can be set by default, and then redefined for some groups of
 hosts without changing the default for all others.
 Or it can be used to simply fix a dynamic j2 variable to the desired value in
-hosts definitions if dynamic value is not the one expected. Etc.
+hosts definitions if dynamic value is not the one expected (you can even
+redefine the whole logic of the stack without editing the stack code). Etc.
 
 Inventory can be seen as a giant pizza, in 3D then flatten.
 
@@ -352,5 +353,10 @@ These are key groups of the stack.
 
 -------------
 
-You can now follow the next part, learn Ansible, or if you already know
-Ansible, you can skip this part and jump directly to the BlueBanquise part.
+You can now follow the next part, depending of your needs:
+
+* learn basic system administration on how to deploy bare metal servers
+* learn Ansible
+
+Or if you already know basic system administration and Ansible, you can skip
+these tutorials and jump directly to the BlueBanquise part.

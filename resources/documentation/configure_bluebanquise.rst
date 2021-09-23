@@ -3,7 +3,9 @@
 ===============================
 
 At this point, you should have an operating system with Ansible installed on it,
-and basic OS repositories. You also have installed BlueBanquise package.
+and basic OS repositories. You also have installed BlueBanquise package and its
+dependencies, and your main NIC (Network Interface Controller) is configured and
+activated (up).
 
 Enable BlueBanquise and ssh
 ===========================
@@ -24,12 +26,13 @@ To do so, set ANSIBLE_CONFIG:
   allows to use both default Ansible and BlueBanquise together.
 
 Edit /etc/hosts file, and add "management1" (or whatever your current
-management node hostname) on localhost line:
+management node hostname) with its target ip (the one set on the main NIC):
 
 .. code-block:: text
 
-  127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4 management1
+  127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
   ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+  10.10.0.1   management1
 
 This will allow us to bootstrap the management configuration.
 
@@ -40,8 +43,9 @@ passphrase (leave empty when asked and press enter):
 
   ssh-keygen -t ed25519
 
-Then spread this key on the current host so that management1 can ssh on itlsef
-passwordless:
+Then spread this key on the current host so that management1 can ssh on itself
+passwordless (you will be asked current root password to establish ssh
+connection):
 
 .. code-block:: text
 
@@ -58,22 +62,16 @@ It is time to configure the inventory to match cluster needs.
 Configure inventory
 ===================
 
-This documentation will cover the configuration of a very simple cluster:
-
-.. image:: images/example_cluster_small.svg
-
-More features are available in the stack. Read roles Readme to learn more about
-each roles capabilities.
-
 Check example inventory
 -----------------------
 
 An inventory example is provided in
 /etc/bluebanquise/resources/examples/simple_cluster/ as a base for our work.
 
-This example is based on the picture provided just above.
+This example match the cluster exposed before:
+>>>>>>>>>>>>>>>>>>>>>>>
 
-Lets copy it to use it as our new inventory:
+Copy it to use it as your new inventory starting point:
 
 .. code-block:: bash
 
@@ -87,15 +85,14 @@ Lets copy it to use it as our new inventory:
 Review nodes
 ------------
 
-Time to review the provided example configuration, and adapt it to your
-configuration.
-
-First, the nodes.
+First step is to review the provided example configuration, and adapt it to your
+configuration. The following part assume all path are relative to
+/etc/bluebanquise/inventory/ folder.
 
 Management node
 ^^^^^^^^^^^^^^^
 
-Open file cluster/nodes/managements.yml:
+Open file cluster/nodes/managements.yml, and visualize content:
 
 .. code-block:: yaml
 
@@ -172,8 +169,8 @@ Then the network interfaces and their associated networks:
 It should not be too difficult to understand this file.
 
 .. note:
-  More network features are available, see the nic_nmcli readme file for more
-  information.
+  More network features and configurations are available, see the nic_nmcli role
+  readme file for more information.
 
 Other nodes
 ^^^^^^^^^^^
@@ -225,11 +222,12 @@ convention, which by default is: **iceX-Y** with X the iceberg number, and Y the
 subnet number in this iceberg X. In our case, we are working on iceberg1
 (default when disabling icebergs mechanism), and we only have one subnet, so our
 administration network will be ice1-1. If we would need another subnet, its name
-would have been ice1-2, etc. Interconnect-1 is not an administration network.
+would have been ice1-2, etc. Interconnect-1 is not an administration network as
+it is not using **iceX-Y** pattern.
 
 .. note::
   In new versions of the stack, it is now possible to replace the number Y by a
-  string compatible with [0-9][a-z][A-Z] regex.
+  string compatible with [0-9][a-z][A-Z] regex. For example ice1-prod.
 
 Open file group_vars/all/general_settings/network.yml and let's check part of
 its content:
@@ -242,7 +240,7 @@ its content:
       prefix: 16                                        # Network prefix
       netmask: 255.255.0.0                              # Network netmask, must comply with prefix
       broadcast: 10.10.255.255                          # Broadcast, deduced from subnet and prefix/netmask
-      dhcp_unknown_range: 10.10.254.1 10.10.254.254     # This is the range of ip where unknown nodes (i.e. not in the inventory) will be placed if asking for an ip
+      dhcp_unknown_range: 10.10.254.1 10.10.254.254     # Optional, this is the range of ip where unknown nodes (i.e. not in the inventory) will be placed if asking for an ip
       gateway: 10.10.0.1                                # Optional, define a gateway
       is_in_dhcp: true                                  # If you want this network to be in the dhcp (only apply to management networks)
       is_in_dns: true                                   # If you want this network to be in the dns
@@ -250,7 +248,6 @@ its content:
         pxe_ip: 10.10.0.1
         dns_ip: 10.10.0.1
         repository_ip: 10.10.0.1
-        authentication_ip: 10.10.0.1
         time_ip: 10.10.0.1
         log_ip: 10.10.0.1
 
@@ -260,10 +257,10 @@ One note about *services_ip*: it is used if services are spread over multiple
 managements, or in case of High Availability with virtual IPs. Ansible is not
 able to gather this information alone from playbooks (it could, but this would
 end up with a way too much complex stack), and so we have to provide it manually.
-You can also set here an IP address from another subnet if your system has network
-routing.
+You can also set here an IP address from another subnet if your system has
+network routing.
 
-Then check content the second network, interconnect-1 in file
+Now check content of the second network, interconnect-1 in file
 group_vars/all/general_settings/network.yml . As this is **not** an
 administration network, its configuration is easy.
 
@@ -304,6 +301,10 @@ they will bind to repository_ip in ice1-1.yml .
 See the repositories_client role part of the documentation for advanced
 configurations.
 
+Note also that if you wish to define different repositories per equipment, you
+can easily use variable precedence mechanism seen in the Ansible tutorial to
+define repositories variable in each equipment group.
+
 NFS
 ^^^
 
@@ -316,23 +317,23 @@ General
 
 File group_vars/all/general_settings/general.yml configure few main parameters:
 
-* Time zone (very important)
+* Time zone (very important, should match the one of your current management server)
 
-Do not bother about the other parameters.
+Do not bother right now about the other parameters.
 
-And that is all for general configuration. Finally, let’s check the default
-parameters.
+And that is all for general configuration. Finally, let’s check the equipment
+default parameters.
 
-Review Default parameters
--------------------------
+Review equipment default parameters
+-----------------------------------
 
-Last part, and probably the most complicated, are default parameters.
+Last part, and probably the most complicated, are equipment default parameters.
 
 Remember Ansible precedence mechanism. All variables in group_vars/all/ have
 less priority, while variables in group_vars/* have a higher priority.
 
 The idea here is the following: group_vars/all/equipment_all/ folder contains
-all the default parameters for all nodes. Here authentication, and
+equipment default parameters for all nodes. Here authentication, and
 equipment_profile. You have to tune these parameters to match your exact
 "global" need, and then copy (if needed) part of these files into dedicated
 group_vars folder for each equipment group, and tune them according to these
@@ -360,7 +361,8 @@ in equipment_typeC group. Let's check c001:
     ep_access_control: enforcing
   [root@]#
 
-Not good, we want to disable access_control on computes. We need to change that.
+Lets say this is not good, and we want to disable access_control on computes.
+We need to change that.
 
 Open file group_vars/equipment_typeC/equipment_profile.yml and set
 access_control to disabled.
@@ -417,10 +419,13 @@ PXE
    * Possible values:
       * standard
       * dhcpretry
+      * noshell
    * Notes:
      standard is ok for most cases. dhcpretry is to be used on networks where
      link on switch may take some time to go up. In dhcpretry mode, the iPXE rom
      will indefinitely try to get an ip from the dhcp.
+     noshell is similar to standard, but without shell in case of issues. This
+     allows "exit" EFI boot, for specific devices (like Nvidia DGX).
 
 * **ep_preserve_efi_first_boot_device**
    * Possible values:
@@ -539,7 +544,7 @@ To generate an sha512 password, use the following command (python >3.3):
 
 We need to ensure our management1 node ssh public key is set here.
 
-Get the content of /root/.ssh/id_rsa.pub and add it in this file. At the same
+Get the content of /root/.ssh/id_ed25519.pub and add it in this file. At the same
 time, **remove the ssh key provided here as example**.
 
 It is possible to do it automatically using the following command:
@@ -547,7 +552,7 @@ It is possible to do it automatically using the following command:
 .. code-block:: text
 
   # Copy public key of the mgmt to the inventory
-  /usr/bin/sed -i -e "s#- ssh-rsa.*#- $(cat /root/.ssh/id_rsa.pub)#" \
+  /usr/bin/sed -i -e "s#- ssh-rsa.*#- $(cat /root/.ssh/id_ed25519.pub)#" \
     /etc/bluebanquise/inventory/group_vars/all/equipment_all/authentication.yml
 
 .. warning::

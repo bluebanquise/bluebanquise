@@ -1,27 +1,34 @@
 BlueBanquise Documentation
 ==========================
 
-Welcome on BlueBanquise documentation.
+.. image:: images/BlueBanquise_logo.svg
+   :align: center
 
-This documentation provides information on:
+Welcome on BlueBanquise main documentation.
 
-* How to use Ansible (generic, not related to the stack)
+These pages contain information on:
+
+* How to use Ansible (generic knowledge, not related to the stack)
 * How to deploy, configure, and maintain BlueBanquise on different scenario clusters
 * Detailed documentation on each roles provided with the stack
 
 `Please report us <https://github.com/bluebanquise/bluebanquise/issues>`_ any
 issues in this documentation.
 
-Documentation authors:
+Please proceed to :ref:`Introduction` to start.
 
-* LEVEUGLE Benoît
-* KEATS Johnny
-* TRAVOUILLON Bruno
-* GELLNER Tim
-* RIBEIRO Adrien
-* MERZOUKI Hamid
-* PEROTIN Matthieu
-* PIETERS David
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+A FAIRE:
+ipv6
+HA + Haproxy
+slurm
+sys admin tuto
+advanced nic_nmcli examples
+git gitea
+
+
+------------
 
 .. toctree::
    :maxdepth: 3
@@ -48,3 +55,16 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+------------
+
+Documentation authors:
+
+* LEVEUGLE Benoît
+* KEATS Johnny
+* TRAVOUILLON Bruno
+* GELLNER Tim
+* RIBEIRO Adrien
+* MERZOUKI Hamid
+* PEROTIN Matthieu
+* PIETERS David

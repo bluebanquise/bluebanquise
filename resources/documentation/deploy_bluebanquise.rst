@@ -9,14 +9,14 @@ First step is to deploy configuration on management1 node, and then deploy OS on
 the other systems. Last step will be to deploy configuration on the other
 systems.
 
-Management configuration
-========================
+Management deployment
+=====================
 
 Get managements playbook
 ------------------------
 
 We are going to use the provided default playbook. This playbook will install
-most of the **core** roles. Enough to deploy first stage of the cluster.
+most of the **CORE** roles. Enough to deploy first stage of the cluster.
 
 Copy example playbook managements to /etc/bluebanquise/playbooks/:
 
@@ -77,29 +77,42 @@ We first ensure our NIC are up, so the repositories part is working.
 
 Then start your main interface manually. Here enp0s3:
 
-.. code-block:: bash
+.. raw:: html
+
+  <div style="border: 1px solid; margin: 0px 0px 0px 20px; padding: 6px;">
+  Major version: <b>7</b><br><br>
+
+.. code-block:: text
 
   ifup enp0s3
 
-Or on RHEL/CentOS 8:
+.. raw:: html
 
-.. code-block:: bash
+  </div><br>
+  <div style="border: 1px solid; margin: 0px 0px 0px 20px; padding: 6px;">
+  Major version: <b>8</b><br><br>
+
+.. code-block:: text
 
   nmcli con up enp0s3
 
-Once interface is up (check using *ip a* command), setup the BlueBanquise
-controller:
+.. raw:: html
 
-.. code-block:: bash
+  </div><br>
 
-  ansible-playbook /etc/bluebanquise/playbooks/managements.yml --limit management1 --tags bluebanquise
+Once interface is up (check using *ip a* command), execute the bluebanquise role
+and the repositories_server role:
+
+.. code-block:: text
+
+  ansible-playbook /etc/bluebanquise/playbooks/managements.yml --limit management1 --tags bluebanquise,repositories_server
 
 This will install the requirements to run BlueBanquise (mostly python filters
-for Ansible).
+for Ansible), and ensure the web server of local repositories is running.
 
 Then play the whole playbook:
 
-.. code-block:: bash
+.. code-block:: text
 
   ansible-playbook /etc/bluebanquise/playbooks/managements.yml --limit management1
 
@@ -120,8 +133,8 @@ expected state.
 
 Now that management1 is up and running, it is time to deploy the other nodes.
 
-PXE
-===
+Deploy OS on other nodes: PXE
+=============================
 
 Next step is to deploy the other nodes using PXE process.
 
@@ -175,7 +188,7 @@ Before booting remote nodes in PXE, we need to ask management1 to activate
 remote nodes deployment. If not, remote nodes will not be able to grab their
 dedicated configuration from management node at boot.
 
-To manipulate nodes PXE boot, a command, *bootset*, is available.
+To manipulate nodes PXE boot, a command, **bootset**, is available.
 
 We are going to deploy login1 and c001, c002, c003 and c004.
 
@@ -226,7 +239,7 @@ OS deployment
 -------------
 
 Power on now the remote nodes, have them boot over LAN, and follow the
-installation procedure. It should take around 15-20 minutes depending on your
+installation procedure. It should take around 5-20 minutes depending on your
 hardware.
 
 Once done, proceed to next part.
@@ -234,7 +247,8 @@ Once done, proceed to next part.
 Apply other nodes configuration
 ===============================
 
-Applying configuration on other nodes is simple.
+Now that all the nodes have an operating system installed and running, applying
+configuration on these nodes is simple.
 
 Ensure first you can ssh passwordless on each of the freshly deployed nodes. If
 yes, copy example playbooks:
@@ -266,8 +280,8 @@ and/or specialize it.
 instructions on how to use them), or continue this documentation to:
 
 * BlueBanquise generic cluster
-    * (Optional) Deploy diskless nodes
-    * (Optional) Deploy a multi icebergs cluster
+    * Deploy a multi icebergs cluster
+    * Deploy diskless nodes
 * BlueBanquise specialized cluster
     * Deploy Prometheus (Monitoring your cluster)
     * Deploy Slurm (Specialize your cluster for High Performance Computing)
