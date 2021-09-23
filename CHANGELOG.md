@@ -10,6 +10,7 @@
   - generic_psf. Owner: @johnnykeats
   - grafana. Owner: @oxedions
   - haproxy. Owner: @oxedions
+  - high_availability. Owner: @oxedions
   - lmod. Owner: @oxedions
   - nhc. Owner: @oxedions
   - ofed. Owner: @oxedions

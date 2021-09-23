@@ -1,0 +1,209 @@
+---
+- name: package █ Install packages
+  package:
+    name: "{{item}}"
+    state: present
+  tags:
+    - package
+  loop:
+    - pacemaker
+    - corosync
+    - pcs
+    - fence-agents-all
+
+- name: group █ Create cluster system group
+  group:
+    name: haclient
+    state: present
+
+- name: user █ Create cluster system user
+  user:
+    name: hacluster
+    state: present
+    password: "{{ high_availability_ha_cluster_password }}"
+    groups: haclient
+    comment: 'HA Cluster Administrator'
+
+- name: service █ Enable and start PCSD service
+  service:
+    name: pcsd
+    enabled: true
+    state: started
+
+- name: command █ Check nodes already registered
+  command: "cat /var/lib/pcsd/known-hosts"
+  register: pcs_known_hosts
+  changed_when: False
+  ignore_errors: yes
+
+- name: Create cluster
+  run_once: true
+  delegate_to: "{{ high_availability_reference_node }}"
+  block:
+
+    - name: command █ Register nodes
+      command: "pcs host auth {{ item.name }} -u hacluster -p root"
+      loop: "{{ high_availability_cluster_nodes }}"
+      when: ( pcs_known_hosts.stdout_lines | select("match", ".*"+item.name+".*") | list | length ) < 1
+
+    - name: command █ Check cluster exist
+      command: "cat /etc/corosync/corosync.conf"
+      register: corosync_known_hosts
+      changed_when: False
+      ignore_errors: yes
+
+    - name: command █ Register reference node
+      command: "pcs cluster setup ha_cluster {{ item.name }} {% for addr in item.addrs %}addr={{ addr }} {% endfor %}"
+      loop: "{{ high_availability_cluster_nodes }}"
+      when:
+        - ( corosync_known_hosts.stdout_lines | select("match", ".*"+high_availability_reference_node+".*") | list | length ) < 1
+        - item.name == "{{ high_availability_reference_node }}"
+
+    - name: command █ Check nodes already in corosync
+      command: "cat /etc/corosync/corosync.conf"
+      register: corosync_known_hosts
+      changed_when: False
+      ignore_errors: yes
+
+    - name: command █ Register other nodes
+      command: "pcs cluster node add {{ item.name }} {% for addr in item.addrs %}addr={{ addr }} {% endfor %} --force"
+      loop: "{{ high_availability_cluster_nodes }}"
+      when:
+        - ( corosync_known_hosts.stdout_lines | select("match", ".*name:\\s"+item.name+".*") | list | length ) < 1
+        - item.name != "{{ high_availability_reference_node }}"
+
+- name: service █ Enable and start cluster
+  service:
+    name: "{{ item }}"
+    enabled: true
+    state: started
+  loop:
+    - corosync
+    - pacemaker
+
+- name: firewalld █ "Add services to firewall's {{ ha_firewall_zone | default('public') }} zone"
+  firewalld:
+    zone: "{{ ha_firewall_zone | default('public') }}"
+    service: high-availability
+    immediate: "yes"
+    permanent: "yes"
+    state: enabled
+  when: ep_firewall | default(false) | bool
+  tags:
+    - firewall
+
+- name: Configure cluster
+  run_once: true
+  delegate_to: "{{ high_availability_reference_node }}"
+  block:
+
+    - name: command █ Check cluster properties
+      command: "pcs property"
+      register: pcs_property
+      changed_when: False
+      ignore_errors: yes
+
+    - name: command █ Set properties
+      command: "pcs property set {{ item.name }}={{ item.value }}"
+      loop: "{{ high_availability_pcs_property | default([]) }}"
+      when:
+        - ( pcs_property.stdout_lines | select("match", ".*"+item.name+":\\s"+(item.value|string)+".*" ) | list | length) < 1
+
+    - name: command █ Check cluster resource op defaults
+      command: "pcs resource op defaults"
+      register: pcs_resource_op_defaults
+      changed_when: False
+      ignore_errors: yes
+
+    - name: command █ Set cluster resource op defaults
+      command: "pcs resource op defaults update {{ item.name }}={{ item.value }}"
+      loop: "{{ high_availability_pcs_resource_op_defaults | default([]) }}"
+      when:
+        - ( pcs_resource_op_defaults.stdout_lines | select("match", ".*"+item.name+"="+(item.value|string)+".*") | list | length ) < 1
+
+    - name: command █ Check cluster resource defaults
+      command: "pcs resource defaults"
+      register: pcs_resource_defaults
+      changed_when: False
+      ignore_errors: yes
+
+    - name: command █ Set cluster resource defaults
+      command: "pcs resource defaults update {{ item.name }}={{ item.value }}"
+      loop: "{{ high_availability_pcs_resource_defaults | default([]) }}"
+      when:
+        - ( pcs_resource_defaults.stdout_lines | select("match", ".*"+item.name+"="+(item.value|string)+".*") | list | length ) < 1
+
+    - name: command █ Store current configuration into cib file
+      command: "pcs cluster cib {{ high_availability_cib_file_path }}"
+      changed_when: false
+
+    - name: command █ Add resources to cluster
+      command: "pcs -f {{ high_availability_cib_file_path }} resource create {{ item.1.id }} {{ item.1.type }} {{ ('arguments' in item.1) | ternary(item.1.arguments, '') }} {{ (item.0.group) | ternary('--group ' + item.0.group, '') }}"
+      register: cmd
+      changed_when: cmd.rc == 0
+      failed_when:
+        - cmd.rc != 0
+        - "'already exists' not in cmd.stderr"
+      loop: "{{ high_availability_resources | subelements('resources') }}"
+      loop_control:
+        label: "resource : {{ item.1.id }}"
+      notify: command █ Push HA configuration
+
+    - name: command █ Set colocation constraints
+      command: "pcs -f {{ high_availability_cib_file_path }} constraint colocation add {{ ('master' in item.1) | ternary(item.1.master, item.0.group) }} with {{ ('slave' in item.1) | ternary(item.1.slave, item.0.group) }} {{ ('score' in item.1) | ternary('score=' + item.1.score, '') }}"
+      register: cmd
+      changed_when: cmd.rc == 0
+      failed_when:
+        - cmd.rc != 0
+        - "'already exists' not in cmd.stderr"
+      loop: "{{ lookup('subelements', high_availability_resources, 'colocations', {'skip_missing': True}, wantlist=True) }}"
+      loop_control:
+        label: "colocation : {{ item.0.group }} with {{ item.1.slave }}"
+      notify: command █ Push HA configuration
+
+    - name: command █ Set location constraints
+      command: "pcs -f {{ high_availability_cib_file_path }} constraint location {{ item.0.group }} {{ item.1.type }} {{ item.1.nodes | join(' ') }}"
+      register: cmd
+      changed_when: cmd.rc == 0
+      failed_when:
+        - cmd.rc != 0
+        - "'already exists' not in cmd.stderr"
+      loop: "{{ lookup('subelements', high_availability_resources, 'locations', {'skip_missing': True}, wantlist=True) }}"
+      loop_control:
+        label: "location : {{ item.0.group }} {{ item.1.type }} {{ item.1.nodes | join(' ') }}"
+      notify: command █ Push HA configuration
+
+    - name: command █ Create stonith
+      command: "pcs -f {{ high_availability_cib_file_path }} stonith create {{ item.name }} {{ item.type }} pcmk_host_check={{ item.pcmk_host_check }} {% if item.pcmk_host_check == 'static-list' %}pcmk_host_list={{item.pcmk_host_list}}{% endif %} pcmk_reboot_action={{ item.pcmk_reboot_action }} {{ item.parameters }}"
+      register: cmd
+      changed_when: cmd.rc == 0
+      loop: "{{ high_availability_stonith }}"
+      failed_when:
+        - cmd.rc != 0
+        - "'already exists' not in cmd.stderr"
+      when: high_availability_stonith is defined and high_availability_stonith
+      notify: command █ Push HA configuration
+
+    - name: command █ Set stonith prefers constraint
+      command: "pcs -f {{ high_availability_cib_file_path }} constraint location {{ item.name }} prefers {{ item.prefers }}"
+      loop: "{{ high_availability_stonith }}"
+      register: cmd
+      changed_when: cmd.rc == 0
+      failed_when:
+        - cmd.rc != 0
+        - "'already exists' not in cmd.stderr"
+      when: high_availability_stonith is defined and high_availability_stonith
+      notify: command █ Push HA configuration
+
+    - name: command █ Set stonith avoids constraint
+      command: "pcs -f {{ high_availability_cib_file_path }} constraint location {{ item.name }} avoids {{ item.avoids }}"
+      register: cmd
+      changed_when: cmd.rc == 0
+      failed_when:
+        - cmd.rc != 0
+        - "'already exists' not in cmd.stderr"
+      loop: "{{ high_availability_stonith }}"
+      when: high_availability_stonith is defined and high_availability_stonith
+      notify: command █ Push HA configuration
+
+- meta: flush_handlers

@@ -21,6 +21,7 @@ While the core stack aims to be multiple Linux distributions ready, each Communi
 | generic_psf           | Generic packages, services, folders and files            | @johnnykeats    | [link](roles/generic_psf/)          |
 | grafana               | Install Grafana                                          | @oxedions       | [link](roles/grafana/)              |
 | haproxy               | Install and configure a basic http haproxy               | @oxedions       | [link](roles/haproxy/)              |
+| high_availability     | Setup a corosync-pacemaker based HA cluster              | @oxedions       | [link](roles/high_availability/)    |
 | lmod                  | Install and configure Lmod                               | @oxedions       | [link](roles/lmod/)                 |
 | nhc                   | Install and configure LBNL Node Health Check             | @oxedions       | [link](roles/nhc/)                  |
 | ofed                  | Install OFED OpenFabrics                                 | @oxedions       | [link](roles/ofed/)                 |
