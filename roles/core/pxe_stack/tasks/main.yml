@@ -309,7 +309,7 @@
     owner: root
     group: root
     mode: 0600
-    remote_src : yes
+    remote_src: yes
   with_items: "{{ j2_equipment_groups_list }}"
   when:
     - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
@@ -333,8 +333,8 @@
     path: "/dev/shm/tmp_curtin_{{ item }}.yaml"
     regexp: '^kernel:$'
     line: |
-      keyboard: {layout: {{hostvars[groups[item][0]]['ep_configuration']['keyboard_layout']|lower}}, toggle: null, variant: ''}
-      locale: {{hostvars[groups[item][0]]['ep_configuration']['system_language']}}
+      keyboard: {layout: {{ hostvars[groups[item][0]]['ep_configuration']['keyboard_layout']|lower }}, toggle: null, variant: ''}
+      locale: {{ hostvars[groups[item][0]]['ep_configuration']['system_language'] }}
       user-data:
         disable_root: false
 
@@ -385,7 +385,7 @@
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_user }}"
-    remote_src : yes
+    remote_src: yes
   with_items: "{{ j2_equipment_groups_list }}"
   when:
     - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
