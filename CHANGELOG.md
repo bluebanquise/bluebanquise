@@ -13,6 +13,7 @@
   - high_availability. Owner: @oxedions
   - lmod. Owner: @oxedions
   - nhc. Owner: @oxedions
+  - nvidia. Owner: @oxedions
   - ofed. Owner: @oxedions
   - openldap. Owner: @oxedions
   - prometheus. Owner: @oxedions
