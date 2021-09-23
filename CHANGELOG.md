@@ -14,6 +14,7 @@
 
 #### Roles improvement or fix
 
+  - pxe_stack: force substitution of files by symlinks in case of an update (#587)
   - core/log_server
     - remote logs stored in a similar fashion as the server (#568)
   - all: add compatibility with multiple RHEL like distributions (#560)
