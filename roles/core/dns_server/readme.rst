@@ -101,5 +101,6 @@ Files generated:
 Changelog
 ^^^^^^^^^
 
+* 1.0.2: Improve role performances. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.1: Added SOA. Bruno Travouillon <devel@travouillon.fr>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
