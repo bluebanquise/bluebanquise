@@ -1,3 +1,47 @@
 ---
 - name: reload firewalld
   command: firewall-cmd --reload
+
+- name: service █ Restart prometheus service
+  service:
+    name: prometheus
+    state: restarted
+  when:
+    - "'service' not in ansible_skip_tags"
+    - (start_services | bool)
+
+- name: service █ Restart alertmanager service
+  service:
+    name: alertmanager
+    state: restarted
+  when:
+    - "'service' not in ansible_skip_tags"
+    - (start_services | bool)
+
+- name: service █ Restart karma service
+  service:
+    name: karma
+    state: restarted
+  when:
+    - "'service' not in ansible_skip_tags"
+    - (start_services | bool)
+
+- name: service █ Restart ipmi_exporter service
+  service:
+    name: ipmi_exporter
+    state: restarted
+  when:
+    - "'service' not in ansible_skip_tags"
+    - (start_services | bool)
+
+- name: service █ Restart snmp_exporter service
+  service:
+    name: snmp_exporter
+    state: restarted
+  when:
+    - "'service' not in ansible_skip_tags"
+    - (start_services | bool)
+
+- name: systemd █ Reload systemd configuration
+  systemd:
+    daemon_reload: yes

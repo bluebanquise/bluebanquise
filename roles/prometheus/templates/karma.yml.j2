@@ -1,15 +1,15 @@
 authentication:
   basicAuth:
     users:
-      - username: {{ prometheus_karma_username }}
-        password: {{ prometheus_karma_password }}
+      - username: {{ prometheus_server_karma_username }}
+        password: {{ prometheus_server_karma_password }}
 
 alertmanager:
   interval: 10s
   servers:
     - cluster: prometheus
-      name: {{ prometheus_karma_alertmanager_server_name }}
-      uri: "http://localhost:9093"
+      name: {{ prometheus_server_alertmanager_host }}
+      uri: "http://{{ prometheus_server_alertmanager_host }}:9093"
       timeout: 10s
       proxy: false
 
@@ -19,7 +19,7 @@ filters:
     - "@cluster=prometheus"
 
 karma:
-  name: {{ prometheus_karma_name }}
+  name: Karma dashboard
 
 grid:
   sorting:

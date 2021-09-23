@@ -1,26 +1,30 @@
+#jinja2: lstrip_blocks: "True"
 #### Blue Banquise file ####
 ## {{ansible_managed}}
 
-global:
-  smtp_smarthost: 'localhost:25'
-  smtp_from: 'alertmanager@your_domain'
-  smtp_require_tls: false
-
-route:
-  group_by: ['alertname', 'job']
-  group_wait: {{prometheus.alertmanager.group_wait}}
-  group_interval: {{prometheus.alertmanager.group_interval}}
-  repeat_interval: {{prometheus.alertmanager.repeat_interval}}
-  receiver: sys-admin-team
-
-receivers:
-  - name: 'sys-admin-team'
-    email_configs:
-      - to: 'sys-admin-team@site.com'
-
-inhibit_rules:
-- source_match:
-    severity: 'critical'
-  target_match:
-    severity: 'warning'
-  equal: ['alertname', 'cluster', 'service']
+{% macro yamlexpand(dict,ident,waslist) %}
+  {% for key, value in dict.items() %}
+    {% if value is mapping %}{# This is a dict, go deeper #}
+{% for space in range(ident) %} {% endfor %}{% if waslist and loop.first %}- {% else %}  {% endif %}{{key}}:
+{{yamlexpand(value,ident+2,false)}}
+    {% else %}
+      {% if value is iterable %}{# This is a list #}
+        {% if value is string %}
+{% for space in range(ident) %} {% endfor %}{% if waslist and loop.first %}- {% else %}  {% endif %}{{key}}: {{ value }}
+        {% else %}
+{% for space in range(ident) %} {% endfor %}{% if waslist and loop.first %}- {% else %}  {% endif %}{{key}}:
+          {% for item in value %}
+            {% if item is mapping %}{# This is a dict, go deeper #}
+{{yamlexpand(item,ident+4,true)}}
+            {% else %}
+{% for space in range(ident) %} {% endfor %}    - {{item}}
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      {% else %}
+{% for space in range(ident) %} {% endfor %}{% if waslist and loop.first %}- {% else %}  {% endif %}{{ key }}: {{ value }}
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+{% endmacro %}
+{{ yamlexpand(prometheus_server_alertmanager_raw_configuration,0,false) }}

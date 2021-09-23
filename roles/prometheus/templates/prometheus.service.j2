@@ -1,0 +1,14 @@
+[Unit]
+  Description=Prometheus Monitoring
+  Wants=network-online.target
+  After=network-online.target
+
+[Service]
+  User=prometheus
+  Group=prometheus
+  Type=simple
+  ExecStart=/usr/local/bin/prometheus \
+  {{ prometheus_server_launch_parameters | indent(2, True) }}
+
+[Install]
+  WantedBy=multi-user.target

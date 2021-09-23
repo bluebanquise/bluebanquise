@@ -1,19 +1,90 @@
 ---
-monitoring:
-  exporters:
+prometheus_client: false
+prometheus_server: false
 
-prometheus:
+prometheus_server_manage_prometheus: true
+prometheus_server_manage_alertmanager: true
+prometheus_server_manage_karma: true
+prometheus_server_manage_am_executor: false
+prometheus_server_manage_ipmi_exporter: false
+prometheus_server_manage_snmp_exporter: false
+
+prometheus_server_prometheus_host: localhost
+prometheus_server_alertmanager_host: localhost
+prometheus_server_karma_host: localhost
+prometheus_server_am_executor_host: localhost
+prometheus_server_ipmi_exporter_host: localhost
+prometheus_server_snmp_exporter_host: localhost
+
+prometheus_server_prometheus_user_gid: 909
+prometheus_server_prometheus_user_uid: 909
+
+prometheus_server_launch_parameters: |
+  --config.file /etc/prometheus/prometheus.yml \
+  --storage.tsdb.path /var/lib/prometheus/ \
+  --web.console.templates=/etc/prometheus/consoles \
+  --web.console.libraries=/etc/prometheus/console_libraries $PROMETHEUS_OPTIONS
+
+alertmanager_launch_parameters: |
+  --config.file=/etc/alertmanager/alertmanager.yml
+
+karma_launch_parameters: |
+  --config.file=/etc/karma/karma.yml
+
+ipmi_exporter_launch_parameters: |
+  --config.file=/etc/ipmi_exporter/ipmi_config.yml
+
+snmp_exporter_launch_parameters: |
+  --config.file=/etc/snmp_exporter/snmp.yml
+
+prometheus_server_configuration_global:
   scrape_interval: 1m
+  scrape_timeout: 20s
   evaluation_interval: 2m
-  alertmanager:
+
+prometheus_server_prometheus_raw_jobs:
+prometheus_server_prometheus_raw_configuration:
+
+prometheus_server_additional_alerts: []
+prometheus_server_custom_alerts:
+
+prometheus_server_alertmanager_raw_configuration:
+  global:
+    smtp_smarthost: 'localhost:25'
+    smtp_from: 'alertmanager@your_domain'
+    smtp_require_tls: false
+  route:
+    group_by: ['alertname', 'job']
     group_wait: 1m
     group_interval: 10m
     repeat_interval: 3h
+    receiver: sys-admin-team
+  receivers:
+    - name: 'sys-admin-team'
+      email_configs:
+        - to: 'sys-admin-team@bluebanquise.com'
+  inhibit_rules:
+    - source_match:
+        severity: 'critical'
+      target_match:
+        severity: 'warning'
+      equal: ['alertname', 'cluster', 'service']
 
-prometheus_karma_username: admin
-prometheus_karma_password: admin
-prometheus_karma_alertmanager_server_name: prometheus1
-prometheus_karma_name: alertmanager_karma
+prometheus_exporters_groups_to_scrape: []
+prometheus_exporters_to_scrape: []
 
-prometheus_client: false
-prometheus_server: false
+prometheus_ipmi_scrape: false
+prometheus_snmp_scrape: false
+
+prometheus_ipmi_scrape_equipment_profiles: []
+prometheus_snmp_scrape_equipment_profiles: []
+
+prometheus_server_snmp_exporter_with_generator: false
+prometheus_server_snmp_exporter_raw_configuration:
+
+prometheus_server_karma_username: admin
+prometheus_server_karma_password: admin
+
+prometheus_firewall_open: false
+prometheus_server_firewall_zone: public
+prometheus_client_firewall_zone: public

@@ -1,18 +1,25 @@
-- name: install monitoring packages
-  package:
-    name: "{{ item.value.package }}"
-    state: present
-  loop: "{{ monitoring.exporters |dict2items }}"
-  when: item.value.package is defined and item.key != "ipmi_exporter" and item.key != "snmp_exporter"
+---
+- name: set_fact ░ Gather exporters to install
+  set_fact:
+    exporters_groups: "{{ (exporters_groups | default([])) + item.value }}"
+  loop: "{{ prometheus_exporters_groups_to_scrape | dict2items}}"
+  when: inventory_hostname in groups[item.key]
 
-- name: "firewalld █ Add services to firewall's {{ prometheus_client_firewall_zone | default('public') }} zone"
+- name: package █ install exporters packages
+  package:
+    name: "{{ item.package }}"
+    state: present
+  loop: "{{ exporters_groups }}"
+  when: item.package is defined and item.package is not none
+
+- name: "firewalld █ Open exporters ports into firewall's {{ prometheus_client_firewall_zone | default('public') }} zone"
   firewalld:
     zone: "{{ prometheus_client_firewall_zone | default('public') }}"
     port: "{{ item.port }}/tcp"
     immediate: "yes"
     permanent: "yes"
     state: enabled
-  loop: "{{ monitoring.exporters.values() | list }}"
+  loop: "{{ exporters_groups }}"
   when:
     - ansible_facts.os_family == "RedHat"
     - ep_firewall | default(false) | bool
@@ -20,22 +27,10 @@
   tags:
     - firewall
 
-- name: set services
+- name: service █ Manage exporters services
   service:
-    name: "{{ item.value.service }}"
+    name: "{{ item.service }}"
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
     state: "{{ (start_services | bool) | ternary('started', omit) }}"
-  loop: "{{ monitoring.exporters |dict2items }}"
-  when: item.value.service is defined and item.key != "ipmi_exporter" and item.key != "snmp_exporter"
-
-- name: set templates
-  template:
-    src: "{{ item.value.templates.src }}"
-    dest: "{{ item.value.templates.dest }}"
-    owner: root
-    group: root
-    mode: 0640
-  tags:
-    - template
-  loop: "{{ monitoring.exporters |dict2items }}"
-  when: item.value.templates.src is defined and item.value.templates.dest is defined
+  loop: "{{ exporters_groups }}"
+  when: item.service is defined and item.service is not none

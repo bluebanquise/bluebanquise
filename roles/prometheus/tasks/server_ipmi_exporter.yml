@@ -1,0 +1,50 @@
+---
+- name: Package █ Install ipmi_exporter and freeipmi packages
+  package:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - ipmi_exporter
+    - freeipmi
+
+- name: template █ Generate ipmi_exporter service file
+  template:
+    src: ipmi_exporter.service.j2
+    dest: /etc/systemd/system/ipmi_exporter.service
+    owner: root
+    group: root
+    mode: 0755
+  notify: systemd █ Reload systemd configuration
+  tags:
+    - template
+
+- name: file █ Create ipmi_exporter directories structure
+  file:
+   path: "{{ item }}"
+   state: directory
+   mode: 0750
+   owner: ipmi_exporter
+   group: ipmi_exporter
+  loop:
+   - /etc/ipmi_exporter/
+
+- name: Template █ Generate /etc/ipmi_exporter/ipmi_config.yml
+  template:
+    src: ipmi_config.yml.j2
+    dest: /etc/ipmi_exporter/ipmi_config.yml
+    owner: ipmi_exporter
+    group: ipmi_exporter
+    mode: 0640
+  notify: service █ Restart ipmi_exporter service
+  tags:
+    - template
+
+- meta: flush_handlers
+
+- name: service █ Manage ipmi_exporter service state
+  service:
+    name: ipmi_exporter
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+    state: "{{ (start_services | bool) | ternary('started', omit) }}"
+  tags:
+    - service

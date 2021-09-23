@@ -1,0 +1,47 @@
+---
+- name: Package █ Install karma package
+  package:
+    name: karma
+    state: present
+
+- name: template █ Generate karma service file
+  template:
+    src: karma.service.j2
+    dest: /etc/systemd/system/karma.service
+    owner: root
+    group: root
+    mode: 0755
+  notify: systemd █ Reload systemd configuration
+  tags:
+    - template
+
+- name: file █ Create karma directories structure
+  file:
+   path: "{{ item }}"
+   state: directory
+   mode: 0750
+   owner: karma
+   group: karma
+  loop:
+   - /etc/karma/
+
+- name: Template █ Generate /etc/karma/karma.yml
+  template:
+    src: karma.yml.j2
+    dest: /etc/karma/karma.yml
+    owner: karma
+    group: karma
+    mode: 0640
+  notify: service █ Restart karma service
+  tags:
+    - template
+
+- meta: flush_handlers
+
+- name: service █ Manage karma service state
+  service:
+    name: karma
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+    state: "{{ (start_services | bool) | ternary('started', omit) }}"
+  tags:
+    - service

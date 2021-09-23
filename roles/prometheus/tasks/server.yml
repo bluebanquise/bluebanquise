@@ -1,159 +1,37 @@
 ---
-
-- name: Package
-  package:
-    name: "{{ packages }}"
-    state: present
-  vars:
-    packages:
-    - prometheus
-    - alertmanager
-    - ipmi_exporter
-    - freeipmi
-    - snmp_exporter
-    - karma
-
-# for generator of oid walk for snmp_exporter     
-- name: Package
-  package:
-    name: "{{ item }}"
-    state: present
-  vars:
-    packages:
-    - gcc
-    - make
-    - net-snmp
-    - net-snmp-utils
-    - net-snmp-libs
-    - net-snmp-devel
-  when:
-    - monitoring.exporters.snmp_exporter.with_generator is defined
-    - monitoring.exporters.snmp_exporter.with_generator
-
-- name: "copy █ Install firewalld service configuration file"
-  copy:
-    src: alertmanager.xml
-    dest: /etc/firewalld/services/alertmanager.xml
-    owner: root
-    group: root
-    mode: 0644
-  when:
-    - ansible_facts.os_family == "RedHat"
-    - ep_firewall | default(false) | bool
-  notify: reload firewalld
+- name: include_tasks ░ Setup Prometheus
+  include_tasks: "server_prometheus.yml"
+  when: prometheus_server_manage_prometheus
   tags:
-    - firewall
+    - internal
 
-- meta: flush_handlers
-
-- name: "firewalld █ Add services to firewall's {{ prometheus_server_firewall_zone | default('public') }} zone"
-  firewalld:
-    zone: "{{ prometheus_server_firewall_zone | default('public') }}"
-    service: "{{ item }}"
-    immediate: "yes"
-    permanent: "yes"
-    state: enabled
-  when:
-    - ansible_facts.os_family == "RedHat"
-    - ep_firewall | default(false) | bool
-  loop:
-    - prometheus
-    - alertmanager
+- name: include_tasks ░ Setup Alertmanager
+  include_tasks: "server_alertmanager.yml"
+  when: prometheus_server_manage_alertmanager
   tags:
-    - firewall
+    - internal
 
-- name: Create directories structure
-  file:
-   path: "{{ item }}"
-   state: directory
-   mode: 0750
-   owner: prometheus
-   group: prometheus
-  loop:
-   - /etc/prometheus/alerts/
-   - /var/lib/prometheus
-
-- name: Template >> /etc/prometheus/prometheus.yml
-  template:
-    src: prometheus.yml.j2
-    dest: /etc/prometheus/prometheus.yml
-    owner: prometheus
-    group: prometheus
-    mode: 0640
+- name: include_tasks ░ Setup Karma
+  include_tasks: "server_karma.yml"
+  when: prometheus_server_manage_karma
   tags:
-    - template
+    - internal
 
-- name: Template >> /etc/prometheus/alerts/general.yml
-  template:
-    src: alerts/general.yml.j2
-    dest: /etc/prometheus/alerts/general.yml
-    owner: prometheus
-    group: prometheus
-    mode: 0640
+#- name: include_tasks ░ Setup Am-executor
+#  include_tasks: "server_am_executor.yml"
+#  when: prometheus_server_manage_karma
+#  tags:
+#    - internal
 
-- name: Create directories structure for alertmanager
-  file:
-   path: "{{ item }}"
-   state: directory
-   mode: 0750
-   owner: alertmanager
-   group: alertmanager
-  loop:
-   - /etc/alertmanager
-
-- name: Template >> /etc/alertmanager/alertmanager.yml
-  template:
-    src: alertmanager.yml.j2
-    dest: /etc/alertmanager/alertmanager.yml
-    owner: alertmanager
-    group: alertmanager
-    mode: 0640
+- name: include_tasks ░ Setup ipmi_exporter
+  include_tasks: "server_ipmi_exporter.yml"
+  when: prometheus_server_manage_ipmi_exporter
   tags:
-    - template
+    - internal
 
-- name: Template >> /etc/ipmi_exporter/ipmi_config.yml
-  template:
-    src: ipmi_config.yml.j2
-    dest: /etc/ipmi_exporter/ipmi_config.yml
-    owner: ipmi_exporter
-    group: ipmi_exporter
-    mode: 0640
+- name: include_tasks ░ Setup snmp_exporter
+  include_tasks: "server_snmp_exporter.yml"
+  when: prometheus_server_manage_snmp_exporter
   tags:
-    - template
+    - internal
 
-- name: Template >> /etc/karma/karma.yml
-  template:
-    src: karma.yml.j2
-    dest: /etc/karma/karma.yml
-    owner: karma
-    group: karma
-    mode: 0640
-  tags:
-    - template
-
-- name: Enable/disable services
-  service:
-    name: "{{ item }}"
-    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
-  loop:
-    - prometheus
-    - alertmanager
-    - ipmi_exporter
-    - snmp_exporter
-    - karma
-  tags:
-    - service
-
-- name: Start services
-  service:
-    name: "{{ item }}"
-    state: started
-  loop:
-    - prometheus
-    - alertmanager
-    - ipmi_exporter
-    - snmp_exporter
-    - karma
-  when: (start_services | bool)
-  tags:
-    - service

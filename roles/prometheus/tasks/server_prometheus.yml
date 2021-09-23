@@ -1,0 +1,114 @@
+---
+- name: group █ Add prometheus group
+  group:
+    name: prometheus
+    gid: "{{ prometheus_server_prometheus_user_gid }}"
+    state: present
+
+- name: user █ Add prometheus user
+  user:
+    name: prometheus
+    shell: /bin/false
+    uid: "{{ prometheus_server_prometheus_user_uid }}"
+    group: prometheus
+    home: /var/lib/prometheus
+    state: present
+
+- name: package █ Install prometheus package
+  package:
+    name: prometheus
+    state: present
+
+- name: template █ Generate prometheus service file
+  template:
+    src: prometheus.service.j2
+    dest: /etc/systemd/system/prometheus.service
+    owner: root
+    group: root
+    mode: 0755
+  notify: systemd █ Reload systemd configuration
+  tags:
+    - template
+
+- name: "firewalld █ Add prometheus service to firewall's {{ prometheus_server_firewall_zone | default('public') }} zone"
+  firewalld:
+    zone: "{{ prometheus_server_firewall_zone | default('public') }}"
+    service: prometheus
+    immediate: "yes"
+    permanent: "yes"
+    state: enabled
+  when:
+    - ansible_facts.os_family == "RedHat"
+    - ep_firewall | default(false) | bool
+  tags:
+    - firewall
+
+- name: file █ Create Prometheus directories structure
+  file:
+   path: "{{ item }}"
+   state: directory
+   mode: 0750
+   owner: prometheus
+   group: prometheus
+  loop:
+   - /etc/prometheus/
+   - /etc/prometheus/alerts/
+   - /var/lib/prometheus
+
+- name: Template █ Generate /etc/prometheus/prometheus.yml
+  template:
+    src: prometheus.yml.j2
+    dest: /etc/prometheus/prometheus.yml
+    owner: prometheus
+    group: prometheus
+    mode: 0640
+  notify: service █ Restart prometheus service
+  tags:
+    - template
+
+- name: copy █ Copy /etc/prometheus/alerts/general.yml
+  copy:
+    src: alerts/general.yml
+    dest: /etc/prometheus/alerts/general.yml
+    owner: prometheus
+    group: prometheus
+    mode: 0640
+
+- name: copy █ Copy additional alerts to /etc/prometheus/alerts/
+  copy:
+    src: alerts/{{ item }}.yml
+    dest: /etc/prometheus/alerts/{{ item }}.yml
+    owner: prometheus
+    group: prometheus
+    mode: 0640
+  loop: "{{ prometheus_server_additional_alerts }}"
+  when: prometheus_server_additional_alerts is defined and prometheus_server_additional_alerts
+
+- name: template █ Generate users alerts to /etc/prometheus/alerts/user_alerts.yml
+  template:
+    src: user_alerts.yml.j2
+    dest: /etc/prometheus/alerts/user_alerts.yml
+    owner: prometheus
+    group: prometheus
+    mode: 0640
+  when: prometheus_server_custom_alerts is defined and prometheus_server_custom_alerts is not none
+  notify: service █ Restart prometheus service
+
+- name: file █ Create service needed directory
+  file:
+    path: /etc/systemd/system/prometheus.service.d
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  when: prometheus_server_launch_parameters is defined and prometheus_server_launch_parameters is not none
+
+- meta: flush_handlers
+
+- name: service █ Manage prometheus service state
+  service:
+    name: prometheus
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+    state: "{{ (start_services | bool) | ternary('started', omit) }}"
+  tags:
+    - service
