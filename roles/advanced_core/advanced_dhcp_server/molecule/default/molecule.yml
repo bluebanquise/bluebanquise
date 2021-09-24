@@ -98,6 +98,7 @@ provisioner:
             ep_ipxe_driver: default
             ep_ipxe_embed: standard
             ep_ipxe_platform: pcbios
+            ep_equipment_type: server
             ep_hardware:
               cpu:
                 architecture: x86_64
@@ -129,6 +130,7 @@ provisioner:
             ep_ipxe_driver: default
             ep_ipxe_platform: efi
             ep_ipxe_embed: standard
+            ep_equipment_type: server
             ep_hardware:
               cpu:
                 architecture: x86_64
@@ -152,6 +154,7 @@ provisioner:
             ep_ipxe_driver: snponly
             ep_ipxe_platform: efi
             ep_ipxe_embed: standard
+            ep_equipment_type: server
             ep_hardware:
               cpu:
                 architecture: x86_64
