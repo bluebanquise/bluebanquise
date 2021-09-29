@@ -18,7 +18,9 @@
   - core/log_server
     - remote logs stored in a similar fashion as the server (#568)
   - all: add compatibility with multiple RHEL like distributions (#560)
-  - conman: fix execpath for RHEL 8 (#584)
+  - conman:
+    - fix execpath for RHEL 8 (#584)
+    - force conman user gid and uid (#601)
   - advanced_dhcp_server: fix issue with added spaces. Could prevent DHCP to start (#561)
   - diskless:
     - fix issues with dnf command in the livenet module (#528)
