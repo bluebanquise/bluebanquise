@@ -29,7 +29,6 @@ The **BlueBanquise** stack is made of two main parts:
 This documentation is structured as the following:
 
 * Few basic vocabulary
-* A full HPC sys admin tutorial, independent of the stack
 * A full Ansible training, independent of the stack
 * Procedure to install BlueBanquise CORE
     * Install first management host
@@ -45,10 +44,16 @@ This documentation is structured as the following:
 
 If you encounter any bugs/issues or have any comments, please inform us.
 
-Note that since BlueBanquise is a multi-distribution based stack, parts of the
+Note that if you wish are new to cluster management system administration,
+`a full manual tutorial is available on github. <https://github.com/oxedions/admin_sys_baremetal_tutorial>`_
+
+Note also that since BlueBanquise is a multi-distribution based stack, parts of the
 documentation may be dedicated to a specific Linux distribution (always
 explicitly mentioned).
 
 We hope you will enjoy this stack as much as we do.
+
+If you need help, do not hesitate to use `the discussions tab <https://github.com/bluebanquise/bluebanquise/discussions>`_ 
+of the project's github.
 
 Next step is to grab few basic :ref:`Vocabulary`.

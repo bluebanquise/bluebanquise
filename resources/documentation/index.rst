@@ -39,12 +39,14 @@ git gitea
    vocabulary
    learn_ansible
    containers
-   install_first_management
+   bootstrap
    configure_bluebanquise
    deploy_bluebanquise
+   high_availability
    multiple_icebergs
    diskless
    monitoring
+   slurm
    stories
    roles
    references

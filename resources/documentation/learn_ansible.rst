@@ -8,6 +8,9 @@ Ansible.
 This section tries to provide key knowledge to at least be able to manipulate
 and edit the stack to your needs.
 
+Note that if you wish are new to cluster management system administration,
+`a full manual tutorial is available on github. <https://github.com/oxedions/admin_sys_baremetal_tutorial>`_
+
 Install Ansible
 ===============
 

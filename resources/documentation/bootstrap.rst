@@ -2,29 +2,33 @@
 [Core] - Bootstrap base system
 ==============================
 
+BlueBanquise can be used to deploy from a simple IT room for students, to High
+Performance Computing clusters. Configuration is the same in both cases, only
+size and specialized roles are different.
 
-
+In this documentation, most of the time, we will refer to "servers", but any
+kind of workstation will work the same way.
 
 This documentation will cover the configuration of a very simple cluster:
 
-.. image:: images/example_cluster_small.svg
+.. image:: images/generic_cluster/all.svg
 
-The documentation focus on main inventory parameters of the stack. However, more
-features are available in the stack. Read roles Readme to learn more about
-each role capabilities.
+More complex clusters are detailed later, once the generic part is done.
 
+Note also that the documentation focus on main inventory parameters of the stack.
+However, more features are available in the stack. Read roles Readme to learn
+more about each role capabilities.
 
+The first step is to bootstrap the first management server/workstation of the
+cluster.
 
+.. image:: images/generic_cluster/usb_distributions.svg
 
+This procedure mainly depend on the Linux distribution chosen. Please follow the
+target system procedure:
 
-
-The first step is to bootstrap the first management server of the cluster.
-
-This procedure mainly depend on the Linux distribution chosen. In the following
-section, bordered parts are dedicated to specific distributions or specific
-major version, while non bordered part are generic.
-
-First step is to install first management node manually.
+* :ref:`Bootstrap RHEL like system`
+* :ref:`Bootstrap Ubuntu like system`
 
 Bootstrap RHEL like system
 ==========================
@@ -49,12 +53,12 @@ Currently supported and tested Linux RHEL like distributions are:
     * CloudLinux
     * AlmaLinux
 
-.. warning::
+.. note::
   In the following documentation, we will always use *redhat/8/x86_64/* or
   *redhat/7/x86_64/* when setting path. Adapt this to your target distribution
   and architecture.
   Distribution keywords supported are: **redhat**, **rhel**, **centos**,
-  **rockylinux**, **oraclelinux**, **cloudLinux**, **almalinux**.
+  **rockylinux**, **oraclelinux**, **cloudlinux**, **almalinux**.
   And supported architecture are **x86_64** or **arm64**.
 
 The following configuration is recommended:
@@ -77,8 +81,8 @@ Install the Linux operating system manually (from USB key, CDrom, netboot, etc.)
 
 It is recommended to only choose minimal install during packages selection
 (core or minimal server).
-Also, it is recommended to let system in English, and only set your keyboard and
-time zone to your country.
+Also, it is **STRONGLY** recommended to let system in English (US), and only
+set your keyboard and time zone to your country.
 
 Repositories
 ------------
@@ -88,7 +92,7 @@ We then need to prepare boot images and packages repositories.
 
 Boot images include the installer system which starts the deployment after PXE
 boot, while packages repositories include the software that will be installed
-on the systems.
+on the systems. On RHEL like systems, all is included in the original ISO.
 
 Boot images and packages repositories structure follows a specific pattern,
 which defaults to the major release version in the path:
@@ -111,7 +115,7 @@ which defaults to the major release version in the path:
   This pattern parameters (distribution, version, architecture) must match
   the one provided in the **equipment_profile** file seen later.
 
-Isos to be used
+ISOs to be used
 ^^^^^^^^^^^^^^^
 
 .. raw:: html
@@ -151,7 +155,8 @@ Obtain the main binary DVD from distribution website. You need to grab the
 Copy iso on system
 ^^^^^^^^^^^^^^^^^^
 
-Mount iso and copy content to web server directory: (replace redhat/8 by
+Copy iso on system.
+Then mount iso and copy content to web server directory: (replace redhat/8 by
 redhat/7, centos/8, centos/7, rockylinux/8, etc depending of your system).
 
 .. code-block:: bash

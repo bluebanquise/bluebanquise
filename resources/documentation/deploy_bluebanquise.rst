@@ -75,6 +75,9 @@ We first ensure our NIC are up, so the repositories part is working.
 
   ansible-playbook /etc/bluebanquise/playbooks/managements.yml --limit management1 --tags set_hostname,nic_nmcli
 
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>
 Then start your main interface manually. Here enp0s3:
 
 .. raw:: html
@@ -100,7 +103,10 @@ Then start your main interface manually. Here enp0s3:
 
   </div><br>
 
-Once interface is up (check using *ip a* command), execute the bluebanquise role
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+Once interface are up (check using *ip a* command), execute the bluebanquise role
 and the repositories_server role:
 
 .. code-block:: text
@@ -118,14 +124,7 @@ Then play the whole playbook:
 
 And wait...
 
-If all goes well, you can check that all services are up and running:
-
-.. code-block:: bash
-
-  systemctl status httpd
-  systemctl status atftpd
-  systemctl status dhcpd
-  systemctl status named
+If all goes well, you can check that all services are up and running.
 
 You can replay the same ansible-playbook command over and over, Ansible will
 just update/correct what is needed, and do nothing for all that is at an
@@ -238,7 +237,7 @@ set on nodes during deployment).
 OS deployment
 -------------
 
-Power on now the remote nodes, have them boot over LAN, and follow the
+Power on now the remote nodes, have them boot over LAN, and watch the automatic
 installation procedure. It should take around 5-20 minutes depending on your
 hardware.
 
@@ -250,8 +249,13 @@ Apply other nodes configuration
 Now that all the nodes have an operating system installed and running, applying
 configuration on these nodes is simple.
 
-Ensure first you can ssh passwordless on each of the freshly deployed nodes. If
-yes, copy example playbooks:
+Ensure first you can ssh passwordless on each of the freshly deployed nodes.
+(Note: on some Linux distributions, if DHCP leases are short, you may loose
+ip shortly after system is booted. It that happen, reboot system to get an ip
+again. This issue is solved once the nic_nmcli role has been applied on hosts,
+as it sets ip statically).
+
+If yes, copy example playbooks:
 
 .. code-block:: bash
 
@@ -274,21 +278,21 @@ Your cluster should now be fully deployed the generic way: operating systems are
 deployed on each hosts, and basic services (DNS, repositories, time
 synchronization, etc.) are up and running.
 
-It is time to use some community roles to add specific features to the cluster
-and/or specialize it.
+It is time to use some `COMMUNITY <https://github.com/bluebanquise/community>`_
+roles to add specific features to the cluster and/or specialize it.
 (Please refer to each community roles dedicated documentation to get
 instructions on how to use them), or continue this documentation to:
 
 * BlueBanquise generic cluster
+    * Deploy High Availability with multiple managements nodes
     * Deploy a multi icebergs cluster
     * Deploy diskless nodes
 * BlueBanquise specialized cluster
     * Deploy Prometheus (Monitoring your cluster)
     * Deploy Slurm (Specialize your cluster for High Performance Computing)
-    * Deploy Nomad and Consul (Deploy containers orchestration on the cluster)
 
 You will also find a "stories" section that describes step by step few recurrent
 situation you may face during the life of your cluster.
 
-Thank your for following this training. We really hope you will enjoy our stack.
+Thank your for following this training. We really hope you will enjoy the stack.
 Please report us any bad or good feedback.

@@ -395,6 +395,9 @@ Equipment profiles are variables dedicated to groups of nodes equipment. These
 variables cover most of the hardware, operating system, PXE needs, etc. of the
 related nodes.
 
+Except for operating system and partitioning, default values should match for
+a simple cluster with standard hardware.
+
 Lets review them:
 
 PXE
