@@ -81,6 +81,27 @@
   tags:
     - template
 
+- name: create /etc/dhcpd.conf link
+  file:
+    src: /etc/dhcp/dhcpd.conf
+    dest: /etc/dhcpd.conf
+    state: link
+    force: yes
+  when: ansible_facts.os_family == "Suse"
+  notify: service █ Restart dhcp server
+
+- name: template █ Generate /etc/sysconfig/dhcpd for SuSE based systems
+  template:
+    src: sysconfig.dhcpd.j2
+    dest: /etc/sysconfig/dhcpd
+    owner: root
+    group: root
+    mode: 0644
+  when: ansible_facts.os_family == "Suse"
+  notify: service █ Restart dhcp server
+  tags:
+    - template
+
 - name: Manage services state
   service:
     name: "{{ item }}"
