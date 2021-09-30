@@ -70,7 +70,7 @@ prometheus_server_alertmanager_raw_configuration:
         severity: 'warning'
       equal: ['alertname', 'cluster', 'service']
 
-prometheus_exporters_groups_to_scrape: []
+prometheus_exporters_groups_to_scrape: {}
 prometheus_exporters_to_scrape: []
 
 prometheus_ipmi_scrape: false
