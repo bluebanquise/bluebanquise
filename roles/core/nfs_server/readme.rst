@@ -62,6 +62,7 @@ Packages installed:
 Changelog
 ^^^^^^^^^
 
+* 1.0.5: Updated to work with OpenSuSE. Neil Munday <neil@mundayweb.com>
 * 1.0.4: Added molecule tests. osmocl <osmocl@osmo.cl>
 * 1.0.3: Clean. johnnykeats <johnny.keats@outlook.com>
 * 1.0.2: Added Ubuntu 18.04 compatibility. johnnykeats <johnny.keats@outlook.com>
