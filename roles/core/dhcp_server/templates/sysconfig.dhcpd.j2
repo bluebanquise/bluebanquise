@@ -1,0 +1,186 @@
+# {{ ansible_managed }}
+
+## Path: 	Network/DHCP/DHCP server
+## Description: DHCPv4 server settings
+## Type:	string
+## Default:	""
+## ServiceRestart: dhcpd
+#
+# Interface(s) for the DHCPv4 server to listen on.
+# 
+# A special keyword is ANY, it will cause dhcpd to autodetect available
+# interfaces.
+#
+# Examples: DHCPD_INTERFACE="eth0 eth1 eth2"
+#           DHCPD_INTERFACE="ANY"
+#
+DHCPD_INTERFACE="{%- for v in hostvars[inventory_hostname]['network_interfaces'] | selectattr('network','defined') | selectattr('network','match','^'+j2_current_iceberg_network+'-[a-zA-Z0-9]+') %}
+ {{ v['interface'] }} 
+{%- endfor -%}"
+
+## Path: 	Network/DHCP/DHCP server
+## Description: DHCPv6 server settings
+## Type:	string
+## Default:	""
+## ServiceRestart: dhcpd6
+#
+# Interface(s) for the DHCPv6 server to listen on.
+# 
+# A special keyword is ANY, it will cause dhcpd to autodetect available
+# interfaces.
+#
+# Examples: DHCPD6_INTERFACE="eth0 eth1 eth2"
+#           DHCPD6_INTERFACE="ANY"
+#
+DHCPD6_INTERFACE=""
+## Description: Restart dhcpv4 server when interface goes up (again)
+## Type:        list(yes,no,auto,)
+## Default:     
+#
+# When the dhcp server is listening on a virtual interface, e.g. bridge,
+# bonding or vlan, and this interface gets deleted and recreated during
+# a network restart, dhcpd will stop answering requests on this interface
+# and needs a restart as well.
+# Begining with SLE-10 SP3, we install an if-up.d post script (see ifup(8)
+# and also ifservices(5)), enabled in auto mode by default. This variable
+# can be used to force or avoid the dhcp server restart:
+#
+#   no:   do not restart dhcpd
+#  yes:   force a dhcp server restart
+# auto:   (default) restart for virtual interfaces (bond,bridge,vlan) when
+#         all interfaces used in DHCPD_INTERFACE variable are up as well.
+#
+# Except of this global setting, the variable can be specified per interface
+# in the interface configurations (/etc/sysconfig/network/ifcfg-$name).
+#
+DHCPD_IFUP_RESTART=""
+## Description: Restart dhcpv6 server when interface goes up (again)
+## Type:        list(yes,no,auto,)
+## Default:     
+#
+# When the dhcp server is listening on a virtual interface, e.g. bridge,
+# bonding or vlan, and this interface gets deleted and recreated during
+# a network restart, dhcpd will stop answering requests on this interface
+# and needs a restart as well.
+# Begining with SLE-10 SP3, we install an if-up.d post script (see ifup(8)
+# and also ifservices(5)), enabled in auto mode by default. This variable
+# can be used to force or avoid the dhcp server restart:
+#
+#   no:   do not restart dhcpd
+#  yes:   force a dhcp server restart
+# auto:   (default) restart for virtual interfaces (bond,bridge,vlan) when
+#         all interfaces used in DHCPD_INTERFACE variable are up as well.
+#
+# Except of this global setting, the variable can be specified per interface
+# in the interface configurations (/etc/sysconfig/network/ifcfg-$name).
+#
+DHCPD6_IFUP_RESTART=""
+
+## Type:	yesno
+## Default:	yes
+## ServiceRestart: dhcpd
+#
+# Shall the DHCP server dhcpd run in a chroot jail (/var/lib/dhcp)?
+#
+# Each time you start dhcpd with the init script, /etc/dhcpd.conf
+# will be copied to /var/lib/dhcp/etc/.
+# 
+# Some files that are important for hostname to IP address resolution
+# (/etc/{gai.conf,nsswitch.conf,resolv.conf,host.conf,hosts,localtime},
+# /lib/lib{resolv.so.*,libnss_*.so.*,libpthread.so.0,libdl.so.2}) will
+# also be copied to the chroot jail by the init script when you start
+# it (less than 1MB altogether).
+# 
+# The pid file will be in /var/lib/dhcp/var/run/dhcpd.pid. 
+#
+DHCPD_RUN_CHROOTED="yes"
+
+## Type:	yesno
+## Default:	yes
+## ServiceRestart: dhcpd6
+#
+# Shall the DHCP server dhcpd run in a chroot jail (/var/lib/dhcp6)?
+#
+# Each time you start dhcpd with the init script, /etc/dhcpd6.conf
+# will be copied to /var/lib/dhcp6/etc/.
+# 
+# Some files that are important for hostname to IP address resolution
+# (/etc/{gai.conf,nsswitch.conf,resolv.conf,host.conf,hosts,localtime},
+# /lib/lib{resolv.so.*,libnss_*.so.*,libpthread.so.0,libdl.so.2}) will
+# also be copied to the chroot jail by the init script when you start
+# it (less than 1MB altogether).
+# 
+# The pid file will be in /var/lib/dhcp6/var/run/dhcpd.pid. 
+#
+DHCPD6_RUN_CHROOTED="yes"
+
+## Type:	string
+## Default:	"/etc/dhcpd.d"
+## ServiceRestart: dhcpd
+#
+# Since version 3, dhcpd.conf can contain include statements. 
+# If you enter the names of any include files here, _all_ conf
+# files will be copied to $chroot/etc/, when dhcpd is started in the 
+# chroot jail. (/etc/dhcpd.conf is always copied.)
+#
+# For your convenience, you can also specify entire directories,
+# that will be copied inclusive subdirectories. The /etc/dhcpd.d
+# directory will be copied by default when it exists.
+#
+# Example: "/etc/foo.bar.conf /etc/dhcpd.bootp-clients.conf"
+#
+#DHCPD_CONF_INCLUDE_FILES="/etc/dhcpd.d"
+DHCPD_CONF_INCLUDE_FILES="/etc/dhcp"
+
+## Type:	string
+## Default:	"/etc/dhcpd.d"
+## ServiceRestart: dhcpd6
+#
+# Since version 3, dhcpd.conf can contain include statements. 
+# If you enter the names of any include files here, _all_ conf
+# files will be copied to $chroot/etc/, when dhcpd is started in
+# the chroot jail. (/etc/dhcpd6.conf is always copied.)
+#
+# For your convenience, you can also specify entire directories,
+# that will be copied inclusive subdirectories. The /etc/dhcpd6.d
+# directory will be copied by default when it exists.
+#
+# Example: "/etc/foo.bar.conf /etc/dhcpd6.bootp-clients.conf"
+#
+DHCPD6_CONF_INCLUDE_FILES="/etc/dhcpd6.d"
+
+## Type:	string
+## Default:	"dhcpd"
+## ServiceRestart: dhcpd
+#
+# Leave empty or enter "root" to let dhcpd run as root. 
+# Enter "dhcpd" to run dhcpd as user 'dhcpd'.
+#
+DHCPD_RUN_AS="dhcpd"
+
+## Type:	string
+## Default:	"dhcpd"
+## ServiceRestart: dhcpd6
+#
+# Leave empty or enter "root" to let dhcpd run as root. 
+# Enter "dhcpd" to run dhcpd as user 'dhcpd'.
+#
+DHCPD6_RUN_AS="dhcpd"
+
+## Type:	string
+## Default:	""
+## ServiceRestart: dhcpd
+#
+# Other arguments that you want dhcpd to be started with
+# (e.g. "-p 1234" for a non-standard port to listen on)
+#
+DHCPD_OTHER_ARGS=""
+
+## Type:	string
+## Default:	""
+## ServiceRestart: dhcpd6
+#
+# Other arguments that you want dhcpd to be started with
+# (e.g. "-p 1234" for a non-standard port to listen on)
+#
+DHCPD6_OTHER_ARGS=""
