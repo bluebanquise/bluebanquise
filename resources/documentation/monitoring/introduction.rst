@@ -1,5 +1,5 @@
-Introduction
-============
+Monitoring Introduction
+=======================
 
 This monitoring documentation has multiple aims:
 

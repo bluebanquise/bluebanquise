@@ -38,15 +38,15 @@ git gitea
    introduction
    vocabulary
    learn_ansible
-   containers
    bootstrap
    configure_bluebanquise
    deploy_bluebanquise
-   high_availability
    multiple_icebergs
    diskless
+   high_availability
    monitoring
    slurm
+   containers
    stories
    roles
    references

@@ -7,12 +7,21 @@ and basic OS repositories. You also have installed BlueBanquise package and its
 dependencies, and your main NIC (Network Interface Controller) is configured and
 activated (up).
 
+.. image:: images/clusters/documentation_example_single_island_step_1.svg
+   :align: center
+
 Enable BlueBanquise and ssh
 ===========================
 
-By default, Ansible will read ANSIBLE_CONFIG, ansible.cfg in the current
-working directory, .ansible.cfg in the home directory or
-/etc/ansible/ansible.cfg, whichever it finds first.
+By default, Ansible will check presence of configuration file at multiple
+locations:
+
+1. Environment variable **ANSIBLE_CONFIG**
+2. ansible.cfg in the current working directory
+3. .ansible.cfg in the home directory
+4. /etc/ansible/ansible.cfg
+
+The first found is used as main configuration.
 
 To enable BlueBanquise, we need Ansible to use /etc/bluebanquise/ansible.cfg.
 To do so, set ANSIBLE_CONFIG:
@@ -44,14 +53,14 @@ passphrase (leave empty when asked and press enter):
   ssh-keygen -t ed25519
 
 Then spread this key on the current host so that management1 can ssh on itself
-passwordless (you will be asked current root password to establish ssh
-connection):
+passwordless (you will be asked current root password to establish this first
+ssh connection):
 
 .. code-block:: text
 
   ssh-copy-id management1
 
-And finally, ensure you can ssh without password now:
+Now, ensure you can ssh without password now:
 
 .. code-block:: text
 
@@ -66,10 +75,10 @@ Check example inventory
 -----------------------
 
 An inventory example is provided in
-/etc/bluebanquise/resources/examples/simple_cluster/ as a base for our work.
+/etc/bluebanquise/resources/examples/simple_cluster/ and will be used
+as a base for this documentation.
 
-This example match the cluster exposed before:
->>>>>>>>>>>>>>>>>>>>>>>
+This example match the cluster exposed previously.
 
 Copy it to use it as your new inventory starting point:
 
@@ -81,6 +90,61 @@ Copy it to use it as your new inventory starting point:
   Ansible will read **ALL** files in the inventory. **NEVER do a backup of a file
   here!**
   Backup in another location, outside of /etc/bluebanquise/inventory.
+
+Review groups
+-------------
+
+In BlueBanquise, there are 3 main types of groups, apart of user's custom groups.
+
+Use command ansible-inventory to display current groups in the inventory:
+
+.. code-block:: text
+
+  [root@management1 ~]# ansible-inventory --graph
+  @all:
+    |--@internal:
+    |  |--dummy
+    |--@mg_computes:
+    |  |--@equipment_typeC:
+    |  |  |--compute1
+    |  |  |--compute2
+    |  |  |--compute3
+    |  |  |--compute4
+    |--@mg_logins:
+    |  |--@equipment_typeL:
+    |  |  |--login1
+    |--@mg_managements:
+    |  |--@equipment_typeM:
+    |  |  |--management1
+    |--@mg_storages:
+    |  |--@equipment_typeS:
+    |  |  |--storage1
+    |--@rack_1:
+    |  |--compute1
+    |  |--compute2
+    |  |--compute3
+    |  |--compute4
+    |  |--login1
+    |  |--management1
+    |  |--storage1
+    |--@ungrouped:
+  [root@management1 ~]#
+
+In this example inventory, you can see **mg_** groups, and **equipment_** groups.
+*rack_1* group is a user's custom group and is not important for the stack to
+operate properly.
+
+**mg_** groups are called master groups (or main groups), and define global
+purpose of their nodes: storages, managements, logins, computes, etc.
+
+**equipment_** groups are called equipment profile groups, and define equipment
+related settings of their nodes. These groups are linked to the hardware of
+nodes. For example, if in **mg_computes** group, your cluster contains 2 type of
+nodes, for example model_A and model_B servers, then you need to create 2
+equipment profile groups, called equipment_model_A and equipment_model_B, that
+contain their related nodes.
+
+Equipment profiles are subgroups of master groups.
 
 Review nodes
 ------------
@@ -122,7 +186,7 @@ First, the groups:
 
 .. code-block:: yaml
 
-  mg_managements:         # This is the main group (also called master group), it is very useful with advanced configuration
+  mg_managements:         # This is the master group (also called main group), it is very useful with advanced configuration
     children:             # This is an Ansible instruction, indicating the below group is included in mg_managements group
       equipment_typeM:    # This is the equipment group of the management node. It always starts by 'equipment_'
         hosts:            # This is an Ansible instruction, to list below the hosts member of this group
@@ -168,17 +232,29 @@ Then the network interfaces and their associated networks:
 
 It should not be too difficult to understand this file.
 
-.. note:
+What is essential here is to understand that order network interfaces are
+defined under *network_interfaces* variable matters. Rules are the following:
+
+* The first interface in the list is the resolution interface. This is the one a ping will try to reach.
+* The first management network attached interface (management networks are explain in the next chapter) is the main network interface. This is the one ssh and so Ansible will use to connect to the node.
+
+If these rules do not comply with your needs, remember that the stack logic can
+be precedenced: simply define new *j2_node_main_resolution_network*,
+*j2_node_main_network*, etc variables (these variables are stored into *internal*
+folder)
+
+.. note::
   More network features and configurations are available, see the nic_nmcli role
   readme file for more information.
 
 Other nodes
 ^^^^^^^^^^^
 
-Now, review compute and login nodes in their respective
-cluster/nodes/computes.yml and cluster/nodes/logins.yml files. Same rules
-apply. You can also add more nodes, or if you have for example multiple type
-of equipment for computes nodes or login nodes, add another equipment group
+Now, review computes, logins and storages nodes in their respective
+*cluster/nodes/computes.yml*, *cluster/nodes/logins.yml* and
+*cluster/nodes/storages.yml* files. Same rules apply.
+You can also add more nodes, or if you have for example multiple type
+of equipment for computes nodes, add other equipment groups
 this way:
 
 .. code-block:: yaml
@@ -187,15 +263,15 @@ this way:
     children:
       equipment_typeC:
         hosts:
-          c001:
+          compute1:
           [...]
       equipment_typeD:
         hosts:
-          c005:
+          compute5:
           [...]
       equipment_typeE:
         hosts:
-          c010:
+          compute10:
           [...]
 
 Now, let's have a look at the logical networks.
@@ -207,29 +283,31 @@ In **BlueBanquise**, nodes are connected together through logical networks. Most
 of the time, logical networks will match your physical network, but for advanced
 networking, it can be different.
 
-All networks are defined in group_vars/all/general_settings/network.yml file.
+All networks are defined in *group_vars/all/general_settings/network.yml* file.
 In this current example inventory, there are two networks provided:
-ice1-1 and interconnect-1.
+*ice1-1* and *interconnect-1*.
 
 Before reviewing the file, please read this **IMPORTANT** information: in
-**BlueBanquise** there are two kind of networks: administration/management
-networks, and the others.
+**BlueBanquise** there are two kind of networks: **administration/management
+networks**, and the "others".
 
-An administration network is used to deploy and manage the nodes. It will be for
+An **administration network** is used to deploy and manage the nodes. It will be for
 example used to run a DHCP server, handle the PXE stack, etc, and also all the
 Ansible ssh connections. Administration networks have a strict naming
 convention, which by default is: **iceX-Y** with X the iceberg number, and Y the
 subnet number in this iceberg X. In our case, we are working on iceberg1
 (default when disabling icebergs mechanism), and we only have one subnet, so our
 administration network will be ice1-1. If we would need another subnet, its name
-would have been ice1-2, etc. Interconnect-1 is not an administration network as
-it is not using **iceX-Y** pattern.
+would have been ice1-2, etc.
+
+Interconnect-1 is not an administration network as it is not using **iceX-Y**
+pattern. So it belongs to the "others" networks.
 
 .. note::
   In new versions of the stack, it is now possible to replace the number Y by a
   string compatible with [0-9][a-z][A-Z] regex. For example ice1-prod.
 
-Open file group_vars/all/general_settings/network.yml and let's check part of
+Open file *group_vars/all/general_settings/network.yml* and let's check part of
 its content:
 
 .. code-block:: yaml
@@ -261,36 +339,37 @@ You can also set here an IP address from another subnet if your system has
 network routing.
 
 Now check content of the second network, interconnect-1 in file
-group_vars/all/general_settings/network.yml . As this is **not** an
+*group_vars/all/general_settings/network.yml* . As this is **not** an
 administration network, its configuration is easy.
 
 That is all for basic networking. General network parameters are set in
-group_vars/all/general_settings/network.yml file, and nodes parameters are
+*group_vars/all/general_settings/network.yml* file, and nodes parameters are
 defined in the node’s files.
+Nodes *network_interfaces* are linked to logical networks.
 
 Now, let's have a look at the general configuration.
 
 Review general configuration
 ----------------------------
 
-General configuration is made in group_vars/all/general_settings.
+General configuration is made in *group_vars/all/general_settings*.
 
 Externals
 ^^^^^^^^^
 
-File group_vars/all/general_settings/external.yml allows to configure external
+File *group_vars/all/general_settings/external.yml* allows to configure external
 resources. It should be self understandable.
 
 Network
 ^^^^^^^
 
-File group_vars/all/general_settings/network.yml allows to configure network
+File *group_vars/all/general_settings/network.yml* allows to configure network
 related parameters, and detail all networks of the cluster.
 
 Repositories
 ^^^^^^^^^^^^
 
-File group_vars/all/general_settings/repositories.yml configure repositories to
+File *group_vars/all/general_settings/repositories.yml* configure repositories to
 use for all nodes (using groups and variable precedence, repositories can be
 tuned for each group of nodes, or even each node).
 
@@ -303,19 +382,19 @@ configurations.
 
 Note also that if you wish to define different repositories per equipment, you
 can easily use variable precedence mechanism seen in the Ansible tutorial to
-define repositories variable in each equipment group.
+define repositories variable in each equipment group, or even for each node.
 
 NFS
 ^^^
 
-File group_vars/all/general_settings/nfs.yml allows to set NFS shared folders
+File *group_vars/all/general_settings/nfs.yml* allows to set NFS shared folders
 inside the cluster. Comments in the file should be enough to understand this
 file.
 
 General
 ^^^^^^^
 
-File group_vars/all/general_settings/general.yml configure few main parameters:
+File *group_vars/all/general_settings/general.yml* configure few main parameters:
 
 * Time zone (very important, should match the one of your current management server)
 
@@ -353,11 +432,11 @@ and check access_control variable. It is set to enforcing:
   ep_access_control: enforcing
 
 Ok, but so all nodes will get this value. Let's check computes nodes, that are
-in equipment_typeC group. Let's check c001:
+in equipment_typeC group. Let's check compute1:
 
 .. code-block:: bash
 
-  [root@]# ansible-inventory --host c001 --yaml | grep ep_access_control
+  [root@]# ansible-inventory --host compute1 --yaml | grep ep_access_control
     ep_access_control: enforcing
   [root@]#
 
@@ -371,7 +450,7 @@ Now check again:
 
 .. code-block:: bash
 
-  [root@]# ansible-inventory --host c001 --yaml | grep ep_access_control
+  [root@]# ansible-inventory --host compute1 --yaml | grep ep_access_control
     ep_access_control: disabled
   [root@]#
 

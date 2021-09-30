@@ -2,9 +2,9 @@ mg_computes:
   children:
     equipment_typeC:
       hosts:
-        c001:
+        compute1:
           bmc:
-            name: bc001
+            name: bcompute1
             ip4: 10.10.103.1
             mac: 08:00:27:dc:44:91
             network: ice1-1
@@ -16,9 +16,9 @@ mg_computes:
             - interface: ib0
               ip4: 10.20.3.1
               network: interconnect-1
-        c002:
+        compute2:
           bmc:
-            name: bc002
+            name: bcompute2
             ip4: 10.10.103.2
             mac: 08:00:27:dc:54:91
             network: ice1-1
@@ -30,9 +30,9 @@ mg_computes:
             - interface: ib0
               ip4: 10.20.3.2
               network: interconnect-1
-        c003:
+        compute3:
           bmc:
-            name: bc003
+            name: bcompute3
             ip4: 10.10.103.3
             mac: 08:00:27:dc:64:91
             network: ice1-1
@@ -44,9 +44,9 @@ mg_computes:
             - interface: ib0
               ip4: 10.20.3.3
               network: interconnect-1
-        c004:
+        compute4:
           bmc:
-            name: bc004
+            name: bcompute4
             ip4: 10.10.103.4
             mac: 08:00:27:dc:74:91
             network: ice1-1

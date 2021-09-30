@@ -16,6 +16,9 @@ An Ansible **host** (also often referred as a **node**) is a remote host managed
 by Ansible. An **host** can be a physical server, but also a VM, a container or
 something else.
 
+.. image:: images/nodes/hosts_example.svg
+   :align: center
+
 Hosts are defined in */etc/bluebanquise/inventory/cluster/nodes*.
 
 Please do a difference between an **Ansible managed host**, and a **host**.
@@ -308,21 +311,30 @@ the same pool of nodes**.
 One iceberg configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
+|
+
 .. image:: images/one_iceberg.svg
+
+|
 
 For simple systems (small/medium HPC cluster, small enterprise network,
 university IT practical session room, etc.), one iceberg scenario is the
 standard. One or multiple management will reach the same ethernet administration
 networks, and federate the same pool of nodes.
 
-.. image:: images/one_iceberg_example_1.svg
+.. image:: images/clusters/single_iceberg_2_single_column.svg
+   :align: center
 
-.. image:: images/one_iceberg_example_2.svg
+|
 
 Multiple icebergs configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+|
+
 .. image:: images/multiple_icebergs.svg
+
+|
 
 For advanced systems, (large HPC clusters needing load spreading with unified
 network, enterprise network, etc.), multiple icebergs scenario can be required.
@@ -332,7 +344,10 @@ Manipulating order of network_interfaces defined for each host allows to create
 a unified network so all nodes from all icebergs can communicate through this
 network (most of the time an Interconnect network).
 
-.. image:: images/multiple_icebergs_example_1.svg
+.. image:: images/clusters/multiple_icebergs.png
+   :align: center
+
+|
 
 Equipment profiles
 ------------------
@@ -345,11 +360,16 @@ parameters (this includes hosts operating system parameters, kernel parameters,
 partitioning, etc.), and other variables if needed like dedicated
 authentication parameters. These variables are prefixed with **ep_**.
 
+.. image:: images/inventory/ep_hard.svg
+   :align: center
+
 These are key groups of the stack.
 
 **It is important** to note that equipment_profiles variables (**ep_**)
 **must not** be used at an upper level than group_vars in variables precedence.
 **It can, but you must NOT**, due to special usage of them.
+
+For now, just keep in mind these variables exist. These will be discussed later.
 
 -------------
 

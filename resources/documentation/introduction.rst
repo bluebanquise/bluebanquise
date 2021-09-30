@@ -7,6 +7,8 @@ deploy and manage clusters of hosts.
 These clusters can be from few workstations in enterprise to very large HPC or
 servers farm clusters.
 
+.. image:: images/clusters/3_size_single_row.png
+
 **BlueBanquise** is the result of a need. A need for a very simple stack, not
 based on multi languages scripts difficult to maintain. A stack that can keep
 simplicity while managing very complex architecture.
@@ -31,16 +33,16 @@ This documentation is structured as the following:
 * Few basic vocabulary
 * A full Ansible training, independent of the stack
 * Procedure to install BlueBanquise CORE
-    * Install first management host
+    * Bootstrap first management host
     * Configure BlueBanquise
     * Deploy BlueBanquise configuration and other nodes via network (PXE)
-    * (Optional) Deploy diskless nodes
     * (Optional) Deploy a multi icebergs cluster
-* Few words on how to test the stack into containers
+    * (Optional) Deploy diskless nodes
 * Procedures to specialize the cluster using BlueBanquise COMMUNITY
-    * Deploy an High Availability cluster, based on Corosync/Pacemaker and Haproxy
+    * Deploy an High Availability cluster, based on Corosync/Pacemaker and HAproxy
     * Deploy Prometheus (Monitor your cluster)
     * Deploy Slurm (Specialize your cluster for High Performance Computing or a Blender render farm)
+* Few words on how to test the stack into containers
 
 If you encounter any bugs/issues or have any comments, please inform us.
 
@@ -53,7 +55,7 @@ explicitly mentioned).
 
 We hope you will enjoy this stack as much as we do.
 
-If you need help, do not hesitate to use `the discussions tab <https://github.com/bluebanquise/bluebanquise/discussions>`_ 
+If you need help, do not hesitate to use `the discussions tab <https://github.com/bluebanquise/bluebanquise/discussions>`_
 of the project's github.
 
 Next step is to grab few basic :ref:`Vocabulary`.

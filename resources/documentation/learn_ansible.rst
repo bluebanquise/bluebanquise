@@ -8,7 +8,7 @@ Ansible.
 This section tries to provide key knowledge to at least be able to manipulate
 and edit the stack to your needs.
 
-Note that if you wish are new to cluster management system administration,
+Note that if you are new to cluster management system administration,
 `a full manual tutorial is available on github. <https://github.com/oxedions/admin_sys_baremetal_tutorial>`_
 
 Install Ansible
@@ -1384,6 +1384,4 @@ If you feel something is missing in this quick Ansible training, please do not
 hesitate to ask us to add elements.
 
 Time to move on to BlueBanquise stack itself, and bootstrap first management
-server. But before proceeding, a small optional section is dedicated to
-containers, and how to simply ask a playbook to execute its tasks inside a
-container.
+server.
