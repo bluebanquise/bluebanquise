@@ -9,6 +9,7 @@
 #    This module allow to manage kernels globaly. It
 #    allow to make basic actions on kernels.
 #
+# 1.2.1: Role update. David Pieters <davidpieters22@gmail.com>
 # 1.2.0: Role update. David Pieters <davidpieters22@gmail.com>, Benoit Leveugle <benoit.leveugle@gmail.com>
 # 1.1.0: Role update. Benoit Leveugle <benoit.leveugle@gmail.com>, Bruno Travouillon <devel@travouillon.fr>
 # 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
@@ -77,8 +78,10 @@ class KernelManager:
 
         # Use image method to set kernel
         image.kernel = kernel
-        # Register image with new kernel
+        # Change the kernel in the image_data file
         image.register_image()
+        # Change the kernel in the boot.ipxe file
+        image.generate_ipxe_boot_file()
 
     # Generate initramfs from kernel
     @staticmethod

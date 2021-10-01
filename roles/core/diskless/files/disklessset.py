@@ -11,6 +11,7 @@
 #    This python script allows to create and manage diskless
 #    images from a linux command line interface.
 #
+# 1.2.1: Role update. David Pieters <davidpieters22@gmail.com>
 # 1.2.0: Role update. David Pieters <davidpieters22@gmail.com>, Benoit Leveugle <benoit.leveugle@gmail.com>
 # 1.1.0: Role update. Benoit Leveugle <benoit.leveugle@gmail.com>, Bruno Travouillon <devel@travouillon.fr>
 # 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
@@ -35,7 +36,7 @@ if __name__ == "__main__":
     # Set logging logs level, you can configure the logging level in order to have more or less logging informations.
     # You can select one of these levels (sorted by logs number): (lot of logs) DEBUG (default) > INFO > WARNING > ERROR (few logs)
     # Just change the value of the level on the line bellow.
-    logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
+    logging.root.setLevel(logging.DEBUG)
 
     # Set script banner
     BANNER = """\n
@@ -70,15 +71,17 @@ if __name__ == "__main__":
             print(' 1 - Manage and create diskless images (need modules)')
             print(' 2 - List available diskless images')
             print(' 3 - Remove a diskless image')
-            print(' 4 - Manage kernel of a diskless image')
+            print(' 4 - Clone a diskless image')
+            print(' 5 - Create image from a parameters file')
+            print(' 6 - Manage kernel of a diskless image')
 
             # The second part is about other actions
             printc("\n > Other actions", Color.BLUE)
 
-            print(' 5 - List available kernels')
-            print(' 6 - Generate a new initramfs\n')
-            print(' 7 - Clear a corrupted image (Use only as a last resort)')
-            print(' 8 - Exit\n')
+            print(' 7 - List available kernels')
+            print(' 8 - Generate a new initramfs\n')
+            print(' 9 - Clear a corrupted image (Use only as a last resort)')
+            print(' 10 - Exit\n')
 
             # When the user press CTRL + c in a sub menu, he returns to main menu
             # When the user press CTRL + c in the main menu he exit program
@@ -98,7 +101,7 @@ if __name__ == "__main__":
             in_main_menu = False
 
             # Clear potential previous bad installations before excecuting a main menu action
-            ImageManager.clean_intallations()
+            ImageManager.clean_installations()
 
             # With ImageManager.cli_use_modules() we can use all available modules
             if main_action == '1':
@@ -111,67 +114,39 @@ if __name__ == "__main__":
 
             # Remove a diskless image
             elif main_action == '3':
-                # Get image object to remove
-                image = ImageManager.get_created_image(ImageManager.cli_select_created_image())
-                printc('\n⚠ Would you realy delete image \'' + image.name + '\' definitively (yes/no) ?', Color.RED)
-
-                # get confirmation from user
-                confirmation = input('-->: ').replace(" ", "")
-
-                if confirmation == 'yes':
-                    # Remove image
-                    ImageManager.remove_image(image)
-                    printc('\n[OK] Done.', Color.GREEN)
-
-                elif confirmation == 'no':
-                    printc('\n[+] Image deletion cancelled', Color.YELLOW)
-
-            # Change the kernel of an existing image
+               ImageManager.remove_image()
+            
+            # Remove a diskless image
             elif main_action == '4':
+               ImageManager.cli_clone_image()
+
+            # Create image from a parameters file
+            elif main_action == '5':
+                ImageManager.cli_create_image_from_parameters()
+                printc('\n[OK] Done.', Color.GREEN)
+
+             # Change the kernel of an existing image
+            elif main_action == '6':
                 KernelManager.cli_change_kernel()
                 printc('\n[OK] Done.', Color.GREEN)
 
             # Display available kernels for image
-            elif main_action == '5':
+            elif main_action == '7':
                 KernelManager.cli_display_kernels()
                 printc('\n[OK] Done.', Color.GREEN)
 
             # Generate a new initramfs file from an existing kernel
-            elif main_action == '6':
+            elif main_action == '8':
                 selected_kernel = KernelManager.cli_select_kernel()
                 KernelManager.generate_initramfs(selected_kernel)
                 printc('\n[OK] Done.', Color.GREEN)
 
             # Clean an image
-            elif main_action == '7':
-                # Get list of existing images
-                images_names = ImageManager.get_image_names()
-
-                # If there is no images, raise an exception
-                if not images_names:
-                    raise UserWarning('No images.')
-
-                # Don't get in creation images
-                image_names = [image_name for image_name in images_names if ImageManager.get_image_status(image_name) != ImageManager.ImageStatus.IN_CREATION]
-
-                # If there is image, select the image
-                image_name = select_from_list(image_names)
-
-                printc('\n⚠ Would you realy clean image \'' + image_name + '\' definitively (yes/no) ?', Color.RED)
-
-                # get confirmation from user
-                confirmation = input('-->: ').replace(" ", "")
-
-                if confirmation == 'yes':
-                    # Clean selected image
-                    ImageManager.clean_intallation(image_name)
-                    printc('\n[OK] Done.', Color.GREEN)
-
-                elif confirmation == 'no':
-                    printc('\n[+] Image cleaning cancelled', Color.YELLOW)
+            elif main_action == '9':
+               ImageManager.cli_clear_image()
 
             # Exit program
-            elif main_action == '8':
+            elif main_action == '10':
                 exit()
 
             # Bad entry

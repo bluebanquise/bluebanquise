@@ -10,6 +10,7 @@
 #    allow to make basic actions on images. It can
 #    manage all types of images.
 #
+# 1.2.1: Role update. David Pieters <davidpieters22@gmail.com>
 # 1.2.0: Role update. David Pieters <davidpieters22@gmail.com>, Benoit Leveugle <benoit.leveugle@gmail.com>
 # 1.1.0: Role update. Benoit Leveugle <benoit.leveugle@gmail.com>, Bruno Travouillon <devel@travouillon.fr>
 # 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
@@ -27,7 +28,7 @@ import sys
 from enum import Enum, auto
 
 # Import diskless modules
-from diskless.utils import Color, printc, select_from_list, load_file
+from diskless.utils import Color, printc, select_from_list, load_file, inform
 
 
 class ImageManager:
@@ -214,6 +215,18 @@ class ImageManager:
         image.remove_files()
 
     @staticmethod
+    def clone_image(image, clone_name):
+        """clone an existing image
+
+        :param image: A created image object
+        :type image: Image
+        :param clone_name: The name of the clone
+        :type clone_name: str
+        """
+        # Use image object method to delete all related files
+        image.clone(clone_name)
+
+    @staticmethod
     def is_image(image_name):
         """Check if an image_name correspond to an image
 
@@ -231,7 +244,7 @@ class ImageManager:
         return False
 
     @classmethod
-    def clean_intallations(cls):
+    def clean_installations(cls):
         """Clean all corrupted images."""
         logging.debug("Start cleaning images...\n")
 
@@ -258,7 +271,7 @@ class ImageManager:
                 logging.warning('Image \'' + image_name + '\' cleaned\n')
 
     @classmethod
-    def clean_intallation(cls, image_name):
+    def clean_installation(cls, image_name):
         """Clean an specific image.
 
         :param image_name: The name of the created or corrupted image object to clean
@@ -328,12 +341,17 @@ class ImageManager:
                 subprocess.check_output("ps -A -o pid | grep -w " + str(image_pid), shell=True)
                 # An image is in creation if there is in the ongoing_intallations dictionary
                 # and there is a process instance to finishing created it.
-                return cls.ImageStatus.IN_CREATION
+                
+                if image_pid == os.getpid():
+                    # Cannot be at this program point and creating image at the same time
+                    return cls.ImageStatus.CORRUPTED
+                else:
+                    return cls.ImageStatus.IN_CREATION
 
             # If there is not running process for image creator instance pid
             except subprocess.CalledProcessError:
                 # An image is corrupted when it is in the ongoing_intallations dictionary
-                # but there is no process instance to finishing created it.
+                # but there is no process instance to finishing to creating it.
                 return cls.ImageStatus.CORRUPTED
 
         # The not in ongoing installation
@@ -375,7 +393,7 @@ class ImageManager:
         # Get ongoing_intallations dictionary
         ongoing_intallations = cls.get_ongoing_installations()
         # Add image to dictionary
-        ongoing_intallations[image_name] = {'pid': os.getpid(), 'image_class': image_class}
+        ongoing_intallations[image_name] = {'image_class': image_class, 'pid': os.getpid()}
         # Write ongoing_intallations dictionary
         cls.set_ongoin_installations(ongoing_intallations)
 
@@ -438,6 +456,32 @@ class ImageManager:
 
         except FileNotFoundError:
             raise FileNotFoundError('File /diskless/installations.yml cannot be writen.')
+
+
+    @classmethod
+    def create_image_from_parameters(cls,parameters_file):
+
+        try:
+            # Get the image module and class to create image by its name with it's class constructor
+            with open(parameters_file, 'r') as f:
+                # Get image datas
+                image_dict = yaml.safe_load(f)
+            
+            # Format dictionary
+            image_dict = image_dict['image_data']
+
+            # Get image class
+            image_class = image_dict['image_class']        
+
+            # Import the image class from the image_class name
+            image_class = ImageManager.get_class(image_class)
+            
+            image_class.create_image_from_parameters(image_dict)
+
+        except FileNotFoundError:
+            raise FileNotFoundError('Error loading image_data file for image ' + parameters_file)
+        except ValueError:
+            raise ValueError('Enable to load image class for image ' + parameters_file + ' from image data file ' + parameters_file)
 
     #####################
     # CLI reserved part #
@@ -521,6 +565,99 @@ class ImageManager:
         else:
             raise UserWarning('No images.')
 
+    @staticmethod
+    def cli_clone_image():
+        image_to_clone = ImageManager.get_created_image(ImageManager.cli_select_created_image())
+
+        printc('\n[+] Enter the clone name:', Color.BLUE)
+        while True:
+
+            # Get the clone name
+            clone_name = input('-->: ').replace(" ", "")
+
+            if clone_name == '':
+                inform('Image name cannot be empty !')
+
+            if ImageManager.is_image(clone_name):
+                 print('Cannot clone into an existing image')
+
+            else:
+                break
+
+        # get confirmation from user
+        printc('\n[+] Confirm you want to clone image \'' + image_to_clone.name + '\' into \'' + clone_name + '\' (yes/no)', Color.BLUE)
+        confirmation = input('-->: ').replace(" ", "")
+
+        if confirmation in {'yes','y'}:
+            # Remove image
+            ImageManager.clone_image(image_to_clone, clone_name)
+            printc('\n[OK] Done.', Color.GREEN)
+
+        elif confirmation in {'no','n'}:
+            printc('\n[+] Image clonning cancelled', Color.YELLOW)
+
+    @staticmethod
+    def cli_create_image_from_parameters():
+        # Inject ssh key or not
+        printc('\nEnter path to the parameters file', Color.GREEN)
+        while True:
+            parameters_file = input('-->: ')
+
+            if parameters_file != '' and not os.path.exists(parameters_file):
+                inform('Parameter file not found ' + parameters_file + ' , please enter another value.')
+            
+            elif parameters_file == '':
+               inform('Parameters file path cannot be empty')
+                
+            else:
+                break
+        print(parameters_file)
+        ImageManager.create_image_from_parameters(parameters_file)
+
+    @staticmethod
+    def remove_image():
+        # Get image object to remove
+        image = ImageManager.get_created_image(ImageManager.cli_select_created_image())
+        printc('\n⚠ Would you realy like to delete image \'' + image.name + '\' definitively (yes/no) ?', Color.RED)
+
+        # get confirmation from user
+        confirmation = input('-->: ').replace(" ", "")
+
+        if confirmation in {'yes','y'}:
+            # Remove image
+            ImageManager.remove_image(image)
+            printc('\n[OK] Done.', Color.GREEN)
+
+        elif confirmation in {'no','n'}:
+            printc('\n[+] Image deletion cancelled', Color.YELLOW)
+            
+    @staticmethod
+    def cli_clear_image():
+        # Get list of existing images
+        images_names = ImageManager.get_image_names()
+
+        # If there is no images, raise an exception
+        if not images_names:
+            raise UserWarning('No images.')
+
+        # Don't get in creation images
+        image_names = [image_name for image_name in images_names if ImageManager.get_image_status(image_name) != ImageManager.ImageStatus.IN_CREATION]
+
+        # If there is image, select the image
+        image_name = select_from_list(image_names)
+
+        printc('\n⚠ Would you realy clean image \'' + image_name + '\' definitively (yes/no) ?', Color.RED)
+
+        # get confirmation from user
+        confirmation = input('-->: ').replace(" ", "")
+
+        if confirmation == 'yes':
+            # Clean selected image
+            ImageManager.clean_installation(image_name)
+            printc('\n[OK] Done.', Color.GREEN)
+
+        elif confirmation == 'no':
+            printc('\n[+] Image cleaning cancelled', Color.YELLOW)
 
 # Add the modules directory path to importation path
 sys.path.append(ImageManager.MODULES_PATH)
