@@ -16,6 +16,7 @@
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
         - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family | upper }}.yml"
         - "vars/{{ ansible_facts.os_family }}.yml"
       skip: true
   tags:
@@ -27,6 +28,16 @@
     state: present
   tags:
     - package
+
+- name: "service █ Stop and disable {{ nic_nmcli_services_to_stop | join(' ') }} state"
+  service:
+    name: "{{ item }}"
+    enabled: no
+    state: stopped
+  loop: "{{ nic_nmcli_services_to_stop }}"
+  when: nic_nmcli_services_to_stop is defined
+  tags:
+    - service
 
 - name: "service █ Manage {{ nic_nmcli_services_to_start | join(' ') }} state"
   service:

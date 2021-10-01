@@ -160,6 +160,7 @@ You can define routes at two levels:
 Changelog
 ^^^^^^^^^
 
+* 1.3.2: Added support for OpenSuSE. Neil Munday <neil@mundayweb.com>
 * 1.3.1: Add DNS4 and DNS4_SEARCH vars logic. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.0: Rewrite logic to prevent crash and ease code reading. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.2.0: Add routes4, route_metric4, never_default4 and zone. Benoit Leveugle <benoit.leveugle@gmail.com>
