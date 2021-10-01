@@ -16,6 +16,7 @@
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
         - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family | upper }}.yml"
         - "vars/{{ ansible_facts.os_family }}.yml"
       skip: true
   tags:
@@ -29,7 +30,7 @@
     permanent: "yes"
     state: enabled
   when:
-    - ansible_facts.os_family == "RedHat"
+    - ansible_facts.os_family == "RedHat" or ansible_facts.os_family == "Suse"
     - ep_firewall | default(false) | bool
   loop: "{{ dns_server_firewall_services_to_add }}"
   tags:
@@ -42,11 +43,32 @@
   tags:
     - package
 
+- name: file █ Run named outside of chroot on SuSE base systems
+  lineinfile:
+    path: /etc/sysconfig/named
+    regexp: '^NAMED_RUN_CHROOTED='
+    line: 'NAMED_RUN_CHROOTED="no"'
+  when: ansible_facts.os_family == "Suse"
+  notify: service █ Restart dns services
+
 - name: file █ Create needed directory /var/named
   file:
     path: /var/named
     state: directory
-    mode: 0755
+    owner: root
+    group: named
+    mode: 0775
+
+- name: file █ Create needed directories under /var/named
+  file:
+    path: /var/named/{{ item }}
+    state: directory
+    owner: root
+    group: named
+    mode: 0770
+  with_items:
+    - data
+    - dynamic
 
 - name: template █ Generate /etc/named.conf
   template:
@@ -56,6 +78,40 @@
     group: root
     mode: 0644
   notify: service █ Restart dns services
+  tags:
+    - template
+
+- name: template █ Generate /etc/named.rfc1912.zones for SuSE based systems
+  template:
+    src: named.rfc1912.zones.j2
+    dest: /etc/named.rfc1912.zones
+    owner: root
+    group: root
+    mode: 0644
+  notify: service █ Restart dns services
+  when: ansible_facts.os_family == "Suse"
+  tags:
+    - template
+
+- name: file █ Created /var/named/named.ca for SuSE based systems
+  copy:
+    src: named.ca
+    dest: /var/named/named.ca
+    owner: root
+    group: root
+    mode: 0644
+  notify: service █ Restart dns services
+  when: ansible_facts.os_family == "Suse"
+
+- name: template █ Generate /etc/named.root.key for SuSE based systems
+  template:
+    src: named.root.key.j2
+    dest: /etc/named.root.key
+    owner: root
+    group: root
+    mode: 0644
+  notify: service █ Restart dns services
+  when: ansible_facts.os_family == "Suse"
   tags:
     - template
 
