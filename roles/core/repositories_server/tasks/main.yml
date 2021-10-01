@@ -43,6 +43,20 @@
   tags:
     - package
 
+- name: include_tasks ░ Use OS dedicated task
+  include_tasks: "{{ item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}.yml"
+        - "{{ ansible_facts.os_family | upper }}.yml"
+        - "{{ ansible_facts.os_family }}.yml"
+      skip: true
+  tags:
+    - internal 
+
 - name: "service █ Manage {{ repositories_server_services_to_start | join(' ') }} services state"
   service:
     name: "{{ item }}"

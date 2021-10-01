@@ -1,0 +1,10 @@
+---
+
+- name: file █ Create /etc/apache2/default-server.conf
+  copy:
+    src: SUSE/default-server.conf
+    dest: /etc/apache2/default-server.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify: service █ Restart http server service
