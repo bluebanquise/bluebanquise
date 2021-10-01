@@ -4,7 +4,7 @@
     state: latest
   when: update_reboot_upgrade_packages
 
-- name: Reboot a slow machine that might have lots of updates to apply
+- name: reboot █ Reboot a slow machine that might have lots of updates to apply
   reboot:
     reboot_timeout: "{{ update_reboot_reboot_timeout }}"
   when: update_reboot_reboot
