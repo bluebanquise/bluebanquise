@@ -25,7 +25,7 @@ import logging
 from termios import tcflush, TCIFLUSH
 
 # Import diskless modules from path
-from diskless.utils import Color, printc, select_from_list
+from diskless.utils import Color, printc, ok, inform, warn, ask
 from diskless.kernel_manager import KernelManager
 from diskless.image_manager import ImageManager
 
@@ -88,7 +88,7 @@ if __name__ == "__main__":
             printc('At any time: (CTRL + c) => Return to this main menu.\n', Color.BLUE)
 
             # Answer to get the action to execute
-            print(' Select an action:')
+            ask(' Select an action:')
 
             # Prevent old inputs to be taken as current input by cleaning stdin buffer
             tcflush(sys.stdin, TCIFLUSH)
@@ -110,11 +110,11 @@ if __name__ == "__main__":
             # Display already created diskless images
             elif main_action == '2':
                 ImageManager.cli_display_images()
-                printc('\n[OK] Done.', Color.GREEN)
+                ok()
 
             # Remove a diskless image
             elif main_action == '3':
-               ImageManager.remove_image()
+               ImageManager.cli_remove_image()
             
             # Remove a diskless image
             elif main_action == '4':
@@ -123,23 +123,23 @@ if __name__ == "__main__":
             # Create image from a parameters file
             elif main_action == '5':
                 ImageManager.cli_create_image_from_parameters()
-                printc('\n[OK] Done.', Color.GREEN)
+                ok()
 
              # Change the kernel of an existing image
             elif main_action == '6':
                 KernelManager.cli_change_kernel()
-                printc('\n[OK] Done.', Color.GREEN)
+                ok()
 
             # Display available kernels for image
             elif main_action == '7':
                 KernelManager.cli_display_kernels()
-                printc('\n[OK] Done.', Color.GREEN)
+                ok()
 
             # Generate a new initramfs file from an existing kernel
             elif main_action == '8':
                 selected_kernel = KernelManager.cli_select_kernel()
                 KernelManager.generate_initramfs(selected_kernel)
-                printc('\n[OK] Done.', Color.GREEN)
+                ok()
 
             # Clean an image
             elif main_action == '9':
@@ -151,7 +151,7 @@ if __name__ == "__main__":
 
             # Bad entry
             else:
-                printc('\n[INFO] \'' + main_action + '\' is not a valid entry. Please enter another value.', Color.YELLOW)
+                inform( main_action + '\' is not a valid entry. Please enter another value.')
 
         # When user press CTRL + c
         except KeyboardInterrupt:
@@ -166,4 +166,4 @@ if __name__ == "__main__":
         # Only catch UserWarning type exceptions
         except UserWarning as e:
             # Display to the user a warning message
-            printc('[WARNING] ' + str(e), Color.YELLOW)
+            warn(str(e))

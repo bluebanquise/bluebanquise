@@ -51,13 +51,40 @@ def printc(text, color):
     """
     print(color + text + Color.TAG_END)
 
+def ask(text):
+    """Print a text in the shell with the "INFO" tag and the yellow color 
+
+    :param text: The text to print
+    :type text: str
+    """
+    print(Color.BLUE + '[+] ' + text + Color.TAG_END)
+
+def ask_module(text):
+    """Print a text in the shell with the "INFO" tag and the yellow color 
+
+    :param text: The text to print
+    :type text: str
+    """
+    print(Color.GREEN + '[+] ' + text + Color.TAG_END)
+
 def inform(text):
     """Print a text in the shell with the "INFO" tag and the yellow color 
 
     :param text: The text to print
     :type text: str
     """
-    print(Color.YELLOW + '[INFO] ' + text + Color.TAG_END)
+    print(Color.YELLOW + '[-] ' + text + Color.TAG_END)
+
+def ok(text = None):
+    """Print a text in the shell with the "INFO" tag and the yellow color 
+
+    :param text: The text to print
+    :type text: str
+    """
+    if text != None:
+        print(Color.GREEN + '[OK] ' + text + Color.TAG_END)
+    else:
+        print(Color.GREEN + '[OK] Done' + Color.TAG_END)
 
 def warn(text):
     """Print a text in the shell with the "WARNING" tag and the red color
@@ -65,7 +92,7 @@ def warn(text):
     :param text: The text to print
     :type text: str
     """
-    print(Color.RED + '[WARNING] ' + text + Color.TAG_END)
+    print(Color.RED + '[x] ' + text + Color.TAG_END)
 
 def select_from_list(_list):
     """Display to the user an interface for selecting an element in a list.

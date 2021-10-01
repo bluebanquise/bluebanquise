@@ -32,8 +32,7 @@ from subprocess import check_call, check_output, CalledProcessError
 from diskless.modules.base_module import Image
 from diskless.kernel_manager import KernelManager
 from diskless.image_manager import ImageManager
-from diskless.utils import Color, printc, select_from_list, inform, warn
-
+from diskless.utils import Color, printc, select_from_list, inform, warn, ok, ask_module
 
 # Class representing a livenet image
 class LivenetImage(Image):
@@ -727,7 +726,7 @@ def cli_menu():
     # Display main livenet menu
     printc('\n == Livenet image module == \n', Color.GREEN)
 
-    print('\n Select an action:')
+    ask_module('Select an action:')
     action_list = ['Generate a new livenet image', 'Mount an existing livenet image', 'Unount an existing livenet image', 'Resize livenet image']
     
     while True:
@@ -790,7 +789,7 @@ def cli_create_livenet_image_questions():
         raise UserWarning('No kernel available.')
 
     # Give a name to the image to create
-    printc('[+] Give a name for your image', Color.GREEN)
+    ask_module('Give a name for your image')
     while True:
 
         # Get new image name
@@ -808,15 +807,15 @@ def cli_create_livenet_image_questions():
             break
 
     # Select the kernel to use
-    printc('\n[+] Select your kernel:', Color.GREEN)
+    ask_module('Select your kernel:')
     selected_kernel = select_from_list(kernel_list)
 
     # Manage password
-    printc('\n[+] Give a password for your image', Color.GREEN)
+    ask_module('Give a password for your image')
     selected_password = input('Enter clear root password of the new image: ').replace(" ", "")
 
     # Select livenet type
-    printc('\n[+] Choose your image type:', Color.GREEN)
+    ask_module('Choose your image type:')
     types_list = ['Standard: core (~1.3Gb)', 'Small: openssh, dnf and NetworkManager (~300Mb)', 'Minimal: openssh only (~270Mb)']
     get_type = select_from_list(types_list)
 
@@ -828,7 +827,7 @@ def cli_create_livenet_image_questions():
         selected_type = LivenetImage.Type.CORE
 
     # Select livenet size
-    printc('\nPlease choose image size:\n(supported units: M=1024*1024, G=1024*1024*1024)\n(Examples: 5120M or 5G)', Color.GREEN)
+    ask_module('Please choose image size:\n(supported units: M=1024*1024, G=1024*1024*1024)\n(Examples: 5120M or 5G)')
     while True:
         selected_size = input('-->: ')
 
@@ -846,7 +845,7 @@ def cli_create_livenet_image_questions():
             inform(str(e))
 
     # Inject ssh key or not
-    printc('\nEnter path to SSH public key (left empty to disable key injection)', Color.GREEN)
+    ask_module('Enter path to SSH public key (left empty to disable key injection)')
     while True:
         selected_ssh_pub_key = input('-->: ')
 
@@ -859,7 +858,7 @@ def cli_create_livenet_image_questions():
             break         
 
     # Activate SELinux or not
-    printc('\nActivate SELinux inside the image (yes/no) ?', Color.GREEN)
+    ask_module('Activate SELinux inside the image (yes/no) ?')
     while 'selinux' not in locals():
         answer_selinux = input('-->: ')
         if answer_selinux in {'yes','y'}:
@@ -870,7 +869,7 @@ def cli_create_livenet_image_questions():
             inform('Invalid input, please enter another value.')
      
     # Propose to user to install additional packages
-    printc('\nDo you want to customize your image with additional packages (yes/no) ? ', Color.GREEN)
+    ask_module('Do you want to customize your image with additional packages (yes/no) ? ')
     while 'additional_packages' not in locals():
         choice = input('-->: ')
         # Install additional packages
@@ -884,14 +883,14 @@ def cli_create_livenet_image_questions():
             inform('Invalid entry !')
 
     # Propose to user to specify a release version
-    printc('\nSpecify a release version for installation (left empty to not use the --relasever option)', Color.GREEN)
+    ask_module('Specify a release version for installation (left empty to not use the --relasever option)')
     release_version = input('-->: ')
     if release_version == '':
         release_version = None
 
     # Propose to optimize image packages
-    printc('\nDo you wish tool try to optimize image by using aggressive packages dependencies parameters ? ', Color.GREEN)
-    printc('Note that this may collide with additional packages if asked for. (yes/no) ? ', Color.GREEN)
+    ask_module('Do you wish tool try to optimize image by using aggressive packages dependencies parameters ? ')
+    ask_module('Note that this may collide with additional packages if asked for. (yes/no) ? ')
     
     while 'optimize' not in locals():
         answer_optimize = input('-->: ')
@@ -907,7 +906,7 @@ def cli_create_livenet_image_questions():
 def cli_construct_livenet_image(name, password, kernel, type, size, additional_packages, ssh_pub_key, selinux, release_version, optimize):
 
     # Confirm image creation
-    printc('\n[+] Would you like to create a new livenet image with the following attributes: (yes/no)', Color.GREEN)
+    ask_module('Would you like to create a new livenet image with the following attributes: (yes/no)')
     print('  ├── Image name: \t\t' + name)
     print('  ├── Image password: \t\t' + password)
     print('  ├── Image kernel: \t\t' + kernel)
@@ -940,7 +939,7 @@ def cli_construct_livenet_image(name, password, kernel, type, size, additional_p
                 try:
                     # Create the image object
                     LivenetImage(name, password, kernel, type, size, additional_packages, ssh_pub_key, selinux, release_version, optimize)
-                    printc('\n[OK] Done.', Color.GREEN)
+                    ok()
                     return
 
                 # If an error occurs during the image creation
@@ -960,14 +959,14 @@ def cli_construct_livenet_image(name, password, kernel, type, size, additional_p
                             break
 
                         elif confirmation in {'no','n'}:
-                            printc('\n[+] Image creation cancelled, return to main menu.', Color.YELLOW)
+                            inform('Image creation cancelled, return to main menu.')
                             return
 
                         else:
                             inform('Invalid confirmation !')
 
         elif confirmation in {'no','n'}:
-            printc('\n[+] Image creation cancelled, return to main menu.', Color.YELLOW)
+            inform('Image creation cancelled, return to main menu.')
             return
 
         else:
@@ -988,7 +987,7 @@ def cli_mount_livenet_image():
         raise UserWarning('No unmounted livenet images.')
 
     # Select a staging image for golden image creation
-    printc('[+] Select the livenet image to mount:', Color.GREEN)
+    ask_module('Select the livenet image to mount:')
     unmounted_image_name = select_from_list(unmounted_images_names)
     unmounted_image = ImageManager.get_created_image(unmounted_image_name)
 
@@ -1010,7 +1009,7 @@ def cli_unmount_livenet_image():
         raise UserWarning('No mounted livenet images.')
 
     # Select a staging image for golden image creation
-    printc('[+] Select the livenet image to unmount:', Color.GREEN)
+    ask_module('Select the livenet image to unmount:', Color.GREEN)
     mounted_image_name = select_from_list(mounted_images_names)
     mounted_image = ImageManager.get_created_image(mounted_image_name)
 
@@ -1034,12 +1033,12 @@ def cli_resize_livenet_image():
         raise UserWarning('No unmounted livenet images to resize.')
 
     # Select a livenet to mount
-    printc('[+] Select the livenet image to mount:', Color.GREEN)
+    ask_module('Select the livenet image to mount:')
     unmounted_image_name = select_from_list(unmounted_images_names)
     unmounted_image = ImageManager.get_created_image(unmounted_image_name)
 
     # Enter new size
-    printc('Please enter your new image size:\n(supported units: M=1024*1024, G=1024*1024*1024)\n(Examples: 5120M or 5G)', Color.GREEN)
+    ask_module('Please enter your new image size:\n(supported units: M=1024*1024, G=1024*1024*1024)\n(Examples: 5120M or 5G)')
     
     while True:
         selected_size = input('-->: ')
@@ -1058,7 +1057,7 @@ def cli_resize_livenet_image():
             inform(str(e))
 
     # Confirm image resizing
-    printc('\n[+] Are you sure you want to resize image \'' + unmounted_image.name + '\' with the following size: (yes/no)', Color.GREEN)
+    ask_module('Are you sure you want to resize image \'' + unmounted_image.name + '\' with the following size: (yes/no)')
     print('  └── Image size: ' + selected_size)
 
     while True:
@@ -1067,11 +1066,11 @@ def cli_resize_livenet_image():
         if confirmation in {'yes','y'}:
             # Create the image object
             unmounted_image.resize(image_size)
-            printc('\n[OK] Done.', Color.GREEN)
+            ok()
             return
 
         elif confirmation in {'no','n'}:
-            printc('\n[+] Image resizing cancelled, return to main menu.', Color.YELLOW)
+            inform('Image resizing cancelled, return to main menu.')
             return
         
         else:

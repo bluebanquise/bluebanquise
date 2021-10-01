@@ -30,7 +30,7 @@ from subprocess import check_output, CalledProcessError
 from diskless.modules.base_module import Image
 from diskless.kernel_manager import KernelManager
 from diskless.image_manager import ImageManager
-from diskless.utils import Color, printc, select_from_list, inform, warn
+from diskless.utils import Color, printc, select_from_list, inform, warn, ask_module, ok
 
 
 # Class representing an nfs staging image
@@ -430,7 +430,7 @@ def cli_menu():
     # Display main menu
     printc('\n == NFS image module == \n', Color.GREEN)
 
-    print('\n Select an action:')
+    ask_module('Select an action:')
     action_list = ['Generate a new nfs staging image', 'Generate a new nfs golden image from a staging image', 'Manage nodes of a golden image']
     
     while True:
@@ -459,7 +459,7 @@ def cli_create_nfsstaging_image_questions():
         raise UserWarning('No kernel available')
 
     # Condition to test if image name is compliant
-    printc('[+] Give a name for your image', Color.GREEN)
+    ask_module('Give a name for your image')
     while True:
 
         # Get new image name
@@ -472,18 +472,18 @@ def cli_create_nfsstaging_image_questions():
             break
 
         # Else
-        print('Image ' + selected_image_name + ' already exist, use another image name.')
+        inform('Image ' + selected_image_name + ' already exist, use another image name.')
 
     # Select the kernel to use
-    printc('\n[+] Select your kernel:', Color.GREEN)
+    ask_module('Select your kernel:')
     selected_kernel = select_from_list(kernel_list)
 
     # Manage password
-    printc('\n[+] Give a password for your image', Color.GREEN)
+    ask_module(' Give a password for your image')
     selected_password = input('Please enter clear root password of the new image: ').replace(" ", "")
 
     # Propose to user to install additional packages
-    printc('\nDo you want to customize your image with additional packages? (yes/no)', Color.GREEN)
+    ask_module('Do you want to customize your image with additional packages? (yes/no)')
     while not 'additional_packages' in locals():
         choice = input('-->: ')
         # Install addictional packages
@@ -497,7 +497,7 @@ def cli_create_nfsstaging_image_questions():
             inform('Invalid entry !')
 
     # Propose to user to specify a release version
-    printc('\nSpecify a release version for installation (left empty to not use the --relasever option)', Color.GREEN)
+    ask_module('Specify a release version for installation (left empty to not use the --relasever option)')
     release_version = input('-->: ')
     if release_version == '':
         release_version = None
@@ -507,7 +507,7 @@ def cli_create_nfsstaging_image_questions():
 def cli_construct_nfsstaging_image(name, password, kernel, additional_packages, release_version):
 
     # Confirm image creation
-    printc('\n[+] Would you like to create a new nfs staging image with the following attributes: (yes/no)', Color.GREEN)
+    ask_module('Would you like to create a new nfs staging image with the following attributes: (yes/no)')
     print('  ├── Image name: \t\t' + name)
     print('  ├── Image password : \t\t' + password)
 
@@ -532,7 +532,7 @@ def cli_construct_nfsstaging_image(name, password, kernel, additional_packages, 
                 try:
                     # Create the image object
                     NfsStagingImage(name, password, kernel, additional_packages, release_version)
-                    printc('\n[OK] Done.', Color.GREEN)
+                    ok()
                     return
 
                 # If an error occurs during the image creation
@@ -551,14 +551,14 @@ def cli_construct_nfsstaging_image(name, password, kernel, additional_packages, 
                             break
 
                         elif confirmation in {'no','n'}:
-                            printc('\n[+] Image creation cancelled, return to main menu.', Color.YELLOW)
+                            inform('Image creation cancelled, return to main menu.')
                             return
 
                         else:
                             inform('Invalid confirmation !')
 
         elif confirmation in {'no','n'}:
-            printc('\n[+] Image creation cancelled, return to main menu.', Color.YELLOW)
+            inform('Image creation cancelled, return to main menu.')
             return
 
         else:
@@ -578,12 +578,12 @@ def cli_create_nfsgolden_image_questions():
     staging_images_names = [staging_image.name for staging_image in staging_images]
 
     # Select a staging image for golden image creation
-    printc('[+] Select the nfs image to use for golden image creation:', Color.GREEN)
+    ask_module('Select the nfs image to use for golden image creation:')
     staging_image_name = select_from_list(staging_images_names)
     staging_image = ImageManager.get_created_image(staging_image_name)
 
     # Condition to test if image name is compliant
-    printc('\n[+] Give a name for your image', Color.GREEN)
+    ask_module(' Give a name for your image')
     while True:
 
         # Get new image name
@@ -604,7 +604,7 @@ def cli_create_nfsgolden_image_questions():
 def cli_construct_nfsgolden_image(name, staging_image):
 
     # Confirm image creation
-    printc('\n[+] Would you like to create a new nfs golden image with the following attributes: (yes/no)', Color.GREEN)
+    ask_module(' Would you like to create a new nfs golden image with the following attributes: (yes/no)')
     print('  ├── Image name: \t\t' + name)
     print('  └── Staging image from: \t' + staging_image.name)
 
@@ -619,7 +619,7 @@ def cli_construct_nfsgolden_image(name, staging_image):
                 try:
                     # Create the image object
                     NfsGoldenImage(name, staging_image)
-                    printc('\n[OK] Done.', Color.GREEN)
+                    ok()
                     return
 
                 # If an error occurs during the image creation
@@ -639,14 +639,14 @@ def cli_construct_nfsgolden_image(name, staging_image):
                             break
 
                         elif confirmation in {'no','n'}:
-                            printc('\n[+] Image creation cancelled, return to main menu.', Color.YELLOW)
+                            inform('Image creation cancelled, return to main menu.')
                             return
 
                         else:
                             inform('Invalid confirmation !')
 
         elif confirmation in {'no','n'}:
-            printc('\nImage creation cancelled, return to main menu.', Color.YELLOW)
+            inform('Image creation cancelled, return to main menu.')
             return
 
         else:
@@ -665,12 +665,12 @@ def cli_manage_nodes():
     golden_images_names = [golden_image.name for golden_image in golden_images]
 
     # Select the golden image to manage from list
-    printc('\n[+] Select the golden image to manage:', Color.GREEN)
+    ask_module('Select the golden image to manage:')
     golden_image_name = select_from_list(golden_images_names)
     golden_image = ImageManager.get_created_image(golden_image_name)
 
     # Choose an action for nodes management
-    printc('\n[+] Manages nodes of image ' + golden_image_name, Color.GREEN)
+    ask_module('Manages nodes of image ' + golden_image_name)
     action_list = ['List nodes with the image', 'Add nodes with the image', 'Remove nodes with the image']
     action = select_from_list(action_list)
 
@@ -678,18 +678,18 @@ def cli_manage_nodes():
     if action == 'List nodes with the image':
         nodeset = golden_image.get_nodes()
         print(nodeset)
-        printc('\n[OK] Done.', Color.GREEN)
+        ok()
 
     # Add some nodes to the image
     elif action == 'Add nodes with the image':
-        printc('\n[+] Actual image NodeSet is: ' + str(golden_image.nodes), Color.GREEN)
-        printc('[+] Please enter nodes range to add:', Color.GREEN)
+        ask_module('Actual image NodeSet is: ' + str(golden_image.nodes))
+        ask_module('Please enter nodes range to add:')
         while True:
             nodes_range = input('-->: ').replace(" ", "")
             # Test if nodes_range is a valid range
             try:
                 golden_image.add_nodes(nodes_range)
-                printc('\n[OK] Done.', Color.GREEN)
+                ok()
                 break
 
             except KeyError:
@@ -697,13 +697,13 @@ def cli_manage_nodes():
 
     # Delete nodes from image
     elif action == 'Remove nodes with the image':
-        printc('\n[+] Please enter nodes range to remove:', Color.GREEN)
+        ask_module('Please enter nodes range to remove:')
         while True:
             nodes_range = input('-->: ').replace(" ", "")
             # Test if nodes_range is a valid range
             try:
                 golden_image.remove_nodes(nodes_range)
-                printc('\n[OK] Done.', Color.GREEN)
+                ok()
                 break
 
             except KeyError:

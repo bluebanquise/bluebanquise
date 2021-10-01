@@ -28,7 +28,7 @@ import sys
 from enum import Enum, auto
 
 # Import diskless modules
-from diskless.utils import Color, printc, select_from_list, load_file, inform
+from diskless.utils import Color, printc, select_from_list, load_file, inform, ask, ok, warn
 
 
 class ImageManager:
@@ -502,7 +502,7 @@ class ImageManager:
         module_names = [module.replace('_module.py', '') for module in modules if 'base' not in module and 'module' in module]
 
         # Select desired image type in the list
-        printc('[+] Select the module you want to use:\n', Color.BLUE)
+        ask('Select the module you want to use:')
         selected_module_name = select_from_list(module_names)
 
         # Convert image type into it's corresponding module name
@@ -526,7 +526,7 @@ class ImageManager:
 
             # If there are images
             if images_names_list:
-                printc('[+] Select the image:\n', Color.BLUE)
+                ask('Select the image:')
                 # Allow the user to select an image name from the list
                 return select_from_list(images_names_list)
 
@@ -569,7 +569,7 @@ class ImageManager:
     def cli_clone_image():
         image_to_clone = ImageManager.get_created_image(ImageManager.cli_select_created_image())
 
-        printc('\n[+] Enter the clone name:', Color.BLUE)
+        ask('Enter the clone name:')
         while True:
 
             # Get the clone name
@@ -579,27 +579,27 @@ class ImageManager:
                 inform('Image name cannot be empty !')
 
             if ImageManager.is_image(clone_name):
-                 print('Cannot clone into an existing image')
+                inform('Cannot clone into an existing image')
 
             else:
                 break
 
         # get confirmation from user
-        printc('\n[+] Confirm you want to clone image \'' + image_to_clone.name + '\' into \'' + clone_name + '\' (yes/no)', Color.BLUE)
+        ask('Confirm that you want to clone image \'' + image_to_clone.name + '\' into \'' + clone_name + '\' (yes/no)')
         confirmation = input('-->: ').replace(" ", "")
 
         if confirmation in {'yes','y'}:
             # Remove image
             ImageManager.clone_image(image_to_clone, clone_name)
-            printc('\n[OK] Done.', Color.GREEN)
+            ok()
 
         elif confirmation in {'no','n'}:
-            printc('\n[+] Image clonning cancelled', Color.YELLOW)
+            inform('Image clonning cancelled')
 
     @staticmethod
     def cli_create_image_from_parameters():
         # Inject ssh key or not
-        printc('\nEnter path to the parameters file', Color.GREEN)
+        ask('Enter path to the parameters file')
         while True:
             parameters_file = input('-->: ')
 
@@ -613,23 +613,6 @@ class ImageManager:
                 break
         print(parameters_file)
         ImageManager.create_image_from_parameters(parameters_file)
-
-    @staticmethod
-    def remove_image():
-        # Get image object to remove
-        image = ImageManager.get_created_image(ImageManager.cli_select_created_image())
-        printc('\n⚠ Would you realy like to delete image \'' + image.name + '\' definitively (yes/no) ?', Color.RED)
-
-        # get confirmation from user
-        confirmation = input('-->: ').replace(" ", "")
-
-        if confirmation in {'yes','y'}:
-            # Remove image
-            ImageManager.remove_image(image)
-            printc('\n[OK] Done.', Color.GREEN)
-
-        elif confirmation in {'no','n'}:
-            printc('\n[+] Image deletion cancelled', Color.YELLOW)
             
     @staticmethod
     def cli_clear_image():
@@ -646,7 +629,7 @@ class ImageManager:
         # If there is image, select the image
         image_name = select_from_list(image_names)
 
-        printc('\n⚠ Would you realy clean image \'' + image_name + '\' definitively (yes/no) ?', Color.RED)
+        warn('⚠ Would you realy clean image \'' + image_name + '\' definitively (yes/no) ?')
 
         # get confirmation from user
         confirmation = input('-->: ').replace(" ", "")
@@ -654,10 +637,27 @@ class ImageManager:
         if confirmation == 'yes':
             # Clean selected image
             ImageManager.clean_installation(image_name)
-            printc('\n[OK] Done.', Color.GREEN)
+            ok()
 
         elif confirmation == 'no':
-            printc('\n[+] Image cleaning cancelled', Color.YELLOW)
+            inform('Image cleaning cancelled')
+
+    @staticmethod
+    def cli_remove_image():
+        # Get image object to remove
+        image = ImageManager.get_created_image(ImageManager.cli_select_created_image())
+        warn('⚠ Would you realy like to delete image \'' + image.name + '\' definitively (yes/no) ?')
+
+        # get confirmation from user
+        confirmation = input('-->: ').replace(" ", "")
+
+        if confirmation in {'yes','y'}:
+            # Remove image
+            ImageManager.remove_image(image)
+            ok()
+
+        elif confirmation in {'no','n'}:
+            inform('Image deletion cancelled')
 
 # Add the modules directory path to importation path
 sys.path.append(ImageManager.MODULES_PATH)

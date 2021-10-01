@@ -24,7 +24,7 @@ import logging
 # Import diskless modules
 from diskless.modules.base_module import Image
 from diskless.image_manager import ImageManager
-from diskless.utils import Color, printc, inform, select_from_list
+from diskless.utils import Color, printc, inform, ask, ok, select_from_list
 
 
 class DemoImage(Image):
@@ -45,7 +45,7 @@ class DemoImage(Image):
         # Create the 'my_message attribute'
         self.my_message = my_message
         self.generate_files()
-        printc("Image created ! Check images list to look at it.", Color.RED)
+        ok("Image created ! Check images list to look at it.", Color.RED)
 
     def generate_files(self):
         super().generate_files()
@@ -70,7 +70,7 @@ class DemoImage(Image):
         f.write("This file will be removed throughout normal image generation !")
         f.close()
 
-        print('Would you like to corrupt this image generation?(yes/no)')
+        ask('Would you like to corrupt this image generation?(yes/no)')
         choice = input('-->: ')
         if choice == 'yes':
             exit()  # <- Fake a program crash
@@ -156,7 +156,7 @@ def cli_menu():
 
     printc('\n == Welcome to demo image module == \n', Color.GREEN)
 
-    print('\n Select an action')
+    ask('Select an action')
     action_list = ['Create my demo image']
     action = select_from_list(action_list)
     print('')
@@ -166,7 +166,7 @@ def cli_menu():
         # Condition to test if image name is compliant
         while True:
 
-            printc('[+] Give a name for your demo image', Color.GREEN)
+            ask('Give a name for your demo image')
             # Get new image name
             selected_image_name = input('-->: ').replace(" ", "")
 
@@ -180,7 +180,7 @@ def cli_menu():
                 break
             
 
-        printc('\nGive a message for your demo image:', Color.GREEN)
+        ask('Give a message for your demo image:')
         demo_message = input('-->: ')
 
         # Create a DemoImage image
