@@ -55,7 +55,7 @@
         - "{{ ansible_facts.os_family }}.yml"
       skip: true
   tags:
-    - internal 
+    - internal
 
 - name: "service █ Manage {{ repositories_server_services_to_start | join(' ') }} services state"
   service:
