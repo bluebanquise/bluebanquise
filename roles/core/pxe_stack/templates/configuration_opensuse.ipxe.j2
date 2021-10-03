@@ -1,22 +1,25 @@
 #!ipxe
 
-echo
-echo Now starting os deployment process.
-echo OpenSuse ipxe configuration.
-echo
+echo |
+echo | Entering equipment_profiles/{{ item | replace('equipment_','') | trim }}.ipxe file.
+echo |
+echo |
 
-echo Loading linux ...
+# Ansible variables
+set eq-equipment-profile compute
+set eq-architecture ${arch}
+set eq-distribution {{hostvars[groups[item][0]]['ep_operating_system']['distribution']}}
+set eq-distribution-major-version {{hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version']}}
+set eq-distribution-version {{ hostvars[groups[item][0]]['ep_operating_system']['distribution_version'] | default(hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version']) }}
+set eq-console {{hostvars[groups[item][0]]['ep_console']}}
+set eq-kernel-parameters {{hostvars[groups[item][0]]['ep_kernel_parameters']}}
+set eq-repositories-environment {{ hostvars[groups[item][0]]['ep_operating_system']['repositories_environment'] | default('') }}
 
-kernel http://${next-server}/repositories/{{hostvars[groups[item][0]]['ep_operating_system']['distribution']}}/{{hostvars[groups[item][0]]['ep_operating_system']['distribution_version']}}/{{hostvars[groups[item][0]]['ep_hardware']['cpu']['architecture']}}/netboot/linux install=http://${next-server}/repositories/{{hostvars[groups[item][0]]['ep_operating_system']['distribution']}}/{{hostvars[groups[item][0]]['ep_operating_system']['distribution_version']}}/{{hostvars[groups[item][0]]['ep_hardware']['cpu']['architecture']}}/os autoyast=http://${next-server}/preboot_execution_environment/equipment_os_configurations/autoyast.{{item | replace('equipment_','') | trim}}.xml {{hostvars[groups[item][0]]['ep_kernel_parameters']}} {{hostvars[groups[item][0]]['ep_console']}} ipxe_next_server=${next-server} ${dedicated-parameters}
+# Dynamic variables
+set images-root http://${next-server}/repositories/${eq-repositories-environment}/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/
+set repository-root http://${next-server}/repositories/${eq-repositories-environment}/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/
 
-echo Loading initial ramdisk ...
-
-initrd http://${next-server}/repositories/{{hostvars[groups[item][0]]['ep_operating_system']['distribution']}}/{{hostvars[groups[item][0]]['ep_operating_system']['distribution_version']}}/{{hostvars[groups[item][0]]['ep_hardware']['cpu']['architecture']}}/netboot/initrd
-
-echo ALL DONE! We are ready.
-echo Booting in 2 s ...
+echo | Now chaining to --> menu.ipxe
 sleep 2
-
-boot
-
+chain http://${next-server}/preboot_execution_environment/menu.ipxe
 

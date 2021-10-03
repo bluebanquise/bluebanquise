@@ -1,0 +1,18 @@
+- name: "package █ Install installation environment for OpenSuSE {{ansible_distribution_version}} {{ ep_hardware['cpu']['architecture'] }}"
+  package:
+    name: "tftpboot-installation-openSUSE-Leap-{{ansible_distribution_version}}-{{ ep_hardware['cpu']['architecture'] }}"
+    state: present
+
+- name: "file █ create symlink for /usr/share/tftpboot-installation/openSUSE-Leap-{{ansible_distribution_version}}-{{ ep_hardware['cpu']['architecture'] }}/boot/x86_64/loader to /var/www/html/repositories/opensuse/{{ ep_operating_system['distribution_version'] | default(ep_operating_system['distribution_major_version']) }}/x86_64/netboot"
+  file:
+    src: "/usr/share/tftpboot-installation/openSUSE-Leap-{{ansible_distribution_version}}-{{ ep_hardware['cpu']['architecture'] }}/boot/{{ ep_hardware['cpu']['architecture'] }}/loader"
+    dest: "/var/www/html/repositories/opensuse/{{ ep_operating_system['distribution_version'] | default(ep_operating_system['distribution_major_version']) }}/{{ ep_hardware['cpu']['architecture'] }}/netboot"
+    state: link
+
+- name: "copy █ atftpd service file"
+  copy:
+    src: opensuse/atftpd.service
+    dest: /usr/lib/systemd/system/atftpd.service 
+
+
+

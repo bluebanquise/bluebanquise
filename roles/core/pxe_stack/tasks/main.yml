@@ -16,6 +16,7 @@
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
         - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family | upper }}.yml"
         - "vars/{{ ansible_facts.os_family }}.yml"
       skip: true
   tags:
@@ -29,7 +30,7 @@
     permanent: "yes"
     state: enabled
   when:
-    - ansible_facts.os_family == "RedHat"
+    - ansible_facts.os_family == "RedHat" or ansible_facts.os_family == "Suse"
     - ep_firewall | default(false) | bool
   loop: "{{ pxe_stack_firewall_services_to_add }}"
   tags:
@@ -199,34 +200,45 @@
 
 ##### OpenSuse
 
-# OUTDATED, need review
-# - name: Templates >> autoyasts for OpenSuse
-#   template:
-#     src: "autoyast.xml.j2"
-#     dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.autoyast.xml
-#     mode: 0644
-#     owner: "{{ pxe_stack_apache_user }}"
-#     group: "{{ pxe_stack_apache_user }}"
-#   with_items: "{{ j2_equipment_groups_list }}"
-#   when:
-#     - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
-#     - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) == 'opensuse'
-#   tags:
-#     - template
-#
-# - name: Templates >> equipment_profiles for OpenSuse
-#   template:
-#     src: "configuration_opensuse.ipxe.j2"
-#     dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.ipxe
-#     mode: 0644
-#     owner: "{{ pxe_stack_apache_user }}"
-#     group: "{{ pxe_stack_apache_user }}"
-#   with_items: "{{ j2_equipment_groups_list }}"
-#   when:
-#     - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
-#     - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) == 'opensuse'
-#   tags:
-#     - template
+- name: copy █ Copy osdeploy files for OpenSuSE /var/www/html/preboot_execution_environment/osdeploy/
+  copy:
+    src: osdeploy/opensuse_{{ item.major }}.ipxe
+    dest: "/var/www/html/preboot_execution_environment/osdeploy/opensuse_{{ item.major }}.ipxe"
+    mode: 0644
+    owner: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_user }}"
+  loop: "{{ pxe_stack_supported_os.suse }}"
+  when: ansible_facts.os_family == "Suse"
+    
+- name: Templates >> autoyasts for OpenSuse
+  template:
+    src: "autoyast.xml.j2"
+    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.autoyast.xml
+    mode: 0644
+    owner: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_user }}"
+  with_items: "{{ j2_equipment_groups_list }}"
+  when:
+    - ansible_facts.os_family == "Suse"
+    - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
+    - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) == 'opensuse'
+  tags:
+    - template
+
+- name: Templates >> equipment_profiles for OpenSuse
+  template:
+    src: "configuration_opensuse.ipxe.j2"
+    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.ipxe
+    mode: 0644
+    owner: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_user }}"
+  with_items: "{{ j2_equipment_groups_list }}"
+  when:
+    - ansible_facts.os_family == "Suse"
+    - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
+    - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) == 'opensuse'
+  tags:
+    - template
 #
 # ##### Minimal, specific
 #

@@ -18,6 +18,7 @@
 
   <networking>
     <keep_install_network config:type="boolean">true</keep_install_network>
+    <managed config:type="boolean">true</managed>
   </networking>
 
   <software>
@@ -25,6 +26,9 @@
     <patterns config:type="list">
       <pattern>base</pattern>
     </patterns>
+    <packages config:type="list">
+      <package>openssh-server</package>
+    </packages>
   </software> 
 
 {{hostvars[groups[item][0]]['ep_partitioning']}}
