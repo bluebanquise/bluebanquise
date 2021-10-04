@@ -5,9 +5,11 @@
 At this point, **BlueBanquise** configuration is done. We are ready to deploy
 the cluster.
 
-First step is to deploy configuration on management1 node, and then deploy OS on
-the other systems. Last step will be to deploy configuration on the other
-systems.
+We are going to proceed in the following order:
+
+1. Deploy configuration on management1 node
+3. Deploy fresh OS on the other nodes, from management1
+4. Deploy configuration on the other nodes.
 
 Management deployment
 =====================
@@ -18,7 +20,7 @@ Get managements playbook
 We are going to use the provided default playbook. This playbook will install
 most of the **CORE** roles. Enough to deploy first stage of the cluster.
 
-Copy example playbook managements to /etc/bluebanquise/playbooks/:
+Copy example playbook managements to */etc/bluebanquise/playbooks/*:
 
 .. code-block:: bash
 
@@ -28,7 +30,7 @@ Copy example playbook managements to /etc/bluebanquise/playbooks/:
 Then, we will ask Ansible to read this playbook, and execute all roles listed
 inside on management1 node (check hosts at top of the file).
 
-To do so, we are going to use the ansible-playbook command.
+To do so, we are going to use the **ansible-playbook** command.
 
 Ansible-playbook
 ----------------
@@ -56,7 +58,7 @@ Additional documentation about tags usage in playbooks is available
 Extra vars
 ^^^^^^^^^^
 
-Extra vars allow to pass variables with maximum precedence at execution time,
+Extra-vars allows to pass variables with maximum precedence at execution time,
 for any purpose (debug, test, or simply need).
 
 To do so, use:
@@ -75,39 +77,8 @@ We first ensure our NIC are up, so the repositories part is working.
 
   ansible-playbook /etc/bluebanquise/playbooks/managements.yml --limit management1 --tags set_hostname,nic_nmcli
 
-
-
->>>>>>>>>>>>>>>>>>>>>>>>>
-Then start your main interface manually. Here enp0s3:
-
-.. raw:: html
-
-  <div style="border: 1px solid; margin: 0px 0px 0px 20px; padding: 6px;">
-  Major version: <b>7</b><br><br>
-
-.. code-block:: text
-
-  ifup enp0s3
-
-.. raw:: html
-
-  </div><br>
-  <div style="border: 1px solid; margin: 0px 0px 0px 20px; padding: 6px;">
-  Major version: <b>8</b><br><br>
-
-.. code-block:: text
-
-  nmcli con up enp0s3
-
-.. raw:: html
-
-  </div><br>
-
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-
-Once interface are up (check using *ip a* command), execute the bluebanquise role
-and the repositories_server role:
+Check interfaces are up (check using *ip a* command), and execute the
+bluebanquise role and the repositories_server role:
 
 .. code-block:: text
 
@@ -124,16 +95,20 @@ Then play the whole playbook:
 
 And wait...
 
-If all goes well, you can check that all services are up and running.
+If all went well, you can check that all services are up and running.
 
-You can replay the same ansible-playbook command over and over, Ansible will
-just update/correct what is needed, and do nothing for all that is at an
-expected state.
+.. note::
+  You can replay the same ansible-playbook command over and over, Ansible will
+  just update/correct what is needed, and do nothing for all that is at an
+  expected state.
 
 Now that management1 is up and running, it is time to deploy the other nodes.
 
 Deploy OS on other nodes: PXE
 =============================
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 Next step is to deploy the other nodes using PXE process.
 
@@ -142,7 +117,8 @@ workstation to boot on LAN.
 
 If your device cannot boot on LAN, use iso or usb image provided on management1
 in /var/www/html/preboot_execution_environment/bin/[x86_64|arm64]. These images
-will start a LAN boot automatically.
+will start a LAN boot automatically, even if your computer is not PXE able
+natively.
 
 In **BlueBanquise**, PXE process has been made so that any kind of hardware able
 to boot PXE, USB or CDrom can start deployment.
@@ -189,7 +165,7 @@ dedicated configuration from management node at boot.
 
 To manipulate nodes PXE boot, a command, **bootset**, is available.
 
-We are going to deploy login1 and c001, c002, c003 and c004.
+We are going to deploy login1 and compute1, compute2, compute3 and compute4.
 
 Let's use bootset to set them to deploy OS at next PXE boot:
 
@@ -251,7 +227,7 @@ configuration on these nodes is simple.
 
 Ensure first you can ssh passwordless on each of the freshly deployed nodes.
 (Note: on some Linux distributions, if DHCP leases are short, you may loose
-ip shortly after system is booted. It that happen, reboot system to get an ip
+ip shortly after system is booted. If that happen, reboot system to get an ip
 again. This issue is solved once the nic_nmcli role has been applied on hosts,
 as it sets ip statically).
 
@@ -261,13 +237,15 @@ If yes, copy example playbooks:
 
   cp -a /etc/bluebanquise/resources/examples/simple_cluster/playbooks/computes.yml /etc/bluebanquise/playbooks/
   cp -a /etc/bluebanquise/resources/examples/simple_cluster/playbooks/logins.yml /etc/bluebanquise/playbooks/
+  cp -a /etc/bluebanquise/resources/examples/simple_cluster/playbooks/storages.yml /etc/bluebanquise/playbooks/
 
 And execute them, using --limit parameter to specify targets:
 
 .. code-block:: bash
 
   ansible-playbook /etc/bluebanquise/playbooks/logins.yml
-  ansible-playbook /etc/bluebanquise/playbooks/computes.yml --limit c001,c002,c003,c004
+  ansible-playbook /etc/bluebanquise/playbooks/storages.yml
+  ansible-playbook /etc/bluebanquise/playbooks/computes.yml --limit compute1,compute2,compute3,compute4
 
 You can see that Ansible will work on computes nodes in parallel, using more CPU
 on the management1 node (by spawning multiple forks).
@@ -282,6 +260,8 @@ It is time to use some `COMMUNITY <https://github.com/bluebanquise/community>`_
 roles to add specific features to the cluster and/or specialize it.
 (Please refer to each community roles dedicated documentation to get
 instructions on how to use them), or continue this documentation to:
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 * BlueBanquise generic cluster
     * Deploy High Availability with multiple managements nodes
