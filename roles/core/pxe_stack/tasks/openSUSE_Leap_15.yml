@@ -1,4 +1,4 @@
-- name: "package █ Install installation environment for OpenSuSE {{ansible_distribution_version}} {{ ep_hardware['cpu']['architecture'] }}"
+- name: "package █ Install installation environment for OpenSuSE {{ ansible_distribution_version }} {{ ep_hardware['cpu']['architecture'] }}"
   package:
     name: "tftpboot-installation-openSUSE-Leap-{{ ansible_distribution_version }}-{{ ep_hardware['cpu']['architecture'] }}"
     state: present
@@ -12,4 +12,7 @@
 - name: "copy █ atftpd service file"
   copy:
     src: opensuse/atftpd.service
-    dest: /usr/lib/systemd/system/atftpd.service 
+    dest: /usr/lib/systemd/system/atftpd.service
+    owner: root
+    group: root
+    mode: 0644

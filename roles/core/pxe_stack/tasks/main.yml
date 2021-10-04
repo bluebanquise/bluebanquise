@@ -209,7 +209,7 @@
     group: "{{ pxe_stack_apache_user }}"
   loop: "{{ pxe_stack_supported_os.suse }}"
   when: ansible_facts.os_family == "Suse"
-    
+
 - name: Templates >> autoyasts for OpenSuse
   template:
     src: "autoyast.xml.j2"
