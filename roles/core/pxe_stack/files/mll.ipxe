@@ -1,0 +1,32 @@
+#!ipxe
+
+echo |
+echo | Entering mll.ipxe file.
+echo |
+
+echo | Now starting Minimal Live Linux boot process.
+echo |
+echo | Parameters used:
+echo | > Console: ${eq-console}
+echo | > Additional kernel parameters: ${eq-kernel-parameters} ${dedicated-kernel-parameters}
+echo |
+echo | Loading linux ...
+
+kernel http://${next-server}/preboot_execution_environment/mll/kernel.xz ${eq-console} ${eq-kernel-parameters} ${dedicated-kernel-parameters}
+
+echo | Loading initial ramdisk ...
+
+initrd http://${next-server}/preboot_execution_environment/mll/rootfs.xz
+
+echo | ALL DONE! We are ready.
+echo | Downloaded images report:
+
+imgstat
+
+echo | Booting in 4s ...
+echo |
+echo +----------------------------------------------------+
+
+sleep 4
+
+boot

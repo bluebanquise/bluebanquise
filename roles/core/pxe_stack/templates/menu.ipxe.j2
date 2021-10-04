@@ -32,13 +32,13 @@ item bootosdeploy         Deploy OS (This will deploy/redeploy operating system)
 item bootdisk             Boot on disk (This will boot on local disk)
 item --gap                Diskless
 item bootdiskless         Start a diskless OS (Configured using diskless tool)
+item minimal_live_linux         Minimal Live Linux
 {% if pxe_stack_enable_cloning %}
 item --gap                Cloning
 item bootclone            Clone OS
 item bootdeployclone      Deploy already made clone
 {% endif %}
 #item --gap                Tools
-#item minimal_live_linux   Minimal Live Linux
 #item memtest              Memtest (To check Memory)
 item --gap                Other
 item startshell           iPXE shell (Go to an iPXE shell)
@@ -116,6 +116,6 @@ iseq ${platform} efi && goto bootdisk-efi || goto bootdisk-legacy
 #echo Booting Memtest86+
 #boot http://${next-server}/preboot_execution_environment/bin/memtest86+-5.01.bin || shell
 
-#:minimal_live_linux
-#echo Booting Minimal Live Linux
-#chain http://${next-server}/preboot_execution_environment/equipment_ipxe_configurations/minimal.ipxe
+:minimal_live_linux
+echo Booting Minimal Live Linux
+chain http://${next-server}/preboot_execution_environment/mll/mll.ipxe

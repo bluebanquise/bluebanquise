@@ -65,6 +65,7 @@
     - /var/www/html/preboot_execution_environment/nodes
     - /var/www/html/preboot_execution_environment/equipment_profiles
     - /var/www/html/preboot_execution_environment/osdeploy
+    - /var/www/html/preboot_execution_environment/mll
 
 - name: include_tasks ░ Use OS dedicated task
   include_tasks: "{{ item }}"
@@ -164,6 +165,16 @@
     - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) in ['redhat','centos','cloudlinux','oraclelinux']
   tags:
     - template
+
+##### Minimal Live Linux
+
+- name: file █ Generate Minimal Live Linux files
+  file:
+    src: mll.ipxe
+    dest: "/var/www/html/preboot_execution_environment/mll/mll.ipxe"
+    mode: 0644
+    owner: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_user }}"
 
 ##### Ubuntu
 
