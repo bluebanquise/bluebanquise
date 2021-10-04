@@ -13,7 +13,9 @@
   include_vars: "{{ item }}"
   with_first_found:
     - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}.yml"
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_version }}.yml"
         - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
         - "vars/{{ ansible_facts.os_family }}.yml"
@@ -25,10 +27,12 @@
   include_tasks: "{{ item }}"
   with_first_found:
     - files:
-        - "firewall/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
-        - "firewall/{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
-        - "firewall/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
-        - "firewall/{{ ansible_facts.os_family | replace(' ','_') }}.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}/firewall.yml"
       skip: true
   tags:
     - internal
