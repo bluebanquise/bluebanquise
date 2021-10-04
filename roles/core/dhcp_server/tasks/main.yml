@@ -13,27 +13,31 @@
   include_vars: "{{ item }}"
   with_first_found:
     - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}.yml"
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_version }}.yml"
         - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
-        - "vars/{{ ansible_facts.os_family | upper }}.yml"
         - "vars/{{ ansible_facts.os_family }}.yml"
       skip: true
   tags:
     - always
 
-- name: "firewalld █ Add services to firewall's {{ dhcp_server_firewall_zone | default('public') }} zone"
-  firewalld:
-    zone: "{{ dhcp_server_firewall_zone | default('public') }}"
-    service: "{{ item }}"
-    immediate: "yes"
-    permanent: "yes"
-    state: enabled
-  when:
-    - ansible_facts.os_family == "RedHat" or ansible_facts.os_family == "Suse"
-    - ep_firewall | default(false) | bool
-  loop: "{{ dhcp_server_firewall_services_to_add }}"
+- name: include_tasks ░ Use OS dedicated firewall task
+  include_tasks: "{{ outer_item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}/firewall.yml"
+      skip: true
+  loop_control:
+    loop_var: outer_item
   tags:
+    - internal
     - firewall
 
 - name: "package █ Install {{ dhcp_server_packages_to_install | join(' ') }}"
@@ -42,18 +46,6 @@
     state: present
   tags:
     - package
-
-- name: template █ Generate /etc/sysconfig/dhcpd for SuSE based systems
-  template:
-    src: sysconfig.dhcpd.j2
-    dest: /etc/sysconfig/dhcpd
-    owner: root
-    group: root
-    mode: 0644
-  when: ansible_facts.os_family == "Suse"
-  notify: service █ Restart dhcp server
-  tags:
-    - template
 
 - name: template █ Generate /etc/dhcp/dhcpd.conf
   template:
@@ -65,15 +57,6 @@
   notify: service █ Restart dhcp server
   tags:
     - template
-
-- name: create /etc/dhcpd.conf link
-  file:
-    src: /etc/dhcp/dhcpd.conf
-    dest: /etc/dhcpd.conf
-    state: link
-    force: yes
-  when: ansible_facts.os_family == "Suse"
-  notify: service █ Restart dhcp server
 
 - name: template █ Generate /etc/dhcp/dhcpd.networks.conf
   template:
@@ -100,6 +83,20 @@
   notify: service █ Restart dhcp server
   tags:
     - template
+
+- name: include_tasks ░ Use OS additional tasks
+  include_tasks: "{{ outer_item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/tasks.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/tasks.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/tasks.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/tasks.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}/tasks.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}/tasks.yml"
+      skip: true
+  loop_control:
+    loop_var: outer_item
 
 - name: meta █ Run handler tasks to restart dhcp services
   meta: flush_handlers
