@@ -13,6 +13,3 @@
   copy:
     src: opensuse/atftpd.service
     dest: /usr/lib/systemd/system/atftpd.service 
-
-
-
