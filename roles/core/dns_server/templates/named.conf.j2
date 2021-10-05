@@ -50,6 +50,10 @@ options {
 
   pid-file "/run/named/named.pid";
   session-keyfile "/run/named/session.key";
+
+{% if dns_overrides is defined %}
+  response-policy { zone "override"; };
+{% endif %}
 };
 
 logging {
@@ -75,6 +79,13 @@ zone "in-addr.arpa" IN {
   file "reverse";
   allow-update { none; };
 };
+
+{% if dns_overrides is defined %}
+zone "override" {
+  type master;
+  file "override";
+};
+{% endif %}
 
 include "/etc/named.rfc1912.zones";
 include "/etc/named.root.key";
