@@ -48,7 +48,7 @@ a relay.
     dns_server:  <<<<<<<<<<
       - 208.67.222.222
 
-To optionally override the IP addresses returned by certain host you define *group_vars/all/general_settings/dns_override.yml with the following content for example:
+To optionally override the IP addresses returned by certain host you define *group_vars/all/general_settings/dns_override.yml* with the following content for example:
 
 .. code-block:: yaml
 
