@@ -160,6 +160,7 @@ You can define routes at two levels:
 Changelog
 ^^^^^^^^^
 
+* 1.4.1: Adapt role to handle multiple distributions. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.0: Add Ubuntu support. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.1: Add DNS4 and DNS4_SEARCH vars logic. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.0: Rewrite logic to prevent crash and ease code reading. Benoit Leveugle <benoit.leveugle@gmail.com>

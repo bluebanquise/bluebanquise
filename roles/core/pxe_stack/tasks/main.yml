@@ -122,25 +122,25 @@
     - template
 
 - name: include_tasks ░ Include RedHat familly clients support
-  include_tasks: client_os_support/RedHat.yml
+  include_tasks: client_os/RedHat.yml
   when: pxe_stack_client_os_RedHat
   tags:
     - internal
 
 - name: include_tasks ░ Include Ubuntu familly clients support
-  include_tasks: client_os_support/Ubuntu.yml
+  include_tasks: client_os/Ubuntu.yml
   when: pxe_stack_client_os_Ubuntu
   tags:
     - internal
 
 - name: include_tasks ░ Include DGX familly clients support
-  include_tasks: client_os_support/DGX.yml
+  include_tasks: client_os/DGX.yml
   when: pxe_stack_client_os_DGX
   tags:
     - internal
 
 - name: include_tasks ░ Include Suse familly clients support
-  include_tasks: client_os_support/Suse.yml
+  include_tasks: client_os/Suse.yml
   when: pxe_stack_client_os_Suse
   tags:
     - internal

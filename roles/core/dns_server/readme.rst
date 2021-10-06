@@ -101,6 +101,7 @@ Files generated:
 Changelog
 ^^^^^^^^^
 
+* 1.1.1: Adapt role to handle multiple distributions. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.0: Add Ubuntu support. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.2: Improve role performances. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.1: Added SOA. Bruno Travouillon <devel@travouillon.fr>
