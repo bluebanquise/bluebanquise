@@ -67,7 +67,14 @@
     - /var/www/html/preboot_execution_environment/osdeploy
 
 - name: include_tasks ░ Use OS dedicated task
-  include_tasks: "{{ (ansible_facts.distribution|replace(' ','_')) }}_{{ ansible_facts.distribution_major_version }}.yml"
+  include_tasks: "{{ item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}.yml"
+      skip: true
   tags:
     - internal
 
@@ -108,25 +115,28 @@
   tags:
     - template
 
-##### Centos
+##### RedHat os familly
 
-- name: copy █ Copy osdeploy files /var/www/html/preboot_execution_environment/osdeploy/redhat_
+- name: copy █ Copy osdeploy files /var/www/html/preboot_execution_environment/osdeploy/
   copy:
-    src: osdeploy/redhat_{{ item }}.ipxe
-    dest: "/var/www/html/preboot_execution_environment/osdeploy/redhat_{{ item }}.ipxe"
+    src: osdeploy/redhat_{{ item.major }}.ipxe
+    dest: "/var/www/html/preboot_execution_environment/osdeploy/redhat_{{ item.major }}.ipxe"
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_user }}"
-  with_items: "{{ pxe_stack_supported_os.redhat }}"
+  loop: "{{ pxe_stack_supported_os.redhat }}"
 
-- name: copy █ Copy osdeploy files /var/www/html/preboot_execution_environment/osdeploy/centos_
-  copy:
-    src: osdeploy/centos_{{ item }}.ipxe
-    dest: "/var/www/html/preboot_execution_environment/osdeploy/centos_{{ item }}.ipxe"
+- name: file █ Generate links for all supported OS
+  file:
+    src: redhat_{{ item.0.major }}.ipxe
+    dest: "/var/www/html/preboot_execution_environment/osdeploy/{{ item.1 }}_{{ item.0.major }}.ipxe"
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_user }}"
-  with_items: "{{ pxe_stack_supported_os.centos }}"
+    state: link
+    force: yes
+  loop: "{{ pxe_stack_supported_os.redhat | subelements('distributions') }}"
+  when: item.1 != 'redhat'
 
 - name: template █ Generate kickstarts /var/www/html/preboot_execution_environment/equipment_profiles/{item}.kickstart.cfg
   template:
@@ -138,7 +148,7 @@
   with_items: "{{ j2_equipment_groups_list }}"
   when:
     - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
-    - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) in ['redhat','centos']
+    - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) in ['redhat','centos','cloudlinux','oraclelinux']
   tags:
     - template
 
@@ -152,7 +162,7 @@
   with_items: "{{ j2_equipment_groups_list }}"
   when:
     - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
-    - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) in ['redhat','centos']
+    - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) in ['redhat','centos','cloudlinux','oraclelinux']
   tags:
     - template
 
@@ -245,6 +255,7 @@
     state: present
     name: "{{ pxe_stack_apache_cgi_module }}"
   notify: service █ Restart pxe services
+  when: ansible_facts.os_family == 'RedHat' and ( ansible_facts.distribution_major_version | int ) < 9
 
 - name: "copy █ Copy {{ pxe_stack_apache_conf_path }}/cgi.conf"
   copy:

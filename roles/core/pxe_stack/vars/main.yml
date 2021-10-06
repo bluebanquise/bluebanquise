@@ -1,10 +1,23 @@
 ---
-pxe_stack_role_version: 1.1.6
+pxe_stack_role_version: 1.2.0
 
 pxe_stack_supported_os:
-  centos:
-    - 7
-    - 8
+#  centos:
+#    - 7
+#    - 8
   redhat:
-    - 7
-    - 8
+    - major: 7
+      distributions:
+        - redhat
+        - centos
+    - major: 8
+      distributions:
+        - redhat
+        - centos
+        - cloudlinux
+        - oraclelinux
+        - almalinux
+        - rocky
+    - major: 9
+      distributions:
+        - redhat

@@ -6,15 +6,40 @@
 
 #### New roles
 
+  - filesystem: set filesystems (#573)
+  - modprobe: load/unload kernel modules (#573)
+  - mount: mount devices (#573)
+  - parted: set partitions (#573)
+  - sudoers: add users or groups to sudoers (#573)
+
 #### Roles improvement or fix
 
+  - pxe_stack: force substitution of files by symlinks in case of an update (#587)
+  - core/log_server
+    - remote logs stored in a similar fashion as the server (#568)
+  - all: add compatibility with multiple RHEL like distributions (#560)
+  - conman: fix execpath for RHEL 8 (#584)
+  - advanced_dhcp_server: fix issue with added spaces. Could prevent DHCP to start (#561)
   - diskless:
     - fix issues with dnf command in the livenet module (#528)
     - fix issues preventing access to nodes booting a livenet image (#525)
+    - notify in readme/page that firewall does not work in chroot (#569)
+    - fix python path of diskless files (#590)
+  dns_server:
+    - improve role performances (#597)
   - kernel_config: prevent crash if variable ep_kernel_parameters is undefined (#559)
+  - log_server/client:
+    - allow custom configuration path (#591)
+  - nic_nmcli:
+    - add dns4 and dns4_search vars logic (#585)
+    - improve role capabilities (#558)
   - pxe_stack: fix issues with hostname not set during kickstart on RHEL 8.3 (#522)
   - set_hostname: add fqdn capability (#543)
-  - time: allow to set sysconfig OPTIONS for chronyd (#552)
+  - ssh_master: add custom config variable (#579)
+  - time:
+    - allow to set sysconfig OPTIONS for chronyd (#552)
+    - allow to add additional networks for server to reply (#555)
+    - allow custom configuration path (#591)
 
 ### Breaking changes
 

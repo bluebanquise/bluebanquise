@@ -1,5 +1,6 @@
 ---
 diskless_apache_user: apache
+diskless_python_version: 3.6
 diskless_packages_to_install:
   - httpd
   - python3-clustershell

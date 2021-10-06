@@ -1,0 +1,10 @@
+---
+- name: lineinfile █ Add sudoers users and groups
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: "^{{ item.name }}"
+    line: "{{ item.name }} {{ item.privilege }}"
+    validate: 'visudo -cf %s'
+  loop: "{{ sudoers }}"
+  when: sudoers is defined and sudoers

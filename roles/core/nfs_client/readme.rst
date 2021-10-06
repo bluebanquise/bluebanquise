@@ -5,7 +5,8 @@ Description
 ^^^^^^^^^^^
 
 This role provides an automatic nfs client that mount targets and create local
-directories if needed.
+directories if needed. It is a more "friendly" way to use NFS compared to 
+basic **mount** role.
 
 Instructions
 ^^^^^^^^^^^^
@@ -16,6 +17,10 @@ See the **nfs_server** role instructions for more details.
 
 Simply note that paths that should be mounted will be automatically created by
 this role if they do not exist.
+
+It is also possible to manipulate mount state using *nfs_client_directories_state*
+variable. Default is **mounted**. Refer to `mount module documentation <https://docs.ansible.com/ansible/latest/collections/ansible/posix/mount_module.html#parameter-state>`_
+to get other possibles values.
 
 Input
 ^^^^^

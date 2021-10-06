@@ -11,21 +11,17 @@
 
 While main target is High Performance Computing (HPC), the BlueBanquise stack is generic and can adapt to any kind of architecture (university or enterprise infrastructures, render farm, etc.).
 
-BlueBanquise is part of the **Algoric** Project from the [**Fabrique du Loch**](https://www.lafabriqueduloch.org/fr/accueil/) FabLab.
-
-![BlueBanquise Logo](resources/pictures/FabriqueDuLochAlgoric_logo_large.svg)
-
-It is a revamping of the old stack [Banquise](https://github.com/oxedions/banquise), based on Salt.
-
-## Resources
-
-### Files
-
 The stack is split over multiple repositories:
 
 * :globe_with_meridians: **[Core](https://github.com/bluebanquise/bluebanquise):** the CORE of the stack, provides roles and tools to deploy and configure hosts.
 
-* :star: **[Community](https://github.com/bluebanquise/community):** COMMUNITY roles and tools, provides additional features on top of CORE. The release cycle of COMMUNITY is different than CORE.
+* :globe_with_meridians: **[Community](https://github.com/bluebanquise/community):** COMMUNITY roles and tools, provides additional features on top of CORE. The release cycle of COMMUNITY is different than CORE.
+
+* :globe_with_meridians: **[Tools](https://github.com/bluebanquise/tools):** Tools repository contains sources of stack tools.
+
+* :globe_with_meridians: **[Infrastructure](https://github.com/bluebanquise/infrastructure):** Infrastructure repository contains needed script and files to build packages.
+
+## Resources
 
 ### Documentation
 
@@ -40,27 +36,34 @@ The stack packages are available in the [repositories subfolder](https://blueban
 
 ## Supported software environment
 
-| Operating System family | Operating System distribution | Tested versions    | Notes                               |
-| ----------------------- | ----------------------------- | ------------------ | ----------------------------------- |
-| Red Hat                 |                               |                    |                                     |
-|                         | RHEL                          | 7, 8               | √                                   |
-|                         | CentOS                        | 7, 8               | √                                   |
-|                         | CentOS Stream                 | 8                  | In dev, targeted for next release   |
-|                         | Oracle Linux                  | 8                  | In dev, targeted for next release   |
-|                         | CloudLinux                    | 8                  | In dev, targeted for next release   |
-|                         | AlmaLinux                     | 8                  | In dev, targeted for next release   |
-|                         | RockyLinux                    | NA                 | Waiting for distribution release    |
-|                         | Fedora                        | 33                 | In dev, targeted for next release   |
-| Suse                    |                               |                    |                                     |
-|                         | SLES                          | NA                 | Targeted for future release         |
-|                         | OpenSuse Leap                 | NA                 | Targeted for future release         |
-| Debian                  |                               |                    |                                     |
-|                         | Ubuntu                        | NA                 | Targeted for future release         |
-|                         | Debian                        | NA                 | Targeted for future release         |
+| Operating System family | Operating System distribution | Tested versions    | Notes                                                       |
+| ----------------------- | ----------------------------- | ------------------ | ----------------------------------------------------------- |
+| Red Hat                 |                               |                    |                                                             |
+|                         | RHEL                          | 7, 8               | √                                                           |
+|                         | CentOS                        | 7, 8               | √                                                           |
+|                         | CentOS Stream                 | 8                  | √                                                           |
+|                         | Oracle Linux                  | 8                  | √                                                           |
+|                         | Cloud Linux                   | 8                  | Base iso not enough, need to bind to external repositories. |
+|                         | Alma Linux                    | 8                  | √                                                           |
+|                         | Rocky Linux                   | 8                  | √                                                           |
+| Suse                    |                               |                    |                                                             |
+|                         | SLES                          | NA                 | Targeted for future release                                 |
+|                         | OpenSuse Leap                 | NA                 | Targeted for future release                                 |
+| Debian                  |                               |                    |                                                             |
+|                         | Ubuntu                        | NA                 | Targeted for future release                                 |
+|                         | Debian                        | NA                 | Targeted for future release                                 |
 
 Ansible >= 2.9.13 is mandatory for BlueBanquise to run properly.
 
 **[OpenHPC](https://openhpc.community/downloads/)** scientific packages and OpenHPC slurm job scheduler are compatible with the stack.
+
+## Algoric project
+
+BlueBanquise is part of the **Algoric** Project from the [**Fabrique du Loch**](https://www.lafabriqueduloch.org/fr/accueil/) FabLab.
+
+![BlueBanquise Logo](resources/pictures/FabriqueDuLochAlgoric_logo_large.svg)
+
+It is a revamping of the old stack [Banquise](https://github.com/oxedions/banquise), based on Salt.
 
 ## The name
 

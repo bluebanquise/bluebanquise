@@ -121,6 +121,9 @@ class LivenetImage(Image):
         # Setup image password
         self.set_image_password(self.WORKING_DIRECTORY + 'generated_os')
 
+        # Ensure root password is allowed
+        self.set_image_ssh_permitrootlogin(self.WORKING_DIRECTORY + 'generated_os')
+
         # Setup ssh key
         if hasattr(self, 'ssh_pub_key'):
             self.set_image_ssh_pub_key()
@@ -254,6 +257,21 @@ class LivenetImage(Image):
             # Write new passord file content
         with open(mountage_directory + '/etc/shadow', "w") as ff:
             ff.write(newText)
+
+    # Ensure root login is allowed via ssh
+    def set_image_ssh_permitrootlogin(self, mountage_directory):
+        logging.info('Setting up image \'' + self.name + '\' sshd PermitRootLogin')
+
+        # Create new file content
+        with open(mountage_directory + '/etc/ssh/sshd_config', 'r') as ff:
+            filebuffer = ff.readlines()
+        for i in range(len(filebuffer)):
+            if 'PermitRootLogin' in filebuffer[i]:
+                filebuffer[i] = 'PermitRootLogin yes'
+
+        # Write new file content
+        with open(mountage_directory + '/etc/ssh/sshd_config', "w") as ff:
+            ff.writelines(filebuffer)
 
     # Write meta data inside image os-release file
     def set_image_release_meta_data(self):
