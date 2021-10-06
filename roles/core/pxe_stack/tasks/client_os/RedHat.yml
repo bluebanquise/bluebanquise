@@ -22,7 +22,7 @@
 
 - name: template █ Generate kickstarts /var/www/html/preboot_execution_environment/equipment_profiles/{item}.kickstart.cfg
   template:
-    src: "kickstart.cfg.j2"
+    src: "RedHat/kickstart.cfg.j2"
     dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.kickstart.cfg
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
@@ -36,7 +36,7 @@
 
 - name: template █ Generate equipment_profiles /var/www/html/preboot_execution_environment/equipment_profiles/{item}.ipxe
   template:
-    src: "equipment_profile_ks.ipxe.j2"
+    src: "RedHat/equipment_profile_ks.ipxe.j2"
     dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.ipxe
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"

@@ -3,7 +3,7 @@ pxe_stack_enable_cloning: false
 pxe_stack_sshd_force_permitrootlogin: true
 pxe_stack_preseed_remove_apt_sources: true
 
-pxe_stack_client_os_RedHat: true
-pxe_stack_client_os_Ubuntu: true
-pxe_stack_client_os_DGX: false
-pxe_stack_client_os_Suse: true
+pxe_stack_client_os_redhat: true
+pxe_stack_client_os_ubuntu: true
+pxe_stack_client_os_dgx: false
+pxe_stack_client_os_suse: true

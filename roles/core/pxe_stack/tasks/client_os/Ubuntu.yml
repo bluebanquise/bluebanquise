@@ -13,7 +13,7 @@
 
 - name: file █ Generate links for all supported OS
   file:
-    src: redhat_{{ item.0.major }}.ipxe
+    src: ubuntu_{{ item.0.major }}.ipxe
     dest: "/var/www/html/preboot_execution_environment/osdeploy/{{ item.1 }}_{{ item.0.major }}.ipxe"
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
@@ -26,7 +26,7 @@
 
 - name: template █ Generate preseeds /var/www/html/preboot_execution_environment/equipment_profiles/{item}.preseed.cfg
   template:
-    src: "preseed.cfg.j2"
+    src: "Ubuntu/preseed.cfg.j2"
     dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.preseed.cfg
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
@@ -40,7 +40,7 @@
 
 - name: template █ Generate equipment_profiles /var/www/html/preboot_execution_environment/equipment_profiles/{item}.ipxe
   template:
-    src: "equipment_profile_preseed.ipxe.j2"
+    src: "Ubuntu/equipment_profile_preseed.ipxe.j2"
     dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.ipxe
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
@@ -84,7 +84,7 @@
 
 - name: template █ Generate cloud-init user-data
   template:
-    src: "user-data.j2"
+    src: "Ubuntu/user-data.j2"
     dest: "/var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.cloud-init/user-data"
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
@@ -98,7 +98,7 @@
 
 - name: template █ Generate equipment_profiles /var/www/html/preboot_execution_environment/equipment_profiles/{item}.ipxe
   template:
-    src: "equipment_profile_cloud-init.ipxe.j2"
+    src: "Ubuntu/equipment_profile_cloud-init.ipxe.j2"
     dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.ipxe
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"

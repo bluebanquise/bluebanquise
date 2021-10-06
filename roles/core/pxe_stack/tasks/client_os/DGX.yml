@@ -11,7 +11,7 @@
 
 - name: template █ Generate equipment_profiles /var/www/html/preboot_execution_environment/equipment_profiles/{item}.ipxe
   template:
-    src: "equipment_profile_dgxos.ipxe.j2"
+    src: "DGX/equipment_profile_dgxos.ipxe.j2"
     dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.ipxe
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
