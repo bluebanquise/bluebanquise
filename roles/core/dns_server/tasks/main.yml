@@ -125,7 +125,7 @@
     group: root
     mode: 0644
   notify: service █ Restart dns services
-  when: dns_overrides is defined and  zoneconf.changed  # noqa 503
+  when: dns_overrides is defined and zoneconf.changed  # noqa 503
   tags:
     - template
 
