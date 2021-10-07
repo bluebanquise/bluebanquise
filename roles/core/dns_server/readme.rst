@@ -48,6 +48,17 @@ a relay.
     dns_server:  <<<<<<<<<<
       - 208.67.222.222
 
+To optionally override the IP addresses returned by certain host you define *group_vars/all/general_settings/dns_override.yml* with the following content for example:
+
+.. code-block:: yaml
+
+  dns_overrides:
+    0.uk.pool.ntp.org: 10.11.0.1
+
+In this example, DNS look-ups for *0.uk.pool.ntp.org* will return *10.11.0.1*.
+
+This will cause */var/named/override* to be generated.
+
 Input
 ^^^^^
 
@@ -83,6 +94,8 @@ Optional inventory vars:
    * .mac
    * .name
 
+* dns_overrides
+
 Output
 ^^^^^^
 
@@ -96,11 +109,13 @@ Files generated:
 * /var/named/forward
 * /var/named/reverse
 * /var/named/forward.soa
+* /var/named/override
 * /var/named/reverse.soa
 
 Changelog
 ^^^^^^^^^
 
+* 1.1.0: Change role to use new layout and override feature for issue #608. Neil Munday <neil@mundayweb.com>
 * 1.0.2: Improve role performances. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.1: Added SOA. Bruno Travouillon <devel@travouillon.fr>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>

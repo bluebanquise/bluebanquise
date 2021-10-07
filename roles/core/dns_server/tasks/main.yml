@@ -13,7 +13,9 @@
   include_vars: "{{ item }}"
   with_first_found:
     - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}.yml"
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_version }}.yml"
         - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
         - "vars/{{ ansible_facts.os_family }}.yml"
@@ -21,18 +23,21 @@
   tags:
     - always
 
-- name: firewalld █ "Add services to firewall's {{ dns_server_firewall_zone | default('public') }} zone"
-  firewalld:
-    zone: "{{ dns_server_firewall_zone | default('public') }}"
-    service: "{{ item }}"
-    immediate: "yes"
-    permanent: "yes"
-    state: enabled
-  when:
-    - ansible_facts.os_family == "RedHat"
-    - ep_firewall | default(false) | bool
-  loop: "{{ dns_server_firewall_services_to_add }}"
+- name: "include_tasks ░ Use OS dedicated firewall task"
+  include_tasks: "{{ outer_item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}/firewall.yml"
+      skip: true
+  loop_control:
+    loop_var: outer_item
   tags:
+    - internal
     - firewall
 
 - name: "package █ Install {{ dns_server_packages_to_install | join(' ') }} packages"
@@ -109,6 +114,18 @@
     mode: 0644
   notify: service █ Restart dns services
   when: zoneconf.changed  # noqa 503
+  tags:
+    - template
+
+- name: template █ Generate override file
+  template:
+    src: override.j2
+    dest: /var/named/override
+    owner: root
+    group: root
+    mode: 0644
+  notify: service █ Restart dns services
+  when: dns_overrides is defined and zoneconf.changed  # noqa 503
   tags:
     - template
 
