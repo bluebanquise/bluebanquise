@@ -25,7 +25,7 @@
     - fix issues preventing access to nodes booting a livenet image (#525)
     - notify in readme/page that firewall does not work in chroot (#569)
     - fix python path of diskless files (#590)
-  dns_server:
+  - dns_server:
     - improve role performances (#597)
     - add ability to set IP addresses for external domains (#609)
   - kernel_config: prevent crash if variable ep_kernel_parameters is undefined (#559)
