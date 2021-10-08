@@ -4,7 +4,7 @@ Audit system
 Description
 ^^^^^^^^^^^
 
-This role provides the default auditd configuration which is suitable for RHEL8 systems.
+This role provides the default auditd configuration which is suitable for RHEL8/CentOS systems.
 Also allows to send the audit logs to the syslog server (cf: https://access.redhat.com/solutions/4986931)
 
 Instructions

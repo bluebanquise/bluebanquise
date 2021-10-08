@@ -7,6 +7,7 @@ Molecule unit tests
 
 |                                                                                                                           | CentOS 8 | CentOS 7 | OpenSUSE 15.1 |
 |-----------------------------------------------------------------------------------------------------------------------------------------------------|:-:|:-:|:-:|
+|![core/audit_system unit testing](https://github.com/bluebanquise/bluebanquise/workflows/core/bluebanquise%20unit%20testing/badge.svg)               | x |   |   |
 |![core/bluebanquise unit testing](https://github.com/bluebanquise/bluebanquise/workflows/core/bluebanquise%20unit%20testing/badge.svg)               | x | x |   |
 |![core/clustershell unit testing](https://github.com/bluebanquise/bluebanquise/workflows/core/clustershell%20unit%20testing/badge.svg)               | x | x | x |
 |![core/conman unit testing](https://github.com/bluebanquise/bluebanquise/workflows/core/conman%20unit%20testing/badge.svg)                           | x | x | x |
