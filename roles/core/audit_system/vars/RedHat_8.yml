@@ -1,0 +1,12 @@
+---
+audit_config_role_version: 1.0.0
+
+audit_config_packages_to_install:
+  - audit
+  - audispd-plugins
+audit_config_services_to_start:
+  - auditd
+audit_config_plugins_directory: 
+  - /etc/audit/plugins.d
+audit_config_syslog_file: 
+  - syslog.conf

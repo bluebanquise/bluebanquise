@@ -1,0 +1,53 @@
+---
+
+- name: include_vars Gather OS specific variables
+  # This task gathers variables defined in OS specific files.
+  #
+  # Search vars in:
+  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
+  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
+  #  - <distribution>.yml            # eg. CentOS.yml
+  #  - <os_family>.yml               # eg. RedHat.yml
+  #
+  # If no OS specific file is found, the role will default to vars/main.yml
+  #
+  include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family }}.yml"
+      skip: true
+  tags:
+    - always
+
+- name: "Install packages"
+  package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ audit_config_packages_to_install }}"
+  tags:
+    - package
+
+- name: "Check that the {{ audit_config_plugins_directory }}/{{ audit_config_syslog_file }} exists"
+  stat:
+    path: "{{ audit_config_plugins_directory }}/{{ audit_config_syslog_file }}"
+  register: audit_result
+
+- name: "Allow audit logs to be forwarded to remote syslog server"
+  replace:
+    path: "{{ audit_config_plugins_directory }}/{{ audit_config_syslog_file }}"
+    regexp: "^active = .*"
+    replace: "active = yes"
+  notify: service Restart auditd service
+  when: audit_result.stat.exists
+
+- name: "service Manage {{ audit_config_services_to_start }} state"
+  service:
+    name: "{{ item }}"
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+    state: "{{ (start_services | bool) | ternary('started', omit) }}"
+  loop: "{{ audit_config_services_to_start }}"
+  tags:
+    - service
