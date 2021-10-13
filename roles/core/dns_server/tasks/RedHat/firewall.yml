@@ -1,5 +1,4 @@
 ---
-
 - name: firewalld █ "Add services to firewall's {{ dns_server_firewall_zone | default('public') }} zone"
   firewalld:
     zone: "{{ dns_server_firewall_zone | default('public') }}"

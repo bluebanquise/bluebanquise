@@ -21,26 +21,27 @@
   tags:
     - always
 
-- name: firewalld █ "Add services to firewall's {{ repositories_server_firewall_zone | default('public') }} zone"
-  firewalld:
-    zone: "{{ repositories_server_firewall_zone | default('public') }}"
-    service: "{{ item }}"
-    immediate: "yes"
-    permanent: "yes"
-    state: enabled
-  when:
-    - ansible_facts.os_family == "RedHat"
-    - ep_firewall | default(false) | bool
-  loop: "{{ repositories_server_firewall_services_to_add }}"
-  tags:
-    - firewall
-
 - name: "package █ Install {{ repositories_server_packages_to_install | join(' ') }} packages"
   package:
     name: "{{ repositories_server_packages_to_install }}"
     state: present
   tags:
     - package
+
+- name: include_tasks ░ Use OS dedicated firewall task
+  include_tasks: "{{ item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}/firewall.yml"
+      skip: true
+  tags:
+    - internal
+    - firewall
 
 - name: "service █ Manage {{ repositories_server_services_to_start | join(' ') }} services state"
   service:

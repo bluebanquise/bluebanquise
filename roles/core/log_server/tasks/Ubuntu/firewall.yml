@@ -1,0 +1,7 @@
+- name: ufw █ "Add services to firewall"
+  ufw:
+    rule: allow
+    port: "{{ log_server_port }}"
+    proto: tcp
+  tags:
+    - firewall

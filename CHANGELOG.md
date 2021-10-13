@@ -4,6 +4,10 @@
 
 ### Major changes
 
+#### Overall changes
+
+  - add Ubuntu 18.04 and 20.04 partial support (#582)
+
 #### New roles
 
   - filesystem: set filesystems (#573)

@@ -3,13 +3,14 @@ pxe_stack_apache_user: www-data
 pxe_stack_apache_conf_path: /etc/apache2/conf-enabled
 pxe_stack_apache_cgi_module: cgid
 pxe_stack_packages_to_install:
-  - ipxe-x86_64-bluebanquise
-  - ipxe-arm64-bluebanquise
+  - ipxe-x86-64-bluebanquise
+#  - ipxe-arm64-bluebanquise
   - apache2
   - python3
   - python3-yaml
   - python3-clustershell
-pxe_stack_default_tftp_package: atftp
+pxe_stack_default_tftp_package: tftpd-hpa
 pxe_stack_services_to_start:
   - apache2
-pxe_stack_default_tftp_service: atftpd
+pxe_stack_default_tftp_service: tftpd-hpa
+pxe_stack_apache_cgi_bin_path: /usr/lib/cgi-bin

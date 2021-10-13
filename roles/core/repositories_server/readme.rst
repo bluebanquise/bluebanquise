@@ -72,6 +72,8 @@ Http server packages installed.
 Changelog
 ^^^^^^^^^
 
+* 1.1.1: Adapt role to handle multiple distributions. Benoit Leveugle <benoit.leveugle@gmail.com>
+* 1.1.0: Add Ubuntu support. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.3: Clean. johnnykeats <johnny.keats@outlook.com>
 * 1.0.2: Regrouped all distribs into a main file. johnnykeats <johnny.keats@outlook.com>
 * 1.0.1: Documentation. johnnykeats <johnny.keats@outlook.com>

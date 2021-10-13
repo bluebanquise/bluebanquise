@@ -115,7 +115,9 @@ Files generated:
 Changelog
 ^^^^^^^^^
 
-* 1.1.0: Change role to use new layout and override feature for issue #608. Neil Munday <neil@mundayweb.com>
+* 1.3.1: Adapt role to handle multiple distributions. Benoit Leveugle <benoit.leveugle@gmail.com>
+* 1.3.0: Change role to use new layout and override feature for issue #608. Neil Munday <neil@mundayweb.com>
+* 1.2.0: Add Ubuntu support. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.2: Improve role performances. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.1: Added SOA. Bruno Travouillon <devel@travouillon.fr>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>

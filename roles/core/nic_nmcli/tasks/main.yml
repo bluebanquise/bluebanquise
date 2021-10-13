@@ -28,6 +28,23 @@
   tags:
     - package
 
+- name: include_tasks ░ Use OS dedicated task
+  include_tasks: "{{ item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}/main.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}/main.yml"
+      skip: true
+  tags:
+    - internal
+
+- name: meta █ Run handlers
+  meta: flush_handlers
+
 - name: "service █ Manage {{ nic_nmcli_services_to_start | join(' ') }} state"
   service:
     name: "{{ item }}"
@@ -37,13 +54,23 @@
   tags:
     - service
 
-# - name: Solve possible unmanaged (Ubuntu only)
-#   file:
-#     path: /etc/NetworkManager/conf.d/10-globally-managed-devices.conf
-#     state: touch
-#   when:
-#     - ansible_facts.distribution_major_version == "18"
-#     - ansible_facts.os_family == "Ubuntu"
+- name: service █ Ensure Betwork Manager is running
+  service:
+    name: "{{ item }}"
+    state: started
+  register: nm_service_details
+  until: nm_service_details.status.ActiveState == "active" and nm_service_details.state == "started"
+  retries: 10
+  delay: 5
+  loop: "{{ nic_nmcli_services_to_start }}"
+
+# - name: service_facts ░ Wait for NetworkManager to be running
+#   service_facts:
+#   register: result
+#   until: "result.ansible_facts.services['{{ item }}'].state == 'running'"
+#   retries: 10
+#   delay: 5
+#   loop: "{{ nic_nmcli_services_to_start }}"
 
 - name: nmcli █ Set NICs configuration
   nmcli:
