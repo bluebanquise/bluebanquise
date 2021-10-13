@@ -1,0 +1,8 @@
+---
+nic_nmcli_packages_to_install:
+  - NetworkManager
+  - NetworkManager-connection-editor
+  - python3-semanage
+  - python3-policycoreutils
+nic_nmcli_services_to_start:
+  - NetworkManager

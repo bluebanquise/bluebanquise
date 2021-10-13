@@ -1,0 +1,8 @@
+---
+
+- name: "service █ Stop and disable wicked"
+  service:
+    name: wicked
+    enabled: no
+    state: stopped
+
