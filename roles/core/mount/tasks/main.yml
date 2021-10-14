@@ -9,6 +9,6 @@
     opts: "{{ item.opts | default(omit) }}"
     passno: "{{ item.passno | default(omit) }}"
     path: "{{ item.path }}"
-    src: "{{ item.force | default(omit) }}"
+    src: "{{ item.src | default(omit) }}"
     state: "{{ item.state }}"
   loop: "{{ mount }}"
