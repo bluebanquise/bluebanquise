@@ -31,7 +31,7 @@ subnet {{ networks[network]['subnet'] }} netmask {{ networks[network]['netmask']
   next-server {{ networks[network]['services_ip']['pxe_ip'] }};
       {% endif %}
 
-  include "/etc/dhcp/dhcpd.{{ network }}.conf";
+  include "{{ dhcp_server_conf_dir }}/dhcpd.{{ network }}.conf";
 
 }
     {% endif %}
