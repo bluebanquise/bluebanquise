@@ -4,7 +4,7 @@
 
 $TTL 86400
 $ORIGIN in-addr.arpa.
-$INCLUDE "/var/named/reverse.soa"
+$INCLUDE "{{ dns_server_named_dir }}/reverse.soa"
 @ IN NS {{ inventory_hostname }}.{{ domain_name }}.
 
 {# Macro to write host in file #}

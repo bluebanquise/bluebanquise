@@ -1,0 +1,11 @@
+- name: "copy █ /etc/named.rfc1912.zones"
+  copy:
+    src: Suse/named.rfc1912.zones
+    dest: /etc/named.rfc1912.zones
+    owner: root
+    group: root
+    mode: "0644"
+  notify: service █ Restart dns services
+  tags:
+    - template
+
