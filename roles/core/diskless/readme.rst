@@ -339,6 +339,7 @@ Example of parameters file to create a nfs staging image:
       password: root
       kernel: vmlinuz-4.18.0-305.el8.x86_64
       additional_packages: ['gzip']
+      release_version: 8
       image_class: NfsStagingImage
     
 additional_packages, and release_version are optional.
