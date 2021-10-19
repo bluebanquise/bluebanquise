@@ -305,7 +305,7 @@ Clone an existing diskless image into another image.
 Create an image from a parameters file
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Create a new image from a parameters file. The parameters file must follow a specfic template. You can take example from the "image_data.yml" files generated when created images from questions (The usual way). You have to put a clear password in the given parameters file and follow these templates: 
+This option allow you to create an image without go through the questions phase. You can create the new image from a parameters file. The parameters file must follow a specfic template. You can take example from the "image_data.yml" files generated when created images from questions (The usual way). You have to put a clear password in the given parameters file and follow these templates: 
 
 Template of parameters file to create a livenet image:
 """"""""""""""""""""""""""""""""""""""""""""""""""""""
