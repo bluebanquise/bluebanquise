@@ -48,20 +48,22 @@ Set up the tool
    1 - Manage and create diskless images (need modules)
    2 - List available diskless images
    3 - Remove a diskless image
-   4 - Manage kernel of a diskless image
+   4 - Clone a diskless image
+   5 - Create an image from a parameters file
+   6 - Manage kernel of a diskless image
 
    > Other actions
-   5 - List available kernels
-   6 - Generate a new initramfs
+   7 - List available kernels
+   8 - Generate a new initramfs
 
-   7 - Clear a corrupted image
-   8 - Exit
+   9 - Clear a corrupted image (Use only as a last resort)
+   10 - Exit
 
   At any time: (CTRL + c) => Return to this main menu.
 
-   Select an action:
+  [+]  Select an action:
   -->:
-  
+
 4. Check that the kernels you previously added are present in the tool:
 
 .. code-block:: text
@@ -70,49 +72,52 @@ Set up the tool
    1 - Manage and create diskless images (need modules)
    2 - List available diskless images
    3 - Remove a diskless image
-   4 - Manage kernel of a diskless image
+   4 - Clone a diskless image
+   5 - Create an image from a parameters file
+   6 - Manage kernel of a diskless image
 
    > Other actions
-   5 - List available kernels
-   6 - Generate a new initramfs
+   7 - List available kernels
+   8 - Generate a new initramfs
 
-   7 - Clear a corrupted image
-   8 - Exit
+   9 - Clear a corrupted image (Use only as a last resort)
+   10 - Exit
 
   At any time: (CTRL + c) => Return to this main menu.
 
-   Select an action:
-  -->: 5
-
+  [+]  Select an action:
+  -->: 7
   Available kernels:
       │
-      └── vmlinuz-4.18.0-147.el8.x86_64 - missing initramfs-kernel-4.18.0-147.el8.x86_64
-
+      └── vmlinuz-4.18.0-305.el8.x86_64 - missing initramfs-kernel-4.18.0-305.el8.x86_64
+    
 5. Generate a new initramfs for your kernel:
 
 .. code-block:: text
 
-     > Diskless image management
-   1 - Manage and create diskless images (need modules)
-   2 - List available diskless images
-   3 - Remove a diskless image
-   4 - Manage kernel of a diskless image
+    > Diskless image management
+    1 - Manage and create diskless images (need modules)
+    2 - List available diskless images
+    3 - Remove a diskless image
+    4 - Clone a diskless image
+    5 - Create an image from a parameters file
+    6 - Manage kernel of a diskless image
 
-   > Other actions
-   5 - List available kernels
-   6 - Generate a new initramfs
+    > Other actions
+    7 - List available kernels
+    8 - Generate a new initramfs
 
-   7 - Clear a corrupted image
-   8 - Exit
+    9 - Clear a corrupted image (Use only as a last resort)
+    10 - Exit
 
-  At any time: (CTRL + c) => Return to this main menu.
+    At any time: (CTRL + c) => Return to this main menu.
 
-   Select an action:
-  -->: 6
+    [+]  Select an action:
+    -->: 8
 
-  Select the kernel:
-   1 - vmlinuz-4.18.0-147.el8.x86_64
-  -->: 1
+    [+] Select the kernel:
+    1 - vmlinuz-4.18.0-305.el8.x86_64
+    -->: 1
 
 6. After initramfs generation, check that initramfs is present with the kernel:
 
@@ -122,23 +127,24 @@ Set up the tool
    1 - Manage and create diskless images (need modules)
    2 - List available diskless images
    3 - Remove a diskless image
-   4 - Manage kernel of a diskless image
+   4 - Clone a diskless image
+   5 - Create an image from a parameters file
+   6 - Manage kernel of a diskless image
 
    > Other actions
-   5 - List available kernels
-   6 - Generate a new initramfs
+   7 - List available kernels
+   8 - Generate a new initramfs
 
-   7 - Clear a corrupted image
-   8 - Exit
+   9 - Clear a corrupted image (Use only as a last resort)
+   10 - Exit
 
   At any time: (CTRL + c) => Return to this main menu.
 
-   Select an action:
-  -->: 5
-
+  [+]  Select an action:
+  -->: 7
   Available kernels:
       │
-      └── vmlinuz-4.18.0-147.el8.x86_64 - initramfs present
+      └── vmlinuz-4.18.0-305.el8.x86_64 - initramfs present
 
 Now the tool is ready to be used.
 
@@ -162,26 +168,27 @@ In the diskless main menu you can select the first option and select the module 
    1 - Manage and create diskless images (need modules)
    2 - List available diskless images
    3 - Remove a diskless image
-   4 - Manage kernel of a diskless image
+   4 - Clone a diskless image
+   5 - Create an image from a parameters file
+   6 - Manage kernel of a diskless image
 
    > Other actions
-   5 - List available kernels
-   6 - Generate a new initramfs
+   7 - List available kernels
+   8 - Generate a new initramfs
 
-   7 - Clear a corrupted image
-   8 - Exit
+   9 - Clear a corrupted image (Use only as a last resort)
+   10 - Exit
 
   At any time: (CTRL + c) => Return to this main menu.
 
-   Select an action:
+  [+]  Select an action:
   -->: 1
 
   [+] Select the module you want to use:
-
-   1 - livenet
-   2 - demo
+   1 - demo
+   2 - livenet
    3 - nfs
-  -->: 
+  -->:
 
 Livenet module
 """"""""""""""
@@ -289,6 +296,55 @@ Remove a diskless image
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 Simply choose and remove a previously created diskless image.
+
+Clone a diskless image
+^^^^^^^^^^^^^^^^^^^^^^
+
+Clone an existing diskless image into another image.
+
+Create an image from a parameters file
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This option allow you to create an image without go through the questions phase. You can create the new image from a parameters file. The parameters file must follow a specfic template. You can take example from the "image_data.yml" files generated when created images from questions (The usual way). You have to put a clear password in the given parameters file and follow these templates: 
+
+Template of parameters file to create a livenet image:
+""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+.. code-block:: text
+
+  image_data:
+
+      name: live1-clone
+      password: root
+      kernel: vmlinuz-4.18.0-305.el8.x86_64
+      livenet_type: Type.CORE
+      livenet_size: 500
+      ssh_pub_key: /root/.ssh/id_rsa.pub
+      selinux: False
+      optimize: False
+      additional_packages: ['gzip']
+      release_version: 8
+      image_class: LivenetImage
+
+ssh_pub_key, additional_packages, and release_version are optional.
+
+Example of parameters file to create a nfs staging image:
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+.. code-block:: text
+
+  image_data:
+
+      name: nfs1
+      password: root
+      kernel: vmlinuz-4.18.0-305.el8.x86_64
+      additional_packages: ['gzip']
+      release_version: 8
+      image_class: NfsStagingImage
+    
+additional_packages, and release_version are optional.
+
+Don't put your parameters file in the disklessset tool directories, just load it with the tool option 5.
 
 Manage kernel of a diskless image
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
