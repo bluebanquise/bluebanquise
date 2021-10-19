@@ -10,7 +10,7 @@
 #    allow to make basic actions on images. It can
 #    manage all types of images.
 #
-# 1.2.1: Role update. David Pieters <davidpieters22@gmail.com>
+# 1.3.0: Role update. David Pieters <davidpieters22@gmail.com>
 # 1.2.0: Role update. David Pieters <davidpieters22@gmail.com>, Benoit Leveugle <benoit.leveugle@gmail.com>
 # 1.1.0: Role update. Benoit Leveugle <benoit.leveugle@gmail.com>, Bruno Travouillon <devel@travouillon.fr>
 # 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
@@ -164,7 +164,7 @@ class ImageManager:
         except FileNotFoundError:
             raise FileNotFoundError('Error loading image_data file for image ' + image_name)
         except ValueError:
-            raise ValueError('Enable to load image class for image ' + image_name + 'from image data file ' + image_data_file)
+            raise ValueError('Unable to load image class for image ' + image_name + 'from image data file ' + image_data_file)
 
     # Get all images objects
     @staticmethod
@@ -437,7 +437,7 @@ class ImageManager:
             return ongoing_intallations
 
         except FileNotFoundError:
-            raise FileNotFoundError('Enable to load /diskless/installations.yml file')
+            raise FileNotFoundError('Unable to load /diskless/installations.yml file')
 
     # Set ongoing_intallations dictionary content
     @classmethod
@@ -460,28 +460,49 @@ class ImageManager:
 
     @classmethod
     def create_image_from_parameters(cls,parameters_file):
+        """Create an image from a file containing all the creation parameters
 
+        :param parameters_file: The location of the parameters file
+        :type parameters_file: str
+        :raises ValueError: If the data inside the parameters file are not compliant
+        :raises FileNotFoundError: If parameters file not readable
+        """
         try:
-            # Get the image module and class to create image by its name with it's class constructor
-            with open(parameters_file, 'r') as f:
-                # Get image datas
-                image_dict = yaml.safe_load(f)
+            # Get parameters file content
+            image_dict = load_file(parameters_file)
             
-            # Format dictionary
-            image_dict = image_dict['image_data']
-
-            # Get image class
-            image_class = image_dict['image_class']        
-
-            # Import the image class from the image_class name
-            image_class = ImageManager.get_class(image_class)
+            # Test dictionary content format
+            if not 'image_data' in image_dict:
+                raise ValueError('Invalide parameter file format.')
+            else:
+                image_dict = image_dict['image_data']
             
-            image_class.create_image_from_parameters(image_dict)
+            # Check if name and class elements are present (mandatory)
+            if not all(key in image_dict for key in ['name', 'image_class']):
+                raise ValueError('Name or class not specified in the parameters file.')
+            elif image_dict['name'] == None:
+                raise ValueError('Name is not defined')
+            elif image_dict['image_class'] == None:
+                raise ValueError('class is not defined')
+            else:
+                # Get the image name
+                image_name = image_dict['name']
+                 # Check if the image already exists
+                if ImageManager.is_image(image_name):
+                    raise ValueError('Image with the same name already exists, cannot use this name.')
+
+                # Get image class
+                image_class = image_dict['image_class']
+
+                # Import the image class from the image_class name
+                image_class = ImageManager.get_class(image_class)
+
+                # Create a new image with the image class and the parameters
+                image_class.create_image_from_parameters(image_dict)
 
         except FileNotFoundError:
             raise FileNotFoundError('Error loading image_data file for image ' + parameters_file)
-        except ValueError:
-            raise ValueError('Enable to load image class for image ' + parameters_file + ' from image data file ' + parameters_file)
+
 
     #####################
     # CLI reserved part #
@@ -542,7 +563,8 @@ class ImageManager:
         if image_names:
             # For each image name
             for image_name in image_names:
-
+                
+                print('')
                 # Get the status of image
                 image_status = ImageManager.get_image_status(image_name)
 
@@ -560,13 +582,12 @@ class ImageManager:
                     printc('   [CORRUPTED]', Color.RED)
                     print(' • Image name: ' + image_name)
 
-                print('')
-
         else:
             raise UserWarning('No images.')
 
     @staticmethod
     def cli_clone_image():
+        """Ask the user for cloning an image"""
         image_to_clone = ImageManager.get_created_image(ImageManager.cli_select_created_image())
 
         ask('Enter the clone name:')
@@ -591,31 +612,39 @@ class ImageManager:
         if confirmation in {'yes','y'}:
             # Remove image
             ImageManager.clone_image(image_to_clone, clone_name)
-            ok()
+            ok('Image clonned')
 
         elif confirmation in {'no','n'}:
             inform('Image clonning cancelled')
 
     @staticmethod
     def cli_create_image_from_parameters():
-        # Inject ssh key or not
-        ask('Enter path to the parameters file')
+        """Ask the user for crating a new image from a parameters file"""
+
+        # Get the path to the parameters file
+        ask('Enter the path to the parameters file')
         while True:
             parameters_file = input('-->: ')
-
+     
+            # If path not correct
             if parameters_file != '' and not os.path.exists(parameters_file):
                 inform('Parameter file not found ' + parameters_file + ' , please enter another value.')
-            
+
+            # If nothing given by the user
             elif parameters_file == '':
-               inform('Parameters file path cannot be empty')
-                
+                inform('Parameters file path cannot be empty')
+
             else:
-                break
-        print(parameters_file)
-        ImageManager.create_image_from_parameters(parameters_file)
-            
+                try:
+                    # Try to create a new image with the parameters file
+                    ImageManager.create_image_from_parameters(parameters_file)
+                    break
+                except Exception as e:
+                    inform(str(e))
+
     @staticmethod
     def cli_clear_image():
+        """Ask user for cleaning an image"""
         # Get list of existing images
         images_names = ImageManager.get_image_names()
 
@@ -637,13 +666,14 @@ class ImageManager:
         if confirmation == 'yes':
             # Clean selected image
             ImageManager.clean_installation(image_name)
-            ok()
+            ok('Image cleaned')
 
         elif confirmation == 'no':
             inform('Image cleaning cancelled')
 
     @staticmethod
     def cli_remove_image():
+        """Ask user for removing an image"""
         # Get image object to remove
         image = ImageManager.get_created_image(ImageManager.cli_select_created_image())
         warn('⚠ Would you realy like to delete image \'' + image.name + '\' definitively (yes/no) ?')
@@ -654,7 +684,7 @@ class ImageManager:
         if confirmation in {'yes','y'}:
             # Remove image
             ImageManager.remove_image(image)
-            ok()
+            ok('Image deleted')
 
         elif confirmation in {'no','n'}:
             inform('Image deletion cancelled')

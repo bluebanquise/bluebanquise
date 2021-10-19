@@ -9,7 +9,7 @@
 #    This module allow to manage kernels globaly. It
 #    allow to make basic actions on kernels.
 #
-# 1.2.1: Role update. David Pieters <davidpieters22@gmail.com>
+# 1.3.0: Role update. David Pieters <davidpieters22@gmail.com>
 # 1.2.0: Role update. David Pieters <davidpieters22@gmail.com>, Benoit Leveugle <benoit.leveugle@gmail.com>
 # 1.1.0: Role update. Benoit Leveugle <benoit.leveugle@gmail.com>, Bruno Travouillon <devel@travouillon.fr>
 # 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
@@ -20,7 +20,7 @@
 # Import basic modules
 import os
 import logging
-from diskless.utils import Color, printc, select_from_list
+from diskless.utils import Color, inform, ask, select_from_list
 from diskless.image_manager import ImageManager
 
 
@@ -97,7 +97,7 @@ class KernelManager:
         kernel_version = kernel.replace('vmlinuz-', '')
         generation_path = KernelManager.KERNELS_PATH + '/initramfs-kernel-' + kernel_version
 
-        printc('[INFO] Now generating initramfs... May take some time', Color.BLUE)
+        inform('[INFO] Now generating initramfs... May take some time')
 
         # Generate the new initramfs file with dracut command on the kernel
         logging.info('Executing \'dracut --xz -v -m "network base nfs" --add "ifcfg livenet systemd systemd-initrd dracut-systemd" --add-drivers xfs --no-hostonly --nolvmconf --force ' + generation_path + ' --kver ' + kernel_version + '\'')
@@ -123,7 +123,7 @@ class KernelManager:
         kernels_list = KernelManager.get_kernels()
         # If there are available kernels
         if kernels_list:
-            print('Select the kernel:')
+            ask('Select the kernel:')
             # return selected kernel
             return select_from_list(kernels_list)
         else:

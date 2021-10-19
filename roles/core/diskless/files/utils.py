@@ -8,7 +8,7 @@
 # utils:
 #    This module allow to create usefull functions
 #
-# 1.2.1: Role update. David Pieters <davidpieters22@gmail.com>
+# 1.3.0: Role update. David Pieters <davidpieters22@gmail.com>
 # 1.2.0: Role update. David Pieters <davidpieters22@gmail.com>, Benoit Leveugle <benoit.leveugle@gmail.com>
 # 1.1.0: Role update. Benoit Leveugle <benoit.leveugle@gmail.com>, Bruno Travouillon <devel@travouillon.fr>
 # 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
@@ -19,16 +19,24 @@ import yaml
 import logging
 
 
-# Load YAML files
 def load_file(filename):
+    """Load a YAML file from a path.
+
+    :param filename: The path to load file.
+    :type filename: str
+    """
+
     logging.debug('Loading file ' + filename)
     with open(filename, 'r') as f:
         # return yaml.load(f, Loader=yaml.FullLoader) ## Waiting for PyYaml 5.1
         return yaml.load(f)
 
 
-# Class that contains colors
 class Color():
+    """Class that contains all needed color values.
+    Each color is represented by a specific shell color expression.
+    """
+
     # Colors
     BLUE = '\033[94m'
     YELLOW = '\033[93m'
@@ -42,57 +50,99 @@ class Color():
 
 # Method to print using color
 def printc(text, color):
-    """Print a text in the shell with a color
+    """Print a text in the shell with a color.
 
     :param text: The text to print
     :type text: str
-    :param color: The color to print
-    :type color: str
+    :param color: The color to print text
+    :type color: Color
     """
+
     print(color + text + Color.TAG_END)
 
-def ask(text):
-    """Print a text in the shell with the "INFO" tag and the yellow color 
 
-    :param text: The text to print
-    :type text: str
+def display(color, tag, *texts):
+    """Print a text in the shell with a color and an tag.
+
+    :param *texts: The texts arguments to print, each argument will be a new line in the shell.
+    :type text: str[]
+    :param color: The color to print text
+    :type color: Color
+    :param tag: A string to put in the begining of the text to display
+    :type tag: str
+    :raises ValueError: When there is a non string value in the textx.
     """
-    print(Color.BLUE + '[+] ' + text + Color.TAG_END)
 
-def ask_module(text):
-    """Print a text in the shell with the "INFO" tag and the yellow color 
+    # Check if all elements are of string type
+    if not all(isinstance(item, str) for item in texts):
+        raise ValueError("Invalid input")
+    
+    # Display first list element
+    print(color + '\n' + tag + ' ' + texts[0] + Color.TAG_END)
+    # Display other elements in new lines
+    for i in range (1,len(texts)):
+        print(color + '    ' + texts[i] + Color.TAG_END)
 
-    :param text: The text to print
-    :type text: str
+
+def ask(*texts):
+    """Print a text in the shell with the '[+]' tag and the blue color 
+
+    :param *texts: Each line to display in the shell
+    :type *texts: str
     """
-    print(Color.GREEN + '[+] ' + text + Color.TAG_END)
+    
+    color = Color.BLUE
+    tag = '[+]'
+    display(color, tag, *texts)
 
-def inform(text):
-    """Print a text in the shell with the "INFO" tag and the yellow color 
 
-    :param text: The text to print
-    :type text: str
+def ask_module(*texts):
+    """Print a text in the shell with the '[+]' tag and the green color 
+
+    :param *texts: Each line to display in the shell
+    :type *texts: str
     """
-    print(Color.YELLOW + '[-] ' + text + Color.TAG_END)
+
+    # Color to use in the modules
+    color = Color.GREEN
+    tag = '[+]'
+    display(color, tag, *texts)
+
+        
+def inform(*texts):
+    """Print a text in the shell with the '[-]' tag and the yellow color 
+
+    :param *texts: Each line to display in the shell
+    :type *texts: str
+    """
+
+    color = Color.YELLOW
+    tag = '[-]'
+    display(color, tag, *texts)
+
+
+def warn(*texts):
+    """Print a text in the shell with the '[x]' tag and the red color.
+
+    :param *texts: Each line to display in the shell
+    :type *texts: str
+    """
+
+    color = Color.RED
+    tag = '[x]'
+    display(color, tag, *texts)
 
 def ok(text = None):
-    """Print a text in the shell with the "INFO" tag and the yellow color 
+    """Print a text in the shell with the '[OK]' tag and the green color, or just the '[OK] Done' text.
 
     :param text: The text to print
     :type text: str
     """
     if text != None:
-        print(Color.GREEN + '[OK] ' + text + Color.TAG_END)
+        print(Color.GREEN + '\n[OK] ' + text + Color.TAG_END)
     else:
-        print(Color.GREEN + '[OK] Done' + Color.TAG_END)
+        print(Color.GREEN + '\n[OK] Done' + Color.TAG_END)
 
-def warn(text):
-    """Print a text in the shell with the "WARNING" tag and the red color
-
-    :param text: The text to print
-    :type text: str
-    """
-    print(Color.RED + '[x] ' + text + Color.TAG_END)
 
 def select_from_list(_list):
     """Display to the user an interface for selecting an element in a list.
@@ -104,6 +154,7 @@ def select_from_list(_list):
     :raises ValueError: When the list is empty
     :raises UserWarning: When the user input is not valid
     """
+
     # If the list is not empty
     if _list:
         # For each element of the list
@@ -124,4 +175,4 @@ def select_from_list(_list):
                 selected_item = _list[item_index]
                 return selected_item
 
-        inform(item_string_index + '\' is not in the listed numbers. Please enter another value or return to themain menu (CTRL + c).')
+        inform('\'' + item_string_index + '\' is not in the listed numbers. Please enter another value or return to the main menu (CTRL + c).')

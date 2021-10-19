@@ -10,7 +10,7 @@
 #    for all images classes. You need to be in compliance with this
 #    class when creating new diskless images classes.
 #
-# 1.2.1: Role update. David Pieters <davidpieters22@gmail.com>
+# 1.3.0: Role update. David Pieters <davidpieters22@gmail.com>
 # 1.2.0: Role update. David Pieters <davidpieters22@gmail.com>, Benoit Leveugle <benoit.leveugle@gmail.com>
 # 1.1.0: Role update. Benoit Leveugle <benoit.leveugle@gmail.com>, Bruno Travouillon <devel@travouillon.fr>
 # 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
@@ -28,8 +28,9 @@ from abc import ABC, abstractmethod
 import subprocess
 
 # Import diskless modules
-from diskless.utils import Color, printc, inform
+from diskless.utils import Color, inform, ask
 from diskless.image_manager import ImageManager
+from diskless.utils import ask_module
 
 
 class Image(ABC):
@@ -131,7 +132,10 @@ class Image(ABC):
 
     @abstractmethod
     def clone(self, clone_name):
-        """Clone the image into another image"""
+        """Clone the image into another image.
+        :param clone_name: The name of the clone who will be cloned 
+        :type clone_name: str
+        """
         logging.info('Clonning image \'' + self.name + '\' into \'' + clone_name + '\'')
 
     @staticmethod
@@ -263,6 +267,16 @@ class Image(ABC):
         # Return all class images
         return class_images
 
+    @staticmethod
+    def create_image_from_parameters(image_dict):
+        """Getting all the image building arguments from a dictionary
+
+        :param image_dict: The dictionary of parameters
+        :type image_dict: str
+        """
+        logging.info('Parsing input parameters...')
+
+
     #####################
     # CLI reserved part #
     #####################
@@ -289,8 +303,7 @@ class Image(ABC):
     @staticmethod
     def cli_add_packages():
         """Ask user for a list of packages"""
-        printc('Give a list of packages separated by spaces.', Color.GREEN)
-        printc('Exemple: \'package1 package2 package3 ...\' ', Color.GREEN)
+        ask_module('Give a list of packages separated by spaces.', 'Exemple: \'package1 package2 package3 ...\' ')
 
         while True:
 

@@ -11,7 +11,7 @@
 #    This python script allows to create and manage diskless
 #    images from a linux command line interface.
 #
-# 1.2.1: Role update. David Pieters <davidpieters22@gmail.com>
+# 1.3.0: Role update. David Pieters <davidpieters22@gmail.com>
 # 1.2.0: Role update. David Pieters <davidpieters22@gmail.com>, Benoit Leveugle <benoit.leveugle@gmail.com>
 # 1.1.0: Role update. Benoit Leveugle <benoit.leveugle@gmail.com>, Bruno Travouillon <devel@travouillon.fr>
 # 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
@@ -36,7 +36,7 @@ if __name__ == "__main__":
     # Set logging logs level, you can configure the logging level in order to have more or less logging informations.
     # You can select one of these levels (sorted by logs number): (lot of logs) DEBUG (default) > INFO > WARNING > ERROR (few logs)
     # Just change the value of the level on the line bellow.
-    logging.root.setLevel(logging.DEBUG)
+    logging.root.setLevel(logging.INFO)
 
     # Set script banner
     BANNER = """\n
@@ -83,9 +83,9 @@ if __name__ == "__main__":
             print(' 9 - Clear a corrupted image (Use only as a last resort)')
             print(' 10 - Exit\n')
 
-            # When the user press CTRL + c in a sub menu, he returns to main menu
-            # When the user press CTRL + c in the main menu he exit program
-            printc('At any time: (CTRL + c) => Return to this main menu.\n', Color.BLUE)
+            # When the user press CTRL + c in a sub menu, it returns to main menu
+            # When the user press CTRL + c in the main menu it exit program
+            printc('At any time: (CTRL + c) => Return to this main menu.', Color.BLUE)
 
             # Answer to get the action to execute
             ask(' Select an action:')
@@ -95,7 +95,6 @@ if __name__ == "__main__":
 
             # Get user choice
             main_action = input('-->: ')
-            print('')
 
             # Now that user has made a choice, we are not longer in the main menu
             in_main_menu = False
@@ -116,14 +115,13 @@ if __name__ == "__main__":
             elif main_action == '3':
                ImageManager.cli_remove_image()
             
-            # Remove a diskless image
+            # Clone a diskless image
             elif main_action == '4':
                ImageManager.cli_clone_image()
 
             # Create image from a parameters file
             elif main_action == '5':
                 ImageManager.cli_create_image_from_parameters()
-                ok()
 
              # Change the kernel of an existing image
             elif main_action == '6':
@@ -151,7 +149,7 @@ if __name__ == "__main__":
 
             # Bad entry
             else:
-                inform( main_action + '\' is not a valid entry. Please enter another value.')
+                inform('\'' + main_action + '\' is not a valid entry. Please enter another value.')
 
         # When user press CTRL + c
         except KeyboardInterrupt:

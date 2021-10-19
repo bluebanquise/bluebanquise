@@ -10,7 +10,7 @@
 #    images. This type of image allow to load operating system
 #    in ram.
 #
-# 1.2.1: Role update. David Pieters <davidpieters22@gmail.com>
+# 1.3.0: Role update. David Pieters <davidpieters22@gmail.com>
 # 1.2.0: Role update. David Pieters <davidpieters22@gmail.com>, Benoit Leveugle <benoit.leveugle@gmail.com>
 # 1.1.0: Role update. Benoit Leveugle <benoit.leveugle@gmail.com>, Bruno Travouillon <devel@travouillon.fr>
 # 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
@@ -24,6 +24,7 @@ import shutil
 import crypt
 import logging
 import re
+import sys
 from datetime import datetime
 from enum import Enum, auto
 from subprocess import check_call, check_output, CalledProcessError
@@ -359,9 +360,10 @@ class LivenetImage(Image):
         # If the livenet image is currently mounted
         if self.is_mounted == True:
             was_mounted = True
-            # Unmount before removing files
+            # Unmount it before cloning it's files
             self.unmount()
 
+        # Clone directory path
         CLONE_IMAGE_DIRECTORY = Image.IMAGES_DIRECTORY + clone_name + '/'
         
         # Copying image directory for the clone
@@ -376,10 +378,13 @@ class LivenetImage(Image):
         clone.name = clone_name
         clone.IMAGE_DIRECTORY = CLONE_IMAGE_DIRECTORY
         clone.WORKING_DIRECTORY = LivenetImage.WORKING_DIRECTORY + clone.name + '/'
-        clone.MOUNT_DIRECTORY = LivenetImage.WORKING_DIRECTORY + 'mnt/'
+        clone.MOUNT_DIRECTORY = LivenetImage.WORKING_DIRECTORY + clone.name + '/mnt/'
 
         # Register the clone to update it's image_data file values
         clone.register_image()
+
+        # Update the boot.ipxe file content
+        clone.generate_ipxe_boot_file()
 
         if was_mounted == True:
             self.mount()
@@ -603,9 +608,16 @@ class LivenetImage(Image):
             logging.debug('Executing \'rm -rf ' + IMAGES_DIRECTORY + '\'')
             shutil.rmtree(IMAGES_DIRECTORY)
 
+    # Get the parameters from a dictionary
     @staticmethod
     def create_image_from_parameters(image_dict):
+        super().create_image_from_parameters(image_dict)
 
+        # Check that there are all mandatory the parameters
+        if not all(key in image_dict for key in ['name', 'password', 'kernel', 'livenet_type', 'livenet_size', 'optimize', 'selinux']):
+            raise ValueError('Invalid set of parameters')
+        
+        # Getting attributes from the dictionary
         name = str(image_dict['name'])
         password = str(image_dict['password'])
         kernel = image_dict['kernel']
@@ -641,6 +653,7 @@ class LivenetImage(Image):
         else:
             release_version = None
 
+        # Create the new image with the parameters
         cli_construct_livenet_image(name, password, kernel, livenet_type, livenet_size, additional_packages, ssh_pub_key, selinux, release_version, optimize)
 
     @staticmethod
@@ -724,7 +737,7 @@ boot
 
 def cli_menu():
     # Display main livenet menu
-    printc('\n == Livenet image module == \n', Color.GREEN)
+    printc('\n == Livenet image module == ', Color.GREEN)
 
     ask_module('Select an action:')
     action_list = ['Generate a new livenet image', 'Mount an existing livenet image', 'Unount an existing livenet image', 'Resize livenet image']
@@ -746,7 +759,7 @@ def cli_menu():
 
         # Catch the error in order to stay in this menu if an error appends
         except UserWarning as e:
-                inform(str(e))
+            inform(str(e))
 
 
 # Get a size from the user and check the compliance
@@ -774,12 +787,13 @@ def cli_get_size(size):
 
         # If the giga value has no dot separator
         else:
-            size = str(int(size) * 1024)
+            size = str(int(size)*1024)
 
     return size
 
 
 def cli_create_livenet_image_questions():
+    """Get all the image building arguments from the user shell."""
 
     # Get available kernels
     kernel_list = KernelManager.get_available_kernels()
@@ -889,8 +903,7 @@ def cli_create_livenet_image_questions():
         release_version = None
 
     # Propose to optimize image packages
-    ask_module('Do you wish tool try to optimize image by using aggressive packages dependencies parameters ? ')
-    ask_module('Note that this may collide with additional packages if asked for. (yes/no) ? ')
+    ask_module('Do you wish tool try to optimize image by using aggressive packages dependencies parameters ?','Note that this may collide with additional packages if asked for. (yes/no) ?')
     
     while 'optimize' not in locals():
         answer_optimize = input('-->: ')
@@ -899,11 +912,12 @@ def cli_create_livenet_image_questions():
         elif answer_optimize in {'no','n'}:
             optimize = False
         else:
-            inform('\nInvalid input, please enter another value.')
+            inform('Invalid input, please enter another value.')
 
     cli_construct_livenet_image(selected_image_name, selected_password, selected_kernel, selected_type, image_size, additional_packages, selected_ssh_pub_key, selinux, release_version, optimize)
     
 def cli_construct_livenet_image(name, password, kernel, type, size, additional_packages, ssh_pub_key, selinux, release_version, optimize):
+    """Create the new livenet image."""
 
     # Confirm image creation
     ask_module('Would you like to create a new livenet image with the following attributes: (yes/no)')
@@ -934,36 +948,28 @@ def cli_construct_livenet_image(name, password, kernel, type, size, additional_p
         # Image creation confirmed
         if confirmation in {'yes','y'}:
 
-            # While want to create the image, allow to retry image creation
-            while True:
-                try:
-                    # Create the image object
-                    LivenetImage(name, password, kernel, type, size, additional_packages, ssh_pub_key, selinux, release_version, optimize)
-                    ok()
-                    return
+            try:
+                # Create the image object
+                LivenetImage(name, password, kernel, type, size, additional_packages, ssh_pub_key, selinux, release_version, optimize)
+                ok()
+                return
 
-                # If an error occurs during the image creation
-                except Exception as e:
-                    # First, clean previous uncompleted installation
-                    ImageManager.clean_installation(name)
+            # If an exception occurs during the image creation process
+            except Exception as e:
+                # First, clean previous uncompleted installation
+                ImageManager.clean_installation(name)
+                warn('An exception occurred durring the installation process !', 
+                     'The exception was: ' + str(e))
 
-                    warn('An error occurs durring the installation process ! Scroll up to view the error details.')
-                    warn('The error was:' + str(e))
-                    inform('Would you like to retry the installation with the same parameters (yes/no)?')
-                    inform('(If you exit now you will lost all the image creation parameters you entered.)')
-                    
-                    while True:
-                        confirmation = input('-->: ').replace(" ", "")
-                        # Retry image creation
-                        if confirmation in {'yes','y'}:
-                            break
-
-                        elif confirmation in {'no','n'}:
-                            inform('Image creation cancelled, return to main menu.')
-                            return
-
-                        else:
-                            inform('Invalid confirmation !')
+            # If an error occurs during the image creation process
+            except:
+                # First, clean previous uncompleted installation
+                ImageManager.clean_installation(name)
+                warn('An error occurred durring the installation process ! Maybe scroll up can give you more details.',
+                     'The error was: ' + sys.exc_info()[0])
+                
+            inform('Would you like to retry the installation with the same parameters (yes/no)?',
+                   '(If you exit now you will lost all the image creation parameters you entered.)')
 
         elif confirmation in {'no','n'}:
             inform('Image creation cancelled, return to main menu.')
@@ -972,6 +978,7 @@ def cli_construct_livenet_image(name, password, kernel, type, size, additional_p
         else:
             inform('Invalid confirmation !')
     
+
 def cli_mount_livenet_image():
     livenet_images = LivenetImage.get_images()
 
@@ -992,6 +999,7 @@ def cli_mount_livenet_image():
     unmounted_image = ImageManager.get_created_image(unmounted_image_name)
 
     unmounted_image.mount()
+    ok("Image mounted !")
 
 
 def cli_unmount_livenet_image():
@@ -1009,11 +1017,12 @@ def cli_unmount_livenet_image():
         raise UserWarning('No mounted livenet images.')
 
     # Select a staging image for golden image creation
-    ask_module('Select the livenet image to unmount:', Color.GREEN)
+    ask_module('Select the livenet image to unmount:')
     mounted_image_name = select_from_list(mounted_images_names)
     mounted_image = ImageManager.get_created_image(mounted_image_name)
 
     mounted_image.unmount()
+    ok("Image unmounted !")
 
 
 def cli_resize_livenet_image():
@@ -1066,7 +1075,7 @@ def cli_resize_livenet_image():
         if confirmation in {'yes','y'}:
             # Create the image object
             unmounted_image.resize(image_size)
-            ok()
+            ok('Image resized !')
             return
 
         elif confirmation in {'no','n'}:
