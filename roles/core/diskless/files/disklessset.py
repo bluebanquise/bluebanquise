@@ -72,7 +72,7 @@ if __name__ == "__main__":
             print(' 2 - List available diskless images')
             print(' 3 - Remove a diskless image')
             print(' 4 - Clone a diskless image')
-            print(' 5 - Create image from a parameters file')
+            print(' 5 - Create an image from a parameters file')
             print(' 6 - Manage kernel of a diskless image')
 
             # The second part is about other actions

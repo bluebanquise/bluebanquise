@@ -1,8 +1,8 @@
-Diskless User documentation
-===========================
+Diskless
+--------
 
 Description
------------
+^^^^^^^^^^^
 
 This role provides needed tools to deploy a basic diskless cluster.
 
@@ -16,8 +16,10 @@ It is important to understand that this role is independant of the pxe_stack cor
 Validated on RHEL8.
 Python based.
 
+A technical documentation is available on https://github.com/bluebanquise/bluebanquise/tree/master/resources/documentation/diskless
+
 Set up the tool
----------------
+^^^^^^^^^^^^^^^
 
 1. Apply your playbook with the "diskless" role activated (see *Example playbook* part).
 
@@ -141,7 +143,7 @@ Set up the tool
 Now the tool is ready to be used.
 
 Manage and create diskless images with modules
-----------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The diskless tool use modules for image creation. Because the tool is modular, new modules can be added for specific images.
 By default 3 module are provided:
@@ -182,7 +184,7 @@ In the diskless main menu you can select the first option and select the module 
   -->: 
 
 Livenet module
-^^^^^^^^^^^^^^
+""""""""""""""
 
 Entering the livenet module will prompt the following menu:
 
@@ -214,7 +216,7 @@ When generating a new livenet image with the first option, you will have to give
 * The size of the image (It will take this size into ram memory). Please be aware to give enough memory for your operating system.
 
 NFS module
-^^^^^^^^^^
+""""""""""
 
 Entering the livenet module will prompt the following menu:
 
@@ -236,16 +238,11 @@ In this menu you can do 3 actions:
 * Manage nodes of a golden image: Create a specific file system for each nodes for a specific golden image. After adding a node to a golden image via this option, you can boot the node onto the golden image.
 
 Demo module
-^^^^^^^^^^^
+"""""""""""
 
 You can create demo images to test the diskless tool.
 Corrupt a demo image will allow you to test the cleaning mechanism of the tool. In fact a corrupted demo image will be cleaned when listing images.
 Demo module can also be used by devellopers to understand module creation.
-
-Actions
--------
-
-With the diskless tool, you can do different actions on diskless images.
 
 List available diskless images
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -336,7 +333,7 @@ Exit
 Exist the diskless tool.
 
 Boot a diskless image
----------------------
+^^^^^^^^^^^^^^^^^^^^^
 
 You can use the bootset bluebanquise tool to setup the boot image for a specific machine:
 
@@ -347,7 +344,7 @@ You can use the bootset bluebanquise tool to setup the boot image for a specific
 Please refer you to bootset documentation for further information.
 
 Customizing Livenet image
--------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The image name used in the examples below is *space_image*.
 
@@ -374,6 +371,7 @@ with the following head:
       j2_node_main_network: ice1-1                #<<< UPDATE
       start_service: false
       image_equipment_profile: equipment_typeC    #<<< UPDATE
+      ep_firewall: false
   
     pre_tasks:
       - name: Add current host to defined equipment_profile
@@ -408,6 +406,7 @@ Notes:
 * The multiple `-i` defines Ansible inventories to gather. By default, in BlueBanquise, the first two inventories are used. We simply add the third one, corresponding to the mounting point.
 * The `-e` (extra vars) are here to specify to the stack which iceberg and main network are to be used in the configuration of the node. (System cannot know on which nodes the image will be used).
 * The `--skip-tags identify` prevents hostname and static ip to be set, since the image should be generic for multiple hosts.
+* Firewall does not work properly in a chroot environment. Variable ep_firewall must be set to false when executing playbook in the chrooted image. If there are firewall related changes to be applied on the image, execute playbook with ep_firewall set to false in the playbook (but keep it true in the inventory) in the chrooted image. Once node is booted in diskless, execute again the playbook with ep_firewall to true (note: you can focus on firewall tasks only at this point using the firewall tag).
 
 Before closing, also remember to clean dnf cache into the image chroot to save space.
 
@@ -422,8 +421,8 @@ Using disklessset now, choose option 2 to unmount the image and squashfs it agai
 It is possible now to use the tool to resize image, to reduce it to the desired value (to save ram on target host).
 Always keep at least 100MB in / for temporary files and few logs generated during run.
 
-A Playbook Exemple
-------------------
+Example Playbook
+^^^^^^^^^^^^^^^^
 
 .. code-block:: text
 
@@ -435,3 +434,16 @@ A Playbook Exemple
 
 Once the node is started, run your playbook with your roles.
 It is important to synchronize your node's time by running the time role.
+
+To be done
+^^^^^^^^^^
+
+* Make a livenet image autosizing system (Taken automatically the minimum size for operating system in ram).
+* Make a diskless conf file in /etc in order to configure : Autoclean on/off, Directories location (images, kernels, ...).
+
+Changelog
+^^^^^^^^^
+* 1.3.0: Role update. David Pieters <davidpieters22@gmail.com>
+* 1.2.0: Role update. David Pieters <davidpieters22@gmail.com>, Benoit Leveugle <benoit.leveugle@gmail.com>
+* 1.1.0: Role update. Benoit Leveugle <benoit.leveugle@gmail.com>, Bruno Travouillon <devel@travouillon.fr>
+* 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>

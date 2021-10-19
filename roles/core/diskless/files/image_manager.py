@@ -588,12 +588,14 @@ class ImageManager:
     @staticmethod
     def cli_clone_image():
         """Ask the user for cloning an image"""
+
+        # Get the image to clone
         image_to_clone = ImageManager.get_created_image(ImageManager.cli_select_created_image())
 
         ask('Enter the clone name:')
         while True:
 
-            # Get the clone name
+            # Ask the user for a clone name
             clone_name = input('-->: ').replace(" ", "")
 
             if clone_name == '':
@@ -605,12 +607,12 @@ class ImageManager:
             else:
                 break
 
-        # get confirmation from user
+        # Get confirmation from user
         ask('Confirm that you want to clone image \'' + image_to_clone.name + '\' into \'' + clone_name + '\' (yes/no)')
         confirmation = input('-->: ').replace(" ", "")
 
         if confirmation in {'yes','y'}:
-            # Remove image
+            # Clone the image
             ImageManager.clone_image(image_to_clone, clone_name)
             ok('Image clonned')
 
