@@ -308,6 +308,7 @@ Create an image from a parameters file
 Create a new image from a parameters file. The parameters file must follow a specfic template. You can take example from the "image_data.yml" files generated when created images from questions (The usual way). You have to put a clear password in the given parameters file and follow these templates: 
 
 Template of parameters file to create a livenet image:
+""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 .. code-block:: text
 
@@ -328,6 +329,7 @@ Template of parameters file to create a livenet image:
 ssh_pub_key, additional_packages, and release_version are optional.
 
 Example of parameters file to create a nfs staging image:
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 .. code-block:: text
 
