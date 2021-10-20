@@ -77,6 +77,7 @@ class NfsStagingImage(Image):
         # Generate image files
         self.generate_files()
 
+
     # Generate staging image files
     def generate_files(self):
         super().generate_files()
@@ -86,12 +87,14 @@ class NfsStagingImage(Image):
         self.set_image_password()
         self.generate_ipxe_boot_file()
 
+
     # Remove files associated with the NFS image
     def remove_files(self):
         super().remove_files()
 
         logging.debug('Executing \'rm -rf ' + self.NFS_DIRECTORY + '\'')
         shutil.rmtree(self.NFS_DIRECTORY)
+
 
     # Clone the image into another image
     def clone(self, clone_name):
@@ -110,6 +113,7 @@ class NfsStagingImage(Image):
         # Copying nfs directory for the clone
         logging.debug('Copying directory ' + self.NFS_DIRECTORY + ' into ' + CLONE_NFS_DIRECTORY)
         logging.debug('Executing \'cp -r ' + self.NFS_DIRECTORY + ' ' + CLONE_NFS_DIRECTORY + '\'')
+        
         # Don't crash copying symlinks because they can point to non existing ressources 
         # (it is not a booted file system)
         shutil.copytree(self.NFS_DIRECTORY, CLONE_NFS_DIRECTORY, symlinks=True)
@@ -128,12 +132,14 @@ class NfsStagingImage(Image):
         # Update the boot.ipxe file content
         clone.generate_ipxe_boot_file()
 
+
     # Create image base folders
     def create_image_folders(self):
         super().create_image_folders()
         # Create the specific nfs image directory
         logging.debug('Executing \'mkdir ' + self.NFS_DIRECTORY + '\'')
         os.mkdir(self.NFS_DIRECTORY)
+
 
     # Generate image file system
     def generate_file_system(self):
@@ -159,6 +165,7 @@ class NfsStagingImage(Image):
             logging.debug('Executing \'dnf install ' + release + ' -y --installroot=' + self.NFS_DIRECTORY + ' ' + packages + '\'')
             os.system('dnf install ' + release + ' -y --installroot=' + self.NFS_DIRECTORY + ' ' + packages)
 
+
     # Set a password for the image
     # Staging images need a password
     def set_image_password(self):
@@ -174,6 +181,7 @@ class NfsStagingImage(Image):
         with open(self.NFS_DIRECTORY + 'etc/shadow', "w") as ff:
             ff.write(newText)
 
+
     # Clean all image files without image object when an image is corrupted
     @staticmethod
     def clean(image_name):
@@ -188,6 +196,7 @@ class NfsStagingImage(Image):
             logging.debug(NfsStagingImage.NFS_DIRECTORY + image_name + ' is a directory')
             logging.debug('Executing \'rm -rf ' + NfsStagingImage.NFS_DIRECTORY + image_name + '\'')
             shutil.rmtree(NfsStagingImage.NFS_DIRECTORY + image_name)
+
 
     # Get the parameters from a dictionary
     @classmethod
@@ -215,6 +224,7 @@ class NfsStagingImage(Image):
         
         # Create the new image with the parameters
         cli_construct_nfsstaging_image(name, password, kernel, additional_packages, release_version)
+
 
     @staticmethod
     def get_boot_file_template():
@@ -281,10 +291,12 @@ class NfsGoldenImage(Image):
         # Generate image files
         self.generate_files(staging_image)
 
+
     def get_existing_image(self):
         super().get_existing_image()
         # Convert string node set into NodeSet object
         self.nodes = NodeSet(self.nodes)
+
 
     # Generate golden image files
     def generate_files(self, staging_image):
@@ -293,10 +305,12 @@ class NfsGoldenImage(Image):
         self.generate_file_system(staging_image)
         super().generate_ipxe_boot_file()
 
+
     def create_image_folders(self):
         super().create_image_folders()
         logging.debug('Executing \'mkdir -p ' + self.NFS_DIRECTORY + 'nodes\'')
         os.makedirs(self.NFS_DIRECTORY + 'nodes')
+
 
     def generate_file_system(self, staging_image):
         super().generate_file_system()
@@ -304,9 +318,11 @@ class NfsGoldenImage(Image):
         logging.debug('Executing \'cp -a ' + staging_image.NFS_DIRECTORY + ' ' + self.NFS_DIRECTORY + 'image/\'')
         os.system('cp -a ' + staging_image.NFS_DIRECTORY + ' ' + self.NFS_DIRECTORY + 'image/')
 
+
     # List nodes associated with nfs golden image
     def get_nodes(self):
         return self.nodes
+
 
     # Add nodes to the image
     def add_nodes(self, nodes_range):
@@ -329,6 +345,7 @@ class NfsGoldenImage(Image):
         # Register image with new values
         self.register_image()
 
+
     # Remove nodes from the golden image
     def remove_nodes(self, nodes_range):
         try:
@@ -348,6 +365,7 @@ class NfsGoldenImage(Image):
         except KeyError:
             raise KeyError("NodeSet to remove is not in image NodeSet !")
 
+
     # Remove files associated with the NFS image
     def remove_files(self):
         super().remove_files()
@@ -355,11 +373,13 @@ class NfsGoldenImage(Image):
         logging.debug('Executing \'rm -rf ' + self.NFS_DIRECTORY + '\'')
         shutil.rmtree(self.NFS_DIRECTORY)
 
+
     # Clone the image into another image
     def clone(self, clone_name):
 
         super().clone(clone_name)
 
+        # Clone directories path
         CLONE_IMAGE_DIRECTORY = Image.IMAGES_DIRECTORY + clone_name + '/'
         CLONE_NFS_DIRECTORY = NfsGoldenImage.NFS_DIRECTORY + clone_name + '/'
 
@@ -387,6 +407,10 @@ class NfsGoldenImage(Image):
         # Register the clone to update it's image_data file values
         clone.register_image()
 
+        # Update the boot.ipxe file content
+        clone.generate_ipxe_boot_file()
+
+
     # Clean all image files without image object when an image is corrupted
     @staticmethod
     def clean(image_name):
@@ -401,6 +425,7 @@ class NfsGoldenImage(Image):
             logging.debug(NfsGoldenImage.NFS_DIRECTORY + image_name + ' is a directory')
             logging.debug('Executing \'rm -rf ' + NfsGoldenImage.NFS_DIRECTORY + image_name + '\'')
             shutil.rmtree(NfsGoldenImage.NFS_DIRECTORY + image_name)
+
 
     @staticmethod
     def get_boot_file_template():
@@ -683,8 +708,11 @@ def cli_manage_nodes():
 
     # Add some nodes to the image
     elif action == 'Add nodes with the image':
-        ask_module('Actual image NodeSet is: ' + str(golden_image.nodes))
-        ask_module('Please enter nodes range to add:')
+        if golden_image.nodes.__len__() == 0:
+            ask_module('Actualy there are no nodes for this image', 'Please enter nodes range to add:')
+        else:
+            ask_module('Actual image NodeSet is: ' + str(golden_image.nodes), 'Please enter nodes range to add:')
+
         while True:
             nodes_range = input('-->: ').replace(" ", "")
             # Test if nodes_range is a valid range

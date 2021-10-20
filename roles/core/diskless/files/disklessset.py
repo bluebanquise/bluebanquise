@@ -36,10 +36,10 @@ if __name__ == "__main__":
     # Set logging logs level, this level can be configured in order to have more or less logging informations.
     # There are four levels (sorted by logs number): (lot of logs) DEBUG (default) > INFO > WARNING > ERROR (few logs)
     # Set logging level from the first argument
-    if sys.argv[1] == '-d':
+    if len(sys.argv) > 1 and sys.argv[1] == '-d':
         logging.root.setLevel(logging.DEBUG)
-    elif sys.argv[1] == '-i':
-        logging.root.setLevel(logging.INFO)
+    elif len(sys.argv) > 1 and sys.argv[1] == '-i':
+            logging.root.setLevel(logging.INFO)
     else:
         # Default level
         logging.root.setLevel(logging.WARNING)
@@ -138,7 +138,7 @@ if __name__ == "__main__":
 
             # Generate a new initramfs file from an existing kernel
             elif main_action == '8':
-                KernelManager.cli_generate_initramfs
+                KernelManager.cli_generate_initramfs()
 
             # Clean an image
             elif main_action == '9':

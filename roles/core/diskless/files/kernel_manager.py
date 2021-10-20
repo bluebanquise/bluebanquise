@@ -101,7 +101,7 @@ class KernelManager:
         kernel_version = kernel.replace('vmlinuz-', '')
         generation_path = KernelManager.KERNELS_PATH + '/initramfs-kernel-' + kernel_version
 
-        inform('[INFO] Now generating initramfs... May take some time')
+        inform('Now generating initramfs... May take some time')
 
         # Generate the new initramfs file with dracut command on the kernel
         logging.info('Executing \'dracut --xz -v -m "network base nfs" --add "ifcfg livenet systemd systemd-initrd dracut-systemd" --add-drivers xfs --no-hostonly --nolvmconf --force ' + generation_path + ' --kver ' + kernel_version + '\'')
