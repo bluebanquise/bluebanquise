@@ -318,7 +318,7 @@ Template of parameters file to create a livenet image:
       password: root
       kernel: vmlinuz-4.18.0-305.el8.x86_64
       livenet_type: Type.CORE
-      livenet_size: 500
+      livenet_size: 700
       ssh_pub_key: /root/.ssh/id_rsa.pub
       selinux: False
       optimize: False
