@@ -31,7 +31,9 @@
   - slurm: major role upgrade. (#11)
   - users_basic: add ssh public keys support. (#12)
   - prometheus: correct default value of prometheus_exporters_groups_to_scrape. (#30)
-  - podman: quotes in lists of registries. (#34)
+  - podman: 
+    - correct logical operator to run local registry. (#33)
+    - quotes in lists of registries. (#34)
 
 ### New tools
 
