@@ -492,7 +492,7 @@ def cli_create_nfsstaging_image_questions():
     selected_kernel = select_from_list(kernel_list)
 
     # Manage password
-    ask_module(' Give a password for your image')
+    ask_module('Give a password for your image')
     selected_password = input('Please enter clear root password of the new image: ').replace(" ", "")
 
     # Propose to user to install additional packages

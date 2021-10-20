@@ -314,7 +314,7 @@ Template of parameters file to create a livenet image:
 
   image_data:
 
-      name: live1-clone
+      name: livenet1
       password: root
       kernel: vmlinuz-4.18.0-305.el8.x86_64
       livenet_type: Type.CORE

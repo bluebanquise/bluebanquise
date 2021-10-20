@@ -33,10 +33,16 @@ from diskless.image_manager import ImageManager
 # Main program
 if __name__ == "__main__":
 
-    # Set logging logs level, you can configure the logging level in order to have more or less logging informations.
-    # You can select one of these levels (sorted by logs number): (lot of logs) DEBUG (default) > INFO > WARNING > ERROR (few logs)
-    # Just change the value of the level on the line bellow.
-    logging.root.setLevel(logging.DEBUG)
+    # Set logging logs level, this level can be configured in order to have more or less logging informations.
+    # There are four levels (sorted by logs number): (lot of logs) DEBUG (default) > INFO > WARNING > ERROR (few logs)
+    # Set logging level from the first argument
+    if sys.argv[1] == '-d':
+        logging.root.setLevel(logging.DEBUG)
+    elif sys.argv[1] == '-i':
+        logging.root.setLevel(logging.INFO)
+    else:
+        # Default level
+        logging.root.setLevel(logging.WARNING)
 
     # Set script banner
     BANNER = """\n
@@ -47,7 +53,7 @@ if __name__ == "__main__":
   ██████╔╝██║███████║██║  ██╗███████╗███████╗███████║███████║
   ╚═════╝ ╚═╝╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝╚══════╝
 """
-
+  
     # Print script banner
     printc(BANNER + '\n        Entering BlueBanquise diskless manager (v1.3.0)', Color.BLUE)
 
