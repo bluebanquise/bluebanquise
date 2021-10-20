@@ -64,6 +64,8 @@ Set up the tool
   [+]  Select an action:
   -->:
 
+You can add -i (info) or -d (debug) options to the disklessset command to get logs during the execution.
+
 4. Check that the kernels you previously added are present in the tool:
 
 .. code-block:: text
