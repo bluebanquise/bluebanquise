@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.1 - Next release
+
+### Updated roles
+
+  - podman: 
+    - correct logical operator to run local registry. (#33)
+    - quotes in lists of registries. (#34)
+
 ## 1.0.0 - Next release
 
 ### New roles
@@ -31,9 +39,6 @@
   - slurm: major role upgrade. (#11)
   - users_basic: add ssh public keys support. (#12)
   - prometheus: correct default value of prometheus_exporters_groups_to_scrape. (#30)
-  - podman: 
-    - correct logical operator to run local registry. (#33)
-    - quotes in lists of registries. (#34)
 
 ### New tools
 
