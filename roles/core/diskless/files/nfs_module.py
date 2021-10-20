@@ -190,9 +190,9 @@ class NfsStagingImage(Image):
             shutil.rmtree(NfsStagingImage.NFS_DIRECTORY + image_name)
 
     # Get the parameters from a dictionary
-    @staticmethod
-    def create_image_from_parameters(image_dict):
-        super().create_image_from_parameters(image_dict)
+    @classmethod
+    def create_image_from_parameters(cls, image_dict):
+        super().create_image_from_parameters()
 
         # Check that there are all mandatory the parameters
         if not all(key in image_dict for key in ['name', 'password', 'kernel']):
@@ -209,7 +209,7 @@ class NfsStagingImage(Image):
             additional_packages = None
 
         if 'release_version' in  image_dict:
-            release_version = image_dict['release_version']
+            release_version = str(image_dict['release_version'])
         else:
             release_version = None
         
@@ -440,7 +440,7 @@ boot
 def cli_menu():
 
     # Display main menu
-    printc('\n == NFS image module == \n', Color.GREEN)
+    printc('\n == NFS image module == ', Color.GREEN)
 
     ask_module('Select an action:')
     action_list = ['Generate a new nfs staging image', 'Generate a new nfs golden image from a staging image', 'Manage nodes of a golden image']

@@ -35,6 +35,7 @@ from diskless.kernel_manager import KernelManager
 from diskless.image_manager import ImageManager
 from diskless.utils import Color, printc, select_from_list, inform, warn, ok, ask_module
 
+
 # Class representing a livenet image
 class LivenetImage(Image):
 
@@ -117,11 +118,13 @@ class LivenetImage(Image):
         # Generate image files
         self.generate_files()
 
+
     def generate_files(self):
         super().generate_files()
         super().create_image_folders()
         self.generate_file_system()
         self.generate_ipxe_boot_file()
+
 
     def generate_file_system(self):
         super().generate_file_system()
@@ -148,6 +151,7 @@ class LivenetImage(Image):
 
         # Generate image squashfs.img
         self.generate_squashfs()
+
 
     # Use dnf command in order to create the image operating system
     def generate_operating_system(self):
@@ -203,6 +207,7 @@ class LivenetImage(Image):
             logging.debug('dnf install ' + dnf_packages + release + ' -y --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --setopt=module_platform_id=platform:el8')
             os.system('dnf install ' + dnf_packages + release + ' -y --installroot=' + self.WORKING_DIRECTORY + 'generated_os/ --setopt=module_platform_id=platform:el8')
 
+
     # Generate the image squashfs image after creating the image rootfs image
     # The operating system need to be previoulsy created by the
     # generate_operating_system method.
@@ -254,6 +259,7 @@ class LivenetImage(Image):
         logging.debug('Executing \'rm -rf ' + self.IMAGE_DIRECTORY + 'tosquash\'')
         shutil.rmtree(self.IMAGE_DIRECTORY + 'tosquash')
 
+
     # Set a password for the image
     # Staging images need a password
     def set_image_password(self, mountage_directory):
@@ -268,6 +274,7 @@ class LivenetImage(Image):
             # Write new passord file content
         with open(mountage_directory + '/etc/shadow', "w") as ff:
             ff.write(newText)
+
 
     # Ensure root login is allowed via ssh
     def set_image_ssh_permitrootlogin(self, mountage_directory):
@@ -284,6 +291,7 @@ class LivenetImage(Image):
         with open(mountage_directory + '/etc/ssh/sshd_config', "w") as ff:
             ff.writelines(filebuffer)
 
+
     # Write meta data inside image os-release file
     def set_image_release_meta_data(self):
         logging.info('Setting image \'' + self.name + '\' meta data')
@@ -292,6 +300,7 @@ class LivenetImage(Image):
             ff.writelines(['BLUEBANQUISE_IMAGE_NAME="{0}"\n'.format(self.name),
                            'BLUEBANQUISE_IMAGE_KERNEL="{0}"\n'.format(self.kernel),
                            'BLUEBANQUISE_IMAGE_DATE="{0}"\n'.format(datetime.today().strftime('%Y-%m-%d'))])
+
 
     # Inject ssh pub key
     def set_image_ssh_pub_key(self):
@@ -303,6 +312,7 @@ class LivenetImage(Image):
 
         logging.debug('Executing \'cp ' + self.ssh_pub_key + ' ' + self.WORKING_DIRECTORY + 'generated_os/root/.ssh/authorized_keys\'')
         shutil.copyfile(self.ssh_pub_key, self.WORKING_DIRECTORY + 'generated_os/root/.ssh/authorized_keys')
+
 
     # Enable SELinux in the image
     def set_image_selinux(self):
@@ -341,6 +351,7 @@ class LivenetImage(Image):
         logging.debug('Executing \'umount ' + self.WORKING_DIRECTORY + 'generated_os/{sys/fs/selinux,sys,proc}\'')
         check_call('umount ' + self.WORKING_DIRECTORY + 'generated_os/{sys/fs/selinux,sys/kernel/tracing,sys,proc}', shell=True)
 
+
     # Remove files associated with the NFS image
     def remove_files(self):
 
@@ -350,6 +361,7 @@ class LivenetImage(Image):
             self.unmount()
 
         super().remove_files()
+
 
     # Clone the image into another image
     def clone(self, clone_name):
@@ -388,6 +400,7 @@ class LivenetImage(Image):
 
         if was_mounted == True:
             self.mount()
+
 
     # Mount the image to edit it
     def mount(self):
@@ -438,6 +451,7 @@ class LivenetImage(Image):
         self.is_mounted = True
         self.register_image()
 
+
     # Unmount the image when the editing is finished
     def unmount(self):
         """Unmounting livenet image"""
@@ -477,6 +491,7 @@ class LivenetImage(Image):
         # Changing image mountage status
         self.is_mounted = False
         self.register_image()
+
 
     # Resize the livenet image image size
     def resize(self, new_size):
@@ -556,6 +571,7 @@ class LivenetImage(Image):
 
         logging.info('Image has been resized to ' + new_size + 'Mb')
 
+
     # We must redefine the method because we cannot register attributs as boolean
     def get_existing_image(self):
         super().get_existing_image()
@@ -572,6 +588,7 @@ class LivenetImage(Image):
                 self.selinux = True
             elif self.selinux == 'False':
                 self.selinux = False
+
 
     # Clean all image files without image object when an image is corrupted
     @staticmethod
@@ -608,10 +625,11 @@ class LivenetImage(Image):
             logging.debug('Executing \'rm -rf ' + IMAGES_DIRECTORY + '\'')
             shutil.rmtree(IMAGES_DIRECTORY)
 
+
     # Get the parameters from a dictionary
-    @staticmethod
-    def create_image_from_parameters(image_dict):
-        super().create_image_from_parameters(image_dict)
+    @classmethod
+    def create_image_from_parameters(cls, image_dict):
+        super().create_image_from_parameters()
 
         # Check that there are all mandatory the parameters
         if not all(key in image_dict for key in ['name', 'password', 'kernel', 'livenet_type', 'livenet_size', 'optimize', 'selinux']):
@@ -639,7 +657,7 @@ class LivenetImage(Image):
            selinux = False
 
         if 'ssh_pub_key' in  image_dict:
-            ssh_pub_key = image_dict['ssh_pub_key']
+            ssh_pub_key = str(image_dict['ssh_pub_key'])
         else:
             ssh_pub_key = None
 
@@ -649,12 +667,13 @@ class LivenetImage(Image):
             additional_packages = None
 
         if 'release_version' in  image_dict:
-            release_version = image_dict['release_version']
+            release_version = str(image_dict['release_version'])
         else:
             release_version = None
 
         # Create the new image with the parameters
         cli_construct_livenet_image(name, password, kernel, livenet_type, livenet_size, additional_packages, ssh_pub_key, selinux, release_version, optimize)
+
 
     @staticmethod
     def get_boot_file_template():
@@ -685,6 +704,7 @@ sleep 4
 boot
 '''
 
+
     def cli_display_info(self):
         """Display informations about an image"""
 
@@ -714,6 +734,7 @@ boot
 
         # For the last tuple element of the list
         print('     └── ' + str(list(attributes_dictionary.keys())[-1]) + ': ' + str(list(attributes_dictionary.values())[-1]))
+
 
     # Override method because of selinux
     def generate_ipxe_boot_file(self):
@@ -830,18 +851,18 @@ def cli_create_livenet_image_questions():
 
     # Select livenet type
     ask_module('Choose your image type:')
-    types_list = ['Standard: core (~1.3Gb)', 'Small: openssh, dnf and NetworkManager (~300Mb)', 'Minimal: openssh only (~270Mb)']
+    types_list = ['Standard: core (~1.3Gb)', 'Small: openssh, dnf and NetworkManager (~700Mb)', 'Minimal: openssh only (~680Mb)']
     get_type = select_from_list(types_list)
 
     if get_type == 'Standard: core (~1.3Gb)':
         selected_type = LivenetImage.Type.STANDARD
-    elif get_type == 'Small: openssh, dnf and NetworkManager (~300Mb)':
+    elif get_type == 'Small: openssh, dnf and NetworkManager (~700Mb)':
         selected_type = LivenetImage.Type.SMALL
     else:
         selected_type = LivenetImage.Type.CORE
 
     # Select livenet size
-    ask_module('Please choose image size:\n(supported units: M=1024*1024, G=1024*1024*1024)\n(Examples: 5120M or 5G)')
+    ask_module('Please choose image size:', '(supported units: M=1024*1024, G=1024*1024*1024)', '(Examples: 700M or 5G)')
     while True:
         selected_size = input('-->: ')
 
@@ -915,6 +936,7 @@ def cli_create_livenet_image_questions():
             inform('Invalid input, please enter another value.')
 
     cli_construct_livenet_image(selected_image_name, selected_password, selected_kernel, selected_type, image_size, additional_packages, selected_ssh_pub_key, selinux, release_version, optimize)
+    
     
 def cli_construct_livenet_image(name, password, kernel, type, size, additional_packages, ssh_pub_key, selinux, release_version, optimize):
     """Create the new livenet image."""
@@ -1047,7 +1069,7 @@ def cli_resize_livenet_image():
     unmounted_image = ImageManager.get_created_image(unmounted_image_name)
 
     # Enter new size
-    ask_module('Please enter your new image size:\n(supported units: M=1024*1024, G=1024*1024*1024)\n(Examples: 5120M or 5G)')
+    ask_module('Please enter your new image size:\n(supported units: M=1024*1024, G=1024*1024*1024)\n(Examples: 700M or 5G)')
     
     while True:
         selected_size = input('-->: ')

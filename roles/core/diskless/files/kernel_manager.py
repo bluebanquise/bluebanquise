@@ -20,7 +20,7 @@
 # Import basic modules
 import os
 import logging
-from diskless.utils import Color, inform, ask, select_from_list
+from diskless.utils import Color, inform, ask, ok, select_from_list
 from diskless.image_manager import ImageManager
 
 
@@ -30,6 +30,7 @@ class KernelManager:
 
     # Path where diskless kernels are
     KERNELS_PATH = '/var/www/html/preboot_execution_environment/diskless/kernels'
+
 
     @staticmethod
     def get_kernels():
@@ -46,6 +47,7 @@ class KernelManager:
             return kernel_list
         else:
             return None
+
 
     @staticmethod
     def get_available_kernels():
@@ -65,6 +67,7 @@ class KernelManager:
         else:
             return None
 
+
     @staticmethod
     def change_kernel(image, kernel):
         """Change the kernel of an image object.
@@ -82,6 +85,7 @@ class KernelManager:
         image.register_image()
         # Change the kernel in the boot.ipxe file
         image.generate_ipxe_boot_file()
+
 
     # Generate initramfs from kernel
     @staticmethod
@@ -129,6 +133,7 @@ class KernelManager:
         else:
             raise UserWarning('No available kernel.')
 
+
     # [CLI] Display a list of available kernels
     @staticmethod
     def cli_display_kernels():
@@ -157,10 +162,13 @@ class KernelManager:
                 # If it is not the last kernel of the list
                 else:
                     print("    ├── "+str(kernel)+' - ' + initramfs_status)
+            ok()
 
         # If the list of kernels is empty
         else:
-            raise UserWarning('No kernels found in /var/www/html/preboot_execution_environment/diskless/kernels/\nPlease refer to readme.rst for details on how to obtain kernels.')
+            inform('No kernels found in /var/www/html/preboot_execution_environment/diskless/kernels/','Please refer to readme.rst for details on how to obtain kernels.')
+            return
+
 
     @staticmethod
     def cli_change_kernel():
@@ -170,6 +178,9 @@ class KernelManager:
         """
         # Get all images
         images_list = ImageManager.get_created_images()
+        if not images_list:
+            inform('No images.')
+            return
 
         # Select only images with kernel attribut
         images_with_kernel = []
@@ -179,7 +190,8 @@ class KernelManager:
 
         # If there is no image with kernel, raise an exception
         if not images_with_kernel:
-            raise UserWarning('Not any image with a kernel')
+            inform('Not any image with a kernel')
+            return
 
         # Select the image to change kernel
         image_name = select_from_list(images_with_kernel)
@@ -191,3 +203,9 @@ class KernelManager:
 
         # Set image kernel by using image method
         KernelManager.change_kernel(image, new_kernel)
+        ok()
+
+    def cli_generate_initramfs():
+        selected_kernel = KernelManager.cli_select_kernel()
+        KernelManager.generate_initramfs(selected_kernel)
+        ok()

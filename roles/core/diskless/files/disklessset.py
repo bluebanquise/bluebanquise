@@ -36,7 +36,7 @@ if __name__ == "__main__":
     # Set logging logs level, you can configure the logging level in order to have more or less logging informations.
     # You can select one of these levels (sorted by logs number): (lot of logs) DEBUG (default) > INFO > WARNING > ERROR (few logs)
     # Just change the value of the level on the line bellow.
-    logging.root.setLevel(logging.INFO)
+    logging.root.setLevel(logging.DEBUG)
 
     # Set script banner
     BANNER = """\n
@@ -49,7 +49,7 @@ if __name__ == "__main__":
 """
 
     # Print script banner
-    printc(BANNER + '\n           Entering BlueBanquise diskless manager', Color.BLUE)
+    printc(BANNER + '\n        Entering BlueBanquise diskless manager (v1.3.0)', Color.BLUE)
 
     # Create a main_action variable
     main_action = ''
@@ -109,7 +109,6 @@ if __name__ == "__main__":
             # Display already created diskless images
             elif main_action == '2':
                 ImageManager.cli_display_images()
-                ok()
 
             # Remove a diskless image
             elif main_action == '3':
@@ -126,18 +125,14 @@ if __name__ == "__main__":
              # Change the kernel of an existing image
             elif main_action == '6':
                 KernelManager.cli_change_kernel()
-                ok()
 
             # Display available kernels for image
             elif main_action == '7':
                 KernelManager.cli_display_kernels()
-                ok()
 
             # Generate a new initramfs file from an existing kernel
             elif main_action == '8':
-                selected_kernel = KernelManager.cli_select_kernel()
-                KernelManager.generate_initramfs(selected_kernel)
-                ok()
+                KernelManager.cli_generate_initramfs
 
             # Clean an image
             elif main_action == '9':
@@ -164,4 +159,4 @@ if __name__ == "__main__":
         # Only catch UserWarning type exceptions
         except UserWarning as e:
             # Display to the user a warning message
-            warn(str(e))
+            inform(str(e))

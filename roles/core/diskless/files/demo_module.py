@@ -47,6 +47,7 @@ class DemoImage(Image):
         self.generate_files()
         ok("Image created ! Check images list to look at it.")
 
+
     def generate_files(self):
         super().generate_files()
         self.create_image_folders()
@@ -54,11 +55,13 @@ class DemoImage(Image):
         # The 'my_message attribute' will be saved in image_data file when registering.
         # You will see it when listing images after demo image creation.
 
+
     def create_image_folders(self):
         super().create_image_folders()
         # Create a folder just for the exemple.
         logging.debug('Executing \'mkdir -p /diskless/demo_directory_' + self.name + '\'')
         os.makedirs('/diskless/demo_directory_' + self.name)
+
 
     # This function will help us to understand the difference between clean and remove methods
     def generate_file_system(self):
@@ -85,12 +88,14 @@ class DemoImage(Image):
         logging.debug('Executing \'rm -f /diskless/demo_file_to_remove_' + self.name + '.txt\'')
         os.remove('/diskless/demo_file_to_remove_' + self.name + '.txt')
 
+
     def remove_files(self):
         # Remove the image files when the image was properly created
         super().remove_files()
 
         logging.debug('Executing \'rm -rf /diskless/demo_directory_' + self.name + '\'')
         shutil.rmtree('/diskless/demo_directory_' + self.name)
+
 
     # Clone the image into another image
     def clone(self, clone_name):
@@ -139,6 +144,7 @@ class DemoImage(Image):
             logging.debug('/diskless/demo_file_to_remove_' + image_name + '.txt is a file')
             logging.debug('Executing \'rm -f /diskless/demo_file_to_remove_' + image_name + '.txt\'')
             os.remove('/diskless/demo_file_to_remove_' + image_name + '.txt')
+
 
     @staticmethod
     def get_boot_file_template():
