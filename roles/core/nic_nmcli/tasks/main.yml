@@ -54,7 +54,7 @@
   tags:
     - service
 
-- name: service █ Ensure Betwork Manager is running
+- name: service █ Ensure Network Manager is running
   service:
     name: "{{ item }}"
     state: started
