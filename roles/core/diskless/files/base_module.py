@@ -22,13 +22,12 @@
 import os
 import shutil
 from datetime import datetime
-import yaml
 import logging
 from abc import ABC, abstractmethod
 import subprocess
 
 # Import diskless modules
-from diskless.utils import Color, inform, ask
+from diskless.utils import inform
 from diskless.image_manager import ImageManager
 from diskless.utils import ask_module, load_file
 
@@ -113,12 +112,10 @@ class Image(ABC):
             ImageManager.unregister_installation(self.name)
             logging.info('Image \'' + self.name + '\' creation complete !')
 
-
     @abstractmethod
     def create_new_image(self):
         """Create a new image. This method must be redefined in all subclasses."""
         logging.info('Starting image \'' + self.name + '\' creation')
-
 
     @abstractmethod
     def remove_files(self):
@@ -132,7 +129,6 @@ class Image(ABC):
             logging.debug('Executing \'rm -rf ' + self.IMAGE_DIRECTORY + '\'')
             shutil.rmtree(self.IMAGE_DIRECTORY)
 
-
     @abstractmethod
     def clone(self, clone_name):
         """Clone the image into another image.
@@ -141,14 +137,12 @@ class Image(ABC):
         """
         logging.info('Clonning image \'' + self.name + '\' into \'' + clone_name + '\'')
 
-
     @staticmethod
     @abstractmethod
     def get_boot_file_template():
         """Get the class boot file template.
         This method must be redefined in all Image subclasses."""
         return ''
-
 
     @staticmethod
     @abstractmethod
@@ -162,11 +156,9 @@ class Image(ABC):
         """
         logging.info('Cleaning image \'' + image_name + '\' files')
 
-
     def generate_files(self):
         """Generate image files."""
         logging.info('Start generating image \'' + self.name + '\' stuff...')
-
 
     def create_image_folders(self):
         """Create image folders."""
@@ -176,11 +168,9 @@ class Image(ABC):
         logging.debug('Executing \'mkdir ' + self.IMAGE_DIRECTORY + '\'')
         os.mkdir(self.IMAGE_DIRECTORY)
 
-
     def generate_file_system(self):
         """Generate image file system."""
         logging.info('Start generating image \'' + self.name + '\' file system...')
-
 
     def register_image(self):
         """Register the image data into it's 'image_data' file.
@@ -204,16 +194,14 @@ class Image(ABC):
         with open(self.IMAGE_DIRECTORY + '/image_data.yml', "w") as ff:
             ff.write(file_content)
 
-
     def get_image_data(self):
         """Getting image data that has been writen inside the image image_data.yml during register_image() call."""
 
         # Reading image_data file
         data = load_file(self.IMAGE_DIRECTORY + '/image_data.yml')
-    
+
         # Getting image_data
         return data['image_data']
-
 
     def get_existing_image(self):
         """Load an existing image. The loading consist of getting all image attributes from it's image_data.yml file."""
@@ -227,7 +215,6 @@ class Image(ABC):
 
         # Convert name into a string value, this is necessary because name can be a number
         self.name = str(self.name)
-
 
     # Change image kernel
     def set_kernel(self, kernel):
@@ -245,7 +232,6 @@ class Image(ABC):
         # Register image with new kernel
         self.register_image()
 
-
     def generate_ipxe_boot_file(self):
         """Generate an ipxe boot file for the image."""
         logging.info('Creating image \'' + self.name + '\' IPXE boot file')
@@ -259,7 +245,6 @@ class Image(ABC):
         logging.debug('Creating boot content inside file ' + self.IMAGE_DIRECTORY + 'boot.ipxe')
         with open(self.IMAGE_DIRECTORY + 'boot.ipxe', "w") as ff:
             ff.write(file_content)
-
 
     @classmethod
     def get_images(cls):
@@ -277,7 +262,6 @@ class Image(ABC):
         # Return all class images
         return class_images
 
-
     @classmethod
     def create_image_from_parameters(cls):
         """Getting all the image building arguments from a dictionary
@@ -286,7 +270,6 @@ class Image(ABC):
         :type image_dict: str
         """
         logging.info('Parsing input parameters...')
-
 
     #####################
     # CLI reserved part #
@@ -310,7 +293,6 @@ class Image(ABC):
 
         # For the last tuple element of the list
         print('     └── ' + str(list(attributes_dictionary.keys())[-1]) + ': ' + str(list(attributes_dictionary.values())[-1]))
-
 
     @staticmethod
     def cli_add_packages():

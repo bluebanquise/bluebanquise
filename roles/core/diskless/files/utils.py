@@ -76,28 +76,28 @@ def display(color, tag, *texts):
     # Check if all elements are of string type
     if not all(isinstance(item, str) for item in texts):
         raise ValueError("Invalid input")
-    
+
     # Display first list element
     print(color + '\n' + tag + ' ' + texts[0] + Color.TAG_END)
     # Display other elements in new lines
-    for i in range (1,len(texts)):
+    for i in range (1, len(texts)):
         print(color + '    ' + texts[i] + Color.TAG_END)
 
 
 def ask(*texts):
-    """Print a text in the shell with the '[+]' tag and the blue color 
+    """Print a text in the shell with the '[+]' tag and the blue color
 
     :param *texts: Each line to display in the shell
     :type *texts: str
     """
-    
+
     color = Color.BLUE
     tag = '[+]'
     display(color, tag, *texts)
 
 
 def ask_module(*texts):
-    """Print a text in the shell with the '[+]' tag and the green color 
+    """Print a text in the shell with the '[+]' tag and the green color
 
     :param *texts: Each line to display in the shell
     :type *texts: str
@@ -108,9 +108,9 @@ def ask_module(*texts):
     tag = '[+]'
     display(color, tag, *texts)
 
-        
+   
 def inform(*texts):
-    """Print a text in the shell with the '[-]' tag and the yellow color 
+    """Print a text in the shell with the '[-]' tag and the yellow color
 
     :param *texts: Each line to display in the shell
     :type *texts: str
@@ -132,13 +132,14 @@ def warn(*texts):
     tag = '[x]'
     display(color, tag, *texts)
 
-def ok(text = None):
+
+def ok(text=None):
     """Print a text in the shell with the '[OK]' tag and the green color, or just the '[OK] Done' text.
 
     :param text: The text to print
     :type text: str
     """
-    if text != None:
+    if text is not None:
         print(Color.GREEN + '\n[OK] ' + text + Color.TAG_END)
     else:
         print(Color.GREEN + '\n[OK] Done' + Color.TAG_END)

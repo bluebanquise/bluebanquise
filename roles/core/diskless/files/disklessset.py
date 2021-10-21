@@ -25,7 +25,7 @@ import logging
 from termios import tcflush, TCIFLUSH
 
 # Import diskless modules from path
-from diskless.utils import Color, printc, ok, inform, warn, ask
+from diskless.utils import Color, printc, inform, ask
 from diskless.kernel_manager import KernelManager
 from diskless.image_manager import ImageManager
 
@@ -39,7 +39,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == '-d':
         logging.root.setLevel(logging.DEBUG)
     elif len(sys.argv) > 1 and sys.argv[1] == '-i':
-            logging.root.setLevel(logging.INFO)
+        logging.root.setLevel(logging.INFO)
     else:
         # Default level
         logging.root.setLevel(logging.WARNING)
@@ -53,7 +53,7 @@ if __name__ == "__main__":
   ██████╔╝██║███████║██║  ██╗███████╗███████╗███████║███████║
   ╚═════╝ ╚═╝╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝╚══════╝
 """
-  
+
     # Print script banner
     printc(BANNER + '\n        Entering BlueBanquise diskless manager (v1.3.0)', Color.BLUE)
 
@@ -118,17 +118,17 @@ if __name__ == "__main__":
 
             # Remove a diskless image
             elif main_action == '3':
-               ImageManager.cli_remove_image()
-            
+                ImageManager.cli_remove_image()
+
             # Clone a diskless image
             elif main_action == '4':
-               ImageManager.cli_clone_image()
+                ImageManager.cli_clone_image()
 
             # Create image from a parameters file
             elif main_action == '5':
                 ImageManager.cli_create_image_from_parameters()
 
-             # Change the kernel of an existing image
+            # Change the kernel of an existing image
             elif main_action == '6':
                 KernelManager.cli_change_kernel()
 
@@ -142,7 +142,7 @@ if __name__ == "__main__":
 
             # Clean an image
             elif main_action == '9':
-               ImageManager.cli_clear_image()
+                ImageManager.cli_clear_image()
 
             # Exit program
             elif main_action == '10':

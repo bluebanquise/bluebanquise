@@ -31,7 +31,6 @@ class KernelManager:
     # Path where diskless kernels are
     KERNELS_PATH = '/var/www/html/preboot_execution_environment/diskless/kernels'
 
-
     @staticmethod
     def get_kernels():
         """Get the list of kernels inside KernelManager.KERNELS_PATH.
@@ -47,7 +46,6 @@ class KernelManager:
             return kernel_list
         else:
             return None
-
 
     @staticmethod
     def get_available_kernels():
@@ -67,7 +65,6 @@ class KernelManager:
         else:
             return None
 
-
     @staticmethod
     def change_kernel(image, kernel):
         """Change the kernel of an image object.
@@ -85,7 +82,6 @@ class KernelManager:
         image.register_image()
         # Change the kernel in the boot.ipxe file
         image.generate_ipxe_boot_file()
-
 
     # Generate initramfs from kernel
     @staticmethod
@@ -133,7 +129,6 @@ class KernelManager:
         else:
             raise UserWarning('No available kernel.')
 
-
     # [CLI] Display a list of available kernels
     @staticmethod
     def cli_display_kernels():
@@ -166,9 +161,8 @@ class KernelManager:
 
         # If the list of kernels is empty
         else:
-            inform('No kernels found in /var/www/html/preboot_execution_environment/diskless/kernels/','Please refer to readme.rst for details on how to obtain kernels.')
+            inform('No kernels found in /var/www/html/preboot_execution_environment/diskless/kernels/', 'Please refer to readme.rst for details on how to obtain kernels.')
             return
-
 
     @staticmethod
     def cli_change_kernel():

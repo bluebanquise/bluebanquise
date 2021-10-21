@@ -46,7 +46,6 @@ class ImageManager:
         CORRUPTED = auto()
         CREATED = auto()
 
-
     @staticmethod
     def get_class(class_name):
         """Get a diskless image class object by it's class name. The class must be in a diskless module.
@@ -81,7 +80,6 @@ class ImageManager:
 
         raise ValueError('No class ' + class_name + ' fouded in modules.')
 
-
     @staticmethod
     def get_image_names():
         """Get the name of all existing images base directories inside the IMAGES_DIRECTORY directory.
@@ -98,7 +96,6 @@ class ImageManager:
         # If there are no images
         else:
             return None
-
 
     @staticmethod
     def get_image_data_path(image_name):
@@ -120,7 +117,6 @@ class ImageManager:
             return image_data_path
         else:
             return None
-
 
     @staticmethod
     def get_created_image(image_name):
@@ -168,7 +164,6 @@ class ImageManager:
         except ValueError:
             raise ValueError('Unable to load image class for image ' + image_name + 'from image data file ' + image_data_file)
 
-
     # Get all images objects
     @staticmethod
     def get_created_images():
@@ -207,7 +202,6 @@ class ImageManager:
 
         return None
 
-
     @staticmethod
     def remove_image(image):
         """Remove an existing image
@@ -217,7 +211,6 @@ class ImageManager:
         """
         # Use image object method to delete all related files
         image.remove_files()
-
 
     @staticmethod
     def clone_image(image, clone_name):
@@ -230,7 +223,6 @@ class ImageManager:
         """
         # Use image object method to delete all related files
         image.clone(clone_name)
-
 
     @staticmethod
     def is_image(image_name):
@@ -248,7 +240,6 @@ class ImageManager:
                 return True
 
         return False
-
 
     @classmethod
     def clean_installations(cls):
@@ -276,7 +267,6 @@ class ImageManager:
                 cls.unregister_installation(image_name)
 
                 logging.warning('Image \'' + image_name + '\' cleaned\n')
-
 
     @classmethod
     def clean_installation(cls, image_name):
@@ -321,7 +311,6 @@ class ImageManager:
 
         logging.info('Image \'' + image_name + '\' cleaned')
 
-
     @classmethod
     def get_image_status(cls, image_name):
         """Get the status of an image
@@ -350,7 +339,7 @@ class ImageManager:
                 subprocess.check_output("ps -A -o pid | grep -w " + str(image_pid), shell=True)
                 # An image is in creation if there is in the ongoing_intallations dictionary
                 # and there is a process instance to finishing created it.
-                
+
                 if image_pid == os.getpid():
                     # Cannot be at this program point and creating image at the same time
                     return cls.ImageStatus.CORRUPTED
@@ -367,7 +356,6 @@ class ImageManager:
         else:
             # Try to create image
             return cls.ImageStatus.CREATED
-
 
     @classmethod
     def get_installation_pid(cls, image_name):
@@ -389,7 +377,6 @@ class ImageManager:
         else:
             return None
 
-
     @classmethod
     def register_installation(cls, image_name, image_class):
         """Add the image to the ongoing_intallations dictionary
@@ -408,7 +395,6 @@ class ImageManager:
         # Write ongoing_intallations dictionary
         cls.set_ongoin_installations(ongoing_intallations)
 
-
     @classmethod
     def unregister_installation(cls, image_name):
         """Remove the image from the ongoing_intallations dictionary
@@ -424,7 +410,6 @@ class ImageManager:
         del (ongoing_intallations[image_name])
         # Write ongoing_intallations dictionary
         cls.set_ongoin_installations(ongoing_intallations)
-
 
     @classmethod
     def get_ongoing_installations(cls):
@@ -452,7 +437,6 @@ class ImageManager:
         except FileNotFoundError:
             raise FileNotFoundError('Unable to load /diskless/installations.yml file')
 
-
     # Set ongoing_intallations dictionary content
     @classmethod
     def set_ongoin_installations(cls, ongoing_intallations):
@@ -471,9 +455,8 @@ class ImageManager:
         except FileNotFoundError:
             raise FileNotFoundError('File /diskless/installations.yml cannot be writen.')
 
-
     @classmethod
-    def create_image_from_parameters(cls,parameters_file):
+    def create_image_from_parameters(cls, parameters_file):
         """Create an image from a file containing all the creation parameters
 
         :param parameters_file: The location of the parameters file
@@ -484,24 +467,24 @@ class ImageManager:
         try:
             # Get parameters file content
             image_dict = load_file(parameters_file)
-            
+
             # Test dictionary content format
-            if not 'image_data' in image_dict:
+            if 'image_data' not in image_dict:
                 raise ValueError('Invalide parameter file format.')
             else:
                 image_dict = image_dict['image_data']
-            
+
             # Check if name and class elements are present (mandatory)
             if not all(key in image_dict for key in ['name', 'image_class']):
                 raise ValueError('Name or class not specified in the parameters file.')
-            elif image_dict['name'] == None:
+            elif image_dict['name'] is None:
                 raise ValueError('Name is not defined')
-            elif image_dict['image_class'] == None:
+            elif image_dict['image_class'] is None:
                 raise ValueError('class is not defined')
             else:
                 # Get the image name
                 image_name = image_dict['name']
-                 # Check if the image already exists
+                # Check if the image already exists
                 if ImageManager.is_image(image_name):
                     raise ValueError('Image with the same name already exists, cannot use this name.')
 
@@ -516,7 +499,6 @@ class ImageManager:
 
         except FileNotFoundError:
             raise FileNotFoundError('Error loading image_data file for image ' + parameters_file)
-
 
     #####################
     # CLI reserved part #
@@ -549,7 +531,6 @@ class ImageManager:
         # Launch module menu
         module.cli_menu()
 
-
     @staticmethod
     def cli_select_created_image():
         """Select an image from the list of created images"""
@@ -567,7 +548,6 @@ class ImageManager:
                 return select_from_list(images_names_list)
 
         raise UserWarning('No image to select.')
-
 
     @staticmethod
     def cli_display_images():
@@ -602,7 +582,6 @@ class ImageManager:
         else:
             raise UserWarning('No images.')
 
-
     @staticmethod
     def cli_clone_image():
         """Ask the user for cloning an image"""
@@ -631,19 +610,18 @@ class ImageManager:
         while True:
             confirmation = input('-->: ').replace(" ", "")
 
-            if confirmation in {'yes','y'}:
+            if confirmation in {'yes', 'y'}:
                 # Clone the image
                 ImageManager.clone_image(image_to_clone, clone_name)
                 ok('Image clonned')
                 return
 
-            elif confirmation in {'no','n'}:
+            elif confirmation in {'no', 'n'}:
                 inform('Image clonning cancelled')
                 return
 
             else:
                 inform('\'' + confirmation + '\' is not a valid entry. Please enter another value.')
-
 
     @staticmethod
     def cli_create_image_from_parameters():
@@ -669,7 +647,6 @@ class ImageManager:
                     break
                 except Exception as e:
                     inform(str(e))
-
 
     @staticmethod
     def cli_clear_image():
@@ -711,31 +688,31 @@ class ImageManager:
             else:
                 inform('\'' + confirmation + '\' is not a valid entry. Please enter another value.')
 
-
     @staticmethod
     def cli_remove_image():
         """Ask user for removing an image"""
         # Get image object to remove
         image = ImageManager.get_created_image(ImageManager.cli_select_created_image())
         warn('⚠ Would you realy like to delete image \'' + image.name + '\' definitively (yes/no) ?')
-        
+
         while True:
 
             # get confirmation from user
             confirmation = input('-->: ').replace(" ", "")
 
-            if confirmation in {'yes','y'}:
+            if confirmation in {'yes', 'y'}:
                 # Remove image
                 ImageManager.remove_image(image)
                 ok('Image deleted')
                 return
 
-            elif confirmation in {'no','n'}:
+            elif confirmation in {'no', 'n'}:
                 inform('Image deletion cancelled')
                 return
 
             else:
                 inform('\'' + confirmation + '\' is not a valid entry. Please enter another value.')
+
 
 # Add the modules directory path to importation path
 sys.path.append(ImageManager.MODULES_PATH)
