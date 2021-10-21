@@ -684,21 +684,32 @@ class ImageManager:
         # Don't get in creation images
         image_names = [image_name for image_name in images_names if ImageManager.get_image_status(image_name) != ImageManager.ImageStatus.IN_CREATION]
 
-        # If there is image, select the image
-        image_name = select_from_list(image_names)
+        if image_names:
+            # If there is images, select the image
+            image_name = select_from_list(image_names)
+
+        else:
+            inform('No images.')
+            return
 
         warn('⚠ Would you realy clean image \'' + image_name + '\' definitively (yes/no) ?')
 
-        # get confirmation from user
-        confirmation = input('-->: ').replace(" ", "")
+        while True:
+            # get confirmation from user
+            confirmation = input('-->: ').replace(" ", "")
 
-        if confirmation == 'yes':
-            # Clean selected image
-            ImageManager.clean_installation(image_name)
-            ok('Image cleaned')
+            if confirmation in {'yes', 'y'}:
+                # Clean selected image
+                ImageManager.clean_installation(image_name)
+                ok('Image cleaned')
+                return
 
-        elif confirmation == 'no':
-            inform('Image cleaning cancelled')
+            elif confirmation in {'no', 'n'}:
+                inform('Image cleaning cancelled')
+                return
+
+            else:
+                inform('\'' + confirmation + '\' is not a valid entry. Please enter another value.')
 
 
     @staticmethod
