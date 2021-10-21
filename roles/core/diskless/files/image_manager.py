@@ -559,7 +559,7 @@ class ImageManager:
         if image_names:
             # For each image name
             for image_name in image_names:
-                
+
                 print('')
                 # Get the status of image
                 image_status = ImageManager.get_image_status(image_name)
@@ -631,7 +631,7 @@ class ImageManager:
         ask('Enter the path to the parameters file')
         while True:
             parameters_file = input('-->: ')
-     
+
             # If path not correct
             if parameters_file != '' and not os.path.exists(parameters_file):
                 inform('Parameter file not found ' + parameters_file + ' , please enter another value.')

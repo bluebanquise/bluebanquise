@@ -132,7 +132,7 @@ class Image(ABC):
     @abstractmethod
     def clone(self, clone_name):
         """Clone the image into another image.
-        :param clone_name: The name of the clone who will be cloned 
+        :param clone_name: The name of the clone who will be cloned
         :type clone_name: str
         """
         logging.info('Clonning image \'' + self.name + '\' into \'' + clone_name + '\'')

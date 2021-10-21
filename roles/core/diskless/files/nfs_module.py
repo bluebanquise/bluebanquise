@@ -23,7 +23,6 @@ import os
 import shutil
 import crypt
 import logging
-import sys
 from subprocess import check_output, CalledProcessError
 
 
@@ -62,7 +61,7 @@ class NfsStagingImage(Image):
                     # Check packages availability
                     logging.debug('Executing \'subprocess.check_output(\'dnf list \'' + package_name + ' | grep ' + package_name + ', shell=True)\'')
                     check_output('dnf list ' + package_name + ' | grep ' + package_name, shell=True)
-          
+
                 # If there is not running process for image creator instance pid
                 except CalledProcessError:
                     raise ValueError('Invalid additional_packages parameter value')
@@ -110,7 +109,7 @@ class NfsStagingImage(Image):
         # Copying nfs directory for the clone
         logging.debug('Copying directory ' + self.NFS_DIRECTORY + ' into ' + CLONE_NFS_DIRECTORY)
         logging.debug('Executing \'cp -r ' + self.NFS_DIRECTORY + ' ' + CLONE_NFS_DIRECTORY + '\'')
-        
+
         # Don't crash copying symlinks because they can point to non existing ressources
         # (it is not a booted file system)
         shutil.copytree(self.NFS_DIRECTORY, CLONE_NFS_DIRECTORY, symlinks=True)
@@ -198,13 +197,13 @@ class NfsStagingImage(Image):
         # Check that there are all mandatory the parameters
         if not all(key in image_dict for key in ['name', 'password', 'kernel']):
             raise ValueError('Invalid set of parameters')
-        
-        # Getting attributes from the dictionary 
+
+        # Getting attributes from the dictionary
         name = str(image_dict['name'])
         password = str(image_dict['password'])
         kernel = image_dict['kernel']
 
-        if 'additional_packages' in  image_dict:
+        if 'additional_packages' in image_dict:
             additional_packages = image_dict['additional_packages']
         else:
             additional_packages = None
@@ -213,7 +212,7 @@ class NfsStagingImage(Image):
             release_version = str(image_dict['release_version'])
         else:
             release_version = None
-        
+
         # Create the new image with the parameters
         cli_construct_nfsstaging_image(name, password, kernel, additional_packages, release_version)
 
@@ -277,7 +276,7 @@ class NfsGoldenImage(Image):
 
         self.nodes = NodeSet()
         self.NFS_DIRECTORY = NfsGoldenImage.NFS_DIRECTORY + self.name + '/'
-        
+
         # Generate image files
         self.generate_files(staging_image)
 
@@ -560,13 +559,6 @@ def cli_construct_nfsstaging_image(name, password, kernel, additional_packages, 
                 warn('An exception occurred durring the installation process !',
                      'The exception was: ' + str(e))
 
-            # If an error occurs during the image creation process
-            except:
-                # First, clean previous uncompleted installation
-                ImageManager.clean_installation(name)
-                warn('An error occurred durring the installation process ! Maybe scroll up can give you more details.',
-                     'The error was: ' + sys.exc_info()[0])
-
             inform('Would you like to retry the installation with the same parameters (yes/no)?',
                    '(If you exit now you will lost all the image creation parameters you entered.)')
 
@@ -643,12 +635,6 @@ def cli_construct_nfsgolden_image(name, staging_image):
                 warn('An exception occurs durring the installation process !',
                      'The exception was: ' + str(e))
 
-            except:
-                # First, clean previous uncompleted installation
-                ImageManager.clean_installation(name)
-                warn('An error occurs durring the installation process ! Maybe scroll up can give you more details.',
-                     'The error was: ' + sys.exc_info()[0])
-  
             inform('Would you like to retry the installation with the same parameters (yes/no)?',
                    '(If you exit now you will lost all the image creation parameters you entered.)')
 

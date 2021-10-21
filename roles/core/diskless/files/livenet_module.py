@@ -24,7 +24,6 @@ import shutil
 import crypt
 import logging
 import re
-import sys
 from datetime import datetime
 from enum import Enum, auto
 from subprocess import check_call, check_output, CalledProcessError
@@ -359,14 +358,14 @@ class LivenetImage(Image):
 
         was_mounted = False
         # If the livenet image is currently mounted
-        if self.is_mounted == True:
+        if self.is_mounted is True:
             was_mounted = True
             # Unmount it before cloning it's files
             self.unmount()
 
         # Clone directory path
         CLONE_IMAGE_DIRECTORY = Image.IMAGES_DIRECTORY + clone_name + '/'
-        
+
         # Copying image directory for the clone
         logging.debug('Copying directory ' + self.IMAGE_DIRECTORY + ' into ' + CLONE_IMAGE_DIRECTORY)
         logging.debug('Executing \'cp -r ' + self.IMAGE_DIRECTORY + ' ' + CLONE_IMAGE_DIRECTORY + '\'')
@@ -870,7 +869,7 @@ def cli_create_livenet_image_questions():
         else:
             if selected_ssh_pub_key == '':
                 selected_ssh_pub_key = None
-            break     
+            break
 
     # Activate SELinux or not
     ask_module('Activate SELinux inside the image (yes/no) ?')
@@ -963,13 +962,6 @@ def cli_construct_livenet_image(name, password, kernel, type, size, additional_p
                 warn('An exception occurred durring the installation process !',
                      'The exception was: ' + str(e))
 
-            # If an error occurs during the image creation process
-            except:
-                # First, clean previous uncompleted installation
-                ImageManager.clean_installation(name)
-                warn('An error occurred durring the installation process ! Maybe scroll up can give you more details.',
-                     'The error was: ' + sys.exc_info()[0])
-    
             inform('Would you like to retry the installation with the same parameters (yes/no)?',
                    '(If you exit now you will lost all the image creation parameters you entered.)')
 

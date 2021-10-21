@@ -80,7 +80,7 @@ def display(color, tag, *texts):
     # Display first list element
     print(color + '\n' + tag + ' ' + texts[0] + Color.TAG_END)
     # Display other elements in new lines
-    for i in range (1, len(texts)):
+    for i in range(1, len(texts)):
         print(color + '    ' + texts[i] + Color.TAG_END)
 
 
@@ -108,7 +108,7 @@ def ask_module(*texts):
     tag = '[+]'
     display(color, tag, *texts)
 
-   
+
 def inform(*texts):
     """Print a text in the shell with the '[-]' tag and the yellow color
 
