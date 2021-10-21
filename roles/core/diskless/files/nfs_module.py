@@ -208,7 +208,7 @@ class NfsStagingImage(Image):
         else:
             additional_packages = None
 
-        if 'release_version' in  image_dict:
+        if 'release_version' in image_dict:
             release_version = str(image_dict['release_version'])
         else:
             release_version = None
