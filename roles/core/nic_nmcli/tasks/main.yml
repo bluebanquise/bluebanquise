@@ -132,10 +132,6 @@
   tags:
     - identify
 
-- debug:
-    msg: "{{ j2_nic_nmcli_ip4 }}"
-  loop: "{{ network_interfaces }}"
-
 - name: shell █ Force apply nic settings
   shell: "nmcli con down {{ item.item.interface }} && sleep 2 && nmcli con up {{ item.item.interface }}"
   loop: "{{ nic_nmcli_apply.results }}"
