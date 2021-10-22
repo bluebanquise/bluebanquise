@@ -1,21 +1,24 @@
 ---
 nic_nmcli_role_version: 1.4.1
 
-j2_nic_nmcli_ip4: "
-{% set ip4 = '' %}
+j2_nic_nmcli_ip4: "{{ j2_nic_nmcli_ip4_main | trim }}{% if item.ip4 is defined and item.ip4_manual is defined %},{% endif %}{{ j2_nic_nmcli_ip4_manual | trim }}"
+
+j2_nic_nmcli_ip4_main: "
 {% if item.ip4 is defined %}
   {% if '/' in item.ip4 %}
-    {% set ip4 = item.ip4 %}
+    {{ item.ip4 }}
   {% elif item.network is defined and networks[item.network]['prefix4'] is defined %}
-    {% set ip4 = item.ip4 + '/' + networks[item.network]['prefix4'] %}
+    {{ item.ip4 }}/{{ networks[item.network]['prefix4'] }}
   {% elif item.network is defined and networks[item.network]['prefix'] is defined %}
-    {% set ip4 = item.ip4 + '/' + networks[item.network]['prefix'] %}
+    {{ item.ip4 }}/{{ networks[item.network]['prefix'] }}
   {% endif %}
 {% endif %}
+"
+
+j2_nic_nmcli_ip4_manual: "
 {% if item.ip4_manual is defined %}
-  {% for ipsub in item.ip4_manual %}{% if ip4 != '' %},{% endif %}{{ipsub}}{%endfor %}
+  {% for ipsub in item.ip4_manual %}{% if not loop.first %},{% endif %}{{ ipsub }}{%endfor %}
 {% endif %}
-{{ ip4 }}
 "
 
 j2_nic_nmcli_ip6: "
