@@ -5,3 +5,4 @@ Roadmap only describes major objectives. Small objectives are developed as strea
 ## 1.6
 
 - Suse/OpenSuse integration
+- Better tests (Molecule tests, Jenkins pipeline)
