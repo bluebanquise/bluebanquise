@@ -74,11 +74,27 @@ zone "{{ domain_name }}" IN {
   allow-update { none; };
 };
 
-zone "in-addr.arpa" IN {
-  type master;
-  file "{{ dns_server_named_dir }}/reverse.zone";
-  allow-update { none; };
+{% macro create_reverse_zone(network, octets) -%}
+zone "{{ octets }}.in-addr.arpa" IN {
+   type master;
+   file "{{ dns_server_named_dir }}/{{ network }}.rr.zone";
+   allow-update { none; };
 };
+{%- endmacro %}
+
+{% for network, props in networks.items() %}
+{% if props['is_in_dns'] %}
+{% if props['prefix'] <= 8 %}
+{{ create_reverse_zone(network, props['subnet'].split('.')[0]) }}
+{% elif props['prefix'] <= 16 %}
+{{ create_reverse_zone(network, props['subnet'].split('.')[0:2]|reverse|join('.')) }}
+{% elif props['prefix'] <= 24 %}
+{{ create_reverse_zone(network, props['subnet'].split('.')[0:3]|reverse|join('.')) }}
+{% elif props['prefix'] < 32 %}
+{{ create_reverse_zone(network, props['subnet'].split('.')[0:4]|reverse|join('.')) }}
+{% endif %}
+{% endif %}
+{% endfor %}
 
 {% if dns_overrides is defined %}
 zone "override" {
