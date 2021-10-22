@@ -157,6 +157,20 @@ You can define routes at two levels:
   destination in first position, gateway in second position and optionally
   the metric in third position.
 
+Apply changes
+"""""""""""""
+
+By default, if interfaces are down, the role will have them up, and at the same 
+time set their configuration.
+
+However, in some cases, users might need to force some updates (for example if 
+you wish to set routes on the main interface, etc).
+
+To achieve that, two variables are at disposal:
+
+* ``nic_nmcli_reload_connections``: this variable will trigger a handler that will ask NetworkManager to reload its configuration.
+* ``nic_nmcli_force_nic_restart``: this variable will trigger a a task that will manually down and up interfaces. To be used with care.
+
 Changelog
 ^^^^^^^^^
 

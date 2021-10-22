@@ -2,15 +2,20 @@
 nic_nmcli_role_version: 1.4.1
 
 j2_nic_nmcli_ip4: "
+{% set ip4 = '' %}
 {% if item.ip4 is defined %}
   {% if '/' in item.ip4 %}
-    {{ item.ip4 }}
+    {% set ip4 = item.ip4 %}
   {% elif item.network is defined and networks[item.network]['prefix4'] is defined %}
-    {{ item.ip4 }}/{{ networks[item.network]['prefix4'] }}
+    {% set ip4 = item.ip4 + '/' + networks[item.network]['prefix4'] %}
   {% elif item.network is defined and networks[item.network]['prefix'] is defined %}
-    {{ item.ip4 }}/{{ networks[item.network]['prefix'] }}
+    {% set ip4 = item.ip4 + '/' + networks[item.network]['prefix'] %}
   {% endif %}
 {% endif %}
+{% if item.ip4_manual is defined %}
+  {% for ipsub in item.ip4_manual %}{% if ip4 != '' %},{% endif %}{{ipsub}}{%endfor %}
+{% endif %}
+{{ ip4 }}
 "
 
 j2_nic_nmcli_ip6: "
