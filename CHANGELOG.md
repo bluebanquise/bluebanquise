@@ -48,6 +48,9 @@
 
 ### Breaking changes
 
+  - nfs_client: support multiple sebooleans (#620)
+    `nfs_settings.selinux.use_nfs_home_dirs` value is replaced by `nfs_client_sebooleans`.
+
 ## 1.4.0
 
 ### Major changes
