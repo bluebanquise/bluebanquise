@@ -36,6 +36,7 @@
   - log_server/client:
     - allow custom configuration path (#591)
   - nic_nmcli:
+    - add ip4_manual entry (#618)
     - add dns4 and dns4_search vars logic (#585)
     - improve role capabilities (#558)
   - pxe_stack: fix issues with hostname not set during kickstart on RHEL 8.3 (#522)
