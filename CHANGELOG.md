@@ -22,6 +22,7 @@
   - core/log_server
     - remote logs stored in a similar fashion as the server (#568)
   - all: add compatibility with multiple RHEL like distributions (#560)
+  - clustershell: prevent dummy host to be included (#619)
   - conman: fix execpath for RHEL 8 (#584)
   - advanced_dhcp_server: fix issue with added spaces. Could prevent DHCP to start (#561)
   - diskless:
