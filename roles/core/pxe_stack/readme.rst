@@ -173,6 +173,7 @@ To be done
 Changelog
 ^^^^^^^^^
 
+* 1.3.2: Added OpenSuSE support. Neil Munday <neil@mundayweb.com>
 * 1.3.1: Adapt role to handle multiple distributions. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.0: Add Ubuntu support. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.2.0: Add compatibility for multiple OS distributions (RedHat like). Benoit Leveugle <benoit.leveugle@gmail.com>

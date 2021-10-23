@@ -1,10 +1,45 @@
 ##### OpenSuse
 
+- name: "copy █ Copy osdeploy files {{ pxe_stack_htdocs_path }}/osdeploy/"
+  copy:
+    src: osdeploy/opensuse_15.ipxe
+    dest: "{{ pxe_stack_htdocs_path }}/osdeploy/opensuse_15.ipxe"
+    mode: 0644
+    owner: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_user }}"
+
+- name: template █ Create autoyast file for OpenSuSE
+  template:
+    src: Suse/autoyast.xml.j2
+    dest: "{{ pxe_stack_htdocs_path }}/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.autoyast.xml"
+    owner: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_user }}"
+  with_items: "{{ j2_equipment_groups_list }}"
+  when:
+    - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
+    - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) == 'opensuse'
+  tags:
+    - template
+
+- name: template █ equipment_profiles for OpenSuse
+  template:
+    src: Suse/equipment_profile_autoyast.ipxe.j2
+    dest: "{{ pxe_stack_htdocs_path }}/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.ipxe"
+    mode: 0644
+    owner: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_user }}"
+  with_items: "{{ j2_equipment_groups_list }}"
+  when:
+    - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
+    - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) == 'opensuse'
+  tags:
+    - template
+
 # OUTDATED, need review
 # - name: Templates >> autoyasts for OpenSuse
 #   template:
 #     src: "autoyast.xml.j2"
-#     dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.autoyast.xml
+#     dest: {{ pxe_stack_htdocs_path }}/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.autoyast.xml
 #     mode: 0644
 #     owner: "{{ pxe_stack_apache_user }}"
 #     group: "{{ pxe_stack_apache_user }}"
@@ -18,7 +53,7 @@
 # - name: Templates >> equipment_profiles for OpenSuse
 #   template:
 #     src: "configuration_opensuse.ipxe.j2"
-#     dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.ipxe
+#     dest: {{ pxe_stack_htdocs_path }}/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.ipxe
 #     mode: 0644
 #     owner: "{{ pxe_stack_apache_user }}"
 #     group: "{{ pxe_stack_apache_user }}"
@@ -34,7 +69,7 @@
 # - name: Templates >> equipment_ipxe_configuration for Minimal Live Linux
 #   template:
 #     src: "configuration_minimal.ipxe.j2"
-#     dest: /var/www/html/preboot_execution_environment/equipment_profiles/minimal.ipxe
+#     dest: {{ pxe_stack_htdocs_path }}/equipment_profiles/minimal.ipxe
 #     mode: 0644
 #     owner: "{{ pxe_stack_apache_user }}"
 #     group: "{{ pxe_stack_apache_user }}"

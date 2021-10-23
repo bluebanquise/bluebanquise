@@ -1,0 +1,8 @@
+---
+
+- name: "lineinfile █ Set ATFTPD_DIRECTORY in /etc/sysconfig/atftpd"
+  lineinfile:
+    path: /etc/sysconfig/atftpd
+    regexp: '^ATFTPD_DIRECTORY='
+    line: 'ATFTPD_DIRECTORY="/var/lib/tftpboot"'
+  notify: "service █ Restart pxe services"

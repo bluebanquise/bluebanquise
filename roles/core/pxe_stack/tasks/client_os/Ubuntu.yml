@@ -2,10 +2,10 @@
 
 ## Generic
 
-- name: copy █ Copy osdeploy files /var/www/html/preboot_execution_environment/osdeploy/
+- name: "copy █ Copy osdeploy files {{ pxe_stack_htdocs_path }}/osdeploy/"
   copy:
     src: osdeploy/ubuntu_{{ item.major }}.ipxe
-    dest: "/var/www/html/preboot_execution_environment/osdeploy/ubuntu_{{ item.major }}.ipxe"
+    dest: "{{ pxe_stack_htdocs_path }}/osdeploy/ubuntu_{{ item.major }}.ipxe"
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_user }}"
@@ -14,7 +14,7 @@
 - name: file █ Generate links for all supported OS
   file:
     src: ubuntu_{{ item.0.major }}.ipxe
-    dest: "/var/www/html/preboot_execution_environment/osdeploy/{{ item.1 }}_{{ item.0.major }}.ipxe"
+    dest: "{{ pxe_stack_htdocs_path }}/osdeploy/{{ item.1 }}_{{ item.0.major }}.ipxe"
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_user }}"
@@ -24,10 +24,10 @@
 
 ## 18.04
 
-- name: template █ Generate preseeds /var/www/html/preboot_execution_environment/equipment_profiles/{item}.preseed.cfg
+- name: "template █ Generate preseeds {{ pxe_stack_htdocs_path }}/equipment_profiles/{item}.preseed.cfg"
   template:
     src: "Ubuntu/preseed.cfg.j2"
-    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.preseed.cfg
+    dest: "{{ pxe_stack_htdocs_path }}/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.preseed.cfg"
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_user }}"
@@ -38,10 +38,10 @@
   tags:
     - template
 
-- name: template █ Generate equipment_profiles /var/www/html/preboot_execution_environment/equipment_profiles/{item}.ipxe
+- name: "template █ Generate equipment_profiles {{ pxe_stack_htdocs_path }}/equipment_profiles/{item}.ipxe"
   template:
     src: "Ubuntu/equipment_profile_preseed.ipxe.j2"
-    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.ipxe
+    dest: "{{ pxe_stack_htdocs_path }}/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.ipxe"
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_user }}"
@@ -56,7 +56,7 @@
 
 - name: file █ Create cloud-init paths
   file:
-    path: "/var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.cloud-init/"
+    path: "{{ pxe_stack_htdocs_path }}/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.cloud-init/"
     state: directory
     mode: 0755
     owner: "{{ pxe_stack_apache_user }}"
@@ -70,7 +70,7 @@
 
 - name: file █ Create cloud-init empty meta-data
   file:
-    path: "/var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.cloud-init/meta-data"
+    path: "{{ pxe_stack_htdocs_path }}/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.cloud-init/meta-data"
     state: touch
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
@@ -85,7 +85,7 @@
 - name: template █ Generate cloud-init user-data
   template:
     src: "Ubuntu/user-data.j2"
-    dest: "/var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.cloud-init/user-data"
+    dest: "{{ pxe_stack_htdocs_path }}/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.cloud-init/user-data"
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_user }}"
@@ -96,10 +96,10 @@
   tags:
     - template
 
-- name: template █ Generate equipment_profiles /var/www/html/preboot_execution_environment/equipment_profiles/{item}.ipxe
+- name: "template █ Generate equipment_profiles {{ pxe_stack_htdocs_path }}/equipment_profiles/{item}.ipxe"
   template:
     src: "Ubuntu/equipment_profile_cloud-init.ipxe.j2"
-    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.ipxe
+    dest: "{{ pxe_stack_htdocs_path }}/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.ipxe"
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_user }}"
