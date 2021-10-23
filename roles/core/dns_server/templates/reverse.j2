@@ -1,37 +1,46 @@
 #jinja2: lstrip_blocks: True
 ;#### Blue Banquise file ####
-;## {{ ansible_managed }}
+;## {{ ansible_managed }} 
 
 $TTL 86400
-$ORIGIN in-addr.arpa.
-$INCLUDE "/var/named/reverse.soa"
+$ORIGIN {{ j2_dns_server_get_network | trim }}.in-addr.arpa.
+$INCLUDE "{{ item }}.rr.soa"
 @ IN NS {{ inventory_hostname }}.{{ domain_name }}.
 
-{# Macro to write host in file #}
-{% macro write_host(host,host_dict,host_node_main_resolution_network) %}
-  {% if host_dict['network_interfaces'] is defined and host_dict['network_interfaces'] is iterable %}
-    {% for nic in host_dict['network_interfaces'] %}
-      {% if nic.ip4 is defined and nic.ip4 is not none %}
-        {% if nic.network is defined and nic.network == host_node_main_resolution_network %}
-{{ nic.ip4.split('.')[3] }}.{{ nic.ip4.split('.')[2] }}.{{ nic.ip4.split('.')[1] }}.{{ nic.ip4.split('.')[0] }} IN PTR {{ host }}.{{ domain_name }}.
-{{ nic.ip4.split('.')[3] }}.{{ nic.ip4.split('.')[2] }}.{{ nic.ip4.split('.')[1] }}.{{ nic.ip4.split('.')[0] }} IN PTR {{ host }}-{{ nic.network }}.{{ domain_name }}.
-        {% elif nic.network is defined and nic.network is not none %}
-{{ nic.ip4.split('.')[3] }}.{{ nic.ip4.split('.')[2] }}.{{ nic.ip4.split('.')[1] }}.{{ nic.ip4.split('.')[0] }} IN PTR {{ host }}-{{ nic.network }}.{{ domain_name }}.
-        {% else %}
-{# Do nothing, not in registered network #}
-        {% endif %}
-      {% endif %}
-    {% endfor %}
-    {% if host_dict['bmc'] is defined %}
-      {% set bmc_args = host_dict['bmc'] %}
-      {% if (bmc_args.name is defined and bmc_args.name is not none) and (bmc_args.ip4 is defined and bmc_args.ip4 is not none) and (bmc_args.network is defined and bmc_args.network is not none) %}
-{{ bmc_args.ip4.split('.')[3] }}.{{ bmc_args.ip4.split('.')[2] }}.{{ bmc_args.ip4.split('.')[1] }}.{{ bmc_args.ip4.split('.')[0] }} IN PTR {{ bmc_args.name }}.{{ domain_name }}.
-{{ bmc_args.ip4.split('.')[3] }}.{{ bmc_args.ip4.split('.')[2] }}.{{ bmc_args.ip4.split('.')[1] }}.{{ bmc_args.ip4.split('.')[0] }} IN PTR {{ bmc_args.name }}-{{ bmc_args.network }}.{{ domain_name }}.
-      {% endif %}
-    {% endif %}
-  {% endif %}
-{% endmacro %}
+{% macro create_record(octets, name) -%}
+{{ octets }} IN PTR {{ name }}.
+{%- endmacro %}
 
-{% for host in groups['all'] -%}
-{{ write_host(host,hostvars[host],hostvars[host]['j2_node_main_resolution_network']) }}
-{%- endfor %}
+{% macro get_host_octets(ip, prefix) -%}
+{% if prefix <= 8 %}
+{{ ip.split('.')[3] }}
+{% elif prefix <= 16 %}
+{{ ip.split('.')[2:4]|reverse|join('.') }}
+{% elif prefix <= 24 %}
+{{ ip.split('.')[1:3]|reverse|join('.') }}
+{% elif prefix < 32 %}
+{{ ip.split('.')[0:4]|reverse|join('.') }}
+{% endif %}
+{%- endmacro %}
+
+{% for host in groups['all'] %}
+{% if hostvars[host]['network_interfaces'] is defined and hostvars[host]['network_interfaces'] is iterable %}
+{% for nic in hostvars[host]['network_interfaces'] %}
+{% if nic.network is defined and nic.network == item and nic.ip4 is defined and nic.ip4 is not none and networks[item].prefix is defined %}
+{{ create_record(get_host_octets(nic.ip4, networks[item].prefix)|trim, [[host, item]|join('-'), domain_name]|join('.')) }}
+{% if item == hostvars[host]['j2_node_main_resolution_network'] %}
+{{ create_record(get_host_octets(nic.ip4, networks[item].prefix)|trim, [host, domain_name]|join('.')) }}
+{% endif %}
+{% if hostvars[host].bmc is defined %}
+{% set bmc_args = hostvars[host]['bmc'] %}
+{% if bmc_args.name is defined and bmc_args.name is not none and bmc_args.ip4 is defined and bmc_args.ip4 is not none and bmc_args.network is defined and bmc_args.network is not none and bmc_args.network == item %}
+{{ create_record(get_host_octets(bmc_args.ip4, networks[bmc_args.network].prefix)|trim, [[bmc_args.name, bmc_args.network]|join('-'), domain_name]|join('.')) }}
+{% if item == hostvars[host]['j2_node_main_resolution_network'] %}
+{{ create_record(get_host_octets(bmc_args.ip4, networks[bmc_args.network].prefix)|trim, [bmc_args.name, domain_name]|join('.')) }}
+{% endif %}
+{% endif %}
+{% endif %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endfor %}
