@@ -9,7 +9,7 @@
       register: stat_results
       with_items:
         - /etc/named.conf
-        - /var/named/forward
+        - /var/named/forward.zone
         - /var/named/reverse
 
     - name: assert files exist
