@@ -10,7 +10,7 @@
       with_items:
         - /etc/named.conf
         - /var/named/forward.zone
-        - /var/named/reverse
+        - /var/named/ice1-1.rr.zone
 
     - name: assert files exist
       assert:
