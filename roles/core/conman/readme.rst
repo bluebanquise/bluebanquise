@@ -49,6 +49,7 @@ Files generated:
 Changelog
 ^^^^^^^^^
 
+* 1.0.5: Add OpenSuSE support. Neil Munday <neil@mundayweb.com>
 * 1.0.4: Run the conman service with user conman. Bruno Travouillon <devel@travouillon.fr>
 * 1.0.3: Clean. johnnykeats <johnny.keats@outlook.com>
 * 1.0.2: Tested on ubuntu 18.04 and validated. johnnykeats <johnny.keats@outlook.com>
