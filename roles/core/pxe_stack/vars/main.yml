@@ -17,7 +17,7 @@ pxe_stack_supported_os:
         - cloudlinux
         - oraclelinux
         - almalinux
-        - rocky
+        - rockylinux
     - major: 9
       distributions:
         - redhat
