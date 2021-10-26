@@ -8,3 +8,10 @@
     disable_gpg_check: yes
     state: "{{ item.state | default('present') }}"
   with_items: "{{ repositories }}"
+
+- name: Disable delta RPMs
+  lineinfile:
+    path: /etc/zypp/zypp.conf
+    insertafter: '# download.use_deltarpm = true'
+    regexp: '^download.use_deltarpm ='
+    line: 'download.use_deltarpm = false'
