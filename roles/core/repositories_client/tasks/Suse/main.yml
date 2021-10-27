@@ -1,5 +1,7 @@
 ---
 
+# skip os repository as installation will have created
+# /etc/zypp/repos.d/openSUSE-Leap-15.3-1.repo (or similar)
 - name: Setting repositories
   zypper_repository:
     name: "{{ item }}"
@@ -8,6 +10,7 @@
     disable_gpg_check: yes
     state: "{{ item.state | default('present') }}"
   with_items: "{{ repositories }}"
+  when: item != "os"
 
 - name: Disable delta RPMs
   lineinfile:
