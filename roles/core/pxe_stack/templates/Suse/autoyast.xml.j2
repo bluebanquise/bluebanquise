@@ -74,8 +74,6 @@ for I in $*; do case "$I" in *=*) eval $I;; esac; done
 
 echo "All went well, we can inform next-server we succeeded"
 curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$(hostname -s)&boot=disk"
-#curl -s -k http://10.10.0.1/cgi-bin/bootswitch.cgi --data "node=$(hostname -s)&boot=disk"
-#curl -s -k http://10.10.0.1/cgi-bin/$ipxe_next_server.cgi
 
 ]]>
                 </source>
