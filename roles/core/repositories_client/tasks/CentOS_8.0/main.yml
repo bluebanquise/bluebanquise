@@ -17,7 +17,7 @@
   # would add any other repository to the configuration. See the documentation
   # for details on how to proceed.
   ini_file:
-    path: "/etc/yum.repos.d/CentOS-Linux-Extras.repo"
+    path: "/etc/yum.repos.d/CentOS-Extras.repo"
     section: "extras"
     option: enabled
     value: '0'
@@ -49,7 +49,7 @@
   # repositories, thus installed with the special repository 'os' in
   # BlueBanquise.
   yum_repository:
-    name: "{{ item.repoid | lower }}"
+    name: "{{ item.repoid }}"
     description: "{{ item.repoid }} gen by Ansible"
     baseurl: "{{ item.baseurl | default(baseurl_prefix + 'os/' + item.repoid) }}"
     file: "{{ item.file }}"
@@ -64,8 +64,8 @@
     # will configure BaseOS and AppStream with default values.
     - "{{ repositories|selectattr('name', 'defined')
           |selectattr('name', 'match', 'os')|list
-          |combine({'file':'CentOS-Linux-BaseOS','repoid':'BaseOS'}) }}"
+          |combine({'file':'CentOS-Base','repoid':'BaseOS'}) }}"
     - "{{ repositories|selectattr('name', 'defined')
           |selectattr('name', 'match', 'os')|list
-          |combine({'file':'CentOS-Linux-AppStream','repoid':'AppStream'}) }}"
+          |combine({'file':'CentOS-AppStream','repoid':'AppStream'}) }}"
   when: ( 'os' in repositories ) or ( item.name is defined and item.name == 'os' )
