@@ -88,6 +88,7 @@ Integrate journalctl logging instead of rsyslog.
 Changelog
 ^^^^^^^^^
 
+* 1.2.1: Add OpenSuSE support. Neil Munday <neil@mundayweb.com>
 * 1.2.0: Add Ubuntu support. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.1: Add custom configuration path. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.0: Enable custom rsyslog configuration with log_client_custom_config <dilassert@gmail.com>
