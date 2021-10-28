@@ -11,3 +11,4 @@ log_server_rsyslog_conf_path: /etc/rsyslog.conf
 log_server_firewall_services_to_add:
   - syslog
 log_server_port: 514
+log_server_work_dir: /var/spool/rsyslog

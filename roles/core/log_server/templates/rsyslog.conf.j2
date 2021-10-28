@@ -25,7 +25,7 @@ $InputTCPServerRun {{ log_server_port }}
 #### GLOBAL DIRECTIVES ####
 
 # Where to place auxiliary files
-$WorkDirectory /var/lib/rsyslog
+$WorkDirectory {{ log_server_work_dir }}
 
 # Use default timestamp format
 $ActionFileDefaultTemplate RSYSLOG_TraditionalFileFormat
