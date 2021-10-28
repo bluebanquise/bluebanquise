@@ -40,7 +40,7 @@
     path: "{{ audit_config_plugins_directory }}/{{ audit_config_syslog_file }}"
     regexp: "^active = .*"
     replace: "active = yes"
-  notify: service Restart auditd service
+  notify: service █ Restart auditd service
   when: audit_result.stat.exists
 
 - name: "service █ Manage {{ audit_config_services_to_start }} state"
