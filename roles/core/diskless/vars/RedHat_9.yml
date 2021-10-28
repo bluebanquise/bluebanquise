@@ -9,3 +9,4 @@ diskless_packages_to_install:
   - xfsdump
   - squashfs-tools
   - disklessset
+
