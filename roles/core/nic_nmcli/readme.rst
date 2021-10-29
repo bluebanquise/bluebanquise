@@ -31,6 +31,7 @@ some provides more integrated features:
   **networks[item.network]['prefix4']** or default to
   **networks[item.network]['prefix']** to complete address. You can force
   address with prefix if string *'/'* is present.
+* **ip4_manual**: allows to pass additional list of ip/prefix to role.
 * **mtu**: has higher precedence over **networks[item.network]['mtu']** if
   both are set.
 * **gw4**: has higher precedence over **networks[item.network]['.gateway4']**
@@ -78,8 +79,16 @@ In multiple ip modes, you need to set the prefix yourself:
 
   network_interfaces:
     - interface: eth0
-      ip4: 10.10.0.1/16,10.10.0.2/16
+      ip4: 10.10.0.1
+      ip4_manual: 
+        - 10.10.0.2/16
+        - 10.10.0.3/16
       network: ice1-1
+
+Note: you can use ``ip4_manual`` without ``ip4`` only if 
+the corresponding interface is not to be used as main resolution interface
+or main interface (which means another interface with an ip4 and linked to 
+a management network is set above in the *network_interfaces* list).
 
 Bond
 """"
@@ -157,9 +166,24 @@ You can define routes at two levels:
   destination in first position, gateway in second position and optionally
   the metric in third position.
 
+Apply changes
+"""""""""""""
+
+By default, if interfaces are down, the role will have them up, and at the same 
+time set their configuration.
+
+However, in some cases, users might need to force some updates (for example if 
+you wish to set routes on the main interface, etc).
+
+To achieve that, two variables are at disposal:
+
+* ``nic_nmcli_reload_connections``: this variable will trigger a handler that will ask NetworkManager to reload its configuration.
+* ``nic_nmcli_force_nic_restart``: this variable will trigger a a task that will manually down and up interfaces. To be used with care.
+
 Changelog
 ^^^^^^^^^
 
+* 1.5.0: Add ip4_manual entry. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.1: Adapt role to handle multiple distributions. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.0: Add Ubuntu support. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.1: Add DNS4 and DNS4_SEARCH vars logic. Benoit Leveugle <benoit.leveugle@gmail.com>

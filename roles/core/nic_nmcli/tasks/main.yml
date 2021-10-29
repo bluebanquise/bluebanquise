@@ -132,5 +132,12 @@
   tags:
     - identify
 
+- name: shell █ Force apply nic settings
+  shell: "nmcli con down {{ item.item.interface }} && sleep 2 && nmcli con up {{ item.item.interface }}"
+  loop: "{{ nic_nmcli_apply.results }}"
+  when:
+    - nic_nmcli_force_nic_restart is defined and nic_nmcli_force_nic_restart
+    - item.changed
+
 - name: meta █ Run handler tasks to reload connections
   meta: flush_handlers
