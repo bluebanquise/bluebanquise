@@ -53,7 +53,7 @@
     name: "{{ item }}"
     state: yes
     persistent: yes
-  loop: "{{ nfs_client_sebooleans }}""
+  loop: "{{ nfs_client_sebooleans }}"
   when:
     - ansible_facts.selinux.status == "enabled"
 
