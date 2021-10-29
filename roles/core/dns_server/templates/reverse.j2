@@ -23,19 +23,20 @@ $INCLUDE "{{ item }}.rr.soa"
   {% endif %}
 {%- endmacro %}
 
-{% for host in groups['all'] %}
-  {% if hostvars[host]['network_interfaces'] is defined and hostvars[host]['network_interfaces'] is iterable %}
-    {% for nic in hostvars[host]['network_interfaces'] %}
+{# Macro to write host in file #}
+{% macro write_host(host,host_dict,host_node_main_resolution_network) %}
+  {% if host_dict['network_interfaces'] is defined and host_dict['network_interfaces'] is iterable %}
+    {% for nic in host_dict['network_interfaces'] %}
       {% if nic.network is defined and nic.network == item and nic.ip4 is defined and nic.ip4 is not none and networks[item].prefix is defined %}
 {{ create_record(get_host_octets(nic.ip4, networks[item].prefix)|trim, [[host, item]|join('-'), domain_name]|join('.')) }}
-        {% if item == hostvars[host]['j2_node_main_resolution_network'] %}
+        {% if item == host_node_main_resolution_network %}
 {{ create_record(get_host_octets(nic.ip4, networks[item].prefix)|trim, [host, domain_name]|join('.')) }}
         {% endif %}
-        {% if hostvars[host].bmc is defined %}
-          {% set bmc_args = hostvars[host]['bmc'] %}
+        {% if host_dict['bmc'] is defined %}
+          {% set bmc_args = host_dict['bmc'] %}
           {% if bmc_args.name is defined and bmc_args.name is not none and bmc_args.ip4 is defined and bmc_args.ip4 is not none and bmc_args.network is defined and bmc_args.network is not none and bmc_args.network == item %}
 {{ create_record(get_host_octets(bmc_args.ip4, networks[bmc_args.network].prefix)|trim, [[bmc_args.name, bmc_args.network]|join('-'), domain_name]|join('.')) }}
-            {% if item == hostvars[host]['j2_node_main_resolution_network'] %}
+            {% if item == host_node_main_resolution_network %}
 {{ create_record(get_host_octets(bmc_args.ip4, networks[bmc_args.network].prefix)|trim, [bmc_args.name, domain_name]|join('.')) }}
             {% endif %}
           {% endif %}
@@ -43,4 +44,8 @@ $INCLUDE "{{ item }}.rr.soa"
       {% endif %}
     {% endfor %}
   {% endif %}
-{% endfor %}
+{% endmacro -%}
+
+{% for host in groups['all'] -%}
+{{ write_host(host,hostvars[host],hostvars[host]['j2_node_main_resolution_network']) }}
+{%- endfor %}
