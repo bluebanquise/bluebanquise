@@ -1,6 +1,4 @@
 ---
 log_client_packages_to_install:
   - rsyslog
-  - python3-selinux
-  - python3-policycoreutils
 log_client_work_dir: /var/spool/rsyslog

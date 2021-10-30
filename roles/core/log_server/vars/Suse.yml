@@ -3,8 +3,6 @@ log_server_packages_to_install:
   - rsyslog
   - logrotate
   - xz
-  - python3-selinux
-  - python3-policycoreutils
 log_server_services_to_start:
   - rsyslog
 log_server_rsyslog_conf_path: /etc/rsyslog.conf

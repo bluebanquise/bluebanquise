@@ -8,10 +8,8 @@ pxe_stack_packages_to_install:
   - ipxe-x86_64-bluebanquise
 #  - ipxe-arm64-bluebanquise
   - apache2
-  - python3-policycoreutils
   - clustershell
   - python3-clustershell
-  - policycoreutils
 pxe_stack_default_tftp_package: atftp
 pxe_stack_services_to_start:
   - httpd

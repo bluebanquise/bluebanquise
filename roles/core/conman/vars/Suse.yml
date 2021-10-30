@@ -4,5 +4,3 @@ conman_execpath: "/usr/lib/conman/exec"
 conman_packages_to_install:
   - conman
   - ipmitool
-  - python3-selinux
-  - python3-policycoreutils
