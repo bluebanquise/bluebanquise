@@ -28,7 +28,7 @@ class KernelManager:
     """Class to manage kernels of the diskless tool."""
 
     # Path where diskless kernels are
-    KERNELS_PATH = '/var/www/html/preboot_execution_environment/diskless/kernels'
+    KERNELS_PATH = '{{ diskless_htdocs_path }}/diskless/kernels'
 
     @staticmethod
     def get_kernels():
@@ -157,7 +157,7 @@ class KernelManager:
 
         # If the list of kernels is empty
         else:
-            raise UserWarning('No kernels found in /var/www/html/preboot_execution_environment/diskless/kernels/\nPlease refer to readme.rst for details on how to obtain kernels.')
+            raise UserWarning('No kernels found in {{ diskless_htdocs_path }}/diskless/kernels/\nPlease refer to readme.rst for details on how to obtain kernels.')
 
     @staticmethod
     def cli_change_kernel():

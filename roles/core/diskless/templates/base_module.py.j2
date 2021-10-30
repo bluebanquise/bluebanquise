@@ -56,7 +56,7 @@ class Image(ABC):
     boot_file_template = ''
 
     # Each image has it's own base directory in IMAGES_DIRECTORY directory
-    IMAGES_DIRECTORY = '/var/www/html/preboot_execution_environment/diskless/images/'
+    IMAGES_DIRECTORY = '{{ diskless_htdocs_path }}/diskless/images/'
 
     def __init__(self, name, *args):
         """Class consructor.
