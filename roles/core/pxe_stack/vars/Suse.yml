@@ -14,7 +14,6 @@ pxe_stack_packages_to_install:
   - policycoreutils
 pxe_stack_default_tftp_package: atftp
 pxe_stack_services_to_start:
-  - atftpd.socket
   - httpd
 pxe_stack_default_tftp_service: atftpd.socket
 pxe_stack_firewall_services_to_add:
