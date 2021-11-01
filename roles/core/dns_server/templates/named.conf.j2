@@ -88,10 +88,8 @@ zone "{{ octets }}.in-addr.arpa" IN {
 {{ create_reverse_zone(network, props['subnet'].split('.')[0]) }}
     {% elif props['prefix'] <= 16 %}
 {{ create_reverse_zone(network, props['subnet'].split('.')[0:2]|reverse|join('.')) }}
-    {% elif props['prefix'] <= 24 %}
+    {% elif props['prefix'] <= 31 %}
 {{ create_reverse_zone(network, props['subnet'].split('.')[0:3]|reverse|join('.')) }}
-    {% elif props['prefix'] < 32 %}
-{{ create_reverse_zone(network, props['subnet'].split('.')[0:4]|reverse|join('.')) }}
     {% endif %}
   {% endif %}
 {% endfor %}

@@ -6,9 +6,7 @@ j2_dns_server_get_network: "
 {{ networks[item]['subnet'].split('.')[0] }}
 {% elif networks[item]['prefix'] <= 16 %}
 {{ networks[item]['subnet'].split('.')[0:2]|reverse|join('.') }}
-{% elif networks[item]['prefix'] <= 24 %}
+{% elif networks[item]['prefix'] <= 31 %}
 {{ networks[item]['subnet'].split('.')[0:3]|reverse|join('.') }}
-{% elif networks[item]['prefix'] < 32 %}
-{{ networks[item]['subnet'].split('.')[0:4]|reverse|join('.') }}
 {% endif %}
 "
