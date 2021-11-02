@@ -4,12 +4,19 @@ BlueBanquise Documentation
 .. image:: images/BlueBanquise_logo.svg
    :align: center
 
-Welcome on BlueBanquise main documentation.
+Welcome on BlueBanquise main documentation. You should find here all needed 
+information on how to deploy and use the BlueBanquise stack.
+
+Since one of the main BlueBanquise goals is also to be a training for new Linux system 
+administrators, part of the documentation is generic knowledge and act 
+as a tutorial for basic cluster deployment and basic Ansible usage. Advanced users 
+can skip these parts.
 
 These pages contain information on:
 
+* How to manually deploy a test HPC cluster (generic knowledge, not related to the stack)
 * How to use Ansible (generic knowledge, not related to the stack)
-* How to deploy, configure, and maintain BlueBanquise on different scenario clusters
+* How to bootstrap, configure, deploy and maintain BlueBanquise on different scenario clusters
 * Detailed documentation on each roles provided with the stack
 
 `Please report us <https://github.com/bluebanquise/bluebanquise/issues>`_ any
@@ -37,7 +44,8 @@ git gitea
 
    introduction
    vocabulary
-   learn_ansible
+   training_sysadmin
+   training_ansible
    bootstrap
    configure_bluebanquise
    deploy_bluebanquise

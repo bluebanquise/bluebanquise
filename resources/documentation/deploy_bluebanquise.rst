@@ -107,9 +107,6 @@ Now that management1 is up and running, it is time to deploy the other nodes.
 Deploy OS on other nodes: PXE
 =============================
 
-
->>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
 Next step is to deploy the other nodes using PXE process.
 
 NOTE: it is assumed here you know how to have your other nodes / VM / servers /
@@ -123,6 +120,9 @@ natively.
 In **BlueBanquise**, PXE process has been made so that any kind of hardware able
 to boot PXE, USB or CDrom can start deployment.
 
+PXE process overview
+--------------------
+
 You can get more information and a detailed schema in the pxe_stack role section
 of this documentation. Simply explained, the PXE chain is the following (files
 are in /var/www/html/preboot_execution_environment):
@@ -133,7 +133,7 @@ are in /var/www/html/preboot_execution_environment):
     |
   IP obtained, next-server obtained
     |
-  Load iPXE bluebanquise ROM
+  Download (tftp) and load bluebanquise iPXE ROM
     |
   DHCP request again with new ROM
     |
@@ -156,6 +156,144 @@ again to menu file. The menu file display a simple menu, and wait 10s for user
 before starting the default entry (which can be os deployment, or boot to disk,
 or boot diskless).
 
+The following slides explain the whole PXE process of the BlueBanquise stack:
+
+.. raw:: html
+
+  <!-- from https://www.w3schools.com/howto/howto_js_slideshow.asp -->
+  <script>
+  var slideIndex = 1;
+  showSlides(slideIndex);
+  // Next/previous controls
+  function plusSlides(n) {
+    showSlides(slideIndex += n);
+  }
+  // Thumbnail image controls
+  function currentSlide(n) {
+    showSlides(slideIndex = n);
+  }
+  function showSlides(n) {
+    var i;
+    var slides = document.getElementsByClassName("mySlides");
+    var dots = document.getElementsByClassName("dot");
+    if (n > slides.length) {slideIndex = 1}
+    if (n < 1) {slideIndex = slides.length}
+    for (i = 0; i < slides.length; i++) {
+        slides[i].style.display = "none";
+    }
+    for (i = 0; i < dots.length; i++) {
+        dots[i].className = dots[i].className.replace(" active", "");
+    }
+    slides[slideIndex-1].style.display = "block";
+    dots[slideIndex-1].className += " active";
+  }
+  </script>
+  <!-- Slideshow container -->
+  <div class="slideshow-container">
+     <!-- Full-width images with number and caption text -->
+     <div class="mySlides">
+       <div class="numbertext">1 / 18</div>
+       <img src="_static/deploy_bluebanquise_pxe_slides/Slide1.PNG" style="width:100%">
+     </div>
+     <div class="mySlides">
+       <div class="numbertext">2 / 18</div>
+       <img src="_static/deploy_bluebanquise_pxe_slides/Slide2.PNG" style="width:100%">
+     </div>
+     <div class="mySlides">
+       <div class="numbertext">3 / 18</div>
+       <img src="_static/deploy_bluebanquise_pxe_slides/Slide3.PNG" style="width:100%">
+     </div>
+     <div class="mySlides">
+       <div class="numbertext">4 / 18</div>
+       <img src="_static/deploy_bluebanquise_pxe_slides/Slide4.PNG" style="width:100%">
+     </div>
+     <div class="mySlides">
+       <div class="numbertext">5 / 18</div>
+       <img src="_static/deploy_bluebanquise_pxe_slides/Slide5.PNG" style="width:100%">
+     </div>
+     <div class="mySlides">
+       <div class="numbertext">6 / 18</div>
+       <img src="_static/deploy_bluebanquise_pxe_slides/Slide6.PNG" style="width:100%">
+     </div>
+     <div class="mySlides">
+       <div class="numbertext">7 / 18</div>
+       <img src="_static/deploy_bluebanquise_pxe_slides/Slide7.PNG" style="width:100%">
+     </div>
+     <div class="mySlides">
+       <div class="numbertext">8 / 18</div>
+       <img src="_static/deploy_bluebanquise_pxe_slides/Slide8.PNG" style="width:100%">
+     </div>
+     <div class="mySlides">
+       <div class="numbertext">9 / 18</div>
+       <img src="_static/deploy_bluebanquise_pxe_slides/Slide9.PNG" style="width:100%">
+     </div>
+     <div class="mySlides">
+       <div class="numbertext">10 / 18</div>
+       <img src="_static/deploy_bluebanquise_pxe_slides/Slide10.PNG" style="width:100%">
+     </div>
+     <div class="mySlides">
+       <div class="numbertext">11 / 18</div>
+       <img src="_static/deploy_bluebanquise_pxe_slides/Slide11.PNG" style="width:100%">
+     </div>
+     <div class="mySlides">
+       <div class="numbertext">12 / 18</div>
+       <img src="_static/deploy_bluebanquise_pxe_slides/Slide12.PNG" style="width:100%">
+     </div>
+     <div class="mySlides">
+       <div class="numbertext">13 / 18</div>
+       <img src="_static/deploy_bluebanquise_pxe_slides/Slide13.PNG" style="width:100%">
+     </div>
+     <div class="mySlides">
+       <div class="numbertext">14 / 18</div>
+       <img src="_static/deploy_bluebanquise_pxe_slides/Slide14.PNG" style="width:100%">
+     </div>
+     <div class="mySlides">
+       <div class="numbertext">15 / 18</div>
+       <img src="_static/deploy_bluebanquise_pxe_slides/Slide15.PNG" style="width:100%">
+     </div>
+     <div class="mySlides">
+       <div class="numbertext">16 / 18</div>
+       <img src="_static/deploy_bluebanquise_pxe_slides/Slide16.PNG" style="width:100%">
+     </div>
+     <div class="mySlides">
+       <div class="numbertext">17 / 18</div>
+       <img src="_static/deploy_bluebanquise_pxe_slides/Slide17.PNG" style="width:100%">
+     </div>
+     <div class="mySlides">
+       <div class="numbertext">18 / 18</div>
+       <img src="_static/deploy_bluebanquise_pxe_slides/Slide17.PNG" style="width:100%">
+     </div>
+     <!-- Next and previous buttons -->
+     <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+     <a class="next" onclick="plusSlides(1)">&#10095;</a>
+  </div>
+  <br>
+  <!-- The dots/circles -->
+  <div style="text-align:center">
+    <span class="dot" onclick="currentSlide(1)"></span>
+    <span class="dot" onclick="currentSlide(2)"></span>
+    <span class="dot" onclick="currentSlide(3)"></span>
+    <span class="dot" onclick="currentSlide(4)"></span>
+    <span class="dot" onclick="currentSlide(5)"></span>
+    <span class="dot" onclick="currentSlide(6)"></span>
+    <span class="dot" onclick="currentSlide(7)"></span>
+    <span class="dot" onclick="currentSlide(8)"></span>
+    <span class="dot" onclick="currentSlide(9)"></span>
+    <span class="dot" onclick="currentSlide(10)"></span>
+    <span class="dot" onclick="currentSlide(11)"></span>
+    <span class="dot" onclick="currentSlide(12)"></span>
+    <span class="dot" onclick="currentSlide(13)"></span>
+    <span class="dot" onclick="currentSlide(14)"></span>
+    <span class="dot" onclick="currentSlide(15)"></span>
+    <span class="dot" onclick="currentSlide(16)"></span>
+    <span class="dot" onclick="currentSlide(17)"></span>
+    <span class="dot" onclick="currentSlide(18)"></span>
+  </div>
+  <!-- Addon from Benoit Leveugle: force slide1 after page load -->
+  <script type="module">
+    currentSlide(1)
+  </script>
+
 bootset
 -------
 
@@ -165,19 +303,19 @@ dedicated configuration from management node at boot.
 
 To manipulate nodes PXE boot, a command, **bootset**, is available.
 
-We are going to deploy login1 and compute1, compute2, compute3 and compute4.
+We are going to deploy login1, storage1 and compute1, compute2, compute3 and compute4.
 
 Let's use bootset to set them to deploy OS at next PXE boot:
 
 .. code-block:: bash
 
-  bootset -n login1,c[001-004] -b osdeploy
+  bootset -n login1,storage1,c[001-004] -b osdeploy
 
 You can check the result using:
 
 .. code-block:: bash
 
-  bootset -n login1,c[001-004] -s
+  bootset -n login1,storage1,c[001-004] -s
 
 Which should return:
 
@@ -185,7 +323,7 @@ Which should return:
 
   [INFO] Loading /etc/bootset/nodes_parameters.yml
   [INFO] Loading /etc/bootset/pxe_parameters.yml
-  Next boot deployment: c[001-004],login1
+  Next boot deployment: c[001-004],login1,storage1
 
 Note that this osdeploy state will be automatically updated once OS is deployed
 on remote nodes, and set to disk.
@@ -226,10 +364,12 @@ Now that all the nodes have an operating system installed and running, applying
 configuration on these nodes is simple.
 
 Ensure first you can ssh passwordless on each of the freshly deployed nodes.
-(Note: on some Linux distributions, if DHCP leases are short, you may loose
+
+.. note::
+On some Linux distributions, if DHCP leases are short, you may loose
 ip shortly after system is booted. If that happen, reboot system to get an ip
 again. This issue is solved once the nic_nmcli role has been applied on hosts,
-as it sets ip statically).
+as it sets ip statically.
 
 If yes, copy example playbooks:
 

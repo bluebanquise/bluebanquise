@@ -31,6 +31,7 @@ The **BlueBanquise** stack is made of two main parts:
 This documentation is structured as the following:
 
 * Few basic vocabulary
+* A full Cluster system administration training, independent of the stack
 * A full Ansible training, independent of the stack
 * Procedure to install BlueBanquise CORE
     * Bootstrap first management host

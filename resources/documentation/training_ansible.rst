@@ -1,6 +1,6 @@
-=============
-Learn Ansible
-=============
+====================
+[Training] - Ansible
+====================
 
 To understand how **BlueBanquise** works, it is essential to learn basis of
 Ansible.
