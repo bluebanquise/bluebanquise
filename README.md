@@ -1,8 +1,14 @@
-## Community
+# Community
 
 ![BlueBanquise Community](resources/pictures/BlueBanquise_Community_logo_large.png)
 
-This repository hosts all community driven roles or tools around [**BlueBanquise**](https://github.com/bluebanquise/bluebanquise). These addition roles/tools can be new, or simply forks from the [core stack](https://github.com/bluebanquise/bluebanquise/tree/master/roles).
+This repository hosts all [internal community driven roles or tools](#internal-community-roles-and-tools) around [**BlueBanquise**](https://github.com/bluebanquise/bluebanquise). These additional roles/tools can be new, or simply forks from the [core stack](https://github.com/bluebanquise/bluebanquise/tree/master/roles).
+
+We also maintain here a [list of external roles and tools](#external-roles-and-tools) known to be working well with BlueBanquise.
+
+## Internal Community roles and tools
+
+### Concept
 
 Each role/tool is owned by a developer, in charge of it.
 
@@ -10,7 +16,7 @@ Each owner can ask a new release of the repository, as this repository was made 
 
 While the core stack aims to be multiple Linux distributions ready, each Community role owner is in charge of providing compatibility with Linux distributions (or not) for the additional role.
 
-## List of available roles/tools
+### List of available roles/tools
 
 | Role/tool name        | Description                                              | Owner           | Link                                |
 | --------------------- | -------------------------------------------------------- | --------------- | ----------------------------------- |
@@ -36,3 +42,10 @@ While the core stack aims to be multiple Linux distributions ready, each Communi
 | update_reboot         | Update all packages and reboot system                    | @oxedions       | [link](roles/update_reboot/)        |
 | users_basic           | Set / remove users                                       | @oxedions       | [link](roles/users_basic/)          |
 
+## External roles and tools
+
+These roles were reported compatible by BlueBanquise community users. Please do not hesitate to submit more.
+
+| Role/tool name        | Description                                              | Owner           | Link                                         |
+| --------------------- | -------------------------------------------------------- | --------------- | -------------------------------------------- |
+| 389ds-server          | Installs the 389DS server (LDAP server)                  | lvps            | [link](https://github.com/lvps/389ds-server) |
