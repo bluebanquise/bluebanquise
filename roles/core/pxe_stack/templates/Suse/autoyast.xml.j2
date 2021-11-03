@@ -128,17 +128,19 @@ echo "All went well, we can inform next-server we succeeded"
 curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$(hostname -s)&boot=disk"
 
 ]]>
-                </source>
+        </source>
       </script>
     </chroot-scripts>
 {% if hostvars[groups[item][0]]['ep_autoinstall_post_script'] is defined and hostvars[groups[item][0]]['ep_autoinstall_post_script'] is not none %}
     <post-scripts config:type="list">
-      <filename>post.sh</filename>
-      <interpreter>shell</interpreter>
-      <source><![CDATA[
+      <script>      
+        <filename>custom-post.sh</filename>
+        <interpreter>shell</interpreter>
+        <source><![CDATA[
 {{ hostvars[groups[item][0]]['ep_autoinstall_post_script'] }}
 ]]>
-      </source>
+        </source>
+      </script>
     </post-scripts>
 {% endif %}
   </scripts>
