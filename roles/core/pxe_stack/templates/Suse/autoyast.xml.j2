@@ -59,12 +59,64 @@
 </services-manager>
 
 <scripts>
-    <chroot-scripts config:type="list">
+    <pre-scripts config:type="list">
+{% if hostvars[groups[item][0]]['ep_preserve_efi_first_boot_device'] == true %}
       <script>
-                    <debug config:type="boolean">true</debug>
-                    <filename>post.sh</filename>
-                    <interpreter>shell</interpreter>
-                    <source><![CDATA[
+        <debug config:type="boolean">true</debug>
+        <filename>pre.sh</filename>
+        <interpreter>shell</interpreter>
+	<source><![CDATA[
+#!/bin/sh
+
+if [ -d /sys/firmware/efi ]; then
+    netboot=`efibootmgr | awk '/^BootCurrent:/{print $2;}'`
+    [ ! -z $netboot ] && echo $netboot > /tmp/uefi_netboot
+    efibootmgr > /tmp/uefiall
+fi
+
+]]>
+	</source>
+      </script>
+{% endif %}
+{% if hostvars[groups[item][0]]['ep_autoinstall_pre_script'] is defined and hostvars[groups[item][0]]['ep_autoinstall_pre_script'] is not none %}
+      <script>
+        <debug config:type="boolean">true</debug>
+        <filename>custom-pre.sh</filename>
+        <interpreter>shell</interpreter>
+	<source><![CDATA[
+{{ hostvars[groups[item][0]]['ep_autoinstall_pre_script'] }}
+]]>
+	</source>
+      </script>
+{% endif %}
+    </pre-scripts>
+    <chroot-scripts config:type="list">
+{% if hostvars[groups[item][0]]['ep_preserve_efi_first_boot_device'] == true %}
+      <script>
+        <debug config:type="boolean">true</debug>
+        <filename>post-no-chroot.sh</filename>
+        <interpreter>shell</interpreter>
+        <chrooted config:type="boolean">false</chrooted>
+        <source><![CDATA[
+#!/bin/sh
+
+if [ -d /sys/firmware/efi ]; then
+    echo "Restoring EFI first boot device..."
+    netboot=$(cat /tmp/uefi_netboot)
+    currentorder=`efibootmgr | awk '/^BootOrder:/{print $2;}'`
+    efibootmgr -o $netboot,$(echo $currentorder | sed "s/$netboot//" | sed 's/^,//' | sed 's/,$//' | sed 's/,,/,/')
+    echo " End."
+fi
+
+]]>
+	</source>
+      </script>
+{% endif %}
+      <script>
+        <debug config:type="boolean">true</debug>
+        <filename>post.sh</filename>
+        <interpreter>shell</interpreter>
+        <source><![CDATA[
 #!/bin/sh
 
 # Turn the kernel parameters into variables
@@ -79,6 +131,16 @@ curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$(hostna
                 </source>
       </script>
     </chroot-scripts>
+{% if hostvars[groups[item][0]]['ep_autoinstall_post_script'] is defined and hostvars[groups[item][0]]['ep_autoinstall_post_script'] is not none %}
+    <post-scripts config:type="list">
+      <filename>post.sh</filename>
+      <interpreter>shell</interpreter>
+      <source><![CDATA[
+{{ hostvars[groups[item][0]]['ep_autoinstall_post_script'] }}
+]]>
+      </source>
+    </post-scripts>
+{% endif %}
   </scripts>
 
  <general>
