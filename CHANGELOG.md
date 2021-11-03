@@ -33,6 +33,7 @@
   - dns_server:
     - improve role performances (#597)
     - add ability to set IP addresses for external domains (#609)
+    - re-worked reverse zone generation to fix issue #614. (#621)
   - kernel_config: prevent crash if variable ep_kernel_parameters is undefined (#559)
   - log_server/client:
     - allow custom configuration path (#591)
