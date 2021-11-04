@@ -4,6 +4,7 @@
   vars:
     start_services: false
     enable_services: false
+    forward_audit_logs: true
   tasks:
     - name: "Include audit_system"
       include_role:
