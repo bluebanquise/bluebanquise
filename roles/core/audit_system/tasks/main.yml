@@ -41,10 +41,12 @@
     regexp: "^active = .*"
     replace: "active = yes"
   notify: service █ Restart auditd service
-  when: audit_result.stat.exists
+  when:
+    - audit_result.stat.exists
+    - forward_audit_logs | default(false) | bool
 
 - name: "service █ Manage {{ audit_config_services_to_start }} state"
-  service:
+  ansible.builtin.service:
     name: "{{ item }}"
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
     state: "{{ (start_services | bool) | ternary('started', omit) }}"

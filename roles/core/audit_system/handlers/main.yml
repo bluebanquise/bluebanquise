@@ -1,9 +1,9 @@
 ---
-
 - name: service █ Restart auditd service
-  service:
+  ansible.builtin.service:
     name: "{{ item }}"
     state: restarted
+    use: service  # systemctl can't restart auditd, service can: https://access.redhat.com/solutions/2664811
   loop: "{{ audit_config_services_to_start }}"
   when:
     - "'service' not in ansible_skip_tags"
