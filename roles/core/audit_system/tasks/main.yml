@@ -43,7 +43,7 @@
   notify: service █ Restart auditd service
   when:
     - audit_result.stat.exists
-    - forward_audit_logs | default(false) | bool
+    - audit_system_forward_audit_logs | default(false) | bool
 
 - name: "service █ Manage {{ audit_config_services_to_start }} state"
   ansible.builtin.service:

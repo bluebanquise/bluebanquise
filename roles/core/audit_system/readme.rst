@@ -11,7 +11,7 @@ It is as well able to restart auditd service using FQCN module (solve: https://a
 Instructions
 ^^^^^^^^^^^^
 
-Since the auditd manage sensitive data, you need to set the variable forward_audit_logs to true to sent audit logs to the rsyslog server.
+Since the auditd manage sensitive data, you need to set the variable audit_system_forward_audit_logs to true to send audit logs to the rsyslog server.
 
 Files:
 
