@@ -1,0 +1,59 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+
+    - name: Collect package facts
+      package_facts:
+        manager: auto
+
+    - name: Collect services facts
+      service_facts:
+
+    - name: Assert audit packages are installed
+      assert:
+        that: "'{{ item }}' in ansible_facts.packages"
+      loop:
+        - audit
+        - audispd-plugins
+
+    - name: Retrieve file /etc/audit/auditd.conf system status
+      stat:
+        path: /etc/audit/auditd.conf
+      register: reg_file_audit
+      changed_when: false
+
+    - name: Assert file /etc/audit/auditd.conf exists
+      assert:
+        that:
+          - reg_file_audit.stat.exists
+          - reg_file_audit.stat.mode == '0640'
+          - reg_file_audit.stat.pw_name == 'root'
+          - reg_file_audit.stat.gr_name == 'root'
+
+    - name: Retrieve file /etc/audit/plugins.d/syslog.conf system status
+      stat:
+        path: /etc/audit/plugins.d/syslog.conf
+      register: reg_file_syslog
+      changed_when: false
+
+    - name: Assert file /etc/audit/plugins.d/syslog.conf exists
+      assert:
+        that:
+          - reg_file_syslog.stat.exists
+          - reg_file_syslog.stat.mode == '0640'
+          - reg_file_syslog.stat.pw_name == 'root'
+          - reg_file_syslog.stat.gr_name == 'root'
+
+    - name: Retrieve configuration in /etc/audit/plugins.d/syslog.conf file
+      lineinfile:
+        path: /etc/audit/plugins.d/syslog.conf
+        regexp: '^active = yes'
+        state: absent
+      check_mode: true
+      register: reg_conf_audit
+      changed_when: false
+
+    - name: Check /etc/audit/plugins.d/syslog.conf file contains activated configuration to forward logs
+      assert:
+        that: reg_conf_audit.found

@@ -10,6 +10,7 @@
 
 #### New roles
 
+  - audit_system: install/configure audit logs, compatible with Centos8, RedHat8, Ubuntu 18.04 and 20.04 (#611)
   - filesystem: set filesystems (#573)
   - modprobe: load/unload kernel modules (#573)
   - mount: mount devices (#573)
