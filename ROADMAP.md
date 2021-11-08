@@ -4,7 +4,29 @@ Roadmap only describes major objectives. Small objectives are developed as strea
 
 ## 1.6
 
+### Main objectives, mandatory
+
+#### Core
+
 - Suse/OpenSuse integration
-- If possible, Debian integration
+
+#### Community
+
+- Suse/OpenSuse integration into main Community roles
+
+#### Tools/Infrastructure
+
+- Suse/OpenSuse integration into infrastructure
+- Suse/OpenSuse integration into bootset tool
+
+### Optional objectives
+
+#### Core
+
+- Debian integration
 - Better tests (Molecule tests, tests pipeline)
-- Integrate https://github.com/neilmunday/slurm-mail to Community role
+
+#### Community
+
+- Integrate https://github.com/neilmunday/slurm-mail to slurm Community role
+- K8S Hybrid cluster
