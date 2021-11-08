@@ -1,5 +1,5 @@
 ---
-ep_console: console=tty0 console=ttyS1,115200n8 
+ep_console: console=tty0 console=ttyS1,115200n8
 
 ep_equipment_authentication:
   user: root
