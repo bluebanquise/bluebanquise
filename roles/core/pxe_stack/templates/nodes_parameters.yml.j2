@@ -15,7 +15,7 @@
   {% set range = groups['all'] %}
 {% endif %}
 
-{% for host in range %}
+{% for host in (range | sort) %}
   {% if hostvars[host]['ep_equipment_type'] == "server" %}
     {% if hostvars[host]['network_interfaces'] is defined and hostvars[host]['network_interfaces'] is not none %}
 {{ host }}:

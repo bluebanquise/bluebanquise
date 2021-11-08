@@ -19,10 +19,11 @@
 
 #### Roles improvement or fix
 
-  - pxe_stack: force substitution of files by symlinks in case of an update (#587)
   - core/log_server
     - remote logs stored in a similar fashion as the server (#568)
-  - all: add compatibility with multiple RHEL like distributions (#560)
+  - all:
+    - add compatibility with multiple RHEL like distributions (#560)
+    - prevent unsorted ranges (causes unexepcted changed status) (#628)
   - clustershell: prevent dummy host to be included (#619)
   - conman: fix execpath for RHEL 8 (#584)
   - advanced_dhcp_server: fix issue with added spaces. Could prevent DHCP to start (#561)
@@ -42,7 +43,9 @@
     - add ip4_manual entry (#618)
     - add dns4 and dns4_search vars logic (#585)
     - improve role capabilities (#558)
-  - pxe_stack: fix issues with hostname not set during kickstart on RHEL 8.3 (#522)
+  - pxe_stack:
+    - fix issues with hostname not set during kickstart on RHEL 8.3 (#522)
+    - force substitution of files by symlinks in case of an update (#587)
   - set_hostname: add fqdn capability (#543)
   - ssh_master: add custom config variable (#579)
   - time:
