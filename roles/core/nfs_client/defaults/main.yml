@@ -4,4 +4,3 @@ nfs_client_directories_state: mounted
 nfs_client_sebooleans:
   - use_nfs_home_dirs
   - httpd_use_nfs
-  
