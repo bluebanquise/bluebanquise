@@ -14,6 +14,7 @@
   - filesystem: set filesystems (#573)
   - modprobe: load/unload kernel modules (#573)
   - mount: mount devices (#573)
+  - pam_limits: set pam limits (#633)
   - parted: set partitions (#573)
   - sudoers: add users or groups to sudoers (#573)
 
