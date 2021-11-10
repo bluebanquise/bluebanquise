@@ -39,6 +39,7 @@
     - add dns4 and dns4_search vars logic (#585)
     - improve role capabilities (#558)
   - pxe_stack: fix issues with hostname not set during kickstart on RHEL 8.3 (#522)
+  - repositories_client: fix CentOS 8.4 repository compatibility (#534)
   - set_hostname: add fqdn capability (#543)
   - ssh_master: add custom config variable (#579)
   - time:
