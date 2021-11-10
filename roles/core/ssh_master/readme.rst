@@ -156,6 +156,7 @@ Output
 Changelog
 ^^^^^^^^^
 
+* 1.0.6: Prevent unsorted ranges. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.5: Add custom config variable. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.4: Add ssh ProxyJump capability for icebergs. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.3: Update to new network_interfaces syntax. Benoit Leveugle <benoit.leveugle@gmail.com>

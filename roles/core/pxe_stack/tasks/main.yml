@@ -13,7 +13,9 @@
   include_vars: "{{ item }}"
   with_first_found:
     - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}.yml"
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_version }}.yml"
         - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
         - "vars/{{ ansible_facts.os_family }}.yml"
@@ -21,18 +23,19 @@
   tags:
     - always
 
-- name: "firewalld █ Add services to firewall's {{ pxe_stack_firewall_zone | default('public') }} zone"
-  firewalld:
-    zone: "{{ pxe_stack_firewall_zone | default('public') }}"
-    service: "{{ item }}"
-    immediate: "yes"
-    permanent: "yes"
-    state: enabled
-  when:
-    - ansible_facts.os_family == "RedHat"
-    - ep_firewall | default(false) | bool
-  loop: "{{ pxe_stack_firewall_services_to_add }}"
+- name: include_tasks ░ Use OS dedicated firewall task
+  include_tasks: "{{ item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}/firewall.yml"
+      skip: true
   tags:
+    - internal
     - firewall
 
 - name: "package █ Install {{ (pxe_stack_packages_to_install + [pxe_stack_tftp_package | default(pxe_stack_default_tftp_package)]) | join(' ') }} packages"
@@ -41,6 +44,7 @@
     state: present
   tags:
     - package
+  notify: systemd █ Reload systemd configuration
 
 - name: file █ Create pxe directories structure
   file:
@@ -48,7 +52,7 @@
     state: directory
     mode: 0755
   loop:
-    - /var/www/cgi-bin
+    - "{{ pxe_stack_apache_cgi_bin_path }}"
     - /etc/bluebanquise
     - /etc/bootset
 
@@ -70,10 +74,12 @@
   include_tasks: "{{ item }}"
   with_first_found:
     - files:
-        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
-        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
-        - "{{ ansible_facts.distribution | replace(' ','_') }}.yml"
-        - "{{ ansible_facts.os_family | replace(' ','_') }}.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}/main.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}/main.yml"
       skip: true
   tags:
     - internal
@@ -115,132 +121,29 @@
   tags:
     - template
 
-##### RedHat os familly
-
-- name: copy █ Copy osdeploy files /var/www/html/preboot_execution_environment/osdeploy/
-  copy:
-    src: osdeploy/redhat_{{ item.major }}.ipxe
-    dest: "/var/www/html/preboot_execution_environment/osdeploy/redhat_{{ item.major }}.ipxe"
-    mode: 0644
-    owner: "{{ pxe_stack_apache_user }}"
-    group: "{{ pxe_stack_apache_user }}"
-  loop: "{{ pxe_stack_supported_os.redhat }}"
-
-- name: file █ Generate links for all supported OS
-  file:
-    src: redhat_{{ item.0.major }}.ipxe
-    dest: "/var/www/html/preboot_execution_environment/osdeploy/{{ item.1 }}_{{ item.0.major }}.ipxe"
-    mode: 0644
-    owner: "{{ pxe_stack_apache_user }}"
-    group: "{{ pxe_stack_apache_user }}"
-    state: link
-    force: yes
-  loop: "{{ pxe_stack_supported_os.redhat | subelements('distributions') }}"
-  when: item.1 != 'redhat'
-
-- name: template █ Generate kickstarts /var/www/html/preboot_execution_environment/equipment_profiles/{item}.kickstart.cfg
-  template:
-    src: "kickstart.cfg.j2"
-    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.kickstart.cfg
-    mode: 0644
-    owner: "{{ pxe_stack_apache_user }}"
-    group: "{{ pxe_stack_apache_user }}"
-  with_items: "{{ j2_equipment_groups_list }}"
-  when:
-    - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
-    - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) in ['redhat','centos','cloudlinux','oraclelinux']
+- name: include_tasks ░ Include RedHat familly clients support
+  include_tasks: client_os/RedHat.yml
+  when: pxe_stack_client_os_redhat
   tags:
-    - template
+    - internal
 
-- name: template █ Generate equipment_profiles /var/www/html/preboot_execution_environment/equipment_profiles/{item}.ipxe
-  template:
-    src: "equipment_profile.ipxe.j2"
-    dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.ipxe
-    mode: 0644
-    owner: "{{ pxe_stack_apache_user }}"
-    group: "{{ pxe_stack_apache_user }}"
-  with_items: "{{ j2_equipment_groups_list }}"
-  when:
-    - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
-    - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) in ['redhat','centos','cloudlinux','oraclelinux']
+- name: include_tasks ░ Include Ubuntu familly clients support
+  include_tasks: client_os/Ubuntu.yml
+  when: pxe_stack_client_os_ubuntu
   tags:
-    - template
+    - internal
 
-##### Ubuntu
+- name: include_tasks ░ Include DGX familly clients support
+  include_tasks: client_os/DGX.yml
+  when: pxe_stack_client_os_dgx
+  tags:
+    - internal
 
-# OUTDATED, need review
-# - name: template █ Generate preseeds for Ubuntu
-#   template:
-#     src: "preseed.cfg.j2"
-#     dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.preseed.cfg
-#     mode: 0644
-#     owner: "{{ pxe_stack_apache_user }}"
-#     group: "{{ pxe_stack_apache_user }}"
-#   with_items: "{{ j2_equipment_groups_list }}"
-#   when:
-#     - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
-#     - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) == 'ubuntu'
-#   tags:
-#     - template
-#
-# - name: Templates >> equipment_profiles for Ubuntu
-#   template:
-#     src: "configuration_ubuntu.ipxe.j2"
-#     dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.ipxe
-#     mode: 0644
-#     owner: "{{ pxe_stack_apache_user }}"
-#     group: "{{ pxe_stack_apache_user }}"
-#   with_items: "{{ j2_equipment_groups_list }}"
-#   when:
-#     - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
-#     - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) == 'ubuntu'
-#   tags:
-#     - template
-
-##### OpenSuse
-
-# OUTDATED, need review
-# - name: Templates >> autoyasts for OpenSuse
-#   template:
-#     src: "autoyast.xml.j2"
-#     dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.autoyast.xml
-#     mode: 0644
-#     owner: "{{ pxe_stack_apache_user }}"
-#     group: "{{ pxe_stack_apache_user }}"
-#   with_items: "{{ j2_equipment_groups_list }}"
-#   when:
-#     - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
-#     - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) == 'opensuse'
-#   tags:
-#     - template
-#
-# - name: Templates >> equipment_profiles for OpenSuse
-#   template:
-#     src: "configuration_opensuse.ipxe.j2"
-#     dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.ipxe
-#     mode: 0644
-#     owner: "{{ pxe_stack_apache_user }}"
-#     group: "{{ pxe_stack_apache_user }}"
-#   with_items: "{{ j2_equipment_groups_list }}"
-#   when:
-#     - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
-#     - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) == 'opensuse'
-#   tags:
-#     - template
-#
-# ##### Minimal, specific
-#
-# - name: Templates >> equipment_ipxe_configuration for Minimal Live Linux
-#   template:
-#     src: "configuration_minimal.ipxe.j2"
-#     dest: /var/www/html/preboot_execution_environment/equipment_profiles/minimal.ipxe
-#     mode: 0644
-#     owner: "{{ pxe_stack_apache_user }}"
-#     group: "{{ pxe_stack_apache_user }}"
-#   tags:
-#     - template
-
-##### END
+- name: include_tasks ░ Include Suse familly clients support
+  include_tasks: client_os/Suse.yml
+  when: pxe_stack_client_os_suse
+  tags:
+    - internal
 
 - name: copy █ Copy /usr/bin/bootset
   copy:
@@ -264,10 +167,10 @@
     mode: 0644
   notify: service █ Restart pxe services
 
-- name: copy █ Copy /var/www/cgi-bin/bootswitch.cgi
+- name: "copy █ Copy {{ pxe_stack_apache_cgi_bin_path }}/bootswitch.cgi"
   copy:
     src: bootswitch.cgi
-    dest: /var/www/cgi-bin/bootswitch.cgi
+    dest: "{{ pxe_stack_apache_cgi_bin_path }}/bootswitch.cgi"
     mode: 0744
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_user }}"

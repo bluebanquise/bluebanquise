@@ -4,3 +4,7 @@
   command: yum clean metadata
   args:
     warn: no
+
+- name: command █ apt update cache
+  command: apt update
+  when: repositories_client_apt_update_cache

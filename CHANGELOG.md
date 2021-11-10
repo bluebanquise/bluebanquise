@@ -4,8 +4,13 @@
 
 ### Major changes
 
+#### Overall changes
+
+  - add Ubuntu 18.04 and 20.04 partial support (#582)
+
 #### New roles
 
+  - audit_system: install/configure audit logs, compatible with Centos8, RedHat8, Ubuntu 18.04 and 20.04 (#611)
   - filesystem: set filesystems (#573)
   - modprobe: load/unload kernel modules (#573)
   - mount: mount devices (#573)
@@ -14,11 +19,13 @@
 
 #### Roles improvement or fix
 
-  - pxe_stack: force substitution of files by symlinks in case of an update (#587)
   - core/log_server
     - remote logs stored in a similar fashion as the server (#568)
-  - all: add compatibility with multiple RHEL like distributions (#560)
-  - conman:
+  - all:
+    - add compatibility with multiple RHEL like distributions (#560)
+    - prevent unsorted ranges (causes unexepcted changed status) (#628)
+  - clustershell: prevent dummy host to be included (#619)
+  - conman: fix execpath for RHEL 8 (#584)
     - fix execpath for RHEL 8 (#584)
     - force conman user gid and uid (#605)
   - advanced_dhcp_server: fix issue with added spaces. Could prevent DHCP to start (#561)
@@ -27,15 +34,20 @@
     - fix issues preventing access to nodes booting a livenet image (#525)
     - notify in readme/page that firewall does not work in chroot (#569)
     - fix python path of diskless files (#590)
-  dns_server:
+  - dns_server:
     - improve role performances (#597)
+    - add ability to set IP addresses for external domains (#609)
+    - re-worked reverse zone generation to fix issue #614. (#621)
   - kernel_config: prevent crash if variable ep_kernel_parameters is undefined (#559)
   - log_server/client:
     - allow custom configuration path (#591)
   - nic_nmcli:
+    - add ip4_manual entry (#618)
     - add dns4 and dns4_search vars logic (#585)
     - improve role capabilities (#558)
-  - pxe_stack: fix issues with hostname not set during kickstart on RHEL 8.3 (#522)
+  - pxe_stack:
+    - fix issues with hostname not set during kickstart on RHEL 8.3 (#522)
+    - force substitution of files by symlinks in case of an update (#587)
   - set_hostname: add fqdn capability (#543)
   - ssh_master: add custom config variable (#579)
   - time:

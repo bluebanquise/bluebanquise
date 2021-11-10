@@ -104,7 +104,7 @@
   Loop over hosts to write, and write all interfaces in this network.
   First part is dedicated to calculate ipxe rom filename.
 ###############################################################################}
-{% for host in range %}
+{% for host in (range | sort) %}
   {% set current_hostvars = hostvars[host] %}{# buffer #}
   {% if current_hostvars['network_interfaces'] is defined and current_hostvars['network_interfaces'] is iterable %}
     {#- Define iPXE rom to use #}
@@ -125,10 +125,14 @@
     {% else %}
       {% set ipxe_embed = 'standard' %}
     {% endif %}
-    {% if current_hostvars['ep_ipxe_platform'] == 'efi' %}{# Finally, build file name depending of platform and previous parameters #}
-      {% set ipxe_rom_filename = (ipxe_architecture + '/' + ipxe_embed + '_' + ipxe_driver + 'ipxe.efi') %}
-    {% else %}{# Assume everything else is pcbios #}
-      {% set ipxe_rom_filename = (ipxe_architecture + '/' + ipxe_embed + '_undionly.kpxe') %}
+    {% if current_hostvars['ep_equipment_type'] == 'server' %}
+      {% if current_hostvars['ep_ipxe_platform'] == 'efi' %}{# Finally, build file name depending of platform and previous parameters #}
+        {% set ipxe_rom_filename = (ipxe_architecture + '/' + ipxe_embed + '_' + ipxe_driver + 'ipxe.efi') %}
+      {% else %}{# Assume everything else is pcbios #}
+        {% set ipxe_rom_filename = (ipxe_architecture + '/' + ipxe_embed + '_undionly.kpxe') %}
+      {% endif %}
+    {% else %}
+        {% set ipxe_rom_filename=None %}
     {% endif -%}
 
     {%- for nic in current_hostvars['network_interfaces'] %}

@@ -1,0 +1,8 @@
+---
+log_server_packages_to_install:
+  - rsyslog
+  - logrotate
+  - xz-utils
+log_server_services_to_start:
+  - rsyslog
+log_server_rsyslog_conf_path: /etc/rsyslog.conf

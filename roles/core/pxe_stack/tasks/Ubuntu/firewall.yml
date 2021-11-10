@@ -1,0 +1,14 @@
+- name: ufw █ "Add http service to firewall"
+  ufw:
+    rule: allow
+    name: Apache
+  tags:
+    - firewall
+
+- name: ufw █ "Add tftp service to firewall"
+  ufw:
+    rule: allow
+    port: '69'
+    proto: udp
+  tags:
+    - firewall
