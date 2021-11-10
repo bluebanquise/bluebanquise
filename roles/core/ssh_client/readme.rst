@@ -1,10 +1,11 @@
-SSH master
+ssh client
 ----------
 
 Description
 ^^^^^^^^^^^
 
-This role configures the ssh access of inventory known hosts to ensure ssh access through nodes main network.
+This role configures the ssh access of inventory known hosts to ensure ssh
+access through nodes main network.
 
 Instructions
 ^^^^^^^^^^^^
@@ -156,6 +157,7 @@ Output
 Changelog
 ^^^^^^^^^
 
+* 1.0.7: Rename role. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.6: Prevent unsorted ranges. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.5: Add custom config variable. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.4: Add ssh ProxyJump capability for icebergs. Benoit Leveugle <benoit.leveugle@gmail.com>
