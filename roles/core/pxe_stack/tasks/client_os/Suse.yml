@@ -1,0 +1,42 @@
+##### OpenSuse
+
+# OUTDATED, need review
+# - name: Templates >> autoyasts for OpenSuse
+#   template:
+#     src: "autoyast.xml.j2"
+#     dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.autoyast.xml
+#     mode: 0644
+#     owner: "{{ pxe_stack_apache_user }}"
+#     group: "{{ pxe_stack_apache_user }}"
+#   with_items: "{{ j2_equipment_groups_list }}"
+#   when:
+#     - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
+#     - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) == 'opensuse'
+#   tags:
+#     - template
+#
+# - name: Templates >> equipment_profiles for OpenSuse
+#   template:
+#     src: "configuration_opensuse.ipxe.j2"
+#     dest: /var/www/html/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.ipxe
+#     mode: 0644
+#     owner: "{{ pxe_stack_apache_user }}"
+#     group: "{{ pxe_stack_apache_user }}"
+#   with_items: "{{ j2_equipment_groups_list }}"
+#   when:
+#     - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
+#     - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) == 'opensuse'
+#   tags:
+#     - template
+#
+# ##### Minimal, specific
+#
+# - name: Templates >> equipment_ipxe_configuration for Minimal Live Linux
+#   template:
+#     src: "configuration_minimal.ipxe.j2"
+#     dest: /var/www/html/preboot_execution_environment/equipment_profiles/minimal.ipxe
+#     mode: 0644
+#     owner: "{{ pxe_stack_apache_user }}"
+#     group: "{{ pxe_stack_apache_user }}"
+#   tags:
+#     - template

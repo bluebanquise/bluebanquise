@@ -50,6 +50,10 @@ options {
 
   pid-file "/run/named/named.pid";
   session-keyfile "/run/named/session.key";
+
+{% if dns_overrides is defined %}
+  response-policy { zone "override"; };
+{% endif %}
 };
 
 logging {
@@ -66,15 +70,36 @@ zone "." IN {
 
 zone "{{ domain_name }}" IN {
   type master;
-  file "forward";
+  file "forward.zone";
   allow-update { none; };
 };
 
-zone "in-addr.arpa" IN {
-  type master;
-  file "reverse";
-  allow-update { none; };
+{% macro create_reverse_zone(network, octets) -%}
+zone "{{ octets }}.in-addr.arpa" IN {
+   type master;
+   file "{{ network }}.rr.zone";
+   allow-update { none; };
 };
+{%- endmacro %}
+
+{% for network, props in networks.items() %}
+  {% if props['is_in_dns'] %}
+    {% if props['prefix'] <= 8 %}
+{{ create_reverse_zone(network, props['subnet'].split('.')[0]) }}
+    {% elif props['prefix'] <= 16 %}
+{{ create_reverse_zone(network, props['subnet'].split('.')[0:2]|reverse|join('.')) }}
+    {% elif props['prefix'] <= 31 %}
+{{ create_reverse_zone(network, props['subnet'].split('.')[0:3]|reverse|join('.')) }}
+    {% endif %}
+  {% endif %}
+{% endfor %}
+
+{% if dns_overrides is defined %}
+zone "override" {
+  type master;
+  file "override.zone";
+};
+{% endif %}
 
 include "/etc/named.rfc1912.zones";
 include "/etc/named.root.key";

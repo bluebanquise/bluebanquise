@@ -49,7 +49,8 @@ Files generated:
 Changelog
 ^^^^^^^^^
 
-* 1.0.5: Force conman user gid/uid. Benoit Leveugle <benoit.leveugle@gmail.com>
+* 1.0.6: Force conman user gid/uid. Benoit Leveugle <benoit.leveugle@gmail.com>
+* 1.0.5: Prevent unsorted ranges. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.4: Run the conman service with user conman. Bruno Travouillon <devel@travouillon.fr>
 * 1.0.3: Clean. johnnykeats <johnny.keats@outlook.com>
 * 1.0.2: Tested on ubuntu 18.04 and validated. johnnykeats <johnny.keats@outlook.com>

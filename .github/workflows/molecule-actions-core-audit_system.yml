@@ -1,0 +1,39 @@
+---
+name: core/audit_system unit testing
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'roles/core/audit_system/**'
+      - '.github/workflows/molecule-actions-core-audit_system.yml'
+  pull_request:
+    paths:
+      - 'roles/core/audit_system/**'
+      - '.github/workflows/molecule-actions-core-audit_system.yml'
+
+jobs:
+  molecule_test:
+    name: ${{ matrix.distro }} - molecule test
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        distro:
+          - centos:8
+
+    env:
+      MOLECULE_DISTRO: ${{ matrix.distro }}
+      PY_COLORS: 1
+      ANSIBLE_FORCE_COLOR: 1
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Setup python environment
+        uses: actions/setup-python@v1
+      - name: Install packages
+        run: |
+          pip install tox
+      - name: Run molecule test for core/audit_system
+        run: |
+          cd roles/core/audit_system && tox

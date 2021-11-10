@@ -1,0 +1,29 @@
+---
+- name: copy █ Copy /etc/netplan/01-netcfg.yaml
+  copy:
+    src: netplan.yml
+    dest: /etc/netplan/01-netcfg.yaml
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - command █ Netplan generate
+    - command █ Netplan apply
+  tags:
+    - template
+
+- name: file █ Ensure old netplan configuration is erased
+  file:
+    path: /etc/netplan/00-installer-config.yaml
+    state: absent
+
+- name: lineinfile █ Prevent automatic connections
+  lineinfile:
+    path: /etc/NetworkManager/NetworkManager.conf
+    insertafter: '\[main\]'
+    firstmatch: true
+    line: no-auto-default=*
+    state: present
+
+- name: meta █ Run handlers
+  meta: flush_handlers

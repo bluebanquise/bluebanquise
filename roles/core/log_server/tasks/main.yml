@@ -21,31 +21,19 @@
   tags:
     - always
 
-- name: "firewalld █ Add services to firewall's {{ log_server_firewall_zone | default('public') }} zone"
-  firewalld:
-    zone: "{{ log_server_firewall_zone | default('public') }}"
-    service: "{{ item }}"
-    immediate: "yes"
-    permanent: "yes"
-    state: enabled
-  when:
-    - ansible_facts.os_family == "RedHat"
-    - ep_firewall | default(false) | bool
-  loop: "{{ log_server_firewall_services_to_add }}"
+- name: include_tasks ░ Use OS dedicated firewall task
+  include_tasks: "{{ item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}/firewall.yml"
+      skip: true
   tags:
-    - firewall
-
-- name: "firewalld █ Add custom port to firewall's {{ log_server_firewall_zone | default('public') }} zone"
-  firewalld:
-    zone: "{{ log_server_firewall_zone | default('public') }}"
-    port: "{{ log_server_port }}/tcp"
-    immediate: "yes"
-    permanent: "yes"
-    state: enabled
-  when:
-    - ansible_facts.os_family == "RedHat"
-    - ep_firewall | default(false) | bool
-  tags:
+    - internal
     - firewall
 
 - name: "package █ Install {{ log_server_packages_to_install }} packages"

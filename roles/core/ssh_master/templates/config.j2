@@ -38,7 +38,7 @@ Host {{ host }}
   {% set range = groups['all'] %}
 {% endif %}
 
-{% for host in range %}
+{% for host in (range | sort) %}
   {% if hostvars[host]['network_interfaces'] is defined and hostvars[host]['network_interfaces'] is iterable %}
 {{ write_host(host,(node_main_network(hostvars[host]['network_interfaces'],j2_current_iceberg_network)| trim), None) }}
   {% endif %}
