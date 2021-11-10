@@ -9,6 +9,7 @@ Roadmap only describes major objectives. Small objectives are developed as strea
 #### Core
 
 - Suse/OpenSuse integration
+- Upgrade to > 2.9 Ansible versions
 
 #### Community
 
