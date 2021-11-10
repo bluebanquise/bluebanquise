@@ -26,6 +26,8 @@
     - prevent unsorted ranges (causes unexepcted changed status) (#628)
   - clustershell: prevent dummy host to be included (#619)
   - conman: fix execpath for RHEL 8 (#584)
+    - fix execpath for RHEL 8 (#584)
+    - force conman user gid and uid (#605)
   - advanced_dhcp_server: fix issue with added spaces. Could prevent DHCP to start (#561)
   - diskless:
     - fix issues with dnf command in the livenet module (#528)
