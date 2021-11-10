@@ -49,9 +49,9 @@
   - set_hostname: add fqdn capability (#543)
   - ssh_master:
     - add custom config variable (#579)
-    - rename role
+    - rename role (#635)
   - ssh_slave:
-    - rename role
+    - rename role (#635)
   - time:
     - allow to set sysconfig OPTIONS for chronyd (#552)
     - allow to add additional networks for server to reply (#555)
