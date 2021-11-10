@@ -2,6 +2,6 @@
 - name: Converge
   hosts: all
   tasks:
-    - name: "Include ssh_slave"
+    - name: "Include ssh_remote_keys"
       include_role:
-        name: "ssh_slave"
+        name: "ssh_remote_keys"

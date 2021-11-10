@@ -1,16 +1,16 @@
 ---
-name: core/ssh_slave unit testing
+name: core/ssh_remote_keys unit testing
 on:
   push:
     branches:
       - master
     paths:
-      - 'roles/core/ssh_slave/**'
-      - '.github/workflows/molecule-actions-core-ssh_slave.yml'
+      - 'roles/core/ssh_remote_keys/**'
+      - '.github/workflows/molecule-actions-core-ssh_remote_keys.yml'
   pull_request:
     paths:
-      - 'roles/core/ssh_slave/**'
-      - '.github/workflows/molecule-actions-core-ssh_slave.yml'
+      - 'roles/core/ssh_remote_keys/**'
+      - '.github/workflows/molecule-actions-core-ssh_remote_keys.yml'
 
 jobs:
   molecule_test:
@@ -36,6 +36,6 @@ jobs:
       - name: Install packages
         run: |
           pip install tox
-      - name: Run molecule test for core/ssh_slave
+      - name: Run molecule test for core/ssh_remote_keys
         run: |
-          cd roles/core/ssh_slave && tox
+          cd roles/core/ssh_remote_keys && tox
