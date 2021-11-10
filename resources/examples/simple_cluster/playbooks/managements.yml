@@ -17,8 +17,8 @@
       tags: bluebanquise
     - role: hosts_file
       tags: hosts_file
-    - role: ssh_client
-      tags: ssh_client
+    - role: ssh_master
+      tags: ssh_master
     - role: dhcp_server
       tags: dhcp_server
     - role: dns_server
