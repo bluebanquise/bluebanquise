@@ -1,16 +1,16 @@
 ---
-name: core/ssh_master unit testing
+name: core/ssh_client unit testing
 on:
   push:
     branches:
       - master
     paths:
-      - 'roles/core/ssh_master/**'
-      - '.github/workflows/molecule-actions-core-ssh_master.yml'
+      - 'roles/core/ssh_client/**'
+      - '.github/workflows/molecule-actions-core-ssh_client.yml'
   pull_request:
     paths:
-      - 'roles/core/ssh_master/**'
-      - '.github/workflows/molecule-actions-core-ssh_master.yml'
+      - 'roles/core/ssh_client/**'
+      - '.github/workflows/molecule-actions-core-ssh_client.yml'
 
 jobs:
   molecule_test:
@@ -36,6 +36,6 @@ jobs:
       - name: Install packages
         run: |
           pip install tox
-      - name: Run molecule test for core/ssh_master
+      - name: Run molecule test for core/ssh_client
         run: |
-          cd roles/core/ssh_master && tox
+          cd roles/core/ssh_client && tox

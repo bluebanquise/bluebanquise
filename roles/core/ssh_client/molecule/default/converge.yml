@@ -2,6 +2,6 @@
 - name: Converge
   hosts: molecule_platform
   tasks:
-    - name: "Include ssh_master"
+    - name: "Include ssh_client"
       include_role:
-        name: "ssh_master"
+        name: "ssh_client"
