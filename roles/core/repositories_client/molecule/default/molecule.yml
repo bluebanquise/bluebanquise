@@ -94,7 +94,7 @@ provisioner:
         ep_operating_system:
           distribution: centos
           distribution_major_version: 8
-          distribution_version: 8.2
+          distribution_version: 8.4
       distrorepos-simple-centos7:
         ep_operating_system:
           distribution: centos

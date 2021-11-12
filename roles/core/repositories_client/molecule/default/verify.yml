@@ -89,14 +89,14 @@
   hosts: centos8:!distrorepos
   tasks:
     # AppStream
-    - name: Read /etc/yum.repos.d/CentOS-AppStream.repo
+    - name: Read /etc/yum.repos.d/CentOS-Linux-AppStream.repo
       slurp:
-        src: /etc/yum.repos.d/CentOS-AppStream.repo
+        src: /etc/yum.repos.d/CentOS-Linux-AppStream.repo
       register: appstream_repo
-    - name: Display /etc/yum.repos.d/CentOS-AppStream.repo
+    - name: Display /etc/yum.repos.d/CentOS-Linux-AppStream.repo
       debug:
         msg: "{{ appstream_repo['content'] | b64decode }}"
-    - name: Check presence of a single baseurl in CentOS-AppStream.repo
+    - name: Check presence of a single baseurl in CentOS-Linux-AppStream.repo
       assert:
         that: appstream_repo['content'] | b64decode |
                 regex_findall(("^baseurl "), multiline=True) | length == 1
@@ -106,14 +106,14 @@
                 regex_search(("^baseurl = http://10.10.0.1/repositories/.*/centos/8.*/\$basearch/os/AppStream$"), multiline=True)
 
     # BaseOS
-    - name: Read /etc/yum.repos.d/CentOS-Base.repo
+    - name: Read /etc/yum.repos.d/CentOS-Linux-Base.repo
       slurp:
-        src: /etc/yum.repos.d/CentOS-Base.repo
+        src: /etc/yum.repos.d/CentOS-Linux-Base.repo
       register: baseos_repo
-    - name: Display /etc/yum.repos.d/CentOS-Base.repo
+    - name: Display /etc/yum.repos.d/CentOS-Linux-Base.repo
       debug:
         msg: "{{ baseos_repo['content'] | b64decode }}"
-    - name: Check presence of a single baseurl in CentOS-Base.repo
+    - name: Check presence of a single baseurl in CentOS-Linux-Base.repo
       assert:
         that: baseos_repo['content'] | b64decode |
                 regex_findall(("^baseurl "), multiline=True) | length == 1
@@ -123,11 +123,11 @@
                 regex_search(("^baseurl = http://10.10.0.1/repositories/.*/centos/8.*/\$basearch/os/BaseOS$"), multiline=True)
 
     # Extras (default repositories_client_disable_distro_repos)
-    - name: Read /etc/yum.repos.d/CentOS-Extras.repo
+    - name: Read /etc/yum.repos.d/CentOS-Linux-Extras.repo
       slurp:
-        src: /etc/yum.repos.d/CentOS-Extras.repo
+        src: /etc/yum.repos.d/CentOS-Linux-Extras.repo
       register: extras_repo
-    - name: Display /etc/yum.repos.d/CentOS-Extras.repo
+    - name: Display /etc/yum.repos.d/CentOS-Linux-Extras.repo
       debug:
         msg: "{{ extras_repo['content'] | b64decode }}"
     - name: Check Extras is disabled
@@ -198,11 +198,11 @@
   hosts: centos8:&distrorepos
   tasks:
     # Extras
-    - name: Read /etc/yum.repos.d/CentOS-Extras.repo
+    - name: Read /etc/yum.repos.d/CentOS-Linux-Extras.repo
       slurp:
-        src: /etc/yum.repos.d/CentOS-Extras.repo
+        src: /etc/yum.repos.d/CentOS-Linux-Extras.repo
       register: extras_repo
-    - name: Display /etc/yum.repos.d/CentOS-Extras.repo
+    - name: Display /etc/yum.repos.d/CentOS-Linux-Extras.repo
       debug:
         msg: "{{ extras_repo['content'] | b64decode }}"
     - name: Check Extras is disabled
