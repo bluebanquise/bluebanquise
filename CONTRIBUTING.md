@@ -4,7 +4,10 @@
 
 Please do not hesitate to contact us using [issues](https://github.com/bluebanquise/bluebanquise/issues) or [discussions](https://github.com/bluebanquise/bluebanquise/discussions), we will be glad to help you! :raising_hand:
 
-The stack is still young, and some aspects are not clearly defined yet. But here are some basic guidelines:
+Please keep in mind we are doing this as a **best effort**, on our free time :family:.
+We will do our best to at least acknowledge we got your query.
+
+You will find here some basic guidelines to contribute.
 
 ## Conventions
 
@@ -14,42 +17,33 @@ and commits adheres to [Conventional Commits](https://www.conventionalcommits.or
 
 Whenever possible, we try to comply with these conventions.
 
-## Reporting bugs :beetle:
+## Reporting bugs
 
-If you encounter any bug (and you will probably do), please provide the following details:
-* How did you end up to this bug? What were you expecting as a normal result?
-* Full trace of the shell
-* Your operating system distribution and version
-* Your Ansible version
-
-If the bug is related to PXE or OS deployment:
-* Is system is in EFI or legacy/bios?
-* What is the native ROM of the system, PXE or iPXE? Did you boot in PXE, or from USB/CDrom?
-* What is the hardware used?
-* A small photo/screenshot of the screen when it fails maybe?
+If you encounter any bug, please open an issue.
+An issue template is generated when creating a bug issue. Try to comply with it to fasten our answer.
 
 We may ask you more questions then, or even to provide part of your inventories.
 Feel free to refuse, we will **never** take offence.
 
 Do not provide security related data (ssh key, passwords, etc) in your reports.
 
-## Asking for new features / enhancements :bulb:
+## Asking for new features / enhancements
 
-We would be happy to provide more possibilities to the stack.
+If you need new features, please open an issue using the feature request template.
+Try to comply with it to fasten our answer.
 
-However, please keep in mind we are doing this as a **best effort**, on our free time :family:.
-We will do our best to at least acknowledge we got your query.
-
-Also, if we consider this may damage the stack (modifications in the engine or the core roles),
-or break the KISS (Keep it simple) effort we are doing on the stack, we may refuse the feature, 
-or propose to create it in the [community repository](https://github.com/bluebanquise/community) instead.
-
-## Pull Requests :arrow_heading_down:
+## Pull Requests
 
 All contributions must pass through a Pull Request, to ensure easy reviewing of modifications.
 
 We will then do our best to answer you and test your contribution as soon as possible, before merging it.
 We may iterate with you to converge before merging to master branch.
+
+### Datamodel
+
+A datamodel is available at https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md
+
+Your PR must comply with it.
 
 ### Backports
 
@@ -81,7 +75,11 @@ Submit the PR for `backport/1.2/<pr_number_from_master>` against the
 By default, each role has a version number, set in vars/main.yml and at the bottom of the readme.rst or README.md.
 If your PR brings changes to the tasks, files, templates or vars folders, please increment the version.
 
-## Development guidelines :octopus:
+### Changelog
+
+In order to get your PR accepted, please update the main CHANGELOG.md. This is mandatory to merge the PR.
+
+## Development guidelines
 
 ### The stack philosophy
 
@@ -130,32 +128,18 @@ This is scripts job.
 However, when possible, manual way should always be documented side by side with the automated way,
 to allow easy debug and simply understand scripts, as the stack also has a teaching objective.
 
-4. If a WebUI is available (and it is planed), standard inventory editing,
-standard deployment using ansible-playbook, and standard usage will remain the default way.
-
 ### Variables
 
-1. Variables should be centralized in the inventory as much as possible,
-to ensure a single location for users to configure all, and non-replication of variables.
-This is not the Ansible standard, but a need for a unified stack.
+1. Internal roles variables, means under the hood variables that user should not consider modifying,
+must be defined in the role vars.
+External roles variables, means variables that user are expected to precedence,
+must be defined in the role defaults.
 
-2. Internal roles variables, means under the hood variables that user should not consider modifying,
-can be defined in the role vars or defaults. Example: packages names, services names, paths, etc.
+2. All variables related to an equipment_profile should go in group_vars/all/equipment_all/ (global) or in group_vars/equipment_X/ with X the equipment profile name (dedicated). These variables must be prefixed by **ep_**.
 
-3. General variables, i.e. not related to an equipment_profile, can be defined in group_vars/all/general_settings/,
-in dedicated files or if needed in a new one. When possible, variables should be optional.
-In any cases, they must be documented in the role readme (and if needed provided commented in the example inventories).
-
-4. All variables related to an equipment_profile should go in group_vars/all/equipment_all/ (global) or in group_vars/equipment_X/ with X the equipment profile name (dedicated). These variables must be prefixed by **ep_**.
-
-5. All variables containing jinja2 code must be prefix with *j2_* and stored in internal/group_vars/all/j2_variables/.
+3. All variables containing jinja2 code must be prefix with **j2_** and stored in internal/group_vars/all/j2_variables/.
 j2_ variables are core of the stack, and should be manipulated with care.
 These are intended to be precedence by user only. If needed, theses variables can be fixed.
-
-6. Also, consider that some variables are specific in BlueBanquise,
-and do not fully follow the standard rules of Ansible.
-As stated in 4, these variables **must** be set in group_vars/equipment_X/ folders or in group_vars/all/equipment_all/.
-Any other usage (for example at host_vars level or extra_vars level) will result in a unpredictable situation, as the stack use a random host of these groups to gather equipment_profile data.
 
 ### Miscellaneous
 
@@ -169,16 +153,7 @@ Networks start at 1, icebergs at 1, etc.
 4. If you are working on Microsoft Windows, please check you do not submit CRLF (seen sometime as ^M at the end of your lines).
 See [Customizing-Git-Git-Configuration](https://www.git-scm.com/book/en/v2/Customizing-Git-Git-Configuration#_code_core_autocrlf_code].
 
-## Ownership
-
-By default, each contributing physical person will be added to a “Contributors” list in the main stack README file.
-This is important for us. Remember to add yourself with first PR.
-
-If you do not wish so, you are free.
-
 ## License
 
 The stack is under MIT. This choice is based on a wish to allow everyone to use it.
 Please consider using the same license if you wish to Pull Request some code into the main project.
-
-If you do not wish so, but you still wish to contribute, please contact us.
