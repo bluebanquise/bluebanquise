@@ -1,16 +1,16 @@
 ---
-name: core/ssh_master unit testing
+name: core/audit_system unit testing
 on:
   push:
     branches:
       - master
     paths:
-      - 'roles/core/ssh_master/**'
-      - '.github/workflows/molecule-actions-core-ssh_master.yml'
+      - 'roles/core/audit_system/**'
+      - '.github/workflows/molecule-actions-core-audit_system.yml'
   pull_request:
     paths:
-      - 'roles/core/ssh_master/**'
-      - '.github/workflows/molecule-actions-core-ssh_master.yml'
+      - 'roles/core/audit_system/**'
+      - '.github/workflows/molecule-actions-core-audit_system.yml'
 
 jobs:
   molecule_test:
@@ -20,9 +20,7 @@ jobs:
       fail-fast: false
       matrix:
         distro:
-          - centos:7
           - centos:8
-          - opensuseleap:15.1
 
     env:
       MOLECULE_DISTRO: ${{ matrix.distro }}
@@ -36,6 +34,6 @@ jobs:
       - name: Install packages
         run: |
           pip install tox
-      - name: Run molecule test for core/ssh_master
+      - name: Run molecule test for core/audit_system
         run: |
-          cd roles/core/ssh_master && tox
+          cd roles/core/audit_system && tox

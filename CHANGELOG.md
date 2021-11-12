@@ -50,7 +50,11 @@
     - force substitution of files by symlinks in case of an update (#587)
   - repositories_client: fix CentOS 8.4 repository compatibility (#534)
   - set_hostname: add fqdn capability (#543)
-  - ssh_master: add custom config variable (#579)
+  - ssh_master:
+    - add custom config variable (#579)
+    - rename role (#635)
+  - ssh_slave:
+    - rename role (#635)
   - time:
     - allow to set sysconfig OPTIONS for chronyd (#552)
     - allow to add additional networks for server to reply (#555)

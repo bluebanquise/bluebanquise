@@ -104,7 +104,7 @@
   Loop over hosts to write, and write all interfaces in this network.
   First part is dedicated to calculate ipxe rom filename.
 ###############################################################################}
-{% for host in range %}
+{% for host in (range | sort) %}
   {% set current_hostvars = hostvars[host] %}{# buffer #}
   {% if current_hostvars['network_interfaces'] is defined and current_hostvars['network_interfaces'] is iterable %}
     {#- Define iPXE rom to use #}
