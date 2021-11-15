@@ -20,7 +20,12 @@ this role if they do not exist.
 
 It is also possible to manipulate mount state using *nfs_client_directories_state*
 variable. Default is **mounted**. Refer to `mount module documentation <https://docs.ansible.com/ansible/latest/collections/ansible/posix/mount_module.html#parameter-state>`_
-to get other possibles values.
+to get other possible values.
+
+By default, on SELinux capable and activated systems, the role will 
+enable 2 sebooleans, one for /home support and one for httpd support.
+To change this behavior, simply update `nfs_client_sebooleans` variable 
+which is a list of sebooleans to activate.
 
 Input
 ^^^^^
@@ -55,6 +60,7 @@ Packages installed:
 Changelog
 ^^^^^^^^^
 
+* 1.1.0: Change the way sebooleans values are set to allow MI mechanism. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.4: Added new variable to allow all possible mount values in state parameter. Osmocl <osmocl@osmo.cl>
 * 1.0.3: Clean. johnnykeats <johnny.keats@outlook.com>
 * 1.0.2: Added Ubuntu 18.04 compatibility. johnnykeats <johnny.keats@outlook.com>
