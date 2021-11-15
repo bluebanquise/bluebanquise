@@ -1,5 +1,4 @@
 ---
-
 ep_partitioning: |
   <partitioning config:type="list">
     <drive>
@@ -12,6 +11,6 @@ ep_partitioning: |
 ep_operating_system:
   distribution: opensuse_leap
   distribution_major_version: 15
-  distribution_version: 15.1
+  distribution_version: 15.3
 
 ep_equipment_type: server
