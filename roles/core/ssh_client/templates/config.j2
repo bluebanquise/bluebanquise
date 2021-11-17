@@ -1,4 +1,6 @@
 #jinja2: lstrip_blocks: "True"
+#### Blue Banquise file ####
+## {{ ansible_managed }}
 
 {% if ssh_client_custom_config is defined and ssh_client_custom_config is not none %}
 {{ ssh_client_custom_config }}
@@ -11,11 +13,14 @@
 {# Macro to avoid redundancy #}
 {% macro write_host(host, host_vars, ssh_jump) %}
 Host {{ host }}
-    {% if host_vars['ssh_client_stricthostkeychecking'] is defined and not host_vars['ssh_client_stricthostkeychecking'] %}
-    StrictHostKeyChecking no
+    {% if host_vars['ssh_client_stricthostkeychecking'] is defined %}
+    StrictHostKeyChecking {{ host_vars['ssh_client_stricthostkeychecking'] }}
     {% endif %}
-    {% if host_vars['ssh_client_userknownhostsfile'] is defined and not host_vars['ssh_client_userknownhostsfile'] %}
-    UserKnownHostsFile=/dev/null
+    {% if host_vars['ssh_client_userknownhostsfile'] is defined %}
+    UserKnownHostsFile {{ ssh_client_userknownhostsfile }}
+    {% endif %}
+    {% if host_vars['ssh_client_loglevel'] is defined %}
+    LogLevel {{ host_vars['ssh_client_loglevel'] }}
     {% endif %}
     {% if ssh_jump is none %}
     Hostname %h-{{ node_main_network(host_vars['network_interfaces'], j2_current_iceberg_network) | trim }}
@@ -23,12 +28,7 @@ Host {{ host }}
     Hostname %h
     ProxyJump {{ ssh_jump }}
     {% endif %}
-    {% if host_vars['ssh_client_loglevel'] is defined %}
-    LogLevel {{ host_vars['ssh_client_loglevel'] }}
-    {% endif %}
 {% endmacro %}
-#### Blue Banquise file ####
-## {{ ansible_managed }}
 
 {% if icebergs_system == true %}
 # Icebergs system is on
@@ -42,6 +42,20 @@ Host {{ host }}
   {% set range = groups['all'] %}
 {% endif %}
 
+# Global parameters
+{% if ssh_client_global_stricthostkeychecking is not none or ssh_client_global_userknownhostsfile is not none or ssh_client_global_loglevel is not none %}
+Host *
+  {% if ssh_client_global_stricthostkeychecking is not none %}
+    StrictHostKeyChecking {{ ssh_client_global_stricthostkeychecking }}
+  {% endif %}
+  {% if ssh_client_global_userknownhostsfile is not none %}
+    UserKnownHostsFile {{ ssh_client_global_userknownhostsfile }}
+  {% endif %}
+  {% if ssh_client_global_loglevel is not none %}
+    LogLevel {{ ssh_client_global_loglevel }}
+  {% endif %}
+{% endif %}
+
 {% for host in (range | sort) %}
   {% set host_vars = hostvars[host] %}
   {% if host_vars['network_interfaces'] is defined and host_vars['network_interfaces'] is iterable %}
@@ -49,7 +63,7 @@ Host {{ host }}
   {% endif %}
 {% endfor %}
 
-{#
+
 {% if icebergs_system == true and ssh_client_enable_jump == true %}
 # Icebergs ssh_jump system is on
 
@@ -78,7 +92,7 @@ before using the first management node found in the group list.
 ## Iceberg {{ iceberg }}
         {% for host in groups[iceberg] %}
           {% if host != ssh_jump_target.value %}
-{{ write_host(host, None, ssh_jump_target.value, None) }}
+{{ write_host(host, None, ssh_jump_target.value) }}
           {% endif %}
         {% endfor %}
       {% endif %}
@@ -87,4 +101,4 @@ before using the first management node found in the group list.
   {% endfor %}
 
 {% endif %}
-#}
+

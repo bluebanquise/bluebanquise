@@ -23,12 +23,11 @@ current iceberg if using icebergs mode), with the following parameters:
   Host freya
       Hostname %h-ice1-1
 
-And possibly add :
+And possibly add more parameters if asked for:
 
-.. code-block:: text
-
-    StrictHostKeyChecking no
-    UserKnownHostsFile=/dev/null
+* StrictHostKeyChecking
+* UserKnownHostsFile
+* LogLevel
 
 If asked for.
 
@@ -59,7 +58,7 @@ You can see here ssh is not trying to reach **freya** but is using
 is in /etc/hosts or DNS, ssh and so Ansible will always use the management
 network of the target host.
 
-Also, keep in mind that when redeploying a host its SSH key changes, which
+Also, keep in mind that when redeploying an host, its SSH key changes, which
 requires to remove the former host key from the known_hosts file, then add the
 new key. It is possible to achieve this with the commands below:
 
@@ -69,6 +68,9 @@ new key. It is possible to achieve this with the commands below:
       sed -i -e "/^${host}/d" /root/.ssh/known_hosts; \
   done
   # clush -o '-o StrictHostKeyChecking=no' -w $NODES dmidecode -s system-uuid
+
+Advanced usage
+""""""""""""""
 
 It is possible to disable the strict host key checking in the inventory with the
 configuration below:
@@ -87,14 +89,14 @@ file will include the following parameters:
 
   Host freya
       StrictHostKeyChecking no
-      UserKnownHostsFile=/dev/null
+      UserKnownHostsFile /dev/null
       Hostname %h-ice1-1
 
 This ensure no issues when redeploying an host, at the cost of security.
 
 Note that this file generation is kind of "sensible", and will surely be the
 first one to break in case of uncoherent inventory. If this happens, check your
-inventory, fix it, and remove manually /root/.ssh/config and relaunch its
+inventory, fix it, remove manually /root/.ssh/config and relaunch its
 generation.
 
 Multiple iceberg usage
