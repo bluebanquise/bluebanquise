@@ -10,6 +10,11 @@ access through nodes main network.
 Instructions
 ^^^^^^^^^^^^
 
+Note that this file generation is kind of "sensible", and will surely be the
+first one to break in case of uncoherent inventory. If this happens, check your
+inventory, fix it, remove manually /root/.ssh/config and relaunch its
+generation.
+
 Basic usage
 """""""""""
 
@@ -29,7 +34,7 @@ And possibly add more parameters if asked for:
 * UserKnownHostsFile
 * LogLevel
 
-If asked for.
+See advanced usage for these parameters.
 
 Note that for this example host, **freya**, the target hostname for ssh is
 %h-ice1-1, which translates to **freya-ice1-1**. This can be seen when invoking
@@ -72,32 +77,35 @@ new key. It is possible to achieve this with the commands below:
 Advanced usage
 """"""""""""""
 
-It is possible to disable the strict host key checking in the inventory with the
-configuration below:
+It is possible to set specific parameters at global and/or nodes level:
+
+* StrictHostKeyChecking
+* UserKnownHostsFile
+* LogLevel
+
+To achieve that, the following variables are available:
+
+* ssh_client_global_loglevel
+* ssh_client_global_stricthostkeychecking
+* ssh_client_global_userknownhostsfile
+
+Which are evaluated at global level, and:
+
+* ssh_client_loglevel
+* ssh_client_stricthostkeychecking
+* ssh_client_userknownhostsfile
+
+Which are evaluated for each host.
+
+For example, to disable host key checking for a specific host, set:
 
 .. code-block:: yaml
 
-   ---
-   security:
-     ssh:
-       hostkey_checking: false
+  ssh_client_loglevel: QUIET
+  ssh_client_stricthostkeychecking: no
+  ssh_client_userknownhostsfile: /dev/null
 
-This was the default behaviour prior BlueBanquise 1.3. The ssh configuration
-file will include the following parameters:
-
-.. code-block:: text
-
-  Host freya
-      StrictHostKeyChecking no
-      UserKnownHostsFile /dev/null
-      Hostname %h-ice1-1
-
-This ensure no issues when redeploying an host, at the cost of security.
-
-Note that this file generation is kind of "sensible", and will surely be the
-first one to break in case of uncoherent inventory. If this happens, check your
-inventory, fix it, remove manually /root/.ssh/config and relaunch its
-generation.
+At host hostvars level.
 
 Multiple iceberg usage
 """"""""""""""""""""""
@@ -140,12 +148,17 @@ Mandatory inventory vars:
 
 * network_interfaces[item]
 * icebergs_system
+* ssh_client_loglevel
+* ssh_client_stricthostkeychecking
+* ssh_client_userknownhostsfile
 
 Optional inventory vars:
 
 **hostvars[inventory_hostname]**
 
-* security.ssh.hostkey_checking
+* ssh_client_global_loglevel
+* ssh_client_global_stricthostkeychecking
+* ssh_client_global_userknownhostsfile
 * ssh_master_enable_jump
 * ssh_master_iceberg_jump_target
 * ssh_master_custom_config
