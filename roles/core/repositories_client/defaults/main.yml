@@ -1,2 +1,3 @@
 ---
 repositories_client_disable_distro_repos: true
+repositories_client_apt_update_cache: true

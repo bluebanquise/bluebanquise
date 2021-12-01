@@ -1,0 +1,32 @@
+#!ipxe
+
+echo |
+echo | Entering equipment_profiles/{{ item | replace('equipment_','') | trim }}.ipxe file.
+echo |
+echo | Getting equipment_profile group variables...
+echo |
+
+# Ansible variables
+set eq-equipment-profile {{ item | replace('equipment_','') | trim }}
+set eq-architecture ${arch}
+set eq-distribution {{ hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower }}
+set eq-distribution-major-version {{ hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] }}
+set eq-distribution-version {{ hostvars[groups[item][0]]['ep_operating_system']['distribution_version'] | default('${eq-distribution-major-version}') }}
+set eq-console {{ hostvars[groups[item][0]]['ep_console'] }}
+set eq-kernel-parameters {{ hostvars[groups[item][0]]['ep_kernel_parameters'] }}
+set eq-repositories-environment {{ hostvars[groups[item][0]]['ep_operating_system']['repositories_environment'] | default('') }}
+
+# Dynamic variables
+set images-root http://${next-server}/repositories/${eq-repositories-environment}/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/
+set repository-root http://${next-server}/repositories/${eq-repositories-environment}/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/
+set cloud-init-path http://${next-server}/preboot_execution_environment/equipment_profiles/${eq-equipment-profile}.cloud-init/ 
+
+echo | images-root: ${images-root}
+echo | repository-root: ${repository-root}
+echo | cloud-init-path: ${cloud-init-path}
+echo |
+
+# Now chain to menu
+echo | Now chaining to --> menu.ipxe
+sleep 2
+chain http://${next-server}/preboot_execution_environment/menu.ipxe || shell

@@ -1,0 +1,83 @@
+#jinja2: lstrip_blocks: "True"
+
+{% if ssh_master_custom_config is defined and ssh_master_custom_config is not none %}
+{{ ssh_master_custom_config }}
+{% endif %}
+
+{% macro node_main_network(macro_network_interfaces,macro_current_iceberg_network) %}
+{{ macro_network_interfaces | selectattr('network','defined') | selectattr('network','match','^'+macro_current_iceberg_network+'-[a-zA-Z0-9]+') | map(attribute='network') | list | first }}
+{% endmacro %}
+
+{# Macro to avoid redundancy #}
+{% macro write_host(host,macro_node_main_network,ssh_jump) %}
+Host {{ host }}
+    {% if security.ssh.hostkey_checking is not defined or
+          security.ssh.hostkey_checking == false %}
+    StrictHostKeyChecking no
+    UserKnownHostsFile=/dev/null
+    {% endif %}
+    {% if ssh_jump is none %}
+    Hostname %h-{{ macro_node_main_network }}
+    {% else %}
+    Hostname %h
+    ProxyJump {{ ssh_jump }}
+    {% endif %}
+{% endmacro %}
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+
+{% if icebergs_system == true %}
+# Icebergs system is on
+{% set range = groups[j2_current_iceberg] %}
+  {% for host in groups[managements_group_name] %}
+    {% if hostvars[host]['iceberg_master'] == j2_current_iceberg %}
+{{ range.append(host) }}
+    {% endif %}
+  {% endfor %}
+{% else %}
+  {% set range = groups['all'] %}
+{% endif %}
+
+{% for host in (range | sort) %}
+  {% if hostvars[host]['network_interfaces'] is defined and hostvars[host]['network_interfaces'] is iterable %}
+{{ write_host(host,(node_main_network(hostvars[host]['network_interfaces'],j2_current_iceberg_network)| trim), None) }}
+  {% endif %}
+{% endfor %}
+
+{% if icebergs_system == true and ssh_master_enable_jump == true %}
+# Icebergs ssh_jump system is on
+
+{#
+This mechanism allows SSH ProxyJump from a top iceberg to a sub_iceberg
+using one sub_iceberg management node to reach all other nodes in this sub_iceberg.
+Template will try to check if a manually set target has been set for the iceberg
+before using the first management node found in the group list.
+#}
+
+  {% for iceberg in (groups | select('match','^'+iceberg_naming+'.*') | list | unique | sort ) %}
+    {% if hostvars[groups[iceberg][0]]['iceberg_master'] == j2_current_iceberg %}
+      {% set ssh_jump_target = namespace(value=none) %}
+      {% if hostvars[groups[iceberg][0]]['ssh_master_iceberg_jump_target'] is defined %}
+        {% set ssh_jump_target.value = hostvars[groups[iceberg][0]]['ssh_master_iceberg_jump_target'] %}
+      {% else %}
+        {% for host in groups[managements_group_name] %}
+          {% if host in groups[iceberg] %}
+            {% set ssh_jump_target.value = host %}
+            {% break %}
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+      {% if ssh_jump_target.value is not none %}
+
+## Iceberg {{ iceberg }}
+        {% for host in groups[iceberg] %}
+          {% if host != ssh_jump_target.value %}
+{{ write_host(host, None, ssh_jump_target.value) }}
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+
+    {% endif %}
+  {% endfor %}
+
+{% endif %}

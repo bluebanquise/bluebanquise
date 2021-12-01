@@ -1,5 +1,7 @@
 - name: shell ░ Get current kernel parameters
   shell: "set -o pipefail && grubby --info=DEFAULT | grep args"
+  args:
+    executable: /bin/bash
   register: current_kernel_parameters
   changed_when: False
 

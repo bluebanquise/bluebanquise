@@ -1,0 +1,8 @@
+---
+ep_console: console=tty0 console=ttyS0,9600n8
+
+ep_equipment_authentication:
+  user: root
+  password: calvin
+
+ep_equipment_type: server

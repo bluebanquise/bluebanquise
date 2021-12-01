@@ -26,3 +26,15 @@ if node_boot == 'disk':
     file.writelines(filebuffer)
     file.close
     print('Boot set to disk')
+elif node_boot == 'next':
+    file = open('/var/www/html/preboot_execution_environment/nodes/'+str(node_name)+'.ipxe','r')
+    filebuffer = file.readlines()
+    for i in range(len(filebuffer)):
+        if 'menu-default' in filebuffer[i]:
+            filebuffer[i] = 'set menu-default bootnext\n'
+    file.close
+    file = open('/var/www/html/preboot_execution_environment/nodes/'+str(node_name)+'.ipxe','w')
+    file.writelines(filebuffer)
+    file.close
+    print('Boot set to next')
+

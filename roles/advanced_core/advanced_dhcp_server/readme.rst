@@ -175,6 +175,7 @@ host {{ macro_host }} {
 Changelog
 ^^^^^^^^^
 
+* 1.0.6: Prevent unsorted ranges. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.5: Improve performances. Add dhcp_options and patterns features. Allow multiple entries per host. Benoit Leveugle <benoit.leveugle@atos.net>
 * 1.0.4: Update to new network_interfaces syntax. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.3: Added support of multiple DNS servers. Bruno Travouillon <devel@travouillon.fr>

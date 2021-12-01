@@ -130,6 +130,9 @@ sources.list file.
 Changelog
 ^^^^^^^^^
 
+* 1.1.2: Incorporated fix for issue 534. Neil Munday <neil@mundayweb.com>
+* 1.1.1: Adapt role to handle multiple distributions. Benoit Leveugle <benoit.leveugle@gmail.com>
+* 1.1.0: Add Ubuntu support. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.8: Add state parameter. Bruno Travouillon <devel@travouillon.fr>
 * 1.0.7: Simplified version of the role. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.6: Deprecate external_repositories. Bruno Travouillon <devel@travouillon.fr>

@@ -17,6 +17,8 @@ log_server_port variable.
 Changelog
 ^^^^^^^^^
 
+* 1.1.1: Adapt role to handle multiple distributions. Benoit Leveugle <benoit.leveugle@gmail.com>
+* 1.1.0: Add Ubuntu support. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.4: Add custom configuration path. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.3: Enable log server port customization with log_server_port. strus38
 * 1.0.1: Fixed bad template. Documentation. johnnykeats <johnny.keats@outlook.com>
