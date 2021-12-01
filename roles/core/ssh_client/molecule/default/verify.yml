@@ -47,7 +47,7 @@
       # 3 platforms + 1 fake mgmt + 4 fake hosts
       assert:
         that: ssh_conf['content'] | b64decode |
-                regex_findall(("^Host "), multiline=True) | length == 8
+                regex_findall(("^Host "), multiline=True) | length == 9
     - name: Check StrictHostKeyChecking is defined for global
       assert:
         that: ssh_conf['content'] | b64decode |
