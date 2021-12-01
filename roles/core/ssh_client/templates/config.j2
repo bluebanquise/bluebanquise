@@ -13,13 +13,13 @@
 {# Macro to avoid redundancy #}
 {% macro write_host(host, host_vars, ssh_jump) %}
 Host {{ host }}
-    {% if host_vars['ssh_client_stricthostkeychecking'] is defined %}
+    {% if host_vars['ssh_client_stricthostkeychecking'] is defined and host_vars['ssh_client_stricthostkeychecking'] is not none %}
     StrictHostKeyChecking {{ host_vars['ssh_client_stricthostkeychecking'] }}
     {% endif %}
-    {% if host_vars['ssh_client_userknownhostsfile'] is defined %}
+    {% if host_vars['ssh_client_userknownhostsfile'] is defined and host_vars['ssh_client_userknownhostsfile'] is not none %}
     UserKnownHostsFile {{ ssh_client_userknownhostsfile }}
     {% endif %}
-    {% if host_vars['ssh_client_loglevel'] is defined %}
+    {% if host_vars['ssh_client_loglevel'] is defined and host_vars['ssh_client_loglevel'] is not none %}
     LogLevel {{ host_vars['ssh_client_loglevel'] }}
     {% endif %}
     {% if ssh_jump is none %}
