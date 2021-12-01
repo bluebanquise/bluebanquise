@@ -151,11 +151,13 @@ Mandatory inventory vars:
 
 * network_interfaces[item]
 * icebergs_system
+
+Optional inventory vars:
+
+**hostvars[hosts]**
 * ssh_client_loglevel
 * ssh_client_stricthostkeychecking
 * ssh_client_userknownhostsfile
-
-Optional inventory vars:
 
 **hostvars[inventory_hostname]**
 
