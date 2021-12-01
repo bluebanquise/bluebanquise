@@ -114,6 +114,9 @@ The ssh_master role allows to enable ssh ProxyJump to ssh from a top iceberg to
 hosts of a sub_iceberg, through one master of the sub_iceberg.
 This allows simple central point to ansible-playbook.
 
+Important note: this feature does not work on RHEL < 8 versions, has namespace 
+mechanism has been introduced with RHEL 8 Jinja2 version.
+
 To activate this feature, enable it first by adding in your inventory the
 variable:
 
