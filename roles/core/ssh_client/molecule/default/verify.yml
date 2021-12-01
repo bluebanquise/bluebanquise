@@ -23,7 +23,7 @@
     - name: Check StrictHostKeyChecking = no
       assert:
         that: ssh_conf['content'] | b64decode |
-                regex_findall(("^ +StrictHostKeyChecking no$"), multiline=True) | length == 8
+                regex_findall(("^ +StrictHostKeyChecking yes$"), multiline=True) | length == 1
 
 - name: Verify icebergs_system = true
   hosts:
