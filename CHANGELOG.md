@@ -14,6 +14,8 @@
 
 #### Roles improvement or fix
 
+  - disklessset
+    - Update to version 1.3.0 (#617)
   - pxe_stack: force substitution of files by symlinks in case of an update (#587)
   - core/log_server
     - remote logs stored in a similar fashion as the server (#568)
