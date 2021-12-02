@@ -244,7 +244,7 @@ Entering the livenet module will prompt the following menu:
 
 In this menu you can do 3 actions:
 
-* Generate a new nfs staging image : A staging image is the base image. You must not boot onto a stagging image but firstly create a golden image from it and boot on the golden image specific filesystem (Created with option 3).
+* Generate a new NFS staging image : A staging image is the base image. You must not boot onto a staging image but firstly create a golden image from it and boot on the golden image specific filesystem (Created with option 3).
 * Generate a new nfs golden image from a staging image : Create a golden image from previously created staging image.
 * Manage nodes of a golden image: Create a specific file system for each node for a specific golden image. After adding a node to a golden image via this option, you can boot the node onto the golden image.
 
