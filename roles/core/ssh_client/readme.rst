@@ -10,6 +10,11 @@ access through nodes main network.
 Instructions
 ^^^^^^^^^^^^
 
+Note that this file generation is kind of "sensible", and will surely be the
+first one to break in case of uncoherent inventory. If this happens, check your
+inventory, fix it, remove manually /root/.ssh/config and relaunch its
+generation.
+
 Basic usage
 """""""""""
 
@@ -23,14 +28,13 @@ current iceberg if using icebergs mode), with the following parameters:
   Host freya
       Hostname %h-ice1-1
 
-And possibly add :
+And possibly add more parameters if asked for:
 
-.. code-block:: text
+* StrictHostKeyChecking
+* UserKnownHostsFile
+* LogLevel
 
-    StrictHostKeyChecking no
-    UserKnownHostsFile=/dev/null
-
-If asked for.
+See advanced usage for these parameters.
 
 Note that for this example host, **freya**, the target hostname for ssh is
 %h-ice1-1, which translates to **freya-ice1-1**. This can be seen when invoking
@@ -59,7 +63,7 @@ You can see here ssh is not trying to reach **freya** but is using
 is in /etc/hosts or DNS, ssh and so Ansible will always use the management
 network of the target host.
 
-Also, keep in mind that when redeploying a host its SSH key changes, which
+Also, keep in mind that when redeploying an host, its SSH key changes, which
 requires to remove the former host key from the known_hosts file, then add the
 new key. It is possible to achieve this with the commands below:
 
@@ -70,32 +74,38 @@ new key. It is possible to achieve this with the commands below:
   done
   # clush -o '-o StrictHostKeyChecking=no' -w $NODES dmidecode -s system-uuid
 
-It is possible to disable the strict host key checking in the inventory with the
-configuration below:
+Advanced usage
+""""""""""""""
+
+It is possible to set specific parameters at global and/or nodes level:
+
+* StrictHostKeyChecking
+* UserKnownHostsFile
+* LogLevel
+
+To achieve that, the following variables are available:
+
+* ssh_client_global_loglevel
+* ssh_client_global_stricthostkeychecking
+* ssh_client_global_userknownhostsfile
+
+Which are evaluated at global level, and:
+
+* ssh_client_loglevel
+* ssh_client_stricthostkeychecking
+* ssh_client_userknownhostsfile
+
+Which are evaluated for each host.
+
+For example, to disable host key checking for a specific host, set:
 
 .. code-block:: yaml
 
-   ---
-   security:
-     ssh:
-       hostkey_checking: false
+  ssh_client_loglevel: QUIET
+  ssh_client_stricthostkeychecking: no
+  ssh_client_userknownhostsfile: /dev/null
 
-This was the default behaviour prior BlueBanquise 1.3. The ssh configuration
-file will include the following parameters:
-
-.. code-block:: text
-
-  Host freya
-      StrictHostKeyChecking no
-      UserKnownHostsFile=/dev/null
-      Hostname %h-ice1-1
-
-This ensure no issues when redeploying an host, at the cost of security.
-
-Note that this file generation is kind of "sensible", and will surely be the
-first one to break in case of uncoherent inventory. If this happens, check your
-inventory, fix it, and remove manually /root/.ssh/config and relaunch its
-generation.
+At host hostvars level.
 
 Multiple iceberg usage
 """"""""""""""""""""""
@@ -103,6 +113,9 @@ Multiple iceberg usage
 The ssh_master role allows to enable ssh ProxyJump to ssh from a top iceberg to
 hosts of a sub_iceberg, through one master of the sub_iceberg.
 This allows simple central point to ansible-playbook.
+
+Important note: this feature does not work on RHEL < 8 versions, has namespace 
+mechanism has been introduced with RHEL 8 Jinja2 version.
 
 To activate this feature, enable it first by adding in your inventory the
 variable:
@@ -141,9 +154,16 @@ Mandatory inventory vars:
 
 Optional inventory vars:
 
+**hostvars[hosts]**
+* ssh_client_loglevel
+* ssh_client_stricthostkeychecking
+* ssh_client_userknownhostsfile
+
 **hostvars[inventory_hostname]**
 
-* security.ssh.hostkey_checking
+* ssh_client_global_loglevel
+* ssh_client_global_stricthostkeychecking
+* ssh_client_global_userknownhostsfile
 * ssh_master_enable_jump
 * ssh_master_iceberg_jump_target
 * ssh_master_custom_config
@@ -157,6 +177,7 @@ Output
 Changelog
 ^^^^^^^^^
 
+* 1.1.0: Add more granularity to host key checking, improve role's performances. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.7: Rename role. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.6: Prevent unsorted ranges. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.5: Add custom config variable. Benoit Leveugle <benoit.leveugle@gmail.com>

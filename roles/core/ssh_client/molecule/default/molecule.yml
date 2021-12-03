@@ -62,9 +62,9 @@ provisioner:
           - interface: en0
             network: ice1-1
       hostkey_checking:
-        security:
-          ssh:
-            hostkey_checking: true
+        ssh_client_global_loglevel: QUIET
+        ssh_client_global_stricthostkeychecking: no
+        ssh_client_global_userknownhostsfile: /dev/null
         icebergs_system: false
         j2_current_iceberg: iceberg1
         j2_current_iceberg_network: ice1
@@ -88,6 +88,9 @@ provisioner:
             network_interfaces:
               - interface: en0
                 network: ice1-1
+            ssh_client_loglevel: DEBUG
+            ssh_client_stricthostkeychecking: yes
+            ssh_client_userknownhostsfile:
           fake-host2:
             j2_current_iceberg_network: ice1
             network_interfaces:

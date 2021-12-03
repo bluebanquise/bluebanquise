@@ -1,1 +1,5 @@
-ssh_master_enable_jump: false
+---
+ssh_client_enable_jump: false
+ssh_client_global_loglevel:
+ssh_client_global_stricthostkeychecking:
+ssh_client_global_userknownhostsfile:

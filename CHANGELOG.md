@@ -57,6 +57,7 @@
   - ssh_master:
     - add custom config variable (#579)
     - rename role (#635)
+    - Add more granularity to host key checking, improve role's performances (#638)
   - ssh_slave:
     - rename role (#635)
   - time:
