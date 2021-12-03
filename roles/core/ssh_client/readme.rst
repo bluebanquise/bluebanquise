@@ -177,6 +177,7 @@ Output
 Changelog
 ^^^^^^^^^
 
+* 1.1.0: Add more granularity to host key checking, improve role's performances. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.7: Rename role. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.6: Prevent unsorted ranges. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.5: Add custom config variable. Benoit Leveugle <benoit.leveugle@gmail.com>
