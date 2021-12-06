@@ -5,7 +5,7 @@ pxe
 /playbooks/
 
 ## Don't track custom roles ##
-/roles/custom/
+/roles/custom
 
 ## VirtualEnv ##
 venv-molecule/
