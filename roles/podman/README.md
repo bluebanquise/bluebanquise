@@ -4,7 +4,7 @@ Ansible role for setting up [podman](https://podman.io) in Bluebanquise environm
 
 This role is compatible with HA clusters:
 * For active/active configuration please refer to the documentation since you need create 'bundles' to launch your containers: [How to create pacemaker container bundles using podman](https://access.redhat.com/solutions/3871591).
-* For active/passive cluster
+* For active/passive cluster, it is possible to use systemd services to launch containers, and then use pacemaker to manage the systemd containers. An example of this is the registry container deployed by this role. Note that the clients of the registry should use a virtual IP address managed by pacemaker.
 
 ## Supported Platforms
 
