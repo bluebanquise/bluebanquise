@@ -1,0 +1,8 @@
+---
+loki_role_version: 1.0
+loki_data_dir: /opt/loki
+loki_index_dir: "{{ loki_data_dir }}/index"
+loki_chunks_dir: "{{ loki_data_dir }}/chunks"
+loki_port: 3100
+loki_promtail_port: 9080
+loki_promtail_syslog_port: 1514
