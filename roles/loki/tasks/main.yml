@@ -41,6 +41,26 @@
     - internal
     - firewall
 
+- name: "group █ Add user groups"
+  group:
+    gid: "{{ item.value.gid }}"
+    name: "{{ item.key }}"
+    state: present
+  with_dict: "{{ loki_groups }}"
+
+- name: "user █ Add users"
+  user:
+    name: "{{ item.key }}"
+    comment: "{{ item.value.comment | default(omit) }}"
+    group: "{{ item.value.group }}"
+    groups: "{{ item.value.groups | default(omit) }}"
+    create_home: "{{ item.value.create_home | default('yes') }}"
+    home: "{{ item.value.home | default(omit) }}"
+    shell: "{{ item.value.shell | default(omit) }}"
+    state: present
+    uid: "{{ item.value.uid }}"
+  with_dict: "{{ loki_users }}"
+
 - name: "package █ Install packages"
   package:
     name: "{{ item }}"
@@ -48,6 +68,38 @@
   with_items:
     - loki
     - promtail
+
+- name: "template █ Create /etc/systemd/system/loki.service"
+  template:
+    src: loki.service.j2
+    dest: /etc/systemd/system/loki.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart loki
+  register: loki_service_rslt
+
+- name: "template █ Create /etc/systemd/system/promtail.service"
+  template:
+    src: promtail.service.j2
+    dest: /etc/systemd/system/promtail.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart promtail
+  register: promtail_service_rslt
+
+- name: "command █ Reload systemd"
+  command: systemctl daemon-reload
+  when: loki_service_rslt.changed or promtail_service_rslt.changed
+
+- name: "file █ Create loki conf dir {{ loki_conf_dir }}"
+  file:
+    path: "{{ loki_conf_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
 
 # check for data dirs
 - name: "stat █ Check for {{ loki_data_dir }}"
@@ -68,10 +120,10 @@
 - name: "template █ Configure loki"
   template:
     src: loki.yml.j2
-    dest: /etc/loki.yml
+    dest: "{{ loki_conf_dir }}/loki.yml"
     owner: root
     group: root
-    mode: '0644'
+    mode: "0644"
   notify: restart loki
   tags:
     - template
@@ -94,10 +146,18 @@
     state: started
     enabled: true
 
+- name: "file █ create promtail conf dir {{ loki_promtail_conf_dir }}"
+  file:
+    path: "{{ loki_promtail_conf_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
 - name: "template █ Configure promtail"
   template:
     src: promtail.yml.j2
-    dest: /etc/promtail.yml
+    dest: "{{ loki_promtail_conf_dir }}/promtail.yml"
     owner: root
     group: root
     mode: "0644"
@@ -116,7 +176,7 @@
   tags:
     - template
 
-- name: "service █ Sta and enable promtail"
+- name: "service █ Start and enable promtail"
   service:
     name: promtail
     state: started

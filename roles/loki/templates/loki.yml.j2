@@ -2,8 +2,11 @@
 
 auth_enabled: false
 
+
 server:
+  http_listen_address: {{ loki_ip }}
   http_listen_port: {{ loki_port }}
+  grpc_listen_port: {{ loki_grpc_port }}
 
 ingester:
   wal: 
