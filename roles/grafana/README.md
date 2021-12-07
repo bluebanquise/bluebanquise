@@ -144,6 +144,7 @@ Note: if you try to add dashboards, the role will alwats at checking if the data
 
 ## Changelog
 
+* 2.0.2: Add OpenSUSE support. Neil Munday <neil@mundayweb.com>
 * 2.0.1: Add Ubuntu support. Matthieu Isoard
 * 2.0.0: Role enhancements. Matthieu Isoard
 * 1.0.0: Role creation. Bruno Travouillon <devel@travouillon.fr>

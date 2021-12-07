@@ -1,0 +1,7 @@
+---
+grafana_packages_to_install:
+  - grafana
+grafana_services_to_start:
+  - grafana-server
+grafana_firewall_services_to_add:
+  - grafana
