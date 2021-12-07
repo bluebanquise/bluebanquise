@@ -8,18 +8,20 @@ This role provides needed tools to deploy a basic diskless cluster.
 
 Two types of images are available:
 
-* Livenet images are full ram images, without persistance, but need less infrastructure.
-* NFS images are full nfs rw images, with persistance, very simple to use, but need more infrastructure.
+* Livenet images are full ram images, without persistence, but need less infrastructure.
+* NFS images are full nfs rw images, with persistence, very simple to use, but need more infrastructure.
 
-It is important to understand that this role is independant of the pxe_stack core role, and so each tools do not communicate.
+It is important to understand that this role is independent of the pxe_stack core role, and so each tool do not communicate.
 
-Validated on RHEL8.
+Validated on RHEL 8.
 Python based.
 
 A technical documentation is available on https://github.com/bluebanquise/bluebanquise/tree/master/resources/documentation/diskless
 
 Set up the tool
 ^^^^^^^^^^^^^^^
+
+Note: if using GPG keys (recommended), have a look at bottom of the readme to prevent a possible issue.
 
 1. Apply your playbook with the "diskless" role activated (see *Example playbook* part).
 
@@ -242,25 +244,25 @@ Entering the livenet module will prompt the following menu:
 
 In this menu you can do 3 actions:
 
-* Generate a new nfs staging image : A staging image is the base image. You must not boot onto a stagging image but firsty create a golden image from it and boot on the golden image specific filesystem (Created with option 3).
-* Generate a new nfs golden image from a staging image : Create a golden image from previoulsy created staging image.
-* Manage nodes of a golden image: Create a specific file system for each nodes for a specific golden image. After adding a node to a golden image via this option, you can boot the node onto the golden image.
+* Generate a new NFS staging image : A staging image is the base image. You must not boot onto a staging image but firstly create a golden image from it and boot on the golden image specific filesystem (Created with option 3).
+* Generate a new NFS golden image from a staging image : Create a golden image from previously created staging image.
+* Manage nodes of a golden image: Create a specific file system for each node for a specific golden image. After adding a node to a golden image via this option, you can boot the node onto the golden image.
 
 Demo module
 """""""""""
 
 You can create demo images to test the diskless tool.
-Corrupt a demo image will allow you to test the cleaning mechanism of the tool. In fact a corrupted demo image will be cleaned when listing images.
-Demo module can also be used by devellopers to understand module creation.
+Corrupt a demo image will allow you to test the cleaning mechanism of the tool. In fact, a corrupted demo image will be cleaned when listing images.
+Demo module can also be used by developers to understand module creation.
 
 List available diskless images
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This menu will allow you to view created and in creation diskless images with their attributs:
+This menu will allow you to view created and in creation diskless images with their attributes:
 
 .. code-block:: text
 
-     > Diskless image management
+   > Diskless image management
    1 - Manage and create diskless images (need modules)
    2 - List available diskless images
    3 - Remove a diskless image
@@ -307,7 +309,7 @@ Clone an existing diskless image into another image.
 Create an image from a parameters file
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This option allow you to create an image without go through the questions phase. You can create the new image from a parameters file. The parameters file must follow a specfic template. You can take example from the "image_data.yml" files generated when created images from questions (The usual way). You have to put a clear password in the given parameters file and follow these templates: 
+This option allows you to create an image without go through the questions phase. You can create the new image from a parameters file. The parameters file must follow a specific template. You can take example from the "image_data.yml" files generated when created images from questions (The usual way). You have to put a clear password in the given parameters file and follow these templates: 
 
 Template of parameters file to create a livenet image:
 """"""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -358,7 +360,7 @@ List available kernels
 
 Show available kernels for diskless images. Kernels can be added in /var/www/html/preboot_execution_environment/diskless/kernels.
 
-If the kernel has a generated initramfs file (Exemple with one kernel):
+If the kernel has a generated initramfs file (Example with one kernel):
 
 .. code-block:: text
 
@@ -382,8 +384,8 @@ Generate a new initramfs file for a kernel.
 Clear a corrupted image
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Remove totaly a diskless image with a brutal method.
-You must use this option only if the image is corrupted or there are non compliant files.
+Remove totally a diskless image with a brutal method.
+You must use this option only if the image is corrupted or there are non-compliant files.
 
 Exit
 ^^^^
@@ -492,6 +494,79 @@ Example Playbook
 
 Once the node is started, run your playbook with your roles.
 It is important to synchronize your node's time by running the time role.
+
+GPG keys issues
+^^^^^^^^^^^^^^^
+
+If using GPG keys check (recommended), in order to use the tool, you must define gpgkey option in inventories list.
+
+If not specified, the following message might appear during images creation:
+
+.. code-block:: text
+
+  [INFO] Installing system into image.
+  Unable to detect release version (use '--releasever' to specify release version)
+
+  You have enabled checking of packages via GPG keys. This is a good thing.
+  However, you do not have any GPG public keys installed. You need to download
+  the keys for packages you wish to install and install them.
+  You can do that by running the command:
+      rpm --import public.gpg.key  
+
+
+  Alternatively, you can specify the url to the key you would like to use
+  for a repository in the 'gpgkey' option in a repository section and DNF
+  will install it for you.
+
+  For more information contact your distribution or package provider.
+
+  Problem repository: [AppStream]  
+  [...]
+  [INFO] Setting password into image.
+  Traceback (most recent call last):
+    File "/usr/bin/disklessset", line 435, in <module>
+      with open(os.path.join(installroot, 'etc/shadow'), "r+") as ff:
+  FileNotFoundError: [Errno 2] No such file or directory: '/var/tmp/diskless/workdir/test1/mnt/etc/shadow'
+
+To solve this, simply set gpgkey file location in the inventory:
+
+.. code-block:: yaml
+
+  repositories:
+    - bluebanquise
+    - { name: 'os', gpgcheck: True, gpgkey: "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial" }
+
+And update management server repositories (has these are used to generate the base image):
+
+.. code-block:: text
+
+  # ansible-playbook playbooks/managements.yml --tags repositories_client --limit management1 --diff
+  [...]
+  TASK [repositories_client : yum_repository █ Setting OS repositories] *************************************************
+  Tuesday 22 September 2020  10:29:40 -0400 (0:00:00.502)       0:00:04.044 *****
+  --- before: /etc/yum.repos.d/CentOS-Base.repo
+  +++ after: /etc/yum.repos.d/CentOS-Base.repo
+  @@ -2,5 +2,6 @@
+   baseurl = http://10.10.0.1/repositories//centos/8/$basearch/os/BaseOS
+   enabled = 1
+   gpgcheck = 1
+  +gpgkey = file:///etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
+   name = BaseOS gen by Ansible
+
+
+  changed: [management1] => (item={'name': 'os', 'gpgcheck': True, 'gpgkey': 'file:///etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial', 'file': 'CentOS-Base', 'repoid': 'BaseOS'})
+  --- before: /etc/yum.repos.d/CentOS-AppStream.repo
+  +++ after: /etc/yum.repos.d/CentOS-AppStream.repo
+  @@ -2,5 +2,6 @@
+   baseurl = http://10.10.0.1/repositories//centos/8/$basearch/os/AppStream
+   enabled = 1
+   gpgcheck = 1
+  +gpgkey = file:///etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
+   name = AppStream gen by Ansible
+
+  changed: [management1] => (item={'name': 'os', 'gpgcheck': True, 'gpgkey': 'file:///etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial', 'file': 'CentOS-AppStream', 'repoid': 'AppStream'})
+
+Then image creation should not face GPG key issue anymore.
 
 To be done
 ^^^^^^^^^^
