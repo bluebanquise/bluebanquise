@@ -20,6 +20,8 @@
 
 #### Roles improvement or fix
 
+  - diskless
+    - Removed outdated copy scripts task
   - disklessset
     - Update to version 1.3.0 (#617)
   - pxe_stack: force substitution of files by symlinks in case of an update (#587)
