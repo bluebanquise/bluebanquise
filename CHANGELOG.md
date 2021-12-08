@@ -26,7 +26,9 @@
     - add compatibility with multiple RHEL like distributions (#560)
     - prevent unsorted ranges (causes unexepcted changed status) (#628)
   - clustershell: prevent dummy host to be included (#619)
-  - conman: fix execpath for RHEL 8 (#584)
+  - conman: 
+    - fix execpath for RHEL 8 (#584)
+    - implement support for externaly defined BMC (#640)
     - fix execpath for RHEL 8 (#584)
     - force conman user gid and uid (#605)
   - advanced_dhcp_server: fix issue with added spaces. Could prevent DHCP to start (#561)
@@ -46,6 +48,8 @@
     - add ip4_manual entry (#618)
     - add dns4 and dns4_search vars logic (#585)
     - improve role capabilities (#558)
+  - powerman:
+    - implement support for externaly defined BMC (#640)
   - pxe_stack:
     - fix issues with hostname not set during kickstart on RHEL 8.3 (#522)
     - force substitution of files by symlinks in case of an update (#587)
