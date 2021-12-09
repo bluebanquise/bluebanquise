@@ -16,6 +16,17 @@
   command: "podman load -i {{ podman_registry_container_path }}"
   changed_when: false
 
+- name: firewalld █ "Add registry port to firewall's {{ ha_firewall_zone | default('public') }} zone"
+  firewalld:
+    zone: "{{ ha_firewall_zone | default('public') }}"
+    port: "{{ podman_local_registry_port }}/tcp"
+    immediate: "yes"
+    permanent: "yes"
+    state: enabled
+  when: ep_firewall | default(false) | bool
+  tags:
+    - firewall
+
 - name: template █ Install registry service file
   template:
     src: registry.service.j2
