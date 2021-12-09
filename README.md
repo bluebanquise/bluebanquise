@@ -25,7 +25,7 @@ While the core stack aims to be multiple Linux distributions ready, each Communi
 | drbd                  | Setup drbd disk replication on multiple nodes            | @oxedions       | [link](roles/drbd/)                 |
 | flexlm                | Configure flexlm                                         | @strus38        | [link](roles/flexlm/)               |
 | generic_psf           | Generic packages, services, folders and files            | @johnnykeats    | [link](roles/generic_psf/)          |
-| grafana               | Install Grafana                                          | @oxedions       | [link](roles/grafana/)              |
+| grafana               | Install Grafana                                          | @strus38        | [link](roles/grafana/)              |
 | haproxy               | Install and configure a basic http haproxy               | @oxedions       | [link](roles/haproxy/)              |
 | high_availability     | Setup a corosync-pacemaker based HA cluster              | @oxedions       | [link](roles/high_availability/)    |
 | lmod                  | Install and configure Lmod                               | @oxedions       | [link](roles/lmod/)                 |
