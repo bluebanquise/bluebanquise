@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.2 - Next release
+
+### New roles
+
+  - loki. Owner: @neilmunday
+
 ## 1.0.1 - Next release
 
 ### Updated roles
