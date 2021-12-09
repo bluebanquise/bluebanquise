@@ -12,6 +12,7 @@ README.md @oxedions @johnnykeats
 /roles/nhc/ @oxedions
 /roles/ofed/ @oxedions
 /roles/openldap/ @oxedions
+/roles/podman/ @strus38
 /roles/powerman/ @oxedions
 /roles/prometheus/ @oxedions
 /roles/report/ @oxedions
