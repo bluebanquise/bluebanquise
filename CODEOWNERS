@@ -9,6 +9,7 @@ README.md @oxedions @johnnykeats
 /roles/generic_psf/ @johnnykeats
 /roles/grafana/ @oxedions
 /roles/lmod/ @oxedions
+/roles/loki/ @neilmunday
 /roles/nhc/ @oxedions
 /roles/ofed/ @oxedions
 /roles/openldap/ @oxedions
