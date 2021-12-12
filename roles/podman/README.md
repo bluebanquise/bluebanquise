@@ -16,6 +16,14 @@ This role is compatible with HA clusters:
 
 Ansible 2.7 or higher is required for defaults/main/*.yml to work correctly.
 
+## Known Limitations
+
+When firewalld is running, containers deployed with podman may lose connectivity if the firewall rules are reloaded with the `firewall-cmd --reload` command, due to non-persistent rules added by podman being lost. As a workaround, the following command should be used after reloading the firewall, it will restore container connectivity without having to re-deploy the containers:
+
+```
+podman network reload --all
+```
+
 ## Variables
 
 Variables for this role:
