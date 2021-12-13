@@ -16,13 +16,38 @@
   command: "podman load -i {{ podman_registry_container_path }}"
   changed_when: false
 
-- name: registry █ Find out if registry is already deployed
-  command: "podman container exists {{ podman_registry_container }}"
-  register: cmdout
-  changed_when: false
-  failed_when: false
+- name: firewalld █ "Add registry port to firewall's {{ ha_firewall_zone | default('public') }} zone"
+  firewalld:
+    zone: "{{ ha_firewall_zone | default('public') }}"
+    port: "{{ podman_local_registry_port }}/tcp"
+    immediate: "yes"
+    permanent: "yes"
+    state: enabled
+  when: ep_firewall | default(false) | bool
+  tags:
+    - firewall
 
-- name: registry █ Run local registry
-  command: "podman run --privileged -d --name registry -p 5000:{{ podman_local_registry_port }} -v /var/lib/registry:{{ podman_local_registry_dir }} --restart=always {{ podman_registry_container }}:{{ podman_registry_container_tag }}"
-  # yamllint disable-line rule:line-length
-  when: cmdout is not defined or cmdout.rc != 0
+- name: template █ Install registry service file
+  template:
+    src: registry.service.j2
+    dest: /etc/systemd/system/registry.service
+    owner: root
+    group: root
+    force: yes
+    mode: 0655
+  tags:
+    - service
+
+- name: systemd █ Reload systemd
+  systemd:
+    daemon_reload: yes
+  tags:
+    - service
+
+- name: service █ Manage registry state
+  service:
+    name: registry
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+    state: "{{ (start_services | bool) | ternary('started', omit) }}"
+  tags:
+    - service

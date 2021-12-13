@@ -4,7 +4,7 @@ Ansible role for setting up [podman](https://podman.io) in Bluebanquise environm
 
 This role is compatible with HA clusters:
 * For active/active configuration please refer to the documentation since you need create 'bundles' to launch your containers: [How to create pacemaker container bundles using podman](https://access.redhat.com/solutions/3871591).
-* For active/passive cluster
+* For active/passive cluster, it is possible to use systemd services to launch containers, and then use pacemaker to manage the systemd containers. An example of this is the registry container deployed by this role. Note that the clients of the registry should use a virtual IP address managed by pacemaker.
 
 ## Supported Platforms
 
@@ -15,6 +15,14 @@ This role is compatible with HA clusters:
 ## Requirements
 
 Ansible 2.7 or higher is required for defaults/main/*.yml to work correctly.
+
+## Known Limitations
+
+When firewalld is running, containers deployed with podman may lose connectivity if the firewall rules are reloaded with the `firewall-cmd --reload` command, due to non-persistent rules added by podman being lost. As a workaround, the following command should be used after reloading the firewall, it will restore container connectivity without having to re-deploy the containers:
+
+```
+podman network reload --all
+```
 
 ## Variables
 
