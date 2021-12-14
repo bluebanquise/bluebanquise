@@ -4,6 +4,9 @@
 
 ### Updated roles
 
+  - high_availability
+    - configure firewall before pcs commands. (#41)
+
   - podman: 
     - correct logical operator to run local registry. (#33)
     - quotes in lists of registries. (#34)

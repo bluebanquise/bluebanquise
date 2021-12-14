@@ -36,6 +36,17 @@
   changed_when: False
   ignore_errors: yes
 
+- name: firewalld █ "Add services to firewall's {{ ha_firewall_zone | default('public') }} zone"
+  firewalld:
+    zone: "{{ ha_firewall_zone | default('public') }}"
+    service: high-availability
+    immediate: "yes"
+    permanent: "yes"
+    state: enabled
+  when: ep_firewall | default(false) | bool
+  tags:
+    - firewall
+
 - name: Create cluster
   run_once: true
   delegate_to: "{{ high_availability_reference_node }}"
@@ -80,17 +91,6 @@
   loop:
     - corosync
     - pacemaker
-
-- name: firewalld █ "Add services to firewall's {{ ha_firewall_zone | default('public') }} zone"
-  firewalld:
-    zone: "{{ ha_firewall_zone | default('public') }}"
-    service: high-availability
-    immediate: "yes"
-    permanent: "yes"
-    state: enabled
-  when: ep_firewall | default(false) | bool
-  tags:
-    - firewall
 
 - name: Configure cluster
   run_once: true

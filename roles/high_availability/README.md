@@ -556,4 +556,5 @@ not present. Then in HA resources, declare the following:
 
 ## 5. Changelog
 
+* 1.0.1: Configure firewall before pcs commands. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
