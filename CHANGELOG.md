@@ -20,20 +20,18 @@
 
 #### Roles improvement or fix
 
-  - disklessset
-    - Update to version 1.3.0 (#617)
-  - pxe_stack: force substitution of files by symlinks in case of an update (#587)
-  - core/log_server
-    - remote logs stored in a similar fashion as the server (#568)
   - all:
     - add compatibility with multiple RHEL like distributions (#560)
     - prevent unsorted ranges (causes unexepcted changed status) (#628)
+  - bluebanquise:
+    - Add missing bluebanquise_filter package (#648)
   - clustershell: prevent dummy host to be included (#619)
   - conman: fix execpath for RHEL 8 (#584)
     - fix execpath for RHEL 8 (#584)
     - force conman user gid and uid (#605)
   - advanced_dhcp_server: fix issue with added spaces. Could prevent DHCP to start (#561)
   - diskless:
+    - Update to version 1.3.0 (#617)
     - fix issues with dnf command in the livenet module (#528)
     - fix issues preventing access to nodes booting a livenet image (#525)
     - notify in readme/page that firewall does not work in chroot (#569)
@@ -45,6 +43,7 @@
   - kernel_config: prevent crash if variable ep_kernel_parameters is undefined (#559)
   - log_server/client:
     - allow custom configuration path (#591)
+    - remote logs stored in a similar fashion as the server (#568)
   - nic_nmcli:
     - add ip4_manual entry (#618)
     - add dns4 and dns4_search vars logic (#585)
