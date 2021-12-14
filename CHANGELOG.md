@@ -49,6 +49,7 @@
     - add dns4 and dns4_search vars logic (#585)
     - improve role capabilities (#558)
   - pxe_stack:
+    - Add bootset as package. (#649)
     - fix issues with hostname not set during kickstart on RHEL 8.3 (#522)
     - force substitution of files by symlinks in case of an update (#587)
   - repositories_client: fix CentOS 8.4 repository compatibility (#534)

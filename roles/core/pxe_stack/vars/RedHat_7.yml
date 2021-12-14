@@ -10,6 +10,7 @@ pxe_stack_packages_to_install:
   - python36
   - python36-PyYAML
   - python36-clustershell
+  - bootset
 pxe_stack_default_tftp_package: atftp
 pxe_stack_services_to_start:
   - httpd
