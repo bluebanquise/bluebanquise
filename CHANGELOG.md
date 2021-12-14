@@ -31,6 +31,7 @@
     - force conman user gid and uid (#605)
   - advanced_dhcp_server: fix issue with added spaces. Could prevent DHCP to start (#561)
   - diskless:
+    - Remove script from role and rely on package. (#650)
     - Update to version 1.3.0 (#617)
     - fix issues with dnf command in the livenet module (#528)
     - fix issues preventing access to nodes booting a livenet image (#525)
