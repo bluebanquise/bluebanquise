@@ -43,7 +43,7 @@ All variables which can be overridden are stored in [defaults/main.yml](defaults
 | loki_promtail_grpc_port     | 0                          | Set to zero to randomise gRPC port                                        |
 | loki_promtail_grpc_ip       | 127.0.0.1                  | Promtail gRPC address                                                     |
 | loki_promtail_syslog_port   | 1514                       | Syslog listener port                                                      |
-|loki_promtail_syslog_ip      | 127.0.0.1                  | Syslog address                                                            |
+| loki_promtail_syslog_ip      | 127.0.0.1                  | Syslog address                                                            |
 
 ## Change log
 

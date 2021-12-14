@@ -9,6 +9,7 @@
 /roles/generic_psf/ @johnnykeats
 /roles/grafana/ @strus38
 /roles/lmod/ @oxedions
+/roles/loki/ @neilmunday
 /roles/nhc/ @oxedions
 /roles/ofed/ @oxedions
 /roles/openldap/ @oxedions
