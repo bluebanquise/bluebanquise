@@ -10,7 +10,7 @@ pxe_stack_packages_to_install:
   - clustershell
   - python3-clustershell
   - policycoreutils
-  - bootset
+  - bluebanquise-bootset
 pxe_stack_default_tftp_package: atftp
 pxe_stack_services_to_start:
   - httpd
