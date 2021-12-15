@@ -10,3 +10,24 @@
         gpgcheck: False
       when:
         - ansible_facts.os_family == "RedHat"
+
+    - name: "Configure EPEL repository"
+      yum_repository:
+        name: epel
+        description: epel repository
+        baseurl: https://dl.fedoraproject.org/pub/epel/$releasever/$basearch/
+        gpgcheck: False
+      when:
+        - ansible_facts.os_family == "RedHat"
+        - ansible_distribution_major_version == "7"
+
+    - name: Install python3-clustershell package
+      package:
+        name:
+          - python36-clustershell
+          - python36
+        state: present
+      when:
+        - ansible_facts.os_family == "RedHat"
+        - ansible_distribution_major_version == "7"
+
