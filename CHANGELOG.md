@@ -12,6 +12,7 @@
 
   - high_availability
     - configure firewall before pcs commands. (#41)
+    - enable/disable STONITH when configuration is available/unavailable (#43)
 
   - podman: 
     - correct logical operator to run local registry. (#33)

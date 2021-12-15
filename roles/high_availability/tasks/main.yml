@@ -206,4 +206,18 @@
       when: high_availability_stonith is defined and high_availability_stonith
       notify: command █ Push HA configuration
 
+    - name: command █ Disable stonith if it is not configured
+      command: "pcs -f {{ high_availability_cib_file_path }} property set stonith-enabled=false"
+      when:
+        - (pcs_property.stdout_lines | select("match", ".*stonith-enabled:\\sfalse.*") | list | length) == 0
+        - high_availability_stonith is not defined or not high_availability_stonith
+      notify: command █ Push HA configuration
+
+    - name: command █ Enable stonith if it has been properly configured
+      command: "pcs -f {{ high_availability_cib_file_path }} property set stonith-enabled=true"
+      when:
+        - (pcs_property.stdout_lines | select("match", ".*stonith-enabled:\\strue.*") | list | length) == 0
+        - high_availability_stonith is defined and high_availability_stonith
+      notify: command █ Push HA configuration
+
 - meta: flush_handlers

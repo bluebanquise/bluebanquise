@@ -322,6 +322,8 @@ high_availability_stonith:
     avoids: ha1                                                        # Avoid resource to be running on own host
 ```
 
+If `high_availability_stonith` is not defined in the inventory, then this role will disable STONITH (stonith-enabled: false). This will allow the HA cluster to operate without STONITH (not recommended for production). Adding the `high_availability_stonith` variable will enable STONITH again.
+
 ## 3. Deploy HA
 
 The HA cluster is expected to have an active-passive configuration.
@@ -556,5 +558,6 @@ not present. Then in HA resources, declare the following:
 
 ## 5. Changelog
 
+* 1.0.2: Enable/disable STONITH when configuration is available/unavailable. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.0.1: Configure firewall before pcs commands. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
