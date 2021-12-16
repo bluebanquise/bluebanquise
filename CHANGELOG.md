@@ -25,6 +25,7 @@
     - prevent unsorted ranges (causes unexepcted changed status) (#628)
   - bluebanquise:
     - Add missing bluebanquise_filter package (#648)
+    - Updated bluebanquise-filters rpm dependency (#654)
   - clustershell: prevent dummy host to be included (#619)
   - conman: fix execpath for RHEL 8 (#584)
     - fix execpath for RHEL 8 (#584)
@@ -53,6 +54,8 @@
     - Add bootset as package. (#649)
     - fix issues with hostname not set during kickstart on RHEL 8.3 (#522)
     - force substitution of files by symlinks in case of an update (#587)
+  - powerman:
+    - Updated bluebanquise-filters rpm dependency (#654)
   - repositories_client: fix CentOS 8.4 repository compatibility (#534)
   - set_hostname: add fqdn capability (#543)
   - ssh_master:
@@ -109,6 +112,7 @@
     - allow custom server port (#397)
   - core/ssh_master:
     - add ssh jump capability in multi icebergs context (one level only) (#395)
+
 
 ### Breaking changes
 
