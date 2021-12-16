@@ -133,12 +133,11 @@ You can set the reference node in the `ha_parameters.yml`, and on need, use
 high_availability_reference_node: ha1
 ```
 
-Fianly, before deploying HA cluster, update
-`high_availability_ha_cluster_password`variable with a new SHA512 password hash
-(do not use default one for production).
+Finaly, before deploying HA cluster, update `high_availability_ha_cluster_password` variable with an unencrypted password for hacluster user, and `high_availability_ha_cluster_password_sha512` with the corresponding SHA512 password hash (do not use default values for production).
 
 ```yaml
-high_availability_ha_cluster_password: $6$M3crarMVoUV3rALd$ZTre2CIyss7zOb4lkLoG23As9OAkYPw2BM88Y1F43n8CCyV5XWwAYEwBOrS8bcCBIMjIPdJG.ndOfzWyAVR4j0
+high_availability_ha_cluster_password: root
+high_availability_ha_cluster_password_sha512: $6$M3crarMVoUV3rALd$ZTre2CIyss7zOb4lkLoG23As9OAkYPw2BM88Y1F43n8CCyV5XWwAYEwBOrS8bcCBIMjIPdJG.ndOfzWyAVR4j0
 ```
 
 Now deploy the HA cluster with these parameters.
@@ -558,6 +557,7 @@ not present. Then in HA resources, declare the following:
 
 ## 5. Changelog
 
+* 1.0.3: Fix use of unencrypted password of hacluster user. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.0.2: Enable/disable STONITH when configuration is available/unavailable. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.0.1: Configure firewall before pcs commands. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>

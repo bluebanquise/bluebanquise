@@ -20,7 +20,7 @@
   user:
     name: hacluster
     state: present
-    password: "{{ high_availability_ha_cluster_password }}"
+    password: "{{ high_availability_ha_cluster_password_sha512 }}"
     groups: haclient
     comment: 'HA Cluster Administrator'
 
@@ -53,7 +53,7 @@
   block:
 
     - name: command █ Register nodes
-      command: "pcs host auth {{ item.name }} -u hacluster -p root"
+      command: "pcs host auth {{ item.name }} -u hacluster -p {{ high_availability_ha_cluster_password }}"
       loop: "{{ high_availability_cluster_nodes }}"
       when: ( pcs_known_hosts.stdout_lines | select("match", ".*"+item.name+".*") | list | length ) < 1
 
