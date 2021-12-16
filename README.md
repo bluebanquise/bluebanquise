@@ -29,6 +29,7 @@ While the core stack aims to be multiple Linux distributions ready, each Communi
 | haproxy               | Install and configure a basic http haproxy               | @oxedions       | [link](roles/haproxy/)              |
 | high_availability     | Setup a corosync-pacemaker based HA cluster              | @oxedions       | [link](roles/high_availability/)    |
 | lmod                  | Install and configure Lmod                               | @oxedions       | [link](roles/lmod/)                 |
+| loki                  | Install and configure Loki                               | @neilmunday     | [link](roles/loki/)                 |
 | nhc                   | Install and configure LBNL Node Health Check             | @oxedions       | [link](roles/nhc/)                  |
 | nvidia                | Install Nvidia driver and Cuda                           | @oxedions       | [link](roles/nvidia/)               |
 | ofed                  | Install OFED OpenFabrics                                 | @oxedions       | [link](roles/ofed/)                 |
