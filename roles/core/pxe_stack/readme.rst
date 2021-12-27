@@ -173,6 +173,7 @@ To be done
 Changelog
 ^^^^^^^^^
 
+* 1.3.4: Fix missing efi bootorder management for Ubuntu. johnnykeats <johnny.keats@outlook.com>
 * 1.3.3: Add bootset as package. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.2: Prevent unsorted ranges. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.1: Adapt role to handle multiple distributions. Benoit Leveugle <benoit.leveugle@gmail.com>
