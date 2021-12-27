@@ -2,6 +2,8 @@
 
 Roadmap only describes major objectives. Small objectives are developed as stream.
 
+![ROADMAP picture](resources/pictures/ROADMAP.svg)
+
 ## 1.6
 
 ### Main objectives, mandatory
@@ -9,25 +11,20 @@ Roadmap only describes major objectives. Small objectives are developed as strea
 #### Core
 
 - Suse/OpenSuse integration
-- Upgrade to > 2.9 Ansible versions
-
-#### Community
-
-- Suse/OpenSuse integration into main Community roles
+- Minimal Live Linux integration (as a tool)
 
 #### Tools/Infrastructure
 
 - Suse/OpenSuse integration into infrastructure
 - Suse/OpenSuse integration into bootset tool
+- Automate improvement
+- Power management tool
+- Provides ISOs and bootstrap scripts
+- Start working on the full test infrastructure (look for hardware)
 
 ### Optional objectives
 
-#### Core
-
-- Debian integration
-- Better tests (Molecule tests, tests pipeline)
-
 #### Community
 
-- Integrate https://github.com/neilmunday/slurm-mail to slurm Community role
+- Integrate https://github.com/neilmunday/slurm-mail to Slurm Community role
 - K8S Hybrid cluster
