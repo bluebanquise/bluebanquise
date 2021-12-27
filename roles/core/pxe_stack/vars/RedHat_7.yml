@@ -3,8 +3,8 @@ pxe_stack_apache_cgi_module: cgi
 pxe_stack_apache_conf_path: /etc/httpd/conf.d
 pxe_stack_apache_user: apache
 pxe_stack_packages_to_install:
-  - ipxe-x86_64-bluebanquise
-  - ipxe-arm64-bluebanquise
+  - bluebanquise-ipxe-x86_64
+  - bluebanquise-ipxe-arm64
   - httpd
   - policycoreutils-python
   - python36
