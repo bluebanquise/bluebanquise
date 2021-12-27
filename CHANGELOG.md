@@ -56,6 +56,7 @@
   - repositories_client: fix CentOS 8.4 repository compatibility (#534)
   - set_hostname: add fqdn capability (#543)
   - ssh_master:
+    - Fix issue with empty network interfaces (#657)
     - add custom config variable (#579)
     - rename role (#635)
     - Add more granularity to host key checking, improve role's performances (#638)
