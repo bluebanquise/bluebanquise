@@ -58,7 +58,7 @@ Host *
 
 {% for host in (range | sort) %}
   {% set host_vars = hostvars[host] %}
-  {% if host_vars['network_interfaces'] is defined and host_vars['network_interfaces'] is iterable %}
+  {% if host_vars['network_interfaces'] is defined and host_vars['network_interfaces'] and host_vars['network_interfaces'] is not mapping %}
 {{ write_host(host, host_vars, None) }}
   {% endif %}
 {% endfor %}
