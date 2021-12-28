@@ -36,22 +36,22 @@ The stack aims at supporting a maximum range of hardware, CPU architectures, and
 
 Currently supported distributions are:
 
-| Operating System family | Operating System distribution | Tested versions    | Notes                                                       |
-| ----------------------- | ----------------------------- | ------------------ | ----------------------------------------------------------- |
-| Red Hat                 |                               |                    |                                                             |
-|                         | RHEL                          | 7, 8               | √                                                           |
-|                         | Rocky Linux                   | 8                  | √                                                           |
-|                         | CentOS                        | 7, 8               | √                                                           |
-|                         | CentOS Stream                 | 8                  | √                                                           |
-|                         | Oracle Linux                  | 8                  | √                                                           |
-|                         | Cloud Linux                   | 8                  | √                                                           |
-|                         | Alma Linux                    | 8                  | √                                                           |
-| Debian                  |                               |                    |                                                             |
-|                         | Ubuntu                        | 20.04              | √. Diskless not supported for now.                          |
-|                         | Debian                        |                    | Targeted for future release                                 |
-| Suse                    |                               |                    |                                                             |
-|                         | SLES                          |                    | Targeted for future release                                 |
-|                         | OpenSuse Leap                 |                    | Targeted for future release                                 |
+| Operating System family | Operating System distribution | Tested versions    | Architectures    | Notes                                                       |
+| ----------------------- | ----------------------------- | ------------------ | ---------------- | ----------------------------------------------------------- |
+| Red Hat                 |                               |                    |                  |                                                             |
+|                         | RHEL                          | 7, 8               | x86_64, aarch64  | √                                                           |
+|                         | Rocky Linux                   | 8                  | x86_64, aarch64  | √                                                           |
+|                         | CentOS                        | 7, 8               | x86_64, aarch64  | √                                                           |
+|                         | CentOS Stream                 | 8                  | x86_64, aarch64  | √                                                           |
+|                         | Oracle Linux                  | 8                  | x86_64, aarch64  | √                                                           |
+|                         | Cloud Linux                   | 8                  | x86_64, aarch64  | √                                                           |
+|                         | Alma Linux                    | 8                  | x86_64, aarch64  | √                                                           |
+| Debian                  |                               |                    |                  |                                                             |
+|                         | Ubuntu                        | 20.04              | x86_64, aarch64  | √. Diskless not supported for now.                          |
+|                         | Debian                        |                    |                  | Targeted for future release                                 |
+| Suse                    |                               |                    |                  |                                                             |
+|                         | SLES                          |                    |                  | Targeted for future release                                 |
+|                         | OpenSuse Leap                 |                    |                  | Targeted for future release                                 |
 
 Ansible >= 2.9.13 is mandatory for BlueBanquise to run properly.
 
