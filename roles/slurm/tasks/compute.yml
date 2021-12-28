@@ -12,6 +12,14 @@
   tags:
     - firewall
 
+- name: "copy █ Copy cgroup.conf to {{ slurm_home_path }}/cgroup.conf"
+  copy:
+    src: cgroup.conf
+    dest: "{{ slurm_home_path }}/cgroup.conf"
+    owner: slurm
+    group: slurm
+    mode: 0644
+
 - name: include_tasks ░ Deploy Slurm compute configuration
   include_tasks: "compute_{{ slurm_computes_config }}.yml"
 

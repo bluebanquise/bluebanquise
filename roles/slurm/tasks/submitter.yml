@@ -14,29 +14,3 @@
   tags:
     - firewall
 
-- name: file █ Create service needed directory
-  file:
-    path: /etc/systemd/system/slurmd.service.d
-    state: directory
-    owner: slurm
-    group: slurm
-    mode: 0755
-
-- name: template █ Generate service file set_controller.conf
-  template:
-    src: set_controller.conf.j2
-    dest: /etc/systemd/system/slurmd.service.d/set_controller.conf
-    owner: root
-    group: root
-    mode: 0644
-  notify: systemd █ Reload systemd configuration
-  tags:
-    - template
-
-- name: service █ Manage slurmd state
-  service:
-    name: slurmd
-    enabled: yes
-    state: started
-  tags:
-    - service

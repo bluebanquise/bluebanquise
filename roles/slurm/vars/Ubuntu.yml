@@ -1,39 +1,25 @@
 ---
-slurm_home_path: /etc/slurm-llnl
+slurm_home_path: /etc/slurm
 slurm_packages_to_install:
-  before_17:
-    controller:
-      - libmunge2
-      - munge
-      - slurm-wlm
-      - slurmctld
-      - slurm-wlm-basic-plugins
-    node:
-      - libmunge2
-      - munge
-      - slurm-wlm
-      - slurmd
-      - slurm-wlm-basic-plugins
-    passive:
-      - libmunge2
-      - munge
-      - slurm-wlm
-      - slurm-wlm-basic-plugins
-  after_17:
-    controller:
-      - libmunge2
-      - munge
-      - slurm-wlm
-      - slurmctld
-      - slurm-wlm-basic-plugins
-    node:
-      - libmunge2
-      - munge
-      - slurm-wlm
-      - slurmd
-      - slurm-wlm-basic-plugins
-    passive:
-      - libmunge2
-      - munge
-      - slurm-wlm
-      - slurm-wlm-basic-plugins
+  controller:
+    - munge
+    - libmunge2
+    - slurm
+    - slurm-devel
+    - slurm-slurmctld
+  accounting:
+    - mariadb
+    - mariadb-server
+    - python3-mysql
+    - slurm-slurmdbd
+  compute:
+    - munge
+    - libmunge2
+    - slurm
+    - slurm-devel
+    - slurm-slurmd
+  submitter:
+    - munge
+    - libmunge2
+    - slurm
+    - slurm-devel

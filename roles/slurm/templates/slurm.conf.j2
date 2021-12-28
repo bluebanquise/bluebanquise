@@ -11,8 +11,10 @@
 ClusterName={{ slurm_cluster_name }}
 ControlMachine={{ slurm_control_machine }}
 
+{% if slurm_computes_config == "configless" %}
 ## Use configless mode
 SlurmctldParameters=enable_configless
+{% endif %}
 
 ## Authentication
 SlurmUser=slurm
@@ -93,6 +95,6 @@ PartitionName={{partition.partition_name}} {% for arg, arg_value in partition.pa
 
 {% if slurm_all_partition.enable is defined and slurm_all_partition.enable %}
 ## Partition for all
-PartitionName=all {% for arg, arg_value in slurm_all_partition.partition_configuration.items() %} {{ arg }}={{ arg_value }}{% endfor %} Nodes={% for computes_group in slurm_computes_groups %}{% if groups[computes_group] is defined and groups[computes_group] is iterable %}{% for node in groups[computes_group] %}{% if loop.first %}{{node}}{% else %},{{node}}{% endif %}{% endfor %}{% endif %}{% endfor %}
+PartitionName=all {% for arg, arg_value in slurm_all_partition.partition_configuration.items() %} {{ arg }}={{ arg_value }}{% endfor %} Nodes={% for computes_group in slurm_computes_groups %}{% if groups[computes_group] is defined and groups[computes_group] is iterable %}{% if not loop.first %},{% endif %}{% for node in groups[computes_group] %}{% if loop.first %}{{node}}{% else %},{{node}}{% endif %}{% endfor %}{% endif %}{% endfor %}
 
 {% endif %}
