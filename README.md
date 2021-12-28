@@ -17,8 +17,6 @@ The stack is split over two repositories:
 
 * :globe_with_meridians: **[Community](https://github.com/bluebanquise/community):** COMMUNITY roles and tools provides additional production level features **on top of CORE** to specialize cluster.
 
-![BlueBanquise Logo](resources/pictures/COREvsCOMMUNITY.svg)
-
 ## Resources
 
 ### Documentation
