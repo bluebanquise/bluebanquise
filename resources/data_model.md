@@ -286,3 +286,21 @@ j2_node_main_network: Main network. The network used by Ansible to deploy config
 j2_node_main_network_interface: Main network interface. Same as main network, but provides interface name instead of network.
 j2_management_networks: List of management networks.
 ```
+
+## Next version (2.0.0)
+
+* Support for externaly defined bmc
+* Support for `ep_host_authentication` variable. `ep_equipment_authentication` deprecated and removed.
+
+```
+ep_host_authentication:
+  - protocol: SNMP
+    user: snmpuser
+    password: snmppass
+  - protocol: SSH
+    user: sshuser
+    password: sshpass
+  - protocol: IPMI
+    user: ADMIN
+    password: ADMIN
+```

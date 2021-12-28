@@ -26,7 +26,9 @@
   - bluebanquise:
     - Add missing bluebanquise_filter package (#648)
   - clustershell: prevent dummy host to be included (#619)
-  - conman: fix execpath for RHEL 8 (#584)
+  - conman: 
+    - fix execpath for RHEL 8 (#584)
+    - implement support for externaly defined BMC (#640)
     - fix execpath for RHEL 8 (#584)
     - force conman user gid and uid (#605)
   - advanced_dhcp_server: fix issue with added spaces. Could prevent DHCP to start (#561)
@@ -49,6 +51,8 @@
     - add ip4_manual entry (#618)
     - add dns4 and dns4_search vars logic (#585)
     - improve role capabilities (#558)
+  - powerman:
+    - implement support for externaly defined BMC (#640)
   - pxe_stack:
     - Fix missing efi bootorder management for Ubuntu (#656)
     - Add bootset as package. (#649)
