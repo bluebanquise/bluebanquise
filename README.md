@@ -9,17 +9,15 @@
 
 **BlueBanquise** is a coherent **Ansible** roles collection, designed to deploy and manage large group of hosts (clusters of nodes).
 
-While main target is High Performance Computing (HPC), the BlueBanquise stack is generic and can adapt to any kind of architecture (university or enterprise infrastructures, render farm, etc.).
+The BlueBanquise stack is generic and can adapt to any kind of architecture (High Performance Computing clusters, university or enterprise infrastructures, Blender render farm, K8S cluster, etc.).
 
-The stack is split over multiple repositories:
+The stack is split over two repositories:
 
-* :globe_with_meridians: **[Core](https://github.com/bluebanquise/bluebanquise):** the CORE of the stack, provides roles and tools to deploy and configure hosts.
+* :globe_with_meridians: **[Core](https://github.com/bluebanquise/bluebanquise):** the CORE of the stack, focused on providing roles and tools to deploy hosts and configure vital services. CORE is generic to any kind of cluster.
 
-* :globe_with_meridians: **[Community](https://github.com/bluebanquise/community):** COMMUNITY roles and tools, provides additional features on top of CORE. The release cycle of COMMUNITY is different than CORE.
+* :globe_with_meridians: **[Community](https://github.com/bluebanquise/community):** COMMUNITY roles and tools provides additional production level features **on top of CORE** to specialize cluster.
 
-* :globe_with_meridians: **[Tools](https://github.com/bluebanquise/tools):** Tools repository contains sources of stack tools.
-
-* :globe_with_meridians: **[Infrastructure](https://github.com/bluebanquise/infrastructure):** Infrastructure repository contains needed script and files to build packages.
+![BlueBanquise Logo](resources/pictures/COREvsCOMMUNITY.svg)
 
 ## Resources
 
@@ -32,26 +30,30 @@ usage description.
 
 ### Packages
 
-The stack packages are available in the [repositories subfolder](https://bluebanquise.com/repository/).
+The stack packages are available in the [repositories subfolder](https://bluebanquise.com/repository/releases/).
 
 ## Supported software environment
+
+The stack aims at supporting a maximum range of hardware, CPU architectures, and Linux distributions.
+
+Currently supported distributions are:
 
 | Operating System family | Operating System distribution | Tested versions    | Notes                                                       |
 | ----------------------- | ----------------------------- | ------------------ | ----------------------------------------------------------- |
 | Red Hat                 |                               |                    |                                                             |
 |                         | RHEL                          | 7, 8               | √                                                           |
+|                         | Rocky Linux                   | 8                  | √                                                           |
 |                         | CentOS                        | 7, 8               | √                                                           |
 |                         | CentOS Stream                 | 8                  | √                                                           |
 |                         | Oracle Linux                  | 8                  | √                                                           |
-|                         | Cloud Linux                   | 8                  | Base iso not enough, need to bind to external repositories. |
+|                         | Cloud Linux                   | 8                  | √                                                           |
 |                         | Alma Linux                    | 8                  | √                                                           |
-|                         | Rocky Linux                   | 8                  | √                                                           |
-| Suse                    |                               |                    |                                                             |
-|                         | SLES                          | NA                 | Targeted for future release                                 |
-|                         | OpenSuse Leap                 | NA                 | Targeted for future release                                 |
 | Debian                  |                               |                    |                                                             |
-|                         | Ubuntu                        | NA                 | Targeted for future release                                 |
-|                         | Debian                        | NA                 | Targeted for future release                                 |
+|                         | Ubuntu                        | 20.04              | √. Diskless not supported for now.                          |
+|                         | Debian                        |                    | Targeted for future release                                 |
+| Suse                    |                               |                    |                                                             |
+|                         | SLES                          |                    | Targeted for future release                                 |
+|                         | OpenSuse Leap                 |                    | Targeted for future release                                 |
 
 Ansible >= 2.9.13 is mandatory for BlueBanquise to run properly.
 
