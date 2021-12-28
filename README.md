@@ -59,7 +59,7 @@ Ansible >= 2.9.13 is mandatory for BlueBanquise to run properly.
 
 ## Algoric project
 
-BlueBanquise is part of the **Algoric** Project from the [**Fabrique du Loch**](https://www.lafabriqueduloch.org/fr/accueil/) FabLab.
+BlueBanquise is part of the [**Algoric**](https://algoric.org/) project from the [**Fabrique du Loch**](https://www.lafabriqueduloch.org/fr/accueil/) FabLab, located in Brittany - France.
 
 ![BlueBanquise Logo](resources/pictures/FabriqueDuLochAlgoric_logo_large.svg)
 
@@ -77,6 +77,7 @@ You may wonder where this name comes from:
 Special thanks:
 
 * to [CINES](https://www.cines.fr/en/) who provided Algoric team with hardware to develop this stack.
+* to Bull-Atos team from Toulouse who provided Algoric team with hardware to develop this stack.
 * to [@remyd1](https://github.com/remyd1) for his help on [Banquise](https://github.com/oxedions/banquise) original stack.
 * to [@bouriquet](https://github.com/bouriquet) for his active help on the stack.
 * to [@btravouillon](https://github.com/btravouillon) for his active help on the stack.
