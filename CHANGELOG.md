@@ -5,8 +5,9 @@
 ### New roles
 
   - loki. Owner: @neilmunday
+  - automate. Owner: @oxedions
 
-## 1.0.1 - Next release
+## 1.0.1
 
 ### Updated roles
 
@@ -19,7 +20,7 @@
     - correct logical operator to run local registry. (#33)
     - quotes in lists of registries. (#34)
 
-## 1.0.0 - Next release
+## 1.0.0
 
 ### New roles
 

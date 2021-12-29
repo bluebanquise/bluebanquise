@@ -20,6 +20,7 @@ While the core stack aims to be multiple Linux distributions ready, each Communi
 
 | Role/tool name        | Description                                              | Owner           | Link                                |
 | --------------------- | -------------------------------------------------------- | --------------- | ----------------------------------- |
+| automate              | Automate recurrent sys admin tasks                       | @oxedions       | [link](roles/automate/)             |
 | clone                 | Clone to image and restore HDD                           | @johnnykeats    | [link](roles/clone/)                |
 | display_tuning        | Provides screenrc configuration and iceberg shell colors | @oxedions       | [link](roles/display_tuning/)       |
 | drbd                  | Setup drbd disk replication on multiple nodes            | @oxedions       | [link](roles/drbd/)                 |

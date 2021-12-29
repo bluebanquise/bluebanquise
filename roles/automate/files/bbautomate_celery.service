@@ -1,0 +1,15 @@
+[Unit]
+  Description=bbautomate_celery
+  Wants=network-online.target
+  After=network-online.target
+
+[Service]
+  User=root
+  Group=root
+  Type=simple
+  Environment="PYTHONPATH=/usr/local/bin/"
+#  WorkingDirectory=/var/lib/celery
+  ExecStart=celery -A bbautomate.celery worker --loglevel=info
+
+[Install]
+  WantedBy=multi-user.target
