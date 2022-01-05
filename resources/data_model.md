@@ -1,4 +1,4 @@
-# BlueBanquise CORE inventory data model reference
+# BlueBanquise CORE inventory data model reference 1.0.0
 
 This data model is frozen, and should evolve only if major need.
 
