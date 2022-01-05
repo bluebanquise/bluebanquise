@@ -16,7 +16,7 @@ dnf install -y centos-release-rabbitmq-38
 
 ### Create tasks list
 
-The tool expect a task list to be provided.
+The tool expects a task list to be provided.
 
 Create file `/etc/bbautomate/tasks.yml`, and define your tasks the following way:
 
@@ -66,7 +66,7 @@ When a task is performed with a specific target node as argument (assuming here 
 
 ### Triggering tasks
 
-The tool is listening via Flask on port **5000** on **localhost**.
+The tool listens via Flask on port **5000** on **localhost**.
 
 To trigger a task, for example `deploy_computes_nodes` seen above, query the Flask server via a curl command:
 
