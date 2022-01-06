@@ -23,7 +23,6 @@ import logging
 from ClusterShell.NodeSet import NodeSet
 import ssh_wait
 from datetime import datetime
-from packaging import version
 
 # Colors, from https://stackoverflow.com/questions/287871/how-to-print-colored-text-in-terminal-in-python
 class bcolors:
@@ -38,11 +37,12 @@ class bcolors:
 
 def load_file(filename):
     logging.info(bcolors.OKBLUE+'Loading '+filename+bcolors.ENDC)
+
     with open(filename, 'r') as f:
-        if version.parse(yaml.__version__) < version.parse("5.1.0"):
-            return yaml.load(f)
-        else:
+        # Select YAML loader (needs PyYAML 5.1+ to be safe)
+        if int(yaml.__version__.split('.')[0]) > 5 or (int(yaml.__version__.split('.')[0]) == 5 and int(yaml.__version__.split('.')[1]) >= 1):
             return yaml.load(f, Loader=yaml.FullLoader)
+        return yaml.load(f)
 
 app = Flask(__name__)
 app.config['CELERY_BROKER_URL'] = 'pyamqp://root:root@localhost//'

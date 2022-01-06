@@ -11,7 +11,10 @@
 
 ### Updated roles
 
-  - high_availability
+  - automate:
+    - improve yaml loader. (#49)
+
+  - high_availability:
     - configure firewall before pcs commands. (#41)
     - enable/disable STONITH when configuration is available/unavailable (#43)
     - fix use of unencrypted password of hacluster user (#45)

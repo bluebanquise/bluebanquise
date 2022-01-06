@@ -108,16 +108,6 @@
     - service █ Restart bbautomate_flask service
     - service █ Restart bbautomate_celery service
 
-#- name: template █ Generate tasks list /etc/automate/tasks.yml
-#  template:
-#    src: tasks.yml.j2
-#    dest: /etc/bbautomate/tasks.yml
-#    owner: root
-#    group: root
-#    mode: 0755
-#  tags:
-#    - template
-
 - name: copy █ Generate bbautomate_flask service file
   copy:
     src: bbautomate_flask.service

@@ -158,5 +158,6 @@ Once booted, diskless nodes will now trigger the automate to request a playbook 
 
 ## Changelog
 
+* 1.0.1: Improve yaml loader. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
 
