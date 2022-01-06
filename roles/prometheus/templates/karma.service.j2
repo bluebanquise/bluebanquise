@@ -9,7 +9,7 @@
   Type=simple
   WorkingDirectory=/etc/karma/
   ExecStart=/usr/local/bin/karma \
-  {{ karma_launch_parameters | indent(2, True) }}
+  {{ prometheus_server_karma_launch_parameters | indent(2, True) }}
 
 [Install]
   WantedBy=multi-user.target

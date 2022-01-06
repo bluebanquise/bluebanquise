@@ -1,5 +1,4 @@
 ---
-
 - name: include_tasks ░ Prometheus client
   include_tasks: "client.yml"
   when: prometheus_client

@@ -18,23 +18,31 @@ prometheus_server_snmp_exporter_host: localhost
 
 prometheus_server_prometheus_user_gid: 909
 prometheus_server_prometheus_user_uid: 909
+prometheus_server_alertmanager_user_gid: 910
+prometheus_server_alertmanager_user_uid: 910
+prometheus_server_karma_user_gid: 911
+prometheus_server_karma_user_uid: 911
+prometheus_server_ipmi_exporter_user_gid: 912
+prometheus_server_ipmi_exporter_user_uid: 912
+prometheus_server_snmp_exporter_user_gid: 913
+prometheus_server_snmp_exporter_user_uid: 913
 
-prometheus_server_launch_parameters: |
+prometheus_server_prometheus_launch_parameters: |
   --config.file /etc/prometheus/prometheus.yml \
   --storage.tsdb.path /var/lib/prometheus/ \
   --web.console.templates=/etc/prometheus/consoles \
   --web.console.libraries=/etc/prometheus/console_libraries $PROMETHEUS_OPTIONS
 
-alertmanager_launch_parameters: |
+prometheus_server_alertmanager_launch_parameters: |
   --config.file=/etc/alertmanager/alertmanager.yml
 
-karma_launch_parameters: |
+prometheus_server_karma_launch_parameters: |
   --config.file=/etc/karma/karma.yml
 
-ipmi_exporter_launch_parameters: |
+prometheus_server_ipmi_exporter_launch_parameters: |
   --config.file=/etc/ipmi_exporter/ipmi_config.yml
 
-snmp_exporter_launch_parameters: |
+prometheus_server_snmp_exporter_launch_parameters: |
   --config.file=/etc/snmp_exporter/snmp.yml
 
 prometheus_server_configuration_global:

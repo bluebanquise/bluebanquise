@@ -1,6 +1,6 @@
 # Prometheus
 
-Note: this role comply with BlueBanquise data-model 1.0.0.
+Note: this role comply with BlueBanquise data-model 1.0.0 (https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md).
 
 Table of content:
 
@@ -16,6 +16,7 @@ Table of content:
     + [Alertmanager configuration](#alertmanager-configuration)
     + [Karma configuration](#karma-configuration)
   * [4. Basic Client configuration](#4-basic-client-configuration)
+    + [Exporters](#exporters)
   * [5. IPMI and SNMP](#5-ipmi-and-snmp)
   * [6. Advanced usage](#6-advanced-usage)
     + [Set custom launch parameters](#set-custom-launch-parameters)
@@ -24,6 +25,7 @@ Table of content:
     + [Adding raw prometheus.conf scraping jobs:](#adding-raw-prometheusconf-scraping-jobs-)
     + [Adding raw prometheus.conf configuration](#adding-raw-prometheusconf-configuration)
   * [Changelog](#changelog)
+
 
 ## 1. Description
 
@@ -243,7 +245,7 @@ or to [this page](https://www.robustperception.io/whats-the-difference-between-g
 
 Few Karma parameters can be defined if needed.
 
-To set kerma username and password, use:
+To set karma username and password, use:
 
 ```yaml
 prometheus_server_karma_username: admin
@@ -268,7 +270,7 @@ Playbook example:
 
 The client side of the role simply install and start local exporters on nodes.
 
-## 5. Exporters
+### Exporters
 
 Each exporter has its own http port. For example, node_exporter is available at
 http://localhost:9100 .
@@ -284,7 +286,7 @@ Both variables are very similar.
 
 `prometheus_exporters_to_scrape` is used by server side only. Exporters listed
 here will be scraped by Prometheus using defined `address` and `port`.
-Exporters here have to be installed manually or with another role/task since
+Exporters listed here have to be installed manually or with another role/task since
 client side of the role will not consider them.
 
 ```yaml
@@ -305,6 +307,11 @@ prometheus_exporters_to_scrape:
 Server side will scrap these exporters on all the nodes of the group, while
 client side will install them on all nodes of the group.
 
+It is important to understand that the client side of the role is capable of 
+generating everything needed by an exporter binary: service file, users, working dir, etc.
+The role will generate these elements depending of the variables present.
+The list of capabilities is described after the example.
+
 Note that if port is not present, server side will ignore the exporter, but
 client side will install and start it. This can be used to install
 `prometheus_exporters_to_scrape` in HA context.
@@ -321,6 +328,11 @@ prometheus_exporters_groups_to_scrape:
       package: node_exporter
       service: node_exporter
       port: 9100
+      user: node_exporter
+      group: node_exporter
+      home: /var/lib/node_exporter
+      uid: 950
+      gid: 950
     - name: login_exporter
       package: login_exporter
       service: login_exporter
@@ -331,6 +343,17 @@ prometheus_exporters_groups_to_scrape:
 
 Note here that **scrape_interval** and **scrape_timeout** are optional
 values for each exporter here. These will override default values only if set.
+
+The following actions can occur:
+
+* If group is defined, a group will be created for the exporter (and set as default group in service file)
+* If gid is defined and group is defined, the group created will have this gid
+* If user is defined, a user will be created for the exporter (and set as default user in service file)
+* If uid is defined and user is defined, the user created will have this uid
+* If package is defined, the corresponding package will be installed (should be exporter binary)
+* If service is defined, a systemd service file will be generated and service will be started.
+* If service is defined, a corresponding /etc/{{service}} folder will be created if not exist
+* If port is defined, the port will be opened in the firewall if firewall is up
 
 ## 5. IPMI and SNMP
 
@@ -350,8 +373,8 @@ prometheus_server_manage_snmp: false
 ```
 
 You then need to specify which equipment_profile groups of nodes have to be
-ipmi scraped. To do so, simply set the `prometheus_ipmi_scrape_equipment_profiles`
-variable:
+ipmi scraped. To do so, simply set the global variable `prometheus_ipmi_scrape_equipment_profiles` 
+in the default *inventory/group_vars/all/prometheus.yml* file:
 
 ```yaml
 prometheus_ipmi_scrape_equipment_profiles:
@@ -522,6 +545,7 @@ prometheus_server_prometheus_raw_configuration:
 
 ## Changelog
 
+* 1.2.1: Add missing part of the role. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.2.0: Role global enhancement. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.1: Documentation. johnnykeats <johnny.keats@outlook.com>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>, johnnykeats <johnny.keats@outlook.com>

@@ -1,4 +1,19 @@
 ---
+- name: group █ Add alertmanager group
+  group:
+    name: alertmanager
+    gid: "{{ prometheus_server_alertmanager_user_gid }}"
+    state: present
+
+- name: user █ Add alertmanager user
+  user:
+    name: alertmanager
+    shell: /bin/false
+    uid: "{{ prometheus_server_alertmanager_user_uid }}"
+    group: alertmanager
+    home: /var/lib/alertmanager
+    state: present
+
 - name: Package █ Install alertmanager package
   package:
     name: alertmanager
@@ -64,7 +79,6 @@
   notify: service █ Restart alertmanager service
   tags:
     - template
-    - tyty
 
 - meta: flush_handlers
 

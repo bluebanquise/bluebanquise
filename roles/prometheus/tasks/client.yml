@@ -5,12 +5,57 @@
   loop: "{{ prometheus_exporters_groups_to_scrape | dict2items}}"
   when: inventory_hostname in groups[item.key]
 
+- name: group █ Add exporters needed groups
+  group:
+    name: "{{ item.group }}"
+    gid: "{{ item.gid | default(omit) }}"
+    system: yes
+    state: present
+  loop: "{{ exporters_groups }}"
+  when: item.group is defined
+
+- name: user █ Add exporters needed users
+  user:
+    name: "{{ item.user }}"
+    shell: /bin/false
+    uid: "{{ item.uid | default(omit) }}"
+    group: "{{ item.group | default(omit) }}"
+    home: "{{ item.home | default('/var/lib/'+item.user) }}"
+    system: yes
+    state: present
+  loop: "{{ exporters_groups }}"
+  when: item.user is defined
+
 - name: package █ install exporters packages
   package:
     name: "{{ item.package }}"
     state: present
   loop: "{{ exporters_groups }}"
   when: item.package is defined and item.package is not none
+
+- name: template █ Generate exporters service file
+  template:
+    src: exporter.service.j2
+    dest: "/etc/systemd/system/{{ item.service }}.service"
+    owner: root
+    group: root
+    mode: 0755
+  notify: systemd █ Reload systemd configuration
+  loop: "{{ exporters_groups }}"
+  when: item.service is defined
+  tags:
+    - template
+
+- name: file █ Create exporters working directories
+  file:
+    path: "/etc/{{ item.service }}/"
+    state: directory
+    mode: 0755
+    owner: "{{ item.user | default('root') }}"
+    group: "{{ item.group | default('root') }}"
+  loop: "{{ exporters_groups }}"
+
+- meta: flush_handlers
 
 - name: "firewalld █ Open exporters ports into firewall's {{ prometheus_client_firewall_zone | default('public') }} zone"
   firewalld:
@@ -34,3 +79,5 @@
     state: "{{ (start_services | bool) | ternary('started', omit) }}"
   loop: "{{ exporters_groups }}"
   when: item.service is defined and item.service is not none
+  tags:
+    - service

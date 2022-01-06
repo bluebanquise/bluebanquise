@@ -1,4 +1,19 @@
 ---
+- name: group █ Add karma group
+  group:
+    name: karma
+    gid: "{{ prometheus_server_karma_user_gid }}"
+    state: present
+
+- name: user █ Add karma user
+  user:
+    name: karma
+    shell: /bin/false
+    uid: "{{ prometheus_server_karma_user_uid }}"
+    group: karma
+    home: /var/lib/karma
+    state: present
+
 - name: Package █ Install karma package
   package:
     name: karma

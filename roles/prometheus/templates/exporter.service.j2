@@ -1,0 +1,15 @@
+[Unit]
+  Description={{ item.service }}
+  Wants=network-online.target
+  After=network-online.target
+
+[Service]
+  User={{ item.user | default('root') }}
+  Group={{ item.group | default('root') }}
+  Type=simple
+  WorkingDirectory=/etc/{{ item.service }}/
+  ExecStart={{ item.path | default('/usr/local/bin/'+item.service) }} \
+  {{ item.launch_parameters | default('') | indent(2, True) }}
+
+[Install]
+  WantedBy=multi-user.target

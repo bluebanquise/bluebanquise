@@ -9,7 +9,7 @@
   Type=simple
   WorkingDirectory=/etc/ipmi_exporter/
   ExecStart=/usr/local/bin/ipmi_exporter \
-  {{ ipmi_exporter_launch_parameters | indent(2, True) }}
+  {{ prometheus_server_ipmi_exporter_launch_parameters | indent(2, True) }}
 
 [Install]
   WantedBy=multi-user.target

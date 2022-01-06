@@ -1,4 +1,18 @@
 ---
+- name: group █ Add snmp_exporter group
+  group:
+    name: snmp_exporter
+    gid: "{{ prometheus_server_snmp_exporter_user_gid }}"
+    state: present
+
+- name: user █ Add snmp_exporter user
+  user:
+    name: snmp_exporter
+    shell: /bin/false
+    uid: "{{ prometheus_server_snmp_exporter_user_uid }}"
+    group: snmp_exporter
+    home: /var/lib/snmp_exporter
+    state: present
 
 - name: stat ░ Check if file /etc/snmp_exporter/snmp.yml exist
   stat:
