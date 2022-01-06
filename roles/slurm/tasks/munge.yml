@@ -6,6 +6,7 @@
     owner: munge
     group: munge
     mode: 0400
+  notify: service █ Restart munge
 
 - name: service █ Manage munge state
   service:

@@ -2,3 +2,12 @@
 - name: systemd █ Reload systemd configuration
   systemd:
     daemon_reload: yes
+
+- name: service █ Restart munge
+  service:
+    name: munge
+    state: restarted
+  when:
+    - "'service' not in ansible_skip_tags"
+    - (start_services | bool)
+
