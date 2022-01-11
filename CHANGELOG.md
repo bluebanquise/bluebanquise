@@ -51,6 +51,7 @@
     - add ip4_manual entry (#618)
     - add dns4 and dns4_search vars logic (#585)
     - improve role capabilities (#558)
+    - add missing register of nic_nmcli_apply variable (#662)
   - powerman:
     - implement support for externaly defined BMC (#640)
   - pxe_stack:

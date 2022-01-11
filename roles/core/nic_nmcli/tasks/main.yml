@@ -128,6 +128,7 @@
     method6: "{{ item.method6 | default(omit) }}"
   notify: command █ Reload connections
   loop: "{{ network_interfaces }}"
+  register: nic_nmcli_apply
   when: item.skip is not defined or (item.skip is defined and not item.skip)
   tags:
     - identify

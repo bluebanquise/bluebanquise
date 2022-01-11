@@ -183,6 +183,7 @@ To achieve that, two variables are at disposal:
 Changelog
 ^^^^^^^^^
 
+* 1.5.1: Add missing register of nic_nmcli_apply variable. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.5.0: Add ip4_manual entry. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.1: Adapt role to handle multiple distributions. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.0: Add Ubuntu support. Benoit Leveugle <benoit.leveugle@gmail.com>
