@@ -137,8 +137,18 @@
   shell: "nmcli con down {{ item.item.interface }} && sleep 2 && nmcli con up {{ item.item.interface }}"
   loop: "{{ nic_nmcli_apply.results }}"
   when:
-    - nic_nmcli_force_nic_restart is defined and nic_nmcli_force_nic_restart
+    - nic_nmcli_force_nic_restart
     - item.changed
+
+- name: reboot █ Reboot system to ensure apply nic configuration
+  reboot:
+    reboot_timeout: "{{ nic_nmcli_reboot_timeout }}"
+  register: reboot_status
+  loop: "{{ nic_nmcli_apply.results }}"
+  when:
+    - nic_nmcli_reboot
+    - item.changed
+    - not (reboot_status.changed | d(false))
 
 - name: meta █ Run handler tasks to reload connections
   meta: flush_handlers

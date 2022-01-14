@@ -175,14 +175,17 @@ time set their configuration.
 However, in some cases, users might need to force some updates (for example if 
 you wish to set routes on the main interface, etc).
 
-To achieve that, two variables are at disposal:
+To achieve that, few variables are at disposal:
 
 * ``nic_nmcli_reload_connections``: this variable will trigger a handler that will ask NetworkManager to reload its configuration.
-* ``nic_nmcli_force_nic_restart``: this variable will trigger a a task that will manually down and up interfaces. To be used with care.
+* ``nic_nmcli_force_nic_restart``: this variable will trigger a task that will manually down and up interfaces. To be used with care.
+* ``nic_nmcli_reboot``: this variable will trigger a reboot if any nic configuration changed. To be used with care.
+
 
 Changelog
 ^^^^^^^^^
 
+* 1.5.2: Add reboot capability, needed on some system. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.5.1: Add missing register of nic_nmcli_apply variable. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.5.0: Add ip4_manual entry. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.1: Adapt role to handle multiple distributions. Benoit Leveugle <benoit.leveugle@gmail.com>

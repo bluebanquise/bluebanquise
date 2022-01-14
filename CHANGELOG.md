@@ -40,6 +40,7 @@
     - notify in readme/page that firewall does not work in chroot (#569)
     - fix python path of diskless files (#590)
   - dns_server:
+    - Add missing vital parameters to allow binding to external DNS servers (#XXX)
     - improve role performances (#597)
     - add ability to set IP addresses for external domains (#609)
     - re-worked reverse zone generation to fix issue #614. (#621)
@@ -48,6 +49,7 @@
     - allow custom configuration path (#591)
     - remote logs stored in a similar fashion as the server (#568)
   - nic_nmcli:
+    - Add reboot capability, needed on some system. (#XXX)
     - add ip4_manual entry (#618)
     - add dns4 and dns4_search vars logic (#585)
     - improve role capabilities (#558)
@@ -55,6 +57,7 @@
   - powerman:
     - implement support for externaly defined BMC (#640)
   - pxe_stack:
+    - Fix missing tftp path for Ubuntu (#XXX)
     - Fix missing efi bootorder management for Ubuntu (#656)
     - Add bootset as package. (#649)
     - fix issues with hostname not set during kickstart on RHEL 8.3 (#522)
