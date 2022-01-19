@@ -24,3 +24,4 @@
     state: present
     reload: "{{ kernel_config_sysctl_reload | ternary('yes','no') }}"
   with_dict: "{{ ep_sysctl }}"
+  when: ep_sysctl is defined
