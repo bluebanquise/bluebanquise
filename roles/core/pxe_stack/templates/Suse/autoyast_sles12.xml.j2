@@ -27,9 +27,18 @@
       <pattern>base</pattern>
     </patterns>
     <packages config:type="list">
+      <package>python36</package>
       <package>openssh</package>
     </packages>
   </software> 
+
+  <bootloader>
+{% if hostvars[groups[item][0]]['ep_ipxe_platform'] == 'efi' %}
+    <loader_type>grub2-efi</loader_type>
+{% else %}
+    <loader_type>grub2</loader_type>
+{% endif %}
+  </bootloader>
 
 {{hostvars[groups[item][0]]['ep_partitioning']}}
 
