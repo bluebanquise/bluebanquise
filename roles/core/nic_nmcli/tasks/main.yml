@@ -17,7 +17,7 @@
         - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
         - "vars/{{ ansible_facts.os_family }}.yml"
-      errors: ignore
+      skip: true
   tags:
     - always
 
@@ -38,7 +38,7 @@
         - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
         - "{{ ansible_facts.distribution | replace(' ','_') }}/main.yml"
         - "{{ ansible_facts.os_family | replace(' ','_') }}/main.yml"
-      errors: ignore
+      skip: true
   tags:
     - internal
 
