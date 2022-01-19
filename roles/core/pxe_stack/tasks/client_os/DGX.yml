@@ -6,7 +6,7 @@
     dest: "{{ pxe_stack_htdocs_path }}/osdeploy/dgxos_{{ item.major }}.ipxe"
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
-    group: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_group }}"
   loop: "{{ pxe_stack_supported_os.dgxos }}"
 
 - name: "template █ Generate equipment_profiles {{ pxe_stack_htdocs_path }}/equipment_profiles/{item}.ipxe"
@@ -15,7 +15,7 @@
     dest: "{{ pxe_stack_htdocs_path }}/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.ipxe"
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
-    group: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_group }}"
   with_items: "{{ j2_equipment_groups_list }}"
   when:
     - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'

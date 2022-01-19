@@ -64,7 +64,7 @@
     state: directory
     mode: 0755
     owner: "{{ pxe_stack_apache_user }}"
-    group: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_group }}"
   loop:
     - "{{ pxe_stack_htdocs_path }}"
     - "{{ pxe_stack_htdocs_path }}/bin"
@@ -106,7 +106,7 @@
     dest: "{{ pxe_stack_htdocs_path }}/{{ item }}.ipxe"
     mode: 0755
     owner: "{{ pxe_stack_apache_user }}"
-    group: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_group }}"
   loop:
     - convergence
     - menu
@@ -119,7 +119,7 @@
     dest: "{{ pxe_stack_htdocs_path }}/nodes/.ipxe"
     mode: 0755
     owner: "{{ pxe_stack_apache_user }}"
-    group: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_group }}"
   tags:
     - template
 
@@ -175,7 +175,7 @@
     dest: "{{ pxe_stack_apache_cgi_bin_path }}/bootswitch.cgi"
     mode: 0744
     owner: "{{ pxe_stack_apache_user }}"
-    group: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_group }}"
   tags:
     - template
 

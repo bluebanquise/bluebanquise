@@ -6,7 +6,7 @@
     dest: "{{ pxe_stack_htdocs_path }}/osdeploy/redhat_{{ item.major }}.ipxe"
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
-    group: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_group }}"
   loop: "{{ pxe_stack_supported_os.redhat }}"
 
 - name: file █ Generate links for all supported OS
@@ -15,7 +15,7 @@
     dest: "{{ pxe_stack_htdocs_path }}/osdeploy/{{ item.1 }}_{{ item.0.major }}.ipxe"
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
-    group: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_group }}"
     state: link
   loop: "{{ pxe_stack_supported_os.redhat | subelements('distributions') }}"
   when: item.1 != 'redhat'
@@ -26,7 +26,7 @@
     dest: "{{ pxe_stack_htdocs_path }}/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.kickstart.cfg"
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
-    group: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_group }}"
   with_items: "{{ j2_equipment_groups_list }}"
   when:
     - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
@@ -40,7 +40,7 @@
     dest: "{{ pxe_stack_htdocs_path }}/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.ipxe"
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
-    group: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_group }}"
   with_items: "{{ j2_equipment_groups_list }}"
   when:
     - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'

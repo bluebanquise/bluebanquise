@@ -2,6 +2,7 @@
 pxe_stack_apache_cgi_module: cgid
 pxe_stack_apache_conf_path: /etc/httpd/conf.d
 pxe_stack_apache_user: apache
+pxe_stack_apache_group: apache
 pxe_stack_htdocs_path: /var/www/html/preboot_execution_environment
 pxe_stack_packages_to_install:
   - ipxe-x86_64-bluebanquise

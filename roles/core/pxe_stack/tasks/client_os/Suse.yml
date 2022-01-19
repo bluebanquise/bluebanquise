@@ -1,38 +1,58 @@
-##### OpenSuse
+##### OpenSuse / SLES
 
 - name: "copy █ Copy osdeploy files {{ pxe_stack_htdocs_path }}/osdeploy/"
   copy:
-    src: osdeploy/opensuse_15.ipxe
-    dest: "{{ pxe_stack_htdocs_path }}/osdeploy/opensuse_15.ipxe"
+    src: "osdeploy/{{ item }}"
+    dest: "{{ pxe_stack_htdocs_path }}/osdeploy/{{ item }}"
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
-    group: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_group }}"
+  with_items:
+    - opensuse_15.ipxe
+    - sles_12.ipxe
+    - sles_15.ipxe
 
-- name: template █ Create autoyast file for OpenSuSE
+- name: template █ Create autoyast file for SLES 12
   template:
-    src: Suse/autoyast.xml.j2
+    src: Suse/autoyast_sles12.xml.j2
     dest: "{{ pxe_stack_htdocs_path }}/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.autoyast.xml"
     owner: "{{ pxe_stack_apache_user }}"
-    group: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_group }}"
     validate: /usr/bin/xmllint --noout --relaxng /usr/share/YaST2/schema/autoyast/rng/profile.rng %s
   with_items: "{{ j2_equipment_groups_list }}"
   when:
     - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
-    - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) == 'opensuse'
+    - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) == 'sles'
+    - hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] == 12
   tags:
     - template
 
-- name: template █ equipment_profiles for OpenSuse
+- name: template █ Create autoyast file for OpenSuSE 15 / SLES 15
+  template:
+    src: Suse/autoyast.xml.j2
+    dest: "{{ pxe_stack_htdocs_path }}/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.autoyast.xml"
+    owner: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_group }}"
+    validate: /usr/bin/xmllint --noout --relaxng /usr/share/YaST2/schema/autoyast/rng/profile.rng %s
+  with_items: "{{ j2_equipment_groups_list }}"
+  when:
+    - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
+    - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) == 'opensuse' or (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) == 'sles'
+    - hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] == 15
+  tags:
+    - template
+
+- name: template █ equipment_profiles for OpenSuSE / SLES
   template:
     src: Suse/equipment_profile_autoyast.ipxe.j2
     dest: "{{ pxe_stack_htdocs_path }}/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.ipxe"
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
-    group: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_group }}"
   with_items: "{{ j2_equipment_groups_list }}"
   when:
     - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
-    - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) == 'opensuse'
+    - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) == 'opensuse' or (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) == "sles"
   tags:
     - template
 

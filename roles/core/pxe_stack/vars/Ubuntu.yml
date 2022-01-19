@@ -1,5 +1,6 @@
 ---
 pxe_stack_apache_user: www-data
+pxe_stack_apache_group: www-data
 pxe_stack_apache_conf_path: /etc/apache2/conf-enabled
 pxe_stack_apache_cgi_module: cgid
 pxe_stack_htdocs_path: /var/www/html/preboot_execution_environment
