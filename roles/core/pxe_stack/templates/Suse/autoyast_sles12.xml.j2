@@ -64,8 +64,8 @@
   <user>
     <username>root</username>
     <user_password>{{hostvars[groups[item][0]]['authentication_root_password_sha512']}}</user_password>
-    <uid>1001</uid>
-    <gid>100</gid>
+    <uid>0</uid>
+    <gid>0</gid>
     <encrypted config:type="boolean">true</encrypted>
     <fullname>Root User</fullname>
     <authorized_keys config:type="list">
