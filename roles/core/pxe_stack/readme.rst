@@ -173,6 +173,7 @@ To be done
 Changelog
 ^^^^^^^^^
 
+* 1.3.6: Fix missing efi check in auto install files. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.5: Fix missing tftp path for Ubuntu. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.4: Fix missing efi bootorder management for Ubuntu. johnnykeats <johnny.keats@outlook.com>
 * 1.3.3: Add bootset as package. Benoit Leveugle <benoit.leveugle@gmail.com>

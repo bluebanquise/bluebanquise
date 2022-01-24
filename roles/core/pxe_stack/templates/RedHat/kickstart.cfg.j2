@@ -76,7 +76,7 @@ curl
 
 # This EFI first boot order restoration trick is from stacki, not from me.
 # See https://github.com/Teradata/stacki for more details
-{% if hostvars[groups[item][0]]['ep_preserve_efi_first_boot_device'] == true %}
+{% if hostvars[groups[item][0]]['ep_preserve_efi_first_boot_device'] == true and hostvars[groups[item][0]]['ep_ipxe_platform'] == 'efi' %}
 %pre
 set -x
 if [ -d /sys/firmware/efi ]; then
