@@ -120,7 +120,7 @@ d-i preseed/late_command string \
 {% if pxe_stack_sshd_force_permitrootlogin %}
   in-target sh -c 'sed -i "s/^#PermitRootLogin.*\$/PermitRootLogin yes/g" /etc/ssh/sshd_config'; \
 {% endif %}
-{% if pxe_stack_preseed_remove_apt_sources %}
+{% if not pxe_stack_ubuntu_preseed_preserve_sources_list %}
   in-target sh -c 'echo " " > /etc/apt/sources.list'; \
   in-target sh -c 'apt update'; \
 {% endif %}

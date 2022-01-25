@@ -59,6 +59,7 @@
   - powerman:
     - implement support for externaly defined BMC (#640)
   - pxe_stack:
+    - Allow manipulating sources list in autoinstall on Ubuntu (#665)
     - Fix missing efi check in auto install files (#665)
     - Fix missing tftp path for Ubuntu (#665)
     - Fix missing efi bootorder management for Ubuntu (#656)

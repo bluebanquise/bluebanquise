@@ -1,6 +1,9 @@
 #cloud-config
 autoinstall:
   version: 1
+  apt:
+    geoip: true
+    preserve_sources_list: {{ pxe_stack_ubuntu_user_data_preserve_sources_list }}
   keyboard: {layout: {{hostvars[groups[item][0]]['ep_configuration']['keyboard_layout']|lower}}, toggle: null, variant: ''}
   locale: {{hostvars[groups[item][0]]['ep_configuration']['system_language']}}
   user-data:
