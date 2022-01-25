@@ -28,6 +28,15 @@
   tags:
     - package
 
+- name: "service █ Manage {{ nic_nmcli_services_to_start | join(' ') }} state"
+  service:
+    name: "{{ item }}"
+    enabled: yes
+    state: "{{ (nic_nmcli_start_services | bool) | ternary('started', omit) }}"
+  loop: "{{ nic_nmcli_services_to_start }}"
+  tags:
+    - service
+
 - name: include_tasks ░ Use OS dedicated task
   include_tasks: "{{ item }}"
   with_first_found:
@@ -44,15 +53,6 @@
 
 - name: meta █ Run handlers
   meta: flush_handlers
-
-- name: "service █ Manage {{ nic_nmcli_services_to_start | join(' ') }} state"
-  service:
-    name: "{{ item }}"
-    enabled: yes
-    state: started
-  loop: "{{ nic_nmcli_services_to_start }}"
-  tags:
-    - service
 
 - name: service █ Ensure Betwork Manager is running
   service:
@@ -146,7 +146,7 @@
   register: reboot_status
   loop: "{{ nic_nmcli_apply.results }}"
   when:
-    - nic_nmcli_reboot
+    - nic_nmcli_force_reboot
     - item.changed
     - not (reboot_status.changed | d(false))
 

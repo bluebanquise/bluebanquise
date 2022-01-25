@@ -50,6 +50,7 @@
     - allow custom configuration path (#591)
     - remote logs stored in a similar fashion as the server (#568)
   - nic_nmcli:
+    - Improve Ubuntu compatibility. (#665)
     - Add reboot capability, needed on some system. (#665)
     - add ip4_manual entry (#618)
     - add dns4 and dns4_search vars logic (#585)

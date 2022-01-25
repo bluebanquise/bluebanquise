@@ -185,6 +185,7 @@ To achieve that, few variables are at disposal:
 Changelog
 ^^^^^^^^^
 
+* 1.5.3: Improve Ubuntu compatibility. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.5.2: Add reboot capability, needed on some system. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.5.1: Add missing register of nic_nmcli_apply variable. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.5.0: Add ip4_manual entry. Benoit Leveugle <benoit.leveugle@gmail.com>
