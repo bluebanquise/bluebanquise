@@ -25,8 +25,8 @@ autoinstall:
 {% if pxe_stack_preseed_remove_apt_sources %}
     - echo " " > /target/etc/apt/sources.list
 {% endif %}
-{% if hostvars[groups[item][0]]['ep_preserve_efi_first_boot_device'] == true and hostvars[groups[item][0]]['ep_ipxe_platform'] == 'efi' %}
-    - efibootmgr -o $(efibootmgr | grep BootCurrent | cut -d" " -f2),$(efibootmgr | grep BootOrder | sed "s/BootOrder:\ //" | sed "s/$(efibootmgr | grep BootCurrent | cut -d" " -f2),//")
+{% if hostvars[groups[item][0]]['ep_preserve_efi_first_boot_device'] == true %}
+    - sh -c '[ -d /sys/firmware/efi ] && efibootmgr -o $(efibootmgr | grep BootCurrent | cut -d" " -f2),$(efibootmgr | grep BootOrder | sed "s/BootOrder:\ //" | sed "s/$(efibootmgr | grep BootCurrent | cut -d" " -f2),//") || echo "Not an EFI system, skipping"'
 {% endif %}
     - sed -i 's|^root:.:|root:{{hostvars[groups[item][0]]['authentication_root_password_sha512']}}:|' /target/etc/shadow
     - curtin in-target --target=/target -- sh -c 'set -- `cat /proc/cmdline`; for I in $*; do case "$I" in *=*) eval $I;; esac; done; curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$node_hostname&boot=disk";'

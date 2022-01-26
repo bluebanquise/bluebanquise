@@ -125,7 +125,7 @@ d-i preseed/late_command string \
   in-target sh -c 'apt update'; \
 {% endif %}
 {% if hostvars[groups[item][0]]['ep_preserve_efi_first_boot_device'] == true %}
-  in-target sh -c 'efibootmgr -o $(efibootmgr | grep BootCurrent | cut -d" " -f2),$(efibootmgr | grep BootOrder | sed "s/BootOrder:\ //" | sed "s/$(efibootmgr | grep BootCurrent | cut -d" " -f2),//")'
+  in-target sh -c '[ -d /sys/firmware/efi ] && efibootmgr -o $(efibootmgr | grep BootCurrent | cut -d" " -f2),$(efibootmgr | grep BootOrder | sed "s/BootOrder:\ //" | sed "s/$(efibootmgr | grep BootCurrent | cut -d" " -f2),//") || echo "Not an EFI system, skipping"'
 {% endif %}
   in-target set -- `cat /proc/cmdline`; for I in $*; do case "$I" in *=*) eval $I;; esac; done; \
   in-target echo Next server is $ipxe_next_server; \
