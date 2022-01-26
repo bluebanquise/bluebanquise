@@ -9,7 +9,7 @@
   notify:
     - command █ Netplan generate
     - command █ Netplan apply
-    - reboot █ Reboot Ubuntu system to enable network-manager first time 
+    - reboot █ Reboot Ubuntu system to enable network-manager first time
   tags:
     - template
 
@@ -18,13 +18,13 @@
     path: /etc/netplan/00-installer-config.yaml
     state: absent
 
-#- name: lineinfile █ Prevent automatic connections
-#  lineinfile:
-#    path: /etc/NetworkManager/NetworkManager.conf
-#    insertafter: '\[main\]'
-#    firstmatch: true
-#    line: no-auto-default=*
-#    state: present
+# - name: lineinfile █ Prevent automatic connections
+#   lineinfile:
+#     path: /etc/NetworkManager/NetworkManager.conf
+#     insertafter: '\[main\]'
+#     firstmatch: true
+#     line: no-auto-default=*
+#     state: present
 
 - name: meta █ Run handlers
   meta: flush_handlers
