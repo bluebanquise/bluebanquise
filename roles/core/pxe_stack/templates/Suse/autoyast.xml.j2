@@ -1,6 +1,23 @@
+#jinja2: lstrip_blocks: True
 <?xml version="1.0"?>
 <!DOCTYPE profile>
 <profile xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http://www.suse.com/1.0/configns">
+
+  <add-on>
+    <add_on_products config:type="list">
+{% for repo in repositories %}
+  {% if repo != "os" %}
+      <listentry>
+        <media_url>http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/{{ ep_operating_system['repositories_environment'] | default('') }}/{{ ep_operating_system['distribution'] }}/{{ ep_operating_system['distribution_version'] | default(ep_operating_system['distribution_major_version']) }}/{{ ep_hardware['cpu']['architecture'] }}/{{ repo }}</media_url>
+        <alias>{{ repo }}</alias>
+        <ask_on_error config:type="boolean">false</ask_on_error>
+        <confirm_license config:type="boolean">false</confirm_license>
+        <name>{{ repo }}</name>
+      </listentry>
+  {% endif %}
+{% endfor %}
+    </add_on_products>
+  </add-on>
 
   <keyboard>
     <keymap>{{hostvars[groups[item][0]]['ep_configuration']['keyboard_layout']|lower}}</keymap>
@@ -22,6 +39,9 @@
   </networking>
 
   <software>
+    <products config:type="list">
+      <product>SLES</product>
+    </products>
     <install_recommended config:type="boolean">true</install_recommended>
     <patterns config:type="list">
       <pattern>base</pattern>
@@ -31,14 +51,22 @@
     </packages>
   </software> 
 
+  <bootloader>
+{% if hostvars[groups[item][0]]['ep_ipxe_platform'] == 'efi' %}
+    <loader_type>grub2-efi</loader_type>
+{% else %}
+    <loader_type>grub2</loader_type>
+{% endif %}
+  </bootloader>
+
 {{hostvars[groups[item][0]]['ep_partitioning']}}
 
  <users config:type="list">
   <user>
     <username>root</username>
     <user_password>{{hostvars[groups[item][0]]['authentication_root_password_sha512']}}</user_password>
-    <uid>1001</uid>
-    <gid>100</gid>
+    <uid>0</uid>
+    <gid>0</gid>
     <encrypted config:type="boolean">true</encrypted>
     <fullname>Root User</fullname>
     <authorized_keys config:type="list">
@@ -145,10 +173,16 @@ curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$(hostna
 {% endif %}
   </scripts>
 
- <general>
+<general>
   <mode>
-   <confirm config:type="boolean">false</confirm>
+    <confirm config:type="boolean">false</confirm>
   </mode>
+  <signature-handling>
+    <accept_unsigned_file config:type="boolean">true</accept_unsigned_file>
+    <accept_unknown_gpg_key config:type="boolean">true</accept_unknown_gpg_key>
+    <accept_non_trusted_gpg_key config:type="boolean">true</accept_non_trusted_gpg_key>
+    <import_gpg_key config:type="boolean">true</import_gpg_key>
+  </signature-handling>
  </general>
 
 </profile>

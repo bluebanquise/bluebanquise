@@ -14,10 +14,10 @@ pxe_stack_packages_to_install:
   - ipxe-x86_64-bluebanquise
 #  - ipxe-arm64-bluebanquise
   - python3-clustershell
-pxe_stack_default_tftp_package: atftp
+pxe_stack_default_tftp_package: tftp
 pxe_stack_services_to_start:
   - httpd
-pxe_stack_default_tftp_service: atftpd.socket
+pxe_stack_default_tftp_service: tftp
 pxe_stack_firewall_services_to_add:
   - http
   - tftp
