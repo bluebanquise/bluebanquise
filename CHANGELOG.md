@@ -54,6 +54,7 @@
     - add missing register of nic_nmcli_apply variable (#662)
   - powerman:
     - implement support for externaly defined BMC (#640)
+    - Fix reference to bluebanquise-filters (#669)
   - pxe_stack:
     - Fix missing efi bootorder management for Ubuntu (#656)
     - Add bootset as package. (#649)
