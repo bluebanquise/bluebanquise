@@ -9,7 +9,7 @@
   notify:
     - command █ Netplan generate
     - command █ Netplan apply
-    - reboot █ Reboot Ubuntu system to enable network-manager first time
+    - reboot █ Reboot system
   tags:
     - template
 

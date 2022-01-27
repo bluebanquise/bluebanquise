@@ -9,7 +9,7 @@
 - name: command █ Netplan apply
   command: netplan apply
 
-- name: reboot █ Reboot Ubuntu system to enable Network-Manager first time
+- name: reboot █ Reboot system
   reboot:
     reboot_timeout: "{{ nic_nmcli_reboot_timeout }}"
   when:
