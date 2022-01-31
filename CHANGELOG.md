@@ -66,6 +66,7 @@
     - Add bootset as package. (#649)
     - fix issues with hostname not set during kickstart on RHEL 8.3 (#522)
     - force substitution of files by symlinks in case of an update (#587)
+    - Reapply #587 (#666)
   - repositories_client:
     - Improve Ubuntu support (#665)
     - fix CentOS 8.4 repository compatibility (#534)
