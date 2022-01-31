@@ -22,7 +22,7 @@ autoinstall:
 {% if pxe_stack_sshd_force_permitrootlogin %}
     - sed -i "s/^#PermitRootLogin.*\$/PermitRootLogin yes/g" /target/etc/ssh/sshd_config
 {% endif %}
-{% if pxe_stack_preseed_remove_apt_sources %}
+{% if not pxe_stack_ubuntu_user_data_preserve_sources_list %}
     - echo " " > /target/etc/apt/sources.list
 {% endif %}
 {% if hostvars[groups[item][0]]['ep_preserve_efi_first_boot_device'] == true %}
