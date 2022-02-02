@@ -70,12 +70,12 @@ JobAcctGatherType=jobacct_gather/linux
   {% if groups[computes_group] is iterable %}
     {% set buffer = hostvars[groups[computes_group][0]]['ep_hardware'] %}
     {% if buffer.cpu.sockets is defined and buffer.cpu.sockets is not none and buffer.cpu.corespersocket is defined and buffer.cpu.corespersocket is not none and buffer.cpu.threadspercore is defined and buffer.cpu.threadspercore is not none%}
-      {% set nodes_parameters = ' Sockets=' + buffer.cpu.sockets + ' CoresPerSocket=' + buffer.cpu.corespersocket + ' ThreadsPerCore=' + buffer.cpu.threadspercore %}
+      {% set nodes_parameters = ' Sockets=' + (buffer.cpu.sockets|string) + ' CoresPerSocket=' + (buffer.cpu.corespersocket|string) + ' ThreadsPerCore=' + (buffer.cpu.threadspercore|string) %}
     {% else %}{# Will fail if cores is also not set. Expected minimal value. #}
       {% set nodes_parameters = ' Procs=' + (buffer.cpu.cores | string) %}
     {% endif %}
     {% if buffer.memory is defined and buffer.memory is not none %}
-        {% set nodes_parameters = nodes_parameters + ' RealMemory=' + buffer.memory %}
+        {% set nodes_parameters = nodes_parameters + ' RealMemory=' + (buffer.memory|string) %}
     {% endif %}
     {% if buffer.slurm_extra_nodes_parameters is defined and buffer.slurm_extra_nodes_parameters is not none %}
         {% set nodes_parameters = nodes_parameters + slurm_extra_nodes_parameters %}

@@ -178,6 +178,7 @@ sacctmgr list cluster
 
 ## Changelog
 
+* 1.1.1: Missing string filter in template. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.0: Role major upgrade. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.2: Update role, remove munge key. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.1: Documentation. Benoit Leveugle <benoit.leveugle@gmail.com>

@@ -9,6 +9,7 @@
 
 ### Updated roles
 
+  - slurm: missing string filter in templates
   - prometheus: update ubuntu support
 
 ## 1.0.1
