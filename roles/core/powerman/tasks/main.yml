@@ -4,7 +4,7 @@
     name:
       - freeipmi
       - powerman
-      - bluebanquise_filters
+      - bluebanquise-filters
     state: present
   tags:
     - package

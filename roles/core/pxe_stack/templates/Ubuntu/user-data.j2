@@ -3,12 +3,7 @@ autoinstall:
   version: 1
   apt:
     geoip: true
-    preserve_sources_list: false
-    primary:
-    - arches: [amd64, i386]
-      uri: http://hr.archive.ubuntu.com/ubuntu
-    - arches: [default]
-      uri: http://ports.ubuntu.com/ubuntu-ports
+    preserve_sources_list: {{ pxe_stack_ubuntu_user_data_preserve_sources_list }}
   keyboard: {layout: {{hostvars[groups[item][0]]['ep_configuration']['keyboard_layout']|lower}}, toggle: null, variant: ''}
   locale: {{hostvars[groups[item][0]]['ep_configuration']['system_language']}}
   user-data:
@@ -27,11 +22,11 @@ autoinstall:
 {% if pxe_stack_sshd_force_permitrootlogin %}
     - sed -i "s/^#PermitRootLogin.*\$/PermitRootLogin yes/g" /target/etc/ssh/sshd_config
 {% endif %}
-{% if pxe_stack_preseed_remove_apt_sources %}
+{% if not pxe_stack_ubuntu_user_data_preserve_sources_list %}
     - echo " " > /target/etc/apt/sources.list
 {% endif %}
 {% if hostvars[groups[item][0]]['ep_preserve_efi_first_boot_device'] == true %}
-    - efibootmgr -o $(efibootmgr | grep BootCurrent | cut -d" " -f2),$(efibootmgr | grep BootOrder | sed "s/BootOrder:\ //" | sed "s/$(efibootmgr | grep BootCurrent | cut -d" " -f2),//")
+    - sh -c '[ -d /sys/firmware/efi ] && efibootmgr -o $(efibootmgr | grep BootCurrent | cut -d" " -f2),$(efibootmgr | grep BootOrder | sed "s/BootOrder:\ //" | sed "s/$(efibootmgr | grep BootCurrent | cut -d" " -f2),//") || echo "Not an EFI system, skipping"'
 {% endif %}
     - sed -i 's|^root:.:|root:{{hostvars[groups[item][0]]['authentication_root_password_sha512']}}:|' /target/etc/shadow
     - curtin in-target --target=/target -- sh -c 'set -- `cat /proc/cmdline`; for I in $*; do case "$I" in *=*) eval $I;; esac; done; curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$node_hostname&boot=disk";'

@@ -27,6 +27,7 @@
     - Add missing bluebanquise_filter package (#648)
   - clustershell: prevent dummy host to be included (#619)
   - conman: 
+    - Fix bluebanquise-filters package name (#665)
     - fix execpath for RHEL 8 (#584)
     - implement support for externaly defined BMC (#640)
     - fix execpath for RHEL 8 (#584)
@@ -40,6 +41,7 @@
     - notify in readme/page that firewall does not work in chroot (#569)
     - fix python path of diskless files (#590)
   - dns_server:
+    - Add missing vital parameters to allow binding to external DNS servers (#665)
     - improve role performances (#597)
     - add ability to set IP addresses for external domains (#609)
     - re-worked reverse zone generation to fix issue #614. (#621)
@@ -48,6 +50,8 @@
     - allow custom configuration path (#591)
     - remote logs stored in a similar fashion as the server (#568)
   - nic_nmcli:
+    - Improve Ubuntu compatibility. (#665)
+    - Add reboot capability, needed on some system. (#665)
     - add ip4_manual entry (#618)
     - add dns4 and dns4_search vars logic (#585)
     - improve role capabilities (#558)
@@ -55,12 +59,17 @@
   - powerman:
     - implement support for externaly defined BMC (#640)
   - pxe_stack:
+    - Allow manipulating sources list in autoinstall on Ubuntu (#665)
+    - Fix missing efi check in auto install files (#665)
+    - Fix missing tftp path for Ubuntu (#665)
     - Fix missing efi bootorder management for Ubuntu (#656)
     - Add bootset as package. (#649)
     - fix issues with hostname not set during kickstart on RHEL 8.3 (#522)
     - force substitution of files by symlinks in case of an update (#587)
     - Reapply #587 (#666)
-  - repositories_client: fix CentOS 8.4 repository compatibility (#534)
+  - repositories_client:
+    - Improve Ubuntu support (#665)
+    - fix CentOS 8.4 repository compatibility (#534)
   - set_hostname: add fqdn capability (#543)
   - ssh_master:
     - Fix issue with empty network interfaces (#657)
