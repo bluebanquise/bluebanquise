@@ -1,11 +1,15 @@
 # Changelog
 
-## 1.0.2 - Next release
+## 1.5.0 - Next release
 
 ### New roles
 
   - loki. Owner: @neilmunday
   - automate. Owner: @oxedions
+
+### Updated roles
+
+  - prometheus: update ubuntu support
 
 ## 1.0.1
 

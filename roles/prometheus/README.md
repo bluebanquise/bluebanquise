@@ -545,6 +545,7 @@ prometheus_server_prometheus_raw_configuration:
 
 ## Changelog
 
+* 1.2.2: Fix ubuntu support. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.2.1: Add missing part of the role. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.2.0: Role global enhancement. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.1: Documentation. johnnykeats <johnny.keats@outlook.com>

@@ -16,11 +16,10 @@
 
 - name: Package █ Install ipmi_exporter and freeipmi packages
   package:
-    name: "{{ item }}"
+    name: "{{ prometheus_server_ipmi_exporter_packages_to_install }}"
     state: present
-  loop:
-    - ipmi-exporter
-    - freeipmi
+  tags:
+    - package
 
 - name: template █ Generate ipmi_exporter service file
   template:

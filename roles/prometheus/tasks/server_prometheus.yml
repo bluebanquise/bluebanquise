@@ -16,8 +16,10 @@
 
 - name: package █ Install prometheus package
   package:
-    name: prometheus
+    name: "{{ prometheus_server_prometheus_packages_to_install }}"
     state: present
+  tags:
+    - package
 
 - name: template █ Generate prometheus service file
   template:

@@ -16,8 +16,10 @@
 
 - name: Package █ Install alertmanager package
   package:
-    name: alertmanager
+    name: "{{ prometheus_server_alertmanager_packages_to_install }}"
     state: present
+  tags:
+    - package
 
 - name: template █ Generate alertmanager service file
   template:

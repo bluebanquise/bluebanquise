@@ -16,8 +16,10 @@
 
 - name: Package █ Install karma package
   package:
-    name: karma
+    name: "{{ prometheus_server_karma_packages_to_install }}"
     state: present
+  tags:
+    - package
 
 - name: template █ Generate karma service file
   template:

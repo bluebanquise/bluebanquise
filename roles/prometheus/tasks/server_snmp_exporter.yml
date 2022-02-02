@@ -32,23 +32,19 @@
 
 - name: Package █ Install snmp_exporter package
   package:
-    name: snmp_exporter
+    name: "{{ prometheus_server_snmp_exporter_packages_to_install }}"
     state: present
+  tags:
+    - package
 
 # for generator of oid walk for snmp_exporter
 - name: Package █ Install snmp_exporter generator packages
   package:
-    name: "{{ item }}"
+    name: "{{ prometheus_server_snmp_exporter_additional_packages_to_install }}"
     state: present
-  vars:
-    packages:
-    - gcc
-    - make
-    - net-snmp
-    - net-snmp-utils
-    - net-snmp-libs
-    - net-snmp-devel
   when: prometheus_server_snmp_exporter_with_generator
+  tags:
+    - package
 
 - name: template █ Generate snmp_exporter service file
   template:
