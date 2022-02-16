@@ -4,15 +4,9 @@
   service:
     name: wicked
     enabled: no
-  register: wicked_rslt
+  notify: reboot █ Reboot system
 
 - name: "service █ Enable NetworkManager"
   service:
     name: NetworkManager
     enabled: yes
-
-- name: "reboot █ Reboot to use NetworkManager"
-  reboot:
-    reboot_timeout: 600
-  when: wicked_rslt.changed
-

@@ -7,4 +7,4 @@
     owner: root
     group: root
     mode: 0644
-  notify: service █ Restart http server service 
+  notify: service █ Restart http server service
