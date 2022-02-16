@@ -35,9 +35,6 @@
     - /diskless/images/nfsimages
     - /diskless/images/nfsimages/golden
     - /diskless/images/nfsimages/staging
-    # Create directories for python modules
-    - "{{ diskless_usr_lib_dir }}/python{{ diskless_python_version }}/site-packages/diskless"
-    - "{{ diskless_usr_lib_dir }}/python{{ diskless_python_version }}/site-packages/diskless/modules"
     # Create directory for 'installations.yml' file
     - /var/lib/diskless
     # Create working directory for images
@@ -45,29 +42,13 @@
     # Create disklessset configuration directory
     - /etc/disklessset/
 
-# Copy script files with permission
-- name: "copy █ Add diskless scripts"
-  copy:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
-    mode: 0755
-  with_items:
-    - { src: 'utils.py', dest: '{{ diskless_usr_lib_dir }}/python{{ diskless_python_version }}/site-packages/diskless/utils.py' }
-    - { src: 'image_manager.py', dest: '{{ diskless_usr_lib_dir }}/python{{ diskless_python_version }}/site-packages/diskless/image_manager.py' }
-    - { src: 'nfs_module.py', dest: '{{ diskless_usr_lib_dir }}/python{{ diskless_python_version }}/site-packages/diskless/modules/nfs_module.py' }
-    - { src: 'livenet_module.py', dest: '{{ diskless_usr_lib_dir }}/python{{ diskless_python_version }}/site-packages/diskless/modules/livenet_module.py' }
-    - { src: 'demo_module.py', dest: '{{ diskless_usr_lib_dir }}/python{{ diskless_python_version }}/site-packages/diskless/modules/demo_module.py' }
-    - { src: 'disklessset.py', dest: '/usr/bin/disklessset' }
-
-- name: "template █ Generate diskless scripts"
+- name: template █ Generate /etc/disklessset/diskless_parameters.yml
   template:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
     mode: "{{ item.mode }}"
   with_items:
-    - { src: 'base_module.py.j2', dest: '{{ diskless_usr_lib_dir }}/python{{ diskless_python_version }}/site-packages/diskless/modules/base_module.py', mode: '0755' }
     - { src: 'diskless_parameters.yml.j2', dest: '/etc/disklessset/diskless_parameters.yml', mode: '0644' }
-    - { src: 'kernel_manager.py.j2', dest: '{{ diskless_usr_lib_dir }}/python{{ diskless_python_version }}/site-packages/diskless/kernel_manager.py', mode: '0644' }
   tags:
     - template
 

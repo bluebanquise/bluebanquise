@@ -25,8 +25,8 @@
         that: "'{{ item }}' in ansible_facts.packages"
       loop:
         - atftp
-        - ipxe-x86_64-bluebanquise
-        - ipxe-arm64-bluebanquise
+        - bluebanquise-ipxe-x86_64
+        - bluebanquise-ipxe-arm64
         - httpd
 
     - name: Assert pxe extra el8 packages are installed

@@ -1,4 +1,4 @@
-# BlueBanquise CORE inventory data model reference
+# BlueBanquise CORE inventory data model reference 1.0.0
 
 This data model is frozen, and should evolve only if major need.
 
@@ -285,4 +285,22 @@ j2_node_main_resolution_network: Main resolution network. The network on which h
 j2_node_main_network: Main network. The network used by Ansible to deploy configuration (related to ssh).
 j2_node_main_network_interface: Main network interface. Same as main network, but provides interface name instead of network.
 j2_management_networks: List of management networks.
+```
+
+## Next version (2.0.0)
+
+* Support for externaly defined bmc
+* Support for `ep_host_authentication` variable. `ep_equipment_authentication` deprecated and removed.
+
+```
+ep_host_authentication:
+  - protocol: SNMP
+    user: snmpuser
+    password: snmppass
+  - protocol: SSH
+    user: sshuser
+    password: sshpass
+  - protocol: IPMI
+    user: ADMIN
+    password: ADMIN
 ```

@@ -19,3 +19,5 @@
       line: 'TFTP_ADDRESS="0.0.0.0:69"'
     - regexp: "^TFTP_OPTIONS"
       line: 'TFTP_OPTIONS="--secure --verbose"'
+    - regexp: "^TFTP_DIRECTORY"
+      line: 'TFTP_DIRECTORY="/var/lib/tftpboot"'

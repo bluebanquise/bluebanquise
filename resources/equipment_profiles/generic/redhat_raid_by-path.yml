@@ -1,0 +1,20 @@
+---
+ep_partitioning: |
+      # Partition clearing information
+      clearpart --all --initlabel --drives=/dev/disk/by-path/pci-0000:00:11.4-ata-1.0,/dev/disk/by-path/pci-0000:00:11.4-ata-2.0
+      # Disk partitioning information
+      part raid.01 --ondisk=disk/by-path/pci-0000:00:11.4-ata-1.0 --size=1024
+      part raid.02 --ondisk=disk/by-path/pci-0000:00:11.4-ata-1.0 --size=4096
+      part raid.03 --ondisk=disk/by-path/pci-0000:00:11.4-ata-1.0 --size=1000 --grow
+      part raid.04 --ondisk=disk/by-path/pci-0000:00:11.4-ata-2.0 --size=1024
+      part raid.05 --ondisk=disk/by-path/pci-0000:00:11.4-ata-2.0 --size=4096
+      part raid.06 --ondisk=disk/by-path/pci-0000:00:11.4-ata-2.0 --size=1000 --grow
+      raid /boot --level=1 --device=md0 --fstype=ext4 raid.01 raid.04 --label=BOOT
+      raid swap --level=1 --device=md2 --fstype=swap raid.02 raid.05 --label=SWAP
+      raid / --level=1 --device=md3 --fstype=ext4 raid.03 raid.06 --label=ROOT
+
+ep_operating_system:
+  distribution: RedHat
+  distribution_major_version: 8
+
+ep_equipment_type: server

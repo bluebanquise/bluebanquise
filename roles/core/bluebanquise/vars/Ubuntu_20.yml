@@ -3,3 +3,4 @@ bluebanquise_packages_to_install:
   - ansible
   - python3-jmespath
   - python3-netaddr
+  - bluebanquise-filters

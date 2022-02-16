@@ -1,5 +1,5 @@
 ---
-dns_server_role_version: 1.3.2
+dns_server_role_version: 1.4.0
 
 j2_dns_server_get_network: "
 {% if networks[item]['prefix'] <= 8 %}

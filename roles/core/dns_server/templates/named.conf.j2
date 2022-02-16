@@ -27,6 +27,9 @@ options {
     {{ networks[network]['subnet'] }}/{{ networks[network]['prefix'] }};
   {% endif %}
 {% endfor %}
+{% for allow_query in dns_server_allow_query %}
+    {{ allow_query }};
+{% endfor %}
   };
 
 {% if external_dns.dns_server is defined and external_dns.dns_server %}
@@ -34,14 +37,17 @@ options {
   {% for forwarder in external_dns.dns_server %}
     {{ forwarder }};
   {% endfor %}
+  {% for forwarder in dns_server_forwarders %}
+    {{ forwarder }};
+  {% endfor %}
   };
 {% else %}
   recursion no;
 {% endif %}
 
-  dnssec-enable yes;
-  dnssec-validation yes;
-  dnssec-lookaside auto;
+  dnssec-enable {{ dns_server_dnssec_enable }};
+  dnssec-validation {{ dns_server_dnssec_validation }};
+  dnssec-lookaside {{ dns_server_dnssec_lookaside }};
 
   /* Path to ISC DLV key */
   bindkeys-file "/etc/named.iscdlv.key";

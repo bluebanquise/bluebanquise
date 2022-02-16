@@ -19,6 +19,7 @@
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_group }}"
     state: link
+    force: yes
   loop: "{{ pxe_stack_supported_os.ubuntu | subelements('distributions') }}"
   when: item.1 != 'ubuntu'
 

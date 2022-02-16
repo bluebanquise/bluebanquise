@@ -61,6 +61,7 @@ provisioner:
         ep_console: console=tty0 console=ttyS1,115200n8
         ep_kernel_parameters: nomodeset
         ep_firewall: true
+        ep_ipxe_platform: efi
         ep_preserve_efi_first_boot_device: true
         ep_partitioning: |
           clearpart --all --initlabel

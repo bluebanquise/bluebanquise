@@ -1,0 +1,62 @@
+---
+- name: Verify
+  hosts: molecule_platform
+  tasks:
+    - name: Read /root/.ssh/config
+      slurp:
+        src: /root/.ssh/config
+      register: ssh_conf
+
+    - name: Display /root/.ssh/config
+      debug:
+        msg: "{{ ssh_conf['content'] | b64decode }}"
+
+- name: Verify icebergs_system = false
+  hosts:
+    - icebergs-off
+  tasks:
+    - name: Check presence of 8 hosts
+      # 3 platforms + 1 fake mgmt + 4 fake hosts
+      assert:
+        that: ssh_conf['content'] | b64decode |
+                regex_findall(("^Host "), multiline=True) | length == 8
+    - name: Check StrictHostKeyChecking = True
+      assert:
+        that: ssh_conf['content'] | b64decode |
+                regex_findall(("^ +StrictHostKeyChecking True$"), multiline=True) | length == 1
+    - name: Check LogLevel = DEBUG
+      assert:
+        that: ssh_conf['content'] | b64decode |
+                regex_findall(("^ +LogLevel DEBUG$"), multiline=True) | length == 1
+
+- name: Verify icebergs_system = true
+  hosts:
+    - icebergs-on
+  tasks:
+    - name: Check presence of management node only
+      assert:
+        that: ssh_conf['content'] | b64decode |
+                regex_findall(("^Host icebergs-on"), multiline=True) |
+                length == 1
+
+- name: Verify hostkey_checking = true
+  hosts:
+    - hostkey_checking
+  tasks:
+    - name: Check presence of 8 hosts
+      # 3 platforms + 1 fake mgmt + 4 fake hosts
+      assert:
+        that: ssh_conf['content'] | b64decode |
+                regex_findall(("^Host "), multiline=True) | length == 9
+    - name: Check StrictHostKeyChecking is defined for global
+      assert:
+        that: ssh_conf['content'] | b64decode |
+                regex_findall(("^ +StrictHostKeyChecking False$"), multiline=True) | length == 1
+    - name: Check UserKnownHostsFile is defined for global
+      assert:
+        that: ssh_conf['content'] | b64decode |
+                regex_findall(("^ +UserKnownHostsFile /dev/null$"), multiline=True) | length == 1
+    - name: Check LogLevel is defined for global
+      assert:
+        that: ssh_conf['content'] | b64decode |
+                regex_findall(("^ +LogLevel QUIET$"), multiline=True) | length == 1

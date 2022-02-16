@@ -120,9 +120,12 @@ d-i preseed/late_command string \
 {% if pxe_stack_sshd_force_permitrootlogin %}
   in-target sh -c 'sed -i "s/^#PermitRootLogin.*\$/PermitRootLogin yes/g" /etc/ssh/sshd_config'; \
 {% endif %}
-{% if pxe_stack_preseed_remove_apt_sources %}
+{% if not pxe_stack_ubuntu_preseed_preserve_sources_list %}
   in-target sh -c 'echo " " > /etc/apt/sources.list'; \
   in-target sh -c 'apt update'; \
+{% endif %}
+{% if hostvars[groups[item][0]]['ep_preserve_efi_first_boot_device'] == true %}
+  in-target sh -c '[ -d /sys/firmware/efi ] && efibootmgr -o $(efibootmgr | grep BootCurrent | cut -d" " -f2),$(efibootmgr | grep BootOrder | sed "s/BootOrder:\ //" | sed "s/$(efibootmgr | grep BootCurrent | cut -d" " -f2),//") || echo "Not an EFI system, skipping"'
 {% endif %}
   in-target set -- `cat /proc/cmdline`; for I in $*; do case "$I" in *=*) eval $I;; esac; done; \
   in-target echo Next server is $ipxe_next_server; \

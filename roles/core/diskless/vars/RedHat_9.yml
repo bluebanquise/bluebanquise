@@ -10,3 +10,4 @@ diskless_packages_to_install:
   - dracut-live
   - xfsdump
   - squashfs-tools
+  - bluebanquise-disklessset

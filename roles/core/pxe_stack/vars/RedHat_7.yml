@@ -5,13 +5,14 @@ pxe_stack_apache_user: apache
 pxe_stack_apache_group: apache
 pxe_stack_htdocs_path: /var/www/html/preboot_execution_environment
 pxe_stack_packages_to_install:
-  - ipxe-x86_64-bluebanquise
-  - ipxe-arm64-bluebanquise
+  - bluebanquise-ipxe-x86_64
+  - bluebanquise-ipxe-arm64
   - httpd
   - policycoreutils-python
   - python36
   - python36-PyYAML
   - python36-clustershell
+  - bluebanquise-bootset
 pxe_stack_default_tftp_package: atftp
 pxe_stack_services_to_start:
   - httpd

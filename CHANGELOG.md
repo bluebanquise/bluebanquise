@@ -10,43 +10,83 @@
 
 #### New roles
 
+  - audit_system: install/configure audit logs, compatible with Centos8, RedHat8, Ubuntu 18.04 and 20.04 (#611)
   - filesystem: set filesystems (#573)
   - modprobe: load/unload kernel modules (#573)
   - mount: mount devices (#573)
+  - pam_limits: set pam limits (#633)
   - parted: set partitions (#573)
   - sudoers: add users or groups to sudoers (#573)
 
 #### Roles improvement or fix
 
-  - pxe_stack: force substitution of files by symlinks in case of an update (#587)
-  - core/log_server
-    - remote logs stored in a similar fashion as the server (#568)
-  - all: add compatibility with multiple RHEL like distributions (#560)
-  - conman: fix execpath for RHEL 8 (#584)
+  - all:
+    - add compatibility with multiple RHEL like distributions (#560)
+    - prevent unsorted ranges (causes unexepcted changed status) (#628)
+  - bluebanquise:
+    - Add missing bluebanquise_filter package (#648)
+  - clustershell: prevent dummy host to be included (#619)
+  - conman: 
+    - Fix bluebanquise-filters package name (#665)
+    - fix execpath for RHEL 8 (#584)
+    - implement support for externaly defined BMC (#640)
+    - fix execpath for RHEL 8 (#584)
+    - force conman user gid and uid (#605)
   - advanced_dhcp_server: fix issue with added spaces. Could prevent DHCP to start (#561)
   - diskless:
+    - Remove script from role and rely on package. (#650)
+    - Update to version 1.3.0 (#617)
     - fix issues with dnf command in the livenet module (#528)
     - fix issues preventing access to nodes booting a livenet image (#525)
     - notify in readme/page that firewall does not work in chroot (#569)
     - fix python path of diskless files (#590)
   - dns_server:
+    - Add missing vital parameters to allow binding to external DNS servers (#665)
     - improve role performances (#597)
     - add ability to set IP addresses for external domains (#609)
+    - re-worked reverse zone generation to fix issue #614. (#621)
   - kernel_config: prevent crash if variable ep_kernel_parameters is undefined (#559)
   - log_server/client:
     - allow custom configuration path (#591)
+    - remote logs stored in a similar fashion as the server (#568)
   - nic_nmcli:
+    - Improve Ubuntu compatibility. (#665)
+    - Add reboot capability, needed on some system. (#665)
+    - add ip4_manual entry (#618)
     - add dns4 and dns4_search vars logic (#585)
     - improve role capabilities (#558)
-  - pxe_stack: fix issues with hostname not set during kickstart on RHEL 8.3 (#522)
+    - add missing register of nic_nmcli_apply variable (#662)
+  - powerman:
+    - implement support for externaly defined BMC (#640)
+  - pxe_stack:
+    - Allow manipulating sources list in autoinstall on Ubuntu (#665)
+    - Fix missing efi check in auto install files (#665)
+    - Fix missing tftp path for Ubuntu (#665)
+    - Fix missing efi bootorder management for Ubuntu (#656)
+    - Add bootset as package. (#649)
+    - fix issues with hostname not set during kickstart on RHEL 8.3 (#522)
+    - force substitution of files by symlinks in case of an update (#587)
+    - Reapply #587 (#666)
+  - repositories_client:
+    - Improve Ubuntu support (#665)
+    - fix CentOS 8.4 repository compatibility (#534)
   - set_hostname: add fqdn capability (#543)
-  - ssh_master: add custom config variable (#579)
+  - ssh_master:
+    - Fix issue with empty network interfaces (#657)
+    - add custom config variable (#579)
+    - rename role (#635)
+    - Add more granularity to host key checking, improve role's performances (#638)
+  - ssh_slave:
+    - rename role (#635)
   - time:
     - allow to set sysconfig OPTIONS for chronyd (#552)
     - allow to add additional networks for server to reply (#555)
     - allow custom configuration path (#591)
 
 ### Breaking changes
+
+  - nfs_client: support multiple sebooleans (#620)
+    `nfs_settings.selinux.use_nfs_home_dirs` value is replaced by `nfs_client_sebooleans`.
 
 ## 1.4.0
 

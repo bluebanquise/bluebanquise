@@ -147,14 +147,6 @@
   tags:
     - internal
 
-- name: template █ Create /usr/bin/bootset
-  template:
-    src: bootset.py.j2
-    dest: /usr/bin/bootset
-    mode: 0700
-  tags:
-    - template
-
 - name: apache2_module █ Enable apache2 cgi module
   apache2_module:
     state: present

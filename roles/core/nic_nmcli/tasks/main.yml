@@ -28,6 +28,15 @@
   tags:
     - package
 
+- name: "service █ Manage {{ nic_nmcli_services_to_start | join(' ') }} state"
+  service:
+    name: "{{ item }}"
+    enabled: yes
+    state: "{{ (nic_nmcli_start_services | bool) | ternary('started', omit) }}"
+  loop: "{{ nic_nmcli_services_to_start }}"
+  tags:
+    - service
+
 - name: include_tasks ░ Use OS dedicated task
   include_tasks: "{{ item }}"
   with_first_found:
@@ -128,9 +137,27 @@
     method6: "{{ item.method6 | default(omit) }}"
   notify: command █ Reload connections
   loop: "{{ network_interfaces }}"
+  register: nic_nmcli_apply
   when: item.skip is not defined or (item.skip is defined and not item.skip)
   tags:
     - identify
+
+- name: shell █ Force apply nic settings
+  shell: "nmcli con down {{ item.item.interface }} && sleep 2 && nmcli con up {{ item.item.interface }}"
+  loop: "{{ nic_nmcli_apply.results }}"
+  when:
+    - nic_nmcli_force_nic_restart
+    - item.changed
+
+- name: reboot █ Reboot system to ensure apply nic configuration
+  reboot:
+    reboot_timeout: "{{ nic_nmcli_reboot_timeout }}"
+  register: reboot_status
+  loop: "{{ nic_nmcli_apply.results }}"
+  when:
+    - nic_nmcli_force_reboot
+    - item.changed
+    - not (reboot_status.changed | d(false))
 
 - name: meta █ Run handler tasks to reload connections
   meta: flush_handlers

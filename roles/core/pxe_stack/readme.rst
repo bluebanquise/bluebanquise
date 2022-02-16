@@ -173,7 +173,13 @@ To be done
 Changelog
 ^^^^^^^^^
 
-* 1.3.2: Added OpenSuSE support. Neil Munday <neil@mundayweb.com>
+* 1.4.0: Added OpenSuSE support. Neil Munday <neil@mundayweb.com>
+* 1.3.7: Allow manipulating sources list in autoinstall on Ubuntu. Benoit Leveugle <benoit.leveugle@gmail.com>
+* 1.3.6: Fix missing efi check in auto install files. Benoit Leveugle <benoit.leveugle@gmail.com>
+* 1.3.5: Fix missing tftp path for Ubuntu. Benoit Leveugle <benoit.leveugle@gmail.com>
+* 1.3.4: Fix missing efi bootorder management for Ubuntu. johnnykeats <johnny.keats@outlook.com>
+* 1.3.3: Add bootset as package. Benoit Leveugle <benoit.leveugle@gmail.com>
+* 1.3.2: Prevent unsorted ranges. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.1: Adapt role to handle multiple distributions. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.0: Add Ubuntu support. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.2.0: Add compatibility for multiple OS distributions (RedHat like). Benoit Leveugle <benoit.leveugle@gmail.com>

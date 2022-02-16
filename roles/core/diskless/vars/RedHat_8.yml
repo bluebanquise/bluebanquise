@@ -9,3 +9,4 @@ diskless_packages_to_install:
   - nfs-utils
   - dracut-live
   - xfsdump
+  - bluebanquise-disklessset
