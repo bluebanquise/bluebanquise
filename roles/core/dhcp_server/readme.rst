@@ -117,6 +117,7 @@ Files generated:
 Changelog
 ^^^^^^^^^
 
+* 1.2.0: Update role to work with OpenSuSE. Neil Munday <neil@mundayweb.com>
 * 1.1.2: Prevent unsorted ranges. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.1: Adapt role to handle multiple distributions. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.0: Add Ubuntu support. Benoit Leveugle <benoit.leveugle@gmail.com>

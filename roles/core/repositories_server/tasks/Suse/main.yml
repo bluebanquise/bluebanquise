@@ -1,0 +1,10 @@
+---
+
+- name: copy █ Configure Apache2
+  copy:
+    src: Suse/default-server.conf
+    dest: /etc/apache2/default-server.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify: service █ Restart http server service

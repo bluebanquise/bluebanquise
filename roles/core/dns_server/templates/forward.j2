@@ -4,7 +4,7 @@
 
 $TTL 86400
 $ORIGIN {{ domain_name }}.
-$INCLUDE "/var/named/forward.soa"
+$INCLUDE "{{ dns_server_named_dir }}/forward.soa"
 @ IN NS {{ inventory_hostname }}.{{ domain_name }}.
 
 {# Macro to write host in file #}

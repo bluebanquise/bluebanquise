@@ -15,10 +15,10 @@ options {
   };
 
   listen-on-v6 port 53 { ::1; };
-  directory 	"/var/named";
-  dump-file 	"/var/named/data/cache_dump.db";
-  statistics-file "/var/named/data/named_stats.txt";
-  memstatistics-file "/var/named/data/named_mem_stats.txt";
+  directory 	"{{ dns_server_var_dir }}";
+  dump-file 	"{{ dns_server_dump_file }}";
+  statistics-file "{{ dns_server_statistics_file }}";
+  memstatistics-file "{{ dns_server_mem_stats_file }}";
 
   allow-query {
     localhost;
@@ -52,7 +52,7 @@ options {
   /* Path to ISC DLV key */
   bindkeys-file "/etc/named.iscdlv.key";
 
-  managed-keys-directory "/var/named/dynamic";
+  managed-keys-directory "{{ dns_server_managed_keys_dir }}";
 
   pid-file "/run/named/named.pid";
   session-keyfile "/run/named/session.key";
@@ -64,26 +64,26 @@ options {
 
 logging {
   channel default_debug {
-    file "data/named.run";
+    file "{{ dns_server_log_dir }}/named.run";
     severity dynamic;
   };
 };
 
 zone "." IN {
   type hint;
-  file "named.ca";
+  file "{{ dns_server_root_hint_file }}";
 };
 
 zone "{{ domain_name }}" IN {
   type master;
-  file "forward.zone";
+  file "{{ dns_server_named_dir }}/forward.zone";
   allow-update { none; };
 };
 
 {% macro create_reverse_zone(network, octets) -%}
 zone "{{ octets }}.in-addr.arpa" IN {
    type master;
-   file "{{ network }}.rr.zone";
+   file "{{ dns_server_named_dir }}/{{ network }}.rr.zone";
    allow-update { none; };
 };
 {%- endmacro %}
@@ -103,9 +103,9 @@ zone "{{ octets }}.in-addr.arpa" IN {
 {% if dns_overrides is defined %}
 zone "override" {
   type master;
-  file "override.zone";
+  file "{{ dns_server_named_dir }}/override.zone";
 };
 {% endif %}
 
 include "/etc/named.rfc1912.zones";
-include "/etc/named.root.key";
+include "{{ dns_server_root_key_file }}";

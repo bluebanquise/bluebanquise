@@ -24,7 +24,7 @@
     - always
 
 - name: include_tasks ░ Use OS dedicated firewall task
-  include_tasks: "{{ item }}"
+  include_tasks: "{{ outer_item }}"
   with_first_found:
     - files:
         - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
@@ -34,6 +34,8 @@
         - "{{ ansible_facts.distribution | replace(' ','_') }}/firewall.yml"
         - "{{ ansible_facts.os_family | replace(' ','_') }}/firewall.yml"
       skip: true
+  loop_control:
+    loop_var: outer_item
   tags:
     - internal
     - firewall
@@ -45,10 +47,17 @@
   tags:
     - package
 
-- name: template █ Generate /etc/dhcp/dhcpd.conf
+- name: "file █ Create {{ dhcp_server_conf_dir }}"
+  file:
+    path: "{{ dhcp_server_conf_dir }}"
+    owner: root
+    mode: "0755"
+    state: directory
+
+- name: "template █ Generate {{ dhcp_server_conf_file }}"
   template:
     src: dhcpd.conf.j2
-    dest: /etc/dhcp/dhcpd.conf
+    dest: "{{ dhcp_server_conf_file }}"
     owner: root
     group: root
     mode: 0644
@@ -56,10 +65,10 @@
   tags:
     - template
 
-- name: template █ Generate /etc/dhcp/dhcpd.networks.conf
+- name: "template █ Generate {{ dhcp_server_conf_dir }}/dhcpd.networks.conf"
   template:
     src: dhcpd.networks.conf.j2
-    dest: /etc/dhcp/dhcpd.networks.conf
+    dest: "{{ dhcp_server_conf_dir }}/dhcpd.networks.conf"
     owner: root
     group: root
     mode: 0644
@@ -67,10 +76,10 @@
   tags:
     - template
 
-- name: "template █ Generate /etc/dhcp/dhcpd.{{ item }}.conf"
+- name: "template █ Generate {{ dhcp_server_conf_dir }}/dhcpd.{{ item }}.conf"
   template:
     src: dhcpd.subnet.conf.j2
-    dest: "/etc/dhcp/dhcpd.{{ item }}.conf"
+    dest: "{{ dhcp_server_conf_dir }}/dhcpd.{{ item }}.conf"
     owner: root
     group: root
     mode: 0644
@@ -81,6 +90,20 @@
   notify: service █ Restart dhcp server
   tags:
     - template
+
+- name: include_tasks ░ Apply OS specific tasks
+  include_tasks: "{{ item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}/main.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}/main.yml"
+      skip: true
+  tags:
+    - internal
 
 - name: meta █ Run handler tasks to restart dhcp services
   meta: flush_handlers

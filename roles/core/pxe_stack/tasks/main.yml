@@ -24,7 +24,7 @@
     - always
 
 - name: include_tasks ░ Use OS dedicated firewall task
-  include_tasks: "{{ item }}"
+  include_tasks: "{{ outer_item }}"
   with_first_found:
     - files:
         - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
@@ -34,6 +34,8 @@
         - "{{ ansible_facts.distribution | replace(' ','_') }}/firewall.yml"
         - "{{ ansible_facts.os_family | replace(' ','_') }}/firewall.yml"
       skip: true
+  loop_control:
+    loop_var: outer_item
   tags:
     - internal
     - firewall
@@ -62,13 +64,13 @@
     state: directory
     mode: 0755
     owner: "{{ pxe_stack_apache_user }}"
-    group: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_group }}"
   loop:
-    - /var/www/html/preboot_execution_environment
-    - /var/www/html/preboot_execution_environment/bin
-    - /var/www/html/preboot_execution_environment/nodes
-    - /var/www/html/preboot_execution_environment/equipment_profiles
-    - /var/www/html/preboot_execution_environment/osdeploy
+    - "{{ pxe_stack_htdocs_path }}"
+    - "{{ pxe_stack_htdocs_path }}/bin"
+    - "{{ pxe_stack_htdocs_path }}/nodes"
+    - "{{ pxe_stack_htdocs_path }}/equipment_profiles"
+    - "{{ pxe_stack_htdocs_path }}/osdeploy"
 
 - name: include_tasks ░ Use OS dedicated task
   include_tasks: "{{ item }}"
@@ -98,26 +100,26 @@
     dest: "/etc/bootset/pxe_parameters.yml"
     mode: 0644
 
-- name: template █ Generate /var/www/html/preboot_execution_environment/{menu|convergence}.ipxe
+- name: "template █ Generate {{ pxe_stack_htdocs_path }}/{menu|convergence}.ipxe"
   template:
     src: "{{ item }}.ipxe.j2"
-    dest: "/var/www/html/preboot_execution_environment/{{ item }}.ipxe"
+    dest: "{{ pxe_stack_htdocs_path }}/{{ item }}.ipxe"
     mode: 0755
     owner: "{{ pxe_stack_apache_user }}"
-    group: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_group }}"
   loop:
     - convergence
     - menu
   tags:
     - template
 
-- name: template █ Generate /var/www/html/preboot_execution_environment/nodes/.ipxe
+- name: "template █ Generate {{ pxe_stack_htdocs_path }}/nodes/.ipxe"
   template:
     src: nohostname.ipxe.j2
-    dest: /var/www/html/preboot_execution_environment/nodes/.ipxe
+    dest: "{{ pxe_stack_htdocs_path }}/nodes/.ipxe"
     mode: 0755
     owner: "{{ pxe_stack_apache_user }}"
-    group: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_group }}"
   tags:
     - template
 
@@ -159,13 +161,15 @@
     mode: 0644
   notify: service █ Restart pxe services
 
-- name: "copy █ Copy {{ pxe_stack_apache_cgi_bin_path }}/bootswitch.cgi"
-  copy:
-    src: bootswitch.cgi
+- name: "template █ Create {{ pxe_stack_apache_cgi_bin_path }}/bootswitch.cgi"
+  template:
+    src: bootswitch.cgi.j2
     dest: "{{ pxe_stack_apache_cgi_bin_path }}/bootswitch.cgi"
     mode: 0744
     owner: "{{ pxe_stack_apache_user }}"
-    group: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_group }}"
+  tags:
+    - template
 
 - name: meta █ Run handler tasks to restart pxe services
   meta: flush_handlers

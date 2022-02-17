@@ -43,6 +43,22 @@
     - internal
     - firewall
 
+- name: include_tasks ░ Use OS dedicated task
+  include_tasks: "{{ outer_item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}/main.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}/main.yml"
+      skip: true
+  loop_control:
+    loop_var: outer_item
+  tags:
+    - internal
+
 - name: "service █ Manage {{ repositories_server_services_to_start | join(' ') }} services state"
   service:
     name: "{{ item }}"

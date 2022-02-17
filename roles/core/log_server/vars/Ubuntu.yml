@@ -6,3 +6,4 @@ log_server_packages_to_install:
 log_server_services_to_start:
   - rsyslog
 log_server_rsyslog_conf_path: /etc/rsyslog.conf
+log_server_work_dir: /var/lib/rsyslog

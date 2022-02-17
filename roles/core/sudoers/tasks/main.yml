@@ -1,4 +1,10 @@
 ---
+
+- name: package █ Install sudo
+  package:
+    name: sudo
+    state: present
+
 - name: lineinfile █ Add sudoers users and groups
   lineinfile:
     dest: /etc/sudoers

@@ -1,4 +1,6 @@
 ---
+diskless_htdocs_path: /var/www/html/preboot_execution_environment
+diskless_usr_lib_dir: /usr/lib64
 diskless_apache_user: apache
 diskless_python_version: 3.6
 diskless_packages_to_install:

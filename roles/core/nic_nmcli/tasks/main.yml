@@ -54,7 +54,16 @@
 - name: meta █ Run handlers
   meta: flush_handlers
 
-- name: service █ Ensure Betwork Manager is running
+- name: "service █ Manage {{ nic_nmcli_services_to_start | join(' ') }} state"
+  service:
+    name: "{{ item }}"
+    enabled: yes
+    state: started
+  loop: "{{ nic_nmcli_services_to_start }}"
+  tags:
+    - service
+
+- name: service █ Ensure Network Manager is running
   service:
     name: "{{ item }}"
     state: started

@@ -49,6 +49,7 @@ Files generated:
 Changelog
 ^^^^^^^^^
 
+* 1.2.0: Add OpenSuSE support. Neil Munday <neil@mundayweb.com>
 * 1.1.0: Implement support for externaly defined BMC. johnnykeats <johnny.keats@outlook.com>
 * 1.0.6: Force conman user gid/uid. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.5: Prevent unsorted ranges. Benoit Leveugle <benoit.leveugle@gmail.com>

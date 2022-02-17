@@ -4,7 +4,7 @@
 
 $TTL 86400
 $ORIGIN {{ j2_dns_server_get_network | trim }}.in-addr.arpa.
-$INCLUDE "{{ item }}.rr.soa"
+$INCLUDE "{{ dns_server_named_dir }}/{{ item }}.rr.soa"
 @ IN NS {{ inventory_hostname }}.{{ domain_name }}.
 
 {% macro create_record(octets, name) -%}

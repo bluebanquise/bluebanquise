@@ -1,5 +1,5 @@
 ---
-log_client_role_version: 1.2.0
+log_client_role_version: 1.2.1
 log_client_packages_to_install:
   - rsyslog
 log_client_services_to_start:

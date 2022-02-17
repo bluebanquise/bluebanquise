@@ -4,3 +4,5 @@ dhcp_server_packages_to_install:
   - python-netaddr
 dhcp_server_services_to_start:
   - isc-dhcp-server
+dhcp_server_conf_file: /etc/dhcp/dhcpd.conf
+dhcp_server_conf_dir: /etc/dhcp

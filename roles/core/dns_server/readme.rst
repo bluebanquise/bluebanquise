@@ -115,6 +115,7 @@ Files generated:
 Changelog
 ^^^^^^^^^
 
+* 1.4.0: Re-worked role to work with Suse as well as existing distributions. Neil Munday <neil@mundayweb.com>
 * 1.3.3: Add missing vital parameters to allow binding to external DNS servers. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.2: Re-worked reverse zone generation to fix issue #614. Neil Munday <neil@mundayweb.com>
 * 1.3.1: Adapt role to handle multiple distributions. Benoit Leveugle <benoit.leveugle@gmail.com>

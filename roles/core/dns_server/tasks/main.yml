@@ -47,11 +47,13 @@
   tags:
     - package
 
-- name: file █ Create needed directory /var/named
+- name: "file █ Create needed directory {{ dns_server_named_dir }}"
   file:
-    path: /var/named
+    path: "{{ dns_server_named_dir }}"
     state: directory
-    mode: 0755
+    owner: root
+    group: named
+    mode: 0750
 
 - name: template █ Generate /etc/named.conf
   template:
@@ -64,10 +66,10 @@
   tags:
     - template
 
-- name: template █ Generate Forward zone file on Master DNS /var/named/forward.zone
+- name: "template █ Generate Forward zone file on Master DNS {{ dns_server_named_dir }}/forward.zone"
   template:
     src: forward.j2
-    dest: /var/named/forward.zone
+    dest: "{{ dns_server_named_dir }}/forward.zone"
     owner: root
     group: root
     mode: 0644
@@ -83,10 +85,10 @@
     - template
     - internal
 
-- name: template █ Generate SOA for forward zone file /var/named/forward.soa
+- name: "template █ Generate SOA for forward zone file {{ dns_server_named_dir }}/forward.soa"
   template:
     src: forward.soa.j2
-    dest: /var/named/forward.soa
+    dest: "{{ dns_server_named_dir }}/forward.soa"
     owner: root
     group: root
     mode: 0644
@@ -95,10 +97,10 @@
   tags:
     - template
 
-- name: "template █ Generate Reverse zone files for each network: /var/named/{{ item }}.rr.zone"
+- name: "template █ Generate Reverse zone file on Master DNS {{ dns_server_named_dir }}/{{ item }}.rr.zone"
   template:
     src: reverse.j2
-    dest: "/var/named/{{ item }}.rr.zone"
+    dest: "{{ dns_server_named_dir }}/{{ item }}.rr.zone"
     owner: root
     group: root
     mode: 0644
@@ -107,10 +109,10 @@
   tags:
     - template
 
-- name: "template █ Generate SOA for reverse zone files for each network: /var/named/{{ item }}.rr.soa"
+- name: "template █ Generate SOA for reverse zone file {{ dns_server_named_dir }}/{{ item }}.rr.soa"
   template:
     src: reverse.soa.j2
-    dest: "/var/named/{{ item }}.rr.soa"
+    dest: "{{ dns_server_named_dir }}/{{ item }}.rr.soa"
     owner: root
     group: root
     mode: 0644
@@ -120,10 +122,10 @@
   tags:
     - template
 
-- name: "template █ Generate override zone file: /var/named/override.zone"
+- name: "template █ Generate override file {{ dns_server_named_dir }}/override.zone"
   template:
     src: override.j2
-    dest: /var/named/override.zone
+    dest: "{{ dns_server_named_dir }}/override.zone"
     owner: root
     group: root
     mode: 0644
@@ -131,6 +133,20 @@
   when: dns_overrides is defined and zoneconf.changed  # noqa 503
   tags:
     - template
+
+- name: include_tasks ░ Apply OS specific tasks
+  include_tasks: "{{ item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}/main.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}/main.yml"
+      skip: true
+  tags:
+    - internal
 
 - name: meta █ Run handler tasks to restart dns services
   meta: flush_handlers

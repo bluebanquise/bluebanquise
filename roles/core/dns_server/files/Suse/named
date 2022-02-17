@@ -1,0 +1,65 @@
+## Type: string
+## Default: ""
+## ServiceReload: named
+#
+# All mentioned config files will be copied relativ to /var/lib/named/, when
+# 'named' is started in the chroot jail.
+#
+# /etc/named.conf and /etc/rndc.key are always copied.  Also all files from
+# include statements in named.conf.
+#
+# Filenames can be relative to /etc/named.d/.
+#
+# Please take care of the order if one file needs a setting of another.
+#
+# Example: "/etc/named-dhcpd.key ldap.dump rndc-access.conf"
+#
+# /etc/bind.keys is already included to suppress named warning about missing file.
+NAMED_CONF_INCLUDE_FILES="/etc/bind.keys"
+
+## Type: string
+## Default: "createNamedConfInclude"
+## ServiceReload: named
+#
+# Programms to be executed each time the DNS server 'named' is started or
+# reloaded.
+#
+# Filenames can be relative to /usr/share/bind/.
+#
+NAMED_INITIALIZE_SCRIPTS="createNamedConfInclude"
+## Path: Network/DNS/Name Server
+## Description: Names server settings
+## Type: yesno
+## Default: yes
+## ServiceRestart: lwresd,named
+#
+# Shall the DNS server 'named' or the LightWeight RESolver Daemon, lwresd run
+# in the chroot jail /var/lib/named/?
+#
+# Each time you start one of the daemons with the init script, /etc/named.conf,
+# /etc/named.conf.include, /etc/rndc.key, and all files listed in
+# NAMED_CONF_INCLUDE_FILES will be copied relative to /var/lib/named/.
+#
+# The pid file will be in /var/lib/named/run/named/ and named named.pid
+# or lwresd.pid.
+#
+NAMED_RUN_CHROOTED="no"
+
+## Type: string
+## Default: ""
+## ServiceRestart: lwresd,named
+#
+# Additional arguments when starting the name daemon with the init script
+# /etc/init.d/named or rcnamed.
+#
+# For example "-n 2" to use two CPUs if named is unable to determine the
+# number of available CPUs.
+#
+# See man 8 named for all available commandline options.
+#
+# "-t /var/lib/named/var" is added if NAMED_RUN_CHROOTED is set to yes.
+#
+# "-u named" is used in any case by the init script to run the named daemon as
+# user 'named' after completing privileged operations.
+#
+NAMED_ARGS=""

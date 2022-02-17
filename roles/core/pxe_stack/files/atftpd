@@ -1,3 +1,0 @@
-USE_INETD=false
-# OPTIONS below are used only with init script
-OPTIONS="--no-multicast --maxthread 100 --verbose=7 /var/lib/tftpboot --logfile /var/log/atftpd.log"
