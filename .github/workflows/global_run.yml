@@ -35,7 +35,7 @@ jobs:
       - name: Prepare host for deployment - 1 - SSH keys
         run: ssh-keygen -t ed25519 -q -N "" -f $HOME/.ssh/id_ed25519; cp $HOME/.ssh/id_ed25519.pub $HOME/.ssh/authdorized_keys; echo "Host *" > $HOME/.ssh/config && echo " StrictHostKeyChecking no" >> $HOME/.ssh/config
       - name: Prepare host for deployment - 2 - hosts
-        run: echo "127.0.0.1 management1" >> /etc/hosts
+        run: sudo echo "127.0.0.1 management1" >> /etc/hosts
       
       - name: Test
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml -t set_hostname
