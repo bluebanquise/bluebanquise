@@ -29,7 +29,7 @@ jobs:
         run: sudo mkdir /etc/bluebanquise; sudo chown -R $(id -u):$(id -g) /etc/bluebanquise; cp -a * /etc/bluebanquise;
 
       - name: Prepare bluebanquise environment
-        run: cp -a /etc/bluebanquise/resources/example/simple_cluster/inventory /etc/bluebanquise; cp -a /etc/bluebanquise/resources/example/simple_cluster/playbooks /etc/bluebanquise
+        run: cp -a /etc/bluebanquise/resources/examples/simple_cluster/inventory /etc/bluebanquise; cp -a /etc/bluebanquise/resources/examples/simple_cluster/playbooks /etc/bluebanquise
       
 
       - name: Prepare host for deployment - 1 - SSH keys
@@ -37,3 +37,5 @@ jobs:
       - name: Prepare host for deployment - 2 - hosts
         run: echo "127.0.0.1 management1" >> /etc/hosts
       
+      - name: Test
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml -t set_hostname
