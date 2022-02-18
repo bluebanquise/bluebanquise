@@ -1,0 +1,39 @@
+---
+name: Test generic deployment
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  molecule_test:
+    name: Deploy management node
+    runs-on: ubuntu-20.04
+    env:
+      ANSIBLE_CONFIG: /etc/bluebanquise/ansible.cfg
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup python environment
+        uses: actions/setup-python@v1
+
+      - name: Install packages
+        run: pip3 install ansible
+
+      - name: Install community.general
+        run: ansible-galaxy collection install community.general
+
+      - name: Prepare bluebanquise folder
+        run: sudo mkdir /etc/bluebanquise; sudo chown -R $(id -u):$(id -g) /etc/bluebanquise; cp -a * /etc/bluebanquise;
+
+      - name: Prepare bluebanquise environment
+        run: cp -a /etc/bluebanquise/resources/example/simple_cluster/inventory /etc/bluebanquise; cp -a /etc/bluebanquise/resources/example/simple_cluster/playbooks /etc/bluebanquise
+      
+
+      - name: Prepare host for deployment - 1 - SSH keys
+        run: ssh-keygen -t ed25519 -q -N "" -f $HOME/.ssh/id_ed25519; cp $HOME/.ssh/id_ed25519.pub $HOME/.ssh/authdorized_keys; echo "Host *" > $HOME/.ssh/config && echo " StrictHostKeyChecking no" >> $HOME/.ssh/config
+      - name: Prepare host for deployment - 2 - hosts
+        run: echo "127.0.0.1 management1" >> /etc/hosts
+      
