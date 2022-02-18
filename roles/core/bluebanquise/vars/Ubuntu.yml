@@ -4,3 +4,4 @@ bluebanquise_packages_to_install:
   - python-jmespath
   - python-netaddr
   - bluebanquise-filters
+  - clustershell
