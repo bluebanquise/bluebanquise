@@ -37,5 +37,5 @@ jobs:
 #      - name: Prepare host for deployment - 2 - hosts
 #        run: echo "Host management1" > $HOME/.ssh/config && echo " Hostname localhost" >> $HOME/.ssh/config
       
-      - name: Test
-        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=local --limit management1 -t set_hostname
+#      - name: Test
+        run: sudo ANSIBLE_CONFIG=/etc/bluebanquise/ansible.cfg ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=local --limit management1 -t set_hostname
