@@ -34,6 +34,11 @@ Mandatory inventory vars:
 * bmc
    * .ip4
 
+Optional inventory vars:
+
+* conman_conman_user_gid: 287
+* conman_conman_user_uid: 287
+
 Output
 ^^^^^^
 
