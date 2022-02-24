@@ -1,5 +1,5 @@
-Introduction
-============
+Monitoring Introduction
+=======================
 
 This monitoring documentation has multiple aims:
 
@@ -10,7 +10,7 @@ This monitoring documentation has multiple aims:
 
 This documentation is built around those section:
 
-1. Prometheus
-2. Alerts
+1. Introduction
+2. Prometheus and alerting
 3. Grafana
 4. Exporters

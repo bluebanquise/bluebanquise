@@ -24,9 +24,9 @@ copyright = u'2019, Benoît Leveugle, Johnny Keats'
 author = u'Benoît Leveugle, Johnny Keats, Bruno Travouillon, Tim Gellner, David Pieters'
 
 # The short X.Y version
-version = u'1.3'
+version = u'1.5'
 # The full version, including alpha/beta/rc tags
-release = u'1.3.0'
+release = u'1.5.0'
 
 
 # -- General configuration ---------------------------------------------------
@@ -42,6 +42,7 @@ extensions = [
     'sphinx.ext.imgmath',
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
+    'sphinx.ext.autosectionlabel',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -85,6 +86,7 @@ pygments_style = None
 html_logo = "logo.png"
 html_theme = "sphinx_rtd_theme"
 html_theme_path = ["_themes", ]
+html_css_files = ["custom.css",]
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the

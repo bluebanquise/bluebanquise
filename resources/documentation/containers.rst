@@ -18,14 +18,14 @@ Podman
 Install podman and grab base image
 ----------------------------------
 
-Install podman
+Install podman:
 
 .. code-block:: text
 
   dnf config-manager --set-enabled PowerTools
   dnf install -y @container-tools
 
-Enable systemd in Podman
+Enable systemd in Podman:
 
 .. code-block:: text
 
@@ -189,5 +189,23 @@ Here host is listening on 192.168.1.21:
       inet 192.168.1.21/24 brd 192.168.1.255 scope global dynamic noprefixroute eth1
          valid_lft 64092sec preferred_lft 64092sec
   [root@pc-200 ~]#
+
+To attach to the container, and tune few things inside, use the following command:
+
+.. code-block:: text
+
+  podman exec -it repositories /bin/bash
+
+To stop the container, use:
+
+.. code-block:: text
+
+  podman stop repositories
+
+To start it again, use:
+
+.. code-block:: text
+
+  podman start repositories
 
 Use a web browser to check http server is running (you will end up in apache test page).
