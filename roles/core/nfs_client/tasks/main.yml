@@ -19,8 +19,7 @@
         - "vars/{{ ansible_facts.os_family }}.yml"
       skip: true
   tags:
-    - internal
-    - package
+    - always
 
 - name: "package █ Install {{ nfs_client_packages_to_install | join(' ') }} packages"
   package:
@@ -49,19 +48,19 @@
   tags:
     - service
 
-- name: seboolean █ Enable selinux /home dir boolean if needed
+- name: seboolean █ Enable selinux booleans if needed
   seboolean:
-    name: use_nfs_home_dirs
+    name: "{{ item }}"
     state: yes
     persistent: yes
+  loop: "{{ nfs_client_sebooleans }}"
   when:
     - ansible_facts.selinux.status == "enabled"
-    - nfs_settings.selinux.use_nfs_home_dirs | bool
 
 - name: mount █ Mount exported NFS into directories
   mount:
     path: "{{ item.0.mount }}"
-    src: "{{ item.0.server }}{% if item.0.take_over_network is defined and item.0.take_over_network is not none %}-{{ item.0.take_over_network }}{% endif %}:{{ item.0.export }}"
+    src: "{% if item.0.server | ipaddr %}{{ item.0.server }}:{{ item.0.export }}{% else %}{{ item.0.server }}{% if item.0.take_over_network is defined and item.0.take_over_network is not none %}-{{ item.0.take_over_network }}{% endif %}:{{ item.0.export }}{% endif %}"
     fstype: nfs
     opts: "{{ item.0.mount_arguments }}"
     state: "{{ nfs_client_directories_state }}"

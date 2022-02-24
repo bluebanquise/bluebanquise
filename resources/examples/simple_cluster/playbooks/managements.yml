@@ -7,8 +7,8 @@
 
     - role: set_hostname
       tags: set_hostname
-    - role: nic
-      tags: nic
+    - role: nic_nmcli
+      tags: nic_nmcli
     - role: repositories_server
       tags: repositories_server
     - role: repositories_client
@@ -17,8 +17,8 @@
       tags: bluebanquise
     - role: hosts_file
       tags: hosts_file
-    - role: ssh_master
-      tags: ssh_master
+    - role: ssh_client
+      tags: ssh_client
     - role: dhcp_server
       tags: dhcp_server
     - role: dns_server

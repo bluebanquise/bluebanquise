@@ -19,10 +19,7 @@
         - "vars/{{ ansible_facts.os_family }}.yml"
       skip: true
   tags:
-    - internal
-    - package
-    - service
-    - template
+    - always
 
 - name: Install packages
   package:
@@ -31,19 +28,19 @@
   tags:
     - package
 
-- name: Template >> /etc/rsyslog.conf
+- name: "template █ Generate {{ log_client_rsyslog_conf_path }}"
   template:
     src: rsyslog.conf.j2
-    dest: "{{ log_client_rsyslog_conf_path }}"
+    dest: "{{ log_client_rsyslog_custom_conf_path | default(log_client_rsyslog_conf_path) }}"
     owner: root
     group: root
     mode: 0644
-  notify: Restart rsyslog services
+  notify: service █ Restart rsyslog service
   when: "'rsyslog.conf' not in (log_client_configuration_files | default([]) | selectattr('name','defined') | map(attribute='name') | list)"
   tags:
     - template
 
-- name: Add custom rsyslog files
+- name: "template █ Generate custom rsyslog files"
   template:
     src: rsyslog.d_custom.conf.j2
     dest: "{{ item.path | default('/etc/rsyslog.d') }}/{{ item.name }}"
@@ -53,12 +50,12 @@
   loop: "{{ log_client_configuration_files }}"
   loop_control:
     label: "Install configuration file {{ item.name }}"
-  notify: Restart rsyslog services
+  notify: service █ Restart rsyslog service
   when: log_client_configuration_files is defined and log_client_configuration_files is iterable
   tags:
     - template
 
-- name: Allow syslog port into SELinux
+- name: seport █ Allow syslog port into SELinux
   seport:
     ports: "{{ log_client_server_port }}"
     proto: "{{ item }}"
@@ -70,11 +67,12 @@
   loop:
     - tcp
     - udp
-  notify: Restart rsyslog services
+  notify: service █ Restart rsyslog service
 
-- meta: flush_handlers
+- name: meta █ Run handler tasks to restart rsyslog services
+  meta: flush_handlers
 
-- name: Manage services state
+- name: "service █ Manage {{ log_client_services_to_start }} state"
   service:
     name: "{{ item }}"
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"

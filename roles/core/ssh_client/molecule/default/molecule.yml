@@ -1,0 +1,110 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: docker
+platforms:
+  - name: icebergs-off
+    groups:
+      - molecule_platform
+    image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
+    override_command: false
+    capabilities:
+      - "SYS_ADMIN"
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    pre_build_image: true
+  - name: icebergs-on
+    groups:
+      - iceberg2
+      - mg_managements
+      - molecule_platform
+    image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
+    override_command: false
+    capabilities:
+      - "SYS_ADMIN"
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    pre_build_image: true
+  - name: hostkey_checking
+    groups:
+      - molecule_platform
+    image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
+    override_command: false
+    capabilities:
+      - "SYS_ADMIN"
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    pre_build_image: true
+provisioner:
+  name: ansible
+  env:
+    ANSIBLE_CONFIG: "${MOLECULE_PROJECT_DIRECTORY}/../../../ansible.cfg"
+  inventory:
+    host_vars:
+      icebergs-off:
+        icebergs_system: false
+        j2_current_iceberg: iceberg1
+        j2_current_iceberg_network: ice1
+        network_interfaces:
+          - interface: en0
+            network: ice1-1
+      icebergs-on:
+        icebergs_system: true
+        iceberg_master: iceberg1
+        j2_current_iceberg: iceberg2
+        j2_current_iceberg_network: ice1
+        managements_group_name: mg_managements
+        network_interfaces:
+          - interface: en0
+            network: ice1-1
+      hostkey_checking:
+        ssh_client_global_loglevel: QUIET
+        ssh_client_global_stricthostkeychecking: no
+        ssh_client_global_userknownhostsfile: /dev/null
+        icebergs_system: false
+        j2_current_iceberg: iceberg1
+        j2_current_iceberg_network: ice1
+        network_interfaces:
+          - interface: en0
+            network: ice1-1
+    # Extra hosts
+    hosts:
+      iceberg2:
+        hosts:
+          fake-mgmt2:
+            iceberg_master: iceberg1
+            j2_current_iceberg_network: ice1
+            network_interfaces:
+              - interface: en0
+                network: ice1-1
+      computes:
+        hosts:
+          fake-host1:
+            j2_current_iceberg_network: ice1
+            network_interfaces:
+              - interface: en0
+                network: ice1-1
+            ssh_client_loglevel: DEBUG
+            ssh_client_stricthostkeychecking: yes
+            ssh_client_userknownhostsfile:
+          fake-host2:
+            j2_current_iceberg_network: ice1
+            network_interfaces:
+              - interface: en0
+                network: ice1-1
+          fake-host3:
+            j2_current_iceberg_network: ice1
+            network_interfaces:
+              - interface: en0
+                network: ice1-1
+          fake-host4:
+            j2_current_iceberg_network: ice1
+            network_interfaces:
+              - interface: en0
+                network: ice1-1
+verifier:
+  name: ansible

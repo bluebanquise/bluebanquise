@@ -19,47 +19,33 @@
         - "vars/{{ ansible_facts.os_family }}.yml"
       skip: true
   tags:
-    - firewall
+    - always
+
+- name: include_tasks ░ Use OS dedicated firewall task
+  include_tasks: "{{ outer_item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}/firewall.yml"
+      skip: true
+  loop_control:
+    loop_var: outer_item
+  tags:
     - internal
-    - package
-    - service
-    - template
-
-- name: "Add services to firewall's {{ log_server_firewall_zone | default('public') }} zone"
-  firewalld:
-    zone: "{{ log_server_firewall_zone | default('public') }}"
-    service: "{{ item }}"
-    immediate: "yes"
-    permanent: "yes"
-    state: enabled
-  when:
-    - ansible_facts.os_family == "RedHat"
-    - ep_firewall | default(false) | bool
-  loop: "{{ log_server_firewall_services_to_add }}"
-  tags:
     - firewall
 
-- name: "Add custom port to firewall's {{ log_server_firewall_zone | default('public') }} zone"
-  firewalld:
-    zone: "{{ log_server_firewall_zone | default('public') }}"
-    port: "{{ log_server_port }}/tcp"
-    immediate: "yes"
-    permanent: "yes"
-    state: enabled
-  when:
-    - ansible_facts.os_family == "RedHat"
-    - ep_firewall | default(false) | bool
-  tags:
-    - firewall
-
-- name: Install packages
+- name: "package █ Install {{ log_server_packages_to_install }} packages"
   package:
     name: "{{ log_server_packages_to_install }}"
     state: present
   tags:
     - package
 
-- name: Create /var/log/rsyslog directory
+- name: file █ Create /var/log/rsyslog directory
   file:  # noqa 208
     path: /var/log/rsyslog
     setype: var_log_t
@@ -69,18 +55,18 @@
     - ansible_facts.os_family == "RedHat"
     - ansible_facts.selinux.status == "enabled"
 
-- name: Template >> /etc/rsyslog.conf
+- name: "template █ Generate {{ log_server_rsyslog_conf_path }}"
   template:
     src: rsyslog.conf.j2
-    dest: "{{ log_server_rsyslog_conf_path }}"
+    dest: "{{ log_server_rsyslog_custom_conf_path | default(log_server_rsyslog_conf_path) }}"
     owner: root
     group: root
     mode: 0644
-  notify: Restart rsyslog services
+  notify: service █ Restart rsyslog service
   tags:
     - template
 
-- name: Allow syslog port into SELinux
+- name: seport █ Allow syslog port into SELinux
   seport:
     ports: "{{ log_server_port }}"
     proto: "{{ item }}"
@@ -92,20 +78,20 @@
   loop:
     - tcp
     - udp
-  notify: Restart rsyslog services
+  notify: service █ Restart rsyslog service
 
-- name: Template >> /etc/logrotate.d/rsyslog
+- name: "template █ Generate /etc/logrotate.d/rsyslog"
   template:
     src: rsyslog_logrotate.j2
     dest: /etc/logrotate.d/rsyslog
     owner: root
     group: root
     mode: 0644
-  notify: Restart rsyslog services
+  notify: service █ Restart rsyslog service
   tags:
     - template
 
-- name: Configure logrotate to use xz
+- name: lineinfile █ Configure logrotate to use xz
   lineinfile:
     path: /etc/logrotate.conf
     regexp: "{{ item }}"
@@ -114,13 +100,14 @@
     - compresscmd /usr/bin/xz
     - uncompresscmd /usr/bin/unxz
     - compressext .xz
-  notify: Restart rsyslog services
+  notify: service █ Restart rsyslog service
   tags:
     - template
 
-- meta: flush_handlers
+- name: meta █ Run handler tasks to restart rsyslog services
+  meta: flush_handlers
 
-- name: Manage services state
+- name: "service █ Manage {{ log_server_services_to_start }} services state"
   service:
     name: "{{ item }}"
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"

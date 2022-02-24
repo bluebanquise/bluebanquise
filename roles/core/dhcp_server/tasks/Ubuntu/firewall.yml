@@ -1,0 +1,7 @@
+- name: ufw █ "Add services to firewall"
+  ufw:
+    rule: allow
+    port: '67'
+    proto: udp
+  tags:
+    - firewall

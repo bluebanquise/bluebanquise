@@ -35,7 +35,7 @@ Log client verbosity defaults to info, it can be one of the following (defined i
 +----------+----------------------------------+
 
 
-You can split the configuration into several files, using **log_client_configuration_files**. 
+You can split the configuration into several files, using **log_client_configuration_files**.
 This variable can also be used to override the default rsyslog configuration.
 It uses variables:
 - **name**: the configuration file name
@@ -56,7 +56,7 @@ For example:
         *.emerg                                                 :omusrmsg:*
         uucp,news.crit                                          /var/log/spooler
         local7.*                                                /var/log/boot.log
-  
+
     - name: forwarding-rules.conf
       content: |
         *.* @@10.0.0.0:514
@@ -87,9 +87,12 @@ Integrate journalctl logging instead of rsyslog.
 
 Changelog
 ^^^^^^^^^
+
+* 1.2.1: Add OpenSuSE support. Neil Munday <neil@mundayweb.com>
+* 1.2.0: Add Ubuntu support. Benoit Leveugle <benoit.leveugle@gmail.com>
+* 1.1.1: Add custom configuration path. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.0: Enable custom rsyslog configuration with log_client_custom_config <dilassert@gmail.com>
 * 1.0.4: Enable verbosity configuration with log_client_verbosity <dilassert@gmail.com>
 * 1.0.3: Enable log server port customization with log_client_server_port. strus38
 * 1.0.1: Fixed bad template. Documentation. johnnykeats <johnny.keats@outlook.com>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
- 

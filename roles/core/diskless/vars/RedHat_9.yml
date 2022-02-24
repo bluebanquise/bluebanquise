@@ -1,0 +1,13 @@
+---
+diskless_htdocs_path: /var/www/html/preboot_execution_environment
+diskless_usr_lib_dir: /usr/lib64
+diskless_apache_user: apache
+diskless_python_version: 3.9
+diskless_packages_to_install:
+  - httpd
+  - python3-clustershell
+  - nfs-utils
+  - dracut-live
+  - xfsdump
+  - squashfs-tools
+  - bluebanquise-disklessset

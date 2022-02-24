@@ -1,0 +1,5 @@
+---
+# Blacklist nouveau driver
+ep_kernel_parameters: modprobe.blacklist=nouveau nouveau.modeset=0 rd.driver.blacklist=nouveau
+
+ep_equipment_type: server

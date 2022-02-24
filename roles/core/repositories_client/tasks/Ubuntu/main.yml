@@ -1,0 +1,24 @@
+---
+- name: set_fact ░ Set static baseurl prefix
+  set_fact:
+    baseurl_prefix:
+      "http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/\
+      {{ ep_operating_system['repositories_environment'] | default('') }}/\
+      {{ ep_operating_system['distribution'] }}/\
+      {{ ep_operating_system['distribution_version'] | default(ep_operating_system['distribution_major_version']) }}/\
+      {{ ansible_architecture }}/"
+
+- name: apt_repository █ Setting deb sources repositories
+  apt_repository:
+    repo: "{{ item.repo | default('deb [trusted=yes] ' + baseurl_prefix + ( item.name | default(item) | string ) + ' ' + ( item.distribution | default('./') )) }}"
+    state: "{{ item.state | default('present') }}"
+    codename: "{{ item.codename | default(omit) }}"
+    filename: "{{ item.filename | default(omit) }}"
+    install_python_apt: "{{ item.install_python_apt | default(omit) }}"
+    mode: "{{ item.mode | default(omit) }}"
+    update_cache: "{{ item.update_cache | default('no') }}"
+    update_cache_retries: "{{ item.update_cache_retries | default(omit) }}"
+    update_cache_retry_max_delay: "{{ item.update_cache_retry_max_delay | default(omit) }}"
+    validate_certs: "{{ item.validate_certs | default(omit) }}"
+  with_items: "{{ repositories | union(external_repositories|default([])) }}"
+  notify: command █ apt update cache

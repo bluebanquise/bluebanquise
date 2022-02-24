@@ -5,11 +5,11 @@ on:
     branches:
       - master
     paths:
-      - 'roles/advanced-core/advanced_dns_server/**'
+      - 'roles/advanced_core/advanced_dns_server/**'
       - '.github/workflows/molecule-actions-advanced_core-advanced_dns_server.yml'
   pull_request:
     paths:
-      - 'roles/advanced-core/advanced_dns_server/**'
+      - 'roles/advanced_core/advanced_dns_server/**'
       - '.github/workflows/molecule-actions-advanced_core-advanced_dns_server.yml'
 
 jobs:
@@ -37,4 +37,4 @@ jobs:
           pip install tox
       - name: Run molecule test for advanced_core/advanced_dns_server
         run: |
-          cd roles/advanced-core/advanced_dns_server && tox
+          cd roles/advanced_core/advanced_dns_server && tox

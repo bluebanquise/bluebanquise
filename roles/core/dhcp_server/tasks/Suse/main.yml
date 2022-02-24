@@ -1,0 +1,10 @@
+- name: template █ Generate /etc/sysconfig/dhcpd for SuSE based systems
+  template:
+    src: Suse/sysconfig.j2
+    dest: /etc/sysconfig/dhcpd
+    owner: root
+    group: root
+    mode: 0644
+  notify: service █ Restart dhcp server
+  tags:
+    - template

@@ -19,24 +19,21 @@
         - "vars/{{ ansible_facts.os_family }}.yml"
       skip: true
   tags:
-    - firewall
-    - internal
-    - package
-    - service
-    - template
+    - always
 
-- name: firewalld █ "Add services to firewall's {{ time_firewall_zone | default('public') }} zone"
-  firewalld:
-    zone: "{{ time_firewall_zone | default('public') }}"
-    service: "{{ item }}"
-    immediate: "yes"
-    permanent: "yes"
-    state: enabled
-  when:
-    - ansible_facts.os_family == "RedHat"
-    - ep_firewall | default(false) | bool
-  loop: "{{ time_firewall_services_to_add }}"
+- name: include_tasks ░ Use OS dedicated firewall task
+  include_tasks: "{{ item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}/firewall.yml"
+      skip: true
   tags:
+    - internal
     - firewall
 
 - name: "package █ Install {{ time_packages_to_install | join(' ') }} packages"
@@ -46,10 +43,10 @@
   tags:
     - package
 
-- name: template █ Generate /etc/chrony.conf
+- name: "template █ Generate {{ time_chrony_conf_path }}"
   template:
     src: chrony.conf.j2
-    dest: "{{ time_chrony_conf_path }}"
+    dest: "{{ time_chrony_custom_conf_path | default(time_chrony_conf_path) }}"
     owner: root
     group: root
     mode: 0644
@@ -57,11 +54,22 @@
   tags:
     - template
 
+- name: lineinfile █ Set sysconfig OPTIONS for chronyd
+  lineinfile:
+    path: /etc/sysconfig/chronyd
+    regexp: '^OPTIONS'
+    line: OPTIONS="{{ time_chronyd_options }}"
+  notify: service █ Restart time services
+  when: time_chronyd_options is defined
+  tags:
+    - template
+
 - name: "timezone █ Set system to {{ time_zone }} timezone"
   timezone:
     name: "{{ time_zone }}"
 
-- meta: flush_handlers
+- name: meta █ Run handler tasks to restart time services
+  meta: flush_handlers
 
 - name: "service █ Manage {{ time_services_to_start | join(' ') }} services state"
   service:

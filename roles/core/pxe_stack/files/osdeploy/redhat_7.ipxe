@@ -1,11 +1,11 @@
 #!ipxe
 
 echo |
-echo | Entering osdeploy/centos_7.ipxe file.
+echo | Entering osdeploy/redhat_7.ipxe file.
 echo |
 
 echo | Now starting os deployment process.
-echo | Centos or RedHat ipxe configuration.
+echo | RedHat 7 Family ipxe configuration.
 echo |
 echo | Parameters used:
 echo | > Operating system target: ${eq-distribution} ${eq-distribution-version} ${eq-architecture}
