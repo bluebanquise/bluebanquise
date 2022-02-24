@@ -581,7 +581,7 @@ We now need to prepare boot images and packages repositories.
 
 Boot images include the installer system which starts the deployment after PXE
 boot, while packages repositories include the software that will be installed
-on the systems. On Ubuntu like systems, PXE minimal is provided in the ISO, and 
+on the systems. On Ubuntu like systems, PXE minimal is provided in the ISO, and
 other repositories need to be grabbed from the web.
 
 Boot images and packages repositories structure follows a specific pattern,
@@ -1009,7 +1009,116 @@ Using *ip a* command, you should now see your ip set on the interface.
 Bootstrap SUSE like system
 ==========================
 
-To be added in 1.6 release.
+SLES 15
+-------
+
+Notes:
+
+* To use SLES 15 you will require an active SLES subscription to receive updates.
+* SLES 15 SP3 is used in the example code blocks below - adjust to your chosen service pack.
+
+After installing the OS the first step requires configuring RMT to mirror the SLES repositories. Make sure you have at least 80GB available to mirror the repositories.
+
+.. code-block:: bash
+
+  zypper install rmt-server yast2-user rsync
+  systemctl start mariadb
+  systemctl enable mariadb
+  /usr/bin/mysqladmin -u root password suitable_password_here
+  yast2
+
+From the yast2 interface select RMT from the menus and enter the required information which includes your SLES proxy ID which you can find from your SUSE online account.
+
+Once configured run:
+
+.. code-block:: bash
+
+  rmt-cli sync
+
+To list all available repositories that you can mirror run:
+
+.. code-block:: bash
+
+  rmt-cli products list --all
+
+The minimum SLES 15 repositories that you need to mirror are:
+
+* Basesystem Module
+* Desktop Applications Module
+* Development Tools Module
+* HPC Module
+* Server Applications Module
+* SUSE Linux Enterprise High Performance Computing
+* SUSE Linux Enterprise Server
+* SUSE Package Hub
+* Web and Scripting Module
+
+Each repository has a unique ID number that you can use with the ``rmt-cli`` command to mirror:
+
+.. code-block:: bash
+
+  rmt-cli products enable ID_NUMBER
+
+Once you have enabled the repositories above you can then sync the repositories like so:
+
+.. code-block:: bash
+
+  rmt-cli mirror all
+
+The repositories will be downloaded to: ``/var/lib/rmt/public/repo``.
+
+Now you can create the BlueBanquise repository directories like so:
+
+.. code-block:: bash
+
+  mkdir -p /srv/www/htdocs/repositories/sles/15.3/x86_64/os
+  cd /srv/www/htdocs/repositories/sles/15.3/x86_64
+  ln -s /var/lib/rmt/public/repo/SUSE/Backports/SLE-15-SP3_x86_64/standard SLE-Backports
+  ln -s /var/lib/rmt/public/repo/SUSE/Products/SLE-Module-Basesystem/15-SP3/x86_64/product SLE-Module-Basesystem
+  ln -s /var/lib/rmt/public/repo/SUSE/Updates/SLE-Module-Basesystem/15-SP3/x86_64/update SLE-Module-Basesystem-Updates
+  ln -s /var/lib/rmt/public/repo/SUSE/Products/SLE-Module-Desktop-Applications/15-SP3/x86_64/product SLE-Module-Desktop-Applications
+  ln -s /var/lib/rmt/public/repo/SUSE/Updates/SLE-Module-Desktop-Applications/15-SP3/x86_64/update SLE-Module-Desktop-Applications-Updates
+  ln -s /var/lib/rmt/public/repo/SUSE/Products/SLE-Module-Development-Tools/15-SP3/x86_64/product SLE-Module-Development-Tools
+  ln -s /var/lib/rmt/public/repo/SUSE/Updates/SLE-Module-Development-Tools/15-SP3/x86_64/update SLE-Module-Development-Tools-Updates
+  ln -s /var/lib/rmt/public/repo/SUSE/Products/SLE-Module-HPC/15-SP3/x86_64/product SLE-Module-HPC
+  ln -s /var/lib/rmt/public/repo/SUSE/Updates/SLE-Module-HPC/15-SP3/x86_64/update SLE-Module-HPC-Updates
+  ln -s /var/lib/rmt/public/repo/SUSE/Products/SLE-Module-Packagehub-Subpackages/15-SP3/x86_64/product SLE-Module-Packagehub-Subpackages
+  ln -s /var/lib/rmt/public/repo/SUSE/Updates/SLE-Module-Packagehub-Subpackages/15-SP3/x86_64/update SLE-Module-Packagehub-Subpackages-Updates
+  ln -s /var/lib/rmt/public/repo/SUSE/Products/SLE-Module-Server-Applications/15-SP3/x86_64/product SLE-Module-Server-Applications
+  ln -s /var/lib/rmt/public/repo/SUSE/Updates/SLE-Module-Server-Applications/15-SP3/x86_64/update SLE-Module-Server-Applications-Updates
+
+Populate the OS repository:
+
+.. code-block:: bash
+
+  mount SLE-15-SP3-Full-x86_64-GM-Media1.iso /mnt
+  rsync -av /mnt/ /srv/www/htdocs/repositories/sles/15.3/x86_64/os/
+  umount /mnt
+
+Add repositories to ``/etc/bluebanquise/inventory/group_vars/all/general_settings/repositories.yml``:
+
+.. code-block::
+
+  repositories:
+    - os
+    - bluebanquise
+    - SLE-Backports
+    - SLE-Module-Basesystem
+    - SLE-Module-Basesystem-Updates
+    - SLE-Module-Development-Tools
+    - SLE-Module-Development-Tools-Updates
+    - SLE-Module-Development-Tools
+    - SLE-Module-Development-Tools-Updates
+    - SLE-Module-Desktop-Applications
+    - SLE-Module-Desktop-Applications-Updates
+    - SLE-Module-HPC
+    - SLE-Module-HPC-Updates
+    - SLE-Module-Packagehub-Subpackages
+    - SLE-Module-Packagehub-Subpackages-Updates
+    - SLE-Module-Python2
+    - SLE-Module-Python2-Updates
+    - SLE-Module-Server-Applications
+    - SLE-Module-Server-Applications-Updates
 
 -------------
 
