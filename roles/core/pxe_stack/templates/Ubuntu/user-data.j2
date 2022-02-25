@@ -1,3 +1,4 @@
+#jinja2: lstrip_blocks: "True"
 #cloud-config
 autoinstall:
   version: 1
@@ -7,20 +8,36 @@ autoinstall:
   keyboard: {layout: {{hostvars[groups[item][0]]['ep_configuration']['keyboard_layout']|lower}}, toggle: null, variant: ''}
   locale: {{hostvars[groups[item][0]]['ep_configuration']['system_language']}}
   user-data:
+{% if pxe_stack_ubuntu_user_data_enable_sudo %}
+    users:
+      - name: {{ pxe_stack_ubuntu_user_data_sudo_user }}
+        ssh-authorized-keys:
+        {% for ssh_key in hostvars[groups[item][0]]['authentication_ssh_keys'] %}
+          - {{ ssh_key }}
+        {% endfor %}
+        sudo: ['ALL=(ALL) NOPASSWD:ALL']
+        groups: sudo
+        shell: /bin/bash
+        passwd: "{{hostvars[groups[item][0]]['authentication_root_password_sha512']}}"
+    disable_root: true
+{% else %}
     disable_root: false
+{% endif %}
   ssh:
-    allow-pw: true
     install-server: true
-{% if hostvars[groups[item][0]]['ep_partitioning'] is not none %}
+{% if hostvars[groups[item][0]]['ep_partitioning'] is defined and hostvars[groups[item][0]]['ep_partitioning'] is not none %}
 {{ hostvars[groups[item][0]]['ep_partitioning'] | indent(2, True) }}
 {% endif %}
   late-commands:
+{% if not pxe_stack_ubuntu_user_data_enable_sudo %}
     - mkdir /target/root/.ssh
-{% for ssh_key in hostvars[groups[item][0]]['authentication_ssh_keys'] %}
+    {% for ssh_key in hostvars[groups[item][0]]['authentication_ssh_keys'] %}
     - echo "{{ ssh_key }}" >> /target/root/.ssh/authorized_keys
-{% endfor %}
-{% if pxe_stack_sshd_force_permitrootlogin %}
+    {% endfor %}
+    {% if pxe_stack_sshd_force_permitrootlogin %}
     - sed -i "s/^#PermitRootLogin.*\$/PermitRootLogin yes/g" /target/etc/ssh/sshd_config
+    {% endif %}
+    - sed -i 's|^root:.:|root:{{hostvars[groups[item][0]]['authentication_root_password_sha512']}}:|' /target/etc/shadow
 {% endif %}
 {% if not pxe_stack_ubuntu_user_data_preserve_sources_list %}
     - echo " " > /target/etc/apt/sources.list
@@ -28,6 +45,5 @@ autoinstall:
 {% if hostvars[groups[item][0]]['ep_preserve_efi_first_boot_device'] == true %}
     - sh -c '[ -d /sys/firmware/efi ] && efibootmgr -o $(efibootmgr | grep BootCurrent | cut -d" " -f2),$(efibootmgr | grep BootOrder | sed "s/BootOrder:\ //" | sed "s/$(efibootmgr | grep BootCurrent | cut -d" " -f2),//") || echo "Not an EFI system, skipping"'
 {% endif %}
-    - sed -i 's|^root:.:|root:{{hostvars[groups[item][0]]['authentication_root_password_sha512']}}:|' /target/etc/shadow
     - curtin in-target --target=/target -- sh -c 'set -- `cat /proc/cmdline`; for I in $*; do case "$I" in *=*) eval $I;; esac; done; curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$node_hostname&boot=disk";'
 
