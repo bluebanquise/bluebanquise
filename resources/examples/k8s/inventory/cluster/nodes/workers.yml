@@ -1,0 +1,18 @@
+mg_workers:
+  children:
+    equipment_typeK8SW:
+      hosts:
+        w1:
+          network_interfaces:
+            - interface: enp0s3
+              ip4: 10.10.3.1
+              mac: 08:00:27:0d:44:90
+              network: ice1-1
+        w2:
+          network_interfaces:
+            - interface: enp0s3
+              ip4: 10.10.3.2
+              mac: 08:00:27:0d:54:90
+              network: ice1-1
+
+        # Add more workers if needed...

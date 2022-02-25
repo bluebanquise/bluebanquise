@@ -1,0 +1,17 @@
+---
+- name: masters
+  hosts: "mg_masters"
+  roles:
+
+    - role: set_hostname
+      tags: set_hostname
+    - role: nic
+      tags: nic
+    - role: hosts_file
+      tags: hosts_file
+    - role: dns_client
+      tags: dns_client
+    - role: time
+      tags: time
+      vars:
+        time_profile: client

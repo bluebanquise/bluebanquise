@@ -21,3 +21,4 @@
       line: 'TFTP_OPTIONS="--secure --verbose"'
     - regexp: "^TFTP_DIRECTORY"
       line: 'TFTP_DIRECTORY="/var/lib/tftpboot"'
+  notify: service █ Restart pxe services

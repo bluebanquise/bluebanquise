@@ -1,0 +1,12 @@
+---
+nfs:
+  softwares:
+    mount: /data                                # Which path clients should mount this NFS
+    export: /data                               # What path server should export
+    server: ansible                             # The server that export this storage space
+    clients_groups:                             # Can be an equipment group, or a main group (mg), or any other ansible group
+      - mg_workers
+      - mg_logins
+    take_over_network: ice1-1                   # Network used to share this storage space
+    export_arguments: rw,no_root_squash,async   # Arguments for the server (export)
+    mount_arguments: rw,rsize=32768,wsize=32768,intr,nfsvers=4.2,bg     # Arguments for the client (mount)
