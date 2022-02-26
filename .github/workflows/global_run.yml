@@ -39,3 +39,6 @@ jobs:
       
       - name: Test
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t set_hostname
+
+      - name: Test2
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t hosts_file
