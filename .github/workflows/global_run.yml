@@ -50,7 +50,7 @@ jobs:
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t ssh_client --diff
 
       - name: Role test - dhcp_server (dry run)
-        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t dhcp_server --diff -e "{start_services: False}"
+        run: 'ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t dhcp_server --diff -e "{start_services: False}"'
 
       - name: Role test - dns_server
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t dns_server --diff
