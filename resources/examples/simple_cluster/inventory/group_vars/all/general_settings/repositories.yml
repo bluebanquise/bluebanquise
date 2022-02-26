@@ -1,3 +1,2 @@
 repositories:
-  - bluebanquise
-  - os
+  - repo: deb [trusted=yes] http://bluebanquise.com/repository/releases/1.5/ubuntu2004/x86_64/bluebanquise/ ./

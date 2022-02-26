@@ -37,8 +37,38 @@ jobs:
 #      - name: Prepare host for deployment - 2 - hosts
 #        run: echo "Host management1" > $HOME/.ssh/config && echo " Hostname localhost" >> $HOME/.ssh/config
       
-      - name: Test
-        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t set_hostname
+      - name: Role test - set_hostname
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t set_hostname --diff
 
-      - name: Test2
-        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t hosts_file
+      - name: Role test - hosts_file
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t hosts_file --diff
+
+      - name: Role test - repositories_server
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t repositories_server --diff
+
+      - name: Role test - repositories_client
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t repositories_client --diff
+
+      - name: Role test - bluebanquise
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t bluebanquise --diff
+
+      - name: Role test - ssh_client
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t ssh_client --diff
+
+      - name: Role test - dhcp_server (dry run)
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t dhcp_server --check --diff
+
+      - name: Role test - dns_server
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t dns_server --diff
+
+      - name: Role test - dns_client
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t dns_client --check --diff
+
+      - name: Role test - time
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t time --diff
+
+      - name: Role test - pxe_stack
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t pxe_stack --diff
+
+      - name: Role test - nfs_server
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t nfs_server --diff
