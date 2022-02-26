@@ -31,12 +31,6 @@ jobs:
       - name: Prepare bluebanquise environment
         run: cp -a /etc/bluebanquise/resources/examples/simple_cluster/inventory /etc/bluebanquise; cp -a /etc/bluebanquise/resources/examples/simple_cluster/playbooks /etc/bluebanquise
       
-
-#      - name: Prepare host for deployment - 1 - SSH keys
-#        run: ssh-keygen -t ed25519 -q -N "" -f $HOME/.ssh/id_ed25519; cp $HOME/.ssh/id_ed25519.pub $HOME/.ssh/authorized_keys; echo "Host *" > $HOME/.ssh/config && echo " StrictHostKeyChecking no" >> $HOME/.ssh/config
-#      - name: Prepare host for deployment - 2 - hosts
-#        run: echo "Host management1" > $HOME/.ssh/config && echo " Hostname localhost" >> $HOME/.ssh/config
-      
       - name: Role test - set_hostname
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t set_hostname --diff
 
