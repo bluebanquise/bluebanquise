@@ -15,3 +15,4 @@ dns_server_root_key_file: /var/lib/named/named.root.key
 dns_server_root_hint_file: /var/lib/named/root.hint
 dns_server_statistics_file: /var/log/named.stats
 dns_server_var_dir: /var/lib/named
+dns_server_dns_user: named

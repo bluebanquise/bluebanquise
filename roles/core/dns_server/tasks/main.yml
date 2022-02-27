@@ -52,7 +52,7 @@
     path: "{{ dns_server_named_dir }}"
     state: directory
     owner: root
-    group: named
+    group: "{{ dns_server_dns_user }}"
     mode: 0750
 
 - name: template █ Generate /etc/named.conf
