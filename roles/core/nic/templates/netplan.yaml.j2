@@ -7,9 +7,10 @@ network:
   version: 2
   renderer: networkd
 {% for nic in network_interfaces %}
+{% set item = nic %}
   ethernets:
   {% if (nic.type is not defined) or (nic.type is defined and nic.type is none) or (nic.type is defined and nic.type == 'ethernet') %}
-    {{ item.conn_name | default(item.interface) | string }}:
+    {{ nic.conn_name | default(nic.interface) | string }}:
       dhcp4: no
       addresses:
         - {{ j2_nic_nmcli_ip4 | trim | default(omit,true) }}
