@@ -1,0 +1,20 @@
+#jinja2: lstrip_blocks: True
+#### BlueBanquise file ####
+## {{ansible_managed}}
+# This file describes the network interfaces available on your system
+# For more information, see netplan(5).
+network:
+  version: 2
+  renderer: networkd
+{% for nic in network_interfaces %}
+  ethernets:
+  {% if (nic.type is not defined) or (nic.type is defined and nic.type is none) or (nic.type is defined and nic.type == 'ethernet') %}
+    {{ item.conn_name | default(item.interface) | string }}:
+      dhcp4: no
+      addresses:
+        - {{ j2_nic_nmcli_ip4 | trim | default(omit,true) }}
+      #gateway4: 192.168.1.1
+      #nameservers:
+      #  addresses: [8.8.8.8,8.8.4.4]
+  {% endif %}
+{% endfor %}

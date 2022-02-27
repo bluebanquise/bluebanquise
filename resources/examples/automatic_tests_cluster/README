@@ -1,0 +1,11 @@
+This examples is composed of:
+
+* 1 management node. Network: 10.10.0.1 as main interface, 10.10.100.1 as bmc
+* 1 login node. Network: 10.10.2.1, 10.10.102.1
+* 4 computes nodes. Network: 10.10.3.[1-4], 10.10.103.[1-4]
+
+Each node is also connected to an interconnect, on 10.20.0.0 subnet.
+
+All of them are link with a single ethernet management network, and with an interconnect.
+
+Management node exports /opt/software and /home to the others nodes through NFS.

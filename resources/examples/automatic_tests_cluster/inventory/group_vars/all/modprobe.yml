@@ -1,0 +1,6 @@
+  modprobe:
+    - name: 8021q
+      state: present
+    - name: dummy
+      state: present
+      params: 'numdummies=2'

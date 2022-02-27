@@ -1,0 +1,27 @@
+---
+
+ep_console: console=tty0 console=ttyS1,115200n8
+
+ep_access_control: enforcing
+ep_firewall: true
+
+ep_partitioning: |
+  clearpart --all --initlabel
+  part /boot --fstype=ext4 --size=1024
+  part / --fstype=ext4 --size=60000
+  part /home --fstype=ext4 --size=4096 --grow
+
+ep_equipment_type: server
+
+ep_hardware:
+  cpu:
+    architecture: x86_64
+    cores: 8
+    cores_per_socket: 4
+    sockets: 1
+    threads_per_core: 2
+  gpu:
+
+ep_equipment_authentication:
+  user: ADMIN
+  password: ADMIN

@@ -29,8 +29,20 @@ jobs:
         run: sudo mkdir /etc/bluebanquise; sudo chown -R $(id -u):$(id -g) /etc/bluebanquise; cp -a * /etc/bluebanquise;
 
       - name: Prepare bluebanquise environment
-        run: cp -a /etc/bluebanquise/resources/examples/simple_cluster/inventory /etc/bluebanquise; cp -a /etc/bluebanquise/resources/examples/simple_cluster/playbooks /etc/bluebanquise
-      
+        run: cp -a /etc/bluebanquise/resources/examples/automatic_tests_cluster/inventory /etc/bluebanquise; cp -a /etc/bluebanquise/resources/examples/automatic_tests_cluster/playbooks /etc/bluebanquise
+
+      - name: Role test - modprobe
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t modprobe --diff
+
+      - name: Prepare needed fake hardware
+        run: dd if=/dev/zero of=/dev/shm/1g.img bs=1 count=0 seek=1G; ip link add dummy0 type dummy; 
+
+      - name: Role test - nic
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t nic --diff
+
+      - name: Show network conf
+        run: ip a
+
       - name: Role test - set_hostname
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t set_hostname --diff
 

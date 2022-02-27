@@ -1,0 +1,26 @@
+nfs_settings:
+  selinux:
+    use_nfs_home_dirs: true                     # Will automatically set this boolean to true if /home is mounted on client side
+
+nfs:
+  softwares:
+    mount: /opt/software                        # Which path clients should mount this NFS
+    export: /opt/software                       # What path server should export
+    server: management1                         # The server that export this storage space
+    clients_groups:                             # Can be an equipment group, or a main group (mg), or any other ansible group
+      - mg_computes
+      - mg_logins
+    take_over_network: ice1-1                   # Network used to share this storage space
+    export_arguments: ro,no_root_squash,async   # Arguments for the server (export)
+    mount_arguments: ro,intr,nfsvers=4.2,bg     # Arguments for the client (mount)
+
+  home:
+    mount: /home
+    export: /home
+    server: management1
+    clients_groups:
+      - mg_computes
+      - mg_logins
+    take_over_network: ice1-1
+    export_arguments: rw,no_root_squash,sync
+    mount_arguments: rw,intr,rsize=32768,wsize=32768,nfsvers=4.2,bg

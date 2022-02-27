@@ -1,2 +1,103 @@
 ---
-nic_role_version: 1.1.0
+nic_nmcli_role_version: 1.6.0
+
+j2_nic_nmcli_ip4: "{{ j2_nic_nmcli_ip4_main | trim }}{% if item.ip4 is defined and item.ip4_manual is defined %},{% endif %}{{ j2_nic_nmcli_ip4_manual | trim }}"
+
+j2_nic_nmcli_ip4_main: "
+{% if item.ip4 is defined %}
+  {% if '/' in item.ip4 %}
+    {{ item.ip4 }}
+  {% elif item.network is defined and networks[item.network]['prefix4'] is defined %}
+    {{ item.ip4 }}/{{ networks[item.network]['prefix4'] }}
+  {% elif item.network is defined and networks[item.network]['prefix'] is defined %}
+    {{ item.ip4 }}/{{ networks[item.network]['prefix'] }}
+  {% endif %}
+{% endif %}
+"
+
+j2_nic_nmcli_ip4_manual: "
+{% if item.ip4_manual is defined %}
+  {% for ipsub in item.ip4_manual %}{% if not loop.first %},{% endif %}{{ ipsub }}{%endfor %}
+{% endif %}
+"
+
+j2_nic_nmcli_ip6: "
+{% if item.ip6 is defined %}
+  {% if '/' in item.ip6 %}
+    {{ item.ip6 }}
+  {% elif item.network is defined and networks[item.network]['prefix6'] is defined %}
+    {{ item.ip6 }}/{{ networks[item.network]['prefix6'] }}
+  {% endif %}
+{% endif %}
+"
+
+# Check here if never_default4 is set or not. If set, gw4 cannot be used as both are mutually exclusive. If not set, then get gw4 from network_interfaces, then default to network.gateway4 then default to network.gateway then omit.
+j2_nic_nmcli_gw4: "
+{% if item.never_default4 is not defined %}
+  {% if item.gw4 is defined %}
+    {{ item.gw4 }}
+  {% elif item.network is defined and networks[item.network]['gateway4'] is defined %}
+    {{ networks[item.network]['gateway4'] }}
+  {% elif item.network is defined and networks[item.network]['gateway'] is defined %}
+    {{ networks[item.network]['gateway'] }}
+  {% endif %}
+{% endif %}
+"
+
+j2_nic_nmcli_gw6: "
+{% if item.never_default6 is not defined %}
+  {% if item.gw6 is defined %}
+    {{ item.gw6 }}
+  {% elif item.network is defined and networks[item.network]['gateway6'] is defined %}
+    {{ networks[item.network]['gateway6'] }}
+  {% endif %}
+{% endif %}
+"
+
+j2_nic_nmcli_routes4: "
+{% if item.routes4 is defined %}
+  {{ item.routes4 }}
+{% elif item.network is defined and networks[item.network]['routes4'] is defined %}
+  {{ networks[item.network]['routes4'] }}
+{% endif %}
+"
+
+j2_nic_nmcli_route_metric4: "
+{% if item.route_metric4 is defined %}
+  {{ item.route_metric4 }}
+{% elif item.network is defined and networks[item.network]['route_metric4'] is defined %}
+  {{ networks[item.network]['route_metric4'] }}
+{% endif %}
+"
+
+j2_nic_nmcli_never_default4: "
+{% if item.never_default4 is defined %}
+  {{ item.never_default4 }}
+{% elif item.network is defined and networks[item.network]['never_default4'] is defined %}
+  {{ networks[item.network]['never_default4'] }}
+{% endif %}
+"
+
+j2_nic_nmcli_mtu: "
+{% if item.mtu is defined %}
+  {{ item.mtu }}
+{% elif item.network is defined and networks[item.network]['mtu'] is defined %}
+  {{ networks[item.network]['mtu'] }}
+{% endif %}
+"
+
+j2_nic_nmcli_dns4: "
+{% if item.dns4 is defined %}
+  {{ item.dns4 }}
+{% elif item.network is defined and networks[item.network]['dns4'] is defined %}
+  {{ networks[item.network]['dns4'] }}
+{% endif %}
+"
+
+j2_nic_nmcli_dns4_search: "
+{% if item.dns4_search is defined %}
+  {{ item.dns4_search }}
+{% elif item.network is defined and networks[item.network]['dns4_search'] is defined %}
+  {{ networks[item.network]['dns4_search'] }}
+{% endif %}
+"

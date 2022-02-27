@@ -1,0 +1,13 @@
+---
+
+ep_partitioning: |
+  clearpart --all --initlabel
+  part /boot --fstype=ext4 --size=1024
+  part / --fstype=ext4 --size=60000
+  part /home --fstype=ext4 --size=4096 --grow
+
+ep_equipment_type: server
+
+ep_equipment_authentication:
+  user: ADMIN
+  password: ADMIN
