@@ -1,20 +1,20 @@
 ---
 
 - name: "package █ Install {{ nic_nmcli_packages_to_install | join(' ') }}"
-  package:
+  ansible.builtin.package:
     name: "{{ nic_nmcli_packages_to_install }}"
     state: present
   tags:
     - package
 
 - name: "service █ Disable wicked"
-  service:
+  ansible.builtin.service:
     name: wicked
     enabled: no
   notify: reboot █ Reboot system
 
 - name: "service █ Manage {{ nic_nmcli_services_to_start | join(' ') }} state"
-  service:
+  ansible.builtin.service:
     name: "{{ item }}"
     enabled: yes
     state: "{{ (nic_nmcli_start_services | bool) | ternary('started', omit) }}"
@@ -23,7 +23,7 @@
     - service
 
 - name: nmcli █ Set NICs configuration
-  nmcli:
+  community.general.nmcli:
     # Tuned
     conn_name: "{{ item.conn_name | default(item.interface) | string }}"
     ifname: "{{ item.ifname | default(item.physical_device) | default(omit) }}"
@@ -84,17 +84,17 @@
     - identify
 
 - name: meta █ Run handler tasks to reload connections
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers
 
 - name: shell █ Force apply nic settings
-  shell: "nmcli con down {{ item.item.interface }} && sleep 2 && nmcli con up {{ item.item.interface }}"
+  ansible.builtin.shell: "nmcli con down {{ item.item.interface }} && sleep 2 && nmcli con up {{ item.item.interface }}"
   loop: "{{ nic_nmcli_apply.results }}"
   when:
     - nic_nmcli_force_nic_restart
     - item.changed
 
 - name: reboot █ Reboot system to ensure apply nic configuration
-  reboot:
+  ansible.builtin.reboot:
     reboot_timeout: "{{ nic_nmcli_reboot_timeout }}"
   register: reboot_status
   loop: "{{ nic_nmcli_apply.results }}"
