@@ -35,7 +35,7 @@ jobs:
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t modprobe --diff
 
       - name: Prepare needed fake hardware
-        run: dd if=/dev/zero of=/dev/shm/1g.img bs=1 count=0 seek=1G; sudo ip link add dummy0 type dummy; 
+        run: dd if=/dev/zero of=/dev/shm/1g.img bs=1 count=0 seek=1G; ip a; sudo ip link add dummy0 type dummy; 
 
       - name: Role test - nic
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t nic --diff
