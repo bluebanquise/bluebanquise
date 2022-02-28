@@ -1,7 +1,7 @@
 ---
 
 - name: service █ Restart http server service
-  service:
+  ansible.builtin.service:
     name: "{{ item }}"
     state: restarted
   loop: "{{ repositories_server_services_to_start }}"

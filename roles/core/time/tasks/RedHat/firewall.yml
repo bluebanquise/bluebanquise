@@ -1,5 +1,5 @@
 - name: firewalld █ "Add services to firewall's {{ time_firewall_zone | default('public') }} zone"
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ time_firewall_zone | default('public') }}"
     service: "{{ item }}"
     immediate: "yes"

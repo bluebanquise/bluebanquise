@@ -11,7 +11,7 @@
   #
   # If no OS specific file is found, the role will default to vars/main.yml
   #
-  include_vars: "{{ item }}"
+  ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - files:
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
@@ -23,7 +23,7 @@
     - always
 
 - name: "package █ install"
-  package:
+  ansible.builtin.package:
     name: "{{ item }}"
     state: present
   loop: "{{ audit_config_packages_to_install }}"
@@ -31,12 +31,12 @@
     - package
 
 - name: "stat █ Check that the {{ audit_config_plugins_directory }}/{{ audit_config_syslog_file }} exists"
-  stat:
+  ansible.builtin.stat:
     path: "{{ audit_config_plugins_directory }}/{{ audit_config_syslog_file }}"
   register: audit_result
 
 - name: "replace █ Allow audit logs to be forwarded to remote syslog server"
-  replace:
+  ansible.builtin.replace:
     path: "{{ audit_config_plugins_directory }}/{{ audit_config_syslog_file }}"
     regexp: "^active = .*"
     replace: "active = yes"

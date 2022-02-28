@@ -1,5 +1,5 @@
 - name: ufw █ "Add services to firewall"
-  ufw:
+  community.general.ufw:
     rule: allow
     name: Apache
   tags:

@@ -10,7 +10,7 @@
   #
   # If no OS specific file is found, the role will default to vars/main.yml
   #
-  include_vars: "{{ item }}"
+  ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - files:
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}.yml"
@@ -24,7 +24,7 @@
     - always
 
 - name: include_tasks ░ Use OS dedicated firewall task
-  include_tasks: "{{ outer_item }}"
+  ansible.builtin.include_tasks: "{{ outer_item }}"
   with_first_found:
     - files:
         - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
@@ -41,21 +41,21 @@
     - firewall
 
 - name: "package █ Install {{ dhcp_server_packages_to_install | join(' ') }}"
-  package:
+  ansible.builtin.package:
     name: "{{ dhcp_server_packages_to_install }}"
     state: present
   tags:
     - package
 
 - name: "file █ Create {{ dhcp_server_conf_dir }}"
-  file:
+  ansible.builtin.file:
     path: "{{ dhcp_server_conf_dir }}"
     owner: root
     mode: "0755"
     state: directory
 
 - name: "template █ Generate {{ dhcp_server_conf_file }}"
-  template:
+  ansible.builtin.template:
     src: dhcpd.conf.j2
     dest: "{{ dhcp_server_conf_file }}"
     owner: root
@@ -66,7 +66,7 @@
     - template
 
 - name: "template █ Generate {{ dhcp_server_conf_dir }}/dhcpd.networks.conf"
-  template:
+  ansible.builtin.template:
     src: dhcpd.networks.conf.j2
     dest: "{{ dhcp_server_conf_dir }}/dhcpd.networks.conf"
     owner: root
@@ -77,7 +77,7 @@
     - template
 
 - name: "template █ Generate {{ dhcp_server_conf_dir }}/dhcpd.{{ item }}.conf"
-  template:
+  ansible.builtin.template:
     src: dhcpd.subnet.conf.j2
     dest: "{{ dhcp_server_conf_dir }}/dhcpd.{{ item }}.conf"
     owner: root
@@ -92,7 +92,7 @@
     - template
 
 - name: include_tasks ░ Apply OS specific tasks
-  include_tasks: "{{ item }}"
+  ansible.builtin.include_tasks: "{{ item }}"
   with_first_found:
     - files:
         - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
@@ -106,10 +106,10 @@
     - internal
 
 - name: meta █ Run handler tasks to restart dhcp services
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers
 
 - name: "service █ Manage {{ dhcp_server_services_to_start | join(' ') }} state"
-  service:
+  ansible.builtin.service:
     name: "{{ item }}"
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
     state: "{{ (start_services | bool) | ternary('started', omit) }}"

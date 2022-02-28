@@ -1,7 +1,7 @@
 ##### RedHat os familly
 
 - name: "copy █ Copy osdeploy files {{ pxe_stack_htdocs_path }}/osdeploy/"
-  copy:
+  ansible.builtin.copy:
     src: osdeploy/redhat_{{ item.major }}.ipxe
     dest: "{{ pxe_stack_htdocs_path }}/osdeploy/redhat_{{ item.major }}.ipxe"
     mode: 0644
@@ -10,7 +10,7 @@
   loop: "{{ pxe_stack_supported_os.redhat }}"
 
 - name: file █ Generate links for all supported OS
-  file:
+  ansible.builtin.file:
     src: redhat_{{ item.0.major }}.ipxe
     dest: "{{ pxe_stack_htdocs_path }}/osdeploy/{{ item.1 }}_{{ item.0.major }}.ipxe"
     mode: 0644
@@ -22,7 +22,7 @@
   when: item.1 != 'redhat'
 
 - name: "template █ Generate kickstarts {{ pxe_stack_htdocs_path }}/equipment_profiles/{item}.kickstart.cfg"
-  template:
+  ansible.builtin.template:
     src: "RedHat/kickstart.cfg.j2"
     dest: "{{ pxe_stack_htdocs_path }}/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.kickstart.cfg"
     mode: 0644
@@ -36,7 +36,7 @@
     - template
 
 - name: "template █ Generate equipment_profiles {{ pxe_stack_htdocs_path }}/equipment_profiles/{item}.ipxe"
-  template:
+  ansible.builtin.template:
     src: "RedHat/equipment_profile_ks.ipxe.j2"
     dest: "{{ pxe_stack_htdocs_path }}/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.ipxe"
     mode: 0644

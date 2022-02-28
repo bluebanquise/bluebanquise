@@ -1,6 +1,6 @@
 ---
 - name: set_fact ░ Set static baseurl prefix
-  set_fact:
+  ansible.builtin.set_fact:
     baseurl_prefix:
       "http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/\
       {{ ep_operating_system['repositories_environment'] | default('') }}/\
@@ -12,7 +12,7 @@
   # In BlueBanquise, the CentOS 7 system repository is installed with the
   # special repository 'os', thus we disable default repositories if 'os' is
   # configured.
-  ini_file:
+  ansible.builtin.ini_file:
     path: "/etc/yum.repos.d/CentOS-Base.repo"
     section: "{{ item }}"
     option: enabled
@@ -27,7 +27,7 @@
   notify: command █ yum clean metadata
 
 - name: yum_repository █ Setting repositories
-  yum_repository:
+  ansible.builtin.yum_repository:
     name: "{{ item.name | default(item) }}"
     description: "{{ item.name | default(item) }} gen by Ansible"
     baseurl: "{{ item.baseurl | default(baseurl_prefix + item.name | default(item)) }}/"

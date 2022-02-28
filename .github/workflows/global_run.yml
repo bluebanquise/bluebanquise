@@ -34,8 +34,8 @@ jobs:
       - name: Role test - modprobe
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t modprobe --diff
 
-      - name: Prepare needed fake hardware
-        run: dd if=/dev/zero of=/tmp/1g.img bs=1 count=0 seek=1G;
+      - name: Prepare needed files and folders
+        run: dd if=/dev/zero of=/tmp/1g.img bs=1 count=0 seek=1G; sudo mkdir -p /opt/software; sudo mkdir -p /opt/software_client;
 
       - name: Role test - nic
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t nic --diff
@@ -62,7 +62,8 @@ jobs:
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t ssh_client --diff
 
       - name: Role test - dhcp_server (dry run)
-        run: 'ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t dhcp_server --diff -e "{start_services: False}"'
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t dhcp_server --diff 
+# -e "{start_services: False}"'
 
       - name: Role test - dns_server
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t dns_server --diff

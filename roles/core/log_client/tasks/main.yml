@@ -10,7 +10,7 @@
   #
   # If no OS specific file is found, the role will default to vars/main.yml
   #
-  include_vars: "{{ item }}"
+  ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - files:
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
@@ -22,14 +22,14 @@
     - always
 
 - name: Install packages
-  package:
+  ansible.builtin.package:
     name: "{{ log_client_packages_to_install }}"
     state: present
   tags:
     - package
 
 - name: "template █ Generate {{ log_client_rsyslog_conf_path }}"
-  template:
+  ansible.builtin.template:
     src: rsyslog.conf.j2
     dest: "{{ log_client_rsyslog_custom_conf_path | default(log_client_rsyslog_conf_path) }}"
     owner: root
@@ -41,7 +41,7 @@
     - template
 
 - name: "template █ Generate custom rsyslog files"
-  template:
+  ansible.builtin.template:
     src: rsyslog.d_custom.conf.j2
     dest: "{{ item.path | default('/etc/rsyslog.d') }}/{{ item.name }}"
     owner: root
@@ -56,7 +56,7 @@
     - template
 
 - name: seport █ Allow syslog port into SELinux
-  seport:
+  community.general.seport:
     ports: "{{ log_client_server_port }}"
     proto: "{{ item }}"
     setype: syslogd_port_t
@@ -70,10 +70,10 @@
   notify: service █ Restart rsyslog service
 
 - name: meta █ Run handler tasks to restart rsyslog services
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers
 
 - name: "service █ Manage {{ log_client_services_to_start }} state"
-  service:
+  ansible.builtin.service:
     name: "{{ item }}"
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
     state: "{{ (start_services | bool) | ternary('started', omit) }}"

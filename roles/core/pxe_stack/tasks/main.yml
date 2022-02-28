@@ -10,7 +10,7 @@
   #
   # If no OS specific file is found, the role will default to vars/main.yml
   #
-  include_vars: "{{ item }}"
+  ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - files:
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}.yml"
@@ -24,7 +24,7 @@
     - always
 
 - name: include_tasks ░ Use OS dedicated firewall task
-  include_tasks: "{{ outer_item }}"
+  ansible.builtin.include_tasks: "{{ outer_item }}"
   with_first_found:
     - files:
         - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
@@ -41,7 +41,7 @@
     - firewall
 
 - name: "package █ Install {{ (pxe_stack_packages_to_install + [pxe_stack_tftp_package | default(pxe_stack_default_tftp_package)]) | join(' ') }} packages"
-  package:
+  ansible.builtin.package:
     name: "{{ pxe_stack_packages_to_install + [pxe_stack_tftp_package | default(pxe_stack_default_tftp_package)] }}"
     state: present
   tags:
@@ -49,7 +49,7 @@
   notify: systemd █ Reload systemd configuration
 
 - name: file █ Create pxe directories structure
-  file:
+  ansible.builtin.file:
     path: "{{ item }}"
     state: directory
     mode: 0755
@@ -59,7 +59,7 @@
     - /etc/bootset
 
 - name: file █ Create pxe http directories structure
-  file:
+  ansible.builtin.file:
     path: "{{ item }}"
     state: directory
     mode: 0755
@@ -73,7 +73,7 @@
     - "{{ pxe_stack_htdocs_path }}/osdeploy"
 
 - name: include_tasks ░ Use OS dedicated task
-  include_tasks: "{{ item }}"
+  ansible.builtin.include_tasks: "{{ item }}"
   with_first_found:
     - files:
         - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
@@ -87,7 +87,7 @@
     - internal
 
 - name: template █ Generate /etc/bootset/nodes_parameters.yml
-  template:
+  ansible.builtin.template:
     src: nodes_parameters.yml.j2
     dest: /etc/bootset/nodes_parameters.yml
     mode: 0644
@@ -95,13 +95,13 @@
     - template
 
 - name: template █ Generate /etc/bootset/pxe_parameters.yml
-  template:
+  ansible.builtin.template:
     src: "pxe_parameters.yml.j2"
     dest: "/etc/bootset/pxe_parameters.yml"
     mode: 0644
 
 - name: "template █ Generate {{ pxe_stack_htdocs_path }}/{menu|convergence}.ipxe"
-  template:
+  ansible.builtin.template:
     src: "{{ item }}.ipxe.j2"
     dest: "{{ pxe_stack_htdocs_path }}/{{ item }}.ipxe"
     mode: 0755
@@ -114,7 +114,7 @@
     - template
 
 - name: "template █ Generate {{ pxe_stack_htdocs_path }}/nodes/.ipxe"
-  template:
+  ansible.builtin.template:
     src: nohostname.ipxe.j2
     dest: "{{ pxe_stack_htdocs_path }}/nodes/.ipxe"
     mode: 0755
@@ -124,45 +124,45 @@
     - template
 
 - name: include_tasks ░ Include RedHat familly clients support
-  include_tasks: client_os/RedHat.yml
+  ansible.builtin.include_tasks: client_os/RedHat.yml
   when: pxe_stack_client_os_redhat
   tags:
     - internal
 
 - name: include_tasks ░ Include Ubuntu familly clients support
-  include_tasks: client_os/Ubuntu.yml
+  ansible.builtin.include_tasks: client_os/Ubuntu.yml
   when: pxe_stack_client_os_ubuntu
   tags:
     - internal
 
 - name: include_tasks ░ Include DGX familly clients support
-  include_tasks: client_os/DGX.yml
+  ansible.builtin.include_tasks: client_os/DGX.yml
   when: pxe_stack_client_os_dgx
   tags:
     - internal
 
 - name: include_tasks ░ Include Suse familly clients support
-  include_tasks: client_os/Suse.yml
+  ansible.builtin.include_tasks: client_os/Suse.yml
   when: pxe_stack_client_os_suse
   tags:
     - internal
 
 - name: apache2_module █ Enable apache2 cgi module
-  apache2_module:
+  community.general.apache2_module:
     state: present
     name: "{{ pxe_stack_apache_cgi_module }}"
   notify: service █ Restart pxe services
   when: ansible_facts.os_family == 'RedHat' and ( ansible_facts.distribution_major_version | int ) < 9
 
 - name: "copy █ Copy {{ pxe_stack_apache_conf_path }}/cgi.conf"
-  copy:
+  ansible.builtin.copy:
     src: cgi.conf
     dest: "{{ pxe_stack_apache_conf_path }}/cgi.conf"
     mode: 0644
   notify: service █ Restart pxe services
 
 - name: "template █ Create {{ pxe_stack_apache_cgi_bin_path }}/bootswitch.cgi"
-  template:
+  ansible.builtin.template:
     src: bootswitch.cgi.j2
     dest: "{{ pxe_stack_apache_cgi_bin_path }}/bootswitch.cgi"
     mode: 0744
@@ -172,10 +172,10 @@
     - template
 
 - name: meta █ Run handler tasks to restart pxe services
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers
 
 - name: "service █ Manage {{ (pxe_stack_services_to_start + [pxe_stack_tftp_service | default(pxe_stack_default_tftp_service)]) | join(' ') }} state"
-  service:
+  ansible.builtin.service:
     name: "{{ item }}"
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
     state: "{{ (start_services | bool) | ternary('started', omit) }}"

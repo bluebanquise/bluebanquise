@@ -1,6 +1,6 @@
 ---
 - name: fail ░ Check presence of required parameters
-  fail:
+  ansible.builtin.fail:
     msg: "Bailing out.
   This role requires networks[{{ item['network'] }}]['firewall']['zone']"
   when: networks[item['network']]['firewall']['zone'] is not defined
@@ -11,7 +11,7 @@
     - internal
 
 - name: "firewalld █ Ensure firewall zones exist"
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ networks[item]['firewall']['zone'] }}"
     permanent: yes
     state: present
@@ -20,10 +20,10 @@
   notify: service █ Restart firewall services
 
 - name: meta █ Run handler tasks to restart firewall services
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers
 
 - name: "firewalld █ Configure firewall zones"
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ networks[item]['firewall']['zone'] }}"
     source: "{{ networks[item]['subnet'] }}/{{ networks[item]['prefix'] }}"
     immediate: yes
@@ -36,7 +36,7 @@
             to zone '{{ networks[item]['firewall']['zone'] }}'"
 
 - name: "firewalld █ Add services to firewall's zones"
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ item.0.zone }}"
     service: "{{ item.1 }}"
     immediate: "yes"
@@ -47,7 +47,7 @@
     label: "Add service {{ item.1 }} to zone {{ item.0.zone }}"
 
 - name: "firewalld █ Remove services from firewall's zones"
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ item.0.zone }}"
     service: "{{ item.1 }}"
     immediate: "yes"
@@ -58,7 +58,7 @@
     label: "Remove service {{ item.1 }} from zone {{ item.0.zone }}"
 
 - name: "firewalld █ Add ports to firewall's zones"
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ item.0.zone }}"
     port: "{{ item.1 }}"
     immediate: "yes"
@@ -69,7 +69,7 @@
     label: "Add port {{ item.1 }} to zone {{ item.0.zone }}"
 
 - name: "firewalld █ Remove ports from firewall's zones"
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ item.0.zone }}"
     port: "{{ item.1 }}"
     immediate: "yes"
@@ -80,7 +80,7 @@
     label: "Remove port {{ item.1 }} from zone {{ item.0.zone }}"
 
 - name: "firewalld █ Add rich rules to firewall's zones"
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ item.0.zone }}"
     rich_rule: "{{ item.1 }}"
     immediate: "yes"
@@ -91,7 +91,7 @@
     label: "Add rich rule '{{ item.1 }}' to zone {{ item.0.zone }}"
 
 - name: "firewalld █ Remove rich rules from firewall's zones"
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ item.0.zone }}"
     rich_rule: "{{ item.1 }}"
     immediate: "yes"
@@ -102,7 +102,7 @@
     label: "Remove rich rule '{{ item.1 }}' from zone {{ item.0.zone }}"
 
 - name: "firewalld █ Add ICMP blocks to firewall's zones"
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ item.0.zone }}"
     icmp_block: "{{ item.1 }}"
     immediate: "yes"
@@ -113,7 +113,7 @@
     label: "Add ICMP block '{{ item.1 }}' to zone {{ item.0.zone }}"
 
 - name: "firewalld █ Remove ICMP blocks from firewall's zones"
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ item.0.zone }}"
     icmp_block: "{{ item.1 }}"
     immediate: "yes"
@@ -124,7 +124,7 @@
     label: "Remove ICMP block '{{ item.1 }}' from zone {{ item.0.zone }}"
 
 - name: "firewalld █ Define ICMP block inversion in firewall's zones"
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ item.zone }}"
     icmp_block_inversion: "{{ item.icmp_block_inversion | string }}"
     immediate: "yes"
@@ -136,7 +136,7 @@
     label: "{{ item.icmp_block_inversion | default(False) | ternary('Enable', 'Disable') }} ICMP block inversion in zone {{ item.zone }}"
 
 - name: "firewalld █ Define masquerade in firewall's zones"
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ item.zone }}"
     masquerade: "{{ item.masquerade | string }}"
     immediate: "yes"

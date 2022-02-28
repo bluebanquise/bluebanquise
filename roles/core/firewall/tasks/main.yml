@@ -10,7 +10,7 @@
   #
   # If no OS specific file is found, the role will default to vars/main.yml
   #
-  include_vars: "{{ item }}"
+  ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - files:
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
@@ -22,14 +22,14 @@
     - always
 
 - name: "package █ Install {{ firewall_packages_to_install | join(' ') }} packages"
-  package:
+  ansible.builtin.package:
     name: "{{ firewall_packages_to_install }}"
     state: present
   tags:
     - package
 
 - name: "service █ Manage {{ firewall_services_to_start | join(' ') }} state"
-  service:
+  ansible.builtin.service:
     name: "{{ item }}"
     enabled: "{{ (ep_firewall | bool) | ternary('yes','no') }}"
     state: "{{ (ep_firewall | bool) | ternary('started', 'stopped') }}"
@@ -38,7 +38,7 @@
     - service
 
 - name: "include_tasks ░ Configure firewall: {{ ansible_facts.os_family }}"
-  include_tasks: "{{ item }}"
+  ansible.builtin.include_tasks: "{{ item }}"
   with_first_found:
     - files:
         - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"

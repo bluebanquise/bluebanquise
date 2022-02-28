@@ -3,7 +3,7 @@
 # skip os repository as installation will have created
 # /etc/zypp/repos.d/openSUSE-Leap-15.3-1.repo (or similar)
 - name: Setting repositories
-  zypper_repository:
+  community.general.zypper_repository:
     name: "{{ item }}"
     description: "{{ item }} gen by Ansible"
     repo: "http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/{{ ep_operating_system['repositories_environment'] | default('') }}/{{ ep_operating_system['distribution'] }}/{{ ep_operating_system['distribution_version'] | default(ep_operating_system['distribution_major_version']) }}/{{ ep_hardware['cpu']['architecture'] }}/{{ item }}/"
@@ -13,7 +13,7 @@
   when: item != "os"
 
 - name: Disable delta RPMs
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/zypp/zypp.conf
     insertafter: '# download.use_deltarpm = true'
     regexp: '^download.use_deltarpm ='

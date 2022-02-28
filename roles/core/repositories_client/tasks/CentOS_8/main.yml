@@ -1,6 +1,6 @@
 ---
 - name: set_fact ░ Set static baseurl prefix
-  set_fact:
+  ansible.builtin.set_fact:
     baseurl_prefix:
       "http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/\
       {{ ep_operating_system['repositories_environment'] | default('') }}/\
@@ -16,7 +16,7 @@
   # If you need to configure the Extras repository, consider adding it as you
   # would add any other repository to the configuration. See the documentation
   # for details on how to proceed.
-  ini_file:
+  ansible.builtin.ini_file:
     path: "/etc/yum.repos.d/CentOS-Linux-Extras.repo"
     section: "extras"
     option: enabled
@@ -30,7 +30,7 @@
   notify: command █ yum clean metadata
 
 - name: yum_repository █ Setting repositories
-  yum_repository:
+  ansible.builtin.yum_repository:
     name: "{{ item.name | default(item) }}"
     description: "{{ item.name | default(item) }} gen by Ansible"
     baseurl: "{{ item.baseurl | default(baseurl_prefix + item.name | default(item)) }}/"
@@ -48,7 +48,7 @@
   # in /etc/yum.repos.d/Centos-AppStream.repo. These are the operating system
   # repositories, thus installed with the special repository 'os' in
   # BlueBanquise.
-  yum_repository:
+  ansible.builtin.yum_repository:
     name: "{{ item.repoid | lower }}"
     description: "{{ item.repoid }} gen by Ansible"
     baseurl: "{{ item.baseurl | default(baseurl_prefix + 'os/' + item.repoid) }}"

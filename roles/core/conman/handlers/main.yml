@@ -1,6 +1,6 @@
 ---
 - name: service █ Restart conman
-  service:
+  ansible.builtin.service:
     name: conman
     state: restarted
   when:
@@ -8,5 +8,5 @@
     - (start_services | bool)
 
 - name: systemd █ Reload systemd configuration
-  systemd:
+  ansible.builtin.systemd:
     daemon_reload: yes

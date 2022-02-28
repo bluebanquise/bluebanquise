@@ -1,7 +1,7 @@
 ---
 
 - name: "lineinfile █ Set ATFTPD_DIRECTORY in /etc/sysconfig/atftpd"
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/sysconfig/atftpd
     regexp: '^ATFTPD_DIRECTORY='
     line: 'ATFTPD_DIRECTORY="/srv/tftpboot"'
