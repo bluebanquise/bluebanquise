@@ -209,6 +209,8 @@ Have now the other nodes boot over PXE the way you desire.
 You should see the operating system deploying on other nodes. Once OS has been deployed, nodes will reboot and 
 boot over disk automatically.
 
+.. image:: images/scenario_kubernetes/cluster_deploy_bb.svg
+
 Ensure now you can reach all nodes using bluebanquise user:
 
 .. code-block:: text
@@ -224,8 +226,6 @@ If all goes well, deploy nodes configuration using their dedicated playbooks:
   ansible-playbook m.yml -b --diff
   ansible-playbook w.yml -b --diff
 
-.. image:: images/scenario_kubernetes/cluster_deploy_bb.svg
-
 Once configuration has been pushed, you need to check if nodes can reach the web and resolve external domains.
 
 .. code-block:: text
@@ -234,8 +234,92 @@ Once configuration has been pushed, you need to check if nodes can reach the web
   ping 8.8.8.8
   ping google.com
 
-If both ping respond, your cluster is ready to host Kubernetes. Only missing element is hap3 and hap4 configuration 
-to be able to relay Kubernets admin API to administrators.
+If both ping respond, your cluster is ready to host Kubernetes.
+Time to create haproxy and keepaloved resources on hap3 and hap4 couple.
+
+Haproxy and keepalived
+----------------------
+
+Ssh on hap3 and install both tools:
+
+.. code-block:: text
+
+  apt-get install haproxy keepalived
+
+Now tune haproxy to make this host redirect all incoming tcp traffic on port 6443 to kubernetes masters.
+Edit file /etc/haproxy/haproxy.cfg and add at the end:
+
+.. code-block:: text
+
+  listen kubernetes-apiserver-https
+    bind *:6443
+    mode tcp
+    option log-health-checks
+    timeout client 3h
+    timeout server 3h
+    server m1 10.10.2.1:6443 check check-ssl verify none inter 10000
+    server m2 10.10.2.2:6443 check check-ssl verify none inter 10000
+    server m3 10.10.2.3:6443 check check-ssl verify none inter 10000
+    balance roundrobin
+
+And start/restart service:
+
+.. code-block:: text
+
+  systemctl restart haproxy
+
+Now create the keepalived virtual ip. Edit/create /etc/keepalived/keepalived.conf and add the following content:
+
+.. code-block:: text
+
+  vrrp_script reload_haproxy {
+      script "/usr/bin/killall -0 haproxy"
+      interval 1
+  }
+
+  vrrp_instance VI_1 {
+    virtual_router_id 100
+    state MASTER
+    priority 100
+
+    # interval de check
+    advert_int 1
+
+    # interface de synchro entre les LB
+    lvs_sync_daemon_interface enp0s3
+    interface enp0s3
+
+    # authentification entre les 2 machines LB
+    authentication {
+      auth_type PASS
+      auth_pass secret
+    }
+
+    # vip
+    virtual_ipaddress {
+      10.10.0.3/16 brd 10.10.255.255 scope global
+    }
+
+    track_script {
+      reload_haproxy
+    }
+
+  }
+
+And start service:
+
+.. code-block:: text
+
+  systemctl restart keepalived
+
+You should see the virtual ip created on your external NIC, as keepalived entered MASTER state on this node.
+
+Do the exact same procedure on hap4. You should not see the virtual ip spawning as keepalived will detect ip already 
+exist on hap3 and so will enter BACKUP state.
+
+Also prepare hap1 and hap2 systems by installing haproxy and keepalived on them. Configure keepalived, but let haproxy down and unconfigured for now.
+
+.. image:: images/scenario_kubernetes/cluster_deploy_bb_playbooks.svg
 
 Deploy Kubernetes cluster
 =========================
@@ -403,6 +487,10 @@ And check the cluster is running as expected:
   w2     Ready    <none>                 4m48s   v1.22.5
   bluebanquise@ansible:~$
 
+You can see that we access the cluster through our haproxy server, port 6443.
+
+.. image:: images/scenario_kubernetes/cluster_deployed_k8s.svg
+
 Install Octant
 ==============
 
@@ -437,8 +525,6 @@ Configure nginx-ingress together with MetalLB
 
 We want our ingress resources to be reachable over a virtual ip, spawned by MetalLB, and 
 connected to our proxy servers.
-
->>>>>>>>>>>>>>>>>> scehma
 
 Create file nginx-ingress-metallb.yml with the following content:
 
@@ -508,13 +594,13 @@ You should now be able to see the address given by MetalLB to reach ingress reso
 
 Here: 10.10.7.7
 
+.. image:: images/scenario_kubernetes/k8s_resources_step1.svg
+
 Create test resources
 ---------------------
 
 Lets create 2 http server basic resources, and 
 connect them to dedicated services, and then to an ingress.
-
->>>>>>>>>>>>>>>>>>
 
 Create file banana.yml with the following content:
 
@@ -611,6 +697,8 @@ We can check that http server works. Ssh on a master, and try to curl these ip
   banana
   bluebanquise@m1:~$
 
+.. image:: images/scenario_kubernetes/k8s_resources_step2.svg
+
 Lets now create an ingress, so these 2 web servers can be reached from the MetalLB ip.
 
 Create file fruits.yml with the following content:
@@ -671,6 +759,8 @@ And try to reach pods on the MetalLB ip:
   apple
   bluebanquise@ansible:~$
 
+.. image:: images/scenario_kubernetes/k8s_resources_step3.svg
+
 It is also interesting to check resources graph into Octant:
 
 .. image:: images/scenario_kubernetes/octant_fruits.png
@@ -707,13 +797,8 @@ the keepalived virtualip:
 
 .. code-block:: text
 
-  curl http://10.10.0.3/banana
+  curl http://192.168.1.202/banana
 
 If you get 'banana' as an answer, you won!
 
 K8S cluster is now ready to accept your resources.
-
-Deploy Monitoring (optional)
-============================
-
-
