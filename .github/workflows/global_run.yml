@@ -7,8 +7,8 @@ on:
   pull_request:
 
 jobs:
-  molecule_test:
-    name: Deploy management node
+  generic_deployment_ubuntu_2004:
+    name: Deploy Ubuntu 20.04 generic node
     runs-on: ubuntu-20.04
     env:
       ANSIBLE_CONFIG: /etc/bluebanquise/ansible.cfg
@@ -135,3 +135,26 @@ jobs:
 
       - name: Role test - mount
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t mount --diff
+
+  generic_deployment_rockylinux_8:
+    name: Deploy RockyLinux 8 generic node
+    runs-on: ubuntu-20.04
+    env:
+      ANSIBLE_CONFIG: /etc/bluebanquise/ansible.cfg
+      PY_COLORS: '1'
+      ANSIBLE_FORCE_COLOR: '1'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Create rockylinux systemd able image
+        uses: sudo docker build --tag rockylinux:8_systemd -f ./resources/docker/Dockerfile_RockyLinux_8_systemd
+
+      - name: Prepare bluebanquise folder
+        run: sudo mkdir /etc/bluebanquise; sudo chown -R $(id -u):$(id -g) /etc/bluebanquise; cp -a * /etc/bluebanquise;
+
+      - name: Start container
+        run: sudo docker run -d --net=host --name test_container -v /etc/bluebanquise/:/etc/bluebanquise/ rockylinux:8_systemd
+
+      - name: List containers
+        run: docker ps -a

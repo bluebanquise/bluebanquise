@@ -26,3 +26,4 @@ mount:
   - path: /mnt/
     src: /dev/mapper/data-data1
     state: present
+    fstype: ext4
