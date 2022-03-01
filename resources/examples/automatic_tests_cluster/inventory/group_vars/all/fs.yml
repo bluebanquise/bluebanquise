@@ -1,0 +1,13 @@
+parted:
+  # Create a new ext4 primary partition
+  - device: /tmp/1g.img
+    number: 1
+    state: present
+    fs_type: ext4
+    part_end: 300MiB
+  # Create a new primary partition for LVM
+  - device: /tmp/1g.img
+    number: 2
+    flags: [ lvm ]
+    state: present
+    part_end: 500MiB

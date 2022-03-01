@@ -93,7 +93,7 @@ jobs:
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t conman --diff
 
       - name: Role test - firewall
-        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t firewall --diff
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t firewall_role --diff
 
       - name: Role test - kernel_config
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t kernel_config --diff
@@ -121,6 +121,9 @@ jobs:
 
       - name: Role test - parted
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t parted --diff
+
+      - name: Ensure partitions are available
+        run: losetup --partscan --show --find /tmp/1g.img; lsblk;
 
       - name: Role test - lvm
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t lvm --diff

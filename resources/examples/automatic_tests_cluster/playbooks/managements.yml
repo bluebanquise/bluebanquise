@@ -44,7 +44,7 @@
     - role: filesystem
       tags: filesystem
     - role: firewall
-      tags: firewall
+      tags: firewall_role
     - role: kernel_config
       tags: kernel_config
     - role: log_client
