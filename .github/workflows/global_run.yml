@@ -148,7 +148,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Create rockylinux systemd able image
-        uses: sudo docker build --tag rockylinux:8_systemd -f ./resources/docker/Dockerfile_RockyLinux_8_systemd
+        run: sudo docker build --tag rockylinux:8_systemd -f ./resources/docker/Dockerfile_RockyLinux_8_systemd
 
       - name: Prepare bluebanquise folder
         run: sudo mkdir /etc/bluebanquise; sudo chown -R $(id -u):$(id -g) /etc/bluebanquise; cp -a * /etc/bluebanquise;
