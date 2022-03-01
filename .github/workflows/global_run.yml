@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-20.04
     env:
       ANSIBLE_CONFIG: /etc/bluebanquise/ansible.cfg
+      PY_COLORS: '1'
+      ANSIBLE_FORCE_COLOR: '1'
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -35,7 +37,7 @@ jobs:
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t modprobe --diff
 
       - name: Prepare needed files and folders
-        run: dd if=/dev/zero of=/tmp/1g.img bs=1 count=0 seek=1G; sudo mkdir -p /opt/software; sudo mkdir -p /opt/software_client;
+        run: dd if=/dev/zero of=/tmp/1g.img bs=1 count=0 seek=1G; sudo mkdir -p /opt/software; sudo mkdir -p /opt/software_client; sudo useradd test-user;
 
       - name: Role test - nic
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t nic --diff
@@ -133,4 +135,3 @@ jobs:
 
       - name: Role test - mount
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t mount --diff
-
