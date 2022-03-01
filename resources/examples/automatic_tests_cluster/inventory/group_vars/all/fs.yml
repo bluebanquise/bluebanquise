@@ -1,13 +1,28 @@
 parted:
-  # Create a new ext4 primary partition
   - device: /tmp/1g.img
     number: 1
     state: present
-    fs_type: ext4
-    part_end: 300MiB
-  # Create a new primary partition for LVM
-  - device: /tmp/1g.img
-    number: 2
     flags: [ lvm ]
+    part_end: "100%"
+
+lvm:
+  vgs:
+    - vg: data
+      pvs:
+        - /dev/loop0p1
+  lvs:
+    - lv: data1
+      size: 200M
+      vg: data
+    - lv: data2
+      size: 300M
+      vg: data
+
+filesystem:
+  - fstype: ext4
+    dev: /dev/mapper/data-data1
+
+mount:
+  - path: /mnt/
+    src: /dev/mapper/data-data1
     state: present
-    part_end: 500MiB
