@@ -61,7 +61,7 @@ jobs:
       - name: Role test - ssh_client
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t ssh_client --diff
 
-      - name: Role test - dhcp_server (dry run)
+      - name: Role test - dhcp_server
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t dhcp_server --diff 
 # -e "{start_services: False}"'
 
@@ -79,3 +79,49 @@ jobs:
 
       - name: Role test - nfs_server
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t nfs_server --diff
+
+      - name: Role test - nfs_client
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t nfs_client --diff
+
+      - name: Role test - audit_system
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t audit_system --diff
+
+      - name: Role test - clustershell
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t clustershell --diff
+
+      - name: Role test - conman
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t conman --diff
+
+      - name: Role test - firewall
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t firewall --diff
+
+      - name: Role test - kernel_config
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t kernel_config --diff
+
+      - name: Role test - log_server
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t log_server --diff
+
+      - name: Role test - log_client
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t log_client --diff
+
+
+    - role: filesystem
+      tags: filesystem
+    - role: lvm
+      tags: lvm
+    - role: mount
+      tags: mount
+    - role: nfs_client
+      tags: nfs_client
+    - role: pam_limits
+      tags: pam_limits
+    - role: parted
+      tags: parted
+    - role: powerman
+      tags: powerman
+    - role: root_password
+      tags: root_password
+    - role: ssh_remote_keys
+      tags: ssh_remote_keys
+    - role: sudoers
+      tags: sudoers
