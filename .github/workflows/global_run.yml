@@ -104,24 +104,30 @@ jobs:
       - name: Role test - log_client
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t log_client --diff
 
+      - name: Role test - pam_limits
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t pam_limits --diff
 
-    - role: filesystem
-      tags: filesystem
-    - role: lvm
-      tags: lvm
-    - role: mount
-      tags: mount
-    - role: nfs_client
-      tags: nfs_client
-    - role: pam_limits
-      tags: pam_limits
-    - role: parted
-      tags: parted
-    - role: powerman
-      tags: powerman
-    - role: root_password
-      tags: root_password
-    - role: ssh_remote_keys
-      tags: ssh_remote_keys
-    - role: sudoers
-      tags: sudoers
+      - name: Role test - powerman
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t powerman --diff
+
+      - name: Role test - root_password
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t root_password --diff
+
+      - name: Role test - ssh_remote_keys
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t ssh_remote_keys --diff
+
+      - name: Role test - sudoers
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t sudoers --diff
+
+      - name: Role test - parted
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t parted --diff
+
+      - name: Role test - lvm
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t lvm --diff
+
+      - name: Role test - filesystem
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t filesystem --diff
+
+      - name: Role test - mount
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t mount --diff
+
