@@ -154,7 +154,7 @@ jobs:
         run: sudo mkdir /etc/bluebanquise; sudo chown -R $(id -u):$(id -g) /etc/bluebanquise; cp -a * /etc/bluebanquise;
 
       - name: Start container
-        run: docker run -d --net=host --name test_container -v /etc/bluebanquise/:/etc/bluebanquise/ rockylinux:8_systemd
+        run: docker run -d --net=host --name test_container -v /etc/bluebanquise/:/etc/bluebanquise/ rockylinux/rockylinux:8_systemd
 
       - name: List containers
         run: docker ps -a
