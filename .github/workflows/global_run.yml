@@ -125,7 +125,7 @@ jobs:
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t parted --diff
 
       - name: Ensure partitions are available
-        run: losetup --partscan --show --find /tmp/1g.img; lsblk;
+        run: sudo losetup --partscan --show --find /tmp/1g.img; lsblk;
 
       - name: Role test - lvm
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t lvm --diff
