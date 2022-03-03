@@ -169,5 +169,5 @@ jobs:
         run: ansible-galaxy collection install community.general
 
       - name: Role test - set_hostname
-        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t dhcp_server --diff -u root 
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t dhcp_server --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
         #-e "start_services=false"
