@@ -23,4 +23,3 @@
   when: zoneconf.changed  # noqa 503
   tags:
     - template
-

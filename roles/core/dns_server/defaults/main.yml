@@ -1,6 +1,6 @@
 ---
-dns_server_dnssec_enable: yes
-dns_server_dnssec_validation: yes
+dns_server_dnssec_enable: true
+dns_server_dnssec_validation: true
 dns_server_dnssec_lookaside: auto
 
 dns_server_forwarders: []  # list of custom forwarders ip.
