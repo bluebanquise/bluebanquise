@@ -153,6 +153,9 @@ jobs:
       - name: Prepare bluebanquise folder
         run: sudo mkdir /etc/bluebanquise; sudo chown -R $(id -u):$(id -g) /etc/bluebanquise; cp -a * /etc/bluebanquise;
 
+      - name: Prepare bluebanquise environment
+        run: cp -a /etc/bluebanquise/resources/examples/automatic_tests_cluster/inventory /etc/bluebanquise; cp -a /etc/bluebanquise/resources/examples/automatic_tests_cluster/playbooks /etc/bluebanquise
+
       - name: Start container
         run: docker run -d --net=host --name management1 -v /etc/bluebanquise/:/etc/bluebanquise/ -v /sys/fs/cgroup:/sys/fs/cgroup:ro rockylinux/rockylinux:8_systemd
 
@@ -166,4 +169,5 @@ jobs:
         run: ansible-galaxy collection install community.general
 
       - name: Role test - set_hostname
-        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t dhcp_server --diff -u root -e "start_services=false"
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t dhcp_server --diff -u root 
+        #-e "start_services=false"
