@@ -1,6 +1,6 @@
 FROM opensuse/leap:15
 
 RUN set -ex; \
-     zypper -n install git systemd-sysvinit systemd-network;
+     zypper -n install python3 systemd-sysvinit systemd-network;
 
 CMD [ "/sbin/init" ]
