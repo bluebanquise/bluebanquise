@@ -23,7 +23,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Create rockylinux systemd able image
-        run: docker build -t centos:7_systemd -f ./resources/docker/Dockerfile_CentoOS_7_systemd .
+        run: docker build -t centos:7_systemd -f ./resources/docker/Dockerfile_CentOS_7_systemd .
 
       - name: Start container
         run: docker run -d --net=host --name management1 --tmpfs /tmp --tmpfs /run -v /sys/fs/cgroup:/sys/fs/cgroup:ro centos:7_systemd
