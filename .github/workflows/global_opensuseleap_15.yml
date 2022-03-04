@@ -26,7 +26,7 @@ jobs:
         run: docker build -t opensuse/leap:15_systemd -f ./resources/docker/Dockerfile_OpenSUSELeap_15_systemd .
 
       - name: Start container
-        run: docker run -d --net=host --name management1 --tmpfs /tmp --tmpfs /run -v /etc/bluebanquise/:/etc/bluebanquise/ -v /sys/fs/cgroup:/sys/fs/cgroup:ro centos:7_systemd
+        run: docker run -d --net=host --name management1 --tmpfs /tmp --tmpfs /run -v /sys/fs/cgroup:/sys/fs/cgroup:ro centos:7_systemd
 
       - name: Prepare bluebanquise folder
         run: sudo mkdir /etc/bluebanquise; sudo chown -R $(id -u):$(id -g) /etc/bluebanquise; cp -a * /etc/bluebanquise;
