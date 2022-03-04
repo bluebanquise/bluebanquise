@@ -3,7 +3,7 @@
 cluster_name: algoric
 
 # Localisation
-time_zone: Europe/Brussels
+time_zone: Europe/Paris
 
 # Internal mechanisms
 icebergs_system: false  # Activate or deactivate icebergs topology system. Experimental.
