@@ -22,7 +22,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Create rockylinux systemd able image
+      - name: Create centos systemd able image
         run: docker build -t centos:7_systemd -f ./resources/docker/Dockerfile_CentOS_7_systemd .
 
       - name: Start container

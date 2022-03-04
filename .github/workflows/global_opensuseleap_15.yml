@@ -22,7 +22,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Create rockylinux systemd able image
+      - name: Create opensuse leap systemd able image
         run: docker build -t opensuse/leap:15_systemd -f ./resources/docker/Dockerfile_OpenSUSELeap_15_systemd .
 
       - name: Start container
