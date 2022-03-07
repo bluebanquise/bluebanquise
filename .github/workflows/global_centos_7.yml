@@ -38,7 +38,7 @@ jobs:
         run: "echo -e '  - name: bluebanquise\n    baseurl: https://bluebanquise.com/repository/releases/1.5/el7/x86_64/bluebanquise/\n    gpgcheck: 0\n    enabled: true' >> /etc/bluebanquise/inventory/group_vars/all/general_settings/repositories.yml;"
 
       - name: Install packages
-        run: pip3 install ansible netaddr clustershell
+        run: pip3 install ansible netaddr clustershell jmespath
 
       - name: Install community.general
         run: ansible-galaxy collection install community.general
