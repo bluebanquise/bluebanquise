@@ -38,7 +38,7 @@ jobs:
         run: cp -a /etc/bluebanquise/resources/examples/automatic_tests_cluster/inventory /etc/bluebanquise; cp -a /etc/bluebanquise/resources/examples/automatic_tests_cluster/playbooks /etc/bluebanquise
 
       - name: Setup repository
-        run: echo '  - repo: deb [trusted=yes] http://bluebanquise.com/repository/releases/1.5/ubuntu2004/x86_64/bluebanquise/ ./' >> /etc/bluebanquise/inventory/group_vars/all/general_settings/repositories.yml;
+        run: "echo '  - repo: deb [trusted=yes] http://bluebanquise.com/repository/releases/1.5/ubuntu2004/x86_64/bluebanquise/ ./' >> /etc/bluebanquise/inventory/group_vars/all/general_settings/repositories.yml;"
 
       - name: Role test - modprobe
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t modprobe --diff
