@@ -1,0 +1,18 @@
+mg_storages:
+  children:
+    equipment_typeS:
+      hosts:
+        storage1:
+          bmc:
+            name: bstorage1
+            ip4: 10.10.101.1
+            mac: 08:00:27:dc:b8:a7
+            network: ice1-1
+          network_interfaces:
+            - interface: enp0s3
+              ip4: 10.10.1.1
+              mac: 08:00:27:dc:b8:a5
+              network: ice1-1
+            - interface: ib0
+              ip4: 10.20.1.1
+              network: interconnect-1

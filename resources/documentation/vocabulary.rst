@@ -2,8 +2,7 @@
 Vocabulary
 ==========
 
-Lets establish few common terms between us before going deeper in technical
-details.
+Lets establish few common terms before going deeper in technical details.
 
 Some words are important in **BlueBanquise**. Most of them are described here.
 
@@ -14,12 +13,15 @@ Host
 ----
 
 An Ansible **host** (also often referred as a **node**) is a remote host managed
-by Ansible. An **host** can be a physical server, but also a VM or something
-else.
+by Ansible. An **host** can be a physical server, but also a VM, a container or
+something else.
+
+.. image:: images/nodes/hosts_example.svg
+   :align: center
 
 Hosts are defined in */etc/bluebanquise/inventory/cluster/nodes*.
 
-Please do a difference between an Ansible managed host, and a host.
+Please do a difference between an **Ansible managed host**, and a **host**.
 All equipment that can have an ip address on the network are considered "host",
 but only those with an ssh + python capability and on which we will use Ansible
 to deploy a configuration are considered "Ansible managed host".
@@ -170,7 +172,7 @@ j2 Variables
 These are **BlueBanquise** specific variables.
 All variables with name starting by **j2_** are j2 variables.
 
-These variables are all stored in internal/group_vars/all/j2_variables
+Most of these variables are stored in internal/group_vars/all/j2_variables
 directory, and are used for the internal purpose of the stack.
 
 These variables are here to simplify tasks and templates writing, and centralize
@@ -201,7 +203,7 @@ Roles
 ^^^^^
 
 An Ansible role is a list of tasks to do to achieve a purpose.
-For example, there will be a role called dhcp_server, that contains task to
+For example, there will be a role called dhcp_server, that contains tasks to
 install, configure and start the dhcp server.
 
 In **BlueBanquise**, default path is /etc/bluebanquise/roles.
@@ -214,7 +216,7 @@ Roles are the **AUTOMATION LOGIC**.
 Playbooks
 ^^^^^^^^^
 
-An Ansible playbook is simply a list of roles to apply, on a specific host or
+An Ansible playbook is simply a list of roles to apply on a specific host or
 group of hosts. It is a yaml file.
 
 In **BlueBanquise**, default path is /etc/bluebanquise/playbooks.
@@ -229,7 +231,7 @@ We are reaching the very important part of the stack.
 Ansible has an internal mechanism called **Variables precedence**.
 Simply put: you can define the same variables (same name) multiple times, and
 using this mechanism, some definitions will have priority above others,
-depending of the situation.
+depending of their position.
 
 When a variable is defined in a yml file, the position of the file in the
 ansible inventory is key.
@@ -237,7 +239,7 @@ ansible inventory is key.
 For example, a variable defined in /etc/bluebanquise/inventory/group_vars/all/
 will have the less precedence, and a variable defined in
 /etc/bluebanquise/inventory/cluster will have a higher precedence, and so win if
-loaded.
+variable is used.
 
 The full list of available variables precedence is provided in Ansible
 documentation:
@@ -250,7 +252,8 @@ values if desired.
 For example, values can be set by default, and then redefined for some groups of
 hosts without changing the default for all others.
 Or it can be used to simply fix a dynamic j2 variable to the desired value in
-hosts definitions if dynamic value is not the one expected. Etc.
+hosts definitions if dynamic value is not the one expected (you can even
+redefine the whole logic of the stack without editing the stack code). Etc.
 
 Inventory can be seen as a giant pizza, in 3D then flatten.
 
@@ -308,22 +311,30 @@ the same pool of nodes**.
 One iceberg configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
+|
+
 .. image:: images/one_iceberg.svg
+
+|
 
 For simple systems (small/medium HPC cluster, small enterprise network,
 university IT practical session room, etc.), one iceberg scenario is the
 standard. One or multiple management will reach the same ethernet administration
 networks, and federate the same pool of nodes.
 
-.. image:: images/one_iceberg_example_1.svg
+.. image:: images/clusters/single_iceberg_2_single_column.svg
+   :align: center
 
-.. image:: images/one_iceberg_example_2.svg
-
+|
 
 Multiple icebergs configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+|
+
 .. image:: images/multiple_icebergs.svg
+
+|
 
 For advanced systems, (large HPC clusters needing load spreading with unified
 network, enterprise network, etc.), multiple icebergs scenario can be required.
@@ -333,21 +344,39 @@ Manipulating order of network_interfaces defined for each host allows to create
 a unified network so all nodes from all icebergs can communicate through this
 network (most of the time an Interconnect network).
 
-.. image:: images/multiple_icebergs_example_1.svg
+.. image:: images/clusters/multiple_icebergs.png
+   :align: center
+
+|
 
 Equipment profiles
 ------------------
 
-In **BlueBanquise**, nodes are nearly always part of a group starting with
+In **BlueBanquise**, nodes are always part of a group starting with
 prefix **equipment_**. These groups are called *equipment profiles*.
 
 They are used to provide to hosts of this group the **equipment_profile**
 parameters (this includes hosts operating system parameters, kernel parameters,
 partitioning, etc.), and other variables if needed like dedicated
-authentication parameters.
+authentication parameters. These variables are prefixed with **ep_**.
+
+.. image:: images/inventory/ep_hard.svg
+   :align: center
 
 These are key groups of the stack.
 
-**It is important** to note that equipment_profiles dictionary **must not** be
-used at an upper level than group_vars in variables precedence.
-**It can, but you must NOT**.
+**It is important** to note that equipment_profiles variables (**ep_**)
+**must not** be used at an upper level than group_vars in variables precedence.
+**It can, but you must NOT**, due to special usage of them.
+
+For now, just keep in mind these variables exist. These will be discussed later.
+
+-------------
+
+You can now follow the next part, depending of your needs:
+
+* learn basic system administration on how to deploy bare metal servers
+* learn Ansible
+
+Or if you already know basic system administration and Ansible, you can skip
+these tutorials and jump directly to the BlueBanquise part.

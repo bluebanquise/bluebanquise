@@ -1,9 +1,9 @@
-========================
-Manage multiple icebergs
-========================
+=================================
+[Core] - Manage multiple icebergs
+=================================
 
-Now that the simple configuration has been tested and done, it is possible,
-to extend the cluster, to activate the multiple icebergs mechanism.
+Now that the simple configuration has been tested and done, it is possible
+to extend the cluster, by activating the multiple icebergs mechanism.
 
 Icebergs mechanism allows to split cluster into parts, in order to:
 
@@ -68,9 +68,8 @@ configuration).
   icebergs are numbered at 1 by default. However, nothing prevents using 0 as a
   start point when activating icebergs mechanism.
 
-We are going to split this target cluster into different icebergs:
-
-.. image:: images/multiple_icebergs_2.svg
+We are going to split the target cluster of the main documentation into
+different icebergs.
 
 Iceberg1 will be the top iceberg, and icebergs 2, 3 and 4 will be standard
 icebergs, with iceberg1 as master iceberg.
@@ -307,21 +306,33 @@ etc. configuration files.
 
 .. note::
   Even if mngt2 is not part of iceberg1, it has been added to configuration
-  files on mngt1, like any other nodes of iceberg1. All nodes part of a sub
-  iceberg and also part of *mg_managements* group are automatically added, as
+  files on mngt1, like any other nodes of iceberg1. All nodes part of group
+  *mg_managements* and part of a sub iceberg group are automatically added, as
   they also need to be deployed from this iceberg, like any other nodes.
 
 Once done, use standard procedure to deploy OS on mngt2 from mngt1 (*bootset*,
 etc).
 
-Now, few steps has to be followed in a specific order in order to deploy
+Now, few steps has to be followed in a specific order to deploy
 configuration on mngt2.
 
 Deploy sub management configuration
 -----------------------------------
 
-First, using default strategy (you can use another one), it is needed that mngt2
-mount over nfs the repositories and the BlueBanquise configuration from mngt1.
+Sub managements (here mngt2) need to have locally access to the repositories and
+BlueBanquise inventory that are currently stored on top managements
+(here mngt1).
+
+There are multiple strategy to achieve that. Two are proposed here:
+
+1. using an NFS share (if good network bandwidth and small storage)
+2. using SyncThings tool (good if you have enough storage)
+
+Using NFS
+^^^^^^^^^
+
+We will ensure that mngt2 mount over nfs the repositories and the BlueBanquise
+inventory from mngt1.
 This to be able to install packages, but also act as a repository server for
 its iceberg, and be able to deploy the configuration on its iceberg nodes.
 
@@ -422,6 +433,13 @@ on mngt2, and httpd server is running on mngt2.
 
 .. image:: images/multiple_icebergs_5.svg
 
+Using SyncThings
+^^^^^^^^^^^^^^^^
+
+
+Deploy configuration
+^^^^^^^^^^^^^^^^^^^^
+
 Now, mngt2 can be autonomous and do not need to be part of iceberg1.
 Deploy the whole configuration on it:
 
@@ -429,7 +447,8 @@ Deploy the whole configuration on it:
 
   mngt1# ansible-playbook /etc/bluebanquise/playbooks/mngt2.yml
 
-And now mngt2 act as iceberg2 management, and can provide packages to its nodes.
+From now, mngt2 act as iceberg2 management, and can provide packages to its
+pool of client nodes.
 
 .. image:: images/multiple_icebergs_6.svg
 
@@ -456,7 +475,7 @@ allow your nodes to be able to reach the same Slurm controller, mostly running
 on the mngt1 server.
 
 But you will also need to ensure direct hostnames resolution of all computes
-nodes is done on the interconnect, and not on the internet. Why ? Simply because
+nodes is done on the interconnect, and not on the internet. Why? Simply because
 when parallel computations take places, Slurm will provide to the instance nodes
 hostnames as target, and so if nodes need to reach each other through ethernet,
 nodes from one iceberg will not be able to reach nodes from other icebergs, and
