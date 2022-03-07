@@ -173,6 +173,7 @@ To be done
 Changelog
 ^^^^^^^^^
 
+* 1.4.1: Extend bootset support for custom htdocs path. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.0: Added OpenSuSE support. Neil Munday <neil@mundayweb.com>
 * 1.3.7: Allow manipulating sources list in autoinstall on Ubuntu. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.6: Fix missing efi check in auto install files. Benoit Leveugle <benoit.leveugle@gmail.com>

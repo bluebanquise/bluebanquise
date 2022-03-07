@@ -1,6 +1,6 @@
-=============
-Learn Ansible
-=============
+====================
+[Training] - Ansible
+====================
 
 To understand how **BlueBanquise** works, it is essential to learn basis of
 Ansible.
@@ -8,16 +8,26 @@ Ansible.
 This section tries to provide key knowledge to at least be able to manipulate
 and edit the stack to your needs.
 
-It is assumed here that your system is already installed, and that Ansible has
-also been installed. It is also assumed that **BlueBanquise** stack has not been
-installed yet, and so Ansible is freshly installed without modifications.
+Note that if you are new to cluster management system administration,
+`a full manual tutorial is available on github. <https://github.com/oxedions/admin_sys_baremetal_tutorial>`_
 
-All work will be done on the current host.
+Install Ansible
+===============
+
+There are multiple ways to install Ansible. Everything is described on the
+`main Ansible documentation <https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html>`_
+
+If you wish only to learn Ansible, simplest way is
+`to use pip (or pip3) <https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#installing-ansible-with-pip>`_
+
+If you wish to install Ansible on a production system, use your operating system
+packages manager.
 
 Minimal inventory
 =================
 
-Edit /etc/hosts file, and add "management1" on localhost line:
+Now that Ansible is installed on your system, edit /etc/hosts file, and add
+"management1" on localhost line:
 
 .. code-block:: text
 
@@ -115,7 +125,7 @@ The **ansible** command provides few interesting features.
 Version
 ^^^^^^^
 
-First command is to check current Ansible version. It should be >= 2.8.2:
+First command is to check current Ansible version. It should be >= 2.9.13:
 
 .. code-block:: bash
 
@@ -1373,6 +1383,5 @@ should have provided you the very basis of Ansible.
 If you feel something is missing in this quick Ansible training, please do not
 hesitate to ask us to add elements.
 
-Time to move on to BlueBanquise stack itself. But before proceeding, a small
-section is dedicated to containers, and how to simply ask a playbook to execute
-its tasks inside a container.
+Time to move on to BlueBanquise stack itself, and bootstrap first management
+server.

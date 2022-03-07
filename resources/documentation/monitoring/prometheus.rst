@@ -1,8 +1,9 @@
 Prometheus
 ==========
 
-In this topic, we will see how to configure and deploy both prometheus_server
-and prometheus_client Ansible roles.
+In this topic, we will see how to configure and deploy 
+the prometheus Ansible roles from BlueBanquise Community 
+repository.
 
 Prerequisites
 -------------
@@ -10,8 +11,8 @@ Prerequisites
 * Have ansible installed
 * Know how to use playbooks
 
-Also, make sure those packages are present on your system (they should be in the
-bluebanquise or any other repository):
+Also, make sure those packages are available on the repositories 
+of your system (they should be in the bluebanquise repository):
 
 * prometheus
 * alertmanager
@@ -27,7 +28,7 @@ Prometheus Server
 ^^^^^^^^^^^^^^^^^
 
 First create file
-/etc/bluebanquise/inventory/group_vars/all/addons/prometheus.yml with the
+/etc/bluebanquise/inventory/group_vars/all/prometheus.yml with the
 following content:
 
 .. code-block:: yaml

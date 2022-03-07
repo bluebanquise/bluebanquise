@@ -1,6 +1,23 @@
 # Changelog
 
-## 1.5.0 - Next-release
+## 1.6.0 - Next-release
+
+### Major changes
+
+#### Overall changes
+
+  - add SLES 15 and 12 support (#627)
+
+#### New roles
+
+#### Roles improvement or fix
+
+  - pxe_stack:
+    - Extend bootset support for custom htdocs path (#676)
+  - clushershell:
+    - fix an idempotency problem of role clustershell (#675)
+
+## 1.5.0
 
 ### Major changes
 
