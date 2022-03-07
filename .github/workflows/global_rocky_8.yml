@@ -34,6 +34,9 @@ jobs:
       - name: Prepare bluebanquise environment
         run: cp -a /etc/bluebanquise/resources/examples/automatic_tests_cluster/inventory /etc/bluebanquise; cp -a /etc/bluebanquise/resources/examples/automatic_tests_cluster/playbooks /etc/bluebanquise
 
+      - name: Setup repository
+        run: echo -e '  name: bluebanquise\n  baseurl:https://bluebanquise.com/repository/releases/1.5/el8/x86_64/bluebanquise/\n  gpgcheck: 0\n  enabled: true' >> /etc/bluebanquise/inventory/group_vars/all/general_settings/repositories.yml;
+
       - name: Install packages
         run: pip3 install ansible netaddr clustershell
 
@@ -41,14 +44,71 @@ jobs:
         run: ansible-galaxy collection install community.general
 
       - name: Role test - repositories_server
-        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t repositories_server --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t repositories_server --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root
+
+      - name: Role test - repositories_client
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t repositories_client --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
+
+      - name: Role test - bluebanquise
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t bluebanquise --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
+
+      - name: Role test - ssh_client
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t ssh_client --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
 
       - name: Role test - dhcp_server
-        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t dhcp_server --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false start_services=false" -u root 
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t dhcp_server --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root  
+# -e "{start_services: False}"'
 
       - name: Role test - dns_server
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t dns_server --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
 
-      - name: Role test - time
-        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t time --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false start_services=false" -u root 
+      - name: Role test - dns_client
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t dns_client --check --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
 
+      - name: Role test - time
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t time --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
+
+      - name: Role test - pxe_stack
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t pxe_stack --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
+
+      - name: Role test - nfs_server
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t nfs_server --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
+
+      - name: Role test - nfs_client
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t nfs_client --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
+
+      - name: Role test - audit_system
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t audit_system --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
+
+      - name: Role test - clustershell
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t clustershell --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
+
+      - name: Role test - conman
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t conman --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
+
+      - name: Role test - firewall
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t firewall_role --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
+
+      - name: Role test - kernel_config
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t kernel_config --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
+
+      - name: Role test - log_server
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t log_server --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
+
+      - name: Role test - log_client
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t log_client --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
+
+      - name: Role test - pam_limits
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t pam_limits --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
+
+      - name: Role test - powerman
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t powerman --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
+
+      - name: Role test - root_password
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t root_password --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
+
+      - name: Role test - ssh_remote_keys
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t ssh_remote_keys --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
+
+      - name: Role test - sudoers
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t sudoers --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
