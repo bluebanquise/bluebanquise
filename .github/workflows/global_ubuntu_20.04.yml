@@ -40,9 +40,6 @@ jobs:
       - name: Setup repository
         run: "echo '  - repo: deb [trusted=yes] http://bluebanquise.com/repository/releases/1.5/ubuntu2004/x86_64/bluebanquise/ ./' >> /etc/bluebanquise/inventory/group_vars/all/general_settings/repositories.yml;"
 
-      - name: Set dummy interface
-        run: modprobe -v dummy numdummies=2; ip addr add 10.10.0.1/16 dev dummy0; ip a;
-
       - name: Role test - modprobe
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t modprobe --diff
 
