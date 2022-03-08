@@ -38,7 +38,7 @@ jobs:
         run: "echo -e '  - name: bluebanquise\n    baseurl: https://bluebanquise.com/repository/releases/1.5/el8/x86_64/bluebanquise/\n    gpgcheck: 0\n    enabled: true' >> /etc/bluebanquise/inventory/group_vars/all/general_settings/repositories.yml;"
 
       - name: Set dummy interface
-        run: modprobe -v dummy numdummies=2; ip addr add 10.10.0.1/16 dev dummy0; ip a;
+        run: sudo modprobe -v dummy numdummies=2; sudo ip addr add 10.10.0.1/16 dev dummy0; ip a;
 
       - name: Install packages
         run: pip3 install ansible netaddr clustershell jmespath
