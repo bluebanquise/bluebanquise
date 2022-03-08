@@ -2,5 +2,6 @@ FROM centos:7
 
 RUN set -ex; \
     yum -y install python3 httpd procps less; yum clean all;
+RUN mkdir /root/.ssh -p;
 
 CMD [ "/sbin/init" ]
