@@ -28,6 +28,9 @@ jobs:
       - name: Start container
         run: docker run -d --net=host --name management1 --tmpfs /tmp --tmpfs /run -v /sys/fs/cgroup:/sys/fs/cgroup:ro rockylinux/rockylinux:8_systemd
 
+      - name: Setup container
+        run: docker exec management1 bash -c "mkdir -p /opt/software; mkdir -p /opt/software_client; useradd test-user;"
+
       - name: Prepare bluebanquise folder
         run: sudo mkdir /etc/bluebanquise; sudo chown -R $(id -u):$(id -g) /etc/bluebanquise; cp -a * /etc/bluebanquise;
 
