@@ -46,8 +46,8 @@ jobs:
       - name: Install packages
         run: pip3 install ansible netaddr clustershell jmespath
 
-      - name: Install community.general
-        run: ansible-galaxy collection install community.general
+      - name: Install collections
+        run: ansible-galaxy collection install community.general; ansible-galaxy collection install git+https://github.com/bluebanquise/collection.filters.git,main;
 
       - name: Role test - repositories_server
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t repositories_server --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root

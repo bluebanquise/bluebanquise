@@ -28,8 +28,8 @@ jobs:
       - name: Install packages
         run: pip3 install ansible netaddr clustershell jmespath
 
-      - name: Install community.general
-        run: ansible-galaxy collection install community.general
+      - name: Install collections
+        run: ansible-galaxy collection install community.general; ansible-galaxy collection install git+https://github.com/bluebanquise/collection.filters.git,main;
 
       - name: Prepare bluebanquise folder
         run: sudo mkdir /etc/bluebanquise; sudo chown -R $(id -u):$(id -g) /etc/bluebanquise; cp -a * /etc/bluebanquise;
@@ -64,8 +64,8 @@ jobs:
       - name: Role test - repositories_client
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t repositories_client --diff
 
-      - name: Role test - bluebanquise
-        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t bluebanquise --diff
+      #- name: Role test - bluebanquise
+        #run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t bluebanquise --diff
 
       - name: Role test - ssh_client
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t ssh_client --diff
