@@ -84,7 +84,7 @@ jobs:
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t nfs_client --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false nfs_client_directories_state=present" -u root 
 
       - name: Role test - audit_system
-        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t audit_system --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t audit_system --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false start_services=false" -u root 
 
       - name: Role test - clustershell
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t clustershell --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
@@ -93,7 +93,7 @@ jobs:
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t conman --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
 
       - name: Role test - firewall
-        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t firewall_role --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t firewall_role --diff --check -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
 
       - name: Role test - kernel_config
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t kernel_config --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
