@@ -29,6 +29,7 @@
         - name: "Zone internal: collect sources"
           command: firewall-cmd --zone=internal --list-sources
           register: firewall_cmd_result
+          when: true
 
         - name: Check ice1-1 (10.11.0.0/16) and ice2-1 (10.11.0.0/16) are in zone internal
           assert:
@@ -38,6 +39,7 @@
         - name: Collect sources of zone trusted
           command: firewall-cmd --zone=trusted --list-sources
           register: firewall_cmd_result
+          when: true
 
         - name: Check interconnect1 (10.21.0.0/16) is in zone trusted
           assert:
@@ -47,18 +49,22 @@
         - name: "Zone internal: collect services"
           command: firewall-cmd --zone=internal --list-services
           register: internal_services_result
+          when: true
 
         - name: "Zone internal: collect ports"
           command: firewall-cmd --zone=internal --list-ports
           register: internal_ports_result
+          when: true
 
         - name: "Zone internal: collect rich rules"
           command: firewall-cmd --zone=internal --list-rich-rules
           register: internal_rich_rules_result
+          when: true
 
         - name: "Zone internal: collect ICMP blocks"
           command: firewall-cmd --zone=internal --list-icmp-blocks
           register: internal_icmp_blocks_result
+          when: true
 
       when: ansible_facts.os_family == 'RedHat'
 
@@ -117,6 +123,7 @@
           # Because we set icmp_block_inversion: no, expect rc=1
           ignore_errors: True
           register: internal_inversion_result
+          when: true
 
         - name: "Zone internal: Check ICMP block inversion is disabled"
           assert:
@@ -132,6 +139,7 @@
         - name: "Zone internal: Query masquerade status"
           command: firewall-cmd --zone=internal --query-masquerade
           register: internal_masquerade_result
+          when: true
 
         - name: "Zone internal: Check masquerade is enabled"
           assert:

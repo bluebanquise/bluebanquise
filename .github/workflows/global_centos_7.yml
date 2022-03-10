@@ -108,8 +108,8 @@ jobs:
       - name: Role test - pam_limits
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t pam_limits --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
 
-      - name: Role test - powerman
-        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t powerman --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
+#      - name: Role test - powerman
+#        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t powerman --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
 
       - name: Role test - root_password
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t root_password --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
