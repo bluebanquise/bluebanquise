@@ -38,7 +38,7 @@ jobs:
         run: cp -a /etc/bluebanquise/resources/examples/automatic_tests_cluster/inventory /etc/bluebanquise; cp -a /etc/bluebanquise/resources/examples/automatic_tests_cluster/playbooks /etc/bluebanquise
 
       - name: Setup repository
-        run: "echo -e '  - name: bluebanquise\n    baseurl: https://bluebanquise.com/repository/releases/1.5/el7/x86_64/bluebanquise/\n    gpgcheck: 0\n    enabled: true' >> /etc/bluebanquise/inventory/group_vars/all/general_settings/repositories.yml;"
+        run: "echo -e '  - name: bluebanquise\n    baseurl: https://bluebanquise.com/repository/releases/latest/el7/x86_64/bluebanquise/\n    gpgcheck: 0\n    enabled: true' >> /etc/bluebanquise/inventory/group_vars/all/general_settings/repositories.yml;"
 
       - name: Set dummy interface
         run: sudo modprobe -v dummy numdummies=2; sudo ip addr add 10.10.0.1/16 dev dummy0; ip a;
@@ -63,7 +63,9 @@ jobs:
 
       - name: Role test - dhcp_server
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t dhcp_server --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false start_services=false" -u root  
-# -e "{start_services: False}"'
+
+      - name: Role test - advanced_dhcp_server
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t advanced_dhcp_server --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false start_services=false" -u root  
 
       - name: Role test - dns_server
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t dns_server --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 

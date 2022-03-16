@@ -10,7 +10,7 @@
   #
   # If no OS specific file is found, the role will default to vars/main.yml
   #
-  include_vars: "{{ item }}"
+  ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - files:
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
@@ -21,22 +21,25 @@
   tags:
     - always
 
-- name: "Add services to firewall's {{ advanced_dhcp_server_firewall_zone | default('public') }} zone"
-  firewalld:
-    zone: "{{ advanced_dhcp_server_firewall_zone | default('public') }}"
-    service: "{{ item }}"
-    immediate: "yes"
-    permanent: "yes"
-    state: enabled
-  when:
-    - ansible_facts.os_family == "RedHat"
-    - ep_firewall | default(false) | bool
-  loop: "{{ advanced_dhcp_server_firewall_services_to_add }}"
+- name: include_tasks ░ Use OS dedicated firewall task
+  ansible.builtin.include_tasks: "{{ outer_item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}/firewall.yml"
+      skip: true
+  loop_control:
+    loop_var: outer_item
   tags:
+    - internal
     - firewall
 
 - name: Package
-  package:
+  ansible.builtin.package:
     name: "{{ item }}"
     state: present
   loop: "{{ advanced_dhcp_server_packages_to_install }}"
@@ -44,7 +47,7 @@
     - package
 
 - name: Template >> /etc/dhcp/dhcpd.conf
-  template:
+  ansible.builtin.template:
     src: dhcpd.conf.j2
     dest: /etc/dhcp/dhcpd.conf
     owner: root
@@ -55,7 +58,7 @@
     - template
 
 - name: Template >> /etc/dhcp/dhcpd.networks.conf
-  template:
+  ansible.builtin.template:
     src: dhcpd.networks.conf.j2
     dest: /etc/dhcp/dhcpd.networks.conf
     owner: root
@@ -66,7 +69,7 @@
     - template
 
 - name: Template >> /etc/dhcp/dhcpd.{{ item }}.conf
-  template:
+  ansible.builtin.template:
     src: dhcpd.subnet.conf.j2
     dest: /etc/dhcp/dhcpd.{{ item }}.conf
     owner: root
@@ -81,7 +84,7 @@
     - template
 
 - name: Manage services state
-  service:
+  ansible.builtin.service:
     name: "{{ item }}"
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
     state: "{{ (start_services | bool) | ternary('started', omit) }}"

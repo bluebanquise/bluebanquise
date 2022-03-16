@@ -185,6 +185,7 @@ To achieve that, few variables are at disposal:
 Changelog
 ^^^^^^^^^
 
+* 1.7.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.6.0: Add OpenSuSE 12 and 15 support. Neil Munday <neil@mundayweb.com>
 * 1.5.3: Improve Ubuntu compatibility. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.5.2: Add reboot capability, needed on some system. Benoit Leveugle <benoit.leveugle@gmail.com>

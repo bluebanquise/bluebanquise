@@ -27,7 +27,7 @@ Packages installed:
 
 Changelog
 ^^^^^^^^^
-
+* 1.3.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.2.0: Add OpenSuSE support. Neil Munday <neil@mundayweb.com>
 * 1.1.1: Add bluebanquise_filters in packages list. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.0: Add Ubuntu support. Benoit Leveugle <benoit.leveugle@gmail.com>

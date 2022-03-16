@@ -1,5 +1,5 @@
-NIC with nmcli
---------------
+NIC
+---
 
 Description
 ^^^^^^^^^^^

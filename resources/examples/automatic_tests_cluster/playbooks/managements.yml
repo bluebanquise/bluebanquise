@@ -21,6 +21,8 @@
       tags: ssh_client
     - role: dhcp_server
       tags: dhcp_server
+    - role: advanced_dhcp_server
+      tags: advanced_dhcp_server
     - role: dns_server
       tags: dns_server
     - role: dns_client

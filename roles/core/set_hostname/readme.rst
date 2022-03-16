@@ -26,6 +26,7 @@ Optional inventory vars:
 Changelog
 ^^^^^^^^^
 
+* 1.1.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.3: Add fully qualified domain name capability. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.2: Clean. johnnykeats <johnny.keats@outlook.com>
 * 1.0.1: Documentation. johnnykeats <johnny.keats@outlook.com>

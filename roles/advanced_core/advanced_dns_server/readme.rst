@@ -1,6 +1,8 @@
 Advanced DNS server
 -------------------
 
+**WARNING** This role need a full update. To be done before BB 2.0.0.
+
 Description
 ^^^^^^^^^^^
 

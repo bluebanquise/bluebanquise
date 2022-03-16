@@ -17,6 +17,7 @@ log_server_port variable.
 Changelog
 ^^^^^^^^^
 
+* 1.2.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.2: Added OpenSuSE variables. Neil Munday <neil@mundayweb.com>
 * 1.1.1: Adapt role to handle multiple distributions. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.0: Add Ubuntu support. Benoit Leveugle <benoit.leveugle@gmail.com>

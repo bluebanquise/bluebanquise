@@ -35,4 +35,5 @@ Example:
 Changelog
 ^^^^^^^^^
 
+* 1.1.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.0: Role creation. Johnny Keats <johnny.keats@outlook.com>

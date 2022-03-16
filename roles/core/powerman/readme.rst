@@ -49,6 +49,7 @@ Files generated:
 Changelog
 ^^^^^^^^^
 
+* 1.2.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.1: Fix bluebanquise-filters package name. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.0: Implement support for externaly defined BMC. johnnykeats <johnny.keats@outlook.com>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
