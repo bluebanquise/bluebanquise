@@ -1,12 +1,34 @@
 ---
-dns_server_role_version: 1.4.0
+dns_server_role_version: 1.4.1
 
-j2_dns_server_get_network: "
-{% if networks[item]['prefix'] <= 8 %}
-{{ networks[item]['subnet'].split('.')[0] }}
-{% elif networks[item]['prefix'] <= 16 %}
-{{ networks[item]['subnet'].split('.')[0:2]|reverse|join('.') }}
-{% elif networks[item]['prefix'] <= 31 %}
-{{ networks[item]['subnet'].split('.')[0:3]|reverse|join('.') }}
-{% endif %}
-"
+j2_dns_server_get_first_octets: "
+{%- set ip_networks = [] -%}
+{%- for host in groups['all'] -%}
+  {%- if hostvars[host]['network_interfaces'] is defined -%}
+    {%- for interface in hostvars[host]['network_interfaces'] -%}
+      {%- if interface['network'] == outer_item and  interface['ip4'] is defined and networks[interface['network']]['is_in_dns'] -%}
+        {%- set ip_prefix = interface['ip4'].split('.')[0:3]|join('.') -%}
+        {%- if ip_prefix not in ip_networks -%}
+          {{ ip_networks.append(ip_prefix) }}
+        {%- endif -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- if hostvars[host]['bmc'] is defined -%}
+      {%- set bmc_args = hostvars[host]['bmc'] -%}
+      {%- if bmc_args.name is defined and \
+          bmc_args.name is not none and \
+          bmc_args.ip4 is defined and \
+          bmc_args.ip4 is not none and \
+          bmc_args.network is defined \
+          and bmc_args.network is not none and \
+          bmc_args.network == outer_item \
+      -%}
+        {%- set ip_prefix = bmc_args.ip4.split('.')[0:3]|join('.') -%}
+        {%- if ip_prefix not in ip_networks -%}
+          {{ ip_networks.append(ip_prefix) }}
+        {%- endif -%}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endif -%}
+{%- endfor -%}
+{{ ip_networks|join(',') }}"
