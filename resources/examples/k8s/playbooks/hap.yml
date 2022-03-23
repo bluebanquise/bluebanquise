@@ -5,8 +5,8 @@
 
     - role: set_hostname
       tags: set_hostname
-    - role: custom_nic_nmcli
-      tags: custom_nic_nmcli
+    - role: nic
+      tags: nic
     - role: hosts_file
       tags: hosts_file
     - role: dns_client
