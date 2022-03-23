@@ -1,0 +1,22 @@
+mg_masters:
+  children:
+    equipment_typeK8SM:
+      hosts:
+        m1:
+          network_interfaces:
+            - interface: enp0s3
+              ip4: 10.10.2.1
+              mac: 08:00:27:dc:f8:a5
+              network: ice1-1
+        m2:
+          network_interfaces:
+            - interface: enp0s3
+              ip4: 10.10.2.2
+              mac: 08:00:27:dc:f8:a6
+              network: ice1-1
+        m3:
+          network_interfaces:
+            - interface: enp0s3
+              ip4: 10.10.2.3
+              mac: 08:00:27:dc:f8:a7
+              network: ice1-1

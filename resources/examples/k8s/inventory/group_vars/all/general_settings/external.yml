@@ -1,0 +1,17 @@
+external_time:
+  time_server:
+    pool:  # List of possible time pools
+      - pool.ntp.org
+    server:
+  time_client:
+    pool:
+    server:
+
+external_dns:
+  dns_server:  # set as forwarders in named.conf
+    - 8.8.8.8
+    - 8.8.4.4
+  dns_client:  # set directly on client side in resolv.conf
+
+# Hosts defined here will be automatically added into /etc/hosts
+external_hosts:

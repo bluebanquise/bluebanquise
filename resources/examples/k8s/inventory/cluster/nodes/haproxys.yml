@@ -1,0 +1,40 @@
+mg_haproxys:
+  children:
+    equipment_typeK8SHAP:
+      hosts:
+        hap1:
+          network_interfaces:
+            - interface: enp0s3
+              ip4: 10.10.4.1
+              mac: 08:00:27:0d:44:91
+              network: ice1-1
+            - interface: enp0s8
+              ip4: 192.168.1.101
+              network: backbone
+        hap2:
+          network_interfaces:
+            - interface: enp0s3
+              ip4: 10.10.4.2
+              mac: 08:00:27:0d:54:91
+              network: ice1-1
+            - interface: enp0s8
+              ip4: 192.168.1.102
+              network: backbone
+        hap3:
+          network_interfaces:
+            - interface: enp0s3
+              ip4: 10.10.4.3
+              mac: 08:00:27:0d:64:91
+              network: ice1-1
+            - interface: enp0s8
+              ip4: 192.168.1.103
+              network: backbone
+        hap4:
+          network_interfaces:
+            - interface: enp0s3
+              ip4: 10.10.4.4
+              mac: 08:00:27:0d:74:91
+              network: ice1-1
+            - interface: enp0s8
+              ip4: 192.168.1.104
+              network: backbone

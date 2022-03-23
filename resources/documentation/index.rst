@@ -55,6 +55,7 @@ git gitea
    monitoring
    slurm
    containers
+   scenario_kubernetes
    stories
    roles
    references

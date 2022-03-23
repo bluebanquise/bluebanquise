@@ -1,0 +1,35 @@
+### Network related settings
+
+## DNS
+domain_name: cluster.local
+
+## List of logical networks
+networks:
+
+  ice1-1:
+    subnet: 10.10.0.0
+    prefix: 16
+    netmask: 255.255.0.0
+    broadcast: 10.10.255.255
+    dhcp_unknown_range: 10.10.254.1 10.10.254.254
+    gateway: 10.10.0.1
+    dns4: 10.10.0.1
+    is_in_dhcp: true
+    is_in_dns: true
+    services_ip:
+      pxe_ip: 10.10.0.1
+      dns_ip: 10.10.0.1
+      repository_ip: 10.10.0.1
+      authentication_ip: 10.10.0.1
+      time_ip: 10.10.0.1
+      log_ip: 10.10.0.1
+
+  backbone:
+    subnet: 192.168.1.0
+    prefix: 24
+    netmask: 255.255.255.0
+    broadcast: 192.168.1.255
+    gateway: 192.168.1.1
+    dns4: 8.8.8.8
+    is_in_dhcp: false
+    is_in_dns: true

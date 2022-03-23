@@ -1,0 +1,4 @@
+repositories_client_apt_update_cache: true
+
+repositories:
+  - repo: deb [trusted=yes] http://bluebanquise.com/repository/releases/1.5/ubuntu2004/x86_64/bluebanquise/ ./
