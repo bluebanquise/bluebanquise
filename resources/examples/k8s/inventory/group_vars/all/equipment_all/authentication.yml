@@ -5,4 +5,3 @@ authentication_root_password_sha512: $6$M3crarMVoUV3rALd$ZTre2CIyss7zOb4lkLoG23A
 # SSH public keys to be added as authorized keys on deployed/managed hosts
 authentication_ssh_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBAmInyLG4oavgn54xIY9/8GfUBwCz328LxM4s/E8Ti+ root@ubuntu0
-
