@@ -1,0 +1,25 @@
+---
+
+- name: "template █ Generate Reverse zone file on Master DNS {{ dns_server_named_dir }}/{{ item }}.rr.zone"
+  template:
+    src: reverse.j2
+    dest: "{{ dns_server_named_dir }}/{{ item|trim }}.rr.zone"
+    owner: root
+    group: root
+    mode: 0644
+  with_items: "{{ j2_dns_server_get_first_octets.split(',') }}"
+  tags:
+    - template
+
+- name: "template █ Generate SOA for reverse zone file {{ dns_server_named_dir }}/{{ item }}.rr.soa"
+  template:
+    src: reverse.soa.j2
+    dest: "{{ dns_server_named_dir }}/{{ item|trim }}.rr.soa"
+    owner: root
+    group: root
+    mode: 0644
+  notify: service █ Restart dns services
+  with_items: "{{ j2_dns_server_get_first_octets.split(',') }}"
+  when: zoneconf.changed  # noqa 503
+  tags:
+    - template
