@@ -7,3 +7,5 @@ rules:
     level: error
   line-length: disable
   truthy: disable
+  skip_list:
+    - fqcn-builtins
