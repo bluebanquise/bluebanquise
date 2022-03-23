@@ -64,8 +64,8 @@ jobs:
       - name: Role test - dhcp_server
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t dhcp_server --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false start_services=false" -u root  
 
-      - name: Role test - advanced_dhcp_server
-        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t advanced_dhcp_server --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false start_services=false" -u root  
+#      - name: Role test - advanced_dhcp_server
+#        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t advanced_dhcp_server --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false start_services=false" -u root  
 
       - name: Role test - dns_server
         run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=docker --limit management1 -t dns_server --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
