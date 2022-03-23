@@ -1,5 +1,5 @@
 # Many community roles and tools are using same convention for hosts variables.
 # This file should provide some useful variables uses everywhere.
 
-ansible_host: "{{ j2_node_main_network }}"
-ip: "{{ j2_node_main_resolution_network }}"
+#ansible_host: "{{ j2_node_main_network }}"
+#ip: "{{ j2_node_main_resolution_network }}"
