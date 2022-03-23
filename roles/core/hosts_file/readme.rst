@@ -59,6 +59,7 @@ Files generated:
 Changelog
 ^^^^^^^^^
 
+* 1.1.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.8: Prevent unsorted ranges. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.7: Clean code. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.6: Update to new network_interfaces syntax. Benoit Leveugle <benoit.leveugle@gmail.com>

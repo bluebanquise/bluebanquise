@@ -1,6 +1,6 @@
 ---
 - name: service █ Restart firewall services
-  service:
+  ansible.builtin.service:
     name: "{{ item }}"
     state: restarted
   loop: "{{ firewall_services_to_start }}"

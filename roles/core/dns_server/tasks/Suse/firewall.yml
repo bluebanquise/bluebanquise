@@ -1,6 +1,6 @@
 ---
 - name: firewalld █ "Add services to firewall's {{ dns_server_firewall_zone | default('public') }} zone"
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ dns_server_firewall_zone | default('public') }}"
     service: "{{ item }}"
     immediate: "yes"

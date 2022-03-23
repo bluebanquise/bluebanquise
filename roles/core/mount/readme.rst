@@ -44,5 +44,6 @@ for the full list of available parameters.
 Changelog
 ^^^^^^^^^
 
+* 1.1.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.1: Bug fix for src option. Neil Munday <neil@mundayweb.com>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>

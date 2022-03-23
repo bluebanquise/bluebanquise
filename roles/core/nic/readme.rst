@@ -1,56 +1,105 @@
 NIC
 ---
 
-.. warning:
-  This role is deprecated and will be removed soon.
-  Please consider using nic_nmcli role instead.
-
 Description
 ^^^^^^^^^^^
 
 This role configure network interfaces to provide desired ip, prefix, gateway, etc.
+The role also cover routes definitions on interfaces.
+
+This role provides all features availables in the main nmcli module.
+Please refer to `nmcli module documentation <https://docs.ansible.com/ansible/latest/collections/community/general/nmcli_module.html>`_ .
+
+.. warning:
+  This role needs **latest** (2.2.0) nmcli.py module.
 
 Instructions
 ^^^^^^^^^^^^
 
-This role provide network configuration based on system files (ifcfg files for RHEL/Centos systems).
+Stack specific behaviors
+""""""""""""""""""""""""
 
-User need to restart network or interfaces one by one for changes to take effect after role execution.
+While all of the nmcli module options are supported,
+some provides more integrated features:
 
-As a reminder, the creation of a new network requires a new entry in the
-``/etc/bluebanquise/inventory/group_vars/all/general_settings/network.yml`` file.
+* **conn_name**: is equal to **interface**, but has higher precedence over
+  **interface** if both are set.
+* **ifname**: is equal to **physical_device**, but has higher precedence over
+  **ifname** if both are set.
+* **type**: is set to *ethernet* by default if not set.
+* **ip4**: can be set using a simple ipv4, then role will use
+  **networks[item.network]['prefix4']** or default to
+  **networks[item.network]['prefix']** to complete address. You can force
+  address with prefix if string *'/'* is present.
+* **ip4_manual**: allows to pass additional list of ip/prefix to role.
+* **mtu**: has higher precedence over **networks[item.network]['mtu']** if
+  both are set.
+* **gw4**: has higher precedence over **networks[item.network]['.gateway4']**
+  if set which has higher precedence over **networks[item.network]['.gateway']**
+  if set. Note that gw4 is cannot be set at the same time than never_default4
+  (mutually exclusives).
+* **routes4**: is a list, that defines routes to be set on the interface. See
+  examples bellow. Has higher precedence over
+  **networks[item.network]['.routes4']** if set.
+* **route_metric4**: is to set general metric for gateway or routes (if not set
+  on route level) for this interface. Has higher precedence over
+  **networks[item.network]['.route_metric4']** if set.
+* **never_default4**: is related to ipv4.never-default nmcli parameter
+  (DEFROUTE). Has higher precedence over
+  **networks[item.network]['.never_default4']** if set.
 
-Network interfaces configurations are done at host level:
+Basic ipv4
+""""""""""
 
 .. code-block:: yaml
 
   network_interfaces:
-    - interface: enp0s3        # Interface name on system
-      ip4: 10.11.0.1           # ip v4 to be set
-      mac: 08:00:27:de:42:22   # MAC address of this NIC
-      network: ice1-1          # Logical network connected to
+    - interface: eth0
+      ip4: 10.10.0.1
+      network: ice1-1
 
-By default, connections are of type ethernet. It is possible to specify connection type, for example infiniband:
+Force gateway and MTU
+"""""""""""""""""""""
 
 .. code-block:: yaml
 
   network_interfaces:
-    - interface: ib0
-      ip4: 10.20.0.1
-      network: interconnect-1
-      type: infiniband
+    - interface: eth0
+      ip4: 10.10.0.1
+      network: ice1-1
+      gw4: 10.10.2.1
+      mtu: 9000
 
-To configure an LACP bonding, specify slave interfaces, and then create the bond, using bond-slave type and bond type:
+Multiple ip
+"""""""""""
+
+In multiple ip modes, you need to set the prefix yourself:
+
+.. code-block:: yaml
+
+  network_interfaces:
+    - interface: eth0
+      ip4: 10.10.0.1
+      ip4_manual: 
+        - 10.10.0.2/16
+        - 10.10.0.3/16
+      network: ice1-1
+
+Note: you can use ``ip4_manual`` without ``ip4`` only if 
+the corresponding interface is not to be used as main resolution interface
+or main interface (which means another interface with an ip4 and linked to 
+a management network is set above in the *network_interfaces* list).
+
+Bond
+""""
 
 .. code-block:: yaml
 
   network_interfaces:
     - interface: bond0
-      type: bond
-      vlan: false
-      bond_options: "mode=4 xmit_hash_policy=layer3+4 miimon=100 lacp_rate=1"
-      ip4: 10.100.0.1
+      ip4: 10.10.0.1
       network: ice1-1
+      type: bond
     - interface: eth0
       type: bond-slave
       master: bond0
@@ -58,81 +107,32 @@ To configure an LACP bonding, specify slave interfaces, and then create the bond
       type: bond-slave
       master: bond0
 
-To configure a VLAN, simply set vlan to true.
+.. warning::
+  In BlueBanquise, as the roles are relying on network_interfaces list order,
+  never place bond-slave above the bond master (here bond0 definition must be
+  set above eth0 and eth1).
 
-In this example we want to use a dedicated subnet for VLAN 100,
-we have created a net-100 network (corresponding to VLAN 100).
-
-Otherwise, you can just use an existing network.
-
-.. code-block:: yaml
-
-  network_interfaces:
-    - interface: vlan100
-      vlan: true
-      vlan_id: 100
-      physical_device: eth2
-      ip4: 10.100.0.1
-      network: net-100
-
-A full example with VLAN over bond would be:
+Vlan
+""""
 
 .. code-block:: yaml
 
-  network_interfaces:
-    - interface: eth3
-      network: lk1
-      ip4: 172.16.0.2
-    - interface: bond0
-      type: bond
-      bond_options: "mode=4 xmit_hash_policy=layer3+4 miimon=100 lacp_rate=1"
-      network: ice1-1
-      ip4: 172.21.2.102
-    - interface: bond0.100
-      type: vlan
-      network: ice1-2
-      ip4: 10.100.0.1
-      vlan: true
-      vlan_id: 100
-      physical_device: bond0
-    - interface: bond0.1
-      type: vlan
-      network: ice1-3
-      ip4: 10.1.0.1
-      vlan: true
-      vlan_id: 1
-      physical_device: bond0
-    - interface: enp136s0f0
-      type: bond-slave
-      master: bond0
-    - interface: enp136s0f1
-      type: bond-slave
-      master: bond0
+  - interface: eth2.100
+    type: vlan
+    vlanid: 100
+    vlandev: eth2
+    ip4: 10.100.0.1
+    network: net-100
 
-It is also possible to configure multiple ip per interface, using:
+Refer to `nmcli module documentation <https://docs.ansible.com/ansible/latest/collections/community/general/nmcli_module.html>`_
+for more options.
 
-.. code-block:: yaml
+Routes
+""""""
 
-  network_interfaces:
-    - interface: eth3
-      network: lk1
-      ip4_multi:
-        - 172.16.0.2/16
-        - 172.16.0.3/16
-        - 192.168.1.117/24
+You can define routes at two levels:
 
-To assign a network interface to a firewall zone:
-
-.. code-block:: yaml
-
-  network_interfaces:
-    - interface: ens5
-      ip4: 192.168.121.124
-      network: bb
-      zone: external
-
-MTU and/or Gateway can be set in the network file, and will be applied to NIC
-linked to this network.
+* In networks.yml, inside a network. For example:
 
 .. code-block:: yaml
 
@@ -142,29 +142,61 @@ linked to this network.
       prefix: 16
       netmask: 255.255.0.0
       broadcast: 10.10.255.255
-      dhcp_unknown_range: 10.10.254.1 10.10.254.254
-      gateway: 10.10.2.1     <<<<<<<<<<
-      mtu: 9000              <<<<<<<<<<
-      is_in_dhcp: true
-      is_in_dns: true
-      services_ip:
-        pxe_ip: 10.10.0.1
-        dns_ip: 10.10.0.1
-        repository_ip: 10.10.0.1
-        authentication_ip: 10.10.0.1
-        time_ip: 10.10.0.1
-        log_ip: 10.10.0.1
+      routes4:
+        - 10.11.0.0/24 10.10.0.2
+        - 10.12.0.0/24 10.10.0.2 300
 
-To be done
-^^^^^^^^^^
+* Or under host definition, so in hostvars:
 
-Add Ubuntu and Opensuse compatibility if asked for.
+.. code-block:: yaml
+
+      hosts:
+        management1:
+          network_interfaces:
+            - interface: enp0s8
+              ip4: 10.10.0.1
+              mac: 08:00:27:36:c0:ac
+              network: ice1-1
+              routes4:
+                - 10.11.0.0/24 10.10.0.2
+                - 10.12.0.0/24 10.10.0.2 300
+
+.. note:
+  In route4 list, each element of the list is a tuple with the network
+  destination in first position, gateway in second position and optionally
+  the metric in third position.
+
+Apply changes
+"""""""""""""
+
+By default, if interfaces are down, the role will have them up, and at the same 
+time set their configuration.
+
+However, in some cases, users might need to force some updates (for example if 
+you wish to set routes on the main interface, etc).
+
+To achieve that, few variables are at disposal:
+
+* ``nic_nmcli_reload_connections``: this variable will trigger a handler that will ask NetworkManager to reload its configuration.
+* ``nic_nmcli_force_nic_restart``: this variable will trigger a task that will manually down and up interfaces. To be used with care.
+* ``nic_nmcli_reboot``: this variable will trigger a reboot if any nic configuration changed. To be used with care.
+
 
 Changelog
 ^^^^^^^^^
 
-* 1.1.0: Assign a network interface to a firewall zone. Bruno Travouillon <devel@travouillon.fr>
-* 1.0.3: Update readme. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.0.2: Update to new network_interfaces syntax. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.0.1: Fix VLAN and BOND. Benoit Leveugle <benoit.leveugle@gmail.com>
+* 1.6.0: Add OpenSuSE 12 and 15 support. Neil Munday <neil@mundayweb.com>
+* 1.5.3: Improve Ubuntu compatibility. Benoit Leveugle <benoit.leveugle@gmail.com>
+* 1.5.2: Add reboot capability, needed on some system. Benoit Leveugle <benoit.leveugle@gmail.com>
+* 1.5.1: Add missing register of nic_nmcli_apply variable. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
+* 1.5.0: Add ip4_manual entry. Benoit Leveugle <benoit.leveugle@gmail.com>
+* 1.4.1: Adapt role to handle multiple distributions. Benoit Leveugle <benoit.leveugle@gmail.com>
+* 1.4.0: Add Ubuntu support. Benoit Leveugle <benoit.leveugle@gmail.com>
+* 1.3.1: Add DNS4 and DNS4_SEARCH vars logic. Benoit Leveugle <benoit.leveugle@gmail.com>
+* 1.3.0: Rewrite logic to prevent crash and ease code reading. Benoit Leveugle <benoit.leveugle@gmail.com>
+* 1.2.0: Add routes4, route_metric4, never_default4 and zone. Benoit Leveugle <benoit.leveugle@gmail.com>
+* 1.1.1: Add routes support on NIC. Benoit Leveugle <benoit.leveugle@gmail.com>
+* 1.1.0: Rewamp full role to handle all nmcli module features. Benoit Leveugle <benoit.leveugle@gmail.com>
+* 1.0.2: Adding Ubuntu 18.04 compatibility. johnnykeats <johnny.keats@outlook.com>
+* 1.0.1: Documentation. johnnykeats <johnny.keats@outlook.com>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>

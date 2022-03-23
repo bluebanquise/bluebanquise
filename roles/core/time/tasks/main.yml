@@ -10,7 +10,7 @@
   #
   # If no OS specific file is found, the role will default to vars/main.yml
   #
-  include_vars: "{{ item }}"
+  ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - files:
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
@@ -22,7 +22,7 @@
     - always
 
 - name: include_tasks ░ Use OS dedicated firewall task
-  include_tasks: "{{ item }}"
+  ansible.builtin.include_tasks: "{{ item }}"
   with_first_found:
     - files:
         - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
@@ -37,14 +37,14 @@
     - firewall
 
 - name: "package █ Install {{ time_packages_to_install | join(' ') }} packages"
-  package:
+  ansible.builtin.package:
     name: "{{ time_packages_to_install }}"
     state: present
   tags:
     - package
 
 - name: "template █ Generate {{ time_chrony_conf_path }}"
-  template:
+  ansible.builtin.template:
     src: chrony.conf.j2
     dest: "{{ time_chrony_custom_conf_path | default(time_chrony_conf_path) }}"
     owner: root
@@ -55,7 +55,7 @@
     - template
 
 - name: lineinfile █ Set sysconfig OPTIONS for chronyd
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/sysconfig/chronyd
     regexp: '^OPTIONS'
     line: OPTIONS="{{ time_chronyd_options }}"
@@ -65,14 +65,14 @@
     - template
 
 - name: "timezone █ Set system to {{ time_zone }} timezone"
-  timezone:
+  ansible.builtin.timezone:
     name: "{{ time_zone }}"
 
 - name: meta █ Run handler tasks to restart time services
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers
 
 - name: "service █ Manage {{ time_services_to_start | join(' ') }} services state"
-  service:
+  ansible.builtin.service:
     name: "{{ item }}"
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
     state: "{{ (start_services | bool) | ternary('started', omit) }}"

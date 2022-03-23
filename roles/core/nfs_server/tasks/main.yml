@@ -10,7 +10,7 @@
   #
   # If no OS specific file is found, the role will default to vars/main.yml
   #
-  include_vars: "{{ item }}"
+  ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - files:
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
@@ -22,7 +22,7 @@
     - always
 
 - name: include_tasks ░ Use OS dedicated firewall task
-  include_tasks: "{{ outer_item }}"
+  ansible.builtin.include_tasks: "{{ outer_item }}"
   with_first_found:
     - files:
         - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
@@ -39,14 +39,14 @@
     - firewall
 
 - name: "package █ Install {{ nfs_server_packages_to_install | join(' ') }} packages"
-  package:
+  ansible.builtin.package:
     name: "{{ nfs_server_packages_to_install }}"
     state: present
   tags:
     - package
 
 - name: lineinfile █ Edit file /etc/exports to add exported FS
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/exports
     regexp: ' # export name: {{ item }}$'
     line: "{{ nfs[item]['export'] }} {{ networks[nfs[item]['take_over_network']]['subnet'] }}/{{ networks[nfs[item]['take_over_network']]['prefix'] }}({{ nfs[item]['export_arguments'] }}) # export name: {{ item }}"
@@ -57,10 +57,10 @@
     - template
 
 - name: meta █ Run handler tasks to restart nfs server services
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers
 
 - name: "service █ Manage {{ nfs_server_services_to_start | join(' ') }} state"
-  service:
+  ansible.builtin.service:
     name: "{{ item }}"
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
     state: "{{ (start_services | bool) | ternary('started', omit) }}"

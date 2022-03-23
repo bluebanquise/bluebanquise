@@ -21,6 +21,7 @@ Files:
 
 Changelog
 ^^^^^^^^^
+* 1.1.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.2: Configure handler to use FQCN (ansible.builtin.service) module. osmocl <osmocl@osmo.cl>
 * 1.0.1: Add Ubuntu 18.04 and 20.04 support. osmocl <osmocl@osmo.cl>
 * 1.0.0: Role creation. osmocl <osmocl@osmo.cl>

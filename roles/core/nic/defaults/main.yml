@@ -1,1 +1,7 @@
-nic_nm_controlled: yes
+---
+nic_nmcli_reload_connections: false  # Reload network connections if changed
+nic_nmcli_force_nic_restart: false  # Force restart connection using down and up
+nic_nmcli_force_reboot: false  # Reboot OS in case of NIC configuration change
+nic_nmcli_allow_reboot: false  # Reboot after switch from netplan to network-manager on Ubuntu systems, or to enable NM on Suse
+nic_nmcli_start_services: true
+nic_nmcli_reboot_timeout: 600

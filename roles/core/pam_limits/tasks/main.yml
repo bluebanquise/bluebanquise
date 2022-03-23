@@ -1,6 +1,6 @@
 ---
 - name: pam_limits █ Set pam_limits
-  pam_limits:
+  community.general.pam_limits:
     backup: "{{ item.backup | default(omit) }}"
     comment: "{{ item.comment | default(omit) }}"
     dest: "{{ item.dest | default(omit) }}"

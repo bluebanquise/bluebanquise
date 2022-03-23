@@ -1,6 +1,6 @@
 ---
 - name: include_tasks ░ Use OS dedicated task
-  include_tasks: "{{ item }}"
+  ansible.builtin.include_tasks: "{{ item }}"
   with_first_found:
     - files:
         - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"

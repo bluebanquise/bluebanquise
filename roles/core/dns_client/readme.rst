@@ -48,7 +48,7 @@ Files generated:
 
 Changelog
 ^^^^^^^^^
-
+* 1.1.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.4: Clean. johnnykeats <johnny.keats@outlook.com>
 * 1.0.3: Added support of multiple DNS servers. Bruno Travouillon <devel@travouillon.fr>
 * 1.0.2: Added variable for role version. johnnykeats <johnny.keats@outlook.com>

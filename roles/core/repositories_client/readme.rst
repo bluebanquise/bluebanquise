@@ -130,6 +130,7 @@ sources.list file.
 Changelog
 ^^^^^^^^^
 
+* 1.3.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.2.0: Add OpenSuSE support and correct ansible warning for included tasks loop. Neil Munday <neil@mundayweb.com>
 * 1.1.3: Improve Ubuntu support. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.2: Incorporated fix for issue 534. Neil Munday <neil@mundayweb.com>

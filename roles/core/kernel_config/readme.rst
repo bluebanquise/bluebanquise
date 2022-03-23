@@ -47,6 +47,7 @@ Optional inventory vars:
 Changelog
 ^^^^^^^^^
 
+* 1.2.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.1: Add OpenSuSE support. Neil Munday <neil@mundayweb.com>
 * 1.1.0: Add Ubuntu support. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>

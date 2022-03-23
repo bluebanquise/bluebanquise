@@ -1,7 +1,7 @@
 ---
 
 - name: template █ Generate /root/.ssh/config
-  template:
+  ansible.builtin.template:
     src: "config.j2"
     dest: /root/.ssh/config
     owner: root

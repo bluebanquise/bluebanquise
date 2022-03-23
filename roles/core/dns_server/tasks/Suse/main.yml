@@ -1,5 +1,5 @@
 - name: "copy █ /etc/named.rfc1912.zones"
-  copy:
+  ansible.builtin.copy:
     src: Suse/named.rfc1912.zones
     dest: /etc/named.rfc1912.zones
     owner: root
@@ -8,7 +8,7 @@
   notify: service █ Restart dns services
 
 - name: "copy █ /etc/sysconfig/named"
-  copy:
+  ansible.builtin.copy:
     src: Suse/named
     dest: /etc/sysconfig/named
     owner: root

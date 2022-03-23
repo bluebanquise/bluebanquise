@@ -85,6 +85,8 @@ pygments_style = None
 #     }
 html_logo = "logo.png"
 html_theme = "sphinx_rtd_theme"
+html_theme_path = ["_themes"]
+html_css_files = ["custom.css"]
 html_theme_path = ["_themes", ]
 html_css_files = ["custom.css", ]
 

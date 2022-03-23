@@ -10,7 +10,7 @@
   #
   # If no OS specific file is found, the role will default to vars/main.yml
   #
-  include_vars: "{{ item }}"
+  ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - files:
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
@@ -22,7 +22,7 @@
     - always
 
 - name: package █ Install Ansible and dependencies for filters
-  package:
+  ansible.builtin.package:
     name: "{{ bluebanquise_packages_to_install }}"
     state: present
   tags:

@@ -1,6 +1,6 @@
 ---
 - name: file █ Enable cgi.load for apache2
-  file:
+  ansible.builtin.file:
     src: ../mods-available/cgi.load
     dest: /etc/apache2/mods-enabled/cgi.load
     mode: 0644
@@ -10,7 +10,7 @@
   notify: service █ Restart pxe services
 
 - name: lineinfile █ Configure tftpd-hpa tftp server
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "/etc/default/tftpd-hpa"
     regexp: "{{ item.regexp }}"
     line: "{{ item.line }}"

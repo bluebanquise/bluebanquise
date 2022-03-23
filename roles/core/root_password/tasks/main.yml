@@ -1,6 +1,6 @@
 ---
 - name: user █ Set root password
-  user:
+  ansible.builtin.user:
     name: root
     password: "{{ authentication_root_password_sha512 }}"
   no_log: true

@@ -11,8 +11,8 @@ pxe_stack_packages_to_install:
   - autoyast2-installation
   - clustershell
   - libxml2-tools
-  - ipxe-x86_64-bluebanquise
-#  - ipxe-arm64-bluebanquise
+  - bluebanquise-ipxe-x86_64
+  - bluebanquise-ipxe-arm64
   - python3-clustershell
 pxe_stack_default_tftp_package: atftp
 pxe_stack_services_to_start:

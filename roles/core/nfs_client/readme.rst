@@ -60,6 +60,7 @@ Packages installed:
 Changelog
 ^^^^^^^^^
 
+* 1.3.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.2.0: Added OpenSUSE 15 support. Neil Munday <neil@mundayweb.com>
 * 1.1.0: Change the way sebooleans values are set to allow MI mechanism. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.4: Added new variable to allow all possible mount values in state parameter. Osmocl <osmocl@osmo.cl>

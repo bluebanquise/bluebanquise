@@ -10,7 +10,7 @@
   #
   # If no OS specific file is found, the role will default to vars/main.yml
   #
-  include_vars: "{{ item }}"
+  ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - files:
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}.yml"
@@ -24,7 +24,7 @@
     - always
 
 - name: "include_tasks ░ Use OS dedicated firewall task"
-  include_tasks: "{{ outer_item }}"
+  ansible.builtin.include_tasks: "{{ outer_item }}"
   with_first_found:
     - files:
         - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
@@ -41,22 +41,22 @@
     - firewall
 
 - name: "package █ Install {{ dns_server_packages_to_install | join(' ') }} packages"
-  package:
+  ansible.builtin.package:
     name: "{{ dns_server_packages_to_install }}"
     state: present
   tags:
     - package
 
 - name: "file █ Create needed directory {{ dns_server_named_dir }}"
-  file:
+  ansible.builtin.file:
     path: "{{ dns_server_named_dir }}"
     state: directory
     owner: root
-    group: named
+    group: "{{ dns_server_dns_user }}"
     mode: 0750
 
 - name: template █ Generate /etc/named.conf
-  template:
+  ansible.builtin.template:
     src: named.conf.j2
     dest: /etc/named.conf
     owner: root
@@ -67,7 +67,7 @@
     - template
 
 - name: "template █ Generate Forward zone file on Master DNS {{ dns_server_named_dir }}/forward.zone"
-  template:
+  ansible.builtin.template:
     src: forward.j2
     dest: "{{ dns_server_named_dir }}/forward.zone"
     owner: root
@@ -78,7 +78,7 @@
     - template
 
 - name: set_fact ░ Set SOA Serial for reverse zone
-  set_fact:
+  ansible.builtin.set_fact:
     serial: "{{ lookup('pipe', 'date +%s') }}"
   when: zoneconf.changed  # noqa 503
   tags:
@@ -86,7 +86,7 @@
     - internal
 
 - name: "template █ Generate SOA for forward zone file {{ dns_server_named_dir }}/forward.soa"
-  template:
+  ansible.builtin.template:
     src: forward.soa.j2
     dest: "{{ dns_server_named_dir }}/forward.soa"
     owner: root
@@ -98,14 +98,14 @@
     - template
 
 - name: "include_tasks ░ Use reverse zone task"
-  include_tasks: reverse.yml
+  ansible.builtin.include_tasks: reverse.yml
   with_items: "{{ networks }}"
   when: networks[outer_item].is_in_dns
   loop_control:
     loop_var: outer_item
 
 - name: "template █ Generate override file {{ dns_server_named_dir }}/override.zone"
-  template:
+  ansible.builtin.template:
     src: override.j2
     dest: "{{ dns_server_named_dir }}/override.zone"
     owner: root
@@ -117,7 +117,7 @@
     - template
 
 - name: include_tasks ░ Apply OS specific tasks
-  include_tasks: "{{ item }}"
+  ansible.builtin.include_tasks: "{{ item }}"
   with_first_found:
     - files:
         - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
@@ -131,10 +131,10 @@
     - internal
 
 - name: meta █ Run handler tasks to restart dns services
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers
 
 - name: "service █ Manage {{ dns_server_services_to_start | join(' ') }} state"
-  service:
+  ansible.builtin.service:
     name: "{{ item }}"
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
     state: "{{ (start_services | bool) | ternary('started', omit) }}"

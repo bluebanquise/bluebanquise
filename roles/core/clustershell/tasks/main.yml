@@ -1,12 +1,12 @@
 - name: package █ Install clustershell package
-  package:
+  ansible.builtin.package:
     name: clustershell
     state: present
   tags:
     - package
 
 - name: template █ Generate /etc/clustershell/groups.d/local.cfg
-  template:
+  ansible.builtin.template:
     src: local.cfg.j2
     dest: /etc/clustershell/groups.d/local.cfg
     owner: root

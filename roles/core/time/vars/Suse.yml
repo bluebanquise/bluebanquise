@@ -1,6 +1,7 @@
 ---
 time_packages_to_install:
   - chrony
+  - timezone
 time_services_to_start:
   - chronyd
 time_firewall_services_to_add:

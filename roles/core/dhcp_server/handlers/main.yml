@@ -1,6 +1,6 @@
 ---
 - name: service █ Restart dhcp server
-  service:
+  ansible.builtin.service:
     name: "{{ item }}"
     state: restarted
   loop: "{{ dhcp_server_services_to_start }}"

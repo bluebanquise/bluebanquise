@@ -3,7 +3,7 @@
 ## Generic
 
 - name: "copy █ Copy osdeploy files {{ pxe_stack_htdocs_path }}/osdeploy/"
-  copy:
+  ansible.builtin.copy:
     src: osdeploy/ubuntu_{{ item.major }}.ipxe
     dest: "{{ pxe_stack_htdocs_path }}/osdeploy/ubuntu_{{ item.major }}.ipxe"
     mode: 0644
@@ -12,7 +12,7 @@
   loop: "{{ pxe_stack_supported_os.ubuntu }}"
 
 - name: file █ Generate links for all supported OS
-  file:
+  ansible.builtin.file:
     src: ubuntu_{{ item.0.major }}.ipxe
     dest: "{{ pxe_stack_htdocs_path }}/osdeploy/{{ item.1 }}_{{ item.0.major }}.ipxe"
     mode: 0644
@@ -26,7 +26,7 @@
 ## 18.04
 
 - name: "template █ Generate preseeds {{ pxe_stack_htdocs_path }}/equipment_profiles/{item}.preseed.cfg"
-  template:
+  ansible.builtin.template:
     src: "Ubuntu/preseed.cfg.j2"
     dest: "{{ pxe_stack_htdocs_path }}/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.preseed.cfg"
     mode: 0644
@@ -40,7 +40,7 @@
     - template
 
 - name: "template █ Generate equipment_profiles {{ pxe_stack_htdocs_path }}/equipment_profiles/{item}.ipxe"
-  template:
+  ansible.builtin.template:
     src: "Ubuntu/equipment_profile_preseed.ipxe.j2"
     dest: "{{ pxe_stack_htdocs_path }}/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.ipxe"
     mode: 0644
@@ -56,7 +56,7 @@
 ## 20.04
 
 - name: file █ Create cloud-init paths
-  file:
+  ansible.builtin.file:
     path: "{{ pxe_stack_htdocs_path }}/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.cloud-init/"
     state: directory
     mode: 0755
@@ -70,7 +70,7 @@
     - file
 
 - name: file █ Create cloud-init empty meta-data
-  file:
+  ansible.builtin.file:
     path: "{{ pxe_stack_htdocs_path }}/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.cloud-init/meta-data"
     state: touch
     mode: 0644
@@ -84,7 +84,7 @@
     - file
 
 - name: template █ Generate cloud-init user-data
-  template:
+  ansible.builtin.template:
     src: "Ubuntu/user-data.j2"
     dest: "{{ pxe_stack_htdocs_path }}/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.cloud-init/user-data"
     mode: 0644
@@ -98,7 +98,7 @@
     - template
 
 - name: "template █ Generate equipment_profiles {{ pxe_stack_htdocs_path }}/equipment_profiles/{item}.ipxe"
-  template:
+  ansible.builtin.template:
     src: "Ubuntu/equipment_profile_cloud-init.ipxe.j2"
     dest: "{{ pxe_stack_htdocs_path }}/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.ipxe"
     mode: 0644

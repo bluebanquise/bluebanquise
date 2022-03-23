@@ -1,0 +1,32 @@
+### Network related settings
+
+## DNS
+domain_name: tumulus.local
+
+## List of logical networks
+networks:
+
+  ice1-1:
+    subnet: 10.10.0.0
+    prefix: 16
+    netmask: 255.255.0.0
+    broadcast: 10.10.255.255
+    dhcp_unknown_range: 10.10.254.1 10.10.254.254
+    gateway: 10.10.2.1
+    is_in_dhcp: true
+    is_in_dns: true
+    services_ip:
+      pxe_ip: 10.10.0.1
+      dns_ip: 10.10.0.1
+      repository_ip: 10.10.0.1
+      authentication_ip: 10.10.0.1
+      time_ip: 10.10.0.1
+      log_ip: 10.10.0.1
+
+  interconnect-1:
+    subnet: 10.20.0.0
+    prefix: 16
+    netmask: 255.255.0.0
+    broadcast: 10.20.255.255
+    is_in_dhcp: false
+    is_in_dns: true

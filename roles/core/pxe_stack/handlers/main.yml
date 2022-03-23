@@ -1,6 +1,6 @@
 ---
 - name: service █ Restart pxe services
-  service:
+  ansible.builtin.service:
     name: "{{ item }}"
     state: restarted
   loop: "{{ pxe_stack_services_to_start }}"
@@ -9,5 +9,5 @@
     - (start_services | bool)
 
 - name: systemd █ Reload systemd configuration
-  systemd:
+  ansible.builtin.systemd:
     daemon_reload: yes

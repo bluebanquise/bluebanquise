@@ -1,6 +1,6 @@
 ---
 - name: filesystem █ Creating filesystems
-  filesystem:
+  ansible.builtin.filesystem:
     dev: "{{ item.dev }}"
     force: "{{ item.force | default(omit) }}"
     fstype: "{{ item.fstype | default(omit) }}"

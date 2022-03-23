@@ -10,7 +10,7 @@
   #
   # If no OS specific file is found, the role will default to vars/main.yml
   #
-  include_vars: "{{ item }}"
+  ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - files:
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
@@ -22,14 +22,14 @@
     - always
 
 - name: "package █ Install {{ nfs_client_packages_to_install | join(' ') }} packages"
-  package:
+  ansible.builtin.package:
     name: "{{ nfs_client_packages_to_install }}"
     state: present
   tags:
     - package
 
 - name: file █ Create NFS directories
-  file:  # noqa 208
+  ansible.builtin.file:  # noqa 208
     path: "{{ item.0.mount }}"
     state: directory
   with_subelements:
@@ -40,7 +40,7 @@
     - inventory_hostname in groups[item.1]
 
 - name: service █ Manage rpcbind state
-  service:
+  ansible.builtin.service:
     name: rpcbind
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
     state: "{{ (start_services | bool) | ternary('started', omit) }}"
@@ -49,7 +49,7 @@
     - service
 
 - name: seboolean █ Enable selinux booleans if needed
-  seboolean:
+  ansible.posix.seboolean:
     name: "{{ item }}"
     state: yes
     persistent: yes
@@ -58,7 +58,7 @@
     - ansible_facts.selinux.status == "enabled"
 
 - name: mount █ Mount exported NFS into directories
-  mount:
+  ansible.builtin.mount:
     path: "{{ item.0.mount }}"
     src: "{% if item.0.server | ipaddr %}{{ item.0.server }}:{{ item.0.export }}{% else %}{{ item.0.server }}{% if item.0.take_over_network is defined and item.0.take_over_network is not none %}-{{ item.0.take_over_network }}{% endif %}:{{ item.0.export }}{% endif %}"
     fstype: nfs

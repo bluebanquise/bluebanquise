@@ -25,5 +25,6 @@ Set needed sudoers using a list:
 Changelog
 ^^^^^^^^^
 
+* 1.1.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.1: Updated role to install sudo package. Neil Munday <neil@mundayweb.com>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>

@@ -1,6 +1,6 @@
 ---
 - name: service █ Restart dns services
-  service:
+  ansible.builtin.service:
     name: "{{ item }}"
     state: restarted
   loop: "{{ dns_server_services_to_start }}"

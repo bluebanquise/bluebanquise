@@ -1,14 +1,14 @@
 ---
 
 - name: "package █ Install {{ lvm_packages_to_install | join(' ') }} packages"
-  package:
+  ansible.builtin.package:
     name: "{{ lvm_packages_to_install }}"
     state: present
   tags:
     - package
 
 - name: lvg █ Creating volume groups
-  lvg:
+  ansible.builtin.lvg:
     vg: "{{ item.vg }}"
     pvs: "{{ item.pvs | join(',') }}"
     force: "{{ item.force | default(omit) }}"
@@ -22,7 +22,7 @@
     - item.pvs is defined and item.pvs
 
 - name: lvol █ Creating logical volumes
-  lvol:
+  ansible.builtin.lvol:
     vg: "{{ item.vg }}"
     lv: "{{ item.lv }}"
     size: "{{ item.size }}"

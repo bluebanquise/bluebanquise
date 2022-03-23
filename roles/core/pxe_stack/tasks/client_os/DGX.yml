@@ -1,7 +1,7 @@
 ##### DGX OS
 
 - name: "copy █ Copy osdeploy files {{ pxe_stack_htdocs_path }}/osdeploy/"
-  copy:
+  ansible.builtin.copy:
     src: osdeploy/dgxos_{{ item.major }}.ipxe
     dest: "{{ pxe_stack_htdocs_path }}/osdeploy/dgxos_{{ item.major }}.ipxe"
     mode: 0644
@@ -10,7 +10,7 @@
   loop: "{{ pxe_stack_supported_os.dgxos }}"
 
 - name: "template █ Generate equipment_profiles {{ pxe_stack_htdocs_path }}/equipment_profiles/{item}.ipxe"
-  template:
+  ansible.builtin.template:
     src: "DGX/equipment_profile_dgxos.ipxe.j2"
     dest: "{{ pxe_stack_htdocs_path }}/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.ipxe"
     mode: 0644
@@ -24,7 +24,7 @@
     - template
 
 - name: copy ░ Copy reference DGX curtin
-  copy:
+  ansible.builtin.copy:
     src: "/var/www/html/repositories/dgxos/{{ hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] }}/x86_64/netboot/curtin/{{ hostvars[groups[item][0]]['ep_dgx_curtin_type'] }}-curtin.yaml"
     dest: "/dev/shm/tmp_curtin_{{ item }}.yaml"
     owner: root
@@ -38,7 +38,7 @@
   changed_when: false
 
 - name: replace ░ Remove OEM from DGX curtin
-  replace:
+  ansible.builtin.replace:
     path: "/dev/shm/tmp_curtin_{{ item }}.yaml"
     after: '# Prepare oem-config'
     regexp: '^(.+)$'
@@ -50,7 +50,7 @@
   changed_when: false
 
 - name: lineinfile ░ Set local parameters, allow root user
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "/dev/shm/tmp_curtin_{{ item }}.yaml"
     regexp: '^kernel:$'
     line: |
@@ -67,7 +67,7 @@
   changed_when: false
 
 - name: lineinfile ░ Enable reboot after install
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "/dev/shm/tmp_curtin_{{ item }}.yaml"
     regexp: '^  mode: CHANGE_POWER_STATE$'
     line: '  mode: reboot'
@@ -78,7 +78,7 @@
   changed_when: false
 
 - name: lineinfile ░ Set BlueBanquise custom parameters into curtin
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "/dev/shm/tmp_curtin_{{ item }}.yaml"
     insertafter: '^late_commands:'
     line: |
@@ -100,7 +100,7 @@
   changed_when: false
 
 - name: copy █ Copy final curtin to destination
-  copy:
+  ansible.builtin.copy:
     src: "/dev/shm/tmp_curtin_{{ item }}.yaml"
     dest: "{{ pxe_stack_htdocs_path }}/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.curtin.yaml"
     mode: 0644

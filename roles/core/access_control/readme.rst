@@ -33,5 +33,6 @@ kickstart.
 Changelog
 ^^^^^^^^^
 
+* 1.1.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.1: Adapt role to handle multiple distributions. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>

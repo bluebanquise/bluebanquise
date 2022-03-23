@@ -1,0 +1,15 @@
+mg_managements:
+  children:
+    equipment_typeM:
+      hosts:
+        management1:
+          bmc:
+            name: bmanagement1
+            ip4: 10.10.100.1
+            mac: 08:00:27:dc:f8:f6
+            network: ice1-1
+          network_interfaces:
+            - interface: dummy0
+              ip4: 10.10.0.1
+              mac: 08:00:27:dc:f8:f5
+              network: ice1-1

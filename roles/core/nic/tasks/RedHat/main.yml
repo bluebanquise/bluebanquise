@@ -1,0 +1,96 @@
+- name: "package █ Install {{ nic_nmcli_packages_to_install | join(' ') }}"
+  ansible.builtin.package:
+    name: "{{ nic_nmcli_packages_to_install }}"
+    state: present
+  tags:
+    - package
+
+- name: "service █ Manage {{ nic_nmcli_services_to_start | join(' ') }} state"
+  ansible.builtin.service:
+    name: "{{ item }}"
+    enabled: yes
+    state: "{{ (nic_nmcli_start_services | bool) | ternary('started', omit) }}"
+  loop: "{{ nic_nmcli_services_to_start }}"
+  tags:
+    - service
+
+- name: nmcli █ Set NICs configuration
+  community.general.nmcli:
+    # Tuned
+    conn_name: "{{ item.conn_name | default(item.interface) | string }}"
+    ifname: "{{ item.ifname | default(item.physical_device) | default(omit) }}"
+    ip4: "{{ j2_nic_nmcli_ip4 | trim | default(omit,true) }}"
+    gw4: "{{ j2_nic_nmcli_gw4 | trim | default(omit,true) }}"
+    routes4: "{{ j2_nic_nmcli_routes4 | trim | default(omit,true) }}"
+    route_metric4: "{{ j2_nic_nmcli_route_metric4 | trim | default(omit,true) }}"
+    never_default4: "{{ j2_nic_nmcli_never_default4 | trim | default(omit,true) }}"
+    dns4: "{{ j2_nic_nmcli_dns4 | trim | default(omit,true) }}"
+    dns4_search: "{{ j2_nic_nmcli_dns4_search | trim | default(omit,true) }}"
+    ip6: "{{ j2_nic_nmcli_ip6 | trim | default(omit,true) }}"
+    gw6: "{{ j2_nic_nmcli_gw6 | trim | default(omit,true) }}"
+    mtu: "{{ j2_nic_nmcli_mtu | trim | default(omit,true) }}"
+    type: "{{ item.type | default('ethernet') }}"  # Even if in the documentation type is optional, it is in fact mandatory. Default to ethernet.
+    # Standard
+    state: "{{ item.state | default('present') }}"
+    autoconnect: "{{ item.autoconnect | default(omit) }}"
+    ageingtime: "{{ item.ageingtime | default(omit) }}"
+    arp_interval: "{{ item.arp_interval | default(omit) }}"
+    arp_ip_target: "{{ item.arp_ip_target | default(omit) }}"
+    dhcp_client_id: "{{ item.dhcp_client_id | default(omit) }}"
+    dns6: "{{ item.dns6 | default(omit) }}"
+    dns6_search: "{{ item.dns6_search | default(omit) }}"
+    downdelay: "{{ item.downdelay | default(omit) }}"
+    egress: "{{ item.egress | default(omit) }}"
+    flags: "{{ item.flags | default(omit) }}"
+    forwarddelay: "{{ item.forwarddelay | default(omit) }}"
+    hairpin: "{{ item.hairpin | default(omit) }}"
+    hellotime: "{{ item.hellotime | default(omit) }}"
+    ingress: "{{ item.ingress | default(omit) }}"
+    ip_tunnel_dev: "{{ item.ip_tunnel_dev | default(omit) }}"
+    ip_tunnel_local: "{{ item.ip_tunnel_local | default(omit) }}"
+    ip_tunnel_remote: "{{ item.ip_tunnel_remote | default(omit) }}"
+    mac: "{{ item.force_mac | default(omit) }}"
+    master: "{{ item.master | default(omit) }}"
+    maxage: "{{ item.maxage | default(omit) }}"
+    mode: "{{ item.mode | default(omit) }}"
+    miimon: "{{ item.miimon | default(omit) }}"
+    path_cost: "{{ item.path_cost | default(omit) }}"
+    primary: "{{ item.primary | default(omit) }}"
+    priority: "{{ item.priority | default(omit) }}"
+    slavepriority: "{{ item.slavepriority | default(omit) }}"
+    stp: "{{ item.stp | default(omit) }}"
+    updelay: "{{ item.updelay | default(omit) }}"
+    vlandev: "{{ item.vlandev | default(omit) }}"
+    vlanid: "{{ item.vlanid | default(omit) }}"
+    vxlan_id: "{{ item.vxlan_id | default(omit) }}"
+    vxlan_local: "{{ item.vxlan_local | default(omit) }}"
+    vxlan_remote: "{{ item.vxlan_remote | default(omit) }}"
+    zone: "{{ item.zone | default(omit) }}"
+    method4: "{{ item.method4 | default(omit) }}"
+    method6: "{{ item.method6 | default(omit) }}"
+  notify: command █ Reload connections
+  loop: "{{ network_interfaces }}"
+  register: nic_nmcli_apply
+  when: item.skip is not defined or (item.skip is defined and not item.skip)
+  tags:
+    - identify
+
+- name: meta █ Run handler tasks to reload connections
+  ansible.builtin.meta: flush_handlers
+
+- name: shell █ Force apply nic settings
+  ansible.builtin.shell: "nmcli con down {{ item.item.interface }} && sleep 2 && nmcli con up {{ item.item.interface }}"
+  loop: "{{ nic_nmcli_apply.results }}"
+  when:
+    - nic_nmcli_force_nic_restart
+    - item.changed
+
+- name: reboot █ Reboot system to ensure apply nic configuration
+  ansible.builtin.reboot:
+    reboot_timeout: "{{ nic_nmcli_reboot_timeout }}"
+  register: reboot_status
+  loop: "{{ nic_nmcli_apply.results }}"
+  when:
+    - nic_nmcli_force_reboot
+    - item.changed
+    - not (reboot_status.changed | d(false))

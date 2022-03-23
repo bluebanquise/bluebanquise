@@ -1,6 +1,6 @@
 ---
 - name: set_fact ░ Set static baseurl prefix
-  set_fact:
+  ansible.builtin.set_fact:
     baseurl_prefix:
       "http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/\
       {{ ep_operating_system['repositories_environment'] | default('') }}/\
@@ -9,7 +9,7 @@
       {{ ansible_architecture }}/"
 
 - name: apt_repository █ Setting deb sources repositories
-  apt_repository:
+  ansible.builtin.apt_repository:
     repo: "{{ item.repo | default('deb [trusted=yes] ' + baseurl_prefix + ( item.name | default(item) | string ) + ' ' + ( item.distribution | default('./') )) }}"
     state: "{{ item.state | default('present') }}"
     codename: "{{ item.codename | default(omit) }}"

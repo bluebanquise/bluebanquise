@@ -1,0 +1,21 @@
+---
+- name: copy █ Copy /etc/netplan/01-netcfg.yaml
+  ansible.builtin.template:
+    src: netplan.yaml.j2
+    dest: /etc/netplan/01-netcfg.yaml
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - command █ Netplan generate
+    - command █ Netplan apply
+  tags:
+    - template
+
+- name: file █ Ensure old netplan configuration is erased
+  ansible.builtin.file:
+    path: /etc/netplan/00-installer-config.yaml
+    state: absent
+
+- name: meta █ Run handlers
+  ansible.builtin.meta: flush_handlers
