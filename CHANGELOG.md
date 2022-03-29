@@ -16,6 +16,8 @@
     - Extend bootset support for custom htdocs path (#676)
   - clushershell:
     - fix an idempotency problem of role clustershell (#675)
+  - nfs_server:
+    - Add auto directories creation capability. (#685)
 
 ## 1.5.0
 
