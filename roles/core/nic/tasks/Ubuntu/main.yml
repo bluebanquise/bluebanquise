@@ -1,21 +1,17 @@
 ---
-- name: copy █ Copy /etc/netplan/01-netcfg.yaml
+- name: template █ Render networkd NICs configuration
   ansible.builtin.template:
-    src: netplan.yaml.j2
-    dest: /etc/netplan/01-netcfg.yaml
+    src: networkd.j2
+    dest: "/etc/systemd/network/{{ item.conn_name | default(item.interface) | string }}.network."
     owner: root
     group: root
     mode: 0644
+  loop: "{{ network_interfaces }}"
   notify:
-    - command █ Netplan generate
-    - command █ Netplan apply
+    - command █ networkctl reload
   tags:
     - template
-
-- name: file █ Ensure old netplan configuration is erased
-  ansible.builtin.file:
-    path: /etc/netplan/00-installer-config.yaml
-    state: absent
+    - identify
 
 - name: meta █ Run handlers
   ansible.builtin.meta: flush_handlers

@@ -1,11 +1,11 @@
 # Main nic macros.
 # TO BE KEEPT SYNC with j2 vars defined in vars/main.yml!!
 
-{% macro nic_ip4_macro(item)%}
-{{nic_ip4_main_macro(item) | trim }}{% if item.ip4 is defined and item.ip4_manual is defined %},{% endif %}{{ nic_ip4_manual(item) | trim }}
+{% macro nic_ip4(item)%}
+{{nic_ip4_main(item) | trim }}{% if item.ip4 is defined and item.ip4_manual is defined %},{% endif %}{{ nic_ip4_manual(item) | trim }}
 {% endmacro %}
 
-{% macro nic_ip4_main_macro(item)%}
+{% macro nic_ip4_main(item)%}
 {% if item.ip4 is defined %}
   {% if '/' in item.ip4 %}
     {{ item.ip4 }}
@@ -22,4 +22,3 @@
   {% for ipsub in item.ip4_manual %}{% if not loop.first %},{% endif %}{{ ipsub }}{%endfor %}
 {% endif %}
 {% endmacro %}
-

@@ -1,0 +1,8 @@
+#jinja2: lstrip_blocks: True
+#### BlueBanquise file ####
+## {{ansible_managed}}
+
+[Match]
+Name={{ nic.conn_name | default(nic.interface) | string }}
+[Network]
+Address={{ j2.nic_ip4_macro(nic) | trim }}
