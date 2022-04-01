@@ -28,9 +28,13 @@ reboot
 auth --enableshadow --passalgo=sha512
 {% endif %}
 
+{% if not pxe_stack_enable_root %}
+rootpw --lock
+user {{ pxe_stack_sudo_user }} --iscrypted --password {{ hostvars[groups[item][0]]['authentication_root_password_sha512'] }}
+{% else %}
 # Root password (sha512)
 rootpw --iscrypted {{ hostvars[groups[item][0]]['authentication_root_password_sha512'] }}
-
+{% endif %}
 
 ##### Network
 
@@ -65,9 +69,7 @@ bootloader --append="{{ hostvars[groups[item][0]]['ep_kernel_parameters'] }}" --
 # Partitioning
 {{ hostvars[groups[item][0]]['ep_partitioning'] }}
 
-
 ##### Packages
-
 %packages
 @core
 curl
@@ -114,9 +116,18 @@ xxEOFxx
 # Ensure SELinux configuration is ok
 restorecon -R -v /root/.ssh
 
-{% if pxe_stack_sshd_force_permitrootlogin %}
+{% if pxe_stack_enable_root %}
 # Ensure root login is enabled via ssh
 sed -i 's/^.*PermitRootLogin.*$/PermitRootLogin\ yes/' /etc/ssh/sshd_config
+{% else %}
+# Ensure no root login is enabled via ssh
+sed -i 's/^.*PermitRootLogin.*$/PermitRootLogin\ no/' /etc/ssh/sshd_config
+# Set admin user as sudo
+{% if pxe_stack_sudo_is_passwordless %}
+echo '{{ pxe_stack_sudo_user }} ALL=(ALL:ALL) NOPASSWD:ALL' >> /etc/sudoers.d/{{ pxe_stack_sudo_user }}
+{% else %}
+echo '{{ pxe_stack_sudo_user }} ALL=(ALL:ALL) ALL' >> /etc/sudoers.d/{{ pxe_stack_sudo_user }}
+{% endif %}
 {% endif %}
 
 # Turn the kernel parameters into variables
