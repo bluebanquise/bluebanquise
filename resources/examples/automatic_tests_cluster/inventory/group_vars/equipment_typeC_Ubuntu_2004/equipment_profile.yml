@@ -6,6 +6,11 @@ ep_kernel_parameters: nomodeset
 ep_access_control: disabled
 ep_firewall: false
 
+ep_operating_system:
+  distribution: ubuntu
+  distribution_major_version: 20
+  distribution_version: 20.04
+
 ep_equipment_type: server
 
 ep_hardware:
