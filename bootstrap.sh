@@ -14,6 +14,8 @@ echo -e " ║ BlueBanquise bootstrap.                      ║"
 echo -e " ║ v 1.0.0                                      ║"
 echo -e " ╚══════════════════════════════════════════════╝\e[39m"
 
+CURRENT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+
 source bootstrap_input.sh
 source /etc/os-release
 
@@ -71,6 +73,18 @@ message_output "Setting system variables into .bashrc and sudoers..."
 cat $HOME/.bashrc | grep -q '.local/bin' || echo "export PATH=/home/bluebanquise/.local/bin:\$PATH" >> $HOME/.bashrc
 cat $HOME/.bashrc | grep -q PYTHONPATH || echo "export PYTHONPATH=\$(pip3 show ClusterShell | grep Location | awk -F ' ' '{print \$2}')" >> $HOME/.bashrc
 sudo cat /etc/sudoers | grep -q PYTHONPATH || echo 'Defaults env_keep += "PYTHONPATH"' | sudo EDITOR='tee -a' visudo
+
+message_output "Generating ssh keys..."
+ls $HOME/.ssh/ | grep -q id_ed25519 || ssh-keygen -t ed25519 -f $HOME/.ssh/id_ed25519 -q -N ""
+cat $HOME/.ssh/authorized_keys | grep -q bluebanquise || cat $HOME/.ssh/id_ed25519.pub >> $HOME/.ssh/authorized_keys
+cd $CURRENT_DIR
+sed -i '/ssh-rsa/d' inventory/group_vars/all/equipment_all/authentication.yml
+sed -i '/ssh-ed25519/d' inventory/group_vars/all/equipment_all/authentication.yml
+echo "  - $(cat $HOME/.ssh/id_ed25519.pub)" >> inventory/group_vars/all/equipment_all/authentication.yml
+
+message_output "Setting first connection..."
+cat /etc/hosts | grep -q mgt1 || sudo echo 127.0.0.1 mgt1 >> /etc/hosts
+ssh -o StrictHostKeyChecking=no mgt1 echo Ok
 
 echo -e "\e[34m"
 echo -e " ╔══════════════════════════════════════════════╗"
