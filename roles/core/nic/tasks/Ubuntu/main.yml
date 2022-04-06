@@ -2,7 +2,7 @@
 - name: template █ Render networkd NICs configuration
   ansible.builtin.template:
     src: networkd.j2
-    dest: "/etc/systemd/network/{{ item.conn_name | default(item.interface) | string }}.network."
+    dest: "/etc/systemd/network/{{ item.conn_name | default(item.interface) | string }}.network"
     owner: root
     group: root
     mode: 0644

@@ -2,7 +2,9 @@
 #### BlueBanquise file ####
 ## {{ansible_managed}}
 
+{% import 'j2_macros.j2' as j2 with context %}
+
 [Match]
-Name={{ nic.conn_name | default(nic.interface) | string }}
+Name={{ item.conn_name | default(item.interface) | string }}
 [Network]
-Address={{ j2.nic_ip4_macro(nic) | trim }}
+Address={{ j2.nic_ip4(item) | trim }}
