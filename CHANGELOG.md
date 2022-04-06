@@ -17,6 +17,8 @@
     - Allow to choose between root or sudo user. (#687)
   - clushershell:
     - fix an idempotency problem of role clustershell (#675)
+  - nfs_server:
+    - Add auto directories creation capability. (#685)
 
 ## 1.5.0
 

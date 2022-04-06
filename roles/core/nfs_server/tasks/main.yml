@@ -56,6 +56,14 @@
   tags:
     - template
 
+- name: file █ Create exported directories if not existing
+  ansible.builtin.file:
+    path: "{{ nfs[item]['export'] }}"
+    state: directory
+    mode: 0755
+  with_items: "{{ nfs }}"
+  when: nfs_server_create_directories_if_not_exist
+
 - name: meta █ Run handler tasks to restart nfs server services
   ansible.builtin.meta: flush_handlers
 
