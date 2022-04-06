@@ -173,6 +173,7 @@ To be done
 Changelog
 ^^^^^^^^^
 
+* 1.6.0: Allow to choose between root or sudo user. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.5.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.1: Extend bootset support for custom htdocs path. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.0: Added OpenSuSE support. Neil Munday <neil@mundayweb.com>

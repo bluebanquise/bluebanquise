@@ -19,7 +19,7 @@
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_group }}"
-    validate: /usr/bin/xmllint --noout --relaxng /usr/share/YaST2/schema/autoyast/rng/profile.rng %s
+    # validate: /usr/bin/xmllint --noout --relaxng /usr/share/YaST2/schema/autoyast/rng/profile.rng %s
   with_items: "{{ j2_equipment_groups_list }}"
   when:
     - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
@@ -35,7 +35,7 @@
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_group }}"
-    validate: /usr/bin/xmllint --noout --relaxng /usr/share/YaST2/schema/autoyast/rng/profile.rng %s
+    # validate: /usr/bin/xmllint --noout --relaxng /usr/share/YaST2/schema/autoyast/rng/profile.rng %s
   with_items: "{{ j2_equipment_groups_list }}"
   when:
     - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'

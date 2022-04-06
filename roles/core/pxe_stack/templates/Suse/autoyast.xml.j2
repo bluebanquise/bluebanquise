@@ -61,6 +61,7 @@
 
 {{hostvars[groups[item][0]]['ep_partitioning']}}
 
+{% if pxe_stack_enable_root %}
  <users config:type="list">
   <user>
     <username>root</username>
@@ -76,6 +77,26 @@
     </authorized_keys>
    </user>
  </users>
+{% else %}
+  <!-- disable root password and add ssh keys to sudo user -->
+  <users config:type="list">
+    <user>
+      <username>root</username>
+      <user_password>!</user_password>
+      <encrypted config:type="boolean">true</encrypted>
+    </user>
+    <user>
+      <username>{{ pxe_stack_sudo_user }}</username>
+      <user_password>{{hostvars[groups[item][0]]['authentication_root_password_sha512']}}</user_password>
+      <encrypted config:type="boolean">true</encrypted>
+      <authorized_keys config:type="list">
+  {% for ssh_key in hostvars[groups[item][0]]['authentication_ssh_keys'] %}
+        <listentry>{{ssh_key}}</listentry>
+  {% endfor %}
+      </authorized_keys>
+    </user>
+  </users>
+{% endif %}
 
 <services-manager>
   <default_target>multi-user</default_target>
@@ -119,6 +140,24 @@ fi
 {% endif %}
     </pre-scripts>
     <chroot-scripts config:type="list">
+{% if not pxe_stack_enable_root %}
+      <script>
+        <chrooted config:type="boolean">true</chrooted>
+        <filename>add_sles_sudo_rule.sh</filename>
+        <interpreter>shell</interpreter>
+        <source>
+<![CDATA[
+#!/bin/sh
+echo "Defaults:sles !targetpw
+{% if pxe_stack_sudo_is_passwordless %}
+{{ pxe_stack_sudo_user }} ALL=(ALL,ALL) NOPASSWD: ALL" > /etc/sudoers.d/{{ pxe_stack_sudo_user }}
+{% else %}
+{{ pxe_stack_sudo_user }} ALL=(ALL,ALL) ALL" > /etc/sudoers.d/{{ pxe_stack_sudo_user }}
+{% endif %}
+]]>
+          </source>
+      </script>
+{% endif %}
 {% if hostvars[groups[item][0]]['ep_preserve_efi_first_boot_device'] == true %}
       <script>
         <debug config:type="boolean">true</debug>

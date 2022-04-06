@@ -1,6 +1,6 @@
 mg_computes:
   children:
-    equipment_typeC:
+    equipment_typeC_Redhat_7:
       hosts:
         c001:
           bmc:
@@ -16,6 +16,8 @@ mg_computes:
             - interface: ib0
               ip4: 10.20.3.1
               network: interconnect-1
+    equipment_typeC_Redhat_8:
+      hosts:
         c002:
           bmc:
             name: bc002
@@ -30,6 +32,8 @@ mg_computes:
             - interface: ib0
               ip4: 10.20.3.2
               network: interconnect-1
+    equipment_typeC_Ubuntu_2004:
+      hosts:
         c003:
           bmc:
             name: bc003
@@ -44,6 +48,8 @@ mg_computes:
             - interface: ib0
               ip4: 10.20.3.3
               network: interconnect-1
+    equipment_typeC_Opensuse_153:
+      hosts:
         c004:
           bmc:
             name: bc004
