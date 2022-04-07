@@ -9,7 +9,7 @@ lvm:
   vgs:
     - vg: data
       pvs:
-        - /dev/loop3p1
+        - /dev/loop4p1
   lvs:
     - lv: data1
       size: 200M
