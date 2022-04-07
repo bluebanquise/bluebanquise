@@ -11,8 +11,6 @@
       tags: repositories_server
     - role: repositories_client
       tags: repositories_client
-    - role: bluebanquise
-      tags: bluebanquise
     - role: hosts_file
       tags: hosts_file
     - role: ssh_client
