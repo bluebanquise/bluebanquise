@@ -6,7 +6,7 @@
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
-from ansible.errors import AnsibleFilterError
+from ansible.errors import AnsibleError
 from ClusterShell.NodeSet import NodeSet
 from ansible.module_utils.common.text.converters import to_native
 
