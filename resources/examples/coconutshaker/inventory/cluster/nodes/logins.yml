@@ -1,0 +1,18 @@
+mg_logins:
+  children:
+    equipment_typeL:
+      hosts:
+        login1:
+          bmc:
+            name: blogin1
+            ip4: 10.10.102.1
+            mac: 08:00:27:dc:f8:a7
+            network: ice1-1
+          network_interfaces:
+            - interface: enp0s3
+              ip4: 10.10.2.1
+              mac: 08:00:27:dc:f8:a5
+              network: ice1-1
+            - interface: ib0
+              ip4: 10.20.2.1
+              network: interconnect-1
