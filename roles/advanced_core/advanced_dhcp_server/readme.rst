@@ -175,6 +175,7 @@ host {{ macro_host }} {
 Changelog
 ^^^^^^^^^
 
+* 1.1.1: Allows usage of time_ip list. Thiago Cardozo <thiago.cardozo@yahoo.com.br>
 * 1.1.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.6: Prevent unsorted ranges. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.5: Improve performances. Add dhcp_options and patterns features. Allow multiple entries per host. Benoit Leveugle <benoit.leveugle@atos.net>

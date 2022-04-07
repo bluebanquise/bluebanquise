@@ -20,6 +20,8 @@
     - fix an idempotency problem of role clustershell (#675)
   - nfs_server:
     - Add auto directories creation capability. (#685)
+  - advanced_dhcp_server:
+    - Allows usage of a time_ip list. (#692)
 
 ## 1.5.0
 
@@ -47,7 +49,7 @@
   - bluebanquise:
     - Add missing bluebanquise_filter package (#648)
   - clustershell: prevent dummy host to be included (#619)
-  - conman: 
+  - conman:
     - Fix bluebanquise-filters package name (#665)
     - fix execpath for RHEL 8 (#584)
     - implement support for externaly defined BMC (#640)
