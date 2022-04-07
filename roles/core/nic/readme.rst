@@ -177,9 +177,9 @@ you wish to set routes on the main interface, etc).
 
 To achieve that, few variables are at disposal:
 
-* ``nic_nmcli_reload_connections``: this variable will trigger a handler that will ask NetworkManager to reload its configuration.
-* ``nic_nmcli_force_nic_restart``: this variable will trigger a task that will manually down and up interfaces. To be used with care.
-* ``nic_nmcli_reboot``: this variable will trigger a reboot if any nic configuration changed. To be used with care.
+* ``nic_reload_connections``: this variable will trigger a handler that will ask NetworkManager to reload its configuration.
+* ``nic_force_nic_restart``: this variable will trigger a task that will manually down and up interfaces. To be used with care.
+* ``nic_reboot``: this variable will trigger a reboot if any nic configuration changed. To be used with care.
 
 
 Changelog

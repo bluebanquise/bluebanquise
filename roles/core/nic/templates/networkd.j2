@@ -1,0 +1,12 @@
+#jinja2: lstrip_blocks: True
+#### BlueBanquise file ####
+## {{ansible_managed}}
+
+{% import 'j2_macros.j2' as j2 with context %}
+
+[Match]
+Name={{ item.conn_name | default(item.interface) | string }}
+[Network]
+Address={{ j2.nic_ip4(item) | trim }}
+Gateway={{ j2.nic_gw4(item) | trim }}
+DNS={{ j2.nic_dns4(item) | trim }}
