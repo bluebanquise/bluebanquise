@@ -2,5 +2,7 @@
   community.general.ufw:
     rule: allow
     name: Apache
+  when:
+    - ep_firewall | default(false) | bool
   tags:
     - firewall

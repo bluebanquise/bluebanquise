@@ -1,8 +1,7 @@
-- name: ufw █ "Add services to firewall"
+- name: ufw █ "Add ntp service to firewall"
   community.general.ufw:
     rule: allow
-    port: '67'
-    proto: udp
+    name: ntp
   when:
     - ep_firewall | default(false) | bool
   tags:

@@ -2,6 +2,8 @@
   community.general.ufw:
     rule: allow
     name: Apache
+  when:
+    - ep_firewall | default(false) | bool
   tags:
     - firewall
 
@@ -10,5 +12,7 @@
     rule: allow
     port: '69'
     proto: udp
+  when:
+    - ep_firewall | default(false) | bool
   tags:
     - firewall

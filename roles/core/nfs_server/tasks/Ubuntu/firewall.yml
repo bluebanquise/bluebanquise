@@ -3,6 +3,8 @@
     rule: allow
     port: '2049'
     proto: "{{ item }}"
+  when:
+    - ep_firewall | default(false) | bool
   loop:
     - udp
     - tcp
