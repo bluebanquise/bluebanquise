@@ -22,3 +22,23 @@
   {% for ipsub in item.ip4_manual %}{% if not loop.first %},{% endif %}{{ ipsub }}{%endfor %}
 {% endif %}
 {% endmacro %}
+
+{% macro nic_gw4(item)%}
+{% if item.never_default4 is not defined %}
+  {% if item.gw4 is defined %}
+    {{ item.gw4 }}
+  {% elif item.network is defined and networks[item.network]['gateway4'] is defined %}
+    {{ networks[item.network]['gateway4'] }}
+  {% elif item.network is defined and networks[item.network]['gateway'] is defined %}
+    {{ networks[item.network]['gateway'] }}
+  {% endif %}
+{% endif %}
+{% endmacro %}
+
+{% macro nic_dns4(item)%}
+{% if item.dns4 is defined %}
+  {{ item.dns4 }}
+{% elif item.network is defined and networks[item.network]['dns4'] is defined %}
+  {{ networks[item.network]['dns4'] }}
+{% endif %}
+{% endmacro %}
