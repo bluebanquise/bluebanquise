@@ -29,7 +29,7 @@ jobs:
         run: pip3 install ansible netaddr clustershell jmespath
 
       - name: Install collections
-        run: ansible-galaxy collection install community.general; ansible-galaxy collection install git+https://github.com/bluebanquise/collection.filters.git,main;
+        run: ansible-galaxy collection install community.general
 
       - name: Prepare bluebanquise folder
         run: sudo mkdir /etc/bluebanquise; sudo chown -R $(id -u):$(id -g) /etc/bluebanquise; cp -a * /etc/bluebanquise;
