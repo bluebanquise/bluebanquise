@@ -68,8 +68,8 @@ include "/etc/powerman/ipmipower.dev"
       {% else %}
         {% set device_suffix = '' %}
       {% endif %}
-device "{{ equipment }}{{ device_suffix }}" "ipmipower" "/usr/sbin/ipmipower --wait-until-on --wait-until-off -h {{ bmcs|bluebanquise.filters.nodeset }} -u {{ host_bmc_user }} -p {{ host_bmc_password }} |&"
-node "{{ hosts|bluebanquise.filters.nodeset }}" "{{ equipment }}{{ device_suffix }}" "{{ bmcs|bluebanquise.filters.nodeset }}"
+device "{{ equipment }}{{ device_suffix }}" "ipmipower" "/usr/sbin/ipmipower --wait-until-on --wait-until-off -h {{ bmcs|nodeset }} -u {{ host_bmc_user }} -p {{ host_bmc_password }} |&"
+node "{{ hosts|nodeset }}" "{{ equipment }}{{ device_suffix }}" "{{ bmcs|nodeset }}"
     {% endfor %}
   {% endfor %}
 {% endfor %}
