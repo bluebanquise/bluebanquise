@@ -1,12 +1,9 @@
-- name: ufw █ "Add services to firewall"
+- name: ufw █ "Add ntp ports to firewall"
   community.general.ufw:
     rule: allow
-    port: '2049'
-    proto: "{{ item }}"
+    port: '123'
+    proto: udp
   when:
     - ep_firewall | default(false) | bool
-  loop:
-    - udp
-    - tcp
   tags:
     - firewall

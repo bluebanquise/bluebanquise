@@ -3,5 +3,7 @@
     rule: allow
     port: '67'
     proto: udp
+  when:
+    - ep_firewall | default(false) | bool
   tags:
     - firewall

@@ -3,5 +3,7 @@
     rule: allow
     port: "{{ log_server_port }}"
     proto: tcp
+  when:
+    - ep_firewall | default(false) | bool
   tags:
     - firewall

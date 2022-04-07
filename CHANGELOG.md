@@ -7,6 +7,7 @@
 #### Overall changes
 
   - add SLES 15 and 12 support (#627)
+  - fix firewall boolean for Ubuntu ufw (#690)
 
 #### New roles
 
