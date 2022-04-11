@@ -1,0 +1,31 @@
+---
+
+ep_operating_system:
+  distribution: redhat  # centos, redhat, debian, ubuntu, opensuse, etc.
+  distribution_major_version: 8
+
+
+ep_console:
+
+ep_access_control: disabled
+ep_firewall: false
+
+ep_partitioning: |
+  clearpart --all --initlabel
+  autopart --type=plain --fstype=ext4 --nohome
+
+
+ep_equipment_type: server
+
+ep_hardware:
+  cpu:
+    architecture: x86_64
+    cores: 8
+    cores_per_socket: 4
+    sockets: 1
+    threads_per_core: 2
+  gpu:
+
+ep_equipment_authentication:
+  user: ADMIN
+  password: ADMIN

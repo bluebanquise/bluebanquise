@@ -41,8 +41,16 @@ if $INSTALL_GALAXY_REQUIREMENTS; then
 fi
 
 message_output "Copying sample inventory and playbooks."
-cp -a resources/examples/simple_cluster/inventory .
-cp -a resources/examples/simple_cluster/playbooks .
+if [[ -d inventory ]]; then
+  message_output "Inventory folder already exist, skipping copy."
+else
+  cp -a resources/examples/simple_cluster/inventory .
+fi
+if [[ -d playbooks ]]; then
+  message_output "Playbooks folder already exist, skipping copy."
+else
+  cp -a resources/examples/simple_cluster/playbooks .
+fi
 
 if $GATHER_PACKAGES; then
   message_output "Gathering packages and images repositories, may take a while..."
@@ -67,11 +75,31 @@ if $GATHER_PACKAGES; then
       ln -s $UBUNTU_2004_ISO ubuntu-20.04-live-server-amd64.iso
     fi
   fi
+  if $GATHER_PACKAGES_REDHAT_8; then
+    mkdir -p /var/www/html/repositories/redhat/8/x86_64/
+    cd /var/www/html/repositories/redhat/8/x86_64/
+    if [[ -d bluebanquise ]]; then
+      message_output "BlueBanquise folder already exist, skipping packages download."
+    else
+      wget -np -nH --cut-dirs 5 -r --reject "index.html*" http://bluebanquise.com/repository/releases/latest/el8/x86_64/bluebanquise/
+    fi
+    if [[ -d os ]]; then
+      message_output "Os folder already exist, skipping iso download."
+    else
+      wget $REDHAT_8_ISO_URL
+      sudo mount /var/www/html/repositories/redhat/8/x86_64/$REDHAT_8_ISO /mnt
+      mkdir /var/www/html/repositories/redhat/8/x86_64/os/
+      cp -a /mnt/* /var/www/html/repositories/redhat/8/x86_64/os/
+      sudo umount /mnt
+    fi
+  fi
+
 fi
 
 message_output "Setting system variables into .bashrc and sudoers..."
 cat $HOME/.bashrc | grep -q '.local/bin' || echo "export PATH=/home/bluebanquise/.local/bin:\$PATH" >> $HOME/.bashrc
 cat $HOME/.bashrc | grep -q PYTHONPATH || echo "export PYTHONPATH=\$(pip3 show ClusterShell | grep Location | awk -F ' ' '{print \$2}')" >> $HOME/.bashrc
+cat $HOME/.bashrc | grep -q ANSIBLE_CONFIG | echo "ANSIBLE_CONFIG=\$HOME/bluebanquise/ansible.cfg" >> $HOME/.bashrc
 sudo cat /etc/sudoers | grep -q PYTHONPATH || echo 'Defaults env_keep += "PYTHONPATH"' | sudo EDITOR='tee -a' visudo
 
 message_output "Generating ssh keys..."

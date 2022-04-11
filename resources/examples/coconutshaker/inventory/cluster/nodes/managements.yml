@@ -4,7 +4,7 @@ mg_managements:
       hosts:
         mgt1:
           bmc:
-            name: bmgt1
+            name: mgt1
             ip4: 10.10.100.1
             mac: 08:00:27:dc:f8:f6
             network: ice1-1

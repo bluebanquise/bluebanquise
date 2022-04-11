@@ -30,7 +30,7 @@ auth --enableshadow --passalgo=sha512
 
 {% if not pxe_stack_enable_root %}
 rootpw --lock
-user {{ pxe_stack_sudo_user }} --iscrypted --password {{ hostvars[groups[item][0]]['authentication_root_password_sha512'] }}
+user --name={{ pxe_stack_sudo_user }} --iscrypted --password={{ hostvars[groups[item][0]]['authentication_root_password_sha512'] }}
 {% else %}
 # Root password (sha512)
 rootpw --iscrypted {{ hostvars[groups[item][0]]['authentication_root_password_sha512'] }}
@@ -73,6 +73,9 @@ bootloader --append="{{ hostvars[groups[item][0]]['ep_kernel_parameters'] }}" --
 %packages
 @core
 curl
+{% if not pxe_stack_enable_root %}
+sudo
+{% endif %}
 %end
 
 
@@ -106,6 +109,10 @@ set +x
 %post --interpreter /bin/bash --log /root/main_post-install.log
 set -x
 
+{% if pxe_stack_enable_root %}
+
+# Ensure root login is enabled via ssh
+sed -i 's/^.*PermitRootLogin.*$/PermitRootLogin\ yes/' /etc/ssh/sshd_config
 # Add ssh keys from ssh_keys list
 mkdir /root/.ssh
 cat << xxEOFxx >> /root/.ssh/authorized_keys
@@ -116,18 +123,25 @@ xxEOFxx
 # Ensure SELinux configuration is ok
 restorecon -R -v /root/.ssh
 
-{% if pxe_stack_enable_root %}
-# Ensure root login is enabled via ssh
-sed -i 's/^.*PermitRootLogin.*$/PermitRootLogin\ yes/' /etc/ssh/sshd_config
 {% else %}
 # Ensure no root login is enabled via ssh
 sed -i 's/^.*PermitRootLogin.*$/PermitRootLogin\ no/' /etc/ssh/sshd_config
+# Add ssh keys from ssh_keys list
+mkdir /home/{{ pxe_stack_sudo_user }}/.ssh
+cat << xxEOFxx >> /home/{{ pxe_stack_sudo_user }}/.ssh/authorized_keys
+{% for ssh_key in hostvars[groups[item][0]]['authentication_ssh_keys'] %}
+{{ ssh_key }}
+{% endfor %}
+xxEOFxx
+# Ensure SELinux configuration is ok
+restorecon -R -v /home/{{ pxe_stack_sudo_user }}/.ssh
 # Set admin user as sudo
 {% if pxe_stack_sudo_is_passwordless %}
 echo '{{ pxe_stack_sudo_user }} ALL=(ALL:ALL) NOPASSWD:ALL' >> /etc/sudoers.d/{{ pxe_stack_sudo_user }}
 {% else %}
 echo '{{ pxe_stack_sudo_user }} ALL=(ALL:ALL) ALL' >> /etc/sudoers.d/{{ pxe_stack_sudo_user }}
 {% endif %}
+
 {% endif %}
 
 # Turn the kernel parameters into variables

@@ -1,60 +1,54 @@
 mg_computes:
   children:
-    equipment_typeC:
+    equipment_C_Ubuntu_2004:
       hosts:
-        compute1:
+        c001:
           bmc:
-            name: bcompute1
+            name: bc001
             ip4: 10.10.103.1
             mac: 08:00:27:dc:44:91
             network: ice1-1
           network_interfaces:
             - interface: enp0s9
               ip4: 10.10.3.1
-              mac: 08:00:27:0d:44:90
+              mac: 08:00:27:0d:44:91
               network: ice1-1
-            - interface: ib0
-              ip4: 10.20.3.1
-              network: interconnect-1
-        compute2:
+    equipment_C_RedHat_8:
+      hosts:
+        c002:
           bmc:
-            name: bcompute2
+            name: bc002
             ip4: 10.10.103.2
             mac: 08:00:27:dc:54:91
             network: ice1-1
           network_interfaces:
             - interface: enp0s9
               ip4: 10.10.3.2
-              mac: 08:00:27:0d:54:90
+              mac: 08:00:27:0d:44:92
               network: ice1-1
-            - interface: ib0
-              ip4: 10.20.3.2
-              network: interconnect-1
-        compute3:
+    equipment_C_RedHat_7:
+      hosts:
+        c003:
           bmc:
-            name: bcompute3
+            name: bc003
             ip4: 10.10.103.3
             mac: 08:00:27:dc:64:91
             network: ice1-1
           network_interfaces:
             - interface: enp0s9
               ip4: 10.10.3.3
-              mac: 08:00:27:0d:64:90
+              mac: 08:00:27:0d:44:93
               network: ice1-1
-            - interface: ib0
-              ip4: 10.20.3.3
-              network: interconnect-1
-        compute4:
+    equipment_C_OpenSUSELeap_153:
+      hosts:
+        c004:
           bmc:
-            name: bcompute4
+            name: bc004
             ip4: 10.10.103.4
             mac: 08:00:27:dc:74:91
             network: ice1-1
           network_interfaces:
             - interface: enp0s9
               ip4: 10.10.3.4
-              mac: 08:00:27:0d:74:91
+              mac: 08:00:27:0d:44:94
               network: ice1-1
-            - interface: ib0
-              ip4: 10.20.3.4
-              network: interconnect-1
