@@ -40,5 +40,7 @@
   {{ item.dns4 }}
 {% elif item.network is defined and networks[item.network]['dns4'] is defined %}
   {{ networks[item.network]['dns4'] }}
+{% elif item.network is defined and networks[item.network]['services_ip'] is defined and networks[item.network]['services_ip']['dns_ip'] is defined %}
+  {{ networks[item.network]['services_ip']['dns_ip'] }}
 {% endif %}
 {% endmacro %}
