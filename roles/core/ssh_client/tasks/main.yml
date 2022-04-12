@@ -1,5 +1,4 @@
 ---
-
 - name: file █ Create user ssh directory if not exist
   ansible.builtin.file:
     path: "{% if ansible_env.SUDO_USER is defined %}/home/{{ ansible_env.SUDO_USER }}{% else %}/root{% endif %}/.ssh"
@@ -15,4 +14,3 @@
     mode: 0600
   tags:
     - template
-

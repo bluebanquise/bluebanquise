@@ -7,4 +7,3 @@
     - ep_firewall | default(false) | bool
   tags:
     - firewall
-
