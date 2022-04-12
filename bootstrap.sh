@@ -44,12 +44,12 @@ message_output "Copying sample inventory and playbooks."
 if [[ -d inventory ]]; then
   message_output "Inventory folder already exist, skipping copy."
 else
-  cp -a resources/examples/simple_cluster/inventory .
+  cp -a resources/examples/$SAMPLE_INVENTORY/inventory .
 fi
 if [[ -d playbooks ]]; then
   message_output "Playbooks folder already exist, skipping copy."
 else
-  cp -a resources/examples/simple_cluster/playbooks .
+  cp -a resources/examples/$SAMPLE_INVENTORY/playbooks .
 fi
 
 if $GATHER_PACKAGES; then
