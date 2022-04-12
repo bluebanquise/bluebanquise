@@ -3,7 +3,7 @@
 autoinstall:
   version: 1
   apt:
-    geoip: true
+    geoip: false
     preserve_sources_list: {{ pxe_stack_ubuntu_preserve_sources_list }}
   keyboard: {layout: {{hostvars[groups[item][0]]['ep_configuration']['keyboard_layout']|lower}}, toggle: null, variant: ''}
   locale: {{hostvars[groups[item][0]]['ep_configuration']['system_language']}}
@@ -29,6 +29,7 @@ autoinstall:
 {% endif %}
   ssh:
     install-server: true
+    allow-pw: true
 {% if hostvars[groups[item][0]]['ep_partitioning'] is defined and hostvars[groups[item][0]]['ep_partitioning'] is not none %}
 {{ hostvars[groups[item][0]]['ep_partitioning'] | indent(2, True) }}
 {% endif %}

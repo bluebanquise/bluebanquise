@@ -1,0 +1,4 @@
+ansible>=5.5.0
+netaddr>=0.7.19
+clustershell
+jmespath>=0.9.5

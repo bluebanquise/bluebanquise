@@ -1,0 +1,51 @@
+---
+
+# iPXE network driver
+# default should be good for most of NIC, but some need SNP. Refer to http://ipxe.org/appnote/buildtargets for more information.
+ep_ipxe_driver: default  # default or snp or snponly
+ep_ipxe_platform: pcbios  # can be pcbios (for legacy/bios) or efi
+ep_ipxe_embed: standard  # can be standard or dhcpretry
+
+# When installing in EFI, grub2 break the boot order and set next boot to disk (seriously, why??!)
+# In most case, you prefer system to continue to boot on PXE, and so the stack can restore first boot device after grub2 installation
+ep_preserve_efi_first_boot_device: true  # true or false
+
+ep_console:
+ep_kernel_parameters:
+
+ep_access_control: enforcing  # Selinux, AppArmor, etc. Selinux: enforcing, permissive, disabled
+ep_firewall: true  # Enable or disable native firewall
+
+ep_partitioning: |  # Please provide native distribution partitioning. This example is for Centos/RedHat systems.
+  clearpart --all --initlabel
+  autopart --type=plain --fstype=ext4 --nohome
+
+ep_autoinstall_pre_script:  # Add optional pre script in auto installer file (kickstart, preseed, autoyast)
+ep_autoinstall_post_script:  # Add optional post script in auto installer file (kickstart, preseed, autoyast)
+
+ep_operating_system:
+  distribution: centos  # centos, redhat, debian, ubuntu, opensuse, etc.
+  distribution_major_version: 8
+  # Optional: define a minor distribution version to force (repositories/PXE)
+  # distribution_version: 8.0
+  # Optional: add an environment in the repositories path (eg. production, staging) (repositories/PXE)
+  # repositories_environment: production
+
+ep_equipment_type: none  # If server, a pxe profile will be generated
+
+ep_configuration:
+  keyboard_layout: us  # us, fr, etc.
+  system_language: en_US.UTF-8  # You should not update this if you want to google issues...
+
+ep_hardware:
+  cpu:
+    architecture: x86_64  # Can be x86_64 or arm64
+    cores: 1              # Mainly for slurm, but optional. You can define here detailed information on the CPUs.
+    cores_per_socket: 1
+    sockets: 1
+    threads_per_core: 1
+  gpu:
+
+ep_equipment_authentication:  # login/password for BMC, storage bay controller, switch, etc.
+  user: user
+  password: password

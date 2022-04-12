@@ -1,0 +1,7 @@
+---
+# Root password to be used on deployed hosts
+authentication_root_password_sha512: $6$kK8ELZbRo9vnvRh/$SbZjmjhaftN8.pw5GVKBW6IHSZYBtjhzcX9nJNjdOg4ZPfUHY./7NmxPNBAF4KBAh2XM8q0ValFI0oeu1/0CI1 # bluebanquise
+
+# SSH public keys to be added as authorized keys on deployed/managed hosts
+authentication_ssh_keys:
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILo5yP7VZtIY9dDU6lZaqapSvIgRzUE5L8fZGbqaKECh bluebanquise@localhost

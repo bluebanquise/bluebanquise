@@ -1,9 +1,9 @@
 ##### RedHat os familly
 
-- name: "copy █ Copy osdeploy files {{ pxe_stack_htdocs_path }}/osdeploy/"
+- name: "copy █ Copy osdeploy files {{ pxe_stack_htdocs_path }}/preboot_execution_environment/osdeploy/"
   ansible.builtin.copy:
     src: osdeploy/redhat_{{ item.major }}.ipxe
-    dest: "{{ pxe_stack_htdocs_path }}/osdeploy/redhat_{{ item.major }}.ipxe"
+    dest: "{{ pxe_stack_htdocs_path }}/preboot_execution_environment/osdeploy/redhat_{{ item.major }}.ipxe"
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_group }}"
@@ -12,7 +12,7 @@
 - name: file █ Generate links for all supported OS
   ansible.builtin.file:
     src: redhat_{{ item.0.major }}.ipxe
-    dest: "{{ pxe_stack_htdocs_path }}/osdeploy/{{ item.1 }}_{{ item.0.major }}.ipxe"
+    dest: "{{ pxe_stack_htdocs_path }}/preboot_execution_environment/osdeploy/{{ item.1 }}_{{ item.0.major }}.ipxe"
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_group }}"
@@ -21,10 +21,10 @@
   loop: "{{ pxe_stack_supported_os.redhat | subelements('distributions') }}"
   when: item.1 != 'redhat'
 
-- name: "template █ Generate kickstarts {{ pxe_stack_htdocs_path }}/equipment_profiles/{item}.kickstart.cfg"
+- name: "template █ Generate kickstarts {{ pxe_stack_htdocs_path }}/preboot_execution_environment/equipment_profiles/{item}.kickstart.cfg"
   ansible.builtin.template:
     src: "RedHat/kickstart.cfg.j2"
-    dest: "{{ pxe_stack_htdocs_path }}/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.kickstart.cfg"
+    dest: "{{ pxe_stack_htdocs_path }}/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.kickstart.cfg"
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_group }}"
@@ -35,10 +35,10 @@
   tags:
     - template
 
-- name: "template █ Generate equipment_profiles {{ pxe_stack_htdocs_path }}/equipment_profiles/{item}.ipxe"
+- name: "template █ Generate equipment_profiles {{ pxe_stack_htdocs_path }}/preboot_execution_environment/equipment_profiles/{item}.ipxe"
   ansible.builtin.template:
     src: "RedHat/equipment_profile_ks.ipxe.j2"
-    dest: "{{ pxe_stack_htdocs_path }}/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.ipxe"
+    dest: "{{ pxe_stack_htdocs_path }}/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.ipxe"
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_group }}"

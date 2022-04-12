@@ -1,0 +1,15 @@
+mg_managements:
+  children:
+    equipment_M_Ubuntu_2004:
+      hosts:
+        mgt1:
+          bmc:
+            name: mgt1
+            ip4: 10.10.100.1
+            mac: 08:00:27:dc:f8:f6
+            network: ice1-1
+          network_interfaces:
+            - interface: ens3
+              ip4: 10.10.0.1
+              mac: 52:54:00:fa:1f:02
+              network: ice1-1

@@ -1,0 +1,17 @@
+### General settings file
+
+cluster_name: algoric
+
+# Localisation
+time_zone: Europe/Brussels
+
+# Internal mechanisms
+icebergs_system: false  # Activate or deactivate icebergs topology system. Experimental.
+
+# Services handling
+enable_services: true  # Enable or disable services on startup (set to false when using high availability)
+start_services: true  # Handle start/restart of the services (set to false when using high availability)
+
+# /etc/hosts
+hosts_file:
+  range: all  # can be all (all hosts) or iceberg (iceberg only)

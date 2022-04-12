@@ -4,7 +4,7 @@ pxe_stack_apache_conf_path: /etc/apache2/conf.d
 pxe_stack_apache_user: wwwrun
 pxe_stack_apache_group: wwwrun
 pxe_stack_apache_cgi_bin_path: /srv/www/cgi-bin
-pxe_stack_htdocs_path: /srv/www/htdocs/preboot_execution_environment
+pxe_stack_htdocs_path: /srv/www/htdocs
 pxe_stack_packages_to_install:
   - apache2
   - autoyast2
