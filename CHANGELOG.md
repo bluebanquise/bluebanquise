@@ -20,6 +20,8 @@
     - fix an idempotency problem of role clustershell (#675)
   - nfs_server:
     - Add auto directories creation capability. (#685)
+  - nic:
+    - Add missing dns entry. (#694)
   - advanced_dhcp_server:
     - Allows usage of a time_ip list. (#692)
 
