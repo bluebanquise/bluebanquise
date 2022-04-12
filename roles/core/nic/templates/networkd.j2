@@ -10,3 +10,15 @@ Name={{ item.conn_name | default(item.interface) | string }}
 Address={{ j2.nic_ip4(item) | trim }}
 Gateway={{ j2.nic_gw4(item) | trim }}
 DNS={{ j2.nic_dns4(item) | trim }}
+
+{% for route_buff in (j2.nic_routes4(item) | from_yaml_all)[0] %}
+{% set route = route_buff | string | split(' ') %}
+[Route]
+Destination={{ route[0] }}
+Gateway={{ route[1] }}
+{% if route[2] is defined %}
+Metric={{ route[2] }}
+{% endif %}
+
+{% endfor %}
+
