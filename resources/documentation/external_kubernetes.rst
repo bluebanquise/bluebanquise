@@ -1,5 +1,5 @@
 ==============================
-[Scenario] - Deploy Kubernetes
+[External] - Deploy Kubernetes
 ==============================
 
 BlueBanquise and Kubernetes works pretty well together.

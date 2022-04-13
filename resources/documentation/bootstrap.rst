@@ -16,9 +16,10 @@ This documentation will cover the configuration of a very simple cluster:
 
 More complex clusters are detailed later, once the generic part is done.
 
-Note also that the documentation focus on main inventory parameters of the stack.
-However, more features are available in the stack. Read roles Readme to learn
-more about each role capabilities.
+.. note::
+   It is important to note that the documentation focus on main inventory parameters of the stack.
+   However, **more features are available in the stack**. Read roles Readme files to learn
+   more about each role capabilities.
 
 The first step is to bootstrap the first management server/workstation of the
 cluster.
@@ -48,7 +49,7 @@ to RHEL like distributions", and so will concern the following distributions:
   <b>RHEL</b> <img src="_static/logo_rhel.png">, <b>CentOS</b> <img src="_static/logo_centos.png">, <b>RockyLinux</b> <img src="_static/logo_rocky.png">, <b>OracleLinux</b> <img src="_static/logo_oraclelinux.png">, <b>CloudLinux</b> <img src="_static/logo_cloudlinux.png">, <b>AlmaLinux</b> <img src="_static/logo_almalinux.png">
   </div><br><br>
 
-Currently supported and tested Linux RHEL like distributions are:
+Currently supported Linux RHEL like distributions are:
 
 * Major version: 7
     * RHEL
@@ -59,7 +60,7 @@ Currently supported and tested Linux RHEL like distributions are:
     * CentOS-Stream
     * RockyLinux
     * OracleLinux
-    * CloudLinux
+    * CloudLinux (with external repositories)
     * AlmaLinux
 
 .. note::
@@ -67,7 +68,8 @@ Currently supported and tested Linux RHEL like distributions are:
   *redhat/7/x86_64/* when setting path. Adapt this to your target distribution
   and architecture.
   Distribution keywords supported are: **redhat**, **rhel**, **centos**,
-  **rockylinux**, **oraclelinux**, **cloudlinux**, **almalinux**.
+  **rockylinux**, **oraclelinux**, **cloudlinux**, **almalinux**. All these 
+  keywords are links to **redhat**.
   And supported architecture are **x86_64** or **arm64**.
 
 The following configuration is recommended:
@@ -80,23 +82,8 @@ And the following minimal configuration is the strict minimal if you wish to
 test the stack in VMs:
 
 * >= 1 vCPU
-* >= 2 Gb RAM (Anaconda PXE part needs a lot of RAM)
+* >= 2 Gb RAM (Anaconda PXE part needs a lot of RAM, once system is installed, can be reduced to 1Gb)
 * >= 20 Gb HDD
-
-ISOs to be used
-^^^^^^^^^^^^^^^
-
-Obtain the main binary DVD from Red Hat, RockyLinux, etc. Naming is
-similar to:
-
-* rhel-8.3-x86_64-dvd.iso
-* rhel-server-7.9-x86_64-dvd.iso
-* CentOS-8.3.2011-x86_64-dvd1.iso
-* CentOS-7-x86_64-Everything-2009.iso
-* ...
-
-You need to grab the ISO that contains all base repositories, so around the big
-one of the list (> 6 Gb in general).
 
 OS installation
 ---------------
@@ -108,16 +95,54 @@ version 0.9.5 (not above).
 Then install the Linux operating system manually (boot on USB, etc).
 
 It is recommended to only choose minimal install during packages selection
-(core or minimal server).
+(core or minimal server), to reduce load and attack surface.
 Also, it is **STRONGLY** recommended to let system in English (US), and only
 set your keyboard and time zone to your country.
 
-Repositories
-------------
+Create bluebanquise user
+------------------------
 
 Once system is installed and rebooted, login on it.
+We will assume from here that you are using a sudo user. If using root user, 
+remove sudo for each bellow commands.
 
-We now need to prepare boot images and packages repositories.
+Create the ``bluebanquise`` user manually:
+
+.. code-block::
+
+  sudo adduser bluebanquise
+
+Set bluebanquise user as passwordless sudo able user:
+
+.. code-block::
+
+  echo 'bluebanquise ALL=(ALL:ALL) NOPASSWD:ALL' | sudo tee -a /etc/sudoers.d/bluebanquise
+
+Bootstrap stack - online
+------------------------
+
+Login as bluebanquise user, and clone github repoitory:
+
+.. code-block::
+
+  sudo su bluebanquise
+  cd $HOME
+  git clone https://github.com/bluebanquise/bluebanquise.git
+
+Review content of file ``bootstrap_input.sh``, and adjust to your needs, especially 
+ISO to be used and ISO URL (default here is AlmaLinux).
+Other defaults should be good for most users.
+
+Then simply execute the ``bootstrap.sh`` script. The script will install needed system packages, 
+download python needed dependencies and Ansible via pip, and download BlueBanquise and base OS 
+packages and iso. Note that depending of your network connection, this step could take a while.
+
+.. code-block::
+
+  cd bluebanquise
+  ./bootstrap.sh
+
+Once script has executed, it is interesting to check repositories structure created.
 
 Boot images include the installer system which starts the deployment after PXE
 boot, while packages repositories include the software that will be installed
@@ -136,453 +161,75 @@ which defaults to the major release version in the path:
                                     v    v    v    v
        /var/www/html/repositories/redhat/8/x86_64/os/
 
-.. note::
-  The */var/www/html* path given here is an example, as it may vary depending of
-  distribution used. What maters is the structure following this path.
 
 .. warning::
   This pattern parameters (distribution, version, architecture) must match
   the one provided in the **equipment_profile** file seen later.
 
-Copy iso on system
-^^^^^^^^^^^^^^^^^^
+You can see that 2 repositories were created:
 
-Copy iso on system.
-Then mount iso and copy content to web server directory: (replace redhat/8 by
-redhat/7, centos/8, centos/7, rockylinux/8, etc depending of your system).
+* bluebanquise: contains bluebanquise packages
+* os: contains OS iso content (will be used for PXE and base repository)
 
-.. code-block:: bash
+If all went well, you can proceed to next step: :ref:`[Core] - Configure BlueBanquise`
 
-  mkdir -p /var/www/html/repositories/redhat/8/x86_64/os/
-  mount rhel-8.3-x86_64-dvd.iso /mnt
-  cp -a /mnt/* /var/www/html/repositories/redhat/8/x86_64/os/
-  restorecon -Rv /var/www/html/repositories/redhat/8/x86_64/os
+Bootstrap stack - offline
+-------------------------
 
-Set OS repository
-^^^^^^^^^^^^^^^^^
+It is common with RedHat like operating system to perform offline clusters deployment.
 
-Now, create first repository manually. Part of the procedure is different
-between major versions, since base repositories were split in two with RHEL 8.
+BlueBanquise bootstrap script is able to use a local iso and a local repository folder as bootstrap source.
 
-First step is to backup and clean current configuration:
+Login as bluebanquise user, and upload a copy of cloned github repoitory, assumed here bluebanquise-git.tar.gz, 
+then extract it at bluebanquise user home folder:
 
-.. code-block:: bash
+.. code-block::
 
-  cp -a /etc/yum.repos.d /root/yum.repos.d_native
+  sudo su bluebanquise
+  cd $HOME
+  tar xvzf bluebanquise-git.tar.gz
 
-Then next step depends of the major version used:
+Create offline needed folder in bluebanquise home folder:
 
-.. raw:: html
+.. code-block::
 
-  <div style="border: 1px solid; margin: 0px 0px 0px 20px; padding: 6px;">
-  Major version: <b>7</b><br><br>
+  mkdir -p /home/bluebanquise/bluebanquise/offline_bootstrap/
 
-Create file */etc/yum.repos.d/os.repo* with the following content:
+Upload into this folder:
 
-.. code-block:: text
+* OS main iso. You have to provide the stack the full main DVD iso (the one that contains BaseOS and AppStream full repositories.
+Can be rhel-8.3-x86_64-dvd.iso, AlmaLinux-8.5-x86_64-dvd.iso, Rocky-8.5-x86_64-dvd1.iso, etc.).
+* BlueBanquise el8 repository main folder (Assuming cluster is x86_64: http://bluebanquise.com/repository/releases/latest/el8/x86_64/bluebanquise).
 
-  [os]
-  name=os
-  baseurl=file:///var/www/html/repositories/redhat/7/x86_64/os/
-  gpgcheck=0
-  enabled=1
+After upload, you should have:
 
-.. raw:: html
+.. code-block::
 
-  </div><br>
-  <div style="border: 1px solid; margin: 0px 0px 0px 20px; padding: 6px;">
-  Major version: <b>8</b><br><br>
+  bluebanquise@localhost:~/ ls /home/bluebanquise/bluebanquise/offline_bootstrap/
+  rhel-8.5-x86_64-dvd.iso
+  bluebanquise
 
-Create file */etc/yum.repos.d/BaseOS.repo* with the following content:
+Edit then ``bootstrap_input.sh`` into bluebanquise main folder, and 
+set ``REDHAT_8_OFFLINE`` to ``true``. Also set ``REDHAT_8_ISO`` to match iso name you provided.
+Do not care about ``REDHAT_8_ISO_URL`` as it will be ignored in offline mode.
 
-.. code-block:: text
+Execute then the bootstrap script.
 
-  [BaseOS]
-  name=BaseOS
-  baseurl=file:///var/www/html/repositories/redhat/8/x86_64/os/BaseOS/
-  gpgcheck=0
-  enabled=1
+.. code-block::
 
-Then create file */etc/yum.repos.d/AppStream.repo* with the following content:
+  cd $HOME/bluebanquise
+  ./bootstrap.sh
 
-.. code-block:: text
+.. note::
+  After bootstrap, for your convenience, local repositories are kept 
+  activated. They are however no more needed. If you wish to remove them, 
+  delete file /etc/yum.repos.d/bootstrap.repo .
 
-  [AppStream]
-  name=AppStream
-  baseurl=file:///var/www/html/repositories/redhat/8/x86_64/os/AppStream/
-  gpgcheck=0
-  enabled=1
-
-.. raw:: html
-
-  </div><br>
-
-If you don't need the DVD ISO anymore, umount it:
-
-.. code-block:: bash
-
-  umount /mnt
-
-Now ensure repository is available. Again, this step depends of the major
-version used:
-
-.. raw:: html
-
-  <div style="border: 1px solid; margin: 0px 0px 0px 20px; padding: 6px;">
-  Major version: <b>7</b><br><br>
-
-.. code-block:: bash
-
-  yum repolist
-
-.. raw:: html
-
-  </div><br>
-  <div style="border: 1px solid; margin: 0px 0px 0px 20px; padding: 6px;">
-  Major version: <b>8</b><br><br>
-
-.. code-block:: bash
-
-  dnf repolist
-
-.. raw:: html
-
-  </div><br>
-
-BlueBanquise and extra
-^^^^^^^^^^^^^^^^^^^^^^
-
-We now need to download locally main BlueBanquise repository.
-We will also setup and empty extra repository, that will be used later to store
-external rpms.
-
-.. raw:: html
-
-  <div style="border: 1px solid; margin: 0px 0px 0px 20px; padding: 6px;">
-  Major version: <b>7</b><br><br>
-
-Install reposync:
-
-.. code-block:: bash
-
-  yum install yum-utils -y
-
-Then create temporary external repository in a temporary folder:
-
-.. code-block:: bash
-
-  mkdir /tmp/bbrepo/
-  cat << EOF > /tmp/bbrepo/bluebanquise.repo
-  [bluebanquise]
-  name = bluebanquise
-  baseurl = https://bluebanquise.com/repository/releases/latest/el7/x86_64/bluebanquise/
-  gpgcheck = 0
-  enabled = 1
-  EOF
-
-Create now final repository destination, and download bluebanquise repository
-locally, asking only for latest packages, and restore SELinux tags:
-
-.. code-block:: bash
-
-  mkdir /var/www/html/repositories/redhat/7/x86_64/bluebanquise
-  reposync --repoid=bluebanquise -c /tmp/bbrepo/bluebanquise.repo -p /var/www/html/repositories/redhat/7/x86_64/bluebanquise --newest-only --download-metadata
-  restorecon -Rv /var/www/html/repositories/redhat/7/x86_64/bluebanquise
-
-Now create final repository file */etc/yum.repos.d/BaseOS.repo* with the
-following content:
-
-.. code-block:: text
-
-  [bluebanquise]
-  name=bluebanquise
-  baseurl=file:///var/www/html/repositories/redhat/7/x86_64/bluebanquise/
-  gpgcheck=0
-  enabled=1
-
-Now create empty extra repository:
-
-.. code-block:: bash
-
-  mkdir -p /var/www/html/repositories/redhat/7/x86_64/extra/
-  createrepo /var/www/html/repositories/redhat/7/x86_64/extra/
-  restorecon -Rv /var/www/html/repositories/redhat/7/x86_64/extra
-
-And register it by adding file */etc/yum.repos.d/extra.repo* with the following
-content:
-
-.. code-block:: text
-
-  [extra]
-  name=extra
-  baseurl=file:///var/www/html/repositories/redhat/7/x86_64/extra/
-  gpgcheck=0
-  enabled=1
-
-.. raw:: html
-
-  </div><br>
-  <div style="border: 1px solid; margin: 0px 0px 0px 20px; padding: 6px;">
-  Major version: <b>8</b><br><br>
-
-Install reposync:
-
-.. code-block:: bash
-
-  dnf install yum-utils -y
-
-Then create temporary external repository in a temporary folder:
-
-.. code-block:: bash
-
-  mkdir /tmp/bbrepo/
-  cat << EOF > /tmp/bbrepo/bluebanquise.repo
-  [bluebanquise]
-  name = bluebanquise
-  baseurl = https://bluebanquise.com/repository/releases/latest/el8/x86_64/bluebanquise/
-  gpgcheck = 0
-  enabled = 1
-  EOF
-
-Create now final repository destination, and download bluebanquise repository
-locally, asking only for latest packages, and restore SELinux tags:
-
-.. code-block:: bash
-
-  mkdir /var/www/html/repositories/redhat/8/x86_64/bluebanquise
-  reposync --repoid=bluebanquise -c /tmp/bbrepo/bluebanquise.repo -p /var/www/html/repositories/redhat/8/x86_64/bluebanquise --newest-only --download-metadata
-  restorecon -Rv /var/www/html/repositories/redhat/8/x86_64/bluebanquise
-
-Now create final repository file */etc/yum.repos.d/BaseOS.repo* with the
-following content:
-
-.. code-block:: text
-
-  [bluebanquise]
-  name=bluebanquise
-  baseurl=file:///var/www/html/repositories/redhat/8/x86_64/bluebanquise/
-  gpgcheck=0
-  enabled=1
-
-Now create empty extra repository:
-
-.. code-block:: bash
-
-  mkdir -p /var/www/html/repositories/redhat/8/x86_64/extra/
-  createrepo /var/www/html/repositories/redhat/8/x86_64/extra/
-  restorecon -Rv /var/www/html/repositories/redhat/8/x86_64/extra
-
-And register it by adding file */etc/yum.repos.d/extra.repo* with the following
-content:
-
-.. code-block:: text
-
-  [extra]
-  name=extra
-  baseurl=file:///var/www/html/repositories/redhat/8/x86_64/extra/
-  gpgcheck=0
-  enabled=1
-
-.. raw:: html
-
-  </div><br>
-
-Download Ansible
-----------------
-
-Now that repositories are set, it is time to download Ansible.
-
-On RHEL like systems, Ansible comes from the EPEL.
-
-We need to install EPEL first, then download all needed rpms, and add them to
-the *extra* repository we created before.
-
-.. raw:: html
-
-  <div style="border: 1px solid; margin: 0px 0px 0px 20px; padding: 6px;">
-  Major version: <b>7</b><br><br>
-
-Install EPEL repositories:
-
-.. code-block:: bash
-
-  yum install wget
-  wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-  yum install epel-release-latest-7.noarch.rpm
-
-Download Ansible package and needed dependencies, and store them into the extra
-repository:
-
-.. code-block:: bash
-
-  yum install --downloadonly --downloaddir=/var/www/html/repositories/redhat/7/x86_64/extra/ ansible
-
-Then update extra repository database and clean main host cache:
-
-.. code-block:: bash
-
-  createrepo --update /var/www/html/repositories/redhat/7/x86_64/extra/
-  yum remove epel-release-latest-7
-  yum clean all
-
-.. raw:: html
-
-  </div><br>
-  <div style="border: 1px solid; margin: 0px 0px 0px 20px; padding: 6px;">
-  Major version: <b>8</b><br><br>
-
-Install EPEL repositories:
-
-.. code-block:: bash
-
-  dnf install wget
-  wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
-  dnf install epel-release-latest-8.noarch.rpm
-
-Download Ansible package and needed dependencies, and store them into the extra
-repository:
-
-.. code-block:: bash
-
-  dnf install --downloadonly --downloaddir=/var/www/html/repositories/redhat/8/x86_64/extra/ ansible
-
-Then update extra repository database and clean main host cache:
-
-.. code-block:: bash
-
-  createrepo --update /var/www/html/repositories/redhat/8/x86_64/extra/
-  dnf remove epel-release-latest-8
-  dnf clean all
-
-.. raw:: html
-
-  </div><br>
-
-Install BlueBanquise and Ansible
---------------------------------
-
-Install BlueBanquise and Ansible on the system:
-
-.. raw:: html
-
-  <div style="border: 1px solid; margin: 0px 0px 0px 20px; padding: 6px;">
-  Major version: <b>7</b><br><br>
-
-.. code-block:: bash
-
-  yum install bluebanquise ansible
-
-.. raw:: html
-
-  </div><br>
-  <div style="border: 1px solid; margin: 0px 0px 0px 20px; padding: 6px;">
-  Major version: <b>8</b><br><br>
-
-.. code-block:: bash
-
-  dnf install bluebanquise ansible
-
-.. raw:: html
-
-  </div><br>
-
-Bring up main NIC
------------------
-
-Finally, last part is to bring up main network interface controller, the one
-with *10.10.0.1* ip on the schema given at top of the page. We will assume this
-NIC is *enp0s8* here. Please adapt to your hardware (list interfaces using
-**ip a** command).
-
-First, ensure NetworkManager is installed:
-
-.. raw:: html
-
-  <div style="border: 1px solid; margin: 0px 0px 0px 20px; padding: 6px;">
-  Major version: <b>7</b><br><br>
-
-.. code-block:: bash
-
-  yum install NetworkManager
-
-.. raw:: html
-
-  </div><br>
-  <div style="border: 1px solid; margin: 0px 0px 0px 20px; padding: 6px;">
-  Major version: <b>8</b><br><br>
-
-.. code-block:: bash
-
-  dnf install NetworkManager
-
-.. raw:: html
-
-  </div><br>
-
-Then ensure it is started:
-
-.. code-block:: bash
-
-  systemctl start NetworkManager
-  systemctl enable NetworkManager
-
-And configure your interface to set a manual ipv4 address on it, then bring it
-up:
-
-.. code-block:: bash
-
-  nmcli con mod enps08 ipv4.addresses 10.10.0.1/16
-  nmcli con mod enps08 ipv4.method manual
-  nmcli con up enps08
-
-Using *ip a* command, you should now see your ip set on the interface.
-
-Bootstrap Ubuntu like system
-============================
-
-Currently supported and tested Linux Ubuntu versions are:
-
-* 20.04
-
-Also, DGX OS support is provided experimentaly for the following versions:
-
-* DGX OS 5.x
-
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-ISOs to be used
-^^^^^^^^^^^^^^^
-
-Obtain the main binary CD iso from Ubuntu. Naming is
-similar to:
-
-* ubuntu-20.04-live-server-amd64.iso
-
-OS installation
----------------
-
-Simply write iso **directly** on USB stick like a binary image, do not use a
-special tool. On Linux, use dd, on Microsoft Windows, use Win32DiskImager but only
-version 0.9.5 (not above).
-
-Then install the Linux operating system manually (boot on USB, etc).
-
-It is recommended to only choose minimal install during packages selection
-(when proposed, do not forget to enable open ssh server installation).
-Also, it is **STRONGLY** recommended to let system in English (US), and only
-set your keyboard and time zone to your country.
-
-Repositories
-------------
-
-Once system is installed and rebooted, login on it.
-
-We now need to prepare boot images and packages repositories.
+Once script has executed, it is interesting to check repositories structure created.
 
 Boot images include the installer system which starts the deployment after PXE
 boot, while packages repositories include the software that will be installed
-on the systems. On Ubuntu like systems, PXE minimal is provided in the ISO, and
-other repositories need to be grabbed from the web.
+on the systems. On RHEL like systems, all is included in the original ISO.
 
 Boot images and packages repositories structure follows a specific pattern,
 which defaults to the major release version in the path:
@@ -597,414 +244,134 @@ which defaults to the major release version in the path:
                                     v    v    v    v
        /var/www/html/repositories/redhat/8/x86_64/os/
 
-.. note::
-  The */var/www/html* path given here is an example, as it may vary depending of
-  distribution used. What maters is the structure following this path.
 
 .. warning::
   This pattern parameters (distribution, version, architecture) must match
   the one provided in the **equipment_profile** file seen later.
 
-Copy iso on system
-^^^^^^^^^^^^^^^^^^
+You can see that 2 repositories were created:
 
-Copy iso on system.
-Then mount iso and copy content to web server directory: (replace redhat/8 by
-redhat/7, centos/8, centos/7, rockylinux/8, etc depending of your system).
+* bluebanquise: contains bluebanquise packages
+* os: contains OS iso content (will be used for PXE and base repository)
 
-.. code-block:: bash
+If all went well, you can proceed to next step: :ref:`[Core] - Configure BlueBanquise`
 
-  mkdir -p /var/www/html/repositories/redhat/8/x86_64/os/
-  mount rhel-8.3-x86_64-dvd.iso /mnt
-  cp -a /mnt/* /var/www/html/repositories/redhat/8/x86_64/os/
-  restorecon -Rv /var/www/html/repositories/redhat/8/x86_64/os
-
-Set OS repository
-^^^^^^^^^^^^^^^^^
-
-Now, create first repository manually. Part of the procedure is different
-between major versions, since base repositories were split in two with RHEL 8.
-
-First step is to backup and clean current configuration:
-
-.. code-block:: bash
-
-  cp -a /etc/yum.repos.d /root/yum.repos.d_native
-
-Then next step depends of the major version used:
+Bootstrap Ubuntu like system
+============================
 
 .. raw:: html
 
-  <div style="border: 1px solid; margin: 0px 0px 0px 20px; padding: 6px;">
-  Major version: <b>7</b><br><br>
+  <div style="padding: 6px;">
+  <b>Ubuntu</b> <img src="_static/logo_ubuntu.png">
+  </div><br><br>
 
-Create file */etc/yum.repos.d/os.repo* with the following content:
+Currently supported Linux Ubuntu distributions are:
 
-.. code-block:: text
+* Ubuntu 20.04
 
-  [os]
-  name=os
-  baseurl=file:///var/www/html/repositories/redhat/7/x86_64/os/
-  gpgcheck=0
-  enabled=1
+The following configuration is recommended:
 
-.. raw:: html
+* >= 2 CPU/vCPU
+* >= 8 Gb RAM
+* >= 40 Gb HDD
 
-  </div><br>
-  <div style="border: 1px solid; margin: 0px 0px 0px 20px; padding: 6px;">
-  Major version: <b>8</b><br><br>
+And the following minimal configuration is the strict minimal if you wish to
+test the stack in VMs:
 
-Create file */etc/yum.repos.d/BaseOS.repo* with the following content:
+* >= 1 vCPU
+* >= 6 Gb RAM (PXE part needs a lot of RAM, once system is installed, can be reduced to 1Gb)
+* >= 20 Gb HDD
 
-.. code-block:: text
+OS installation
+---------------
 
-  [BaseOS]
-  name=BaseOS
-  baseurl=file:///var/www/html/repositories/redhat/8/x86_64/os/BaseOS/
-  gpgcheck=0
-  enabled=1
+Simply write iso **directly** on USB stick like a binary image, do not use a
+special tool. On Linux, use dd, on Microsoft Windows, use Win32DiskImager but only
+version 0.9.5 (not above).
 
-Then create file */etc/yum.repos.d/AppStream.repo* with the following content:
+Then install the Linux operating system manually (boot on USB, etc).
 
-.. code-block:: text
+It is recommended to only choose minimal install during packages selection
+(core or minimal server), to reduce load and attack surface. Remember to 
+ask for openssh-server installation.
+Also, it is **STRONGLY** recommended to let system in English (US), and only
+set your keyboard and time zone to your country.
 
-  [AppStream]
-  name=AppStream
-  baseurl=file:///var/www/html/repositories/redhat/8/x86_64/os/AppStream/
-  gpgcheck=0
-  enabled=1
+Create bluebanquise user
+------------------------
 
-.. raw:: html
+Once system is installed and rebooted, login on it.
+We will assume from here that you are using a sudo user. If using root user, 
+remove sudo for each bellow commands.
 
-  </div><br>
+Create the ``bluebanquise`` user manually:
 
-If you don't need the DVD ISO anymore, umount it:
+.. code-block::
 
-.. code-block:: bash
+  sudo adduser bluebanquise
 
-  umount /mnt
+Set bluebanquise user as passwordless sudo able user:
 
-Now ensure repository is available. Again, this step depends of the major
-version used:
+.. code-block::
 
-.. raw:: html
+  echo 'bluebanquise ALL=(ALL:ALL) NOPASSWD:ALL' | sudo tee -a /etc/sudoers.d/bluebanquise
 
-  <div style="border: 1px solid; margin: 0px 0px 0px 20px; padding: 6px;">
-  Major version: <b>7</b><br><br>
+Bootstrap stack
+---------------
 
-.. code-block:: bash
+Login as bluebanquise user, and clone github repoitory:
 
-  yum repolist
+.. code-block::
 
-.. raw:: html
+  sudo su bluebanquise
+  cd $HOME
+  git clone https://github.com/bluebanquise/bluebanquise.git
 
-  </div><br>
-  <div style="border: 1px solid; margin: 0px 0px 0px 20px; padding: 6px;">
-  Major version: <b>8</b><br><br>
+Review content of file ``bootstrap_input.sh``, and adjust to your needs, especially 
+ISO to be used and ISO URL.
+Other defaults should be good for most users.
 
-.. code-block:: bash
+Then simply execute the ``bootstrap.sh`` script. The script will install needed system packages, 
+download python needed dependencies and Ansible via pip, and download BlueBanquise and base OS 
+packages and iso. Note that depending of your network connection, this step could take a while.
 
-  dnf repolist
+.. code-block::
 
-.. raw:: html
+  cd bluebanquise
+  ./bootstrap.sh
 
-  </div><br>
+Once script has executed, it is interesting to check repositories structure created.
 
-BlueBanquise and extra
-^^^^^^^^^^^^^^^^^^^^^^
+Boot images include the installer system which starts the deployment after PXE
+boot, while packages repositories include the software that will be installed
+on the systems. On Ubuntu systems, all is included in the original ISO.
 
-We now need to download locally main BlueBanquise repository.
-We will also setup and empty extra repository, that will be used later to store
-external rpms.
-
-.. raw:: html
-
-  <div style="border: 1px solid; margin: 0px 0px 0px 20px; padding: 6px;">
-  Major version: <b>7</b><br><br>
-
-Install reposync:
-
-.. code-block:: bash
-
-  yum install yum-utils -y
-
-Then create temporary external repository in a temporary folder:
+Boot images and packages repositories structure follows a specific pattern,
+which defaults to the major release version in the path:
 
 .. code-block:: bash
 
-  mkdir /tmp/bbrepo/
-  cat << EOF > /tmp/bbrepo/bluebanquise.repo
-  [bluebanquise]
-  name = bluebanquise
-  baseurl = https://bluebanquise.com/repository/releases/latest/el7/x86_64/bluebanquise/
-  gpgcheck = 0
-  enabled = 1
-  EOF
+                  Distribution      Version   Architecture      Repository
+                        +               +       +                 +
+                        |               +--+    |                 |
+                        +-----------+      |    |      +----------+
+                                    |      |    |      |
+                                    v      v    v      v
+       /var/www/html/repositories/ubuntu/20.04/x86_64/os/
 
-Create now final repository destination, and download bluebanquise repository
-locally, asking only for latest packages, and restore SELinux tags:
 
-.. code-block:: bash
+.. warning::
+  This pattern parameters (distribution, version, architecture) must match
+  the one provided in the **equipment_profile** file seen later.
 
-  mkdir /var/www/html/repositories/redhat/7/x86_64/bluebanquise
-  reposync --repoid=bluebanquise -c /tmp/bbrepo/bluebanquise.repo -p /var/www/html/repositories/redhat/7/x86_64/bluebanquise --newest-only --download-metadata
-  restorecon -Rv /var/www/html/repositories/redhat/7/x86_64/bluebanquise
+You can see that 2 repositories were created:
 
-Now create final repository file */etc/yum.repos.d/BaseOS.repo* with the
-following content:
+* bluebanquise: contains bluebanquise packages
+* os: contains OS iso content (will be used for PXE and base repository)
 
-.. code-block:: text
+Also, you can see that iso was added along repositories. Raw ISO is needed during PXE process.
 
-  [bluebanquise]
-  name=bluebanquise
-  baseurl=file:///var/www/html/repositories/redhat/7/x86_64/bluebanquise/
-  gpgcheck=0
-  enabled=1
-
-Now create empty extra repository:
-
-.. code-block:: bash
-
-  mkdir -p /var/www/html/repositories/redhat/7/x86_64/extra/
-  createrepo /var/www/html/repositories/redhat/7/x86_64/extra/
-  restorecon -Rv /var/www/html/repositories/redhat/7/x86_64/extra
-
-And register it by adding file */etc/yum.repos.d/extra.repo* with the following
-content:
-
-.. code-block:: text
-
-  [extra]
-  name=extra
-  baseurl=file:///var/www/html/repositories/redhat/7/x86_64/extra/
-  gpgcheck=0
-  enabled=1
-
-.. raw:: html
-
-  </div><br>
-  <div style="border: 1px solid; margin: 0px 0px 0px 20px; padding: 6px;">
-  Major version: <b>8</b><br><br>
-
-Install reposync:
-
-.. code-block:: bash
-
-  dnf install yum-utils -y
-
-Then create temporary external repository in a temporary folder:
-
-.. code-block:: bash
-
-  mkdir /tmp/bbrepo/
-  cat << EOF > /tmp/bbrepo/bluebanquise.repo
-  [bluebanquise]
-  name = bluebanquise
-  baseurl = https://bluebanquise.com/repository/releases/latest/el8/x86_64/bluebanquise/
-  gpgcheck = 0
-  enabled = 1
-  EOF
-
-Create now final repository destination, and download bluebanquise repository
-locally, asking only for latest packages, and restore SELinux tags:
-
-.. code-block:: bash
-
-  mkdir /var/www/html/repositories/redhat/8/x86_64/bluebanquise
-  reposync --repoid=bluebanquise -c /tmp/bbrepo/bluebanquise.repo -p /var/www/html/repositories/redhat/8/x86_64/bluebanquise --newest-only --download-metadata
-  restorecon -Rv /var/www/html/repositories/redhat/8/x86_64/bluebanquise
-
-Now create final repository file */etc/yum.repos.d/BaseOS.repo* with the
-following content:
-
-.. code-block:: text
-
-  [bluebanquise]
-  name=bluebanquise
-  baseurl=file:///var/www/html/repositories/redhat/8/x86_64/bluebanquise/
-  gpgcheck=0
-  enabled=1
-
-Now create empty extra repository:
-
-.. code-block:: bash
-
-  mkdir -p /var/www/html/repositories/redhat/8/x86_64/extra/
-  createrepo /var/www/html/repositories/redhat/8/x86_64/extra/
-  restorecon -Rv /var/www/html/repositories/redhat/8/x86_64/extra
-
-And register it by adding file */etc/yum.repos.d/extra.repo* with the following
-content:
-
-.. code-block:: text
-
-  [extra]
-  name=extra
-  baseurl=file:///var/www/html/repositories/redhat/8/x86_64/extra/
-  gpgcheck=0
-  enabled=1
-
-.. raw:: html
-
-  </div><br>
-
-Download Ansible
-----------------
-
-Now that repositories are set, it is time to download Ansible.
-
-On RHEL like systems, Ansible comes from the EPEL.
-
-We need to install EPEL first, then download all needed rpms, and add them to
-the *extra* repository we created before.
-
-.. raw:: html
-
-  <div style="border: 1px solid; margin: 0px 0px 0px 20px; padding: 6px;">
-  Major version: <b>7</b><br><br>
-
-Install EPEL repositories:
-
-.. code-block:: bash
-
-  yum install wget
-  wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-  yum install epel-release-latest-7.noarch.rpm
-
-Download Ansible package and needed dependencies, and store them into the extra
-repository:
-
-.. code-block:: bash
-
-  yum install --downloadonly --downloaddir=/var/www/html/repositories/redhat/7/x86_64/extra/ ansible
-
-Then update extra repository database and clean main host cache:
-
-.. code-block:: bash
-
-  createrepo --update /var/www/html/repositories/redhat/7/x86_64/extra/
-  yum remove epel-release-latest-7
-  yum clean all
-
-.. raw:: html
-
-  </div><br>
-  <div style="border: 1px solid; margin: 0px 0px 0px 20px; padding: 6px;">
-  Major version: <b>8</b><br><br>
-
-Install EPEL repositories:
-
-.. code-block:: bash
-
-  dnf install wget
-  wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
-  dnf install epel-release-latest-8.noarch.rpm
-
-Download Ansible package and needed dependencies, and store them into the extra
-repository:
-
-.. code-block:: bash
-
-  dnf install --downloadonly --downloaddir=/var/www/html/repositories/redhat/8/x86_64/extra/ ansible
-
-Then update extra repository database and clean main host cache:
-
-.. code-block:: bash
-
-  createrepo --update /var/www/html/repositories/redhat/8/x86_64/extra/
-  dnf remove epel-release-latest-8
-  dnf clean all
-
-.. raw:: html
-
-  </div><br>
-
-Install BlueBanquise and Ansible
---------------------------------
-
-Install BlueBanquise and Ansible on the system:
-
-.. raw:: html
-
-  <div style="border: 1px solid; margin: 0px 0px 0px 20px; padding: 6px;">
-  Major version: <b>7</b><br><br>
-
-.. code-block:: bash
-
-  yum install bluebanquise ansible
-
-.. raw:: html
-
-  </div><br>
-  <div style="border: 1px solid; margin: 0px 0px 0px 20px; padding: 6px;">
-  Major version: <b>8</b><br><br>
-
-.. code-block:: bash
-
-  dnf install bluebanquise ansible
-
-.. raw:: html
-
-  </div><br>
-
-Bring up main NIC
------------------
-
-Finally, last part is to bring up main network interface controller, the one
-with *10.10.0.1* ip on the schema given at top of the page. We will assume this
-NIC is *enp0s8* here. Please adapt to your hardware (list interfaces using
-**ip a** command).
-
-First, ensure NetworkManager is installed:
-
-.. raw:: html
-
-  <div style="border: 1px solid; margin: 0px 0px 0px 20px; padding: 6px;">
-  Major version: <b>7</b><br><br>
-
-.. code-block:: bash
-
-  yum install NetworkManager
-
-.. raw:: html
-
-  </div><br>
-  <div style="border: 1px solid; margin: 0px 0px 0px 20px; padding: 6px;">
-  Major version: <b>8</b><br><br>
-
-.. code-block:: bash
-
-  dnf install NetworkManager
-
-.. raw:: html
-
-  </div><br>
-
-Then ensure it is started:
-
-.. code-block:: bash
-
-  systemctl start NetworkManager
-  systemctl enable NetworkManager
-
-And configure your interface to set a manual ipv4 address on it, then bring it
-up:
-
-.. code-block:: bash
-
-  nmcli con mod enps08 ipv4.addresses 10.10.0.1/16
-  nmcli con mod enps08 ipv4.method manual
-  nmcli con up enps08
-
-Using *ip a* command, you should now see your ip set on the interface.
-
-
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-
-
-
-
+If all went well, you can proceed to next step: :ref:`[Core] - Configure BlueBanquise`
 
 Bootstrap SUSE like system
 ==========================
@@ -1095,7 +462,7 @@ Populate the OS repository:
   rsync -av /mnt/ /srv/www/htdocs/repositories/sles/15.3/x86_64/os/
   umount /mnt
 
-Add repositories to ``/etc/bluebanquise/inventory/group_vars/all/general_settings/repositories.yml``:
+Add repositories to ``~/bluebanquise/inventory/group_vars/all/general_settings/repositories.yml``:
 
 .. code-block::
 

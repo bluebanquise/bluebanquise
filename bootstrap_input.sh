@@ -10,3 +10,4 @@ UBUNTU_2004_ISO_URL=https://releases.ubuntu.com/20.04/ubuntu-20.04.4-live-server
 UBUNTU_2004_ISO=ubuntu-20.04.4-live-server-amd64.iso
 REDHAT_8_ISO_URL=http://mirror.crexio.com/almalinux/8.5/isos/x86_64/AlmaLinux-8.5-x86_64-dvd.iso
 REDHAT_8_ISO=AlmaLinux-8.5-x86_64-dvd.iso
+REDHAT_8_OFFLINE=false

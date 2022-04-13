@@ -1,6 +1,9 @@
-==========
-Containers
-==========
+===
+FAQ
+===
+
+Is it possible to put BlueBanquise into a container ?
+=====================================================
 
 There are many ways to put BlueBanquise stack inside containers.
 The stack was designed to be able to spread services over multiple management
@@ -13,10 +16,10 @@ Podman was chosen as containers tool, as it allows simple systemd usage inside
 containers without needed additional tuning or unsecure privileged containers.
 
 Podman
-======
+------
 
 Install podman and grab base image
-----------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Install podman:
 
@@ -38,7 +41,7 @@ Grab latest centos image:
   podman pull centos:latest
 
 Generic ansible ready image
----------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Create a generic image, that contains python3 only (centos **W**ith
 **P**ython**3**).
@@ -77,7 +80,7 @@ Once done, check your new source image is ready:
   [root@pc-200 centoswp3]#
 
 Example: repositories container
--------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Now start a container, called repositories. There are two ways:
 

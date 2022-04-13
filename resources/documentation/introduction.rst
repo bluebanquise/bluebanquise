@@ -36,19 +36,17 @@ This documentation is structured as the following:
 * Procedure to install BlueBanquise CORE
     * Bootstrap first management host
     * Configure BlueBanquise
-    * Deploy BlueBanquise configuration and other nodes via network (PXE)
+    * Deploy cluster
     * (Optional) Deploy a multi icebergs cluster
     * (Optional) Deploy diskless nodes
-* Procedures to specialize the cluster using BlueBanquise COMMUNITY
+* Procedures to specialize the cluster using BlueBanquise COMMUNITY or external tools
     * Deploy an High Availability cluster, based on Corosync/Pacemaker and HAproxy
     * Deploy Prometheus (Monitor your cluster)
     * Deploy Slurm (Specialize your cluster for High Performance Computing or a Blender render farm)
-* Few words on how to test the stack into containers
+    * Deploy Kubernetes (K8S) over BlueBanquise using Kubespray
+* An FAQ
 
 If you encounter any bugs/issues or have any comments, please inform us.
-
-Note that if you wish are new to cluster management system administration,
-`a full manual tutorial is available on github. <https://github.com/oxedions/admin_sys_baremetal_tutorial>`_
 
 Note also that since BlueBanquise is a multi-distribution based stack, parts of the
 documentation may be dedicated to a specific Linux distribution (always
