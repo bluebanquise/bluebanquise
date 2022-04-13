@@ -7,8 +7,8 @@
 
     - role: set_hostname
       tags: set_hostname
-    - role: nic_nmcli
-      tags: nic_nmcli
+    - role: nic
+      tags: nic
     - role: repositories_server
       tags: repositories_server
     - role: repositories_client

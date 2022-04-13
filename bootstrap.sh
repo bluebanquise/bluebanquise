@@ -19,39 +19,6 @@ CURRENT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd 
 source bootstrap_input.sh
 source /etc/os-release
 
-if $INSTALL_SYSTEM_REQUIREMENTS; then
-  message_output "Installing OS needed dependencies..."
-  if [ "$NAME" == "Ubuntu" ]; then
-    if [ "$VERSION_ID" == "20.04" ]; then
-      sudo apt-get install python3-pip
-    fi
-  fi
-fi
-
-if $INSTALL_PIP_REQUIREMENTS; then
-  message_output "Installing python needed dependencies via pip3..."
-  pip3 install -r requirements.txt
-fi
-
-export PATH=/home/bluebanquise/.local/bin:$PATH
-
-if $INSTALL_GALAXY_REQUIREMENTS; then
-  message_output "Installing Ansible needed collections..."
-  ansible-galaxy collection install community.general
-fi
-
-message_output "Copying sample inventory and playbooks."
-if [[ -d inventory ]]; then
-  message_output "Inventory folder already exist, skipping copy."
-else
-  cp -a resources/examples/$SAMPLE_INVENTORY/inventory .
-fi
-if [[ -d playbooks ]]; then
-  message_output "Playbooks folder already exist, skipping copy."
-else
-  cp -a resources/examples/$SAMPLE_INVENTORY/playbooks .
-fi
-
 if $GATHER_PACKAGES; then
   message_output "Gathering packages and images repositories, may take a while..."
   sudo mkdir -p /var/www/html/
@@ -81,19 +48,81 @@ if $GATHER_PACKAGES; then
     if [[ -d bluebanquise ]]; then
       message_output "BlueBanquise folder already exist, skipping packages download."
     else
-      wget -np -nH --cut-dirs 5 -r --reject "index.html*" http://bluebanquise.com/repository/releases/latest/el8/x86_64/bluebanquise/
+      if $REDHAT_8_OFFLINE; then
+        cp -a $CURRENT_DIR/offline_bootstrap/bluebanquise /var/www/html/repositories/redhat/8/x86_64/
+      else
+        wget -np -nH --cut-dirs 5 -r --reject "index.html*" http://bluebanquise.com/repository/releases/latest/el8/x86_64/bluebanquise/
+      fi
     fi
     if [[ -d os ]]; then
       message_output "Os folder already exist, skipping iso download."
     else
-      wget $REDHAT_8_ISO_URL
+      if $REDHAT_8_OFFLINE; then
+        cp -a $CURRENT_DIR/offline_bootstrap/$REDHAT_8_ISO .
+      else
+        wget $REDHAT_8_ISO_URL
+      fi
       sudo mount /var/www/html/repositories/redhat/8/x86_64/$REDHAT_8_ISO /mnt
       mkdir /var/www/html/repositories/redhat/8/x86_64/os/
       cp -a /mnt/* /var/www/html/repositories/redhat/8/x86_64/os/
       sudo umount /mnt
     fi
+    restorecon -Rv /var/www/html/
   fi
 
+fi
+
+if $REDHAT_8_OFFLINE; then
+  message_output "Configuring offline repositories..."
+cat << EOF | sudo tee -a /etc/yum.repos.d/bootstrap.repo
+[BaseOS]
+name=BaseOS
+baseurl=file:///var/www/html/repositories/redhat/8/x86_64/os/BaseOS/
+gpgcheck=0
+enabled=1
+
+[AppStream]
+name=AppStream
+baseurl=file:///var/www/html/repositories/redhat/8/x86_64/os/AppStream/
+gpgcheck=0
+enabled=1
+EOF
+fi
+
+if $INSTALL_SYSTEM_REQUIREMENTS; then
+  message_output "Installing OS needed dependencies..."
+  if [ "$NAME" == "Ubuntu" ]; then
+    if [ "$VERSION_ID" == "20.04" ]; then
+      sudo apt-get install python3-pip
+    fi
+  fi
+  if [ "$PLATFORM_ID" == "platform:el8" ]; then
+    sudo dnf install python3-pip -y
+  fi
+fi
+
+if $INSTALL_PIP_REQUIREMENTS; then
+  message_output "Installing python needed dependencies via pip3..."
+  pip3 install -r requirements.txt
+fi
+
+export PATH=/home/bluebanquise/.local/bin:$PATH
+
+if $INSTALL_GALAXY_REQUIREMENTS; then
+  message_output "Installing Ansible needed collections..."
+  ansible-galaxy collection install community.general
+fi
+
+message_output "Copying sample inventory and playbooks."
+if [[ -d inventory ]]; then
+  message_output "Inventory folder already exist, skipping copy."
+else
+  cp -a resources/examples/$SAMPLE_INVENTORY/inventory .
+fi
+if [[ -d playbooks ]]; then
+  message_output "Playbooks folder already exist, skipping copy."
+else
+  cp -a resources/examples/$SAMPLE_INVENTORY/playbooks .
 fi
 
 message_output "Setting system variables into .bashrc and sudoers..."

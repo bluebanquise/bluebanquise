@@ -24,17 +24,6 @@ issues in this documentation.
 
 Please proceed to :ref:`Introduction` to start.
 
->>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<
-<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-A FAIRE:
-ipv6
-HA + Haproxy
-slurm
-sys admin tuto
-advanced nic_nmcli examples
-git gitea
-
-
 ------------
 
 .. toctree::
@@ -48,14 +37,15 @@ git gitea
    training_ansible
    bootstrap
    configure_bluebanquise
-   deploy_bluebanquise
+   deploy_cluster
    multiple_icebergs
    diskless
-   high_availability
-   monitoring
-   slurm
+   community_high_availability
+   community_monitoring
+   community_slurm
+   external_kubernetes
+   FAQ
    containers
-   scenario_kubernetes
    stories
    roles
    references

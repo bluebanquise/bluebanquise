@@ -19,7 +19,8 @@ something else.
 .. image:: images/nodes/hosts_example.svg
    :align: center
 
-Hosts are defined in */etc/bluebanquise/inventory/cluster/nodes*.
+
+Hosts are defined in *~/bluebanquise/inventory/cluster/nodes*.
 
 Please do a difference between an **Ansible managed host**, and a **host**.
 All equipment that can have an ip address on the network are considered "host",

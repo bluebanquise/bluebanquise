@@ -3,15 +3,14 @@
 ===============================
 
 At this point, you should have an operating system with Ansible installed on it,
-and basic OS repositories. You also have installed BlueBanquise package and its
-dependencies, and your main NIC (Network Interface Controller) is configured and
-activated (up).
+and basic OS repositories. You also have installed BlueBanquise cloned and its
+dependencies.
 
 .. image:: images/clusters/documentation_example_single_island_step_1.svg
    :align: center
 
-Enable BlueBanquise and ssh
-===========================
+Understand Environment
+======================
 
 By default, Ansible will check presence of configuration file at multiple
 locations:
@@ -23,50 +22,30 @@ locations:
 
 The first found is used as main configuration.
 
-To enable BlueBanquise, we need Ansible to use /etc/bluebanquise/ansible.cfg.
-To do so, set ANSIBLE_CONFIG:
+The bootstrap script created an entry in your bluebanquise user .bashrc 
+file that export ANSIBLE_CONFIG variable:
 
-.. code-block:: bash
+.. code-block::
 
-  export ANSIBLE_CONFIG=/etc/bluebanquise/ansible.cfg
+  ANSIBLE_CONFIG=$HOME/bluebanquise/ansible.cfg
 
-.. note::
-  You can revert to Ansible default behavior by unsetting this variable. It
-  allows to use both default Ansible and BlueBanquise together.
+The script also created 2 other exports:
 
-Edit /etc/hosts file, and add "management1" (or whatever your current
-management node hostname) with its target ip (the one set on the main NIC):
+.. code-block::
 
-.. code-block:: text
+  export PATH=/home/bluebanquise/.local/bin:$PATH
+  export PYTHONPATH=$(pip3 show ClusterShell | grep Location | awk -F ' ' '{print $2}')
 
-  127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
-  ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
-  10.10.0.1   management1
+First one add ansible and ansible related binaries into PATH to be usable from shell.
+Second one ensure your PYTHONPATH will be exported later when excuting commands as sudo.
 
-This will allow us to bootstrap the management configuration.
+You can also check the /etc/sudoers file. The script added the line:
 
-Generate now an ssh key for current management1 host, and do not set a
-passphrase (leave empty when asked and press enter):
+.. code-block::
 
-.. code-block:: text
+  Defaults env_keep += "PYTHONPATH"
 
-  ssh-keygen -t ed25519
-
-Then spread this key on the current host so that management1 can ssh on itself
-passwordless (you will be asked current root password to establish this first
-ssh connection):
-
-.. code-block:: text
-
-  ssh-copy-id management1
-
-Now, ensure you can ssh without password now:
-
-.. code-block:: text
-
-  ssh management1
-
-It is time to configure the inventory to match cluster needs.
+This ensure your PYTHONPATH is exported into sudo environment.
 
 Configure inventory
 ===================
@@ -74,22 +53,15 @@ Configure inventory
 Check example inventory
 -----------------------
 
-An inventory example is provided in
-/etc/bluebanquise/resources/examples/simple_cluster/ and will be used
-as a base for this documentation.
+An inventory example as been copied by script into your bluebanquise folder.
+If needed, other examples can be found in ``resources/examples/``.
 
-This example match the cluster exposed previously.
-
-Copy it to use it as your new inventory starting point:
-
-.. code-block:: bash
-
-  cp -a /etc/bluebanquise/resources/examples/simple_cluster/inventory /etc/bluebanquise/inventory
+The example copied matchs the cluster exposed previously.
 
 .. warning::
   Ansible will read **ALL** files in the inventory. **NEVER do a backup of a file
   here!**
-  Backup in another location, outside of /etc/bluebanquise/inventory.
+  Backup in another location, outside of ~/bluebanquise/inventory.
 
 Review groups
 -------------
@@ -100,7 +72,7 @@ Use command ansible-inventory to display current groups in the inventory:
 
 .. code-block:: text
 
-  [root@management1 ~]# ansible-inventory --graph
+  bluebanquise@localhost:~/ ansible-inventory --graph
   @all:
     |--@internal:
     |  |--dummy
@@ -128,13 +100,12 @@ Use command ansible-inventory to display current groups in the inventory:
     |  |--management1
     |  |--storage1
     |--@ungrouped:
-  [root@management1 ~]#
 
 In this example inventory, you can see **mg_** groups, and **equipment_** groups.
 *rack_1* group is a user's custom group and is not important for the stack to
 operate properly.
 
-**mg_** groups are called master groups (or main groups), and define global
+**mg_** groups are called master groups, and define global
 purpose of their nodes: storages, managements, logins, computes, etc.
 
 **equipment_** groups are called equipment profile groups, and define equipment
@@ -151,7 +122,7 @@ Review nodes
 
 First step is to review the provided example configuration, and adapt it to your
 configuration. The following part assume all path are relative to
-/etc/bluebanquise/inventory/ folder.
+~/bluebanquise/inventory/ folder.
 
 Management node
 ^^^^^^^^^^^^^^^
@@ -244,7 +215,7 @@ be precedenced: simply define new *j2_node_main_resolution_network*,
 folder)
 
 .. note::
-  More network features and configurations are available, see the nic_nmcli role
+  More network features and configurations are available, see the **nic** role
   readme file for more information.
 
 Other nodes
@@ -285,7 +256,7 @@ networking, it can be different.
 
 All networks are defined in *group_vars/all/general_settings/network.yml* file.
 In this current example inventory, there are two networks provided:
-*ice1-1* and *interconnect-1*.
+``ice1-1`` and ``interconnect-1``.
 
 Before reviewing the file, please read this **IMPORTANT** information: in
 **BlueBanquise** there are two kind of networks: **administration/management
@@ -331,21 +302,21 @@ its content:
 
 All explanations are given above.
 
-One note about *services_ip*: it is used if services are spread over multiple
+One note about ``services_ip``: it is used if services are spread over multiple
 managements, or in case of High Availability with virtual IPs. Ansible is not
 able to gather this information alone from playbooks (it could, but this would
 end up with a way too much complex stack), and so we have to provide it manually.
 You can also set here an IP address from another subnet if your system has
 network routing.
 
-Now check content of the second network, interconnect-1 in file
+Now check content of the second network, ``interconnect-1`` in file
 *group_vars/all/general_settings/network.yml* . As this is **not** an
 administration network, its configuration is easy.
 
 That is all for basic networking. General network parameters are set in
 *group_vars/all/general_settings/network.yml* file, and nodes parameters are
 defined in the node’s files.
-Nodes *network_interfaces* are linked to logical networks.
+Nodes ``network_interfaces`` are linked to logical networks.
 
 Now, let's have a look at the general configuration.
 
@@ -373,12 +344,40 @@ File *group_vars/all/general_settings/repositories.yml* configure repositories t
 use for all nodes (using groups and variable precedence, repositories can be
 tuned for each group of nodes, or even each node).
 
-Right now, only *os* and *bluebanquise* are set. This means two or three
-(depending of the operating system) repositories will be added to nodes, and
-they will bind to repository_ip in ice1-1.yml .
+It is important to set correct repositories to avoid issues during deployments.
+
+By default, recommanded settings are:
+
+* RHEL like system:
+
+.. raw:: html
+
+  <div style="padding: 6px;">
+  <b>RHEL</b> <img src="_static/logo_rhel.png">, <b>CentOS</b> <img src="_static/logo_centos.png">, <b>RockyLinux</b> <img src="_static/logo_rocky.png">, <b>OracleLinux</b> <img src="_static/logo_oraclelinux.png">, <b>CloudLinux</b> <img src="_static/logo_cloudlinux.png">, <b>AlmaLinux</b> <img src="_static/logo_almalinux.png">
+  </div><br><br>
+
+.. code-block:: yaml
+
+  repositories:
+    - os            # Will bind to OS iso for BaseOS and AppStream base repositories
+    - bluebanquise  # Will bind to bluebanquise repository
+
+* Ubuntu system:
+
+.. raw:: html
+
+  <div style="padding: 6px;">
+  <b>Ubuntu</b> <img src="_static/logo_ubuntu.png">
+  </div><br><br>
+
+.. code-block:: yaml
+
+  repositories:
+    # No need for os, as Ubuntu directly grab packages from the web
+    - bluebanquise  # Will bind to bluebanquise repository
 
 See the repositories_client role part of the documentation for advanced
-configurations.
+configurations (list accept basic repos naming, but also advanced paterns).
 
 Note also that if you wish to define different repositories per equipment, you
 can easily use variable precedence mechanism seen in the Ansible tutorial to
@@ -390,6 +389,8 @@ NFS
 File *group_vars/all/general_settings/nfs.yml* allows to set NFS shared folders
 inside the cluster. Comments in the file should be enough to understand this
 file.
+
+Tune this file according to your need, or remove it if you do not plan to use NFS.
 
 General
 ^^^^^^^
@@ -451,7 +452,7 @@ Lets say this is not good, and we want to disable access_control on computes.
 We need to change that.
 
 Open file *group_vars/equipment_typeC/equipment_profile.yml* and set
-access_control to disabled.
+``access_control`` to  *disabled*.
 
 Now check again:
 
@@ -467,7 +468,7 @@ parameters in equipment_all, which act as a global/default set, and then copy
 
 .. image:: images/misc/warning.svg
    :align: center
-
+|
 .. warning::
   **IMPORTANT**: equipment_profile variables and authentication variables **are
   not standard**. It is **STRICTLY FORBIDDEN** to tune them outside default
@@ -667,7 +668,7 @@ It is possible to do it automatically using the following command:
 
   # Copy public key of the mgmt to the inventory
   /usr/bin/sed -i -e "s#- ssh-rsa.*#- $(cat /root/.ssh/id_ed25519.pub)#" \
-    /etc/bluebanquise/inventory/group_vars/all/equipment_all/authentication.yml
+    ~/bluebanquise/inventory/group_vars/all/equipment_all/authentication.yml
 
 .. warning::
   If you update the managements ssh keys, do not forget to update this file.

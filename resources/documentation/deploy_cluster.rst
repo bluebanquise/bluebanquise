@@ -1,15 +1,15 @@
-============================
-[Core] - Deploy BlueBanquise
-============================
+=======================
+[Core] - Deploy Cluster
+=======================
 
 At this point, **BlueBanquise** configuration is done. We are ready to deploy
 the cluster.
 
 We are going to proceed in the following order:
 
-1. Deploy configuration on management1 node
-3. Deploy fresh OS on the other nodes, from management1
-4. Deploy configuration on the other nodes.
+#. Deploy configuration on management1 node
+#. Deploy fresh OS on the other nodes, from management1
+#. Deploy configuration on the other nodes.
 
 Management deployment
 =====================
@@ -17,15 +17,18 @@ Management deployment
 Get managements playbook
 ------------------------
 
+If you used the bootstrap script, you already have the managements.yml playbook 
+into *~/bluebanquise/playbooks/* folder. You can skip this step.
+
 We are going to use the provided default playbook. This playbook will install
 most of the **CORE** roles. Enough to deploy first stage of the cluster.
 
-Copy example playbook managements to */etc/bluebanquise/playbooks/*:
+Copy example playbook managements to *~/bluebanquise/playbooks/*:
 
 .. code-block:: bash
 
-  mkdir /etc/bluebanquise/playbooks/
-  cp -a /etc/bluebanquise/resources/examples/simple_cluster/playbooks/managements.yml /etc/bluebanquise/playbooks/
+  mkdir ~/bluebanquise/playbooks/
+  cp -a ~/bluebanquise/resources/examples/simple_cluster/playbooks/managements.yml ~/bluebanquise/playbooks/
 
 Then, we will ask Ansible to read this playbook, and execute all roles listed
 inside on management1 node (check hosts at top of the file).
@@ -75,23 +78,22 @@ We first ensure our NIC are up, so the repositories part is working.
 
 .. code-block:: bash
 
-  ansible-playbook /etc/bluebanquise/playbooks/managements.yml --limit management1 --tags set_hostname,nic_nmcli
+  ansible-playbook ~/bluebanquise/playbooks/managements.yml --limit management1 --tags set_hostname,nic
 
 Check interfaces are up (check using *ip a* command), and execute the
 bluebanquise role and the repositories_server role:
 
 .. code-block:: text
 
-  ansible-playbook /etc/bluebanquise/playbooks/managements.yml --limit management1 --tags bluebanquise,repositories_server
+  ansible-playbook ~/bluebanquise/playbooks/managements.yml --limit management1 --tags repositories_server
 
-This will install the requirements to run BlueBanquise (mostly python filters
-for Ansible), and ensure the web server of local repositories is running.
+This will install the requirements to ensure the web server of local repositories is running.
 
 Then play the whole playbook:
 
 .. code-block:: text
 
-  ansible-playbook /etc/bluebanquise/playbooks/managements.yml --limit management1
+  ansible-playbook ~/bluebanquise/playbooks/managements.yml --limit management1
 
 And wait...
 
@@ -148,7 +150,7 @@ are in /var/www/html/preboot_execution_environment):
   iPXE chain to task specified in myhostname.ipxe (deploy os, boot on disk, etc)
 
 Whatever the boot source, and whatever Legacy BIOS or UEFI, all converge to
-http://${next-server}/preboot_execution_environment/convergence.ipxe. Then this
+``http://${next-server}/preboot_execution_environment/convergence.ipxe``. Then this
 file chain to node specific file in nodes (this file is generated using *bootset*
 command). The node specific file contains the default entry for the iPXE menu,
 then node chain to its equipment_profile file, to gather group values, and chain
@@ -261,7 +263,7 @@ The following slides explain the whole PXE process of the BlueBanquise stack:
      </div>
      <div class="mySlides">
        <div class="numbertext">18 / 18</div>
-       <img src="_static/deploy_bluebanquise_pxe_slides/Slide17.PNG" style="width:100%">
+       <img src="_static/deploy_bluebanquise_pxe_slides/Slide18.PNG" style="width:100%">
      </div>
      <!-- Next and previous buttons -->
      <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
@@ -305,17 +307,17 @@ To manipulate nodes PXE boot, a command, **bootset**, is available.
 
 We are going to deploy login1, storage1 and compute1, compute2, compute3 and compute4.
 
-Let's use bootset to set them to deploy OS at next PXE boot:
+Let's use bootset to set them to deploy OS at next PXE boot (bootset must be launched using sudo if not root):
 
 .. code-block:: bash
 
-  bootset -n login1,storage1,c[001-004] -b osdeploy
+  sudo bootset -n login1,storage1,c[001-004] -b osdeploy
 
 You can check the result using:
 
 .. code-block:: bash
 
-  bootset -n login1,storage1,c[001-004] -s
+  sudo bootset -n login1,storage1,c[001-004] -s
 
 Which should return:
 
@@ -346,7 +348,7 @@ set on nodes during deployment).
 
 .. code-block:: bash
 
-  ansible-playbook /etc/bluebanquise/playbooks/managements.yml --tags pxe_stack
+  ansible-playbook ~/bluebanquise/playbooks/managements.yml --tags pxe_stack
 
 OS deployment
 -------------
@@ -375,17 +377,17 @@ If yes, copy example playbooks:
 
 .. code-block:: bash
 
-  cp -a /etc/bluebanquise/resources/examples/simple_cluster/playbooks/computes.yml /etc/bluebanquise/playbooks/
-  cp -a /etc/bluebanquise/resources/examples/simple_cluster/playbooks/logins.yml /etc/bluebanquise/playbooks/
-  cp -a /etc/bluebanquise/resources/examples/simple_cluster/playbooks/storages.yml /etc/bluebanquise/playbooks/
+  cp -a ~/bluebanquise/resources/examples/simple_cluster/playbooks/computes.yml ~/bluebanquise/playbooks/
+  cp -a ~/bluebanquise/resources/examples/simple_cluster/playbooks/logins.yml ~/bluebanquise/playbooks/
+  cp -a ~/bluebanquise/resources/examples/simple_cluster/playbooks/storages.yml ~/bluebanquise/playbooks/
 
 And execute them, using --limit parameter to specify targets:
 
 .. code-block:: bash
 
-  ansible-playbook /etc/bluebanquise/playbooks/logins.yml
-  ansible-playbook /etc/bluebanquise/playbooks/storages.yml
-  ansible-playbook /etc/bluebanquise/playbooks/computes.yml --limit compute1,compute2,compute3,compute4
+  ansible-playbook ~/bluebanquise/playbooks/logins.yml
+  ansible-playbook ~/bluebanquise/playbooks/storages.yml
+  ansible-playbook ~/bluebanquise/playbooks/computes.yml --limit compute1,compute2,compute3,compute4
 
 You can see that Ansible will work on computes nodes in parallel, using more CPU
 on the management1 node (by spawning multiple forks).
@@ -399,19 +401,10 @@ synchronization, etc.) are up and running.
 It is time to use some `COMMUNITY <https://github.com/bluebanquise/community>`_
 roles to add specific features to the cluster and/or specialize it.
 (Please refer to each community roles dedicated documentation to get
-instructions on how to use them), or continue this documentation to:
+instructions on how to use them), or continue this documentation to 
+go into advanced configurations.
 
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-* BlueBanquise generic cluster
-    * Deploy High Availability with multiple managements nodes
-    * Deploy a multi icebergs cluster
-    * Deploy diskless nodes
-* BlueBanquise specialized cluster
-    * Deploy Prometheus (Monitoring your cluster)
-    * Deploy Slurm (Specialize your cluster for High Performance Computing)
-
-You will also find a "stories" section that describes step by step few recurrent
+You will also find a "FAQ" section that could help with few recurrent
 situation you may face during the life of your cluster.
 
 Thank your for following this training. We really hope you will enjoy the stack.
