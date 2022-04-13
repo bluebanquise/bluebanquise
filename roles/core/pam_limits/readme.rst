@@ -10,7 +10,7 @@ Instructions
 ^^^^^^^^^^^^
 
 The roles handles all arguments listed in 
-`Ansible pam_limits module.<https://docs.ansible.com/ansible/latest/collections/community/general/pam_limits_module.html>`_
+`Ansible pam_limits module <https://docs.ansible.com/ansible/latest/collections/community/general/pam_limits_module.html>`_ .
 
 Example:
 

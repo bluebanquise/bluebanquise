@@ -163,14 +163,14 @@ An example of macro would be, for the pattern *my_equipment_x* defined above:
 
 .. code-block:: text
 
-{% macro my_equipment_x(macro_host, macro_nic, macro_filename) %}
-host {{ macro_host }} {
-  option host-name "{{macro_host}}";
-    hardware ethernet {{macro_nic.mac}};
-    fixed-address {{macro_nic.ip4}};
-    filename "{{macro_filename}}";
-}
-{% endmacro %}
+  {% macro my_equipment_x(macro_host, macro_nic, macro_filename) %}
+  host {{ macro_host }} {
+    option host-name "{{macro_host}}";
+      hardware ethernet {{macro_nic.mac}};
+      fixed-address {{macro_nic.ip4}};
+      filename "{{macro_filename}}";
+  }
+  {% endmacro %}
 
 Changelog
 ^^^^^^^^^

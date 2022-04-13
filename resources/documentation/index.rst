@@ -65,6 +65,7 @@ Documentation authors:
 * KEATS Johnny
 * TRAVOUILLON Bruno
 * GELLNER Tim
+* MUNDAY Neil
 * RIBEIRO Adrien
 * MERZOUKI Hamid
 * PEROTIN Matthieu
