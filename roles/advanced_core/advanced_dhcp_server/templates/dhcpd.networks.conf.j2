@@ -59,7 +59,7 @@ subnet {{networks[network]['subnet']}} netmask {{networks[network]['netmask']}} 
     {% endif %}
   {% endif %}
 
-  include "/etc/dhcp/dhcpd.{{network}}.conf";
+  include "{{ advanced_dhcp_server_conf_dir }}/dhcpd.{{network}}.conf";
 
 }
 {% endif %}
@@ -110,7 +110,7 @@ subnet {{networks[network]['subnet']}} netmask {{networks[network]['netmask']}} 
     {% endif %}
   {% endif %}
 
-  include "/etc/dhcp/dhcpd.{{network}}.conf";
+  include "{{ advanced_dhcp_server_conf_dir }}/dhcpd.{{network}}.conf";
 
 }
 {% endif %}

@@ -1,9 +1,10 @@
 ---
 advanced_dhcp_server_packages_to_install:
   - dhcp-server
+  - python3-netaddr
 advanced_dhcp_server_services_to_start:
   - dhcpd
 advanced_dhcp_server_firewall_services_to_add:
   - dhcp
-advanced_dhcp_server_conf_file: /etc/dhcp/dhcpd.conf
-advanced_dhcp_server_conf_dir: /etc/dhcp
+advanced_dhcp_server_conf_file: /etc/dhcpd.conf
+advanced_dhcp_server_conf_dir: /etc/dhcpd.d
