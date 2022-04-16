@@ -18,6 +18,8 @@
     - Allow to choose between root or sudo user. (#687)
   - clushershell:
     - fix an idempotency problem of role clustershell (#675)
+  - dhcp_server:
+    - Add capability to choose ipxe ROM. (#698)
   - nfs_server:
     - Add auto directories creation capability. (#685)
   - nic:

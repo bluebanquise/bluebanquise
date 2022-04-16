@@ -25,22 +25,38 @@
  # 11 64-bit ARM EFI
  # https://ipxe.org/cfg/platform
 
+{% if dhcp_server_ipxe_driver == 'snponly' %}
+  {% set ipxe_driver = 'snponly_' %}
+{% elif dhcp_server_ipxe_driver == 'snp' %}
+  {% set ipxe_driver = 'snp_' %}
+{% else %}{# Assume everything else is default driver #}
+  {% set ipxe_driver = '' %}
+{% endif %}
+
+{% if dhcp_server_ipxe_embed == 'dhcpretry' %}
+  {% set ipxe_embed = 'dhcpretry' %}
+{% elif dhcp_server_ipxe_embed == 'noshell' %}
+  {% set ipxe_embed = 'noshell' %}
+{% else %}{# Assume everything else is standard script #}
+  {% set ipxe_embed = 'standard' %}
+{% endif %}
+
  option client-arch code 93 = unsigned integer 16;
  if exists client-arch {
    if option client-arch = 00:00 {
-     filename "x86_64/standard_undionly.kpxe";
+     filename "x86_64/{{ ipxe_embed }}_undionly.kpxe";
    } elsif option client-arch = 00:06 {
-     filename "x86/standard_ipxe.efi";
+     filename "x86/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi";
    } elsif option client-arch = 00:07 {
-     filename "x86_64/standard_ipxe.efi";
+     filename "x86_64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi";
    } elsif option client-arch = 00:08 {
-     filename "x86_64/standard_ipxe.efi";
+     filename "x86_64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi";
    } elsif option client-arch = 00:09 {
-     filename "x86_64/standard_ipxe.efi";
+     filename "x86_64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi";
    } elsif option client-arch = 00:0a {
-     filename "arm32/standard_ipxe.efi";
+     filename "arm32/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi";
    } elsif option client-arch = 00:0b {
-     filename "arm64/standard_ipxe.efi";
+     filename "arm64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi";
    }
  }
 
