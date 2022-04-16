@@ -15,7 +15,7 @@
   community.general.zypper_repository:
     name: "{{ item.name | default(item) }}"
     description: "{{ item.name | default(item) }} gen by Ansible"
-    repo: "{{ item.repo | default(baseurl_prefix + item.repo | default(item)) }}"
+    repo: "{{ item.repo | default(baseurl_prefix + item.repo | default(item.name | default(item))) }}"
     disable_gpg_check: "{{ item.disable_gpg_check | default(omit) }}"
     auto_import_keys: "{{ item.disable_gpg_check | default(omit) }}"
     autorefresh: "{{ item.autorefresh | default(omit) }}"
