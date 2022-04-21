@@ -3,6 +3,7 @@
 <!DOCTYPE profile>
 <profile xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http://www.suse.com/1.0/configns">
 
+{% if ep_operating_system['distribution'] == "SLES" %} 
   <add-on>
     <add_on_products config:type="list">
 {% for repo in repositories %}
@@ -18,6 +19,7 @@
 {% endfor %}
     </add_on_products>
   </add-on>
+{% endif %}
 
   <keyboard>
     <keymap>{{hostvars[groups[item][0]]['ep_configuration']['keyboard_layout']|lower}}</keymap>
@@ -39,15 +41,20 @@
   </networking>
 
   <software>
+{% if ep_operating_system['distribution'] == "SLES" %} 
     <products config:type="list">
       <product>SLES</product>
     </products>
+{% endif %}
     <install_recommended config:type="boolean">true</install_recommended>
     <patterns config:type="list">
       <pattern>base</pattern>
     </patterns>
     <packages config:type="list">
       <package>openssh-server</package>
+    {% if pxe_stack_enable_root %}
+      <package>sudo</package>
+    {% endif %}
     </packages>
   </software> 
 

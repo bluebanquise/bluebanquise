@@ -173,6 +173,7 @@ To be done
 Changelog
 ^^^^^^^^^
 
+* 1.6.1: Updated to work with both SLES and OpenSUSE and install sudo package if sudo use is enabled. Neil Munday <neil@mundayweb.com>
 * 1.6.0: Allow to choose between root or sudo user. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.5.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.1: Extend bootset support for custom htdocs path. Benoit Leveugle <benoit.leveugle@gmail.com>
