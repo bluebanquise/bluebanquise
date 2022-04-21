@@ -136,11 +136,11 @@ jobs:
       - name: Ensure partitions are available
         run: sudo losetup --partscan --show --find /tmp/1g.img; lsblk;
 
-      - name: Role test - lvm
-        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t lvm --diff
+        #      - name: Role test - lvm
+        #        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t lvm --diff
 
-      - name: Role test - filesystem
-        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t filesystem --diff
+        #      - name: Role test - filesystem
+        #        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t filesystem --diff
 
-      - name: Role test - mount
-        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t mount --diff
+        #      - name: Role test - mount
+        #        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t mount --diff
