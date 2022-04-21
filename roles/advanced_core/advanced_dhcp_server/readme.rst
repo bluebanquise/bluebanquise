@@ -175,6 +175,7 @@ An example of macro would be, for the pattern *my_equipment_x* defined above:
 Changelog
 ^^^^^^^^^
 
+* 1.1.2: Updated to work with SLES/OpenSUSE. Neil Munday <neil@mundayweb.com>
 * 1.1.1: Allows usage of time_ip list. Thiago Cardozo <thiago.cardozo@yahoo.com.br>
 * 1.1.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.6: Prevent unsorted ranges. Benoit Leveugle <benoit.leveugle@gmail.com>

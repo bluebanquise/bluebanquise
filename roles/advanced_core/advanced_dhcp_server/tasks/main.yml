@@ -46,10 +46,17 @@
   tags:
     - package
 
-- name: Template >> /etc/dhcp/dhcpd.conf
+- name: "file █ Create {{ advanced_dhcp_server_conf_dir }}"
+  ansible.builtin.file:
+    path: "{{ dhcp_server_conf_dir }}"
+    owner: root
+    mode: "0755"
+    state: directory
+
+- name: "Template >> {{ advanced_dhcp_server_conf_file }}"
   ansible.builtin.template:
     src: dhcpd.conf.j2
-    dest: /etc/dhcp/dhcpd.conf
+    dest: "{{ advanced_dhcp_server_conf_file }}"
     owner: root
     group: root
     mode: 0644
@@ -57,10 +64,10 @@
   tags:
     - template
 
-- name: Template >> /etc/dhcp/dhcpd.networks.conf
+- name: "Template >> {{ advanced_dhcp_server_conf_dir }}/dhcpd.networks.conf"
   ansible.builtin.template:
     src: dhcpd.networks.conf.j2
-    dest: /etc/dhcp/dhcpd.networks.conf
+    dest: "{{ advanced_dhcp_server_conf_dir }}/dhcpd.networks.conf"
     owner: root
     group: root
     mode: 0644
@@ -68,10 +75,10 @@
   tags:
     - template
 
-- name: Template >> /etc/dhcp/dhcpd.{{ item }}.conf
+- name: "Template >> {{ advanced_dhcp_server_conf_dir }}/dhcpd.{{ item }}.conf"
   ansible.builtin.template:
     src: dhcpd.subnet.conf.j2
-    dest: /etc/dhcp/dhcpd.{{ item }}.conf
+    dest: "{{ advanced_dhcp_server_conf_dir }}/dhcpd.{{ item }}.conf"
     owner: root
     group: root
     mode: 0644
