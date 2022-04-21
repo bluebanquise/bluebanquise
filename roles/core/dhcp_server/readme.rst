@@ -54,10 +54,12 @@ Resulting example network could be:
 Finally, note that the following parameters can be set in the inventory, to
 override default ones:
 
-* dhcp_server_default_lease_time (default to 600)
-* dhcp_server_max_lease_time (default to 7200)
+* dhcp_server_default_lease_time (default to 600) to set default lease time
+* dhcp_server_max_lease_time (default to 7200) to set max lease time
+* dhcp_server_ipxe_driver to set ipxe default EFI driver (see main BlueBanquise documentation, equipment profiles variables)
+* dhcp_server_ipxe_embed to set ipxe default embed script (see main BlueBanquise documentation, equipment profiles variables)
 
-Consider increasing the default values once your network is production ready.
+Consider increasing the default leases values once your network is production ready.
 
 Input
 ^^^^^
@@ -89,6 +91,8 @@ Optional inventory vars:
 
 * dhcp_server_default_lease_time
 * dhcp_server_max_lease_time
+* dhcp_server_ipxe_driver
+* dhcp_server_ipxe_embed
 
 * network[item]
    * .dhcp_unknown_range
@@ -117,6 +121,7 @@ Files generated:
 Changelog
 ^^^^^^^^^
 
+* 1.4.0: Add capability to choose ipxe ROM. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.2.0: Update role to work with OpenSuSE. Neil Munday <neil@mundayweb.com>
 * 1.1.2: Prevent unsorted ranges. Benoit Leveugle <benoit.leveugle@gmail.com>
