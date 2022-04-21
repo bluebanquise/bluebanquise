@@ -8,5 +8,24 @@
 Name={{ item.conn_name | default(item.interface) | string }}
 [Network]
 Address={{ j2.nic_ip4(item) | trim }}
+{% if j2.nic_gw4(item) | length > 0 %}
 Gateway={{ j2.nic_gw4(item) | trim }}
+{% endif %}
+{% if j2.nic_dns4(item) | length > 0 %}
 DNS={{ j2.nic_dns4(item) | trim }}
+{% endif %}
+
+{% set route_buffer = (j2.nic_routes4(item) | from_yaml_all) %}
+{% if route_buffer[0] is defined and route_buffer[0] %}
+  {% for routes in route_buffer[0] %}
+    {% set route = routes | string | split(' ') %}
+[Route]
+Destination={{ route[0] }}
+Gateway={{ route[1] }}
+    {% if route[2] is defined %}
+Metric={{ route[2] }}
+    {% endif %}
+
+  {% endfor %}
+{% endif %}
+

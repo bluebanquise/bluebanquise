@@ -44,3 +44,12 @@
   {{ networks[item.network]['services_ip']['dns_ip'] }}
 {% endif %}
 {% endmacro %}
+
+{% macro nic_routes4(item)%}
+{% if item.routes4 is defined %}
+  {{ item.routes4 }}
+{% elif item.network is defined and networks[item.network]['routes4'] is defined %}
+  {{ networks[item.network]['routes4'] }}
+{% endif %}
+{% endmacro %}
+
