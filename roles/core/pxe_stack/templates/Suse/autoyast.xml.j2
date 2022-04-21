@@ -52,7 +52,7 @@
     </patterns>
     <packages config:type="list">
       <package>openssh-server</package>
-    {% if pxe_stack_enable_root %}
+    {% if not pxe_stack_enable_root %}
       <package>sudo</package>
     {% endif %}
     </packages>

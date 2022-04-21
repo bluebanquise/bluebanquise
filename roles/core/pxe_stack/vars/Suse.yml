@@ -17,6 +17,7 @@ pxe_stack_packages_to_install:
 pxe_stack_default_tftp_package: tftp
 pxe_stack_services_to_start:
   - httpd
+  - tftp
 pxe_stack_default_tftp_service: tftp
 pxe_stack_firewall_services_to_add:
   - http
