@@ -1,12 +1,12 @@
 ---
 - name: install █ Add grafana group
-  group:
+  ansible.builtin.group:
     name: grafana
     gid: "{{ grafana_user_gid }}"
     state: present
 
 - name: install █ Add grafana user
-  user:
+  ansible.builtin.user:
     name: grafana
     shell: /bin/false
     uid: "{{ grafana_user_uid }}"
@@ -15,7 +15,7 @@
     state: present
 
 - name: "install █ Add services to firewall's {{ grafana_firewall_zone | default('public') }} zone"
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ grafana_firewall_zone | default('public') }}"
     service: "{{ item }}"
     immediate: "yes"
@@ -30,7 +30,7 @@
     - firewall
 
 - name: "install █ Install {{ grafana_packages_to_install | join(' ') }} packages"
-  package:
+  ansible.builtin.package:
     name: "{{ grafana_packages_to_install }}"
     state: present
   tags:
