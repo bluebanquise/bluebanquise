@@ -301,6 +301,31 @@ high_availability_resources:
 
 Type can be `prefers` and `avoids`.
 
+#### 2.4.3. Order constraint
+
+This setting allows the definition of order between resource groups.
+For example, to set group dns to start after group http:
+
+```yaml
+high_availability_resources:
+  - group: http
+    resources:
+      - id: vip-http
+        type: IPaddr2
+        arguments: "ip=10.10.0.7 cidr_netmask=255.255.0.0"
+      - id: service-http
+        type: systemd:httpd
+  - group: dns
+    resources:
+      - id: vip-dns
+        type: IPaddr2
+        arguments: "ip=10.10.0.8 cidr_netmask=255.255.0.0"
+      - id: service-dns
+        type: systemd:named
+    order:
+      - start_after: http
+```
+
 ### 2.5. Stonith
 
 Stonith (for "Shoot The Other Node In The Head") allows to prevent issues when a
@@ -557,6 +582,7 @@ not present. Then in HA resources, declare the following:
 
 ## 5. Changelog
 
+* 1.0.4: Allows order constraint between resource groups. Thiago Cardozo <thiago.cardozo@yahoo.com.br>
 * 1.0.3: Fix use of unencrypted password of hacluster user. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.0.2: Enable/disable STONITH when configuration is available/unavailable. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.0.1: Configure firewall before pcs commands. Giacomo Mc Evoy <gino.mcevoy@gmail.com>

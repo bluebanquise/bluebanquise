@@ -149,6 +149,18 @@
         label: "resource : {{ item.1.id }}"
       notify: command █ Push HA configuration
 
+    - name: command █ Set order constraints
+      command: "pcs -f {{ high_availability_cib_file_path }} constraint order start {{ item.1.start_after }} then start {{ item.0.group }}"
+      register: cmd
+      changed_when: cmd.rc == 0
+      failed_when:
+        - cmd.rc != 0
+        - "'already exists' not in cmd.stderr"
+      loop: "{{ lookup('subelements', high_availability_resources, 'order', {'skip_missing': True}, wantlist=True) }}"
+      loop_control:
+        label: "order : {{ item.0.group }} {{ item.1.start_after }}"
+      notify: command █ Push HA configuration
+
     - name: command █ Set colocation constraints
       command: "pcs -f {{ high_availability_cib_file_path }} constraint colocation add {{ ('master' in item.1) | ternary(item.1.master, item.0.group) }} with {{ ('slave' in item.1) | ternary(item.1.slave, item.0.group) }} {{ ('score' in item.1) | ternary('score=' + item.1.score, '') }}"
       register: cmd

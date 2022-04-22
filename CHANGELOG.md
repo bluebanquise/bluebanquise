@@ -1,6 +1,13 @@
 # Changelog
 
-## 1.5.0 - Next release
+## 1.5.1
+
+### Updated roles
+
+  - high_availability:
+    - Allows order constraint between resource groups (#58)
+
+## 1.5.0
 
 ### New roles
 
@@ -24,7 +31,7 @@
     - enable/disable STONITH when configuration is available/unavailable (#43)
     - fix use of unencrypted password of hacluster user (#45)
 
-  - podman: 
+  - podman:
     - correct logical operator to run local registry. (#33)
     - quotes in lists of registries. (#34)
 
