@@ -17,3 +17,6 @@ pxe_stack_sudo_is_passwordless: true
 
 # Preserve default sources list for Ubuntu
 pxe_stack_ubuntu_preserve_sources_list: true
+
+# Preserve default sources list for OpenSUSE
+pxe_stack_opensuse_preserve_sources_list: true
