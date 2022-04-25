@@ -79,7 +79,7 @@
     mode: '0755'
   with_flattened:
     - '{{ flexlm_licences }}'
-  when: 
+  when:
     - (item.lic_src|d())
     - item.lic_path
   tags:
@@ -94,7 +94,7 @@
     mode: 0640
   with_flattened:
     - '{{ flexlm_licences }}'
-  when: 
+  when:
     - (item.lic_src|d())
     - item.lic_path
   notify: ['restart flexlm services']
