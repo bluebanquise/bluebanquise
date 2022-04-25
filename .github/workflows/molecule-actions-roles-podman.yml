@@ -35,7 +35,8 @@ jobs:
         uses: actions/checkout@v3
       - name: Setup python environment
         uses: actions/setup-python@v3
-        with: python3.6
+        with:
+          python-version: '3.8'
       - name: Install packages
         run: |
           pip uninstall ansible ansible-base
