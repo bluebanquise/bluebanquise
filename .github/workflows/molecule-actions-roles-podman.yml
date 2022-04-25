@@ -39,7 +39,6 @@ jobs:
           python-version: '3.8'
       - name: Install packages
         run: |
-          pip uninstall ansible ansible-base
           pip install tox
       - name: Run molecule test for roles/podman
         run: |

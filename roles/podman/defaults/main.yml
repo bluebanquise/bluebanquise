@@ -51,6 +51,7 @@ podman_storage_mountopt: 'nodev'
 # and get custom ~/.config/containers/libpod.conf
 podman_users:
   root: '100000:65535' # noqa
+
 # if you want i.e. the user vagrant to start unprivileged containers
 # you can do the following:
 # podman_users:
