@@ -3,23 +3,21 @@
 <!DOCTYPE profile>
 <profile xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http://www.suse.com/1.0/configns">
 
-{% if ep_operating_system['distribution'] == "SLES" %} 
   <add-on>
     <add_on_products config:type="list">
 {% for repo in repositories %}
   {% if repo != "os" %}
       <listentry>
-        <media_url>http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/{{ ep_operating_system['repositories_environment'] | default('') }}/{{ ep_operating_system['distribution'] }}/{{ ep_operating_system['distribution_version'] | default(ep_operating_system['distribution_major_version']) }}/{{ ep_hardware['cpu']['architecture'] }}/{{ repo }}</media_url>
-        <alias>{{ repo }}</alias>
+        <media_url>http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/{{ ep_operating_system['repositories_environment'] | default('') }}/{{ ep_operating_system['distribution'] }}/{{ ep_operating_system['distribution_version'] | default(ep_operating_system['distribution_major_version']) }}/{{ ep_hardware['cpu']['architecture'] }}/{{ repo.name | default(repo) }}</media_url>
+        <alias>{{ repo.name | default(repo) }}</alias>
         <ask_on_error config:type="boolean">false</ask_on_error>
         <confirm_license config:type="boolean">false</confirm_license>
-        <name>{{ repo }}</name>
+        <name>{{ repo.name | default(repo) }}</name>
       </listentry>
   {% endif %}
 {% endfor %}
     </add_on_products>
   </add-on>
-{% endif %}
 
   <keyboard>
     <keymap>{{hostvars[groups[item][0]]['ep_configuration']['keyboard_layout']|lower}}</keymap>
@@ -41,7 +39,7 @@
   </networking>
 
   <software>
-{% if ep_operating_system['distribution'] == "SLES" %} 
+{% if hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower == "sles" %}
     <products config:type="list">
       <product>SLES</product>
     </products>
@@ -204,6 +202,18 @@ curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$(hostna
 ]]>
         </source>
       </script>
+{% if hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower == "opensuse" and not pxe_stack_opensuse_preserve_sources_list %}
+      <script>
+        <chrooted config:type="boolean">true</chrooted>
+        <filename>chroot-post.sh</filename>
+        <interpreter>shell</interpreter>
+        <source><![CDATA[
+#!/bin/bash
+sed -i "s/enabled=1/enabled=0/" /etc/zypp/repos.d/repo-*
+]]>
+        </source>
+      </script>
+{% endif %}
     </chroot-scripts>
 {% if hostvars[groups[item][0]]['ep_autoinstall_post_script'] is defined and hostvars[groups[item][0]]['ep_autoinstall_post_script'] is not none %}
     <post-scripts config:type="list">
