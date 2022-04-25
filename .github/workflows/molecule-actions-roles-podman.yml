@@ -20,8 +20,9 @@ jobs:
       fail-fast: false
       matrix:
         distro:
-          - centos:7
-          - centos:8
+          - centos7:python3
+          - centos8:latest
+          - rockylinux8:latest
 
     env:
       MOLECULE_DISTRO: ${{ matrix.distro }}
