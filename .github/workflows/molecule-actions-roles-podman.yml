@@ -19,6 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        python-version: ['3.6','3.8','3.9','3.10']
         distro:
           - centos7
           - centos8
@@ -32,9 +33,11 @@ jobs:
       ANSIBLE_FORCE_COLOR: 1
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup python environment
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
       - name: Install packages
         run: |
           pip uninstall ansible ansible-base
