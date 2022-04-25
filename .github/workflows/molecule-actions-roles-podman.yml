@@ -23,7 +23,9 @@ jobs:
           - centos7
           - centos8
           - rockylinux8
-
+          - ubuntu1804
+          - ubuntu2004
+          - ubuntu2204
     env:
       MOLECULE_DISTRO: ${{ matrix.distro }}
       PY_COLORS: 1
@@ -35,6 +37,7 @@ jobs:
         uses: actions/setup-python@v1
       - name: Install packages
         run: |
+          pip uninstall ansible ansible-base
           pip install tox
       - name: Run molecule test for roles/podman
         run: |
