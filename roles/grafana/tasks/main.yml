@@ -10,7 +10,7 @@
   #
   # If no OS specific file is found, the role will default to vars/main.yml
   #
-  include_vars: "{{ item }}"
+  ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - files:
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
@@ -29,7 +29,7 @@
     - plugins
     - apikeys
 
-- include_tasks: preflight.yml
+- ansible.builtin.include_tasks: preflight.yml
   tags:
     - package
     - service
@@ -41,7 +41,7 @@
     - plugins
     - apikeys
 
-- include_tasks: preflight_ports.yml
+- ansible.builtin.include_tasks: preflight_ports.yml
   when: ansible_version.major > 2 and ansible_version.minor >= 9
   tags:
     - package
@@ -54,26 +54,26 @@
     - plugins
     - apikeys
 
-- include_tasks: install.yml
+- ansible.builtin.include_tasks: install.yml
   tags:
     - package
     - firewall
 
-- include_tasks: configure.yml
+- ansible.builtin.include_tasks: configure.yml
   tags:
     - service
     - configure
 
-- include_tasks: plugins.yml
+- ansible.builtin.include_tasks: plugins.yml
   when: grafana_plugins != []
   tags:
     - plugins
 
 - name: service █ Force all notified handlers to run at this point
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers
 
 - name: service █ Wait for grafana to start (http/s)
-  wait_for:
+  ansible.builtin.wait_for:
     host: "{{ grafana_address }}"
     port: "{{ grafana_port }}"
   when: grafana_server.protocol is undefined or grafana_server.protocol in ['http', 'https']
@@ -88,7 +88,7 @@
     - plugins
 
 - name: service █ Wait for grafana to start (socket)
-  wait_for:
+  ansible.builtin.wait_for:
     path: "{{ grafana_server.socket }}"
   when: grafana_server.protocol is defined and grafana_server.protocol == 'socket'
   tags:
@@ -109,7 +109,7 @@
   ignore_errors: yes
 
 - name: grafana █ Debug grafana-cli when  command is failing
-  debug:
+  ansible.builtin.debug:
     msg: "grafana-cli failed to set password {{ grafana_cli_var.stderr }}"
   when:
     - grafana_cli_var is defined
@@ -117,29 +117,29 @@
   failed_when: grafana_cli_var.rc != 0
   ignore_errors: yes
 
-- include_tasks: api_keys.yml
+- ansible.builtin.include_tasks: api_keys.yml
   when: grafana_api_keys | length > 0
   tags:
     - apikeys
 
-- include_tasks: datasources.yml
+- ansible.builtin.include_tasks: datasources.yml
   when: grafana_datasources != []
   tags:
     - datasources
 
 - name: "grafana █ Check if there are any dashboards in local {{ grafana_dashboards_dir }}"
-  set_fact:
+  ansible.builtin.set_fact:
     found_dashboards: "{{ lookup('fileglob', grafana_dashboards_dir + '/*.json', wantlist=True) }}"
   tags:
     - dashboards
 
-- include_tasks: dashboards.yml
+- ansible.builtin.include_tasks: dashboards.yml
   when: grafana_dashboards | length > 0 or found_dashboards | length > 0
   tags:
     - dashboards
 
 - name: grafana █ UI login information
-  debug:
+  ansible.builtin.debug:
     msg:
       - '###############################################################'
       - 'Grafana UI access:'

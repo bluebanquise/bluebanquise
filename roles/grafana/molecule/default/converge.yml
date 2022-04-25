@@ -7,7 +7,7 @@
     enable_services: true
   tasks:
     - name: "Enable firewall for EL8"
-      set_fact:
+      ansible.builtin.set_fact:
         ep_firewall: true
       when:
         - ansible_facts.os_family == "RedHat"
@@ -15,7 +15,7 @@
         - ansible_facts.services['firewalld'] is defined
 
     - name: "Include grafana"
-      include_role:
+      ansible.builtin.include_role:
         name: "grafana"
       vars:
         - grafana_port: '9000'
