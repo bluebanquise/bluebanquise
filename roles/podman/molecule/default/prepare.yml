@@ -5,7 +5,7 @@
 
   tasks:
     - name: "Install firewalld and net-tools"
-      package:
+      ansible.builtin.package:
         name: "{{ item }}"
       when: ansible_facts.os_family == "RedHat"
       with_items:
@@ -13,7 +13,7 @@
         - net-tools
 
     - name: "Start firewalld"
-      service:
+      ansible.builtin.service:
         name: firewalld
         state: started
       when:
