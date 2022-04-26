@@ -51,22 +51,24 @@
     - "{{ grafana_data_dir }}/dashboards"
     - "{{ grafana_data_dir }}/plugins"
 
-- block:
-  - name: configure █ Create grafana socket directory
-    ansible.builtin.file:
-      path: "{{ grafana_server.socket | dirname }}"
-      state: directory
-      mode: 0775
-      owner: "grafana"
-      group: "grafana"
+- name: configure █ Create grafana socket directory
+  ansible.builtin.file:
+    path: "{{ grafana_server.socket | dirname }}"
+    state: directory
+    mode: 0775
+    owner: "grafana"
+    group: "grafana"
+  when:
+    - grafana_server.protocol is defined and grafana_server.protocol == 'socket'
+    - grafana_server.socket | dirname != '/var/run'
 
-  - name: configure █ Ensure grafana socket directory created on startup
-    ansible.builtin.template:
-      src: tmpfiles.j2
-      dest: /etc/tmpfiles.d/grafana.conf
-      owner: root
-      group: root
-      mode: 0640
+- name: configure █ Ensure grafana socket directory created on startup
+  ansible.builtin.template:
+    src: tmpfiles.j2
+    dest: /etc/tmpfiles.d/grafana.conf
+    owner: root
+    group: root
+    mode: 0640
   when:
     - grafana_server.protocol is defined and grafana_server.protocol == 'socket'
     - grafana_server.socket | dirname != '/var/run'
