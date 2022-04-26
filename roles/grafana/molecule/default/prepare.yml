@@ -5,7 +5,7 @@
 
   tasks:
     - name: "Install firewalld and net-tools"
-      package:
+      ansible.builtin.package:
         name: "{{ item }}"
       when: ansible_facts.os_family == "RedHat"
       with_items:
@@ -13,7 +13,7 @@
         - net-tools
 
     - name: "Start firewalld"
-      service:
+      ansible.builtin.service:
         name: firewalld
         state: started
       when: 
@@ -21,7 +21,7 @@
         - ansible_facts.services['firewalld'] is defined
 
     - name: "Configure Grafana repository for EL7/8"
-      yum_repository:
+      ansible.builtin.yum_repository:
         name: grafana
         description: Grafana repository
         baseurl: https://packages.grafana.com/oss/rpm

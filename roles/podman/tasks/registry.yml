@@ -1,6 +1,6 @@
 ---
 - name: registry █ Create local directory
-  file:
+  ansible.builtin.file:
     path: "{{ podman_local_registry_dir }}"
     state: directory
     owner: "{{ podman_local_registry_owner | default(root) }}"
@@ -8,16 +8,16 @@
     mode: '0644'
 
 - name: registry █ Check the path of the registry container
-  stat:
+  ansible.builtin.stat:
     path: "{{ podman_registry_container_path }}"
   register: p
 
 - name: registry █ Load local registry container
-  command: "podman load -i {{ podman_registry_container_path }}"
+  ansible.builtin.command: "podman load -i {{ podman_registry_container_path }}"
   changed_when: false
 
 - name: firewalld █ "Add registry port to firewall's {{ ha_firewall_zone | default('public') }} zone"
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ ha_firewall_zone | default('public') }}"
     port: "{{ podman_local_registry_port }}/tcp"
     immediate: "yes"
@@ -28,24 +28,24 @@
     - firewall
 
 - name: template █ Install registry service file
-  template:
+  ansible.builtin.template:
     src: registry.service.j2
     dest: /etc/systemd/system/registry.service
     owner: root
     group: root
-    force: yes
+    force: true
     mode: 0655
   tags:
     - service
 
 - name: systemd █ Reload systemd
-  systemd:
-    daemon_reload: yes
+  ansible.builtin.systemd:
+    daemon_reload: true
   tags:
     - service
 
 - name: service █ Manage registry state
-  service:
+  ansible.builtin.service:
     name: registry
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
     state: "{{ (start_services | bool) | ternary('started', omit) }}"

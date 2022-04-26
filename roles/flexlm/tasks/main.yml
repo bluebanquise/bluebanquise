@@ -1,7 +1,7 @@
 ---
 # Load vars
 - name: flexlm █ Load specific OS vars
-  include_vars: "{{ item }}"
+  ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - files:
         - "{{ ansible_distribution|lower }}-{{ ansible_distribution_release }}.yml"
@@ -14,7 +14,7 @@
 
 # Manage required system packages
 - name: flexlm █ Ensure required packages are in there desired state
-  package:
+  ansible.builtin.package:
     name: '{{ item }}'
     state: '{{ "present" if (flexlm_deploy_state == "present") else "absent" }}'
   with_flattened:
@@ -26,7 +26,7 @@
 
 # user
 - name: flexlm █ Create flexlm user
-  user:
+  ansible.builtin.user:
     name: '{{ flexlm_user_name }}'
     createhome: false
     system: true
@@ -36,7 +36,7 @@
 
 # Create a symlink for /tmp
 - name: flexlm █ Symlink /usr/tmp
-  file:
+  ansible.builtin.file:
     src: /tmp
     dest: /usr/tmp
     state: link
@@ -46,7 +46,7 @@
 
 # Create a symlink for libs
 - name: flexlm █ Symlinks to /lib64/ld-linux-x86-64.so.2
-  file:
+  ansible.builtin.file:
     src: /lib64/ld-linux-x86-64.so.2
     dest: '{{ item }}'
     state: link
@@ -59,7 +59,7 @@
 
 # Vendor and licence
 - name: flexlm █ Add Vendor daemon
-  copy:
+  ansible.builtin.copy:
     src: '{{ item.bin_src }}'
     dest: '{{ item.bin_path | d("/opt/" + item.name + "/bin") }}'
     owner: '{{ flexlm_user_name }}'
@@ -73,20 +73,20 @@
     - configure
 
 - name: flexlm █ Create lic_path if needed
-  file:
+  ansible.builtin.file:
     path: "{{ item.lic_path | basename }}"
     state: directory
     mode: '0755'
   with_flattened:
     - '{{ flexlm_licences }}'
-  when: 
+  when:
     - (item.lic_src|d())
     - item.lic_path
   tags:
     - configure
 
 - name: flexlm █ Add licence file
-  copy:
+  ansible.builtin.copy:
     src: '{{ item.lic_src }}'
     dest: '{{ item.lic_path }}'
     owner: '{{ flexlm_user_name }}'
@@ -94,7 +94,7 @@
     mode: 0640
   with_flattened:
     - '{{ flexlm_licences }}'
-  when: 
+  when:
     - (item.lic_src|d())
     - item.lic_path
   notify: ['restart flexlm services']
@@ -104,7 +104,7 @@
 # Manage services
 
 - name: flexlm █ Add systemd unit
-  template:
+  ansible.builtin.template:
     src: '{{ flexlm_service_unit_content }}'
     dest: '{{ "/etc/systemd/system/flexlm-" + item.name + ".service" }}'
     owner: 'root'
@@ -119,7 +119,7 @@
     - service
 
 - name: flexlm █ Manage flexlm services
-  service:
+  ansible.builtin.service:
     name: '{{ "flexlm-" + item.name }}'
     state: '{{ "started" if (flexlm_deploy_state == "present" and (item.service | d(true) | bool)) else "stopped" }}'
     enabled: '{{ item.service | d(true) | bool }}'

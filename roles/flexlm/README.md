@@ -63,4 +63,5 @@ This role is validated on:
 
 ## Changelog
 
+* 1.0.1: Update all module to full path. Matthieu Isoard
 * 1.0.0: Initial support. Matthieu Isoard

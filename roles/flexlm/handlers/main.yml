@@ -1,7 +1,7 @@
 ---
 # handlers file for flexlm
 - name: restart flexlm services
-  service:
+  ansible.builtin.service:
     name: '{{ "flexlm-" + item.name }}'
     state: '{{ "restarted" if (flexlm_deploy_state == "present" and (item.service | d(True) | bool)) else "stopped" }}'
     enabled: '{{ item.service | d(True) | bool }}'
@@ -12,5 +12,5 @@
     - (start_services | bool)
 
 - name: systemd daemon reload
-  systemd:
-    daemon_reload: True
+  ansible.builtin.systemd:
+    daemon_reload: true

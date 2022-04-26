@@ -7,7 +7,7 @@
     enable_services: true
   tasks:
     - name: "Enable firewall for EL8"
-      set_fact:
+      ansible.builtin.set_fact:
         ep_firewall: true
       when:
         - ansible_facts.os_family == "RedHat"

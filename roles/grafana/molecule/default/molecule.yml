@@ -8,10 +8,8 @@ lint: |
   yamllint .
 platforms:
   - name: instance
-    image: "quay.io/actatux/ansible-${MOLECULE_DISTRO:-centos:8}"
-    override_command: false
-    capabilities:
-      - "SYS_ADMIN"
+    image: "geerlingguy/docker-${MOLECULE_DISTRO:-centos7}-ansible:latest"
+    command: ${MOLECULE_DOCKER_COMMAND:-""}
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
     privileged: true

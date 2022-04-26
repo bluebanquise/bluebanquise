@@ -1,6 +1,6 @@
 ---
 - name: restart grafana
-  service:
+  ansible.builtin.service:
     name: "{{ item  }}"
     state: restarted
     daemon_reload: true
@@ -10,7 +10,7 @@
     - (start_services | bool)
 
 - name: Set privileges on provisioned dashboards
-  file:
+  ansible.builtin.file:
     path: "{{ grafana_data_dir }}/dashboards"
     recurse: true
     owner: grafana
@@ -19,7 +19,7 @@
   listen: "provisioned dashboards changed"
 
 - name: Set privileges on provisioned dashboards directory
-  file:
+  ansible.builtin.file:
     path: "{{ grafana_data_dir }}/dashboards"
     state: directory
     recurse: false

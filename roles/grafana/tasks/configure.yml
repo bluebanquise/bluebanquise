@@ -1,6 +1,6 @@
 ---
 - name: configure █ Ensure grafana configuration directories exist
-  file:
+  ansible.builtin.file:
     path: "{{ item }}"
     state: directory
     owner: root
@@ -16,7 +16,7 @@
     - "/etc/grafana/provisioning/plugins"
 
 - name: configure █ Create grafana main configuration file
-  template:
+  ansible.builtin.template:
     src: grafana.ini.j2
     dest: /etc/grafana/grafana.ini
     owner: root
@@ -26,7 +26,7 @@
   notify: restart grafana
 
 - name: configure █ Create grafana LDAP configuration file
-  template:
+  ansible.builtin.template:
     src: ldap.toml.j2
     dest: "{{ grafana_auth.ldap.config_file | default('/etc/grafana/ldap.toml') }}"
     owner: root
@@ -39,7 +39,7 @@
   notify: restart grafana
 
 - name: configure █ Create grafana directories
-  file:
+  ansible.builtin.file:
     path: "{{ item }}"
     state: directory
     mode: 0755
@@ -53,7 +53,7 @@
 
 - block:
   - name: configure █ Create grafana socket directory
-    file:
+    ansible.builtin.file:
       path: "{{ grafana_server.socket | dirname }}"
       state: directory
       mode: 0775
@@ -61,7 +61,7 @@
       group: "grafana"
 
   - name: configure █ Ensure grafana socket directory created on startup
-    template:
+    ansible.builtin.template:
       src: tmpfiles.j2
       dest: /etc/tmpfiles.d/grafana.conf
       owner: root
@@ -72,7 +72,7 @@
     - grafana_server.socket | dirname != '/var/run'
 
 - name: configure █ Enable grafana to ports lower than port 1024
-  capabilities:
+  community.general.capabilities:
     path: /usr/sbin/grafana-server
     capability: CAP_NET_BIND_SERVICE+ep
     state: present

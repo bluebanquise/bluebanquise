@@ -1,6 +1,6 @@
 ---
 - name: conf █ Configure /etc/container/*.conf
-  template:
+  ansible.builtin.template:
     src: "{{ item }}.j2"
     dest: "/{{ item }}"
     owner: root
