@@ -40,7 +40,7 @@ grafana_server:
 # Security
 grafana_security:
   admin_user: admin
-  # Please do not change the default password, you need to change it 
+  # Please do not change the default password, you need to change it
   # only if you update it throught the UI/REST APIs afterwards
   admin_password: admin
 #  secret_key: ""

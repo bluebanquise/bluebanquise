@@ -103,10 +103,10 @@
 
 - name: grafana █ Ensure password is set to the one in the role variables
   ansible.builtin.command: "grafana-cli admin reset-admin-password {{ grafana_security.admin_password }}"
-  changed_when: False
+  changed_when: false
   no_log: true
   register: grafana_cli_var
-  ignore_errors: yes
+  ignore_errors: true
 
 - name: grafana █ Debug grafana-cli when  command is failing
   ansible.builtin.debug:
@@ -114,8 +114,8 @@
   when:
     - grafana_cli_var is defined
     - grafana_cli_var.rc != 0
-  failed_when: grafana_cli_var.rc != 0
-  ignore_errors: yes
+  failed_when: false
+  changed_when: false
 
 - ansible.builtin.include_tasks: api_keys.yml
   when: grafana_api_keys | length > 0

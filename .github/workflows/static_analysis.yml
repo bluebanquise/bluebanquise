@@ -2,7 +2,7 @@ name: Static code analysis
 on:
   push:
     branches:
-      - main
+      - master
     paths-ignore:
       - '**.md'
       - '**.rst'
@@ -17,25 +17,82 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup python environment
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v3
 
       - name: Install packages
-        run: pip install ansible ansible-lint flake8
+        run: pip install ansible ansible-lint flake8 yamllint
 
-      - name: Run ansible linter role/flexlm
-        run: cd roles/flexlm && ansible-lint -v -x 204
+      - name: Check python code
+        run: flake8 . --statistics --ignore E501,E226 --extend-exclude=roles/automate/,roles/clone/,roles/display_tuning/,roles/drbd/,roles/generic_psf/,roles/haproxy/,roles/high_availability/,roles/lmod/,roles/loki/,roles/nhc/,roles/nvidia/,roles/ofed/,roles/openldap/,roles/prometheus/,roles/rasdaemon/,roles/report/,roles/slurm/,roles/update_reboot/,roles/users_basic/
 
-      - name: Check python code role/grafana
-        run: cd roles/grafana && flake8 . --statistics --ignore E501,E226
+      # - name: Run ansible linter for automate
+      #   run: ansible-lint roles/automate
 
-      - name: Run ansible linter role/grafana
-        run: cd roles/grafana && ansible-lint -v -x 204
+      # - name: Run ansible linter for clone
+      #   run: ansible-lint roles/clone
+
+      # - name: Run ansible linter for display_tuning
+      #   run: ansible-lint roles/display_tuning
+
+      # - name: Run ansible linter for drbd
+      #   run: ansible-lint roles/drbd
       
-      - name: Check python code role/podman
-        run: cd roles/podman && flake8 . --statistics --ignore E501,E226
+      - name: Run ansible linter for flexlm
+        run: ansible-lint roles/flexlm
 
-      - name: Run ansible linter role/podman
-        run: cd roles/podman && ansible-lint -v -x 204
+      # - name: Run ansible linter for generic_psf
+      #   run: ansible-lint roles/generic_psf
+      
+      - name: Run ansible linter for grafana
+        run: ansible-lint roles/grafana
+      
+      # - name: Run ansible linter for haproxy
+      #   run: ansible-lint roles/haproxy
+
+      # - name: Run ansible linter for high_availability
+      #   run: ansible-lint roles/high_availability
+
+      # - name: Run ansible linter for lmod
+      #   run: ansible-lint roles/lmod
+
+      # - name: Run ansible linter for loki
+      #   run: ansible-lint roles/loki
+
+      # - name: Run ansible linter for nhc
+      #   run: ansible-lint roles/nhc
+
+      # - name: Run ansible linter for nvidia
+      #   run: ansible-lint roles/nvidia
+
+      # - name: Run ansible linter for ofed
+      #   run: ansible-lint roles/ofed
+
+      # - name: Run ansible linter for openldap
+      #   run: ansible-lint roles/openldap
+
+      - name: Run ansible linter for podman
+        run: ansible-lint roles/podman
+      
+      # - name: Run ansible linter for prometheus
+      #   run: ansible-lint roles/prometheus
+
+      # - name: Run ansible linter for rasdaemon
+      #   run: ansible-lint roles/rasdaemon
+
+      # - name: Run ansible linter for report
+      #   run: ansible-lint roles/report
+      
+      - name: Run ansible linter for singularity
+        run: ansible-lint roles/singularity
+      
+      # - name: Run ansible linter for slurm
+      #   run: ansible-lint roles/slurm
+
+      # - name: Run ansible linter for update_reboot
+      #   run: ansible-lint roles/update_reboot
+
+      # - name: Run ansible linter for users_basic
+      #   run: ansible-lint roles/user_basics

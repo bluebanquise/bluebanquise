@@ -1,8 +1,8 @@
 ---
-singularity_role_version: 1.0.0
+singularity_role_version: 1.0.1
 
 singularity_packages_to_install:
-  - singularity
+  - singularity-ce
 
 singularity_config_dir: "/etc/singularity"
 
