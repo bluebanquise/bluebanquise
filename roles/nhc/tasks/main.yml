@@ -10,7 +10,7 @@
   #
   # If no OS specific file is found, the role will default to vars/main.yml
   #
-  include_vars: "{{ item }}"
+  ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - files:
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
@@ -23,12 +23,12 @@
     - package
 
 - name: "package █ Install nhc and additional packages"
-  package:
+  ansible.builtin.package:
     name: "{{ nhc_packages_to_install + nhc_custom_packages_to_install }}"
     state: present
 
 - name: template █ Generate nhc configuration file
-  template:
+  ansible.builtin.template:
     src: nhc.conf.j2
     dest: /etc/nhc/nhc.conf
     owner: root
@@ -37,7 +37,7 @@
   when: "'nhc.conf' not in (nhc_files | default([]) | selectattr('name','defined') | map(attribute='name') | list)"
 
 - name: template █ Copy nhc custom files
-  template:
+  ansible.builtin.template:
     src: nhc_custom_file.j2
     dest: "/etc/nhc/{{ item.name }}"
     owner: root

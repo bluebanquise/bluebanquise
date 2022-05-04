@@ -1,14 +1,14 @@
 ---
 
 - name: group █ Add users groups
-  group:
+  ansible.builtin.group:
     name: "{{ item.name }}"
     gid: "{{ item.gid }}"
     state: "{{ item.state | default('present') }}"
   with_items: "{{ users_basic.users }}"
 
 - name: user █ Add/remove users
-  user:
+  ansible.builtin.user:
     name: "{{ item.name }}"
     comment: "{{ item.comment | default(omit) }}"
     uid: "{{ item.uid }}"
@@ -27,7 +27,7 @@
   with_items: "{{ users_basic.users }}"
 
 - name: authorized_key █ Manage user authorized_keys if exist
-  authorized_key:
+  ansible.posix.authorized_key:
     user: "{{ item.name }}"
     key: "{{ item.ssh_key }}"
     state: present

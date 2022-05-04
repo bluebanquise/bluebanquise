@@ -1,6 +1,6 @@
 ---
 - name: copy █ Copy munge.key to /etc/munge/munge.key
-  copy:
+  ansible.builtin.copy:
     src: munge.key
     dest: /etc/munge/munge.key
     owner: munge
@@ -9,7 +9,7 @@
   notify: service █ Restart munge
 
 - name: service █ Manage munge state
-  service:
+  ansible.builtin.service:
     name: munge
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
     state: "{{ (start_services | bool) | ternary('started', omit) }}"

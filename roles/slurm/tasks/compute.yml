@@ -1,6 +1,6 @@
 ---
 - name: "firewalld █ Add services to firewall's {{ slurm_firewall_zone | default('public') }} zone"
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ slurm_firewall_zone | default('public') }}"
     port: "{{ slurm_slurmd_port }}/tcp"
     immediate: "yes"
@@ -13,7 +13,7 @@
     - firewall
 
 - name: "copy █ Copy cgroup.conf to {{ slurm_home_path }}/cgroup.conf"
-  copy:
+  ansible.builtin.copy:
     src: cgroup.conf
     dest: "{{ slurm_home_path }}/cgroup.conf"
     owner: slurm
@@ -21,10 +21,10 @@
     mode: 0644
 
 - name: include_tasks ░ Deploy Slurm compute configuration
-  include_tasks: "compute_{{ slurm_computes_config }}.yml"
+  ansible.builtin.include_tasks: "compute_{{ slurm_computes_config }}.yml"
 
 - name: service █ Manage slurmd state
-  service:
+  ansible.builtin.service:
     name: slurmd
     enabled: yes
     state: started

@@ -1,6 +1,6 @@
 ---
 - name: service █ Restart http server
-  service:
+  ansible.builtin.service:
     name: httpd
     state: restarted
   when:

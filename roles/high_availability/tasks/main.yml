@@ -1,6 +1,6 @@
 ---
 - name: package █ Install packages
-  package:
+  ansible.builtin.package:
     name: "{{item}}"
     state: present
   tags:
@@ -12,12 +12,12 @@
     - fence-agents-all
 
 - name: group █ Create cluster system group
-  group:
+  ansible.builtin.group:
     name: haclient
     state: present
 
 - name: user █ Create cluster system user
-  user:
+  ansible.builtin.user:
     name: hacluster
     state: present
     password: "{{ high_availability_ha_cluster_password_sha512 }}"
@@ -25,19 +25,19 @@
     comment: 'HA Cluster Administrator'
 
 - name: service █ Enable and start PCSD service
-  service:
+  ansible.builtin.service:
     name: pcsd
     enabled: true
     state: started
 
 - name: command █ Check nodes already registered
-  command: "cat /var/lib/pcsd/known-hosts"
+  ansible.builtin.command: "cat /var/lib/pcsd/known-hosts"
   register: pcs_known_hosts
   changed_when: False
   ignore_errors: yes
 
 - name: firewalld █ "Add services to firewall's {{ ha_firewall_zone | default('public') }} zone"
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ ha_firewall_zone | default('public') }}"
     service: high-availability
     immediate: "yes"
@@ -53,38 +53,38 @@
   block:
 
     - name: command █ Register nodes
-      command: "pcs host auth {{ item.name }} -u hacluster -p {{ high_availability_ha_cluster_password }}"
+      ansible.builtin.command: "pcs host auth {{ item.name }} -u hacluster -p {{ high_availability_ha_cluster_password }}"
       loop: "{{ high_availability_cluster_nodes }}"
       when: ( pcs_known_hosts.stdout_lines | select("match", ".*"+item.name+".*") | list | length ) < 1
 
     - name: command █ Check cluster exist
-      command: "cat /etc/corosync/corosync.conf"
+      ansible.builtin.command: "cat /etc/corosync/corosync.conf"
       register: corosync_known_hosts
       changed_when: False
       ignore_errors: yes
 
     - name: command █ Register reference node
-      command: "pcs cluster setup ha_cluster {{ item.name }} {% for addr in item.addrs %}addr={{ addr }} {% endfor %}"
+      ansible.builtin.command: "pcs cluster setup ha_cluster {{ item.name }} {% for addr in item.addrs %}addr={{ addr }} {% endfor %}"
       loop: "{{ high_availability_cluster_nodes }}"
       when:
         - ( corosync_known_hosts.stdout_lines | select("match", ".*"+high_availability_reference_node+".*") | list | length ) < 1
         - item.name == "{{ high_availability_reference_node }}"
 
     - name: command █ Check nodes already in corosync
-      command: "cat /etc/corosync/corosync.conf"
+      ansible.builtin.command: "cat /etc/corosync/corosync.conf"
       register: corosync_known_hosts
       changed_when: False
       ignore_errors: yes
 
     - name: command █ Register other nodes
-      command: "pcs cluster node add {{ item.name }} {% for addr in item.addrs %}addr={{ addr }} {% endfor %} --force"
+      ansible.builtin.command: "pcs cluster node add {{ item.name }} {% for addr in item.addrs %}addr={{ addr }} {% endfor %} --force"
       loop: "{{ high_availability_cluster_nodes }}"
       when:
         - ( corosync_known_hosts.stdout_lines | select("match", ".*name:\\s"+item.name+".*") | list | length ) < 1
         - item.name != "{{ high_availability_reference_node }}"
 
 - name: service █ Enable and start cluster
-  service:
+  ansible.builtin.service:
     name: "{{ item }}"
     enabled: true
     state: started
@@ -98,47 +98,47 @@
   block:
 
     - name: command █ Check cluster properties
-      command: "pcs property"
+      ansible.builtin.command: "pcs property"
       register: pcs_property
       changed_when: False
       ignore_errors: yes
 
     - name: command █ Set properties
-      command: "pcs property set {{ item.name }}={{ item.value }}"
+      ansible.builtin.command: "pcs property set {{ item.name }}={{ item.value }}"
       loop: "{{ high_availability_pcs_property | default([]) }}"
       when:
         - ( pcs_property.stdout_lines | select("match", ".*"+item.name+":\\s"+(item.value|string)+".*" ) | list | length) < 1
 
     - name: command █ Check cluster resource op defaults
-      command: "pcs resource op defaults"
+      ansible.builtin.command: "pcs resource op defaults"
       register: pcs_resource_op_defaults
       changed_when: False
       ignore_errors: yes
 
     - name: command █ Set cluster resource op defaults
-      command: "pcs resource op defaults update {{ item.name }}={{ item.value }}"
+      ansible.builtin.command: "pcs resource op defaults update {{ item.name }}={{ item.value }}"
       loop: "{{ high_availability_pcs_resource_op_defaults | default([]) }}"
       when:
         - ( pcs_resource_op_defaults.stdout_lines | select("match", ".*"+item.name+"="+(item.value|string)+".*") | list | length ) < 1
 
     - name: command █ Check cluster resource defaults
-      command: "pcs resource defaults"
+      ansible.builtin.command: "pcs resource defaults"
       register: pcs_resource_defaults
       changed_when: False
       ignore_errors: yes
 
     - name: command █ Set cluster resource defaults
-      command: "pcs resource defaults update {{ item.name }}={{ item.value }}"
+      ansible.builtin.command: "pcs resource defaults update {{ item.name }}={{ item.value }}"
       loop: "{{ high_availability_pcs_resource_defaults | default([]) }}"
       when:
         - ( pcs_resource_defaults.stdout_lines | select("match", ".*"+item.name+"="+(item.value|string)+".*") | list | length ) < 1
 
     - name: command █ Store current configuration into cib file
-      command: "pcs cluster cib {{ high_availability_cib_file_path }}"
+      ansible.builtin.command: "pcs cluster cib {{ high_availability_cib_file_path }}"
       changed_when: false
 
     - name: command █ Add resources to cluster
-      command: "pcs -f {{ high_availability_cib_file_path }} resource create {{ item.1.id }} {{ item.1.type }} {{ ('arguments' in item.1) | ternary(item.1.arguments, '') }} {{ (item.0.group) | ternary('--group ' + item.0.group, '') }}"
+      ansible.builtin.command: "pcs -f {{ high_availability_cib_file_path }} resource create {{ item.1.id }} {{ item.1.type }} {{ ('arguments' in item.1) | ternary(item.1.arguments, '') }} {{ (item.0.group) | ternary('--group ' + item.0.group, '') }}"
       register: cmd
       changed_when: cmd.rc == 0
       failed_when:
@@ -150,7 +150,7 @@
       notify: command █ Push HA configuration
 
     - name: command █ Set order constraints
-      command: "pcs -f {{ high_availability_cib_file_path }} constraint order start {{ item.1.start_after }} then start {{ item.0.group }}"
+      ansible.builtin.command: "pcs -f {{ high_availability_cib_file_path }} constraint order start {{ item.1.start_after }} then start {{ item.0.group }}"
       register: cmd
       changed_when: cmd.rc == 0
       failed_when:
@@ -162,7 +162,7 @@
       notify: command █ Push HA configuration
 
     - name: command █ Set colocation constraints
-      command: "pcs -f {{ high_availability_cib_file_path }} constraint colocation add {{ ('master' in item.1) | ternary(item.1.master, item.0.group) }} with {{ ('slave' in item.1) | ternary(item.1.slave, item.0.group) }} {{ ('score' in item.1) | ternary('score=' + item.1.score, '') }}"
+      ansible.builtin.command: "pcs -f {{ high_availability_cib_file_path }} constraint colocation add {{ ('master' in item.1) | ternary(item.1.master, item.0.group) }} with {{ ('slave' in item.1) | ternary(item.1.slave, item.0.group) }} {{ ('score' in item.1) | ternary('score=' + item.1.score, '') }}"
       register: cmd
       changed_when: cmd.rc == 0
       failed_when:
@@ -174,7 +174,7 @@
       notify: command █ Push HA configuration
 
     - name: command █ Set location constraints
-      command: "pcs -f {{ high_availability_cib_file_path }} constraint location {{ item.0.group }} {{ item.1.type }} {{ item.1.nodes | join(' ') }}"
+      ansible.builtin.command: "pcs -f {{ high_availability_cib_file_path }} constraint location {{ item.0.group }} {{ item.1.type }} {{ item.1.nodes | join(' ') }}"
       register: cmd
       changed_when: cmd.rc == 0
       failed_when:
@@ -186,7 +186,7 @@
       notify: command █ Push HA configuration
 
     - name: command █ Create stonith
-      command: "pcs -f {{ high_availability_cib_file_path }} stonith create {{ item.name }} {{ item.type }} pcmk_host_check={{ item.pcmk_host_check }} {% if item.pcmk_host_check == 'static-list' %}pcmk_host_list={{item.pcmk_host_list}}{% endif %} pcmk_reboot_action={{ item.pcmk_reboot_action }} {{ item.parameters }}"
+      ansible.builtin.command: "pcs -f {{ high_availability_cib_file_path }} stonith create {{ item.name }} {{ item.type }} pcmk_host_check={{ item.pcmk_host_check }} {% if item.pcmk_host_check == 'static-list' %}pcmk_host_list={{item.pcmk_host_list}}{% endif %} pcmk_reboot_action={{ item.pcmk_reboot_action }} {{ item.parameters }}"
       register: cmd
       changed_when: cmd.rc == 0
       loop: "{{ high_availability_stonith }}"
@@ -197,7 +197,7 @@
       notify: command █ Push HA configuration
 
     - name: command █ Set stonith prefers constraint
-      command: "pcs -f {{ high_availability_cib_file_path }} constraint location {{ item.name }} prefers {{ item.prefers }}"
+      ansible.builtin.command: "pcs -f {{ high_availability_cib_file_path }} constraint location {{ item.name }} prefers {{ item.prefers }}"
       loop: "{{ high_availability_stonith }}"
       register: cmd
       changed_when: cmd.rc == 0
@@ -208,7 +208,7 @@
       notify: command █ Push HA configuration
 
     - name: command █ Set stonith avoids constraint
-      command: "pcs -f {{ high_availability_cib_file_path }} constraint location {{ item.name }} avoids {{ item.avoids }}"
+      ansible.builtin.command: "pcs -f {{ high_availability_cib_file_path }} constraint location {{ item.name }} avoids {{ item.avoids }}"
       register: cmd
       changed_when: cmd.rc == 0
       failed_when:
@@ -219,14 +219,14 @@
       notify: command █ Push HA configuration
 
     - name: command █ Disable stonith if it is not configured
-      command: "pcs -f {{ high_availability_cib_file_path }} property set stonith-enabled=false"
+      ansible.builtin.command: "pcs -f {{ high_availability_cib_file_path }} property set stonith-enabled=false"
       when:
         - (pcs_property.stdout_lines | select("match", ".*stonith-enabled:\\sfalse.*") | list | length) == 0
         - high_availability_stonith is not defined or not high_availability_stonith
       notify: command █ Push HA configuration
 
     - name: command █ Enable stonith if it has been properly configured
-      command: "pcs -f {{ high_availability_cib_file_path }} property set stonith-enabled=true"
+      ansible.builtin.command: "pcs -f {{ high_availability_cib_file_path }} property set stonith-enabled=true"
       when:
         - (pcs_property.stdout_lines | select("match", ".*stonith-enabled:\\strue.*") | list | length) == 0
         - high_availability_stonith is defined and high_availability_stonith

@@ -1,13 +1,13 @@
 ---
 
 - name: include_tasks ░ Setup infiniband client
-  include_tasks: "client.yml"
+  ansible.builtin.include_tasks: "client.yml"
   when: ofed_client
   tags:
     - internal
 
 - name: include_tasks ░ Setup infiniband subnet manager
-  include_tasks: "subnet_manager.yml"
+  ansible.builtin.include_tasks: "subnet_manager.yml"
   when: ofed_subnet_manager
   tags:
     - internal

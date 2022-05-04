@@ -1,12 +1,12 @@
 ---
 - name: group █ Add ipmi_exporter group
-  group:
+  ansible.builtin.group:
     name: ipmi_exporter
     gid: "{{ prometheus_server_ipmi_exporter_user_gid }}"
     state: present
 
 - name: user █ Add ipmi_exporter user
-  user:
+  ansible.builtin.user:
     name: ipmi_exporter
     shell: /bin/false
     uid: "{{ prometheus_server_ipmi_exporter_user_uid }}"
@@ -15,14 +15,14 @@
     state: present
 
 - name: Package █ Install ipmi_exporter and freeipmi packages
-  package:
+  ansible.builtin.package:
     name: "{{ prometheus_server_ipmi_exporter_packages_to_install }}"
     state: present
   tags:
     - package
 
 - name: template █ Generate ipmi_exporter service file
-  template:
+  ansible.builtin.template:
     src: ipmi_exporter.service.j2
     dest: /etc/systemd/system/ipmi_exporter.service
     owner: root
@@ -33,7 +33,7 @@
     - template
 
 - name: file █ Create ipmi_exporter directories structure
-  file:
+  ansible.builtin.file:
    path: "{{ item }}"
    state: directory
    mode: 0750
@@ -43,7 +43,7 @@
    - /etc/ipmi_exporter/
 
 - name: Template █ Generate /etc/ipmi_exporter/ipmi_config.yml
-  template:
+  ansible.builtin.template:
     src: ipmi_config.yml.j2
     dest: /etc/ipmi_exporter/ipmi_config.yml
     owner: ipmi_exporter
@@ -56,7 +56,7 @@
 - meta: flush_handlers
 
 - name: service █ Manage ipmi_exporter service state
-  service:
+  ansible.builtin.service:
     name: ipmi_exporter
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
     state: "{{ (start_services | bool) | ternary('started', omit) }}"

@@ -1,13 +1,13 @@
 ---
 - name: "package █ Install rasdaemon"
-  package:
+  ansible.builtin.package:
     name: rasdaemon
     state: present
   tags:
     - package
 
 - name: "service █ Start rasdaemon service"
-  service:
+  ansible.builtin.service:
     name: rasdaemon
     state: started
   tags:

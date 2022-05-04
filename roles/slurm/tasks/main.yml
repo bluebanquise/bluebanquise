@@ -10,7 +10,7 @@
   #
   # If no OS specific file is found, the role will default to vars/main.yml
   #
-  include_vars: "{{ item }}"
+  ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - files:
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
@@ -22,7 +22,7 @@
     - always
 
 - name: "package █ Install {{ slurm_packages_to_install[slurm_profile] | join(' ') }}"
-  package:
+  ansible.builtin.package:
     name: "{{ slurm_packages_to_install[slurm_profile] }}"
     state: present
   tags:
@@ -31,18 +31,18 @@
 # Install MUNGE, generic part
 
 - name: include_tasks ░ Deploy Munge
-  include_tasks: "munge.yml"
+  ansible.builtin.include_tasks: "munge.yml"
 
 # Setup slurm user/group, generic part
 
 - name: group █ Add slurm group
-  group:
+  ansible.builtin.group:
     name: slurm
     gid: 777
     state: present
 
 - name: user █ Add slurm user
-  user:
+  ansible.builtin.user:
     name: slurm
     shell: /bin/false
     uid: 777
@@ -53,13 +53,13 @@
 # Setup directories, generic part
 
 - name: "file █ Enforce permissions on {{ slurm_home_path }}"
-  file:
+  ansible.builtin.file:
     path: "{{ slurm_home_path }}"
     state: directory
     mode: 0755
 
 - name: file █ Create needed directories
-  file:
+  ansible.builtin.file:
     path: "{{ item }}"
     state: directory
     owner: slurm
@@ -73,18 +73,18 @@
 # Setup slurm controller
 
 - name: include_tasks ░ Deploy Slurm controller
-  include_tasks: "controller.yml"
+  ansible.builtin.include_tasks: "controller.yml"
   when: slurm_profile == 'controller'
 
 # Setup slurm computes
 
 - name: include_tasks ░ Deploy Slurm compute
-  include_tasks: "compute.yml"
+  ansible.builtin.include_tasks: "compute.yml"
   when: slurm_profile == 'compute'
 
 # Setup slurm submitter
 
 - name: include_tasks ░ Deploy Slurm submitter
-  include_tasks: "submitter.yml"
+  ansible.builtin.include_tasks: "submitter.yml"
   when: slurm_profile == 'submitter'
 

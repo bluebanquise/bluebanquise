@@ -10,7 +10,7 @@
   #
   # If no OS specific file is found, the role will default to vars/main.yml
   #
-  include_vars: "{{ item }}"
+  ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - files:
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
@@ -23,14 +23,14 @@
     - package
 
 - name: "package █ Install {{ lmod_packages_to_install | join(' ') }}"
-  package:
+  ansible.builtin.package:
     name: "{{ lmod_packages_to_install }}"
     state: present
   tags:
     - package
 
 - name: template █ Generate /etc/profile.d/modules_extra_path.sh
-  template:
+  ansible.builtin.template:
     src: modules_extra_path.sh.j2
     dest: /etc/profile.d/modules_extra_path.sh
     owner: root

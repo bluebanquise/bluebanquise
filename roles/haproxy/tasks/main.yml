@@ -1,6 +1,6 @@
 ---
 - name: package █ Install httpd and haproxy
-  package:
+  ansible.builtin.package:
     name:
       - httpd
       - haproxy
@@ -9,14 +9,14 @@
     - package
 
 - name: lineinfile █ Disable default listen on all interfaces
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/httpd/conf/httpd.conf
     regexp: '^Listen 80'
     line: '#Listen 80'
   notify: service █ Restart http server
 
 - name: template █ Set http server ips and ports to listen to
-  template:
+  ansible.builtin.template:
     src: listen.conf.j2
     dest: /etc/httpd/conf.d/listen.conf
     owner: root
@@ -27,7 +27,7 @@
   notify: service █ Restart http server
 
 - name: template █ Configure haproxy
-  template:
+  ansible.builtin.template:
     src: haproxy.cfg.j2
     dest: /etc/haproxy/haproxy.cfg
     owner: root
@@ -40,7 +40,7 @@
   meta: flush_handlers
 
 - name: service █ Manage httpd service
-  service:
+  ansible.builtin.service:
     name: httpd
     enabled: yes
     state: started

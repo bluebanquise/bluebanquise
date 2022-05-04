@@ -1,9 +1,9 @@
 - name: systemd █ Reload systemd configuration
-  systemd:
+  ansible.builtin.systemd:
     daemon_reload: yes
 
 - name: service █ Restart bbautomate_flask service
-  service:
+  ansible.builtin.service:
     name: bbautomate_flask
     state: restarted
   when:
@@ -11,7 +11,7 @@
     - (start_services | bool)
 
 - name: service █ Restart bbautomate_celery service
-  service:
+  ansible.builtin.service:
     name: bbautomate_celery
     state: restarted
   when:

@@ -1,12 +1,12 @@
 ---
 - name: group █ Add prometheus group
-  group:
+  ansible.builtin.group:
     name: prometheus
     gid: "{{ prometheus_server_prometheus_user_gid }}"
     state: present
 
 - name: user █ Add prometheus user
-  user:
+  ansible.builtin.user:
     name: prometheus
     shell: /bin/false
     uid: "{{ prometheus_server_prometheus_user_uid }}"
@@ -15,14 +15,14 @@
     state: present
 
 - name: package █ Install prometheus package
-  package:
+  ansible.builtin.package:
     name: "{{ prometheus_server_prometheus_packages_to_install }}"
     state: present
   tags:
     - package
 
 - name: template █ Generate prometheus service file
-  template:
+  ansible.builtin.template:
     src: prometheus.service.j2
     dest: /etc/systemd/system/prometheus.service
     owner: root
@@ -33,7 +33,7 @@
     - template
 
 - name: "firewalld █ Add prometheus service to firewall's {{ prometheus_server_firewall_zone | default('public') }} zone"
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ prometheus_server_firewall_zone | default('public') }}"
     service: prometheus
     immediate: "yes"
@@ -46,7 +46,7 @@
     - firewall
 
 - name: file █ Create Prometheus directories structure
-  file:
+  ansible.builtin.file:
    path: "{{ item }}"
    state: directory
    mode: 0750
@@ -58,7 +58,7 @@
    - /var/lib/prometheus
 
 - name: Template █ Generate /etc/prometheus/prometheus.yml
-  template:
+  ansible.builtin.template:
     src: prometheus.yml.j2
     dest: /etc/prometheus/prometheus.yml
     owner: prometheus
@@ -69,7 +69,7 @@
     - template
 
 - name: copy █ Copy /etc/prometheus/alerts/general.yml
-  copy:
+  ansible.builtin.copy:
     src: alerts/general.yml
     dest: /etc/prometheus/alerts/general.yml
     owner: prometheus
@@ -77,7 +77,7 @@
     mode: 0640
 
 - name: copy █ Copy additional alerts to /etc/prometheus/alerts/
-  copy:
+  ansible.builtin.copy:
     src: alerts/{{ item }}.yml
     dest: /etc/prometheus/alerts/{{ item }}.yml
     owner: prometheus
@@ -87,7 +87,7 @@
   when: prometheus_server_additional_alerts is defined and prometheus_server_additional_alerts
 
 - name: template █ Generate users alerts to /etc/prometheus/alerts/user_alerts.yml
-  template:
+  ansible.builtin.template:
     src: user_alerts.yml.j2
     dest: /etc/prometheus/alerts/user_alerts.yml
     owner: prometheus
@@ -97,7 +97,7 @@
   notify: service █ Restart prometheus service
 
 - name: file █ Create service needed directory
-  file:
+  ansible.builtin.file:
     path: /etc/systemd/system/prometheus.service.d
     state: directory
     owner: root
@@ -108,7 +108,7 @@
 - meta: flush_handlers
 
 - name: service █ Manage prometheus service state
-  service:
+  ansible.builtin.service:
     name: prometheus
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
     state: "{{ (start_services | bool) | ternary('started', omit) }}"

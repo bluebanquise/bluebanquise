@@ -1,6 +1,6 @@
 ---
 - name: "firewalld █ Add ports to firewall's {{ slurm_firewall_zone | default('public') }} zone"
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ slurm_firewall_zone | default('public') }}"
     port: "{{ item }}/tcp"
     immediate: "yes"

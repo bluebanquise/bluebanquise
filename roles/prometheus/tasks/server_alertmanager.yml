@@ -1,12 +1,12 @@
 ---
 - name: group █ Add alertmanager group
-  group:
+  ansible.builtin.group:
     name: alertmanager
     gid: "{{ prometheus_server_alertmanager_user_gid }}"
     state: present
 
 - name: user █ Add alertmanager user
-  user:
+  ansible.builtin.user:
     name: alertmanager
     shell: /bin/false
     uid: "{{ prometheus_server_alertmanager_user_uid }}"
@@ -15,14 +15,14 @@
     state: present
 
 - name: Package █ Install alertmanager package
-  package:
+  ansible.builtin.package:
     name: "{{ prometheus_server_alertmanager_packages_to_install }}"
     state: present
   tags:
     - package
 
 - name: template █ Generate alertmanager service file
-  template:
+  ansible.builtin.template:
     src: alertmanager.service.j2
     dest: /etc/systemd/system/alertmanager.service
     owner: root
@@ -33,7 +33,7 @@
     - template
 
 - name: "copy █ Install firewalld service configuration file"
-  copy:
+  ansible.builtin.copy:
     src: alertmanager.xml
     dest: /etc/firewalld/services/alertmanager.xml
     owner: root
@@ -49,7 +49,7 @@
 - meta: flush_handlers
 
 - name: "firewalld █ Add alertmanager service to firewall's {{ prometheus_server_firewall_zone | default('public') }} zone"
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ prometheus_server_firewall_zone | default('public') }}"
     service: alertmanager
     immediate: "yes"
@@ -62,7 +62,7 @@
     - firewall
 
 - name: file █ Create Alertmanager directories structure
-  file:
+  ansible.builtin.file:
    path: "{{ item }}"
    state: directory
    mode: 0750
@@ -72,7 +72,7 @@
    - /etc/alertmanager/
 
 - name: Template █ Generate /etc/alertmanager/alertmanager.yml
-  template:
+  ansible.builtin.template:
     src: alertmanager.yml.j2
     dest: /etc/alertmanager/alertmanager.yml
     owner: alertmanager
@@ -85,7 +85,7 @@
 - meta: flush_handlers
 
 - name: service █ Manage alertmanager service state
-  service:
+  ansible.builtin.service:
     name: alertmanager
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
     state: "{{ (start_services | bool) | ternary('started', omit) }}"

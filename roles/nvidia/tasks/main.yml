@@ -1,24 +1,24 @@
 ---
 - name: package █  Install needed pre-requisite packages
-  package:
+  ansible.builtin.package:
     name:
       - kernel-devel-{{ ansible_kernel }}
       - kernel-headers-{{ ansible_kernel }}
     state: present
 
 - name: package █ Install nvidia-driver
-  package:
+  ansible.builtin.package:
     name: '@nvidia-driver:latest-dkms'
     state: present
 
 - name: service █ enable nvidia-persistenced
-  service:
+  ansible.builtin.service:
     name: nvidia-persistenced
     enabled: yes
     state: started
 
 - name: package █ Install cuda
-  package:
+  ansible.builtin.package:
     name: cuda
     state: present
   when: nvidia_install_cuda

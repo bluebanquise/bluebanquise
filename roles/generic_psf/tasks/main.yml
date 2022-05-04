@@ -2,7 +2,7 @@
 
 # Install requested packages
 - name: "package █ Install {{ generic_psf_packages | join(' ') }}"
-  package:
+  ansible.builtin.package:
     name: "{{ generic_psf_packages }}"
     state: present
   tags:
@@ -10,7 +10,7 @@
 
 # Create needed folders
 - name: "file █ Create requested folders"
-  file:
+  ansible.builtin.file:
     path: "{{ item.path }}"
     state: directory
     owner: "{{ item.owner | default('root') }}"
@@ -22,7 +22,7 @@
 
 # Render requested files
 - name: "template █ Render requested files"
-  template:
+  ansible.builtin.template:
     src: generic_file.j2
     dest: "{{ item.path }}"
     owner: "{{ item.owner | default('root') }}"
@@ -34,7 +34,7 @@
 
 # Start requested services
 - name: "service █ Start {{ generic_psf_services | join(' ') }} services"
-  service:
+  ansible.builtin.service:
     name: "{{ item }}"
     state: started
   loop: "{{ generic_psf_services }}"

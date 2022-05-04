@@ -10,7 +10,7 @@
   #
   # If no OS specific file is found, the role will default to vars/main.yml
   #
-  include_vars: "{{ item }}"
+  ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - files:
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}.yml"
@@ -24,13 +24,13 @@
     - always
 
 - name: include_tasks ░ Prometheus client
-  include_tasks: "client.yml"
+  ansible.builtin.include_tasks: "client.yml"
   when: prometheus_client
   tags:
     - internal
 
 - name: include_tasks ░ Prometheus server
-  include_tasks: "server.yml"
+  ansible.builtin.include_tasks: "server.yml"
   when: prometheus_server
   tags:
     - internal

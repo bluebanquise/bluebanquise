@@ -1,6 +1,6 @@
 ---
 - name: "template █ Generate configuration files in {{ slurm_home_path }}"
-  template:
+  ansible.builtin.template:
     src: "{{ item }}.j2"
     dest: "{{ slurm_home_path }}/{{ item }}"
     owner: slurm

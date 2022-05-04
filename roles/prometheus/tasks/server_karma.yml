@@ -1,12 +1,12 @@
 ---
 - name: group █ Add karma group
-  group:
+  ansible.builtin.group:
     name: karma
     gid: "{{ prometheus_server_karma_user_gid }}"
     state: present
 
 - name: user █ Add karma user
-  user:
+  ansible.builtin.user:
     name: karma
     shell: /bin/false
     uid: "{{ prometheus_server_karma_user_uid }}"
@@ -15,14 +15,14 @@
     state: present
 
 - name: Package █ Install karma package
-  package:
+  ansible.builtin.package:
     name: "{{ prometheus_server_karma_packages_to_install }}"
     state: present
   tags:
     - package
 
 - name: template █ Generate karma service file
-  template:
+  ansible.builtin.template:
     src: karma.service.j2
     dest: /etc/systemd/system/karma.service
     owner: root
@@ -33,7 +33,7 @@
     - template
 
 - name: file █ Create karma directories structure
-  file:
+  ansible.builtin.file:
    path: "{{ item }}"
    state: directory
    mode: 0750
@@ -43,7 +43,7 @@
    - /etc/karma/
 
 - name: Template █ Generate /etc/karma/karma.yml
-  template:
+  ansible.builtin.template:
     src: karma.yml.j2
     dest: /etc/karma/karma.yml
     owner: karma
@@ -56,7 +56,7 @@
 - meta: flush_handlers
 
 - name: service █ Manage karma service state
-  service:
+  ansible.builtin.service:
     name: karma
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
     state: "{{ (start_services | bool) | ternary('started', omit) }}"

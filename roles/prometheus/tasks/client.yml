@@ -1,12 +1,12 @@
 ---
 - name: set_fact ░ Gather exporters to install
-  set_fact:
+  ansible.builtin.set_fact:
     exporters_groups: "{{ (exporters_groups | default([])) + item.value }}"
   loop: "{{ prometheus_exporters_groups_to_scrape | dict2items}}"
   when: inventory_hostname in groups[item.key]
 
 - name: group █ Add exporters needed groups
-  group:
+  ansible.builtin.group:
     name: "{{ item.group }}"
     gid: "{{ item.gid | default(omit) }}"
     system: yes
@@ -15,7 +15,7 @@
   when: item.group is defined
 
 - name: user █ Add exporters needed users
-  user:
+  ansible.builtin.user:
     name: "{{ item.user }}"
     shell: /bin/false
     uid: "{{ item.uid | default(omit) }}"
@@ -27,14 +27,14 @@
   when: item.user is defined
 
 - name: package █ install exporters packages
-  package:
+  ansible.builtin.package:
     name: "{{ item.package }}"
     state: present
   loop: "{{ exporters_groups }}"
   when: item.package is defined and item.package is not none
 
 - name: template █ Generate exporters service file
-  template:
+  ansible.builtin.template:
     src: exporter.service.j2
     dest: "/etc/systemd/system/{{ item.service }}.service"
     owner: root
@@ -47,7 +47,7 @@
     - template
 
 - name: file █ Create exporters working directories
-  file:
+  ansible.builtin.file:
     path: "/etc/{{ item.service }}/"
     state: directory
     mode: 0755
@@ -58,7 +58,7 @@
 - meta: flush_handlers
 
 - name: "firewalld █ Open exporters ports into firewall's {{ prometheus_client_firewall_zone | default('public') }} zone"
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ prometheus_client_firewall_zone | default('public') }}"
     port: "{{ item.port }}/tcp"
     immediate: "yes"
@@ -73,7 +73,7 @@
     - firewall
 
 - name: service █ Manage exporters services
-  service:
+  ansible.builtin.service:
     name: "{{ item.service }}"
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
     state: "{{ (start_services | bool) | ternary('started', omit) }}"

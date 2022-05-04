@@ -1,10 +1,10 @@
 - name: package █ Upgrade all packages
-  package:
+  ansible.builtin.package:
     name: "*"
     state: latest
   when: update_reboot_upgrade_packages
 
 - name: reboot █ Reboot a slow machine that might have lots of updates to apply
-  reboot:
+  ansible.builtin.reboot:
     reboot_timeout: "{{ update_reboot_reboot_timeout }}"
   when: update_reboot_reboot

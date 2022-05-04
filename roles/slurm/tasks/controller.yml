@@ -1,10 +1,10 @@
 ---
 - name: include_tasks ░ Deploy Slurm accounting
-  include_tasks: "accounting.yml"
+  ansible.builtin.include_tasks: "accounting.yml"
   when: slurm_enable_accounting
 
 - name: "firewalld █ Add ports to firewall's {{ slurm_firewall_zone | default('public') }} zone"
-  firewalld:
+  ansible.posix.firewalld:
     zone: "{{ slurm_firewall_zone | default('public') }}"
     port: "{{ item }}/tcp"
     immediate: "yes"
@@ -20,7 +20,7 @@
     - firewall
 
 - name: "template █ Generate configuration files in {{ slurm_home_path }}"
-  template:
+  ansible.builtin.template:
     src: "{{ item }}.j2"
     dest: "{{ slurm_home_path }}/{{ item }}"
     owner: slurm
@@ -32,7 +32,7 @@
     - slurm.conf
 
 - name: "copy █ Copy cgroup.conf to {{ slurm_home_path }}/cgroup.conf"
-  copy:
+  ansible.builtin.copy:
     src: cgroup.conf
     dest: "{{ slurm_home_path }}/cgroup.conf"
     owner: slurm
@@ -40,7 +40,7 @@
     mode: 0644
 
 - name: service █ Manage slurmctld state
-  service:
+  ansible.builtin.service:
     name: slurmctld
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
     state: "{{ (start_services | bool) | ternary('started', omit) }}"
