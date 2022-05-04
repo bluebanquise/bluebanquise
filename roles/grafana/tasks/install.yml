@@ -14,6 +14,18 @@
     home: "{{ grafana_user_home }}"
     state: present
 
+- name: install ░ Check for log file
+  ansible.builtin.stat:
+    path: "{{ grafana_logs_dir }}"
+  register: log_exists
+
+- name: install █ Change log owner
+  ansible.builtin.file:
+    path: "{{ grafana_logs_dir }}"
+    owner: "{{ grafana_user_uid }}"
+    group: "{{ grafana_user_gid }}"
+  when: log_exists.stat.exists
+
 - name: "install █ Add services to firewall's {{ grafana_firewall_zone | default('public') }} zone"
   ansible.posix.firewalld:
     zone: "{{ grafana_firewall_zone | default('public') }}"
@@ -24,7 +36,6 @@
   when:
     - ansible_facts.os_family == "RedHat"
     - ep_firewall | default(false) | bool
-    - ansible_facts.services["{{ item }}"].state == "running"
   loop: "{{ grafana_firewall_services_to_add }}"
   tags:
     - firewall

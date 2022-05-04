@@ -4,6 +4,9 @@
 
 ### Updated roles
 
+  - grafana:
+    - fix log file permissions (#63)
+    - fix varname and removed firewall running check (#63)
   - high_availability:
     - Allows order constraint between resource groups (#58)
 
