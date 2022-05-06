@@ -1,4 +1,5 @@
 ---
+# All these parameters overwrite the same ones defined in global file all/equipment_all/equipment_profile.yml
 
 ep_console: console=tty0 console=ttyS1,115200n8
 ep_kernel_parameters: nomodeset

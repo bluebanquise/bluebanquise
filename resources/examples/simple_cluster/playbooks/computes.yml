@@ -1,5 +1,5 @@
 ---
-# use '--limit c001' to restrict playbook to
+# use '--limit compute1' to restrict playbook to
 # c001 if mg_computes contains multiple compute nodes
 - name: computes
   hosts: "mg_computes"  # Will deploy on all mg_computes group nodes if no --limit
@@ -13,8 +13,6 @@
       tags: nic
     - role: hosts_file
       tags: hosts_file
-    - role: dns_client
-      tags: dns_client
     - role: time
       tags: time
       vars:

@@ -13,8 +13,6 @@
       tags: nic
     - role: hosts_file
       tags: hosts_file
-    - role: dns_client
-      tags: dns_client
     - role: time
       tags: time
       vars:

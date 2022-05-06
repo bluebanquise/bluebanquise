@@ -6,7 +6,7 @@ nfs:
   softwares:
     mount: /opt/software                        # Which path clients should mount this NFS
     export: /opt/software                       # What path server should export
-    server: management1                         # The server that export this storage space
+    server: storage1                         # The server that export this storage space
     clients_groups:                             # Can be an equipment group, or a main group (mg), or any other ansible group
       - mg_computes
       - mg_logins
@@ -17,7 +17,7 @@ nfs:
   home:
     mount: /home
     export: /home
-    server: management1
+    server: storage1
     clients_groups:
       - mg_computes
       - mg_logins

@@ -1,4 +1,0 @@
----
-security:
-  ssh:
-    hostkey_checking: true  # enable or disable hostkey checking
