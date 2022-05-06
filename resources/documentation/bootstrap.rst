@@ -110,7 +110,7 @@ Create the ``bluebanquise`` user manually:
 
 .. code-block::
 
-  sudo adduser bluebanquise
+  sudo adduser --home /var/lib/bluebanquise bluebanquise
 
 Set bluebanquise user as passwordless sudo able user:
 
@@ -118,10 +118,13 @@ Set bluebanquise user as passwordless sudo able user:
 
   echo 'bluebanquise ALL=(ALL:ALL) NOPASSWD:ALL' | sudo tee -a /etc/sudoers.d/bluebanquise
 
-Bootstrap stack - online
-------------------------
+There are now 2 ways to bootstrap stack: using provided bootstrap script as is (which assumes you are able to reach the web), 
+or following offline method as described bellow.
 
-Login as bluebanquise user, and clone github repoitory:
+Bootstrap stack - Using bootstrap script (online)
+-------------------------------------------------
+
+Login as bluebanquise user, and clone github repository:
 
 .. code-block::
 
@@ -173,45 +176,60 @@ You can see that 2 repositories were created:
 
 If all went well, you can proceed to next step: :ref:`[Core] - Configure BlueBanquise`
 
-Bootstrap stack - offline
--------------------------
+Bootstrap stack - Using bootstrap script (offline)
+--------------------------------------------------
 
 It is common with RedHat like operating system to perform offline clusters deployment.
 
 BlueBanquise bootstrap script is able to use a local iso and a local repository folder as bootstrap source.
 
-Login as bluebanquise user, and upload a copy of cloned github repoitory, assumed here bluebanquise-git.tar.gz, 
-then extract it at bluebanquise user home folder:
+On a system able to reach the web, grab all needed elements (you may need to modify few parts depending of your desired 
+final Linux distribution). This includes OS base ISO, bluebanquise repository, and python pip dependencies.
+
+.. code-block::
+
+  mkdir bb_offline
+  cd bb_offline
+  git clone https://github.com/bluebanquise/bluebanquise.git
+  cd bluebanquise
+  mkdir offline_bootstrap
+  cd offline_bootstrap
+  mkdir iso
+  cd iso
+  wget http://mirror.crexio.com/almalinux/8.5/isos/x86_64/AlmaLinux-8.5-x86_64-dvd.iso
+  cd ../
+  mkdir repositories
+  cd repositories
+  wget -np -nH --cut-dirs 5 -r --reject "index.html*" http://bluebanquise.com/repository/releases/latest/ubuntu2004/x86_64/bluebanquise/
+  cd ../
+  mkdir pip3
+  cd pip3
+  pip3 download -r $HOME/bluebanquise/requirements.txt
+  cd ../
+  mkdir collections
+  cd collections
+  ansible-galaxy collection download community.general
+  cd ../
+
+Then pack all of this as a unique archive:
+
+.. code-block::
+
+  cd ../../
+  tar cvzf bluebanquise_offline.tar.gz bluebanquise
+
+Login as bluebanquise user on cluster main node, where bluebanquise user was already created, 
+and upload and then extract archive in bluebanquise user's home folder:
 
 .. code-block::
 
   sudo su bluebanquise
   cd $HOME
-  tar xvzf bluebanquise-git.tar.gz
-
-Create offline needed folder in bluebanquise home folder:
-
-.. code-block::
-
-  mkdir -p /home/bluebanquise/bluebanquise/offline_bootstrap/
-
-Upload into this folder:
-
-* OS main iso. You have to provide the stack the full main DVD iso (the one that contains BaseOS and AppStream full repositories.
-Can be rhel-8.3-x86_64-dvd.iso, AlmaLinux-8.5-x86_64-dvd.iso, Rocky-8.5-x86_64-dvd1.iso, etc.).
-* BlueBanquise el8 repository main folder (Assuming cluster is x86_64: http://bluebanquise.com/repository/releases/latest/el8/x86_64/bluebanquise).
-
-After upload, you should have:
-
-.. code-block::
-
-  bluebanquise@localhost:~/ ls /home/bluebanquise/bluebanquise/offline_bootstrap/
-  rhel-8.5-x86_64-dvd.iso
-  bluebanquise
+  tar xvzf bluebanquise_offline.tar.gz
 
 Edit then ``bootstrap_input.sh`` into bluebanquise main folder, and 
-set ``REDHAT_8_OFFLINE`` to ``true``. Also set ``REDHAT_8_ISO`` to match iso name you provided.
-Do not care about ``REDHAT_8_ISO_URL`` as it will be ignored in offline mode.
+set ``OFFLINE_MODE`` to ``true``. Also ensure that ``REDHAT_8_ISO`` name match the iso 
+file name present in ``offline_bootstrap`` folder.
 
 Execute then the bootstrap script.
 

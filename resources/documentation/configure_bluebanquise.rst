@@ -50,6 +50,25 @@ This ensure your PYTHONPATH is exported into sudo environment.
 Configure inventory
 ===================
 
+It is important to understand inventory structure.
+
+By default, main location are the following:
+
+.. image:: images/inventory/key_paths.svg
+   :align: center
+
+
+* ``cluster/nodes/`` and ``cluster/groups/``: this is where nodes are listed, with their dedicated network parameters, and linked to desired groups
+* ``group_vars/equipment_X/``: this is where equipment profile groups are described (OS to be used, kernel parameters, partitioning, iPXE settings, etc.)
+* ``group_vars/all/general_settings/``: this is where stack global values are set (logical networks, domain name, nfs, etc.)
+
+Then, each described node will inherit from these settings. It is important to understand that some settings are linked. For example,
+a node set as member of group ``equipment_server_A_1`` will inherit this group parameters. Also, if a network interface of this node is 
+linked to logical network ``ice1-1``, it will inherit all ``ice1-1`` network parameters. Etc.
+
+.. image:: images/inventory/node_get_values.svg
+   :align: center
+
 Check example inventory
 -----------------------
 
