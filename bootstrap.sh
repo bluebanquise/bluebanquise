@@ -14,7 +14,8 @@ echo -e " ║ BlueBanquise bootstrap.                      ║"
 echo -e " ║ v 1.0.0                                      ║"
 echo -e " ╚══════════════════════════════════════════════╝\e[39m"
 
-CURRENT_DIR=$(dirname "$(realpath "${0}")")
+#CURRENT_DIR=$(dirname "$(realpath "${0}")")
+CURRENT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 source bootstrap_input.sh
 source /etc/os-release
