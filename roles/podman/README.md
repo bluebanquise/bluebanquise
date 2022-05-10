@@ -14,11 +14,13 @@ This role is compatible with HA clusters:
 
 ## Requirements
 
-Ansible 2.7 or higher is required for defaults/main/*.yml to work correctly.
+Ansible 2.7 or higher is required for `defaults/main/*.yml` to work correctly.
 
 ## Known Limitations
 
-When firewalld is running, containers deployed with podman may lose connectivity if the firewall rules are reloaded with the `firewall-cmd --reload` command, due to non-persistent rules added by podman being lost. As a workaround, the following command should be used after reloading the firewall, it will restore container connectivity without having to re-deploy the containers:
+- When firewalld is running, containers deployed with podman may lose connectivity if the firewall rules are reloaded with the `firewall-cmd --reload` command, due to non-persistent rules added by podman being lost. As a workaround, the following command should be used after reloading the firewall, it will restore container connectivity without having to re-deploy the containers:
+
+- There is an issue between podman and pacemaker: if a privileged container is managed by a systemd service (e.g. using `podman generate systemd` command), the container may lose connectivity the first time that the service is started by pacemaker. To avoid this issue, use the user-mode networking for unprivileged containers, by adding `--net=slip4netns` to the `podman run` command in the service definition. For reference, see the template of the registry service.
 
 ```
 podman network reload --all
@@ -118,3 +120,8 @@ podman_local_registry_group: "root"
 ## License and Author
 
 * Author:: @strus38
+
+## Changelog
+
+* 1.0.1: Use slirp4netns to avoid error with HA. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
+* 1.0.0: Role creation. @strus38

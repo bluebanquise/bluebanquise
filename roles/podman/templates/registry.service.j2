@@ -9,7 +9,7 @@ Environment=PODMAN_SYSTEMD_UNIT=%n
 Restart=on-failure
 TimeoutStopSec=62
 ExecStartPre=/bin/rm -f %t/%n.ctr-id
-ExecStart=/usr/bin/podman run --cidfile=%t/%n.ctr-id --sdnotify=conmon --cgroups=no-conmon --rm --replace --name=registry --privileged -p 5000:{{ podman_local_registry_port }} -v /var/lib/registry:{{ podman_local_registry_dir }} {{ podman_registry_container }}:{{ podman_registry_container_tag }}
+ExecStart=/usr/bin/podman run --net=slirp4netns --cidfile=%t/%n.ctr-id --sdnotify=conmon --cgroups=no-conmon --rm --replace --name=registry --privileged -p 5000:{{ podman_local_registry_port }} -v /var/lib/registry:{{ podman_local_registry_dir }} {{ podman_registry_container }}:{{ podman_registry_container_tag }}
 ExecStop=/usr/bin/podman stop -t 2 --ignore --cidfile=%t/%n.ctr-id
 ExecStopPost=/usr/bin/podman rm -f --ignore --cidfile=%t/%n.ctr-id
 Type=notify

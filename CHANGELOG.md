@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.6
+
+### Updated roles
+
+  - podman:
+    - Use slirp4netns to avoid error with HA (#65)
+
 ## 1.5.1
 
 ### Updated roles
