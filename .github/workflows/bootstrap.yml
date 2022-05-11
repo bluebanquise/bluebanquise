@@ -44,6 +44,7 @@ jobs:
       ANSIBLE_FORCE_COLOR: '1'
     steps:
       - name: Checkout code
+        uses: actions/checkout@v2
 
       - name: Execute doc manupilations
         run: useradd -m -d /var/lib/bluebanquise -s /bin/bash bluebanquise; echo 'bluebanquise ALL=(ALL:ALL) NOPASSWD:ALL' | tee -a /etc/sudoers.d/bluebanquise; mkdir /var/lib/bluebanquise/bluebanquise/; cp -a * /var/lib/bluebanquise/bluebanquise/; chown -R bluebanquise:bluebanquise /var/lib/bluebanquise/bluebanquise
