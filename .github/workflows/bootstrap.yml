@@ -47,7 +47,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Execute doc manupilations
-        run: useradd -m -d /var/lib/bluebanquise -s /bin/bash bluebanquise; echo 'bluebanquise ALL=(ALL:ALL) NOPASSWD:ALL' | tee -a /etc/sudoers.d/bluebanquise; mkdir /var/lib/bluebanquise/bluebanquise/; cp -a * /var/lib/bluebanquise/bluebanquise/; chown -R bluebanquise:bluebanquise /var/lib/bluebanquise/bluebanquise
+        run: sudo useradd -m -d /var/lib/bluebanquise -s /bin/bash bluebanquise; echo 'bluebanquise ALL=(ALL:ALL) NOPASSWD:ALL' | sudo tee -a /etc/sudoers.d/bluebanquise; sudo mkdir /var/lib/bluebanquise/bluebanquise/; sudo cp -a * /var/lib/bluebanquise/bluebanquise/; sudo chown -R bluebanquise:bluebanquise /var/lib/bluebanquise
 
       - name: Tune and execute bootstrap script
-        run: sed -i 's/GATHER_PACKAGES=true/GATHER_PACKAGES=false/' /var/lib/bluebanquise/bluebanquise/bootstrap_input.sh; su - bluebanquise -c '/var/lib/bluebanquise/bluebanquise/bootstrap.sh'
+        run: sudo sed -i 's/GATHER_PACKAGES=true/GATHER_PACKAGES=false/' /var/lib/bluebanquise/bluebanquise/bootstrap_input.sh; sudo -u bluebanquise /var/lib/bluebanquise/bluebanquise/bootstrap.sh
