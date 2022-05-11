@@ -64,7 +64,7 @@
       ignore_errors: yes
 
     - name: command █ Register reference node
-      ansible.builtin.command: "pcs cluster setup ha_cluster {{ item.name }} {% for addr in item.addrs %}addr={{ addr }} {% endfor %}"
+      ansible.builtin.command: "pcs cluster setup {{ high_availability_cluster_name }} {{ item.name }} {% for addr in item.addrs %}addr={{ addr }} {% endfor %}"
       loop: "{{ high_availability_cluster_nodes }}"
       when:
         - ( corosync_known_hosts.stdout_lines | select("match", ".*"+high_availability_reference_node+".*") | list | length ) < 1

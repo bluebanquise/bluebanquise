@@ -68,6 +68,7 @@ Then in `inventory/group_vars/ha_cluster` folder, create a file
 `ha_parameters.yml` with the following variables, tuned to your needs:
 
 ```yaml
+high_availability_cluster_name: ha_cluster  # name of the pacemaker/corosync cluster
 high_availability_cluster_nodes:
   - name: ha1             # Hostname of the HA cluster nodes
     addrs:                # List of addresses to be used for HA ring (allow multiple rings for redundancy)
@@ -104,6 +105,7 @@ to secure HA cluster in case one network fail:
 So for example here:
 
 ```yaml
+high_availability_cluster_name: ha_cluster
 high_availability_cluster_nodes:
   - name: ha1             # Hostname of the HA cluster nodes
     addrs:                # List of addresses to be used for HA ring (allow multiple rings for redundancy)
@@ -582,6 +584,7 @@ not present. Then in HA resources, declare the following:
 
 ## 5. Changelog
 
+* 1.0.5: Allow specification of name of the cluster. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.0.4: Allows order constraint between resource groups. Thiago Cardozo <thiago.cardozo@yahoo.com.br>
 * 1.0.3: Fix use of unencrypted password of hacluster user. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.0.2: Enable/disable STONITH when configuration is available/unavailable. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
