@@ -31,7 +31,7 @@ jobs:
         run: docker run -d --net=host --name mgt1 --tmpfs /tmp --tmpfs /run -v /sys/fs/cgroup:/sys/fs/cgroup:ro -v /shared:/shared rockylinux/rockylinux:8_systemd
 
       - name: Setup container and execute doc manupilations
-        run: docker exec mgt1 bash -c "dnf update; dnf install sudo -y; useradd -m -d /var/lib/bluebanquise -s /bin/bash bluebanquise; echo 'bluebanquise ALL=(ALL:ALL) NOPASSWD:ALL' | tee -a /etc/sudoers.d/bluebanquise; mkdir /var/lib/bluebanquise/bluebanquise/; cp -a /shared/* /var/lib/bluebanquise/bluebanquise/"
+        run: docker exec mgt1 bash -c "dnf update; dnf install sudo -y; useradd -m -d /var/lib/bluebanquise -s /bin/bash bluebanquise; echo 'bluebanquise ALL=(ALL:ALL) NOPASSWD:ALL' | tee -a /etc/sudoers.d/bluebanquise; mkdir /var/lib/bluebanquise/bluebanquise/; cp -a /shared/* /var/lib/bluebanquise/bluebanquise/; chown -R bluebanquise:bluebanquise /var/lib/bluebanquise/bluebanquise"
 
       - name: Tune and execute bootstrap script
         run: docker exec mgt1 bash -c "sed -i 's/GATHER_PACKAGES=true/GATHER_PACKAGES=false/' /var/lib/bluebanquise/bluebanquise/bootstrap_input.sh; su - bluebanquise -c '/var/lib/bluebanquise/bluebanquise/bootstrap.sh'"
