@@ -35,3 +35,18 @@ jobs:
 
       - name: Tune and execute bootstrap script
         run: docker exec mgt1 bash -c "sed -i 's/GATHER_PACKAGES=true/GATHER_PACKAGES=false/' /var/lib/bluebanquise/bluebanquise/bootstrap_input.sh; sed -i 's/ESTABLISH_FIRST_SSH=true/ESTABLISH_FIRST_SSH=false/' /var/lib/bluebanquise/bluebanquise/bootstrap_input.sh; su - bluebanquise -c '/var/lib/bluebanquise/bluebanquise/bootstrap.sh'"
+
+  bootstrap_ubuntu_2004:
+    name: bootstrap on Ubuntu 20.04
+    runs-on: ubuntu-20.04
+    env:
+      PY_COLORS: '1'
+      ANSIBLE_FORCE_COLOR: '1'
+    steps:
+      - name: Checkout code
+
+      - name: Execute doc manupilations
+        run: useradd -m -d /var/lib/bluebanquise -s /bin/bash bluebanquise; echo 'bluebanquise ALL=(ALL:ALL) NOPASSWD:ALL' | tee -a /etc/sudoers.d/bluebanquise; mkdir /var/lib/bluebanquise/bluebanquise/; cp -a * /var/lib/bluebanquise/bluebanquise/; chown -R bluebanquise:bluebanquise /var/lib/bluebanquise/bluebanquise
+
+      - name: Tune and execute bootstrap script
+        run: sed -i 's/GATHER_PACKAGES=true/GATHER_PACKAGES=false/' /var/lib/bluebanquise/bluebanquise/bootstrap_input.sh; su - bluebanquise -c '/var/lib/bluebanquise/bluebanquise/bootstrap.sh'
