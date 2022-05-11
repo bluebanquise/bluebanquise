@@ -170,8 +170,11 @@ sed -i '/ssh-ed25519/d' inventory/group_vars/all/equipment_all/authentication.ym
 echo "  - $(cat $HOME/.ssh/id_ed25519.pub)" >> inventory/group_vars/all/equipment_all/authentication.yml
 
 message_output "Setting first connection..."
-cat /etc/hosts | grep -q mgt1 || sudo echo 127.0.0.1 mgt1 >> /etc/hosts
+cat /etc/hosts | grep -q mgt1 || echo "127.0.0.1 mgt1" | sudo tee -a /etc/hosts
+
+if $ESTABLISH_FIRST_SSH; then
 ssh -o StrictHostKeyChecking=no mgt1 echo Ok
+fi
 
 echo -e "\e[34m"
 echo -e " ╔══════════════════════════════════════════════╗"

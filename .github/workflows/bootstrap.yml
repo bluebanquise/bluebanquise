@@ -34,4 +34,4 @@ jobs:
         run: docker exec mgt1 bash -c "dnf update; dnf install sudo -y; useradd -m -d /var/lib/bluebanquise -s /bin/bash bluebanquise; echo 'bluebanquise ALL=(ALL:ALL) NOPASSWD:ALL' | tee -a /etc/sudoers.d/bluebanquise; mkdir /var/lib/bluebanquise/bluebanquise/; cp -a /shared/* /var/lib/bluebanquise/bluebanquise/; chown -R bluebanquise:bluebanquise /var/lib/bluebanquise/bluebanquise"
 
       - name: Tune and execute bootstrap script
-        run: docker exec mgt1 bash -c "sed -i 's/GATHER_PACKAGES=true/GATHER_PACKAGES=false/' /var/lib/bluebanquise/bluebanquise/bootstrap_input.sh; su - bluebanquise -c '/var/lib/bluebanquise/bluebanquise/bootstrap.sh'"
+        run: docker exec mgt1 bash -c "sed -i 's/GATHER_PACKAGES=true/GATHER_PACKAGES=false/' /var/lib/bluebanquise/bluebanquise/bootstrap_input.sh; sed -i 's/ESTABLISH_FIRST_SSH=true/ESTABLISH_FIRST_SSH=false/' /var/lib/bluebanquise/bluebanquise/bootstrap_input.sh; su - bluebanquise -c '/var/lib/bluebanquise/bluebanquise/bootstrap.sh'"
