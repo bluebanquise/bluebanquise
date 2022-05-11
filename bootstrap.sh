@@ -161,6 +161,7 @@ cat $HOME/.bashrc | grep -q ANSIBLE_CONFIG | echo "ANSIBLE_CONFIG=\$HOME/blueban
 sudo cat /etc/sudoers | grep -q PYTHONPATH || echo 'Defaults env_keep += "PYTHONPATH"' | sudo EDITOR='tee -a' visudo
 
 message_output "Generating ssh keys..."
+mkdir $HOME/.ssh
 ls $HOME/.ssh/ | grep -q id_ed25519 || ssh-keygen -t ed25519 -f $HOME/.ssh/id_ed25519 -q -N ""
 cat $HOME/.ssh/authorized_keys | grep -q bluebanquise || cat $HOME/.ssh/id_ed25519.pub >> $HOME/.ssh/authorized_keys
 cd $CURRENT_DIR
