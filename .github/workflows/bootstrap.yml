@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Clone code into shared directory
-        run: mkdir -p /shared; cp -a * /shared
+        run: sudo mkdir -p /shared; sudo cp -a * /shared
 
       - name: Create rockylinux systemd able image
         run: docker build -t rockylinux/rockylinux:8_systemd -f ./resources/docker/Dockerfile_RockyLinux_8_systemd .
