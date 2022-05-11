@@ -114,7 +114,7 @@ if $INSTALL_SYSTEM_REQUIREMENTS; then
     fi
   fi
   if [ "$PLATFORM_ID" == "platform:el8" ]; then
-    sudo dnf install python3 python3-pip python3-policycoreutils -y
+    sudo dnf install python3 python3-pip python3-policycoreutils openssh-clients -y
   fi
 fi
 
