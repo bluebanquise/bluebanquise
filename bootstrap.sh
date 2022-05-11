@@ -123,7 +123,7 @@ if $INSTALL_PIP_REQUIREMENTS; then
   if $OFFLINE_MODE; then
     pip3 install --no-index --find-links $CURRENT_DIR/offline_bootstrap/pip3/ -r requirements.txt
   else
-    pip3 install --upgrade pip
+    sudo pip3 install --upgrade pip
     pip3 install -r requirements.txt
   fi
 fi
