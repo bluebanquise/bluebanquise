@@ -16,7 +16,7 @@ echo -e " ╚══════════════════════�
 
 CURRENT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-source bootstrap_input.sh
+source $CURRENT_DIR/bootstrap_input.sh
 source /etc/os-release
 
 if $GATHER_PACKAGES; then
