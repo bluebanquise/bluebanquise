@@ -1,0 +1,32 @@
+# Equipment groups correspond to the hardware of nodes
+# Most of the time, one equipment profile group is created for each different kind of  hardware
+# However, in some cases, user may have to define multiple equipment profiles for a single 
+# hardware, for example if multiple OS configuration are possible.
+# Equipment groups are free to be renamed, keeping prefix equipment_
+
+[equipment_typeM]
+mgt1
+
+[equipment_typeL]
+login1
+
+[equipment_typeS]
+storage1
+
+[equipment_typeC_Redhat_7]
+c001
+
+[equipment_typeC_Redhat_8]
+c002
+
+[equipment_typeC_Ubuntu_2004]
+c003
+
+[equipment_typeC_Opensuse_153]
+c004
+
+# Empty group to detect issues related to empty group
+[equipment_empty]
+
+[equipment_dummy]
+fakehost_ep

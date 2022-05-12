@@ -1,0 +1,19 @@
+# Master groups correspond to the meaning of their nodes
+# Note that mg_managements is hardcoded for management nodes
+# (but you can still change it in internal_variables.yml)
+# Other groups are free to be renamed, keeping prefix mg_
+
+[mg_managements]
+management1
+
+[mg_logins]
+login1
+
+[mg_computes]
+c00[1:4]
+
+# Empty group to detect issues related to empty group
+[mg_empty]
+
+[mg_dummy]
+fakehost_mg

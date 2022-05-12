@@ -22,6 +22,7 @@
     # validate: /usr/bin/xmllint --noout --relaxng /usr/share/YaST2/schema/autoyast/rng/profile.rng %s
   with_items: "{{ j2_equipment_groups_list }}"
   when:
+    - groups[item] | length > 0
     - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
     - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) == 'sles'
     - hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] == 12
@@ -38,6 +39,7 @@
     # validate: /usr/bin/xmllint --noout --relaxng /usr/share/YaST2/schema/autoyast/rng/profile.rng %s
   with_items: "{{ j2_equipment_groups_list }}"
   when:
+    - groups[item] | length > 0
     - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
     - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) == 'opensuse' or (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) == 'sles'
     - hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] == 15
@@ -53,6 +55,7 @@
     group: "{{ pxe_stack_apache_group }}"
   with_items: "{{ j2_equipment_groups_list }}"
   when:
+    - groups[item] | length > 0
     - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
     - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) == 'opensuse' or (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) == "sles"
   tags:
