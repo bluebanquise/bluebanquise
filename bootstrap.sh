@@ -16,7 +16,7 @@ echo -e " ╚══════════════════════�
 
 CURRENT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-source bootstrap_input.sh
+source $CURRENT_DIR/bootstrap_input.sh
 source /etc/os-release
 
 if $GATHER_PACKAGES; then
@@ -114,7 +114,7 @@ if $INSTALL_SYSTEM_REQUIREMENTS; then
     fi
   fi
   if [ "$PLATFORM_ID" == "platform:el8" ]; then
-    sudo dnf install python3 python3-pip python3-policycoreutils -y
+    sudo dnf install python3 python3-pip python3-policycoreutils openssh-clients -y
   fi
 fi
 
@@ -123,6 +123,7 @@ if $INSTALL_PIP_REQUIREMENTS; then
   if $OFFLINE_MODE; then
     pip3 install --no-index --find-links $CURRENT_DIR/offline_bootstrap/pip3/ -r requirements.txt
   else
+    sudo pip3 install --upgrade pip
     pip3 install -r requirements.txt
   fi
 fi
@@ -160,6 +161,7 @@ cat $HOME/.bashrc | grep -q ANSIBLE_CONFIG | echo "ANSIBLE_CONFIG=\$HOME/blueban
 sudo cat /etc/sudoers | grep -q PYTHONPATH || echo 'Defaults env_keep += "PYTHONPATH"' | sudo EDITOR='tee -a' visudo
 
 message_output "Generating ssh keys..."
+mkdir $HOME/.ssh
 ls $HOME/.ssh/ | grep -q id_ed25519 || ssh-keygen -t ed25519 -f $HOME/.ssh/id_ed25519 -q -N ""
 cat $HOME/.ssh/authorized_keys | grep -q bluebanquise || cat $HOME/.ssh/id_ed25519.pub >> $HOME/.ssh/authorized_keys
 cd $CURRENT_DIR
@@ -168,8 +170,11 @@ sed -i '/ssh-ed25519/d' inventory/group_vars/all/equipment_all/authentication.ym
 echo "  - $(cat $HOME/.ssh/id_ed25519.pub)" >> inventory/group_vars/all/equipment_all/authentication.yml
 
 message_output "Setting first connection..."
-cat /etc/hosts | grep -q mgt1 || sudo echo 127.0.0.1 mgt1 >> /etc/hosts
+cat /etc/hosts | grep -q mgt1 || echo "127.0.0.1 mgt1" | sudo tee -a /etc/hosts
+
+if $ESTABLISH_FIRST_SSH; then
 ssh -o StrictHostKeyChecking=no mgt1 echo Ok
+fi
 
 echo -e "\e[34m"
 echo -e " ╔══════════════════════════════════════════════╗"

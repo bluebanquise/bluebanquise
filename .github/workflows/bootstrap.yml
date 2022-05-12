@@ -1,0 +1,53 @@
+---
+
+# Bootstrap testing
+# Using docker environment
+
+name: bootstrap
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  bootstrap_rocky_8:
+    name: bootstrap on RockyLinux 8
+    runs-on: ubuntu-20.04
+    env:
+      PY_COLORS: '1'
+      ANSIBLE_FORCE_COLOR: '1'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Clone code into shared directory
+        run: sudo mkdir -p /shared; sudo cp -a * /shared
+
+      - name: Create rockylinux systemd able image
+        run: docker build -t rockylinux/rockylinux:8_systemd -f ./resources/docker/Dockerfile_RockyLinux_8_systemd .
+
+      - name: Start container
+        run: docker run -d --net=host --name mgt1 --tmpfs /tmp --tmpfs /run -v /sys/fs/cgroup:/sys/fs/cgroup:ro -v /shared:/shared rockylinux/rockylinux:8_systemd
+
+      - name: Setup container and execute doc manupilations
+        run: docker exec mgt1 bash -c "dnf update; dnf install sudo -y; useradd -m -d /var/lib/bluebanquise -s /bin/bash bluebanquise; echo 'bluebanquise ALL=(ALL:ALL) NOPASSWD:ALL' | tee -a /etc/sudoers.d/bluebanquise; mkdir /var/lib/bluebanquise/bluebanquise/; cp -a /shared/* /var/lib/bluebanquise/bluebanquise/; chown -R bluebanquise:bluebanquise /var/lib/bluebanquise/bluebanquise"
+
+      - name: Tune and execute bootstrap script
+        run: docker exec mgt1 bash -c "sed -i 's/GATHER_PACKAGES=true/GATHER_PACKAGES=false/' /var/lib/bluebanquise/bluebanquise/bootstrap_input.sh; sed -i 's/ESTABLISH_FIRST_SSH=true/ESTABLISH_FIRST_SSH=false/' /var/lib/bluebanquise/bluebanquise/bootstrap_input.sh; su - bluebanquise -c '/var/lib/bluebanquise/bluebanquise/bootstrap.sh'"
+
+  bootstrap_ubuntu_2004:
+    name: bootstrap on Ubuntu 20.04
+    runs-on: ubuntu-20.04
+    env:
+      PY_COLORS: '1'
+      ANSIBLE_FORCE_COLOR: '1'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Execute doc manupilations
+        run: sudo useradd -m -d /var/lib/bluebanquise -s /bin/bash bluebanquise; echo 'bluebanquise ALL=(ALL:ALL) NOPASSWD:ALL' | sudo tee -a /etc/sudoers.d/bluebanquise; sudo mkdir /var/lib/bluebanquise/bluebanquise/; sudo cp -a * /var/lib/bluebanquise/bluebanquise/; sudo chown -R bluebanquise:bluebanquise /var/lib/bluebanquise
+
+      - name: Tune and execute bootstrap script
+        run: sudo sed -i 's/GATHER_PACKAGES=true/GATHER_PACKAGES=false/' /var/lib/bluebanquise/bluebanquise/bootstrap_input.sh; sudo -u bluebanquise /var/lib/bluebanquise/bluebanquise/bootstrap.sh
