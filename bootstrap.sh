@@ -17,7 +17,7 @@ echo -e " ╚══════════════════════�
 #CURRENT_DIR=$(dirname "$(realpath "${0}")")
 CURRENT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-source bootstrap_input.sh
+source $CURRENT_DIR/bootstrap_input.sh
 source /etc/os-release
 
 if $GATHER_PACKAGES; then
@@ -132,7 +132,7 @@ if $INSTALL_SYSTEM_REQUIREMENTS; then
     fi
   fi
   if [ "$PLATFORM_ID" == "platform:el8" ]; then
-    sudo dnf install python3 python3-pip python3-policycoreutils -y
+    sudo dnf install python3 python3-pip python3-policycoreutils openssh-clients -y
   fi
 fi
 
@@ -143,6 +143,7 @@ if $INSTALL_PIP_REQUIREMENTS; then
                  --find-links "${CURRENT_DIR}/offline_bootstrap/pip3/"\
                  -r requirements.txt
   else
+    sudo pip3 install --upgrade pip
     pip3 install -r requirements.txt
   fi
 fi
@@ -188,6 +189,7 @@ echo 'Defaults env_keep += "PYTHONPATH"' |\
 sudo EDITOR='tee -a' visudo
 
 message_output "Generating ssh keys..."
+mkdir $HOME/.ssh
 # Create SSH key pair if id_ed25519 doesn't exist
 if [[ ! -f "${HOME}/.ssh/id_ed25519" ]]; then
   ssh-keygen -t ed25519\
@@ -210,6 +212,7 @@ then
 fi
 
 cd "${CURRENT_DIR}"
+
 sed -i '/ssh-rsa/d' inventory/group_vars/all/equipment_all/authentication.yml
 sed -i '/ssh-ed25519/d' inventory/group_vars/all/equipment_all/authentication.yml
 echo "  - $(cat "${HOME}"/.ssh/id_ed25519.pub)" |\
@@ -220,7 +223,9 @@ grep -q mgt1 /etc/hosts ||\
 echo "127.0.0.1 mgt1" |\
 sudo tee -a /etc/hosts
 
+if $ESTABLISH_FIRST_SSH; then
 ssh -o StrictHostKeyChecking=no mgt1 echo Ok
+fi
 
 echo -e "\e[34m"
 echo -e " ╔══════════════════════════════════════════════╗"

@@ -26,6 +26,8 @@
     - Add missing dns entry. (#694)
   - advanced_dhcp_server:
     - Allows usage of a time_ip list. (#692)
+  - powerman:
+    - Fix error when ep_host_authentication does not contain IPMI credentials (#706)
 
 ## 1.5.0
 
