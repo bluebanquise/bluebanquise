@@ -110,13 +110,18 @@ Create the ``bluebanquise`` user manually:
 
 .. code-block::
 
-  sudo adduser --home /var/lib/bluebanquise bluebanquise
+  sudo useradd\
+         -m\
+          -d /var/lib/bluebanquise\
+          -s /bin/bash\
+          bluebanquise
 
 Set bluebanquise user as passwordless sudo able user:
 
 .. code-block::
 
-  echo 'bluebanquise ALL=(ALL:ALL) NOPASSWD:ALL' | sudo tee -a /etc/sudoers.d/bluebanquise
+  echo 'bluebanquise ALL=(ALL:ALL) NOPASSWD:ALL' |\
+  sudo tee -a /etc/sudoers.d/bluebanquise
 
 There are now 2 ways to bootstrap stack: using provided bootstrap script as is (which assumes you are able to reach the web), 
 or following offline method as described bellow.
@@ -128,7 +133,7 @@ Login as bluebanquise user, and clone github repository:
 
 .. code-block::
 
-  sudo su bluebanquise
+  sudo -iu bluebanquise
   cd $HOME
   git clone https://github.com/bluebanquise/bluebanquise.git
 

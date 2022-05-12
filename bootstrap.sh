@@ -14,6 +14,7 @@ echo -e " ║ BlueBanquise bootstrap.                      ║"
 echo -e " ║ v 1.0.0                                      ║"
 echo -e " ╚══════════════════════════════════════════════╝\e[39m"
 
+#CURRENT_DIR=$(dirname "$(realpath "${0}")")
 CURRENT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 source $CURRENT_DIR/bootstrap_input.sh
@@ -26,54 +27,71 @@ if $GATHER_PACKAGES; then
   if [ "$NAME" == "Ubuntu" ]; then
     if [ "$VERSION_ID" == "20.04" ]; then
       if $GATHER_PACKAGES_UBUNTU_2004; then
-        mkdir -p /var/www/html/repositories/ubuntu/20.04/x86_64/
-        cd /var/www/html/repositories/ubuntu/20.04/x86_64/
-        if [[ -d bluebanquise ]]; then
+        REPO_PATH="/var/www/html/repositories/ubuntu/20.04/x86_64/"
+        if [[ -d "${REPO_PATH}"/bluebanquise ]]; then
           message_output "BlueBanquise folder already exist, skipping packages."
         else
           if $OFFLINE_MODE; then
-            cp -a $CURRENT_DIR/offline_bootstrap/repositories/bluebanquise .
+            cp -a "${CURRENT_DIR}/offline_bootstrap/repositories/bluebanquise"\
+                  "${REPO_PATH}"
           else
-            wget -np -nH --cut-dirs 5 -r --reject "index.html*" http://bluebanquise.com/repository/releases/latest/ubuntu2004/x86_64/bluebanquise/
+            wget -P "${REPO_PATH}"\
+                 -np\
+                 -nH\
+                 --cut-dirs 5\
+                 -r\
+                 --reject "index.html*"\
+                 http://bluebanquise.com/repository/releases/latest/ubuntu2004/x86_64/bluebanquise/
           fi
         fi
-        if [[ -d os ]]; then
+        if [[ -d "${REPO_PATH}"/os ]]; then
           message_output "Os folder already exist, skipping iso."
         else
           if $OFFLINE_MODE; then
-            cp -a $CURRENT_DIR/offline_bootstrap/repositories/iso/$UBUNTU_2004_ISO .
+            cp -a\
+              "$CURRENT_DIR/offline_bootstrap/repositories/iso/$UBUNTU_2004_ISO"\
+              "${REPO_PATH}"
           else
-            wget $UBUNTU_2004_ISO_URL
+            wget -P "${REPO_PATH}"\
+                 "${UBUNTU_2004_ISO_URL}"
           fi
           sudo mount /var/www/html/repositories/ubuntu/20.04/x86_64/$UBUNTU_2004_ISO /mnt
           mkdir /var/www/html/repositories/ubuntu/20.04/x86_64/os/
           cp -a /mnt/* /var/www/html/repositories/ubuntu/20.04/x86_64/os/
           sudo umount /mnt
-          ln -s $UBUNTU_2004_ISO ubuntu-20.04-live-server-amd64.iso
+          ln -s "${UBUNTU_2004_ISO}" ubuntu-20.04-live-server-amd64.iso
         fi
       fi
     fi
   fi
   if [ "$PLATFORM_ID" == "platform:el8" ]; then
     if $GATHER_PACKAGES_REDHAT_8; then
-      mkdir -p /var/www/html/repositories/redhat/8/x86_64/
-      cd /var/www/html/repositories/redhat/8/x86_64/
+      REPO_PATH="/var/www/html/repositories/redhat/8/x86_64/"
+      mkdir -p "${REPO_PATH}"
       if [[ -d bluebanquise ]]; then
         message_output "BlueBanquise folder already exist, skipping packages download."
       else
         if $OFFLINE_MODE; then
-          cp -a $CURRENT_DIR/offline_bootstrap/repositories/bluebanquise .
+          cp -a "$CURRENT_DIR/offline_bootstrap/repositories/bluebanquise"\
+            "${REPO_PATH}"
         else
-          wget -np -nH --cut-dirs 5 -r --reject "index.html*" http://bluebanquise.com/repository/releases/latest/el8/x86_64/bluebanquise/
+          wget -P "${REPO_PATH}"\
+               -np\
+               -nH\
+               --cut-dirs 5\
+               -r\
+               --reject "index.html*"\
+               http://bluebanquise.com/repository/releases/latest/el8/x86_64/bluebanquise/
         fi
       fi
       if [[ -d os ]]; then
         message_output "Os folder already exist, skipping iso download."
       else
         if $OFFLINE_MODE; then
-          cp -a $CURRENT_DIR/offline_bootstrap/iso/$REDHAT_8_ISO .
+          cp -a "$CURRENT_DIR/offline_bootstrap/iso/$REDHAT_8_ISO"\
+          "{REPO_PATH}"
         else
-          wget $REDHAT_8_ISO_URL
+          wget -P "{REPO_PATH}" "${REDHAT_8_ISO_URL}"
         fi
         sudo mount /var/www/html/repositories/redhat/8/x86_64/$REDHAT_8_ISO /mnt
         mkdir /var/www/html/repositories/redhat/8/x86_64/os/
@@ -85,7 +103,7 @@ if $GATHER_PACKAGES; then
   fi
 fi
 
-cd $CURRENT_DIR
+cd "${CURRENT_DIR}"
 
 if [ "$PLATFORM_ID" == "platform:el8" ]; then
   if $OFFLINE_MODE; then
@@ -121,7 +139,9 @@ fi
 if $INSTALL_PIP_REQUIREMENTS; then
   message_output "Installing python needed dependencies via pip3..."
   if $OFFLINE_MODE; then
-    pip3 install --no-index --find-links $CURRENT_DIR/offline_bootstrap/pip3/ -r requirements.txt
+    pip3 install --no-index\
+                 --find-links "${CURRENT_DIR}/offline_bootstrap/pip3/"\
+                 -r requirements.txt
   else
     sudo pip3 install --upgrade pip
     pip3 install -r requirements.txt
@@ -133,14 +153,14 @@ export PATH=$HOME/.local/bin:$PATH
 if $INSTALL_GALAXY_REQUIREMENTS; then
   message_output "Installing Ansible needed collections..."
   if $OFFLINE_MODE; then
-    cd $CURRENT_DIR/offline_bootstrap/collections/collections/
+    cd "$CURRENT_DIR/offline_bootstrap/collections/collections/"
     ansible-galaxy collection install -r requirements.yml
   else
     ansible-galaxy collection install community.general
   fi
 fi
 
-cd $CURRENT_DIR
+cd "${CURRENT_DIR}"
 
 message_output "Copying sample inventory and playbooks."
 if [[ -d inventory ]]; then
@@ -155,22 +175,53 @@ else
 fi
 
 message_output "Setting system variables into .bashrc and sudoers..."
-cat $HOME/.bashrc | grep -q '.local/bin' || echo "export PATH=$HOME/.local/bin:\$PATH" >> $HOME/.bashrc
-cat $HOME/.bashrc | grep -q PYTHONPATH || echo "export PYTHONPATH=\$(pip3 show ClusterShell | grep Location | awk -F ' ' '{print \$2}')" >> $HOME/.bashrc
-cat $HOME/.bashrc | grep -q ANSIBLE_CONFIG | echo "ANSIBLE_CONFIG=\$HOME/bluebanquise/ansible.cfg" >> $HOME/.bashrc
-sudo cat /etc/sudoers | grep -q PYTHONPATH || echo 'Defaults env_keep += "PYTHONPATH"' | sudo EDITOR='tee -a' visudo
+grep -q -E "^export PATH.*/\.local/bin" "${HOME}"/.bashrc ||\
+echo "export PATH=\$HOME/.local/bin:\$PATH" |\
+tee -a "${HOME}"/.bashrc
+
+grep -q PYTHONPATH "${HOME}"/.bashrc ||\
+echo "export PYTHONPATH=\$(pip3 showClusterShell | grep Location | awk -F ' ' '{print \$2}')" >> "${HOME}"/.bashrc
+
+echo "export ANSIBLE_CONFIG=\$HOME/bluebanquise/ansible.cfg" |
+tee -a "${HOME}"/.bashrc
+sudo grep -q PYTHONPATH /etc/sudoers ||\
+echo 'Defaults env_keep += "PYTHONPATH"' |\
+sudo EDITOR='tee -a' visudo
 
 message_output "Generating ssh keys..."
 mkdir $HOME/.ssh
-ls $HOME/.ssh/ | grep -q id_ed25519 || ssh-keygen -t ed25519 -f $HOME/.ssh/id_ed25519 -q -N ""
-cat $HOME/.ssh/authorized_keys | grep -q bluebanquise || cat $HOME/.ssh/id_ed25519.pub >> $HOME/.ssh/authorized_keys
-cd $CURRENT_DIR
+# Create SSH key pair if id_ed25519 doesn't exist
+if [[ ! -f "${HOME}/.ssh/id_ed25519" ]]; then
+  ssh-keygen -t ed25519\
+    -f "${HOME}"/.ssh/id_ed25519\
+    -q\
+    -N ""
+fi
+
+# Add id_ed25519 public key to authorized keys
+if [[ ! -f "${HOME}/.ssh/authorized_keys" ]]; then
+  cp "${HOME}/.ssh/id_ed25519.pub"\
+    "${HOME}/.ssh/authorized_keys"
+else
+  if ! grep -q -f "${HOME}/.ssh/id_ed25519.pub"\
+       "${HOME}/.ssh/authorized_keys";
+then
+    tee -a "${HOME}/.ssh/authorized_keys" > /dev/null\
+    < "${HOME}/.ssh/id_ed25519.pub"
+  fi
+fi
+
+cd "${CURRENT_DIR}"
+
 sed -i '/ssh-rsa/d' inventory/group_vars/all/equipment_all/authentication.yml
 sed -i '/ssh-ed25519/d' inventory/group_vars/all/equipment_all/authentication.yml
-echo "  - $(cat $HOME/.ssh/id_ed25519.pub)" >> inventory/group_vars/all/equipment_all/authentication.yml
+echo "  - $(cat "${HOME}"/.ssh/id_ed25519.pub)" |\
+tee -a inventory/group_vars/all/equipment_all/authentication.yml
 
 message_output "Setting first connection..."
-cat /etc/hosts | grep -q mgt1 || echo "127.0.0.1 mgt1" | sudo tee -a /etc/hosts
+grep -q mgt1 /etc/hosts ||\
+echo "127.0.0.1 mgt1" |\
+sudo tee -a /etc/hosts
 
 if $ESTABLISH_FIRST_SSH; then
 ssh -o StrictHostKeyChecking=no mgt1 echo Ok
