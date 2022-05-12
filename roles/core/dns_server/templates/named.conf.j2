@@ -32,6 +32,12 @@ options {
 {% endfor %}
   };
 
+{% if dns_server_recursion %}
+  recursion yes;
+{% else %}
+  recursion no;
+{% endif %}
+
 {% if external_dns.dns_server is defined and external_dns.dns_server %}
   forwarders {
   {% for forwarder in external_dns.dns_server %}
@@ -41,8 +47,6 @@ options {
     {{ forwarder }};
   {% endfor %}
   };
-{% else %}
-  recursion no;
 {% endif %}
 
   dnssec-enable {{ dns_server_dnssec_enable }};
