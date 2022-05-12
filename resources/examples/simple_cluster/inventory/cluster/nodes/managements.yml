@@ -1,14 +1,16 @@
-mgt1:
-  bmc:
-    name: bmgt1
-    ip4: 10.10.100.1
-    mac: 08:00:27:dc:f8:f6
-    network: ice1-1
-  network_interfaces:
-    - interface: enp0s8
-      ip4: 10.10.0.1
-      mac: 08:00:27:dc:f8:f5
-      network: ice1-1
-    - interface: ib0
-      ip4: 10.20.0.1
-      network: interconnect-1
+all:
+  hosts:
+    mgt1:
+      bmc:
+        name: bmgt1
+        ip4: 10.10.100.1
+        mac: 08:00:27:dc:f8:f6
+        network: ice1-1
+      network_interfaces:
+        - interface: enp0s8
+          ip4: 10.10.0.1
+          mac: 08:00:27:dc:f8:f5
+          network: ice1-1
+        - interface: ib0
+          ip4: 10.20.0.1
+          network: interconnect-1
