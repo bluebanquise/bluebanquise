@@ -28,6 +28,8 @@
     - Allows usage of a time_ip list. (#692)
   - powerman:
     - Fix error when ep_host_authentication does not contain IPMI credentials (#706)
+  - dns_server:
+    - Add recursion management. (#712)
 
 ## 1.5.0
 
