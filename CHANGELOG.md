@@ -13,6 +13,8 @@
 
 #### Roles improvement or fix
 
+  - all:
+    - Remove netaddr packages in roles (#713)
   - pxe_stack:
     - Extend bootset support for custom htdocs path (#676)
     - Allow to choose between root or sudo user. (#687)
