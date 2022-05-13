@@ -30,6 +30,7 @@
     group: "{{ pxe_stack_apache_group }}"
   with_items: "{{ j2_equipment_groups_list }}"
   when:
+    - groups[item] | length > 0
     - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
     - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) in ['redhat','centos','rockylinux','cloudlinux','oraclelinux','almalinux']
   tags:
@@ -44,6 +45,7 @@
     group: "{{ pxe_stack_apache_group }}"
   with_items: "{{ j2_equipment_groups_list }}"
   when:
+    - groups[item] | length > 0
     - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
     - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) in ['redhat','centos','rockylinux','cloudlinux','oraclelinux','almalinux']
   tags:

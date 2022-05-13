@@ -16,6 +16,7 @@
   - pxe_stack:
     - Extend bootset support for custom htdocs path (#676)
     - Allow to choose between root or sudo user. (#687)
+    - Prevent crash when empty ep group. (#711)
   - clushershell:
     - fix an idempotency problem of role clustershell (#675)
   - dhcp_server:
