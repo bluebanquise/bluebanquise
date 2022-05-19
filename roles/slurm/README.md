@@ -157,6 +157,12 @@ In the final *slurm.conf* configuration file.
 
 ### Accounting
 
+To enable Accounting the community.mysql ansible module is required:
+
+```
+ansible-galaxy collection install community.mysql
+```
+
 If you enable accounting, once the role has been applied on
 controller, check existence of the cluster in the database:
 
