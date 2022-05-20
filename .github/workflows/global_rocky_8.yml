@@ -44,7 +44,7 @@ jobs:
         run: sudo modprobe -v dummy numdummies=2; sudo ip addr add 10.10.0.1/16 dev dummy0; ip a;
 
       - name: Install packages
-        run: pip3 install ansible netaddr clustershell jmespath
+        run: pip3 install -r requirements.txt
 
       - name: Install collections
         run: ansible-galaxy collection install community.general
