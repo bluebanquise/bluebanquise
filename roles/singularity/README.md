@@ -55,5 +55,6 @@ Playbook example:
 
 ## ChangeLog
 
+* 1.0.2: Update FQDN. strus38
 * 1.0.1: Update package name to singularity-ce. strus38
 * 1.0.0: Initial version. strus38
