@@ -33,6 +33,8 @@
     - Fix error when ep_host_authentication does not contain IPMI credentials (#706)
   - dns_server:
     - Add recursion management. (#712)
+  - ssh_remote_keys:
+    - Allow keys to sudo user folder. (#716)
 
 ## 1.5.0
 
