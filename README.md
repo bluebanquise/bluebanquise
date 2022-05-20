@@ -50,10 +50,10 @@ Currently supported distributions are:
 |                         | Ubuntu                        | 20.04              | x86_64, aarch64  | √. Diskless not supported for now.                          |
 |                         | Debian                        |                    |                  | Targeted for future release                                 |
 | Suse                    |                               |                    |                  |                                                             |
-|                         | SLES                          |                    |                  | Targeted for future release                                 |
-|                         | OpenSuse Leap                 |                    |                  | Targeted for future release                                 |
+|                         | SLES                          | 15.3               | x86_64, aarch64  | √                                                           |
+|                         | OpenSuse Leap                 | 15.3               | x86_64, aarch64  | √                                                           |
 
-Ansible >= 2.9.13 is mandatory for BlueBanquise to run properly.
+Ansible >= 4.10.0 is mandatory for BlueBanquise to run properly.
 
 **[OpenHPC](https://openhpc.community/downloads/)** scientific packages and OpenHPC slurm job scheduler are compatible with the stack.
 
