@@ -10,7 +10,7 @@
   #
   # If no OS specific file is found, the role will default to vars/main.yml
   #
-  include_vars: "{{ item }}"
+  ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - files:
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
@@ -24,7 +24,7 @@
     - template
 
 - name: singularity █ Install singularity
-  package:
+  ansible.builtin.package:
     name: "{{ item }}"
     state: present
   with_items: "{{ singularity_packages_to_install }}"
@@ -32,7 +32,7 @@
     - package
 
 - name: singularity █ Template in singularity.conf
-  template:
+  ansible.builtin.template:
     src: singularity.conf.j2
     dest: "{{ singularity_config_dir }}/singularity.conf"
     backup: yes
@@ -43,7 +43,7 @@
     - template
 
 - name: singularity █ Template in init if singularity_manage_init_file is True
-  template:
+  ansible.builtin.template:
     src: init.j2
     dest: "{{ singularity_config_dir }}/init"
     backup: yes
