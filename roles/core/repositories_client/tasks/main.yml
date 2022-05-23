@@ -14,3 +14,6 @@
     loop_var: outer_item
   tags:
     - internal
+
+- name: meta ░ Run handler tasks to update the package manager's cache
+  ansible.builtin.meta: flush_handlers
