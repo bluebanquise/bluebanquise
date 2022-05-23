@@ -73,9 +73,9 @@
     - file
 
 - name: file █ Create cloud-init empty meta-data
-  ansible.builtin.file:
-    path: "{{ pxe_stack_htdocs_path }}/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.cloud-init/meta-data"
-    state: touch
+  ansible.builtin.copy:
+    dest: "{{ pxe_stack_htdocs_path }}/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.cloud-init/meta-data"
+    content: ""
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_group }}"
