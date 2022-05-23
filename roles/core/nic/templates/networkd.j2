@@ -6,13 +6,23 @@
 
 [Match]
 Name={{ item.conn_name | default(item.interface) | string }}
+
+{% if (item.dhcp is defined) and (item.dhcp is sameas true) %}
+[Network]
+DHCP=ipv4
+
+[DHCP]
+UseDNS=false
+UseDomains=false
+{% else %}
 [Network]
 Address={{ j2.nic_ip4(item) | trim }}
-{% if j2.nic_gw4(item) | length > 0 %}
+    {% if j2.nic_gw4(item) | length > 0 %}
 Gateway={{ j2.nic_gw4(item) | trim }}
-{% endif %}
-{% if j2.nic_dns4(item) | length > 0 %}
+    {% endif %}
+    {% if j2.nic_dns4(item) | length > 0 %}
 DNS={{ j2.nic_dns4(item) | trim }}
+    {% endif %}
 {% endif %}
 
 {% set route_buffer = (j2.nic_routes4(item) | from_yaml_all) %}
@@ -25,7 +35,6 @@ Gateway={{ route[1] }}
     {% if route[2] is defined %}
 Metric={{ route[2] }}
     {% endif %}
-
   {% endfor %}
 {% endif %}
 
