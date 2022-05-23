@@ -1,5 +1,5 @@
-SSH slave
----------
+SSH remote key
+--------------
 
 Description
 ^^^^^^^^^^^
@@ -9,7 +9,8 @@ This role configure the ssh client authorized public key.
 Instructions
 ^^^^^^^^^^^^
 
-This role will ensure remote hosts is having currently defined ssh authorized public keys in their */root/.ssh/authorized_keys* file.
+This role will ensure remote hosts is having currently defined ssh authorized public keys in their */root/.ssh/authorized_keys* file
+(or sudo user home if not using root user).
 
 These keys are set in file *group_vars/all/equipment_all/authentication.yml*.
 

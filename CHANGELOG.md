@@ -19,6 +19,7 @@
     - Extend bootset support for custom htdocs path (#676)
     - Allow to choose between root or sudo user. (#687)
     - Prevent crash when empty ep group. (#711)
+    - Improve idempotency of role pxe_stack. (#718)
   - clushershell:
     - fix an idempotency problem of role clustershell (#675)
   - dhcp_server:
@@ -35,6 +36,8 @@
     - Add recursion management. (#712)
   - ssh_remote_keys:
     - Allow keys to sudo user folder. (#716)
+  - repositories_client:
+    - Flush handlers at the end of role repositories_client. (#717)
 
 ## 1.5.0
 

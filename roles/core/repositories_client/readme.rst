@@ -130,6 +130,7 @@ sources.list file.
 Changelog
 ^^^^^^^^^
 
+* 1.3.2: Flush handlers at the end of role repositories_client. #sla31
 * 1.3.1: Updated SUSE subtask to handle missing repo definition when repo is a dictionary. Neil Munday <neil@mundayweb.com>
 * 1.3.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.2.0: Add OpenSuSE support and correct ansible warning for included tasks loop. Neil Munday <neil@mundayweb.com>
