@@ -6,7 +6,7 @@ j2_dns_server_get_first_octets: "
 {%- for host in groups['all'] -%}
   {%- if hostvars[host]['network_interfaces'] is defined -%}
     {%- for interface in hostvars[host]['network_interfaces'] -%}
-      {%- if interface['network'] == outer_item and  interface['ip4'] is defined and networks[interface['network']]['is_in_dns'] -%}
+      {%- if interface['network'] is defined and interface['network'] == outer_item and  interface['ip4'] is defined and networks[interface['network']]['is_in_dns'] -%}
         {%- set ip_prefix = interface['ip4'].split('.')[0:3]|join('.') -%}
         {%- if ip_prefix not in ip_networks -%}
           {{ ip_networks.append(ip_prefix) }}
