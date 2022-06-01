@@ -86,7 +86,7 @@
 - name: service █ Enable and start cluster
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: true
+    enabled: "{{ high_availability_autostart |  default(false) }}"
     state: started
   loop:
     - corosync
