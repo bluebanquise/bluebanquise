@@ -15,8 +15,8 @@ $INCLUDE "{{ dns_server_named_dir }}/{{ item }}.rr.soa"
 {% macro write_host(host,host_dict,host_node_main_resolution_network) %}
   {% if host_dict['network_interfaces'] is defined and host_dict['network_interfaces'] is iterable %}
     {% for nic in host_dict['network_interfaces'] %}
-      {% if nic.network is defined and nic.network == outer_item and nic.ip4 is defined and nic.ip4 is not none and nic.ip4.split('.')[0:3]|join('.') == item %}
-{{ create_record(nic.ip4, [[host, outer_item]|join('-'), domain_name]|join('.')) }}
+      {% if nic.network is defined and nic.ip4 is defined and nic.ip4 is not none and nic.ip4.split('.')[0:3]|join('.') == item %}
+{{ create_record(nic.ip4, [[host, nic.network]|join('-'), domain_name]|join('.')) }}
         {% if item == host_node_main_resolution_network %}
 {{ create_record(nic.ip4, [host, domain_name]|join('.')) }}
         {% endif %}
@@ -25,7 +25,7 @@ $INCLUDE "{{ dns_server_named_dir }}/{{ item }}.rr.soa"
   {% endif %}
   {% if host_dict['bmc'] is defined %}
     {% set bmc_args = host_dict['bmc'] %}
-    {% if bmc_args.name is defined and bmc_args.name is not none and bmc_args.ip4 is defined and bmc_args.ip4 is not none and bmc_args.network is defined and bmc_args.network is not none and bmc_args.network == outer_item and bmc_args.ip4.split('.')[0:3]|join('.') == item  %}
+    {% if bmc_args.name is defined and bmc_args.name is not none and bmc_args.ip4 is defined and bmc_args.ip4 is not none and bmc_args.ip4.split('.')[0:3]|join('.') == item  %}
 {{ create_record(bmc_args.ip4, [[bmc_args.name, bmc_args.network]|join('-'), domain_name]|join('.')) }}
       {% if item == host_node_main_resolution_network %}
 {{ create_record(bmc_args.ip4, [bmc_args.name, domain_name]|join('.')) }}
