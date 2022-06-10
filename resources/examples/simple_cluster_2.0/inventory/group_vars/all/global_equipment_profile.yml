@@ -1,0 +1,75 @@
+---
+
+---
+# Admin password to be used on deployed hosts
+## Replaces authentication_root_password_sha512
+<<<< NEW
+ep_admin_password_sha512: $6$M3crarMVoUV3rALd$ZTre2CIyss7zOb4lkLoG23As9OAkYPw2BM88Y1F43n8CCyV5XWwAYEwBOrS8bcCBIMjIPdJG.ndOfzWyAVR4j0  # This password is 'root', change it!
+
+# SSH public keys to be added as authorized keys on deployed/managed hosts
+## Replaces authentication_ssh_keys
+ep_admin_authorized_ssh_keys:
+<<<< NEW
+  - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDodjKUXHm1K7HkQ8rgyXDfOAW9wvWHz24+YpkNGO0wI/jS0E44F4pdfNSqUWfLfBwwyiJ/+iLQAcJZjrQ1CnECNtImpHNRuMVH6shXX99oYRDOfJ8/MV89zrAe/KDUR677/j1dHYIS1fGzOzsxey00n+2c4LqxiFvwEIOGkB6W96aIQTx+V7eTxMegYrNttlh9eSR8yr8n4+0qk29wVVvtMysEUIt1z12dtqOr7lBuXhOy9EIUz+EZpPyXFrJiNBaKFpZBJXjzzRwR0uplyH5qf3tb3vgIxgHDPKiYRIOf3Caa9XAgmE1BU+R36wvLoS2z58ELQekJeO5z7TpsxXeB root@localhost.localdomain
+
+# iPXE network driver
+# default should be good for most of NIC, but some need SNP. Refer to http://ipxe.org/appnote/buildtargets for more information.
+ep_ipxe_driver: snponly  # default or snp or snponly << DEFAULT TO SNPONLY
+ep_ipxe_platform: pcbios  # can be pcbios (for legacy/bios) or efi
+ep_ipxe_embed: standard  # can be standard or dhcpretry
+
+# When installing in EFI, grub2 break the boot order and set next boot to disk (seriously, why??!)
+# In most case, you prefer system to continue to boot on PXE, and so the stack can restore first boot device after grub2 installation
+ep_preserve_efi_first_boot_device: true  # true or false
+
+ep_console:
+ep_kernel_parameters:
+
+ep_access_control: enforcing  # Selinux, AppArmor, etc. Selinux: enforcing, permissive, disabled
+ep_firewall: true  # Enable or disable native firewall
+
+ep_partitioning: |  # Please provide native distribution partitioning. This example is for Centos/RedHat systems.
+  clearpart --all --initlabel
+  autopart --type=plain --fstype=ext4 --nohome
+
+<< THESE 2 NEXT SHOULD BE REPLACED BY A SIMPLE autoinstall-add or somthing like that
+ep_autoinstall_pre_script:  # Add optional pre script in auto installer file (kickstart, preseed, autoyast)
+ep_autoinstall_post_script:  # Add optional post script in auto installer file (kickstart, preseed, autoyast)
+
+ep_operating_system:
+  distribution: centos  # centos, redhat, debian, ubuntu, opensuse, etc.
+  distribution_major_version: 8
+  # Optional: define a minor distribution version to force (repositories/PXE)
+  # distribution_version: 8.0
+  # Optional: add an environment in the repositories path (eg. production, staging) (repositories/PXE)
+  # repositories_environment: production
+
+ep_equipment_type: none  # If server, a pxe profile will be generated
+
+ep_configuration:
+  keyboard_layout: us  # us, fr, etc.
+  system_language: en_US.UTF-8  # You should not update this if you want to google issues...
+
+
+ep_cpu_architecture: x86_64  <<<< NEW
+
+ep_hardware:
+  cpu:
+    cores: 1              # Mainly for slurm, but optional. You can define here detailed information on the CPUs.
+    cores_per_socket: 1
+    sockets: 1
+    threads_per_core: 1
+  gpu:
+
+ep_equipment_authentication:  # login/password for BMC, storage bay controller, switch, etc.
+<<<< NEW SHAPE
+  - protocol: IPMI
+    user: bmcuser
+    password: bmcpass
+  - protocol: redfish
+    user: bmcuser
+    password: bmcpass
+    ...
+  - protocol: virsh
+    remote_host: hypervisor1
+    ...
