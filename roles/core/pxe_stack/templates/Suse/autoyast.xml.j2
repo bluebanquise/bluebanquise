@@ -193,8 +193,7 @@ fi
 
 # Turn the kernel parameters into variables
 # We are looking for next_server value
-set -- `cat /proc/cmdline`
-for I in $*; do case "$I" in *=*) eval $I;; esac; done
+for I in `cat /proc/cmdline | tr " " "\n" | grep -E "^ipxe_next_server="` ; do eval $I; done
 
 echo "All went well, we can inform next-server we succeeded"
 curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$(hostname -s)&boot=disk"
