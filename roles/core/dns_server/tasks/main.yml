@@ -98,7 +98,7 @@
     - template
 
 - name: "template █ Generate Reverse zone file on Master DNS {{ dns_server_named_dir }}/{{ item }}.rr.zone"
-  template:
+  ansible.builtin.template:
     src: reverse.j2
     dest: "{{ dns_server_named_dir }}/{{ item|trim }}.rr.zone"
     owner: root
@@ -109,7 +109,7 @@
     - template
 
 - name: "template █ Generate SOA for reverse zone file {{ dns_server_named_dir }}/{{ item }}.rr.soa"
-  template:
+  ansible.builtin.template:
     src: reverse.soa.j2
     dest: "{{ dns_server_named_dir }}/{{ item|trim }}.rr.soa"
     owner: root
