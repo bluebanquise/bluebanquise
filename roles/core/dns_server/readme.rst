@@ -115,6 +115,8 @@ Files generated:
 Changelog
 ^^^^^^^^^
 
+* 1.5.3: Bug fix for issue #724. Neil Munday <neil@mundayweb.com>
+* 1.5.2: Bug fix for bond interfaces with no network defined.
 * 1.5.1: Add recursion management. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.5.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.1: Bug fix for issue #682. Neil Munday <neil@mundayweb.com>
