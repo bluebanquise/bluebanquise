@@ -1,0 +1,23 @@
+---
+repositories_client_os_native_repositories:
+  - repo: deb http://archive.ubuntu.com/ubuntu/ jammy main restricted
+    state: present
+  - repo: deb http://archive.ubuntu.com/ubuntu/ jammy-updates main restricted
+    state: present
+  - repo: deb http://archive.ubuntu.com/ubuntu/ jammy universe
+    state: present
+  - repo: deb http://archive.ubuntu.com/ubuntu/ jammy-updates universe
+    state: present
+  - repo: deb http://archive.ubuntu.com/ubuntu/ jammy multiverse
+    state: present
+  - repo: deb http://archive.ubuntu.com/ubuntu/ jammy-updates multiverse
+    state: present
+  - repo: deb http://archive.ubuntu.com/ubuntu/ jammy-backports main restricted universe multiverse
+    state: present
+  - repo: deb http://security.ubuntu.com/ubuntu/ jammy-security main restricted
+    state: present
+  - repo: deb http://security.ubuntu.com/ubuntu/ jammy-security universe
+    state: present
+  - repo: deb http://security.ubuntu.com/ubuntu/ jammy-security multiverse
+    state: present
+

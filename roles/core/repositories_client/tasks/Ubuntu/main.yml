@@ -1,16 +1,32 @@
 ---
-- name: set_fact ░ Set static baseurl prefix
+- name: set_fact ▒ Set static baseurl prefix
   ansible.builtin.set_fact:
-    baseurl_prefix:
+    repositories_client_baseurl_prefix:
       "http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/\
       {{ ep_operating_system['repositories_environment'] | default('') }}/\
       {{ ep_operating_system['distribution'] }}/\
       {{ ep_operating_system['distribution_version'] | default(ep_operating_system['distribution_major_version']) }}/\
       {{ ansible_architecture }}/"
+  when:
+    - j2_node_main_network is defined and j2_node_main_network is not none
+    - networks is defined and networks is not none
+    - networks[j2_node_main_network] is defined and networks[j2_node_main_network] is not none
+    - networks[j2_node_main_network]['services_ip'] is defined and networks[j2_node_main_network]['services_ip'] is not none
+    - networks[j2_node_main_network]['services_ip']['repository_ip'] is defined and networks[j2_node_main_network]['services_ip']['repository_ip'] is not none
+    - ep_operating_system is defined and ep_operating_system is not none
+    - ep_operating_system['distribution'] is defined and ep_operating_system['distribution'] is not none
+    - (ep_operating_system['distribution_version'] is defined and ep_operating_system['distribution_version'] is not none) or (ep_operating_system['distribution_major_version'] is defined and ep_operating_system['distribution_major_version'] is not none)
 
-- name: apt_repository █ Setting deb sources repositories
+- name: file ▒ Disable sources.list repositories
+  ansible.builtin.replace:
+    path: /etc/apt/sources.list
+    regexp: '^(deb.+)$'
+    replace: '# \1'
+  when: repositories_client_disable_distro_repos
+
+- name: apt_repository ▒ Setting deb sources repositories
   ansible.builtin.apt_repository:
-    repo: "{{ item.repo | default('deb [trusted=yes] ' + baseurl_prefix + ( item.name | default(item) | string ) + ' ' + ( item.distribution | default('./') )) }}"
+    repo: "{{ item.repo | default('deb [trusted=yes] ' + (repositories_client_baseurl_prefix | default('')) + ( item.name | default(item) | string ) + ' ' + ( item.distribution | default('./') )) }}"
     state: "{{ item.state | default('present') }}"
     codename: "{{ item.codename | default(omit) }}"
     filename: "{{ item.filename | default(omit) }}"
@@ -20,5 +36,7 @@
     update_cache_retries: "{{ item.update_cache_retries | default(omit) }}"
     update_cache_retry_max_delay: "{{ item.update_cache_retry_max_delay | default(omit) }}"
     validate_certs: "{{ item.validate_certs | default(omit) }}"
-  with_items: "{{ repositories | union(external_repositories|default([])) }}"
-  notify: command █ apt update cache
+  with_items: "{{ (bb_repositories | default([])) | union(repositories_client_enable_os_native | ternary( repositories_client_os_native_repositories | default([]), []) ) }}"
+  notify: command ▒ apt update cache
+  when:
+    - (item.repo is defined and item.repo is not none) or (repositories_client_baseurl_prefix is defined and repositories_client_baseurl_prefix is not none)
