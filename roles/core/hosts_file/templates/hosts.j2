@@ -14,13 +14,17 @@
 
   {%- if host_dict['network_interfaces'] is defined and host_dict['network_interfaces'] is iterable %}
     {%- for nic in host_dict['network_interfaces'] %}
-      {% if nic.network is defined and nic.network is not none %}  
+      {% if nic.network is defined and nic.network is not none and nic.ip4 is defined and (nic.ip4 | ansible.utils.ipaddr) %}  
 {{ nic.ip4 }} {{ host }}-{{ nic.network }}
       {% endif %}
     {% endfor %}
   {% endif %}
-  {%- if host_j2_node_main_resolution_address is not none and host_j2_node_main_resolution_address %}
-{{ host_j2_node_main_resolution_address }} {{ host }} {{ host }}.{{ bb_domain_name | default(hosts_file_domaine_name) }} {{ alias_list|join(' ') }} 
+
+  {%- if host_j2_node_main_resolution_address is not none and (host_j2_node_main_resolution_address | ansible.utils.ipaddr) %}
+    {% if host_dict['network'] is defined and host_dict['network'] is not none and host_dict['network'] is string %}
+{{ host_j2_node_main_resolution_address }} {{ host }}-{{ host_dict['network'] }}
+    {% endif %}
+{{ host_j2_node_main_resolution_address }} {{ host }} {{ host }}.{{ bb_domain_name | default(hosts_file_domaine_name) }} {{ alias_list|join(' ') }}
   {% endif %}  
 
   {%- if host_dict['bmc'] is defined and host_dict['bmc'] is not none %}
@@ -31,7 +35,7 @@
     {% if host_dict['bmc']['alias'] is defined and host_dict['bmc']['alias'] is not none and host_iceberg == current_iceberg %}
       {% for alias in host_dict['bmc']['alias'] %}{{ bmc_alias_list.append(alias) }}{% endfor %}
     {% endif %}
-    {% if (host_dict['bmc'].name is defined and host_dict['bmc'].name is not none) and (host_dict['bmc'].ip4 is defined and host_dict['bmc'].ip4 is not none) %}
+    {% if (host_dict['bmc'].name is defined and host_dict['bmc'].name is not none) and (host_dict['bmc'].ip4 is defined and (host_dict['bmc'].ip4 | ansible.utils.ipaddr) ) %}
 {{ host_dict['bmc'].ip4 }} {{ host_dict['bmc'].name }} {{ bmc_alias_list|join(' ') }}
     {% endif %}
   {% endif -%}
@@ -47,8 +51,6 @@
 ## Internal hosts
 
 {% for host in (j2_hosts_range | sort) -%}
-{{ host }}
-{{  hostvars[host]['j2_node_main_resolution_address'] }}
 {{ write_host(host,hostvars[host], hostvars[host]['j2_node_main_resolution_address'],hostvars[host]['j2_current_iceberg'],j2_current_iceberg) }}
 {%- endfor %}
 

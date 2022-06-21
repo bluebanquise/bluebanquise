@@ -4,17 +4,7 @@
 
 include "/etc/powerman/ipmipower.dev"
 
-{% if icebergs_system == true %}
-# Iceberg system is on
-  {% set range = groups[j2_current_iceberg] %}
-  {% for host in groups[managements_group_name] %}
-    {% if hostvars[host]['iceberg_master'] == j2_current_iceberg %}
-      {% set _ = range.append(host) %}
-    {% endif %}
-  {% endfor %}
-{% else %}
-  {% set range = groups['all'] %}
-{% endif %}
+{% set range = (j2_hosts_range | sort) %}
 
 {% for equipment in j2_equipment_groups_list %}
   {% set hosts = [] %}

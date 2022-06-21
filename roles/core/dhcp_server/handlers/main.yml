@@ -2,8 +2,8 @@
 - name: service █ Restart dhcp server
   ansible.builtin.service:
     name: "{{ item }}"
-    state: restarted
+    state: "{{ (dhcp_server_start_services | default(bb_start_services) | default(true) | bool) | ternary('restarted', omit) }}"
   loop: "{{ dhcp_server_services_to_start }}"
   when:
     - "'service' not in ansible_skip_tags"
-    - (start_services | bool)
+    - dhcp_server_start_services | default(bb_start_services) | default(true)
