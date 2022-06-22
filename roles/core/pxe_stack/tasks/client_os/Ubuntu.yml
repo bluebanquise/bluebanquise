@@ -34,9 +34,10 @@
     group: "{{ pxe_stack_apache_group }}"
   with_items: "{{ j2_equipment_groups_list }}"
   when:
-    - groups[item] | length > 0
-    - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
-    - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) in ['ubuntu'] and hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] == 18
+    - groups[item] | default([]) | length > 0
+    - hostvars[groups[item][0]]['ep_equipment_type'] | default(pxe_stack_ep_equipment_type) == "server"
+    - (hostvars[groups[item][0]]['ep_operating_system']['distribution'] | default(pxe_stack_ep_operating_system.distribution) | lower) in ['ubuntu']
+    - (hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] | default(pxe_stack_ep_operating_system.distribution_major_version)) == 18
   tags:
     - template
 
@@ -49,9 +50,11 @@
     group: "{{ pxe_stack_apache_group }}"
   with_items: "{{ j2_equipment_groups_list }}"
   when:
-    - groups[item] | length > 0
-    - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
-    - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) in ['ubuntu'] and hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] == 18
+    - groups[item] | default([]) | length > 0
+    - hostvars[groups[item][0]]['ep_equipment_type'] | default(pxe_stack_ep_equipment_type) == "server"
+    - (hostvars[groups[item][0]]['ep_operating_system']['distribution'] | default(pxe_stack_ep_operating_system.distribution) | lower) in ['ubuntu']
+    - (hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] | default(pxe_stack_ep_operating_system.distribution_major_version)) ==
+18
   tags:
     - template
 
@@ -66,9 +69,11 @@
     group: "{{ pxe_stack_apache_group }}"
   with_items: "{{ j2_equipment_groups_list }}"
   when:
-    - groups[item] | length > 0
-    - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
-    - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) in ['ubuntu'] and hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] == 20
+    - groups[item] | default([]) | length > 0
+    - hostvars[groups[item][0]]['ep_equipment_type'] | default(pxe_stack_ep_equipment_type) == "server"
+    - (hostvars[groups[item][0]]['ep_operating_system']['distribution'] | default(pxe_stack_ep_operating_system.distribution) | lower) in ['ubuntu']
+    - (hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] | default(pxe_stack_ep_operating_system.distribution_major_version)) ==
+20
   tags:
     - file
 
@@ -81,9 +86,11 @@
     group: "{{ pxe_stack_apache_group }}"
   with_items: "{{ j2_equipment_groups_list }}"
   when:
-    - groups[item] | length > 0
-    - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
-    - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) in ['ubuntu'] and hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] == 20
+    - groups[item] | default([]) | length > 0
+    - hostvars[groups[item][0]]['ep_equipment_type'] | default(pxe_stack_ep_equipment_type) == "server"
+    - (hostvars[groups[item][0]]['ep_operating_system']['distribution'] | default(pxe_stack_ep_operating_system.distribution) | lower) in ['ubuntu']
+    - (hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] | default(pxe_stack_ep_operating_system.distribution_major_version)) ==
+20
   tags:
     - file
 
@@ -96,9 +103,11 @@
     group: "{{ pxe_stack_apache_group }}"
   with_items: "{{ j2_equipment_groups_list }}"
   when:
-    - groups[item] | length > 0
-    - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
-    - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) in ['ubuntu'] and hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] == 20
+    - groups[item] | default([]) | length > 0
+    - hostvars[groups[item][0]]['ep_equipment_type'] | default(pxe_stack_ep_equipment_type) == "server"
+    - (hostvars[groups[item][0]]['ep_operating_system']['distribution'] | default(pxe_stack_ep_operating_system.distribution) | lower) in ['ubuntu']
+    - (hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] | default(pxe_stack_ep_operating_system.distribution_major_version)) ==
+20
   tags:
     - template
 
@@ -111,8 +120,10 @@
     group: "{{ pxe_stack_apache_group }}"
   with_items: "{{ j2_equipment_groups_list }}"
   when:
-    - groups[item] | length > 0
-    - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
-    - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) in ['ubuntu'] and hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] == 20
+    - groups[item] | default([]) | length > 0
+    - hostvars[groups[item][0]]['ep_equipment_type'] | default(pxe_stack_ep_equipment_type) == "server"
+    - (hostvars[groups[item][0]]['ep_operating_system']['distribution'] | default(pxe_stack_ep_operating_system.distribution) | lower) in ['ubuntu']
+    - (hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] | default(pxe_stack_ep_operating_system.distribution_major_version)) ==
+20
   tags:
     - template

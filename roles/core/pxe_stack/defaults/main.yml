@@ -20,3 +20,10 @@ pxe_stack_ubuntu_preserve_sources_list: true
 
 # Preserve default sources list for OpenSUSE
 pxe_stack_opensuse_preserve_sources_list: true
+
+### Default equipment profile parameters
+pxe_stack_ep_equipment_type: server
+pxe_stack_ep_operating_system:
+  distribution: ubuntu
+  distribution_version: 22.04
+  distribution_major_version: 22
