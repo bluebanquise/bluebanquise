@@ -18,10 +18,9 @@ cpuid --ext 29 && set arch x86_64 || set arch x86
 goto displayarch
 :displayarch
 echo | Detected architecture: ${arch}
-
+sleep 1
 echo |
 echo | Now chaining to --> nodes/${hostname}.ipxe
 echo |
 sleep 1
-chain http://${next-server}/preboot_execution_environment/nodes/${hostname}.ipxe
-
+chain http://${next-server}/pxe/nodes/${hostname}.ipxe

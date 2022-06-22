@@ -1,4 +1,7 @@
 ---
+
+pxe_stack_time_zone: Europe/Brussels
+
 # Enable distributions support
 pxe_stack_client_os_redhat: true
 pxe_stack_client_os_ubuntu: true
@@ -27,3 +30,24 @@ pxe_stack_ep_operating_system:
   distribution: ubuntu
   distribution_version: 22.04
   distribution_major_version: 22
+  repositories_environment:
+
+pxe_stack_ep_console:
+pxe_stack_ep_kernel_parameters:
+
+pxe_stack_ep_keyboard_layout: us  # us, fr, etc.
+pxe_stack_ep_system_language: en_US.UTF-8  # You should not update this if you want to google issues...
+
+pxe_stack_ep_admin_password_sha512: "!"
+pxe_stack_ep_admin_ssh_keys: []
+
+pxe_stack_ep_access_control: enforcing
+pxe_stack_ep_firewall: true
+
+# WARNING! If nothing is set for partitioning,
+# automatic partitioning will be activated.
+pxe_stack_ep_partitioning:
+
+pxe_stack_ep_preserve_efi_first_boot_device: true
+
+pxe_stack_ep_autoinstall_custom_content:

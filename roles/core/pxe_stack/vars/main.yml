@@ -2,9 +2,6 @@
 pxe_stack_role_version: 1.6.4
 
 pxe_stack_supported_os:
-#  centos:
-#    - 7
-#    - 8
   redhat:
     - major: 7
       distributions:
@@ -14,18 +11,24 @@ pxe_stack_supported_os:
       distributions:
         - redhat
         - centos
-        - cloudlinux
         - oraclelinux
         - almalinux
         - rockylinux
     - major: 9
       distributions:
         - redhat
+        - centosstream
+        - oraclelinux
+        - almalinux
+        - rockylinux
   ubuntu:
     - major: 18
       distributions:
         - ubuntu
     - major: 20
+      distributions:
+        - ubuntu
+    - major: 22
       distributions:
         - ubuntu
   dgxos:
@@ -36,3 +39,9 @@ pxe_stack_supported_os:
     - major: 15
       distributions:
         - opensuse
+
+pxe_stack_redhat_automatic_partitioning: |
+  clearpart --all --initlabel
+  autopart --type=plain --fstype=ext4
+
+pxe_stack_ubuntu_automatic_partitioning: " "

@@ -66,11 +66,11 @@
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_group }}"
   loop:
-    - "{{ pxe_stack_htdocs_path }}/preboot_execution_environment/"
-    - "{{ pxe_stack_htdocs_path }}/preboot_execution_environment/bin"
-    - "{{ pxe_stack_htdocs_path }}/preboot_execution_environment/nodes"
-    - "{{ pxe_stack_htdocs_path }}/preboot_execution_environment/equipment_profiles"
-    - "{{ pxe_stack_htdocs_path }}/preboot_execution_environment/osdeploy"
+    - "{{ pxe_stack_htdocs_path }}/pxe/"
+    - "{{ pxe_stack_htdocs_path }}/pxe/bin"
+    - "{{ pxe_stack_htdocs_path }}/pxe/nodes"
+    - "{{ pxe_stack_htdocs_path }}/pxe/equipment_profiles"
+    - "{{ pxe_stack_htdocs_path }}/pxe/osdeploy"
 
 - name: include_tasks ░ Use OS dedicated task
   ansible.builtin.include_tasks: "{{ item }}"
@@ -100,10 +100,10 @@
     dest: "/etc/bootset/pxe_parameters.yml"
     mode: 0644
 
-- name: "template █ Generate {{ pxe_stack_htdocs_path }}/preboot_execution_environment/{menu|convergence}.ipxe"
+- name: "template █ Generate {{ pxe_stack_htdocs_path }}/pxe/{menu|convergence}.ipxe"
   ansible.builtin.template:
     src: "{{ item }}.ipxe.j2"
-    dest: "{{ pxe_stack_htdocs_path }}/preboot_execution_environment/{{ item }}.ipxe"
+    dest: "{{ pxe_stack_htdocs_path }}/pxe/{{ item }}.ipxe"
     mode: 0755
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_group }}"
@@ -113,10 +113,10 @@
   tags:
     - template
 
-- name: "template █ Generate {{ pxe_stack_htdocs_path }}/preboot_execution_environment/nodes/.ipxe"
+- name: "template █ Generate {{ pxe_stack_htdocs_path }}/pxe/nodes/.ipxe"
   ansible.builtin.template:
     src: nohostname.ipxe.j2
-    dest: "{{ pxe_stack_htdocs_path }}/preboot_execution_environment/nodes/.ipxe"
+    dest: "{{ pxe_stack_htdocs_path }}/pxe/nodes/.ipxe"
     mode: 0755
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_group }}"

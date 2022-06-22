@@ -61,7 +61,7 @@ goto start
 :startgrubshell
 echo Booting on a Grub2 shell image...
 sleep 2
-chain http://${next-server}/preboot_execution_environment/bin/${arch}/grub2_shell.img || shell
+chain http://${next-server}/pxe/bin/${arch}/grub2_shell.img || shell
 exit 1
 
 :showinfo
@@ -87,16 +87,16 @@ set submenu-timeout 0
 goto start
 
 :bootosdeploy
-chain http://${next-server}/preboot_execution_environment/osdeploy/${eq-distribution}_${eq-distribution-major-version}.ipxe || shell
+chain http://${next-server}/pxe/osdeploy/${eq-distribution}_${eq-distribution-major-version}.ipxe || shell
 
 :bootdiskless
-chain http://${next-server}/preboot_execution_environment/diskless/images/${node-image}/boot.ipxe || shell
+chain http://${next-server}/pxe/diskless/images/${node-image}/boot.ipxe || shell
 
 :bootclone
-chain http://${next-server}/preboot_execution_environment/clone/clone.ipxe
+chain http://${next-server}/pxe/clone/clone.ipxe
 
 :bootdeployclone
-chain http://${next-server}/preboot_execution_environment/clone/deploy_clone.ipxe
+chain http://${next-server}/pxe/clone/deploy_clone.ipxe
 
 :bootdisk
 iseq ${platform} efi && goto bootdisk-efi || goto bootdisk-legacy
@@ -110,7 +110,7 @@ iseq ${platform} efi && goto bootdisk-efi || goto bootdisk-legacy
     :bootdisk-efi
     echo Booting on disk in EFI way
     sleep 2
-    chain http://${next-server}/preboot_execution_environment/bin/${arch}/grub2_efi_autofind.img || shell
+    chain http://${next-server}/pxe/bin/${arch}/grub2_efi_autofind.img || shell
     exit 1
 
 :bootnext
@@ -118,8 +118,8 @@ exit
 
 #:memtest
 #echo Booting Memtest86+
-#boot http://${next-server}/preboot_execution_environment/bin/memtest86+-5.01.bin || shell
+#boot http://${next-server}/pxe/bin/memtest86+-5.01.bin || shell
 
 #:minimal_live_linux
 #echo Booting Minimal Live Linux
-#chain http://${next-server}/preboot_execution_environment/equipment_ipxe_configurations/minimal.ipxe
+#chain http://${next-server}/pxe/equipment_ipxe_configurations/minimal.ipxe

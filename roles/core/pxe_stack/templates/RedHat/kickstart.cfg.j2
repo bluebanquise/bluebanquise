@@ -10,30 +10,30 @@ text
 firstboot --enable
 
 # System keyboard layout
-keyboard --vckeymap={{ hostvars[groups[item][0]]['ep_configuration']['keyboard_layout']|lower }} --xlayouts='{{ hostvars[groups[item][0]]['ep_configuration']['keyboard_layout']|lower }}'
+keyboard --vckeymap={{ (hostvars[groups[item][0]]['ep_keyboard_layout'] | default(pxe_stack_ep_keyboard_layout)) | lower }} --xlayouts='{{ (hostvars[groups[item][0]]['ep_keyboard_layout'] | default(pxe_stack_ep_keyboard_layout)) | lower }}'
 
 # System language
-lang {{ hostvars[groups[item][0]]['ep_configuration']['system_language'] }}
+lang {{ hostvars[groups[item][0]]['ep_system_language'] | default(pxe_stack_ep_system_language) }}
 
 # System timezone
-timezone {{ time_zone }} --isUtc
+timezone {{ bb_time_zone | default(pxe_stack_time_zone) }} --isUtc
 
 # Reboot after installation
 reboot
 
 ##### Authentication settings
 
-{% if hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version']|int < 8 %}
+{% if (hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] | default(pxe_stack_ep_operating_system.distribution_major_version) ) | int < 8 %}
 # Define authentication method (sha512)
 auth --enableshadow --passalgo=sha512
 {% endif %}
 
 {% if not pxe_stack_enable_root %}
 rootpw --lock
-user --name={{ pxe_stack_sudo_user }} --iscrypted --password={{ hostvars[groups[item][0]]['authentication_root_password_sha512'] }}
+user --name={{ pxe_stack_sudo_user }} --iscrypted --password={{ hostvars[groups[item][0]]['ep_admin_password_sha512'] | default(pxe_stack_ep_admin_password_sha512) }}
 {% else %}
 # Root password (sha512)
-rootpw --iscrypted {{ hostvars[groups[item][0]]['authentication_root_password_sha512'] }}
+rootpw --iscrypted {{ hostvars[groups[item][0]]['ep_admin_password_sha512'] | default(pxe_stack_ep_admin_password_sha512) }}
 {% endif %}
 
 ##### Network
@@ -42,19 +42,17 @@ rootpw --iscrypted {{ hostvars[groups[item][0]]['authentication_root_password_sh
 network --bootproto=dhcp --ipv6=auto --activate
 network --hostname=localhost.localdomain
 
-
 ##### Security
 
 # SELinux
-{% if hostvars[groups[item][0]]['ep_access_control'] is defined and
-   hostvars[groups[item][0]]['ep_access_control'] in ['enforcing', 'permissive'] %}
-selinux --{{ hostvars[groups[item][0]]['ep_access_control'] }}
+{% if (hostvars[groups[item][0]]['ep_access_control'] | default(pxe_stack_ep_access_control)) in ['enforcing', 'permissive'] %}
+selinux --{{ hostvars[groups[item][0]]['ep_access_control'] | default(pxe_stack_ep_access_control) }}
 {% else %}
 selinux --disabled
 {% endif %}
 
 # Firwalld
-{% if hostvars[groups[item][0]]['ep_firewall'] is defined and hostvars[groups[item][0]]['ep_firewall'] == true %}
+{% if (hostvars[groups[item][0]]['ep_firewall'] | default(pxe_stack_ep_firewall)) == true %}
 firewall --enabled
 {% else %}
 firewall --disabled
@@ -62,12 +60,14 @@ firewall --disabled
 
 
 ##### Partitionning
+# WARNING! Note that in BlueBanquise, if nothing was set for partitioning,
+# a potentially destructive default will be chosen!
 
 # Bootloader configuration
-bootloader --append="{{ hostvars[groups[item][0]]['ep_kernel_parameters'] }}" --location=mbr
+bootloader --append="{{ hostvars[groups[item][0]]['ep_kernel_parameters'] | default(pxe_stack_ep_kernel_parameters) }}" --location=mbr
 
 # Partitioning
-{{ hostvars[groups[item][0]]['ep_partitioning'] }}
+{{ hostvars[groups[item][0]]['ep_partitioning'] | default(pxe_stack_ep_partitioning) | default(pxe_stack_redhat_automatic_partitioning) }}
 
 ##### Packages
 %packages
@@ -81,32 +81,14 @@ sudo
 
 # This EFI first boot order restoration trick is from stacki, not from me.
 # See https://github.com/Teradata/stacki for more details
-{% if hostvars[groups[item][0]]['ep_preserve_efi_first_boot_device'] == true %}
-%pre
-set -x
-if [ -d /sys/firmware/efi ]; then
-    netboot=`efibootmgr | awk '/^BootCurrent:/{print $2;}'`
-    [ ! -z $netboot ] && echo $netboot > /tmp/uefi_netboot
-    efibootmgr > /tmp/uefiall
-fi
-set +x
-%end
-
-%post --nochroot --log /mnt/sysimage/root/efirestore_post-install.log
-set -x
-if [ -d /sys/firmware/efi ]; then
-    echo "Restoring EFI first boot device..."
-    netboot=$(cat /tmp/uefi_netboot)
-    currentorder=`efibootmgr | awk '/^BootOrder:/{print $2;}'`
-    efibootmgr -o $netboot,$(echo $currentorder | sed "s/$netboot//" | sed 's/^,//' | sed 's/,$//' | sed 's/,,/,/')
-    echo " End."
-fi
-set +x
+{% if (hostvars[groups[item][0]]['ep_preserve_efi_first_boot_device'] | default(pxe_stack_ep_preserve_efi_first_boot_device)) == true %}
+%post --interpreter /bin/bash --log /root/bluebanquise_efi_post-install.log
+[ -d /sys/firmware/efi ] && efibootmgr -o $(efibootmgr | grep BootCurrent | cut -d" " -f2),$(efibootmgr | grep BootOrder | sed "s/BootOrder:\ //" | sed "s/$(efibootmgr | grep BootCurrent | cut -d" " -f2),//") || echo "Not an EFI system, skipping"
 %end
 {% endif %}
 
 # Main post, ssh keys and inform server auto install is done
-%post --interpreter /bin/bash --log /root/main_post-install.log
+%post --interpreter /bin/bash --log /root/bluebanquise_main_post-install.log
 set -x
 
 {% if pxe_stack_enable_root %}
@@ -116,11 +98,11 @@ sed -i 's/^.*PermitRootLogin.*$/PermitRootLogin\ yes/' /etc/ssh/sshd_config
 # Add ssh keys from ssh_keys list
 mkdir /root/.ssh
 cat << xxEOFxx >> /root/.ssh/authorized_keys
-{% for ssh_key in hostvars[groups[item][0]]['authentication_ssh_keys'] %}
+{% for ssh_key in (hostvars[groups[item][0]]['ep_admin_ssh_keys'] | default(pxe_stack_ep_admin_ssh_keys)) %}
 {{ ssh_key }}
 {% endfor %}
 xxEOFxx
-# Ensure SELinux configuration is ok
+# Ensure SELinux configuration is ok, best effort
 restorecon -R -v /root/.ssh
 
 {% else %}
@@ -129,11 +111,11 @@ sed -i 's/^.*PermitRootLogin.*$/PermitRootLogin\ no/' /etc/ssh/sshd_config
 # Add ssh keys from ssh_keys list
 mkdir /home/{{ pxe_stack_sudo_user }}/.ssh
 cat << xxEOFxx >> /home/{{ pxe_stack_sudo_user }}/.ssh/authorized_keys
-{% for ssh_key in hostvars[groups[item][0]]['authentication_ssh_keys'] %}
+{% for ssh_key in (hostvars[groups[item][0]]['ep_admin_ssh_keys'] | default(pxe_stack_ep_admin_ssh_keys)) %}
 {{ ssh_key }}
 {% endfor %}
 xxEOFxx
-# Ensure SELinux configuration is ok
+# Ensure SELinux configuration is ok, best effort
 restorecon -R -v /home/{{ pxe_stack_sudo_user }}/.ssh
 # Set admin user as sudo
 {% if pxe_stack_sudo_is_passwordless %}
@@ -154,16 +136,7 @@ curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$node_ho
 set +x
 %end
 
-
-# Custom scripts
-{% if hostvars[groups[item][0]]['ep_autoinstall_pre_script'] is defined and hostvars[groups[item][0]]['ep_autoinstall_pre_script'] is not none %}
-%pre --log /root/custom_pre.log
-{{ hostvars[groups[item][0]]['ep_autoinstall_pre_script'] }}
-%end
-{% endif %}
-
-{% if hostvars[groups[item][0]]['ep_autoinstall_post_script'] is defined and hostvars[groups[item][0]]['ep_autoinstall_post_script'] is not none %}
-%post --log /root/custom_post.log
-{{ hostvars[groups[item][0]]['ep_autoinstall_post_script'] }}
-%end
+# Custom scripts or kickstart content
+{% if (hostvars[groups[item][0]]['ep_autoinstall_custom_content'] | default(pxe_stack_ep_autoinstall_custom_content)) is not none %}
+{{ (hostvars[groups[item][0]]['ep_autoinstall_custom_content'] | default(pxe_stack_ep_autoinstall_custom_content)) }}
 {% endif %}

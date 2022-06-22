@@ -1,18 +1,18 @@
 ##### DGX OS
 
-- name: "copy █ Copy osdeploy files {{ pxe_stack_htdocs_path }}/preboot_execution_environment/osdeploy/"
+- name: "copy █ Copy osdeploy files {{ pxe_stack_htdocs_path }}/pxe/osdeploy/"
   ansible.builtin.copy:
     src: osdeploy/dgxos_{{ item.major }}.ipxe
-    dest: "{{ pxe_stack_htdocs_path }}/preboot_execution_environment/osdeploy/dgxos_{{ item.major }}.ipxe"
+    dest: "{{ pxe_stack_htdocs_path }}/pxe/osdeploy/dgxos_{{ item.major }}.ipxe"
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_group }}"
   loop: "{{ pxe_stack_supported_os.dgxos }}"
 
-- name: "template █ Generate equipment_profiles {{ pxe_stack_htdocs_path }}/preboot_execution_environment/equipment_profiles/{item}.ipxe"
+- name: "template █ Generate equipment_profiles {{ pxe_stack_htdocs_path }}/pxe/equipment_profiles/{item}.ipxe"
   ansible.builtin.template:
     src: "DGX/equipment_profile_dgxos.ipxe.j2"
-    dest: "{{ pxe_stack_htdocs_path }}/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.ipxe"
+    dest: "{{ pxe_stack_htdocs_path }}/pxe/equipment_profiles/{{ item | replace(bb_core_equipment_naming+'_','') | trim }}.ipxe"
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_group }}"
@@ -108,7 +108,7 @@
 - name: copy █ Copy final curtin to destination
   ansible.builtin.copy:
     src: "/dev/shm/tmp_curtin_{{ item }}.yaml"
-    dest: "{{ pxe_stack_htdocs_path }}/preboot_execution_environment/equipment_profiles/{{ item | replace(equipment_naming+'_','') | trim }}.curtin.yaml"
+    dest: "{{ pxe_stack_htdocs_path }}/pxe/equipment_profiles/{{ item | replace(bb_core_equipment_naming+'_','') | trim }}.curtin.yaml"
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_user }}"

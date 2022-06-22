@@ -24,7 +24,7 @@ set node-main-network-interface auto
 # Dynamic variables
 set images-root http://${next-server}/repositories/${eq-repositories-environment}/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/
 set repository-root http://${next-server}/repositories/${eq-repositories-environment}/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/
-set preseed-path http://${next-server}/preboot_execution_environment/equipment_profiles//${eq-equipment-profile}.preseed.cfg
+set preseed-path http://${next-server}/pxe/equipment_profiles//${eq-equipment-profile}.preseed.cfg
 
 echo | images-root: ${images-root}
 echo | repository-root: ${repository-root}
@@ -34,4 +34,4 @@ echo |
 # Now chain to menu
 echo | Now chaining to --> menu.ipxe
 sleep 2
-chain http://${next-server}/preboot_execution_environment/menu.ipxe || shell
+chain http://${next-server}/pxe/menu.ipxe || shell

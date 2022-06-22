@@ -16,7 +16,8 @@ echo | next-server:  ${net0.dhcp/next-server:ipv4}
 echo |
 echo +----------------------------------------------------+
 echo
-echo Could not get an hostname from dhcp-server.
-echo Please check configuration.
+echo Could not get a valid hostname from dhcp-server.
+echo Please check configuration, or check that command
+echo bluebanquise-bootset has been used for that host.
 echo Dropping to an iPXE shell...
 shell

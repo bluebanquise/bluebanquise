@@ -1,8 +1,8 @@
 ## Tested on Centos 7.6
 ---
-- name: sefcontext █ Set SELinux context on /var/www/html/preboot_execution_environment/nodes
+- name: sefcontext █ Set SELinux context on /var/www/html/pxe/nodes
   community.general.sefcontext:
-    target: '/var/www/html/preboot_execution_environment/nodes(/.*)?'
+    target: '/var/www/html/pxe/nodes(/.*)?'
     setype: httpd_sys_rw_content_t
     state: present
   when:
