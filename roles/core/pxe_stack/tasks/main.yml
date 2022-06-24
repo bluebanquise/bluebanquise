@@ -128,6 +128,7 @@
   when: pxe_stack_client_os_redhat
   tags:
     - internal
+    - dev2
 
 - name: include_tasks ░ Include Ubuntu familly clients support
   ansible.builtin.include_tasks: client_os/Ubuntu.yml
