@@ -45,3 +45,27 @@ pxe_stack_redhat_automatic_partitioning: |
   autopart --type=plain --fstype=ext4
 
 pxe_stack_ubuntu_automatic_partitioning: " "
+
+pxe_stack_suse_automatic_partitioning: |
+  <partitioning config:type="list">
+    <drive>
+      <initialize config:type="boolean">true</initialize>
+      <use>all</use>
+      <partitions config:type="list">
+        <partition>
+          <filesystem config:type="symbol">ext4</filesystem>
+          <mount>/</mount>
+          <size>max</size>
+        </partition>
+        <partition>
+          <filesystem config:type="symbol">ext4</filesystem>
+          <mount>/boot</mount>
+          <size>512MiB</size>
+        </partition>
+        <partition>
+          <mount>swap</mount>
+          <size>512MiB</size>
+        </partition>
+      </partitions>
+    </drive>
+  </partitioning>

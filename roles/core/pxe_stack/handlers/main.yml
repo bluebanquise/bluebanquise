@@ -2,11 +2,11 @@
 - name: service █ Restart pxe services
   ansible.builtin.service:
     name: "{{ item }}"
-    state: restarted
+    state: "{{ (dhcp_server_start_services | default(bb_start_services) | default(true) | bool) | ternary('restarted', omit) }}"
   loop: "{{ pxe_stack_services_to_start }}"
   when:
     - "'service' not in ansible_skip_tags"
-    - (start_services | bool)
+    - pxe_stack_start_services | default(bb_start_services) | default(true)
 
 - name: systemd █ Reload systemd configuration
   ansible.builtin.systemd:

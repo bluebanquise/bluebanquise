@@ -1,3 +1,4 @@
+---
 - name: "firewalld █ Add services to firewall's {{ pxe_stack_firewall_zone | default('public') }} zone"
   ansible.posix.firewalld:
     zone: "{{ pxe_stack_firewall_zone | default('public') }}"

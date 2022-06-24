@@ -1,5 +1,11 @@
-## Tested on Centos 7.6
 ---
+- name: apache2_module █ Enable apache2 cgi module
+  community.general.apache2_module:
+    state: present
+    name: "{{ pxe_stack_apache_cgi_module }}"
+  notify: service █ Restart pxe services
+  when: ansible_facts.os_family == 'RedHat' and ( ansible_facts.distribution_major_version | int ) < 9
+
 - name: sefcontext █ Set SELinux context on /var/www/html/pxe/nodes
   community.general.sefcontext:
     target: '/var/www/html/pxe/nodes(/.*)?'

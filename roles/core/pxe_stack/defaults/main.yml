@@ -20,7 +20,6 @@ pxe_stack_sudo_is_passwordless: true
 
 # Preserve default sources list for Ubuntu
 pxe_stack_ubuntu_preserve_sources_list: true
-
 # Preserve default sources list for OpenSUSE
 pxe_stack_opensuse_preserve_sources_list: true
 
@@ -50,4 +49,20 @@ pxe_stack_ep_partitioning:
 
 pxe_stack_ep_preserve_efi_first_boot_device: true
 
+# Add custom content to any kind of auto install files: kickstart, preseed, user-data and autoyast
+# This content is added at end of files.
 pxe_stack_ep_autoinstall_custom_content:
+
+# Add custom script to autoyast and user-data. Use pxe_stack_ep_autoinstall_custom_content variable for kickstart.
+pxe_stack_ep_autoinstall_custom_scripts: []
+#  - name: script1
+#    content: |
+#      ...
+
+
+pxe_stack_suse_autoinstall_repositories: []
+#  - media_url: http://10.10.0.1/repositories/sles/15.3/x86_64/updates
+#    name: sles_updates
+
+pxe_stack_enable_services:
+pxe_stack_start_services:

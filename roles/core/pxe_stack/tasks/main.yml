@@ -147,13 +147,6 @@
   tags:
     - internal
 
-- name: apache2_module █ Enable apache2 cgi module
-  community.general.apache2_module:
-    state: present
-    name: "{{ pxe_stack_apache_cgi_module }}"
-  notify: service █ Restart pxe services
-  when: ansible_facts.os_family == 'RedHat' and ( ansible_facts.distribution_major_version | int ) < 9
-
 - name: "copy █ Copy {{ pxe_stack_apache_conf_path }}/cgi.conf"
   ansible.builtin.copy:
     src: cgi.conf
@@ -177,8 +170,8 @@
 - name: "service █ Manage {{ (pxe_stack_services_to_start + [pxe_stack_tftp_service | default(pxe_stack_default_tftp_service)]) | join(' ') }} state"
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
-    state: "{{ (start_services | bool) | ternary('started', omit) }}"
+    enabled: "{{ (pxe_stack_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes','no') }}"
+    state: "{{ (pxe_stack_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   loop: "{{ pxe_stack_services_to_start + [pxe_stack_tftp_service | default(pxe_stack_default_tftp_service)] }}"
   tags:
     - service
