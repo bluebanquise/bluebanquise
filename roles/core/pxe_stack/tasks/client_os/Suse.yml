@@ -25,7 +25,7 @@
     - groups[item] | length > 0
     - hostvars[groups[item][0]]['ep_equipment_type'] | default(pxe_stack_ep_equipment_type) == "server"
     - (hostvars[groups[item][0]]['ep_operating_system']['distribution'] | default(pxe_stack_ep_operating_system.distribution) | lower) == 'sles'
-    - (hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] | default(pxe_stack_ep_operating_system.distribution_major_version)) == 12
+    - (hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] | default(pxe_stack_ep_operating_system.distribution_major_version)) | int == 12
   tags:
     - template
 
@@ -42,7 +42,7 @@
     - groups[item] | length > 0
     - hostvars[groups[item][0]]['ep_equipment_type'] | default(pxe_stack_ep_equipment_type) == "server"
     - (hostvars[groups[item][0]]['ep_operating_system']['distribution'] | default(pxe_stack_ep_operating_system.distribution) | lower) in ['opensuse','sles']
-    - (hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] | default(pxe_stack_ep_operating_system.distribution_major_version)) == 15
+    - (hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] | default(pxe_stack_ep_operating_system.distribution_major_version)) | int == 15
   tags:
     - template
 

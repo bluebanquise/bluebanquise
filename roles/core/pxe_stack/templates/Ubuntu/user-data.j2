@@ -31,7 +31,7 @@ autoinstall:
     install-server: true
     allow-pw: true
 
-{{ (hostvars[groups[item][0]]['ep_partitioning'] | default(pxe_stack_ep_partitioning) | default(pxe_stack_ubuntu_automatic_partitioning)) | indent(2, True) }}
+{{ (hostvars[groups[item][0]]['ep_partitioning'] | default(pxe_stack_ep_partitioning) | default(pxe_stack_ubuntu_automatic_partitioning, true)) | indent(2, True) }}
  
   late-commands:
 {% if pxe_stack_enable_root %}

@@ -1,0 +1,18 @@
+- name: ufw █ "Add http service to firewall"
+  community.general.ufw:
+    rule: allow
+    name: Apache
+  when:
+    - ep_firewall | default(false) | bool
+  tags:
+    - firewall
+
+- name: ufw █ "Add tftp service to firewall"
+  community.general.ufw:
+    rule: allow
+    port: '69'
+    proto: udp
+  when:
+    - ep_firewall | default(false) | bool
+  tags:
+    - firewall

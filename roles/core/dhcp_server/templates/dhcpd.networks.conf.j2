@@ -18,7 +18,7 @@ subnet {{ networks[network]['subnet'] }} netmask {{ (networks[network]['subnet']
   option domain-name "{{ bb_domain_name | default(dhcp_server_domain_name) }}";
   option broadcast-address {{ (networks[network]['subnet'] + '/' + (networks[network]['prefix'] | string) ) | ansible.utils.ipaddr('broadcast') }};
 
-      {% if networks[network]['gateway4'] is defined and networks[network]['gateway4'] is is iterable and networks[network]['gateway4'] is not string and networks[network]['gateway4'] is not mapping %}
+      {% if networks[network]['gateway4'] is defined and networks[network]['gateway4'] is iterable and networks[network]['gateway4'] is not string and networks[network]['gateway4'] is not mapping %}
         {% set gateways = [] %}
         {% for gw4 in networks[network]['gateway4'] %}
           {% if gw4.ip is defined and (gw4.ip | ansible.utils.ipaddr) %}

@@ -7,6 +7,7 @@ pxe_stack_client_os_redhat: true
 pxe_stack_client_os_ubuntu: true
 pxe_stack_client_os_dgx: false
 pxe_stack_client_os_suse: true
+pxe_stack_client_os_debian: true
 
 # Add cloning entry in ixpe menu
 pxe_stack_enable_cloning: false

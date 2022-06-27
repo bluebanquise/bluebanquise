@@ -90,7 +90,7 @@
     - j2_current_iceberg_network is not none and j2_current_iceberg_network in item
     - networks is defined and networks is iterable and networks is not string and networks is mapping
     - networks[item] is defined and networks[item] is not none
-    - networks[item].is_in_dhcp | default(true)
+    - networks[item].is_in_dhcp | default(true, true)
   notify: service █ Restart dhcp server
   tags:
     - template
@@ -115,8 +115,8 @@
 - name: "service █ Manage {{ dhcp_server_services_to_start | join(' ') }} state"
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: "{{ (dhcp_server_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes','no') }}"
-    state: "{{ (dhcp_server_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
+    enabled: "{{ (dhcp_server_enable_services | default(bb_enable_services) | default(true, true) | bool) | ternary('yes', 'no') }}"
+    state: "{{ (dhcp_server_start_services | default(bb_start_services) | default(true, true) | bool) | ternary('started', omit) }}"
   loop: "{{ dhcp_server_services_to_start }}"
   tags:
     - service

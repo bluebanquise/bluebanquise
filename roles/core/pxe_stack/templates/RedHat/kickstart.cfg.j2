@@ -16,7 +16,11 @@ keyboard --vckeymap={{ (hostvars[groups[item][0]]['ep_keyboard_layout'] | defaul
 lang {{ hostvars[groups[item][0]]['ep_system_language'] | default(pxe_stack_ep_system_language) }}
 
 # System timezone
+{% if (hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] | default(pxe_stack_ep_operating_system.distribution_major_version) ) | int < 9 %}
 timezone {{ bb_time_zone | default(pxe_stack_time_zone) }} --isUtc
+{% else %}
+timezone {{ bb_time_zone | default(pxe_stack_time_zone) }} --utc
+{% endif %}
 
 # Reboot after installation
 reboot
