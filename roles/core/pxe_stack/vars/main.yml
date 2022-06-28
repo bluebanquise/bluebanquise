@@ -39,6 +39,10 @@ pxe_stack_supported_os:
     - major: 15
       distributions:
         - opensuse
+  debian:
+    - major: 11
+      distributions:
+        - debian
 
 pxe_stack_redhat_automatic_partitioning: |
   clearpart --all --initlabel
@@ -69,3 +73,9 @@ pxe_stack_suse_automatic_partitioning: |
       </partitions>
     </drive>
   </partitioning>
+
+pxe_stack_debian_automatic_partitioning: |
+  d-i partman-auto/disk string /dev/sda
+  d-i partman-auto/method string regular
+  d-i partman-auto/choose_recipe select atomic
+  d-i partman-auto/init_automatically_partition select Guided - use entire disk

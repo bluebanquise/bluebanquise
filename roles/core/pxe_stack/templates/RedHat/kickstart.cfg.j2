@@ -71,7 +71,7 @@ firewall --disabled
 bootloader --append="{{ hostvars[groups[item][0]]['ep_kernel_parameters'] | default(pxe_stack_ep_kernel_parameters) }}" --location=mbr
 
 # Partitioning
-{{ hostvars[groups[item][0]]['ep_partitioning'] | default(pxe_stack_ep_partitioning) | default(pxe_stack_redhat_automatic_partitioning,true) }}
+{{ hostvars[groups[item][0]]['ep_partitioning'] | default(pxe_stack_ep_partitioning) | default(pxe_stack_redhat_automatic_partitioning, true) }}
 
 ##### Packages
 %packages

@@ -61,7 +61,7 @@
     <loader_type>default</loader_type>
   </bootloader>
 
-{{ hostvars[groups[item][0]]['ep_partitioning'] | default(pxe_stack_ep_partitioning) | default(pxe_stack_suse_automatic_partitioning) }}
+{{ hostvars[groups[item][0]]['ep_partitioning'] | default(pxe_stack_ep_partitioning) | default(pxe_stack_suse_automatic_partitioning, true) }}
 
 {% if pxe_stack_enable_root %}
  <users config:type="list">
