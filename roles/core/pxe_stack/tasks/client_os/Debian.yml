@@ -24,33 +24,33 @@
   when: item.1 != 'debian'
 
 - name: "template █ Generate preseeds {{ pxe_stack_htdocs_path }}/pxe/equipment_profiles/{item}.preseed.cfg"
-   ansible.builtin.template:
-     src: "Debian/preseed.cfg.j2"
-     dest: "{{ pxe_stack_htdocs_path }}/pxe/equipment_profiles/{{ item | replace(bb_core_equipment_naming+'_','') | trim }}.preseed.cfg"
-     mode: 0644
-     owner: "{{ pxe_stack_apache_user }}"
-     group: "{{ pxe_stack_apache_group }}"
-   with_items: "{{ j2_equipment_groups_list }}"
-   when:
+  ansible.builtin.template:
+    src: "Debian/preseed.cfg.j2"
+    dest: "{{ pxe_stack_htdocs_path }}/pxe/equipment_profiles/{{ item | replace(bb_core_equipment_naming+'_','') | trim }}.preseed.cfg"
+    mode: 0644
+    owner: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_group }}"
+  with_items: "{{ j2_equipment_groups_list }}"
+  when:
     - groups[item] | default([]) | length > 0
     - hostvars[groups[item][0]]['ep_equipment_type'] | default(pxe_stack_ep_equipment_type) == "server"
     - (hostvars[groups[item][0]]['ep_operating_system']['distribution'] | default(pxe_stack_ep_operating_system.distribution) | lower) in ['debian']
     - (hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] | default(pxe_stack_ep_operating_system.distribution_major_version) | int) in [11]
-   tags:
-     - template
+  tags:
+    - template
 
- - name: "template █ Generate equipment_profiles {{ pxe_stack_htdocs_path }}/pxe/equipment_profiles/{item}.ipxe"
-   ansible.builtin.template:
-     src: "Debian/equipment_profile_preseed.ipxe.j2"
-     dest: "{{ pxe_stack_htdocs_path }}/pxe/equipment_profiles/{{ item | replace(bb_core_equipment_naming+'_','') | trim }}.ipxe"
-     mode: 0644
-     owner: "{{ pxe_stack_apache_user }}"
-     group: "{{ pxe_stack_apache_group }}"
-   with_items: "{{ j2_equipment_groups_list }}"
-   when:
+- name: "template █ Generate equipment_profiles {{ pxe_stack_htdocs_path }}/pxe/equipment_profiles/{item}.ipxe"
+  ansible.builtin.template:
+    src: "Debian/equipment_profile_preseed.ipxe.j2"
+    dest: "{{ pxe_stack_htdocs_path }}/pxe/equipment_profiles/{{ item | replace(bb_core_equipment_naming+'_','') | trim }}.ipxe"
+    mode: 0644
+    owner: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_group }}"
+  with_items: "{{ j2_equipment_groups_list }}"
+  when:
     - groups[item] | default([]) | length > 0
     - hostvars[groups[item][0]]['ep_equipment_type'] | default(pxe_stack_ep_equipment_type) == "server"
     - (hostvars[groups[item][0]]['ep_operating_system']['distribution'] | default(pxe_stack_ep_operating_system.distribution) | lower) in ['debian']
     - (hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] | default(pxe_stack_ep_operating_system.distribution_major_version) | int) in [11]
-   tags:
-     - template
+  tags:
+    - template

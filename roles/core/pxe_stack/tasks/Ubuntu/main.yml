@@ -12,8 +12,8 @@
 - name: lineinfile █ Configure tftpd-hpa tftp server
   ansible.builtin.lineinfile:
     path: "/etc/default/tftpd-hpa"
-    regexp: "{{ item.regexp }}"
-    line: "{{ item.line }}"
+    regexp: "{{ line_item.regexp }}"
+    line: "{{ line_item.line }}"
   loop:
     - regexp: "^TFTP_ADDRESS"
       line: 'TFTP_ADDRESS="0.0.0.0:69"'
@@ -21,4 +21,6 @@
       line: 'TFTP_OPTIONS="--secure --verbose"'
     - regexp: "^TFTP_DIRECTORY"
       line: 'TFTP_DIRECTORY="/var/lib/tftpboot"'
+  loop_control:
+    loop_var: line_item
   notify: service █ Restart pxe services
