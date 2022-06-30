@@ -297,6 +297,7 @@ high_availability_resources:
         type: systemd:httpd
     locations:
       - type: prefers
+        score: 100 # If not defined, default socore is INFINITY.
         nodes:
           - ha2
 ```

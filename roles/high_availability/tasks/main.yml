@@ -174,7 +174,7 @@
       notify: command █ Push HA configuration
 
     - name: command █ Set location constraints
-      ansible.builtin.command: "pcs -f {{ high_availability_cib_file_path }} constraint location {{ item.0.group }} {{ item.1.type }} {{ item.1.nodes | join(' ') }}"
+      ansible.builtin.command: "pcs -f {{ high_availability_cib_file_path }} constraint location {{ item.0.group }} {{ item.1.type }} {% for node in item.1.nodes %}{{node}}={{item.1.score | default('INFINITY')}} {% endfor %}"
       register: cmd
       changed_when: cmd.rc == 0
       failed_when:
