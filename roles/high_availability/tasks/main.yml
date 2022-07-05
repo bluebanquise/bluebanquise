@@ -204,7 +204,7 @@
       failed_when:
         - cmd.rc != 0
         - "'already exists' not in cmd.stderr"
-      when: high_availability_stonith is defined and high_availability_stonith
+      when: high_availability_stonith is defined and high_availability_stonith.prefers is defined
       notify: command █ Push HA configuration
 
     - name: command █ Set stonith avoids constraint
