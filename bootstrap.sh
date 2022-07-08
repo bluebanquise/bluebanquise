@@ -89,7 +89,7 @@ if $GATHER_PACKAGES; then
       else
         if $OFFLINE_MODE; then
           cp -a "$CURRENT_DIR/offline_bootstrap/iso/$REDHAT_8_ISO"\
-          "{REPO_PATH}"
+          "${REPO_PATH}"
         else
           wget -P "{REPO_PATH}" "${REDHAT_8_ISO_URL}"
         fi

@@ -94,8 +94,8 @@
       {% endfor %}
         4_bb: ["curtin", "in-target", "--", "sh", "-c", "sed -i 's/^#PermitRootLogin.*$/PermitRootLogin yes/g' /etc/ssh/sshd_config"]
         5_bb: ["curtin", "in-target", "--", "sh", "-c", "sed -i 's|^root:.:|root:{{ hostvars[groups[item][0]]['authentication_root_password_sha512'] }}:|' /etc/shadow"]
-        6_bb: ["curtin", "in-target", "--", "sh", "-c", 'set -- `cat /proc/cmdline`; for I in $*; do case "$I" in *=*) eval $I;; esac; done; curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$node_hostname&boot=next";']
-        7_bb: ["curtin", "in-target", "--", "sh", "-c", '/bin/echo -e "network:\n  version: 2\n  ethernets:"> /etc/netplan/01-netcfg.yaml; for i in $(ip link show | grep ':\ en' | awk -F ' ' '{print $2}' | sed 's/://'); do /bin/echo -e "\n    $i:\n      dhcp4: true" >> /etc/netplan/01-netcfg.yaml; done;']
+        6_bb: ["curtin", "in-target", "--", "sh", "-c", 'for I in `cat /proc/cmdline | tr " " "\n" | grep -E "^(node_hostname|ipxe_next_server)="` ; do eval $I; done; curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$node_hostname&boot=disk"']
+        7_bb: ["curtin", "in-target", "--", "sh", "-c", '/bin/echo -e "network:\n  version: 2\n  ethernets:"> /etc/netplan/01-netcfg.yaml; for i in $(ip -br l | grep "^en" | cut -d" " -f1); do /bin/echo -e "\n    $i:\n      dhcp4: true" >> /etc/netplan/01-netcfg.yaml; done']
         # 8_bb: ["curtin", "in-target", "--", "sh", "-c", 'efibootmgr -o $(efibootmgr | grep BootCurrent | cut -d" " -f2),$(efibootmgr | grep BootOrder | sed "s/BootOrder:\ //" | sed "s/$(efibootmgr | grep BootCurrent | cut -d" " -f2),//")']
         9_bb: ["curtin", "in-target", "--", "sh", "-c", "apt-get remove -y nvidia-oem-config-eula"]
   with_items: "{{ j2_equipment_groups_list }}"

@@ -48,5 +48,5 @@ autoinstall:
 {% if (hostvars[groups[item][0]]['ep_preserve_efi_first_boot_device'] | default(pxe_stack_ep_preserve_efi_first_boot_device)) == true %}
     - sh -c '[ -d /sys/firmware/efi ] && efibootmgr -o $(efibootmgr | grep BootCurrent | cut -d" " -f2),$(efibootmgr | grep BootOrder | sed "s/BootOrder:\ //" | sed "s/$(efibootmgr | grep BootCurrent | cut -d" " -f2),//") || echo "Not an EFI system, skipping"'
 {% endif %}
-    - curtin in-target --target=/target -- sh -c 'set -- `cat /proc/cmdline`; for I in $*; do case "$I" in *=*) eval $I;; esac; done; curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$node_hostname&boot=disk";'
+    - curtin in-target --target=/target -- sh -c 'for I in `cat /proc/cmdline | tr " " "\n" | grep -E "^(node_hostname|ipxe_next_server)="` ; do eval $I; done; curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$node_hostname&boot=disk"'
 

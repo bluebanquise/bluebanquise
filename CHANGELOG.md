@@ -1,6 +1,21 @@
 # Changelog
 
-## 1.6.0 - Next-release
+## 2.0.0 - Next-release
+
+### Major changes
+
+#### Overall changes
+
+#### New roles
+
+#### Roles improvement or fix
+
+  - dns_server:
+    - Bug fix for bond interfaces with no network defined (#722)
+  - pxe_stack:
+    - Add force main NIC and fix gateway (#723)
+
+## 1.6.0
 
 ### Major changes
 

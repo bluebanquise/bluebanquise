@@ -165,6 +165,9 @@ inventory or in the playbook the following variables:
 * **pxe_stack_tftp_package**: set the package name of the tftp server to be used. Stack propose *atftp* or *fbtftp_server*.
 * **pxe_stack_tftp_service**: set the service name of the tftp server to be used. Stack propose *atftpd* or *fbtftp_server*.
 
+It is also possible to force the main network interface for bootset -f network usage, by setting ``pxe_stack_node_main_network_interface``
+for a group of hosts or even at hostvars level.
+
 To be done
 ^^^^^^^^^^
 
@@ -173,6 +176,7 @@ To be done
 Changelog
 ^^^^^^^^^
 
+* 1.7.0: Add force main NIC and fix gateway. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.6.4: Improve idempotency of role pxe_stack. #sla31
 * 1.6.3: Prevent crash when empty ep group. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.6.2: Added pxe_stack_opensuse_preserve_sources_list variable to handle activation of online repos in autoyast files. Neil Munday <neil@mundayweb.com>
