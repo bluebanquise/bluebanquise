@@ -55,8 +55,8 @@ jobs:
 #      - name: Show network conf
 #        run: ip a
 
-      - name: Role test - set_hostname
-        run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t set_hostname --diff
+      #- name: Role test - set_hostname
+        #run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t set_hostname --diff
 
       - name: Role test - hosts_file
         run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t hosts_file --diff
