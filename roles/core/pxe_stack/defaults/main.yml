@@ -9,9 +9,6 @@ pxe_stack_client_os_dgx: false
 pxe_stack_client_os_suse: true
 pxe_stack_client_os_debian: true
 
-# Add cloning entry in ixpe menu
-pxe_stack_enable_cloning: false
-
 # Enable root user as default user
 pxe_stack_enable_root: false
 # Sudo user if root not enabled
@@ -70,3 +67,23 @@ pxe_stack_start_services:
 # Automatically detect NIC to be used in preseed
 # Only works if a single NIC is connected.
 pxe_stack_ep_preseed_auto_main_network_interface: true
+
+
+# Add cloning entry in ixpe menu
+pxe_stack_enable_cloning: false
+pxe_stack_enable_diskless: true
+pxe_stack_enable_alpine: true
+
+pxe_stack_alpine_version: 3.16
+
+### CLONEZILLA
+# Allows to backup/restore systems, or even deploy multiple systems via images.
+# Be aware that pxe_stack role does not handle nfs server, you will have to 
+# use the nfs role to create export or use an external nfs.
+
+# NFS server to store images. Should be an ip, as DNS resolution might not work.
+# If not set, default is pxe_server ip (next-server, provided by DHCP server).
+pxe_stack_clonezilla_nfs_export_server:
+
+# Mount point from which load images from NFS server.
+pxe_stack_clonezilla_nfs_mount_point: /cloned_images

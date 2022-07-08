@@ -9,12 +9,15 @@ echo |
 # Ansible variables
 set eq-equipment-profile {{ item | replace('equipment_','') | trim }}
 set eq-architecture ${arch}
-set eq-distribution {{ hostvars[groups[item][0]]['ep_operating_system']['distribution'] | default(pxe_stack_ep_operating_system.distribution) | lower }}
-set eq-distribution-major-version {{ hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] | default(pxe_stack_ep_operating_system.distribution_major_version) }}
-set eq-distribution-version {{ hostvars[groups[item][0]]['ep_operating_system']['distribution_version'] | default(hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version']) | default(pxe_stack_ep_operating_system.distribution_version) | default(pxe_stack_ep_operating_system.distribution_major_version) }}
+set eq-distribution {{ hostvars[groups[item][0]]['ep_operating_system']['distribution'] | default(pxe_stack_ep_operating_system.distribution, true) | lower }}
+set eq-distribution-major-version {{ hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] | default(pxe_stack_ep_operating_system.distribution_major_version, true) }}
+set eq-distribution-version {{ hostvars[groups[item][0]]['ep_operating_system']['distribution_version'] | default(hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'], true) | default(pxe_stack_ep_operating_system.distribution_version, true) | default(pxe_stack_ep_operating_system.distribution_major_version, true) }}
 set eq-console {{ hostvars[groups[item][0]]['ep_console'] | default(pxe_stack_ep_console) }}
 set eq-kernel-parameters {{ hostvars[groups[item][0]]['ep_kernel_parameters'] | default(pxe_stack_ep_kernel_parameters) }}
 set eq-repositories-environment {{ hostvars[groups[item][0]]['ep_operating_system']['repositories_environment'] | default(pxe_stack_ep_operating_system.repositories_environment) | default('') }}
+{% if (hostvars[groups[item][0]]['ep_autoclone_parameters'] is defined and hostvars[groups[item][0]]['ep_autoclone_parameters'] is not none) or (pxe_stack_ep_autoclone_parameters is defined and pxe_stack_ep_autoclone_parameters is not none) %}
+set eq-autoclone-parameters {{ hostvars[groups[item][0]]['ep_autoclone_parameters'] | default(pxe_stack_ep_autoclone_parameters, true)}}
+{% endif %}
 
 # Preseed specific need (known bug with multiple UP/Active NIC)
 {% if (hostvars[groups[item][0]]['ep_preseed_auto_main_network_interface'] is defined and hostvars[groups[item][0]]['ep_preseed_auto_main_network_interface']) or (pxe_stack_ep_preseed_auto_main_network_interface is defined and ep_preseed_auto_main_network_interface) %}

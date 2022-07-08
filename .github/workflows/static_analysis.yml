@@ -32,4 +32,4 @@ jobs:
         run: ansible-lint
         env:
           # Set path to ansible roles to workaround ansible-lint#1375
-          ANSIBLE_ROLES_PATH: roles/custom:roles/core:roles/addons:roles/advanced_core
+          ANSIBLE_ROLES_PATH: roles/core:roles/advanced_core

@@ -1,0 +1,14 @@
+networks:
+  net1-1:
+    prefix: 16
+    subnet: 10.11.0.0
+    services:
+      dns4:
+        - ip: 10.10.0.1
+          host: mg1-dns
+      pxe4:
+        - ip: 10.10.0.1
+          host: mg1-pxe
+  net2-1:
+    prefix: 16
+    subnet: 10.12.0.0

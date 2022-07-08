@@ -71,6 +71,7 @@
     - "{{ pxe_stack_htdocs_path }}/pxe/nodes"
     - "{{ pxe_stack_htdocs_path }}/pxe/equipment_profiles"
     - "{{ pxe_stack_htdocs_path }}/pxe/osdeploy"
+    - "{{ pxe_stack_htdocs_path }}/pxe/tools"
 
 - name: include_tasks ░ Use OS dedicated task
   ansible.builtin.include_tasks: "{{ item }}"
@@ -150,6 +151,18 @@
 - name: include_tasks ░ Include Debian familly clients support
   ansible.builtin.include_tasks: client_os/Debian.yml
   when: pxe_stack_client_os_debian
+  tags:
+    - internal
+
+- name: include_tasks ░ Include Alpine live support
+  ansible.builtin.include_tasks: client_os/Alpine.yml
+  when: pxe_stack_enable_alpine
+  tags:
+    - internal
+
+- name: include_tasks ░ Include CloneZilla live support
+  ansible.builtin.include_tasks: client_os/Clonezilla.yml
+  when: pxe_stack_enable_clonezilla
   tags:
     - internal
 

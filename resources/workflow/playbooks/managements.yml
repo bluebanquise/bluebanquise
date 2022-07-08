@@ -1,0 +1,71 @@
+---
+- name: managements playbook
+  hosts: "mg_managements"
+  roles:
+
+    - role: set_hostname
+      tags: set_hostname
+    - role: nic
+      tags: nic
+    - role: repositories_server
+      tags: repositories_server
+    - role: repositories_client
+      tags: repositories_client
+    - role: hosts_file
+      tags: hosts_file
+    - role: ssh_client
+      tags: ssh_client
+    - role: dhcp_server
+      tags: dhcp_server
+    - role: advanced_dhcp_server
+      tags: advanced_dhcp_server
+    - role: dns_server
+      tags: dns_server
+    - role: dns_client
+      tags: dns_client
+    - role: time
+      tags: time
+      vars:
+        time_profile: server
+    - role: pxe_stack
+      tags: pxe_stack
+    - role: nfs_server
+      tags: nfs_server
+    - role: audit_system
+      tags: audit_system
+    - role: clustershell
+      tags: clustershell
+    - role: conman
+      tags: conman
+    - role: diskless
+      tags: diskless
+    - role: filesystem
+      tags: filesystem
+    - role: firewall
+      tags: firewall_role
+    - role: kernel_config
+      tags: kernel_config
+    - role: log_client
+      tags: log_client
+    - role: log_server
+      tags: log_server
+    - role: lvm
+      tags: lvm
+    - role: modprobe
+      tags: modprobe
+    - role: mount
+      tags: mount
+    - role: nfs_client
+      tags: nfs_client
+    - role: pam_limits
+      tags: pam_limits
+    - role: parted
+      tags: parted
+    - role: powerman
+      tags: powerman
+    - role: root_password
+      tags: root_password
+    - role: ssh_remote_keys
+      tags: ssh_remote_keys
+    - role: sudoers
+      tags: sudoers
