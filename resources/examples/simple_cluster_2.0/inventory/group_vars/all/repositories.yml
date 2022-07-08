@@ -1,4 +1,0 @@
-# Explain here that this is a global setting here, but that it can be defined 
-# for groups or even hosts
-bb_repositories:
-  - bluebanquise
