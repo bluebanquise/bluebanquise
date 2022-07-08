@@ -38,7 +38,7 @@ jobs:
         run: sudo mkdir /var/lib/bluebanquise; sudo chown -R $(id -u):$(id -g) /var/lib/bluebanquise; cp -a * /var/lib/bluebanquise;
 
       - name: Prepare bluebanquise environment
-        run: cp -a /var/lib/bluebanquise/resources/workflow/inventory_${{ matrix.version }} /var/lib/bluebanquise; cp -a /var/lib/bluebanquise/resources/workflow/playbooks /var/lib/bluebanquise
+        run: cp -a /var/lib/bluebanquise/resources/workflow/inventory_${{ matrix.inventory }} /var/lib/bluebanquise; cp -a /var/lib/bluebanquise/resources/workflow/playbooks /var/lib/bluebanquise
 
       - name: Setup repository
         run: "echo '  - repo: deb [trusted=yes] http://bluebanquise.com/repository/releases/latest/ubuntu2004/x86_64/bluebanquise/ ./' >> /var/lib/bluebanquise/inventory/group_vars/all/general_settings/repositories.yml;"
