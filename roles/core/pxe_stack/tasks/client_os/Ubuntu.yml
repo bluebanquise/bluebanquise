@@ -59,22 +59,6 @@
 
 ## 20.04
 
-- debug:
-    msg: " COUCOU "
-  with_items: "{{ j2_equipment_groups_list }}"
-  tags: dev3
-  when:
-    - groups[item] | default([]) | length > 0
-    - hostvars[groups[item][0]]['ep_equipment_type'] | default(pxe_stack_ep_equipment_type) == "server"
-    - (hostvars[groups[item][0]]['ep_operating_system']['distribution'] | default(pxe_stack_ep_operating_system.distribution) | lower) in ['ubuntu']
-    - (hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] | default(pxe_stack_ep_operating_system.distribution_major_version) | int) in [20, 22]
-
-- debug:
-    msg: "{{ (hostvars[groups[item][0]]['ep_operating_system']['distribution'] | default(pxe_stack_ep_operating_system.distribution) | lower)}}"
-  with_items: "{{ j2_equipment_groups_list }}"
-  tags: dev3
-
-
 - name: file █ Create cloud-init paths
   ansible.builtin.file:
     path: "{{ pxe_stack_htdocs_path }}/pxe/equipment_profiles/{{ item | replace(bb_core_equipment_naming+'_','') | trim }}.cloud-init/"

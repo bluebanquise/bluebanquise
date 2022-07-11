@@ -23,4 +23,3 @@ dhcp_server_enable_services:
 ### Others ###
 # Domain name provided by dhcp to clients
 dhcp_server_domain_name: cluster.local
-

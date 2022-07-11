@@ -19,7 +19,7 @@
     gpgkey: "{{ item.gpgkey | default(omit) }}"
     proxy: "{{ item.proxy | default(omit) }}"
     state: "{{ item.state | default('present') }}"
-  with_items: "{{ repositories | union(external_repositories|default([])) }}"
+  with_items: "{{ repositories | union(external_repositories | default([])) }}"
   when: ( item != 'os' ) and ( item.name is not defined or item.name != 'os' )
 
 - name: yum_repository █ Setting OS repositories
@@ -37,9 +37,9 @@
     # Combine BaseOS and AppStream with 'os' parameters if any. Otherwise, this
     # will configure BaseOS and AppStream with default values.
     - "{{ repositories|selectattr('name', 'defined')
-          |selectattr('name', 'match', 'os')|list
-          |combine({'repoid':'BaseOS'}) }}"
+          | selectattr('name', 'match', 'os') | list
+          | combine({'repoid':'BaseOS'}) }}"
     - "{{ repositories|selectattr('name', 'defined')
-          |selectattr('name', 'match', 'os')|list
-          |combine({'repoid':'AppStream'}) }}"
+          | selectattr('name', 'match', 'os') | list
+          | combine({'repoid':'AppStream'}) }}"
   when: ( 'os' in repositories ) or ( item.name is defined and item.name == 'os' )

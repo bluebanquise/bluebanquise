@@ -49,7 +49,7 @@
   when:
     - groups[item] | length > 0
     - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
-    - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) in ['dgxos'] and hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] == 5
+    - (hostvars[groups[item][0]]['ep_operating_system']['distribution'] | lower) in ['dgxos'] and hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] == 5
   changed_when: false
 
 - name: lineinfile ░ Set local parameters, allow root user
@@ -57,7 +57,7 @@
     path: "/dev/shm/tmp_curtin_{{ item }}.yaml"
     regexp: '^kernel:$'
     line: |
-      keyboard: {layout: {{ hostvars[groups[item][0]]['ep_configuration']['keyboard_layout']|lower }}, toggle: null, variant: ''}
+      keyboard: {layout: {{ hostvars[groups[item][0]]['ep_configuration']['keyboard_layout'] | lower }}, toggle: null, variant: ''}
       locale: {{ hostvars[groups[item][0]]['ep_configuration']['system_language'] }}
       user-data:
         disable_root: false
@@ -67,7 +67,7 @@
   when:
     - groups[item] | length > 0
     - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
-    - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) in ['dgxos'] and hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] == 5
+    - (hostvars[groups[item][0]]['ep_operating_system']['distribution'] | lower) in ['dgxos'] and hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] == 5
   changed_when: false
 
 - name: lineinfile ░ Enable reboot after install
@@ -102,7 +102,7 @@
   when:
     - groups[item] | length > 0
     - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
-    - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) in ['dgxos'] and hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] == 5
+    - (hostvars[groups[item][0]]['ep_operating_system']['distribution'] | lower) in ['dgxos'] and hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] == 5
   changed_when: false
 
 - name: copy █ Copy final curtin to destination

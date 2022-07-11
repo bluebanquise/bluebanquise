@@ -101,7 +101,7 @@
     dest: "/etc/bootset/pxe_parameters.yml"
     mode: 0644
 
-- name: "template █ Generate {{ pxe_stack_htdocs_path }}/pxe/{menu|convergence}.ipxe"
+- name: "template █ Generate {{ pxe_stack_htdocs_path }}/pxe/ files"
   ansible.builtin.template:
     src: "{{ item }}.ipxe.j2"
     dest: "{{ pxe_stack_htdocs_path }}/pxe/{{ item }}.ipxe"

@@ -10,8 +10,8 @@
 
 ##### TO BE DOCUMENTED
 
-#bb_icebergs_system: false
-#bb_iceberg_hosts_range:
+# bb_icebergs_system: false
+# bb_iceberg_hosts_range:
 
 #############################################################
 ############ CORE REGEX
@@ -34,7 +34,7 @@ j2_master_groups_list: "{{ groups | select('match','^'+bb_core_master_groups_nam
 j2_equipment_groups_list: "{{ (groups | select('match','^'+bb_core_equipment_naming+'_.*') | list | length | int > 0) | ternary(groups | select('match','^'+bb_core_equipment_naming+'_.*') | list | unique | sort, ['all']) }}"
 # Host curreny equipment group.
 
-  #j2_node_equipment: "{{ (groups | select('match','^'+bb_core_equipment_naming+'_.*') | list | length | int > 0) | ternary ( group_names | select('match','^'+bb_core_equipment_naming+'_.*') | list ,'all')}}"
+# j2_node_equipment: "{{ (groups | select('match','^'+bb_core_equipment_naming+'_.*') | list | length | int > 0) | ternary ( group_names | select('match','^'+bb_core_equipment_naming+'_.*') | list ,'all')}}"
 j2_node_equipment: "{{ (groups | select('match','^'+bb_core_equipment_naming+'_.*') | list | length | int > 0) | ternary(group_names | select('match','^'+bb_core_equipment_naming+'_.*') | list | unique | sort | first | default('') | replace(bb_core_equipment_naming + '_',''), 'all') }}"
 
 ### Network
@@ -62,10 +62,10 @@ j2_current_iceberg: "{{ bb_icebergs_system | default(false) | ternary( group_nam
 # Grab current iceberg number
 j2_current_iceberg_number: "{{ j2_current_iceberg | replace(bb_core_iceberg_naming,' ') | trim }}"
 # Grab current iceberg networks pattern
-j2_current_iceberg_network: "{{ bb_icebergs_system | default(false) | ternary( bb_core_management_networks_naming + (j2_current_iceberg_number|string), bb_core_management_networks_naming ) }}"
+j2_current_iceberg_network: "{{ bb_icebergs_system | default(false) | ternary(bb_core_management_networks_naming + (j2_current_iceberg_number | string), bb_core_management_networks_naming) }}"
 # Generate list of managements connected to this iceberg from sub icebergs
 j2_iceberg_sub_managements_members: "{% set range = [] %}{% for host in (groups[bb_core_managements_group_name] | default([])) %}{% if (hostvars[host]['bb_iceberg_master'] | default(none))  == j2_current_iceberg %}{{ range.append(host) }}{% endif %}{% endfor %}{{ range }}"
 # Generate range of hosts to include in current configurations
 j2_hosts_range: "{{ ((bb_icebergs_system | default(false)) == true and (bb_iceberg_hosts_range | default('all')) == 'iceberg') | ternary( j2_iceberg_sub_managements_members + groups[j2_current_iceberg] | default([]), groups['all']) }}"
 # Generate a dict that contains host main network for each iceberg
-j2_icebergs_main_network_dict: "{{ '{' }}{% for iceberg in (j2_icebergs_groups_list | default([])) %}{% if not loop.first %},{% endif %}'{{iceberg}}':'{{ network_interfaces | default([]) | selectattr('network','defined') | selectattr('network','match','^'+( bb_icebergs_system | default(false) | ternary( bb_core_management_networks_naming + (iceberg | replace(bb_core_iceberg_naming,' ') | trim|string), bb_core_management_networks_naming )   )+'-[a-zA-Z0-9]+') | map(attribute='network') | list | first | default(none) }}'{% endfor %}{{ '}' }}"
+j2_icebergs_main_network_dict: "{{ '{' }}{% for iceberg in (j2_icebergs_groups_list | default([])) %}{% if not loop.first %},{% endif %}'{{iceberg}}':'{{ network_interfaces | default([]) | selectattr('network','defined') | selectattr('network','match','^'+( bb_icebergs_system | default(false) | ternary( bb_core_management_networks_naming + (iceberg | replace(bb_core_iceberg_naming,' ') | trim | string), bb_core_management_networks_naming ) )+'-[a-zA-Z0-9]+') | map(attribute='network') | list | first | default(none) }}'{% endfor %}{{ '}' }}"

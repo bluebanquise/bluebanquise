@@ -20,4 +20,3 @@ repositories_client_os_native_repositories:
     state: present
   - repo: deb http://security.ubuntu.com/ubuntu/ jammy-security multiverse
     state: present
-
