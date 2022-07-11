@@ -70,7 +70,7 @@ pxe_stack_ep_preseed_auto_main_network_interface: true
 
 
 # Add cloning entry in ixpe menu
-pxe_stack_enable_cloning: false
+pxe_stack_enable_clonezilla: false
 pxe_stack_enable_diskless: false
 pxe_stack_enable_alpine: false
 

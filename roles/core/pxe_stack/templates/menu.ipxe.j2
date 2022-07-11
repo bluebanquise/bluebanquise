@@ -30,7 +30,7 @@ item bootnext             Exit ipxe and continue EFI boot
 item --gap                Diskless
 item bootdiskless         Start a diskless OS (Configured using diskless tool)
 {% endif %}
-{% if pxe_stack_enable_cloning %}
+{% if pxe_stack_enable_clonezilla %}
 item --gap                Cloning
 item bootclone            Clone/Deploy OS
 item bootautoclone        Auto Clone (advanced)
