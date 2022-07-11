@@ -29,7 +29,7 @@ jobs:
         run: flake8 . --statistics --ignore E501,E226
 
       - name: Run ansible linter
-        run: ansible-lint
+        run: ansible-lint --exclude roles/core/pxe_stack/tasks/client_os/DGX.yml
         env:
           # Set path to ansible roles to workaround ansible-lint#1375
           ANSIBLE_ROLES_PATH: roles/core:roles/advanced_core
