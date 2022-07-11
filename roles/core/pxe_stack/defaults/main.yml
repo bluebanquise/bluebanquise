@@ -78,7 +78,7 @@ pxe_stack_alpine_version: 3.16
 
 ### CLONEZILLA
 # Allows to backup/restore systems, or even deploy multiple systems via images.
-# Be aware that pxe_stack role does not handle nfs server, you will have to 
+# Be aware that pxe_stack role does not handle nfs server, you will have to
 # use the nfs role to create export or use an external nfs.
 
 # NFS server to store images. Should be an ip, as DNS resolution might not work.

@@ -117,4 +117,4 @@
   when:
     - groups[item] | length > 0
     - hostvars[groups[item][0]]['ep_equipment_type'] == 'server'
-    - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) in ['dgxos'] and hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] == 5
+    - (hostvars[groups[item][0]]['ep_operating_system']['distribution'] | lower) in ['dgxos'] and hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] == 5

@@ -36,10 +36,10 @@
   loop:
     # Combine BaseOS and AppStream with 'os' parameters if any. Otherwise, this
     # will configure BaseOS and AppStream with default values.
-    - "{{ repositories|selectattr('name', 'defined')
+    - "{{ repositories | selectattr('name', 'defined')
           | selectattr('name', 'match', 'os') | list
           | combine({'repoid':'BaseOS'}) }}"
-    - "{{ repositories|selectattr('name', 'defined')
+    - "{{ repositories | selectattr('name', 'defined')
           | selectattr('name', 'match', 'os') | list
           | combine({'repoid':'AppStream'}) }}"
   when: ( 'os' in repositories ) or ( item.name is defined and item.name == 'os' )

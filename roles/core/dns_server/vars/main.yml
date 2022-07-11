@@ -7,7 +7,7 @@ j2_dns_server_get_first_octets: "
   {%- if hostvars[host]['network_interfaces'] is defined -%}
     {%- for interface in hostvars[host]['network_interfaces'] -%}
       {%- if interface['ip4'] is defined and networks[interface['network']]['is_in_dns'] is defined and networks[interface['network']]['is_in_dns'] -%}
-        {%- set ip_prefix = interface['ip4'].split('.')[0:3]|join('.') -%}
+        {%- set ip_prefix = interface['ip4'].split('.')[0:3] | join('.') -%}
         {%- if ip_prefix not in ip_networks -%}
           {{ ip_networks.append(ip_prefix) }}
         {%- endif -%}
@@ -24,7 +24,7 @@ j2_dns_server_get_first_octets: "
           networks[bmc_args.network]['is_in_dns'] is defined and \
           networks[bmc_args.network]['is_in_dns']
       -%}
-        {%- set ip_prefix = bmc_args.ip4.split('.')[0:3]|join('.') -%}
+        {%- set ip_prefix = bmc_args.ip4.split('.')[0:3] | join('.') -%}
         {%- if ip_prefix not in ip_networks -%}
           {{ ip_networks.append(ip_prefix) }}
         {%- endif -%}
@@ -32,4 +32,4 @@ j2_dns_server_get_first_octets: "
     {%- endif -%}
   {%- endif -%}
 {%- endfor -%}
-{{ ip_networks|join(',') }}"
+{{ ip_networks | join(',') }}"
