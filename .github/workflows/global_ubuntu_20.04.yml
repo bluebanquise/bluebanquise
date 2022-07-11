@@ -74,7 +74,7 @@ jobs:
 #        run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t ssh_client --diff
 
       - name: Role test - dhcp_server
-        run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t dhcp_server --diff --check
+        run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t dhcp_server --diff
 
 #      - name: Role test - advanced_dhcp_server
 #        run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t advanced_dhcp_server --diff
