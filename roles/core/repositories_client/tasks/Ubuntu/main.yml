@@ -37,6 +37,6 @@
     update_cache_retry_max_delay: "{{ item.update_cache_retry_max_delay | default(omit) }}"
     validate_certs: "{{ item.validate_certs | default(omit) }}"
   with_items: "{{ (bb_repositories | default([])) | union(repositories_client_enable_os_native | ternary( repositories_client_os_native_repositories | default([]), []) ) }}"
-  notify: command ▒ apt update cache
+  notify: command █ apt update cache
   when:
     - (item.repo is defined and item.repo is not none) or (repositories_client_baseurl_prefix is defined and repositories_client_baseurl_prefix is not none)
