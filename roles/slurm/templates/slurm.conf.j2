@@ -50,6 +50,14 @@ MpiDefault={{ slurm_MpiDefault | default('',true) }}
 SchedulerType={{ slurm_SchedulerType }}
 SelectType={{ slurm_SelectType }}
 
+{% if slurm_gresTypes is defined and slurm_gresTypes is not none %}
+# Gres configuration
+GresTypes={{ slurm_gresTypes }}
+ProctrackType=proctrack/cgroup
+TaskPlugin=affinity,cgroup
+SelectTypeParameters=CR_Core_Memory,CR_CORE_DEFAULT_DIST_BLOCK,CR_ONE_TASK_PER_CORE
+
+{% endif %}
 {% if slurm_enable_accounting %}
 ## Accounting
 AccountingStorageHost=localhost
@@ -78,7 +86,7 @@ JobAcctGatherType=jobacct_gather/linux
         {% set nodes_parameters = nodes_parameters + ' RealMemory=' + (buffer.memory|string) %}
     {% endif %}
     {% if buffer.slurm_extra_nodes_parameters is defined and buffer.slurm_extra_nodes_parameters is not none %}
-        {% set nodes_parameters = nodes_parameters + ' ' + buffer.slurm_extra_nodes_parameters %}
+        {% set nodes_parameters = nodes_parameters + ' ' +  buffer.slurm_extra_nodes_parameters %}
     {% endif %}
 NodeName={{ groups[computes_group] | nodeset }} {{ nodes_parameters }}
 

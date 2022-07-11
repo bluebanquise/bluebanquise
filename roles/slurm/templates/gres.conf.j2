@@ -1,0 +1,16 @@
+#jinja2: lstrip_blocks: True
+#### Blue Banquise file ####
+## {{ansible_managed}}
+
+# Documentation:
+# https://slurm.schedmd.com/gres.conf.html
+
+{# GPU Resources Definition #}
+{% for gpu in hostvars[inventory_hostname]['ep_hardware']['gpu'] %}
+  {% if gpu.split(' ')[0] == 'NVIDIA' %}
+    {% set gpu_vendor = 'nvidia' %}
+  {% endif %}
+  {% if gpu_vendor == 'nvidia' %}
+Name=gpu File=/dev/nvidia{{loop.index0}}
+  {% endif %}
+{% endfor %}

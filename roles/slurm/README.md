@@ -182,8 +182,51 @@ And check again if the cluster exist:
 sacctmgr list cluster
 ```
 
+### GPU Gres
+
+Unfortunately for now, this is only supported for NVIDIA GPUS.
+
+To Enable GPU gres the GPUS needs to be defined on the equipment_profile. You can check the GPU names with the following command:
+```
+$ nvidia-smi -L
+```
+You need to add the Gres extra arguments for slurm as well, so you would add something like the following to your equipment_profile.yml file if you have 8x NVIDIA A100-SXM4-40GB on your hardawre for example: 
+```yaml
+ep_hardware:
+  slurm_extra_nodes_parameters: "Gres=gpu:8"
+  [...]
+  gpu:
+    - NVIDIA A100-SXM4-40GB
+    - NVIDIA A100-SXM4-40GB
+    - NVIDIA A100-SXM4-40GB
+    - NVIDIA A100-SXM4-40GB
+    - NVIDIA A100-SXM4-40GB
+    - NVIDIA A100-SXM4-40GB
+    - NVIDIA A100-SXM4-40GB
+    - NVIDIA A100-SXM4-40GB
+```
+
+To enable it on the slurm configuration its required to define ```slurm_SelectType: "select/cons_tres"``` and ```slurm_gresTypes: gpu```. For example:
+
+
+
+```yaml
+  slurm_cluster_name: bluebanquise
+  slurm_control_machine: management1
+  slurm_SelectType: "select/cons_tres"
+  slurm_gresTypes: gpu
+  slurm_computes_groups:
+    - equipment_typeC
+  slurm_partitions_list:
+    - computes_groups:
+        - equipment_typeC
+        - equipment_typeC_gpu
+      partition_name: typeC
+```
+
 ## Changelog
 
+* 1.2.0: Added GPU Gres configuration. Lucas Santos <lucassouzasantos@gmail.com>
 * 1.1.1: Missing string filter in template. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.0: Role major upgrade. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.2: Update role, remove munge key. Benoit Leveugle <benoit.leveugle@gmail.com>
