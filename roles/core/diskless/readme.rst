@@ -205,7 +205,7 @@ Entering the livenet module will prompt the following menu:
 
    1 - Generate a new livenet image
    2 - Mount an existing livenet image
-   3 - Unount an existing livenet image
+   3 - Unmount an existing livenet image
    4 - Resize livenet image
 
    Select an action
@@ -215,7 +215,7 @@ In this menu you can do four actions:
 
 * Generate a new livenet image : This will guide you in order to create a new livenet image to boot.
 * Mount an existing livenet image : Mount a livenet image in order to make actions inside (install packages, ...). Livenet images are mounted inside /var/tmp/diskless/workdir/<image name>/mnt.
-* Unount an existing livenet image : Unmount a mounted livenet image.
+* Unmount an existing livenet image : Unmount a mounted livenet image.
 * Resize livenet image : Resize a livenet image operating system in order to adjust space taken into the ram.
 
 When generating a new livenet image with the first option, you will have to give few parameters:
