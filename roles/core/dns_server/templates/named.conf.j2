@@ -6,10 +6,21 @@ options {
   listen-on port 53 {
     127.0.0.1;
 {% for network in j2_management_networks %}
-  {% if networks[network]['is_in_dns'] is defined and networks[network]['is_in_dns'] == true %}
-    {% if networks[network]['services_ip']['dns_ip'] is defined and networks[network]['services_ip']['dns_ip'] is not none %}
-    {{networks[network]['services_ip']['dns_ip']}};
+  {% if (networks[network]['is_in_dns'] | default(true)) and networks[network]['services'] is defined and networks[network]['services'] is iterable and networks[network]['services'] is not string and networks[network]['services'] is mapping %}
+    {% if networks[network]['services']['dns4'] is defined and networks[network]['services']['dns4'] is iterable and networks[network]['services']['dns4'] is not string and networks[network]['services']['dns4'] is not mapping %}
+      {% set dns_ips = [] %}
+      {% for dns4 in networks[network]['services']['dns4'] %}
+        {% if dns4.ip is defined and (dns4.ip | ansible.utils.ipaddr) %}
+          {{ dns_ips.append(dns4.ip) }}
+        {% endif %}
+      {% endfor %}
+      {% if (dns_ips | length) > 0 %}
+      {% for dns_ip in dns_ips %}
+    {{ dns_ips }};
+      {% endif %}
     {% endif %}
+  {% elif (networks[network]['is_in_dns'] | default(true)) and networks[network]['services_ip'] is defined and (networks[network]['services_ip'] | ansible.utils.ipaddr) %}
+    {{ networks[network]['services_ip'] }};
   {% endif %}
 {% endfor %}
   };
@@ -23,7 +34,7 @@ options {
   allow-query {
     localhost;
 {% for network in j2_management_networks %}
-  {% if networks[network]['is_in_dns'] is defined and networks[network]['is_in_dns'] == true %}
+  {% if (networks[network]['is_in_dns'] | default(true)) %}
     {{ networks[network]['subnet'] }}/{{ networks[network]['prefix'] }};
   {% endif %}
 {% endfor %}
@@ -38,11 +49,8 @@ options {
   recursion no;
 {% endif %}
 
-{% if external_dns.dns_server is defined and external_dns.dns_server %}
+{% if (dns_server_forwarders | len) > 0 %}
   forwarders {
-  {% for forwarder in external_dns.dns_server %}
-    {{ forwarder }};
-  {% endfor %}
   {% for forwarder in dns_server_forwarders %}
     {{ forwarder }};
   {% endfor %}
@@ -61,7 +69,7 @@ options {
   pid-file "/run/named/named.pid";
   session-keyfile "/run/named/session.key";
 
-{% if dns_overrides is defined %}
+{% if dns_server_overrides is defined %}
   response-policy { zone "override"; };
 {% endif %}
 };
@@ -78,7 +86,7 @@ zone "." IN {
   file "{{ dns_server_root_hint_file }}";
 };
 
-zone "{{ domain_name }}" IN {
+zone "{{ bb_domain_name | default(dns_server_domaine_name) }}" IN {
   type master;
   file "{{ dns_server_named_dir }}/forward.zone";
   allow-update { none; };
@@ -92,33 +100,11 @@ zone "{{ octets.split('.')|reverse|join('.') }}.in-addr.arpa" IN {
 };
 {%- endmacro %}
 
-{% set ip_networks = [] %}
-
-{% for host in groups['all'] %}
-  {% if hostvars[host]['network_interfaces'] is defined %}
-    {% for interface in hostvars[host]['network_interfaces'] %}
-      {% if interface['network'] is defined and interface['ip4'] is defined and networks[interface['network']]['is_in_dns'] %}
-        {% set ip_prefix = interface['ip4'].split('.')[0:3]|join('.') %}
-        {% if ip_prefix not in ip_networks %}
-          {{ ip_networks.append(ip_prefix) }}
+{% for ip_prefix in j2_dns_server_get_first_octets.split(',') %}
 {{ create_reverse_zone(ip_prefix) }}
-        {% endif %}
-      {% endif %}
-    {% endfor %}
-  {% endif %}
-  {% if hostvars[host]['bmc'] is defined %}
-    {% set bmc_args = hostvars[host]['bmc'] %}
-    {% if bmc_args.ip4 is defined %}
-      {% set ip_prefix = bmc_args.ip4.split('.')[0:3]|join('.') %}
-      {% if ip_prefix not in ip_networks %}
-        {{ ip_networks.append(ip_prefix) }}
-{{ create_reverse_zone(ip_prefix) }}
-      {% endif %}
-    {% endif %}
-  {% endif %}
 {% endfor %}
 
-{% if dns_overrides is defined %}
+{% if dns_server_overrides is defined %}
 zone "override" {
   type master;
   file "{{ dns_server_named_dir }}/override.zone";

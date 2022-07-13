@@ -2,8 +2,8 @@
 - name: service █ Restart dns services
   ansible.builtin.service:
     name: "{{ item }}"
-    state: restarted
+    state: "{{ (dns_server_start_services | default(bb_start_services) | default(true, true) | bool) | ternary('restarted', omit) }}"
   loop: "{{ dns_server_services_to_start }}"
   when:
     - "'service' not in ansible_skip_tags"
-    - (start_services | bool)
+    - dns_server_start_services | default(bb_start_services) | default(true, true)

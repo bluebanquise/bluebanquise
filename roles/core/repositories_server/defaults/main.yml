@@ -1,0 +1,8 @@
+### Enable and/or start services ###
+# These values can be set in inventory to manipulate
+# services behavior. If not set, default to true for both.
+# Roles variables precedence global ones:
+# dhcp_server_start_services > bb_start_services > default(true)
+# dhcp_server_enable_services > bb_enable_services > default(true)
+dhcp_server_start_services:
+dhcp_server_enable_services:

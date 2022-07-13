@@ -59,11 +59,11 @@
   tags:
     - internal
 
-- name: "service █ Manage {{ repositories_server_services_to_start | join(' ') }} services state"
+- name: "service █ Manage {{ repositories_server_services_to_start | join(' ') }} state"
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
-    state: "{{ (start_services | bool) | ternary('started', omit) }}"
+    enabled: "{{ (repositories_server_enable_services | default(bb_enable_services) | default(true, true) | bool) | ternary('yes', 'no') }}"
+    state: "{{ (repositories_server_start_services | default(bb_start_services) | default(true, true) | bool) | ternary('started', omit) }}"
   loop: "{{ repositories_server_services_to_start }}"
   tags:
     - service

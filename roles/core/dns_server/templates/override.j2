@@ -9,8 +9,8 @@ $TTL 60
 
 localhost       A   127.0.0.1
 
-{% if dns_overrides is defined %}
-{% for site, ip in dns_overrides.items() %}
+{% if dns_server_overrides is defined %}
+{% for site, ip in dns_server_overrides.items() %}
 {{ site }}    A        {{ ip }}
 {% endfor %}
 {% endif %}

@@ -3,7 +3,7 @@
 
 {% for gr, gr_vars in groups.items() %}
 {% if (gr|string) != 'ungrouped' %}
-{{gr}}: {% for node in gr_vars | sort %}{% if node != 'dummy' %}{% if loop.first %}{{node}}{% else %},{{node}}{% endif %}{% endif %}{% endfor %}
+{{ gr }}: {% for node in gr_vars | sort %}{% if node != 'dummy' %}{% if loop.first %}{{ node }}{% else %},{{ node }}{% endif %}{% endif %}{% endfor %}
 
 {% endif %}
 {% endfor %}

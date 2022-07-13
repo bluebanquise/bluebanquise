@@ -3,8 +3,8 @@
 - name: service █ Restart http server service
   ansible.builtin.service:
     name: "{{ item }}"
-    state: restarted
+    state: "{{ (repositories_server_start_services | default(bb_start_services) | default(true, true) | bool) | ternary('restarted', omit) }}"
   loop: "{{ repositories_server_services_to_start }}"
   when:
     - "'service' not in ansible_skip_tags"
-    - (start_services | bool)
+    - repositories_server_start_services | default(bb_start_services) | default(true, true)
