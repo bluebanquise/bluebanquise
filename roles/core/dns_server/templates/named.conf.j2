@@ -17,7 +17,7 @@ options {
       {% if (dns_ips | length) > 0 %}
       {% for dns_ip in dns_ips %}
     {{ dns_ips }};
-      {% endif %}
+      {% endfor %}
     {% endif %}
   {% elif (networks[network]['is_in_dns'] | default(true)) and networks[network]['services_ip'] is defined and (networks[network]['services_ip'] | ansible.utils.ipaddr) %}
     {{ networks[network]['services_ip'] }};
