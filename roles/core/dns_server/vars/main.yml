@@ -6,7 +6,7 @@ j2_dns_server_get_first_octets: "
 {%- for host in (groups['all'] | sort) -%}
   {%- if hostvars[host]['network_interfaces'] is defined and hostvars[host]['network_interfaces'] is iterable -%}
     {%- for interface in hostvars[host]['network_interfaces'] -%}
-      {%- if interface['ip4'] is defined and (interface['ip4'] | ansible.utils.ipaddr) and (networks[interface['network']]['is_in_dns'] | default(true)) -%}
+      {%- if interface['ip4'] is defined and (interface['ip4'] | ansible.utils.ipaddr) and interface['network'] is defined and interface['network'] is not none and networks[interface['network']] is defined and (networks[interface['network']]['is_in_dns'] | default(true)) -%}
         {%- set ip_prefix = interface['ip4'].split('.')[0:3] | join('.') -%}
         {%- if ip_prefix not in ip_networks -%}
           {{ ip_networks.append(ip_prefix) }}
