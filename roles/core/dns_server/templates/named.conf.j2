@@ -50,7 +50,7 @@ options {
   recursion no;
 {% endif %}
 
-{% if (dns_server_forwarders | len) > 0 %}
+{% if (dns_server_forwarders | length) > 0 %}
   forwarders {
   {% for forwarder in dns_server_forwarders %}
     {{ forwarder }};
