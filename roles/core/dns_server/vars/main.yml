@@ -4,7 +4,7 @@ dns_server_role_version: 1.5.3
 j2_dns_server_get_first_octets: "
 {%- set ip_networks = [] -%}
 {%- for host in (groups['all'] | sort) -%}
-  {%- if hostvars[host]['network_interfaces'] is defined and host_dict['network_interfaces'] is iterable -%}
+  {%- if hostvars[host]['network_interfaces'] is defined and hostvars[host]['network_interfaces'] is iterable -%}
     {%- for interface in hostvars[host]['network_interfaces'] -%}
       {%- if interface['ip4'] is defined and (interface['ip4'] | ansible.utils.ipaddr) and (networks[interface['network']]['is_in_dns'] | default(true)) -%}
         {%- set ip_prefix = interface['ip4'].split('.')[0:3] | join('.') -%}
