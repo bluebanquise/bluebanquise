@@ -55,8 +55,12 @@ if $GATHER_PACKAGES; then
             wget -P "${REPO_PATH}"\
                  "${UBUNTU_2004_ISO_URL}"
           fi
+          mountpoint -q /mnt
+          if [ $? -eq 0 ]; then
+            sudo umount /mnt
+          fi
           sudo mount /var/www/html/repositories/ubuntu/20.04/x86_64/$UBUNTU_2004_ISO /mnt
-          mkdir /var/www/html/repositories/ubuntu/20.04/x86_64/os/
+          mkdir -p /var/www/html/repositories/ubuntu/20.04/x86_64/os/
           cp -a /mnt/* /var/www/html/repositories/ubuntu/20.04/x86_64/os/
           sudo umount /mnt
           ln -s "${UBUNTU_2004_ISO}" ubuntu-20.04-live-server-amd64.iso
@@ -93,8 +97,12 @@ if $GATHER_PACKAGES; then
         else
           wget -P "{REPO_PATH}" "${REDHAT_8_ISO_URL}"
         fi
+        mountpoint -q /mnt
+        if [ $? -eq 0 ]; then
+          sudo umount /mnt
+        fi
         sudo mount /var/www/html/repositories/redhat/8/x86_64/$REDHAT_8_ISO /mnt
-        mkdir /var/www/html/repositories/redhat/8/x86_64/os/
+        mkdir -p /var/www/html/repositories/redhat/8/x86_64/os/
         cp -a /mnt/* /var/www/html/repositories/redhat/8/x86_64/os/
         sudo umount /mnt
       fi
@@ -189,7 +197,7 @@ echo 'Defaults env_keep += "PYTHONPATH"' |\
 sudo EDITOR='tee -a' visudo
 
 message_output "Generating ssh keys..."
-mkdir $HOME/.ssh
+mkdir -p $HOME/.ssh
 # Create SSH key pair if id_ed25519 doesn't exist
 if [[ ! -f "${HOME}/.ssh/id_ed25519" ]]; then
   ssh-keygen -t ed25519\
