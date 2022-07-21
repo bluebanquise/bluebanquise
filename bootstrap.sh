@@ -180,7 +180,7 @@ echo "export PATH=\$HOME/.local/bin:\$PATH" |\
 tee -a "${HOME}"/.bashrc
 
 grep -q PYTHONPATH "${HOME}"/.bashrc ||\
-echo "export PYTHONPATH=\$(pip3 showClusterShell | grep Location | awk -F ' ' '{print \$2}')" >> "${HOME}"/.bashrc
+echo "export PYTHONPATH=\$(pip3 show ClusterShell | grep Location | awk -F ' ' '{print \$2}')" >> "${HOME}"/.bashrc
 
 echo "export ANSIBLE_CONFIG=\$HOME/bluebanquise/ansible.cfg" |
 tee -a "${HOME}"/.bashrc
