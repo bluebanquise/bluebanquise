@@ -1,9 +1,9 @@
 ---
 
-# Global run on Ubuntu 20.04
+# Global run on Ubuntu 22.04
 # Using instance environment (no docker)
 
-name: global ubuntu 20.04
+name: global ubuntu 22.04
 on:
   push:
     branches:
@@ -12,8 +12,8 @@ on:
 
 jobs:
   global_run_ubuntu_2004:
-    name: Global deployment on Ubuntu 20.04
-    runs-on: ubuntu-20.04
+    name: Global deployment on Ubuntu 22.04
+    runs-on: ubuntu-22.04
     env:
       ANSIBLE_CONFIG: /var/lib/bluebanquise/ansible.cfg
       PY_COLORS: '1'
