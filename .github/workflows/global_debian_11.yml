@@ -25,7 +25,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Create rockylinux systemd able image
+      - name: Create debian systemd able image
         run: docker build -t debian:11_systemd -f ./resources/docker/Dockerfile_Debian_11_systemd .
 
       - name: Start container
