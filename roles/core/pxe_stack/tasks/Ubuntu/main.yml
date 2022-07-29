@@ -24,3 +24,5 @@
   loop_control:
     loop_var: line_item
   notify: service █ Restart pxe services
+  tags:
+    - need_package
