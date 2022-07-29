@@ -2,7 +2,6 @@
 # skip os repository as installation will have created
 # /etc/zypp/repos.d/openSUSE-Leap-15.3-1.repo (or similar)
 
----
 - name: set_fact <|> Set static baseurl prefix
   ansible.builtin.set_fact:
     repositories_client_baseurl_prefix:
