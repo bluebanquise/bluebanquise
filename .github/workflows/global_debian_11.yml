@@ -1,9 +1,9 @@
 ---
 
-# Global run on CentOS 7
+# Global run on Debian 11
 # Using docker environment
 
-name: global CentOS 7
+name: global debian 11
 on:
   push:
     branches:
@@ -11,8 +11,8 @@ on:
   pull_request:
 
 jobs:
-  global_run_centos_7:
-    name: Global deployment on CentOS 7
+  global_run_debian_11:
+    name: Global deployment on Debian 11
     runs-on: ubuntu-20.04
     env:
       ANSIBLE_CONFIG: /var/lib/bluebanquise/ansible.cfg
@@ -25,11 +25,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Create centos systemd able image
-        run: docker build -t centos:7_systemd -f ./resources/docker/Dockerfile_CentOS_7_systemd .
+      - name: Create rockylinux systemd able image
+        run: docker build -t debian:11_systemd -f ./resources/docker/Dockerfile_Debian_11_systemd .
 
       - name: Start container
-        run: docker run -d --net=host --name mg1 --tmpfs /tmp --tmpfs /run -v /sys/fs/cgroup:/sys/fs/cgroup:ro centos:7_systemd
+        run: docker run -d --net=host --name mg1 --tmpfs /tmp --tmpfs /run -v /sys/fs/cgroup:/sys/fs/cgroup:ro rockylinux/rockylinux:8_systemd
 
       - name: Setup container
         run: docker exec mg1 bash -c "mkdir -p /opt/software; mkdir -p /opt/software_client; useradd test-user;"

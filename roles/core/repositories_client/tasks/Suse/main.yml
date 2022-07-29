@@ -2,16 +2,26 @@
 # skip os repository as installation will have created
 # /etc/zypp/repos.d/openSUSE-Leap-15.3-1.repo (or similar)
 
-- name: set_fact ░ Set static baseurl prefix
+---
+- name: set_fact <|> Set static baseurl prefix
   ansible.builtin.set_fact:
-    baseurl_prefix:
+    repositories_client_baseurl_prefix:
       "http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/\
-      {{ ep_operating_system['repositories_environment'] | default('') }}/\
+      {{ ep_operating_system['repositories_environment'] | default('', true) }}/\
       {{ ep_operating_system['distribution'] }}/\
       {{ ep_operating_system['distribution_version'] | default(ep_operating_system['distribution_major_version']) }}/\
       {{ ansible_architecture }}/"
+  when:
+    - j2_node_main_network is defined and j2_node_main_network is not none
+    - networks is defined and networks is not none
+    - networks[j2_node_main_network] is defined and networks[j2_node_main_network] is not none
+    - networks[j2_node_main_network]['services_ip'] is defined and networks[j2_node_main_network]['services_ip'] is not none
+    - networks[j2_node_main_network]['services_ip']['repository_ip'] is defined and networks[j2_node_main_network]['services_ip']['repository_ip'] is not none
+    - ep_operating_system is defined and ep_operating_system is not none
+    - ep_operating_system['distribution'] is defined and ep_operating_system['distribution'] is not none
+    - (ep_operating_system['distribution_version'] is defined and ep_operating_system['distribution_version'] is not none) or (ep_operating_system['distribution_major_version'] is defined and ep_operating_system['distribution_major_version'] is not none)
 
-- name: zypper_repository █ Setting repositories
+- name: zypper_repository <|+> Setting repositories
   community.general.zypper_repository:
     name: "{{ item.name | default(item) }}"
     description: "{{ item.name | default(item) }} gen by Ansible"
@@ -24,12 +34,16 @@
     priority: "{{ item.priority | default(omit) }}"
     runrefresh: "{{ item.runrefresh | default(omit) }}"
     state: "{{ item.state | default('present') }}"
-  with_items: "{{ repositories }}"
-  when: item != "os"
+  with_items: "{{ bb_repositories }}"
+  when:
+    - bb_repositories is not none and bb_repositories is iterable and bb_repositories is not string and bb_repositories is not mapping
+    - (item.name is defined and item.name is not none) or (repositories_client_baseurl_prefix is defined and repositories_client_baseurl_prefix is not none)
 
-- name: lineinfile █ Disable delta RPMs
+- name: lineinfile <|+> Disable delta RPMs
   ansible.builtin.lineinfile:
     path: /etc/zypp/zypp.conf
     insertafter: '# download.use_deltarpm = true'
     regexp: '^download.use_deltarpm ='
     line: 'download.use_deltarpm = false'
+  when:
+    - repositories_client_disable_delata_rpm

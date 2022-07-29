@@ -11,7 +11,7 @@ on:
   pull_request:
 
 jobs:
-  global_run_rocky_8:
+  global_run_opensuse_leap_15:
     name: Global deployment on OpenSuse Leap 15
     runs-on: ubuntu-20.04
     env:
