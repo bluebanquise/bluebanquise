@@ -53,10 +53,10 @@ jobs:
         run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t repositories_client --diff
 
       - name: Role test - dhcp_server
-        run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t dhcp_server --diff --skip-tags need_package
+        run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t dhcp_server --diff
 
       - name: Role test - dns_server
         run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t dns_server --diff
 
       - name: Role test - pxe_stack
-        run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t pxe_stack --diff --skip-tags package
+        run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t pxe_stack --diff --skip-tags package,need_package
