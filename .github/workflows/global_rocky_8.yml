@@ -53,10 +53,10 @@ jobs:
         run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --connection=docker --limit mg1 -t repositories_client --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
 
       - name: Role test - dhcp_server
-        run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --connection=docker --limit mg1 -t dhcp_server --diff -e 'ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false {"bb_start_services": false}' -u root  
+        run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --connection=docker --limit mg1 -t dhcp_server --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false bb_start_services=false" -u root  
 
       - name: Role test - dns_server
         run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --connection=docker --limit mg1 -t dns_server --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
 
       - name: Role test - pxe_stack
-        run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --connection=docker --limit mg1 -t pxe_stack --skip-tags package --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
+        run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --connection=docker --limit mg1 -t pxe_stack --skip-tags package --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false bb_start_services=false" -u root 

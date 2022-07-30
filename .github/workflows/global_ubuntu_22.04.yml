@@ -59,4 +59,4 @@ jobs:
         run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t dns_server --diff
 
       - name: Role test - pxe_stack
-        run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t pxe_stack --diff --skip-tags package,need_package
+        run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t pxe_stack --diff --skip-tags package,need_package -e "bb_start_services=false"
