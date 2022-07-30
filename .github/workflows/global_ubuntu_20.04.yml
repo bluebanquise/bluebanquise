@@ -38,7 +38,7 @@ jobs:
         run: sudo mkdir /var/lib/bluebanquise; sudo chown -R $(id -u):$(id -g) /var/lib/bluebanquise; cp -a * /var/lib/bluebanquise;
 
       - name: Prepare bluebanquise environment
-        run: cp -a /var/lib/bluebanquise/resources/workflow/inventory_${{ matrix.inventory }} /var/lib/bluebanquise/inventory; cp -a /var/lib/bluebanquise/resources/workflow/playbooks /var/lib/bluebanquise
+        run: 'cp -a /var/lib/bluebanquise/resources/workflow/inventory_${{ matrix.inventory }} /var/lib/bluebanquise/inventory; cp -a /var/lib/bluebanquise/resources/workflow/playbooks /var/lib/bluebanquise; echo "pxe_stack_start_services: false" >> /var/lib/bluebanquise/inventory/group_vars/all/vars.yml'
 
       - name: Role test - set_hostname
         run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t set_hostname --diff
