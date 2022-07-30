@@ -38,7 +38,7 @@ jobs:
         run: sudo mkdir /var/lib/bluebanquise; sudo chown -R $(id -u):$(id -g) /var/lib/bluebanquise; cp -a * /var/lib/bluebanquise;
 
       - name: Prepare bluebanquise environment
-        run: 'cp -a /var/lib/bluebanquise/resources/workflow/inventory_${{ matrix.inventory }} /var/lib/bluebanquise/inventory; cp -a /var/lib/bluebanquise/resources/workflow/playbooks /var/lib/bluebanquise; echo "dhcp_server_start_services: false" >> /var/lib/bluebanquise/inventory/group_vars/all/vars.yml'
+        run: 'cp -a /var/lib/bluebanquise/resources/workflow/inventory_${{ matrix.inventory }} /var/lib/bluebanquise/inventory; cp -a /var/lib/bluebanquise/resources/workflow/playbooks /var/lib/bluebanquise; echo "dhcp_server_start_services: False" >> /var/lib/bluebanquise/inventory/group_vars/all/vars.yml'
 
       - name: Install packages
         run: pip3 install -r requirements.txt
