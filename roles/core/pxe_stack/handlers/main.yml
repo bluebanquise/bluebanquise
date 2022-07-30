@@ -6,7 +6,7 @@
   loop: "{{ pxe_stack_services_to_start }}"
   when:
     - "'service' not in ansible_skip_tags"
-    - pxe_stack_start_services | default(bb_start_services | bool) | default(true, true)
+    - pxe_stack_start_services | default(bb_start_services) | default(true, true) | bool
 
 - name: systemd █ Reload systemd configuration
   ansible.builtin.systemd:

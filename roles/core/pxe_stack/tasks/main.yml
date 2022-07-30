@@ -189,8 +189,8 @@
 - name: "service █ Manage {{ (pxe_stack_services_to_start + [pxe_stack_tftp_service | default(pxe_stack_default_tftp_service)]) | join(' ') }} state"
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: "{{ (pxe_stack_enable_services | default(bb_enable_services | bool) | default(true, true) | bool) | ternary('yes', 'no') }}"
-    state: "{{ (pxe_stack_start_services | default(bb_start_services | bool) | default(true, true) | bool) | ternary('started', omit) }}"
+    enabled: "{{ (pxe_stack_enable_services | default(bb_enable_services) | default(true, true) | bool) | ternary('yes', 'no') }}"
+    state: "{{ (pxe_stack_start_services | default(bb_start_services) | default(true, true) | bool) | ternary('started', omit) }}"
   loop: "{{ pxe_stack_services_to_start + [pxe_stack_tftp_service | default(pxe_stack_default_tftp_service)] }}"
   tags:
     - service
