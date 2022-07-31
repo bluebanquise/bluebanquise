@@ -186,7 +186,7 @@
 - name: meta █ Run handler tasks to restart pxe services
   ansible.builtin.meta: flush_handlers
 
-- name: "service █ Manage {{ (pxe_stack_services_to_start + [pxe_stack_tftp_service | default(pxe_stack_default_tftp_service)]) | join(' ') }} state"
+- name: "service █ Manage all {{ (pxe_stack_services_to_start + [pxe_stack_tftp_service | default(pxe_stack_default_tftp_service)]) | join(' ') }} state"
   ansible.builtin.service:
     name: "{{ item }}"
     enabled: "{{ (pxe_stack_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"

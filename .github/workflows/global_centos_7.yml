@@ -42,6 +42,11 @@ jobs:
           cp -a /var/lib/bluebanquise/resources/workflow/inventory_${{ matrix.inventory }} /var/lib/bluebanquise/inventory
           cp -a /var/lib/bluebanquise/resources/workflow/playbooks /var/lib/bluebanquise
           echo "pxe_stack_start_services: False" >> /var/lib/bluebanquise/inventory/group_vars/all/vars.yml
+          echo "pxe_stack_enable_services: False" >> /var/lib/bluebanquise/inventory/group_vars/all/vars.yml
+          echo "dns_server_start_services: False" >> /var/lib/bluebanquise/inventory/group_vars/all/vars.yml
+          echo "dns_server_enable_services: False" >> /var/lib/bluebanquise/inventory/group_vars/all/vars.yml
+          echo "dhcp_server_start_services: False" >> /var/lib/bluebanquise/inventory/group_vars/all/vars.yml
+          echo "dhcp_server_enable_services: False" >> /var/lib/bluebanquise/inventory/group_vars/all/vars.yml
 
       - name: Install packages
         run: pip3 install -r requirements.txt
