@@ -17,8 +17,8 @@ dhcp_server_ipxe_embed: standard
 # Roles variables precedence global ones:
 # dhcp_server_start_services > bb_start_services > default(true)
 # dhcp_server_enable_services > bb_enable_services > default(true)
-dhcp_server_start_services:
-dhcp_server_enable_services:
+# dhcp_server_start_services:
+# dhcp_server_enable_services:
 
 ### Others ###
 # Domain name provided by dhcp to clients

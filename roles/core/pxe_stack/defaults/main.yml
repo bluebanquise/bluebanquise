@@ -61,8 +61,8 @@ pxe_stack_suse_autoinstall_repositories: []
 #  - media_url: http://10.10.0.1/repositories/sles/15.3/x86_64/updates
 #    name: sles_updates
 
-pxe_stack_enable_services:
-pxe_stack_start_services:
+# pxe_stack_enable_services:
+# pxe_stack_start_services:
 
 # Automatically detect NIC to be used in preseed
 # Only works if a single NIC is connected.

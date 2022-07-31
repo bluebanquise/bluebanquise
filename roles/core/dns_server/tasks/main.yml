@@ -153,8 +153,8 @@
 - name: "service █ Manage {{ dns_server_services_to_start | join(' ') }} state"
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: "{{ (dns_server_enable_services | default(bb_enable_services) | default(true, true) | bool) | ternary('yes', 'no') }}"
-    state: "{{ (dns_server_start_services | default(bb_start_services) | default(true, true) | bool) | ternary('started', omit) }}"
+    enabled: "{{ (dns_server_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    state: "{{ (dns_server_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   loop: "{{ dns_server_services_to_start }}"
   tags:
     - service
