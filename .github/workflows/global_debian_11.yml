@@ -44,7 +44,9 @@ jobs:
         run: 'cp -a /var/lib/bluebanquise/resources/workflow/inventory_${{ matrix.inventory }} /var/lib/bluebanquise/inventory; cp -a /var/lib/bluebanquise/resources/workflow/playbooks /var/lib/bluebanquise; echo "dhcp_server_start_services: False" >> /var/lib/bluebanquise/inventory/group_vars/all/vars.yml'
 
       - name: Install packages
-        run: pip3 install -r requirements.txt
+        run: |
+          sudo apt update && sudo apt install python3 python3-setuptools
+          pip3 install -r requirements.txt
 
       - name: Install collections
         run: ansible-galaxy collection install community.general
