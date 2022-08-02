@@ -22,7 +22,7 @@ $INCLUDE "{{ dns_server_named_dir }}/{{ item }}.rr.soa"
         {% endif %}
       {% endif %}
     {% endfor %}
-  {% elif host_dict['network'] is defined and host_dict['network'] is not none and host_dict['network'] is string and host_dict['network'] == item and host_j2_node_main_resolution_address is not none and (host_j2_node_main_resolution_address | ansible.utils.ipaddr) %}
+  {% elif host_dict['network'] is defined and host_dict['network'] is not none and host_dict['network'] is string and host_j2_node_main_resolution_address is not none and (host_j2_node_main_resolution_address | ansible.utils.ipaddr) and and host_j2_node_main_resolution_address.split('.')[0:3]|join('.') == item %}
 {{ create_record(host_j2_node_main_resolution_address, [[host, host_dict['network']] | join('-'), bb_domain_name | default(dns_server_domaine_name)] | join('.')) }}
   {% endif %}
   {% if host_dict['bmc'] is defined %}

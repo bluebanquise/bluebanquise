@@ -14,9 +14,7 @@
 # Examples: DHCPD_INTERFACE="eth0 eth1 eth2"
 #           DHCPD_INTERFACE="ANY"
 #
-DHCPD_INTERFACE="{%- for v in hostvars[inventory_hostname]['network_interfaces'] | selectattr('network','defined') | selectattr('network','match','^'+j2_current_iceberg_network+'-[a-zA-Z0-9]+') %}
- {{ v['interface'] }} 
-{%- endfor -%}"
+DHCPD_INTERFACE="ANY"
 
 ## Path: 	Network/DHCP/DHCP server
 ## Description: DHCPv6 server settings

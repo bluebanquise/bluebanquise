@@ -94,7 +94,7 @@ zone "{{ bb_domain_name | default(dns_server_domaine_name) }}" IN {
 };
 
 {% macro create_reverse_zone(octets) -%}
-zone "{{ octets.split('.')|reverse|join('.') }}.in-addr.arpa" IN {
+zone "{{ octets.split('.') | reverse | join('.') }}.in-addr.arpa" IN {
    type master;
    file "{{ dns_server_named_dir }}/{{ octets }}.rr.zone";
    allow-update { none; };

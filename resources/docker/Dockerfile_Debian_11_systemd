@@ -1,4 +1,4 @@
-FROM debian:11
+FROM debian:11.3
 
 RUN set -ex; \
     apt update && apt -y install systemd systemd-sysv python3;
