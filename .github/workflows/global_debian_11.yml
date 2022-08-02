@@ -13,7 +13,7 @@ on:
 jobs:
   global_run_debian_11:
     name: Global deployment on Debian 11
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     env:
       ANSIBLE_CONFIG: /var/lib/bluebanquise/ansible.cfg
       PY_COLORS: '1'
@@ -44,25 +44,22 @@ jobs:
         run: 'cp -a /var/lib/bluebanquise/resources/workflow/inventory_${{ matrix.inventory }} /var/lib/bluebanquise/inventory; cp -a /var/lib/bluebanquise/resources/workflow/playbooks /var/lib/bluebanquise; echo "dhcp_server_start_services: False" >> /var/lib/bluebanquise/inventory/group_vars/all/vars.yml'
 
       - name: Install packages
-        run: |
-          sudo apt update && sudo apt install python3 python3-setuptools
-          pip3 install setuptools_rust
-          pip3 install -r requirements.txt
+        run: pip3 install -r requirements.txt
 
       - name: Install collections
         run: ansible-galaxy collection install community.general
 
       - name: Role test - repositories_server
-        run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --connection=docker --limit mg1 -t repositories_server --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root
+        run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --connection=docker --limit mg1 -t repositories_server --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root --skip-tags service
 
       - name: Role test - repositories_client
-        run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --connection=docker --limit mg1 -t repositories_client --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
+        run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --connection=docker --limit mg1 -t repositories_client --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root  --skip-tags service
 
       - name: Role test - dhcp_server
-        run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --connection=docker --limit mg1 -t dhcp_server --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false bb_start_services=false" -u root  
+        run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --connection=docker --limit mg1 -t dhcp_server --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false bb_start_services=false" -u root --skip-tags service
 
       - name: Role test - dns_server
-        run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --connection=docker --limit mg1 -t dns_server --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
+        run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --connection=docker --limit mg1 -t dns_server --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root --skip-tags service
 
       - name: Role test - pxe_stack
-        run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --connection=docker --limit mg1 -t pxe_stack --skip-tags package,service --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false bb_start_services=false" -u root 
+        run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --connection=docker --limit mg1 -t pxe_stack --skip-tags package,service --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root --skip-tags service
