@@ -46,6 +46,7 @@ jobs:
       - name: Install packages
         run: |
           sudo apt update && sudo apt install python3 python3-setuptools
+          pip3 install setuptools_rust
           pip3 install -r requirements.txt
 
       - name: Install collections
