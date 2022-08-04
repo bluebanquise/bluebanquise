@@ -2,13 +2,6 @@
 #### Blue Banquise file ####
 ## {{ ansible_managed }}
 
-{% if ssh_client_custom_config is defined and ssh_client_custom_config is not none %}
-{{ ssh_client_custom_config }}
-{% endif %}
-
-{% macro node_main_network(macro_network_interfaces,macro_current_iceberg_network) %}
-{{ macro_network_interfaces | selectattr('network','defined') | selectattr('network','match','^'+macro_current_iceberg_network+'-[a-zA-Z0-9]+') | map(attribute='network') | list | first }}
-{% endmacro %}
 
 {# Macro to avoid redundancy #}
 {% macro write_host(host, host_vars, ssh_jump) %}
@@ -23,23 +16,18 @@ Host {{ host }}
     LogLevel {{ host_vars['ssh_client_loglevel'] }}
     {% endif %}
     {% if ssh_jump is none %}
-    Hostname %h-{{ node_main_network(host_vars['network_interfaces'], j2_current_iceberg_network) | trim }}
+      {% set host_to_be_used_network = host_vars['j2_icebergs_main_network_dict'][j2_current_iceberg] | default(none, true) %}
+    Hostname %h{% if host_to_be_used_network is not none %}-{{ host_to_be_used_network }}{% endif %}
+
     {% else %}
     Hostname %h
     ProxyJump {{ ssh_jump }}
     {% endif %}
 {% endmacro %}
 
-{% if icebergs_system == true %}
-# Icebergs system is on
-{% set range = groups[j2_current_iceberg] %}
-  {% for host in groups[managements_group_name] %}
-    {% if hostvars[host]['iceberg_master'] == j2_current_iceberg %}
-{{ range.append(host) }}
-    {% endif %}
-  {% endfor %}
-{% else %}
-  {% set range = groups['all'] %}
+
+{% if ssh_client_custom_config is defined and ssh_client_custom_config is not none %}
+{{ ssh_client_custom_config }}
 {% endif %}
 
 # Global parameters
@@ -56,13 +44,13 @@ Host *
   {% endif %}
 {% endif %}
 
-{% for host in (range | sort) %}
+{% for host in (j2_hosts_range | sort) -%}
   {% set host_vars = hostvars[host] %}
-  {% if host_vars['network_interfaces'] is defined and host_vars['network_interfaces'] and host_vars['network_interfaces'] is not mapping %}
 {{ write_host(host, host_vars, None) }}
   {% endif %}
 {% endfor %}
 
+{#
 
 {% if icebergs_system == true and ssh_client_enable_jump == true %}
 # Icebergs ssh_jump system is on
@@ -102,3 +90,4 @@ before using the first management node found in the group list.
 
 {% endif %}
 
+#}
