@@ -5,4 +5,4 @@
     key: "{{ item }}"
     exclusive: no
     state: present
-  with_items: "{{ authentication_ssh_keys }}"
+  with_items: "{{ ep_admin_ssh_keys | default(ssh_remote_keys_ep_admin_ssh_keys) }}"
