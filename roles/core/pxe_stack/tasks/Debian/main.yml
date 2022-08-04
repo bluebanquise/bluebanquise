@@ -22,3 +22,5 @@
     - regexp: "^TFTP_DIRECTORY"
       line: 'TFTP_DIRECTORY="/var/lib/tftpboot"'
   notify: service █ Restart pxe services
+  tags:
+    - need_package
