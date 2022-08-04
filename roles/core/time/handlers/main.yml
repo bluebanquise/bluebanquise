@@ -6,4 +6,4 @@
   loop: "{{ time_services_to_start }}"
   when:
     - "'service' not in ansible_skip_tags"
-    - (start_services | bool)
+    - time_start_services | default(bb_start_services) | default(true) | bool
