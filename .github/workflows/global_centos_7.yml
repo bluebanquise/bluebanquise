@@ -65,3 +65,17 @@ jobs:
 
       - name: Role test - pxe_stack
         run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --connection=docker --limit mg1 -t pxe_stack --skip-tags package,service --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
+
+      - name: Role test - time
+        run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --connection=docker --limit mg1 -t time --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root
+
+      - name: Role test - audit_system
+        run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --connection=docker --limit mg1 -t audit_system --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root
+
+      - name: Role test - clustershell
+        run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --connection=docker --limit mg1 -t clustershell --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root
+
+      - name: Role test - ssh
+        run: |
+          ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --connection=docker --limit mg1 -t ssh_client --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root
+          ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --connection=docker --limit mg1 -t ssh_remote_keys --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root

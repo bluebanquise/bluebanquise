@@ -2,42 +2,51 @@
 #### Blue Banquise file ####
 ## {{ ansible_managed }}
 
-{% macro node_main_network(macro_network_interfaces,macro_current_iceberg_network) %}
-{{ macro_network_interfaces | selectattr('network','defined') | selectattr('network','match','^'+macro_current_iceberg_network+'-[a-zA-Z0-9]+') | map(attribute='network') | list | first }}
-{% endmacro %}
-
 {% set external = false %}
-{% if external_time['time_'+time_profile]['pool'] is defined and
-      external_time['time_'+time_profile]['pool'] is iterable %}
+{% if time_server_external_pools | lenght > 0 %}
   {% set external = true %}
 # External pool
-  {% for external_pool in external_time['time_'+time_profile]['pool'] %}
+  {% for external_pool in time_server_external_pools %}
 pool {{ external_pool }} iburst maxsources 3
   {% endfor %}
-{% elif external_time['time_'+time_profile]['server'] is defined and
-        external_time['time_'+time_profile]['server'] is iterable %}
+{% elif time_server_external_servers | lenght > 0 %}
   {% set external = true %}
 # External servers
-  {% for external_server in external_time['time_'+time_profile]['server'] %}
+  {% for external_server in time_server_external_servers %}
 server {{ external_server }}
   {% endfor %}
 {% endif -%}
 
-{% if time_profile == 'client' %}
-  {% set time_sources = networks[j2_node_main_network]['services_ip']['time_ip'] %}
-{% elif time_profile == 'server' and icebergs_system == true and iceberg_master != 'top' %}
-  {# We need here to get master island ntp ip, depending of the subnet this node is member of.#}
-  {% set time_sources = networks[(node_main_network(network_interfaces,management_networks_naming+(iceberg_master|replace(iceberg_naming,' ')| trim | string))| trim)]['services_ip']['time_ip'] %}
-{% endif -%}
-
-{% if not external and time_sources is defined and time_sources is string %}
+{% if not external %}{# Bind to an internal server #}
 # Source server to bind to
-server {{ time_sources }} iburst
-{% elif not external and time_sources is defined and time_sources is iterable %}
-# Source servers to bind to
-  {% for time_ip in time_sources %}
-server {{ time_ip }} iburst
-  {% endfor %}
+
+  {% if time_profile == 'client' %}{# Client binds to its main network server, if exist #}
+    {% if networks[j2_node_main_network]['services']['ntp4'] is defined and networks[j2_node_main_network]['services']['ntp4'] is iterable and networks[j2_node_main_network]['services']['ntp4'] is not string and networks[j2_node_main_network]['services']['ntp4'] is not mapping %}
+      {% for ntp4 in networks[j2_node_main_network]['services']['ntp4'] %}
+        {% if ntp4.ip is defined and (ntp4.ip | ansible.utils.ipaddr) %}
+server {{ ntp4.ip }} iburst
+        {% elif ntp4.hostname is defined and ntp4.hostname is not none %}
+server {{ ntp4.hostname }} iburst
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+
+  {# Server binds to its main network server from upper iceberg, if exist #}
+  {% elif time_profile == 'server' and (bb_icebergs_system is defined and bb_icebergs_system) and (iceberg_master is defined and iceberg_master != "top") %}
+    {% set host_to_be_used_network = j2_icebergs_main_network_dict[iceberg_master] | default(none, true) %}
+    {% if host_to_be_used_network is not none %}
+      {% if networks[host_to_be_used_network]['services']['ntp4'] is defined and networks[host_to_be_used_network]['services']['ntp4'] is iterable and networks[host_to_be_used_network]['services']['ntp4'] is not string and networks[host_to_be_used_network]['services']['ntp4'] is not mapping %}
+        {% for ntp4 in networks[host_to_be_used_network]['services']['ntp4'] %}
+          {% if ntp4.ip is defined and (ntp4.ip | ansible.utils.ipaddr) %}
+server {{ ntp4.ip }} iburst
+          {% elif ntp4.hostname is defined and ntp4.hostname is not none %}
+server {{ ntp4.hostname }} iburst
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    {% endif %}
+  {% endif %}
+
 {% endif %}
 
 # Record the rate at which the system clock gains/losses time.
@@ -52,24 +61,42 @@ rtcsync
 
 {% if time_profile == 'server' %}
 # Allow NTP client access from local network.
-  {% for nic in network_interfaces %}
-    {% if nic.network is defined and nic.network is not none %}
+
+  {% if network_interfaces is defined and network_interfaces is iterable and network_interfaces is not mapping and network_interfaces is not string %}
+    {% for nic in network_interfaces %}
+      {% if nic.network is defined and nic.network is not none %}
+        {% if networks is defined and networks is iterable and networks is mapping %}
+          {% if networks[nic.network] is defined and networks[nic.network] is mapping %}
+            {% if networks[nic.network]['subnet'] is defined and networks[nic.network]['subnet'] is not none and networks[nic.network]['prefix'] is defined and networks[nic.network]['prefix'] is not none %}
 allow {{ networks[nic.network]['subnet'] }}/{{ networks[nic.network]['prefix'] }}
+            {% endif %}
+          {% endif %}
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+  {% elif network is defined and network is not none %}
+    {% if networks is defined and networks is iterable and networks is mapping %}
+      {% if networks[network] is defined and networks[network] is mapping %}
+        {% if networks[network]['subnet'] is defined and networks[network]['subnet'] is not none and networks[network]['prefix'] is defined and networks[network]['prefix'] is not none %}
+ allow {{ networks[network]['subnet'] }}/{{ networks[network]['prefix'] }}
+        {% endif %}
+      {% endif %}
     {% endif %}
-  {% endfor %}
-  {% if time_additional_networks_allowed is defined and time_additional_networks_allowed is iterable %}
-    {% for addons in time_additional_networks_allowed %}
-allow {{ addons }}
+  {% endif %}
+
+  {% if time_additional_networks_allowed | lenght > 0 %}
+    {% for add_net in time_additional_networks_allowed %}
+allow {{ add_net }}
     {% endfor %}
   {% endif %}
 
 # Serve time even if not synchronized to a time source.
 # Fairly unreliable time source
   {% if iceberg_level is defined and iceberg_level is not none %}
-    {% if (iceberg_level|int) > 3 %}
+    {% if (iceberg_level | int) > 3 %}
 local stratum 15
     {% else %}
-local stratum {{ 12+(iceberg_level|int) }}
+local stratum {{ 12 + (iceberg_level | int) }}
     {% endif %}
   {% else %}
 local stratum 12

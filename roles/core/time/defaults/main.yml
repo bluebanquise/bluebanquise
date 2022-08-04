@@ -1,0 +1,5 @@
+time_server_external_pools: []
+time_server_external_servers: []
+time_client_external_pools: []
+time_client_external_servers: []
+time_additional_networks_allowed: []

@@ -65,3 +65,17 @@ jobs:
 
       - name: Role test - pxe_stack
         run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t pxe_stack --diff --skip-tags package,need_package,service
+
+      - name: Role test - time
+        run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t time --diff
+
+      - name: Role test - audit_system
+        run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t audit_system --diff
+
+      - name: Role test - clustershell
+        run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t clustershell --diff
+
+      - name: Role test - ssh
+        run: |
+          ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t ssh_client --diff
+          ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t ssh_remote_keys --diff
