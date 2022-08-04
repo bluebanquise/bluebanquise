@@ -47,7 +47,6 @@ Host *
 {% for host in (j2_hosts_range | sort) -%}
   {% set host_vars = hostvars[host] %}
 {{ write_host(host, host_vars, None) }}
-  {% endif %}
 {% endfor %}
 
 {#

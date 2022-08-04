@@ -69,8 +69,8 @@ jobs:
       - name: Role test - time
         run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t time --diff
 
-      - name: Role test - audit_system
-        run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t audit_system --diff
+      # - name: Role test - audit_system
+      #   run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t audit_system --diff
 
       - name: Role test - clustershell
         run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t clustershell --diff
