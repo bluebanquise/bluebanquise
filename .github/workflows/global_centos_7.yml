@@ -20,7 +20,7 @@ jobs:
       ANSIBLE_FORCE_COLOR: '1'
     strategy:
       matrix:
-        inventory: [light, standard, mi]
+        inventory: [standard]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
