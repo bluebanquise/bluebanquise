@@ -1,0 +1,40 @@
+#### SERVER MODULES ####
+
+# Provides UDP syslog reception
+$ModLoad imudp
+$UDPServerRun {{ log_server_port }}
+
+# Provides TCP syslog reception
+$ModLoad imtcp
+$InputTCPServerRun {{ log_server_port }}
+
+
+#### RULES ####
+
+# Everybody gets emergency messages
+*.emerg                                                 :omusrmsg:*
+
+# Log anything (except mail) of level info or higher.
+# Don't log private authentication messages!
+$template Messages,"/var/log/rsyslog/%HOSTNAME%/messages"
+*.info;mail.none;authpriv.none;cron.none ?Messages
+
+# The authpriv file has restricted access.
+$template Secure,"/var/log/rsyslog/%HOSTNAME%/secure"
+authpriv.* ?Secure
+
+# Log all the mail messages in one place.
+$template Mail,"/var/log/rsyslog/%HOSTNAME%/maillog"
+mail.* ?Mail
+
+# Log cron stuff
+$template Cron,"/var/log/rsyslog/%HOSTNAME%/cron"
+cron.* ?Cron
+
+# Save news errors of level crit and higher in a special file.
+$template Spooler,"/var/log/rsyslog/%HOSTNAME%/spooler"
+uucp,news.crit ?Spooler
+
+# Save boot messages also to boot.log
+$template Boot,"/var/log/rsyslog/%HOSTNAME%/boot.log"
+local7.* ?Boot

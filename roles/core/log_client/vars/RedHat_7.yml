@@ -1,6 +1,0 @@
----
-log_client_packages_to_install:
-  - rsyslog
-  - libselinux-python
-  - policycoreutils-python
-log_client_work_dir: /var/lib/rsyslog

@@ -1,0 +1,90 @@
+---
+- name: include_vars ░ Gather OS specific variables
+  # This task gathers variables defined in OS specific files.
+  #
+  # Search vars in:
+  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
+  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
+  #  - <distribution>.yml            # eg. CentOS.yml
+  #  - <os_family>.yml               # eg. RedHat.yml
+  #
+  # If no OS specific file is found, the role will default to vars/main.yml
+  #
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family }}.yml"
+      skip: true
+  tags:
+    - always
+
+- name: "package █ Install {{ log_packages_to_install }} packages"
+  ansible.builtin.package:
+    name: "{{ log_packages_to_install }}"
+    state: present
+  tags:
+    - package
+
+- name: "template █ Generate {{ log_rsyslog_conf_path }}"
+  ansible.builtin.template:
+    src: rsyslog.conf.j2
+    dest: "{{ log_rsyslog_custom_conf_path | default(log_rsyslog_conf_path) }}"
+    owner: root
+    group: root
+    mode: 0644
+  notify: service █ Restart rsyslog service
+  when: "'rsyslog.conf' not in (log_configuration_files | default([]) | selectattr('name','defined') | map(attribute='name') | list)"
+  tags:
+    - template
+
+- name: "template █ Generate custom rsyslog files"
+  ansible.builtin.template:
+    src: rsyslog.d_custom.conf.j2
+    dest: "{{ item.path | default('/etc/rsyslog.d') }}/{{ item.name }}"
+    owner: root
+    group: root
+    mode: 0644
+  loop: "{{ log_configuration_files }}"
+  loop_control:
+    label: "Install configuration file {{ item.name }}"
+  notify: service █ Restart rsyslog service
+  when: log_configuration_files is defined and log_configuration_files is iterable
+  tags:
+    - template
+
+- name: include_tasks ░ Configure log Server
+  ansible.builtin.include_tasks: "server.yml"
+  when: log_profile == "server"
+
+- name: include_tasks ░ Configure log Client
+  ansible.builtin.include_tasks: "client.yml"
+  when: log_profile == "client"
+
+- name: seport █ Allow syslog port into SELinux
+  community.general.seport:
+    ports: "{{ log_server_port }}"
+    proto: "{{ item }}"
+    setype: syslogd_port_t
+    state: present
+  when:
+    - ansible_facts.os_family == "RedHat"
+    - ansible_facts.selinux.status == "enabled"
+  loop:
+    - tcp
+    - udp
+  notify: service █ Restart rsyslog service
+
+- name: meta █ Run handler tasks to restart rsyslog services
+  ansible.builtin.meta: flush_handlers
+
+- name: "service █ Manage {{ log_server_services_to_start }} services state"
+  ansible.builtin.service:
+    name: "{{ item }}"
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+    state: "{{ (start_services | bool) | ternary('started', omit) }}"
+  loop: "{{ log_server_services_to_start }}"
+  tags:
+    - service

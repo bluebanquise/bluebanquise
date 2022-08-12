@@ -1,0 +1,16 @@
+---
+log_packages_to_install:
+  - rsyslog
+  - logrotate
+  - xz
+  - libselinux-python
+  - policycoreutils-python
+log_services_to_start:
+  - rsyslog
+log_rsyslog_conf_path: /etc/rsyslog.conf
+log_client_rsyslog_conf_path: /etc/rsyslog.d/client.conf
+log_server_rsyslog_conf_path: /etc/rsyslog.d/server.conf
+log_work_dir: /var/lib/rsyslog
+log_firewall_services_to_add:
+  - syslog
+  - rsh  # 514/tcp

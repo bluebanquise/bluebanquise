@@ -1,0 +1,26 @@
+- name: "firewalld █ Add services to firewall's {{ log_firewall_zone | default('public') }} zone"
+  ansible.posix.firewalld:
+    zone: "{{ log_firewall_zone | default('public') }}"
+    service: "{{ item }}"
+    immediate: "yes"
+    permanent: "yes"
+    state: enabled
+  when:
+    - ansible_facts.os_family == "RedHat"
+    - ep_firewall | default(false) | bool
+  loop: "{{ log_firewall_services_to_add }}"
+  tags:
+    - firewall
+
+- name: "firewalld █ Add custom port to firewall's {{ log_firewall_zone | default('public') }} zone"
+  ansible.posix.firewalld:
+    zone: "{{ log_firewall_zone | default('public') }}"
+    port: "{{ log_port }}/tcp"
+    immediate: "yes"
+    permanent: "yes"
+    state: enabled
+  when:
+    - ansible_facts.os_family == "RedHat"
+    - ep_firewall | default(false) | bool
+  tags:
+    - firewall

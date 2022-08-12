@@ -5,6 +5,7 @@
     state: present
   tags:
     - package
+    - large-package
 
 - name: "template █ Generate Alpine live boot file to {{ pxe_stack_htdocs_path }}/pxe/tools/"
   ansible.builtin.template:

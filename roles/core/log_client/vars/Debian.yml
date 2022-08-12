@@ -1,4 +1,0 @@
----
-log_client_packages_to_install:
-  - rsyslog
-log_client_work_dir: /var/lib/rsyslog

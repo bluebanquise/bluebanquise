@@ -1,10 +1,15 @@
-d-i debian-installer/locale string en_US
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+
+### zone
+d-i debian-installer/locale string {{hostvars[groups[item][0]]['ep_system_language']  | default(pxe_stack_ep_system_language) }}
+d-i keyboard-configuration/xkb-keymap select {{hostvars[groups[item][0]]['ep_keyboard_layout']  | default(pxe_stack_ep_keyboard_layout) | lower}}
 d-i debian-installer/language string en
 d-i debian-installer/country string US
-d-i localechooser/supported-locales multiselect en_US.UTF-8, fr_FR.UTF-8
+d-i localechooser/supported-locales multiselect en_US.UTF-8
 
-d-i keyboard-configuration/xkb-keymap select fr
-
+### network
+## Note: a dhcp gateway MUST be set for the network, even a dummy one
 d-i netcfg/choose_interface select auto
 d-i netcfg/use_dhcp string true
 d-i netcfg/link_wait_timeout string 10
@@ -16,6 +21,7 @@ d-i netcfg/get_domain unassigned-domain
 d-i netcfg/get_hostname seen true
 d-i netcfg/get_domain seen true
 
+### Repositories
 d-i mirror/country string manual
 d-i mirror/http/hostname string 10.10.0.1
 d-i mirror/http/directory string /deb11
@@ -26,9 +32,13 @@ d-i debian-installer/allow_unauthenticated boolean true
 d-i passwd/make-user boolean false
 d-i passwd/root-password-crypted password $6$k.RYFFx8joDk.azd$Z9GOaX2TvXbYHLRyfFHGAyqiSeOTgmzU/X2VbnoFNeTj3W7p0hGnN/wzABxfGZ928DDnmeWAsZOK/cCkYeEXp/
 
+### Time
+d-i clock-setup/utc-auto boolean true
 d-i clock-setup/utc boolean true
-d-i time/zone string Europe/Paris
+d-i time/zone string {{ bb_time_zone | default(pxe_stack_time_zone) }} #US/Pacific
+d-i clock-setup/ntp boolean true
 
+### Partitioning
 d-i partman-lvm/device_remove_lvm boolean true
 d-i partman-md/device_remove_md boolean true
 d-i partman-lvm/confirm boolean true
@@ -37,10 +47,8 @@ d-i partman/choose_partition select finish
 d-i partman/confirm boolean true
 d-i partman/confirm_nooverwrite boolean true
 
-d-i partman-auto/disk string /dev/sda
-d-i partman-auto/method string regular
-d-i partman-auto/choose_recipe select atomic
-d-i partman-auto/init_automatically_partition select Guided - use entire disk
+{{ hostvars[groups[item][0]]['ep_partitioning'] | default(pxe_stack_ep_partitioning) | default(pxe_stack_debian_automatic_partitioning, true) }}
+
 
 d-i pkgsel/upgrade select none
 d-i pkgsel/updatedb boolean false

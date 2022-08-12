@@ -29,6 +29,8 @@ server {{ ntp4.ip }} iburst
 server {{ ntp4.hostname }} iburst
         {% endif %}
       {% endfor %}
+    {% elif networks[j2_node_main_network]['services_ip'] is defined and (networks[j2_node_main_network]['services_ip'] | ansible.utils.ipaddr) %}
+server {{ networks[j2_node_main_network]['services_ip'] }} iburst
     {% endif %}
 
   {# Server binds to its main network server from upper iceberg, if exist #}
