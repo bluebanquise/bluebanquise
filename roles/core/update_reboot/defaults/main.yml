@@ -1,0 +1,4 @@
+---
+update_reboot_upgrade_packages: false
+update_reboot_reboot: false
+update_reboot_reboot_timeout: 600

@@ -29,9 +29,6 @@ d-i mirror/http/proxy string
 d-i pkgsel/install-language-support boolean false
 d-i debian-installer/allow_unauthenticated boolean true
 
-d-i passwd/make-user boolean false
-d-i passwd/root-password-crypted password $6$k.RYFFx8joDk.azd$Z9GOaX2TvXbYHLRyfFHGAyqiSeOTgmzU/X2VbnoFNeTj3W7p0hGnN/wzABxfGZ928DDnmeWAsZOK/cCkYeEXp/
-
 ### Time
 d-i clock-setup/utc-auto boolean true
 d-i clock-setup/utc boolean true
@@ -49,7 +46,12 @@ d-i partman/confirm_nooverwrite boolean true
 
 {{ hostvars[groups[item][0]]['ep_partitioning'] | default(pxe_stack_ep_partitioning) | default(pxe_stack_debian_automatic_partitioning, true) }}
 
+### Users
+d-i passwd/make-user boolean false
+d-i passwd/root-password-crypted password  {{ hostvars[groups[item][0]]['ep_admin_password_sha512'] | default(pxe_stack_ep_admin_password_sha512) }}
 
+### Packages
+d-i pkgsel/include string openssh-server curl
 d-i pkgsel/upgrade select none
 d-i pkgsel/updatedb boolean false
 d-i pkgsel/update-policy select none
@@ -58,7 +60,23 @@ d-i apt-setup/universe boolean false
 d-i apt-setup/backports boolean false
 d-i apt-setup/proposed boolean false
 
+### Grub
 d-i grub-installer/only_debian boolean true
 d-i grub-installer/bootdev  string default
 
+### Reboot
 d-i finish-install/reboot_in_progress note
+
+### Specific
+d-i preseed/late_command string \
+  in-target sh -c 'mkdir /root/.ssh'; \
+{% for ssh_key in (hostvars[groups[item][0]]['ep_admin_ssh_keys'] | default(pxe_stack_ep_admin_ssh_keys)) %}
+  in-target sh -c 'echo "{{ ssh_key }}" >> /root/.ssh/authorized_keys'; \
+{% endfor %}
+  in-target sh -c 'sed -i "s/^#PermitRootLogin.*\$/PermitRootLogin yes/g" /etc/ssh/sshd_config'; \
+{% if hostvars[groups[item][0]]['ep_preserve_efi_first_boot_device'] == true %}
+  in-target sh -c '[ -d /sys/firmware/efi ] && efibootmgr -o $(efibootmgr | grep BootCurrent | cut -d" " -f2),$(efibootmgr | grep BootOrder | sed "s/BootOrder:\ //" | sed "s/$(efibootmgr | grep BootCurrent | cut -d" " -f2),//") || echo "Not an EFI system, skipping"'
+{% endif %}
+  in-target for I in `cat /proc/cmdline | tr " " "\n" | grep -E "^(node_hostname|ipxe_next_server)="` ; do eval $I; done; \
+  in-target echo Next server is $ipxe_next_server; \
+  in-target curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$node_hostname&boot=disk";

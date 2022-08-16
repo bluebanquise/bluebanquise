@@ -1,0 +1,42 @@
+---
+
+# Install requested packages
+- name: "package █ Install {{ generic_psf_packages | join(' ') }}"
+  ansible.builtin.package:
+    name: "{{ generic_psf_packages }}"
+    state: present
+  tags:
+    - package
+
+# Create needed folders
+- name: "file █ Create requested folders"
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner | default('root') }}"
+    group: "{{ item.group | default('root') }}"
+    mode: "{{ item.mode | default('0755') }}"
+  loop: "{{ generic_psf_folders }}"
+  tags:
+    - file
+
+# Render requested files
+- name: "template █ Render requested files"
+  ansible.builtin.template:
+    src: generic_file.j2
+    dest: "{{ item.path }}"
+    owner: "{{ item.owner | default('root') }}"
+    group: "{{ item.group | default('root') }}"
+    mode: "{{ item.mode | default('0644') }}"
+  loop: "{{ generic_psf_files }}"
+  tags:
+    - template
+
+# Start requested services
+- name: "service █ Start {{ generic_psf_services | join(' ') }} services"
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: started
+  loop: "{{ generic_psf_services }}"
+  tags:
+    - service
