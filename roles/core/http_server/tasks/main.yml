@@ -59,6 +59,55 @@
   tags:
     - internal
 
+- name: lineinfile █ Set main configuration file custom configurations
+  ansible.builtin.lineinfile:
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    path: /etc/httpd/httpd.conf
+    regexp: "{{ line_item.regexp }}"
+    line: "{{ line_item.line }}"
+  loop:
+    - regexp: "^TFTP_ADDRESS"
+      line: 'TFTP_ADDRESS="0.0.0.0:69"'
+    - regexp: "^TFTP_OPTIONS"
+      line: 'TFTP_OPTIONS="--secure --verbose"'
+    - regexp: "^TFTP_DIRECTORY"
+      line: 'TFTP_DIRECTORY="/var/lib/tftpboot"'
+  loop_control:
+    loop_var: line_item
+  notify: service █ Restart pxe services
+  tags:
+    - need_package
+
+
+- name: template █ Set http server custom configurations
+  ansible.builtin.template:
+    src: custom.conf.j2
+    dest: "/etc/httpd/conf.d/{{ item.rule_name }}.conf"
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - template
+  with_items: "{{ http_server_configurations }}"
+  when:
+    - http_server_configurations is not none
+    - http_server_configurations is iterable
+  notify: service █ Restart http server service
+
+- name: apache2_module █ Enable apache2 modules
+  community.general.apache2_module:
+    force: "{{ item.force | default(omit, true) }}"
+    identifier: "{{ item.identifier | default(omit, true) }}"
+    ignore_configcheck: "{{ item.ignore_configcheck | default(omit, true) }}"
+    name: "{{ item.name }}"
+    state: "{{ item.state | default(omit, true) }}"
+  with_items: "{{ http_server_modules }}"
+  when:
+    - http_server_modules is not none
+    - http_server_modules is iterable
+    - item.name is defined and item.name is not none
+  notify: service █ Restart http server service
+
 - name: "service █ Manage {{ repositories_server_services_to_start | join(' ') }} state"
   ansible.builtin.service:
     name: "{{ item }}"
