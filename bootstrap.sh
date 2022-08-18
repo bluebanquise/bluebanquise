@@ -147,6 +147,7 @@ fi
 if $INSTALL_PIP_REQUIREMENTS; then
   message_output "Installing python needed dependencies via pip3..."
   if $OFFLINE_MODE; then
+    sudo pip3 install --upgrade pip --no-index --find-links "${CURRENT_DIR}/offline_bootstrap/pip3/"
     pip3 install --no-index\
                  --find-links "${CURRENT_DIR}/offline_bootstrap/pip3/"\
                  -r requirements.txt
