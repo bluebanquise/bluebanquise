@@ -1,7 +1,7 @@
 - name: ufw █ "Add services to firewall"
   community.general.ufw:
     rule: allow
-    port: "{{ log_port }}"
+    port: "{{ rsyslog_port }}"
     proto: tcp
   when:
     - ep_firewall | default(false) | bool

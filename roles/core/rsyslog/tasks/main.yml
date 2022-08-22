@@ -21,22 +21,22 @@
   tags:
     - always
 
-- name: "package █ Install {{ log_packages_to_install }} packages"
+- name: "package █ Install {{ rsyslog_packages_to_install }} packages"
   ansible.builtin.package:
-    name: "{{ log_packages_to_install }}"
+    name: "{{ rsyslog_packages_to_install }}"
     state: present
   tags:
     - package
 
-- name: "template █ Generate {{ log_rsyslog_conf_path }}"
+- name: "template █ Generate {{ rsyslog__conf_path }}"
   ansible.builtin.template:
     src: rsyslog.conf.j2
-    dest: "{{ log_rsyslog_custom_conf_path | default(log_rsyslog_conf_path) }}"
+    dest: "{{ rsyslog__custom_conf_path | default(rsyslog__conf_path) }}"
     owner: root
     group: root
     mode: 0644
   notify: service █ Restart rsyslog service
-  when: "'rsyslog.conf' not in (log_configuration_files | default([]) | selectattr('name','defined') | map(attribute='name') | list)"
+  when: "'rsyslog.conf' not in (rsyslog_configuration_files | default([]) | selectattr('name','defined') | map(attribute='name') | list)"
   tags:
     - template
 
@@ -47,25 +47,25 @@
     owner: root
     group: root
     mode: 0644
-  loop: "{{ log_configuration_files }}"
+  loop: "{{ rsyslog_configuration_files }}"
   loop_control:
     label: "Install configuration file {{ item.name }}"
   notify: service █ Restart rsyslog service
-  when: log_configuration_files is defined and log_configuration_files is iterable
+  when: rsyslog_configuration_files is defined and rsyslog_configuration_files is iterable
   tags:
     - template
 
 - name: include_tasks ░ Configure log Server
   ansible.builtin.include_tasks: "server.yml"
-  when: log_profile == "server"
+  when: rsyslog_profile == "server"
 
 - name: include_tasks ░ Configure log Client
   ansible.builtin.include_tasks: "client.yml"
-  when: log_profile == "client"
+  when: rsyslog_profile == "client"
 
 - name: seport █ Allow syslog port into SELinux
   community.general.seport:
-    ports: "{{ log_server_port }}"
+    ports: "{{ rsyslog_server_port }}"
     proto: "{{ item }}"
     setype: syslogd_port_t
     state: present
@@ -80,11 +80,11 @@
 - name: meta █ Run handler tasks to restart rsyslog services
   ansible.builtin.meta: flush_handlers
 
-- name: "service █ Manage {{ log_server_services_to_start }} services state"
+- name: "service █ Manage {{ rsyslog_server_services_to_start }} services state"
   ansible.builtin.service:
     name: "{{ item }}"
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
     state: "{{ (start_services | bool) | ternary('started', omit) }}"
-  loop: "{{ log_server_services_to_start }}"
+  loop: "{{ rsyslog_server_services_to_start }}"
   tags:
     - service

@@ -41,7 +41,6 @@ jobs:
         run: |
           cp -a /var/lib/bluebanquise/resources/workflow/inventory_${{ matrix.inventory }} /var/lib/bluebanquise/inventory
           cp -a /var/lib/bluebanquise/resources/workflow/playbooks /var/lib/bluebanquise
-
       - name: Set dummy interface
         run: sudo modprobe -v dummy numdummies=2; sudo ip addr add 10.10.0.1/16 dev dummy0; ip a;
 
@@ -51,8 +50,8 @@ jobs:
       - name: Role test - hosts_file
         run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t hosts_file --diff
 
-      - name: Role test - repositories_server
-        run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t repositories_server --diff
+      - name: Role test - http_server
+        run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t http_server --diff
 
       - name: Role test - repositories_client
         run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t repositories_client --diff

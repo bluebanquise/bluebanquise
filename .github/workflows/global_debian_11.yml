@@ -49,8 +49,8 @@ jobs:
       - name: Install collections
         run: ansible-galaxy collection install community.general
 
-      - name: Role test - repositories_server
-        run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --connection=docker --limit mg1 -t repositories_server --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root --skip-tags service
+      - name: Role test - http_server
+        run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --connection=docker --limit mg1 -t http_server --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root --skip-tags service
 
       - name: Role test - repositories_client
         run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --connection=docker --limit mg1 -t repositories_client --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root  --skip-tags service

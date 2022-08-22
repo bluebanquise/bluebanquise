@@ -18,7 +18,7 @@ $ModLoad imjournal # provides access to the systemd journal
 #### GLOBAL DIRECTIVES ####
 
 # Where to place auxiliary files
-$WorkDirectory {{ log_work_dir }}
+$WorkDirectory {{ rsyslog_work_dir }}
 
 # Use default timestamp format
 $ActionFileDefaultTemplate RSYSLOG_TraditionalFileFormat

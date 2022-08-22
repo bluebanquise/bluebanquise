@@ -1,5 +1,5 @@
 ---
-repositories_server_packages_to_install:
+http_server_packages_to_install:
   - apache2
-repositories_server_services_to_start:
+http_server_services_to_start:
   - apache2

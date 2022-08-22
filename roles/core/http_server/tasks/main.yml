@@ -21,9 +21,9 @@
   tags:
     - always
 
-- name: "package █ Install {{ repositories_server_packages_to_install | join(' ') }} packages"
+- name: "package █ Install {{ http_server_packages_to_install | join(' ') }} packages"
   ansible.builtin.package:
-    name: "{{ repositories_server_packages_to_install }}"
+    name: "{{ http_server_packages_to_install }}"
     state: present
   tags:
     - package
@@ -59,39 +59,30 @@
   tags:
     - internal
 
-- name: lineinfile █ Set main configuration file custom configurations
+- name: lineinfile █ Set http server main settings
   ansible.builtin.lineinfile:
-  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-    path: /etc/httpd/httpd.conf
-    regexp: "{{ line_item.regexp }}"
-    line: "{{ line_item.line }}"
-  loop:
-    - regexp: "^TFTP_ADDRESS"
-      line: 'TFTP_ADDRESS="0.0.0.0:69"'
-    - regexp: "^TFTP_OPTIONS"
-      line: 'TFTP_OPTIONS="--secure --verbose"'
-    - regexp: "^TFTP_DIRECTORY"
-      line: 'TFTP_DIRECTORY="/var/lib/tftpboot"'
-  loop_control:
-    loop_var: line_item
-  notify: service █ Restart pxe services
-  tags:
-    - need_package
+    path: "{{ pxe_stack_apache_main_conf_path }}"
+    regexp: "{{ item.regexp }}"
+    line: "{{ litem.line }}"
+  with_items: "{{ http_server_settings }}"
+  when:
+    - http_server_settings is not none
+    - http_server_settings is iterable
+  notify: service █ Restart http server service
 
-
-- name: template █ Set http server custom configurations
+- name: template █ Generate http server configuration files
   ansible.builtin.template:
     src: custom.conf.j2
-    dest: "/etc/httpd/conf.d/{{ item.rule_name }}.conf"
+    dest: "{{ pxe_stack_apache_conf_path }}/{{ item.rule_name }}.conf"
     owner: root
     group: root
     mode: 0644
   tags:
     - template
-  with_items: "{{ http_server_configurations }}"
+  with_items: "{{ http_server_configurations_files }}"
   when:
-    - http_server_configurations is not none
-    - http_server_configurations is iterable
+    - http_server_configurations_files is not none
+    - http_server_configurations_files is iterable
   notify: service █ Restart http server service
 
 - name: apache2_module █ Enable apache2 modules
@@ -108,11 +99,11 @@
     - item.name is defined and item.name is not none
   notify: service █ Restart http server service
 
-- name: "service █ Manage {{ repositories_server_services_to_start | join(' ') }} state"
+- name: "service █ Manage {{ http_server_services_to_start | join(' ') }} state"
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: "{{ (repositories_server_enable_services | default(bb_enable_services) | default(true, true) | bool) | ternary('yes', 'no') }}"
-    state: "{{ (repositories_server_start_services | default(bb_start_services) | default(true, true) | bool) | ternary('started', omit) }}"
-  loop: "{{ repositories_server_services_to_start }}"
+    enabled: "{{ (http_server_enable_services | default(bb_enable_services) | default(true, true) | bool) | ternary('yes', 'no') }}"
+    state: "{{ (http_server_start_services | default(bb_start_services) | default(true, true) | bool) | ternary('started', omit) }}"
+  loop: "{{ http_server_services_to_start }}"
   tags:
     - service
