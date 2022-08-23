@@ -85,6 +85,16 @@
 
 {% if external_hosts is defined and external_hosts is not none and external_hosts %}
   {% for host in (external_hosts | sort) %}
+    {% if 'ip' in external_hosts[host] %}
+      {% set ipstr = external_hosts[host]['ip'] %}
+      {% if 'alias' in external_hosts[host] %}
+        {% set hoststr = host ~ " " ~ external_hosts[host]['alias']|join(" ") %}
+      {% else %}
+        {% set hoststr = host %}
+      {% endif %}
+{{ ipstr }} {{ hoststr }}
+    {% else %}
 {{ external_hosts[host] }} {{ host }}
+    {% endif %}
   {% endfor %}
 {% endif %}

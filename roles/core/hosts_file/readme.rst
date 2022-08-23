@@ -27,6 +27,16 @@ External hosts defined in *group_vars/all/general_settings/external.yml*
 at variable **external_hosts** will be automatically added in the */etc/hosts*
 file.
 
+`external_hosts` can be defined either directly with `hostname: IP.IP.IP.IP` or with some aliases:
+
+```yaml
+external_hosts:
+  extnas4:
+    ip: 10.10.4.4
+    alias:
+      - enas4
+```
+
 Input
 ^^^^^
 
@@ -59,6 +69,7 @@ Files generated:
 Changelog
 ^^^^^^^^^
 
+* 1.1.1: Add alias for external hosts Rémy Dernat <remy.d1@gmx.fr>
 * 1.1.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.8: Prevent unsorted ranges. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.7: Clean code. Benoit Leveugle <benoit.leveugle@gmail.com>
