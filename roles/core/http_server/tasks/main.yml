@@ -61,7 +61,7 @@
 
 - name: lineinfile █ Set http server main settings
   ansible.builtin.lineinfile:
-    path: "{{ pxe_stack_apache_main_conf_path }}"
+    path: "{{ http_server_apache_main_conf_path }}"
     regexp: "{{ item.regexp }}"
     line: "{{ litem.line }}"
   with_items: "{{ http_server_settings }}"

@@ -31,14 +31,14 @@
 - name: group █ Ensure group conman exists
   ansible.builtin.group:
     name: conman
-    gid: "{{ conman_conman_user_gid }}"
+    gid: "{{ conman_user_gid }}"
     state: present
     system: yes
 
 - name: user █ Ensure user conman exists
   ansible.builtin.user:
     name: conman
-    uid: "{{ conman_conman_user_uid }}"
+    uid: "{{ conman_user_uid }}"
     state: present
     comment: "Connection Manager service"
     group: conman
