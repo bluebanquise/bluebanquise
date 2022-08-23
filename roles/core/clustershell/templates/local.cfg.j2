@@ -2,11 +2,9 @@
 ## {{ansible_managed}}
 
 {% for gr, gr_vars in groups.items() %}
-{% if (gr|string) != 'ungrouped' %}
-{{ gr }}: {% for node in gr_vars | sort %}{% if node != 'dummy' %}{% if loop.first %}{{ node }}{% else %},{{ node }}{% endif %}{% endif %}{% endfor %}
+{% if (gr | string) != 'ungrouped' %}
+{% set nodes = gr_vars.remove('dummy') %}
+{{ gr }}: {% for node in nodes | sort %}{% if loop.first %}{{ node }}{% else %},{{ node }}{% endif %}{% endfor %}
 
 {% endif %}
 {% endfor %}
-
-
-

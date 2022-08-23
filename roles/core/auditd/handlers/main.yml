@@ -4,7 +4,7 @@
     name: "{{ item }}"
     state: "{{ (repositories_server_start_services | default(bb_start_services) | default(true, true) | bool) | ternary('restarted', omit) }}"
     use: service  # systemctl can't restart auditd, service can: https://access.redhat.com/solutions/2664811
-  loop: "{{ audit_system_services_to_start }}"
+  loop: "{{ auditd_services_to_start }}"
   when:
     - "'service' not in ansible_skip_tags"
-    - audit_system_start_services | default(bb_start_services) | default(true, true)
+    - auditd_start_services | default(bb_start_services) | default(true, true)

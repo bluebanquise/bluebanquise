@@ -1,5 +1,0 @@
----
-audit_system_packages_to_install:
-  - auditd
-  - audispd-plugins
-audit_system_plugins_directory: /etc/audisp/plugins.d

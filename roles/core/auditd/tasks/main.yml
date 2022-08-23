@@ -26,30 +26,30 @@
   ansible.builtin.package:
     name: "{{ item }}"
     state: present
-  loop: "{{ audit_system_packages_to_install }}"
+  loop: "{{ auditd_packages_to_install }}"
   tags:
     - package
 
-- name: "stat █ Check that the {{ audit_system_plugins_directory }}/{{ audit_system_syslog_file }} exists"
+- name: "stat █ Check that the {{ auditd_plugins_directory }}/{{ auditd_syslog_file }} exists"
   ansible.builtin.stat:
-    path: "{{ audit_system_plugins_directory }}/{{ audit_system_syslog_file }}"
+    path: "{{ auditd_plugins_directory }}/{{ auditd_syslog_file }}"
   register: audit_result
 
 - name: "replace █ Allow audit logs to be forwarded to remote syslog server"
   ansible.builtin.replace:
-    path: "{{ audit_system_plugins_directory }}/{{ audit_system_syslog_file }}"
+    path: "{{ auditd_plugins_directory }}/{{ auditd_syslog_file }}"
     regexp: "^active = .*"
     replace: "active = yes"
   notify: service █ Restart auditd service
   when:
     - audit_result.stat.exists
-    - audit_system_forward_audit_logs | default(false) | bool
+    - auditd_forward_audit_logs | default(false) | bool
 
-- name: "service █ Manage {{ audit_system_services_to_start | join(' ') }} state"
+- name: "service █ Manage {{ auditd_services_to_start | join(' ') }} state"
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: "{{ (audit_system_enable_services | default(bb_enable_services) | default(true, true) | bool) | ternary('yes', 'no') }}"
-    state: "{{ (audit_system_start_services | default(bb_start_services) | default(true, true) | bool) | ternary('started', omit) }}"
-  loop: "{{ audit_system_services_to_start }}"
+    enabled: "{{ (auditd_enable_services | default(bb_enable_services) | default(true, true) | bool) | ternary('yes', 'no') }}"
+    state: "{{ (auditd_start_services | default(bb_start_services) | default(true, true) | bool) | ternary('started', omit) }}"
+  loop: "{{ auditd_services_to_start }}"
   tags:
     - service

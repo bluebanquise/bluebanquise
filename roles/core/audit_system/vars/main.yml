@@ -1,7 +1,0 @@
----
-audit_system_role_version: 1.1.0
-
-audit_system_services_to_start:
-  - auditd
-
-audit_system_syslog_file: syslog.conf
