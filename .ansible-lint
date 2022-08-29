@@ -4,3 +4,5 @@ warn_list:
 verbosity: 1
 skip_list:
   - fqcn-builtins
+  - jinja[spacing]
+  - name[casing]
