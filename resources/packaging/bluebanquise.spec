@@ -59,7 +59,7 @@ find roles/{core,advanced_core} -type d \
  | xargs -l1 -i{} echo '%dir %{_sysconfdir}/%{name}/{}' >> rolesfiles.txt
 
 # All other files in roles subdirectory are standard
-find roles/{core,advanced_core} -type f ! -name readme.rst \
+find roles/{core,advanced_core} \( -type f -o -type l \) ! -name readme.rst \
  ! -path 'roles/*/templates/*' ! -path 'roles/*/files/*' ! -path 'roles/*/vars/*' \
  | xargs -l1 -i{} echo %{_sysconfdir}/%{name}/{} >> rolesfiles.txt
 
@@ -73,8 +73,8 @@ grep -v 'roles/addons/' rolesfiles.txt > rolesfiles.cores
 mkdir -p %{buildroot}%{_sysconfdir}/%{name}/roles
 cp -a ansible.cfg %{buildroot}%{_sysconfdir}/%{name}/
 cp -aL internal %{buildroot}%{_sysconfdir}/%{name}/
-cp -aL roles/core %{buildroot}%{_sysconfdir}/%{name}/roles/
-cp -aL roles/advanced_core %{buildroot}%{_sysconfdir}/%{name}/roles/
+cp -a roles/core %{buildroot}%{_sysconfdir}/%{name}/roles/
+cp -a roles/advanced_core %{buildroot}%{_sysconfdir}/%{name}/roles/
 mkdir -p %{buildroot}%{_sysconfdir}/%{name}/roles/custom
 mkdir -p %{buildroot}%{_sbindir}
 cp -a tools/bluebanquise-playbook %{buildroot}%{_sbindir}/
