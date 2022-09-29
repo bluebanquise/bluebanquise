@@ -26,7 +26,7 @@ Note: this role requires *bluebanquise_filters* package to be installed.
 **IMPORTANT**: before using the role, first thing to do is to generate a
 new munge key file. To do so, generate a new munge.key file using:
 
-```
+```bash
 dd if=/dev/urandom bs=1 count=1024 > munge.key
 mungekey -c -k /etc/bluebanquise/roles/community/slurm/files/munge.key
 ```
@@ -132,7 +132,7 @@ tune.
 ### Additional slurm.conf settings
 
 It is possible to add more content into *slurm.conf* file using the multi-lines
-**slurm_slurm_conf_additional_content** variable.
+**slurm_slurm_conf_additional_content** list variable.
 
 ### Optional nodes tuning
 
@@ -144,6 +144,13 @@ For example, setting:
 
 ```yaml
 ep_hardware:
+  cpu:
+    architecture: x86_64
+    cores: 24
+    corespersocket: 10
+    sockets: 2
+    threadspercore: 1
+  memory: 63500
   slurm_extra_nodes_parameters: Feature=XXXX Weight=YY
 ```
 
@@ -159,26 +166,26 @@ In the final *slurm.conf* configuration file.
 
 To enable Accounting the community.mysql ansible module is required:
 
-```
+```bash
 ansible-galaxy collection install community.mysql
 ```
 
 If you enable accounting, once the role has been applied on
 controller, check existence of the cluster in the database:
 
-```
+```bash
 sacctmgr list cluster
 ```
 
 If cluster is not here, add it using (assuming cluster name is *algoric*):
 
-```
+```bash
 sacctmgr add cluster algoric
 ```
 
 And check again if the cluster exist:
 
-```
+```bash
 sacctmgr list cluster
 ```
 
@@ -187,10 +194,13 @@ sacctmgr list cluster
 Unfortunately for now, this is only supported for NVIDIA GPUS.
 
 To Enable GPU gres the GPUS needs to be defined on the equipment_profile. You can check the GPU names with the following command:
-```
+
+```bash
 $ nvidia-smi -L
 ```
-You need to add the Gres extra arguments for slurm as well, so you would add something like the following to your equipment_profile.yml file if you have 8x NVIDIA A100-SXM4-40GB on your hardawre for example: 
+
+You need to add the Gres extra arguments for slurm as well, so you would add something like the following to your equipment_profile.yml file if you have 8x NVIDIA A100-SXM4-40GB on your hardawre for example:
+
 ```yaml
 ep_hardware:
   slurm_extra_nodes_parameters: "Gres=gpu:8"
@@ -206,9 +216,7 @@ ep_hardware:
     - NVIDIA A100-SXM4-40GB
 ```
 
-To enable it on the slurm configuration its required to define ```slurm_SelectType: "select/cons_tres"``` and ```slurm_gresTypes: gpu```. For example:
-
-
+To enable it on the slurm configuration its required to define `slurm_SelectType: "select/cons_tres"` and `slurm_gresTypes: gpu`. For example:
 
 ```yaml
   slurm_cluster_name: bluebanquise

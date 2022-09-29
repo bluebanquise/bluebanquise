@@ -181,23 +181,26 @@ add them in the inventory by adding their YAML code in the file
 *inventory/group_vars/all/prometheus_alerts.yml*. For example:
 
 ```yaml
-prometheus_server_custom_alerts:
-  - alert: HostOutOfMemory
-    expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100 < 10
-    for: 2m
-    labels:
-      severity: warning
-    annotations:
-      summary: Host out of memory (instance {{ $labels.instance }})
-      description: Node memory is filling up (< 10% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}
-  - alert: HostOutOfInodes
-    expr: node_filesystem_files_free{mountpoint ="/rootfs"} / node_filesystem_files{mountpoint="/rootfs"} * 100 < 10 and ON (instance, device, mountpoint) node_filesystem_readonly{mountpoint="/rootfs"} == 0
-    for: 2m
-    labels:
-      severity: warning
-    annotations:
-      summary: Host out of inodes (instance {{ $labels.instance }})
-      description: Disk is almost running out of available inodes (< 10% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}
+prometheus_server_custom_alerts: !unsafe >
+  groups:
+    - name: user alerts
+      rules:
+      - alert: HostOutOfMemory
+        expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100 < 10
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Host out of memory (instance {{ $labels.instance }})"
+          description: "Node memory is filling up (< 10% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+      - alert: HostOutOfInodes
+        expr: node_filesystem_files_free{mountpoint ="/rootfs"} / node_filesystem_files{mountpoint="/rootfs"} * 100 < 10 and ON (instance, device, mountpoint) node_filesystem_readonly{mountpoint="/rootfs"} == 0                              
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Host out of inodes (instance {{ $labels.instance }})"
+          description: "Disk is almost running out of available inodes (< 10% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
 ```
 
 ### Alertmanager configuration

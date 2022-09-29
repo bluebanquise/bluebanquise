@@ -41,3 +41,7 @@ slurm_ReturnToService: 0
 slurm_SchedulerType: sched/backfill
 slurm_SelectType: select/linear
 slurm_MpiDefault: pmi2
+# additional slurm.conf go here
+#slurm_slurm_conf_additional_content:
+#  - TmpFS=/scratch
+#  - AccountingStorageEnforce=associations

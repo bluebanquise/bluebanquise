@@ -66,7 +66,10 @@ JobAcctGatherType=jobacct_gather/linux
 {% endif %}
 
 ## Additional content if exist
-{{ slurm_slurm_conf_additional_content | default('',true) }}
+{% if slurm_slurm_conf_additional_content is defined and slurm_slurm_conf_additional_content is iterable %}{% for slurm_slurm_conf_content in slurm_slurm_conf_additional_
+content %}
+{{ slurm_slurm_conf_content | default('', true) }}                                                                                                                       
+{% endfor %}{% endif %}
 
 ## Nodes and partitions list
 # Note: in configless mode, only slurm.conf is shipped to slurmds.
@@ -96,7 +99,7 @@ NodeName={{ groups[computes_group] | nodeset }} {{ nodes_parameters }}
 ## Partitions list
 {% if slurm_partitions_list is defined and slurm_partitions_list %}
   {% for partition in slurm_partitions_list %}
-PartitionName={{partition.partition_name}} {% for arg, arg_value in partition.partition_configuration.items() %} {{ arg }}={{ arg_value }}{% endfor %} Nodes={% for computes_group in partition.computes_groups %}{% if groups[computes_group] is iterable %}{% for node in groups[computes_group] %}{% if loop.first %}{{node}}{% else %},{{node}}{% endif %}{% endfor %}{% endif %}{% endfor %}
+PartitionName={{partition.partition_name}} {% for arg, arg_value in partition.partition_configuration.items() %} {{ arg }}={{ arg_value }}{% endfor %} Nodes={% for computes_group in partition.computes_groups %}{% if groups[computes_group] is iterable %}{% if not loop.first %},{% endif %}{% for node in groups[computes_group] %}{% if loop.first %}{{node}}{% else %},{{node}}{% endif %}{% endfor %}{% endif %}{% endfor %}
 
   {% endfor %}
 {% endif %}
