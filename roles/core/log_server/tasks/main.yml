@@ -46,7 +46,7 @@
     - package
 
 - name: file █ Create /var/log/rsyslog directory
-  ansible.builtin.file:  # noqa 208
+  ansible.builtin.file:  # noqa risky-file-permissions
     path: /var/log/rsyslog
     setype: var_log_t
     state: directory

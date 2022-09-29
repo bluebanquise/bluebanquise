@@ -29,7 +29,7 @@
     - package
 
 - name: file █ Create NFS directories
-  ansible.builtin.file:  # noqa 208
+  ansible.builtin.file:  # noqa risky-file-permissions
     path: "{{ item.0.mount }}"
     state: directory
   with_subelements:
