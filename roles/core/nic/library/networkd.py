@@ -56,6 +56,10 @@ class Networkd(object):
         network.append("[Match]")
         if self.ifname is not None: 
             network.append("Name=" + self.ifname)
+        elif self.conn_name is not None:
+            network.append("Name=" + self.conn_name)
+#        elif self.mac is not None:
+#            network.append("MACAddress=" + self.mac)
 
         # NETWORK
         network.append("[Network]")
@@ -69,7 +73,7 @@ class Networkd(object):
                 network.append("Bond=" + self.master)
 
         # ADDRESS
-        if self.method4 == "manual":
+        if self.method4 == "manual" or self.method4 is None:
             network.append("[Address]")
             for ip4 in self.ip4:
                 network.append("Address=" + ip4)

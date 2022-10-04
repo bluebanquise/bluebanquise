@@ -34,7 +34,7 @@
     master: "{{ item.master | default(omit) }}"
     mode: "{{ item.mode | default(omit) }}"
     method4: "{{ item.method4 | default(omit) }}"
-  notify: command █ Reload connections
+  notify: command █ networkctl reload
   loop: "{{ network_interfaces }}"
   register: nic_apply
   when: item.skip is not defined or (item.skip is defined and not item.skip)
