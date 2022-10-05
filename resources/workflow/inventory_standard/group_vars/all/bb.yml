@@ -32,25 +32,29 @@ bb_core_managements_group_name: mg_managements
 j2_master_groups_list: "{{ groups | select('match','^'+bb_core_master_groups_naming+'_.*') | list | unique | sort }}"
 # List of equipment groups.
 j2_equipment_groups_list: "{{ (groups | select('match','^'+bb_core_equipment_naming+'_.*') | list | length | int > 0) | ternary(groups | select('match','^'+bb_core_equipment_naming+'_.*') | list | unique | sort, ['all']) }}"
-# Host curreny equipment group.
-
-# j2_node_equipment: "{{ (groups | select('match','^'+bb_core_equipment_naming+'_.*') | list | length | int > 0) | ternary ( group_names | select('match','^'+bb_core_equipment_naming+'_.*') | list ,'all')}}"
+# Host current equipment group.
 j2_node_equipment: "{{ (groups | select('match','^'+bb_core_equipment_naming+'_.*') | list | length | int > 0) | ternary(group_names | select('match','^'+bb_core_equipment_naming+'_.*') | list | unique | sort | first | default('') | replace(bb_core_equipment_naming + '_',''), 'all') }}"
 
 ### Network
-# Main resolution network. The network on which host can be ping by direct name. (ex: ping c001).
+
+## Resolution
+# Resolution network. The network on which host can be ping by direct name. (ex: ping c001).
 j2_node_main_resolution_network: "{{ network_interfaces[0].network | default(none) }}"
-# Main network. The network used by Ansible to deploy configuration (related to ssh).
+# Resolution address.
+j2_node_main_resolution_address: "{{ (network_interfaces[0].ip4 | default('')).split('/')[0] | default(none) }}"
+
+## Main network
+# The network used by Ansible to deploy configuration (related to ssh).
 # Also the network used by the host to get services ip.
 j2_node_main_network: "{{ network_interfaces | default([]) | selectattr('network','defined') | selectattr('network','match','^'+j2_current_iceberg_network+'-[a-zA-Z0-9]+') | map(attribute='network') | list | first | default(none) }}"
-# Main network interface. Same as main network, but provides interface name instead of network.
-j2_node_main_network_interface: "{{ network_interfaces | selectattr('network','defined') | selectattr('network','match','^'+j2_current_iceberg_network+'-[a-zA-Z0-9]+') | map(attribute='interface') | list | first | default(none) }}"
+# Main network interface. For consistency, we use j2_node_main_network as source.
+j2_node_main_network_interface: "{{ network_interfaces[j2_node_main_network].interface | default(none) }}"
+# Main address, same concept.
+j2_node_main_address: "{{ network_interfaces[j2_node_main_network].ip4 | default(none) }}"
+
+## Other
 # List of management networks.
 j2_management_networks: "{{ networks | select('match','^'+j2_current_iceberg_network+'-[a-zA-Z0-9]+') | list | unique | sort }}"
-# Main resolution address
-j2_node_main_resolution_address: "{{ ip | default(network_interfaces | default([]) | selectattr('network','defined') | selectattr('network','match','^'+j2_node_main_resolution_network) | map(attribute='ip4') | list | first ) | default( (network_interfaces[0].ip4 | default('')).split('/')[0] ) | default(none) }}"
-# Main address
-j2_node_main_address: "{{ ansible_host | default(network_interfaces[j2_node_main_network].ip4) | default(none) }}"
 
 ### Icebergs engine file
 # List all icebergs
