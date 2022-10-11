@@ -3,10 +3,6 @@
 ## {{ ansible_managed }}
 
 {%- for host in (j2_hosts_range | sort) %}
-{#
-   ~~~~~~~ ADVANCED NETWORKING
-   ~~~~~~~ With network_interfaces defined
-#}
   {% if hostvars[host]['network_interfaces'] is defined and hostvars[host]['network_interfaces'] is iterable and hostvars[host]['network_interfaces'] is not mapping and hostvars[host]['network_interfaces'] is not string %}
     {% for nic in hostvars[host]['network_interfaces'] %}
       {% if nic.network is defined and nic.network == item and (nic.ip4 is defined and (nic.ip4 | ansible.utils.ipaddr)) and (nic.mac is defined and (nic.mac | ansible.utils.hwaddr)) %}
@@ -28,20 +24,6 @@ host {{ host }}-{{ item }} {
     fixed-address {{ bmc_args.ip4 }};
   }
       {% endif %}
-    {% endif %}
-{#
-   ~~~~~~~ BASIC NETWORKING
-   ~~~~~~~ Without network_interfaces defined
-   ~~~~~~~ Need at least network variable to be defined, if not ignored as it could just be usage of precedence
-#}
-  {% elif hostvars[host]['network'] is defined and hostvars[host]['network'] is not none and hostvars[host]['network'] is string %}
-    {% if hostvars[host]['network'] == item and hostvars[host]['ip'] is defined and (hostvars[host]['ip'] | ansible.utils.ipaddr) and hostvars[host]['mac'] is defined and (hostvars[host]['mac'] | ansible.utils.hwaddr) %}
-
-host {{ host }}-{{ item }} {
-  option host-name "{{ host }}";
-  hardware ethernet {{ hostvars[host]['mac'] | ansible.utils.hwaddr('linux') }};
-  fixed-address {{ hostvars[host]['ip'] }};
-}
     {% endif %}
   {% endif %}
 {% endfor %}

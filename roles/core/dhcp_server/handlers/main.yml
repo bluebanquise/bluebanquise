@@ -1,5 +1,5 @@
 ---
-- name: service █ Restart dhcp server
+- name: service <|+> Restart dhcp server
   ansible.builtin.service:
     name: "{{ item }}"
     state: restarted

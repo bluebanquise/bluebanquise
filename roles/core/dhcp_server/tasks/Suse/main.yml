@@ -1,4 +1,4 @@
-- name: template █ Generate /etc/sysconfig/dhcpd for SuSE based systems
+- name: template <|+> Generate /etc/sysconfig/dhcpd for SuSE based systems
   template:
     src: Suse/sysconfig.j2
     dest: /etc/sysconfig/dhcpd
