@@ -72,6 +72,7 @@
     - "{{ pxe_stack_htdocs_path }}/pxe/equipment_profiles"
     - "{{ pxe_stack_htdocs_path }}/pxe/osdeploy"
     - "{{ pxe_stack_htdocs_path }}/pxe/tools"
+    - "{{ pxe_stack_htdocs_path }}/pxe/netboots"
 
 - name: include_tasks ░ Use OS dedicated task
   ansible.builtin.include_tasks: "{{ item }}"
