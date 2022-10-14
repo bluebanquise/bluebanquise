@@ -23,3 +23,7 @@ dhcp_server_ipxe_embed: standard
 ### Others ###
 # Domain name provided by dhcp to clients
 dhcp_server_domain_name: cluster.local
+
+
+dhcp_server_ignore_client_uids: false
+dhcp_server_global_options: []

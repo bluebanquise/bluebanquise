@@ -33,14 +33,12 @@ subnet {{ networks[network]['subnet'] }} netmask {{ (networks[network]['subnet']
       {% endif %}
   option domain-name "{{ bb_domain_name | default(dhcp_server_domain_name) }}";
   option broadcast-address {{ (networks[network]['subnet'] + '/' + (networks[network]['prefix'] | string) ) | ansible.utils.ipaddr('broadcast') }};
-
       {% if networks[network]['gateway4'] is defined %}
 {{ item_add("option routers", networks[network]['gateway4']) }}
       {% endif %}
 
 {# Either ~~~~~~~ ADVANCED SERVICES #}
       {% if networks[network]['services'] is defined and networks[network]['services'] is iterable and networks[network]['services'] is not string and networks[network]['services'] is mapping %}
-
         {% if networks[network]['services']['dns4'] is defined %}
 {{ item_add("option domain-name-servers", networks[network]['services']['dns4']) }}
         {% endif %}
