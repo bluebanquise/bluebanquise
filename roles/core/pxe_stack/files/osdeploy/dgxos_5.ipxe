@@ -12,7 +12,7 @@ echo | > Operating system target: ${eq-distribution} ${eq-distribution-version} 
 echo | > Console: ${eq-console}
 echo | > Additional kernel parameters: ${eq-kernel-parameters} ${dedicated-kernel-parameters}
 echo | > Deployment server: ${next-server}
-echo | > Target iso: repositories/${eq-repositories-environment}/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/DGXOS-5.iso
+echo | > Target iso: ${images-root}/DGXOS-5.iso
 echo | > Target curtin: ${curtin-path}
 echo |
 echo | Loading linux ...

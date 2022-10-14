@@ -1,5 +1,9 @@
 ---
 
+############################################################
+### Global parameters
+
+# Default time zone
 pxe_stack_time_zone: Europe/Brussels
 
 # Enable distributions support
@@ -21,7 +25,13 @@ pxe_stack_ubuntu_preserve_sources_list: true
 # Preserve default sources list for OpenSUSE
 pxe_stack_opensuse_preserve_sources_list: true
 
+# Do not edit here
+# pxe_stack_enable_services:
+# pxe_stack_start_services:
+
+############################################################
 ### Default equipment profile parameters
+
 pxe_stack_ep_equipment_type: server
 pxe_stack_ep_operating_system:
   distribution: ubuntu
@@ -57,24 +67,21 @@ pxe_stack_ep_autoinstall_custom_scripts: []
 #    content: |
 #      ...
 
-pxe_stack_suse_autoinstall_repositories: []
-#  - media_url: http://10.10.0.1/repositories/sles/15.3/x86_64/updates
-#    name: sles_updates
-
-# pxe_stack_enable_services:
-# pxe_stack_start_services:
-
 # Automatically detect NIC to be used in preseed
 # Only works if a single NIC is connected.
 pxe_stack_ep_preseed_auto_main_network_interface: true
 
+############################################################
+### Misc parameters
 
-# Add cloning entry in ixpe menu
+pxe_stack_suse_autoinstall_repositories: []
+#  - media_url: http://10.10.0.1/repositories/sles/15.3/x86_64/updates
+#    name: sles_updates
+
+# Add optional dedicated entries in ixpe menu
 pxe_stack_enable_clonezilla: false
 pxe_stack_enable_diskless: false
 pxe_stack_enable_alpine: false
-
-pxe_stack_alpine_version: 3.16
 
 ### CLONEZILLA
 # Allows to backup/restore systems, or even deploy multiple systems via images.
@@ -87,3 +94,6 @@ pxe_stack_clonezilla_nfs_export_server:
 
 # Mount point from which load images from NFS server.
 pxe_stack_clonezilla_nfs_mount_point: /cloned_images
+
+### ALPINE
+pxe_stack_alpine_version: 3.16

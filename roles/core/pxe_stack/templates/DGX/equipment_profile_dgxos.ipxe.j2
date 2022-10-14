@@ -17,7 +17,7 @@ set eq-kernel-parameters {{ hostvars[groups[item][0]]['ep_kernel_parameters'] }}
 set eq-repositories-environment {{ hostvars[groups[item][0]]['ep_operating_system']['repositories_environment'] | default('') }}
 
 # Dynamic variables
-set images-root http://${next-server}/repositories/${eq-repositories-environment}/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/
+set images-root http://${next-server}/pxe/netboots/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/
 set curtin-path http://${next-server}/preboot_execution_environment/equipment_profiles/${eq-equipment-profile}.curtin.yaml
 
 echo | images-root: ${images-root}

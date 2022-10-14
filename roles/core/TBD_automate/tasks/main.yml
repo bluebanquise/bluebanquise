@@ -12,7 +12,10 @@
   tags:
     - package
 
-#### rabbitMQ
+
+ pip3 install celery flask rabbitMQ clustershell ssh-wait colour_text packaging
+
+#### rabbitMQch
 
 - name: template █ Generate rabbitMQ cookie
   ansible.builtin.template:

@@ -45,4 +45,4 @@
     regexp: '^download.use_deltarpm ='
     line: 'download.use_deltarpm = false'
   when:
-    - repositories_client_disable_delata_rpm
+    - repositories_client_disable_delta_rpm
