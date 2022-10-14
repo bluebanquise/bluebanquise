@@ -12,7 +12,7 @@
             {{ elements.append(elem.hostname) }}
           {% endif %}
         {% endfor %}
-        {% if (name_servers | length) > 0 %}
+        {% if (elements | length) > 0 %}
   option {{ option_name }} {{ elements | join(', ') }};
         {% endif %}
       {% endif %}
