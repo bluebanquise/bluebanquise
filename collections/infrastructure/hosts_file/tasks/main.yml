@@ -1,5 +1,5 @@
 ---
-- name: "template <|+> Generate /etc/hosts"
+- name: "template <|> Generate /etc/hosts"
   ansible.builtin.template:
     src: hosts.j2
     dest: /etc/hosts

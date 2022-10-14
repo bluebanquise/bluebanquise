@@ -1,13 +1,13 @@
 ---
 
-- name: file █ Ensure old netplan configuration is erased
+- name: file <|> Ensure old netplan configuration is erased
   ansible.builtin.file:
     path: /etc/netplan/00-installer-config.yaml
     state: absent
   tags:
     - identify
 
-- name: file █ Disable netplan management
+- name: file <|> Disable netplan management
   ansible.builtin.copy:
     src: 01-netcfg.yaml
     dest: /etc/netplan/01-netcfg.yaml
@@ -15,11 +15,11 @@
     group: root
     mode: 0644
   notify:
-    - command █ netplan generate
+    - command <|> netplan generate
   tags:
     - identify
 
-- name: networkd █ Set NICs configuration
+- name: networkd <|> Set NICs configuration
   networkd:
     # Tuned
     conn_name: "{{ item.conn_name | default(item.interface) | string }}"
@@ -34,7 +34,7 @@
     master: "{{ item.master | default(omit) }}"
     mode: "{{ item.mode | default(omit) }}"
     method4: "{{ item.method4 | default(omit) }}"
-  notify: command █ networkctl reload
+  notify: command <|> networkctl reload
   loop: "{{ network_interfaces }}"
   register: nic_apply
   when: item.skip is not defined or (item.skip is defined and not item.skip)
@@ -42,5 +42,5 @@
     - identify
 
 
-- name: meta █ Run handlers
+- name: meta <|> Run handlers
   ansible.builtin.meta: flush_handlers
