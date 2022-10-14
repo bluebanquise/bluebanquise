@@ -2,10 +2,10 @@
 #### Blue Banquise file ####
 ## {{ ansible_managed }}
 
-{% macro option_add(option_name, option_list) %}
-      {% if option_list is defined and option_list is iterable and option_list is not string and option_list is not mapping %}
+{% macro item_add(item_name, items_list) %}
+      {% if items_list is defined and items_list is iterable and items_list is not string and items_list is not mapping %}
         {% set elements = [] %}
-        {% for elem in option_list %}
+        {% for elem in items_list %}
           {% if elem.ip is defined and (elem.ip | ansible.utils.ipaddr) %}
             {{ elements.append(elem.ip) }}
           {% elif elem.hostname is defined and elem.hostname is not none and elem.hostname is string %}
@@ -13,7 +13,7 @@
           {% endif %}
         {% endfor %}
         {% if (elements | length) > 0 %}
-  option {{ option_name }} {{ elements | join(', ') }};
+  {{ item_name }} {{ elements | join(', ') }};
         {% endif %}
       {% endif %}
 {% endmacro %}
@@ -34,73 +34,24 @@ subnet {{ networks[network]['subnet'] }} netmask {{ (networks[network]['subnet']
   option domain-name "{{ bb_domain_name | default(dhcp_server_domain_name) }}";
   option broadcast-address {{ (networks[network]['subnet'] + '/' + (networks[network]['prefix'] | string) ) | ansible.utils.ipaddr('broadcast') }};
 
-{% if networks[network]['gateway4'] is defined %}
-{{ option_add("routers", networks[network]['gateway4']) }}
-{% endif %}
+      {% if networks[network]['gateway4'] is defined %}
+{{ item_add("option routers", networks[network]['gateway4']) }}
+      {% endif %}
 
-{#
-      {% if networks[network]['gateway4'] is defined and networks[network]['gateway4'] is iterable and networks[network]['gateway4'] is not string and networks[network]['gateway4'] is not mapping %}
-        {% set gateways = [] %}
-        {% for gw4 in networks[network]['gateway4'] %}
-          {% if gw4.ip is defined and (gw4.ip | ansible.utils.ipaddr) %}
-            {{ gateways.append(gw4.ip) }}
-          {% elif gw4.hostname is defined and gw4.hostname is not none %}
-            {{ gateways.append(gw4.hostname) }}
-          {% endif %}
-        {% endfor %}
-        {% if (name_servers | length) > 0 %}
-  option routers {{ gateways | join(', ') }};
-        {% endif %}
-      {% endif %} #}
-
-{#
-   ~~~~~~~ ADVANCED SERVICES
-   ~~~~~~~ With services defined under network
-#}
+{# Either ~~~~~~~ ADVANCED SERVICES #}
       {% if networks[network]['services'] is defined and networks[network]['services'] is iterable and networks[network]['services'] is not string and networks[network]['services'] is mapping %}
-        {% if networks[network]['services']['dns4'] is defined and networks[network]['services']['dns4'] is iterable and networks[network]['services']['dns4'] is not string and networks[network]['services']['dns4'] is not mapping %}
-          {% set name_servers = [] %}
-          {% for dns4 in networks[network]['services']['dns4'] %}
-            {% if dns4.ip is defined and (dns4.ip | ansible.utils.ipaddr) %}
-              {{ name_servers.append(dns4.ip) }}
-            {% endif %}
-          {% endfor %}
-          {% if (name_servers | length) > 0 %}
-  option domain-name-servers {{ name_servers | join(', ') }};
-          {% endif %}
+
+        {% if networks[network]['services']['dns4'] is defined %}
+{{ item_add("option domain-name-servers", networks[network]['services']['dns4']) }}
         {% endif %}
-        {% if networks[network]['services']['ntp4'] is defined and networks[network]['services']['ntp4'] is iterable and networks[network]['services']['ntp4'] is not string and networks[network]['services']['ntp4'] is not mapping %}
-          {% set ntp_servers = [] %}
-          {% for ntp4 in networks[network]['services']['ntp4'] %}
-            {% if ntp4.ip is defined and (ntp4.ip | ansible.utils.ipaddr) %}
-              {{ ntp_servers.append(ntp4.ip) }}
-            {% elif ntp4.hostname is defined and ntp4.hostname is not none %}
-              {{ ntp_servers.append(ntp4.hostname) }}
-            {% endif %}
-          {% endfor %}
-          {% if (ntp_servers | length) > 0 %}
-  option ntp-servers {{ ntp_servers | join(', ') }};
-          {% endif %}
+        {% if networks[network]['services']['ntp4'] is defined %}
+{{ item_add("option ntp-servers", networks[network]['services']['dns4']) }}
+        {% endif %}
+        {% if networks[network]['services']['pxe4'] is defined %}
+{{ item_add("next-server", networks[network]['services']['pxe4']) }}
         {% endif %}
 
-        {% if networks[network]['services']['pxe4'] is defined and networks[network]['services']['pxe4'] is iterable and networks[network]['services']['pxe4'] is not string and networks[network]['services']['pxe4'] is not mapping %}
-
-          {% set pxe_servers = [] %}
-          {% for pxe4 in networks[network]['services']['pxe4'] %}
-            {% if pxe4.ip is defined and (pxe4.ip | ansible.utils.ipaddr) %}
-              {{ pxe_servers.append(pxe4.ip) }}
-            {% elif pxe4.hostname is defined and pxe4.hostname is not none %}
-              {{ pxe_servers.append(pxe4.hostname) }}
-            {% endif %}
-          {% endfor %}
-          {% if (pxe_servers | length) > 0 %}
-  next-server {{ pxe_servers[0] }};{# There can be only one next-server #}
-          {% endif %}
-        {% endif %}
-{#
-   ~~~~~~~ BASIC SERVICES
-   ~~~~~~~ With services_ip defined under network
-#}
+{# Or ~~~~~~~ BASIC SERVICES #}
       {% elif networks[network]['services_ip'] is defined and (networks[network]['services_ip'] | ansible.utils.ipaddr) %}
   option domain-name-servers {{ networks[network]['services_ip'] }};
   option ntp-servers {{ networks[network]['services_ip'] }};
