@@ -4,7 +4,7 @@ namespace: bluebanquise
 name: infrastructure
 
 # The version of the collection. Must be compatible with semantic versioning
-version: 2.0.2
+version: 2.0.3
 
 # The path to the Markdown (.md) readme file. This path is relative to the root of the collection
 readme: README.md
@@ -15,6 +15,7 @@ authors:
   - Benoit Leveugle <benoit.leveugle@gmail.com>
   - Johnny Keats <johnny.keats@outlook.com>
   - Bruno Travouillon <devel@travouillon.fr>
+  - Neil Munday <neil@mundayweb.com>
   - Adrien Ribeiro <adrien.ribeiro@atos.net>
 
 ### OPTIONAL but strongly recommended

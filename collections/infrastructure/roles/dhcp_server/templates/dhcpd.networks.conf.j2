@@ -2,11 +2,27 @@
 #### Blue Banquise file ####
 ## {{ ansible_managed }}
 
+{% macro option_add(option_name, option_list) %}
+      {% if option_list is defined and option_list is iterable and option_list is not string and option_list is not mapping %}
+        {% set elements = [] %}
+        {% for elem in option_list %}
+          {% if elem.ip is defined and (elem.ip | ansible.utils.ipaddr) %}
+            {{ elements.append(elem.ip) }}
+          {% elif elem.hostname is defined and elem.hostname is not none and elem.hostname is string %}
+            {{ elements.append(elem.hostname) }}
+          {% endif %}
+        {% endfor %}
+        {% if (name_servers | length) > 0 %}
+  option {{ option_name }} {{ elements | join(', ') }};
+        {% endif %}
+      {% endif %}
+{% endmacro %}
+
 #### SUBNETS
 
 {% for network in networks %}
   {% if j2_current_iceberg_network in network %}
-    {% if (networks[network]['is_in_dhcp'] | default(true)) %}
+    {% if (networks[network]['dhcp_server'] | default(true)) %}
 
 subnet {{ networks[network]['subnet'] }} netmask {{ (networks[network]['subnet'] + '/' + (networks[network]['prefix'] | string) ) | ansible.utils.ipaddr('netmask') }} {
 
@@ -18,6 +34,11 @@ subnet {{ networks[network]['subnet'] }} netmask {{ (networks[network]['subnet']
   option domain-name "{{ bb_domain_name | default(dhcp_server_domain_name) }}";
   option broadcast-address {{ (networks[network]['subnet'] + '/' + (networks[network]['prefix'] | string) ) | ansible.utils.ipaddr('broadcast') }};
 
+{% if networks[network]['gateway4'] is defined %}
+{{ option_add("routers", networks[network]['gateway4']) }}
+{% endif %}
+
+{#
       {% if networks[network]['gateway4'] is defined and networks[network]['gateway4'] is iterable and networks[network]['gateway4'] is not string and networks[network]['gateway4'] is not mapping %}
         {% set gateways = [] %}
         {% for gw4 in networks[network]['gateway4'] %}
@@ -30,7 +51,7 @@ subnet {{ networks[network]['subnet'] }} netmask {{ (networks[network]['subnet']
         {% if (name_servers | length) > 0 %}
   option routers {{ gateways | join(', ') }};
         {% endif %}
-      {% endif %}
+      {% endif %} #}
 
 {#
    ~~~~~~~ ADVANCED SERVICES

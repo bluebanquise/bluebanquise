@@ -1,0 +1,21 @@
+---
+pxe_stack_apache_cgi_module: cgid
+pxe_stack_apache_conf_path: /etc/httpd/conf.d
+pxe_stack_apache_user: apache
+pxe_stack_apache_group: apache
+pxe_stack_htdocs_path: /var/www/html
+pxe_stack_packages_to_install:
+  - bluebanquise-ipxe-x86_64
+  - bluebanquise-ipxe-arm64
+  - httpd
+  - python3-policycoreutils
+  - policycoreutils
+  - bluebanquise-bootset
+pxe_stack_default_tftp_package: atftp
+pxe_stack_services_to_start:
+  - httpd
+pxe_stack_default_tftp_service: atftpd
+pxe_stack_firewall_services_to_add:
+  - http
+  - tftp
+pxe_stack_apache_cgi_bin_path: /var/www/cgi-bin

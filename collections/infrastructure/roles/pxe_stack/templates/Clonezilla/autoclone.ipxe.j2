@@ -1,0 +1,50 @@
+#!ipxe
+
+echo |
+echo | Entering tools/autoclone.ipxe
+echo |
+
+echo | Now starting system cloning process.
+echo |
+echo | Parameters used:
+echo | > Console: ${eq-console}
+echo | > Additional kernel parameters: ${eq-kernel-parameters} ${dedicated-kernel-parameters}
+echo | > Deployment and cloning server: ${next-server}
+echo | > Target image name: ${node-image}
+
+iseq ${eq-autoclone-parameters} none && goto generic || goto custom
+:generic
+set clone-parameters ocs-sr -q2 -batch -j2 -z1 -i 2096 -fsck-src-part-y -senc -p reboot savedisk ${node-image}.img sda 
+goto kernel-line
+:custom
+set clone-parameters ${eq-autoclone-parameters}
+goto kernel-line
+
+:kernel-line
+echo | > Cloning parameters: ${clone-parameters}
+echo |
+echo | Loading linux ...
+
+kernel http://${next-server}/pxe/bin/clonezilla/live/vmlinuz initrd=initrd.img fetch=http://${next-server}/pxe/bin/clonezilla/live/filesystem.squashfs boot=live union=overlay username=user hostname=wily config components noswap edd=on nomodeset nodmraid noeject noprompt locales=en_US.UTF-8 keyboard-layouts=NONE ocs_prerun1="dhclient -v eth0" ocs_prerun2="sleep 2" ocs_prerun3="sudo mount -t nfs {% if pxe_stack_clonezilla_nfs_export_server is not none %}{{ pxe_stack_clonezilla_nfs_export_server }}:{{ pxe_stack_clonezilla_nfs_mount_point }}{% else %}${next-server}:{{ pxe_stack_clonezilla_nfs_mount_point }}{% endif %} /home/partimag" ocs_postrun1="curl -s -k http://${next-server}/cgi-bin/bootswitch.cgi --data 'node=${hostname}&boot=disk'" ocs_live_run="${clone-parameters}" ocs_live_extra_param="" ocs_live_batch="yes" vga=788 ip= net.ifnames=0 splash i915.blacklist=yes radeonhd.blacklist=yes nouveau.blacklist=yes vmwgfx.enable_fbdev=1 ${eq-kernel-parameters} ${dedicated-kernel-parameters} ${eq-console}
+
+echo | Loading initial ramdisk ...
+
+initrd  http://${next-server}/pxe/bin/clonezilla/live/initrd.img
+
+echo | ALL DONE! We are ready.
+echo | Downloaded images report:
+
+imgstat
+
+echo | Booting in 4s ...
+echo |
+echo +----------------------------------------------------+
+
+sleep 4
+
+boot
+
+
+
+
+

@@ -1,0 +1,7 @@
+---
+- name: Converge
+  hosts: management1
+  tasks:
+    - name: "Include pxe_stack"
+      include_role:
+        name: "pxe_stack"

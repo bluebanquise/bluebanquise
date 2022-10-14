@@ -1,64 +1,41 @@
-Hosts file
-----------
+# Hosts file
 
-Description
-^^^^^^^^^^^
+## Description
 
 This role provides a basic /etc/hosts files.
 
-Instructions
-^^^^^^^^^^^^
+## Instructions
 
 This role will gather all hosts from the inventory, and add them, using all
-their known internal network connections ip, into */etc/hosts* file.
+their known internal network connections, into */etc/hosts* file.
 
 In case of multiple icebergs system, administrator can reduce the scope of this
-gathering using **hosts_file.range** variable in
-*group_vars/all/general_settings/general.yml*.
-Setting **range** to *all* will use all Ansible inventory hosts, while setting
-**range** to *iceberg* will reduce the gathering to the current host iceberg.
+gathering by setting `hosts_file_range`:
 
-.. code-block:: yaml
+* **all** will use all Ansible inventory hosts
+* **iceberg** will reduce the gathering to the current host iceberg
 
-  hosts_file:  <<<<<<<<
-    range: all # can be all (all hosts) or iceberg (iceberg only)
+Default is **iceberg**.
 
-External hosts defined in *group_vars/all/general_settings/external.yml*
-at variable **external_hosts** will be automatically added in the */etc/hosts*
-file.
+```yaml
+hosts_file_range: all
+```
 
-Input
-^^^^^
+It is also possible to define external hosts to be added into hosts file.
+To do so, define `hosts_file_external_hosts` this way:
 
-Mandatory inventory vars:
+```yaml
+hosts_file_external_hosts:
+  myhost: 10.10.10.10
+  mysecondhost: 7.7.7.7
+```
 
-**hostvars[host]**
+This role is using `hosts_file_domaine_name` variable to set FQDN. Default is **cluster.local**.
+Note that `hosts_file_domaine_name` is precedenced by the global variable `bb_domain_name` if set. 
 
-* network_interfaces
-   * .ip4
-   * .mac
+## Changelog
 
-Optional inventory vars:
-
-**hostvars[hosts]**
-
-* alias
-* global_alias
-* bmc
-   * .ip4
-   * .mac
-   * .name
-
-Output
-^^^^^^
-
-Files generated:
-
-* /etc/hosts
-
-Changelog
-^^^^^^^^^
-
+* 1.2.0: Update to BB 2.0 format. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.8: Prevent unsorted ranges. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.7: Clean code. Benoit Leveugle <benoit.leveugle@gmail.com>
