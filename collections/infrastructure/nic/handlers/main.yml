@@ -1,0 +1,18 @@
+---
+- name: command █ Reload connections
+  command: nmcli con reload
+  when: nic_reload_connections
+
+- name: command █ netplan generate
+  command: netplan generate
+  notify:
+    - command █ networkctl reload
+
+- name: command █ networkctl reload
+  command: networkctl reload
+
+- name: reboot █ Reboot system
+  reboot:
+    reboot_timeout: "{{ nic_reboot_timeout }}"
+  when:
+    - nic_allow_reboot

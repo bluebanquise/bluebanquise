@@ -1,0 +1,7 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+  - name: Assert hostname
+    assert:
+      that: ansible_hostname == "instance"

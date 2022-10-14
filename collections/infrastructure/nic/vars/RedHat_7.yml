@@ -1,0 +1,8 @@
+---
+nic_packages_to_install:
+  - NetworkManager-glib
+  - nm-connection-editor
+  - libsemanage-python
+  - policycoreutils-python
+nic_services_to_start:
+  - NetworkManager

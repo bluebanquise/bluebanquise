@@ -1,0 +1,7 @@
+---
+nic_reload_connections: false  # Reload network connections if changed
+nic_force_nic_restart: false  # Force restart connection using down and up
+nic_force_reboot: false  # Reboot OS in case of NIC configuration change
+nic_allow_reboot: false  # Reboot after switch from netplan to network-manager on Ubuntu systems, or to enable NM on Suse
+nic_start_services: true
+nic_reboot_timeout: 600

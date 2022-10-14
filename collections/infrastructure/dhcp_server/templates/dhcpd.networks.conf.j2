@@ -1,0 +1,94 @@
+#jinja2: lstrip_blocks: True
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+
+#### SUBNETS
+
+{% for network in networks %}
+  {% if j2_current_iceberg_network in network %}
+    {% if (networks[network]['is_in_dhcp'] | default(true)) %}
+
+subnet {{ networks[network]['subnet'] }} netmask {{ (networks[network]['subnet'] + '/' + (networks[network]['prefix'] | string) ) | ansible.utils.ipaddr('netmask') }} {
+
+  default-lease-time {{ dhcp_server_default_lease_time }};
+  max-lease-time {{ dhcp_server_max_lease_time }};
+      {% if networks[network]['dhcp_unknown_range'] is defined and networks[network]['dhcp_unknown_range'] is not none %}
+  range {{ networks[network]['dhcp_unknown_range'] }};
+      {% endif %}
+  option domain-name "{{ bb_domain_name | default(dhcp_server_domain_name) }}";
+  option broadcast-address {{ (networks[network]['subnet'] + '/' + (networks[network]['prefix'] | string) ) | ansible.utils.ipaddr('broadcast') }};
+
+      {% if networks[network]['gateway4'] is defined and networks[network]['gateway4'] is iterable and networks[network]['gateway4'] is not string and networks[network]['gateway4'] is not mapping %}
+        {% set gateways = [] %}
+        {% for gw4 in networks[network]['gateway4'] %}
+          {% if gw4.ip is defined and (gw4.ip | ansible.utils.ipaddr) %}
+            {{ gateways.append(gw4.ip) }}
+          {% elif gw4.hostname is defined and gw4.hostname is not none %}
+            {{ gateways.append(gw4.hostname) }}
+          {% endif %}
+        {% endfor %}
+        {% if (name_servers | length) > 0 %}
+  option routers {{ gateways | join(', ') }};
+        {% endif %}
+      {% endif %}
+
+{#
+   ~~~~~~~ ADVANCED SERVICES
+   ~~~~~~~ With services defined under network
+#}
+      {% if networks[network]['services'] is defined and networks[network]['services'] is iterable and networks[network]['services'] is not string and networks[network]['services'] is mapping %}
+        {% if networks[network]['services']['dns4'] is defined and networks[network]['services']['dns4'] is iterable and networks[network]['services']['dns4'] is not string and networks[network]['services']['dns4'] is not mapping %}
+          {% set name_servers = [] %}
+          {% for dns4 in networks[network]['services']['dns4'] %}
+            {% if dns4.ip is defined and (dns4.ip | ansible.utils.ipaddr) %}
+              {{ name_servers.append(dns4.ip) }}
+            {% endif %}
+          {% endfor %}
+          {% if (name_servers | length) > 0 %}
+  option domain-name-servers {{ name_servers | join(', ') }};
+          {% endif %}
+        {% endif %}
+        {% if networks[network]['services']['ntp4'] is defined and networks[network]['services']['ntp4'] is iterable and networks[network]['services']['ntp4'] is not string and networks[network]['services']['ntp4'] is not mapping %}
+          {% set ntp_servers = [] %}
+          {% for ntp4 in networks[network]['services']['ntp4'] %}
+            {% if ntp4.ip is defined and (ntp4.ip | ansible.utils.ipaddr) %}
+              {{ ntp_servers.append(ntp4.ip) }}
+            {% elif ntp4.hostname is defined and ntp4.hostname is not none %}
+              {{ ntp_servers.append(ntp4.hostname) }}
+            {% endif %}
+          {% endfor %}
+          {% if (ntp_servers | length) > 0 %}
+  option ntp-servers {{ ntp_servers | join(', ') }};
+          {% endif %}
+        {% endif %}
+
+        {% if networks[network]['services']['pxe4'] is defined and networks[network]['services']['pxe4'] is iterable and networks[network]['services']['pxe4'] is not string and networks[network]['services']['pxe4'] is not mapping %}
+
+          {% set pxe_servers = [] %}
+          {% for pxe4 in networks[network]['services']['pxe4'] %}
+            {% if pxe4.ip is defined and (pxe4.ip | ansible.utils.ipaddr) %}
+              {{ pxe_servers.append(pxe4.ip) }}
+            {% elif pxe4.hostname is defined and pxe4.hostname is not none %}
+              {{ pxe_servers.append(pxe4.hostname) }}
+            {% endif %}
+          {% endfor %}
+          {% if (pxe_servers | length) > 0 %}
+  next-server {{ pxe_servers[0] }};{# There can be only one next-server #}
+          {% endif %}
+        {% endif %}
+{#
+   ~~~~~~~ BASIC SERVICES
+   ~~~~~~~ With services_ip defined under network
+#}
+      {% elif networks[network]['services_ip'] is defined and (networks[network]['services_ip'] | ansible.utils.ipaddr) %}
+  option domain-name-servers {{ networks[network]['services_ip'] }};
+  option ntp-servers {{ networks[network]['services_ip'] }};
+  next-server {{ networks[network]['services_ip'] }};
+      {% endif %}
+
+  include "{{ dhcp_server_conf_dir }}/dhcpd.{{ network }}.conf";
+
+}
+    {% endif %}
+  {% endif %}
+{% endfor %}
