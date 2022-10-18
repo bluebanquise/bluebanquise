@@ -82,8 +82,97 @@ Consider increasing the default leases values once your network is production re
 
 ### Advanced usage
 
+#### Multiple entries
 
+It is possible to have multiple entries for an host interface in the
+configuration.
 
+For example, set a mac address and a dhcp_client_identifier this way:
+
+```yaml
+hosts:
+  c001:
+    network_interfaces:
+      - interface: eth0
+        ip4: 10.10.3.1
+        mac: 08:00:27:36:c0:ac
+        dhcp_client_identifier: 00:40:1c
+        network: net-1
+```
+
+This will create an entry related to mac address and one to dhcp client
+identifier.
+
+#### Shared networks
+
+It is possible to combine networks into shared-networks when multiple subnets
+are on the same NIC, or when using opt82/option_match parameter.
+To do so, add a dedicated optional `shared_network` key in the network definition.
+
+Networks of the same shared network must have the same `shared_network` value, 
+which is the name of this share.
+
+For example to add net-1 and net-2 into the same shared network, define them
+this way:
+
+```yaml
+  networks:
+    net-1:
+      subnet: 10.10.0.0
+      prefix: 16
+      shared_network: wolf
+    net-2:
+      subnet: 10.30.0.0
+      prefix: 16
+      shared_network: wolf
+```
+
+`shared_network` variable is optional and is simply ignored if not set.
+
+#### opt 61 and opt 82
+
+It is possible to use advanced dhcp features to identify an host. The following
+parameters are available, for the host and its BMC:
+
+- `mac`: identify based on MAC address. Same than standard dhcp server.
+- `dhcp_client_identifier`: identify based on a pattern (string, etc) to recognize an host. Also known as option 61.
+- `host_identifier`: identify based on an option (agent.circuit-id, agent.remote-id, etc) to recognize an host. Also known as option 82.
+- `match`: identify based on multiple options in combination to recognize an host. Also known as option 82 with hack.
+
+If using match, because this features is using a specific 'hack' in the dhcp
+server, you **must** define this host in a shared network, even if this shared
+network contains a single network (see this very well made page for more
+information: http://www.miquels.cistron.nl/isc-dhcpd/).
+
+#### Add dhcp node specific parameters and options
+
+It is possible to add specific dhcp settings to an host interface, which can be
+useful in some specific cases.
+This is achieved adding a list named `dhcp_server_settings` inside the host's NIC definition.
+
+For example:
+
+```yaml
+hosts:
+  c001:
+    network_interfaces:
+      - interface: eth0
+        ip4: 10.10.3.1
+        dhcp_client_identifier: 00:40:1c
+        dhcp_server_settings:
+          - option pxelinux.magic code 208 = string
+          - option pxelinux.configfile code 209 = text
+        network: ice1-1
+```
+
+#### Hosts equipment profile level iPXE rom
+
+By default, all hosts will use global `dhcp_server_ipxe_driver` and `dhcp_server_ipxe_embed`
+settings.
+
+However, note that the role will read `ep_ipxe_driver` and `ep_ipxe_embed` equipment profile variables, and precedence global settings for hosts that have these values set.
+
+This allows for example to have an heterogenous cluster, with a group of hosts booting on *snponly* driver, while others boot on *default* one.
 
 ## Changelog
 

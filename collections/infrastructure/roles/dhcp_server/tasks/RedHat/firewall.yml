@@ -1,4 +1,4 @@
-- name: "firewalld <|+> Add services to firewall's {{ dhcp_server_firewall_zone | default('public') }} zone"
+- name: "firewalld <|> Add services to firewall's {{ dhcp_server_firewall_zone | default('public') }} zone"
   ansible.posix.firewalld:
     zone: "{{ dhcp_server_firewall_zone | default('public') }}"
     service: "{{ item }}"

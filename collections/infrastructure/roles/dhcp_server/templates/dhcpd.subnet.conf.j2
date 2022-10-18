@@ -38,6 +38,11 @@
     hardware ethernet {{nic.mac | ansible.utils.hwaddr('linux')}};
     fixed-address {{nic.ip4}};
     {{ set_filename(ipxe_driver, ipxe_embed) }}
+    {% if nic.dhcp_server_settings is defined and nic.dhcp_server_settings is iterable %}
+      {% for setting in nic.dhcp_server_settings %}
+    {{ setting }};
+      {% endfor %}
+    {% endif %}
   }
 
   {%- endif %}
@@ -48,6 +53,11 @@
     option dhcp-client-identifier {{nic.dhcp_client_identifier}};
     fixed-address {{nic.ip4}};
     {{ set_filename(ipxe_driver, ipxe_embed) }}
+    {% if nic.dhcp_server_settings is defined and nic.dhcp_server_settings is iterable %}
+      {% for setting in nic.dhcp_server_settings %}
+    {{ setting }};
+      {% endfor %}
+    {% endif %}
   }
 
   {%- endif %}
@@ -58,6 +68,11 @@
     host-identifier {{nic.host_identifier}};
     fixed-address {{nic.ip4}};
     {{ set_filename(ipxe_driver, ipxe_embed) }}
+    {% if nic.dhcp_server_settings is defined and nic.dhcp_server_settings is iterable %}
+      {% for setting in nic.dhcp_server_settings %}
+    {{ setting }};
+      {% endfor %}
+    {% endif %}
   }
 
   {%- endif %}
@@ -73,6 +88,11 @@
     allow members of "option_match_{{host}}";
     range {{nic.ip4}};
     {{ set_filename(ipxe_driver, ipxe_embed) }}
+    {% if nic.dhcp_server_settings is defined and nic.dhcp_server_settings is iterable %}
+      {% for setting in nic.dhcp_server_settings %}
+    {{ setting }};
+      {% endfor %}
+    {% endif %}
   }
 
   {%- endif %}

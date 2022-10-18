@@ -17,6 +17,7 @@ dhcp_server_ipxe_embed: standard
 # Roles variables precedence global ones:
 # dhcp_server_start_services > bb_start_services > default(true)
 # dhcp_server_enable_services > bb_enable_services > default(true)
+
 # dhcp_server_start_services:
 # dhcp_server_enable_services:
 
@@ -24,6 +25,11 @@ dhcp_server_ipxe_embed: standard
 # Domain name provided by dhcp to clients
 dhcp_server_domain_name: cluster.local
 
-
+# Specific settings
+# Consider setting to true if using match patterns
 dhcp_server_ignore_client_uids: false
-dhcp_server_global_options: []
+dhcp_server_stash_agent_options: false
+
+# Add user custom global settings to main dhcp configuration file
+# No need to add ";" at the end, template will add it
+dhcp_server_global_settings: []

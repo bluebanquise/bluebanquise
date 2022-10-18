@@ -1,5 +1,5 @@
 ---
-- name: include_vars <|-> Gather OS specific variables
+- name: include_vars <|> Gather OS specific variables
   # This task gathers variables defined in OS specific files.
   #
   # Search vars in:
@@ -23,7 +23,7 @@
   tags:
     - always
 
-- name: include_tasks <|-> Use OS dedicated firewall task
+- name: include_tasks <|> Use OS dedicated firewall task
   ansible.builtin.include_tasks: "{{ outer_item }}"
   with_first_found:
     - files:
@@ -40,45 +40,45 @@
     - internal
     - firewall
 
-- name: "package <|+> Install {{ dhcp_server_packages_to_install | join(' ') }}"
+- name: "package <|> Install {{ dhcp_server_packages_to_install | join(' ') }}"
   ansible.builtin.package:
     name: "{{ dhcp_server_packages_to_install }}"
     state: present
   tags:
     - package
 
-- name: "file <|+> Create {{ dhcp_server_conf_dir }}"
+- name: "file <|> Create {{ dhcp_server_conf_dir }}"
   ansible.builtin.file:
     path: "{{ dhcp_server_conf_dir }}"
     owner: root
     mode: "0755"
     state: directory
 
-- name: "template <|+> Generate {{ dhcp_server_conf_file }}"
+- name: "template <|> Generate {{ dhcp_server_conf_file }}"
   ansible.builtin.template:
     src: dhcpd.conf.j2
     dest: "{{ dhcp_server_conf_file }}"
     owner: root
     group: root
     mode: 0644
-  notify: service <|+> Restart dhcp server
+  notify: service <|> Restart dhcp server
   tags:
     - template
 
-- name: "template <|+> Generate {{ dhcp_server_conf_dir }}/dhcpd.networks.conf"
+- name: "template <|> Generate {{ dhcp_server_conf_dir }}/dhcpd.networks.conf"
   ansible.builtin.template:
     src: dhcpd.networks.conf.j2
     dest: "{{ dhcp_server_conf_dir }}/dhcpd.networks.conf"
     owner: root
     group: root
     mode: 0644
-  notify: service <|+> Restart dhcp server
+  notify: service <|> Restart dhcp server
   when:
     - networks is defined and networks is iterable and networks is not string and networks is mapping
   tags:
     - template
 
-- name: "template <|+> Generate {{ dhcp_server_conf_dir }}/dhcpd.{{ item }}.conf"
+- name: "template <|> Generate {{ dhcp_server_conf_dir }}/dhcpd.{{ item }}.conf"
   ansible.builtin.template:
     src: dhcpd.subnet.conf.j2
     dest: "{{ dhcp_server_conf_dir }}/dhcpd.{{ item }}.conf"
@@ -91,11 +91,11 @@
     - networks is defined and networks is iterable and networks is not string and networks is mapping
     - networks[item] is defined and networks[item] is not none
     - networks[item].is_in_dhcp | default(true, true)
-  notify: service <|+> Restart dhcp server
+  notify: service <|> Restart dhcp server
   tags:
     - template
 
-- name: include_tasks <|-> Apply OS specific tasks
+- name: include_tasks <|> Apply OS specific tasks
   ansible.builtin.include_tasks: "{{ item }}"
   with_first_found:
     - files:
@@ -109,10 +109,10 @@
   tags:
     - internal
 
-- name: meta <|+> Run handler tasks to restart dhcp services
+- name: meta <|> Run handler tasks to restart dhcp services
   ansible.builtin.meta: flush_handlers
 
-- name: "service <|+> Manage {{ dhcp_server_services_to_start | join(' ') }} state"
+- name: "service <|> Manage {{ dhcp_server_services_to_start | join(' ') }} state"
   ansible.builtin.service:
     name: "{{ item }}"
     enabled: "{{ (dhcp_server_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
