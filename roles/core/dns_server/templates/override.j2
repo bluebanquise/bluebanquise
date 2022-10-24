@@ -1,5 +1,5 @@
 $TTL 60
-@            IN    SOA  localhost. root.localhost.  (
+@            IN    SOA  {{ inventory_hostname }}.{{ domain_name }}. root.{{ domain_name }}.  (
                           {{ serial }} ; serial
                           1h           ; refresh
                           30m          ; retry
