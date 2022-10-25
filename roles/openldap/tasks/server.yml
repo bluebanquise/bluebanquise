@@ -22,7 +22,11 @@
     - internal
     - package
 
-- name: "package █ Install {{ openldap_packages_to_install | join(' ') }} packages"
+- name: debug
+  debug:
+    msg: "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml --- vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml --- vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml --- vars/{{ ansible_facts.os_family }}.yml"
+
+- name: "package █ Install {{ openldap_server_packages_to_install | join(' ') }} packages"
   package:
     name: "{{ openldap_server_packages_to_install }}"
     state: present
@@ -103,7 +107,7 @@
   when: not inetorgperson.stat.exists
 
 - name: Checking chdomain.ldif was already pushed
-  command: grep RootPW /etc/openldap/slapd.d/cn=config/olcDatabase={2}hdb.ldif
+  command: "grep RootPW /etc/openldap/slapd.d/cn=config/olcDatabase={2}{{openldap_backend_db | default('hdb')}}.ldif"
   register: chdomain
   failed_when: chdomain.rc != 0 and chdomain.rc != 1
   changed_when: False

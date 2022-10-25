@@ -4,24 +4,40 @@ replace: olcAccess
 olcAccess: {0}to * by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth"
   read by dn.base="cn=Manager{% for dc in domain_name.split('.') %},dc={{dc}}{% endfor %}" read by * none
 
+{% if openldap_backend_db is defined %}
+dn: olcDatabase={2}{{openldap_backend_db}},cn=config
+{% else %}
 dn: olcDatabase={2}hdb,cn=config
+{% endif %}
 changetype: modify
 replace: olcSuffix
 olcSuffix: {% for dc in domain_name.split('.') %}{% if not loop.first %},{% endif %}dc={{dc}}{% endfor %}
 
 
+{% if openldap_backend_db is defined %}
+dn: olcDatabase={2}{{openldap_backend_db}},cn=config
+{% else %}
 dn: olcDatabase={2}hdb,cn=config
+{% endif %}
 changetype: modify
 replace: olcRootDN
 olcRootDN: cn=Manager{% for dc in domain_name.split('.') %},dc={{dc}}{% endfor %}
 
 
+{% if openldap_backend_db is defined %}
+dn: olcDatabase={2}{{openldap_backend_db}},cn=config
+{% else %}
 dn: olcDatabase={2}hdb,cn=config
+{% endif %}
 changetype: modify
 add: olcRootPW
 olcRootPW: {{ ldap_settings.manager_password_hash }}
 
+{% if openldap_backend_db is defined %}
+dn: olcDatabase={2}{{openldap_backend_db}},cn=config
+{% else %}
 dn: olcDatabase={2}hdb,cn=config
+{% endif %}
 changetype: modify
 add: olcAccess
 olcAccess: {0}to attrs=userPassword,shadowLastChange by

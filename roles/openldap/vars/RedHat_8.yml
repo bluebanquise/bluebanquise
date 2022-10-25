@@ -1,5 +1,5 @@
 ---
-openldap_packages_to_install:
+openldap_server_packages_to_install:
   - openldap-servers
   - openldap-clients
   - httpd
