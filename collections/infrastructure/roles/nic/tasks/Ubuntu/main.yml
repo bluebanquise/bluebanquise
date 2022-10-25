@@ -33,6 +33,8 @@
     master: "{{ item.master | default(omit) }}"
     mode: "{{ item.mode | default(omit) }}"
     method4: "{{ item.method4 | default(omit) }}"
+    vlanid: "{{ item.vlanid | default(omit) }}"
+    vlandev: "{{ item.vlandev | default(omit) }}"
   notify: command <|> networkctl reload
   loop: "{{ network_interfaces }}"
   when: item.skip is not defined or (item.skip is defined and not item.skip)

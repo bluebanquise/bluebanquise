@@ -148,7 +148,7 @@ a management network is set above in the *network_interfaces* list).
 network_interfaces:
   - interface: bond0
     ip4: 10.10.0.1
-    network:net-1
+    network: net-1
     type: bond
   - interface: eth0
     type: bond-slave

@@ -27,7 +27,7 @@ def same_list_file(list1, filepath):
 
 def write_list_to_file(list1, filepath):
     path = pathlib.Path(filepath)
-    os.makedirs(path.parent, mode = 0o755, exist_ok=True)    
+    os.makedirs(path.parent, mode = 0o755, exist_ok=True)
     f = open(filepath, "w")
     for it in list1:
         f.write(it + "\n")
@@ -48,13 +48,15 @@ class Networkd(object):
         self.dns4 = module.params['dns4']
         self.method4 = module.params['method4']
         self.mode = module.params['mode']
+        self.vlanid = module.params['vlanid']
+        self.vlandev = module.params['vlandev']
 
     def generate_network(self):
         network = []
 
         # MATCH
         network.append("[Match]")
-        if self.ifname is not None: 
+        if self.ifname is not None:
             network.append("Name=" + self.ifname)
         elif self.conn_name is not None:
             network.append("Name=" + self.conn_name)
@@ -75,8 +77,9 @@ class Networkd(object):
         # ADDRESS
         if self.method4 == "manual" or self.method4 is None:
             network.append("[Address]")
-            for ip4 in self.ip4:
-                network.append("Address=" + ip4)
+            if self.ip4 is not None:
+                for ip4 in self.ip4:
+                    network.append("Address=" + ip4)
 
         # ADDRESS
         if self.gw4 is not None:
@@ -101,6 +104,8 @@ class Networkd(object):
 
         if self.type == "bond":
             netdev.append("Kind=bond")
+        elif self.type == "vlan":
+            netdev.append("Kind=vlan")
 
         # BOND
         if self.type == "bond":
@@ -109,6 +114,11 @@ class Networkd(object):
                 netdev.append("Mode=" + self.mode)
             else:
                 netdev.append("Mode=802.3ad")
+
+        # VLAN
+        if self.type == "vlan":
+            netdev.append("[VLAN]")
+            netdev.append("Id=" + str(self.vlanid))
 
         return netdev
 
@@ -135,6 +145,8 @@ def main():
             method4=dict(type='str', choices=['auto', 'link-local', 'manual', 'shared', 'disabled']),
             mode=dict(type='str', default='balance-rr',
                       choices=['802.3ad', 'active-backup', 'balance-alb', 'balance-rr', 'balance-tlb', 'balance-xor', 'broadcast']),
+            vlanid=dict(type='int'),
+            vlandev=dict(type='str'),
         ),
         mutually_exclusive=[],
         required_if=[],
@@ -159,7 +171,7 @@ def main():
             print("Absent")
         elif networkd.state == 'present':
 
-            if networkd.type in ['ethernet','infiniband','bond-slave']:
+            if networkd.type in ['ethernet','infiniband','bond-slave','vlan']:
 
                 # Generate Network file
                 network = networkd.generate_network()
@@ -171,7 +183,7 @@ def main():
                 if changed:
                     write_list_to_file(network, network_file)
 
-            elif networkd.type in ['bond']:
+            if networkd.type in ['bond','vlan']:
 
                 # Generate Netdev file
                 netdev = networkd.generate_netdev()
@@ -183,11 +195,34 @@ def main():
                 if changed:
                     write_list_to_file(netdev, netdev_file)
 
+            if networkd.type in ['vlan']:
+
+                # Ensure vlan is registered in main connection (vlandev) network file
+                vlandev_file = "/etc/systemd/network/" + networkd.vlandev +".network"
+                path = pathlib.Path(vlandev_file)
+                os.makedirs(path.parent, mode = 0o755, exist_ok=True)
+                f = open(vlandev_file)
+                filepath_lines = f.readlines()
+                vlan_present = False
+                for i in range(0,len(filepath_lines),1):
+                    if filepath_lines[i] == "VLAN=" + networkd.conn_name:
+                        vlan_present = True
+                if not vlan_present:
+                    for i in range(0,len(filepath_lines),1):
+                        if filepath_lines[i] == "[Network]\n":
+                            filepath_lines.insert(i+1, "VLAN=" + networkd.conn_name)
+                            f.close()
+                            f = open(vlandev_file, "w")
+                            for j in range(0,len(filepath_lines),1):
+                                f.write(filepath_lines[j] + "\n")
+                            break
+                f.close()
+
             # Post actions
             #if changed == 1:
                 #stdout, stderr = subprocess.Popen("networkctl reload", stdout=os.subprocess.PIPE, stderr=subprocess.STDOUT, shell=True).communicate()
                 #stdout, stderr = subprocess.Popen("networkctl reconfigure " + networkd.conn_name, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True).communicate()
-                
+
 
     except NetworkdModuleError as e:
         module.fail_json(name=networkd.conn_name, msg=str(e))
@@ -196,7 +231,7 @@ def main():
         result['changed'] = False
     else:
         result['changed'] = True
-    
+
     result['stdout'] = "COUCOU LES AMICHES"
 
     module.exit_json(**result)
