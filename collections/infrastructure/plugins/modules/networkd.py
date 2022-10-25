@@ -48,6 +48,7 @@ class Networkd(object):
         self.dns4 = module.params['dns4']
         self.method4 = module.params['method4']
         self.mode = module.params['mode']
+        self.mtu = module.params['mtu']
         self.vlanid = module.params['vlanid']
         self.vlandev = module.params['vlandev']
 
@@ -92,6 +93,11 @@ class Networkd(object):
                 network.append("Gateway=" + route4.split(' ')[1])
                 if len(route4.split(' ')) > 2:
                     network.append("Metric=" + route4.split(' ')[2])
+
+        # LINK
+        if self.mtu is not None:
+            network.append("[Link]")
+            network.append("MTUBytes=" + self.mtu)
 
         return network
 
@@ -145,6 +151,7 @@ def main():
             method4=dict(type='str', choices=['auto', 'link-local', 'manual', 'shared', 'disabled']),
             mode=dict(type='str', default='balance-rr',
                       choices=['802.3ad', 'active-backup', 'balance-alb', 'balance-rr', 'balance-tlb', 'balance-xor', 'broadcast']),
+            mtu=dict(type='str'),
             vlanid=dict(type='int'),
             vlandev=dict(type='str'),
         ),

@@ -32,6 +32,7 @@
     state: "{{ item.state | default('present') }}"
     master: "{{ item.master | default(omit) }}"
     mode: "{{ item.mode | default(omit) }}"
+    mtu: "{{ item.mtu | default(omit) }}"
     method4: "{{ item.method4 | default(omit) }}"
     vlanid: "{{ item.vlanid | default(omit) }}"
     vlandev: "{{ item.vlandev | default(omit) }}"
