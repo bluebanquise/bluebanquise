@@ -78,6 +78,7 @@ Role need whole revamp.
 
 ## Changelog
 
+* 1.1.1: Added Firewall configuration <lucassouzasantos@gmail.com>
 * 1.1.0: Fixed some bugs and added The possibility to set other options for backend DB <lucassouzasantos@gmail.com>
 * 1.0.2: Support multiple and secured connections to LDAP servers. <mathis.gavillon@atos.net>
 * 1.0.1: Fixed bad template. Documentation. johnnykeats <johnny.keats@outlook.com>

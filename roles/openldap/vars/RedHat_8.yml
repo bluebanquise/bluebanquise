@@ -6,3 +6,7 @@ openldap_server_packages_to_install:
   - phpldapadmin
   - python3-libselinux
   - python3-policycoreutils
+
+openldap_server_firewall_services_to_add:
+  - ldap
+  - ldaps
