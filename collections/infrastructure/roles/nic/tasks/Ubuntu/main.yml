@@ -31,9 +31,14 @@
     type: "{{ item.type | default('ethernet') }}"  # Even if in the documentation type is optional, it is in fact mandatory. Default to ethernet.
     # Standard
     state: "{{ item.state | default('present') }}"
+    arp_interval: "{{ item.arp_interval | default(omit) }}"
+    arp_ip_target: "{{ item.arp_ip_target | default(omit) }}"
+    downdelay: "{{ item.downdelay | default(omit) }}"
     master: "{{ item.master | default(omit) }}"
     mode: "{{ item.mode | default(omit) }}"
+    miimon: "{{ item.miimon | default(omit) }}"
     method4: "{{ item.method4 | default(omit) }}"
+    updelay: "{{ item.updelay | default(omit) }}"
     vlanid: "{{ item.vlanid | default(omit) }}"
     vlandev: "{{ item.vlandev | default(omit) }}"
   notify: command <|> networkctl reload

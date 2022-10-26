@@ -33,6 +33,14 @@ def write_list_to_file(list1, filepath):
         f.write(it + "\n")
     f.close()
 
+
+def check_milliseconds_field_is_digit(networkd,  name):
+    networkd_field = getattr(networkd, name)
+    if networkd_field is not None and not networkd_field.isdigit():
+        msg = name + " should only contain numbers representing milliseconds"
+        networkd.module.fail_json(msg=msg)
+
+
 class Networkd(object):
 
     def __init__(self, module):
@@ -40,6 +48,9 @@ class Networkd(object):
         self.conn_name = module.params['conn_name']
         self.master = module.params['master']
         self.state = module.params['state']
+        self.arp_interval = module.params['arp_interval']
+        self.arp_ip_target = module.params['arp_ip_target']
+        self.downdelay = module.params['downdelay']
         self.ifname = module.params['ifname']
         self.type = module.params['type']
         self.ip4 = module.params['ip4']
@@ -47,8 +58,10 @@ class Networkd(object):
         self.routes4 = module.params['routes4']
         self.dns4 = module.params['dns4']
         self.method4 = module.params['method4']
+        self.miimon = module.params['miimon']
         self.mode = module.params['mode']
         self.mtu = module.params['mtu']
+        self.updelay = module.params['updelay']
         self.vlanid = module.params['vlanid']
         self.vlandev = module.params['vlandev']
 
@@ -120,6 +133,16 @@ class Networkd(object):
                 netdev.append("Mode=" + self.mode)
             else:
                 netdev.append("Mode=802.3ad")
+            if self.miimon is not None:
+                netdev.append("MIIMonitorSec=" + self.miimon + "ms")
+            if self.updelay is not None:
+                netdev.append("UpDelaySec=" + self.updelay + "ms")
+            if self.downdelay is not None:
+                netdev.append("DownDelaySec=" + self.downdelay + "ms")
+            if self.arp_interval is not None:
+                netdev.append("ARPIntervalSec=" + self.arp_interval + "ms")
+            if self.arp_ip_target is not None:
+                netdev.append("ARPIPTargets=" + self.arp_ip_target)
 
         # VLAN
         if self.type == "vlan":
@@ -135,6 +158,9 @@ def main():
             state=dict(type='str', required=True, choices=['absent', 'present']),
             conn_name=dict(type='str', required=True),
             master=dict(type='str'),
+            arp_interval=dict(type='str'),
+            arp_ip_target=dict(type='str'),
+            downdelay=dict(type='str'),
             ifname=dict(type='str'),
             type=dict(type='str',
                       choices=[
@@ -151,7 +177,9 @@ def main():
             method4=dict(type='str', choices=['auto', 'link-local', 'manual', 'shared', 'disabled']),
             mode=dict(type='str', default='balance-rr',
                       choices=['802.3ad', 'active-backup', 'balance-alb', 'balance-rr', 'balance-tlb', 'balance-xor', 'broadcast']),
+            miimon=dict(type='str'),
             mtu=dict(type='str'),
+            updelay=dict(type='str'),
             vlanid=dict(type='int'),
             vlandev=dict(type='str'),
         ),
@@ -171,6 +199,10 @@ def main():
     # check for issues
     if networkd.conn_name is None:
         networkd.module.fail_json(msg="Please specify a name for the connection")
+    check_milliseconds_field_is_digit(networkd, "miimon")
+    check_milliseconds_field_is_digit(networkd, "updelay")
+    check_milliseconds_field_is_digit(networkd, "downdelay")
+    check_milliseconds_field_is_digit(networkd, "arp_interval")
 
     try:
         if networkd.state == 'absent':
