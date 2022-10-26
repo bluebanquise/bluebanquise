@@ -33,6 +33,14 @@ def write_list_to_file(list1, filepath):
         f.write(it + "\n")
     f.close()
 
+
+def check_milliseconds_field_is_digit(networkd,  name):
+    networkd_field = getattr(networkd, name)
+    if networkd_field is not None and not networkd_field.isdigit():
+        msg = name + " should only contain numbers representing milliseconds"
+        networkd.module.fail_json(msg=msg)
+
+
 class Networkd(object):
 
     def __init__(self, module):
@@ -126,13 +134,13 @@ class Networkd(object):
             else:
                 netdev.append("Mode=802.3ad")
             if self.miimon is not None:
-                netdev.append("MIIMonitorSec=" + self.miimon)
+                netdev.append("MIIMonitorSec=" + self.miimon + "ms")
             if self.updelay is not None:
-                netdev.append("UpDelaySec=" + self.updelay)
+                netdev.append("UpDelaySec=" + self.updelay + "ms")
             if self.downdelay is not None:
-                netdev.append("DownDelaySec=" + self.downdelay)
+                netdev.append("DownDelaySec=" + self.downdelay + "ms")
             if self.arp_interval is not None:
-                netdev.append("ARPIntervalSec=" + self.arp_interval)
+                netdev.append("ARPIntervalSec=" + self.arp_interval + "ms")
             if self.arp_ip_target is not None:
                 netdev.append("ARPIPTargets=" + self.arp_ip_target)
 
@@ -191,6 +199,10 @@ def main():
     # check for issues
     if networkd.conn_name is None:
         networkd.module.fail_json(msg="Please specify a name for the connection")
+    check_milliseconds_field_is_digit(networkd, "miimon")
+    check_milliseconds_field_is_digit(networkd, "updelay")
+    check_milliseconds_field_is_digit(networkd, "downdelay")
+    check_milliseconds_field_is_digit(networkd, "arp_interval")
 
     try:
         if networkd.state == 'absent':
