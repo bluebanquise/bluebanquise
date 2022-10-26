@@ -90,9 +90,9 @@ class Networkd(object):
 
         # ADDRESS
         if self.method4 == "manual" or self.method4 is None:
-            network.append("[Address]")
             if self.ip4 is not None:
                 for ip4 in self.ip4:
+                    network.append("[Address]")
                     network.append("Address=" + ip4)
 
         # ADDRESS
