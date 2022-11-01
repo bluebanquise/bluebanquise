@@ -37,7 +37,7 @@
 - name: Start services
   service:
     name: "{{ item }}"
-    state: started
+    state: restarted
   with_items:
 #    - nscd
     - sssd

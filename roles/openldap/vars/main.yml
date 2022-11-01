@@ -1,8 +1,11 @@
 ---
-openldap_role_version: 1.0.2
+openldap_role_version: 1.1.1
 
 openldap_packages_to_install:
   - openldap-servers
   - openldap-clients
   - httpd
   - phpldapadmin
+
+
+#openldap_backend_db: mdb
