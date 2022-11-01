@@ -26,7 +26,9 @@ def same_list_file(list1, filepath):
     return same
 
 
-def write_list_to_file(list1, filepath):
+def write_list_to_file(list1, filepath, check_mode):
+    if check_mode:
+        return
     path = pathlib.Path(filepath)
     os.makedirs(path.parent, mode=0o755, exist_ok=True)
     f = open(filepath, "w")
@@ -249,7 +251,7 @@ def main():
                 changed = not same_list_file(network, network_file)
                 # Write configuration if changes detected
                 if changed:
-                    write_list_to_file(network, network_file)
+                    write_list_to_file(network, network_file, module.check_mode)
 
             if networkd.type in ['bond', 'vlan']:
 
@@ -262,7 +264,7 @@ def main():
                 changed = not same_list_file(netdev, netdev_file)
                 # Write configuration if changes detected
                 if changed:
-                    write_list_to_file(netdev, netdev_file)
+                    write_list_to_file(netdev, netdev_file, module.check_mode)
 
 # Post actions
 # if changed == 1:
