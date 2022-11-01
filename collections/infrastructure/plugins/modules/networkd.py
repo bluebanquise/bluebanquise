@@ -64,6 +64,8 @@ class Networkd(object):
         self.updelay = module.params['updelay']
         self.vlanid = module.params['vlanid']
         self.vlandev = module.params['vlandev']
+        self.vlan_mapping = module.params['vlans']
+
 
     def generate_network(self):
         network = []
@@ -71,9 +73,10 @@ class Networkd(object):
         # MATCH
         network.append("[Match]")
         if self.ifname is not None:
-            network.append("Name=" + self.ifname)
+            ifname = self.ifname
         elif self.conn_name is not None:
-            network.append("Name=" + self.conn_name)
+            ifname = self.conn_name
+        network.append("Name=" + ifname)
 #        elif self.mac is not None:
 #            network.append("MACAddress=" + self.mac)
 
@@ -87,6 +90,9 @@ class Networkd(object):
         if self.type == "bond-slave":
             if self.master is not None:
                 network.append("Bond=" + self.master)
+        if self.vlan_mapping is not None and len(self.vlan_mapping) > 0:
+            for id in self.vlan_mapping:
+                network.append("VLAN=" + ifname + str(id))
 
         # ADDRESS
         if self.method4 == "manual" or self.method4 is None:
@@ -182,6 +188,7 @@ def main():
             updelay=dict(type='str'),
             vlanid=dict(type='int'),
             vlandev=dict(type='str'),
+            vlan_mapping=dict(type='list', elements='int'),
         ),
         mutually_exclusive=[],
         required_if=[],
@@ -234,28 +241,28 @@ def main():
                 if changed:
                     write_list_to_file(netdev, netdev_file)
 
-            if networkd.type in ['vlan']:
+            # if networkd.type in ['vlan']:
 
-                # Ensure vlan is registered in main connection (vlandev) network file
-                vlandev_file = "/etc/systemd/network/" + networkd.vlandev +".network"
-                path = pathlib.Path(vlandev_file)
-                os.makedirs(path.parent, mode = 0o755, exist_ok=True)
-                f = open(vlandev_file)
-                filepath_lines = f.readlines()
-                vlan_present = False
-                for i in range(0,len(filepath_lines),1):
-                    if filepath_lines[i] == "VLAN=" + networkd.conn_name:
-                        vlan_present = True
-                if not vlan_present:
-                    for i in range(0,len(filepath_lines),1):
-                        if filepath_lines[i] == "[Network]\n":
-                            filepath_lines.insert(i+1, "VLAN=" + networkd.conn_name)
-                            f.close()
-                            f = open(vlandev_file, "w")
-                            for j in range(0,len(filepath_lines),1):
-                                f.write(filepath_lines[j] + "\n")
-                            break
-                f.close()
+            #     # Ensure vlan is registered in main connection (vlandev) network file
+            #     vlandev_file = "/etc/systemd/network/" + networkd.vlandev +".network"
+            #     path = pathlib.Path(vlandev_file)
+            #     os.makedirs(path.parent, mode = 0o755, exist_ok=True)
+            #     f = open(vlandev_file)
+            #     filepath_lines = f.readlines()
+            #     vlan_present = False
+            #     for i in range(0,len(filepath_lines),1):
+            #         if filepath_lines[i] == "VLAN=" + networkd.conn_name:
+            #             vlan_present = True
+            #     if not vlan_present:
+            #         for i in range(0,len(filepath_lines),1):
+            #             if filepath_lines[i] == "[Network]\n":
+            #                 filepath_lines.insert(i+1, "VLAN=" + networkd.conn_name)
+            #                 f.close()
+            #                 f = open(vlandev_file, "w")
+            #                 for j in range(0,len(filepath_lines),1):
+            #                     f.write(filepath_lines[j] + "\n")
+            #                 break
+            #     f.close()
 
             # Post actions
             #if changed == 1:
