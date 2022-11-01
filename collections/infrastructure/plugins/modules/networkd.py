@@ -92,7 +92,7 @@ class Networkd(object):
                 network.append("Bond=" + self.master)
         if self.vlan_mapping is not None and len(self.vlan_mapping) > 0:
             for id in self.vlan_mapping:
-                network.append("VLAN=" + ifname + str(id))
+                network.append("VLAN=" + ifname + "." + str(id))
 
         # ADDRESS
         if self.method4 == "manual" or self.method4 is None:
