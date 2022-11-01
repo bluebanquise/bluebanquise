@@ -1,5 +1,7 @@
 #!/usr/bin/python
-# noqa: E501
+# Copyright (c) 2022 BlueBanquise
+# MIT license
+# https://github.com/bluebanquise/bluebanquise
 
 import os
 import pathlib
