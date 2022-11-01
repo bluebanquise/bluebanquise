@@ -110,7 +110,7 @@ class Networkd(object):
         # LINK
         if self.mtu is not None:
             network.append("[Link]")
-            network.append("MTUBytes=" + self.mtu)
+            network.append("MTUBytes=" + str(self.mtu))
 
         return network
 
@@ -178,7 +178,7 @@ def main():
             mode=dict(type='str', default='balance-rr',
                       choices=['802.3ad', 'active-backup', 'balance-alb', 'balance-rr', 'balance-tlb', 'balance-xor', 'broadcast']),
             miimon=dict(type='str'),
-            mtu=dict(type='str'),
+            mtu=dict(type='int'),
             updelay=dict(type='str'),
             vlanid=dict(type='int'),
             vlandev=dict(type='str'),
