@@ -65,7 +65,7 @@ class Networkd(object):
         self.updelay = module.params['updelay']
         self.vlanid = module.params['vlanid']
         self.vlandev = module.params['vlandev']
-        self.vlan_mapping = module.params['vlans']
+        self.vlan_mapping = module.params['vlan_mapping']
 
     def generate_network(self):
         network = []
