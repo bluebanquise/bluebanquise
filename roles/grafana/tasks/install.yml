@@ -46,3 +46,12 @@
     state: present
   tags:
     - install
+
+- name: service █ Manage grafana-server state
+  ansible.builtin.service:
+    name: "{{ item }}"
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+    state: "{{ (start_services | bool) | ternary('started', omit) }}"
+  loop: "{{ grafana_services_to_start }}"
+  tags:
+    - service
