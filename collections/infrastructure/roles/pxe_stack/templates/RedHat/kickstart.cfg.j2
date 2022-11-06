@@ -34,7 +34,7 @@ auth --enableshadow --passalgo=sha512
 
 {% if not pxe_stack_enable_root %}
 rootpw --lock
-user --name={{ pxe_stack_sudo_user }} --iscrypted --password={{ hostvars[groups[item][0]]['ep_admin_password_sha512'] | default(pxe_stack_ep_admin_password_sha512) }}
+user --name={{ pxe_stack_sudo_user }} --homedir={{ pxe_stack_sudo_user_home }} --iscrypted --password={{ hostvars[groups[item][0]]['ep_admin_password_sha512'] | default(pxe_stack_ep_admin_password_sha512) }}
 {% else %}
 # Root password (sha512)
 rootpw --iscrypted {{ hostvars[groups[item][0]]['ep_admin_password_sha512'] | default(pxe_stack_ep_admin_password_sha512) }}

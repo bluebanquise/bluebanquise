@@ -1,9 +1,5 @@
 #!ipxe
 
-# Set graphics mode and configure colours
-#console --x 800 --y 600 --picture http://10.10.0.1/texture.png #--left 32 --right 32 --top 32 --bottom 48
-#console --picture http://${next-server}/riddick.png
-
 ###################### MAIN MENU ####################################
 
 # Some menu defaults
@@ -11,6 +7,7 @@ set menu-timeout 10000
 set submenu-timeout ${menu-timeout}
 isset ${menu-default} || set menu-default bootdisk
 set esc:hex 1b
+
 set bold ${esc:string}[1m
 set orange ${esc:string}[33;0m
 set yellow ${esc:string}[33;1m

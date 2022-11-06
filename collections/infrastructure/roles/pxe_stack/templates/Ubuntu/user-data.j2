@@ -11,6 +11,7 @@ autoinstall:
 {% if not pxe_stack_enable_root %}
     users:
       - name: {{ pxe_stack_sudo_user }}
+        homedir: {{ pxe_stack_sudo_user_home }}
         ssh-authorized-keys:
         {% for ssh_key in (hostvars[groups[item][0]]['ep_admin_ssh_keys'] | default(pxe_stack_ep_admin_ssh_keys)) %}
           - {{ ssh_key }}

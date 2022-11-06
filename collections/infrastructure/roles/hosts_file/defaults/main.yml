@@ -1,3 +1,4 @@
+---
 hosts_file_domaine_name: cluster.local
 hosts_file_external_hosts: {}
 hosts_file_range: iceberg

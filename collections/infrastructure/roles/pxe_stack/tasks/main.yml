@@ -56,7 +56,7 @@
   loop:
     - "{{ pxe_stack_apache_cgi_bin_path }}"
     - /etc/bluebanquise
-    - /etc/bootset
+    - /etc/bluebanquise/bootset
 
 - name: file █ Create pxe http directories structure
   ansible.builtin.file:
@@ -88,18 +88,18 @@
   tags:
     - internal
 
-- name: template █ Generate /etc/bootset/nodes_parameters.yml
+- name: template █ Generate /etc/bluebanquise/bootset/nodes_parameters.yml
   ansible.builtin.template:
     src: nodes_parameters.yml.j2
-    dest: /etc/bootset/nodes_parameters.yml
+    dest: /etc/bluebanquise/bootset/nodes_parameters.yml
     mode: 0644
   tags:
     - template
 
-- name: template █ Generate /etc/bootset/pxe_parameters.yml
+- name: template █ Generate /etc/bluebanquise/bootset/pxe_parameters.yml
   ansible.builtin.template:
     src: "pxe_parameters.yml.j2"
-    dest: "/etc/bootset/pxe_parameters.yml"
+    dest: "/etc/bluebanquise/bootset/pxe_parameters.yml"
     mode: 0644
 
 - name: "template █ Generate {{ pxe_stack_htdocs_path }}/pxe/ files"
@@ -173,6 +173,12 @@
     dest: "{{ pxe_stack_apache_conf_path }}/cgi.conf"
     mode: 0644
   notify: service █ Restart pxe services
+
+- name: "copy █ Copy bluebanquise-bootset"
+  ansible.builtin.copy:
+    src: bluebanquise-bootset
+    dest: "/usr/bin/bluebanquise-bootset"
+    mode: 0755
 
 - name: "template █ Create {{ pxe_stack_apache_cgi_bin_path }}/bootswitch.cgi"
   ansible.builtin.template:

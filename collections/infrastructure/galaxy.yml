@@ -4,7 +4,7 @@ namespace: bluebanquise
 name: infrastructure
 
 # The version of the collection. Must be compatible with semantic versioning
-version: 2.0.13
+version: 2.0.14
 
 # The path to the Markdown (.md) readme file. This path is relative to the root of the collection
 readme: README.md
@@ -39,6 +39,8 @@ tags:
   - sysadmin
   - pxe
   - infrastructure
+  - linux
+  - networkd
 
 # Collections that this collection requires to be installed for it to be usable. The key of the dict is the
 # collection label 'namespace.name'. The value is a version range

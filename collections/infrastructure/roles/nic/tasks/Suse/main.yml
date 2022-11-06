@@ -1,5 +1,4 @@
 ---
-
 - name: "package <|> Install {{ nic_packages_to_install | join(' ') }}"
   ansible.builtin.package:
     name: "{{ nic_packages_to_install }}"

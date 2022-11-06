@@ -17,6 +17,7 @@ pxe_stack_client_os_debian: true
 pxe_stack_enable_root: false
 # Sudo user if root not enabled
 pxe_stack_sudo_user: bluebanquise
+pxe_stack_sudo_user_home: /var/lib/bluebanquise
 # Set sudo user as passwordless sudoer
 pxe_stack_sudo_is_passwordless: true
 

@@ -89,6 +89,7 @@
     </user>
     <user>
       <username>{{ pxe_stack_sudo_user }}</username>
+      <home>{{ pxe_stack_sudo_user_home }}</home>
       <user_password>{{ hostvars[groups[item][0]]['ep_admin_password_sha512'] | default(pxe_stack_ep_admin_password_sha512) }}</user_password>
       <encrypted config:type="boolean">true</encrypted>
       <authorized_keys config:type="list">

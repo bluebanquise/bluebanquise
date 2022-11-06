@@ -10,7 +10,6 @@ pxe_stack_packages_to_install:
   - httpd
   - python3-policycoreutils
   - policycoreutils
-  - bluebanquise-bootset
 pxe_stack_default_tftp_package: atftp
 pxe_stack_services_to_start:
   - httpd
