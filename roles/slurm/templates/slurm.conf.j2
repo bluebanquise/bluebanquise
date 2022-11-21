@@ -66,8 +66,7 @@ JobAcctGatherType=jobacct_gather/linux
 {% endif %}
 
 ## Additional content if exist
-{% if slurm_slurm_conf_additional_content is defined and slurm_slurm_conf_additional_content is iterable %}{% for slurm_slurm_conf_content in slurm_slurm_conf_additional_
-content %}
+{% if slurm_slurm_conf_additional_content is defined and slurm_slurm_conf_additional_content is iterable %}{% for slurm_slurm_conf_content in slurm_slurm_conf_additional_content %}
 {{ slurm_slurm_conf_content | default('', true) }}                                                                                                                       
 {% endfor %}{% endif %}
 
