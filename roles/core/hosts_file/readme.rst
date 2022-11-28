@@ -44,6 +44,8 @@ Optional inventory vars:
 
 * alias
 * global_alias
+* network_interfaces
+   * .alias
 * bmc
    * .ip4
    * .mac
@@ -59,6 +61,7 @@ Files generated:
 Changelog
 ^^^^^^^^^
 
+* 1.2.0: Add optional alias to every interface. Matthieu Isoard <indigoping4cgmi@gmail.com>
 * 1.1.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.8: Prevent unsorted ranges. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.7: Clean code. Benoit Leveugle <benoit.leveugle@gmail.com>

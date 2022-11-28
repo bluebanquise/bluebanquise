@@ -36,7 +36,7 @@
         {% if nic.network == host_resolution_network %}
 {{ nic.ip4 }} {{ host }} {{ host }}.{{ domain_name }} {{ host }}-{{ nic.network }} {{ alias_list|join(' ') }}
         {% else %}
-{{ nic.ip4 }} {{ host }}-{{ nic.network }}
+{{ nic.ip4 }} {{ host }}-{{ nic.network }} {% if nic.alias is defined %}{{ nic.alias }}{% endif %}
         {% endif %}
       {% endif %}
     {% endfor %}

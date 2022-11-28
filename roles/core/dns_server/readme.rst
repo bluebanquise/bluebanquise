@@ -93,7 +93,8 @@ Optional inventory vars:
    * .ip4
    * .mac
    * .name
-
+* network_interfaces
+   * .alias
 * dns_overrides
 
 Output
@@ -115,6 +116,7 @@ Files generated:
 Changelog
 ^^^^^^^^^
 
+* 1.6.0: Add optional alias to every interface. Matthieu Isoard <indigoping4cgmi@gmail.com>
 * 1.5.3: Bug fix for issue #724. Neil Munday <neil@mundayweb.com>
 * 1.5.2: Bug fix for bond interfaces with no network defined.
 * 1.5.1: Add recursion management. Benoit Leveugle <benoit.leveugle@gmail.com>
