@@ -76,6 +76,8 @@ d-i finish-install/reboot_in_progress note
 d-i preseed/late_command string \
   in-target sh -c 'mkdir /root/.ssh'; \
 {% for ssh_key in (hostvars[groups[item][0]]['ep_admin_ssh_keys'] | default(pxe_stack_ep_admin_ssh_keys)) %}
+
+{{ pxe_stack_sudo_user }}
   in-target sh -c 'echo "{{ ssh_key }}" >> /root/.ssh/authorized_keys'; \
 {% endfor %}
 {% if pxe_stack_enable_root %}

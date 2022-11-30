@@ -1,0 +1,143 @@
+---
+
+- name: filesystem <|> Creating filesystems
+  ansible.builtin.filesystem:
+    dev: "{{ item.dev }}"
+    force: "{{ item.force | default(omit) }}"
+    fstype: "{{ item.fstype | default(omit) }}"
+    opts: "{{ item.opts | default(omit) }}"
+    resizefs: "{{ item.resizefs | default(omit) }}"
+    state: "{{ item.state | default(omit) }}"
+  loop: "{{ generic.filesystem }}"
+  when: generic.filesystem is defined and generic.filesystem is iterable and generic.filesystem is mapping
+
+- name: cron <|> Set cron jobs
+  ansible.builtin.cron:
+    backup: "{{ item.backup | default(omit) }}"
+    cron_file: "{{ item.cron_file | default(omit) }}"
+    day: "{{ item.day | default(omit) }}"
+    disabled: "{{ item.disabled | default(omit) }}"
+    env: "{{ item.env | default(omit) }}"
+    hour: "{{ item.hour | default(omit) }}"
+    insertafter: "{{ item.insertafter | default(omit) }}"
+    insertbefore: "{{ item.insertbefore | default(omit) }}"
+    job: "{{ item.job | default(omit) }}"
+    minute: "{{ item.minute | default(omit) }}"
+    month: "{{ item.month | default(omit) }}"
+    name: "{{ item.name }}"
+    special_time: "{{ item.special_time | default(omit) }}"
+    state: "{{ item.state | default(omit) }}"
+    user: "{{ item.user | default(omit) }}"
+    weekday: "{{ item.weekday | default(omit) }}"
+  loop: "{{ generic.cron }}"
+  when: generic.cron is defined and generic.cron is iterable and generic.cron is mapping
+
+- name: "package <|> Install packages"
+  ansible.builtin.package:
+    name: "{{ item.name }}"
+    state: "{{ item.state }}"
+    use: "{{ item.use | default(omit) }}"
+  loop: "{{ generic.package }}"
+  when: generic.package is defined and generic.package is iterable and generic.package is mapping
+
+- name: "file <|> Create/manage requested files/folders"
+  ansible.builtin.file:
+    access_time: "{{ item.access_time | default(omit) }}"
+    access_time_format: "{{ item.access_time_format | default(omit) }}"
+    attributes: "{{ item.attributes | default(omit) }}"
+    follow: "{{ item.follow | default(omit) }}"
+    force: "{{ item.force | default(omit) }}"
+    group: "{{ item.group | default(omit) }}"
+    mode: "{{ item.mode | default(omit) }}"
+    modification_time: "{{ item.modification_time | default(omit) }}"
+    modification_time_format: "{{ item.modification_time_format | default(omit) }}"
+    owner: "{{ item.owner | default(omit) }}"
+    path: "{{ item.path }}"
+    recurse: "{{ item.recurse | default(omit) }}"
+    selevel: "{{ item.selevel | default(omit) }}"
+    serole: "{{ item.serole | default(omit) }}"
+    setype: "{{ item.setype | default(omit) }}"
+    seuser: "{{ item.seuser | default(omit) }}"
+    src: "{{ item.src | default(omit) }}"
+    state: "{{ item.state | default(omit) }}"
+    unsafe_writes: "{{ item.unsafe_writes | default(omit) }}"
+  loop: "{{ generic.file }}"
+  when: generic.file is defined and generic.file is iterable and generic.file is mapping
+
+- name: "template <|> Render requested templates"
+  ansible.builtin.template:
+    attributes: "{{ item.attributes | default(omit) }}"
+    backup: "{{ item.backup | default(omit) }}"
+    block_end_string: "{{ item.block_end_string | default(omit) }}"
+    block_start_string: "{{ item.block_start_string | default(omit) }}"
+    comment_end_string: "{{ item.comment_end_string | default(omit) }}"
+    comment_start_string: "{{ item.comment_start_string | default(omit) }}"
+    dest: "{{ item.dest }}"
+    follow: "{{ item.follow | default(omit) }}"
+    force: "{{ item.force | default(omit) }}"
+    group: "{{ item.group | default(omit) }}"
+    lstrip_blocks: "{{ item.lstrip_blocks | default(omit) }}"
+    mode: "{{ item.mode | default(omit) }}"
+    newline_sequence: "{{ item.newline_sequence | default(omit) }}"
+    output_encoding: "{{ item.output_encoding | default(omit) }}"
+    owner: "{{ item.owner | default(omit) }}"
+    selevel: "{{ item.selevel | default(omit) }}"
+    serole: "{{ item.serole | default(omit) }}"
+    setype: "{{ item.setype | default(omit) }}"
+    seuser: "{{ item.seuser | default(omit) }}"
+    src: generic.j2
+    trim_blocks: "{{ item.trim_blocks | default(omit) }}"
+    unsafe_writes: "{{ item.unsafe_writes | default(omit) }}"
+    validate: "{{ item.validate | default(omit) }}"
+    variable_end_string: "{{ item.variable_end_string | default(omit) }}"
+    variable_start_string: "{{ item.variable_start_string | default(omit) }}"
+  loop: "{{ generic.template }}"
+  when: generic.template is defined and generic.template is iterable and generic.template is mapping
+
+- name: "lineinfile <|> Edit lines in files"
+  ansible.builtin.lineinfile:   
+    attributes: "{{ item.attributes | default(omit) }}"
+    backrefs: "{{ item.backrefs | default(omit) }}"
+    backup: "{{ item.backup | default(omit) }}"
+    create: "{{ item.create | default(omit) }}"
+    firstmatch: "{{ item.firstmatch | default(omit) }}"
+    group: "{{ item.group | default(omit) }}"
+    insertafter: "{{ item.insertafter | default(omit) }}"
+    insertbefore: "{{ item.insertbefore | default(omit) }}"
+    line: "{{ item.line | default(omit) }}"
+    mode: "{{ item.mode | default(omit) }}"
+    others: "{{ item.others | default(omit) }}"
+    owner: "{{ item.owner | default(omit) }}"
+    path: "{{ item.path }}"
+    regexp: "{{ item.regexp | default(omit) }}"
+    search_string: "{{ item.search_string | default(omit) }}"
+    selevel: "{{ item.selevel | default(omit) }}"
+    serole: "{{ item.serole | default(omit) }}"
+    setype: "{{ item.setype | default(omit) }}"
+    seuser: "{{ item.seuser | default(omit) }}"
+    state: "{{ item.state | default(omit) }}"
+    unsafe_writes: "{{ item.unsafe_writes | default(omit) }}"
+    validate: "{{ item.validate | default(omit) }}"
+  loop: "{{ generic.lineinfile }}"
+  when: generic.lineinfile is defined and generic.lineinfile is iterable and generic.lineinfile is mapping
+
+- name: modprobe <|> Load or unload kernel modules
+  community.general.modprobe:
+    name: "{{ item.name }}"
+    params: "{{ item.params | default(omit) }}"
+    state: "{{ item.state | default(omit) }}"
+  loop: "{{ generic.modprobe }}"
+  when: generic.modprobe is defined and generic.modprobe is iterable and generic.modprobe is mapping
+
+- name: "service <|> Manage services"
+  ansible.builtin.service:
+    arguments: "{{ item.arguments | default(omit) }}"
+    enabled: "{{ item.enabled | default(omit) }}"
+    name: "{{ item.name }}"
+    pattern: "{{ item.pattern | default(omit) }}"
+    runlevel: "{{ item.runlevel | default(omit) }}"
+    sleep: "{{ item.sleep | default(omit) }}"
+    state: "{{ item.state | default(omit) }}"
+    use: "{{ item.use | default(omit) }}"
+  loop: "{{ generic.service }}"
+  when: generic.service is defined and generic.service is iterable and generic.service is mapping
