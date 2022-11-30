@@ -95,7 +95,7 @@ if $GATHER_PACKAGES; then
           cp -a "$CURRENT_DIR/offline_bootstrap/iso/$REDHAT_8_ISO"\
           "${REPO_PATH}"
         else
-          wget -P "{REPO_PATH}" "${REDHAT_8_ISO_URL}"
+          wget -P "${REPO_PATH}" "${REDHAT_8_ISO_URL}"
         fi
         mountpoint -q /mnt
         if [ $? -eq 0 ]; then
