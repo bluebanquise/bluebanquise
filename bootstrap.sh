@@ -72,7 +72,7 @@ if $GATHER_PACKAGES; then
     if $GATHER_PACKAGES_REDHAT_8; then
       REPO_PATH="/var/www/html/repositories/redhat/8/x86_64/"
       mkdir -p "${REPO_PATH}"
-      if [[ -d bluebanquise ]]; then
+      if [[ -d "${REPO_PATH}"/bluebanquise ]]; then
         message_output "BlueBanquise folder already exist, skipping packages download."
       else
         if $OFFLINE_MODE; then
@@ -88,7 +88,7 @@ if $GATHER_PACKAGES; then
                http://bluebanquise.com/repository/releases/latest/el8/x86_64/bluebanquise/
         fi
       fi
-      if [[ -d os ]]; then
+      if [[ -d "${REPO_PATH}"/os ]]; then
         message_output "Os folder already exist, skipping iso download."
       else
         if $OFFLINE_MODE; then
@@ -97,8 +97,7 @@ if $GATHER_PACKAGES; then
         else
           wget -P "${REPO_PATH}" "${REDHAT_8_ISO_URL}"
         fi
-        mountpoint -q /mnt
-        if [ $? -eq 0 ]; then
+        if mountpoint -q /mnt; then
           sudo umount /mnt
         fi
         sudo mount /var/www/html/repositories/redhat/8/x86_64/$REDHAT_8_ISO /mnt
@@ -191,6 +190,7 @@ tee -a "${HOME}"/.bashrc
 grep -q PYTHONPATH "${HOME}"/.bashrc ||\
 echo "export PYTHONPATH=\$(pip3 show ClusterShell | grep Location | awk -F ' ' '{print \$2}')" >> "${HOME}"/.bashrc
 
+grep -q ANSIBLE_CONFIG "${HOME}"/.bashrc ||\
 echo "export ANSIBLE_CONFIG=\$HOME/bluebanquise/ansible.cfg" |
 tee -a "${HOME}"/.bashrc
 sudo grep -q PYTHONPATH /etc/sudoers ||\
@@ -199,6 +199,7 @@ sudo EDITOR='tee -a' visudo
 
 message_output "Generating ssh keys..."
 mkdir -p $HOME/.ssh
+chmod 700 $HOME/.ssh
 # Create SSH key pair if id_ed25519 doesn't exist
 if [[ ! -f "${HOME}/.ssh/id_ed25519" ]]; then
   ssh-keygen -t ed25519\
@@ -228,12 +229,12 @@ echo "  - $(cat "${HOME}"/.ssh/id_ed25519.pub)" |\
 tee -a inventory/group_vars/all/equipment_all/authentication.yml
 
 message_output "Setting first connection..."
-grep -q mgt1 /etc/hosts ||\
-echo "127.0.0.1 mgt1" |\
+grep -q $SYSTEM_HOSTNAME /etc/hosts ||\
+echo "127.0.0.1 $SYSTEM_HOSTNAME" |\
 sudo tee -a /etc/hosts
 
 if $ESTABLISH_FIRST_SSH; then
-ssh -o StrictHostKeyChecking=no mgt1 echo Ok
+ssh -o StrictHostKeyChecking=no $SYSTEM_HOSTNAME echo Ok
 fi
 
 echo -e "\e[34m"
