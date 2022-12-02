@@ -108,7 +108,7 @@ zone "{{ octets.split('.')|reverse|join('.') }}.in-addr.arpa" IN {
   {% endif %}
   {% if hostvars[host]['bmc'] is defined %}
     {% set bmc_args = hostvars[host]['bmc'] %}
-    {% if bmc_args.ip4 is defined %}
+    {% if bmc_args.ip4 is defined and networks[bmc_args['network']]['is_in_dns'] %}
       {% set ip_prefix = bmc_args.ip4.split('.')[0:3]|join('.') %}
       {% if ip_prefix not in ip_networks %}
         {{ ip_networks.append(ip_prefix) }}
