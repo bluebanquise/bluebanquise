@@ -1,0 +1,15 @@
+---
+dns_server_dnssec_enable: true
+dns_server_dnssec_validation: true
+dns_server_dnssec_lookaside: auto
+
+dns_server_recursion: false  # Enable recursion, to be combined with forwarders
+
+dns_server_forwarders: []  # list of custom forwarders ip.
+dns_server_allow_query: []  # list with subnet/prefix format. Ex: - 10.10.0.0/16
+
+dns_server_domaine_name: cluster.local
+
+# dns_server_overrides
+# dns_server_start_services:
+# dns_server_enable_services:

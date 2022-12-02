@@ -1,0 +1,40 @@
+---
+dns_server_role_version: 1.6.0
+
+j2_dns_server_get_first_octets: "
+{%- set ip_networks = [] -%}
+{%- for host in (groups['all'] | sort) -%}
+  {%- if hostvars[host]['network_interfaces'] is defined and hostvars[host]['network_interfaces'] is iterable -%}
+    {%- for interface in hostvars[host]['network_interfaces'] -%}
+      {%- if interface['ip4'] is defined and (interface['ip4'] | ansible.utils.ipaddr) and interface['network'] is defined and interface['network'] is not none and networks[interface['network']] is defined and (networks[interface['network']]['dns_server'] | default(true)) -%}
+        {%- set ip_prefix = interface['ip4'].split('.')[0:3] | join('.') -%}
+        {%- if ip_prefix not in ip_networks -%}
+          {{ ip_networks.append(ip_prefix) }}
+        {%- endif -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
+  {%- if hostvars[host]['j2_node_main_resolution_address'] is not none and (hostvars[host]['j2_node_main_resolution_address'] | ansible.utils.ipaddr) -%}
+    {%- set ip_prefix = hostvars[host]['j2_node_main_resolution_address'].split('.')[0:3] | join('.') -%}
+    {%- if ip_prefix not in ip_networks -%}
+      {{ ip_networks.append(ip_prefix) }}
+    {%- endif -%}
+  {%- endif -%}
+  {%- if hostvars[host]['bmc'] is defined and hostvars[host]['bmc'] is not none -%}
+    {%- set bmc_args = hostvars[host]['bmc'] -%}
+    {%- if bmc_args.name is defined and \
+        bmc_args.name is not none and \
+        bmc_args.ip4 is defined and \
+        (bmc_args.ip4 | ansible.utils.ipaddr) and \
+        bmc_args.network is defined and \
+        bmc_args.network is not none and \
+        (networks[bmc_args.network]['dns_server'] | default(true))
+    -%}
+      {%- set ip_prefix = bmc_args.ip4.split('.')[0:3] | join('.') -%}
+      {%- if ip_prefix not in ip_networks -%}
+        {{ ip_networks.append(ip_prefix) }}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endif -%}
+{%- endfor -%}
+{{ ip_networks | join(',') }}"

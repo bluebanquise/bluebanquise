@@ -79,7 +79,7 @@ subnet {{ networks[network]['subnet'] }} netmask {{ (networks[network]['subnet']
 {% for shared_network in ( shared_networks | unique | sort ) %}
 shared-network {{ shared_network }} {
   {% for network in networks %}
-    {% if j2_current_iceberg_network in network and (networks[network]['dhcp_server'] | default(false)) %}
+    {% if j2_current_iceberg_network in network and (networks[network]['dhcp_server'] | default(true)) %}
       {% if networks[network]['shared_network'] is defined and networks[network]['shared_network'] is not none and networks[network]['shared_network'] == shared_network %}
 {{ write_network(network) }}
       {% endif %}
