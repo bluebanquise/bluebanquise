@@ -51,6 +51,7 @@ This will cause `/var/named/override` to be generated.
 
 ## Changelog
 
+* 1.7.0: Add optional alias to every interface. Matthieu Isoard <indigoping4cgmi@gmail.com>
 * 1.6.0: Update to BB 2.0 format. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.5.3: Bug fix for issue #724. Neil Munday <neil@mundayweb.com>
 * 1.5.2: Bug fix for bond interfaces with no network defined.
