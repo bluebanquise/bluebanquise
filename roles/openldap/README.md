@@ -31,7 +31,7 @@ $  slappasswd -h {SSHA} -s abcd123
 ```
 
 The default backend database that this role expects is 'hdb', if you are using some diferent one, for instance 'mdb', just add the openldap_backend_db option to vars, example for 'mdb':
-```
+```yaml
 openldap_backend_db: mdb
 ```
 
