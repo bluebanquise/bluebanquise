@@ -1,0 +1,16 @@
+# {{ ansible_managed }}
+[Unit]
+Description={{ item.description | d("flexlm Licence Manager for " + item.name) }}
+After=network.target
+
+[Service]
+Type=simple
+User={{ flexlm_user_name }}
+WorkingDirectory={{ item.bin_path | d("/opt/" + item.name + "/bin") }}
+ExecStart={{ item.lmgrd_path }} -z -c {{ item.lic_path | d("/opt/" + item.name + "/etc/licence.lic") }}
+SuccessExitStatus=15
+Restart=always
+RestartSec={{ item.timewait | d(60) | int }}
+
+[Install]
+WantedBy=multi-user.target

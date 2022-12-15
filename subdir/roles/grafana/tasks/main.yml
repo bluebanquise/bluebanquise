@@ -1,0 +1,159 @@
+---
+- name: include_vars █ Gather OS specific variables
+  # This task gathers variables defined in OS specific files.
+  #
+  # Search vars in:
+  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
+  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
+  #  - <distribution>.yml            # eg. CentOS.yml
+  #  - <os_family>.yml               # eg. RedHat.yml
+  #
+  # If no OS specific file is found, the role will default to vars/main.yml
+  #
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family }}.yml"
+      skip: true
+  tags:
+    - package
+    - service
+    - firewall
+    - configure
+    - datasources
+    - notifications
+    - dashboards
+    - plugins
+    - apikeys
+
+- ansible.builtin.include_tasks: preflight.yml
+  tags:
+    - package
+    - service
+    - firewall
+    - configure
+    - datasources
+    - notifications
+    - dashboards
+    - plugins
+    - apikeys
+
+- ansible.builtin.include_tasks: preflight_ports.yml
+  when: ansible_version.major > 2 and ansible_version.minor >= 9
+  tags:
+    - package
+    - service
+    - firewall
+    - configure
+    - datasources
+    - notifications
+    - dashboards
+    - plugins
+    - apikeys
+
+- ansible.builtin.include_tasks: install.yml
+  tags:
+    - package
+    - firewall
+
+- ansible.builtin.include_tasks: configure.yml
+  tags:
+    - service
+    - configure
+
+- ansible.builtin.include_tasks: plugins.yml
+  when: grafana_plugins != []
+  tags:
+    - plugins
+
+- name: service █ Force all notified handlers to run at this point
+  ansible.builtin.meta: flush_handlers
+
+- name: service █ Wait for grafana to start (http/s)
+  ansible.builtin.wait_for:
+    host: "{{ grafana_address }}"
+    port: "{{ grafana_port }}"
+  when: grafana_server.protocol is undefined or grafana_server.protocol in ['http', 'https']
+  tags:
+    - package
+    - service
+    - firewall
+    - configure
+    - datasources
+    - notifications
+    - dashboards
+    - plugins
+
+- name: service █ Wait for grafana to start (socket)
+  ansible.builtin.wait_for:
+    path: "{{ grafana_server.socket }}"
+  when: grafana_server.protocol is defined and grafana_server.protocol == 'socket'
+  tags:
+    - package
+    - service
+    - firewall
+    - configure
+    - datasources
+    - notifications
+    - dashboards
+    - plugins
+
+- name: grafana █ Ensure password is set to the one in the role variables
+  ansible.builtin.command: "grafana-cli admin reset-admin-password {{ grafana_security.admin_password }}"
+  changed_when: false
+  no_log: true
+  register: grafana_cli_var
+  ignore_errors: true
+
+- name: grafana █ Debug grafana-cli when  command is failing
+  ansible.builtin.debug:
+    msg: "grafana-cli failed to set password {{ grafana_cli_var.stderr }}"
+  when:
+    - grafana_cli_var is defined
+    - grafana_cli_var.rc != 0
+  failed_when: false
+  changed_when: false
+
+- ansible.builtin.include_tasks: api_keys.yml
+  when: grafana_api_keys | length > 0
+  tags:
+    - apikeys
+
+- ansible.builtin.include_tasks: datasources.yml
+  when: grafana_datasources != []
+  tags:
+    - datasources
+
+- name: "grafana █ Check if there are any dashboards in local {{ grafana_dashboards_dir }}"
+  ansible.builtin.set_fact:
+    found_dashboards: "{{ lookup('fileglob', grafana_dashboards_dir + '/*.json', wantlist=True) }}"
+  tags:
+    - dashboards
+
+- ansible.builtin.include_tasks: dashboards.yml
+  when: grafana_dashboards | length > 0 or found_dashboards | length > 0
+  tags:
+    - dashboards
+
+- name: grafana █ UI login information
+  ansible.builtin.debug:
+    msg:
+      - '###############################################################'
+      - 'Grafana UI access:'
+      - "URL: {{ grafana_address }}:{{ grafana_port }}"
+      - "- login: {{ grafana_security.admin_user }}"
+      - "- password: {{ grafana_security.admin_password }}"
+      - '###############################################################'
+  tags:
+    - package
+    - service
+    - firewall
+    - configure
+    - datasources
+    - notifications
+    - dashboards
+    - plugins
+    - apikeys

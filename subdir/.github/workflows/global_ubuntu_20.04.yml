@@ -1,0 +1,140 @@
+---
+
+# Global run on Ubuntu 20.04
+# Using instance environment (no docker)
+
+name: global ubuntu 20.04
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  global_run_ubuntu_2004:
+    name: Global deployment on Ubuntu 20.04
+    runs-on: ubuntu-20.04
+    env:
+      ANSIBLE_CONFIG: /etc/bluebanquise/ansible.cfg
+      PY_COLORS: '1'
+      ANSIBLE_FORCE_COLOR: '1'
+    steps:
+      - name: Checkout Bluebanquise master branch
+        uses: actions/checkout@v3
+        with:
+          repository: bluebanquise/bluebanquise
+          path: bluebanquise
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          path: community
+
+      - name: Setup python environment
+        uses: actions/setup-python@v3
+
+      - name: Install packages
+        run: pip3 install ansible netaddr clustershell jmespath
+
+      - name: Install collections
+        run: ansible-galaxy collection install community.general ansible.posix containers.podman community.grafana
+
+      - name: Prepare bluebanquise folder
+        run: sudo mkdir /etc/bluebanquise; sudo chown -R $(id -u):$(id -g) /etc/bluebanquise; cp -a $GITHUB_WORKSPACE/bluebanquise/* /etc/bluebanquise;
+      
+      - name: Prepare bluebanquise community folder
+        run:  cp -a $GITHUB_WORKSPACE/community/* /etc/bluebanquise;
+
+      - name: Prepare bluebanquise environment
+        run: cp -a /etc/bluebanquise/resources/examples/automatic_tests_cluster/inventory /etc/bluebanquise; cp -a /etc/bluebanquise/resources/examples/automatic_tests_cluster/playbooks /etc/bluebanquise
+
+      - name: Update ansible.cfg
+        run: sed -i 's#roles_path            = roles/custom:roles/core:roles/addons:roles/advanced_core#roles_path            = roles/custom:roles/core:roles/addons:roles/advanced_core:roles#' /etc/bluebanquise/ansible.cfg
+      
+      - name: Setup repository
+        run: "echo '  - repo: deb [trusted=yes] http://bluebanquise.com/repository/releases/latest/ubuntu2004/x86_64/bluebanquise/ ./' >> /etc/bluebanquise/inventory/group_vars/all/general_settings/repositories.yml;"
+
+      - name: Role test - modprobe
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=local --limit management1 -t modprobe --diff
+
+      - name: Prepare needed files and folders
+        run: dd if=/dev/zero of=/tmp/1g.img bs=1 count=0 seek=1G; sudo mkdir -p /opt/software; sudo mkdir -p /opt/software_client; sudo useradd test-user;
+      
+      - name: Role test - repositories_server
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=local --limit management1 -t repositories_server --diff --become
+
+      - name: Role test - repositories_client
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --connection=local --limit management1 -t repositories_client --diff --become
+      
+      # - name: Role test - prometheus server
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=local --limit management1 -t prometheus --diff  -e prometheus_server=true
+      
+      # - name: Role test - prometheus client
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=local --limit management1 -t prometheus --diff  -e prometheus_client=true
+      
+      - name: Role test - grafana - Add Grafana repo
+        run: sudo apt-get install -y gnupg2 curl software-properties-common; curl https://packages.grafana.com/gpg.key | sudo apt-key add -; sudo add-apt-repository "deb https://packages.grafana.com/oss/deb stable main"
+
+      - name: Role test - grafana
+        run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=local --limit management1 -t grafana --diff 
+
+      - name: Role test - podman
+        run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=local --limit management1 -t podman --diff 
+      
+      # - name: Role test - automate
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=local --limit management1 -t automate --diff 
+
+      # - name: Role test - display_tuning
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=local --limit management1 -t display_tuning --diff 
+
+      # - name: Role test - drbd
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=local --limit management1 -t drbd --diff 
+
+      # - name: Role test - flexlm
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=local --limit management1 -t flexlm --diff 
+
+      # - name: Role test - generic_psf
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=local --limit management1 -t generic_psf --diff 
+
+      # - name: Role test - haproxy
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=local --limit management1 -t haproxy --diff 
+
+      # - name: Role test - high_availability
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=local --limit management1 -t high_availability --diff 
+
+      # - name: Role test - lmod
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=local --limit management1 -t lmod --diff 
+
+      # - name: Role test - loki
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=local --limit management1 -t loki --diff 
+
+      # - name: Role test - nhc
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=local --limit management1 -t nhc --diff 
+
+      # - name: Role test - nvidia
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=local --limit management1 -t nvidia --diff 
+
+      # - name: Role test - ofed
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=local --limit management1 -t ofed --diff 
+
+      # - name: Role test - openldap
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=local --limit management1 -t openldap --diff 
+
+      # - name: Role test - rasdaemon
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=local --limit management1 -t rasdaemon --diff 
+
+      # - name: Role test - report
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=local --limit management1 -t report --diff 
+
+      # - name: Role test - singularity
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_computes.yml --connection=local --limit management1 -t singularity --diff
+      # https://github.com/sylabs/singularity/releases/download/v3.9.1/singularity-ce_3.9.1+6-g38b50cbc5-focal_amd64.deb
+
+      # - name: Role test - slurm
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=local --limit management1 -t slurm --diff 
+
+      # - name: Role test - update_reboot
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=local --limit management1 -t update_reboot --diff 
+
+      # - name: Role test - users_basic
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=local --limit management1 -t users_basic --diff 

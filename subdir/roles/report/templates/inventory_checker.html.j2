@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>BlueBanquise - Report</title>
+    <link rel="stylesheet" href="css/main.css" />
+    <style type="text/css">
+    @font-face {
+        font-family: 'OpenSans-Light';
+        src:  url('fonts/OpenSans-Light.ttf')  format('truetype');
+    }
+    @font-face {
+        font-family: 'OpenSans';
+        src:  url('fonts/OpenSans-Regular.ttf')  format('truetype');
+    }
+    </style>
+  </head>
+<script>
+function includeHTML() {
+  var z, i, elmnt, file, xhttp;
+  /* Loop through a collection of all HTML elements: */
+  z = document.getElementsByTagName("*");
+  for (i = 0; i < z.length; i++) {
+    elmnt = z[i];
+    /*search for elements with a certain atrribute:*/
+    file = elmnt.getAttribute("w3-include-html");
+    if (file) {
+      /* Make an HTTP request using the attribute value as the file name: */
+      xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4) {
+          if (this.status == 200) {elmnt.innerHTML = this.responseText;}
+          if (this.status == 404) {elmnt.innerHTML = "Page not found.";}
+          /* Remove the attribute, and call this function once more: */
+          elmnt.removeAttribute("w3-include-html");
+          includeHTML();
+        }
+      }
+      xhttp.open("GET", file, true);
+      xhttp.send();
+      /* Exit the function: */
+      return;
+    }
+  }
+}
+</script>
+<body>
+
+
+<ul class="top">
+  <li><a class="logo" href="index.html"><span style="color: #108bde">Blue</span>Banquise</a></li>
+  <li><a href="index.html">Home</a></li>
+  <li><a href="inventory_checker.html" class="active">Inventory Checker</a></li>
+  <li><a href="cluster_configuration.html">Cluster configuration</a></li>
+  <li><a href="graphs.html">Graphs</a></li>
+</ul>
+
+<div style="padding:2% 1%; max-width: 900px; margin: auto;">
+
+<h1>BlueBanquise Inventory Checker</h1>
+<br>
+Please consider that this debug tools will not catch all errors in your inventories, but try to provide protection again common mistakes.<br>
+<br>
+This report has been generated at:<br>
+{{ansible_managed}}<br>
+<br>
+<h2>Groups checker report</h2>
+<div w3-include-html="inventory_checker/groups.html"></div>
+<br>
+<h2>Hosts checker report</h2>
+<div w3-include-html="inventory_checker/hosts.html"></div>
+<br>
+</div>
+
+<script>
+includeHTML();
+</script>
+
+
+</body>
+
+</html>

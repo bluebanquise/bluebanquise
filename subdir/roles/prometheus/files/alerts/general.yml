@@ -1,0 +1,65 @@
+groups:
+- name: General alerts
+  rules:
+  - alert: Exporter_down
+    expr: up == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Exporter down (instance {{ $labels.instance }})"
+      description: "Prometheus exporter down\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - alert: PrometheusConfigurationReloadFailure
+    expr: prometheus_config_last_reload_successful != 1
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Prometheus configuration reload failure (instance{{ $labels.instance }})"
+      description: "Prometheus configuration reload error\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - alert: PrometheusTooManyRestarts
+    expr: changes(process_start_time_seconds{job=~"prometheus|pushgateway|alertmanager"}[15m]) > 2
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Prometheus too many restarts (instance {{ $labels.instance }})"
+      description: "Prometheus has restarted more than twice in the last 15 minutes. It might be crashlooping.\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - alert: PrometheusNotConnectedToAlertmanager
+    expr: prometheus_notifications_alertmanagers_discovered < 1
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Prometheus not connected to alertmanager (instance {{ $labels.instance }})"
+      description: "Prometheus cannot connect the alertmanager\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - alert: PrometheusRuleEvaluationSlow
+    expr: prometheus_rule_group_last_duration_seconds > prometheus_rule_group_interval_seconds
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Prometheus rule evaluation slow (instance {{ $labels.instance }})"
+      description: "It indicates a slower storage backend access or too complex query.\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - alert: PrometheusTargetEmpty
+    expr: prometheus_sd_discovered_targets == 0
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Prometheus target empty (instance {{ $labels.instance }})"
+      description: "Prometheus has no target in service discovery\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - alert: PrometheusLargeScrape
+    expr: increase(prometheus_target_scrapes_exceeded_sample_limit_total[10m]) > 10
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Prometheus large scrape (instance {{ $labels.instance }})"
+      description: "Prometheus has many scrapes that exceed the sample limit\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"

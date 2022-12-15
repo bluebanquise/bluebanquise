@@ -1,0 +1,37 @@
+---
+- name: include_tasks ░ Setup Prometheus
+  ansible.builtin.include_tasks: "server_prometheus.yml"
+  when: prometheus_server_manage_prometheus
+  tags:
+    - internal
+
+- name: include_tasks ░ Setup Alertmanager
+  ansible.builtin.include_tasks: "server_alertmanager.yml"
+  when: prometheus_server_manage_alertmanager
+  tags:
+    - internal
+
+- name: include_tasks ░ Setup Karma
+  ansible.builtin.include_tasks: "server_karma.yml"
+  when: prometheus_server_manage_karma
+  tags:
+    - internal
+
+#- name: include_tasks ░ Setup Am-executor
+#  include_tasks: "server_am_executor.yml"
+#  when: prometheus_server_manage_karma
+#  tags:
+#    - internal
+
+- name: include_tasks ░ Setup ipmi_exporter
+  ansible.builtin.include_tasks: "server_ipmi_exporter.yml"
+  when: prometheus_server_manage_ipmi_exporter
+  tags:
+    - internal
+
+- name: include_tasks ░ Setup snmp_exporter
+  ansible.builtin.include_tasks: "server_snmp_exporter.yml"
+  when: prometheus_server_manage_snmp_exporter
+  tags:
+    - internal
+
