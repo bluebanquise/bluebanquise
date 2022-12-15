@@ -1,6 +1,6 @@
-# Generic wrappers collection
+# System wrappers collection
 
-![generic](generic_logo.svg)
+![system](system_logo.svg)
 
 This roles is just a convenient collection of wrappers above the following Ansible modules:
 
@@ -18,10 +18,10 @@ Using this role, it is theoretically possible to setup and start a large number 
 
 ### cron
 
-Set needed cron on node/group by defining generic.cron list based on cron module parameters. Example:
+Set needed cron on node/group by defining system.cron list based on cron module parameters. Example:
 
 ```yaml
-generic:
+system:
   cron:
     - name: "check dirs"
       minute: "0"
@@ -41,10 +41,10 @@ for the full list of available parameters.
 
 ### package
 
-Install desired packages on node/group by defining generic.package list based on package module parameters. Example:
+Install desired packages on node/group by defining system.package list based on package module parameters. Example:
 
 ```yaml
-generic:
+system:
   package:
     - name: ntpdate
       state: present
@@ -57,10 +57,10 @@ for the full list of available parameters.
 
 ### file
 
-Create desired file or folder / change permissions / etc on node/group by defining generic.file list based on file module parameters. Example:
+Create desired file or folder / change permissions / etc on node/group by defining system.file list based on file module parameters. Example:
 
 ```yaml
-generic:
+system:
   file:
     - path: /etc/foo.conf
       owner: foo
@@ -81,10 +81,10 @@ for the full list of available parameters.
 
 ### template
 
-Generate desired files based from custom templates on node/group by defining generic.template list based on template module parameters. Note that for this wrapper, a special additional key was added: `template`, that should contain the template to render and replace the `src` key:
+Generate desired files based from custom templates on node/group by defining system.template list based on template module parameters. Note that for this wrapper, a special additional key was added: `template`, that should contain the template to render and replace the `src` key:
 
 ```yaml
-generic:
+system:
   template:
     - template: |
         This is a template to render
@@ -102,10 +102,10 @@ for the full list of available parameters.
 
 ### lineinfile
 
-Edit lines of files on node/group by defining generic.lineinfile list based on lineinfile module parameters. Example:
+Edit lines of files on node/group by defining system.lineinfile list based on lineinfile module parameters. Example:
 
 ```yaml
-generic:
+system:
   lineilfile:
     - path: /etc/selinux/config
       regexp: '^SELINUX='
@@ -123,10 +123,10 @@ for the full list of available parameters.
 
 ### service
 
-Manage services on node/group by defining generic.service list based on service module parameters. Example:
+Manage services on node/group by defining system.service list based on service module parameters. Example:
 
 ```yaml
-generic:
+system:
   service:
     - name: httpd
       state: started
@@ -140,10 +140,10 @@ for the full list of available parameters.
 
 ## filesystem
 
-Manage filesystems (devices or files) on node/group by defining generic.filesystem list based on filesystem module parameters. Example:
+Manage filesystems (devices or files) on node/group by defining system.filesystem list based on filesystem module parameters. Example:
 
 ```yaml
-generic:
+system:
   filesystem:
     - fstype: ext2
       dev: /dev/sdb1
@@ -159,10 +159,10 @@ for the full list of available parameters.
 
 ## modprobe
 
-Manage kernel modules on node/group by defining generic.modprobe list based on modprobe module parameters. Example:
+Manage kernel modules on node/group by defining system.modprobe list based on modprobe module parameters. Example:
 
 ```yaml
-generic:
+system:
   modprobe:
     - name: 8021q
       state: present

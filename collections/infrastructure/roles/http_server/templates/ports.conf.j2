@@ -1,0 +1,7 @@
+#jinja2: lstrip_blocks: True
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+
+{% for port in http_server_custom_ports %}
+Listen {{ port }}
+{% endfor %}

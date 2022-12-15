@@ -8,8 +8,8 @@
     opts: "{{ item.opts | default(omit) }}"
     resizefs: "{{ item.resizefs | default(omit) }}"
     state: "{{ item.state | default(omit) }}"
-  loop: "{{ generic.filesystem }}"
-  when: generic.filesystem is defined and generic.filesystem is iterable and generic.filesystem is mapping
+  loop: "{{ system.filesystem }}"
+  when: system.filesystem is defined and system.filesystem is iterable and system.filesystem is mapping
 
 - name: cron <|> Set cron jobs
   ansible.builtin.cron:
@@ -29,16 +29,16 @@
     state: "{{ item.state | default(omit) }}"
     user: "{{ item.user | default(omit) }}"
     weekday: "{{ item.weekday | default(omit) }}"
-  loop: "{{ generic.cron }}"
-  when: generic.cron is defined and generic.cron is iterable and generic.cron is mapping
+  loop: "{{ system.cron }}"
+  when: system.cron is defined and system.cron is iterable and system.cron is mapping
 
 - name: "package <|> Install packages"
   ansible.builtin.package:
     name: "{{ item.name }}"
     state: "{{ item.state }}"
     use: "{{ item.use | default(omit) }}"
-  loop: "{{ generic.package }}"
-  when: generic.package is defined and generic.package is iterable and generic.package is mapping
+  loop: "{{ system.package }}"
+  when: system.package is defined and system.package is iterable and system.package is mapping
 
 - name: "file <|> Create/manage requested files/folders"
   ansible.builtin.file:
@@ -61,8 +61,8 @@
     src: "{{ item.src | default(omit) }}"
     state: "{{ item.state | default(omit) }}"
     unsafe_writes: "{{ item.unsafe_writes | default(omit) }}"
-  loop: "{{ generic.file }}"
-  when: generic.file is defined and generic.file is iterable and generic.file is mapping
+  loop: "{{ system.file }}"
+  when: system.file is defined and system.file is iterable and system.file is mapping
 
 - name: "template <|> Render requested templates"
   ansible.builtin.template:
@@ -91,8 +91,8 @@
     validate: "{{ item.validate | default(omit) }}"
     variable_end_string: "{{ item.variable_end_string | default(omit) }}"
     variable_start_string: "{{ item.variable_start_string | default(omit) }}"
-  loop: "{{ generic.template }}"
-  when: generic.template is defined and generic.template is iterable and generic.template is mapping
+  loop: "{{ system.template }}"
+  when: system.template is defined and system.template is iterable and system.template is mapping
 
 - name: "lineinfile <|> Edit lines in files"
   ansible.builtin.lineinfile:   
@@ -118,16 +118,16 @@
     state: "{{ item.state | default(omit) }}"
     unsafe_writes: "{{ item.unsafe_writes | default(omit) }}"
     validate: "{{ item.validate | default(omit) }}"
-  loop: "{{ generic.lineinfile }}"
-  when: generic.lineinfile is defined and generic.lineinfile is iterable and generic.lineinfile is mapping
+  loop: "{{ system.lineinfile }}"
+  when: system.lineinfile is defined and system.lineinfile is iterable and system.lineinfile is mapping
 
 - name: modprobe <|> Load or unload kernel modules
   community.general.modprobe:
     name: "{{ item.name }}"
     params: "{{ item.params | default(omit) }}"
     state: "{{ item.state | default(omit) }}"
-  loop: "{{ generic.modprobe }}"
-  when: generic.modprobe is defined and generic.modprobe is iterable and generic.modprobe is mapping
+  loop: "{{ system.modprobe }}"
+  when: system.modprobe is defined and system.modprobe is iterable and system.modprobe is mapping
 
 - name: "service <|> Manage services"
   ansible.builtin.service:
@@ -139,5 +139,5 @@
     sleep: "{{ item.sleep | default(omit) }}"
     state: "{{ item.state | default(omit) }}"
     use: "{{ item.use | default(omit) }}"
-  loop: "{{ generic.service }}"
-  when: generic.service is defined and generic.service is iterable and generic.service is mapping
+  loop: "{{ system.service }}"
+  when: system.service is defined and system.service is iterable and system.service is mapping

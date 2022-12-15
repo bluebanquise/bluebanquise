@@ -1,0 +1,33 @@
+---
+- name: Verify
+  hosts: management1
+  tasks:
+
+    - name: Collect package facts
+      package_facts:
+        manager: auto
+
+    - name: Collect services facts
+      service_facts:
+
+    - name: Collect services of zone public
+      command: firewall-cmd --zone=public --list-all
+      register: firewall_cmd_result
+      changed_when: False
+
+    - name: Firewall zone public check presence of service http
+      assert:
+        that: firewall_cmd_result.stdout |
+                    regex_findall(('http'), multiline=False) | length == 1
+
+    - name: Assert httpd package is installed
+      assert:
+        that: "'httpd' in ansible_facts.packages"
+
+    - name: Check services httpd is enabled
+      assert:
+        that: "ansible_facts.services['httpd.service'].status == 'enabled'"
+
+    - name: Check services httpd is running
+      assert:
+        that: "ansible_facts.services['httpd.service'].state == 'running'"
