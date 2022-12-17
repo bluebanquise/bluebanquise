@@ -1,0 +1,9 @@
+---
+
+interconnect_stack:
+
+# OFED
+interconnect_ofed_memlock_soft: 'unlimited'
+interconnect_ofed_memlock_hard: 'unlimited'
+interconnect_ofed_client: false
+interconnect_ofed_subnet_manager: false

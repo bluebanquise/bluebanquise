@@ -1,38 +1,33 @@
-PXE Stack
----------
+# PXE Stack
 
-Description
-^^^^^^^^^^^
+## Description
 
-This role provides the whole PXE stack. It is a key feature of the stack.
+This role provides the whole PXE stack needed to deploy servers over the network (assuming coupled with a dhcp server).
 
-Instructions
-^^^^^^^^^^^^
+## Instructions
 
 This role will deploy all the needed files, binaries, and scripts to deploy
-remote hosts using PXE (or even USB and CD boot).
+remote hosts using PXE (or even USB and CD boot to trigger PXE on non PXE able systems).
 
 The role takes place just after the dhcp in the PXE deployment, and will
 configure all the iPXE chain needed after dhcp provided hosts with next-server
 ip address and filename to use.
 
-**Files location**
-""""""""""""""""""
+### Files location
 
-* PXE boot files are located in /var/www/html/preboot_execution_environment/, with path depending of the operating system.
+* PXE boot files are located in {{ pxe_stack_htdocs_path }}/pxe/, with path depending of the operating system.
    * *bin/* directory contains some needed bin files, typically grub2 files for EFI boot.
    * *equipment_profiles/* directory contains equipment_profiles related files, i.e. ipxe file with group variables, and os configuration files (kickstart, preseed, autoyast).
    * *nodes/* directory contains hosts dedicated files, i.e. ipxe file with hosts dedicated variables.
    * *osdeploy/* directory contains static files, with patterns to boot each kind of supported distributions.
-* Basic configuration files are located in /etc/bootset/.
+* Basic configuration files are located in /etc/bluebanquise/bootset.
    * *nodes_parameters.yml* contains all nodes PXE needed parameters.
    * *pxe_parameters.yml* contains needed values for scripts to adapt to **current pxe server host** (these parameters do not apply to PXE booted hosts !!).
 * Scripts are located in /usr/bin/.
 
-**Inventory configuration**
-"""""""""""""""""""""""""""
+### Inventory configuration
 
-This role will rely on multiple parts of the inventory, and is probably the most "invasive" role of the whole stack.
+This role will rely on multiple parts of the inventory, and is probably the most "invasive" role of the whole collection.
 
 * equipment_profile parameters are used for each equipment_profile group. All
   boot configuration is made relying on it (operating system, cpu architecture,
@@ -43,10 +38,9 @@ This role will rely on multiple parts of the inventory, and is probably the most
 * hosts **network_interfaces** dedicated variables, to be able to force static
   ip address at kernel boot.
 
-**bootset usage**
-"""""""""""""""""
+### bluebanquise-bootset usage
 
-Once the role is deployed, and hosts gathered into */etc/bootset/nodes_parameters.yml*, the bootset tool can be used to manipulate remote hosts PXE boot. By default, 3 states can be defined for each host:
+Once the role is deployed, and hosts gathered into */etc/bluebanquise/bootset/nodes_parameters.yml*, the bluebanquise-bootset tool can be used to manipulate remote hosts PXE boot. By default, 3 states can be defined for each host:
 
 * osdeploy: the remote host will deploy/redeploy its operating system, using inventory equipment_profile parameters of its equipment profile group.
 * disk: the remote host will boot on disk. This parameter is automatically set after a successful **osdeploy**.
@@ -54,17 +48,17 @@ Once the role is deployed, and hosts gathered into */etc/bootset/nodes_parameter
 
 Again, consider that if you set an host to osdeploy, and that it succeed its deployment, stack will automatically set the host into disk boot for next boot, to avoid infinite reinstallation loop.
 
-To get bootset help, use:
+To get bluebanquise-bootset help, use:
 
 .. code-block:: text
 
-  bootset -h
+  bluebanquise-bootset -h
 
 To ask an host to deploy/redeploy its operating system, use:
 
 .. code-block:: text
 
-  bootset -n c001 -b osdeploy
+  bluebanquise-bootset -n c001 -b osdeploy
 
 With c001 the target host to be redeployed.
 
@@ -72,7 +66,7 @@ To set this host to boot on disk, use:
 
 .. code-block:: text
 
-  bootset -n c001 -b disk
+  bluebanquise-bootset -n c001 -b disk
 
 It is also possible to work on a range of host, using nodeset formatting:
 
@@ -98,7 +92,7 @@ Also, on some "difficult" networks, system administrator may require to force st
 
   bootset -n c001 -b osdeploy -f network
 
-Or in combinaison with update, using comma separated:
+Or in combination with update, using comma separated:
 
 .. code-block:: text
 

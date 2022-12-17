@@ -178,6 +178,8 @@
   ansible.builtin.copy:
     src: bluebanquise-bootset
     dest: "/usr/bin/bluebanquise-bootset"
+    owner: root
+    group: root
     mode: 0755
 
 - name: "template █ Create {{ pxe_stack_apache_cgi_bin_path }}/bootswitch.cgi"

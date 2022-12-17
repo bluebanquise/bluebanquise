@@ -29,8 +29,8 @@
 - name: authorized_key █ Manage user authorized_keys if exist
   ansible.posix.authorized_key:
     user: "{{ item.name }}"
-    key: "{{ item.ssh_key }}"
+    key: "{{ item.ssh_authorized_keys }}"
     state: present
-    exclusive: "{{ item.ssh_key_exclusive | default(omit) }}"
+    exclusive: "{{ item.ssh_authorized_keys_exclusive | default(omit) }}"
   with_items: "{{ users_basic.users }}"
-  when: item.ssh_key is defined and item.ssh_key
+  when: item.ssh_authorized_kesy is defined and item.ssh_authorized_keys

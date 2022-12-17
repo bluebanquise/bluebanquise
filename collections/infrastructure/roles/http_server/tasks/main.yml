@@ -59,36 +59,18 @@
   tags:
     - internal
 
-- name: template █ Generate custom ports
+- name: template █ Generate custom listen configuration
   ansible.builtin.template:
-    src: ports.conf.j2
-    dest: "{{ pxe_stack_apache_conf_path }}/custom_ports.conf"
+    src: listen.conf.j2
+    dest: "{{ pxe_stack_apache_conf_path }}/custom_listen.conf"
     owner: root
     group: root
     mode: 0644
   tags:
     - template
-  with_items: "{{ http_server_custom_ports }}"
   when:
-    - http_server_custom_ports is not none
-    - http_server_custom_ports is iterable
-  notify:
-    - service █ Restart http server service
-    - lineinfile █ Disable default listen on all interfaces
-
-- name: template █ Generate custom ports
-  ansible.builtin.template:
-    src: ports.conf.j2
-    dest: "{{ pxe_stack_apache_conf_path }}/custom_ports.conf"
-    owner: root
-    group: root
-    mode: 0644
-  tags:
-    - template
-  with_items: "{{ http_server_custom_ports }}"
-  when:
-    - http_server_custom_ports is not none
-    - http_server_custom_ports is iterable
+    - http_server_listen is defined
+    - http_server_listen is not none
   notify:
     - service █ Restart http server service
     - lineinfile █ Disable default listen on all interfaces

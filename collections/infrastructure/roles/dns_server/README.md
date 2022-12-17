@@ -6,8 +6,8 @@ This role provides a dns server based on bind.
 
 ## Instructions
 
-This DNS role will automatically add all networks of the cluster, assuming their
-variable **dns_server** is set to true:
+This DNS role will automatically add networks of the cluster defined in the Ansible inventory,
+assuming their variable **dns_server** is set to true:
 
 ```yaml
 networks:
@@ -16,10 +16,11 @@ networks:
     prefix: 16
     netmask: 255.255.0.0
     broadcast: 10.11.255.255
-    is_in_dhcp: true
+    dhcp_server: true
     dns_server: true  <<<<<<<<<<
     services_ip:
-      dns_ip: 10.11.0.1
+      dns4:
+        - ip: 10.11.0.1
 ```
 
 It will generate 5 files:
@@ -41,7 +42,7 @@ dns_server_forwarders:
 To optionally override the IP addresses returned by certain host you can define `dns_server_overrides` variable, like the following content for example:
 
 ```yaml
-dns_overrides:
+dns_server_overrides:
   0.uk.pool.ntp.org: 10.11.0.1
 ```
 
