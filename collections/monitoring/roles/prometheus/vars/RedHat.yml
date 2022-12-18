@@ -16,4 +16,4 @@ prometheus_server_snmp_exporter_additional_packages_to_install:
   - net-snmp-libs
   - net-snmp-devel
 prometheus_server_karma_packages_to_install:
-  - prometheus
+  - karma
