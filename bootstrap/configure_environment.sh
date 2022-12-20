@@ -21,7 +21,7 @@ sudo grep -q PYTHONPATH /etc/sudoers ||\
 echo 'Defaults env_keep += "PYTHONPATH"' |\
 sudo EDITOR='tee -a' visudo
 
-mkdir $HOME/.ssh
+mkdir -p $HOME/.ssh
 # Create SSH key pair if id_ed25519 doesn't exist
 if [[ ! -f "${HOME}/.ssh/id_ed25519" ]]; then
   ssh-keygen -t ed25519\
