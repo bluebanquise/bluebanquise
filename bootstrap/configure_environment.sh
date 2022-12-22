@@ -5,8 +5,7 @@ export PATH=$HOME/.local/bin:$PATH
 ansible-galaxy collection install community.general
 
 # Install BlueBanquise collections
-ansible-galaxy collection install git+https://github.com/bluebanquise/bluebanquise.git#/collections/infrastructur
-e,dev/2.0 -vvv --upgrade
+ansible-galaxy collection install git+https://github.com/bluebanquise/bluebanquise.git#/collections/infrastructure,dev/2.0 -vvv --upgrade
 
 # Set pip bins in PATH
 grep -q -E "^export PATH.*/\.local/bin" "${HOME}"/.bashrc ||\
