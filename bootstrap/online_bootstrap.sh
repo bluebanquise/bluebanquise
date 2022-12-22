@@ -26,12 +26,15 @@ echo -e " \e[31mThis tool is going to install packages and act as"
 echo -e " priviledged user on this system to perform needed"
 echo -e " operations.\e[0m"
 echo
-read -p " Please confirm you agree with that (Y/N): " -r
-echo
-if [[ ! $REPLY =~ ^[Yy]$ ]]
+if [[ $1 != 'silent' ]]
 then
+  read -p " Please confirm you agree with that (Y/N): " -r
+  echo
+  if [[ ! $REPLY =~ ^[Yy]$ ]]
+  then
     echo " Exiting tool."
     exit 0
+  fi
 fi
 echo " Proceeding..."
 sleep 1
