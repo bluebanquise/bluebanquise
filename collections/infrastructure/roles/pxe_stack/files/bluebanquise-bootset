@@ -48,8 +48,8 @@ def load_file(filename):
 
 def set_default_boot(node, boot, node_image=None, extra_parameters=None):
     logging.info('    ├── '+bcolors.OKBLUE+'Switching boot to '+boot+bcolors.ENDC)
-    logging.info('    ├── '+bcolors.OKBLUE+'Editing file /var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe'+bcolors.ENDC)
-    with open('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe', 'r') as f:
+    logging.info('    ├── '+bcolors.OKBLUE+'Editing file /var/www/html/pxe/nodes/'+str(node)+'.ipxe'+bcolors.ENDC)
+    with open('/var/www/html/pxe/nodes/'+str(node)+'.ipxe', 'r') as f:
         filebuffer = f.readlines()
     for i in range(len(filebuffer)):
         if 'menu-default' in filebuffer[i]:
@@ -58,7 +58,7 @@ def set_default_boot(node, boot, node_image=None, extra_parameters=None):
             filebuffer[i] = 'set node-image {}\n'.format(node_image)
         if ('extra-parameters' in filebuffer[i]) and (extra_parameters is not None):
             filebuffer[i] = 'set extra-parameters {}\n'.format(extra_parameters)
-    with open('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe', 'w') as f:
+    with open('/var/www/html/pxe/nodes/'+str(node)+'.ipxe', 'w') as f:
         f.writelines(filebuffer)
     logging.info('    └── '+bcolors.OKGREEN+'[OK] Done.'+bcolors.ENDC)
 
@@ -91,7 +91,7 @@ print("""\
       (/)_ (/)_ V_/_
 
    BlueBanquise bootset
-   v1.0.7
+   v1.0.8
    https://github.com/bluebanquise/tools/
 
 """)
@@ -110,7 +110,7 @@ apache_uid = pwd.getpwnam(pxe_parameters["pxe_parameters"]["apache_uid"]).pw_uid
 apache_gid = grp.getgrnam(pxe_parameters["pxe_parameters"]["apache_gid"]).gr_gid
 
 htdocs_path = pxe_parameters["pxe_parameters"]["htdocs_path"]
-pxe_nodes_path = htdocs_path + '/preboot_execution_environment/nodes/'
+pxe_nodes_path = htdocs_path + '/pxe/nodes/'
 
 
 if passed_arguments.status is not None:
@@ -169,10 +169,10 @@ elif passed_arguments.boot is not None:
             logging.info(bcolors.OKGREEN+'[OK] Working on node '+str(node)+' ...'+bcolors.ENDC)
             # Check if we need to create or update files
             logging.info('    ├── '+bcolors.OKBLUE+'Checking '+str(node)+' files...'+bcolors.ENDC)
-            if str(os.path.exists('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe')) == 'False':
-                logging.info('    ├── '+bcolors.OKBLUE+'Creating file /var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe'+bcolors.ENDC)
+            if str(os.path.exists('/var/www/html/pxe/nodes/'+str(node)+'.ipxe')) == 'False':
+                logging.info('    ├── '+bcolors.OKBLUE+'Creating file /var/www/html/pxe/nodes/'+str(node)+'.ipxe'+bcolors.ENDC)
             else:
-                logging.info('    ├── '+bcolors.OKBLUE+'Editing file /var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe'+bcolors.ENDC)
+                logging.info('    ├── '+bcolors.OKBLUE+'Editing file /var/www/html/pxe/nodes/'+str(node)+'.ipxe'+bcolors.ENDC)
             dedicated_parameters = str('')
             if 'network' in passed_arguments.force:
                 dedicated_parameters = str('ip='+nodes_parameters[str(node)]["network"]["node_main_network_interface_ip"]+'::'+nodes_parameters[str(node)]["network"]["node_main_network_gateway"]+':'+nodes_parameters[str(node)]["network"]["node_main_network_netmask"]+':'+str(node)+':'+nodes_parameters[str(node)]["network"]["node_main_network_interface"]+':none')
@@ -195,11 +195,11 @@ elif passed_arguments.boot is not None:
                 '# Now chain to menu menu',
                 'echo | Now chaining to --> equipment_profiles/${equipment-profile}.ipxe',
                 'sleep 2',
-                'chain http://${next-server}/preboot_execution_environment/equipment_profiles/${equipment-profile}.ipxe || shell'))
+                'chain http://${next-server}/pxe/equipment_profiles/${equipment-profile}.ipxe || shell'))
 
-            with open('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe', 'w') as ff:
+            with open('/var/www/html/pxe/nodes/'+str(node)+'.ipxe', 'w') as ff:
                 ff.write(generic_node_ipxe)
-            os.chown('/var/www/html/preboot_execution_environment/nodes/'+str(node)+'.ipxe', apache_uid, apache_gid)
+            os.chown('/var/www/html/pxe/nodes/'+str(node)+'.ipxe', apache_uid, apache_gid)
             logging.info('    ├── '+bcolors.OKGREEN+'[OK] Done.'+bcolors.ENDC)
 
             set_default_boot(node=node, boot=passed_arguments.boot, node_image=passed_arguments.image, extra_parameters=passed_arguments.extra_parameters)
@@ -209,7 +209,7 @@ elif passed_arguments.boot is not None:
 
     # Ensure SELinux context is correct
     if pxe_parameters["pxe_parameters"]["ansible_selinux_status"] == "enabled":
-        os.system('restorecon -Rv /var/www/html/preboot_execution_environment/nodes/')
+        os.system('restorecon -Rv /var/www/html/pxe/nodes/')
 
 elif passed_arguments.kickstart is not None:
 
@@ -219,7 +219,7 @@ elif passed_arguments.kickstart is not None:
         exit(1)
 
     # The kickstart.cfg file is created by Ansible role pxe_stack
-    with open(os.path.join('/var/www/html/preboot_execution_environment/equipment_profiles/',
+    with open(os.path.join('/var/www/html/pxe/equipment_profiles/',
                            '{profile}.kickstart.cfg'.format(profile=nodes_parameters[node]['equipment_profile'])), "r") as f:
         for line in f.readlines():
             print(line.strip())
