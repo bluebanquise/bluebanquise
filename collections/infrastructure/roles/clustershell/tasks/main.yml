@@ -15,6 +15,15 @@
   tags:
     - pip
 
+- name: file <|> Create configuration directory
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+  loop:
+    - /etc/clustershell
+    - /etc/clustershell/groups.d
+
 - name: template <|> Generate /etc/clustershell/groups.d/local.cfg
   ansible.builtin.template:
     src: local.cfg.j2
