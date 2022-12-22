@@ -86,6 +86,7 @@
     - template
   with_items: "{{ http_server_configurations_files }}"
   when:
+    - http_server_configurations_files is defined
     - http_server_configurations_files is not none
     - http_server_configurations_files is iterable
   notify: service █ Restart http server service
@@ -99,6 +100,7 @@
     state: "{{ item.state | default(omit, true) }}"
   with_items: "{{ http_server_modules }}"
   when:
+    - http_server_modules is defined
     - http_server_modules is not none
     - http_server_modules is iterable
     - item.name is defined and item.name is not none
