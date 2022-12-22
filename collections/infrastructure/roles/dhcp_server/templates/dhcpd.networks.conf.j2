@@ -91,7 +91,7 @@ shared-network {{ shared_network }} {
 ## NON SHARED NETWORKS SUBNETS
 
 {% for network in networks %}
-  {% if j2_current_iceberg_network in network and (networks[network]['dhcp_server'] | default(false)) %}
+  {% if j2_current_iceberg_network in network and (networks[network]['dhcp_server'] | default(true)) %}
     {% if networks[network]['shared_network'] is not defined or networks[network]['shared_network'] is none  %}
 {{ write_network(network) }}
     {% endif %}
