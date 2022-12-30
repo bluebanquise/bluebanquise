@@ -20,7 +20,7 @@ set eq-autoclone-parameters {{ hostvars[groups[item][0]]['ep_autoclone_parameter
 {% endif %}
 
 # Preseed specific need (known bug with multiple UP/Active NIC)
-{% if (hostvars[groups[item][0]]['ep_preseed_auto_main_network_interface'] is defined and hostvars[groups[item][0]]['ep_preseed_auto_main_network_interface']) or (pxe_stack_ep_preseed_auto_main_network_interface is defined and ep_preseed_auto_main_network_interface) %}
+{% if (hostvars[groups[item][0]]['ep_preseed_auto_main_network_interface'] is defined and hostvars[groups[item][0]]['ep_preseed_auto_main_network_interface'] is not none) or (pxe_stack_ep_preseed_auto_main_network_interface is defined and ep_preseed_auto_main_network_interface is not none) %}
 set node-main-network-interface auto
 {% endif %}
 
