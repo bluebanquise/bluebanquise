@@ -37,7 +37,15 @@ j2_nic_gw4: "
   {% if item.gw4 is defined %}
     {{ item.gw4 }}
   {% elif item.network is defined and networks[item.network]['gateway4'] is defined %}
-    {{ networks[item.network]['gateway4'] }}
+    {% if networks[item.network]['gateway4'] is string %}
+      {{ networks[item.network]['gateway4'] }}
+    {% elif networks[item.network]['gateway4'] is iterable and networks[item.network]['gateway4'] is not mapping %}
+      {% if networks[item.network]['gateway4'][0]['ip'] is defined %}
+        {{ networks[item.network]['gateway4'][0]['ip'] }}
+      {% elif networks[item.network]['gateway4'][0]['hostname'] is defined %}
+        {{ networks[item.network]['gateway4'][0]['hostname'] }}
+      {% endif %}
+    {% endif %}
   {% elif item.network is defined and networks[item.network]['gateway'] is defined %}
     {{ networks[item.network]['gateway'] }}
   {% endif %}

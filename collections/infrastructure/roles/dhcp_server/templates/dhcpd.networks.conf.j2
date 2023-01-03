@@ -6,19 +6,19 @@
   Generic service item write
 ###############################################################################}
 {% macro item_add(item_name, items_list) %}
-      {% if items_list is defined and items_list is iterable and items_list is not string and items_list is not mapping %}
-        {% set elements = [] %}
-        {% for elem in items_list %}
-          {% if elem.ip is defined and (elem.ip | ansible.utils.ipaddr) %}
-            {{ elements.append(elem.ip) }}
-          {% elif elem.hostname is defined and elem.hostname is not none and elem.hostname is string %}
-            {{ elements.append(elem.hostname) }}
-          {% endif %}
-        {% endfor %}
-        {% if (elements | length) > 0 %}
-  {{ item_name }} {{ elements | join(', ') }};
-        {% endif %}
+  {% if items_list is defined and items_list is iterable and items_list is not string and items_list is not mapping %}
+    {% set elements = [] %}
+    {% for elem in items_list %}
+      {% if elem.ip is defined and (elem.ip | ansible.utils.ipaddr) %}
+        {{ elements.append(elem.ip) }}
+      {% elif elem.hostname is defined and elem.hostname is not none and elem.hostname is string %}
+        {{ elements.append(elem.hostname) }}
       {% endif %}
+    {% endfor %}
+    {% if (elements | length) > 0 %}
+{{ item_name }} {{ elements | join(', ') }};
+    {% endif %}
+  {% endif %}
 {% endmacro %}
 
 {###############################################################################
@@ -35,7 +35,11 @@ subnet {{ networks[network]['subnet'] }} netmask {{ (networks[network]['subnet']
   option domain-name "{{ bb_domain_name | default(dhcp_server_domain_name) }}";
   option broadcast-address {{ (networks[network]['subnet'] + '/' + (networks[network]['prefix'] | string) ) | ansible.utils.ipaddr('broadcast') }};
       {% if networks[network]['gateway4'] is defined %}
+        {% if networks[network]['gateway4'] is string %}
+  option routers {{ networks[network]['gateway4'] }};
+        {% elif networks[network]['gateway4'] is iterable and networks[network]['gateway4'] is mapping %}
 {{ item_add("option routers", networks[network]['gateway4']) }}
+        {% endif %}
       {% endif %}
 
 {# Either ~~~~~~~ ADVANCED SERVICES #}
