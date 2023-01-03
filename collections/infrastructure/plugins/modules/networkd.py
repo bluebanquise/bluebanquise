@@ -70,6 +70,7 @@ class Networkd(object):
         self.vlanid = module.params['vlanid']
         self.vlandev = module.params['vlandev']
         self.vlan_mapping = module.params['vlan_mapping']
+        self.never_default4 = module.params['never_default4']
 
     def generate_network(self):
         network = []
@@ -105,17 +106,18 @@ class Networkd(object):
                     network.append("[Address]")
                     network.append("Address=" + ip4)
 
-        # ADDRESS
-        if self.gw4 is not None:
-            network.append("[Route]")
-            network.append("Gateway=" + self.gw4)
-        if self.routes4 is not None:
-            for route4 in self.routes4:
+        # ROUTE
+        if not self.never_default4:
+            if self.gw4 is not None:
                 network.append("[Route]")
-                network.append("Destination=" + route4.split(' ')[0])
-                network.append("Gateway=" + route4.split(' ')[1])
-                if len(route4.split(' ')) > 2:
-                    network.append("Metric=" + route4.split(' ')[2])
+                network.append("Gateway=" + self.gw4)
+            if self.routes4 is not None:
+                for route4 in self.routes4:
+                    network.append("[Route]")
+                    network.append("Destination=" + route4.split(' ')[0])
+                    network.append("Gateway=" + route4.split(' ')[1])
+                    if len(route4.split(' ')) > 2:
+                        network.append("Metric=" + route4.split(' ')[2])
 
         # LINK
         if self.mtu is not None:
@@ -210,6 +212,7 @@ def main():
             vlanid=dict(type='int'),
             vlandev=dict(type='str'),
             vlan_mapping=dict(type='list', elements='int'),
+            never_default4=dict(type='bool', default=False),
         ),
         mutually_exclusive=[],
         required_if=[],

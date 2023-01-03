@@ -42,6 +42,7 @@
     vlanid: "{{ item.vlanid | default(omit) }}"
     vlandev: "{{ item.vlandev | default(omit) }}"
     vlan_mapping: "{{ item.vlan_mapping | default(omit) }}"
+    never_default4: "{{ item.never_default4 | default(omit) }}"
   notify: command <|> networkctl reload
   loop: "{{ network_interfaces }}"
   when: item.skip is not defined or (item.skip is defined and not item.skip)
