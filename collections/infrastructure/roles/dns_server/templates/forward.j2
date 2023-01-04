@@ -15,6 +15,9 @@ $INCLUDE "{{ dns_server_named_dir }}/forward.soa"
         {% if nic.ip4 is defined and nic.ip4 is not none and (nic.ip4 | ansible.utils.ipaddr) %}
 {{ host }}-{{ nic.network }} IN A {{ nic.ip4 }}
         {% endif %}
+        {% if nic.alias is defined %}
+{{ nic.alias }} IN A {{ nic.ip4 }}
+        {% endif %}
       {% endif %}
     {% endfor %}
   {% endif %}
