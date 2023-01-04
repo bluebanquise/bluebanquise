@@ -37,7 +37,7 @@ subnet {{ networks[network]['subnet'] }} netmask {{ (networks[network]['subnet']
       {% if networks[network]['gateway4'] is defined %}
         {% if networks[network]['gateway4'] is string %}
   option routers {{ networks[network]['gateway4'] }};
-        {% elif networks[network]['gateway4'] is iterable and networks[network]['gateway4'] is mapping %}
+        {% elif networks[network]['gateway4'] is iterable and networks[network]['gateway4'] is not mapping %}
 {{ item_add("option routers", networks[network]['gateway4']) }}
         {% endif %}
       {% endif %}
