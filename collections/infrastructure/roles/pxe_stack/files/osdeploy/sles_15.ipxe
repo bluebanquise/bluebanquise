@@ -18,7 +18,8 @@ echo | > Target AutoYast: ${eq-equipment-profile}.autoyast.xml
 echo |
 echo | Loading linux ...
 
-kernel ${images-root}/iso/boot/${eq-architecture}/loader/linux install=${images-root}/iso autoyast=http://${next-server}/pxe/equipment_profiles/${eq-equipment-profile}.autoyast.xml  ${eq-console} ${eq-kernel-parameters} ipxe_next_server=${next-server} ${dedicated-parameters}
+# DEV: Need to check if path do not need to match opensuse
+kernel ${images-root}/iso/boot/${eq-architecture}/loader/linux install=${images-root}/iso autoyast=http://${next-server}/pxe/equipment_profiles/${eq-equipment-profile}.autoyast.xml textmode=1 ${eq-console} ${eq-kernel-parameters} ipxe_next_server=${next-server} ${dedicated-parameters}
 
 echo | Loading initial ramdisk ...
 

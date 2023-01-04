@@ -1,3 +1,4 @@
+/*
 .wy-nav-content {
 max-width: 80% !important;
 }
@@ -8,19 +9,16 @@ max-width: 80% !important;
 
 * {box-sizing:border-box}
 
-/* Slideshow container */
 .slideshow-container {
   max-width: 1000px;
   position: relative;
   margin: auto;
 }
 
-/* Hide the images by default */
 .mySlides {
   display: none;
 }
 
-/* Next & previous buttons */
 .prev, .next {
   cursor: pointer;
   position: absolute;
@@ -36,18 +34,15 @@ max-width: 80% !important;
   user-select: none;
 }
 
-/* Position the "next button" to the right */
 .next {
   right: 0;
   border-radius: 3px 0 0 3px;
 }
 
-/* On hover, add a black background color with a little bit see-through */
 .prev:hover, .next:hover {
   background-color: rgba(0,0,0,0.8);
 }
 
-/* Caption text */
 .text {
   color: #f2f2f2;
   font-size: 15px;
@@ -58,7 +53,6 @@ max-width: 80% !important;
   text-align: center;
 }
 
-/* Number text (1/3 etc) */
 .numbertext {
   color: #f2f2f2;
   font-size: 12px;
@@ -67,7 +61,6 @@ max-width: 80% !important;
   top: 0;
 }
 
-/* The dots/bullets/indicators */
 .dot {
   cursor: pointer;
   height: 15px;
@@ -81,4 +74,33 @@ max-width: 80% !important;
 
 .active, .dot:hover {
   background-color: #717171;
+}
+*/
+.tip_card {
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+  transition: 0.3s;
+  border-radius: 5px; /* 5px rounded corners */
+  width: 100%;
+  overflow:hidden;
+}
+/* On mouse-over, add a deeper shadow */
+.tip_card:hover {
+  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+}
+/* Add some padding inside the card container */
+.tip_card_img_container {
+  float: left;
+  clear: left;
+  width: 15%;
+}
+
+.tip_card_title_container {
+  float:left;   
+  margin-left:10px;
+}
+
+.tip_card_content_container {
+    float: left;
+    overflow: hidden;
+    width: 85%;
 }
