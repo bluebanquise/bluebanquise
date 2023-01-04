@@ -79,7 +79,7 @@ d-i finish-install/reboot_in_progress note
 d-i preseed/late_command string \
 {% if pxe_stack_enable_root %}
   in-target sh -c 'mkdir /root/.ssh'; \
-  {% for ssh_key in hostvars[groups[item][0]]['authentication_ssh_keys'] %}
+  {% for ssh_key in (hostvars[groups[item][0]]['ep_admin_ssh_keys'] | default(pxe_stack_ep_admin_ssh_keys)) %}
   in-target sh -c 'echo "{{ ssh_key }}" >> /root/.ssh/authorized_keys'; \
   {% endfor %}
   in-target sh -c 'sed -i "s/^#PermitRootLogin.*\$/PermitRootLogin yes/g" /etc/ssh/sshd_config'; \
@@ -99,7 +99,7 @@ d-i preseed/late_command string \
   in-target sh -c 'echo " " > /etc/apt/sources.list'; \
   in-target sh -c 'apt update'; \
 {% endif %}
-{% if hostvars[groups[item][0]]['ep_preserve_efi_first_boot_device'] == true %}
+{% if (hostvars[groups[item][0]]['ep_preserve_efi_first_boot_device'] | default(pxe_stack_ep_preserve_efi_first_boot_device)) == true %}
   in-target sh -c '[ -d /sys/firmware/efi ] && efibootmgr -o $(efibootmgr | grep BootCurrent | cut -d" " -f2),$(efibootmgr | grep BootOrder | sed "s/BootOrder:\ //" | sed "s/$(efibootmgr | grep BootCurrent | cut -d" " -f2),//") || echo "Not an EFI system, skipping"'
 {% endif %}
   in-target for I in `cat /proc/cmdline | tr " " "\n" | grep -E "^(node_hostname|ipxe_next_server)="` ; do eval $I; done; \
