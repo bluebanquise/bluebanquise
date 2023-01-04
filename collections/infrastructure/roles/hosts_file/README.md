@@ -35,6 +35,7 @@ Note that `hosts_file_domaine_name` is precedenced by the global variable `bb_do
 
 ## Changelog
 
+* 1.3.0: Add optional alias to every interface. Matthieu Isoard <indigoping4cgmi@gmail.com>
 * 1.2.0: Update to BB 2.0 format. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.8: Prevent unsorted ranges. Benoit Leveugle <benoit.leveugle@gmail.com>
