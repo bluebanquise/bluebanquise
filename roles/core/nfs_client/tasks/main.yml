@@ -1,0 +1,72 @@
+---
+- name: include_vars ░ Gather OS specific variables
+  # This task gathers variables defined in OS specific files.
+  #
+  # Search vars in:
+  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
+  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
+  #  - <distribution>.yml            # eg. CentOS.yml
+  #  - <os_family>.yml               # eg. RedHat.yml
+  #
+  # If no OS specific file is found, the role will default to vars/main.yml
+  #
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family }}.yml"
+      skip: true
+  tags:
+    - always
+
+- name: "package █ Install {{ nfs_client_packages_to_install | join(' ') }} packages"
+  ansible.builtin.package:
+    name: "{{ nfs_client_packages_to_install }}"
+    state: present
+  tags:
+    - package
+
+- name: file █ Create NFS directories
+  ansible.builtin.file:  # noqa risky-file-permissions
+    path: "{{ item.0.mount }}"
+    state: directory
+  with_subelements:
+    - "{{ nfs }}"
+    - clients_groups
+  when:
+    - groups[item.1] is defined and groups[item.1] is not none
+    - inventory_hostname in groups[item.1]
+
+- name: service █ Manage rpcbind state
+  ansible.builtin.service:
+    name: rpcbind
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+    state: "{{ (start_services | bool) | ternary('started', omit) }}"
+  when: ansible_facts.distribution in ['CentOS','RedHat']
+  tags:
+    - service
+
+- name: seboolean █ Enable selinux booleans if needed
+  ansible.posix.seboolean:
+    name: "{{ item }}"
+    state: yes
+    persistent: yes
+  loop: "{{ nfs_client_sebooleans }}"
+  when:
+    - ansible_facts.selinux.status == "enabled"
+
+- name: mount █ Mount exported NFS into directories
+  ansible.builtin.mount:
+    path: "{{ item.0.mount }}"
+    src: "{% if item.0.server | ipaddr %}{{ item.0.server }}:{{ item.0.export }}{% else %}{{ item.0.server }}{% if item.0.take_over_network is defined and item.0.take_over_network is not none %}-{{ item.0.take_over_network }}{% endif %}:{{ item.0.export }}{% endif %}"
+    fstype: nfs
+    opts: "{{ item.0.mount_arguments }}"
+    state: "{{ nfs_client_directories_state }}"
+  with_subelements:
+    - "{{ nfs }}"
+    - clients_groups
+  when:
+    - groups[item.1] is defined and not none
+    - inventory_hostname in groups[item.1]

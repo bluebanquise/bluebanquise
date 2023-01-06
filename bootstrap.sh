@@ -55,8 +55,12 @@ if $GATHER_PACKAGES; then
             wget -P "${REPO_PATH}"\
                  "${UBUNTU_2004_ISO_URL}"
           fi
+          mountpoint -q /mnt
+          if [ $? -eq 0 ]; then
+            sudo umount /mnt
+          fi
           sudo mount /var/www/html/repositories/ubuntu/20.04/x86_64/$UBUNTU_2004_ISO /mnt
-          mkdir /var/www/html/repositories/ubuntu/20.04/x86_64/os/
+          mkdir -p /var/www/html/repositories/ubuntu/20.04/x86_64/os/
           cp -a /mnt/* /var/www/html/repositories/ubuntu/20.04/x86_64/os/
           sudo umount /mnt
           ln -s "${UBUNTU_2004_ISO}" ubuntu-20.04-live-server-amd64.iso
@@ -68,7 +72,7 @@ if $GATHER_PACKAGES; then
     if $GATHER_PACKAGES_REDHAT_8; then
       REPO_PATH="/var/www/html/repositories/redhat/8/x86_64/"
       mkdir -p "${REPO_PATH}"
-      if [[ -d bluebanquise ]]; then
+      if [[ -d "${REPO_PATH}"/bluebanquise ]]; then
         message_output "BlueBanquise folder already exist, skipping packages download."
       else
         if $OFFLINE_MODE; then
@@ -84,17 +88,20 @@ if $GATHER_PACKAGES; then
                http://bluebanquise.com/repository/releases/latest/el8/x86_64/bluebanquise/
         fi
       fi
-      if [[ -d os ]]; then
+      if [[ -d "${REPO_PATH}"/os ]]; then
         message_output "Os folder already exist, skipping iso download."
       else
         if $OFFLINE_MODE; then
           cp -a "$CURRENT_DIR/offline_bootstrap/iso/$REDHAT_8_ISO"\
           "${REPO_PATH}"
         else
-          wget -P "{REPO_PATH}" "${REDHAT_8_ISO_URL}"
+          wget -P "${REPO_PATH}" "${REDHAT_8_ISO_URL}"
+        fi
+        if mountpoint -q /mnt; then
+          sudo umount /mnt
         fi
         sudo mount /var/www/html/repositories/redhat/8/x86_64/$REDHAT_8_ISO /mnt
-        mkdir /var/www/html/repositories/redhat/8/x86_64/os/
+        mkdir -p /var/www/html/repositories/redhat/8/x86_64/os/
         cp -a /mnt/* /var/www/html/repositories/redhat/8/x86_64/os/
         sudo umount /mnt
       fi
@@ -139,6 +146,7 @@ fi
 if $INSTALL_PIP_REQUIREMENTS; then
   message_output "Installing python needed dependencies via pip3..."
   if $OFFLINE_MODE; then
+    sudo pip3 install --upgrade pip --no-index --find-links "${CURRENT_DIR}/offline_bootstrap/pip3/"
     pip3 install --no-index\
                  --find-links "${CURRENT_DIR}/offline_bootstrap/pip3/"\
                  -r requirements.txt
@@ -180,8 +188,9 @@ echo "export PATH=\$HOME/.local/bin:\$PATH" |\
 tee -a "${HOME}"/.bashrc
 
 grep -q PYTHONPATH "${HOME}"/.bashrc ||\
-echo "export PYTHONPATH=\$(pip3 showClusterShell | grep Location | awk -F ' ' '{print \$2}')" >> "${HOME}"/.bashrc
+echo "export PYTHONPATH=\$(pip3 show ClusterShell | grep Location | awk -F ' ' '{print \$2}')" >> "${HOME}"/.bashrc
 
+grep -q ANSIBLE_CONFIG "${HOME}"/.bashrc ||\
 echo "export ANSIBLE_CONFIG=\$HOME/bluebanquise/ansible.cfg" |
 tee -a "${HOME}"/.bashrc
 sudo grep -q PYTHONPATH /etc/sudoers ||\
@@ -189,7 +198,8 @@ echo 'Defaults env_keep += "PYTHONPATH"' |\
 sudo EDITOR='tee -a' visudo
 
 message_output "Generating ssh keys..."
-mkdir $HOME/.ssh
+mkdir -p $HOME/.ssh
+chmod 700 $HOME/.ssh
 # Create SSH key pair if id_ed25519 doesn't exist
 if [[ ! -f "${HOME}/.ssh/id_ed25519" ]]; then
   ssh-keygen -t ed25519\
@@ -219,12 +229,12 @@ echo "  - $(cat "${HOME}"/.ssh/id_ed25519.pub)" |\
 tee -a inventory/group_vars/all/equipment_all/authentication.yml
 
 message_output "Setting first connection..."
-grep -q mgt1 /etc/hosts ||\
-echo "127.0.0.1 mgt1" |\
+grep -q $SYSTEM_HOSTNAME /etc/hosts ||\
+echo "127.0.0.1 $SYSTEM_HOSTNAME" |\
 sudo tee -a /etc/hosts
 
 if $ESTABLISH_FIRST_SSH; then
-ssh -o StrictHostKeyChecking=no mgt1 echo Ok
+ssh -o StrictHostKeyChecking=no $SYSTEM_HOSTNAME echo Ok
 fi
 
 echo -e "\e[34m"

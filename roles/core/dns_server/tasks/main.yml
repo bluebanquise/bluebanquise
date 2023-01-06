@@ -80,7 +80,7 @@
 - name: set_fact ░ Set SOA Serial for reverse zone
   ansible.builtin.set_fact:
     serial: "{{ lookup('pipe', 'date +%s') }}"
-  when: zoneconf.changed  # noqa 503
+  when: zoneconf.changed  # noqa no-handler
   tags:
     - template
     - internal
@@ -93,7 +93,7 @@
     group: root
     mode: 0644
   notify: service █ Restart dns services
-  when: zoneconf.changed  # noqa 503
+  when: zoneconf.changed  # noqa no-handler
   tags:
     - template
 
@@ -117,7 +117,7 @@
     mode: 0644
   notify: service █ Restart dns services
   with_items: "{{ j2_dns_server_get_first_octets.split(',') }}"
-  when: zoneconf.changed  # noqa 503
+  when: zoneconf.changed  # noqa no-handler
   tags:
     - template
 
@@ -129,7 +129,7 @@
     group: root
     mode: 0644
   notify: service █ Restart dns services
-  when: dns_overrides is defined and zoneconf.changed  # noqa 503
+  when: dns_overrides is defined and zoneconf.changed  # noqa no-handler
   tags:
     - template
 

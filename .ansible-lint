@@ -4,6 +4,5 @@ warn_list:
 verbosity: 1
 skip_list:
   - fqcn-builtins
-exclude_paths:
-  - ./roles/core/pxe_stack/tasks/client_os/DGX.yml
-  - .github/
+  - jinja[spacing]
+  - name[casing]
