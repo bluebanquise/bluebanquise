@@ -1,9 +1,0 @@
-# BlueBanquise internal j2_ variables.
-# Equipment
-# (c) 2019-2020 Benoit Leveugle
-
-# List of master groups.
-j2_master_groups_list: "{{ groups | select('match','^'+master_groups_naming+'_.*') | list | unique | sort }}"
-
-# List of equipment groups.
-j2_equipment_groups_list: "{{ groups | select('match','^'+equipment_naming+'_.*') | list | unique | sort }}"

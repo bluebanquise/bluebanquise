@@ -1,0 +1,23 @@
+---
+# use '--limit c001' to restrict playbook to
+# c001 if mg_computes contains multiple compute nodes
+- name: community_computes
+  hosts: "mg_computes"
+  roles:
+
+    - role: lmod
+      tags: lmod
+    - role: nhc
+      tags: nhc
+    - role: nvidia
+      tags: nvidia
+    - role: ofed
+      tags: ofed
+    - role: podman
+      tags: podman
+    - role: rasdaemon
+      tags: rasdaemon
+    - role: singularity
+      tags: singularity
+    - role: slurm
+      tags: slurm

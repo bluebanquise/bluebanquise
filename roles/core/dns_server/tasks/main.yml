@@ -100,7 +100,7 @@
 - name: "template █ Generate Reverse zone file on Master DNS {{ dns_server_named_dir }}/{{ item }}.rr.zone"
   ansible.builtin.template:
     src: reverse.j2
-    dest: "{{ dns_server_named_dir }}/{{ item|trim }}.rr.zone"
+    dest: "{{ dns_server_named_dir }}/{{ item | trim }}.rr.zone"
     owner: root
     group: root
     mode: 0644
@@ -111,7 +111,7 @@
 - name: "template █ Generate SOA for reverse zone file {{ dns_server_named_dir }}/{{ item }}.rr.soa"
   ansible.builtin.template:
     src: reverse.soa.j2
-    dest: "{{ dns_server_named_dir }}/{{ item|trim }}.rr.soa"
+    dest: "{{ dns_server_named_dir }}/{{ item | trim }}.rr.soa"
     owner: root
     group: root
     mode: 0644
@@ -153,8 +153,8 @@
 - name: "service █ Manage {{ dns_server_services_to_start | join(' ') }} state"
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
-    state: "{{ (start_services | bool) | ternary('started', omit) }}"
+    enabled: "{{ (dns_server_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    state: "{{ (dns_server_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   loop: "{{ dns_server_services_to_start }}"
   tags:
     - service

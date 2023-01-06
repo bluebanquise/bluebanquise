@@ -1,0 +1,14 @@
+#jinja2: lstrip_blocks: "True"
+{% if haproxy_restrict_nodes_http_listen %}
+  {% for node in haproxy_nodes %}
+    {% if node.name == inventory_hostname %}
+Listen {{ node.ip }}:{{node.port}}
+    {% endif %}
+  {% endfor %}
+{% else %}
+  {% for interface in network_interfaces %}
+    {% if interface.ip4 is defined and interface.ip4 is not none %}
+Listen {{ interface.ip4 }}:80
+    {% endif %}
+  {% endfor %}
+{% endif %}

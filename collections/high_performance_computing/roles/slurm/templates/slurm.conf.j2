@@ -1,0 +1,110 @@
+#jinja2: lstrip_blocks: True
+#### Blue Banquise file ####
+## {{ansible_managed}}
+
+# Documentation:
+# https://slurm.schedmd.com/slurm.conf.html
+
+## Very minimal slurm.conf
+
+## Controller
+ClusterName={{ slurm_cluster_name }}
+ControlMachine={{ slurm_control_machine }}
+
+{% if slurm_computes_config == "configless" %}
+## Use configless mode
+SlurmctldParameters=enable_configless
+{% endif %}
+
+## Authentication
+SlurmUser=slurm
+AuthType=auth/munge
+CryptoType=crypto/munge
+
+## Ports
+SrunPortRange={{ slurm_SrunPortRange }}
+
+## Files path
+StateSaveLocation={{ slurm_StateSaveLocation }}
+SlurmdSpoolDir={{ slurm_SlurmdSpoolDir }}
+SlurmctldPidFile={{ slurm_SlurmctldPidFile }}
+SlurmdPidFile={{ slurm_SlurmdPidFile }}
+
+## Logging
+SlurmctldDebug={{ slurm_SlurmctldDebug }}
+SlurmctldLogFile={{ slurm_SlurmctldLogFile }}
+SlurmdDebug={{ slurm_SlurmdDebug }}
+SlurmdLogFile={{ slurm_SlurmdLogFile }}
+
+## Timeouts
+SlurmctldTimeout={{ slurm_SlurmctldTimeout }}
+SlurmdTimeout={{ slurm_SlurmdTimeout }}
+
+## We don't want a node to go back in pool without sys admin acknowledgement
+ReturnToService={{ slurm_ReturnToService }}
+
+## Using pmi/pmi2/pmix interface for MPI
+MpiDefault={{ slurm_MpiDefault | default('',true) }}
+
+## Basic scheduling based on nodes
+SchedulerType={{ slurm_SchedulerType }}
+SelectType={{ slurm_SelectType }}
+
+{% if slurm_gresTypes is defined and slurm_gresTypes is not none %}
+# Gres configuration
+GresTypes={{ slurm_gresTypes }}
+ProctrackType=proctrack/cgroup
+TaskPlugin=affinity,cgroup
+SelectTypeParameters=CR_Core_Memory,CR_CORE_DEFAULT_DIST_BLOCK,CR_ONE_TASK_PER_CORE
+
+{% endif %}
+{% if slurm_enable_accounting %}
+## Accounting
+AccountingStorageHost=localhost
+AccountingStorageType=accounting_storage/slurmdbd
+JobAcctGatherType=jobacct_gather/linux
+{% endif %}
+
+## Additional content if exist
+{% if slurm_slurm_conf_additional_content is defined and slurm_slurm_conf_additional_content is iterable %}{% for slurm_slurm_conf_content in slurm_slurm_conf_additional_content %}
+{{ slurm_slurm_conf_content | default('', true) }}                                                                                                                       
+{% endfor %}{% endif %}
+
+## Nodes and partitions list
+# Note: in configless mode, only slurm.conf is shipped to slurmds.
+# We need to compact all configuration into this single file.
+# -> no includes allowed.
+
+{# Nodes definition #}
+{% for computes_group in slurm_computes_groups %}
+  {% if groups[computes_group] is iterable %}
+    {% set buffer = hostvars[groups[computes_group][0]]['ep_hardware'] %}
+    {% if buffer.cpu.sockets is defined and buffer.cpu.sockets is not none and buffer.cpu.corespersocket is defined and buffer.cpu.corespersocket is not none and buffer.cpu.threadspercore is defined and buffer.cpu.threadspercore is not none%}
+      {% set nodes_parameters = ' Sockets=' + (buffer.cpu.sockets|string) + ' CoresPerSocket=' + (buffer.cpu.corespersocket|string) + ' ThreadsPerCore=' + (buffer.cpu.threadspercore|string) %}
+    {% else %}{# Will fail if cores is also not set. Expected minimal value. #}
+      {% set nodes_parameters = ' Procs=' + (buffer.cpu.cores | string) %}
+    {% endif %}
+    {% if buffer.memory is defined and buffer.memory is not none %}
+        {% set nodes_parameters = nodes_parameters + ' RealMemory=' + (buffer.memory|string) %}
+    {% endif %}
+    {% if buffer.slurm_extra_nodes_parameters is defined and buffer.slurm_extra_nodes_parameters is not none %}
+        {% set nodes_parameters = nodes_parameters + ' ' +  buffer.slurm_extra_nodes_parameters %}
+    {% endif %}
+NodeName={{ groups[computes_group] | nodeset }} {{ nodes_parameters }}
+
+  {% endif %}
+{% endfor %}
+
+## Partitions list
+{% if slurm_partitions_list is defined and slurm_partitions_list %}
+  {% for partition in slurm_partitions_list %}
+PartitionName={{partition.partition_name}} {% for arg, arg_value in partition.partition_configuration.items() %} {{ arg }}={{ arg_value }}{% endfor %} Nodes={% for computes_group in partition.computes_groups %}{% if groups[computes_group] is iterable %}{% if not loop.first %},{% endif %}{% for node in groups[computes_group] %}{% if loop.first %}{{node}}{% else %},{{node}}{% endif %}{% endfor %}{% endif %}{% endfor %}
+
+  {% endfor %}
+{% endif %}
+
+{% if slurm_all_partition.enable is defined and slurm_all_partition.enable %}
+## Partition for all
+PartitionName=all {% for arg, arg_value in slurm_all_partition.partition_configuration.items() %} {{ arg }}={{ arg_value }}{% endfor %} Nodes={% for computes_group in slurm_computes_groups %}{% if groups[computes_group] is defined and groups[computes_group] is iterable %}{% if not loop.first %},{% endif %}{% for node in groups[computes_group] %}{% if loop.first %}{{node}}{% else %},{{node}}{% endif %}{% endfor %}{% endif %}{% endfor %}
+
+{% endif %}

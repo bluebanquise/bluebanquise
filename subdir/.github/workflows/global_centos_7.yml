@@ -1,0 +1,155 @@
+---
+
+# Global run on CentOS 7
+# Using docker environment
+
+name: global centos 7
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  global_run_centos_7:
+    name: Global deployment on CentOS 7
+    runs-on: ubuntu-20.04
+    env:
+      ANSIBLE_CONFIG: /etc/bluebanquise/ansible.cfg
+      PY_COLORS: '1'
+      ANSIBLE_FORCE_COLOR: '1'
+    steps:          
+      - name: Checkout Bluebanquise master branch
+        uses: actions/checkout@v3
+        with:
+          repository: bluebanquise/bluebanquise
+          path: bluebanquise
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          path: community
+
+      - name: Create centos systemd able image
+        run: docker build -t centos:7_systemd -f $GITHUB_WORKSPACE/bluebanquise/resources/docker/Dockerfile_CentOS_7_systemd .
+
+      - name: Start container
+        run: docker run -d --net=host --name management1 --tmpfs /tmp --tmpfs /run -v /sys/fs/cgroup:/sys/fs/cgroup:ro centos:7_systemd
+
+      - name: Setup container
+        run: docker exec management1 bash -c "mkdir -p /opt/software; mkdir -p /opt/software_client; useradd test-user;"
+
+      - name: Prepare bluebanquise folder
+        run: sudo mkdir /etc/bluebanquise; sudo chown -R $(id -u):$(id -g) /etc/bluebanquise; cp -a $GITHUB_WORKSPACE/bluebanquise/* /etc/bluebanquise;
+      
+      - name: Prepare bluebanquise community folder
+        run:  cp -a $GITHUB_WORKSPACE/community/* /etc/bluebanquise;
+      
+      - name: Debug
+        run: ls -Rla /etc/bluebanquise
+
+      - name: Prepare bluebanquise environment
+        run: cp -a /etc/bluebanquise/resources/examples/automatic_tests_cluster/inventory /etc/bluebanquise; cp -a /etc/bluebanquise/resources/examples/automatic_tests_cluster/playbooks /etc/bluebanquise
+      
+      - name: Update ansible.cfg
+        run: sed -i 's#roles_path            = roles/custom:roles/core:roles/addons:roles/advanced_core#roles_path            = roles/custom:roles/core:roles/addons:roles/advanced_core:roles#' /etc/bluebanquise/ansible.cfg
+
+      - name: Setup repository
+        run: "echo -e '  - name: bluebanquise\n    baseurl: https://bluebanquise.com/repository/releases/latest/el7/x86_64/bluebanquise/\n    gpgcheck: 0\n    enabled: true' >> /etc/bluebanquise/inventory/group_vars/all/general_settings/repositories.yml;"
+
+      - name: Set dummy interface
+        run: sudo modprobe -v dummy numdummies=2; sudo ip addr add 10.10.0.1/16 dev dummy0; ip a;
+
+      - name: Install packages
+        run: pip3 install ansible netaddr clustershell jmespath
+
+      - name: Install collections
+        run: ansible-galaxy collection install community.general ansible.posix containers.podman community.grafana
+
+      - name: Role test - repositories_server
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=docker --limit management1 -t repositories_server --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root
+
+      - name: Role test - repositories_client
+        run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=docker --limit management1 -t repositories_client --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root 
+      
+      # - name: Role test - prometheus server
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=docker --limit management1 -t prometheus --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root -e prometheus_server=true
+      
+      # - name: Role test - prometheus client
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=docker --limit management1 -t prometheus --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root -e prometheus_client=true
+      
+      - name: Role test - grafana - Add Grafana repo
+        run: docker exec management1 bash -c "echo -e '[grafana]\nname=grafana\nbaseurl=https://packages.grafana.com/oss/rpm\nenabled=1\ngpgcheck=0\ngpgkey=https://packages.grafana.com/gpg.key\nsslverify=1\nsslcacert=/etc/pki/tls/certs/ca-bundle.crt' | tee -a /etc/yum.repos.d/grafana.repo;"
+      
+      - name: Role test - grafana
+        run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=docker --limit management1 -t grafana --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root
+
+      # podman role is not supported on centos7
+      # - name: Role test - podman
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=docker --limit management1 -t podman --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root
+
+      # - name: Role test - automate
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=docker --limit management1 -t automate --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root
+
+      # - name: Role test - display_tuning
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=docker --limit management1 -t display_tuning --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root
+
+      # - name: Role test - drbd
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=docker --limit management1 -t drbd --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root
+
+      # - name: Role test - flexlm
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=docker --limit management1 -t flexlm --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root
+
+      # - name: Role test - generic_psf
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=docker --limit management1 -t generic_psf --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root
+
+      # - name: Role test - haproxy
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=docker --limit management1 -t haproxy --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root
+
+      # - name: Role test - high_availability
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=docker --limit management1 -t high_availability --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root
+
+      # - name: Role test - lmod
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=docker --limit management1 -t lmod --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root
+
+      # - name: Role test - loki
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=docker --limit management1 -t loki --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root
+
+      # - name: Role test - nhc
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=docker --limit management1 -t nhc --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root
+
+      # - name: Role test - nvidia
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=docker --limit management1 -t nvidia --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root
+
+      # - name: Role test - ofed
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=docker --limit management1 -t ofed --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root
+
+      # - name: Role test - openldap
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=docker --limit management1 -t openldap --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root
+
+      # - name: Role test - rasdaemon
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=docker --limit management1 -t rasdaemon --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root
+
+      # - name: Role test - report
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=docker --limit management1 -t report --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root
+
+      # - name: Role test - singularity - Add Singuarity repo
+      #   run: docker exec management1 bash -c "yum install createrepo -y; mkdir -p /var/www/html/repositories/centos/7/x86_64/singularity; curl https://github.com/sylabs/singularity/releases/download/v3.9.1/singularity-ce-3.9.1+6.g38b50cb-1.el7.x86_64.rpm --output /var/www/html/repositories/centos/7/x86_64/singularity/singularity-ce-3.9.1+6.g38b50cb-1.el7.x86_64.rpm; createrepo /var/www/html/repositories/centos/7/x86_64/singularity;"
+      
+      # - name: Role test - singularity - repositories_client
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/managements.yml --become --connection=docker --limit management1 -t repositories_client --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root -e repositories=["singularity"]
+      
+      # - name: Role test - singularity on management
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=docker --limit management1 -t singularity --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root
+
+      # - name: Role test - singularity on computes
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_computes.yml --become --connection=docker --limit management1 -t singularity --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root
+
+      # - name: Role test - slurm
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=docker --limit management1 -t slurm --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root
+
+      # - name: Role test - update_reboot
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=docker --limit management1 -t update_reboot --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root
+
+      # - name: Role test - users_basic
+      #   run: ansible-playbook /etc/bluebanquise/playbooks/community_managements.yml --become --connection=docker --limit management1 -t users_basic --diff -e "ansible_connection=docker ansible_python_interpreter=/usr/bin/python3 ep_firewall=false" -u root

@@ -1,0 +1,8 @@
+{{ ansible_managed | comment }}
+{% if ansible_os_family == 'Debian' %}
+lxd:100000:65535
+{% endif %}
+root:100000:65535
+{% for group, mapping in podman_users.items() %}
+{{ group }}:{{ mapping }}
+{% endfor %}

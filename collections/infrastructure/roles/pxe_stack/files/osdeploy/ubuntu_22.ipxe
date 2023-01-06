@@ -1,0 +1,37 @@
+#!ipxe
+
+echo |
+echo | Entering osdeploy/ubuntu_22.ipxe file.
+echo |
+
+echo | Now starting os deployment process.
+echo | Ubuntu 22 Family ipxe configuration.
+echo |
+echo | Parameters used:
+echo | > Operating system target: ${eq-distribution} ${eq-distribution-version} ${eq-architecture}
+echo | > Console: ${eq-console}
+echo | > Additional kernel parameters: ${eq-kernel-parameters} ${dedicated-kernel-parameters}
+echo | > Deployment server: ${next-server}
+echo | > Target iso: ${images-root}/ubuntu-22.04-live-server-amd64.iso
+echo | > Target cloud-init folder: ${cloud-init-path}
+echo |
+echo | Loading linux ...
+
+kernel ${images-root}/iso/casper/vmlinuz initrd=initrd root=/dev/ram0 ramdisk_size=1500000 ip=dhcp url=${images-root}/ubuntu-22.04-live-server-amd64.iso autoinstall ds=nocloud-net;s=${cloud-init-path} ${eq-console} ${eq-kernel-parameters} ${dedicated-kernel-parameters} ipxe_next_server=${next-server} node_hostname=${hostname}
+
+echo | Loading initial ramdisk ...
+
+initrd ${images-root}/iso/casper/initrd
+
+echo | ALL DONE! We are ready.
+echo | Downloaded images report:
+
+imgstat
+
+echo | Booting in 4s ...
+echo |
+echo +----------------------------------------------------+
+
+sleep 4
+
+boot

@@ -1,0 +1,24 @@
+#### Blue Banquise file ####
+## {{ansible_managed}}
+
+# Documentation:
+# https://slurm.schedmd.com/slurmdbd.conf.html
+
+## Authentication
+AuthInfo=/var/run/munge/munge.socket.2
+AuthType=auth/munge
+SlurmUser=slurm
+
+## Mariadb server
+DbdHost=localhost
+
+## Log and pid
+LogFile={{ slurm_SlurmdbdLogFile }}
+DebugLevel={{ slurm_SlurmdbdDebug }}
+PidFile=/var/run/slurmdbd.pid
+
+## Storage
+StorageType=accounting_storage/mysql
+StorageUser={{ slurm_StorageUser }}
+StoragePass={{ slurm_StoragePass }}
+

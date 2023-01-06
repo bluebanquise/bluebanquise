@@ -1,0 +1,23 @@
+#!ipxe
+
+
+#kernel ${images-root}/os/install/netboot/ubuntu-installer/amd64/linux initrd=initrd.gz preseed/url=${preseed-path} auto=true priority=critical locale=en_US.UTF-8 console-setup/charmap=UTF-8 console-keymaps-at/keymaps=pc105 console-setup/layoutcode=us console-setup/ask_detect=false netcfg/choose_interface=${node-main-network-interface} mirror/http/hostname=http://${next-server} mirror/http/directory=${mirror-directory} ${eq-console} ${eq-kernel-parameters} ${dedicated-kernel-parameters} ipxe_next_server=${next-server} node_hostname=${hostname}
+
+kernel http://10.10.0.1/repositories/debian/11.3/x86_64/os/install.amd/vmlinuz initrd=initrd.gz auto=true priority=critical locale=en_US.UTF-8 console-setup/charmap=UTF-8 console-keymaps-at/keymaps=pc105 console-setup/layoutcode=us console-setup/ask_detect=false preseed/url=http://10.10.0.1/preseed.cfg debian-installer/allow_unauthenticated=true
+
+echo | Loading initial ramdisk ...
+
+initrd http://10.10.0.1/repositories/debian/11.3/x86_64/initrd.gz
+
+echo | ALL DONE! We are ready.
+echo | Downloaded images report:
+
+imgstat
+
+echo | Booting in 4s ...
+echo |
+echo +----------------------------------------------------+
+
+sleep 4
+
+boot

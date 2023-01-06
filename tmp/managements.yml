@@ -1,0 +1,11 @@
+---
+# use '--limit mgt1' to restrict playbook to
+# management1 if mg_managements contains multiple management nodes
+- name: managements playbook
+  hosts: "mg_managements"
+  roles:
+
+    - role: dhcp_server
+      tags: dhcp_server
+    - role: pxe_stack
+      tags: pxe_stack

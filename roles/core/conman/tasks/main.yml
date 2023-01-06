@@ -31,14 +31,14 @@
 - name: group █ Ensure group conman exists
   ansible.builtin.group:
     name: conman
-    gid: "{{ conman_conman_user_gid }}"
+    gid: "{{ conman_user_gid }}"
     state: present
     system: yes
 
 - name: user █ Ensure user conman exists
   ansible.builtin.user:
     name: conman
-    uid: "{{ conman_conman_user_uid }}"
+    uid: "{{ conman_user_uid }}"
     state: present
     comment: "Connection Manager service"
     group: conman
@@ -118,7 +118,7 @@
 - name: service █ Manage conman state
   ansible.builtin.service:
     name: conman
-    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
-    state: "{{ (start_services | bool) | ternary('started', omit) }}"
+    enabled: "{{ (conman_enable_services | default(bb_enable_services) | default(true, true) | bool) | ternary('yes', 'no') }}"
+    state: "{{ (conman_start_services | default(bb_start_services) | default(true, true) | bool) | ternary('started', omit) }}"
   tags:
     - service

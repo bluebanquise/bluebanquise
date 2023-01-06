@@ -20,27 +20,26 @@ set resetbg ${esc:string}[49m
 set resetbold ${esc:string}[22m
 set reset ${esc:string}[0m
 
-# Figure out if client is 64-bit capable
-#cpuid --ext 29 && set arch x86_64 || set arch x86
-#cpuid --ext 29 && set archb 64 || set archb 32
-#cpuid --ext 29 && set archl x86_64 || set archl i386
-
 :start
-menu BlueBanquise iPXE boot menu for ${manufacturer} ${product} (${arch}bit)
+menu BlueBanquise iPXE boot menu for ${manufacturer} ${product} ${arch}
 item --gap                Main boot
 item bootosdeploy         Deploy OS (This will deploy/redeploy operating system)
 item bootdisk             Boot on disk (This will boot on local disk)
 item bootnext             Exit ipxe and continue EFI boot
+{% if pxe_stack_enable_diskless %}
 item --gap                Diskless
 item bootdiskless         Start a diskless OS (Configured using diskless tool)
-{% if pxe_stack_enable_cloning %}
-item --gap                Cloning
-item bootclone            Clone OS
-item bootdeployclone      Deploy already made clone
 {% endif %}
-#item --gap                Tools
-#item minimal_live_linux   Minimal Live Linux
-#item memtest              Memtest (To check Memory)
+{% if pxe_stack_enable_clonezilla %}
+item --gap                Cloning
+item bootclone            Clone/Deploy OS
+item bootautoclone        Auto Clone (advanced)
+item bootautodeploy       Auto Deploy (advanced)
+{% endif %}
+item --gap                Tools
+{% if pxe_stack_enable_alpine %}
+item bootalpinelive       Boot a live Alpine
+{% endif %}
 item --gap                Other
 item startshell           iPXE shell (Go to an iPXE shell)
 item startgrubshell       Grub2 shell (Go to a Grub2 shell, EFI only)
@@ -61,7 +60,7 @@ goto start
 :startgrubshell
 echo Booting on a Grub2 shell image...
 sleep 2
-chain http://${next-server}/preboot_execution_environment/bin/${arch}/grub2_shell.img || shell
+chain http://${next-server}/pxe/bin/${arch}/grub2_shell.img || shell
 exit 1
 
 :showinfo
@@ -87,16 +86,19 @@ set submenu-timeout 0
 goto start
 
 :bootosdeploy
-chain http://${next-server}/preboot_execution_environment/osdeploy/${eq-distribution}_${eq-distribution-major-version}.ipxe || shell
+chain http://${next-server}/pxe/osdeploy/${eq-distribution}_${eq-distribution-major-version}.ipxe || shell
 
 :bootdiskless
-chain http://${next-server}/preboot_execution_environment/diskless/images/${node-image}/boot.ipxe || shell
+chain http://${next-server}/pxe/diskless/images/${node-image}/boot.ipxe || shell
 
 :bootclone
-chain http://${next-server}/preboot_execution_environment/clone/clone.ipxe
+chain http://${next-server}/pxe/clone/clone.ipxe
 
 :bootdeployclone
-chain http://${next-server}/preboot_execution_environment/clone/deploy_clone.ipxe
+chain http://${next-server}/pxe/clone/deploy_clone.ipxe
+
+:bootalpinelive 
+chain http://${next-server}/pxe/tools/alpine.ipxe
 
 :bootdisk
 iseq ${platform} efi && goto bootdisk-efi || goto bootdisk-legacy
@@ -110,7 +112,7 @@ iseq ${platform} efi && goto bootdisk-efi || goto bootdisk-legacy
     :bootdisk-efi
     echo Booting on disk in EFI way
     sleep 2
-    chain http://${next-server}/preboot_execution_environment/bin/${arch}/grub2_efi_autofind.img || shell
+    chain http://${next-server}/pxe/bin/${arch}/grub2_efi_autofind.img || shell
     exit 1
 
 :bootnext
@@ -118,8 +120,8 @@ exit
 
 #:memtest
 #echo Booting Memtest86+
-#boot http://${next-server}/preboot_execution_environment/bin/memtest86+-5.01.bin || shell
+#boot http://${next-server}/pxe/bin/memtest86+-5.01.bin || shell
 
 #:minimal_live_linux
 #echo Booting Minimal Live Linux
-#chain http://${next-server}/preboot_execution_environment/equipment_ipxe_configurations/minimal.ipxe
+#chain http://${next-server}/pxe/equipment_ipxe_configurations/minimal.ipxe

@@ -1,0 +1,34 @@
+---
+- name: "firewalld █ Add services to firewall's {{ slurm_firewall_zone | default('public') }} zone"
+  ansible.posix.firewalld:
+    zone: "{{ slurm_firewall_zone | default('public') }}"
+    port: "{{ slurm_slurmd_port }}/tcp"
+    immediate: "yes"
+    permanent: "yes"
+    state: enabled
+  when:
+    - ansible_facts.os_family == "RedHat"
+    - ep_firewall | default(false) | bool
+  tags:
+    - firewall
+
+- name: "template █ Generate cgroup.conf to {{ slurm_home_path }}/cgroup.conf"
+  ansible.builtin.template:
+    src: "cgroup.conf.j2"
+    dest: "{{ slurm_home_path }}/cgroup.conf"
+    owner: slurm
+    group: slurm
+    mode: 0644
+  tags:
+    - template
+
+- name: include_tasks ░ Deploy Slurm compute configuration
+  ansible.builtin.include_tasks: "compute_{{ slurm_computes_config }}.yml"
+
+- name: service █ Manage slurmd state
+  ansible.builtin.service:
+    name: slurmd
+    enabled: yes
+    state: started
+  tags:
+    - service

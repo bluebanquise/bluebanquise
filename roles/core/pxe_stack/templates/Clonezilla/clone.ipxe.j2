@@ -1,0 +1,35 @@
+#!ipxe
+
+echo |
+echo | Entering tools/clone.ipxe
+echo |
+
+echo | Now starting system manual cloning process.
+echo |
+echo | Parameters used:
+echo | > Console: ${eq-console}
+echo | > Additional kernel parameters: ${eq-kernel-parameters} ${dedicated-kernel-parameters}
+echo | > Deployment server: ${next-server}
+
+echo |
+echo | Loading linux ...
+
+:kernel-line
+kernel http://${next-server}/pxe/bin/clonezilla/live/vmlinuz initrd=initrd.img fetch=http://${next-server}/pxe/bin/clonezilla/live/filesystem.squashfs boot=live union=overlay username=user hostname=bluebanquise config components noswap edd=on nomodeset vga=788 ip=dhcp net.ifnames=0 splash i915.blacklist=yes radeonhd.blacklist=yes nouveau.blacklist=yes vmwgfx.enable_fbdev=1 ${eq-kernel-parameters} ${dedicated-kernel-parameters} ${eq-console}
+
+echo | Loading initial ramdisk ...
+
+initrd http://${next-server}/pxe/bin/clonezilla/live/initrd.img
+
+echo | ALL DONE! We are ready.
+echo | Downloaded images report:
+
+imgstat
+
+echo | Booting in 4s ...
+echo |
+echo +----------------------------------------------------+
+
+sleep 4
+
+boot

@@ -12,17 +12,17 @@ echo | > Operating system target: ${eq-distribution} ${eq-distribution-version} 
 echo | > Console: ${eq-console}
 echo | > Additional kernel parameters: ${eq-kernel-parameters} ${dedicated-kernel-parameters}
 echo | > Deployment server: ${next-server}
-echo | > Target images: repositories/${eq-repositories-environment}/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/
+echo | > Target images: ${images-root}
 echo | > Target repos: repositories/${eq-repositories-environment}/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/
 echo | > Target AutoYast: ${eq-equipment-profile}.autoyast.xml
 echo |
 echo | Loading linux ...
 
-kernel http://${next-server}/repositories/${eq-repositories-environment}/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/os/boot/${eq-architecture}/loader/linux install=http://${next-server}/repositories/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/os autoyast=http://${next-server}/preboot_execution_environment/equipment_profiles/${eq-equipment-profile}.autoyast.xml  ${eq-console} ${eq-kernel-parameters} ipxe_next_server=${next-server} ${dedicated-parameters}
+kernel ${images-root}/iso/boot/${eq-architecture}/loader/linux install=${images-root}/iso autoyast=http://${next-server}/pxe/equipment_profiles/${eq-equipment-profile}.autoyast.xml  ${eq-console} ${eq-kernel-parameters} ipxe_next_server=${next-server} ${dedicated-parameters}
 
 echo | Loading initial ramdisk ...
 
-initrd http://${next-server}/repositories/${eq-repositories-environment}/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/os/boot/${eq-architecture}/loader/initrd
+initrd ${images-root}/iso/boot/${eq-architecture}/loader/initrd
 
 echo | ALL DONE! We are ready.
 echo | Downloaded images report:

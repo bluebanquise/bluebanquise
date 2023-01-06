@@ -19,19 +19,28 @@
   tags:
     - identify
 
-- name: template █ Render networkd NICs configuration
-  ansible.builtin.template:
-    src: networkd.j2
-    dest: "/etc/systemd/network/{{ item.conn_name | default(item.interface) | string }}.network"
-    owner: root
-    group: root
-    mode: 0644
+- name: networkd █ Set NICs configuration
+  networkd:
+    # Tuned
+    conn_name: "{{ item.conn_name | default(item.interface) | string }}"
+    ifname: "{{ item.ifname | default(item.physical_device) | default(omit) }}"
+    ip4: "{{ j2_nic_ip4 | trim | default(omit,true) }}"
+    gw4: "{{ j2_nic_gw4 | trim | default(omit,true) }}"
+    routes4: "{{ j2_nic_routes4 | trim | default(omit,true) }}"
+    dns4: "{{ j2_nic_dns4 | trim | default(omit,true) }}"
+    type: "{{ item.type | default('ethernet') }}"  # Even if in the documentation type is optional, it is in fact mandatory. Default to ethernet.
+    # Standard
+    state: "{{ item.state | default('present') }}"
+    master: "{{ item.master | default(omit) }}"
+    mode: "{{ item.mode | default(omit) }}"
+    method4: "{{ item.method4 | default(omit) }}"
+  notify: command █ networkctl reload
   loop: "{{ network_interfaces }}"
-  notify:
-    - command █ networkctl reload
+  register: nic_apply
+  when: item.skip is not defined or (item.skip is defined and not item.skip)
   tags:
-    - template
     - identify
+
 
 - name: meta █ Run handlers
   ansible.builtin.meta: flush_handlers

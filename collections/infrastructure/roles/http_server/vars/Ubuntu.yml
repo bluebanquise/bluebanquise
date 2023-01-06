@@ -1,0 +1,6 @@
+---
+http_server_packages_to_install:
+  - apache2
+http_server_services_to_start:
+  - apache2
+http_server_apache_conf_path: /etc/apache2/conf-enabled

@@ -1,4 +1,4 @@
-@ IN SOA  {{ inventory_hostname }}.{{ domain_name }}. root.{{ domain_name }}. (
+@ IN SOA  {{ inventory_hostname }}.{{ bb_domain_name | default(dns_server_domaine_name) }}. root.{{ bb_domain_name | default(dns_server_domaine_name) }}. (
   {{ serial }}  ;Serial
   3600        ;Refresh
   1800        ;Retry

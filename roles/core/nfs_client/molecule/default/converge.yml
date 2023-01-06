@@ -1,7 +1,0 @@
----
-- name: Converge
-  hosts: all
-  tasks:
-    - name: "Include nfs_client"
-      include_role:
-        name: "nfs_client"

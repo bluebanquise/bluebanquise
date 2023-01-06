@@ -1,0 +1,2 @@
+# {{ ansible_managed }}
+action(type="omfwd" Target="127.0.0.1" protocol="tcp" port="{{ loki_promtail_syslog_port }}" Template="RSYSLOG_SyslogProtocol23Format" TCP_Framing="octet-counted" KeepAlive="on")

@@ -1,0 +1,3 @@
+---
+flexlm_packages_to_install:
+  - lsb-compat

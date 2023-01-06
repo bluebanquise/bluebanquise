@@ -1,0 +1,183 @@
+---
+- name: include_vars ░ Gather OS specific variables
+  # This task gathers variables defined in OS specific files.
+  #
+  # Search vars in:
+  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
+  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
+  #  - <distribution>.yml            # eg. CentOS.yml
+  #  - <os_family>.yml               # eg. RedHat.yml
+  #
+  # If no OS specific file is found, the role will default to vars/main.yml
+  #
+  include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family }}.yml"
+      skip: true
+  tags:
+    - internal
+    - package
+
+- name: include_tasks ░ Use OS dedicated firewall task
+  ansible.builtin.include_tasks: "{{ item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}/firewall.yml"
+      skip: true
+  tags:
+    - internal
+    - firewall
+
+- name: "package █ Install {{ openldap_server_packages_to_install | join(' ') }} packages"
+  package:
+    name: "{{ openldap_server_packages_to_install }}"
+    state: present
+  tags:
+    - package
+
+- name: Checking DB_CONFIG exist
+  stat:
+    path: /var/lib/ldap/DB_CONFIG
+  register: db_config
+
+- name: Copy DB_CONFIG
+  copy:
+    src: /usr/share/openldap-servers/DB_CONFIG.example
+    remote_src: true
+    dest: /var/lib/ldap/DB_CONFIG
+    owner: ldap
+    group: ldap
+    mode: 0644
+  when: not db_config.stat.exists
+
+- name: Enable/disable services
+  service:
+    name: slapd
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+  tags:
+    - service
+
+- name: Start ldap
+  service:
+    name: slapd
+    state: started
+  when: (start_services | bool)
+  tags:
+    - service
+
+- name: Template >> chdomain.ldif
+  template:
+    src: chdomain.ldif.j2
+    dest: /dev/shm/chdomain.ldif
+    mode: 0644
+#  when:
+#    - db_config.stat.exists == False
+
+- name: Template >> basedomain.ldif
+  template:
+    src: basedomain.ldif.j2
+    dest: /dev/shm/basedomain.ldif
+    mode: 0644
+#  when:
+#    - db_config.stat.exists == False
+
+- name: Checking cosine.ldif was already pushed
+  stat:
+    path: /etc/openldap/slapd.d/cn=config/cn=schema/cn={1}cosine.ldif
+  register: cosine
+
+- name: Add cosine.ldif to ldap
+  command: ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/cosine.ldif
+  when: not cosine.stat.exists
+
+- name: Checking nis.ldif was already pushed
+  stat:
+    path: /etc/openldap/slapd.d/cn=config/cn=schema/cn={2}nis.ldif
+  register: nis
+
+- name: Add nis.ldif to ldap
+  command: ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/nis.ldif
+  when: not nis.stat.exists
+
+- name: Checking inetorgperson.ldif was already pushed
+  stat:
+    path: /etc/openldap/slapd.d/cn=config/cn=schema/cn={3}inetorgperson.ldif
+  register: inetorgperson
+
+- name: Add inetorgperson.ldif to ldap
+  command: ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/inetorgperson.ldif
+  when: not inetorgperson.stat.exists
+
+- name: Checking chdomain.ldif was already pushed
+  command: "grep RootPW /etc/openldap/slapd.d/cn=config/olcDatabase={2}{{openldap_backend_db | default('hdb')}}.ldif"
+  register: chdomain
+  failed_when: chdomain.rc != 0 and chdomain.rc != 1
+  changed_when: False
+
+- name: Add chdomain.ldif to ldap
+  command: ldapmodify -Y EXTERNAL -H ldapi:/// -f /dev/shm/chdomain.ldif
+  when:
+    - chdomain.rc == 1
+
+- name: Checking Manager is present in configuration
+  shell: set -o pipefail && ldapsearch -b "{% for dc in domain_name.split('.') %}{% if not loop.first %},{% endif %}dc={{ dc }}{% endfor %}" -x -LLL -s sub "objectClass=organizationalRole" cn | grep "^cn" | grep Manager
+  register: basedomain
+  failed_when: basedomain.rc != 0 and basedomain.rc != 1
+  changed_when: False
+
+#- name: Checking basedomain.ldif was already pushed
+#  shell: test $(($(ldapsearch -x -b "dc=sphen,dc=local" | grep People > /dev/null 2>&1; echo $?) + $(ldapsearch -x -b "dc=sphen,dc=local" | grep Group > /dev/null 2>&1; echo $?) ))
+#  register: basedomain
+
+- name: Add basedomain.ldif to ldap
+  command: ldapadd -x -D cn=Manager{% for dc in domain_name.split('.') %},dc={{ dc }}{% endfor %} -w {{ ldap_settings.manager_password }} -f /dev/shm/basedomain.ldif
+  when:
+    - basedomain.rc == 1
+
+- name: Update phpldapadmin config file >> comment
+  lineinfile:
+    path: /etc/phpldapadmin/config.php
+    regexp: ^\$servers\-\>setValue\('login','attr','uid'\);
+    line: //$servers->setValue('login','attr','uid');
+
+- name: Update phpldapadmin config file >> uncomment
+  lineinfile:
+    path: /etc/phpldapadmin/config.php
+    regexp: ^//\ \$servers\-\>setValue\('login','attr','dn'\);
+    line: $servers->setValue('login','attr','dn');
+
+- name: Set httpd_can_connect_ldap flag
+  seboolean:
+    name: httpd_can_connect_ldap
+    state: yes
+    persistent: yes
+
+- name: Enable/disable services
+  service:
+    name: "{{ item }}"
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+  with_items:
+    - slapd
+    - httpd
+  tags:
+    - service
+
+- name: Restart services
+  service:
+    name: "{{ item }}"
+    state: restarted
+  with_items:
+    - slapd
+    - httpd
+  when: (start_services | bool)
+  tags:
+    - service

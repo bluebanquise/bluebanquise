@@ -16,7 +16,7 @@ Example:
 
 .. code-block:: yaml
 
-  pam_limits:
+  rlimits:
     - domain: joe
       limit_type: soft
       limit_item: nofile

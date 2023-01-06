@@ -1,0 +1,3 @@
+---
+set_hostname_fqdn: true
+set_hostname_domain_name: cluster.local

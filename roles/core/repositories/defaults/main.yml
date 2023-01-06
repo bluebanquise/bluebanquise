@@ -1,0 +1,5 @@
+---
+repositories_client_disable_distro_repos: false
+repositories_client_enable_os_native: true
+repositories_client_apt_update_cache: true
+repositories_client_disable_delta_rpm: true

@@ -61,5 +61,6 @@
  }
 
 ## NETWORKS AND NODES
-
+{% if networks is defined and networks is iterable and networks is not string and networks is mapping %}
 include "{{ dhcp_server_conf_dir }}/dhcpd.networks.conf";
+{% endif %}

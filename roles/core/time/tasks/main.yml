@@ -64,9 +64,9 @@
   tags:
     - template
 
-- name: "timezone █ Set system to {{ time_zone }} timezone"
+- name: "timezone █ Set system to {{ bb_time_zone | default(time_time_zone, true) }} timezone"
   ansible.builtin.timezone:
-    name: "{{ time_zone }}"
+    name: "{{ bb_time_zone | default(time_time_zone, true) }}"
 
 - name: meta █ Run handler tasks to restart time services
   ansible.builtin.meta: flush_handlers
@@ -74,8 +74,8 @@
 - name: "service █ Manage {{ time_services_to_start | join(' ') }} services state"
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
-    state: "{{ (start_services | bool) | ternary('started', omit) }}"
+    enabled: "{{ (time_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    state: "{{ (time_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   loop: "{{ time_services_to_start }}"
   tags:
     - service

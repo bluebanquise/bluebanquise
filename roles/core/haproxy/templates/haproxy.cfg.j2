@@ -1,0 +1,90 @@
+#jinja2: lstrip_blocks: "True"
+#---------------------------------------------------------------------
+# Global settings
+#---------------------------------------------------------------------
+global
+{% if haproxy_global_parameters is defined and haproxy_global_parameters is not none %}
+{{ haproxy_global_parameters }}
+{% else %}
+    # to have these messages end up in /var/log/haproxy.log you will
+    # need to:
+    #
+    # 1) configure syslog to accept network log events.  This is done
+    #    by adding the '-r' option to the SYSLOGD_OPTIONS in
+    #    /etc/sysconfig/syslog
+    #
+    # 2) configure local2 events to go to the /var/log/haproxy.log
+    #   file. A line like the following can be added to
+    #   /etc/sysconfig/syslog
+    #
+    #    local2.*                       /var/log/haproxy.log
+    #
+    log         127.0.0.1 local2
+
+    chroot      /var/lib/haproxy
+    pidfile     /var/run/haproxy.pid
+    maxconn     4000
+    user        haproxy
+    group       haproxy
+    daemon
+
+    # turn on stats unix socket
+    stats socket /var/lib/haproxy/stats
+
+    # utilize system-wide crypto-policies
+    ssl-default-bind-ciphers PROFILE=SYSTEM
+    ssl-default-server-ciphers PROFILE=SYSTEM
+{% endif %}
+
+#---------------------------------------------------------------------
+# common defaults that all the 'listen' and 'backend' sections will
+# use if not designated in their block
+#---------------------------------------------------------------------
+defaults
+{% if haproxy_defaults_parameters is defined and haproxy_defaults_parameters is not none %}
+{{ haproxy_defaults_parameters }}
+{% else %}
+    mode                    http
+    log                     global
+    option                  httplog
+    option                  dontlognull
+    option http-server-close
+    option forwardfor       except 127.0.0.0/8
+    option                  redispatch
+    retries                 3
+    timeout http-request    10s
+    timeout queue           1m
+    timeout connect         10s
+    timeout client          1m
+    timeout server          1m
+    timeout http-keep-alive 10s
+    timeout check           10s
+    maxconn                 3000
+{% endif %}
+
+#---------------------------------------------------------------------
+# List of frontend and associated backends
+#---------------------------------------------------------------------
+
+{% if haproxy_resources is defined and haproxy_resources is iterable and haproxy_resources is not mapping and haproxy_resources is not string %}
+  {% for resource in haproxy_resources %}
+frontend {{ resource.name}}-frontend
+ bind {{ resource['frontend']['ip4'] }}:{{ resource['frontend']['port'] }}
+ default_backend {{ resource.name}}-backend
+    {% if resource['frontend']['parameters'] is defined and resource['frontend']['parameters'] is not none %}
+{{ resource['frontend']['parameters'] | indent(1, True) }}
+    {% endif %}
+
+backend {{ resource.name}}-backend
+    {% if resource['backend']['parameters'] is defined and resource['backend']['parameters'] is not none %}
+{{ resource['backend']['parameters'] | indent(1, True) }}
+    {% else %}
+ mode http
+ balance roundrobin
+    {% endif %}
+    {% for server in resource['backend']['servers'] %}
+ server {{ server.hostname }} {{ server.ip4 }}:{{ server.port }} {% if server.parameters is defined and server.parameters is not none %}{{ server.parameters }}{% else %}check{% endif %}
+
+    {% endfor %}
+
+{% endfor %}
