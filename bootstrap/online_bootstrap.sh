@@ -57,7 +57,6 @@ sudo -u bluebanquise /bin/bash -c '
 cd /var/lib/bluebanquise
 git clone https://github.com/bluebanquise/bluebanquise.git
 cd bluebanquise
-git checkout dev/2.0
 cd bootstrap/
 chmod +x configure_environment.sh
 ./configure_environment.sh
