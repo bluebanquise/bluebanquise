@@ -24,7 +24,7 @@ d-i netcfg/get_domain seen true
 
 ### Repositories
 d-i mirror/country string manual
-d-i mirror/http/hostname string http.us.debian.org
+d-i mirror/http/hostname string deb.debian.org
 d-i mirror/http/directory string /debian
 d-i mirror/http/proxy string
 
@@ -58,7 +58,7 @@ d-i passwd/root-password-crypted password {{ hostvars[groups[item][0]]['ep_admin
 
 ### Packages
 tasksel tasksel/first multiselect minimal
-d-i pkgsel/include string openssh-server curl
+d-i pkgsel/include string openssh-server curl python3
 d-i pkgsel/upgrade select none
 d-i pkgsel/updatedb boolean false
 d-i pkgsel/update-policy select none
@@ -76,6 +76,9 @@ d-i grub-installer/bootdev  string default
 d-i finish-install/reboot_in_progress note
 
 ### Specific
+
+### TODO: adjust to enable systemd-networkd by default
+
 d-i preseed/late_command string \
 {% if pxe_stack_enable_root %}
   in-target sh -c 'mkdir /root/.ssh'; \
@@ -84,10 +87,12 @@ d-i preseed/late_command string \
   {% endfor %}
   in-target sh -c 'sed -i "s/^#PermitRootLogin.*\$/PermitRootLogin yes/g" /etc/ssh/sshd_config'; \
 {% else %}
+  in-target sh -c '/sbin/usermod -m -d {{ pxe_stack_sudo_user_home }} {{ pxe_stack_sudo_user }}'; \
   in-target sh -c 'mkdir {{ pxe_stack_sudo_user_home }}/.ssh'; \
   {% for ssh_key in (hostvars[groups[item][0]]['ep_admin_ssh_keys'] | default(pxe_stack_ep_admin_ssh_keys)) %}
-  in-target sh -c 'echo "{{ ssh_key }}"" >> {{ pxe_stack_sudo_user_home }}/.ssh/authorized_keys';\
+  in-target sh -c 'echo "{{ ssh_key }}" >> {{ pxe_stack_sudo_user_home }}/.ssh/authorized_keys';\
   {% endfor %}
+  in-target sh -c 'chown -R {{ pxe_stack_sudo_user }}:{{ pxe_stack_sudo_user }} {{ pxe_stack_sudo_user_home }}/.ssh'; \
   in-target sh -c 'sed -i "s/^#PermitRootLogin.*\$/PermitRootLogin no/g" /etc/ssh/sshd_config'; \
   {% if pxe_stack_sudo_is_passwordless %}
   in-target sh -c 'echo "{{ pxe_stack_sudo_user }} ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers.d/{{ pxe_stack_sudo_user }}'
