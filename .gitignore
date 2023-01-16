@@ -6,6 +6,7 @@ pxe
 
 ## Don't track possible documentation build ##
 /resources/documentation/_build/
+documentation/_build
 
 ## Don't track custom roles ##
 /roles/custom
