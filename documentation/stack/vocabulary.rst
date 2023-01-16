@@ -2,49 +2,71 @@
 Vocabulary
 ==========
 
-Some words are important in **BlueBanquise**. Most of them are described here.
+Some key terms are important in **BlueBanquise**. Most of them are described here.
 
 Ansible vocabulary
 ==================
 
+Inventory
+---------
+
+An Ansible inventory is a file or a folder that contains data to be parsed by Ansible.
+An inventory contains the list of hosts to be addressed, and their associated data.
+
+You can use multiple inventories to define multiple states of the cluster,
+stack them at runtime if needed, etc. Also, since inventories are
+text based, it can be interesting to version them with git.
+
+In remaining of the documentation, we will assume a single inventory for the whole cluster,
+and all inventory path will be ``~/inventory/``, but you can store it anywhere.
+
 Host
 ----
 
-An Ansible **host** (also often referred as a **node**) is a remote host managed
-by Ansible. An **host** can be a physical server, but also a VM, a container or
+An **Ansible managed host** (also often referred as a **node**) is a remote host managed
+by Ansible. An **Ansible managed host** can be a physical server, but also a VM, a container or
 something else.
 
-.. image:: images/nodes/hosts_example.svg
+.. image:: images/hosts_example.svg
    :align: center
 
 
-Hosts are defined in ``~/bluebanquise/inventory/cluster/`` folder.
+Hosts are defined by default in ``~/inventory/cluster/`` inventory folder.
 
-Please do a difference between an **Ansible managed host**, and a **host**.
-All equipment that can have an ip address on the network are considered "host",
+Please do a difference between an **Ansible managed host**, and a **simple host**.
+All equipment that can have an ip address on the network are considered "simple host",
 but only those with an **ssh** + **python** capability and on which we will use Ansible
 to deploy a configuration are considered "Ansible managed host".
-They are declared the same way in the stack inventory.
 
 Group
 -----
 
-An Ansible **group** is a logical aggregation of hosts.
+An Ansible **group** is a logical aggregation of Ansible managed hosts.
 For example, system administrator can define a group "database_servers" that
-would contain hosts "database1" and "database2".
+would contain nodes "database1" and "database2".
 
-**Groups** allow Ansible to provide dedicated **variables** to member hosts or
-execute tasks on a set of hosts.
+**Groups** allow Ansible to provide dedicated **variables** to group's member nodes or
+execute tasks on a set of nodes.
 
-Note: a host can be part of multiple groups.
+Note: a node can be part of multiple groups.
 
 Variables
 ---------
 
 Variables in Ansible follow the YAML structure.
 
-A variable is like in any programming language: a variable name, and a data
-related.
+A variable is like in any programming language: a variable name (key), and a data
+related (value).
+
+.. raw:: html
+
+   <br>
+   <div class="tip_card">                
+   <div class="tip_card_img_container"><img src="../_static/img_avatar.png" style="width:100px; border-radius: 5px 0 0 5px; float: left;" /></div>
+   <div class="tip_card_title_container"><b>Tip from the penguin:</b></div>
+   <div class="tip_card_content_container"><p>Ansible supports 2 input format: INI and YAML. We will focus on YAML, but consider INI as a good candidate for simple cluster.</p></div>
+   </div>
+   <br>
 
 Multiple kind of variables exist in Ansible:
 
@@ -58,7 +80,8 @@ A simple variable is defined this way:
   my_variable_1: hello!
   my_variable_2: 7777
 
-In Jinja2, variables will be accessible directly this way:
+In Jinja2, the language used in Ansible templates,
+variables will be accessible directly this way:
 
 .. code-block:: text
 
@@ -73,7 +96,8 @@ Output will be:
 List
 ^^^^
 
-A list is like an array, and can be iterated over:
+A list is like an array, and can be iterated over. It is important to note that
+a list is an ordered element.
 
 .. code-block:: yaml
 
@@ -92,7 +116,7 @@ list can be used (like an array):
   {% endfor %}
   {{ my_names_list[0] }}
 
-Note that index start at 0.
+Note that index starts at 0.
 
 Output will be:
 
@@ -117,7 +141,8 @@ it is possible to check the list itself:
 Dictionary
 ^^^^^^^^^^^
 
-A dictionary, is simply a pack of other variables, organized as a tree, and
+A dictionary (also sometime called an hash),
+is simply a pack of other variables, organized as a tree, and
 defined under it (some kind of variables tree):
 
 .. code-block:: yaml
@@ -132,6 +157,9 @@ defined under it (some kind of variables tree):
       - bob
       - alice
       - henry
+
+It is important to note that a dictionary cannot be considered as an
+ordered element.
 
 In Jinja2, dictionary can be access two ways:
 
@@ -163,7 +191,7 @@ Output will be:
   bob
 
 
-Jinja2 will be discussed later, do not worry about this point for now.
+To learn Jinja2 basics, please check the Ansible training at BEN_BEN
 
 j2 Variables
 ^^^^^^^^^^^^
@@ -194,14 +222,14 @@ Inventory, roles, and playbooks
 Inventory
 ^^^^^^^^^
 
-The Ansible inventory is the directory that contains Ansible variables and hosts
+As stated before, the Ansible inventory is the directory that contains Ansible variables and hosts
 definitions.
 
-Inventory is the **DATA**. In **BlueBanquise**, default path is ``~/bluebanquise/inventory``.
+Inventory is the **DATA**. In **BlueBanquise**, default path is ``~/inventory``.
 
 .. note::
   You can have multiple inventories, and switch between them using ``-i`` parameter
-  when using Ansible commands.
+  when using Ansible commands. You can also stack them with multiple ``-i``.
 
 Roles
 ^^^^^
@@ -210,10 +238,9 @@ An Ansible role is a list of tasks to do to achieve a purpose.
 For example, there will be a role called ``dhcp_server``, that contains tasks to
 install, configure and start the dhcp server.
 
-In **BlueBanquise**, default path is ``~/bluebanquise/roles``.
-
-Note that roles folder is split in multiple directories, but
-``ansible.cfg`` file is configured to use roles in all of them.
+In **BlueBanquise**, roles are imported from collections.
+You can add your own custom roles by editing the ``ansible.cfg`` file and
+add your custom folders.
 
 Roles are the **AUTOMATION LOGIC**.
 
@@ -223,29 +250,42 @@ Playbooks
 An Ansible playbook is simply a list of roles to apply on a specific host or
 group of hosts. It is a yaml file.
 
-In **BlueBanquise**, default path is ``~/bluebanquise/playbooks``.
+You can store your playbook files anywhere.
 
 Playbooks are your **LIST OF ROLES TO APPLY on your hosts/targets**.
+
+.. raw:: html
+
+   <br>
+   <div class="tip_card">                
+   <div class="tip_card_img_container"><img src="../_static/img_avatar.png" style="width:100px; border-radius: 5px 0 0 5px; float: left;" /></div>
+   <div class="tip_card_title_container"><b>Tip from the penguin:</b></div>
+   <div class="tip_card_content_container"><p>Inventories, roles, and playbooks, are all text based. For production environment, strongly consider versioning them using git.</p></div>
+   </div>
+   <br>
 
 ----------
 
 Variables precedence
 --------------------
 
-We are reaching the very important part of the stack.
+We are reaching the **very important** part of the stack.
 
-Ansible has an internal mechanism called **Variables precedence**.
-Simply put: you can define the same variables (same key name) multiple times, and
+If you do not know Ansible, PLEASE take 30 min to follow the small tutorial at BEN_BEN
+
+Ansible has an internal mechanism called **variables precedence**.
+Not using it prevents to unlock the stack full potential.
+
+Simply put: you can define the same variables (same key name) multiple times in the inventory, and
 using this mechanism, some definitions will have priority above others,
-depending of their position.
+depending of their position and the target nodes.
 
 When a variable is defined in a yml file, the position of the file in the
-Ansible inventory matters and is important.
+Ansible inventory structure matters and is important.
 
-For example, a variable defined in ``~/bluebanquise/inventory/group_vars/all/``
-will have the less precedence, and a variable defined in
-``~/bluebanquise/inventory/cluster`` will have a higher precedence, and so win if
-variable is used.
+For example, a variable defined in ``~/inventory/group_vars/all/``
+will have less precedence than a variable defined in
+``~/inventory/cluster``, and so this last one will win if called.
 
 The full list of available variables precedence is provided in Ansible
 documentation:
@@ -263,9 +303,9 @@ redefine the whole logic of the stack without editing the stack code). Etc.
 
 Inventory can be seen as a giant pizza, in 3D then flatten.
 
-* *Paste* is the variable in ``~/bluebanquise/inventory/group_vars/all``
-* Then *large ingredients* comes from ``~/bluebanquise/inventory/group_vars/equipment_myequipment``
-* Then *small ingredients* above are the ``~/bluebanquise/inventory/cluster/nodes/``
+* *Paste* is the variable in ``~/inventory/group_vars/all``
+* Then *large ingredients* comes from ``~/inventory/group_vars/equipment_myequipment``
+* Then *small ingredients* above are the ``~/inventory/cluster/nodes/``
 * And *pepper and tomatoes* (last layer) is the extra-vars at call.
 
 .. image:: images/pizza_example.svg
@@ -273,7 +313,7 @@ Inventory can be seen as a giant pizza, in 3D then flatten.
 I like pizza...
 
 Refer to the Ansible tutorial of this documentation if you do not know how to use Ansible,
-to learn this mechanism by practice.
+to learn this mechanism by practice. BEN_BEN
 
 Replace
 -------

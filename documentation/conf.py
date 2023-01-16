@@ -84,8 +84,8 @@ pygments_style = None
 #     'logo_name': 'Training',
 #     }
 html_logo = "logo.png"
-#html_theme = "sphinx_book_theme"
-html_theme = "furo"
+html_theme = "sphinx_book_theme"
+#html_theme = "furo"
 html_theme_path = ["_themes"]
 #html_css_files = ["custom.css"]
 html_theme_path = ["_themes", ]
