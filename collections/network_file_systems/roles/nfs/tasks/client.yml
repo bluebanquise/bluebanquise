@@ -1,0 +1,51 @@
+---
+- name: "package █ Install {{ nfs_client_packages_to_install | join(' ') }} packages"
+  ansible.builtin.package:
+    name: "{{ nfs_client_packages_to_install }}"
+    state: present
+  tags:
+    - package
+
+- name: file █ Create NFS directories
+  ansible.builtin.file:
+    path: "{{ item.0.mount }}"
+    state: directory
+  with_subelements:
+    - "{{ nfs_shares }}"
+    - clients_groups
+  when:
+    - groups[item.1] is defined
+    - inventory_hostname in groups[item.1]
+
+- name: seboolean █ Enable selinux booleans if needed
+  ansible.posix.seboolean:
+    name: "{{ item }}"
+    state: yes
+    persistent: yes
+  loop: "{{ nfs_client_sebooleans }}"
+  when:
+    - ansible_facts.selinux.status == "enabled"
+
+- name: service █ Manage rpcbind state
+  ansible.builtin.service:
+    name: rpcbind
+    enabled: "{{ (nfs_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    state: "{{ (nfs_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
+  when: ansible_facts.distribution in ['CentOS','RedHat']
+  tags:
+    - service
+
+- name: mount █ Mount exported NFS into directories
+  ansible.builtin.mount:
+    path: "{{ item.0.mount }}"
+    src: "{{ item.0.server }}{% if item.0.network is defined and item.0.network is not none %}-{{ item.0.network }}{% endif %}:{{ item.0.export }}"
+    fstype: nfs
+    opts: "{{ item.0.mount_options | default('rw,fsc,nfsvers=4.2,bg,nosuid,nodev',true) }}"
+    state: "{{ nfs_client_directories_state }}"
+  with_subelements:
+    - "{{ nfs_shares }}"
+    - clients_groups
+  when:
+    - groups[item.1] is defined
+    - inventory_hostname in groups[item.1]
+    - item.0.server is defined and item.0.server is not none

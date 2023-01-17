@@ -1,0 +1,16 @@
+---
+- name: file █ Create user ssh directory if not exist
+  ansible.builtin.file:
+    path: "{% if ansible_env.SUDO_USER is defined %}/home/{{ ansible_env.SUDO_USER }}{% else %}/root{% endif %}/.ssh"
+    state: directory
+    mode: 0700
+
+- name: "template █ Generate {% if ansible_env.SUDO_USER is defined %}/home/{{ ansible_env.SUDO_USER }}{% else %}/root{% endif %}/.ssh/config"
+  ansible.builtin.template:
+    src: "config.j2"
+    dest: "{% if ansible_env.SUDO_USER is defined %}/home/{{ ansible_env.SUDO_USER }}{% else %}/root{% endif %}/.ssh/config"
+    owner: "{% if ansible_env.SUDO_USER is defined %}{{ ansible_env.SUDO_USER }}{% else %}root{% endif %}"
+    group: "{% if ansible_env.SUDO_USER is defined %}{{ ansible_env.SUDO_USER }}{% else %}root{% endif %}"
+    mode: 0600
+  tags:
+    - template

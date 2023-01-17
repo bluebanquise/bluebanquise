@@ -10,7 +10,6 @@ pxe_stack_packages_to_install:
   - httpd
   - policycoreutils-python
   - clustershell
-  - python3-clustershell
   - python36
   - python36-PyYAML
   - python36-clustershell
