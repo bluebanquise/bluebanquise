@@ -9,6 +9,11 @@ pxe_stack_packages_to_install:
   - bluebanquise-ipxe-arm64
   - httpd
   - policycoreutils-python
+  - clustershell
+  - python3-clustershell
+  - python36
+  - python36-PyYAML
+  - python36-clustershell
 pxe_stack_default_tftp_package: atftp
 pxe_stack_services_to_start:
   - httpd

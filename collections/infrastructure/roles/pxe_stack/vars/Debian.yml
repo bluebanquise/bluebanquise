@@ -8,6 +8,9 @@ pxe_stack_packages_to_install:
   - bluebanquise-ipxe-x86-64
   - bluebanquise-ipxe-arm64
   - apache2
+  - python3
+  - python3-yaml
+  - python3-clustershell
 pxe_stack_default_tftp_package: tftpd-hpa
 pxe_stack_services_to_start:
   - apache2
