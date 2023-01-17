@@ -1,22 +1,12 @@
 ---
-- name: file <|> Ensure old netplan configuration is erased
-  ansible.builtin.file:
-    path: /etc/netplan/00-installer-config.yaml
-    state: absent
+- name: "service <|> Manage {{ nic_services_to_start | join(' ') }} state"
+  ansible.builtin.service:
+    name: "{{ item }}"
+    enabled: yes
+    state: "{{ (nic_start_services | bool) | ternary('started', omit) }}"
+  loop: "{{ nic_services_to_start }}"
   tags:
-    - identify
-
-- name: file <|> Disable netplan management
-  ansible.builtin.copy:
-    src: 01-netcfg.yaml
-    dest: /etc/netplan/01-netcfg.yaml
-    owner: root
-    group: root
-    mode: 0644
-  #notify:
-  #  - command <|> netplan generate
-  tags:
-    - identify
+    - service
 
 - name: networkd <|> Set NICs configuration
   bluebanquise.infrastructure.networkd:
@@ -48,6 +38,15 @@
   when: item.skip is not defined or (item.skip is defined and not item.skip)
   tags:
     - identify
+
+- name: lineinfile <|> Remove NICs entry from /etc/network/interfaces
+  lineinfile:
+    path: /etc/network/interfaces
+    regexp: ".*{{ item.conn_name | default(item.interface) | string }}.*" 
+    state: absent
+    backup: yes
+  loop: "{{ network_interfaces }}"
+  when: item.skip is not defined or (item.skip is defined and not item.skip)
 
 - name: meta <|> Run handlers
   ansible.builtin.meta: flush_handlers
