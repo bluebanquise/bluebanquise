@@ -10,7 +10,7 @@
 # booset tool, to manage nodes PXE boot
 #   - Benoît Leveugle <benoit.leveugle@gmail.com>
 #   - Adrien Ribeiro <adrien.ribeiro@atos.net>
-#   - Bruno Travouillon <devel@travouillon.fr> 
+#   - Bruno Travouillon <devel@travouillon.fr>
 #   - johnnykeats <johnny.keats@outlook.com>
 # https://github.com/bluebanquise/bluebanquise - MIT license
 
@@ -21,7 +21,6 @@ import pwd
 import re
 from argparse import ArgumentParser
 import yaml
-from ClusterShell.NodeSet import NodeSet
 
 
 # Colors, from https://stackoverflow.com/questions/287871/how-to-print-colored-text-in-terminal-in-python
@@ -63,6 +62,36 @@ def set_default_boot(node, boot, node_image=None, extra_parameters=None):
     logging.info('    └── '+bcolors.OKGREEN+'[OK] Done.'+bcolors.ENDC)
 
 
+def rangeexpand(txt):
+    lst = []
+    for r in txt.split(','):
+        zlen = len(str(r).split('-')[0])
+        lstlen_0 = len(lst)
+        if '-' in r[1:]:
+            r0, r1 = r[1:].split('-', 1)
+            lst += range(int(r[0] + r0), int(r1) + 1)
+        else:
+            lst.append(int(r))
+        lstlen_1 = len(lst)
+        for i in range(lstlen_0, lstlen_1):
+            lst[i] = str(lst[i]).zfill(zlen)
+    return lst
+
+
+def nodesetexpand(znodeset):
+    nodeset = []
+    for n in znodeset.split(','):
+        # supports a single range per element
+        if '[' in n and ']' in n:
+            n1 = n.split('[')[0]
+            n3 = n.split(']')[1]
+            for nn in rangeexpand(n.replace(n1 + '[', '').replace(']' + n3, '')):
+                nodeset.append(n1 + nn + n3)
+        else:
+            nodeset.append(n)
+    return nodeset
+
+
 # Get arguments passed to bootset
 parser = ArgumentParser()
 parser.add_argument("-n", "--nodes", dest="nodes",
@@ -91,8 +120,8 @@ print("""\
       (/)_ (/)_ V_/_
 
    BlueBanquise bootset
-   v1.0.8
-   https://github.com/bluebanquise/tools/
+   v1.1.0
+   https://github.com/bluebanquise/bluebanquise/
 
 """)
 
@@ -114,12 +143,12 @@ pxe_nodes_path = htdocs_path + '/pxe/nodes/'
 
 
 if passed_arguments.status is not None:
-    diskfull = NodeSet()
+    diskfull = []
     diskless = dict()
-    osdeploy = NodeSet()
+    osdeploy = []
 
     # Iteration on nodes
-    for node in NodeSet(passed_arguments.nodes):
+    for node in nodesetexpand(passed_arguments.nodes):
         # Check if node file exist
         ipxe_file = os.path.join(pxe_nodes_path, '{node}.ipxe'.format(node=node))
         if not os.path.exists(ipxe_file):
@@ -132,25 +161,25 @@ if passed_arguments.status is not None:
                 boot = re.search(r"^set menu-default boot(.+)", ipxe_conf, re.MULTILINE).group(1)
 
                 if boot == 'disk':
-                    diskfull.update(node)
+                    diskfull.append(node)
                 elif boot == 'osdeploy':
-                    osdeploy.update(node)
+                    osdeploy.append(node)
                 elif boot == 'diskless':
                     # If diskless, group nodes per image
                     image = re.search(r"^set node-image (.+)", ipxe_conf, re.MULTILINE).group(1)
                     if image not in diskless:
-                        diskless[image] = NodeSet()
-                    diskless[image].update(node)
+                        diskless[image] = []
+                    diskless[image].append(node)
 
     # Display NodeSet per boot type
     if len(diskfull):
-        print('Diskfull: {nodes}'.format(nodes=diskfull))
+        print('Diskfull: {nodes}'.format(nodes=','.join(diskfull)))
     if len(osdeploy):
-        print('Next boot deployment: {nodes}'.format(nodes=osdeploy))
+        print('Next boot deployment: {nodes}'.format(nodes=','.join(osdeploy)))
     if len(diskless):
         print('Diskless image(s):')
         for image in diskless:
-            print(' - {image}: {nodes}'.format(image=image, nodes=diskless[image]))
+            print(' - {image}: {nodes}'.format(image=image, nodes=','.join(diskless[image])))
 
 elif passed_arguments.boot is not None:
 
@@ -160,7 +189,7 @@ elif passed_arguments.boot is not None:
         quit()
 
     # Iteration on nodes
-    for node in NodeSet(passed_arguments.nodes):
+    for node in nodesetexpand(passed_arguments.nodes):
 
         # Check if node exist in Ansible generated file
         logging.info(bcolors.OKBLUE+'Cheking if node '+str(node)+' exist...'+bcolors.ENDC)
