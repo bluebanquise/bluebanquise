@@ -1,0 +1,37 @@
+---
+
+loki_groups:
+  promtail:
+    gid: 461
+  loki:
+    gid: 462
+
+loki_users:
+  promtail:
+    uid: 461
+    group: promtail
+    home: /var/empty/promtail
+    comment: promtail user
+  loki:
+    uid: 462
+    group: loki
+    home: /var/empty/loki
+    comment: loki user
+
+loki_conf_dir: /etc/loki
+loki_data_dir: /var/lib/loki
+loki_index_dir: "{{ loki_data_dir }}/index"
+loki_chunks_dir: "{{ loki_data_dir }}/chunks"
+loki_ip: 127.0.0.1
+loki_port: 3100
+loki_grpc_port: 9095
+
+loki_promtail_conf_dir: /etc/promtail
+loki_promtail_enable_server: false
+loki_promtail_ip: 127.0.0.1
+loki_promtail_port: 9080
+loki_promtail_grpc_port: 0
+loki_promtail_grpc_ip: 127.0.0.1
+loki_promtail_syslog_port: 1514
+loki_promtail_syslog_ip: 127.0.0.1
+

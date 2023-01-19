@@ -1,0 +1,14 @@
+---
+- name: mount █ Control active and configured mount points
+  ansible.posix.mount:
+    backup: "{{ item.backup | default(omit) }}"
+    boot: "{{ item.boot | default(omit) }}"
+    dump: "{{ item.dump | default(omit) }}"
+    fstab: "{{ item.fstab | default(omit) }}"
+    fstype: "{{ item.fstype | default(omit) }}"
+    opts: "{{ item.opts | default(omit) }}"
+    passno: "{{ item.passno | default(omit) }}"
+    path: "{{ item.path }}"
+    src: "{{ item.src | default(omit) }}"
+    state: "{{ item.state }}"
+  loop: "{{ mount }}"

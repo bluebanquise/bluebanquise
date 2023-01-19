@@ -4,40 +4,15 @@
 
 This roles is just a convenient collection of wrappers above the following Ansible modules:
 
-* cron
 * package
 * file
 * template
 * service
 * lineinfile
-* filesystem
 
 Using this role, it is theoretically possible to setup and start a large number of services.
 
 ## Wrappers
-
-### cron
-
-Set needed cron on node/group by defining system.cron list based on cron module parameters. Example:
-
-```yaml
-system:
-  cron:
-    - name: "check dirs"
-      minute: "0"
-      hour: "5,2"
-      job: "ls -alh > /dev/null"
-    - name: yum autoupdate
-      weekday: "2"
-      minute: "0"
-      hour: "12"
-      user: root
-      job: "YUMINTERACTIVE=0 /usr/sbin/yum-autoupdate"
-      cron_file: ansible_yum-autoupdate
-```
-
-See `**cron** Ansible module page <https://docs.ansible.com/ansible/latest/collections/ansible/builtin/cron_module.html>`_
-for the full list of available parameters.
 
 ### package
 

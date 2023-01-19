@@ -1,0 +1,13 @@
+---
+- name: pam_limits █ Set pam_limits
+  community.general.pam_limits:
+    backup: "{{ item.backup | default(omit) }}"
+    comment: "{{ item.comment | default(omit) }}"
+    dest: "{{ item.dest | default(omit) }}"
+    domain: "{{ item.domain }}"
+    limit_item: "{{ item.limit_item }}"
+    limit_type: "{{ item.limit_type }}"
+    use_max: "{{ item.use_max | default(omit) }}"
+    use_min: "{{ item.use_min | default(omit) }}"
+    value: "{{ item.value }}"
+  loop: "{{ pam_limits }}"

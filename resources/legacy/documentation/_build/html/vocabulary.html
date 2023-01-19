@@ -1,0 +1,560 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>2. Vocabulary &mdash; BlueBanquise Documentation 1.5.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="3. [Training] - Cluster SysAdmin" href="training_sysadmin.html" />
+    <link rel="prev" title="1. Introduction" href="introduction.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> BlueBanquise Documentation
+          
+
+          
+            
+            <img src="_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">1. Introduction</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">2. Vocabulary</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#ansible-vocabulary">2.1. Ansible vocabulary</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#host">2.1.1. Host</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#group">2.1.2. Group</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#variables">2.1.3. Variables</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#simple">2.1.3.1. Simple</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#list">2.1.3.2. List</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dictionary">2.1.3.3. Dictionary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#j2-variables">2.1.3.4. j2 Variables</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#inventory-roles-and-playbooks">2.1.4. Inventory, roles, and playbooks</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#inventory">2.1.4.1. Inventory</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#roles">2.1.4.2. Roles</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#playbooks">2.1.4.3. Playbooks</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#variables-precedence">2.1.5. Variables precedence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#replace">2.1.6. Replace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#jinja2">2.1.7. Jinja2</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#stack-vocabulary">2.2. Stack vocabulary</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#icebergs">2.2.1. Icebergs</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#one-iceberg-configuration">2.2.1.1. One iceberg configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#multiple-icebergs-configuration">2.2.1.2. Multiple icebergs configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#equipment-profiles">2.2.2. Equipment profiles</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="training_sysadmin.html">3. [Training] - Cluster SysAdmin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="training_ansible.html">4. [Training] - Ansible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bootstrap.html">5. [Core] - Bootstrap base system</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configure_bluebanquise.html">6. [Core] - Configure BlueBanquise</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deploy_bluebanquise.html">7. [Core] - Deploy BlueBanquise</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multiple_icebergs.html">8. [Core] - Manage multiple icebergs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="diskless.html">9. [Core] - Diskless</a></li>
+<li class="toctree-l1"><a class="reference internal" href="high_availability.html">10. [Community] - High Availability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring.html">11. [Community] - Monitoring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="containers.html">12. Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stories.html">13. Stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roles.html">14. Roles list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">15. References</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">BlueBanquise Documentation</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li><span class="section-number">2. </span>Vocabulary</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/vocabulary.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="vocabulary">
+<h1><span class="section-number">2. </span>Vocabulary<a class="headerlink" href="#vocabulary" title="Permalink to this headline">¶</a></h1>
+<p>Lets establish few common terms before going deeper in technical details.</p>
+<p>Some words are important in <strong>BlueBanquise</strong>. Most of them are described here.</p>
+<div class="section" id="ansible-vocabulary">
+<h2><span class="section-number">2.1. </span>Ansible vocabulary<a class="headerlink" href="#ansible-vocabulary" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="host">
+<h3><span class="section-number">2.1.1. </span>Host<a class="headerlink" href="#host" title="Permalink to this headline">¶</a></h3>
+<p>An Ansible <strong>host</strong> (also often referred as a <strong>node</strong>) is a remote host managed
+by Ansible. An <strong>host</strong> can be a physical server, but also a VM, a container or
+something else.</p>
+<img alt="_images/hosts_example.svg" class="align-center" src="_images/hosts_example.svg" /><p>Hosts are defined in <em>/etc/bluebanquise/inventory/cluster/nodes</em>.</p>
+<p>Please do a difference between an <strong>Ansible managed host</strong>, and a <strong>host</strong>.
+All equipment that can have an ip address on the network are considered “host”,
+but only those with an ssh + python capability and on which we will use Ansible
+to deploy a configuration are considered “Ansible managed host”.
+They are declared the same way in the stack inventory.</p>
+</div>
+<div class="section" id="group">
+<h3><span class="section-number">2.1.2. </span>Group<a class="headerlink" href="#group" title="Permalink to this headline">¶</a></h3>
+<p>An Ansible <strong>group</strong> is a logical aggregation of hosts.
+For example, system administrator can define a group “database_servers” that
+would contain hosts “database1” and “database2”.</p>
+<p><strong>Groups</strong> allow Ansible to provide dedicated <strong>variables</strong> to member hosts or
+execute tasks on a set of hosts.</p>
+<p>Note: a host can be part of multiple groups.</p>
+</div>
+<div class="section" id="variables">
+<h3><span class="section-number">2.1.3. </span>Variables<a class="headerlink" href="#variables" title="Permalink to this headline">¶</a></h3>
+<p>Variables in Ansible follow the YAML structure.</p>
+<p>A variable is like in any programming language: a variable name, and a data
+related.</p>
+<p>Multiple kind of variables exist in Ansible:</p>
+<div class="section" id="simple">
+<h4><span class="section-number">2.1.3.1. </span>Simple<a class="headerlink" href="#simple" title="Permalink to this headline">¶</a></h4>
+<p>A simple variable is defined this way:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">my_variable_1</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">hello!</span>
+<span class="nt">my_variable_2</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">7777</span>
+</pre></div>
+</div>
+<p>In Jinja2, variables will be accessible directly this way:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>{{ my_variable_1 }}
+</pre></div>
+</div>
+<p>Output will be:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>hello!
+</pre></div>
+</div>
+</div>
+<div class="section" id="list">
+<h4><span class="section-number">2.1.3.2. </span>List<a class="headerlink" href="#list" title="Permalink to this headline">¶</a></h4>
+<p>A list is like an array, and can be iterated over:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">my_names_list</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">bob</span>
+  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">alice</span>
+  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">henry</span>
+</pre></div>
+</div>
+<p>In Jinja2, variables in a list can be iterated over, or a specific value of the
+list can be used (like an array):</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>{% for i in my_names_list %}
+{{ i }}
+{% endfor %}
+{{ my_names_list[0] }}
+</pre></div>
+</div>
+<p>Note that index start at 0.</p>
+<p>Output will be:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>bob
+alice
+henry
+bob
+</pre></div>
+</div>
+<p>Note also that to check if a list is empty,
+it is possible to check the list itself:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>{% if my_names_list %}
+the list is not empty
+{% else %}
+the list is empty
+{% endif %}
+</pre></div>
+</div>
+</div>
+<div class="section" id="dictionary">
+<h4><span class="section-number">2.1.3.3. </span>Dictionary<a class="headerlink" href="#dictionary" title="Permalink to this headline">¶</a></h4>
+<p>A dictionary, is simply a pack of other variables, organized as a tree, and
+defined under it (some kind of variables tree):</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">my_dictionarry_1</span><span class="p">:</span>
+  <span class="nt">my_variable_1</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">hello!</span>
+  <span class="nt">my_variable_2</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">7777</span>
+  <span class="nt">my_sub_part</span><span class="p">:</span>
+    <span class="nt">color</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">yellow</span>
+    <span class="nt">font</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">verdana</span>
+  <span class="nt">my_names_list</span><span class="p">:</span>
+    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">bob</span>
+    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">alice</span>
+    <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">henry</span>
+</pre></div>
+</div>
+<p>In Jinja2, dictionary can be access two ways:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>{% for i in my_dictionarry_1.my_names_list %}
+{{ i }}
+{% endfor %}
+{% for i in my_dictionarry_1[&#39;my_names_list&#39;] %}
+{{ i }}
+{% endfor %}
+
+{{ my_dictionarry_1.my_names_list[0] }}
+{{ my_dictionarry_1[&#39;my_names_list&#39;][0] }}
+</pre></div>
+</div>
+<p>Output will be:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>bob
+alice
+henry
+bob
+alice
+henry
+
+bob
+bob
+</pre></div>
+</div>
+<p>Jinja2 will be discussed later, do not worry about this point for now.</p>
+</div>
+<div class="section" id="j2-variables">
+<h4><span class="section-number">2.1.3.4. </span>j2 Variables<a class="headerlink" href="#j2-variables" title="Permalink to this headline">¶</a></h4>
+<p>These are <strong>BlueBanquise</strong> specific variables.
+All variables with name starting by <strong>j2_</strong> are j2 variables.</p>
+<p>Most of these variables are stored in internal/group_vars/all/j2_variables
+directory, and are used for the internal purpose of the stack.</p>
+<p>These variables are here to simplify tasks and templates writing, and centralize
+main logic of the stack.
+To clarify your mind, you can consider that these variables contain Jinja2 code
+as a string, that will be interpreted by Ansible during tasks/templates
+execution.</p>
+<p>Remember that in any case, if these variables are not providing the expected
+value, you can use Ansible variables precedence mechanism to force your values.</p>
+<p>Last point, for developers, these j2 variables should be considered as a way to
+keep compatibility with roles, while upgrading the logic of the stack. Do not
+hesitate to use them in roles, to ensure long term compatibility.</p>
+</div>
+</div>
+<div class="section" id="inventory-roles-and-playbooks">
+<h3><span class="section-number">2.1.4. </span>Inventory, roles, and playbooks<a class="headerlink" href="#inventory-roles-and-playbooks" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="inventory">
+<h4><span class="section-number">2.1.4.1. </span>Inventory<a class="headerlink" href="#inventory" title="Permalink to this headline">¶</a></h4>
+<p>The Ansible inventory is the directory that contains Ansible variables and hosts
+definitions. In <strong>BlueBanquise</strong>, default path is /etc/bluebanquise/inventory.</p>
+<p>Inventory is the <strong>DATA</strong>.</p>
+</div>
+<div class="section" id="roles">
+<h4><span class="section-number">2.1.4.2. </span>Roles<a class="headerlink" href="#roles" title="Permalink to this headline">¶</a></h4>
+<p>An Ansible role is a list of tasks to do to achieve a purpose.
+For example, there will be a role called dhcp_server, that contains tasks to
+install, configure and start the dhcp server.</p>
+<p>In <strong>BlueBanquise</strong>, default path is /etc/bluebanquise/roles.</p>
+<p>Note that /etc/bluebanquise/roles is split in multiple directories, but
+ansible.cfg file is configured to use roles in all of them.</p>
+<p>Roles are the <strong>AUTOMATION LOGIC</strong>.</p>
+</div>
+<div class="section" id="playbooks">
+<h4><span class="section-number">2.1.4.3. </span>Playbooks<a class="headerlink" href="#playbooks" title="Permalink to this headline">¶</a></h4>
+<p>An Ansible playbook is simply a list of roles to apply on a specific host or
+group of hosts. It is a yaml file.</p>
+<p>In <strong>BlueBanquise</strong>, default path is /etc/bluebanquise/playbooks.</p>
+<p>Playbooks are your <strong>LIST OF ROLES TO APPLY on your hosts/targets</strong>.</p>
+</div>
+</div>
+<div class="section" id="variables-precedence">
+<h3><span class="section-number">2.1.5. </span>Variables precedence<a class="headerlink" href="#variables-precedence" title="Permalink to this headline">¶</a></h3>
+<p>We are reaching the very important part of the stack.</p>
+<p>Ansible has an internal mechanism called <strong>Variables precedence</strong>.
+Simply put: you can define the same variables (same name) multiple times, and
+using this mechanism, some definitions will have priority above others,
+depending of their position.</p>
+<p>When a variable is defined in a yml file, the position of the file in the
+ansible inventory is key.</p>
+<p>For example, a variable defined in /etc/bluebanquise/inventory/group_vars/all/
+will have the less precedence, and a variable defined in
+/etc/bluebanquise/inventory/cluster will have a higher precedence, and so win if
+variable is used.</p>
+<p>The full list of available variables precedence is provided in Ansible
+documentation:
+<a class="reference external" href="https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html#variable-precedence-where-should-i-put-a-variable">variable precedence list</a></p>
+<p>This feature is key to the stack and key for system administrator to manipulate
+the <strong>BlueBanquise</strong> stack the way he/she wants, and <em>force</em> automatic
+values if desired.</p>
+<p>For example, values can be set by default, and then redefined for some groups of
+hosts without changing the default for all others.
+Or it can be used to simply fix a dynamic j2 variable to the desired value in
+hosts definitions if dynamic value is not the one expected (you can even
+redefine the whole logic of the stack without editing the stack code). Etc.</p>
+<p>Inventory can be seen as a giant pizza, in 3D then flatten.</p>
+<ul class="simple">
+<li><p><em>Paste</em> is the variable in /etc/bluebanquise/inventory/group_vars/all</p></li>
+<li><p>Then <em>large ingredients</em> comes from /etc/bluebanquise/inventory/group_vars/equipment_myequipment</p></li>
+<li><p>Then <em>small ingredients</em> above are the /etc/bluebanquise/inventory/cluster/nodes/</p></li>
+<li><p>And <em>pepper and tomatoes</em> (last layer) is the extra-vars at call.</p></li>
+</ul>
+<img alt="_images/pizza_example.svg" src="_images/pizza_example.svg" /><p>I like pizza…</p>
+</div>
+<div class="section" id="replace">
+<h3><span class="section-number">2.1.6. </span>Replace<a class="headerlink" href="#replace" title="Permalink to this headline">¶</a></h3>
+<p>Ansible and BlueBanquise default hash_behaviour is <em>replace</em>.</p>
+<p>If using <em>replace</em>, when a dictionary is impacted by the variable’s precedence
+mechanism, Ansible overwrite the <strong>full dictionary</strong> if a variable has a higher
+precedence somewhere.</p>
+<p>If using <em>merge</em>, Ansible will only update the related variable, and keep the
+original dictionary and values for all other variables in this dictionary.
+However, merge is now considered deprecated and is no more default in
+BlueBanquise.</p>
+</div>
+<div class="section" id="jinja2">
+<h3><span class="section-number">2.1.7. </span>Jinja2<a class="headerlink" href="#jinja2" title="Permalink to this headline">¶</a></h3>
+<p>Jinja2 is the templating language used by Ansible to render templates in roles.
+It is heavily used in the stack, and learning Jinja2 will often be needed to
+create custom roles.
+(But Jinja2 is simple if you are use to code or especially script with bash).</p>
+<p>Full documentation is available in a “single page”:
+<a class="reference external" href="https://jinja.palletsprojects.com/en/2.10.x/templates/">Jinja2 template designer</a></p>
+</div>
+</div>
+<div class="section" id="stack-vocabulary">
+<h2><span class="section-number">2.2. </span>Stack vocabulary<a class="headerlink" href="#stack-vocabulary" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="icebergs">
+<h3><span class="section-number">2.2.1. </span>Icebergs<a class="headerlink" href="#icebergs" title="Permalink to this headline">¶</a></h3>
+<p>Icebergs are logical (and often physical) isolation of ethernet management
+networks. Most of the time, icebergs are used to:</p>
+<ul class="simple">
+<li><p>Spread load over multiple managements servers (for very large clusters). Icebergs are also often called “islands” in these cases.</p></li>
+<li><p>Secure cluster by dividing specific usages, to prevent compromised system to access all the network.</p></li>
+</ul>
+<p>One Iceberg is composed of one or multiple managements servers, <strong>in charge of
+the same pool of nodes</strong>.</p>
+<p><strong>BlueBanquise</strong> support many kinds of configurations, but most common are:</p>
+<div class="section" id="one-iceberg-configuration">
+<h4><span class="section-number">2.2.1.1. </span>One iceberg configuration<a class="headerlink" href="#one-iceberg-configuration" title="Permalink to this headline">¶</a></h4>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<img alt="_images/one_iceberg.svg" src="_images/one_iceberg.svg" /><div class="line-block">
+<div class="line"><br /></div>
+</div>
+<p>For simple systems (small/medium HPC cluster, small enterprise network,
+university IT practical session room, etc.), one iceberg scenario is the
+standard. One or multiple management will reach the same ethernet administration
+networks, and federate the same pool of nodes.</p>
+<img alt="_images/single_iceberg_2_single_column.svg" class="align-center" src="_images/single_iceberg_2_single_column.svg" /><div class="line-block">
+<div class="line"><br /></div>
+</div>
+</div>
+<div class="section" id="multiple-icebergs-configuration">
+<h4><span class="section-number">2.2.1.2. </span>Multiple icebergs configuration<a class="headerlink" href="#multiple-icebergs-configuration" title="Permalink to this headline">¶</a></h4>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<img alt="_images/multiple_icebergs.svg" src="_images/multiple_icebergs.svg" /><div class="line-block">
+<div class="line"><br /></div>
+</div>
+<p>For advanced systems, (large HPC clusters needing load spreading with unified
+network, enterprise network, etc.), multiple icebergs scenario can be required.
+<strong>BlueBanquise</strong> allows multiple levels of icebergs, for complex needs.</p>
+<p>Manipulating order of network_interfaces defined for each host allows to create
+a unified network so all nodes from all icebergs can communicate through this
+network (most of the time an Interconnect network).</p>
+<img alt="_images/multiple_icebergs.png" class="align-center" src="_images/multiple_icebergs.png" />
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</div>
+</div>
+<div class="section" id="equipment-profiles">
+<h3><span class="section-number">2.2.2. </span>Equipment profiles<a class="headerlink" href="#equipment-profiles" title="Permalink to this headline">¶</a></h3>
+<p>In <strong>BlueBanquise</strong>, nodes are always part of a group starting with
+prefix <strong>equipment_</strong>. These groups are called <em>equipment profiles</em>.</p>
+<p>They are used to provide to hosts of this group the <strong>equipment_profile</strong>
+parameters (this includes hosts operating system parameters, kernel parameters,
+partitioning, etc.), and other variables if needed like dedicated
+authentication parameters. These variables are prefixed with <strong>ep_</strong>.</p>
+<img alt="_images/ep_hard.svg" class="align-center" src="_images/ep_hard.svg" /><p>These are key groups of the stack.</p>
+<p><strong>It is important</strong> to note that equipment_profiles variables (<strong>ep_</strong>)
+<strong>must not</strong> be used at an upper level than group_vars in variables precedence.
+<strong>It can, but you must NOT</strong>, due to special usage of them.</p>
+<p>For now, just keep in mind these variables exist. These will be discussed later.</p>
+<hr class="docutils" />
+<p>You can now follow the next part, depending of your needs:</p>
+<ul class="simple">
+<li><p>learn basic system administration on how to deploy bare metal servers</p></li>
+<li><p>learn Ansible</p></li>
+</ul>
+<p>Or if you already know basic system administration and Ansible, you can skip
+these tutorials and jump directly to the BlueBanquise part.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="training_sysadmin.html" class="btn btn-neutral float-right" title="3. [Training] - Cluster SysAdmin" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="introduction.html" class="btn btn-neutral float-left" title="1. Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2019, Benoît Leveugle, Johnny Keats.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

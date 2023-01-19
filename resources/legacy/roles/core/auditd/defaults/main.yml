@@ -1,0 +1,2 @@
+---
+auditd_forward_audit_logs: false  # true

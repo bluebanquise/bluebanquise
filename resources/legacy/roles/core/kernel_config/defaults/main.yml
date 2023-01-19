@@ -1,0 +1,2 @@
+---
+kernel_config_sysctl_reload: true

@@ -1,0 +1,184 @@
+---
+
+- name: include_vars ░ Gather OS specific variables
+  # This task gathers variables defined in OS specific files.
+  #
+  # Search vars in:
+  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
+  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
+  #  - <distribution>.yml            # eg. CentOS.yml
+  #  - <os_family>.yml               # eg. RedHat.yml
+  #
+  # If no OS specific file is found, the role will default to vars/main.yml
+  #
+  include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family }}.yml"
+      skip: true
+  tags:
+    - always
+
+- name: include_tasks ░ Use OS dedicated firewall task
+  include_tasks: "{{ outer_item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}/firewall.yml"
+      skip: true
+  loop_control:
+    loop_var: outer_item
+  tags:
+    - internal
+    - firewall
+
+- name: "group █ Add user groups"
+  group:
+    gid: "{{ item.value.gid }}"
+    name: "{{ item.key }}"
+    state: present
+  with_dict: "{{ loki_groups }}"
+
+- name: "user █ Add users"
+  user:
+    name: "{{ item.key }}"
+    comment: "{{ item.value.comment | default(omit) }}"
+    group: "{{ item.value.group }}"
+    groups: "{{ item.value.groups | default(omit) }}"
+    create_home: "{{ item.value.create_home | default('yes') }}"
+    home: "{{ item.value.home | default(omit) }}"
+    shell: "{{ item.value.shell | default(omit) }}"
+    state: present
+    uid: "{{ item.value.uid }}"
+  with_dict: "{{ loki_users }}"
+
+- name: "package █ Install packages"
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - loki
+    - promtail
+
+- name: "template █ Create /etc/systemd/system/loki.service"
+  template:
+    src: loki.service.j2
+    dest: /etc/systemd/system/loki.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart loki
+  register: loki_service_rslt
+
+- name: "template █ Create /etc/systemd/system/promtail.service"
+  template:
+    src: promtail.service.j2
+    dest: /etc/systemd/system/promtail.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart promtail
+  register: promtail_service_rslt
+
+- name: "command █ Reload systemd"
+  command: systemctl daemon-reload
+  when: loki_service_rslt.changed or promtail_service_rslt.changed
+
+- name: "file █ Create loki conf dir {{ loki_conf_dir }}"
+  file:
+    path: "{{ loki_conf_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+# check for data dirs
+- name: "stat █ Check for {{ loki_data_dir }}"
+  stat:
+    path: "{{ loki_data_dir }}"
+  register: dir_rslt
+
+- name: "set_fact ░ Set period start date if {{ loki_data_dir }} does not exist"
+  set_fact:
+    loki_from_date: "{{ lookup('pipe', 'date +%Y-%m-%d') }}" 
+  when: not dir_rslt.stat.exists
+
+- name: "set_fact ░ Set period start date based on {{ loki_data_dir }} ctime"
+  set_fact:
+    loki_from_date: "{{ lookup('pipe', 'date -d @' + dir_rslt.stat.ctime|string + ' +%Y-%m-%d') }}"
+  when: dir_rslt.stat.exists
+
+- name: "template █ Configure loki"
+  template:
+    src: loki.yml.j2
+    dest: "{{ loki_conf_dir }}/loki.yml"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart loki
+  tags:
+    - template
+
+- name: "file █ Create data dirs"
+  file:
+    state: directory
+    path: "{{ item }}"
+    owner: loki
+    group: loki
+    mode: "0700"
+  with_items:
+    - "{{ loki_data_dir }}"
+    - "{{ loki_chunks_dir }}"
+    - "{{ loki_index_dir }}"
+
+- name: "service █ Start and enable loki"
+  service:
+    name: loki
+    state: started
+    enabled: true
+
+- name: "file █ create promtail conf dir {{ loki_promtail_conf_dir }}"
+  file:
+    path: "{{ loki_promtail_conf_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: "template █ Configure promtail"
+  template:
+    src: promtail.yml.j2
+    dest: "{{ loki_promtail_conf_dir }}/promtail.yml"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart promtail
+  tags:
+    - template
+
+- name: "template █ Add rsyslog forwarder"
+  template:
+    src: promtail-forward.conf.j2
+    dest: /etc/rsyslog.d/promtail-forward.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: service █ Restart rsyslog service
+  tags:
+    - template
+
+- name: "service █ Start and enable promtail"
+  service:
+    name: promtail
+    state: started
+    enabled: true
+

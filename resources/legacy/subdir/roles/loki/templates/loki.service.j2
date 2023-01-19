@@ -1,0 +1,13 @@
+# {{ ansible_managed }}
+[Unit]
+Description=Loki
+Documentation=https://grafana.com/docs/loki/latest
+After=network.target
+
+[Service]
+User=loki
+ExecStart=/usr/bin/loki -config.file {{ loki_conf_dir }}/loki.yml
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

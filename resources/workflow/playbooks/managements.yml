@@ -3,65 +3,26 @@
   hosts: "mg_managements"
   roles:
 
-    - role: set_hostname
+    - role: bluebanquise.infrastructure.set_hostname
       tags: set_hostname
-    - role: nic
+    - role: bluebanquise.infrastructure.nic
       tags: nic
-    - role: http_server
+    - role: bluebanquise.infrastructure.http_server
       tags: http_server
-    - role: repositories
+    - role: bluebanquise.infrastructure.repositories
       tags: repositories
-    - role: hosts_file
+    - role: bluebanquise.infrastructure.hosts_file
       tags: hosts_file
-    - role: ssh_client
+    - role: bluebanquise.infrastructure.ssh_client
       tags: ssh_client
-    - role: dhcp_server
+    - role: bluebanquise.infrastructure.dhcp_server
       tags: dhcp_server
-    - role: advanced_dhcp_server
-      tags: advanced_dhcp_server
-    - role: dns_server
+    - role: bluebanquise.infrastructure.dns_server
       tags: dns_server
-    - role: dns_client
-      tags: dns_client
-    - role: time
+    - role: bluebanquise.infrastructure.time
       tags: time
       vars:
         time_profile: server
-    - role: pxe_stack
+    - role: bluebanquise.infrastructure.pxe_stack
       tags: pxe_stack
-    - role: nfs
-      tags: nfs
-    - role: auditd
-      tags: auditd
-    - role: clustershell
-      tags: clustershell
-    - role: conman
-      tags: conman
-    - role: diskless
-      tags: diskless
-    - role: filesystem
-      tags: filesystem
-    - role: firewall
-      tags: firewall_role
-    - role: kernel_config
-      tags: kernel_config
-    - role: rsyslog
-      tags: rsyslog
-    - role: lvm
-      tags: lvm
-    - role: modprobe
-      tags: modprobe
-    - role: mount
-      tags: mount
-    - role: pam_limits
-      tags: pam_limits
-    - role: parted
-      tags: parted
-    - role: powerman
-      tags: powerman
-    - role: root_password
-      tags: root_password
-    - role: ssh_remote_keys
-      tags: ssh_remote_keys
-    - role: sudoers
-      tags: sudoers
+

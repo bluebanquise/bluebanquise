@@ -1,0 +1,17 @@
+---
+- name: parted █ Configure block device partitions
+  community.general.parted:
+    align: "{{ item.align | default(omit) }}"
+    device: "{{ item.device }}"
+    flags: "{{ item.flags | default(omit) }}"
+    fs_type: "{{ item.fs_type | default(omit) }}"
+    label: "{{ item.label | default(omit) }}"
+    name: "{{ item.name | default(omit) }}"
+    number: "{{ item.number | default(omit) }}"
+    part_end: "{{ item.part_end | default(omit) }}"
+    part_start: "{{ item.part_start | default(omit) }}"
+    part_type: "{{ item.part_type | default(omit) }}"
+    resize: "{{ item.resize | default(omit) }}"
+    state: "{{ item.state | default(omit) }}"
+    unit: "{{ item.unit | default(omit) }}"
+  loop: "{{ parted }}"

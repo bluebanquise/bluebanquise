@@ -1,0 +1,81 @@
+---
+- name: include_vars ░ Gather OS specific variables
+  # This task gathers variables defined in OS specific files.
+  #
+  # Search vars in:
+  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
+  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
+  #  - <distribution>.yml            # eg. CentOS.yml
+  #  - <os_family>.yml               # eg. RedHat.yml
+  #
+  # If no OS specific file is found, the role will default to vars/main.yml
+  #
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family }}.yml"
+      skip: true
+  tags:
+    - always
+
+- name: include_tasks ░ Use OS dedicated firewall task
+  ansible.builtin.include_tasks: "{{ item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}/firewall.yml"
+      skip: true
+  tags:
+    - internal
+    - firewall
+
+- name: "package █ Install {{ time_packages_to_install | join(' ') }} packages"
+  ansible.builtin.package:
+    name: "{{ time_packages_to_install }}"
+    state: present
+  tags:
+    - package
+
+- name: "template █ Generate {{ time_chrony_conf_path }}"
+  ansible.builtin.template:
+    src: chrony.conf.j2
+    dest: "{{ time_chrony_custom_conf_path | default(time_chrony_conf_path) }}"
+    owner: root
+    group: root
+    mode: 0644
+  notify: service █ Restart time services
+  tags:
+    - template
+
+- name: lineinfile █ Set sysconfig OPTIONS for chronyd
+  ansible.builtin.lineinfile:
+    path: /etc/sysconfig/chronyd
+    regexp: '^OPTIONS'
+    line: OPTIONS="{{ time_chronyd_options }}"
+  notify: service █ Restart time services
+  when: time_chronyd_options is defined
+  tags:
+    - template
+
+- name: "timezone █ Set system to {{ bb_time_zone | default(time_time_zone, true) }} timezone"
+  ansible.builtin.timezone:
+    name: "{{ bb_time_zone | default(time_time_zone, true) }}"
+
+- name: meta █ Run handler tasks to restart time services
+  ansible.builtin.meta: flush_handlers
+
+- name: "service █ Manage {{ time_services_to_start | join(' ') }} services state"
+  ansible.builtin.service:
+    name: "{{ item }}"
+    enabled: "{{ (time_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    state: "{{ (time_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
+  loop: "{{ time_services_to_start }}"
+  tags:
+    - service

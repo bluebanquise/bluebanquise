@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Bouml (http://bouml.free.fr/) -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="1047" height="621" version="1.1" xmlns="http://www.w3.org/2000/svg">
+<g>
+	<rect fill="#cbcbcb" stroke="none" stroke-opacity="1" x="893" y="529" width="5" height="63" />
+	<rect fill="#cbcbcb" stroke="none" stroke-opacity="1" x="715" y="587" width="183" height="5" />
+	<rect fill="#ffffc0" stroke="black" stroke-width="1" stroke-opacity="1" x="709" y="523" width="184" height="64" />
+	<text font-family="Helvetica" font-size="16" fill="#000000" xml:space="preserve" font-weight="bold" text-anchor="middle" x="801" y="543">InheritedImage...</text>
+	<line stroke="black" stroke-opacity="1" x1="709" y1="556" x2="893" y2="556" />
+</g>
+<g>
+	<rect fill="#cbcbcb" stroke="none" stroke-opacity="1" x="888" y="387" width="5" height="63" />
+	<rect fill="#cbcbcb" stroke="none" stroke-opacity="1" x="732" y="445" width="161" height="5" />
+	<rect fill="#ffffc0" stroke="black" stroke-width="1" stroke-opacity="1" x="726" y="381" width="162" height="64" />
+	<text font-family="Helvetica" font-size="16" fill="#000000" xml:space="preserve" font-weight="bold" text-anchor="middle" x="807" y="401">FuturImages...</text>
+	<line stroke="black" stroke-opacity="1" x1="726" y1="414" x2="888" y2="414" />
+</g>
+<g>
+	<rect fill="#cbcbcb" stroke="none" stroke-opacity="1" x="497" y="387" width="5" height="63" />
+	<rect fill="#cbcbcb" stroke="none" stroke-opacity="1" x="347" y="445" width="155" height="5" />
+	<rect fill="#ffffc0" stroke="black" stroke-width="1" stroke-opacity="1" x="341" y="381" width="156" height="64" />
+	<text font-family="Helvetica" font-size="16" fill="#000000" xml:space="preserve" font-weight="bold" text-anchor="middle" x="419" y="401">StagingImage</text>
+	<line stroke="black" stroke-opacity="1" x1="341" y1="414" x2="497" y2="414" />
+</g>
+<g>
+	<rect fill="#cbcbcb" stroke="none" stroke-opacity="1" x="298" y="387" width="5" height="63" />
+	<rect fill="#cbcbcb" stroke="none" stroke-opacity="1" x="154" y="445" width="149" height="5" />
+	<rect fill="#ffffc0" stroke="black" stroke-width="1" stroke-opacity="1" x="148" y="381" width="150" height="64" />
+	<text font-family="Helvetica" font-size="16" fill="#000000" xml:space="preserve" font-weight="bold" text-anchor="middle" x="223" y="401">GoldenImage</text>
+	<line stroke="black" stroke-opacity="1" x1="148" y1="414" x2="298" y2="414" />
+</g>
+<g>
+	<rect fill="#cbcbcb" stroke="none" stroke-opacity="1" x="454" y="49" width="5" height="63" />
+	<rect fill="#cbcbcb" stroke="none" stroke-opacity="1" x="290" y="107" width="169" height="5" />
+	<rect fill="#ffffc0" stroke="black" stroke-width="1" stroke-opacity="1" x="284" y="43" width="170" height="64" />
+	<text font-family="Helvetica" font-size="16" fill="#000000" xml:space="preserve" font-weight="bold" text-anchor="middle" x="369" y="63">KernelManager</text>
+	<line stroke="black" stroke-opacity="1" x1="284" y1="76" x2="454" y2="76" />
+</g>
+<g>
+	<polygon fill="#c0ffff" stroke="black" stroke-opacity="1" points="381,500 634,500 634,520 654,520 654,609 381,609 381,500" />
+	<line stroke="black" stroke-opacity="1" x1="634" y1="500" x2="654" y2="520" />
+	<text font-family="Helvetica" font-size="16" fill="#000000" xml:space="preserve" x="401" y="545">We can make all</text>
+	<text font-family="Helvetica" font-size="16" fill="#000000" xml:space="preserve" x="401" y="570">inheritance we need</text>
+</g>
+<g>
+	<rect fill="#cbcbcb" stroke="none" stroke-opacity="1" x="733" y="49" width="5" height="63" />
+	<rect fill="#cbcbcb" stroke="none" stroke-opacity="1" x="575" y="107" width="163" height="5" />
+	<rect fill="#ffffc0" stroke="black" stroke-width="1" stroke-opacity="1" x="569" y="43" width="164" height="64" />
+	<text font-family="Helvetica" font-size="16" fill="#000000" xml:space="preserve" font-weight="bold" text-anchor="middle" x="651" y="63">ImageManager</text>
+	<line stroke="black" stroke-opacity="1" x1="569" y1="76" x2="733" y2="76" />
+</g>
+<g>
+	<polygon fill="#c0ffff" stroke="black" stroke-opacity="1" points="770,207 1015,207 1015,227 1035,227 1035,316 770,316 770,207" />
+	<line stroke="black" stroke-opacity="1" x1="1015" y1="207" x2="1035" y2="227" />
+	<text font-family="Helvetica" font-size="16" fill="#000000" xml:space="preserve" x="790" y="252">We can create new</text>
+	<text font-family="Helvetica" font-size="16" fill="#000000" xml:space="preserve" x="790" y="277">images classes</text>
+</g>
+<g>
+	<line stroke="black" stroke-opacity="1" x1="460" y1="78" x2="568" y2="78" />
+</g>
+<g>
+	<line stroke-dasharray="4,4" stroke="black" stroke-opacity="1" x1="654" y1="555" x2="708" y2="555" />
+</g>
+<g>
+	<line stroke-dasharray="4,4" stroke="black" stroke-opacity="1" x1="830" y1="380" x2="867" y2="316" />
+</g>
+<g>
+	<line stroke="#000000" stroke-opacity="1" x1="804" y1="522" x2="806" y2="456" />
+	<line stroke="#000000" stroke-opacity="1" x1="807" y1="451" x2="800" y2="456" />
+	<line stroke="#000000" stroke-opacity="1" x1="807" y1="451" x2="812" y2="457" />
+	<line stroke="#000000" stroke-opacity="1" x1="800" y1="456" x2="812" y2="457" />
+</g>
+<g>
+	<rect fill="#cbcbcb" stroke="none" stroke-opacity="1" x="691" y="389" width="5" height="63" />
+	<rect fill="#cbcbcb" stroke="none" stroke-opacity="1" x="545" y="447" width="151" height="5" />
+	<rect fill="#ffffc0" stroke="black" stroke-width="1" stroke-opacity="1" x="539" y="383" width="152" height="64" />
+	<text font-family="Helvetica" font-size="16" fill="#000000" xml:space="preserve" font-weight="bold" text-anchor="middle" x="615" y="403">LivenetImage</text>
+	<line stroke="black" stroke-opacity="1" x1="539" y1="416" x2="691" y2="416" />
+</g>
+<g>
+	<rect fill="#cbcbcb" stroke="none" stroke-opacity="1" x="549" y="193" width="5" height="63" />
+	<rect fill="#cbcbcb" stroke="none" stroke-opacity="1" x="475" y="251" width="79" height="5" />
+	<rect fill="#ffffc0" stroke="black" stroke-width="1" stroke-opacity="1" x="469" y="187" width="80" height="64" />
+	<text font-family="Helvetica" font-size="16" fill="#000000" xml:space="preserve" font-weight="bold" text-anchor="middle" x="509" y="207">Image</text>
+	<line stroke="black" stroke-opacity="1" x1="469" y1="220" x2="549" y2="220" />
+</g>
+<g>
+	<line stroke="black" stroke-opacity="1" x1="406" y1="113" x2="477" y2="186" />
+</g>
+<g>
+	<line stroke="black" stroke-opacity="1" x1="618" y1="113" x2="544" y2="186" />
+</g>
+<g>
+	<line stroke="#000000" stroke-opacity="1" x1="275" y1="380" x2="463" y2="251" />
+	<line stroke="#000000" stroke-opacity="1" x1="468" y1="248" x2="459" y2="246" />
+	<line stroke="#000000" stroke-opacity="1" x1="468" y1="248" x2="466" y2="256" />
+	<line stroke="#000000" stroke-opacity="1" x1="459" y1="246" x2="466" y2="256" />
+</g>
+<g>
+	<line stroke="#000000" stroke-opacity="1" x1="436" y1="380" x2="491" y2="262" />
+	<line stroke="#000000" stroke-opacity="1" x1="494" y1="257" x2="486" y2="259" />
+	<line stroke="#000000" stroke-opacity="1" x1="494" y1="257" x2="496" y2="264" />
+	<line stroke="#000000" stroke-opacity="1" x1="486" y1="259" x2="496" y2="264" />
+</g>
+<g>
+	<line stroke="#000000" stroke-opacity="1" x1="597" y1="382" x2="532" y2="262" />
+	<line stroke="#000000" stroke-opacity="1" x1="530" y1="257" x2="527" y2="265" />
+	<line stroke="#000000" stroke-opacity="1" x1="530" y1="257" x2="538" y2="259" />
+	<line stroke="#000000" stroke-opacity="1" x1="527" y1="265" x2="538" y2="259" />
+</g>
+<g>
+	<line stroke="#000000" stroke-opacity="1" x1="755" y1="380" x2="560" y2="252" />
+	<line stroke="#000000" stroke-opacity="1" x1="555" y1="249" x2="556" y2="257" />
+	<line stroke="#000000" stroke-opacity="1" x1="555" y1="249" x2="563" y2="247" />
+	<line stroke="#000000" stroke-opacity="1" x1="556" y1="257" x2="563" y2="247" />
+</g>
+</svg>

@@ -1,0 +1,918 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>9. [Core] - Diskless &mdash; BlueBanquise Documentation 1.5.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="10. [Community] - High Availability" href="high_availability.html" />
+    <link rel="prev" title="8. [Core] - Manage multiple icebergs" href="multiple_icebergs.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> BlueBanquise Documentation
+          
+
+          
+            
+            <img src="_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vocabulary.html">2. Vocabulary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="training_sysadmin.html">3. [Training] - Cluster SysAdmin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="training_ansible.html">4. [Training] - Ansible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bootstrap.html">5. [Core] - Bootstrap base system</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configure_bluebanquise.html">6. [Core] - Configure BlueBanquise</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deploy_bluebanquise.html">7. [Core] - Deploy BlueBanquise</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multiple_icebergs.html">8. [Core] - Manage multiple icebergs</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">9. [Core] - Diskless</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">9.1. Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#diskless-user-documentation">9.2. Diskless User documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#description">9.2.1. Description</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#set-up-the-tool">9.2.2. Set up the tool</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#manage-and-create-diskless-images-with-modules">9.2.3. Manage and create diskless images with modules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#livenet-module">9.2.3.1. Livenet module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nfs-module">9.2.3.2. NFS module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#demo-module">9.2.3.3. Demo module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#actions">9.2.4. Actions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#list-available-diskless-images">9.2.4.1. List available diskless images</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#remove-a-diskless-image">9.2.4.2. Remove a diskless image</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#manage-kernel-of-a-diskless-image">9.2.4.3. Manage kernel of a diskless image</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#list-available-kernels">9.2.4.4. List available kernels</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#generate-a-new-initramfs">9.2.4.5. Generate a new initramfs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clear-a-corrupted-image">9.2.4.6. Clear a corrupted image</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exit">9.2.4.7. Exit</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#boot-a-diskless-image">9.2.5. Boot a diskless image</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#customizing-livenet-image">9.2.6. Customizing Livenet image</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#a-playbook-exemple">9.2.7. A Playbook Exemple</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#diskless-technical-documentation">9.3. Diskless Technical Documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#software-architecture">9.3.1. Software Architecture</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#classes-architecture">9.3.1.1. Classes architecture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#modules-architecture">9.3.1.2. Modules architecture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#file-system-architecture">9.3.1.3. File system architecture</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#the-image-system">9.3.2. The image system</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#overview-about-images">9.3.2.1. Overview about images</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#save-an-image">9.3.2.2. Save an image</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#load-an-image">9.3.2.3. Load an image</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-creation">9.3.3. Module creation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#module-implementation">9.3.3.1. Module implementation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#images-class-s-implementation">9.3.3.2. Images class’s implementation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#cleaning-process">9.3.4. Cleaning process</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#image-creation-process">9.3.4.1. Image creation process</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#image-status">9.3.4.2. Image status</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">9.3.4.3. Cleaning process</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="high_availability.html">10. [Community] - High Availability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring.html">11. [Community] - Monitoring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="containers.html">12. Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stories.html">13. Stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roles.html">14. Roles list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">15. References</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">BlueBanquise Documentation</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li><span class="section-number">9. </span>[Core] - Diskless</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/diskless.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="core-diskless">
+<h1><span class="section-number">9. </span>[Core] - Diskless<a class="headerlink" href="#core-diskless" title="Permalink to this headline">¶</a></h1>
+<p>This part is about the diskless tool. There are two documentations, a user documentation to understand how to use the diskless tool and a technical documentation for developers.</p>
+<div class="section" id="introduction">
+<h2><span class="section-number">9.1. </span>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>A diskless node is a node that don’t use hard drive to get access to its operating system. There are several ways for a node to boot with diskless.</p>
+<p>For example, it can load all its operating system in its RAM or it can use remote storage for its operating system.</p>
+<p>The diskless tool was created in order to manage diskless images easily. It allows to create, manage and remove diskless images on a management server. Then the nodes ask this management server in order to get their images.</p>
+<p>The diskless tool is Python based, it integrate a GUI for manage images.</p>
+</div>
+<div class="section" id="diskless-user-documentation">
+<h2><span class="section-number">9.2. </span>Diskless User documentation<a class="headerlink" href="#diskless-user-documentation" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="description">
+<h3><span class="section-number">9.2.1. </span>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h3>
+<p>This role provides needed tools to deploy a basic diskless cluster.</p>
+<p>Two types of images are available:</p>
+<ul class="simple">
+<li><p>Livenet images are full ram images, without persistance, but need less infrastructure.</p></li>
+<li><p>NFS images are full nfs rw images, with persistance, very simple to use, but need more infrastructure.</p></li>
+</ul>
+<p>It is important to understand that this role is independant of the pxe_stack core role, and so each tools do not communicate.</p>
+<p>Validated on RHEL8.
+Python based.</p>
+</div>
+<div class="section" id="set-up-the-tool">
+<h3><span class="section-number">9.2.2. </span>Set up the tool<a class="headerlink" href="#set-up-the-tool" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li><p>Apply your playbook with the “diskless” role activated (see <em>Example playbook</em> part).</p></li>
+<li><p>Copy from /boot the kernels you want to use for your images:</p></li>
+</ol>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>cp /boot/vmlinuz-&lt;kernel releases to use for diskless nodes&gt; \
+   /var/www/html/preboot_execution_environment/diskless/kernels/
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>Launch <em>disklessset</em> command and check that the software launches correctly:</p></li>
+</ol>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>  ██████╗ ██╗███████╗██╗  ██╗██╗     ███████╗███████╗███████╗
+  ██╔══██╗██║██╔════╝██║ ██╔╝██║     ██╔════╝██╔════╝██╔════╝
+  ██║  ██║██║███████╗█████╔╝ ██║     █████╗  ███████╗███████╗
+  ██║  ██║██║╚════██║██╔═██╗ ██║     ██╔══╝  ╚════██║╚════██║
+  ██████╔╝██║███████║██║  ██╗███████╗███████╗███████║███████║
+  ╚═════╝ ╚═╝╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝╚══════╝
+
+           Entering BlueBanquise diskless manager
+
+ &gt; Diskless image management
+ 1 - Manage and create diskless images (need modules)
+ 2 - List available diskless images
+ 3 - Remove a diskless image
+ 4 - Manage kernel of a diskless image
+
+ &gt; Other actions
+ 5 - List available kernels
+ 6 - Generate a new initramfs
+
+ 7 - Clear a corrupted image
+ 8 - Exit
+
+At any time: (CTRL + c) =&gt; Return to this main menu.
+
+ Select an action:
+--&gt;:
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li><p>Check that the kernels you previously added are present in the tool:</p></li>
+</ol>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> &gt; Diskless image management
+ 1 - Manage and create diskless images (need modules)
+ 2 - List available diskless images
+ 3 - Remove a diskless image
+ 4 - Manage kernel of a diskless image
+
+ &gt; Other actions
+ 5 - List available kernels
+ 6 - Generate a new initramfs
+
+ 7 - Clear a corrupted image
+ 8 - Exit
+
+At any time: (CTRL + c) =&gt; Return to this main menu.
+
+ Select an action:
+--&gt;: 5
+
+Available kernels:
+    │
+    └── vmlinuz-4.18.0-147.el8.x86_64 - missing initramfs-kernel-4.18.0-147.el8.x86_64
+</pre></div>
+</div>
+<ol class="arabic simple" start="5">
+<li><p>Generate a new initramfs for your kernel:</p></li>
+</ol>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>   &gt; Diskless image management
+ 1 - Manage and create diskless images (need modules)
+ 2 - List available diskless images
+ 3 - Remove a diskless image
+ 4 - Manage kernel of a diskless image
+
+ &gt; Other actions
+ 5 - List available kernels
+ 6 - Generate a new initramfs
+
+ 7 - Clear a corrupted image
+ 8 - Exit
+
+At any time: (CTRL + c) =&gt; Return to this main menu.
+
+ Select an action:
+--&gt;: 6
+
+Select the kernel:
+ 1 - vmlinuz-4.18.0-147.el8.x86_64
+--&gt;: 1
+</pre></div>
+</div>
+<ol class="arabic simple" start="6">
+<li><p>After initramfs generation, check that initramfs is present with the kernel:</p></li>
+</ol>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> &gt; Diskless image management
+ 1 - Manage and create diskless images (need modules)
+ 2 - List available diskless images
+ 3 - Remove a diskless image
+ 4 - Manage kernel of a diskless image
+
+ &gt; Other actions
+ 5 - List available kernels
+ 6 - Generate a new initramfs
+
+ 7 - Clear a corrupted image
+ 8 - Exit
+
+At any time: (CTRL + c) =&gt; Return to this main menu.
+
+ Select an action:
+--&gt;: 5
+
+Available kernels:
+    │
+    └── vmlinuz-4.18.0-147.el8.x86_64 - initramfs present
+</pre></div>
+</div>
+<p>Now the tool is ready to be used.</p>
+</div>
+<div class="section" id="manage-and-create-diskless-images-with-modules">
+<h3><span class="section-number">9.2.3. </span>Manage and create diskless images with modules<a class="headerlink" href="#manage-and-create-diskless-images-with-modules" title="Permalink to this headline">¶</a></h3>
+<p>The diskless tool use modules for image creation. Because the tool is modular, new modules can be added for specific images.
+By default 3 module are provided:</p>
+<ul class="simple">
+<li><p>livenet : Livenet images creation and management</p></li>
+<li><p>demo : A demonstration module to illustrate how the diskless tool works</p></li>
+<li><p>nfs : NFS images creation and management</p></li>
+</ul>
+<p>Each modules has it’s own features.</p>
+<p>In the diskless main menu you can select the first option and select the module to use:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> &gt; Diskless image management
+ 1 - Manage and create diskless images (need modules)
+ 2 - List available diskless images
+ 3 - Remove a diskless image
+ 4 - Manage kernel of a diskless image
+
+ &gt; Other actions
+ 5 - List available kernels
+ 6 - Generate a new initramfs
+
+ 7 - Clear a corrupted image
+ 8 - Exit
+
+At any time: (CTRL + c) =&gt; Return to this main menu.
+
+ Select an action:
+--&gt;: 1
+
+[+] Select the module you want to use:
+
+ 1 - livenet
+ 2 - demo
+ 3 - nfs
+--&gt;:
+</pre></div>
+</div>
+<div class="section" id="livenet-module">
+<h4><span class="section-number">9.2.3.1. </span>Livenet module<a class="headerlink" href="#livenet-module" title="Permalink to this headline">¶</a></h4>
+<p>Entering the livenet module will prompt the following menu:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> == Livenet image module ==
+
+ 1 - Generate a new livenet image
+ 2 - Mount an existing livenet image
+ 3 - Unount an existing livenet image
+ 4 - Resize livenet image
+
+ Select an action
+--&gt;:
+</pre></div>
+</div>
+<p>In this menu you can do four actions:</p>
+<ul class="simple">
+<li><p>Generate a new livenet image : This will guide you in order to create a new livenet image to boot.</p></li>
+<li><p>Mount an existing livenet image : Mount a livenet image in order to make actions inside (install packages, …). Livenet images are mounted inside /var/tmp/diskless/workdir/&lt;image name&gt;/mnt.</p></li>
+<li><p>Unount an existing livenet image : Unmount a mounted livenet image.</p></li>
+<li><p>Resize livenet image : Resize a livenet image operating system in order to adjust space taken into the ram.</p></li>
+</ul>
+<p>When generating a new livenet image with the first option, you will have to give few parameters:</p>
+<ul class="simple">
+<li><p>The name you want for your image</p></li>
+<li><p>The password for your image</p></li>
+<li><p>The kernel to use</p></li>
+<li><p>The type of livenet image, by default there are 3 types of livenet images.</p></li>
+<li><p>The size of the image (It will take this size into ram memory). Please be aware to give enough memory for your operating system.</p></li>
+</ul>
+</div>
+<div class="section" id="nfs-module">
+<h4><span class="section-number">9.2.3.2. </span>NFS module<a class="headerlink" href="#nfs-module" title="Permalink to this headline">¶</a></h4>
+<p>Entering the livenet module will prompt the following menu:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> == NFS image module ==
+
+ 1 - Generate a new nfs staging image
+ 2 - Generate a new nfs golden image from a staging image
+ 3 - Manage nodes of a golden image
+
+ Select an action
+--&gt;:
+</pre></div>
+</div>
+<p>In this menu you can do 3 actions:</p>
+<ul class="simple">
+<li><p>Generate a new nfs staging image : A staging image is the base image. You must not boot onto a stagging image but firsty create a golden image from it and boot on the golden image specific filesystem (Created with option 3).</p></li>
+<li><p>Generate a new nfs golden image from a staging image : Create a golden image from previoulsy created staging image.</p></li>
+<li><p>Manage nodes of a golden image: Create a specific file system for each nodes for a specific golden image. After adding a node to a golden image via this option, you can boot the node onto the golden image.</p></li>
+</ul>
+</div>
+<div class="section" id="demo-module">
+<h4><span class="section-number">9.2.3.3. </span>Demo module<a class="headerlink" href="#demo-module" title="Permalink to this headline">¶</a></h4>
+<p>You can create demo images to test the diskless tool.
+Corrupt a demo image will allow you to test the cleaning mechanism of the tool. In fact a corrupted demo image will be cleaned when listing images.
+Demo module can also be used by devellopers to understand module creation.</p>
+</div>
+</div>
+<div class="section" id="actions">
+<h3><span class="section-number">9.2.4. </span>Actions<a class="headerlink" href="#actions" title="Permalink to this headline">¶</a></h3>
+<p>With the diskless tool, you can do different actions on diskless images.</p>
+<div class="section" id="list-available-diskless-images">
+<h4><span class="section-number">9.2.4.1. </span>List available diskless images<a class="headerlink" href="#list-available-diskless-images" title="Permalink to this headline">¶</a></h4>
+<p>This menu will allow you to view created and in creation diskless images with their attributs:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>   &gt; Diskless image management
+ 1 - Manage and create diskless images (need modules)
+ 2 - List available diskless images
+ 3 - Remove a diskless image
+ 4 - Manage kernel of a diskless image
+
+ &gt; Other actions
+ 5 - List available kernels
+ 6 - Generate a new initramfs
+
+ 7 - Clear a corrupted image
+ 8 - Exit
+
+At any time: (CTRL + c) =&gt; Return to this main menu.
+
+ Select an action:
+--&gt;: 2
+
+   [IN_CREATION]
+ • Image name: nfsimg1
+   Installation pid: 28716
+
+   [CREATED]
+ • Image name: livenetimg1
+     ├── IMAGE_DIRECTORY: /var/www/html/preboot_execution_environment/diskless/images/livenetimg1
+     ├── kernel: vmlinuz-4.18.0-147.el8.x86_64
+     ├── image: initramfs-kernel-4.18.0-147.el8.x86_64
+     ├── password: $6$fUfb9XQ2RCxHO15O$TubY.EQ44IP1xxbZYdpQl1mDrpyz1SoZ8eW3ApK3IoadfC7KjHCej7UtCjBLTbX9UBZm5rgKFhP1NfQUrIUxZ1
+     ├── livenet_type: Type.STANDARD
+     ├── livenet_size: 1500
+     ├── is_mounted: False
+     ├── image_class: LivenetImage
+     └── creation_date: 2020-10-21
+</pre></div>
+</div>
+</div>
+<div class="section" id="remove-a-diskless-image">
+<h4><span class="section-number">9.2.4.2. </span>Remove a diskless image<a class="headerlink" href="#remove-a-diskless-image" title="Permalink to this headline">¶</a></h4>
+<p>Simply choose and remove a previously created diskless image.</p>
+</div>
+<div class="section" id="manage-kernel-of-a-diskless-image">
+<h4><span class="section-number">9.2.4.3. </span>Manage kernel of a diskless image<a class="headerlink" href="#manage-kernel-of-a-diskless-image" title="Permalink to this headline">¶</a></h4>
+<p>Change the kernel of an existing diskless image.</p>
+</div>
+<div class="section" id="list-available-kernels">
+<h4><span class="section-number">9.2.4.4. </span>List available kernels<a class="headerlink" href="#list-available-kernels" title="Permalink to this headline">¶</a></h4>
+<p>Show available kernels for diskless images. Kernels can be added in /var/www/html/preboot_execution_environment/diskless/kernels.</p>
+<p>If the kernel has a generated initramfs file (Exemple with one kernel):</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Available kernels:
+    │
+    └── vmlinuz-4.18.0-147.el8.x86_64 - initramfs present
+</pre></div>
+</div>
+<p>If the kernel hasn’t a generated initramfs file:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Available kernels:
+    │
+    └── vmlinuz-4.18.0-147.el8.x86_64 - missing initramfs-kernel-4.18.0-147.el8.x86_64
+</pre></div>
+</div>
+</div>
+<div class="section" id="generate-a-new-initramfs">
+<h4><span class="section-number">9.2.4.5. </span>Generate a new initramfs<a class="headerlink" href="#generate-a-new-initramfs" title="Permalink to this headline">¶</a></h4>
+<p>Generate a new initramfs file for a kernel.</p>
+</div>
+<div class="section" id="clear-a-corrupted-image">
+<h4><span class="section-number">9.2.4.6. </span>Clear a corrupted image<a class="headerlink" href="#clear-a-corrupted-image" title="Permalink to this headline">¶</a></h4>
+<p>Remove totaly a diskless image with a brutal method.
+You must use this option only if the image is corrupted or there are non compliant files.</p>
+</div>
+<div class="section" id="exit">
+<h4><span class="section-number">9.2.4.7. </span>Exit<a class="headerlink" href="#exit" title="Permalink to this headline">¶</a></h4>
+<p>Exist the diskless tool.</p>
+</div>
+</div>
+<div class="section" id="boot-a-diskless-image">
+<h3><span class="section-number">9.2.5. </span>Boot a diskless image<a class="headerlink" href="#boot-a-diskless-image" title="Permalink to this headline">¶</a></h3>
+<p>You can use the bootset bluebanquise tool to setup the boot image for a specific machine:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># bootset -n &lt;machine name&gt; -b diskless -i &lt;diskless image name&gt;
+</pre></div>
+</div>
+<p>Please refer you to bootset documentation for further information.</p>
+</div>
+<div class="section" id="customizing-livenet-image">
+<h3><span class="section-number">9.2.6. </span>Customizing Livenet image<a class="headerlink" href="#customizing-livenet-image" title="Permalink to this headline">¶</a></h3>
+<p>The image name used in the examples below is <em>space_image</em>.</p>
+<p>The disklessset tool allows to customize livenet images before booting them,
+by mounting images and providing simple chroot inventory. System administrator
+can then tune or execute playbooks inside images.
+This step also saves time on the execution of playbooks on booted diskless nodes.</p>
+<p>To mount a livenet image in order to customize it, go to livenet module and select “mount livenet image”.</p>
+<p>It is now possible to copy files, install rpms, or tune any aspects of the
+mounted image.</p>
+<p>To execute an Ansible playbook into the image, generate a new playbook
+with the following head:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Computes diskless playbook</span>
+  <span class="nt">hosts</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">/var/tmp/diskless/workdir/{{ image_name }}/mnt</span>
+  <span class="nt">connection</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">chroot</span>
+  <span class="nt">vars</span><span class="p">:</span>
+    <span class="nt">j2_current_iceberg</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">iceberg1</span>                <span class="c1">#&lt;&lt;&lt; UPDATE IF NEEDED</span>
+    <span class="nt">j2_node_main_network</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ice1-1</span>                <span class="c1">#&lt;&lt;&lt; UPDATE</span>
+    <span class="nt">start_service</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
+    <span class="nt">image_equipment_profile</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">equipment_typeC</span>    <span class="c1">#&lt;&lt;&lt; UPDATE</span>
+
+  <span class="nt">pre_tasks</span><span class="p">:</span>
+    <span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Add current host to defined equipment_profile</span>
+      <span class="nt">add_host</span><span class="p">:</span>
+        <span class="nt">hostname</span><span class="p">:</span> <span class="s">&quot;{{</span><span class="nv"> </span><span class="s">inventory_hostname</span><span class="nv"> </span><span class="s">}}&quot;</span>
+        <span class="nt">groups</span><span class="p">:</span> <span class="s">&quot;{{</span><span class="nv"> </span><span class="s">image_equipment_profile</span><span class="nv"> </span><span class="s">}}&quot;</span>
+      <span class="nt">tags</span><span class="p">:</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">always</span>
+
+  <span class="nt">roles</span><span class="p">:</span>
+  <span class="c1"># ADD HERE YOUR ROLES</span>
+</pre></div>
+</div>
+<p>Now, update the needed values in this file:</p>
+<ul class="simple">
+<li><p><strong>j2_current_iceberg</strong>: Except if you are using multiple icebergs advanced feature, you should let this to <cite>iceberg1</cite>.</p></li>
+<li><p><strong>j2_node_main_network</strong>: Set here your main network to be used. This will allow the roles to determine the services ip to bind to.</p></li>
+<li><p><strong>image_equipment_profile</strong>: Set here your equipment_profile to be used. This will allow the roles to determine key values, for example find the repositories path to be used (distribution version, etc).</p></li>
+</ul>
+<p>And add your desired roles under <strong>roles:</strong> in the file, like for
+any standard playbook.</p>
+<p>Then execute it into the mounted image using the following command:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ansible-playbook computes.yml \
+-i /etc/bluebanquise/inventory/ -i /etc/bluebanquise/internal/ -i /var/tmp/diskless/workdir/space_image/inventory/ \
+--skip-tags identify -e &quot;image_name=space_image&quot;
+</pre></div>
+</div>
+<p>Notes:</p>
+<ul class="simple">
+<li><p>The multiple <cite>-i</cite> defines Ansible inventories to gather. By default, in BlueBanquise, the first two inventories are used. We simply add the third one, corresponding to the mounting point.</p></li>
+<li><p>The <cite>-e</cite> (extra vars) are here to specify to the stack which iceberg and main network are to be used in the configuration of the node. (System cannot know on which nodes the image will be used).</p></li>
+<li><p>The <cite>–skip-tags identify</cite> prevents hostname and static ip to be set, since the image should be generic for multiple hosts.</p></li>
+</ul>
+<p>Before closing, also remember to clean dnf cache into the image chroot to save space.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># dnf clean all --installroot /var/tmp/diskless/workdir/space_image/mnt/
+</pre></div>
+</div>
+<p>Now, using df command, check used space of the image, to resize it later if whished.</p>
+<p>Using disklessset now, choose option 2 to unmount the image and squashfs it again.</p>
+<p>It is possible now to use the tool to resize image, to reduce it to the desired value (to save ram on target host).
+Always keep at least 100MB in / for temporary files and few logs generated during run.</p>
+</div>
+<div class="section" id="a-playbook-exemple">
+<h3><span class="section-number">9.2.7. </span>A Playbook Exemple<a class="headerlink" href="#a-playbook-exemple" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>- hosts: mngt0-1
+  roles:
+    - pxe_stack
+    - diskless
+</pre></div>
+</div>
+<p>Once the node is started, run your playbook with your roles.
+It is important to synchronize your node’s time by running the time role.</p>
+</div>
+</div>
+<div class="section" id="diskless-technical-documentation">
+<h2><span class="section-number">9.3. </span>Diskless Technical Documentation<a class="headerlink" href="#diskless-technical-documentation" title="Permalink to this headline">¶</a></h2>
+<p>This documentation is about the diskless tool. It is a technical documentation for the developers. It allow to understand the tool internal architecture and functioning.</p>
+<div class="section" id="software-architecture">
+<h3><span class="section-number">9.3.1. </span>Software Architecture<a class="headerlink" href="#software-architecture" title="Permalink to this headline">¶</a></h3>
+<p>The tool is class and object oriented and fully modular.</p>
+<p>It can be used by mutiple ways:</p>
+<ul class="simple">
+<li><p>Use class methods to manage diskless images.</p></li>
+<li><p>Connect a custom API in order to use the class methods.</p></li>
+<li><p>Use the cli integrated system.</p></li>
+</ul>
+<div class="section" id="classes-architecture">
+<h4><span class="section-number">9.3.1.1. </span>Classes architecture<a class="headerlink" href="#classes-architecture" title="Permalink to this headline">¶</a></h4>
+<p>The tool is based on a simple design patern:</p>
+<div class="figure align-center" id="id2">
+<img alt="_images/class_architecture.SVG" src="_images/class_architecture.SVG" /><p class="caption"><span class="caption-text">Class architecture</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+</div>
+<p>There are three main classes:</p>
+<ul class="simple">
+<li><p>KernelManager: The class to manage kernels</p></li>
+<li><p>ImageManager: The class to manage images</p></li>
+<li><p>Image: The mother class of all images</p></li>
+</ul>
+<p>The Image class can be inherited to create custom image classes. The first implementation of the diskless tool includes three image classes:</p>
+<ul class="simple">
+<li><p>NfsImage: The class to create nfs images. With this type of image a node can had a remote operating system on an nfs server.</p></li>
+<li><p>LivenetImage: The class to create livenet images. With this type of image a node can load it’s operation system in RAM.</p></li>
+<li><p>DemoImage: A demo image class that is an exemple of how to create custom classes.</p></li>
+</ul>
+</div>
+<div class="section" id="modules-architecture">
+<h4><span class="section-number">9.3.1.2. </span>Modules architecture<a class="headerlink" href="#modules-architecture" title="Permalink to this headline">¶</a></h4>
+<p>The images classes are contained in modules:</p>
+<div class="figure align-center" id="id3">
+<img alt="_images/modules_architecture.SVG" src="_images/modules_architecture.SVG" /><p class="caption"><span class="caption-text">The modules and their classes</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
+</div>
+<p>Each module is independent and can be added or removed from the module directory depending on the needs.</p>
+</div>
+<div class="section" id="file-system-architecture">
+<h4><span class="section-number">9.3.1.3. </span>File system architecture<a class="headerlink" href="#file-system-architecture" title="Permalink to this headline">¶</a></h4>
+<p>Bellow the gobal hierarchy of the diskless tool files (absolute paths) :</p>
+<ul class="simple">
+<li><p>Diskless basic files:</p></li>
+</ul>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>/diskless
+└── /images
+    └── /nfsimages
+        ├── /golden
+        └── /staging
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Python modules</p></li>
+</ul>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>/lib/python3.6/site-packages/diskless/
+├── utils.py
+├── image_manager.py
+├── kernel_manager.py
+└── /modules
+    ├── base_module.py
+    ├── livenet_module.py
+    ├── demo_module.py
+    └── nfs_module.py
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Ongoing installations file</p></li>
+</ul>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>/var/lib/diskless
+└── installations.yml
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Temporary directory to work with images</p></li>
+</ul>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>/var/tmp/diskless/workdir/
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>CLI diskless script:</p></li>
+</ul>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>/usr/bin
+└── disklessset (disklesset.py)
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Files on http server:</p></li>
+</ul>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>/var/www/html/preboot_execution_environment/diskless
+├── images
+└── kernels
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="the-image-system">
+<h3><span class="section-number">9.3.2. </span>The image system<a class="headerlink" href="#the-image-system" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="overview-about-images">
+<h4><span class="section-number">9.3.2.1. </span>Overview about images<a class="headerlink" href="#overview-about-images" title="Permalink to this headline">¶</a></h4>
+<p>In the diskless tool images are objects instantiated from Image class inherited classes. An Image object is a representation of a concrete diskless image. An image cannot be directly instantiated from Image class because it is an abstract class. Image classes inherited from Image class are specific images. Each inherited image class has it’s own features and image creation process. For example the process of creation of an NFS image by the NfsImage class is different from the process of creation of a Livenet image by the LivenetImage class.</p>
+<p>Each image object has at least its own base directory in directory:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>/var/www/html/preboot_execution_environment/diskless/images
+</pre></div>
+</div>
+<p>This directory take the name of the image, for exemple:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>/var/www/html/preboot_execution_environment/diskless/images/myimage
+</pre></div>
+</div>
+<p>An image object has two mandatory base files in it’s base directory that are:</p>
+<ul class="simple">
+<li><p>image_data.yml: The file where all images attributs are stored when the diskless program is not running.</p></li>
+<li><p>boot.ipxe: The booting file of the image that give instructions about the booting process.</p></li>
+</ul>
+</div>
+<div class="section" id="save-an-image">
+<h4><span class="section-number">9.3.2.2. </span>Save an image<a class="headerlink" href="#save-an-image" title="Permalink to this headline">¶</a></h4>
+<p>A diskless image has several attributs, for exemple it’s name or it’s kernel. When the diskless program is not running we need to have all images attributs saved. This save is done by the register_image() instance method of the Image class. Calling this method with an image object just save all the image attributs in it’s image_data.yml file.</p>
+<p>When modifying image attributs you need to re-register image in order to save new image attributs values.</p>
+</div>
+<div class="section" id="load-an-image">
+<h4><span class="section-number">9.3.2.3. </span>Load an image<a class="headerlink" href="#load-an-image" title="Permalink to this headline">¶</a></h4>
+<p>To load an image as an object, just call the ImageManager.get_created_image(image_name) static method with the created image name to load.</p>
+</div>
+</div>
+<div class="section" id="module-creation">
+<h3><span class="section-number">9.3.3. </span>Module creation<a class="headerlink" href="#module-creation" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="module-implementation">
+<h4><span class="section-number">9.3.3.1. </span>Module implementation<a class="headerlink" href="#module-implementation" title="Permalink to this headline">¶</a></h4>
+<p>With the diskless tool other modules and image classes can be easily and quickly created by developers.</p>
+<p>The creation of a new module need to follow some conventions:</p>
+<ul class="simple">
+<li><p>The name of the module must finish by ‘_module.py’.</p></li>
+<li><p>In order to use the module it must be stored in the /lib/python3.6/site-packages/diskless/modules directory.</p></li>
+</ul>
+<p>If the module is compliant it will be automatically detected by the diskless tool.</p>
+<p>To use the module with cli interface, the module need to has a cli_menu() function. The aim of these function is to provide actions inside the module. You can take exemple from the demo_module.</p>
+</div>
+<div class="section" id="images-class-s-implementation">
+<h4><span class="section-number">9.3.3.2. </span>Images class’s implementation<a class="headerlink" href="#images-class-s-implementation" title="Permalink to this headline">¶</a></h4>
+<p>Inside a module, developers can implement images classes depending of their needs. These image classes must be inherited from Image class (in base_module).</p>
+<p>Inherited classes have to follow several convention:</p>
+<p>First, they have to redefine all Image abstract methods:</p>
+<ul class="simple">
+<li><p>create_new_image()       -&gt; Define your own image creation process</p></li>
+<li><p>remove_files()           -&gt; Specify what files to remove when the image was properly created</p></li>
+<li><p>clean()                  -&gt; Specify what files to remove when the image was not properly created (All possible files)</p></li>
+<li><p>get_boot_file_template() -&gt; Get the image boot file template</p></li>
+</ul>
+<p>The module has also to be compliant with the constructor and create_new_image() method implementation. It has to define it’s constructor and and create_new_image() as following:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">arg1</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">arg2</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">argX</span> <span class="o">=</span> <span class="kc">None</span><span class="o">...</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">arg1</span><span class="p">,</span> <span class="n">arg2</span><span class="p">,</span> <span class="n">argX</span><span class="o">...</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">create_new_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg1</span><span class="p">,</span> <span class="n">arg32</span><span class="p">,</span> <span class="n">argX</span><span class="o">...</span><span class="p">):</span>
+    <span class="o">...</span><span class="p">(</span><span class="n">your</span> <span class="n">code</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The constructor don’t have to be modified, all instruction for image creation must be defined in and from create_new_image() body. Look at the demo_image for an exemple of implementation.</p>
+</div>
+</div>
+<div class="section" id="cleaning-process">
+<h3><span class="section-number">9.3.4. </span>Cleaning process<a class="headerlink" href="#cleaning-process" title="Permalink to this headline">¶</a></h3>
+<p>The cleaning process is an important process to keep diskless tool file system clean. This process aim to clean all files of an image when the installation process of the image has crashed.</p>
+<div class="section" id="image-creation-process">
+<h4><span class="section-number">9.3.4.1. </span>Image creation process<a class="headerlink" href="#image-creation-process" title="Permalink to this headline">¶</a></h4>
+<p>The mechanism of cleaning images use a file called installation.yml file. We add informations about images installation inside this file during the image installation.</p>
+<p>Bellow, a properly image creation process:</p>
+<div class="figure align-center" id="id4">
+<img alt="_images/proper_installation.png" src="_images/proper_installation.png" />
+<p class="caption"><span class="caption-text">A proper installation process</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
+</div>
+<p>We can see that at the start of the installation the image is registered inside the installations.yml file, and at the end of the installation the image is unregistered from this file.</p>
+<p>Bellow, a bad image installation process:</p>
+<div class="figure align-center" id="id5">
+<img alt="_images/bad_installation.png" src="_images/bad_installation.png" />
+<p class="caption"><span class="caption-text">An image installation that crash</span><a class="headerlink" href="#id5" title="Permalink to this image">¶</a></p>
+</div>
+<p>We can see that the image is nether unregistered from the installation.yml file because the process has crashed.</p>
+</div>
+<div class="section" id="image-status">
+<h4><span class="section-number">9.3.4.2. </span>Image status<a class="headerlink" href="#image-status" title="Permalink to this headline">¶</a></h4>
+<p>An image can has three status:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 53%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 15%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Image status</p></th>
+<th class="head"><p>CREATED</p></th>
+<th class="head"><p>IN_CREATION</p></th>
+<th class="head"><p>CORRUPTED</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Inside installations.yml file</p></td>
+<td></td>
+<td><p>x</p></td>
+<td><p>x</p></td>
+</tr>
+<tr class="row-odd"><td><p>Installation process is running</p></td>
+<td></td>
+<td><p>x</p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>As you can see the image status depend on two elements. If the image is registered or not inside the installation.yml file, and if the process that install the image is currently running.</p>
+<p>The content of the installatins.yml file is the following:</p>
+<div class="figure align-center" id="id6">
+<img alt="_images/installation_file.png" src="_images/installation_file.png" />
+<p class="caption"><span class="caption-text">Content of installations.yml file during two simultaneous images installations.</span><a class="headerlink" href="#id6" title="Permalink to this image">¶</a></p>
+</div>
+<p>We can see that the name and the class of the image are registered. The pid of the installation process is also registered.</p>
+</div>
+<div class="section" id="id1">
+<h4><span class="section-number">9.3.4.3. </span>Cleaning process<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h4>
+<p>The cleaning process is called once after the user has selected an action in the main menu in gui.</p>
+<p>Bellow the cleaning process:</p>
+<div class="figure align-center" id="id7">
+<img alt="_images/clean_installations.SVG" src="_images/clean_installations.SVG" /><p class="caption"><span class="caption-text">Image cleaning process</span><a class="headerlink" href="#id7" title="Permalink to this image">¶</a></p>
+</div>
+<p>We can see that an image is cleaning when it’s status is CORRUPTED. Bellow the process to get image status:</p>
+<div class="figure align-center" id="id8">
+<img alt="_images/get_image_status.SVG" src="_images/get_image_status.SVG" /><p class="caption"><span class="caption-text">Getting image status process</span><a class="headerlink" href="#id8" title="Permalink to this image">¶</a></p>
+</div>
+<p>This process returns the image status in compliance with the previous image status table.</p>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="high_availability.html" class="btn btn-neutral float-right" title="10. [Community] - High Availability" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="multiple_icebergs.html" class="btn btn-neutral float-left" title="8. [Core] - Manage multiple icebergs" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2019, Benoît Leveugle, Johnny Keats.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

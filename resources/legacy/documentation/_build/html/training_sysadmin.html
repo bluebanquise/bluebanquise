@@ -1,0 +1,2257 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>3. [Training] - Cluster SysAdmin &mdash; BlueBanquise Documentation 1.5.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="4. [Training] - Ansible" href="training_ansible.html" />
+    <link rel="prev" title="2. Vocabulary" href="vocabulary.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> BlueBanquise Documentation
+          
+
+          
+            
+            <img src="_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vocabulary.html">2. Vocabulary</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">3. [Training] - Cluster SysAdmin</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#hardware-requirements">3.1. Hardware requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#useful-commands">3.2. Useful commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#vocabulary">3.3. Vocabulary</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#basic-concepts">3.3.1. Basic concepts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#basic-words">3.3.2. Basic words</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#understanding-services">3.3.3. Understanding services</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#computational-resources-management">3.3.4. Computational resources management</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#cluster-description">3.4. Cluster description</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#architecture">3.4.1. Architecture</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#network">3.4.2. Network</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#final-notes-before-we-start">3.4.3. Final notes before we start</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#management-node-installation">3.5. Management node installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#setup-basic-repositories">3.5.1. Setup basic repositories</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#main-os">3.5.1.1. Main OS</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#other-repositories">3.5.1.2. Other repositories</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#dhcp-server">3.5.2. DHCP server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dns-server">3.5.3. DNS server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hosts-file">3.5.4. Hosts file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#time-server">3.5.5. Time server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pxe-stack">3.5.6. PXE stack</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#fbtftp-module">3.5.6.1. fbtftp module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fbtftp-custom-server">3.5.6.2. fbtftp custom server</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ipxe-custom-rom">3.5.6.3. iPXE custom rom</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ipxe-chain">3.5.6.4. iPXE chain</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#kickstart">3.5.6.5. Kickstart</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#other-nodes-installation">3.6. Other nodes installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#boot-over-pxe">3.6.1. Boot over PXE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configure-client-side">3.6.2. Configure client side</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#set-hostname">3.6.2.1. Set hostname</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#configure-repositories">3.6.2.2. Configure repositories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dns-client">3.6.2.3. DNS client</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">3.6.2.4. Hosts file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#time-client">3.6.2.5. Time client</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#storage">3.7. Storage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#nfs-server">3.7.1. NFS server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nfs-clients">3.7.2. NFS clients</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#slurm">3.8. Slurm</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#controller">3.8.1. Controller</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#computes-nodes">3.8.2. Computes nodes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#submitter">3.8.3. Submitter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#submitting-jobs">3.8.4. Submitting jobs</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#submitting-without-a-script">3.8.4.1. Submitting without a script</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#basic-job-script">3.8.4.2. Basic job script</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#serial-job">3.8.4.3. Serial job</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#openmp-job">3.8.4.4. OpenMP job</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mpi-job">3.8.4.5. MPI job</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#real-life-example-with-blender-job">3.8.4.6. Real life example with Blender job</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#users">3.9. Users</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#infiniband">3.10. Infiniband</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gpu-nvidia">3.11. GPU (Nvidia)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ensure-kernel-do-not-crash">3.11.1. Ensure kernel do not crash</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#disable-nouveau-driver">3.11.2. Disable nouveau driver</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#install-nvidia-driver">3.11.3. Install Nvidia driver</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#conclusion">3.12. Conclusion</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="training_ansible.html">4. [Training] - Ansible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bootstrap.html">5. [Core] - Bootstrap base system</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configure_bluebanquise.html">6. [Core] - Configure BlueBanquise</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deploy_bluebanquise.html">7. [Core] - Deploy BlueBanquise</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multiple_icebergs.html">8. [Core] - Manage multiple icebergs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="diskless.html">9. [Core] - Diskless</a></li>
+<li class="toctree-l1"><a class="reference internal" href="high_availability.html">10. [Community] - High Availability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring.html">11. [Community] - Monitoring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="containers.html">12. Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stories.html">13. Stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roles.html">14. Roles list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">15. References</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">BlueBanquise Documentation</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li><span class="section-number">3. </span>[Training] - Cluster SysAdmin</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/training_sysadmin.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="training-cluster-sysadmin">
+<h1><span class="section-number">3. </span>[Training] - Cluster SysAdmin<a class="headerlink" href="#training-cluster-sysadmin" title="Permalink to this headline">¶</a></h1>
+<p>This tutorial tries to teach how to install manually a basic HPC cluster.
+This part is optional and if you already have this knowledge, you can
+skip it and proceed to Ansible training, or to BlueBanquise bootstrap.</p>
+<p>This tutorial will focus on simplicity.
+All software used are very common and when facing an error, a quick look on the
+web will most of the time solves the issue.</p>
+<p>If you face any issues with this tutorial, do not hesitate to contact us, we
+are always glad to help.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This tutorial is based on RockyLinux, but can be adapted to other
+distribution with ease.</p>
+</div>
+<div class="section" id="hardware-requirements">
+<h2><span class="section-number">3.1. </span>Hardware requirements<a class="headerlink" href="#hardware-requirements" title="Permalink to this headline">¶</a></h2>
+<p>The following hardware is needed to perform this training:</p>
+<p><strong>Minimal configuration to do the training:</strong>
+Laptop/workstation with 4Go RAM and 20Go disk. VT-x instructions MUST be activated in the BIOS. VMs will be used.</p>
+<p><strong>Recommended configuration to do the training:</strong>
+Laptop/workstation with 8go or 16go, and 40Go disk. VT-x instructions MUST be activated in the BIOS. VMs will be used.</p>
+<p><strong>Best configuration to do the training:</strong>
+A real cluster, with real physical servers.</p>
+</div>
+<div class="section" id="useful-commands">
+<h2><span class="section-number">3.2. </span>Useful commands<a class="headerlink" href="#useful-commands" title="Permalink to this headline">¶</a></h2>
+<p>General commands:</p>
+<ul class="simple">
+<li><p>Load a kernel module : <code class="docutils literal notranslate"><span class="pre">modprobe</span> <span class="pre">mymodule</span> <span class="pre">-v</span></code></p></li>
+<li><p>Unload a kernel module : <code class="docutils literal notranslate"><span class="pre">modprobe</span> <span class="pre">-r</span> <span class="pre">mymodule</span></code></p></li>
+<li><p>List loaded kernel modules : <code class="docutils literal notranslate"><span class="pre">lsmod</span></code></p></li>
+<li><p>Check listening processes and port used : <code class="docutils literal notranslate"><span class="pre">netstat</span> <span class="pre">-aut</span></code></p></li>
+<li><p>Get hardware information (use –help for more details) : <code class="docutils literal notranslate"><span class="pre">inxi</span></code></p></li>
+<li><p>Check network configuration : <code class="docutils literal notranslate"><span class="pre">ip</span> <span class="pre">add</span></code></p></li>
+<li><p>Open a screen : <code class="docutils literal notranslate"><span class="pre">screen</span> <span class="pre">-S</span> <span class="pre">sphen</span></code></p></li>
+<li><p>List screens : <code class="docutils literal notranslate"><span class="pre">screen</span> <span class="pre">-ls</span></code></p></li>
+<li><p>Join a screen : <code class="docutils literal notranslate"><span class="pre">screen</span> <span class="pre">-x</span> <span class="pre">sphen</span></code></p></li>
+<li><p>Detach a screen : use <code class="docutils literal notranslate"><span class="pre">Ctrl+a+d</span></code> on keyboard</p></li>
+<li><p>Change keyboard language in current terminal : <code class="docutils literal notranslate"><span class="pre">loadkeys</span> <span class="pre">fr</span></code> (azerty), <code class="docutils literal notranslate"><span class="pre">loadkeys</span> <span class="pre">us</span></code> (qwerty)</p></li>
+<li><p>Remount / when in read only (often in recovery mode) : <code class="docutils literal notranslate"><span class="pre">mount</span> <span class="pre">-o</span> <span class="pre">remount,rw</span> <span class="pre">/</span></code></p></li>
+<li><p>Apply a patch on a file : <code class="docutils literal notranslate"><span class="pre">patch</span> <span class="pre">myfile.txt</span> <span class="pre">&lt;</span> <span class="pre">mypatch.txt</span></code></p></li>
+<li><p>Do a patch from original and modified file : <code class="docutils literal notranslate"><span class="pre">diff</span> <span class="pre">-Naur</span> <span class="pre">original.txt</span> <span class="pre">modified.txt</span></code></p></li>
+</ul>
+<p>IPMI commands for remote control :</p>
+<ul class="simple">
+<li><p>Boot, very useful for very slow to boot systems (bios can be replaced with pxe or cdrom or disk) : <code class="docutils literal notranslate"><span class="pre">ipmitool</span> <span class="pre">-I</span> <span class="pre">lanplus</span> <span class="pre">-H</span> <span class="pre">bmc5</span> <span class="pre">-U</span> <span class="pre">user</span> <span class="pre">-P</span> <span class="pre">password</span> <span class="pre">chassis</span> <span class="pre">bootdev</span> <span class="pre">bios</span></code></p></li>
+<li><p>Make boot persistent : <code class="docutils literal notranslate"><span class="pre">ipmitool</span> <span class="pre">-I</span> <span class="pre">lanplus</span> <span class="pre">-H</span> <span class="pre">bmc5</span> <span class="pre">-U</span> <span class="pre">user</span> <span class="pre">-P</span> <span class="pre">password</span> <span class="pre">chassis</span> <span class="pre">bootdev</span> <span class="pre">disk</span> <span class="pre">options=persistent</span></code></p></li>
+<li><p>Control power (reset car be replaced with soft or cycle or off or on) : <code class="docutils literal notranslate"><span class="pre">ipmitool</span> <span class="pre">-I</span> <span class="pre">lanplus</span> <span class="pre">-H</span> <span class="pre">bmc5</span> <span class="pre">-U</span> <span class="pre">user</span> <span class="pre">-P</span> <span class="pre">password</span> <span class="pre">chassis</span> <span class="pre">power</span> <span class="pre">reset</span></code></p></li>
+<li><p>Activate remote console (use Enter, then &amp; then . to exit) : <code class="docutils literal notranslate"><span class="pre">ipmitool</span> <span class="pre">-H</span> <span class="pre">bmc5</span> <span class="pre">-U</span> <span class="pre">user</span> <span class="pre">-P</span> <span class="pre">password</span> <span class="pre">-I</span> <span class="pre">lanplus</span> <span class="pre">-e</span> <span class="pre">\&amp;</span> <span class="pre">sol</span> <span class="pre">activate</span></code></p></li>
+</ul>
+<p>More: <a class="reference external" href="https://support.pivotal.io/hc/en-us/articles/206396927-How-to-work-on-IPMI-and-IPMITOOL">https://support.pivotal.io/hc/en-us/articles/206396927-How-to-work-on-IPMI-and-IPMITOOL</a>
+Note: when using sol activate, if keyboard does not work, try using the same command into a screen, this may solve the issue.</p>
+<p>Clush usage :</p>
+<ul class="simple">
+<li><p>To do a command on all nodes : <code class="docutils literal notranslate"><span class="pre">clush</span> <span class="pre">-bw</span> <span class="pre">node1,node[4-5]</span> <span class="pre">&quot;hostname&quot;</span></code></p></li>
+<li><p>To copy a file on all nodes : <code class="docutils literal notranslate"><span class="pre">clush</span> <span class="pre">-w</span> <span class="pre">node1,node[4-5]</span> <span class="pre">–copy</span> <span class="pre">/root/slurm.conf</span> <span class="pre">–dest=/etc/slurm/slurm.conf</span></code></p></li>
+<li><p>To replace a string in a file of all nodes : <code class="docutils literal notranslate"><span class="pre">clush</span> <span class="pre">-bw</span> <span class="pre">compute1[34-67]</span> <span class="pre">'sed</span> <span class="pre">-i</span> <span class="pre">&quot;s/10.0.0.1/nfsserver/g&quot;</span> <span class="pre">/etc/fstab'</span></code></p></li>
+</ul>
+</div>
+<div class="section" id="vocabulary">
+<h2><span class="section-number">3.3. </span>Vocabulary<a class="headerlink" href="#vocabulary" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="basic-concepts">
+<h3><span class="section-number">3.3.1. </span>Basic concepts<a class="headerlink" href="#basic-concepts" title="Permalink to this headline">¶</a></h3>
+<p>Few words on vocabulary used:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>To avoid confusion around “server” word:</dt><dd><ul>
+<li><p>a <strong>node</strong> refers to a physical or virtual machine with an operating system on it.</p></li>
+<li><p>a <strong>server</strong> refer to a software daemon listening on the network.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>A <strong>NIC</strong> is a network interface controller (the thing you plug the Ethernet cable in ツ).</p></li>
+<li><p>The system administrator, or sysadmin, will be you, the person in charge of managing the cluster.</p></li>
+<li><p>Pets and Cattles
+* A pet node is a key node, that you MUST keep healthy and that is considered difficult to reinstall.
+* A cattle node, is a “trashable” node, that you consider non vital to production and that is considered easy to reinstall.</p></li>
+</ul>
+<img alt="_images/sysadmin.jpg" class="align-center" src="_images/sysadmin.jpg" />
+<p>![Pets and cattle](resources/hpc-meta.jpg)</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Original black and white image from Roger Rössing, otothek_df_roe-neg_0006125_016_Sch%C3%A4fer_vor_seiner_Schafherde_auf_einer_Wiese_im_Harz.jpg)</p>
+</div>
+<p>An HPC cluster can be seen like a sheep flock.
+The admin sys (shepherd), the management node (shepherd dog), and the compute/login nodes (sheep).</p>
+<p>This leads to two types of nodes, like cloud computing: pets (shepherd dog) and cattle (sheep).
+While the safety of your pets must be absolute for good production, losing cattle is common and considered normal.</p>
+<p>In High Performance Computing, most of the time, management node, file system (io) nodes, etc, are considered as pets. On the other hand, compute nodes and login nodes are considered cattle.</p>
+<p>Same philosophy apply for file systems: some must be safe, others can be faster but “losable”, and users have to understand it and take precautions.
+In this tutorial, /home will be considered safe, and /scratch fast but losable.</p>
+</div>
+<div class="section" id="basic-words">
+<h3><span class="section-number">3.3.2. </span>Basic words<a class="headerlink" href="#basic-words" title="Permalink to this headline">¶</a></h3>
+<p>An HPC cluster is an aggregate of physical compute nodes dedicated to intensive calculations.
+Most of the time, these calculations are related to sciences, but can also be used in other domains, like finances.</p>
+<p>On general HPC clusters, users will be able to login through ssh on dedicated nodes (called login nodes),
+upload their code and data, then compile their code, and launch jobs (calculations) on the cluster.</p>
+<p>To maintain the cluster synchronized and to provide features, multiple <strong>services</strong> are running on management node.</p>
+<p>Most of the time, a cluster is composed of:</p>
+<ul class="simple">
+<li><p>An <strong>administration node</strong> or <strong>management node</strong> (pet), whose purpose is to host all core resources of the cluster.</p></li>
+<li><p><strong>IO nodes</strong> (pet), whose purpose is to provide storage for users. Basic storage is based on NFS, and advanced storage (optional) on parallel file systems.</p></li>
+<li><p><strong>Login nodes</strong> (cattle), whose purpose is to be the place where users interact with the cluster and with the job scheduler, and manage their code and data.</p></li>
+<li><p><strong>Compute nodes</strong> (cattle), whose purpose is to provide calculation resources.</p></li>
+</ul>
+<p>A node is the name given to a server inside an HPC cluster. Nodes are most of the time equipped with a <strong>BMC</strong>
+for Baseboard Management Controller, which is kind of a small server connected on the server motherboard and allow manipulating the server remotely (power on, power off, boot order, status, console, etc.).</p>
+<p>Sometime, servers are <strong>racked</strong> into a <strong>chassis</strong> that can embed an <strong>CMC</strong> for Chassis Management Controller. Servers and chassis can even be
+<strong>racked</strong> into a rack that can embed an <strong>RMC</strong> for Rack Management Controller.</p>
+<p>On the <strong>operating system</strong> (OS), a <strong>service</strong> is a software daemon managed by <strong>systemd</strong>. For example, the DHCP server service is in charge of attributing nodes IP addresses on the network depending of their MAC address (each network interface has its own MAC). Another example, the job scheduler, is also used as a service. Etc.</p>
+<p>Management node, called here <code class="docutils literal notranslate"><span class="pre">odin</span></code>, is the node hosting most of vital services of the cluster.</p>
+<p><strong>Interconnect</strong> network, often based on the <strong>InfiniBand</strong> technology (IB), is used in parallel of the Ethernet network (Eth). Interconnect is mainly used for calculations (transfer data between process of running codes) and is used to export the fast file systems, exported by the IO nodes. InfiniBand has much lower latency and much higher bandwidth than Ethernet network.</p>
+</div>
+<div class="section" id="understanding-services">
+<h3><span class="section-number">3.3.3. </span>Understanding services<a class="headerlink" href="#understanding-services" title="Permalink to this headline">¶</a></h3>
+<p>As said above, management node host multiple basic services needed to run the cluster:</p>
+<ul class="simple">
+<li><p>The <strong>repository</strong> server: based on http protocol, it provides packages (rpm) to all nodes of the cluster. Service is <code class="docutils literal notranslate"><span class="pre">httpd</span></code> (Apache).</p></li>
+<li><p>The <strong>tftp</strong> server: based on tftp protocol, it provides PXE very basic files to initialize boot sequence on the remote servers. Service is <code class="docutils literal notranslate"><span class="pre">fbtftp</span></code> (Facebook Tftp).</p></li>
+<li><p>The <strong>dhcp</strong> server: provides ip for all nodes and BMC on the network. Ip are attributed using MAC addresses of network interfaces. Service is <code class="docutils literal notranslate"><span class="pre">dhcpd</span></code> (ISC DHCP).</p></li>
+<li><p>The <strong>dns</strong> server: provides link between ip and hostname, and the opposite. Service is <code class="docutils literal notranslate"><span class="pre">named</span></code> (bind9).</p></li>
+<li><p>The <strong>time</strong> server: provides a single and synchronized clock for all equipment of the cluster. More important than it seems. Service is <code class="docutils literal notranslate"><span class="pre">chronyd</span></code> (Chrony).</p></li>
+<li><p>The <strong>pxe stack</strong>: represent the aggregate of the repository server, the tftp server, the dhcp server, the dns server and the time server. Used to deploy OS on nodes on the cluster using the network.</p></li>
+<li><p>The <strong>nfs</strong> server: export simple storage spaces and allows nodes to mount these exported spaces locally (/home, /opt, etc. ). Service is <code class="docutils literal notranslate"><span class="pre">nfs-server</span></code>.</p></li>
+<li><p>The <strong>LDAP</strong> server: provides centralized users authentication for all nodes. Is optional for small clusters. Service is <code class="docutils literal notranslate"><span class="pre">slapd</span></code> (OpenLDAP).</p></li>
+<li><p>The <strong>job scheduler</strong> server: manage computational resources, and spread jobs from users on the cluster. Service is <code class="docutils literal notranslate"><span class="pre">slurmctld</span></code> (Slurm).</p></li>
+<li><p>The <strong>monitoring</strong> server: monitor the cluster to provide metrics, and raise alerts in case of issues. Service is <code class="docutils literal notranslate"><span class="pre">prometheus</span></code> (Prometheus).</p></li>
+</ul>
+</div>
+<div class="section" id="computational-resources-management">
+<h3><span class="section-number">3.3.4. </span>Computational resources management<a class="headerlink" href="#computational-resources-management" title="Permalink to this headline">¶</a></h3>
+<p>The <strong>job scheduler</strong> is the conductor of computational resources of the cluster.</p>
+<p>A <strong>job</strong> is a small script, that contains instructions on how to execute the calculation program, and that also contains information for to the job scheduler (required job duration, how much resources are needed, etc.).</p>
+<p>When a user ask the job scheduler to execute a <strong>job</strong>, which is call <strong>submitting a job</strong>, the job enter <strong>jobs queue</strong>.
+The job scheduler is then in charge of finding free computational resources depending of the needs of the job, then launching the job and monitoring it during its execution. Note that the job scheduler is in charge of managing all jobs to ensure maximum usage of computational resources, which is why sometime, the job scheduler will put some jobs on hold for a long time in a queue, to wait for free resources.
+In return, after user has submitted a job, the job scheduler will provide user a <strong>job ID</strong> to allow following job state in the jobs queue and during its execution.</p>
+</div>
+</div>
+<div class="section" id="cluster-description">
+<h2><span class="section-number">3.4. </span>Cluster description<a class="headerlink" href="#cluster-description" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="architecture">
+<h3><span class="section-number">3.4.1. </span>Architecture<a class="headerlink" href="#architecture" title="Permalink to this headline">¶</a></h3>
+<p>The cluster structure for this training will be as follows:</p>
+<img alt="_images/cluster_schema.svg" class="align-center" src="_images/cluster_schema.svg" /><p>On the hardware side:</p>
+<ul class="simple">
+<li><p>One master node called <code class="docutils literal notranslate"><span class="pre">odin</span></code>.</p></li>
+<li><p>One storage node called <code class="docutils literal notranslate"><span class="pre">thor</span></code>, based one NFS, will be deployed, for /home and /software.</p></li>
+<li><p>One login node called <code class="docutils literal notranslate"><span class="pre">heimdall</span></code> for users to login.</p></li>
+<li><p>Multiple compute nodes, called <code class="docutils literal notranslate"><span class="pre">valkyries</span></code> will then be deployed on the fly with PXE.</p></li>
+</ul>
+</div>
+<div class="section" id="network">
+<h3><span class="section-number">3.4.2. </span>Network<a class="headerlink" href="#network" title="Permalink to this headline">¶</a></h3>
+<p>Network information:</p>
+<p>The whole cluster will use a single subnet 10.10.0.0/16.
+IP used will be (nic name to be set depending of your hardware):</p>
+<ul class="simple">
+<li><p>odin: 10.10.0.1 (nic: enp0s3)</p></li>
+<li><p>thor : 10.10.1.1 (nic: enp0s3)</p></li>
+<li><p>heimdall: 10.10.2.1 (nic: enp0s3), 192.168.1.77 (nic: enp0s8) for users access</p></li>
+<li><p>valkyrieX: 10.10.3.X (nic: enp0s3)</p></li>
+</ul>
+<p>Domain name will be cluster.local</p>
+<p>Note: if you plan to test this tutorial in Virtualbox, 10.10.X.X range may
+already been taken by Virtualbox NAT. In this case, use another subnet.</p>
+</div>
+<div class="section" id="final-notes-before-we-start">
+<h3><span class="section-number">3.4.3. </span>Final notes before we start<a class="headerlink" href="#final-notes-before-we-start" title="Permalink to this headline">¶</a></h3>
+<p>All nodes will be installed with a minimal install Centos 8. Needed other rpms
+will be created on the fly from sources.</p>
+<ul class="simple">
+<li><p>To simplify this tutorial, firewall will be deactivated. You can reactivate it later.</p></li>
+<li><p>We will keep SELinux enforced. When facing permission denied, try setting SELinux into permissive mode to check if that’s the reason, or check selinux logs.</p></li>
+<li><p>If you get <code class="docutils literal notranslate"><span class="pre">Pane</span> <span class="pre">is</span> <span class="pre">dead</span></code> error during pxe install, most of the time increase RAM to minimum 1200 Mo and it should be ok.</p></li>
+<li><p>You can edit files using <code class="docutils literal notranslate"><span class="pre">vim</span></code> which is a powerful tool, but if you feel more comfortable with, use <code class="docutils literal notranslate"><span class="pre">nano</span></code> (<code class="docutils literal notranslate"><span class="pre">nano</span> <span class="pre">myfile.txt</span></code>, then edit file, then use <code class="docutils literal notranslate"><span class="pre">Ctrl+O</span></code> to save, and <code class="docutils literal notranslate"><span class="pre">Ctrl+X</span></code> to exit).</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="management-node-installation">
+<h2><span class="section-number">3.5. </span>Management node installation<a class="headerlink" href="#management-node-installation" title="Permalink to this headline">¶</a></h2>
+<p>This part describes how to manually install <code class="docutils literal notranslate"><span class="pre">odin</span></code> management node basic services, needed to deploy and install the other servers.</p>
+<p>Install first system with Centos DVD image, and choose minimal install as package selection (Or server with GUI if you prefer. However, more packages installed means less security and less performance).</p>
+<p>Partition schema should be the following, without LVM but standard partitions:</p>
+<ul class="simple">
+<li><p>/boot 2Go ext4</p></li>
+<li><p>swap 4Go</p></li>
+<li><p>/ remaining space ext4</p></li>
+</ul>
+<p>Be extremely careful with time zone choice. This parameter is more important than it seems as time zone will be set in the kickstart file later, and MUST be the same than the one chosen here when installing <code class="docutils literal notranslate"><span class="pre">odin</span></code>. If you don’t know which one to use, choose America/Chicago, the same one chose in the kickstart example of this document.
+After install and reboot, disable firewalld using:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>systemctl disable firewalld
+systemctl stop firewalld
+</pre></div>
+</div>
+<p>Change hostname to <code class="docutils literal notranslate"><span class="pre">odin</span></code> (need to login again to see changes):</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>hostnamectl set-hostname odin.cluster.local
+</pre></div>
+</div>
+<p>To start most services, we need the main NIC to be up and ready with an ip.
+We will use <strong>NetworkManager</strong> to handle network. <code class="docutils literal notranslate"><span class="pre">nmcli</span></code> is the command to interact with NetworkManager.</p>
+<p>Assuming main NIC name is <code class="docutils literal notranslate"><span class="pre">enp0s8</span></code>, to set <code class="docutils literal notranslate"><span class="pre">10.10.0.1/16</span></code> IP and subnet on it, use the following commands:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>nmcli con mod enp0s8 ipv4.addresses 10.10.0.1/16
+nmcli con mod enp0s8 ipv4.method manual
+nmcli con up enp0s8
+</pre></div>
+</div>
+<p>Then ensure interface is up with correct ip using:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ip a
+</pre></div>
+</div>
+<p>You should see your NICs with <code class="docutils literal notranslate"><span class="pre">enp0s8</span></code> having ip <code class="docutils literal notranslate"><span class="pre">10.10.0.1</span></code> with <code class="docutils literal notranslate"><span class="pre">/16</span></code> prefix.</p>
+<p>Time to setup basic repositories.</p>
+<div class="section" id="setup-basic-repositories">
+<h3><span class="section-number">3.5.1. </span>Setup basic repositories<a class="headerlink" href="#setup-basic-repositories" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="main-os">
+<h4><span class="section-number">3.5.1.1. </span>Main OS<a class="headerlink" href="#main-os" title="Permalink to this headline">¶</a></h4>
+<p>Backup and clean first default Centos repositories:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>cp -a /etc/yum.repos.d/ /root/
+rm -f /etc/yum.repos.d/*
+</pre></div>
+</div>
+<p>The local repository allows the main server and other servers to install automatically rpm with correct dependencies without having to access web repository. All needed rpm are available in the Centos DVD.</p>
+<p>Next step depends if you are using a Virtual Machine or a real server.</p>
+<p>3 ways to do:</p>
+<ol class="arabic simple">
+<li><p>If you are using a real server, upload the Centos DVD in /root folder and mount it in /mnt (or mount it directly from CDROM):</p></li>
+</ol>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>mount /root/CentOS-8-x86_64-Everything.iso /mnt
+</pre></div>
+</div>
+<p>Copy full iso (will be needed later for PXE), and use the database already on the DVD:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>mkdir -p /var/www/html/repositories/centos/8/x86_64/os/
+cp -a /mnt/* /var/www/html/repositories/centos/8/x86_64/os/
+restorecon -r /var/www/html/
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>Or you can also simply mount the iso directly in the good folder:</p></li>
+</ol>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>mkdir -p /var/www/html/repositories/centos/8/x86_64/os/
+mount /root/CentOS-8-x86_64-Everything.iso /var/www/html/repositories/centos/8/x86_64/os/
+restorecon -r /var/www/html/
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>If you are using a Virtual Machine, simply create the folder and mount the ISO that you should have added into the virtual CDROM drive:</p></li>
+</ol>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>mkdir -p /var/www/html/repositories/centos/8/x86_64/os/
+mount /dev/cdrom /var/www/html/repositories/centos/8/x86_64/os/
+restorecon -r /var/www/html/
+</pre></div>
+</div>
+<p>Now, indicate the server the repository position (here local disk). To do so, edit the file <code class="docutils literal notranslate"><span class="pre">/etc/yum.repos.d/os.repo</span></code> and add:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[BaseOS]
+name=BaseOS
+baseurl=file:///var/www/html/repositories/centos/8/x86_64/os/BaseOS
+gpgcheck=0
+enabled=1
+
+[AppStream]
+name=AppStream
+baseurl=file:///var/www/html/repositories/centos/8/x86_64/os/AppStream
+gpgcheck=0
+enabled=1
+</pre></div>
+</div>
+<p>OS repositories are split between BaseOS and AppStream. Using this file, we will reach both.</p>
+<p>Finally, install and start the <code class="docutils literal notranslate"><span class="pre">httpd</span></code> service, to allow other servers using this repository through <code class="docutils literal notranslate"><span class="pre">http</span></code>.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>dnf install httpd -y
+systemctl enable httpd
+systemctl start httpd
+</pre></div>
+</div>
+<p>The repository server is up, and listening. We can now use it to reach repositories, as any other servers on the cluster network will.</p>
+<p>Edit <code class="docutils literal notranslate"><span class="pre">/etc/yum.repos.d/os.repo</span></code> and set:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[BaseOS]
+name=BaseOS
+baseurl=http://10.10.0.1/repositories/centos/8/x86_64/os/BaseOS
+gpgcheck=0
+enabled=1
+
+[AppStream]
+name=AppStream
+baseurl=http://10.10.0.1/repositories/centos/8/x86_64/os/AppStream
+gpgcheck=0
+enabled=1
+</pre></div>
+</div>
+<p>Ensure it works, by installing for example <code class="docutils literal notranslate"><span class="pre">wget</span></code>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>dnf clean all
+dnf repolist
+dnf install wget
+</pre></div>
+</div>
+</div>
+<div class="section" id="other-repositories">
+<h4><span class="section-number">3.5.1.2. </span>Other repositories<a class="headerlink" href="#other-repositories" title="Permalink to this headline">¶</a></h4>
+<p>We will need to add extra packages as not all is contained in the Centos 8 DVD.
+Create extra repository folder:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>mkdir -p /var/www/html/repositories/centos/8/x86_64/extra/
+restorecon -r /var/www/html/
+</pre></div>
+</div>
+<p>Grab the packages from the web using wget:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>wget https://fr2.rpmfind.net/linux/epel/8/Everything/x86_64/Packages/c/clustershell-1.8.3-2.el8.noarch.rpm -P /var/www/html/repositories/centos/8/x86_64/extra/
+wget https://fr2.rpmfind.net/linux/epel/8/Everything/x86_64/Packages/p/python3-clustershell-1.8.3-2.el8.noarch.rpm -P /var/www/html/repositories/centos/8/x86_64/extra/
+</pre></div>
+</div>
+<p>We now need to create a new repository here using the dedicated command.
+We must install this command first:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>dnf install -y createrepo
+createrepo /var/www/html/repositories/centos/8/x86_64/extra/
+restorecon -r /var/www/html/
+</pre></div>
+</div>
+<p>Then create dedicated repository file <code class="docutils literal notranslate"><span class="pre">/etc/yum.repos.d/extra.repo</span></code> with the following content:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[Extra]
+name=Extra
+baseurl=http://10.10.0.1/repositories/centos/8/x86_64/extra
+gpgcheck=0
+enabled=1
+</pre></div>
+</div>
+<p>To close this repositories part, we may install few useful packages.</p>
+<p>If a local web browser is needed, install the following packages:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>dnf install xorg-x11-utils xauth firefox
+</pre></div>
+</div>
+<p>Then login on node using <code class="docutils literal notranslate"><span class="pre">ssh</span> <span class="pre">-X</span> <span class="pre">-C</span></code> to be able to launch <code class="docutils literal notranslate"><span class="pre">firefox</span></code>. Note however that this can be extremely slow.
+A better way is to use ssh port forwarding features (<code class="docutils literal notranslate"><span class="pre">-L</span></code>), but this part is not covered this training.</p>
+<p>Also, install clustershell and ipmitool, these will be used for computes nodes deployment and PXE tools.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>dnf install clustershell ipmitool
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="dhcp-server">
+<h3><span class="section-number">3.5.2. </span>DHCP server<a class="headerlink" href="#dhcp-server" title="Permalink to this headline">¶</a></h3>
+<p>The DHCP server is used to assign ip addresses and hostnames to other nodes. It is the first server seen by a new node booting in PXE for installation. In this configuration, it is assumed MAC addresses of nodes are known.</p>
+<p>Install the dhcp server package:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>dnf install dhcp-server
+</pre></div>
+</div>
+<p>Do not start it now, configure it first.
+The configuration file is <code class="docutils literal notranslate"><span class="pre">/etc/dhcp/dhcpd.conf</span></code>.
+It should be like the following, replacing MAC address here by the ones of the current cluster. It is possible to tune global values.
+Unknown nodes/BMC will be given a temporary ip on the 10.0.254.x range if dhcp server do not know their MAC address.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>authoritative;
+
+ option client-arch code 93 = unsigned integer 16;
+ if exists client-arch {
+   if option client-arch = 00:00 {
+     filename &quot;undionly.kpxe&quot;;
+   } elsif option client-arch = 00:07 {
+     filename &quot;ipxe.efi&quot;;
+   } elsif option client-arch = 00:08 {
+     filename &quot;ipxe.efi&quot;;
+   } elsif option client-arch = 00:09 {
+     filename &quot;ipxe.efi&quot;;
+   }
+ }
+
+ subnet 10.10.0.0 netmask 255.255.0.0 {
+   # range 10.10.254.0 10.10.254.254; # range where unknown servers will be
+   option domain-name &quot;cluster.local&quot;;
+   option domain-name-servers 10.10.0.1; # dns server ip
+   option broadcast-address 10.10.255.255;
+   default-lease-time 600;
+   max-lease-time 7200;
+
+   next-server 10.10.0.1; #  pxe server ip
+
+   # List of nodes
+
+   host thor {
+    hardware ethernet 08:00:27:18:68:BC;
+    fixed-address 10.10.1.1;
+    option host-name &quot;thor&quot;;
+   }
+
+   host heimdall {
+    hardware ethernet 08:00:27:18:58:BC;
+    fixed-address 10.10.2.1;
+    option host-name &quot;heimdall&quot;;
+   }
+
+   host valkyrie01 {
+    hardware ethernet 08:00:27:18:67:BC;
+    fixed-address 10.10.3.1;
+    option host-name &quot;valkyrie01&quot;;
+   }
+
+   host valkyrie02 {
+    hardware ethernet 08:00:27:18:68:BC;
+    fixed-address 10.10.3.2;
+    option host-name &quot;valkyrie02&quot;;
+   }
+
+ }
+</pre></div>
+</div>
+<p>Finally, start and enable the dhcp service:</p>
+<p>WARNING: only enable the DHCP service if you are on an isolated network, as in opposite to the other services, it may disturb the network if another DHCP is on this network.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>systemctl enable dhcpd
+systemctl start dhcpd
+</pre></div>
+</div>
+<p>Note: if needed, you can search for nodes in <code class="docutils literal notranslate"><span class="pre">10.10.254.0-10.10.254.254</span></code> range using the following <code class="docutils literal notranslate"><span class="pre">nmap</span></code> command (install it using <code class="docutils literal notranslate"><span class="pre">dnf</span> <span class="pre">install</span> <span class="pre">nmap</span></code>):</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>nmap 10.10.254.0-254
+</pre></div>
+</div>
+<p>This is useful to check after a cluster installation that no equipment connected on the network was forgotten in the process.</p>
+</div>
+<div class="section" id="dns-server">
+<h3><span class="section-number">3.5.3. </span>DNS server<a class="headerlink" href="#dns-server" title="Permalink to this headline">¶</a></h3>
+<p>DNS server provides on the network ip/hostname relation to all hosts:</p>
+<ul class="simple">
+<li><p>ip for corresponding hostname</p></li>
+<li><p>hostname for corresponding ip</p></li>
+</ul>
+<p>Install dns server package:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>dnf install bind
+</pre></div>
+</div>
+<p>Configuration includes 3 files: main configuration file, forward file, and reverse file. (You can separate files into more if you wish, not needed here).</p>
+<p>Main configuration file is <code class="docutils literal notranslate"><span class="pre">/etc/named.conf</span></code>, and should be as follow:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>options {
+    listen-on port 53 { 127.0.0.1; 10.10.0.1;};
+    listen-on-v6 port 53 { ::1; };
+    directory       &quot;/var/named&quot;;
+    dump-file       &quot;/var/named/data/cache_dump.db&quot;;
+    statistics-file &quot;/var/named/data/named_stats.txt&quot;;
+    memstatistics-file &quot;/var/named/data/named_mem_stats.txt&quot;;
+    allow-query     { localhost; 10.10.0.0/16;};
+
+    recursion no;
+
+    dnssec-enable no;
+    dnssec-validation no;
+    dnssec-lookaside auto;
+
+    /* Path to ISC DLV key */
+    bindkeys-file &quot;/etc/named.iscdlv.key&quot;;
+
+    managed-keys-directory &quot;/var/named/dynamic&quot;;
+
+    pid-file &quot;/run/named/named.pid&quot;;
+    session-keyfile &quot;/run/named/session.key&quot;;
+};
+
+logging {
+        channel default_debug {
+                file &quot;data/named.run&quot;;
+                severity dynamic;
+        };
+};
+
+zone &quot;.&quot; IN {
+    type hint;
+    file &quot;named.ca&quot;;
+};
+
+zone&quot;cluster.local&quot; IN {
+type master;
+file &quot;forward&quot;;
+allow-update { none; };
+};
+zone&quot;10.10.in-addr.arpa&quot; IN {
+type master;
+file &quot;reverse&quot;;
+allow-update { none; };
+};
+
+include &quot;/etc/named.rfc1912.zones&quot;;
+include &quot;/etc/named.root.key&quot;;
+</pre></div>
+</div>
+<p>Note that the <code class="docutils literal notranslate"><span class="pre">10.10.in-addr.arpa</span></code> is related to first part of our range of ip.
+If cluster was using for example <code class="docutils literal notranslate"><span class="pre">172.16.x.x</span></code> ip range, then it would have been <code class="docutils literal notranslate"><span class="pre">16.172.in-addr.arpa</span></code>.</p>
+<p>Recursion is disabled because no other network access is supposed available.</p>
+<p>What contains our names and ip are the two last zone parts. They refer to two files: <code class="docutils literal notranslate"><span class="pre">forward</span></code> and <code class="docutils literal notranslate"><span class="pre">reverse</span></code>. These files are located in <code class="docutils literal notranslate"><span class="pre">/var/named/</span></code>.</p>
+<p>First one is <code class="docutils literal notranslate"><span class="pre">/var/named/forward</span></code> with the following content:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>$TTL 86400
+@   IN  SOA     odin.cluster.local. root.cluster.local. (
+        2011071001  ;Serial
+        3600        ;Refresh
+        1800        ;Retry
+        604800      ;Expire
+        86400       ;Minimum TTL
+)
+@       IN  NS          odin.cluster.local.
+@       IN  A           10.10.0.1
+
+odin               IN  A   10.10.0.1
+thor               IN  A   10.10.1.1
+heimdall           IN  A   10.10.2.1
+
+valkyrie01         IN  A   10.10.3.1
+valkyrie02         IN  A   10.10.3.2
+</pre></div>
+</div>
+<p>Second one is <code class="docutils literal notranslate"><span class="pre">/var/named/reverse</span></code>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>$TTL 86400
+@   IN  SOA     odin.cluster.local. root.cluster.local. (
+        2011071001  ;Serial
+        3600        ;Refresh
+        1800        ;Retry
+        604800      ;Expire
+        86400       ;Minimum TTL
+)
+@       IN  NS          odin.cluster.local.
+@       IN  PTR         cluster.local.
+
+odin      IN  A   10.10.0.1
+
+1.0        IN  PTR         odin.cluster.local.
+1.1        IN  PTR         thor.cluster.local.
+1.2        IN  PTR         heimdall.cluster.local.
+
+1.3        IN  PTR         valkyrie01.cluster.local.
+2.3        IN  PTR         valkyrie02.cluster.local.
+</pre></div>
+</div>
+<p>Set rights on files:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>chgrp named -R /var/named
+chown -v root:named /etc/named.conf
+restorecon -rv /var/named
+restorecon -v /etc/named.conf
+</pre></div>
+</div>
+<p>And start service:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>systemctl enable named
+systemctl start named
+</pre></div>
+</div>
+<p>The server is up and running. We need to setup client part, even on out <code class="docutils literal notranslate"><span class="pre">odin</span></code>
+management node. To do so, edit <code class="docutils literal notranslate"><span class="pre">/etc/resolv.conf</span></code> and add the following (but keep your primary dns after the one of the cluster to be able to resolv other hosts over the web):</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>search cluster.local
+nameserver 10.10.0.1
+</pre></div>
+</div>
+<p>So for example, my final file at home is:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>nameserver 10.10.0.1
+search home cluster.local
+nameserver 192.168.1.1
+nameserver 2a01:cb08:8acc:b600:a63e:51ff:fe14:f413
+nameserver fe80::a63e:51ff:fe14:f413%enp0s3
+</pre></div>
+</div>
+<p>Which allows me to resolv <code class="docutils literal notranslate"><span class="pre">thor</span></code> or <code class="docutils literal notranslate"><span class="pre">google.com</span></code>.</p>
+<p>Note: you may wish to prevent other scripts (dhclient for example) to edit the file.
+If using an ext4 filesystem, it is possible to lock the file using:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>chattr +i /etc/resolv.conf
+</pre></div>
+</div>
+<p>Use <code class="docutils literal notranslate"><span class="pre">-i</span></code> to unlock it later.</p>
+<p>DNS is now ready. You can try to ping <code class="docutils literal notranslate"><span class="pre">odin</span></code> and see if it works.
+Stop DNS service and try again to see it does not resolve ip anymore.</p>
+</div>
+<div class="section" id="hosts-file">
+<h3><span class="section-number">3.5.4. </span>Hosts file<a class="headerlink" href="#hosts-file" title="Permalink to this headline">¶</a></h3>
+<p>An alternative or in complement to DNS, most system administrators setup an hosts file.</p>
+<p>The hosts file allows to resolve locally which ip belongs to which hostname if written inside. For small clusters, it can fully replace the DNS.
+On large cluster, most system administrators write inside at least key or critical hostnames and ip.</p>
+<p>Lets create our hosts file. Edit <code class="docutils literal notranslate"><span class="pre">/etc/hosts</span></code> file and have it match the following:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+
+10.10.0.1   odin
+10.10.1.1   thor
+10.10.2.1   heimdall
+10.10.3.1   valkyrie01
+10.10.3.2   valkyrie02
+</pre></div>
+</div>
+<p>You can now try to stop DNS server and check that now, even with the DNS stopped, we can resolve and ping <code class="docutils literal notranslate"><span class="pre">odin</span></code>.</p>
+</div>
+<div class="section" id="time-server">
+<h3><span class="section-number">3.5.5. </span>Time server<a class="headerlink" href="#time-server" title="Permalink to this headline">¶</a></h3>
+<p>The time server provides date and time to ensure all nodes/servers are synchronized. This is VERY important, as many authentication tools (munge, ldap, etc.) will not work if cluster is not clock synchronized. If something fail to authenticate, one of the first debug move is to check clock are synchronized.</p>
+<p>Install needed packages:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>dnf install chrony
+</pre></div>
+</div>
+<p>Configuration file is <code class="docutils literal notranslate"><span class="pre">/etc/chrony.conf</span></code>.</p>
+<p>We will configure it to allow the local network to query time from this server.
+Also, because this is a poor clock source, we use a stratum 12.</p>
+<p>The file content should be as bellow:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># Define local clock as a bad clock
+local stratum 12
+
+# Allow queries from the main network
+allow 10.10.0.0/16
+
+# Record the rate at which the system clock gains/losses time.
+driftfile /var/lib/chrony/drift
+
+# Allow the system clock to be stepped in the first three updates
+# if its offset is larger than 1 second.
+makestep 1.0 3
+
+# Enable kernel synchronization of the real-time clock (RTC).
+rtcsync
+
+# Specify directory for log files.
+logdir /var/log/chrony
+</pre></div>
+</div>
+<p>Then start and enable service:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>systemctl restart chronyd
+systemctl enable chronyd
+</pre></div>
+</div>
+</div>
+<div class="section" id="pxe-stack">
+<h3><span class="section-number">3.5.6. </span>PXE stack<a class="headerlink" href="#pxe-stack" title="Permalink to this headline">¶</a></h3>
+<p>PXE, for Preboot Execution Environment, is a mechanism that allows remote hosts to boot from the network and deploy operating system using configuration and packages from the management node.</p>
+<p>It is now time to setup the PXE stack, which is composed of the dhcp server, the http server, the tftp server, the dns server, and the time server.</p>
+<p>The http server will distribute the minimal kernel and initramfs for remote Linux booting, the kickstart autoinstall file for remote hosts to know how they should be installed, and the repositories for packages distribution. Some very basic files will be provided using tftp as this is the most compatible PXE protocol.</p>
+<p>Note that the Centos already embed a very basic tftp server. But it cannot handle an HPC cluster load, and so we replace it by the Facebook python based tftp server.</p>
+<div class="section" id="fbtftp-module">
+<h4><span class="section-number">3.5.6.1. </span>fbtftp module<a class="headerlink" href="#fbtftp-module" title="Permalink to this headline">¶</a></h4>
+<p>Lets grab python module first:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>mkdir fbtftp-0.5
+cd fbtftp-0.5
+dnf install git tar rpm-build
+git clone https://github.com/facebook/fbtftp.git .
+python3 setup.py bdist_rpm --spec-only
+cd ../
+tar cvzf fbtftp-0.5.tar.gz fbtftp-0.5
+rpmbuild -ta fbtftp-0.5.tar.gz
+</pre></div>
+</div>
+</div>
+<div class="section" id="fbtftp-custom-server">
+<h4><span class="section-number">3.5.6.2. </span>fbtftp custom server<a class="headerlink" href="#fbtftp-custom-server" title="Permalink to this headline">¶</a></h4>
+<p>Now create a custom tftp server based on fbtftp. Create first needed folders:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>mkdir fbtftp_server-0.1
+mkdir fbtftp_server-0.1/services
+</pre></div>
+</div>
+<p>Now create file <code class="docutils literal notranslate"><span class="pre">fbtftp_server-0.1/fbtftp_server.py</span></code> with the following content:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>#!/usr/bin/env python3
+# Copyright (c) Facebook, Inc. and its affiliates.
+
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
+import argparse
+import logging
+import os
+
+from fbtftp.base_handler import BaseHandler
+from fbtftp.base_handler import ResponseData
+from fbtftp.base_server import BaseServer
+
+
+class FileResponseData(ResponseData):
+    def __init__(self, path):
+        self._size = os.stat(path).st_size
+        self._reader = open(path, &quot;rb&quot;)
+
+    def read(self, n):
+        return self._reader.read(n)
+
+    def size(self):
+        return self._size
+
+    def close(self):
+        self._reader.close()
+
+
+def print_session_stats(stats):
+    logging.info(&quot;Stats: for %r requesting %r&quot; % (stats.peer, stats.file_path))
+    logging.info(&quot;Error: %r&quot; % stats.error)
+    logging.info(&quot;Time spent: %dms&quot; % (stats.duration() * 1e3))
+    logging.info(&quot;Packets sent: %d&quot; % stats.packets_sent)
+    logging.info(&quot;Packets ACKed: %d&quot; % stats.packets_acked)
+    logging.info(&quot;Bytes sent: %d&quot; % stats.bytes_sent)
+    logging.info(&quot;Options: %r&quot; % stats.options)
+    logging.info(&quot;Blksize: %r&quot; % stats.blksize)
+    logging.info(&quot;Retransmits: %d&quot; % stats.retransmits)
+    logging.info(&quot;Server port: %d&quot; % stats.server_addr[1])
+    logging.info(&quot;Client port: %d&quot; % stats.peer[1])
+
+
+def print_server_stats(stats):
+    &quot;&quot;&quot;
+    Print server stats - see the ServerStats class
+    &quot;&quot;&quot;
+    # NOTE: remember to reset the counters you use, to allow the next cycle to
+    #       start fresh
+    counters = stats.get_and_reset_all_counters()
+    logging.info(&quot;Server stats - every %d seconds&quot; % stats.interval)
+    if &quot;process_count&quot; in counters:
+        logging.info(
+            &quot;Number of spawned TFTP workers in stats time frame : %d&quot;
+            % counters[&quot;process_count&quot;]
+        )
+
+
+class StaticHandler(BaseHandler):
+    def __init__(self, server_addr, peer, path, options, root, stats_callback):
+        self._root = root
+        super().__init__(server_addr, peer, path, options, stats_callback)
+
+    def get_response_data(self):
+        return FileResponseData(os.path.join(self._root, self._path))
+
+
+class StaticServer(BaseServer):
+    def __init__(
+        self,
+        address,
+        port,
+        retries,
+        timeout,
+        root,
+        handler_stats_callback,
+        server_stats_callback=None,
+    ):
+        self._root = root
+        self._handler_stats_callback = handler_stats_callback
+        super().__init__(address, port, retries, timeout, server_stats_callback)
+
+    def get_handler(self, server_addr, peer, path, options):
+        return StaticHandler(
+            server_addr, peer, path, options, self._root, self._handler_stats_callback
+        )
+
+
+def get_arguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(&quot;--ip&quot;, type=str, default=&quot;::&quot;, help=&quot;IP address to bind to&quot;)
+    parser.add_argument(&quot;--port&quot;, type=int, default=1969, help=&quot;port to bind to&quot;)
+    parser.add_argument(
+        &quot;--retries&quot;, type=int, default=5, help=&quot;number of per-packet retries&quot;
+    )
+    parser.add_argument(
+        &quot;--timeout_s&quot;, type=int, default=2, help=&quot;timeout for packet retransmission&quot;
+    )
+    parser.add_argument(
+        &quot;--root&quot;, type=str, default=&quot;&quot;, help=&quot;root of the static filesystem&quot;
+    )
+    return parser.parse_args()
+
+
+def main():
+    args = get_arguments()
+    logging.getLogger().setLevel(logging.DEBUG)
+    server = StaticServer(
+        args.ip,
+        args.port,
+        args.retries,
+        args.timeout_s,
+        args.root,
+        print_session_stats,
+        print_server_stats,
+    )
+    try:
+        server.run()
+    except KeyboardInterrupt:
+        server.close()
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</pre></div>
+</div>
+<p>This file is our custom server, that will use fbtftp module.</p>
+<p>Then create file <code class="docutils literal notranslate"><span class="pre">fbtftp_server-0.1/services/fbtftp_server.service</span></code> with the following content:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[Unit]
+Description=Facebook TFTP server
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/env python3 /usr/local/bin/fbtftp_server.py --root /var/lib/tftpboot/ --port 69
+
+[Install]
+WantedBy=multi-user.target
+</pre></div>
+</div>
+<p>This file is the service file, that we will use to start or stop our custom server.</p>
+<p>And finally, create file <code class="docutils literal notranslate"><span class="pre">fbtftp_server-0.1/fbtftp_server.spec</span></code> with the following content:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Name:     fbtftp_server
+Summary:  fbtftp_server
+Release:  1%{?dist}
+Version:  0.1
+License:  MIT
+Group:    System Environment/Base
+URL:      https://github.com/bluebanquise/
+Source:   https://bluebanquise.com/sources/fbtftp_server-0.1.tar.gz
+Packager: Benoit Leveugle &lt;benoit.leveugle@gmail.com&gt;
+
+Requires: fbtftp
+
+%define debug_package %{nil}
+
+%description
+Facebook tftp simple implementation, based on server example from
+https://github.com/facebook/fbtftp/tree/master/examples
+
+%prep
+
+%setup -q
+
+%build
+
+%install
+# Populate binaries
+mkdir -p $RPM_BUILD_ROOT/usr/local/bin/
+cp -a fbtftp_server.py $RPM_BUILD_ROOT/usr/local/bin/
+
+# Add services
+mkdir -p $RPM_BUILD_ROOT/usr/lib/systemd/system/
+cp -a services/fbtftp_server.service $RPM_BUILD_ROOT/usr/lib/systemd/system/
+
+%files
+%defattr(-,root,root,-)
+/usr/local/bin/fbtftp_server.py
+/usr/lib/systemd/system/fbtftp_server.service
+
+%changelog
+
+* Wed Oct 07 2020 Benoit Leveugle &lt;benoit.leveugle@gmail.com&gt;
+- Create
+</pre></div>
+</div>
+<p>This file specify how the package should be built.</p>
+<p>Lets now create the package:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>tar cvzf fbtftp_server-0.1.tar.gz fbtftp_server-0.1
+rpmbuild -ta fbtftp_server-0.1.tar.gz --target=noarch
+</pre></div>
+</div>
+<p>Copy both packages into our extra repository, update the repository:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>cp /root/rpmbuild/RPMS/noarch/fbtftp-0.5-1.noarch.rpm /var/www/html/repositories/centos/8/x86_64/extra/
+cp /root/rpmbuild/RPMS/noarch/fbtftp_server-0.1-1.el8.noarch.rpm /var/www/html/repositories/centos/8/x86_64/extra/
+createrepo /var/www/html/repositories/centos/8/x86_64/extra/
+dnf clean all
+</pre></div>
+</div>
+<p>Now install both packages:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>dnf install fbtftp_server -y
+</pre></div>
+</div>
+</div>
+<div class="section" id="ipxe-custom-rom">
+<h4><span class="section-number">3.5.6.3. </span>iPXE custom rom<a class="headerlink" href="#ipxe-custom-rom" title="Permalink to this headline">¶</a></h4>
+<p>We then need ipxe files. We could use native syslinux or shim.efi files, but this is just not flexible enough for new generation HPC clusters.
+Also, ipxe files provided by Centos are way too old. We will build them ourselves, and include our own init script.</p>
+<p>Grab latest ipxe version from git.</p>
+<p>To do so, install needed tools to build C code:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>dnf groupinstall &quot;Development tools&quot; -y
+dnf install xz-devel -y
+</pre></div>
+</div>
+<p>Then clone the ipxe repository into <code class="docutils literal notranslate"><span class="pre">/root/ipxe</span></code>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>mkdir /root/ipxe
+cd /root/ipxe
+git clone https://github.com/ipxe/ipxe.git .
+</pre></div>
+</div>
+<p>Lets create our ipxe script, that will display a nice ascii art, so we can see it loading, and that will target the file we want.
+To create something simple, lets target the file <code class="docutils literal notranslate"><span class="pre">http://${next-server}/boot.ipxe</span></code> at boot.</p>
+<p>Create file <code class="docutils literal notranslate"><span class="pre">/root/ipxe/src/our_script.ipxe</span></code> with the following content:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>#!ipxe
+
+echo
+echo . . . . . . . *. . . . .*. . . *. . . . .*
+echo . . . . . ***. . . . . **********. . . . . ***
+echo . . . .*****. . . . . .**********. . . . . .*****
+echo . . .*******. . . . . .**********. . . . . .*******
+echo . .**********. . . . .************. . . . .**********
+echo . ****************************************************
+echo .******************************************************
+echo ********************************************************
+echo ********************************************************
+echo ********************************************************
+echo .******************************************************
+echo . ********. . . ************************. . . ********
+echo . .*******. . . .*. . .*********. . . *. . . .*******
+echo . . .******. . . . . . .*******. . . . . . . ******
+echo . . . .*****. . . . . . .*****. . . . . . . *****
+echo . . . . . ***. . . . . . .***. . . . . . . ***
+echo . . . . . . **. . . . . . .*. . . . . . . **
+echo
+
+sleep 4
+
+ifconf --configurator dhcp || shell
+
+echo
+echo +---------------- System information ----------------+
+echo |
+echo | hostname:     ${hostname}
+echo | platform:     ${platform}
+echo | mac:          ${net0/mac}
+echo | ip:           ${net0.dhcp/ip:ipv4}
+echo | netmask:      ${net0.dhcp/netmask:ipv4}
+echo | dhcp-server:  ${net0.dhcp/dhcp-server:ipv4}
+echo | gateway:      ${net0.dhcp/gateway:ipv4}
+echo | dns-server:   ${net0.dhcp/dns:ipv4}
+echo | domain:       ${net0.dhcp/domain:string}
+echo | next-server:  ${net0.dhcp/next-server:ipv4}
+echo | user-class:   ${user-class:string}
+echo |
+echo +----------------------------------------------------+
+echo
+
+sleep 4
+
+chain http://${next-server}/boot.ipxe || shell
+</pre></div>
+</div>
+<p>Simply put, this script will display a nice ascii art, then sleep 4s, then
+request dhcp server for all information (ip, hostname, next-server, etc.),
+then display some of the information obtained, then sleep 4s, then chain load to
+file <code class="docutils literal notranslate"><span class="pre">http://${next-server}/boot.ipxe</span></code> with <code class="docutils literal notranslate"><span class="pre">${next-server}</span></code> obtained from the DHCP server.
+The <code class="docutils literal notranslate"><span class="pre">||</span> <span class="pre">shell</span></code> means: if chaining fail, launch a shell so that sys admin can debug.</p>
+<p>Then enter the src directory and build the needed files:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>cd src
+make -j 4 bin-x86_64-efi/ipxe.efi EMBED=our_script.ipxe DEBUG=intel,dhcp,vesafb
+make -j 4 bin/undionly.kpxe EMBED=our_script.ipxe DEBUG=intel,dhcp,vesafb
+</pre></div>
+</div>
+<p>And finally copy these files into the <code class="docutils literal notranslate"><span class="pre">/var/lib/tftpboot/</span></code> folder so that tftp server
+can provide them to the nodes booting.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>mkdir -p /var/lib/tftpboot/
+cp bin-x86_64-efi/ipxe.efi /var/lib/tftpboot/
+cp bin/undionly.kpxe /var/lib/tftpboot/
+</pre></div>
+</div>
+<p>Finally, start fbtftp_server service:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>systemctl start fbtftp_server
+systemctl enable fbtftp_server
+</pre></div>
+</div>
+</div>
+<div class="section" id="ipxe-chain">
+<h4><span class="section-number">3.5.6.4. </span>iPXE chain<a class="headerlink" href="#ipxe-chain" title="Permalink to this headline">¶</a></h4>
+<p>Now we will create file <code class="docutils literal notranslate"><span class="pre">/var/www/html/boot.ipxe</span></code> that will be targeted by each node booting.
+There are multiple strategy here. We could simply add basic boot information in this file and consider it done.
+But we would quickly face an issue: how to handle different parameters per nodes? Maybe one kind of node need a specific console or kernel parameter that the others do not need.</p>
+<p>To solve that, we will simply create a folder <code class="docutils literal notranslate"><span class="pre">/var/www/html/nodes/</span></code> and create one file per node inside.
+Then we will ask in the <code class="docutils literal notranslate"><span class="pre">boot.ipxe</span></code> file that each node booting load its own file, related to its hostname provided by the DHCP.</p>
+<p>Tip: we will then be able to use file links to create one file per group of nodes if needed.</p>
+<p>Create folder:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>mkdir /var/www/html/nodes/
+mkdir /var/www/html/nodes_groups/
+</pre></div>
+</div>
+<p>And create <code class="docutils literal notranslate"><span class="pre">/var/www/html/boot.ipxe</span></code> file with the following content:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>#!ipxe
+echo Chaining to node dedicated file
+chain http://${next-server}/nodes/${hostname}.ipxe || shell
+</pre></div>
+</div>
+<p>Last step for the iPXE chain is to create a file for our group of node, and link
+our node to this group.</p>
+<p>Create file <code class="docutils literal notranslate"><span class="pre">/var/www/html/nodes_groups/group_storage.ipxe</span></code> with the following content:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>#!ipxe
+
+echo Booting OS
+echo Group profile: storage
+
+echo +----------------------------------------------------+
+echo |
+echo | Loading kernel
+
+kernel http://${next-server}/repositories/centos/8/x86_64/os/images/pxeboot/vmlinuz initrd=initrd.img inst.stage2=http://${next-server}/repositories/centos/8/x86_64/os/ inst.repo=http://${next-server}/repositories/centos/8/x86_64/os/BaseOS/ ks=http://${next-server}/nodes_groups/group_storage.kickstart.cfg
+
+echo | Loading initial ramdisk ...
+
+initrd http://${next-server}/repositories/centos/8/x86_64/os/images/pxeboot/initrd.img
+
+echo | ALL DONE! We are ready.
+echo | Downloaded images report:
+
+imgstat
+
+echo | Booting in 4s ...
+echo |
+echo +----------------------------------------------------+
+
+sleep 4
+
+boot
+</pre></div>
+</div>
+<p>Then, link the node <code class="docutils literal notranslate"><span class="pre">thor</span></code> to this group:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>cd /var/www/html/nodes/
+ln -s ../nodes_groups/group_storage.ipxe thor.ipxe
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It is important that link are relative: you have to cd into nodes directory,
+and create the link from here with a relative path.</p>
+</div>
+<p>To summarize, chain will be the following: <code class="docutils literal notranslate"><span class="pre">DHCP</span> <span class="pre">-&gt;</span> <span class="pre">{undionly.kpxe|ipxe.efi}</span> <span class="pre">-&gt;</span> <span class="pre">boot.ipxe</span> <span class="pre">-&gt;</span> <span class="pre">thor.ipxe</span> <span class="pre">(group_storage.ipxe)</span></code> .</p>
+</div>
+<div class="section" id="kickstart">
+<h4><span class="section-number">3.5.6.5. </span>Kickstart<a class="headerlink" href="#kickstart" title="Permalink to this headline">¶</a></h4>
+<p>We now need to provide a kickstart file.</p>
+<p>The kickstart file will provide auto-installation features: what should be installed, how, etc.
+We will create one kickstart file per group of nodes.</p>
+<p>To create the kickstart file, we need an ssh public key from our <code class="docutils literal notranslate"><span class="pre">odin</span></code> management
+node. Create it, without passphrase:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ssh-keygen -N &quot;&quot; -t Ed25519
+</pre></div>
+</div>
+<p>And get the content of the public key file <code class="docutils literal notranslate"><span class="pre">/root/.ssh/id_ed25519.pub</span></code>, we will use it just bellow to generate the
+kickstart file. For example, content of mine is:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIqpyyh44Hz3gvhISaIE9yJ/ao8fBLNo7qwPJcYjQdIl root@odin.cluster.local
+</pre></div>
+</div>
+<p>Now we need an sha512 password hash. Generate one using the following command:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>python3 -c &#39;import crypt,getpass; print(crypt.crypt(getpass.getpass(), crypt.mksalt(crypt.METHOD_SHA512)))&#39;
+</pre></div>
+</div>
+<p>And keep it somewhere (for example, <code class="docutils literal notranslate"><span class="pre">$6$7zvrwimYcypA8JWc$5GWYVF7zrI5eorsPN8IUT1n/Gmjpkic7h2cCbFVxbkqJeG0/kmJsYw6EN9oX3NQ34duwW7qAmOI13Y/0v5oHn.</span></code> is for <code class="docutils literal notranslate"><span class="pre">root</span></code> as password, which is not secure but ok for training purpose), we will use it just bellow to generate the kickstart file.</p>
+<p>Then, create the kickstart file <code class="docutils literal notranslate"><span class="pre">/var/www/html/nodes_groups/group_storage.kickstart.cfg</span></code>
+dedicated to storage group, with the following minimal content:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>##### General settings
+
+# Do not use GUI
+text
+
+# Run the Setup Agent on first boot
+firstboot --enable
+
+# System keyboard layout
+keyboard --vckeymap=us --xlayouts=us
+
+# System language
+lang en_US.UTF-8
+
+# System timezone
+timezone Europe/Brussels --isUtc
+
+# Reboot after installation
+reboot
+
+##### Authentication settings
+
+# Root password (sha512)
+rootpw --iscrypted $6$7zvrwimYcypA8JWc$5GWYVF7zrI5eorsPN8IUT1n/Gmjpkic7h2cCbFVxbkqJeG0/kmJsYw6EN9oX3NQ34duwW7qAmOI13Y/0v5oHn.
+
+
+##### Network
+
+# Network settings
+network --bootproto=dhcp --ipv6=auto --activate
+network --hostname=localhost.localdomain
+
+##### Security
+
+# SELinux
+selinux --enforcing
+
+# Firwalld
+firewall --disabled
+
+##### Partitionning
+
+# Bootloader configuration
+bootloader --append=&quot;&quot; --location=mbr
+
+# Partitioning
+clearpart --all --initlabel
+autopart --type=plain --fstype=ext4 --nohome
+
+##### Packages
+
+%packages
+@core
+%end
+
+# Main post, ssh keys
+%post --interpreter /bin/bash --log /root/main_post-install.log
+
+# Add ssh keys from ssh_keys list
+mkdir /root/.ssh
+cat &lt;&lt; xxEOFxx &gt;&gt; /root/.ssh/authorized_keys
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIqpyyh44Hz3gvhISaIE9yJ/ao8fBLNo7qwPJcYjQdIl root@odin.cluster.local
+xxEOFxx
+# Ensure SELinux configuration is ok
+restorecon -R -v /root/.ssh
+
+%end
+</pre></div>
+</div>
+<p>Notes:</p>
+<ul class="simple">
+<li><p>The ssh public key here will allow us to ssh on the remote hosts without having to provide a password.</p></li>
+<li><p>We install only the absolute minimal operating system. It is strongly recommended to do the minimal amount of tasks during a kickstart.</p></li>
+<li><p>Important note: the time zone parameter is very important. Choose here the same than the one choose when installing the OS of <code class="docutils literal notranslate"><span class="pre">odin</span></code>. If you don’t know the one used, it can be found using: <code class="docutils literal notranslate"><span class="pre">ll</span> <span class="pre">/etc/localtime</span></code></p></li>
+<li><p>Ensure also your keyboard type is correct.</p></li>
+<li><p>For compatibility purpose, this kickstart example does not specify which hard drive disk to use, but only locate first one and use it. Tune it later according to your needs.</p></li>
+</ul>
+<p>Now, ensure all services are started:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>systemctl start httpd
+systemctl enable httpd
+systemctl start fbtftp_server
+systemctl enable fbtftp_server
+</pre></div>
+</div>
+<p>We can proceed with the boot of <code class="docutils literal notranslate"><span class="pre">thor</span></code> node, and then the other nodes.</p>
+</div>
+</div>
+</div>
+<div class="section" id="other-nodes-installation">
+<h2><span class="section-number">3.6. </span>Other nodes installation<a class="headerlink" href="#other-nodes-installation" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="boot-over-pxe">
+<h3><span class="section-number">3.6.1. </span>Boot over PXE<a class="headerlink" href="#boot-over-pxe" title="Permalink to this headline">¶</a></h3>
+<p>Open 2 shell on <code class="docutils literal notranslate"><span class="pre">odin</span></code>. In the first one, launch watch logs of dhcp and tftp server using:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>journalctl -u dhcpd -u fbtftp_server -f
+</pre></div>
+</div>
+<p>In the second one, watch http server logs using:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>tail -f /var/log/httpd/*
+</pre></div>
+</div>
+<p>Now, boot the <code class="docutils literal notranslate"><span class="pre">thor</span></code> node over PXE, and watch it deploy. Also watch the logs to
+understand all steps.</p>
+<p>Once the operating system is installed, and the node has rebooted, have it boot
+over disk, and ensure operating system is booted before proceeding.</p>
+<p>Repeat this operation to deploy each nodes of your cluster.</p>
+<p>Note: if you let nodes boot over PXE after reboot, they will again deploy, and enter in an infinite deployment loop.
+There are strategy to solve that automatically, but this is out of the scope of this training. For now, simply change boot order after os deployment.</p>
+</div>
+<div class="section" id="configure-client-side">
+<h3><span class="section-number">3.6.2. </span>Configure client side<a class="headerlink" href="#configure-client-side" title="Permalink to this headline">¶</a></h3>
+<p>Now that other nodes are deployed and reachable over ssh, it is time to configure client side on them.</p>
+<p>We will use clustershell (clush) a lot, as it allows to manipulate a lot of hosts over ssh at the same time.</p>
+<div class="section" id="set-hostname">
+<h4><span class="section-number">3.6.2.1. </span>Set hostname<a class="headerlink" href="#set-hostname" title="Permalink to this headline">¶</a></h4>
+<p>Set hostname on each nodes using the following command (tuned for each nodes of course):</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>hostnamectl set-hostname thor.cluster.local
+</pre></div>
+</div>
+</div>
+<div class="section" id="configure-repositories">
+<h4><span class="section-number">3.6.2.2. </span>Configure repositories<a class="headerlink" href="#configure-repositories" title="Permalink to this headline">¶</a></h4>
+<p>You need the nodes be able to grab packages from <code class="docutils literal notranslate"><span class="pre">odin</span></code>.</p>
+<p>On each client node, backup current repositories, and clean them:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>cp -a /etc/yum.repos.d/ /root/yum.repos.d.backup
+rm -f /etc/yum.repos.d/*.repo
+</pre></div>
+</div>
+<p>Now create file <code class="docutils literal notranslate"><span class="pre">/etc/yum.repos.d/os.repo</span></code> with the following content:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[BaseOS]
+name=BaseOS
+baseurl=http://10.10.0.1/repositories/centos/8/x86_64/os/BaseOS
+gpgcheck=0
+enabled=1
+
+[AppStream]
+name=AppStream
+baseurl=http://10.10.0.1/repositories/centos/8/x86_64/os/AppStream
+gpgcheck=0
+enabled=1
+</pre></div>
+</div>
+<p>And create file <code class="docutils literal notranslate"><span class="pre">/etc/yum.repos.d/extra.repo</span></code> with the following content:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[Extra]
+name=Extra
+baseurl=http://10.10.0.1/repositories/centos/8/x86_64/extra
+gpgcheck=0
+enabled=1
+</pre></div>
+</div>
+<p>Now clean cache, and ensure you can reach the repositories and download packages (try to install wget for example):</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>dnf clean all
+dnf update
+dnf install wget -y
+</pre></div>
+</div>
+<p>A simpler way can be also to copy <code class="docutils literal notranslate"><span class="pre">odin</span></code> repositories files directly on clients, and do all in parallel using clush.
+Lets redo it, this time faster:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>clush -bw thor,heimdall,valkyrie[01-02] &#39;cp -a /etc/yum.repos.d/ /root/yum.repos.d.backup&#39;
+clush -bw thor,heimdall,valkyrie[01-02] &#39;rm -f /etc/yum.repos.d/*.repo&#39;
+clush -w thor,heimdall,valkyrie[01-02] --copy /etc/yum.repos.d/* --dest /etc/yum.repos.d/
+clush -bw thor,heimdall,valkyrie[01-02] &#39;dnf clean all&#39;
+clush -bw thor,heimdall,valkyrie[01-02] &#39;dnf update -y&#39;
+clush -bw thor,heimdall,valkyrie[01-02] &#39;dnf install wget -y&#39;
+</pre></div>
+</div>
+</div>
+<div class="section" id="dns-client">
+<h4><span class="section-number">3.6.2.3. </span>DNS client<a class="headerlink" href="#dns-client" title="Permalink to this headline">¶</a></h4>
+<p>IF not already automatically done from DHCP, on each client node, set <code class="docutils literal notranslate"><span class="pre">odin</span></code> as default DNS server, by updating <code class="docutils literal notranslate"><span class="pre">/etc/resolv.conf</span></code> file with the following content:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>search cluster.local
+nameserver 10.10.0.1
+</pre></div>
+</div>
+</div>
+<div class="section" id="id1">
+<h4><span class="section-number">3.6.2.4. </span>Hosts file<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h4>
+<p>On each client, edit <code class="docutils literal notranslate"><span class="pre">/etc/hosts</span></code> file and have it match the following:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+
+10.10.0.1   odin
+10.10.1.1   thor
+10.10.2.1   heimdall
+10.10.3.1   valkyrie01
+10.10.3.2   valkyrie02
+</pre></div>
+</div>
+<p>You can also simply upload the file from <code class="docutils literal notranslate"><span class="pre">odin</span></code> on clients, using clush.</p>
+</div>
+<div class="section" id="time-client">
+<h4><span class="section-number">3.6.2.5. </span>Time client<a class="headerlink" href="#time-client" title="Permalink to this headline">¶</a></h4>
+<p>On each client, ensure time server is <code class="docutils literal notranslate"><span class="pre">odin</span></code> sp that our cluster is time synchronised.</p>
+<p>Install needed packages:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>dnf install chrony
+</pre></div>
+</div>
+<p>Configuration file is <code class="docutils literal notranslate"><span class="pre">/etc/chrony.conf</span></code>. The file content should be as bellow:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># Source server to bind to
+server 10.10.0.1 iburst
+
+# Record the rate at which the system clock gains/losses time.
+driftfile /var/lib/chrony/drift
+
+# Allow the system clock to be stepped in the first three updates
+# if its offset is larger than 1 second.
+makestep 1.0 3
+
+# Enable kernel synchronization of the real-time clock (RTC).
+rtcsync
+
+# Specify directory for log files.
+logdir /var/log/chrony
+</pre></div>
+</div>
+<p>Ensure client can communicate with the server.</p>
+<p>Stop service:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>systemctl stop chronyd
+</pre></div>
+</div>
+<p>And force a clock sync:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>chronyd -q &#39;server 10.10.0.1 iburst&#39;
+</pre></div>
+</div>
+<p>If you get the following (or something close) then your clock can sync from server:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>chronyd version 3.5 starting (+CMDMON +NTP +REFCLOCK +RTC +PRIVDROP +SCFILTER +SIGND +ASYNCDNS +SECHASH +IPV6 +DEBUG)
+Initial frequency 12.820 ppm
+System clock wrong by 0.000050 seconds (step)
+chronyd exiting
+</pre></div>
+</div>
+<p>However, if you get something similar to this:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>chronyd version 3.5 starting (+CMDMON +NTP +REFCLOCK +RTC +PRIVDROP +SCFILTER +SIGND +ASYNCDNS +SECHASH +IPV6 +DEBUG)
+Initial frequency 12.820 ppm
+No suitable source for synchronisation
+chronyd exiting
+</pre></div>
+</div>
+<p>It means something went wrong (firewall ?).</p>
+<p>Then start and enable service:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>systemctl start chronyd
+systemctl enable chronyd
+</pre></div>
+</div>
+<p>Again, you can use clush to do all these tasks in parallel on all client nodes.</p>
+<p>Our nodes are now configured with the very basic needs. Time to focus on storage.</p>
+</div>
+</div>
+</div>
+<div class="section" id="storage">
+<h2><span class="section-number">3.7. </span>Storage<a class="headerlink" href="#storage" title="Permalink to this headline">¶</a></h2>
+<p>Storage is hosted on <code class="docutils literal notranslate"><span class="pre">thor</span></code>. We will share <code class="docutils literal notranslate"><span class="pre">/home</span></code> and <code class="docutils literal notranslate"><span class="pre">/software</span></code> from this server.
+Then we will mount these directories on the login node <code class="docutils literal notranslate"><span class="pre">heimdall</span></code> and computes nodes <code class="docutils literal notranslate"><span class="pre">valkyrie01,valkyrie02</span></code>.</p>
+<div class="section" id="nfs-server">
+<h3><span class="section-number">3.7.1. </span>NFS server<a class="headerlink" href="#nfs-server" title="Permalink to this headline">¶</a></h3>
+<p>Ssh on <code class="docutils literal notranslate"><span class="pre">thor</span></code>.</p>
+<p>Now ensure first these 2 directories exist:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>mkdir /home
+mkdir /software
+</pre></div>
+</div>
+<p>Now, install needed packages:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>dnf install nfs-utils -y
+</pre></div>
+</div>
+<p>Now, ask the nfs server daemon to export those directories over the network.</p>
+<p>Since <code class="docutils literal notranslate"><span class="pre">/home</span></code> is expected to be used by users to store there data, it must be read/write access.
+On the other hand, <code class="docutils literal notranslate"><span class="pre">/software</span></code> is designed to provide software (compiler, libraries, etc.) across
+the cluster, and so it should be read only access.</p>
+<p>Edit <code class="docutils literal notranslate"><span class="pre">/etc/exports</span></code> file, and add the 2 exported folders with good parameters:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>/home 10.10.0.0/16(rw,no_root_squash,sync)
+/software 10.10.0.0/16(ro,no_root_squash,sync)
+</pre></div>
+</div>
+<p>Simply put, we ask here nfs-server to export both directories, restricted only to the
+10.10.0.0/16 subnet. Note that one is <code class="docutils literal notranslate"><span class="pre">rw</span></code> (read/write), the other is <code class="docutils literal notranslate"><span class="pre">ro</span></code> (read only).</p>
+<p>Start now the nfs-server:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>systemctl start nfs-server
+systemctl enable nfs-server
+</pre></div>
+</div>
+<p>Now, ensure the exports are working, using the following command targeting the server ip:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>showmount -e thor
+</pre></div>
+</div>
+<p>You should see the exports available on this server.</p>
+</div>
+<div class="section" id="nfs-clients">
+<h3><span class="section-number">3.7.2. </span>NFS clients<a class="headerlink" href="#nfs-clients" title="Permalink to this headline">¶</a></h3>
+<p>Ssh on <code class="docutils literal notranslate"><span class="pre">heimdall</span></code>.</p>
+<p>Install needed packages to mount nfs foreign export:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>dnf install nfs-utils -y
+</pre></div>
+</div>
+<p>Now edit <code class="docutils literal notranslate"><span class="pre">/etc/fstab</span></code> file, and add the 2 entries needed for our folders exported by <code class="docutils literal notranslate"><span class="pre">thor</span></code>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>thor:/home /home nfs rw,rsize=32768,wsize=32768,intr,nfsvers=4,bg 0 0
+thor:/software /software nfs ro,intr,nfsvers=4,bg 0 0
+</pre></div>
+</div>
+<p>Note: bg parameter ensure that the mounts are done in background mode. This avoid
+blocking the system at boot if these folder are not reachable (for example if <code class="docutils literal notranslate"><span class="pre">thor</span></code> server is down at this very moment).</p>
+<p>Now ask for mount of them:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>mkdir /software
+mkdir /home
+mount /home
+mount /software
+</pre></div>
+</div>
+<p>And ensure they are mounted using <code class="docutils literal notranslate"><span class="pre">df</span></code> command.</p>
+<p>Redo these client steps on all other clients, so computes nodes <code class="docutils literal notranslate"><span class="pre">valkyrie01,valkyrie02</span></code>,
+so that the exported folders are available on each nodes where users interact.</p>
+</div>
+</div>
+<div class="section" id="slurm">
+<h2><span class="section-number">3.8. </span>Slurm<a class="headerlink" href="#slurm" title="Permalink to this headline">¶</a></h2>
+<p>Let’s install now the cluster job scheduler, Slurm.</p>
+<p>First, we need to build packages. Grab Munge and Slurm sources.
+Munge will be used to handle authentication between Slurm daemons.</p>
+<p>Note: beware, links may change over time, especially Slurm from Schemd. You may need to update it.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>wget https://github.com/dun/munge/releases/download/munge-0.5.14/munge-0.5.14.tar.xz
+dnf install bzip2-devel openssl-devel zlib-devel -y
+wget https://github.com/dun.gpg
+wget https://github.com/dun/munge/releases/download/munge-0.5.14/munge-0.5.14.tar.xz.asc
+rpmbuild -ta munge-0.5.14.tar.xz
+</pre></div>
+</div>
+<p>Now install munge, as it is needed to build slurm:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>cp /root/rpmbuild/RPMS/x86_64/munge-* /var/www/html/repositories/centos/8/x86_64/extra/
+createrepo /var/www/html/repositories/centos/8/x86_64/extra/
+dnf clean all
+dnf install munge munge-libs munge-devel
+</pre></div>
+</div>
+<p>Now build slurm packages:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>wget https://download.schedmd.com/slurm/slurm-20.11.7.tar.bz2
+dnf install munge munge-libs munge-devel
+dnf install pam-devel readline-devel perl-ExtUtils-MakeMaker
+dnf install mariadb mariadb-devel
+rpmbuild -ta slurm-20.11.7.tar.bz2
+cp /root/rpmbuild/RPMS/x86_64/slurm* /var/www/html/repositories/centos/8/x86_64/extra/
+createrepo /var/www/html/repositories/centos/8/x86_64/extra/
+dnf clean all
+</pre></div>
+</div>
+<p>Slurm controller side is called slurmctld while on compute nodes, it is called slurmd .
+On the “submitter” node, no daemon except munge is required.</p>
+<p>Tip: if anything goes wrong with slurm, proceed as following:</p>
+<ol class="arabic simple">
+<li><p>Ensure time is exactly the same on nodes. If time is different, munge based authentication will fail.</p></li>
+<li><p>Ensure munge daemon is started, and that munge key is the same on all hosts (check md5sum for example).</p></li>
+<li><p>Stop slurmctld and stop slurmd daemons, and start them in two different shells manually in debug + verbose mode: <code class="docutils literal notranslate"><span class="pre">slurmctld</span> <span class="pre">-D</span> <span class="pre">-vvvvvvv</span></code> in shell 1 on controller server, and <code class="docutils literal notranslate"><span class="pre">slurmd</span> <span class="pre">-D</span> <span class="pre">-vvvvvvv</span></code> in shell 2 on compute node.</p></li>
+</ol>
+<div class="section" id="controller">
+<h3><span class="section-number">3.8.1. </span>Controller<a class="headerlink" href="#controller" title="Permalink to this headline">¶</a></h3>
+<p>Install munge needed packages:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>dnf install munge munge-libs
+</pre></div>
+</div>
+<p>And generate a munge key:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>mungekey -c -f -k /etc/munge/munge.key
+chown munge:munge /etc/munge/munge.key
+</pre></div>
+</div>
+<p>We will spread this key over all servers of the cluster.</p>
+<p>Lets start and enable munge daemon:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>systemctl start munge
+systemctl enable munge
+</pre></div>
+</div>
+<p>Now install slurm controller <code class="docutils literal notranslate"><span class="pre">slurmctld</span></code> packages:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>dnf install slurm slurm-slurmctld -y
+groupadd -g 567 slurm
+useradd  -m -c &quot;Slurm workload manager&quot; -d /etc/slurm -u 567 -g slurm -s /bin/false slurm
+mkdir /etc/slurm
+mkdir /var/log/slurm
+mkdir -p /var/spool/slurmd/StateSave
+chown -R slurm:slurm /var/log/slurm
+chown -R slurm:slurm /var/spool/slurmd
+</pre></div>
+</div>
+<p>Lets create a very minimal slurm configuration.</p>
+<p>Create file <code class="docutils literal notranslate"><span class="pre">/etc/slurm/slurm.conf</span></code> with the following content:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># Documentation:
+# https://slurm.schedmd.com/slurm.conf.html
+
+## Controller
+ClusterName=valhalla
+ControlMachine=odin
+
+## Authentication
+SlurmUser=slurm
+AuthType=auth/munge
+CryptoType=crypto/munge
+
+## Files path
+StateSaveLocation=/var/spool/slurmd/StateSave
+SlurmdSpoolDir=/var/spool/slurmd/slurmd
+SlurmctldPidFile=/var/run/slurmctld.pid
+SlurmdPidFile=/var/run/slurmd.pid
+
+## Logging
+SlurmctldDebug=5
+SlurmdDebug=5
+
+## We don&#39;t want a node to go back in pool without sys admin acknowledgement
+ReturnToService=0
+
+## Using pmi/pmi2/pmix interface for MPI
+MpiDefault=pmi2
+
+## Basic scheduling based on nodes
+SchedulerType=sched/backfill
+SelectType=select/linear
+
+## Nodes definition
+NodeName=valkyrie01 Procs=1
+NodeName=valkyrie02 Procs=1
+
+## Partitions definition
+PartitionName=all MaxTime=INFINITE State=UP Default=YES Nodes=valkyrie01,valkyrie02
+</pre></div>
+</div>
+<p>Also create file <code class="docutils literal notranslate"><span class="pre">/etc/slurm/cgroup.conf</span></code> with the following content:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>CgroupAutomount=yes
+ConstrainCores=yes
+</pre></div>
+</div>
+<p>And start slurm controller:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>systemctl start slurmctld
+systemctl enable slurmctld
+</pre></div>
+</div>
+<p>Using <code class="docutils literal notranslate"><span class="pre">sinfo</span></code> command, you should now see the cluster start, with both computes nodes down for now.</p>
+</div>
+<div class="section" id="computes-nodes">
+<h3><span class="section-number">3.8.2. </span>Computes nodes<a class="headerlink" href="#computes-nodes" title="Permalink to this headline">¶</a></h3>
+<p>On both <code class="docutils literal notranslate"><span class="pre">valkyrie01,valkyrie02</span></code> nodes, install munge the same way than on controller.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>clush -bw valkyrie01,valkyrie02 dnf install munge -y
+</pre></div>
+</div>
+<p>Ensure munge key generated on controller node is spread on each client. From <code class="docutils literal notranslate"><span class="pre">odin</span></code>, scp the file:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>clush -w valkyrie01,valkyrie02 --copy /etc/munge/munge.key --dest /etc/munge/munge.key
+clush -bw valkyrie01,valkyrie02 chown munge:munge /etc/munge/munge.key
+</pre></div>
+</div>
+<p>And start munge on each compute node:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>clush -bw valkyrie01,valkyrie02 systemctl start munge
+clush -bw valkyrie01,valkyrie02 systemctl enable munge
+</pre></div>
+</div>
+<p>Now on each compute node, install slurmd needed packages:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>clush -bw valkyrie01,valkyrie02 dnf clean all
+clush -bw valkyrie01,valkyrie02 dnf install slurm slurm-slurmd -y
+</pre></div>
+</div>
+<p>Now again, spread same slurm configuration files from <code class="docutils literal notranslate"><span class="pre">odin</span></code> to each compute nodes:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>clush -bw valkyrie01,valkyrie02 groupadd -g 567 slurm
+clush -bw valkyrie01,valkyrie02 &#39;useradd  -m -c &quot;Slurm workload manager&quot; -d /etc/slurm -u 567 -g slurm -s /bin/false slurm&#39;
+clush -bw valkyrie01,valkyrie02 mkdir /etc/slurm
+clush -bw valkyrie01,valkyrie02 mkdir /var/log/slurm
+clush -bw valkyrie01,valkyrie02 mkdir -p /var/spool/slurmd/slurmd
+clush -bw valkyrie01,valkyrie02 chown -R slurm:slurm /var/log/slurm
+clush -bw valkyrie01,valkyrie02 chown -R slurm:slurm /var/spool/slurmd
+clush -w valkyrie01,valkyrie02 --copy /etc/slurm/slurm.conf --dest /etc/slurm/slurm.conf
+clush -w valkyrie01,valkyrie02 --copy /etc/slurm/cgroup.conf --dest /etc/slurm/cgroup.conf
+</pre></div>
+</div>
+<p>And start on each compute node slurmd service:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>clush -bw valkyrie01,valkyrie02 systemctl start slurmd
+clush -bw valkyrie01,valkyrie02 systemctl enable slurmd
+</pre></div>
+</div>
+<p>And simply test cluster works:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>scontrol update nodename=valkyrie01,valkyrie02 state=idle
+</pre></div>
+</div>
+<p>Now, sinfo shows that one node is idle, and srun allows to launch a basic job:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[root@odin ~]# sinfo
+PARTITION AVAIL  TIMELIMIT  NODES  STATE NODELIST
+all*         up   infinite      1   unk* valkyrie02
+all*         up   infinite      1   idle valkyrie01
+[root@odin ~]# srun -N 1 hostname
+valkyrie01.cluster.local
+[root@odin ~]#
+</pre></div>
+</div>
+</div>
+<div class="section" id="submitter">
+<h3><span class="section-number">3.8.3. </span>Submitter<a class="headerlink" href="#submitter" title="Permalink to this headline">¶</a></h3>
+<p>Last step to deploy slurm is to install the login node, <code class="docutils literal notranslate"><span class="pre">heimdall</span></code>, that will act as
+a submitter.</p>
+<p>A slurm submitter only need configuration files, and an active munge.</p>
+<p>Install munge the same way than on controller.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>dnf install munge
+</pre></div>
+</div>
+<p>Ensure munge key generated on controller node is spread here:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>scp /etc/munge/munge.key heimdall:/etc/munge/munge.key
+</pre></div>
+</div>
+<p>And start munge on <code class="docutils literal notranslate"><span class="pre">heimdall</span></code>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>systemctl start munge
+systemctl enable munge
+</pre></div>
+</div>
+<p>No install minimal slurm packages:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>dnf install slurm
+</pre></div>
+</div>
+<p>Now again, spread same slurm configuration files from <code class="docutils literal notranslate"><span class="pre">odin</span></code> to <code class="docutils literal notranslate"><span class="pre">heimdall</span></code>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>scp /etc/slurm/slurm.conf heimdall:/etc/slurm/slurm.conf
+scp /etc/slurm/cgroup.conf heimdall:/etc/slurm/cgroup.conf
+</pre></div>
+</div>
+<p>Nothing to start here, you can test <code class="docutils literal notranslate"><span class="pre">sinfo</span></code> command from <code class="docutils literal notranslate"><span class="pre">heimdall</span></code> to ensure it works.</p>
+<p>Slurm cluster is now ready.</p>
+</div>
+<div class="section" id="submitting-jobs">
+<h3><span class="section-number">3.8.4. </span>Submitting jobs<a class="headerlink" href="#submitting-jobs" title="Permalink to this headline">¶</a></h3>
+<p>To execute calculations on the cluster, users will rely on Slurm to submit jobs and get calculation resources.
+Submit commands are <code class="docutils literal notranslate"><span class="pre">srun</span></code> and <code class="docutils literal notranslate"><span class="pre">sbatch</span></code>.</p>
+<p>Before using Slurm, it is important to understand how resources are requested.
+A calculation node is composed of multiple calculation cores. When asking for resources, it is possible to ask the following:</p>
+<ul class="simple">
+<li><p>I want this much calculations processes (one per core), do what is needed to provide them to me -&gt; use <code class="docutils literal notranslate"><span class="pre">-n</span></code>.</p></li>
+<li><p>I want this much nodes, I will handle the rest -&gt; use <code class="docutils literal notranslate"><span class="pre">-N</span></code>.</p></li>
+<li><p>I want this much nodes and I want you to start this much processes per nodes -&gt; use <code class="docutils literal notranslate"><span class="pre">-N</span></code> combined with <code class="docutils literal notranslate"><span class="pre">--ntasks-per-node</span></code>.</p></li>
+<li><p>I want this much calculations processes (one per core), and this much processes per nodes, calculate yourself the number of nodes required for that -&gt; use <code class="docutils literal notranslate"><span class="pre">--ntasks-per-node</span></code> combined with <code class="docutils literal notranslate"><span class="pre">-n</span></code>.</p></li>
+<li><p>Etc.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">-N</span></code>, <code class="docutils literal notranslate"><span class="pre">-n</span></code> and <code class="docutils literal notranslate"><span class="pre">--ntasks-per-node</span></code> are complementary, and only two of them should be used at a time (slurm will deduce the last one using number of cores available on compute nodes as written in the slurm configuration file).
+<code class="docutils literal notranslate"><span class="pre">-N</span></code> specifies the total number of nodes to allocate to the job, <code class="docutils literal notranslate"><span class="pre">-n</span></code> the total number of processes to start, and <code class="docutils literal notranslate"><span class="pre">--ntasks-per-node</span></code> the number of processes to launch per node.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>n=N*ntasks-per-node
+</pre></div>
+</div>
+<p>Here, we will see the following submittion ways:</p>
+<ol class="arabic simple">
+<li><p>Submitting without a script</p></li>
+<li><p>Submitting a basic job script</p></li>
+<li><p>Submitting a serial job script</p></li>
+<li><p>Submitting an OpenMP job script</p></li>
+<li><p>Submitting an MPI job script</p></li>
+<li><p>A real life example with submitting a 3D animation render on a cluster combining Blender and Slurm arrays.</p></li>
+</ol>
+<div class="section" id="submitting-without-a-script">
+<h4><span class="section-number">3.8.4.1. </span>Submitting without a script<a class="headerlink" href="#submitting-without-a-script" title="Permalink to this headline">¶</a></h4>
+<p>It is possible to launch a very simple job without a script, using the <code class="docutils literal notranslate"><span class="pre">srun</span></code> command. To do that, use <code class="docutils literal notranslate"><span class="pre">srun</span></code> directly, specifying the number of nodes required. For example:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>srun -N 1 hostname
+</pre></div>
+</div>
+<p>Result can be: <code class="docutils literal notranslate"><span class="pre">valkyrie01</span></code></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>srun -N 2 hostname
+</pre></div>
+</div>
+<p>Result can be :</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>valkyrie01
+valkyrie02
+</pre></div>
+</div>
+<p>Using this method is a good way to test cluster, or compile code on compute nodes directly, or just use the compute and memory capacity of a node to do simple tasks on it.</p>
+</div>
+<div class="section" id="basic-job-script">
+<h4><span class="section-number">3.8.4.2. </span>Basic job script<a class="headerlink" href="#basic-job-script" title="Permalink to this headline">¶</a></h4>
+<p>To submit a basic job scrip, user needs to use <code class="docutils literal notranslate"><span class="pre">sbatch</span></code> command and provides it a script to execute which contains at the beginning some Slurm information.</p>
+<p>A very basic script is:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>#!/bin/bash
+#SBATCH -J myjob
+#SBATCH -o myjob.out.%j
+#SBATCH -e myjob.err.%j
+#SBATCH -N 1
+#SBATCH -n 1
+#SBATCH --ntasks-per-node=1
+#SBATCH -p all
+#SBATCH --exclusive
+#SBATCH -t 00:10:00
+
+echo &quot;###&quot;
+date
+echo &quot;###&quot;
+
+echo &quot;Hello World ! &quot;
+hostname
+sleep 30s
+echo &quot;###&quot;
+date
+echo &quot;###&quot;
+</pre></div>
+</div>
+<p>It is very important to understand Slurm parameters here:
+*       <code class="docutils literal notranslate"><span class="pre">-J</span></code> is to set the name of the job
+*       <code class="docutils literal notranslate"><span class="pre">-o</span></code> to set the output file of the job
+*       <code class="docutils literal notranslate"><span class="pre">-e</span></code> to set the error output file of the job
+*       <code class="docutils literal notranslate"><span class="pre">-p</span></code> to select partition to use (optional)
+*       <code class="docutils literal notranslate"><span class="pre">--exclusive</span></code> to specify nodes used must not be shared with other users (optional)
+*       <code class="docutils literal notranslate"><span class="pre">-t</span></code> to specify the maximum time allocated to the job (job will be killed if it goes beyond, beware). Using a small time allow to be able to run a job quickly in the waiting queue, using a large time will force to wait more
+*       <code class="docutils literal notranslate"><span class="pre">-N</span></code>, <code class="docutils literal notranslate"><span class="pre">-n</span></code> and <code class="docutils literal notranslate"><span class="pre">--ntasks-per-node</span></code> were already described.</p>
+<p>To submit this script, user needs to use sbatch:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>sbatch myscript.sh
+</pre></div>
+</div>
+<p>If the script syntax is ok, <code class="docutils literal notranslate"><span class="pre">sbatch</span></code> will return a job id number. This number can be used to follow the job progress, using <code class="docutils literal notranslate"><span class="pre">squeue</span></code> (assuming job number is 91487):</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>squeue -j 91487
+</pre></div>
+</div>
+<p>Check under ST the status of the job. PD (pending), R (running), CA (cancelled), CG (completing), CD (completed), F (failed), TO (timeout), and NF (node failure).</p>
+<p>It is also possible to check all user jobs running:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>squeue -u myuser
+</pre></div>
+</div>
+<p>In this example, execution results will be written by Slurm into <code class="docutils literal notranslate"><span class="pre">myjob.out.91487</span></code> and <code class="docutils literal notranslate"><span class="pre">myjob.err.91487</span></code>.</p>
+</div>
+<div class="section" id="serial-job">
+<h4><span class="section-number">3.8.4.3. </span>Serial job<a class="headerlink" href="#serial-job" title="Permalink to this headline">¶</a></h4>
+<p>To launch a very basic serial job, use the following template as a script for <code class="docutils literal notranslate"><span class="pre">sbatch</span></code>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>#!/bin/bash
+#SBATCH -J myjob
+#SBATCH -o myjob.out.%j
+#SBATCH -e myjob.err.%j
+#SBATCH -N 1
+#SBATCH --ntasks-per-node=1
+#SBATCH --exclusive
+#SBATCH -t 03:00:00
+
+echo &quot;############### START #######&quot;
+date
+echo &quot;############### &quot;
+
+/home/myuser/./myexecutable.exe
+
+echo &quot;############### END #######&quot;
+date
+echo &quot;############### &quot;
+</pre></div>
+</div>
+</div>
+<div class="section" id="openmp-job">
+<h4><span class="section-number">3.8.4.4. </span>OpenMP job<a class="headerlink" href="#openmp-job" title="Permalink to this headline">¶</a></h4>
+<p>To launch an OpenMP job (with multithreads), assuming the code was compiled with openmp flags, use:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>#!/bin/bash
+#SBATCH -J myjob
+#SBATCH -o myjob.out.%j
+#SBATCH -e myjob.err.%j
+#SBATCH -N 1
+#SBATCH --ntasks-per-node=1
+#SBATCH --exclusive
+#SBATCH -t 03:00:00
+
+## If compute node has 24 cores
+export OMP_NUM_THREADS=24
+## If needed, to be tuned to needs
+export OMP_SCHEDULE=&quot;dynamic, 100&quot;
+
+echo &quot;############### START #######&quot;
+date
+echo &quot;############### &quot;
+
+/home/myuser/./myparaexecutable.exe
+
+echo &quot;############### END #######&quot;
+date
+echo &quot;############### &quot;
+</pre></div>
+</div>
+<p>Note that it is assumed here that a node has 24 cores.</p>
+</div>
+<div class="section" id="mpi-job">
+<h4><span class="section-number">3.8.4.5. </span>MPI job<a class="headerlink" href="#mpi-job" title="Permalink to this headline">¶</a></h4>
+<p>To submit an MPI job, assuming the code was parallelized with MPI and compile with MPI, use (note the <code class="docutils literal notranslate"><span class="pre">srun</span></code>, replacing the <code class="docutils literal notranslate"><span class="pre">mpirun</span></code>):</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>#!/bin/bash
+#SBATCH -J myjob
+#SBATCH -o myjob.out.%j
+#SBATCH -e myjob.err.%j
+#SBATCH -N 4
+#SBATCH --ntasks-per-node=24
+#SBATCH --exclusive
+#SBATCH -t 03:00:00
+
+echo &quot;############### START #######&quot;
+date
+echo &quot;############### &quot;
+
+srun /home/myuser/./mympiexecutable.exe
+
+echo &quot;############### END #######&quot;
+date
+echo &quot;############### &quot;
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">srun</span></code> will act as <code class="docutils literal notranslate"><span class="pre">mpirun</span></code>, but providing automatically all already tuned arguments for the cluster.</p>
+</div>
+<div class="section" id="real-life-example-with-blender-job">
+<h4><span class="section-number">3.8.4.6. </span>Real life example with Blender job<a class="headerlink" href="#real-life-example-with-blender-job" title="Permalink to this headline">¶</a></h4>
+<p>Blender animations/movies are render using CPU and GPU. In this tutorial, we will focus on CPU since we do not have GPU (or if you have, lucky you).</p>
+<p>We will render an animation of 40 frames.</p>
+<p>We could create a simple job, asking Blender to render this animation. But Blender will then use a single compute node. We have a cluster at disposal, lets take advantage of that.</p>
+<p>We will use Slurm job arrays (so an array of jobs) to split these 40 frames into chuck of 5 frames. Each chuck will be a unique job. Using this method, we will use all available computes nodes of our small cluster.</p>
+<p>Note that 5 is an arbitrary number, and this depend of how difficult to render each frame is. If a unique frame takes 10 minutes to render, then you can create chink of 1 frame. If on the other hand each frame takes 10s to render, it is better to group them by chunk as Blender as a “starting time” for each new chunk.</p>
+<p>First download Blender and the demo:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>wget https://download.blender.org/demo/geometry-nodes/candy_bounce_geometry-nodes_demo.blend
+wget https://ftp.nluug.nl/pub/graphics/blender/release/Blender2.93/blender-2.93.1-linux-x64.tar.xz
+</pre></div>
+</div>
+<p>Extract Blender into <code class="docutils literal notranslate"><span class="pre">/software</span></code> and copy demo file into <code class="docutils literal notranslate"><span class="pre">/home</span></code>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>cp candy_bounce_geometry-nodes_demo.blend /home
+tar xJvf blender-2.93.1-linux-x64.tar.xz -C /software
+</pre></div>
+</div>
+<p>Now lets create the job file. Create file <code class="docutils literal notranslate"><span class="pre">/home/blender_job.job</span></code> with the following content:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>#!/bin/bash
+#SBATCH -J myjob
+#SBATCH -o myjob.out.%j
+#SBATCH -e myjob.err.%j
+#SBATCH -N 1
+#SBATCH --ntasks-per-node=1
+#SBATCH --exclusive
+#SBATCH -t 01:00:00
+
+set -x
+
+# We set chunk size to 5 frames
+chunk_size=5
+
+# We calculate frames span for each job depending of ARRAY_TASK_ID
+range_min=$(((SLURM_ARRAY_TASK_ID-1)*chunk_size+1))
+range_max=$(((SLURM_ARRAY_TASK_ID)*chunk_size))
+
+# We include blender binary into our PATH
+export PATH=/software/blender-2.93.1-linux-x64/:$PATH
+
+# We start the render
+# -b is the input blender file
+# -o is the output target folder, with files format
+# -F is the output format
+# -f specify the range
+# -noaudio is self explaining
+# IMPORTANT: Blender arguments must be given in that specific order.
+
+eval blender -b /home/candy_bounce_geometry-nodes_demo.blend -o /home/frame##### -F PNG -f $range_min..$range_max -noaudio
+
+# Note: if you have issues with default engine, try using CYCLES. Slower.
+# eval blender -b /home/candy_bounce_geometry-nodes_demo.blend -E CYCLES -o /home/frame##### -F PNG -f $range_min..$range_max -noaudio
+</pre></div>
+</div>
+<p>This job file will be executed for each job.
+Since we have 40 frames to render, and we create 5 frames chunk, this means we need to ask Slurm to create a job array of <code class="docutils literal notranslate"><span class="pre">40/5=8</span></code> jobs.</p>
+<p>Launch the array of jobs:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>sbatch --array=1-8 /home/blender_job.job
+</pre></div>
+</div>
+<p>If all goes well, using <code class="docutils literal notranslate"><span class="pre">squeue</span></code> command, you should be able to see the jobs currently running, and the ones currently pending for resources.</p>
+<p>You can follow jobs by watching their job file (refreshed by Slurm regularly).
+And after few seconds/minutes depending of your hardware, you should see first animation frames as PNG images in /home folder.</p>
+<img alt="_images/animation.gif" class="align-center" src="_images/animation.gif" />
+<p>This example shows how to use Slurm to create a Blender render farm.</p>
+</div>
+</div>
+</div>
+<div class="section" id="users">
+<h2><span class="section-number">3.9. </span>Users<a class="headerlink" href="#users" title="Permalink to this headline">¶</a></h2>
+<p>To have users on the cluster, you need to have the users registered on each node, with same pid and same group gid.</p>
+<p>There are multiple ways to synchronize users on a cluster of nodes. Popular tools are based on Ldap or Ad.
+However, this is out of the scope of this tutorial, and so we will manage users manually on our small cluster.</p>
+<p>To generate a user with a fix pid and fix gid, use the following commands on <code class="docutils literal notranslate"><span class="pre">heimdall</span></code> login node:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>groupadd -g 2001 myuser
+adduser myuser --shell /bin/bash -d /home/myuser -u 2001 -g 2001
+mkdir /home/myuser
+chown -R myuser:myuser /home/myuser
+</pre></div>
+</div>
+<p>Then on all other nodes, including <code class="docutils literal notranslate"><span class="pre">thor</span></code> and <code class="docutils literal notranslate"><span class="pre">odin</span></code>, create user only (no need to recreate the <code class="docutils literal notranslate"><span class="pre">/home</span></code> as it is spread over NFS)</p>
+<p>On each other nodes, do the following:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>groupadd -g 2001 myuser
+adduser myuser --shell /bin/bash -d /home/myuser -u 2001 -g 2001
+</pre></div>
+</div>
+<p>Note: for each new user, increment the user number (2002 -&gt; 2003 -&gt; 2004 -&gt; etc.).
+Also, use number above 2000 to avoid issues or conflict with possible system ids.</p>
+<p>It is important to understand that using manual methods to add users may seems simple, but has a major drawback: the cluster can quickly become out of synchronization regarding users.
+To prevent that, you can create scripts, rely on automation tools like Ansible, or use a centralized users database (OpenLDAP, etc.).</p>
+</div>
+<div class="section" id="infiniband">
+<h2><span class="section-number">3.10. </span>Infiniband<a class="headerlink" href="#infiniband" title="Permalink to this headline">¶</a></h2>
+<p>If you need InfiniBand support on nodes, simply install the package group related:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>dnf groupinstall &#39;infiniband support&#39;
+</pre></div>
+</div>
+<p>And then enable rdma service:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>systemctl start rdma
+systemctl enable rdma
+</pre></div>
+</div>
+<p>You should now see the ib0 interface in the NIC list from <code class="docutils literal notranslate"><span class="pre">ip</span> <span class="pre">a</span></code>.</p>
+</div>
+<div class="section" id="gpu-nvidia">
+<h2><span class="section-number">3.11. </span>GPU (Nvidia)<a class="headerlink" href="#gpu-nvidia" title="Permalink to this headline">¶</a></h2>
+<p>To setup an GPU, you need to:</p>
+<ul class="simple">
+<li><p>Ensure kernel do not crash at start (happen often if kernel is too old for hardware)</p></li>
+<li><p>Ensure <strong>nouveau</strong> driver do not prevent Nvidia driver to load</p></li>
+<li><p>Ensure Nvidia driver load</p></li>
+</ul>
+<p>You can then install CUDA build and runtime environment on a shared space, or on each nodes, as you wish.</p>
+<p>Lets do that step by step.</p>
+<div class="section" id="ensure-kernel-do-not-crash">
+<h3><span class="section-number">3.11.1. </span>Ensure kernel do not crash<a class="headerlink" href="#ensure-kernel-do-not-crash" title="Permalink to this headline">¶</a></h3>
+<p>To prevent kernel from crashing at boot (Kernel Panic) due to too recent GPU hardware, edit the ipxe file that contains the kernel line
+(for example file <code class="docutils literal notranslate"><span class="pre">/var/www/html/nodes_groups/group_compute_gpu.ipxe</span></code> and append <code class="docutils literal notranslate"><span class="pre">nomodeset</span></code> to the kernel line. For example:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>#!ipxe
+
+echo Booting OS
+echo Group profile: compute_gpu
+
+echo +----------------------------------------------------+
+echo |
+echo | Loading kernel
+
+kernel http://${next-server}/repositories/centos/8/x86_64/os/images/pxeboot/vmlinuz initrd=initrd.img inst.stage2=http://${next-server}/repositories/centos/8/x86_64/os/ inst.repo=http://${next-server}/repositories/centos/8/x86_64/os/BaseOS/ ks=http://${next-server}/nodes_groups/group_compute_gpu.kickstart.cfg nomodeset
+
+echo | Loading initial ramdisk ...
+
+initrd http://${next-server}/repositories/centos/8/x86_64/os/images/pxeboot/initrd.img
+
+echo | ALL DONE! We are ready.
+echo | Downloaded images report:
+
+imgstat
+
+echo | Booting in 4s ...
+echo |
+echo +----------------------------------------------------+
+
+sleep 4
+
+boot
+</pre></div>
+</div>
+<p>Also, edit kickstart file, for example here file <code class="docutils literal notranslate"><span class="pre">/var/www/html/nodes_groups/group_compute_gpu.kickstart.cfg</span></code>, and ensure the same is added to the bootloader parameter.
+So for example, in the kickstart file, ensure you have this line:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>bootloader --append=&quot;nomodeset&quot; --location=mbr
+</pre></div>
+</div>
+<p>Node should not crash anymore.</p>
+</div>
+<div class="section" id="disable-nouveau-driver">
+<h3><span class="section-number">3.11.2. </span>Disable nouveau driver<a class="headerlink" href="#disable-nouveau-driver" title="Permalink to this headline">¶</a></h3>
+<p>Again, redo the same process than before, but add another kernel parameter: <code class="docutils literal notranslate"><span class="pre">modprobe.blacklist=nouveau</span> <span class="pre">nouveau.modeset=0</span> <span class="pre">rd.driver.blacklist=nouveau</span></code></p>
+<p>So edit ipxe <code class="docutils literal notranslate"><span class="pre">/var/www/html/nodes_groups/group_compute_gpu.ipxe</span></code> file again:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>#!ipxe
+
+echo Booting OS
+echo Group profile: compute_gpu
+
+echo +----------------------------------------------------+
+echo |
+echo | Loading kernel
+
+kernel http://${next-server}/repositories/centos/8/x86_64/os/images/pxeboot/vmlinuz initrd=initrd.img inst.stage2=http://${next-server}/repositories/centos/8/x86_64/os/ inst.repo=http://${next-server}/repositories/centos/8/x86_64/os/BaseOS/ ks=http://${next-server}/nodes_groups/group_compute_gpu.kickstart.cfg nomodeset modprobe.blacklist=nouveau nouveau.modeset=0 rd.driver.blacklist=nouveau
+
+echo | Loading initial ramdisk ...
+
+initrd http://${next-server}/repositories/centos/8/x86_64/os/images/pxeboot/initrd.img
+
+echo | ALL DONE! We are ready.
+echo | Downloaded images report:
+
+imgstat
+
+echo | Booting in 4s ...
+echo |
+echo +----------------------------------------------------+
+
+sleep 4
+
+boot
+</pre></div>
+</div>
+<p>And edit <code class="docutils literal notranslate"><span class="pre">/var/www/html/nodes_groups/group_compute_gpu.kickstart.cfg</span></code> file again:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>bootloader --append=&quot;nomodeset modprobe.blacklist=nouveau nouveau.modeset=0 rd.driver.blacklist=nouveau&quot; --location=mbr
+</pre></div>
+</div>
+<p>Now, node will boot without <code class="docutils literal notranslate"><span class="pre">nouveau</span></code> driver loaded.</p>
+</div>
+<div class="section" id="install-nvidia-driver">
+<h3><span class="section-number">3.11.3. </span>Install Nvidia driver<a class="headerlink" href="#install-nvidia-driver" title="Permalink to this headline">¶</a></h3>
+<p>Grab driver from Nvidia website, that match your hardware and Linux distribution (and arch).</p>
+<p>Now install epel repository:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+</pre></div>
+</div>
+<p>Now install Nvidia repository:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ARCH=$( /bin/arch )
+distribution=$(. /etc/os-release;echo $ID``rpm -E &quot;%{?rhel}%{?fedora}&quot;``)
+dnf config-manager --add-repo http://developer.download.nvidia.com/compute/cuda/repos/$distribution/${ARCH}/cuda-rhel8.repo
+</pre></div>
+</div>
+<p>Install needed kernel headers:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>dnf install -y kernel-devel-$(uname -r) kernel-headers-$(uname -r)
+</pre></div>
+</div>
+<p>And install driver</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>dnf clean all
+dnf -y module install nvidia-driver:latest-dkms
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="conclusion">
+<h2><span class="section-number">3.12. </span>Conclusion<a class="headerlink" href="#conclusion" title="Permalink to this headline">¶</a></h2>
+<p>The cluster is ready to be used.</p>
+<p>Additional task could be done:</p>
+<ul class="simple">
+<li><p>Compiling an up to date GCC suit</p></li>
+<li><p>Compiling an MPI suite</p></li>
+<li><p>Adding monitoring on the cluster</p></li>
+<li><p>Enabling Slurm accounting</p></li>
+<li><p>Etc.</p></li>
+</ul>
+<p>If you wish now to learn Ansible, to automate all of this, proceed to next section of this documentation.
+Just keep in mind that hostnames ysed here and in this remain of documentation are different (odin -&gt; management1, etc). So update according to your needs.</p>
+<p>Thank you for following this tutorial. If you find something is missing, or find an issue, please notify us :-)</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="training_ansible.html" class="btn btn-neutral float-right" title="4. [Training] - Ansible" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="vocabulary.html" class="btn btn-neutral float-left" title="2. Vocabulary" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2019, Benoît Leveugle, Johnny Keats.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

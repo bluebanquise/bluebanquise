@@ -1,0 +1,1847 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>11. [Community] - Monitoring &mdash; BlueBanquise Documentation 1.5.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="&lt;no title&gt;" href="slurm.html" />
+    <link rel="prev" title="10. [Community] - High Availability" href="high_availability.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> BlueBanquise Documentation
+          
+
+          
+            
+            <img src="_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vocabulary.html">2. Vocabulary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="training_sysadmin.html">3. [Training] - Cluster SysAdmin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="training_ansible.html">4. [Training] - Ansible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bootstrap.html">5. [Core] - Bootstrap base system</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configure_bluebanquise.html">6. [Core] - Configure BlueBanquise</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deploy_bluebanquise.html">7. [Core] - Deploy BlueBanquise</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multiple_icebergs.html">8. [Core] - Manage multiple icebergs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="diskless.html">9. [Core] - Diskless</a></li>
+<li class="toctree-l1"><a class="reference internal" href="high_availability.html">10. [Community] - High Availability</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">11. [Community] - Monitoring</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#monitoring-introduction">11.1. Monitoring Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#prometheus">11.2. Prometheus</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#prerequisites">11.2.1. Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#installation">11.2.2. Installation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#prometheus-server">11.2.2.1. Prometheus Server</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#prometheus-client">11.2.2.2. Prometheus Client</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#prometheus-yml">11.2.3. Prometheus.yml</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#variables">11.2.4. Variables</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#counters">11.2.4.1. Counters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gauges">11.2.4.2. Gauges</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#histograms-summaries">11.2.4.3. Histograms &amp; Summaries</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#queries">11.2.5. Queries</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#regex">11.2.5.1. Regex</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#boolean-operators">11.2.5.2. Boolean operators</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#functions-aggregations">11.2.5.3. Functions &amp; aggregations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#alerts">11.2.6. Alerts</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#alertmanager">11.2.6.1. Alertmanager</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#grafana">11.3. Grafana</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">11.3.1. Installation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#manual-installation">11.3.1.1. Manual installation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#useful-files">11.3.2. Useful Files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dashboard">11.3.3. Dashboard</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#query">11.3.3.1. Query</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#transform">11.3.3.2. Transform</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#alert">11.3.3.3. Alert</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#types-of-visualization">11.3.4. Types of Visualization</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#graph">11.3.4.1. Graph</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bar-gauge">11.3.4.2. Bar gauge</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#extra">11.3.5. Extra</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id5">11.3.5.1. Variables</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#main-dashboard">11.3.5.2. Main Dashboard</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#exporters">11.4. Exporters</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#node-exporter">11.4.1. Node_exporter</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id6">11.4.1.1. Alerts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#start-service">11.4.1.2. Start service</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id7">11.4.1.3. Dashboard</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#ipmi-exporter">11.4.2. Ipmi_exporter</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id8">11.4.2.1. Alerts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id9">11.4.2.2. Start service</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id10">11.4.2.3. Dashboard</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#snmp-exporter">11.4.3. Snmp_exporter</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#snmp-exporter-setup">11.4.3.1. Snmp_exporter setup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#setup-targets">11.4.3.2. Setup targets</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#switch-setup">11.4.3.3. Switch setup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id11">11.4.3.4. Start service</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id12">11.4.3.5. Dashboard</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#ha-cluster-exporter">11.4.4. Ha_cluster_exporter</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id13">11.4.4.1. Alerts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id14">11.4.4.2. Start service</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dashboards">11.4.4.3. Dashboards</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#slurm-exporter">11.4.5. Slurm_exporter</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#metrics">11.4.5.1. Metrics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id15">11.4.5.2. Start service</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id16">11.4.5.3. Alerts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id17">11.4.5.4. Dashboard</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="containers.html">12. Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stories.html">13. Stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roles.html">14. Roles list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">15. References</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">BlueBanquise Documentation</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li><span class="section-number">11. </span>[Community] - Monitoring</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/monitoring.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="community-monitoring">
+<h1><span class="section-number">11. </span>[Community] - Monitoring<a class="headerlink" href="#community-monitoring" title="Permalink to this headline">¶</a></h1>
+<p>Default monitoring of the stack is based on Prometheus.</p>
+<div class="section" id="monitoring-introduction">
+<h2><span class="section-number">11.1. </span>Monitoring Introduction<a class="headerlink" href="#monitoring-introduction" title="Permalink to this headline">¶</a></h2>
+<p>This monitoring documentation has multiple aims:</p>
+<ul class="simple">
+<li><p>Provide an overview of Prometheus and the different exporters.</p></li>
+<li><p>Provide instructions on how to add exporters to nodes, and how you could add your own exporters.</p></li>
+<li><p>Provide instructions on alerting configuration.</p></li>
+<li><p>Provide an overview of Grafana and the different dashboard.</p></li>
+</ul>
+<p>This documentation is built around those section:</p>
+<ol class="arabic simple">
+<li><p>Introduction</p></li>
+<li><p>Prometheus and alerting</p></li>
+<li><p>Grafana</p></li>
+<li><p>Exporters</p></li>
+</ol>
+</div>
+<div class="section" id="prometheus">
+<h2><span class="section-number">11.2. </span>Prometheus<a class="headerlink" href="#prometheus" title="Permalink to this headline">¶</a></h2>
+<p>In this topic, we will see how to configure and deploy
+the prometheus Ansible roles from BlueBanquise Community
+repository.</p>
+<div class="section" id="prerequisites">
+<h3><span class="section-number">11.2.1. </span>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Have ansible installed</p></li>
+<li><p>Know how to use playbooks</p></li>
+</ul>
+<p>Also, make sure those packages are available on the repositories
+of your system (they should be in the bluebanquise repository):</p>
+<ul class="simple">
+<li><p>prometheus</p></li>
+<li><p>alertmanager</p></li>
+<li><p>karma</p></li>
+<li><p>ipmi_exporter</p></li>
+<li><p>snmp_exporter</p></li>
+<li><p>grafana</p></li>
+</ul>
+</div>
+<div class="section" id="installation">
+<h3><span class="section-number">11.2.2. </span>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="prometheus-server">
+<h4><span class="section-number">11.2.2.1. </span>Prometheus Server<a class="headerlink" href="#prometheus-server" title="Permalink to this headline">¶</a></h4>
+<p>First create file
+/etc/bluebanquise/inventory/group_vars/all/prometheus.yml with the
+following content:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">prometheus</span><span class="p">:</span>
+  <span class="nt">scrape_interval</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1m</span>
+  <span class="nt">evaluation_interval</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2m</span>
+  <span class="nt">alertmanager</span><span class="p">:</span>
+    <span class="nt">group_wait</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1m</span>
+    <span class="nt">group_interval</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10m</span>
+    <span class="nt">repeat_interval</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">3h</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference external" href="https://www.robustperception.io/whats-the-difference-between-group_interval-group_wait-and-repeat_interval">https://www.robustperception.io/whats-the-difference-between-group_interval-group_wait-and-repeat_interval</a></p>
+</div>
+<p>Now, simply add to the playbook of your choice (which is for the Prometheus
+server) the prometheus_server role (change the values of enable_services and start_services accordingly):</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">vars</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="nt">enable_services</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+  <span class="p p-Indicator">-</span> <span class="nt">start_services</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="nt">roles</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="nt">role</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">prometheus_server</span>
+    <span class="nt">tags</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">prometheus_server</span>
+</pre></div>
+</div>
+<p>Then run:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ansible-playbook /etc/ansible/playbooks/&lt;your server playbook&gt; --tags prometheus_server
+</pre></div>
+</div>
+<p>Now prometheus_server should be installed and configured with a minimal
+configuration.</p>
+<p>The configuration file for Prometheus is located under
+/etc/prometheus/prometheus.yml.
+It contains all the exporters to scrape, and more.</p>
+<p>It is now time to configure client side. Note that while the
+/etc/bluebanquise/inventory/group_vars/all/addons/prometheus.yml file is only
+used by the prometheus_server role, the client files seen in next section will
+be shared by both server and client role. Server will use it to know which
+exporters to scrap on who, and clients will use it to know which exporters to
+install locally.</p>
+</div>
+<div class="section" id="prometheus-client">
+<h4><span class="section-number">11.2.2.2. </span>Prometheus Client<a class="headerlink" href="#prometheus-client" title="Permalink to this headline">¶</a></h4>
+<p>For each <em>equipment_profile</em>, create a file called monitoring.yml that contains
+the desired exporters to be deployed, into equipment_profile folder of your
+target hosts groups.</p>
+<p>For example, to set exporters to be scrapped and installed on all hosts of
+equipment_profile equipment_XX, create the file
+/etc/ansible/inventory/group_vars/equipment_XX/monitoring.yml, with the
+following content:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">monitoring</span><span class="p">:</span>
+  <span class="nt">exporters</span><span class="p">:</span>
+    <span class="nt">node_exporter</span><span class="p">:</span>
+      <span class="nt">package</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">node_exporter</span>
+      <span class="nt">service</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">node_exporter</span>
+      <span class="nt">port</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">9100</span>
+    <span class="nt">ha_cluster_exporter</span><span class="p">:</span>
+      <span class="nt">package</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ha_cluster_exporter</span>
+      <span class="nt">service</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ha_cluster_exporter</span>
+      <span class="nt">scrape_interval</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10m</span>
+      <span class="nt">scrape_timeout</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">4m</span>
+      <span class="nt">port</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">9664</span>
+</pre></div>
+</div>
+<p>This will setup here two exporters on these equipments: node_exporter and
+ha_cluster_exporter.</p>
+<p>Also don’t forget to add the name of the package you want to install and the
+service name.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>As you can see, you can also add the scrape_interval (which is how
+often the metrics get scraped), and the scrape_timeout (which represents how
+long until a scrape request times out).</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you want to add exporters, make sure your package contains the
+binary and the .service file, put preferably under /usr/local/bin and
+/etc/systemd/system.</p>
+</div>
+<p>Now simply add to the playbook of your choice (which is for the Prometheus
+clients) the prometheus_client role (change the values  of enable_services and start_services accordingly):</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">vars</span><span class="p">:</span>
+   <span class="p p-Indicator">-</span> <span class="nt">enable_services</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+   <span class="p p-Indicator">-</span> <span class="nt">start_services</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="nt">roles</span><span class="p">:</span>
+   <span class="p p-Indicator">-</span> <span class="nt">role</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">prometheus_client</span>
+     <span class="nt">tags</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">prometheus_client</span>
+</pre></div>
+</div>
+<p>Then run:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ansible-playbook /etc/ansible/playbooks/&lt;your client playbook&gt; --tags prometheus_client
+</pre></div>
+</div>
+<p>Now prometheus_client should be installed.</p>
+<p>Also, re-execute the prometheus_server role on the management node hosting the
+Prometheus server, to ensure Prometheus is now aware of these new exporters to
+scrape.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ansible-playbook /etc/ansible/playbooks/&lt;your server playbook&gt; --tags prometheus_server
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="prometheus-yml">
+<h3><span class="section-number">11.2.3. </span>Prometheus.yml<a class="headerlink" href="#prometheus-yml" title="Permalink to this headline">¶</a></h3>
+<p>File /etc/prometheus/prometheus.yml is where all the exporters and the scrape
+related variables are stored for the Prometheus server to run.
+It looks something like this:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">global</span><span class="p">:</span>
+  <span class="nt">scrape_interval</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1m</span>
+  <span class="nt">evaluation_interval</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2m</span>
+
+<span class="nt">rule_files</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="s">&#39;alerts/*.yml&#39;</span>
+
+<span class="nt">alerting</span><span class="p">:</span>
+  <span class="nt">alertmanagers</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="nt">static_configs</span><span class="p">:</span>
+    <span class="p p-Indicator">-</span> <span class="nt">targets</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">localhost:9093</span>
+
+<span class="nt">scrape_configs</span><span class="p">:</span>
+
+  <span class="c1"># I watch myself</span>
+  <span class="p p-Indicator">-</span> <span class="nt">job_name</span><span class="p">:</span> <span class="s">&#39;prometheus_master&#39;</span>
+    <span class="nt">scrape_interval</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">30s</span>
+    <span class="nt">static_configs</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="nt">targets</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;localhost:9090&#39;</span><span class="p p-Indicator">]</span>
+
+<span class="c1"># GENERIC EXPORTER</span>
+<span class="c1"># All equipment profiles and their exporters</span>
+  <span class="p p-Indicator">-</span> <span class="nt">job_name</span><span class="p">:</span> <span class="s">&#39;equipment_R_node_exporter&#39;</span>
+    <span class="nt">scrape_interval</span><span class="p">:</span>
+    <span class="nt">scrape_timeout</span><span class="p">:</span>
+    <span class="nt">static_configs</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="nt">targets</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;management1-1:9100&#39;</span><span class="p p-Indicator">]</span>
+      <span class="p p-Indicator">-</span> <span class="nt">targets</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;management1-2:9100&#39;</span><span class="p p-Indicator">]</span>
+</pre></div>
+</div>
+<p>Few notes:</p>
+<ul class="simple">
+<li><p><strong>rule_files</strong> is where the alert related configurations are located</p></li>
+<li><p><strong>alerting</strong> is where Prometheus should send alerts (i.e. Alertmanager)</p></li>
+<li><p><strong>scrape_configs</strong> is where are defined all the exporters that server need to listen to, with the targets, and so on</p></li>
+</ul>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference external" href="https://prometheus.io/docs/prometheus/latest/configuration/configuration/">https://prometheus.io/docs/prometheus/latest/configuration/configuration/</a></p>
+</div>
+<p>It is now time to learn variables before using them in the Prometheus interface.</p>
+</div>
+<div class="section" id="variables">
+<h3><span class="section-number">11.2.4. </span>Variables<a class="headerlink" href="#variables" title="Permalink to this headline">¶</a></h3>
+<p>There are 4 types of variable in Prometheus:</p>
+<ol class="arabic simple">
+<li><p>Counters</p></li>
+<li><p>Gauges</p></li>
+<li><p>Histograms</p></li>
+<li><p>Summaries</p></li>
+</ol>
+<div class="section" id="counters">
+<h4><span class="section-number">11.2.4.1. </span>Counters<a class="headerlink" href="#counters" title="Permalink to this headline">¶</a></h4>
+<p>Counters are used for metrics that can only increase.
+It is an incremental counter, that is used in order to know how rapidly
+something grows for example.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For example, it is used for the number of packets that is transmitted by a switch interface.
+Using the irate function of Prometheus, we can then tell how many packets were transmitted in a given interval.</p>
+</div>
+<p>It can also be used for error counts, tasks completed, and so on.</p>
+</div>
+<div class="section" id="gauges">
+<h4><span class="section-number">11.2.4.2. </span>Gauges<a class="headerlink" href="#gauges" title="Permalink to this headline">¶</a></h4>
+<p>Gauges are used for metrics that can go up, but can also decrease.
+It gives a specific value for the time set.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For example, it is used for the temperature of the BMCs.
+This way, you have the temperature for any given time.
+It can also be used for memory usage, number of requests, and so on.</p>
+</div>
+<p>It can be used with function like min, max, average, and so on to get the
+desired result.</p>
+</div>
+<div class="section" id="histograms-summaries">
+<h4><span class="section-number">11.2.4.3. </span>Histograms &amp; Summaries<a class="headerlink" href="#histograms-summaries" title="Permalink to this headline">¶</a></h4>
+<p>Histograms and summaries are more complex variable types, and are used less
+often, which is the reason why we won’t go too much in the details.
+Histograms and summaries are both used for getting the request durations, or
+the response sizes.
+Their main goal is to watch for data that fall in a certain category.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference external" href="https://prometheus.io/docs/practices/histograms/">https://prometheus.io/docs/practices/histograms/</a></p>
+</div>
+</div>
+</div>
+<div class="section" id="queries">
+<h3><span class="section-number">11.2.5. </span>Queries<a class="headerlink" href="#queries" title="Permalink to this headline">¶</a></h3>
+<p>In order to query a <strong>metric</strong> with Prometheus, you have to go to the Prometheus
+web page.
+By default, it is located at <strong>http://localhost:9090</strong> .</p>
+<p>To query a metric, simply type in the metric name. You also have a dropdown list
+with all the available metrics to query.</p>
+<a class="reference internal image-reference" href="_images/query1.PNG"><img alt="_images/query1.PNG" src="_images/query1.PNG" style="width: 80%;" /></a>
+<p>If you want specific metrics (with one or more specific labels):</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>query_name{instance=&quot;instance&quot;}
+</pre></div>
+</div>
+<p>For example, ipmi_fan_speed_rpm{name=”P-FAN1”} will only return the fan_speed of
+the fan name “P-FAN-1”:</p>
+<a class="reference internal image-reference" href="_images/query2.PNG"><img alt="_images/query2.PNG" src="_images/query2.PNG" style="width: 80%;" /></a>
+<p>In the graph tab, you can also see the variation of the value over time.
+You can also choose from when to when.</p>
+<a class="reference internal image-reference" href="_images/query3.PNG"><img alt="_images/query3.PNG" src="_images/query3.PNG" style="width: 80%;" /></a>
+<div class="section" id="regex">
+<h4><span class="section-number">11.2.5.1. </span>Regex<a class="headerlink" href="#regex" title="Permalink to this headline">¶</a></h4>
+<p>You can also use the same queries, but with regex.</p>
+<p>If you want the attribute to follow the given regex, the global syntax for is:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>query{attribute=~&quot;regex_value&quot;}
+</pre></div>
+</div>
+<p>Or if you don’t want the attribute to follow the regex:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>query{attribute!~&quot;regex_value&quot;}
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <strong>tilda</strong> here is very important.</p>
+</div>
+<p>Using this syntax, you can:</p>
+<ul class="simple">
+<li><p>get the metrics which attribute corresponds to a list</p></li>
+</ul>
+<p>For example:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ipmi_fan_speed_rpm{name=~&quot;MB-FAN5|MB-FAN4|S-FAN2&quot;}
+</pre></div>
+</div>
+<p>will return:</p>
+<a class="reference internal image-reference" href="_images/query4.PNG"><img alt="_images/query4.PNG" src="_images/query4.PNG" style="width: 50%;" /></a>
+<ul class="simple">
+<li><p>follow a pattern</p></li>
+</ul>
+<p>For example:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ipmi_fan_speed_rpm{name=~&quot;.*.FAN.*&quot;}
+</pre></div>
+</div>
+<p>will return all the ipmi_fan_speed_rpm metrics with the string “FAN” in its
+name label.</p>
+<p>Another example:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ipmi_fan_speed_rpm{__name__=~&quot;ipmi.*&quot;,instance=~&quot;001-bmc&quot;}
+</pre></div>
+</div>
+<p>will return all the metrics which name starts with ipmi, and which instance is
+001-bmc.</p>
+<a class="reference internal image-reference" href="_images/query5.PNG"><img alt="_images/query5.PNG" src="_images/query5.PNG" style="width: 50%;" /></a>
+</div>
+<div class="section" id="boolean-operators">
+<h4><span class="section-number">11.2.5.2. </span>Boolean operators<a class="headerlink" href="#boolean-operators" title="Permalink to this headline">¶</a></h4>
+<p>You can also combine different metrics, using boolean operators. There are
+several operators in Prometheus. Some of them are the following:</p>
+<ul class="simple">
+<li><p>== (equal)</p></li>
+<li><p>!= (not-equal)</p></li>
+<li><p>&gt; (greater-than)</p></li>
+<li><p>&lt; (less-than)</p></li>
+<li><p>&gt;= (greater-or-equal)</p></li>
+<li><p>&lt;= (less-or-equal)</p></li>
+</ul>
+<p>These are used in order to get the results that correspond to the condition.
+For example:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ipmi_up==1
+</pre></div>
+</div>
+<p>will only return the instances of the query that are equal to one.</p>
+<p>It is also possible to use logic operators:</p>
+<ul class="simple">
+<li><p>and (intersection)</p></li>
+<li><p>or (union)</p></li>
+<li><p>unless (complement)</p></li>
+</ul>
+<p>Vector1 and vector2 results in a vector consisting of the elements of vector1
+for which there are elements in vector2 with exactly matching label sets.
+Other elements are dropped. The metric name and values are carried over from the
+left-hand side vector.</p>
+<p>For example:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>node_exporter_build_info and ignoring(revision, version,goversion,branch,package) node_cpu_package_throttles_total
+</pre></div>
+</div>
+<p>will return:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>node_exporter_build_info{branch=&quot;HEAD&quot;,goversion=&quot;go1.12.5&quot;,instance=&quot;1-2:9100&quot;,job=&quot;equipment_R_node_exporter&quot;,revision=&quot;3db77732e925c08f675d7404a8c46466b2ece83e&quot;,version=&quot;0.18.1&quot;}
+</pre></div>
+</div>
+<p>because it has the same instance name and job name as a node_cpu_package_throttles_total.</p>
+<p>Vector1 or vector2 results in a vector that contains all original elements (label sets + values) of vector1 and additionally all elements of vector2 which do not have matching label sets in vector1.</p>
+<p>For example:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>node_exporter_build_info or node_cpu_package_throttles_total
+</pre></div>
+</div>
+<p>will return:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>node_exporter_build_info{branch=&quot;HEAD&quot;,goversion=&quot;go1.12.5&quot;,instance=&quot;1-2:9100&quot;,job=&quot;equipment_R_node_exporter&quot;,revision=&quot;3db77732e925c08f675d7404a8c46466b2ece83e&quot;,version=&quot;0.18.1&quot;}
+node_cpu_package_throttles_total{instance=&quot;1-2:9100&quot;,job=&quot;equipment_R_node_exporter&quot;,package=&quot;0&quot;}
+node_cpu_package_throttles_total{instance=&quot;1-2:9100&quot;,job=&quot;equipment_R_node_exporter&quot;,package=&quot;1&quot;}
+</pre></div>
+</div>
+<p>Vector1 unless vector2 results in a vector consisting of the elements of vector1 for which there are no elements in vector2 with exactly matching label sets. All matching elements in both vectors are dropped.</p>
+<p>There are also other types of boolean operators, like group_left or group_right,
+in the online documentation.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference external" href="https://prometheus.io/docs/prometheus/latest/querying/operators/">https://prometheus.io/docs/prometheus/latest/querying/operators/</a></p>
+</div>
+</div>
+<div class="section" id="functions-aggregations">
+<h4><span class="section-number">11.2.5.3. </span>Functions &amp; aggregations<a class="headerlink" href="#functions-aggregations" title="Permalink to this headline">¶</a></h4>
+<p>Prometheus comes with a variety of querying functions. We will go through some
+of the major ones:</p>
+<ul class="simple">
+<li><p>delta</p></li>
+<li><p>irate</p></li>
+<li><p>avg</p></li>
+<li><p>sum</p></li>
+<li><p>min, max</p></li>
+</ul>
+<div class="section" id="delta">
+<h5><span class="section-number">11.2.5.3.1. </span>delta<a class="headerlink" href="#delta" title="Permalink to this headline">¶</a></h5>
+<p><em>delta()</em> calculates the difference of value between the value from X minutes
+ago and the current value.</p>
+<p>Example:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>delta(ipmi_current_amperes[5m])
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/query6.PNG"><img alt="_images/query6.PNG" src="_images/query6.PNG" style="width: 80%;" /></a>
+</div>
+<div class="section" id="rate-irate">
+<h5><span class="section-number">11.2.5.3.2. </span>rate &amp; irate<a class="headerlink" href="#rate-irate" title="Permalink to this headline">¶</a></h5>
+<p><em>rate()</em> gives you the per second average rate of change over your range
+interval.
+<em>irate()</em> is the per second rate of change at the end of your range interval</p>
+<p>The difference between rate and delta, is that rate automatically adjusts for
+resets. It means that it only works with “counter” variables, i.e. a variable
+that can only increase.
+For example, if a metric value changes like this:</p>
+<ul class="simple">
+<li><p>0</p></li>
+<li><p>4</p></li>
+<li><p>6</p></li>
+<li><p>10</p></li>
+</ul>
+<p>and resets:</p>
+<ul class="simple">
+<li><p>2</p></li>
+</ul>
+<p>Rate will capture the change, and will take the value of 2 as if it were 12 to
+get the rate.</p>
+</div>
+<div class="section" id="avg">
+<h5><span class="section-number">11.2.5.3.3. </span>avg<a class="headerlink" href="#avg" title="Permalink to this headline">¶</a></h5>
+<p><em>avg()</em> returns the average value of <strong>all</strong> query results.</p>
+<p>By default, it returns the avg value by job:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>avg(ipmi_current_amperes)
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/query8.PNG"><img alt="_images/query8.PNG" src="_images/query8.PNG" style="width: 50%;" /></a>
+<p>But you can also average by any other attribute, using avg(query) by(attribute):</p>
+<a class="reference internal image-reference" href="_images/query9.PNG"><img alt="_images/query9.PNG" src="_images/query9.PNG" style="width: 80%;" /></a>
+</div>
+<div class="section" id="avg-over-time">
+<h5><span class="section-number">11.2.5.3.4. </span>avg_over_time<a class="headerlink" href="#avg-over-time" title="Permalink to this headline">¶</a></h5>
+<p><em>avg_over_time()</em> is self explanatory, it gives you the average value of a
+metric during the given interval, <strong>for each instance</strong>.</p>
+<p>For example if ipmi_current_amperes had the values: 2, 4, 6 in the last 5m:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>avgi_over_time(ipmi_current_amperes[5m])
+</pre></div>
+</div>
+<p>would return 4.</p>
+<p>output example:</p>
+<a class="reference internal image-reference" href="_images/query7.PNG"><img alt="_images/query7.PNG" src="_images/query7.PNG" style="width: 80%;" /></a>
+</div>
+<div class="section" id="sum-min-max">
+<h5><span class="section-number">11.2.5.3.5. </span>sum, min, max<a class="headerlink" href="#sum-min-max" title="Permalink to this headline">¶</a></h5>
+<p>Self explanatory.
+Works the same way as <em>avg</em>, and can be used with _over_time too.</p>
+</div>
+<div class="section" id="more">
+<h5><span class="section-number">11.2.5.3.6. </span>more<a class="headerlink" href="#more" title="Permalink to this headline">¶</a></h5>
+<p>For <em>more</em> info, check:</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference external" href="https://prometheus.io/docs/prometheus/latest/querying/functions/">https://prometheus.io/docs/prometheus/latest/querying/functions/</a></p>
+</div>
+<p>It is now time to understand how alerts work in Prometheus.</p>
+</div>
+</div>
+</div>
+<div class="section" id="alerts">
+<h3><span class="section-number">11.2.6. </span>Alerts<a class="headerlink" href="#alerts" title="Permalink to this headline">¶</a></h3>
+<p>Alerts are located in the /etc/prometheus/alerts/ directory.</p>
+<p>An example of alert:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">groups</span><span class="p">:</span>
+<span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Alerts for nodes</span>
+  <span class="nt">rules</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="nt">alert</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">high_RAM_ Usage</span>
+    <span class="nt">expr</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">(1 - (node_memory_MemAvailable_bytes{job=~&quot;.*.R.*&quot;} / (node_memory_MemTotal_bytes{job=~&quot;.*.R.*&quot;})))* 100 &gt; 90</span>
+    <span class="nt">for</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1m</span>
+    <span class="nt">labels</span><span class="p">:</span>
+      <span class="nt">severity</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">warning</span>
+    <span class="nt">annotations</span><span class="p">:</span>
+      <span class="nt">summary</span><span class="p">:</span> <span class="s">&quot;</span><span class="nv"> </span><span class="s">(instance</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">$labels.instance</span><span class="nv"> </span><span class="s">}})&quot;</span>
+      <span class="nt">description</span><span class="p">:</span> <span class="s">&quot;memory</span><span class="nv"> </span><span class="s">usage</span><span class="nv"> </span><span class="s">greater</span><span class="nv"> </span><span class="s">than</span><span class="nv"> </span><span class="s">90%</span><span class="nv">  </span><span class="s">\n</span><span class="nv">  </span><span class="s">VALUE</span><span class="nv"> </span><span class="s">=</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">$value</span><span class="nv"> </span><span class="s">}}\n</span><span class="nv">  </span><span class="s">LABELS:</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">$labels</span><span class="nv"> </span><span class="s">}}&quot;</span>
+</pre></div>
+</div>
+<p>This alert will be seen as <em>pending</em> by Prometheus when the condition in
+<strong>expr:</strong> is verified, in this case, when the percentage of used RAM is greater
+than 90%.
+It will seen as <em>firing</em> when the condition is met for X minutes, hours, or
+days, X being in the <strong>for</strong> field.
+It will be fired with an extra label called severity, which is set to <em>warning</em>
+in this case.
+The annotations section is here to set a summary and description of the alert.
+You can access the variables of the metric by using de global variables
+{{ $value }} or {{ $labels }}.</p>
+<p>Tip: if you need a same alert to fire a warning after a t_1 desired time, and
+then fire a critical after a longer t_2 time, duplicate the alert, with the
+exact same name and arguments, changing only <strong>for</strong> and <strong>severity</strong>. The
+Alertmanager configuration is made to handle these case: when same name,
+a critical alert will overlap a warning alert.</p>
+<div class="section" id="alertmanager">
+<h4><span class="section-number">11.2.6.1. </span>Alertmanager<a class="headerlink" href="#alertmanager" title="Permalink to this headline">¶</a></h4>
+<p>Alertmanager is an additional tool for Prometheus, used to manage alerts.</p>
+<p><strong>Alertmanager DO NOT evaluate alerts</strong>, this is Prometheus task. Alertmanager
+is a tool to manage alerts already fired by Prometheus.</p>
+<p>By default, it’s located under the management node’s ip address, port 9093.
+Configuration file of Alertmanager is under /etc/alertmanager/alertmanager.yml.</p>
+<p>By default it looks like this:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">global</span><span class="p">:</span>
+  <span class="nt">smtp_smarthost</span><span class="p">:</span> <span class="s">&#39;localhost:25&#39;</span>
+  <span class="nt">smtp_from</span><span class="p">:</span> <span class="s">&#39;alertmanager@your_domain&#39;</span>
+  <span class="nt">smtp_require_tls</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
+
+<span class="nt">route</span><span class="p">:</span>
+  <span class="nt">group_by</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;alertname&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;job&#39;</span><span class="p p-Indicator">]</span>
+  <span class="nt">group_wait</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1m</span>
+  <span class="nt">group_interval</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10m</span>
+  <span class="nt">repeat_interval</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">3h</span>
+  <span class="nt">receiver</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">sys-admin-team</span>
+
+<span class="nt">receivers</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="s">&#39;sys-admin-team&#39;</span>
+    <span class="nt">email_configs</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="nt">to</span><span class="p">:</span> <span class="s">&#39;sys-admin-team@site.com&#39;</span>
+
+<span class="nt">inhibit_rules</span><span class="p">:</span>
+<span class="p p-Indicator">-</span> <span class="nt">source_match</span><span class="p">:</span>
+    <span class="nt">severity</span><span class="p">:</span> <span class="s">&#39;critical&#39;</span>
+  <span class="nt">target_match</span><span class="p">:</span>
+    <span class="nt">severity</span><span class="p">:</span> <span class="s">&#39;warning&#39;</span>
+  <span class="nt">equal</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;alertname&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;cluster&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;service&#39;</span><span class="p p-Indicator">]</span>
+</pre></div>
+</div>
+<p>You can find more about it here:</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference external" href="https://prometheus.io/docs/alerting/latest/configuration/">https://prometheus.io/docs/alerting/latest/configuration/</a></p>
+</div>
+<p>And here are examples of some alerts:</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference external" href="https://awesome-prometheus-alerts.grep.to/rules.html">https://awesome-prometheus-alerts.grep.to/rules.html</a></p>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="grafana">
+<h2><span class="section-number">11.3. </span>Grafana<a class="headerlink" href="#grafana" title="Permalink to this headline">¶</a></h2>
+<p>In this topic, we will see how to install Grafana, using the provided rpms.</p>
+<div class="section" id="id1">
+<h3><span class="section-number">11.3.1. </span>Installation<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="manual-installation">
+<h4><span class="section-number">11.3.1.1. </span>Manual installation<a class="headerlink" href="#manual-installation" title="Permalink to this headline">¶</a></h4>
+<p>There should be a package for grafana under the bluebanquise repository.</p>
+<p>By running the following command:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>dnf install grafana # (RHEL8)
+yum install grafana # (RHEL7)
+</pre></div>
+</div>
+<p>It should install grafana-server.</p>
+</div>
+</div>
+<div class="section" id="useful-files">
+<h3><span class="section-number">11.3.2. </span>Useful Files<a class="headerlink" href="#useful-files" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>The service is located under /usr/lib/systemd/system/grafana-server.service</p></li>
+<li><p>The binary under /usr/sbin/grafana-server</p></li>
+<li><p>Grafana datas (dashboards, and so on) are stored under /var/lib/grafana/grafana.db</p></li>
+<li><p>Grafana default settings under /usr/share/grafana/conf/default.ini</p></li>
+</ul>
+<p>Now, log into Grafana at <a class="reference external" href="http://localhost:3000">http://localhost:3000</a>, using default credentials
+admin / admin.</p>
+</div>
+<div class="section" id="dashboard">
+<h3><span class="section-number">11.3.3. </span>Dashboard<a class="headerlink" href="#dashboard" title="Permalink to this headline">¶</a></h3>
+<p>A dashboard is made of Query and Alerts.</p>
+<div class="section" id="query">
+<h4><span class="section-number">11.3.3.1. </span>Query<a class="headerlink" href="#query" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="metrics-field">
+<h5><span class="section-number">11.3.3.1.1. </span>metrics field<a class="headerlink" href="#metrics-field" title="Permalink to this headline">¶</a></h5>
+<p>This section is where you put Prometheus metric queries.
+See the Prometheus section of the documentation for more information about the metrics
+(functions, different types of variables, show only certain instances) as both
+tools share the same syntax.</p>
+<a class="reference internal image-reference" href="_images/supp1.PNG"><img alt="_images/supp1.PNG" src="_images/supp1.PNG" style="width: 80%;" /></a>
+<p>By default, it shows you the requested metric in a graph panel.</p>
+<a class="reference internal image-reference" href="_images/supp2.PNG"><img alt="_images/supp2.PNG" src="_images/supp2.PNG" style="width: 80%;" /></a>
+</div>
+<div class="section" id="legend-field">
+<h5><span class="section-number">11.3.3.1.2. </span>legend field<a class="headerlink" href="#legend-field" title="Permalink to this headline">¶</a></h5>
+<p>You can choose here what the legend will look like.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>syntaxe: {{ metric label }}text_you_want
+</pre></div>
+</div>
+<p>By default, it will show the whole metric.
+Example:</p>
+<a class="reference internal image-reference" href="_images/legend_field1.PNG"><img alt="_images/legend_field1.PNG" src="_images/legend_field1.PNG" style="width: 60%;" /></a>
+<p>By example:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>{{instance}}:toto:{{device}}
+</pre></div>
+</div>
+<p>Will provides:</p>
+<a class="reference internal image-reference" href="_images/legend_field2.PNG"><img alt="_images/legend_field2.PNG" src="_images/legend_field2.PNG" style="width: 30%;" /></a>
+</div>
+<div class="section" id="min-step-and-resolution">
+<h5><span class="section-number">11.3.3.1.3. </span>min step and resolution<a class="headerlink" href="#min-step-and-resolution" title="Permalink to this headline">¶</a></h5>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It is recommended not to change the min step and Resolution.</p>
+</div>
+</div>
+<div class="section" id="format">
+<h5><span class="section-number">11.3.3.1.4. </span>format<a class="headerlink" href="#format" title="Permalink to this headline">¶</a></h5>
+<p>Time series or table or heatmap. It is recommended to choose timeseries if you
+desire to make a graph.</p>
+</div>
+<div class="section" id="instant">
+<h5><span class="section-number">11.3.3.1.5. </span>instant<a class="headerlink" href="#instant" title="Permalink to this headline">¶</a></h5>
+<p>If you only want to have the latest scraped metric.
+Useful when using tables.</p>
+</div>
+</div>
+<div class="section" id="transform">
+<h4><span class="section-number">11.3.3.2. </span>Transform<a class="headerlink" href="#transform" title="Permalink to this headline">¶</a></h4>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The transform tab is new with Grafana 7, and is still in development.</p>
+</div>
+<a class="reference internal image-reference" href="_images/transform1.PNG"><img alt="_images/transform1.PNG" src="_images/transform1.PNG" style="width: 30%;" /></a>
+<p>Mainly useful when using graphs. Allows you to show the things you want in the
+table, by reducing, filtering, joining metrics, and organizing fields.</p>
+<p>For example :</p>
+<a class="reference internal image-reference" href="_images/transformExample.PNG"><img alt="_images/transformExample.PNG" src="_images/transformExample.PNG" style="width: 50%;" /></a>
+<p>Here, we have 3 queries, but if you make no transform, it will look like this:</p>
+<a class="reference internal image-reference" href="_images/transformExample3.PNG"><img alt="_images/transformExample3.PNG" src="_images/transformExample3.PNG" style="width: 80%;" /></a>
+<p>So we need to make the following transformations to get the desired table:</p>
+<ol class="arabic simple">
+<li><p>Filter by name, to only take the values that we want.</p></li>
+<li><p>Outer Join, to join the query values into one table (query A,query B,query C) here we join on ifName because it’s the common value between the queries that we want to use.</p></li>
+<li><p>Organize field, to put everything where we want, and to rename de fields Value B and Value C (values of the queries)  to show what they represent.</p></li>
+</ol>
+<p>With this transformation:</p>
+<a class="reference internal image-reference" href="_images/transformExample2.PNG"><img alt="_images/transformExample2.PNG" src="_images/transformExample2.PNG" style="width: 80%;" /></a>
+<p>You get the following result:</p>
+<a class="reference internal image-reference" href="_images/supp3.PNG"><img alt="_images/supp3.PNG" src="_images/supp3.PNG" style="width: 80%;" /></a>
+<p>You can find more about the different transformations here:
+<a class="reference external" href="https://grafana.com/docs/grafana/latest/panels/transformations/">https://grafana.com/docs/grafana/latest/panels/transformations/</a></p>
+</div>
+<div class="section" id="alert">
+<h4><span class="section-number">11.3.3.3. </span>Alert<a class="headerlink" href="#alert" title="Permalink to this headline">¶</a></h4>
+<p>You can create alerts in Grafana, by setting up conditions.
+It is pretty much self-explanatory, but if you want more info, you can check
+this link: <a class="reference external" href="https://grafana.com/docs/grafana/latest/alerting/create-alerts/">https://grafana.com/docs/grafana/latest/alerting/create-alerts/</a></p>
+<p>Note that alerts defined in Grafana are not related to alerts defined in
+Prometheus.</p>
+<p>Note also that using plugins, it is possible to import into Grafana alerts
+registered into Alertmanager.</p>
+</div>
+</div>
+<div class="section" id="types-of-visualization">
+<h3><span class="section-number">11.3.4. </span>Types of Visualization<a class="headerlink" href="#types-of-visualization" title="Permalink to this headline">¶</a></h3>
+<p>By default, there are 11 different types of visualization, but you can install
+more using the plugin list.
+You can find them here:
+<a class="reference external" href="https://grafana.com/grafana/plugins?direction=asc&amp;orderBy=weight&amp;type=panel">https://grafana.com/grafana/plugins?direction=asc&amp;orderBy=weight&amp;type=panel</a></p>
+<p>In this documentation, we will go through 2 of the most used ones, as they have
+approximately all the options that other types of visualization have.</p>
+<div class="section" id="graph">
+<h4><span class="section-number">11.3.4.1. </span>Graph<a class="headerlink" href="#graph" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="panel">
+<h5><span class="section-number">11.3.4.1.1. </span>Panel<a class="headerlink" href="#panel" title="Permalink to this headline">¶</a></h5>
+<div class="section" id="display">
+<h6><span class="section-number">11.3.4.1.1.1. </span>Display<a class="headerlink" href="#display" title="Permalink to this headline">¶</a></h6>
+<p>Here, you can choose the design of your graph. You can fidget with the options
+to get your desired graph.
+If you want more info, check
+<a class="reference external" href="https://grafana.com/docs/grafana/latest/panels/visualizations/graph-panel/">https://grafana.com/docs/grafana/latest/panels/visualizations/graph-panel/</a></p>
+</div>
+<div class="section" id="series-override">
+<h6><span class="section-number">11.3.4.1.1.2. </span>Series override<a class="headerlink" href="#series-override" title="Permalink to this headline">¶</a></h6>
+<p>In this section, you have access to even more customization. It allows you to
+customize only certain series, using regex.
+Here is a detailed example on how to use it:
+<a class="reference external" href="https://community.grafana.com/t/advanced-graphing-part1-style-overrides/207">https://community.grafana.com/t/advanced-graphing-part1-style-overrides/207</a></p>
+</div>
+<div class="section" id="axes">
+<h6><span class="section-number">11.3.4.1.1.3. </span>Axes<a class="headerlink" href="#axes" title="Permalink to this headline">¶</a></h6>
+<p>Choose the units of the axes, and relabel them. You can also add mins and maxs.
+You can have more info here:</p>
+</div>
+<div class="section" id="legend">
+<h6><span class="section-number">11.3.4.1.1.4. </span>Legend<a class="headerlink" href="#legend" title="Permalink to this headline">¶</a></h6>
+<p>Legend related options, you can show the legend as a table, add min, max, avg,
+current values.</p>
+<a class="reference internal image-reference" href="_images/LegendExample.PNG"><img alt="_images/LegendExample.PNG" src="_images/LegendExample.PNG" style="width: 80%;" /></a>
+</div>
+<div class="section" id="thresholds">
+<h6><span class="section-number">11.3.4.1.1.5. </span>Thresholds<a class="headerlink" href="#thresholds" title="Permalink to this headline">¶</a></h6>
+<p>The threshold lets you change the background color when the value is less than
+or greater than the chosen value.</p>
+<a class="reference internal image-reference" href="_images/thresholdExample1.PNG"><img alt="_images/thresholdExample1.PNG" src="_images/thresholdExample1.PNG" style="width: 80%;" /></a>
+</div>
+<div class="section" id="time-regions">
+<h6><span class="section-number">11.3.4.1.1.6. </span>Time regions<a class="headerlink" href="#time-regions" title="Permalink to this headline">¶</a></h6>
+<p>Allows to highlight certain time regions of the graph, not used very often.</p>
+</div>
+<div class="section" id="data-links-links">
+<h6><span class="section-number">11.3.4.1.1.7. </span>Data links, links<a class="headerlink" href="#data-links-links" title="Permalink to this headline">¶</a></h6>
+<p>Here, you can add links to different graphs, using the URL.
+For more info, check here:
+<a class="reference external" href="https://grafana.com/docs/grafana/latest/linking/data-links/">https://grafana.com/docs/grafana/latest/linking/data-links/</a></p>
+</div>
+</div>
+</div>
+<div class="section" id="bar-gauge">
+<h4><span class="section-number">11.3.4.2. </span>Bar gauge<a class="headerlink" href="#bar-gauge" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id2">
+<h5><span class="section-number">11.3.4.2.1. </span>Panel<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h5>
+<div class="section" id="id3">
+<h6><span class="section-number">11.3.4.2.1.1. </span>Display<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h6>
+<p>You can choose between two options in the show option.
+Calculate will show you the result of the calculation (First Value, Last Value,
+and so on), whereas All Values will show you all the values scraped in the last
+XX minutes. You can choose the max number of results in the Limit field.
+You can also choose  the orientation and the display mode (aesthetics)</p>
+<a class="reference internal image-reference" href="_images/BarGaugeex1.PNG"><img alt="_images/BarGaugeex1.PNG" src="_images/BarGaugeex1.PNG" style="width: 80%;" /></a>
+</div>
+<div class="section" id="links">
+<h6><span class="section-number">11.3.4.2.1.2. </span>Links<a class="headerlink" href="#links" title="Permalink to this headline">¶</a></h6>
+<p>Cf above.</p>
+</div>
+<div class="section" id="repeat-options">
+<h6><span class="section-number">11.3.4.2.1.3. </span>Repeat options<a class="headerlink" href="#repeat-options" title="Permalink to this headline">¶</a></h6>
+<p>If activated, will show the panel X times in the dashboard, with X being the
+number of results we get.</p>
+<p>for example with the repeat option enabled:</p>
+<a class="reference internal image-reference" href="_images/BarGaugeex2.PNG"><img alt="_images/BarGaugeex2.PNG" src="_images/BarGaugeex2.PNG" style="width: 80%;" /></a>
+<p>without the repeat option enabled:</p>
+<a class="reference internal image-reference" href="_images/BarGaugeex3.PNG"><img alt="_images/BarGaugeex3.PNG" src="_images/BarGaugeex3.PNG" style="width: 50%;" /></a>
+<p>as you can see, in one case, you get the results in different panels, and in the
+other case you get the results in the same panel.</p>
+</div>
+</div>
+<div class="section" id="field">
+<h5><span class="section-number">11.3.4.2.2. </span>Field<a class="headerlink" href="#field" title="Permalink to this headline">¶</a></h5>
+<div class="section" id="unit">
+<h6><span class="section-number">11.3.4.2.2.1. </span>Unit<a class="headerlink" href="#unit" title="Permalink to this headline">¶</a></h6>
+<p>Self-explanatory, choose the unit, min, max and the display name for the values.</p>
+</div>
+<div class="section" id="id4">
+<h6><span class="section-number">11.3.4.2.2.2. </span>Thresholds<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h6>
+<p>Changes the color of the bars according to what is put in the threshold.</p>
+<p>Example:</p>
+<a class="reference internal image-reference" href="_images/thresholdExample2.PNG"><img alt="_images/thresholdExample2.PNG" src="_images/thresholdExample2.PNG" style="width: 80%;" /></a>
+</div>
+<div class="section" id="value-mapping">
+<h6><span class="section-number">11.3.4.2.2.3. </span>Value mapping<a class="headerlink" href="#value-mapping" title="Permalink to this headline">¶</a></h6>
+<p>Transforms the values into text.</p>
+<p>Example:</p>
+<a class="reference internal image-reference" href="_images/ValueMappingEx.PNG"><img alt="_images/ValueMappingEx.PNG" src="_images/ValueMappingEx.PNG" style="width: 80%;" /></a>
+<p>Here, we know that if the metric’s value is 1, it means that it is up, 2 down,
+and so on.
+So we map those values accordingly.</p>
+</div>
+<div class="section" id="data-links">
+<h6><span class="section-number">11.3.4.2.2.4. </span>Data links<a class="headerlink" href="#data-links" title="Permalink to this headline">¶</a></h6>
+<p>See above.</p>
+</div>
+</div>
+<div class="section" id="override">
+<h5><span class="section-number">11.3.4.2.3. </span>Override<a class="headerlink" href="#override" title="Permalink to this headline">¶</a></h5>
+<p>Override lets you override some values, by filtering fields.
+However, it is still a beta option.</p>
+<p>For more info check above.</p>
+</div>
+</div>
+</div>
+<div class="section" id="extra">
+<h3><span class="section-number">11.3.5. </span>Extra<a class="headerlink" href="#extra" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id5">
+<h4><span class="section-number">11.3.5.1. </span>Variables<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h4>
+<p>To access get variables like these:</p>
+<a class="reference internal image-reference" href="_images/Captureshow.PNG"><img alt="_images/Captureshow.PNG" src="_images/Captureshow.PNG" style="width: 30%;" /></a>
+<p>first, go to the top right corner of Grafana:</p>
+<a class="reference internal image-reference" href="_images/variable.PNG"><img alt="_images/variable.PNG" src="_images/variable.PNG" style="width: 30%;" /></a>
+<p>go to variable:</p>
+<a class="reference internal image-reference" href="_images/Variable1.PNG"><img alt="_images/Variable1.PNG" src="_images/Variable1.PNG" style="width: 20%;" /></a>
+<p>Then, enter a query to get the results you want to transform as a variable.
+For example:</p>
+<a class="reference internal image-reference" href="_images/variable2.PNG"><img alt="_images/variable2.PNG" src="_images/variable2.PNG" style="width: 30%;" /></a>
+<p>By doing this query you get the different instances of ifOutOctets.
+Without the regex used like that:</p>
+<a class="reference internal image-reference" href="_images/variable3.PNG"><img alt="_images/variable3.PNG" src="_images/variable3.PNG" style="width: 80%;" /></a>
+<p>you should get results like that:</p>
+<a class="reference internal image-reference" href="_images/variable4.PNG"><img alt="_images/variable4.PNG" src="_images/variable4.PNG" style="width: 50%;" /></a>
+<p>However, by using the regex seen above, we get results that can be later used
+with some queries, like for example:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ifConnectorPresent{ifName=~&quot;$interface&quot;}
+</pre></div>
+</div>
+<p>with $interface the name of our variable.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Here, we use =~ in order to accept special regex characters, like .* for example. You can see more about that in the Prometheus part of the documentation</p>
+</div>
+</div>
+<div class="section" id="main-dashboard">
+<h4><span class="section-number">11.3.5.2. </span>Main Dashboard<a class="headerlink" href="#main-dashboard" title="Permalink to this headline">¶</a></h4>
+<p>To create a main dashboard, simply create a new dashboard, and choose
+visualization style “Dashboard list”, you should get something like that:</p>
+<a class="reference internal image-reference" href="_images/MainDashboard.PNG"><img alt="_images/MainDashboard.PNG" src="_images/MainDashboard.PNG" style="width: 20%;" /></a>
+<p>Choose the Search option and then simply choose the folder that you want to list.</p>
+<a class="reference internal image-reference" href="_images/mainDashboard2.PNG"><img alt="_images/mainDashboard2.PNG" src="_images/mainDashboard2.PNG" style="width: 80%;" /></a>
+<p>By clicking on the dashboard links, you get redirected to them.</p>
+</div>
+</div>
+</div>
+<div class="section" id="exporters">
+<h2><span class="section-number">11.4. </span>Exporters<a class="headerlink" href="#exporters" title="Permalink to this headline">¶</a></h2>
+<p>Multiple exporters are available for Prometheus.
+Most of them can be found here:
+<a class="reference external" href="https://prometheus.io/docs/instrumenting/exporters/">https://prometheus.io/docs/instrumenting/exporters/</a></p>
+<p>We will go through some of them.</p>
+<div class="section" id="node-exporter">
+<h3><span class="section-number">11.4.1. </span>Node_exporter<a class="headerlink" href="#node-exporter" title="Permalink to this headline">¶</a></h3>
+<p>The node_exporter is an official exporter from Prometheus, and can be found
+here: <a class="reference external" href="https://github.com/prometheus/node_exporter">https://github.com/prometheus/node_exporter</a></p>
+<p>By default, the node_exporter runs under the port 9100.</p>
+<p>To access the metrics, either do:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>curl http://localhost:9100/metrics
+</pre></div>
+</div>
+<p>or access it directly in a browser. However, using curl can be handy, because
+you can grep the output, and do other nice things with it.</p>
+<p>You should get something like this:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># HELP node_vmstat_pgpgin /proc/vmstat information field pgpgin.
+# TYPE node_vmstat_pgpgin untyped
+node_vmstat_pgpgin 2.25160698e+08
+# HELP node_vmstat_pgpgout /proc/vmstat information field pgpgout.
+# TYPE node_vmstat_pgpgout untyped
+node_vmstat_pgpgout 1.18421998e+09
+# HELP node_vmstat_pswpin /proc/vmstat information field pswpin.
+# TYPE node_vmstat_pswpin untyped
+node_vmstat_pswpin 47719
+# HELP node_vmstat_pswpout /proc/vmstat information field pswpout.
+# TYPE node_vmstat_pswpout untyped
+node_vmstat_pswpout 532036
+# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE process_cpu_seconds_total counter
+process_cpu_seconds_total 20272.88
+# HELP process_max_fds Maximum number of open file descriptors.
+# TYPE process_max_fds gauge
+process_max_fds 1024
+</pre></div>
+</div>
+<p>There are a lot of information given by node_exporter. It is an heavy
+exporter, that is generally not run on compute nodes, in order to prevent
+any loss of computational power.</p>
+<p>Some of the information given are the following:</p>
+<ul class="simple">
+<li><p>Cpu core throttle</p></li>
+<li><p>Cpu max,min,scaled frequency</p></li>
+<li><p>Cpu time spent in each mode</p></li>
+<li><p>Discards total time</p></li>
+<li><p>Disk information (discard time,discarded sectors,discards completed, discards merged,disk io, disk io time, disk io time weighted seconds, disk read bytes, disk read time,…)</p></li>
+<li><p>Filesystem (avail bytes, errors, mount points,etc…)</p></li>
+<li><p>Temperature sensors values</p></li>
+<li><p>Infiniband</p></li>
+<li><p>Memory usage, etc…</p></li>
+<li><p>Network( mtu bytes, protocols, received bytes, etc…)</p></li>
+<li><p>Nfs requests</p></li>
+<li><p>Scrape</p></li>
+<li><p>Etc…</p></li>
+</ul>
+<p>You can see more by looking at the local metrics.</p>
+<div class="section" id="id6">
+<h4><span class="section-number">11.4.1.1. </span>Alerts<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h4>
+<p>All the alerts for the node_exporter are stored under
+/etc/prometheus/alerts/node.yml</p>
+<p>Some of them include :</p>
+<ul class="simple">
+<li><p>High RAM usage</p></li>
+<li><p>High CPU usage</p></li>
+<li><p>High mount volume</p></li>
+<li><p>Host out of inodes</p></li>
+<li><p>Unusual disk write latency</p></li>
+<li><p>etc…</p></li>
+</ul>
+</div>
+<div class="section" id="start-service">
+<h4><span class="section-number">11.4.1.2. </span>Start service<a class="headerlink" href="#start-service" title="Permalink to this headline">¶</a></h4>
+<p>To start the service, simply run:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>systemctl start node_exporter
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>all exporter services are under the /etc/systemd/system directory, and most binaries are under the /usr/local/bin directory</p>
+</div>
+</div>
+<div class="section" id="id7">
+<h4><span class="section-number">11.4.1.3. </span>Dashboard<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h4>
+<p>Grafana open source dashboard:</p>
+<ul class="simple">
+<li><p>General info (structure, release, system, version,domain name)</p></li>
+<li><p>CPU Busy</p></li>
+<li><p>Used RAM, Used Max Mount, CPU IO wait, CPU Cores, etc..</p></li>
+<li><p>Mounts (Available, used, etc…)</p></li>
+<li><p>System load</p></li>
+<li><p>CPU Basic</p></li>
+</ul>
+<p>To access the dashboard: access the management at <a class="reference external" href="http://localhost:3000">http://localhost:3000</a></p>
+<p>You can also do some “port forwarding” to reach Grafana.</p>
+</div>
+</div>
+<div class="section" id="ipmi-exporter">
+<h3><span class="section-number">11.4.2. </span>Ipmi_exporter<a class="headerlink" href="#ipmi-exporter" title="Permalink to this headline">¶</a></h3>
+<p>The ipmi_exporter is an official Prometheus exporter, and can be found here:
+<a class="reference external" href="https://github.com/soundcloud/ipmi_exporter">https://github.com/soundcloud/ipmi_exporter</a></p>
+<p>By default, the ipmi_exporter runs under the port 9290.</p>
+<p>To access the metrics, either do:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>curl &#39;http://localhost:9290/ipmi?target=mgmt1-1-bmc&amp;module=equipment_R_E4m&#39;
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>here, the request is <a class="reference external" href="http:/">http:/</a>/&lt;ip address of where the exporter is located&gt;/snmp?target=&lt;name of the taget to get metrics from&gt;&amp;module=&lt;module&gt;</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>you can get the list of all modules here: <em>/etc/ipmi_exporter/ipmi_config.yml</em></p>
+</div>
+<p>or you can access it directly in a browser. However, using curl can be handy,
+because you can grep the output, and do other nice things with it.</p>
+<p>You can get a list of all modules under <em>/etc/ipmi_exporter/ipmi_config.yml</em></p>
+<p>The ipmi_config file is automatically generated by the ansible prometheus_server
+role.</p>
+<p>You should get something like this:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># HELP ipmi_bmc_info Constant metric with value &#39;1&#39; providing details about the BMC.
+# TYPE ipmi_bmc_info gauge
+ipmi_bmc_info{firmware_revision=&quot;3.70&quot;,manufacturer_id=&quot;Super Micro Computer Inc. (10876)&quot;} 1
+# HELP ipmi_chassis_power_state Current power state (1=on, 0=off).
+# TYPE ipmi_chassis_power_state gauge
+ipmi_chassis_power_state 1
+# HELP ipmi_fan_speed_rpm Fan speed in rotations per minute.
+# TYPE ipmi_fan_speed_rpm gauge
+ipmi_fan_speed_rpm{id=&quot;1679&quot;,name=&quot;P-FAN1&quot;} 7000
+ipmi_fan_speed_rpm{id=&quot;1746&quot;,name=&quot;P-FAN2&quot;} 6600
+ipmi_fan_speed_rpm{id=&quot;1813&quot;,name=&quot;S-FAN1&quot;} 7300
+ipmi_fan_speed_rpm{id=&quot;1880&quot;,name=&quot;S-FAN2&quot;} 7500
+ipmi_fan_speed_rpm{id=&quot;1947&quot;,name=&quot;MB-FAN4&quot;} 7400
+ipmi_fan_speed_rpm{id=&quot;2014&quot;,name=&quot;MB-FAN5&quot;} 7100
+# HELP ipmi_fan_speed_state Reported state of a fan speed sensor (0=nominal, 1=warning, 2=critical).
+# TYPE ipmi_fan_speed_state gauge
+ipmi_fan_speed_state{id=&quot;1679&quot;,name=&quot;P-FAN1&quot;} 0
+</pre></div>
+</div>
+<p>Some of the information given are the following:</p>
+<ul class="simple">
+<li><p>Fan speed</p></li>
+<li><p>Power consumption in watts</p></li>
+<li><p>Temperature (multiple sensors)</p></li>
+<li><p>Voltage</p></li>
+<li><p>Amperes</p></li>
+<li><p>Etc…</p></li>
+</ul>
+<p>You can see more by looking at the local metrics.</p>
+<div class="section" id="id8">
+<h4><span class="section-number">11.4.2.1. </span>Alerts<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h4>
+<p>All the alerts for the ipmi_exporter are stored under /etc/prometheus/alerts/ipmi.yml</p>
+<p>Some of them include :</p>
+<ul class="simple">
+<li><p>High fan speed</p></li>
+<li><p>Fan speed too high</p></li>
+<li><p>High power consumption</p></li>
+<li><p>Power consumption too high</p></li>
+<li><p>Problem with powers supply</p></li>
+<li><p>High ipmi temperature</p></li>
+<li><p>Ipmi temperature too high</p></li>
+<li><p>Scraping problem</p></li>
+<li><p>High voltage</p></li>
+<li><p>Voltage too high</p></li>
+</ul>
+</div>
+<div class="section" id="id9">
+<h4><span class="section-number">11.4.2.2. </span>Start service<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h4>
+<p>To start the service, simply type:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>systemctl start ipmi_exporter
+</pre></div>
+</div>
+<p>You can change the BMC options of the inventory groups (compute nodes or
+management nodes) under <em>/etc/ipmi_exporter/ipmi_config.yml</em></p>
+<p>By default, it should look like this:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">modules</span><span class="p">:</span>
+
+<span class="nt">equipment_compute_C</span><span class="p">:</span>
+  <span class="nt">user</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">user</span>
+  <span class="nt">pass</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">password</span>
+  <span class="nt">driver</span><span class="p">:</span> <span class="s">&quot;LAN_2_0&quot;</span>
+  <span class="nt">privilege</span><span class="p">:</span> <span class="s">&quot;user&quot;</span>
+  <span class="nt">timeout</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10000</span>
+  <span class="nt">collectors</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">bmc</span>
+  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">ipmi</span>
+  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">chassis</span>
+  <span class="nt">exclude_sensor_ids</span><span class="p">:</span>
+
+
+<span class="nt">equipment_R_E4m</span><span class="p">:</span>
+  <span class="nt">user</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ADMIN</span>
+  <span class="nt">pass</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ADMIN</span>
+  <span class="nt">driver</span><span class="p">:</span> <span class="s">&quot;LAN_2_0&quot;</span>
+  <span class="nt">privilege</span><span class="p">:</span> <span class="s">&quot;user&quot;</span>
+  <span class="nt">timeout</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10000</span>
+  <span class="nt">collectors</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">bmc</span>
+  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">ipmi</span>
+  <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">chassis</span>
+  <span class="nt">exclude_sensor_ids</span><span class="p">:</span>
+</pre></div>
+</div>
+<p>If you modify the BMC username or password, don’t forget to check the changes
+in this file.</p>
+</div>
+<div class="section" id="id10">
+<h4><span class="section-number">11.4.2.3. </span>Dashboard<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h4>
+<p>There are several dashboards for ipmi.</p>
+<p>They give the following:</p>
+<ul class="simple">
+<li><p>Fan speed (min,max,avg,current) graph</p></li>
+<li><p>Temperature ( per sensors)</p></li>
+<li><p>Average Temperature of all sensors (min,max,avg,current)</p></li>
+<li><p>Alerts (warnings and critical)</p></li>
+<li><p>Power consumption (min,max,avg,current)</p></li>
+<li><p>Voltage (per sensors)</p></li>
+<li><p>Amperes</p></li>
+<li><p>etc…</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="snmp-exporter">
+<h3><span class="section-number">11.4.3. </span>Snmp_exporter<a class="headerlink" href="#snmp-exporter" title="Permalink to this headline">¶</a></h3>
+<p>The snmp_exporter can be found here:
+<a class="reference external" href="https://github.com/prometheus/snmp_exporter">https://github.com/prometheus/snmp_exporter</a></p>
+<p>By default, the snmp_exorter runs under the port 9116.</p>
+<p>This exporter, along with the ipmi exporter, is a little special, as it executes
+snmp commands on the targets. So we can get the metrics of all the targets with
+the exporter running locally on our management server.</p>
+<p>To access the metrics, do:</p>
+<blockquote>
+<div><p>curl ‘<a class="reference external" href="http://localhost:9116/snmp?target=switch-001">http://localhost:9116/snmp?target=switch-001</a>’</p>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>here, the request is <a class="reference external" href="http:/">http:/</a>/&lt;ip address of where the exporter is located&gt;/snmp?target=&lt;ip address of the switch that we want the metrics from&gt;</p>
+</div>
+<p>Otherwise we can  access it directly in a browser. However, using curl can be
+handy, because you can grep the output, and do other nice things with it.</p>
+<p>You should get something like this:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># HELP ifAdminStatus The desired state of the interface - 1.3.6.1.2.1.2.2.1.7
+# TYPE ifAdminStatus gauge
+ifAdminStatus{ifAlias=&quot;&quot;,ifDescr=&quot;&quot;,ifIndex=&quot;1&quot;,ifName=&quot;Gi0/0&quot;} 2
+ifAdminStatus{ifAlias=&quot;&quot;,ifDescr=&quot;&quot;,ifIndex=&quot;10&quot;,ifName=&quot;Gi1/0/3&quot;} 1
+ifAdminStatus{ifAlias=&quot;&quot;,ifDescr=&quot;&quot;,ifIndex=&quot;11&quot;,ifName=&quot;Gi1/0/4&quot;} 1
+ifAdminStatus{ifAlias=&quot;&quot;,ifDescr=&quot;&quot;,ifIndex=&quot;12&quot;,ifName=&quot;Gi1/0/5&quot;} 1
+ifAdminStatus{ifAlias=&quot;&quot;,ifDescr=&quot;&quot;,ifIndex=&quot;13&quot;,ifName=&quot;Gi1/0/6&quot;} 1
+ifAdminStatus{ifAlias=&quot;&quot;,ifDescr=&quot;&quot;,ifIndex=&quot;2&quot;,ifName=&quot;Nu0&quot;} 1
+ifAdminStatus{ifAlias=&quot;&quot;,ifDescr=&quot;&quot;,ifIndex=&quot;20&quot;,ifName=&quot;Gi1/0/13&quot;} 1
+ifAdminStatus{ifAlias=&quot;&quot;,ifDescr=&quot;&quot;,ifIndex=&quot;27&quot;,ifName=&quot;Gi1/0/20&quot;} 1
+ifAdminStatus{ifAlias=&quot;&quot;,ifDescr=&quot;&quot;,ifIndex=&quot;29&quot;,ifName=&quot;Gi1/0/22&quot;} 1
+ifAdminStatus{ifAlias=&quot;&quot;,ifDescr=&quot;&quot;,ifIndex=&quot;3&quot;,ifName=&quot;VLAN-1&quot;} 1
+</pre></div>
+</div>
+<div class="section" id="snmp-exporter-setup">
+<h4><span class="section-number">11.4.3.1. </span>Snmp_exporter setup<a class="headerlink" href="#snmp-exporter-setup" title="Permalink to this headline">¶</a></h4>
+<p>The setup of this exporter is a little tricky.</p>
+<p>By default, we provide a configuration file for this exporter only for cisco
+switches.</p>
+<p>This is because snmp needs specific OIDS, in order to query the switches.
+These OIDS can vary depending on the switch you use.</p>
+<p>You can have a look at all OIDS available here:
+<a class="reference external" href="https://cric.grenoble.cnrs.fr/Administrateurs/Outils/MIBS/">https://cric.grenoble.cnrs.fr/Administrateurs/Outils/MIBS/</a></p>
+<p>You can find this file under /etc/snmp_exporter/snmp.yml</p>
+<p>It should look something like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">..</span> <span class="n">code</span><span class="o">-</span><span class="n">block</span><span class="p">::</span> <span class="n">yaml</span>
+</pre></div>
+</div>
+<blockquote>
+<div><dl class="simple">
+<dt>if_mib:</dt><dd><dl class="simple">
+<dt>walk:</dt><dd><ul class="simple">
+<li><p>1.3.6.1.2.1.2</p></li>
+<li><p>1.3.6.1.2.1.31.1.1</p></li>
+<li><p>1.3.6.1.4.1.25461.2.1.2.3.11.1.2</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+<dt>get:</dt><dd><ul class="simple">
+<li><p>1.3.6.1.2.1.1.3.0</p></li>
+</ul>
+</dd>
+<dt>metrics:</dt><dd><ul class="simple">
+<li><p>name: sysUpTime
+oid: 1.3.6.1.2.1.1.3
+type: gauge
+help: The time (in hundredths of a second) since the network management portion of the system was last re-initialized. - 1.3.6.1.2.1.1.3</p></li>
+<li><p>name: ifNumber
+oid: 1.3.6.1.2.1.2.1
+type: gauge
+help: The number of network interfaces (regardless of their current state) present on this system. - 1.3.6.1.2.1.2.1</p></li>
+<li><p>name: ifIndex
+oid: 1.3.6.1.2.1.2.2.1.1
+type: gauge
+help: A unique value, greater than zero, for each interface - 1.3.6.1.2.1.2.2.1.1
+indexes:</p></li>
+</ul>
+</dd>
+</dl>
+</div></blockquote>
+<p>If you have another switch you want to query, you can generate another file than
+the one we provide.</p>
+<p>By installing snmp_exporter, you should have a generator installed under
+/usr/local/go/src/github.com/prometheus/snmp_exporter/generator</p>
+<p>Here, you have a file, generator.yml that you have to change, according to what
+you want.</p>
+<p>By default, it looks like this:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>modules:
+# Default IF-MIB interfaces table with ifIndex.
+if_mib:
+  walk: [sysUpTime, interfaces,ifXTable]
+  version: 1
+  auth:
+    community: cluster
+  lookups:
+    - source_indexes: [ifIndex]
+      lookup: ifAlias
+    - source_indexes: [ifIndex]
+      lookup: ifDescr
+    - source_indexes: [ifIndex]
+      # Use OID to avoid conflict with Netscaler NS-ROOT-MIB.
+      lookup: 1.3.6.1.2.1.31.1.1.1.1 # ifName
+  overrides:
+    ifAlias:
+      ignore: true # Lookup metric
+    ifDescr:
+      ignore: true # Lookup metric
+    ifName:
+      ignore: true # Lookup metric
+    ifType:
+      type: EnumAsInfo
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Notice the auth section, by default, we setup the switches with the cluster community with no password required. See the switch setup section for more info.</p>
+</div>
+<p>You can tune it as you want, as long as you follow this syntax:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>modules:
+module_name:  # The module name. You can have as many modules as you want.
+  walk:       # List of OIDs to walk. Can also be SNMP object names or specific instances.
+    - 1.3.6.1.2.1.2              # Same as &quot;interfaces&quot;
+    - sysUpTime                  # Same as &quot;1.3.6.1.2.1.1.3&quot;
+    - 1.3.6.1.2.1.31.1.1.1.6.40  # Instance of &quot;ifHCInOctets&quot; with index &quot;40&quot;
+
+  version: 2  # SNMP version to use. Defaults to 2.
+              # 1 will use GETNEXT, 2 and 3 use GETBULK.
+  max_repetitions: 25  # How many objects to request with GET/GETBULK, defaults to 25.
+                       # May need to be reduced for buggy devices.
+  retries: 3   # How many times to retry a failed request, defaults to 3.
+  timeout: 5s  # Timeout for each individual SNMP request, defaults to 5s.
+
+  auth:
+    # Community string is used with SNMP v1 and v2. Defaults to &quot;public&quot;.
+    community: public
+
+    # v3 has different and more complex settings.
+    # Which are required depends on the security_level.
+    # The equivalent options on NetSNMP commands like snmpbulkwalk
+    # and snmpget are also listed. See snmpcmd(1).
+    username: user  # Required, no default. -u option to NetSNMP.
+    security_level: noAuthNoPriv  # Defaults to noAuthNoPriv. -l option to NetSNMP.
+                                  # Can be noAuthNoPriv, authNoPriv or authPriv.
+    password: pass  # Has no default. Also known as authKey, -A option to NetSNMP.
+                    # Required if security_level is authNoPriv or authPriv.
+    auth_protocol: MD5  # MD5 or SHA, defaults to MD5. -a option to NetSNMP.
+                        # Used if security_level is authNoPriv or authPriv.
+    priv_protocol: DES  # DES or AES, defaults to DES. -x option to NetSNMP.
+                        # Used if security_level is authPriv.
+    priv_password: otherPass # Has no default. Also known as privKey, -X option to NetSNMP.
+                             # Required if security_level is authPriv.
+    context_name: context # Has no default. -n option to NetSNMP.
+                          # Required if context is configured on the device.
+
+  lookups:  # Optional list of lookups to perform.
+            # The default for `keep_source_indexes` is false. Indexes must be unique for this option to be used.
+
+    # If the index of a table is bsnDot11EssIndex, usually that&#39;d be the label
+    # on the resulting metrics from that table. Instead, use the index to
+    # lookup the bsnDot11EssSsid table entry and create a bsnDot11EssSsid label
+    # with that value.
+    - source_indexes: [bsnDot11EssIndex]
+      lookup: bsnDot11EssSsid
+      drop_source_indexes: false  # If true, delete source index labels for this lookup.
+                                  # This avoids label clutter when the new index is unique.
+
+   overrides: # Allows for per-module overrides of bits of MIBs
+     metricName:
+       ignore: true # Drops the metric from the output.
+       regex_extracts:
+         Temp: # A new metric will be created appending this to the metricName to become metricNameTemp.
+           - regex: &#39;(.*)&#39; # Regex to extract a value from the returned SNMP walks&#39;s value.
+             value: &#39;$1&#39; # The result will be parsed as a float64, defaults to $1.
+         Status:
+           - regex: &#39;.*Example&#39;
+             value: &#39;1&#39; # The first entry whose regex matches and whose value parses wins.
+           - regex: &#39;.*&#39;
+             value: &#39;0&#39;
+       type: DisplayString # Override the metric type, possible types are:
+                           #   gauge:   An integer with type gauge.
+                           #   counter: An integer with type counter.
+                           #   OctetString: A bit string, rendered as 0xff34.
+                           #   DateAndTime: An RFC 2579 DateAndTime byte sequence. If the device has no time zone data, UTC is used.
+                           #   DisplayString: An ASCII or UTF-8 string.
+                           #   PhysAddress48: A 48 bit MAC address, rendered as 00:01:02:03:04:ff.
+                           #   Float: A 32 bit floating-point value with type gauge.
+                           #   Double: A 64 bit floating-point value with type gauge.
+                           #   InetAddressIPv4: An IPv4 address, rendered as 1.2.3.4.
+                           #   InetAddressIPv6: An IPv6 address, rendered as 0102:0304:0506:0708:090A:0B0C:0D0E:0F10.
+                           #   InetAddress: An InetAddress per RFC 4001. Must be preceded by an InetAddressType.
+                           #   InetAddressMissingSize: An InetAddress that violates section 4.1 of RFC 4001 by
+                           #       not having the size in the index. Must be preceded by an InetAddressType.
+                           #   EnumAsInfo: An enum for which a single timeseries is created. Good for constant values.
+                           #   EnumAsStateSet: An enum with a time series per state. Good for variable low-cardinality enums.
+                           #   Bits: An RFC 2578 BITS construct, which produces a StateSet with a time series per bit.
+</pre></div>
+</div>
+<p>Here is a list of MIBS:</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference external" href="https://github.com/librenms/librenms/tree/master/mibs">https://github.com/librenms/librenms/tree/master/mibs</a></p>
+</div>
+<p>You can get more info here:</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference external" href="https://github.com/prometheus/snmp_exporter/tree/master/generator">https://github.com/prometheus/snmp_exporter/tree/master/generator</a></p>
+</div>
+<p>And here:</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference external" href="https://programmer.group/prometheus-prometheus-monitoring-switch-snmp.html">https://programmer.group/prometheus-prometheus-monitoring-switch-snmp.html</a></p>
+</div>
+<p>Once you are done tuning the file, simply do:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>$ export MIBDIRS=mibs
+$ ./generator generate
+</pre></div>
+</div>
+<p>&gt;hat you will get is a snmp.yml file. Simply copy the new file:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>$ cp snmp.yml /etc/snmp_exporter/
+</pre></div>
+</div>
+</div>
+<div class="section" id="setup-targets">
+<h4><span class="section-number">11.4.3.2. </span>Setup targets<a class="headerlink" href="#setup-targets" title="Permalink to this headline">¶</a></h4>
+<p>To setup the targets, simply add:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">monitoring</span><span class="p">:</span>
+
+<span class="nt">exporters</span><span class="p">:</span>
+  <span class="nt">snmp_exporter</span><span class="p">:</span>
+    <span class="nt">port</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">9116</span>
+    <span class="nt">with_generator</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
+</pre></div>
+</div>
+<p>to the /etc/ansible/inventory/group_vars/equipment_profile you desire.</p>
+</div>
+<div class="section" id="switch-setup">
+<h4><span class="section-number">11.4.3.3. </span>Switch setup<a class="headerlink" href="#switch-setup" title="Permalink to this headline">¶</a></h4>
+<p>To setup the community on the switch to communicate with the exporter:
+Go to the switch via ssh or telnet, and enter the following commands:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>$ Enable
+$ configure terminal
+$ snmp-server community cluster RO
+$ exit
+$ write memory
+</pre></div>
+</div>
+<dl class="simple">
+<dt>You can change cluster to any community name you want, that is written in the</dt><dd><p>snmp.yml file</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="id11">
+<h4><span class="section-number">11.4.3.4. </span>Start service<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h4>
+<p>To start the service, simply run:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>systemctl start snmp_exporter
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>all exporter services are under the /etc/systemd/system directory, and most binaries are under the /usr/local/bin directory</p>
+</div>
+</div>
+<div class="section" id="id12">
+<h4><span class="section-number">11.4.3.5. </span>Dashboard<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h4>
+<p>The dashboard gives the following:</p>
+<ul class="simple">
+<li><p>Interface thoughput( in and out)</p></li>
+<li><p>Interface in,out,total in, total out, Bandwidth</p></li>
+<li><p>Alerts</p></li>
+<li><p>Percentage of casts (uni,multi,etc) In and Out</p></li>
+<li><p>Max in, Max out, number of interfaces, Total in,Uptime, Total out</p></li>
+<li><p>Etc…</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="ha-cluster-exporter">
+<h3><span class="section-number">11.4.4. </span>Ha_cluster_exporter<a class="headerlink" href="#ha-cluster-exporter" title="Permalink to this headline">¶</a></h3>
+<p>The ha_cluster_exporter is an open source exporter, and can be found here:
+<a class="reference external" href="https://github.com/ClusterLabs/ha_cluster_exporter">https://github.com/ClusterLabs/ha_cluster_exporter</a></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>No packages are provided in the stack for this exporter.
+You will need to build it yourself.</p>
+</div>
+<p>By default, the ha_cluster_exorter runs under the port 9664.</p>
+<p>To access the metrics, either do:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>curl http://localhost:9664/metrics
+</pre></div>
+</div>
+<p>Or access it directly in a browser. However, using curl can be handy, because
+you can grep the output, and do other nice things with it.</p>
+<p>You should get something like this:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># HELP ha_cluster_corosync_member_votes How many votes each member node has contributed with to the current quorum
+# TYPE ha_cluster_corosync_member_votes gauge
+ha_cluster_corosync_member_votes{local=&quot;true&quot;,node=&quot;mgmt1-2&quot;,node_id=&quot;1&quot;} 1
+# HELP ha_cluster_corosync_quorate Whether or not the cluster is quorate
+# TYPE ha_cluster_corosync_quorate gauge
+ha_cluster_corosync_quorate 1
+# HELP ha_cluster_corosync_quorum_votes Cluster quorum votes; one line per type
+# TYPE ha_cluster_corosync_quorum_votes gauge
+ha_cluster_corosync_quorum_votes{type=&quot;expected_votes&quot;} 2
+ha_cluster_corosync_quorum_votes{type=&quot;highest_expected&quot;} 2
+ha_cluster_corosync_quorum_votes{type=&quot;quorum&quot;} 1
+ha_cluster_corosync_quorum_votes{type=&quot;total_votes&quot;} 1
+# HELP ha_cluster_corosync_ring_errors The total number of faulty corosync rings
+# TYPE ha_cluster_corosync_ring_errors gauge
+ha_cluster_corosync_ring_errors 0
+# HELP ha_cluster_pacemaker_config_last_change The timestamp of the last change of the cluster configuration
+# TYPE ha_cluster_pacemaker_config_last_change counter
+ha_cluster_pacemaker_config_last_change 1.593617322e+09
+# HELP ha_cluster_pacemaker_fail_count The Fail count number per node and resource id
+# TYPE ha_cluster_pacemaker_fail_count gauge
+ha_cluster_pacemaker_fail_count{node=&quot;mgmt1-2&quot;,resource=&quot;fs-conman&quot;} 0
+ha_cluster_pacemaker_fail_count{node=&quot;mgmt1-2&quot;,resource=&quot;fs-data-http&quot;} 0
+ha_cluster_pacemaker_fail_count{node=&quot;mgmt1-2&quot;,resource=&quot;fs-data-pgsql&quot;} 0
+ha_cluster_pacemaker_fail_count{node=&quot;mgmt1-2&quot;,resource=&quot;fs-grafana-database&quot;} 0
+ha_cluster_pacemaker_fail_count{node=&quot;mgmt1-2&quot;,resource=&quot;fs-prometheus-database&quot;} 0
+ha_cluster_pacemaker_fail_count{node=&quot;mgmt1-2&quot;,resource=&quot;fs-rsyslog&quot;} 0
+</pre></div>
+</div>
+<p>Some of the information given are the following:</p>
+<ul class="simple">
+<li><p>Pacemaker fails</p></li>
+<li><p>Pacemaker constraints</p></li>
+<li><p>Pacemaker migration threshold</p></li>
+<li><p>Pacemaker node status</p></li>
+<li><p>Status of Pacemaker resources</p></li>
+<li><p>Pacemaker stonith (enabled or not)</p></li>
+</ul>
+<p>You can see more by looking at the local metrics, and by checking the github
+page.</p>
+<div class="section" id="id13">
+<h4><span class="section-number">11.4.4.1. </span>Alerts<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h4>
+<p>All the alerts for the node_exporter are stored under
+/etc/prometheus/alerts/ha.yml</p>
+<p>Some of them include :</p>
+<ul class="simple">
+<li><p>Not quorate</p></li>
+<li><p>Long standby</p></li>
+<li><p>Failed services</p></li>
+<li><p>Failed resources</p></li>
+<li><p>Failcount&gt;migration threshold</p></li>
+<li><p>Stonith not enabled</p></li>
+<li><p>Negative location constraints</p></li>
+</ul>
+</div>
+<div class="section" id="id14">
+<h4><span class="section-number">11.4.4.2. </span>Start service<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h4>
+<p>To start the service, simply run:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>systemctl start ha_cluster_exporter
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>All exporter services are under the /etc/systemd/system directory,
+and most binaries are under the /usr/local/bin directory.</p>
+</div>
+</div>
+<div class="section" id="dashboards">
+<h4><span class="section-number">11.4.4.3. </span>Dashboards<a class="headerlink" href="#dashboards" title="Permalink to this headline">¶</a></h4>
+<p>there are several dashboards for the ha.</p>
+<p>Here is what they show:</p>
+<ul class="simple">
+<li><p>Pacemaker nodes (Total  nodes, online nodes, expected up, DC)</p></li>
+<li><p>Quorum votes (expected votes, highest expected vote, total votes)</p></li>
+<li><p>Is quorate?</p></li>
+<li><p>Ring errors</p></li>
+<li><p>Last pacemaker change</p></li>
+<li><p>Resources (names, agent,status,…)</p></li>
+<li><p>Alerts (name, severity, instance…)</p></li>
+<li><p>Etc…</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="slurm-exporter">
+<h3><span class="section-number">11.4.5. </span>Slurm_exporter<a class="headerlink" href="#slurm-exporter" title="Permalink to this headline">¶</a></h3>
+<p>The slurm_exporter is an open source exporter for Prometheus, and can be found
+here: <a class="reference external" href="https://github.com/vpenso/prometheus-slurm-exporter">https://github.com/vpenso/prometheus-slurm-exporter</a></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>No packages are provided in the stack for this exporter.
+You will need to build it yourself.</p>
+</div>
+<p>By default, the slurm_exorter runs under the port 9817.</p>
+<p>To access the metrics, either do:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">curl</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">localhost</span><span class="p">:</span><span class="mi">9817</span><span class="o">/</span><span class="n">metrics</span>
+</pre></div>
+</div>
+<p>or access it directly in a browser. However, using curl can be handy, because
+you can grep the output, and do other nice things with it.</p>
+<p>You should get something like this:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># TYPE promhttp_metric_handler_requests_total counter
+promhttp_metric_handler_requests_total{code=&quot;200&quot;} 3029
+promhttp_metric_handler_requests_total{code=&quot;500&quot;} 0
+promhttp_metric_handler_requests_total{code=&quot;503&quot;} 0
+# HELP slurm_cpus_alloc Allocated CPUs
+# TYPE slurm_cpus_alloc gauge
+slurm_cpus_alloc 65792
+# HELP slurm_cpus_idle Idle CPUs
+# TYPE slurm_cpus_idle gauge
+slurm_cpus_idle 0
+# HELP slurm_cpus_other Mix CPUs
+# TYPE slurm_cpus_other gauge
+slurm_cpus_other 15616
+# HELP slurm_cpus_total Total CPUs
+# TYPE slurm_cpus_total gauge
+slurm_cpus_total 81408
+# HELP slurm_nodes_alloc Allocated nodes
+# TYPE slurm_nodes_alloc gauge
+slurm_nodes_alloc 257
+# HELP slurm_nodes_comp Completing nodes
+# TYPE slurm_nodes_comp gauge
+slurm_nodes_comp 0
+# HELP slurm_nodes_down Down nodes
+# TYPE slurm_nodes_down gauge
+slurm_nodes_down 28
+</pre></div>
+</div>
+<div class="section" id="metrics">
+<h4><span class="section-number">11.4.5.1. </span>Metrics<a class="headerlink" href="#metrics" title="Permalink to this headline">¶</a></h4>
+<p>Here is an extract from the github page:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>## Exported Metrics
+
+### State of the CPUs
+
+* **Allocated**: CPUs which have been allocated to a job.
+* **Idle**: CPUs not allocated to a job and thus available for use.
+* **Other**: CPUs which are unavailable for use at the moment.
+* **Total**: total number of CPUs.
+
+- [Information extracted from the SLURM **sinfo** command](https://slurm.schedmd.com/sinfo.html)
+- [Slurm CPU Management User and Administrator Guide](https://slurm.schedmd.com/cpu_management.html)
+
+### State of the Nodes
+
+* **Allocated**: nodes which has been allocated to one or more jobs.
+* **Completing**: all jobs associated with these nodes are in the process of being completed.
+* **Down**: nodes which are unavailable for use.
+* **Drain**: with this metric two different states are accounted for:
+  - nodes in ``drained`` state (marked unavailable for use per system administrator request)
+  - nodes in ``draining`` state (currently executing jobs but which will not be allocated for new ones).
+* **Fail**: these nodes are expected to fail soon and are unavailable for use per system administrator request.
+* **Error**: nodes which are currently in an error state and not capable of running any jobs.
+* **Idle**: nodes not allocated to any jobs and thus available for use.
+* **Maint**: nodes which are currently marked with the __maintenance__ flag.
+* **Mixed**: nodes which have some of their CPUs ALLOCATED while others are IDLE.
+* **Resv**: these nodes are in an advanced reservation and not generally available.
+
+[Information extracted from the SLURM **sinfo** command](https://slurm.schedmd.com/sinfo.html)
+
+### Status of the Jobs
+
+* **PENDING**: Jobs awaiting for resource allocation.
+* **PENDING_DEPENDENCY**: Jobs awaiting because of a unexecuted job dependency.
+* **RUNNING**: Jobs currently allocated.
+* **SUSPENDED**: Job has an allocation but execution has been suspended and CPUs have been released for other jobs.
+* **CANCELLED**: Jobs which were explicitly cancelled by the user or system administrator.
+* **COMPLETING**: Jobs which are in the process of being completed.
+* **COMPLETED**: Jobs have terminated all processes on all nodes with an exit code of zero.
+* **CONFIGURING**: Jobs have been allocated resources, but are waiting for them to become ready for use.
+* **FAILED**: Jobs terminated with a non-zero exit code or other failure condition.
+* **TIMEOUT**: Jobs terminated upon reaching their time limit.
+* **PREEMPTED**: Jobs terminated due to preemption.
+* **NODE_FAIL**: Jobs terminated due to failure of one or more allocated nodes.
+
+[Information extracted from the SLURM **squeue** command](https://slurm.schedmd.com/squeue.html)
+
+### Scheduler Information
+
+* **Server Thread count**: The number of current active ``slurmctld`` threads.
+* **Queue size**: The length of the scheduler queue.
+* **Last cycle**: Time in microseconds for last scheduling cycle.
+* **Mean cycle**: Mean of scheduling cycles since last reset.
+* **Cycles per minute**: Counter of scheduling executions per minute.
+* **(Backfill) Last cycle**: Time in microseconds of last backfilling cycle.
+* **(Backfill) Mean cycle**: Mean of backfilling scheduling cycles in microseconds since last reset.
+* **(Backfill) Depth mean**: Mean of processed jobs during backfilling scheduling cycles since last reset.
+</pre></div>
+</div>
+<p>You can see more by looking at the local metrics.</p>
+</div>
+<div class="section" id="id15">
+<h4><span class="section-number">11.4.5.2. </span>Start service<a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h4>
+<p>To start the service, simply run:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>systemctl start slurm_exporter
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>all exporter services are under the /etc/systemd/system directory, and most binaries are under the /usr/local/bin directory</p>
+</div>
+</div>
+<div class="section" id="id16">
+<h4><span class="section-number">11.4.5.3. </span>Alerts<a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h4>
+<p>All the alerts for the slurm_exporter are stored under /etc/prometheus/alerts/</p>
+<p>Some of them include :</p>
+<ul class="simple">
+<li><p>High RAM usage</p></li>
+<li><p>High CPU usage</p></li>
+<li><p>High mount volume</p></li>
+<li><p>Host out of inodes</p></li>
+<li><p>Unusual disk write latency</p></li>
+<li><p>etc…</p></li>
+</ul>
+</div>
+<div class="section" id="id17">
+<h4><span class="section-number">11.4.5.4. </span>Dashboard<a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h4>
+<p>A dashboard is provided on the exporter github page.</p>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="slurm.html" class="btn btn-neutral float-right" title="&lt;no title&gt;" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="high_availability.html" class="btn btn-neutral float-left" title="10. [Community] - High Availability" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2019, Benoît Leveugle, Johnny Keats.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
