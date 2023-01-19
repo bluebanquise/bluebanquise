@@ -2,6 +2,7 @@
 - name: dashboards █ Download Opensource Grafana dashboards
   delegate_to: localhost
   run_once: true
+  become: false
   block:
     - name: dashboards █ Create local grafana dashboard directory
       ansible.builtin.tempfile:
