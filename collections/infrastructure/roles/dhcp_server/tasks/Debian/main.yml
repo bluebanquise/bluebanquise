@@ -1,0 +1,12 @@
+---
+
+- name: template <|> Generate /etc/default/isc-dhcp-server for Debian based systems
+  template:
+    src: Debian/isc-dhcp-server.j2
+    dest: /etc/default/isc-dhcp-server
+    owner: root
+    group: root
+    mode: 0644
+  notify: service <|> Restart dhcp server
+  tags:
+    - template
