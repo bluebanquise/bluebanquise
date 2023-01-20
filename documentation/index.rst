@@ -66,4 +66,5 @@ set_hostname
    introduction
    stack/introduction
    stack/vocabulary
+   stack/bootstrap
    hpc_training

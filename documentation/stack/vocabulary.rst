@@ -38,6 +38,9 @@ All equipment that can have an ip address on the network are considered "simple 
 but only those with an **ssh** + **python** capability and on which we will use Ansible
 to deploy a configuration are considered "Ansible managed host".
 
+Also, note that in this documentation, most of the time, we will refer to "servers",
+but any kind of workstation or laptop will work the same way.
+
 Group
 -----
 
@@ -322,7 +325,7 @@ Ansible and BlueBanquise default hash_behaviour is *replace* (which is Ansible's
 
 If using *replace*, when a dictionary is impacted by the variable’s precedence
 mechanism, Ansible overwrite the **full dictionary** if a variable has a higher
-precedence somewhere.
+precedence somewhere. This is the reason why BlueBanquise stack avoids huge dictionaries.
 
 Jinja2
 ------
@@ -330,7 +333,6 @@ Jinja2
 Jinja2 is the templating language used by Ansible to render templates in roles.
 It is heavily used in the stack, and learning Jinja2 will often be needed to
 create custom roles.
-(But Jinja2 is simple if you are use to code or especially script with bash and python).
 
 Full documentation is available in a "single page":
 `Jinja2 template designer <https://jinja.palletsprojects.com/en/2.10.x/templates/>`_
@@ -393,31 +395,43 @@ network (most of the time an Interconnect network).
 
 |
 
-Equipment profiles
-------------------
+Master groups
+-------------
 
-In **BlueBanquise**, nodes are often part of a group starting with
-prefix **equipment_**. These groups are called *equipment profiles*.
+Most nodes are part of 2 groups: a **master group**, and an **equipment group**.
 
-They are used to provide to hosts of this group the **equipment_profile**
-parameters (vender, server model, hardware embed, hosts operating system parameters, kernel parameters,
-partitioning, etc.), and other variables if needed like dedicated
-authentication parameters. These variables are prefixed with **ep_**.
+Master groups are always prefixed by ``mg_`` and define the purpose of a group of nodes.
+For example, the master group ``mg_computes`` would contain all compute dedicated nodes of a cluster.
+
+Note that you can define master groups with the name you want. Only one name is reserved: ``mg_managements``.
+This master group must contain all management nodes of the cluster, as it is used by the stack to identify them.
+
+Equipment groups
+----------------
+
+Equipment groups (also sometime referred as *equipment profiles*) are always prefixed by ``equipment_``.
 
 .. image:: images/inventory/ep_hard.svg
    :align: center
 
-These are key groups of the stack.
+Equipment groups are used to store main parameters (vendor, server model, hardware embed, operating system parameters, kernel parameters,
+partitioning, etc.) of member nodes.
+I can also be used to store other variables if needed like dedicated
+authentication parameters.
 
-**It is important** to note that equipment_profiles variables (**ep_**)
-**must not** be used at an upper level than group_vars in variables precedence.
-**It can, but you must NOT**, due to special usage of them.
+Most variables defined in equipment groups are prefixed with ``ep_``.
+**It is important** to note that variables prefixed by ``ep_``
+**MUST NOT** be used at an upper level than group_vars in variables precedence.
 
-For now, just keep in mind these variables exist. These will be discussed later.
+Reason is the following: BlueBanquise roles need to capture parameters of a whole equipment group of nodes.
+However, there are no native mechanism in Ansible to query a specific variable of a group (due to precedence mechanism).
+To bypass this limitation, roles query ``ep_`` variables of one node of the group, and consider these parameters to be the same for all members of this equipment group.
+Defining ``ep_`` variables at an upper level would break this logic and generate unexpected behaviors.
+If this explanation makes no sens for you, do not worry for now, and keep in mind that ``ep_`` must be defined inside ``equipment_`` groups only.
 
 -------------
 
-You can now follow the next part, depending of your needs:
+This vocabulary and the trainings available at BEN_BEN should be enough to
+clarify the remaining of this documentation.
 
-* Proceed to quick start to deploy a very basic cluster.
-* Proceed with a standard full cluster deployment.
+You can now proceed to the next part: bootstrapping the stack BEN_BEN.
