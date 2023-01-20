@@ -2,6 +2,7 @@
 - name: dashboards █ Download Opensource Grafana dashboards
   delegate_to: localhost
   run_once: true
+  become: false
   block:
     - name: dashboards █ Create local grafana dashboard directory
       ansible.builtin.tempfile:
@@ -18,7 +19,6 @@
         -o {{ _tmp_dashboards.path }}/{{ item.dashboard_id }}.json
       args:
         creates: "{{ _tmp_dashboards.path }}/{{ item.dashboard_id }}.json"
-        warn: false
       register: _download_dashboards
       until: _download_dashboards is succeeded
       retries: 5
