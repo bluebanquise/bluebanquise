@@ -1,6 +1,6 @@
-==============================
-[Core] - Bootstrap base system
-==============================
+=========
+Bootstrap
+=========
 
 BlueBanquise bootstrapping procedure is the same, whatever the final cluster.
 Only difference is if cluster is connected to the web, or air-gapped (isolated from the web).
@@ -95,7 +95,7 @@ And the following minimal configuration is the strict minimal if you wish to
 test the stack in VMs:
 
 * >= 1 vCPU
-* >= 2 Gb RAM (Anaconda PXE part needs a lot of RAM, once system is installed, can be reduced to 1Gb)
+* >= 2 Gb RAM (Anaconda PXE part needs a lot of RAM, once system is installed, can be reduced to 1Gb or even 512Mb)
 * >= 20 Gb HDD
 
 OS installation
@@ -103,7 +103,7 @@ OS installation
 
 Simply write iso **directly** on USB stick like a binary image, do not use a
 special tool. On Linux, use dd, on Microsoft Windows, use Win32DiskImager but only
-version 0.9.5 (not above).
+version 0.9.5 (not above). The tool is available at BEN_BEN (Do not write on the wrong disk. Use the tool at your own risks!).
 
 Then install the Linux operating system manually (boot on USB, etc).
 
@@ -112,12 +112,30 @@ It is recommended to only choose minimal install during packages selection
 Also, it is **STRONGLY** recommended to let system in English (US), and only
 set your keyboard and time zone to your country.
 
-Create bluebanquise user
-------------------------
+Bootstrap script
+----------------
 
 Once system is installed and rebooted, login on it.
 We will assume from here that you are using a sudo user. If using root user, 
 remove sudo for each bellow commands.
+
+Note that if you plan to use an air-gapped cluster, please proceed to BEN_BEN.
+
+Install curl (should already be installed):
+
+.. code-block::
+
+  sudo dnf install curl
+
+Then download and execute online bootstrap tool:
+
+.. code-block::
+
+  https://raw.githubusercontent.com/bluebanquise/bluebanquise/master/bootstrap/online_bootstrap.sh
+
+AAAAAAAAAAAAAAAAAAAA
+
+
 
 Create the ``bluebanquise`` user manually:
 

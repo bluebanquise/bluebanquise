@@ -35,6 +35,7 @@ EOT EOT EOT EOT
    <div class="tip_card_content_container"><p>If this is your first time with BlueBanquise, you are strongly encouraged to follow the step by step deployment guide of the documentation.</p></div>
    </div>
 
+ADD "create and add your own roles"
 ADD gitea in doc / script ?
 
 LIST OF EXTERNAL ROLES:

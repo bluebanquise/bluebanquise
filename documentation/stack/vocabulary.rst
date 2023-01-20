@@ -429,6 +429,9 @@ To bypass this limitation, roles query ``ep_`` variables of one node of the grou
 Defining ``ep_`` variables at an upper level would break this logic and generate unexpected behaviors.
 If this explanation makes no sens for you, do not worry for now, and keep in mind that ``ep_`` must be defined inside ``equipment_`` groups only.
 
+NETWORKS BEN_BEN
+Management network vs standard network.
+
 -------------
 
 This vocabulary and the trainings available at BEN_BEN should be enough to
