@@ -144,6 +144,7 @@ Note: if you try to add dashboards, the role will alwats at checking if the data
 
 ## Changelog
 
+* 2.0.5: Fix grafana-cli with the use of homepath. Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 2.0.4: Fix log permissions and firewall check. Thiago Cardozo <thiago.cardozo@yahoo.com.br>
 * 2.0.3: Update to fully qualified module name. Matthieu Isoard
 * 2.0.2: Add OpenSUSE support. Neil Munday <neil@mundayweb.com>
