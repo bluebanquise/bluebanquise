@@ -94,12 +94,15 @@ Few explanations:
   here!**, as it will be read too.
   Backup in another location, outside of ``inventory`` folder.
 
-Time now to define our nodes.
+Time now to define our management1 node.
 
-Defining nodes
---------------
+Defining management1
+--------------------
 
-The first step here is to define the management node.
+Node and groups
+^^^^^^^^^^^^^^^
+
+The first step here is to define the management1 management node as a basic Ansible host.
 
 Create file ``inventory/cluster/nodes/managements.yml`` (name of the file doesn't matter),
 and add the first management node inside:
@@ -124,8 +127,41 @@ Should output:
     |--management1
     |--@ungrouped:
 
-We now need to link the management node to a logical network.
-This network will be used to deploy, reach, and manage the other nodes of the cluster.
+We can see that management1 node is part of group all. Since it is a management node, we also need it to be
+part of **mg_managements** group, so the BlueBanquise stack identifies it as a special node. Remember, ``mg_`` groups
+define the purpose of nodes.
+
+Create file ``inventory/cluster/groups/mg.yml`` (name of the file doesn't matter), and add the
+following INI content:
+
+.. code-block::ini
+
+  [mg_managements]
+  management1
+
+And check again groups structure:
+
+.. code-block::
+
+  ansible-inventory -i inventory --graph
+
+Should output:
+
+.. code-block::
+
+  @all:
+    |--@mg_managements:
+    |  |--management1
+    |--@ungrouped:
+
+We are not going to define the related equipment group for now (``ep_``).
+
+Networking
+^^^^^^^^^^
+
+We now need to link the management1 node to a logical network.
+
+First step is to create this network. It will be used to deploy, reach, and manage the other nodes of the cluster.
 This is a **management network**.
 
 Create file  ``inventory/group_vars/all/networks.yml`` (name of the file doesn't matter,
@@ -133,28 +169,227 @@ but path ``inventory/group_vars/all/`` is important),
 and define network ``net-admin`` inside.
 Note that a management network must always be prefixed by ``net_``.
 
-networks:
-  net-admin:
-    prefix: 16
-    subnet: 10.10.0.0
-    services:
-      dns4:
-        - ip: 10.10.0.1
-          host: mg1-dns
-      pxe4:
-        - ip: 10.10.0.1
-          host: mg1-pxe
+.. code-block::yaml
 
+  networks:
+    net-admin:
+      prefix: 16
+      subnet: 10.10.0.0
+
+Now, lets link our **management1** dedicated network interfaces
+to this network, and assign it ip ``10.10.0.1``. We will assume interface is ``eno1``, but it could be 
+enp0s1, eth2, etc. Use command ``ip a`` to list available network interfaces.
+
+Edit file ``inventory/cluster/nodes/managements.yml``
+and add network_interfaces information under host name (ensure MAC address matches the one of your host):
+
+.. code-block::yaml
+
+  all:
+    hosts:
+      management1:
         network_interfaces:
           - interface: eno1
-            ip4: 10.10.3.2
+            ip4: 10.10.0.1
             mac: 1a:2b:3c:4d:5e:9f
             network: net-admin
 
+management1 **eno1** NIC is now set with ip **10.10.0.1** and linked to network **net-admin** with prefix **16** and subnet **10.10.0.0**.
+
+Time now to add the other nodes of the cluster. If the cluster is very large, an smart strategy at this point 
+is to only define 1 node of each kind, then proceed to the remaining of the documentation to ensure all nodes can deploy,
+and come back to this point later to add remaining nodes.
+
+Defining other nodes
+--------------------
+
+We now have to define the remaining nodes. In this example, this includes:
+
+* storage1
+* login1
+* computes[1-4]
+
+Create file ``inventory/cluster/nodes/storages.yml`` and add inside:
+
+.. code-block::yaml
+
+  all:
+    hosts:
+      storage1:
+
+Create file ``inventory/cluster/nodes/logins.yml`` and add inside:
+
+.. code-block::yaml
+
+  all:
+    hosts:
+      login1:
+
+Create file ``inventory/cluster/nodes/computes.yml`` and add inside:
+
+.. code-block::yaml
+
+  all:
+    hosts:
+      compute1:
+      compute2:
+      compute3:
+      compute4:
+
+.. raw:: html
+
+   <br>
+   <div class="tip_card">                
+   <div class="tip_card_img_container"><img src="../_static/img_avatar.png" style="width:100px; border-radius: 5px 0 0 5px; float: left;" /></div>
+   <div class="tip_card_title_container"><b>Tip from the penguin:</b></div>
+   <div class="tip_card_content_container"><p>For very large clusters, you can create one file per rack for example. All files are read and merged during Ansible execution.</p></div>
+   </div>
+   <br>
+
+Then, add nodes into dedicated mg groups.
+
+Edit file ``inventory/cluster/groups/mg.yml`` and add other groups so that file matches the following:
+
+.. code-block::ini
+
+  [mg_managements]
+  management1
+
+  [mg_storages]
+  storage1
+
+  [mg_logins]
+  login1
+
+  [mg_computes]
+  compute[1:4]
+
+.. warning::
+   Note that Ansible INI range syntax is not the same than ClusterShell syntax. A range here is defined by ``[1:4]`` instead of ``[1-4]``.
+
+Now, check all is setup properly and understood by Ansible:
+
+.. code-block::
+
+  ansible-inventory -i inventory --graph
+
+Should output:
+
+.. code-block::
+
+  @all:
+    |--@mg_managements:
+    |  |--management1
+    |--@mg_storages:
+    |  |--storage1
+    |--@mg_logins:
+    |  |--login1
+    |--@mg_computes:
+    |  |--compute1
+    |  |--compute2
+    |  |--compute3
+    |  |--compute4
+    |--@ungrouped:
+
+Now link all nodes to ``net-admin`` network. It works the same way than with **management1** node.
+For example, for computes nodes, assuming their main NIC is named enp0s1:
+
+.. code-block::yaml
+
+  all:
+    hosts:
+      compute1:
+        network_interfaces:
+          - interface: enp0s1
+            ip4: 10.10.3.1
+            mac: 1a:2b:3c:4d:1e:9f
+            network: net-admin
+      compute2:
+        network_interfaces:
+          - interface: enp0s1
+            ip4: 10.10.3.2
+            mac: 1a:2b:3c:4d:2e:9f
+            network: net-admin
+      compute3:
+        network_interfaces:
+          - interface: enp0s1
+            ip4: 10.10.3.3
+            mac: 1a:2b:3c:4d:3e:9f
+            network: net-admin
+      compute4:
+        network_interfaces:
+          - interface: enp0s1
+            ip4: 10.10.3.4
+            mac: 1a:2b:3c:4d:4e:9f
+            network: net-admin
+
+Ensure MAC address match the ones of the nodes, and do the same for **storage1** and **login1**.
+
+All our nodes are now defined, and linked to the same administration network.
+
+BMS (optional)
+--------------
+
+If your servers are attached and managed by embed BMCs, it needs to be defined too, so the stack can
+register BMCs into dedicated tools (power management, remote consoles, monitoring, etc.).
+If you do not have BMCs, please skip this part.
+
+To define a BMC, simply attach it to an host, and link its network interface to a network. In this example
+we will link BMCs to the ``net-admin`` network.
+Note however that it is a good practice to later isolate BMCs on a dedicated network.
+
+We will assume here that **storage1** has a BMC, called **bstorage1**, with ip ``10.10.101.1``.
+Edit file ``inventory/cluster/nodes/storages.yml`` and add BMC settings, at same level than ``network_interfaces``, as follow:
+
+.. code-block::yaml
+
+  all:
+    hosts:
+      storage1:
+        bmc:
+          name: bstorage1
+          ip4: 10.10.101.1
+          mac: 08:00:27:dc:f8:f6
+          network: net-admin
+        network_interfaces:
+          - interface: enp0s1
+            ip4: 10.10.1.4
+            mac: 1a:2b:3c:4d:7e:9f
+            network: net-admin
+
+It is now time to define services endpoint.
+
+Define services
+---------------
+
+To operate, a cluster of nodes needs services. The most vital ones are:
+
+* dhcp
+* pxe (http, tftp)
+* dns
+* time
+
+On our cluster, all these services will be hosted on management1 node. And all other nodes will
+bind to these services over ``net-admin`` network. To do so, we need to define in the inventory that
+management1 will be the main host of all services, and that its ip ``10.10.0.1`` will be the endpoint for that.
+
+Edit file ``inventory/group_vars/all/networks.yml``, and define key ``services_ip`` under ``net-admin`` network, 
+as follow:
+
+.. code-block::yaml
+
+  networks:
+    net-admin:
+      prefix: 16
+      subnet: 10.10.0.0
+      services_ip: 10.10.0.1
+
+You will be able later to fine define endpoint ip/hostname for each service. But for now, we want all of them to simply
+rely on management1 node.
 
 
-
-
+BEN_BEN
+BMCs
 
 
 Review groups
