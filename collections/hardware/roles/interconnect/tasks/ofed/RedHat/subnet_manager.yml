@@ -1,6 +1,6 @@
 ---
 
-- name: package █ Install opensm packages
+- name: package <|> Install opensm packages
   ansible.builtin.package:
     name: "{{ item }}"
     state: present
@@ -10,7 +10,7 @@
   tags:
     - package
 
-- name: service █ Manage opensm state
+- name: service <|> Manage opensm state
   ansible.builtin.service:
     name: opensm
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"

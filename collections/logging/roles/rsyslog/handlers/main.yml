@@ -1,6 +1,6 @@
 ---
 
-- name: service █ Restart rsyslog service
+- name: service <|> Restart rsyslog service
   ansible.builtin.service:
     name: "{{ item }}"
     state: restarted

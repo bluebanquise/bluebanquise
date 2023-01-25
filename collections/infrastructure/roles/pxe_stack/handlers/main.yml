@@ -1,5 +1,5 @@
 ---
-- name: service █ Restart pxe services
+- name: service <|> Restart pxe services
   ansible.builtin.service:
     name: "{{ item }}"
     state: restarted
@@ -8,6 +8,6 @@
     - "'service' not in ansible_skip_tags"
     - pxe_stack_start_services | default(bb_start_services) | default(true) | bool
 
-- name: systemd █ Reload systemd configuration
+- name: systemd <|> Reload systemd configuration
   ansible.builtin.systemd:
     daemon_reload: yes

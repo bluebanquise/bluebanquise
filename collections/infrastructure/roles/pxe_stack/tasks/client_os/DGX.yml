@@ -1,6 +1,6 @@
 ##### DGX OS
 
-- name: "copy █ Copy osdeploy files {{ pxe_stack_htdocs_path }}/pxe/osdeploy/"
+- name: "copy <|> Copy osdeploy files {{ pxe_stack_htdocs_path }}/pxe/osdeploy/"
   ansible.builtin.copy:
     src: osdeploy/dgxos_{{ item.major }}.ipxe
     dest: "{{ pxe_stack_htdocs_path }}/pxe/osdeploy/dgxos_{{ item.major }}.ipxe"
@@ -9,7 +9,7 @@
     group: "{{ pxe_stack_apache_group }}"
   loop: "{{ pxe_stack_supported_os.dgxos }}"
 
-- name: "template █ Generate equipment_profiles {{ pxe_stack_htdocs_path }}/pxe/equipment_profiles/{item}.ipxe"
+- name: "template <|> Generate equipment_profiles {{ pxe_stack_htdocs_path }}/pxe/equipment_profiles/{item}.ipxe"
   ansible.builtin.template:
     src: "DGX/equipment_profile_dgxos.ipxe.j2"
     dest: "{{ pxe_stack_htdocs_path }}/pxe/equipment_profiles/{{ item | replace(bb_core_equipment_naming+'_','') | trim }}.ipxe"
@@ -24,7 +24,7 @@
   tags:
     - template
 
-- name: copy ░ Copy reference DGX curtin
+- name: copy <|> Copy reference DGX curtin
   ansible.builtin.copy:
     src: "/var/www/html/repositories/dgxos/{{ hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] }}/x86_64/netboot/curtin/{{ hostvars[groups[item][0]]['ep_dgx_curtin_type'] }}-curtin.yaml"
     dest: "/dev/shm/tmp_curtin_{{ item }}.yaml"
@@ -39,7 +39,7 @@
     - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) in ['dgxos'] and hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] == 5
   changed_when: false
 
-- name: replace ░ Remove OEM from DGX curtin
+- name: replace <|> Remove OEM from DGX curtin
   ansible.builtin.replace:
     path: "/dev/shm/tmp_curtin_{{ item }}.yaml"
     after: '# Prepare oem-config'
@@ -52,7 +52,7 @@
     - (hostvars[groups[item][0]]['ep_operating_system']['distribution'] | lower) in ['dgxos'] and hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] == 5
   changed_when: false
 
-- name: lineinfile ░ Set local parameters, allow root user
+- name: lineinfile <|> Set local parameters, allow root user
   ansible.builtin.lineinfile:
     path: "/dev/shm/tmp_curtin_{{ item }}.yaml"
     regexp: '^kernel:$'
@@ -70,7 +70,7 @@
     - (hostvars[groups[item][0]]['ep_operating_system']['distribution'] | lower) in ['dgxos'] and hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] == 5
   changed_when: false
 
-- name: lineinfile ░ Enable reboot after install
+- name: lineinfile <|> Enable reboot after install
   ansible.builtin.lineinfile:
     path: "/dev/shm/tmp_curtin_{{ item }}.yaml"
     regexp: '^  mode: CHANGE_POWER_STATE$'
@@ -82,7 +82,7 @@
     - (hostvars[groups[item][0]]['ep_operating_system']['distribution']|lower) in ['dgxos'] and hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] == 5
   changed_when: false
 
-- name: lineinfile ░ Set BlueBanquise custom parameters into curtin
+- name: lineinfile <|> Set BlueBanquise custom parameters into curtin
   ansible.builtin.lineinfile:
     path: "/dev/shm/tmp_curtin_{{ item }}.yaml"
     insertafter: '^late_commands:'
@@ -105,7 +105,7 @@
     - (hostvars[groups[item][0]]['ep_operating_system']['distribution'] | lower) in ['dgxos'] and hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] == 5
   changed_when: false
 
-- name: copy █ Copy final curtin to destination
+- name: copy <|> Copy final curtin to destination
   ansible.builtin.copy:
     src: "/dev/shm/tmp_curtin_{{ item }}.yaml"
     dest: "{{ pxe_stack_htdocs_path }}/pxe/equipment_profiles/{{ item | replace(bb_core_equipment_naming+'_','') | trim }}.curtin.yaml"

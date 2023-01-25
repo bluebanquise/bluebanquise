@@ -1,5 +1,5 @@
 ---
-- name: api_keys █ Ensure grafana key directory exists
+- name: api_keys <|> Ensure grafana key directory exists
   become: false
   ansible.builtin.file:
     path: "{{ grafana_api_keys_dir }}/{{ inventory_hostname }}"
@@ -7,7 +7,7 @@
     mode: 0644
   delegate_to: localhost
 
-- name: api_keys █ Check api key list
+- name: api_keys <|> Check api key list
   ansible.builtin.uri:
     url: "{{ grafana_api_url }}/api/auth/keys"
     user: "{{ grafana_security.admin_user }}"
@@ -17,7 +17,7 @@
   no_log: true
   register: existing_api_keys
 
-- name: api_keys █ Create grafana api keys
+- name: api_keys <|> Create grafana api keys
   ansible.builtin.uri:
     url: "{{ grafana_api_url }}/api/auth/keys"
     user: "{{ grafana_security.admin_user }}"
@@ -31,7 +31,7 @@
   when: ((existing_api_keys['json'] | selectattr("name", "equalto", item['name'])) | list) | length == 0
   register: new_api_keys
 
-- name: api_keys █ Create api keys file to allow the keys to be seen and used by other automation
+- name: api_keys <|> Create api keys file to allow the keys to be seen and used by other automation
   ansible.builtin.copy:
     dest: "{{ grafana_api_keys_dir }}/{{ inventory_hostname }}/{{ item['item']['name'] }}.key"
     content: "{{ item['json']['key'] }}"

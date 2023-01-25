@@ -1,5 +1,5 @@
 ---
-- name: service █ Restart auditd service
+- name: service <|> Restart auditd service
   ansible.builtin.service:
     name: "{{ item }}"
     state: "{{ (repositories_server_start_services | default(bb_start_services) | default(true, true) | bool) | ternary('restarted', omit) }}"

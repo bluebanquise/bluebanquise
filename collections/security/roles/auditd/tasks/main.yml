@@ -1,6 +1,6 @@
 ---
 
-- name: include_vars ░ Gather OS specific variables
+- name: include_vars <|> Gather OS specific variables
   # This task gathers variables defined in OS specific files.
   #
   # Search vars in:
@@ -22,7 +22,7 @@
   tags:
     - always
 
-- name: "package █ install"
+- name: "package <|> install"
   ansible.builtin.package:
     name: "{{ item }}"
     state: present
@@ -30,22 +30,22 @@
   tags:
     - package
 
-- name: "stat █ Check that the {{ auditd_plugins_directory }}/{{ auditd_syslog_file }} exists"
+- name: "stat <|> Check that the {{ auditd_plugins_directory }}/{{ auditd_syslog_file }} exists"
   ansible.builtin.stat:
     path: "{{ auditd_plugins_directory }}/{{ auditd_syslog_file }}"
   register: audit_result
 
-- name: "replace █ Allow audit logs to be forwarded to remote syslog server"
+- name: "replace <|> Allow audit logs to be forwarded to remote syslog server"
   ansible.builtin.replace:
     path: "{{ auditd_plugins_directory }}/{{ auditd_syslog_file }}"
     regexp: "^active = .*"
     replace: "active = yes"
-  notify: service █ Restart auditd service
+  notify: service <|> Restart auditd service
   when:
     - audit_result.stat.exists
     - auditd_forward_audit_logs | default(false) | bool
 
-- name: "service █ Manage {{ auditd_services_to_start | join(' ') }} state"
+- name: "service <|> Manage {{ auditd_services_to_start | join(' ') }} state"
   ansible.builtin.service:
     name: "{{ item }}"
     enabled: "{{ (auditd_enable_services | default(bb_enable_services) | default(true, true) | bool) | ternary('yes', 'no') }}"

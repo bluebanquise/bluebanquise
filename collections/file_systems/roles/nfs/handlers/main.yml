@@ -1,5 +1,5 @@
 ---
-- name: service █ Restart NFS server services
+- name: service <|> Restart NFS server services
   ansible.builtin.service:
     name: "{{ item }}"
     state: restarted

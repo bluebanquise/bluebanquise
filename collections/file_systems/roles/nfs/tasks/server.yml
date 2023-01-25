@@ -1,5 +1,5 @@
 ---
-- name: include_tasks ░ Use OS dedicated firewall task
+- name: include_tasks <|> Use OS dedicated firewall task
   ansible.builtin.include_tasks: "{{ outer_item }}"
   with_first_found:
     - files:
@@ -16,14 +16,14 @@
     - internal
     - firewall
 
-- name: "package █ Install {{ nfs_server_packages_to_install | join(' ') }} packages"
+- name: "package <|> Install {{ nfs_server_packages_to_install | join(' ') }} packages"
   ansible.builtin.package:
     name: "{{ nfs_server_packages_to_install }}"
     state: present
   tags:
     - package
 
-- name: lineinfile █ Set number of threads to be used
+- name: lineinfile <|> Set number of threads to be used
   ansible.builtin.lineinfile:
     path: /etc/nfs.conf
     regexp: "^#[nfsd]$"
@@ -31,32 +31,32 @@
     regexp: "threads="
     line: "threads={{ nfs_server_threads | default(8, true) }}"
 
-- name: file █ Create NFS configuration directories
+- name: file <|> Create NFS configuration directories
   ansible.builtin.file:
     path: /etc/nfs.conf.d
     state: directory
 
-- name: template █ Generate custom NFS configuration into /etc/nfs.conf.d
+- name: template <|> Generate custom NFS configuration into /etc/nfs.conf.d
   ansible.builtin.template:
     src: nfs.conf.j2
     dest: /etc/nfs.conf.d/bluebanquise.conf
     owner: root
     group: root
     mode: 0644
-  notify: service █ Restart NFS server services
+  notify: service <|> Restart NFS server services
 
-- name: lineinfile █ Edit file /etc/exports to add exported FS
+- name: lineinfile <|> Edit file /etc/exports to add exported FS
   ansible.builtin.lineinfile:
     path: /etc/exports
     regexp: ' # export id: {{ item.export }}$'
     line: "{{ item.export }} {% if item.network is defined and item.network is not none and networks[item.network] is defined and networks[item.network]['subnet'] is defined and networks[item.network]['subnet'] is not none and networks[item.network]['prefix'] is defined and networks[item.network]['prefix'] is not none %}{{networks[item.network]['subnet']}}/{{networks[item.network]['prefix']}}{% else %}*{% endif %}({{ item.export_options | default('rw,sync,root_squash', true) }}) # export id: {{ item.export }}"
   when: inventory_hostname == item.server
   with_items: "{{ nfs_shares }}"
-  notify: service █ Restart NFS server services
+  notify: service <|> Restart NFS server services
   tags:
     - template
 
-- name: file █ Create exported directories if not existing
+- name: file <|> Create exported directories if not existing
   ansible.builtin.file:
     path: "{{ item.export }}"
     state: directory
@@ -64,10 +64,10 @@
   with_items: "{{ nfs_shares }}"
   when: nfs_server_create_directories_if_not_exist
 
-- name: meta █ Run handler tasks to restart NFS server services
+- name: meta <|> Run handler tasks to restart NFS server services
   ansible.builtin.meta: flush_handlers
 
-- name: "service █ Manage {{ nfs_server_services_to_start | join(' ') }} state"
+- name: "service <|> Manage {{ nfs_server_services_to_start | join(' ') }} state"
   ansible.builtin.service:
     name: "{{ item }}"
     enabled: "{{ (nfs_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"

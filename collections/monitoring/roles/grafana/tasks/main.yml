@@ -1,5 +1,5 @@
 ---
-- name: include_vars █ Gather OS specific variables
+- name: include_vars <|> Gather OS specific variables
   # This task gathers variables defined in OS specific files.
   #
   # Search vars in:
@@ -69,10 +69,10 @@
   tags:
     - plugins
 
-- name: service █ Force all notified handlers to run at this point
+- name: service <|> Force all notified handlers to run at this point
   ansible.builtin.meta: flush_handlers
 
-- name: service █ Wait for grafana to start (http/s)
+- name: service <|> Wait for grafana to start (http/s)
   ansible.builtin.wait_for:
     host: "{{ grafana_address }}"
     port: "{{ grafana_port }}"
@@ -87,7 +87,7 @@
     - dashboards
     - plugins
 
-- name: service █ Wait for grafana to start (socket)
+- name: service <|> Wait for grafana to start (socket)
   ansible.builtin.wait_for:
     path: "{{ grafana_server.socket }}"
   when: grafana_server.protocol is defined and grafana_server.protocol == 'socket'
@@ -101,14 +101,14 @@
     - dashboards
     - plugins
 
-- name: grafana █ Ensure password is set to the one in the role variables
+- name: grafana <|> Ensure password is set to the one in the role variables
   ansible.builtin.command: "grafana-cli --homepath {{ grafana_homepath }} admin reset-admin-password {{ grafana_security.admin_password }}"
   changed_when: false
   no_log: true
   register: grafana_cli_var
   ignore_errors: true
 
-- name: grafana █ Debug grafana-cli when  command is failing
+- name: grafana <|> Debug grafana-cli when  command is failing
   ansible.builtin.debug:
     msg: "grafana-cli failed to set password {{ grafana_cli_var.stderr }}"
   when:
@@ -127,7 +127,7 @@
   tags:
     - datasources
 
-- name: "grafana █ Check if there are any dashboards in local {{ grafana_dashboards_dir }}"
+- name: "grafana <|> Check if there are any dashboards in local {{ grafana_dashboards_dir }}"
   ansible.builtin.set_fact:
     found_dashboards: "{{ lookup('fileglob', grafana_dashboards_dir + '/*.json', wantlist=True) }}"
   tags:
@@ -138,7 +138,7 @@
   tags:
     - dashboards
 
-- name: grafana █ UI login information
+- name: grafana <|> UI login information
   ansible.builtin.debug:
     msg:
       - '###############################################################'

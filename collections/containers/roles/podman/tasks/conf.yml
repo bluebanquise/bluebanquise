@@ -1,5 +1,5 @@
 ---
-- name: conf █ Configure /etc/container/*.conf
+- name: conf <|> Configure /etc/container/*.conf
   ansible.builtin.template:
     src: "{{ item }}.j2"
     dest: "/{{ item }}"

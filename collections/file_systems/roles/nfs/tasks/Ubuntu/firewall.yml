@@ -1,4 +1,4 @@
-- name: ufw █ "Add services to firewall"
+- name: ufw <|> "Add services to firewall"
   community.general.ufw:
     rule: allow
     port: '2049'

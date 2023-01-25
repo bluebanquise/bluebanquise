@@ -1,11 +1,11 @@
 ---
-- name: install █ Add grafana group
+- name: install <|> Add grafana group
   ansible.builtin.group:
     name: grafana
     gid: "{{ grafana_user_gid }}"
     state: present
 
-- name: install █ Add grafana user
+- name: install <|> Add grafana user
   ansible.builtin.user:
     name: grafana
     shell: /bin/false
@@ -14,19 +14,19 @@
     home: "{{ grafana_user_home }}"
     state: present
 
-- name: install ░ Check for log file
+- name: install <|> Check for log file
   ansible.builtin.stat:
     path: "{{ grafana_logs_dir }}"
   register: log_exists
 
-- name: install █ Change log owner
+- name: install <|> Change log owner
   ansible.builtin.file:
     path: "{{ grafana_logs_dir }}"
     owner: "{{ grafana_user_uid }}"
     group: "{{ grafana_user_gid }}"
   when: log_exists.stat.exists
 
-- name: "install █ Add services to firewall's {{ grafana_firewall_zone | default('public') }} zone"
+- name: "install <|> Add services to firewall's {{ grafana_firewall_zone | default('public') }} zone"
   ansible.posix.firewalld:
     zone: "{{ grafana_firewall_zone | default('public') }}"
     service: "{{ item }}"
@@ -40,14 +40,14 @@
   tags:
     - firewall
 
-- name: "install █ Install {{ grafana_packages_to_install | join(' ') }} packages"
+- name: "install <|> Install {{ grafana_packages_to_install | join(' ') }} packages"
   ansible.builtin.package:
     name: "{{ grafana_packages_to_install }}"
     state: present
   tags:
     - install
 
-- name: service █ Manage grafana-server state
+- name: service <|> Manage grafana-server state
   ansible.builtin.service:
     name: "{{ item }}"
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"

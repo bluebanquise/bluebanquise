@@ -1,6 +1,6 @@
 ---
 
-- name: include_tasks ░ Use OS dedicated task
+- name: include_tasks <|> Use OS dedicated task
   ansible.builtin.include_tasks: "{{ outer_item }}"
   with_first_found:
     - files:

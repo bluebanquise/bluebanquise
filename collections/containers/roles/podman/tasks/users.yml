@@ -1,5 +1,5 @@
 ---
-- name: users █ Create /etc/subuid and /etc/subgid
+- name: users <|> Create /etc/subuid and /etc/subgid
   ansible.builtin.template:
     src: "{{ item }}.j2"
     dest: "/{{ item }}"
@@ -12,11 +12,11 @@
     - etc/subgid
   when: podman_manual_mapping|bool
 
-- name: users █ Set getent_passwd fact
+- name: users <|> Set getent_passwd fact
   ansible.builtin.getent:
     database: passwd
 
-- name: users █ Create directory
+- name: users <|> Create directory
   ansible.builtin.file:
     path: "{{ getent_passwd[item.key][4] }}/.config/containers"
     state: directory
@@ -26,7 +26,7 @@
   loop: "{{ podman_users|dict2items }}"
   when: getent_passwd[item.key][1]|int >= 1000
 
-- name: users █ Deploy user configuration for non-root pods
+- name: users <|> Deploy user configuration for non-root pods
   ansible.builtin.template:
     src: home/libpod.conf.j2
     dest: "{{ getent_passwd[item.key][4] }}/.config/containers/libpod.conf"

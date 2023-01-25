@@ -1,5 +1,5 @@
 ---
-- name: include_vars ░ Gather OS specific variables
+- name: include_vars <|> Gather OS specific variables
   # This task gathers variables defined in OS specific files.
   #
   # Search vars in:
@@ -21,7 +21,7 @@
   tags:
     - always
 
-- name: "package █ Install {{ slurm_packages_to_install[slurm_profile] | join(' ') }}"
+- name: "package <|> Install {{ slurm_packages_to_install[slurm_profile] | join(' ') }}"
   ansible.builtin.package:
     name: "{{ slurm_packages_to_install[slurm_profile] }}"
     state: present
@@ -30,18 +30,18 @@
 
 # Install MUNGE, generic part
 
-- name: include_tasks ░ Deploy Munge
+- name: include_tasks <|> Deploy Munge
   ansible.builtin.include_tasks: "munge.yml"
 
 # Setup slurm user/group, generic part
 
-- name: group █ Add slurm group
+- name: group <|> Add slurm group
   ansible.builtin.group:
     name: slurm
     gid: 777
     state: present
 
-- name: user █ Add slurm user
+- name: user <|> Add slurm user
   ansible.builtin.user:
     name: slurm
     shell: /bin/false
@@ -52,13 +52,13 @@
 
 # Setup directories, generic part
 
-- name: "file █ Enforce permissions on {{ slurm_home_path }}"
+- name: "file <|> Enforce permissions on {{ slurm_home_path }}"
   ansible.builtin.file:
     path: "{{ slurm_home_path }}"
     state: directory
     mode: 0755
 
-- name: file █ Create needed directories
+- name: file <|> Create needed directories
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
@@ -72,19 +72,19 @@
 
 # Setup slurm controller
 
-- name: include_tasks ░ Deploy Slurm controller
+- name: include_tasks <|> Deploy Slurm controller
   ansible.builtin.include_tasks: "controller.yml"
   when: slurm_profile == 'controller'
 
 # Setup slurm computes
 
-- name: include_tasks ░ Deploy Slurm compute
+- name: include_tasks <|> Deploy Slurm compute
   ansible.builtin.include_tasks: "compute.yml"
   when: slurm_profile == 'compute'
 
 # Setup slurm submitter
 
-- name: include_tasks ░ Deploy Slurm submitter
+- name: include_tasks <|> Deploy Slurm submitter
   ansible.builtin.include_tasks: "submitter.yml"
   when: slurm_profile == 'submitter'
 

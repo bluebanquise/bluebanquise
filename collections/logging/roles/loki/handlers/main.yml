@@ -1,11 +1,11 @@
 ---
-- name: service █ restart loki
+- name: service <|> restart loki
   service:
     name: loki
     state: restarted
   listen: restart loki
 
-- name: service █ restart promtail
+- name: service <|> restart promtail
   service:
     name: promtail
     state: restarted

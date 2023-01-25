@@ -1,8 +1,8 @@
 ---
 
-- name: "lineinfile █ Set ATFTPD_DIRECTORY in /etc/sysconfig/atftpd"
+- name: "lineinfile <|> Set ATFTPD_DIRECTORY in /etc/sysconfig/atftpd"
   ansible.builtin.lineinfile:
     path: /etc/sysconfig/atftpd
     regexp: '^ATFTPD_DIRECTORY='
     line: 'ATFTPD_DIRECTORY="/srv/tftpboot"'
-  notify: "service █ Restart pxe services"
+  notify: "service <|> Restart pxe services"

@@ -1,6 +1,6 @@
 ##### OpenSuse / SLES
 
-- name: "copy █ Copy osdeploy files {{ pxe_stack_htdocs_path }}/pxe/osdeploy/"
+- name: "copy <|> Copy osdeploy files {{ pxe_stack_htdocs_path }}/pxe/osdeploy/"
   ansible.builtin.copy:
     src: "osdeploy/{{ item }}"
     dest: "{{ pxe_stack_htdocs_path }}/pxe/osdeploy/{{ item }}"
@@ -12,7 +12,7 @@
     - sles_12.ipxe
     - sles_15.ipxe
 
-- name: template █ Create autoyast file for SLES 12
+- name: template <|> Create autoyast file for SLES 12
   ansible.builtin.template:
     src: Suse/autoyast_sles12.xml.j2
     dest: "{{ pxe_stack_htdocs_path }}/pxe/equipment_profiles/{{ item | replace(bb_core_equipment_naming+'_','') | trim }}.autoyast.xml"
@@ -29,7 +29,7 @@
   tags:
     - template
 
-- name: template █ Create autoyast file for OpenSuSE 15 / SLES 15
+- name: template <|> Create autoyast file for OpenSuSE 15 / SLES 15
   ansible.builtin.template:
     src: Suse/autoyast.xml.j2
     dest: "{{ pxe_stack_htdocs_path }}/pxe/equipment_profiles/{{ item | replace(bb_core_equipment_naming+'_','') | trim }}.autoyast.xml"
@@ -46,7 +46,7 @@
   tags:
     - template
 
-- name: template █ equipment_profiles for OpenSuSE / SLES
+- name: template <|> equipment_profiles for OpenSuSE / SLES
   ansible.builtin.template:
     src: Suse/equipment_profile_autoyast.ipxe.j2
     dest: "{{ pxe_stack_htdocs_path }}/pxe/equipment_profiles/{{ item | replace(bb_core_equipment_naming+'_','') | trim }}.ipxe"

@@ -1,5 +1,5 @@
 ---
-- name: include_vars ░ Gather OS specific variables
+- name: include_vars <|> Gather OS specific variables
   # This task gathers variables defined in OS specific files.
   #
   # Search vars in:
@@ -23,7 +23,7 @@
   tags:
     - always
 
-- name: "include_tasks ░ Use OS dedicated firewall task"
+- name: "include_tasks <|> Use OS dedicated firewall task"
   ansible.builtin.include_tasks: "{{ outer_item }}"
   with_first_found:
     - files:
@@ -40,14 +40,14 @@
     - internal
     - firewall
 
-- name: "package █ Install {{ dns_server_packages_to_install | join(' ') }} packages"
+- name: "package <|> Install {{ dns_server_packages_to_install | join(' ') }} packages"
   ansible.builtin.package:
     name: "{{ dns_server_packages_to_install }}"
     state: present
   tags:
     - package
 
-- name: "file █ Create needed directory {{ dns_server_named_dir }}"
+- name: "file <|> Create needed directory {{ dns_server_named_dir }}"
   ansible.builtin.file:
     path: "{{ dns_server_named_dir }}"
     state: directory
@@ -55,18 +55,18 @@
     group: "{{ dns_server_dns_user }}"
     mode: 0750
 
-- name: template █ Generate /etc/named.conf
+- name: template <|> Generate /etc/named.conf
   ansible.builtin.template:
     src: named.conf.j2
     dest: /etc/named.conf
     owner: root
     group: root
     mode: 0644
-  notify: service █ Restart dns services
+  notify: service <|> Restart dns services
   tags:
     - template
 
-- name: "template █ Generate Forward zone file on Master DNS {{ dns_server_named_dir }}/forward.zone"
+- name: "template <|> Generate Forward zone file on Master DNS {{ dns_server_named_dir }}/forward.zone"
   ansible.builtin.template:
     src: forward.j2
     dest: "{{ dns_server_named_dir }}/forward.zone"
@@ -77,7 +77,7 @@
   tags:
     - template
 
-- name: set_fact ░ Set SOA Serial for reverse zone
+- name: set_fact <|> Set SOA Serial for reverse zone
   ansible.builtin.set_fact:
     serial: "{{ lookup('pipe', 'date +%s') }}"
   when: zoneconf.changed  # noqa 503
@@ -85,19 +85,19 @@
     - template
     - internal
 
-- name: "template █ Generate SOA for forward zone file {{ dns_server_named_dir }}/forward.soa"
+- name: "template <|> Generate SOA for forward zone file {{ dns_server_named_dir }}/forward.soa"
   ansible.builtin.template:
     src: forward.soa.j2
     dest: "{{ dns_server_named_dir }}/forward.soa"
     owner: root
     group: root
     mode: 0644
-  notify: service █ Restart dns services
+  notify: service <|> Restart dns services
   when: zoneconf.changed  # noqa 503
   tags:
     - template
 
-- name: "template █ Generate Reverse zone file on Master DNS {{ dns_server_named_dir }}/{{ item }}.rr.zone"
+- name: "template <|> Generate Reverse zone file on Master DNS {{ dns_server_named_dir }}/{{ item }}.rr.zone"
   ansible.builtin.template:
     src: reverse.j2
     dest: "{{ dns_server_named_dir }}/{{ item | trim }}.rr.zone"
@@ -108,32 +108,32 @@
   tags:
     - template
 
-- name: "template █ Generate SOA for reverse zone file {{ dns_server_named_dir }}/{{ item }}.rr.soa"
+- name: "template <|> Generate SOA for reverse zone file {{ dns_server_named_dir }}/{{ item }}.rr.soa"
   ansible.builtin.template:
     src: reverse.soa.j2
     dest: "{{ dns_server_named_dir }}/{{ item | trim }}.rr.soa"
     owner: root
     group: root
     mode: 0644
-  notify: service █ Restart dns services
+  notify: service <|> Restart dns services
   with_items: "{{ j2_dns_server_get_first_octets.split(',') }}"
   when: zoneconf.changed  # noqa 503
   tags:
     - template
 
-- name: "template █ Generate override file {{ dns_server_named_dir }}/override.zone"
+- name: "template <|> Generate override file {{ dns_server_named_dir }}/override.zone"
   ansible.builtin.template:
     src: override.j2
     dest: "{{ dns_server_named_dir }}/override.zone"
     owner: root
     group: root
     mode: 0644
-  notify: service █ Restart dns services
+  notify: service <|> Restart dns services
   when: dns_overrides is defined and zoneconf.changed  # noqa 503
   tags:
     - template
 
-- name: include_tasks ░ Apply OS specific tasks
+- name: include_tasks <|> Apply OS specific tasks
   ansible.builtin.include_tasks: "{{ item }}"
   with_first_found:
     - files:
@@ -147,10 +147,10 @@
   tags:
     - internal
 
-- name: meta █ Run handler tasks to restart dns services
+- name: meta <|> Run handler tasks to restart dns services
   ansible.builtin.meta: flush_handlers
 
-- name: "service █ Manage {{ dns_server_services_to_start | join(' ') }} state"
+- name: "service <|> Manage {{ dns_server_services_to_start | join(' ') }} state"
   ansible.builtin.service:
     name: "{{ item }}"
     enabled: "{{ (dns_server_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"

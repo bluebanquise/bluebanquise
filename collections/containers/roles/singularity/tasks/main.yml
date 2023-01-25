@@ -1,5 +1,5 @@
 ---
-- name: include_vars ░ Gather OS specific variables
+- name: include_vars <|> Gather OS specific variables
   # This task gathers variables defined in OS specific files.
   #
   # Search vars in:
@@ -23,7 +23,7 @@
     - package
     - template
 
-- name: singularity █ Install singularity
+- name: singularity <|> Install singularity
   ansible.builtin.package:
     name: "{{ item }}"
     state: present
@@ -31,7 +31,7 @@
   tags:
     - package
 
-- name: singularity █ Template in singularity.conf
+- name: singularity <|> Template in singularity.conf
   ansible.builtin.template:
     src: singularity.conf.j2
     dest: "{{ singularity_config_dir }}/singularity.conf"
@@ -42,7 +42,7 @@
   tags:
     - template
 
-- name: singularity █ Template in init if singularity_manage_init_file is True
+- name: singularity <|> Template in init if singularity_manage_init_file is True
   ansible.builtin.template:
     src: init.j2
     dest: "{{ singularity_config_dir }}/init"

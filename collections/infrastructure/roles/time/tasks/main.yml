@@ -1,5 +1,5 @@
 ---
-- name: include_vars ░ Gather OS specific variables
+- name: include_vars <|> Gather OS specific variables
   # This task gathers variables defined in OS specific files.
   #
   # Search vars in:
@@ -21,7 +21,7 @@
   tags:
     - always
 
-- name: include_tasks ░ Use OS dedicated firewall task
+- name: include_tasks <|> Use OS dedicated firewall task
   ansible.builtin.include_tasks: "{{ item }}"
   with_first_found:
     - files:
@@ -36,42 +36,42 @@
     - internal
     - firewall
 
-- name: "package █ Install {{ time_packages_to_install | join(' ') }} packages"
+- name: "package <|> Install {{ time_packages_to_install | join(' ') }} packages"
   ansible.builtin.package:
     name: "{{ time_packages_to_install }}"
     state: present
   tags:
     - package
 
-- name: "template █ Generate {{ time_chrony_conf_path }}"
+- name: "template <|> Generate {{ time_chrony_conf_path }}"
   ansible.builtin.template:
     src: chrony.conf.j2
     dest: "{{ time_chrony_custom_conf_path | default(time_chrony_conf_path) }}"
     owner: root
     group: root
     mode: 0644
-  notify: service █ Restart time services
+  notify: service <|> Restart time services
   tags:
     - template
 
-- name: lineinfile █ Set sysconfig OPTIONS for chronyd
+- name: lineinfile <|> Set sysconfig OPTIONS for chronyd
   ansible.builtin.lineinfile:
     path: /etc/sysconfig/chronyd
     regexp: '^OPTIONS'
     line: OPTIONS="{{ time_chronyd_options }}"
-  notify: service █ Restart time services
+  notify: service <|> Restart time services
   when: time_chronyd_options is defined
   tags:
     - template
 
-- name: "timezone █ Set system to {{ bb_time_zone | default(time_time_zone, true) }} timezone"
+- name: "timezone <|> Set system to {{ bb_time_zone | default(time_time_zone, true) }} timezone"
   ansible.builtin.timezone:
     name: "{{ bb_time_zone | default(time_time_zone, true) }}"
 
-- name: meta █ Run handler tasks to restart time services
+- name: meta <|> Run handler tasks to restart time services
   ansible.builtin.meta: flush_handlers
 
-- name: "service █ Manage {{ time_services_to_start | join(' ') }} services state"
+- name: "service <|> Manage {{ time_services_to_start | join(' ') }} services state"
   ansible.builtin.service:
     name: "{{ item }}"
     enabled: "{{ (time_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"

@@ -1,22 +1,22 @@
-- name: "copy █ /etc/named.rfc1912.zones"
+- name: "copy <|> /etc/named.rfc1912.zones"
   ansible.builtin.copy:
     src: Suse/named.rfc1912.zones
     dest: /etc/named.rfc1912.zones
     owner: root
     group: root
     mode: "0644"
-  notify: service █ Restart dns services
+  notify: service <|> Restart dns services
 
-- name: "copy █ /etc/sysconfig/named"
+- name: "copy <|> /etc/sysconfig/named"
   ansible.builtin.copy:
     src: Suse/named
     dest: /etc/sysconfig/named
     owner: root
     group: root
     mode: "0644"
-  notify: service █ Restart dns services
+  notify: service <|> Restart dns services
 
-- name: "file █ Create needed directory {{ dns_server_log_dir }}"
+- name: "file <|> Create needed directory {{ dns_server_log_dir }}"
   ansible.builtin.file:
     path: "{{ dns_server_log_dir }}"
     state: directory
