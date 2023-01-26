@@ -1,8 +1,8 @@
-Diskless
---------
+# Diskless
 
-Description
-^^^^^^^^^^^
+## Description
+
+**WARNING!! THIS ROLE IS LEGACY, AND IS UNDER REFACTORING PROCESS.**
 
 This role provides needed tools to deploy a basic diskless cluster.
 
@@ -18,8 +18,7 @@ Python based.
 
 A technical documentation is available on https://github.com/bluebanquise/bluebanquise/tree/master/resources/documentation/diskless
 
-Set up the tool
-^^^^^^^^^^^^^^^
+## Set up the tool
 
 Note: if using GPG keys (recommended), have a look at bottom of the readme to prevent a possible issue.
 
@@ -152,8 +151,7 @@ You can add -i (info) or -d (debug) options to the disklessset command to get lo
 
 Now the tool is ready to be used.
 
-Manage and create diskless images with modules
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+## Manage and create diskless images with modules
 
 The diskless tool use modules for image creation. Because the tool is modular, new modules can be added for specific images.
 By default 3 module are provided:
@@ -194,8 +192,7 @@ In the diskless main menu you can select the first option and select the module 
    3 - nfs
   -->:
 
-Livenet module
-""""""""""""""
+### Livenet module
 
 Entering the livenet module will prompt the following menu:
 
@@ -226,8 +223,7 @@ When generating a new livenet image with the first option, you will have to give
 * The type of livenet image, by default there are 3 types of livenet images.
 * The size of the image (It will take this size into ram memory). Please be aware to give enough memory for your operating system.
 
-NFS module
-""""""""""
+### NFS module
 
 Entering the livenet module will prompt the following menu:
 
@@ -248,15 +244,13 @@ In this menu you can do 3 actions:
 * Generate a new NFS golden image from a staging image : Create a golden image from previously created staging image.
 * Manage nodes of a golden image: Create a specific file system for each node for a specific golden image. After adding a node to a golden image via this option, you can boot the node onto the golden image.
 
-Demo module
-"""""""""""
+### Demo module
 
 You can create demo images to test the diskless tool.
 Corrupt a demo image will allow you to test the cleaning mechanism of the tool. In fact, a corrupted demo image will be cleaned when listing images.
 Demo module can also be used by developers to understand module creation.
 
-List available diskless images
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+## List available diskless images
 
 This menu will allow you to view created and in creation diskless images with their attributes:
 
@@ -296,23 +290,19 @@ This menu will allow you to view created and in creation diskless images with th
        ├── image_class: LivenetImage
        └── creation_date: 2020-10-21
 
-Remove a diskless image
-^^^^^^^^^^^^^^^^^^^^^^^
+## Remove a diskless image
 
 Simply choose and remove a previously created diskless image.
 
-Clone a diskless image
-^^^^^^^^^^^^^^^^^^^^^^
+## Clone a diskless image
 
 Clone an existing diskless image into another image.
 
-Create an image from a parameters file
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+## Create an image from a parameters file
 
 This option allows you to create an image without go through the questions phase. You can create the new image from a parameters file. The parameters file must follow a specific template. You can take example from the "image_data.yml" files generated when created images from questions (The usual way). You have to put a clear password in the given parameters file and follow these templates: 
 
-Template of parameters file to create a livenet image:
-""""""""""""""""""""""""""""""""""""""""""""""""""""""
+### Template of parameters file to create a livenet image:
 
 .. code-block:: text
 
@@ -332,8 +322,7 @@ Template of parameters file to create a livenet image:
 
 ssh_pub_key, additional_packages, and release_version are optional.
 
-Example of parameters file to create a nfs staging image:
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+### Example of parameters file to create a nfs staging image:
 
 .. code-block:: text
 
@@ -350,13 +339,11 @@ additional_packages, and release_version are optional.
 
 Don't put your parameters file in the disklessset tool directories, just load it with the tool option 5.
 
-Manage kernel of a diskless image
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+## Manage kernel of a diskless image
 
 Change the kernel of an existing diskless image.
 
-List available kernels
-^^^^^^^^^^^^^^^^^^^^^^
+## List available kernels
 
 Show available kernels for diskless images. Kernels can be added in /var/www/html/preboot_execution_environment/diskless/kernels.
 
@@ -376,24 +363,20 @@ If the kernel hasn't a generated initramfs file:
       │
       └── vmlinuz-4.18.0-147.el8.x86_64 - missing initramfs-kernel-4.18.0-147.el8.x86_64
 
-Generate a new initramfs
-^^^^^^^^^^^^^^^^^^^^^^^^
+## Generate a new initramfs
 
 Generate a new initramfs file for a kernel.
 
-Clear a corrupted image
-^^^^^^^^^^^^^^^^^^^^^^^
+## Clear a corrupted image
 
 Remove totally a diskless image with a brutal method.
 You must use this option only if the image is corrupted or there are non-compliant files.
 
-Exit
-^^^^
+## Exit
 
 Exist the diskless tool.
 
-Boot a diskless image
-^^^^^^^^^^^^^^^^^^^^^
+## Boot a diskless image
 
 You can use the bootset bluebanquise tool to setup the boot image for a specific machine:
 
@@ -403,8 +386,7 @@ You can use the bootset bluebanquise tool to setup the boot image for a specific
 
 Please refer you to bootset documentation for further information.
 
-Customizing Livenet image
-^^^^^^^^^^^^^^^^^^^^^^^^^
+## Customizing Livenet image
 
 The image name used in the examples below is *space_image*.
 
@@ -481,8 +463,7 @@ Using disklessset now, choose option 2 to unmount the image and squashfs it agai
 It is possible now to use the tool to resize image, to reduce it to the desired value (to save ram on target host).
 Always keep at least 100MB in / for temporary files and few logs generated during run.
 
-Example Playbook
-^^^^^^^^^^^^^^^^
+## Example Playbook
 
 .. code-block:: text
 
@@ -495,8 +476,7 @@ Example Playbook
 Once the node is started, run your playbook with your roles.
 It is important to synchronize your node's time by running the time role.
 
-GPG keys issues
-^^^^^^^^^^^^^^^
+## GPG keys issues
 
 If using GPG keys check (recommended), in order to use the tool, you must define gpgkey option in inventories list.
 
@@ -568,14 +548,13 @@ And update management server repositories (has these are used to generate the ba
 
 Then image creation should not face GPG key issue anymore.
 
-To be done
-^^^^^^^^^^
+## To be done
 
 * Make a livenet image autosizing system (Taken automatically the minimum size for operating system in ram).
 * Make a diskless conf file in /etc in order to configure : Autoclean on/off, Directories location (images, kernels, ...).
 
-Changelog
-^^^^^^^^^
+## Changelog
+
 * 1.4.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.1: Remove script from role and rely on package. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.0: Role update. David Pieters <davidpieters22@gmail.com>

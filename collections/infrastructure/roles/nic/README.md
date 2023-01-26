@@ -1,5 +1,7 @@
 # Network Interface Controllers - NIC
 
+**WARNING!** Always keep in mind that using this role, you could lose connection! Always have a backup way to reach the system.
+
 ## Description
 
 This role configure network interfaces to provide desired ip, prefix, gateway, etc.
@@ -18,7 +20,7 @@ If using Ubuntu or Debian derivate OS, networkd (Systemd Networkd) module from t
 | gw4 | x | x |   |
 | routes4 | x | x |   |
 | route_metric4 | x |   |   |
-| never_default4 | x |   |   |
+| never_default4 | x | x |   |
 | dns4 | x | x |   |
 | dns4_search | x |   |   |
 | ip6 | x |   |   |

@@ -1,5 +1,11 @@
 # cron
 
+## Description
+
+This role simply act as a wrapper to cron Ansible module.
+
+## Instructions
+
 Set needed cron on node/group by defining cron list based on cron module parameters. Example:
 
 ```yaml
@@ -19,3 +25,7 @@ cron:
 
 See `**cron** Ansible module page <https://docs.ansible.com/ansible/latest/collections/ansible/builtin/cron_module.html>`_
 for the full list of available parameters.
+
+## Changelog
+
+* 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>

@@ -1,41 +1,35 @@
-kernel_config
--------------
+# kernel_config
 
-Description
-^^^^^^^^^^^
+## Description
 
 This role apply/update kernel parameters and sysctl parameters.
 
-Instructions
-^^^^^^^^^^^^
+## Instructions
 
-kernel parameters
-"""""""""""""""""
+### kernel parameters
 
-The role uses the *ep_kernel_parameters* as source.
+The role uses the `ep_kernel_parameters` variable as source.
 
-sysctl
-""""""
+### sysctl
 
-Sysctl parameters to be set are defined in the *ep_sysctl*
+Sysctl parameters to be set are defined in the `ep_sysctl`
 variable. As it is an *ep_* variable, it should only be
 set for each equipment profiles, and not set at hostvars
 level.
 
 An example would be:
 
-.. code-block:: yaml
-
-  ep_sysctl:
-    kernel.panic: absent
-    vm.swappiness: 5
-    ...
+```yaml
+ep_sysctl:
+  kernel.panic: absent
+  vm.swappiness: 5
+  ...
+```
 
 It is optionally possible to prevent sysctl reload by
-setting variable *kernel_config_sysctl_reload* to **false**.
+setting variable `kernel_config_sysctl_reload` to **false**.
 
-Input
-^^^^^
+## Input
 
 Optional inventory vars:
 
@@ -44,8 +38,7 @@ Optional inventory vars:
 * ep_kernel_parameters
 * kernel_config_sysctl_reload
 
-Changelog
-^^^^^^^^^
+## Changelog
 
 * 1.2.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.1: Add OpenSuSE support. Neil Munday <neil@mundayweb.com>

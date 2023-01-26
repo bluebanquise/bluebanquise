@@ -1,8 +1,6 @@
-Firewall
---------
+# Firewall
 
-Description
-^^^^^^^^^^^
+## Description
 
 This role configures the firewall service on the hosts.
 
@@ -10,73 +8,68 @@ For each network interface of the host where the play runs, this role binds the
 source address **subnet/prefix** to the zone defined in **firewall.zone** if
 the network must be in the firewall.
 
-Instructions
-^^^^^^^^^^^^
+## Instructions
 
-**Inventory configuration**
-"""""""""""""""""""""""""""
+### Inventory configuration
 
 Enable or disable the firewall service in the equipment profile:
 
-.. code-block:: yaml
-
-  ep_firewall: true
+```yaml
+ep_firewall: true
+```
 
 To add a network of the host to a zone, define the zone name in
 **firewall.zone** in the network:
 
-.. code-block:: yaml
-
-  networks:
-    ice1-1:
-      subnet: 10.10.0.0
-      prefix: 16
-      netmask: 255.255.0.0
-      broadcast: 10.10.255.255
-      gateway: 10.10.2.1
-      firewall:
-        zone: internal
-    interconnect-1:
-      subnet: 10.20.0.0
-      prefix: 16
-      firewall:
-        zone: trusted
-
+```yaml
+networks:
+  ice1-1:
+    subnet: 10.10.0.0
+    prefix: 16
+    netmask: 255.255.0.0
+    broadcast: 10.10.255.255
+    gateway: 10.10.2.1
+    firewall:
+      zone: internal
+  interconnect-1:
+    subnet: 10.20.0.0
+    prefix: 16
+    firewall:
+      zone: trusted
+```
 
 To add or delete custom services that are not handled by any other role, define
 the `firewall_zones` parameter as below:
 
-.. code-block:: yaml
-
-  firewall_zones:
-    - zone: internal            <<< zone name
-      services_enabled:         <<< list of service to enable
-        - high-availability
-        - prometheus
-      services_disabled:        <<< list of service to disable
-        - cockpit
+```yaml
+firewall_zones:
+  - zone: internal            <<< zone name
+    services_enabled:         <<< list of service to enable
+      - high-availability
+      - prometheus
+    services_disabled:        <<< list of service to disable
+      - cockpit
+```
 
 It is possible to add or delete custom ports and rich rules with the same
 parameter:
 
-.. code-block:: yaml
+```yaml
+firewall_zones:
+  - zone: internal            <<< zone name
+    ports_enabled:            <<< list of ports to enable
+      - 1234/tcp
+    ports_disabled:           <<< list of ports to disable
+      - 5678/tcp
+    rich_rules_enabled:       <<< list of rich rules to enable
+      - "rule family=ipv4 forward-port port=443 protocol=tcp to-port=8443"
+    rich_rules_disabled:      <<< list of rich rules to disable
+      - 'rule service name="ftp" audit limit value="1/m" accept'
+    icmp_block_inversion: yes
+    masquerade: yes
+```
 
-  firewall_zones:
-    - zone: internal            <<< zone name
-      ports_enabled:            <<< list of ports to enable
-        - 1234/tcp
-      ports_disabled:           <<< list of ports to disable
-        - 5678/tcp
-      rich_rules_enabled:       <<< list of rich rules to enable
-        - "rule family=ipv4 forward-port port=443 protocol=tcp to-port=8443"
-      rich_rules_disabled:      <<< list of rich rules to disable
-        - 'rule service name="ftp" audit limit value="1/m" accept'
-      icmp_block_inversion: yes
-      masquerade: yes
-
-
-**Integration with other roles**
-""""""""""""""""""""""""""""""""
+### Integration with other roles
 
 BlueBanquise ships with roles that already support some level of firewall
 configuration by adding services to the default zone (public). For each role,
@@ -86,8 +79,7 @@ it is possible to override the default zone by setting
 For example, if you want to add the services of the pxe_stack roles to the
 internal zone, you must set the variable `pxe_stack_firewall_zone: internal`.
 
-Input
-^^^^^
+## Input
 
 Mandatory inventory vars:
 
@@ -119,15 +111,13 @@ Optional inventory vars:
     * icmp_block_inversion (bool)
     * masquerade           (bool)
 
-Output
-^^^^^^
+## Output
 
 Package installed:
 
 * firewall
 
-Changelog
-^^^^^^^^^
+## Changelog
 
 * 1.2.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.3: Add OpenSuSE support. Neil Munday <neil@mundayweb.com>
