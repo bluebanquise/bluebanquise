@@ -1,5 +1,5 @@
 ---
-conman_role_version: 1.4.0
+conman_role_version: 1.4.1
 
 conman_execpath: "/usr/lib/conman/exec"
 
