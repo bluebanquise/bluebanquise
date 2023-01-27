@@ -1,0 +1,19 @@
+#jinja2: lstrip_blocks: "True"
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+
+/var/log/conman/*.log {
+  compress
+  dateext
+  missingok
+  nocopytruncate
+  nocreate
+  nodelaycompress
+  nomail
+  rotate 4
+  sharedscripts
+  weekly
+  postrotate
+    /usr/bin/killall -HUP conmand
+  endscript
+}
