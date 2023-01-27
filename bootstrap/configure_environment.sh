@@ -1,14 +1,34 @@
 #!/usr/bin/env bash
 set -e
 
-# Install minimal requirements
-pip3 install setuptools-rust
-pip3 install -r requirements.txt
-export PATH=$HOME/.local/bin:$PATH
-ansible-galaxy collection install community.general
+# Get parameters if any
+
+export COLLECTIONS_LOCAL_PATH="none"
+
+for arg in "$@"; do
+  if [[ "$arg" == *"--bb_collections_local_path="* ]]; then
+    export COLLECTIONS_LOCAL_PATH=$(echo $arg | awk -F '=' '{print $2}')
+  fi
+done
+
+# Install minimal requirements into a virtual environment
+python3 -m venv ansible_venv
+source ansible_venv/bin/activate && \
+python3 -m pip install --upgrade pip && \
+pip3 install setuptools setuptools_rust && \
+pip3 install -r requirements.txt &&
+deactivate
+
+source ansible_venv/bin/activate && \
+ansible-galaxy collection install community.general && \
+deactivate
 
 # Install BlueBanquise collections
-ansible-galaxy collection install git+https://github.com/bluebanquise/bluebanquise.git#/collections/infrastructure,master -vvv --upgrade
+if [[ $COLLECTIONS_LOCAL_PATH != "none" ]]; then
+  ansible-galaxy collection install $COLLECTIONS_LOCAL_PATH
+else
+  ansible-galaxy collection install git+https://github.com/bluebanquise/bluebanquise.git#/collections/infrastructure,master -vvv --upgrade
+fi
 
 # Set pip bins in PATH
 grep -q -E "^export PATH.*/\.local/bin" "${HOME}"/.bashrc ||\

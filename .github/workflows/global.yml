@@ -35,10 +35,10 @@ jobs:
         run: docker run -d --net=host --name mg1 --tmpfs /tmp --tmpfs /run -v /sys/fs/cgroup:/sys/fs/cgroup:ro -v $PWD:/bluebanquise rockylinux/rockylinux:8_systemd
 
       - name: Setup container
-        run: docker exec mg1 bash -c "/bluebanquise/bootstrap/online_bootstrap.sh silent skip_env"
+        run: docker exec mg1 bash -c "/bluebanquise/bootstrap/online_bootstrap.sh --silent --skip_environment"
 
       - name: Setup container
-        run: docker exec mg1 bash -c "sudo -u bluebanquise /bin/bash -c 'cd /bluebanquise/bootstrap/ && ./configure_environment.sh'"
+        run: docker exec mg1 bash -c "sudo -u bluebanquise /bin/bash -c 'cd /bluebanquise/bootstrap/ && ./configure_environment.sh --bb_collections_local_path=/bluebanquise/collections/'"
 
       # - name: Prepare bluebanquise folder
       #   run: sudo mkdir /var/lib/bluebanquise; sudo chown -R $(id -u):$(id -g) /var/lib/bluebanquise; cp -a * /var/lib/bluebanquise;
