@@ -38,7 +38,7 @@ jobs:
         run: docker exec mg1 bash -c "/bluebanquise/bootstrap/online_bootstrap.sh silent skip_env"
 
       - name: Setup container
-        run: docker exec mg1 bash -c "sudo -u bluebanquise /bin/bash -c '/bluebanquise/bootstrap/configure_environment.sh'"
+        run: docker exec mg1 bash -c "sudo -u bluebanquise /bin/bash -c 'cd /bluebanquise/bootstrap/ && ./configure_environment.sh'"
 
       # - name: Prepare bluebanquise folder
       #   run: sudo mkdir /var/lib/bluebanquise; sudo chown -R $(id -u):$(id -g) /var/lib/bluebanquise; cp -a * /var/lib/bluebanquise;
