@@ -3,7 +3,7 @@
 # Global run on Ubuntu 22.04
 # Using instance environment (no docker)
 
-name: All roles in one - Ubuntu 22.04
+name: All roles in one
 on:
   push:
     branches:
@@ -11,8 +11,8 @@ on:
   #pull_request:
 
 jobs:
-  roles_u22:
-    name: All roles in one - Ubuntu 22.04
+  roles:
+    name: All roles in one
     runs-on: ubuntu-22.04
     env:
       ANSIBLE_CONFIG: /var/lib/bluebanquise/ansible.cfg
@@ -25,11 +25,40 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Setup python environment
-        uses: actions/setup-python@v1
+      - name: Create rockylinux systemd able image
+        run: docker build -t rockylinux/rockylinux:8_systemd -f ./resources/docker/Dockerfile_RockyLinux_8_systemd .
 
-      - name: Bootstrap system
-        run: cd bootstrap && chmod +x online_bootstrap.sh && ./online_bootstrap.sh silent 
+      - name: Set dummy interface
+        run: sudo modprobe -v dummy numdummies=2; sudo ip addr add 10.10.0.1/16 dev dummy0; ip a;
+
+      - name: Start container
+        run: docker run -d --net=host --name mg1 --tmpfs /tmp --tmpfs /run -v /sys/fs/cgroup:/sys/fs/cgroup:ro -v $PWD:/bluebanquise rockylinux/rockylinux:8_systemd
+
+      - name: Setup container
+        run: docker exec mg1 bash -c "/bluebanquise/bootstrap/online_bootstrap.sh silent skip_env"
+
+      - name: Setup container
+        run: docker exec mg1 bash -c "sudo -u bluebanquise /bin/bash -c '/bluebanquise/bootstrap/configure_environment.sh'"
+
+      # - name: Prepare bluebanquise folder
+      #   run: sudo mkdir /var/lib/bluebanquise; sudo chown -R $(id -u):$(id -g) /var/lib/bluebanquise; cp -a * /var/lib/bluebanquise;
+
+      # - name: Prepare bluebanquise environment
+      #   run: |
+      #     cp -a /var/lib/bluebanquise/resources/workflow/inventory_${{ matrix.inventory }} /var/lib/bluebanquise/inventory
+      #     cp -a /var/lib/bluebanquise/resources/workflow/playbooks /var/lib/bluebanquise
+
+      # - name: Install packages
+      #   run: pip3 install -r requirements.txt
+
+      # - name: Install collections
+      #   run: ansible-galaxy collection install community.general
+
+#      - name: Setup python environment
+        #uses: actions/setup-python@v1
+
+#      - name: Bootstrap system
+ #       run: cd bootstrap && chmod +x online_bootstrap.sh && ./online_bootstrap.sh silent 
 
       # - name: Add bluebanquise repositories
       #   uses: sudo curl http://bluebanquise.com/repository/releases/latest/u22/x86_64/bluebanquise/bluebanquise.list --output /etc/apt/sources.list.d/bluebanquise.list

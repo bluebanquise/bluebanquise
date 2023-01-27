@@ -53,6 +53,8 @@ message_output "Creating bluebanquise user, may take a while..."
 id -u bluebanquise &>/dev/null || sudo useradd --create-home --home-dir /var/lib/bluebanquise --shell /bin/bash bluebanquise
 echo 'bluebanquise ALL=(ALL:ALL) NOPASSWD:ALL' | sudo tee /etc/sudoers.d/bluebanquise
 
+if [[ $2 != 'skip_env' ]]
+then
 sudo -u bluebanquise /bin/bash -c '
 cd /var/lib/bluebanquise
 git clone https://github.com/bluebanquise/bluebanquise.git
@@ -61,6 +63,7 @@ cd bootstrap/
 chmod +x configure_environment.sh
 ./configure_environment.sh
 '
+fi
 
 echo
 echo " Bootstrap done."
