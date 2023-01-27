@@ -16,22 +16,21 @@ CURRENT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd 
 # Install minimal requirements into a virtual environment
 cd $HOME
 python3 -m venv ansible_venv
-source ansible_venv/bin/activate && \
+source ansible_venv/bin/activate
+
 python3 -m pip install --upgrade pip && \
 pip3 install setuptools setuptools_rust && \
-pip3 install -r $CURRENT_DIR/requirements.txt &&
-deactivate
+pip3 install -r $CURRENT_DIR/requirements.txt
 
-source ansible_venv/bin/activate && \
-ansible-galaxy collection install community.general && \
-deactivate
-
+ansible-galaxy collection install community.general
 # Install BlueBanquise collections
 if [[ $COLLECTIONS_LOCAL_PATH != "none" ]]; then
   ansible-galaxy collection install $COLLECTIONS_LOCAL_PATH
 else
   ansible-galaxy collection install git+https://github.com/bluebanquise/bluebanquise.git#/collections/infrastructure,master -vvv --upgrade
 fi
+
+deactivate
 
 # Set pip bins in PATH
 grep -q -E "^export PATH.*/\.local/bin" "${HOME}"/.bashrc ||\
