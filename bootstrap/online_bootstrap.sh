@@ -46,7 +46,7 @@ if [ "$NAME" == "Ubuntu" ]; then
   fi
 fi
 if [ "$PLATFORM_ID" == "platform:el8" ] || [ "$PLATFORM_ID" == "platform:el9" ]; then
-  sudo dnf install python3 python3-pip python3-policycoreutils openssh-clients -y
+  sudo dnf install python3 python3-pip python3-policycoreutils openssh-clients python3-setuptools -y 
 fi
 
 message_output "Creating bluebanquise user, may take a while..."

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+set -e
+
 # Install minimal requirements
 pip3 install -r requirements.txt
 export PATH=$HOME/.local/bin:$PATH
