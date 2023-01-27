@@ -74,6 +74,7 @@ Once these pam_limits parameter pushed, restart conman daemon.
 
 ## Changelog
 
+* 1.5.0: Add logrotate file. Matthieu Isoard <indigoping4cgmi@gmail.com>
 * 1.4.0: Update to BB 2.0 format. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.2.0: Add OpenSuSE support. Neil Munday <neil@mundayweb.com>
