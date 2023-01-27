@@ -43,7 +43,7 @@ jobs:
         run: docker exec mg1 bash -c "sudo -u bluebanquise /bin/bash -c 'cp -a /bluebanquise/resources/workflow/inventory_${{ matrix.inventory }} /var/lib/bluebanquise/inventory && cp -a /bluebanquise/resources/workflow/playbooks /var/lib/bluebanquise'"
 
       - name: Role test - set_hostname
-        run: docker exec mg1 bash -c "sudo -u bluebanquise /bin/bash -c 'cd $HOME && source ansible_venv/bin/activate && ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml -i inventory --become --connection=local --limit mg1 -t set_hostname --diff'"
+        run: docker exec mg1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml -i /var/lib/bluebanquise/ inventory --become --connection=local --limit mg1 --diff'"
 
 
       # - name: Prepare bluebanquise folder
