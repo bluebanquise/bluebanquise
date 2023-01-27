@@ -11,7 +11,10 @@ for arg in "$@"; do
   fi
 done
 
+CURRENT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+
 # Install minimal requirements into a virtual environment
+cd $HOME
 python3 -m venv ansible_venv
 source ansible_venv/bin/activate && \
 python3 -m pip install --upgrade pip && \
