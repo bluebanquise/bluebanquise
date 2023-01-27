@@ -19,7 +19,7 @@ python3 -m venv ansible_venv
 source ansible_venv/bin/activate && \
 python3 -m pip install --upgrade pip && \
 pip3 install setuptools setuptools_rust && \
-pip3 install -r requirements.txt &&
+pip3 install -r $CURRENT_DIR/requirements.txt &&
 deactivate
 
 source ansible_venv/bin/activate && \
