@@ -387,13 +387,146 @@ as follow:
 You will be able later to fine define endpoint ip/hostname for each service. But for now, we want all of them to simply
 rely on management1 node.
 
+Equipment groups
+----------------
 
-BEN_BEN
-BMCs
+We could now deploy configuration on management1 node. However, we haven't defined any OS related parameters:
+
+* Linux distribution and distribution version
+* Partitioning desired on deployed nodes
+* Specific kernel parameters (including consoles if needed)
+* IPMI password if needed
+* Admin password and ssh keys
+* etc.
+
+Equipment groups are Ansible group, that define for their member nodes all deployment parameters, and can also store
+useful data like hardware vendor, comments, etc.
+Most of the time, each kind of server / workstation will refer to a dedicated equipment group.
+
+By default, if nodes are not member of any equipment group, they will belong to ``all`` *magic* equipment group and so
+be configured according to pxe_stack role defaults (x86_64 Ubuntu 22.04).
+
+Equipment groups (except *all*) are always prefixed with ``equipment_``. Then remaining naming convention is up to administrator.
+
+We will assume here that management1 is part of ``equipment_SUPERMICRO_16C_32G``, login and computes nodes are part of
+``equipment_GIGABYTE_64C_256G`` and storage1 node is part of ``equipment_5TB_NVME`` (again, as long as prefix is respected, naming is up to you).
+
+Operating system
+^^^^^^^^^^^^^^^^
+
+Create file ``inventory/cluster/groups/equipment.yml`` and add nodes as follow:
+
+.. code-block::ini
+
+  [equipment_SUPERMICRO_16C_32G]
+  management1
+
+  [equipment_5TB_NVME]
+  storage1
+
+  [equipment_GIGABYTE_64C_256G]
+  login1
+  compute[1:4]
+
+Now, create folders that will contain dedicated files of each group:
+
+.. code-block::text
+
+  mkdir inventory/group_vars/equipment_SUPERMICRO_16C_32G
+  mkdir inventory/group_vars/equipment_GIGABYTE_64C_256G
+  mkdir inventory/group_vars/equipment_5TB_NVME
+
+We will assume that the cluster is homogenous, and that it relies on AlmaLinux 9 Linux distribution. Procedure is
+nearly the same whatever the target distribution.
+
+Create file ``inventory/group_vars/equipment_SUPERMICRO_16C_32G/os.yml`` and add the following content:
+
+.. code-block::yaml
+
+  ep_console:
+  ep_kernel_parameters:
+
+  ep_partitioning:
+
+  ep_operating_system:
+    distribution: almalinux
+    distribution_major_version: 9
+
+  ep_configuration:
+    keyboard_layout: us  # us, fr, etc.
+    system_language: en_US.UTF-8  # You should not update this if you want to google issues...
+
+Note that if left empty, ``ep_partitioning`` will use native OS auto-partitioning, which might fail if hardware is not
+generic, or result in loss of data if only a specific disk should be targeted on a multi-disks system.
+You can provide native distribution partitioning. For a RedHat like system, an example could be:
+
+.. code-block::yaml
+
+  ep_partitioning: |
+    clearpart --all --initlabel
+    part /boot --fstype=ext4 --size=1024
+    part / --fstype=ext4 --size=60000
+    part /home --fstype=ext4 --size=4096 --grow
+
+Please read your Linux distribution documentation for extended / complex partitioning syntax.
+Few examples are provided at BEN_BEN
+
+A full list of available equipment ``ep_`` keys are available at BEN_BEN.
+
+Do now the same for all other equipment groups, by creating files
+``inventory/group_vars/equipment_GIGABYTE_64C_256G/os.yml`` and
+``inventory/group_vars/equipment_5TB_NVME/os.yml``
+
+Access and security
+^^^^^^^^^^^^^^^^^^^
+
+Now generate an admin password SHA512 hash, using:
+
+.. code-block::python
+
+  python3 -c 'import crypt,getpass; print(crypt.crypt(getpass.getpass(), crypt.mksalt(crypt.METHOD_SHA512)))'
+
+And copy the output.
+
+Then grab ssh public key of current user (should be bluebanquise user by default).
+
+.. code-block::text
+
+  cat $HOME/.ssh/id_ed25519.pub
+
+And copy the output.
+
+Then create file ``inventory/group_vars/equipment_SUPERMICRO_16C_32G/security.yml`` and add the following content:
+
+.. code-block::yaml
 
 
-Review groups
--------------
+  ep_access_control: enforcing  # We set SELinux to enforcing
+  ep_firewall: true  # We want firewall to be enabled
+
+ep_admin_password_sha512
+
+ep_admin_ssh_keys
+
+  ep_host_authentication:  # comment if not needed. Login/password for BMC, storage bay controller, switch, etc.
+    - protocol: IPMI
+      user: admin
+      password: admin
+
+Comment/remove ``ep_host_authentication`` and ``ep_console`` if you do not have BMCs on these equipment.
+
+
+Hardware
+^^^^^^^^
+
+.. code-block::yaml
+
+
+  ep_equipment_type: server  # If server, a pxe profile will be generated
+
+
+
+
 
 In BlueBanquise, there are 3 main types of groups, apart of user's custom groups.
 
@@ -807,200 +940,6 @@ parameters in equipment_all, which act as a global/default set, and then copy
   do that, add more equipment groups and tune this way. If you do not respect this
   rule, unexpected behavior will happen during configuration deployment.
 
-Equipment profile variables
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Equipment profiles are variables dedicated to groups of nodes equipment. These
-variables cover most of the hardware, operating system, PXE needs, etc. of the
-related nodes.
-
-.. image:: images/inventory/ep_hard.svg
-   :align: center
-
-Except for operating system and partitioning, default values should match for
-a simple cluster with standard hardware.
-
-Lets review them:
-
-PXE
-"""
-
-* **ep_ipxe_driver**
-   * Possible values:
-      * default
-      * snp
-      * snponly
-   * Notes:
-     See https://ipxe.org/appnote/buildtargets.
-     Most of servers should accept default driver, but snp or snponly can be required on some (with many NICs for example).
-* **ep_ipxe_platform**
-   * Possible values:
-      * pcbios
-      * efi
-   * Notes:
-     This is the BIOS firmware type.
-     Should be detected automatically, but some roles need to force it.
-* **ep_ipxe_embed**
-   * Possible values:
-      * standard
-      * dhcpretry
-      * noshell
-   * Notes:
-     standard is ok for most cases. dhcpretry is to be used on networks where
-     link on switch may take some time to go up. In dhcpretry mode, the iPXE rom
-     will indefinitely try to get an ip from the dhcp.
-     noshell is similar to standard, but without shell in case of issues. This
-     allows "exit" EFI boot, for specific devices (like Nvidia DGX).
-
-* **ep_preserve_efi_first_boot_device**
-   * Possible values:
-      * true
-      * false
-   * Notes:
-     Try to force grub to restore EFI boot order during OS deployment. Allows to
-     keep PXE first for example.
-
-Kernel settings
-"""""""""""""""
-
-* **ep_console**
-   * Notes:
-     Custom value: the server console to be used. For example: console=tty0 console=ttyS1,115200n8
-
-* **ep_kernel_parameters**
-   * Notes:
-     Custom value: additional kernel parameters to be added on kernel line.
-
-* **ep_sysctl**
-   * Notes:
-     Custom value: additional sysctl kernel parameters.
-
-Security
-""""""""
-
-* **ep_access_control**
-   * Possible values:
-      * enforcing
-      * permissive
-      * disabled
-   * Notes:
-     Activate or not the access control (SELinux, etc.).
-
-* **ep_firewall**
-   * Possible values:
-      * true
-      * false
-   * Notes:
-     Activate or not the firewall (firewalld, etc.).
-
-Operating system setup
-""""""""""""""""""""""
-
-* **ep_partitioning**
-   * Notes:
-     Custom value: contains the partitioning multiple lines to be used. It is
-     expected here native distribution syntax. For example, for RHEL/CentOS, use
-     plain kickstart partitioning syntax (allows full custom partitioning).
-
-* **ep_autoinstall_pre_script**
-   * Notes:
-     To add a multiple lines %pre script in the auto deployment file (kickstart,
-     autoyast, preseed, etc.)
-
-* **ep_autoinstall_post_script**
-   * Notes:
-     To add a multiple lines %post script in the auto deployment file (kickstart,
-     autoyast, preseed, etc.)
-
-* **ep_operating_system**
-   * **distribution**
-      * Notes:
-        Custom value: set the distribution to be used here. This will be
-        directly related to the repository used. Standard values are: centos,
-        redhat, debian, ubuntu, opensuse, etc.
-   * **distribution_major_version**
-      * Notes:
-        Custom value: set the distribution major version number or string.
-   * **distribution_version**
-      * Notes:
-        Custom and optional value: set the distribution minor/custom version to
-        be used. This will force repositories and PXE to use a minor version
-        instead of relying on a major.
-   * **repositories_environment**
-      * Notes:
-        Custom and optional value: set a production environment, to prepend all
-        paths to be used (see repositories_client role documentation). For
-        example: production, staging, test, etc.
-
-* **ep_configuration**
-   * keyboard_layout**
-      * Possible values:
-         * us
-         * fr
-         * etc.
-      * Notes:
-        Set the keyboard layout.
-   * system_language**
-      * Possible values:
-         * en_US.UTF-8
-         * etc.
-      * Notes:
-        Set the system locals. It is strongly recommended to keep en_US.UTF-8.
-
-Hardware
-""""""""
-
-* **ep_equipment_type**
-   * Possible values:
-      * server
-      * any other custom values but not "server"
-   * Notes:
-     If server, then PXE files will be generated by the pxe_stack role. If not,
-     then value can be custom (and no PXE files will be generated).
-
-* **ep_hardware**
-   * Notes:
-     Multiple fields to define system architecture. Some addon roles (like slurm)
-     may rely on these values.
-
-Board credentials (BMC, controller, other)
-""""""""""""""""""""""""""""""""""""""""""
-
-* **ep_equipment_authentication**
-   * **user**
-      * Notes:
-        Custom value: set the BMC, storage bay controller, switch, etc. user.
-   * **password**
-      * Notes:
-        Custom value: set the BMC, storage bay controller, switch, etc. password.
-
-Authentication
-^^^^^^^^^^^^^^
-
-Authentication file allows to define default root password for all nodes, and
-default public ssh keys lists.
-
-To generate an sha512 password, use the following command (python >3.3):
-
-.. code-block:: text
-
-  python -c 'import crypt,getpass; print(crypt.crypt(getpass.getpass(), crypt.mksalt(crypt.METHOD_SHA512)))'
-
-We need to ensure our management1 node ssh public key is set here.
-
-Get the content of */root/.ssh/id_ed25519.pub* and add it in this file. At the
-same time, **remove the ssh key provided here as example**.
-
-It is possible to do it automatically using the following command:
-
-.. code-block:: text
-
-  # Copy public key of the mgmt to the inventory
-  /usr/bin/sed -i -e "s#- ssh-rsa.*#- $(cat /root/.ssh/id_ed25519.pub)#" \
-    ~/bluebanquise/inventory/group_vars/all/equipment_all/authentication.yml
-
-.. warning::
-  If you update the managements ssh keys, do not forget to update this file.
 
 -------------
 
