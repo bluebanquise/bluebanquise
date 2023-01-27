@@ -18,9 +18,9 @@ jobs:
       ANSIBLE_CONFIG: /var/lib/bluebanquise/ansible.cfg
       PY_COLORS: '1'
       ANSIBLE_FORCE_COLOR: '1'
-    # strategy:
-    #   matrix:
-    #     inventory: [light, standard, mi]
+    strategy:
+      matrix:
+        inventory: [standard]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -35,10 +35,18 @@ jobs:
         run: docker run -d --net=host --name mg1 --tmpfs /tmp --tmpfs /run -v /sys/fs/cgroup:/sys/fs/cgroup:ro -v $PWD:/bluebanquise rockylinux/rockylinux:8_systemd
 
       - name: Setup container
-        run: docker exec mg1 bash -c "/bluebanquise/bootstrap/online_bootstrap.sh --silent --skip_environment"
+        run: |
+          docker exec mg1 bash -c "/bluebanquise/bootstrap/online_bootstrap.sh --silent --skip_environment"
+          docker exec mg1 bash -c "sudo -u bluebanquise /bin/bash -c 'cd /bluebanquise/bootstrap/ && ./configure_environment.sh --bb_collections_local_path=/bluebanquise/collections/'"
 
-      - name: Setup container
-        run: docker exec mg1 bash -c "sudo -u bluebanquise /bin/bash -c 'cd /bluebanquise/bootstrap/ && ./configure_environment.sh --bb_collections_local_path=/bluebanquise/collections/'"
+      - name: Prepare run input files
+        run: |
+          cp -a /bluebanquise/resources/workflow/inventory_${{ matrix.inventory }} /var/lib/bluebanquise/inventory
+          cp -a /bluebanquise/resources/workflow/playbooks /var/lib/bluebanquise
+
+      - name: Role test - set_hostname
+        run: docker exec mg1 bash -c "sudo -u bluebanquise /bin/bash -c 'ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t set_hostname --diff'"
+
 
       # - name: Prepare bluebanquise folder
       #   run: sudo mkdir /var/lib/bluebanquise; sudo chown -R $(id -u):$(id -g) /var/lib/bluebanquise; cp -a * /var/lib/bluebanquise;
