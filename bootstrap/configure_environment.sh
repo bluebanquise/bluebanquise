@@ -2,6 +2,7 @@
 set -e
 
 # Install minimal requirements
+pip3 install setuptools-rust
 pip3 install -r requirements.txt
 export PATH=$HOME/.local/bin:$PATH
 ansible-galaxy collection install community.general
@@ -19,6 +20,7 @@ grep -q PYTHONPATH "${HOME}"/.bashrc ||\
 echo "export PYTHONPATH=\$(pip3 show ClusterShell | grep Location | awk -F ' ' '{print \$2}')" >> "${HOME}"/.bashrc
 
 # Bind to bluebanquise default ansible.cfg
+mkdir -p $HOME/bluebanquise/
 echo "export ANSIBLE_CONFIG=\$HOME/bluebanquise/ansible.cfg" |
 tee -a "${HOME}"/.bashrc
 
