@@ -14,6 +14,8 @@
     - Bug fix for bond interfaces with no network defined (#722)
   - pxe_stack:
     - Add force main NIC and fix gateway (#723)
+  - repositories:
+    - Support gpgkey for Ubuntu (#762)
 
 ## 1.6.0
 

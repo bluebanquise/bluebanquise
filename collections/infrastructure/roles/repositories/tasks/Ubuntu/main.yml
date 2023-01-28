@@ -17,6 +17,15 @@
     - ep_operating_system['distribution'] is defined and ep_operating_system['distribution'] is not none
     - (ep_operating_system['distribution_version'] is defined and ep_operating_system['distribution_version'] is not none) or (ep_operating_system['distribution_major_version'] is defined and ep_operating_system['distribution_major_version'] is not none)
 
+- name: set_fact <|> Initialize trust_option_by_repo
+  ansible.builtin.set_fact:
+    trust_option_by_repo: >-
+      {{ trust_option_by_repo | default([]) | combine(
+        {item.name: 'signed-by=' + item.gpgkey}
+        if ((item.gpgcheck is defined and item.gpgcheck | bool) and (item.gpgkey is defined and item.gpgkey | length > 0 )) else
+        {item.name: 'trusted=yes'}) }}
+  with_items: "{{ bb_repositories }}"
+
 - name: file <|+> Disable sources.list repositories
   ansible.builtin.replace:
     path: /etc/apt/sources.list
@@ -43,7 +52,7 @@
 
 - name: apt_repository <|+> Setting custom repositories
   ansible.builtin.apt_repository:
-    repo: "{{ item.repo | default('deb [trusted=yes] ' + (repositories_client_baseurl_prefix | default('', true)) + ( item.name | default(item, true) | string ) + ' ' + ( item.distribution | default('./', true) )) }}"
+    repo: "{{ item.repo | default('deb [' + trust_option_by_repo[item.name] + '] ' + (repositories_client_baseurl_prefix | default('', true)) + ( item.name | default(item, true) | string ) + ' ' + ( item.distribution | default('./', true) )) }}"
     state: "{{ item.state | default('present') }}"
     codename: "{{ item.codename | default(omit) }}"
     filename: "{{ item.filename | default(omit) }}"
