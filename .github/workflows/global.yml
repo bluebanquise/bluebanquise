@@ -43,8 +43,9 @@ jobs:
         run: docker exec mg1 bash -c "sudo -u bluebanquise /bin/bash -c 'cp -a /bluebanquise/resources/workflow/inventory_${{ matrix.inventory }} /var/lib/bluebanquise/inventory && cp -a /bluebanquise/resources/workflow/playbooks /var/lib/bluebanquise'"
 
       - name: Role test - set_hostname
-        run: docker exec mg1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mg1 --diff'"
-
+        run: |
+          docker exec mg1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ansible-playbook /var/lib/bluebanquise/playbooks/all.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mg1 --diff --skip-tags nic'"
+          docker exec mg1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ansible-playbook /var/lib/bluebanquise/playbooks/all.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mg1 --diff --check --tags nic'"
 
       # - name: Prepare bluebanquise folder
       #   run: sudo mkdir /var/lib/bluebanquise; sudo chown -R $(id -u):$(id -g) /var/lib/bluebanquise; cp -a * /var/lib/bluebanquise;

@@ -23,6 +23,10 @@
       tags: time
       vars:
         time_profile: server
+    - role: bluebanquise.infrastructure.time
+      tags: time
+      vars:
+        time_profile: client
     - role: bluebanquise.infrastructure.pxe_stack
       tags: pxe_stack
 
