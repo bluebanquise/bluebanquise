@@ -44,6 +44,7 @@ jobs:
 
       - name: Role test - set_hostname
         run: |
+          docker exec mg1 bash -c "sudo hostnamectl set-hostname dummy || echo will fail"
           docker exec mg1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ansible-playbook /var/lib/bluebanquise/playbooks/all.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mg1 --diff --skip-tags nic'"
           docker exec mg1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ansible-playbook /var/lib/bluebanquise/playbooks/all.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mg1 --diff --check --tags nic'"
 
