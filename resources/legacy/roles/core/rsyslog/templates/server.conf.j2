@@ -38,3 +38,17 @@ uucp,news.crit ?Spooler
 # Save boot messages also to boot.log
 $template Boot,"/var/log/rsyslog/%HOSTNAME%/boot.log"
 local7.* ?Boot
+
+# Rules for processing remote app logs
+$template RemoteLogs,"/var/log/rsyslog/%HOSTNAME%/%PROGRAMNAME%.log"
+*.* ?RemoteLogs
+
+# Also save logs of log_server locally
+if $fromhost-ip == '127.0.0.1' then {
+  *.info;mail.none;authpriv.none;cron.none                /var/log/messages
+  authpriv.*                                              /var/log/secure
+  mail.*                                                  -/var/log/maillog
+  cron.*                                                  /var/log/cron
+  uucp,news.crit                                          /var/log/spooler
+  local7.*                                                /var/log/boot.log
+}
