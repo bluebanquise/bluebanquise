@@ -1,9 +1,6 @@
 ---
 
-# Global run on Ubuntu 22.04
-# Using instance environment (no docker)
-
-name: All roles in one
+name: EL8
 on:
   push:
     branches:
@@ -12,7 +9,7 @@ on:
 
 jobs:
   roles:
-    name: All roles in one
+    name: EL8
     runs-on: ubuntu-22.04
     env:
       ANSIBLE_CONFIG: /var/lib/bluebanquise/ansible.cfg
@@ -29,7 +26,7 @@ jobs:
         run: docker build -t rockylinux/rockylinux:8_systemd -f ./resources/docker/Dockerfile_RockyLinux_8_systemd .
 
       - name: Set dummy interface
-        run: sudo modprobe -v dummy numdummies=2; sudo ip addr add 10.10.0.1/16 dev dummy0; ip a;
+        run: sudo modprobe -v dummy numdummies=2 && sudo ip addr add 10.10.0.1/16 dev dummy0 && sudo ip link set dev dummy0 up && ip a;
 
       - name: Start container
         run: docker run -d --privileged --cgroupns=host --net=host --name mg1 -v /sys/fs/cgroup:/sys/fs/cgroup:rw -v $PWD:/bluebanquise rockylinux/rockylinux:8_systemd
@@ -38,77 +35,12 @@ jobs:
         run: |
           docker exec mg1 bash -c "/bluebanquise/bootstrap/online_bootstrap.sh --silent --skip_environment"
           docker exec mg1 bash -c "sudo -u bluebanquise /bin/bash -c 'cd /bluebanquise/bootstrap/ && ./configure_environment.sh --bb_collections_local_path=/bluebanquise/collections/'"
+          docker exec mg1 bash -c "dnf install wget -y && cd /etc/yum.repos.d/ && wget http://bluebanquise.com/repository/releases/latest/el8/x86_64/bluebanquise/bluebanquise.repo"
 
       - name: Prepare run input files
         run: docker exec mg1 bash -c "sudo -u bluebanquise /bin/bash -c 'cp -a /bluebanquise/resources/workflow/inventory_${{ matrix.inventory }} /var/lib/bluebanquise/inventory && cp -a /bluebanquise/resources/workflow/playbooks /var/lib/bluebanquise'"
 
       - name: Role test - set_hostname
         run: |
-          docker exec mg1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ansible-playbook /var/lib/bluebanquise/playbooks/all.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mg1 --diff --check --tags hosts_file,dhcp_server,nic'"
-          docker exec mg1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ansible-playbook /var/lib/bluebanquise/playbooks/all.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mg1 --diff --skip-tags hosts_file,dhcp_server,nic,set_hostname'"
-
-      # - name: Prepare bluebanquise folder
-      #   run: sudo mkdir /var/lib/bluebanquise; sudo chown -R $(id -u):$(id -g) /var/lib/bluebanquise; cp -a * /var/lib/bluebanquise;
-
-      # - name: Prepare bluebanquise environment
-      #   run: |
-      #     cp -a /var/lib/bluebanquise/resources/workflow/inventory_${{ matrix.inventory }} /var/lib/bluebanquise/inventory
-      #     cp -a /var/lib/bluebanquise/resources/workflow/playbooks /var/lib/bluebanquise
-
-      # - name: Install packages
-      #   run: pip3 install -r requirements.txt
-
-      # - name: Install collections
-      #   run: ansible-galaxy collection install community.general
-
-#      - name: Setup python environment
-        #uses: actions/setup-python@v1
-
-#      - name: Bootstrap system
- #       run: cd bootstrap && chmod +x online_bootstrap.sh && ./online_bootstrap.sh silent 
-
-      # - name: Add bluebanquise repositories
-      #   uses: sudo curl http://bluebanquise.com/repository/releases/latest/u22/x86_64/bluebanquise/bluebanquise.list --output /etc/apt/sources.list.d/bluebanquise.list
-
-      # - name: Install packages
-      #   run: pip3 install -r requirements.txt
-
-      # - name: Prepare bluebanquise environment
-      #   run: |
-      #     cp -a /var/lib/bluebanquise/resources/workflow/inventory_${{ matrix.inventory }} /var/lib/bluebanquise/inventory
-      #     cp -a /var/lib/bluebanquise/resources/workflow/playbooks /var/lib/bluebanquise
-
-      # - name: Set dummy interface
-      #   run: sudo modprobe -v dummy numdummies=2; sudo ip addr add 10.10.0.1/16 dev dummy0; ip a;
-
-      # - name: Role test - set_hostname
-      #   run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t set_hostname --diff
-
-      # - name: Role test - hosts_file
-      #   run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t hosts_file --diff
-
-      # - name: Role test - http_server
-      #   run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t http_server --diff
-
-      # - name: Role test - repositories
-      #   run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t repositories --diff
-
-      # - name: Role test - dhcp_server
-      #   run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t dhcp_server --diff
-
-      # - name: Role test - dns_server
-      #   run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t dns_server --diff
-
-      # - name: Role test - pxe_stack
-      #   run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t pxe_stack --diff --skip-tags package,need_package,service
-
-      # - name: Role test - time
-      #   run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t time --diff
-
-      # - name: Role test - clustershell
-      #   run: ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t clustershell --diff
-
-      # - name: Role test - ssh
-      #   run: |
-      #     ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t ssh_client --diff
-      #     ansible-playbook /var/lib/bluebanquise/playbooks/managements.yml --become --connection=local --limit mg1 -t ssh_remote_keys --diff
+          docker exec mg1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ansible-playbook /var/lib/bluebanquise/playbooks/all.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mg1 --diff --check --tags hosts_file'"
+          docker exec mg1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ansible-playbook /var/lib/bluebanquise/playbooks/all.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mg1 --diff --skip-tags hosts_file,nic,set_hostname'"

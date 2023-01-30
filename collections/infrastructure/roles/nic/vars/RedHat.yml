@@ -1,5 +1,6 @@
 ---
 nic_packages_to_install:
+  - NetworkManager
   - NetworkManager-libnm
   - nm-connection-editor
   - python3-libsemanage
