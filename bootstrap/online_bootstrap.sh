@@ -1,6 +1,18 @@
 #!/usr/bin/env bash
 set -e
 
+export SILENT="false"
+export SKIP_ENVIRONMENT="false"
+
+for arg in "$@"; do
+  if [[ "$arg" == *"--silent"* ]]; then
+    export SILENT="true"
+  fi
+  if [[ "$arg" == *"--skip_environment"* ]]; then
+    export SKIP_ENVIRONMENT="true"
+  fi
+done
+
 function message_output () {
   echo -e "\e[34m"
   echo -e " ╔═══════════════════════════════════════════════════════════════╗"
@@ -26,7 +38,7 @@ echo -e " \e[31mThis tool is going to install packages and act as"
 echo -e " priviledged user on this system to perform needed"
 echo -e " operations.\e[0m"
 echo
-if [[ $1 != 'silent' ]]
+if [[ $SILENT == "false" ]]
 then
   read -p " Please confirm you agree with that (Y/N): " -r
   echo
@@ -45,14 +57,17 @@ if [ "$NAME" == "Ubuntu" ]; then
     sudo apt-get install python3-pip git -y
   fi
 fi
-if [ "$PLATFORM_ID" == "platform:el8" ] || [ "$PLATFORM_ID" == "platform:el9" ]; then
-  sudo dnf install python3 python3-pip python3-policycoreutils openssh-clients -y
+if [ "$PLATFORM_ID" == "platform:el8" ]; then
+  sudo dnf install git python39 python39-pip python3-policycoreutils openssh-clients -y
+  alternatives --set python3 /usr/bin/python3.9
 fi
 
 message_output "Creating bluebanquise user, may take a while..."
 id -u bluebanquise &>/dev/null || sudo useradd --create-home --home-dir /var/lib/bluebanquise --shell /bin/bash bluebanquise
 echo 'bluebanquise ALL=(ALL:ALL) NOPASSWD:ALL' | sudo tee /etc/sudoers.d/bluebanquise
 
+if [[ $SKIP_ENVIRONMENT == "false" ]]
+then
 sudo -u bluebanquise /bin/bash -c '
 cd /var/lib/bluebanquise
 git clone https://github.com/bluebanquise/bluebanquise.git
@@ -61,6 +76,7 @@ cd bootstrap/
 chmod +x configure_environment.sh
 ./configure_environment.sh
 '
+fi
 
 echo
 echo " Bootstrap done."
