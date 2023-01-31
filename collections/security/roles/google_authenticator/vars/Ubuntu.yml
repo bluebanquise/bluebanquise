@@ -1,0 +1,3 @@
+---
+google_authenticator_packages_to_install:
+  - libpam-google-authenticator

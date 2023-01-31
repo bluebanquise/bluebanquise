@@ -1,0 +1,4 @@
+---
+google_authenticator_packages_to_install:
+  - google-authenticator
+  - qrencode-libs
