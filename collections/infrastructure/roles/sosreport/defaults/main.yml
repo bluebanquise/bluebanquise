@@ -1,0 +1,5 @@
+---
+sosreport_binary_path: /usr/local/bin
+sosreport_binary_name: sosreport-bb
+sosreport_output_path: /var/logs/sosreport
+sosreport_tempfile_path: /tmp/sosreport
