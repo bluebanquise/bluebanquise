@@ -1,4 +1,4 @@
-# Log 
+# Log
 
 ## Description
 
@@ -80,6 +80,7 @@ log_client_configuration_files:
 
 ## Changelog
 
+* 1.4.1: Register server local apps locally;more precise logrotate wildcards. <boubee.thiago@gmail.com>
 * 1.4.0: Merge both client and server. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.2.1: Add OpenSuSE support. Neil Munday <neil@mundayweb.com>
