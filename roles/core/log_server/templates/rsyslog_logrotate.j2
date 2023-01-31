@@ -1,7 +1,18 @@
 #### Blue Banquise file ####
 ## {{ansible_managed}}
 
-/var/log/rsyslog/*/*.log {
+/var/log/rsyslog/*/*.log
+/var/log/rsyslog/*/messages
+/var/log/rsyslog/*/cron
+/var/log/rsyslog/*/secure
+/var/log/rsyslog/*/maillog
+/var/log/rsyslog/*/spooler
+{
     daily
+    missingok
     rotate 5
+    sharedscripts
+    postrotate
+        /usr/bin/systemctl try-restart rsyslog-server.service > /dev/null 2>/dev/null || true
+    endscript
 }
