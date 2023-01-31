@@ -11,13 +11,13 @@ For now the Role has two possible configuration modes:
 1 - public key + google authenticator ( recomended )
 
 ```yaml
-mfa_mode: password
+mfa_mode: publickey
 ```
 
 2- password + google authenticator
 
 ```yaml
-mfa_mode: publickey
+mfa_mode: password
 ```
 
 ## Changelog
