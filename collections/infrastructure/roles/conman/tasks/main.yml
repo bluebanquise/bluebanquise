@@ -104,6 +104,22 @@
   tags:
     - template
 
+- name: logrotate <|> Check if /etc/logrotated.d/conman file exists
+  ansible.builtin.stat: 
+    path: /etc/logrotated.d/conman
+  register: logrotate_conman
+
+- name: logrotate <|> Generate /etc/logrotated.d/conman
+  ansible.builtin.template:
+    src: conman.logrotate.j2
+    dest: /etc/logrotated.d/conman
+    owner: conman
+    group: conman
+    mode: 0600
+  when: not logrotate_conman.stat.exists
+  tags:
+    - template
+
 - name: seboolean <|> Allow all daemons the ability to use unallocated ttys
   ansible.posix.seboolean:
     name: daemons_use_tty

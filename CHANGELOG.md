@@ -14,6 +14,10 @@
     - Bug fix for bond interfaces with no network defined (#722)
   - pxe_stack:
     - Add force main NIC and fix gateway (#723)
+  - repositories:
+    - Support gpgkey for Ubuntu (#762)
+  - rsyslog:
+    - More precise rules for logroation;write log server local messages also in /var/log/;write app messages in /var/log/rsyslog/ (#771)
 
 ## 1.6.0
 
