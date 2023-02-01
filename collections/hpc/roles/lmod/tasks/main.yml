@@ -1,5 +1,5 @@
 ---
-- name: include_vars ░ Gather OS specific variables
+- name: include_vars <|> Gather OS specific variables
   # This task gathers variables defined in OS specific files.
   #
   # Search vars in:
@@ -22,14 +22,14 @@
     - internal
     - package
 
-- name: "package █ Install {{ lmod_packages_to_install | join(' ') }}"
+- name: "package <|> Install {{ lmod_packages_to_install | join(' ') }}"
   ansible.builtin.package:
     name: "{{ lmod_packages_to_install }}"
     state: present
   tags:
     - package
 
-- name: template █ Generate /etc/profile.d/modules_extra_path.sh
+- name: template <|> Generate /etc/profile.d/modules_extra_path.sh
   ansible.builtin.template:
     src: modules_extra_path.sh.j2
     dest: /etc/profile.d/modules_extra_path.sh

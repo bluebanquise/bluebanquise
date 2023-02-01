@@ -1,11 +1,11 @@
 ---
-- name: group █ Add snmp_exporter group
+- name: group <|> Add snmp_exporter group
   ansible.builtin.group:
     name: snmp_exporter
     gid: "{{ prometheus_server_snmp_exporter_user_gid }}"
     state: present
 
-- name: user █ Add snmp_exporter user
+- name: user <|> Add snmp_exporter user
   ansible.builtin.user:
     name: snmp_exporter
     shell: /bin/false
@@ -14,12 +14,12 @@
     home: /var/lib/snmp_exporter
     state: present
 
-- name: stat ░ Check if file /etc/snmp_exporter/snmp.yml exist
+- name: stat <|> Check if file /etc/snmp_exporter/snmp.yml exist
   ansible.builtin.stat:
     path: /etc/snmp_exporter/snmp.yml
   register: prometheus_snmp_file_exist
 
-- name: assert ░ Assert /etc/snmp_exporter/snmp.yml is present
+- name: assert <|> Assert /etc/snmp_exporter/snmp.yml is present
   ansible.builtin.assert:
     that:
       - prometheus_snmp_file_exist.stat.exists
@@ -30,7 +30,7 @@
       Exiting.
     success_msg: "/etc/snmp_exporter/snmp.yml is present, proceeding..."
 
-- name: Package █ Install snmp_exporter package
+- name: Package <|> Install snmp_exporter package
   ansible.builtin.package:
     name: "{{ prometheus_server_snmp_exporter_packages_to_install }}"
     state: present
@@ -38,7 +38,7 @@
     - package
 
 # for generator of oid walk for snmp_exporter
-- name: Package █ Install snmp_exporter generator packages
+- name: Package <|> Install snmp_exporter generator packages
   ansible.builtin.package:
     name: "{{ prometheus_server_snmp_exporter_additional_packages_to_install }}"
     state: present
@@ -46,18 +46,18 @@
   tags:
     - package
 
-- name: template █ Generate snmp_exporter service file
+- name: template <|> Generate snmp_exporter service file
   ansible.builtin.template:
     src: snmp_exporter.service.j2
     dest: /etc/systemd/system/snmp_exporter.service
     owner: root
     group: root
     mode: 0755
-  notify: systemd █ Reload systemd configuration
+  notify: systemd <|> Reload systemd configuration
   tags:
     - template
 
-- name: file █ Create snmp_exporter directories structure
+- name: file <|> Create snmp_exporter directories structure
   ansible.builtin.file:
    path: "{{ item }}"
    state: directory
@@ -67,7 +67,7 @@
   loop:
    - /etc/snmp_exporter/
 
-- name: Template █ Generate /etc/snmp_exporter/snmp.yml
+- name: Template <|> Generate /etc/snmp_exporter/snmp.yml
   ansible.builtin.template:
     src: snmp.yml.yml.j2
     dest: /etc/snmp_exporter/snmp.yml
@@ -75,25 +75,25 @@
     group: snmp_exporter
     mode: 0640
   when: prometheus_server_snmp_exporter_raw_configuration is defined and prometheus_server_snmp_exporter_raw_configuration is not none
-  notify: service █ Restart snmp_exporter service
+  notify: service <|> Restart snmp_exporter service
   tags:
     - template
 
 - meta: flush_handlers
 
-- name: stat ░ Check /etc/snmp_exporter/snmp.yml exists
+- name: stat <|> Check /etc/snmp_exporter/snmp.yml exists
   ansible.builtin.stat:
     path: /etc/snmp_exporter/snmp.yml
   register: stat_result
 
-- name: assert ░ Assert that snmp.yml file exist
+- name: assert <|> Assert that snmp.yml file exist
   ansible.builtin.assert:
     that:
       - stat_result.stat.exists
     fail_msg: "/etc/snmp_exporter/snmp.yml file does not exist, cannot start snmp_exporter"
     success_msg: "/etc/snmp_exporter/snmp.yml file does exist, proceeding"
 
-- name: service █ Manage snmp_exporter service state
+- name: service <|> Manage snmp_exporter service state
   ansible.builtin.service:
     name: snmp_exporter
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"

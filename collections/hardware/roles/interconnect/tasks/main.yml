@@ -1,4 +1,4 @@
 ---
-- name: include_tasks ░ Configure OFED Interconnect
+- name: include_tasks <|> Configure OFED Interconnect
   ansible.builtin.include_tasks: "ofed/main.yml"
   when: interconnect_stack == "ofed"

@@ -1,5 +1,5 @@
 ---
-- name: user █ Set root password
+- name: user <|> Set root password
   ansible.builtin.user:
     name: root
     password: "{{ ep_admin_password_sha512 | default(root_password_ep_admin_password_sha512) }}"

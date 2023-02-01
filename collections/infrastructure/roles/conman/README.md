@@ -14,7 +14,7 @@ Files generated:
 
 Conman role will automatically look for equipment profile variables and bmc registered of each hosts.
 
-To make an host conmanc compatible in the inventory, ensure the `bmc` dict is set for the target host, and that target host as access (host_vars, group_vars, etc) to and `ep_host_authentication` list with IPMI protocol registered.
+To make an host conman compatible in the inventory, ensure the `bmc` dict is set for the target host, and that target host as access (host_vars, group_vars, etc) to and `ep_host_authentication` list with IPMI protocol registered.
 
 An ultra basic example would be:
 
@@ -32,13 +32,16 @@ all:
           ip4: 10.10.0.1
           network: net1-1
           mac: YY:YY:YY:YY:YY:YY
-      ep_host_authentication:
-        - protocol: IPMI
-          user: ADMIN
-          pass: ADMIN
 ```
 
-Note however that `ep_host_authentication` was originaly designed to be used for equipment profiles groups, but can be set this way if using BlueBanquise as a standalone collection.
+And:
+
+```ini
+[all:vars]
+ep_host_authentication="[{'protocol': 'IPMI', 'user': 'ADMIN', 'pass': 'ADMIN'}]"
+```
+
+Note however that `ep_host_authentication` was originally designed to be used for equipment profiles groups, but can be set this way if using BlueBanquise as a standalone collection.
 
 ### Conman usage
 

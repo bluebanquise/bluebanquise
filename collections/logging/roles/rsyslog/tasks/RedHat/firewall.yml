@@ -1,4 +1,4 @@
-- name: "firewalld █ Add services to firewall's {{ rsyslog_firewall_zone | default('public') }} zone"
+- name: "firewalld <|> Add services to firewall's {{ rsyslog_firewall_zone | default('public') }} zone"
   ansible.posix.firewalld:
     zone: "{{ rsyslog_firewall_zone | default('public') }}"
     service: "{{ item }}"
@@ -12,7 +12,7 @@
   tags:
     - firewall
 
-- name: "firewalld █ Add custom port to firewall's {{ rsyslog_firewall_zone | default('public') }} zone"
+- name: "firewalld <|> Add custom port to firewall's {{ rsyslog_firewall_zone | default('public') }} zone"
   ansible.posix.firewalld:
     zone: "{{ rsyslog_firewall_zone | default('public') }}"
     port: "{{ rsyslog_port }}/tcp"

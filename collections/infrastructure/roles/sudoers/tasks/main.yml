@@ -1,11 +1,11 @@
 ---
 
-- name: package █ Install sudo
+- name: package <|> Install sudo
   ansible.builtin.package:
     name: sudo
     state: present
 
-- name: lineinfile █ Add sudoers users and groups
+- name: lineinfile <|> Add sudoers users and groups
   ansible.builtin.lineinfile:
     dest: /etc/sudoers
     state: present

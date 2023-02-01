@@ -1,6 +1,6 @@
 ---
 
-- name: include_tasks ░ Use OS dedicated firewall task
+- name: include_tasks <|> Use OS dedicated firewall task
   ansible.builtin.include_tasks: "{{ outer_item }}"
   with_first_found:
     - files:
@@ -17,19 +17,19 @@
     - internal
     - firewall
 
-- name: "template █ Generate server.conf.j2"
+- name: "template <|> Generate server.conf.j2"
   ansible.builtin.template:
     src: server.conf.j2
     dest: "{{ rsyslog_server_rsyslog_custom_conf_path | default(rsyslog_server_rsyslog_conf_path) }}"
     owner: root
     group: root
     mode: 0644
-  notify: service █ Restart rsyslog service
+  notify: service <|> Restart rsyslog service
   when: "'server.conf' not in (rsyslog_configuration_files | default([]) | selectattr('name','defined') | map(attribute='name') | list)"
   tags:
     - template
 
-- name: file █ Create /var/log/rsyslog directory
+- name: file <|> Create /var/log/rsyslog directory
   ansible.builtin.file:
     path: /var/log/rsyslog
     setype: var_log_t
@@ -39,18 +39,18 @@
     - ansible_facts.os_family == "RedHat"
     - ansible_facts.selinux.status == "enabled"
 
-- name: "template █ Generate /etc/logrotate.d/rsyslog"
+- name: "template <|> Generate /etc/logrotate.d/rsyslog"
   ansible.builtin.template:
     src: rsyslog_logrotate.j2
     dest: /etc/logrotate.d/rsyslog
     owner: root
     group: root
     mode: 0644
-  notify: service █ Restart rsyslog service
+  notify: service <|> Restart rsyslog service
   tags:
     - template
 
-- name: lineinfile █ Configure logrotate to use xz
+- name: lineinfile <|> Configure logrotate to use xz
   ansible.builtin.lineinfile:
     path: /etc/logrotate.conf
     regexp: "{{ item }}"
@@ -59,6 +59,6 @@
     - compresscmd /usr/bin/xz
     - uncompresscmd /usr/bin/unxz
     - compressext .xz
-  notify: service █ Restart rsyslog service
+  notify: service <|> Restart rsyslog service
   tags:
     - template

@@ -1,11 +1,11 @@
 ---
-- name: group █ Add ipmi_exporter group
+- name: group <|> Add ipmi_exporter group
   ansible.builtin.group:
     name: ipmi_exporter
     gid: "{{ prometheus_server_ipmi_exporter_user_gid }}"
     state: present
 
-- name: user █ Add ipmi_exporter user
+- name: user <|> Add ipmi_exporter user
   ansible.builtin.user:
     name: ipmi_exporter
     shell: /bin/false
@@ -14,25 +14,25 @@
     home: /var/lib/ipmi_exporter
     state: present
 
-- name: Package █ Install ipmi_exporter and freeipmi packages
+- name: Package <|> Install ipmi_exporter and freeipmi packages
   ansible.builtin.package:
     name: "{{ prometheus_server_ipmi_exporter_packages_to_install }}"
     state: present
   tags:
     - package
 
-- name: template █ Generate ipmi_exporter service file
+- name: template <|> Generate ipmi_exporter service file
   ansible.builtin.template:
     src: ipmi_exporter.service.j2
     dest: /etc/systemd/system/ipmi_exporter.service
     owner: root
     group: root
     mode: 0755
-  notify: systemd █ Reload systemd configuration
+  notify: systemd <|> Reload systemd configuration
   tags:
     - template
 
-- name: file █ Create ipmi_exporter directories structure
+- name: file <|> Create ipmi_exporter directories structure
   ansible.builtin.file:
    path: "{{ item }}"
    state: directory
@@ -42,20 +42,20 @@
   loop:
    - /etc/ipmi_exporter/
 
-- name: Template █ Generate /etc/ipmi_exporter/ipmi_config.yml
+- name: Template <|> Generate /etc/ipmi_exporter/ipmi_config.yml
   ansible.builtin.template:
     src: ipmi_config.yml.j2
     dest: /etc/ipmi_exporter/ipmi_config.yml
     owner: ipmi_exporter
     group: ipmi_exporter
     mode: 0640
-  notify: service █ Restart ipmi_exporter service
+  notify: service <|> Restart ipmi_exporter service
   tags:
     - template
 
 - meta: flush_handlers
 
-- name: service █ Manage ipmi_exporter service state
+- name: service <|> Manage ipmi_exporter service state
   ansible.builtin.service:
     name: ipmi_exporter
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"

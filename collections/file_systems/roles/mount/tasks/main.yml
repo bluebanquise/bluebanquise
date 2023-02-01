@@ -1,5 +1,5 @@
 ---
-- name: mount █ Control active and configured mount points
+- name: mount <|> Control active and configured mount points
   ansible.posix.mount:
     backup: "{{ item.backup | default(omit) }}"
     boot: "{{ item.boot | default(omit) }}"

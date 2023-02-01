@@ -1,5 +1,5 @@
 ---
-- name: fail ░ Check presence of required parameters
+- name: fail <|> Check presence of required parameters
   ansible.builtin.fail:
     msg: "Bailing out.
   This role requires networks[{{ item['network'] }}]['firewall']['zone']"
@@ -10,19 +10,19 @@
   tags:
     - internal
 
-- name: "firewalld █ Ensure firewall zones exist"
+- name: "firewalld <|> Ensure firewall zones exist"
   ansible.posix.firewalld:
     zone: "{{ networks[item]['firewall']['zone'] }}"
     permanent: yes
     state: present
   when: networks[item]['firewall']['zone'] is defined
   loop: "{{ (network_interfaces | map(attribute='network') | list) }}"
-  notify: service █ Restart firewall services
+  notify: service <|> Restart firewall services
 
-- name: meta █ Run handler tasks to restart firewall services
+- name: meta <|> Run handler tasks to restart firewall services
   ansible.builtin.meta: flush_handlers
 
-- name: "firewalld █ Configure firewall zones"
+- name: "firewalld <|> Configure firewall zones"
   ansible.posix.firewalld:
     zone: "{{ networks[item]['firewall']['zone'] }}"
     source: "{{ networks[item]['subnet'] }}/{{ networks[item]['prefix'] }}"
@@ -35,7 +35,7 @@
     label: "Add source '{{ networks[item]['subnet'] }}/{{ networks[item]['prefix'] }}'
             to zone '{{ networks[item]['firewall']['zone'] }}'"
 
-- name: "firewalld █ Add services to firewall's zones"
+- name: "firewalld <|> Add services to firewall's zones"
   ansible.posix.firewalld:
     zone: "{{ item.0.zone }}"
     service: "{{ item.1 }}"
@@ -46,7 +46,7 @@
   loop_control:
     label: "Add service {{ item.1 }} to zone {{ item.0.zone }}"
 
-- name: "firewalld █ Remove services from firewall's zones"
+- name: "firewalld <|> Remove services from firewall's zones"
   ansible.posix.firewalld:
     zone: "{{ item.0.zone }}"
     service: "{{ item.1 }}"
@@ -57,7 +57,7 @@
   loop_control:
     label: "Remove service {{ item.1 }} from zone {{ item.0.zone }}"
 
-- name: "firewalld █ Add ports to firewall's zones"
+- name: "firewalld <|> Add ports to firewall's zones"
   ansible.posix.firewalld:
     zone: "{{ item.0.zone }}"
     port: "{{ item.1 }}"
@@ -68,7 +68,7 @@
   loop_control:
     label: "Add port {{ item.1 }} to zone {{ item.0.zone }}"
 
-- name: "firewalld █ Remove ports from firewall's zones"
+- name: "firewalld <|> Remove ports from firewall's zones"
   ansible.posix.firewalld:
     zone: "{{ item.0.zone }}"
     port: "{{ item.1 }}"
@@ -79,7 +79,7 @@
   loop_control:
     label: "Remove port {{ item.1 }} from zone {{ item.0.zone }}"
 
-- name: "firewalld █ Add rich rules to firewall's zones"
+- name: "firewalld <|> Add rich rules to firewall's zones"
   ansible.posix.firewalld:
     zone: "{{ item.0.zone }}"
     rich_rule: "{{ item.1 }}"
@@ -90,7 +90,7 @@
   loop_control:
     label: "Add rich rule '{{ item.1 }}' to zone {{ item.0.zone }}"
 
-- name: "firewalld █ Remove rich rules from firewall's zones"
+- name: "firewalld <|> Remove rich rules from firewall's zones"
   ansible.posix.firewalld:
     zone: "{{ item.0.zone }}"
     rich_rule: "{{ item.1 }}"
@@ -101,7 +101,7 @@
   loop_control:
     label: "Remove rich rule '{{ item.1 }}' from zone {{ item.0.zone }}"
 
-- name: "firewalld █ Add ICMP blocks to firewall's zones"
+- name: "firewalld <|> Add ICMP blocks to firewall's zones"
   ansible.posix.firewalld:
     zone: "{{ item.0.zone }}"
     icmp_block: "{{ item.1 }}"
@@ -112,7 +112,7 @@
   loop_control:
     label: "Add ICMP block '{{ item.1 }}' to zone {{ item.0.zone }}"
 
-- name: "firewalld █ Remove ICMP blocks from firewall's zones"
+- name: "firewalld <|> Remove ICMP blocks from firewall's zones"
   ansible.posix.firewalld:
     zone: "{{ item.0.zone }}"
     icmp_block: "{{ item.1 }}"
@@ -123,7 +123,7 @@
   loop_control:
     label: "Remove ICMP block '{{ item.1 }}' from zone {{ item.0.zone }}"
 
-- name: "firewalld █ Define ICMP block inversion in firewall's zones"
+- name: "firewalld <|> Define ICMP block inversion in firewall's zones"
   ansible.posix.firewalld:
     zone: "{{ item.zone }}"
     icmp_block_inversion: "{{ item.icmp_block_inversion | string }}"
@@ -135,7 +135,7 @@
   loop_control:
     label: "{{ item.icmp_block_inversion | default(False) | ternary('Enable', 'Disable') }} ICMP block inversion in zone {{ item.zone }}"
 
-- name: "firewalld █ Define masquerade in firewall's zones"
+- name: "firewalld <|> Define masquerade in firewall's zones"
   ansible.posix.firewalld:
     zone: "{{ item.zone }}"
     masquerade: "{{ item.masquerade | string }}"

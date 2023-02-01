@@ -1,4 +1,4 @@
 ---
-- name: include_tasks ░ Configure Nvidia GPU
+- name: include_tasks <|> Configure Nvidia GPU
   ansible.builtin.include_tasks: "nvidia/main.yml"
   when: gpu_vendor == "nvidia"

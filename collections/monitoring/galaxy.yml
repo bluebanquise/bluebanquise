@@ -50,6 +50,7 @@ tags:
 # range specifiers can be set and are separated by ','
 dependencies: 
   "community.general": "*"
+  "bluebanquise.infrastructure": "*"
 
 # The URL of the originating SCM repository
 repository: https://github.com/bluebanquise/bluebanquise

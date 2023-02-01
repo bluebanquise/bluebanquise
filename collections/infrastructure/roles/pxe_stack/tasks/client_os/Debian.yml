@@ -2,7 +2,7 @@
 
 ## Generic
 
-- name: "copy █ Copy osdeploy files {{ pxe_stack_htdocs_path }}/pxe/osdeploy/"
+- name: "copy <|> Copy osdeploy files {{ pxe_stack_htdocs_path }}/pxe/osdeploy/"
   ansible.builtin.copy:
     src: osdeploy/debian_{{ item.major }}.ipxe
     dest: "{{ pxe_stack_htdocs_path }}/pxe/osdeploy/debian_{{ item.major }}.ipxe"
@@ -11,7 +11,7 @@
     group: "{{ pxe_stack_apache_group }}"
   loop: "{{ pxe_stack_supported_os.debian }}"
 
-- name: file █ Generate links for all supported OS
+- name: file <|> Generate links for all supported OS
   ansible.builtin.file:
     src: debian_{{ item.0.major }}.ipxe
     dest: "{{ pxe_stack_htdocs_path }}/pxe/osdeploy/{{ item.1 }}_{{ item.0.major }}.ipxe"
@@ -23,7 +23,7 @@
   loop: "{{ pxe_stack_supported_os.debian | subelements('distributions') }}"
   when: item.1 != 'debian'
 
-- name: "template █ Generate preseeds {{ pxe_stack_htdocs_path }}/pxe/equipment_profiles/{item}.preseed.cfg"
+- name: "template <|> Generate preseeds {{ pxe_stack_htdocs_path }}/pxe/equipment_profiles/{item}.preseed.cfg"
   ansible.builtin.template:
     src: "Debian/preseed.cfg.j2"
     dest: "{{ pxe_stack_htdocs_path }}/pxe/equipment_profiles/{{ item | replace(bb_core_equipment_naming+'_','') | trim }}.preseed.cfg"
@@ -39,7 +39,7 @@
   tags:
     - template
 
-- name: "template █ Generate equipment_profiles {{ pxe_stack_htdocs_path }}/pxe/equipment_profiles/{item}.ipxe"
+- name: "template <|> Generate equipment_profiles {{ pxe_stack_htdocs_path }}/pxe/equipment_profiles/{item}.ipxe"
   ansible.builtin.template:
     src: "Debian/equipment_profile_preseed.ipxe.j2"
     dest: "{{ pxe_stack_htdocs_path }}/pxe/equipment_profiles/{{ item | replace(bb_core_equipment_naming+'_','') | trim }}.ipxe"

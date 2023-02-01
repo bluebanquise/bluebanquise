@@ -1,9 +1,9 @@
 ---
-- name: systemd █ Reload systemd configuration
+- name: systemd <|> Reload systemd configuration
   ansible.builtin.systemd:
     daemon_reload: yes
 
-- name: service █ Restart munge
+- name: service <|> Restart munge
   ansible.builtin.service:
     name: munge
     state: restarted

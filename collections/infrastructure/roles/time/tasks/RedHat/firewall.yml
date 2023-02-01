@@ -1,4 +1,4 @@
-- name: firewalld █ "Add services to firewall's {{ time_firewall_zone | default('public') }} zone"
+- name: firewalld <|> "Add services to firewall's {{ time_firewall_zone | default('public') }} zone"
   ansible.posix.firewalld:
     zone: "{{ time_firewall_zone | default('public') }}"
     service: "{{ item }}"
@@ -6,7 +6,6 @@
     permanent: "yes"
     state: enabled
   when:
-    - ansible_facts.os_family == "RedHat"
     - ep_firewall | default(false) | bool
   loop: "{{ time_firewall_services_to_add }}"
   tags:

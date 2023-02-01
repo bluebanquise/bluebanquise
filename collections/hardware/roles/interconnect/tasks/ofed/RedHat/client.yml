@@ -1,13 +1,13 @@
 ---
 
-- name: package █ Install infiniband minimal packages
+- name: package <|> Install infiniband minimal packages
   ansible.builtin.package:
     name: "@Infiniband Support"
     state: present
   tags:
     - package
 
-- name: pam_limits █ Configure system memlock settings for rdma
+- name: pam_limits <|> Configure system memlock settings for rdma
   community.general.pam_limits:
     domain: '*'
     limit_type: "{{ item.limit_type }}"
@@ -19,7 +19,7 @@
   tags:
     - pam_limits
 
-- name: service █ Enforce rdma state
+- name: service <|> Enforce rdma state
   ansible.builtin.service:
     name: rdma
     enabled: yes

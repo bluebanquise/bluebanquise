@@ -1,5 +1,5 @@
 ---
-- name: "template █ Generate configuration files in {{ slurm_home_path }}"
+- name: "template <|> Generate configuration files in {{ slurm_home_path }}"
   ansible.builtin.template:
     src: "{{ item }}.j2"
     dest: "{{ slurm_home_path }}/{{ item }}"
@@ -11,7 +11,7 @@
   loop:
     - slurm.conf
    
-- name: "template █ Generate gres.conf in {{ slurm_home_path }}"
+- name: "template <|> Generate gres.conf in {{ slurm_home_path }}"
   ansible.builtin.template:
     src: "{{ item }}.j2"
     dest: "{{ slurm_home_path }}/{{ item }}"

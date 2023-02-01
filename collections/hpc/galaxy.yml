@@ -1,7 +1,7 @@
 namespace: bluebanquise
 
 # The name of the collection. Has the same character restrictions as 'namespace'
-name: high_performance_computing
+name: hpc
 
 # The version of the collection. Must be compatible with semantic versioning
 version: 2.0.0
@@ -49,6 +49,7 @@ tags:
 # range specifiers can be set and are separated by ','
 dependencies: 
   "community.general": "*"
+  "bluebanquise.infrastructure": "*"
 
 # The URL of the originating SCM repository
 repository: https://github.com/bluebanquise/bluebanquise

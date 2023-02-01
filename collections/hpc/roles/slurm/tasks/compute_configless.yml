@@ -1,5 +1,5 @@
 ---
-- name: file █ Create service needed directory
+- name: file <|> Create service needed directory
   ansible.builtin.file:
     path: /etc/systemd/system/slurmd.service.d
     state: directory
@@ -7,13 +7,13 @@
     group: slurm
     mode: 0755
 
-- name: template █ Generate service file set_controller.conf
+- name: template <|> Generate service file set_controller.conf
   ansible.builtin.template:
     src: set_controller.conf.j2
     dest: /etc/systemd/system/slurmd.service.d/set_controller.conf
     owner: root
     group: root
     mode: 0644
-  notify: systemd █ Reload systemd configuration
+  notify: systemd <|> Reload systemd configuration
   tags:
     - template

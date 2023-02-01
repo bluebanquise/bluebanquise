@@ -3,16 +3,16 @@
 ## {{ ansible_managed }}
 
 {% set external = false %}
-{% if time_server_external_pools | length > 0 %}
+{% if time_external_pools | length > 0 %}
   {% set external = true %}
 # External pool
-  {% for external_pool in time_server_external_pools %}
+  {% for external_pool in time_external_pools %}
 pool {{ external_pool }} iburst maxsources 3
   {% endfor %}
-{% elif time_server_external_servers | length > 0 %}
+{% elif time_external_servers | length > 0 %}
   {% set external = true %}
 # External servers
-  {% for external_server in time_server_external_servers %}
+  {% for external_server in time_external_servers %}
 server {{ external_server }}
   {% endfor %}
 {% endif -%}
@@ -76,14 +76,6 @@ allow {{ networks[nic.network]['subnet'] }}/{{ networks[nic.network]['prefix'] }
         {% endif %}
       {% endif %}
     {% endfor %}
-  {% elif network is defined and network is not none %}
-    {% if networks is defined and networks is iterable and networks is mapping %}
-      {% if networks[network] is defined and networks[network] is mapping %}
-        {% if networks[network]['subnet'] is defined and networks[network]['subnet'] is not none and networks[network]['prefix'] is defined and networks[network]['prefix'] is not none %}
- allow {{ networks[network]['subnet'] }}/{{ networks[network]['prefix'] }}
-        {% endif %}
-      {% endif %}
-    {% endif %}
   {% endif %}
 
   {% if time_additional_networks_allowed | length > 0 %}

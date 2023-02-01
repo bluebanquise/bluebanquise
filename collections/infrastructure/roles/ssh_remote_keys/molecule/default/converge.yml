@@ -1,7 +1,0 @@
----
-- name: Converge
-  hosts: all
-  tasks:
-    - name: "Include ssh_remote_keys"
-      include_role:
-        name: "ssh_remote_keys"

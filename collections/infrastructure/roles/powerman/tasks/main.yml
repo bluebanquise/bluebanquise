@@ -1,5 +1,5 @@
 ---
-- name: package █ Install freeipmi and powerman
+- name: package <|> Install freeipmi and powerman
   ansible.builtin.package:
     name:
       - freeipmi
@@ -8,21 +8,21 @@
   tags:
     - package
 
-- name: template █ Generate /etc/powerman/powerman.conf
+- name: template <|> Generate /etc/powerman/powerman.conf
   ansible.builtin.template:
     src: powerman.conf.j2
     dest: /etc/powerman/powerman.conf
     owner: root
     group: root
     mode: 0644
-  notify: service █ Restart powerman
+  notify: service <|> Restart powerman
   tags:
     - template
 
-- name: meta █ Run handler tasks to restart powerman service
+- name: meta <|> Run handler tasks to restart powerman service
   ansible.builtin.meta: flush_handlers
 
-- name: service █ Manage powerman state
+- name: service <|> Manage powerman state
   ansible.builtin.service:
     name: powerman
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"

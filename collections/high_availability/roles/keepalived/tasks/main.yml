@@ -1,5 +1,5 @@
 ---
-- name: include_vars ░ Gather OS specific variables
+- name: include_vars <|> Gather OS specific variables
   # This task gathers variables defined in OS specific files.
   #
   # Search vars in:
@@ -23,7 +23,7 @@
   tags:
     - always
 
-- name: include_tasks ░ Use OS dedicated firewall task
+- name: include_tasks <|> Use OS dedicated firewall task
   ansible.builtin.include_tasks: "{{ outer_item }}"
   with_first_found:
     - files:
@@ -40,7 +40,7 @@
     - internal
     - firewall
 
-- name: "package █ Install {{ keepalived_packages_to_install | join(' ') }}"
+- name: "package <|> Install {{ keepalived_packages_to_install | join(' ') }}"
   ansible.builtin.package:
     name: "{{ keepalived_packages_to_install }}"
     state: present
@@ -48,9 +48,9 @@
     - package
 
 <<<<<<< HEAD:roles/core/keepalived/tasks/main.yml
-- name: "template █ Generate {{ keepalived_conf_file }}"
+- name: "template <|> Generate {{ keepalived_conf_file }}"
 =======
-- name: file █ Create /var/log/rsyslog directory
+- name: file <|> Create /var/log/rsyslog directory
   ansible.builtin.file:  # noqa risky-file-permissions
     path: /var/log/rsyslog
     setype: var_log_t
@@ -60,7 +60,7 @@
     - ansible_facts.os_family == "RedHat"
     - ansible_facts.selinux.status == "enabled"
 
-- name: "template █ Generate {{ log_server_rsyslog_conf_path }}"
+- name: "template <|> Generate {{ log_server_rsyslog_conf_path }}"
 >>>>>>> 3d255f14a4c00b7d47aa29df356a38f1dd442dad:roles/core/log_server/tasks/main.yml
   ansible.builtin.template:
     src: keepalived.conf.j2
@@ -68,14 +68,14 @@
     owner: root
     group: root
     mode: 0644
-  notify: service █ Restart dhcp server
+  notify: service <|> Restart dhcp server
   tags:
     - template
 
-- name: meta █ Run handler tasks to restart dhcp services
+- name: meta <|> Run handler tasks to restart dhcp services
   ansible.builtin.meta: flush_handlers
 
-- name: "service █ Manage {{ keepalived_services_to_start | join(' ') }} state"
+- name: "service <|> Manage {{ keepalived_services_to_start | join(' ') }} state"
   ansible.builtin.service:
     name: "{{ item }}"
     enabled: "{{ (keepalived_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"

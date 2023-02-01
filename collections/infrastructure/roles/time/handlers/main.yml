@@ -1,5 +1,5 @@
 ---
-- name: service █ Restart time services
+- name: service <|> Restart time services
   ansible.builtin.service:
     name: "{{ item }}"
     state: restarted

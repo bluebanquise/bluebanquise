@@ -1,12 +1,12 @@
 ---
-- name: "package █ Install {{ nfs_client_packages_to_install | join(' ') }} packages"
+- name: "package <|> Install {{ nfs_client_packages_to_install | join(' ') }} packages"
   ansible.builtin.package:
     name: "{{ nfs_client_packages_to_install }}"
     state: present
   tags:
     - package
 
-- name: file █ Create NFS directories
+- name: file <|> Create NFS directories
   ansible.builtin.file:
     path: "{{ item.0.mount }}"
     state: directory
@@ -17,7 +17,7 @@
     - groups[item.1] is defined
     - inventory_hostname in groups[item.1]
 
-- name: seboolean █ Enable selinux booleans if needed
+- name: seboolean <|> Enable selinux booleans if needed
   ansible.posix.seboolean:
     name: "{{ item }}"
     state: yes
@@ -26,7 +26,7 @@
   when:
     - ansible_facts.selinux.status == "enabled"
 
-- name: service █ Manage rpcbind state
+- name: service <|> Manage rpcbind state
   ansible.builtin.service:
     name: rpcbind
     enabled: "{{ (nfs_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
@@ -35,7 +35,7 @@
   tags:
     - service
 
-- name: mount █ Mount exported NFS into directories
+- name: mount <|> Mount exported NFS into directories
   ansible.builtin.mount:
     path: "{{ item.0.mount }}"
     src: "{{ item.0.server }}{% if item.0.network is defined and item.0.network is not none %}-{{ item.0.network }}{% endif %}:{{ item.0.export }}"

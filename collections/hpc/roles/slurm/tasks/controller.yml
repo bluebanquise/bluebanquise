@@ -1,9 +1,9 @@
 ---
-- name: include_tasks ░ Deploy Slurm accounting
+- name: include_tasks <|> Deploy Slurm accounting
   ansible.builtin.include_tasks: "accounting.yml"
   when: slurm_enable_accounting
 
-- name: "firewalld █ Add ports to firewall's {{ slurm_firewall_zone | default('public') }} zone"
+- name: "firewalld <|> Add ports to firewall's {{ slurm_firewall_zone | default('public') }} zone"
   ansible.posix.firewalld:
     zone: "{{ slurm_firewall_zone | default('public') }}"
     port: "{{ item }}/tcp"
@@ -19,7 +19,7 @@
   tags:
     - firewall
 
-- name: "template █ Generate configuration files in {{ slurm_home_path }}"
+- name: "template <|> Generate configuration files in {{ slurm_home_path }}"
   ansible.builtin.template:
     src: "{{ item }}.j2"
     dest: "{{ slurm_home_path }}/{{ item }}"
@@ -31,7 +31,7 @@
   loop:
     - slurm.conf
 
-- name: "copy █ Copy cgroup.conf to {{ slurm_home_path }}/cgroup.conf"
+- name: "copy <|> Copy cgroup.conf to {{ slurm_home_path }}/cgroup.conf"
   ansible.builtin.copy:
     src: cgroup.conf
     dest: "{{ slurm_home_path }}/cgroup.conf"
@@ -39,7 +39,7 @@
     group: slurm
     mode: 0644
 
-- name: service █ Manage slurmctld state
+- name: service <|> Manage slurmctld state
   ansible.builtin.service:
     name: slurmctld
     enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"

@@ -1,5 +1,5 @@
 ---
-- name: service █ Restart powerman
+- name: service <|> Restart powerman
   ansible.builtin.service:
     name: powerman
     state: restarted

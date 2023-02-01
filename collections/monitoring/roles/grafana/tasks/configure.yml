@@ -1,5 +1,5 @@
 ---
-- name: configure █ Ensure grafana configuration directories exist
+- name: configure <|> Ensure grafana configuration directories exist
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
@@ -15,7 +15,7 @@
     - "/etc/grafana/provisioning/notifiers"
     - "/etc/grafana/provisioning/plugins"
 
-- name: configure █ Create grafana main configuration file
+- name: configure <|> Create grafana main configuration file
   ansible.builtin.template:
     src: grafana.ini.j2
     dest: /etc/grafana/grafana.ini
@@ -25,7 +25,7 @@
   no_log: true
   notify: restart grafana
 
-- name: configure █ Create grafana LDAP configuration file
+- name: configure <|> Create grafana LDAP configuration file
   ansible.builtin.template:
     src: ldap.toml.j2
     dest: "{{ grafana_auth.ldap.config_file | default('/etc/grafana/ldap.toml') }}"
@@ -38,7 +38,7 @@
   no_log: true
   notify: restart grafana
 
-- name: configure █ Create grafana directories
+- name: configure <|> Create grafana directories
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
@@ -51,7 +51,7 @@
     - "{{ grafana_data_dir }}/dashboards"
     - "{{ grafana_data_dir }}/plugins"
 
-- name: configure █ Create grafana socket directory
+- name: configure <|> Create grafana socket directory
   ansible.builtin.file:
     path: "{{ grafana_server.socket | dirname }}"
     state: directory
@@ -62,7 +62,7 @@
     - grafana_server.protocol is defined and grafana_server.protocol == 'socket'
     - grafana_server.socket | dirname != '/var/run'
 
-- name: configure █ Ensure grafana socket directory created on startup
+- name: configure <|> Ensure grafana socket directory created on startup
   ansible.builtin.template:
     src: tmpfiles.j2
     dest: /etc/tmpfiles.d/grafana.conf
@@ -73,7 +73,7 @@
     - grafana_server.protocol is defined and grafana_server.protocol == 'socket'
     - grafana_server.socket | dirname != '/var/run'
 
-- name: configure █ Enable grafana to ports lower than port 1024
+- name: configure <|> Enable grafana to ports lower than port 1024
   community.general.capabilities:
     path: /usr/sbin/grafana-server
     capability: CAP_NET_BIND_SERVICE+ep

@@ -1,5 +1,5 @@
 ---
-- name: file █ Enable cgi.load for apache2
+- name: file <|> Enable cgi.load for apache2
   ansible.builtin.file:
     src: ../mods-available/cgi.load
     dest: /etc/apache2/mods-enabled/cgi.load
@@ -7,9 +7,9 @@
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_user }}"
     state: link
-  notify: service █ Restart pxe services
+  notify: service <|> Restart pxe services
 
-- name: lineinfile █ Configure tftpd-hpa tftp server
+- name: lineinfile <|> Configure tftpd-hpa tftp server
   ansible.builtin.lineinfile:
     path: "/etc/default/tftpd-hpa"
     regexp: "{{ line_item.regexp }}"
@@ -23,6 +23,6 @@
       line: 'TFTP_DIRECTORY="/var/lib/tftpboot"'
   loop_control:
     loop_var: line_item
-  notify: service █ Restart pxe services
+  notify: service <|> Restart pxe services
   tags:
     - need_package

@@ -1,5 +1,5 @@
 ---
-- name: modprobe █ Load or unload kernel modules
+- name: modprobe <|> Load or unload kernel modules
   community.general.modprobe:
     name: "{{ item.name }}"
     params: "{{ item.params | default(omit) }}"

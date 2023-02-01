@@ -1,5 +1,5 @@
 ---
-- name: firewalld █ "Add services to firewall's {{ repositories_server_firewall_zone | default('public') }} zone"
+- name: firewalld <|> "Add services to firewall's {{ repositories_server_firewall_zone | default('public') }} zone"
   ansible.posix.firewalld:
     zone: "{{ repositories_server_firewall_zone | default('public') }}"
     service: "{{ item }}"
