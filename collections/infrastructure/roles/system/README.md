@@ -113,42 +113,6 @@ system:
 See `**service** Ansible module page <https://docs.ansible.com/ansible/latest/collections/ansible/builtin/service_module.html>`_
 for the full list of available parameters.
 
-## filesystem
-
-Manage filesystems (devices or files) on node/group by defining system.filesystem list based on filesystem module parameters. Example:
-
-```yaml
-system:
-  filesystem:
-    - fstype: ext2
-      dev: /dev/sdb1
-    - fstype: ext4
-      dev: /dev/sdb1
-      opts: -cc
-    - dev: /dev/sde1
-      state: absent
-```
-
-See `**filesystem** Ansible module page <https://docs.ansible.com/ansible/latest/collections/community/general/filesystem_module.html>`_
-for the full list of available parameters.
-
-## modprobe
-
-Manage kernel modules on node/group by defining system.modprobe list based on modprobe module parameters. Example:
-
-```yaml
-system:
-  modprobe:
-    - name: 8021q
-      state: present
-    - name: dummy
-      state: present
-      params: 'numdummies=2'
-```
-
-See `**modprobe** Ansible module page <https://docs.ansible.com/ansible/latest/collections/community/general/modprobe_module.html>`_
-for the full list of available parameters.
-
 ## Changelog
 
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
