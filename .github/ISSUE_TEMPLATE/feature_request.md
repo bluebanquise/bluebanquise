@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-[Provide general introduction to the feature request, and why it is relevant to this repository]
+[Provide here general introduction to the feature request, and why it is relevant to this repository]
 
 ## Context
 

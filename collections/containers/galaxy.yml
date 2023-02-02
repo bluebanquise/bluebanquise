@@ -12,11 +12,8 @@ readme: README.md
 # A list of the collection's content authors. Can be just the name or in the format 'Full Name <email> (url)
 # @nicks:irc/im.site#channel'
 authors:
-  - Benoit Leveugle <benoit.leveugle@gmail.com>
-  - Johnny Keats <johnny.keats@outlook.com>
-  - Bruno Travouillon <devel@travouillon.fr>
-  - Neil Munday <neil@mundayweb.com>
-  - Adrien Ribeiro <adrien.ribeiro@atos.net>
+  - Matthieu Isoard @strus38
+  - Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 
 ### OPTIONAL but strongly recommended
 # A short summary description of the collection
