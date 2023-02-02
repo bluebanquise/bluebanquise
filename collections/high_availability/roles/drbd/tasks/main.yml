@@ -41,9 +41,6 @@
   register: drbd_created
   changed_when: False
 
-- debug:
-    msg: "{{ drbd_created }}"
-
 - name: command <|> Create needed resources
   ansible.builtin.command: "drbdadm create-md {{ item.name }} "
   loop: "{{ drbd_resources }}"

@@ -28,11 +28,18 @@
     path: /etc/nfs.conf
     regexp: "^#[nfsd]$"
     line: "[nfsd]"
+
+- name: lineinfile <|> Set number of threads to be used
+  ansible.builtin.lineinfile:
+    path: /etc/nfs.conf
     regexp: "threads="
     line: "threads={{ nfs_server_threads | default(8, true) }}"
 
 - name: file <|> Create NFS configuration directories
   ansible.builtin.file:
+    owner: root
+    group: root
+    mode: 0755
     path: /etc/nfs.conf.d
     state: directory
 

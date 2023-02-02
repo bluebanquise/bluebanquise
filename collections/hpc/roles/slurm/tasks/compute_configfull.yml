@@ -10,7 +10,7 @@
     - template
   loop:
     - slurm.conf
-   
+
 - name: "template <|> Generate gres.conf in {{ slurm_home_path }}"
   ansible.builtin.template:
     src: "{{ item }}.j2"
@@ -22,4 +22,5 @@
     - template
   loop:
     - gres.conf
-  when: slurm_gresTypes is defined and slurm_gresTypes == 'gpu' and ep_hardware['gpu'] is defined 
+  when: slurm_gresTypes is defined and slurm_gresTypes == 'gpu' and ep_hardware['gpu'] is defined
+

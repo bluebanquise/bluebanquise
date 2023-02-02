@@ -37,10 +37,12 @@
 - name: command <|> Check if slurm_acct_db database has been created
   ansible.builtin.command: mysql -e "SHOW DATABASES  LIKE 'slurm_acct_db'"
   register: slurm_database_exist
+  changed_when: false
 
 - name: command <|> Check if slurm database user has been created
   ansible.builtin.command: mysql -e "use mysql; select Host,User from user;"
   register: slurm_database_user_exist
+  changed_when: false
 
 - name: mysql_db <|> Create slurm_acct_db database
   community.mysql.mysql_db:

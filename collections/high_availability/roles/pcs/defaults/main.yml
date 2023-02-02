@@ -1,3 +1,4 @@
+---
 high_availability_cib_file_path: /root/ha_config.ansible.xml
 high_availability_ha_cluster_name: ha_cluster
 high_availability_ha_cluster_password: root

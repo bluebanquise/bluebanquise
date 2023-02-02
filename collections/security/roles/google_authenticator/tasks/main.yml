@@ -21,8 +21,7 @@
 
 - name: "Install google_authenticator packages"
   package:
-    name: "{{ google_authenticator_packages_to_install }}" 
-    state: latest
+    name: "{{ google_authenticator_packages_to_install }}"
   tags:
     - package
 
@@ -41,7 +40,7 @@
     insertafter: '^#ChallengeResponseAuthentication'
     line: 'ChallengeResponseAuthentication yes'
 
-# Public key mode configurations: 
+# Public key mode configurations:
 
 - name: "edit sshd config to support google-authenticator for 2fa (publickey + google-auth)"
   ansible.builtin.blockinfile:
@@ -63,7 +62,7 @@
   when: mfa_mode == 'publickey'
 
 
-# Password mode configurations: 
+# Password mode configurations:
 
 - name: "edit sshd config to support google-authenticator for 2fa (publickey + google-auth)"
   ansible.builtin.blockinfile:

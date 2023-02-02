@@ -13,8 +13,8 @@
     owner: root
     group: root
     mode: 0644
-  #notify:
-  #  - command <|> netplan generate
+  # notify:
+  #   - command <|> netplan generate
   tags:
     - identify
 

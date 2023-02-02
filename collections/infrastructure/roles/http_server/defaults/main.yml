@@ -12,3 +12,4 @@ http_server_settings:
     line: ServerTokens Prod
   - regexp: "^ServerSignature"
     line: ServerSignature Off
+

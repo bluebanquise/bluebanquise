@@ -53,37 +53,37 @@
 
 # Join to be added later
 
-#- name: command <|> Check current cluster status
-#  command: "rabbitmqctl cluster_status"
-#  register: rabbitmqctl_cluster_status
-#  changed_when: False
-#  ignore_errors: yes
-#  run_once: true
-#  delegate_to: "{{ worker_cluster_rabbitmq_reference_node }}"
+# - name: command <|> Check current cluster status
+#   command: "rabbitmqctl cluster_status"
+#   register: rabbitmqctl_cluster_status
+#   changed_when: False
+#   ignore_errors: yes
+#   run_once: true
+#   delegate_to: "{{ worker_cluster_rabbitmq_reference_node }}"
 
-#- name: command <|> Stop_app to join reference node
-#  command: "rabbitmqctl stop_app"
-#  when:
-#    - (rabbitmqctl_cluster_status.stdout_lines | select("match", "^rabbit@"+inventory_hostname+".*") | list | length) < 1
-#    - inventory_hostname != worker_cluster_rabbitmq_reference_node
+# - name: command <|> Stop_app to join reference node
+#   command: "rabbitmqctl stop_app"
+#   when:
+#     - (rabbitmqctl_cluster_status.stdout_lines | select("match", "^rabbit@"+inventory_hostname+".*") | list | length) < 1
+#     - inventory_hostname != worker_cluster_rabbitmq_reference_node
 
-#- name: command <|> Reset configuration before joining reference node
-#  command: "rabbitmqctl reset"
-#  when:
-#    - (rabbitmqctl_cluster_status.stdout_lines | select("match", "^rabbit@"+inventory_hostname+".*") | list | length) < 1
-#    - inventory_hostname != worker_cluster_rabbitmq_reference_node
+# - name: command <|> Reset configuration before joining reference node
+#   command: "rabbitmqctl reset"
+#   when:
+#     - (rabbitmqctl_cluster_status.stdout_lines | select("match", "^rabbit@"+inventory_hostname+".*") | list | length) < 1
+#     - inventory_hostname != worker_cluster_rabbitmq_reference_node
 
-#- name: command <|> Join reference node
-#  command: "rabbitmqctl join_cluster rabbit@{{ worker_cluster_rabbitmq_reference_node }}"
-#  when:
-#    - (rabbitmqctl_cluster_status.stdout_lines | select("match", "^rabbit@"+inventory_hostname+".*") | list | length) < 1
-#    - inventory_hostname != worker_cluster_rabbitmq_reference_node
+# - name: command <|> Join reference node
+#   command: "rabbitmqctl join_cluster rabbit@{{ worker_cluster_rabbitmq_reference_node }}"
+#   when:
+#     - (rabbitmqctl_cluster_status.stdout_lines | select("match", "^rabbit@"+inventory_hostname+".*") | list | length) < 1
+#     - inventory_hostname != worker_cluster_rabbitmq_reference_node
 
-#- name: command <|> Start app after joining
-#  command: "rabbitmqctl start_app"
-#  when:
-#    - (rabbitmqctl_cluster_status.stdout_lines | select("match", "^rabbit@"+inventory_hostname+".*") | list | length) < 1
-#    - inventory_hostname != worker_cluster_rabbitmq_reference_node
+# - name: command <|> Start app after joining
+#   command: "rabbitmqctl start_app"
+#   when:
+#     - (rabbitmqctl_cluster_status.stdout_lines | select("match", "^rabbit@"+inventory_hostname+".*") | list | length) < 1
+#     - inventory_hostname != worker_cluster_rabbitmq_reference_node
 
 #### Automate (Flask and Celery)
 
@@ -132,7 +132,8 @@
   tags:
     - template
 
-- meta: flush_handlers
+- name: meta <|> Run handler tasks
+  ansible.builtin.meta: flush_handlers
 
 - name: service <|> Manage bbautomate_flask service state
   ansible.builtin.service:

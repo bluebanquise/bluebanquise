@@ -1,3 +1,4 @@
 ---
 access_control_packages_to_install:
-  - selinux-policy 
+  - selinux-policy
+

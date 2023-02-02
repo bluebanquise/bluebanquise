@@ -8,6 +8,9 @@
 
 - name: file <|> Create NFS directories
   ansible.builtin.file:
+    owner: root
+    group: root
+    mode: 0755
     path: "{{ item.0.mount }}"
     state: directory
   with_subelements:
