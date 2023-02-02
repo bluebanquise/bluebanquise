@@ -5,7 +5,7 @@
     name: "{{ item.name }}"
     gid: "{{ item.gid }}"
     state: "{{ item.state | default('present') }}"
-  with_items: "{{ users_basic.users }}"
+  with_items: "{{ users_basic.users | default([]) }}"
 
 - name: user <|> Add/remove users
   ansible.builtin.user:
@@ -24,7 +24,7 @@
     ssh_key_file: "{{ item.ssh_key_file | default(omit) }}"
     remove: "{{ item.remove | default('no') }}"
     state: "{{ item.state | default('present') }}"
-  with_items: "{{ users_basic.users }}"
+  with_items: "{{ users_basic.users | default([]) }}"
 
 - name: authorized_key <|> Manage user authorized_keys if exist
   ansible.posix.authorized_key:
@@ -32,5 +32,5 @@
     key: "{{ item.ssh_authorized_keys }}"
     state: present
     exclusive: "{{ item.ssh_authorized_keys_exclusive | default(omit) }}"
-  with_items: "{{ users_basic.users }}"
+  with_items: "{{ users_basic.users | default([]) }}"
   when: item.ssh_authorized_kesy is defined and item.ssh_authorized_keys

@@ -104,15 +104,15 @@
   tags:
     - template
 
-- name: logrotate <|> Check if /etc/logrotated.d/conman file exists
+- name: stat <|> Check if /etc/logrotate.d/conman file exists
   ansible.builtin.stat: 
-    path: /etc/logrotated.d/conman
+    path: /etc/logrotate.d/conman
   register: logrotate_conman
 
-- name: logrotate <|> Generate /etc/logrotated.d/conman
+- name: template <|> Generate /etc/logrotate.d/conman
   ansible.builtin.template:
     src: conman.logrotate.j2
-    dest: /etc/logrotated.d/conman
+    dest: /etc/logrotate.d/conman
     owner: conman
     group: conman
     mode: 0600
