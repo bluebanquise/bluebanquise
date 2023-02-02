@@ -13,7 +13,7 @@
     - package
 
 
- pip3 install celery flask rabbitMQ clustershell ssh-wait colour_text packaging
+# pip3 install celery flask rabbitMQ clustershell ssh-wait colour_text packaging
 
 #### rabbitMQch
 
