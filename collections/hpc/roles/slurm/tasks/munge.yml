@@ -15,4 +15,3 @@
     state: "{{ (start_services | bool) | ternary('started', omit) }}"
   tags:
     - service
-

@@ -109,7 +109,7 @@
 
 - name: "set_fact <|> Set period start date if {{ loki_data_dir }} does not exist"
   set_fact:
-    loki_from_date: "{{ lookup('pipe', 'date +%Y-%m-%d') }}" 
+    loki_from_date: "{{ lookup('pipe', 'date +%Y-%m-%d') }}"
   when: not dir_rslt.stat.exists
 
 - name: "set_fact <|> Set period start date based on {{ loki_data_dir }} ctime"
@@ -181,4 +181,3 @@
     name: promtail
     state: started
     enabled: true
-

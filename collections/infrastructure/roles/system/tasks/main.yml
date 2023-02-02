@@ -39,7 +39,7 @@
   when: system.template is defined and system.template is iterable
 
 - name: "lineinfile <|> Edit lines in files"
-  ansible.builtin.lineinfile: 
+  ansible.builtin.lineinfile:
     attributes: "{{ item.attributes | default(omit) }}"
     backrefs: "{{ item.backrefs | default(omit) }}"
     backup: "{{ item.backup | default(omit) }}"

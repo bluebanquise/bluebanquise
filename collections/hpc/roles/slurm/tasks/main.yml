@@ -87,4 +87,3 @@
 - name: include_tasks <|> Deploy Slurm submitter
   ansible.builtin.include_tasks: "submitter.yml"
   when: slurm_profile == 'submitter'
-

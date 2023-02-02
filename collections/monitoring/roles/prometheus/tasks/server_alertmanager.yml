@@ -46,7 +46,8 @@
   tags:
     - firewall
 
-- meta: flush_handlers
+- name: meta <|> Run handler tasks
+  ansible.builtin.meta: flush_handlers
 
 - name: "firewalld <|> Add alertmanager service to firewall's {{ prometheus_server_firewall_zone | default('public') }} zone"
   ansible.posix.firewalld:
@@ -63,13 +64,13 @@
 
 - name: file <|> Create Alertmanager directories structure
   ansible.builtin.file:
-   path: "{{ item }}"
-   state: directory
-   mode: 0750
-   owner: alertmanager
-   group: alertmanager
+    path: "{{ item }}"
+    state: directory
+    mode: 0750
+    owner: alertmanager
+    group: alertmanager
   loop:
-   - /etc/alertmanager/
+    - /etc/alertmanager/
 
 - name: Template <|> Generate /etc/alertmanager/alertmanager.yml
   ansible.builtin.template:
@@ -82,7 +83,8 @@
   tags:
     - template
 
-- meta: flush_handlers
+- name: meta <|> Run handler tasks
+  ansible.builtin.meta: flush_handlers
 
 - name: service <|> Manage alertmanager service state
   ansible.builtin.service:

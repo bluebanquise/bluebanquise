@@ -100,4 +100,3 @@
       loop: "{{ drbdadm_status.results }}"
       when:
         - (item.stdout_lines | select("match", ".*Primary$") | list | length) < 1
-

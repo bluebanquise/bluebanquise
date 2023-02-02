@@ -105,7 +105,7 @@
     - template
 
 - name: stat <|> Check if /etc/logrotate.d/conman file exists
-  ansible.builtin.stat: 
+  ansible.builtin.stat:
     path: /etc/logrotate.d/conman
   register: logrotate_conman
 
@@ -138,4 +138,3 @@
     state: "{{ (conman_start_services | default(bb_start_services) | default(true, true) | bool) | ternary('started', omit) }}"
   tags:
     - service
-

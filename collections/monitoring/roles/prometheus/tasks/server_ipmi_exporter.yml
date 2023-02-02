@@ -34,13 +34,13 @@
 
 - name: file <|> Create ipmi_exporter directories structure
   ansible.builtin.file:
-   path: "{{ item }}"
-   state: directory
-   mode: 0750
-   owner: ipmi_exporter
-   group: ipmi_exporter
+    path: "{{ item }}"
+    state: directory
+    mode: 0750
+    owner: ipmi_exporter
+    group: ipmi_exporter
   loop:
-   - /etc/ipmi_exporter/
+    - /etc/ipmi_exporter/
 
 - name: Template <|> Generate /etc/ipmi_exporter/ipmi_config.yml
   ansible.builtin.template:
@@ -53,7 +53,8 @@
   tags:
     - template
 
-- meta: flush_handlers
+- name: meta <|> Run handler tasks
+  ansible.builtin.meta: flush_handlers
 
 - name: service <|> Manage ipmi_exporter service state
   ansible.builtin.service:

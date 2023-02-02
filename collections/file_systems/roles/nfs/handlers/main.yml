@@ -7,4 +7,3 @@
   when:
     - "'service' not in ansible_skip_tags"
     - nfs_start_services | default(bb_start_services) | default(true) | bool
-

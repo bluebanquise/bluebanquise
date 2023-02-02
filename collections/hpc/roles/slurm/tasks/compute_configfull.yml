@@ -23,4 +23,3 @@
   loop:
     - gres.conf
   when: slurm_gresTypes is defined and slurm_gresTypes == 'gpu' and ep_hardware['gpu'] is defined
-

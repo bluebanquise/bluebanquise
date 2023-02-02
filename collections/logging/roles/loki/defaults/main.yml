@@ -34,4 +34,3 @@ loki_promtail_grpc_port: 0
 loki_promtail_grpc_ip: 127.0.0.1
 loki_promtail_syslog_port: 1514
 loki_promtail_syslog_ip: 127.0.0.1
-

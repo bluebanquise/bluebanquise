@@ -6,4 +6,3 @@
   when:
     - "'service' not in ansible_skip_tags"
     - powerman_start_services | default(bb_start_services) | default(true, true)
-
