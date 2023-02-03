@@ -89,8 +89,9 @@
   notify: restart promtail
   register: promtail_service_rslt
 
-- name: "command <|> Reload systemd"
-  command: systemctl daemon-reload
+- name: systemd <|> Reload systemd configuration
+  ansible.builtin.systemd:
+    daemon_reload: yes
   when: loki_service_rslt.changed or promtail_service_rslt.changed
 
 - name: "file <|> Create loki conf dir {{ loki_conf_dir }}"
