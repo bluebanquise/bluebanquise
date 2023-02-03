@@ -15,6 +15,8 @@ CURRENT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd 
 
 # Install minimal requirements into a virtual environment
 cd $HOME
+ENV LANG en_US.UTF-8
+ENV LC_ALL en_US.UTF-8
 python3 -m venv ansible_venv
 source ansible_venv/bin/activate
 
