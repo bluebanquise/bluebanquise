@@ -38,7 +38,7 @@
   loop: "{{ system.template }}"
   when: system.template is defined and system.template is iterable
 
-- name: "lineinfile <|> Edit lines in files"
+- name: "lineinfile <|> Edit lines in files" # noqa args[module]
   ansible.builtin.lineinfile:
     attributes: "{{ item.attributes | default(omit) }}"
     backrefs: "{{ item.backrefs | default(omit) }}"

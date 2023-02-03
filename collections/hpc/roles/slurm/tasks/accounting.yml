@@ -50,7 +50,7 @@
     state: present
   when: "'slurm_acct_db' not in slurm_database_exist.stdout_lines"
 
-- name: setup slurm db user
+- name: setup slurm db user # noqa no-tabs
   community.mysql.mysql_user:
     name: "{{ slurm_StorageUser }}"
     password: "{{ slurm_StoragePass }}"

@@ -1,10 +1,10 @@
 warn_list:
   - role-name  # Role name {0} does not match ``^[a-z][a-z0-9_]+$`` pattern
   - no-changed-when
-  - package-latest
-  - no-tabs
+  - no-jinja-when
 verbosity: 1
 skip_list:
   - fqcn-builtins
   - jinja[spacing]
   - name[casing]
+  - name[template]

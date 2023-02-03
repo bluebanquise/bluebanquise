@@ -1,6 +1,6 @@
 ---
 
-- name: cron <|> Set cron jobs
+- name: cron <|> Set cron jobs # noqa args[module]
   ansible.builtin.cron:
     backup: "{{ item.backup | default(omit) }}"
     cron_file: "{{ item.cron_file | default(omit) }}"

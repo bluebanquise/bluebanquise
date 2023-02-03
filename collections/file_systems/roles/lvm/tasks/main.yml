@@ -8,7 +8,7 @@
     - package
 
 - name: lvg <|> Creating volume groups
-  ansible.builtin.lvg:
+  community.general.lvg:
     vg: "{{ item.vg }}"
     pvs: "{{ item.pvs | join(',') }}"
     force: "{{ item.force | default(omit) }}"
@@ -22,7 +22,7 @@
     - item.pvs is defined and item.pvs
 
 - name: lvol <|> Creating logical volumes
-  ansible.builtin.lvol:
+  community.general.lvol:
     vg: "{{ item.vg }}"
     lv: "{{ item.lv }}"
     size: "{{ item.size }}"
