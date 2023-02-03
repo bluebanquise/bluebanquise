@@ -22,7 +22,8 @@ python3 -m pip install --upgrade pip && \
 pip3 install setuptools setuptools_rust && \
 pip3 install -r $CURRENT_DIR/requirements.txt
 
-ansible-galaxy collection install community.general
+echo "Trying 3 times to grab community.general..."
+ansible-galaxy collection install community.general || ansible-galaxy collection install community.general || ansible-galaxy collection install community.general
 # Install BlueBanquise collections
 if [[ $COLLECTIONS_LOCAL_PATH != "none" ]]; then
   ansible-galaxy collection install $COLLECTIONS_LOCAL_PATH

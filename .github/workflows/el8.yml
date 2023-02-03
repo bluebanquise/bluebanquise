@@ -14,14 +14,14 @@ jobs:
       ANSIBLE_CONFIG: /var/lib/bluebanquise/ansible.cfg
       PY_COLORS: '1'
       ANSIBLE_FORCE_COLOR: '1'
-    strategy:
-      matrix:
-        inventory: [standard]
+    # strategy:
+    #   matrix:
+    #     inventory: [standard]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Create rockylinux systemd able image
+      - name: Create Rockylinux systemd able image
         run: docker build -t rockylinux/rockylinux:8_systemd -f ./resources/docker/Dockerfile_RockyLinux_8_systemd .
 
       - name: Set dummy interface
@@ -37,7 +37,7 @@ jobs:
           docker exec mg1 bash -c "dnf install wget -y && cd /etc/yum.repos.d/ && wget http://bluebanquise.com/repository/releases/latest/el8/x86_64/bluebanquise/bluebanquise.repo"
 
       - name: Prepare run input files
-        run: docker exec mg1 bash -c "sudo -u bluebanquise /bin/bash -c 'cp -a /bluebanquise/resources/workflow/inventory_${{ matrix.inventory }} /var/lib/bluebanquise/inventory && cp -a /bluebanquise/resources/workflow/playbooks /var/lib/bluebanquise'"
+        run: docker exec mg1 bash -c "sudo -u bluebanquise /bin/bash -c 'cp -a /bluebanquise/resources/workflow/inventory_standard /var/lib/bluebanquise/inventory && cp -a /bluebanquise/resources/workflow/playbooks /var/lib/bluebanquise'"
 
       - name: Roles execution
         run: |

@@ -54,12 +54,32 @@ echo
 message_output "Installing OS needed dependencies..."
 if [ "$NAME" == "Ubuntu" ]; then
   if [ "$VERSION_ID" == "20.04" ] || [ "$VERSION_ID" == "22.04" ]; then
-    sudo apt-get install python3-pip git -y
+    sudo apt-get update
+    sudo apt-get install python3 python3-pip git -y
   fi
+fi
+if [ "$PLATFORM_ID" == "platform:el7" ]; then
+  sudo dnf install git python36 python36-pip python3-policycoreutils openssh-clients -y
+  alternatives --set python3 /usr/bin/python3.6
 fi
 if [ "$PLATFORM_ID" == "platform:el8" ]; then
   sudo dnf install git python39 python39-pip python3-policycoreutils openssh-clients -y
   alternatives --set python3 /usr/bin/python3.9
+fi
+if [ "$PLATFORM_ID" == "platform:el9" ]; then
+  sudo dnf install git python3 python3-pip python39-pip python3-policycoreutils openssh-clients -y
+fi
+if [ "$distribution" == 'opensuse_leap' ]; then
+  if [[ "$distribution_version" =~ ^15\. ]]; then
+    sudo zypper -n install python3 python3-pip git
+  fi
+fi
+if [ "$distribution" == 'Debian' ]; then
+  if [ "$distribution_version" == "11" ]; then
+      sudo apt update
+      export DEBIAN_FRONTEND=noninteractive
+      sudo apt install -y python3 python3-pip git
+  fi
 fi
 
 message_output "Creating bluebanquise user, may take a while..."
