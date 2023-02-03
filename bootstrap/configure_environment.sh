@@ -12,11 +12,14 @@ for arg in "$@"; do
 done
 
 CURRENT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+source /etc/os-release
 
 # Install minimal requirements into a virtual environment
 cd $HOME
-export LANG=en_US.UTF-8
-export LC_ALL=en_US.UTF-8
+if [ "$PLATFORM_ID" == "platform:el7" ]; then
+  export LANG=en_US.UTF-8
+  export LC_ALL=en_US.UTF-8
+fi
 python3 -m venv ansible_venv
 source ansible_venv/bin/activate
 
