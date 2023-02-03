@@ -17,8 +17,7 @@
   ansible.builtin.package:
     name: '{{ item }}'
     state: '{{ "present" if (flexlm_deploy_state == "present") else "absent" }}'
-  with_flattened:
-    - '{{ flexlm_required_packages | to_nice_json }}'
+  loop: "{{ flexlm_required_packages | to_nice_json | flatten }}"
   register: flexlm_pkg_result
   until: flexlm_pkg_result is success
   tags:
@@ -65,8 +64,7 @@
     owner: '{{ flexlm_user_name }}'
     group: '{{ flexlm_user_name }}'
     mode: 0754
-  with_flattened:
-    - '{{ flexlm_licences }}'
+  loop: "{{ flexlm_licences | flatten }}"
   when: (item.bin_src|d())
   notify: ['restart flexlm services']
   tags:
@@ -77,8 +75,7 @@
     path: "{{ item.lic_path | basename }}"
     state: directory
     mode: '0755'
-  with_flattened:
-    - '{{ flexlm_licences }}'
+  loop: "{{ flexlm_licences | flatten }}"
   when:
     - (item.lic_src|d())
     - item.lic_path
@@ -92,8 +89,7 @@
     owner: '{{ flexlm_user_name }}'
     group: '{{ flexlm_user_name }}'
     mode: 0640
-  with_flattened:
-    - '{{ flexlm_licences }}'
+  loop: "{{ flexlm_licences | flatten }}"
   when:
     - (item.lic_src|d())
     - item.lic_path
@@ -110,8 +106,7 @@
     owner: 'root'
     group: 'root'
     mode: '0644'
-  with_flattened:
-    - '{{ flexlm_licences }}'
+  loop: "{{ flexlm_licences | flatten }}"
   when: ( (flexlm_deploy_state == "present") and
         ( item.service | d(true) ))
   notify: ['systemd daemon reload', 'restart flexlm services']
@@ -123,7 +118,6 @@
     name: '{{ "flexlm-" + item.name }}'
     state: '{{ "started" if (flexlm_deploy_state == "present" and (item.service | d(true) | bool)) else "stopped" }}'
     enabled: '{{ item.service | d(true) | bool }}'
-  with_flattened:
-    - '{{ flexlm_licences }}'
+  loop: "{{ flexlm_licences | flatten }}"
   tags:
     - service
