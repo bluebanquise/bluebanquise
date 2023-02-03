@@ -1,7 +1,7 @@
 FROM rockylinux/rockylinux:9
 
 RUN set -ex; \
-    dnf -y install python3 procps less epel-release sudo; dnf clean all;
+    dnf -y install python3 procps less epel-release sudo systemd; dnf clean all;
 RUN mkdir /root/.ssh -p;
 
-CMD [ "/sbin/init" ]
+CMD [ "/usr/sbin/init" ]
