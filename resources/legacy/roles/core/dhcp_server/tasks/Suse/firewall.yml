@@ -1,0 +1,12 @@
+- name: "firewalld <|+> Add services to firewall's {{ dhcp_server_firewall_zone | default('public') }} zone"
+  ansible.posix.firewalld:
+    zone: "{{ dhcp_server_firewall_zone | default('public') }}"
+    service: "{{ item }}"
+    immediate: "yes"
+    permanent: "yes"
+    state: enabled
+  when:
+    - ep_firewall | default(false) | bool
+  loop: "{{ dhcp_server_firewall_services_to_add }}"
+  tags:
+    - firewall

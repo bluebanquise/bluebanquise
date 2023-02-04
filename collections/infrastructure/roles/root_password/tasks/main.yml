@@ -1,0 +1,7 @@
+---
+- name: user <|> Set root password
+  ansible.builtin.user:
+    name: root
+    password: "{{ ep_admin_password_sha512 | default(root_password_ep_admin_password_sha512) }}"
+  no_log: true
+  when: (ep_admin_password_sha512 is defined and ep_admin_password_sha512 is not none) or (root_password_ep_admin_password_sha512 is defined and root_password_ep_admin_password_sha512 is not none)

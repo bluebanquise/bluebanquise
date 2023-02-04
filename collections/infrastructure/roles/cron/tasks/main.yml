@@ -1,0 +1,22 @@
+---
+
+- name: cron <|> Set cron jobs
+  ansible.builtin.cron:
+    backup: "{{ item.backup | default(omit) }}"
+    cron_file: "{{ item.cron_file | default(omit) }}"
+    day: "{{ item.day | default(omit) }}"
+    disabled: "{{ item.disabled | default(omit) }}"
+    env: "{{ item.env | default(omit) }}"
+    hour: "{{ item.hour | default(omit) }}"
+    insertafter: "{{ item.insertafter | default(omit) }}"
+    insertbefore: "{{ item.insertbefore | default(omit) }}"
+    job: "{{ item.job | default(omit) }}"
+    minute: "{{ item.minute | default(omit) }}"
+    month: "{{ item.month | default(omit) }}"
+    name: "{{ item.name }}"
+    special_time: "{{ item.special_time | default(omit) }}"
+    state: "{{ item.state | default(omit) }}"
+    user: "{{ item.user | default(omit) }}"
+    weekday: "{{ item.weekday | default(omit) }}"
+  loop: "{{ cron }}"
+  when: cron is defined and cron is iterable

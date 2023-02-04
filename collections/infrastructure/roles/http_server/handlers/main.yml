@@ -1,0 +1,16 @@
+---
+
+- name: service <|> Restart http server service
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: "{{ (http_server_start_services | default(bb_start_services) | default(true, true) | bool) | ternary('restarted', omit) }}"
+  loop: "{{ http_server_services_to_start }}"
+  when:
+    - "'service' not in ansible_skip_tags"
+    - http_server_start_services | default(bb_start_services) | default(true, true)
+
+- name: lineinfile <|> Disable default listen on all interfaces
+  ansible.builtin.lineinfile:
+    path: "{{ http_server_apache_main_conf_path }}"
+    regexp: '^Listen 80'
+    line: '#Listen 80'

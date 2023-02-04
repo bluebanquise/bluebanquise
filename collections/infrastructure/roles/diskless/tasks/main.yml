@@ -1,0 +1,72 @@
+---
+- name: include_vars <|> Gather OS specific variables
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family }}.yml"
+      skip: true
+  tags:
+    - always
+
+- name: "package <|> Install {{ diskless_packages_to_install | join(' ') }}"
+  ansible.builtin.package:
+    name: "{{ diskless_packages_to_install }}"
+    state: present
+  tags:
+    - package
+
+- name: "Create diskless directories structure"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+  loop:
+    # Create base directories for images
+    - "{{ diskless_htdocs_path }}"
+    - "{{ diskless_htdocs_path }}/diskless"
+    - "{{ diskless_htdocs_path }}/diskless/images"
+    - "{{ diskless_htdocs_path }}/diskless/kernels"
+    # Create additional directories for images
+    - /diskless
+    - /diskless/images
+    - /diskless/images/nfsimages
+    - /diskless/images/nfsimages/golden
+    - /diskless/images/nfsimages/staging
+    # Create directory for 'installations.yml' file
+    - /var/lib/diskless
+    # Create working directory for images
+    - /var/tmp/diskless/workdir/
+    # Create disklessset configuration directory
+    - /etc/disklessset/
+
+- name: template <|> Generate /etc/disklessset/diskless_parameters.yml
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: "{{ item.mode }}"
+  with_items:
+    - { src: 'diskless_parameters.yml.j2', dest: '/etc/disklessset/diskless_parameters.yml', mode: '0644' }
+  tags:
+    - template
+
+# We need to check file existance because an image installation can be running yet, we cannot juste replace the file
+- name: Check if installations.yml file exists
+  ansible.builtin.stat:
+    path: /var/lib/diskless/installations.yml
+  register: stat_result
+
+# Copy installations.yml file if installations.yml doesnt already exist
+- name: Copy installations.yml file if doesn't already exist
+  ansible.builtin.copy:
+    src: installations.yml
+    dest: /var/lib/diskless/installations.yml
+    mode: 0755
+  when: not stat_result.stat.exists
+
+- name: Add nfs export point if doesn't already exist
+  ansible.builtin.lineinfile:
+    dest: /etc/exports
+    line: /diskless/images/nfsimages *(rw,no_root_squash,sync)

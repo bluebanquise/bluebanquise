@@ -1,0 +1,9 @@
+#### Blue Banquise file ####
+## {{ansible_managed}}
+
+{% for gr, nodes in groups.items() %}
+{% if (gr | string) != 'ungrouped' %}
+{{ gr }}: {% for node in nodes | sort %}{% if loop.first %}{{ node }}{% else %},{{ node }}{% endif %}{% endfor %}
+
+{% endif %}
+{% endfor %}

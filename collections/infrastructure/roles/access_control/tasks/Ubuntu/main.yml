@@ -1,0 +1,9 @@
+---
+# For more details, please refer to https://ubuntu.com/server/docs/security-apparmor
+- name: "service <|> Manage apparmor state"
+  ansible.builtin.service:
+    name: apparmor
+    enabled: "{% if (ep_access_control | default(access_control_ep_access_control)= == 'enforcing' %}yes{% else %}no{% endif %}"
+    state: "{% if (ep_access_control | default(access_control_ep_access_control)= == 'enforcing' %}started{% else %}stopped{% endif %}"
+  tags:
+    - service

@@ -9,8 +9,8 @@
       tags: set_hostname
     - role: repositories_client
       tags: repositories_client
-    - role: nic_nmcli
-      tags: nic_nmcli
+    - role: nic
+      tags: nic
     - role: hosts_file
       tags: hosts_file
     - role: dns_client

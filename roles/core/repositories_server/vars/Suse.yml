@@ -1,7 +1,0 @@
----
-repositories_server_packages_to_install:
-  - apache2
-repositories_server_services_to_start:
-  - apache2
-repositories_server_firewall_services_to_add:
-  - http

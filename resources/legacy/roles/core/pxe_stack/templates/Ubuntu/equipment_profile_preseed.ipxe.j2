@@ -1,0 +1,40 @@
+#!ipxe
+
+echo |
+echo | Entering equipment_profiles/{{ item | replace('equipment_','') | trim }}.ipxe file.
+echo |
+echo | Getting equipment_profile group variables...
+echo |
+
+# Ansible variables
+set eq-equipment-profile {{ item | replace('equipment_','') | trim }}
+set eq-architecture ${arch}
+set eq-distribution {{ hostvars[groups[item][0]]['ep_operating_system']['distribution'] | default(pxe_stack_ep_operating_system.distribution, true) | lower }}
+set eq-distribution-major-version {{ hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] | default(pxe_stack_ep_operating_system.distribution_major_version, true) }}
+set eq-distribution-version {{ hostvars[groups[item][0]]['ep_operating_system']['distribution_version'] | default(hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'], true) | default(pxe_stack_ep_operating_system.distribution_version, true) | default(pxe_stack_ep_operating_system.distribution_major_version, true) }}
+set eq-console {{ hostvars[groups[item][0]]['ep_console'] | default(pxe_stack_ep_console) }}
+set eq-kernel-parameters {{ hostvars[groups[item][0]]['ep_kernel_parameters'] | default(pxe_stack_ep_kernel_parameters) }}
+set eq-repositories-environment {{ hostvars[groups[item][0]]['ep_operating_system']['repositories_environment'] | default(pxe_stack_ep_operating_system.repositories_environment) | default('') }}
+{% if (hostvars[groups[item][0]]['ep_autoclone_parameters'] is defined and hostvars[groups[item][0]]['ep_autoclone_parameters'] is not none) or (pxe_stack_ep_autoclone_parameters is defined and pxe_stack_ep_autoclone_parameters is not none) %}
+set eq-autoclone-parameters {{ hostvars[groups[item][0]]['ep_autoclone_parameters'] | default(pxe_stack_ep_autoclone_parameters, true)}}
+{% endif %}
+
+# Preseed specific need (known bug with multiple UP/Active NIC)
+{% if hostvars[groups[item][0]]['ep_preseed_auto_main_network_interface'] is defined and hostvars[groups[item][0]]['ep_preseed_auto_main_network_interface'] %}
+set node-main-network-interface auto
+{% endif %}
+
+# Dynamic variables
+set images-root http://${next-server}/pxe/netboots/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/
+set repository-root http://${next-server}/repositories/${eq-repositories-environment}/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/
+set preseed-path http://${next-server}/pxe/equipment_profiles//${eq-equipment-profile}.preseed.cfg
+
+echo | images-root: ${images-root}
+echo | repository-root: ${repository-root}
+echo | preseed-path: ${preseed-path}
+echo |
+
+# Now chain to menu
+echo | Now chaining to --> menu.ipxe
+sleep 2
+chain http://${next-server}/pxe/menu.ipxe || shell

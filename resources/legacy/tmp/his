@@ -1,0 +1,48 @@
+  113  wget http://ftp.debian.org/debian/dists/Debian11.3/main/installer-amd64/current/images/netboot/netboot.tar.gz
+  114  ls
+  115  tar xvzf netboot.tar.gz
+  116  ls
+  117  mv debian-installer/amd64/initrd.gz .
+  118  ls
+  119  rm debian-installer initrd ldlinux.c32 pxelinux.* version.info  -Rf
+  120  ls
+  121  gunzip initrd.gz
+  122  cd buffer/
+  123  cpio -id < ../initrd
+  124  ls
+  125  find . -name *.ko
+  126  cd ../
+  127  ls
+  128  cd initrd_dvd/
+  129  find . -name *.ko
+  130  cd ../
+  131  ls
+  132  cd os/
+  133  ls
+  134  ls install.amd/
+  135  cd /var/www/html/
+  136  ls
+  137  cp pxe/osdeploy/ubuntu_18.ipxe .
+  138  mv ubuntu_18.ipxe debian.ipxe
+  139  vi debian.ipxe
+  140  ls
+  141  mv preseed.cfg.j2 preseed.cfg
+  142  vi preseed.cfg
+  143  vi pxe/convergence.ipxe
+  144  tail -f /var/log/apache2/*
+  145  cd /var/www/html/repositories/debian/11.3/x86_64/
+  146  ls
+  147  cd initrd_netboot/
+  148  ls
+  149  cd buffer/
+  150  ls
+  151  find . -name *.ko
+  152  /usr/bin/cp -a -f ../../initrd_dvd/buffer/lib/modules/5.10.0-13-amd64/kernel/* lib/modules/5.10.0-13-amd64/kernel/
+  153  find . -name *.ko
+  154  cd ../
+  155  cd buffer/
+  156  find . | cpio --create --format='newc' > ../../initrd
+  157  cd ../../
+  158  mls
+  159  ls
+  160  gzip initrd

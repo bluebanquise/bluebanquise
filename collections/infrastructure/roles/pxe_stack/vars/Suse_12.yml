@@ -1,0 +1,21 @@
+---
+pxe_stack_apache_cgi_module: cgid
+pxe_stack_apache_conf_path: /etc/apache2/conf.d
+pxe_stack_apache_user: wwwrun
+pxe_stack_apache_group: www
+pxe_stack_apache_cgi_bin_path: /srv/www/cgi-bin
+pxe_stack_htdocs_path: /srv/www/htdocs
+pxe_stack_packages_to_install:
+  - apache2
+  - autoyast2
+  - autoyast2-installation
+  - libxml2-tools
+  - bluebanquise-ipxe-x86_64
+  - bluebanquise-ipxe-arm64
+pxe_stack_default_tftp_package: atftp
+pxe_stack_services_to_start:
+  - httpd
+pxe_stack_default_tftp_service: atftpd
+pxe_stack_firewall_services_to_add:
+  - http
+  - tftp

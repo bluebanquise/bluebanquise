@@ -1,0 +1,55 @@
+# Main nic macros.
+# TO BE KEEPT SYNC with j2 vars defined in vars/main.yml!!
+
+{% macro nic_ip4(item)%}
+{{nic_ip4_main(item) | trim }}{% if item.ip4 is defined and item.ip4_manual is defined %},{% endif %}{{ nic_ip4_manual(item) | trim }}
+{% endmacro %}
+
+{% macro nic_ip4_main(item)%}
+{% if item.ip4 is defined %}
+  {% if '/' in item.ip4 %}
+    {{ item.ip4 }}
+  {% elif item.network is defined and networks[item.network]['prefix4'] is defined %}
+    {{ item.ip4 }}/{{ networks[item.network]['prefix4'] }}
+  {% elif item.network is defined and networks[item.network]['prefix'] is defined %}
+    {{ item.ip4 }}/{{ networks[item.network]['prefix'] }}
+  {% endif %}
+{% endif %}
+{% endmacro %}
+
+{% macro nic_ip4_manual(item)%}
+{% if item.ip4_manual is defined %}
+  {% for ipsub in item.ip4_manual %}{% if not loop.first %},{% endif %}{{ ipsub }}{%endfor %}
+{% endif %}
+{% endmacro %}
+
+{% macro nic_gw4(item)%}
+{% if item.never_default4 is not defined %}
+  {% if item.gw4 is defined %}
+    {{ item.gw4 }}
+  {% elif item.network is defined and networks[item.network]['gateway4'] is defined %}
+    {{ networks[item.network]['gateway4'] }}
+  {% elif item.network is defined and networks[item.network]['gateway'] is defined %}
+    {{ networks[item.network]['gateway'] }}
+  {% endif %}
+{% endif %}
+{% endmacro %}
+
+{% macro nic_dns4(item)%}
+{% if item.dns4 is defined %}
+  {{ item.dns4 }}
+{% elif item.network is defined and networks[item.network]['dns4'] is defined %}
+  {{ networks[item.network]['dns4'] }}
+{% elif item.network is defined and networks[item.network]['services_ip'] is defined and networks[item.network]['services_ip']['dns_ip'] is defined %}
+  {{ networks[item.network]['services_ip']['dns_ip'] }}
+{% endif %}
+{% endmacro %}
+
+{% macro nic_routes4(item)%}
+{% if item.routes4 is defined %}
+  {{ item.routes4 }}
+{% elif item.network is defined and networks[item.network]['routes4'] is defined %}
+  {{ networks[item.network]['routes4'] }}
+{% endif %}
+{% endmacro %}
+

@@ -1,0 +1,34 @@
+# {{ ansible_managed }}
+
+server:
+{% if loki_promtail_enable_server %}
+  enable: true
+  http_listen_port: {{ loki_promtail_port }}
+  http_listen_address: {{ loki_promtail_ip }}
+  grpc_listen_port: {{ loki_promtail_grpc_port }}
+  grpc_listen_address: {{ loki_promtail_grpc_ip }}
+{% else %}
+  disable: true
+{% endif %}
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://127.0.0.1:{{ loki_port }}/loki/api/v1/push
+
+scrape_configs:
+  - job_name: syslog
+    syslog:
+      listen_address: {{ loki_promtail_syslog_ip }}:{{ loki_promtail_syslog_port }}
+      idle_timeout: 120s
+      label_structured_data: yes
+      labels:
+        job: "syslog"
+    relabel_configs:
+      - source_labels: ['__syslog_message_hostname']
+        target_label: 'host'
+      - source_labels: ['__syslog_message_app_name']
+        target_label: 'app'
+      - source_labels: ['__syslog_message_severity']
+        target_label: 'level'

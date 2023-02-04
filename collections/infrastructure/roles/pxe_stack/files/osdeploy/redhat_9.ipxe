@@ -1,0 +1,37 @@
+#!ipxe
+
+echo |
+echo | Entering osdeploy/redhat_9.ipxe file.
+echo |
+
+echo | Now starting os deployment process.
+echo | RedHat 9 Family ipxe configuration.
+echo |
+echo | Parameters used:
+echo | > Operating system target: ${eq-distribution} ${eq-distribution-version} ${eq-architecture}
+echo | > Console: ${eq-console}
+echo | > Additional kernel parameters: ${eq-kernel-parameters} ${dedicated-kernel-parameters}
+echo | > Deployment server: ${next-server}
+echo | > Target images: ${images-root}
+echo | > Target kickstart: ${eq-equipment-profile}.kickstart.cfg
+echo |
+echo | Loading linux ...
+
+kernel ${images-root}/iso/images/pxeboot/vmlinuz initrd=initrd.img inst.stage2=${images-root}/iso/ inst.repo=${images-root}/iso/BaseOS/ inst.ks=${kickstart-path} ${eq-console} ${eq-kernel-parameters} ${dedicated-kernel-parameters} ipxe_next_server=${next-server} node_hostname=${hostname}
+
+echo | Loading initial ramdisk ...
+
+initrd ${images-root}/iso/images/pxeboot/initrd.img
+
+echo | ALL DONE! We are ready.
+echo | Downloaded images report:
+
+imgstat
+
+echo | Booting in 4s ...
+echo |
+echo +----------------------------------------------------+
+
+sleep 4
+
+boot

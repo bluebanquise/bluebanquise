@@ -1,0 +1,103 @@
+#jinja2: lstrip_blocks: True
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+
+{###############################################################################
+  Generic service item write
+###############################################################################}
+{% macro item_add(item_name, items_list) %}
+  {% if items_list is defined and items_list is iterable and items_list is not string and items_list is not mapping %}
+    {% set elements = [] %}
+    {% for elem in items_list %}
+      {% if elem.ip is defined and (elem.ip | ansible.utils.ipaddr) %}
+        {{ elements.append(elem.ip) }}
+      {% elif elem.hostname is defined and elem.hostname is not none and elem.hostname is string %}
+        {{ elements.append(elem.hostname) }}
+      {% endif %}
+    {% endfor %}
+    {% if (elements | length) > 0 %}
+{{ item_name }} {{ elements | join(', ') }};
+    {% endif %}
+  {% endif %}
+{% endmacro %}
+
+{###############################################################################
+  Write a network
+###############################################################################}
+{% macro write_network(network) %}
+subnet {{ networks[network]['subnet'] }} netmask {{ (networks[network]['subnet'] + '/' + (networks[network]['prefix'] | string) ) | ansible.utils.ipaddr('netmask') }} {
+
+  default-lease-time {{ dhcp_server_default_lease_time | string }};
+  max-lease-time {{ dhcp_server_max_lease_time | string }};
+      {% if networks[network]['dhcp_unknown_range'] is defined and networks[network]['dhcp_unknown_range'] is not none %}
+  range {{ networks[network]['dhcp_unknown_range'] }};
+      {% endif %}
+  option domain-name "{{ bb_domain_name | default(dhcp_server_domain_name) }}";
+  option broadcast-address {{ (networks[network]['subnet'] + '/' + (networks[network]['prefix'] | string) ) | ansible.utils.ipaddr('broadcast') }};
+      {% if networks[network]['gateway4'] is defined %}
+        {% if networks[network]['gateway4'] is string %}
+  option routers {{ networks[network]['gateway4'] }};
+        {% elif networks[network]['gateway4'] is iterable and networks[network]['gateway4'] is not mapping %}
+{{ item_add("option routers", networks[network]['gateway4']) }}
+        {% endif %}
+      {% endif %}
+
+{# Either ~~~~~~~ ADVANCED SERVICES #}
+      {% if networks[network]['services'] is defined and networks[network]['services'] is iterable and networks[network]['services'] is not string and networks[network]['services'] is mapping %}
+        {% if networks[network]['services']['dns4'] is defined %}
+{{ item_add("option domain-name-servers", networks[network]['services']['dns4']) }}
+        {% endif %}
+        {% if networks[network]['services']['ntp4'] is defined %}
+{{ item_add("option ntp-servers", networks[network]['services']['dns4']) }}
+        {% endif %}
+        {% if networks[network]['services']['pxe4'] is defined %}
+{{ item_add("next-server", networks[network]['services']['pxe4']) }}
+        {% endif %}
+
+{# Or ~~~~~~~ BASIC SERVICES #}
+      {% elif networks[network]['services_ip'] is defined and (networks[network]['services_ip'] | ansible.utils.ipaddr) %}
+  option domain-name-servers {{ networks[network]['services_ip'] }};
+  option ntp-servers {{ networks[network]['services_ip'] }};
+  next-server {{ networks[network]['services_ip'] }};
+      {% endif %}
+
+  include "{{ dhcp_server_conf_dir }}/dhcpd.{{ network }}.conf";
+
+}
+{% endmacro %}
+
+#### SUBNETS
+
+{# SHARED NETWORKS GATHERING IF ANY #}
+{% set shared_networks = [] %}
+{% for network in networks %}
+  {% if j2_current_iceberg_network in network %}{# check if this network is part of the current iceberg #}
+    {% if networks[network]['shared_network'] is defined and not none %}
+{{ shared_networks.append(networks[network]['shared_network']|string) }}
+    {% endif %}
+  {% endif %}
+{% endfor %}
+
+## SHARED NETWORKS SUBNETS
+
+{% for shared_network in ( shared_networks | unique | sort ) %}
+shared-network {{ shared_network }} {
+  {% for network in networks %}
+    {% if j2_current_iceberg_network in network and (networks[network]['dhcp_server'] | default(true)) %}
+      {% if networks[network]['shared_network'] is defined and networks[network]['shared_network'] is not none and networks[network]['shared_network'] == shared_network %}
+{{ write_network(network) }}
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+}
+{% endfor %}
+
+## NON SHARED NETWORKS SUBNETS
+
+{% for network in networks %}
+  {% if j2_current_iceberg_network in network and (networks[network]['dhcp_server'] | default(true)) %}
+    {% if networks[network]['shared_network'] is not defined or networks[network]['shared_network'] is none  %}
+{{ write_network(network) }}
+    {% endif %}
+  {% endif %}
+{% endfor %}

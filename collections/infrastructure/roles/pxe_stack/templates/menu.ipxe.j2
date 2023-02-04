@@ -1,0 +1,124 @@
+#!ipxe
+
+###################### MAIN MENU ####################################
+
+# Some menu defaults
+set menu-timeout 10000
+set submenu-timeout ${menu-timeout}
+isset ${menu-default} || set menu-default bootdisk
+set esc:hex 1b
+
+set bold ${esc:string}[1m
+set orange ${esc:string}[33;0m
+set yellow ${esc:string}[33;1m
+set cyan ${esc:string}[36;1m
+set resetfg ${esc:string}[39m
+set resetbg ${esc:string}[49m
+set resetbold ${esc:string}[22m
+set reset ${esc:string}[0m
+
+:start
+menu BlueBanquise iPXE boot menu for ${manufacturer} ${product} ${arch}
+item --gap                Main boot
+item bootosdeploy         Deploy OS (This will deploy/redeploy operating system)
+item bootdisk             Boot on disk (This will boot on local disk)
+item bootnext             Exit ipxe and continue EFI boot
+{% if pxe_stack_enable_diskless %}
+item --gap                Diskless
+item bootdiskless         Start a diskless OS (Configured using diskless tool)
+{% endif %}
+{% if pxe_stack_enable_clonezilla %}
+item --gap                Cloning
+item bootclone            Clone/Deploy OS
+item bootautoclone        Auto Clone (advanced)
+item bootautodeploy       Auto Deploy (advanced)
+{% endif %}
+item --gap                Tools
+{% if pxe_stack_enable_alpine %}
+item bootalpinelive       Boot a live Alpine
+{% endif %}
+item --gap                Other
+item startshell           iPXE shell (Go to an iPXE shell)
+item startgrubshell       Grub2 shell (Go to a Grub2 shell, EFI only)
+item showinfo             Display system infos
+choose --timeout ${menu-timeout} --default ${menu-default} selected || goto cancel
+set menu-timeout 0
+goto ${selected}
+
+############ MAIN MENU ITEMS ############
+
+:startshell
+echo Type 'exit' to get the back to the menu.
+shell
+set menu-timeout 0
+set submenu-timeout 0
+goto start
+
+:startgrubshell
+echo Booting on a Grub2 shell image...
+sleep 2
+chain http://${next-server}/pxe/bin/${arch}/grub2_shell.img || shell
+exit 1
+
+:showinfo
+echo
+echo +---------------- System information ----------------+
+echo |
+echo | hostname:     ${hostname}
+echo | platform:     ${platform}
+echo | mac:          ${net0/mac}
+echo | ip:           ${net0.dhcp/ip:ipv4}
+echo | netmask:      ${net0.dhcp/netmask:ipv4}
+echo | dhcp-server:  ${net0.dhcp/dhcp-server:ipv4}
+echo | gateway:      ${net0.dhcp/gateway:ipv4}
+echo | dns-server:   ${net0.dhcp/dns:ipv4}
+echo | domain:       ${net0.dhcp/domain:string}
+echo | next-server:  ${net0.dhcp/next-server:ipv4}
+echo |
+echo +----------------------------------------------------+
+echo
+prompt Press any key to continue
+set menu-timeout 0
+set submenu-timeout 0
+goto start
+
+:bootosdeploy
+chain http://${next-server}/pxe/osdeploy/${eq-distribution}_${eq-distribution-major-version}.ipxe || shell
+
+:bootdiskless
+chain http://${next-server}/pxe/diskless/images/${node-image}/boot.ipxe || shell
+
+:bootclone
+chain http://${next-server}/pxe/clone/clone.ipxe
+
+:bootdeployclone
+chain http://${next-server}/pxe/clone/deploy_clone.ipxe
+
+:bootalpinelive 
+chain http://${next-server}/pxe/tools/alpine.ipxe
+
+:bootdisk
+iseq ${platform} efi && goto bootdisk-efi || goto bootdisk-legacy
+
+    :bootdisk-legacy
+    echo Booting on disk in legacy bios way
+    sleep 2
+    sanboot --no-describe --drive 0x80 || shell
+    exit
+
+    :bootdisk-efi
+    echo Booting on disk in EFI way
+    sleep 2
+    chain http://${next-server}/pxe/bin/${arch}/grub2_efi_autofind.img || shell
+    exit 1
+
+:bootnext
+exit
+
+#:memtest
+#echo Booting Memtest86+
+#boot http://${next-server}/pxe/bin/memtest86+-5.01.bin || shell
+
+#:minimal_live_linux
+#echo Booting Minimal Live Linux
+#chain http://${next-server}/pxe/equipment_ipxe_configurations/minimal.ipxe

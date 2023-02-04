@@ -1,0 +1,25 @@
+- name: package █ Install clustershell system package
+  ansible.builtin.package:
+    name: clustershell
+    state: present
+  when: clustershell_install_from_package
+  tags:
+    - package
+
+- name: package █ Install clustershell pip package
+  ansible.builtin.pip:
+    name: clustershell
+    state: present
+  when: clustershell_install_from_pip
+  tags:
+    - pip
+
+- name: template █ Generate /etc/clustershell/groups.d/local.cfg
+  ansible.builtin.template:
+    src: local.cfg.j2
+    dest: /etc/clustershell/groups.d/local.cfg
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - template

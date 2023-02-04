@@ -1,8 +1,0 @@
----
-- name: authorized_key █ Add authorized key
-  ansible.posix.authorized_key:
-    user: "{% if ansible_env.SUDO_USER is defined %}{{ ansible_env.SUDO_USER }}{% else %}root{% endif %}"
-    key: "{{ item }}"
-    exclusive: no
-    state: present
-  with_items: "{{ authentication_ssh_keys }}"

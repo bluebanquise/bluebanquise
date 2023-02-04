@@ -7,15 +7,18 @@
 
 ## What is BlueBanquise
 
-**BlueBanquise** is a coherent **Ansible** roles collection, designed to deploy and manage large group of hosts (clusters of nodes).
+**BlueBanquise** is group of coherent **Ansible** collections and tools, designed to deploy and manage large group of hosts (clusters of nodes).
 
-The BlueBanquise stack is generic and can adapt to any kind of architecture (High Performance Computing clusters, university or enterprise infrastructures, Blender render farm, K8S cluster, etc.).
+The BlueBanquise collections are generic and can adapt to any kind of architecture (High Performance Computing clusters, university or enterprise infrastructures, Blender render farm, K8S cluster, etc.).
+A specific focus is made on scalability for very large clusters.
 
-The stack is split over two repositories:
+When "stacked" together, collections and tools form the **BlueBanquise stack**.
 
-* :globe_with_meridians: **[Core](https://github.com/bluebanquise/bluebanquise):** the CORE of the stack, focused on providing roles and tools to deploy hosts and configure vital services. CORE is generic to any kind of cluster.
+## Collections
 
-* :globe_with_meridians: **[Community](https://github.com/bluebanquise/community):** COMMUNITY roles and tools provides additional production level features **on top of CORE** to specialize cluster.
+The following collections are available:
+
+* :globe_with_meridians: **[Infrastructure](https://github.com/bluebanquise/bluebanquise/collections/infrastructure):** the core of the stack, focused on providing roles and tools to deploy hosts and configure vital services.
 
 ## Resources
 
@@ -23,8 +26,7 @@ The stack is split over two repositories:
 
 The stack documentation is available on the BlueBanquise website, in [documentation subfolder](https://bluebanquise.com/documentation/).
 
-Note that each role (CORE or COMMUNITY) embeds its own readme, with detailed
-usage description.
+Note that each role embeds its own README, with detailed usage description.
 
 ### Packages
 
@@ -34,28 +36,26 @@ The stack packages are available in the [repositories subfolder](https://blueban
 
 The stack aims at supporting a maximum range of hardware, CPU architectures, and Linux distributions.
 
-Currently supported distributions are:
+Currently tested and supported distributions (other derivative could work) are:
 
 | Operating System family | Operating System distribution | Tested versions    | Architectures    | Notes                                                       |
 | ----------------------- | ----------------------------- | ------------------ | ---------------- | ----------------------------------------------------------- |
 | Red Hat                 |                               |                    |                  |                                                             |
-|                         | RHEL                          | 7, 8               | x86_64, aarch64  | √                                                           |
-|                         | Rocky Linux                   | 8                  | x86_64, aarch64  | √                                                           |
+|                         | RHEL                          | 7, 8, 9               | x86_64, aarch64  | √                                                           |
+|                         | Rocky Linux                   | 8, 9                  | x86_64, aarch64  | √                                                           |
 |                         | CentOS                        | 7, 8               | x86_64, aarch64  | √                                                           |
 |                         | CentOS Stream                 | 8                  | x86_64, aarch64  | √                                                           |
-|                         | Oracle Linux                  | 8                  | x86_64, aarch64  | √                                                           |
-|                         | Cloud Linux                   | 8                  | x86_64, aarch64  | √                                                           |
-|                         | Alma Linux                    | 8                  | x86_64, aarch64  | √                                                           |
+|                         | Alma Linux                    | 8, 9                  | x86_64, aarch64  | √                                                           |
 | Debian                  |                               |                    |                  |                                                             |
-|                         | Ubuntu                        | 20.04              | x86_64, aarch64  | √. Diskless not supported for now.                          |
-|                         | Debian                        |                    |                  | Targeted for future release                                 |
+|                         | Ubuntu                        | 20.04, 22.04              | x86_64, arm64  | √. Diskless not supported for now.                          |
+|                         | Debian                        | 11                   |  x86_64, arm64                | √. Diskless not supported for now.  |
 | Suse                    |                               |                    |                  |                                                             |
-|                         | SLES                          | 15.3               | x86_64, aarch64  | √                                                           |
-|                         | OpenSuse Leap                 | 15.3               | x86_64, aarch64  | √                                                           |
+|                         | SLES                          | 15               | x86_64, aarch64  | √. Diskless not supported for now.                                                           |
+|                         | OpenSuse Leap                 | 15               | x86_64, aarch64  | √. Diskless not supported for now.          |
 
 Ansible >= 4.10.0 is mandatory for BlueBanquise to run properly.
 
-**[OpenHPC](https://openhpc.community/downloads/)** scientific packages and OpenHPC slurm job scheduler are compatible with the stack.
+**[OpenHPC](https://openhpc.community/downloads/)** scientific packages are compatible with the stack.
 
 ## Algoric project
 
@@ -71,13 +71,3 @@ You may wonder where this name comes from:
 
 * [BlueBanquise](https://en.wikipedia.org/wiki/File:Blue_iceberg_in_the_Ilulissat_icefjord.jpg)
 * [Blue Iceberg](https://en.wikipedia.org/wiki/Blue_iceberg)
-
-## Thanks
-
-Special thanks:
-
-* to [CINES](https://www.cines.fr/en/) who provided Algoric team with hardware to develop this stack.
-* to Bull-Atos team from Toulouse who provided Algoric team with hardware to develop this stack.
-* to [@remyd1](https://github.com/remyd1) for his help on [Banquise](https://github.com/oxedions/banquise) original stack.
-* to [@bouriquet](https://github.com/bouriquet) for his active help on the stack.
-* to [@btravouillon](https://github.com/btravouillon) for his active help on the stack.

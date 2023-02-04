@@ -1,0 +1,55 @@
+---
+
+- name: include_vars <|> Gather OS specific variables
+  # This task gathers variables defined in OS specific files.
+  #
+  # Search vars in:
+  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
+  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
+  #  - <distribution>.yml            # eg. CentOS.yml
+  #  - <os_family>.yml               # eg. RedHat.yml
+  #
+  # If no OS specific file is found, the role will default to vars/main.yml
+  #
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family }}.yml"
+      skip: true
+  tags:
+    - always
+
+- name: "package <|> install"
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ auditd_packages_to_install }}"
+  tags:
+    - package
+
+- name: "stat <|> Check that the {{ auditd_plugins_directory }}/{{ auditd_syslog_file }} exists"
+  ansible.builtin.stat:
+    path: "{{ auditd_plugins_directory }}/{{ auditd_syslog_file }}"
+  register: audit_result
+
+- name: "replace <|> Allow audit logs to be forwarded to remote syslog server"
+  ansible.builtin.replace:
+    path: "{{ auditd_plugins_directory }}/{{ auditd_syslog_file }}"
+    regexp: "^active = .*"
+    replace: "active = yes"
+  notify: service <|> Restart auditd service
+  when:
+    - audit_result.stat.exists
+    - auditd_forward_audit_logs | default(false) | bool
+
+- name: "service <|> Manage {{ auditd_services_to_start | join(' ') }} state"
+  ansible.builtin.service:
+    name: "{{ item }}"
+    enabled: "{{ (auditd_enable_services | default(bb_enable_services) | default(true, true) | bool) | ternary('yes', 'no') }}"
+    state: "{{ (auditd_start_services | default(bb_start_services) | default(true, true) | bool) | ternary('started', omit) }}"
+  loop: "{{ auditd_services_to_start }}"
+  tags:
+    - service

@@ -1,0 +1,496 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Grafana &mdash; BlueBanquise Documentation 1.5.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> BlueBanquise Documentation
+          
+
+          
+            
+            <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vocabulary.html">2. Vocabulary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../training_sysadmin.html">3. [Training] - Cluster SysAdmin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../training_ansible.html">4. [Training] - Ansible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bootstrap.html">5. [Core] - Bootstrap base system</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configure_bluebanquise.html">6. [Core] - Configure BlueBanquise</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../deploy_bluebanquise.html">7. [Core] - Deploy BlueBanquise</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../multiple_icebergs.html">8. [Core] - Manage multiple icebergs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../diskless.html">9. [Core] - Diskless</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../high_availability.html">10. [Community] - High Availability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monitoring.html">11. [Community] - Monitoring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../containers.html">12. Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../stories.html">13. Stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../roles.html">14. Roles list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">15. References</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">BlueBanquise Documentation</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Grafana</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/monitoring/grafana.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="grafana">
+<h1>Grafana<a class="headerlink" href="#grafana" title="Permalink to this headline">¶</a></h1>
+<p>In this topic, we will see how to install Grafana, using the provided rpms.</p>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="manual-installation">
+<h3>Manual installation<a class="headerlink" href="#manual-installation" title="Permalink to this headline">¶</a></h3>
+<p>There should be a package for grafana under the bluebanquise repository.</p>
+<p>By running the following command:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>dnf install grafana # (RHEL8)
+yum install grafana # (RHEL7)
+</pre></div>
+</div>
+<p>It should install grafana-server.</p>
+</div>
+</div>
+<div class="section" id="useful-files">
+<h2>Useful Files<a class="headerlink" href="#useful-files" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>The service is located under /usr/lib/systemd/system/grafana-server.service</p></li>
+<li><p>The binary under /usr/sbin/grafana-server</p></li>
+<li><p>Grafana datas (dashboards, and so on) are stored under /var/lib/grafana/grafana.db</p></li>
+<li><p>Grafana default settings under /usr/share/grafana/conf/default.ini</p></li>
+</ul>
+<p>Now, log into Grafana at <a class="reference external" href="http://localhost:3000">http://localhost:3000</a>, using default credentials
+admin / admin.</p>
+</div>
+<div class="section" id="dashboard">
+<h2>Dashboard<a class="headerlink" href="#dashboard" title="Permalink to this headline">¶</a></h2>
+<p>A dashboard is made of Query and Alerts.</p>
+<div class="section" id="query">
+<h3>Query<a class="headerlink" href="#query" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="metrics-field">
+<h4>metrics field<a class="headerlink" href="#metrics-field" title="Permalink to this headline">¶</a></h4>
+<p>This section is where you put Prometheus metric queries.
+See the Prometheus section of the documentation for more information about the metrics
+(functions, different types of variables, show only certain instances) as both
+tools share the same syntax.</p>
+<a class="reference internal image-reference" href="../_images/supp1.PNG"><img alt="../_images/supp1.PNG" src="../_images/supp1.PNG" style="width: 80%;" /></a>
+<p>By default, it shows you the requested metric in a graph panel.</p>
+<a class="reference internal image-reference" href="../_images/supp2.PNG"><img alt="../_images/supp2.PNG" src="../_images/supp2.PNG" style="width: 80%;" /></a>
+</div>
+<div class="section" id="legend-field">
+<h4>legend field<a class="headerlink" href="#legend-field" title="Permalink to this headline">¶</a></h4>
+<p>You can choose here what the legend will look like.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>syntaxe: {{ metric label }}text_you_want
+</pre></div>
+</div>
+<p>By default, it will show the whole metric.
+Example:</p>
+<a class="reference internal image-reference" href="../_images/legend_field1.PNG"><img alt="../_images/legend_field1.PNG" src="../_images/legend_field1.PNG" style="width: 60%;" /></a>
+<p>By example:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>{{instance}}:toto:{{device}}
+</pre></div>
+</div>
+<p>Will provides:</p>
+<a class="reference internal image-reference" href="../_images/legend_field2.PNG"><img alt="../_images/legend_field2.PNG" src="../_images/legend_field2.PNG" style="width: 30%;" /></a>
+</div>
+<div class="section" id="min-step-and-resolution">
+<h4>min step and resolution<a class="headerlink" href="#min-step-and-resolution" title="Permalink to this headline">¶</a></h4>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It is recommended not to change the min step and Resolution.</p>
+</div>
+</div>
+<div class="section" id="format">
+<h4>format<a class="headerlink" href="#format" title="Permalink to this headline">¶</a></h4>
+<p>Time series or table or heatmap. It is recommended to choose timeseries if you
+desire to make a graph.</p>
+</div>
+<div class="section" id="instant">
+<h4>instant<a class="headerlink" href="#instant" title="Permalink to this headline">¶</a></h4>
+<p>If you only want to have the latest scraped metric.
+Useful when using tables.</p>
+</div>
+</div>
+<div class="section" id="transform">
+<h3>Transform<a class="headerlink" href="#transform" title="Permalink to this headline">¶</a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The transform tab is new with Grafana 7, and is still in development.</p>
+</div>
+<a class="reference internal image-reference" href="../_images/transform1.PNG"><img alt="../_images/transform1.PNG" src="../_images/transform1.PNG" style="width: 30%;" /></a>
+<p>Mainly useful when using graphs. Allows you to show the things you want in the
+table, by reducing, filtering, joining metrics, and organizing fields.</p>
+<p>For example :</p>
+<a class="reference internal image-reference" href="../_images/transformExample.PNG"><img alt="../_images/transformExample.PNG" src="../_images/transformExample.PNG" style="width: 50%;" /></a>
+<p>Here, we have 3 queries, but if you make no transform, it will look like this:</p>
+<a class="reference internal image-reference" href="../_images/transformExample3.PNG"><img alt="../_images/transformExample3.PNG" src="../_images/transformExample3.PNG" style="width: 80%;" /></a>
+<p>So we need to make the following transformations to get the desired table:</p>
+<ol class="arabic simple">
+<li><p>Filter by name, to only take the values that we want.</p></li>
+<li><p>Outer Join, to join the query values into one table (query A,query B,query C) here we join on ifName because it’s the common value between the queries that we want to use.</p></li>
+<li><p>Organize field, to put everything where we want, and to rename de fields Value B and Value C (values of the queries)  to show what they represent.</p></li>
+</ol>
+<p>With this transformation:</p>
+<a class="reference internal image-reference" href="../_images/transformExample2.PNG"><img alt="../_images/transformExample2.PNG" src="../_images/transformExample2.PNG" style="width: 80%;" /></a>
+<p>You get the following result:</p>
+<a class="reference internal image-reference" href="../_images/supp3.PNG"><img alt="../_images/supp3.PNG" src="../_images/supp3.PNG" style="width: 80%;" /></a>
+<p>You can find more about the different transformations here:
+<a class="reference external" href="https://grafana.com/docs/grafana/latest/panels/transformations/">https://grafana.com/docs/grafana/latest/panels/transformations/</a></p>
+</div>
+<div class="section" id="alert">
+<h3>Alert<a class="headerlink" href="#alert" title="Permalink to this headline">¶</a></h3>
+<p>You can create alerts in Grafana, by setting up conditions.
+It is pretty much self-explanatory, but if you want more info, you can check
+this link: <a class="reference external" href="https://grafana.com/docs/grafana/latest/alerting/create-alerts/">https://grafana.com/docs/grafana/latest/alerting/create-alerts/</a></p>
+<p>Note that alerts defined in Grafana are not related to alerts defined in
+Prometheus.</p>
+<p>Note also that using plugins, it is possible to import into Grafana alerts
+registered into Alertmanager.</p>
+</div>
+</div>
+<div class="section" id="types-of-visualization">
+<h2>Types of Visualization<a class="headerlink" href="#types-of-visualization" title="Permalink to this headline">¶</a></h2>
+<p>By default, there are 11 different types of visualization, but you can install
+more using the plugin list.
+You can find them here:
+<a class="reference external" href="https://grafana.com/grafana/plugins?direction=asc&amp;orderBy=weight&amp;type=panel">https://grafana.com/grafana/plugins?direction=asc&amp;orderBy=weight&amp;type=panel</a></p>
+<p>In this documentation, we will go through 2 of the most used ones, as they have
+approximately all the options that other types of visualization have.</p>
+<div class="section" id="graph">
+<h3>Graph<a class="headerlink" href="#graph" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="panel">
+<h4>Panel<a class="headerlink" href="#panel" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="display">
+<h5>Display<a class="headerlink" href="#display" title="Permalink to this headline">¶</a></h5>
+<p>Here, you can choose the design of your graph. You can fidget with the options
+to get your desired graph.
+If you want more info, check
+<a class="reference external" href="https://grafana.com/docs/grafana/latest/panels/visualizations/graph-panel/">https://grafana.com/docs/grafana/latest/panels/visualizations/graph-panel/</a></p>
+</div>
+<div class="section" id="series-override">
+<h5>Series override<a class="headerlink" href="#series-override" title="Permalink to this headline">¶</a></h5>
+<p>In this section, you have access to even more customization. It allows you to
+customize only certain series, using regex.
+Here is a detailed example on how to use it:
+<a class="reference external" href="https://community.grafana.com/t/advanced-graphing-part1-style-overrides/207">https://community.grafana.com/t/advanced-graphing-part1-style-overrides/207</a></p>
+</div>
+<div class="section" id="axes">
+<h5>Axes<a class="headerlink" href="#axes" title="Permalink to this headline">¶</a></h5>
+<p>Choose the units of the axes, and relabel them. You can also add mins and maxs.
+You can have more info here:</p>
+</div>
+<div class="section" id="legend">
+<h5>Legend<a class="headerlink" href="#legend" title="Permalink to this headline">¶</a></h5>
+<p>Legend related options, you can show the legend as a table, add min, max, avg,
+current values.</p>
+<a class="reference internal image-reference" href="../_images/LegendExample.PNG"><img alt="../_images/LegendExample.PNG" src="../_images/LegendExample.PNG" style="width: 80%;" /></a>
+</div>
+<div class="section" id="thresholds">
+<h5>Thresholds<a class="headerlink" href="#thresholds" title="Permalink to this headline">¶</a></h5>
+<p>The threshold lets you change the background color when the value is less than
+or greater than the chosen value.</p>
+<a class="reference internal image-reference" href="../_images/thresholdExample1.PNG"><img alt="../_images/thresholdExample1.PNG" src="../_images/thresholdExample1.PNG" style="width: 80%;" /></a>
+</div>
+<div class="section" id="time-regions">
+<h5>Time regions<a class="headerlink" href="#time-regions" title="Permalink to this headline">¶</a></h5>
+<p>Allows to highlight certain time regions of the graph, not used very often.</p>
+</div>
+<div class="section" id="data-links-links">
+<h5>Data links, links<a class="headerlink" href="#data-links-links" title="Permalink to this headline">¶</a></h5>
+<p>Here, you can add links to different graphs, using the URL.
+For more info, check here:
+<a class="reference external" href="https://grafana.com/docs/grafana/latest/linking/data-links/">https://grafana.com/docs/grafana/latest/linking/data-links/</a></p>
+</div>
+</div>
+</div>
+<div class="section" id="bar-gauge">
+<h3>Bar gauge<a class="headerlink" href="#bar-gauge" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id1">
+<h4>Panel<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id2">
+<h5>Display<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h5>
+<p>You can choose between two options in the show option.
+Calculate will show you the result of the calculation (First Value, Last Value,
+and so on), whereas All Values will show you all the values scraped in the last
+XX minutes. You can choose the max number of results in the Limit field.
+You can also choose  the orientation and the display mode (aesthetics)</p>
+<a class="reference internal image-reference" href="../_images/BarGaugeex1.PNG"><img alt="../_images/BarGaugeex1.PNG" src="../_images/BarGaugeex1.PNG" style="width: 80%;" /></a>
+</div>
+<div class="section" id="links">
+<h5>Links<a class="headerlink" href="#links" title="Permalink to this headline">¶</a></h5>
+<p>Cf above.</p>
+</div>
+<div class="section" id="repeat-options">
+<h5>Repeat options<a class="headerlink" href="#repeat-options" title="Permalink to this headline">¶</a></h5>
+<p>If activated, will show the panel X times in the dashboard, with X being the
+number of results we get.</p>
+<p>for example with the repeat option enabled:</p>
+<a class="reference internal image-reference" href="../_images/BarGaugeex2.PNG"><img alt="../_images/BarGaugeex2.PNG" src="../_images/BarGaugeex2.PNG" style="width: 80%;" /></a>
+<p>without the repeat option enabled:</p>
+<a class="reference internal image-reference" href="../_images/BarGaugeex3.PNG"><img alt="../_images/BarGaugeex3.PNG" src="../_images/BarGaugeex3.PNG" style="width: 50%;" /></a>
+<p>as you can see, in one case, you get the results in different panels, and in the
+other case you get the results in the same panel.</p>
+</div>
+</div>
+<div class="section" id="field">
+<h4>Field<a class="headerlink" href="#field" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="unit">
+<h5>Unit<a class="headerlink" href="#unit" title="Permalink to this headline">¶</a></h5>
+<p>Self-explanatory, choose the unit, min, max and the display name for the values.</p>
+</div>
+<div class="section" id="id3">
+<h5>Thresholds<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h5>
+<p>Changes the color of the bars according to what is put in the threshold.</p>
+<p>Example:</p>
+<a class="reference internal image-reference" href="../_images/thresholdExample2.PNG"><img alt="../_images/thresholdExample2.PNG" src="../_images/thresholdExample2.PNG" style="width: 80%;" /></a>
+</div>
+<div class="section" id="value-mapping">
+<h5>Value mapping<a class="headerlink" href="#value-mapping" title="Permalink to this headline">¶</a></h5>
+<p>Transforms the values into text.</p>
+<p>Example:</p>
+<a class="reference internal image-reference" href="../_images/ValueMappingEx.PNG"><img alt="../_images/ValueMappingEx.PNG" src="../_images/ValueMappingEx.PNG" style="width: 80%;" /></a>
+<p>Here, we know that if the metric’s value is 1, it means that it is up, 2 down,
+and so on.
+So we map those values accordingly.</p>
+</div>
+<div class="section" id="data-links">
+<h5>Data links<a class="headerlink" href="#data-links" title="Permalink to this headline">¶</a></h5>
+<p>See above.</p>
+</div>
+</div>
+<div class="section" id="override">
+<h4>Override<a class="headerlink" href="#override" title="Permalink to this headline">¶</a></h4>
+<p>Override lets you override some values, by filtering fields.
+However, it is still a beta option.</p>
+<p>For more info check above.</p>
+</div>
+</div>
+</div>
+<div class="section" id="extra">
+<h2>Extra<a class="headerlink" href="#extra" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="variables">
+<h3>Variables<a class="headerlink" href="#variables" title="Permalink to this headline">¶</a></h3>
+<p>To access get variables like these:</p>
+<a class="reference internal image-reference" href="../_images/Captureshow.PNG"><img alt="../_images/Captureshow.PNG" src="../_images/Captureshow.PNG" style="width: 30%;" /></a>
+<p>first, go to the top right corner of Grafana:</p>
+<a class="reference internal image-reference" href="../_images/variable.PNG"><img alt="../_images/variable.PNG" src="../_images/variable.PNG" style="width: 30%;" /></a>
+<p>go to variable:</p>
+<a class="reference internal image-reference" href="../_images/Variable1.PNG"><img alt="../_images/Variable1.PNG" src="../_images/Variable1.PNG" style="width: 20%;" /></a>
+<p>Then, enter a query to get the results you want to transform as a variable.
+For example:</p>
+<a class="reference internal image-reference" href="../_images/variable2.PNG"><img alt="../_images/variable2.PNG" src="../_images/variable2.PNG" style="width: 30%;" /></a>
+<p>By doing this query you get the different instances of ifOutOctets.
+Without the regex used like that:</p>
+<a class="reference internal image-reference" href="../_images/variable3.PNG"><img alt="../_images/variable3.PNG" src="../_images/variable3.PNG" style="width: 80%;" /></a>
+<p>you should get results like that:</p>
+<a class="reference internal image-reference" href="../_images/variable4.PNG"><img alt="../_images/variable4.PNG" src="../_images/variable4.PNG" style="width: 50%;" /></a>
+<p>However, by using the regex seen above, we get results that can be later used
+with some queries, like for example:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ifConnectorPresent{ifName=~&quot;$interface&quot;}
+</pre></div>
+</div>
+<p>with $interface the name of our variable.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Here, we use =~ in order to accept special regex characters, like .* for example. You can see more about that in the Prometheus part of the documentation</p>
+</div>
+</div>
+<div class="section" id="main-dashboard">
+<h3>Main Dashboard<a class="headerlink" href="#main-dashboard" title="Permalink to this headline">¶</a></h3>
+<p>To create a main dashboard, simply create a new dashboard, and choose
+visualization style “Dashboard list”, you should get something like that:</p>
+<a class="reference internal image-reference" href="../_images/MainDashboard.PNG"><img alt="../_images/MainDashboard.PNG" src="../_images/MainDashboard.PNG" style="width: 20%;" /></a>
+<p>Choose the Search option and then simply choose the folder that you want to list.</p>
+<a class="reference internal image-reference" href="../_images/mainDashboard2.PNG"><img alt="../_images/mainDashboard2.PNG" src="../_images/mainDashboard2.PNG" style="width: 80%;" /></a>
+<p>By clicking on the dashboard links, you get redirected to them.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2019, Benoît Leveugle, Johnny Keats.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

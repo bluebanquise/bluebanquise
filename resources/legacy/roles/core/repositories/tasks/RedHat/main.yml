@@ -1,0 +1,49 @@
+---
+- name: set_fact <|> Set static baseurl prefix
+  ansible.builtin.set_fact:
+    repositories_client_baseurl_prefix:
+      "http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/\
+      {{ ep_operating_system['repositories_environment'] | default('', true) }}/\
+      {{ ep_operating_system['distribution'] }}/\
+      {{ ep_operating_system['distribution_version'] | default(ep_operating_system['distribution_major_version']) }}/\
+      {{ ansible_architecture }}/"
+  when:
+    - j2_node_main_network is defined and j2_node_main_network is not none
+    - networks is defined and networks is not none
+    - networks[j2_node_main_network] is defined and networks[j2_node_main_network] is not none
+    - networks[j2_node_main_network]['services_ip'] is defined and networks[j2_node_main_network]['services_ip'] is not none
+    - networks[j2_node_main_network]['services_ip']['repository_ip'] is defined and networks[j2_node_main_network]['services_ip']['repository_ip'] is not none
+    - ep_operating_system is defined and ep_operating_system is not none
+    - ep_operating_system['distribution'] is defined and ep_operating_system['distribution'] is not none
+    - (ep_operating_system['distribution_version'] is defined and ep_operating_system['distribution_version'] is not none) or (ep_operating_system['distribution_major_version'] is defined and ep_operating_system['distribution_major_version'] is not none)
+
+- name: yum_repository <|+> Disabling native OS repositories
+  ansible.builtin.yum_repository:
+    name: "{{ item.name | default(item) }}"
+    description: "{{ item.name | default(item) }} gen by Ansible"
+    baseurl: "{{ item.baseurl | default(baseurl_prefix + item.name | default(item)) }}/"
+    enabled: "{{ item.enabled | default(1) }}"
+    exclude: "{{ item.exclude | default(omit) }}"
+    gpgcheck: "{{ item.gpgcheck | default(0) }}"
+    gpgkey: "{{ item.gpgkey | default(omit) }}"
+    proxy: "{{ item.proxy | default(omit) }}"
+    state: "{{ item.state | default('present') }}"
+  with_items: "{{ repositories_client_os_native_repositories | default([], true) }}"
+  when:
+    - repositories_client_enable_os_native
+
+- name: yum_repository <|+> Setting repositories
+  ansible.builtin.yum_repository:
+    name: "{{ item.name | default(item) }}"
+    description: "{{ item.name | default(item) }} gen by Ansible"
+    baseurl: "{{ item.baseurl | default(repositories_client_baseurl_prefix + (item.name | default(item))) }}/"
+    enabled: "{{ item.enabled | default(1) }}"
+    exclude: "{{ item.exclude | default(omit) }}"
+    gpgcheck: "{{ item.gpgcheck | default(0) }}"
+    gpgkey: "{{ item.gpgkey | default(omit) }}"
+    proxy: "{{ item.proxy | default(omit) }}"
+    state: "{{ item.state | default('present') }}"
+  with_items: "{{ bb_repositories }}"
+  when:
+    - bb_repositories is not none and bb_repositories is iterable and bb_repositories is not string and bb_repositories is not mapping
+    - (item.name is defined and item.name is not none) or (repositories_client_baseurl_prefix is defined and repositories_client_baseurl_prefix is not none)

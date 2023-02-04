@@ -1,0 +1,13 @@
+---
+
+- name: "template <|> Generate client.conf.j2"
+  ansible.builtin.template:
+    src: client.conf.j2
+    dest: "{{ rsyslog_client_rsyslog_custom_conf_path | default(rsyslog_client_rsyslog_conf_path) }}"
+    owner: root
+    group: root
+    mode: 0644
+  notify: service <|> Restart rsyslog service
+  when: "'client.conf' not in (rsyslog_configuration_files | default([]) | selectattr('name','defined') | map(attribute='name') | list)"
+  tags:
+    - template

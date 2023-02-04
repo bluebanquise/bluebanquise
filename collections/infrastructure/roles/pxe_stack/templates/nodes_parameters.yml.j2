@@ -1,0 +1,27 @@
+#jinja2: lstrip_blocks: "True"
+---
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+
+{% for host in (j2_hosts_range | sort) %}
+  {% if (hostvars[host]['ep_equipment_type'] | default("server")) == "server" %}
+{{ host }}:
+  equipment_profile: {{ hostvars[host]['j2_node_equipment'] | default("all # no_equipment_set") }}
+    {% if hostvars[host]['network_interfaces'] is defined and hostvars[host]['network_interfaces'] is iterable and hostvars[host]['network_interfaces'] is not string and hostvars[host]['network_interfaces'] is not mapping %}
+      {% set host_to_be_used_network = hostvars[host]['j2_icebergs_main_network_dict'][j2_current_iceberg] | default(none, true) %}
+      {% if host_to_be_used_network is not none %}
+  network:
+        {% for nic in hostvars[host]['network_interfaces'] %}
+          {% if nic.network is defined and nic.network == host_to_be_used_network %}
+            {% if nic.interface is defined and nic.interface is not none %}
+    node_main_network_interface: {{ nic.interface }}
+            {% endif %}
+    node_main_network_netmask: {{ (networks[host_to_be_used_network]['subnet'] + '/' + (networks[host_to_be_used_network]['prefix'] | string) ) | ansible.utils.ipaddr('netmask') | default(none, true) }}
+    node_main_network_gateway: {{ nic.gw4 | default(networks[host_to_be_used_network]['gw4'], true) | default(none, true) }}
+    node_main_network_interface_ip: {{ nic.ip4 | default(none, true) }}
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    {% endif %}
+  {% endif %}
+{% endfor %}

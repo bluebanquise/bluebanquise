@@ -1,0 +1,9 @@
+###
+# Slurm cgroup support configuration file
+###
+CgroupAutomount=yes
+ConstrainCores=yes
+ConstrainRAMSpace=yes
+{% if slurm_gresTypes is defined and slurm_gresTypes is not none %}
+ConstrainDevices=yes
+{% endif %}

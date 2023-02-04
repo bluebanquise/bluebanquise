@@ -1,0 +1,45 @@
+---
+# use '--limit management1' to restrict playbook to
+# management1 if mg_managements contains multiple management nodes
+- name: community_managements
+  hosts: "mg_managements"
+  roles:
+
+    - role: automate
+      tags: automate
+    - role: clone
+      tags: clone
+    - role: display_tuning
+      tags: display_tuning
+    - role: drbd
+      tags: drbd
+    - role: flexlm
+      tags: flexlm
+    - role: generic_psf
+      tags: generic_psf
+    - role: grafana
+      tags: grafana
+    - role: haproxy
+      tags: haproxy
+    - role: high_availability
+      tags: high_availability
+    - role: lmod
+      tags: lmod
+    - role: loki
+      tags: loki
+    - role: ofed
+      tags: ofed
+    - role: openldap
+      tags: openldap
+    - role: podman
+      tags: podman
+    - role: prometheus
+      tags: prometheus
+    - role: rasdaemon
+      tags: rasdaemon
+    - role: report
+      tags: report
+    - role: update_reboot
+      tags: update_reboot
+    - role: users_basic
+      tags: users_basic

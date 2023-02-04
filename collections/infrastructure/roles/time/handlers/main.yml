@@ -1,0 +1,9 @@
+---
+- name: service <|> Restart time services
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: restarted
+  loop: "{{ time_services_to_start }}"
+  when:
+    - "'service' not in ansible_skip_tags"
+    - time_start_services | default(bb_start_services) | default(true) | bool

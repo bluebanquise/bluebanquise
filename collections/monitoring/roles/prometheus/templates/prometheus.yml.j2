@@ -1,0 +1,116 @@
+#jinja2: lstrip_blocks: "True"
+#### Blue Banquise file ####
+## {{ansible_managed}}
+
+global:
+{% for global_key, global_value in prometheus_server_configuration_global.items() %}
+  {{ global_key }}: {{ global_value }}
+{% endfor %}
+
+rule_files:
+  - 'alerts/*.yml'
+
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets:
+      - {{ prometheus_server_alertmanager_host }}:9093
+
+{{ prometheus_server_prometheus_raw_configuration }}
+
+scrape_configs:
+
+  # I watch myself
+  - job_name: 'prometheus_master'
+    scrape_interval: 30s
+    static_configs:
+      - targets: ['localhost:9090']
+
+{% if prometheus_server_prometheus_raw_jobs is defined and prometheus_server_prometheus_raw_jobs is not none %}
+{{ prometheus_server_prometheus_raw_jobs | indent(2, True) }}
+{% endif %}
+
+# GENERIC EXPORTER
+{% for exporter in prometheus_exporters_to_scrape %}
+  - job_name: '{{ exporter.name }}'
+    scrape_interval: {{ exporter.scrape_interval | default('') }}
+    scrape_timeout: {{ exporter.scrape_timeout | default('') }}
+    static_configs:
+      - targets: ['{{ exporter.address }}:{{ exporter.port }}']
+{% endfor %}
+
+# GENERIC GROUP EXPORTER
+{% if prometheus_exporters_groups_to_scrape is mapping %}
+{% for exporter_group, exporter_group_vars in prometheus_exporters_groups_to_scrape.items() %}
+  {% for exporter in exporter_group_vars %}
+    {% if exporter.port is defined %}
+  - job_name: '{{ exporter_group }}_{{ exporter.name }}'
+    scrape_interval: {{ exporter.scrape_interval | default('') }}
+    scrape_timeout: {{ exporter.scrape_timeout | default('') }}
+    static_configs:
+      {% for node in groups[exporter_group] %}
+      - targets: ['{{ node }}:{{ exporter.port }}']
+      {% endfor %}
+    {% endif %}
+  {% endfor %}
+{% endfor %}
+{% endif %}
+
+# SNMP_EXPORTER
+{% for equipment in  prometheus_snmp_scrape_equipment_profiles %}
+  - job_name: 'snmp_{{equipment.name}}'
+    scrape_interval: {{ equipment.scrape_interval | default('') }}
+    scrape_timeout: {{ equipment.scrape_timeout | default('') }}
+    static_configs:
+     - targets:
+    {% for node in groups[equipment.name] %}
+       - {{ node }}
+    {% endfor %}
+
+    metrics_path: /snmp
+    # params:
+     # module: [if_mib]
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: {{ prometheus_server_snmp_exporter_host }}:9116
+{% endfor %}
+
+
+# BMC - IPMI_EXPORTER
+{% for equipment in prometheus_ipmi_scrape_equipment_profiles %}
+  - job_name: ipmi_{{equipment.name}}
+    params:
+      module: [{{equipment.name}}]
+    scrape_interval: {{ equipment.scrape_interval | default('') }}
+    scrape_timeout: {{ equipment.scrape_timeout | default('') }}
+    metrics_path: /ipmi
+    scheme: http
+    static_configs:
+    {% for node in groups[equipment.name] %}
+      {% if hostvars[node]['bmc'] is defined %}
+      - targets: ['{{hostvars[node]['bmc']['name']}}']
+      {% endif %}
+    {% endfor %}
+    relabel_configs:
+    - source_labels: [__address__]
+      separator: ;
+      regex: (.*)
+      target_label: __param_target
+      replacement: ${1}
+      action: replace
+    - source_labels: [__param_target]
+      separator: ;
+      regex: (.*)
+      target_label: instance
+      replacement: ${1}
+      action: replace
+    - separator: ;
+      regex: .*
+      target_label: __address__
+      replacement: {{ prometheus_server_ipmi_exporter_host }}:9290
+      action: replace
+{% endfor %}

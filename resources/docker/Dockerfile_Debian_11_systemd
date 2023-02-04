@@ -1,0 +1,7 @@
+FROM debian:11.3
+
+RUN set -ex; \
+    apt update && apt -y install systemd systemd-sysv python3;
+RUN mkdir /root/.ssh -p;
+
+CMD ["/lib/systemd/systemd"]

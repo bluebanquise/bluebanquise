@@ -1,0 +1,3 @@
+---
+nic_services_to_start:
+  - systemd-networkd

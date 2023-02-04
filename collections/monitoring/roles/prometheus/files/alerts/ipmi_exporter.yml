@@ -1,0 +1,103 @@
+groups:
+- name: Alerts for ipmitool
+  rules:
+  - alert: high_fanspeed
+    expr: ipmi_fan_speed_state == 1
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: "fan speed is high (instance {{ $labels.instance }})"
+      description: "fan speed warning \n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - alert: fanspeed_too_high
+    expr: ipmi_fan_speed_state == 2
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "fan speed is too high, risks of overheating (instance {{ $labels.instance }})"
+      description: "fan speed warning \n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - alert: high_power_consumption
+    expr: ipmi_power_state == 1
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "power consumption is high (instance {{ $labels.instance }})"
+      description: "power consumption warning \n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - alert: power_consumption_too_high
+    expr: ipmi_power_state == 2
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "power consumption is too high (instance {{ $labels.instance }})"
+      description: "power consumption warning \n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+
+  - alert: sensor_warning
+    expr: ipmi_sensor_state == 1
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "there might be a problem with a sensor (see description) (instance {{ $labels.instance }})"
+      description: "sensor warning \n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - alert: sensor_danger
+    expr: ipmi_sensor_state == 2
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "there is a problem with a sensor (see description) (instance {{ $labels.instance }})"
+      description: "sensor danger \n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - alert: high_ipmi_temperature
+    expr: ipmi_temperature_state == 1
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "temperature is high (instance {{ $labels.instance }})"
+      description: "temperature warning \n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - alert: ipmi_temperature_too_high
+    expr: ipmi_temperature_state == 2
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "temperature is too high (instance {{ $labels.instance }})"
+      description: "temperature danger \n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+
+  - alert: ipmi_scrape_problem
+    expr: ipmi_up == 2
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: "could not scrape value of (instance {{ $labels.instance }})"
+      description: "scrape was not possible \n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - alert: high_ipmi_voltage
+    expr: ipmi_voltage_state == 1
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "voltage is high (instance {{ $labels.instance }})"
+      description: "voltage warning \n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+  - alert: ipmi_voltage_too_high
+    expr: ipmi_voltage_state == 2
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "voltage is too high (instance {{ $labels.instance }})"
+      description: "voltage danger  \n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"

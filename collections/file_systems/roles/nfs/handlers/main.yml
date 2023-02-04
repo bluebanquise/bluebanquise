@@ -1,0 +1,10 @@
+---
+- name: service <|> Restart NFS server services
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: restarted
+  loop: "{{ nfs_server_services_to_start }}"
+  when:
+    - "'service' not in ansible_skip_tags"
+    - nfs_start_services | default(bb_start_services) | default(true) | bool
+

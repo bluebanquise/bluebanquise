@@ -1,0 +1,12 @@
+- name: ufw <|> "Add services to firewall"
+  community.general.ufw:
+    rule: allow
+    port: '53'
+    proto: "{{ item }}"
+  when:
+    - ep_firewall | default(false) | bool
+  loop:
+    - udp
+    - tcp
+  tags:
+    - firewall

@@ -1,0 +1,100 @@
+---
+- name: include_vars ░ Gather OS specific variables
+  # This task gathers variables defined in OS specific files.
+  #
+  # Search vars in:
+  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
+  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
+  #  - <distribution>.yml            # eg. CentOS.yml
+  #  - <os_family>.yml               # eg. RedHat.yml
+  #
+  # If no OS specific file is found, the role will default to vars/main.yml
+  #
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family }}.yml"
+      skip: true
+  tags:
+    - always
+
+- name: include_tasks ░ Use OS dedicated firewall task
+  ansible.builtin.include_tasks: "{{ outer_item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}/firewall.yml"
+      skip: true
+  loop_control:
+    loop_var: outer_item
+  tags:
+    - internal
+    - firewall
+
+- name: Package
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ advanced_dhcp_server_packages_to_install }}"
+  tags:
+    - package
+
+- name: "file █ Create {{ advanced_dhcp_server_conf_dir }}"
+  ansible.builtin.file:
+    path: "{{ advanced_dhcp_server_conf_dir }}"
+    owner: root
+    mode: "0755"
+    state: directory
+
+- name: "Template >> {{ advanced_dhcp_server_conf_file }}"
+  ansible.builtin.template:
+    src: dhcpd.conf.j2
+    dest: "{{ advanced_dhcp_server_conf_file }}"
+    owner: root
+    group: root
+    mode: 0644
+  notify: Restart dhcp services
+  tags:
+    - template
+
+- name: "Template >> {{ advanced_dhcp_server_conf_dir }}/dhcpd.networks.conf"
+  ansible.builtin.template:
+    src: dhcpd.networks.conf.j2
+    dest: "{{ advanced_dhcp_server_conf_dir }}/dhcpd.networks.conf"
+    owner: root
+    group: root
+    mode: 0644
+  notify: Restart dhcp services
+  tags:
+    - template
+
+- name: "Template >> {{ advanced_dhcp_server_conf_dir }}/dhcpd.{{ item }}.conf"
+  ansible.builtin.template:
+    src: dhcpd.subnet.conf.j2
+    dest: "{{ advanced_dhcp_server_conf_dir }}/dhcpd.{{ item }}.conf"
+    owner: root
+    group: root
+    mode: 0644
+  with_items: "{{ networks }}"
+  when:
+    - j2_current_iceberg_network in item
+    - networks[item].is_in_dhcp
+  notify: Restart dhcp services
+  tags:
+    - template
+
+- name: Manage services state
+  ansible.builtin.service:
+    name: "{{ item }}"
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+    state: "{{ (start_services | bool) | ternary('started', omit) }}"
+  loop: "{{ advanced_dhcp_server_services_to_start }}"
+  tags:
+    - service

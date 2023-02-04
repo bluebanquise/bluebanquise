@@ -1,0 +1,69 @@
+---
+- name: set_fact <|> Set static baseurl prefix
+  ansible.builtin.set_fact:
+    repositories_client_baseurl_prefix:
+      "http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/\
+      {{ ep_operating_system['repositories_environment'] | default('', true) }}/\
+      {{ ep_operating_system['distribution'] }}/\
+      {{ ep_operating_system['distribution_version'] | default(ep_operating_system['distribution_major_version']) }}/\
+      {{ ansible_architecture }}/"
+  when:
+    - j2_node_main_network is defined and j2_node_main_network is not none
+    - networks is defined and networks is not none
+    - networks[j2_node_main_network] is defined and networks[j2_node_main_network] is not none
+    - networks[j2_node_main_network]['services_ip'] is defined and networks[j2_node_main_network]['services_ip'] is not none
+    - networks[j2_node_main_network]['services_ip']['repository_ip'] is defined and networks[j2_node_main_network]['services_ip']['repository_ip'] is not none
+    - ep_operating_system is defined and ep_operating_system is not none
+    - ep_operating_system['distribution'] is defined and ep_operating_system['distribution'] is not none
+    - (ep_operating_system['distribution_version'] is defined and ep_operating_system['distribution_version'] is not none) or (ep_operating_system['distribution_major_version'] is defined and ep_operating_system['distribution_major_version'] is not none)
+
+- name: set_fact <|> Initialize trust_option_by_repo
+  ansible.builtin.set_fact:
+    trust_option_by_repo: >-
+      {{ trust_option_by_repo | default([]) | combine(
+        {item.name: 'signed-by=' + item.gpgkey}
+        if ((item.gpgcheck is defined and item.gpgcheck | bool) and (item.gpgkey is defined and item.gpgkey | length > 0 )) else
+        {item.name: 'trusted=yes'}) }}
+  with_items: "{{ bb_repositories }}"
+
+- name: file <|+> Disable sources.list repositories
+  ansible.builtin.replace:
+    path: /etc/apt/sources.list
+    regexp: '^(deb.+)$'
+    replace: '# \1'
+  when: repositories_client_disable_distro_repos
+
+- name: apt_repository <|+> Setting os native repositories
+  ansible.builtin.apt_repository:
+    repo: "{{ item.repo }}"
+    state: "{{ item.state | default('present') }}"
+    codename: "{{ item.codename | default(omit) }}"
+    filename: "{{ item.filename | default(omit) }}"
+    install_python_apt: "{{ item.install_python_apt | default(omit) }}"
+    mode: "{{ item.mode | default(omit) }}"
+    update_cache: "{{ item.update_cache | default('no') }}"
+    update_cache_retries: "{{ item.update_cache_retries | default(omit) }}"
+    update_cache_retry_max_delay: "{{ item.update_cache_retry_max_delay | default(omit) }}"
+    validate_certs: "{{ item.validate_certs | default(omit) }}"
+  with_items: "{{ repositories_client_os_native_repositories | default([], true) }}"
+  notify: command <|> apt update cache
+  when:
+    - repositories_client_enable_os_native
+
+- name: apt_repository <|+> Setting custom repositories
+  ansible.builtin.apt_repository:
+    repo: "{{ item.repo | default('deb [' + trust_option_by_repo[item.name] + '] ' + (repositories_client_baseurl_prefix | default('', true)) + ( item.name | default(item, true) | string ) + ' ' + ( item.distribution | default('./', true) )) }}"
+    state: "{{ item.state | default('present') }}"
+    codename: "{{ item.codename | default(omit) }}"
+    filename: "{{ item.filename | default(omit) }}"
+    install_python_apt: "{{ item.install_python_apt | default(omit) }}"
+    mode: "{{ item.mode | default(omit) }}"
+    update_cache: "{{ item.update_cache | default('no') }}"
+    update_cache_retries: "{{ item.update_cache_retries | default(omit) }}"
+    update_cache_retry_max_delay: "{{ item.update_cache_retry_max_delay | default(omit) }}"
+    validate_certs: "{{ item.validate_certs | default(omit) }}"
+  with_items: "{{ bb_repositories }}"
+  notify: command <|> apt update cache
+  when:
+    - bb_repositories is not none and bb_repositories is iterable and bb_repositories is not string and bb_repositories is not mapping
+    - (item.repo is defined and item.repo is not none) or (repositories_client_baseurl_prefix is defined and repositories_client_baseurl_prefix is not none)

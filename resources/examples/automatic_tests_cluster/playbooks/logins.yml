@@ -7,10 +7,10 @@
 
     - role: set_hostname
       tags: set_hostname
-    - role: repositories_client
-      tags: repositories_client
-    - role: nic_nmcli
-      tags: nic_nmcli
+    - role: repositories
+      tags: repositories
+    - role: nic
+      tags: nic
     - role: hosts_file
       tags: hosts_file
     - role: dns_client
@@ -19,5 +19,5 @@
       tags: time
       vars:
         time_profile: client
-    - role: nfs_client
-      tags: nfs_client
+    - role: nfs
+      tags: nfs

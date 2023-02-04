@@ -1,0 +1,16 @@
+---
+- name: "package █ Install Alpine binaries"
+  ansible.builtin.package:
+    name: "bluebanquise_alpine_live"
+    state: present
+  tags:
+    - package
+    - large-package
+
+- name: "template █ Generate Alpine live boot file to {{ pxe_stack_htdocs_path }}/pxe/tools/"
+  ansible.builtin.template:
+    src: Alpine/alpine.ipxe.j2
+    dest: "{{ pxe_stack_htdocs_path }}/pxe/tools/alpine.ipxe"
+    mode: 0644
+    owner: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_group }}"

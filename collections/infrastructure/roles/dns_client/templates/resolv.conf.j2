@@ -1,0 +1,27 @@
+#jinja2: lstrip_blocks: True
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+
+{% if networks[j2_node_main_network]['services'] is defined and networks[j2_node_main_network]['services'] is iterable and networks[j2_node_main_network]['services'] is not string and networks[j2_node_main_network]['services'] is mapping %}
+  {% if networks[j2_node_main_network]['services']['dns4'] is defined and networks[j2_node_main_network]['services']['dns4'] is iterable and networks[j2_node_main_network]['services']['dns4'] is not string and networks[j2_node_main_network]['services']['dns4'] is not mapping %}
+    {% set nameservers = [] %}
+    {% for elem in networks[j2_node_main_network]['services']['dns4'] %}
+      {% if elem.ip is defined and (elem.ip | ansible.utils.ipaddr) %}
+        {{ nameservers.append(elem.ip) }}
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+{% elif networks[j2_node_main_network]['services_ip'] is defined and (networks[j2_node_main_network]['services_ip'] | ansible.utils.ipaddr) %}
+  {% set nameservers = [networks[j2_node_main_network]['services_ip']] %}
+{% endif %}
+
+search {{ bb_domain_name | default(dns_client_domain_name) }}
+{% for nameserver in nameservers %}
+nameserver {{ nameserver }}
+{% endfor %}
+
+{% if dns_client_external_server is defined and dns_client_external_server is iterable %}
+  {% for external_dns in dns_client_external_server %}
+nameserver {{ external_server }}
+  {% endfor %}
+{% endif %}

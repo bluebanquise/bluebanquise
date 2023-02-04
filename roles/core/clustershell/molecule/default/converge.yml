@@ -1,8 +1,0 @@
----
-- name: Converge
-  hosts: all
-
-  tasks:
-    - name: "Include clustershell"
-      include_role:
-        name: "clustershell"

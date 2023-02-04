@@ -1,0 +1,160 @@
+---
+- name: include_vars <|> Gather OS specific variables
+  # This task gathers variables defined in OS specific files.
+  #
+  # Search vars in:
+  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
+  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
+  #  - <distribution>.yml            # eg. CentOS.yml
+  #  - <os_family>.yml               # eg. RedHat.yml
+  #
+  # If no OS specific file is found, the role will default to vars/main.yml
+  #
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family }}.yml"
+      skip: true
+  tags:
+    - always
+
+- name: "include_tasks <|> Use OS dedicated firewall task"
+  ansible.builtin.include_tasks: "{{ outer_item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}/firewall.yml"
+      skip: true
+  loop_control:
+    loop_var: outer_item
+  tags:
+    - internal
+    - firewall
+
+- name: "package <|> Install {{ dns_server_packages_to_install | join(' ') }} packages"
+  ansible.builtin.package:
+    name: "{{ dns_server_packages_to_install }}"
+    state: present
+  tags:
+    - package
+
+- name: "file <|> Create needed directory {{ dns_server_named_dir }}"
+  ansible.builtin.file:
+    path: "{{ dns_server_named_dir }}"
+    state: directory
+    owner: root
+    group: "{{ dns_server_dns_user }}"
+    mode: 0750
+
+- name: template <|> Generate /etc/named.conf
+  ansible.builtin.template:
+    src: named.conf.j2
+    dest: /etc/named.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify: service <|> Restart dns services
+  tags:
+    - template
+
+- name: "template <|> Generate Forward zone file on Master DNS {{ dns_server_named_dir }}/forward.zone"
+  ansible.builtin.template:
+    src: forward.j2
+    dest: "{{ dns_server_named_dir }}/forward.zone"
+    owner: root
+    group: root
+    mode: 0644
+  register: zoneconf
+  tags:
+    - template
+
+- name: set_fact <|> Set SOA Serial for reverse zone
+  ansible.builtin.set_fact:
+    serial: "{{ lookup('pipe', 'date +%s') }}"
+  when: zoneconf.changed  # noqa 503
+  tags:
+    - template
+    - internal
+
+- name: "template <|> Generate SOA for forward zone file {{ dns_server_named_dir }}/forward.soa"
+  ansible.builtin.template:
+    src: forward.soa.j2
+    dest: "{{ dns_server_named_dir }}/forward.soa"
+    owner: root
+    group: root
+    mode: 0644
+  notify: service <|> Restart dns services
+  when: zoneconf.changed  # noqa 503
+  tags:
+    - template
+
+- name: "template <|> Generate Reverse zone file on Master DNS {{ dns_server_named_dir }}/{{ item }}.rr.zone"
+  ansible.builtin.template:
+    src: reverse.j2
+    dest: "{{ dns_server_named_dir }}/{{ item | trim }}.rr.zone"
+    owner: root
+    group: root
+    mode: 0644
+  with_items: "{{ j2_dns_server_get_first_octets.split(',') }}"
+  tags:
+    - template
+
+- name: "template <|> Generate SOA for reverse zone file {{ dns_server_named_dir }}/{{ item }}.rr.soa"
+  ansible.builtin.template:
+    src: reverse.soa.j2
+    dest: "{{ dns_server_named_dir }}/{{ item | trim }}.rr.soa"
+    owner: root
+    group: root
+    mode: 0644
+  notify: service <|> Restart dns services
+  with_items: "{{ j2_dns_server_get_first_octets.split(',') }}"
+  when: zoneconf.changed  # noqa 503
+  tags:
+    - template
+
+- name: "template <|> Generate override file {{ dns_server_named_dir }}/override.zone"
+  ansible.builtin.template:
+    src: override.j2
+    dest: "{{ dns_server_named_dir }}/override.zone"
+    owner: root
+    group: root
+    mode: 0644
+  notify: service <|> Restart dns services
+  when: dns_overrides is defined and zoneconf.changed  # noqa 503
+  tags:
+    - template
+
+- name: include_tasks <|> Apply OS specific tasks
+  ansible.builtin.include_tasks: "{{ item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}/main.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}/main.yml"
+      skip: true
+  tags:
+    - internal
+
+- name: meta <|> Run handler tasks to restart dns services
+  ansible.builtin.meta: flush_handlers
+
+- name: "service <|> Manage {{ dns_server_services_to_start | join(' ') }} state"
+  ansible.builtin.service:
+    name: "{{ item }}"
+    enabled: "{{ (dns_server_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    state: "{{ (dns_server_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
+  loop: "{{ dns_server_services_to_start }}"
+  tags:
+    - service

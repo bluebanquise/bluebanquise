@@ -1,0 +1,5 @@
+---
+podman_packages_to_install:
+  - podman
+  # optionnal
+  - podman-compose

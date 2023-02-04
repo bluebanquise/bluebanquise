@@ -1,0 +1,726 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Prometheus &mdash; BlueBanquise Documentation 1.5.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> BlueBanquise Documentation
+          
+
+          
+            
+            <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vocabulary.html">2. Vocabulary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../training_sysadmin.html">3. [Training] - Cluster SysAdmin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../training_ansible.html">4. [Training] - Ansible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bootstrap.html">5. [Core] - Bootstrap base system</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configure_bluebanquise.html">6. [Core] - Configure BlueBanquise</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../deploy_bluebanquise.html">7. [Core] - Deploy BlueBanquise</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../multiple_icebergs.html">8. [Core] - Manage multiple icebergs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../diskless.html">9. [Core] - Diskless</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../high_availability.html">10. [Community] - High Availability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monitoring.html">11. [Community] - Monitoring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../containers.html">12. Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../stories.html">13. Stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../roles.html">14. Roles list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">15. References</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">BlueBanquise Documentation</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Prometheus</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/monitoring/prometheus.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="prometheus">
+<h1>Prometheus<a class="headerlink" href="#prometheus" title="Permalink to this headline">¶</a></h1>
+<p>In this topic, we will see how to configure and deploy
+the prometheus Ansible roles from BlueBanquise Community
+repository.</p>
+<div class="section" id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Have ansible installed</p></li>
+<li><p>Know how to use playbooks</p></li>
+</ul>
+<p>Also, make sure those packages are available on the repositories
+of your system (they should be in the bluebanquise repository):</p>
+<ul class="simple">
+<li><p>prometheus</p></li>
+<li><p>alertmanager</p></li>
+<li><p>karma</p></li>
+<li><p>ipmi_exporter</p></li>
+<li><p>snmp_exporter</p></li>
+<li><p>grafana</p></li>
+</ul>
+</div>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="prometheus-server">
+<h3>Prometheus Server<a class="headerlink" href="#prometheus-server" title="Permalink to this headline">¶</a></h3>
+<p>First create file
+/etc/bluebanquise/inventory/group_vars/all/prometheus.yml with the
+following content:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">prometheus</span><span class="p">:</span>
+  <span class="nt">scrape_interval</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1m</span>
+  <span class="nt">evaluation_interval</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2m</span>
+  <span class="nt">alertmanager</span><span class="p">:</span>
+    <span class="nt">group_wait</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1m</span>
+    <span class="nt">group_interval</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10m</span>
+    <span class="nt">repeat_interval</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">3h</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference external" href="https://www.robustperception.io/whats-the-difference-between-group_interval-group_wait-and-repeat_interval">https://www.robustperception.io/whats-the-difference-between-group_interval-group_wait-and-repeat_interval</a></p>
+</div>
+<p>Now, simply add to the playbook of your choice (which is for the Prometheus
+server) the prometheus_server role (change the values of enable_services and start_services accordingly):</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">vars</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="nt">enable_services</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+  <span class="p p-Indicator">-</span> <span class="nt">start_services</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="nt">roles</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="nt">role</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">prometheus_server</span>
+    <span class="nt">tags</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">prometheus_server</span>
+</pre></div>
+</div>
+<p>Then run:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ansible-playbook /etc/ansible/playbooks/&lt;your server playbook&gt; --tags prometheus_server
+</pre></div>
+</div>
+<p>Now prometheus_server should be installed and configured with a minimal
+configuration.</p>
+<p>The configuration file for Prometheus is located under
+/etc/prometheus/prometheus.yml.
+It contains all the exporters to scrape, and more.</p>
+<p>It is now time to configure client side. Note that while the
+/etc/bluebanquise/inventory/group_vars/all/addons/prometheus.yml file is only
+used by the prometheus_server role, the client files seen in next section will
+be shared by both server and client role. Server will use it to know which
+exporters to scrap on who, and clients will use it to know which exporters to
+install locally.</p>
+</div>
+<div class="section" id="prometheus-client">
+<h3>Prometheus Client<a class="headerlink" href="#prometheus-client" title="Permalink to this headline">¶</a></h3>
+<p>For each <em>equipment_profile</em>, create a file called monitoring.yml that contains
+the desired exporters to be deployed, into equipment_profile folder of your
+target hosts groups.</p>
+<p>For example, to set exporters to be scrapped and installed on all hosts of
+equipment_profile equipment_XX, create the file
+/etc/ansible/inventory/group_vars/equipment_XX/monitoring.yml, with the
+following content:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">monitoring</span><span class="p">:</span>
+  <span class="nt">exporters</span><span class="p">:</span>
+    <span class="nt">node_exporter</span><span class="p">:</span>
+      <span class="nt">package</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">node_exporter</span>
+      <span class="nt">service</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">node_exporter</span>
+      <span class="nt">port</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">9100</span>
+    <span class="nt">ha_cluster_exporter</span><span class="p">:</span>
+      <span class="nt">package</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ha_cluster_exporter</span>
+      <span class="nt">service</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">ha_cluster_exporter</span>
+      <span class="nt">scrape_interval</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10m</span>
+      <span class="nt">scrape_timeout</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">4m</span>
+      <span class="nt">port</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">9664</span>
+</pre></div>
+</div>
+<p>This will setup here two exporters on these equipments: node_exporter and
+ha_cluster_exporter.</p>
+<p>Also don’t forget to add the name of the package you want to install and the
+service name.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>As you can see, you can also add the scrape_interval (which is how
+often the metrics get scraped), and the scrape_timeout (which represents how
+long until a scrape request times out).</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you want to add exporters, make sure your package contains the
+binary and the .service file, put preferably under /usr/local/bin and
+/etc/systemd/system.</p>
+</div>
+<p>Now simply add to the playbook of your choice (which is for the Prometheus
+clients) the prometheus_client role (change the values  of enable_services and start_services accordingly):</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">vars</span><span class="p">:</span>
+   <span class="p p-Indicator">-</span> <span class="nt">enable_services</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+   <span class="p p-Indicator">-</span> <span class="nt">start_services</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="nt">roles</span><span class="p">:</span>
+   <span class="p p-Indicator">-</span> <span class="nt">role</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">prometheus_client</span>
+     <span class="nt">tags</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">prometheus_client</span>
+</pre></div>
+</div>
+<p>Then run:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ansible-playbook /etc/ansible/playbooks/&lt;your client playbook&gt; --tags prometheus_client
+</pre></div>
+</div>
+<p>Now prometheus_client should be installed.</p>
+<p>Also, re-execute the prometheus_server role on the management node hosting the
+Prometheus server, to ensure Prometheus is now aware of these new exporters to
+scrape.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ansible-playbook /etc/ansible/playbooks/&lt;your server playbook&gt; --tags prometheus_server
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="prometheus-yml">
+<h2>Prometheus.yml<a class="headerlink" href="#prometheus-yml" title="Permalink to this headline">¶</a></h2>
+<p>File /etc/prometheus/prometheus.yml is where all the exporters and the scrape
+related variables are stored for the Prometheus server to run.
+It looks something like this:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">global</span><span class="p">:</span>
+  <span class="nt">scrape_interval</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1m</span>
+  <span class="nt">evaluation_interval</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2m</span>
+
+<span class="nt">rule_files</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="s">&#39;alerts/*.yml&#39;</span>
+
+<span class="nt">alerting</span><span class="p">:</span>
+  <span class="nt">alertmanagers</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="nt">static_configs</span><span class="p">:</span>
+    <span class="p p-Indicator">-</span> <span class="nt">targets</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">localhost:9093</span>
+
+<span class="nt">scrape_configs</span><span class="p">:</span>
+
+  <span class="c1"># I watch myself</span>
+  <span class="p p-Indicator">-</span> <span class="nt">job_name</span><span class="p">:</span> <span class="s">&#39;prometheus_master&#39;</span>
+    <span class="nt">scrape_interval</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">30s</span>
+    <span class="nt">static_configs</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="nt">targets</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;localhost:9090&#39;</span><span class="p p-Indicator">]</span>
+
+<span class="c1"># GENERIC EXPORTER</span>
+<span class="c1"># All equipment profiles and their exporters</span>
+  <span class="p p-Indicator">-</span> <span class="nt">job_name</span><span class="p">:</span> <span class="s">&#39;equipment_R_node_exporter&#39;</span>
+    <span class="nt">scrape_interval</span><span class="p">:</span>
+    <span class="nt">scrape_timeout</span><span class="p">:</span>
+    <span class="nt">static_configs</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="nt">targets</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;management1-1:9100&#39;</span><span class="p p-Indicator">]</span>
+      <span class="p p-Indicator">-</span> <span class="nt">targets</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;management1-2:9100&#39;</span><span class="p p-Indicator">]</span>
+</pre></div>
+</div>
+<p>Few notes:</p>
+<ul class="simple">
+<li><p><strong>rule_files</strong> is where the alert related configurations are located</p></li>
+<li><p><strong>alerting</strong> is where Prometheus should send alerts (i.e. Alertmanager)</p></li>
+<li><p><strong>scrape_configs</strong> is where are defined all the exporters that server need to listen to, with the targets, and so on</p></li>
+</ul>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference external" href="https://prometheus.io/docs/prometheus/latest/configuration/configuration/">https://prometheus.io/docs/prometheus/latest/configuration/configuration/</a></p>
+</div>
+<p>It is now time to learn variables before using them in the Prometheus interface.</p>
+</div>
+<div class="section" id="variables">
+<h2>Variables<a class="headerlink" href="#variables" title="Permalink to this headline">¶</a></h2>
+<p>There are 4 types of variable in Prometheus:</p>
+<ol class="arabic simple">
+<li><p>Counters</p></li>
+<li><p>Gauges</p></li>
+<li><p>Histograms</p></li>
+<li><p>Summaries</p></li>
+</ol>
+<div class="section" id="counters">
+<h3>Counters<a class="headerlink" href="#counters" title="Permalink to this headline">¶</a></h3>
+<p>Counters are used for metrics that can only increase.
+It is an incremental counter, that is used in order to know how rapidly
+something grows for example.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For example, it is used for the number of packets that is transmitted by a switch interface.
+Using the irate function of Prometheus, we can then tell how many packets were transmitted in a given interval.</p>
+</div>
+<p>It can also be used for error counts, tasks completed, and so on.</p>
+</div>
+<div class="section" id="gauges">
+<h3>Gauges<a class="headerlink" href="#gauges" title="Permalink to this headline">¶</a></h3>
+<p>Gauges are used for metrics that can go up, but can also decrease.
+It gives a specific value for the time set.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For example, it is used for the temperature of the BMCs.
+This way, you have the temperature for any given time.
+It can also be used for memory usage, number of requests, and so on.</p>
+</div>
+<p>It can be used with function like min, max, average, and so on to get the
+desired result.</p>
+</div>
+<div class="section" id="histograms-summaries">
+<h3>Histograms &amp; Summaries<a class="headerlink" href="#histograms-summaries" title="Permalink to this headline">¶</a></h3>
+<p>Histograms and summaries are more complex variable types, and are used less
+often, which is the reason why we won’t go too much in the details.
+Histograms and summaries are both used for getting the request durations, or
+the response sizes.
+Their main goal is to watch for data that fall in a certain category.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference external" href="https://prometheus.io/docs/practices/histograms/">https://prometheus.io/docs/practices/histograms/</a></p>
+</div>
+</div>
+</div>
+<div class="section" id="queries">
+<h2>Queries<a class="headerlink" href="#queries" title="Permalink to this headline">¶</a></h2>
+<p>In order to query a <strong>metric</strong> with Prometheus, you have to go to the Prometheus
+web page.
+By default, it is located at <strong>http://localhost:9090</strong> .</p>
+<p>To query a metric, simply type in the metric name. You also have a dropdown list
+with all the available metrics to query.</p>
+<a class="reference internal image-reference" href="../_images/query1.PNG"><img alt="../_images/query1.PNG" src="../_images/query1.PNG" style="width: 80%;" /></a>
+<p>If you want specific metrics (with one or more specific labels):</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>query_name{instance=&quot;instance&quot;}
+</pre></div>
+</div>
+<p>For example, ipmi_fan_speed_rpm{name=”P-FAN1”} will only return the fan_speed of
+the fan name “P-FAN-1”:</p>
+<a class="reference internal image-reference" href="../_images/query2.PNG"><img alt="../_images/query2.PNG" src="../_images/query2.PNG" style="width: 80%;" /></a>
+<p>In the graph tab, you can also see the variation of the value over time.
+You can also choose from when to when.</p>
+<a class="reference internal image-reference" href="../_images/query3.PNG"><img alt="../_images/query3.PNG" src="../_images/query3.PNG" style="width: 80%;" /></a>
+<div class="section" id="regex">
+<h3>Regex<a class="headerlink" href="#regex" title="Permalink to this headline">¶</a></h3>
+<p>You can also use the same queries, but with regex.</p>
+<p>If you want the attribute to follow the given regex, the global syntax for is:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>query{attribute=~&quot;regex_value&quot;}
+</pre></div>
+</div>
+<p>Or if you don’t want the attribute to follow the regex:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>query{attribute!~&quot;regex_value&quot;}
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <strong>tilda</strong> here is very important.</p>
+</div>
+<p>Using this syntax, you can:</p>
+<ul class="simple">
+<li><p>get the metrics which attribute corresponds to a list</p></li>
+</ul>
+<p>For example:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ipmi_fan_speed_rpm{name=~&quot;MB-FAN5|MB-FAN4|S-FAN2&quot;}
+</pre></div>
+</div>
+<p>will return:</p>
+<a class="reference internal image-reference" href="../_images/query4.PNG"><img alt="../_images/query4.PNG" src="../_images/query4.PNG" style="width: 50%;" /></a>
+<ul class="simple">
+<li><p>follow a pattern</p></li>
+</ul>
+<p>For example:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ipmi_fan_speed_rpm{name=~&quot;.*.FAN.*&quot;}
+</pre></div>
+</div>
+<p>will return all the ipmi_fan_speed_rpm metrics with the string “FAN” in its
+name label.</p>
+<p>Another example:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ipmi_fan_speed_rpm{__name__=~&quot;ipmi.*&quot;,instance=~&quot;001-bmc&quot;}
+</pre></div>
+</div>
+<p>will return all the metrics which name starts with ipmi, and which instance is
+001-bmc.</p>
+<a class="reference internal image-reference" href="../_images/query5.PNG"><img alt="../_images/query5.PNG" src="../_images/query5.PNG" style="width: 50%;" /></a>
+</div>
+<div class="section" id="boolean-operators">
+<h3>Boolean operators<a class="headerlink" href="#boolean-operators" title="Permalink to this headline">¶</a></h3>
+<p>You can also combine different metrics, using boolean operators. There are
+several operators in Prometheus. Some of them are the following:</p>
+<ul class="simple">
+<li><p>== (equal)</p></li>
+<li><p>!= (not-equal)</p></li>
+<li><p>&gt; (greater-than)</p></li>
+<li><p>&lt; (less-than)</p></li>
+<li><p>&gt;= (greater-or-equal)</p></li>
+<li><p>&lt;= (less-or-equal)</p></li>
+</ul>
+<p>These are used in order to get the results that correspond to the condition.
+For example:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ipmi_up==1
+</pre></div>
+</div>
+<p>will only return the instances of the query that are equal to one.</p>
+<p>It is also possible to use logic operators:</p>
+<ul class="simple">
+<li><p>and (intersection)</p></li>
+<li><p>or (union)</p></li>
+<li><p>unless (complement)</p></li>
+</ul>
+<p>Vector1 and vector2 results in a vector consisting of the elements of vector1
+for which there are elements in vector2 with exactly matching label sets.
+Other elements are dropped. The metric name and values are carried over from the
+left-hand side vector.</p>
+<p>For example:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>node_exporter_build_info and ignoring(revision, version,goversion,branch,package) node_cpu_package_throttles_total
+</pre></div>
+</div>
+<p>will return:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>node_exporter_build_info{branch=&quot;HEAD&quot;,goversion=&quot;go1.12.5&quot;,instance=&quot;1-2:9100&quot;,job=&quot;equipment_R_node_exporter&quot;,revision=&quot;3db77732e925c08f675d7404a8c46466b2ece83e&quot;,version=&quot;0.18.1&quot;}
+</pre></div>
+</div>
+<p>because it has the same instance name and job name as a node_cpu_package_throttles_total.</p>
+<p>Vector1 or vector2 results in a vector that contains all original elements (label sets + values) of vector1 and additionally all elements of vector2 which do not have matching label sets in vector1.</p>
+<p>For example:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>node_exporter_build_info or node_cpu_package_throttles_total
+</pre></div>
+</div>
+<p>will return:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>node_exporter_build_info{branch=&quot;HEAD&quot;,goversion=&quot;go1.12.5&quot;,instance=&quot;1-2:9100&quot;,job=&quot;equipment_R_node_exporter&quot;,revision=&quot;3db77732e925c08f675d7404a8c46466b2ece83e&quot;,version=&quot;0.18.1&quot;}
+node_cpu_package_throttles_total{instance=&quot;1-2:9100&quot;,job=&quot;equipment_R_node_exporter&quot;,package=&quot;0&quot;}
+node_cpu_package_throttles_total{instance=&quot;1-2:9100&quot;,job=&quot;equipment_R_node_exporter&quot;,package=&quot;1&quot;}
+</pre></div>
+</div>
+<p>Vector1 unless vector2 results in a vector consisting of the elements of vector1 for which there are no elements in vector2 with exactly matching label sets. All matching elements in both vectors are dropped.</p>
+<p>There are also other types of boolean operators, like group_left or group_right,
+in the online documentation.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference external" href="https://prometheus.io/docs/prometheus/latest/querying/operators/">https://prometheus.io/docs/prometheus/latest/querying/operators/</a></p>
+</div>
+</div>
+<div class="section" id="functions-aggregations">
+<h3>Functions &amp; aggregations<a class="headerlink" href="#functions-aggregations" title="Permalink to this headline">¶</a></h3>
+<p>Prometheus comes with a variety of querying functions. We will go through some
+of the major ones:</p>
+<ul class="simple">
+<li><p>delta</p></li>
+<li><p>irate</p></li>
+<li><p>avg</p></li>
+<li><p>sum</p></li>
+<li><p>min, max</p></li>
+</ul>
+<div class="section" id="delta">
+<h4>delta<a class="headerlink" href="#delta" title="Permalink to this headline">¶</a></h4>
+<p><em>delta()</em> calculates the difference of value between the value from X minutes
+ago and the current value.</p>
+<p>Example:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>delta(ipmi_current_amperes[5m])
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="../_images/query6.PNG"><img alt="../_images/query6.PNG" src="../_images/query6.PNG" style="width: 80%;" /></a>
+</div>
+<div class="section" id="rate-irate">
+<h4>rate &amp; irate<a class="headerlink" href="#rate-irate" title="Permalink to this headline">¶</a></h4>
+<p><em>rate()</em> gives you the per second average rate of change over your range
+interval.
+<em>irate()</em> is the per second rate of change at the end of your range interval</p>
+<p>The difference between rate and delta, is that rate automatically adjusts for
+resets. It means that it only works with “counter” variables, i.e. a variable
+that can only increase.
+For example, if a metric value changes like this:</p>
+<ul class="simple">
+<li><p>0</p></li>
+<li><p>4</p></li>
+<li><p>6</p></li>
+<li><p>10</p></li>
+</ul>
+<p>and resets:</p>
+<ul class="simple">
+<li><p>2</p></li>
+</ul>
+<p>Rate will capture the change, and will take the value of 2 as if it were 12 to
+get the rate.</p>
+</div>
+<div class="section" id="avg">
+<h4>avg<a class="headerlink" href="#avg" title="Permalink to this headline">¶</a></h4>
+<p><em>avg()</em> returns the average value of <strong>all</strong> query results.</p>
+<p>By default, it returns the avg value by job:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>avg(ipmi_current_amperes)
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="../_images/query8.PNG"><img alt="../_images/query8.PNG" src="../_images/query8.PNG" style="width: 50%;" /></a>
+<p>But you can also average by any other attribute, using avg(query) by(attribute):</p>
+<a class="reference internal image-reference" href="../_images/query9.PNG"><img alt="../_images/query9.PNG" src="../_images/query9.PNG" style="width: 80%;" /></a>
+</div>
+<div class="section" id="avg-over-time">
+<h4>avg_over_time<a class="headerlink" href="#avg-over-time" title="Permalink to this headline">¶</a></h4>
+<p><em>avg_over_time()</em> is self explanatory, it gives you the average value of a
+metric during the given interval, <strong>for each instance</strong>.</p>
+<p>For example if ipmi_current_amperes had the values: 2, 4, 6 in the last 5m:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>avgi_over_time(ipmi_current_amperes[5m])
+</pre></div>
+</div>
+<p>would return 4.</p>
+<p>output example:</p>
+<a class="reference internal image-reference" href="../_images/query7.PNG"><img alt="../_images/query7.PNG" src="../_images/query7.PNG" style="width: 80%;" /></a>
+</div>
+<div class="section" id="sum-min-max">
+<h4>sum, min, max<a class="headerlink" href="#sum-min-max" title="Permalink to this headline">¶</a></h4>
+<p>Self explanatory.
+Works the same way as <em>avg</em>, and can be used with _over_time too.</p>
+</div>
+<div class="section" id="more">
+<h4>more<a class="headerlink" href="#more" title="Permalink to this headline">¶</a></h4>
+<p>For <em>more</em> info, check:</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference external" href="https://prometheus.io/docs/prometheus/latest/querying/functions/">https://prometheus.io/docs/prometheus/latest/querying/functions/</a></p>
+</div>
+<p>It is now time to understand how alerts work in Prometheus.</p>
+</div>
+</div>
+</div>
+<div class="section" id="alerts">
+<h2>Alerts<a class="headerlink" href="#alerts" title="Permalink to this headline">¶</a></h2>
+<p>Alerts are located in the /etc/prometheus/alerts/ directory.</p>
+<p>An example of alert:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">groups</span><span class="p">:</span>
+<span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Alerts for nodes</span>
+  <span class="nt">rules</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="nt">alert</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">high_RAM_ Usage</span>
+    <span class="nt">expr</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">(1 - (node_memory_MemAvailable_bytes{job=~&quot;.*.R.*&quot;} / (node_memory_MemTotal_bytes{job=~&quot;.*.R.*&quot;})))* 100 &gt; 90</span>
+    <span class="nt">for</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1m</span>
+    <span class="nt">labels</span><span class="p">:</span>
+      <span class="nt">severity</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">warning</span>
+    <span class="nt">annotations</span><span class="p">:</span>
+      <span class="nt">summary</span><span class="p">:</span> <span class="s">&quot;</span><span class="nv"> </span><span class="s">(instance</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">$labels.instance</span><span class="nv"> </span><span class="s">}})&quot;</span>
+      <span class="nt">description</span><span class="p">:</span> <span class="s">&quot;memory</span><span class="nv"> </span><span class="s">usage</span><span class="nv"> </span><span class="s">greater</span><span class="nv"> </span><span class="s">than</span><span class="nv"> </span><span class="s">90%</span><span class="nv">  </span><span class="s">\n</span><span class="nv">  </span><span class="s">VALUE</span><span class="nv"> </span><span class="s">=</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">$value</span><span class="nv"> </span><span class="s">}}\n</span><span class="nv">  </span><span class="s">LABELS:</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">$labels</span><span class="nv"> </span><span class="s">}}&quot;</span>
+</pre></div>
+</div>
+<p>This alert will be seen as <em>pending</em> by Prometheus when the condition in
+<strong>expr:</strong> is verified, in this case, when the percentage of used RAM is greater
+than 90%.
+It will seen as <em>firing</em> when the condition is met for X minutes, hours, or
+days, X being in the <strong>for</strong> field.
+It will be fired with an extra label called severity, which is set to <em>warning</em>
+in this case.
+The annotations section is here to set a summary and description of the alert.
+You can access the variables of the metric by using de global variables
+{{ $value }} or {{ $labels }}.</p>
+<p>Tip: if you need a same alert to fire a warning after a t_1 desired time, and
+then fire a critical after a longer t_2 time, duplicate the alert, with the
+exact same name and arguments, changing only <strong>for</strong> and <strong>severity</strong>. The
+Alertmanager configuration is made to handle these case: when same name,
+a critical alert will overlap a warning alert.</p>
+<div class="section" id="alertmanager">
+<h3>Alertmanager<a class="headerlink" href="#alertmanager" title="Permalink to this headline">¶</a></h3>
+<p>Alertmanager is an additional tool for Prometheus, used to manage alerts.</p>
+<p><strong>Alertmanager DO NOT evaluate alerts</strong>, this is Prometheus task. Alertmanager
+is a tool to manage alerts already fired by Prometheus.</p>
+<p>By default, it’s located under the management node’s ip address, port 9093.
+Configuration file of Alertmanager is under /etc/alertmanager/alertmanager.yml.</p>
+<p>By default it looks like this:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">global</span><span class="p">:</span>
+  <span class="nt">smtp_smarthost</span><span class="p">:</span> <span class="s">&#39;localhost:25&#39;</span>
+  <span class="nt">smtp_from</span><span class="p">:</span> <span class="s">&#39;alertmanager@your_domain&#39;</span>
+  <span class="nt">smtp_require_tls</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">false</span>
+
+<span class="nt">route</span><span class="p">:</span>
+  <span class="nt">group_by</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;alertname&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;job&#39;</span><span class="p p-Indicator">]</span>
+  <span class="nt">group_wait</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1m</span>
+  <span class="nt">group_interval</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">10m</span>
+  <span class="nt">repeat_interval</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">3h</span>
+  <span class="nt">receiver</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">sys-admin-team</span>
+
+<span class="nt">receivers</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="nt">name</span><span class="p">:</span> <span class="s">&#39;sys-admin-team&#39;</span>
+    <span class="nt">email_configs</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="nt">to</span><span class="p">:</span> <span class="s">&#39;sys-admin-team@site.com&#39;</span>
+
+<span class="nt">inhibit_rules</span><span class="p">:</span>
+<span class="p p-Indicator">-</span> <span class="nt">source_match</span><span class="p">:</span>
+    <span class="nt">severity</span><span class="p">:</span> <span class="s">&#39;critical&#39;</span>
+  <span class="nt">target_match</span><span class="p">:</span>
+    <span class="nt">severity</span><span class="p">:</span> <span class="s">&#39;warning&#39;</span>
+  <span class="nt">equal</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="s">&#39;alertname&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;cluster&#39;</span><span class="p p-Indicator">,</span> <span class="s">&#39;service&#39;</span><span class="p p-Indicator">]</span>
+</pre></div>
+</div>
+<p>You can find more about it here:</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference external" href="https://prometheus.io/docs/alerting/latest/configuration/">https://prometheus.io/docs/alerting/latest/configuration/</a></p>
+</div>
+<p>And here are examples of some alerts:</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference external" href="https://awesome-prometheus-alerts.grep.to/rules.html">https://awesome-prometheus-alerts.grep.to/rules.html</a></p>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2019, Benoît Leveugle, Johnny Keats.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

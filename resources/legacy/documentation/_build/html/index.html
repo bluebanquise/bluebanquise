@@ -1,0 +1,554 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>BlueBanquise Documentation &mdash; BlueBanquise Documentation 1.5.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="1. Introduction" href="introduction.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="#" class="icon icon-home"> BlueBanquise Documentation
+          
+
+          
+            
+            <img src="_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vocabulary.html">2. Vocabulary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="training_sysadmin.html">3. [Training] - Cluster SysAdmin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="training_ansible.html">4. [Training] - Ansible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bootstrap.html">5. [Core] - Bootstrap base system</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configure_bluebanquise.html">6. [Core] - Configure BlueBanquise</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deploy_bluebanquise.html">7. [Core] - Deploy BlueBanquise</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multiple_icebergs.html">8. [Core] - Manage multiple icebergs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="diskless.html">9. [Core] - Diskless</a></li>
+<li class="toctree-l1"><a class="reference internal" href="high_availability.html">10. [Community] - High Availability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring.html">11. [Community] - Monitoring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="containers.html">12. Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stories.html">13. Stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roles.html">14. Roles list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">15. References</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">BlueBanquise Documentation</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="#" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>BlueBanquise Documentation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="bluebanquise-documentation">
+<h1>BlueBanquise Documentation<a class="headerlink" href="#bluebanquise-documentation" title="Permalink to this headline">¶</a></h1>
+<img alt="_images/BlueBanquise_logo.svg" class="align-center" src="_images/BlueBanquise_logo.svg" /><p>Welcome on BlueBanquise main documentation. You should find here all needed
+information on how to deploy and use the BlueBanquise stack.</p>
+<p>Since one of the main BlueBanquise goals is also to be a training for new Linux system
+administrators, part of the documentation is generic knowledge and act
+as a tutorial for basic cluster deployment and basic Ansible usage. Advanced users
+can skip these parts.</p>
+<p>These pages contain information on:</p>
+<ul class="simple">
+<li><p>How to manually deploy a test HPC cluster (generic knowledge, not related to the stack)</p></li>
+<li><p>How to use Ansible (generic knowledge, not related to the stack)</p></li>
+<li><p>How to bootstrap, configure, deploy and maintain BlueBanquise on different scenario clusters</p></li>
+<li><p>Detailed documentation on each roles provided with the stack</p></li>
+</ul>
+<p><a class="reference external" href="https://github.com/bluebanquise/bluebanquise/issues">Please report us</a> any
+issues in this documentation.</p>
+<p>Please proceed to <a class="reference internal" href="introduction.html#introduction"><span class="std std-ref">Introduction</span></a> to start.</p>
+<div class="section" id="id1">
+<h2>&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&lt;&lt;&lt;<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>A FAIRE:
+ipv6
+HA + Haproxy
+slurm
+sys admin tuto
+advanced nic_nmcli examples
+git gitea</p>
+<hr class="docutils" />
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vocabulary.html">2. Vocabulary</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="vocabulary.html#ansible-vocabulary">2.1. Ansible vocabulary</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="vocabulary.html#host">2.1.1. Host</a></li>
+<li class="toctree-l3"><a class="reference internal" href="vocabulary.html#group">2.1.2. Group</a></li>
+<li class="toctree-l3"><a class="reference internal" href="vocabulary.html#variables">2.1.3. Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="vocabulary.html#inventory-roles-and-playbooks">2.1.4. Inventory, roles, and playbooks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="vocabulary.html#variables-precedence">2.1.5. Variables precedence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="vocabulary.html#replace">2.1.6. Replace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="vocabulary.html#jinja2">2.1.7. Jinja2</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="vocabulary.html#stack-vocabulary">2.2. Stack vocabulary</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="vocabulary.html#icebergs">2.2.1. Icebergs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="vocabulary.html#equipment-profiles">2.2.2. Equipment profiles</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="training_sysadmin.html">3. [Training] - Cluster SysAdmin</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="training_sysadmin.html#hardware-requirements">3.1. Hardware requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="training_sysadmin.html#useful-commands">3.2. Useful commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="training_sysadmin.html#vocabulary">3.3. Vocabulary</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="training_sysadmin.html#basic-concepts">3.3.1. Basic concepts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="training_sysadmin.html#basic-words">3.3.2. Basic words</a></li>
+<li class="toctree-l3"><a class="reference internal" href="training_sysadmin.html#understanding-services">3.3.3. Understanding services</a></li>
+<li class="toctree-l3"><a class="reference internal" href="training_sysadmin.html#computational-resources-management">3.3.4. Computational resources management</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="training_sysadmin.html#cluster-description">3.4. Cluster description</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="training_sysadmin.html#architecture">3.4.1. Architecture</a></li>
+<li class="toctree-l3"><a class="reference internal" href="training_sysadmin.html#network">3.4.2. Network</a></li>
+<li class="toctree-l3"><a class="reference internal" href="training_sysadmin.html#final-notes-before-we-start">3.4.3. Final notes before we start</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="training_sysadmin.html#management-node-installation">3.5. Management node installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="training_sysadmin.html#setup-basic-repositories">3.5.1. Setup basic repositories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="training_sysadmin.html#dhcp-server">3.5.2. DHCP server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="training_sysadmin.html#dns-server">3.5.3. DNS server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="training_sysadmin.html#hosts-file">3.5.4. Hosts file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="training_sysadmin.html#time-server">3.5.5. Time server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="training_sysadmin.html#pxe-stack">3.5.6. PXE stack</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="training_sysadmin.html#other-nodes-installation">3.6. Other nodes installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="training_sysadmin.html#boot-over-pxe">3.6.1. Boot over PXE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="training_sysadmin.html#configure-client-side">3.6.2. Configure client side</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="training_sysadmin.html#storage">3.7. Storage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="training_sysadmin.html#nfs-server">3.7.1. NFS server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="training_sysadmin.html#nfs-clients">3.7.2. NFS clients</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="training_sysadmin.html#slurm">3.8. Slurm</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="training_sysadmin.html#controller">3.8.1. Controller</a></li>
+<li class="toctree-l3"><a class="reference internal" href="training_sysadmin.html#computes-nodes">3.8.2. Computes nodes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="training_sysadmin.html#submitter">3.8.3. Submitter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="training_sysadmin.html#submitting-jobs">3.8.4. Submitting jobs</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="training_sysadmin.html#users">3.9. Users</a></li>
+<li class="toctree-l2"><a class="reference internal" href="training_sysadmin.html#infiniband">3.10. Infiniband</a></li>
+<li class="toctree-l2"><a class="reference internal" href="training_sysadmin.html#gpu-nvidia">3.11. GPU (Nvidia)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="training_sysadmin.html#ensure-kernel-do-not-crash">3.11.1. Ensure kernel do not crash</a></li>
+<li class="toctree-l3"><a class="reference internal" href="training_sysadmin.html#disable-nouveau-driver">3.11.2. Disable nouveau driver</a></li>
+<li class="toctree-l3"><a class="reference internal" href="training_sysadmin.html#install-nvidia-driver">3.11.3. Install Nvidia driver</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="training_sysadmin.html#conclusion">3.12. Conclusion</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="training_ansible.html">4. [Training] - Ansible</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="training_ansible.html#install-ansible">4.1. Install Ansible</a></li>
+<li class="toctree-l2"><a class="reference internal" href="training_ansible.html#minimal-inventory">4.2. Minimal inventory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="training_ansible.html#ansible-commands">4.3. Ansible commands</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="training_ansible.html#ansible">4.3.1. ansible</a></li>
+<li class="toctree-l3"><a class="reference internal" href="training_ansible.html#ansible-inventory">4.3.2. ansible-inventory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="training_ansible.html#ansible-playbook">4.3.3. ansible-playbook</a></li>
+<li class="toctree-l3"><a class="reference internal" href="training_ansible.html#debug">4.3.4. Debug</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="training_ansible.html#variables-and-groups">4.4. Variables and groups</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="training_ansible.html#adding-variables">4.4.1. Adding variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="training_ansible.html#configuring-groups">4.4.2. Configuring groups</a></li>
+<li class="toctree-l3"><a class="reference internal" href="training_ansible.html#variables-precedence">4.4.3. Variables precedence</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="training_ansible.html#roles-and-playbooks">4.5. Roles and playbooks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="training_ansible.html#role">4.5.1. Role</a></li>
+<li class="toctree-l3"><a class="reference internal" href="training_ansible.html#playbook">4.5.2. Playbook</a></li>
+<li class="toctree-l3"><a class="reference internal" href="training_ansible.html#jinja2">4.5.3. Jinja2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="training_ansible.html#task-again">4.5.4. Task again</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bootstrap.html">5. [Core] - Bootstrap base system</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bootstrap.html#bootstrap-rhel-like-system">5.1. Bootstrap RHEL like system</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bootstrap.html#isos-to-be-used">5.1.1. ISOs to be used</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bootstrap.html#copy-iso-on-system">5.1.2. Copy iso on system</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bootstrap.html#set-os-repository">5.1.3. Set OS repository</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bootstrap.html#bluebanquise-and-extra">5.1.4. BlueBanquise and extra</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="bootstrap.html#bootstrap-ubuntu-like-system">5.2. Bootstrap Ubuntu like system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bootstrap.html#bootstrap-suse-like-system">5.3. Bootstrap SUSE like system</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="configure_bluebanquise.html">6. [Core] - Configure BlueBanquise</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="configure_bluebanquise.html#enable-bluebanquise-and-ssh">6.1. Enable BlueBanquise and ssh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configure_bluebanquise.html#configure-inventory">6.2. Configure inventory</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="configure_bluebanquise.html#check-example-inventory">6.2.1. Check example inventory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configure_bluebanquise.html#review-groups">6.2.2. Review groups</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configure_bluebanquise.html#review-nodes">6.2.3. Review nodes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configure_bluebanquise.html#review-logical-networks">6.2.4. Review logical networks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configure_bluebanquise.html#review-general-configuration">6.2.5. Review general configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configure_bluebanquise.html#review-equipment-default-parameters">6.2.6. Review equipment default parameters</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="deploy_bluebanquise.html">7. [Core] - Deploy BlueBanquise</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="deploy_bluebanquise.html#management-deployment">7.1. Management deployment</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="deploy_bluebanquise.html#get-managements-playbook">7.1.1. Get managements playbook</a></li>
+<li class="toctree-l3"><a class="reference internal" href="deploy_bluebanquise.html#ansible-playbook">7.1.2. Ansible-playbook</a></li>
+<li class="toctree-l3"><a class="reference internal" href="deploy_bluebanquise.html#apply-management1-configuration">7.1.3. Apply management1 configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="deploy_bluebanquise.html#deploy-os-on-other-nodes-pxe">7.2. Deploy OS on other nodes: PXE</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="deploy_bluebanquise.html#pxe-process-overview">7.2.1. PXE process overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="deploy_bluebanquise.html#bootset">7.2.2. bootset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="deploy_bluebanquise.html#ssh-public-key">7.2.3. SSH public key</a></li>
+<li class="toctree-l3"><a class="reference internal" href="deploy_bluebanquise.html#os-deployment">7.2.4. OS deployment</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="deploy_bluebanquise.html#apply-other-nodes-configuration">7.3. Apply other nodes configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="multiple_icebergs.html">8. [Core] - Manage multiple icebergs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="multiple_icebergs.html#iceberg-elements">8.1. Iceberg elements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="multiple_icebergs.html#configuring-top-iceberg">8.2. Configuring top iceberg</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="multiple_icebergs.html#understanding-mechanism">8.2.1. Understanding mechanism</a></li>
+<li class="toctree-l3"><a class="reference internal" href="multiple_icebergs.html#enabling-iceberg-mechanism">8.2.2. Enabling iceberg mechanism</a></li>
+<li class="toctree-l3"><a class="reference internal" href="multiple_icebergs.html#create-iceberg-1">8.2.3. Create iceberg 1</a></li>
+<li class="toctree-l3"><a class="reference internal" href="multiple_icebergs.html#create-iceberg-2">8.2.4. Create iceberg 2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="multiple_icebergs.html#deploy-sub-management-configuration">8.2.5. Deploy sub management configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="multiple_icebergs.html#interconnect-and-job-scheduler-hpc-only">8.2.6. Interconnect and job scheduler (HPC only)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="diskless.html">9. [Core] - Diskless</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="diskless.html#introduction">9.1. Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="diskless.html#diskless-user-documentation">9.2. Diskless User documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="diskless.html#description">9.2.1. Description</a></li>
+<li class="toctree-l3"><a class="reference internal" href="diskless.html#set-up-the-tool">9.2.2. Set up the tool</a></li>
+<li class="toctree-l3"><a class="reference internal" href="diskless.html#manage-and-create-diskless-images-with-modules">9.2.3. Manage and create diskless images with modules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="diskless.html#actions">9.2.4. Actions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="diskless.html#boot-a-diskless-image">9.2.5. Boot a diskless image</a></li>
+<li class="toctree-l3"><a class="reference internal" href="diskless.html#customizing-livenet-image">9.2.6. Customizing Livenet image</a></li>
+<li class="toctree-l3"><a class="reference internal" href="diskless.html#a-playbook-exemple">9.2.7. A Playbook Exemple</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="diskless.html#diskless-technical-documentation">9.3. Diskless Technical Documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="diskless.html#software-architecture">9.3.1. Software Architecture</a></li>
+<li class="toctree-l3"><a class="reference internal" href="diskless.html#the-image-system">9.3.2. The image system</a></li>
+<li class="toctree-l3"><a class="reference internal" href="diskless.html#module-creation">9.3.3. Module creation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="diskless.html#cleaning-process">9.3.4. Cleaning process</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="high_availability.html">10. [Community] - High Availability</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="high_availability.html#create-ha-cluster">10.1. Create HA Cluster</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="high_availability.html#ha-cluster-group">10.1.1. ha_cluster group</a></li>
+<li class="toctree-l3"><a class="reference internal" href="high_availability.html#reference-node">10.1.2. Reference node</a></li>
+<li class="toctree-l3"><a class="reference internal" href="high_availability.html#cluster-password">10.1.3. Cluster password</a></li>
+<li class="toctree-l3"><a class="reference internal" href="high_availability.html#deploy-cluster">10.1.4. Deploy cluster</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="high_availability.html#populate-cluster-with-resources">10.2. Populate cluster with resources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="high_availability.html#configure-cluster">10.3. Configure cluster</a></li>
+<li class="toctree-l2"><a class="reference internal" href="high_availability.html#expanding-cluster">10.4. Expanding cluster</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring.html">11. [Community] - Monitoring</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="monitoring.html#monitoring-introduction">11.1. Monitoring Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="monitoring.html#prometheus">11.2. Prometheus</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="monitoring.html#prerequisites">11.2.1. Prerequisites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="monitoring.html#installation">11.2.2. Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="monitoring.html#prometheus-yml">11.2.3. Prometheus.yml</a></li>
+<li class="toctree-l3"><a class="reference internal" href="monitoring.html#variables">11.2.4. Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="monitoring.html#queries">11.2.5. Queries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="monitoring.html#alerts">11.2.6. Alerts</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="monitoring.html#grafana">11.3. Grafana</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="monitoring.html#id1">11.3.1. Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="monitoring.html#useful-files">11.3.2. Useful Files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="monitoring.html#dashboard">11.3.3. Dashboard</a></li>
+<li class="toctree-l3"><a class="reference internal" href="monitoring.html#types-of-visualization">11.3.4. Types of Visualization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="monitoring.html#extra">11.3.5. Extra</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="monitoring.html#exporters">11.4. Exporters</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="monitoring.html#node-exporter">11.4.1. Node_exporter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="monitoring.html#ipmi-exporter">11.4.2. Ipmi_exporter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="monitoring.html#snmp-exporter">11.4.3. Snmp_exporter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="monitoring.html#ha-cluster-exporter">11.4.4. Ha_cluster_exporter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="monitoring.html#slurm-exporter">11.4.5. Slurm_exporter</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="containers.html">12. Containers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="containers.html#podman">12.1. Podman</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="containers.html#install-podman-and-grab-base-image">12.1.1. Install podman and grab base image</a></li>
+<li class="toctree-l3"><a class="reference internal" href="containers.html#generic-ansible-ready-image">12.1.2. Generic ansible ready image</a></li>
+<li class="toctree-l3"><a class="reference internal" href="containers.html#example-repositories-container">12.1.3. Example: repositories container</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="stories.html">13. Stories</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="stories.html#management-and-main-configuration">13.1. Management and main configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="stories.html#versioning-the-inventory">13.1.1. Versioning the inventory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stories.html#adding-a-new-repository">13.1.2. Adding a new repository</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stories.html#update-management-nodes-configuration">13.1.3. Update management nodes configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="stories.html#nodes">13.2. Nodes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="stories.html#adding-a-new-node">13.2.1. Adding a new node</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stories.html#adding-a-new-range-of-nodes">13.2.2. Adding a new range of nodes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stories.html#adding-a-new-master-group">13.2.3. Adding a new master group</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stories.html#adding-a-new-equipment-profile-group">13.2.4. Adding a new equipment_profile group</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stories.html#adding-a-custom-group">13.2.5. Adding a custom group</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stories.html#replacing-updating-a-node">13.2.6. Replacing/Updating a node</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stories.html#deploying-nodes">13.2.7. Deploying nodes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stories.html#apply-or-update-nodes-configuration">13.2.8. Apply or update nodes configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stories.html#changing-equipment-profile-group-of-some-nodes">13.2.9. Changing equipment_profile group of some nodes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stories.html#manage-multiple-distribution-versions">13.2.10. Manage multiple distribution versions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="stories.html#roles-and-playbooks">13.3. Roles and playbooks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="stories.html#create-a-custom-role">13.3.1. Create a custom role</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="stories.html#security">13.4. Security</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="stories.html#update-root-password">13.4.1. Update root password</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stories.html#use-vault-to-enhance-inventory-security">13.4.2. Use vault to enhance inventory security</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stories.html#externalize-ansible">13.4.3. Externalize Ansible</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="stories.html#storage">13.5. Storage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="stories.html#lvm-mirroring">13.5.1. LVM mirroring</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="roles.html">14. Roles list</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="roles.html#core">14.1. CORE</a></li>
+<li class="toctree-l2"><a class="reference internal" href="roles.html#advanced-core">14.2. ADVANCED CORE</a></li>
+<li class="toctree-l2"><a class="reference internal" href="roles.html#addons">14.3. ADDONS</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">15. References</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="references.html#external-graphics">15.1. External Graphics</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+<hr class="docutils" />
+<p>Documentation authors:</p>
+<ul class="simple">
+<li><p>LEVEUGLE Benoît</p></li>
+<li><p>KEATS Johnny</p></li>
+<li><p>TRAVOUILLON Bruno</p></li>
+<li><p>GELLNER Tim</p></li>
+<li><p>RIBEIRO Adrien</p></li>
+<li><p>MERZOUKI Hamid</p></li>
+<li><p>PEROTIN Matthieu</p></li>
+<li><p>PIETERS David</p></li>
+</ul>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="introduction.html" class="btn btn-neutral float-right" title="1. Introduction" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2019, Benoît Leveugle, Johnny Keats.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

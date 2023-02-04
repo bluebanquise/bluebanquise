@@ -1,0 +1,47 @@
+---
+- name: reload firewalld
+  ansible.builtin.command: firewall-cmd --reload
+
+- name: service <|> Restart prometheus service
+  ansible.builtin.service:
+    name: prometheus
+    state: restarted
+  when:
+    - "'service' not in ansible_skip_tags"
+    - (start_services | bool)
+
+- name: service <|> Restart alertmanager service
+  ansible.builtin.service:
+    name: alertmanager
+    state: restarted
+  when:
+    - "'service' not in ansible_skip_tags"
+    - (start_services | bool)
+
+- name: service <|> Restart karma service
+  ansible.builtin.service:
+    name: karma
+    state: restarted
+  when:
+    - "'service' not in ansible_skip_tags"
+    - (start_services | bool)
+
+- name: service <|> Restart ipmi_exporter service
+  ansible.builtin.service:
+    name: ipmi_exporter
+    state: restarted
+  when:
+    - "'service' not in ansible_skip_tags"
+    - (start_services | bool)
+
+- name: service <|> Restart snmp_exporter service
+  ansible.builtin.service:
+    name: snmp_exporter
+    state: restarted
+  when:
+    - "'service' not in ansible_skip_tags"
+    - (start_services | bool)
+
+- name: systemd <|> Reload systemd configuration
+  ansible.builtin.systemd:
+    daemon_reload: yes

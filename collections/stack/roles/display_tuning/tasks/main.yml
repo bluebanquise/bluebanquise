@@ -1,0 +1,22 @@
+- name: lineinfile <|> Configure root color based on iceberg number
+  lineinfile:
+    path: /root/.bashrc
+    line: 'PS1="\[\e[01;{{ 31+(j2_current_iceberg_number|int) }}m\]\h:\w#\[\e[00;m\] "'
+
+- name: copy <|> Add disk usage small script for screenrc
+  copy:
+    src: free_root_disk
+    dest: /usr/bin/free_root_disk
+    mode: 0700
+
+- name: copy <|> Add screenrc configuration
+  copy:
+    src: screenrc
+    dest: /root/.screenrc
+    mode: 0644
+
+- name: copy <|> Add vimrc configuration
+  copy:
+    src: vimrc
+    dest: /root/.vimrc
+    mode: 0644

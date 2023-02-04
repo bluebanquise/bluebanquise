@@ -1,0 +1,93 @@
+---
+- name: group <|> Add alertmanager group
+  ansible.builtin.group:
+    name: alertmanager
+    gid: "{{ prometheus_server_alertmanager_user_gid }}"
+    state: present
+
+- name: user <|> Add alertmanager user
+  ansible.builtin.user:
+    name: alertmanager
+    shell: /bin/false
+    uid: "{{ prometheus_server_alertmanager_user_uid }}"
+    group: alertmanager
+    home: /var/lib/alertmanager
+    state: present
+
+- name: Package <|> Install alertmanager package
+  ansible.builtin.package:
+    name: "{{ prometheus_server_alertmanager_packages_to_install }}"
+    state: present
+  tags:
+    - package
+
+- name: template <|> Generate alertmanager service file
+  ansible.builtin.template:
+    src: alertmanager.service.j2
+    dest: /etc/systemd/system/alertmanager.service
+    owner: root
+    group: root
+    mode: 0755
+  notify: systemd <|> Reload systemd configuration
+  tags:
+    - template
+
+- name: "copy <|> Install firewalld service configuration file"
+  ansible.builtin.copy:
+    src: alertmanager.xml
+    dest: /etc/firewalld/services/alertmanager.xml
+    owner: root
+    group: root
+    mode: 0644
+  when:
+    - ansible_facts.os_family == "RedHat"
+    - ep_firewall | default(false) | bool
+  notify: reload firewalld
+  tags:
+    - firewall
+
+- meta: flush_handlers
+
+- name: "firewalld <|> Add alertmanager service to firewall's {{ prometheus_server_firewall_zone | default('public') }} zone"
+  ansible.posix.firewalld:
+    zone: "{{ prometheus_server_firewall_zone | default('public') }}"
+    service: alertmanager
+    immediate: "yes"
+    permanent: "yes"
+    state: enabled
+  when:
+    - ansible_facts.os_family == "RedHat"
+    - ep_firewall | default(false) | bool
+  tags:
+    - firewall
+
+- name: file <|> Create Alertmanager directories structure
+  ansible.builtin.file:
+   path: "{{ item }}"
+   state: directory
+   mode: 0750
+   owner: alertmanager
+   group: alertmanager
+  loop:
+   - /etc/alertmanager/
+
+- name: Template <|> Generate /etc/alertmanager/alertmanager.yml
+  ansible.builtin.template:
+    src: alertmanager.yml.j2
+    dest: /etc/alertmanager/alertmanager.yml
+    owner: alertmanager
+    group: alertmanager
+    mode: 0640
+  notify: service <|> Restart alertmanager service
+  tags:
+    - template
+
+- meta: flush_handlers
+
+- name: service <|> Manage alertmanager service state
+  ansible.builtin.service:
+    name: alertmanager
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+    state: "{{ (start_services | bool) | ternary('started', omit) }}"
+  tags:
+    - service

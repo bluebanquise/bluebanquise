@@ -1,0 +1,119 @@
+#jinja2: lstrip_blocks: "True"
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+
+{###############################################################################
+  Write dedicated filename if requested
+###############################################################################}
+{% macro set_filename(ipxe_driver, ipxe_embed) %}
+  {% if ipxe_driver is not none and ipxe_embed is not none %}
+    if exists client-arch {
+    if option client-arch = 00:00 {
+      filename "x86_64/{{ ipxe_embed }}_undionly.kpxe";
+    } elsif option client-arch = 00:06 {
+      filename "x86/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi";
+    } elsif option client-arch = 00:07 {
+      filename "x86_64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi";
+    } elsif option client-arch = 00:08 {
+      filename "x86_64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi";
+    } elsif option client-arch = 00:09 {
+      filename "x86_64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi";
+    } elsif option client-arch = 00:0a {
+      filename "arm32/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi";
+    } elsif option client-arch = 00:0b {
+      filename "arm64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi";
+    }
+  }
+  {%- endif %}
+{%- endmacro %}
+
+{###############################################################################
+  Write entries for each possible methods for current nic
+###############################################################################}
+{% macro write_host(host, nic, ipxe_driver, ipxe_embed) %}
+  {% if nic.mac is defined and (nic.mac | ansible.utils.hwaddr)%}
+
+  host {{host}}-{{item}}-mac {
+    option host-name "{{host}}";
+    hardware ethernet {{nic.mac | ansible.utils.hwaddr('linux')}};
+    fixed-address {{nic.ip4}};
+    {{ set_filename(ipxe_driver, ipxe_embed) }}
+    {% if nic.dhcp_server_settings is defined and nic.dhcp_server_settings is iterable %}
+      {% for setting in nic.dhcp_server_settings %}
+    {{ setting }};
+      {% endfor %}
+    {% endif %}
+  }
+
+  {%- endif %}
+  {% if nic.dhcp_client_identifier is defined %}
+
+  host {{host}}-{{item}}-dhcp-client-identifier {
+    option host-name "{{host}}";
+    option dhcp-client-identifier {{nic.dhcp_client_identifier}};
+    fixed-address {{nic.ip4}};
+    {{ set_filename(ipxe_driver, ipxe_embed) }}
+    {% if nic.dhcp_server_settings is defined and nic.dhcp_server_settings is iterable %}
+      {% for setting in nic.dhcp_server_settings %}
+    {{ setting }};
+      {% endfor %}
+    {% endif %}
+  }
+
+  {%- endif %}
+  {% if nic.host_identifier is defined %}
+
+  host {{host}}-{{item}}-host-identifier {
+    option host-name "{{host}}";
+    host-identifier {{nic.host_identifier}};
+    fixed-address {{nic.ip4}};
+    {{ set_filename(ipxe_driver, ipxe_embed) }}
+    {% if nic.dhcp_server_settings is defined and nic.dhcp_server_settings is iterable %}
+      {% for setting in nic.dhcp_server_settings %}
+    {{ setting }};
+      {% endfor %}
+    {% endif %}
+  }
+
+  {%- endif %}
+  {% if nic.match is defined %}{# Warning, only works in a shared network!! #}
+
+  class "option_match_{{host}}" {
+    match if (
+      {{nic.match}}
+    );
+  }
+  pool {
+    option host-name "{{host}}";
+    allow members of "option_match_{{host}}";
+    range {{nic.ip4}};
+    {{ set_filename(ipxe_driver, ipxe_embed) }}
+    {% if nic.dhcp_server_settings is defined and nic.dhcp_server_settings is iterable %}
+      {% for setting in nic.dhcp_server_settings %}
+    {{ setting }};
+      {% endfor %}
+    {% endif %}
+  }
+
+  {%- endif %}
+{%- endmacro %}
+
+{###############################################################################
+  Main iteration over hosts
+###############################################################################}
+{%- for host in (j2_hosts_range | sort) %}
+  {% set current_hostvars = hostvars[host] %}{# buffer, avoid calls to hostvars #}
+  {% if current_hostvars['network_interfaces'] is defined and current_hostvars['network_interfaces'] is iterable and current_hostvars['network_interfaces'] is not mapping and current_hostvars['network_interfaces'] is not string %}
+    {% for nic in current_hostvars['network_interfaces'] %}
+      {%- if nic.network is defined and nic.network == item and nic.ip4 is defined and (nic.ip4 | ansible.utils.ipaddr) %}
+{{ write_host(host, nic, current_hostvars['ep_ipxe_driver'] | default(None), current_hostvars['ep_ipxe_embed'] | default(None)) }}
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+  {%- if current_hostvars['bmc'] is defined %}
+    {% set bmc_args = current_hostvars['bmc'] %}
+    {% if bmc_args.network is defined and bmc_args.network == item and (bmc_args.name is defined and bmc_args.name is not none) and (bmc_args.mac is defined and (bmc_args.mac | ansible.utils.hwaddr)) and (bmc_args.ip4 is defined and (bmc_args.ip4 | ansible.utils.ipaddr)) %}
+{{ write_host(bmc_args.name, bmc_args, None, None) }}
+    {% endif %}
+  {% endif %}
+{% endfor %}
