@@ -17,7 +17,7 @@ source /etc/os-release
 
 # Install minimal requirements into a virtual environment
 cd $HOME
-if [ "$PLATFORM_ID" == "platform:el7" ]; then
+if [ "$VERSION_ID" == "7" ]; then
   export LANG=en_US.UTF-8
   export LC_ALL=en_US.UTF-8
 fi
