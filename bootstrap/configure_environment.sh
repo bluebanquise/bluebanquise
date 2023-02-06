@@ -22,6 +22,7 @@ if [ "$VERSION_ID" == "7" ]; then
   scl enable rh-python38 bash && \
   echo "scl enable rh-python38 bash" >> $HOME/.bashrc
 fi
+echo "Python version: $(python3 --version)"
 python3 -m venv ansible_venv
 source ansible_venv/bin/activate
 
@@ -30,7 +31,7 @@ pip3 install setuptools setuptools_rust && \
 pip3 install -r $CURRENT_DIR/requirements.txt
 
 echo "Trying 3 times to grab community.general..."
-ansible-galaxy collection install community.general || ansible-galaxy collection install community.general || ansible-galaxy collection install community.general
+ansible-galaxy collection install community.general || sleep 30 && ansible-galaxy collection install community.general || sleep 30 && ansible-galaxy collection install community.general
 # Install BlueBanquise collections
 if [[ $COLLECTIONS_LOCAL_PATH != "none" ]]; then
   ansible-galaxy collection install $COLLECTIONS_LOCAL_PATH
