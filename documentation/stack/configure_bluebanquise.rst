@@ -504,9 +504,9 @@ Then create file ``inventory/group_vars/equipment_SUPERMICRO_16C_32G/security.ym
   ep_access_control: enforcing  # We set SELinux to enforcing
   ep_firewall: true  # We want firewall to be enabled
 
-ep_admin_password_sha512
+  ep_admin_password_sha512: 
 
-ep_admin_ssh_keys
+  ep_admin_ssh_keys:
 
   ep_host_authentication:  # comment if not needed. Login/password for BMC, storage bay controller, switch, etc.
     - protocol: IPMI
