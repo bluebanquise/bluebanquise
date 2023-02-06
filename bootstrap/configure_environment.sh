@@ -19,8 +19,13 @@ source /etc/os-release
 cd $HOME
 if [ "$VERSION_ID" == "7" ]; then
   # We need python 3.8 minimum
-  scl enable rh-python38 bash && \
-  echo "scl enable rh-python38 bash" >> $HOME/.bashrc
+  echo 'export LD_LIBRARY_PATH=/opt/rh/rh-python38/root/usr/lib64:$LD_LIBRARY_PATH' >> $HOME/.bashrc
+  echo 'export MANPATH=/opt/rh/rh-python38/root/usr/share/man:$MANPATH' >> $HOME/.bashrc
+  echo 'export PATH=/opt/rh/rh-python38/root/usr/local/bin:/opt/rh/rh-python38/root/usr/bin:$PATH' >> $HOME/.bashrc
+  echo 'export PKG_CONFIG_PATH=/opt/rh/rh-python38/root/usr/lib64/pkgconfig:$PKG_CONFIG_PATH' >> $HOME/.bashrc
+  echo 'export XDG_DATA_DIRS=/opt/rh/rh-python38/root/usr/share:$XDG_DATA_DIRS' >> $HOME/.bashrc
+  echo 'export X_SCLS="rh-python38 "' >> $HOME/.bashrc
+  source $HOME/.bashrc
 fi
 echo "Python version: $(python3 --version)"
 python3 -m venv ansible_venv
