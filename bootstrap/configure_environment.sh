@@ -18,8 +18,9 @@ source /etc/os-release
 # Install minimal requirements into a virtual environment
 cd $HOME
 if [ "$VERSION_ID" == "7" ]; then
-  export LANG=en_US.UTF-8
-  export LC_ALL=en_US.UTF-8
+  # We need python 3.8 minimum
+  scl enable rh-python38 bash && \
+  echo "scl enable rh-python38 bash" >> $HOME/.bashrc
 fi
 python3 -m venv ansible_venv
 source ansible_venv/bin/activate

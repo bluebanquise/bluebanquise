@@ -59,9 +59,11 @@ if [ "$NAME" == "Ubuntu" ]; then
   fi
 fi
 if [ "$VERSION_ID" == "7" ]; then
-  sudo yum install git python36 python36-pip python3-policycoreutils openssh -y
-  # sudo ln -s /usr/bin/python3.6 /usr/bin/python3
-  # sudo ln -s /usr/bin/pip3.6 /usr/bin/pip3
+  # We need Python 3.8 minimum
+  sudo yum -y install epel-release
+  sudo yum -y install centos-release-scl-rh centos-release-scl
+  sudo yum --enablerepo=centos-sclo-rh -y install rh-python38
+  # Now we can 'scl enable rh-python38 bash' to trigger python3.8
 fi
 if [ "$PLATFORM_ID" == "platform:el8" ]; then
   sudo dnf install git python39 python39-pip python3-policycoreutils openssh-clients -y
