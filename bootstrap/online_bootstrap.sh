@@ -60,8 +60,8 @@ if [ "$NAME" == "Ubuntu" ]; then
 fi
 if [ "$VERSION_ID" == "7" ]; then
   sudo yum install git python36 python36-pip python3-policycoreutils openssh -y
-  sudo ln -s /usr/bin/python3.6 /usr/bin/python3
-  sudo ln -s /usr/bin/pip3.6 /usr/bin/pip3
+  # sudo ln -s /usr/bin/python3.6 /usr/bin/python3
+  # sudo ln -s /usr/bin/pip3.6 /usr/bin/pip3
 fi
 if [ "$PLATFORM_ID" == "platform:el8" ]; then
   sudo dnf install git python39 python39-pip python3-policycoreutils openssh-clients -y
