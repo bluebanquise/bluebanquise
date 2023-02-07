@@ -60,7 +60,7 @@ if [ "$NAME" == "Ubuntu" ]; then
 fi
 if [ "$VERSION_ID" == "7" ]; then
   # We need Python 3.8 minimum
-  sudo yum -y install epel-release
+  sudo yum -y install epel-release openssh
   sudo yum -y install centos-release-scl-rh centos-release-scl
   sudo yum --enablerepo=centos-sclo-rh -y install rh-python38
   # Now we can 'scl enable rh-python38 bash' to trigger python3.8
