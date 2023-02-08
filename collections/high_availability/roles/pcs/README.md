@@ -606,6 +606,7 @@ not present. Then in HA resources, declare the following:
 
 ## 5. Changelog
 
+* 1.0.6: (docs): examples to hash cluster password with Python and Perl. Leo Araujo <lmagdanello40@gmail.com>
 * 1.0.5: Allow specification of name of the cluster. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.0.4: Allows order constraint between resource groups. Thiago Cardozo <thiago.cardozo@yahoo.com.br>
 * 1.0.3: Fix use of unencrypted password of hacluster user. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
