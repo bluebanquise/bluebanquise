@@ -1,7 +1,7 @@
 ---
-- name: firewalld <|> "Add services to firewall's {{ repositories_server_firewall_zone | default('public') }} zone"
+- name: firewalld <|> "Add services to firewall's {{ http_server_firewall_zone | default('public') }} zone"
   ansible.posix.firewalld:
-    zone: "{{ repositories_server_firewall_zone | default('public') }}"
+    zone: "{{ http_server_firewall_zone | default('public') }}"
     service: "{{ item }}"
     immediate: "yes"
     permanent: "yes"
@@ -9,6 +9,6 @@
   when:
     - ansible_facts.os_family == "RedHat"
     - ep_firewall | default(false) | bool
-  loop: "{{ repositories_server_firewall_services_to_add }}"
+  loop: "{{ http_server_firewall_services_to_add }}"
   tags:
     - firewall
