@@ -59,7 +59,7 @@ if [ "$NAME" == "Ubuntu" ]; then
 fi
 if [ "$PLATFORM_ID" == "platform:el8" ]; then
   sudo dnf install git python39 python39-pip python3-policycoreutils openssh-clients -y
-  alternatives --set python3 /usr/bin/python3.9
+  sudo alternatives --set python3 /usr/bin/python3.9
 fi
 
 message_output "Creating bluebanquise user, may take a while..."
