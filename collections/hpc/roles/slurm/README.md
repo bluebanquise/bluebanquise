@@ -234,6 +234,7 @@ To enable it on the slurm configuration its required to define `slurm_SelectType
 
 ## Changelog
 
+* 1.2.1: Update to BB 2.0 format
 * 1.2.0: Added GPU Gres configuration. Lucas Santos <lucassouzasantos@gmail.com>
 * 1.1.1: Missing string filter in template. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.0: Role major upgrade. Benoit Leveugle <benoit.leveugle@gmail.com>
