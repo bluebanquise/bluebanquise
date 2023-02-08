@@ -58,6 +58,7 @@ http_server_configurations_files:
 
 ## Changelog
 
+* 1.3.1: Update to BB 2.0 format
 * 1.3.0: Update to BB 2.0 format. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.2.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.2: Added OpenSuSE support. Neil Munday <neil@mundayweb.com>
