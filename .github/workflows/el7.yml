@@ -42,4 +42,4 @@ jobs:
       - name: Roles execution
         run: |
           docker exec mg1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ansible-playbook /var/lib/bluebanquise/playbooks/all.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mg1 --diff --check --tags hosts_file,dns_client'"
-          docker exec mg1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ansible-playbook /var/lib/bluebanquise/playbooks/all.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mg1 --diff --skip-tags kernel_config,hosts_file,nic,set_hostname,dns_client'"
+          docker exec mg1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ansible-playbook /var/lib/bluebanquise/playbooks/all.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mg1 --diff --skip-tags access_control,kernel_config,hosts_file,nic,set_hostname,dns_client'"

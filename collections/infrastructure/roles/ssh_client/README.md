@@ -168,6 +168,7 @@ Optional inventory vars:
 
 ## Changelog
 
+* 1.2.1: Fixed sudo user home directory. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.2.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.1: Fix issue with empty network interfaces. johnnykeats <johnny.keats@outlook.com>
 * 1.1.0: Add more granularity to host key checking, improve role's performances. Benoit Leveugle <benoit.leveugle@gmail.com>
