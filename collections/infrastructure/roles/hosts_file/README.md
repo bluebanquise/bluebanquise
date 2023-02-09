@@ -28,6 +28,11 @@ To do so, define `hosts_file_external_hosts` this way:
 hosts_file_external_hosts:
   myhost: 10.10.10.10
   mysecondhost: 7.7.7.7
+  mythirdhost:
+    ip: 10.10.10.33
+    alias:
+      - machine3
+      - extmachine3
 ```
 
 This role is using `hosts_file_domaine_name` variable to set FQDN. Default is **cluster.local**.
