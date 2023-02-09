@@ -4,4 +4,4 @@ RUN set -ex; \
     yum -y install httpd procps less epel-release systemd sudo; yum clean all;
 RUN mkdir /root/.ssh -p;
 
-CMD [ "/sbin/init" ]
+CMD [ "/usr/sbin/init" ]
