@@ -548,7 +548,7 @@ prometheus_server_prometheus_raw_configuration:
 
 ## Changelog
 
-* 1.2.4: Update to BB 2.0 format
+* 1.2.4: Update to BB 2.0 format. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.2.3: Fix karma package to install on RedHat. Emmanuel Chevreau <manu44600@gmail.com>
 * 1.2.2: Fix ubuntu support. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.2.1: Add missing part of the role. Benoit Leveugle <benoit.leveugle@gmail.com>
