@@ -1,0 +1,10 @@
+{% if clush is defined %}
+#### Blue Banquise file ####
+## {{ansible_managed}}
+
+{% for roles, groups in clush.items() %}
+{% for group, node in groups.items() %}
+{{ roles }}: {{ node|join(',')|trim }}
+{% endfor %}
+{% endfor %}
+{% endif %}

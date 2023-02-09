@@ -1,3 +1,4 @@
 ---
 clustershell_install_from_package: false
 clustershell_install_from_pip: false
+clustershell_custom_map: false

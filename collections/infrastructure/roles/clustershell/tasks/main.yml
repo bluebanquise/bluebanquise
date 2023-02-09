@@ -33,3 +33,26 @@
     mode: 0644
   tags:
     - template
+  when: clustershell_custom_map == false
+
+- name: cluster <|> Create clusters.yaml if clush inventory exists
+  ansible.builtin.template:
+    src: cluster.yaml.j2
+    dest: /etc/clustershell/groups.d/cluster.yaml
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - template
+  when: clush is defined and clustershell_custom_map
+
+- name: cluster <|> Create local.cfg with mapping names
+  ansible.builtin.template:
+    src: local.cfg.mapping.j2
+    dest: /etc/clustershell/groups.d/local.cfg
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - template
+  when: clush is defined and clustershell_custom_map

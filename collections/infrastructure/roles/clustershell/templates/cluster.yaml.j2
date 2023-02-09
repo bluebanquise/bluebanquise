@@ -1,0 +1,15 @@
+{% if clush is defined %}
+#### Blue Banquise file ####
+## {{ansible_managed}}
+
+{% for roles, groups in clush.items() %}
+{{ roles }}:
+{% for group, node in groups.items() %}
+{% if '@' in node|string %}
+  {{ group }}: '{% for item in node %}{{ item }}:{{ clush[item | replace("@", "")].keys()|join(",") }}{% if not loop.last %},{% endif %}{% endfor %}'
+{% else %}
+  {{ group }}: '{{ node|join(',')|trim }}'
+{% endif %}
+{% endfor %}
+{% endfor %}
+{% endif %}

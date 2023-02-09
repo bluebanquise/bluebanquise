@@ -1,9 +1,9 @@
 #### Blue Banquise file ####
 ## {{ansible_managed}}
 
-{% for gr, nodes in groups.items() %}
-{% if (gr | string) != 'ungrouped' %}
-{{ gr }}: {% for node in nodes | sort %}{% if loop.first %}{{ node }}{% else %},{{ node }}{% endif %}{% endfor %}
+{% for gr, gr_vars in groups.items() %}
+{% if (gr|string) != 'ungrouped' %}
+{{ gr }}: {% set gr_vars_without_dummy = gr_vars | reject("equalto", "dummy") %}{% for node in gr_vars_without_dummy | sort %}{{ node }}{% if not loop.last %},{% endif %}{% endfor %}
 
 {% endif %}
 {% endfor %}
