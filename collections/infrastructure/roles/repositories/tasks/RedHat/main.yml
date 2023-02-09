@@ -1,8 +1,9 @@
 ---
-- name: set_fact <|> Set static baseurl prefix
+
+- name: set_fact <|> Set static baseurl prefix (services_ip)
   ansible.builtin.set_fact:
     repositories_client_baseurl_prefix:
-      "http://{{ networks[j2_node_main_network]['services_ip']['repository_ip'] }}/repositories/\
+      "http://{{ networks[j2_node_main_network]['services_ip'] }}/repositories/\
       {{ ep_operating_system['repositories_environment'] | default('', true) }}/\
       {{ ep_operating_system['distribution'] }}/\
       {{ ep_operating_system['distribution_version'] | default(ep_operating_system['distribution_major_version']) }}/\
@@ -11,8 +12,24 @@
     - j2_node_main_network is defined and j2_node_main_network is not none
     - networks is defined and networks is not none
     - networks[j2_node_main_network] is defined and networks[j2_node_main_network] is not none
-    - networks[j2_node_main_network]['services_ip'] is defined and networks[j2_node_main_network]['services_ip'] is not none
-    - networks[j2_node_main_network]['services_ip']['repository_ip'] is defined and networks[j2_node_main_network]['services_ip']['repository_ip'] is not none
+    - networks[j2_node_main_network]['services_ip'] is defined and (networks[j2_node_main_network]['services_ip'] | ansible.utils.ipaddr)
+    - ep_operating_system is defined and ep_operating_system is not none
+    - ep_operating_system['distribution'] is defined and ep_operating_system['distribution'] is not none
+    - (ep_operating_system['distribution_version'] is defined and ep_operating_system['distribution_version'] is not none) or (ep_operating_system['distribution_major_version'] is defined and ep_operating_system['distribution_major_version'] is not none)
+
+- name: set_fact <|> Set static baseurl prefix (services)
+  ansible.builtin.set_fact:
+    repositories_client_baseurl_prefix:
+      "http://{{ networks[j2_node_main_network]['services']['repository'] }}/repositories/\
+      {{ ep_operating_system['repositories_environment'] | default('', true) }}/\
+      {{ ep_operating_system['distribution'] }}/\
+      {{ ep_operating_system['distribution_version'] | default(ep_operating_system['distribution_major_version']) }}/\
+      {{ ansible_architecture }}/"
+  when:
+    - j2_node_main_network is defined and j2_node_main_network is not none
+    - networks is defined and networks is not none
+    - networks[j2_node_main_network] is defined and networks[j2_node_main_network] is not none
+    - networks[j2_node_main_network]['services']['repository'] is defined and networks[j2_node_main_network]['services']['repository'] is not none
     - ep_operating_system is defined and ep_operating_system is not none
     - ep_operating_system['distribution'] is defined and ep_operating_system['distribution'] is not none
     - (ep_operating_system['distribution_version'] is defined and ep_operating_system['distribution_version'] is not none) or (ep_operating_system['distribution_major_version'] is defined and ep_operating_system['distribution_major_version'] is not none)

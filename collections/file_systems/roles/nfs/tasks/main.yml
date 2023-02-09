@@ -23,8 +23,8 @@
 
 - name: include_tasks <|> Configure NFS Server
   ansible.builtin.include_tasks: "server.yml"
-  when: server in nfs_profile
+  when: "'server' in nfs_profile"
 
 - name: include_tasks <|> Configure NFS Client
   ansible.builtin.include_tasks: "client.yml"
-  when: client in nfs_profile
+  when: "'client' in nfs_profile"

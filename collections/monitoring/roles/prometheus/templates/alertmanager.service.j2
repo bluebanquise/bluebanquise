@@ -8,7 +8,7 @@
   Group=alertmanager
   Type=simple
   WorkingDirectory=/etc/alertmanager/
-  ExecStart=/usr/local/bin/alertmanager \
+  ExecStart=/bin/alertmanager \
   {{ prometheus_server_alertmanager_launch_parameters | indent(2, True) }}
 
 [Install]

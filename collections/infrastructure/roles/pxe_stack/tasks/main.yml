@@ -182,6 +182,14 @@
     group: root
     mode: 0755
 
+- name: "file <|> Convenience link for bootset"
+  ansible.builtin.file:
+    path: "/bin/bootset"
+    state: link
+    src: "/usr/bin/bluebanquise-bootset"
+    owner: root
+    group: root
+
 - name: "template <|> Create {{ pxe_stack_apache_cgi_bin_path }}/bootswitch.cgi"
   ansible.builtin.template:
     src: bootswitch.cgi.j2

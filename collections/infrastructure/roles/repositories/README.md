@@ -91,6 +91,7 @@ If one want to keep the distro repositories, they must define
 
 ## Changelog
 
+* 1.3.4: Update to BB 2.0 format. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.3.3: Support gpgkey for Ubuntu. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.3.2: Flush handlers at the end of role repositories_client. #sla31
 * 1.3.1: Updated SUSE subtask to handle missing repo definition when repo is a dictionary. Neil Munday <neil@mundayweb.com>

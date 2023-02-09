@@ -90,7 +90,7 @@ JobAcctGatherType=jobacct_gather/linux
     {% if buffer.slurm_extra_nodes_parameters is defined and buffer.slurm_extra_nodes_parameters is not none %}
         {% set nodes_parameters = nodes_parameters + ' ' +  buffer.slurm_extra_nodes_parameters %}
     {% endif %}
-NodeName={{ groups[computes_group] | nodeset }} {{ nodes_parameters }}
+NodeName={{ groups[computes_group] | bluebanquise.hpc.nodeset }} {{ nodes_parameters }}
 
   {% endif %}
 {% endfor %}
