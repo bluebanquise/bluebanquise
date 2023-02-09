@@ -1,7 +1,7 @@
 FROM centos:7
 
 RUN set -ex; \
-    yum -y install httpd procps less epel-release sudo; yum clean all;
+    yum -y install httpd procps less epel-release systemd sudo; yum clean all;
 RUN mkdir /root/.ssh -p;
 
 CMD [ "/sbin/init" ]
