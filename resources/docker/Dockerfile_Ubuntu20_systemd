@@ -1,4 +1,4 @@
-FROM debian:11
+FROM ubuntu:20.04
 
 RUN set -ex; \
     apt update && apt -y install systemd systemd-sysv python3 python3-pip sudo;
