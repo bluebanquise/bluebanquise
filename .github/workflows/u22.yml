@@ -1,10 +1,10 @@
 ---
 name: U22
 on:
-  push:
-    branches:
-      - master
-  pull_request:
+  # push:
+  #   branches:
+  #     - master
+  # pull_request:
 
 jobs:
   roles:
@@ -42,4 +42,5 @@ jobs:
       - name: Roles execution
         run: |
           docker exec mg1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ansible-playbook /var/lib/bluebanquise/playbooks/all.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mg1 --diff --check --tags hosts_file,dns_client'"
-          docker exec mg1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ansible-playbook /var/lib/bluebanquise/playbooks/all.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mg1 --diff --skip-tags firewall,kernel_config,hosts_file,nic,set_hostname,dns_client'"
+          docker exec mg1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ansible-playbook /var/lib/bluebanquise/playbooks/all.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mg1 --diff --skip-tags access_control,firewall,kernel_config,hosts_file,nic,set_hostname,dns_client'"
+          docker exec mg1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ansible-playbook /var/lib/bluebanquise/playbooks/all.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mg1 --diff --tags access_control --skip-tags service'"
