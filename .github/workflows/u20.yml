@@ -21,8 +21,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Create Debian systemd able image
-        run: docker build -t ubuntu_20:systemd -f ./resources/docker/Dockerfile_ubuntu_20_systemd .
+      - name: Create Ubuntu systemd able image
+        run: docker build -t ubuntu_20:systemd -f ./resources/docker/Dockerfile_Ubuntu_20_systemd .
 
       - name: Set dummy interface
         run: sudo modprobe -v dummy numdummies=2 && sudo ip addr add 10.10.0.1/16 dev dummy0 && sudo ip link set dev dummy0 up && ip a;
