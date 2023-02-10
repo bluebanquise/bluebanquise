@@ -55,7 +55,7 @@ message_output "Installing OS needed dependencies..."
 if [ "$NAME" == "Ubuntu" ]; then
   if [ "$VERSION_ID" == "20.04" ] || [ "$VERSION_ID" == "22.04" ]; then
     sudo apt-get update
-    sudo apt-get install python3 python3-pip python3-venv ssh git -y
+    sudo apt-get install python3 python3-pip python3-venv ssh curl git -y
   fi
 fi
 if [ "$VERSION_ID" == "7" ]; then
