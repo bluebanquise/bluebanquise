@@ -98,7 +98,7 @@ NodeName={{ groups[computes_group] | bluebanquise.hpc.nodeset }} {{ nodes_parame
 ## Partitions list
 {% if slurm_partitions_list is defined and slurm_partitions_list %}
   {% for partition in slurm_partitions_list %}
-PartitionName={{partition.partition_name}} {% for arg, arg_value in partition.partition_configuration.items() %} {{ arg }}={{ arg_value }}{% endfor %} Nodes={% for computes_group in partition.computes_groups %}{% if groups[computes_group] is iterable %}{% if not loop.first %},{% endif %}{% for node in groups[computes_group] %}{% if loop.first %}{{node}}{% else %},{{node}}{% endif %}{% endfor %}{% endif %}{% endfor %}
+PartitionName={{partition.partition_name}} {% for arg, arg_value in partition.partition_configuration.items() %} {{ arg }}={{ arg_value }}{% endfor %} Nodes={% for computes_group in partition.computes_groups %}{% if groups[computes_group] is iterable %}{% if not loop.first %},{% endif %}{{ groups[computes_group] | bluebanquise.hpc.nodeset }}{% endif %}{% endfor %}
 
   {% endfor %}
 {% endif %}
