@@ -59,13 +59,13 @@
 
 - name: file <|> Create snmp_exporter directories structure
   ansible.builtin.file:
-   path: "{{ item }}"
-   state: directory
-   mode: 0750
-   owner: snmp_exporter
-   group: snmp_exporter
+    path: "{{ item }}"
+    state: directory
+    mode: 0750
+    owner: snmp_exporter
+    group: snmp_exporter
   loop:
-   - /etc/snmp_exporter/
+    - /etc/snmp_exporter/
 
 - name: Template <|> Generate /etc/snmp_exporter/snmp.yml
   ansible.builtin.template:
@@ -79,7 +79,8 @@
   tags:
     - template
 
-- meta: flush_handlers
+- name: meta <|> Run handler tasks
+  ansible.builtin.meta: flush_handlers
 
 - name: stat <|> Check /etc/snmp_exporter/snmp.yml exists
   ansible.builtin.stat:

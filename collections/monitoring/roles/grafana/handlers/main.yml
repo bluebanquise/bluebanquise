@@ -3,7 +3,6 @@
   ansible.builtin.service:
     name: "{{ item  }}"
     state: restarted
-    daemon_reload: true
   with_items: "{{ grafana_services_to_start }}"
   when:
     - "'service' not in ansible_skip_tags"

@@ -55,7 +55,8 @@
     group: "{{ item.group | default('root') }}"
   loop: "{{ exporters_groups }}"
 
-- meta: flush_handlers
+- name: meta <|> Run handler tasks
+  ansible.builtin.meta: flush_handlers
 
 - name: "firewalld <|> Open exporters ports into firewall's {{ prometheus_client_firewall_zone | default('public') }} zone"
   ansible.posix.firewalld:

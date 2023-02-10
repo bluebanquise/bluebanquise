@@ -2,7 +2,7 @@
 - name: service <|> Restart powerman
   ansible.builtin.service:
     name: powerman
-    state: restarted
+    state: "{{ (powerman_start_services | default(bb_start_services) | default(true, true) | bool) | ternary('restarted', omit) }}"
   when:
     - "'service' not in ansible_skip_tags"
-    - (start_services | bool)
+    - powerman_start_services | default(bb_start_services) | default(true, true)

@@ -232,4 +232,5 @@
         - high_availability_stonith is defined and high_availability_stonith
       notify: command <|> Push HA configuration
 
-- meta: flush_handlers
+- name: meta <|> Run handler tasks
+  ansible.builtin.meta: flush_handlers

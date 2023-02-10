@@ -29,7 +29,8 @@
     - plugins
     - apikeys
 
-- ansible.builtin.include_tasks: preflight.yml
+- name: include_tasks <|> preflight
+  ansible.builtin.include_tasks: preflight.yml
   tags:
     - package
     - service
@@ -41,7 +42,8 @@
     - plugins
     - apikeys
 
-- ansible.builtin.include_tasks: preflight_ports.yml
+- name: include_tasks <|> preflight_ports
+  ansible.builtin.include_tasks: preflight_ports.yml
   when: ansible_version.major > 2 and ansible_version.minor >= 9
   tags:
     - package
@@ -54,17 +56,20 @@
     - plugins
     - apikeys
 
-- ansible.builtin.include_tasks: install.yml
+- name: include_tasks <|> install
+  ansible.builtin.include_tasks: install.yml
   tags:
     - package
     - firewall
 
-- ansible.builtin.include_tasks: configure.yml
+- name: include_tasks <|> configure
+  ansible.builtin.include_tasks: configure.yml
   tags:
     - service
     - configure
 
-- ansible.builtin.include_tasks: plugins.yml
+- name: include_tasks <|> plugins
+  ansible.builtin.include_tasks: plugins.yml
   when: grafana_plugins != []
   tags:
     - plugins
@@ -117,12 +122,14 @@
   failed_when: false
   changed_when: false
 
-- ansible.builtin.include_tasks: api_keys.yml
+- name: include_tasks <|> api_keys
+  ansible.builtin.include_tasks: api_keys.yml
   when: grafana_api_keys | length > 0
   tags:
     - apikeys
 
-- ansible.builtin.include_tasks: datasources.yml
+- name: include_tasks <|> datasources
+  ansible.builtin.include_tasks: datasources.yml
   when: grafana_datasources != []
   tags:
     - datasources
@@ -133,7 +140,8 @@
   tags:
     - dashboards
 
-- ansible.builtin.include_tasks: dashboards.yml
+- name: include_tasks <|> dashboards
+  ansible.builtin.include_tasks: dashboards.yml
   when: grafana_dashboards | length > 0 or found_dashboards | length > 0
   tags:
     - dashboards

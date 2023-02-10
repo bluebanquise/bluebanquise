@@ -17,11 +17,11 @@
   tags:
     - internal
 
-#- name: include_tasks <|> Setup Am-executor
-#  include_tasks: "server_am_executor.yml"
-#  when: prometheus_server_manage_karma
-#  tags:
-#    - internal
+# - name: include_tasks <|> Setup Am-executor
+#   include_tasks: "server_am_executor.yml"
+#   when: prometheus_server_manage_karma
+#   tags:
+#     - internal
 
 - name: include_tasks <|> Setup ipmi_exporter
   ansible.builtin.include_tasks: "server_ipmi_exporter.yml"
@@ -34,4 +34,3 @@
   when: prometheus_server_manage_snmp_exporter
   tags:
     - internal
-

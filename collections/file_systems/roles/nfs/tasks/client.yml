@@ -8,6 +8,9 @@
 
 - name: file <|> Create NFS directories
   ansible.builtin.file:
+    owner: root
+    group: root
+    mode: 0755
     path: "{{ item.0.mount }}"
     state: directory
   with_subelements:
@@ -36,7 +39,7 @@
     - service
 
 - name: mount <|> Mount exported NFS into directories
-  ansible.builtin.mount:
+  ansible.posix.mount:
     path: "{{ item.0.mount }}"
     src: "{{ item.0.server }}{% if item.0.network is defined and item.0.network is not none %}-{{ item.0.network }}{% endif %}:{{ item.0.export }}"
     fstype: nfs

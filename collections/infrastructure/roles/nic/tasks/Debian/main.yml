@@ -42,7 +42,7 @@
 - name: lineinfile <|> Remove NICs entry from /etc/network/interfaces
   lineinfile:
     path: /etc/network/interfaces
-    regexp: ".*{{ item.conn_name | default(item.interface) | string }}.*" 
+    regexp: ".*{{ item.conn_name | default(item.interface) | string }}.*"
     state: absent
     backup: yes
   loop: "{{ network_interfaces }}"

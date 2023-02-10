@@ -12,7 +12,7 @@
       check_mode: false
 
     # Use curl to solve issue #77
-    - name: dashboards <|> Download grafana dashboard from grafana.net to local directory
+    - name: dashboards <|> Download grafana dashboard from grafana.net to local directory # noqa command-instead-of-module
       ansible.builtin.command: >
         curl --fail --compressed
         https://grafana.com/api/dashboards/{{ item.dashboard_id }}/revisions/{{ item.revision_id }}/download

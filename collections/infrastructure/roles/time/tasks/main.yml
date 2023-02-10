@@ -65,7 +65,7 @@
     - template
 
 - name: "timezone <|> Set system to {{ bb_time_zone | default(time_time_zone, true) }} timezone"
-  ansible.builtin.timezone:
+  community.general.timezone:
     name: "{{ bb_time_zone | default(time_time_zone, true) }}"
 
 - name: meta <|> Run handler tasks to restart time services

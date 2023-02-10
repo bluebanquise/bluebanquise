@@ -47,15 +47,15 @@
 
 - name: file <|> Create Prometheus directories structure
   ansible.builtin.file:
-   path: "{{ item }}"
-   state: directory
-   mode: 0750
-   owner: prometheus
-   group: prometheus
+    path: "{{ item }}"
+    state: directory
+    mode: 0750
+    owner: prometheus
+    group: prometheus
   loop:
-   - /etc/prometheus/
-   - /etc/prometheus/alerts/
-   - /var/lib/prometheus
+    - /etc/prometheus/
+    - /etc/prometheus/alerts/
+    - /var/lib/prometheus
 
 - name: Template <|> Generate /etc/prometheus/prometheus.yml
   ansible.builtin.template:
@@ -105,7 +105,8 @@
     mode: 0755
   when: prometheus_server_launch_parameters is defined and prometheus_server_launch_parameters is not none
 
-- meta: flush_handlers
+- name: meta <|> Run handler tasks
+  ansible.builtin.meta: flush_handlers
 
 - name: service <|> Manage prometheus service state
   ansible.builtin.service:

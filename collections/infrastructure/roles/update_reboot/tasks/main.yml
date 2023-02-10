@@ -1,4 +1,4 @@
-- name: package <|> Upgrade all packages
+- name: package <|> Upgrade all packages # noqa package-latest
   ansible.builtin.package:
     name: "*"
     state: latest

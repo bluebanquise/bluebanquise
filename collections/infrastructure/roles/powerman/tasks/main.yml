@@ -25,7 +25,7 @@
 - name: service <|> Manage powerman state
   ansible.builtin.service:
     name: powerman
-    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
-    state: "{{ (start_services | bool) | ternary('started', omit) }}"
+    enabled: "{{ (powerman_enable_services | default(bb_enable_services) | default(true, true) | bool) | ternary('yes', 'no') }}"
+    state: "{{ (powerman_start_services | default(bb_start_services) | default(true, true) | bool) | ternary('started', omit) }}"
   tags:
     - service

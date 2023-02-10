@@ -1,5 +1,13 @@
 ---
 
+- name: user <|> Add dhcpd user if missing
+  ansible.builtin.user:
+    name: dhcpd
+    comment: DHCP server daemon
+    home: /var/lib/dhcp
+    shell: /bin/false
+    system: true
+
 - name: template <|> Generate /etc/sysconfig/dhcpd for SuSE based systems
   template:
     src: Suse/sysconfig.j2

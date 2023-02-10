@@ -34,13 +34,13 @@
 
 - name: file <|> Create karma directories structure
   ansible.builtin.file:
-   path: "{{ item }}"
-   state: directory
-   mode: 0750
-   owner: karma
-   group: karma
+    path: "{{ item }}"
+    state: directory
+    mode: 0750
+    owner: karma
+    group: karma
   loop:
-   - /etc/karma/
+    - /etc/karma/
 
 - name: Template <|> Generate /etc/karma/karma.yml
   ansible.builtin.template:
@@ -53,7 +53,8 @@
   tags:
     - template
 
-- meta: flush_handlers
+- name: meta <|> Run handler tasks
+  ansible.builtin.meta: flush_handlers
 
 - name: service <|> Manage karma service state
   ansible.builtin.service:

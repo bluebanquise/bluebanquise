@@ -47,21 +47,7 @@
   tags:
     - package
 
-<<<<<<< HEAD:roles/core/keepalived/tasks/main.yml
 - name: "template <|> Generate {{ keepalived_conf_file }}"
-=======
-- name: file <|> Create /var/log/rsyslog directory
-  ansible.builtin.file:  # noqa risky-file-permissions
-    path: /var/log/rsyslog
-    setype: var_log_t
-    state: directory
-    recurse: yes
-  when:
-    - ansible_facts.os_family == "RedHat"
-    - ansible_facts.selinux.status == "enabled"
-
-- name: "template <|> Generate {{ log_server_rsyslog_conf_path }}"
->>>>>>> 3d255f14a4c00b7d47aa29df356a38f1dd442dad:roles/core/log_server/tasks/main.yml
   ansible.builtin.template:
     src: keepalived.conf.j2
     dest: "{{ keepalived_conf_file }}"

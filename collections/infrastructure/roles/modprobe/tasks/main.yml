@@ -4,4 +4,4 @@
     name: "{{ item.name }}"
     params: "{{ item.params | default(omit) }}"
     state: "{{ item.state | default(omit) }}"
-  loop: "{{ modprobe }}"
+  loop: "{{ modprobe | default([]) }}"

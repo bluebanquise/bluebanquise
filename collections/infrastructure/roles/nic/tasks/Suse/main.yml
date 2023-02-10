@@ -21,7 +21,7 @@
   tags:
     - service
 
-- name: nmcli <|> Set NICs configuration
+- name: nmcli <|> Set NICs configuration # noqa args[module]
   community.general.nmcli:
     # Tuned
     conn_name: "{{ item.conn_name | default(item.interface) | string }}"

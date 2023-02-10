@@ -18,7 +18,7 @@
     - item not in current_kernel_parameters.stdout
 
 - name: sysctl <|> Update sysctl parameters
-  ansible.builtin.sysctl:
+  ansible.posix.sysctl:
     name: "{{ item.key }}"
     value: "{{ item.value }}"
     state: present

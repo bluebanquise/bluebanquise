@@ -1,0 +1,7 @@
+---
+ep_firewall: false
+ep_equipment_type: server
+ep_host_authentication:
+  - protocol: IPMI
+    user: ADMIN
+    password: ADMIN

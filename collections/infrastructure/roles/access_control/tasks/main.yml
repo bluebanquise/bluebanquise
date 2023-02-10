@@ -23,6 +23,13 @@
   tags:
     - always
 
+- name: "package <|> Install {{ access_control_packages_to_install | default([]) | join(' ') }}"
+  ansible.builtin.package:
+    name: "{{ access_control_packages_to_install | default([]) }}"
+    state: present
+  tags:
+    - package
+
 - name: include_tasks <|> Use OS dedicated task
   ansible.builtin.include_tasks: "{{ item }}"
   with_first_found:

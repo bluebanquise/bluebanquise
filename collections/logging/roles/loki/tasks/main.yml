@@ -76,8 +76,9 @@
     owner: root
     group: root
     mode: "0644"
-  notify: restart loki
-  register: loki_service_rslt
+  notify:
+    - systemd <|> Reload systemd configuration
+    - restart loki
 
 - name: "template <|> Create /etc/systemd/system/promtail.service"
   template:
@@ -86,12 +87,9 @@
     owner: root
     group: root
     mode: "0644"
-  notify: restart promtail
-  register: promtail_service_rslt
-
-- name: "command <|> Reload systemd"
-  command: systemctl daemon-reload
-  when: loki_service_rslt.changed or promtail_service_rslt.changed
+  notify:
+    - systemd <|> Reload systemd configuration
+    - restart promtail
 
 - name: "file <|> Create loki conf dir {{ loki_conf_dir }}"
   file:
@@ -109,7 +107,7 @@
 
 - name: "set_fact <|> Set period start date if {{ loki_data_dir }} does not exist"
   set_fact:
-    loki_from_date: "{{ lookup('pipe', 'date +%Y-%m-%d') }}" 
+    loki_from_date: "{{ lookup('pipe', 'date +%Y-%m-%d') }}"
   when: not dir_rslt.stat.exists
 
 - name: "set_fact <|> Set period start date based on {{ loki_data_dir }} ctime"
@@ -181,4 +179,3 @@
     name: promtail
     state: started
     enabled: true
-

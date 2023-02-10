@@ -1,6 +1,6 @@
 ---
 - name: preflight <|> Check if grafana port is not already in use
-  listen_ports_facts:
+  community.general.listen_ports_facts:
   when: ansible_version.major > 2 and ansible_version.minor >= 9
 
 - name: preflight <|> Fail if defined port is already used by another application

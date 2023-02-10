@@ -39,7 +39,7 @@ def write_list_to_file(list1, filepath, check_mode):
     f.close()
 
 
-def check_milliseconds_field_is_digit(networkd,  name):
+def check_milliseconds_field_is_digit(networkd, name):
     networkd_field = getattr(networkd, name)
     if networkd_field is not None and not networkd_field.isdigit():
         msg = name + " should only contain numbers representing milliseconds"
@@ -190,11 +190,11 @@ def main():
             dns4=dict(type='list', elements='str'),
             method4=dict(type='str',
                          choices=[
-                          'auto',
-                          'link-local',
-                          'manual',
-                          'shared',
-                          'disabled'
+                             'auto',
+                             'link-local',
+                             'manual',
+                             'shared',
+                             'disabled'
                          ]),
             mode=dict(type='str', default='balance-rr',
                       choices=[
