@@ -28,6 +28,11 @@ To do so, define `hosts_file_external_hosts` this way:
 hosts_file_external_hosts:
   myhost: 10.10.10.10
   mysecondhost: 7.7.7.7
+  mythirdhost:
+    ip: 10.10.10.33
+    alias:
+      - machine3
+      - extmachine3
 ```
 
 This role is using `hosts_file_domaine_name` variable to set FQDN. Default is **cluster.local**.
@@ -35,6 +40,7 @@ Note that `hosts_file_domaine_name` is precedenced by the global variable `bb_do
 
 ## Changelog
 
+* 1.3.1: Update to BB 2.0 format. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.3.0: Add optional alias to every interface. Matthieu Isoard <indigoping4cgmi@gmail.com>
 * 1.2.0: Update to BB 2.0 format. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>

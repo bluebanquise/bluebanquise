@@ -2,11 +2,11 @@
 
 # Provides UDP syslog reception
 $ModLoad imudp
-$UDPServerRun {{ rsyslog_server_port }}
+$UDPServerRun {{ rsyslog_port }}
 
 # Provides TCP syslog reception
 $ModLoad imtcp
-$InputTCPServerRun {{ rsyslog_server_port }}
+$InputTCPServerRun {{ rsyslog_port }}
 
 
 #### RULES ####

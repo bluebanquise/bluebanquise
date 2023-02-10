@@ -1,2 +1,4 @@
 ---
 rsyslog_port: 514
+
+rsyslog_client_verbosity: "info"

@@ -67,7 +67,7 @@ if [ "$VERSION_ID" == "7" ]; then
 fi
 if [ "$PLATFORM_ID" == "platform:el8" ]; then
   sudo dnf install git python39 python39-pip python3-policycoreutils openssh-clients -y
-  alternatives --set python3 /usr/bin/python3.9
+  sudo alternatives --set python3 /usr/bin/python3.9
 fi
 if [ "$PLATFORM_ID" == "platform:el9" ]; then
   sudo dnf install git python3 python3-pip python3-pip python3-policycoreutils openssh-clients -y

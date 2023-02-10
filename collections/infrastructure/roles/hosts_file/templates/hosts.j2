@@ -20,7 +20,7 @@
     {% endfor %}
   {% endif %}
 
-  {%- if host_j2_node_main_resolution_address is not none and (host_j2_node_main_resolution_address | ansible.utils.ipaddr) %}
+  {% if host_j2_node_main_resolution_address is not none and (host_j2_node_main_resolution_address | ansible.utils.ipaddr) %}
 {{ host_j2_node_main_resolution_address }} {{ host }} {{ host }}.{{ bb_domain_name | default(hosts_file_domaine_name) }} {{ alias_list|join(' ') }}
   {% endif %}  
 
@@ -51,5 +51,15 @@
 ## External hosts
 
 {% for host in (hosts_file_external_hosts | sort) %}
+  {% if 'ip' in hosts_file_external_hosts[host] %}
+    {% set ipstr = hosts_file_external_hosts[host]['ip'] %}
+    {% if 'alias' in hosts_file_external_hosts[host] %}
+      {% set hoststr = host ~ " " ~ hosts_file_external_hosts[host]['alias']|join(" ") %}
+    {% else %}
+      {% set hoststr = host %}
+    {% endif %}
+{{ ipstr }} {{ hoststr }}
+  {% else %}
 {{ hosts_file_external_hosts[host] }} {{ host }}
+  {% endif %}
 {% endfor %}

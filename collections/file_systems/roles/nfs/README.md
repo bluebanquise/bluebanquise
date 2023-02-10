@@ -142,6 +142,7 @@ which is a list of sebooleans to activate.
 
 ## Changelog
 
+* 1.4.1: Update to BB 2.0 format. Pierre Gay <pierre.gay@u-bordeaux.fr>, Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>
 * 1.4.0: Merged client and server. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.2.0: Added OpenSUSE 15 support. Neil Munday <neil@mundayweb.com>

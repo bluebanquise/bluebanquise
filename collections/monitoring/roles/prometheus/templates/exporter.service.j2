@@ -8,7 +8,7 @@
   Group={{ item.group | default('root') }}
   Type=simple
   WorkingDirectory=/etc/{{ item.service }}/
-  ExecStart={{ item.path | default('/usr/local/bin/'+item.service) }} \
+  ExecStart={{ item.path | default('/bin/'+item.service) }} \
   {{ item.launch_parameters | default('') | indent(2, True) }}
 
 [Install]

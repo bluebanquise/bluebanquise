@@ -147,6 +147,7 @@ for a group of hosts or even at hostvars level.
 
 ## Changelog
 
+* 1.8.1: Update to BB 2.0 format again. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.8.0: Update to BB 2.0 format. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.7.0: Add force main NIC and fix gateway. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.6.4: Improve idempotency of role pxe_stack. #sla31

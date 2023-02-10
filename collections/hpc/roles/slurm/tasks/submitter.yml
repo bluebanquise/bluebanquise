@@ -13,3 +13,15 @@
     - "{{ slurm_SrunPortRange }}"
   tags:
     - firewall
+
+- name: "template █ Generate configuration files in {{ slurm_home_path }}"
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "{{ slurm_home_path }}/{{ item }}"
+    owner: slurm
+    group: slurm
+    mode: 0644
+  tags:
+    - template
+  loop:
+    - slurm.conf

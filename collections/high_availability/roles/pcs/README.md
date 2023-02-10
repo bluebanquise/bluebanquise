@@ -142,6 +142,27 @@ high_availability_ha_cluster_password: root
 high_availability_ha_cluster_password_sha512: $6$M3crarMVoUV3rALd$ZTre2CIyss7zOb4lkLoG23As9OAkYPw2BM88Y1F43n8CCyV5XWwAYEwBOrS8bcCBIMjIPdJG.ndOfzWyAVR4j0
 ```
 
+You can hash your password easily using Python/Perl:
+
+*Python (>= 3.3):*
+
+```
+python -c 'import crypt; print(crypt.crypt("YOUR_HA_CLUSTER_PASSWD", crypt.mksalt(crypt.METHOD_SHA512)))'
+```
+
+*Python (2.x or 3.x):*
+
+```
+python -c "import crypt, getpass, pwd; \
+             print(crypt.crypt('YOUR_HA_CLUSTER_PASSWD', '\$6\$saltsalt\$'))"
+```
+
+*Perl:*
+
+```
+perl -e 'print crypt("YOUR_HA_CLUSTER_PASSWD","\$6\$saltsalt\$") . "\n"'
+```
+
 Now deploy the HA cluster with these parameters.
 
 Check cluster status after role deployment using:
@@ -585,6 +606,7 @@ not present. Then in HA resources, declare the following:
 
 ## 5. Changelog
 
+* 1.0.6: (docs): examples to hash cluster password with Python and Perl. Leo Araujo <lmagdanello40@gmail.com>
 * 1.0.5: Allow specification of name of the cluster. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.0.4: Allows order constraint between resource groups. Thiago Cardozo <thiago.cardozo@yahoo.com.br>
 * 1.0.3: Fix use of unencrypted password of hacluster user. Giacomo Mc Evoy <gino.mcevoy@gmail.com>

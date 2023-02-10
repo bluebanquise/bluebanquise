@@ -65,7 +65,7 @@
 
 - name: seport <|> Allow syslog port into SELinux
   community.general.seport:
-    ports: "{{ rsyslog_server_port }}"
+    ports: "{{ rsyslog_port }}"
     proto: "{{ item }}"
     setype: syslogd_port_t
     state: present

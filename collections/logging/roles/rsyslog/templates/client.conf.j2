@@ -25,7 +25,10 @@ local7.*                                                /var/log/boot.log
 
 #### FORWARD RULES ####
 
-{% if networks[j2_node_main_network] is defined networks[j2_node_main_network]['services'] is defined and networks[j2_node_main_network]['services']['log'] and networks[j2_node_main_network]['services']['log'] is iterable %}
+{% if networks[j2_node_main_network] is defined
+      and networks[j2_node_main_network]['services'] is defined
+      and networks[j2_node_main_network]['services']['log']
+      and networks[j2_node_main_network]['services']['log'] is iterable %}
     {% for rsyslog_server in networks[j2_node_main_network]['services']['log'] %}
         {% if (log_server.ip is defined and (log_server.ip | ansible.utils.ipaddr)) or (log_server.hostname is defined and rsyslog_server.hostname is not none) %}
 # ### begin forwarding rule ###
@@ -43,14 +46,14 @@ $ActionResumeRetryCount -1    # infinite retries if host is down
 *.* @@{{ rsyslog_server.hostname }}:{{ rsyslog_port }}
         {% endif %}
 # ### end of the forwarding rule ###
-
+        {% endif %}
     {% endfor %}
 {% elif networks[j2_node_main_network]['services_ip'] is defined and (networks[j2_node_main_network]['services_ip'] | ansible.utils.ipaddr) %}
 # ### begin forwarding rule ###
 # Remote Logging (we use TCP for reliable delivery)
 # An on-disk queue is created for this action. If the remote host is
 # down, messages are spooled to disk and sent when it is up again.
-$ActionQueueFileName fwdRule{{ loop.count }} # unique name prefix for spool files
+$ActionQueueFileName fwdRule # unique name prefix for spool files
 $ActionQueueMaxDiskSpace 1g   # 1gb space limit (use as much as possible)
 $ActionQueueSaveOnShutdown on # save messages to disk on shutdown
 $ActionQueueType LinkedList   # run asynchronously

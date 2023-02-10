@@ -2,3 +2,4 @@ ansible
 netaddr
 clustershell
 jmespath
+jinja2
