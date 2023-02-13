@@ -33,6 +33,8 @@
     - Fix error when ep_host_authentication does not contain IPMI credentials (#706)
   - dns_server:
     - Add recursion management. (#712)
+  - log_server:
+    - More precise rules for logroation;write log server local messages also in /var/log/;write app messages in /var/log/rsyslog/ (#784)
 
 ## 1.5.0
 
