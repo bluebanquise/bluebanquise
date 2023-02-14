@@ -234,6 +234,7 @@ To enable it on the slurm configuration its required to define `slurm_SelectType
 
 ## Changelog
 
+* 1.2.3: Fix old CamelCase variables. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.2.2: Improve partition definition readability in slurm.conf. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.2.1: Update to BB 2.0 format. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.2.0: Added GPU Gres configuration. Lucas Santos <lucassouzasantos@gmail.com>
