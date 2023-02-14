@@ -216,13 +216,13 @@ ep_hardware:
     - NVIDIA A100-SXM4-40GB
 ```
 
-To enable it on the slurm configuration its required to define `slurm_SelectType: "select/cons_tres"` and `slurm_gresTypes: gpu`. For example:
+To enable it on the slurm configuration its required to define `slurm_selecttype: "select/cons_tres"` and `slurm_grestypes: gpu`. For example:
 
 ```yaml
   slurm_cluster_name: bluebanquise
   slurm_control_machine: management1
-  slurm_SelectType: "select/cons_tres"
-  slurm_gresTypes: gpu
+  slurm_selecttype: "select/cons_tres"
+  slurm_grestypes: gpu
   slurm_computes_groups:
     - equipment_typeC
   slurm_partitions_list:
