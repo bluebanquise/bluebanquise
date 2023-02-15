@@ -10,7 +10,7 @@
     - ansible_facts.os_family == "RedHat"
     - ep_firewall | default(false) | bool
   loop:
-    - "{{ slurm_SrunPortRange }}"
+    - "{{ slurm_srunportrange }}"
   tags:
     - firewall
 

@@ -52,11 +52,11 @@
 
 - name: setup slurm db user # noqa no-tabs
   community.mysql.mysql_user:
-    name: "{{ slurm_StorageUser }}"
-    password: "{{ slurm_StoragePass }}"
+    name: "{{ slurm_storageuser }}"
+    password: "{{ slurm_storagepass }}"
     priv: 'slurm_acct_db.*:ALL'
     state: present
-  when: "('localhost\t' + slurm_StorageUser) not in slurm_database_user_exist.stdout_lines"
+  when: "('localhost\t' + slurm_storageuser) not in slurm_database_user_exist.stdout_lines"
 
 - name: service <|> Manage slurmdbd state
   ansible.builtin.service:
