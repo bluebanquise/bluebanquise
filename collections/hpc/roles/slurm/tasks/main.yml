@@ -67,8 +67,8 @@
     mode: 0755
   loop:
     - /var/log/slurm
-    - "{{ slurm_SlurmdSpoolDir }}"
-    - "{{ slurm_StateSaveLocation }}"
+    - "{{ slurm_slurmdspooldir }}"
+    - "{{ slurm_statesavelocation }}"
 
 # Setup slurm controller
 

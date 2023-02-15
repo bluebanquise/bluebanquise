@@ -13,12 +13,12 @@ SlurmUser=slurm
 DbdHost=localhost
 
 ## Log and pid
-LogFile={{ slurm_SlurmdbdLogFile }}
-DebugLevel={{ slurm_SlurmdbdDebug }}
+LogFile={{ slurm_slurmdbdlogfile }}
+DebugLevel={{ slurm_slurmdbddebug }}
 PidFile=/var/run/slurmdbd.pid
 
 ## Storage
 StorageType=accounting_storage/mysql
-StorageUser={{ slurm_StorageUser }}
-StoragePass={{ slurm_StoragePass }}
+StorageUser={{ slurm_storageuser }}
+StoragePass={{ slurm_storagepass }}
 

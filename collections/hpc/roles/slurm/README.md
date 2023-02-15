@@ -216,13 +216,13 @@ ep_hardware:
     - NVIDIA A100-SXM4-40GB
 ```
 
-To enable it on the slurm configuration its required to define `slurm_SelectType: "select/cons_tres"` and `slurm_gresTypes: gpu`. For example:
+To enable it on the slurm configuration its required to define `slurm_selecttype: "select/cons_tres"` and `slurm_grestypes: gpu`. For example:
 
 ```yaml
   slurm_cluster_name: bluebanquise
   slurm_control_machine: management1
-  slurm_SelectType: "select/cons_tres"
-  slurm_gresTypes: gpu
+  slurm_selecttype: "select/cons_tres"
+  slurm_grestypes: gpu
   slurm_computes_groups:
     - equipment_typeC
   slurm_partitions_list:
@@ -234,6 +234,7 @@ To enable it on the slurm configuration its required to define `slurm_SelectType
 
 ## Changelog
 
+* 1.2.3: Fix old CamelCase variables. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.2.2: Improve partition definition readability in slurm.conf. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.2.1: Update to BB 2.0 format. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.2.0: Added GPU Gres configuration. Lucas Santos <lucassouzasantos@gmail.com>
