@@ -18,6 +18,8 @@
     - Support gpgkey for Ubuntu (#762)
   - rsyslog:
     - More precise rules for logroation;write log server local messages also in /var/log/;write app messages in /var/log/rsyslog/ (#771)
+	- PR #771 was wrongly partially applied to legacy role (#783)
+	- Fixed rsyslog service restart command (#787)
 
 ## 1.6.0
 
