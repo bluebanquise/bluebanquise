@@ -1,4 +1,4 @@
-warn_list:
+# warn_list:
 verbosity: 1
 skip_list:
   - role-name  # Role name {0} does not match ``^[a-z][a-z0-9_]+$`` pattern
