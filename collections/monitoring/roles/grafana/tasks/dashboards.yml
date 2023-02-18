@@ -62,7 +62,7 @@
     hidden: true
     patterns:
       - "*.json"
-  register: _dashboards_present
+  register: dashboards_present
   when: grafana_provisioning_synced
 
 - name: dashboards <|> Import grafana dashboards
@@ -73,13 +73,13 @@
     mode: 0644
   with_fileglob:
     - "{{ grafana_dashboards_dir }}/*.json"
-  register: _dashboards_copied
+  register: dashboards_copied
   notify: "provisioned dashboards changed"
 
 - name: dashboards <|> Get dashboard lists
   ansible.builtin.set_fact:
-    _dashboards_present_list: "{{ _dashboards_present | json_query('files[*].path') | default([]) }}"
-    _dashboards_copied_list: "{{ _dashboards_copied | json_query('results[*].dest') | default([]) }}"
+    dashboards_present_list: "{{ dashboards_present | json_query('files[*].path') | default([]) }}"
+    dashboards_copied_list: "{{ dashboards_copied | json_query('results[*].dest') | default([]) }}"
   when: grafana_provisioning_synced
 
 - name: dashboards <|> Remove dashboards not present on deployer machine (synchronize)
@@ -87,5 +87,5 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: absent
-  with_items: "{{ _dashboards_present_list | difference( _dashboards_copied_list ) }}"
+  with_items: "{{ dashboards_present_list | difference( dashboards_copied_list ) }}"
   when: grafana_provisioning_synced
