@@ -1,4 +1,12 @@
 ---
+
+- name: "lineinfile <|> Ensure firewalld config AllowZoneDrifting={{ firewall_firewalld_allow_zone_drifting | ternary('yes', 'no') }}"
+  ansible.builtin.lineinfile:
+    path: /etc/firewalld/firewalld.conf
+    regexp: "^AllowZoneDrifting=.*$"
+    line: "AllowZoneDrifting={{ firewall_firewalld_allow_zone_drifting | ternary('yes', 'no') }}"
+  notify: service <|> Restart firewall services
+
 - name: fail <|> Check presence of required parameters
   ansible.builtin.fail:
     msg: "Bailing out.
