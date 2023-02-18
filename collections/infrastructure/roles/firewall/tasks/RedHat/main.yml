@@ -1,10 +1,10 @@
 ---
 
-- name: "lineinfile <|> Ensure firewalld config AllowZoneDrifting={{ firewalld_allow_zone_drifting | ternary('yes', 'no') }}"
+- name: "lineinfile <|> Ensure firewalld config AllowZoneDrifting={{ firewall_firewalld_allow_zone_drifting | ternary('yes', 'no') }}"
   ansible.builtin.lineinfile:
     path: /etc/firewalld/firewalld.conf
     regexp: "^AllowZoneDrifting=.*$"
-    line: "AllowZoneDrifting={{ firewalld_allow_zone_drifting | ternary('yes', 'no') }}"
+    line: "AllowZoneDrifting={{ firewall_firewalld_allow_zone_drifting | ternary('yes', 'no') }}"
   notify: service <|> Restart firewall services
 
 - name: fail <|> Check presence of required parameters

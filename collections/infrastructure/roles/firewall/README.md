@@ -113,8 +113,8 @@ Optional inventory vars:
 
 Optional role vars:
 
-* firewalld_allow_zone_drifting: Enforce the state of Firewalld AllowZoneDrifting configuration
-option (default: `false`)
+* firewall_firewalld_allow_zone_drifting: Enforce the state of Firewalld
+AllowZoneDrifting configuration option (default: `false`)
 
 ## Output
 
