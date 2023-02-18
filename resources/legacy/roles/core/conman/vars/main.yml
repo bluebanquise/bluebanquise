@@ -1,8 +1,0 @@
----
-conman_role_version: 1.3.0
-
-conman_execpath: "/usr/lib/conman/exec"
-
-conman_packages_to_install:
-  - conman
-  - ipmitool

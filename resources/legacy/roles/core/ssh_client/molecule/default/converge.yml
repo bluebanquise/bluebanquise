@@ -1,7 +1,0 @@
----
-- name: Converge
-  hosts: molecule_platform
-  tasks:
-    - name: "Include ssh_client"
-      include_role:
-        name: "ssh_client"

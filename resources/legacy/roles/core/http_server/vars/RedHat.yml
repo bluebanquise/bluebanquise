@@ -1,8 +1,0 @@
----
-http_server_packages_to_install:
-  - httpd
-http_server_services_to_start:
-  - httpd
-http_server_firewall_services_to_add:
-  - http
-http_server_apache_conf_path: /etc/httpd/conf.d

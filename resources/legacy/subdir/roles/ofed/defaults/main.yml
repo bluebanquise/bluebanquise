@@ -1,6 +1,0 @@
----
-# defaults file for ofed
-ofed_memlock_soft: 'unlimited'
-ofed_memlock_hard: 'unlimited'
-ofed_client: false
-ofed_subnet_manager: false

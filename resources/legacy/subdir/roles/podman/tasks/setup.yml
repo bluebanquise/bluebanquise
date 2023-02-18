@@ -1,5 +1,0 @@
----
-- name: setup █ Install podman packages
-  ansible.builtin.package:
-    name: "{{ podman_packages_to_install }}"
-    state: present
