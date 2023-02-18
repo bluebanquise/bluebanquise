@@ -1,8 +1,0 @@
----
-nic_packages_to_install:
-  - NetworkManager
-#  - NetworkManager-connection-editor
-  - python3-dbus-python
-  - typelib-1_0-NM-1_0
-nic_services_to_start:
-  - NetworkManager

@@ -1,9 +1,0 @@
----
-- name: Prepare
-  hosts: all
-
-  tasks:
-    - name: "Umount Docker's /etc/resolv.conf"
-      mount:
-        path: /etc/resolv.conf
-        state: unmounted

@@ -1,9 +1,0 @@
----
-- name: Converge
-  hosts: all
-  vars:
-    domain_name: bluebanquise.local
-  tasks:
-    - name: "Include set_hostname"
-      include_role:
-        name: "set_hostname"

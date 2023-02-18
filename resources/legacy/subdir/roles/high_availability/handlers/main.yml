@@ -1,4 +1,0 @@
-
-- name: command █ Push HA configuration
-  ansible.builtin.command: "pcs cluster cib-push {{ high_availability_cib_file_path }}"
-
