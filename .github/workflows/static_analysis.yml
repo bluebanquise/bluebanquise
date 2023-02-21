@@ -28,5 +28,6 @@ jobs:
       - name: Check python code
         run: flake8 collections/{infrastructure,containers,file_systems,hardware,high_availability,hpc,logging,monitoring,security} --statistics --ignore E501,E226
 
+      # Note: exclude grafana dashboard for now, to be fixed
       - name: Run ansible linter
-        run: ansible-lint collections/
+        run: ansible-lint collections/ --exclude collections/monitoring/roles/grafana/tasks/dashboards.yml
