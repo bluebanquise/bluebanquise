@@ -21,10 +21,11 @@
   tags:
     - always
 
-- name: "package <|> Install {{ slurm_packages_to_install[slurm_profile] | join(' ') }}"
+- name: "package <|> Install required Slurm packages"
   ansible.builtin.package:
     name: "{{ slurm_packages_to_install[slurm_profile] }}"
     state: present
+  when: slurm_profile is defined and slurm_profile is not none
   tags:
     - package
 

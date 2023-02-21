@@ -45,3 +45,7 @@ slurm_mpidefault: pmi2
 # slurm_slurm_conf_additional_content:
 #   - tmpfs=/scratch
 #   - AccountingstorageEnforce=associations
+
+## Munge
+
+# slurm_munge_key_b64: # User need to define it, would be too risky to provide one

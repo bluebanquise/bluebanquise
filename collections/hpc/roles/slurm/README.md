@@ -24,15 +24,49 @@ Note: this role requires *bluebanquise_filters* package to be installed.
 ### Munge key
 
 **IMPORTANT**: before using the role, first thing to do is to generate a
-new munge key file. To do so, generate a new munge.key file using:
+new munge key file. This file need to be the same on all nodes of the Slurm cluster, and so need to be spread by the role.
 
-```bash
-dd if=/dev/urandom bs=1 count=1024 > munge.key
-mungekey -c -k /etc/bluebanquise/roles/community/slurm/files/munge.key
+The role do not provide default munge key file, as it is considered a security risk.
+
+The role supports currently 2 ways to provide key file:
+
+* Provide plain file into `files` subfolder of executed playbook folder
+* Provide base64 encoded string
+
+First step for both methods is to generate a new munge.key file locally using (note that you need munge package to be installed on your system):
+
+```
+mungekey -c -k munge.key
 ```
 
-I do not provide default munge key file, as it is considered a security risk.
-(Too much users were using the example key).
+Then, next step depends of method choose.
+
+#### Provide plain file
+
+Assuming your playbooks folder is `$HOME/playbooks`, create a `files` subfolder, and place your key inside:
+
+```
+mkdir -p $HOME/playbooks/files
+mv munge.key $HOME/playbooks/files/munge.key
+```
+
+Role will spread this file across all nodes of the Slurm cluster.
+
+#### Provide base64 encoded string
+
+Get base64 encoded string from the key, using:
+
+```
+base64 -w 0 munge.key
+```
+
+You should get long string as a result (example, but DO NOT USE IT!! : `hYcbkjJgv5YyybNqKbo+JvXLakIY2zFcZhpopipS8JmLmeE3YHgMcbUO74LIGKqzpIgD7ILPgUKmzgSl8BOK9WHQcMxywvh2fY567+4TyEq/HEArVfqdsIPw1U/jodDt2DL3MTNvci5hTJ8JNJZZKrjJc2x/FBlF52hAt+KLm+g=`). Copy it (beware not copying anything, as the command do not generate a new line at the end), and create a variable called `slurm_munge_key_b64` in the inventory, with the copied string as content:
+
+```yaml
+slurm_munge_key_b64: hYcbkjJgv5YyybNqKbo+JvXLakIY2zFcZhpopipS8JmLmeE3YHgMcbUO74LIGKqzpIgD7ILPgUKmzgSl8BOK9WHQcMxywvh2fY567+4TyEq/HEArVfqdsIPw1U/jodDt2DL3MTNvci5hTJ8JNJZZKrjJc2x/FBlF52hAt+KLm+g=
+```
+
+Role will decode this string to generate key on all nodes of the Slurm cluster.
 
 ### Apply role
 
