@@ -62,3 +62,7 @@
       tags: update_reboot
     - role: bluebanquise.infrastructure.users
       tags: users
+
+    # HPC
+    - role: bluebanquise.hpc.slurm
+      tags: slurm
