@@ -65,3 +65,16 @@
     state: "{{ (start_services | bool) | ternary('started', omit) }}"
   tags:
     - service
+
+- name: "firewalld <|> Add Slurmdbd ports to firewall's {{ slurm_firewall_zone | default('public') }} zone"
+  ansible.posix.firewalld:
+    zone: "{{ slurm_firewall_zone | default('public') }}"
+    port: "{{ slurm_slurmdbd_port }}/tcp"
+    immediate: "yes"
+    permanent: "yes"
+    state: enabled
+  when:
+    - ansible_facts.os_family == "RedHat"
+    - ep_firewall | default(false) | bool
+  tags:
+    - firewall
