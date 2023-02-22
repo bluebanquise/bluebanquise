@@ -66,3 +66,5 @@
     # HPC
     - role: bluebanquise.hpc.slurm
       tags: slurm
+      vars:
+        slurm_profile: controller
