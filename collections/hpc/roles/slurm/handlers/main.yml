@@ -9,4 +9,4 @@
     state: restarted
   when:
     - "'service' not in ansible_skip_tags"
-    - (start_services | bool)
+    - slurm_start_services | default(bb_start_services) | default(true) | bool

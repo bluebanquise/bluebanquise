@@ -41,6 +41,8 @@ mungekey -c -k munge.key
 
 Then, next step depends of method choose.
 
+In any case, if your `inventory` or `playbooks/files/` folders are hosted on a sensitive server or stored in a version controlled repository (git, ...), you should **strongly** consider encrypting the key file or the inventory files with an [Ansible Vault](https://docs.ansible.com/ansible/latest/vault_guide/index.html).
+
 #### Provide plain file
 
 Assuming your playbooks folder is `$HOME/playbooks`, create a `files` subfolder, and place your key inside:
