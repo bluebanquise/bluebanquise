@@ -10,7 +10,7 @@ slurm_packages_to_install:
   accounting:
     - mariadb
     - mariadb-server
-    - python3-mysqlclient
+    - python3-mysql
     - slurm-slurmdbd
   compute:
     - munge

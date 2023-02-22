@@ -1,4 +1,6 @@
 ---
+slurm_cluster_name: bluebanquise
+
 ## Computes configuration way to use (configfull vs configless)
 slurm_computes_config: configfull
 

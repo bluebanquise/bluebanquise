@@ -2,6 +2,8 @@
 - name: systemd <|> Reload systemd configuration
   ansible.builtin.systemd:
     daemon_reload: yes
+  when:
+    - "'service' not in ansible_skip_tags"
 
 - name: service <|> Restart munge
   ansible.builtin.service:
