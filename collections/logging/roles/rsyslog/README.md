@@ -80,6 +80,7 @@ log_client_configuration_files:
 
 ## Changelog
 
+* 1.4.3: Proper command to restart rsyslog post rotation. Thiago Cardozo <boubee.thiago@gmail.com>
 * 1.4.2: Update to BB 2.0 format. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.4.1: Register server local apps locally;more precise logrotate wildcards. <boubee.thiago@gmail.com>
 * 1.4.0: Merge both client and server. Benoit Leveugle <benoit.leveugle@gmail.com>
