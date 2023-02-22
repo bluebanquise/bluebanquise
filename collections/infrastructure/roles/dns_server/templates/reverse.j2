@@ -17,7 +17,7 @@ $INCLUDE "{{ dns_server_named_dir }}/{{ item }}.rr.soa"
     {% for nic in host_dict['network_interfaces'] %}
       {% if nic.network is defined and nic.ip4 is defined and (networks[nic.network].is_in_dns | default(true)) and nic.ip4 is not none and (nic.ip4 | ansible.utils.ipaddr) and nic.ip4.split('.')[0:3]|join('.') == item %}
 {{ create_record(nic.ip4, [[host, nic.network]|join('-'), bb_domain_name | default(dns_server_domaine_name)] | join('.')) }}
-        {% if item == host_j2_node_main_resolution_network %}
+        {% if host_j2_node_main_resolution_address.split('.')[0:3]|join('.') == item %}
 {{ create_record(nic.ip4, [host, bb_domain_name | default(dns_server_domaine_name)] | join('.')) }}
         {% endif %}
       {% endif %}

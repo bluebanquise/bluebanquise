@@ -1,9 +1,0 @@
-#### Blue Banquise file ####
-## {{ ansible_managed }}
-
-{% for section in nfs_server_tuning %}
-[{{ section }}]
-  {% for parameter, parameter_value in nfs_server_tuning[section].items() %}
-{{ parameter }}={{ parameter_value }}
-  {% endfor %}
-{% endfor %}

@@ -1,5 +1,5 @@
 ---
-dns_server_role_version: 1.7.0
+dns_server_role_version: 1.7.1
 
 j2_dns_server_get_first_octets: "
 {%- set ip_networks = [] -%}

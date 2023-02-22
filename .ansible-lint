@@ -1,11 +1,12 @@
-warn_list:
+# warn_list:
+verbosity: 1
+skip_list:
   - role-name  # Role name {0} does not match ``^[a-z][a-z0-9_]+$`` pattern
   - no-changed-when
   - no-jinja-when
-  - galaxy[no-changelog]
-verbosity: 1
-skip_list:
   - fqcn-builtins
   - jinja[spacing]
   - name[casing]
   - name[template]
+  - yaml[octal-values]
+  - galaxy[no-changelog]

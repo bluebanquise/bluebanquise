@@ -111,14 +111,22 @@ Optional inventory vars:
     * icmp_block_inversion (bool)
     * masquerade           (bool)
 
+Optional role vars:
+
+* firewall_firewalld_allow_zone_drifting: Enforce the state of Firewalld
+AllowZoneDrifting configuration option (default: `false`)
+
 ## Output
 
 Package installed:
 
 * firewall
 
+
+
 ## Changelog
 
+* 1.3.0: Add firewalld_allow_zone_drifting variable. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.2.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.3: Add OpenSuSE support. Neil Munday <neil@mundayweb.com>
 * 1.1.2: Adapt role to handle multiple distributions. Benoit Leveugle <benoit.leveugle@gmail.com>

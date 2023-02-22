@@ -1,10 +1,10 @@
 ---
 name: EL9
 on:
-  # push:
-  #   branches:
-  #     - master
-  # pull_request:
+  push:
+    branches:
+      - master
+  pull_request:
 
 jobs:
   roles:
