@@ -60,7 +60,7 @@ SelectTypeParameters=CR_Core_Memory,CR_CORE_DEFAULT_DIST_BLOCK,CR_ONE_TASK_PER_C
 {% endif %}
 {% if slurm_enable_accounting %}
 ## Accounting
-AccountingStorageHost=localhost
+AccountingStorageHost={{ slurm_control_machine }}
 AccountingStorageType=accounting_storage/slurmdbd
 JobAcctGatherType=jobacct_gather/linux
 {% endif %}
