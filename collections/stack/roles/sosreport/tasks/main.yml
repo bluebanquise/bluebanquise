@@ -46,7 +46,7 @@
 
 - name: sosreport <|> Generate sosreport binary file
   ansible.builtin.template:
-    src: sosreport.sh.j2
+    src: bluebanquise-sosreport.sh.j2
     dest: "{{ sosreport_binary_path }}/{{ sosreport_binary_name }}"
     owner: root
     group: root

@@ -1,0 +1,5 @@
+---
+sosreport_binary_path: /usr/local/bin
+sosreport_binary_name: bluebanquise-sosreport
+sosreport_output_path: /var/logs/bluebanquise-sosreport
+sosreport_tempfile_path: /tmp/bluebanquise-sosreport

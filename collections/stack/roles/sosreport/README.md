@@ -2,7 +2,7 @@
 
 ## Description
 
-This role installs the sos CLI & support script used to gather cluster information for support purpose.
+This role installs the sos CLI & support script used to gather cluster information for support purpose: bluebanquise-sosreport
 
 ## Instruction
 
@@ -13,8 +13,8 @@ Some variables may be tweaked if necessary:
 ```
 $ cat defaults/main.yml
 sosreport_binary_path: /usr/local/bin
-sosreport_binary_name: sosreport-bb
-sosreport_output_path: /tmp/sosreport
+sosreport_binary_name: bluebanquise-sosreport
+sosreport_output_path: /tmp/bluebanquise-sosreport
 sosreport_tempfile_path: /tmp
 ```
 
@@ -23,13 +23,13 @@ sosreport_tempfile_path: /tmp
 ```
 $ cat playbooks/sosreport.yml
 - name: Install and configure sosreport
-  hosts: "mg_managements, mg_logins, mg_computes"
+  hosts: "mg_managements"
   roles:
     - name: sosreport
 
 $ ansible-playbook playbooks/sosreport.yml
 
-$ sosreport-bb
+$ bluebanquise-sosreport
 Package manager: dnf
 === Checking script dependencies
 === Checking node dependencies
@@ -43,14 +43,14 @@ compute1002 : Generating sos report...
 compute10025 : Generating sos report...
 compute10006 : Generating sos report...
 ...
-/tmp/sosreport/sos_error_logs.txt
-/tmp/sosreport/sos-collector-2023-01-30-svfbp.tar.xz
+/tmp/bluebanquise-sosreport/sos_error_logs.txt
+/tmp/bluebanquise-sosreport/sos-collector-2023-01-30-svfbp.tar.xz
 
 ######################################################################
 ##
 ## INFO - Please MANUALLY delete temporary report files: /tmp/sosreport
-## Please send the /var/logs/sosreport/sosreport-2023-01-30.tgz file to Support team
-## with the SHA1: 0262e1d8304ad4023c268c39e6b9213ce4de2fce  /var/logs/sosreport/sosreport-2023-01-30.tgz
+## Please send the /var/logs/bluebanquise-sosreport/bluebanquise-sosreport-2023-01-30.tgz file to Support team
+## with the SHA1: 0262e1d8304ad4023c268c39e6b9213ce4de2fce  /var/logs/bluebanquise-sosreport/bluebanquise-sosreport-2023-01-30.tgz
 ##
 ######################################################################
 ```
