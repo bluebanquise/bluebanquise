@@ -42,7 +42,7 @@
     mode: 0755
     group: root
     owner: root
-  when: output_path.stat.exists == false
+  when: not output_path.stat.exists
 
 - name: sosreport <|> Generate sosreport binary file
   ansible.builtin.template:
