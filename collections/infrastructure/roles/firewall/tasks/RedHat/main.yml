@@ -21,11 +21,25 @@
 - name: "firewalld <|> Ensure firewall zones exist"
   ansible.posix.firewalld:
     zone: "{{ networks[item]['firewall']['zone'] }}"
-    permanent: yes
+    permanent: true
     state: present
   when: networks[item]['firewall']['zone'] is defined
   loop: "{{ (network_interfaces | map(attribute='network') | list) }}"
   notify: service <|> Restart firewall services
+
+- name: "firewalld <|> Ensure interfaces are in the correct firewall zone"
+  ansible.posix.firewalld:
+    interface: "{{ item.interface }}"
+    zone: "{{ networks[item.network]['firewall']['zone'] }}"
+    permanent: true
+    immediate: true
+    state: enabled
+  when: networks[item.network]['firewall']['zone'] is defined
+  loop: "{{ network_interfaces }}"
+  loop_control:
+    label: "{{ item.interface }} -> {{ networks[item.network]['firewall']['zone'] }}"
+  notify: service <|> Restart firewall services
+
 
 - name: meta <|> Run handler tasks to restart firewall services
   ansible.builtin.meta: flush_handlers
