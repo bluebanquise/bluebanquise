@@ -77,7 +77,8 @@ fi
 # Add id_ed25519 public key to authorized keys
 if [[ ! -f "${HOME}/.ssh/authorized_keys" ]]; then
   cp "${HOME}/.ssh/id_ed25519.pub"\
-    "${HOME}/.ssh/authorized_keys"
+     "${HOME}/.ssh/authorized_keys"
+  chmod 600 "${HOME}/.ssh/authorized_keys"
 else
   if ! grep -q -f "${HOME}/.ssh/id_ed25519.pub"\
        "${HOME}/.ssh/authorized_keys";
