@@ -61,35 +61,30 @@ group_quotas_default_hard: 6G
 
 - Trird task - Set specific quotas for users or groups
 
-```
 Third task defines specific users and groups with their required mount points and 
 dimension values.
-```
 
-- Example Inventory variables 
-  .. code-block:: yaml
+```yml
   quota_filesystem:
-     -name: FS1
-      mountpoint: XXXXXX
+   -name: FS1
+    mountpoint: XXXXXX
 
-     -name: FS2
-      mountpoint: XXXXXX
-
-
- .. code-block:: yaml
-      quotas_spec:
-      - type: user
-        name: nobody
-        mountpoint: XXXXXX
-        bsoft: 5G
-        hard: 6G 
-
-      - type: group
-        name: nobody
-        mountpoint: YYYYYY
-        soft: 5G
-        hard: 6G
- 
+   -name: FS2
+    mountpoint: XXXXXX
+    
+  quotas_spec:
+   - type: user
+     name: nobody
+     mountpoint: XXXXXX
+     bsoft:5G
+     hard:6G
+  
+  - type: group
+    name: nobody
+    mountpoint: YYYYYY
+    soft: 5G
+    hard: 6G
+ ```
 
 
 
