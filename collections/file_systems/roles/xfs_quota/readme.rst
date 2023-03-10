@@ -68,26 +68,27 @@ dimension values.
 
 - Example Inventory variables 
 
-.. code-block:: yaml
+ .. code-block:: yaml
 
-quota_filesystem:
--name: FS1
- mountpoint: XXXXXX
--name: FS2
- mountpoint: XXXXXX
+ quota_filesystem:
+  -name: FS1
+   mountpoint: XXXXXX
+  
+  -name: FS2
+   mountpoint: XXXXXX
 
-quotas_spec:
-- type: user
-  name: nobody
-  mountpoint: XXXXXX
-  soft: 5G
-  hard: 6G 
+ quotas_spec:
+ - type: user
+   name: nobody
+   mountpoint: XXXXXX
+   soft: 5G
+   hard: 6G 
 
-- type: group
-  name: nobody
-  mountpoint: YYYYYY
-  soft: 5G
-  hard: 6G
+ - type: group
+   name: nobody
+   mountpoint: YYYYYY
+   soft: 5G
+   hard: 6G
 
  See `**xfs_quota** Ansible module page <https://docs.ansible.com/ansible/latest/collections/community/general/xfs_quota_module.html>`_
  for the full list of available parameters.
