@@ -62,12 +62,12 @@ dimension values.
    quotas_spec:
    - type: user
      name: nobody
-     mountpoint: XXXXXX
+     mount: /exposts/nfs
      bsoft:5G
      hard:6G
    - type: group
      name: nobody
-     mountpoint: YYYYYY
+     mount: /exports/nfs
      soft: 5G
      hard: 6G
 
