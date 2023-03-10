@@ -6,7 +6,7 @@ Description
 
 Used to set default user and group disk quotas on xfs disk used by server.
 
-There are 3 types of quotas<br>
+There are 3 types of quotas
 user
 group
 project <b>not implemented</b>
@@ -16,7 +16,8 @@ This is defined at the mount point in this case we are only using user and group
 This role provides simply provides an interface to `**xfs_quota** Ansible module <https://docs.ansible.com/ansible/latest/collections/community/general/xfs_quota_module.html>`_
 
 
-# How to define variables
+- How to define variables
+
 To define the variables, enter the folder of the node in question in 
 "inventory/group_vars/equipment_type*", and use the examples below
 
