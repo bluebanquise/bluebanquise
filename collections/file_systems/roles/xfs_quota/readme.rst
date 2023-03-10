@@ -70,8 +70,8 @@ dimension values.
     - type: user
       name: nobody 
       mount: /exposts/nfs
-      bsoft:5G
-      hard:6G
+      soft: 5G
+      hard: 6G
     
     - type: group
       name: nobody
