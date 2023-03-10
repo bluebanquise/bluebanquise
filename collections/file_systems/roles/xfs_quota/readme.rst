@@ -64,7 +64,7 @@ group_quotas_default_hard: 6G
 Third task defines specific users and groups with their required mount points and 
 dimension values.
 
-```yml
+``` yml
   quota_filesystem:
    -name: FS1
     mountpoint: XXXXXX
