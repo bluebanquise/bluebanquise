@@ -7,9 +7,9 @@ Description
 Used to set default user and group disk quotas on xfs disk used by server.
 
 There are 3 types of quotas:
--user
--group
--proiject not implemented
+- user
+- group
+- proiject not implemented
 
 This is defined at the mount point in this case we are only using user and group.
 
