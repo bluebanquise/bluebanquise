@@ -6,13 +6,16 @@ Description
 
 Used to set default user and group disk quotas on xfs disk used by server.
 
+
 **There are 3 types of quotas:**
 
 - user
 - group
 - *project Not implemented*
 
+
 This is defined at the mount point in this case we are only using user and group.
+
 
 This role provides simply provides an interface to `**xfs_quota** Ansible module <https://docs.ansible.com/ansible/latest/collections/community/general/xfs_quota_module.html>`_
 
@@ -20,6 +23,7 @@ This role provides simply provides an interface to `**xfs_quota** Ansible module
 **How to define variables**
 
 To define the variables, enter the folder of the node in question in "inventory/group_vars/equipment_type*", and use the examples below
+
 
 **Type of variables**
 
@@ -29,6 +33,7 @@ soft  - minimum value for quota
 hard  - maximum value for quota
 quota_filesystem - Filesystems for default rule of users
 or groups that are not specified
+
 
 **First task - Set defaults for user quotas**
 
@@ -52,6 +57,7 @@ user_quotas_default_soft: 5G
 user_quotas_default_hard: 6G
 group_quotas_default_soft: 5G
 group_quotas_default_hard: 6G
+
 
 
 **Trird task - Set specific quotas for users or groups**
