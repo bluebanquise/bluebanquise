@@ -58,25 +58,29 @@ dimension values.
 
 
 .. code-block:: yaml
-  
-   quotas_spec:
-   - type: user
-     name: nobody
-     mount: /exposts/nfs
-     bsoft:5G
-     hard:6G
-   - type: group
-     name: nobody
-     mount: /exports/nfs
-     soft: 5G
-     hard: 6G
-
    quota_filesystem:
     -name: FS1
      mountpoint: XXXXXX
 
     -name: FS2
      mountpoint: XXXXXX
+
+   quotas_spec:
+   - type: user
+     name: nobody 
+     mount: /exposts/nfs
+     bsoft:5G
+     hard:6G
+   - type: group
+     name: nobody
+     mount: /exports/nfs
+     soft: 5G
+     hard: 6G
+
+   quota_filesystem:
+    -name: FS1
+     mountpoint: XXXXXX
+
 
 
  See `**xfs_quota** Ansible module page <https://docs.ansible.com/ansible/latest/collections/community/general/xfs_quota_module.html>`_
