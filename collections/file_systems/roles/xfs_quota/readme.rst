@@ -25,34 +25,6 @@ To define the variables, enter the folder of the node in question in "inventory/
 
 
 
-**First task - Set defaults for user quotas**
-
-If the variables below are not defined in the inventory,these values will be the defaults of all filesystems defined in the variable "quota_filesystems_default"
-
-user_quotas_default_soft: 5G
-user_quotas_default_hard: 6G
-group_quotas_default_soft: 5G
-group_quotas_default_hard: 6G
-
-
-**Second task - Set defaults for group quotas**
-
-If the variables below are not defined in the inventory, these values
-will be the defaults of all filesystems defined in the variable 
-"quota_filesystem"
-
-user_quotas_default_soft: 5G
-user_quotas_default_hard: 6G
-group_quotas_default_soft: 5G
-group_quotas_default_hard: 6G
-
-
-
-**Trird task - Set specific quotas for users or groups**
-
-Third task defines specific users and groups with their required mount points and 
-dimension values.
-
 
 .. code-block:: yaml
 
