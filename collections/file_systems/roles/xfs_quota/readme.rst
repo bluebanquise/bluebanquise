@@ -14,7 +14,6 @@ Used to set default user and group disk quotas on xfs disk used by server.
 - *project Not implemented*
 
 
-This is defined at the mount point in this case we are only using user and group.
 
 
 This role provides simply provides an interface to `**xfs_quota** Ansible module <https://docs.ansible.com/ansible/latest/collections/community/general/xfs_quota_module.html>`_
@@ -28,9 +27,7 @@ To define the variables, enter the folder of the node in question in "inventory/
 
 **First task - Set defaults for user quotas**
 
-If the variables below are not defined in the inventory, 
-these values will be the defaults of all filesystems defined in the variable
-"quota_filesystems_default"
+If the variables below are not defined in the inventory,these values will be the defaults of all filesystems defined in the variable "quota_filesystems_default"
 
 user_quotas_default_soft: 5G
 user_quotas_default_hard: 6G
