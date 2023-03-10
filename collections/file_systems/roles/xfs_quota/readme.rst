@@ -10,7 +10,7 @@ Used to set default user and group disk quotas on xfs disk used by server.
 
 - user
 - group
-- proiject not implemented
+-~~proiject not implemented~~
 
 This is defined at the mount point in this case we are only using user and group.
 
