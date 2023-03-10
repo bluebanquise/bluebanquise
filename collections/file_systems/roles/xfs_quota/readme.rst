@@ -58,6 +58,7 @@ dimension values.
 
 
 .. code-block:: yaml
+
   quota_filesystem:
    -name: FS1
     mountpoint: XXXXXX
