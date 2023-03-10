@@ -34,7 +34,6 @@ hard  - maximum value for quota
 quota_filesystem - Filesystems for default rule of users
 or groups that are not specified
 
-
 **First task - Set defaults for user quotas**
 
 If the variables below are not defined in the inventory, 
