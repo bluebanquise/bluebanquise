@@ -25,13 +25,6 @@ This role provides simply provides an interface to `**xfs_quota** Ansible module
 To define the variables, enter the folder of the node in question in "inventory/group_vars/equipment_type*", and use the examples below
 
 
-**Type of variables**
-
-- type:  user , group  
-- mount: mount point
-- soft:  minimum value for quota
-- hard:  maximum value for quota
-- quota_filesystem - Filesystems for default rule of users or groups that are not specified
 
 **First task - Set defaults for user quotas**
 
