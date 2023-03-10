@@ -27,15 +27,11 @@ To define the variables, enter the folder of the node in question in "inventory/
 
 **Type of variables**
 
-```
-
-type  - user , group  
-mount - mount point
-soft  - minimum value for quota
-hard  - maximum value for quota
-quota_filesystem - Filesystems for default rule of users
-or groups that are not specified
-```
+- type  - user , group  
+- mount - mount point
+- soft  - minimum value for quota
+- hard  - maximum value for quota
+- quota_filesystem - Filesystems for default rule of users or groups that are not specified
 
 **First task - Set defaults for user quotas**
 
