@@ -77,9 +77,8 @@ dimension values.
     -name: FS2
      mountpoint: XXXXXX
 
-.. code-block:: yaml
- quotas_spec:
-   - type: user
+  quotas_spec:
+    - type: user
       name: nobody
       mountpoint: XXXXXX
       soft: 5G
