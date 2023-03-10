@@ -19,10 +19,12 @@ Used to set default user and group disk quotas on xfs disk used by server.
 This role provides simply provides an interface to `**xfs_quota** Ansible module <https://docs.ansible.com/ansible/latest/collections/community/general/xfs_quota_module.html>`_
 
 
-**How to define variables**
 
-To define the variables, enter the folder of the node in question in "inventory/group_vars/equipment_type*", and use the examples below
+Instructions
+^^^^^^^^^^^^
+Set mountpoint for user and group default values in quota_filesystem
 
+Set specific values for user and groups outside the default scope in quota_spec
 
 
 
