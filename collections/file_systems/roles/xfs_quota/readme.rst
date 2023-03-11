@@ -19,6 +19,7 @@ Used to set default user and group disk quotas on xfs disk used by server.
 This role provides simply provides an interface to `**xfs_quota** Ansible module <https://docs.ansible.com/ansible/latest/collections/community/general/xfs_quota_module.html>`_
 
 **Observation**
+
 For this role to work, the filesystem mount configurations must have the options uquota, gquota, pquota .
 
 example fstab
