@@ -64,5 +64,4 @@ See `**xfs_quota** Ansible module page <https://docs.ansible.com/ansible/latest/
 
 Changelog
 ^^^^^^^^^
-* Role Creation. Alisson Zuza - alisson.zuza1987@gmail.com
-
+*1.0.0: Role Creation. Alisson Zuza <alisson.zuza1987@gmail.com>
