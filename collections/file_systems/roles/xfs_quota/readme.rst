@@ -59,7 +59,6 @@ Set specific values for user and groups outside the default scope in quota_spec
       hard: 6G
 
 
-
 See `**xfs_quota** Ansible module page <https://docs.ansible.com/ansible/latest/collections/community/general/xfs_quota_module.html>`_ for the full list of available parameters.
 
 Changelog
