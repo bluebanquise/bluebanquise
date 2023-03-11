@@ -23,7 +23,7 @@ This role provides simply provides an interface to `**xfs_quota** Ansible module
 
 For this role to work, the filesystem mount configurations must have the options uquota, gquota, pquota .
 
-Example fstab
+Example 
 
 /dev/xvdb1 /xfs xfs rw,quota,gquota,pquota 0 0
 
@@ -61,4 +61,7 @@ Set specific values for user and groups outside the default scope in quota_spec
 
 
 See `**xfs_quota** Ansible module page <https://docs.ansible.com/ansible/latest/collections/community/general/xfs_quota_module.html>`_ for the full list of available parameters.
+
+Changelog
+* Role Creation. Alisson Zuza <alisson.zuza1987@gmail.com>
 
