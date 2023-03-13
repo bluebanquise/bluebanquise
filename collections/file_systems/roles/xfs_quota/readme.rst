@@ -48,7 +48,7 @@ Set specific values for user and groups outside the default scope in quota_spec
    quotas_spec:
     - type: user
       name: nobody 
-      mount: /exposts/nfs
+      mount: /exports/nfs
       soft: 5G
       hard: 6G
     
