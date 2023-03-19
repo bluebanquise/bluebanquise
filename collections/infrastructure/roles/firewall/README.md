@@ -126,6 +126,7 @@ Package installed:
 
 ## Changelog
 
+* 1.3.1: Firewalld: enforce interfaces to their relevant zone. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.3.0: Add firewalld_allow_zone_drifting variable. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.2.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.3: Add OpenSuSE support. Neil Munday <neil@mundayweb.com>
