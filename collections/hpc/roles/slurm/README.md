@@ -234,6 +234,7 @@ To enable it on the slurm configuration its required to define `slurm_selecttype
 
 ## Changelog
 
+* 1.2.5: RedHat 9 packages file. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.2.4: Set accounting host name in `slurm.conf` in order to allow submitters to connect. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.2.3: Fix old CamelCase variables. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.2.2: Improve partition definition readability in slurm.conf. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
