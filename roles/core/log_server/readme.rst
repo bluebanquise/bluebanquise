@@ -17,6 +17,7 @@ log_server_port variable.
 Changelog
 ^^^^^^^^^
 
+* 1.2.2: Proper command to restart rsyslog post rotation. Thiago Cardozo <boubee.thiago@gmail.com> - BB 1.6 backport
 * 1.2.1: Register server local apps locally;more precise logrotate wildcards. <boubee.thiago@gmail.com> - BB 1.6 backport <gino.mcevoy@gmail.com>
 * 1.2.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.2: Added OpenSuSE variables. Neil Munday <neil@mundayweb.com>
