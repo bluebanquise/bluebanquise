@@ -13,6 +13,6 @@
     rotate 5
     sharedscripts
     postrotate
-        /usr/bin/systemctl try-restart rsyslog-server.service > /dev/null 2>/dev/null || true
+        /usr/bin/systemctl kill -s HUP rsyslog.service > /dev/null 2>/dev/null || true
     endscript
 }
