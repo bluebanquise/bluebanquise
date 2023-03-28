@@ -4,8 +4,8 @@
   xfs_quota:
    type: user
    mountpoint: "{{ item.mountpoint }}"
-   bsoft: "{{ user_quotas_default_soft }}"
-   bhard: "{{ user_quotas_default_hard }}"
+   bsoft: "{{ xfs_quota_user_bsoft }}"
+   bhard: "{{ xfs_quota_user_bhard }}"
    state: present
   loop: "{{ quota_filesystem }}"
 
@@ -14,8 +14,8 @@
   xfs_quota:
    type: group
    mountpoint: "{{ item.mountpoint }}"
-   bsoft: "{{ group_quotas_default_soft }}"
-   bhard: "{{ group_quotas_default_hard }}"
+   bsoft: "{{ xfs_quota_group_bsoft }}"
+   bhard: "{{ xfs_quota_group_bhard }}"
    state: present
   loop: "{{ quota_filesystem }}"
 
@@ -24,7 +24,7 @@
    type: "{{ item.type }}"
    name: "{{ item.name }}"
    mountpoint: "{{ item.mountpoint }}"
-   bsoft: "{{ item.soft }}"
-   bhard: "{{ item.hard }}"
+   bsoft: "{{ item.bsoft }}"
+   bhard: "{{ item.bhard }}"
    state: present
   loop: "{{ quotas_spec }}"
