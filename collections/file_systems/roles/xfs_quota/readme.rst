@@ -1,5 +1,5 @@
 Xfs_quota
-----------
+------
 
 Description
 ^^^^^^^^^^^
