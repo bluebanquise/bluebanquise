@@ -24,9 +24,7 @@ This role provides simply an interface to `**xfs_quota** Ansible module <https:/
 For this role to work, the filesystem mount configurations must have the options uquota, gquota, pquota .
 
 Example 
-
 ```
-
 /dev/xvdb1 /xfs xfs rw,quota,gquota,pquota 0 0
 ```
 
