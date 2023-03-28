@@ -1,5 +1,5 @@
 ---
-user_quotas_default_soft: 5G
-user_quotas_default_hard: 6G
-group_quotas_default_soft: 5G
-group_quotas_default_hard: 6G
+xfs_quota_user_bsoft: 5G
+xfs_quota_user_bhard: 6G
+xfs_quota_group_bsoft: 5G
+xfs_quota_group_bhard: 6G
