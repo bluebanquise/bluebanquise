@@ -25,8 +25,9 @@ For this role to work, the filesystem mount configurations must have the options
 
 Example 
 
+```
 /dev/xvdb1 /xfs xfs rw,quota,gquota,pquota 0 0
-
+```
 
 Instructions
 ^^^^^^^^^^^^
