@@ -50,14 +50,14 @@ Set specific values for user and groups outside the default scope in quota_spec
     - type: user
       name: nobody 
       mountpoint: /exports/nfs
-      soft: 5G
-      hard: 6G
+      bsoft: 5G
+      bhard: 6G
     
     - type: group
       name: nobody
       mountpoint: /exports/nfs
-      soft: 5G
-      hard: 6G
+      bsoft: 5G
+      bhard: 6G
 
 
 See `**xfs_quota** Ansible module page <https://docs.ansible.com/ansible/latest/collections/community/general/xfs_quota_module.html>`_ for the full list of available parameters.
