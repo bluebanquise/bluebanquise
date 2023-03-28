@@ -27,7 +27,7 @@ Example
 
 .. code-block:: text
 
-/dev/xvdb1 /xfs xfs rw,quota,gquota,pquota 0 0
+  /dev/xvdb1 /xfs xfs rw,quota,gquota,pquota 0 0
 
 Instructions
 ^^^^^^^^^^^^
