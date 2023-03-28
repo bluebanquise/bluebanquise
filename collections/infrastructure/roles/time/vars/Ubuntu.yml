@@ -3,5 +3,5 @@ time_packages_to_install:
   - chrony
   - tzdata
 time_services_to_start:
-  - chronyd
+  - chrony
 time_chrony_conf_path: /etc/chrony/chrony.conf
