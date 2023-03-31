@@ -2,7 +2,7 @@
 dns_server_packages_to_install:
   - bind9
 dns_server_services_to_start:
-  - bind9
+  - named
 dns_server_dump_file: /var/named/data/cache_dump.db
 dns_server_localhost_file: /var/named/named.localhost
 dns_server_log_dir: data
