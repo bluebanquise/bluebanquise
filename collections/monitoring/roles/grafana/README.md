@@ -30,6 +30,7 @@ All variables which can be overridden are stored in [defaults/main.yml](defaults
 | Name                               | Default Value | Description                        |
 | -----------------------------------| ------------- | -----------------------------------|
 | `grafana_provisioning_synced`      | false            | Ensure no previously provisioned dashboards are kept if not referenced anymore. |
+| `grafana_install_oss_packages`     | false            | Install a recent version of Grafana OSS available in the Grafana project |
 | `grafana_instance`                 | {{ ansible_fqdn \| default(ansible_host) \| default(inventory_hostname) }} | Grafana instance name |
 | `grafana_logs_dir`                 | /var/log/grafana | Path to logs directory |
 | `grafana_data_dir`                 | /var/lib/grafana | Path to database directory |
@@ -140,10 +141,17 @@ If you need to install a specific version of Grafana
 ansible-playbook /etc/bluebanquise/playbooks/grafana.yml --limit management1 -e"grafana_packages_to_install='grafana-7.2.0'"
 ```
 
+Or to install a newer version which is not present in the system repositories
+```yaml
+ansible-playbook /etc/bluebanquise/playbooks/grafana.yml --limit management1 -e"grafana_install_oss_packages=true grafana_packages_to_install='grafana-9.4.7-1.x86_64.rpm'"
+```
+Check the [download page](https://grafana.com/grafana/download?edition=oss) for the name of the file corresponding to your operating system.
+
 Note: if you try to add dashboards, the role will alwats at checking if the datasource is accessible. Thus, make sure all datasources are installed before Grafana.
 
 ## Changelog
 
+* 2.1.0: Ability to install a recent version of Grafana. Alexandra Darrieutort <alexandra.darrieutort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 2.0.6: Avoid unnecessary handlers when no dashboard has changed. Alexandra Darrieutort <alexandra.darrieutort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 2.0.5: Fix grafana-cli with the use of homepath. Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 2.0.4: Fix log permissions and firewall check. Thiago Cardozo <thiago.cardozo@yahoo.com.br>
