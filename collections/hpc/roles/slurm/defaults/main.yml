@@ -30,7 +30,7 @@ slurm_slurmctldtimeout: 600
 slurm_slurmdtimeout: 600
 
 ## Accounting (storage)
-slurm_enable_accounting: true
+slurm_enable_accounting: false
 slurm_storageuser: slurm
 slurm_storagepass: ssap_slurm
 ### mariadb
