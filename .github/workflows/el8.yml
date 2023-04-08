@@ -39,6 +39,9 @@ jobs:
       - name: Prepare run input files
         run: docker exec mg1 bash -c "sudo -u bluebanquise /bin/bash -c 'cp -a /bluebanquise/resources/workflow/inventory_standard /var/lib/bluebanquise/inventory && cp -a /bluebanquise/resources/workflow/playbooks /var/lib/bluebanquise'"
 
+      - name: Get hostname
+        run: docker exec mg1 bash -c "hostnamectl"
+
       - name: Roles execution
         run: |
           docker exec mg1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ansible-playbook /var/lib/bluebanquise/playbooks/all.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mg1 --diff --check --tags hosts_file,dns_client'"
