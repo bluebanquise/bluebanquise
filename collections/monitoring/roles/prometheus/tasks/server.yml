@@ -34,3 +34,9 @@
   when: prometheus_server_manage_snmp_exporter
   tags:
     - internal
+
+- name: include_tasks <|> Setup tls and/or basic authentication
+  ansible.builtin.include_tasks: "server_security.yml"
+  when: prometheus_server_enable_tls or prometheus_server_enable_basic_auth
+  tags:
+    - internal
