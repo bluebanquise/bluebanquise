@@ -143,7 +143,7 @@ ansible-playbook /etc/bluebanquise/playbooks/grafana.yml --limit management1 -e"
 
 Or to install a newer version which is not present in the system repositories
 ```yaml
-ansible-playbook /etc/bluebanquise/playbooks/grafana.yml --limit management1 -e"grafana_install_oss_packages=true grafana_packages_to_install='grafana-9.4.7-1.x86_64.rpm'"
+ansible-playbook /etc/bluebanquise/playbooks/grafana.yml --limit management1 -e "grafana_install_oss_packages=true grafana_packages_to_install='grafana-9.4.7-1.x86_64.rpm'"
 ```
 Check the [download page](https://grafana.com/grafana/download?edition=oss) for the name of the file corresponding to your operating system.
 
