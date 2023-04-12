@@ -38,6 +38,10 @@ configuration, set variable `dns_server_forwarders` as a list of target forwarde
 dns_server_forwarders:
   - 8.8.8.8
 ```
+You can enable recursion with the forwarders configuration using the following variable:
+```yaml
+dns_server_recursion: yes
+```
 
 To optionally override the IP addresses returned by certain host you can define `dns_server_overrides` variable, like the following content for example:
 
