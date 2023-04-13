@@ -1,6 +1,8 @@
 ---
 grafana_provisioning_synced: false
 
+grafana_install_oss_packages: false
+
 # RPM is configuring the following user: uid=990(grafana) gid=984(grafana) groups=984(grafana)
 grafana_user_gid: 984
 grafana_user_uid: 990
