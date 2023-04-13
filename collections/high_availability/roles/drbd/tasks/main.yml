@@ -1,4 +1,4 @@
-- name: "package <|> Install packages"
+- name: package █ Install DRBD packages
   ansible.builtin.package:
     name:
       - drbd90-utils
@@ -8,14 +8,14 @@
   tags:
     - package
 
-- name: selinux_permissive <|> Allow drbd
+- name: selinux_permissive █ Allow drbd
   community.general.selinux_permissive:
     name: drbd_t
     permissive: true
   when:
     - ansible_facts.selinux.status == "enabled"
 
-- name: template <|> Generate /etc/drbd.d/global_common.conf
+- name: template █ Generate /etc/drbd.d/global_common.conf
   ansible.builtin.template:
     src: global_common.conf.j2
     dest: /etc/drbd.d/global_common.conf
@@ -25,7 +25,7 @@
   tags:
     - template
 
-- name: template <|> Generate /etc/drbd.d/resources.res
+- name: template █ Generate /etc/drbd.d/resources.res
   ansible.builtin.template:
     src: resource.res.j2
     dest: "/etc/drbd.d/{{ item.name }}.res"
@@ -36,67 +36,140 @@
   tags:
     - template
 
-- name: command <|> Check if resources are created
+- name: command █ Check if resources are created
   ansible.builtin.shell: 'cat /var/lib/drbd/*.lkbd'
   register: drbd_created
   changed_when: False
+  ignore_errors: true
 
-- name: command <|> Create needed resources
-  ansible.builtin.command: "drbdadm create-md {{ item.name }} "
+- name: filesystem █ Create a new primary partition
+  community.general.parted:
+    device: "{{ item.partitionning.device | default(omit) }}"
+    number: "{{ item.partitionning.number | default(omit) }}"
+    label: "{{ item.partitionning.label | default(omit) }}"
+    state: "{{ item.partitionning.state | default(omit) }}"
+    align: "{{ item.partitionning.align | default(omit) }}"
+    part_type: "{{ item.partitionning.part_type| default(omit) }}"
+    part_start: "{{ item.partitionning.part_start | default(omit) }}"
+    part_end: "{{ item.partitionning.part_end | default(omit) }}"
+  loop: "{{ drbd_resources }}"
+  when: item.partitionning is defined and item.partitionning is not none
+
+- name: filesystem █ Create a volume group
+  community.general.lvg:
+    vg: "{{ item.logical_volumes.vg | default(omit) }}"
+    pvs: "{{ item.logical_volumes.partition | default(omit) }}"
+  loop: "{{ drbd_resources }}"
+  when: item.logical_volumes is defined and item.logical_volumes is not none
+
+- name: filesystem █ Create logical volume
+  community.general.lvol:
+    vg: "{{ item.logical_volumes.vg | default(omit) }}"
+    lv: "{{ item.logical_volumes.lv | default(omit) }}"
+    size: "{{ item.logical_volumes.size | default(omit) }}"
+    pvs: "{{ item.logical_volumes.partition | default(omit) }}"
+    state: "{{ item.logical_volumes.state | default(omit) }}"
+  loop: "{{ drbd_resources }}"
+  when: item.logical_volumes is defined and item.logical_volumes is not none
+
+- name: command █ Create needed resources
+  ansible.builtin.command: "/usr/sbin/drbdadm create-md {{ item.name }} --force"
   loop: "{{ drbd_resources }}"
   when:
     - (drbd_created.stdout_lines | select("match", ".*"+item.disk+"$") | list | length) < 1
 
-- name: command <|> Check if resources are up
-  ansible.builtin.command: 'drbdadm status'
+- name: command █ Check if resources are up
+  ansible.builtin.command: "/usr/sbin/drbdadm status"
   register: drbdadm_status
   changed_when: False
 
-- name: command <|> Up needed resources
-  ansible.builtin.command: "drbdadm up {{ item.name }} "
+- name: command █ Up needed resources
+  ansible.builtin.command: "/usr/sbin/drbdadm up {{ item.name }}"
   loop: "{{ drbd_resources }}"
   when:
     - (drbdadm_status.stdout_lines | select("match", "^"+item.name+".*") | list | length) < 1
-
-- name: pause <|> Wait for resources to be up and used
-  ansible.builtin.pause:
-    seconds: "{{ drbd_pause_seconds }}"
 
 - name: Format FS if needed
   run_once: true
   block:
 
-    - name: command <|> Check if resources are not already used
-      ansible.builtin.shell: "drbdadm status | sed -n '/^{{ item.name }}/,/^$/{p;/^$/q}'"
+    - name: command █ Check if resources are not already used
+      ansible.builtin.shell: "/usr/sbin/drbdadm status | grep {{ item.name }}"
       register: drbdadm_status
       changed_when: False
+      failed_when: "drbdadm_status.rc != 0"
       loop: "{{ drbd_resources }}"
 
-    - name: command <|> Set localhost as primary device
-      ansible.builtin.command: "drbdadm primary {{ item.item.name }} --force"
-      loop: "{{ drbdadm_status.results }}"
-      when:
-        - (item.stdout_lines | select("match", ".*Primary$") | list | length) < 1
+    - name: command █ Set localhost as primary device
+      ansible.builtin.command: "/usr/sbin/drbdadm primary {{ item[0].name }}"
+      register: drbdadm_primary
+      delegate_to: "{{ drbd_resources[0].nodes.keys() | list | first }}"
+      changed_when:
+        - "drbdadm_primary.rc == 0"
+        - '"Primary" not in item[1].stdout'
+      failed_when: "drbdadm_primary.rc != 0"
+      loop: "{{ drbd_resources | product(drbdadm_status.results) | list }}"
+      when: item[0].name == item[1].item.name
 
-    - name: pause <|> Wait for resources to be set primary
-      ansible.builtin.pause:
-        seconds: "{{ drbd_pause_seconds }}"
-
-    - name: filesystem <|> Creating filesystems
+    - name: filesystem █ Creating filesystems
       community.general.filesystem:
-        dev: "{{ item.item.device }}"
-        force: "{{ item.item.filesystem.force | default(omit) }}"
-        fstype: "{{ item.item.filesystem.fstype | default(omit) }}"
-        opts: "{{ item.item.filesystem.opts | default(omit) }}"
-        resizefs: "{{ item.item.filesystem.resizefs | default(omit) }}"
-        state: "{{ item.item.filesystem.state | default(omit) }}"
-      loop: "{{ drbdadm_status.results }}"
-      when:
-        - (item.stdout_lines | select("match", ".*Primary$") | list | length) < 1
-        - item.item.filesystem is defined and item.item.filesystem is not none
+        dev: "{{ item.device }}"
+        force: "{{ item.filesystem.force | default(omit) }}"
+        fstype: "{{ item.filesystem.fstype | default(omit) }}"
+        opts: "{{ item.filesystem.opts | default(omit) }}"
+        resizefs: "{{ item.filesystem.resizefs | default(omit) }}"
+        state: "{{ item.filesystem.state | default(omit) }}"
+      loop: "{{ drbd_resources }}"
+      when: item.filesystem is defined and item.filesystem is not none
 
-    - name: command <|> Release resource
-      ansible.builtin.command: "drbdadm secondary {{ item.item.name }}"
-      loop: "{{ drbdadm_status.results }}"
-      when:
-        - (item.stdout_lines | select("match", ".*Primary$") | list | length) < 1
+- name: Check if DRBD local directories exists
+  ansible.builtin.stat:
+    path: "{{ item.mount.path | default(omit) }}"
+  register: stat_result
+  loop: "{{ drbd_resources }}"
+  when: item.mount is defined and item.mount is not none
+
+- name: Create directories if they does not exist
+  ansible.builtin.file:
+    path: "{{ item[0].mount.path | default(omit) }}"
+    state: directory
+    mode: '0755'
+  when:
+    - item[0].mount is defined and item[0].mount is not none
+    - not item[1].stat.exists
+  loop: "{{ drbd_resources | product(stat_result.results) | list }}"
+
+- name: filesystem █ Mounting DRBD filesystem in local directory
+  ansible.posix.mount:
+    path: "{{ item.mount.path | default(omit) }}"
+    src: "{{ item.mount.source | default(omit) }}"
+    fstype: "{{ item.mount.fstype | default(omit) }}"
+    state: "{{ item.mount.state | default(omit) }}"
+    opts: noauto
+  loop: "{{ drbd_resources }}"
+  when: item.mount is defined and item.mount is not none
+  delegate_to: "{{ drbd_resources[0].nodes.keys() | list | first }}"
+  run_once: true
+
+- name: filesystem █ Mounting DRBD filesystem in local directory
+  ansible.posix.mount:
+    path: "{{ item.mount.path | default(omit) }}"
+    src: "{{ item.mount.source | default(omit) }}"
+    fstype: "{{ item.mount.fstype | default(omit) }}"
+    state: "{{ item.mount.state | default(omit) }}"
+    opts: noauto
+  loop: "{{ drbd_resources }}"
+  when: item.mount is defined and item.mount is not none
+  delegate_to: "{{ drbd_resources[0].nodes.keys() | list | first }}"
+  run_once: true
+
+- name: command █ Get
+  ansible.builtin.command: /usr/sbin/drbdadm status all
+  register: drbdadm_final_status
+  changed_when: false
+  run_once: true
+
+- name: show█ drbdadm status
+  debug:
+    msg: "{{ drbdadm_final_status.stdout }}"
+  run_once: true
