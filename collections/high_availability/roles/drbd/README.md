@@ -164,5 +164,5 @@ https://linbit.com/drbd-user-guide/drbd-guide-9_0-en/#p-apps
 
 ## Changelog
 
-* 1.0.1: Role improvements. Hamid Merzouki <hamid.merzouki@naverlabs.com>
+* 1.1: Role improvements. Hamid Merzouki <hamid.merzouki@naverlabs.com>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
