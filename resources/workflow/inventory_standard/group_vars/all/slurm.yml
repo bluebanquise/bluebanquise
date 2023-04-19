@@ -1,3 +1,11 @@
 slurm_munge_key_b64: hYcbkjJgv5YyybNqKbo+JvXLakIY2zFcZhpopipS8JmLmeE3YHgMcbUO74LIGKqzpIgD7ILPgUKmzgSl8BOK9WHQcMxywvh2fY567+4TyEq/HEArVfqdsIPw1U/jodDt2DL3MTNvci5hTJ8JNJZZKrjJc2x/FBlF52hAt+KLm+g=
 slurm_enable_accounting: true
-slurm_control_machine: localhost
+slurm_control_machine: mg1
+slurm_cluster_name: bluebanquise
+slurm_computes_groups:
+  - equipment_typeC
+slurm_all_partition:
+    enable: true
+    partition_configuration:
+      State: UP
+      Default: yes

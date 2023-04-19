@@ -1,0 +1,18 @@
+---
+- name: managements playbook
+  hosts: "mg_managements"
+  roles:
+
+    # HPC
+    - role: bluebanquise.hpc.slurm
+      tags: slurm
+      vars:
+        slurm_profile: controller
+    - role: bluebanquise.hpc.slurm
+      tags: slurm
+      vars:
+        slurm_profile: compute
+    - role: bluebanquise.hpc.slurm
+      tags: slurm
+      vars:
+        slurm_profile: submitter
