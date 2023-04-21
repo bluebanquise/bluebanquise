@@ -65,6 +65,13 @@ AccountingStorageType=accounting_storage/slurmdbd
 JobAcctGatherType=jobacct_gather/linux
 {% endif %}
 
+## Acct Gather
+AcctGatherNodeFreq={{ slurm_acct_gather_node_freq }}
+AcctGatherEnergyType=acct_gather_energy/{{ slurm_acct_gather_energy_type }}
+AcctGatherInterconnectType=acct_gather_interconnect/{{slurm_acct_gather_interconnect_type}}
+AcctGatherFilesystemType=acct_gather_filesystem/{{ slurm_acct_gather_filesystem_type }}
+AcctGatherProfileType=acct_gather_profile/{{ slurm_acct_gather_profile_type }}
+
 ## Additional content if exist
 {% if slurm_slurm_conf_additional_content is defined and slurm_slurm_conf_additional_content is iterable %}{% for slurm_slurm_conf_content in slurm_slurm_conf_additional_content %}
 {{ slurm_slurm_conf_content | default('', true) }}                                                                                                                       
