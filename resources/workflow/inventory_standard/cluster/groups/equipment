@@ -1,0 +1,38 @@
+[equipment_typeC]
+c001
+
+[equipment_rhel8]
+mgt2
+[equipment_rhel8:vars]
+ep_operating_system={'distribution':"redhat", 'distribution_version':"8", 'distribution_major_version':"8" }
+
+[equipment_rhel9]
+mgt3
+[equipment_rhel9:vars]
+ep_operating_system={'distribution':"redhat", 'distribution_version':"9", 'distribution_major_version':"9" }
+
+[equipment_rhel7]
+mgt4
+[equipment_rhel7:vars]
+ep_operating_system={'distribution':"redhat", 'distribution_version':"7", 'distribution_major_version':"7" }
+
+[equipment_ubuntu20]
+mgt5
+[equipment_ubuntu20:vars]
+ep_operating_system={'distribution':"ubuntu", 'distribution_version':"20.04", 'distribution_major_version':"20" }
+
+[equipment_ubuntu22]
+mgt6
+[equipment_ubuntu22:vars]
+ep_operating_system={'distribution':"ubuntu", 'distribution_version':"22.04", 'distribution_major_version':"22" }
+
+[equipment_opensuseleap15]
+mgt7
+[equipment_opensuseleap15:vars]
+ep_operating_system={'distribution':"opensuse", 'distribution_version':"15", 'distribution_major_version':"15" }
+
+[equipment_debian11]
+mgt8
+[equipment_debian11:vars]
+ep_operating_system={'distribution':"debian", 'distribution_version':"11", 'distribution_major_version':"11" }
+ep_partitioning="d-i partman-auto/disk string /dev/vda\nd-i partman-auto/method string regular\nd-i partman-auto/choose_recipe select atomic\nd-i partman-auto/init_automatically_partition select Guided - use entire disk\n"

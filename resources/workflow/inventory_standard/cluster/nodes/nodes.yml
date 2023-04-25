@@ -1,6 +1,7 @@
 all:
   hosts:
 
+    # Management nodes
     mgt1:
       bmc:
         name: bmgt1
@@ -14,7 +15,50 @@ all:
           mac: 1a:2b:3c:4d:1e:9f
           skip: true
           never_default4: true
+    mgt2:
+      network_interfaces:
+        - ip4: 10.10.0.2
+          mac: 1a:2b:3c:4d:2e:8f
+          network: net-admin
+          interface: enp1s0
+    mgt3:
+      network_interfaces:
+        - ip4: 10.10.0.3
+          mac: 1a:2b:3c:4d:3e:8f
+          network: net-admin
+          interface: enp1s0
+    mgt4:
+      network_interfaces:
+        - ip4: 10.10.0.4
+          mac: 1a:2b:3c:4d:4e:8f
+          network: net-admin
+          interface: eth0
+    mgt5:
+      network_interfaces:
+        - ip4: 10.10.0.5
+          mac: 1a:2b:3c:4d:5e:8f
+          network: net-admin
+          interface: enp1s0
+    mgt6:
+      network_interfaces:
+        - ip4: 10.10.0.6
+          mac: 1a:2b:3c:4d:6e:8f
+          network: net-admin
+          interface: enp1s0
+    mgt7:
+      network_interfaces:
+        - ip4: 10.10.0.7
+          mac: 1a:2b:3c:4d:7e:8f
+          network: net-admin
+          interface: enp1s0
+    mgt8:
+      network_interfaces:
+        - ip4: 10.10.0.8
+          mac: 1a:2b:3c:4d:8e:8f
+          network: net-admin
+          interface: enp1s0
 
+    # A compute node
     c001:
       network_interfaces:
         - interface: enp1s0
