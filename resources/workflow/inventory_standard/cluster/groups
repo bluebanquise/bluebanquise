@@ -1,8 +1,0 @@
-[mg_managements]
-mg1
-
-[mg_computes]
-c00[1:4]
-
-[equipment_typeC]
-c001

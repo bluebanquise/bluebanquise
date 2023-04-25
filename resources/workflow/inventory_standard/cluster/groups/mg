@@ -1,0 +1,5 @@
+[mg_managements]
+mgt[1:8]
+
+[mg_computes]
+c001

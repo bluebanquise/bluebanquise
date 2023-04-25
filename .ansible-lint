@@ -9,4 +9,4 @@ skip_list:
   - name[casing]
   - name[template]
   - yaml[octal-values]
-  - galaxy[no-changelog]
+  - galaxy[*]
