@@ -3,7 +3,7 @@ all:
 
     mgt1:
       bmc:
-        name: bmgt
+        name: bmgt1
         ip4: 10.10.100.1
         network: net-admin
         mac: 2a:2b:3c:4d:5e:6f
