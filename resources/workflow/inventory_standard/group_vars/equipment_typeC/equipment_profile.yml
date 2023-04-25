@@ -8,6 +8,7 @@ ep_hardware:
     sockets: 2
     threads_per_core: 1
 
-ep_equipment_authentication:
-  user: ADMIN
-  password: ADMIN
+ep_host_authentication:
+  - protocol: IPMI
+    user: ADMIN
+    password: ADMIN
