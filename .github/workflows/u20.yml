@@ -35,6 +35,7 @@ jobs:
           docker exec mgt1 bash -c "/bluebanquise/bootstrap/online_bootstrap.sh --silent --skip_environment"
           docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'cd /bluebanquise/bootstrap/ && ./configure_environment.sh --bb_collections_local_path=/bluebanquise/collections/'"
           docker exec mgt1 bash -c "curl http://bluebanquise.com/repository/releases/latest/deb11/x86_64/bluebanquise/bluebanquise.list --output /etc/apt/sources.list.d/bluebanquise.list"
+          docker exec mgt1 bash -c "apt-update && DEBIAN_FRONTEND=noninteractive apt-get install apt-utils -y"
 
       - name: Prepare run input files
         run: docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'cp -a /bluebanquise/resources/workflow/inventory_standard /var/lib/bluebanquise/inventory && cp -a /bluebanquise/resources/workflow/playbooks /var/lib/bluebanquise'"
@@ -42,9 +43,9 @@ jobs:
       - name: Infrastructure roles execution
         run: |
           docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ansible-playbook /var/lib/bluebanquise/playbooks/infrastructure.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --check --tags hosts_file,dns_client'"
-          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ansible-playbook /var/lib/bluebanquise/playbooks/infrastructure.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --skip-tags repositories,firewall,kernel_config,hosts_file,nic,set_hostname,dns_client'"
+          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ansible-playbook /var/lib/bluebanquise/playbooks/infrastructure.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --skip-tags access_control,repositories,firewall,kernel_config,hosts_file,nic,set_hostname,dns_client'"
           docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ansible-playbook /var/lib/bluebanquise/playbooks/infrastructure.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --tags access_control --skip-tags service'"
 
       - name: HPC roles execution
         run: |
-          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ansible-playbook /var/lib/bluebanquise/playbooks/hpc.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff'"
+          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ansible-playbook /var/lib/bluebanquise/playbooks/hpc.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --tags slurm,lmod,flexlm'"

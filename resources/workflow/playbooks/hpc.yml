@@ -16,3 +16,9 @@
       tags: slurm
       vars:
         slurm_profile: submitter
+    - role: bluebanquise.hpc.flexlm
+      tags: flexlm
+    - role: bluebanquise.hpc.nhc
+      tags: nhc
+    - role: bluebanquise.hpc.lmod
+      tags: lmod

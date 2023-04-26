@@ -1,5 +1,15 @@
 # lmod
 
+|      OS      | Version | Supported |
+|:-------------|:--------|:---------:|
+| Ubuntu       |   20.04 |    yes    |
+| Ubuntu       |   22.04 |    yes    |
+| RHEL         |       7 |    yes    |
+| RHEL         |       8 |    yes    |
+| RHEL         |       9 |    yes    |
+| OpenSuseLeap |      15 |    yes    |
+| Debian       |      11 |    yes    |
+
 ## Description
 
 This role simply install Lmod tool (https://lmod.readthedocs.io/) and
