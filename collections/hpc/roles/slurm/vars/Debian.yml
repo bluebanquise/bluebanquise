@@ -8,7 +8,7 @@ slurm_packages_to_install:
     - slurm-devel
     - slurm-slurmctld
   accounting:
-    - mariadb
+    - mariadb-common
     - mariadb-server
     - python3-mysql
     - slurm-slurmdbd

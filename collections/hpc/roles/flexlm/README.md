@@ -3,10 +3,10 @@
 |      OS      | Version | Supported |
 |:-------------|:--------|:---------:|
 | Ubuntu       |   20.04 |    yes    |
-| Ubuntu       |   22.04 |    yes    |
+| Ubuntu       |   22.04 |    no     |
 | RHEL         |       7 |    yes    |
 | RHEL         |       8 |    yes    |
-| RHEL         |       9 |    yes    |
+| RHEL         |       9 |    no     |
 | OpenSuseLeap |      15 |    no     |
 | Debian       |      11 |    yes    |
 
