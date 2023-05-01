@@ -1,15 +1,51 @@
 ---
+
+- name: include_vars <|> Gather OS specific variables
+  # This task gathers variables defined in OS specific files.
+  #
+  # Search vars in:
+  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
+  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
+  #  - <distribution>.yml            # eg. CentOS.yml
+  #  - <os_family>.yml               # eg. RedHat.yml
+  #
+  # If no OS specific file is found, the role will default to vars/main.yml
+  #
+  include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family }}.yml"
+      skip: true
+  tags:
+    - always
+
+- name: include_tasks <|> Use OS dedicated firewall task
+  include_tasks: "{{ item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}/firewall.yml"
+      skip: true
+  tags:
+    - internal
+    - firewall
+
 - name: package <|> Install packages
   ansible.builtin.package:
     name: "{{item}}"
     state: present
   tags:
     - package
-  loop:
-    - pacemaker
-    - corosync
-    - pcs
-    - fence-agents-all
+  loop: "{{ high_availability_packages_to_install }}"
 
 - name: group <|> Create cluster system group
   ansible.builtin.group:
@@ -36,16 +72,19 @@
   changed_when: False
   ignore_errors: yes
 
-- name: firewalld <|> "Add services to firewall's {{ ha_firewall_zone | default('public') }} zone"
-  ansible.posix.firewalld:
-    zone: "{{ ha_firewall_zone | default('public') }}"
-    service: high-availability
-    immediate: "yes"
-    permanent: "yes"
-    state: enabled
-  when: ep_firewall | default(false) | bool
+- name: include_tasks <|> Use OS dedicated task before creating cluster
+  ansible.builtin.include_tasks: "{{ item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/before_create.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/before_create.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/before_create.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/before_create.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}/before_create.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}/before_create.yml"
+      skip: true
   tags:
-    - firewall
+    - internal
 
 - name: Create cluster
   run_once: true
@@ -116,7 +155,7 @@
       ignore_errors: yes
 
     - name: command <|> Set cluster resource op defaults
-      ansible.builtin.command: "pcs resource op defaults update {{ item.name }}={{ item.value }}"
+      ansible.builtin.command: "{{ high_availability_resource_op_defaults_update }} {{ item.name }}={{ item.value }}"
       loop: "{{ high_availability_pcs_resource_op_defaults | default([]) }}"
       when:
         - ( pcs_resource_op_defaults.stdout_lines | select("match", ".*"+item.name+"="+(item.value|string)+".*") | list | length ) < 1
@@ -128,7 +167,7 @@
       ignore_errors: yes
 
     - name: command <|> Set cluster resource defaults
-      ansible.builtin.command: "pcs resource defaults update {{ item.name }}={{ item.value }}"
+      ansible.builtin.command: "{{ high_availability_resource_defaults_update }} {{ item.name }}={{ item.value }}"
       loop: "{{ high_availability_pcs_resource_defaults | default([]) }}"
       when:
         - ( pcs_resource_defaults.stdout_lines | select("match", ".*"+item.name+"="+(item.value|string)+".*") | list | length ) < 1

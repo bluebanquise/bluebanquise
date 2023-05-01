@@ -38,6 +38,10 @@ configuration, set variable `dns_server_forwarders` as a list of target forwarde
 dns_server_forwarders:
   - 8.8.8.8
 ```
+You can enable recursion with the forwarders configuration using the following variable:
+```yaml
+dns_server_recursion: yes
+```
 
 To optionally override the IP addresses returned by certain host you can define `dns_server_overrides` variable, like the following content for example:
 
@@ -52,6 +56,7 @@ This will cause `/var/named/override` to be generated.
 
 ## Changelog
 
+* 1.7.2: Rename systemd service to named for Ubuntu. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.7.1: Find correct default resolution network in reverse zone. Alexandra Darrieutort <alexandra.darrieutort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.7.0: Add optional alias to every interface. Matthieu Isoard <indigoping4cgmi@gmail.com>
 * 1.6.0: Update to BB 2.0 format. Benoit Leveugle <benoit.leveugle@gmail.com>

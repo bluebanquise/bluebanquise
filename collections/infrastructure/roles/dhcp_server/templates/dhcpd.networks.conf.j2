@@ -48,7 +48,7 @@ subnet {{ networks[network]['subnet'] }} netmask {{ (networks[network]['subnet']
 {{ item_add("option domain-name-servers", networks[network]['services']['dns4']) }}
         {% endif %}
         {% if networks[network]['services']['ntp4'] is defined %}
-{{ item_add("option ntp-servers", networks[network]['services']['dns4']) }}
+{{ item_add("option ntp-servers", networks[network]['services']['ntp4']) }}
         {% endif %}
         {% if networks[network]['services']['pxe4'] is defined %}
 {{ item_add("next-server", networks[network]['services']['pxe4']) }}

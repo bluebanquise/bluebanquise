@@ -20,12 +20,18 @@ Once role has been deployed, check groups using:
 nodeset -LL
 ```
 
+Note:
+If you are using the Python virtual environment, the return of the command may not be correct.
+You can use the `clustershell_prefix_path` variable to copy the configuration file to the right place.
+Default value is empty.
+
 ## To be done
 
 Tree execution mode is missing.
 
 ## Changelog
 
+* 1.3.0: Add optional variable clustershell_prefix_path. Pierre Gay <pierre.gay@u-bordeaux.fr>, Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>
 * 1.2.0: Update to BB 2.0 format. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.2: Prevent dummy user to be included. Documentation. Benoit Leveugle <benoit.leveugle@gmail.com>

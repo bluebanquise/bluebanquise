@@ -23,3 +23,16 @@
   loop:
     - gres.conf
   when: slurm_grestypes is defined and slurm_gresTypes == 'gpu' and ep_hardware['gpu'] is defined
+
+- name: "template <|> Generate acct_gather.conf in {{ slurm_home_path }}"
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "{{ slurm_home_path }}/{{ item }}"
+    owner: slurm
+    group: slurm
+    mode: 0600
+  tags:
+    - template
+  loop:
+    - acct_gather.conf
+  when: (slurm_acct_gather_energy_type is not none) or (slurm_acct_gather_interconnect_type is not none) or (slurm_acct_gather_filesystem_type is not none) or (slurm_acct_gather_profile_type is not none)

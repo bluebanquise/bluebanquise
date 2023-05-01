@@ -1,0 +1,47 @@
+#jinja2: lstrip_blocks: True
+#### Blue Banquise file ####
+## {{ansible_managed}}
+
+# Documentation:
+# https://slurm.schedmd.com/acct_gather.conf.html
+
+###
+# Slurm acct_gather configuration file
+###
+
+{% if slurm_acct_gather_energy_type is defined and slurm_acct_gather_energy_type == 'ipmi' %}
+# Parameters for acct_gather_energy/impi plugin
+EnergyIPMIFrequency={{ slurm_acct_gather_energy_ipmi_frequency }}
+EnergyIPMICalcAdjustment={{ slurm_acct_gather_energy_ipmi_calc_adjustment }}
+EnergyIPMIPowerSensors=Node={{ ",".join(slurm_acct_gather_energy_ipmi_power_sensors) }}
+EnergyIPMIUsername={{ ep_equipment_authentication.user }}
+EnergyIPMIPassword={{ ep_equipment_authentication.password }}
+{% endif %}
+{% if slurm_acct_gather_energy_type is defined and slurm_acct_gather_energy_type == 'xcc' %}
+# Parameters for acct_gather_energy/xcc plugin
+EnergyIPMIFrequency={{ slurm_acct_gather_energy_ipmi_frequency }}
+EnergyIPMITimeout={{ slurm_acct_gather_energy_ipmi_timeout }}
+{% endif %}
+{% if slurm_acct_gather_interconnect_type is defined and slurm_acct_gather_interconnect_type == 'ofed' %}
+# Parameters for acct_gather_interconnect/ofed plugin
+InfinibandOFEDPort={{ slurm_acct_gather_interconnect_infiniband_ofed_port }}
+{% endif %}
+{% if slurm_acct_gather_interconnect_type is defined and slurm_acct_gather_interconnect_type == 'sysfs' %}
+# Parameters for acct_gather_interconnect/sysfs plugin
+SysfsInterfaces={{ slurm_acct_gather_interconnect_sysfs_interfaces }}
+{% endif %}
+{% if slurm_acct_gather_profile_type is defined and slurm_acct_gather_profile_type == 'hdf5' %}
+# Parameters for acct_gather_profile/hdf5 plugin
+ProfileHDF5Dir={{ slurm_acct_gather_profile_hdf5_dir }}
+ProfileHDF5Default={{ slurm_acct_gather_profile_hdf5_default }}
+{% endif %}
+{% if slurm_acct_gather_profile_type is defined and slurm_acct_gather_profile_type == 'influxdb' %}
+# Parameters for acct_gather_profile/influxdb plugin
+ProfileInfluxDBDatabase={{ slurm_acct_gather_profile_influxdb_database }}
+ProfileInfluxDBDefault={{ slurm_acct_gather_profile_influxdb_default }}
+ProfileInfluxDBHost={{ slurm_acct_gather_profile_influxdb_host }}
+ProfileInfluxDBPass={{ slurm_acct_gather_profile_influxdb_pass }}
+ProfileInfluxDBRTPolicy={{ slurm_acct_gather_profile_influxdb_rt_policy }}
+ProfileInfluxDBUser={{ slurm_acct_gather_profile_influxdb_user }}
+ProfileInfluxDBTimeout={{ slurm_acct_gather_profile_influxdb_timeout }}
+{% endif %}

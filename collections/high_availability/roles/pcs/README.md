@@ -46,6 +46,8 @@ of 3 ha servers working together.
                                     Network
 ```
 
+This role is supported on RHEL and Ubuntu operating systems.
+
 ## 2. Instructions to configure
 
 Ensure your nodes are able to install HA components (may require a special
@@ -604,8 +606,13 @@ not present. Then in HA resources, declare the following:
       score: -INFINITY
 ```
 
-## 5. Changelog
+## 5. Known Issues
 
+* When pacemaker/corosync are first installed in Ubuntu 20/22, a default pacemaker cluster is created. This role will detect the presence of the default cluster and destroy it. The conditions for destroying the cluster are matching the cluster name 'debian' and having 0 resources configured.
+
+## 6. Changelog
+
+* 1.1.0: Add Ubuntu support. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.0.6: (docs): examples to hash cluster password with Python and Perl. Leo Araujo <lmagdanello40@gmail.com>
 * 1.0.5: Allow specification of name of the cluster. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.0.4: Allows order constraint between resource groups. Thiago Cardozo <thiago.cardozo@yahoo.com.br>

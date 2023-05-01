@@ -38,6 +38,34 @@ slurm_innodb_buffer_pool_size: 1024M
 slurm_innodb_log_file_size: 64M
 slurm_innodb_lock_wait_timeout: 900
 
+## Acct Gather
+slurm_acct_gather_node_freq: 0
+### acct_gather_energy plugin
+slurm_acct_gather_energy_type: none
+slurm_acct_gather_energy_ipmi_frequency: 30
+slurm_acct_gather_energy_ipmi_calc_adjustment: 'no'
+slurm_acct_gather_energy_ipmi_power_sensors: []
+slurm_acct_gather_energy_ipmi_timeout: 10
+### acct_gather_interconnect plugin
+slurm_acct_gather_interconnect_type: none
+slurm_acct_gather_interconnect_infiniband_ofed_port: 1
+slurm_acct_gather_interconnect_sysfs_interfaces: []
+### acct_gather_filesystem plugin
+slurm_acct_gather_filesystem_type: none
+### acct_gather_profil plugin
+slurm_acct_gather_profile_type: none
+slurm_acct_gather_profile_hdf5_dir: ""
+slurm_acct_gather_profile_hdf5_default:
+  - None
+slurm_acct_gather_profile_influxdb_database: ""
+slurm_acct_gather_profile_influxdb_default:
+  - None
+slurm_acct_gather_profile_influxdb_host: ""
+slurm_acct_gather_profile_influxdb_pass: ""
+slurm_acct_gather_profile_influxdb_rt_policy: ""
+slurm_acct_gather_profile_influxdb_user: ""
+slurm_acct_gather_profile_influxdb_timeout: 10
+
 ## Other
 slurm_returntoservice: 0
 slurm_schedulertype: sched/backfill

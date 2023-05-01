@@ -1,0 +1,15 @@
+---
+
+- name: command <|> Check for default cluster in Ubuntu
+  ansible.builtin.command: "pcs status"
+  register: pcs_status_ubuntu
+  changed_when: False
+  ignore_errors: yes
+
+- name: command <|> Destroy default cluster to avoid error with pcs cluster setup in Ubuntu
+  ansible.builtin.command: "pcs cluster destroy"
+  when:
+    - pcs_status_ubuntu is defined
+    - "'Cluster name: debian' in pcs_status_ubuntu.stdout"
+    - "'* 0 resource instances configured' in pcs_status_ubuntu.stdout"
+    - "'* No resources' in pcs_status_ubuntu.stdout"

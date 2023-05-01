@@ -1,0 +1,14 @@
+---
+
+- name: firewalld <|> "Add services to firewall's {{ ha_firewall_zone | default('public') }} zone"
+  ansible.posix.firewalld:
+    zone: "{{ ha_firewall_zone | default('public') }}"
+    service: high_availability
+    immediate: "yes"
+    permanent: "yes"
+    state: enabled
+  when:
+    - ansible_facts.os_family == "RedHat"
+    - ep_firewall | default(false) | bool
+  tags:
+    - firewall

@@ -21,13 +21,13 @@
     state: directory
     mode: 0755
   loop:
-    - /etc/clustershell
-    - /etc/clustershell/groups.d
+    - "{{ clustershell_prefix_path }}/etc/clustershell"
+    - "{{ clustershell_prefix_path }}/etc/clustershell/groups.d"
 
-- name: template <|> Generate /etc/clustershell/groups.d/local.cfg
+- name: template <|> Generate {{ clustershell_prefix_path }}/etc/clustershell/groups.d/local.cfg
   ansible.builtin.template:
     src: local.cfg.j2
-    dest: /etc/clustershell/groups.d/local.cfg
+    dest: "{{ clustershell_prefix_path }}/etc/clustershell/groups.d/local.cfg"
     owner: root
     group: root
     mode: 0644

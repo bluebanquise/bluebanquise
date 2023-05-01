@@ -22,6 +22,7 @@ Role compatibility:
     + [Additional slurm.conf settings](#additional-slurmconf-settings)
     + [Optional nodes tuning](#optional-nodes-tuning)
     + [Accounting](#accounting)
+    + [Acct Gather](#acct-gather)
   * [Changelog](#changelog)
 
 ## Description
@@ -280,8 +281,33 @@ To enable it on the slurm configuration its required to define `slurm_selecttype
       partition_name: typeC
 ```
 
+### Acct Gather
+
+For example, to monitor the power and energy usage of compute nodes, you can use RAPL (Running Average Power Limit) method.
+But this method monitors CPUs and RAM only.
+This is enabled in slurm by setting these variables:
+
+```
+slurm_acct_gather_node_freq: 30
+slurm_acct_gather_energy_type: rapl
+```
+
+Do a `scontrol reconfig` and the power values become available:
+
+```
+$ scontrol show node n123
+...
+   CurrentWatts=239 LowestJoules=17445 ConsumedJoules=2581586467
+```
+
+Note: For some types of plugins it will be necessary to define some associated options which can be found in the slurm configuration file acct_gather.conf.
+See more explanation on https://slurm.schedmd.com/acct_gather.conf.html
+
 ## Changelog
 
+* 1.3.0: Added acct_gather plugin configuration. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
+* 1.2.5: RedHat 9 packages file. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
+* 1.2.4: Set accounting host name in `slurm.conf` in order to allow submitters to connect. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.2.3: Fix old CamelCase variables. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.2.2: Improve partition definition readability in slurm.conf. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.2.1: Update to BB 2.0 format. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
