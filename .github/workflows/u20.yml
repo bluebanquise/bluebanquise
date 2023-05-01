@@ -9,7 +9,7 @@ on:
 jobs:
   roles:
     name: U20
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     env:
       ANSIBLE_CONFIG: /var/lib/bluebanquise/ansible.cfg
       PY_COLORS: '1'
@@ -34,7 +34,7 @@ jobs:
         run: |
           docker exec mgt1 bash -c "/bluebanquise/bootstrap/online_bootstrap.sh --silent --skip_environment"
           docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'cd /bluebanquise/bootstrap/ && ./configure_environment.sh --bb_collections_local_path=/bluebanquise/collections/'"
-          docker exec mgt1 bash -c "curl http://bluebanquise.com/repository/releases/latest/deb11/x86_64/bluebanquise/bluebanquise.list --output /etc/apt/sources.list.d/bluebanquise.list"
+          docker exec mgt1 bash -c "curl http://bluebanquise.com/repository/releases/latest/u20/x86_64/bluebanquise/bluebanquise.list --output /etc/apt/sources.list.d/bluebanquise.list"
           docker exec mgt1 bash -c "apt update && DEBIAN_FRONTEND=noninteractive apt-get install apt-utils -y"
 
       - name: Prepare run input files
