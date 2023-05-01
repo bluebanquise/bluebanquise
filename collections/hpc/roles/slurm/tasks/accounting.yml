@@ -19,7 +19,7 @@
 - name: "template <|> Generate /etc/my.cnf.d/slurmdbd.cnf"
   ansible.builtin.template:
     src: slurmdbd.cnf.j2
-    dest: /etc/my.cnf.d/slurmdbd.cnf
+    dest: "{{ slurm_mysql_cnf_dir }}/slurmdbd.cnf"
     owner: root
     group: root
     mode: 0644
@@ -38,17 +38,23 @@
   ansible.builtin.command: mysql -e "SHOW DATABASES  LIKE 'slurm_acct_db'"
   register: slurm_database_exist
   changed_when: false
+  tags:
+    - service
 
 - name: command <|> Check if slurm database user has been created
   ansible.builtin.command: mysql -e "use mysql; select Host,User from user;"
   register: slurm_database_user_exist
   changed_when: false
+  tags:
+    - service
 
 - name: mysql_db <|> Create slurm_acct_db database
   community.mysql.mysql_db:
     name: slurm_acct_db
     state: present
   when: "'slurm_acct_db' not in slurm_database_exist.stdout_lines"
+  tags:
+    - service
 
 - name: setup slurm db user # noqa no-tabs
   community.mysql.mysql_user:
@@ -57,6 +63,8 @@
     priv: 'slurm_acct_db.*:ALL'
     state: present
   when: "('localhost\t' + slurm_storageuser) not in slurm_database_user_exist.stdout_lines"
+  tags:
+    - service
 
 - name: service <|> Manage slurmdbd state
   ansible.builtin.service:

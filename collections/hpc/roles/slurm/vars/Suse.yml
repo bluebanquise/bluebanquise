@@ -1,5 +1,6 @@
 ---
 slurm_home_path: /etc/slurm
+slurm_mysql_cnf_dir: /etc/my.cnf.d
 slurm_packages_to_install:
   controller:
     - munge
@@ -12,6 +13,8 @@ slurm_packages_to_install:
     - mariadb-server
     - slurm-slurmdbd
     - python3-mysqlclient
+    - python3-PyMySQL
+    - python3
   compute:
     - munge
     - munge-libs
