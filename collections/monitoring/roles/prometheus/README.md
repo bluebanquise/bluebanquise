@@ -22,8 +22,9 @@ Table of content:
     + [Set custom launch parameters](#set-custom-launch-parameters)
     + [Manipulate firewall](#manipulate-firewall)
     + [Splitting services](#splitting-services)
-    + [Adding raw prometheus.conf scraping jobs:](#adding-raw-prometheusconf-scraping-jobs-)
+    + [Adding raw prometheus.conf scraping jobs:](#adding-raw-prometheusconf-scraping-jobs)
     + [Adding raw prometheus.conf configuration](#adding-raw-prometheusconf-configuration)
+    + [TLS and/or Basic Authentication](#tls-andor-basic-authentication)
   * [Changelog](#changelog)
 
 
@@ -546,8 +547,41 @@ prometheus.conf file using the following multi lines variable:
 prometheus_server_prometheus_raw_configuration:
 ```
 
+### TLS and/or Basic Authentication
+
+To enable TLS encryption, you need to set these variables:
+
+```yaml
+prometheus_server_enable_tls: true
+prometheus_server_tls_cert_file: 
+prometheus_server_tls_key_file: 
+```
+
+To enable basic authentication, you need to set these variables:
+
+```yaml
+prometheus_server_enable_basic_auth: true
+prometheus_server_basic_auth_user: 
+prometheus_server_basic_auth_password: 
+prometheus_server_basic_auth_hash_password: 
+```
+
+Note: You can use python3-bcrypt to generate hashed password. See more at https://prometheus.io/docs/guides/basic-auth/#hashing-a-password .
+
+To load web configuration file, use the --web.config.file flag:
+
+```yaml
+prometheus_server_prometheus_launch_parameters: |
+  --config.file /etc/prometheus/prometheus.yml \
+  --storage.tsdb.path /var/lib/prometheus/ \
+  --web.console.templates=/etc/prometheus/consoles \
+  --web.console.libraries=/etc/prometheus/console_libraries $PROMETHEUS_OPTIONS \
+  --web.config.file=/etc/prometheus/web.yml
+```
+
 ## Changelog
 
+* 1.3.0: Support TLS and Basic Authentication. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.2.4: Update to BB 2.0 format. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.2.3: Fix karma package to install on RedHat. Emmanuel Chevreau <manu44600@gmail.com>
 * 1.2.2: Fix ubuntu support. Benoit Leveugle <benoit.leveugle@gmail.com>

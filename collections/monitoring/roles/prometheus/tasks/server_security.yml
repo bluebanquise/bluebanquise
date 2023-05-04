@@ -1,0 +1,12 @@
+---
+
+- name: template <|> Generate prometheus web config file
+  ansible.builtin.template:
+    src: web.yml.j2
+    dest: /etc/prometheus/web.yml
+    owner: prometheus
+    group: prometheus
+    mode: 0644
+  notify: service <|> Restart prometheus service
+  tags:
+    - template

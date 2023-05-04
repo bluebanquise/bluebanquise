@@ -1,15 +1,8 @@
 #jinja2: lstrip_blocks: True
-{% set min_port = drbd_resources_port_range.split('-')[0] %}
-{% set port = namespace(port=min_port) %}
-{% for resource in drbd_resources %}
-  {% if item.name == resource.name %}
-    {% set port.port = ((port.port|int) + (loop.index|int) - 1) %}
-  {% endif %}
-{% endfor %}
 resource {{ item.name }} {
 {% for node, node_ip in item.nodes.items() %}
   on {{ node }} {
-    address   {{ node_ip }}:{{ port.port }};
+    address   {{ node_ip }}:{{ item.port }};
     device    {{ item.device }};
     disk      {{ item.disk }};
     meta-disk {{ item.metadisk }};
