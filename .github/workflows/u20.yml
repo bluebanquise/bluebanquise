@@ -37,7 +37,7 @@ jobs:
           docker exec mgt1 bash -c "curl http://bluebanquise.com/repository/releases/latest/u20/x86_64/bluebanquise/bluebanquise.list --output /etc/apt/sources.list.d/bluebanquise.list"
           docker exec mgt1 bash -c "apt update && DEBIAN_FRONTEND=noninteractive apt-get install apt-utils -y"
           # We need to disable accounting for now
-          docker exec mgt1 bash -c "sed -i 's/slurm_enable_accounting:\ true/slurm_enable_accounting: false/' /var/lib/bluebanquise/inventory/group_vars/all/slurm.yml"
+          # docker exec mgt1 bash -c "sed -i 's/slurm_enable_accounting:\ true/slurm_enable_accounting: false/' /var/lib/bluebanquise/inventory/group_vars/all/slurm.yml"
 
       - name: Prepare run input files
         run: docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'cp -a /bluebanquise/resources/workflow/inventory_standard /var/lib/bluebanquise/inventory && cp -a /bluebanquise/resources/workflow/playbooks /var/lib/bluebanquise'"
