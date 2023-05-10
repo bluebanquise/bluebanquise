@@ -9,10 +9,11 @@ slurm_packages_to_install:
     - slurm-devel
     - slurm-slurmctld
   accounting:
-    - mariadb-common
-    - mariadb-server
     - python3-mysqldb
     - slurm-slurmdbd
+  accounting_mysql:
+    - mariadb-common
+    - mariadb-server
   compute:
     - munge
     - libmunge2
