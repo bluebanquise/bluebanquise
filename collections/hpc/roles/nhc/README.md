@@ -1,5 +1,15 @@
 # Node Health Checker
 
+|      OS      | Version | Supported |
+|:-------------|:--------|:---------:|
+| Ubuntu       |   20.04 |    no     |
+| Ubuntu       |   22.04 |    no     |
+| RHEL         |       7 |    yes    |
+| RHEL         |       8 |    yes    |
+| RHEL         |       9 |    yes    |
+| OpenSuseLeap |      15 |    no     |
+| Debian       |      11 |    no     |
+
 ## Description
 
 This role install and configure NHC.

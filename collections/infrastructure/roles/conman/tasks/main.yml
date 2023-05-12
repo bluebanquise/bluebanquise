@@ -57,7 +57,7 @@
     - ansible_facts.os_family == "RedHat"
 
 - name: file <|> Create /var/log/conman directory
-  ansible.builtin.file:  # noqa 208
+  ansible.builtin.file:  # noqa risky-file-permissions
     path: /var/log/conman
     setype: "{{ (ansible_facts.selinux.status == 'enabled') | ternary('conman_log_t', omit) }}"
     state: directory

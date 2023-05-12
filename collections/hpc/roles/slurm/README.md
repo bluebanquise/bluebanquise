@@ -1,5 +1,17 @@
 # Slurm
 
+Role compatibility:
+
+|      OS      | Version | Supported |
+|:-------------|:--------|:---------:|
+| Ubuntu       |   20.04 |    yes (does not support local MYSQL installation) |
+| Ubuntu       |   22.04 |    yes (does not support local MYSQL installation) |
+| RHEL         |       7 |    yes    |
+| RHEL         |       8 |    yes    |
+| RHEL         |       9 |    yes    |
+| OpenSuseLeap |      15 |    yes    |
+| Debian       |      11 |    yes    |
+
 - [Slurm](#slurm)
   * [Description](#description)
   * [Instructions](#instructions)
@@ -25,15 +37,51 @@ Note: this role requires *bluebanquise_filters* package to be installed.
 ### Munge key
 
 **IMPORTANT**: before using the role, first thing to do is to generate a
-new munge key file. To do so, generate a new munge.key file using:
+new munge key file. This file need to be the same on all nodes of the Slurm cluster, and so need to be spread by the role.
 
-```bash
-dd if=/dev/urandom bs=1 count=1024 > munge.key
-mungekey -c -k /etc/bluebanquise/roles/community/slurm/files/munge.key
+The role do not provide default munge key file, as it is considered a security risk.
+
+The role supports currently 2 ways to provide key file:
+
+* Provide plain file into `files` subfolder of executed playbook folder
+* Provide base64 encoded string
+
+First step for both methods is to generate a new munge.key file locally using (note that you need munge package to be installed on your system):
+
+```
+mungekey -c -k munge.key
 ```
 
-I do not provide default munge key file, as it is considered a security risk.
-(Too much users were using the example key).
+Then, next step depends of method choose.
+
+In any case, if your `inventory` or `playbooks/files/` folders are hosted on a sensitive server or stored in a version controlled repository (git, ...), you should **strongly** consider encrypting the key file or the inventory files with an [Ansible Vault](https://docs.ansible.com/ansible/latest/vault_guide/index.html).
+
+#### Provide plain file
+
+Assuming your playbooks folder is `$HOME/playbooks`, create a `files` subfolder, and place your key inside:
+
+```
+mkdir -p $HOME/playbooks/files
+mv munge.key $HOME/playbooks/files/munge.key
+```
+
+Role will spread this file across all nodes of the Slurm cluster.
+
+#### Provide base64 encoded string
+
+Get base64 encoded string from the key, using:
+
+```
+base64 -w 0 munge.key
+```
+
+You should get long string as a result (example, but DO NOT USE IT!! : `hYcbkjJgv5YyybNqKbo+JvXLakIY2zFcZhpopipS8JmLmeE3YHgMcbUO74LIGKqzpIgD7ILPgUKmzgSl8BOK9WHQcMxywvh2fY567+4TyEq/HEArVfqdsIPw1U/jodDt2DL3MTNvci5hTJ8JNJZZKrjJc2x/FBlF52hAt+KLm+g=`). Copy it (beware not copying anything, as the command do not generate a new line at the end), and create a variable called `slurm_munge_key_b64` in the inventory, with the copied string as content:
+
+```yaml
+slurm_munge_key_b64: hYcbkjJgv5YyybNqKbo+JvXLakIY2zFcZhpopipS8JmLmeE3YHgMcbUO74LIGKqzpIgD7ILPgUKmzgSl8BOK9WHQcMxywvh2fY567+4TyEq/HEArVfqdsIPw1U/jodDt2DL3MTNvci5hTJ8JNJZZKrjJc2x/FBlF52hAt+KLm+g=
+```
+
+Role will decode this string to generate key on all nodes of the Slurm cluster.
 
 ### Apply role
 
@@ -170,6 +218,43 @@ To enable Accounting the community.mysql ansible module is required:
 ```bash
 ansible-galaxy collection install community.mysql
 ```
+
+Then, set `slurm_enable_accounting` variable to **true**.
+
+Configuration then depends on your needs.
+
+#### Database and login user settings
+
+Note that if you wand the role to create Slurm related database or Slurm related user into the MYSQL database, you need to set the following variables to true:
+
+* `slurm_accounting_mysql_create_database`: if **true**, create **"slurm_acct_db"** database if not existing in MYSQL.
+* `slurm_accounting_mysql_create_user`: if **true**, create needed user (set by `slurm_accounting_storage_user`) into MYSQL. This user will have rights on the **"slurm_acct_db"** database.
+
+Also, set the following variables to configure Slurm database user settings:
+
+* `slurm_accounting_storage_user`: user to be used by slurmdbd process to login into databse. Default: **slurm**.
+* `slurm_accounting_storage_pass`: password to be used by slurmdbd process to login into database. Default: **ssap_slurm**. Please be sure to change this value in production.
+
+You can then either choose to use a distant MYSQL server, or ask the role to deploy one locally.
+
+#### Using an external MYSQL database server
+
+Ensure variable `slurm_enable_local_mysql` is set to **false**.
+
+Then, set the following variables to configure remote server settings:
+
+* `slurm_accounting_mysql_login_host`: MYSQL server remote server address or hostname.
+* `slurm_accounting_mysql_login_port`: MYSQL server remote server port (leave empty if default).
+* `slurm_accounting_mysql_login_user`: MYSQL server remote server user to login.
+* `slurm_accounting_mysql_login_password`: MYSQL server remote server password to login.
+
+#### Deploying and using a local MYSQL database server
+
+Ensure variable `slurm_enable_local_mysql` is set to **true**.
+
+You should be able to let all `slurm_accounting_mysql_login_*` variables to default.
+
+#### Commands to be used once deployed
 
 If you enable accounting, once the role has been applied on
 controller, check existence of the cluster in the database:

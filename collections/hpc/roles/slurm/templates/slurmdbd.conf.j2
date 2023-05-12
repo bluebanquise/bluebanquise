@@ -10,7 +10,7 @@ AuthType=auth/munge
 SlurmUser=slurm
 
 ## Mariadb server
-DbdHost=localhost
+DbdHost={{ slurm_accounting_mysql_login_host | default('localhost', true) }}
 
 ## Log and pid
 LogFile={{ slurm_slurmdbdlogfile }}
@@ -19,6 +19,6 @@ PidFile=/var/run/slurmdbd.pid
 
 ## Storage
 StorageType=accounting_storage/mysql
-StorageUser={{ slurm_storageuser }}
-StoragePass={{ slurm_storagepass }}
+StorageUser={{ slurm_accounting_storage_user }}
+StoragePass={{ slurm_accounting_storage_pass }}
 

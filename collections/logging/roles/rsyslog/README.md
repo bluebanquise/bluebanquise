@@ -1,5 +1,15 @@
 # Log
 
+|      OS      | Version | Supported |
+|:-------------|:--------|:---------:|
+| Ubuntu       |   20.04 |    yes    |
+| Ubuntu       |   22.04 |    yes    |
+| RHEL         |       7 |    yes    |
+| RHEL         |       8 |    yes    |
+| RHEL         |       9 |    yes    |
+| OpenSuseLeap |      15 |    yes    |
+| Debian       |      11 |    yes    |
+
 ## Description
 
 This role provides an rsyslog configuration, for both server and client.

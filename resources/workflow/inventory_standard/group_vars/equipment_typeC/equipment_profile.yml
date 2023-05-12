@@ -1,0 +1,14 @@
+ep_equipment_type: server
+
+ep_hardware:
+  cpu:
+    architecture: x86_64
+    cores: 24
+    cores_per_socket: 12
+    sockets: 2
+    threads_per_core: 1
+
+ep_host_authentication:
+  - protocol: IPMI
+    user: ADMIN
+    password: ADMIN
