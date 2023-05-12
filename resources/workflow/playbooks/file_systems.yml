@@ -3,7 +3,6 @@
   hosts: "mg_managements"
   roles:
 
-    # HPC
     - role: bluebanquise.file_systems.nfs
       tags: nfs
       vars:
@@ -14,7 +13,7 @@
       tags: filesystem
     - role: bluebanquise.file_systems.lvm
       tags: lvm
-    - role: bluebanquise.file_sye stems.mount
+    - role: bluebanquise.file_systems.mount
       tags: mount
     - role: bluebanquise.file_systems.parted
       tags: parted
