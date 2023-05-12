@@ -14,4 +14,4 @@
     resize: "{{ item.resize | default(omit) }}"
     state: "{{ item.state | default(omit) }}"
     unit: "{{ item.unit | default(omit) }}"
-  loop: "{{ parted }}"
+  loop: "{{ parted | default([], true) }}"

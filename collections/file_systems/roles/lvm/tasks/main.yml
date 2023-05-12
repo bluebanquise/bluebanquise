@@ -16,7 +16,7 @@
     state: "{{ item.state | default(omit) }}"
     pv_options: "{{ item.pv_options | default(omit) }}"
     vg_options: "{{ item.vg_options | default(omit) }}"
-  loop: "{{ lvm.vgs }}"
+  loop: "{{ lvm.vgs | default([], true) }}"
   when:
     - item.vg is defined and item.vg is not none
     - item.pvs is defined and item.pvs
@@ -34,7 +34,7 @@
     snapshot: "{{ item.snapshot | default(omit) }}"
     state: "{{ item.state | default(omit) }}"
     thinpool: "{{ item.thinpool | default(omit) }}"
-  loop: "{{ lvm.lvs }}"
+  loop: "{{ lvm.lvs | default([], true) }}"
   when:
     - item.vg is defined and item.vg is not none
     - item.lv is defined and item.lv is not none

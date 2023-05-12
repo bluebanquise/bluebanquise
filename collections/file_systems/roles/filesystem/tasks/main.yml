@@ -7,4 +7,4 @@
     opts: "{{ item.opts | default(omit) }}"
     resizefs: "{{ item.resizefs | default(omit) }}"
     state: "{{ item.state | default(omit) }}"
-  loop: "{{ filesystem }}"
+  loop: "{{ filesystem | default([], true) }}"
