@@ -47,3 +47,7 @@ jobs:
       - name: HPC roles execution
         run: |
           docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ansible-playbook /var/lib/bluebanquise/playbooks/hpc.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff  --tags slurm --skip-tags service'"
+
+      - name: FS roles execution
+        run: |
+          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ansible-playbook /var/lib/bluebanquise/playbooks/file_systems.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff'"

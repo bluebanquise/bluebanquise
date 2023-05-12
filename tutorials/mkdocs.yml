@@ -1,0 +1,7 @@
+site_name: BlueBanquise - Tutorials
+
+#markdown_extensions:
+#  - pymdownx.highlight:....
+
+nav:
+    - Home: index.md

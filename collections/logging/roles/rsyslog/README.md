@@ -16,8 +16,22 @@ This role provides an rsyslog configuration, for both server and client.
 
 ## Instructions
 
+### Server or client
+
+The role allows to deploy a client or a server, using `rsyslog_profile` value, which can be **server** or **client**:
+
+Example:
+
+```yaml
+rsyslog_profile: server
+```
+
+### Port
+
 Log server port is set to 514 by default, and can be customized with log_port variable.
 This value should be set accordingly between server and client.
+
+### Verbosity
 
 Log client verbosity defaults to info, it can be one of the following (defined in the syslog protocol):
 

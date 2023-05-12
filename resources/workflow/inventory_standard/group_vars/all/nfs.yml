@@ -1,0 +1,11 @@
+nfs:
+  softwares:
+    mount: /opt/software
+    export: /opt/software
+    server: mgt1
+    clients_groups:
+      - mg_computes
+      - mg_managements
+    take_over_network: net-admin
+    export_options: ro,async
+    mount_options: ro,nfsvers=4.2,bg
