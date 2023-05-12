@@ -8,3 +8,5 @@ nfs_shares:
       take_over_network: net-admin
       export_options: ro,async
       mount_options: ro,nfsvers=4.2,bg
+
+nfs_client_directories_state: present
