@@ -1,6 +1,6 @@
 nfs_shares:
     - mount: /test
-      export: /dev/shm
+      export: /dev/shm/test/
       server: mgt1
       clients_groups:
         - mg_computes
