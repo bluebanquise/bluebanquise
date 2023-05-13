@@ -1,6 +1,6 @@
 nfs_shares:
-    - mount: /opt/software
-      export: /opt/software
+    - mount: /tmp
+      export: /tmp
       server: mgt1
       clients_groups:
         - mg_computes
