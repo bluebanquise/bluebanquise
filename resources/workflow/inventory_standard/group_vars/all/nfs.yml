@@ -1,5 +1,5 @@
 nfs_shares:
-    - mount: /tmp
+    - mount: /test
       export: /tmp
       server: mgt1
       clients_groups:
