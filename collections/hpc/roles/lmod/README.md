@@ -51,4 +51,5 @@ Files generated:
 
 ## Changelog
 
+* 1.0.1: Expand to other distributions. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
