@@ -1,15 +1,12 @@
-LVM
----
+# LVM
 
-Description
-^^^^^^^^^^^
+## Description
 
 This role configure local LVM storage: Physical Volumes, Volume Groups, and Logical Volumes.
 
 Role assume standard LVM tree. For example:
 
-.. code-block:: text
-
+```
   +---------+
   |   pv1   +-----+
   +---------+     |                         +---------+
@@ -23,9 +20,9 @@ Role assume standard LVM tree. For example:
   +---------+     |                         +---------+
   |   pv3   +-----+
   +---------+
+```
 
-Instructions
-^^^^^^^^^^^^
+## Instructions
 
 All options from lvg and lvol ansible modules are supported. See:
 
@@ -34,60 +31,59 @@ All options from lvg and lvol ansible modules are supported. See:
 
 To configure LVM on an host, use the following YAML structure:
 
-.. code-block:: yaml
-
-      hosts:
-        management1:
-          network_interfaces:
-            - interface: enp0s8
-              ip4: 10.10.0.1
-              mac: 08:00:27:36:c0:ac
-              network: ice1-1
-          lvm:
-            vgs:
-              - vg: data
-                pvs:
-                  - /dev/sdb
-                  - /dev/sdc
-              - vg: colors
-                pvs:
-                  - /dev/sde
-                  - /dev/sdf
-            lvs:
-              - lv: test
-                size: 200M
-                vg: data
-              - lv: test2
-                size: 10G
-                vg: data
-              - lv: blue
-                size: 100M
-                vg: colors
+```yaml
+hosts:
+  management1:
+    network_interfaces:
+      - interface: enp0s8
+        ip4: 10.10.0.1
+        mac: 08:00:27:36:c0:ac
+        network: ice1-1
+    lvm:
+      vgs:
+        - vg: data
+          pvs:
+            - /dev/sdb
+            - /dev/sdc
+        - vg: colors
+          pvs:
+            - /dev/sde
+            - /dev/sdf
+      lvs:
+        - lv: test
+          size: 200M
+          vg: data
+        - lv: test2
+          size: 10G
+          vg: data
+        - lv: blue
+          size: 100M
+          vg: colors
+```
 
 At *vgs* level, all options from module **lvg** are available.
 At *lvs* level, all options from module **lvol** are available.
 
 For example, you can create a mirrored logical volume using:
 
-.. code-block:: yaml
-
-          storage:
-            lvm:
-              vgs:
-                - vg: data
-                  pvs:
-                    - /dev/sdb
-                    - /dev/sdc
-              lvs:
-                - lv: test
-                  size: 200M
-                  vg: data
-                  opts: -m 1
+```yaml
+storage:
+  lvm:
+    vgs:
+      - vg: data
+        pvs:
+          - /dev/sdb
+          - /dev/sdc
+    lvs:
+      - lv: test
+        size: 200M
+        vg: data
+        opts: -m 1
+```
 
 Which will produce a 2 mirror lv:
 
-.. code-block:: text
-
+```
   root]# lvdisplay
   --- Logical volume ---
   LV Path                /dev/data/test
@@ -106,67 +102,12 @@ Which will produce a 2 mirror lv:
   Read ahead sectors     auto
   - currently set to     8192
   Block device           253:4
+```
 
 Etc.
 
-.. note::
-  LVM mirroring recovering is documented in the story section of the main
-  BlueBanquise documentation.
+## Changelog
 
-Input
-^^^^^
-
-Mandatory inventory vars:
-
-**hostvars[inventory_hostname]**
-
-For pv:
-
-* lvm[vgs]
-   * vg
-   * pvs
-
-For lv:
-
-* lvm[lvs]
-  * lv
-  * size
-  * vg
-
-Optional inventory vars:
-
-**hostvars[inventory_hostname]**
-
-For pv:
-
-* lvm[vgs]
-   * force
-   * pesize
-   * pv_options
-   * pvresize
-   * state
-   * vg_options
-
-For lv:
-
-* lvm[lvs]
-   * active
-   * force
-   * opts
-   * resizefs
-   * shrink
-   * snapshot
-   * state
-   * thinpool
-
-^^^^^^
-
-Packages installed:
-
-* lvm management tools package
-
-Changelog
-^^^^^^^^^
-
+* 1.1.1: Fix missing list. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>

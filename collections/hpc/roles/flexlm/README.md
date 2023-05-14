@@ -73,5 +73,6 @@ This role is validated on:
 
 ## Changelog
 
+* 1.0.2: Fix few packages names. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.1: Update all module to full path. Matthieu Isoard
 * 1.0.0: Initial support. Matthieu Isoard

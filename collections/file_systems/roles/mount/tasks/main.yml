@@ -11,4 +11,4 @@
     path: "{{ item.path }}"
     src: "{{ item.src | default(omit) }}"
     state: "{{ item.state }}"
-  loop: "{{ mount }}"
+  loop: "{{ mount | default([], true) }}"

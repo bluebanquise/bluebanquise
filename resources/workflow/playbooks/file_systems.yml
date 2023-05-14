@@ -1,0 +1,19 @@
+---
+- name: managements playbook
+  hosts: "mg_managements"
+  roles:
+
+    - role: bluebanquise.file_systems.nfs
+      tags: nfs
+      vars:
+        nfs_profile:
+          - server
+          - client
+    - role: bluebanquise.file_systems.filesystem
+      tags: filesystem
+    - role: bluebanquise.file_systems.lvm
+      tags: lvm
+    - role: bluebanquise.file_systems.mount
+      tags: mount
+    - role: bluebanquise.file_systems.parted
+      tags: parted
