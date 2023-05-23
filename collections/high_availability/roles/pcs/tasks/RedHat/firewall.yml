@@ -3,7 +3,7 @@
 - name: firewalld <|> "Add services to firewall's {{ ha_firewall_zone | default('public') }} zone"
   ansible.posix.firewalld:
     zone: "{{ ha_firewall_zone | default('public') }}"
-    service: high_availability
+    service: high-availability
     immediate: "yes"
     permanent: "yes"
     state: enabled
