@@ -1,0 +1,6 @@
+ep_equipment_type: server
+
+ep_operating_system:
+  distribution: "redhat"
+  distribution_version: "8"
+  distribution_major_version: "8"

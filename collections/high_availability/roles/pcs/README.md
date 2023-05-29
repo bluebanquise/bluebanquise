@@ -612,6 +612,7 @@ not present. Then in HA resources, declare the following:
 
 ## 6. Changelog
 
+* 1.1.1: Fix service name in RHEL firewall. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.1.0: Add Ubuntu support. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.0.6: (docs): examples to hash cluster password with Python and Perl. Leo Araujo <lmagdanello40@gmail.com>
 * 1.0.5: Allow specification of name of the cluster. Giacomo Mc Evoy <gino.mcevoy@gmail.com>

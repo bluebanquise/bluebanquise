@@ -1,5 +1,15 @@
 # Flexlm
 
+|      OS      | Version | Supported |
+|:-------------|:--------|:---------:|
+| Ubuntu       |   20.04 |    yes    |
+| Ubuntu       |   22.04 |    no     |
+| RHEL         |       7 |    yes    |
+| RHEL         |       8 |    yes    |
+| RHEL         |       9 |    no     |
+| OpenSuseLeap |      15 |    no     |
+| Debian       |      11 |    yes    |
+
 ## Overview
 
 A role to manage Flexlm daemon and licence files.
@@ -63,5 +73,6 @@ This role is validated on:
 
 ## Changelog
 
+* 1.0.2: Fix few packages names. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.1: Update all module to full path. Matthieu Isoard
 * 1.0.0: Initial support. Matthieu Isoard

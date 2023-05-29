@@ -6,12 +6,23 @@
     owner: munge
     group: munge
     mode: 0400
+  when: slurm_munge_key_b64 is not defined or (slurm_munge_key_b64 is defined and slurm_munge_key_b64 is none)
+  notify: service <|> Restart munge
+
+- name: copy <|> Write munge key to /etc/munge/munge.key from b64
+  ansible.builtin.copy:
+    dest: /etc/munge/munge.key
+    content: "{{ slurm_munge_key_b64 | b64decode }}"
+    owner: munge
+    group: munge
+    mode: 0400
+  when: slurm_munge_key_b64 is defined and slurm_munge_key_b64 is not none
   notify: service <|> Restart munge
 
 - name: service <|> Manage munge state
   ansible.builtin.service:
     name: munge
-    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
-    state: "{{ (start_services | bool) | ternary('started', omit) }}"
+    enabled: "{{ (slurm_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    state: "{{ (slurm_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   tags:
     - service

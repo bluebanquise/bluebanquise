@@ -1,0 +1,13 @@
+---
+- name: managements playbook
+  hosts: "mg_managements"
+  roles:
+
+    - role: bluebanquise.logging.rsyslog
+      tags: rsyslog
+      vars:
+        rsyslog_profile: server
+    - role: bluebanquise.logging.rsyslog
+      tags: rsyslog
+      vars:
+        rsyslog_profile: client     

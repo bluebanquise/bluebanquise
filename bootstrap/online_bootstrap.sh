@@ -74,9 +74,14 @@ if [ "$PLATFORM_ID" == "platform:el9" ]; then
   sudo dnf install git python3 python3-pip python3-pip python3-policycoreutils openssh-clients -y
 fi
 if [ "$ID" == "opensuse-leap" ]; then
+  sudo zypper -n install python3 python3-pip
   sudo zypper -n install python39 python39-pip git openssh
-  sudo ln -s /usr/bin/python3.9 /usr/bin/python3
-  sudo ln -s /usr/bin/pip3.9 /usr/bin/pip3
+  sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 3
+  sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.9 3
+  sudo update-alternatives --install /usr/bin/pip pip /usr/bin/pip3.9 3
+  sudo update-alternatives --install /usr/bin/pip3 pip3 /usr/bin/pip3.9 3
+  # sudo ln -s /usr/bin/python3.9 /usr/bin/python3
+  # sudo ln -s /usr/bin/pip3.9 /usr/bin/pip3
 fi
 if [ "$VERSION_ID" == "11" ]; then
   sudo apt update

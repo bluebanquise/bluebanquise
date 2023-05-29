@@ -80,11 +80,11 @@
 - name: meta <|> Run handler tasks to restart rsyslog services
   ansible.builtin.meta: flush_handlers
 
-- name: "service <|> Manage {{ rsyslog_server_services_to_start }} services state"
+- name: "service <|> Manage {{ rsyslog_services_to_start | join(' ') }} state"
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
-    state: "{{ (start_services | bool) | ternary('started', omit) }}"
-  loop: "{{ rsyslog_server_services_to_start }}"
+    enabled: "{{ (rsyslog_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    state: "{{ (rsyslog_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
+  loop: "{{ rsyslog_services_to_start }}"
   tags:
     - service

@@ -27,7 +27,7 @@ local7.*                                                /var/log/boot.log
 
 {% if networks[j2_node_main_network] is defined
       and networks[j2_node_main_network]['services'] is defined
-      and networks[j2_node_main_network]['services']['log']
+      and networks[j2_node_main_network]['services']['log'] is defined
       and networks[j2_node_main_network]['services']['log'] is iterable %}
     {% for rsyslog_server in networks[j2_node_main_network]['services']['log'] %}
         {% if (log_server.ip is defined and (log_server.ip | ansible.utils.ipaddr)) or (log_server.hostname is defined and rsyslog_server.hostname is not none) %}

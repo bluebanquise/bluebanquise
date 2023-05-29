@@ -2,8 +2,9 @@
 ---
 - name: command <|> yum clean metadata
   ansible.builtin.command: yum clean metadata
-  args:
-    warn: no
+# Note: do not know why this was introduced, commenting for now
+#  args:
+#    warn: no
 
 - name: command <|> apt update cache
   ansible.builtin.command: apt update

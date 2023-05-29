@@ -80,7 +80,7 @@
 - name: set_fact <|> Set SOA Serial for reverse zone
   ansible.builtin.set_fact:
     serial: "{{ lookup('pipe', 'date +%s') }}"
-  when: zoneconf.changed  # noqa 503
+  when: zoneconf.changed  # noqa no-handler
   tags:
     - template
     - internal

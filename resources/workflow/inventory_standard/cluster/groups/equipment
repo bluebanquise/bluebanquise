@@ -1,0 +1,25 @@
+# mgt1 is assumed into all, so ends up into the "all" equipment group
+
+[equipment_typeC]
+c001
+
+[equipment_rhel8]
+mgt2
+
+[equipment_rhel9]
+mgt3
+
+[equipment_rhel7]
+mgt4
+
+[equipment_ubuntu20]
+mgt5
+
+[equipment_ubuntu22]
+mgt6
+
+[equipment_opensuseleap15]
+mgt7
+
+[equipment_debian11]
+mgt8
