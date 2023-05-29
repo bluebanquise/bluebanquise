@@ -1,30 +1,15 @@
 ---
 
-- name: Set defaults for user quotas
-  xfs_quota:
-   type: user
-   mountpoint: "{{ item.mountpoint }}"
-   bsoft: "{{ xfs_quota_user_bsoft }}"
-   bhard: "{{ xfs_quota_user_bhard }}"
-   state: present
-  loop: "{{ quota_filesystem }}"
-
-
-- name: Set default Quotas Group
-  xfs_quota:
-   type: group
-   mountpoint: "{{ item.mountpoint }}"
-   bsoft: "{{ xfs_quota_group_bsoft }}"
-   bhard: "{{ xfs_quota_group_bhard }}"
-   state: present
-  loop: "{{ quota_filesystem }}"
-
-- name: Set quotas for specific users or groups
-  xfs_quota:
-   type: "{{ item.type }}"
-   name: "{{ item.name }}"
-   mountpoint: "{{ item.mountpoint }}"
-   bsoft: "{{ item.bsoft }}"
-   bhard: "{{ item.bhard }}"
-   state: present
-  loop: "{{ quotas_spec }}"
+- name: xfs_quota <|> Set XFS quotas
+  community.general.xfs_quota:
+    type: "{{ item.type }}"
+    mountpoint: "{{ item.mountpoint }}"
+    bhard: "{{ item.bhard | default(omit) }}"
+    bsoft: "{{ item.bsoft | default(omit) }}"
+    ihard: "{{ item.ihard | default(omit) }}"
+    isoft: "{{ item.isoft | default(omit) }}"
+    name: "{{ item.name | default(omit) }}"
+    rtbhard: "{{ item.rtbhard | default(omit) }}"
+    rtbsoft: "{{ item.rtbsoft | default(omit) }}"
+    state: "{{ item.state| default('present') }}"
+  loop: "{{ xfs_quota }}"

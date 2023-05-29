@@ -39,14 +39,7 @@ Set specific values for user and groups outside the default scope in quota_spec
 
 .. code-block:: yaml
 
-   quota_filesystem:
-    -name: FS1
-     mountpoint: XXXXXX
-
-    -name: FS2
-     mountpoint: XXXXXX
-
-   quotas_spec:
+   xfs_quota:
     - type: user
       name: nobody 
       mountpoint: /exports/nfs
