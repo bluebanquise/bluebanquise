@@ -64,6 +64,32 @@ If using Ubuntu or Debian derivate OS, networkd (Systemd Networkd) module from t
 | zone | x |   |   |
 | method4 | x | x |   |
 | method6 | x |   |   |
+| addr_gen_mode6 | x |   |   |
+| dns4_ignore_auto | x |   |   |
+| dns6_ignore_auto | x |   |   |
+| gsm | x |   |   |
+| gw4_ignore_auto | x |   |   |
+| gw6_ignore_auto | x |   |   |
+| ignore_unsupported_suboptions | x |   |   |
+| ip_privacy6 | x |   |   |
+| ip_tunnel_input_key | x |   |   |
+| ip_tunnel_output_key | x |   |   |
+| may_fail4 | x |   |   |
+| route_metric6 | x |   |   |
+| routes4_extended | x |   |   |
+| routes6 | x |   |   |
+| routes6_extended | x |   |   |
+| routing_rules4 | x |   |   |
+| runner | x |   |   |
+| runner_fast_rate | x |   |   |
+| runner_hwaddr_policy | x |   |   |
+| ssid | x |   |   |
+| transport_mode | x |   |   |
+| vpn | x |   |   |
+| wifi | x |   |   |
+| wifi_sec | x |   |   |
+| wireguard | x |   |   |
+| xmit_hash_policy | x |   |   |
 
 ## Instructions
 
@@ -233,6 +259,7 @@ To achieve that, few variables are at disposal:
 
 ## Changelog
 
+* 1.8.0: Add new nmcli keys. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.7.0: Update to BB 2.0 format. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.6.1: Add missing dns entry. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.6.0: Add OpenSuSE 12 and 15 support. Neil Munday <neil@mundayweb.com>

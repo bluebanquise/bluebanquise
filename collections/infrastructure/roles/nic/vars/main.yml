@@ -1,5 +1,5 @@
 ---
-nic_role_version: 1.7.0
+nic_role_version: 1.8.0
 
 j2_nic_ip4: "{{ j2_nic_ip4_main | trim }}{% if item.ip4 is defined and item.ip4_manual is defined %},{% endif %}{{ j2_nic_ip4_manual | trim }}"
 
