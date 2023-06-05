@@ -10,8 +10,8 @@
 - name: fail <|> Check presence of required parameters
   ansible.builtin.fail:
     msg: "Bailing out.
-  This role requires networks[{{ item['network'] }}]['firewall']['zone']"
-  when: networks[item['network']]['firewall']['zone'] is not defined
+  This role requires networks[{{ item['network'] }}]['firewall']['zone'] to be set"
+  when: (item['network'] is defined and networks[item['network']]['firewall'] is not defined) or (item['network'] is defined and networks[item['network']]['firewall']['zone'] is not defined)
   loop: "{{ network_interfaces }}"
   loop_control:
     label: "{{ item['interface'] }}"
@@ -24,7 +24,7 @@
     permanent: true
     state: present
   when: networks[item]['firewall']['zone'] is defined
-  loop: "{{ (network_interfaces | map(attribute='network') | list) }}"
+  loop: "{{ (network_interfaces | selectattr('network', 'defined') | map(attribute='network') | list) }}"
   notify: service <|> Restart firewall services
 
 - name: "firewalld <|> Ensure interfaces are in the correct firewall zone"
@@ -34,12 +34,11 @@
     permanent: true
     immediate: true
     state: enabled
-  when: networks[item.network]['firewall']['zone'] is defined
+  when: networks[item.network]['firewall'] is defined and networks[item.network]['firewall']['zone'] is defined
   loop: "{{ network_interfaces }}"
   loop_control:
     label: "{{ item.interface }} -> {{ networks[item.network]['firewall']['zone'] }}"
   notify: service <|> Restart firewall services
-
 
 - name: meta <|> Run handler tasks to restart firewall services
   ansible.builtin.meta: flush_handlers
@@ -52,7 +51,7 @@
     permanent: yes
     state: enabled
   when: networks[item]['firewall']['zone'] is defined
-  loop: "{{ (network_interfaces | map(attribute='network') | list) }}"
+  loop: "{{ (network_interfaces | selectattr('network', 'defined') | map(attribute='network') | list) }}"
   loop_control:
     label: "Add source '{{ networks[item]['subnet'] }}/{{ networks[item]['prefix'] }}'
             to zone '{{ networks[item]['firewall']['zone'] }}'"
