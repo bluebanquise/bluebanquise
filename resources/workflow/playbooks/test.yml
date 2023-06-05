@@ -5,3 +5,12 @@
     - name: test
       debug:
         msg: "{{ tyty2 }}"
+        
+    - name: test
+      debug:
+        msg: "{{ bb_core_iceberg_naming }}"
+    - name: test
+      debug:
+        msg: "{{ j2_node_main_network }}"
+
+        
