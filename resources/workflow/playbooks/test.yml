@@ -1,0 +1,7 @@
+---
+- name: managements playbook
+  hosts: "mg_managements"
+  tasks:
+    - name: test
+      debug:
+        msg: "{{ tyty2 }}"
