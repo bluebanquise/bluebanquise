@@ -4,15 +4,25 @@
 
 {###############################################################################
   Generic service item write
-###############################################################################}
-{% macro item_add(item_name, items_list) %}
+################################################################################
+ip_or_host allows to define priorities between ip or host
+#}
+{% macro item_add(item_name, items_list, ip_or_host) %}
   {% if items_list is defined and items_list is iterable and items_list is not string and items_list is not mapping %}
     {% set elements = [] %}
     {% for elem in items_list %}
-      {% if elem.ip is defined and (elem.ip | ansible.utils.ipaddr) %}
-        {{ elements.append(elem.ip) }}
-      {% elif elem.hostname is defined and elem.hostname is not none and elem.hostname is string %}
-        {{ elements.append(elem.hostname) }}
+      {% if ip_or_host == "ip" %}
+        {% if elem.ip is defined and (elem.ip | ansible.utils.ipaddr) %}
+          {{ elements.append(elem.ip) }}
+        {% elif elem.hostname is defined and elem.hostname is not none and elem.hostname is string %}
+          {{ elements.append(elem.hostname) }}
+        {% endif %}
+      {% else %}
+        {% if elem.hostname is defined and elem.hostname is not none and elem.hostname is string %}
+          {{ elements.append(elem.hostname) }}
+        {% elif elem.ip is defined and (elem.ip | ansible.utils.ipaddr) %}
+          {{ elements.append(elem.ip) }}
+        {% endif %}
       {% endif %}
     {% endfor %}
     {% if (elements | length) > 0 %}
@@ -38,20 +48,20 @@ subnet {{ networks[network]['subnet'] }} netmask {{ (networks[network]['subnet']
         {% if networks[network]['gateway4'] is string %}
   option routers {{ networks[network]['gateway4'] }};
         {% elif networks[network]['gateway4'] is iterable and networks[network]['gateway4'] is not mapping %}
-{{ item_add("option routers", networks[network]['gateway4']) }}
+{{ item_add("option routers", networks[network]['gateway4'], "host") }}
         {% endif %}
       {% endif %}
 
 {# Either ~~~~~~~ ADVANCED SERVICES #}
       {% if networks[network]['services'] is defined and networks[network]['services'] is iterable and networks[network]['services'] is not string and networks[network]['services'] is mapping %}
         {% if networks[network]['services']['dns4'] is defined %}
-{{ item_add("option domain-name-servers", networks[network]['services']['dns4']) }}
+{{ item_add("option domain-name-servers", networks[network]['services']['dns4'], "ip") }}
         {% endif %}
         {% if networks[network]['services']['ntp4'] is defined %}
-{{ item_add("option ntp-servers", networks[network]['services']['ntp4']) }}
+{{ item_add("option ntp-servers", networks[network]['services']['ntp4'], "host") }}
         {% endif %}
         {% if networks[network]['services']['pxe4'] is defined %}
-{{ item_add("next-server", networks[network]['services']['pxe4']) }}
+{{ item_add("next-server", networks[network]['services']['pxe4'], "host") }}
         {% endif %}
 
 {# Or ~~~~~~~ BASIC SERVICES #}
