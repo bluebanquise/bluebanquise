@@ -13,4 +13,12 @@
       debug:
         msg: "{{ j2_node_main_network }}"
 
-        
+    - name: test
+      debug:
+        msg: "{{ networks }}"
+    - name: test
+      debug:
+        msg: "{{ networks[j2_node_main_network] }}"
+    - name: test
+      debug:
+        msg: "{{ hostvars[inventory_hostname]['networks'][j2_node_main_network] }}"
