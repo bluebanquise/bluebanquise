@@ -26,7 +26,7 @@ ip_or_host allows to define priorities between ip or host
       {% endif %}
     {% endfor %}
     {% if (elements | length) > 0 %}
-{{ item_name }} {{ elements | join(', ') }};
+  {{ item_name }} {{ elements | join(', ') }};
     {% endif %}
   {% endif %}
 {% endmacro %}

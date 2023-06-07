@@ -5,10 +5,10 @@ networks:
     services:
       dns4:
         - ip: 10.10.0.1
-          host: mg1-dns
+          hostname: mg1-dns
       pxe4:
         - ip: 10.10.0.1
-          host: mg1-pxe
+          hostname: mg1-pxe
   net-test:
     prefix: 16
     subnet: 10.11.0.0
