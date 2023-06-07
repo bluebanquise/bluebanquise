@@ -1,0 +1,167 @@
+#jinja2: lstrip_blocks: "True"
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+
+#!/bin/bash
+
+#set -x
+
+if [ "$(arch)" != "x86_64" ]; then
+    echo "This script only supports x86_64 architecture at the moment."
+    exit 1
+fi
+
+JQ=$(type -p jq)
+SOS=$(type -p sos)
+SH1SUM=$(type -p sha1sum)
+PKGMGR=""
+
+
+tmp="{{ sosreport_tempfile_path }}"
+output_path="{{ sosreport_output_path }}"
+output_file="sosreport"
+
+function usage {
+    cat <<EOF
+Usage:
+  $0 [options]
+
+Note: the script must be run on the management node
+
+Options:
+  --output-file <filename>      Write output to specified file.
+                                (default: $output_file>)
+  --tmp <directory>             Directory to use for temporary files
+                                (default: $tmp)
+EOF
+}
+
+while [ $# -gt 0 ]; do
+    case $1 in
+        --help)
+            usage
+            exit 0
+            ;;
+        --output-file)
+            output_file=$2
+            shift; shift
+            ;;
+        --tmp)
+            tmp=$2
+            shift; shift
+            ;;
+        *)
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+function strict_version {
+    ver=$1
+    ver_req=$2
+    $(type -p python3 || type -p python) -c "from distutils.version import StrictVersion;print(StrictVersion('$ver') >= StrictVersion('$ver_req'));" 2>/dev/null || /bin/true
+}
+
+function check_main_deps {
+    if [ -z "$JQ" -o -z "$SH1SUM" -o -z "$SOS" ]; then
+        echo "Missing software needs to be installed.  Verifying sudo access..."
+        SUID=$(sudo id -u)
+        if [ "$SUID" != "0" ]; then
+            echo "Could not verify sudo access.  Cannot continue."
+            echo "Please resolve sudo access before re-running this script."
+            exit 1
+        else
+            echo "Verified sudo access..."
+        fi
+        install_pkgs=
+        if [ -z "$JQ" ]; then
+            echo "jq command not found...  Installing..."
+            install_pkgs+="jq "
+        fi
+	    if [ -z "$SOS" ]; then
+            echo "sos command not found...  Abording..."
+            exit 1
+        fi
+        if [ -z "$SH1SUM" ]; then
+            echo "sha1sum command not found...  Using md5sum..."
+            SH1SUM=$(type -p md5sum)
+            if [ -z "$SH1SUM" ]; then
+                echo "md5sum command not found... STOPPING: you must have sha1sum or md5sum installed."
+                exit 1
+            fi
+        fi
+        
+        if [ -n "$install_pkgs" ]; then
+            $PKGMGR -y install $install_pkgs
+        fi
+    fi
+}
+
+###############################################################################
+
+set -e
+
+declare -A osInfo;
+osInfo[/etc/redhat-release]=dnf
+osInfo[/etc/arch-release]=pacman
+osInfo[/etc/gentoo-release]=emerge
+osInfo[/etc/SuSE-release]=zypp
+osInfo[/etc/debian_version]=apt-get
+osInfo[/etc/alpine-release]=apk
+
+for f in ${!osInfo[@]}
+do
+    if [[ -f $f ]];then
+        echo Package manager: ${osInfo[$f]}
+        PKGMGR=${osInfo[$f]}
+    fi
+done
+
+echo "=== Checking script dependencies"
+check_main_deps
+
+if [ -d $tmp ]; then
+    echo "ERROR - $tmp detected, please delete the repository first"
+    exit 1
+fi
+if [ -f  $output_path ]; then
+    echo "ERROR - $output_path detected, please delete the repository first"
+    exit 1
+fi
+
+mkdir -p $output_path
+inventorydir="$tmp/ansible/inventory"
+mkdir -p $inventorydir
+roledir="$tmp/ansible/roles"
+mkdir -p $roledir
+
+echo "=== Copying Ansible inventory and roles"
+cp -r /etc/bluebanquise/roles $roledir
+cp -r /etc/bluebanquise/inventory $inventorydir
+
+echo "=== Gathering all nodes sos reports..."
+nodes="{% for host in groups['mg_managements'] %}{% if not loop.first %}{{ host }}{% if not loop.last %},{% endif %}{% endif %}{% endfor %}"
+
+nodes="$nodes,{% for host in groups['mg_logins'] %}{% if not loop.first %}{{ host }}{% if not loop.last %},{% endif %}{% endif %}{% endfor %}"
+
+nodes="$nodes,{% for host in groups['mg_computes'] %}{% if not loop.first %}{{ host }}{% if not loop.last %},{% endif %}{% endif %}{% endfor %}"
+
+sos collect --all-logs --batch --tmp-dir=$tmp --nodes=$nodes 2>$tmp/sos_error_logs.txt
+
+tardate=$(date +%F)
+echo "=== Generating TGZ file $output_path/$output_file.tgz from $tmp"
+cd $output_path && tar zcvf $output_file-$tardate.tgz $tmp
+echo ""
+
+echo ""
+sha1code=$($SH1SUM $output_path/$output_file-$tardate.tgz)
+echo "######################################################################"
+echo "##"
+echo "## INFO - Please MANUALLY delete temporary report files: $tmp"
+echo "## Please send the $output_path/$output_file-$tardate.tgz file to Support team"
+echo "## with the SHA1: $sha1code"
+echo "##"
+echo "######################################################################"
+echo ""
+exit 0

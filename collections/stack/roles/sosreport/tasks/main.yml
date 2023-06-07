@@ -1,0 +1,55 @@
+---
+- name: include_vars <|> Gather OS specific variables
+  # This task gathers variables defined in OS specific files.
+  #
+  # Search vars in:
+  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
+  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
+  #  - <distribution>.yml            # eg. CentOS.yml
+  #  - <os_family>.yml               # eg. RedHat.yml
+  #
+  # If no OS specific file is found, the role will default to vars/main.yml
+  #
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family }}.yml"
+      skip: true
+  tags:
+    - always
+
+- name: "sosreport <|> Install {{ sosreport_packages_to_install }} packages"
+  ansible.builtin.package:
+    name: "{{ sosreport_packages_to_install }}"
+    state: present
+  tags:
+    - package
+
+- name: "sosreport <|> Create directories"
+  ansible.builtin.stat:
+    path: "{{ sosreport_output_path }}"
+  register: output_path
+
+- name: "Ansible Create directory if not exists"
+  ansible.builtin.file:
+    path: "{{ sosreport_output_path }}"
+    state: directory
+    mode: 0755
+    group: root
+    owner: root
+  when: not output_path.stat.exists
+
+- name: sosreport <|> Generate sosreport binary file
+  ansible.builtin.template:
+    src: bluebanquise-sosreport.sh.j2
+    dest: "{{ sosreport_binary_path }}/{{ sosreport_binary_name }}"
+    owner: root
+    group: root
+    mode: 0755
+  tags:
+    - template
