@@ -1,0 +1,15 @@
+---
+
+- name: xfs_quota <|> Set XFS quotas
+  community.general.xfs_quota:
+    type: "{{ item.type }}"
+    mountpoint: "{{ item.mountpoint }}"
+    bhard: "{{ item.bhard | default(omit) }}"
+    bsoft: "{{ item.bsoft | default(omit) }}"
+    ihard: "{{ item.ihard | default(omit) }}"
+    isoft: "{{ item.isoft | default(omit) }}"
+    name: "{{ item.name | default(omit) }}"
+    rtbhard: "{{ item.rtbhard | default(omit) }}"
+    rtbsoft: "{{ item.rtbsoft | default(omit) }}"
+    state: "{{ item.state| default('present') }}"
+  loop: "{{ xfs_quota }}"
