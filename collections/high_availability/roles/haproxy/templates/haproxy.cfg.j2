@@ -44,20 +44,28 @@ defaults
 {% if haproxy_defaults_parameters is defined and haproxy_defaults_parameters is not none %}
 {{ haproxy_defaults_parameters }}
 {% else %}
-    mode                    http
+    mode                    {{ haproxy_mode }}
     log                     global
+  {% if haproxy_mode == 'http' %}
     option                  httplog
+  {% endif %}
     option                  dontlognull
+  {% if haproxy_mode == 'http' %}
     option http-server-close
+  {% endif %}
     option forwardfor       except 127.0.0.0/8
     option                  redispatch
     retries                 3
+  {% if haproxy_mode == 'http' %}
     timeout http-request    10s
+  {% endif %}
     timeout queue           1m
     timeout connect         10s
     timeout client          1m
     timeout server          1m
+  {% if haproxy_mode == 'http' %}
     timeout http-keep-alive 10s
+  {% endif %}
     timeout check           10s
     maxconn                 3000
 {% endif %}
@@ -79,7 +87,7 @@ backend {{ resource.name}}-backend
     {% if resource['backend']['parameters'] is defined and resource['backend']['parameters'] is not none %}
 {{ resource['backend']['parameters'] | indent(1, True) }}
     {% else %}
- mode http
+ mode {{ haproxy_mode }}
  balance roundrobin
     {% endif %}
     {% for server in resource['backend']['servers'] %}
@@ -87,4 +95,5 @@ backend {{ resource.name}}-backend
 
     {% endfor %}
 
-{% endfor %}
+  {% endfor %}
+{% endif %}
