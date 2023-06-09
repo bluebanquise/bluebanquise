@@ -55,8 +55,8 @@
     {% for service in networks[net]['services'] %}
       {% if networks[net]['services'][service] is iterable %}
         {% for iphost in networks[net]['services'][service] %}
-          {% if iphost.ip is defined and iphost.host is defined %}
-{{ iphost.ip }} {{ iphost.host }} {{ iphost.host }}-{{ net }} {{ iphost.host }}-{{ net }}-{{ service }}
+          {% if iphost.ip4 is defined and iphost.hostname is defined and (iphost.ip4 | ansible.utils.ipaddr) %}
+{{ iphost.ip4 }} {{ iphost.hostname }} {{ iphost.hostname }}-{{ service }} {{ iphost.hostname }}-{{ service }}-{{ net }}
           {% endif %}
         {% endfor %}
       {% endif %}

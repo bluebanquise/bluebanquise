@@ -18,9 +18,10 @@ networks:
     broadcast: 10.11.255.255
     dhcp_server: true
     dns_server: true  <<<<<<<<<<
-    services_ip:
-      dns4:
-        - ip: 10.11.0.1
+    services:
+      dns:
+        - ip4: 10.11.0.1
+          hostname: mgt1-dns
 ```
 
 It will generate 5 files:
@@ -56,6 +57,7 @@ This will cause `/var/named/override` to be generated.
 
 ## Changelog
 
+* 1.7.3: Add missing services records. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.7.2: Rename systemd service to named for Ubuntu. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.7.1: Find correct default resolution network in reverse zone. Alexandra Darrieutort <alexandra.darrieutort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.7.0: Add optional alias to every interface. Matthieu Isoard <indigoping4cgmi@gmail.com>
