@@ -3,11 +3,11 @@
 ## {{ ansible_managed }}
 
 {% if networks[j2_node_main_network]['services'] is defined and networks[j2_node_main_network]['services'] is iterable and networks[j2_node_main_network]['services'] is not string and networks[j2_node_main_network]['services'] is mapping %}
-  {% if networks[j2_node_main_network]['services']['dns4'] is defined and networks[j2_node_main_network]['services']['dns4'] is iterable and networks[j2_node_main_network]['services']['dns4'] is not string and networks[j2_node_main_network]['services']['dns4'] is not mapping %}
+  {% if networks[j2_node_main_network]['services']['dns'] is defined and networks[j2_node_main_network]['services']['dns'] is iterable and networks[j2_node_main_network]['services']['dns'] is not string and networks[j2_node_main_network]['services']['dns'] is not mapping %}
     {% set nameservers = [] %}
-    {% for elem in networks[j2_node_main_network]['services']['dns4'] %}
-      {% if elem.ip is defined and (elem.ip | ansible.utils.ipaddr) %}
-        {{ nameservers.append(elem.ip) }}
+    {% for elem in networks[j2_node_main_network]['services']['dns'] %}
+      {% if elem.ip4 is defined and (elem.ip4 | ansible.utils.ipaddr) %}
+        {{ nameservers.append(elem.ip4) }}
       {% endif %}
     {% endfor %}
   {% endif %}
