@@ -54,7 +54,7 @@
     owner: root
     group: root
     mode: 0644
-  notify: service <|> Restart dhcp server
+  notify: service <|> Restart keepalived server
   tags:
     - template
 
