@@ -54,7 +54,7 @@ $INCLUDE "{{ dns_server_named_dir }}/forward.soa"
         {% for iphost in networks[net]['services'][service] %}
           {% if iphost.ip4 is defined and iphost.hostname is defined and (iphost.ip4 | ansible.utils.ipaddr) %}
 {{ iphost.hostname }} IN A {{ iphost.ip4 }}
-{{ iphost.hostname }}-{{ service }}  IN A {{ iphost.ip4 }}
+{{ iphost.hostname }}-{{ service }} IN A {{ iphost.ip4 }}
 {{ iphost.hostname }}-{{ service }}-{{ net }} IN A {{ iphost.ip4 }}
           {% endif %}
         {% endfor %}
