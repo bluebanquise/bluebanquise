@@ -1,4 +1,5 @@
 ---
+
 - name: package <|> Install httpd and haproxy
   ansible.builtin.package:
     name:
@@ -14,6 +15,7 @@
     regexp: '^Listen 80'
     line: '#Listen 80'
   notify: service <|> Restart http server
+  when: haproxy_mode == 'http'
 
 - name: template <|> Set http server ips and ports to listen to
   ansible.builtin.template:
@@ -25,6 +27,7 @@
   tags:
     - template
   notify: service <|> Restart http server
+  when: haproxy_mode == 'http'
 
 - name: template <|> Configure haproxy
   ansible.builtin.template:
@@ -35,6 +38,7 @@
     mode: 0644
   tags:
     - template
+  notify: service <|> Restart haproxy server
 
 - name: meta <|> Run handler tasks to restart services
   meta: flush_handlers
@@ -42,6 +46,15 @@
 - name: service <|> Manage httpd service
   ansible.builtin.service:
     name: httpd
+    enabled: yes
+    state: started
+  tags:
+    - service
+  when: haproxy_mode == 'http'
+
+- name: service <|> Manage haproxy service
+  ansible.builtin.service:
+    name: haproxy
     enabled: yes
     state: started
   tags:

@@ -73,6 +73,8 @@ simply send redirect instructions.
 Deploy haproxy role on server0 with the following parameters:
 
 ```yaml
+haproxy_mode: http
+
 haproxy_resources:
   - name: myhttp
     frontend:
@@ -126,6 +128,8 @@ simply send redirect instructions.
 Deploy haproxy role on server1 with the following parameters:
 
 ```yaml
+haproxy_mode: http
+
 haproxy_resources:
   - name: myhttp
     frontend:
@@ -197,6 +201,8 @@ open port 80 on 10.10.0.7.
 Then deploy haproxy role on server1 with the following parameters:
 
 ```yaml
+haproxy_mode: http
+
 haproxy_resources:
   - name: myhttp
     frontend:
@@ -267,6 +273,8 @@ haproxy_apache_restrict_to_ip4:
 Now, configure role with the following parameters:
 
 ```yaml
+haproxy_mode: http
+
 haproxy_resources:
   - name: myhttp
     frontend:
@@ -301,4 +309,5 @@ if you execute it multiple time.
 
 ## Changelog
 
+* 1.0.1: Add TCP mode. Alexandra Darrieutort <alexandra.darrieutort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>

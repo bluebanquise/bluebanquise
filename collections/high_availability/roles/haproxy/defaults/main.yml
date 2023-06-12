@@ -1,1 +1,3 @@
 haproxy_restrict_nodes_http_listen: false
+
+haproxy_mode: tcp
