@@ -70,11 +70,11 @@ include "/etc/powerman/ipmipower.dev"
         {% set device_suffix = '' %}
       {% endif %}
       {% if powerman_enable_ipmi_lan_2_0 is defined and powerman_enable_ipmi_lan_2_0 %}
-device "{{ equipment }}{{ device_suffix }}" "ipmipower" "/usr/sbin/ipmipower --wait-until-on --wait-until-off -h {{ bmcs|bluebanquise.infrastructure.nodeset }} -u {{ host_bmc_user }} -p {{ host_bmc_password }} -D LAN_2_0 |&"
+device "{{ equipment }}{{ device_suffix }}" "ipmipower" "/usr/sbin/ipmipower --wait-until-on --wait-until-off -h {{ bmcs|bluebanquise.commons.nodeset }} -u {{ host_bmc_user }} -p {{ host_bmc_password }} -D LAN_2_0 |&"
       {% else %}
-device "{{ equipment }}{{ device_suffix }}" "ipmipower" "/usr/sbin/ipmipower --wait-until-on --wait-until-off -h {{ bmcs|bluebanquise.infrastructure.nodeset }} -u {{ host_bmc_user }} -p {{ host_bmc_password }} |&"
+device "{{ equipment }}{{ device_suffix }}" "ipmipower" "/usr/sbin/ipmipower --wait-until-on --wait-until-off -h {{ bmcs|bluebanquise.commons.nodeset }} -u {{ host_bmc_user }} -p {{ host_bmc_password }} |&"
       {% endif %}
-node "{{ hosts|bluebanquise.infrastructure.nodeset }}" "{{ equipment }}{{ device_suffix }}" "{{ bmcs|bluebanquise.infrastructure.nodeset }}"
+node "{{ hosts|bluebanquise.commons.nodeset }}" "{{ equipment }}{{ device_suffix }}" "{{ bmcs|bluebanquise.commons.nodeset }}"
     {% endfor %}
   {% endfor %}
 {% endfor %}

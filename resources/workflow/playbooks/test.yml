@@ -1,0 +1,24 @@
+---
+- name: managements playbook
+  hosts: "mg_managements"
+  tasks:
+    - name: test
+      debug:
+        msg: "{{ tyty2 }}"
+        
+    - name: test
+      debug:
+        msg: "{{ bb_core_iceberg_naming }}"
+    - name: test
+      debug:
+        msg: "{{ j2_node_main_network }}"
+
+    - name: test
+      debug:
+        msg: "{{ networks }}"
+    - name: test
+      debug:
+        msg: "{{ networks[j2_node_main_network] }}"
+    - name: test
+      debug:
+        msg: "{{ hostvars[inventory_hostname]['networks'][j2_node_main_network] }}"

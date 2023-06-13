@@ -97,7 +97,7 @@ AcctGatherProfileType=acct_gather_profile/{{ slurm_acct_gather_profile_type }}
     {% if buffer.slurm_extra_nodes_parameters is defined and buffer.slurm_extra_nodes_parameters is not none %}
         {% set nodes_parameters = nodes_parameters + ' ' +  buffer.slurm_extra_nodes_parameters %}
     {% endif %}
-NodeName={{ groups[computes_group] | bluebanquise.hpc.nodeset }} {{ nodes_parameters }}
+NodeName={{ groups[computes_group] | bluebanquise.commons.nodeset }} {{ nodes_parameters }}
 
   {% endif %}
 {% endfor %}
@@ -105,7 +105,7 @@ NodeName={{ groups[computes_group] | bluebanquise.hpc.nodeset }} {{ nodes_parame
 ## Partitions list
 {% if slurm_partitions_list is defined and slurm_partitions_list %}
   {% for partition in slurm_partitions_list %}
-PartitionName={{partition.partition_name}} {% for arg, arg_value in partition.partition_configuration.items() %} {{ arg }}={{ arg_value }}{% endfor %} Nodes={% for computes_group in partition.computes_groups %}{% if groups[computes_group] is iterable %}{% if not loop.first %},{% endif %}{{ groups[computes_group] | bluebanquise.hpc.nodeset }}{% endif %}{% endfor %}
+PartitionName={{partition.partition_name}} {% for arg, arg_value in partition.partition_configuration.items() %} {{ arg }}={{ arg_value }}{% endfor %} Nodes={% for computes_group in partition.computes_groups %}{% if groups[computes_group] is iterable %}{% if not loop.first %},{% endif %}{{ groups[computes_group] | bluebanquise.commons.nodeset }}{% endif %}{% endfor %}
 
   {% endfor %}
 {% endif %}
