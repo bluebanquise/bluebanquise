@@ -176,6 +176,7 @@ This allows for example to have an heterogenous cluster, with a group of hosts b
 
 ## Changelog
 
+* 1.5.1: Fix ip and host orders. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.5.0: Update to BB 2.0 format. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.0: Add capability to choose ipxe ROM. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>

@@ -73,6 +73,7 @@ variable.
 
 ## Changelog
 
+* 1.3.2: Fix services entries. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.1: Rename systemd service to chrony for Ubuntu. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.3.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.2.1: Adapt role to handle multiple distributions. Benoit Leveugle <benoit.leveugle@gmail.com>

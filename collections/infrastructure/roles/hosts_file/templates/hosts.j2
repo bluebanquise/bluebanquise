@@ -48,6 +48,22 @@
 {{ write_host(host,hostvars[host], hostvars[host]['j2_node_main_resolution_address'],hostvars[host]['j2_current_iceberg'],j2_current_iceberg) }}
 {%- endfor %}
 
+## Services hosts
+
+{% for net in networks %}
+  {% if networks[net]['services'] is defined and networks[net]['services'] is mapping %}
+    {% for service in networks[net]['services'] %}
+      {% if networks[net]['services'][service] is iterable %}
+        {% for iphost in networks[net]['services'][service] %}
+          {% if iphost.ip4 is defined and iphost.hostname is defined and (iphost.ip4 | ansible.utils.ipaddr) %}
+{{ iphost.ip4 }} {{ iphost.hostname }} {{ iphost.hostname }}-{{ service }} {{ iphost.hostname }}-{{ service }}-{{ net }}
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+{% endfor %}
+
 ## External hosts
 
 {% for host in (hosts_file_external_hosts | sort) %}
