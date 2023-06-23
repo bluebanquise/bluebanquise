@@ -788,11 +788,11 @@ ansible-playbook --become --skip-tags identify,secret /path/to/playbook.yml
 You can also directly chroot into image using:
 
 ```
-sudo chroot " + tool_parameters['nfs_diskless_folder'] + "/my_reference_image
+sudo chroot /nfs/diskless/my_reference_image
 ```
 
 Remember that this is only possible if image CPU architecture is the same than current host.
-You can also directly edit files into `" + tool_parameters['nfs_diskless_folder'] + "/my_reference_image` folder for quick changes.
+You can also directly edit files into `/nfs/diskless/my_reference_image` folder for quick changes.
 
 ### Update kernel
 
@@ -849,13 +849,81 @@ ansible-playbook --become --tags identify,secret /path/to/playbook.yml
 
 ## Debug and errors
 
+### Package fail to install in NFS diskless
+
+Some sensitive system packages might refuse to install while in NFS due to NFS cap limitations.
+
+For example, on RHEL 9, shadow-utils rpm will fail to upgrade:
+
+```
+[bluebanquise@c001 ~]$ dnf update -y
+...
+warning: /etc/shadow created as /etc/shadow.rpmnew
+
+  Running scriptlet: setup-2.13.7-9.el9.noarch                                                                                70/193
+  Upgrading        : shadow-utils-2:4.9-6.el9.x86_64                                                                          71/193
+Error unpacking rpm package shadow-utils-2:4.9-6.el9.x86_64
+error: unpacking of archive failed on file /usr/bin/newgidmap;64944fc1: cpio: cap_set_file
+error: shadow-utils-2:4.9-6.el9.x86_64: install failed
+[bluebanquise@c001 ~]$
+```
+
+It is possible to see that this even fail with nfs 4.2 mount:
+
+```
+[bluebanquise@c001 ~]$ nfsstat -m
+/ from 10.10.0.1:/nfs/diskless/my_image
+ Flags: rw,relatime,vers=4.2,rsize=1048576,wsize=1048576,namlen=255,hard,proto=tcp,timeo=600,retrans=2,sec=sys,clientaddr=10.10.0.8,local_lock=none,addr=10.10.0.1
+[bluebanquise@c001 ~]$
+```
+ 
+Solution is to install the failing package using chroot method on NFS server:
+
+```
+bluebanquise@mgt1:/$ sudo chroot /nfs/diskless/my_image
+bash-5.1# dnf update
+Failed to set locale, defaulting to C.UTF-8
+Dependencies resolved.
+================================================================ Package          Arch       Version           Repository  Size
+================================================================Upgrading:
+ shadow-utils     x86_64     2:4.9-6.el9       baseos     1.1 M
+
+Transaction Summary
+================================================================Upgrade  1 Package
+
+Total download size: 1.1 M
+Is this ok [y/N]: y
+Downloading Packages:
+shadow-utils-4.9-6.el9.x86_64.r 5.6 MB/s | 1.1 MB     00:00
+----------------------------------------------------------------Total                           3.2 MB/s | 1.1 MB     00:00
+Running transaction check
+Transaction check succeeded.
+Running transaction test
+Transaction test succeeded.
+Running transaction
+  Preparing        :                                        1/1
+  Upgrading        : shadow-utils-2:4.9-6.el9.x86_64        1/2
+  Cleanup          : shadow-utils-2:4.9-5.el9.x86_64        2/2
+  Running scriptlet: shadow-utils-2:4.9-5.el9.x86_64        2/2
+  Verifying        : shadow-utils-2:4.9-6.el9.x86_64        1/2
+  Verifying        : shadow-utils-2:4.9-5.el9.x86_64        2/2
+
+Upgraded:
+  shadow-utils-2:4.9-6.el9.x86_64
+
+Complete!
+bash-5.1#
+```
+
+### Cleaning folders
+
 The tool has been made with a sys admin philosophy. I tried to avoid any complex steps, and in case of crash, the tool will not cleanup the files, so you can investigate and retry failed command.
 This however could lead to issues, so in case of crash, remember to check the following folders for remaining zombie files to be cleaned:
 
 * /var/lib/bluebanquise/diskless/bootstrap_images/
 * /var/lib/bluebanquise/diskless/bootstrap_images/tmp/
 * /var/www/html/pxe/diskless/
-* " + tool_parameters['nfs_diskless_folder'] + "/
+* /nfs/diskless/
 
 ## Conclusion
 
