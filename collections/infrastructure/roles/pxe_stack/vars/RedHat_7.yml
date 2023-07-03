@@ -20,3 +20,13 @@ pxe_stack_firewall_services_to_add:
   - http
   - tftp
 pxe_stack_apache_cgi_bin_path: /var/www/cgi-bin
+pxe_stack_diskless_packages_to_install:
+  - nfs-utils
+  - libselinux-python
+  - policycoreutils-python
+pxe_stack_diskless_services_to_start:
+  - nfs-server
+  - rpcbind
+pxe_stack_diskless_firewall_services_to_add:
+  - nfs
+  - rpc-bind

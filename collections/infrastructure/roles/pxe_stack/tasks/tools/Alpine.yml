@@ -1,7 +1,7 @@
 ---
 - name: "package <|> Install Alpine binaries"
   ansible.builtin.package:
-    name: "bluebanquise_alpine_live"
+    name: "alpine_live_ipxe"
     state: present
   tags:
     - package

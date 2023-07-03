@@ -20,3 +20,12 @@ pxe_stack_default_tftp_service: tftp
 pxe_stack_firewall_services_to_add:
   - http
   - tftp
+pxe_stack_diskless_packages_to_install:
+  - nfs-utils
+pxe_stack_diskless_services_to_start:
+  - nfsserver
+  - rpcbind
+pxe_stack_diskless_firewall_services_to_add:
+  - nfs
+  - mountd
+  - rpc-bind

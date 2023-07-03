@@ -1,0 +1,32 @@
+---
+
+- name: include_tasks <|> Include RedHat familly diskful support
+  ansible.builtin.include_tasks: diskful/RedHat.yml
+  when: pxe_stack_diskful_os_redhat
+  tags:
+    - internal
+
+- name: include_tasks <|> Include Ubuntu familly diskful support
+  ansible.builtin.include_tasks: diskful/Ubuntu.yml
+  when: pxe_stack_diskful_os_ubuntu
+  tags:
+    - internal
+
+- name: include_tasks <|> Include Suse familly diskful support
+  ansible.builtin.include_tasks: diskful/Suse.yml
+  when: pxe_stack_diskful_os_suse
+  tags:
+    - internal
+
+- name: include_tasks <|> Include Debian familly diskful support
+  ansible.builtin.include_tasks: diskful/Debian.yml
+  when: pxe_stack_diskful_os_debian
+  tags:
+    - internal
+
+# DGX was a POC only, to be use as source for help
+- name: include_tasks <|> Include DGX familly diskful support
+  ansible.builtin.include_tasks: diskful/DGX.yml
+  when: pxe_stack_diskful_os_dgx
+  tags:
+    - internal

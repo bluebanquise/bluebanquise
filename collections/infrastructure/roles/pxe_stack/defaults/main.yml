@@ -7,11 +7,11 @@
 pxe_stack_time_zone: Europe/Brussels
 
 # Enable distributions support
-pxe_stack_client_os_redhat: true
-pxe_stack_client_os_ubuntu: true
-pxe_stack_client_os_dgx: false
-pxe_stack_client_os_suse: true
-pxe_stack_client_os_debian: true
+pxe_stack_diskful_os_redhat: true
+pxe_stack_diskful_os_ubuntu: true
+pxe_stack_diskful_os_suse: true
+pxe_stack_diskful_os_debian: true
+pxe_stack_diskful_os_dgx: false
 
 # Enable root user as default user
 pxe_stack_enable_root: false
@@ -42,6 +42,8 @@ pxe_stack_ep_operating_system:
 
 pxe_stack_ep_console:
 pxe_stack_ep_kernel_parameters:
+
+pxe_stack_ep_kernel_aggressive_dhcp: true
 
 pxe_stack_ep_keyboard_layout: us  # us, fr, etc.
 pxe_stack_ep_system_language: en_US.UTF-8  # You should not update this if you want to google issues...
@@ -79,10 +81,19 @@ pxe_stack_suse_autoinstall_repositories: []
 #  - media_url: http://10.10.0.1/repositories/sles/15.3/x86_64/updates
 #    name: sles_updates
 
+############################################################
+### DISKLESS
+
+pxe_stack_enable_diskless: true
+pxe_stack_diskless_nfs_path: /nfs/diskless
+
+############################################################
+### TOOLS
+
 # Add optional dedicated entries in ixpe menu
-pxe_stack_enable_clonezilla: false
-pxe_stack_enable_diskless: false
-pxe_stack_enable_alpine: false
+pxe_stack_enable_clonezilla: true
+pxe_stack_enable_alpine: true
+pxe_stack_enable_memtest: true
 
 ### CLONEZILLA
 # Allows to backup/restore systems, or even deploy multiple systems via images.
@@ -94,7 +105,5 @@ pxe_stack_enable_alpine: false
 pxe_stack_clonezilla_nfs_export_server:
 
 # Mount point from which load images from NFS server.
-pxe_stack_clonezilla_nfs_mount_point: /cloned_images
+pxe_stack_clonezilla_nfs_mount_point: /nfs/cloned_images
 
-### ALPINE
-pxe_stack_alpine_version: 3.16

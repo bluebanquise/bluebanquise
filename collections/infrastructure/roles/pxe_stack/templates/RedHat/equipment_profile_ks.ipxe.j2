@@ -16,7 +16,10 @@ set eq-console {{ hostvars[groups[item][0]]['ep_console'] | default(pxe_stack_ep
 set eq-kernel-parameters {{ hostvars[groups[item][0]]['ep_kernel_parameters'] | default(pxe_stack_ep_kernel_parameters) }}
 set eq-repositories-environment {{ hostvars[groups[item][0]]['ep_operating_system']['repositories_environment'] | default(pxe_stack_ep_operating_system.repositories_environment) | default('') }}
 {% if (hostvars[groups[item][0]]['ep_autoclone_parameters'] is defined and hostvars[groups[item][0]]['ep_autoclone_parameters'] is not none) or (pxe_stack_ep_autoclone_parameters is defined and pxe_stack_ep_autoclone_parameters is not none) %}
-set eq-autoclone-parameters {{ hostvars[groups[item][0]]['ep_autoclone_parameters'] | default(pxe_stack_ep_autoclone_parameters, true)}}
+set eq-autoclone-parameters {{ hostvars[groups[item][0]]['ep_autoclone_parameters'] | default(pxe_stack_ep_autoclone_parameters, true) }}
+{% endif %}
+{% if hostvars[groups[item][0]]['ep_kernel_aggressive_dhcp'] | default(pxe_stack_ep_kernel_aggressive_dhcp, true) %}
+set eq-kernel-aggressive-dhcp rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4
 {% endif %}
 
 # Dynamic variables

@@ -9,7 +9,7 @@
 
 - name: "package <|> Install Clonezilla iso"
   ansible.builtin.package:
-    name: "bluebanquise_clonezilla"
+    name: "clonezilla"
     state: present
   tags:
     - package

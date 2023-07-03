@@ -3,3 +3,10 @@ mgt[1:8]
 
 [mg_computes]
 c001
+
+[rhel9_86_64]
+c[001:100]
+spartn10-11
+
+[rhel9_86_64:vars]
+repositories=

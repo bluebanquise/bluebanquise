@@ -39,6 +39,10 @@
   tags:
     - internal
     - firewall
+    
+
+################################################################################################
+######################## GENERIC PART
 
 - name: "package <|> Install {{ (pxe_stack_packages_to_install + [pxe_stack_tftp_package | default(pxe_stack_default_tftp_package)]) | join(' ') }} packages"
   ansible.builtin.package:
@@ -125,70 +129,12 @@
   tags:
     - template
 
-- name: include_tasks <|> Include RedHat familly clients support
-  ansible.builtin.include_tasks: client_os/RedHat.yml
-  when: pxe_stack_client_os_redhat
-  tags:
-    - internal
-
-- name: include_tasks <|> Include Ubuntu familly clients support
-  ansible.builtin.include_tasks: client_os/Ubuntu.yml
-  when: pxe_stack_client_os_ubuntu
-  tags:
-    - internal
-
-- name: include_tasks <|> Include DGX familly clients support
-  ansible.builtin.include_tasks: client_os/DGX.yml
-  when: pxe_stack_client_os_dgx
-  tags:
-    - internal
-
-- name: include_tasks <|> Include Suse familly clients support
-  ansible.builtin.include_tasks: client_os/Suse.yml
-  when: pxe_stack_client_os_suse
-  tags:
-    - internal
-
-- name: include_tasks <|> Include Debian familly clients support
-  ansible.builtin.include_tasks: client_os/Debian.yml
-  when: pxe_stack_client_os_debian
-  tags:
-    - internal
-
-- name: include_tasks <|> Include Alpine live support
-  ansible.builtin.include_tasks: client_os/Alpine.yml
-  when: pxe_stack_enable_alpine
-  tags:
-    - internal
-
-- name: include_tasks <|> Include CloneZilla live support
-  ansible.builtin.include_tasks: client_os/Clonezilla.yml
-  when: pxe_stack_enable_clonezilla
-  tags:
-    - internal
-
 - name: "copy <|> Copy {{ pxe_stack_apache_conf_path }}/cgi.conf"
   ansible.builtin.copy:
     src: cgi.conf
     dest: "{{ pxe_stack_apache_conf_path }}/cgi.conf"
     mode: 0644
   notify: service <|> Restart pxe services
-
-- name: "copy <|> Copy bluebanquise-bootset"
-  ansible.builtin.copy:
-    src: bluebanquise-bootset
-    dest: "/usr/bin/bluebanquise-bootset"
-    owner: root
-    group: root
-    mode: 0755
-
-- name: "file <|> Convenience link for bootset"
-  ansible.builtin.file:
-    path: "/bin/bootset"
-    state: link
-    src: "/usr/bin/bluebanquise-bootset"
-    owner: root
-    group: root
 
 - name: "template <|> Create {{ pxe_stack_apache_cgi_bin_path }}/bootswitch.cgi"
   ansible.builtin.template:
@@ -199,6 +145,45 @@
     group: "{{ pxe_stack_apache_group }}"
   tags:
     - template
+
+- name: "copy <|> Copy bluebanquise-bootset"
+  ansible.builtin.copy:
+    src: bluebanquise-bootset
+    dest: "/usr/bin/bluebanquise-bootset"
+    owner: root
+    group: root
+    mode: 0755
+
+
+################################################################################################
+######################## DISKFUL
+
+- name: include_tasks <|> Include diskful
+  ansible.builtin.include_tasks: diskful.yml
+  tags:
+    - internal
+
+
+################################################################################################
+######################## DISKLESS
+
+- name: include_tasks <|> Include diskless
+  ansible.builtin.include_tasks: diskless.yml
+  tags:
+    - internal
+
+
+################################################################################################
+######################## TOOLS
+
+- name: include_tasks <|> Include tools
+  ansible.builtin.include_tasks: tools.yml
+  tags:
+    - internal
+
+
+################################################################################################
+######################## HANDLERS AND SERVICES
 
 - name: meta <|> Run handler tasks to restart pxe services
   ansible.builtin.meta: flush_handlers

@@ -2,9 +2,36 @@
 
 ## Description
 
-This role provides the whole PXE stack needed to deploy servers over the network (assuming coupled with a dhcp server).
+This role provides the whole PXE stack needed to deploy computers over the network (assuming coupled with a dhcp server).
+This role is one of the major role of the BlueBanquise project.
 
-## Instructions
+## Quick start
+
+This quick start assume an x86_64 system booting over EFI PXE.
+
+1. Ensure dhcp server target filename `x86/standard_snponly_ipxe.efi`, or if using a custom iPXE, that it chains to `http://yournextserverip/pxe/convergence.ipxe`.
+2. If needed, configure target console using `pxe_stack_ep_console` parameter.
+
+```yaml
+pxe_stack_ep_console: console=ttyS0,115200
+```
+
+3. Set the target Linux distribution to deploy, using `pxe_stack_ep_operating_system dict`:
+
+```yaml
+pxe_stack_ep_operating_system:
+  distribution: ubuntu
+  distribution_version: 22.04
+  distribution_major_version: 22
+  repositories_environment:
+```
+
+4. If not using default partitioning, configure `pxe_stack_ep_partitioning`, providing your target Linux distribution autoinstall partitioning raw syntax (kickstart, autoyast, preseed, curtin, etc.).
+4. Deploy the role
+
+
+
+## Detailed Instructions
 
 This role will deploy all the needed files, binaries, and scripts to deploy
 remote hosts using PXE (or even USB and CD boot to trigger PXE on non PXE able systems).

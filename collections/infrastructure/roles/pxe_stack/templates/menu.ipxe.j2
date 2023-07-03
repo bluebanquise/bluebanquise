@@ -37,7 +37,9 @@ item --gap                Tools
 {% if pxe_stack_enable_alpine %}
 item bootalpinelive       Boot a live Alpine
 {% endif %}
-item --gap                Other
+{% if pxe_stack_enable_memtest %}
+item bootmemtest          Boot memtest86+
+{% endif %}
 item startshell           iPXE shell (Go to an iPXE shell)
 item startgrubshell       Grub2 shell (Go to a Grub2 shell, EFI only)
 item showinfo             Display system infos
@@ -86,7 +88,7 @@ goto start
 chain http://${next-server}/pxe/osdeploy/${eq-distribution}_${eq-distribution-major-version}.ipxe || shell
 
 :bootdiskless
-chain http://${next-server}/pxe/diskless/images/${node-image}/boot.ipxe || shell
+chain http://${next-server}/pxe/diskless/${node-image}/boot.ipxe || shell
 
 :bootclone
 chain http://${next-server}/pxe/clone/clone.ipxe
@@ -100,17 +102,17 @@ chain http://${next-server}/pxe/tools/alpine.ipxe
 :bootdisk
 iseq ${platform} efi && goto bootdisk-efi || goto bootdisk-legacy
 
-    :bootdisk-legacy
-    echo Booting on disk in legacy bios way
-    sleep 2
-    sanboot --no-describe --drive 0x80 || shell
-    exit
+:bootdisk-legacy
+echo Booting on disk in legacy bios way
+sleep 2
+sanboot --no-describe --drive 0x80 || shell
+exit
 
-    :bootdisk-efi
-    echo Booting on disk in EFI way
-    sleep 2
-    chain http://${next-server}/pxe/bin/${arch}/grub2_efi_autofind.img || shell
-    exit 1
+:bootdisk-efi
+echo Booting on disk in EFI way
+sleep 2
+chain http://${next-server}/pxe/bin/${arch}/grub2_efi_autofind.img || shell
+exit 1
 
 :bootnext
 exit
