@@ -29,4 +29,3 @@ pxe_stack_diskless_services_to_start:
 pxe_stack_diskless_firewall_services_to_add:
   - nfs
   - rpc-bind
-

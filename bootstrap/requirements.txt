@@ -1,4 +1,4 @@
-ansible == 7.4.0
+ansible
 netaddr
 clustershell
 jmespath

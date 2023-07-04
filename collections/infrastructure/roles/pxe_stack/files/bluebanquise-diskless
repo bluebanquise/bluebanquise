@@ -219,21 +219,16 @@ if not os.environ.get("SUDO_UID") and os.geteuid() != 0:
     raise PermissionError("You need to run this script with sudo or as root.")
     quit(1)
 
-logging.info(bcolors.OKBLUE + 'Loading parameters from /etc/bluebanquise/diskless.yaml...' + bcolors.ENDC)
+logging.info(bcolors.OKBLUE + 'Loading parameters from /etc/bluebanquise/diskless.yml...' + bcolors.ENDC)
 try:
-    with open("/etc/bluebanquise/diskless.yaml", "r") as file:
+    with open("/etc/bluebanquise/diskless.yml", "r") as file:
         tool_parameters = yaml.safe_load(file)
 except FileNotFoundError:
-    print(bcolors.FAIL + " File /etc/bluebanquise/diskless.yaml does not exist, please re-run pxe_stack role before using the tool." + bcolors.ENDC)
+    print(bcolors.FAIL + " File /etc/bluebanquise/diskless.yml does not exist, please re-run pxe_stack role before using the tool." + bcolors.ENDC)
     quit(1)
 except Exception:
-    print(bcolors.FAIL + " An error occurred reading the file /etc/bluebanquise/diskless.yaml. Please investigate." + bcolors.ENDC)
+    print(bcolors.FAIL + " An error occurred reading the file /etc/bluebanquise/diskless.yml. Please investigate." + bcolors.ENDC)
     quit(1)
-
-# tool_parameters:
-#   sudo_user_home: /var/lib/bluebanquise/
-#   http_pxe_folder: /var/www/html/pxe/
-#   nfs_path: /nfs/diskless/
 
 logging.info(bcolors.OKBLUE + 'Checking folders exist...' + bcolors.ENDC)
 if not os.path.exists(tool_parameters['sudo_user_home'] + "/diskless/bootstrap_images"):
@@ -246,7 +241,6 @@ if not os.path.exists(tool_parameters['http_pxe_folder'] + "/diskless"):
     logging.info(bcolors.OKBLUE + "Creating " + tool_parameters['http_pxe_folder'] + "/diskless/ folder." + bcolors.ENDC)
     protected_os_system("mkdir -p " + tool_parameters['http_pxe_folder'] + "/diskless/")
 
-# SUPPORT ERRORS, only partial for now
 
 while True:
 

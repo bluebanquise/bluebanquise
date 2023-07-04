@@ -106,4 +106,3 @@ pxe_stack_clonezilla_nfs_export_server:
 
 # Mount point from which load images from NFS server.
 pxe_stack_clonezilla_nfs_mount_point: /nfs/cloned_images
-

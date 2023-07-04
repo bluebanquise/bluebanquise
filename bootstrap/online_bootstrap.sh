@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -e
-
+set -x
 export SILENT="false"
 export SKIP_ENVIRONMENT="false"
 
@@ -75,11 +75,11 @@ if [ "$PLATFORM_ID" == "platform:el9" ]; then
 fi
 if [ "$ID" == "opensuse-leap" ]; then
   sudo zypper -n install python3 python3-pip
-  sudo zypper -n install python39 python39-pip git openssh
-  sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 3
-  sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.9 3
-  sudo update-alternatives --install /usr/bin/pip pip /usr/bin/pip3.9 3
-  sudo update-alternatives --install /usr/bin/pip3 pip3 /usr/bin/pip3.9 3
+  sudo zypper -n install python311 python311-pip git openssh
+  sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 3
+  sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.11 3
+  sudo update-alternatives --install /usr/bin/pip pip /usr/bin/pip3.11 3
+  sudo update-alternatives --install /usr/bin/pip3 pip3 /usr/bin/pip3.11 3
   # sudo ln -s /usr/bin/python3.9 /usr/bin/python3
   # sudo ln -s /usr/bin/pip3.9 /usr/bin/pip3
 fi
