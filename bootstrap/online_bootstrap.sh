@@ -52,6 +52,7 @@ echo " Proceeding..."
 sleep 1
 echo
 message_output "Installing OS needed dependencies..."
+# UBUNTU
 if [ "$NAME" == "Ubuntu" ]; then
   if [ "$VERSION_ID" == "20.04" ] || [ "$VERSION_ID" == "22.04" ]; then
     export DEBIAN_FRONTEND=noninteractive
@@ -59,6 +60,7 @@ if [ "$NAME" == "Ubuntu" ]; then
     sudo apt-get install python3 python3-pip python3-venv ssh curl git -y
   fi
 fi
+# RHEL
 if [ "$VERSION_ID" == "7" ]; then
   # We need Python 3.8 minimum
   sudo yum -y install epel-release openssh
@@ -73,9 +75,10 @@ fi
 if [ "$PLATFORM_ID" == "platform:el9" ]; then
   sudo dnf install git python3 python3-pip python3-pip python3-policycoreutils openssh-clients -y
 fi
+# OPENSUSE LEAP
 if [ "$ID" == "opensuse-leap" ]; then
   sudo zypper -n install python3 python3-pip
-  sudo zypper -n install python311 python311-pip git openssh
+  sudo zypper -n install python311 python311-pip git openssh curl
   sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 3
   sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.11 3
   sudo update-alternatives --install /usr/bin/pip pip /usr/bin/pip3.11 3
@@ -83,7 +86,8 @@ if [ "$ID" == "opensuse-leap" ]; then
   # sudo ln -s /usr/bin/python3.9 /usr/bin/python3
   # sudo ln -s /usr/bin/pip3.9 /usr/bin/pip3
 fi
-if [ "$VERSION_ID" == "11" ]; then
+# DEBIAN
+if [ "$VERSION_ID" == "11" ] || [ "$VERSION_ID" == "12" ]; then
   sudo apt update
   export DEBIAN_FRONTEND=noninteractive
   sudo apt install -y python3 python3-pip python3-venv git ssh curl
