@@ -67,7 +67,7 @@ if [ "$NAME" == "Ubuntu" ]; then
     echo
     export DEBIAN_FRONTEND=noninteractive
     sudo apt-get update
-    sudo apt-get install build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev wget libbz2-dev pkg-config -y
+    sudo apt-get install build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev wget libbz2-dev pkg-config ssh curl git -y
     wget https://www.python.org/ftp/python/3.11.4/Python-3.11.4.tgz
     tar -xf Python-3.11.*.tgz
     cd Python-3.11.*/
