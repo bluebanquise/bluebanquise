@@ -1,0 +1,6 @@
+---
+conman_execpath: "/usr/share/conman/exec"
+
+conman_packages_to_install:
+  - conman
+  - ipmitool
