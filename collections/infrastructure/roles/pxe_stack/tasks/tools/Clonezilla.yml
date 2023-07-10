@@ -16,7 +16,7 @@
     - large-package
 
 - name: "Template <|> Generate Clonezilla live boot files to {{ pxe_stack_htdocs_path }}/pxe/tools/"
-  ansible.builtin.copy:
+  ansible.builtin.template:
     src: "Clonezilla/{{ item }}.ipxe.j2"
     dest: "{{ pxe_stack_htdocs_path }}/pxe/tools/clonezilla/{{ item }}.ipxe"
     mode: 0644
