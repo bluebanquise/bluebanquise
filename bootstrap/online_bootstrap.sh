@@ -78,6 +78,14 @@ if [ "$NAME" == "Ubuntu" ]; then
     sudo update-alternatives --install /usr/bin/python python /usr/local/bin/python3.11 3
     sudo update-alternatives --install /usr/bin/pip pip /usr/local/bin/pip3.11 3
     sudo update-alternatives --install /usr/bin/pip3 pip3 /usr/local/bin/pip3.11 3
+    cd ../
+    wget http://deb.debian.org/debian/pool/main/p/python-apt/python-apt_2.6.0.tar.xz
+    tar xJvf python-apt_2.6.0.tar.xz
+    cd python-apt-2.6.0/   
+    sudo apt build-dep ./
+    sudo python setup.py build
+    sudo python setup.py build install
+    cd ../
   fi
 fi
 # RHEL
