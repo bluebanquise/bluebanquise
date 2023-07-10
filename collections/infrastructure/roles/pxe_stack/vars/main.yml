@@ -46,6 +46,9 @@ pxe_stack_supported_os:
     - major: 11
       distributions:
         - debian
+    - major: 12
+      distributions:
+        - debian
 
 pxe_stack_redhat_automatic_partitioning: |
   clearpart --all --initlabel

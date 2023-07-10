@@ -28,6 +28,10 @@ echo | Downloaded images report:
 
 imgstat
 
+echo | MD5sums:
+md5sum initrd.img vmlinuz
+echo |
+
 echo | Booting in 4s ...
 echo |
 echo +----------------------------------------------------+

@@ -15,11 +15,11 @@ echo |
 echo | Loading linux ...
 
 :kernel-line
-kernel http://${next-server}/pxe/bin/clonezilla/live/vmlinuz initrd=initrd.img fetch=http://${next-server}/pxe/bin/clonezilla/live/filesystem.squashfs boot=live union=overlay username=user hostname=bluebanquise config components noswap edd=on nomodeset vga=788 ip=dhcp net.ifnames=0 splash i915.blacklist=yes radeonhd.blacklist=yes nouveau.blacklist=yes vmwgfx.enable_fbdev=1 ${eq-kernel-parameters} ${dedicated-kernel-parameters} ${eq-console}
+kernel http://${next-server}/pxe/tools/clonezilla/vmlinuz initrd=initrd.img fetch=http://${next-server}/pxe/tools/clonezilla/filesystem.squashfs boot=live union=overlay username=user hostname=bluebanquise config components noswap edd=on nomodeset vga=788 ip=dhcp net.ifnames=0 splash i915.blacklist=yes radeonhd.blacklist=yes nouveau.blacklist=yes vmwgfx.enable_fbdev=1 ${eq-kernel-parameters} ${dedicated-kernel-parameters} ${eq-console}
 
 echo | Loading initial ramdisk ...
 
-initrd http://${next-server}/pxe/bin/clonezilla/live/initrd.img
+initrd http://${next-server}/pxe/tools/clonezilla/initrd.img
 
 echo | ALL DONE! We are ready.
 echo | Downloaded images report:

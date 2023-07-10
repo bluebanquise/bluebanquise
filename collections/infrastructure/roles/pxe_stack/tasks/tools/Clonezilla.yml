@@ -18,7 +18,7 @@
 - name: "Template <|> Generate Clonezilla live boot files to {{ pxe_stack_htdocs_path }}/pxe/tools/"
   ansible.builtin.copy:
     src: "Clonezilla/{{ item }}.ipxe.j2"
-    dest: "{{ pxe_stack_htdocs_path }}/pxe/tools/{{ item }}.ipxe"
+    dest: "{{ pxe_stack_htdocs_path }}/pxe/tools/clonezilla/{{ item }}.ipxe"
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_group }}"
