@@ -82,7 +82,7 @@ if [ "$NAME" == "Ubuntu" ]; then
     wget http://deb.debian.org/debian/pool/main/p/python-apt/python-apt_2.6.0.tar.xz
     tar xJvf python-apt_2.6.0.tar.xz
     cd python-apt-2.6.0/   
-    sudo apt build-dep ./
+    sudo apt build-dep ./ -y
     sudo python setup.py build
     sudo python setup.py build install
     cd ../
