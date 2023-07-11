@@ -27,17 +27,19 @@ item bootnext             Exit ipxe and continue EFI boot
 item --gap                Diskless
 item bootdiskless         Start a diskless OS (Configured using diskless tool)
 {% endif %}
+item --gap                Tools
 {% if pxe_stack_enable_clonezilla %}
 item --gap                Cloning
-item bootclone            Clone/Deploy OS
+item bootclone            Clonezilla live - Clone/Deploy OS
 item bootautoclone        Auto Clone (advanced)
 item bootautodeploy       Auto Deploy (advanced)
 {% endif %}
-item --gap                Tools
 {% if pxe_stack_enable_alpine %}
 item bootalpinelive       Boot a live Alpine
 {% endif %}
-item --gap                Other
+{% if pxe_stack_enable_memtest %}
+item bootmemtest          Boot memtest86+
+{% endif %}
 item startshell           iPXE shell (Go to an iPXE shell)
 item startgrubshell       Grub2 shell (Go to a Grub2 shell, EFI only)
 item showinfo             Display system infos
@@ -86,39 +88,47 @@ goto start
 chain http://${next-server}/pxe/osdeploy/${eq-distribution}_${eq-distribution-major-version}.ipxe || shell
 
 :bootdiskless
-chain http://${next-server}/pxe/diskless/images/${node-image}/boot.ipxe || shell
+chain http://${next-server}/pxe/diskless/${node-image}/boot.ipxe || shell
 
 :bootclone
-chain http://${next-server}/pxe/clone/clone.ipxe
+chain http://${next-server}/pxe/clonezilla/clone.ipxe
 
-:bootdeployclone
-chain http://${next-server}/pxe/clone/deploy_clone.ipxe
+:bootautoclone
+chain http://${next-server}/pxe/clonezilla/autoclone.ipxe
+
+:bootautodeploy
+chain http://${next-server}/pxe/clonezilla/autodeploy.ipxe
 
 :bootalpinelive 
-chain http://${next-server}/pxe/tools/alpine.ipxe
+chain http://${next-server}/pxe/tools/alpine/boot.ipxe
 
 :bootdisk
 iseq ${platform} efi && goto bootdisk-efi || goto bootdisk-legacy
 
-    :bootdisk-legacy
-    echo Booting on disk in legacy bios way
-    sleep 2
-    sanboot --no-describe --drive 0x80 || shell
-    exit
+:bootdisk-legacy
+echo Booting on disk in legacy bios way
+sleep 2
+sanboot --no-describe --drive 0x80 || shell
+exit
 
-    :bootdisk-efi
-    echo Booting on disk in EFI way
-    sleep 2
-    chain http://${next-server}/pxe/bin/${arch}/grub2_efi_autofind.img || shell
-    exit 1
+:bootdisk-efi
+echo Booting on disk in EFI way
+sleep 2
+chain http://${next-server}/pxe/bin/${arch}/grub2_efi_autofind.img || shell
+exit 1
+
+:bootmemtest
+iseq ${platform} efi && goto bootmemtest-efi || goto bootmemtest-legacy
+
+:bootmemtest-legacy
+echo Booting memtest in legacy bios way
+sleep 2
+boot http://${next-server}/pxe/tools/memtest86plus/memtest.bin || shell
+
+:bootmemtest-efi
+echo Booting memtest in EFI way
+sleep 2
+kernel http://${next-server}/pxe/tools/memtest86plus/memtest.efi || shell
 
 :bootnext
 exit
-
-#:memtest
-#echo Booting Memtest86+
-#boot http://${next-server}/pxe/bin/memtest86+-5.01.bin || shell
-
-#:minimal_live_linux
-#echo Booting Minimal Live Linux
-#chain http://${next-server}/pxe/equipment_ipxe_configurations/minimal.ipxe

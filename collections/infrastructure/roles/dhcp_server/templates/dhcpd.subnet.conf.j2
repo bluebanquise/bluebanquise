@@ -11,17 +11,17 @@
     if option client-arch = 00:00 {
       filename "x86_64/{{ ipxe_embed }}_undionly.kpxe";
     } elsif option client-arch = 00:06 {
-      filename "x86/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi";
+      filename "x86/{{ ipxe_embed }}_{{ ipxe_driver }}_ipxe.efi";
     } elsif option client-arch = 00:07 {
-      filename "x86_64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi";
+      filename "x86_64/{{ ipxe_embed }}_{{ ipxe_driver }}_ipxe.efi";
     } elsif option client-arch = 00:08 {
-      filename "x86_64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi";
+      filename "x86_64/{{ ipxe_embed }}_{{ ipxe_driver }}_ipxe.efi";
     } elsif option client-arch = 00:09 {
-      filename "x86_64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi";
+      filename "x86_64/{{ ipxe_embed }}_{{ ipxe_driver }}_ipxe.efi";
     } elsif option client-arch = 00:0a {
-      filename "arm32/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi";
+      filename "arm32/{{ ipxe_embed }}_{{ ipxe_driver }}_ipxe.efi";
     } elsif option client-arch = 00:0b {
-      filename "arm64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi";
+      filename "arm64/{{ ipxe_embed }}_{{ ipxe_driver }}_ipxe.efi";
     }
   }
   {%- endif %}

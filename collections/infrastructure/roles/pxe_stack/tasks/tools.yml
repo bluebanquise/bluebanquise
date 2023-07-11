@@ -1,0 +1,13 @@
+---
+
+- name: include_tasks <|> Include Alpine live support
+  ansible.builtin.include_tasks: tools/Alpine.yml
+  when: pxe_stack_enable_alpine
+  tags:
+    - internal
+
+- name: include_tasks <|> Include CloneZilla live support
+  ansible.builtin.include_tasks: tools/Clonezilla.yml
+  when: pxe_stack_enable_clonezilla
+  tags:
+    - internal

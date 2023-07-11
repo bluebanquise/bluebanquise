@@ -17,7 +17,7 @@ echo | > Target kickstart: ${eq-equipment-profile}.kickstart.cfg
 echo |
 echo | Loading linux ...
 
-kernel ${images-root}/iso/images/pxeboot/vmlinuz initrd=initrd.img inst.stage2=${images-root}/iso/ inst.repo=${images-root}/iso/BaseOS/ inst.ks=${kickstart-path} ${eq-console} ${eq-kernel-parameters} ${dedicated-kernel-parameters} ipxe_next_server=${next-server} node_hostname=${hostname}
+kernel ${images-root}/iso/images/pxeboot/vmlinuz initrd=initrd.img inst.stage2=${images-root}/iso/ inst.repo=${images-root}/iso/BaseOS/ inst.ks=${kickstart-path} ${eq-console} ${eq-kernel-parameters} ${eq-kernel-aggressive-dhcp} ${dedicated-kernel-parameters} ipxe_next_server=${next-server} node_hostname=${hostname}
 
 echo | Loading initial ramdisk ...
 
@@ -27,6 +27,10 @@ echo | ALL DONE! We are ready.
 echo | Downloaded images report:
 
 imgstat
+
+echo | MD5sums:
+md5sum initrd.img vmlinuz
+echo |
 
 echo | Booting in 4s ...
 echo |

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -e
-
+set -x
 export SILENT="false"
 export SKIP_ENVIRONMENT="false"
 
@@ -36,7 +36,9 @@ echo " Welcome in the BlueBanquise stack base bootstraper."
 echo
 echo -e " \e[31mThis tool is going to install packages and act as"
 echo -e " priviledged user on this system to perform needed"
-echo -e " operations.\e[0m"
+echo -e " operations. It may permanently affect local system."
+echo -e " I did all my best to prevent issues, but this can happen.\e[0m"
+
 echo
 if [[ $SILENT == "false" ]]
 then
@@ -52,13 +54,41 @@ echo " Proceeding..."
 sleep 1
 echo
 message_output "Installing OS needed dependencies..."
+# UBUNTU
 if [ "$NAME" == "Ubuntu" ]; then
-  if [ "$VERSION_ID" == "20.04" ] || [ "$VERSION_ID" == "22.04" ]; then
+  if [ "$VERSION_ID" == "22.04" ]; then
     export DEBIAN_FRONTEND=noninteractive
     sudo apt-get update
     sudo apt-get install python3 python3-pip python3-venv ssh curl git -y
   fi
+  if [ "$VERSION_ID" == "20.04" ]; then
+    echo
+    echo " INFO - Ubuntu 20.04 python3 is too old, building a recent python... This may take a while."
+    echo
+    export DEBIAN_FRONTEND=noninteractive
+    sudo apt-get update
+    sudo apt-get install build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev wget libbz2-dev pkg-config ssh curl git -y
+    wget https://www.python.org/ftp/python/3.11.4/Python-3.11.4.tgz
+    tar -xf Python-3.11.*.tgz
+    cd Python-3.11.*/
+    ./configure --enable-optimizations --with-ensurepip=install
+    make -j
+    sudo make altinstall
+    sudo update-alternatives --install /usr/bin/python3 python3 /usr/local/bin/python3.11 3
+    sudo update-alternatives --install /usr/bin/python python /usr/local/bin/python3.11 3
+    sudo update-alternatives --install /usr/bin/pip pip /usr/local/bin/pip3.11 3
+    sudo update-alternatives --install /usr/bin/pip3 pip3 /usr/local/bin/pip3.11 3
+    cd ../
+    wget http://deb.debian.org/debian/pool/main/p/python-apt/python-apt_2.6.0.tar.xz
+    tar xJvf python-apt_2.6.0.tar.xz
+    cd python-apt-2.6.0/   
+    sudo apt build-dep ./ -y
+    sudo python setup.py build
+    sudo python setup.py build install
+    cd ../
+  fi
 fi
+# RHEL
 if [ "$VERSION_ID" == "7" ]; then
   # We need Python 3.8 minimum
   sudo yum -y install epel-release openssh
@@ -73,17 +103,19 @@ fi
 if [ "$PLATFORM_ID" == "platform:el9" ]; then
   sudo dnf install git python3 python3-pip python3-pip python3-policycoreutils openssh-clients -y
 fi
+# OPENSUSE LEAP
 if [ "$ID" == "opensuse-leap" ]; then
   sudo zypper -n install python3 python3-pip
-  sudo zypper -n install python39 python39-pip git openssh
-  sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 3
-  sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.9 3
-  sudo update-alternatives --install /usr/bin/pip pip /usr/bin/pip3.9 3
-  sudo update-alternatives --install /usr/bin/pip3 pip3 /usr/bin/pip3.9 3
+  sudo zypper -n install python311 python311-pip git openssh curl
+  sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 3
+  sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.11 3
+  sudo update-alternatives --install /usr/bin/pip pip /usr/bin/pip3.11 3
+  sudo update-alternatives --install /usr/bin/pip3 pip3 /usr/bin/pip3.11 3
   # sudo ln -s /usr/bin/python3.9 /usr/bin/python3
   # sudo ln -s /usr/bin/pip3.9 /usr/bin/pip3
 fi
-if [ "$VERSION_ID" == "11" ]; then
+# DEBIAN
+if [ "$VERSION_ID" == "11" ] || [ "$VERSION_ID" == "12" ]; then
   sudo apt update
   export DEBIAN_FRONTEND=noninteractive
   sudo apt install -y python3 python3-pip python3-venv git ssh curl

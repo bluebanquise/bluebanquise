@@ -1,0 +1,52 @@
+---
+
+- name: package <|> Install diskless packages
+  ansible.builtin.package:
+    name: "{{ pxe_stack_diskless_packages_to_install }}"
+    state: present
+  tags:
+    - package
+
+- name: "copy <|> Copy bluebanquise-diskless"
+  ansible.builtin.copy:
+    src: bluebanquise-diskless
+    dest: "/usr/bin/bluebanquise-diskless"
+    owner: root
+    group: root
+    mode: 0755
+
+- name: template <|> Generate /etc/bluebanquise/diskless.yaml
+  ansible.builtin.template:
+    src: diskless_parameters.yml.j2
+    dest: /etc/bluebanquise/diskless.yml
+    mode: 0644
+  tags:
+    - template
+
+- name: file <|> Create diskless http directories structure
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+    owner: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_group }}"
+  loop:
+    - "{{ pxe_stack_htdocs_path }}/pxe/diskless"
+
+- name: file <|> Create diskless nfs directories structure
+  ansible.builtin.file:
+    path: "{{ pxe_stack_diskless_nfs_path }}"
+    state: directory
+    mode: 0755
+    owner: root
+    group: root
+    recurse: yes
+
+- name: "service <|> Manage diskless services state"
+  ansible.builtin.service:
+    name: "{{ item }}"
+    enabled: "{{ (pxe_stack_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    state: "{{ (pxe_stack_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
+  loop: "{{ pxe_stack_diskless_services_to_start }}"
+  tags:
+    - service

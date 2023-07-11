@@ -40,6 +40,7 @@ tags:
 # L(specifiers,https://python-semanticversion.readthedocs.io/en/latest/#requirement-specification). Multiple version
 # range specifiers can be set and are separated by ','
 dependencies:
+  "community.general": "*"
 
 # The URL of the originating SCM repository
 repository: https://github.com/bluebanquise/bluebanquise
