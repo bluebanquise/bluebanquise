@@ -1,4 +1,4 @@
-# community/podman
+# Podman
 
 Ansible role for setting up [podman](https://podman.io) in Bluebanquise environment.
 
@@ -123,5 +123,6 @@ podman_local_registry_group: "root"
 
 ## Changelog
 
+* 1.0.2: Fix services to match bb 2.0 format. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.1: Use slirp4netns to avoid error with HA. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.0.0: Role creation. @strus38

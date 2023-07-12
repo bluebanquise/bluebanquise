@@ -1,5 +1,5 @@
 ---
-- name: include_vars ░ Gather OS specific variables
+- name: include_vars <|> Gather OS specific variables
   # This task gathers variables defined in OS specific files.
   #
   # Search vars in:
@@ -10,7 +10,7 @@
   #
   # If no OS specific file is found, the role will default to vars/main.yml
   #
-  include_vars: "{{ item }}"
+  ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - files:
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
@@ -19,20 +19,20 @@
         - "vars/{{ ansible_facts.os_family }}.yml"
       skip: true
 
-- name: "Install google_authenticator packages"
-  package:
+- name: "package <|> Install google_authenticator packages"
+  ansible.builtin.package:
     name: "{{ google_authenticator_packages_to_install }}"
   tags:
     - package
 
-- name: "add google-authenticator module to /etc/pam.d/sshd"
+- name: "lineinfile <|> Add google-authenticator module to /etc/pam.d/sshd"
   ansible.builtin.lineinfile:
     path: /etc/pam.d/sshd
     state: present
     insertafter: '^auth'
     line: 'auth       required     pam_google_authenticator.so'
 
-- name: "edit sshd config to support google-authenticator for 2fa"
+- name: "lineinfile <|> Edit sshd config to support google-authenticator for 2fa"
   ansible.builtin.lineinfile:
     path: /etc/ssh/sshd_config
     state: present
@@ -42,7 +42,7 @@
 
 # Public key mode configurations:
 
-- name: "edit sshd config to support google-authenticator for 2fa (publickey + google-auth)"
+- name: "blockinfile <|> Edit sshd config to support google-authenticator for 2fa (publickey + google-auth)"
   ansible.builtin.blockinfile:
     path: /etc/ssh/sshd_config
     backup: yes
@@ -52,19 +52,19 @@
       ##### Bluebanquise Managed Block #####
       # Google-authenticator configuration #
       AuthenticationMethods publickey,keyboard-interactive
-  when: mfa_mode == 'publickey'
+  when: google_authenticator_mfa_mode == 'publickey'
 
-- name: "Comment out the passwd auth on pam sshd file (publickey + google-auth)"
-  replace:
+- name: "replace <|> Comment out the passwd auth on pam sshd file (publickey + google-auth)"
+  ansible.builtin.replace:
     path: /etc/pam.d/sshd
     regexp: '^auth       substack     password-auth'
     replace: '#auth       substack     password-auth'
-  when: mfa_mode == 'publickey'
+  when: google_authenticator_mfa_mode == 'publickey'
 
 
 # Password mode configurations:
 
-- name: "edit sshd config to support google-authenticator for 2fa (publickey + google-auth)"
+- name: "blockinfile <|> Edit sshd config to support google-authenticator for 2fa (publickey + google-auth)"
   ansible.builtin.blockinfile:
     path: /etc/ssh/sshd_config
     backup: yes
@@ -74,20 +74,20 @@
       ##### Bluebanquise Managed Block #####
       # Google-authenticator configuration #
       AuthenticationMethods keyboard-interactive
-  when: mfa_mode == 'password'
+  when: google_authenticator_mfa_mode == 'password'
 
-- name: "ensure that passwd auth on pam sshd file is enabled (passwd) [1/2]"
-  replace:
+- name: "replace <|> Ensure that passwd auth on pam sshd file is enabled (passwd) [1/2]"
+  ansible.builtin.replace:
     path: /etc/pam.d/sshd
     regexp: '^#auth       substack     password-auth'
     replace: 'auth       substack     password-auth'
-  when: mfa_mode == 'password'
+  when: google_authenticator_mfa_mode == 'password'
 
-- name: "ensure that passwd auth on pam sshd file is enabled (passwd) [2/2]"
+- name: "lineinfile <|> Ensure that passwd auth on pam sshd file is enabled (passwd) [2/2]"
   ansible.builtin.lineinfile:
     path: /etc/pam.d/sshd
     state: present
     firstmatch: true
     insertbefore: '^auth'
     line: 'auth       substack     password-auth'
-  when: mfa_mode == 'password'
+  when: google_authenticator_mfa_mode == 'password'

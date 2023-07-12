@@ -11,7 +11,7 @@
   #
   # If no OS specific file is found, the role will default to vars/main.yml
   #
-  include_vars: "{{ item }}"
+  ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - files:
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}.yml"
@@ -25,7 +25,7 @@
     - always
 
 - name: include_tasks <|> Use OS dedicated firewall task
-  include_tasks: "{{ outer_item }}"
+  ansible.builtin.include_tasks: "{{ outer_item }}"
   with_first_found:
     - files:
         - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
@@ -42,14 +42,14 @@
     - firewall
 
 - name: "group <|> Add user groups"
-  group:
+  ansible.builtin.group:
     gid: "{{ item.value.gid }}"
     name: "{{ item.key }}"
     state: present
   with_dict: "{{ loki_groups }}"
 
 - name: "user <|> Add users"
-  user:
+  ansible.builtin.user:
     name: "{{ item.key }}"
     comment: "{{ item.value.comment | default(omit) }}"
     group: "{{ item.value.group }}"
@@ -62,7 +62,7 @@
   with_dict: "{{ loki_users }}"
 
 - name: "package <|> Install packages"
-  package:
+  ansible.builtin.package:
     name: "{{ item }}"
     state: present
   with_items:
@@ -70,7 +70,7 @@
     - promtail
 
 - name: "template <|> Create /etc/systemd/system/loki.service"
-  template:
+  ansible.builtin.template:
     src: loki.service.j2
     dest: /etc/systemd/system/loki.service
     owner: root
@@ -81,7 +81,7 @@
     - restart loki
 
 - name: "template <|> Create /etc/systemd/system/promtail.service"
-  template:
+  ansible.builtin.template:
     src: promtail.service.j2
     dest: /etc/systemd/system/promtail.service
     owner: root
@@ -92,7 +92,7 @@
     - restart promtail
 
 - name: "file <|> Create loki conf dir {{ loki_conf_dir }}"
-  file:
+  ansible.builtin.file:
     path: "{{ loki_conf_dir }}"
     state: directory
     owner: root
@@ -101,22 +101,22 @@
 
 # check for data dirs
 - name: "stat <|> Check for {{ loki_data_dir }}"
-  stat:
+  ansible.builtin.stat:
     path: "{{ loki_data_dir }}"
   register: dir_rslt
 
 - name: "set_fact <|> Set period start date if {{ loki_data_dir }} does not exist"
-  set_fact:
+  ansible.builtin.set_fact:
     loki_from_date: "{{ lookup('pipe', 'date +%Y-%m-%d') }}"
   when: not dir_rslt.stat.exists
 
 - name: "set_fact <|> Set period start date based on {{ loki_data_dir }} ctime"
-  set_fact:
+  ansible.builtin.set_fact:
     loki_from_date: "{{ lookup('pipe', 'date -d @' + dir_rslt.stat.ctime|string + ' +%Y-%m-%d') }}"
   when: dir_rslt.stat.exists
 
 - name: "template <|> Configure loki"
-  template:
+  ansible.builtin.template:
     src: loki.yml.j2
     dest: "{{ loki_conf_dir }}/loki.yml"
     owner: root
@@ -127,7 +127,7 @@
     - template
 
 - name: "file <|> Create data dirs"
-  file:
+  ansible.builtin.file:
     state: directory
     path: "{{ item }}"
     owner: loki
@@ -139,13 +139,15 @@
     - "{{ loki_index_dir }}"
 
 - name: "service <|> Start and enable loki"
-  service:
+  ansible.builtin.service:
     name: loki
-    state: started
-    enabled: true
+    enabled: "{{ (loki_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    state: "{{ (loki_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
+  tags:
+    - service
 
 - name: "file <|> create promtail conf dir {{ loki_promtail_conf_dir }}"
-  file:
+  ansible.builtin.file:
     path: "{{ loki_promtail_conf_dir }}"
     state: directory
     owner: root
@@ -153,7 +155,7 @@
     mode: "0755"
 
 - name: "template <|> Configure promtail"
-  template:
+  ansible.builtin.template:
     src: promtail.yml.j2
     dest: "{{ loki_promtail_conf_dir }}/promtail.yml"
     owner: root
@@ -164,7 +166,7 @@
     - template
 
 - name: "template <|> Add rsyslog forwarder"
-  template:
+  ansible.builtin.template:
     src: promtail-forward.conf.j2
     dest: /etc/rsyslog.d/promtail-forward.conf
     owner: root
@@ -175,7 +177,9 @@
     - template
 
 - name: "service <|> Start and enable promtail"
-  service:
+  ansible.builtin.service:
     name: promtail
-    state: started
-    enabled: true
+    enabled: "{{ (loki_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    state: "{{ (loki_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
+  tags:
+    - service

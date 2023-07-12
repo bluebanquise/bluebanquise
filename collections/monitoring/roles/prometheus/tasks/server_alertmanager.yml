@@ -89,7 +89,7 @@
 - name: service <|> Manage alertmanager service state
   ansible.builtin.service:
     name: alertmanager
-    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
-    state: "{{ (start_services | bool) | ternary('started', omit) }}"
+    enabled: "{{ (prometheus_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    state: "{{ (prometheus_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   tags:
     - service

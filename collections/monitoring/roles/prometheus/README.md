@@ -581,6 +581,7 @@ prometheus_server_prometheus_launch_parameters: |
 
 ## Changelog
 
+* 1.3.1: Port to bb 2.0. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.0: Support TLS and Basic Authentication. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.2.4: Update to BB 2.0 format. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.2.3: Fix karma package to install on RedHat. Emmanuel Chevreau <manu44600@gmail.com>

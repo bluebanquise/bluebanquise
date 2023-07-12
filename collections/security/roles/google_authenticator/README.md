@@ -8,18 +8,19 @@ This role simply install google-authenticator tool and configure the basics to e
 
 For now the Role has two possible configuration modes:
 
-1 - public key + google authenticator ( recomended )
+1 - public key + google authenticator ( recommended )
 
 ```yaml
-mfa_mode: publickey
+google_authenticator_mfa_mode: publickey
 ```
 
 2- password + google authenticator
 
 ```yaml
-mfa_mode: password
+google_authenticator_mfa_mode: password
 ```
 
 ## Changelog
 
+* 1.0.1: Port to bb 2.0. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.0: Role creation. Lucas Santos <lucassouzasantos@gmail.com>
