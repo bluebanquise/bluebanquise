@@ -4,9 +4,13 @@
 modules:
 {% for equipment in prometheus_ipmi_scrape_equipment_profiles %}
 
+  {% if hostvars[groups[equipment.name][0]]['ep_host_authentication'] is defined %}
+      {% set bmc_user = (hostvars[groups[equipment.name][0]]['ep_host_authentication'] | selectattr('protocol','match','IPMI') | map(attribute='user') | list | first | default(none)) %}
+      {% set bmc_password = (hostvars[groups[equipment.name][0]]['ep_host_authentication'] | selectattr('protocol','match','IPMI') | map(attribute='password') | list | first | default(none)) %}
+      {% if bmc_user is defined and bmc_user is not none and bmc_password is defined and bmc_password is not none %}
   {{ equipment.name }}:
-    user: {{ hostvars[groups[equipment.name][0]]['ep_equipment_authentication']['user']}}
-    pass: {{ hostvars[groups[equipment.name][0]]['ep_equipment_authentication']['password']}}
+    user: {{ bmc_user }}
+    pass: {{ bmc_password }}
     driver: "LAN_2_0"
     privilege: "user"
     timeout: 10000
@@ -15,5 +19,6 @@ modules:
     - ipmi
     - chassis
     exclude_sensor_ids:
+{% endif %}
 
-{% endfor %}
+{% endfor %} 
