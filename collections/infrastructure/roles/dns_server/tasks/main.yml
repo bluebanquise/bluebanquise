@@ -117,7 +117,7 @@
     mode: 0644
   notify: service <|> Restart dns services
   with_items: "{{ j2_dns_server_get_first_octets.split(',') }}"
-  when: zoneconf.changed  # noqa 503
+  when: zoneconf.changed  # noqa no-handler
   tags:
     - template
 

@@ -21,4 +21,3 @@
   when:
     - "'service' not in ansible_skip_tags"
     - dhcp_server_start_services | default(bb_start_services) | default(true) | bool
-
