@@ -3,5 +3,5 @@
   hosts: "mg_managements"
   roles:
 
-    - role: bluebanquise.containers.prometheus
+    - role: bluebanquise.monitoring.prometheus
       tags: prometheus
