@@ -11,3 +11,9 @@
   when: pxe_stack_enable_clonezilla
   tags:
     - internal
+
+- name: include_tasks <|> Include Memtest86plus support
+  ansible.builtin.include_tasks: tools/Memtest.yml
+  when: pxe_stack_enable_memtest
+  tags:
+    - internal
