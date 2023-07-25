@@ -7,3 +7,9 @@
       tags: auditd
     - role: bluebanquise.security.google_authenticator
       tags: google_authenticator
+      vars:
+        google_authenticator_mfa_mode: publickey
+    - role: bluebanquise.security.google_authenticator
+      tags: google_authenticator
+      vars:
+        google_authenticator_mfa_mode: password
