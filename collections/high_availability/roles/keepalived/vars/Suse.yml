@@ -1,0 +1,7 @@
+---
+
+keepalived_packages_to_install:
+  - keepalived
+
+keepalived_services_to_start:
+  - keepalived
