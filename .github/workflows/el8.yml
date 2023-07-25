@@ -41,7 +41,9 @@ jobs:
 
       - name: High availability roles execution
         run: |
-          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/high_availability.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff'"
+          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'dnf config-manager --set-enabled ha'"
+          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/high_availability.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff -t pcs,drbd --check'"
+          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/high_availability.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --skip-tags pcs'"
 
       - name: HPC roles execution
         run: |
