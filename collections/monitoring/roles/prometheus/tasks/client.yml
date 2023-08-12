@@ -54,6 +54,7 @@
     owner: "{{ item.user | default('root') }}"
     group: "{{ item.group | default('root') }}"
   loop: "{{ exporters_groups }}"
+  when: item.service is defined
 
 - name: meta <|> Run handler tasks
   ansible.builtin.meta: flush_handlers
