@@ -6,8 +6,5 @@ Documents provided here are generic, and not directly related to the BlueBanquis
 
 Current available tutorials are:
 
-* Server farm system administration
-* Ansible
-* High Performance Computing system administration
-* K8S deployment using Ansible
-* Parallel computing
+* Servers farm system administration
+* Deploying Slurm scheduler over a servers farm (High Performance Computing)
