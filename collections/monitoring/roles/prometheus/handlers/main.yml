@@ -1,4 +1,8 @@
 ---
+- name: systemd <|> Reload systemd configuration
+  ansible.builtin.systemd:
+    daemon_reload: yes
+
 - name: reload firewalld
   ansible.builtin.command: firewall-cmd --reload
 
@@ -41,7 +45,3 @@
   when:
     - "'service' not in ansible_skip_tags"
     - (start_services | bool)
-
-- name: systemd <|> Reload systemd configuration
-  ansible.builtin.systemd:
-    daemon_reload: yes
