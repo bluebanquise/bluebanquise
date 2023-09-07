@@ -27,9 +27,9 @@
 
 {% if nhc_checks is defined and nhc_checks is iterable %}
   {% for check, arguments in nhc_checks.items() %}
-    {% if arguments is iterable %}
+    {% if arguments is iterable and arguments is not string %}
       {% for arg in arguments %}
-* || {{ check }} {{ arguments }}
+* || {{ check }} {{ arg }}
       {% endfor %}
     {% else %}
 * || {{ check }} {{ arguments }}
