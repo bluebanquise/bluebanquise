@@ -1,3 +1,5 @@
-haproxy_restrict_nodes_http_listen: false
+# haproxy_restrict_nodes_http_listen: false
 
-haproxy_mode: tcp
+# haproxy_mode: tcp
+
+haproxy_enable_ip_nonlocal_bind: true

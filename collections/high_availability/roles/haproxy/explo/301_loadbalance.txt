@@ -1,0 +1,32 @@
+
+
+frontend cluster1
+    mode http
+   # http-request redirect
+#    http-request redirect  code 301  location http://10.10.0.2/toto
+#http://%[hdr(host)]%[capture.req.uri]
+    bind 10.10.0.77:80
+    default_backend cluster1_pool
+
+backend cluster1_pool
+    balance roundrobin
+#    http-request redirect code 301 location http://%[hdr(host)]%[capture.req.uri]/toto
+    mode http
+    server mg1 127.0.0.1:8081 check
+    server mg2 127.0.0.1:8082 check # backup weight 100
+    server mg3 127.0.0.1:8083 check # backup weight 200
+
+frontend fmg1
+    mode http
+    bind 127.0.0.1:8081
+    http-request redirect code 301 location http://10.10.0.1/%[path]
+
+frontend fmg2
+    mode http
+    bind 127.0.0.1:8082
+    http-request redirect code 301 location http://10.10.0.2/%[path]
+
+frontend fmg3
+    mode http
+    bind 127.0.0.1:8083
+    http-request redirect code 301 location http://10.10.0.3/%[path]

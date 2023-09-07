@@ -2,8 +2,9 @@
 
 - name: service <|> Restart keepalived server
   ansible.builtin.service:
-    name: keepalived
+    name: "{{ item }}"
     state: restarted
+  loop: "{{ keepalived_services_to_start }}"
   when:
     - "'service' not in ansible_skip_tags"
-    - (start_services | bool)
+    - keepalived_start_services | default(bb_start_services) | default(true) | bool

@@ -1,0 +1,7 @@
+---
+haproxy_packages_to_install:
+  - haproxy
+haproxy_services_to_start:
+  - haproxy
+# haproxy_firewall_services_to_add:
+#   - haproxy

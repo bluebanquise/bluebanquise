@@ -1,17 +1,18 @@
 ---
 
-- name: service <|> Restart http server
-  ansible.builtin.service:
-    name: httpd
-    state: restarted
-  when:
-    - "'service' not in ansible_skip_tags"
-    - (start_services | bool)
+# - name: service <|> Restart http server
+#   ansible.builtin.service:
+#     name: httpd
+#     state: restarted
+#   when:
+#     - "'service' not in ansible_skip_tags"
+#     - (start_services | bool)
 
 - name: service <|> Restart haproxy server
   ansible.builtin.service:
-    name: haproxy
+    name: "{{ item }}"
     state: restarted
+  loop: "{{ haproxy_services_to_start }}"
   when:
     - "'service' not in ansible_skip_tags"
-    - (start_services | bool)
+    - haproxy_start_services | default(bb_start_services) | default(true) | bool
