@@ -205,8 +205,8 @@ Step 2: haproxy proxy this request to localhost:8081 frontend, that is configure
 
 
 ```
- http server1                 http server2                 http server3
- 10.10.0.1:80                 10.10.0.2:80                 10.10.0.3:80
+ http 301 to server1          http 301 to server2          http 301 to server3
+ localhost:8081               localhost:8082               localhost:8083
       ▲         round robin        ▲                            ▲
       └──────────────┬─────────────┴────────────────────────────┘
                      │
@@ -220,21 +220,7 @@ Step 2: haproxy proxy this request to localhost:8081 frontend, that is configure
                 http request
 ```
 
-
-```
- http server1   round robin    http server2
- 10.10.0.1:80 ◄──────┬───────► 10.10.0.2:80
-                     │
-   haproxy ─ ─ ─ ─ ─ ┴────────  haproxy
- 10.10.0.7:80                 10.10.0.7:80 (floating)
-      ▲                            ▲
-      └─ ─ ─ ─ ─ ─ ─ ┬─────────────┘
-                     │
-                     │
-                     │
-                http request
-```
-
+Step 3: client directly connect to server1 at http://10.10.0.1:80/myfile and download the file from this server, without using bandwidth of the haproxy load balancer. If same client request the same file at 10.10.0.7:80 again, it will be redirected this time to server2, so 10.10.0.2:80, etc (round robin).
 
 Configuration is similar to `http_simple`, with few additional keys to be set:
 
@@ -260,13 +246,12 @@ haproxy_resources:
 
 `local_ports_first` defines the ports ranges to be locally used as redirection frontends. In this example, local port used would be 8081, 8082 and 8083. Note that these ports do not need to be open in the firewall, as the usage is strictly internal to haproxy.
 
+
+<!--
 ## Deal with local http 80 port on non dedicated nodes
 
 When using haproxy directly on a target http server, there could be conflicts between ports.
-
-
-
-<!-- 
+ 
 There are multiple scenario possible
 
 * Do you have a separated haproxy physical server, or is haproxy running on the http servers themselfs?
