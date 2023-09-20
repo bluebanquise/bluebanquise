@@ -76,5 +76,6 @@ checks.
 
 ## Changelog
 
+* 1.1.1: Bug fixes on nhc.j2. Lucas santos <lucassouzasantos@gmail.com>
 * 1.1.0: Template nhc_files. Bruno Travouillon <devel@travouillon.fr>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>

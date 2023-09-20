@@ -53,7 +53,9 @@
     owner: root
     group: root
     mode: 0755
-  notify: systemd <|> Reload systemd configuration
+  notify:
+    - systemd <|> Reload systemd configuration
+    - service <|> Restart snmp_exporter service
   tags:
     - template
 

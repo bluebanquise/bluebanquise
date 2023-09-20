@@ -5,3 +5,4 @@ site_name: BlueBanquise - Tutorials
 
 nav:
     - Home: index.md
+    - Servers farm system administration: servers_farm_system_administration.md

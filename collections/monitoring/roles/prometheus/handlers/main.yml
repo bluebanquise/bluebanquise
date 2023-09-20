@@ -1,4 +1,8 @@
 ---
+- name: systemd <|> Reload systemd configuration
+  ansible.builtin.systemd:
+    daemon_reload: yes
+
 - name: reload firewalld
   ansible.builtin.command: firewall-cmd --reload
 
@@ -45,3 +49,4 @@
 - name: systemd <|> Reload systemd configuration
   ansible.builtin.systemd:
     daemon_reload: yes
+    - (start_services | bool)
