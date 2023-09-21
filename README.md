@@ -20,15 +20,15 @@ When "stacked" together, collections and tools are called **BlueBanquise stack**
 
 The following collections are available. **Please note that for now, only infrastructure collection of BlueBanquise 2.X version is considered stable**.
 
-* :globe_with_meridians: **[Infrastructure](https://github.com/bluebanquise/bluebanquise/collections/infrastructure):** the core of the stack, focused on providing roles and tools to deploy hosts and configure vital services.
-* :globe_with_meridians: **[hardware](https://github.com/bluebanquise/bluebanquise/collections/hardware):** specific hardware support roles (GPU, interconnect, etc.).
-* :globe_with_meridians: **[file system](https://github.com/bluebanquise/bluebanquise/collections/file_systems):** support for local or network FS roles.
-* :globe_with_meridians: **[hpc](https://github.com/bluebanquise/bluebanquise/collections/hpc):** High Performance Computing related roles.
-* :globe_with_meridians: **[containers](https://github.com/bluebanquise/bluebanquise/collections/containers):** containers related roles.
-* :globe_with_meridians: **[high availability](https://github.com/bluebanquise/bluebanquise/collections/high_availability):** HA and load balancing related roles.
-* :globe_with_meridians: **[logging](https://github.com/bluebanquise/bluebanquise/collections/logging):** system logging related roles (different from monitoring).
-* :globe_with_meridians: **[monitoring](https://github.com/bluebanquise/bluebanquise/collections/monitoring):** cluster monitoring related roles.
-* :globe_with_meridians: **[security](https://github.com/bluebanquise/bluebanquise/collections/security):** system security related roles.
+* :globe_with_meridians: **[Infrastructure](collections/infrastructure):** the core of the stack, focused on providing roles and tools to deploy hosts and configure vital services.
+* :globe_with_meridians: **[hardware](collections/hardware):** specific hardware support roles (GPU, interconnect, etc.).
+* :globe_with_meridians: **[file system](collections/file_systems):** support for local or network FS roles.
+* :globe_with_meridians: **[hpc](collections/hpc):** High Performance Computing related roles.
+* :globe_with_meridians: **[containers](collections/containers):** containers related roles.
+* :globe_with_meridians: **[high availability](collections/high_availability):** HA and load balancing related roles.
+* :globe_with_meridians: **[logging](collections/logging):** system logging related roles (different from monitoring).
+* :globe_with_meridians: **[monitoring](collections/monitoring):** cluster monitoring related roles.
+* :globe_with_meridians: **[security](collections/security):** system security related roles.
 
 Infrastructure collection should be compatible with all target Linux distributions (RHEL 8, RHEL 9, Debian 11, Debian 12, OpenSuse Leap 15, Ubuntu 20.04, Ubuntu 22.04). Other collections do not support all these distributions (support is added on demand).
 
