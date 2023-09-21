@@ -1,33 +1,79 @@
 ---
+- name: include_vars <|> Gather OS specific variables
+  # This task gathers variables defined in OS specific files.
+  #
+  # Search vars in:
+  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
+  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
+  #  - <distribution>.yml            # eg. CentOS.yml
+  #  - <os_family>.yml               # eg. RedHat.yml
+  #
+  # If no OS specific file is found, the role will default to vars/main.yml
+  #
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family }}.yml"
+      skip: true
+  tags:
+    - always
 
-- name: package <|> Install httpd and haproxy
+- name: "package <|> Install haproxy"
   ansible.builtin.package:
-    name:
-      - httpd
-      - haproxy
+    name: "{{ haproxy_packages_to_install }}"
     state: present
   tags:
     - package
 
-- name: lineinfile <|> Disable default listen on all interfaces
-  ansible.builtin.lineinfile:
-    path: /etc/httpd/conf/httpd.conf
-    regexp: '^Listen 80'
-    line: '#Listen 80'
-  notify: service <|> Restart http server
-  when: haproxy_mode == 'http'
-
-- name: template <|> Set http server ips and ports to listen to
-  ansible.builtin.template:
-    src: listen.conf.j2
-    dest: /etc/httpd/conf.d/listen.conf
-    owner: root
-    group: root
-    mode: 0644
+- name: include_tasks <|> Use OS dedicated firewall task
+  ansible.builtin.include_tasks: "{{ outer_item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}/firewall.yml"
+      skip: true
+  loop_control:
+    loop_var: outer_item
   tags:
-    - template
-  notify: service <|> Restart http server
-  when: haproxy_mode == 'http'
+    - internal
+    - firewall
+
+# - name: lineinfile <|> Disable default listen on all interfaces
+#   ansible.builtin.lineinfile:
+#     path: /etc/httpd/conf/httpd.conf
+#     regexp: '^Listen 80'
+#     line: '#Listen 80'
+#   notify: service <|> Restart http server
+#   when: haproxy_mode == 'http'
+
+# - name: template <|> Set http server ips and ports to listen to
+#   ansible.builtin.template:
+#     src: listen.conf.j2
+#     dest: /etc/httpd/conf.d/listen.conf
+#     owner: root
+#     group: root
+#     mode: 0644
+#   tags:
+#     - template
+#   notify: service <|> Restart http server
+#   when: haproxy_mode == 'http'
+
+- name: sysctl <|> Enable bind on non local ip
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_nonlocal_bind
+    value: '1'
+    state: present
+    reload: true
+  when: haproxy_enable_ip_nonlocal_bind
 
 - name: template <|> Configure haproxy
   ansible.builtin.template:
@@ -43,19 +89,20 @@
 - name: meta <|> Run handler tasks to restart services
   meta: flush_handlers
 
-- name: service <|> Manage httpd service
-  ansible.builtin.service:
-    name: httpd
-    enabled: yes
-    state: started
-  tags:
-    - service
-  when: haproxy_mode == 'http'
+# - name: service <|> Manage httpd service
+#   ansible.builtin.service:
+#     name: httpd
+#     enabled: yes
+#     state: started
+#   tags:
+#     - service
+#   when: haproxy_mode == 'http'
 
-- name: service <|> Manage haproxy service
+- name: "service <|> Manage haproxy service"
   ansible.builtin.service:
-    name: haproxy
-    enabled: yes
-    state: started
+    name: "{{ item }}"
+    enabled: "{{ (haproxy_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    state: "{{ (haproxy_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
+  loop: "{{ haproxy_services_to_start }}"
   tags:
     - service

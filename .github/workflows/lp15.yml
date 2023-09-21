@@ -39,11 +39,10 @@ jobs:
       - name: Prepare run input files
         run: docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'cp -a /bluebanquise/resources/workflow/inventory_standard /var/lib/bluebanquise/inventory && cp -a /bluebanquise/resources/workflow/playbooks /var/lib/bluebanquise'"
 
-      - name: Infrastructure roles execution
-        run: |
-          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/infrastructure.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --check --tags hosts_file,dns_client'"
-          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/infrastructure.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --skip-tags kernel_config,hosts_file,nic,set_hostname,dns_client'"
-          
+      # - name: High availability roles execution
+      #   run: |
+      #     docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/high_availability.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --skip-tags pcs,drbd'"
+
       - name: HPC roles execution
         run: |
           docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/hpc.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff  --tags slurm --skip-tags service'"
@@ -56,3 +55,26 @@ jobs:
         run: |
           # docker exec mgt1 bash -c "zypper -n remove busybox-xz"
           docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/logging.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff'"
+
+      - name: Containers roles execution
+        run: |
+          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/containers.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff'"
+
+      - name: Hardware roles execution
+        run: |
+          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/hardware.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff'"
+
+      - name: Monitoring roles execution
+        run: |
+          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/monitoring.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff'"
+      
+      # - name: Security roles execution
+      #   run: |
+      #     docker exec mgt1 bash -c "zypper -n install openssh-server && systemctl start sshd"
+      #     docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/security.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --skip-tags service'"
+
+      - name: Infrastructure roles execution
+        run: |
+          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/infrastructure.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --check --tags hosts_file,dns_client'"
+          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/infrastructure.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --skip-tags kernel_config,hosts_file,nic,set_hostname,dns_client'"
+          

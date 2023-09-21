@@ -47,7 +47,7 @@
 - name: service <|> Manage registry state
   ansible.builtin.service:
     name: registry
-    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
-    state: "{{ (start_services | bool) | ternary('started', omit) }}"
+    enabled: "{{ (podman_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    state: "{{ (podman_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   tags:
     - service

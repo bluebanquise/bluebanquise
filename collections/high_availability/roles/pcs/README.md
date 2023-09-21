@@ -1,5 +1,7 @@
 # High Availability
 
+Note: this role is only available on RHEL and Ubuntu.
+
 - [High Availability](#high-availability)
   * [1. Description](#1-description)
   * [2. Instructions to configure](#2-instructions-to-configure)

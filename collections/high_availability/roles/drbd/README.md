@@ -1,5 +1,7 @@
 # DRBD
 
+Important: this role is for now limited to RHEL systems. If you wish it to be available on other distributions (Debian, Ubuntu, OpenSuse Leap) please do not hesitate to open a request.
+
 ## Description
 
 This role deploy a basic DRBD (Distributed Replicated Block Device) cluster to share storage between multiple nodes.

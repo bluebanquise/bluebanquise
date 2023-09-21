@@ -4,36 +4,20 @@
 #---------------------------------------------------------------------
 global
 {% if haproxy_global_parameters is defined and haproxy_global_parameters is not none %}
-{{ haproxy_global_parameters }}
+{{ haproxy_global_parameters | indent(4, True) }}
 {% else %}
-    # to have these messages end up in /var/log/haproxy.log you will
-    # need to:
-    #
-    # 1) configure syslog to accept network log events.  This is done
-    #    by adding the '-r' option to the SYSLOGD_OPTIONS in
-    #    /etc/sysconfig/syslog
-    #
-    # 2) configure local2 events to go to the /var/log/haproxy.log
-    #   file. A line like the following can be added to
-    #   /etc/sysconfig/syslog
-    #
-    #    local2.*                       /var/log/haproxy.log
-    #
-    log         127.0.0.1 local2
-
-    chroot      /var/lib/haproxy
-    pidfile     /var/run/haproxy.pid
-    maxconn     4000
+    # These settings are the BlueBanquise role defaults.
+    log /dev/log local0
     user        haproxy
     group       haproxy
-    daemon
-
-    # turn on stats unix socket
-    stats socket /var/lib/haproxy/stats
-
-    # utilize system-wide crypto-policies
+    chroot      /var/lib/haproxy
+    stats socket /run/haproxy/admin.sock user haproxy group haproxy mode 660 level admin
+    nbproc      2
+    nbthread    4
+    maxconn     50000
     ssl-default-bind-ciphers PROFILE=SYSTEM
     ssl-default-server-ciphers PROFILE=SYSTEM
+    daemon
 {% endif %}
 
 #---------------------------------------------------------------------
@@ -42,58 +26,74 @@ global
 #---------------------------------------------------------------------
 defaults
 {% if haproxy_defaults_parameters is defined and haproxy_defaults_parameters is not none %}
-{{ haproxy_defaults_parameters }}
+{{ haproxy_defaults_parameters | indent(4, True) }}
 {% else %}
-    mode                    {{ haproxy_mode }}
-    log                     global
-  {% if haproxy_mode == 'http' %}
-    option                  httplog
-  {% endif %}
-    option                  dontlognull
-  {% if haproxy_mode == 'http' %}
-    option http-server-close
-  {% endif %}
-    option forwardfor       except 127.0.0.0/8
-    option                  redispatch
-    retries                 3
-  {% if haproxy_mode == 'http' %}
-    timeout http-request    10s
-  {% endif %}
-    timeout queue           1m
-    timeout connect         10s
-    timeout client          1m
-    timeout server          1m
-  {% if haproxy_mode == 'http' %}
-    timeout http-keep-alive 10s
-  {% endif %}
-    timeout check           10s
-    maxconn                 3000
+    # These settings are the BlueBanquise role defaults.
+    timeout connect 10s
+    timeout client 30s
+    timeout server 30s
+    log global
+    mode http
+    option httplog
+    maxconn 5000
 {% endif %}
 
 #---------------------------------------------------------------------
 # List of frontend and associated backends
 #---------------------------------------------------------------------
+{% if haproxy_resources_raw is defined and haproxy_resources_raw is string %}
+{{ haproxy_resources_raw }}
+{% endif %}
 
 {% if haproxy_resources is defined and haproxy_resources is iterable and haproxy_resources is not mapping and haproxy_resources is not string %}
   {% for resource in haproxy_resources %}
-frontend {{ resource.name}}-frontend
- bind {{ resource['frontend']['ip4'] }}:{{ resource['frontend']['port'] }}
- default_backend {{ resource.name}}-backend
-    {% if resource['frontend']['parameters'] is defined and resource['frontend']['parameters'] is not none %}
-{{ resource['frontend']['parameters'] | indent(1, True) }}
-    {% endif %}
-
+    {% if resource.type == "http_simple" %}
+############### HTTP_SIMPLE - {{ resource['name'] }}
+frontend {{ resource['name'] }}-frontend
+    mode http
+    bind {{ resource['bind']['ip4'] | default('') }}:{{ resource['bind']['port'] }}
+    default_backend {{ resource['name'] }}-backend
 backend {{ resource.name}}-backend
-    {% if resource['backend']['parameters'] is defined and resource['backend']['parameters'] is not none %}
-{{ resource['backend']['parameters'] | indent(1, True) }}
-    {% else %}
- mode {{ haproxy_mode }}
- balance roundrobin
+    mode http
+    balance roundrobin
+      {% for server in resource['servers'] %}
+    server {{ server['hostname'] }} {{ server['ip4'] }}:{{ server['port'] }} check
+      {% endfor %}
+
+    {% elif resource.type == "http_load_balancer" %}
+############### HTTP_LOAD_BALANCER - {{ resource['name'] }}
+frontend {{ resource['name'] }}-frontend
+    mode http
+    bind {{ resource['bind']['ip4'] | default('') }}:{{ resource['bind']['port'] }}
+    default_backend {{ resource['name'] }}-backend
+backend {{ resource['name'] }}-backend
+    balance roundrobin
+    mode http
+      {% for server in resource['servers'] %}
+    server {{ resource['name'] }}-{{ server['hostname'] }} 127.0.0.1:{{ (resource['local_ports_first'] | int) + (loop.index0 | int) }} check
+      {% endfor %}
+      {% for server in resource['servers'] %}
+frontend {{ resource['name'] }}-{{ server['hostname'] }}-frontend
+    mode http
+    bind 127.0.0.1:{{ (resource['local_ports_first'] | int) + (loop.index0 | int) }}
+    http-request redirect code 301 location http://{{ server['ip4'] }}{% if server['port'] is defined and server['port'] is string %}:{{ server['port'] }}{% endif %}/%[path]
+      {% endfor %}
+
+    {% elif resource.type == "frontend" %}
+############### FRONTEND - {{ resource['name'] }}
+frontend {{ resource['name'] }}
+{{ resource['parameters'] | default('') | indent(4, True) }}
+    bind {{ resource['bind']['ip4'] | default('') }}:{{ resource['bind']['port'] }}
+    default_backend {{ resource['default_backend'] }}
+
+    {% elif resource.type == "backend" %}
+############### BACKEND - {{ resource['name'] }}
+backend {{ resource['name'] }}
+{{ resource['parameters'] | default('') | indent(4, True) }}
+      {% for server in resource['servers'] %}
+    server {{ resource['name'] }}-{{ server['hostname'] }} 127.0.0.1:{{ (resource['local_ports_first'] | int) + (loop.index0 | int) }} {% if server['parameters'] is defined and server['parameters'] is not none %}{{ server['parameters'] }}{% else %}check{% endif %}
+      {% endfor %}
+
     {% endif %}
-    {% for server in resource['backend']['servers'] %}
- server {{ server.hostname }} {{ server.ip4 }}:{{ server.port }} {% if server.parameters is defined and server.parameters is not none %}{{ server.parameters }}{% else %}check{% endif %}
-
-    {% endfor %}
-
   {% endfor %}
 {% endif %}

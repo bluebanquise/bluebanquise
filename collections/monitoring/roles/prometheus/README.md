@@ -581,6 +581,7 @@ prometheus_server_prometheus_launch_parameters: |
 
 ## Changelog
 
+* 1.3.3: Port to bb 2.0. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.2: Restart services when systemd service file changes. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.3.1: Fix error when exporter is missing the service parameter. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.3.0: Support TLS and Basic Authentication. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>

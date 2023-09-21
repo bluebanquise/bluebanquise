@@ -1,0 +1,5 @@
+---
+google_authenticator_packages_to_install:
+  - google-authenticator-libpam
+  - qrencode
+  - libqrencode4

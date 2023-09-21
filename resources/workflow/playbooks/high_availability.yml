@@ -1,0 +1,14 @@
+---
+- name: managements playbook
+  hosts: "mg_managements"
+  roles:
+
+    - role: bluebanquise.high_availability.pcs
+      tags: pcs
+    - role: bluebanquise.high_availability.drbd
+      tags: drbd
+    - role: bluebanquise.high_availability.haproxy
+      tags: haproxy
+    - role: bluebanquise.high_availability.keepalived
+      tags: keepalived
+ 

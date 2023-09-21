@@ -17,3 +17,5 @@
       tags: mount
     - role: bluebanquise.file_systems.parted
       tags: parted
+    - role: bluebanquise.file_systems.xfs_quota
+      tags: xfs_quota

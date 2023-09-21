@@ -48,6 +48,7 @@ hostonly=no
 show_modules=yes
 bluebanquise@mgt1:/tmp$
 
+If needed: dracut  --regenerate-all --force
 """
 
 

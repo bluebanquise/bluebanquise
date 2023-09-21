@@ -23,10 +23,10 @@
     # Tuned
     conn_name: "{{ item.conn_name | default(item.interface) | string }}"
     ifname: "{{ item.ifname | default(item.physical_device) | default(omit) }}"
-    ip4: "{{ j2_nic_ip4 | trim | default(omit,true) }}"
-    gw4: "{{ j2_nic_gw4 | trim | default(omit,true) }}"
-    routes4: "{{ j2_nic_routes4 | trim | default(omit,true) }}"
-    dns4: "{{ j2_nic_dns4 | trim | default(omit,true) }}"
+    ip4: "{{ nic_j2_ip4 | trim | default(omit,true) }}"
+    gw4: "{{ nic_j2_gw4 | trim | default(omit,true) }}"
+    routes4: "{{ nic_j2_routes4 | trim | default(omit,true) }}"
+    dns4: "{{ nic_j2_dns4 | trim | default(omit,true) }}"
     mtu: "{{ item.mtu | default(omit) }}"
     type: "{{ item.type | default('ethernet') }}"  # Even if in the documentation type is optional, it is in fact mandatory. Default to ethernet.
     # Standard

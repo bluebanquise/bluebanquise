@@ -12,4 +12,4 @@
     rtbhard: "{{ item.rtbhard | default(omit) }}"
     rtbsoft: "{{ item.rtbsoft | default(omit) }}"
     state: "{{ item.state| default('present') }}"
-  loop: "{{ xfs_quota }}"
+  loop: "{{ xfs_quota | default([]) }}"

@@ -1,0 +1,9 @@
+---
+
+- name: "package <|> Install memtest86plus"
+  ansible.builtin.package:
+    name: "memtest86plus"
+    state: present
+  tags:
+    - package
+    - large-package
