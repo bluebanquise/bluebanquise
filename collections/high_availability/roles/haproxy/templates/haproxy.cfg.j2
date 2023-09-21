@@ -70,12 +70,12 @@ backend {{ resource['name'] }}-backend
     balance roundrobin
     mode http
       {% for server in resource['servers'] %}
-    server {{ resource['name'] }}-{{ server['hostname'] }} 127.0.0.1:{{ (resource['local_ports_first'] | integer) + (loop.index0 | integer) }} check
+    server {{ resource['name'] }}-{{ server['hostname'] }} 127.0.0.1:{{ (resource['local_ports_first'] | int) + (loop.index0 | int) }} check
       {% endfor %}
       {% for server in resource['servers'] %}
 frontend {{ resource['name'] }}-{{ server['hostname'] }}-frontend
     mode http
-    bind 127.0.0.1:{{ (resource['local_ports_first'] | integer) + (loop.index0 | integer) }}
+    bind 127.0.0.1:{{ (resource['local_ports_first'] | int) + (loop.index0 | int) }}
     http-request redirect code 301 location http://{{ server['ip4'] }}{% if server['port'] is defined and server['port'] is string %}:{{ server['port'] }}{% endif %}/%[path]
       {% endfor %}
 
@@ -91,7 +91,7 @@ frontend {{ resource['name'] }}
 backend {{ resource['name'] }}
 {{ resource['parameters'] | default('') | indent(4, True) }}
       {% for server in resource['servers'] %}
-    server {{ resource['name'] }}-{{ server['hostname'] }} 127.0.0.1:{{ (resource['local_ports_first'] | integer) + (loop.index0 | integer) }} {% if server['parameters'] is defined and server['parameters'] is not none %}{{ server['parameters'] }}{% else %}check{% endif %}
+    server {{ resource['name'] }}-{{ server['hostname'] }} 127.0.0.1:{{ (resource['local_ports_first'] | int) + (loop.index0 | int) }} {% if server['parameters'] is defined and server['parameters'] is not none %}{{ server['parameters'] }}{% else %}check{% endif %}
       {% endfor %}
 
     {% endif %}

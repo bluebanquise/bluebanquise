@@ -49,4 +49,6 @@
 - name: systemd <|> Reload systemd configuration
   ansible.builtin.systemd:
     daemon_reload: yes
-    - (start_services | bool)
+  when:
+    - "'service' not in ansible_skip_tags"
+    - prometheus_start_services | default(bb_start_services) | default(true) | bool
