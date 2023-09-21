@@ -128,15 +128,15 @@ haproxy_resources:
     name: fmg1b
     parameters:
     servers:
-      - name: mg1
+      - hostname: mg1
         ip4: 10.10.0.1
         port: 80
         parameters: check
-      - name: mg2
+      - hostname: mg2
         ip4: 10.10.0.2
         port: 80
         parameters: check backup weight 100
-      - name: mg3
+      - hostname: mg3
         ip4: 10.10.0.3
         port: 80
         parameters: check backup weight 200
@@ -174,10 +174,10 @@ haproxy_resources:
       ip4: 10.10.0.7
       port: 80
     servers:
-      - name: mg1
+      - hostname: mg1
         ip4: 10.10.0.1
         port: 80
-      - name: mg2
+      - hostname: mg2
         ip4: 10.10.0.2
         port: 80
 ```
@@ -233,13 +233,13 @@ haproxy_resources:
       port: 80
     local_ports_first: 8081
     servers:
-      - name: mg1
+      - hostname: mg1
         ip4: 10.10.0.1
         port: 80
-      - name: mg2
+      - hostname: mg2
         ip4: 10.10.0.2
         port: 80
-      - name: mg3
+      - hostname: mg3
         ip4: 10.10.0.3
         port: 80
 ```
