@@ -1,7 +1,7 @@
 ---
 dns_server_role_version: 1.7.3
 
-j2_dns_server_get_first_octets: "
+dns_server_j2_get_first_octets: "
 {%- set ip_networks = [] -%}
 {%- for host in (groups['all'] | sort) -%}
   {%- if hostvars[host]['network_interfaces'] is defined and hostvars[host]['network_interfaces'] is iterable -%}

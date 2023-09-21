@@ -104,7 +104,7 @@
     owner: root
     group: root
     mode: 0644
-  with_items: "{{ j2_dns_server_get_first_octets.split(',') }}"
+  with_items: "{{ dns_server_j2_get_first_octets.split(',') }}"
   tags:
     - template
 
@@ -116,7 +116,7 @@
     group: root
     mode: 0644
   notify: service <|> Restart dns services
-  with_items: "{{ j2_dns_server_get_first_octets.split(',') }}"
+  with_items: "{{ dns_server_j2_get_first_octets.split(',') }}"
   when: zoneconf.changed  # noqa no-handler
   tags:
     - template

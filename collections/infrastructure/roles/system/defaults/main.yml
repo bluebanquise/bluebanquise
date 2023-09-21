@@ -1,5 +1,5 @@
 ---
-generic_psf_packages: []
-generic_psf_services: []
-generic_psf_folders: []
-generic_psf_files: []
+system_packages: []
+system_services: []
+system_folders: []
+system_files: []

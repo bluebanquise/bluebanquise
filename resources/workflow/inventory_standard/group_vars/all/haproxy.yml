@@ -1,0 +1,13 @@
+haproxy_resources:
+  - type: http_simple
+    name: cluster1
+    bind:
+      ip4: 10.10.0.1
+      port: 80
+    servers:
+      - name: mg1
+        ip4: 10.10.0.1
+        port: 80
+      - name: mg2
+        ip4: 10.10.0.2
+        port: 80

@@ -95,7 +95,7 @@ zone "{{ octets.split('.') | reverse | join('.') }}.in-addr.arpa" IN {
 };
 {%- endmacro %}
 
-{% for ip_prefix in j2_dns_server_get_first_octets.split(',') %}
+{% for ip_prefix in dns_server_j2_get_first_octets.split(',') %}
 {{ create_reverse_zone(ip_prefix) }}
 {% endfor %}
 

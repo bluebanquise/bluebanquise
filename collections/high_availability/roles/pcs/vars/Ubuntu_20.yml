@@ -1,11 +1,11 @@
 ---
 
-high_availability_packages_to_install:
+pcs_packages_to_install:
   - pacemaker
   - corosync
   - pcs
   - fence-agents
   - resource-agents
 
-high_availability_resource_op_defaults_update: 'pcs resource op defaults'
-high_availability_resource_defaults_update: 'pcs resource defaults'
+pcs_resource_op_defaults_update: 'pcs resource op defaults'
+pcs_resource_defaults_update: 'pcs resource defaults'
