@@ -12,15 +12,15 @@
 
 ## Overview
 
-A role to manage Flexlm daemon and licence files.
+A role to manage Flexlm daemon and license files.
 
 This role will :
 * Create a specific user to launch daemon.
 * Set up a systemd service (flexlm-item.name).
 * Copy vendor daemon binaries to the host if source is specified.
-* Copy licence file to the host if source is specified.
+* Copy license file to the host if source is specified.
 * Create a symlink (/usr/tmp) to /tmp to avoid error (Ubuntu/Debian).
-* Create a symlinks to ld-linux librairies (Ubuntu/Debian).
+* Create a symlinks to ld-linux libraries (Ubuntu/Debian).
 
 This role is validated on:
 * RHEL / CentOS 7 & 8
@@ -33,7 +33,7 @@ This role is validated on:
 * **flexlm_deploy_state** : The desired state this role should achieve. [default : `present`].
 * **flexlm_user_name** : Username used to launch `lmgrd` [default : `flexlm`].
 * **flexlm_service_unit_content** : Template used to generate the previous file [default : `etc/systemd/system/flexlm.service.j2`].
-* **flexlm_licences** : Lists to manage vendor daemon and licence files [default : `[]`].
+* **flexlm_licenses** : Lists to manage vendor daemon and license files [default : `[]`].
 
 ## Example Playbook
 
@@ -43,36 +43,37 @@ This role is validated on:
 - hosts: intel-lm
   roles:
     - role: flexlm
-      flexlm_licences:
+      flexlm_licenses:
         - name: intel
-          description: 'flexlm Licence Manager for Intel'
+          description: 'flexlm license Manager for Intel'
           bin_path: '/opt/intel/bin'
-          lic_path: '/opt/intel/etc/licence.lic'
+          lic_path: '/opt/intel/etc/license.lic'
           lmgrd_path: '/opt/intel/bin/lmgrd'
 ```
 
-* Manage Flexlm to provide Matlab Licence and vendor daemon binaries :
+* Manage Flexlm to provide Matlab License and vendor daemon binaries :
 
 ```yaml
 - hosts: matlab-lm
   roles:
     - role: flexlm
-      flexlm_licences:
+      flexlm_licenses:
         - name: matlab
-          description: 'flexlm Licence Manager for Matlab'
+          description: 'flexlm license Manager for Matlab'
           bin_path: '/opt/matlab/bin'
           bin_src: '{{ inventory_dir + "/../resources/service/matlab-lm/bin/" }}'
-          lic_path: '/opt/matlab/etc/licence.lic'
-          lic_src: '{{ inventory_dir + "/../resources/host/matlab-lm.domain/etc/licence.lic" }}'
+          lic_path: '/opt/matlab/etc/license.lic'
+          lic_src: '{{ inventory_dir + "/../resources/host/matlab-lm.domain/etc/license.lic" }}'
           lmgrd_path: '/opt/matlab/bin/lmgrd'
 ```
 
 ## Known Issues
 
-* If a value of one licence change in **flexlm_licences** var, all services will be restarted.
+* If a value of one license change in **flexlm_licenses** var, all services will be restarted.
 
 ## Changelog
 
+* 1.0.3: Fix grammar. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.2: Fix few packages names. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.1: Update all module to full path. Matthieu Isoard
 * 1.0.0: Initial support. Matthieu Isoard

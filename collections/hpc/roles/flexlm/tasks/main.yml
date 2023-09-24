@@ -56,7 +56,7 @@
     - configure
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
-# Vendor and licence
+# Vendor and license
 - name: flexlm <|> Add Vendor daemon
   ansible.builtin.copy:
     src: '{{ item.bin_src }}'
@@ -64,7 +64,7 @@
     owner: '{{ flexlm_user_name }}'
     group: '{{ flexlm_user_name }}'
     mode: 0754
-  loop: "{{ flexlm_licences | flatten }}"
+  loop: "{{ flexlm_licenses | flatten }}"
   when: (item.bin_src|d())
   notify: ['restart flexlm services']
   tags:
@@ -75,21 +75,21 @@
     path: "{{ item.lic_path | basename }}"
     state: directory
     mode: '0755'
-  loop: "{{ flexlm_licences | flatten }}"
+  loop: "{{ flexlm_licenses | flatten }}"
   when:
     - (item.lic_src|d())
     - item.lic_path
   tags:
     - configure
 
-- name: flexlm <|> Add licence file
+- name: flexlm <|> Add license file
   ansible.builtin.copy:
     src: '{{ item.lic_src }}'
     dest: '{{ item.lic_path }}'
     owner: '{{ flexlm_user_name }}'
     group: '{{ flexlm_user_name }}'
     mode: 0640
-  loop: "{{ flexlm_licences | flatten }}"
+  loop: "{{ flexlm_licenses | flatten }}"
   when:
     - (item.lic_src|d())
     - item.lic_path
@@ -106,7 +106,7 @@
     owner: 'root'
     group: 'root'
     mode: '0644'
-  loop: "{{ flexlm_licences | flatten }}"
+  loop: "{{ flexlm_licenses | flatten }}"
   when: ( (flexlm_deploy_state == "present") and
         ( item.service | d(true) ))
   notify: ['systemd daemon reload', 'restart flexlm services']
@@ -118,6 +118,6 @@
     name: '{{ "flexlm-" + item.name }}'
     state: '{{ "started" if (flexlm_deploy_state == "present" and (item.service | d(true) | bool)) else "stopped" }}'
     enabled: '{{ item.service | d(true) | bool }}'
-  loop: "{{ flexlm_licences | flatten }}"
+  loop: "{{ flexlm_licenses | flatten }}"
   tags:
     - service

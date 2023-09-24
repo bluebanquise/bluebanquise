@@ -5,7 +5,7 @@
     name: '{{ "flexlm-" + item.name }}'
     state: '{{ "restarted" if (flexlm_deploy_state == "present" and (item.service | d(True) | bool)) else "stopped" }}'
     enabled: '{{ item.service | d(True) | bool }}'
-  loop: "{{ flexlm_licences | flatten }}"
+  loop: "{{ flexlm_licenses | flatten }}"
   when:
     - "'service' not in ansible_skip_tags"
     - (start_services | bool)
