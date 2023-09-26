@@ -1,6 +1,15 @@
-# BlueBanquise CORE inventory data model reference 1.0.0
+# BlueBanquise CORE inventory data model reference 2.0.0
 
-This data model is frozen, and should evolve only if major need.
+## Introduction
+
+This data model explains how core inventory data are expected by most of BlueBanquise roles.
+To ease roles usage, this data model is splitted into sections. Each role uses none, a part, or all sections of this data model. Refer to roles' README.md files to know which sections should be considered.
+
+All roles also have dedicated variables, detailed in each roles' README.md file.
+
+## Notes before reading
+
+This data model is frozen, and should evolve only if major need or when BlueBanquise evoles to a new major version.
 
 Notes:
 
@@ -9,19 +18,52 @@ Notes:
 * When variable is a list, this will be specified by `[]`.
 * When a dictionary can repeat itself (with other data), `...` are added.
 
-## Groups
+## Section 1: Networks
 
-Each host must be member of at least a unique *master_group* (default prefix is `mg_`) and
-a unique *equipment_profile* group (default prefix is `equipment_`) **children of
-this master_group**.
+Networks are defined as followed:
 
-Note: if these requirements are achieved, system administrator is free to manage
-groups the way desired.
+```yaml
+networks:
+  net-admin:
+    prefix: 16
+    subnet: 10.10.0.0
+    services:
+      dns:
+        - ip4: 10.10.0.2
+          hostname: mg1-dns
+        ...
+      pxe:
+        - ip4: 10.10.0.1
+          hostname: mg1-pxe
+      ntp:
+        - ip4: 10.10.0.4
+          hostname: mg1-ntp
+      ...
+  interconnect:
+    prefix: 16
+    subnet: 10.20.0.0
+  ...
+```
 
-In case of multi-icebergs configuration, each host must also be a member of an
-iceberg group (default prefix is `iceberg`).
+When the network name starts by `net-` then it is considered a **management network**, and has special consideration. Other networks are considered simple networks.
 
-## Available variables for each host (hostvars level)
+When a network is a management network, services linked to this network are added under `services` key. Each service kind is a list, and so can accept multiple entries (multiple DNS servers for example).
+
+Note that when a cluster is small and has a single management server, then a *magic* key `services_ip` can be set instead of `services`, and will make all services to converge to this unique ip.
+
+Example:
+
+```yaml
+networks:
+  net-admin:
+    prefix: 16
+    subnet: 10.10.0.0
+    services_ip: 10.10.0.1
+```
+
+Note that some roles supports more keys in networks definition. Data given here are core minimal.
+
+## Section 2: Available variables for each host (hostvars level)
 
 These variables are optional. Using them depend of Ansible roles used.
 
@@ -101,6 +143,20 @@ readme.
 Note that in interfaces list, the first one in the list is hostname resolution
 interface, and first one connected to an administration network (iceX-Y) is
 default ssh interface from managements (Ansible is using ssh to push).
+
+
+## Section 2 : Groups
+
+Each host must be member of at least a unique *master_group* (default prefix is `mg_`) and
+a unique *equipment_profile* group (default prefix is `equipment_`) **children of
+this master_group**.
+
+Note: if these requirements are achieved, system administrator is free to manage
+groups the way desired.
+
+In case of multi-icebergs configuration, each host must also be a member of an
+iceberg group (default prefix is `iceberg`).
+
 
 ## To be defined at group_vars/equipment_profiles group level
 
