@@ -18,6 +18,8 @@ Notes:
 * When variable is a list, this will be specified by `[]`.
 * When a dictionary can repeat itself (with other data), `...` are added.
 
+Last but not least, note that `j2_` variables that contains the stack core logic are provided either by the vars plugin core.py in common collection, either by adding the provided `bb_core.yml` file into your `group_vars/all/` inventory folder.
+
 ## Section 1: Networks
 
 Networks are defined as followed:
@@ -63,7 +65,33 @@ networks:
 
 Note that some roles supports more keys in networks definition. Data given here are core minimal.
 
-## Section 2: Available variables for each host (hostvars level)
+## Section 2: Hosts (nodes) definition
+
+Hosts network connections must be defined the following way:
+
+```yaml
+all:
+  hosts:
+    node001:
+      # Host NIC configuration
+      network_interfaces:
+        - interface: eth1
+          ip4: 10.10.3.1
+          mac: 08:00:27:0d:44:90
+          network: net-admin
+        - interface: eth0
+          skip: true
+        - interface: ib0
+          ip4: 10.20.3.1
+          network: interconnect
+          type: infiniband
+```
+
+More parameters are available for each network interface, see `nic` role README.md file for more details.
+
+**Important:** note that in interfaces list, the first one in the list is hostname resolution
+interface, and first one connected to an administration network (net-XXXXX) is
+default ssh interface from managements (Ansible is using ssh to push). As a result, resolution ip and ssh ip can be the same, or different.
 
 These variables are optional. Using them depend of Ansible roles used.
 
@@ -137,12 +165,7 @@ These variables are optional. Using them depend of Ansible roles used.
       ...
 ```
 
-More parameters are available for each network interface, see nic_nmcli role
-readme.
 
-Note that in interfaces list, the first one in the list is hostname resolution
-interface, and first one connected to an administration network (iceX-Y) is
-default ssh interface from managements (Ansible is using ssh to push).
 
 
 ## Section 2 : Groups
