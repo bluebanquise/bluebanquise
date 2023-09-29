@@ -4,6 +4,12 @@
 
 This role provides a basic /etc/hosts files.
 
+## Data Model
+
+This role relies on [data model](https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md):
+* Section 1 (Networks)
+* Section 2 (Hosts definition)
+
 ## Instructions
 
 This role will gather all hosts from the inventory, and add them, using all

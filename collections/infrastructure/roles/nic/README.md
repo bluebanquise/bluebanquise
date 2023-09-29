@@ -2,6 +2,12 @@
 
 **WARNING!** Always keep in mind that using this role, you could lose connection! Always have a backup way to reach the system.
 
+## Data Model
+
+This role relies on [data model](https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md):
+* Section 1 (Networks)
+* Section 2 (Hosts definition)
+
 ## Description
 
 This role configure network interfaces to provide desired ip, prefix, gateway, etc.

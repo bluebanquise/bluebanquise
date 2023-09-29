@@ -14,6 +14,12 @@
 
 This role provides an rsyslog configuration, for both server and client.
 
+## Data Model
+
+This role relies on [data model](https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md):
+* Section 1 (Networks)
+* Section 2 (Hosts definition)
+
 ## Instructions
 
 ### Server or client

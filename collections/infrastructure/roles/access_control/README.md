@@ -1,5 +1,10 @@
 # Access control
 
+## Data Model
+
+This role relies on [data model](https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md):
+* Section 3.2 (Equipment Groups)
+
 ## Description
 
 This role ensure the node current status comply with

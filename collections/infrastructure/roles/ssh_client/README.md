@@ -5,6 +5,12 @@
 This role configures the ssh access of inventory known hosts to ensure ssh
 access through nodes main network.
 
+## Data Model
+
+This role relies on [data model](https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md):
+* Section 1 (Networks)
+* Section 2 (Hosts definition)
+
 ## Instructions
 
 Note that this file generation is kind of "sensible", and will surely be the

@@ -5,6 +5,14 @@
 This role provides a standard and simple dhcp server combined with the iPXE roms of BlueBanquise.
 It should be enough for most networks.
 
+## Data Model
+
+This role relies on [data model](https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md):
+* Section 1 (Networks)
+* Section 2 (Hosts definition)
+* Section 3.1 (Managements Groups)
+* Section 3.2 (Equipment Groups)
+
 ## Instructions
 
 ### Basic usage
