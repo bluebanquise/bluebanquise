@@ -1,6 +1,15 @@
-# BlueBanquise CORE inventory data model reference 1.0.0
+# BlueBanquise CORE inventory data model reference 2.0.0
 
-This data model is frozen, and should evolve only if major need.
+## Introduction
+
+This data model explains how core inventory data are expected by most of BlueBanquise roles.
+To ease roles usage, this data model is splitted into sections. Each role uses none, a part, or all sections of this data model. Refer to roles' README.md files to know which sections should be considered.
+
+All roles also have dedicated variables, detailed in each roles' README.md file.
+
+## Notes before reading
+
+This data model is frozen, and should evolve only if major need or when BlueBanquise evolves to a new major version.
 
 Notes:
 
@@ -9,102 +18,126 @@ Notes:
 * When variable is a list, this will be specified by `[]`.
 * When a dictionary can repeat itself (with other data), `...` are added.
 
-## Groups
+Last but not least, note that `j2_` variables that contains the stack core logic are provided either by the vars plugin core.py in common collection, either by adding the provided `bb_core.yml` file into your `group_vars/all/` inventory folder.
 
-Each host must be member of at least a unique *master_group* (default prefix is `mg_`) and
-a unique *equipment_profile* group (default prefix is `equipment_`) **children of
-this master_group**.
+## Section 1: Networks
 
-Note: if these requirements are achieved, system administrator is free to manage
-groups the way desired.
-
-In case of multi-icebergs configuration, each host must also be a member of an
-iceberg group (default prefix is `iceberg`).
-
-## Available variables for each host (hostvars level)
-
-These variables are optional. Using them depend of Ansible roles used.
+Networks are defined as followed:
 
 ```yaml
-  # Alias, included in hosts_file
-  global_alias: []         # Global alias is present on all icebergs
-  alias: []                # Alias is present inside host iceberg
-
-  # BMC configuration
-  bmc:
-    name:                      # BMC name
-    ip4:                       # BMC ip4
-    mac:                       # BMC mac or/and dhcp_client_identifier or/and host_identifier or/and match
-    dhcp_client_identifier:
-    host_identifier:
-    match:
-    network:                   # BMC logical network
-
-  # Host NIC configuration
-  network_interfaces:          # Example
-    - interface: eth1
-      ip4: 10.10.3.1
-      mac: 08:00:27:0d:44:90
-      network: ice1-1
-    - interface: eth0
-      ip4: 10.11.3.1
-      mac: 08:00:27:0d:44:91   # interface mac or/and dhcp_client_identifier or/and host_identifier or/and match
-      network: ice1-2
-      dhcp_client_identifier:
-      host_identifier:
-      match:
-      gw4:
-      mtu:
-    - interface: eth2
-      ip4: 10.10.0.1/16,10.10.0.2/16  # Multiple ip possible
-      network: ice1-1
-    - interface: bond0
-      ip4: 10.10.0.1
-      network: ice1-1
-      type: bond
-    - interface: eth3
-      type: bond-slave
-      master: bond0
-    - interface: eth4
-      type: bond-slave
-      master: bond0
-    - interface: eth2.100
-      type: vlan
-      vlanid: 100
-      vlandev: eth2
-      ip4: 10.100.0.1
-      network: net-100
-    - interface: enp0s8
-      ip4: 10.10.0.1
-      mac: 08:00:27:36:c0:ac
-      network: ice1-1
-      routes4:
-        - 10.11.0.0/24 10.10.0.2
-        - 10.12.0.0/24 10.10.0.2 300
-
-  # Host LVM configuration
-  lvm:
-    vgs:
-      - vg:
-        pvs: []
+networks:
+  net-admin:
+    prefix: 16
+    subnet: 10.10.0.0
+    services:
+      dns:
+        - ip4: 10.10.0.2
+          hostname: mg1-dns
+        ...
+      pxe:
+        - ip4: 10.10.0.1
+          hostname: mg1-pxe
+      ntp:
+        - ip4: 10.10.0.4
+          hostname: mg1-ntp
       ...
-    lvs:
-      - lv:
-        size:
-        vg:
-      ...
+  interconnect:
+    prefix: 16
+    subnet: 10.20.0.0
+  ...
 ```
 
-More parameters are available for each network interface, see nic_nmcli role
-readme.
+When the network name starts by `net-` then it is considered a **management network**, and has special consideration. Other networks are considered simple networks.
 
-Note that in interfaces list, the first one in the list is hostname resolution
-interface, and first one connected to an administration network (iceX-Y) is
+When a network is a management network, services linked to this network are added under `services` key. Each service kind is a list, and so can accept multiple entries (multiple DNS servers for example).
+
+Note that when a cluster is small and has a single management server, then a *magic* key `services_ip` can be set instead of `services`, and will make all services to converge to this unique ip.
+
+Example:
+
+```yaml
+networks:
+  net-admin:
+    prefix: 16
+    subnet: 10.10.0.0
+    services_ip: 10.10.0.1
+```
+
+Note that some roles supports more keys in networks definition. Data given here are core minimal.
+
+## Section 2: Hosts (nodes) definition
+
+Hosts network connections must be defined the following way:
+
+```yaml
+all:
+  hosts:
+    node001:
+      network_interfaces:
+        - interface: eth1
+          ip4: 10.10.3.1
+          mac: 08:00:27:0d:44:90
+          network: net-admin
+        - interface: eth0
+          skip: true
+        - interface: ib0
+          ip4: 10.20.3.1
+          network: interconnect
+          type: infiniband
+```
+
+More parameters are available for each network interface, see `nic` role README.md file for more details. Example given here is the bare minimum for roles to identify host.
+
+**Important:** note that in interfaces list, the first one in the list is hostname resolution
+interface, and first one connected to an administration network (net-XXXXX) is
 default ssh interface from managements (Ansible is using ssh to push).
+As a result, resolution ip and ssh ip can be the same, or different.
 
-## To be defined at group_vars/equipment_profiles group level
+If you need to define a server BMC, use the following format:
 
-### equipment_profiles
+```yaml
+all:
+  hosts:
+    node001:
+      bmc:
+        name: node001-bmc
+        ip4: 10.10.103.1
+        mac: 08:00:27:0d:44:91
+        network: net-admin
+      network_interfaces:
+        - interface: eth1
+          ip4: 10.10.3.1
+          mac: 08:00:27:0d:44:90
+          network: net-admin
+        - interface: eth0
+          skip: true
+        - interface: ib0
+          ip4: 10.20.3.1
+          network: interconnect
+          type: infiniband
+```
+
+Some roles like dhcp_server, hosts_file, conman, powerman, etc., can identify hosts BMC using these data.
+
+
+## Section 3: Groups
+
+System admininstrator is free to create Ansible groups as needed. However, some specific groups are to be taken into account.
+
+### 3.1: managements group
+
+Admininstration/management servers must be member of the Ansible group `mg_managements`, to be identified as management servers.
+
+### 3.2: equipments groups
+
+Except for very simple clusters with fully hotorogenous equipment, hosts must be members of an equipment Ansible group.
+
+An equipment group is always prefixed by `equipment_`. Each equipment group possess variables that define the specific hardware/OS related parameters of its members.
+For example, in a cluster with 2 kind of servers (lets say supermicro A and gigabyte B), there will probably be 2 equipment groups: `equipment_supermicro_A` and `equipment_gigabyte_B`.
+
+Many roles use equipment groups, the main one being pxe_stack role.
+
+Example of variables stored in equipment groups:
 
 ```yaml
 ep_ipxe_driver: {default|snp|snponly}
@@ -127,8 +160,8 @@ ep_autoinstall_post_script:
 ep_operating_system:
   distribution:
   distribution_major_version:
-  distribution_version:              # Optional: define a minor distribution version to force (repositories/PXE)
-  repositories_environment:          # Optional: add an environment in the repositories path (eg. production, staging) (repositories/PXE)
+  distribution_version:      # Optional: define a minor distribution version to force (repositories/PXE)
+  repositories_environment:  # Optional: add an environment in the repositories path (eg. production, staging) (repositories/PXE)
 
 ep_equipment_type: {server|...}
 
@@ -145,162 +178,23 @@ ep_hardware:
     threads_per_core:
   gpu:
 
-ep_equipment_authentication:
-  user:
-  password:
-```
-
-### Authentication
-
-```yaml
-authentication_root_password_sha512:
-authentication_ssh_keys: []
-```
-
-## To be defined at group_vars/all group level
-
-### General
-
-```yaml
-cluster_name:
-
-time_zone:
-
-icebergs_system: {true|false}
-
-enable_services: {true|false}
-start_services: {true|false}
-
-hosts_file:
-  range: {all|iceberg}
-```
-
-### Network
-
-```yaml
-domain_name:
-
-networks:
-
-  ice1-1:
-    subnet:
-    prefix:
-    netmask:
-    broadcast:
-    dhcp_unknown_range: 10.10.254.1 10.10.254.254
-    gateway:
-    is_in_dhcp: {true|false}
-    is_in_dns: {true|false}
-    services_ip:
-      pxe_ip:
-      dns_ip:
-      repository_ip:
-      authentication_ip:
-      slurm_ip:
-      monitoring_ip:
-      time_ip:
-      log_ip:
-
-  ...
-```
-
-### Security
-
-```yaml
-security:
-  ssh:
-    hostkey_checking: {true|false}
-```
-
-### Repositories
-
-repositories: []
-
-### External integration
-
-```yaml
-external_time:
-  time_server:
-    pool: []
-    server: []
-  time_client:
-    pool: []
-    server: []
-
-external_dns:
-  dns_server: []
-  dns_client: []
-
-external_hosts:
-  hostname: ip
-  ...
-```
-
-### Network File System
-
-```yaml
-nfs_settings:
-  selinux:
-    use_nfs_home_dirs: {true|false}
-
-nfs:
-  softwares:
-    mount:
-    export:
-    server:
-    clients_groups: []
-    take_over_network:
-    export_arguments:
-    mount_arguments:
-  ...
-```
-
-### Internal variables
-
-```yaml
-iceberg_naming:
-equipment_naming:
-management_networks_naming:
-master_groups_naming:
-managements_group_name:
-```
-
-## Advanced usage
-
-### j2_ available variables
-
-These are internal stack variables, for developers only.
-
-```yaml
-j2_master_groups_list: List of master groups.
-j2_equipment_groups_list: List of equipment groups.
-
-j2_icebergs_groups_list: List of icebergs groups.
-j2_number_of_icebergs: Total number of icebergs.
-j2_current_iceberg: Iceberg host is member of. (only one) (icebergX)
-j2_current_iceberg_number: Iceberg number host is member of. (X)
-j2_current_iceberg_network: Iceberg network host is member of (iceX)
-
-j2_node_main_resolution_network: Main resolution network. The network on which host can be ping by direct name. (ex: ping c001).
-j2_node_main_network: Main network. The network used by Ansible to deploy configuration (related to ssh).
-j2_node_main_network_interface: Main network interface. Same as main network, but provides interface name instead of network.
-j2_management_networks: List of management networks.
-```
-
-## Next version (2.0.0)
-
-* Support for externaly defined bmc
-* Support for `ep_host_authentication` variable. `ep_equipment_authentication` deprecated and removed.
-
-```
-ep_host_authentication:
-  - protocol: SNMP
-    user: snmpuser
-    password: snmppass
-  - protocol: SSH
-    user: sshuser
-    password: sshpass
+ep_host_authentication:  # Authentication to BMC
   - protocol: IPMI
     user: ADMIN
     password: ADMIN
 ```
+
+### 3.3: icebergs groups
+
+These groups are for advanced clusters, using multiple icebergs mechanism. If not using icebergs, please ignore this part.
+
+In case of multi-icebergs configuration, each host must also be a member of an
+iceberg group (default prefix is `iceberg`).
+
+Also, management networks must be prefixed by `netX-` with `X` being the iceberg number.
+
+## Section 4: Global variables
+
+There are few global variables that can be shared by roles. Note that if not set, roles will use their own dedicated variables.
+
+* `bb_domain_name`: set a global domain name for the whole cluster.

@@ -4,6 +4,11 @@
 
 This role apply/update kernel parameters and sysctl parameters.
 
+## Data Model
+
+This role relies on [data model](https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md):
+* Section 3.2 (Equipment Groups)
+
 ## Instructions
 
 ### kernel parameters

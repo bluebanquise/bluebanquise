@@ -5,6 +5,14 @@
 This role provides the whole PXE stack needed to deploy computers over the network (assuming coupled with a dhcp server).
 This role is one of the major role of the BlueBanquise project.
 
+## Data Model
+
+This role relies on [data model](https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md):
+* Section 1 (Networks)
+* Section 2 (Hosts definition)
+* Section 3.1 (Managements Groups)
+* Section 3.2 (Equipment Groups)
+
 ## Quick start
 
 This quick start assume an x86_64 system booting over EFI PXE.
