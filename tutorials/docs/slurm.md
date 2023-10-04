@@ -2,17 +2,16 @@
 
 It is assumed here that you already deployed a generic cluster of nodes (see [dedicated tutorial]())
 
-### 3.4. Computational resources management
+## Vocabulary
 
-The **job scheduler** is the conductor of computational resources of the cluster.
+The **job scheduler** is the conductor of computational resources of the cluster. We will use here the Slurm open source jobs scheduler.
 
 A **job** is a small script, that contains instructions on how to execute the calculation program, and that also contains information for to the job scheduler (required job duration, how much resources are needed, etc.).
 When a user ask the job scheduler to execute a **job**, which is call **submitting a job**, the job enter **jobs queue**.
 The job scheduler is then in charge of finding free computational resources depending of the needs of the job, then launching the job and monitoring it during its execution. Note that the job scheduler is in charge of managing all jobs to ensure maximum usage of computational resources, which is why sometime, the job scheduler will put some jobs on hold for a long time in a queue, to wait for free resources.
 In return, after user has submitted a job, the job scheduler will provide user a **job ID** to allow following job state in the jobs queue and during its execution.
 
-
-## 8. Slurm
+## Build packages
 
 Let's install now the cluster job scheduler, Slurm.
 
@@ -58,9 +57,9 @@ Tip: if anything goes wrong with slurm, proceed as following:
 
 1. Ensure time is exactly the same on nodes. If time is different, munge based authentication will fail.
 2. Ensure munge daemon is started, and that munge key is the same on all hosts (check md5sum for example).
-3. Stop slurmctld and stop slurmd daemons, and start them in two different shells manually in debug + verbose mode: `slurmctld -D -vvvvvvv` in shell 1 on controller server, and `slurmd -D -vvvvvvv` in shell 2 on compute node.
+3. Stop slurmctld and stop slurmd daemons, and start them in two different shells manually in debug + verbose mode: `slurmctld -D -vvvvvvv` in shell 1 on controller server, and `slurmd -D -vvvvvvv` in shell 2 on compute node. Output should help you understand the issue.
 
-### 8.1. Controller
+## Controller
 
 Install munge needed packages:
 
@@ -135,7 +134,7 @@ SchedulerType=sched/backfill
 SelectType=select/linear
 
 ## Nodes definition
-NodeName=valkyrie01 Procs=1
+NodeName=valkyrie01 Procs=1  # Add more procs if your node have more CPU cores
 NodeName=valkyrie02 Procs=1
 
 ## Partitions definition
@@ -156,9 +155,9 @@ systemctl start slurmctld
 systemctl enable slurmctld
 ```
 
-Using `sinfo` command, you should now see the cluster start, with both computes nodes down for now.
+Using `sinfo` command, you should now see the cluster started, with both computes nodes down for now.
 
-### 8.2. Computes nodes
+## Computes nodes
 
 On both `valkyrie01,valkyrie02` nodes, install munge the same way than on controller.
 
@@ -214,7 +213,7 @@ And simply test cluster works:
 scontrol update nodename=valkyrie01,valkyrie02 state=idle
 ```
 
-Now, sinfo shows that one node is idle, and srun allows to launch a basic job:
+Now, sinfo shows that one or two node are idle, and srun allows to launch a basic job:
 
 ```
 [root@odin ~]# sinfo
@@ -226,17 +225,17 @@ valkyrie01.cluster.local
 [root@odin ~]#
 ```
 
-### 8.3. Submitter
+## Submitter
 
 Last step to deploy slurm is to install the login node, `heimdall`, that will act as
-a submitter.
+a submitter. Uses should submit jobs from here.
 
 A slurm submitter only need configuration files, and an active munge.
 
 Install munge the same way than on controller.
 
 ```
-dnf install munge
+dnf install munge -y
 ```
 
 Ensure munge key generated on controller node is spread here:
@@ -269,7 +268,7 @@ Nothing to start here, you can test `sinfo` command from `heimdall` to ensure it
 
 Slurm cluster is now ready.
 
-### 8.4. Submitting jobs
+## Submitting jobs
 
 To execute calculations on the cluster, users will rely on Slurm to submit jobs and get calculation resources.
 Submit commands are `srun` and `sbatch`.
@@ -299,7 +298,7 @@ Here, we will see the following submittion ways:
 5. Submitting an MPI job script
 6. A real life example with submitting a 3D animation render on a cluster combining Blender and Slurm arrays.
 
-#### 8.4.1. Submitting without a script
+### Submitting without a script
 
 It is possible to launch a very simple job without a script, using the `srun` command. To do that, use `srun` directly, specifying the number of nodes required. For example:
 
@@ -322,7 +321,7 @@ valkyrie02
 
 Using this method is a good way to test cluster, or compile code on compute nodes directly, or just use the compute and memory capacity of a node to do simple tasks on it.
 
-#### 8.4.2. Basic job script
+### Basic job script
 
 To submit a basic job scrip, user needs to use `sbatch` command and provides it a script to execute which contains at the beginning some Slurm information.
 
@@ -383,7 +382,7 @@ squeue -u myuser
 
 In this example, execution results will be written by Slurm into `myjob.out.91487` and `myjob.err.91487`.
 
-#### 8.4.3. Serial job
+### Serial job
 
 To launch a very basic serial job, use the following template as a script for `sbatch`:
 
@@ -408,7 +407,7 @@ date
 echo "############### "
 ```
 
-#### 8.4.4. OpenMP job
+### OpenMP job
 
 To launch an OpenMP job (with multithreads), assuming the code was compiled with openmp flags, use:
 
@@ -440,7 +439,7 @@ echo "############### "
 
 Note that it is assumed here that a node has 24 cores.
 
-#### 8.4.5. MPI job
+### MPI job
 
 To submit an MPI job, assuming the code was parallelized with MPI and compile with MPI, use (note the `srun`, replacing the `mpirun`):
 
@@ -467,7 +466,7 @@ echo "############### "
 
 `srun` will act as `mpirun`, but providing automatically all already tuned arguments for the cluster.
 
-#### 8.4.6. Real life example with Blender job
+### Real life example with Blender job
 
 Blender animations/movies are render using CPU and GPU. In this tutorial, we will focus on CPU since we do not have GPU (or if you have, lucky you).
 
@@ -544,7 +543,7 @@ sbatch --array=1-8 /home/blender_job.job
 If all goes well, using `squeue` command, you should be able to see the jobs currently running, and the ones currently pending for resources.
 
 You can follow jobs by watching their job file (refreshed by Slurm regularly).
-And after few seconds/minutes depending of your hardware, you should see first animation frames as PNG images in /home folder.
+And after few seconds/minutes depending of your hardware, you should see first animation frames as PNG images in /home folder. You can use any kind of image/movie tool to generate a movie from these images.
 
 ![Animation](resources/animation.gif)
 

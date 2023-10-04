@@ -1,8 +1,32 @@
-site_name: BlueBanquise - Tutorials
+site_name: BlueBanquise - Generic tutorials
 
 #markdown_extensions:
 #  - pymdownx.highlight:....
 
 nav:
     - Home: index.md
-    - Servers farm system administration: servers_farm_system_administration.md
+    - Clusters system administration:
+        - Servers farm deployment: servers_farm_deployment.md
+        - Ansible: ansible.md
+    - High Performance Computing:
+        - Slurm: slurm.md
+    - Kubernetes:
+        - kubernetes.md
+    #- Datacenters and infrastructure:
+
+theme:
+  name: material
+  palette:
+    scheme: slate
+    primary: lime
+  icon:
+    repo: fontawesome/brands/github
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.expand
+    - navigation.path
+    - header.autohide
+    - navigation.footer
+repo_url: https://github.com/bluebanquise/bluebanquise
+repo_name: Bluebanquise github

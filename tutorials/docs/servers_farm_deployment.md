@@ -1,4 +1,4 @@
-# Servers farm system administration
+# Servers farm deployment
 
 This tutorial tries to teach how to install manually a basic **servers farm**, also called a **cluster**.
 
@@ -140,7 +140,7 @@ On the hardware side:
 
 * One master node called `odin`.
 * One storage node called `thor`, based one NFS, will be deployed, for /home and /software.
-* One login node called `heimdall` for users to login.
+* One external/internal node called `heimdall` for users to login or/and to act as a gateway.
 * Multiple compute nodes, called `valkyries` will then be deployed on the fly via PXE.
 
 This architecture is similar to HPC clusters, but is very generic. A web farm would replace the login node by a gateway or a load balancer, a Blender rendering farm would just skip the login node, etc.
