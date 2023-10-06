@@ -7,11 +7,19 @@ All software used are very common and when facing an error, a quick look on the
 web will most of the time solves the issue.
 
 If you face any issues with this tutorial, do not hesitate to contact me at:
-contact@bluebanquise.com
+`contact@bluebanquise.com`
 
-Important note: this tutorial is based on EL 9 OS (RHEL 9, RockyLinux 9, AlmaLinux 9, etc).
+<div class="comment-tile">
+    <div class="comment-tile-image">
+        <img src="/images/global/Zohar.png" alt="Image Description" width="96" height="96">
+    </div>
+    <div class="comment-tile-text">
+        <p>This tutorial is based on EL 9 OS (RHEL 9, RockyLinux 9, AlmaLinux 9, etc).
 Most of the configurations provided here are portable on other distributions (Ubuntu, Debian, Open Suse).
-In annexes, I will detail how to port this to other distributions.
+In annexes, I will detail how to port this to other distributions.</p>
+    </div>
+</div>
+
 
 ## 1. Hardware requirements
 
@@ -53,7 +61,7 @@ IPMI commands for remote control :
 * Control power (`reset` can be replaced with `soft` or `cycle` or `off` or `on` or `status`) : `ipmitool -I lanplus -H bmc5 -U user -P password chassis power reset`
 * Activate remote console (use `Enter`, then `&` then `.` to exit) : `ipmitool -H bmc5 -U user -P password -I lanplus -e \& sol activate`
 
-More: https://support.pivotal.io/hc/en-us/articles/206396927-How-to-work-on-IPMI-and-IPMITOOL
+More: [IPMI tool how to](https://support.pivotal.io/hc/en-us/articles/206396927-How-to-work-on-IPMI-and-IPMITOOL)
 
 Note: when using sol activate, if keyboard does not work, try using the same command into a screen, this may solve the issue (strangely...).
 
@@ -79,7 +87,7 @@ Few words on vocabulary used:
   * A pet node is a key node, that you MUST keep healthy and that is considered difficult to reinstall.
   * A cattle node, is a "trashable" node, that you consider non vital to production and that is considered easy to reinstall.
 
-![Pets and cattle](resources/hpc-meta.jpg)
+![Pets and cattle](images/servers_farm_deployment/sysadmin.jpg)
 
 (Original black and white image from Roger Rössing, otothek_df_roe-neg_0006125_016_Sch%C3%A4fer_vor_seiner_Schafherde_auf_einer_Wiese_im_Harz.jpg)
 
@@ -126,7 +134,14 @@ As said above, management node host multiple basic services needed to run the cl
 * The **job scheduler** server (if specializing cluster to HPC): manage computational resources, and spread jobs from users on the cluster. Service is `slurmctld` (Slurm).
 * The **monitoring** server: monitor the cluster to provide metrics, and raise alerts in case of issues. Service is `prometheus` (Prometheus).
 
-Small tip: never neglect monitoring, especially during cluster deployment. An healty cluster makes an happy admin, able to play strategy games while the cluster is purring...
+<div class="comment-tile">
+    <div class="comment-tile-image">
+        <img src="/images/global/Zohar.png" alt="Image Description" width="96" height="96">
+    </div>
+    <div class="comment-tile-text">
+        <p>Small tip: never neglect monitoring, especially during cluster deployment. An healty cluster makes an happy admin, able to play strategy games while the cluster is purring...</p>
+    </div>
+</div>
 
 ## 4. Cluster description
 
@@ -134,7 +149,7 @@ Small tip: never neglect monitoring, especially during cluster deployment. An he
 
 The cluster structure for this training will be as follows:
 
-![Pets and cattle](pictures/cluster_schema.svg)
+![Cluster architecture](images/servers_farm_deployment/cluster_schema.svg)
 
 On the hardware side:
 
@@ -204,7 +219,14 @@ hostnamectl set-hostname odin.cluster.local
 To start most services, we need the main NIC to be up and ready with an ip.
 We will use **NetworkManager** to handle network. `nmcli` is the command to interact with NetworkManager.
 
-Note about NetworkManager: some say its bad, some say its good. It depends of admin tastes. Use it if you feel confortable with it, or use systemd-networkd if you prefer. Best idea to me is to use what is default on the system: NetworkManager on RHEL like distributions and Suse, systemd-networkd on Ubuntu and Debian
+<div class="comment-tile">
+    <div class="comment-tile-image">
+        <img src="/images/global/Zohar.png" alt="Image Description" width="96" height="96">
+    </div>
+    <div class="comment-tile-text">
+        <p>Note about NetworkManager: some say its bad, some say its good. It depends of admin tastes. Use it if you feel confortable with it, or use systemd-networkd if you prefer. Best idea to me is to use what is default on the system: NetworkManager on RHEL like distributions and Suse, systemd-networkd on Ubuntu and Debian.</p>
+    </div>
+</div>
 
 Assuming main NIC name is `enp0s8`, to set `10.10.0.1/16` IP and subnet on it, use the following commands:
 
@@ -445,7 +467,14 @@ Note: also add your server's BMC if any.
 
 Finally, start and enable the dhcp service:
 
-WARNING: only enable the DHCP service if you are on an isolated network, as in opposite to the other services, it may disturb the network if another DHCP is on this network.
+<div class="comment-tile">
+    <div class="comment-tile-image">
+        <img src="/images/global/Zohar.png" alt="Image Description" width="96" height="96">
+    </div>
+    <div class="comment-tile-text">
+        <p>&#x26A0; WARNING &#x26A0;: only enable the DHCP service if you are on an isolated network, as in opposite to the other services, it may disturb the network if another DHCP is on this network.</p>
+    </div>
+</div>
 
 ```
 systemctl enable dhcpd
@@ -713,6 +742,15 @@ The http server will distribute the minimal kernel and initramfs for remote Linu
 
 Note that the AlmaLinux already embed a very basic tftp server. But it cannot handle a huge cluster load, and so we replace it by the Facebook python based tftp server.
 
+<div class="comment-tile">
+    <div class="comment-tile-image">
+        <img src="/images/global/Zohar.png" alt="Image Description" width="96" height="96">
+    </div>
+    <div class="comment-tile-text">
+        <p>PXE is the most tricky part, as you will face all possible issues: hardware issues, bad cabling, firewalls, Vlans issues, stupid BIOS or BMCs, etc. Always try with a very simple network (flat, no vlans, no firewalls), and ensure you can deploy OS before complexify and secure the cluster and the network.</p>
+    </div>
+</div>
+
 #### 5.6.1. fbtftp module
 
 Lets grab python module first:
@@ -962,7 +1000,14 @@ dnf install fbtftp_server -y
 We then need ipxe files. We could use native syslinux or shim.efi files, but this is just not flexible enough for new generation clusters.
 We will build our own ipxe roms, and include our own init script.
 
-Small tip: ipxe allows you to build raw roms (the ones we will use in this tutorial), but also iso or usb image that contains the rom. This is VERY (VERY!!!!) useful when you need to boot a stupidely made node with a weird BIOS or some network cards that does not boot over PXE.
+<div class="comment-tile">
+    <div class="comment-tile-image">
+        <img src="/images/global/Zohar.png" alt="Image Description" width="96" height="96">
+    </div>
+    <div class="comment-tile-text">
+        <p>Small tip: ipxe allows you to build raw roms (the ones we will use in this tutorial), but also iso or usb image that contains the rom. This is VERY (VERY!!!!) useful when you need to boot a stupidely made node with a weird BIOS or some network cards that does not boot over PXE.</p>
+    </div>
+</div>
 
 Grab latest ipxe version from git.
 
@@ -1286,8 +1331,15 @@ over disk, and ensure operating system is booted before proceeding.
 
 Repeat this operation to deploy each nodes of your cluster.
 
-Note: if you let nodes boot over PXE after reboot, they will again deploy, and enter in an infinite deployment loop.
-There are strategies to solve that automatically, but this is out of the scope of this training. For now, simply change boot order after os deployment.
+<div class="comment-tile">
+    <div class="comment-tile-image">
+        <img src="/images/global/Zohar.png" alt="Image Description" width="96" height="96">
+    </div>
+    <div class="comment-tile-text">
+        <p>Note: if you let nodes boot over PXE after reboot, they will again deploy, and enter in an infinite deployment loop.
+There are strategies to solve that automatically, but this is out of the scope of this training. For now, simply change boot order after os deployment.</p>
+    </div>
+</div>
 
 
 ### 6.2. Configure client side
@@ -1803,7 +1855,14 @@ Debian uses preseed file to configure auto-installation.
 
 ## 12. Conclusion
 
-CONGRATULATION! The cluster is ready to be used.
+<div class="comment-tile">
+    <div class="comment-tile-image">
+        <img src="/images/global/Zohar.png" alt="Image Description" width="96" height="96">
+    </div>
+    <div class="comment-tile-text">
+        <p>CONGRATULATION!! The cluster is ready to be used!!</p>
+    </div>
+</div>
 
 Next step now is to learn how to automate what we did here. Proposal in next tutorial is based on Ansible but you can user other tools like Salt Stak, Pupper, Chef, etc. >> [Ansible tutorial]()???????????????????
 

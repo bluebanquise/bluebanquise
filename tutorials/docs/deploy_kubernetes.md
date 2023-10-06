@@ -1,18 +1,24 @@
-==============================
-[External] - Deploy Kubernetes
-==============================
+# Deploy a local Kubernetes cluster
 
-BlueBanquise and Kubernetes works pretty well together.
+You can rely on the [servers farm deployment tutorial](servers_farm_deployment.md) seen before to deploy the low lever layer of nodes cluster.
+And on the [Ansible](ansible.md) tutorial to learn how to use and configure Ansible.
 
-While BlueBanquise is in charge of provisioning bare metal / on premise infrastructure, 
-Kubespray can deploy a production ready Kubernetes cluster over this infrastructure.
+While the first tutorial was is in charge of provisioning bare metal / on premise infrastructure, we will use Kubespray here to deploy a production ready Kubernetes cluster over this infrastructure.
 
 This result in 2 layers on the hardware, both autonomous but working together.
 
+<div class="comment-tile">
+    <div class="comment-tile-image">
+        <img src="/images/global/Zohar.png" alt="Image Description" width="96" height="96">
+    </div>
+    <div class="comment-tile-text">
+        <p>Small tip: when possible, try to isolate your layers: bare metal is managed by bare metal, kubernetes is managed by kubernetes. Mixing layers always end up in an unmaintanable cluster.</p>
+    </div>
+</div>
+
 .. image:: images/scenario_kubernetes/K8S_o_BB_o_BM.svg
 
-Deploy BlueBanquise CORE cluster
-================================
+## Deploy CORE cluster
 
 We are going to deploy the following infrastructure, considering that the number of workers 
 can be more than the 2 in this example.
@@ -20,56 +26,52 @@ Master nodes **must** be an odd number (n*2+1). Here we will use 3 masters, whic
 
 We will also rely on 5 additional nodes:
 
-* **ansible** host, which will be the BlueBanquise management node. This server will host BlueBanquise configuration, CORE services (dhcp, dns, repositories, pxe stack, monitoring, etc.).
+* **ansible** host, which will be the management node. This server will host configuration, CORE services (dhcp, dns, repositories, pxe stack, monitoring, etc.).
 * **hap1** and **hap2** which will be haproxy used to expose the Kubernetes cluster to the world.
 * **hap3** and **hap4** which will be haproxy used to reach Kubernetes administration API for system administrators.
+
+Note: you can merge hap1/hap2 with hap3/hap4 to only have 2 nodes in/out.
 
 Both hap[1-2] and hap[3-4] will expose a virtual ip, based on keepalived, to ensure high availability and easy system security upgrades.
 
 .. image:: images/scenario_kubernetes/cluster_main_schema.svg
 
-Install management node
------------------------
+### Install management node
 
-First step is to have an operating system available, with a sudo able user.
-This system will be the **ansible** node.
+We will assume here that you already used the [servers farm deployment tutorial](servers_farm_deployment.md) to deploy all needed hosts and that the cluster is ready.
 
-Install this node manually, using an ISO from Ubuntu-server main site.
-Create user ``bluebanquise`` as base admin user. Also ask for ssh server to be install.
+First step is to have Ansible installed to be able to use Kubespray, and also ensure all nodes have access to the web. We will configure our management node as a gateway, but this could be another node. Please adapt to your infrastructure.
 
-Once system is setup and rebooted, ssh on it, update it and install needed software:
-
-.. code-block:: text
-
-  sudo apt-get update && sudo apt-get upgrade
-  sudo apt-get install git python3 python3-pip
-  pip3 install ansible ansible-base cryptography jinja2 netaddr pbr jmespath ruamel.yaml ruamel.yaml.clib MarkupSafe
+```
+dnf install -y python3 python3-pip
+pip3 install ansible ansible-base cryptography jinja2 netaddr pbr jmespath ruamel.yaml ruamel.yaml.clib MarkupSafe
+```
 
 We will assume our cluster will use this ansible management node as a gateway to reach the web and so download packages and more.
 
 To allow that, edit file /etc/sysctl.conf and add the following content in it:
 
-.. code-block:: text
-
-  net.ipv4.ip_forward = 1
+```
+net.ipv4.ip_forward = 1
+```
 
 Then update iptables and save them to be persistent. In the following command, enp0s3 is the NIC on ansible node that is connected to the web.
-10.10.0.0/16 is the network of the BlueBanquise (and future K8S) cluster, where requests will come to reach the web.
+10.10.0.0/16 is the network of the bare metal (and future K8S) cluster, where requests will come to reach the web.
 
-.. code-block:: text
-
-  sudo iptables -t nat -A POSTROUTING -s 10.10.0.0/16 -o enp0s3 -j MASQUERADE
-  sudo apt install iptables-persistent
-  sudo bash -c 'iptables-save > /etc/iptables/rules.v4'
+```
+sudo iptables -t nat -A POSTROUTING -s 10.10.0.0/16 -o enp0s3 -j MASQUERADE
+sudo apt install iptables-persistent
+sudo bash -c 'iptables-save > /etc/iptables/rules.v4'
+```
 
 Also generate an ssh key for later usage:
 
-.. code-block:: text
-
-  ssh-keygen -t ed25519 -q -N "" -f $HOME/.ssh/id_ed25519
+```
+ssh-keygen -t ed25519 -q -N "" -f $HOME/.ssh/id_ed25519
+```
 
 Reboot system to ensure latest kernel is running, and ipv4 forward enabled.
-System is now ready to host BlueBanquise.
+System is now ready to host services.
 
 .. image:: images/scenario_kubernetes/cluster_bootstrap_ansible.svg
 

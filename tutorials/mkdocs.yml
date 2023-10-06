@@ -11,8 +11,11 @@ nav:
     - High Performance Computing:
         - Slurm: slurm.md
     - Kubernetes:
-        - kubernetes.md
+        - Deploy Kubernetes: deploy_kubernetes.md
     #- Datacenters and infrastructure:
+
+extra_css:
+  - extra.css
 
 theme:
   name: material
