@@ -1,0 +1,19 @@
+- name: systemd <|> Reload systemd configuration
+  ansible.builtin.systemd:
+    daemon_reload: yes
+
+- name: service <|> Restart bbautomate_flask service
+  ansible.builtin.service:
+    name: bbautomate_flask
+    state: restarted
+  when:
+    - "'service' not in ansible_skip_tags"
+    - (start_services | bool)
+
+- name: service <|> Restart bbautomate_celery service
+  ansible.builtin.service:
+    name: bbautomate_celery
+    state: restarted
+  when:
+    - "'service' not in ansible_skip_tags"
+    - (start_services | bool)
