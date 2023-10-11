@@ -545,6 +545,6 @@ If all goes well, using `squeue` command, you should be able to see the jobs cur
 You can follow jobs by watching their job file (refreshed by Slurm regularly).
 And after few seconds/minutes depending of your hardware, you should see first animation frames as PNG images in /home folder. You can use any kind of image/movie tool to generate a movie from these images.
 
-![Animation](resources/animation.gif)
+![Animation](images/slurm/animation.gif)
 
 This example shows how to use Slurm to create a Blender render farm.

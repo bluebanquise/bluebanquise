@@ -1320,6 +1320,79 @@ When using pipes, or output redirections, shell is preferred for example.
 
 [Documentation for shell module can be found at here](https://docs.ansible.com/ansible/latest/modules/shell_module.html#shell-module)
 
+## Advanced usage
+
+If you use Ansible a lot, you will quickly reach some limits, especially with loops in tasks or conditionals.
+There is a way to break these limits: inject jinja code into variables. Ansible will always "evaluate" content of variables, and so execute jinja code inside string variables if present. This is extremly powerfull.
+
+Example:
+
+Create a minimal inventory:
+
+```
+mkdir $HOME/min_inventory/group_vars/all -p
+```
+
+Then create a minimal hosts list into the inventory. Add file $HOME/min_inventory/hosts with the following content:
+
+```INI
+[all]
+localhost
+```
+
+Now create a yaml variables file $HOME/min_inventory/group_vars/all/my_jinja_vars.yml with the following content:
+
+```yaml
+toto: "{% if inventory_hostname == 'foo' %}I am not localhost{% else %}I am {{tata}}{% endif %}"
+tata: "localhost"
+```
+
+You can see that we defined `tata` variable, and that another variable called `toto` contains Jinja code, and a call to `tata` variable if some condition is met.
+
+Now create a minimal playbook at $HOME/minimal_playbook.yml with the following content:
+
+```yaml
+---
+  - name: "Playing with Ansible and Git"
+    hosts: localhost
+    connection: local 
+    tasks:
+      - name: tutu
+        debug:
+          msg: "{{ toto }}"
+```
+
+And execute it:
+
+```
+:~/$ ansible-playbook minimal_playbook.yml -i minimal_inventory 
+
+PLAY [Playing with Ansible and Git] **********************************************************************************************************************************************************
+
+TASK [Gathering Facts] ***********************************************************************************************************************************************************************
+Monday 09 October 2023  08:20:50 +0000 (0:00:00.009)       0:00:00.009 ******** 
+ok: [localhost]
+
+TASK [tutu] **********************************************************************************************************************************************************************************
+Monday 09 October 2023  08:20:51 +0000 (0:00:01.012)       0:00:01.022 ******** 
+ok: [localhost] => 
+  msg: I am localhost
+
+PLAY RECAP ***********************************************************************************************************************************************************************************
+localhost                  : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+Monday 09 October 2023  08:20:51 +0000 (0:00:00.044)       0:00:01.066 ******** 
+=============================================================================== 
+gather_facts ------------------------------------------------------------ 1.01s
+debug ------------------------------------------------------------------- 0.04s
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+total ------------------------------------------------------------------- 1.06s
+:~/$
+```
+
+You can see that jinja code was evaluated, and that toto loaded tata variable.
+You can even creates lists, dicts, etc. this way to create advanced logic.
+
 ----------
 
 ## Conclusion

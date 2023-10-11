@@ -1792,7 +1792,7 @@ Just a quick pro and cons on all PXE solutions:
     * Some disks (especially old raids) are often not available for installer (even if seen by kernel)
 * Ubuntu:
   * Pros:
-    * YAML format is nice for configuration file
+    * YAML format is efficient for configuration file
   * Cons:
     * Installer often falls back to interactive installation if anything is wrong, and does not advertise why (need to spend time searching in logs)
     * Weird behavior with some serial consols
@@ -1801,14 +1801,14 @@ Just a quick pro and cons on all PXE solutions:
   * Pros:
     * Light installer
   * Cons:
-    * Lack of documentation on preseed
+    * Lack of documentation
     * Some missing key features in preseed autoinstall (like support for multiple NICs, you need to manually define wich one to use)
 * OpenSuse Leap:
   * Pros:
     * Nice installer
     * Good documentation
   * Cons:
-    * XML
+    * XML not efficient for configuration file
     * Need to manage some 2 part install (install and post-install)
 
 ### Ubuntu 20.04 and 22.04
@@ -1823,49 +1823,442 @@ To deploy Ubuntu over the network:
 ```
 mkdir -p /var/www/html/pxe/ubuntu/22.04/
 mkdir -p /var/www/html/pxe/ubuntu/22.04/iso_content/
+mkdir -p /var/www/html/pxe/ubuntu/22.04/autoinstall.cloud-init/
+
 ```
 
 2. Download Ubuntu 22.04 live server iso, put it in `/var/www/html/pxe/ubuntu/22.04/` folder and mount it also in `/var/www/html/pxe/ubuntu/22.04/iso_content/` (or copy its content here, its up to you).
 
 ```
 cd /var/www/html/pxe/ubuntu/22.04/
-wget ?????????????????
-mount ???????????? /var/www/html/pxe/ubuntu/22.04/iso_content/
+wget https://releases.ubuntu.com/22.04/ubuntu-22.04.1-live-server-amd64.iso
+mv ubuntu-22.04.1-live-server-amd64.iso ubuntu-22.04-live-server-amd64.iso
+mount ubuntu-22.04-live-server-amd64.iso /var/www/html/pxe/ubuntu/22.04/iso_content/
 ```
 
-3. Create autoinstall file at ???????????????????
+3. Create autoinstall file at `/var/www/html/pxe/ubuntu/22.04/autoinstall.cloud-init/user-data`
 
-?????????????
+```yaml
+#cloud-config
+autoinstall:
+  version: 1
+  apt:
+    geoip: false
+    preserve_sources_list: true
+  keyboard: {layout: us, toggle: null, variant: ''}
+  locale: en_US.UTF-8
+  user-data:
+    users:
+      - name: bluebanquise
+        homedir: /home/bluebanquise
+        ssh-authorized-keys:
+          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIqpyyh44Hz3gvhISaIE9yJ/ao8fBLNo7qwPJcYjQdIl root@odin.cluster.local
+        sudo: ['ALL=(ALL:ALL) NOPASSWD:ALL']
+        groups: sudo
+        shell: /bin/bash
+        passwd: "!"  # Means no password
+    disable_root: true
+  ssh:
+    install-server: true
+    allow-pw: true
+```
 
-4. Create needed empty file:
+4. Create needed empty file at `/var/www/html/pxe/ubuntu/22.04/autoinstall.cloud-init/meta-data` (don't ask me why, but its mandatory):
 
-?????????????
+```
+touch /var/www/html/pxe/ubuntu/22.04/autoinstall.cloud-init/meta-data
+```
 
 5. Create ipxe file to boot:
 
-?????????????
+```
+#!ipxe
+
+echo Booting OS
+
+echo +----------------------------------------------------+
+echo |
+echo | Loading kernel
+
+kernel http://${next-server}/pxe/ubuntu/22.04/iso_content/casper/vmlinuz initrd=initrd root=/dev/ram0 ramdisk_size=1500000 ip=dhcp url=http://${next-server}/pxe/ubuntu/22.04/ubuntu-22.04-live-server-amd64.iso autoinstall ds=nocloud-net;s=http://${next-server}/pxe/ubuntu/22.04/autoinstall.cloud-init/
+
+echo | Loading initial ramdisk ...
+
+initrd http://${next-server}/pxe/ubuntu/22.04/iso_content/casper/initrd
+
+echo | ALL DONE! We are ready.
+echo | Downloaded images report:
+
+imgstat
+
+echo | Booting in 4s ...
+echo |
+echo +----------------------------------------------------+
+
+sleep 4
+
+boot
+```
+
+Few notes:
+
+* The Ubuntu installer needs a lot of ram to operate, since it downloads and extract iso into memory. Ensure at least 4 or even 6 Gb ram.
+* If anything happen wrong, installer automatically fallback to interactive installation mode. You will have to change shell and investigate into installer logs to find issue. This is not always easy as installer logs huge.
+* If serial console is wrong, installer will fallback on interactive installation mode.
+* If installer hang without errors, let it some time. Some steps try some connection and wait for timeout before continuing.
 
 ### Debian 11 and 12
 
-Debian uses preseed file to configure auto-installation.
+Debian uses preseed file to configure auto-installation. Preseed is difficult to use due to a strange lack of **detailed** documentation.
+Also, you will need to have access to external repositories to perform the deployment (I wasn't able to deploy Debian with local repositories as I cannot find the preseed tag to allow unauthenticated repos at second stage), which involves that all your nodes have access to a gateway to reach the web. Installation is done using a netboot and not an ISO.
 
+To deploy Debian over the network:
 
+1. Prepare folders:
+
+```
+mkdir -p /var/www/html/pxe/debian/12/
+mkdir -p /var/www/html/pxe/debian/12/iso_content/
+```
+
+2. Download Debian 12 bootstrap, put it in `/var/www/html/pxe/debian/12/` folder and extract part of it in `/var/www/html/pxe/debian/12/iso_content/`.
+
+```
+cd /var/www/html/pxe/debian/12/
+wget https://deb.debian.org/debian/dists/bookworm/main/installer-amd64/current/images/netboot/netboot.tar.gz
+tar xvzf netboot.tar.gz
+cp debian-installer/amd64/initrd.gz /var/www/html/pxe/debian/12/iso_content/
+cp debian-installer/amd64/linux /var/www/html/pxe/debian/12/iso_content/
+
+```
+
+3. Create autoinstall file at /var/www/html/pxe/debian/12/preseed.cfg
+
+```
+### zone
+d-i debian-installer/locale string en_US.UTF-8
+d-i keyboard-configuration/xkb-keymap select us
+d-i debian-installer/language string en
+d-i debian-installer/country string US
+d-i localechooser/supported-locales multiselect en_US.UTF-8
+
+### network
+## Note: a dhcp gateway MUST be set for the network, even a dummy one
+d-i netcfg/choose_interface select auto
+d-i netcfg/use_dhcp string true
+d-i netcfg/link_wait_timeout string 10
+d-i netcfg/dhcp_timeout string 60
+d-i netcfg/dhcp_failed note
+d-i netcfg/wireless_wep string
+d-i netcfg/get_hostname unassigned-hostname
+d-i netcfg/get_domain unassigned-domain
+d-i netcfg/get_hostname seen true
+d-i netcfg/get_domain seen true
+
+### Repositories
+d-i mirror/country string manual
+d-i mirror/http/hostname string deb.debian.org
+d-i mirror/http/directory string /debian
+d-i mirror/http/proxy string
+
+### Time
+d-i clock-setup/utc-auto boolean true
+d-i clock-setup/utc boolean true
+d-i time/zone string Europe/Brussels #US/Pacific
+d-i clock-setup/ntp boolean true
+
+### Partitioning
+d-i partman-lvm/device_remove_lvm boolean true
+d-i partman-md/device_remove_md boolean true
+d-i partman-lvm/confirm boolean true
+d-i partman-partitioning/confirm_write_new_label boolean true
+d-i partman/choose_partition select finish
+d-i partman/confirm boolean true
+d-i partman/confirm_nooverwrite boolean true
+
+d-i partman-auto/disk string /dev/vda
+d-i partman-auto/method string regular
+d-i partman-auto/choose_recipe select atomic
+d-i partman-auto/init_automatically_partition select Guided - use entire disk
+
+### Users
+d-i passwd/root-login boolean false
+d-i passwd/user-fullname string Bluebanquise User
+d-i passwd/username string bluebanquise
+d-i passwd/user-password-crypted password !
+
+### Packages
+tasksel tasksel/first multiselect minimal
+d-i pkgsel/include string openssh-server curl python3
+d-i pkgsel/upgrade select none
+d-i pkgsel/updatedb boolean false
+d-i pkgsel/update-policy select none
+d-i apt-setup/restricted boolean false
+d-i apt-setup/universe boolean false
+d-i apt-setup/backports boolean false
+d-i apt-setup/proposed boolean false
+popularity-contest popularity-contest/participate boolean false
+
+### Grub
+d-i grub-installer/only_debian boolean true
+d-i grub-installer/bootdev  string default
+
+### Reboot
+d-i finish-install/reboot_in_progress note
+
+### Add our user
+d-i preseed/late_command string \
+  in-target sh -c '/sbin/usermod -m -d /home/bluebanquise bluebanquise'; \
+  in-target sh -c 'mkdir /home/bluebanquise/.ssh'; \
+  in-target sh -c 'echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIqpyyh44Hz3gvhISaIE9yJ/ao8fBLNo7qwPJcYjQdIl root@odin.cluster.local" >> /home/bluebanquise/.ssh/authorized_keys';\
+  in-target sh -c 'chown -R bluebanquise:bluebanquise /home/bluebanquise/.ssh'; \
+  in-target sh -c 'sed -i "s/^#PermitRootLogin.*\$/PermitRootLogin no/g" /etc/ssh/sshd_config'; \
+  in-target sh -c 'echo "bluebanquise ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers.d/bluebanquise'
+```
+
+4. Create ipxe file to boot:
+
+Important note: if your server have more than 1 NIC, then you need to hardcode it on the kernel command line. See comment in the file.
+
+```
+#!ipxe
+
+echo Booting OS
+
+echo +----------------------------------------------------+
+echo |
+echo | Loading kernel
+
+kernel http://${next-server}/pxe/debian/12/iso_content/linux initrd=initrd.gz preseed/url=http://${next-server}/pxe/debian/12/preseed.cfg auto=true priority=critical
+
+# If your server have more than 1 NIC, assuming here its enp0s1 (you might need to boot it once to know the NIC name and adjust here)
+# kernel http://${next-server}/pxe/debian/12/iso_content/linux initrd=initrd.gz preseed/url=http://${next-server}/pxe/debian/12/preseed.cfg auto=true priority=critical netcfg/choose_interface=enp0s1
+
+echo | Loading initial ramdisk ...
+
+initrd http://${next-server}/pxe/debian/12/iso_content/initrd.gz
+
+echo | ALL DONE! We are ready.
+echo | Downloaded images report:
+
+imgstat
+
+echo | Booting in 4s ...
+echo |
+echo +----------------------------------------------------+
+
+sleep 4
+
+boot
+```
+
+Few notes:
+
+* You absolutely need to have a gateway defined to make it automatic.
+* If installer does not see your SATA/NvME disks, then it means it couldn't grab modules from repo (try using an official repo). It is possible to inject modules from the DVD iso manually, see https://github.com/bluebanquise/infrastructure/blob/29b503eab507b056f9658f36e01287192e8b66cb/Validation/steps/12_deploy_debian11.sh#L16
+* I found not working automatic disk selection, you need to manually define it like in this preseed example above (here /dev/sda).
 
 ### OpenSUSE Leap 15
 
+OpenSuse AutoYast installer is a stable installer. It is however slower than the others, XML of autoyast file is a pain, and you have to handle the second stage installation. But globally, this installer is nice to use.
+
+1. Prepare folders:
+
+```
+mkdir -p /var/www/html/pxe/leap/15/
+mkdir -p /var/www/html/pxe/leap/15/iso_content/
+```
+
+2. Download OpenSuse Leap 15 iso, put it in `/var/www/html/pxe/leap/15/` folder and mount or extract in `/var/www/html/pxe/leap/15/iso_content/`.
+
+```
+cd /var/www/html/pxe/leap/15/
+wget https://mirror.its.dal.ca/opensuse/distribution/leap/15.4/iso/openSUSE-Leap-15.4-DVD-x86_64-Build243.2-Media.iso
+mount openSUSE-Leap-15.4-DVD-x86_64-Build243.2-Media.iso /var/www/html/pxe/leap/15/iso_content/
+```
+
+3. Create autoinstall file at /var/www/html/pxe/leap/15/autoyast.xml
+
+```xml
+<?xml version="1.0"?>
+<!DOCTYPE profile>
+<profile xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http://www.suse.com/1.0/configns">
+
+  <add-on>
+    <add_on_products config:type="list">
+    </add_on_products>
+  </add-on>
+
+  <keyboard>
+    <keymap>us</keymap>
+  </keyboard>
+
+  <language>
+    <language>en_US</language>
+    <languages/>
+  </language>
+
+  <timezone>
+    <hwclock>UTC</hwclock>
+    <timezone>Europe/Brussels</timezone>
+  </timezone>
+
+
+  <networking>
+    <keep_install_network config:type="boolean">true</keep_install_network>
+    <managed config:type="boolean">true</managed>
+  </networking>
+
+  <software>
+    <install_recommended config:type="boolean">true</install_recommended>
+    <patterns config:type="list">
+      <pattern>base</pattern>
+    </patterns>
+    <packages config:type="list">
+      <package>openssh-server</package>
+      <package>sudo</package>
+    </packages>
+  </software> 
+
+  <bootloader>
+    <loader_type>default</loader_type>
+  </bootloader>
+
+<partitioning config:type="list">
+  <drive>
+    <initialize config:type="boolean">true</initialize>
+    <use>all</use>
+    <partitions config:type="list">
+      <partition>
+        <filesystem config:type="symbol">ext4</filesystem>
+        <mount>/</mount>
+        <size>max</size>
+      </partition>
+      <partition>
+        <filesystem config:type="symbol">ext4</filesystem>
+        <mount>/boot</mount>
+        <size>512MiB</size>
+      </partition>
+      <partition>
+        <mount>swap</mount>
+        <size>512MiB</size>
+      </partition>
+    </partitions>
+  </drive>
+</partitioning>
+
+  <!-- disable root password and add ssh keys to sudo user -->
+  <users config:type="list">
+    <user>
+      <username>root</username>
+      <user_password>!</user_password>
+      <encrypted config:type="boolean">true</encrypted>
+    </user>
+    <user>
+      <username>bluebanquise</username>
+      <home>/home/bluebanquise</home>
+      <user_password>!</user_password>
+      <encrypted config:type="boolean">true</encrypted>
+      <authorized_keys config:type="list">
+        <listentry>ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIqpyyh44Hz3gvhISaIE9yJ/ao8fBLNo7qwPJcYjQdIl root@odin.cluster.local</listentry>
+      </authorized_keys>
+    </user>
+  </users>
+
+<services-manager>
+  <default_target>multi-user</default_target>
+  <services>
+    <enable config:type="list">
+      <service>sshd</service>
+    </enable>
+  </services>
+</services-manager>
+
+<scripts>
+    <chroot-scripts config:type="list">
+      <script>
+        <chrooted config:type="boolean">true</chrooted>
+        <filename>add_sles_sudo_rule.sh</filename>
+        <interpreter>shell</interpreter>
+        <source>
+<![CDATA[
+#!/bin/sh
+echo "Defaults:sles !targetpw
+bluebanquise ALL=(ALL,ALL) NOPASSWD: ALL" > /etc/sudoers.d/bluebanquise
+]]>
+          </source>
+      </script>
+    </chroot-scripts>
+  </scripts>
+
+<general>
+  <mode>
+    <confirm config:type="boolean">false</confirm>
+  </mode>
+  <!-- Be sure to understand that and adapt to your needs, this is used here to allow local repos -->
+  <signature-handling>
+    <accept_unsigned_file config:type="boolean">true</accept_unsigned_file>
+    <accept_unknown_gpg_key config:type="boolean">true</accept_unknown_gpg_key>
+    <accept_non_trusted_gpg_key config:type="boolean">true</accept_non_trusted_gpg_key>
+    <import_gpg_key config:type="boolean">true</import_gpg_key>
+  </signature-handling>
+ </general>
+
+</profile>
+```
+
+4. Create ipxe file to boot:
+
+Note: you can change textmode=1 to textmode=0 if you wish to see the GUI of the installer on screen (if not using a serial console).
+
+```
+#!ipxe
+
+echo Booting OS
+
+echo +----------------------------------------------------+
+echo |
+echo | Loading kernel
+
+kernel http://${next-server}/pxe/leap/15/iso_content/boot/x86_64/loader/linux install=http://${next-server}/pxe/leap/15/iso_content/ autoyast=http://${next-server}/pxe/leap/15/autoyast.xml textmode=1
+
+echo | Loading initial ramdisk ...
+
+initrd http://${next-server}/pxe/leap/15/iso_content/boot/x86_64/loader/initrd
+
+echo | ALL DONE! We are ready.
+echo | Downloaded images report:
+
+imgstat
+
+echo | Booting in 4s ...
+echo |
+echo +----------------------------------------------------+
+
+sleep 4
+
+boot
+```
+
+Few notes:
+
+* You will need after boot to configure either NetworkManager or systemd-networkd if you wish to use a tool like Ansible or equivalent, as embed network manager does not seems to be supported by all these tools.
+
 ## 12. Conclusion
+
+CONGRATULATION!! The cluster is ready to be used!!
+
+Next step now is to learn how to automate what we did here. Proposal in next tutorial is based on Ansible but you can user other tools like Salt Stak, Pupper, Chef, etc. >> [Ansible tutorial](ansible.md).
+
+Or you can also specialize the cluster, with [HPC cluster tutorial](slurm.md) or [K8S cluster tutorial](deploy_kubernetes.md).
 
 <div class="comment-tile">
     <div class="comment-tile-image">
         <img src="/images/global/Zohar.png" alt="Image Description" width="96" height="96">
     </div>
     <div class="comment-tile-text">
-        <p>CONGRATULATION!! The cluster is ready to be used!!</p>
+        <p>Thank you for following this tutorial. If you find something is missing, or find an issue, please notify the old guy on github by opening an issue or a PR :)</p>
     </div>
 </div>
 
-Next step now is to learn how to automate what we did here. Proposal in next tutorial is based on Ansible but you can user other tools like Salt Stak, Pupper, Chef, etc. >> [Ansible tutorial]()???????????????????
 
-Or you can also specialize the cluster, with HPC cluster tutorial or K8S cluster tutorial.
-
-Thank you for following this tutorial. If you find something is missing, or find an issue, please notify me :)

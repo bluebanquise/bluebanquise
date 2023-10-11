@@ -9,11 +9,13 @@ nav:
         - Servers farm deployment: servers_farm_deployment.md
         - Ansible: ansible.md
     - High Performance Computing:
-        - Slurm: slurm.md
+        - Slurm: hpc_slurm.md
     - Kubernetes:
-        - Deploy Kubernetes: deploy_kubernetes.md
-    #- Datacenters and infrastructure:
-
+        - Deploy Kubernetes: kubernetes_deploy.md
+        - Deploy basic resources: kubernetes_basics.md
+    - Datacenters and infrastructure:
+        - Introduction: datacenters_introduction.md
+        - Safety: datacenters_safety.md
 extra_css:
   - extra.css
 
