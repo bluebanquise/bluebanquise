@@ -6,13 +6,15 @@ This role simply configure repositories for client hosts.
 
 ## Instructions
 
-Repositories are set in **repositories** variable. Two shapes are available: a
+### Define repositories
+
+Repositories are set in **bb_repositories** variable. Two shapes are available: a
 simple one and an advanced one.
 
 Simple one:
 
 ```yaml
-repositories:
+bb_repositories:
   - os
   - bluebanquise
   - myrepo
@@ -21,7 +23,7 @@ repositories:
 Advanced one, to be combined with simple one as desired:
 
 ```yaml
-repositories:
+bb_repositories:
   - os
   - bluebanquise
   - name: epel
@@ -29,22 +31,39 @@ repositories:
     proxy: 'https://proxy:8080'
 ```
 
-Available advanced variables are:
+Available advanced variables depends of the target OS. Please refer to the following pages to know available parameters:
 
-* name
-* baseurl
-* enabled
-* exclude
-* gpgcheck
-* gpgkey
-* proxy
-* state
+* RHEL: https://docs.ansible.com/ansible/latest/collections/ansible/builtin/yum_repository_module.html
+* Debian or Ubuntu: https://docs.ansible.com/ansible/latest/collections/ansible/builtin/apt_repository_module.html
+* Suse: https://docs.ansible.com/ansible/latest/collections/community/general/zypper_repository_module.html
 
-Repository static path is computed using variables defined in the equipment group.
+When using simple format, repository static URL path is computed using variables defined in the equipment group and in networks.
+The following variables are mandatory for this feature to work properly:
+
+**Network**:
+
+```yaml
+networks:
+  net-my-network:
+    services_ip: 10.10.0.1
+```
+
+Or 
+
+```yaml
+networks:
+  net-my-network:
+    services:
+      repositories:
+        - ip4: 10.10.0.1
+          hostname: my-repository-server
+```
+
+**Equipment variables:**
 
 ```yaml
 ep_operating_system:
-  distribution: centos # centos, redhat, debian, ubuntu, opensuse, etc.
+  distribution: redhat # centos, redhat, debian, ubuntu, opensuse, etc.
   distribution_major_version: 8
   # Optional: define a minor distribution version to force (repositories/PXE)
   #distribution_version: 8.0
@@ -52,7 +71,7 @@ ep_operating_system:
   #repositories_environment: production
 ```
 
-If equipment_profile is:
+For example, if equipment_profile is:
 
 ```yaml
 ep_operating_system:
@@ -85,12 +104,21 @@ ep_operating_system:
 
 Then path will be: repositories/production/centos/8.1/$basearch/
 
-For CentOS, the role will disable the default repositories of the distribution.
-If one want to keep the distro repositories, they must define
-`repositories_client_disable_distro_repos: False` in their inventory.
+### Remove native repositories
+
+If you wish to remove native OS repositories, to rely only on local ones (air gapped cluster for example), you need to use the pxe_stack role of the collection. (This role does not support removing repositories for now.)
+
+Simply define:
+
+```yaml
+pxe_stack_preserve_repositories: false
+```
+
+And native repositories will be removed during nodes deployment (PXE install, not playbook execution).
 
 ## Changelog
 
+* 1.3.5: Adapt role to support BB 2.0 networks. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.4: Update to BB 2.0 format. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.3.3: Support gpgkey for Ubuntu. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.3.2: Flush handlers at the end of role repositories_client. #sla31

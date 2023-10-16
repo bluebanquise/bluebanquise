@@ -21,10 +21,8 @@ pxe_stack_sudo_user_home: /var/lib/bluebanquise
 # Set sudo user as passwordless sudoer
 pxe_stack_sudo_is_passwordless: true
 
-# Preserve default sources list for Ubuntu
-pxe_stack_ubuntu_preserve_sources_list: true
-# Preserve default sources list for OpenSUSE
-pxe_stack_opensuse_preserve_sources_list: true
+# Preserve default repositories
+pxe_stack_preserve_repositories: true
 
 # Do not edit here
 # pxe_stack_enable_services:

@@ -162,7 +162,7 @@ curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$(hostna
 ]]>
         </source>
       </script>
-{% if (hostvars[groups[item][0]]['ep_operating_system']['distribution'] | default(pxe_stack_ep_operating_system.distribution)) | lower == "opensuse" and not pxe_stack_opensuse_preserve_sources_list %}
+{% if (hostvars[groups[item][0]]['ep_operating_system']['distribution'] | default(pxe_stack_ep_operating_system.distribution)) | lower == "opensuse" and not pxe_stack_preserve_repositories %}
       <script>
         <chrooted config:type="boolean">true</chrooted>
         <filename>chroot-post.sh</filename>

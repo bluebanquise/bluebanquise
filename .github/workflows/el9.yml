@@ -14,6 +14,10 @@ jobs:
       ANSIBLE_CONFIG: /var/lib/bluebanquise/ansible.cfg
       PY_COLORS: '1'
       ANSIBLE_FORCE_COLOR: '1'
+      BB_REPO: |
+        bb_repositories:
+          - name: bluebanquise
+            baseurl: 'http://bluebanquise.com/repository/releases/latest/el9/x86_64/bluebanquise/'
     # strategy:
     #   matrix:
     #     inventory: [standard]
@@ -34,9 +38,15 @@ jobs:
         run: |
           docker exec mgt1 bash -c "/bluebanquise/bootstrap/online_bootstrap.sh --silent --skip_environment"
           docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'cd /bluebanquise/bootstrap/ && ./configure_environment.sh --bb_collections_local_path=/bluebanquise/collections/'"
-          docker exec mgt1 bash -c "dnf install wget -y && cd /etc/yum.repos.d/ && wget http://bluebanquise.com/repository/releases/latest/el9/x86_64/bluebanquise/bluebanquise.repo && dnf config-manager --set-enabled crb"
+          docker exec mgt1 bash -c "dnf install wget -y && dnf config-manager --set-enabled crb"
+          # docker exec mgt1 bash -c "dnf install wget -y && cd /etc/yum.repos.d/ && wget http://bluebanquise.com/repository/releases/latest/el9/x86_64/bluebanquise/bluebanquise.repo && dnf config-manager --set-enabled crb"
 
       - name: Prepare run input files
+        run: |
+          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'cp -a /bluebanquise/resources/workflow/inventory_standard /var/lib/bluebanquise/inventory && cp -a /bluebanquise/resources/workflow/playbooks /var/lib/bluebanquise'"
+          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'echo $BB_REPO > /var/lib/bluebanquise/inventory/group_vars/all/repositories.yml'"
+
+      - name: Configure BB external repositories
         run: docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'cp -a /bluebanquise/resources/workflow/inventory_standard /var/lib/bluebanquise/inventory && cp -a /bluebanquise/resources/workflow/playbooks /var/lib/bluebanquise'"
 
       # - name: High availability roles execution

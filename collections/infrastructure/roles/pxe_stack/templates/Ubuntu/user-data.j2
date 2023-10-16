@@ -43,7 +43,7 @@ autoinstall:
     - sed -i "s/^#PermitRootLogin.*\$/PermitRootLogin yes/g" /target/etc/ssh/sshd_config
     - sed -i 's|^root:.:|root:{{ hostvars[groups[item][0]]['ep_admin_password_sha512'] | default(pxe_stack_ep_admin_password_sha512) }}:|' /target/etc/shadow
 {% endif %}
-{% if not pxe_stack_ubuntu_preserve_sources_list %}
+{% if not pxe_stack_preserve_repositories %}
     - echo " " > /target/etc/apt/sources.list
 {% endif %}
 {% if (hostvars[groups[item][0]]['ep_preserve_efi_first_boot_device'] | default(pxe_stack_ep_preserve_efi_first_boot_device)) == true %}
