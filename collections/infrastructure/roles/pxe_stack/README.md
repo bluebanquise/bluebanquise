@@ -182,6 +182,7 @@ for a group of hosts or even at hostvars level.
 
 ## Changelog
 
+* 1.8.3: Allow all distributions to erase default repositories. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.8.2: RedHat missing rpm. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.8.1: Update to BB 2.0 format again. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.8.0: Update to BB 2.0 format. Benoit Leveugle <benoit.leveugle@gmail.com>

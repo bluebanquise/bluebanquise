@@ -100,7 +100,7 @@ d-i preseed/late_command string \
   in-target sh -c 'echo "{{ pxe_stack_sudo_user }} ALL=(ALL:ALL) ALL" >> /etc/sudoers.d/{{ pxe_stack_sudo_user }}'
   {% endif %}
 {% endif %}
-{% if not pxe_stack_ubuntu_preserve_sources_list %}
+{% if not pxe_stack_preserve_repositories %}
   in-target sh -c 'echo " " > /etc/apt/sources.list'; \
   in-target sh -c 'apt update'; \
 {% endif %}

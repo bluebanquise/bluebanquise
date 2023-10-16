@@ -136,6 +136,11 @@ for I in `cat /proc/cmdline | tr " " "\n" | grep -E "^(node_hostname|ipxe_next_s
 
 echo "All went well, we can inform next-server we succeeded"
 curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$node_hostname&boot=disk"
+
+{% if not pxe_stack_preserve_repositories %}
+rm -r /var/cache/yum/*
+rm -f /etc/yum.repos.d/*
+{% endif %}
 set +x
 %end
 

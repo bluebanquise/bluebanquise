@@ -4,7 +4,7 @@ autoinstall:
   version: 1
   apt:
     geoip: false
-    preserve_sources_list: {{ pxe_stack_ubuntu_preserve_sources_list }}
+    preserve_sources_list: {{ pxe_stack_preserve_repositories }}
   keyboard: {layout: {{ (hostvars[groups[item][0]]['ep_keyboard_layout'] | default(pxe_stack_ep_keyboard_layout)) | lower }}, toggle: null, variant: ''}
   locale: {{ hostvars[groups[item][0]]['ep_system_language'] | default(pxe_stack_ep_system_language) }}
   user-data:
@@ -43,7 +43,7 @@ autoinstall:
     - sed -i "s/^#PermitRootLogin.*\$/PermitRootLogin yes/g" /target/etc/ssh/sshd_config
     - sed -i 's|^root:.:|root:{{ hostvars[groups[item][0]]['ep_admin_password_sha512'] | default(pxe_stack_ep_admin_password_sha512) }}:|' /target/etc/shadow
 {% endif %}
-{% if not pxe_stack_ubuntu_preserve_sources_list %}
+{% if not pxe_stack_preserve_repositories %}
     - echo " " > /target/etc/apt/sources.list
 {% endif %}
 {% if (hostvars[groups[item][0]]['ep_preserve_efi_first_boot_device'] | default(pxe_stack_ep_preserve_efi_first_boot_device)) == true %}
