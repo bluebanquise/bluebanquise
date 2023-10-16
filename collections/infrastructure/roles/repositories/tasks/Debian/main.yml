@@ -16,18 +16,20 @@
     - bb_repositories is not none and bb_repositories is iterable and bb_repositories is not string and bb_repositories is not mapping
     - item.repo is not defined
 
-- name: set_fact <|> Initialize trust_option_by_repo
-  ansible.builtin.set_fact:
-    trust_option_by_repo: >-
-      {{ trust_option_by_repo | default([]) | combine(
-        {item.name: 'signed-by=' + item.gpgkey}
-        if ((item.gpgcheck is defined and item.gpgcheck | bool) and (item.gpgkey is defined and item.gpgkey | length > 0 )) else
-        {item.name: 'trusted=yes'}) }}
-  with_items: "{{ bb_repositories }}"
+# - name: set_fact <|> Initialize repositories_trust_option_by_repo
+#   ansible.builtin.set_fact:
+#     repositories_trust_option_by_repo: >-
+#       {{ repositories_trust_option_by_repo | default([]) | combine(
+#         {item.name: 'signed-by=' + item.gpgkey}
+#         if ((item.gpgcheck is defined and item.gpgcheck | bool) and (item.gpgkey is defined and item.gpgkey | length > 0 )) else
+#         {item.name: 'trusted=yes'}) }}
+#   with_items: "{{ bb_repositories }}"
+#     - bb_repositories is not none and bb_repositories is iterable and bb_repositories is not string and bb_repositories is not mapping
 
 - name: apt_repository <|> Setting custom repositories
   ansible.builtin.apt_repository:
-    repo: "{{ item.repo | default('deb [' + trust_option_by_repo[item.name] + '] ' + (repositories_j2_simple_url | default('', true)) + ( item.name | default(item, true) | string ) + ' ' + ( item.distribution | default('./', true) )) }}"
+    # repo: "{{ item.repo | default('deb [' + repositories_trust_option_by_repo[item.name] + '] ' + (repositories_j2_simple_url | default('', true)) + ( item.name | default(item, true) | string ) + ' ' + ( item.distribution | default('./', true) )) }}"
+    repo: "{{ item.repo | default('deb [trusted=yes] ' + (repositories_j2_simple_url | default('', true)) + ( item.name | default(item, true) | string ) + ' ' + ( item.distribution | default('./', true) )) }}"
     state: "{{ item.state | default('present') }}"
     codename: "{{ item.codename | default(omit) }}"
     filename: "{{ item.filename | default(omit) }}"
