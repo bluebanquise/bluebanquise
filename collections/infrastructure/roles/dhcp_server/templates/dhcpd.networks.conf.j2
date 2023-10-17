@@ -39,37 +39,43 @@ subnet {{ networks[network]['subnet'] }} netmask {{ (networks[network]['subnet']
 
   default-lease-time {{ dhcp_server_default_lease_time | string }};
   max-lease-time {{ dhcp_server_max_lease_time | string }};
-      {% if networks[network]['dhcp_unknown_range'] is defined and networks[network]['dhcp_unknown_range'] is not none %}
+  {% if networks[network]['dhcp_unknown_range'] is defined and networks[network]['dhcp_unknown_range'] is not none %}
   range {{ networks[network]['dhcp_unknown_range'] }};
-      {% endif %}
+  {% endif %}
   option domain-name "{{ bb_domain_name | default(dhcp_server_domain_name) }}";
   option broadcast-address {{ (networks[network]['subnet'] + '/' + (networks[network]['prefix'] | string) ) | ansible.utils.ipaddr('broadcast') }};
-      {% if networks[network]['gateway'] is defined %}
-        {% if networks[network]['gateway'] is string %}
+  {% if networks[network]['gateway'] is defined %}
+    {% if networks[network]['gateway'] is string %}
   option routers {{ networks[network]['gateway'] }};
-        {% elif networks[network]['gateway'] is iterable and networks[network]['gateway'] is not mapping %}
+    {% elif networks[network]['gateway'] is iterable and networks[network]['gateway'] is not mapping %}
 {{ item_add("option routers", networks[network]['gateway'], "host") }}
-        {% endif %}
-      {% endif %}
+    {% endif %}
+  {% endif %}
 
 {# Either ~~~~~~~ ADVANCED SERVICES #}
-      {% if networks[network]['services'] is defined and networks[network]['services'] is iterable and networks[network]['services'] is not string and networks[network]['services'] is mapping %}
-        {% if networks[network]['services']['dns'] is defined %}
+  {% if networks[network]['services'] is defined and networks[network]['services'] is iterable and networks[network]['services'] is not string and networks[network]['services'] is mapping %}
+    {% if networks[network]['services']['dns'] is defined %}
 {{ item_add("option domain-name-servers", networks[network]['services']['dns'], "ip") }}
-        {% endif %}
-        {% if networks[network]['services']['ntp'] is defined %}
+    {% endif %}
+    {% if networks[network]['services']['ntp'] is defined %}
 {{ item_add("option ntp-servers", networks[network]['services']['ntp'], "host") }}
-        {% endif %}
-        {% if networks[network]['services']['pxe'] is defined %}
+    {% endif %}
+    {% if networks[network]['services']['pxe'] is defined %}
 {{ item_add("next-server", networks[network]['services']['pxe'], "host") }}
-        {% endif %}
+    {% endif %}
 
 {# Or ~~~~~~~ BASIC SERVICES #}
-      {% elif networks[network]['services_ip'] is defined and (networks[network]['services_ip'] | ansible.utils.ipaddr) %}
+  {% elif networks[network]['services_ip'] is defined and (networks[network]['services_ip'] | ansible.utils.ipaddr) %}
   option domain-name-servers {{ networks[network]['services_ip'] }};
   option ntp-servers {{ networks[network]['services_ip'] }};
   next-server {{ networks[network]['services_ip'] }};
-      {% endif %}
+  {% endif %}
+
+  {% if networks[network]['dhcp_server_subnet_settings'] is defined and networks[network]['dhcp_server_subnet_settings'] is iterable and networks[network]['dhcp_server_subnet_settings'] is not string and networks[network]['dhcp_server_subnet_settings'] is not mapping %}
+    {% for subnet_setting in networks[network]['dhcp_server_subnet_settings'] %}
+  {{ subnet_setting }};
+    {% endfor %}
+  {% endif %}
 
   include "{{ dhcp_server_conf_dir }}/dhcpd.{{ network }}.conf";
 
