@@ -10,7 +10,7 @@ If you face any issues with this tutorial, do not hesitate to open an issue on t
 
 <div class="comment-tile">
     <div class="comment-tile-image">
-        <img src="../images/global/Ash.png" alt="Image Description" width="96" height="96">
+        <img src="images/global/Ash.png" alt="Image Description" width="96" height="96">
     </div>
     <div class="comment-tile-text">
         <p>This tutorial is based on EL 9 OS (RHEL 9, RockyLinux 9, AlmaLinux 9, etc).
