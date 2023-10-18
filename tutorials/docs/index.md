@@ -4,7 +4,7 @@
 
 <div class="comment-tile">
     <div class="comment-tile-image">
-        <img src="../images/global/Ash.png" alt="Image Description" width="96" height="96">
+        <img src="images/global/Ash.png" alt="Image Description" width="96" height="96">
     </div>
     <div class="comment-tile-text">
         <p>Welcome on BlueBanquise tutorials!</p>
