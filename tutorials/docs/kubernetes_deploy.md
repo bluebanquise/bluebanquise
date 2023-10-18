@@ -1,7 +1,7 @@
 # Deploy a local Kubernetes cluster
 
-You can rely on the [servers farm deployment tutorial](servers_farm_deployment.md) seen before to deploy the low lever layer of nodes cluster.
-And on the [Ansible](ansible.md) tutorial to learn how to use and configure Ansible.
+You can rely on the [servers farm deployment tutorial](sysadmin_servers_farm_deployment.md) seen before to deploy the low lever layer of nodes cluster.
+And on the [Ansible](sysadmin_ansible.md) tutorial to learn how to use and configure Ansible.
 
 While the first tutorial was is in charge of provisioning bare metal / on premise infrastructure, we will use Kubespray here to deploy a production ready Kubernetes cluster over this infrastructure.
 
@@ -9,7 +9,7 @@ This result in 2 layers on the hardware, both autonomous but working together.
 
 <div class="comment-tile">
     <div class="comment-tile-image">
-        <img src="/images/global/Zohar.png" alt="Image Description" width="96" height="96">
+        <img src="../images/global/Ash.png" alt="Image Description" width="96" height="96">
     </div>
     <div class="comment-tile-text">
         <p>Small tip: when possible, try to isolate your layers: bare metal is managed by bare metal, kubernetes is managed by kubernetes. Mixing layers always end up in an unmaintanable cluster.</p>
@@ -36,8 +36,8 @@ Note: you can merge hap1/hap2 with hap3/hap4 to only have 2 nodes in/out (or eve
 
 ### Install management node
 
-We will assume here that you already used the [servers farm deployment tutorial](servers_farm_deployment.md) to deploy all needed hosts and that the cluster is ready.
-We assume here that the cluster is based on Ubuntu 20.04. See end of [servers farm deployment tutorial](servers_farm_deployment.md) page on how to deploy Ubuntu if needed.
+We will assume here that you already used the [servers farm deployment tutorial](sysadmin_servers_farm_deployment.md) to deploy all needed hosts and that the cluster is ready.
+We assume here that the cluster is based on Ubuntu 20.04. See end of [servers farm deployment tutorial](sysadmin_servers_farm_deployment.md) page on how to deploy Ubuntu if needed.
 
 First step is to have Ansible installed to be able to use Kubespray, and also ensure all nodes have access to the web. We will configure our Ansible node as a gateway, but this could be another node. Please adapt to your infrastructure.
 

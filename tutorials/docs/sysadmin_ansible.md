@@ -1,6 +1,6 @@
 # Ansible
 
-This section tries to provide key knowledge about Ansible to at least be able to reproduce what was done in [servers farm deployment tutorial](servers_farm_deployment.md) in an automated way.
+This section tries to provide key knowledge about Ansible to at least be able to reproduce what was done in [servers farm deployment tutorial](sysadmin_servers_farm_deployment.md) in an automated way.
 
 **IMPORTANT**: We will assume here that user used to perform operations is a passwordless sudo able user on the target system.
 
@@ -14,7 +14,7 @@ If you wish only to learn Ansible, simplest way is
 
 <div class="comment-tile">
     <div class="comment-tile-image">
-        <img src="/images/global/Zohar.png" alt="Image Description" width="96" height="96">
+        <img src="../images/global/Ash.png" alt="Image Description" width="96" height="96">
     </div>
     <div class="comment-tile-text">
         <p>If you wish to install Ansible on a production system, you can use your operating system
@@ -484,7 +484,7 @@ Perfect.
 
 <div class="comment-tile">
     <div class="comment-tile-image">
-        <img src="/images/global/Zohar.png" alt="Image Description" width="96" height="96">
+        <img src="../images/global/Ash.png" alt="Image Description" width="96" height="96">
     </div>
     <div class="comment-tile-text">
         <p>Note: We could also have used a file in inventory/host_vars/management1/new_values..
@@ -535,7 +535,7 @@ And check variables of hosts:
 
 <div class="comment-tile">
     <div class="comment-tile-image">
-        <img src="/images/global/Zohar.png" alt="Image Description" width="96" height="96">
+        <img src="../images/global/Ash.png" alt="Image Description" width="96" height="96">
     </div>
     <div class="comment-tile-text">
         <p>We had to add the whole dictionary in group_vars/clients/myship.yml.
@@ -1351,7 +1351,7 @@ You can see that we defined `tata` variable, and that another variable called `t
 
 Now create a minimal playbook at $HOME/minimal_playbook.yml with the following content:
 
-```yaml
+```yaml title="minimal_playbook.yml"
 ---
   - name: "Playing with Ansible and Git"
     hosts: localhost
@@ -1405,9 +1405,9 @@ hesitate to ask me to add elements.
 
 <div class="comment-tile">
     <div class="comment-tile-image">
-        <img src="/images/global/Zohar.png" alt="Image Description" width="96" height="96">
+        <img src="../images/global/Ash_happy.png" alt="Image Description" width="96" height="96">
     </div>
     <div class="comment-tile-text">
-        <p>One last word: Configuration tools like Ansible are not made to replace administration commands and scripts. Trying to do everything with an automation tool is wrong and a huge waste of efforts and time. It has been made to deploy configurations in an idempotent manner. (Example: using Ansible to simply power on / power off servers in day to day usage is absolutely not a good idea...). Don't listen fan boys, stay on earth.</p>
+        <p>Thank you for following this tutorial! One last word: Configuration tools like Ansible are not made to replace administration commands and scripts. Trying to do everything with an automation tool is wrong and a huge waste of efforts and time. It has been made to deploy configurations in an idempotent manner.</p>
     </div>
 </div>

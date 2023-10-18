@@ -4,7 +4,7 @@
     border: 1px solid #ccc;
     max-width: 100%; /* Adjust the width as needed */
     margin: 20px 0px;
-    background: #2e2e2e;
+    background: #e6e6e6;
 }
 
 /* Style for the image container on the left */
@@ -24,7 +24,7 @@
 /* Style for the text container on the right */
 .comment-tile-text {
     flex: 1; /* Allow it to grow and take remaining space */
-    padding: 10px;
-    color: #fafafade;
+    padding: 2px 10px;
+    color: #222222de;
     font-size: .6rem;
 }

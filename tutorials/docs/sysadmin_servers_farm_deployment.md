@@ -6,22 +6,20 @@ This tutorial will focus on simplicity, lightness and good practices.
 All software used are very common and when facing an error, a quick look on the
 web will most of the time solves the issue.
 
-If you face any issues with this tutorial, do not hesitate to contact me at:
-`contact@bluebanquise.com`
+If you face any issues with this tutorial, do not hesitate to open an issue on the BlueBanquise github.
 
 <div class="comment-tile">
     <div class="comment-tile-image">
-        <img src="/images/global/Zohar.png" alt="Image Description" width="96" height="96">
+        <img src="../images/global/Ash.png" alt="Image Description" width="96" height="96">
     </div>
     <div class="comment-tile-text">
         <p>This tutorial is based on EL 9 OS (RHEL 9, RockyLinux 9, AlmaLinux 9, etc).
-Most of the configurations provided here are portable on other distributions (Ubuntu, Debian, Open Suse).
-In annexes, I will detail how to port this to other distributions.</p>
+Most of this page is portable on other distributions.
+In annexes, I will detail how to deploy via PXE the other common distributions.</p>
     </div>
 </div>
 
-
-## 1. Hardware requirements
+## Hardware requirements
 
 The following hardware is needed to perform this training:
 
@@ -35,7 +33,7 @@ Laptop/workstation with 16go or more, and 100Go disk. VT-x instructions MUST be 
 **Best configuration to do the training:**
 A real cluster, with real physical servers.
 
-## 2. Useful commands
+## Useful commands
 
 General commands:
 
@@ -71,9 +69,9 @@ Clush usage (if clustershell has been installed on system):
 * To copy a file on all nodes : `clush -w node1,node[4-5] --copy /root/slurm.conf --dest=/etc/slurm/slurm.conf`
 * To replace a string in a file of all nodes : `clush -bw compute1[34-67] 'sed -i "s/10.0.0.1/nfsserver/g" /etc/fstab'`
 
-## 3. Vocabulary
+## Vocabulary
 
-### 3.1. Basic concepts
+### Basic concepts
 
 Few words on vocabulary used:
 
@@ -93,7 +91,7 @@ Few words on vocabulary used:
 
 An cluster can be seen like a sheep flock. The admin sys (shepherd), the management node (shepherd dog), and the worker nodes (sheep). This leads to two types of nodes, like cloud computing: pets (shepherd dog) and cattle (sheep). While the safety of your pets must be absolute for good production, losing cattle is common and considered normal. In HPC (High Performance Computing) for example, most of the time, management node, file system (io) nodes, etc, are considered as pets. On the other hand, compute nodes and login nodes are considered cattle. Same philosophy apply for file systems: some must be safe, others can be faster but “losable”, and users have to understand it and take precautions (backup data).
 
-### 3.2. Basic words
+### Basic words
 
 An cluster is an aggregate of physical compute nodes dedicated to perform tasks, hosts resources, or execute intensive calculations.
 On some clusters, like HPC clusters, users will be able to login through ssh on dedicated nodes (called login nodes),
@@ -120,7 +118,7 @@ Management node, called here `odin`, is the node hosting most of vital services 
 
 On some expensive clusters, **Interconnect** network, often based on the **InfiniBand** technology (IB), is used in parallel of the Ethernet network (Eth). Interconnect is mainly used for calculations (transfer data between process of running codes) and is used to export the fast file systems, exported by the IO nodes. InfiniBand has much lower latency and much higher bandwidth than legacy Ethernet network.
 
-### 3.3. Understanding services
+### Understanding services
 
 As said above, management node host multiple basic services needed to run the cluster:
 * The **repository** server: based on http protocol, it provides packages (rpm) to all nodes of the cluster. Service is `httpd` (Apache).
@@ -136,16 +134,16 @@ As said above, management node host multiple basic services needed to run the cl
 
 <div class="comment-tile">
     <div class="comment-tile-image">
-        <img src="/images/global/Zohar.png" alt="Image Description" width="96" height="96">
+        <img src="../images/global/Ash.png" alt="Image Description" width="96" height="96">
     </div>
     <div class="comment-tile-text">
         <p>Small tip: never neglect monitoring, especially during cluster deployment. An healty cluster makes an happy admin, able to play strategy games while the cluster is purring...</p>
     </div>
 </div>
 
-## 4. Cluster description
+## Cluster description
 
-### 4.1. Architecture
+### Architecture
 
 The cluster structure for this training will be as follows:
 
@@ -160,7 +158,7 @@ On the hardware side:
 
 This architecture is similar to HPC clusters, but is very generic. A web farm would replace the login node by a gateway or a load balancer, a Blender rendering farm would just skip the login node, etc.
 
-### 4.2. Network
+### Network
 
 Network information:
 
@@ -177,7 +175,7 @@ Domain name will be `cluster.local`.
 Note: if you plan to test this tutorial in Virtualbox, 10.10.X.X range may
 already been taken by Virtualbox NAT. In this case, use another subnet like 10.77.X.X.
 
-### 4.3. Final notes before we start
+### Final notes before we start
 
 All nodes will be installed with a minimal install AlmaLinux 9. Needed other packages (rpms)
 will be created on the fly from sources.
@@ -188,7 +186,7 @@ will be created on the fly from sources.
 * You can edit files using `vim` which is a powerful tool, but if you feel more comfortable with, use `nano` (`nano myfile.txt`, then edit file, then use `Ctrl+O` to save, and `Ctrl+X` to exit). There is a very nice tutorial online for Vim, investing in it worth it on the long term.
 * Keep cool, and take fresh air when its not working as expected.
 
-## 5. Management node installation
+## Management node installation
 
 This part describes how to manually install `odin` management node basic services, needed to deploy and install the other servers.
 
@@ -221,7 +219,7 @@ We will use **NetworkManager** to handle network. `nmcli` is the command to inte
 
 <div class="comment-tile">
     <div class="comment-tile-image">
-        <img src="/images/global/Zohar.png" alt="Image Description" width="96" height="96">
+        <img src="../images/global/Ash.png" alt="Image Description" width="96" height="96">
     </div>
     <div class="comment-tile-text">
         <p>Note about NetworkManager: some say its bad, some say its good. It depends of admin tastes. Use it if you feel confortable with it, or use systemd-networkd if you prefer. Best idea to me is to use what is default on the system: NetworkManager on RHEL like distributions and Suse, systemd-networkd on Ubuntu and Debian.</p>
@@ -246,9 +244,9 @@ You should see your NICs with `enp0s8` having ip `10.10.0.1` with `/16` prefix.
 
 Time to setup basic repositories.
 
-### 5.1. Setup basic repositories
+### Setup basic repositories
 
-#### 5.1.1. Main OS
+#### Main OS
 
 Backup and clean first default AlmaLinux repositories:
 
@@ -347,7 +345,7 @@ dnf repolist
 dnf install wget
 ```
 
-#### 5.1.2. Other repositories
+#### Other repositories
 
 We will need to add extra packages as not all is contained in the AlmaLinux 9 DVD.
 Create extra repository folder:
@@ -393,7 +391,7 @@ Also, install ipmitool if using an IPMI compatible cluster, these will be used f
 dnf install ipmitool
 ```
 
-### 5.2. DHCP server
+### DHCP server
 
 The DHCP server is used to assign ip addresses and hostnames to other nodes. It is the first server seen by a new node booting in PXE for installation. In this configuration, it is assumed MAC addresses of nodes are known.
 
@@ -469,7 +467,7 @@ Finally, start and enable the dhcp service:
 
 <div class="comment-tile">
     <div class="comment-tile-image">
-        <img src="/images/global/Zohar.png" alt="Image Description" width="96" height="96">
+        <img src="../images/global/Ash.png" alt="Image Description" width="96" height="96">
     </div>
     <div class="comment-tile-text">
         <p>&#x26A0; WARNING &#x26A0;: only enable the DHCP service if you are on an isolated network, as in opposite to the other services, it may disturb the network if another DHCP is on this network.</p>
@@ -489,7 +487,7 @@ nmap 10.10.254.0-254
 
 This is useful to check after a cluster installation that no equipment connected on the network was forgotten in the process, since registered nodes in the DHCP should not be in this range.
 
-### 5.3. DNS server
+### DNS server
 
 DNS server provides on the network ip/hostname relation to all hosts:
 
@@ -631,41 +629,20 @@ management node.
 
 The old way was to edit the `/etc/resolv.conf`. However, when using NetworkManager or systemd-netword, this is bad idea and we should update DNS directly in these tools.
 
-WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
-WWWWWWWWWWWWWWWWW
-
-To do so, edit `/etc/resolv.conf` and add the following (but keep your primary dns after the one of the cluster to be able to resolv other hosts over the web):
-
 ```
-search cluster.local
-nameserver 10.10.0.1
+nmcli con mod enp0s8 ipv4.dns "10.10.0.1"
 ```
 
-So for example, my final file at home is:
+You can check NIC configuration using:
 
 ```
-nameserver 10.10.0.1
-search home cluster.local
-nameserver 192.168.1.1
-nameserver 2a01:cb08:8acc:b600:a63e:51ff:fe14:f413
-nameserver fe80::a63e:51ff:fe14:f413%enp0s3
+nmlci con show enp0s8
 ```
-
-Which allows me to resolv `thor` or `google.com`.
-
-Note: you may wish to prevent other scripts (dhclient for example) to edit the file.
-If using an ext4 filesystem, it is possible to lock the file using:
-
-```
-chattr +i /etc/resolv.conf
-```
-
-Use `-i` to unlock it later.
 
 DNS is now ready. You can try to ping `odin` and see if it works.
 Stop DNS service and try again to see it does not resolve ip anymore.
 
-### 5.4. Hosts file
+### Hosts file
 
 An alternative or in complement to DNS, most system administrators setup an hosts file.
 
@@ -687,7 +664,7 @@ Lets create our hosts file. Edit `/etc/hosts` file and have it match the followi
 
 You can now try to stop DNS server and check that now, even with the DNS stopped, we can resolve and ping `odin`.
 
-### 5.5. Time server
+### Time server
 
 The time server provides date and time to ensure all nodes/servers are synchronized. This is VERY important, as many authentication tools (munge, ldap, etc.) will not work if cluster is not clock synchronized. If something fail to authenticate, one of the first debug move is to check clock are synchronized.
 
@@ -732,7 +709,7 @@ systemctl restart chronyd
 systemctl enable chronyd
 ```
 
-### 5.6. PXE stack
+### PXE stack
 
 PXE, for Preboot Execution Environment, is a mechanism that allows remote hosts to boot from the network and deploy operating system using configuration and packages from the management node.
 
@@ -744,14 +721,14 @@ Note that the AlmaLinux already embed a very basic tftp server. But it cannot ha
 
 <div class="comment-tile">
     <div class="comment-tile-image">
-        <img src="/images/global/Zohar.png" alt="Image Description" width="96" height="96">
+        <img src="../images/global/Ash.png" alt="Image Description" width="96" height="96">
     </div>
     <div class="comment-tile-text">
         <p>PXE is the most tricky part, as you will face all possible issues: hardware issues, bad cabling, firewalls, Vlans issues, stupid BIOS or BMCs, etc. Always try with a very simple network (flat, no vlans, no firewalls), and ensure you can deploy OS before complexify and secure the cluster and the network.</p>
     </div>
 </div>
 
-#### 5.6.1. fbtftp module
+#### fbtftp module
 
 Lets grab python module first:
 
@@ -766,7 +743,7 @@ tar cvzf fbtftp-0.5.tar.gz fbtftp-0.5
 rpmbuild -ta fbtftp-0.5.tar.gz
 ```
 
-#### 5.6.2. fbtftp custom server
+#### fbtftp custom server
 
 Now create a custom tftp server based on fbtftp. Create first needed folders:
 
@@ -995,14 +972,14 @@ Now install both packages:
 dnf install fbtftp_server -y
 ```
 
-#### 5.6.3. iPXE custom rom
+#### iPXE custom rom
 
 We then need ipxe files. We could use native syslinux or shim.efi files, but this is just not flexible enough for new generation clusters.
 We will build our own ipxe roms, and include our own init script.
 
 <div class="comment-tile">
     <div class="comment-tile-image">
-        <img src="/images/global/Zohar.png" alt="Image Description" width="96" height="96">
+        <img src="../images/global/Ash.png" alt="Image Description" width="96" height="96">
     </div>
     <div class="comment-tile-text">
         <p>Small tip: ipxe allows you to build raw roms (the ones we will use in this tutorial), but also iso or usb image that contains the rom. This is VERY (VERY!!!!) useful when you need to boot a stupidely made node with a weird BIOS or some network cards that does not boot over PXE.</p>
@@ -1113,7 +1090,7 @@ systemctl start fbtftp_server
 systemctl enable fbtftp_server
 ```
 
-#### 5.6.4. iPXE chain
+#### iPXE chain
 
 Now we will create file `/var/www/html/boot.ipxe` that will be targeted by each node booting.
 There are multiple strategy here. We could simply add basic boot information in this file and consider it done.
@@ -1186,7 +1163,7 @@ and create the link from here with a relative path.
 
 To summarize, chain will be the following: `DHCP -> {undionly.kpxe|ipxe.efi} -> boot.ipxe -> thor.ipxe (group_storage.ipxe)` .
 
-#### 5.6.5. Kickstart
+#### Kickstart
 
 We now need to provide a kickstart file.
 
@@ -1307,9 +1284,9 @@ systemctl enable fbtftp_server
 
 We can proceed with the boot of `thor` node, and then the other nodes.
 
-## 6. Other nodes installation
+## Other nodes installation
 
-### 6.1. Boot over PXE
+### Boot over PXE
 
 Open 2 shell on `odin`. In the first one, launch watch logs of dhcp and tftp server using:
 
@@ -1333,7 +1310,7 @@ Repeat this operation to deploy each nodes of your cluster.
 
 <div class="comment-tile">
     <div class="comment-tile-image">
-        <img src="/images/global/Zohar.png" alt="Image Description" width="96" height="96">
+        <img src="../images/global/Ash.png" alt="Image Description" width="96" height="96">
     </div>
     <div class="comment-tile-text">
         <p>Note: if you let nodes boot over PXE after reboot, they will again deploy, and enter in an infinite deployment loop.
@@ -1342,13 +1319,13 @@ There are strategies to solve that automatically, but this is out of the scope o
 </div>
 
 
-### 6.2. Configure client side
+### Configure client side
 
 Now that other nodes are deployed and reachable over ssh, it is time to configure client side on them.
 
 We will use clustershell (clush) a lot, as it allows to manipulate a lot of hosts over ssh at the same time. You can install clustershell either via packages (EPEL) either via pip.
 
-#### 6.2.1. Set hostname
+#### Set hostname
 
 Set hostname on each nodes using the following command (tuned for each nodes of course):
 
@@ -1356,7 +1333,7 @@ Set hostname on each nodes using the following command (tuned for each nodes of 
 hostnamectl set-hostname thor.cluster.local
 ```
 
-#### 6.2.2. Configure repositories
+#### Configure repositories
 
 You need the nodes be able to grab packages from `odin`.
 
@@ -1413,11 +1390,11 @@ clush -bw thor,heimdall,valkyrie[01-02] 'dnf update -y'
 clush -bw thor,heimdall,valkyrie[01-02] 'dnf install wget -y'
 ```
 
-#### 6.2.3. DNS client
+#### DNS client
 
 IF not already automatically done from DHCP, on each client node, set `odin` as default DNS server by using previously seen nmcli commands (take this opportunity to set static ips on hosts).
 
-#### 6.2.4. Hosts file
+#### Hosts file
 
 On each client, edit `/etc/hosts` file and have it match the following:
 
@@ -1434,7 +1411,7 @@ On each client, edit `/etc/hosts` file and have it match the following:
 
 You can also simply upload the file from `odin` on clients, using clush.
 
-#### 6.2.5. Time client
+#### Time client
 
 On each client, ensure time server is `odin` sp that our cluster is time synchronised.
 
@@ -1509,12 +1486,12 @@ Again, you can use clush to do all these tasks in parallel on all client nodes.
 
 Our nodes are now configured with the very basic needs. Time to focus on storage.
 
-## 7. Storage
+## Storage
 
 Storage is hosted on `thor`. We will share `/home` and `/software` from this server.
 Then we will mount these directories on the login node `heimdall` and computes nodes `valkyrie01,valkyrie02`.
 
-### 7.1. NFS server
+### NFS server
 
 Ssh on `thor`.
 
@@ -1562,7 +1539,7 @@ showmount -e thor
 
 You should see the exports available on this server.
 
-### 7.2. NFS clients
+### NFS clients
 
 Ssh on `heimdall`.
 
@@ -1596,7 +1573,7 @@ And ensure they are mounted using `df` command.
 Redo these client steps on all other clients, so computes nodes `valkyrie01,valkyrie02`,
 so that the exported folders are available on each nodes where users interact.
 
-## 9. Users
+## Users
 
 To have users on the cluster, you need to have the users registered on each node, with same pid and same group gid.
 
@@ -1627,7 +1604,7 @@ Also, use number above 2000 to avoid issues or conflict with possible system ids
 It is important to understand that using manual methods to add users may seems simple, but has a major drawback: the cluster can quickly become out of synchronization regarding users.
 To prevent that, you can create scripts, rely on automation tools like Ansible, or use a centralized users database (OpenLDAP, etc.).
 
-## 10. Infiniband (optional)
+## Infiniband (optional)
 
 If you need InfiniBand support on nodes, simply install the package group related:
 
@@ -1644,7 +1621,7 @@ systemctl enable rdma
 
 You should now see the ib0 interface in the NIC list from `ip a`.
 
-## 11. Nvidia GPU (optional)
+## Nvidia GPU (optional)
 
 To setup an GPU, you need to:
 
@@ -1656,7 +1633,7 @@ You can then install CUDA build and runtime environment on a shared space, or on
 
 Lets do that step by step.
 
-### 11.1. Ensure kernel do not crash
+### Ensure kernel do not crash
 
 To prevent kernel from crashing at boot (Kernel Panic) due to too recent GPU hardware, edit the ipxe file that contains the kernel line
 (for example file `/var/www/html/nodes_groups/group_compute_gpu.ipxe` and append `nomodeset` to the kernel line. For example:
@@ -1700,7 +1677,7 @@ bootloader --append="nomodeset" --location=mbr
 
 Node should not crash anymore.
 
-### 11.2. Disable nouveau driver
+### Disable nouveau driver
 
 Again, redo the same process than before, but add another kernel parameter: `modprobe.blacklist=nouveau nouveau.modeset=0 rd.driver.blacklist=nouveau`
 
@@ -1744,7 +1721,7 @@ bootloader --append="nomodeset modprobe.blacklist=nouveau nouveau.modeset=0 rd.d
 
 Now, node will boot without `nouveau` driver loaded.
 
-### 11.3. Install Nvidia driver
+### Install Nvidia driver
 
 Grab driver from Nvidia website, that match your hardware and Linux distribution (and arch).
 
@@ -2244,20 +2221,20 @@ Few notes:
 
 * You will need after boot to configure either NetworkManager or systemd-networkd if you wish to use a tool like Ansible or equivalent, as embed network manager does not seems to be supported by all these tools.
 
-## 12. Conclusion
+## Conclusion
 
 CONGRATULATION!! The cluster is ready to be used!!
 
-Next step now is to learn how to automate what we did here. Proposal in next tutorial is based on Ansible but you can user other tools like Salt Stak, Pupper, Chef, etc. >> [Ansible tutorial](ansible.md).
+Next step now is to learn how to automate what we did here. Proposal in next tutorial is based on Ansible but you can user other tools like Salt Stak, Pupper, Chef, etc. >> [Ansible tutorial](sysadmin_ansible.md).
 
-Or you can also specialize the cluster, with [HPC cluster tutorial](slurm.md) or [K8S cluster tutorial](deploy_kubernetes.md).
+Or you can also specialize the cluster, with [HPC cluster tutorial](hpc_slurm.md) or [K8S cluster tutorial](kubernetes_deploy.md).
 
 <div class="comment-tile">
     <div class="comment-tile-image">
-        <img src="/images/global/Zohar.png" alt="Image Description" width="96" height="96">
+        <img src="../images/global/Ash_happy.png" alt="Image Description" width="96" height="96">
     </div>
     <div class="comment-tile-text">
-        <p>Thank you for following this tutorial. If you find something is missing, or find an issue, please notify the old guy on github by opening an issue or a PR :)</p>
+        <p>Thank you for following this tutorial. If you find something is missing, or find an issue, please notify the me on github by opening an issue or a PR :)</p>
     </div>
 </div>
 
