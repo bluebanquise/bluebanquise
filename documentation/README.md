@@ -1,3 +1,7 @@
+WARNING !!!
+
+THIS DOCUMENTATION IS DEPRECATED AND IS UNDER REWORK.
+
 # BlueBanquise documentation
 
 Shields: [![CC BY-NC-SA 4.0][cc-by-nc-sa-shield]][cc-by-nc-sa]

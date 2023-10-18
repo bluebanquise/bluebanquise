@@ -1,4 +1,4 @@
-# Servers farm system administration
+# Servers farm deployment
 
 This tutorial tries to teach how to install manually a basic **servers farm**, also called a **cluster**.
 
@@ -6,14 +6,20 @@ This tutorial will focus on simplicity, lightness and good practices.
 All software used are very common and when facing an error, a quick look on the
 web will most of the time solves the issue.
 
-If you face any issues with this tutorial, do not hesitate to contact me at:
-benoit.leveugle@gmail.com
+If you face any issues with this tutorial, do not hesitate to open an issue on the BlueBanquise github.
 
-Important note: this tutorial is based on EL 9 OS (RHEL 9, RockyLinux 9, AlmaLinux 9, etc).
-Most of the configurations provided here are portable on other distributions (Ubuntu, Debian, Open Suse).
-In annexes, I will detail how to port this to other distributions.
+<div class="comment-tile">
+    <div class="comment-tile-image">
+        <img src="../images/global/Ash.png" alt="Image Description" width="96" height="96">
+    </div>
+    <div class="comment-tile-text">
+        <p>This tutorial is based on EL 9 OS (RHEL 9, RockyLinux 9, AlmaLinux 9, etc).
+Most of this page is portable on other distributions.
+In annexes, I will detail how to deploy via PXE the other common distributions.</p>
+    </div>
+</div>
 
-## 1. Hardware requirements
+## Hardware requirements
 
 The following hardware is needed to perform this training:
 
@@ -27,7 +33,7 @@ Laptop/workstation with 16go or more, and 100Go disk. VT-x instructions MUST be 
 **Best configuration to do the training:**
 A real cluster, with real physical servers.
 
-## 2. Useful commands
+## Useful commands
 
 General commands:
 
@@ -53,43 +59,42 @@ IPMI commands for remote control :
 * Control power (`reset` can be replaced with `soft` or `cycle` or `off` or `on` or `status`) : `ipmitool -I lanplus -H bmc5 -U user -P password chassis power reset`
 * Activate remote console (use `Enter`, then `&` then `.` to exit) : `ipmitool -H bmc5 -U user -P password -I lanplus -e \& sol activate`
 
-More: https://support.pivotal.io/hc/en-us/articles/206396927-How-to-work-on-IPMI-and-IPMITOOL
+More: [IPMI tool how to](https://support.pivotal.io/hc/en-us/articles/206396927-How-to-work-on-IPMI-and-IPMITOOL)
 
 Note: when using sol activate, if keyboard does not work, try using the same command into a screen, this may solve the issue (strangely...).
 
-Clush usage :
+Clush usage (if clustershell has been installed on system):
 
 * To do a command on all nodes : `clush -bw node1,node[4-5] "hostname"`
 * To copy a file on all nodes : `clush -w node1,node[4-5] --copy /root/slurm.conf --dest=/etc/slurm/slurm.conf`
 * To replace a string in a file of all nodes : `clush -bw compute1[34-67] 'sed -i "s/10.0.0.1/nfsserver/g" /etc/fstab'`
 
-## 3. Vocabulary
+## Vocabulary
 
-### 3.1. Basic concepts
+### Basic concepts
 
 Few words on vocabulary used:
 
-* To avoid confusion around "server" word:
-   * a **node** refers to a physical or virtual machine with an operating system on it.
-   * a **server** refer to a software daemon listening on the network.
+* To avoid confusion around "server" word, which can be used for software or hardware, we will keep this convention in this tutorial:
+   * a **node** or an **host** refers to a physical or virtual machine with an operating system on it.
+   * a **server** refer to a software daemon listening on the network (most of the time via a services mechanism like systemd).
 * A **NIC** is a network interface controller (the thing you plug the Ethernet cable in ツ).
    * Note that on some systems, a NIC can be shared between server mother board and server BMC. See that as a bridge, which involve some specific things. Tip: when debugging PXE, try to avoid this kind of configuration, and use a BMC dedicated link if available. When using a shared NIC, link often goes down during PXE process, which means losing remote console during the important part of the PXE process.
-* The **system administrator**, or sysadmin, will be you, the person in charge of managing the cluster.
+* The **system administrator**, or sysadmin, will be you, the person in charge of managing the cluster. It is often refered as the "root" or the "sudo" user.
 * Pets and Cattles
   * A pet node is a key node, that you MUST keep healthy and that is considered difficult to reinstall.
   * A cattle node, is a "trashable" node, that you consider non vital to production and that is considered easy to reinstall.
 
-![Pets and cattle](resources/hpc-meta.jpg)
+![Pets and cattle](images/servers_farm_deployment/sysadmin.jpg)
 
 (Original black and white image from Roger Rössing, otothek_df_roe-neg_0006125_016_Sch%C3%A4fer_vor_seiner_Schafherde_auf_einer_Wiese_im_Harz.jpg)
 
-An HPC cluster can be seen like a sheep flock. The admin sys (shepherd), the management node (shepherd dog), and the compute/login nodes (sheep). This leads to two types of nodes, like cloud computing: pets (shepherd dog) and cattle (sheep). While the safety of your pets must be absolute for good production, losing cattle is common and considered normal. In HPC (High Performance Computing) for example, most of the time, management node, file system (io) nodes, etc, are considered as pets. On the other hand, compute nodes and login nodes are considered cattle. Same philosophy apply for file systems: some must be safe, others can be faster but “losable”, and users have to understand it and take precautions. In this tutorial, /home will be considered safe, and /scratch fast but losable.
+An cluster can be seen like a sheep flock. The admin sys (shepherd), the management node (shepherd dog), and the worker nodes (sheep). This leads to two types of nodes, like cloud computing: pets (shepherd dog) and cattle (sheep). While the safety of your pets must be absolute for good production, losing cattle is common and considered normal. In HPC (High Performance Computing) for example, most of the time, management node, file system (io) nodes, etc, are considered as pets. On the other hand, compute nodes and login nodes are considered cattle. Same philosophy apply for file systems: some must be safe, others can be faster but “losable”, and users have to understand it and take precautions (backup data).
 
-### 3.2. Basic words
+### Basic words
 
-An HPC cluster is an aggregate of physical compute nodes dedicated to intensive calculations.
-Most of the time, these calculations are related to sciences, but can also be used in other domains, like finances.
-On general HPC clusters, users will be able to login through ssh on dedicated nodes (called login nodes),
+An cluster is an aggregate of physical compute nodes dedicated to perform tasks, hosts resources, or execute intensive calculations.
+On some clusters, like HPC clusters, users will be able to login through ssh on dedicated nodes (called login nodes),
 upload their code and data, then compile their code, and launch jobs (calculations) on the cluster.
 
 To maintain the cluster synchronized and to provide features, multiple **services** are running on management node.
@@ -97,12 +102,12 @@ To maintain the cluster synchronized and to provide features, multiple **service
 Most of the time, a cluster is composed of:
 
 * An **administration node** or **management node** (pet), whose purpose is to host all core resources of the cluster.
-* **IO nodes** (pet), whose purpose is to provide storage for users. Basic storage is based on NFS, and advanced storage (optional) on parallel file systems.
-* **Login nodes** (cattle), whose purpose is to be the place where users interact with the cluster and with the job scheduler, and manage their code and data.
-* **Compute nodes** (cattle), whose purpose is to provide calculation resources.
+* **IO nodes** (pet), whose purpose is to provide storage for users. Basic storage is based on NFS, and advanced storage (optional) on parallel file systems (POSIX or object based).
+* **Login nodes** (cattle), whose purpose is to be the place where users or admin can interact with the cluster. On an HPC cluster, this is where users login via ssh and interact with the job scheduler, and manage their code and data.
+* **Compute nodes** or **worker nodes** (cattle), whose purpose is to provide CPU/GPU resources.
 
-A node is the name given to a server inside an HPC cluster. Nodes are most of the time equipped with a **BMC**
-for Baseboard Management Controller, which is kind of a small server connected on the server motherboard and allow manipulating the server remotely (power on, power off, boot order, status, console, etc.).
+A node is the name given to a server inside a cluster. Nodes are most of the time equipped with a **BMC**
+for Baseboard Management Controller, which is kind of a small server connected on the server motherboard and allow manipulating the server remotely (power on, power off, boot order, status, console, etc.). Legacy BMCs are using IPMI protocal to communicate with, while new generation BMC are using http REST API (RedFish API). Unfortunately, many BMC are also using proprietary APIs. Note that standard BMCs also embed a small webserver, to be able to interact with via a web browser.
 
 Sometime, servers are **racked** into a **chassis** that can embed an **CMC** for Chassis Management Controller. Servers and chassis can be
 **racked** into a rack that can embed an **RMC** for Rack Management Controller.
@@ -111,69 +116,81 @@ On the **operating system** (OS), a **service** is a software daemon managed by 
 
 Management node, called here `odin`, is the node hosting most of vital services of the cluster.
 
-**Interconnect** network, often based on the **InfiniBand** technology (IB), is used in parallel of the Ethernet network (Eth). Interconnect is mainly used for calculations (transfer data between process of running codes) and is used to export the fast file systems, exported by the IO nodes. InfiniBand has much lower latency and much higher bandwidth than Ethernet network.
+On some expensive clusters, **Interconnect** network, often based on the **InfiniBand** technology (IB), is used in parallel of the Ethernet network (Eth). Interconnect is mainly used for calculations (transfer data between process of running codes) and is used to export the fast file systems, exported by the IO nodes. InfiniBand has much lower latency and much higher bandwidth than legacy Ethernet network.
 
-### 3.3. Understanding services
+### Understanding services
 
 As said above, management node host multiple basic services needed to run the cluster:
 * The **repository** server: based on http protocol, it provides packages (rpm) to all nodes of the cluster. Service is `httpd` (Apache).
-* The **tftp** server: based on tftp protocol, it provides PXE very basic files to initialize boot sequence on the remote servers. Service is `fbtftp` (Facebook Tftp), but could also be `atftp` or any other tftp server. Note that recent servers do not need a tftp server and can directly boot over http.
+* The **tftp** server: based on tftp protocol, it provides PXE very basic files to initialize boot sequence on the remote servers. Service is `fbtftp` (Facebook Tftp), but could also be `atftp` or any other tftp server. Note that recent servers do not need a tftp server and can directly boot over http (we keep tftp here for compatibility).
 * The **dhcp** server: provides ip for all nodes and BMC on the network. Ip are attributed using MAC addresses of network interfaces. Service is `dhcpd` (ISC DHCP).
 * The **dns** server: provides link between ip and hostname, and the opposite. Service is `named` (bind9).
 * The **time** server: provides a single and synchronized clock for all equipment of the cluster. More important than it seems. Service is `chronyd` (Chrony).
 * The **pxe stack**: represent the aggregate of the repository server, the tftp server, the dhcp server, the dns server and the time server. Used to deploy OS on nodes on the cluster using the network.
 * The **nfs** server: export simple storage spaces and allows nodes to mount these exported spaces locally (/home, /opt, etc. ). Service is `nfs-server`.
-* The **LDAP** server: provides centralized users authentication for all nodes. Is optional for small clusters. Service is `slapd` (OpenLDAP).
+* The **LDAP** server: provides centralized users authentication for all nodes. This is optional for some clusters. Service is `slapd` (OpenLDAP).
 * The **job scheduler** server (if specializing cluster to HPC): manage computational resources, and spread jobs from users on the cluster. Service is `slurmctld` (Slurm).
 * The **monitoring** server: monitor the cluster to provide metrics, and raise alerts in case of issues. Service is `prometheus` (Prometheus).
 
-## 4. Cluster description
+<div class="comment-tile">
+    <div class="comment-tile-image">
+        <img src="../images/global/Ash.png" alt="Image Description" width="96" height="96">
+    </div>
+    <div class="comment-tile-text">
+        <p>Small tip: never neglect monitoring, especially during cluster deployment. An healty cluster makes an happy admin, able to play strategy games while the cluster is purring...</p>
+    </div>
+</div>
 
-### 4.1. Architecture
+## Cluster description
+
+### Architecture
 
 The cluster structure for this training will be as follows:
 
-![Pets and cattle](pictures/cluster_schema.svg)
+![Cluster architecture](images/servers_farm_deployment/cluster_schema.svg)
 
 On the hardware side:
 
 * One master node called `odin`.
 * One storage node called `thor`, based one NFS, will be deployed, for /home and /software.
-* One login node called `heimdall` for users to login.
+* One external/internal node called `heimdall` for users to login or/and to act as a gateway.
 * Multiple compute nodes, called `valkyries` will then be deployed on the fly via PXE.
 
-### 4.2. Network
+This architecture is similar to HPC clusters, but is very generic. A web farm would replace the login node by a gateway or a load balancer, a Blender rendering farm would just skip the login node, etc.
+
+### Network
 
 Network information:
 
-The whole cluster will use a single subnet 10.10.0.0/16.
-IP used will be (nic name to be set depending of your hardware):
+The whole cluster will use a single subnet `10.10.0.0/16`.
+IP used will be (nic name to be set depending of your hardware, use `ip a` command to obtain your nic names, which can be ethX, enoX, enX, enpX, enp0sX, etc.):
 
 * odin: 10.10.0.1 (nic: enp0s3)
 * thor : 10.10.1.1 (nic: enp0s3)
 * heimdall: 10.10.2.1 (nic: enp0s3), 192.168.1.77 (nic: enp0s8) for users access
 * valkyrieX: 10.10.3.X (nic: enp0s3)
 
-Domain name will be cluster.local
+Domain name will be `cluster.local`.
 
 Note: if you plan to test this tutorial in Virtualbox, 10.10.X.X range may
-already been taken by Virtualbox NAT. In this case, use another subnet.
+already been taken by Virtualbox NAT. In this case, use another subnet like 10.77.X.X.
 
-### 4.3. Final notes before we start
+### Final notes before we start
 
-All nodes will be installed with a minimal install RockyLinux 9. Needed other packages (rpms)
+All nodes will be installed with a minimal install AlmaLinux 9. Needed other packages (rpms)
 will be created on the fly from sources.
 
 * To simplify this tutorial, firewall will be deactivated. You can reactivate it later.
-* We will keep SELinux enforced. When facing permission denied, try setting SELinux into permissive mode to check if that's the reason, or check selinux logs.
+* We will keep SELinux enforced. When facing permission denied, try setting SELinux into permissive mode to check if that's the reason, or check selinux logs. I know SELinux can be difficult to deal with, but keeping it enforced also forces you to avoid unexpected dangerous things.
 * If you get `Pane is dead` error during pxe install, most of the time increase RAM to minimum 1200 Mo or more and it should be ok.
-* You can edit files using `vim` which is a powerful tool, but if you feel more comfortable with, use `nano` (`nano myfile.txt`, then edit file, then use `Ctrl+O` to save, and `Ctrl+X` to exit).
+* You can edit files using `vim` which is a powerful tool, but if you feel more comfortable with, use `nano` (`nano myfile.txt`, then edit file, then use `Ctrl+O` to save, and `Ctrl+X` to exit). There is a very nice tutorial online for Vim, investing in it worth it on the long term.
+* Keep cool, and take fresh air when its not working as expected.
 
-## 5. Management node installation
+## Management node installation
 
 This part describes how to manually install `odin` management node basic services, needed to deploy and install the other servers.
 
-Install first system with Centos DVD image, and choose minimal install as package selection (Or server with GUI if you prefer. However, more packages installed means less security and less performance).
+Install first system with AlmaLinux DVD image (using an USB stick), and choose minimal install as package selection (Or server with GUI if you prefer. However, more packages installed means less security and less performance).
 
 Partition schema should be the following, without LVM but standard partitions:
 
@@ -181,7 +198,9 @@ Partition schema should be the following, without LVM but standard partitions:
 *	swap 4Go
 *	/ remaining space ext4
 
-Be extremely careful with time zone choice. This parameter is more important than it seems as time zone will be set in the kickstart file later, and MUST be the same than the one chosen here when installing `odin`. If you don’t know which one to use, choose America/Chicago, the same one chose in the kickstart example of this document.
+Note: you can learn how to use LVMs later.
+
+Be extremely careful with time zone choice. This parameter is more important than it seems as time zone will be set in the kickstart file later, and MUST be the same than the one chosen here when installing `odin`. If you don’t know which one to use, choose Europe/Brussels, the same one chose in the kickstart example of this document.
 After install and reboot, disable firewalld using:
 
 ```
@@ -197,6 +216,15 @@ hostnamectl set-hostname odin.cluster.local
 
 To start most services, we need the main NIC to be up and ready with an ip.
 We will use **NetworkManager** to handle network. `nmcli` is the command to interact with NetworkManager.
+
+<div class="comment-tile">
+    <div class="comment-tile-image">
+        <img src="../images/global/Ash.png" alt="Image Description" width="96" height="96">
+    </div>
+    <div class="comment-tile-text">
+        <p>Note about NetworkManager: some say its bad, some say its good. It depends of admin tastes. Use it if you feel confortable with it, or use systemd-networkd if you prefer. Best idea to me is to use what is default on the system: NetworkManager on RHEL like distributions and Suse, systemd-networkd on Ubuntu and Debian.</p>
+    </div>
+</div>
 
 Assuming main NIC name is `enp0s8`, to set `10.10.0.1/16` IP and subnet on it, use the following commands:
 
@@ -216,50 +244,50 @@ You should see your NICs with `enp0s8` having ip `10.10.0.1` with `/16` prefix.
 
 Time to setup basic repositories.
 
-### 5.1. Setup basic	repositories
+### Setup basic repositories
 
-#### 5.1.1. Main OS
+#### Main OS
 
-Backup and clean first default Centos repositories:
+Backup and clean first default AlmaLinux repositories:
 
 ```
 cp -a /etc/yum.repos.d/ /root/
 rm -f /etc/yum.repos.d/*
 ```
 
-The local repository allows the main server and other servers to install automatically rpm with correct dependencies without having to access web repository. All needed rpm are available in the Centos DVD.
+The local repository allows the main server and other servers to install automatically rpm with correct dependencies without having to access web repository. All needed rpm are available in the AlmaLinux DVD.
 
 Next step depends if you are using a Virtual Machine or a real server.
 
 3 ways to do:
 
-1. If you are using a real server, upload the Centos DVD in /root folder and mount it in /mnt (or mount it directly from CDROM):
+1. If you are using a real server, upload the AlmaLinux DVD in /root folder and mount it in /mnt (or mount it directly from CDROM):
 
 ```
-mount /root/CentOS-8-x86_64-Everything.iso /mnt
+mount /root/AlmaLinux-9-x86_64-Everything.iso /mnt
 ```
 
 Copy full iso (will be needed later for PXE), and use the database already on the DVD:
 
 ```
-mkdir -p /var/www/html/repositories/centos/8/x86_64/os/
-cp -a /mnt/* /var/www/html/repositories/centos/8/x86_64/os/
+mkdir -p /var/www/html/repositories/AlmaLinux/9/x86_64/os/
+cp -a /mnt/* /var/www/html/repositories/AlmaLinux/9/x86_64/os/
 restorecon -r /var/www/html/
 ```
 
 2. Or you can also simply mount the iso directly in the good folder:
 
 ```
-mkdir -p /var/www/html/repositories/centos/8/x86_64/os/
-mount /root/CentOS-8-x86_64-Everything.iso /var/www/html/repositories/centos/8/x86_64/os/
+mkdir -p /var/www/html/repositories/AlmaLinux/9/x86_64/os/
+mount /root/AlmaLinux-9-x86_64-Everything.iso /var/www/html/repositories/AlmaLinux/9/x86_64/os/
 restorecon -r /var/www/html/
 ```
 
 3. If you are using a Virtual Machine, simply create the folder and mount the ISO that you should have added into the virtual CDROM drive:
 
 ```
-mkdir -p /var/www/html/repositories/centos/8/x86_64/os/
-mount /dev/cdrom /var/www/html/repositories/centos/8/x86_64/os/
+mkdir -p /var/www/html/repositories/AlmaLinux/9/x86_64/os/
+mount /dev/cdrom /var/www/html/repositories/AlmaLinux/9/x86_64/os/
 restorecon -r /var/www/html/
 ```
 
@@ -268,16 +296,18 @@ Now, indicate the server the repository position (here local disk). To do so, ed
 ```
 [BaseOS]
 name=BaseOS
-baseurl=file:///var/www/html/repositories/centos/8/x86_64/os/BaseOS
+baseurl=file:///var/www/html/repositories/AlmaLinux/9/x86_64/os/BaseOS
 gpgcheck=0
 enabled=1
 
 [AppStream]
 name=AppStream
-baseurl=file:///var/www/html/repositories/centos/8/x86_64/os/AppStream
+baseurl=file:///var/www/html/repositories/AlmaLinux/9/x86_64/os/AppStream
 gpgcheck=0
 enabled=1
 ```
+
+Note: BaseOS provides basic rpms and tools, while AppStream provides different versions of very specific softwares (you can ask for a specific version of Apache http server for example).
 
 OS repositories are split between BaseOS and AppStream. Using this file, we will reach both.
 
@@ -291,18 +321,18 @@ systemctl start httpd
 
 The repository server is up, and listening. We can now use it to reach repositories, as any other servers on the cluster network will.
 
-Edit `/etc/yum.repos.d/os.repo` and set:
+Edit `/etc/yum.repos.d/os.repo` and update to:
 
 ```
 [BaseOS]
 name=BaseOS
-baseurl=http://10.10.0.1/repositories/centos/8/x86_64/os/BaseOS
+baseurl=http://10.10.0.1/repositories/AlmaLinux/9/x86_64/os/BaseOS
 gpgcheck=0
 enabled=1
 
 [AppStream]
 name=AppStream
-baseurl=http://10.10.0.1/repositories/centos/8/x86_64/os/AppStream
+baseurl=http://10.10.0.1/repositories/AlmaLinux/9/x86_64/os/AppStream
 gpgcheck=0
 enabled=1
 ```
@@ -315,29 +345,22 @@ dnf repolist
 dnf install wget
 ```
 
-#### 5.1.2. Other repositories
+#### Other repositories
 
-We will need to add extra packages as not all is contained in the Centos 8 DVD.
+We will need to add extra packages as not all is contained in the AlmaLinux 9 DVD.
 Create extra repository folder:
 
 ```
-mkdir -p /var/www/html/repositories/centos/8/x86_64/extra/
+mkdir -p /var/www/html/repositories/AlmaLinux/9/x86_64/extra/
 restorecon -r /var/www/html/
 ```
 
-Grab the packages from the web using wget:
-
-```
-wget https://fr2.rpmfind.net/linux/epel/8/Everything/x86_64/Packages/c/clustershell-1.8.3-2.el8.noarch.rpm -P /var/www/html/repositories/centos/8/x86_64/extra/
-wget https://fr2.rpmfind.net/linux/epel/8/Everything/x86_64/Packages/p/python3-clustershell-1.8.3-2.el8.noarch.rpm -P /var/www/html/repositories/centos/8/x86_64/extra/
-```
-
-We now need to create a new repository here using the dedicated command.
+We now need to create a new repository here using the dedicated command. This will be for now an empty repository.
 We must install this command first:
 
 ```
 dnf install -y createrepo
-createrepo /var/www/html/repositories/centos/8/x86_64/extra/
+createrepo /var/www/html/repositories/AlmaLinux/9/x86_64/extra/
 restorecon -r /var/www/html/
 ```
 
@@ -346,7 +369,7 @@ Then create dedicated repository file `/etc/yum.repos.d/extra.repo` with the fol
 ```
 [Extra]
 name=Extra
-baseurl=http://10.10.0.1/repositories/centos/8/x86_64/extra
+baseurl=http://10.10.0.1/repositories/AlmaLinux/9/x86_64/extra
 gpgcheck=0
 enabled=1
 ```
@@ -360,15 +383,15 @@ dnf install xorg-x11-utils xauth firefox
 ```
 
 Then login on node using `ssh -X -C` to be able to launch `firefox`. Note however that this can be extremely slow.
-A better way is to use ssh port forwarding features (`-L`), but this part is not covered this training.
+A better way is to use ssh port forwarding features (`-L`), this part is covered later in this training.
 
-Also, install clustershell and ipmitool, these will be used for computes nodes deployment and PXE tools.
+Also, install ipmitool if using an IPMI compatible cluster, these will be used for computes nodes deployment and PXE tools.
 
 ```
-dnf install clustershell ipmitool
+dnf install ipmitool
 ```
 
-### 5.2. DHCP server
+### DHCP server
 
 The DHCP server is used to assign ip addresses and hostnames to other nodes. It is the first server seen by a new node booting in PXE for installation. In this configuration, it is assumed MAC addresses of nodes are known.
 
@@ -438,9 +461,18 @@ host valkyrie02 {
 }
 ```
 
+Note: also add your server's BMC if any.
+
 Finally, start and enable the dhcp service:
 
-WARNING: only enable the DHCP service if you are on an isolated network, as in opposite to the other services, it may disturb the network if another DHCP is on this network.
+<div class="comment-tile">
+    <div class="comment-tile-image">
+        <img src="../images/global/Ash.png" alt="Image Description" width="96" height="96">
+    </div>
+    <div class="comment-tile-text">
+        <p>&#x26A0; WARNING &#x26A0;: only enable the DHCP service if you are on an isolated network, as in opposite to the other services, it may disturb the network if another DHCP is on this network.</p>
+    </div>
+</div>
 
 ```
 systemctl enable dhcpd
@@ -453,9 +485,9 @@ Note: if needed, you can search for nodes in `10.10.254.0-10.10.254.254` range u
 nmap 10.10.254.0-254
 ```
 
-This is useful to check after a cluster installation that no equipment connected on the network was forgotten in the process.
+This is useful to check after a cluster installation that no equipment connected on the network was forgotten in the process, since registered nodes in the DHCP should not be in this range.
 
-### 5.3. DNS server
+### DNS server
 
 DNS server provides on the network ip/hostname relation to all hosts:
 
@@ -470,7 +502,7 @@ dnf install bind
 
 Configuration includes 3 files: main configuration file, forward file, and reverse file. (You can separate files into more if you wish, not needed here).
 
-Main configuration file is `/etc/named.conf`, and should be as follow:
+Main configuration file is `/etc/named.conf`, and should be as follow (we are creating an isolated cluster, if not, configure recursion and forwarders, refer to Bind9 documentation):
 
 ```
 options {
@@ -592,44 +624,30 @@ systemctl enable named
 systemctl start named
 ```
 
-The server is up and running. We need to setup client part, even on out `odin`
-management node. To do so, edit `/etc/resolv.conf` and add the following (but keep your primary dns after the one of the cluster to be able to resolv other hosts over the web):
+The server is up and running. We need to setup client part, even on our `odin`
+management node.
+
+The old way was to edit the `/etc/resolv.conf`. However, when using NetworkManager or systemd-netword, this is bad idea and we should update DNS directly in these tools.
 
 ```
-search cluster.local
-nameserver 10.10.0.1
+nmcli con mod enp0s8 ipv4.dns "10.10.0.1"
 ```
 
-So for example, my final file at home is:
+You can check NIC configuration using:
 
 ```
-nameserver 10.10.0.1
-search home cluster.local
-nameserver 192.168.1.1
-nameserver 2a01:cb08:8acc:b600:a63e:51ff:fe14:f413
-nameserver fe80::a63e:51ff:fe14:f413%enp0s3
+nmlci con show enp0s8
 ```
-
-Which allows me to resolv `thor` or `google.com`.
-
-Note: you may wish to prevent other scripts (dhclient for example) to edit the file.
-If using an ext4 filesystem, it is possible to lock the file using:
-
-```
-chattr +i /etc/resolv.conf
-```
-
-Use `-i` to unlock it later.
 
 DNS is now ready. You can try to ping `odin` and see if it works.
 Stop DNS service and try again to see it does not resolve ip anymore.
 
-### 5.4. Hosts file
+### Hosts file
 
 An alternative or in complement to DNS, most system administrators setup an hosts file.
 
 The hosts file allows to resolve locally which ip belongs to which hostname if written inside. For small clusters, it can fully replace the DNS.
-On large cluster, most system administrators write inside at least key or critical hostnames and ip.
+On large cluster, most system administrators write inside at least key or critical hostnames and ip and uses a DNS.
 
 Lets create our hosts file. Edit `/etc/hosts` file and have it match the following:
 
@@ -646,7 +664,7 @@ Lets create our hosts file. Edit `/etc/hosts` file and have it match the followi
 
 You can now try to stop DNS server and check that now, even with the DNS stopped, we can resolve and ping `odin`.
 
-### 5.5. Time server
+### Time server
 
 The time server provides date and time to ensure all nodes/servers are synchronized. This is VERY important, as many authentication tools (munge, ldap, etc.) will not work if cluster is not clock synchronized. If something fail to authenticate, one of the first debug move is to check clock are synchronized.
 
@@ -656,10 +674,10 @@ Install needed packages:
 dnf install chrony
 ```
 
-Configuration file is `/etc/chrony.conf`.
+Configuration file is `/etc/chrony.conf`, for both client or/and server configuration, as chrony can act as both client and server at the same time (see time synchronisation as a chain).
 
 We will configure it to allow the local network to query time from this server.
-Also, because this is a poor clock source, we use a stratum 12.
+Also, because this is a poor clock source, we use a stratum 12 (the bigger, the badder time source is). This is purely virtual here, but idea is: if a client can reach multiple time servers, then it will sync with the higest stratum one available.
 
 The file content should be as bellow:
 
@@ -691,7 +709,7 @@ systemctl restart chronyd
 systemctl enable chronyd
 ```
 
-### 5.6. PXE stack
+### PXE stack
 
 PXE, for Preboot Execution Environment, is a mechanism that allows remote hosts to boot from the network and deploy operating system using configuration and packages from the management node.
 
@@ -699,9 +717,18 @@ It is now time to setup the PXE stack, which is composed of the dhcp server, the
 
 The http server will distribute the minimal kernel and initramfs for remote Linux booting, the kickstart autoinstall file for remote hosts to know how they should be installed, and the repositories for packages distribution. Some very basic files will be provided using tftp as this is the most compatible PXE protocol.
 
-Note that the Centos already embed a very basic tftp server. But it cannot handle an HPC cluster load, and so we replace it by the Facebook python based tftp server.
+Note that the AlmaLinux already embed a very basic tftp server. But it cannot handle a huge cluster load, and so we replace it by the Facebook python based tftp server.
 
-#### 5.6.1. fbtftp module
+<div class="comment-tile">
+    <div class="comment-tile-image">
+        <img src="../images/global/Ash.png" alt="Image Description" width="96" height="96">
+    </div>
+    <div class="comment-tile-text">
+        <p>PXE is the most tricky part, as you will face all possible issues: hardware issues, bad cabling, firewalls, Vlans issues, stupid BIOS or BMCs, etc. Always try with a very simple network (flat, no vlans, no firewalls), and ensure you can deploy OS before complexify and secure the cluster and the network.</p>
+    </div>
+</div>
+
+#### fbtftp module
 
 Lets grab python module first:
 
@@ -716,7 +743,7 @@ tar cvzf fbtftp-0.5.tar.gz fbtftp-0.5
 rpmbuild -ta fbtftp-0.5.tar.gz
 ```
 
-#### 5.6.2. fbtftp custom server
+#### fbtftp custom server
 
 Now create a custom tftp server based on fbtftp. Create first needed folders:
 
@@ -855,7 +882,7 @@ if __name__ == "__main__":
     main()
 ```
 
-This file is our custom server, that will use fbtftp module.
+This file is our custom server, that will use fbtftp module (you don't need to understand this code, just assume its our tftp server).
 
 Then create file `fbtftp_server-0.1/services/fbtftp_server.service` with the following content:
 
@@ -933,9 +960,9 @@ rpmbuild -ta fbtftp_server-0.1.tar.gz --target=noarch
 Copy both packages into our extra repository, update the repository:
 
 ```
-cp /root/rpmbuild/RPMS/noarch/fbtftp-0.5-1.noarch.rpm /var/www/html/repositories/centos/8/x86_64/extra/
-cp /root/rpmbuild/RPMS/noarch/fbtftp_server-0.1-1.el8.noarch.rpm /var/www/html/repositories/centos/8/x86_64/extra/
-createrepo /var/www/html/repositories/centos/8/x86_64/extra/
+cp /root/rpmbuild/RPMS/noarch/fbtftp-0.5-1.noarch.rpm /var/www/html/repositories/AlmaLinux/9/x86_64/extra/
+cp /root/rpmbuild/RPMS/noarch/fbtftp_server-0.1-1.el8.noarch.rpm /var/www/html/repositories/AlmaLinux/9/x86_64/extra/
+createrepo /var/www/html/repositories/AlmaLinux/9/x86_64/extra/
 dnf clean all
 ```
 
@@ -945,10 +972,19 @@ Now install both packages:
 dnf install fbtftp_server -y
 ```
 
-#### 5.6.3. iPXE custom rom
+#### iPXE custom rom
 
-We then need ipxe files. We could use native syslinux or shim.efi files, but this is just not flexible enough for new generation HPC clusters.
-Also, ipxe files provided by Centos are way too old. We will build them ourselves, and include our own init script.
+We then need ipxe files. We could use native syslinux or shim.efi files, but this is just not flexible enough for new generation clusters.
+We will build our own ipxe roms, and include our own init script.
+
+<div class="comment-tile">
+    <div class="comment-tile-image">
+        <img src="../images/global/Ash.png" alt="Image Description" width="96" height="96">
+    </div>
+    <div class="comment-tile-text">
+        <p>Small tip: ipxe allows you to build raw roms (the ones we will use in this tutorial), but also iso or usb image that contains the rom. This is VERY (VERY!!!!) useful when you need to boot a stupidely made node with a weird BIOS or some network cards that does not boot over PXE.</p>
+    </div>
+</div>
 
 Grab latest ipxe version from git.
 
@@ -1045,6 +1081,8 @@ cp bin-x86_64-efi/ipxe.efi /var/lib/tftpboot/
 cp bin/undionly.kpxe /var/lib/tftpboot/
 ```
 
+Note: some host do not boot without an **snponly** ipxe.efi version. Refer to ipxe documentation on how to build such rom.
+
 Finally, start fbtftp_server service:
 
 ```
@@ -1052,7 +1090,7 @@ systemctl start fbtftp_server
 systemctl enable fbtftp_server
 ```
 
-#### 5.6.4. iPXE chain
+#### iPXE chain
 
 Now we will create file `/var/www/html/boot.ipxe` that will be targeted by each node booting.
 There are multiple strategy here. We could simply add basic boot information in this file and consider it done.
@@ -1093,11 +1131,11 @@ echo +----------------------------------------------------+
 echo |
 echo | Loading kernel
 
-kernel http://${next-server}/repositories/centos/8/x86_64/os/images/pxeboot/vmlinuz initrd=initrd.img inst.stage2=http://${next-server}/repositories/centos/8/x86_64/os/ inst.repo=http://${next-server}/repositories/centos/8/x86_64/os/BaseOS/ ks=http://${next-server}/nodes_groups/group_storage.kickstart.cfg
+kernel http://${next-server}/repositories/AlmaLinux/9/x86_64/os/images/pxeboot/vmlinuz initrd=initrd.img inst.stage2=http://${next-server}/repositories/AlmaLinux/9/x86_64/os/ inst.repo=http://${next-server}/repositories/AlmaLinux/9/x86_64/os/BaseOS/ inst.ks=http://${next-server}/nodes_groups/group_storage.kickstart.cfg
 
 echo | Loading initial ramdisk ...
 
-initrd http://${next-server}/repositories/centos/8/x86_64/os/images/pxeboot/initrd.img
+initrd http://${next-server}/repositories/AlmaLinux/9/x86_64/os/images/pxeboot/initrd.img
 
 echo | ALL DONE! We are ready.
 echo | Downloaded images report:
@@ -1125,7 +1163,7 @@ and create the link from here with a relative path.
 
 To summarize, chain will be the following: `DHCP -> {undionly.kpxe|ipxe.efi} -> boot.ipxe -> thor.ipxe (group_storage.ipxe)` .
 
-#### 5.6.5. Kickstart
+#### Kickstart
 
 We now need to provide a kickstart file.
 
@@ -1230,7 +1268,7 @@ restorecon -R -v /root/.ssh
 Notes:
 
 * The ssh public key here will allow us to ssh on the remote hosts without having to provide a password.
-* We install only the absolute minimal operating system. It is strongly recommended to do the minimal amount of tasks during a kickstart.
+* We install only the absolute minimal operating system. It is strongly recommended to do the minimal amount of tasks during a kickstart as it is way simpler to debug things installing once system is running.
 * Important note: the time zone parameter is very important. Choose here the same than the one choose when installing the OS of `odin`. If you don’t know the one used, it can be found using: `ll /etc/localtime`
 * Ensure also your keyboard type is correct.
 * For compatibility purpose, this kickstart example does not specify which hard drive disk to use, but only locate first one and use it. Tune it later according to your needs.
@@ -1246,9 +1284,9 @@ systemctl enable fbtftp_server
 
 We can proceed with the boot of `thor` node, and then the other nodes.
 
-## 6. Other nodes installation
+## Other nodes installation
 
-### 6.1. Boot over PXE
+### Boot over PXE
 
 Open 2 shell on `odin`. In the first one, launch watch logs of dhcp and tftp server using:
 
@@ -1270,17 +1308,24 @@ over disk, and ensure operating system is booted before proceeding.
 
 Repeat this operation to deploy each nodes of your cluster.
 
-Note: if you let nodes boot over PXE after reboot, they will again deploy, and enter in an infinite deployment loop.
-There are strategy to solve that automatically, but this is out of the scope of this training. For now, simply change boot order after os deployment.
+<div class="comment-tile">
+    <div class="comment-tile-image">
+        <img src="../images/global/Ash.png" alt="Image Description" width="96" height="96">
+    </div>
+    <div class="comment-tile-text">
+        <p>Note: if you let nodes boot over PXE after reboot, they will again deploy, and enter in an infinite deployment loop.
+There are strategies to solve that automatically, but this is out of the scope of this training. For now, simply change boot order after os deployment.</p>
+    </div>
+</div>
 
 
-### 6.2. Configure client side
+### Configure client side
 
 Now that other nodes are deployed and reachable over ssh, it is time to configure client side on them.
 
-We will use clustershell (clush) a lot, as it allows to manipulate a lot of hosts over ssh at the same time.
+We will use clustershell (clush) a lot, as it allows to manipulate a lot of hosts over ssh at the same time. You can install clustershell either via packages (EPEL) either via pip.
 
-#### 6.2.1. Set hostname
+#### Set hostname
 
 Set hostname on each nodes using the following command (tuned for each nodes of course):
 
@@ -1288,7 +1333,7 @@ Set hostname on each nodes using the following command (tuned for each nodes of 
 hostnamectl set-hostname thor.cluster.local
 ```
 
-#### 6.2.2. Configure repositories
+#### Configure repositories
 
 You need the nodes be able to grab packages from `odin`.
 
@@ -1304,13 +1349,13 @@ Now create file `/etc/yum.repos.d/os.repo` with the following content:
 ```
 [BaseOS]
 name=BaseOS
-baseurl=http://10.10.0.1/repositories/centos/8/x86_64/os/BaseOS
+baseurl=http://10.10.0.1/repositories/AlmaLinux/9/x86_64/os/BaseOS
 gpgcheck=0
 enabled=1
 
 [AppStream]
 name=AppStream
-baseurl=http://10.10.0.1/repositories/centos/8/x86_64/os/AppStream
+baseurl=http://10.10.0.1/repositories/AlmaLinux/9/x86_64/os/AppStream
 gpgcheck=0
 enabled=1
 ```
@@ -1320,7 +1365,7 @@ And create file `/etc/yum.repos.d/extra.repo` with the following content:
 ```
 [Extra]
 name=Extra
-baseurl=http://10.10.0.1/repositories/centos/8/x86_64/extra
+baseurl=http://10.10.0.1/repositories/AlmaLinux/9/x86_64/extra
 gpgcheck=0
 enabled=1
 ```
@@ -1345,16 +1390,11 @@ clush -bw thor,heimdall,valkyrie[01-02] 'dnf update -y'
 clush -bw thor,heimdall,valkyrie[01-02] 'dnf install wget -y'
 ```
 
-#### 6.2.3. DNS client
+#### DNS client
 
-IF not already automatically done from DHCP, on each client node, set `odin` as default DNS server, by updating `/etc/resolv.conf` file with the following content:
+IF not already automatically done from DHCP, on each client node, set `odin` as default DNS server by using previously seen nmcli commands (take this opportunity to set static ips on hosts).
 
-```
-search cluster.local
-nameserver 10.10.0.1
-```
-
-#### 6.2.4. Hosts file
+#### Hosts file
 
 On each client, edit `/etc/hosts` file and have it match the following:
 
@@ -1371,7 +1411,7 @@ On each client, edit `/etc/hosts` file and have it match the following:
 
 You can also simply upload the file from `odin` on clients, using clush.
 
-#### 6.2.5. Time client
+#### Time client
 
 On each client, ensure time server is `odin` sp that our cluster is time synchronised.
 
@@ -1446,12 +1486,12 @@ Again, you can use clush to do all these tasks in parallel on all client nodes.
 
 Our nodes are now configured with the very basic needs. Time to focus on storage.
 
-## 7. Storage
+## Storage
 
 Storage is hosted on `thor`. We will share `/home` and `/software` from this server.
 Then we will mount these directories on the login node `heimdall` and computes nodes `valkyrie01,valkyrie02`.
 
-### 7.1. NFS server
+### NFS server
 
 Ssh on `thor`.
 
@@ -1499,7 +1539,7 @@ showmount -e thor
 
 You should see the exports available on this server.
 
-### 7.2. NFS clients
+### NFS clients
 
 Ssh on `heimdall`.
 
@@ -1533,545 +1573,7 @@ And ensure they are mounted using `df` command.
 Redo these client steps on all other clients, so computes nodes `valkyrie01,valkyrie02`,
 so that the exported folders are available on each nodes where users interact.
 
-## 8. Slurm
-
-Let's install now the cluster job scheduler, Slurm.
-
-First, we need to build packages. Grab Munge and Slurm sources.
-Munge will be used to handle authentication between Slurm daemons.
-
-Note: beware, links may change over time, especially Slurm from Schemd. You may need to update it.
-
-```
-wget https://github.com/dun/munge/releases/download/munge-0.5.14/munge-0.5.14.tar.xz
-dnf install bzip2-devel openssl-devel zlib-devel -y
-wget https://github.com/dun.gpg
-wget https://github.com/dun/munge/releases/download/munge-0.5.14/munge-0.5.14.tar.xz.asc
-rpmbuild -ta munge-0.5.14.tar.xz
-```
-
-Now install munge, as it is needed to build slurm:
-
-```
-cp /root/rpmbuild/RPMS/x86_64/munge-* /var/www/html/repositories/centos/8/x86_64/extra/
-createrepo /var/www/html/repositories/centos/8/x86_64/extra/
-dnf clean all
-dnf install munge munge-libs munge-devel
-```
-
-Now build slurm packages:
-
-```
-wget https://download.schedmd.com/slurm/slurm-20.11.7.tar.bz2
-dnf install munge munge-libs munge-devel
-dnf install pam-devel readline-devel perl-ExtUtils-MakeMaker
-dnf install mariadb mariadb-devel
-rpmbuild -ta slurm-20.11.7.tar.bz2
-cp /root/rpmbuild/RPMS/x86_64/slurm* /var/www/html/repositories/centos/8/x86_64/extra/
-createrepo /var/www/html/repositories/centos/8/x86_64/extra/
-dnf clean all
-```
-
-Slurm controller side is called slurmctld while on compute nodes, it is called slurmd .
-On the "submitter" node, no daemon except munge is required.
-
-Tip: if anything goes wrong with slurm, proceed as following:
-
-1. Ensure time is exactly the same on nodes. If time is different, munge based authentication will fail.
-2. Ensure munge daemon is started, and that munge key is the same on all hosts (check md5sum for example).
-3. Stop slurmctld and stop slurmd daemons, and start them in two different shells manually in debug + verbose mode: `slurmctld -D -vvvvvvv` in shell 1 on controller server, and `slurmd -D -vvvvvvv` in shell 2 on compute node.
-
-### 8.1. Controller
-
-Install munge needed packages:
-
-```
-dnf install munge munge-libs
-```
-
-And generate a munge key:
-
-```
-mungekey -c -f -k /etc/munge/munge.key
-chown munge:munge /etc/munge/munge.key
-```
-
-We will spread this key over all servers of the cluster.
-
-Lets start and enable munge daemon:
-
-```
-systemctl start munge
-systemctl enable munge
-```
-
-Now install slurm controller `slurmctld` packages:
-
-```
-dnf install slurm slurm-slurmctld -y
-groupadd -g 567 slurm
-useradd  -m -c "Slurm workload manager" -d /etc/slurm -u 567 -g slurm -s /bin/false slurm
-mkdir /etc/slurm
-mkdir /var/log/slurm
-mkdir -p /var/spool/slurmd/StateSave
-chown -R slurm:slurm /var/log/slurm
-chown -R slurm:slurm /var/spool/slurmd
-```
-
-Lets create a very minimal slurm configuration.
-
-Create file `/etc/slurm/slurm.conf` with the following content:
-
-```
-# Documentation:
-# https://slurm.schedmd.com/slurm.conf.html
-
-## Controller
-ClusterName=valhalla
-ControlMachine=odin
-
-## Authentication
-SlurmUser=slurm
-AuthType=auth/munge
-CryptoType=crypto/munge
-
-## Files path
-StateSaveLocation=/var/spool/slurmd/StateSave
-SlurmdSpoolDir=/var/spool/slurmd/slurmd
-SlurmctldPidFile=/var/run/slurmctld.pid
-SlurmdPidFile=/var/run/slurmd.pid
-
-## Logging
-SlurmctldDebug=5
-SlurmdDebug=5
-
-## We don't want a node to go back in pool without sys admin acknowledgement
-ReturnToService=0
-
-## Using pmi/pmi2/pmix interface for MPI
-MpiDefault=pmi2
-
-## Basic scheduling based on nodes
-SchedulerType=sched/backfill
-SelectType=select/linear
-
-## Nodes definition
-NodeName=valkyrie01 Procs=1
-NodeName=valkyrie02 Procs=1
-
-## Partitions definition
-PartitionName=all MaxTime=INFINITE State=UP Default=YES Nodes=valkyrie01,valkyrie02
-```
-
-Also create file `/etc/slurm/cgroup.conf` with the following content:
-
-```
-CgroupAutomount=yes
-ConstrainCores=yes
-```
-
-And start slurm controller:
-
-```
-systemctl start slurmctld
-systemctl enable slurmctld
-```
-
-Using `sinfo` command, you should now see the cluster start, with both computes nodes down for now.
-
-### 8.2. Computes nodes
-
-On both `valkyrie01,valkyrie02` nodes, install munge the same way than on controller.
-
-```
-clush -bw valkyrie01,valkyrie02 dnf install munge -y
-```
-
-Ensure munge key generated on controller node is spread on each client. From `odin`, scp the file:
-
-```
-clush -w valkyrie01,valkyrie02 --copy /etc/munge/munge.key --dest /etc/munge/munge.key
-clush -bw valkyrie01,valkyrie02 chown munge:munge /etc/munge/munge.key
-```
-
-And start munge on each compute node:
-
-```
-clush -bw valkyrie01,valkyrie02 systemctl start munge
-clush -bw valkyrie01,valkyrie02 systemctl enable munge
-```
-
-Now on each compute node, install slurmd needed packages:
-
-```
-clush -bw valkyrie01,valkyrie02 dnf clean all
-clush -bw valkyrie01,valkyrie02 dnf install slurm slurm-slurmd -y
-```
-
-Now again, spread same slurm configuration files from `odin` to each compute nodes:
-
-```
-clush -bw valkyrie01,valkyrie02 groupadd -g 567 slurm
-clush -bw valkyrie01,valkyrie02 'useradd  -m -c "Slurm workload manager" -d /etc/slurm -u 567 -g slurm -s /bin/false slurm'
-clush -bw valkyrie01,valkyrie02 mkdir /etc/slurm
-clush -bw valkyrie01,valkyrie02 mkdir /var/log/slurm
-clush -bw valkyrie01,valkyrie02 mkdir -p /var/spool/slurmd/slurmd
-clush -bw valkyrie01,valkyrie02 chown -R slurm:slurm /var/log/slurm
-clush -bw valkyrie01,valkyrie02 chown -R slurm:slurm /var/spool/slurmd
-clush -w valkyrie01,valkyrie02 --copy /etc/slurm/slurm.conf --dest /etc/slurm/slurm.conf
-clush -w valkyrie01,valkyrie02 --copy /etc/slurm/cgroup.conf --dest /etc/slurm/cgroup.conf
-```
-
-And start on each compute node slurmd service:
-
-```
-clush -bw valkyrie01,valkyrie02 systemctl start slurmd
-clush -bw valkyrie01,valkyrie02 systemctl enable slurmd
-```
-
-And simply test cluster works:
-
-```
-scontrol update nodename=valkyrie01,valkyrie02 state=idle
-```
-
-Now, sinfo shows that one node is idle, and srun allows to launch a basic job:
-
-```
-[root@odin ~]# sinfo
-PARTITION AVAIL  TIMELIMIT  NODES  STATE NODELIST
-all*         up   infinite      1   unk* valkyrie02
-all*         up   infinite      1   idle valkyrie01
-[root@odin ~]# srun -N 1 hostname
-valkyrie01.cluster.local
-[root@odin ~]#
-```
-
-### 8.3. Submitter
-
-Last step to deploy slurm is to install the login node, `heimdall`, that will act as
-a submitter.
-
-A slurm submitter only need configuration files, and an active munge.
-
-Install munge the same way than on controller.
-
-```
-dnf install munge
-```
-
-Ensure munge key generated on controller node is spread here:
-
-```
-scp /etc/munge/munge.key heimdall:/etc/munge/munge.key
-```
-
-And start munge on `heimdall`:
-
-```
-systemctl start munge
-systemctl enable munge
-```
-
-No install minimal slurm packages:
-
-```
-dnf install slurm
-```
-
-Now again, spread same slurm configuration files from `odin` to `heimdall`:
-
-```
-scp /etc/slurm/slurm.conf heimdall:/etc/slurm/slurm.conf
-scp /etc/slurm/cgroup.conf heimdall:/etc/slurm/cgroup.conf
-```
-
-Nothing to start here, you can test `sinfo` command from `heimdall` to ensure it works.
-
-Slurm cluster is now ready.
-
-### 8.4. Submitting jobs
-
-To execute calculations on the cluster, users will rely on Slurm to submit jobs and get calculation resources.
-Submit commands are `srun` and `sbatch`.
-
-Before using Slurm, it is important to understand how resources are requested.
-A calculation node is composed of multiple calculation cores. When asking for resources, it is possible to ask the following:
-
-* I want this much calculations processes (one per core), do what is needed to provide them to me -> use `-n`.
-* I want this much nodes, I will handle the rest -> use `-N`.
-* I want this much nodes and I want you to start this much processes per nodes -> use `-N` combined with `--ntasks-per-node`.
-* I want this much calculations processes (one per core), and this much processes per nodes, calculate yourself the number of nodes required for that -> use `--ntasks-per-node` combined with `-n`.
-* Etc.
-
-`-N`, `-n` and `--ntasks-per-node` are complementary, and only two of them should be used at a time (slurm will deduce the last one using number of cores available on compute nodes as written in the slurm configuration file).
-`-N` specifies the total number of nodes to allocate to the job, `-n` the total number of processes to start, and `--ntasks-per-node` the number of processes to launch per node.
-
-```
-n=N*ntasks-per-node
-```
-
-Here, we will see the following submittion ways:
-
-1. Submitting without a script
-2. Submitting a basic job script
-3. Submitting a serial job script
-4. Submitting an OpenMP job script
-5. Submitting an MPI job script
-6. A real life example with submitting a 3D animation render on a cluster combining Blender and Slurm arrays.
-
-#### 8.4.1. Submitting without a script
-
-It is possible to launch a very simple job without a script, using the `srun` command. To do that, use `srun` directly, specifying the number of nodes required. For example:
-
-```
-srun -N 1 hostname
-```
-
-Result can be: `valkyrie01`
-
-```
-srun -N 2 hostname
-```
-
-Result can be :
-
-```
-valkyrie01
-valkyrie02
-```
-
-Using this method is a good way to test cluster, or compile code on compute nodes directly, or just use the compute and memory capacity of a node to do simple tasks on it.
-
-#### 8.4.2. Basic job script
-
-To submit a basic job scrip, user needs to use `sbatch` command and provides it a script to execute which contains at the beginning some Slurm information.
-
-A very basic script is:
-
-```
-#!/bin/bash                                                                                    
-#SBATCH -J myjob                                                                              
-#SBATCH -o myjob.out.%j                                                                       
-#SBATCH -e myjob.err.%j                                                                       
-#SBATCH -N 1                                                                                   
-#SBATCH -n 1                                                                                   
-#SBATCH --ntasks-per-node=1                                                                    
-#SBATCH -p all                                                                        
-#SBATCH --exclusive                                                                            
-#SBATCH -t 00:10:00                                                                            
-
-echo "###"                                                                                     
-date                                                                                           
-echo "###"                                                                                     
-
-echo "Hello World ! "
-hostname
-sleep 30s
-echo "###"
-date
-echo "###"
-```
-
-It is very important to understand Slurm parameters here:
-*	`-J` is to set the name of the job
-*	`-o` to set the output file of the job
-*	`-e` to set the error output file of the job
-*	`-p` to select partition to use (optional)
-*	`--exclusive` to specify nodes used must not be shared with other users (optional)
-*	`-t` to specify the maximum time allocated to the job (job will be killed if it goes beyond, beware). Using a small time allow to be able to run a job quickly in the waiting queue, using a large time will force to wait more
-*	`-N`, `-n` and `--ntasks-per-node` were already described.
-
-To submit this script, user needs to use sbatch:
-
-```
-sbatch myscript.sh
-```
-
-If the script syntax is ok, `sbatch` will return a job id number. This number can be used to follow the job progress, using `squeue` (assuming job number is 91487):
-
-```
-squeue -j 91487
-```
-
-Check under ST the status of the job. PD (pending), R (running), CA (cancelled), CG (completing), CD (completed), F (failed), TO (timeout), and NF (node failure).
-
-It is also possible to check all user jobs running:
-
-```
-squeue -u myuser
-```
-
-In this example, execution results will be written by Slurm into `myjob.out.91487` and `myjob.err.91487`.
-
-#### 8.4.3. Serial job
-
-To launch a very basic serial job, use the following template as a script for `sbatch`:
-
-```
-#!/bin/bash
-#SBATCH -J myjob
-#SBATCH -o myjob.out.%j
-#SBATCH -e myjob.err.%j
-#SBATCH -N 1
-#SBATCH --ntasks-per-node=1
-#SBATCH --exclusive
-#SBATCH -t 03:00:00
-
-echo "############### START #######"
-date
-echo "############### "
-
-/home/myuser/./myexecutable.exe
-
-echo "############### END #######"
-date
-echo "############### "
-```
-
-#### 8.4.4. OpenMP job
-
-To launch an OpenMP job (with multithreads), assuming the code was compiled with openmp flags, use:
-
-```
-#!/bin/bash
-#SBATCH -J myjob
-#SBATCH -o myjob.out.%j
-#SBATCH -e myjob.err.%j
-#SBATCH -N 1
-#SBATCH --ntasks-per-node=1
-#SBATCH --exclusive
-#SBATCH -t 03:00:00
-
-## If compute node has 24 cores
-export OMP_NUM_THREADS=24
-## If needed, to be tuned to needs
-export OMP_SCHEDULE="dynamic, 100"
-
-echo "############### START #######"
-date
-echo "############### "
-
-/home/myuser/./myparaexecutable.exe
-
-echo "############### END #######"
-date
-echo "############### "
-```
-
-Note that it is assumed here that a node has 24 cores.
-
-#### 8.4.5. MPI job
-
-To submit an MPI job, assuming the code was parallelized with MPI and compile with MPI, use (note the `srun`, replacing the `mpirun`):
-
-```
-#!/bin/bash
-#SBATCH -J myjob
-#SBATCH -o myjob.out.%j
-#SBATCH -e myjob.err.%j
-#SBATCH -N 4
-#SBATCH --ntasks-per-node=24
-#SBATCH --exclusive
-#SBATCH -t 03:00:00
-
-echo "############### START #######"
-date
-echo "############### "
-
-srun /home/myuser/./mympiexecutable.exe
-
-echo "############### END #######"
-date
-echo "############### "
-```
-
-`srun` will act as `mpirun`, but providing automatically all already tuned arguments for the cluster.
-
-#### 8.4.6. Real life example with Blender job
-
-Blender animations/movies are render using CPU and GPU. In this tutorial, we will focus on CPU since we do not have GPU (or if you have, lucky you).
-
-We will render an animation of 40 frames.
-
-We could create a simple job, asking Blender to render this animation. But Blender will then use a single compute node. We have a cluster at disposal, lets take advantage of that.
-
-We will use Slurm job arrays (so an array of jobs) to split these 40 frames into chuck of 5 frames. Each chuck will be a unique job. Using this method, we will use all available computes nodes of our small cluster.
-
-Note that 5 is an arbitrary number, and this depend of how difficult to render each frame is. If a unique frame takes 10 minutes to render, then you can create chink of 1 frame. If on the other hand each frame takes 10s to render, it is better to group them by chunk as Blender as a "starting time" for each new chunk.
-
-First download Blender and the demo:
-
-```
-wget https://download.blender.org/demo/geometry-nodes/candy_bounce_geometry-nodes_demo.blend
-wget https://ftp.nluug.nl/pub/graphics/blender/release/Blender2.93/blender-2.93.1-linux-x64.tar.xz
-```
-
-Extract Blender into `/software` and copy demo file into `/home`:
-
-```
-cp candy_bounce_geometry-nodes_demo.blend /home
-tar xJvf blender-2.93.1-linux-x64.tar.xz -C /software
-```
-
-Now lets create the job file. Create file `/home/blender_job.job` with the following content:
-
-```
-#!/bin/bash
-#SBATCH -J myjob
-#SBATCH -o myjob.out.%j
-#SBATCH -e myjob.err.%j
-#SBATCH -N 1
-#SBATCH --ntasks-per-node=1
-#SBATCH --exclusive
-#SBATCH -t 01:00:00
-
-set -x
-
-# We set chunk size to 5 frames
-chunk_size=5
-
-# We calculate frames span for each job depending of ARRAY_TASK_ID
-range_min=$(((SLURM_ARRAY_TASK_ID-1)*chunk_size+1))
-range_max=$(((SLURM_ARRAY_TASK_ID)*chunk_size))
-
-# We include blender binary into our PATH
-export PATH=/software/blender-2.93.1-linux-x64/:$PATH
-
-# We start the render
-# -b is the input blender file
-# -o is the output target folder, with files format
-# -F is the output format
-# -f specify the range
-# -noaudio is self explaining
-# IMPORTANT: Blender arguments must be given in that specific order.
-
-eval blender -b /home/candy_bounce_geometry-nodes_demo.blend -o /home/frame##### -F PNG -f $range_min..$range_max -noaudio
-
-# Note: if you have issues with default engine, try using CYCLES. Slower.
-# eval blender -b /home/candy_bounce_geometry-nodes_demo.blend -E CYCLES -o /home/frame##### -F PNG -f $range_min..$range_max -noaudio
-
-```
-
-This job file will be executed for each job.
-Since we have 40 frames to render, and we create 5 frames chunk, this means we need to ask Slurm to create a job array of `40/5=8` jobs.
-
-Launch the array of jobs:
-
-```
-sbatch --array=1-8 /home/blender_job.job
-```
-
-If all goes well, using `squeue` command, you should be able to see the jobs currently running, and the ones currently pending for resources.
-
-You can follow jobs by watching their job file (refreshed by Slurm regularly).
-And after few seconds/minutes depending of your hardware, you should see first animation frames as PNG images in /home folder.
-
-![Animation](resources/animation.gif)
-
-This example shows how to use Slurm to create a Blender render farm.
-
-## 9. Users
+## Users
 
 To have users on the cluster, you need to have the users registered on each node, with same pid and same group gid.
 
@@ -2102,7 +1604,7 @@ Also, use number above 2000 to avoid issues or conflict with possible system ids
 It is important to understand that using manual methods to add users may seems simple, but has a major drawback: the cluster can quickly become out of synchronization regarding users.
 To prevent that, you can create scripts, rely on automation tools like Ansible, or use a centralized users database (OpenLDAP, etc.).
 
-## 10. Infiniband
+## Infiniband (optional)
 
 If you need InfiniBand support on nodes, simply install the package group related:
 
@@ -2119,7 +1621,7 @@ systemctl enable rdma
 
 You should now see the ib0 interface in the NIC list from `ip a`.
 
-## 11. GPU (Nvidia)
+## Nvidia GPU (optional)
 
 To setup an GPU, you need to:
 
@@ -2131,7 +1633,7 @@ You can then install CUDA build and runtime environment on a shared space, or on
 
 Lets do that step by step.
 
-### 11.1. Ensure kernel do not crash
+### Ensure kernel do not crash
 
 To prevent kernel from crashing at boot (Kernel Panic) due to too recent GPU hardware, edit the ipxe file that contains the kernel line
 (for example file `/var/www/html/nodes_groups/group_compute_gpu.ipxe` and append `nomodeset` to the kernel line. For example:
@@ -2146,11 +1648,11 @@ echo +----------------------------------------------------+
 echo |
 echo | Loading kernel
 
-kernel http://${next-server}/repositories/centos/8/x86_64/os/images/pxeboot/vmlinuz initrd=initrd.img inst.stage2=http://${next-server}/repositories/centos/8/x86_64/os/ inst.repo=http://${next-server}/repositories/centos/8/x86_64/os/BaseOS/ ks=http://${next-server}/nodes_groups/group_compute_gpu.kickstart.cfg nomodeset
+kernel http://${next-server}/repositories/AlmaLinux/9/x86_64/os/images/pxeboot/vmlinuz initrd=initrd.img inst.stage2=http://${next-server}/repositories/AlmaLinux/9/x86_64/os/ inst.repo=http://${next-server}/repositories/AlmaLinux/9/x86_64/os/BaseOS/ ks=http://${next-server}/nodes_groups/group_compute_gpu.kickstart.cfg nomodeset
 
 echo | Loading initial ramdisk ...
 
-initrd http://${next-server}/repositories/centos/8/x86_64/os/images/pxeboot/initrd.img
+initrd http://${next-server}/repositories/AlmaLinux/9/x86_64/os/images/pxeboot/initrd.img
 
 echo | ALL DONE! We are ready.
 echo | Downloaded images report:
@@ -2175,7 +1677,7 @@ bootloader --append="nomodeset" --location=mbr
 
 Node should not crash anymore.
 
-### 11.2. Disable nouveau driver
+### Disable nouveau driver
 
 Again, redo the same process than before, but add another kernel parameter: `modprobe.blacklist=nouveau nouveau.modeset=0 rd.driver.blacklist=nouveau`
 
@@ -2191,11 +1693,11 @@ echo +----------------------------------------------------+
 echo |
 echo | Loading kernel
 
-kernel http://${next-server}/repositories/centos/8/x86_64/os/images/pxeboot/vmlinuz initrd=initrd.img inst.stage2=http://${next-server}/repositories/centos/8/x86_64/os/ inst.repo=http://${next-server}/repositories/centos/8/x86_64/os/BaseOS/ ks=http://${next-server}/nodes_groups/group_compute_gpu.kickstart.cfg nomodeset modprobe.blacklist=nouveau nouveau.modeset=0 rd.driver.blacklist=nouveau
+kernel http://${next-server}/repositories/AlmaLinux/9/x86_64/os/images/pxeboot/vmlinuz initrd=initrd.img inst.stage2=http://${next-server}/repositories/AlmaLinux/9/x86_64/os/ inst.repo=http://${next-server}/repositories/AlmaLinux/9/x86_64/os/BaseOS/ ks=http://${next-server}/nodes_groups/group_compute_gpu.kickstart.cfg nomodeset modprobe.blacklist=nouveau nouveau.modeset=0 rd.driver.blacklist=nouveau
 
 echo | Loading initial ramdisk ...
 
-initrd http://${next-server}/repositories/centos/8/x86_64/os/images/pxeboot/initrd.img
+initrd http://${next-server}/repositories/AlmaLinux/9/x86_64/os/images/pxeboot/initrd.img
 
 echo | ALL DONE! We are ready.
 echo | Downloaded images report:
@@ -2219,7 +1721,7 @@ bootloader --append="nomodeset modprobe.blacklist=nouveau nouveau.modeset=0 rd.d
 
 Now, node will boot without `nouveau` driver loaded.
 
-### 11.3. Install Nvidia driver
+### Install Nvidia driver
 
 Grab driver from Nvidia website, that match your hardware and Linux distribution (and arch).
 
@@ -2250,22 +1752,490 @@ dnf clean all
 dnf -y module install nvidia-driver:latest-dkms
 ```
 
-## 12. Conclusion
+## Other distributions
 
-The cluster is ready to be used.
+Here are how to deploy the other commons distributions. Note that all what we have seen so fare apply the same, packages names are just different, and some configuration path might also change, but tools are the same on all distributions.
 
-Additional task could be done:
+I will go straight to the point here, adapt to your needs once it worked this way.
 
-* Compiling an up to date GCC suit
-* Compiling an MPI suite
-* Adding monitoring on the cluster
-* Enabling Slurm accounting
-* Etc.
+Just a quick pro and cons on all PXE solutions:
 
-If you wish to learn Ansible, to automate all of this, I made another tutorial for that here: http://bluebanquise.com/documentation/learn_ansible.html
-Just keep in mind that hostnames in this Ansible tutorial are different (odin -> management1, etc). So update according to your needs.
+* RHEL:
+  * Pros:
+    * Good documentation
+    * Kickstart format is efficient, especially for those who like scripting
+  * Cons:
+    * Anaconda installer often crashes without explanations
+    * Some disks (especially old raids) are often not available for installer (even if seen by kernel)
+* Ubuntu:
+  * Pros:
+    * YAML format is efficient for configuration file
+  * Cons:
+    * Installer often falls back to interactive installation if anything is wrong, and does not advertise why (need to spend time searching in logs)
+    * Weird behavior with some serial consols
+    * No detailed documentation
+* Debian:
+  * Pros:
+    * Light installer
+  * Cons:
+    * Lack of documentation
+    * Some missing key features in preseed autoinstall (like support for multiple NICs, you need to manually define wich one to use)
+* OpenSuse Leap:
+  * Pros:
+    * Nice installer
+    * Good documentation
+  * Cons:
+    * XML not efficient for configuration file
+    * Need to manage some 2 part install (install and post-install)
 
-You can also rely on an opensource Stack that provides all of this.
-Of course, I will recommended BlueBanquise, https://github/bluebanquise/bluebanquise, but many other stacks exist.
+### Ubuntu 20.04 and 22.04
 
-Thank you for following this tutorial. If you find something is missing, or find an issue, please notify me :-)
+Since 20.04, LTS versions of Ubuntu do not rely anymore on preseed, but on a new mechanism.
+In this example, we will cover deployment of Ubuntu 22.04, but it is the same for 20.04.
+
+To deploy Ubuntu over the network:
+
+1. Prepare folders:
+
+```
+mkdir -p /var/www/html/pxe/ubuntu/22.04/
+mkdir -p /var/www/html/pxe/ubuntu/22.04/iso_content/
+mkdir -p /var/www/html/pxe/ubuntu/22.04/autoinstall.cloud-init/
+
+```
+
+2. Download Ubuntu 22.04 live server iso, put it in `/var/www/html/pxe/ubuntu/22.04/` folder and mount it also in `/var/www/html/pxe/ubuntu/22.04/iso_content/` (or copy its content here, its up to you).
+
+```
+cd /var/www/html/pxe/ubuntu/22.04/
+wget https://releases.ubuntu.com/22.04/ubuntu-22.04.1-live-server-amd64.iso
+mv ubuntu-22.04.1-live-server-amd64.iso ubuntu-22.04-live-server-amd64.iso
+mount ubuntu-22.04-live-server-amd64.iso /var/www/html/pxe/ubuntu/22.04/iso_content/
+```
+
+3. Create autoinstall file at `/var/www/html/pxe/ubuntu/22.04/autoinstall.cloud-init/user-data`
+
+```yaml
+#cloud-config
+autoinstall:
+  version: 1
+  apt:
+    geoip: false
+    preserve_sources_list: true
+  keyboard: {layout: us, toggle: null, variant: ''}
+  locale: en_US.UTF-8
+  user-data:
+    users:
+      - name: bluebanquise
+        homedir: /home/bluebanquise
+        ssh-authorized-keys:
+          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIqpyyh44Hz3gvhISaIE9yJ/ao8fBLNo7qwPJcYjQdIl root@odin.cluster.local
+        sudo: ['ALL=(ALL:ALL) NOPASSWD:ALL']
+        groups: sudo
+        shell: /bin/bash
+        passwd: "!"  # Means no password
+    disable_root: true
+  ssh:
+    install-server: true
+    allow-pw: true
+```
+
+4. Create needed empty file at `/var/www/html/pxe/ubuntu/22.04/autoinstall.cloud-init/meta-data` (don't ask me why, but its mandatory):
+
+```
+touch /var/www/html/pxe/ubuntu/22.04/autoinstall.cloud-init/meta-data
+```
+
+5. Create ipxe file to boot:
+
+```
+#!ipxe
+
+echo Booting OS
+
+echo +----------------------------------------------------+
+echo |
+echo | Loading kernel
+
+kernel http://${next-server}/pxe/ubuntu/22.04/iso_content/casper/vmlinuz initrd=initrd root=/dev/ram0 ramdisk_size=1500000 ip=dhcp url=http://${next-server}/pxe/ubuntu/22.04/ubuntu-22.04-live-server-amd64.iso autoinstall ds=nocloud-net;s=http://${next-server}/pxe/ubuntu/22.04/autoinstall.cloud-init/
+
+echo | Loading initial ramdisk ...
+
+initrd http://${next-server}/pxe/ubuntu/22.04/iso_content/casper/initrd
+
+echo | ALL DONE! We are ready.
+echo | Downloaded images report:
+
+imgstat
+
+echo | Booting in 4s ...
+echo |
+echo +----------------------------------------------------+
+
+sleep 4
+
+boot
+```
+
+Few notes:
+
+* The Ubuntu installer needs a lot of ram to operate, since it downloads and extract iso into memory. Ensure at least 4 or even 6 Gb ram.
+* If anything happen wrong, installer automatically fallback to interactive installation mode. You will have to change shell and investigate into installer logs to find issue. This is not always easy as installer logs huge.
+* If serial console is wrong, installer will fallback on interactive installation mode.
+* If installer hang without errors, let it some time. Some steps try some connection and wait for timeout before continuing.
+
+### Debian 11 and 12
+
+Debian uses preseed file to configure auto-installation. Preseed is difficult to use due to a strange lack of **detailed** documentation.
+Also, you will need to have access to external repositories to perform the deployment (I wasn't able to deploy Debian with local repositories as I cannot find the preseed tag to allow unauthenticated repos at second stage), which involves that all your nodes have access to a gateway to reach the web. Installation is done using a netboot and not an ISO.
+
+To deploy Debian over the network:
+
+1. Prepare folders:
+
+```
+mkdir -p /var/www/html/pxe/debian/12/
+mkdir -p /var/www/html/pxe/debian/12/iso_content/
+```
+
+2. Download Debian 12 bootstrap, put it in `/var/www/html/pxe/debian/12/` folder and extract part of it in `/var/www/html/pxe/debian/12/iso_content/`.
+
+```
+cd /var/www/html/pxe/debian/12/
+wget https://deb.debian.org/debian/dists/bookworm/main/installer-amd64/current/images/netboot/netboot.tar.gz
+tar xvzf netboot.tar.gz
+cp debian-installer/amd64/initrd.gz /var/www/html/pxe/debian/12/iso_content/
+cp debian-installer/amd64/linux /var/www/html/pxe/debian/12/iso_content/
+
+```
+
+3. Create autoinstall file at /var/www/html/pxe/debian/12/preseed.cfg
+
+```
+### zone
+d-i debian-installer/locale string en_US.UTF-8
+d-i keyboard-configuration/xkb-keymap select us
+d-i debian-installer/language string en
+d-i debian-installer/country string US
+d-i localechooser/supported-locales multiselect en_US.UTF-8
+
+### network
+## Note: a dhcp gateway MUST be set for the network, even a dummy one
+d-i netcfg/choose_interface select auto
+d-i netcfg/use_dhcp string true
+d-i netcfg/link_wait_timeout string 10
+d-i netcfg/dhcp_timeout string 60
+d-i netcfg/dhcp_failed note
+d-i netcfg/wireless_wep string
+d-i netcfg/get_hostname unassigned-hostname
+d-i netcfg/get_domain unassigned-domain
+d-i netcfg/get_hostname seen true
+d-i netcfg/get_domain seen true
+
+### Repositories
+d-i mirror/country string manual
+d-i mirror/http/hostname string deb.debian.org
+d-i mirror/http/directory string /debian
+d-i mirror/http/proxy string
+
+### Time
+d-i clock-setup/utc-auto boolean true
+d-i clock-setup/utc boolean true
+d-i time/zone string Europe/Brussels #US/Pacific
+d-i clock-setup/ntp boolean true
+
+### Partitioning
+d-i partman-lvm/device_remove_lvm boolean true
+d-i partman-md/device_remove_md boolean true
+d-i partman-lvm/confirm boolean true
+d-i partman-partitioning/confirm_write_new_label boolean true
+d-i partman/choose_partition select finish
+d-i partman/confirm boolean true
+d-i partman/confirm_nooverwrite boolean true
+
+d-i partman-auto/disk string /dev/vda
+d-i partman-auto/method string regular
+d-i partman-auto/choose_recipe select atomic
+d-i partman-auto/init_automatically_partition select Guided - use entire disk
+
+### Users
+d-i passwd/root-login boolean false
+d-i passwd/user-fullname string Bluebanquise User
+d-i passwd/username string bluebanquise
+d-i passwd/user-password-crypted password !
+
+### Packages
+tasksel tasksel/first multiselect minimal
+d-i pkgsel/include string openssh-server curl python3
+d-i pkgsel/upgrade select none
+d-i pkgsel/updatedb boolean false
+d-i pkgsel/update-policy select none
+d-i apt-setup/restricted boolean false
+d-i apt-setup/universe boolean false
+d-i apt-setup/backports boolean false
+d-i apt-setup/proposed boolean false
+popularity-contest popularity-contest/participate boolean false
+
+### Grub
+d-i grub-installer/only_debian boolean true
+d-i grub-installer/bootdev  string default
+
+### Reboot
+d-i finish-install/reboot_in_progress note
+
+### Add our user
+d-i preseed/late_command string \
+  in-target sh -c '/sbin/usermod -m -d /home/bluebanquise bluebanquise'; \
+  in-target sh -c 'mkdir /home/bluebanquise/.ssh'; \
+  in-target sh -c 'echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIqpyyh44Hz3gvhISaIE9yJ/ao8fBLNo7qwPJcYjQdIl root@odin.cluster.local" >> /home/bluebanquise/.ssh/authorized_keys';\
+  in-target sh -c 'chown -R bluebanquise:bluebanquise /home/bluebanquise/.ssh'; \
+  in-target sh -c 'sed -i "s/^#PermitRootLogin.*\$/PermitRootLogin no/g" /etc/ssh/sshd_config'; \
+  in-target sh -c 'echo "bluebanquise ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers.d/bluebanquise'
+```
+
+4. Create ipxe file to boot:
+
+Important note: if your server have more than 1 NIC, then you need to hardcode it on the kernel command line. See comment in the file.
+
+```
+#!ipxe
+
+echo Booting OS
+
+echo +----------------------------------------------------+
+echo |
+echo | Loading kernel
+
+kernel http://${next-server}/pxe/debian/12/iso_content/linux initrd=initrd.gz preseed/url=http://${next-server}/pxe/debian/12/preseed.cfg auto=true priority=critical
+
+# If your server have more than 1 NIC, assuming here its enp0s1 (you might need to boot it once to know the NIC name and adjust here)
+# kernel http://${next-server}/pxe/debian/12/iso_content/linux initrd=initrd.gz preseed/url=http://${next-server}/pxe/debian/12/preseed.cfg auto=true priority=critical netcfg/choose_interface=enp0s1
+
+echo | Loading initial ramdisk ...
+
+initrd http://${next-server}/pxe/debian/12/iso_content/initrd.gz
+
+echo | ALL DONE! We are ready.
+echo | Downloaded images report:
+
+imgstat
+
+echo | Booting in 4s ...
+echo |
+echo +----------------------------------------------------+
+
+sleep 4
+
+boot
+```
+
+Few notes:
+
+* You absolutely need to have a gateway defined to make it automatic.
+* If installer does not see your SATA/NvME disks, then it means it couldn't grab modules from repo (try using an official repo). It is possible to inject modules from the DVD iso manually, see https://github.com/bluebanquise/infrastructure/blob/29b503eab507b056f9658f36e01287192e8b66cb/Validation/steps/12_deploy_debian11.sh#L16
+* I found not working automatic disk selection, you need to manually define it like in this preseed example above (here /dev/sda).
+
+### OpenSUSE Leap 15
+
+OpenSuse AutoYast installer is a stable installer. It is however slower than the others, XML of autoyast file is a pain, and you have to handle the second stage installation. But globally, this installer is nice to use.
+
+1. Prepare folders:
+
+```
+mkdir -p /var/www/html/pxe/leap/15/
+mkdir -p /var/www/html/pxe/leap/15/iso_content/
+```
+
+2. Download OpenSuse Leap 15 iso, put it in `/var/www/html/pxe/leap/15/` folder and mount or extract in `/var/www/html/pxe/leap/15/iso_content/`.
+
+```
+cd /var/www/html/pxe/leap/15/
+wget https://mirror.its.dal.ca/opensuse/distribution/leap/15.4/iso/openSUSE-Leap-15.4-DVD-x86_64-Build243.2-Media.iso
+mount openSUSE-Leap-15.4-DVD-x86_64-Build243.2-Media.iso /var/www/html/pxe/leap/15/iso_content/
+```
+
+3. Create autoinstall file at /var/www/html/pxe/leap/15/autoyast.xml
+
+```xml
+<?xml version="1.0"?>
+<!DOCTYPE profile>
+<profile xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http://www.suse.com/1.0/configns">
+
+  <add-on>
+    <add_on_products config:type="list">
+    </add_on_products>
+  </add-on>
+
+  <keyboard>
+    <keymap>us</keymap>
+  </keyboard>
+
+  <language>
+    <language>en_US</language>
+    <languages/>
+  </language>
+
+  <timezone>
+    <hwclock>UTC</hwclock>
+    <timezone>Europe/Brussels</timezone>
+  </timezone>
+
+
+  <networking>
+    <keep_install_network config:type="boolean">true</keep_install_network>
+    <managed config:type="boolean">true</managed>
+  </networking>
+
+  <software>
+    <install_recommended config:type="boolean">true</install_recommended>
+    <patterns config:type="list">
+      <pattern>base</pattern>
+    </patterns>
+    <packages config:type="list">
+      <package>openssh-server</package>
+      <package>sudo</package>
+    </packages>
+  </software> 
+
+  <bootloader>
+    <loader_type>default</loader_type>
+  </bootloader>
+
+<partitioning config:type="list">
+  <drive>
+    <initialize config:type="boolean">true</initialize>
+    <use>all</use>
+    <partitions config:type="list">
+      <partition>
+        <filesystem config:type="symbol">ext4</filesystem>
+        <mount>/</mount>
+        <size>max</size>
+      </partition>
+      <partition>
+        <filesystem config:type="symbol">ext4</filesystem>
+        <mount>/boot</mount>
+        <size>512MiB</size>
+      </partition>
+      <partition>
+        <mount>swap</mount>
+        <size>512MiB</size>
+      </partition>
+    </partitions>
+  </drive>
+</partitioning>
+
+  <!-- disable root password and add ssh keys to sudo user -->
+  <users config:type="list">
+    <user>
+      <username>root</username>
+      <user_password>!</user_password>
+      <encrypted config:type="boolean">true</encrypted>
+    </user>
+    <user>
+      <username>bluebanquise</username>
+      <home>/home/bluebanquise</home>
+      <user_password>!</user_password>
+      <encrypted config:type="boolean">true</encrypted>
+      <authorized_keys config:type="list">
+        <listentry>ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIqpyyh44Hz3gvhISaIE9yJ/ao8fBLNo7qwPJcYjQdIl root@odin.cluster.local</listentry>
+      </authorized_keys>
+    </user>
+  </users>
+
+<services-manager>
+  <default_target>multi-user</default_target>
+  <services>
+    <enable config:type="list">
+      <service>sshd</service>
+    </enable>
+  </services>
+</services-manager>
+
+<scripts>
+    <chroot-scripts config:type="list">
+      <script>
+        <chrooted config:type="boolean">true</chrooted>
+        <filename>add_sles_sudo_rule.sh</filename>
+        <interpreter>shell</interpreter>
+        <source>
+<![CDATA[
+#!/bin/sh
+echo "Defaults:sles !targetpw
+bluebanquise ALL=(ALL,ALL) NOPASSWD: ALL" > /etc/sudoers.d/bluebanquise
+]]>
+          </source>
+      </script>
+    </chroot-scripts>
+  </scripts>
+
+<general>
+  <mode>
+    <confirm config:type="boolean">false</confirm>
+  </mode>
+  <!-- Be sure to understand that and adapt to your needs, this is used here to allow local repos -->
+  <signature-handling>
+    <accept_unsigned_file config:type="boolean">true</accept_unsigned_file>
+    <accept_unknown_gpg_key config:type="boolean">true</accept_unknown_gpg_key>
+    <accept_non_trusted_gpg_key config:type="boolean">true</accept_non_trusted_gpg_key>
+    <import_gpg_key config:type="boolean">true</import_gpg_key>
+  </signature-handling>
+ </general>
+
+</profile>
+```
+
+4. Create ipxe file to boot:
+
+Note: you can change textmode=1 to textmode=0 if you wish to see the GUI of the installer on screen (if not using a serial console).
+
+```
+#!ipxe
+
+echo Booting OS
+
+echo +----------------------------------------------------+
+echo |
+echo | Loading kernel
+
+kernel http://${next-server}/pxe/leap/15/iso_content/boot/x86_64/loader/linux install=http://${next-server}/pxe/leap/15/iso_content/ autoyast=http://${next-server}/pxe/leap/15/autoyast.xml textmode=1
+
+echo | Loading initial ramdisk ...
+
+initrd http://${next-server}/pxe/leap/15/iso_content/boot/x86_64/loader/initrd
+
+echo | ALL DONE! We are ready.
+echo | Downloaded images report:
+
+imgstat
+
+echo | Booting in 4s ...
+echo |
+echo +----------------------------------------------------+
+
+sleep 4
+
+boot
+```
+
+Few notes:
+
+* You will need after boot to configure either NetworkManager or systemd-networkd if you wish to use a tool like Ansible or equivalent, as embed network manager does not seems to be supported by all these tools.
+
+## Conclusion
+
+CONGRATULATION!! The cluster is ready to be used!!
+
+Next step now is to learn how to automate what we did here. Proposal in next tutorial is based on Ansible but you can user other tools like Salt Stak, Pupper, Chef, etc. >> [Ansible tutorial](sysadmin_ansible.md).
+
+Or you can also specialize the cluster, with [HPC cluster tutorial](hpc_slurm.md) or [K8S cluster tutorial](kubernetes_deploy.md).
+
+<div class="comment-tile">
+    <div class="comment-tile-image">
+        <img src="../images/global/Ash_happy.png" alt="Image Description" width="96" height="96">
+    </div>
+    <div class="comment-tile-text">
+        <p>Thank you for following this tutorial. If you find something is missing, or find an issue, please notify the me on github by opening an issue or a PR :)</p>
+    </div>
+</div>
+
+
