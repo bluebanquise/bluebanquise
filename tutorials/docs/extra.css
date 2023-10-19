@@ -1,10 +1,10 @@
 /* Style for the tile container */
 .comment-tile {
     display: flex;
-    border: 1px solid #ccc;
+    /*border: 1px solid #ccc;*/
     max-width: 100%; /* Adjust the width as needed */
     margin: 20px 0px;
-    background: #e6e6e6;
+    /* background: #e6e6e6; */
 }
 
 /* Style for the image container on the left */
@@ -27,4 +27,18 @@
     padding: 2px 10px;
     color: #222222de;
     font-size: .6rem;
+}
+
+:root {
+    /* Primary color shades */
+    --md-primary-fg-color:#257ca3;
+    --md-primary-fg-color--light:#42a5f5;
+    --md-primary-fg-color--dark:#1975d2;
+    --md-primary-bg-color:#fff;
+    --md-primary-bg-color--light:#ffffffb3
+    /* Accent color shades */
+    --md-accent-fg-color:#4287ff;
+    --md-accent-fg-color--transparent:#4287ff1a;
+    --md-accent-bg-color:#fff;
+    --md-accent-bg-color--light:#ffffffb3
 }

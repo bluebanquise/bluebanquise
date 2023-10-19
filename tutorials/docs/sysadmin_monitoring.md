@@ -4,7 +4,7 @@ Now that our cluster is ready and running, it important to deploy a monitoring. 
 
 <div class="comment-tile">
     <div class="comment-tile-image">
-        <img src="../images/global/Ash.png" alt="Image Description" width="96" height="96">
+        <img src="../images/global/avatar.png" alt="Image Description" width="96" height="96">
     </div>
     <div class="comment-tile-text">
         <p>In order to allow you to understand how all of this works, we will first launch every tools manually. Once everything is working fine, we will implement service files so tools start via systemd at system startup.</p>
@@ -85,7 +85,7 @@ We now want to create some alerts, and we want to manage these alerts using Aler
 
 <div class="comment-tile">
     <div class="comment-tile-image">
-        <img src="../images/global/Ash.png" alt="Image Description" width="96" height="96">
+        <img src="../images/global/avatar.png" alt="Image Description" width="96" height="96">
     </div>
     <div class="comment-tile-text">
         <p>It is important to understand who do what: Prometheus is in charge of evaluating alert rules agains its data, and then it "Fires" alerts and send them to Alertmanager, who is in charge of organizing and pack them. This is not Alertmanager job to evaluate rules and Fire alerts!</p>
@@ -186,7 +186,7 @@ Grafana allows to create nice day to day dashboards to visualize metrics.
 
 <div class="comment-tile">
     <div class="comment-tile-image">
-        <img src="../images/global/Ash.png" alt="Image Description" width="96" height="96">
+        <img src="../images/global/avatar.png" alt="Image Description" width="96" height="96">
     </div>
     <div class="comment-tile-text">
         <p>Never neglect Grafana and Karma. A nice display is key to make cluster administrators efficients and happy. A good Grafana organisation will be composed of a main page with a summary of all part of the cluster (with red/yellow/green colors to instantly see if all is ok or not), and then dedicated sub-pages for details on each part.</p>
