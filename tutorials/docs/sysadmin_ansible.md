@@ -14,7 +14,7 @@ If you wish only to learn Ansible, simplest way is
 
 <div class="comment-tile">
     <div class="comment-tile-image">
-        <img src="../images/global/Ash.png" alt="Image Description" width="96" height="96">
+        <img src="../images/global/avatar.png" alt="Image Description" width="96" height="96">
     </div>
     <div class="comment-tile-text">
         <p>If you wish to install Ansible on a production system, you can use your operating system
@@ -484,7 +484,7 @@ Perfect.
 
 <div class="comment-tile">
     <div class="comment-tile-image">
-        <img src="../images/global/Ash.png" alt="Image Description" width="96" height="96">
+        <img src="../images/global/avatar.png" alt="Image Description" width="96" height="96">
     </div>
     <div class="comment-tile-text">
         <p>Note: We could also have used a file in inventory/host_vars/management1/new_values..
@@ -535,7 +535,7 @@ And check variables of hosts:
 
 <div class="comment-tile">
     <div class="comment-tile-image">
-        <img src="../images/global/Ash.png" alt="Image Description" width="96" height="96">
+        <img src="../images/global/avatar.png" alt="Image Description" width="96" height="96">
     </div>
     <div class="comment-tile-text">
         <p>We had to add the whole dictionary in group_vars/clients/myship.yml.
@@ -1405,7 +1405,7 @@ hesitate to ask me to add elements.
 
 <div class="comment-tile">
     <div class="comment-tile-image">
-        <img src="../images/global/Ash_happy.png" alt="Image Description" width="96" height="96">
+        <img src="../images/global/avatar.png" alt="Image Description" width="96" height="96">
     </div>
     <div class="comment-tile-text">
         <p>Thank you for following this tutorial! One last word: Configuration tools like Ansible are not made to replace administration commands and scripts. Trying to do everything with an automation tool is wrong and a huge waste of efforts and time. It has been made to deploy configurations in an idempotent manner.</p>

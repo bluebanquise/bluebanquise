@@ -9,7 +9,7 @@ This result in 2 layers on the hardware, both autonomous but working together.
 
 <div class="comment-tile">
     <div class="comment-tile-image">
-        <img src="../images/global/Ash.png" alt="Image Description" width="96" height="96">
+        <img src="../images/global/avatar.png" alt="Image Description" width="96" height="96">
     </div>
     <div class="comment-tile-text">
         <p>Small tip: when possible, try to isolate your layers: bare metal is managed by bare metal, kubernetes is managed by kubernetes. Mixing layers always end up in an unmaintanable cluster.</p>
