@@ -1,6 +1,6 @@
 # DRBD
 
-Important: this role is for now limited to RHEL systems. If you wish it to be available on other distributions (Debian, Ubuntu, OpenSuse Leap) please do not hesitate to open a request.
+Role currently only supports RHEL distributions. If you need other distributions, please notify me via a feature request.
 
 ## Description
 
@@ -21,6 +21,8 @@ jinja version = 3.0.3
 ```
 
 ## Instructions
+
+### RHEL 8
 
 To allow role to find needed packages, you need to add elrepo repositories on 
 all the nodes:
@@ -146,9 +148,6 @@ resource1 role:Primary
   bee-meta2 role:Secondary
     peer-disk:UpToDate
 ```
-
-
-
 
 To delete the configuration (**will delete all data on the DRBD devices**)
 run the following commands :

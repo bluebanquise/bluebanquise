@@ -4,6 +4,7 @@
     name:
       - kernel-devel-{{ ansible_kernel }}
       - kernel-headers-{{ ansible_kernel }}
+      - dkms
     state: present
 
 - name: package <|> Install nvidia-driver

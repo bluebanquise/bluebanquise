@@ -1,9 +1,5 @@
 # Rasdaemon
 
-## Owner
-
-@oxedions
-
 ## Description
 
 The role install and start Rasdaemon tool to track hardware issues.

@@ -4,9 +4,11 @@
 
 This role install GPU related drivers and tools.
 
+Role currently only supports RHEL distributions. If you need other distributions, please notify me via a feature request.
+
 ## Instructions
 
-To specify gpu vendor to setup, simply set `gpu_vendor` variable. Currently,
+To specify gpu vendor to setup, simply set `gpu_vendor` variable to target vendor. Currently,
 variable supports the following vendors:
 
 * nvidia
@@ -34,6 +36,9 @@ When downloading driver, on main Nvidia website, linked Cuda version should be m
 We will assume here RHEL version is 8, but procedure is the same for RHEL 7 or RHEL 9.
 Please adapt commands to your needs, this is a main and non strict guideline.
 
+Note that you need EPEL repositories to be enabled on your system.
+If your system is air-gapped, then you need at least `dkms` package from EPEL to be available in a repository.
+
 Download the driver for related RHEL distribution on main website.
 You should get a huge rpm (around 500Mb).
 This rpm should not be installed directly, but extracted.
@@ -49,7 +54,7 @@ mv $HOME/nvidia-driver-local-repo-rhel8-515.65.01-1.0-1.x86_64.rpm .
 rpm2cpio nvidia-driver-local-repo-rhel8-515.65.01-1.0-1.x86_64.rpm | cpio -idmv
 ```
 
-Now, grab the repository, and push it into your repositories http server folder:
+Now, grab the repository, and push it into your repositories http server folder. For example:
 
 ```
 cp -a var/nvidia-driver-local-repo-rhel8-515.65.01/ /var/www/html/repositories/redhat/8/x86_64/nvidia
