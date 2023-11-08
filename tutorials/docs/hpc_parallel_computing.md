@@ -4,7 +4,7 @@ This practical session objective is to make user aware of his environment and ho
 
 <div class="comment-tile">
     <div class="comment-tile-image">
-        <img src="../images/global/Ash.png" alt="Image Description" width="96" height="96">
+        <img src="../images/global/avatar.png" alt="Image Description" width="96" height="96">
     </div>
     <div class="comment-tile-text">
         <p>Note that this training is light, and objective is to provide a quick introduction. To go deeper, I stronlgy recommand to check the https://chryswoods.com/main/courses.html INCREDIBLE website \o/ !!</p>

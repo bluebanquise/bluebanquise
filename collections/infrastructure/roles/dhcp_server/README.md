@@ -90,6 +90,37 @@ Consider increasing the default leases values once your network is production re
 
 ### Advanced usage
 
+#### Add global options
+
+It is possible to include as many global settings as desired using the `dhcp_server_global_settings` list.
+
+For example:
+
+```yaml
+dhcp_server_global_settings:
+  - ping-check false
+```
+
+Note: do not include the `;` at the end, it is automatically added by the role.
+
+#### Add options per subnet
+
+It is possible to include as many per subnet settings as desired using the `dhcp_server_subnet_settings` defined under the logical network in `networks` dict.
+
+For example:
+
+```yaml
+  networks:
+    net-1:
+      subnet: 10.11.0.0
+      prefix: 16
+      dhcp_server: true
+      dhcp_server_subnet_settings:
+        - deny unknown-clients
+```
+
+Note: do not include the `;` at the end, it is automatically added by the role.
+
 #### Multiple entries
 
 It is possible to have multiple entries for an host interface in the
@@ -184,6 +215,7 @@ This allows for example to have an heterogenous cluster, with a group of hosts b
 
 ## Changelog
 
+* 1.6.0: Added subnet custom settings. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.5.1: Fix ip and host orders. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.5.0: Update to BB 2.0 format. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.0: Add capability to choose ipxe ROM. Benoit Leveugle <benoit.leveugle@gmail.com>

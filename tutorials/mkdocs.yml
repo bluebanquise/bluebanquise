@@ -28,7 +28,7 @@ theme:
   name: material
   palette:
     scheme: default
-    primary: blue
+    primary: custom
   icon:
     repo: fontawesome/brands/github
   features:
