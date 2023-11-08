@@ -30,7 +30,7 @@ local7.*                                                /var/log/boot.log
       and networks[j2_node_main_network]['services']['log'] is defined
       and networks[j2_node_main_network]['services']['log'] is iterable %}
     {% for rsyslog_server in networks[j2_node_main_network]['services']['log'] %}
-        {% if (log_server.ip is defined and (log_server.ip | ansible.utils.ipaddr)) or (log_server.hostname is defined and rsyslog_server.hostname is not none) %}
+        {% if (log_server.ip4 is defined and (log_server.ip4 | ansible.utils.ipaddr)) or (log_server.hostname is defined and rsyslog_server.hostname is not none) %}
 # ### begin forwarding rule ###
 # Remote Logging (we use TCP for reliable delivery)
 # An on-disk queue is created for this action. If the remote host is
@@ -40,8 +40,8 @@ $ActionQueueMaxDiskSpace 1g   # 1gb space limit (use as much as possible)
 $ActionQueueSaveOnShutdown on # save messages to disk on shutdown
 $ActionQueueType LinkedList   # run asynchronously
 $ActionResumeRetryCount -1    # infinite retries if host is down
-        {% if rsyslog_server.ip is defined and (log_server.ip | ansible.utils.ipaddr) %}
-*.* @@{{ rsyslog_server.ip }}:{{ rsyslog_port }}
+        {% if rsyslog_server.ip4 is defined and (log_server.ip4 | ansible.utils.ipaddr) %}
+*.* @@{{ rsyslog_server.ip4 }}:{{ rsyslog_port }}
         {% elif rsyslog_server.hostname is defined and rsyslog_server.hostname is not none %}
 *.* @@{{ rsyslog_server.hostname }}:{{ rsyslog_port }}
         {% endif %}
