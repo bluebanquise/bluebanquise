@@ -29,7 +29,6 @@ item bootdiskless         Start a diskless OS (Configured using diskless tool)
 {% endif %}
 item --gap                Tools
 {% if pxe_stack_enable_clonezilla %}
-item --gap                Cloning
 item bootclone            Clonezilla live - Clone/Deploy OS
 item bootautoclone        Auto Clone (advanced)
 item bootautodeploy       Auto Deploy (advanced)
@@ -91,13 +90,13 @@ chain http://${next-server}/pxe/osdeploy/${eq-distribution}_${eq-distribution-ma
 chain http://${next-server}/pxe/diskless/${node-image}/boot.ipxe || shell
 
 :bootclone
-chain http://${next-server}/pxe/clonezilla/clone.ipxe
+chain http://${next-server}/pxe/tools/clonezilla/clone.ipxe
 
 :bootautoclone
-chain http://${next-server}/pxe/clonezilla/autoclone.ipxe
+chain http://${next-server}/pxe/tools/clonezilla/autoclone.ipxe
 
 :bootautodeploy
-chain http://${next-server}/pxe/clonezilla/autodeploy.ipxe
+chain http://${next-server}/pxe/tools/clonezilla/autodeploy.ipxe
 
 :bootalpinelive 
 chain http://${next-server}/pxe/tools/alpine/boot.ipxe
