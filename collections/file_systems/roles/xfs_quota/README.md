@@ -4,13 +4,6 @@
 
 Used to set default user and group disk quotas on xfs disk used by server.
 
-**There are 3 types of quotas:**
-
-- user
-- group
-- *project Not implemented*
-
-
 This role provides simply an interface to **xfs_quota** Ansible module https://docs.ansible.com/ansible/latest/collections/community/general/xfs_quota_module.html
 
 ## Observation

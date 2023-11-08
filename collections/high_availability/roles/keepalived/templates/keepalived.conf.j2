@@ -1,28 +1,33 @@
 #jinja2: lstrip_blocks: "True"
-vrrp_script reload_haproxy {
+{# vrrp_script reload_haproxy {
     script "/usr/bin/killall -0 haproxy"
     interval 1
-}
+} #}
 
 {% for instance in keepalived_vrrp_instances %}
-vrrp_instance {{ instance.name | default("VI_" + (loop.index | default(instance.id) | string), true)}} {
-  virtual_router_id {{ instance.id | default(loop.index, true) }}
-  state {{ instance.state | default("MASTER", true) }}
-  priority {{ instance.priority | default("100", true) }}
+vrrp_instance {{ instance.name | default("BB_VI_" + (instance.id | default(loop.index, true) | string), true)}} {
 
-  # interval de check
-  advert_int {{ instance.advert_int | default("1", true) }}
+  virtual_router_id {{ instance.id | default("77" + (loop.index | string), true) }}
 
-  # interface de synchro entre les LB
-  interface {{ instance.interface }}
-
-  {% if instance.additional_parameters is defined and instance.additional_parameters is mapping %}
-    {% for parameter, parameter_value in instance.additional_parameters.items() %}
-  {{ parameter }} {{ parameter_value }}
+  {% if inventory_hostname == instance.servers[0] %}
+  state MASTER
+  priority 100
+  {% else %}
+  state BACKUP
+    {% for server in instance.servers %}
+      {% if inventory_hostname == server %}
+  priority {{ 90 - (loop.index | int) }}
+      {% endif %}
     {% endfor %}
   {% endif %}
 
-  # authentification entre les 2 machines LB
+  # CHeck interval
+  advert_int {{ instance.advert_int | default("1", true) }}
+
+  # Synchro interface between LBs
+  interface {{ instance.interface }}
+
+  # Authentication between LBs
   authentication {
     auth_type PASS
     auth_pass {{ instance.auth_pass }}
@@ -35,11 +40,12 @@ vrrp_instance {{ instance.name | default("VI_" + (loop.index | default(instance.
   {% endfor %}
   }
 
+{#
   {% if (instance.manage_haproxy | default(false, true)) %}
   track_script {
     reload_haproxy
   }
   {% endif %}
-
+#}
 }
 {% endfor %}

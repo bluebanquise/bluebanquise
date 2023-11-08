@@ -26,7 +26,7 @@ For a network to be included in the dhcp,
 the variable `dhcp_server` must be set to **true** in the related network configuration (note that if key do not exist, default is **true**). Refer to main Bluebanquise documentation, inventory structure, for more details, or/and see bellow example.
 
 Note also that dhcp role will use the `dhcp_unknown_range` if exist in network configuration. It defines the range of the subnet, for unregistered hosts.
-This Can be useful for temporary connections (laptops, etc) or to detect if an
+This can be useful for temporary connections (laptops, etc) or to detect if an
 hardware is missing in the inventory.
 
 By default, this role will try to use as much defined network settings as available.
@@ -139,7 +139,7 @@ hosts:
         network: net-1
 ```
 
-This will create an entry related to mac address and one to dhcp client
+This will create one entry related to mac address and one to dhcp client
 identifier.
 
 #### Shared networks
@@ -178,7 +178,7 @@ parameters are available, for the host and its BMC:
 - `host_identifier`: identify based on an option (agent.circuit-id, agent.remote-id, etc) to recognize an host. Also known as option 82.
 - `match`: identify based on multiple options in combination to recognize an host. Also known as option 82 with hack.
 
-If using match, because this features is using a specific 'hack' in the dhcp
+If using `match`, because this features is using a specific 'hack' in the dhcp
 server, you **must** define this host in a shared network, even if this shared
 network contains a single network (see this very well made page for more
 information: http://www.miquels.cistron.nl/isc-dhcpd/).

@@ -28,10 +28,10 @@
   tags:
     - package
 
-- name: "template <|> Generate {{ rsyslog__conf_path }}"
+- name: "template <|> Generate {{ rsyslog_conf_path }}"
   ansible.builtin.template:
     src: rsyslog.conf.j2
-    dest: "{{ rsyslog__custom_conf_path | default(rsyslog__conf_path) }}"
+    dest: "{{ rsyslog_custom_conf_path | default(rsyslog_conf_path) }}"
     owner: root
     group: root
     mode: 0644

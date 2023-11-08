@@ -24,7 +24,7 @@ networks:
     netmask: 255.255.0.0
     broadcast: 10.11.255.255
     dhcp_server: true
-    dns_server: true  <<<<<<<<<<
+    dns_server: true  # <<<<<<<<<<
     services:
       dns:
         - ip4: 10.11.0.1

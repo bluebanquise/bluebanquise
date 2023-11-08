@@ -48,6 +48,20 @@ nfs_profile:
   - client
 ```
 
+For example, in the playbook:
+
+```yaml
+---
+- name: managements playbook
+  hosts: "mg_managements"
+  roles:
+    - role: bluebanquise.file_systems.nfs
+      tags: nfs
+      vars:
+        nfs_profile:
+          - server
+```
+
 ### Define shared resources
 
 To use the role, create a file in main inventory, that contains a description
@@ -75,7 +89,7 @@ nfs_shares:
     mount_options: rw,nfsvers=4.2,bg,nosuid,nodev
 ```
 
-A description of each parameter can be found in tables bellow.
+A description of each parameter can be found in table bellow.
 
 Mandatory values are:
 
@@ -131,7 +145,7 @@ easily go to 64, 128 or even 256 threads if cluster is large.
 
 It is possible to manipulate mount state using *nfs_client_directories_state*
 variable. Default is **mounted**. Refer to `mount module documentation <https://docs.ansible.com/ansible/latest/collections/ansible/posix/mount_module.html#parameter-state>`_
-to get other possible values.
+to get other possible values. This value can be important if using role in chroot environment.
 
 #### SELinux
 

@@ -6,6 +6,8 @@ This role install and start all needed drivers for interconnects networks (Mella
 
 The role covers client (driver, libs) and subnet manager installation when needed.
 
+Role currently only supports RHEL distributions. If you need other distributions, please notify me via a feature request.
+
 ## Instructions
 
 To trigger an interconnect setup, simply set `interconnect_stack` variable to the
