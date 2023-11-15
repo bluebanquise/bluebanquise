@@ -8,7 +8,7 @@
 {{ host }}:
   equipment_profile: {{ hostvars[host]['j2_node_equipment'] | default("all # no_equipment_set") }}
     {% if hostvars[host]['network_interfaces'] is defined and hostvars[host]['network_interfaces'] is iterable and hostvars[host]['network_interfaces'] is not string and hostvars[host]['network_interfaces'] is not mapping %}
-      {% set host_to_be_used_network = hostvars[host]['j2_icebergs_main_network_dict'][j2_current_iceberg] | default(none, true) %}
+      {% set host_to_be_used_network = hostvars[host]['j2_icebergs_main_network_dict'][j2_current_iceberg] | default(j2_node_main_network, true) %}
       {% if host_to_be_used_network is not none %}
   network:
         {% for nic in hostvars[host]['network_interfaces'] %}
