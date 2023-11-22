@@ -1,12 +1,12 @@
 #!ipxe
 
 echo |
-echo | Entering equipment_profiles/{{ item | replace('equipment_','') | trim }}.ipxe file.
+echo | Entering equipment_profiles/{{ item | replace(bb_core_equipment_naming~'_','') | trim }}.ipxe file.
 echo |
 echo |
 
 # Ansible variables
-set eq-equipment-profile {{ item | replace('equipment_','') | trim }}
+set eq-equipment-profile {{ item | replace(bb_core_equipment_naming~'_','') | trim }}
 set eq-architecture ${arch}
 set eq-distribution {{ hostvars[groups[item][0]]['ep_operating_system']['distribution'] | default(pxe_stack_ep_operating_system.distribution, true) | lower }}
 set eq-distribution-major-version {{ hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] | default(pxe_stack_ep_operating_system.distribution_major_version, true) }}
