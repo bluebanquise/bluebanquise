@@ -14,7 +14,7 @@ all:
         name: ''
       network_interfaces:
       - interface: en1
-        ip4: 10.10.0.1
+        ip4: 10.10.7.7
         mac: null
         network: null
         skip: false
