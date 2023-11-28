@@ -615,6 +615,7 @@ pxe_stack_enable_memtest: true
 
 ## Changelog
 
+* 1.8.5: replace hard-coded string 'equipment_' with adequate var. #sla31
 * 1.8.4: Improve documentation. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.8.3: Allow all distributions to erase default repositories. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.8.2: RedHat missing rpm. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
