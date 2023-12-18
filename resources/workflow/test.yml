@@ -1,0 +1,65 @@
+---
+- name: test
+  hosts: "c001,c002"
+
+  tasks:
+    - name: calculate forward dict
+      ansible.builtin.set_fact:
+        bb_nodes_ep_forward: "
+{%- set nodes_ep_forward = {} -%}
+{%- for host in j2_hosts_range -%}
+{%- do nodes_ep_forward.update({host: {'hw': (hostvars[host]['group_names'] | select('match','^'+'hw'+'_.*') | list | unique | sort | first) | default(none, true), 'os': (hostvars[host]['group_names'] | select('match','^'+'os'+'_.*') | list | unique | sort | first) | default(none, true)}}) -%}
+{%- endfor -%}
+{{ nodes_ep_forward }}
+"
+
+    - name: calculate reverse dict
+      ansible.builtin.set_fact:
+        bb_nodes_ep_reverse: "
+{%- set nodes_ep_reverse = {} -%}
+{%- for host, host_keys in bb_nodes_ep_forward.items() -%}
+{%- if host_keys['hw'] is not none and host_keys['os'] is not none -%}
+{%- set host_equipment = (host_keys['hw'] + '_' + host_keys['os']) -%}
+{%- if host_equipment not in nodes_ep_reverse -%}
+{%- do nodes_ep_reverse.update({host_equipment: []}) -%}
+{%- endif -%}
+{{ nodes_ep_reverse[host_equipment].append(host) }}
+{%- endif -%}
+{%- endfor -%}
+{{ nodes_ep_reverse }}
+"
+
+    - name: calculate stuff
+      ansible.builtin.set_fact:
+        tyty: "coucou"
+      run_once: true
+
+    - name: display value
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname}} {{tyty}}"
+
+    - name: display
+      ansible.builtin.debug:
+        msg: "{{bb_nodes_ep_forward}}"
+
+
+    - name: display
+      ansible.builtin.debug:
+        msg: "{{bb_nodes_ep_reverse}}"
+# {% set main_dict = { 'forward': {}, 'reverse': {} } %}
+# {% for host in (j2_hosts_range | sort) -%}
+# {% do main_dict['forward'].update({host: {'hw': (hostvars[host]['group_names'] | select('match','^'+'hw'+'_.*') | list | unique | sort | first) | default(none, true), 'os': (hostvars[host]['group_names'] | select('match','^'+'os'+'_.*') | list | unique | sort | first) | default(none, true)}}) %}
+
+
+
+# {% set host_hw = (hostvars[host]['group_names'] | select('match','^'+'hw'+'_.*') | list | unique | sort | first) | default(none, true) %}
+# {% set host_os = (hostvars[host]['group_names'] | select('match','^'+'os'+'_.*') | list | unique | sort | first) | default(none, true) %}
+# {% set current_host_dict = {}%}
+# {% if host_hw is not none %}
+# {% do current_host_dict = {} %}
+# {% endif %}
+# {{ host }} {{host_hw}}
+# {% endfor %}
+# {{ main_dict }}
+# {{ main_dict['forward']['c001'] }}
+# "

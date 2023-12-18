@@ -43,3 +43,4 @@ rpm-build
 .tox
 .cache
 .pytest_cache
+*.pyc

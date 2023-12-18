@@ -1,0 +1,69 @@
+prometheus_server: true
+prometheus_server_manage_ipmi_exporter: true
+prometheus_server_additional_alerts:
+  - ipmi_exporter
+  - node_exporter
+prometheus_server_alertmanager_raw_configuration:
+  global:
+    smtp_smarthost: 'localhost:25'
+    smtp_from: 'alertmanager@your_domain'
+    smtp_require_tls: false
+
+  route:
+    group_by: ['alertname', 'job']
+    group_wait: 1m
+    group_interval: 10m
+    repeat_interval: 3h
+    receiver: sys-admin-team
+
+  receivers:
+    - name: 'sys-admin-team'
+      email_configs:
+        - to: 'sys-admin-team@bluebanquise.com'
+
+  inhibit_rules:
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'cluster', 'service']
+
+prometheus_server_karma_username: admin
+prometheus_server_karma_password: admin
+prometheus_exporters_to_scrape:
+  - name: slurm_exporter
+    scrape_interval: 1m
+    scrape_timeout: 30s
+    address: 10.10.7.11
+    port: 9817
+  - name: ha_cluster_exporter
+    scrape_interval: 1m
+    scrape_timeout: 30s
+    address: 10.10.7.11
+    port: 9664
+prometheus_exporters_groups_to_scrape:
+  equipment_debian11:
+    - name: node_exporter
+      service: node_exporter
+      package: node_exporter
+      port: 9100
+  equipment_rhel7:
+    - name: node_exporter
+      package: node_exporter
+      service: node_exporter
+      port: 9100
+      user: node_exporter
+      group: node_exporter
+      home: /var/lib/node_exporter
+      uid: 950
+      gid: 950
+    - name: login_exporter
+      package: login_exporter
+      service: login_exporter
+      scrape_interval: 1m
+      scrape_timeout: 30s
+      port: 9122
+prometheus_ipmi_scrape_equipment_profiles:
+  - name: equipment_rhel8
+    scrape_interval: 5m
+    scrape_timeout: 2m
