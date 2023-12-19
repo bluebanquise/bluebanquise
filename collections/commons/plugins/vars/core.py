@@ -61,12 +61,11 @@ class VarsModule(BaseVarsPlugin):
 {%- set nodes_profile = j2_bb_nodes_profiles -%}
 {%- endif -%}
 {%- for host, host_keys in nodes_profile.items() -%}
-{%- if host_keys['hw'] is not none and host_keys['os'] is not none -%}
-    {%- set host_equipment = (host_keys['hw'] + '_' + host_keys['os']) -%}
-    {%- if host_equipment not in nodes_ep_reverse -%}
-    {%- do nodes_ep_reverse.update({host_equipment: []}) -%}
-    {%- endif -%}
-{{ nodes_ep_reverse[host_equipment].append(host) }}
+{%- if host_keys['ep'] is not none -%}
+{%- if host_keys['ep'] not in nodes_ep_reverse -%}
+{%- do nodes_ep_reverse.update({host_keys['ep']: []}) -%}
+{%- endif -%}
+{{ nodes_ep_reverse[host_keys['ep']].append(host) }}
 {%- endif -%}
 {%- endfor -%}
 {{ nodes_ep_reverse }}
