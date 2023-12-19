@@ -51,12 +51,20 @@
   tags:
     - templates
 
+- name: debug <|> Display bb_nodes_profiles
+  ansible.builtin.debug:
+    msg: "{{ bb_nodes_profiles}}"
+
 - name: fact <|> Calculate bb_equipments
   ansible.builtin.set_fact:
     bb_equipments: "{{ j2_bb_equipments }}"
   when: bb_equipments is not defined or bb_equipments is none
   tags:
     - templates
+
+- name: debug <|> Display bb_equipments
+  ansible.builtin.debug:
+    msg: "{{ bb_equipments}}"
 #
 
 - name: "package <|> Install {{ (pxe_stack_packages_to_install + [pxe_stack_tftp_package | default(pxe_stack_default_tftp_package)]) | join(' ') }} packages"

@@ -3,7 +3,7 @@
 #### Blue Banquise file ####
 ## {{ ansible_managed }}
 
-{% for host in (bb_nodes_profiles | sort) %}
+{% for host in bb_nodes_profiles %}
   {% if host['type'] == "server" %}
 {{ host }}:
   equipment_profile: {{ host['ep'] | default("all # no_equipment_set", true) }}
