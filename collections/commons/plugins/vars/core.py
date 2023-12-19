@@ -56,6 +56,7 @@ class VarsModule(BaseVarsPlugin):
             # It is expected that the dependency fact be bb_nodes_profiles
             # If the dependency fact was not already cached, it will not be used but that implies longuer calculations
             'j2_bb_equipments': """
+            {%- set nodes_ep_reverse = {} -%}
             {%- if bb_nodes_profiles is defined -%}
             {%- set nodes_profile = bb_nodes_profiles -%}
             {%- else -%}{# Calculate since not cached #}

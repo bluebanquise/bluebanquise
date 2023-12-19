@@ -53,7 +53,7 @@
 
 - name: fact <|> Calculate bb_equipments
   ansible.builtin.set_fact:
-    bb_nodes_profiles: "{{ j2_bb_equipments }}"
+    bb_equipments: "{{ j2_bb_equipments }}"
   when: bb_equipments is not defined or bb_equipments is none
   tags:
     - templates

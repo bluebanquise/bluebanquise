@@ -3,6 +3,24 @@
   hosts: "c001,c002"
 
   tasks:
+    - name: fact <|> Calculate bb_nodes_profiles
+      ansible.builtin.set_fact:
+        bb_nodes_profiles: "{{ j2_bb_nodes_profiles }}"
+      when: bb_nodes_profiles is not defined or bb_nodes_profiles is none
+
+    - name: fact <|> Calculate bb_equipments
+      ansible.builtin.set_fact:
+        bb_equipments: "{{ j2_bb_equipments }}"
+      when: bb_equipments is not defined or bb_equipments is none
+
+    - name: display value
+      ansible.builtin.debug:
+        msg: "{{ bb_nodes_profiles}}"
+
+    - name: display value
+      ansible.builtin.debug:
+        msg: "{{ bb_equipments }}"
+
     - name: calculate forward dict
       ansible.builtin.set_fact:
         bb_nodes_ep_forward: "
