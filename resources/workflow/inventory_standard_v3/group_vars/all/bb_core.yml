@@ -45,15 +45,15 @@ j2_node_main_address: "{{ network_interfaces[j2_node_main_network].ip4 | default
 j2_bb_nodes_profiles: "
 {%- set nodes_ep_forward = {} -%}
 {%- for host in j2_hosts_range -%}
-{%- set host_hw = (hostvars[host]['group_names'] | select('match','^'+'hw'+'_.*') | list | unique | sort | first) | default(none, true) -%}
-{%- set host_os = (hostvars[host]['group_names'] | select('match','^'+'os'+'_.*') | list | unique | sort | first) | default(none, true) -%}
-{%- if host_hw is not none and host_os is not none -%}
-{%- set host_ep = (host_hw + '_' + host_os) -%}
-{%- else -%}
-{%- set host_ep = none -%}
-{%- endif -%}
-{%- set host_type = hostvars[host]['hw_equipment_type'] | default(none, true) -%}
-{%- do nodes_ep_forward.update({host: {'hw': host_hw, 'os': host_os, 'ep': host_ep, 'type': host_type}}) -%}
+  {%- set host_hw = (hostvars[host]['group_names'] | select('match','^'+'hw'+'_.*') | list | unique | sort | first) | default(none, true) -%}
+  {%- set host_os = (hostvars[host]['group_names'] | select('match','^'+'os'+'_.*') | list | unique | sort | first) | default(none, true) -%}
+  {%- if host_hw is not none and host_os is not none -%}
+    {%- set host_ep = (host_hw + '_' + host_os) -%}
+  {%- else -%}
+    {%- set host_ep = none -%}
+  {%- endif -%}
+  {%- set host_type = hostvars[host]['hw_equipment_type'] | default(none, true) -%}
+  {%- do nodes_ep_forward.update({host: {'hw': host_hw, 'os': host_os, 'ep': host_ep, 'type': host_type}}) -%}
 {%- endfor -%}
 {{ nodes_ep_forward }}
 "
