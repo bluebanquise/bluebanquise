@@ -31,21 +31,20 @@ class VarsModule(BaseVarsPlugin):
             #     hw: hw_supermicro_XXX
             #     os: os_ubuntu_22.04_gpu
             # This is a transverse j2 (j2_bb_), used as a cache fact
-            'j2_bb_nodes_profiles': """
-            {%- set nodes_ep_forward = {} -%}
-            {%- for host in j2_hosts_range -%}
-            {%- set host_hw = (hostvars[host]['group_names'] | select('match','^'+'hw'+'_.*') | list | unique | sort | first) | default(none, true) -%}
-            {%- set host_os = (hostvars[host]['group_names'] | select('match','^'+'os'+'_.*') | list | unique | sort | first) | default(none, true) -%}
-            {%- if host_hw is not none and host_os is not none -%}
-            {%- set host_ep = (host_hw + '_' + host_os) -%}
-            {%- else -%}
-            {%- set host_ep = none -%}
-            {%- endif -%}
-            {%- set host_type = hostvars[host]['hw_equipment_type'] | default(none, true) -%}
-            {%- do nodes_ep_forward.update({host: {'hw': host_hw, 'os': host_os, 'ep': host_ep, 'type': host_type}}) -%}
-            {%- endfor -%}
-            {{ nodes_ep_forward }}
-            """,
+            'j2_bb_nodes_profiles': """{%- set nodes_ep_forward = {} -%}
+{%- for host in j2_hosts_range -%}
+{%- set host_hw = (hostvars[host]['group_names'] | select('match','^'+'hw'+'_.*') | list | unique | sort | first) | default(none, true) -%}
+{%- set host_os = (hostvars[host]['group_names'] | select('match','^'+'os'+'_.*') | list | unique | sort | first) | default(none, true) -%}
+{%- if host_hw is not none and host_os is not none -%}
+{%- set host_ep = (host_hw + '_' + host_os) -%}
+{%- else -%}
+{%- set host_ep = none -%}
+{%- endif -%}
+{%- set host_type = hostvars[host]['hw_equipment_type'] | default(none, true) -%}
+{%- do nodes_ep_forward.update({host: {'hw': host_hw, 'os': host_os, 'ep': host_ep, 'type': host_type}}) -%}
+{%- endfor -%}
+{{ nodes_ep_forward }}
+""",
 
             # Generate the equipments that are existing combination of hardware and os profiles
             # and store the list of associated nodes inside these equipments. Nodes without both hw_ and os_ are ignored.
@@ -55,24 +54,23 @@ class VarsModule(BaseVarsPlugin):
             # This is a transverse j2 (j2_bb_), used as a cache fact
             # It is expected that the dependency fact be bb_nodes_profiles
             # If the dependency fact was not already cached, it will not be used but that implies longuer calculations
-            'j2_bb_equipments': """
-            {%- set nodes_ep_reverse = {} -%}
-            {%- if bb_nodes_profiles is defined -%}
-            {%- set nodes_profile = bb_nodes_profiles -%}
-            {%- else -%}{# Calculate since not cached #}
-            {%- set nodes_profile = j2_bb_nodes_profiles -%}
-            {%- endif -%}
-            {%- for host, host_keys in nodes_profile.items() -%}
-            {%- if host_keys['hw'] is not none and host_keys['os'] is not none -%}
-                {%- set host_equipment = (host_keys['hw'] + '_' + host_keys['os']) -%}
-                {%- if host_equipment not in nodes_ep_reverse -%}
-                {%- do nodes_ep_reverse.update({host_equipment: []}) -%}
-                {%- endif -%}
-            {{ nodes_ep_reverse[host_equipment].append(host) }}
-            {%- endif -%}
-            {%- endfor -%}
-            {{ nodes_ep_reverse }}
-            """,
+            'j2_bb_equipments': """{%- set nodes_ep_reverse = {} -%}
+{%- if bb_nodes_profiles is defined -%}
+{%- set nodes_profile = bb_nodes_profiles -%}
+{%- else -%}{# Calculate since not cached #}
+{%- set nodes_profile = j2_bb_nodes_profiles -%}
+{%- endif -%}
+{%- for host, host_keys in nodes_profile.items() -%}
+{%- if host_keys['hw'] is not none and host_keys['os'] is not none -%}
+    {%- set host_equipment = (host_keys['hw'] + '_' + host_keys['os']) -%}
+    {%- if host_equipment not in nodes_ep_reverse -%}
+    {%- do nodes_ep_reverse.update({host_equipment: []}) -%}
+    {%- endif -%}
+{{ nodes_ep_reverse[host_equipment].append(host) }}
+{%- endif -%}
+{%- endfor -%}
+{{ nodes_ep_reverse }}
+""",
 
             ### Network
 
