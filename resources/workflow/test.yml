@@ -21,6 +21,14 @@
       ansible.builtin.debug:
         msg: "{{ bb_equipments }}"
 
+    - name: toto
+      ansible.builtin.debug:
+        msg: "{% for host, host_vars in bb_nodes_profiles.items() %}
+              {% if host_vars['type'] == 'server' %}
+               {{ host}} toto {{host_vars}}
+              {% endif %}
+              {% endfor %}"
+
     - name: calculate forward dict
       ansible.builtin.set_fact:
         bb_nodes_ep_forward: "
