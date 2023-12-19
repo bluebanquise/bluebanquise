@@ -43,6 +43,22 @@
 ################################################################################################
 ######################## GENERIC PART
 
+# Roles transverse variables caching
+- name: fact <|> Calculate bb_nodes_profiles
+  ansible.builtin.set_fact:
+    bb_nodes_profiles: "{{ j2_bb_nodes_profiles }}"
+  when: bb_nodes_profiles is not defined or bb_nodes_profiles is none
+  tags:
+    - templates
+
+- name: fact <|> Calculate bb_equipments
+  ansible.builtin.set_fact:
+    bb_nodes_profiles: "{{ j2_bb_equipments }}"
+  when: bb_equipments is not defined or bb_equipments is none
+  tags:
+    - templates
+#
+
 - name: "package <|> Install {{ (pxe_stack_packages_to_install + [pxe_stack_tftp_package | default(pxe_stack_default_tftp_package)]) | join(' ') }} packages"
   ansible.builtin.package:
     name: "{{ pxe_stack_packages_to_install + [pxe_stack_tftp_package | default(pxe_stack_default_tftp_package)] }}"

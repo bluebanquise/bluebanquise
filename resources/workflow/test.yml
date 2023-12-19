@@ -8,7 +8,15 @@
         bb_nodes_ep_forward: "
 {%- set nodes_ep_forward = {} -%}
 {%- for host in j2_hosts_range -%}
-{%- do nodes_ep_forward.update({host: {'hw': (hostvars[host]['group_names'] | select('match','^'+'hw'+'_.*') | list | unique | sort | first) | default(none, true), 'os': (hostvars[host]['group_names'] | select('match','^'+'os'+'_.*') | list | unique | sort | first) | default(none, true)}}) -%}
+{%- set host_hw = (hostvars[host]['group_names'] | select('match','^'+'hw'+'_.*') | list | unique | sort | first) | default(none, true) -%}
+{%- set host_os = (hostvars[host]['group_names'] | select('match','^'+'os'+'_.*') | list | unique | sort | first) | default(none, true) -%}
+{%- if host_hw is not none and host_os is not none -%}
+{%- set host_ep = (host_hw + '_' + host_os) -%}
+{%- else -%}
+{%- set host_ep = none -%}
+{%- endif -%}
+{%- set host_type = hostvars[host]['hw_equipment_type'] | default(none, true) -%}
+{%- do nodes_ep_forward.update({host: {'hw': host_hw, 'os': host_os, 'ep': host_ep, 'type': host_type}}) -%}
 {%- endfor -%}
 {{ nodes_ep_forward }}
 "
@@ -45,7 +53,7 @@
 
     - name: display
       ansible.builtin.debug:
-        msg: "{{bb_nodes_ep_reverse}}"
+        msg: "{{bb_nodes_ep_reverse.keys()}}"
 # {% set main_dict = { 'forward': {}, 'reverse': {} } %}
 # {% for host in (j2_hosts_range | sort) -%}
 # {% do main_dict['forward'].update({host: {'hw': (hostvars[host]['group_names'] | select('match','^'+'hw'+'_.*') | list | unique | sort | first) | default(none, true), 'os': (hostvars[host]['group_names'] | select('match','^'+'os'+'_.*') | list | unique | sort | first) | default(none, true)}}) %}

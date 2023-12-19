@@ -3,10 +3,10 @@
 #### Blue Banquise file ####
 ## {{ ansible_managed }}
 
-{% for host in (j2_hosts_range | sort) %}
-  {% if (hostvars[host]['ep_equipment_type'] | default("server")) == "server" %}
+{% for host in (bb_nodes_profiles | sort) %}
+  {% if host['type'] == "server" %}
 {{ host }}:
-  equipment_profile: {{ hostvars[host]['j2_node_equipment'] | default("all # no_equipment_set") }}
+  equipment_profile: {{ host['ep'] | default("all # no_equipment_set", true) }}
     {% if hostvars[host]['network_interfaces'] is defined and hostvars[host]['network_interfaces'] is iterable and hostvars[host]['network_interfaces'] is not string and hostvars[host]['network_interfaces'] is not mapping %}
       {% set host_to_be_used_network = hostvars[host]['j2_icebergs_main_network_dict'][j2_current_iceberg] | default(j2_node_main_network, true) %}
       {% if host_to_be_used_network is not none %}
