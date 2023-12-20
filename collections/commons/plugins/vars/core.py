@@ -8,6 +8,8 @@ class VarsModule(BaseVarsPlugin):
         data = {
             'bb_core_iceberg_naming': 'iceberg',
             'bb_core_equipment_naming': 'equipment',
+            'bb_core_os_naming': 'os',
+            'bb_core_hw_naming': 'hw',
             'bb_core_management_networks_naming': 'net',
             'bb_core_master_groups_naming': 'mg',
             'bb_core_managements_group_name': 'mg_managements',
@@ -33,8 +35,8 @@ class VarsModule(BaseVarsPlugin):
             # This is a transverse j2 (j2_bb_), used as a cache fact
             'j2_bb_nodes_profiles': """{%- set bnodes_profiles = {} -%}
 {%- for host in j2_hosts_range -%}
-  {%- set host_hw = (hostvars[host]['group_names'] | select('match','^'+'hw'+'_.*') | list | unique | sort | first) | default(none, true) -%}
-  {%- set host_os = (hostvars[host]['group_names'] | select('match','^'+'os'+'_.*') | list | unique | sort | first) | default(none, true) -%}
+  {%- set host_hw = (hostvars[host]['group_names'] | select('match','^'+bb_core_hw_naming+'_.*') | list | unique | sort | first) | default(none, true) -%}
+  {%- set host_os = (hostvars[host]['group_names'] | select('match','^'+bb_core_hw_naming+'_.*') | list | unique | sort | first) | default(none, true) -%}
   {%- if host_hw is not none and host_os is not none -%}
     {%- set host_ep = (host_hw + '_' + host_os) -%}
   {%- else -%}
@@ -43,8 +45,7 @@ class VarsModule(BaseVarsPlugin):
   {%- set host_type = hostvars[host]['hw_equipment_type'] | default(none, true) -%}
   {%- do bnodes_profiles.update({host: {'hw': host_hw, 'os': host_os, 'ep': host_ep, 'type': host_type}}) -%}
 {%- endfor -%}
-{{ bnodes_profiles }}
-""",
+{{ bnodes_profiles }}""",
 
             # Generate the equipments that are existing combination of hardware and os profiles
             # and store the list of associated nodes inside these equipments. Nodes without both hw_ and os_ are ignored.
@@ -68,8 +69,7 @@ class VarsModule(BaseVarsPlugin):
 {{ bequipments[host_keys['ep']].append(host) }}
   {%- endif -%}
 {%- endfor -%}
-{{ bequipments }}
-""",
+{{ bequipments }}""",
 
             ### Network
 
@@ -88,7 +88,25 @@ class VarsModule(BaseVarsPlugin):
             # Main address, same concept.
             'j2_node_main_address': "{{ network_interfaces[j2_node_main_network].ip4 | default(none) }}",
 
-
+            # Generate the nodes list, as a cache for network_interfaces
+            # Example:
+            # c001:
+            #     alias: null
+            #     bmc:
+            #         ip4: 10.10.103.1
+            #         mac: 2a:2b:3c:2d:5e:6f
+            #         name: bc001
+            #         network: net-admin
+            #     current_iceberg: iceberg1
+            #     global_alias: null
+            #     icebergs_main_network_dict: null
+            #     network_interfaces:
+            #     - interface: enp1s0
+            #         ip4: 10.10.3.1
+            #         mac: 1a:2b:3c:4d:5e:9f
+            #         network: net-admin
+            #     node_main_resolution_address: 10.10.3.1
+            # This is a transverse j2 (j2_bb_), used as a cache fact
             'j2_bb_nodes': """{%- set bnodes = {} -%}
 {%- for host in j2_hosts_range -%}
   {%- do bnodes.update({
