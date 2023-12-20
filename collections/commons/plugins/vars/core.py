@@ -31,19 +31,19 @@ class VarsModule(BaseVarsPlugin):
             #     hw: hw_supermicro_XXX
             #     os: os_ubuntu_22.04_gpu
             # This is a transverse j2 (j2_bb_), used as a cache fact
-            'j2_bb_nodes_profiles': """{%- set nodes_ep_forward = {} -%}
+            'j2_bb_nodes_profiles': """{%- set bnodes_profiles = {} -%}
 {%- for host in j2_hosts_range -%}
-    {%- set host_hw = (hostvars[host]['group_names'] | select('match','^'+'hw'+'_.*') | list | unique | sort | first) | default(none, true) -%}
-    {%- set host_os = (hostvars[host]['group_names'] | select('match','^'+'os'+'_.*') | list | unique | sort | first) | default(none, true) -%}
-    {%- if host_hw is not none and host_os is not none -%}
-        {%- set host_ep = (host_hw + '_' + host_os) -%}
-    {%- else -%}
-        {%- set host_ep = none -%}
-    {%- endif -%}
-    {%- set host_type = hostvars[host]['hw_equipment_type'] | default(none, true) -%}
-    {%- do nodes_ep_forward.update({host: {'hw': host_hw, 'os': host_os, 'ep': host_ep, 'type': host_type}}) -%}
+  {%- set host_hw = (hostvars[host]['group_names'] | select('match','^'+'hw'+'_.*') | list | unique | sort | first) | default(none, true) -%}
+  {%- set host_os = (hostvars[host]['group_names'] | select('match','^'+'os'+'_.*') | list | unique | sort | first) | default(none, true) -%}
+  {%- if host_hw is not none and host_os is not none -%}
+    {%- set host_ep = (host_hw + '_' + host_os) -%}
+  {%- else -%}
+    {%- set host_ep = none -%}
+  {%- endif -%}
+  {%- set host_type = hostvars[host]['hw_equipment_type'] | default(none, true) -%}
+  {%- do bnodes_profiles.update({host: {'hw': host_hw, 'os': host_os, 'ep': host_ep, 'type': host_type}}) -%}
 {%- endfor -%}
-{{ nodes_ep_forward }}
+{{ bnodes_profiles }}
 """,
 
             # Generate the equipments that are existing combination of hardware and os profiles
@@ -54,21 +54,21 @@ class VarsModule(BaseVarsPlugin):
             # This is a transverse j2 (j2_bb_), used as a cache fact
             # It is expected that the dependency fact be bb_nodes_profiles
             # If the dependency fact was not already cached, it will not be used but that implies longuer calculations
-            'j2_bb_equipments': """{%- set nodes_ep_reverse = {} -%}
+            'j2_bb_equipments': """{%- set bequipments = {} -%}
 {%- if bb_nodes_profiles is defined -%}
-    {%- set nodes_profile = bb_nodes_profiles -%}
+  {%- set bnodes_profiles = bb_nodes_profiles -%}
 {%- else -%}{# Calculate since not cached #}
-    {%- set nodes_profile = j2_bb_nodes_profiles -%}
+  {%- set bnodes_profiles = j2_bb_nodes_profiles -%}
 {%- endif -%}
-{%- for host, host_keys in nodes_profile.items() -%}
-    {%- if host_keys['ep'] is not none -%}
-        {%- if host_keys['ep'] not in nodes_ep_reverse -%}
-            {%- do nodes_ep_reverse.update({host_keys['ep']: []}) -%}
-        {%- endif -%}
-{{ nodes_ep_reverse[host_keys['ep']].append(host) }}
+{%- for host, host_keys in bnodes_profiles.items() -%}
+  {%- if host_keys['ep'] is not none -%}
+    {%- if host_keys['ep'] not in bequipments -%}
+      {%- do bequipments.update({host_keys['ep']: []}) -%}
     {%- endif -%}
+{{ bequipments[host_keys['ep']].append(host) }}
+  {%- endif -%}
 {%- endfor -%}
-{{ nodes_ep_reverse }}
+{{ bequipments }}
 """,
 
             ### Network
@@ -87,6 +87,23 @@ class VarsModule(BaseVarsPlugin):
             'j2_node_main_network_interface': "{{ network_interfaces[j2_node_main_network].interface | default(none) }}",
             # Main address, same concept.
             'j2_node_main_address': "{{ network_interfaces[j2_node_main_network].ip4 | default(none) }}",
+
+
+            'j2_bb_nodes': """{%- set bnodes = {} -%}
+{%- for host in j2_hosts_range -%}
+  {%- do bnodes.update({
+    host: {
+      'network_interfaces': hostvars[host]['network_interfaces'] | default(none, true),
+      'node_main_resolution_address': hostvars[host]['j2_node_main_resolution_address'] | default(none, true),
+      'current_iceberg': hostvars[host]['j2_current_iceberg'] | default(none, true),
+      'icebergs_main_network_dict': hostvars[host]['j2_icebergs_main_network_dict'] | default({}, true),
+      'bmc': hostvars[host]['bmc'] | default(none, true),
+      'alias': hostvars[host]['alias'] | default(none, true),
+      'global_alias': hostvars[host]['alias'] | default(none, true)
+    }
+  }) -%}
+{%- endfor -%}
+{{ bnodes }}""",
 
             ## Other
             # List of management networks.

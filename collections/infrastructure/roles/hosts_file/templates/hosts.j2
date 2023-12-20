@@ -44,8 +44,8 @@
 
 ## Internal hosts
 
-{% for host in (j2_hosts_range | sort) -%}
-{{ write_host(host,hostvars[host], hostvars[host]['j2_node_main_resolution_address'],hostvars[host]['j2_current_iceberg'],j2_current_iceberg) }}
+{% for host, host_keys in bb_nodes -%}
+{{ write_host(host, host_keys, host_keys['node_main_resolution_address'], host_keys['current_iceberg'], j2_current_iceberg) }}
 {%- endfor %}
 
 ## Services hosts

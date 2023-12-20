@@ -3,6 +3,49 @@
   hosts: "c001,c002"
 
   tasks:
+
+    # - name: fact <|> Calculate bb_nodes_profiles
+    #   ansible.builtin.set_fact:
+    #     bb_nodes_network_interfaces: "
+    #     {%- set nodes_network_interfaces = {} -%}
+    #     {%- for host in j2_hosts_range -%}
+    #       {%- if hostvars[host]['network_interfaces'] is defined -%}
+    #         {%- set host_node_main_resolution_address = hostvars[host]['j2_node_main_resolution_address'] | default(none, true) -%}
+    #         {%- set host_current_iceberg = hostvars[host]['j2_current_iceberg'] | default(none, true) -%}
+    #         {%- set host_icebergs_main_network_dict = hostvars[host]['j2_icebergs_main_network_dict'] | default(none, true) -%}
+    #         {%- if hostvars[host]['bmc'] is defined -%}
+    #         {%- do nodes_network_interfaces.update({host: {'network_interfaces': hostvars[host]['network_interfaces'], 'node_main_resolution_address': host_node_main_resolution_address, 'current_iceberg': host_current_iceberg, 'icebergs_main_network_dict': host_icebergs_main_network_dict, 'bmc': hostvars[host]['bmc'] }}) -%}
+    #         {%- else -%}
+    #         {%- do nodes_network_interfaces.update({host: {'network_interfaces': hostvars[host]['network_interfaces'], 'node_main_resolution_address': host_node_main_resolution_address, 'current_iceberg': host_current_iceberg, 'icebergs_main_network_dict': host_icebergs_main_network_dict}}) -%}
+    #         {%- endif -%}
+    #       {%- endif -%}
+    #     {%- endfor -%}
+    #     {{ nodes_network_interfaces }}"
+
+    - name: fact <|> Calculate bb_nodes_profiles
+      ansible.builtin.set_fact:
+        bb_nodes: "
+        {%- set nodes_network_interfaces = {} -%}
+        {%- for host in j2_hosts_range -%}
+          {%- do nodes_network_interfaces.update({
+            host: {
+              'network_interfaces': hostvars[host]['network_interfaces'] | default(none, true),
+              'node_main_resolution_address': hostvars[host]['j2_node_main_resolution_address'] | default(none, true),
+              'current_iceberg': hostvars[host]['j2_current_iceberg'] | default(none, true),
+              'icebergs_main_network_dict': hostvars[host]['j2_icebergs_main_network_dict'] | default({}, true),
+              'bmc': hostvars[host]['bmc'] | default(none, true),
+              'alias': hostvars[host]['alias'] | default(none, true),
+              'global_alias': hostvars[host]['alias'] | default(none, true)
+            }
+          }) -%}
+        {%- endfor -%}
+        {{ nodes_network_interfaces }}"
+
+    - name: display value
+      ansible.builtin.debug:
+        msg: "{{ bb_nodes }}"
+
+
     - name: fact <|> Calculate bb_nodes_profiles
       ansible.builtin.set_fact:
         bb_nodes_profiles: "{{ j2_bb_nodes_profiles }}"
