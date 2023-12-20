@@ -1,6 +1,4 @@
-ep_equipment_type: server
-
-ep_operating_system:
+os_operating_system:
   distribution: "redhat"
   distribution_version: "7"
   distribution_major_version: "7"

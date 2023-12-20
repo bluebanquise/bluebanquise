@@ -1,8 +1,0 @@
-ep_equipment_type: server
-
-ep_operating_system:
-  distribution: "debian"
-  distribution_version: "11"
-  distribution_major_version: "11"
-
-ep_partitioning: "d-i partman-auto/disk string /dev/vda\nd-i partman-auto/method string regular\nd-i partman-auto/choose_recipe select atomic\nd-i partman-auto/init_automatically_partition select Guided - use entire disk\n"
