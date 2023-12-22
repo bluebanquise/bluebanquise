@@ -10,13 +10,13 @@ text
 firstboot --enable
 
 # System keyboard layout
-keyboard --vckeymap={{ (hostvars[groups[item][0]]['ep_keyboard_layout'] | default(pxe_stack_ep_keyboard_layout)) | lower }} --xlayouts='{{ (hostvars[groups[item][0]]['ep_keyboard_layout'] | default(pxe_stack_ep_keyboard_layout)) | lower }}'
+keyboard --vckeymap={{ (hostvars[groups[os_profile][0]]['os_keyboard_layout'] | default(pxe_stack_os_keyboard_layout)) | lower }} --xlayouts='{{ (hostvars[groups[os_profile][0]]['os_keyboard_layout'] | default(pxe_stack_os_keyboard_layout)) | lower }}'
 
 # System language
-lang {{ hostvars[groups[item][0]]['ep_system_language'] | default(pxe_stack_ep_system_language) }}
+lang {{ hostvars[groups[os_profile][0]]['os_system_language'] | default(pxe_stack_os_system_language) }}
 
 # System timezone
-{% if (hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] | default(pxe_stack_ep_operating_system.distribution_major_version) ) | int < 9 %}
+{% if (hostvars[groups[os_profile][0]]['os_operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version) ) | int < 9 %}
 timezone {{ bb_time_zone | default(pxe_stack_time_zone) }} --isUtc
 {% else %}
 timezone {{ bb_time_zone | default(pxe_stack_time_zone) }} --utc
@@ -27,17 +27,17 @@ reboot
 
 ##### Authentication settings
 
-{% if (hostvars[groups[item][0]]['ep_operating_system']['distribution_major_version'] | default(pxe_stack_ep_operating_system.distribution_major_version) ) | int < 8 %}
+{% if (hostvars[groups[os_profile][0]]['os_operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version) ) | int < 8 %}
 # Define authentication method (sha512)
 auth --enableshadow --passalgo=sha512
 {% endif %}
 
 {% if not pxe_stack_enable_root %}
 rootpw --lock
-user --name={{ pxe_stack_sudo_user }} --homedir={{ pxe_stack_sudo_user_home }} --iscrypted --password={{ hostvars[groups[item][0]]['ep_admin_password_sha512'] | default(pxe_stack_ep_admin_password_sha512) }}
+user --name={{ pxe_stack_sudo_user }} --homedir={{ pxe_stack_sudo_user_home }} --iscrypted --password={{ hostvars[groups[os_profile][0]]['os_admin_password_sha512'] | default(pxe_stack_os_admin_password_sha512) }}
 {% else %}
 # Root password (sha512)
-rootpw --iscrypted {{ hostvars[groups[item][0]]['ep_admin_password_sha512'] | default(pxe_stack_ep_admin_password_sha512) }}
+rootpw --iscrypted {{ hostvars[groups[os_profile][0]]['os_admin_password_sha512'] | default(pxe_stack_os_admin_password_sha512) }}
 {% endif %}
 
 ##### Network
@@ -49,14 +49,14 @@ network --hostname=localhost.localdomain
 ##### Security
 
 # SELinux
-{% if (hostvars[groups[item][0]]['ep_access_control'] | default(pxe_stack_ep_access_control)) in ['enforcing', 'permissive'] %}
-selinux --{{ hostvars[groups[item][0]]['ep_access_control'] | default(pxe_stack_ep_access_control) }}
+{% if (hostvars[groups[os_profile][0]]['os_access_control'] | default(pxe_stack_os_access_control)) in ['enforcing', 'permissive'] %}
+selinux --{{ hostvars[groups[os_profile][0]]['os_access_control'] | default(pxe_stack_os_access_control) }}
 {% else %}
 selinux --disabled
 {% endif %}
 
 # Firwalld
-{% if (hostvars[groups[item][0]]['ep_firewall'] | default(pxe_stack_ep_firewall)) == true %}
+{% if (hostvars[groups[os_profile][0]]['os_firewall'] | default(pxe_stack_os_firewall)) == true %}
 firewall --enabled
 {% else %}
 firewall --disabled
@@ -68,10 +68,10 @@ firewall --disabled
 # a potentially destructive default will be chosen!
 
 # Bootloader configuration
-bootloader --append="{{ hostvars[groups[item][0]]['ep_kernel_parameters'] | default(pxe_stack_ep_kernel_parameters) }}" --location=mbr
+bootloader --append="{{ hostvars[groups[os_profile][0]]['os_kernel_parameters'] | default(pxe_stack_os_kernel_parameters) }} {{ hostvars[groups[hw_profile][0]]['hw_kernel_parameters'] | default(pxe_stack_hw_kernel_parameters) }} " --location=mbr
 
 # Partitioning
-{{ hostvars[groups[item][0]]['ep_partitioning'] | default(pxe_stack_ep_partitioning) | default(pxe_stack_redhat_automatic_partitioning, true) }}
+{{ hostvars[groups[os_profile][0]]['os_partitioning'] | default(pxe_stack_os_partitioning) | default(pxe_stack_redhat_automatic_partitioning, true) }}
 
 ##### Packages
 %packages
@@ -85,7 +85,7 @@ sudo
 
 # This EFI first boot order restoration trick is from stacki, not from me.
 # See https://github.com/Teradata/stacki for more details
-{% if (hostvars[groups[item][0]]['ep_preserve_efi_first_boot_device'] | default(pxe_stack_ep_preserve_efi_first_boot_device)) == true %}
+{% if (hostvars[groups[hw_profile][0]]['hw_preserve_efi_first_boot_device'] | default(pxe_stack_hw_preserve_efi_first_boot_device)) == true %}
 %post --interpreter /bin/bash --log /root/bluebanquise_efi_post-install.log
 [ -d /sys/firmware/efi ] && efibootmgr -o $(efibootmgr | grep BootCurrent | cut -d" " -f2),$(efibootmgr | grep BootOrder | sed "s/BootOrder:\ //" | sed "s/$(efibootmgr | grep BootCurrent | cut -d" " -f2),//") || echo "Not an EFI system, skipping"
 %end
@@ -102,7 +102,7 @@ sed -i 's/^.*PermitRootLogin.*$/PermitRootLogin\ yes/' /etc/ssh/sshd_config
 # Add ssh keys from ssh_keys list
 mkdir /root/.ssh
 cat << xxEOFxx >> /root/.ssh/authorized_keys
-{% for ssh_key in (hostvars[groups[item][0]]['ep_admin_ssh_keys'] | default(pxe_stack_ep_admin_ssh_keys)) %}
+{% for ssh_key in (hostvars[groups[os_profile][0]]['os_admin_ssh_keys'] | default(pxe_stack_os_admin_ssh_keys)) %}
 {{ ssh_key }}
 {% endfor %}
 xxEOFxx
@@ -115,7 +115,7 @@ sed -i 's/^.*PermitRootLogin.*$/PermitRootLogin\ no/' /etc/ssh/sshd_config
 # Add ssh keys from ssh_keys list
 mkdir {{ pxe_stack_sudo_user_home }}/.ssh
 cat << xxEOFxx >> {{ pxe_stack_sudo_user_home }}/.ssh/authorized_keys
-{% for ssh_key in (hostvars[groups[item][0]]['ep_admin_ssh_keys'] | default(pxe_stack_ep_admin_ssh_keys)) %}
+{% for ssh_key in (hostvars[groups[os_profile][0]]['os_admin_ssh_keys'] | default(pxe_stack_os_admin_ssh_keys)) %}
 {{ ssh_key }}
 {% endfor %}
 xxEOFxx
@@ -145,6 +145,6 @@ set +x
 %end
 
 # Custom scripts or kickstart content
-{% if (hostvars[groups[item][0]]['ep_autoinstall_custom_content'] | default(pxe_stack_ep_autoinstall_custom_content)) is not none %}
-{{ (hostvars[groups[item][0]]['ep_autoinstall_custom_content'] | default(pxe_stack_ep_autoinstall_custom_content)) }}
+{% if (hostvars[groups[os_profile][0]]['os_autoinstall_custom_content'] | default(pxe_stack_os_autoinstall_custom_content)) is not none %}
+{{ (hostvars[groups[os_profile][0]]['os_autoinstall_custom_content'] | default(pxe_stack_os_autoinstall_custom_content)) }}
 {% endif %}

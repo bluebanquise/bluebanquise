@@ -22,6 +22,13 @@
     #     {%- endfor -%}
     #     {{ nodes_network_interfaces }}"
 
+    - debug:
+        msg: "
+          {% set toto = 'hw_A_os_B' %}
+          {{ (toto | split('_os'))[0] }}
+          {{ 'os' + (toto | split('_os'))[1] }}
+          "
+
     - name: fact <|> Calculate bb_nodes_profiles
       ansible.builtin.set_fact:
         bb_nodes: "

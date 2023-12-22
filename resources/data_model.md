@@ -20,6 +20,26 @@ Notes:
 
 Last but not least, note that `j2_` variables that contains the stack core logic are provided either by the vars plugin core.py in common collection, either by adding the provided `bb_core.yml` file into your `group_vars/all/` inventory folder.
 
+## Reserved variables
+
+The following variables are reserved by the stack:
+
+* `os_profile`
+* `hw_profile`
+* `ep_profile`
+* `bb_nodes_profiles`
+* `bb_equipments`
+* `bb_nodes`
+
+Also, nodes hardware and os groups names **cannot contain** the string `_with_`.
+
+## Stack transverse variables
+
+These variables, if set, will precedence all roles' dedicated related variables, and so allow to set the same value for all roles at once.
+
+* `bb_time_zone`
+* `bb_domain_name`
+
 ## Section 1: Networks
 
 Networks are defined as followed:

@@ -31,46 +31,47 @@ pxe_stack_preserve_repositories: true
 ############################################################
 ### Default equipment profile parameters
 
-pxe_stack_ep_equipment_type: server
-pxe_stack_ep_operating_system:
+pxe_stack_hw_equipment_type: server
+pxe_stack_os_operating_system:
   distribution: ubuntu
   distribution_version: 22.04
   distribution_major_version: 22
   repositories_environment:
 
-pxe_stack_ep_console:
-pxe_stack_ep_kernel_parameters:
+pxe_stack_hw_console:
+pxe_stack_hw_kernel_parameters:
+pxe_stack_os_kernel_parameters:
 
-pxe_stack_ep_kernel_aggressive_dhcp: true
+pxe_stack_os_kernel_aggressive_dhcp: true
 
-pxe_stack_ep_keyboard_layout: us  # us, fr, etc.
-pxe_stack_ep_system_language: en_US.UTF-8  # You should not update this if you want to google issues...
+pxe_stack_os_keyboard_layout: us  # us, fr, etc.
+pxe_stack_os_system_language: en_US.UTF-8  # You should not update this if you want to google issues...
 
-pxe_stack_ep_admin_password_sha512: "!"
-pxe_stack_ep_admin_ssh_keys: []
+pxe_stack_os_admin_password_sha512: "!"
+pxe_stack_os_admin_ssh_keys: []
 
-pxe_stack_ep_access_control: enforcing
-pxe_stack_ep_firewall: true
+pxe_stack_os_access_control: enforcing
+pxe_stack_os_firewall: true
 
 # WARNING! If nothing is set for partitioning,
 # automatic partitioning will be activated.
-pxe_stack_ep_partitioning:
+pxe_stack_os_partitioning:
 
-pxe_stack_ep_preserve_efi_first_boot_device: true
+pxe_stack_hw_preserve_efi_first_boot_device: true
 
 # Add custom content to any kind of auto install files: kickstart, preseed, user-data and autoyast
 # This content is added at end of files.
-pxe_stack_ep_autoinstall_custom_content:
+pxe_stack_os_autoinstall_custom_content:
 
-# Add custom script to autoyast and user-data. Use pxe_stack_ep_autoinstall_custom_content variable for kickstart.
-pxe_stack_ep_autoinstall_custom_scripts: []
+# Add custom script to autoyast and user-data. Use pxe_stack_os_autoinstall_custom_content variable for kickstart.
+pxe_stack_os_autoinstall_custom_scripts: []
 #  - name: script1
 #    content: |
 #      ...
 
 # Automatically detect NIC to be used in preseed
 # Only works if a single NIC is connected.
-pxe_stack_ep_preseed_auto_main_network_interface: true
+pxe_stack_os_preseed_auto_main_network_interface: true
 
 ############################################################
 ### Misc parameters

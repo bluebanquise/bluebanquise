@@ -32,17 +32,19 @@ class VarsModule(BaseVarsPlugin):
             #   c001:
             #     hw: hw_supermicro_XXX
             #     os: os_ubuntu_22.04_gpu
+            #     ep: hw_supermicro_XXX_with_os_ubuntu_22.04_gpu
+            #     type: server
             # This is a transverse j2 (j2_bb_), used as a cache fact
             'j2_bb_nodes_profiles': """{%- set bnodes_profiles = {} -%}
 {%- for host in j2_hosts_range -%}
   {%- set host_hw = (hostvars[host]['group_names'] | select('match','^'+bb_core_hw_naming+'_.*') | list | unique | sort | first) | default(none, true) -%}
-  {%- set host_os = (hostvars[host]['group_names'] | select('match','^'+bb_core_hw_naming+'_.*') | list | unique | sort | first) | default(none, true) -%}
+  {%- set host_os = (hostvars[host]['group_names'] | select('match','^'+bb_core_os_naming+'_.*') | list | unique | sort | first) | default(none, true) -%}
+  {%- set host_type = hostvars[host]['hw_equipment_type'] | default(none, true) -%}
   {%- if host_hw is not none and host_os is not none -%}
-    {%- set host_ep = (host_hw + '_' + host_os) -%}
+    {%- set host_ep = (host_hw + '_with_' + host_os) -%}
   {%- else -%}
     {%- set host_ep = none -%}
   {%- endif -%}
-  {%- set host_type = hostvars[host]['hw_equipment_type'] | default(none, true) -%}
   {%- do bnodes_profiles.update({host: {'hw': host_hw, 'os': host_os, 'ep': host_ep, 'type': host_type}}) -%}
 {%- endfor -%}
 {{ bnodes_profiles }}""",
@@ -50,8 +52,10 @@ class VarsModule(BaseVarsPlugin):
             # Generate the equipments that are existing combination of hardware and os profiles
             # and store the list of associated nodes inside these equipments. Nodes without both hw_ and os_ are ignored.
             # Example:
-            #   hw_supermicro_XXX_os_ubuntu_22.04_gpu:
-            #     - c001
+            #   hw_supermicro_XXX_with_os_ubuntu_22.04_gpu:
+            #     nodes:
+            #       - c001
+            #     type: server
             # This is a transverse j2 (j2_bb_), used as a cache fact
             # It is expected that the dependency fact be bb_nodes_profiles
             # If the dependency fact was not already cached, it will not be used but that implies longuer calculations
@@ -64,9 +68,10 @@ class VarsModule(BaseVarsPlugin):
 {%- for host, host_keys in bnodes_profiles.items() -%}
   {%- if host_keys['ep'] is not none -%}
     {%- if host_keys['ep'] not in bequipments -%}
-      {%- do bequipments.update({host_keys['ep']: []}) -%}
+      {%- set operating_system = hostvars[host]['os_operating_system'] | default(none, true) -%}
+      {%- do bequipments.update({host_keys['ep']: {'nodes': [], 'type': host_keys['type'], 'hw': host_keys['hw'], 'os': host_keys['os']}}) -%}
     {%- endif -%}
-{{ bequipments[host_keys['ep']].append(host) }}
+{{ bequipments[host_keys['ep']]['nodes'].append(host) }}
   {%- endif -%}
 {%- endfor -%}
 {{ bequipments }}""",
