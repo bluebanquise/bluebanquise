@@ -23,6 +23,6 @@ nameserver {{ nameserver }}
 
 {% if dns_client_external_server is defined and dns_client_external_server is iterable %}
   {% for external_dns in dns_client_external_server %}
-nameserver {{ external_server }}
+nameserver {{ external_dns }}
   {% endfor %}
 {% endif %}
