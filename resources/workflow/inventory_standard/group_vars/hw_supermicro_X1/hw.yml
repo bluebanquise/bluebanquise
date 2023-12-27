@@ -1,1 +1,6 @@
 hw_equipment_type: server
+
+hw_board_authentication:
+  - protocol: IPMI
+    user: ADMIN
+    password: ADMIN
