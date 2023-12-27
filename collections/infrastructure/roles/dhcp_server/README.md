@@ -209,12 +209,13 @@ hosts:
 By default, all hosts will use global `dhcp_server_ipxe_driver` and `dhcp_server_ipxe_embed`
 settings.
 
-However, note that the role will read `ep_ipxe_driver` and `ep_ipxe_embed` equipment profile variables, and precedence global settings for hosts that have these values set.
+However, note that the role will read `hw_ipxe_driver` and `hw_ipxe_embed` equipment profile variables, and precedence global settings for hosts that have these values set.
 
 This allows for example to have an heterogenous cluster, with a group of hosts booting on *snponly* driver, while others boot on *default* one.
 
 ## Changelog
 
+* 1.6.1: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.6.0: Added subnet custom settings. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.5.1: Fix ip and host orders. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.5.0: Update to BB 2.0 format. Benoit Leveugle <benoit.leveugle@gmail.com>

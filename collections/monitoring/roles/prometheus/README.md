@@ -395,7 +395,7 @@ ipmi_exporter.
 Note that you can set custom scrape_interval and scrape_timeout for ipmi or snmp
 using dedicated variables shown in the example above.
 
-Note also that ipmi_exporter will need `ep_equipment_authentication` dictionary
+Note also that ipmi_exporter will need `hw_board_authentication` dictionary
 to be set for each equipment_profile that needs ipmi data scraping.
 
 ## 6. Advanced usage
@@ -581,6 +581,7 @@ prometheus_server_prometheus_launch_parameters: |
 
 ## Changelog
 
+* 1.3.4: Adapt tp hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.3: Port to bb 2.0. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.2: Restart services when systemd service file changes. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.3.1: Fix error when exporter is missing the service parameter. Giacomo Mc Evoy <gino.mcevoy@gmail.com>

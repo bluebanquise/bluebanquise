@@ -27,9 +27,9 @@
 #     hw_profile: "{{ bb_equipments[item]['hw'] }}"
 #   with_items: "{{ bb_equipments.keys() }}"
 #   when:
-#     - bb_equipments[item]['type'] | default(pxe_stack_ep_equipment_type) == "server"
-#     - bb_equipments[item]['operating_system']['distribution'] | default(pxe_stack_ep_operating_system.distribution) | lower) in ['sles']
-#     - (bb_equipments[item]['operating_system']['distribution_major_version'] | default(pxe_stack_ep_operating_system.distribution_major_version) | int) in [12]
+#     - bb_equipments[item]['type'] | default(pxe_stack_hw_equipment_type) == "server"
+#     - bb_equipments[item]['operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution) | lower) in ['sles']
+#     - (bb_equipments[item]['operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version) | int) in [12]
 #   tags:
 #     - template
 
@@ -46,9 +46,9 @@
     hw_profile: "{{ bb_equipments[item]['hw'] }}"
   with_items: "{{ bb_equipments.keys() }}"
   when:
-    - (bb_equipments[item]['type'] | default(pxe_stack_ep_equipment_type)) == "server"
-    - (hostvars[groups[bb_equipments[item]['os']][0]]['os_operating_system']['distribution'] | default(pxe_stack_ep_operating_system.distribution) | lower) in ['opensuse','sles']
-    - (hostvars[groups[bb_equipments[item]['os']][0]]['os_operating_system']['distribution_major_version'] | default(pxe_stack_ep_operating_system.distribution_major_version) | int) in [15]
+    - (bb_equipments[item]['type'] | default(pxe_stack_hw_equipment_type)) == "server"
+    - (hostvars[groups[bb_equipments[item]['os']][0]]['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution) | lower) in ['opensuse','sles']
+    - (hostvars[groups[bb_equipments[item]['os']][0]]['os_operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version) | int) in [15]
   tags:
     - template
 
@@ -64,7 +64,7 @@
     hw_profile: "{{ bb_equipments[item]['hw'] }}"
   with_items: "{{ bb_equipments.keys() }}"
   when:
-    - (bb_equipments[item]['type'] | default(pxe_stack_ep_equipment_type)) == "server"
-    - (hostvars[groups[bb_equipments[item]['os']][0]]['os_operating_system']['distribution'] | default(pxe_stack_ep_operating_system.distribution) | lower) in ['opensuse','sles']
+    - (bb_equipments[item]['type'] | default(pxe_stack_hw_equipment_type)) == "server"
+    - (hostvars[groups[bb_equipments[item]['os']][0]]['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution) | lower) in ['opensuse','sles']
   tags:
     - template

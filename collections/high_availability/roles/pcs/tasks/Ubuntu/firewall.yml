@@ -6,7 +6,7 @@
     port: '2224'
     proto: tcp
   when:
-    - ep_firewall | default(false) | bool
+    - os_firewall | default(false) | bool
   tags:
     - firewall
 
@@ -16,6 +16,6 @@
     port: '5405:5412'
     proto: udp
   when:
-    - ep_firewall | default(false) | bool
+    - os_firewall | default(false) | bool
   tags:
     - firewall

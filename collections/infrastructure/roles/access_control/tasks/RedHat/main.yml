@@ -2,4 +2,4 @@
 - name: selinux <|> Set SELinux state
   ansible.posix.selinux:
     policy: targeted
-    state: "{{ ep_access_control | default(access_control_ep_access_control) }}"
+    state: "{{ os_access_control | default(access_control_os_access_control) }}"

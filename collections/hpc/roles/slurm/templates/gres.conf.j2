@@ -6,7 +6,7 @@
 # https://slurm.schedmd.com/gres.conf.html
 
 {# GPU Resources Definition #}
-{% for gpu in hostvars[inventory_hostname]['ep_hardware']['gpu'] %}
+{% for gpu in hostvars[inventory_hostname]['hw_specs']['gpu'] %}
   {% if gpu.split(' ')[0] == 'NVIDIA' %}
     {% set gpu_vendor = 'nvidia' %}
   {% endif %}

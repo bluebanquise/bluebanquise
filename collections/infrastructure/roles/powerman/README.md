@@ -38,8 +38,8 @@ Mandatory inventory vars:
 
 **hostvars[hosts]**
 
-* ep_equipment_authentication.user
-* ep_equipment_authentication.password
+* hw_board_authentication.user
+* hw_board_authentication.password
 * bmc
    * .name
    * .ip4
@@ -57,6 +57,7 @@ Files generated:
 
 ## Changelog
 
+* 1.3.2: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.1: Fix defaults path. Pierre Gay <pierre.gay@u-bordeaux.fr>, Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>
 * 1.3.0: add optional variable powerman_enable_ipmi_lan_2_0. Pierre Gay <pierre.gay@u-bordeaux.fr>, Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>
 * 1.2.1: Fix error when ep_host_authentication does not contain IPMI credentials. Giacomo Mc Evoy <gino.mcevoy@gmail.com>

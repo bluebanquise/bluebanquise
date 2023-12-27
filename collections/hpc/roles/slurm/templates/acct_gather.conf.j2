@@ -14,8 +14,8 @@
 EnergyIPMIFrequency={{ slurm_acct_gather_energy_ipmi_frequency }}
 EnergyIPMICalcAdjustment={{ slurm_acct_gather_energy_ipmi_calc_adjustment }}
 EnergyIPMIPowerSensors=Node={{ ",".join(slurm_acct_gather_energy_ipmi_power_sensors) }}
-EnergyIPMIUsername={{ ep_equipment_authentication.user }}
-EnergyIPMIPassword={{ ep_equipment_authentication.password }}
+EnergyIPMIUsername={{ hw_board_authentication.user }}
+EnergyIPMIPassword={{ hw_board_authentication.password }}
 {% endif %}
 {% if slurm_acct_gather_energy_type is defined and slurm_acct_gather_energy_type == 'xcc' %}
 # Parameters for acct_gather_energy/xcc plugin

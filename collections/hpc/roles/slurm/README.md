@@ -189,13 +189,13 @@ It is possible to add more content into *slurm.conf* file using the multi-lines
 ### Optional nodes tuning
 
 It is possible to set variable **slurm_extra_nodes_parameters** under
-**ep_hardware** in an *equipment_profile* to add more parameters on the nodes
+**hw_specs** in an *equipment_profile* to add more parameters on the nodes
 definition line.
 
 For example, setting:
 
 ```yaml
-ep_hardware:
+hw_specs:
   cpu:
     architecture: x86_64
     cores: 24
@@ -291,7 +291,7 @@ $ nvidia-smi -L
 You need to add the Gres extra arguments for slurm as well, so you would add something like the following to your equipment_profile.yml file if you have 8x NVIDIA A100-SXM4-40GB on your hardware for example:
 
 ```yaml
-ep_hardware:
+hw_specs:
   slurm_extra_nodes_parameters: "Gres=gpu:8"
   [...]
   gpu:
@@ -345,6 +345,7 @@ See more explanation on https://slurm.schedmd.com/acct_gather.conf.html
 
 ## Changelog
 
+* 1.4.1: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.0: Add capacity to bind to an external MYSQL database. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.0: Added acct_gather plugin configuration. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.2.5: RedHat 9 packages file. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>

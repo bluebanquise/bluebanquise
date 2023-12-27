@@ -106,7 +106,7 @@
   {% if current_hostvars['network_interfaces'] is defined and current_hostvars['network_interfaces'] is iterable and current_hostvars['network_interfaces'] is not mapping and current_hostvars['network_interfaces'] is not string %}
     {% for nic in current_hostvars['network_interfaces'] %}
       {%- if nic.network is defined and nic.network == item and nic.ip4 is defined and (nic.ip4 | ansible.utils.ipaddr) %}
-{{ write_host(host, nic, current_hostvars['ep_ipxe_driver'] | default(None), current_hostvars['ep_ipxe_embed'] | default(None)) }}
+{{ write_host(host, nic, current_hostvars['hw_ipxe_driver'] | default(None), current_hostvars['hw_ipxe_embed'] | default(None)) }}
       {% endif %}
     {% endfor %}
   {% endif %}

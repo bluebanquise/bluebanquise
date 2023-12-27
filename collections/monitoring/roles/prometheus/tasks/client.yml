@@ -69,7 +69,7 @@
   loop: "{{ exporters_groups }}"
   when:
     - ansible_facts.os_family == "RedHat"
-    - ep_firewall | default(false) | bool
+    - os_firewall | default(false) | bool
     - item.port is defined
   tags:
     - firewall

@@ -151,6 +151,7 @@ Note: if you try to add dashboards, the role will alwats at checking if the data
 
 ## Changelog
 
+* 2.1.2: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 2.1.1: Added additional\_json\_data variable in datasource. Alexandra Darrieutort <alexandra.darrieutort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 2.1.0: Ability to install a recent version of Grafana. Alexandra Darrieutort <alexandra.darrieutort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 2.0.6: Avoid unnecessary handlers when no dashboard has changed. Alexandra Darrieutort <alexandra.darrieutort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>

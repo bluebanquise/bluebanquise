@@ -64,6 +64,7 @@ This will cause `/var/named/override` to be generated.
 
 ## Changelog
 
+* 1.7.4: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.7.3: Add missing services records. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.7.2: Rename systemd service to named for Ubuntu. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.7.1: Find correct default resolution network in reverse zone. Alexandra Darrieutort <alexandra.darrieutort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>

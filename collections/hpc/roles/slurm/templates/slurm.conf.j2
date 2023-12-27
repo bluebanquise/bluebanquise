@@ -85,7 +85,7 @@ AcctGatherProfileType=acct_gather_profile/{{ slurm_acct_gather_profile_type }}
 {# Nodes definition #}
 {% for computes_group in slurm_computes_groups %}
   {% if groups[computes_group] is iterable %}
-    {% set buffer = hostvars[groups[computes_group][0]]['ep_hardware'] %}
+    {% set buffer = hostvars[groups[computes_group][0]]['hw_specs'] %}
     {% if buffer.cpu.sockets is defined and buffer.cpu.sockets is not none and buffer.cpu.corespersocket is defined and buffer.cpu.corespersocket is not none and buffer.cpu.threadspercore is defined and buffer.cpu.threadspercore is not none%}
       {% set nodes_parameters = ' Sockets=' + (buffer.cpu.sockets|string) + ' CoresPerSocket=' + (buffer.cpu.corespersocket|string) + ' ThreadsPerCore=' + (buffer.cpu.threadspercore|string) %}
     {% else %}{# Will fail if cores is also not set. Expected minimal value. #}

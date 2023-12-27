@@ -23,7 +23,7 @@
     immediate: "yes"
     permanent: "yes"
     state: enabled
-  when: ep_firewall | default(false) | bool
+  when: os_firewall | default(false) | bool
   tags:
     - firewall
 

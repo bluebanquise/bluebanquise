@@ -10,8 +10,8 @@ This role is one of the major role of the BlueBanquise project.
 * Deploy diskfull servers
 * Provision diskless servers
 * Start tools via PXE
-  * memtest
-  * clonezilla
+  * memtest (x86_64 only)
+  * clonezilla (x86_64 only)
   * alpine live
 
 ## Data Model
@@ -138,17 +138,18 @@ In that case, simply precedence the role embeded default variables, that will ap
 In your `inventory/group_vars/all`, create file `pxe_stack.yml` with the following content:
 
 ```yaml
-pxe_stack_ep_equipment_type: server  # Servers are always added to PXE
-pxe_stack_ep_operating_system:
+pxe_stack_hw_equipment_type: server  # Servers are always added to PXE
+pxe_stack_os_operating_system:
   distribution: ubuntu
   distribution_version: 22.04        # Minor version is not mandatory but usefull for Ubuntu (22 == 22.04 or 22.10?)
   distribution_major_version: 22
 
-pxe_stack_ep_console:                # If using a remote server with a serial console, set it here
-pxe_stack_ep_kernel_parameters:      # If specific parameters are needed. I recommend to add least 'nomodeset' if server have an attached GPU
+pxe_stack_hw_console:                # If using a remote server with a serial console, set it here
+pxe_stack_os_kernel_parameters:      # If specific parameters are needed. I recommend to add least 'nomodeset' if server have an attached GPU
+pxe_stack_hw_kernel_parameters:      # If you need to specify it as hw level instead of os level (for inventory readbility)
 
-pxe_stack_ep_keyboard_layout: us     # us, fr, etc.
-pxe_stack_ep_system_language: en_US.UTF-8  # You should not update this if you want to google issues...
+pxe_stack_os_keyboard_layout: us     # us, fr, etc.
+pxe_stack_os_system_language: en_US.UTF-8  # You should not update this if you want to google issues...
 pxe_stack_time_zone: Europe/Brussels       # Ensure time zone set here is coherent for your whole cluster
 
 pxe_stack_enable_root: false               # Disable root by default, and create a sudo user instead
@@ -156,34 +157,50 @@ pxe_stack_sudo_user: bluebanquise          # Name of the sudo user
 pxe_stack_sudo_user_home: /var/lib/bluebanquise    # $HOME of the sudo user. Avoid /home/XXXX to prevent later issues.
 pxe_stack_sudo_is_passwordless: true       # Set sudo user as passwordless sudoer
 
-pxe_stack_ep_admin_ssh_keys:
+pxe_stack_os_admin_ssh_keys:
   - XXXXXXXXXXXXXXX                        # Add here your server(s) !! PUBLIC !! ssh key(s)
 
-pxe_stack_ep_access_control: enforcing     # If SELinux or AppArmor (RHEL / Ubuntu only) should be let activated
-pxe_stack_ep_firewall: true                # If firewall (RHEL only for now) should be let activated
+pxe_stack_os_access_control: enforcing     # If SELinux or AppArmor (RHEL / Ubuntu only) should be let activated
+pxe_stack_os_firewall: true                # If firewall (RHEL only for now) should be let activated
 
 # WARNING! If nothing is set for partitioning,
 # automatic partitioning will be activated.
-pxe_stack_ep_partitioning:                 # Set partitioning. Use raw OS format: kickstart for RHEL, preseed for Debian, etc.
+pxe_stack_os_partitioning:                 # Set partitioning. Use raw OS format: kickstart for RHEL, preseed for Debian, etc.
 ```
 
 #### Equipments groups
 
-If cluster have multiple different equipments, it is then mandatory to use equipment groups.
+If cluster have multiple different equipments, it is then mandatory to use hardware and os groups, to allow the role to generate virtual equipment groups.
 
-A specific Ansible group, prefixed by `ep_` have to be created for each kind of equipment present in the cluster. An equipment group can be seen as a storage for the following variables:
+A specific Ansible group, prefixed by `hw_` have to be created for each kind of hardware equipment present in the cluster. An hardware group can be seen as a storage for the following variables:
 
 * Hardware related variables (kernel parameters, partitioning, iPXE specific tunings, console, etc.)
+
+A specific Ansible group, prefixed by `os_` have to be created for each kind of operating system installation settings present in the cluster. An os group can be seen as a storage for the following variables:
+
 * OS related variables (OS version to be used, enable firewall, ssh keys to be deployed, sudo user, etc.)
 
-An host CANNOT be in 2 equipment groups at the same time. Create as many equipment groups as necessary.
+To be taken into account by this role, an host MUST be in one hardware group and one os group at the same time.
+However, an host CANNOT be in 2 hardware or os groups at the same time. Create as many groups as necessary to respect this rule.
 
-For example, for a cluster with 2 kind of servers, one kind based on Ubuntu 22.04 with GPUs (hosts c1 to c10) and another one based on RHEL 9 for CPU only (hosts c11 to c100):
+Lets take as an example a cluster with 2 kind of servers, one kind based on Ubuntu 22.04 with GPUs (hosts c1 to c10) and another one based on RHEL 9 for CPU only (hosts c11 to c100), and both based on the same server hardware (ASUS_G9).
 
-Create groups file, at `inventory/cluster/groups/equipment` with the following content:
+This will mean 2 virtual equipment profiles : 
+
+* `hw_ASUS_G9_with_os_ubuntu_22.04_GPU`
+* `hw_ASUS_G9_with_os_rhel9`
+
+Create/append to groups file, at `inventory/cluster/groups/hw` with the following content:
 
 ```INI
-[ep_my_type_A_GPU]
+[hw_ASUS_G9]
+c[1:100]
+```
+
+Then create/append to groups file, at `inventory/cluster/groups/os` with the following content:
+
+```INI
+[os_ubuntu_22.04_GPU]
 c1
 c2
 c3
@@ -195,65 +212,70 @@ c8
 c9
 c10
 
-[ep_my_type_B]
+[os_rhel9]
 c[11:100]
 ```
 
-Then create equipment groups dedicated folders:
+Then create groups dedicated folders:
 
 ```
-mkdir inventory/group_vars/ep_my_type_A_GPU -p
-mkdir inventory/group_vars/ep_my_type_B -p
+mkdir inventory/group_vars/hw_ASUS_G9 -p
+mkdir inventory/group_vars/os_ubuntu_22.04_GPU -p
+mkdir inventory/group_vars/os_rhel9 -p
 ```
 
 You can store any variables related to these groups in these folders.
 
-Populate now equipment variables for each group.
-Create file `inventory/group_vars/ep_my_type_A_GPU/equipment.yml` with the following content:
+Populate now harwdare variables for the hardware group.
+Create file `inventory/group_vars/hw_ASUS_G9/fw.yml` with the following content:
 
 ```yaml
-ep_equipment_type: server
-ep_operating_system:
+hw_equipment_type: server
+hw_console: console=tty0 console=ttyS1,115200
+```
+
+Populate now os variables for the os groups.
+Create file `inventory/group_vars/os_ubuntu_22.04_GPU/os.yml` with the following content:
+
+```yaml
+os_operating_system:
   distribution: ubuntu
   distribution_version: 22.04
   distribution_major_version: 22
 
-ep_console: console=tty0 console=ttyS1,115200
-ep_kernel_parameters: nomodeset
+os_kernel_parameters: nomodeset
 
-ep_keyboard_layout: us
-ep_system_language: en_US.UTF-8
+os_keyboard_layout: us
+os_system_language: en_US.UTF-8
 
-ep_admin_ssh_keys:
+os_admin_ssh_keys:
   - XXXXXXXXXXXXXXX # Public ssh keys to deploy
 
-ep_access_control: disabled
-ep_firewall: false
+os_access_control: disabled
+os_firewall: false
 
-pxe_stack_ep_partitioning: # Leave empty for auto partitioning
+os_partitioning: # Leave empty for auto partitioning
 ```
 
-Then create file `inventory/group_vars/ep_my_type_B/equipment.yml` with the following content:
+Then create file `inventory/group_vars/os_rhel9/os.yml` with the following content:
 
 ```yaml
-ep_equipment_type: server
-ep_operating_system:
+os_operating_system:
   distribution: redhat
   distribution_major_version: 9
 
-ep_console: console=tty0 console=ttyS0,115200
-ep_kernel_parameters:
+os_kernel_parameters:
 
-ep_keyboard_layout: us
-ep_system_language: en_US.UTF-8
+os_keyboard_layout: us
+os_system_language: en_US.UTF-8
 
-ep_admin_ssh_keys:
+os_admin_ssh_keys:
   - XXXXXXXXXXXXXXX # Public ssh keys to deploy
 
-ep_access_control: disabled
-ep_firewall: false
+os_access_control: disabled
+os_firewall: false
 
-pxe_stack_ep_partitioning: |
+os_partitioning: |
   clearpart --all --initlabel
   autopart --type=plain --fstype=ext4
 ```
@@ -615,6 +637,7 @@ pxe_stack_enable_memtest: true
 
 ## Changelog
 
+* 1.9.0: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.8.5: replace hard-coded string 'equipment_' with adequate var. #sla31
 * 1.8.4: Improve documentation. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.8.3: Allow all distributions to erase default repositories. Benoit Leveugle <benoit.leveugle@gmail.com>

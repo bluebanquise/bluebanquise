@@ -20,11 +20,11 @@ include "/etc/powerman/ipmipower.dev"
         {% set credentials_host = hostvars[host]['bmc']['name'] %}{# Define external bmc as credentials source #}
       {% endif %}
       {# Look for BMC credentials #}
-      {% if hostvars[credentials_host]['ep_host_authentication'] is defined %}
-        {# Found ep_host_authentication settings, use them #}
-        {% set ipmi_credentials = (hostvars[credentials_host]['ep_host_authentication'] | selectattr('protocol','match','IPMI')) %}
+      {% if hostvars[credentials_host]['hw_board_authentication'] is defined %}
+        {# Found hw_board_authentication settings, use them #}
+        {% set ipmi_credentials = (hostvars[credentials_host]['hw_board_authentication'] | selectattr('protocol','match','IPMI')) %}
         {% if ipmi_credentials | length > 0 %}
-          {# Found IPMI credentials from ep_host_authentication, save first entry #}
+          {# Found IPMI credentials from hw_board_authentication, save first entry #}
           {% set host_bmc_user = (ipmi_credentials | map(attribute='user') | list | first) %}
           {% set host_bmc_password = (ipmi_credentials | map(attribute='password') | list | first) %}
         {% else %}

@@ -4,6 +4,6 @@
     port: "{{ rsyslog_port }}"
     proto: tcp
   when:
-    - ep_firewall | default(false) | bool
+    - os_firewall | default(false) | bool
   tags:
     - firewall

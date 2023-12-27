@@ -4,6 +4,6 @@
     port: '123'
     proto: udp
   when:
-    - ep_firewall | default(false) | bool
+    - os_firewall | default(false) | bool
   tags:
     - firewall
