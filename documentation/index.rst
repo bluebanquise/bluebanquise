@@ -4,16 +4,13 @@ BlueBanquise Documentation
 .. image:: images/multiple_icebergs.svg
    :align: center
 
-This documentation contains information on how to deploy and use the BlueBanquise unified stack
-or BlueBanquise Ansible collections.
+Welcome on BlueBanquise documentation.
 
-This documentation also contains few tutorials indirectly related to BlueBanquise,
-for generic system administration knowledge.
+These pages contain information on how to deploy and use the BlueBanquise unified stack.
 
-Users can use left navigation bar to navigate to desired sections,
-or scroll down this page to see the whole documentation summary.
+If you wish to only use a specific role of the provided Ansible collections, directly refer to the role's README.
 
-`Please report us <https://github.com/bluebanquise/bluebanquise/issues>`_ any
+`Please report me <https://github.com/bluebanquise/bluebanquise/issues>`_ any
 issues in this documentation.
 
 This documentation is under Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.

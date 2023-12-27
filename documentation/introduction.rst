@@ -16,43 +16,33 @@ simplicity while managing very complex architecture.
 The **BlueBanquise** project also aims to train new system administrators to the
 deployment of bare metal servers.
 
-The stack rely on **Ansible**.
+The project relies on **Ansible**.
 Ansible was chosen for its simplicity and its security.
 The Ansible inventory groups/variables mechanism can cover from very simple to
 very sophisticated configurations. Ansible is not the fastest tool, nor the
 simplest to debug. However, it is easy to learn, and widely used today with an
 active community.
 
-The **BlueBanquise** stack is made of two main parts:
+The **BlueBanquise** stack is made of multiple Ansible collections.
+The *infrastructure* collection is the largest one, and should be generic. Other collections allows to specialize the cluster of hosts.
 
-* The `CORE <https://github.com/bluebanquise/bluebanquise>`_, aimed to deploy operating system and base services on hosts
-* The `COMMUNITY <https://github.com/bluebanquise/community>`_, aimed to provide specialized features over the CORE (HPC, render farm, etc.)
 
 This documentation is structured as the following:
 
 * Few basic vocabulary
-* A full Cluster system administration training, independent of the stack
-* A full Ansible training, independent of the stack
 * Procedure to install BlueBanquise CORE
     * Bootstrap first management host
     * Configure BlueBanquise
     * Deploy cluster
-    * (Optional) Deploy a multi icebergs cluster
-    * (Optional) Deploy diskless nodes
-* Procedures to specialize the cluster using BlueBanquise COMMUNITY or external tools
-    * Deploy an High Availability cluster, based on Corosync/Pacemaker and HAproxy
-    * Deploy Prometheus (Monitor your cluster)
-    * Deploy Slurm (Specialize your cluster for High Performance Computing or a Blender render farm)
-    * Deploy Kubernetes (K8S) over BlueBanquise using Kubespray
-* An FAQ
+* Procedures to specialize the cluster
 
-If you encounter any bugs/issues or have any comments, please inform us.
+If you encounter any bugs/issues or have any comments, please inform me.
 
 Note also that since BlueBanquise is a multi-distribution based stack, parts of the
 documentation may be dedicated to a specific Linux distribution (always
 explicitly mentioned).
 
-We hope you will enjoy this stack as much as we do.
+I hope you will enjoy this stack as much as I do developing it.
 
 If you need help, do not hesitate to use `the discussions tab <https://github.com/bluebanquise/bluebanquise/discussions>`_
 of the project's github.

@@ -32,23 +32,20 @@ include "/etc/powerman/ipmipower.dev"
           {% set host_bmc_user = '' %}
           {% set host_bmc_password = '' %}
         {% endif %}
-      {% else %}{# Fall back to equipment_authentication | DATAMODEL 2.0 DEPRECATION #}
-        {% set host_bmc_user = hostvars[credentials_host]['ep_equipment_authentication']['user'] %}
-        {% set host_bmc_password = hostvars[credentials_host]['ep_equipment_authentication']['password'] %}
+        {# Check if this set of credentials have been used before in a previous host #}
+        {% if host_bmc_user and host_bmc_user not in credentials_dict -%}
+          {# new user credential, create a dictionary entry for it #}
+          {{ credentials_dict.update({host_bmc_user: {}}) }}
+        {%- endif %}
+        {% if host_bmc_password and host_bmc_password not in credentials_dict[host_bmc_user] -%}
+          {# new password credential, create an inner dictionary entry for it #}
+          {{ credentials_dict[host_bmc_user].update({host_bmc_password: []}) }}
+        {%- endif %}
+        {# Add this host to the set of hosts with the same credentials #}
+        {% if host_bmc_user and host_bmc_password -%}
+          {{ credentials_dict[host_bmc_user][host_bmc_password].append(host) }}
+        {%- endif %}
       {% endif %}
-      {# Check if this set of credentials have been used before in a previous host #}
-      {% if host_bmc_user and host_bmc_user not in credentials_dict -%}
-        {# new user credential, create a dictionary entry for it #}
-        {{ credentials_dict.update({host_bmc_user: {}}) }}
-      {%- endif %}
-      {% if host_bmc_password and host_bmc_password not in credentials_dict[host_bmc_user] -%}
-        {# new password credential, create an inner dictionary entry for it #}
-        {{ credentials_dict[host_bmc_user].update({host_bmc_password: []}) }}
-      {%- endif %}
-      {# Add this host to the set of hosts with the same credentials #}
-      {% if host_bmc_user and host_bmc_password -%}
-        {{ credentials_dict[host_bmc_user][host_bmc_password].append(host) }}
-      {%- endif %}
     {%- endif %}
   {% endfor %}
   {# Render entries for each set of nodes with the same credentials #}
