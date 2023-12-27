@@ -32,11 +32,15 @@ The following collections are available. **Please note that for now, only infras
 
 Infrastructure collection should be compatible with all target Linux distributions (RHEL 8, RHEL 9, Debian 11, Debian 12, OpenSuse Leap 15, Ubuntu 20.04, Ubuntu 22.04). Other collections do not support all these distributions (support is added on demand).
 
+## License
+
+BlueBanquise repository is under **MIT license**, except Bluebanquise documentation which is under **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License**.
+
 ## Resources
 
 ### Documentation
 
-The stack documentation is available on the BlueBanquise website, in [documentation subfolder](https://bluebanquise.com/documentation/). Please note that this documentation is deprecated, and a new documentation for BlueBanquise 2.X will be provided soon.
+The stack documentation is available on the BlueBanquise website, in [documentation subfolder](https://bluebanquise.com/documentation/).
 
 Note that each role embeds its own README, with detailed usage description.
 

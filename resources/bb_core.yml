@@ -56,9 +56,8 @@ j2_node_main_address: "{{ network_interfaces[j2_node_main_network].ip4 | default
 #         network: net-admin
 #     node_main_resolution_address: 10.10.3.1
 # This is a transverse j2 (j2_bb_), used as a cache fact
-j2_bb_nodes: "
-{%- set bnodes = {} -%}
-{%- for host in (j2_hosts_range | sort) -%}
+j2_bb_nodes: "{%- set bnodes = {} -%}
+{%- for host in j2_hosts_range -%}
   {%- do bnodes.update({
     host: {
       'network_interfaces': hostvars[host]['network_interfaces'] | default(none, true),
@@ -80,17 +79,16 @@ j2_bb_nodes: "
 #     hw: hw_supermicro_XXX
 #     os: os_ubuntu_22.04_gpu
 # This is a transverse j2 (j2_bb_), used as a cache fact
-j2_bb_nodes_profiles: "
-{%- set bnodes_profiles = {} -%}
-{%- for host in (j2_hosts_range | sort) -%}
+j2_bb_nodes_profiles: "{%- set bnodes_profiles = {} -%}
+{%- for host in j2_hosts_range -%}
   {%- set host_hw = (hostvars[host]['group_names'] | select('match','^'+bb_core_hw_naming+'_.*') | list | unique | sort | first) | default(none, true) -%}
   {%- set host_os = (hostvars[host]['group_names'] | select('match','^'+bb_core_os_naming+'_.*') | list | unique | sort | first) | default(none, true) -%}
+  {%- set host_type = hostvars[host]['hw_equipment_type'] | default(none, true) -%}
   {%- if host_hw is not none and host_os is not none -%}
-    {%- set host_ep = (host_hw + '_' + host_os) -%}
+    {%- set host_ep = (host_hw + '_with_' + host_os) -%}
   {%- else -%}
     {%- set host_ep = none -%}
   {%- endif -%}
-  {%- set host_type = hostvars[host]['hw_equipment_type'] | default(none, true) -%}
   {%- do bnodes_profiles.update({host: {'hw': host_hw, 'os': host_os, 'ep': host_ep, 'type': host_type}}) -%}
 {%- endfor -%}
 {{ bnodes_profiles }}"
@@ -103,8 +101,7 @@ j2_bb_nodes_profiles: "
 # This is a transverse j2 (j2_bb_), used as a cache fact
 # It is expected that the dependency fact be bb_nodes_profiles
 # If the dependency fact was not already cached, it will not be used but that implies longuer calculations
-j2_bb_equipments: "
-{%- set bequipments = {} -%}
+j2_bb_equipments: "{%- set bequipments = {} -%}
 {%- if bb_nodes_profiles is defined -%}
   {%- set bnodes_profiles = bb_nodes_profiles -%}
 {%- else -%}{# Calculate since not cached #}
@@ -113,9 +110,10 @@ j2_bb_equipments: "
 {%- for host, host_keys in bnodes_profiles.items() -%}
   {%- if host_keys['ep'] is not none -%}
     {%- if host_keys['ep'] not in bequipments -%}
-      {%- do bequipments.update({host_keys['ep']: []}) -%}
+      {%- set operating_system = hostvars[host]['os_operating_system'] | default(none, true) -%}
+      {%- do bequipments.update({host_keys['ep']: {'nodes': [], 'type': host_keys['type'], 'hw': host_keys['hw'], 'os': host_keys['os']}}) -%}
     {%- endif -%}
-{{ bequipments[host_keys['ep']].append(host) }}
+{{ bequipments[host_keys['ep']]['nodes'].append(host) }}
   {%- endif -%}
 {%- endfor -%}
 {{ bequipments }}"
