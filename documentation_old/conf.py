@@ -19,14 +19,14 @@
 
 # -- Project information -----------------------------------------------------
 
-project = u'BlueBanquise Documentation'
-copyright = u'2023, Benoît Leveugle, Johnny Keats'
+project = u'BlueBanquise'
+copyright = u'2022, Benoît Leveugle, Johnny Keats.'
 author = u'Benoît Leveugle, Johnny Keats, Bruno Travouillon, Tim Gellner, David Pieters, Neil Munday'
 
 # The short X.Y version
-version = u'3.0'
+version = u'2.0'
 # The full version, including alpha/beta/rc tags
-release = u'3.0.0'
+release = u'2.0.0'
 
 
 # -- General configuration ---------------------------------------------------
@@ -62,7 +62,7 @@ master_doc = 'index'
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = 'en'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -84,15 +84,21 @@ pygments_style = None
 #     'logo_name': 'Training',
 #     }
 html_logo = "logo.png"
-html_theme = 'sphinx_book_theme'
-html_theme_path = []  # ["_themes", ]
-html_css_files = [] # ["custom.css", ]
+html_theme = "sphinx_book_theme"
+#html_theme = "furo"
+html_theme_path = ["_themes"]
+#html_css_files = ["custom.css"]
+html_theme_path = ["_themes", ]
+html_css_files = ["custom.css", ]
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-# html_theme_options = {}
+html_theme_options = {
+  "repository_url": "https://github.com/bluebanquise/documentation/",
+  "use_repository_button": True,
+        }
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -107,8 +113,19 @@ html_static_path = ['_static']
 # default: ``['localtoc.html', 'relations.html', 'sourcelink.html',
 # 'searchbox.html']``.
 #
-# html_sidebars = {}
 
+
+#html_sidebars = {
+#    "**": [
+#        #"sidebar-logo.html",
+#"search-field.html",
+#                "sponsor.html",
+#
+##"relations.html",
+#"sbt-sidebar-nav.html",
+#"sbt-sidebar-footer.html",
+#    ]
+#}
 
 # -- Options for HTMLHelp output ---------------------------------------------
 

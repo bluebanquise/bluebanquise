@@ -1,10 +1,8 @@
 BlueBanquise Documentation
 ==========================
 
-.. image:: images/BlueBanquise_logo.svg
+.. image:: images/multiple_icebergs.svg
    :align: center
-
-------------
 
 This documentation contains information on how to deploy and use the BlueBanquise unified stack
 or BlueBanquise Ansible collections.
@@ -23,47 +21,28 @@ This documentation is under Creative Commons Attribution-NonCommercial-ShareAlik
 .. image:: images/Cc-by-nc-sa_icon.svg
    :align: center
 
-New user? Please proceed to :ref:`Introduction` as a starting point.
-
-EOT EOT EOT EOT
-
-.. raw:: html
-
-   <div class="tip_card">                
-   <div class="tip_card_img_container"><img src="_static/img_avatar.png" style="width:100px; border-radius: 5px 0 0 5px; float: left;" /></div>
-   <div class="tip_card_title_container"><b>Tip from the penguin:</b></div>
-   <div class="tip_card_content_container"><p>If this is your first time with BlueBanquise, you are strongly encouraged to follow the step by step deployment guide of the documentation.</p></div>
-   </div>
-
-ADD gitea in doc / script ?
-
-LIST OF EXTERNAL ROLES:
-https://github.com/nbigot/ansible-fail2ban
-
-LIST OF 100% WRAPPERS ROLES:
-generic
-
-LIST OF BB ROLES:
-access_control
-clustershell
-conman
-dhcp_server
-dns_client
-hosts_file
-nic
-pxe_stack
-set_hostname
-
-
-
 ------------
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 1
    :caption: Contents:
    :numbered:
 
    introduction
-   stack/introduction
-   stack/vocabulary
-   hpc_training
+   vocabulary
+   training_sysadmin
+   training_ansible
+   bootstrap
+   configure_bluebanquise
+   deploy_cluster
+   multiple_icebergs
+   diskless
+   community_high_availability
+   community_monitoring
+   community_slurm
+   external_kubernetes
+   FAQ
+   containers
+   stories
+   roles
+   references
