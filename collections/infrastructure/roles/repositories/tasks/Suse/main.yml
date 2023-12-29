@@ -22,7 +22,7 @@
 - name: zypper_repository <|+> Setting repositories
   community.general.zypper_repository:
     name: "{{ item.name | default(item) }}"
-    description: "{{ item.name | default(item) }} gen by Ansible"
+    description: "{{ item.description | default(item) }} gen by Ansible"
     repo: "{{ item.repo | default(repositories_j2_simple_url + item.repo | default(item.name | default(item))) }}"
     disable_gpg_check: "{{ item.disable_gpg_check | default(omit) }}"
     auto_import_keys: "{{ item.disable_gpg_check | default(omit) }}"

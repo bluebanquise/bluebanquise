@@ -27,10 +27,12 @@ This documentation is under Creative Commons Attribution-NonCommercial-ShareAlik
 
    introduction
    vocabulary
+   configure_bluebanquise
+   variables_description
    training_sysadmin
    training_ansible
    bootstrap
-   configure_bluebanquise
+   
    deploy_cluster
    multiple_icebergs
    diskless
