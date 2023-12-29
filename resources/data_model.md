@@ -250,9 +250,8 @@ os_operating_system:
   distribution_version:      # Optional: define a minor distribution version to force (repositories/PXE)
   repositories_environment:  # Optional: add an environment in the repositories path (eg. production, staging) (repositories/PXE)
 
-os_configuration:
-  keyboard_layout:
-  system_language:
+os_keyboard_layout:
+os_system_language:
 ```
 
 ### 3.4: icebergs groups

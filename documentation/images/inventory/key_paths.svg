@@ -1,1 +1,384 @@
-<svg width="923" height="452" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" overflow="hidden"><defs><clipPath id="clip0"><rect x="186" y="127" width="923" height="452"/></clipPath></defs><g clip-path="url(#clip0)" transform="translate(-186 -127)"><rect x="213" y="379" width="361" height="142" fill="#00B0F0"/><rect x="213" y="293" width="361" height="67" fill="#92D050"/><rect x="213" y="218" width="361" height="56" fill="#FFC000"/><path d="M0.0748962-0.32481 186.355 42.6286 186.205 43.2782-0.0748962 0.32481ZM185.88 38.7561 192.777 44.4513 184.082 46.5515Z" fill="#262626" transform="matrix(-1 0 0 1 767.277 202.5)"/><path d="M767.235 352.084 581.073 328.663 581.156 328.001 767.318 351.423ZM581.938 332.467 574.5 327.5 582.937 324.53Z" fill="#262626"/><path d="M767.175 512.211 580.751 452.841 580.953 452.205 767.378 511.576ZM580.909 456.739 574.5 450.5 583.337 449.116Z" fill="#262626"/><rect x="767.5" y="129.5" width="341" height="145" stroke="#262626" stroke-linejoin="round" stroke-miterlimit="10" fill="none"/><text font-family="Consolas,Consolas_MSFontService,sans-serif" font-weight="700" font-size="19" transform="translate(776.513 152)">Host NIC settings:<tspan font-weight="400" font-size="19" x="20.6667" y="22">bmc</tspan><tspan font-weight="400" font-size="19" x="51.6667" y="22">:</tspan><tspan font-weight="400" font-size="19" x="51.6667" y="44">...</tspan><tspan font-weight="400" font-size="19" x="20.6667" y="67">network_interfaces</tspan><tspan font-weight="400" font-size="19" x="206.667" y="67">:</tspan><tspan font-weight="400" font-size="19" x="51.6667" y="89">...</tspan><tspan font-size="19" x="0" y="112">Groups</tspan></text><rect x="767.5" y="301.5" width="341" height="100" stroke="#262626" stroke-linejoin="round" stroke-miterlimit="10" fill="none"/><text font-family="Consolas,Consolas_MSFontService,sans-serif" font-weight="700" font-size="19" transform="translate(776.513 324)">Equipment_profiles:<tspan font-weight="400" font-size="19" x="20.6667" y="22">ep_operating_system</tspan><tspan font-weight="400" font-size="19" x="217" y="22">:</tspan><tspan font-weight="400" font-size="19" x="41.3334" y="44">...</tspan><tspan font-weight="400" font-size="19" x="20.6667" y="67">ep_...</tspan></text><rect x="767.5" y="450.5" width="341" height="123" stroke="#262626" stroke-linejoin="round" stroke-miterlimit="10" fill="none"/><text font-family="Consolas,Consolas_MSFontService,sans-serif" font-weight="700" font-size="19" transform="translate(776.513 473)">General_settings<tspan font-size="19" x="165.333" y="0">:</tspan><tspan font-weight="400" font-size="19" x="20.6666" y="22">networks:</tspan><tspan font-weight="400" font-size="19" x="41.3333" y="44">...</tspan><tspan font-weight="400" font-size="19" x="20.6666" y="67">time_zone</tspan><tspan font-weight="400" font-size="19" x="113.667" y="67">: ...</tspan><tspan font-size="19" x="0" y="89">Other global/roles variables...</tspan><tspan font-style="italic" font-weight="400" font-size="19" x="-553.476" y="-232">host_vars</tspan><tspan font-style="italic" font-weight="400" font-size="19" x="-460.476" y="-232">/ or </tspan><tspan font-style="italic" font-weight="400" font-size="19" x="-553.476" y="-210">cluster/{</tspan><tspan font-style="italic" font-weight="400" font-size="19" x="-460.476" y="-210">groups,nodes</tspan><tspan font-style="italic" font-weight="400" font-size="19" x="-336.476" y="-210">}/</tspan><tspan font-style="italic" font-weight="400" font-size="19" x="-553.476" y="-156">group_vars</tspan><tspan font-style="italic" font-weight="400" font-size="19" x="-450.142" y="-156">/</tspan><tspan font-style="italic" font-weight="400" font-size="19" x="-439.809" y="-156">equipment_X</tspan><tspan font-style="italic" font-weight="400" font-size="19" x="-326.142" y="-156">/</tspan><tspan font-style="italic" font-weight="400" font-size="19" x="-553.476" y="-70">group_vars</tspan><tspan font-style="italic" font-weight="400" font-size="19" x="-450.142" y="-70">/all/</tspan><tspan font-size="19" x="-578.641" y="-321">/inventory/</tspan></text><rect x="188.5" y="129.5" width="418" height="444" stroke="#262626" stroke-width="1.33333" stroke-miterlimit="8" stroke-dasharray="5.33333 4" fill="none"/></g></svg>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="923"
+   height="452"
+   overflow="hidden"
+   version="1.1"
+   id="svg4543"
+   sodipodi:docname="key_paths.svg"
+   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview4545"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     showguides="true"
+     inkscape:lockguides="true"
+     inkscape:zoom="0.75760508"
+     inkscape:cx="109.55576"
+     inkscape:cy="245.5105"
+     inkscape:window-width="1920"
+     inkscape:window-height="1029"
+     inkscape:window-x="0"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg4543" />
+  <defs
+     id="defs4455">
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath5079">
+      <g
+         id="g5083">
+        <rect
+           x="0"
+           y="0"
+           width="923"
+           height="452"
+           id="rect5081" />
+      </g>
+    </clipPath>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath5085">
+      <g
+         id="g5089">
+        <rect
+           x="0"
+           y="0"
+           width="923"
+           height="452"
+           id="rect5087" />
+      </g>
+    </clipPath>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath5091">
+      <g
+         id="g5095">
+        <rect
+           x="0"
+           y="0"
+           width="923"
+           height="452"
+           id="rect5093" />
+      </g>
+    </clipPath>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath5097">
+      <g
+         id="g5101">
+        <rect
+           x="0"
+           y="0"
+           width="923"
+           height="452"
+           id="rect5099" />
+      </g>
+    </clipPath>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath5103">
+      <g
+         id="g5107">
+        <rect
+           x="0"
+           y="0"
+           width="923"
+           height="452"
+           id="rect5105" />
+      </g>
+    </clipPath>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath5109">
+      <g
+         id="g5113">
+        <rect
+           x="0"
+           y="0"
+           width="923"
+           height="452"
+           id="rect5111" />
+      </g>
+    </clipPath>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath5115">
+      <g
+         id="g5119">
+        <rect
+           x="0"
+           y="0"
+           width="923"
+           height="452"
+           id="rect5117" />
+      </g>
+    </clipPath>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath5121">
+      <g
+         id="g5125">
+        <rect
+           x="0"
+           y="0"
+           width="923"
+           height="452"
+           id="rect5123" />
+      </g>
+    </clipPath>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath5127">
+      <g
+         id="g5131">
+        <rect
+           x="0"
+           y="0"
+           width="923"
+           height="452"
+           id="rect5129" />
+      </g>
+    </clipPath>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath5133">
+      <g
+         id="g5137">
+        <rect
+           x="0"
+           y="0"
+           width="923"
+           height="452"
+           id="rect5135" />
+      </g>
+    </clipPath>
+  </defs>
+  <rect
+     x="27"
+     y="252"
+     width="361"
+     height="142"
+     fill="#00b0f0"
+     id="rect4457"
+     clip-path="url(#clipPath5133)" />
+  <rect
+     x="27"
+     y="166"
+     width="361"
+     height="67"
+     fill="#92d050"
+     id="rect4459"
+     clip-path="url(#clipPath5127)" />
+  <rect
+     x="27"
+     y="91"
+     width="361"
+     height="56"
+     fill="#ffc000"
+     id="rect4461"
+     clip-path="url(#clipPath5121)" />
+  <path
+     d="m 581.2021,75.17519 -186.2801,42.95341 0.15,0.6496 186.2799,-42.95339 z m -185.8051,39.08091 -6.897,5.6952 8.695,2.1002 z"
+     fill="#262626"
+     id="path4463"
+     clip-path="url(#clipPath5115)" />
+  <path
+     d="m 581.235,225.084 -186.162,-23.421 0.083,-0.662 186.162,23.422 z M 395.938,205.467 388.5,200.5 l 8.437,-2.97 z"
+     fill="#262626"
+     id="path4465"
+     clip-path="url(#clipPath5109)" />
+  <path
+     d="m 581.175,385.211 -186.424,-59.37 0.202,-0.636 186.425,59.371 z M 394.909,329.739 388.5,323.5 l 8.837,-1.384 z"
+     fill="#262626"
+     id="path4467"
+     clip-path="url(#clipPath5103)" />
+  <rect
+     x="581.5"
+     y="2.5"
+     width="341"
+     height="145"
+     stroke="#262626"
+     stroke-linejoin="round"
+     stroke-miterlimit="10"
+     fill="none"
+     id="rect4469"
+     clip-path="url(#clipPath5097)" />
+  <rect
+     x="581.5"
+     y="174.5"
+     width="341"
+     height="100"
+     stroke="#262626"
+     stroke-linejoin="round"
+     stroke-miterlimit="10"
+     fill="none"
+     id="rect4487"
+     clip-path="url(#clipPath5091)" />
+  <rect
+     x="581.5"
+     y="323.5"
+     width="341"
+     height="123"
+     stroke="#262626"
+     stroke-linejoin="round"
+     stroke-miterlimit="10"
+     fill="none"
+     id="rect4499"
+     clip-path="url(#clipPath5085)" />
+  <rect
+     x="2.5"
+     y="2.5"
+     width="418"
+     height="444"
+     stroke="#262626"
+     stroke-width="1.33333"
+     stroke-miterlimit="8"
+     stroke-dasharray="5.33333, 4"
+     fill="none"
+     id="rect4539"
+     clip-path="url(#clipPath5079)" />
+  <text
+     xml:space="preserve"
+     style="font-style:italic;font-size:18.6667px;font-family:sans-serif;-inkscape-font-specification:'sans-serif Italic';fill:none;stroke-width:2"
+     x="36.817268"
+     y="112.43967"
+     id="text4549"><tspan
+       sodipodi:role="line"
+       id="tspan4547"
+       x="36.817268"
+       y="112.43967"
+       style="font-size:18.6667px;fill:#000000;fill-opacity:1">host_vars/ or</tspan><tspan
+       sodipodi:role="line"
+       x="36.817268"
+       y="135.77304"
+       style="font-size:18.6667px;fill:#000000;fill-opacity:1"
+       id="tspan5031">cluster//{groups,nodes}/</tspan></text>
+  <text
+     xml:space="preserve"
+     style="font-style:italic;font-size:18.6667px;font-family:sans-serif;-inkscape-font-specification:'sans-serif Italic';fill:none;stroke-width:2"
+     x="15.551115"
+     y="30.862047"
+     id="text4549-1"><tspan
+       sodipodi:role="line"
+       x="15.551115"
+       y="30.862047"
+       style="font-size:18.6667px;fill:#000000;fill-opacity:1"
+       id="tspan5031-7">inventory/</tspan></text>
+  <text
+     xml:space="preserve"
+     style="font-style:italic;font-size:18.6667px;font-family:sans-serif;-inkscape-font-specification:'sans-serif Italic';fill:none;stroke-width:2"
+     x="592.81641"
+     y="26.542322"
+     id="text4549-1-0"><tspan
+       sodipodi:role="line"
+       x="592.81641"
+       y="26.542322"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:18.6667px;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';fill:#000000;fill-opacity:1"
+       id="tspan5031-7-9">Hosts settings / groups</tspan><tspan
+       sodipodi:role="line"
+       x="592.81641"
+       y="49.875698"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:sans-serif;-inkscape-font-specification:sans-serif;fill:#000000;fill-opacity:1"
+       id="tspan6437">  network_interfaces</tspan><tspan
+       sodipodi:role="line"
+       x="592.81641"
+       y="73.209076"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:sans-serif;-inkscape-font-specification:sans-serif;fill:#000000;fill-opacity:1"
+       id="tspan6443">  bmc</tspan><tspan
+       sodipodi:role="line"
+       x="592.81641"
+       y="96.54245"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:sans-serif;-inkscape-font-specification:sans-serif;fill:#000000;fill-opacity:1"
+       id="tspan6439">  fn, hw, and os groups</tspan><tspan
+       sodipodi:role="line"
+       x="592.81641"
+       y="119.87583"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:sans-serif;-inkscape-font-specification:sans-serif;fill:#000000;fill-opacity:1"
+       id="tspan6441">  custom groups</tspan></text>
+  <text
+     xml:space="preserve"
+     style="font-style:italic;font-size:18.6667px;font-family:sans-serif;-inkscape-font-specification:'sans-serif Italic';fill:none;stroke-width:2"
+     x="592.70679"
+     y="202.78191"
+     id="text4549-1-0-3"><tspan
+       sodipodi:role="line"
+       x="592.70679"
+       y="202.78191"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:18.6667px;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';fill:#000000;fill-opacity:1"
+       id="tspan5031-7-9-6">Groups settings</tspan><tspan
+       sodipodi:role="line"
+       x="592.70679"
+       y="226.11528"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:sans-serif;-inkscape-font-specification:sans-serif;fill:#000000;fill-opacity:1"
+       id="tspan6441-6">  os_operating_system,</tspan><tspan
+       sodipodi:role="line"
+       x="592.70679"
+       y="249.44865"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:sans-serif;-inkscape-font-specification:sans-serif;fill:#000000;fill-opacity:1"
+       id="tspan6501">  hw_console, ...</tspan><tspan
+       sodipodi:role="line"
+       x="592.70679"
+       y="272.78204"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:sans-serif;-inkscape-font-specification:sans-serif;fill:#000000;fill-opacity:1"
+       id="tspan6503" /></text>
+  <text
+     xml:space="preserve"
+     style="font-style:italic;font-size:18.6667px;font-family:sans-serif;-inkscape-font-specification:'sans-serif Italic';fill:none;stroke-width:2"
+     x="592.84082"
+     y="351.72961"
+     id="text4549-1-0-3-1"><tspan
+       sodipodi:role="line"
+       x="592.84082"
+       y="351.72961"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:18.6667px;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';fill:#000000;fill-opacity:1"
+       id="tspan5031-7-9-6-8">General and global settings</tspan><tspan
+       sodipodi:role="line"
+       x="592.84082"
+       y="375.06299"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:sans-serif;-inkscape-font-specification:sans-serif;fill:#000000;fill-opacity:1"
+       id="tspan6441-6-7">  networks</tspan><tspan
+       sodipodi:role="line"
+       x="592.84082"
+       y="398.39636"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:sans-serif;-inkscape-font-specification:sans-serif;fill:#000000;fill-opacity:1"
+       id="tspan6501-9">  domain name, time zone, ...</tspan><tspan
+       sodipodi:role="line"
+       x="592.84082"
+       y="421.72974"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:sans-serif;-inkscape-font-specification:sans-serif;fill:#000000;fill-opacity:1"
+       id="tspan6503-2" /></text>
+  <text
+     xml:space="preserve"
+     style="font-style:italic;font-size:18.6667px;font-family:sans-serif;-inkscape-font-specification:'sans-serif Italic';fill:none;stroke-width:2"
+     x="37.212914"
+     y="205.30978"
+     id="text4549-3"><tspan
+       sodipodi:role="line"
+       x="37.212914"
+       y="205.30978"
+       style="font-size:18.6667px;fill:#000000;fill-opacity:1"
+       id="tspan5031-6">group_vars/{fn_X,hw_X,os_X,...}/</tspan></text>
+  <text
+     xml:space="preserve"
+     style="font-style:italic;font-size:18.6667px;font-family:sans-serif;-inkscape-font-specification:'sans-serif Italic';fill:none;stroke-width:2"
+     x="39.726845"
+     y="331.82901"
+     id="text4549-3-2"><tspan
+       sodipodi:role="line"
+       x="39.726845"
+       y="331.82901"
+       style="font-size:18.6667px;fill:#000000;fill-opacity:1"
+       id="tspan5031-6-9">group_vars/all/</tspan></text>
+</svg>

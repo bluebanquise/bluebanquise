@@ -28,6 +28,8 @@ but only those with an ssh + python capability and on which we will use Ansible
 to deploy a configuration are considered "Ansible managed host".
 They are declared the same way in the stack inventory.
 
+Note also that sometime the term **node** is used as a replacement word for **host**.
+
 Group
 -----
 
@@ -167,14 +169,11 @@ Output will be:
 
 Jinja2 will be discussed later, do not worry about this point for now.
 
-j2 Variables
+j2 variables
 ^^^^^^^^^^^^
 
 These are **BlueBanquise** specific variables.
 All variables with name starting by **j2_** are j2 variables.
-
-Most of these variables are stored in internal/group_vars/all/j2_variables
-directory, and are used for the internal purpose of the stack.
 
 These variables are here to simplify tasks and templates writing, and centralize
 main logic of the stack.
@@ -189,6 +188,21 @@ Last point, for developers, these j2 variables should be considered as a way to
 keep compatibility with roles, while upgrading the logic of the stack. Do not
 hesitate to use them in roles, to ensure long term compatibility.
 
+bb variables
+^^^^^^^^^^^^
+
+These are **BlueBanquise** specific variables.
+All variables with name starting by **bb_** are bb variables.
+
+These variables are transverse variables, which means they will precedence any roles' owned related variables.
+
+Their purpose is to allow a simple centralisation of global values.
+
+A good example is the domain name of the cluster: using roles's variables,
+admin would have to define with the exact same value ``pxe_stack_domain_name``,
+``dns_server_domain_name``, ``dhcp_server_domain_name``, etc. This would be a pain.
+Defining ``bb_domain_name`` can replace all of them at once.
+
 Inventory, roles, and playbooks
 -------------------------------
 
@@ -196,7 +210,7 @@ Inventory
 ^^^^^^^^^
 
 The Ansible inventory is the directory that contains Ansible variables and hosts
-definitions. In **BlueBanquise**, default path is /etc/bluebanquise/inventory.
+definitions. In **BlueBanquise**, default path is ``/var/lib/bluebanquise/inventory``.
 
 Inventory is the **DATA**.
 
@@ -207,10 +221,10 @@ An Ansible role is a list of tasks to do to achieve a purpose.
 For example, there will be a role called dhcp_server, that contains tasks to
 install, configure and start the dhcp server.
 
-In **BlueBanquise**, default path is /etc/bluebanquise/roles.
+In **BlueBanquise**, default path is ``/var/lib/bluebanquise/roles``.
 
-Note that /etc/bluebanquise/roles is split in multiple directories, but
-ansible.cfg file is configured to use roles in all of them.
+Note that Bluebanquise roles are provided via Ansible collections,
+and so are managed by your Ansible local installation.
 
 Roles are the **AUTOMATION LOGIC**.
 
@@ -220,7 +234,7 @@ Playbooks
 An Ansible playbook is simply a list of roles to apply on a specific host or
 group of hosts. It is a yaml file.
 
-In **BlueBanquise**, default path is /etc/bluebanquise/playbooks.
+In **BlueBanquise**, default path is ``/var/lib/bluebanquise/playbooks``.
 
 Playbooks are your **LIST OF ROLES TO APPLY on your hosts/targets**.
 
@@ -237,9 +251,9 @@ depending of their position.
 When a variable is defined in a yml file, the position of the file in the
 ansible inventory is key.
 
-For example, a variable defined in /etc/bluebanquise/inventory/group_vars/all/
+For example, a variable defined in ``/var/lib/bluebanquise/inventory/group_vars/all/``
 will have the less precedence, and a variable defined in
-/etc/bluebanquise/inventory/cluster will have a higher precedence, and so win if
+``/var/lib/bluebanquise/inventory/cluster`` will have a higher precedence, and so win if
 variable is used.
 
 The full list of available variables precedence is provided in Ansible
@@ -258,9 +272,9 @@ redefine the whole logic of the stack without editing the stack code). Etc.
 
 Inventory can be seen as a giant pizza, in 3D then flatten.
 
-* *Paste* is the variable in /etc/bluebanquise/inventory/group_vars/all
-* Then *large ingredients* comes from /etc/bluebanquise/inventory/group_vars/equipment_myequipment
-* Then *small ingredients* above are the /etc/bluebanquise/inventory/cluster/nodes/
+* *Paste* is the variable in /var/lib/bluebanquise/inventory/group_vars/all
+* Then *large ingredients* comes from /var/lib/bluebanquise/inventory/group_vars/equipment_myequipment
+* Then *small ingredients* above are the /var/lib/bluebanquise/inventory/cluster/nodes/
 * And *pepper and tomatoes* (last layer) is the extra-vars at call.
 
 .. image:: images/pizza_example.svg
@@ -353,31 +367,37 @@ network (most of the time an Interconnect network).
 Equipment profiles
 ------------------
 
-In **BlueBanquise**, nodes are always part of a group starting with
-prefix **equipment_**. These groups are called *equipment profiles*.
+In **BlueBanquise**, nodes are, in normal time, part of a at least 3 key groups.
 
-They are used to provide to hosts of this group the **equipment_profile**
-parameters (this includes hosts operating system parameters, kernel parameters,
-partitioning, etc.), and other variables if needed like dedicated
-authentication parameters. These variables are prefixed with **ep_**.
+* 1 function group, that defines the purpose of the node. These groups are always prefixed by ``fn_``. For example: ``fn_worker``.
+* 1 hardware group, that defines the hardware used for the node. These groups are always prefixed by ``hw_``. For example: ``hw_supermicro_X10DRT``.
+* 1 os group, that defines the os used for the node. These groups are always prefixed by ``os_``. For example: ``os_ubuntu_22.04``.
 
-.. image:: images/inventory/ep_hard.svg
+The conjunction of 3 of these groups (one of each) creates an **equipment profile**.
+
+For example:
+
+* host ``A`` is part of the following groups: ``['fn_management', 'hw_X2', 'os_debian_12']``
+* host ``B`` is part of the following groups: ``['fn_worker', 'hw_X1', 'os_debian_12']``
+* host ``C`` is part of the following groups: ``['fn_worker', 'hw_X1', 'os_debian_12']``
+
+This configuration has 2 equipment profiles: ``fn_management_on_hw_X2_with_os_debian_12`` and ``fn_worker_on_hw_X1_with_os_debian_12``.
+
+.. image:: images/groups_ep.svg
    :align: center
+
+These groups are used to provide to hosts dedicated parameters
+(this includes hosts operating system parameters, kernel parameters,
+partitioning, etc.), and other variables if needed like dedicated
+authentication parameters.
 
 These are key groups of the stack.
 
-**It is important** to note that equipment_profiles variables (**ep_**)
-**must not** be used at an upper level than group_vars in variables precedence.
+.. image:: images/ep_hard.svg
+   :align: center
+
+**It is important** to note that hardware groups variables start with prefix ``hw_`` and os groups variables start with prefix ``os_``
+and that these variables **MUST NEVER** be used at an upper level than group_vars in variables precedence.
 **It can, but you must NOT**, due to special usage of them.
 
 For now, just keep in mind these variables exist. These will be discussed later.
-
--------------
-
-You can now follow the next part, depending of your needs:
-
-* learn basic system administration on how to deploy bare metal servers
-* learn Ansible
-
-Or if you already know basic system administration and Ansible, you can skip
-these tutorials and jump directly to the BlueBanquise part.
