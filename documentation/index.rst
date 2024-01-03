@@ -28,20 +28,22 @@ This documentation is under Creative Commons Attribution-NonCommercial-ShareAlik
    introduction
    vocabulary
    configure_bluebanquise
-   variables_description
-   training_sysadmin
-   training_ansible
-   bootstrap
-   
    deploy_cluster
-   multiple_icebergs
-   diskless
-   community_high_availability
-   community_monitoring
-   community_slurm
-   external_kubernetes
-   FAQ
-   containers
-   stories
-   roles
-   references
+   variables_description
+
+
+.. training_sysadmin
+.. training_ansible
+.. bootstrap
+
+.. multiple_icebergs
+.. diskless
+.. community_high_availability
+.. community_monitoring
+.. community_slurm
+.. external_kubernetes
+.. FAQ
+.. containers
+.. stories
+.. roles
+.. references

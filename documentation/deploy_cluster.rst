@@ -1,6 +1,6 @@
-=======================
-[Core] - Deploy Cluster
-=======================
+==============
+Deploy Cluster
+==============
 
 At this point, **BlueBanquise** configuration is done. We are ready to deploy
 the cluster.
@@ -11,34 +11,182 @@ We are going to proceed in the following order:
 #. Deploy fresh OS on the other nodes, from management1
 #. Deploy configuration on the other nodes.
 
-Management deployment
-=====================
+It is assumed that you already have deployed a fresh operating system on the management node management1.
 
-Get managements playbook
-------------------------
+Install vital dependencies
+==========================
 
-If you used the bootstrap script, you already have the managements.yml playbook 
-into *~/bluebanquise/playbooks/* folder. You can skip this step.
+Use the provided bootstrap tool to install needed dependencies for your current system (recent python) and setup bluebanquise user.
+Note that you need the ``sudo`` command to be installed on the system.
 
-We are going to use the provided default playbook. This playbook will install
-most of the **CORE** roles. Enough to deploy first stage of the cluster.
+Using root user (or a sudo user), launch the bootstrap script.
 
-Copy example playbook managements to *~/bluebanquise/playbooks/*:
+The script will install needed packages (mostly python), create the ``bluebanquise`` user with home at ``/var/lib/bluebanquise``,
+set this user sudoer, install Ansible in a virtual environment in this user's home, and generate an ssh keys pair for this user.
+
+Script is verbose to help you debug in case of issues.
 
 .. code-block:: bash
 
-  mkdir ~/bluebanquise/playbooks/
-  cp -a ~/bluebanquise/resources/examples/simple_cluster/playbooks/managements.yml ~/bluebanquise/playbooks/
+  curl -o online_bootstrap.sh https://raw.githubusercontent.com/bluebanquise/bluebanquise/master/bootstrap/online_bootstrap.sh
+  chmod +x online_bootstrap.sh 
+  ./online_bootstrap.sh
+
+Now, login as bluebanquise user. Remaining documentation assumes you are using the bluebanquise user.
+
+.. code-block:: bash
+
+  sudo su - bluebanquise
+
+Management deployment
+=====================
+
+Import inventory
+----------------
+
+Import the inventory previsouly created in this documentation into ``/var/lib/bluebanquise/inventory``.
+
+Set BlueBanquise repository
+---------------------------
+
+In order to be able to download BlueBanquise packages (mostly for pex_stack role), you need to add BlueBanquise repository into the inventory.
+Repository is differend depending of OS.
+Create file ``/var/lib/bluebanquise/inventory/group_vars/all/repositories.yml`` with the following content:
+
+* RHEL like system:
+
+.. raw:: html
+
+  <div style="padding: 6px;">
+  <b>RHEL</b> <img src="_static/logo_rhel.png">, <b>CentOS</b> <img src="_static/logo_centos.png">, <b>RockyLinux</b> <img src="_static/logo_rocky.png">, <b>OracleLinux</b> <img src="_static/logo_oraclelinux.png"><br> <b>CloudLinux</b> <img src="_static/logo_cloudlinux.png">, <b>AlmaLinux</b> <img src="_static/logo_almalinux.png">
+  </div><br><br>
+
+* EL8:
+
+.. code-block:: yaml
+
+  repositories:
+    - name: bluebanquise
+      baseurl: http://bluebanquise.com/repository/releases/latest/el8/x86_64/bluebanquise/
+      enabled: 1
+      state: present
+
+* EL9:
+
+.. code-block:: yaml
+
+  repositories:
+    - name: bluebanquise
+      baseurl: http://bluebanquise.com/repository/releases/latest/el9/x86_64/bluebanquise/
+      enabled: 1
+      state: present
+
+* Ubuntu or Debian like systems:
+
+.. raw:: html
+
+  <div style="padding: 6px;">
+  <b>Ubuntu</b> <img src="_static/logo_ubuntu.png">, <b>Debian</b> <img src="_static/logo_debian.png">
+  </div><br><br>
+
+* Ubuntu 20.04:
+
+.. code-block:: yaml
+
+  repositories:
+    - repo: deb [trusted=yes] http://bluebanquise.com/repository/releases/latest/u20/x86_64/bluebanquise/ focal main
+      state: present
+
+* Ubuntu 22.04:
+
+.. code-block:: yaml
+
+  repositories:
+    - repo: deb [trusted=yes] http://bluebanquise.com/repository/releases/latest/u22/x86_64/bluebanquise/ jammy main
+      state: present
+
+* Debian 11:
+
+.. code-block:: yaml
+
+  repositories:
+    - repo: deb [trusted=yes] http://bluebanquise.com/repository/releases/latest/deb11/x86_64/bluebanquise/ bullseye main
+      state: present
+
+* Debian 12:
+
+.. code-block:: yaml
+
+  repositories:
+    - repo: deb [trusted=yes] http://bluebanquise.com/repository/releases/latest/deb12/x86_64/bluebanquise/ bookworm main
+      state: present
+
+* Suse like system:
+
+.. raw:: html
+
+  <div style="padding: 6px;">
+  <b>Suse</b> <img src="_static/logo_suse.png">
+  </div><br><br>
+
+.. code-block:: yaml
+
+  repositories:
+    - name: bluebanquise
+      disable_gpg_check: true
+      baseurl: https://bluebanquise.com/repository/releases/latest/lp15/x86_64/bluebanquise/
+
+Create management playbook
+--------------------------
+
+Create ``/var/lib/bluebanquise/playbooks`` folder and add a file called ``management1.yml`` playbook into this folder,
+with the following content:
+
+.. code-block:: yaml
+
+  ---
+  - name: management playbook
+    hosts: "management1"
+    roles:
+
+      # Infrastructure
+
+      - role: bluebanquise.infrastructure.hosts_file
+        tags: hosts_file
+      - role: bluebanquise.infrastructure.set_hostname
+        tags: set_hostname
+      - role: bluebanquise.infrastructure.repositories
+        tags: repositories
+      - role: bluebanquise.infrastructure.nic
+        tags: nic
+      - role: bluebanquise.infrastructure.dhcp_server
+        tags: dhcp_server
+      - role: bluebanquise.infrastructure.dns_client
+        tags: dns_client
+      - role: bluebanquise.infrastructure.dns_server
+        tags: dns_server
+      - role: bluebanquise.infrastructure.http_server
+        tags: http_server
+      - role: bluebanquise.infrastructure.pxe_stack
+        tags: pxe_stack
+      - role: bluebanquise.infrastructure.ssh_client
+        tags: ssh_client
+      - role: bluebanquise.infrastructure.time
+        tags: time
+        vars:
+          time_profile: server
+
+Note that this is a basic example to have a working basic cluster. More roles are available in the infrastructure collection.
 
 Then, we will ask Ansible to read this playbook, and execute all roles listed
 inside on management1 node (check hosts at top of the file).
 
-To do so, we are going to use the **ansible-playbook** command.
+To do so, we are going to use the ``ansible-playbook`` command.
 
 Ansible-playbook
 ----------------
 
-*ansible-playbook* is the command used to ask Ansible to execute a playbook.
+``ansible-playbook`` is the command used to ask Ansible to execute a playbook.
 
 We are going to use 2 parameters frequently:
 
@@ -68,32 +216,32 @@ To do so, use:
 
 * **--extra-vars** with " " and space separated variables: --extra-vars "myvar1=true myvar2=77 myvar3=hello"
 
+Note: you need to use json syntax to pass dicts or list to extra vars.
+
 Apply management1 configuration
 -------------------------------
 
 Lets apply now the whole configuration on management1. It can take some time
-depending on your CPU and your hard drive.
+depending on your CPU and your hard drive, and your network connection when using external repositories.
 
-We first ensure our NIC are up, so the repositories part is working.
-
-.. code-block:: bash
-
-  ansible-playbook ~/bluebanquise/playbooks/managements.yml --limit management1 --tags set_hostname,nic
-
-Check interfaces are up (check using *ip a* command), and execute the
-bluebanquise role and the repositories_server role:
+We first ensure our NICs are up, so the repositories part is working.
+Ensure not to cut your connection if working remotely.
 
 .. code-block:: text
 
-  ansible-playbook ~/bluebanquise/playbooks/managements.yml --limit management1 --tags repositories_server
+  ansible-playbook playbooks/managements.yml -i inventory --limit management1 --tags set_hostname,nic
 
-This will install the requirements to ensure the web server of local repositories is running.
+Check interfaces are up (check using ``ip a`` command), and then setp repositories:
+
+.. code-block:: text
+
+  ansible-playbook playbooks/managements.yml -i inventory --limit management1 --tags repositories
 
 Then play the whole playbook:
 
 .. code-block:: text
 
-  ansible-playbook ~/bluebanquise/playbooks/managements.yml --limit management1
+  ansible-playbook playbooks/managements.yml -i inventory --limit management1
 
 And wait...
 
@@ -115,7 +263,7 @@ NOTE: it is assumed here you know how to have your other nodes / VM / servers /
 workstation to boot on LAN.
 
 If your device cannot boot on LAN, use iso or usb image provided on management1
-in /var/www/html/preboot_execution_environment/bin/[x86_64|arm64]. These images
+in /var/www/html/pxe/bin/[x86_64|arm64]. These images
 will start a LAN boot automatically, even if your computer is not PXE able
 natively.
 
@@ -127,7 +275,7 @@ PXE process overview
 
 You can get more information and a detailed schema in the pxe_stack role section
 of this documentation. Simply explained, the PXE chain is the following (files
-are in /var/www/html/preboot_execution_environment):
+are in /var/www/html/pxe):
 
 .. code-block:: text
 
@@ -150,8 +298,8 @@ are in /var/www/html/preboot_execution_environment):
   iPXE chain to task specified in myhostname.ipxe (deploy os, boot on disk, etc)
 
 Whatever the boot source, and whatever Legacy BIOS or UEFI, all converge to
-``http://${next-server}/preboot_execution_environment/convergence.ipxe``. Then this
-file chain to node specific file in nodes (this file is generated using *bootset*
+``http://${next-server}/pxe/convergence.ipxe``. Then this
+file chain to node specific file in nodes (this file is generated using *bluebanquise-bootset*
 command). The node specific file contains the default entry for the iPXE menu,
 then node chain to its equipment_profile file, to gather group values, and chain
 again to menu file. The menu file display a simple menu, and wait 10s for user
@@ -296,59 +444,59 @@ The following slides explain the whole PXE process of the BlueBanquise stack:
     currentSlide(1)
   </script>
 
-bootset
--------
+bluebanquise-bootset
+--------------------
 
 Before booting remote nodes in PXE, we need to ask management1 to activate
 remote nodes deployment. If not, remote nodes will not be able to grab their
 dedicated configuration from management node at boot.
 
-To manipulate nodes PXE boot, a command, **bootset**, is available.
+To manipulate nodes PXE boot on management1 (aka set PXE chain configuration), a command, ``bluebanquise-bootset``, is available.
 
 We are going to deploy login1, storage1 and compute1, compute2, compute3 and compute4.
 
-Let's use bootset to set them to deploy OS at next PXE boot (bootset must be launched using sudo if not root):
+Let's use bluebanquise-bootset to set them to deploy OS at next PXE boot (bluebanquise-bootset must be launched using sudo if not root):
 
 .. code-block:: bash
 
-  sudo bootset -n login1,storage1,c[001-004] -b osdeploy
+  sudo bluebanquise-bootset -n login1,storage1,c[001-004] -b osdeploy
 
 You can check the result using:
 
 .. code-block:: bash
 
-  sudo bootset -n login1,storage1,c[001-004] -s
+  sudo bluebanquise-bootset -n login1,storage1,c[001-004] -s
 
 Which should return:
 
 .. code-block:: text
 
-  [INFO] Loading /etc/bootset/nodes_parameters.yml
-  [INFO] Loading /etc/bootset/pxe_parameters.yml
+  [INFO] Loading /etc/bluebanquise-bootset/nodes_parameters.yml
+  [INFO] Loading /etc/bluebanquise-bootset/pxe_parameters.yml
   Next boot deployment: c[001-004],login1,storage1
 
 Note that this osdeploy state will be automatically updated once OS is deployed
 on remote nodes, and set to disk.
 
-You can also force nodes that boot on PXE to boot on disk using *-b disk*
-instead of *-b osdeploy*.
+You can also force nodes that boot on PXE to boot on disk using ``-b disk``
+instead of ``-b osdeploy``.
 
 Please refer to the pxe_stack role dedicated section in this documentation for
-more information on the bootset usage.
+more information on the bluebanquise-bootset usage.
 
 SSH public key
 --------------
 
 In order to log into the remote nodes without giving the password, check that
-the ssh public key defined in authentication.yml in your inventory match your
-management1 public key (the one generated in /root/.ssh/). If not, update the
-key in authentication.yml and remember to re-run the pxe_stack role (to update
+the ssh public key defined in your os groups inventory (``os_admin_ssh_keys key``) matches your
+management1 public key (the one generated in /var/lib/bluebanquise/.ssh/). If not, update the
+inventory and remember to re-run the pxe_stack role (to update
 PXE related files that contains the ssh public key of the management node to be
 set on nodes during deployment).
 
 .. code-block:: bash
 
-  ansible-playbook ~/bluebanquise/playbooks/managements.yml --tags pxe_stack
+  ansible-playbook playbooks/managements.yml -i inventory --limit management1 --tags pxe_stack
 
 OS deployment
 -------------
@@ -368,28 +516,47 @@ configuration on these nodes is simple.
 Ensure first you can ssh passwordless on each of the freshly deployed nodes.
 
 .. note::
-On some Linux distributions, if DHCP leases are short, you may loose
-ip shortly after system is booted. If that happen, reboot system to get an ip
-again. This issue is solved once the nic_nmcli role has been applied on hosts,
-as it sets ip statically.
+  On some Linux distributions, if DHCP leases are short, you may loose
+  ip shortly after system is booted. If that happen, reboot system to get an ip
+  again. This issue is solved once the nic role has been applied on hosts,
+  as it sets ip statically.
 
-If yes, copy example playbooks:
+We will deploy configuration on compute1 node as an example.
+
+Create file ``playbooks/computes.yml`` with the following content:
+
+.. code-block:: yaml
+
+  ---
+  - name: computes playbook
+    hosts: "fn_compute" # This is a group
+    roles:
+
+      # Infrastructure
+
+      - role: bluebanquise.infrastructure.hosts_file
+        tags: hosts_file
+      - role: bluebanquise.infrastructure.set_hostname
+        tags: set_hostname
+      - role: bluebanquise.infrastructure.repositories
+        tags: repositories
+      - role: bluebanquise.infrastructure.nic
+        tags: nic
+      - role: bluebanquise.infrastructure.ssh_remote_keys
+        tags: ssh_remote_keys
+      - role: bluebanquise.infrastructure.time
+        tags: time
+        vars:
+          time_profile: client
+
+And execute it while targeting compute1 (if you do not limit it, it will deploy configuration in parallel on all the members of the fn_compute group):
 
 .. code-block:: bash
 
-  cp -a ~/bluebanquise/resources/examples/simple_cluster/playbooks/computes.yml ~/bluebanquise/playbooks/
-  cp -a ~/bluebanquise/resources/examples/simple_cluster/playbooks/logins.yml ~/bluebanquise/playbooks/
-  cp -a ~/bluebanquise/resources/examples/simple_cluster/playbooks/storages.yml ~/bluebanquise/playbooks/
+  ansible-playbook playbooks/computes.yml -i inventory --limit compute1
 
-And execute them, using --limit parameter to specify targets:
-
-.. code-block:: bash
-
-  ansible-playbook ~/bluebanquise/playbooks/logins.yml
-  ansible-playbook ~/bluebanquise/playbooks/storages.yml
-  ansible-playbook ~/bluebanquise/playbooks/computes.yml --limit compute1,compute2,compute3,compute4
-
-You can see that Ansible will work on computes nodes in parallel, using more CPU
+If you do not set the limite, and have multiple compute nodes up and running,
+you will see that Ansible will work on computes nodes in parallel, using more CPU
 on the management1 node (by spawning multiple forks).
 
 -------------
@@ -398,14 +565,7 @@ Your cluster should now be fully deployed the generic way: operating systems are
 deployed on each hosts, and basic services (DNS, repositories, time
 synchronization, etc.) are up and running.
 
-It is time to use some `COMMUNITY <https://github.com/bluebanquise/community>`_
-roles to add specific features to the cluster and/or specialize it.
-(Please refer to each community roles dedicated documentation to get
-instructions on how to use them), or continue this documentation to 
-go into advanced configurations.
+You can now use the other sections to go futher and specialize your cluster.
 
-You will also find a "FAQ" section that could help with few recurrent
-situation you may face during the life of your cluster.
-
-Thank your for following this training. We really hope you will enjoy the stack.
-Please report us any bad or good feedback.
+Thank your for following this training. I really hope you will enjoy the stack.
+Please report me any bad or good feedback.

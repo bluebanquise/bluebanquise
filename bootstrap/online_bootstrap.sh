@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 set -e
-set -x
 export SILENT="false"
 export SKIP_ENVIRONMENT="false"
 
@@ -50,7 +49,8 @@ then
     exit 0
   fi
 fi
-echo " Proceeding..."
+echo " Proceeding and enabling verbosity..."
+set -x
 sleep 1
 echo
 message_output "Installing OS needed dependencies..."
