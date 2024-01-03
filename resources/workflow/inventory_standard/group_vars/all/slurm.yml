@@ -4,7 +4,7 @@ slurm_enable_local_mysql: false
 slurm_control_machine: mg1
 slurm_cluster_name: bluebanquise
 slurm_computes_groups:
-  - equipment_typeC
+  - fn_compute
 slurm_all_partition:
     enable: true
     partition_configuration:
