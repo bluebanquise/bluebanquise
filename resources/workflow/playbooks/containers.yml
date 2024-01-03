@@ -1,6 +1,6 @@
 ---
 - name: managements playbook
-  hosts: "mg_managements"
+  hosts: "fn_management"
   roles:
 
     - role: bluebanquise.containers.podman

@@ -18,7 +18,7 @@ When "stacked" together, collections and tools are called **BlueBanquise stack**
 
 ## Collections
 
-The following collections are available. **Please note that for now, only infrastructure collection of BlueBanquise 2.X version is considered stable**.
+The following collections are available. **Please note that for now, only infrastructure collection of BlueBanquise is considered stable**.
 
 * :globe_with_meridians: **[Infrastructure](collections/infrastructure):** the core of the stack, focused on providing roles and tools to deploy hosts and configure vital services.
 * :globe_with_meridians: **[hardware](collections/hardware):** specific hardware support roles (GPU, interconnect, etc.).
@@ -31,6 +31,8 @@ The following collections are available. **Please note that for now, only infras
 * :globe_with_meridians: **[security](collections/security):** system security related roles.
 
 Infrastructure collection should be compatible with all target Linux distributions (RHEL 8, RHEL 9, Debian 11, Debian 12, OpenSuse Leap 15, Ubuntu 20.04, Ubuntu 22.04). Other collections do not support all these distributions (support is added on demand).
+
+Note that few features are still limited on Ubuntu and Debian (mainly network configuration), I am working on it.
 
 ## License
 
@@ -73,9 +75,7 @@ Ansible >= 4.10.0 is mandatory for BlueBanquise to run properly.
 
 Please note that EL 7 systems (Centos 7, RHEL 7, etc.) is now considered best effort only.
 
-**[OpenHPC](https://openhpc.community/downloads/)** scientific packages are compatible with the stack.
-
-## Algoric project
+## The project
 
 BlueBanquise is part of the [**Algoric**](https://algoric.org/) project from the [**Fabrique du Loch**](https://www.lafabriqueduloch.org/fr/accueil/) FabLab, located in Brittany - France.
 
