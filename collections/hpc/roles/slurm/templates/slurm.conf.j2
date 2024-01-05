@@ -92,11 +92,12 @@ AcctGatherProfileType=acct_gather_profile/{{ slurm_acct_gather_profile_type }}
   {% if partition['computes_groups'] is defined and partition['computes_groups'] is not none %}
     {% for compute_group in partition['computes_groups'] %}
 # slurm_nodes {{ slurm_nodes }}
-      {% set slurm_nodes = ((slurm_nodes + groups[compute_group]) | unique) %}
+{{ slurm_nodes.append(groups[compute_group]) }}
 # slurm_nodes {{ slurm_nodes }}
     {% endfor %}
   {% endif %}
 {% endfor %}
+{% set slurm_nodes = slurm_nodes | unique %}
 # Slurm nodes {{ slurm_nodes }}
 {# Now we use bb_nodes_profiles previously cached to pack these nodes per hardware groups #}
 {%- set hw_packs = {} -%}

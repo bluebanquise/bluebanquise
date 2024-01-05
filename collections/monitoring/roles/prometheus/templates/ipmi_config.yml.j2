@@ -1,3 +1,4 @@
+#jinja2: lstrip_blocks: "True"
 # Configuration file for ipmi_exporter
 # https://github.com/soundcloud/ipmi_exporter/blob/master/ipmi_remote.yml
 
@@ -8,6 +9,7 @@ modules:
       {% set bmc_user = (hostvars[groups[hardware.name][0]]['hw_board_authentication'] | selectattr('protocol','match','IPMI') | map(attribute='user') | list | first | default(none)) %}
       {% set bmc_password = (hostvars[groups[hardware.name][0]]['hw_board_authentication'] | selectattr('protocol','match','IPMI') | map(attribute='password') | list | first | default(none)) %}
       {% if bmc_user is defined and bmc_user is not none and bmc_password is defined and bmc_password is not none %}
+
   {{ hardware.name }}:
     user: {{ bmc_user }}
     pass: {{ bmc_password }}
