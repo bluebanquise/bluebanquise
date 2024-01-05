@@ -2,14 +2,16 @@
 
 Now that our cluster is ready and running, it important to deploy a monitoring. Tool proposed here is Prometheus.
 
-<div class="comment-tile">
+<!-- <div class="comment-tile">
     <div class="comment-tile-image">
         <img src="../images/global/avatar.png" alt="Image Description" width="96" height="96">
     </div>
     <div class="comment-tile-text">
         <p>In order to allow you to understand how all of this works, we will first launch every tools manually. Once everything is working fine, we will implement service files so tools start via systemd at system startup.</p>
     </div>
-</div>
+</div> -->
+
+In order to allow you to understand how all of this works, we will first launch every tools manually. Once everything is working fine, we will implement service files so tools start via systemd at system startup.
 
 ## Global ecosystem schema
 
@@ -83,14 +85,16 @@ Now ask for `node_load1` or any other value, and ask for a graph instead of a ta
 
 We now want to create some alerts, and we want to manage these alerts using Alertmanager. Alertmanager job is to pack alerts and send emails/sms/etc to system administrator(s). For example, if your whole cluster go down, you do not want to receive 1000 alerts (one per node if you have 1000 nodes). Alertmanager job is to pack all these alerts and send system administrator a single email with a summary.
 
-<div class="comment-tile">
+<!-- <div class="comment-tile">
     <div class="comment-tile-image">
         <img src="../images/global/avatar.png" alt="Image Description" width="96" height="96">
     </div>
     <div class="comment-tile-text">
         <p>It is important to understand who do what: Prometheus is in charge of evaluating alert rules agains its data, and then it "Fires" alerts and send them to Alertmanager, who is in charge of organizing and pack them. This is not Alertmanager job to evaluate rules and Fire alerts!</p>
     </div>
-</div>
+</div> -->
+
+It is important to understand who do what: Prometheus is in charge of evaluating alert rules agains its data, and then it "Fires" alerts and send them to Alertmanager, who is in charge of organizing and pack them. This is not Alertmanager job to evaluate rules and Fire alerts!
 
 Open a new shell, and connect to server using this time `-L 9093:localhost:9093`.
 
@@ -184,14 +188,16 @@ Note that Karma can accept a configuration file, to customize interface, setup i
 
 Grafana allows to create nice day to day dashboards to visualize metrics.
 
-<div class="comment-tile">
+<!-- <div class="comment-tile">
     <div class="comment-tile-image">
         <img src="../images/global/avatar.png" alt="Image Description" width="96" height="96">
     </div>
     <div class="comment-tile-text">
         <p>Never neglect Grafana and Karma. A nice display is key to make cluster administrators efficients and happy. A good Grafana organisation will be composed of a main page with a summary of all part of the cluster (with red/yellow/green colors to instantly see if all is ok or not), and then dedicated sub-pages for details on each part.</p>
     </div>
-</div>
+</div> -->
+
+Never neglect Grafana and Karma. A nice display is key to make cluster administrators efficients and happy. A good Grafana organisation will be composed of a main page with a summary of all part of the cluster (with red/yellow/green colors to instantly see if all is ok or not), and then dedicated sub-pages for details on each part.
 
 Open a new terminal, and this time connect on server using `-L 3000:localhost:3000`.
 

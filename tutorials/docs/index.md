@@ -2,14 +2,16 @@
 
 ![BlueBanquise Logo](images/global/BlueBanquise_logo_large.svg)
 
-<div class="comment-tile">
+<!-- <div class="comment-tile">
     <div class="comment-tile-image">
         <img src="images/global/avatar.png" alt="Image Description" width="96" height="96">
     </div>
     <div class="comment-tile-text">
         <p>Welcome on BlueBanquise tutorials!</p>
     </div>
-</div>
+</div> -->
+
+Welcome on BlueBanquise tutorials!
 
 Documents provided here are generic, and not directly related to the BlueBanquise Ansible collections or BlueBanquise stack.
 
