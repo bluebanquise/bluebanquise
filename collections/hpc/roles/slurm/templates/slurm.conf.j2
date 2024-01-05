@@ -107,7 +107,7 @@ AcctGatherProfileType=acct_gather_profile/{{ slurm_acct_gather_profile_type }}
   {% endif %}
 {% endfor %}
 {# Now we can generate final NodeNames for slurm #}
-{% for hw_pack, hw_pack_vars in hw_pack.items() %}
+{% for hw_pack, hw_pack_vars in hw_packs.items() %}
   {% set buffer = hw_pack_vars['hw_specs'] %}
   {% if buffer.cpu.sockets is defined and buffer.cpu.sockets is not none and buffer.cpu.corespersocket is defined and buffer.cpu.corespersocket is not none and buffer.cpu.threadspercore is defined and buffer.cpu.threadspercore is not none%}
     {% set nodes_parameters = ' Sockets=' + (buffer.cpu.sockets|string) + ' CoresPerSocket=' + (buffer.cpu.corespersocket|string) + ' ThreadsPerCore=' + (buffer.cpu.threadspercore|string) %}
