@@ -88,19 +88,15 @@ AcctGatherProfileType=acct_gather_profile/{{ slurm_acct_gather_profile_type }}
 {# First we create a full list of all nodes that should be included in the file #}
 {% set slurm_nodes = [] %}
 {% for partition in slurm_partitions_list %}
-# {{ partition }}
   {% if partition['computes_groups'] is defined and partition['computes_groups'] is not none %}
     {% for compute_group in partition['computes_groups'] %}
-# slurm_nodes {{ slurm_nodes }}
       {% for nn in groups[compute_group] %}{# We cannot merge both list inside a for loop in Jinja2 #}
 {{ slurm_nodes.append(nn) }}
       {% endfor %}
-# slurm_nodes {{ slurm_nodes }}
     {% endfor %}
   {% endif %}
 {% endfor %}
 {% set slurm_nodes = (slurm_nodes | unique) %}
-# Slurm nodes {{ slurm_nodes }}
 {# Now we use bb_nodes_profiles previously cached to pack these nodes per hardware groups #}
 {%- set hw_packs = {} -%}
 {% for node in slurm_nodes %}
@@ -113,13 +109,12 @@ AcctGatherProfileType=acct_gather_profile/{{ slurm_acct_gather_profile_type }}
 # WARNING: node {{ node }} is associated with an hw and an os profile
   {% endif %}
 {% endfor %}
-# hw_packs {{ hw_packs }}
 {# Now we can generate final NodeNames for slurm #}
 {% for hw_pack, hw_pack_vars in hw_packs.items() %}
   {% if hw_pack_vars['hw_specs'] is defined and hw_pack_vars['hw_specs'] is not none %}
     {% set buffer = hw_pack_vars['hw_specs'] %}
-    {% if buffer.cpu.sockets is defined and buffer.cpu.sockets is not none and buffer.cpu.corespersocket is defined and buffer.cpu.corespersocket is not none and buffer.cpu.threadspercore is defined and buffer.cpu.threadspercore is not none%}
-      {% set nodes_parameters = ' Sockets=' + (buffer.cpu.sockets|string) + ' CoresPerSocket=' + (buffer.cpu.corespersocket|string) + ' ThreadsPerCore=' + (buffer.cpu.threadspercore|string) %}
+    {% if buffer.cpu.sockets is defined and buffer.cpu.sockets is not none and buffer.cpu.cores_per_socket is defined and buffer.cpu.cores_per_socket is not none and buffer.cpu.threads_per_core is defined and buffer.cpu.threads_per_core is not none%}
+      {% set nodes_parameters = ' Sockets=' + (buffer.cpu.sockets|string) + ' CoresPerSocket=' + (buffer.cpu.cores_per_socket|string) + ' ThreadsPerCore=' + (buffer.cpu.threads_per_core|string) %}
     {% else %}{# Will fail if cores is also not set. Expected minimal value. #}
       {% set nodes_parameters = ' Procs=' + (buffer.cpu.cores | string) %}
     {% endif %}
