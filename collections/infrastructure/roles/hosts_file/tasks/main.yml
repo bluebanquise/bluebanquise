@@ -12,6 +12,9 @@
 - name: debug <|> Display bb_nodes
   ansible.builtin.debug:
     msg: "{{ bb_nodes }}"
+  tags:
+    - templates
+    - debug
 #
 
 - name: "template <|> Generate /etc/hosts"

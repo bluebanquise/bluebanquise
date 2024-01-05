@@ -6,6 +6,7 @@ mgt2
 [os_rhel9]
 mgt3
 c001
+c00[5-7]
 
 [os_rhel7]
 mgt4

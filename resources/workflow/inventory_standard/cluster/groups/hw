@@ -2,6 +2,7 @@
 
 [hw_supermicro_X1]
 c001
+c00[5-7]
 
 [hw_dell_X2]
 mgt[1:9]

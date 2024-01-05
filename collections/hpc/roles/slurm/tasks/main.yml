@@ -31,6 +31,23 @@
   tags:
     - package
 
+# Roles transverse variables caching
+- name: fact <|> Calculate bb_nodes_profiles
+  ansible.builtin.set_fact:
+    bb_nodes_profiles: "{{ j2_bb_nodes_profiles }}"
+  run_once: true
+  when: bb_nodes_profiles is not defined or bb_nodes_profiles is none
+  tags:
+    - templates
+
+- name: debug <|> Display bb_nodes_profiles
+  ansible.builtin.debug:
+    msg: "{{ bb_nodes_profiles}}"
+  tags:
+    - templates
+    - debug
+#
+
 # Install MUNGE, generic part
 
 - name: include_tasks <|> Deploy Munge

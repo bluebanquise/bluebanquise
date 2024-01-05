@@ -110,7 +110,6 @@ j2_bb_equipments: "{%- set bequipments = {} -%}
 {%- for host, host_keys in bnodes_profiles.items() -%}
   {%- if host_keys['ep'] is not none -%}
     {%- if host_keys['ep'] not in bequipments -%}
-      {%- set operating_system = hostvars[host]['os_operating_system'] | default(none, true) -%}
       {%- do bequipments.update({host_keys['ep']: {'nodes': [], 'type': host_keys['type'], 'hw': host_keys['hw'], 'os': host_keys['os']}}) -%}
     {%- endif -%}
 {{ bequipments[host_keys['ep']]['nodes'].append(host) }}
