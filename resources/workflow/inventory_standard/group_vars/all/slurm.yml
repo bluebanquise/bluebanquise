@@ -8,13 +8,9 @@ slurm_computes_groups:
 slurm_partitions_list:
     - computes_groups:
         - fn_compute
-      partition_name: mypartoche
+      partition_name: all
       partition_configuration:
         State: UP
         MaxTime: "72:00:00"
         DefaultTime: "24:00:00"
-slurm_all_partition:
-    enable: true
-    partition_configuration:
-      State: UP
-      Default: yes
+        Default: yes

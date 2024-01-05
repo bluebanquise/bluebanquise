@@ -7,7 +7,7 @@ This role configure the ssh client authorized public key.
 ## Data Model
 
 This role relies on [data model](https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md):
-* Section 3.2 (Equipment Groups)
+* Section 3.3 (OS Groups)
 
 ## Instructions
 

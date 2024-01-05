@@ -4,6 +4,11 @@
 
 This role updates the root password on the target hosts.
 
+## Data Model
+
+This role relies on [data model](https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md):
+* Section 3.3 (OS Groups)
+
 ## Instructions
 
 The root password must be defined in the inventory per equipment profiles using:

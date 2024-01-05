@@ -1,8 +1,12 @@
 # Prometheus
 
-Note: this role comply with BlueBanquise data-model 1.0.0 (https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md).
+## Data Model
 
-Table of content:
+This role relies on [data model](https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md):
+* Section 2 (Hosts definition)
+* Section 3.2 (Hardware Groups)
+
+## Table of content:
 
 - [Prometheus](#prometheus)
   * [1. Description](#1-description)

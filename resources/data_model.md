@@ -218,7 +218,7 @@ hw_board_authentication:  # Authentication to BMC
     password: ADMIN
 ```
 
-### Operating system groups
+### 3.3: Operating system groups
 
 Each host have to be in an operating system group. This group determine the OS related parameters of the target host.
 

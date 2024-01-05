@@ -129,8 +129,7 @@ AcctGatherProfileType=acct_gather_profile/{{ slurm_acct_gather_profile_type }}
     {% if buffer.slurm_extra_nodes_parameters is defined and buffer.slurm_extra_nodes_parameters is not none %}
         {% set nodes_parameters = nodes_parameters + ' ' +  buffer.slurm_extra_nodes_parameters %}
     {% endif %}
-{# NodeName={{ hw_pack_vars['nodes'] | bluebanquise.commons.nodeset }} {{ nodes_parameters }} #}
-NodeName={{ hw_pack_vars['nodes'] }} {{ nodes_parameters }}
+NodeName={{ hw_pack_vars['nodes'] | bluebanquise.commons.nodeset }} {{ nodes_parameters }}
   {% else %}
 # WARNING: pack {{ hw_pack }} does not have hw_specs
   {% endif %}
@@ -143,18 +142,13 @@ NodeName={{ hw_pack_vars['nodes'] }} {{ nodes_parameters }}
     {% set partition_nodes = [] %}
     {% if partition['computes_groups'] is defined and partition['computes_groups'] is not none %}
       {% for compute_group in partition['computes_groups'] %}
-        {% set slurm_nodes = (slurm_nodes + groups[compute_group] | unique) %}
+        {% for nn in groups[compute_group] %}{# We cannot merge both list inside a for loop in Jinja2 #}
+{{ partition_nodes.append(nn) }}
+        {% endfor %}
       {% endfor %}
     {% endif %}
-{# PartitionName={{partition.partition_name}} {% for arg, arg_value in partition.partition_configuration.items() %} {{ arg }}={{ arg_value }}{% endfor %} Nodes={{ partition_nodes | bluebanquise.commons.nodeset }} #}
-PartitionName={{partition.partition_name}} {% for arg, arg_value in partition.partition_configuration.items() %} {{ arg }}={{ arg_value }}{% endfor %} Nodes={{ partition_nodes}}
+    {% set partition_nodes = (partition_nodes | unique) %}
+PartitionName={{partition.partition_name}} {% for arg, arg_value in partition.partition_configuration.items() %} {{ arg }}={{ arg_value }}{% endfor %} Nodes={{ partition_nodes | bluebanquise.commons.nodeset }}
 
   {% endfor %}
-{% endif %}
-
-{% if slurm_all_partition.enable is defined and slurm_all_partition.enable %}
-## Partition for all
-{# PartitionName=all {% for arg, arg_value in slurm_all_partition.partition_configuration.items() %} {{ arg }}={{ arg_value }}{% endfor %} Nodes={{ slurm_nodes | bluebanquise.commons.nodeset }} #}
-PartitionName=all {% for arg, arg_value in slurm_all_partition.partition_configuration.items() %} {{ arg }}={{ arg_value }}{% endfor %} Nodes={{ slurm_nodes }}
-
 {% endif %}

@@ -4,7 +4,7 @@
 
 This role relies on [data model](https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md):
 * Section 2 (Hosts definition)
-* Section 3.2 (Equipment Groups)
+* Section 3.2 (Hardware Groups)
 
 ## Description
 
