@@ -92,7 +92,9 @@ AcctGatherProfileType=acct_gather_profile/{{ slurm_acct_gather_profile_type }}
   {% if partition['computes_groups'] is defined and partition['computes_groups'] is not none %}
     {% for compute_group in partition['computes_groups'] %}
 # slurm_nodes {{ slurm_nodes }}
-{{ slurm_nodes.append(groups[compute_group]) }}
+      {% for nn in groups[compute_group] %}{# We cannot merge both list inside a for loop in Jinja2 #}
+{{ slurm_nodes.append(nn) }}
+      {% endfor %}
 # slurm_nodes {{ slurm_nodes }}
     {% endfor %}
   {% endif %}
