@@ -42,12 +42,12 @@ prometheus_exporters_to_scrape:
     address: 10.10.7.11
     port: 9664
 prometheus_exporters_groups_to_scrape:
-  equipment_debian11:
+  os_debian11:
     - name: node_exporter
       service: node_exporter
       package: node_exporter
       port: 9100
-  equipment_rhel7:
+  os_rhel9:
     - name: node_exporter
       package: node_exporter
       service: node_exporter
@@ -63,7 +63,7 @@ prometheus_exporters_groups_to_scrape:
       scrape_interval: 1m
       scrape_timeout: 30s
       port: 9122
-prometheus_ipmi_scrape_equipment_profiles:
-  - name: equipment_rhel8
+prometheus_ipmi_scrape_hardware_groups:
+  - name: hw_supermicro_X1
     scrape_interval: 5m
     scrape_timeout: 2m

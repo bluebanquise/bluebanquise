@@ -88,12 +88,16 @@ AcctGatherProfileType=acct_gather_profile/{{ slurm_acct_gather_profile_type }}
 {# First we create a full list of all nodes that should be included in the file #}
 {% set slurm_nodes = [] %}
 {% for partition in slurm_partitions_list %}
+# {{ partition }}
   {% if partition['computes_groups'] is defined and partition['computes_groups'] is not none %}
     {% for compute_group in partition['computes_groups'] %}
-      {% set slurm_nodes = (slurm_nodes + groups[compute_group] | unique) %}
+# slurm_nodes {{ slurm_nodes }}
+      {% set slurm_nodes = ((slurm_nodes + groups[compute_group]) | unique) %}
+# slurm_nodes {{ slurm_nodes }}
     {% endfor %}
   {% endif %}
 {% endfor %}
+# Slurm nodes {{ slurm_nodes }}
 {# Now we use bb_nodes_profiles previously cached to pack these nodes per hardware groups #}
 {%- set hw_packs = {} -%}
 {% for node in slurm_nodes %}
@@ -106,6 +110,7 @@ AcctGatherProfileType=acct_gather_profile/{{ slurm_acct_gather_profile_type }}
 # WARNING: node {{ node }} is associated with an hw and an os profile
   {% endif %}
 {% endfor %}
+# hw_packs {{ hw_packs }}
 {# Now we can generate final NodeNames for slurm #}
 {% for hw_pack, hw_pack_vars in hw_packs.items() %}
   {% set buffer = hw_pack_vars['hw_specs'] %}

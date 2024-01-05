@@ -2,13 +2,13 @@
 # https://github.com/soundcloud/ipmi_exporter/blob/master/ipmi_remote.yml
 
 modules:
-{% for equipment in prometheus_ipmi_scrape_equipment_profiles %}
+{% for hardware in prometheus_ipmi_scrape_hardware_groups %}
 
-  {% if hostvars[groups[equipment.name][0]]['hw_board_authentication'] is defined %}
-      {% set bmc_user = (hostvars[groups[equipment.name][0]]['hw_board_authentication'] | selectattr('protocol','match','IPMI') | map(attribute='user') | list | first | default(none)) %}
-      {% set bmc_password = (hostvars[groups[equipment.name][0]]['hw_board_authentication'] | selectattr('protocol','match','IPMI') | map(attribute='password') | list | first | default(none)) %}
+  {% if hostvars[groups[hardware.name][0]]['hw_board_authentication'] is defined %}
+      {% set bmc_user = (hostvars[groups[hardware.name][0]]['hw_board_authentication'] | selectattr('protocol','match','IPMI') | map(attribute='user') | list | first | default(none)) %}
+      {% set bmc_password = (hostvars[groups[hardware.name][0]]['hw_board_authentication'] | selectattr('protocol','match','IPMI') | map(attribute='password') | list | first | default(none)) %}
       {% if bmc_user is defined and bmc_user is not none and bmc_password is defined and bmc_password is not none %}
-  {{ equipment.name }}:
+  {{ hardware.name }}:
     user: {{ bmc_user }}
     pass: {{ bmc_password }}
     driver: "LAN_2_0"
