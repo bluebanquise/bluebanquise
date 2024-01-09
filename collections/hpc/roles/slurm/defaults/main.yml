@@ -5,7 +5,7 @@ slurm_cluster_name: bluebanquise
 slurm_computes_config: configfull
 
 ## files path
-slurm_statesavelocation: /var/spool/slurmd/statesave
+slurm_statesavelocation: /var/spool/slurmctld/statesave
 slurm_slurmdspooldir: /var/spool/slurmd/slurmd
 slurm_slurmctldpidfile: /var/run/slurmctld.pid
 slurm_slurmdpidfile: /var/run/slurmd.pid
