@@ -29,7 +29,7 @@ jobs:
 
       - name: Configure BB external repositories
         run: |
-          echo -e 'bb_repositories:\n  - name: bluebanquise\n    baseurl: "http://bluebanquise.com/repository/releases/latest/el8/x86_64/bluebanquise/"' > resources/workflow/inventory_standard/group_vars/all/repositories.yml
+          echo -e 'bb_repositories:\n  - name: bluebanquise\n    baseurl: "https://bluebanquise.com/repository/releases/latest/el8/x86_64/bluebanquise/"' > resources/workflow/inventory_standard/group_vars/all/repositories.yml
 
       - name: Start container
         run: docker run -d --privileged --cgroupns=host --net=host --name mgt1 -v /sys/fs/cgroup:/sys/fs/cgroup:rw -v $PWD:/bluebanquise rockylinux/rockylinux:8_systemd
