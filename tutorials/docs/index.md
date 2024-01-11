@@ -29,7 +29,3 @@ Current available tutorials are:
 * Kubernetes:
     * [Deploy a Kubernetes cluster using Kubespray](kubernetes_deploy.md)
     * [Deploy basic resources inside a K8S cluster](kubernetes_basics.md)
-* Datacenters:
-    * [Basic introduction](datacenters_introduction.md)
-    * [A small tip about electricity and hydraulic](datacenters_elec_hydro_parallel.md)
-    * [Safety](datacenters_safety.md)
