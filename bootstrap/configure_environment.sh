@@ -48,13 +48,13 @@ fi
 deactivate
 
 # Set pip bins in PATH
-grep -q -E "^export PATH.*/\.local/bin" "${HOME}"/.bashrc ||\
-echo "export PATH=\$HOME/.local/bin:\$PATH" |\
+grep -q -E "^source ansible_venv/bin/activate" "${HOME}"/.bashrc ||\
+echo "source ansible_venv/bin/activate" |\
 tee -a "${HOME}"/.bashrc
 
 # Expand PYTHONPATH, need to make it dynamic
 grep -q PYTHONPATH "${HOME}"/.bashrc ||\
-echo "export PYTHONPATH=\$(pip3 show ClusterShell | grep Location | awk -F ' ' '{print \$2}')" >> "${HOME}"/.bashrc
+echo "export PYTHONPATH=\$(pip3 show Ansible | grep Location | awk -F ' ' '{print \$2}')" >> "${HOME}"/.bashrc
 
 # Bind to bluebanquise default ansible.cfg
 mkdir -p $HOME/bluebanquise/

@@ -8,7 +8,7 @@ web will most of the time solves the issue.
 
 If you face any issues with this tutorial, do not hesitate to open an issue on the BlueBanquise github.
 
-<div class="comment-tile">
+<!-- <div class="comment-tile">
     <div class="comment-tile-image">
         <img src="../images/global/avatar.png" alt="Image Description" width="96" height="96">
     </div>
@@ -17,7 +17,11 @@ If you face any issues with this tutorial, do not hesitate to open an issue on t
 Most of this page is portable on other distributions.
 In annexes, I will detail how to deploy via PXE the other common distributions.</p>
     </div>
-</div>
+</div> -->
+
+This tutorial is based on EL 9 OS (RHEL 9, RockyLinux 9, AlmaLinux 9, etc).
+Most of this page is portable on other distributions.
+In annexes, I will detail how to deploy via PXE the other common distributions.
 
 ## Hardware requirements
 
@@ -132,14 +136,16 @@ As said above, management node host multiple basic services needed to run the cl
 * The **job scheduler** server (if specializing cluster to HPC): manage computational resources, and spread jobs from users on the cluster. Service is `slurmctld` (Slurm).
 * The **monitoring** server: monitor the cluster to provide metrics, and raise alerts in case of issues. Service is `prometheus` (Prometheus).
 
-<div class="comment-tile">
+<!-- <div class="comment-tile">
     <div class="comment-tile-image">
         <img src="../images/global/avatar.png" alt="Image Description" width="96" height="96">
     </div>
     <div class="comment-tile-text">
         <p>Small tip: never neglect monitoring, especially during cluster deployment. An healty cluster makes an happy admin, able to play strategy games while the cluster is purring...</p>
     </div>
-</div>
+</div> -->
+
+Small tip: never neglect monitoring, especially during cluster deployment. An healty cluster makes an happy admin, able to play strategy games while the cluster is purring...
 
 ## Cluster description
 
@@ -217,14 +223,16 @@ hostnamectl set-hostname odin.cluster.local
 To start most services, we need the main NIC to be up and ready with an ip.
 We will use **NetworkManager** to handle network. `nmcli` is the command to interact with NetworkManager.
 
-<div class="comment-tile">
+<!-- <div class="comment-tile">
     <div class="comment-tile-image">
         <img src="../images/global/avatar.png" alt="Image Description" width="96" height="96">
     </div>
     <div class="comment-tile-text">
         <p>Note about NetworkManager: some say its bad, some say its good. It depends of admin tastes. Use it if you feel confortable with it, or use systemd-networkd if you prefer. Best idea to me is to use what is default on the system: NetworkManager on RHEL like distributions and Suse, systemd-networkd on Ubuntu and Debian.</p>
     </div>
-</div>
+</div> -->
+
+Note about NetworkManager: some say its bad, some say its good. It depends of admin tastes. Use it if you feel confortable with it, or use systemd-networkd if you prefer. Best idea to me is to use what is default on the system: NetworkManager on RHEL like distributions and Suse, systemd-networkd on Ubuntu and Debian.
 
 Assuming main NIC name is `enp0s8`, to set `10.10.0.1/16` IP and subnet on it, use the following commands:
 
@@ -465,14 +473,16 @@ Note: also add your server's BMC if any.
 
 Finally, start and enable the dhcp service:
 
-<div class="comment-tile">
+<!-- <div class="comment-tile">
     <div class="comment-tile-image">
         <img src="../images/global/avatar.png" alt="Image Description" width="96" height="96">
     </div>
     <div class="comment-tile-text">
         <p>&#x26A0; WARNING &#x26A0;: only enable the DHCP service if you are on an isolated network, as in opposite to the other services, it may disturb the network if another DHCP is on this network.</p>
     </div>
-</div>
+</div> -->
+
+&#x26A0; WARNING &#x26A0;: only enable the DHCP service if you are on an isolated network, as in opposite to the other services, it may disturb the network if another DHCP is on this network.
 
 ```
 systemctl enable dhcpd
@@ -719,14 +729,16 @@ The http server will distribute the minimal kernel and initramfs for remote Linu
 
 Note that the AlmaLinux already embed a very basic tftp server. But it cannot handle a huge cluster load, and so we replace it by the Facebook python based tftp server.
 
-<div class="comment-tile">
+<!-- <div class="comment-tile">
     <div class="comment-tile-image">
         <img src="../images/global/avatar.png" alt="Image Description" width="96" height="96">
     </div>
     <div class="comment-tile-text">
         <p>PXE is the most tricky part, as you will face all possible issues: hardware issues, bad cabling, firewalls, Vlans issues, stupid BIOS or BMCs, etc. Always try with a very simple network (flat, no vlans, no firewalls), and ensure you can deploy OS before complexify and secure the cluster and the network.</p>
     </div>
-</div>
+</div> -->
+
+PXE is the most tricky part, as you will face all possible issues: hardware issues, bad cabling, firewalls, Vlans issues, stupid BIOS or BMCs, etc. Always try with a very simple network (flat, no vlans, no firewalls), and ensure you can deploy OS before complexify and secure the cluster and the network.
 
 #### fbtftp module
 
@@ -977,14 +989,16 @@ dnf install fbtftp_server -y
 We then need ipxe files. We could use native syslinux or shim.efi files, but this is just not flexible enough for new generation clusters.
 We will build our own ipxe roms, and include our own init script.
 
-<div class="comment-tile">
+<!-- <div class="comment-tile">
     <div class="comment-tile-image">
         <img src="../images/global/avatar.png" alt="Image Description" width="96" height="96">
     </div>
     <div class="comment-tile-text">
         <p>Small tip: ipxe allows you to build raw roms (the ones we will use in this tutorial), but also iso or usb image that contains the rom. This is VERY (VERY!!!!) useful when you need to boot a stupidely made node with a weird BIOS or some network cards that does not boot over PXE.</p>
     </div>
-</div>
+</div> -->
+
+Small tip: ipxe allows you to build raw roms (the ones we will use in this tutorial), but also iso or usb image that contains the rom. This is VERY (VERY!!!!) useful when you need to boot a stupidely made node with a weird BIOS or some network cards that does not boot over PXE.
 
 Grab latest ipxe version from git.
 
@@ -1308,7 +1322,7 @@ over disk, and ensure operating system is booted before proceeding.
 
 Repeat this operation to deploy each nodes of your cluster.
 
-<div class="comment-tile">
+<!-- <div class="comment-tile">
     <div class="comment-tile-image">
         <img src="../images/global/avatar.png" alt="Image Description" width="96" height="96">
     </div>
@@ -1316,8 +1330,10 @@ Repeat this operation to deploy each nodes of your cluster.
         <p>Note: if you let nodes boot over PXE after reboot, they will again deploy, and enter in an infinite deployment loop.
 There are strategies to solve that automatically, but this is out of the scope of this training. For now, simply change boot order after os deployment.</p>
     </div>
-</div>
+</div> -->
 
+Note: if you let nodes boot over PXE after reboot, they will again deploy, and enter in an infinite deployment loop.
+There are strategies to solve that automatically, but this is out of the scope of this training. For now, simply change boot order after os deployment.
 
 ### Configure client side
 
@@ -2229,13 +2245,14 @@ Next step now is to learn how to automate what we did here. Proposal in next tut
 
 Or you can also specialize the cluster, with [HPC cluster tutorial](hpc_slurm.md) or [K8S cluster tutorial](kubernetes_deploy.md).
 
-<div class="comment-tile">
+<!-- <div class="comment-tile">
     <div class="comment-tile-image">
         <img src="../images/global/avatar.png" alt="Image Description" width="96" height="96">
     </div>
     <div class="comment-tile-text">
         <p>Thank you for following this tutorial. If you find something is missing, or find an issue, please notify the me on github by opening an issue or a PR :)</p>
     </div>
-</div>
+</div> -->
 
+Thank you for following this tutorial. If you find something is missing, or find an issue, please notify the me on github by opening an issue or a PR :)
 

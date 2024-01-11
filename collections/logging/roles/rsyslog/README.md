@@ -160,6 +160,7 @@ rsyslog_client_configuration_files:
 
 ## Changelog
 
+* 1.4.6: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.5: Fix variables names and datamodel compatibility and update readme. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.4: Fix variables names. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.3: Proper command to restart rsyslog post rotation. Thiago Cardozo <boubee.thiago@gmail.com>

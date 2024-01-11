@@ -17,18 +17,18 @@ nav:
     - Kubernetes:
         - Deploy Kubernetes: kubernetes_deploy.md
         - Deploy basic resources: kubernetes_basics.md
-    - Datacenters and infrastructure:
-        - Introduction: datacenters_introduction.md
-        - Elec Hydro parallel: datacenters_elec_hydro_parallel.md
-        - Safety: datacenters_safety.md
-extra_css:
-  - extra.css
+    # - Datacenters and infrastructure:
+    #     - Introduction: datacenters_introduction.md
+    #     - Elec Hydro parallel: datacenters_elec_hydro_parallel.md
+    #     - Safety: datacenters_safety.md
+# extra_css:
+#   - extra.css
 
 theme:
   name: material
   palette:
     scheme: default
-    primary: custom
+    primary: indigo
   icon:
     repo: fontawesome/brands/github
   features:

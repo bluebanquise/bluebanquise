@@ -12,7 +12,7 @@ There are multiple ways to install Ansible. Everything is described on the
 If you wish only to learn Ansible, simplest way is
 [to use pip (or pip3](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#installing-ansible-with-pip).
 
-<div class="comment-tile">
+<!-- <div class="comment-tile">
     <div class="comment-tile-image">
         <img src="../images/global/avatar.png" alt="Image Description" width="96" height="96">
     </div>
@@ -20,7 +20,10 @@ If you wish only to learn Ansible, simplest way is
         <p>If you wish to install Ansible on a production system, you can use your operating system
 packages manager, but I strongly recommend using a python venv to avoid conflicting with system python modules and be able to pull an up to date Ansible version.</p>
     </div>
-</div>
+</div> -->
+
+If you wish to install Ansible on a production system, you can use your operating system
+packages manager, but I strongly recommend using a python venv to avoid conflicting with system python modules and be able to pull an up to date Ansible version.
 
 ## Minimal inventory
 
@@ -482,7 +485,7 @@ And check destinations again:
 
 Perfect.
 
-<div class="comment-tile">
+<!-- <div class="comment-tile">
     <div class="comment-tile-image">
         <img src="../images/global/avatar.png" alt="Image Description" width="96" height="96">
     </div>
@@ -492,7 +495,12 @@ Perfect.
   using host_vars folder. But host_vars folder is difficult to use when having a
   very large number of hosts.</p>
     </div>
-</div>
+</div> -->
+
+Note: We could also have used a file in inventory/host_vars/management1/new_values..
+  Setting a variable in the host definition file above the host is equivalent to
+  using host_vars folder. But host_vars folder is difficult to use when having a
+  very large number of hosts.
 
 Let's say now we want to change the model of spaceship of all the slave nodes.
 So not a single host, but all slave members hosts.
@@ -532,7 +540,7 @@ And check variables of hosts:
   model: Gencore Maelstrom
 [root@ ~]#
 ```
-
+<!-- 
 <div class="comment-tile">
     <div class="comment-tile-image">
         <img src="../images/global/avatar.png" alt="Image Description" width="96" height="96">
@@ -543,7 +551,12 @@ And check variables of hosts:
   version is deprecated. If you wish to avoid having to replace all variables
   like here, try to avoid massive dictionaries when not needed.</p>
     </div>
-</div>
+</div> -->
+
+We had to add the whole dictionary in group_vars/clients/myship.yml.
+  This is due to the <b>replace</b> hash_behaviour of Ansible, as the <b>merge</b>
+  version is deprecated. If you wish to avoid having to replace all variables
+  like here, try to avoid massive dictionaries when not needed.
 
 Perfect. Remember the pizza in Vocabulary section. Ansible just flatten the
 whole inventory, using precedence, and you obtain variables.
@@ -1403,11 +1416,13 @@ should have provided you the very basis of Ansible.
 If you feel something is missing in this quick Ansible training, please do not
 hesitate to ask me to add elements.
 
-<div class="comment-tile">
+<!-- <div class="comment-tile">
     <div class="comment-tile-image">
         <img src="../images/global/avatar.png" alt="Image Description" width="96" height="96">
     </div>
     <div class="comment-tile-text">
         <p>Thank you for following this tutorial! One last word: Configuration tools like Ansible are not made to replace administration commands and scripts. Trying to do everything with an automation tool is wrong and a huge waste of efforts and time. It has been made to deploy configurations in an idempotent manner.</p>
     </div>
-</div>
+</div> -->
+
+Thank you for following this tutorial! One last word: Configuration tools like Ansible are not made to replace administration commands and scripts. Trying to do everything with an automation tool is wrong and a huge waste of efforts and time. It has been made to deploy configurations in an idempotent manner.

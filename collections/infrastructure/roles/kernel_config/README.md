@@ -7,25 +7,26 @@ This role apply/update kernel parameters and sysctl parameters.
 ## Data Model
 
 This role relies on [data model](https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md):
-* Section 3.2 (Equipment Groups)
+* Section 3.2 (Hardware Groups)
+* Section 3.3 (OS Groups)
 
 ## Instructions
 
 ### kernel parameters
 
-The role uses the `ep_kernel_parameters` variable as source.
+The role uses the `os_kernel_parameters` and `hw_kernel_parameters` variable as source.
 
 ### sysctl
 
-Sysctl parameters to be set are defined in the `ep_sysctl`
-variable. As it is an *ep_* variable, it should only be
+Sysctl parameters to be set are defined in the `os_sysctl`
+variable. As it is an *os_* variable, it should only be
 set for each equipment profiles, and not set at hostvars
 level.
 
 An example would be:
 
 ```yaml
-ep_sysctl:
+os_sysctl:
   kernel.panic: absent
   vm.swappiness: 5
   ...
@@ -40,11 +41,13 @@ Optional inventory vars:
 
 **hostvars[inventory_hostname]**
 
-* ep_kernel_parameters
+* os_kernel_parameters
+* hw_kernel_parameters
 * kernel_config_sysctl_reload
 
 ## Changelog
 
+* 1.3.0: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.2.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.1: Add OpenSuSE support. Neil Munday <neil@mundayweb.com>
 * 1.1.0: Add Ubuntu support. Benoit Leveugle <benoit.leveugle@gmail.com>

@@ -1,4 +1,4 @@
-# BlueBanquise CORE inventory data model reference 2.0.0
+# BlueBanquise CORE inventory data model reference 3.0.0
 
 ## Introduction
 
@@ -19,6 +19,26 @@ Notes:
 * When a dictionary can repeat itself (with other data), `...` are added.
 
 Last but not least, note that `j2_` variables that contains the stack core logic are provided either by the vars plugin core.py in common collection, either by adding the provided `bb_core.yml` file into your `group_vars/all/` inventory folder.
+
+## Reserved variables
+
+The following variables are reserved by the stack:
+
+* `os_profile`
+* `hw_profile`
+* `ep_profile`
+* `bb_nodes_profiles`
+* `bb_equipments`
+* `bb_nodes`
+
+Also, nodes hardware and os groups names **cannot contain** the string `_with_`.
+
+## Stack transverse variables
+
+These variables, if set, will precedence all roles' dedicated related variables, and so allow to set the same value for all roles at once.
+
+* `bb_time_zone`
+* `bb_domain_name`
 
 ## Section 1: Networks
 
@@ -46,6 +66,8 @@ networks:
     subnet: 10.20.0.0
   ...
 ```
+
+Note: `4` or `6` at end of some keys are related to ipv4 or ipv6.
 
 When the network name starts by `net-` then it is considered a **management network**, and has special consideration. Other networks are considered simple networks.
 
@@ -119,57 +141,69 @@ all:
 
 Some roles like dhcp_server, hosts_file, conman, powerman, etc., can identify hosts BMC using these data.
 
-
 ## Section 3: Groups
 
-System admininstrator is free to create Ansible groups as needed. However, some specific groups are to be taken into account.
+System admininstrator is free to create Ansible groups as needed. However, some specific groups are to be taken into account as they are mandatory.
+Each **Ansible host** must be member of 3 specific groups:
 
-### 3.1: managements group
+* A function group
+* An hardware group
+* An operating system group
 
-Admininstration/management servers must be member of the Ansible group `mg_managements`, to be identified as management servers.
+**Non Ansible hosts** (hosts that should simply be registered in services like DHCP/DNS, but not where an operating system has to be deployed, like a switch) can only be part of a function group if an hardware profile is not relevant.
 
-### 3.2: equipments groups
+The idea is to define an host with a function, an hardware profile, and an OS profile.
 
-Except for very simple clusters with fully hotorogenous equipment, hosts must be members of an equipment Ansible group.
+### 3.1: Function groups
 
-An equipment group is always prefixed by `equipment_`. Each equipment group possess variables that define the specific hardware/OS related parameters of its members.
-For example, in a cluster with 2 kind of servers (lets say supermicro A and gigabyte B), there will probably be 2 equipment groups: `equipment_supermicro_A` and `equipment_gigabyte_B`.
+Each host have to be in a function group. This group determine the function/purpose of the host.
+Function groups are prefixed with `fn_`.
 
-Many roles use equipment groups, the main one being pxe_stack role.
+Function groups can be custom named as needed.
+However, the `fn_management` function group is important and has to be named this way. Tt should contain all management hosts. Ansible will use this group to identify managements hosts and behave accordingly.
 
-Example of variables stored in equipment groups:
+Example of function groups:
+
+* fn_management
+* fn_compute
+* fn_login
+* fn_storage
+* fn_nfs
+* fn_eth_switch
+* fn_rack_manager
+* ...
+
+### 3.2: Hardware groups
+
+Each host have to be in an hardware group. This group determine the hardware related parameters of the target host.
+
+These groups are always prefixed by `hw_`. Hardware groups can be custom named as needed.
+
+Example of hardware groups:
+
+* hw_supermicro_X91HA_E5300_32G
+* hw_asus_XZP4
+* hw_nvidia_DGX_A100
+* ...
+
+Many roles use hardware groups, the main one being pxe_stack role.
+
+Example of variables stored in hardware groups:
 
 ```yaml
-ep_ipxe_driver: {default|snp|snponly}
-ep_ipxe_platform: {pcbios|efi}
-ep_ipxe_embed: {standard|dhcpretry}
+hw_ipxe_driver: {default|snp|snponly}
+hw_ipxe_platform: {pcbios|efi}
+hw_ipxe_embed: {standard|dhcpretry}
 
-ep_preserve_efi_first_boot_device: {true|false}
+hw_console:
+hw_kernel_parameters:
+hw_sysctl:
 
-ep_console:
-ep_kernel_parameters:
-ep_sysctl:
+hw_equipment_type: {server|...}
 
-ep_access_control: {enforcing|permissive|disabled|...}
-ep_firewall: {true|false}
+hw_architecture: {x86_64|arm64}
 
-ep_partitioning:
-ep_autoinstall_pre_script:
-ep_autoinstall_post_script:
-
-ep_operating_system:
-  distribution:
-  distribution_major_version:
-  distribution_version:      # Optional: define a minor distribution version to force (repositories/PXE)
-  repositories_environment:  # Optional: add an environment in the repositories path (eg. production, staging) (repositories/PXE)
-
-ep_equipment_type: {server|...}
-
-ep_configuration:
-  keyboard_layout:
-  system_language:
-
-ep_hardware:
+hw_specs:
   cpu:
     architecture:
     cores:
@@ -178,13 +212,49 @@ ep_hardware:
     threads_per_core:
   gpu:
 
-ep_host_authentication:  # Authentication to BMC
+hw_board_authentication:  # Authentication to BMC
   - protocol: IPMI
     user: ADMIN
     password: ADMIN
 ```
 
-### 3.3: icebergs groups
+### 3.3: Operating system groups
+
+Each host have to be in an operating system group. This group determine the OS related parameters of the target host.
+
+These groups are always prefixed by `os_`. Operating system groups can be custom named as needed.
+
+Example of hardware groups:
+
+* os_ubuntu_22.04_gpu
+* os_almalinux_9
+* ...
+
+Many roles use os groups, the main one being pxe_stack role.
+
+Example of variables stored in os groups:
+
+```yaml
+os_preserve_efi_first_boot_device: {true|false}
+
+os_access_control: {enforcing|permissive|disabled|...}
+os_firewall: {true|false}
+
+os_partitioning:
+os_autoinstall_pre_script:
+os_autoinstall_post_script:
+
+os_operating_system:
+  distribution:
+  distribution_major_version:
+  distribution_version:      # Optional: define a minor distribution version to force (repositories/PXE)
+  repositories_environment:  # Optional: add an environment in the repositories path (eg. production, staging) (repositories/PXE)
+
+os_keyboard_layout:
+os_system_language:
+```
+
+### 3.4: icebergs groups
 
 These groups are for advanced clusters, using multiple icebergs mechanism. If not using icebergs, please ignore this part.
 

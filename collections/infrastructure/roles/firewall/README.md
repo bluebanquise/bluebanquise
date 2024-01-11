@@ -15,7 +15,7 @@ the network must be in the firewall.
 Enable or disable the firewall service in the equipment profile:
 
 ```yaml
-ep_firewall: true
+os_firewall: true
 ```
 
 To add a network of the host to a zone, define the zone name in
@@ -85,7 +85,7 @@ Mandatory inventory vars:
 
 **hostvars[inventory_hostname]**
 
-* ep_firewall
+* os_firewall
 * network[item]
    * .subnet
    * .prefix
@@ -122,10 +122,9 @@ Package installed:
 
 * firewall
 
-
-
 ## Changelog
 
+* 1.3.3: Adapt to os hw split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.2: Fix issue with non networked nic. From @GaelBil. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.1: Firewalld: enforce interfaces to their relevant zone. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.3.0: Add firewalld_allow_zone_drifting variable. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>

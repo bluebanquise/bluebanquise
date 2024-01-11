@@ -7,7 +7,7 @@ This role configure the ssh client authorized public key.
 ## Data Model
 
 This role relies on [data model](https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md):
-* Section 3.2 (Equipment Groups)
+* Section 3.3 (OS Groups)
 
 ## Instructions
 
@@ -17,7 +17,7 @@ This role will ensure remote hosts is having currently defined ssh authorized pu
 Keys are provided as a list:
 
 ```
-ep_admin_ssh_keys:
+os_admin_ssh_keys:
   - ssh-ed25519 AAAAC....
   - ssh-ed25519 AAAAB....
 ```
@@ -26,6 +26,7 @@ ep_admin_ssh_keys:
 
 ## Changelog
 
+* 1.2.0: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.1: Allow keys to sudo user folder. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.3: Rename role. Benoit Leveugle <benoit.leveugle@gmail.com>

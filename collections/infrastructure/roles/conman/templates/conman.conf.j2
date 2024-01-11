@@ -10,7 +10,7 @@ SERVER timestamp=1h
 GLOBAL logopts="timestamp"
 
 {% for host in (j2_hosts_range | sort) -%}
-  {% if (hostvars[host]['ep_equipment_type'] | default("server")) == "server" %}
+  {% if (hostvars[host]['hw_equipment_type'] | default("server")) == "server" %}
     {% if hostvars[host]['bmc'] is defined and hostvars[host]['bmc']['name'] is defined %}
       {# Gather BMC network settings #}
       {% if hostvars[host]['bmc']['ip4'] is defined %}{# BMC is defined inside host #}
@@ -21,9 +21,9 @@ GLOBAL logopts="timestamp"
         {% set credentials_host = hostvars[host]['bmc']['name'] %}{# Define external bmc as credentials source #}
       {% endif %}
       {# Gather BMC credentials settings #}
-      {% if hostvars[credentials_host]['ep_host_authentication'] is defined %}{# Check if host_authentication is defined #}
-        {% set host_bmc_user = (hostvars[credentials_host]['ep_host_authentication'] | selectattr('protocol','match','IPMI') | map(attribute='user') | list | first | default(none)) %}
-        {% set host_bmc_password = (hostvars[credentials_host]['ep_host_authentication'] | selectattr('protocol','match','IPMI') | map(attribute='password') | list | first | default(none)) %}
+      {% if hostvars[credentials_host]['hw_board_authentication'] is defined %}{# Check if host_authentication is defined #}
+        {% set host_bmc_user = (hostvars[credentials_host]['hw_board_authentication'] | selectattr('protocol','match','IPMI') | map(attribute='user') | list | first | default(none)) %}
+        {% set host_bmc_password = (hostvars[credentials_host]['hw_board_authentication'] | selectattr('protocol','match','IPMI') | map(attribute='password') | list | first | default(none)) %}
       {% endif %}
       {% if host_bmc_user is defined and host_bmc_user is not none and host_bmc_password is defined and host_bmc_password is not none %}
 console name="{{ host }}" dev="ipmitool.exp {{ host_bmc['ip4'] }} {{ host_bmc_user }} {{ host_bmc_password }}"

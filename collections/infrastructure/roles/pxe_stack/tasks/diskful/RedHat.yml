@@ -24,31 +24,33 @@
 - name: "template <|> Generate kickstarts {{ pxe_stack_htdocs_path }}/pxe/equipment_profiles/{item}.kickstart.cfg"
   ansible.builtin.template:
     src: "RedHat/kickstart.cfg.j2"
-    dest: "{{ pxe_stack_htdocs_path }}/pxe/equipment_profiles/{{ item | replace(bb_core_equipment_naming+'_','') | trim }}.kickstart.cfg"
+    dest: "{{ pxe_stack_htdocs_path }}/pxe/equipment_profiles/{{ item | trim }}.kickstart.cfg"
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_group }}"
-  with_items: "{{ j2_equipment_groups_list }}"
+  vars:
+    os_profile: "{{ bb_equipments[item]['os'] }}"
+    hw_profile: "{{ bb_equipments[item]['hw'] }}"
+  with_items: "{{ bb_equipments.keys() }}"
   when:
-    - groups[item] | default([]) | length > 0
-    - hostvars[groups[item][0]]['ep_equipment_type'] | default(pxe_stack_ep_equipment_type) == "server"
-    - (hostvars[groups[item][0]]['ep_operating_system']['distribution'] | default(pxe_stack_ep_operating_system.distribution) | lower) in ['redhat','centos','centosstream','rockylinux','cloudlinux','oraclelinux','almalinux']
+    - (bb_equipments[item]['type'] | default(pxe_stack_hw_equipment_type)) == "server"
+    - (hostvars[groups[bb_equipments[item]['os']][0]]['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution) | lower) in ['redhat', 'rhel', 'centos','centosstream','rockylinux','cloudlinux','oraclelinux','almalinux']
   tags:
     - template
-    - dev2
 
 - name: "template <|> Generate equipment_profiles {{ pxe_stack_htdocs_path }}/pxe/equipment_profiles/{item}.ipxe"
   ansible.builtin.template:
     src: "RedHat/equipment_profile_ks.ipxe.j2"
-    dest: "{{ pxe_stack_htdocs_path }}/pxe/equipment_profiles/{{ item | replace(bb_core_equipment_naming+'_','') | trim }}.ipxe"
+    dest: "{{ pxe_stack_htdocs_path }}/pxe/equipment_profiles/{{ item | trim }}.ipxe"
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_group }}"
-  with_items: "{{ j2_equipment_groups_list }}"
+  vars:
+    os_profile: "{{ bb_equipments[item]['os'] }}"
+    hw_profile: "{{ bb_equipments[item]['hw'] }}"
+  with_items: "{{ bb_equipments.keys() }}"
   when:
-    - groups[item] | default([]) | length > 0
-    - hostvars[groups[item][0]]['ep_equipment_type'] | default(pxe_stack_ep_equipment_type) == "server"
-    - (hostvars[groups[item][0]]['ep_operating_system']['distribution'] | default(pxe_stack_ep_operating_system.distribution) | lower) in ['redhat','centos','centosstream','rockylinux','cloudlinux','oraclelinux','almalinux']
+    - (bb_equipments[item]['type'] | default(pxe_stack_hw_equipment_type)) == "server"
+    - (hostvars[groups[bb_equipments[item]['os']][0]]['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution) | lower) in ['redhat', 'rhel', 'centos','centosstream','rockylinux','cloudlinux','oraclelinux','almalinux']
   tags:
     - template
-    - dev2

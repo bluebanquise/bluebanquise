@@ -3,7 +3,7 @@
     rule: allow
     name: Apache
   when:
-    - ep_firewall | default(false) | bool
+    - os_firewall | default(false) | bool
   tags:
     - firewall
 
@@ -13,6 +13,6 @@
     port: '69'
     proto: udp
   when:
-    - ep_firewall | default(false) | bool
+    - os_firewall | default(false) | bool
   tags:
     - firewall

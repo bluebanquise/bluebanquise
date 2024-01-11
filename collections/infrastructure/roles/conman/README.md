@@ -4,7 +4,7 @@
 
 This role relies on [data model](https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md):
 * Section 2 (Hosts definition)
-* Section 3.2 (Equipment Groups)
+* Section 3.2 (Hardware Groups)
 
 ## Description
 
@@ -20,7 +20,7 @@ Files generated:
 
 Conman role will automatically look for equipment profile variables and bmc registered of each hosts.
 
-To make an host conman compatible in the inventory, ensure the `bmc` dict is set for the target host, and that target host as access (host_vars, group_vars, etc) to and `ep_host_authentication` list with IPMI protocol registered.
+To make an host conman compatible in the inventory, ensure the `bmc` dict is set for the target host, and that target host as access (host_vars, group_vars, etc) to and `hw_board_authentication` list with IPMI protocol registered.
 
 An ultra basic example would be:
 
@@ -44,10 +44,10 @@ And:
 
 ```ini
 [all:vars]
-ep_host_authentication="[{'protocol': 'IPMI', 'user': 'ADMIN', 'pass': 'ADMIN'}]"
+hw_board_authentication="[{'protocol': 'IPMI', 'user': 'ADMIN', 'pass': 'ADMIN'}]"
 ```
 
-Note however that `ep_host_authentication` was originally designed to be used for equipment profiles groups, but can be set this way if using BlueBanquise as a standalone collection.
+Note however that `hw_board_authentication` was originally designed to be used for equipment profiles groups, but can be set this way if using BlueBanquise as a standalone collection.
 
 ### Conman usage
 
@@ -83,6 +83,7 @@ Once these pam_limits parameter pushed, restart conman daemon.
 
 ## Changelog
 
+* 1.6.0: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.5.1: Fix logrotate paths. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.5.0: Add logrotate file. Matthieu Isoard <indigoping4cgmi@gmail.com>
 * 1.4.0: Update to BB 2.0 format. Benoit Leveugle <benoit.leveugle@gmail.com>

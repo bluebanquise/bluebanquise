@@ -20,11 +20,11 @@
   </add-on>
 
   <keyboard>
-    <keymap>{{ (hostvars[groups[item][0]]['ep_keyboard_layout'] | default(pxe_stack_ep_keyboard_layout)) | lower }}</keymap>
+    <keymap>{{ (hostvars[groups[os_profile][0]]['os_keyboard_layout'] | default(pxe_stack_os_keyboard_layout)) | lower }}</keymap>
   </keyboard>
 
   <language>
-    <language>{{ (hostvars[groups[item][0]]['ep_system_language'] | default(pxe_stack_ep_system_language)) | replace('.UTF-8','') }}</language>
+    <language>{{ (hostvars[groups[os_profile][0]]['os_system_language'] | default(pxe_stack_os_system_language)) | replace('.UTF-8','') }}</language>
     <languages/>
   </language>
 
@@ -35,12 +35,12 @@
 
 
   <networking>
-    <keep_install_network config:type="boolean">true</keep_install_network>
+    <keos_install_network config:type="boolean">true</keos_install_network>
     <managed config:type="boolean">true</managed>
   </networking>
 
   <software>
-{% if (hostvars[groups[item][0]]['ep_operating_system']['distribution'] | default(pxe_stack_ep_operating_system)) | lower == "sles" %}
+{% if (hostvars[groups[os_profile][0]]['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system)) | lower == "sles" %}
     <products config:type="list">
       <product>SLES</product>
     </products>
@@ -61,19 +61,19 @@
     <loader_type>default</loader_type>
   </bootloader>
 
-{{ hostvars[groups[item][0]]['ep_partitioning'] | default(pxe_stack_ep_partitioning) | default(pxe_stack_suse_automatic_partitioning, true) }}
+{{ hostvars[groups[os_profile][0]]['os_partitioning'] | default(pxe_stack_os_partitioning) | default(pxe_stack_suse_automatic_partitioning, true) }}
 
 {% if pxe_stack_enable_root %}
  <users config:type="list">
   <user>
     <username>root</username>
-    <user_password>{{ hostvars[groups[item][0]]['ep_admin_password_sha512'] | default(pxe_stack_ep_admin_password_sha512) }}</user_password>
+    <user_password>{{ hostvars[groups[os_profile][0]]['os_admin_password_sha512'] | default(pxe_stack_os_admin_password_sha512) }}</user_password>
     <uid>0</uid>
     <gid>0</gid>
     <encrypted config:type="boolean">true</encrypted>
     <fullname>Root User</fullname>
     <authorized_keys config:type="list">
-{% for ssh_key in (hostvars[groups[item][0]]['ep_admin_ssh_keys'] | default(pxe_stack_ep_admin_ssh_keys)) %}
+{% for ssh_key in (hostvars[groups[os_profile][0]]['os_admin_ssh_keys'] | default(pxe_stack_os_admin_ssh_keys)) %}
       <listentry>{{ssh_key}}</listentry>
 {% endfor %}
     </authorized_keys>
@@ -90,10 +90,10 @@
     <user>
       <username>{{ pxe_stack_sudo_user }}</username>
       <home>{{ pxe_stack_sudo_user_home }}</home>
-      <user_password>{{ hostvars[groups[item][0]]['ep_admin_password_sha512'] | default(pxe_stack_ep_admin_password_sha512) }}</user_password>
+      <user_password>{{ hostvars[groups[os_profile][0]]['os_admin_password_sha512'] | default(pxe_stack_os_admin_password_sha512) }}</user_password>
       <encrypted config:type="boolean">true</encrypted>
       <authorized_keys config:type="list">
-  {% for ssh_key in (hostvars[groups[item][0]]['ep_admin_ssh_keys'] | default(pxe_stack_ep_admin_ssh_keys)) %}
+  {% for ssh_key in (hostvars[groups[os_profile][0]]['os_admin_ssh_keys'] | default(pxe_stack_os_admin_ssh_keys)) %}
         <listentry>{{ssh_key}}</listentry>
   {% endfor %}
       </authorized_keys>
@@ -130,7 +130,7 @@ echo "Defaults:sles !targetpw
           </source>
       </script>
 {% endif %}
-{% if (hostvars[groups[item][0]]['ep_preserve_efi_first_boot_device'] | default(pxe_stack_ep_preserve_efi_first_boot_device)) == true %}
+{% if (hostvars[groups[hw_profile][0]]['hw_preserve_efi_first_boot_device'] | default(pxe_stack_hw_preserve_efi_first_boot_device)) == true %}
       <script>
         <debug config:type="boolean">true</debug>
         <filename>post-no-chroot.sh</filename>
@@ -162,7 +162,7 @@ curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$(hostna
 ]]>
         </source>
       </script>
-{% if (hostvars[groups[item][0]]['ep_operating_system']['distribution'] | default(pxe_stack_ep_operating_system.distribution)) | lower == "opensuse" and not pxe_stack_preserve_repositories %}
+{% if (hostvars[groups[os_profile][0]]['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution)) | lower == "opensuse" and not pxe_stack_preserve_repositories %}
       <script>
         <chrooted config:type="boolean">true</chrooted>
         <filename>chroot-post.sh</filename>
@@ -174,7 +174,7 @@ sed -i "s/enabled=1/enabled=0/" /etc/zypp/repos.d/repo-*
         </source>
       </script>
 {% endif %}
-{% for script in pxe_stack_ep_autoinstall_custom_scripts %}
+{% for script in pxe_stack_os_autoinstall_custom_scripts %}
   {% if script.name is defined and script.name is string and script.content is defined and script.content is string %}
       <script>      
         <filename>{{ script.name }}.sh</filename>

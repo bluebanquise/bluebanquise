@@ -7,9 +7,9 @@
       - networks is defined and networks is not none
       - networks[j2_node_main_network] is defined and networks[j2_node_main_network] is not none
       - (networks[j2_node_main_network]['services_ip'] is defined and networks[j2_node_main_network]['services_ip'] is not none) or (networks[j2_node_main_network]['services']['repositories'][0]['ip4'] is defined and networks[j2_node_main_network]['services']['repositories'][0]['ip4'] is not none)
-      - ep_operating_system is defined and ep_operating_system is not none
-      - ep_operating_system['distribution'] is defined and ep_operating_system['distribution'] is not none
-      - (ep_operating_system['distribution_version'] is defined and ep_operating_system['distribution_version'] is not none) or (ep_operating_system['distribution_major_version'] is defined and ep_operating_system['distribution_major_version'] is not none)
+      - os_operating_system is defined and os_operating_system is not none
+      - os_operating_system['distribution'] is defined and os_operating_system['distribution'] is not none
+      - (os_operating_system['distribution_version'] is defined and os_operating_system['distribution_version'] is not none) or (os_operating_system['distribution_major_version'] is defined and os_operating_system['distribution_major_version'] is not none)
     fail_msg: "You are using simple repositories definition. The tool needs multiple variables to be defined to calculate URL and it seems at least one is missing. Please refer to role README for list of variables required."
     success_msg: "All needed parameters are defined for simple URL"
   with_items: "{{ bb_repositories }}"
@@ -20,7 +20,7 @@
 - name: yum_repository <|> Setting repositories
   ansible.builtin.yum_repository:
     name: "{{ item.name | default(item) }}"
-    description: "{{ item.name | default(item) }} gen by Ansible"
+    description: "{{ item.description | default(item) }} gen by Ansible"
     baseurl: "{{ item.baseurl | default(repositories_j2_simple_url + (item.name | default(item))) }}/"
     enabled: "{{ item.enabled | default(1) }}"
     exclude: "{{ item.exclude | default(omit) }}"

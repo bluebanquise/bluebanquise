@@ -1,12 +1,16 @@
 slurm_munge_key_b64: hYcbkjJgv5YyybNqKbo+JvXLakIY2zFcZhpopipS8JmLmeE3YHgMcbUO74LIGKqzpIgD7ILPgUKmzgSl8BOK9WHQcMxywvh2fY567+4TyEq/HEArVfqdsIPw1U/jodDt2DL3MTNvci5hTJ8JNJZZKrjJc2x/FBlF52hAt+KLm+g=
 slurm_enable_accounting: true
 slurm_enable_local_mysql: false
-slurm_control_machine: mg1
+slurm_control_machine: mgt1
 slurm_cluster_name: bluebanquise
 slurm_computes_groups:
-  - equipment_typeC
-slurm_all_partition:
-    enable: true
-    partition_configuration:
-      State: UP
-      Default: yes
+  - fn_compute
+slurm_partitions_list:
+    - computes_groups:
+        - fn_compute
+      partition_name: all
+      partition_configuration:
+        State: UP
+        MaxTime: "72:00:00"
+        DefaultTime: "24:00:00"
+        Default: yes

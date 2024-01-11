@@ -28,7 +28,7 @@ Role compatibility:
 ## Data Model
 
 This role relies on [data model](https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md):
-* Section 3.2 (Equipment Groups)
+* Section 3.2 (Hardware Groups)
 
 ## Description
 
@@ -94,46 +94,46 @@ when loading the role. Extra vars is **slurm_profile**.
 For a controller (server), use:
 
 ```yaml
-  - role: slurm
-    tags: slurm
-    vars:
-      slurm_profile: controller
+- role: slurm
+  tags: slurm
+  vars:
+    slurm_profile: controller
 ```
 
 For a compute node (client), use:
 
 ```yaml
-  - role: slurm
-    tags: slurm
-    vars:
-      slurm_profile: compute
+- role: slurm
+  tags: slurm
+  vars:
+    slurm_profile: compute
 ```
 
 And for a submitter (passive client, login), use:
 
 ```yaml
-  - role: slurm
-    tags: slurm
-    vars:
-      slurm_profile: submitter
+- role: slurm
+  tags: slurm
+  vars:
+    slurm_profile: submitter
 ```
 
 ### Configure main parameters
 
-Then, in the inventory addons folder (inventory/group_vars/all/addons that should
+Then, in the inventory addons folder (inventory/group_vars/all/ that should
 be created if not exist), add a slurm.yml file with the following minimal content,
 tuned according to your needs:
 
 ```yaml
-  slurm_cluster_name: bluebanquise
-  slurm_control_machine: management1
-  slurm_computes_groups:
-    - equipment_typeC
-  slurm_all_partition:
-      enable: true
-      partition_configuration:
-        State: UP
-        Default: yes
+slurm_cluster_name: bluebanquise
+slurm_control_machine: management1
+slurm_partitions_list:
+  - computes_groups:
+      - fn_compute
+    partition_name: all
+    partition_configuration:
+      State: UP
+      Default: yes
 ```
 
 Note: **partition_configuration** can cover all Slurm's available parameters for
@@ -144,37 +144,31 @@ can be any groups of nodes, as long as all nodes used in these groups are includ
 in the groups defined under **slurm_computes_groups**. For example:
 
 ```yaml
-  slurm_cluster_name: bluebanquise
-  slurm_control_machine: management1
-  slurm_computes_groups:
-    - equipment_typeC
-  slurm_partitions_list:
-    - computes_groups:
-        - equipment_typeC
-        - equipment_typeC_gpu
-      partition_name: typeC
-      partition_configuration:
-        State: UP
-        MaxTime: "72:00:00"
-        DefaultTime: "24:00:00"
-        Default: yes
-    - computes_groups:
-        - rack1
-        - rack2
-        - rack3
-      partition_name: rack_room1
-      partition_configuration:
-        State: UP
-  slurm_all_partition:
-      enable: true
-      partition_configuration:
-        State: UP
-        MaxTime: "72:00:00"
-        DefaultTime: "24:00:00"
+slurm_cluster_name: bluebanquise
+slurm_control_machine: management1
+slurm_partitions_list:
+  - computes_groups:
+      - os_debian12
+      - os_debian11
+    partition_name: debian
+    partition_configuration:
+      State: UP
+      MaxTime: "72:00:00"
+      DefaultTime: "24:00:00"
+  - computes_groups:
+      - rack1
+      - rack2
+      - rack3
+    partition_name: rack_room1
+    partition_configuration:
+      State: UP
+  - computes_groups:
+      - fn_compute
+    partition_name: all
+    partition_configuration:
+      State: UP
+      Default: yes
 ```
-
-This will work as long as all nodes included in groups `rack1 + rack2 + rack3`
-are all contained in groups `equipment_typeC + equipment_typeC_gpu`.
 
 ### Review default settings
 
@@ -189,13 +183,13 @@ It is possible to add more content into *slurm.conf* file using the multi-lines
 ### Optional nodes tuning
 
 It is possible to set variable **slurm_extra_nodes_parameters** under
-**ep_hardware** in an *equipment_profile* to add more parameters on the nodes
+**hw_specs** in an *equipment_profile* to add more parameters on the nodes
 definition line.
 
 For example, setting:
 
 ```yaml
-ep_hardware:
+hw_specs:
   cpu:
     architecture: x86_64
     cores: 24
@@ -291,7 +285,7 @@ $ nvidia-smi -L
 You need to add the Gres extra arguments for slurm as well, so you would add something like the following to your equipment_profile.yml file if you have 8x NVIDIA A100-SXM4-40GB on your hardware for example:
 
 ```yaml
-ep_hardware:
+hw_specs:
   slurm_extra_nodes_parameters: "Gres=gpu:8"
   [...]
   gpu:
@@ -312,13 +306,10 @@ To enable it on the slurm configuration its required to define `slurm_selecttype
   slurm_control_machine: management1
   slurm_selecttype: "select/cons_tres"
   slurm_grestypes: gpu
-  slurm_computes_groups:
-    - equipment_typeC
   slurm_partitions_list:
     - computes_groups:
-        - equipment_typeC
-        - equipment_typeC_gpu
-      partition_name: typeC
+        - hw_gpus
+      partition_name: gpu_partoche
 ```
 
 ### Acct Gather
@@ -345,6 +336,7 @@ See more explanation on https://slurm.schedmd.com/acct_gather.conf.html
 
 ## Changelog
 
+* 1.4.1: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.0: Add capacity to bind to an external MYSQL database. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.0: Added acct_gather plugin configuration. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.2.5: RedHat 9 packages file. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>

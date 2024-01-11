@@ -12,7 +12,7 @@
     state: enabled
   when:
     - ansible_facts.os_family == "RedHat"
-    - ep_firewall | default(false) | bool
+    - os_firewall | default(false) | bool
   loop:
     - "{{ slurm_srunportrange }}"
     - "{{ slurm_slurmtld_port }}"

@@ -42,6 +42,8 @@ item bootmemtest          Boot memtest86+
 item startshell           iPXE shell (Go to an iPXE shell)
 item startgrubshell       Grub2 shell (Go to a Grub2 shell, EFI only)
 item showinfo             Display system infos
+item reboot               Reboot
+item poweroff             Poweroff
 choose --timeout ${menu-timeout} --default ${menu-default} selected || goto cancel
 set menu-timeout 0
 goto ${selected}
@@ -60,6 +62,16 @@ echo Booting on a Grub2 shell image...
 sleep 2
 chain http://${next-server}/pxe/bin/${arch}/grub2_shell.img || shell
 exit 1
+
+:reboot
+echo Rebooting system...
+echo sleep 2
+reboot
+
+:poweroff
+echo Powering off system...
+echo sleep 2
+poweroff
 
 :showinfo
 echo

@@ -9,7 +9,7 @@ This role provides a dns server based on bind.
 This role relies on [data model](https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md):
 * Section 1 (Networks)
 * Section 2 (Hosts definition)
-* Section 3.1 (Managements Groups)
+* Section 3.1 (Function Groups)
 
 ## Instructions
 
@@ -64,6 +64,7 @@ This will cause `/var/named/override` to be generated.
 
 ## Changelog
 
+* 1.7.4: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.7.3: Add missing services records. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.7.2: Rename systemd service to named for Ubuntu. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.7.1: Find correct default resolution network in reverse zone. Alexandra Darrieutort <alexandra.darrieutort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>

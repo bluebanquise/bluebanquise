@@ -7,7 +7,7 @@
     permanent: "yes"
     state: enabled
   when:
-    - ep_firewall | default(false) | bool
+    - os_firewall | default(false) | bool
   loop: "{{ dns_server_firewall_services_to_add }}"
   tags:
     - firewall

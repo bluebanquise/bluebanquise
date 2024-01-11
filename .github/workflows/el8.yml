@@ -29,7 +29,7 @@ jobs:
 
       - name: Configure BB external repositories
         run: |
-          echo -e 'bb_repositories:\n  - name: bluebanquise\n    baseurl: "http://bluebanquise.com/repository/releases/latest/el8/x86_64/bluebanquise/"' > resources/workflow/inventory_standard/group_vars/all/repositories.yml
+          echo -e 'bb_repositories:\n  - name: bluebanquise\n    baseurl: "https://bluebanquise.com/repository/releases/latest/el8/x86_64/bluebanquise/"' > resources/workflow/inventory_standard/group_vars/all/repositories.yml
 
       - name: Start container
         run: docker run -d --privileged --cgroupns=host --net=host --name mgt1 -v /sys/fs/cgroup:/sys/fs/cgroup:rw -v $PWD:/bluebanquise rockylinux/rockylinux:8_systemd
@@ -46,49 +46,49 @@ jobs:
 
       - name: Repositories role execution
         run: |
-          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/infrastructure.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff  --tags repositories'"
+          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_JINJA2_EXTENSIONS=jinja2.ext.loopcontrols,jinja2.ext.do ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/infrastructure.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff  --tags repositories'"
 
       - name: High availability roles execution
         run: |
-          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/high_availability.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff -t haproxy,keepalived --skip-tags service'"
+          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_JINJA2_EXTENSIONS=jinja2.ext.loopcontrols,jinja2.ext.do ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/high_availability.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff -t haproxy,keepalived --skip-tags service'"
 
       # - name: High availability roles execution
       #   run: |
       #     docker exec mgt1 bash -c "dnf config-manager --set-enabled ha"
-      #     docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/high_availability.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff -t package'"
-      #     docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/high_availability.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff -t pcs,drbd --check'"
-      #     docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/high_availability.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --skip-tags pcs'"
+      #     docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_JINJA2_EXTENSIONS=jinja2.ext.loopcontrols,jinja2.ext.do ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/high_availability.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff -t package'"
+      #     docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_JINJA2_EXTENSIONS=jinja2.ext.loopcontrols,jinja2.ext.do ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/high_availability.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff -t pcs,drbd --check'"
+      #     docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_JINJA2_EXTENSIONS=jinja2.ext.loopcontrols,jinja2.ext.do ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/high_availability.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --skip-tags pcs'"
 
       - name: HPC roles execution
         run: |
-          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/hpc.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --tags slurm,lmod'"
+          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_JINJA2_EXTENSIONS=jinja2.ext.loopcontrols,jinja2.ext.do ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/hpc.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --skip-tags service --tags slurm,lmod'"
 
       - name: FS roles execution
         run: |
-          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/file_systems.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff'"
+          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_JINJA2_EXTENSIONS=jinja2.ext.loopcontrols,jinja2.ext.do ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/file_systems.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff'"
 
       - name: Logging roles execution
         run: |
-          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/logging.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff'"
+          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_JINJA2_EXTENSIONS=jinja2.ext.loopcontrols,jinja2.ext.do ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/logging.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff'"
 
       - name: Containers roles execution
         run: |
-          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/containers.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff'"
+          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_JINJA2_EXTENSIONS=jinja2.ext.loopcontrols,jinja2.ext.do ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/containers.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff'"
 
       - name: Hardware roles execution
         run: |
-          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/hardware.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff'"
+          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_JINJA2_EXTENSIONS=jinja2.ext.loopcontrols,jinja2.ext.do ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/hardware.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff'"
 
       - name: Monitoring roles execution
         run: |
-          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/monitoring.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff'"
+          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_JINJA2_EXTENSIONS=jinja2.ext.loopcontrols,jinja2.ext.do ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/monitoring.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff'"
       
       # - name: Security roles execution
       #   run: |
       #     docker exec mgt1 bash -c "dnf install openssh-server -y && systemctl start sshd"
-      #     docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/security.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --skip-tags service'"
+      #     docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_JINJA2_EXTENSIONS=jinja2.ext.loopcontrols,jinja2.ext.do ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/security.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --skip-tags service'"
 
       - name: Infrastructure roles execution
         run: |
-          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/infrastructure.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --check --tags hosts_file,dns_client'"
-          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/infrastructure.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --skip-tags kernel_config,hosts_file,nic,set_hostname,dns_client'"
+          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_JINJA2_EXTENSIONS=jinja2.ext.loopcontrols,jinja2.ext.do ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/infrastructure.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --check --tags hosts_file,dns_client'"
+          docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_JINJA2_EXTENSIONS=jinja2.ext.loopcontrols,jinja2.ext.do ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core ansible-playbook /var/lib/bluebanquise/playbooks/infrastructure.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --skip-tags kernel_config,hosts_file,nic,set_hostname,dns_client'"

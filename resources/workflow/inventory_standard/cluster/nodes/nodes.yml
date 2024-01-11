@@ -97,3 +97,39 @@ all:
           mac: 1a:2b:3c:4d:5e:8f
           network: net-admin
 
+    # A compute node
+    c005:
+      bmc:
+        name: bc005
+        ip4: 10.10.103.5
+        network: net-admin
+        mac: 2a:2b:3c:2d:5e:65
+      network_interfaces:
+        - interface: enp1s0
+          ip4: 10.10.3.5
+          mac: 1a:2b:3c:4d:5e:95
+          network: net-admin
+    # A compute node
+    c006:
+      bmc:
+        name: bc006
+        ip4: 10.10.103.6
+        network: net-admin
+        mac: 2a:2b:3c:2d:5e:66
+      network_interfaces:
+        - interface: enp1s0
+          ip4: 10.10.3.6
+          mac: 1a:2b:3c:4d:5e:96
+          network: net-admin
+    # A compute node
+    c007:
+      bmc:
+        name: bc007
+        ip4: 10.10.103.7
+        network: net-admin
+        mac: 2a:2b:3c:2d:5e:67
+      network_interfaces:
+        - interface: enp1s0
+          ip4: 10.10.3.7
+          mac: 1a:2b:3c:4d:5e:97
+          network: net-admin

@@ -156,6 +156,7 @@ which is a list of sebooleans to activate.
 
 ## Changelog
 
+* 1.4.3: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.2: Fix services names for Debian, Ubuntu and OpenSuse. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.1: Update to BB 2.0 format. Pierre Gay <pierre.gay@u-bordeaux.fr>, Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>
 * 1.4.0: Merged client and server. Benoit Leveugle <benoit.leveugle@gmail.com>

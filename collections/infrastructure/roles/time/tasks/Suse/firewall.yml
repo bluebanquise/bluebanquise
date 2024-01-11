@@ -7,7 +7,7 @@
     state: enabled
   when:
     - ansible_facts.os_family == "RedHat"
-    - ep_firewall | default(false) | bool
+    - os_firewall | default(false) | bool
   loop: "{{ time_firewall_services_to_add }}"
   tags:
     - firewall

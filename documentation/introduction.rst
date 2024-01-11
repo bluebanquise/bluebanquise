@@ -2,31 +2,49 @@
 Introduction
 ============
 
-**BlueBanquise** is a collection of Ansible roles, which can be gathered 
-with additional packages and tools as a unified stack, 
-whose purpose is to deploy and manage clusters of hosts.
-These clusters can be from few workstations to very large High Performance Computers,
-servers farm clusters, K8S clusters, etc.
+**BlueBanquise** is a generic stack, based on Ansible, whose purpose is to
+deploy and manage clusters of hosts.
+These clusters can be from few workstations in enterprise to very large HPC or
+servers farm clusters.
 
 .. image:: images/clusters/3_size_single_row.png
 
-**BlueBanquise** is the result of a need for a very simple, text based, stack that can keep
+**BlueBanquise** is the result of a need. A need for a very simple stack, not
+based on multi languages scripts difficult to maintain. A stack that can keep
 simplicity while managing very complex architecture.
 
 The **BlueBanquise** project also aims to train new system administrators to the
-deployment of bare metal server's infrastructures.
+deployment of bare metal servers.
 
-The stack relies on **Ansible**. Ansible is not the fastest tool, however,
-it is easy to learn, and widely used today with an active community.
+The project relies on **Ansible**.
+Ansible was chosen for its simplicity and its security.
+The Ansible inventory groups/variables mechanism can cover from very simple to
+very sophisticated configurations. Ansible is not the fastest tool, nor the
+simplest to debug. However, it is easy to learn, and widely used today with an
+active community.
 
-Major features of BlueBanquise are:
+The **BlueBanquise** stack is made of multiple Ansible collections.
+The *infrastructure* collection is the largest one, and should be generic. Other collections allows to specialize the cluster of hosts.
 
-* High compatibility with hardware
-* Support of multi-distributions
-* Support of multi-architectures (x86_64 and arm64)
 
-Please now choose your desired section:
+This documentation is structured as the following:
 
-* If you only need to use BlueBanquise collections, as independent roles, please directly proceed to BEN_BEN
-* If you are seeking trainings, please proceed to BEN_BEN
-* If you wish to use BlueBanquise as a unified stack, please proceed to BEN_BEN
+* Few basic vocabulary
+* Procedure to install BlueBanquise CORE
+    * Bootstrap first management host
+    * Configure BlueBanquise
+    * Deploy cluster
+* Procedures to specialize the cluster
+
+If you encounter any bugs/issues or have any comments, please inform me.
+
+Note also that since BlueBanquise is a multi-distribution based stack, parts of the
+documentation may be dedicated to a specific Linux distribution (always
+explicitly mentioned).
+
+I hope you will enjoy this stack as much as I do developing it.
+
+If you need help, do not hesitate to use `the discussions tab <https://github.com/bluebanquise/bluebanquise/discussions>`_
+of the project's github.
+
+Next step is to grab few basic :ref:`Vocabulary`.

@@ -1,8 +1,12 @@
 # Prometheus
 
-Note: this role comply with BlueBanquise data-model 1.0.0 (https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md).
+## Data Model
 
-Table of content:
+This role relies on [data model](https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md):
+* Section 2 (Hosts definition)
+* Section 3.2 (Hardware Groups)
+
+## Table of content:
 
 - [Prometheus](#prometheus)
   * [1. Description](#1-description)
@@ -322,12 +326,12 @@ client side will install and start it. This can be used to install
 
 ```yaml
 prometheus_exporters_groups_to_scrape:
-  equipment_management:
+  fn_management:
     - name: node_exporter
       service: node_exporter
       package: node_exporter
       port: 9100
-  equipment_login:
+  fn_login:
     - name: node_exporter
       package: node_exporter
       service: node_exporter
@@ -376,17 +380,17 @@ prometheus_server_manage_ipmi: true
 prometheus_server_manage_snmp: false
 ```
 
-You then need to specify which equipment_profile groups of nodes have to be
-ipmi scraped. To do so, simply set the global variable `prometheus_ipmi_scrape_equipment_profiles` 
+You then need to specify which hardware groups of nodes have to be
+ipmi scraped. To do so, simply set the global variable `prometheus_ipmi_scrape_hardware_groups` 
 in the default *inventory/group_vars/all/prometheus.yml* file:
 
 ```yaml
-prometheus_ipmi_scrape_equipment_profiles:
-  - name: equipment_management
+prometheus_ipmi_scrape_hardware_groups:
+  - name: hw_supermicro_X1
     scrape_interval: 5m
     scrape_timeout: 2m
-  - name: equipment_login
-  - name: equipment_compute
+  - name: hw_Dell_Q1
+  - name: hw_supermicro_X2
 ```
 
 This will add these into prometheus targets configuration for scraping via
@@ -395,8 +399,8 @@ ipmi_exporter.
 Note that you can set custom scrape_interval and scrape_timeout for ipmi or snmp
 using dedicated variables shown in the example above.
 
-Note also that ipmi_exporter will need `ep_equipment_authentication` dictionary
-to be set for each equipment_profile that needs ipmi data scraping.
+Note also that ipmi_exporter will need `hw_board_authentication` dictionary
+to be set for each hardware group that needs ipmi data scraping.
 
 ## 6. Advanced usage
 
@@ -581,6 +585,7 @@ prometheus_server_prometheus_launch_parameters: |
 
 ## Changelog
 
+* 1.3.4: Adapt tp hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.3: Port to bb 2.0. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.2: Restart services when systemd service file changes. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.3.1: Fix error when exporter is missing the service parameter. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
