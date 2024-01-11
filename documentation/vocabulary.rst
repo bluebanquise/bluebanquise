@@ -367,11 +367,11 @@ network (most of the time an Interconnect network).
 Equipment profiles
 ------------------
 
-In **BlueBanquise**, nodes are, in normal time, part of a at least 3 key groups.
+In **BlueBanquise**, nodes are, in normal time, part of a at least 3 key Ansible groups.
 
-* 1 function group, that defines the purpose of the node. These groups are always prefixed by ``fn_``. For example: ``fn_worker``.
-* 1 hardware group, that defines the hardware used for the node. These groups are always prefixed by ``hw_``. For example: ``hw_supermicro_X10DRT``.
-* 1 os group, that defines the os used for the node. These groups are always prefixed by ``os_``. For example: ``os_ubuntu_22.04``.
+* 1 **function group**, that defines the purpose of the node. These groups are always prefixed by ``fn_``. For example: ``fn_worker``.
+* 1 **hardware group**, that defines the hardware used for the node. These groups are always prefixed by ``hw_``. For example: ``hw_supermicro_X10DRT``.
+* 1 **os group**, that defines the os used for the node. These groups are always prefixed by ``os_``. For example: ``os_ubuntu_22.04``.
 
 The conjunction of 3 of these groups (one of each) creates an **equipment profile**.
 

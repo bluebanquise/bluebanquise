@@ -3,6 +3,11 @@
 
 ##### General settings
 
+# Custom scripts or kickstart content
+{% if (hostvars[groups[os_profile][0]]['os_autoinstall_custom_content'] | default(pxe_stack_os_autoinstall_custom_content)) is not none %}
+{{ (hostvars[groups[os_profile][0]]['os_autoinstall_custom_content'] | default(pxe_stack_os_autoinstall_custom_content)) }}
+{% endif %}
+
 # Do not use GUI
 text
 
@@ -144,7 +149,3 @@ rm -f /etc/yum.repos.d/*
 set +x
 %end
 
-# Custom scripts or kickstart content
-{% if (hostvars[groups[os_profile][0]]['os_autoinstall_custom_content'] | default(pxe_stack_os_autoinstall_custom_content)) is not none %}
-{{ (hostvars[groups[os_profile][0]]['os_autoinstall_custom_content'] | default(pxe_stack_os_autoinstall_custom_content)) }}
-{% endif %}

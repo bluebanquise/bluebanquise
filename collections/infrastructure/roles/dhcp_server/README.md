@@ -211,10 +211,13 @@ settings.
 
 However, note that the role will read `hw_ipxe_driver` and `hw_ipxe_embed` equipment profile variables, and precedence global settings for hosts that have these values set.
 
+Also, if user whish to use a custom rom, it is possible to define `hw_pxe_filename` which precedence everything for the target hosts. This can be a relative path for tftp protocol (ex: `x86_64/myrom.efi`) or an http path for HTTP protocol (ex: `http://10.10.0.1/x86_64/myrom.efi`).
+
 This allows for example to have an heterogenous cluster, with a group of hosts booting on *snponly* driver, while others boot on *default* one.
 
 ## Changelog
 
+* 1.6.2: Fix missing pxe variables. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.6.1: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.6.0: Added subnet custom settings. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.5.1: Fix ip and host orders. Benoit Leveugle <benoit.leveugle@gmail.com>

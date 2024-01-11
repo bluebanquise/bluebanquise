@@ -30,7 +30,7 @@ This documentation is under Creative Commons Attribution-NonCommercial-ShareAlik
    configure_bluebanquise
    deploy_cluster
    variables_description
-
+   advanced_usage
 
 .. training_sysadmin
 .. training_ansible
