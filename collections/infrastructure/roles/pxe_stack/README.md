@@ -637,6 +637,7 @@ pxe_stack_enable_memtest: true
 
 ## Changelog
 
+* 1.9.1: Fix introduced bug in autoyast. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.9.0: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.8.5: replace hard-coded string 'equipment_' with adequate var. #sla31
 * 1.8.4: Improve documentation. Benoit Leveugle <benoit.leveugle@gmail.com>
