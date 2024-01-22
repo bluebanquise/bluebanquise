@@ -118,6 +118,7 @@ And native repositories will be removed during nodes deployment (PXE install, no
 
 ## Changelog
 
+* 1.3.6: Fix extra space in automatic url. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.5: Adapt role to support BB 2.0 networks. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.4: Update to BB 2.0 format. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.3.3: Support gpgkey for Ubuntu. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
