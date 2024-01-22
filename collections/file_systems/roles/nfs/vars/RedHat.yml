@@ -11,3 +11,4 @@ nfs_server_services_to_start:
 nfs_server_firewall_services_to_add:
   - nfs
   - rpc-bind
+  - mountd
