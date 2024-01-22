@@ -336,6 +336,7 @@ See more explanation on https://slurm.schedmd.com/acct_gather.conf.html
 
 ## Changelog
 
+* 1.4.2: Improve code. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.1: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.0: Add capacity to bind to an external MYSQL database. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.0: Added acct_gather plugin configuration. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>

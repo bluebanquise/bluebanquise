@@ -42,7 +42,7 @@
 
 - name: debug <|> Display bb_nodes_profiles
   ansible.builtin.debug:
-    msg: "{{ bb_nodes_profiles}}"
+    msg: "{{ bb_nodes_profiles }}"
   tags:
     - templates
     - debug
