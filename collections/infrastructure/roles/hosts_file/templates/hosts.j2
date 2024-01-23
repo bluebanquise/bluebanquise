@@ -44,9 +44,11 @@
 
 ## Internal hosts
 
-{% for host, host_keys in bb_nodes.items() -%}
+{% if bb_nodes is mapping %}
+  {% for host, host_keys in bb_nodes.items() -%}
 {{ write_host(host, host_keys, host_keys['node_main_resolution_address'], host_keys['current_iceberg'], j2_current_iceberg) }}
-{%- endfor %}
+  {%- endfor %}
+{% endif %}
 
 ## Services hosts
 

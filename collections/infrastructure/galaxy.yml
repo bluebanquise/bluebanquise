@@ -4,7 +4,7 @@ namespace: bluebanquise
 name: infrastructure
 
 # The version of the collection. Must be compatible with semantic versioning
-version: 2.3.4
+version: 2.3.5
 
 # The path to the Markdown (.md) readme file. This path is relative to the root of the collection
 readme: README.md

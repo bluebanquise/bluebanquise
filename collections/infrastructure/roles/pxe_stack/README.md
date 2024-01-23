@@ -637,6 +637,7 @@ pxe_stack_enable_memtest: true
 
 ## Changelog
 
+* 1.9.3: Improve code by preventing possible crashes. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.9.2: Fix missing service for nfsv3 in RHEL firewall. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.9.1: Fix introduced bug in autoyast. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.9.0: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>

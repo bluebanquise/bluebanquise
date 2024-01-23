@@ -46,6 +46,7 @@ Note that `hosts_file_domaine_name` is precedenced by the global variable `bb_do
 
 ## Changelog
 
+* 1.4.1: Improve code. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.0: Use bb_nodes cache. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.2: Add missing services entries. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.1: Update to BB 2.0 format. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>

@@ -99,16 +99,18 @@ AcctGatherProfileType=acct_gather_profile/{{ slurm_acct_gather_profile_type }}
 {% set slurm_nodes = (slurm_nodes | unique) %}
 {# Now we use bb_nodes_profiles previously cached to pack these nodes per hardware groups #}
 {%- set hw_packs = {} -%}
-{% for node in slurm_nodes %}
-  {% if bb_nodes_profiles[node] is defined and bb_nodes_profiles[node]['hw'] is defined and bb_nodes_profiles[node]['hw'] is not none %}
-    {% if bb_nodes_profiles[node]['hw'] not in hw_packs %}
-      {% do hw_packs.update({bb_nodes_profiles[node]['hw']: {'nodes': [], 'hw_specs': (hostvars[node]['hw_specs'] | default(none, true)) }}) %}
-    {% endif %}
+{% if bb_nodes_profiles is mapping %}
+  {% for node in slurm_nodes %}
+    {% if bb_nodes_profiles[node] is defined and bb_nodes_profiles[node]['hw'] is defined and bb_nodes_profiles[node]['hw'] is not none %}
+      {% if bb_nodes_profiles[node]['hw'] not in hw_packs %}
+        {% do hw_packs.update({bb_nodes_profiles[node]['hw']: {'nodes': [], 'hw_specs': (hostvars[node]['hw_specs'] | default(none, true)) }}) %}
+      {% endif %}
 {{ hw_packs[bb_nodes_profiles[node]['hw']]['nodes'].append(node) }}
-  {% else %}
+    {% else %}
 # WARNING: node {{ node }} is associated with an hw and an os profile
-  {% endif %}
-{% endfor %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
 {# Now we can generate final NodeNames for slurm #}
 {% for hw_pack, hw_pack_vars in hw_packs.items() %}
   {% if hw_pack_vars['hw_specs'] is defined and hw_pack_vars['hw_specs'] is not none %}

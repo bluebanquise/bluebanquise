@@ -3,25 +3,29 @@
 #### Blue Banquise file ####
 ## {{ ansible_managed }}
 
-{% for host, host_vars in bb_nodes_profiles.items() %}
-  {% if host_vars['type'] == "server" %}
-{{ host }}:
-  equipment_profile: {{ host_vars['ep'] | default("all # no_equipment_set", true) }}
-    {% if hostvars[host]['network_interfaces'] is defined and hostvars[host]['network_interfaces'] is iterable and hostvars[host]['network_interfaces'] is not string and hostvars[host]['network_interfaces'] is not mapping %}
-      {% set host_to_be_used_network = hostvars[host]['j2_icebergs_main_network_dict'][j2_current_iceberg] | default(j2_node_main_network, true) %}
-      {% if host_to_be_used_network is not none %}
-  network:
-        {% for nic in hostvars[host]['network_interfaces'] %}
-          {% if nic.network is defined and nic.network == host_to_be_used_network %}
-            {% if nic.interface is defined and nic.interface is not none %}
-    node_main_network_interface: {{ nic.interface }}
+{% if bb_nodes_profiles is mapping %}
+  {% for host, host_vars in bb_nodes_profiles.items() %}
+    {% if host_vars['type'] == "server" %}
+  {{ host }}:
+    equipment_profile: {{ host_vars['ep'] | default("all # no_equipment_set", true) }}
+      {% if hostvars[host]['network_interfaces'] is defined and hostvars[host]['network_interfaces'] is iterable and hostvars[host]['network_interfaces'] is not string and hostvars[host]['network_interfaces'] is not mapping %}
+        {% set host_to_be_used_network = hostvars[host]['j2_icebergs_main_network_dict'][j2_current_iceberg] | default(j2_node_main_network, true) %}
+        {% if host_to_be_used_network is not none %}
+    network:
+          {% for nic in hostvars[host]['network_interfaces'] %}
+            {% if nic.network is defined and nic.network == host_to_be_used_network %}
+              {% if nic.interface is defined and nic.interface is not none %}
+      node_main_network_interface: {{ nic.interface }}
+              {% endif %}
+      node_main_network_netmask: {{ (networks[host_to_be_used_network]['subnet'] + '/' + (networks[host_to_be_used_network]['prefix'] | string) ) | ansible.utils.ipaddr('netmask') | default(none, true) }}
+      node_main_network_gateway: {{ nic.gw4 | default(networks[host_to_be_used_network]['gw4'], true) | default(none, true) }}
+      node_main_network_interface_ip: {{ nic.ip4 | default(none, true) }}
             {% endif %}
-    node_main_network_netmask: {{ (networks[host_to_be_used_network]['subnet'] + '/' + (networks[host_to_be_used_network]['prefix'] | string) ) | ansible.utils.ipaddr('netmask') | default(none, true) }}
-    node_main_network_gateway: {{ nic.gw4 | default(networks[host_to_be_used_network]['gw4'], true) | default(none, true) }}
-    node_main_network_interface_ip: {{ nic.ip4 | default(none, true) }}
-          {% endif %}
-        {% endfor %}
+          {% endfor %}
+        {% endif %}
       {% endif %}
     {% endif %}
-  {% endif %}
-{% endfor %}
+  {% endfor %}
+{% else %}
+WARNING: bb_nodes_profiles calculation seems wrong, investigate execution logs!
+{% endif %}
