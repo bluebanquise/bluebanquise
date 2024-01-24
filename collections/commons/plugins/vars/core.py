@@ -11,8 +11,8 @@ class VarsModule(BaseVarsPlugin):
             'bb_core_os_naming': 'os',
             'bb_core_hw_naming': 'hw',
             'bb_core_management_networks_naming': 'net',
-            'bb_core_master_groups_naming': 'mg',
-            'bb_core_managements_group_name': 'mg_managements',
+            'bb_core_master_groups_naming': 'fn',
+            'bb_core_managements_group_name': 'fn_management',
 
             #############################################################
             ############ J2_ LOGIC
@@ -22,8 +22,10 @@ class VarsModule(BaseVarsPlugin):
             # List of master groups.
             'j2_master_groups_list': "{{ groups | select('match','^'+bb_core_master_groups_naming+'_.*') | list | unique | sort }}",
             # List of equipment groups.
+            # Deprecated
             'j2_equipment_groups_list': "{{ (groups | select('match','^'+bb_core_equipment_naming+'_.*') | list | length | int > 0) | ternary(groups | select('match','^'+bb_core_equipment_naming+'_.*') | list | unique | sort, ['all']) }}",
             # Host current equipment group.
+            # Deprecated
             'j2_node_equipment': "{{ (groups | select('match','^'+bb_core_equipment_naming+'_.*') | list | length | int > 0) | ternary(group_names | select('match','^'+bb_core_equipment_naming+'_.*') | list | unique | sort | first | default('') | replace(bb_core_equipment_naming + '_',''), 'all') }}",
 
             ## Equipments
