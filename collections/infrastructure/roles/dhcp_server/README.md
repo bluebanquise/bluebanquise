@@ -217,6 +217,7 @@ This allows for example to have an heterogenous cluster, with a group of hosts b
 
 ## Changelog
 
+* 1.6.3: Fix double character for ipxe rom. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.6.2: Fix missing pxe variables. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.6.1: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.6.0: Added subnet custom settings. Benoit Leveugle <benoit.leveugle@gmail.com>
