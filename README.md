@@ -34,6 +34,18 @@ Infrastructure collection should be compatible with all target Linux distributio
 
 Note that few features are still limited on Ubuntu and Debian (mainly network configuration), I am working on it.
 
+## Core variables
+
+In order to use BlueBanquise collections, you need the core variables, that contains the logic.
+
+## Quickstart
+
+In order to use collections, you need to:
+
+1. Install Ansible and load collections into your local Ansible installation
+2. Create a basic inventory and a basic playbook
+3. 
+
 ## License
 
 BlueBanquise repository is under **MIT license**, except Bluebanquise documentation which is under **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License**.
