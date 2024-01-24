@@ -267,7 +267,7 @@ Now create file ``group_vars/os_almalinux_9/settings.yml`` with the following co
   os_keyboard_layout: us
   os_system_language: en_US.UTF-8
 
-  os_partitioning:
+  os_partitioning: |
     clearpart --all --initlabel
     autopart --type=plain --fstype=ext4
 
