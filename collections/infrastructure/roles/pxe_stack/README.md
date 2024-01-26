@@ -637,6 +637,7 @@ pxe_stack_enable_memtest: true
 
 ## Changelog
 
+* 1.9.5: Switch RHEL from atftp to native tftp-server (fix from @sgaosdgr). Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.9.4: Fix bad variable name for console. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.9.3: Improve code by preventing possible crashes. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.9.2: Fix missing service for nfsv3 in RHEL firewall. Benoit Leveugle <benoit.leveugle@gmail.com>
