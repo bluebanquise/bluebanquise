@@ -28,7 +28,7 @@ theme:
   name: material
   palette:
     scheme: default
-    primary: indigo
+    primary: black
   icon:
     repo: fontawesome/brands/github
   features:
