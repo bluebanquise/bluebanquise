@@ -18,6 +18,8 @@ pxe_stack_enable_root: false
 # Sudo user if root not enabled
 pxe_stack_sudo_user: bluebanquise
 pxe_stack_sudo_user_home: /var/lib/bluebanquise
+pxe_stack_sudo_user_uid: 477
+pxe_stack_sudo_user_gid: 477
 # Set sudo user as passwordless sudoer
 pxe_stack_sudo_is_passwordless: true
 
