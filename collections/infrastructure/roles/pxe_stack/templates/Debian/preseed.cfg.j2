@@ -50,6 +50,8 @@ d-i partman/confirm_nooverwrite boolean true
 d-i passwd/root-login boolean false
 d-i passwd/user-fullname string Bluebanquise User
 d-i passwd/username string {{ pxe_stack_sudo_user }}
+d-i passwd/user-uid string {{ pxe_stack_sudo_user_uid }}
+d-i passwd/user-gid string {{ pxe_stack_sudo_user_gid }}
 d-i passwd/user-password-crypted password {{ hostvars[groups[os_profile][0]]['os_admin_password_sha512'] | default(pxe_stack_os_admin_password_sha512) }}
 {% else %}
 d-i passwd/make-user boolean false

@@ -635,8 +635,23 @@ pxe_stack_enable_alpine: true
 pxe_stack_enable_memtest: true
 ```
 
+### Sudo user
+
+You can configure the target sudo user by setting these variables:
+
+```yaml
+pxe_stack_enable_root: false
+pxe_stack_sudo_user: bluebanquise
+pxe_stack_sudo_user_home: /var/lib/bluebanquise
+pxe_stack_sudo_user_uid: 477
+pxe_stack_sudo_user_gid: 477
+```
+
+Note that using an home folder into /home for the bluebanquise sudo user can be dangerous as /home is often mounted on a cluster, and so would colide with local bluebanquise user home.
+
 ## Changelog
 
+* 1.10.0: Add ability to set sudo user uid and gid. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.9.5: Switch RHEL from atftp to native tftp-server (fix from @sgaosdgr). Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.9.4: Fix bad variable name for console. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.9.3: Improve code by preventing possible crashes. Benoit Leveugle <benoit.leveugle@gmail.com>
