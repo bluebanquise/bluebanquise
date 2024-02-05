@@ -14,13 +14,12 @@
 
   {% if host_j2_node_main_resolution_address is not none and (host_j2_node_main_resolution_address | ansible.utils.ipaddr) %}
 {{ host_j2_node_main_resolution_address }} {{ host }} {{ host }}.{{ bb_domain_name | default(hosts_file_domaine_name) }} {{ alias_list|join(' ') }}
-  {% endif %}  
-
-  {% if hosts_file_enable_extended_names %}
+  {% endif %}
+  {% -if hosts_file_enable_extended_names %}
     {%- if host_dict['network_interfaces'] is defined and host_dict['network_interfaces'] is iterable %}
       {%- for nic in host_dict['network_interfaces'] %}
-        {% if nic.network is defined and nic.network is not none and nic.ip4 is defined and (nic.ip4 | ansible.utils.ipaddr) %}  
-  {{ nic.ip4 }} {{ host }}-{{ nic.network }} {% if nic.alias is defined %}{{ nic.alias }}{% endif %}
+        {%- if nic.network is defined and nic.network is not none and nic.ip4 is defined and (nic.ip4 | ansible.utils.ipaddr) %}  
+{{ nic.ip4 }} {{ host }}-{{ nic.network }} {% if nic.alias is defined %}{{ nic.alias }}{% endif %}
         {% endif %}
       {% endfor %}
     {% endif %}
