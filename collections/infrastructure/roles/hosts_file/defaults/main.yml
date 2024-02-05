@@ -2,3 +2,8 @@
 hosts_file_domaine_name: cluster.local
 hosts_file_external_hosts: {}
 hosts_file_range: iceberg
+
+# Allow to write all host names
+# If set to true, hostname, alias, nic-network and nic-alias will be written info hosts file
+# If set to false, only hostname and alias will be written into hosts file
+hosts_file_enable_extended_names: true

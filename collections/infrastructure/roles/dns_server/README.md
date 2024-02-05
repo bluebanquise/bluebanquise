@@ -62,8 +62,49 @@ In this example, DNS look-ups for *0.uk.pool.ntp.org* will return *10.11.0.1*.
 
 This will cause `/var/named/override` to be generated.
 
+## Advanced usage
+
+### Extended naming
+
+User can enable or disable extended naming using the `dns_server_enable_extended_names` variable.
+Default is `true`.
+
+For example, for an host defined this way:
+
+```yaml
+c001:
+  alias:
+    - foobar
+  network_interfaces:
+    - name: eth0
+      ip4: 10.10.3.1
+      network: net-admin
+    - name: eth1
+      ip4: 10.20.3.1
+      network: para
+      alias: fuuuuu
+```
+
+If `dns_server_enable_extended_names: true`, then the following content will be written by default into forward zone:
+
+```
+c001 IN A 10.10.3.1
+foobar IN A 10.10.3.1
+c001-net-admin IN A 10.10.3.1
+c001-para IN IN A 10.20.3.1
+fuuuuu IN A 10.20.3.1
+```
+
+While if `dns_server_enable_extended_names: false`, then the following content will be written into forward zone:
+
+```
+c001 IN A 10.10.3.1
+foobar IN A 10.10.3.1
+```
+
 ## Changelog
 
+* 1.8.0: Add capability to disable extended names, and ensure direct name comes first. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.7.4: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.7.3: Add missing services records. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.7.2: Rename systemd service to named for Ubuntu. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
