@@ -81,7 +81,7 @@ zone "." IN {
   file "{{ dns_server_root_hint_file }}";
 };
 
-zone "{{ bb_domain_name | default(dns_server_domaine_name) }}" IN {
+zone "{{ bb_domain_name | default(dns_server_domain_name) }}" IN {
   type master;
   file "{{ dns_server_named_dir }}/forward.zone";
   allow-update { none; };

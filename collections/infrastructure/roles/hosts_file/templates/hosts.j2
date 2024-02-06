@@ -13,7 +13,7 @@
   {% endif %}
 
   {%- if host_j2_node_main_resolution_address is not none and (host_j2_node_main_resolution_address | ansible.utils.ipaddr) %}
-{{ host_j2_node_main_resolution_address }} {{ host }} {{ host }}.{{ bb_domain_name | default(hosts_file_domaine_name) }} {{ alias_list | join(' ') }}
+{{ host_j2_node_main_resolution_address }} {{ host }} {{ host }}.{{ bb_domain_name | default(hosts_file_domain_name) }} {{ alias_list | join(' ') }}
   {% endif -%}
 
   {%- if hosts_file_enable_extended_names %}
