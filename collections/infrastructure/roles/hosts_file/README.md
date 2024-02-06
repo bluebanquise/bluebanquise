@@ -44,8 +44,46 @@ hosts_file_external_hosts:
 This role is using `hosts_file_domaine_name` variable to set FQDN. Default is **cluster.local**.
 Note that `hosts_file_domaine_name` is precedenced by the global variable `bb_domain_name` if set. 
 
+## Advanced usage
+
+### Extended naming
+
+User can enable or disable extended naming using the `hosts_file_enable_extended_names` variable.
+Default is `true`.
+
+For example, for an host defined this way:
+
+```yaml
+c001:
+  alias:
+    - foobar
+  network_interfaces:
+    - name: eth0
+      ip4: 10.10.3.1
+      network: net-admin
+    - name: eth1
+      ip4: 10.20.3.1
+      network: para
+      alias: fuuuuu
+```
+
+If `hosts_file_enable_extended_names: true`, then the following content will be written by default into `/etc/hosts` file (assuming here domain name set is `bluebanquise.local`):
+
+```
+10.10.0.3 c001 c001.bluebanquise.local foobar
+10.10.3.1 c001-net-admin
+10.20.3.1 c001-para fuuuuu
+```
+
+While if `hosts_file_enable_extended_names: false`, then the following content will be written into `/etc/hosts` file:
+
+```
+10.10.0.3 c001 c001.bluebanquise.local foobar
+```
+
 ## Changelog
 
+* 1.5.0: Add capability to disable extended names, and ensure direct name comes first. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.1: Improve code. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.0: Use bb_nodes cache. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.2: Add missing services entries. Benoit Leveugle <benoit.leveugle@gmail.com>

@@ -9,25 +9,27 @@ $INCLUDE "{{ dns_server_named_dir }}/forward.soa"
 
 {# Macro to write host in file #}
 {% macro write_host(host,host_dict,host_j2_node_main_resolution_address) %}
-  {% if host_dict['network_interfaces'] is defined and host_dict['network_interfaces'] is iterable %}
-    {% for nic in host_dict['network_interfaces'] %}
-      {% if nic.network is defined and (networks[nic.network].dns_server | default(true)) %}
-        {% if nic.ip4 is defined and nic.ip4 is not none and (nic.ip4 | ansible.utils.ipaddr) %}
-{{ host }}-{{ nic.network }} IN A {{ nic.ip4 }}
-        {% endif %}
-        {% if nic.alias is defined %}
-{{ nic.alias }} IN A {{ nic.ip4 }}
-        {% endif %}
-      {% endif %}
-    {% endfor %}
-  {% endif %}
   {% if host_j2_node_main_resolution_address is not none and (host_j2_node_main_resolution_address | ansible.utils.ipaddr) %}
+{{ host }} IN A {{ host_j2_node_main_resolution_address }}
     {% if host_dict['alias'] is defined and host_dict['alias'] %}
       {% for alias in host_dict['alias'] %}
 {{ alias }} IN A {{ host_j2_node_main_resolution_address }}
       {% endfor %}
     {% endif %}
-{{ host }} IN A {{ host_j2_node_main_resolution_address }}
+  {% endif %}
+  {% if dns_server_enable_extended_names %}
+    {% if host_dict['network_interfaces'] is defined and host_dict['network_interfaces'] is iterable %}
+      {% for nic in host_dict['network_interfaces'] %}
+        {% if nic.network is defined and (networks[nic.network].dns_server | default(true)) %}
+          {% if nic.ip4 is defined and nic.ip4 is not none and (nic.ip4 | ansible.utils.ipaddr) %}
+{{ host }}-{{ nic.network }} IN A {{ nic.ip4 }}
+          {% endif %}
+          {% if nic.alias is defined %}
+{{ nic.alias }} IN A {{ nic.ip4 }}
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+    {% endif %}
   {% endif %}
   {% if host_dict['bmc'] is defined %}
     {% set bmc_args = host_dict['bmc'] %}

@@ -10,6 +10,11 @@ dns_server_allow_query: []  # list with subnet/prefix format. Ex: - 10.10.0.0/16
 
 dns_server_domaine_name: cluster.local
 
+# Allow to write all host names
+# If set to true, hostname, alias, nic-network and nic-alias will be written info forward files
+# If set to false, only hostname and alias will be written into forward files
+dns_server_enable_extended_names: true
+
 # dns_server_overrides
 # dns_server_start_services:
 # dns_server_enable_services:
