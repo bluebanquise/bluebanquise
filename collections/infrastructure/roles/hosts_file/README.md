@@ -41,8 +41,8 @@ hosts_file_external_hosts:
       - extmachine3
 ```
 
-This role is using `hosts_file_domaine_name` variable to set FQDN. Default is **cluster.local**.
-Note that `hosts_file_domaine_name` is precedenced by the global variable `bb_domain_name` if set. 
+This role is using `hosts_file_domain_name` variable to set FQDN. Default is **cluster.local**.
+Note that `hosts_file_domain_name` is precedenced by the global variable `bb_domain_name` if set. 
 
 ## Advanced usage
 
@@ -83,6 +83,7 @@ While if `hosts_file_enable_extended_names: false`, then the following content w
 
 ## Changelog
 
+* 1.5.1: Fix typo on domain name variable. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.5.0: Add capability to disable extended names, and ensure direct name comes first. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.1: Improve code. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.0: Use bb_nodes cache. Benoit Leveugle <benoit.leveugle@gmail.com>
