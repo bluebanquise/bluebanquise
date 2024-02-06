@@ -13,19 +13,19 @@
   {% endif %}
 
   {% if host_j2_node_main_resolution_address is not none and (host_j2_node_main_resolution_address | ansible.utils.ipaddr) %}
-{{ host_j2_node_main_resolution_address }} {{ host }} {{ host }}.{{ bb_domain_name | default(hosts_file_domaine_name) }} {{ alias_list|join(' ') }}
+{{ host_j2_node_main_resolution_address }} {{ host }} {{ host }}.{{ bb_domain_name | default(hosts_file_domaine_name) }} {{ alias_list | join(' ') }}
   {% endif %}
-  {%- if hosts_file_enable_extended_names %}
-    {%- if host_dict['network_interfaces'] is defined and host_dict['network_interfaces'] is iterable %}
-      {%- for nic in host_dict['network_interfaces'] %}
-        {%- if nic.network is defined and nic.network is not none and nic.ip4 is defined and (nic.ip4 | ansible.utils.ipaddr) %}  
-{{ nic.ip4 }} {{ host }}-{{ nic.network }} {% if nic.alias is defined %}{{ nic.alias }}{% endif %}
+  {% if hosts_file_enable_extended_names %}
+    {% if host_dict['network_interfaces'] is defined and host_dict['network_interfaces'] is iterable %}
+      {% for nic in host_dict['network_interfaces'] %}
+        {% if nic.network is defined and nic.network is not none and nic.ip4 is defined and (nic.ip4 | ansible.utils.ipaddr) %}  
+{{ nic.ip4 }} {{ host }}-{{ nic.network }} {{ nic.alias | default('', true)}}
         {% endif %}
       {% endfor %}
     {% endif %}
   {% endif %}
 
-  {%- if host_dict['bmc'] is defined and host_dict['bmc'] is not none %}
+  {% if host_dict['bmc'] is defined and host_dict['bmc'] is not none %}
     {% set bmc_alias_list = [] %}
     {% if host_dict['bmc']['global_alias'] is defined and host_dict['bmc']['global_alias'] is not none %}
       {% for alias in host_dict['bmc']['global_alias'] %}{{ bmc_alias_list.append(alias) }}{% endfor %}
@@ -36,7 +36,7 @@
     {% if (host_dict['bmc'].name is defined and host_dict['bmc'].name is not none) and (host_dict['bmc'].ip4 is defined and (host_dict['bmc'].ip4 | ansible.utils.ipaddr) ) %}
 {{ host_dict['bmc'].ip4 }} {{ host_dict['bmc'].name }} {{ bmc_alias_list|join(' ') }}
     {% endif %}
-  {% endif -%}
+  {% endif %}
 
 {% endmacro %}
 
