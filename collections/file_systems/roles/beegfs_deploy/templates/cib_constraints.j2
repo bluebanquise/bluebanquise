@@ -1,0 +1,29 @@
+<constraints>
+  <rsc_order first="p_drbd_r0-clone" first-action="promote" id="order-p_drbd_r0-clone-p_fs_drbd0-mandatory" then="p_fs_drbd0" then-action="start"/>
+  <rsc_colocation id="colocation-p_fs_drbd0-p_drbd_r0-clone-INFINITY" rsc="p_fs_drbd0" score="INFINITY" with-rsc="p_drbd_r0-clone" with-rsc-role="Promoted"/>
+  <rsc_order id="order_set_pempp0">
+    <resource_set id="order_set_pempp0_set">
+      <resource_ref id="p_drbd_r0-clone"/>
+      <resource_ref id="mgmtd_ip"/>
+      <resource_ref id="p_fs_drbd0"/>
+      <resource_ref id="beegfs_mgmtd"/>
+    </resource_set>
+  </rsc_order>
+  <rsc_order id="order_set_pempp0-1">
+    <resource_set id="order_set_pempp0-1_set">
+      <resource_ref id="p_drbd_r0-clone"/>
+      <resource_ref id="mgmtd_ip"/>
+      <resource_ref id="p_fs_drbd0"/>
+      <resource_ref id="beegfs_mgmtd"/>
+    </resource_set>
+  </rsc_order>
+  <rsc_colocation id="colocation-mgmtd_ip-p_fs_drbd0-INFINITY" rsc="mgmtd_ip" score="INFINITY" with-rsc="p_fs_drbd0" with-rsc-role="Master"/>
+  <rsc_order first="p_drbd_r0-clone" first-action="promote" id="order-p_drbd_r0-clone-p_fs_drbd0-Mandatory" kind="Mandatory" symmetrical="false" then="p_fs_drbd0" then-action="start"/>
+  <rsc_colocation id="colocation-beegfs_mgmtd-mgmtd_ip-INFINITY" rsc="beegfs_mgmtd" score="INFINITY" with-rsc="mgmtd_ip"/>
+{% for host in groups['mgmtd'] %}
+  {%- if loop.first -%}
+    {% set first_host = host %}
+  <rsc_location id="location-beegfs_mgmtd-{{ first_host }}-INFINITY" node="{{ first_host }}" rsc="beegfs_mgmtd" score="INFINITY"/>
+  {% endif %}
+{% endfor %}
+</constraints>

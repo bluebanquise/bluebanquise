@@ -1,0 +1,8 @@
+#jinja2: lstrip_blocks: True
+# {{ ansible_managed }}
+
+{% for v in hostvars[inventory_hostname]['network_interfaces'] | selectattr('network','defined') | selectattr('network','match','^'+j2_current_iceberg_network+'-[a-zA-Z0-9]+') %}
+  {%- if loop.first %}
+ {{ v['interface'] }}
+  {% endif %}
+{% endfor %}

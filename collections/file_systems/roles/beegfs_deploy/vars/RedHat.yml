@@ -1,0 +1,32 @@
+---
+beegfs_mgmtd_packages_to_install:
+  - beegfs-mgmtd
+  - beegfs-utils
+  - beegfs-common
+  - beegfs-client
+  - beegfs-helperd
+
+beegfs_meta_packages_to_install:
+  - beegfs-meta
+  - beegfs-utils
+  - beegfs-client
+  - beegfs-common
+  - beegfs-helperd
+
+beegfs_store_packages_to_install:
+  - beegfs-storage
+  - beegfs-utils
+  - beegfs-common
+
+beegfs_client_packages_to_install:
+  - beegfs-client
+  - beegfs-helperd
+  - beegfs-utils
+  - beegfs-common
+  - elfutils-libelf-devel
+
+beegfs_high_availability_packages_to_install:
+  - pacemaker
+  - corosync
+  - pcs
+  - fence-agents-all

@@ -1,0 +1,282 @@
+---
+- name: include_vars ░ Gather OS specific variables
+  # This task gathers variables defined in OS specific files.
+  #
+  # Search vars in:
+  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
+  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
+  #  - <distribution>.yml            # eg. CentOS.yml
+  #  - <os_family>.yml               # eg. RedHat.yml
+  #
+  # If no OS specific file is found, the role will default to vars/main.yml
+  #
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family }}.yml"
+      skip: true
+  tags:
+    - always
+
+- name: include_tasks ░ Use OS dedicated firewall task
+  ansible.builtin.include_tasks: "{{ outer_item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}/firewall.yml"
+      skip: true
+  loop_control:
+    loop_var: outer_item
+  tags:
+    - internal
+    - firewall
+
+- name: Stop BeeGFS services on client hosts
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: stopped
+  loop:
+    - beegfs-helperd.service
+    - beegfs-client.service
+  when: inventory_hostname in groups["client"]
+  ignore_errors: true
+
+- name: Deleting all storage files
+  ansible.builtin.shell: | 
+          rm -rf {{ item }}/*
+          find {{ item }} -type f -iname ".*" -ls -exec rm -r {} \;
+  with_items:
+    - "{{ beegfs_vars.store_directory.split(',') }}"
+  when: inventory_hostname in groups["store"]
+  ignore_errors: true
+
+- name: Unmount BeeGFS volume
+  ansible.posix.mount:
+    path: "{{ beegfs_vars.store_directory }}"
+    state: unmounted
+  ignore_errors: true
+
+- name: Stop BeeGFS services on storage servers
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: stopped
+  loop:
+    - beegfs-storage.service
+    - beegfs-storage1.mount
+    - beegfs-storage2.mount
+  when: inventory_hostname in groups["store"]
+  ignore_errors: true
+
+- name: Stop BeeGFS services on metadata server
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: stopped
+  loop:
+    - beegfs-meta.service
+    - beegfs-helperd.service
+    - beegfs-client.service
+  when: inventory_hostname in groups["metadata"]
+  ignore_errors: true
+
+- name: Stop BeeGFS services on managemment server
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: stopped
+  loop:
+    - beegfs-mgmtd.service
+    - beegfs-helperd.service
+    - beegfs-client.service
+  when: inventory_hostname in groups["mgmtd"]
+  ignore_errors: true
+
+- name: "BeeGFS Storage/Metadata Node tuning reset"
+  block:
+    - name: "Kernel tuning reset"
+      sysctl:
+        name: "{{ item['key'] }}"
+        value: "{{ item['value'] }}"
+        state: absent
+      loop: "{{ lookup('dict', beegfs_vm_tuning) }}"
+    - name: "Memory tuning reset"
+      command: "{{ item }}"
+      changed_when: false
+      loop:
+        - "echo 10 > /proc/sys/vm/dirty_background_ratio"
+        - "echo 30 > /proc/sys/vm/dirty_ratio"
+        - "echo 100 > /proc/sys/vm/vfs_cache_pressure"
+        - "echo 67584 > /proc/sys/vm/min_free_kbytes"
+        - "echo 0 > /proc/sys/vm/zone_reclaim_mode"
+        - "echo 10 > /proc/sys/vm/watermark_scale_factor"
+        - "echo madvise > /sys/kernel/mm/transparent_hugepage/defrag"
+        - "echo always > /sys/kernel/mm/transparent_hugepage/enabled"
+    - name: "I/O tuning reset"
+      ansible.builtin.shell: |
+              for dev in {{ beegfs_devices | map('regex_replace', '/.*/', '') | join(' ') }}
+               do
+                if [ -d /sys/block/${dev} ] ; then
+                 echo deadline > /sys/block/${dev}/queue/scheduler
+                 echo 256 > /sys/block/${dev}/queue/nr_requests
+                 echo 4096 > /sys/block/${dev}/queue/read_ahead_kb
+                 echo 1280 > /sys/block/${dev}/queue/max_sectors_kb
+                 echo 0 > /sys/block/${dev}/queue/nomerges
+                 echo 1 > /sys/block/${dev}/queue/rq_affinity
+                fi
+               done #\'
+      changed_when: false
+    - name: Stop beegfs-tuning service
+      ansible.builtin.service:
+        name: beegfs-tuning.service
+        state: stopped
+        enabled: false
+    - name: Remove file (delete file)
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /opt/beegfs/beegfs-tuning.sh
+        - /etc/systemd/system/beegfs-tuning.service
+  when: inventory_hostname in groups["metadata"] or inventory_hostname in groups["store"]
+  ignore_errors: yes
+  tags:
+    - script
+
+- name: Uninstall BeeGFS management server package
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: absent
+  loop: "{{ beegfs_mgmtd_packages_to_install }}"
+  when: inventory_hostname in groups["mgmtd"]
+  tags:
+    - package
+
+- name: Uninstall BeeGFS metadata server package
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: absent
+  loop: "{{ beegfs_meta_packages_to_install }}"
+  when: inventory_hostname in groups["metadata"]
+  tags:
+    - package
+
+- name: Uninstall BeeGFS storage server package
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: absent
+  loop: "{{ beegfs_store_packages_to_install }}"
+  when: inventory_hostname in groups["store"]
+  tags:
+    - package
+
+- name: Uninstall BeeGFS client hosts package
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: absent
+  loop: "{{ beegfs_client_packages_to_install }}"
+  when: inventory_hostname in groups["client"]
+  tags:
+    - package
+
+- name: Uninstall BeeGFS libbeegfs-ib RDMA library
+  ansible.builtin.package:
+    name: libbeegfs-ib
+    state: absent
+  when:
+    - inventory_hostname in groups["client"] or inventory_hostname in groups["store"] or inventory_hostname in groups["metadata"]
+    - beegfs_vars.rdma is defined
+    - beegfs_vars.rdma | bool
+  tags:
+    - package
+
+- name: Delete BeeGFS Management data store directory
+  ansible.builtin.file:
+    path: "{{ beegfs_vars.mgmtd_path_prefix }}"
+    state: absent
+    mode: 0755
+  when: inventory_hostname in groups["mgmtd"]
+
+- name: Deleting all metadata files
+  ansible.builtin.shell: rm -rf {{ beegfs_vars.meta_directory }}/*
+  when: inventory_hostname in groups["metadata"]
+
+- name: Unmount  BeeGFS Metadata data store directory
+  ansible.posix.mount:
+    path: "{{ beegfs_vars.meta_directory }}"
+    state: unmounted
+
+- name: Delete BeeGFS Metadata data store directory
+  ansible.builtin.file:
+    path: "{{ beegfs_vars.meta_directory }}"
+    state: absent
+    mode: 0755
+  when: inventory_hostname in groups["metadata"]
+
+- name: Delete BeeGFS Metadata data store directory
+  ansible.builtin.file:
+    path: "{{ beegfs_vars.store_directory }}"
+    state: absent
+    mode: 0755
+  when: inventory_hostname in groups["store"] or inventory_hostname in groups["metadata"] or inventory_hostname in groups["client"]
+
+- name: Find /beegfs/ files
+  ansible.builtin.find:
+    paths: "{{ beegfs_vars.global_directory }}"
+    file_type: file
+  register: files_to_delete
+
+- name: Remove /beegfs/ files
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  with_items: "{{ files_to_delete.files }}"
+
+- name: Remove /etc/beegfs/ directory
+  ansible.builtin.file:
+    path: /etc/beegfs/
+    state: absent
+
+- name: Find the log files
+  find:
+    paths: /var/log/beegfs/
+    patterns: beegfs*
+  register: files_to_delete
+
+- name: Remove the log files
+  file:
+    path: "{{ beegfs_vars.log_path_prefix }}"
+    state: absent
+
+- name: Get running processes
+  ansible.builtin.shell: |
+          /usr/bin/ps -eo pid,command | sed 's/^[ \t]*//' | grep -i bee | grep -v grep | awk '{print $1}'
+  register: running_processes
+  changed_when: false
+
+- name: Display running processes
+  ansible.builtin.debug:
+    msg: "{{ item }}"
+  loop: "{{ running_processes.stdout_lines }}"
+  
+#- name: Kill running processes
+#  ansible.builtin.shell: |
+#          /usr/bin/kill -9 {{ item }}
+#  loop: "{{ running_processes.stdout_lines }}"
+
+#- name: wait process
+#  wait_for:
+#    path: "/proc/{{ item }}/status"
+#    state: absent
+#  loop: "{{ running_processes.stdout_lines }}"
+#  ignore_errors: yes
+#  register: killed_processes
+
+#- name: Force kill stuck processes
+#  ansible.builtin.shell: |
+#          /usr/bin/kill -9 {{ item }}
+#  loop: "{{ killed_processes.results | select('failed') | map(attribute='item') | list }}"
