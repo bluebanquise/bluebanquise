@@ -44,8 +44,8 @@ autoinstall:
     - sed -i 's|^root:.:|root:{{ hostvars[groups[os_profile][0]]['os_admin_password_sha512'] | default(pxe_stack_os_admin_password_sha512) }}:|' /target/etc/shadow
 {% else %}
 {# While this is stupid, there is currently no way in cloudinit to set user uid/gid when creating it, we have to patch that here.#}
-    - 'usermod -u {{ pxe_stack_sudo_user_uid }} {{ pxe_stack_sudo_user }}'
-    - 'groupmod -g {{ pxe_stack_sudo_user_gid }} {{ pxe_stack_sudo_user }}'
+    - curtin in-target --target=/target -- sh -c 'groupadd -g {{ pxe_stack_sudo_user_gid }} {{ pxe_stack_sudo_user }}'
+    - curtin in-target --target=/target -- sh -c 'useradd -d {{ pxe_stack_sudo_user_home }} -m -g {{ pxe_stack_sudo_user_gid }} -u {{ pxe_stack_sudo_user_uid }} -s /bin/bash {{ pxe_stack_sudo_user }}'
 {% endif %}
 {% if not pxe_stack_preserve_repositories %}
     - echo " " > /target/etc/apt/sources.list
