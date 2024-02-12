@@ -1,5 +1,5 @@
-# BlueBanquise
 [![Kofi](resources/pictures/kofi.png)](https://ko-fi.com/oxedions)
+# BlueBanquise
 ![BlueBanquise Logo](resources/pictures/BlueBanquise_logo_large.svg)
 
 <p align="center">
