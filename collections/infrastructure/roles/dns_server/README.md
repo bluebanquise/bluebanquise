@@ -102,8 +102,19 @@ c001 IN A 10.10.3.1
 foobar IN A 10.10.3.1
 ```
 
+### Forward only domains
+
+You can set forward only on domains using the `dns_server_forward_only_domains` list:
+
+```yaml
+dns_server_forward_only_domains:
+  - domain: storage_cluster1.local
+    forwarder_ip: 10.10.5.10
+```
+
 ## Changelog
 
+* 1.10.0: Add forward only domains. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.9.0: Allow services and services_ip together. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.8.1: Fix typo on domain name variable. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.8.0: Add capability to disable extended names, and ensure direct name comes first. Benoit Leveugle <benoit.leveugle@gmail.com>

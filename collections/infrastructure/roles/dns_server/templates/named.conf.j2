@@ -104,5 +104,15 @@ zone "override" {
 };
 {% endif %}
 
+{% if dns_server_forward_only_domains is defined %}
+  {% for forward_only_domain in dns_server_forward_only_domains %}
+zone "{{ forward_only_domain['domain'] }}" IN {
+        type forward;
+        forward only;
+        forwarders { {{ forward_only_domain['forwarder_ip'] }}; };
+};
+  {% endfor %}
+{% endif %}
+
 include "/etc/named.rfc1912.zones";
 include "{{ dns_server_root_key_file }}";
