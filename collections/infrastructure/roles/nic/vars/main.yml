@@ -104,7 +104,7 @@ nic_j2_dns4: "
 {% elif item.network is defined and networks[item.network]['services'] is defined and networks[item.network]['services']['dns'] is defined %}
   {{ networks[item.network]['services']['dns'][0]['ip4'] }}
  {% elif item.network is defined and networks[item.network]['services_ip'] is defined %}
-  {{ networks[item.network]['services_ip'] }} 
+  {{ networks[item.network]['services_ip'] }}
 {% endif %}
 "
 

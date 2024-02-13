@@ -8,8 +8,8 @@ options {
 {% for network in j2_management_networks %}
   {% if (networks[network]['dns_server'] | default(true)) and networks[network]['services'] is defined and networks[network]['services'] is iterable and networks[network]['services'] is not string and networks[network]['services'] is mapping and (networks[network]['services']['dns4'] | default(networks[network]['services']['dns'], true)) is defined and (networks[network]['services']['dns4'] | default(networks[network]['services']['dns'], true)) is iterable and (networks[network]['services']['dns4'] | default(networks[network]['services']['dns'], true)) is not string and (networks[network]['services']['dns4'] | default(networks[network]['services']['dns'], true)) is not mapping %}
     {% for dns4 in (networks[network]['services']['dns4'] | default(networks[network]['services']['dns'], true)) %}
-      {% if dns4.ip is defined and (dns4.ip | ansible.utils.ipaddr) %}
-  {{ dns4.ip }};
+      {% if dns4.ip4 is defined and (dns4.ip4 | ansible.utils.ipaddr) %}
+  {{ dns4.ip4 }};
       {% endif %}
     {% endfor %}
   {% elif (networks[network]['dns_server'] | default(true)) and networks[network]['services_ip'] is defined and (networks[network]['services_ip'] | ansible.utils.ipaddr) %}
