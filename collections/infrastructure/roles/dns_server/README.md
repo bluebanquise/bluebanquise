@@ -104,6 +104,7 @@ foobar IN A 10.10.3.1
 
 ## Changelog
 
+* 1.9.0: Allow services and services_ip together. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.8.1: Fix typo on domain name variable. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.8.0: Add capability to disable extended names, and ensure direct name comes first. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.7.4: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>

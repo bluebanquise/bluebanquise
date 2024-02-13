@@ -1,5 +1,5 @@
 ---
-nic_role_version: 1.8.0
+nic_role_version: 1.9.0
 
 nic_j2_ip4: "{{ nic_j2_ip4_main | trim }}{% if item.ip4 is defined and item.ip4_manual is defined %},{% endif %}{{ nic_j2_ip4_manual | trim }}"
 
@@ -99,8 +99,12 @@ nic_j2_dns4: "
   {{ item.dns4 }}
 {% elif item.network is defined and networks[item.network]['dns4'] is defined %}
   {{ networks[item.network]['dns4'] }}
-{% elif item.network is defined and networks[item.network]['services_ip'] is defined and networks[item.network]['services_ip']['dns_ip'] is defined %}
-  {{ networks[item.network]['services_ip']['dns_ip'] }}
+{% elif item.network is defined and networks[item.network]['services'] is defined and networks[item.network]['services']['dns4'] is defined %}
+  {{ networks[item.network]['services']['dns4'][0]['ip4'] }}
+{% elif item.network is defined and networks[item.network]['services'] is defined and networks[item.network]['services']['dns'] is defined %}
+  {{ networks[item.network]['services']['dns'][0]['ip4'] }}
+ {% elif item.network is defined and networks[item.network]['services_ip'] is defined %}
+  {{ networks[item.network]['services_ip'] }} 
 {% endif %}
 "
 

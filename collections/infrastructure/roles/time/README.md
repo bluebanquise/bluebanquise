@@ -79,6 +79,7 @@ variable.
 
 ## Changelog
 
+* 1.4.0: Allow services and services_ip together. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.2: Fix services entries. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.1: Rename systemd service to chrony for Ubuntu. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.3.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>

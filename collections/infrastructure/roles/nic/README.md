@@ -265,6 +265,7 @@ To achieve that, few variables are at disposal:
 
 ## Changelog
 
+* 1.9.0: Allow services and services_ip together. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.8.0: Add new nmcli keys. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.7.0: Update to BB 2.0 format. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.6.1: Add missing dns entry. Benoit Leveugle <benoit.leveugle@gmail.com>
