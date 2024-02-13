@@ -122,7 +122,8 @@ if [ "$VERSION_ID" == "11" ] || [ "$VERSION_ID" == "12" ]; then
 fi
 
 message_output "Creating bluebanquise user, may take a while..."
-id -u bluebanquise &>/dev/null || sudo useradd --create-home --home-dir /var/lib/bluebanquise --shell /bin/bash bluebanquise
+getent group bluebanquise &>/dev/null || sudo groupadd --gid 377 bluebanquise
+getent passwd bluebanquise &>/dev/null || sudo useradd --gid 377 --uid 377 --create-home --home-dir /var/lib/bluebanquise --shell /bin/bash --system bluebanquise
 echo 'bluebanquise ALL=(ALL:ALL) NOPASSWD:ALL' | sudo tee /etc/sudoers.d/bluebanquise
 
 if [[ $SKIP_ENVIRONMENT == "false" ]]
