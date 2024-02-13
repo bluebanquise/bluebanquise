@@ -7,7 +7,7 @@ slurm_packages_to_install:
     - munge-libs
     - slurm
     - slurm-devel
-    - slurm-slurmctld
+    # - slurm-slurmctld
   accounting:
     - slurm-slurmdbd
     - python3-mysqlclient
@@ -21,7 +21,7 @@ slurm_packages_to_install:
     - munge-libs
     - slurm
     - slurm-devel
-    - slurm-slurmd
+    # - slurm-slurmd
   submitter:
     - munge
     - munge-libs

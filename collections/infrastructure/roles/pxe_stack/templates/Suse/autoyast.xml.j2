@@ -81,6 +81,12 @@
  </users>
 {% else %}
   <!-- disable root password and add ssh keys to sudo user -->
+  <groups config:type="list">
+    <group>
+      <gid>{{ pxe_stack_sudo_user_gid }}</gid>
+      <groupname>{{ pxe_stack_sudo_user }}</groupname>
+    </group>
+  </groups>
   <users config:type="list">
     <user>
       <username>root</username>
