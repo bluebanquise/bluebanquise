@@ -402,6 +402,18 @@ using dedicated variables shown in the example above.
 Note also that ipmi_exporter will need `hw_board_authentication` dictionary
 to be set for each hardware group that needs ipmi data scraping.
 
+You can also create an snmp configuration using the `prometheus_snmp_scrape_hardware_groups` key:
+
+```yaml
+prometheus_snmp_scrape_hardware_groups:
+  - name: hw_pdu
+    snmp_module: pdu
+  - name: hw_cumulus
+    snmp_module: swl
+  - name: hw_wcd
+    snmp_module: wcd
+```
+
 ## 6. Advanced usage
 
 ### Set custom launch parameters
