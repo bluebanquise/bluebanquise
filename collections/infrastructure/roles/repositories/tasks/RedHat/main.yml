@@ -6,7 +6,7 @@
       - j2_node_main_network is defined and j2_node_main_network is not none
       - networks is defined and networks is not none
       - networks[j2_node_main_network] is defined and networks[j2_node_main_network] is not none
-      - (networks[j2_node_main_network]['services_ip'] is defined and networks[j2_node_main_network]['services_ip'] is not none) or (networks[j2_node_main_network]['services']['repositories'][0]['ip4'] is defined and networks[j2_node_main_network]['services']['repositories'][0]['ip4'] is not none)
+      - (networks[j2_node_main_network]['services_ip'] is defined and networks[j2_node_main_network]['services_ip'] is not none) or ((networks[j2_node_main_network]['services']['repositories4'][0]['ip4'] | default(networks[j2_node_main_network]['services']['repositories'][0]['ip4'], true)) is defined and (networks[j2_node_main_network]['services']['repositories4'][0]['ip4'] | default(networks[j2_node_main_network]['services']['repositories'][0]['ip4'], true)) is not none)
       - os_operating_system is defined and os_operating_system is not none
       - os_operating_system['distribution'] is defined and os_operating_system['distribution'] is not none
       - (os_operating_system['distribution_version'] is defined and os_operating_system['distribution_version'] is not none) or (os_operating_system['distribution_major_version'] is defined and os_operating_system['distribution_major_version'] is not none)

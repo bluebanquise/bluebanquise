@@ -1,6 +1,10 @@
 ---
 slurm_cluster_name: bluebanquise
 
+## Slurm user
+slurm_user_gid: 777
+slurm_user_uid: 777
+
 ## Computes configuration way to use (configfull vs configless)
 slurm_computes_config: configfull
 

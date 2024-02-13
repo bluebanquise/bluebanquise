@@ -37,6 +37,15 @@ computes (client) and submitters (often called login) nodes.
 
 ## Instructions
 
+### Setting slurm user id
+
+You can specify slurm user gid/uid by setting the following variables, or keep it default (777):
+
+```yaml
+slurm_user_gid: 777
+slurm_user_uid: 777
+```
+
 ### Munge key
 
 **IMPORTANT**: before using the role, first thing to do is to generate a
@@ -336,6 +345,7 @@ See more explanation on https://slurm.schedmd.com/acct_gather.conf.html
 
 ## Changelog
 
+* 1.5.0: Add ability to define slurm user id. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.2: Improve code. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.1: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.0: Add capacity to bind to an external MYSQL database. Benoit Leveugle <benoit.leveugle@gmail.com>

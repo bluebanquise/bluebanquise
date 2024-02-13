@@ -78,6 +78,8 @@ Example of network configuration, advanced dhcp server:
             ip: 10.11.0.1
 ```
 
+Note that if both `services` and `services_ip` are set, `services` precedence `services_ip`.
+
 Finally, note that the following parameters can be set in the inventory, to
 override default ones:
 
@@ -217,6 +219,7 @@ This allows for example to have an heterogenous cluster, with a group of hosts b
 
 ## Changelog
 
+* 1.7.0: Allow services and services_ip together. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.6.3: Fix double character for ipxe rom. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.6.2: Fix missing pxe variables. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.6.1: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>

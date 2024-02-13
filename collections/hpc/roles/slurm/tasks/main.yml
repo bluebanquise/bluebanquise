@@ -61,14 +61,14 @@
 - name: group <|> Add slurm group
   ansible.builtin.group:
     name: slurm
-    gid: 777
+    gid: "{{ slurm_user_gid }}"
     state: present
 
 - name: user <|> Add slurm user
   ansible.builtin.user:
     name: slurm
     shell: /bin/false
-    uid: 777
+    uid: "{{ slurm_user_uid }}"
     group: slurm
     home: "{{ slurm_home_path }}"
     state: present

@@ -66,20 +66,20 @@ scrape_configs:
 {% endfor %}
 {% endif %}
 
-{# # SNMP_EXPORTER
-{% for equipment in  prometheus_snmp_scrape_equipment_profiles %}
-  - job_name: 'snmp_{{equipment.name}}'
-    scrape_interval: {{ equipment.scrape_interval | default('') }}
-    scrape_timeout: {{ equipment.scrape_timeout | default('') }}
+# SNMP_EXPORTER
+{% for hardware in prometheus_snmp_scrape_hardware_groups %}
+  - job_name: 'snmp_{{hardware.name}}'
+    scrape_interval: {{ hardware.scrape_interval | default('') }}
+    scrape_timeout: {{ hardware.scrape_timeout | default('') }}
     static_configs:
      - targets:
-    {% for node in groups[equipment.name] %}
+    {% for node in groups[hardware.name] %}
        - {{ node }}
     {% endfor %}
 
     metrics_path: /snmp
-    # params:
-     # module: [if_mib]
+    params:
+      module: [{{ hardware.snmp_module }}]
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
@@ -87,7 +87,7 @@ scrape_configs:
         target_label: instance
       - target_label: __address__
         replacement: {{ prometheus_server_snmp_exporter_host }}:9116
-{% endfor %} #}
+{% endfor %}
 
 
 # BMC - IPMI_EXPORTER

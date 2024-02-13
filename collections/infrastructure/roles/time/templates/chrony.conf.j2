@@ -21,8 +21,8 @@ server {{ external_server }}
 # Source server to bind to
 
   {% if time_profile == 'client' %}{# Client binds to its main network server, if exist #}
-    {% if networks[j2_node_main_network]['services']['ntp'] is defined and networks[j2_node_main_network]['services']['ntp'] is iterable and networks[j2_node_main_network]['services']['ntp'] is not string and networks[j2_node_main_network]['services']['ntp'] is not mapping %}
-      {% for ntp in networks[j2_node_main_network]['services']['ntp'] %}
+    {% if networks[j2_node_main_network]['services'] is defined and (networks[j2_node_main_network]['services']['ntp4'] | default(networks[j2_node_main_network]['services']['ntp'], true)) is defined and (networks[j2_node_main_network]['services']['ntp4'] | default(networks[j2_node_main_network]['services']['ntp'], true)) is iterable and (networks[j2_node_main_network]['services']['ntp4'] | default(networks[j2_node_main_network]['services']['ntp'], true)) is not string and (networks[j2_node_main_network]['services']['ntp4'] | default(networks[j2_node_main_network]['services']['ntp'], true)) is not mapping %}
+      {% for ntp in (networks[j2_node_main_network]['services']['ntp4'] | default(networks[j2_node_main_network]['services']['ntp'], true)) %}
         {% if ntp.hostname is defined and ntp.hostname is not none %}
 server {{ ntp.hostname }} iburst
         {% elif ntp.ip4 is defined and (ntp.ip4 | ansible.utils.ipaddr) %}
@@ -37,8 +37,8 @@ server {{ networks[j2_node_main_network]['services_ip'] }} iburst
   {% elif time_profile == 'server' and (bb_icebergs_system is defined and bb_icebergs_system) and (iceberg_master is defined and iceberg_master != "top") %}
     {% set host_to_be_used_network = j2_icebergs_main_network_dict[iceberg_master] | default(none, true) %}
     {% if host_to_be_used_network is not none %}
-      {% if networks[host_to_be_used_network]['services']['ntp'] is defined and networks[host_to_be_used_network]['services']['ntp'] is iterable and networks[host_to_be_used_network]['services']['ntp'] is not string and networks[host_to_be_used_network]['services']['ntp'] is not mapping %}
-        {% for ntp in networks[host_to_be_used_network]['services']['ntp'] %}
+      {% if networks[host_to_be_used_network]['services'] is defined and (networks[host_to_be_used_network]['services']['ntp4'] | default(networks[host_to_be_used_network]['services']['ntp'], true)) is defined and (networks[host_to_be_used_network]['services']['ntp4'] | default(networks[host_to_be_used_network]['services']['ntp'], true)) is iterable and (networks[host_to_be_used_network]['services']['ntp4'] | default(networks[host_to_be_used_network]['services']['ntp'], true)) is not string and (networks[host_to_be_used_network]['services']['ntp4'] | default(networks[host_to_be_used_network]['services']['ntp'], true)) is not mapping %}
+        {% for ntp in (networks[host_to_be_used_network]['services']['ntp4'] | default(networks[host_to_be_used_network]['services']['ntp'], true)) %}
           {% if ntp.hostname is defined and ntp.hostname is not none %}
 server {{ ntp.hostname }} iburst
           {% elif ntp.ip4 is defined and (ntp.ip4 | ansible.utils.ipaddr) %}

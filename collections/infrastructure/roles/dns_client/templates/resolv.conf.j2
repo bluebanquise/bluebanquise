@@ -4,14 +4,12 @@
 
 {% set nameservers = [] %}
 
-{% if networks[j2_node_main_network]['services'] is defined and networks[j2_node_main_network]['services'] is iterable and networks[j2_node_main_network]['services'] is not string and networks[j2_node_main_network]['services'] is mapping %}
-  {% if networks[j2_node_main_network]['services']['dns'] is defined and networks[j2_node_main_network]['services']['dns'] is iterable and networks[j2_node_main_network]['services']['dns'] is not string and networks[j2_node_main_network]['services']['dns'] is not mapping %}
-    {% for elem in networks[j2_node_main_network]['services']['dns'] %}
-      {% if elem.ip4 is defined and (elem.ip4 | ansible.utils.ipaddr) %}
-        {{ nameservers.append(elem.ip4) }}
-      {% endif %}
-    {% endfor %}
-  {% endif %}
+{% if networks[j2_node_main_network]['services'] is defined and networks[j2_node_main_network]['services'] is iterable and networks[j2_node_main_network]['services'] is not string and networks[j2_node_main_network]['services'] is mapping and (networks[j2_node_main_network]['services']['dns4'] | default(networks[j2_node_main_network]['services']['dns'], true)) is defined and (networks[j2_node_main_network]['services']['dns4'] | default(networks[j2_node_main_network]['services']['dns'], true)) is iterable and (networks[j2_node_main_network]['services']['dns4'] | default(networks[j2_node_main_network]['services']['dns'], true)) is not string and (networks[j2_node_main_network]['services']['dns4'] | default(networks[j2_node_main_network]['services']['dns'], true)) is not mapping %}
+  {% for elem in (networks[j2_node_main_network]['services']['dns4'] | default(networks[j2_node_main_network]['services']['dns'], true)) %}
+    {% if elem.ip4 is defined and (elem.ip4 | ansible.utils.ipaddr) %}
+      {{ nameservers.append(elem.ip4) }}
+    {% endif %}
+  {% endfor %}
 {% elif networks[j2_node_main_network]['services_ip'] is defined and (networks[j2_node_main_network]['services_ip'] | ansible.utils.ipaddr) %}
   {% set nameservers = [networks[j2_node_main_network]['services_ip']] %}
 {% endif %}

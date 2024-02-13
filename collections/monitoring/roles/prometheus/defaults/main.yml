@@ -85,7 +85,7 @@ prometheus_ipmi_scrape: false
 prometheus_snmp_scrape: false
 
 prometheus_ipmi_scrape_hardware_groups: []
-prometheus_snmp_scrape_equipment_profiles: []
+prometheus_snmp_scrape_hardware_groups: []
 
 prometheus_server_snmp_exporter_with_generator: false
 prometheus_server_snmp_exporter_raw_configuration:

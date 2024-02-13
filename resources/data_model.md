@@ -240,6 +240,7 @@ os_preserve_efi_first_boot_device: {true|false}
 os_access_control: {enforcing|permissive|disabled|...}
 os_firewall: {true|false}
 
+os_target_disk:
 os_partitioning:
 os_autoinstall_pre_script:
 os_autoinstall_post_script:

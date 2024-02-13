@@ -27,9 +27,9 @@ local7.*                                                /var/log/boot.log
 
 {% if networks[j2_node_main_network] is defined
       and networks[j2_node_main_network]['services'] is defined
-      and networks[j2_node_main_network]['services']['log'] is defined
-      and networks[j2_node_main_network]['services']['log'] is iterable %}
-    {% for rsyslog_server in networks[j2_node_main_network]['services']['log'] %}
+      and (networks[j2_node_main_network]['services']['log4'] | default(networks[j2_node_main_network]['services']['log'], true)) is defined
+      and (networks[j2_node_main_network]['services']['log4'] | default(networks[j2_node_main_network]['services']['log'], true)) is iterable %}
+    {% for rsyslog_server in (networks[j2_node_main_network]['services']['log4'] | default(networks[j2_node_main_network]['services']['log'], true)) %}
         {% if (log_server.ip4 is defined and (log_server.ip4 | ansible.utils.ipaddr)) or (log_server.hostname is defined and rsyslog_server.hostname is not none) %}
 # ### begin forwarding rule ###
 # Remote Logging (we use TCP for reliable delivery)
