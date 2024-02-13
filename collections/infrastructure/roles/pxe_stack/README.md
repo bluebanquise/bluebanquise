@@ -166,6 +166,7 @@ pxe_stack_os_firewall: true                # If firewall (RHEL only for now) sho
 # WARNING! If nothing is set for partitioning,
 # automatic partitioning will be activated.
 pxe_stack_os_partitioning:                 # Set partitioning. Use raw OS format: kickstart for RHEL, preseed for Debian, etc.
+                                           # Leave empty for automated partitioning
 ```
 
 #### Equipments groups
@@ -254,7 +255,8 @@ os_admin_ssh_keys:
 os_access_control: disabled
 os_firewall: false
 
-os_partitioning: # Leave empty for auto partitioning
+os_target_disk: /dev/sda
+os_partitioning: # Leave empty for auto partitioning, that relies on os_target_disk if exist, or auto choose disk if not
 ```
 
 Then create file `inventory/group_vars/os_rhel9/os.yml` with the following content:
@@ -651,6 +653,7 @@ Note that using an home folder into /home for the bluebanquise sudo user can be 
 
 ## Changelog
 
+* 1.11.0: Add ability to select target disk with auto partitioning. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.10.0: Add ability to set sudo user uid and gid. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.9.5: Switch RHEL from atftp to native tftp-server (fix from @sgaosdgr). Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.9.4: Fix bad variable name for console. Benoit Leveugle <benoit.leveugle@gmail.com>

@@ -1,5 +1,5 @@
 ---
-pxe_stack_role_version: 1.10.0
+pxe_stack_role_version: 1.11.0
 
 pxe_stack_supported_os:
   redhat:
@@ -51,14 +51,17 @@ pxe_stack_supported_os:
         - debian
 
 pxe_stack_redhat_automatic_partitioning: |
-  clearpart --all --initlabel
-  autopart --type=plain --fstype=ext4
+  {% if os_target_disk is defined and os_target_disk is not none %}ignoredisk --only-use={{ os_target_disk }}{% endif +%}
+  clearpart --all --initlabel {% if os_target_disk is defined and os_target_disk is not none %}--drives={{ os_target_disk }}{% endif +%}
+  autopart --type=plain --fstype=ext4 {% if os_target_disk is defined and os_target_disk is not none %}--ondisk={{ os_target_disk }}{% endif +%}
 
+# I did not find how to select a specific disk for Ubuntu
 pxe_stack_ubuntu_automatic_partitioning: " "
 
 pxe_stack_suse_automatic_partitioning: |
   <partitioning config:type="list">
     <drive>
+      {% if os_target_disk is defined and os_target_disk is not none %}<device>{{ os_target_disk }}</device>{% endif +%}
       <initialize config:type="boolean">true</initialize>
       <use>all</use>
       <partitions config:type="list">
@@ -81,7 +84,7 @@ pxe_stack_suse_automatic_partitioning: |
   </partitioning>
 
 pxe_stack_debian_automatic_partitioning: |
-  d-i partman-auto/disk string /dev/sda
+  d-i partman-auto/disk string {% if os_target_disk is defined and os_target_disk is not none %}{{ os_target_disk }}{% else %}/dev/sda{% endif +%}
   d-i partman-auto/method string regular
   d-i partman-auto/choose_recipe select atomic
   d-i partman-auto/init_automatically_partition select Guided - use entire disk
