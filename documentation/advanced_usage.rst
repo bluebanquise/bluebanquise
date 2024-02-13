@@ -233,4 +233,8 @@ Manual PXE boot
 Some nodes are difficult or impossible to natively boot over PXE (PXE not supported, impossible to find option in BIOS, boot on non standard cards like Infiniband cards, etc.).
 In such situation, it is possible to use a trick:
 
-If the node has a BMC embed, simply load the 
+- If the node has a BMC embed, simply load the BlueBanquise iPXE iso (from /var/www/html/pxe/bin/x86_64/standard_efi.iso) into the BMC's virtual drive, and boot on it.
+This will start the iPXE boot process, and so use local network interfaces to grab an ip from the DHCP and boot.
+
+- If the node does not have a BMC, you can create a bootable USB image that includes the EFI roms (you can find EFI roms into /var/lib/tftpboot/x86_64/ folder), write it on a USB disk, and have the system boot on USB.
+
