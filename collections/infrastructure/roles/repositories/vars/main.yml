@@ -1,4 +1,4 @@
 ---
-repositories_client_role_version: 1.3.6
+repositories_client_role_version: 1.3.7
 
-repositories_j2_simple_url: "http://{{ networks[j2_node_main_network]['services_ip'] | default(networks[j2_node_main_network]['services']['repositories'][0]['ip4']) | default('', true) }}/repositories/{{ os_operating_system['repositories_environment'] | default('', true) }}/{{ os_operating_system['distribution'] | default('', true) }}/{{ os_operating_system['distribution_version'] | default(os_operating_system['distribution_major_version']) | default('', true)}}/{{ ansible_architecture }}/"
+repositories_j2_simple_url: "http://{{ networks[j2_node_main_network]['services']['repositories4'][0]['ip4'] | default(networks[j2_node_main_network]['services']['repositories'][0]['ip4'], true) | default(networks[j2_node_main_network]['services_ip'], true) | default('', true) }}/repositories/{{ os_operating_system['repositories_environment'] | default('', true) }}/{{ os_operating_system['distribution'] | default('', true) }}/{{ os_operating_system['distribution_version'] | default(os_operating_system['distribution_major_version']) | default('', true)}}/{{ ansible_architecture }}/"
