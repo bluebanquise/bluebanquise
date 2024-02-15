@@ -53,7 +53,7 @@ This role is supported on RHEL and Ubuntu operating systems.
 ## 2. Instructions to configure
 
 Ensure your nodes are able to install HA components (may require a special
- subscription on RHEL OS).
+subscription on RHEL OS).
 
 ### 2.1. HA cluster
 
@@ -72,8 +72,8 @@ Then in `inventory/group_vars/ha_cluster` folder, create a file
 `ha_parameters.yml` with the following variables, tuned to your needs:
 
 ```yaml
-high_availability_cluster_name: ha_cluster  # name of the pacemaker/corosync cluster
-high_availability_cluster_nodes:
+pcs_ha_cluster_name: ha_cluster  # name of the pacemaker/corosync cluster
+pcs_cluster_nodes:
   - name: ha1             # Hostname of the HA cluster nodes
     addrs:                # List of addresses to be used for HA ring (allow multiple rings for redundancy)
       - ha1
@@ -109,8 +109,8 @@ to secure HA cluster in case one network fail:
 So for example here:
 
 ```yaml
-high_availability_cluster_name: ha_cluster
-high_availability_cluster_nodes:
+pcs_ha_cluster_name: ha_cluster
+pcs_cluster_nodes:
   - name: ha1             # Hostname of the HA cluster nodes
     addrs:                # List of addresses to be used for HA ring (allow multiple rings for redundancy)
       - ha1
@@ -131,19 +131,19 @@ These actions can only be done by one member of the pool at a time.
 Note that once the cluster is created, the reference node can be any one from
 the pool that is already registered in the HA cluster.
 
-To set reference node, you need to use variable `high_availability_reference_node`.
+To set reference node, you need to use variable `pcs_reference_node`.
 You can set the reference node in the `ha_parameters.yml`, and on need, use
 `--extra-vars` at `ansible-playbook` invocation to use another one:
 
 ```yaml
-high_availability_reference_node: ha1
+pcs_reference_node: ha1
 ```
 
-Finaly, before deploying HA cluster, update `high_availability_ha_cluster_password` variable with an unencrypted password for hacluster user, and `high_availability_ha_cluster_password_sha512` with the corresponding SHA512 password hash (do not use default values for production).
+Finaly, before deploying HA cluster, update `pcs_ha_cluster_password` variable with an unencrypted password for hacluster user, and `pcs_ha_cluster_password_sha512` with the corresponding SHA512 password hash (do not use default values for production).
 
 ```yaml
-high_availability_ha_cluster_password: root
-high_availability_ha_cluster_password_sha512: $6$M3crarMVoUV3rALd$ZTre2CIyss7zOb4lkLoG23As9OAkYPw2BM88Y1F43n8CCyV5XWwAYEwBOrS8bcCBIMjIPdJG.ndOfzWyAVR4j0
+pcs_ha_cluster_password: root
+pcs_ha_cluster_password_sha512: $6$M3crarMVoUV3rALd$ZTre2CIyss7zOb4lkLoG23As9OAkYPw2BM88Y1F43n8CCyV5XWwAYEwBOrS8bcCBIMjIPdJG.ndOfzWyAVR4j0
 ```
 
 You can hash your password easily using Python/Perl:
@@ -192,13 +192,13 @@ For each, it is possible to define a list of properties with their value. For
 example:
 
 ```yaml
-high_availability_pcs_property:
+pcs_property:
   - name: cluster-recheck-interval
     value: 250
-high_availability_pcs_resource_op_defaults:
+pcs_pcs_resource_op_defaults:
   - name: action-timeout
     value: 40
-high_availability_pcs_resource_defaults:
+pcs_pcs_resource_defaults:
   - name: resource-stickiness
     value: 4300
   - name: migration-threshold
@@ -213,7 +213,7 @@ default values.
 ### 2.3. Resources
 
 A resource is an event (a service running, a partition mounted, a virtual ip
-  created, etc.) shared between nodes. These resources can be instructed to
+created, etc.) shared between nodes. These resources can be instructed to
 run on a single node of the pool at a time, or to be running as clones on
 multiple nodes at the same time.
 
@@ -222,12 +222,12 @@ The role manage resources using groups, which acts as colocation constraint
 (resources of the same group MUST be running on the same host at the same time),
 and using definition order under that groups, which acts as a start order
 constraint (if the first resource in the list fail to start, the second one
-  will not start, etc).
+will not start, etc).
 
 For example:
 
 ```yaml
-high_availability_resources:
+pcs_resources:
   - group: http
     resources:
       - id: vip-http
@@ -284,7 +284,7 @@ For example, to set that `dns` group should never be running on the same host
 than `http` group, add a colocation constraint on dns group this way:
 
 ```yaml
-high_availability_resources:
+pcs_resources:
   - group: http
     resources:
       - id: vip-http
@@ -312,7 +312,7 @@ useful to ensure a good load balancing between the ha cluster nodes.
 For example, to set that `http` groups should be running on ha 2 node:
 
 ```yaml
-high_availability_resources:
+pcs_resources:
   - group: http
     resources:
       - id: vip-http
@@ -335,7 +335,7 @@ This setting allows the definition of order between resource groups.
 For example, to set group dns to start after group http:
 
 ```yaml
-high_availability_resources:
+pcs_resources:
   - group: http
     resources:
       - id: vip-http
@@ -363,7 +363,7 @@ It is possible to define stonith resources using this role. For example, to
 define an IPMI stonith, use:
 
 ```yaml
-high_availability_stonith:
+pcs_stonith:
   - name: fenceha1
     type: fence_ipmilan                                                # IPMI fencing
     pcmk_host_check: static-list
@@ -374,7 +374,10 @@ high_availability_stonith:
     avoids: ha1                                                        # Avoid resource to be running on own host
 ```
 
-If `high_availability_stonith` is not defined in the inventory, then this role will disable STONITH (stonith-enabled: false). This will allow the HA cluster to operate without STONITH (not recommended for production). Adding the `high_availability_stonith` variable will enable STONITH again.
+If `pcs_stonith` is not defined in the inventory, then this role will disable 
+STONITH (stonith-enabled: false). This will allow the HA cluster to operate 
+without STONITH (not recommended for production). 
+Adding the `pcs_stonith` variable will enable STONITH again.
 
 ## 3. Deploy HA
 
@@ -390,7 +393,7 @@ point:
     start_services: false
   roles:
     - (add roles to configure services in HA cluster)
-    - role: high_availability
+    - role: pcs
       tags: ha
 ```
 
@@ -398,7 +401,7 @@ By doing this, all ha compatible roles services will be disabled and not started
 Then HA cluster will be deployed, and populated with resources and properties.
 
 First, start by configuring services in active mode on the reference node,
- set to ha1 for this example:
+set to ha1 for this example:
 
 ```
 ansible-playbook ha-cluster.yml --limit ha1 --skip-tags ha -e "{'start_services': true}"
@@ -416,7 +419,7 @@ ansible-playbook ha-cluster.yml
 
 Bellow is a list of standard resources to be used with BlueBanquise. Note that
 it can/must be adapted to needs (other kind of FS, multiple vip to handle multiple
-  subnets, etc.).
+subnets, etc.).
 
 ### 4.1. Repositories and PXE
 
@@ -610,10 +613,15 @@ not present. Then in HA resources, declare the following:
 
 ## 5. Known Issues
 
-* When pacemaker/corosync are first installed in Ubuntu 20/22, a default pacemaker cluster is created. This role will detect the presence of the default cluster and destroy it. The conditions for destroying the cluster are matching the cluster name 'debian' and having 0 resources configured.
+* When pacemaker/corosync are first installed in Ubuntu 20/22, 
+a default pacemaker cluster is created. 
+This role will detect the presence of the default cluster and destroy it. 
+The conditions for destroying the cluster are matching the cluster name 'debian' 
+and having 0 resources configured.
 
 ## 6. Changelog
 
+* 1.1.3: README update. Hamid MERZOUKI <hamid.merzouki@naverlabs.com>
 * 1.1.2: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.1: Fix service name in RHEL firewall. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.1.0: Add Ubuntu support. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
