@@ -114,6 +114,7 @@ dns_server_forward_only_domains:
 
 ## Changelog
 
+* 1.10.1: Fix extended names for all zones. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.10.0: Add forward only domains. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.9.0: Allow services and services_ip together. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.8.1: Fix typo on domain name variable. Benoit Leveugle <benoit.leveugle@gmail.com>
