@@ -229,19 +229,19 @@ Ensure not to cut your connection if working remotely.
 
 .. code-block:: text
 
-  ansible-playbook playbooks/managements.yml -i inventory --limit management1 --tags set_hostname,nic
+  ansible-playbook playbooks/managements.yml -b -i inventory --limit management1 --tags set_hostname,nic
 
 Check interfaces are up (check using ``ip a`` command), and then setp repositories:
 
 .. code-block:: text
 
-  ansible-playbook playbooks/managements.yml -i inventory --limit management1 --tags repositories
+  ansible-playbook playbooks/managements.yml -b -i inventory --limit management1 --tags repositories
 
 Then play the whole playbook:
 
 .. code-block:: text
 
-  ansible-playbook playbooks/managements.yml -i inventory --limit management1
+  ansible-playbook playbooks/managements.yml -b -i inventory --limit management1
 
 And wait...
 
@@ -496,7 +496,7 @@ set on nodes during deployment).
 
 .. code-block:: bash
 
-  ansible-playbook playbooks/managements.yml -i inventory --limit management1 --tags pxe_stack
+  ansible-playbook playbooks/managements.yml -b -i inventory --limit management1 --tags pxe_stack
 
 OS deployment
 -------------
@@ -553,7 +553,7 @@ And execute it while targeting compute1 (if you do not limit it, it will deploy 
 
 .. code-block:: bash
 
-  ansible-playbook playbooks/computes.yml -i inventory --limit compute1
+  ansible-playbook playbooks/computes.yml -b -i inventory --limit compute1
 
 If you do not set the limite, and have multiple compute nodes up and running,
 you will see that Ansible will work on computes nodes in parallel, using more CPU
