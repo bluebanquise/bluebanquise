@@ -1,0 +1,58 @@
+---
+- name: service <|> Restart BeeGFS metadata service
+  ansible.builtin.service:
+    name: beegfs-meta.service
+    state: restarted
+  when:
+    - "'service' not in ansible_skip_tags"
+    - (start_services | bool)
+
+- name: service <|> Restart BeeGFS management service
+  ansible.builtin.service:
+    name: beegfs-mgmtd.service
+    state: restarted
+  when:
+    - "'service' not in ansible_skip_tags"
+    - (start_services | bool)
+    - inventory_hostname in groups["mgmtd"]
+    - inventory_hostname == groups["mgmtd"][0]
+
+- name: service <|> Restart BeeGFS storage service
+  ansible.builtin.service:
+    name: beegfs-storage.service
+    state: restarted
+  when:
+    - "'service' not in ansible_skip_tags"
+    - (start_services | bool)
+
+- name: service <|> Restart BeeGFS helperd service
+  ansible.builtin.service:
+    name: beegfs-helperd.service
+    state: restarted
+  when:
+    - "'service' not in ansible_skip_tags"
+    - (start_services | bool)
+
+- name: service <|> Restart BeeGFS client service
+  ansible.builtin.service:
+    name: beegfs-client.service
+    state: restarted
+  when:
+    - "'service' not in ansible_skip_tags"
+    - (start_services | bool)
+
+- name: service <|> Restart BeeGFS tuning service
+  ansible.builtin.service:
+    name: beegfs-tuning.service
+    state: restarted
+  when:
+    - "'service' not in ansible_skip_tags"
+    - (start_services | bool)
+
+- name: service <|> Restart corosync service
+  ansible.builtin.service:
+    name: corosync.service
+    state: restarted
+  when:
+    - "'service' not in ansible_skip_tags"
+    - (start_services | bool)

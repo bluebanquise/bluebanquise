@@ -1,0 +1,73 @@
+<resources>
+  <clone id="p_drbd_r0-clone">
+    <primitive class="ocf" id="p_drbd_r0" provider="linbit" type="drbd">
+      <instance_attributes id="p_drbd_r0-instance_attributes">
+{% for resource in drbd_resources %}
+  {% set device = resource.device %}
+      <nvpair id="p_drbd_r0-instance_attributes-drbd_resource" name="drbd_resource" value="{{ resource.name }}"/>
+{% endfor %}
+      </instance_attributes>
+      <operations>
+        <op id="p_drbd_r0-demote-interval-0s" interval="0s" name="demote" timeout="90"/>
+        <op id="p_drbd_r0-monitor-interval-31s" interval="31s" name="monitor" role="Slave" timeout="20s"/>
+        <op id="p_drbd_r0-monitor-interval-29s" interval="29s" name="monitor" role="Master" timeout="20s"/>
+        <op id="p_drbd_r0-notify-interval-0s" interval="0s" name="notify" timeout="90"/>
+        <op id="p_drbd_r0-promote-interval-0s" interval="0s" name="promote" timeout="90"/>
+        <op id="p_drbd_r0-reload-interval-0s" interval="0s" name="reload" timeout="30"/>
+        <op id="p_drbd_r0-start-interval-0s" interval="0s" name="start" timeout="240s"/>
+        <op id="p_drbd_r0-stop-interval-0s" interval="0s" name="stop" timeout="100s"/>
+      </operations>
+    </primitive>
+    <meta_attributes id="p_drbd_r0-clone-meta_attributes">
+      <nvpair id="p_drbd_r0-clone-meta_attributes-clone-max" name="clone-max" value="2"/>
+      <nvpair id="p_drbd_r0-clone-meta_attributes-clone-node-max" name="clone-node-max" value="1"/>
+      <nvpair id="p_drbd_r0-clone-meta_attributes-notify" name="notify" value="true"/>
+      <nvpair id="p_drbd_r0-clone-meta_attributes-promotable" name="promotable" value="true"/>
+      <nvpair id="p_drbd_r0-clone-meta_attributes-promoted-max" name="promoted-max" value="1"/>
+      <nvpair id="p_drbd_r0-clone-meta_attributes-promoted-node-max" name="promoted-node-max" value="1"/>
+    </meta_attributes>
+  </clone>
+  <primitive class="ocf" id="p_fs_drbd0" provider="heartbeat" type="Filesystem">
+    <meta_attributes id="p_fs_drbd0-meta_attributes"/>
+    <instance_attributes id="p_fs_drbd0-instance_attributes">
+{% for resource in drbd_resources %}
+  {% set device = resource.device %}
+    <nvpair id="p_fs_drbd0-instance_attributes-device" name="device" value="{{ device }}"/>
+{% endfor %}
+      <nvpair id="p_fs_drbd0-instance_attributes-directory" name="directory" value="{{ beegfs_vars.mgmtd_path_prefix }}"/>
+      <nvpair id="p_fs_drbd0-instance_attributes-fstype" name="fstype" value="xfs"/>
+      <nvpair id="p_fs_drbd0-instance_attributes-options" name="options" value="noatime,nodiratime"/>
+    </instance_attributes>
+    <operations>
+      <op id="p_fs_drbd0-monitor-interval-20" interval="20" name="monitor" timeout="40s"/>
+      <op id="p_fs_drbd0-start-interval-0" interval="0" name="start" timeout="60s"/>
+      <op id="p_fs_drbd0-stop-interval-0" interval="0" name="stop" timeout="60s"/>
+    </operations>
+  </primitive>
+  <group id="gr_beegfs_mgmtd">
+    <primitive class="systemd" id="beegfs_mgmtd" type="beegfs-mgmtd">
+      <operations>
+        <op id="beegfs_mgmtd-monitor-interval-13s" interval="13s" name="monitor"/>
+        <op id="beegfs_mgmtd-start-interval-0s" interval="0s" name="start" timeout="100"/>
+        <op id="beegfs_mgmtd-stop-interval-0s" interval="0s" name="stop" timeout="100"/>
+      </operations>
+    </primitive>
+  </group>
+  <primitive class="ocf" id="mgmtd_ip" provider="heartbeat" type="IPaddr2">
+    <instance_attributes id="mgmtd_ip-instance_attributes">
+      <nvpair id="mgmtd_ip-instance_attributes-cidr_netmask" name="cidr_netmask" value="{{ beegfs_vars.mgmtd_vip_prefix }}"/>
+      <nvpair id="mgmtd_ip-instance_attributes-iflabel" name="iflabel" value="fl-mgm"/>
+      <nvpair id="mgmtd_ip-instance_attributes-ip" name="ip" value="{{ beegfs_vars.mgmtd_vip }}"/>
+      <nvpair id="mgmtd_ip-instance_attributes-nic" name="nic" value="{%- for v in hostvars[inventory_hostname]['network_interfaces'] | selectattr('network','defined') | selectattr('network','match','^'+j2_current_iceberg_network+'-[a-zA-Z0-9]+') %}
+{%- if loop.first -%} 
+{{ v['interface'] }}
+{%- endif -%}
+{%- endfor -%}"/>
+    </instance_attributes>
+    <operations>
+      <op id="mgmtd_ip-monitor-interval-30s" interval="30s" name="monitor"/>
+      <op id="mgmtd_ip-start-interval-0s" interval="0s" name="start" timeout="20s"/>
+      <op id="mgmtd_ip-stop-interval-0s" interval="0s" name="stop" timeout="20s"/>
+    </operations>
+  </primitive>
+</resources>

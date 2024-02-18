@@ -1,0 +1,369 @@
+---
+- name: include_vars <|> Gather OS specific variables
+  # This task gathers variables defined in OS specific files.
+  #
+  # Search vars in:
+  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
+  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
+  #  - <distribution>.yml            # eg. CentOS.yml
+  #  - <os_family>.yml               # eg. RedHat.yml
+  #
+  # If no OS specific file is found, the role will default to vars/main.yml
+  #
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family }}.yml"
+      skip: true
+  tags:
+    - always
+
+- name: include_tasks <|> Use OS dedicated firewall task
+  ansible.builtin.include_tasks: "{{ outer_item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}/firewall.yml"
+      skip: true
+  loop_control:
+    loop_var: outer_item
+  tags:
+    - internal
+    - firewall
+
+- name: Install kernel headers and makefiles
+  ansible.builtin.package:
+    name: kernel-devel
+    state: present
+  tags:
+    - package
+
+- name: Install BeeGFS management server package
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ beegfs_mgmtd_packages_to_install }}"
+  when: inventory_hostname in groups["mgmtd"]
+  tags:
+    - package
+
+- name: Install BeeGFS metadata server package
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ beegfs_meta_packages_to_install }}"
+  when: inventory_hostname in groups["metadata"]
+  tags:
+    - package
+
+- name: Install BeeGFS storage server package
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ beegfs_store_packages_to_install }}"
+  when: inventory_hostname in groups["store"]
+  tags:
+    - package
+
+- name: Install BeeGFS client package
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ beegfs_client_packages_to_install }}"
+  when: inventory_hostname in groups["client"]
+  tags:
+    - package
+
+- name: Install BeeGFS libbeegfs-ib RDMA library
+  ansible.builtin.package:
+    name: libbeegfs-ib
+    state: present
+  when:
+    - inventory_hostname in groups["client"] or inventory_hostname in groups["store"] or inventory_hostname in groups["metadata"]
+    - beegfs_vars.rdma is defined
+    - beegfs_vars.rdma | bool
+  tags:
+    - package
+
+- name: Create BeeGFS Management data store directory
+  ansible.builtin.file:
+    path: "{{ beegfs_vars.mgmtd_path_prefix }}"
+    state: directory
+    mode: 0755
+  when: inventory_hostname in groups["mgmtd"]
+
+- name: Create BeeGFS Metadata store directory
+  ansible.builtin.file:
+    path: "{{ beegfs_vars.meta_directory }}"
+    state: directory
+    mode: 0755
+  when: inventory_hostname in groups["metadata"]
+
+- name: Create BeeGFS storage directory
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+  when: inventory_hostname in groups["store"]
+  loop:
+    - "{{ beegfs_vars.store_directory.split(',') }}"
+
+- name: Create BeeGFS log store directory
+  ansible.builtin.file:
+    path: "{{ beegfs_vars.log_path_prefix }}"
+    state: directory
+    mode: 0755
+
+- name: Copy template files on metadata servers
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "/etc/beegfs/{{ item }}"
+    owner: root
+    group: root
+    mode: 0644
+  loop:
+    - beegfs-client.conf
+    - beegfs-helperd.conf
+    - beegfs-mgmtd.conf
+    - beegfs-mounts.conf
+  when: inventory_hostname in groups["mgmtd"]
+  notify: service <|> Restart BeeGFS management service
+  tags:
+    - template
+
+- name: Copy template files on metadata servers
+  ansible.builtin.template:
+    src: beegfs-meta.conf.j2
+    dest: /etc/beegfs/beegfs-meta.conf
+    owner: root
+    group: root
+    mode: 0644
+  when: inventory_hostname in groups["metadata"]
+  notify: service <|> Restart BeeGFS metadata service
+  tags:
+    - template
+
+- name: Copy template files on metadata servers
+  ansible.builtin.template:
+    src: interfacesfile.j2
+    dest: /etc/beegfs/interfacesfile
+    owner: root
+    group: root
+    mode: 0644
+  when: inventory_hostname in groups["metadata"]
+  notify: service <|> Restart BeeGFS metadata service
+  tags:
+    - template
+
+- name: Copy template files on storage servers
+  ansible.builtin.template:
+    src: beegfs-storage.conf.j2
+    dest: /etc/beegfs/beegfs-storage.conf
+    owner: root
+    group: root
+    mode: 0644
+  when: inventory_hostname in groups["store"]
+  notify: service <|> Restart BeeGFS storage service
+  tags:
+    - template
+
+- name: Copy template files on client hosts
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "/etc/beegfs/{{ item }}"
+    owner: root
+    group: root
+    mode: 0644
+  loop:
+    - beegfs-client.conf
+    - beegfs-helperd.conf
+    - beegfs-mounts.conf
+    - beegfs-client-autobuild.conf
+  when: inventory_hostname in groups["client"]
+  notify: service <|> Restart BeeGFS client service
+  tags:
+    - template
+
+- name: Copy the connauthfile on all BeeGFS servers
+  ansible.builtin.template:
+    src: files/connauthfile
+    dest: /etc/beegfs/
+    owner: root
+    group: root
+    mode: 0400
+  tags:
+    - template
+
+- name: Initialize the management storage path directory
+  ansible.builtin.command: /opt/beegfs/sbin/beegfs-setup-mgmtd -p "{{ beegfs_vars.mgmtd_path_prefix }}"
+  register: register_mgmtd
+  changed_when: '"All done." in register_mgmtd.stdout'
+  failed_when:
+    - '"ERROR: Storage directory is not empty" in register_mgmtd.stdout'
+    - register_mgmtd.rc != 0
+  ignore_errors: true
+  when:
+    - inventory_hostname in groups["mgmtd"]
+    - inventory_hostname == groups["mgmtd"][0]
+
+- name: BeeGFS Storage/Metadata Node Tuning
+  block:
+    - name: Apply kernel tuning
+      ansible.posix.sysctl:
+        name: "{{ item['key'] }}"
+        value: "{{ item['value'] }}"
+        state: present
+      loop: "{{ lookup('dict', beegfs_vm_tuning) }}"
+    - name: Copy beegfs-tuning.sh to /opt/beegfs/
+      ansible.builtin.template:
+        src: beegfs-tuning.sh.j2
+        dest: /opt/beegfs/beegfs-tuning.sh
+        mode: a+x
+    - name: Copy beegfs-tuning.service to /etc/systemd/system/
+      ansible.builtin.copy:
+        src: beegfs-tuning.service
+        dest: /etc/systemd/system/
+        owner: root
+        group: root
+        mode: '0644'
+        # notify: service █ Restart BeeGFS tuning service
+    - name: Start beegfs-tuning service
+      ansible.builtin.service:
+        name: beegfs-tuning.service
+        state: started
+        enabled: true
+  when: inventory_hostname in groups["metadata"] or inventory_hostname in groups["store"]
+  tags:
+    - template
+
+- name: BeeGFS High Availability
+  block:
+    - name: package <|> Install packages
+      ansible.builtin.package:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ beegfs_high_availability_packages_to_install }}"
+    - name: Copy corosync.conf
+      ansible.builtin.template:
+        src: corosync.conf.j2
+        dest: /etc/corosync/corosync.conf
+        owner: root
+        group: root
+        mode: '0644'
+      notify: service <|> Restart corosync service
+    - name: Copy XML files
+      ansible.builtin.template:
+        src: cib_resources.j2
+        dest: /etc/cib_resources.xml
+        owner: root
+        group: root
+        mode: '0644'
+    - name: Copy XML files
+      ansible.builtin.template:
+        src: cib_constraints.j2
+        dest: /etc/cib_constraints.xml
+        owner: root
+        group: root
+        mode: '0644'
+    - name: command <|> Start the HA cluster
+      ansible.builtin.command: "/usr/sbin/pcs cluster start"
+      changed_when: false
+      run_once: true
+    - name: command <|> Ignore quorum policy
+      ansible.builtin.command: "/usr/sbin/pcs property set no-quorum-policy=ignore"
+      register: cmd
+      changed_when: cmd.rc == 0
+      failed_when: cmd.rc != 0
+      run_once: true
+    - name: command <|> Disable stonith
+      ansible.builtin.command: "/usr/sbin/pcs property set stonith-enabled=false"
+      register: cmd2
+      changed_when: cmd2.rc == 0
+      failed_when: cmd2.rc != 0
+      run_once: true
+    - name: command <|> Import CIB resources
+      ansible.builtin.command: "/usr/sbin/cibadmin --replace --scope resources --xml-file /etc/cib_resources.xml"
+      register: cmd3
+      changed_when: cmd3.rc == 0
+      failed_when: cmd3.rc != 0
+      run_once: true
+    - name: command <|> Import CIB constraints
+      ansible.builtin.command: "/usr/sbin/cibadmin --replace --scope constraints --xml-file /etc/cib_constraints.xml"
+      register: cmd3
+      changed_when: cmd3.rc == 0
+      failed_when: cmd3.rc != 0
+      run_once: true
+    - name: service <|> Enable and start cluster
+      ansible.builtin.service:
+        name: "{{ item }}"
+        enabled: "{{ beegfs_vars.high_availability_autostart | default(false) }}"
+        state: started
+      loop:
+        - corosync
+        - pacemaker
+  when:
+    - inventory_hostname in groups["mgmtd"]
+    - beegfs_vars.high_availability is defined
+    - beegfs_vars.high_availability | bool
+  tags:
+    - ha
+
+- name: Start beegfs-helperd service
+  ansible.builtin.service:
+    name: beegfs-helperd.service
+    state: started
+    enabled: true
+  when: inventory_hostname in groups["mgmtd"] or inventory_hostname in groups["client"]
+
+- name: Start beegfs-mgmtd service
+  ansible.builtin.service:
+    name: beegfs-mgmtd.service
+    state: started
+    enabled: true
+  when: inventory_hostname in groups["mgmtd"]
+
+- name: Start beegfs-meta service
+  ansible.builtin.service:
+    name: beegfs-meta.service
+    state: started
+    enabled: true
+  when: inventory_hostname in groups["metadata"]
+
+- name: Start beegfs-storage service
+  ansible.builtin.service:
+    name: beegfs-storage.service
+    state: started
+    enabled: true
+  when: inventory_hostname in groups["store"]
+
+- name: Start beegfs-client service
+  ansible.builtin.service:
+    name: beegfs-client.service
+    state: started
+    enabled: true
+  when: inventory_hostname in groups["client"]
+
+- name: meta <|> Run handler tasks to restart BeeGFS services
+  ansible.builtin.meta: flush_handlers
+
+- name: Get BeeGFS status from the management server
+  command: /usr/bin/beegfs-check-servers
+  register: beegfs_status
+  changed_when: false
+  when: inventory_hostname in groups["mgmtd"]
+  run_once: true
+
+- name: "Show BeeGFS status"
+  debug:
+    msg: "{{ beegfs_status.stdout }}"
+  run_once: true
+  when:
+    - inventory_hostname in groups["mgmtd"]
+    - not beegfs_status.failed

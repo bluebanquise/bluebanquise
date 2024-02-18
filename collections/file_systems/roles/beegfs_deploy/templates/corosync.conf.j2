@@ -1,0 +1,28 @@
+#jinja2: lstrip_blocks: "True"
+# {{ ansible_managed }}
+totem {
+  version: 2
+  secauth: off
+  cluster_name: cluster
+  transport: knet
+  rrp_mode: passive
+}
+
+nodelist {
+{% for host in groups['mgmtd'] %}
+  node {
+    ring0_addr: {{ hostvars[host]['network_interfaces'] | selectattr('network','defined') | selectattr('network','match','^'+j2_current_iceberg_network+'-[a-zA-Z0-9]+') | map(attribute='ip4') | join }}
+    nodeid: {{ loop.index }}
+    name: {{ host }}
+  }
+{% endfor %}
+}
+
+quorum {
+  provider: corosync_votequorum
+  two_node: 1
+}
+
+logging {
+  to_syslog: yes
+}

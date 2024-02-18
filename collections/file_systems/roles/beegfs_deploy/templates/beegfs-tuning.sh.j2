@@ -1,0 +1,29 @@
+#jinja2: lstrip_blocks: "True"
+# {{ ansible_managed }}
+# BeeGFS tuning parameters
+# https://doc.beegfs.io/latest/advanced_topics/storage_tuning.html
+# https://doc.beegfs.io/latest/advanced_topics/metadata_tuning.html
+
+echo always > /sys/kernel/mm/transparent_hugepage/enabled
+echo always > /sys/kernel/mm/transparent_hugepage/defrag
+
+{% if beegfs_devices | length > 0 %}
+for dev in {{ beegfs_devices | map('regex_replace', '/.*/', '') | join(' ') }}
+  do
+    if [ -d /sys/block/${dev} ] && [ "$(cat /sys/block/${dev}/queue/rotational)" = "1" ]; then # for HDD devices
+      echo mq-deadline > /sys/block/${dev}/queue/scheduler
+      echo 2 > /sys/block/${dev}/queue/nomerges
+      echo 1 > /sys/block/${dev}/queue/rq_affinity
+      echo 128 > /sys/block/${dev}/queue/nr_requests
+      echo 4096 > /sys/block/${dev}/queue/read_ahead_kb
+      echo 1024 > /sys/block/${dev}/queue/max_sectors_kb
+    elif [ "$(cat /sys/block/${dev}/queue/rotational)" = "0" ]; then # for SSD devices
+      echo none > /sys/block/${dev}/queue/scheduler
+      echo 2 > /sys/block/${dev}/queue/nomerges
+      echo 1 > /sys/block/${dev}/queue/rq_affinity
+      echo 2048 > /sys/block/${dev}/queue/nr_requests
+      echo 4096 > /sys/block/${dev}/queue/read_ahead_kb
+      echo 1024 > /sys/block/${dev}/queue/max_sectors_kb
+    fi
+  done
+{% endif %}
