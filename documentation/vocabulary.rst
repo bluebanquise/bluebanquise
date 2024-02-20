@@ -6,6 +6,23 @@ Lets establish few common terms before going deeper in technical details.
 
 Some words are important in **BlueBanquise**. Most of them are described here.
 
+Cluster layers
+==============
+
+The BlueBanquise project assumes that there exist 3 **layers** in a cluster of nodes:
+
+1. **Layer 1** is the infrastructure layer, also known as low level layer. This layer is composed of all that is needed to make the cluster ready to host production. This includes what is needed to power manage and remote manage hardware, what is needed to deploy and configure operating systems on servers, what is needed to connect the cluster and monitor it.
+2. **Layer 2**, optional and above layer 1, is the orchestration layer. This layer is composed of any tool needed to orchestrate production resources. This can be a Kubernetes or a Nomad cluster for example.
+3. **Layer 3** is the production layer, also sometime refered as "added value" layer. This layer is composed of what the clusters is running for, aka production. This can be calculations, web servers hosting, databases, storage management, AI trainings, etc.
+
+The Infrastructure Ansible collection of the BlueBanquise stack has been made to cover layer 1.
+Other collections either extend layer 1 (monitoring, logging, etc.), and some collections cover other layers. The HPC collection for example covers a layer 3 HPC specialization of the cluster.
+You can also use KubeSpray to deploy a Kubernetes cluster, which would be the layer 2, and host web servers into the K8S cluster, which would be layer 3.
+
+It is important to understand that while layer 2 and 3 can be very specialized, layer 1 is generic and is the same for all clusters.
+
+It is also recommended to always separate layers. Mixing layers always end up being a huge mess on the long term.
+
 Ansible vocabulary
 ==================
 

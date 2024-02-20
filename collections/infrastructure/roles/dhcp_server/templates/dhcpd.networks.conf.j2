@@ -44,11 +44,11 @@ subnet {{ networks[network]['subnet'] }} netmask {{ (networks[network]['subnet']
   {% endif %}
   option domain-name "{{ bb_domain_name | default(dhcp_server_domain_name) }}";
   option broadcast-address {{ (networks[network]['subnet'] + '/' + (networks[network]['prefix'] | string) ) | ansible.utils.ipaddr('broadcast') }};
-  {% if networks[network]['gateway'] is defined %}
-    {% if networks[network]['gateway'] is string %}
-  option routers {{ networks[network]['gateway'] }};
-    {% elif networks[network]['gateway'] is iterable and networks[network]['gateway'] is not mapping %}
-{{ item_add("option routers", networks[network]['gateway'], "host") }}
+  {% if (networks[network]['gateway4'] | default(networks[network]['gateway'], true)) is defined %}
+    {% if (networks[network]['gateway4'] | default(networks[network]['gateway'], true)) is string %}
+  option routers {{ (networks[network]['gateway4'] | default(networks[network]['gateway'], true)) }};
+    {% elif (networks[network]['gateway4'] | default(networks[network]['gateway'], true)) is iterable and (networks[network]['gateway4'] | default(networks[network]['gateway'], true)) is not mapping %}
+{{ item_add("option routers", (networks[network]['gateway4'] | default(networks[network]['gateway'], true)), "host") }}
     {% endif %}
   {% endif %}
 
