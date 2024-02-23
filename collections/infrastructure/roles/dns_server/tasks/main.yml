@@ -49,11 +49,17 @@
 
 - name: "file <|> Create needed directory {{ dns_server_named_dir }}"
   ansible.builtin.file:
-    path: "{{ dns_server_named_dir }}"
+    path: "{{ item }}"
     state: directory
     owner: root
     group: "{{ dns_server_dns_user }}"
     mode: 0750
+    with_items:
+      - "{{ dns_server_named_dir }}"
+      - "{{ dns_server_log_dir }}"
+      - "{{ dns_server_managed_keys_dir }}"
+      - "{{ dns_server_var_dir }}"
+      - "{{ dns_server_var_dir  }}/data"
 
 - name: template <|> Generate named main configuration file
   ansible.builtin.template:

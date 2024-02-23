@@ -9,7 +9,7 @@ dns_server_configuration_file: /etc/named.conf
 dns_server_rfc_zone_file: /etc/named.rfc1912.zones
 dns_server_dump_file: /var/named/data/cache_dump.db
 dns_server_localhost_file: /var/named/named.localhost
-dns_server_log_dir: data
+dns_server_log_dir: /var/log/named
 dns_server_loopback_file: /var/named/named.loopback
 dns_server_managed_keys_dir: /var/named/dynamic
 dns_server_mem_stats_file: /var/named/data/named_mem_stats.txt
