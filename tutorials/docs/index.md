@@ -17,7 +17,7 @@ Documents provided here are generic, and not directly related to the BlueBanquis
 
 Current available tutorials are:
 
-* System admininstration:
+* System administration:
     * [Basic introduction](sysadmin_introduction.md)
     * [Servers farm deployment and system administration](sysadmin_servers_farm_deployment.md)
     * [Learn Ansible basics to automate deployments](sysadmin_ansible.md)
