@@ -72,11 +72,6 @@ logging {
   };
 };
 
-zone "." IN {
-  type hint;
-  file "{{ dns_server_root_hint_file }}";
-};
-
 zone "{{ bb_domain_name | default(dns_server_domain_name) }}" IN {
   type master;
   file "{{ dns_server_named_dir }}/forward.zone";
@@ -112,11 +107,19 @@ zone "{{ forward_only_domain['domain'] }}" IN {
   {% endfor %}
 {% endif %}
 
+{% if ansible_distribution != 'Debian' and ansible_distribution != 'Ubuntu'%}
+{% if %}
+zone "." IN {
+  type hint;
+  file "{{ dns_server_root_hint_file }}";
+};
+
+include "{{ dns_server_root_key_file }}";
+{% endif %}
+
 {% if dns_server_rfc_zone_file is defined %}
 include "{{ dns_server_rfc_zone_file }}";
 {% endif %}
-
-include "{{ dns_server_root_key_file }}";
 
 {% if dns_server_raw_content is defined %}
 {{ dns_server_raw_content }}
