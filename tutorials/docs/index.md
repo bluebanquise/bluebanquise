@@ -26,6 +26,6 @@ Current available tutorials are:
     * [Deploying Slurm scheduler over a servers farm](hpc_slurm.md)
     * [Configure users environment](hpc_users_environment.md)
     * [Introduction to parallel computing](hpc_parallel_computing.md)
-* Kubernetes:
+<!--* Kubernetes:
     * [Deploy a Kubernetes cluster using Kubespray](kubernetes_deploy.md)
-    * [Deploy basic resources inside a K8S cluster](kubernetes_basics.md)
+    * [Deploy basic resources inside a K8S cluster](kubernetes_basics.md) -->
