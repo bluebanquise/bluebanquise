@@ -4,6 +4,7 @@ dns_server_services_to_start:
   - named
 dns_server_firewall_services_to_add:
   - dns
+dns_server_configuration_file: /etc/named.conf
 dns_server_dump_file: /var/log/named_dump.db
 dns_server_localhost_file: /var/lib/named/localhost.zone
 dns_server_log_dir: /var/lib/named/log

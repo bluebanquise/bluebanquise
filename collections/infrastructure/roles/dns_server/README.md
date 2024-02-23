@@ -11,7 +11,28 @@ This role relies on [data model](https://github.com/bluebanquise/bluebanquise/bl
 * Section 2 (Hosts definition)
 * Section 3.1 (Function Groups)
 
-## Instructions
+## Basic instructions
+
+The role will generate 5 files (path may vary depending of Linux distribution):
+
+* `/etc/named.conf` (or `/etc/bind/named.conf.options`) that contains main configuration, and that will try to bind to all networks defined on the host it is deployed on, using **services_ip.dns_ip** variable ip of the network.
+* `/var/named/forward` that contains forward resolution of hosts
+* `/var/named/forward.soa` included by /var/named/forward
+* `/var/named/reverse` that contains reverse resolution of hosts
+* `/var/named/reverse.soa` included by /var/named/reverse
+
+### Domain name
+
+By default, domain name used is `cluster.local`.
+It is possible to update domaine name used by setting dns_server_domain_name value:
+
+```yaml
+dns_server_domain_name: foobar.local
+```
+
+If global variable `bb_domain_name` is set, then this value will precedence all other settings.
+
+### Networks
 
 This DNS role will automatically add networks of the cluster defined in the Ansible inventory,
 assuming their variable **dns_server** is set to true:
@@ -31,13 +52,93 @@ networks:
           hostname: mgt1-dns
 ```
 
-It will generate 5 files:
+The role will listen on any ip4 defined under dns key in services, and allow queries on the whole related subnet/prefix:
 
-* `/etc/named.conf` that contains main configuration, and that will try to bind to all networks defined on the host it is deployed on, using **services_ip.dns_ip** variable ip of the network.
-* `/var/named/forward` that contains forward resolution of hosts
-* `/var/named/forward.soa` included by /var/named/forward
-* `/var/named/reverse` that contains reverse resolution of hosts
-* `/var/named/reverse.soa` included by /var/named/reverse
+```yaml
+networks:
+  ice1-1:
+    subnet: 10.11.0.0
+    prefix: 16
+    netmask: 255.255.0.0
+    broadcast: 10.11.255.255
+    dhcp_server: true
+    dns_server: true
+    services:
+      dns:
+        - ip4: 10.11.0.1  # <<<<<<<<<<
+          hostname: mgt1-dns
+```
+
+Note that you can add manually listen ip and queries allowed ranges using respectively `dns_server_listen_on_ip4` and `dns_server_allow_query` lists.
+For example:
+
+```yaml
+dns_server_listen_on_ip4:
+  - 10.21.1.3
+dns_server_allow_query:
+  - 10.21.1.0/24
+```
+
+This can be useful if an interface is manually managed and not present in the Ansible inventory.
+
+### Nodes
+
+The role will scan all hosts defined in the Ansible inventory, and by default will add an entry for the node main network as direct record, and another record for each logical network node is connected to.
+
+For example:
+
+```yaml
+all:
+  hosts:
+    node001:
+      network_interfaces:
+        - interface: eth1
+          ip4: 10.10.3.1
+          mac: 08:00:27:0d:44:90
+          network: net-admin
+        - interface: eth0
+          skip: true
+        - interface: ib0
+          ip4: 10.20.3.1
+          network: interconnect
+          type: infiniband
+```
+
+Will generate the following forward records:
+
+* node001 -> 10.10.3.1
+* node001-net-admin -> 10.10.3.1
+* node001-interconnect -> 10.20.3.1
+
+The role also supports alias and will generate a forward record on them too.
+
+```yaml
+all:
+  hosts:
+    node001:
+      alias:
+        - foo
+        - bar
+      network_interfaces:
+        - interface: eth1
+          ip4: 10.10.3.1
+          mac: 08:00:27:0d:44:90
+          network: net-admin
+        - interface: eth0
+          skip: true
+        - interface: ib0
+          ip4: 10.20.3.1
+          network: interconnect
+          type: infiniband
+```
+
+* node001 -> 10.10.3.1
+* node001-net-admin -> 10.10.3.1
+* node001-interconnect -> 10.20.3.1
+* foo -> 10.10.3.1
+* bar -> 10.10.3.1
+
+### Forward and recursion
 
 To configure forwarding and integrate this dns server into an existing IT
 configuration, set variable `dns_server_forwarders` as a list of target forwarders.
@@ -45,13 +146,19 @@ configuration, set variable `dns_server_forwarders` as a list of target forwarde
 ```yaml
 dns_server_forwarders:
   - 8.8.8.8
+  - 8.8.4.4
 ```
+
 You can enable recursion with the forwarders configuration using the following variable:
 ```yaml
 dns_server_recursion: yes
 ```
 
-To optionally override the IP addresses returned by certain host you can define `dns_server_overrides` variable, like the following content for example:
+## Advanced usage
+
+### Override zone
+
+To optionally override the IP addresses returned by certain host (`response-policy` bind parameter) you can define `dns_server_overrides` variable, like the following content for example:
 
 ```yaml
 dns_server_overrides:
@@ -61,8 +168,6 @@ dns_server_overrides:
 In this example, DNS look-ups for *0.uk.pool.ntp.org* will return *10.11.0.1*.
 
 This will cause `/var/named/override` to be generated.
-
-## Advanced usage
 
 ### Extended naming
 
@@ -112,8 +217,22 @@ dns_server_forward_only_domains:
     forwarder_ip: 10.10.5.10
 ```
 
+### Raw content
+
+You can add additional raw content to named.conf file using the `dns_server_raw_content` key:
+
+```yaml
+dns_server_raw_content: |  
+  zone "localhost" {
+    type primary;
+    file "master/localhost-forward.db";
+    notify no;
+  };
+```
+
 ## Changelog
 
+* 1.10.2: Fix role for Ubuntu and Debian distributions. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.10.1: Fix extended names for all zones. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.10.0: Add forward only domains. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.9.0: Allow services and services_ip together. Benoit Leveugle <benoit.leveugle@gmail.com>

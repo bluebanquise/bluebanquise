@@ -55,10 +55,10 @@
     group: "{{ dns_server_dns_user }}"
     mode: 0750
 
-- name: template <|> Generate /etc/named.conf
+- name: template <|> Generate named main configuration file
   ansible.builtin.template:
     src: named.conf.j2
-    dest: /etc/named.conf
+    dest: "{{ dns_server_configuration_file }}"
     owner: root
     group: root
     mode: 0644

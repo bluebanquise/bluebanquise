@@ -9,12 +9,15 @@ options {
   {% if (networks[network]['dns_server'] | default(true)) and networks[network]['services'] is defined and networks[network]['services'] is iterable and networks[network]['services'] is not string and networks[network]['services'] is mapping and (networks[network]['services']['dns4'] | default(networks[network]['services']['dns'], true)) is defined and (networks[network]['services']['dns4'] | default(networks[network]['services']['dns'], true)) is iterable and (networks[network]['services']['dns4'] | default(networks[network]['services']['dns'], true)) is not string and (networks[network]['services']['dns4'] | default(networks[network]['services']['dns'], true)) is not mapping %}
     {% for dns4 in (networks[network]['services']['dns4'] | default(networks[network]['services']['dns'], true)) %}
       {% if dns4.ip4 is defined and (dns4.ip4 | ansible.utils.ipaddr) %}
-  {{ dns4.ip4 }};
+    {{ dns4.ip4 }};
       {% endif %}
     {% endfor %}
   {% elif (networks[network]['dns_server'] | default(true)) and networks[network]['services_ip'] is defined and (networks[network]['services_ip'] | ansible.utils.ipaddr) %}
     {{ networks[network]['services_ip'] }};
   {% endif %}
+{% endfor %}
+{% for listen in dns_server_listen_on_ip4 %}
+    {{ listen }};
 {% endfor %}
   };
 
@@ -50,12 +53,7 @@ options {
   };
 {% endif %}
 
-  dnssec-enable {{ dns_server_dnssec_enable }};
   dnssec-validation {{ dns_server_dnssec_validation }};
-  dnssec-lookaside {{ dns_server_dnssec_lookaside }};
-
-  /* Path to ISC DLV key */
-  bindkeys-file "/etc/named.iscdlv.key";
 
   managed-keys-directory "{{ dns_server_managed_keys_dir }}";
 
@@ -114,5 +112,12 @@ zone "{{ forward_only_domain['domain'] }}" IN {
   {% endfor %}
 {% endif %}
 
-include "/etc/named.rfc1912.zones";
+{% if dns_server_rfc_zone_file is defined %}
+include "{{ dns_server_rfc_zone_file }}";
+{% endif %}
+
 include "{{ dns_server_root_key_file }}";
+
+{% if dns_server_raw_content is defined %}
+{{ dns_server_raw_content }}
+{% endif %}
