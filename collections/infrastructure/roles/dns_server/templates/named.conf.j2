@@ -108,7 +108,6 @@ zone "{{ forward_only_domain['domain'] }}" IN {
 {% endif %}
 
 {% if ansible_distribution != 'Debian' and ansible_distribution != 'Ubuntu'%}
-{% if %}
 zone "." IN {
   type hint;
   file "{{ dns_server_root_hint_file }}";
