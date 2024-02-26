@@ -515,13 +515,13 @@ while True:
 
         for count, value in enumerate(file_lines):
             if "set image-kernel" in value:
-                file_lines[count] = "set image-kernel vmlinuz-" + kernel_selected
+                file_lines[count] = "set image-kernel vmlinuz-" + kernel_selected + "\n"
             if "set image-initramfs" in value:
-                file_lines[count] = "set image-initramfs initramfs-" + kernel_selected + ".img"
+                file_lines[count] = "set image-initramfs initramfs-" + kernel_selected + ".img" + "\n"
 
         try:
             ipxe_file = open(tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/boot.ipxe", "w")
-            ipxe_file.write(file_lines)
+            ipxe_file.writelines(file_lines)
             ipxe_file.close()
         except Exception:
             print(bcolors.FAIL + " An error occurred writing the file " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/boot.ipxe. Please investigate." + bcolors.ENDC)
@@ -530,11 +530,13 @@ while True:
         logging.info(bcolors.OKBLUE + 'Copying new kernel from nfs image to http folder...' + bcolors.ENDC)
 
         if image_selected_metadata['family'] == "el9":
-            protected_os_system("cp " + tool_parameters['nfs_path'] + "/" + image_selected_input + "/boot/initramfs-" + kernel_selected + ".img " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/initramfs-" + kernel_selected + ".img")
-            protected_os_system("cp " + tool_parameters['nfs_path'] + "/" + image_selected_input + "/lib/modules/" + kernel_selected + "/vmlinuz " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/vmlinuz-" + kernel_selected)
+            protected_os_system("cp -a " + tool_parameters['nfs_path'] + "/" + image_selected_input + "/boot/initramfs-" + kernel_selected + ".img " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/initramfs-" + kernel_selected + ".img")
+            protected_os_system("cp -a " + tool_parameters['nfs_path'] + "/" + image_selected_input + "/lib/modules/" + kernel_selected + "/vmlinuz " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/vmlinuz-" + kernel_selected)
+            protected_os_system("chmod 644 " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/initramfs-*")
         elif image_selected_metadata['family'] == "el8":
-            protected_os_system("cp " + tool_parameters['nfs_path'] + "/" + image_selected_input + "/boot/initramfs-" + kernel_selected + ".img " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/initramfs-" + kernel_selected + ".img")
-            protected_os_system("cp " + tool_parameters['nfs_path'] + "/" + image_selected_input + "/boot/vmlinuz-" + kernel_selected + " " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/vmlinuz-" + kernel_selected)
+            protected_os_system("cp -a " + tool_parameters['nfs_path'] + "/" + image_selected_input + "/boot/initramfs-" + kernel_selected + ".img " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/initramfs-" + kernel_selected + ".img")
+            protected_os_system("cp -a " + tool_parameters['nfs_path'] + "/" + image_selected_input + "/boot/vmlinuz-" + kernel_selected + " " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/vmlinuz-" + kernel_selected)
+            protected_os_system("chmod 644 " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/initramfs-*")
         else:
             print(" Sorry, image family " + image_selected_metadata['family'] + " is unknown :( , aborting.")
             quit(1)
