@@ -6,7 +6,7 @@
 
 include "{{ dns_server_configuration_options_file }}";
 include "{{ dns_server_configuration_local_file }}";
-{% if {{ dns_server_configuration_default_zones_file }} is defined %}
+{% if dns_server_configuration_default_zones_file is defined %}
 include "{{ dns_server_configuration_default_zones_file }}";
 {% endif %}
 
