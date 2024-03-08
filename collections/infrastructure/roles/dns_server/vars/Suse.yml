@@ -8,9 +8,8 @@ dns_server_firewall_services_to_add:
 
 dns_server_dns_user: named
 
-dns_server_log_dir: /var/log/named
-
 dns_server_var_dir: /var/lib/named
+dns_server_log_dir: /var/lib/named/data
 dns_server_dump_file: /var/log/named_dump.db
 dns_server_localhost_file: /var/lib/named/localhost.zone
 dns_server_loopback_file: /var/lib/named/127.0.0.1.zone
