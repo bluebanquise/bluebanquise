@@ -48,6 +48,8 @@
   {% set ipxe_embed = 'dhcpretry' %}
 {% elif dhcp_server_ipxe_embed == 'noshell' %}
   {% set ipxe_embed = 'noshell' %}
+{% elif dhcp_server_ipxe_embed == 'allretry' %}
+  {% set ipxe_embed = 'allretry' %}
 {% else %}{# Assume everything else is standard script #}
   {% set ipxe_embed = 'standard' %}
 {% endif %}

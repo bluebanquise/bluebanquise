@@ -67,11 +67,34 @@
     - "{{ dns_server_managed_keys_dir }}"
     - "{{ dns_server_var_dir }}"
     - "{{ dns_server_var_dir  }}/data"
+    - "{{ dns_server_var_dir  }}/dynamic"
 
 - name: template <|> Generate named main configuration file
   ansible.builtin.template:
     src: named.conf.j2
     dest: "{{ dns_server_configuration_file }}"
+    owner: root
+    group: root
+    mode: 0644
+  notify: service <|> Restart dns services
+  tags:
+    - template
+
+- name: template <|> Generate named options configuration file
+  ansible.builtin.template:
+    src: named.conf.options.j2
+    dest: "{{ dns_server_configuration_options_file }}"
+    owner: root
+    group: root
+    mode: 0644
+  notify: service <|> Restart dns services
+  tags:
+    - template
+
+- name: template <|> Generate named local configuration file
+  ansible.builtin.template:
+    src: named.conf.local.j2
+    dest: "{{ dns_server_configuration_local_file }}"
     owner: root
     group: root
     mode: 0644
