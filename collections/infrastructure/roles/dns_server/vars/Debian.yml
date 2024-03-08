@@ -17,7 +17,11 @@ dns_server_mem_stats_file: /var/cache/bind/data/named_mem_stats.txt
 dns_server_statistics_file: /var/cache/bind/data/named_stats.txt
 
 dns_server_named_dir: /etc/bind
-dns_server_configuration_file: /etc/bind/named.conf.options
+dns_server_configuration_file: /etc/bind/named.conf
+dns_server_configuration_options_file: /etc/bind/named.conf.options
+dns_server_configuration_local_file: /etc/bind/named.conf.local
+dns_server_configuration_default_zones_file: /etc/bind/named.conf.default-zones
+
 dns_server_rfc_zone_file: /etc/bind/zones.rfc1918
 dns_server_root_hint_file: /usr/share/dns/root.hints
 dns_server_root_key_file: /usr/share/dns/root.key
