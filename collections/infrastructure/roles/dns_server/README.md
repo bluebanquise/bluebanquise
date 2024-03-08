@@ -230,6 +230,13 @@ dns_server_raw_content: |
   };
 ```
 
+If your content have to be added to options, uses the
+
+```yaml
+dns_server_raw_options_content: |  
+  also-notify port 5353;
+```
+
 ## Changelog
 
 * 1.10.2: Fix role for Ubuntu and Debian distributions. Benoit Leveugle <benoit.leveugle@gmail.com>
