@@ -21,7 +21,7 @@ dns_server_named_dir: /etc/named.d
 dns_server_configuration_file: /etc/named.conf
 dns_server_configuration_options_file: /etc/named.d/named.conf.options
 dns_server_configuration_local_file: /etc/named.d/named.conf.local
-dns_server_configuration_default_zones_file: /etc/named.d/named.conf.default-zones
+#dns_server_configuration_default_zones_file: /etc/named.d/named.conf.default-zones
 
 # NA dns_server_rfc_zone_file: /etc/bind/zones.rfc1918
 dns_server_root_hint_file: /var/lib/named/root.hint

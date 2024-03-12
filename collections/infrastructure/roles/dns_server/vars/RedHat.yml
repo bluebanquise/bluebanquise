@@ -18,10 +18,10 @@ dns_server_mem_stats_file: /var/named/data/named_mem_stats.txt
 dns_server_statistics_file: /var/named/data/named_stats.txt
 
 dns_server_named_dir: /etc/named
-dns_server_configuration_file: /etc/named/named.conf
+dns_server_configuration_file: /etc/named.conf
 dns_server_configuration_options_file: /etc/named/named.conf.options
 dns_server_configuration_local_file: /etc/named/named.conf.local
-dns_server_configuration_default_zones_file: /etc/named/named.conf.default-zones
+#dns_server_configuration_default_zones_file: /etc/named/named.conf.default-zones
 
 dns_server_rfc_zone_file: /etc/named.rfc1912.zones
 dns_server_root_hint_file: /var/named/named.ca
