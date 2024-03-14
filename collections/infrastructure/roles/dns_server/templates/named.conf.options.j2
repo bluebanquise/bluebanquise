@@ -1,0 +1,82 @@
+#jinja2: lstrip_blocks: True
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+
+## Options for BIND9 dns server
+
+options {
+  listen-on port 53 {
+    127.0.0.1;
+{% for network in j2_management_networks %}
+  {% if (networks[network]['dns_server'] | default(true)) and networks[network]['services'] is defined and networks[network]['services'] is iterable and networks[network]['services'] is not string and networks[network]['services'] is mapping and (networks[network]['services']['dns4'] | default(networks[network]['services']['dns'], true)) is defined and (networks[network]['services']['dns4'] | default(networks[network]['services']['dns'], true)) is iterable and (networks[network]['services']['dns4'] | default(networks[network]['services']['dns'], true)) is not string and (networks[network]['services']['dns4'] | default(networks[network]['services']['dns'], true)) is not mapping %}
+    {% for dns4 in (networks[network]['services']['dns4'] | default(networks[network]['services']['dns'], true)) %}
+      {% if dns4.ip4 is defined and (dns4.ip4 | ansible.utils.ipaddr) %}
+    {{ dns4.ip4 }};
+      {% endif %}
+    {% endfor %}
+  {% elif (networks[network]['dns_server'] | default(true)) and networks[network]['services_ip'] is defined and (networks[network]['services_ip'] | ansible.utils.ipaddr) %}
+    {{ networks[network]['services_ip'] }};
+  {% endif %}
+{% endfor %}
+{% for listen in dns_server_listen_on_ip4 %}
+    {{ listen }};
+{% endfor %}
+  };
+
+  listen-on-v6 port 53 { ::1; };
+  directory 	"{{ dns_server_var_dir }}";
+  dump-file 	"{{ dns_server_dump_file }}";
+  statistics-file "{{ dns_server_statistics_file }}";
+  memstatistics-file "{{ dns_server_mem_stats_file }}";
+
+  allow-query {
+    localhost;
+{% for network in j2_management_networks %}
+  {% if (networks[network]['dns_server'] | default(true)) %}
+    {{ networks[network]['subnet'] }}/{{ networks[network]['prefix'] }};
+  {% endif %}
+{% endfor %}
+{% for allow_query in dns_server_allow_query %}
+    {{ allow_query }};
+{% endfor %}
+  };
+
+{% if dns_server_recursion %}
+  recursion yes;
+{% else %}
+  recursion no;
+{% endif %}
+
+{% if (dns_server_forwarders | length) > 0 %}
+  forwarders {
+  {% for forwarder in dns_server_forwarders %}
+    {{ forwarder }};
+  {% endfor %}
+  };
+{% endif %}
+
+  dnssec-validation {{ dns_server_dnssec_validation }};
+
+  managed-keys-directory "{{ dns_server_managed_keys_dir }}";
+
+  pid-file "/run/named/named.pid";
+  session-keyfile "/run/named/session.key";
+
+{% if dns_server_overrides is defined %}
+  response-policy { zone "override"; };
+{% endif %}
+};
+
+logging {
+  channel default_debug {
+    file "{{ dns_server_log_dir }}/named.log";
+    severity dynamic;
+  };
+
+{% if dns_server_raw_options_content is defined %}
+## Raw options content from user
+
+{{ dns_server_raw_options_content }}
+{% endif %}
+
+};

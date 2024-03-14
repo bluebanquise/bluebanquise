@@ -2,16 +2,25 @@
 dns_server_packages_to_install:
   - bind9
 dns_server_services_to_start:
-  - named
-dns_server_dump_file: /var/named/data/cache_dump.db
-dns_server_localhost_file: /var/named/named.localhost
-dns_server_log_dir: data
-dns_server_loopback_file: /var/named/named.loopback
-dns_server_managed_keys_dir: /var/named/dynamic
-dns_server_mem_stats_file: /var/named/data/named_mem_stats.txt
-dns_server_named_dir: /etc/named
-dns_server_root_hint_file: named.ca
-dns_server_root_key_file: /etc/named.root.key
-dns_server_statistics_file: /var/named/data/named_stats.txt
-dns_server_var_dir: /var/named
+  - bind9
+
 dns_server_dns_user: bind
+
+dns_server_var_dir: /var/cache/bind
+dns_server_log_dir: /var/cache/bind/data
+dns_server_dump_file: /var/cache/bind/data/cache_dump.db
+dns_server_localhost_file: /var/cache/bind/named.localhost
+dns_server_loopback_file: /var/cache/bind/named.loopback
+dns_server_managed_keys_dir: /var/cache/bind/dynamic
+dns_server_mem_stats_file: /var/cache/bind/data/named_mem_stats.txt
+dns_server_statistics_file: /var/cache/bind/data/named_stats.txt
+
+dns_server_named_dir: /etc/bind
+dns_server_configuration_file: /etc/bind/named.conf
+dns_server_configuration_options_file: /etc/bind/named.conf.options
+dns_server_configuration_local_file: /etc/bind/named.conf.local
+dns_server_configuration_default_zones_file: /etc/bind/named.conf.default-zones
+
+dns_server_rfc_zone_file: /etc/bind/zones.rfc1918
+dns_server_root_hint_file: /usr/share/dns/root.hints
+dns_server_root_key_file: /usr/share/dns/root.key

@@ -2,117 +2,16 @@
 #### Blue Banquise file ####
 ## {{ ansible_managed }}
 
-options {
-  listen-on port 53 {
-    127.0.0.1;
-{% for network in j2_management_networks %}
-  {% if (networks[network]['dns_server'] | default(true)) and networks[network]['services'] is defined and networks[network]['services'] is iterable and networks[network]['services'] is not string and networks[network]['services'] is mapping and (networks[network]['services']['dns4'] | default(networks[network]['services']['dns'], true)) is defined and (networks[network]['services']['dns4'] | default(networks[network]['services']['dns'], true)) is iterable and (networks[network]['services']['dns4'] | default(networks[network]['services']['dns'], true)) is not string and (networks[network]['services']['dns4'] | default(networks[network]['services']['dns'], true)) is not mapping %}
-    {% for dns4 in (networks[network]['services']['dns4'] | default(networks[network]['services']['dns'], true)) %}
-      {% if dns4.ip4 is defined and (dns4.ip4 | ansible.utils.ipaddr) %}
-  {{ dns4.ip4 }};
-      {% endif %}
-    {% endfor %}
-  {% elif (networks[network]['dns_server'] | default(true)) and networks[network]['services_ip'] is defined and (networks[network]['services_ip'] | ansible.utils.ipaddr) %}
-    {{ networks[network]['services_ip'] }};
-  {% endif %}
-{% endfor %}
-  };
+## This is the primary configuration file for the BIND DNS server named.
 
-  listen-on-v6 port 53 { ::1; };
-  directory 	"{{ dns_server_var_dir }}";
-  dump-file 	"{{ dns_server_dump_file }}";
-  statistics-file "{{ dns_server_statistics_file }}";
-  memstatistics-file "{{ dns_server_mem_stats_file }}";
-
-  allow-query {
-    localhost;
-{% for network in j2_management_networks %}
-  {% if (networks[network]['dns_server'] | default(true)) %}
-    {{ networks[network]['subnet'] }}/{{ networks[network]['prefix'] }};
-  {% endif %}
-{% endfor %}
-{% for allow_query in dns_server_allow_query %}
-    {{ allow_query }};
-{% endfor %}
-  };
-
-{% if dns_server_recursion %}
-  recursion yes;
-{% else %}
-  recursion no;
+include "{{ dns_server_configuration_options_file }}";
+include "{{ dns_server_configuration_local_file }}";
+{% if dns_server_configuration_default_zones_file is defined %}
+include "{{ dns_server_configuration_default_zones_file }}";
 {% endif %}
 
-{% if (dns_server_forwarders | length) > 0 %}
-  forwarders {
-  {% for forwarder in dns_server_forwarders %}
-    {{ forwarder }};
-  {% endfor %}
-  };
+{% if dns_server_raw_content is defined %}
+## Raw content from user
+
+{{ dns_server_raw_content }}
 {% endif %}
-
-  dnssec-enable {{ dns_server_dnssec_enable }};
-  dnssec-validation {{ dns_server_dnssec_validation }};
-  dnssec-lookaside {{ dns_server_dnssec_lookaside }};
-
-  /* Path to ISC DLV key */
-  bindkeys-file "/etc/named.iscdlv.key";
-
-  managed-keys-directory "{{ dns_server_managed_keys_dir }}";
-
-  pid-file "/run/named/named.pid";
-  session-keyfile "/run/named/session.key";
-
-{% if dns_server_overrides is defined %}
-  response-policy { zone "override"; };
-{% endif %}
-};
-
-logging {
-  channel default_debug {
-    file "{{ dns_server_log_dir }}/named.run";
-    severity dynamic;
-  };
-};
-
-zone "." IN {
-  type hint;
-  file "{{ dns_server_root_hint_file }}";
-};
-
-zone "{{ bb_domain_name | default(dns_server_domain_name) }}" IN {
-  type master;
-  file "{{ dns_server_named_dir }}/forward.zone";
-  allow-update { none; };
-};
-
-{% macro create_reverse_zone(octets) -%}
-zone "{{ octets.split('.') | reverse | join('.') }}.in-addr.arpa" IN {
-   type master;
-   file "{{ dns_server_named_dir }}/{{ octets }}.rr.zone";
-   allow-update { none; };
-};
-{%- endmacro %}
-
-{% for ip_prefix in dns_server_j2_get_first_octets.split(',') %}
-{{ create_reverse_zone(ip_prefix) }}
-{% endfor %}
-
-{% if dns_server_overrides is defined %}
-zone "override" {
-  type master;
-  file "{{ dns_server_named_dir }}/override.zone";
-};
-{% endif %}
-
-{% if dns_server_forward_only_domains is defined %}
-  {% for forward_only_domain in dns_server_forward_only_domains %}
-zone "{{ forward_only_domain['domain'] }}" IN {
-        type forward;
-        forward only;
-        forwarders { {{ forward_only_domain['forwarder_ip'] }}; };
-};
-  {% endfor %}
-{% endif %}
-
-include "/etc/named.rfc1912.zones";
-include "{{ dns_server_root_key_file }}";

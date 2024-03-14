@@ -1,0 +1,63 @@
+#jinja2: lstrip_blocks: True
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+
+{% macro create_reverse_zone(octets) -%}
+zone "{{ octets.split('.') | reverse | join('.') }}.in-addr.arpa" IN {
+   type master;
+   file "{{ dns_server_named_dir }}/{{ octets }}.rr.zone";
+   allow-update { none; };
+};
+{%- endmacro %}
+
+
+## Local server zones
+
+{% if ansible_distribution != 'Debian' and ansible_distribution != 'Ubuntu'%}
+zone "." IN {
+  type hint;
+  file "{{ dns_server_root_hint_file }}";
+};
+
+include "{{ dns_server_root_key_file }}";
+{% endif %}
+
+{% if dns_server_rfc_zone_file is defined %}
+include "{{ dns_server_rfc_zone_file }}";
+{% endif %}
+
+## Forward zones
+
+zone "{{ bb_domain_name | default(dns_server_domain_name) }}" IN {
+  type master;
+  file "{{ dns_server_named_dir }}/forward.zone";
+  allow-update { none; };
+};
+
+{% if dns_server_forward_only_domains is defined %}
+  {% for forward_only_domain in dns_server_forward_only_domains %}
+zone "{{ forward_only_domain['domain'] }}" IN {
+        type forward;
+        forward only;
+        forwarders { {{ forward_only_domain['forwarder_ip'] }}; };
+};
+  {% endfor %}
+{% endif %}
+
+{% if dns_server_overrides is defined %}
+## Override zone
+
+zone "override" {
+  type master;
+  file "{{ dns_server_named_dir }}/override.zone";
+};
+{% endif %}
+
+## Reverse zones
+
+{% for ip_prefix in dns_server_j2_get_first_octets.split(',') %}
+{{ create_reverse_zone(ip_prefix) }}
+{% endfor %}
+
+
+
