@@ -1,0 +1,7 @@
+all:
+  hosts:
+    security1:
+      network_interfaces:
+        - interface: eth0
+          ip4: 10.1.0.77
+          network: net1-1

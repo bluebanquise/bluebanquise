@@ -1,0 +1,17 @@
+[fn_management]
+management1
+management2
+management3
+
+[fn_compute]
+c[001:006]
+gpu[001:002]
+
+[fn_storage]
+storage1
+
+[fn_loging]
+login1
+
+[fn_security]
+security1

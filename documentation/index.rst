@@ -29,6 +29,7 @@ This documentation is under Creative Commons Attribution-NonCommercial-ShareAlik
    vocabulary
    configure_bluebanquise
    deploy_cluster
+   multiple_icebergs
    variables_description
    advanced_usage
 

@@ -110,6 +110,9 @@ At host hostvars level.
 
 ## Multiple iceberg usage
 
+**IMPORTANT: this part of the code is no more maintained, please do not use it.
+Open a request on github if you need it.**
+
 The ssh_master role allows to enable ssh ProxyJump to ssh from a top iceberg to
 hosts of a sub_iceberg, through one master of the sub_iceberg.
 This allows simple central point to ansible-playbook.
@@ -135,8 +138,8 @@ ssh_master_iceberg_jump_target:
 
 ```
 [iceberg3:vars]
-iceberg_master = iceberg1
-iceberg_level = 2
+bb_iceberg_master = iceberg1
+bb_iceberg_level = 2
 ssh_master_iceberg_jump_target = 10.10.0.77
 ```
 

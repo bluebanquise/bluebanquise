@@ -34,8 +34,8 @@ server {{ networks[j2_node_main_network]['services_ip'] }} iburst
     {% endif %}
 
   {# Server binds to its main network server from upper iceberg, if exist #}
-  {% elif time_profile == 'server' and (bb_icebergs_system is defined and bb_icebergs_system) and (iceberg_master is defined and iceberg_master != "top") %}
-    {% set host_to_be_used_network = j2_icebergs_main_network_dict[iceberg_master] | default(none, true) %}
+  {% elif time_profile == 'server' and (bb_icebergs_system is defined and bb_icebergs_system) and (bb_iceberg_master is defined and bb_iceberg_master != "top") %}
+    {% set host_to_be_used_network = j2_icebergs_main_network_dict[bb_iceberg_master] | default(none, true) %}
     {% if host_to_be_used_network is not none %}
       {% if networks[host_to_be_used_network]['services'] is defined and (networks[host_to_be_used_network]['services']['ntp4'] | default(networks[host_to_be_used_network]['services']['ntp'], true)) is defined and (networks[host_to_be_used_network]['services']['ntp4'] | default(networks[host_to_be_used_network]['services']['ntp'], true)) is iterable and (networks[host_to_be_used_network]['services']['ntp4'] | default(networks[host_to_be_used_network]['services']['ntp'], true)) is not string and (networks[host_to_be_used_network]['services']['ntp4'] | default(networks[host_to_be_used_network]['services']['ntp'], true)) is not mapping %}
         {% for ntp in (networks[host_to_be_used_network]['services']['ntp4'] | default(networks[host_to_be_used_network]['services']['ntp'], true)) %}
@@ -86,11 +86,11 @@ allow {{ add_net }}
 
 # Serve time even if not synchronized to a time source.
 # Fairly unreliable time source
-  {% if iceberg_level is defined and iceberg_level is not none %}
-    {% if (iceberg_level | int) > 3 %}
+  {% if bb_iceberg_level is defined and bb_iceberg_level is not none %}
+    {% if (bb_iceberg_level | int) > 3 %}
 local stratum 15
     {% else %}
-local stratum {{ 12 + (iceberg_level | int) }}
+local stratum {{ 12 + (bb_iceberg_level | int) }}
     {% endif %}
   {% else %}
 local stratum 12

@@ -1,0 +1,32 @@
+# This ultra minimal cluster is composed of only 1 management node and 4 compute nodes, all on RHEL 9, with a single network.
+[all]
+mgt1 network_interfaces="[{'ip4':'10.10.0.1', 'mac':'1a:2b:3c:4d:1e:9f', 'network':'net-admin', 'interface':'enp2s0', 'never_default4':'true'}]"
+c001 network_interfaces="[{'ip4':'10.10.3.1', 'mac':'1a:2b:3c:4d:5e:1f', 'network':'net-admin', 'interface':'enp1s0'}]"
+c002 network_interfaces="[{'ip4':'10.10.3.2', 'mac':'1a:2b:3c:4d:5e:2f', 'network':'net-admin', 'interface':'enp1s0'}]"
+c003 network_interfaces="[{'ip4':'10.10.3.3', 'mac':'1a:2b:3c:4d:5e:3f', 'network':'net-admin', 'interface':'enp1s0'}]"
+c004 network_interfaces="[{'ip4':'10.10.3.4', 'mac':'1a:2b:3c:4d:5e:4f', 'network':'net-admin', 'interface':'enp1s0'}]"
+
+[fn_management]
+mgt1
+
+[fn_compute]
+c00[1:4]
+
+[os_rhel9]
+c00[1:4]
+[os_rhel9:vars]
+os_operating_system={'distribution':"redhat", 'distribution_version':"9", 'distribution_major_version':"9" }
+
+[hw_all]
+c00[1:4]
+mgt1
+[hw_all:vars]
+hw_equipment_type="server"
+
+[all:vars]
+# Define unique network settings
+networks={'net-admin':{'subnet':"10.10.0.0", 'prefix':"16", 'gateway':"10.10.0.1", 'services_ip':"10.10.0.1" }}
+dns_server_dnssec_enable=False
+dns_server_dnssec_validation=False
+dns_server_recursion=True
+dns_server_forwarders=['8.8.8.8', '8.8.4.4']
