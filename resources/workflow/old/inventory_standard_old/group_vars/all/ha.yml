@@ -1,0 +1,34 @@
+haproxy_resources:
+  - type: http_simple
+    name: cluster1
+    bind:
+      ip4: 10.10.0.1
+      port: 80
+    servers:
+      - hostname: mg1
+        ip4: 10.10.0.1
+        port: 80
+      - hostname: mg2
+        ip4: 10.10.0.2
+        port: 80
+
+keepalived_vrrp_instances:
+  - name: VI_1 # Optional, is automatically attributed if not set
+    interface: enp0s3
+    id: 101 # Optional, is automatically attributed if not set
+    servers:
+      - mg1 # First in the list is considered MASTER, with top priority
+      - mg2 # Then others are BACKUP, with pritority ordered as in this list (mg1 > mg2 > mg3)
+      - mg3
+    auth_pass: "<replace me>"
+    advert_int: 1 # Optional, advert interval default to 1s if not set
+    virtual_ipaddress:
+      - 10.10.0.3/16 brd 10.10.255.255 scope global
+  - interface: enp0s8
+    servers:
+      - mg2
+      - mg3
+      - mg1
+    auth_pass: "<replace me>"
+    virtual_ipaddress:
+      - 172.16.0.77/16 brd 172.16.255.255 scope global

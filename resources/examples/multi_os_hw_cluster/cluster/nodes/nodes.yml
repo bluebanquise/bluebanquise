@@ -1,0 +1,135 @@
+all:
+  hosts:
+
+    # Management nodes
+    mgt1:
+      bmc:
+        name: bmgt1
+        ip4: 10.10.100.1
+        network: net-admin
+        mac: 2a:2b:3c:4d:5e:6f
+      network_interfaces:
+        - interface: dummy0 # enp2s0
+          ip4: 10.10.0.1
+          network: net-admin
+          mac: 1a:2b:3c:4d:1e:9f
+          skip: true
+          never_default4: true
+    mgt2:
+      network_interfaces:
+        - ip4: 10.10.0.2
+          mac: 1a:2b:3c:4d:2e:8f
+          network: net-admin
+          interface: enp1s0
+    mgt3:
+      network_interfaces:
+        - ip4: 10.10.0.3
+          mac: 1a:2b:3c:4d:3e:8f
+          network: net-admin
+          interface: enp1s0
+    mgt4:
+      network_interfaces:
+        - ip4: 10.10.0.4
+          mac: 1a:2b:3c:4d:4e:8f
+          network: net-admin
+          interface: eth0
+    mgt5:
+      network_interfaces:
+        - ip4: 10.10.0.5
+          mac: 1a:2b:3c:4d:5e:8f
+          network: net-admin
+          interface: enp1s0
+    mgt6:
+      network_interfaces:
+        - ip4: 10.10.0.6
+          mac: 1a:2b:3c:4d:6e:8f
+          network: net-admin
+          interface: enp1s0
+    mgt7:
+      network_interfaces:
+        - ip4: 10.10.0.7
+          mac: 1a:2b:3c:4d:7e:8f
+          network: net-admin
+          interface: enp1s0
+    mgt8:
+      network_interfaces:
+        - ip4: 10.10.0.8
+          mac: 1a:2b:3c:4d:8e:8f
+          network: net-admin
+          interface: enp1s0
+
+    # A compute node
+    c001:
+      bmc:
+        name: bc001
+        ip4: 10.10.103.1
+        network: net-admin
+        mac: 2a:2b:3c:2d:5e:6f
+      network_interfaces:
+        - interface: enp1s0
+          ip4: 10.10.3.1
+          mac: 1a:2b:3c:4d:5e:9f
+          network: net-admin
+
+    # Remaining is here as test
+    c00dummy:
+    c00dummy2:
+      network_interfaces:
+    c002:
+      network_interfaces:
+        - interface: eno1
+          ip4: 10.10.3.2
+          mac: 1a:2b:3c:4d:5e:9a
+          network: net-admin
+    c003:
+      network_interfaces:
+        - interface: eno1
+          ip4: 10.10.3.3/16
+    c004:
+      ip: 10.10.3.2
+      ansible_host: 10.10.3.2
+      network_interfaces:
+        - interface: eno1
+          ip4: 10.11.3.2
+          network: net-test
+        - interface: eno1
+          ip4: 10.10.3.2
+          mac: 1a:2b:3c:4d:5e:8f
+          network: net-admin
+
+    # A compute node
+    c005:
+      bmc:
+        name: bc005
+        ip4: 10.10.103.5
+        network: net-admin
+        mac: 2a:2b:3c:2d:5e:65
+      network_interfaces:
+        - interface: enp1s0
+          ip4: 10.10.3.5
+          mac: 1a:2b:3c:4d:5e:95
+          network: net-admin
+    # A compute node
+    c006:
+      bmc:
+        name: bc006
+        ip4: 10.10.103.6
+        network: net-admin
+        mac: 2a:2b:3c:2d:5e:66
+      network_interfaces:
+        - interface: enp1s0
+          ip4: 10.10.3.6
+          mac: 1a:2b:3c:4d:5e:96
+          network: net-admin
+    # A compute node
+    c007:
+      bmc:
+        name: bc007
+        ip4: 10.10.103.7
+        network: net-admin
+        mac: 2a:2b:3c:2d:5e:67
+      network_interfaces:
+        - interface: enp1s0
+          ip4: 10.10.3.7
+          mac: 1a:2b:3c:4d:5e:97
+          network: net-admin

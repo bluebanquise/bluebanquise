@@ -1,7 +1,7 @@
 ### Network related settings
 
 ## DNS
-domain_name: tumulus.local
+bb_domain_name: tumulus.local
 
 ## Logical networks
 networks:

@@ -1,0 +1,4 @@
+os_operating_system:
+  distribution: "redhat"
+  distribution_version: "8"
+  distribution_major_version: "8"
