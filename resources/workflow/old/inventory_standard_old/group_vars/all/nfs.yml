@@ -1,0 +1,12 @@
+nfs_shares:
+    - mount: /test
+      export: /dev/shm/test/
+      server: mgt1
+      clients_groups:
+        - mg_computes
+        - mg_managements
+      take_over_network: net-admin
+      export_options: ro,async
+      mount_options: ro,nfsvers=4.2,bg
+
+nfs_client_directories_state: present

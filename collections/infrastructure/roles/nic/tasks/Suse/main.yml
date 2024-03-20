@@ -101,6 +101,7 @@
     wifi_sec: "{{ item.wifi_sec | default(omit) }}"
     wireguard: "{{ item.wireguard | default(omit) }}"
     xmit_hash_policy: "{{ item.xmit_hash_policy | default(omit) }}"
+    slave_type: "{{ item.slave_type | default(omit) }}"
   notify: command <|> Reload connections
   loop: "{{ network_interfaces }}"
   register: nic_apply

@@ -1,0 +1,58 @@
+all:
+  hosts:
+    c005:
+      bmc:
+        name: bc005
+        ip4: 10.3.103.1
+        mac: 08:00:27:0d:f8:a5
+        network: net3-1
+      network_interfaces:
+        - interface: enp0s3
+          ip4: 10.3.3.1
+          mac: 08:00:27:0d:f8:a6
+          network: net3-1
+        - interface: ib0
+          ip4: 10.20.3.5
+          network: interconnect-1
+    c006:
+      bmc:
+        name: bc006
+        ip4: 10.3.103.2
+        mac: 08:00:27:0d:f8:b5
+        network: net3-1
+      network_interfaces:
+        - interface: enp0s3
+          ip4: 10.3.3.2
+          mac: 08:00:27:0d:f8:b6
+          network: net3-1
+        - interface: ib0
+          ip4: 10.20.3.6
+          network: interconnect-1
+    gpu001:
+      bmc:
+        name: bgpu001
+        ip4: 10.4.103.1
+        mac: 08:00:27:0d:f8:c5
+        network: net4-1
+      network_interfaces:
+        - interface: enp0s3
+          ip4: 10.4.3.1
+          mac: 08:00:27:0d:f8:c6
+          network: net4-1
+        - interface: ib0
+          ip4: 10.20.3.7
+          network: interconnect-1
+    gpu002:
+      bmc:
+        name: bgpu002
+        ip4: 10.4.103.2
+        mac: 08:00:27:0d:f8:d5
+        network: net4-1
+      network_interfaces:
+        - interface: enp0s3
+          ip4: 10.4.3.2
+          mac: 08:00:27:0d:f8:d6
+          network: net4-1
+        - interface: ib0
+          ip4: 10.20.3.8
+          network: interconnect-1

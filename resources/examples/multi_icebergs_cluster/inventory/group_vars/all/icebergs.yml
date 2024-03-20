@@ -1,0 +1,2 @@
+# Internal mechanisms
+bb_icebergs_system: true  # Activate or deactivate icebergs topology system.

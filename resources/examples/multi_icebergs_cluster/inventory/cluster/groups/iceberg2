@@ -1,0 +1,7 @@
+[iceberg2:vars]
+bb_iceberg_master = iceberg1
+bb_iceberg_level = 2
+
+[iceberg2]
+management2
+c[001:004]
