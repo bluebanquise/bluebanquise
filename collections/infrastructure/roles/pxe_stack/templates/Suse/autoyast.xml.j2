@@ -1,4 +1,11 @@
 #jinja2: lstrip_blocks: True
+<!-- #### Blue Banquise file ####
+## {{ ansible_managed }} -->
+
+{% if hostvars[groups[os_profile][0]]['os_autoinstall_raw_file'] is defined %}
+{{ hostvars[groups[os_profile][0]]['os_autoinstall_raw_file'] }}
+{% else %}
+
 <?xml version="1.0"?>
 <!DOCTYPE profile>
 <profile xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http://www.suse.com/1.0/configns">
@@ -225,7 +232,4 @@ sed -i "s/enabled=1/enabled=0/" /etc/zypp/repos.d/repo-*
 
 </profile>
 
-
-
-
-
+{% endfi %}

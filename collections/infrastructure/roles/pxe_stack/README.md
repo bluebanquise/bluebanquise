@@ -300,6 +300,10 @@ Please note that this is RAW. So you HAVE TO adapt the content to the target dis
 * For Ubuntu, this is curtin/cloud-config syntax (already placed under `autoinstall` and auto indented by 2 space).
 * For SUSE, this is autoyast syntax (inside `<profile>...</profile>`).
 
+It is also possible to fully replace autoinstallation file, by setting the `os_autoinstall_raw_file` value.
+If set, this multi lines string will **FULLY** replace the content of the BlueBanquise generated autoinstallation file.
+Of course, it is expected that user will provide syntax matching target os (kickstart, preseed, autoyast, or cloudinit/curtin).
+
 #### Proxy during PXE
 
 It is possible to set an http proxy server during PXE.
@@ -683,6 +687,7 @@ Note that using an home folder into /home for the bluebanquise sudo user can be 
 
 ## Changelog
 
+* 1.12.0: Add raw content and proxies. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.11.1: Fix kernel upgrade option in bluebanquise-diskless. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.11.0: Add ability to select target disk with auto partitioning. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.10.0: Add ability to set sudo user uid and gid. Benoit Leveugle <benoit.leveugle@gmail.com>

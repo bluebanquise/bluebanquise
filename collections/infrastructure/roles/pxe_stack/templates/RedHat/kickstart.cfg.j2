@@ -1,6 +1,10 @@
 #### Blue Banquise file ####
 ## {{ ansible_managed }}
 
+{% if hostvars[groups[os_profile][0]]['os_autoinstall_raw_file'] is defined %}
+{{ hostvars[groups[os_profile][0]]['os_autoinstall_raw_file'] }}
+{% else %}
+
 ##### General settings
 
 # Custom scripts or kickstart content
@@ -150,3 +154,5 @@ set +x
 %end
 
 {{ hostvars[groups[os_profile][0]]['os_autoinstall_raw_content'] | default(pxe_stack_os_autoinstall_raw_content) }}
+
+{% endif %}
