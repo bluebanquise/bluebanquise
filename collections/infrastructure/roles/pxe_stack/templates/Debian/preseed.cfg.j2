@@ -26,7 +26,7 @@ d-i netcfg/get_domain seen true
 d-i mirror/country string manual
 d-i mirror/http/hostname string deb.debian.org
 d-i mirror/http/directory string /debian
-d-i mirror/http/proxy string
+d-i mirror/http/proxy string {{ hostvars[groups[os_profile][0]]['os_pxe_repository_proxy'] | default(pxe_stack_os_pxe_repository_proxy, true) }}
 
 ### Time
 d-i clock-setup/utc-auto boolean true
@@ -112,3 +112,5 @@ d-i preseed/late_command string \
   in-target for I in `cat /proc/cmdline | tr " " "\n" | grep -E "^(node_hostname|ipxe_next_server)="` ; do eval $I; done; \
   in-target echo Next server is $ipxe_next_server; \
   in-target curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$node_hostname&boot=disk";
+
+{{ hostvars[groups[os_profile][0]]['os_autoinstall_raw_content'] | default(pxe_stack_os_autoinstall_raw_content) }}

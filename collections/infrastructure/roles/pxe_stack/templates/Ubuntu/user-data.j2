@@ -1,6 +1,10 @@
 #jinja2: lstrip_blocks: "True"
 #cloud-config
 autoinstall:
+{% if (hostvars[groups[os_profile][0]]['os_pxe_repository_proxy'] | default(pxe_stack_os_pxe_repository_proxy, true) | default(none, true)) is not none %}
+  proxy: {{ hostvars[groups[os_profile][0]]['os_pxe_repository_proxy'] | default(pxe_stack_os_pxe_repository_proxy, true) }}
+{% endif %}
+  apt_proxy: os_pxe_repository_proxy
   version: 1
   apt:
     geoip: false
@@ -55,3 +59,4 @@ autoinstall:
 {% endif %}
     - curtin in-target --target=/target -- sh -c 'for I in `cat /proc/cmdline | tr " " "\n" | grep -E "^(node_hostname|ipxe_next_server)="` ; do eval $I; done; curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$node_hostname&boot=disk"'
 
+{{ hostvars[groups[os_profile][0]]['os_autoinstall_raw_content'] | default(pxe_stack_os_autoinstall_raw_content) | indent(2, True) }}

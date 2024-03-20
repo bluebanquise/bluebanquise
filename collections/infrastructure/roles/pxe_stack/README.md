@@ -290,6 +290,36 @@ bb_time_zone: Europe/Brussels
 
 Since it is a global cluster setting, time zone is not defined at equipment level.
 
+#### Raw content
+
+You can add raw content to auto install files using the `os_autoinstall_raw_content`.
+Please note that this is RAW. So you HAVE TO adapt the content to the target distribution.
+
+* For RHEL, this is Kickstart syntax (bottom of the kickstart file).
+* For Debian, this is preseed syntax (bottom of the preseed file).
+* For Ubuntu, this is curtin/cloud-config syntax (already placed under `autoinstall` and auto indented by 2 space).
+* For SUSE, this is autoyast syntax (inside `<profile>...</profile>`).
+
+#### Proxy during PXE
+
+It is possible to set an http proxy server during PXE.
+2 main variables are available:
+
+* `os_pxe_repository_proxy`
+* `os_pxe_proxy`
+
+Please always include the `http://` part of the url.
+Note that in most cases, you can also include user and password if exist (http://user:password@proxy.example.com:3128 for example).
+
+Note however that due to the way all auto installations are operating, behavior is not always the same. I did my best to propose working solutions.
+
+* For Ubuntu, `os_pxe_repository_proxy` will be set to `proxy` key of *user-data* file and so used to reach apt repositories (refer to https://ubuntu.com/server/docs/install/autoinstall-reference). `os_pxe_proxy` will be set as kernel parameters `http_proxy={{os_pxe_proxy}} https_proxy={{os_pxe_proxy}}`.
+* For Debian, `os_pxe_repository_proxy` will be written to `d-i mirror/http/proxy` key of preseed file, and so will apply to reach installation packages repository. `os_pxe_proxy` will be passed as kernel arguments : `http_proxy={{os_pxe_proxy}} https_proxy={{os_pxe_proxy}}` and so should be exported as environment variables during the whole process.
+* For RHEL, `os_pxe_repository_proxy` will be passed to `inst.proxy` kernel parameter. However, documentation is not clear about impacted elements (refer to https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html-single/performing_a_standard_rhel_9_installation/index). Since `os_pxe_proxy` cannot be passed as kernel arguments on RHEL (init filters this), this key is not available on RHEL systems.
+* For SUSE, `os_pxe_repository_proxy` will be set to `<proxy>...</proxy>` key of autoyast file (refer to https://doc.opensuse.org/projects/autoyast/#Configuration-Network-Proxy), while `os_pxe_proxy` will be set to kernel parameters as `proxy={{os_pxe_proxy}}` (refer to https://en.opensuse.org/SDB:Linuxrc#p_proxy).
+
+If some of these settings do not match your needs or are not working as expected, please open an issue.
+
 ### bluebanquise-bootset usage
 
 Once the role is deployed, and hosts gathered into `/etc/bluebanquise/bootset/nodes_parameters.yml`, the **bluebanquise-bootset** tool can be used to manipulate remote hosts PXE boot. By default, 3 states can be defined for each host:

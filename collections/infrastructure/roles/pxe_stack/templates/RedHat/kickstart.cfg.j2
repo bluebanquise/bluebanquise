@@ -149,3 +149,4 @@ rm -f /etc/yum.repos.d/*
 set +x
 %end
 
+{{ hostvars[groups[os_profile][0]]['os_autoinstall_raw_content'] | default(pxe_stack_os_autoinstall_raw_content) }}
