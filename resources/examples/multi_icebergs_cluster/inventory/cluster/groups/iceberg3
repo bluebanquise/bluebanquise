@@ -1,0 +1,8 @@
+[iceberg3:vars]
+bb_iceberg_master = iceberg1
+bb_iceberg_level = 2
+
+[iceberg3]
+management3
+c[005:006]
+gpu[001:002]

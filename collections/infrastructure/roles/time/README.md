@@ -74,11 +74,12 @@ This role will react differently if in BlueBanquise stack multi icebergs mode or
 By default, in non multiple icebergs, server will be the time source reference.
 If using multiple icebergs hierarchy, then server can be a time reference if at
 top of the icebergs hierarchy, or simply a time relay with an higher stratum,
-if not a top server. This stratum calculation is done using **iceberg_level**
+if not a top server. This stratum calculation is done using **bb_iceberg_level**
 variable.
 
 ## Changelog
 
+* 1.4.1: Fix icebergs mechanism. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.0: Allow services and services_ip together. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.2: Fix services entries. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.1: Rename systemd service to chrony for Ubuntu. Giacomo Mc Evoy <gino.mcevoy@gmail.com>

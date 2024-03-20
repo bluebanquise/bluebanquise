@@ -1,0 +1,53 @@
+### Network related settings
+
+## DNS
+bb_domain_name: tumulus.local
+
+## Logical networks
+networks:
+
+  external-1:
+    subnet: 192.168.0.0
+    prefix: 16
+    gateway: 192.168.0.1
+    dhcp_server: false
+    dns_server: false
+
+  net1-1:
+    subnet: 10.1.0.0
+    prefix: 16
+    dhcp_unknown_range: 10.1.254.1 10.1.254.254
+    gateway: 10.1.2.1
+    dhcp_server: true
+    dns_server: true
+    services_ip: 10.1.0.1
+
+  net2-1:
+    subnet: 10.2.0.0
+    prefix: 16
+    dhcp_unknown_range: 10.2.254.1 10.2.254.254
+    dhcp_server: true
+    dns_server: true
+    services_ip: 10.2.0.1
+
+  net3-1:
+    subnet: 10.3.0.0
+    prefix: 16
+    dhcp_unknown_range: 10.3.254.1 10.3.254.254
+    dhcp_server: true
+    dns_server: true
+    services_ip: 10.3.0.1
+
+  net3-2:
+    subnet: 10.4.0.0
+    prefix: 16
+    dhcp_unknown_range: 10.4.254.1 10.4.254.254
+    dhcp_server: true
+    dns_server: true
+    services_ip: 10.4.0.1
+
+  interconnect-1:
+    subnet: 10.20.0.0
+    prefix: 16
+    dhcp_server: false
+    dns_server: true

@@ -1,0 +1,4 @@
+os_operating_system:
+  distribution: "ubuntu"
+  distribution_version: "20.04"
+  distribution_major_version: "20"

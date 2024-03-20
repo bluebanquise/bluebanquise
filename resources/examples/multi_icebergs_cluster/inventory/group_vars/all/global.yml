@@ -1,0 +1,9 @@
+### General settings
+
+bb_cluster_name: algoric
+
+# Localisation
+bb_time_zone: Europe/Brussels
+
+# /etc/hosts
+hosts_file_range: all  # can be all (all hosts) or iceberg (iceberg only)

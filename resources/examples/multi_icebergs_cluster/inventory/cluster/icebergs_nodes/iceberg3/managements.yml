@@ -1,0 +1,21 @@
+all:
+  hosts:
+    management3:
+      bmc:
+        name: bmanagement3
+        ip4: 10.1.100.3
+        mac: 08:00:27:0d:41:99
+        network: net1-1
+      network_interfaces:
+        - interface: enp0s3
+          ip4: 10.3.0.1
+          mac: 08:00:27:de:42:23
+          network: net3-1
+        - interface: enp0s9
+          ip4: 10.4.0.1
+          mac: 08:00:27:de:42:25
+          network: net3-2
+        - interface: enp0s8
+          ip4: 10.1.0.3
+          mac: 08:00:27:de:41:21
+          network: net1-1
