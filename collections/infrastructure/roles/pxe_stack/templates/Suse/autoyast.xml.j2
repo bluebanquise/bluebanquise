@@ -224,12 +224,12 @@ sed -i "s/enabled=1/enabled=0/" /etc/zypp/repos.d/repo-*
     {% if "@" in ({{ hostvars[groups[os_profile][0]]['os_pxe_repository_proxy'] | default(pxe_stack_os_pxe_repository_proxy, true) }}) %}
     <proxy_password>{{ (({{ hostvars[groups[os_profile][0]]['os_pxe_repository_proxy'] | default(pxe_stack_os_pxe_repository_proxy, true) }}) | replace("http://", "") | split("@"))[0] | split(":"))[1] }}</proxy_password>
     <proxy_user>{{ (({{ hostvars[groups[os_profile][0]]['os_pxe_repository_proxy'] | default(pxe_stack_os_pxe_repository_proxy, true) }}) | replace("http://", "") | split("@"))[0] | split(":"))[0] }}</proxy_user>
-    {% endfi %}
+    {% endif %}
   </proxy>
-{% endfi %}
+{% endif %}
 
 {{ hostvars[groups[os_profile][0]]['os_autoinstall_raw_content'] | default(pxe_stack_os_autoinstall_raw_content) }}
 
 </profile>
 
-{% endfi %}
+{% endif %}
