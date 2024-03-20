@@ -216,14 +216,15 @@ sed -i "s/enabled=1/enabled=0/" /etc/zypp/repos.d/repo-*
   </signature-handling>
  </general>
 
-{% if (hostvars[groups[os_profile][0]]['os_pxe_repository_proxy'] | default(pxe_stack_os_pxe_repository_proxy, true) | default(none, true)) is not none %}
+{% set repo_proxy = (hostvars[groups[os_profile][0]]['os_pxe_repository_proxy'] | default(pxe_stack_os_pxe_repository_proxy, true) | default(none, true)) %}
+{% if repo_proxy is not none %}
   <proxy>
     <enabled config:type="boolean">true</enabled>
-    <ftp_proxy>{{ hostvars[groups[os_profile][0]]['os_pxe_repository_proxy'] | default(pxe_stack_os_pxe_repository_proxy, true) }}</ftp_proxy>
-    <http_proxy>{{ hostvars[groups[os_profile][0]]['os_pxe_repository_proxy'] | default(pxe_stack_os_pxe_repository_proxy, true) }}</http_proxy>
-    {% if "@" in ({{ hostvars[groups[os_profile][0]]['os_pxe_repository_proxy'] | default(pxe_stack_os_pxe_repository_proxy, true) }}) %}
-    <proxy_password>{{ (({{ hostvars[groups[os_profile][0]]['os_pxe_repository_proxy'] | default(pxe_stack_os_pxe_repository_proxy, true) }}) | replace("http://", "") | split("@"))[0] | split(":"))[1] }}</proxy_password>
-    <proxy_user>{{ (({{ hostvars[groups[os_profile][0]]['os_pxe_repository_proxy'] | default(pxe_stack_os_pxe_repository_proxy, true) }}) | replace("http://", "") | split("@"))[0] | split(":"))[0] }}</proxy_user>
+    <ftp_proxy>{{ repo_proxy }}</ftp_proxy>
+    <http_proxy>{{ repo_proxy }}</http_proxy>
+    {% if "@" in repo_proxy %}
+    <proxy_password>{{ ((repo_proxy | replace("http://", "") | split("@"))[0] | split(":"))[1] }}</proxy_password>
+    <proxy_user>{{ ((repo_proxy | replace("http://", "") | split("@"))[0] | split(":"))[0] }}</proxy_user>
     {% endif %}
   </proxy>
 {% endif %}
