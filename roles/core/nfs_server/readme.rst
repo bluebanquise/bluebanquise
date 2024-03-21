@@ -62,6 +62,7 @@ Packages installed:
 Changelog
 ^^^^^^^^^
 
+* 1.3.1: Disable auto directories creation capability by default. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.3.0: Add auto directories creation capability. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.2.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.2: Add OpenSUSE support. Neil Munday <neil@mundayweb.com>

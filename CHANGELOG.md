@@ -25,6 +25,7 @@
     - Add capability to choose ipxe ROM. (#698)
   - nfs_server:
     - Add auto directories creation capability. (#685)
+    - Disable auto directories creation capability by default. (#910)
   - nic:
     - Add missing dns entry. (#694)
   - advanced_dhcp_server:
