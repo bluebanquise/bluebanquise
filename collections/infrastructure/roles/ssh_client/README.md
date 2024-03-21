@@ -177,6 +177,7 @@ Optional inventory vars:
 
 ## Changelog
 
+* 1.2.2: Fixed ssh_client_userknownhostsfile host_vars. Leo Magdanello <lmagdanello40@gmail.com>
 * 1.2.1: Fixed sudo user home directory. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.2.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.1: Fix issue with empty network interfaces. johnnykeats <johnny.keats@outlook.com>
