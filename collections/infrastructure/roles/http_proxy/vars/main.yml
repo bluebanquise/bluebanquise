@@ -1,0 +1,4 @@
+---
+dhcp_server_role_version: 1.0.0
+http_proxy_packages_to_install: squid
+http_proxy_services_to_start: squid
