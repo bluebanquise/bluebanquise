@@ -17,7 +17,7 @@ Host {{ host }}
     StrictHostKeyChecking {{ host_vars['ssh_client_stricthostkeychecking'] }}
     {% endif %}
     {% if host_vars['ssh_client_userknownhostsfile'] is defined and host_vars['ssh_client_userknownhostsfile'] is not none %}
-    UserKnownHostsFile {{ ssh_client_userknownhostsfile }}
+    UserKnownHostsFile {{ host_vars['ssh_client_userknownhostsfile'] }}
     {% endif %}
     {% if host_vars['ssh_client_loglevel'] is defined and host_vars['ssh_client_loglevel'] is not none %}
     LogLevel {{ host_vars['ssh_client_loglevel'] }}
