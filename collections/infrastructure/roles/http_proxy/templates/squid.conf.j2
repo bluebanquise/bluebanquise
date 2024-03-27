@@ -16,7 +16,6 @@ acl localnet src {{ network }}
 
 # Allowed ports to go through proxy
 {% if http_proxy_default_allowed_ports %}
-acl SSL_ports port 443
 acl Safe_ports port 80		# http
 acl Safe_ports port 21		# ftp
 acl Safe_ports port 443		# https
@@ -40,8 +39,11 @@ acl Safe_ports port {{ port }}
 # Deny requests to certain unsafe ports
 http_access deny !Safe_ports
 
+{% if (http_proxy_https_features_available | default(true, true)) %}
 # Deny CONNECT to other than secure SSL ports
+acl SSL_ports port 443
 http_access deny CONNECT !SSL_ports
+{% endif %}
 
 # Only allow cachemgr access from localhost
 http_access allow localhost manager
