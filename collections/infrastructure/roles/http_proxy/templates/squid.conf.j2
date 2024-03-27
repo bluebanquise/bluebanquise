@@ -31,7 +31,7 @@ acl Safe_ports port 777		# multiling http
 {% if http_proxy_allowed_ports is defined %}
     {% for port in http_proxy_allowed_ports %}
 acl Safe_ports port {{ port }}
-    {% endif %}
+    {% endfor %}
 {% endif %}
 
 #
@@ -82,7 +82,7 @@ coredump_dir {{ http_proxy_coredump_dir }}
 {% if http_proxy_refresh_patterns is defined %}
     {% for refresh_pattern in http_proxy_refresh_patterns %}
 refresh_pattern {{ refresh_pattern }}
-    {% endif %}
+    {% endfor %}
 {% endif %}
 refresh_pattern ^ftp:		1440	20%	10080
 refresh_pattern -i (/cgi-bin/|\?) 0	0%	0
