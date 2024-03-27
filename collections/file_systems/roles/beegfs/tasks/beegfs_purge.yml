@@ -91,6 +91,9 @@
   when: inventory_hostname in groups["mgmtd"]
 
 - name: "BeeGFS Storage/Metadata Node tuning reset"
+  when: inventory_hostname in groups["metadata"] or inventory_hostname in groups["store"]
+  tags:
+    - script
   block:
     - name: "Kernel tuning reset"
       ansible.posix.sysctl:
@@ -136,10 +139,6 @@
       loop:
         - /opt/beegfs/beegfs-tuning.sh
         - /etc/systemd/system/beegfs-tuning.service
-  when: inventory_hostname in groups["metadata"] or inventory_hostname in groups["store"]
-  ignore_errors: yes
-  tags:
-    - script
 
 - name: Uninstall BeeGFS management server package
   ansible.builtin.package:

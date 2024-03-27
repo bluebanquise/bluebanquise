@@ -61,16 +61,16 @@
 - name: "file <|> Create coredump folder"
   ansible.builtin.file:
     path: "{{ http_proxy_coredump_dir }}"
-    owner: proxy
-    group: proxy
+    owner: "{{ http_proxy_squid_user }}"
+    group: "{{ http_proxy_squid_user }}"
     mode: "0755"
     state: directory
 
 - name: "file <|> Create cachefolder folder"
   ansible.builtin.file:
     path: "{{ http_proxy_cache_storage_path }}"
-    owner: proxy
-    group: proxy
+    owner: "{{ http_proxy_squid_user }}"
+    group: "{{ http_proxy_squid_user }}"
     mode: "0755"
     state: directory
   when: http_proxy_cache_enable | bool
