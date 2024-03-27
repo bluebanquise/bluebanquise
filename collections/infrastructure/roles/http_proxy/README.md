@@ -92,8 +92,8 @@ Once set to true, you can define the following parameters for cache (values give
 http_proxy_cache_storage_format: ufs
 http_proxy_cache_storage_path: /var/spool/squid
 http_proxy_cache_storage_size: 100 # MB
-http_proxy_cache_storage_L1: 16
-http_proxy_cache_storage_L2: 256
+http_proxy_cache_storage_l1: 16
+http_proxy_cache_storage_l2: 256
 ```
 
 For more details on these parameters, please refer to http://www.squid-cache.org/Doc/config/cache_dir/

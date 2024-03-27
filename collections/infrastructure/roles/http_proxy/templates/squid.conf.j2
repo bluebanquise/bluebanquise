@@ -70,7 +70,7 @@ http_port {{ http_proxy_port }}
 
 {% if http_proxy_cache_enable %}
 # Uncomment and adjust the following to add a disk cache directory.
-cache_dir {{ http_proxy_cache_storage_format }} {{ http_proxy_cache_storage_path }} {{ http_proxy_cache_storage_size }} {{ http_proxy_cache_storage_L1 }} {{ http_proxy_cache_storage_L2 }}
+cache_dir {{ http_proxy_cache_storage_format }} {{ http_proxy_cache_storage_path }} {{ http_proxy_cache_storage_size }} {{ http_proxy_cache_storage_l1 }} {{ http_proxy_cache_storage_l2 }}
 {% endif %}
 
 # Leave coredumps in the first cache dir

@@ -65,7 +65,7 @@
     group: proxy
     mode: "0755"
     state: directory
-    
+
 - name: "file <|> Create cachefolder folder"
   ansible.builtin.file:
     path: "{{ http_proxy_cache_storage_path }}"
@@ -73,7 +73,7 @@
     group: proxy
     mode: "0755"
     state: directory
-  when: (http_proxy_cache_enable | bool) == true
+  when: http_proxy_cache_enable | bool
 
 - name: meta <|> Run handler tasks to restart services
   ansible.builtin.meta: flush_handlers

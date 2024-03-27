@@ -10,5 +10,5 @@ http_proxy_cache_enable: false
 http_proxy_cache_storage_format: ufs
 http_proxy_cache_storage_path: /var/spool/squid
 http_proxy_cache_storage_size: 100 # MB
-http_proxy_cache_storage_L1: 16
-http_proxy_cache_storage_L2: 256
+http_proxy_cache_storage_l1: 16
+http_proxy_cache_storage_l2: 256

@@ -11,4 +11,3 @@
   loop: "{{ http_proxy_firewall_services_to_add }}"
   tags:
     - firewall
-
