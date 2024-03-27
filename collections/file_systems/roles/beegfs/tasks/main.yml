@@ -214,6 +214,9 @@
     - inventory_hostname == groups["mgmtd"][0]
 
 - name: BeeGFS Storage/Metadata Node Tuning
+  when: inventory_hostname in groups["metadata"] or inventory_hostname in groups["store"]
+  tags:
+    - template
   block:
     - name: Apply kernel tuning
       ansible.posix.sysctl:
@@ -239,11 +242,14 @@
         name: beegfs-tuning.service
         state: started
         enabled: true
-  when: inventory_hostname in groups["metadata"] or inventory_hostname in groups["store"]
-  tags:
-    - template
 
 - name: BeeGFS High Availability
+  when:
+    - inventory_hostname in groups["mgmtd"]
+    - beegfs_vars.high_availability is defined
+    - beegfs_vars.high_availability | bool
+  tags:
+    - ha
   block:
     - name: package <|> Install packages
       ansible.builtin.package:
@@ -308,12 +314,6 @@
       loop:
         - corosync
         - pacemaker
-  when:
-    - inventory_hostname in groups["mgmtd"]
-    - beegfs_vars.high_availability is defined
-    - beegfs_vars.high_availability | bool
-  tags:
-    - ha
 
 - name: Start beegfs-helperd service
   ansible.builtin.service:
