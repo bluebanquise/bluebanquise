@@ -14,6 +14,8 @@ This is useful in many cases. For example:
 * Act as an intermediate between a central http server and clients to ditribute load.
 * Etc.
 
+This role needs at least RHEL (or equivalent) >= 9, Ubuntu >= 22.04, Debian >= 12 and OpenSuse Leap >= 15.5 due to requirements on Squid version.
+
 ## Data Model
 
 This role relies on [data model](https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md):
