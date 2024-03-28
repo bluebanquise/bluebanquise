@@ -1,0 +1,10 @@
+---
+- name: ufw <|> "Add services to firewall"
+  community.general.ufw:
+    rule: allow
+    port: "{{ http_proxy_port }}"
+    proto: tcp
+  when:
+    - os_firewall | default(false) | bool
+  tags:
+    - firewall

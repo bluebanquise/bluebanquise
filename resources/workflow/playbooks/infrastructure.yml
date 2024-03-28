@@ -4,6 +4,8 @@
   roles:
 
     # Infrastructure
+    - role: bluebanquise.infrastructure.http_proxy
+      tags: http_proxy
     - role: bluebanquise.infrastructure.access_control
       tags: access_control
     - role: bluebanquise.infrastructure.clustershell

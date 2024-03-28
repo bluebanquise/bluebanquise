@@ -1,4 +1,11 @@
 #jinja2: lstrip_blocks: True
+<!-- #### Blue Banquise file ####
+## {{ ansible_managed }} -->
+
+{% if hostvars[groups[os_profile][0]]['os_autoinstall_raw_file'] is defined %}
+{{ hostvars[groups[os_profile][0]]['os_autoinstall_raw_file'] }}
+{% else %}
+
 <?xml version="1.0"?>
 <!DOCTYPE profile>
 <profile xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http://www.suse.com/1.0/configns">
@@ -209,9 +216,21 @@ sed -i "s/enabled=1/enabled=0/" /etc/zypp/repos.d/repo-*
   </signature-handling>
  </general>
 
+{% set repo_proxy = (hostvars[groups[os_profile][0]]['os_pxe_repository_proxy'] | default(pxe_stack_os_pxe_repository_proxy, true) | default(none, true)) %}
+{% if repo_proxy is not none %}
+  <proxy>
+    <enabled config:type="boolean">true</enabled>
+    <ftp_proxy>{{ repo_proxy }}</ftp_proxy>
+    <http_proxy>{{ repo_proxy }}</http_proxy>
+    {% if "@" in repo_proxy %}
+    <proxy_password>{{ ((repo_proxy | replace("http://", "") | split("@"))[0] | split(":"))[1] }}</proxy_password>
+    <proxy_user>{{ ((repo_proxy | replace("http://", "") | split("@"))[0] | split(":"))[0] }}</proxy_user>
+    {% endif %}
+  </proxy>
+{% endif %}
+
+{{ hostvars[groups[os_profile][0]]['os_autoinstall_raw_content'] | default(pxe_stack_os_autoinstall_raw_content) }}
+
 </profile>
 
-
-
-
-
+{% endif %}

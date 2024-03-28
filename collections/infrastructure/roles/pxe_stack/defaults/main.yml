@@ -71,6 +71,13 @@ pxe_stack_os_autoinstall_custom_scripts: []
 #    content: |
 #      ...
 
+# Add custom content to autoinstall file (raw)
+pxe_stack_os_autoinstall_raw_content: ""
+
+# Add proxies
+pxe_stack_os_pxe_repository_proxy:
+pxe_stack_os_pxe_proxy:
+
 # Automatically detect NIC to be used in preseed
 # Only works if a single NIC is connected.
 pxe_stack_os_preseed_auto_main_network_interface: true

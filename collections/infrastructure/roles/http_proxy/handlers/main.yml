@@ -1,0 +1,9 @@
+---
+- name: service <|> Restart http_proxy server
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: restarted
+  loop: "{{ http_proxy_services_to_start }}"
+  when:
+    - "'service' not in ansible_skip_tags"
+    - http_proxy_start_services | default(bb_start_services) | default(true) | bool

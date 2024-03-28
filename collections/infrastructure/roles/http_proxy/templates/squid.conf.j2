@@ -1,0 +1,90 @@
+#jinja2: lstrip_blocks: True
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+
+# Note: initial configuration dumped from Almalinux 9
+
+# Allowed local networks
+{% for network in networks %}
+    {% if (networks[network]['http_proxy_server'] | default(true, true)) %}
+acl localnet src {{ networks[network]['subnet'] }}/{{ networks[network]['prefix'] }} # {{ network }}
+    {% endif %}
+{% endfor %}
+{% for network in http_proxy_allowed_networks %}
+acl localnet src {{ network }}
+{% endfor %}
+
+# Allowed ports to go through proxy
+{% if http_proxy_default_allowed_ports %}
+acl Safe_ports port 80		# http
+acl Safe_ports port 21		# ftp
+acl Safe_ports port 443		# https
+acl Safe_ports port 70		# gopher
+acl Safe_ports port 210		# wais
+acl Safe_ports port 1025-65535	# unregistered ports
+acl Safe_ports port 280		# http-mgmt
+acl Safe_ports port 488		# gss-http
+acl Safe_ports port 591		# filemaker
+acl Safe_ports port 777		# multiling http
+{% endif %}
+{% if http_proxy_allowed_ports is defined %}
+    {% for port in http_proxy_allowed_ports %}
+acl Safe_ports port {{ port }}
+    {% endfor %}
+{% endif %}
+
+# Deny requests to certain unsafe ports
+http_access deny !Safe_ports
+
+# Deny CONNECT to other than secure SSL ports
+acl SSL_ports port 443
+http_access deny CONNECT !SSL_ports
+
+# Only allow cachemgr access from localhost
+http_access allow localhost manager
+http_access deny manager
+
+# We strongly recommend the following be uncommented to protect innocent
+# web applications running on the proxy server who think the only
+# one who can access services on "localhost" is a local user
+http_access deny to_localhost
+
+#
+# INSERT YOUR OWN RULE(S) HERE TO ALLOW ACCESS FROM YOUR CLIENTS
+#
+
+# Example rule allowing access from your local networks.
+# Adapt localnet in the ACL section to list your (internal) IP networks
+# from where browsing should be allowed
+http_access allow localnet
+http_access allow localhost
+
+# And finally deny all other access to this proxy
+http_access deny all
+
+# Squid normally listens to port 3128
+http_port {{ http_proxy_port }}
+
+{% if http_proxy_cache_enable %}
+# Uncomment and adjust the following to add a disk cache directory.
+cache_dir {{ http_proxy_cache_storage_format }} {{ http_proxy_cache_storage_path }} {{ http_proxy_cache_storage_size }} {{ http_proxy_cache_storage_l1 }} {{ http_proxy_cache_storage_l2 }}
+{% endif %}
+
+# Leave coredumps in the first cache dir
+coredump_dir {{ http_proxy_coredump_dir }}
+
+#
+# Add any of your own refresh_pattern entries above these.
+#
+{% if http_proxy_refresh_patterns is defined %}
+    {% for refresh_pattern in http_proxy_refresh_patterns %}
+refresh_pattern {{ refresh_pattern }}
+    {% endfor %}
+{% endif %}
+refresh_pattern ^ftp:		1440	20%	10080
+refresh_pattern -i (/cgi-bin/|\?) 0	0%	0
+refresh_pattern .		0	20%	4320
+
+{% if http_proxy_raw_content is defined and http_proxy_raw_content is not none %}
+{{ http_proxy_raw_content }}
+{% endif %}
