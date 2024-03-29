@@ -687,6 +687,7 @@ Note that using an home folder into /home for the bluebanquise sudo user can be 
 
 ## Changelog
 
+* 1.12.1: Fix missing clonezilla directory. Abatcha Olloh <abatchaolloh@outlook.fr>
 * 1.12.0: Add raw content and proxies. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.11.1: Fix kernel upgrade option in bluebanquise-diskless. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.11.0: Add ability to select target disk with auto partitioning. Benoit Leveugle <benoit.leveugle@gmail.com>
