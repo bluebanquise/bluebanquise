@@ -363,6 +363,26 @@ The following actions can occur:
 * If service is defined, a corresponding /etc/{{service}} folder will be created if not exist
 * If port is defined, the port will be opened in the firewall if firewall is up
 
+You can fine tune the service configuration using dedicated parameters
+`service_launch_parameters` and `service_raw_configuration`:
+
+```yaml
+prometheus_exporters_groups_to_scrape:
+  fn_management:
+    - name: node_exporter
+      package: node_exporter
+      port: 9100
+      path: /bin/node_exporter
+      service: node_exporter
+      service_workingdirectory: /etc/node_exporter
+      service_type: simple
+      service_description: This is node_exporter from Prometheus main project
+      service_launch_parameters: --collector.disable-defaults --collector.filesystem
+      service_raw_configuration:
+        - Restart=always
+        - RestartSec=1
+```
+
 ## 5. IPMI and SNMP
 
 ipmi_exporter and snmp_exporter behave differently: they act as translation
@@ -597,6 +617,7 @@ prometheus_server_prometheus_launch_parameters: |
 
 ## Changelog
 
+* 1.4.0: Add more tunig for exporter services. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.4: Adapt tp hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.3: Port to bb 2.0. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.2: Restart services when systemd service file changes. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
