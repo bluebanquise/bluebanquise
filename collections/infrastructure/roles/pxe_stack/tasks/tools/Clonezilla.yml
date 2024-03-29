@@ -6,6 +6,7 @@
     mode: 0755
   loop:
     - "{{ pxe_stack_htdocs_path }}/pxe/bin/clonezilla/"
+    - "{{ pxe_stack_htdocs_path }}/pxe/tools/clonezilla/"
 
 - name: "package <|> Install Clonezilla iso"
   ansible.builtin.package:
