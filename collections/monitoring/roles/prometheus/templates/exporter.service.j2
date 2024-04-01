@@ -1,15 +1,19 @@
 [Unit]
-  Description={{ item.service }}
+  Description={{ item.service_description | default(item.service, true) }}
   Wants=network-online.target
   After=network-online.target
 
 [Service]
   User={{ item.user | default('root') }}
   Group={{ item.group | default('root') }}
-  Type=simple
-  WorkingDirectory=/etc/{{ item.service }}/
+  Type={{ item.service_type | default("simple", true) }}
+  WorkingDirectory={{ item.service_workingdirectory | default("/etc/" + item.service + "/", true) }}
   ExecStart={{ item.path | default('/bin/'+item.service) }} \
-  {{ item.launch_parameters | default('') | indent(2, True) }}
+  {{ item.service_launch_parameters | default(item.launch_parameters, true) | default('', true) | indent(2, True) }}
+
+{% if item.service_raw_configuration is defined and item.service_raw_configuration is not none %}
+{{ item.service_raw_configuration | indent(2, True) }}
+{% endif %}
 
 [Install]
   WantedBy=multi-user.target
