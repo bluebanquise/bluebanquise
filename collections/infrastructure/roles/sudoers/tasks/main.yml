@@ -7,8 +7,12 @@
 
 - name: lineinfile <|> Add sudoers users and groups
   ansible.builtin.lineinfile:
-    dest: /etc/sudoers
+    dest: "{{ item.file_name | default('/etc/sudoers') }}"
     state: present
+    create: true
+    owner: root
+    group: root
+    mode: '0600'
     regexp: "^{{ item.name }}"
     line: "{{ item.name }} {{ item.privilege }}"
     validate: 'visudo -cf %s'
