@@ -5,16 +5,16 @@
     name: sudo
     state: present
 
-- name: lineinfile <|> Add sudoers users and groups
-  ansible.builtin.lineinfile:
-    dest: "{{ item.file_name | default('/etc/sudoers') }}"
+- name: blockinfile <|> Add sudoers users and groups
+  ansible.builtin.blockinfile:
+    path: "{{ item.file_name | default('/etc/sudoers') }}"
     state: present
     create: true
     owner: root
     group: root
     mode: '0600'
-    regexp: "^{{ item.name }}"
-    line: "{{ item.name }} {{ item.privilege }}"
+    block: |
+      {{ item.name }} {{ item.privilege }}
     validate: 'visudo -cf %s'
   loop: "{{ sudoers }}"
   when: sudoers is defined and sudoers
