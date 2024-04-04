@@ -324,6 +324,21 @@ Note however that due to the way all auto installations are operating, behavior 
 
 If some of these settings do not match your needs or are not working as expected, please open an issue.
 
+#### Additional packages during autoinstall
+
+It is possible to set a list of packages to be installed during the automated installation.
+
+To do so, simply define the `os_autoinstall_packages` list the following way, adapting the list of packages to your needs:
+
+```yaml
+os_autoinstall_packages:
+  - curl
+  - wget
+  - vim
+```
+
+Of course, it is expected the packages you ask in the list are available in the repositories exposed to the auto-installer.
+
 ### bluebanquise-bootset usage
 
 Once the role is deployed, and hosts gathered into `/etc/bluebanquise/bootset/nodes_parameters.yml`, the **bluebanquise-bootset** tool can be used to manipulate remote hosts PXE boot. By default, 3 states can be defined for each host:
@@ -687,6 +702,7 @@ Note that using an home folder into /home for the bluebanquise sudo user can be 
 
 ## Changelog
 
+* 1.13.0: Add packages during autoinstall support. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.12.1: Fix missing clonezilla directory. Abatcha Olloh <abatchaolloh@outlook.fr>
 * 1.12.0: Add raw content and proxies. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.11.1: Fix kernel upgrade option in bluebanquise-diskless. Giacomo Mc Evoy <gino.mcevoy@gmail.com>

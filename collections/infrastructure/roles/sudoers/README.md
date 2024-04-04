@@ -35,8 +35,11 @@ sudoers:
     privilege: ALL=(ALL) NOPASSWD:ALL
 ```
 
+Note that only a single name (aka a single user or a list of comma separated users) can be set by file. It would be possible to bypass this limit by pre-calculating a fact in the role task. Please open a Feature request on github if needed.
+
 ## Changelog
 
+* 1.2.1: Fix bug when using list of sudo users as a single name. Code provided by @sgaosdgr. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.2.0: Allow to create dedicated files for some users. Code from @sgaosdgr. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.1: Updated role to install sudo package. Neil Munday <neil@mundayweb.com>
