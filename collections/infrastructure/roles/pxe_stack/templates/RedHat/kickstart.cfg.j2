@@ -89,6 +89,11 @@ curl
 {% if not pxe_stack_enable_root %}
 sudo
 {% endif %}
+{% if os_autoinstall_packages is defined and os_autoinstall_packages is iterable and os_autoinstall_packages is not string and os_autoinstall_packages is not mapping %}
+{% for package in os_autoinstall_packages %}
+{{ package }}
+{% endfor %}
+{% endif %}
 %end
 
 
