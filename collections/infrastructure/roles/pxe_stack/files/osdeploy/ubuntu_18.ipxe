@@ -17,13 +17,13 @@ echo | > Target preseed: ${eq-equipment-profile}.preseed.cfg
 echo |
 echo | Loading linux ...
 
-set mirror-directory /pxe/netboots/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/iso/
+set mirror-directory /{{ pxe_stack_images_root }}/{{ pxe_stack_images_root_iso }}/
 
-kernel ${images-root}/iso/install/netboot/ubuntu-installer/amd64/linux initrd=initrd.gz preseed/url=${preseed-path} auto=true priority=critical locale=en_US.UTF-8 console-setup/charmap=UTF-8 console-keymaps-at/keymaps=pc105 console-setup/layoutcode=us console-setup/ask_detect=false netcfg/choose_interface=${node-main-network-interface} mirror/http/hostname=http://${next-server} mirror/http/directory=${mirror-directory} ${eq-console} ${eq-kernel-parameters} ${dedicated-kernel-parameters} ipxe_next_server=${next-server} node_hostname=${hostname}
+kernel ${images-root-iso}/install/netboot/ubuntu-installer/amd64/linux initrd=initrd.gz preseed/url=${preseed-path} auto=true priority=critical locale=en_US.UTF-8 console-setup/charmap=UTF-8 console-keymaps-at/keymaps=pc105 console-setup/layoutcode=us console-setup/ask_detect=false netcfg/choose_interface=${node-main-network-interface} mirror/http/hostname=http://${next-server} mirror/http/directory=${mirror-directory} ${eq-console} ${eq-kernel-parameters} ${dedicated-kernel-parameters} ipxe_next_server=${next-server} node_hostname=${hostname}
 
 echo | Loading initial ramdisk ...
 
-initrd ${images-root}/iso/install/netboot/ubuntu-installer/amd64/initrd.gz
+initrd ${images-root-iso}/install/netboot/ubuntu-installer/amd64/initrd.gz
 
 echo | ALL DONE! We are ready.
 echo | Downloaded images report:

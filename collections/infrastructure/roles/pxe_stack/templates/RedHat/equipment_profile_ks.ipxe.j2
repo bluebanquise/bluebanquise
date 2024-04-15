@@ -23,7 +23,8 @@ set eq-kernel-aggressive-dhcp rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 r
 {% endif %}
 
 # Dynamic variables
-set images-root http://${next-server}/pxe/netboots/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/
+set images-root http://${next-server}/{{ pxe_stack_images_root }}
+set images-root-iso ${images-root}/{{ pxe_stack_images_root_iso }}
 set repository-root http://${next-server}/repositories/${eq-repositories-environment}/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/
 set kickstart-path http://${next-server}/pxe/equipment_profiles/${eq-equipment-profile}.kickstart.cfg
 

@@ -26,6 +26,10 @@ pxe_stack_sudo_is_passwordless: true
 # Preserve default repositories
 pxe_stack_preserve_repositories: true
 
+# Images root relative directory
+pxe_stack_images_root: "pxe/netboots/${eq-distribution}/${eq-distribution-version}/${eq-architecture}"
+pxe_stack_images_root_iso: "iso"
+
 # Do not edit here
 # pxe_stack_enable_services:
 # pxe_stack_start_services:

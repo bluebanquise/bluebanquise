@@ -17,7 +17,7 @@ echo | > Target cloud-init folder: ${cloud-init-path}
 echo |
 echo | Loading linux ...
 
-kernel ${images-root}/iso/casper/vmlinuz initrd=initrd root=/dev/ram0 ramdisk_size=1500000 ip=dhcp url=${images-root}/ubuntu-22.04-live-server-amd64.iso autoinstall ds=nocloud-net;s=${cloud-init-path} ${eq-console} ${eq-kernel-parameters} ${dedicated-kernel-parameters} ipxe_next_server=${next-server} node_hostname=${hostname}
+kernel ${images-root-iso}/casper/vmlinuz initrd=initrd root=/dev/ram0 ramdisk_size=1500000 ip=dhcp url=${images-root}/ubuntu-22.04-live-server-amd64.iso autoinstall ds=nocloud-net;s=${cloud-init-path} ${eq-console} ${eq-kernel-parameters} ${dedicated-kernel-parameters} ipxe_next_server=${next-server} node_hostname=${hostname}
 
 echo | Loading initial ramdisk ...
 
