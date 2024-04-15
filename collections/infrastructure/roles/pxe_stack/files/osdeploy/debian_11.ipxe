@@ -18,7 +18,7 @@ echo | > Target preseed: ${eq-equipment-profile}.preseed.cfg
 echo |
 echo | Loading linux ...
 
-set mirror-directory /pxe/netboots/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/iso/
+set mirror-directory /{{ pxe_stack_images_root }}/{{ pxe_stack_images_root_iso }}/
 
 kernel ${images-root}/linux initrd=initrd.gz preseed/url=${preseed-path} auto=true priority=critical netcfg/choose_interface=${node-main-network-interface} ${eq-console} ${eq-kernel-parameters} ${dedicated-kernel-parameters} ipxe_next_server=${next-server} node_hostname=${hostname}
 
