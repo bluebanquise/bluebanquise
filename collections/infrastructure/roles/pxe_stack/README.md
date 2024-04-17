@@ -702,6 +702,8 @@ Note that using an home folder into /home for the bluebanquise sudo user can be 
 
 ## Changelog
 
+* 1.15.0: diskless.yml task must be optional <jp.mazzilli@gmail.com>
+* 1.14.0: Set default value for images-root <jp.mazzilli@gmail.com>
 * 1.13.0: Add packages during autoinstall support. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.12.1: Fix missing clonezilla directory. Abatcha Olloh <abatchaolloh@outlook.fr>
 * 1.12.0: Add raw content and proxies. Benoit Leveugle <benoit.leveugle@gmail.com>
