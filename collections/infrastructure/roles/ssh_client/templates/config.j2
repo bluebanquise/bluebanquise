@@ -16,7 +16,7 @@ Host {{ host }}
     LogLevel {{ host_vars['ssh_client_loglevel'] }}
     {% endif %}
     {% if ssh_jump is none %}
-      {% set host_to_be_used_network = host_vars['j2_icebergs_main_network_dict'][j2_current_iceberg] | default(none, true) %}
+      {% set host_to_be_used_network = ssh_client_global_network  | default(host_vars['j2_icebergs_main_network_dict'][j2_current_iceberg], true) | default(none, true) %}
     Hostname %h{% if host_to_be_used_network is not none %}-{{ host_to_be_used_network }}{% endif %}
 
     {% else %}
