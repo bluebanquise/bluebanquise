@@ -26,8 +26,8 @@ set node-main-network-interface auto
 {% endif %}
 
 # Dynamic variables
-set images-root http://${next-server}/pxe/netboots/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/
-set repository-root http://${next-server}/repositories/${eq-repositories-environment}/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/
+set images-root {{ hostvars[groups[os_profile][0]]['os_pxe_images_root'] | default(pxe_stack_os_pxe_images_root) | default("http://${next-server}/pxe/netboots/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/", true) }}
+set repository-root {{ hostvars[groups[os_profile][0]]['os_pxe_repository_root'] | default(pxe_stack_os_pxe_repository_root) | default("http://${next-server}/repositories/${eq-repositories-environment}/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/", true) }}
 set preseed-path http://${next-server}/pxe/equipment_profiles//${eq-equipment-profile}.preseed.cfg
 
 echo | images-root: ${images-root}
