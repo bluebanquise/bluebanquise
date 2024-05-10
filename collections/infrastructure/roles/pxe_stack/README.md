@@ -322,7 +322,7 @@ Note however that due to the way all auto installations are operating, behavior 
 
 * For Ubuntu, `os_pxe_repository_proxy` will be set to `proxy` key of *user-data* file and so used to reach apt repositories (refer to https://ubuntu.com/server/docs/install/autoinstall-reference). `os_pxe_proxy` will be set as kernel parameters `http_proxy={{os_pxe_proxy}} https_proxy={{os_pxe_proxy}}`.
 * For Debian, `os_pxe_repository_proxy` will be written to `d-i mirror/http/proxy` key of preseed file, and so will apply to reach installation packages repository. `os_pxe_proxy` will be passed as kernel arguments : `http_proxy={{os_pxe_proxy}} https_proxy={{os_pxe_proxy}}` and so should be exported as environment variables during the whole process.
-* For RHEL, `os_pxe_repository_proxy` will be passed to `inst.proxy` kernel parameter. However, documentation is not clear about impacted elements (refer to https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html-single/performing_a_standard_rhel_9_installation/index). Since `os_pxe_proxy` cannot be passed as kernel arguments on RHEL (init filters this), this key is not available on RHEL systems.
+* For RHEL, `os_pxe_proxy` will be passed to `inst.proxy` kernel parameter. However, documentation is not clear about impacted elements (refer to https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html-single/performing_a_standard_rhel_9_installation/index). Since `os_pxe_proxy` cannot be passed as standard kernel arguments on RHEL (init filters this), this specific kernel parameter couple (http_proxy and https_proxy) is not available on RHEL systems.
 * For SUSE, `os_pxe_repository_proxy` will be set to `<proxy>...</proxy>` key of autoyast file (refer to https://doc.opensuse.org/projects/autoyast/#Configuration-Network-Proxy), while `os_pxe_proxy` will be set to kernel parameters as `proxy={{os_pxe_proxy}}` (refer to https://en.opensuse.org/SDB:Linuxrc#p_proxy).
 
 If some of these settings do not match your needs or are not working as expected, please open an issue.
@@ -717,6 +717,7 @@ Note that using an home folder into /home for the bluebanquise sudo user can be 
 
 ## Changelog
 
+* 1.16.1: Fix proxy settings. Bug reported by @erkrali. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.16.0: Allow to pull netboot and core repo from a custom URL. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.15.0: diskless.yml task must be optional <jp.mazzilli@gmail.com>
 * 1.14.0: Set default value for images-root <jp.mazzilli@gmail.com>
