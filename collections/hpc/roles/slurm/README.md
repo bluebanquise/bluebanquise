@@ -189,6 +189,26 @@ tune.
 It is possible to add more content into *slurm.conf* file using the multi-lines
 **slurm_slurm_conf_additional_content** list variable.
 
+Example:
+
+```yaml
+slurm_slurm_conf_additional_content:
+  - KillWait=60
+  - KillOnBadExit=1
+```
+
+### Additional slurmdbd.conf settings
+
+It is possible to add more content into *slurmdbd.conf* file using the multi-lines
+**slurm_slurmdbd_conf_additional_content** list variable, the same way **slurm_slurm_conf_additional_content** is used.
+
+Example:
+
+```yaml
+slurm_slurmdbd_conf_additional_content:
+  - ArchiveSteps=yes
+```
+
 ### Optional nodes tuning
 
 It is possible to set variable **slurm_extra_nodes_parameters** under
@@ -345,6 +365,7 @@ See more explanation on https://slurm.schedmd.com/acct_gather.conf.html
 
 ## Changelog
 
+* 1.6.0: Add slurm_slurmdbd_conf_additional_content. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.5.0: Add ability to define slurm user id. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.2: Improve code. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.1: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
