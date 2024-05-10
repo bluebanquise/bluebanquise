@@ -10,7 +10,7 @@
     commands: "{{ item.commands | default(omit, true) }}"
     group: "{{ item.group | default(omit, true) }}"
     host: "{{ item.host | default(omit, true) }}"
-    name:  "{{ item.name }}"
+    name: "{{ item.name }}"
     noexec: "{{ item.noexec | default(omit, true) }}"
     nopassword: "{{ item.nopassword | default(omit, true) }}"
     runas: "{{ item.runas | default(omit, true) }}"
