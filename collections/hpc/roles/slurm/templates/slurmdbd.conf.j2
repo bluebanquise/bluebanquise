@@ -1,3 +1,4 @@
+#jinja2: lstrip_blocks: True
 #### Blue Banquise file ####
 ## {{ansible_managed}}
 
@@ -22,3 +23,9 @@ StorageType=accounting_storage/mysql
 StorageUser={{ slurm_accounting_storage_user }}
 StoragePass={{ slurm_accounting_storage_pass }}
 
+## Additional content if exist
+{% if slurm_slurmdbd_conf_additional_content is defined and slurm_slurmdbd_conf_additional_content is iterable %}
+  {% for slurmdbd_slurm_conf_content in slurm_slurmdbd_conf_additional_content %}
+{{ slurm_slurmdbd_conf_content | default('', true) }}                                                                                                                       
+  {% endfor %}
+{% endif %}
