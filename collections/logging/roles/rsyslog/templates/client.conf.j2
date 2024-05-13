@@ -35,7 +35,7 @@ local7.*                                                /var/log/boot.log
 # Remote Logging (we use TCP for reliable delivery)
 # An on-disk queue is created for this action. If the remote host is
 # down, messages are spooled to disk and sent when it is up again.
-$ActionQueueFileName fwdRule{{ loop.count }} # unique name prefix for spool files
+$ActionQueueFileName fwdRule{{ loop.index }} # unique name prefix for spool files
 $ActionQueueMaxDiskSpace 1g   # 1gb space limit (use as much as possible)
 $ActionQueueSaveOnShutdown on # save messages to disk on shutdown
 $ActionQueueType LinkedList   # run asynchronously
