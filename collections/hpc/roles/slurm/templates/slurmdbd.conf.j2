@@ -25,7 +25,7 @@ StoragePass={{ slurm_accounting_storage_pass }}
 
 ## Additional content if exist
 {% if slurm_slurmdbd_conf_additional_content is defined and slurm_slurmdbd_conf_additional_content is iterable %}
-  {% for slurmdbd_slurm_conf_content in slurm_slurmdbd_conf_additional_content %}
+  {% for slurm_slurmdbd_conf_content in slurm_slurmdbd_conf_additional_content %}
 {{ slurm_slurmdbd_conf_content | default('', true) }}                                                                                                                       
   {% endfor %}
 {% endif %}
