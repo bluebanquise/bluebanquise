@@ -6,7 +6,7 @@ The whole sources are available on the project github: https://github.com/kubern
 
 Documentation is available at: https://github.com/kubernetes-client/python/blob/master/kubernetes/README.md
 
-You can find on this last page all API endpoints. This page is your best ally, as you can easily fond your needed enpoint, and all its related parameters.
+You can find on this last page all API endpoints. This page is your best ally, as you can easily find your needed enpoint, and all its related parameters.
 
 ## Usage
 
