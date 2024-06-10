@@ -380,6 +380,7 @@ See more explanation on https://slurm.schedmd.com/acct_gather.conf.html
 
 ## Changelog
 
+* 1.6.1: Add missing handler for scrontrol. Code from @vedmonds. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.6.0: Add slurmdbd.conf additional content, raw cgroup.conf, and job_submit.lua. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.5.0: Add ability to define slurm user id. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.2: Improve code. Benoit Leveugle <benoit.leveugle@gmail.com>
