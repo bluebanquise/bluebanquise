@@ -11,7 +11,7 @@ Cluster layers
 
 The BlueBanquise project assumes that there exist 3 **layers** in a cluster of nodes:
 
-1. **Layer 1** is the infrastructure layer, also known as low level layer. This layer is composed of all that is needed to make the cluster ready to host production. This includes what is needed to power manage and remote manage hardware, what is needed to deploy and configure operating systems on servers, what is needed to connect the cluster and monitor it.
+1. **Layer 1** is the infrastructure layer, also known as low level layer. This layer is composed of all that is needed to make the cluster ready to host production. This includes what is needed to power manage and remote manage hardware, what is needed to deploy and configure operating systems on servers, the running OS themselfs, what is needed to connect the cluster and monitor it.
 2. **Layer 2**, optional and above layer 1, is the orchestration layer. This layer is composed of any tool needed to orchestrate production resources. This can be a Kubernetes or a Nomad cluster for example.
 3. **Layer 3** is the production layer, also sometime refered as "added value" layer. This layer is composed of what the clusters is running for, aka production. This can be calculations, web servers hosting, databases, storage management, AI trainings, etc.
 
@@ -36,6 +36,7 @@ something else.
 .. image:: images/nodes/hosts_example.svg
    :align: center
 
+|
 
 Hosts are defined in *~/bluebanquise/inventory/cluster/nodes*.
 
@@ -412,6 +413,9 @@ These are key groups of the stack.
 
 .. image:: images/ep_hard.svg
    :align: center
+
+|
+
 
 **It is important** to note that hardware groups variables start with prefix ``hw_`` and os groups variables start with prefix ``os_``
 and that these variables **MUST NEVER** be used at an upper level than group_vars in variables precedence.
