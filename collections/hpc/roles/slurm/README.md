@@ -135,7 +135,7 @@ tuned according to your needs:
 
 ```yaml
 slurm_cluster_name: bluebanquise
-slurm_control_machine: management1
+slurm_controller_hostname: management1
 slurm_partitions_list:
   - computes_groups:
       - fn_compute
@@ -154,7 +154,7 @@ in the groups defined under **slurm_computes_groups**. For example:
 
 ```yaml
 slurm_cluster_name: bluebanquise
-slurm_control_machine: management1
+slurm_controller_hostname: management1
 slurm_partitions_list:
   - computes_groups:
       - os_debian12
@@ -264,6 +264,10 @@ Then, set `slurm_enable_accounting` variable to **true**.
 
 Configuration then depends on your needs.
 
+#### Specific port
+
+You can choose to run the slurmdbd on a specific port using `slurm_dbd_port` key. By default, value is 6819.
+
 #### Database and login user settings
 
 Note that if you wand the role to create Slurm related database or Slurm related user into the MYSQL database, you need to set the following variables to true:
@@ -273,8 +277,8 @@ Note that if you wand the role to create Slurm related database or Slurm related
 
 Also, set the following variables to configure Slurm database user settings:
 
-* `slurm_accounting_storage_user`: user to be used by slurmdbd process to login into databse. Default: **slurm**.
-* `slurm_accounting_storage_pass`: password to be used by slurmdbd process to login into database. Default: **ssap_slurm**. Please be sure to change this value in production.
+* `slurm_accounting_mysql_login_user`: user to be used by slurmdbd process to login into databse. Default: **slurm**.
+* `slurm_accounting_mysql_login_password`: password to be used by slurmdbd process to login into database. Default: **ssap_slurm**. Please be sure to change this value in production.
 
 You can then either choose to use a distant MYSQL server, or ask the role to deploy one locally.
 
@@ -347,7 +351,7 @@ To enable it on the slurm configuration its required to define `slurm_selecttype
 
 ```yaml
   slurm_cluster_name: bluebanquise
-  slurm_control_machine: management1
+  slurm_controller_hostname: management1
   slurm_selecttype: "select/cons_tres"
   slurm_grestypes: gpu
   slurm_partitions_list:
@@ -380,6 +384,8 @@ See more explanation on https://slurm.schedmd.com/acct_gather.conf.html
 
 ## Changelog
 
+* 1.6.2: Fix the way mysql databse is defined. Code from @sgaosdgr. Benoit Leveugle <benoit.leveugle@gmail.com>
+* 1.6.1: Add missing handler for scrontrol. Code from @vedmonds. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.6.0: Add slurmdbd.conf additional content, raw cgroup.conf, and job_submit.lua. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.5.0: Add ability to define slurm user id. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.2: Improve code. Benoit Leveugle <benoit.leveugle@gmail.com>
