@@ -17,3 +17,5 @@
   ansible.builtin.command:
     cmd: scontrol reconfigure
   changed_when: true
+  when:
+    - slurm_allow_scontrol_handler
