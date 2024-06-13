@@ -116,6 +116,11 @@ def nodesetexpand(znodeset):
             nodeset.append(n)
     return nodeset
 
+# Check we have sufficient privileges
+is_admin = os.getuid() == 0
+if ( not is_admin) :
+   print ("Admin rights required for "+os.path.basename(__file__))
+   exit()
 
 # Get arguments passed to bootset
 parser = ArgumentParser()
