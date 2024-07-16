@@ -28,5 +28,5 @@ slurm_packages_to_install:
     - munge
     - libmunge2
     - slurm-smd
-    - slurm-smd-devel
+    - slurm-smd-dev
     - slurm-smd-client
