@@ -26,7 +26,19 @@ local7.*                                                /var/log/boot.log
 
 #### FORWARD RULES ####
 
-{% if networks[j2_node_main_network] is defined
+{% if rsyslog_server_ip4 is defined and rsyslog_server_ip4 is not none and (rsyslog_server_ip4 | ansible.utils.ipaddr ) %}{# Override other parameters, for custom configurations #}
+# ### begin forwarding rule ###
+# Remote Logging (we use TCP for reliable delivery)
+# An on-disk queue is created for this action. If the remote host is
+# down, messages are spooled to disk and sent when it is up again.
+$ActionQueueFileName fwdRule # unique name prefix for spool files
+$ActionQueueMaxDiskSpace 1g   # 1gb space limit (use as much as possible)
+$ActionQueueSaveOnShutdown on # save messages to disk on shutdown
+$ActionQueueType LinkedList   # run asynchronously
+$ActionResumeRetryCount -1    # infinite retries if host is down
+*.* @@{{ rsyslog_server_ip4 }}:{{ rsyslog_port }}
+# ### end of the forwarding rule ###
+{% elif networks[j2_node_main_network] is defined
       and networks[j2_node_main_network]['services'] is defined
       and (networks[j2_node_main_network]['services']['log4'] | default(networks[j2_node_main_network]['services']['log'], true)) is defined
       and (networks[j2_node_main_network]['services']['log4'] | default(networks[j2_node_main_network]['services']['log'], true)) is iterable %}
