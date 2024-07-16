@@ -5,23 +5,28 @@ slurm_packages_to_install:
   controller:
     - munge
     - libmunge2
-    - slurm
-    - slurm-devel
-    - slurm-slurmctld
+    - slurm-smd
+    - slurm-smd-dev
+    - slurm-smd-slurmctld
+    - slurm-smd-client
   accounting:
     - python3-pymysql
-    - slurm-slurmdbd
+    - slurm-smd-slurmdbd
   accounting_mysql:
     - mariadb-client
     - mariadb-server
   compute:
     - munge
     - libmunge2
-    - slurm
-    - slurm-devel
-    - slurm-slurmd
+    - slurm-smd
+    - slurm-smd-dev
+    - slurm-smd-slurmd
+    - slurm-smd-client
+    - slurm-smd-libpmi0
+    - slurm-smd-libpmi2-0
   submitter:
     - munge
     - libmunge2
-    - slurm
-    - slurm-devel
+    - slurm-smd
+    - slurm-smd-devel
+    - slurm-smd-client
