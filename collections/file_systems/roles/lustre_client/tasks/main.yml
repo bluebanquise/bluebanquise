@@ -1,0 +1,46 @@
+#- name: "set lustre source"
+#  set_fact:
+#    lustre_mount_source: "{{lustre_mds_servers | map('regex_replace','$',item.lnet) | join(':') }}:{{ item.path | default(item.name)}}"
+  
+#- name: list items
+#  debug:
+#    msg: "{{item}}"
+#  with_items: "{{ lustre_mounts }}"
+
+#- name: test
+#  vars: 
+#    lustre_mount_source: "{{item.mgs_servers | map('regex_replace','$', '@' ~ item.lnet) | join(':') }}:{{ item.path | default(item.name)}}"
+#  debug:
+#    msg: "{{lustre_mount_source}}"
+#  with_items: "{{ lustre_mounts }}"
+
+- name: "Install lustre-client"
+  package:
+    name: ["lustre-client,kmod-lustre-client"]
+    state: present
+
+- name: "Configure LNET <> Render /etc/modprobe.d/lustre.conf"
+  template:
+    src: lustre.conf.j2
+    dest: /etc/modprobe.d/lustre.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: "mount lustre"
+  vars:
+    lustre_mount_source: "{{item.0.mgs_servers | map('regex_replace','$', '@' ~ item.0.lnet) | join(':') }}:{{ item.0.path | default(item.0.name)}}"
+  ansible.builtin.mount:
+    path: "{{item.0.mount_path}}"
+    src: "{{lustre_mount_source}}"
+    fstype: lustre
+    state: present
+    opts: "{{ item.0.mount_opts | default('') }}"
+  with_subelements:
+    - "{{ lustre_mounts }}"
+    - clients_groups
+  when:
+    - groups[item.1] is defined and not none
+    - inventory_hostname in groups[item.1]
+
+
