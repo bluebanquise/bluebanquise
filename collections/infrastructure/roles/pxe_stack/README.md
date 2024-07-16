@@ -717,6 +717,7 @@ Note that using an home folder into /home for the bluebanquise sudo user can be 
 
 ## Changelog
 
+* 1.16.4: Ensure bluebanquise-bootset is run as root/sudo. <patrick.begou@univ-grenoble-alpes.fr>
 * 1.16.3: Fix bug in kickstart (reported by jpm38). Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.16.2: Fix owner and group for bluebanquise .ssh directory. <patrick.begou@univ-grenoble-alpes.fr>
 * 1.16.1: Fix proxy settings. Bug reported by @erkrali. Benoit Leveugle <benoit.leveugle@gmail.com>
