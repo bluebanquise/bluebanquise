@@ -52,7 +52,7 @@
     dest: /etc/systemd/system/snmp_exporter.service
     owner: root
     group: root
-    mode: 0755
+    mode: 0644
   notify:
     - systemd <|> Reload systemd configuration
     - service <|> Restart snmp_exporter service
