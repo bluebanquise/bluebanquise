@@ -34,7 +34,7 @@
     path: "{{item.0.mount_path}}"
     src: "{{lustre_mount_source}}"
     fstype: lustre
-    state: present
+    state: mounted
     opts: "{{ item.0.mount_opts | default('') }}"
   with_subelements:
     - "{{ lustre_mounts }}"
