@@ -384,6 +384,7 @@ See more explanation on https://slurm.schedmd.com/acct_gather.conf.html
 
 ## Changelog
 
+* 1.6.3: Switch deb packages to official names. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.6.2: Fix the way mysql databse is defined. Code from @sgaosdgr. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.6.1: Add missing handler for scrontrol. Code from @vedmonds. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.6.0: Add slurmdbd.conf additional content, raw cgroup.conf, and job_submit.lua. Benoit Leveugle <benoit.leveugle@gmail.com>
