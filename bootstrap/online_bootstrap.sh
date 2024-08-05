@@ -12,18 +12,17 @@ for arg in "$@"; do
   fi
 done
 
-function message_output () {
-  echo -e "\e[34m"
-  echo -e " ╔═══════════════════════════════════════════════════════════════╗"
-  echo -e " ║ $1"
-  echo -e " ╚═════════════════════\e[39m"
-}
-
 echo -e "\e[34m"
-echo -e " ╔═══════════════════════════════════════════════════════════════╗"
-echo -e " ║ BlueBanquise bootstrap.                                       ║"
-echo -e " ║ v 2.0.0                                                       ║"
-echo -e " ╚═══════════════════════════════════════════════════════════════╝\e[39m"
+echo ""
+echo '
+              (o_
+    (o_  (o_  //\
+    (/)_ (/)_ V_/_
+
+    BlueBanquise bootstrap.
+    v 3.0.0
+'
+echo -e "\e[39m"
 
 # Get current environment
 echo
@@ -35,8 +34,10 @@ echo " Welcome in the BlueBanquise stack base bootstraper."
 echo
 echo -e " \e[31mThis tool is going to install packages and act as"
 echo -e " priviledged user on this system to perform needed"
-echo -e " operations. It may permanently affect local system."
-echo -e " I did all my best to prevent issues, but this can happen.\e[0m"
+echo -e " operations to create the bluebanquise user."
+echo -e " Everything is logged into /var/log/bluebanquise/bootstrap"
+echo -e " This script is configured to stop if anything returns an error."
+echo -e "\e[0m"
 
 echo
 if [[ $SILENT == "false" ]]
@@ -49,13 +50,22 @@ then
     exit 0
   fi
 fi
-echo " Proceeding and enabling verbosity..."
-set -x
+echo " Proceeding..."
 sleep 1
-echo
-message_output "Installing OS needed dependencies..."
+
+echo " Creating logs directory..."
+mkdir -p /var/log/bluebanquise/
+echo "Starting new bootstrap at $(date)" >> /var/log/bluebanquise/bootstrap 2>&1 
+
+echo " Installing OS needed dependencies, could take some time..."
+(
 # UBUNTU
 if [ "$NAME" == "Ubuntu" ]; then
+  if [ "$VERSION_ID" == "24.04" ]; then
+    export DEBIAN_FRONTEND=noninteractive
+    sudo apt-get update
+    sudo apt-get install python3 python3-pip python3-venv ssh curl git -y
+  fi
   if [ "$VERSION_ID" == "22.04" ]; then
     export DEBIAN_FRONTEND=noninteractive
     sudo apt-get update
@@ -120,14 +130,19 @@ if [ "$VERSION_ID" == "11" ] || [ "$VERSION_ID" == "12" ]; then
   export DEBIAN_FRONTEND=noninteractive
   sudo apt install -y python3 python3-pip python3-venv git ssh curl
 fi
+) >> /var/log/bluebanquise/bootstrap 2>&1
 
-message_output "Creating bluebanquise user, may take a while..."
+echo " Creating bluebanquise user..."
+(
 getent group bluebanquise &>/dev/null || sudo groupadd --gid 377 bluebanquise
 getent passwd bluebanquise &>/dev/null || sudo useradd --gid 377 --uid 377 --create-home --home-dir /var/lib/bluebanquise --shell /bin/bash --system bluebanquise
 echo 'bluebanquise ALL=(ALL:ALL) NOPASSWD:ALL' | sudo tee /etc/sudoers.d/bluebanquise
+) >> /var/log/bluebanquise/bootstrap 2>&1
 
 if [[ $SKIP_ENVIRONMENT == "false" ]]
 then
+echo " Setting bluebanquise user environment, this might take a while..."
+(
 sudo -u bluebanquise /bin/bash -c '
 cd /var/lib/bluebanquise
 git clone https://github.com/bluebanquise/bluebanquise.git
@@ -136,6 +151,7 @@ cd bootstrap/
 chmod +x configure_environment.sh
 ./configure_environment.sh
 '
+) >> /var/log/bluebanquise/bootstrap 2>&1
 fi
 
 echo
@@ -148,5 +164,5 @@ echo
 echo " You can find documentation at http://bluebanquise.com/documentation/"
 echo " You can ask for help or rise issues at https://github.com/bluebanquise/bluebanquise/"
 echo
-echo " Thank you for using BlueBanquise."
+echo " Thank you for using BlueBanquise :)"
 echo
