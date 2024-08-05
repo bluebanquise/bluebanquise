@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 set -e
-set -x
 export SILENT="false"
 export SKIP_ENVIRONMENT="false"
 
@@ -64,20 +63,18 @@ echo " Installing OS needed dependencies, could take some time..."
 if [ "$NAME" == "Ubuntu" ]; then
   if [ "$VERSION_ID" == "24.04" ]; then
     sudo apt-get update
-    DEBIAN_FRONTEND=noninteractive sudo apt-get install python3 python3-pip python3-venv ssh curl git -y
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install python3 python3-pip python3-venv ssh curl git -y
   fi
   if [ "$VERSION_ID" == "22.04" ]; then
-    export DEBIAN_FRONTEND=noninteractive
     sudo apt-get update
-    sudo apt-get install python3 python3-pip python3-venv ssh curl git -y
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install python3 python3-pip python3-venv ssh curl git -y
   fi
   if [ "$VERSION_ID" == "20.04" ]; then
     echo
     echo " INFO - Ubuntu 20.04 python3 is too old, building a recent python... This may take a while."
     echo
-    export DEBIAN_FRONTEND=noninteractive
     sudo apt-get update
-    sudo apt-get install build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev wget libbz2-dev pkg-config ssh curl git -y
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev wget libbz2-dev pkg-config ssh curl git -y
     wget https://www.python.org/ftp/python/3.11.4/Python-3.11.4.tgz
     tar -xf Python-3.11.*.tgz
     cd Python-3.11.*/
