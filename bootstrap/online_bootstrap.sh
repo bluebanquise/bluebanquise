@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -e
+set -x
 export SILENT="false"
 export SKIP_ENVIRONMENT="false"
 
@@ -62,9 +63,8 @@ echo " Installing OS needed dependencies, could take some time..."
 # UBUNTU
 if [ "$NAME" == "Ubuntu" ]; then
   if [ "$VERSION_ID" == "24.04" ]; then
-    export DEBIAN_FRONTEND=noninteractive
     sudo apt-get update
-    sudo apt-get install python3 python3-pip python3-venv ssh curl git -y
+    DEBIAN_FRONTEND=noninteractive sudo apt-get install python3 python3-pip python3-venv ssh curl git -y
   fi
   if [ "$VERSION_ID" == "22.04" ]; then
     export DEBIAN_FRONTEND=noninteractive
