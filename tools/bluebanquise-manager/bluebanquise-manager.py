@@ -184,6 +184,7 @@ while True:
       answer = int(wm.w_input("❱❱❱ "))
 
       if answer == 9:
+        wm.w_destroy()
         break
 
       #######################################################################################################
@@ -434,8 +435,10 @@ while True:
     wm.w_create(w_title="Groups")
     while True:
       menu_message = """
-      1. Cluster settings
-      2. Networks
+      1. Function groups
+      2. Hardware groups
+      3. OS groups
+      4. Custom groups
 
       9. Go back
 
