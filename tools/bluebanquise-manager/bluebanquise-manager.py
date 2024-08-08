@@ -5,6 +5,7 @@ from rich.traceback import install
 import textwrap
 import validators
 import zoneinfo
+import json
 
 install(show_locals=True)
 
@@ -14,13 +15,14 @@ install(show_locals=True)
 
 class windows_manager(object):
   """ This is a small windows manager for terminal.
-  I hate things that clear the terminal because it often clear logs or errors.
+  I hate things that clear the terminal because it often clears logs or errors.
   So this is an home made concept of windows manager that lives verticaly in the terminal :)
   """
 
-  def __init__(self):
-    self.w_nesting_level = -1
-    self.w_colors = ['39', '214', '201']
+  def __init__(self, init_nesting_level=-1):
+    self.w_nesting_level = init_nesting_level
+    #self.w_colors = ['39', '214', '201', '226']
+    self.w_colors = ['226', '208', '196', '163']
     self.w_allowed_colors = {
       'blue': '\033[94m',
       'green': '\033[92m',
@@ -46,7 +48,7 @@ class windows_manager(object):
       sys.stdout.write(c)
       sys.stdout.flush()
       if c != " ":
-        time.sleep(1./280)
+        time.sleep(1./500)
 
   def w_input(self, message, nl=True):
     umessage = self.w_decorator_left_right(message, force_nesting_level = self.w_nesting_level + 1, no_right = True)
@@ -127,123 +129,19 @@ class windows_manager(object):
       message = message + buffer
     return message
 
-  # def bprint(self, stage, w_title=None):
-  #   # Get size of terminal
-  #   columns = os.get_terminal_size().columns
-  #   # Set lead section depending if we are creating or closing a window
-  #   # This is of size 5, to be removed later
-  #   if stage == 0:
-  #     lead = "╭─────"
-  #     self.w_nesting_level = self.w_nesting_level + 1
-  #   else:
-  #     lead = "╰─────"
-  #   # Set indent on left depending of current indent lvl
-  #   if self.w_nesting_level == 0:
-  #     box = "\033[38;5;" + self.w_colors[0] + "m" + lead
-  #   elif self.w_nesting_level == 1:
-  #     box = "\033[38;5;" + self.w_colors[0] + "m│  \033[0m" + "\033[38;5;" + self.w_colors[1] + "m" + lead
-  #   elif self.w_nesting_level == 2:
-  #     box = "\033[38;5;" + self.w_colors[0] + "m│\033[0m  " + "\033[38;5;" + self.w_colors[1] + "m│  \033[0m" + "\033[38;5;" + self.w_colors[2] + "m" + lead
-  #   # If we open a window, add title
-  #   if stage == 0 and w_title is not None:
-  #     box = box + " " + str(w_title) + " "
-  #     title_size = len(w_title) + 2
-  #   else:
-  #     title_size = 0
-  #   # Complete the line
-  #   for i in range(1, columns-self.w_nesting_level*4-5-title_size, 1):
-  #     box = box + "─"
-  #   box = box + "\033[0m"
-  #   if stage == 0:
-  #     box = self.bprintl("\n", force_indent = self.w_nesting_level-1) + box
-  #   else:
-  #     box = box
-  #   print(box)
-  #   if stage != 0:
-  #     self.w_nesting_level = self.w_nesting_level - 1
-
-  # def bprintl(self, message, force_indent=None):
-  #   if force_indent is not None:
-  #     indent = force_indent
-  #   else:
-  #     indent = self.w_nesting_level
-  #   if indent == 0:
-  #     message = "\033[38;5;" + self.w_colors[0] + "m│\033[0m " + message
-  #   elif indent == 1:
-  #     message = ("\033[38;5;" + self.w_colors[0] + "m│\033[0m   " +
-  #               "\033[38;5;" + self.w_colors[1] + "m│\033[0m " +
-  #               message)
-  #   elif indent == 2:
-  #     message = ("\033[38;5;" + self.w_colors[0] + "m│\033[0m   " +
-  #               "\033[38;5;" + self.w_colors[1] + "m│\033[0m   " +
-  #               "\033[38;5;" + self.w_colors[2] + "m│\033[0m " +
-  #               message)
-  #   return message
-  
-
-  
-# bprint(0,0)
-
-# menu_message = """
-# Manage inventory
-# 1. Manage global parameters
-# 2. Manage groups (function, os, hardware, ...)
-# 3. Manage nodes
-# 4. Exit"""
-# sprint(textwrap.dedent(menu_message))
-
-# bprint(0,1)
-
-
-# quit()
-
-#\033[38;5;39m coucou\033[0m
-
-# def sprint(message, nl=True, ns=False):
-#   if indent > 0:
-#     sident = ""
-#     visual = "└─"
-#     for i in range(1,indent+1,1):
-#       sident = sident + "    "
-#       visual = visual + "────"
-#     visual = visual + "┐"
-#     message = textwrap.indent(message, sident)
-#     if ns:
-#       message = visual + message
-#   if nl:
-#     message = message + '\n'
-#   for c in message:
-#     sys.stdout.write(c)
-#     sys.stdout.flush()
-#     time.sleep(1./140)
-
-
 print("""\
 
               (o_
     (o_  (o_  //\\
     (/)_ (/)_ V_/_
 
-  BlueBanquise Manager
+  BlueBanquise manager
   v1.0.0
   https://github.com/bluebanquise/bluebanquise/""")
 
 wm = windows_manager()
 
-# wm.w_create(w_title="coucou")
-# wm.w_print("coucou")
-# wm.w_create(w_title="coucou2")
-# wm.w_print("coucou")
-# wm.w_create(w_title="coucou3")
-# wm.w_print("coucou")
-# wm.w_destroy()
-# wm.w_destroy()
-# wm.w_destroy()
-
-
-# quit()
-
-wm.w_create(w_title="BlueBanquise Manager")
+wm.w_create(w_title="BlueBanquise manager")
 
 answer = 0
 while True:
@@ -400,19 +298,21 @@ while True:
 
         wm.w_sprint("-- Entering networks settings")
         wm.w_create(w_title="Network settings")
-        wm.w_sprint("-- Reading configuration")
+        wm.w_sprint("\n-- Reading configuration")
         if os.path.exists("inventory/group_vars/all/networks.yml"):
           with open("inventory/group_vars/all/networks.yml", 'r') as file:
-            cluster = yaml.safe_load(file)
+            networks = yaml.safe_load(file)
         else:
           wm.w_sprint("-- Could not find file, generating default")
           networks = {
             'networks' : {}
           }
-        wm.w_sprint("Current configuration:")
-        wm.w_sprint(" ")
-        wm.w_sprint(yaml.dump(networks, default_flow_style=False))
         while True:
+
+          wm.w_sprint("Current configuration:")
+          wm.w_sprint(" ")
+          wm.w_sprint(yaml.dump(networks, default_flow_style=False))
+
           menu_message = """
           1. Add new network
           2. Edit existing network
@@ -428,33 +328,38 @@ while True:
             break
 
           if answer == 1:
-            wm.w_sprint("Please enter new network name:")
+            wm.w_sprint("-- Entering new network")
+            wm.w_create(w_title="New network")
+            wm.w_sprint("\nPlease enter new network name:")
             wm.w_sprint("Remember that administration networks start with prefix " + wm.t_blue('net-') + '.')
             nname = wm.w_input("❱❱❱ ")
-            networks[nname] = {}
+            networks['networks'][nname] = {}
             wm.w_sprint("Please enter network " + wm.t_blue(nname) + " subnet:")
             sub_answer = wm.w_input("❱❱❱ ")
-            networks[nname]['subnet'] = sub_answer
+            networks['networks'][nname]['subnet'] = sub_answer
             wm.w_sprint("Please enter network " + wm.t_blue(nname) + " prefix:")
             sub_answer = wm.w_input("❱❱❱ ")
-            networks[nname]['prefix'] = sub_answer
+            networks['networks'][nname]['prefix'] = sub_answer
             wm.w_sprint("Please enter network " + wm.t_blue(nname) + " gateway (ip4) if exist:")
             sub_answer = wm.w_input("❱❱❱ ")
-            networks[nname]['gateway4'] = sub_answer            
+            if sub_answer:
+              networks['networks'][nname]['gateway4'] = sub_answer
+            else:
+              networks['networks'][nname]['gateway4'] = None
             if nname.startswith('net-'):
               wm.w_sprint("According to the name, this is an admininstration network.")
-              wm.w_sprint("Enable dhcp on this network (Y/N)?")
+              wm.w_sprint("Register this network in dhcp server (Y/N)?")
               sub_answer = wm.w_input("❱❱❱ ")
               if sub_answer.lower() in ["y","yes"]:
-                networks[nname]['dhcp_server'] = True
+                networks['networks'][nname]['dhcp_server'] = True
               else:
-                networks[nname]['dhcp_server'] = False
-              wm.w_sprint("Enable dns on this network (Y/N)?")
+                networks['networks'][nname]['dhcp_server'] = False
+              wm.w_sprint("Register this network in dns server (Y/N)?")
               sub_answer = wm.w_input("❱❱❱ ")
               if sub_answer.lower() in ["y","yes"]:
-                networks[nname]['dns_server'] = True
+                networks['networks'][nname]['dns_server'] = True
               else:
-                networks[nname]['dns_server'] = False
+                networks['networks'][nname]['dns_server'] = False
               wm.w_sprint("Should all services be on the same ip")
               wm.w_sprint("or do you plan to distribute services,")
               wm.w_sprint("like a dns server on another ip than time server?")
@@ -464,22 +369,81 @@ while True:
                 wm.w_sprint("Ok, using a global services ip for this network.")
                 wm.w_sprint("What will be this ip?")
                 sub_answer = wm.w_input("❱❱❱ ")
-                networks[nname]['services_ip'] = sub_answer
+                networks['networks'][nname]['services_ip'] = sub_answer
               else:
                 wm.w_sprint("Ok, generating default fine grained services.")
                 wm.w_sprint("You will be able to define them or add others later.")
-                networks[nname]['services'] = {}
-                networks[nname]['services']['dns'] = []
-                networks[nname]['services']['ntp'] = []
-                networks[nname]['services']['pxe'] = []
-
-
-
-            cluster['bb_cluster_name'] = sub_answer
+                networks['networks'][nname]['services'] = {}
+                networks['networks'][nname]['services']['dns'] = []
+                networks['networks'][nname]['services']['ntp'] = []
+                networks['networks'][nname]['services']['pxe'] = []
             wm.w_sprint("-- Writting new configuration")
-            with open("inventory/group_vars/all/cluster.yml", 'w+') as file:
-              yaml.dump(cluster, file, default_flow_style=False)
+            with open("inventory/group_vars/all/networks.yml", 'w+') as file:
+              yaml.dump(networks, file, default_flow_style=False)
+
+          if answer == 2:
+            wm.w_sprint("-- Entering network editor")
+            wm.w_create(w_title="Network edit")
+            wm.w_sprint("\nCurrent networks:")
+            for net in networks['networks']:
+              wm.w_sprint("- " + net)
+            wm.w_sprint("Please enter network to edit:")
+            nname = wm.w_input("❱❱❱ ")
+            if not nname in networks['networks']:
+              wm.w_sprint("Network unknown, please check syntax.")
+              continue
+            wm.w_sprint("Current network settings are:")
+            wm.w_sprint(" ")
+            for key, value in networks['networks'][nname].items():
+              wm.w_sprint(wm.t_blue(str(key)) + ": " + str(value))
+            wm.w_sprint(" ")
+            wm.w_sprint("Please enter " + wm.t_blue("key") + " to edit")
+            answer = wm.w_input("❱❱❱ ")
+            if answer in networks['networks'][nname]:
+              if answer == "services":
+                wm.w_sprint("Current registered services:")
+                for service, service_values in networks['networks'][nname]['services'].items():
+                  wm.w_sprint(" - " + service + ": " + str(service_values))
+                wm.w_sprint("Please select a service to edit")
+                service = wm.w_input("❱❱❱ ")
+                if service not in networks['networks'][nname]['services']:
+                  wm.w_sprint("Service unknown, please check syntax.")
+                  continue
+                wm.w_sprint("You can add as multiple ipv4/hostname couples to each service.")
+                wm.w_sprint("For now, you have to pass the dict as a string. For example:")
+                wm.w_sprint("[{'ip4': '10.10.0.1', 'hostname': 'mgt1'},{'ip4': '10.10.0.2', 'hostname': 'mgt2'}]")
+                wm.w_sprint("Please enter dict to set for this service:")
+                answer = wm.w_input("❱❱❱ ")
+                networks['networks'][nname]['services'][service] = json.loads(answer)
+              else:
+                wm.w_sprint("Ok, please enter now new value")
+                sub_answer = wm.w_input("❱❱❱ ")
+                networks['networks'][nname][answer] = sub_answer
+              wm.w_sprint("-- Writting new configuration")
+              with open("inventory/group_vars/all/networks.yml", 'w+') as file:
+                yaml.dump(networks, file, default_flow_style=False)
+            else:
+              wm.w_sprint("-- Could not find key in list, please check entered syntax")
+
+            wm.w_destroy()
 
         wm.w_destroy()
+
+  if answer == 2:
+    wm.w_sprint("-- Entering groups", nl=True)
+    wm.w_create(w_title="Groups")
+    while True:
+      menu_message = """
+      1. Cluster settings
+      2. Networks
+
+      9. Go back
+
+      """
+      wm.w_sprint(textwrap.dedent(menu_message))
+      answer = int(wm.w_input("❱❱❱ "))
+
+      if answer == 9:
+        break
 
     wm.w_destroy()

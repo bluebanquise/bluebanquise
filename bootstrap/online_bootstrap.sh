@@ -151,6 +151,9 @@ chmod +x configure_environment.sh
 ) >> /var/log/bluebanquise/bootstrap 2>&1
 fi
 
+echo " Setting rights on /var/log/bluebanquise/..."
+sudo chown -R bluebanquise:bluebanquise /var/log/bluebanquise/
+
 echo
 echo " Bootstrap done."
 echo " You can now login as bluebanquise user via 'sudo su - bluebanquise'"
