@@ -261,10 +261,12 @@ To achieve that, few variables are at disposal:
 
 * `nic_reload_connections`: this variable will trigger a handler that will ask NetworkManager to reload its configuration.
 * `nic_force_nic_restart`: this variable will trigger a task that will manually down and up interfaces. To be used with care.
+* `nic_restart_timeout`: this variable is used with nic_force_nic_restart to specify the time to wait between connection down and up actions. Default value is 2s.
 * `nic_reboot`: this variable will trigger a reboot if any nic configuration changed. To be used with care.
 
 ## Changelog
 
+* 1.10.1: Make the connection restart timeout configurable <jean-pascal.mazzilli@gmail.com>
 * 1.9.1: Add missing slave_type key. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.9.0: Allow services and services_ip together. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.8.0: Add new nmcli keys. Benoit Leveugle <benoit.leveugle@gmail.com>
