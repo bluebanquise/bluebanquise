@@ -222,12 +222,16 @@ def get_bootstrap_image_path(tool_paths, bootstrap_image_name):
     return os.path.join(tool_paths['bootstrap_images'], bootstrap_image_name)
 
 
-def get_reference_image_nfs_path(tool_parameters, reference_image_name):
-    return os.path.join(tool_parameters['nfs_path'], reference_image_name)
+def get_reference_image_nfs_path(tool_paths, reference_image_name):
+    return os.path.join(tool_paths['nfs'], reference_image_name)
 
 
 def get_reference_image_pxe_path(tool_paths, reference_image_name):
     return os.path.join(tool_paths['http_pxe_diskless'], reference_image_name)
+
+
+def get_live_image_path(tool_paths, live_image_name):
+    return os.path.join(tool_paths['http_pxe_diskless'], live_image_name)
 
 
 print("""\
@@ -273,6 +277,7 @@ tool_paths = {}
 tool_paths['bootstrap_images'] = os.path.join(tool_parameters['sudo_user_home'], "diskless/bootstrap_images")
 tool_paths['bootstrap_images_tmp'] = os.path.join(tool_paths['bootstrap_images'], "tmp")
 tool_paths['http_pxe_diskless'] = os.path.join(tool_parameters['http_pxe_folder'], "diskless")
+tool_paths['nfs'] = tool_parameters['nfs_path']
 
 
 logging.info(bcolors.OKBLUE + 'Checking folders exist...' + bcolors.ENDC)
@@ -397,7 +402,7 @@ while True:
         image_selected_metadata['type'] = "nfs_reference"
 
         bootstrap_image_path = get_bootstrap_image_path(tool_paths, image_selected_metadata['reference_name'])
-        reference_image_nfs_path = get_reference_image_nfs_path(tool_parameters, image_selected_metadata['name'])
+        reference_image_nfs_path = get_reference_image_nfs_path(tool_paths, image_selected_metadata['name'])
         reference_image_pxe_path = get_reference_image_pxe_path(tool_paths, image_selected_metadata['name'])
 
         logging.info(bcolors.OKBLUE + "Extracting bootstrap image copy in " + reference_image_nfs_path + bcolors.ENDC)
@@ -469,7 +474,7 @@ while True:
 
         print(" Please enter reference image to link to a node:")
         image_selected_input = input(" -->: ")
-        reference_image_nfs_path = get_reference_image_nfs_path(tool_parameters, image_selected_input)
+        reference_image_nfs_path = get_reference_image_nfs_path(tool_paths, image_selected_input)
 
         print(" Now, please enter target node to be linked to this image:")
         node_selected_input = input(" -->: ")
@@ -505,7 +510,7 @@ while True:
 
         print(" Please enter reference image to check available kernels:")
         image_selected_input = input(" -->: ")
-        reference_image_nfs_path = get_reference_image_nfs_path(tool_parameters, image_selected_input)
+        reference_image_nfs_path = get_reference_image_nfs_path(tool_paths, image_selected_input)
         reference_image_pxe_path = get_reference_image_pxe_path(tool_paths, image_selected_input)
 
         ## Attention, RHEL 9 et 8 uniquement pour le moment
@@ -587,12 +592,12 @@ while True:
 
         print(" Please enter reference image to clone:")
         image_selected_input = input(" -->: ")
-        reference_image_nfs_path = get_reference_image_nfs_path(tool_parameters, image_selected_input)
+        reference_image_nfs_path = get_reference_image_nfs_path(tool_paths, image_selected_input)
         reference_image_pxe_path = get_reference_image_pxe_path(tool_paths, image_selected_input)
 
         print(" Please enter clone reference image name:")
         image_clone_input = input(" -->: ")
-        clone_image_nfs_path = get_reference_image_nfs_path(tool_parameters, image_clone_input)
+        clone_image_nfs_path = get_reference_image_nfs_path(tool_paths, image_clone_input)
         clone_image_pxe_path = get_reference_image_pxe_path(tool_paths, image_clone_input)
 
         logging.info(bcolors.OKBLUE + 'Cloning image...' + bcolors.ENDC)
@@ -627,7 +632,7 @@ while True:
 
         print(" Please enter reference image to convert to live:")
         image_selected_input = input(" -->: ")
-        reference_image_nfs_path = get_reference_image_nfs_path(tool_parameters, image_selected_input)
+        reference_image_nfs_path = get_reference_image_nfs_path(tool_paths, image_selected_input)
         reference_image_pxe_path = get_reference_image_pxe_path(tool_paths, image_selected_input)
 
         try:
@@ -646,24 +651,28 @@ while True:
         image_selected_metadata['name'] = image_selected_input_name
         image_selected_metadata['type'] = "live"
 
+        reference_image_nfs_path = get_reference_image_nfs_path(tool_paths, image_selected_metadata['reference_name'].split(",")[0])
+        reference_image_pxe_path = get_reference_image_pxe_path(tool_paths, image_selected_metadata['reference_name'].split(",")[0])
+        live_image_path = get_live_image_path(tool_paths, image_selected_metadata['name'])
+
         print(" I now need a live size limit in RAM, in Mb:")
         live_size = input(" -->: ")
         logging.info(bcolors.OKBLUE + 'Preparing FS...' + bcolors.ENDC)
-        protected_os_system("mkdir -p " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/workdir/LiveOS/")
-        protected_os_system("dd if=/dev/zero of=" + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/workdir/LiveOS/rootfs.img bs=1M count=" + live_size)
-        protected_os_system("mkfs.xfs " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/workdir/LiveOS/rootfs.img")
-        os.makedirs(tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/mountdir/")
-        protected_os_system("mount -o loop " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/workdir/LiveOS/rootfs.img " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/mountdir/")
+        protected_os_system("mkdir -p " + live_image_path + "/workdir/LiveOS/")
+        protected_os_system("dd if=/dev/zero of=" + live_image_path + "/workdir/LiveOS/rootfs.img bs=1M count=" + live_size)
+        protected_os_system("mkfs.xfs " + live_image_path + "/workdir/LiveOS/rootfs.img")
+        os.makedirs(live_image_path + "/mountdir/")
+        protected_os_system("mount -o loop " + live_image_path + "/workdir/LiveOS/rootfs.img " + live_image_path + "/mountdir/")
         logging.info(bcolors.OKBLUE + 'Copying files from reference image...' + bcolors.ENDC)
-        protected_os_system("cp -a " + reference_image_nfs_path + "/* " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/mountdir/")
-        protected_os_system("umount " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/mountdir/")
+        protected_os_system("cp -a " + reference_image_nfs_path + "/* " + live_image_path + "/mountdir/")
+        protected_os_system("umount " + live_image_path + "/mountdir/")
         logging.info(bcolors.OKBLUE + 'Squashing image...' + bcolors.ENDC)
-        protected_os_system("mksquashfs " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/workdir " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/squashfs.img")
+        protected_os_system("mksquashfs " + live_image_path + "/workdir " + live_image_path + "/squashfs.img")
         logging.info(bcolors.OKBLUE + 'Copying kernel and initramfs...' + bcolors.ENDC)
-        shutil.rmtree(tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/workdir")
-        protected_os_system("cp -a " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['reference_name'].split(",")[0] + "/initramfs* " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/")
-        protected_os_system("chmod 644 " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/initramfs-*")
-        protected_os_system("cp -a " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['reference_name'].split(",")[0] + "/vmlinuz* " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/")
+        shutil.rmtree(live_image_path + "/workdir")
+        protected_os_system("cp -a " + reference_image_pxe_path + "/initramfs* " + live_image_path + "/")
+        protected_os_system("chmod 644 " + live_image_path + "/initramfs-*")
+        protected_os_system("cp -a " + reference_image_pxe_path + "/vmlinuz* " + live_image_path + "/")
 
         ipxe_content = '''#!ipxe
         echo |
@@ -691,18 +700,18 @@ while True:
         '''.format(image_kernel=("vmlinuz-" + image_selected_metadata['kernel']), image_initramfs=("initramfs-" + image_selected_metadata['kernel'] + ".img"), image_name=image_selected_metadata['name'])
 
         try:
-            ipxe_file = open(tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/boot.ipxe", "w")
+            ipxe_file = open(live_image_path + "/boot.ipxe", "w")
             ipxe_file.write(ipxe_content)
             ipxe_file.close()
         except Exception:
-            print(bcolors.FAIL + " An error occurred writing the file " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/boot.ipxe. Please investigate." + bcolors.ENDC)
+            print(bcolors.FAIL + " An error occurred writing the file " + live_image_path + "/boot.ipxe. Please investigate." + bcolors.ENDC)
             quit(1)
 
         try:
-            with open(tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/metadata.yaml", "w") as file:
+            with open(live_image_path + "/metadata.yaml", "w") as file:
                 yaml.dump(image_selected_metadata, file)
         except Exception:
-            print(bcolors.FAIL + " An error occurred writing the file " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/metadata.yaml. Please investigate." + bcolors.ENDC)
+            print(bcolors.FAIL + " An error occurred writing the file " + live_image_path + "/metadata.yaml. Please investigate." + bcolors.ENDC)
             quit(1)
 
         print(bcolors.OKGREEN + "\n == Livenet image created :) ==" + bcolors.ENDC)
@@ -735,10 +744,12 @@ while True:
             
             print("\n Please enter reference image name to be deleted:")
             delete_image = input(" -->: ")
-            reference_image_nfs_path = get_reference_image_nfs_path(tool_parameters, delete_image)
+            reference_image_nfs_path = get_reference_image_nfs_path(tool_paths, delete_image)
+            reference_image_pxe_path = get_reference_image_pxe_path(tool_paths, delete_image)
+
             logging.info(bcolors.OKBLUE + 'Deleting image...' + bcolors.ENDC)
             protected_os_system("rm -Rf " + reference_image_nfs_path)
-            protected_os_system("rm -Rf " + tool_parameters['http_pxe_folder'] + "diskless/" + delete_image)
+            protected_os_system("rm -Rf " + reference_image_pxe_path)
 
         if str(delete_image_type) == "3":
 
@@ -746,8 +757,9 @@ while True:
 
             print("\n Please enter live image name to be deleted:")
             delete_image = input(" -->: ")
+            live_image_path = get_live_image_path(tool_paths, delete_image)
             logging.info(bcolors.OKBLUE + 'Deleting image...' + bcolors.ENDC)
-            protected_os_system("rm -Rf " + tool_parameters['http_pxe_folder'] + "diskless/" + delete_image)
+            protected_os_system("rm -Rf " + live_image_path)
 
         print(bcolors.OKGREEN + "\n == Image deleted :) ==" + bcolors.ENDC)
 
