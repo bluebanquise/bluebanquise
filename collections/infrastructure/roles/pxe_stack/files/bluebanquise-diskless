@@ -214,6 +214,13 @@ def protected_os_system(raw_command):
     return 0
 
 
+def get_tmp_image_info(tool_paths, image_source_file_name):
+    tmp_image_info = {}
+    tmp_image_info['metadata'] = os.path.join(tool_paths['bootstrap_images_tmp'], "metadata.yaml")
+    tmp_image_info['image_source'] = os.path.join(tool_paths['bootstrap_images_tmp'], image_source_file_name)
+    return tmp_image_info
+
+
 print("""\
 
                 (o_
@@ -251,16 +258,24 @@ except Exception:
     print(bcolors.FAIL + " An error occurred reading the file /etc/bluebanquise/diskless.yml. Please investigate." + bcolors.ENDC)
     quit(1)
 
+
+# Use os.path.join to avoid issues with missing '/' and to reduce code duplication
+tool_paths = {}
+tool_paths['bootstrap_images'] = os.path.join(tool_parameters['sudo_user_home'], "diskless/bootstrap_images")
+tool_paths['bootstrap_images_tmp'] = os.path.join(tool_paths['bootstrap_images'], "tmp")
+tool_paths['http_pxe_diskless'] = os.path.join(tool_parameters['http_pxe_folder'], "diskless")
+
+
 logging.info(bcolors.OKBLUE + 'Checking folders exist...' + bcolors.ENDC)
-if not os.path.exists(tool_parameters['sudo_user_home'] + "/diskless/bootstrap_images"):
-    logging.info(bcolors.OKBLUE + "Creating " + tool_parameters['sudo_user_home'] + "/diskless/bootstrap_images/ folder." + bcolors.ENDC)
-    protected_os_system("mkdir -p " + tool_parameters['sudo_user_home'] + "/diskless/bootstrap_images/tmp/")
+if not os.path.exists(tool_paths['bootstrap_images']):
+    logging.info(bcolors.OKBLUE + "Creating " + tool_paths['bootstrap_images'] + " folder." + bcolors.ENDC)
+    protected_os_system("mkdir -p " + tool_paths['bootstrap_images_tmp'])
 if not os.path.exists(tool_parameters['nfs_path'] + ""):
     logging.info(bcolors.OKBLUE + "Creating " + tool_parameters['nfs_path'] + " folder." + bcolors.ENDC)
     protected_os_system("mkdir -p " + tool_parameters['nfs_path'] + "")
-if not os.path.exists(tool_parameters['http_pxe_folder'] + "/diskless"):
-    logging.info(bcolors.OKBLUE + "Creating " + tool_parameters['http_pxe_folder'] + "/diskless/ folder." + bcolors.ENDC)
-    protected_os_system("mkdir -p " + tool_parameters['http_pxe_folder'] + "/diskless/")
+if not os.path.exists(tool_paths['http_pxe_diskless']):
+    logging.info(bcolors.OKBLUE + "Creating " + tool_paths['http_pxe_diskless'] + " folder." + bcolors.ENDC)
+    protected_os_system("mkdir -p " + tool_paths['http_pxe_diskless'])
 
 
 while True:
@@ -295,40 +310,42 @@ while True:
 
         source_action = input(" -->: ")
 
-        protected_os_system("mkdir -p " + tool_parameters['sudo_user_home'] + "/diskless/bootstrap_images/tmp/")
-        logging.info(bcolors.OKBLUE + "Image will be temporary stored inside " + tool_parameters['sudo_user_home'] + "/diskless/bootstrap_images/tmp/" + bcolors.ENDC)
+        protected_os_system("mkdir -p " + tool_paths['bootstrap_images_tmp'])
+        logging.info(bcolors.OKBLUE + "Image will be temporary stored inside " + tool_paths['bootstrap_images_tmp'] + bcolors.ENDC)
 
         if source_action == "1":
             print(" Please enter bootstrap image ABSOLUTE path of tar.gz archive:")
             image_path = input(" -->: ")
             image_source_file_name = image_path.split('/')[-1]
+            tmp_image_info = get_tmp_image_info(tool_paths, image_source_file_name)
             logging.info(bcolors.OKBLUE + 'Copying image from ' + image_path + ', please be patient...' + bcolors.ENDC)
-            protected_os_system("cp " + image_path + " " + tool_parameters['sudo_user_home'] + "/diskless/bootstrap_images/tmp/" + image_source_file_name)
+            protected_os_system("cp " + image_path + " " + tmp_image_info['image_source'])
 
         elif source_action == "2":
             print(" Please enter bootstrap image URL of tar.gz archive:")
             image_url = input(" -->: ")
             image_source_file_name = image_url.split('/')[-1]
+            tmp_image_info = get_tmp_image_info(tool_paths, image_source_file_name)
             logging.info(bcolors.OKBLUE + 'Downloading image from ' + image_url + ', please be patient...' + bcolors.ENDC)
             response = requests.get(image_url)
             try:
-                with open(tool_parameters['sudo_user_home'] + "/diskless/bootstrap_images/tmp/" + image_source_file_name, 'wb') as file:
+                with open(tmp_image_info['image_source'], 'wb') as file:
                     file.write(response.content)
             except Exception:
                 print(bcolors.FAIL + " An error occurred writing the image locally. Please investigate." + bcolors.ENDC)
                 quit(1)
 
         logging.info(bcolors.OKBLUE + 'Extracting image metadata...' + bcolors.ENDC)
-        protected_os_system("rm -f " + tool_parameters['sudo_user_home'] + "/diskless/bootstrap_images/tmp/metadata.yaml")
-        protected_os_system("tar xzf " + tool_parameters['sudo_user_home'] + "/diskless/bootstrap_images/tmp/" + image_source_file_name + " -C " + tool_parameters['sudo_user_home'] + "/diskless/bootstrap_images/tmp/ metadata.yaml")
+        protected_os_system("rm -f " + tmp_image_info['metadata'])
+        protected_os_system("tar xzf " + tmp_image_info['image_source'] + " -C " + tool_paths['bootstrap_images_tmp'] + "/ metadata.yaml")
         try:
-            with open(tool_parameters['sudo_user_home'] + "/diskless/bootstrap_images/tmp/metadata.yaml", "r") as file:
+            with open(tmp_image_info['metadata'], "r") as file:
                 image_metadata = yaml.safe_load(file)
         except FileNotFoundError:
-            print(bcolors.FAIL + " File " + tool_parameters['sudo_user_home'] + "/diskless/bootstrap_images/tmp/metadata.yaml does not exist, please re-run pxe_stack role before using the tool." + bcolors.ENDC)
+            print(bcolors.FAIL + " File " + tmp_image_info['metadata'] + " does not exist, please re-run pxe_stack role before using the tool." + bcolors.ENDC)
             quit(1)
         except Exception:
-            print(bcolors.FAIL + " An error occurred reading the file " + tool_parameters['sudo_user_home'] + "/diskless/bootstrap_images/tmp/metadata.yaml. Please investigate." + bcolors.ENDC)
+            print(bcolors.FAIL + " An error occurred reading the file " + tmp_image_info['metadata'] + ". Please investigate." + bcolors.ENDC)
             quit(1)
         print(" Found following metadata for new image:")
         display_image_metadata(image_metadata)
@@ -336,12 +353,12 @@ while True:
         logging.info(bcolors.OKBLUE + 'Storing image...' + bcolors.ENDC)
         protected_os_system("mkdir -p " + tool_parameters['sudo_user_home'] + "/diskless/bootstrap_images/" + image_metadata['name'])
         protected_os_system("mv " + tool_parameters['sudo_user_home'] + "/diskless/bootstrap_images/tmp/" + image_source_file_name + " " + tool_parameters['sudo_user_home'] + "/diskless/bootstrap_images/" + image_metadata['name'] + "/image.tar.gz")
-        protected_os_system("mv " + tool_parameters['sudo_user_home'] + "/diskless/bootstrap_images/tmp/metadata.yaml " + tool_parameters['sudo_user_home'] + "/diskless/bootstrap_images/" + image_metadata['name'] + "/metadata.yaml")
+        protected_os_system("mv " + tmp_image_info['metadata'] + " " + tool_parameters['sudo_user_home'] + "/diskless/bootstrap_images/" + image_metadata['name'] + "/metadata.yaml")
         print(bcolors.OKGREEN + "\n == Bootstrap image " + image_metadata['name'] + " is now ready to be used :) ==" + bcolors.ENDC)
 
     if main_action == '3':
 
-        logging.info(bcolors.OKBLUE + "Checking bootstrap images in " + tool_parameters['sudo_user_home'] + "/diskless/bootstrap_images/" + bcolors.ENDC)
+        logging.info(bcolors.OKBLUE + "Checking bootstrap images in " + tool_paths['bootstrap_images'] + bcolors.ENDC)
 
         print("")
         print(" Available bootstrap images to use as reference:")
