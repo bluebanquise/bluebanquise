@@ -218,8 +218,12 @@ def get_tmp_image_source_path(tool_paths, image_source_file_name):
     return os.path.join(tool_paths['bootstrap_images_tmp'], image_source_file_name)
 
 
-def get_bootstrap_image_path(tool_paths, image_name):
-    return os.path.join(tool_paths['bootstrap_images'], image_name)
+def get_bootstrap_image_path(tool_paths, bootstrap_image_name):
+    return os.path.join(tool_paths['bootstrap_images'], bootstrap_image_name)
+
+
+def get_reference_image_nfs_path(tool_parameters, reference_image_name):
+    return os.path.join(tool_parameters['nfs_path'], reference_image_name)
 
 
 print("""\
@@ -374,6 +378,7 @@ while True:
         print("")
 
         bootstrap_image_path = get_bootstrap_image_path(tool_paths, image_selected_input)
+        reference_image_nfs_path = get_reference_image_nfs_path(tool_parameters, image_selected_input_name)
 
         try:
             with open(bootstrap_image_path + "/metadata.yaml", "r") as file:
@@ -390,19 +395,19 @@ while True:
 
         bootstrap_image_path = get_bootstrap_image_path(tool_paths, image_selected_metadata['reference_name'])
 
-        logging.info(bcolors.OKBLUE + "Extracting bootstrap image copy in " + tool_parameters['nfs_path'] + "/" + image_selected_metadata['name'] + bcolors.ENDC)
-        protected_os_system("mkdir -p " + tool_parameters['nfs_path'] + "/" + image_selected_metadata['name'])
-        protected_os_system("tar xzf " + bootstrap_image_path + "/image.tar.gz -C " + tool_parameters['nfs_path'] + "/" + image_selected_metadata['name'])
-        protected_os_system("rm -f " + tool_parameters['nfs_path'] + "/" + image_selected_metadata['name'] + "/metadata.yaml")
+        logging.info(bcolors.OKBLUE + "Extracting bootstrap image copy in " + reference_image_nfs_path + bcolors.ENDC)
+        protected_os_system("mkdir -p " + reference_image_nfs_path)
+        protected_os_system("tar xzf " + bootstrap_image_path + "/image.tar.gz -C " + reference_image_nfs_path + "/")
+        protected_os_system("rm -f " + reference_image_nfs_path + "/metadata.yaml")
         logging.info(bcolors.OKBLUE + "Creating image folder at " + tool_parameters['http_pxe_folder'] + "/diskless/" + image_selected_metadata['name'] + bcolors.ENDC)
         protected_os_system("mkdir -p " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'])
 
         if image_selected_metadata['family'] == "el9":
-            protected_os_system("cp " + tool_parameters['nfs_path'] + "/" + image_selected_metadata['name'] + "/boot/initramfs-" + image_selected_metadata['kernel'] + ".img " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/initramfs-" + image_selected_metadata['kernel'] + ".img")
-            protected_os_system("cp " + tool_parameters['nfs_path'] + "/" + image_selected_metadata['name'] + "/usr/lib/modules/" + image_selected_metadata['kernel'] + "/vmlinuz " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/vmlinuz-" + image_selected_metadata['kernel'])
+            protected_os_system("cp " + reference_image_nfs_path + "/boot/initramfs-" + image_selected_metadata['kernel'] + ".img " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/initramfs-" + image_selected_metadata['kernel'] + ".img")
+            protected_os_system("cp " + reference_image_nfs_path + "/usr/lib/modules/" + image_selected_metadata['kernel'] + "/vmlinuz " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/vmlinuz-" + image_selected_metadata['kernel'])
         elif image_selected_metadata['family'] == "el8":
-            protected_os_system("cp " + tool_parameters['nfs_path'] + "/" + image_selected_metadata['name'] + "/boot/initramfs-" + image_selected_metadata['kernel'] + ".img " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/initramfs-" + image_selected_metadata['kernel'] + ".img")
-            protected_os_system("cp " + tool_parameters['nfs_path'] + "/" + image_selected_metadata['name'] + "/boot/vmlinuz-" + image_selected_metadata['kernel'] + " " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/vmlinuz-" + image_selected_metadata['kernel'])
+            protected_os_system("cp " + reference_image_nfs_path + "/boot/initramfs-" + image_selected_metadata['kernel'] + ".img " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/initramfs-" + image_selected_metadata['kernel'] + ".img")
+            protected_os_system("cp " + reference_image_nfs_path + "/boot/vmlinuz-" + image_selected_metadata['kernel'] + " " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/vmlinuz-" + image_selected_metadata['kernel'])
         else:
             print(" Sorry, image family " + image_selected_metadata['family'] + " is unknown :( , aborting.")
             quit(1)
@@ -448,7 +453,7 @@ while True:
             quit(1)
 
         print(bcolors.OKGREEN + "\n == Reference image has been created :) ==" + bcolors.ENDC)
-        print(" You can now edit image directly inside " + tool_parameters['nfs_path'] + "/" + image_selected_metadata['name'])
+        print(" You can now edit image directly inside " + reference_image_nfs_path)
         print(" Or you can also link image to a node of the target pool, boot it,")
         print(" and live modify it. To do so, use next section in main menu.")
         print(" Please read related help section for detailed explanations and warnings.")
@@ -459,6 +464,8 @@ while True:
 
         print(" Please enter reference image to link to a node:")
         image_selected_input = input(" -->: ")
+        reference_image_nfs_path = get_reference_image_nfs_path(tool_parameters, image_selected_input)
+
         print(" Now, please enter target node to be linked to this image:")
         node_selected_input = input(" -->: ")
         print(" Ok, and to finish, I would need a temporary password for image's internal bluebanquise user.")
@@ -469,15 +476,15 @@ while True:
         image_selected_user_password = crypt.crypt(image_selected_user_password, crypt.mksalt(crypt.METHOD_SHA512))
 
         logging.info(bcolors.OKBLUE + 'Adding bluebanquise user to image...' + bcolors.ENDC)
-        protected_os_system("groupadd -R " + tool_parameters['nfs_path'] + "/" + image_selected_input + "/ --system " + tool_parameters['sudo_user'])
-        protected_os_system("useradd  -R " + tool_parameters['nfs_path'] + "/" + image_selected_input + "/ -m -c 'BlueBanquise user' -d " + tool_parameters['sudo_user_home'] + " --system -g " + tool_parameters['sudo_user'] + " -s /bin/bash -p '" + image_selected_user_password + "' " + tool_parameters['sudo_user'])
+        protected_os_system("groupadd -R " + reference_image_nfs_path + "/ --system " + tool_parameters['sudo_user'])
+        protected_os_system("useradd  -R " + reference_image_nfs_path + "/ -m -c 'BlueBanquise user' -d " + tool_parameters['sudo_user_home'] + " --system -g " + tool_parameters['sudo_user'] + " -s /bin/bash -p '" + image_selected_user_password + "' " + tool_parameters['sudo_user'])
 #            protected_os_system("useradd  -R " + tool_parameters['nfs_path'] + "/" + image_selected_input + "/ -m -c 'BlueBanquise user' -d /var/lib/bluebanquise --system -g bluebanquise -s /bin/bash bluebanquise")
 
-        protected_os_system("echo '" + tool_parameters['sudo_user'] + " ALL=(ALL:ALL) NOPASSWD:ALL' > " + tool_parameters['nfs_path'] + "/" + image_selected_input + "/etc/sudoers.d/" + tool_parameters['sudo_user'])
+        protected_os_system("echo '" + tool_parameters['sudo_user'] + " ALL=(ALL:ALL) NOPASSWD:ALL' > " + reference_image_nfs_path + "/etc/sudoers.d/" + tool_parameters['sudo_user'])
 
         logging.info(bcolors.OKBLUE + 'Updating /etc/exports...' + bcolors.ENDC)
         protected_os_system("cat /etc/exports | grep '# diskless' || echo '# diskless' | tee -a /etc/exports")
-        protected_os_system("cat /etc/exports | grep '" + tool_parameters['nfs_path'] + "/" + image_selected_input + "' && sed -i 's/\/nfs\/diskless\/" + image_selected_input + "\ .*/\/nfs\/diskless\/" + image_selected_input + " " + node_selected_input + "(rw,no_root_squash)/' /etc/exports || sed -i -e '$a" + tool_parameters['nfs_path'] + "/" + image_selected_input + " " + node_selected_input + "(rw,no_root_squash)' /etc/exports")
+        protected_os_system("cat /etc/exports | grep '" + reference_image_nfs_path + "' && sed -i 's/\/nfs\/diskless\/" + image_selected_input + "\ .*/\/nfs\/diskless\/" + image_selected_input + " " + node_selected_input + "(rw,no_root_squash)/' /etc/exports || sed -i -e '$a" + reference_image_nfs_path + " " + node_selected_input + "(rw,no_root_squash)' /etc/exports")
         #  cat /etc/exports | grep '" + tool_parameters['nfs_path'] + "/almalinux_8_minimal ' && sudo sed -i 's/\/nfs\/diskless\/almalinux_9_minimal\ .*/\/nfs\/diskless\/almalinux_9_minimal mgt8(rw,no_root_squash)/' /etc/exports || sudo sed -i -e '$a" + tool_parameters['nfs_path'] + "/almalinux_9_minimal mgt2(rw,no_root_squash)' /etc/exports
         logging.info(bcolors.OKBLUE + 'Restarting nfs server service...' + bcolors.ENDC)
         protected_os_system("systemctl restart nfs-server")
@@ -493,10 +500,11 @@ while True:
 
         print(" Please enter reference image to check available kernels:")
         image_selected_input = input(" -->: ")
+        reference_image_nfs_path = get_reference_image_nfs_path(tool_parameters, image_selected_input)
 
         ## Attention, RHEL 9 et 8 uniquement pour le moment
         print(" Detected kernels are the following:")
-        for it in os.scandir(tool_parameters['nfs_path'] + "/" + image_selected_input + "/lib/modules/"):
+        for it in os.scandir(reference_image_nfs_path + "/lib/modules/"):
             if it.is_dir():
                 print(" - " + it.name)
 
@@ -553,12 +561,12 @@ while True:
         logging.info(bcolors.OKBLUE + 'Copying new kernel from nfs image to http folder...' + bcolors.ENDC)
 
         if image_selected_metadata['family'] == "el9":
-            protected_os_system("cp -a " + tool_parameters['nfs_path'] + "/" + image_selected_input + "/boot/initramfs-" + kernel_selected + ".img " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/initramfs-" + kernel_selected + ".img")
-            protected_os_system("cp -a " + tool_parameters['nfs_path'] + "/" + image_selected_input + "/lib/modules/" + kernel_selected + "/vmlinuz " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/vmlinuz-" + kernel_selected)
+            protected_os_system("cp -a " + reference_image_nfs_path + "/boot/initramfs-" + kernel_selected + ".img " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/initramfs-" + kernel_selected + ".img")
+            protected_os_system("cp -a " + reference_image_nfs_path + "/lib/modules/" + kernel_selected + "/vmlinuz " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/vmlinuz-" + kernel_selected)
             protected_os_system("chmod 644 " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/initramfs-*")
         elif image_selected_metadata['family'] == "el8":
-            protected_os_system("cp -a " + tool_parameters['nfs_path'] + "/" + image_selected_input + "/boot/initramfs-" + kernel_selected + ".img " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/initramfs-" + kernel_selected + ".img")
-            protected_os_system("cp -a " + tool_parameters['nfs_path'] + "/" + image_selected_input + "/boot/vmlinuz-" + kernel_selected + " " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/vmlinuz-" + kernel_selected)
+            protected_os_system("cp -a " + reference_image_nfs_path + "/boot/initramfs-" + kernel_selected + ".img " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/initramfs-" + kernel_selected + ".img")
+            protected_os_system("cp -a " + reference_image_nfs_path + "/boot/vmlinuz-" + kernel_selected + " " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/vmlinuz-" + kernel_selected)
             protected_os_system("chmod 644 " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/initramfs-*")
         else:
             print(" Sorry, image family " + image_selected_metadata['family'] + " is unknown :( , aborting.")
@@ -573,11 +581,14 @@ while True:
 
         print(" Please enter reference image to clone:")
         image_selected_input = input(" -->: ")
+        reference_image_nfs_path = get_reference_image_nfs_path(tool_parameters, image_selected_input)
+
         print(" Please enter clone reference image name:")
         image_clone_input = input(" -->: ")
+        clone_image_nfs_path = get_reference_image_nfs_path(tool_parameters, image_clone_input)
 
         logging.info(bcolors.OKBLUE + 'Cloning image...' + bcolors.ENDC)
-        protected_os_system("cp -a " + tool_parameters['nfs_path'] + "/" + image_selected_input + " " + tool_parameters['nfs_path'] + "/" + image_clone_input)
+        protected_os_system("cp -a " + reference_image_nfs_path + " " + clone_image_nfs_path)
         protected_os_system("cp -a " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + " " + tool_parameters['http_pxe_folder'] + "diskless/" + image_clone_input)
         logging.info(bcolors.OKBLUE + 'Updating new image metadata...' + bcolors.ENDC)
 
@@ -608,6 +619,7 @@ while True:
 
         print(" Please enter reference image to convert to live:")
         image_selected_input = input(" -->: ")
+        reference_image_nfs_path = get_reference_image_nfs_path(tool_parameters, image_selected_input)
 
         try:
             with open(tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/metadata.yaml", "r") as file:
@@ -634,7 +646,7 @@ while True:
         os.makedirs(tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/mountdir/")
         protected_os_system("mount -o loop " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/workdir/LiveOS/rootfs.img " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/mountdir/")
         logging.info(bcolors.OKBLUE + 'Copying files from reference image...' + bcolors.ENDC)
-        protected_os_system("cp -a " + tool_parameters['nfs_path'] + "/" + image_selected_metadata['reference_name'].split(",")[0] + "/* " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/mountdir/")
+        protected_os_system("cp -a " + reference_image_nfs_path + "/* " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/mountdir/")
         protected_os_system("umount " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/mountdir/")
         logging.info(bcolors.OKBLUE + 'Squashing image...' + bcolors.ENDC)
         protected_os_system("mksquashfs " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/workdir " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/squashfs.img")
@@ -714,8 +726,9 @@ while True:
             
             print("\n Please enter reference image name to be deleted:")
             delete_image = input(" -->: ")
+            reference_image_nfs_path = get_reference_image_nfs_path(tool_parameters, delete_image)
             logging.info(bcolors.OKBLUE + 'Deleting image...' + bcolors.ENDC)
-            protected_os_system("rm -Rf " + tool_parameters['nfs_path'] + "/" + delete_image)
+            protected_os_system("rm -Rf " + reference_image_nfs_path)
             protected_os_system("rm -Rf " + tool_parameters['http_pxe_folder'] + "diskless/" + delete_image)
 
         if str(delete_image_type) == "3":
