@@ -7,6 +7,8 @@
 # ██████╔╝███████╗╚██████╔╝███████╗██████╔╝██║  ██║██║ ╚████║╚██████╔╝╚██████╔╝██║███████║███████╗
 # ╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚══▀▀═╝  ╚═════╝ ╚═╝╚══════╝╚══════╝
 #
+# 2.0.2: Improve handling of paths. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
+# 2.0.1: Fix kernel upgrade option. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 # 2.0.0: Full rewamp. Benoît Leveugle <benoit.leveugle@gmail.com>
 # 1.3.7: Improved disklessset checks. Thiago Cardozo <thiago_cardozo@yahoo.com.br>
 # 1.3.6: Fix permissions. Benoit Leveugle <benoit.leveugle@gmail.com>
@@ -240,7 +242,7 @@ print("""\
       (o_  (o_  //\\
       (/)_ (/)_ V_/_
    BlueBanquise diskless
-   v2.0.0 - beta
+   v2.0.2 - beta
    https://github.com/bluebanquise/bluebanquise/
 
 """)
