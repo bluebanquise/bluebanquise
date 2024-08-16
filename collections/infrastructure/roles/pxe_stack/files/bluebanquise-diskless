@@ -102,15 +102,15 @@ def display_image_metadata(image_metadata):
     print("          └─ description: " + image_metadata['description'])
 
 
-def display_images(image_type):
+def display_images(image_type, tool_paths):
     """ Display existing images, return 1 if none found"""
 
     if image_type == "bootstrap":
 
         # Gather bootstrap images
         gathered_bootstrap = []
-        logging.info(bcolors.OKBLUE + "Checking bootstrap images in " + tool_parameters['sudo_user_home'] + "/diskless/bootstrap_images/" + bcolors.ENDC)
-        for it in os.scandir(tool_parameters['sudo_user_home'] + "/diskless/bootstrap_images/"):
+        logging.info(bcolors.OKBLUE + "Checking bootstrap images in " + tool_paths['bootstrap_images'] + bcolors.ENDC)
+        for it in os.scandir(tool_paths['bootstrap_images']):
             if it.is_dir() and it.name != "tmp":
                 try:
                     with open(it.path + "/metadata.yaml", "r") as file:
@@ -136,8 +136,8 @@ def display_images(image_type):
 
         # Gather reference images
         gathered_reference = []
-        logging.info(bcolors.OKBLUE + "Checking reference images in " + tool_parameters['http_pxe_folder'] + "/diskless/" + bcolors.ENDC)
-        for it in os.scandir(tool_parameters['http_pxe_folder'] + "/diskless/"):
+        logging.info(bcolors.OKBLUE + "Checking reference images in " + tool_paths['http_pxe_diskless'] + bcolors.ENDC)
+        for it in os.scandir(tool_paths['http_pxe_diskless']):
             if it.is_dir():
                 try:
                     with open(it.path + "/metadata.yaml", "r") as file:
@@ -165,8 +165,8 @@ def display_images(image_type):
 
         # Gather live images
         gathered_live = []
-        logging.info(bcolors.OKBLUE + "Checking live images in " + tool_parameters['http_pxe_folder'] + "/diskless/" + bcolors.ENDC)
-        for it in os.scandir(tool_parameters['http_pxe_folder'] + "/diskless/"):
+        logging.info(bcolors.OKBLUE + "Checking live images in " + tool_paths['http_pxe_diskless'] + bcolors.ENDC)
+        for it in os.scandir(tool_paths['http_pxe_diskless']):
             if it.is_dir():
                 try:
                     with open(it.path + "/metadata.yaml", "r") as file:
@@ -285,8 +285,8 @@ if not os.path.exists(tool_paths['bootstrap_images']):
     logging.info(bcolors.OKBLUE + "Creating " + tool_paths['bootstrap_images'] + " folder." + bcolors.ENDC)
     protected_os_system("mkdir -p " + tool_paths['bootstrap_images_tmp'])
 if not os.path.exists(tool_parameters['nfs_path'] + ""):
-    logging.info(bcolors.OKBLUE + "Creating " + tool_parameters['nfs_path'] + " folder." + bcolors.ENDC)
-    protected_os_system("mkdir -p " + tool_parameters['nfs_path'] + "")
+    logging.info(bcolors.OKBLUE + "Creating " + tool_paths['nfs'] + " folder." + bcolors.ENDC)
+    protected_os_system("mkdir -p " + tool_paths['nfs'] + "")
 if not os.path.exists(tool_paths['http_pxe_diskless']):
     logging.info(bcolors.OKBLUE + "Creating " + tool_paths['http_pxe_diskless'] + " folder." + bcolors.ENDC)
     protected_os_system("mkdir -p " + tool_paths['http_pxe_diskless'])
@@ -310,9 +310,9 @@ while True:
 
     if main_action == "1":
 
-        display_images("bootstrap")
-        display_images("reference")
-        display_images("live")
+        display_images("bootstrap", tool_paths)
+        display_images("reference", tool_paths)
+        display_images("live", tool_paths)
 
     if main_action == "2":
 
@@ -378,7 +378,7 @@ while True:
         print("")
         print(" Available bootstrap images to use as reference:")
 
-        if display_images("bootstrap") == 1: continue
+        if display_images("bootstrap", tool_paths) == 1: continue
 
         print(" Please enter bootstrap image name to use as source:")
         image_selected_input = input(" -->: ")
@@ -470,7 +470,7 @@ while True:
 
     if main_action == '4':
 
-        if display_images("reference") == 1: continue
+        if display_images("reference", tool_paths) == 1: continue
 
         print(" Please enter reference image to link to a node:")
         image_selected_input = input(" -->: ")
@@ -506,7 +506,7 @@ while True:
 
     if main_action == '5':
 
-        if display_images("reference") == 1: continue
+        if display_images("reference", tool_paths) == 1: continue
 
         print(" Please enter reference image to check available kernels:")
         image_selected_input = input(" -->: ")
@@ -588,7 +588,7 @@ while True:
 
     if main_action == '6':
             
-        if display_images("reference") == 1: continue
+        if display_images("reference", tool_paths) == 1: continue
 
         print(" Please enter reference image to clone:")
         image_selected_input = input(" -->: ")
@@ -628,7 +628,7 @@ while True:
 
     if main_action == '7':
 
-        if display_images("reference") == 1: continue
+        if display_images("reference", tool_paths) == 1: continue
 
         print(" Please enter reference image to convert to live:")
         image_selected_input = input(" -->: ")
@@ -730,7 +730,7 @@ while True:
 
         if str(delete_image_type) == "1":
 
-            if display_images("bootstrap") == 1: continue
+            if display_images("bootstrap", tool_paths) == 1: continue
             
             print("\n Please enter bootstrap image name to be deleted:")
             delete_image = input(" -->: ")
@@ -740,7 +740,7 @@ while True:
 
         if str(delete_image_type) == "2":
 
-            if display_images("reference") == 1: continue
+            if display_images("reference", tool_paths) == 1: continue
             
             print("\n Please enter reference image name to be deleted:")
             delete_image = input(" -->: ")
@@ -753,7 +753,7 @@ while True:
 
         if str(delete_image_type) == "3":
 
-            if display_images("live") == 1: continue
+            if display_images("live", tool_paths) == 1: continue
 
             print("\n Please enter live image name to be deleted:")
             delete_image = input(" -->: ")
