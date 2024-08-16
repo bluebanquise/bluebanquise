@@ -7,8 +7,9 @@
 # ██████╔╝███████╗╚██████╔╝███████╗██████╔╝██║  ██║██║ ╚████║╚██████╔╝╚██████╔╝██║███████║███████╗
 # ╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚══▀▀═╝  ╚═════╝ ╚═╝╚══════╝╚══════╝
 #
+# 2.0.3: Sanitize user input. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 # 2.0.2: Improve handling of paths. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
-# 2.0.1: Fix kernel upgrade option. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
+# 2.0.1: Fix kernel upgrade. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 # 2.0.0: Full rewamp. Benoît Leveugle <benoit.leveugle@gmail.com>
 # 1.3.7: Improved disklessset checks. Thiago Cardozo <thiago_cardozo@yahoo.com.br>
 # 1.3.6: Fix permissions. Benoit Leveugle <benoit.leveugle@gmail.com>
@@ -81,6 +82,7 @@ import requests
 import shutil
 import subprocess
 import crypt
+import string
 
 
 # Colors, from https://stackoverflow.com/questions/287871/how-to-print-colored-text-in-terminal-in-python
@@ -236,13 +238,42 @@ def get_live_image_path(tool_paths, live_image_name):
     return os.path.join(tool_paths['http_pxe_diskless'], live_image_name)
 
 
+def get_user_input(msg, validate_name=False):
+    """Sanitizes the user's input by removing whitespace, keeps prompting until input is valid.
+
+    If validate_name is True, then it also checks that the input complies with the POSIX
+    specification "Portable Filename Character Set" (letters, digits, -, _, .). The goal is to
+    avoid issues with the shell commands executed by the tool.
+    """
+    user_input = ""
+    while user_input == "":
+        # prompt for a non-empty string
+        print(msg)
+        raw_input = input(" -->: ")
+        user_input = raw_input.strip()
+
+        if not validate_name:
+            continue
+
+        # optionally (validate_name True), validate compliance with POSIX "Portable Filename Character Set"
+        allowed_characters = string.ascii_letters + string.digits + '-_.'
+        invalid_characters = set(user_input).difference(set(allowed_characters))
+
+        if len(invalid_characters) > 0:
+            first_invalid_char = list(invalid_characters)[0]
+            print(bcolors.FAIL + "\n Sorry, the character '" + first_invalid_char + "' cannot be used for this input: " + bcolors.ENDC + user_input)
+            user_input = ""
+
+    return user_input
+
+
 print("""\
 
                 (o_
       (o_  (o_  //\\
       (/)_ (/)_ V_/_
    BlueBanquise diskless
-   v2.0.2 - beta
+   v2.0.3 - beta
    https://github.com/bluebanquise/bluebanquise/
 
 """)
@@ -308,7 +339,7 @@ while True:
     print(" 9 - Get help")
     print(" 10 - Exit tool")
 
-    main_action = input(" -->: ")
+    main_action = get_user_input("")
 
     if main_action == "1":
 
@@ -324,22 +355,20 @@ while True:
         print(" 1 - From local file")
         print(" 2 - From http URL")
 
-        source_action = input(" -->: ")
+        source_action = get_user_input("")
 
         protected_os_system("mkdir -p " + tool_paths['bootstrap_images_tmp'])
         logging.info(bcolors.OKBLUE + "Image will be temporary stored inside " + tool_paths['bootstrap_images_tmp'] + bcolors.ENDC)
 
         if source_action == "1":
-            print(" Please enter bootstrap image ABSOLUTE path of tar.gz archive:")
-            image_path = input(" -->: ")
+            image_path = get_user_input(" Please enter bootstrap image ABSOLUTE path of tar.gz archive:")
             image_source_file_name = image_path.split('/')[-1]
             tmp_image_source_path = get_tmp_image_source_path(tool_paths, image_source_file_name)
             logging.info(bcolors.OKBLUE + 'Copying image from ' + image_path + ', please be patient...' + bcolors.ENDC)
             protected_os_system("cp " + image_path + " " + tmp_image_source_path)
 
         elif source_action == "2":
-            print(" Please enter bootstrap image URL of tar.gz archive:")
-            image_url = input(" -->: ")
+            image_url = get_user_input(" Please enter bootstrap image URL of tar.gz archive:")
             image_source_file_name = image_url.split('/')[-1]
             tmp_image_source_path = get_tmp_image_source_path(tool_paths, image_source_file_name)
             logging.info(bcolors.OKBLUE + 'Downloading image from ' + image_url + ', please be patient...' + bcolors.ENDC)
@@ -382,10 +411,8 @@ while True:
 
         if display_images("bootstrap", tool_paths) == 1: continue
 
-        print(" Please enter bootstrap image name to use as source:")
-        image_selected_input = input(" -->: ")
-        print(" Now, please enter new reference image name:")
-        image_selected_input_name = input(" -->: ")
+        image_selected_input = get_user_input(" Please enter bootstrap image name to use as source:", validate_name=True)
+        image_selected_input_name = get_user_input(" Now, please enter new reference image name:", validate_name=True)
         print("")
 
         bootstrap_image_path = get_bootstrap_image_path(tool_paths, image_selected_input)
@@ -474,16 +501,14 @@ while True:
 
         if display_images("reference", tool_paths) == 1: continue
 
-        print(" Please enter reference image to link to a node:")
-        image_selected_input = input(" -->: ")
+        image_selected_input = get_user_input(" Please enter reference image to link to a node:", validate_name=True)
         reference_image_nfs_path = get_reference_image_nfs_path(tool_paths, image_selected_input)
 
-        print(" Now, please enter target node to be linked to this image:")
-        node_selected_input = input(" -->: ")
+        node_selected_input = get_user_input(" Now, please enter target node to be linked to this image:")
         print(" Ok, and to finish, I would need a temporary password for image's internal bluebanquise user.")
         print(" You will be able to update it, or remove it once image is created")
         print(" to allow ssh keys based authentication only.")
-        image_selected_user_password = input(" -->: ")
+        image_selected_user_password = get_user_input("")
         print("")
         image_selected_user_password = crypt.crypt(image_selected_user_password, crypt.mksalt(crypt.METHOD_SHA512))
 
@@ -510,8 +535,7 @@ while True:
 
         if display_images("reference", tool_paths) == 1: continue
 
-        print(" Please enter reference image to check available kernels:")
-        image_selected_input = input(" -->: ")
+        image_selected_input = get_user_input(" Please enter reference image to check available kernels:", validate_name=True)
         reference_image_nfs_path = get_reference_image_nfs_path(tool_paths, image_selected_input)
         reference_image_pxe_path = get_reference_image_pxe_path(tool_paths, image_selected_input)
 
@@ -521,8 +545,7 @@ while True:
             if it.is_dir():
                 print(" - " + it.name)
 
-        print(" Now, please enter kernel to be used as default for boot:")
-        kernel_selected = input(" -->: ")
+        kernel_selected = get_user_input(" Now, please enter kernel to be used as default for boot:", validate_name=True)
 
         logging.info(bcolors.OKBLUE + 'Updating image metadata...' + bcolors.ENDC)
 
@@ -592,13 +615,11 @@ while True:
             
         if display_images("reference", tool_paths) == 1: continue
 
-        print(" Please enter reference image to clone:")
-        image_selected_input = input(" -->: ")
+        image_selected_input = get_user_input(" Please enter reference image to clone:", validate_name=True)
         reference_image_nfs_path = get_reference_image_nfs_path(tool_paths, image_selected_input)
         reference_image_pxe_path = get_reference_image_pxe_path(tool_paths, image_selected_input)
 
-        print(" Please enter clone reference image name:")
-        image_clone_input = input(" -->: ")
+        image_clone_input = get_user_input(" Please enter clone reference image name:", validate_name=True)
         clone_image_nfs_path = get_reference_image_nfs_path(tool_paths, image_clone_input)
         clone_image_pxe_path = get_reference_image_pxe_path(tool_paths, image_clone_input)
 
@@ -632,8 +653,7 @@ while True:
 
         if display_images("reference", tool_paths) == 1: continue
 
-        print(" Please enter reference image to convert to live:")
-        image_selected_input = input(" -->: ")
+        image_selected_input = get_user_input(" Please enter reference image to convert to live:", validate_name=True)
         reference_image_nfs_path = get_reference_image_nfs_path(tool_paths, image_selected_input)
         reference_image_pxe_path = get_reference_image_pxe_path(tool_paths, image_selected_input)
 
@@ -647,8 +667,7 @@ while True:
             print(bcolors.FAIL + " An error occurred reading the file " + reference_image_pxe_path + "/metadata.yaml. Please investigate." + bcolors.ENDC)
             quit(1)
 
-        print(" Now, please enter new live image name:")
-        image_selected_input_name = input(" -->: ")
+        image_selected_input_name = get_user_input(" Now, please enter new live image name:", validate_name=True)
         image_selected_metadata['reference_name'] = image_selected_metadata['name'] + "," + image_selected_metadata['reference_name']
         image_selected_metadata['name'] = image_selected_input_name
         image_selected_metadata['type'] = "live"
@@ -657,8 +676,7 @@ while True:
         reference_image_pxe_path = get_reference_image_pxe_path(tool_paths, image_selected_metadata['reference_name'].split(",")[0])
         live_image_path = get_live_image_path(tool_paths, image_selected_metadata['name'])
 
-        print(" I now need a live size limit in RAM, in Mb:")
-        live_size = input(" -->: ")
+        live_size = get_user_input(" I now need a live size limit in RAM, in Mb:")
         logging.info(bcolors.OKBLUE + 'Preparing FS...' + bcolors.ENDC)
         protected_os_system("mkdir -p " + live_image_path + "/workdir/LiveOS/")
         protected_os_system("dd if=/dev/zero of=" + live_image_path + "/workdir/LiveOS/rootfs.img bs=1M count=" + live_size)
@@ -728,14 +746,13 @@ while True:
         print(" 2 - \033[92mreference\033[0m image")
         print(" 3 - \033[91mlive\033[0m image")
 
-        delete_image_type = input(" -->: ")
+        delete_image_type = get_user_input("")
 
         if str(delete_image_type) == "1":
 
             if display_images("bootstrap", tool_paths) == 1: continue
             
-            print("\n Please enter bootstrap image name to be deleted:")
-            delete_image = input(" -->: ")
+            delete_image = get_user_input("\n Please enter bootstrap image name to be deleted:", validate_name=True)
             bootstrap_image_path = get_bootstrap_image_path(tool_paths, delete_image)
             logging.info(bcolors.OKBLUE + 'Deleting image...' + bcolors.ENDC)
             protected_os_system("rm -Rf " + bootstrap_image_path)
@@ -744,8 +761,7 @@ while True:
 
             if display_images("reference", tool_paths) == 1: continue
             
-            print("\n Please enter reference image name to be deleted:")
-            delete_image = input(" -->: ")
+            delete_image = get_user_input("\n Please enter reference image name to be deleted:", validate_name=True)
             reference_image_nfs_path = get_reference_image_nfs_path(tool_paths, delete_image)
             reference_image_pxe_path = get_reference_image_pxe_path(tool_paths, delete_image)
 
@@ -757,8 +773,7 @@ while True:
 
             if display_images("live", tool_paths) == 1: continue
 
-            print("\n Please enter live image name to be deleted:")
-            delete_image = input(" -->: ")
+            delete_image = get_user_input("\n Please enter live image name to be deleted:", validate_name=True)
             live_image_path = get_live_image_path(tool_paths, delete_image)
             logging.info(bcolors.OKBLUE + 'Deleting image...' + bcolors.ENDC)
             protected_os_system("rm -Rf " + live_image_path)
@@ -774,7 +789,7 @@ while True:
         print(" 1 - Display in current terminal")
         print(" 2 - Write into /tmp/bluebanquise-diskless-help.md")
 
-        help_entry = input(" -->: ")
+        help_entry = get_user_input("")
 
         help_content = """
 # INTRODUCTION AND GENERAL CONCEPT
