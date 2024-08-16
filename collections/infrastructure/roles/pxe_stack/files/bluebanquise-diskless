@@ -214,11 +214,12 @@ def protected_os_system(raw_command):
     return 0
 
 
-def get_tmp_image_info(tool_paths, image_source_file_name):
-    tmp_image_info = {}
-    tmp_image_info['metadata'] = os.path.join(tool_paths['bootstrap_images_tmp'], "metadata.yaml")
-    tmp_image_info['image_source'] = os.path.join(tool_paths['bootstrap_images_tmp'], image_source_file_name)
-    return tmp_image_info
+def get_tmp_image_source_path(tool_paths, image_source_file_name):
+    return os.path.join(tool_paths['bootstrap_images_tmp'], image_source_file_name)
+
+
+def get_bootstrap_image_path(tool_paths, image_name):
+    return os.path.join(tool_paths['bootstrap_images'], image_name)
 
 
 print("""\
@@ -317,43 +318,44 @@ while True:
             print(" Please enter bootstrap image ABSOLUTE path of tar.gz archive:")
             image_path = input(" -->: ")
             image_source_file_name = image_path.split('/')[-1]
-            tmp_image_info = get_tmp_image_info(tool_paths, image_source_file_name)
+            tmp_image_source_path = get_tmp_image_source_path(tool_paths, image_source_file_name)
             logging.info(bcolors.OKBLUE + 'Copying image from ' + image_path + ', please be patient...' + bcolors.ENDC)
-            protected_os_system("cp " + image_path + " " + tmp_image_info['image_source'])
+            protected_os_system("cp " + image_path + " " + tmp_image_source_path)
 
         elif source_action == "2":
             print(" Please enter bootstrap image URL of tar.gz archive:")
             image_url = input(" -->: ")
             image_source_file_name = image_url.split('/')[-1]
-            tmp_image_info = get_tmp_image_info(tool_paths, image_source_file_name)
+            tmp_image_source_path = get_tmp_image_source_path(tool_paths, image_source_file_name)
             logging.info(bcolors.OKBLUE + 'Downloading image from ' + image_url + ', please be patient...' + bcolors.ENDC)
             response = requests.get(image_url)
             try:
-                with open(tmp_image_info['image_source'], 'wb') as file:
+                with open(tmp_image_path, 'wb') as file:
                     file.write(response.content)
             except Exception:
                 print(bcolors.FAIL + " An error occurred writing the image locally. Please investigate." + bcolors.ENDC)
                 quit(1)
 
         logging.info(bcolors.OKBLUE + 'Extracting image metadata...' + bcolors.ENDC)
-        protected_os_system("rm -f " + tmp_image_info['metadata'])
-        protected_os_system("tar xzf " + tmp_image_info['image_source'] + " -C " + tool_paths['bootstrap_images_tmp'] + "/ metadata.yaml")
+        protected_os_system("rm -f " + tool_paths['bootstrap_images_tmp'] + "/metadata.yaml")
+        protected_os_system("tar xzf " + tmp_image_source_path + " -C " + tool_paths['bootstrap_images_tmp'] + "/ metadata.yaml")
         try:
-            with open(tmp_image_info['metadata'], "r") as file:
+            with open(tool_paths['bootstrap_images_tmp'] + "/metadata.yaml", "r") as file:
                 image_metadata = yaml.safe_load(file)
         except FileNotFoundError:
-            print(bcolors.FAIL + " File " + tmp_image_info['metadata'] + " does not exist, please re-run pxe_stack role before using the tool." + bcolors.ENDC)
+            print(bcolors.FAIL + " File " + tool_paths['bootstrap_images_tmp'] + "/metadata.yaml does not exist, please re-run pxe_stack role before using the tool." + bcolors.ENDC)
             quit(1)
         except Exception:
-            print(bcolors.FAIL + " An error occurred reading the file " + tmp_image_info['metadata'] + ". Please investigate." + bcolors.ENDC)
+            print(bcolors.FAIL + " An error occurred reading the file " + tool_paths['bootstrap_images_tmp'] + "/metadata.yaml. Please investigate." + bcolors.ENDC)
             quit(1)
         print(" Found following metadata for new image:")
         display_image_metadata(image_metadata)
+        bootstrap_image_path = get_bootstrap_image_path(tool_paths, image_metadata['name'])
 
         logging.info(bcolors.OKBLUE + 'Storing image...' + bcolors.ENDC)
-        protected_os_system("mkdir -p " + tool_parameters['sudo_user_home'] + "/diskless/bootstrap_images/" + image_metadata['name'])
-        protected_os_system("mv " + tool_parameters['sudo_user_home'] + "/diskless/bootstrap_images/tmp/" + image_source_file_name + " " + tool_parameters['sudo_user_home'] + "/diskless/bootstrap_images/" + image_metadata['name'] + "/image.tar.gz")
-        protected_os_system("mv " + tmp_image_info['metadata'] + " " + tool_parameters['sudo_user_home'] + "/diskless/bootstrap_images/" + image_metadata['name'] + "/metadata.yaml")
+        protected_os_system("mkdir -p " + bootstrap_image_path)
+        protected_os_system("mv " + tmp_image_source_path + " " + bootstrap_image_path + "/image.tar.gz")
+        protected_os_system("mv " + tool_paths['bootstrap_images_tmp'] + "/metadata.yaml " + bootstrap_image_path + "/metadata.yaml")
         print(bcolors.OKGREEN + "\n == Bootstrap image " + image_metadata['name'] + " is now ready to be used :) ==" + bcolors.ENDC)
 
     if main_action == '3':
@@ -371,22 +373,26 @@ while True:
         image_selected_input_name = input(" -->: ")
         print("")
 
+        bootstrap_image_path = get_bootstrap_image_path(tool_paths, image_selected_input)
+
         try:
-            with open(tool_parameters['sudo_user_home'] + "/diskless/bootstrap_images/" + image_selected_input + "/metadata.yaml", "r") as file:
+            with open(bootstrap_image_path + "/metadata.yaml", "r") as file:
                 image_selected_metadata = yaml.safe_load(file)
         except FileNotFoundError:
-            print(bcolors.FAIL + " File " + tool_parameters['sudo_user_home'] + "/diskless/bootstrap_images/" + image_selected_input + "/metadata.yaml does not exist, please re-run pxe_stack role before using the tool." + bcolors.ENDC)
+            print(bcolors.FAIL + " File " + bootstrap_image_path + "/metadata.yaml does not exist, please re-run pxe_stack role before using the tool." + bcolors.ENDC)
             quit(1)
         except Exception:
-            print(bcolors.FAIL + " An error occurred reading the file " + tool_parameters['sudo_user_home'] + "/diskless/bootstrap_images/" + image_selected_input + "/metadata.yaml. Please investigate." + bcolors.ENDC)
+            print(bcolors.FAIL + " An error occurred reading the file " + bootstrap_image_path + "/metadata.yaml. Please investigate." + bcolors.ENDC)
             quit(1)
         image_selected_metadata['reference_name'] = image_selected_metadata['name']
         image_selected_metadata['name'] = image_selected_input_name
         image_selected_metadata['type'] = "nfs_reference"
 
+        bootstrap_image_path = get_bootstrap_image_path(tool_paths, image_selected_metadata['reference_name'])
+
         logging.info(bcolors.OKBLUE + "Extracting bootstrap image copy in " + tool_parameters['nfs_path'] + "/" + image_selected_metadata['name'] + bcolors.ENDC)
         protected_os_system("mkdir -p " + tool_parameters['nfs_path'] + "/" + image_selected_metadata['name'])
-        protected_os_system("tar xzf " + tool_parameters['sudo_user_home'] + "/diskless/bootstrap_images/" + image_selected_metadata['reference_name'] + "/image.tar.gz -C " + tool_parameters['nfs_path'] + "/" + image_selected_metadata['name'])
+        protected_os_system("tar xzf " + bootstrap_image_path + "/image.tar.gz -C " + tool_parameters['nfs_path'] + "/" + image_selected_metadata['name'])
         protected_os_system("rm -f " + tool_parameters['nfs_path'] + "/" + image_selected_metadata['name'] + "/metadata.yaml")
         logging.info(bcolors.OKBLUE + "Creating image folder at " + tool_parameters['http_pxe_folder'] + "/diskless/" + image_selected_metadata['name'] + bcolors.ENDC)
         protected_os_system("mkdir -p " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'])
@@ -698,8 +704,9 @@ while True:
             
             print("\n Please enter bootstrap image name to be deleted:")
             delete_image = input(" -->: ")
+            bootstrap_image_path = get_bootstrap_image_path(tool_paths, delete_image)
             logging.info(bcolors.OKBLUE + 'Deleting image...' + bcolors.ENDC)
-            protected_os_system("rm -Rf " + tool_parameters['sudo_user_home'] + "/diskless/bootstrap_images/" + delete_image)
+            protected_os_system("rm -Rf " + bootstrap_image_path)
 
         if str(delete_image_type) == "2":
 
