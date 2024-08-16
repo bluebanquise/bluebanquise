@@ -226,6 +226,10 @@ def get_reference_image_nfs_path(tool_parameters, reference_image_name):
     return os.path.join(tool_parameters['nfs_path'], reference_image_name)
 
 
+def get_reference_image_pxe_path(tool_paths, reference_image_name):
+    return os.path.join(tool_paths['http_pxe_diskless'], reference_image_name)
+
+
 print("""\
 
                 (o_
@@ -378,7 +382,6 @@ while True:
         print("")
 
         bootstrap_image_path = get_bootstrap_image_path(tool_paths, image_selected_input)
-        reference_image_nfs_path = get_reference_image_nfs_path(tool_parameters, image_selected_input_name)
 
         try:
             with open(bootstrap_image_path + "/metadata.yaml", "r") as file:
@@ -394,24 +397,26 @@ while True:
         image_selected_metadata['type'] = "nfs_reference"
 
         bootstrap_image_path = get_bootstrap_image_path(tool_paths, image_selected_metadata['reference_name'])
+        reference_image_nfs_path = get_reference_image_nfs_path(tool_parameters, image_selected_metadata['name'])
+        reference_image_pxe_path = get_reference_image_pxe_path(tool_paths, image_selected_metadata['name'])
 
         logging.info(bcolors.OKBLUE + "Extracting bootstrap image copy in " + reference_image_nfs_path + bcolors.ENDC)
         protected_os_system("mkdir -p " + reference_image_nfs_path)
         protected_os_system("tar xzf " + bootstrap_image_path + "/image.tar.gz -C " + reference_image_nfs_path + "/")
         protected_os_system("rm -f " + reference_image_nfs_path + "/metadata.yaml")
-        logging.info(bcolors.OKBLUE + "Creating image folder at " + tool_parameters['http_pxe_folder'] + "/diskless/" + image_selected_metadata['name'] + bcolors.ENDC)
-        protected_os_system("mkdir -p " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'])
+        logging.info(bcolors.OKBLUE + "Creating image folder at " + reference_image_pxe_path + bcolors.ENDC)
+        protected_os_system("mkdir -p " + reference_image_pxe_path)
 
         if image_selected_metadata['family'] == "el9":
-            protected_os_system("cp " + reference_image_nfs_path + "/boot/initramfs-" + image_selected_metadata['kernel'] + ".img " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/initramfs-" + image_selected_metadata['kernel'] + ".img")
-            protected_os_system("cp " + reference_image_nfs_path + "/usr/lib/modules/" + image_selected_metadata['kernel'] + "/vmlinuz " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/vmlinuz-" + image_selected_metadata['kernel'])
+            protected_os_system("cp " + reference_image_nfs_path + "/boot/initramfs-" + image_selected_metadata['kernel'] + ".img " + reference_image_pxe_path + "/initramfs-" + image_selected_metadata['kernel'] + ".img")
+            protected_os_system("cp " + reference_image_nfs_path + "/usr/lib/modules/" + image_selected_metadata['kernel'] + "/vmlinuz " + reference_image_pxe_path + "/vmlinuz-" + image_selected_metadata['kernel'])
         elif image_selected_metadata['family'] == "el8":
-            protected_os_system("cp " + reference_image_nfs_path + "/boot/initramfs-" + image_selected_metadata['kernel'] + ".img " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/initramfs-" + image_selected_metadata['kernel'] + ".img")
-            protected_os_system("cp " + reference_image_nfs_path + "/boot/vmlinuz-" + image_selected_metadata['kernel'] + " " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/vmlinuz-" + image_selected_metadata['kernel'])
+            protected_os_system("cp " + reference_image_nfs_path + "/boot/initramfs-" + image_selected_metadata['kernel'] + ".img " + reference_image_pxe_path + "/initramfs-" + image_selected_metadata['kernel'] + ".img")
+            protected_os_system("cp " + reference_image_nfs_path + "/boot/vmlinuz-" + image_selected_metadata['kernel'] + " " + reference_image_pxe_path + "/vmlinuz-" + image_selected_metadata['kernel'])
         else:
             print(" Sorry, image family " + image_selected_metadata['family'] + " is unknown :( , aborting.")
             quit(1)
-        protected_os_system("chmod 644 " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/*")
+        protected_os_system("chmod 644 " + reference_image_pxe_path + "/*")
         ipxe_content = '''#!ipxe
         echo |
         echo | Entering diskless/images/{image_name}/boot.ipxe
@@ -438,18 +443,18 @@ while True:
         '''.format(image_kernel=("vmlinuz-" + image_selected_metadata['kernel']), image_initramfs=("initramfs-" + image_selected_metadata['kernel'] + ".img"), image_name=image_selected_metadata['name'], nfs_path=tool_parameters['nfs_path'])
 
         try:
-            ipxe_file = open(tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/boot.ipxe", "w")
+            ipxe_file = open(reference_image_pxe_path + "/boot.ipxe", "w")
             ipxe_file.write(ipxe_content)
             ipxe_file.close()
         except Exception:
-            print(bcolors.FAIL + " An error occurred writing the file " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/boot.ipxe. Please investigate." + bcolors.ENDC)
+            print(bcolors.FAIL + " An error occurred writing the file " + reference_image_pxe_path + "/boot.ipxe. Please investigate." + bcolors.ENDC)
             quit(1)
 
         try:
-            with open(tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/metadata.yaml", "w") as file:
+            with open(reference_image_pxe_path + "/metadata.yaml", "w") as file:
                 yaml.dump(image_selected_metadata, file)
         except Exception:
-            print(bcolors.FAIL + " An error occurred writing the file " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_metadata['name'] + "/metadata.yaml. Please investigate." + bcolors.ENDC)
+            print(bcolors.FAIL + " An error occurred writing the file " + reference_image_pxe_path + "/metadata.yaml. Please investigate." + bcolors.ENDC)
             quit(1)
 
         print(bcolors.OKGREEN + "\n == Reference image has been created :) ==" + bcolors.ENDC)
@@ -501,6 +506,7 @@ while True:
         print(" Please enter reference image to check available kernels:")
         image_selected_input = input(" -->: ")
         reference_image_nfs_path = get_reference_image_nfs_path(tool_parameters, image_selected_input)
+        reference_image_pxe_path = get_reference_image_pxe_path(tool_paths, image_selected_input)
 
         ## Attention, RHEL 9 et 8 uniquement pour le moment
         print(" Detected kernels are the following:")
@@ -514,34 +520,34 @@ while True:
         logging.info(bcolors.OKBLUE + 'Updating image metadata...' + bcolors.ENDC)
 
         try:
-            with open(tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/metadata.yaml", "r") as file:
+            with open(reference_image_pxe_path + "/metadata.yaml", "r") as file:
                 image_selected_metadata = yaml.safe_load(file)
         except FileNotFoundError:
-            print(bcolors.FAIL + " File " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/metadata.yaml does not exist, please re-run pxe_stack role before using the tool." + bcolors.ENDC)
+            print(bcolors.FAIL + " File " + reference_image_pxe_path + "/metadata.yaml does not exist, please re-run pxe_stack role before using the tool." + bcolors.ENDC)
             quit(1)
         except Exception:
-            print(bcolors.FAIL + " An error occurred reading the file " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/metadata.yaml. Please investigate." + bcolors.ENDC)
+            print(bcolors.FAIL + " An error occurred reading the file " + reference_image_pxe_path + "/metadata.yaml. Please investigate." + bcolors.ENDC)
             quit(1)
 
         image_selected_metadata['kernel'] = kernel_selected
 
         try:
-            with open(tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/metadata.yaml", "w") as file:
+            with open(reference_image_pxe_path + "/metadata.yaml", "w") as file:
                 yaml.dump(image_selected_metadata, file)
         except Exception:
-            print(bcolors.FAIL + " An error occurred writing the file " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/metadata.yaml. Please investigate." + bcolors.ENDC)
+            print(bcolors.FAIL + " An error occurred writing the file " + reference_image_pxe_path + "/metadata.yaml. Please investigate." + bcolors.ENDC)
             quit(1)
 
         logging.info(bcolors.OKBLUE + 'Updating boot.ipxe file...' + bcolors.ENDC)
 
         try:
-            with open(tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/boot.ipxe", 'r') as file:
+            with open(reference_image_pxe_path + "/boot.ipxe", 'r') as file:
                 file_lines = file.readlines()
         except FileNotFoundError:
-            print(bcolors.FAIL + " File " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/boot.ipxe does not exist, please re-run pxe_stack role before using the tool." + bcolors.ENDC)
+            print(bcolors.FAIL + " File " + reference_image_pxe_path + "/boot.ipxe does not exist, please re-run pxe_stack role before using the tool." + bcolors.ENDC)
             quit(1)
         except Exception:
-            print(bcolors.FAIL + " An error occurred reading the file " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/boot.ipxe. Please investigate." + bcolors.ENDC)
+            print(bcolors.FAIL + " An error occurred reading the file " + reference_image_pxe_path + "/boot.ipxe. Please investigate." + bcolors.ENDC)
             quit(1)
 
         for count, value in enumerate(file_lines):
@@ -551,23 +557,23 @@ while True:
                 file_lines[count] = "set image-initramfs initramfs-" + kernel_selected + ".img" + "\n"
 
         try:
-            ipxe_file = open(tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/boot.ipxe", "w")
+            ipxe_file = open(reference_image_pxe_path + "/boot.ipxe", "w")
             ipxe_file.writelines(file_lines)
             ipxe_file.close()
         except Exception:
-            print(bcolors.FAIL + " An error occurred writing the file " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/boot.ipxe. Please investigate." + bcolors.ENDC)
+            print(bcolors.FAIL + " An error occurred writing the file " + reference_image_pxe_path + "/boot.ipxe. Please investigate." + bcolors.ENDC)
             quit(1)
 
         logging.info(bcolors.OKBLUE + 'Copying new kernel from nfs image to http folder...' + bcolors.ENDC)
 
         if image_selected_metadata['family'] == "el9":
-            protected_os_system("cp -a " + reference_image_nfs_path + "/boot/initramfs-" + kernel_selected + ".img " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/initramfs-" + kernel_selected + ".img")
-            protected_os_system("cp -a " + reference_image_nfs_path + "/lib/modules/" + kernel_selected + "/vmlinuz " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/vmlinuz-" + kernel_selected)
-            protected_os_system("chmod 644 " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/initramfs-*")
+            protected_os_system("cp -a " + reference_image_nfs_path + "/boot/initramfs-" + kernel_selected + ".img " + reference_image_pxe_path + "/initramfs-" + kernel_selected + ".img")
+            protected_os_system("cp -a " + reference_image_nfs_path + "/lib/modules/" + kernel_selected + "/vmlinuz " + reference_image_pxe_path + "/vmlinuz-" + kernel_selected)
+            protected_os_system("chmod 644 " + reference_image_pxe_path + "/initramfs-*")
         elif image_selected_metadata['family'] == "el8":
-            protected_os_system("cp -a " + reference_image_nfs_path + "/boot/initramfs-" + kernel_selected + ".img " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/initramfs-" + kernel_selected + ".img")
-            protected_os_system("cp -a " + reference_image_nfs_path + "/boot/vmlinuz-" + kernel_selected + " " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/vmlinuz-" + kernel_selected)
-            protected_os_system("chmod 644 " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/initramfs-*")
+            protected_os_system("cp -a " + reference_image_nfs_path + "/boot/initramfs-" + kernel_selected + ".img " + reference_image_pxe_path + "/initramfs-" + kernel_selected + ".img")
+            protected_os_system("cp -a " + reference_image_nfs_path + "/boot/vmlinuz-" + kernel_selected + " " + reference_image_pxe_path + "/vmlinuz-" + kernel_selected)
+            protected_os_system("chmod 644 " + reference_image_pxe_path + "/initramfs-*")
         else:
             print(" Sorry, image family " + image_selected_metadata['family'] + " is unknown :( , aborting.")
             quit(1)
@@ -582,33 +588,35 @@ while True:
         print(" Please enter reference image to clone:")
         image_selected_input = input(" -->: ")
         reference_image_nfs_path = get_reference_image_nfs_path(tool_parameters, image_selected_input)
+        reference_image_pxe_path = get_reference_image_pxe_path(tool_paths, image_selected_input)
 
         print(" Please enter clone reference image name:")
         image_clone_input = input(" -->: ")
         clone_image_nfs_path = get_reference_image_nfs_path(tool_parameters, image_clone_input)
+        clone_image_pxe_path = get_reference_image_pxe_path(tool_paths, image_clone_input)
 
         logging.info(bcolors.OKBLUE + 'Cloning image...' + bcolors.ENDC)
         protected_os_system("cp -a " + reference_image_nfs_path + " " + clone_image_nfs_path)
-        protected_os_system("cp -a " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + " " + tool_parameters['http_pxe_folder'] + "diskless/" + image_clone_input)
+        protected_os_system("cp -a " + reference_image_pxe_path + " " + clone_image_pxe_path)
         logging.info(bcolors.OKBLUE + 'Updating new image metadata...' + bcolors.ENDC)
 
         try:
-            with open(tool_parameters['http_pxe_folder'] + "diskless/" + image_clone_input + "/metadata.yaml", "r") as file:
+            with open(clone_image_pxe_path + "/metadata.yaml", "r") as file:
                 image_selected_metadata = yaml.safe_load(file)
         except FileNotFoundError:
-            print(bcolors.FAIL + " File " + tool_parameters['http_pxe_folder'] + "diskless/" + image_clone_input + "/metadata.yaml does not exist, please re-run pxe_stack role before using the tool." + bcolors.ENDC)
+            print(bcolors.FAIL + " File " + clone_image_pxe_path + "/metadata.yaml does not exist, please re-run pxe_stack role before using the tool." + bcolors.ENDC)
             quit(1)
         except Exception:
-            print(bcolors.FAIL + " An error occurred reading the file " + tool_parameters['http_pxe_folder'] + "diskless/" + image_clone_input + "/metadata.yaml. Please investigate." + bcolors.ENDC)
+            print(bcolors.FAIL + " An error occurred reading the file " + clone_image_pxe_path + "/metadata.yaml. Please investigate." + bcolors.ENDC)
             quit(1)
 
         image_selected_metadata['name'] = image_clone_input
 
         try:
-            with open(tool_parameters['http_pxe_folder'] + "diskless/" + image_clone_input + "/metadata.yaml", "w") as file:
+            with open(clone_image_pxe_path + "/metadata.yaml", "w") as file:
                 yaml.dump(image_selected_metadata, file)
         except Exception:
-            print(bcolors.FAIL + " An error occurred writing the file " + tool_parameters['http_pxe_folder'] + "diskless/" + image_clone_input + "/metadata.yaml. Please investigate." + bcolors.ENDC)
+            print(bcolors.FAIL + " An error occurred writing the file " + clone_image_pxe_path + "/metadata.yaml. Please investigate." + bcolors.ENDC)
             quit(1)
 
         print(bcolors.OKGREEN + "\n == Image cloned successfully :) ==" + bcolors.ENDC)
@@ -620,15 +628,16 @@ while True:
         print(" Please enter reference image to convert to live:")
         image_selected_input = input(" -->: ")
         reference_image_nfs_path = get_reference_image_nfs_path(tool_parameters, image_selected_input)
+        reference_image_pxe_path = get_reference_image_pxe_path(tool_paths, image_selected_input)
 
         try:
-            with open(tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/metadata.yaml", "r") as file:
+            with open(reference_image_pxe_path + "/metadata.yaml", "r") as file:
                         image_selected_metadata = yaml.safe_load(file)
         except FileNotFoundError:
-            print(bcolors.FAIL + " File " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/metadata.yaml does not exist, please re-run pxe_stack role before using the tool." + bcolors.ENDC)
+            print(bcolors.FAIL + " File " + reference_image_pxe_path + "/metadata.yaml does not exist, please re-run pxe_stack role before using the tool." + bcolors.ENDC)
             quit(1)
         except Exception:
-            print(bcolors.FAIL + " An error occurred reading the file " + tool_parameters['http_pxe_folder'] + "diskless/" + image_selected_input + "/metadata.yaml. Please investigate." + bcolors.ENDC)
+            print(bcolors.FAIL + " An error occurred reading the file " + reference_image_pxe_path + "/metadata.yaml. Please investigate." + bcolors.ENDC)
             quit(1)
 
         print(" Now, please enter new live image name:")
