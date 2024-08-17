@@ -7,6 +7,7 @@
 # ██████╔╝███████╗╚██████╔╝███████╗██████╔╝██║  ██║██║ ╚████║╚██████╔╝╚██████╔╝██║███████║███████╗
 # ╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚══▀▀═╝  ╚═════╝ ╚═╝╚══════╝╚══════╝
 #
+# 2.0.5: Add debug optional parameter. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 # 2.0.4: Ensure parent of home dir exists. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 # 2.0.3: Sanitize user input. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 # 2.0.2: Improve handling of paths. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
@@ -84,6 +85,7 @@ import shutil
 import subprocess
 import crypt
 import string
+import sys
 
 
 # Colors, from https://stackoverflow.com/questions/287871/how-to-print-colored-text-in-terminal-in-python
@@ -199,6 +201,8 @@ def display_images(image_type, tool_paths):
 
 
 def protected_os_system(raw_command):
+    if '--debug' in sys.argv or '-d' in sys.argv:
+        print(raw_command)
 
     try:
         child = subprocess.Popen(raw_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
@@ -274,7 +278,7 @@ print("""\
       (o_  (o_  //\\
       (/)_ (/)_ V_/_
    BlueBanquise diskless
-   v2.0.4 - beta
+   v2.0.5 - beta
    https://github.com/bluebanquise/bluebanquise/
 
 """)
@@ -797,6 +801,7 @@ while True:
 # INTRODUCTION AND GENERAL CONCEPT
 
 bluebanquise-diskless tool is made to manage diskless images life cycles, from creation to production and maintenance.
+You need to run this script with sudo or as root. Pass "-d" or "--debug" parameter to the script to display commands executed.
 
 Workflow is the following, assuming user wishes to boot a pool of nodes with the same live image:
 
