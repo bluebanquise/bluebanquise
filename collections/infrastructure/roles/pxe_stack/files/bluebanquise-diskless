@@ -7,6 +7,7 @@
 # ██████╔╝███████╗╚██████╔╝███████╗██████╔╝██║  ██║██║ ╚████║╚██████╔╝╚██████╔╝██║███████║███████╗
 # ╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚══▀▀═╝  ╚═════╝ ╚═╝╚══════╝╚══════╝
 #
+# 2.0.4: Ensure parent of home dir exists. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 # 2.0.3: Sanitize user input. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 # 2.0.2: Improve handling of paths. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 # 2.0.1: Fix kernel upgrade. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
@@ -273,7 +274,7 @@ print("""\
       (o_  (o_  //\\
       (/)_ (/)_ V_/_
    BlueBanquise diskless
-   v2.0.3 - beta
+   v2.0.4 - beta
    https://github.com/bluebanquise/bluebanquise/
 
 """)
@@ -513,6 +514,7 @@ while True:
         image_selected_user_password = crypt.crypt(image_selected_user_password, crypt.mksalt(crypt.METHOD_SHA512))
 
         logging.info(bcolors.OKBLUE + 'Adding bluebanquise user to image...' + bcolors.ENDC)
+        protected_os_system("mkdir -p " + reference_image_nfs_path + os.path.dirname(tool_parameters['sudo_user_home']))
         protected_os_system("groupadd -R " + reference_image_nfs_path + "/ --system " + tool_parameters['sudo_user'])
         protected_os_system("useradd  -R " + reference_image_nfs_path + "/ -m -c 'BlueBanquise user' -d " + tool_parameters['sudo_user_home'] + " --system -g " + tool_parameters['sudo_user'] + " -s /bin/bash -p '" + image_selected_user_password + "' " + tool_parameters['sudo_user'])
 #            protected_os_system("useradd  -R " + tool_parameters['nfs_path'] + "/" + image_selected_input + "/ -m -c 'BlueBanquise user' -d /var/lib/bluebanquise --system -g bluebanquise -s /bin/bash bluebanquise")
