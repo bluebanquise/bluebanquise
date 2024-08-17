@@ -7,6 +7,7 @@
 # ██████╔╝███████╗╚██████╔╝███████╗██████╔╝██║  ██║██║ ╚████║╚██████╔╝╚██████╔╝██║███████║███████╗
 # ╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚══▀▀═╝  ╚═════╝ ╚═╝╚══════╝╚══════╝
 #
+# 2.0.6: Use --numeric-owner when extracting bootstrap image to ensure correct uid/gid. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 # 2.0.5: Add debug optional parameter. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 # 2.0.4: Ensure parent of home dir exists. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 # 2.0.3: Sanitize user input. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
@@ -278,7 +279,7 @@ print("""\
       (o_  (o_  //\\
       (/)_ (/)_ V_/_
    BlueBanquise diskless
-   v2.0.5 - beta
+   v2.0.6 - beta
    https://github.com/bluebanquise/bluebanquise/
 
 """)
@@ -441,7 +442,7 @@ while True:
 
         logging.info(bcolors.OKBLUE + "Extracting bootstrap image copy in " + reference_image_nfs_path + bcolors.ENDC)
         protected_os_system("mkdir -p " + reference_image_nfs_path)
-        protected_os_system("tar xzf " + bootstrap_image_path + "/image.tar.gz -C " + reference_image_nfs_path + "/")
+        protected_os_system("tar --numeric-owner -x -z -f " + bootstrap_image_path + "/image.tar.gz -C " + reference_image_nfs_path + "/")
         protected_os_system("rm -f " + reference_image_nfs_path + "/metadata.yaml")
         logging.info(bcolors.OKBLUE + "Creating image folder at " + reference_image_pxe_path + bcolors.ENDC)
         protected_os_system("mkdir -p " + reference_image_pxe_path)
