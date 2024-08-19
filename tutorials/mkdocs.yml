@@ -14,7 +14,8 @@ nav:
         - Slurm: hpc_slurm.md
         - Users environment: hpc_users_environment.md
         - Parallel Computing: hpc_parallel_computing.md
-    #- Kubernetes:
+    - Kubernetes:
+        - Python client: kubernetes_python_client
     #    - Deploy Kubernetes: kubernetes_deploy.md
     #    - Deploy basic resources: kubernetes_basics.md
     # - Datacenters and infrastructure:

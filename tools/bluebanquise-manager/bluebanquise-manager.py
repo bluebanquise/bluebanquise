@@ -6,6 +6,7 @@ import textwrap
 import validators
 import zoneinfo
 import json
+import configparser
 
 install(show_locals=True)
 
@@ -47,8 +48,16 @@ class windows_manager(object):
     for c in message:
       sys.stdout.write(c)
       sys.stdout.flush()
-      if c != " ":
-        time.sleep(1./500)
+      if c == "\n":
+        time.sleep(1./30)
+      # if c != " ":
+      #   time.sleep(1./500)
+
+  def w_breakline(self):
+    message = self.w_decorator_left_right("", force_nesting_level = self.w_nesting_level + 1, fill_line = True, fill_dash = True) + '\n'
+    for c in message:
+      sys.stdout.write(c)
+      sys.stdout.flush()
 
   def w_input(self, message, nl=True):
     umessage = self.w_decorator_left_right(message, force_nesting_level = self.w_nesting_level + 1, no_right = True)
@@ -101,7 +110,7 @@ class windows_manager(object):
     print(box)
     self.w_nesting_level = self.w_nesting_level - 1
 
-  def w_decorator_left_right(self, message, force_nesting_level=None, fill_line=False, no_right=False):
+  def w_decorator_left_right(self, message, force_nesting_level=None, fill_line=False, no_right=False, fill_dash=False):
     if force_nesting_level is not None:
       nesting_level = force_nesting_level
     else:
@@ -123,8 +132,22 @@ class windows_manager(object):
           message_buffer = message_buffer.replace("\033[38;5;" + str(i) + "m", "")
         for i, v in self.w_allowed_colors.items():
           message_buffer = message_buffer.replace(v, "")
-        for i in range(1, columns - len(message_buffer), 1):
-          message = message + " "
+        if fill_dash:
+          for i in range(1, columns - len(message_buffer), 1):
+            message = message + "-"
+        else:
+          for i in range(1, columns - len(message_buffer), 1):
+            message = message + " "
+      # if fill_dash:
+      #   columns = os.get_terminal_size().columns
+      #   message_buffer = (message + buffer)
+      #   message_buffer = message_buffer.replace("\033[0m", "")
+      #   for i in self.w_colors:
+      #     message_buffer = message_buffer.replace("\033[38;5;" + str(i) + "m", "")
+      #   for i, v in self.w_allowed_colors.items():
+      #     message_buffer = message_buffer.replace(v, "")
+      #   for i in range(1, columns - len(message_buffer), 1):
+      #     message = message + "-"
 
       message = message + buffer
     return message
@@ -172,8 +195,16 @@ while True:
   if answer == 1:
     wm.w_sprint("-- Entering global parameters", nl=True)
     wm.w_create(w_title="Global parameters")
+    wm.w_sprint(textwrap.dedent("""
+      Global parameters contains Ansible roles' shared parameters,
+      like cluster name, cluster domain name, time zone, etc.
+      
+      """
+    ))
     while True:
       menu_message = """
+      Please select desired setting to manage:
+
       1. Cluster settings
       2. Networks
 
@@ -184,7 +215,6 @@ while True:
       answer = int(wm.w_input("❱❱❱ "))
 
       if answer == 9:
-        wm.w_destroy()
         break
 
       #######################################################################################################
@@ -308,6 +338,15 @@ while True:
           networks = {
             'networks' : {}
           }
+        wm.w_sprint(textwrap.dedent("""
+          Logical networks allow nodes to communicate.
+          A network can be either a management network, and so
+          be dedicated to deploy and manage nodes, or a
+          simple network, to handle basic inter hosts communications
+          or link the cluster to the outside world.
+
+          """
+        ))
         while True:
 
           wm.w_sprint("Current configuration:")
@@ -315,6 +354,8 @@ while True:
           wm.w_sprint(yaml.dump(networks, default_flow_style=False))
 
           menu_message = """
+          Please choose next action:
+
           1. Add new network
           2. Edit existing network
           3. Delete network
@@ -430,11 +471,25 @@ while True:
 
         wm.w_destroy()
 
+    wm.w_destroy()
+
   if answer == 2:
     wm.w_sprint("-- Entering groups", nl=True)
     wm.w_create(w_title="Groups")
+    wm.w_sprint(textwrap.dedent("""
+      Hosts must be grouped into logical groups
+      to define which function, hardware, and OS they belong to.
+      Combination of one of each of these 3 groups makes
+      in BlueBanquise an equipment profile.
+      It is also possible to create custom groups to ease
+      cluster administration.
+      
+      """
+    ))
     while True:
       menu_message = """
+      Please selection kind of group to manage:
+
       1. Function groups
       2. Hardware groups
       3. OS groups
@@ -449,4 +504,125 @@ while True:
       if answer == 9:
         break
 
+      if answer == 1:
+        wm.w_sprint("-- Entering Function groups", nl=True)
+        wm.w_create(w_title="Function groups")
+
+        wm.w_sprint("\n-- Checking configuration")
+        if not os.path.exists("inventory/cluster/fn"):
+          wm.w_sprint("\n-- File does not existe, creating default one")
+          with open("inventory/cluster/fn", 'w+') as file:
+            file.write("[fn_management]\n")
+        wm.w_sprint(textwrap.dedent("""
+          A function group defines the purpose of a node.
+          It can be for example "compute" or "worker".
+          Note that the "management" function group is mandatory
+          and so cannot be deleted.
+          Function groups start in the Ansible inventory
+          with 'fn_' prefix.
+          
+          """
+        ))
+        while True:
+          menu_message = """
+          Please selection desired action:
+
+          1. List current function groups
+          2. Add a new function group
+          3. Rename a function group
+          4. Delete a function group
+
+          9. Go back
+
+          """
+          wm.w_sprint(textwrap.dedent(menu_message))
+          answer = int(wm.w_input("❱❱❱ "))
+
+          if answer == 9:
+            break
+
+          #######################################################################################################
+          ###################### LIST FN GROUPS
+          ########
+          if answer == 1:
+            wm.w_create(w_title="List function groups")
+            wm.w_sprint("-- Reading current configuration\n")
+            config = configparser.ConfigParser(allow_no_value=True)
+            config.read('inventory/cluster/fn')
+            wm.w_sprint("\nList of function groups with their hosts:")
+            for fng, fng_items in config.items():
+              if str(fng) != 'DEFAULT':
+                wm.w_sprint('  ' + wm.t_blue(fng.replace('fn_','')) + ':')
+                for host in fng_items:
+                  wm.w_sprint('    - ' + host)
+            wm.w_destroy()
+
+          #######################################################################################################
+          ###################### ADD FN GROUP
+          ########
+          if answer == 2:
+            wm.w_create(w_title="Add function group")
+            wm.w_sprint("-- Reading current configuration\n")
+            config = configparser.ConfigParser(allow_no_value=True)
+            config.read('inventory/cluster/fn')
+            wm.w_sprint("Please enter new function group, without its prefix 'fn_'")
+            wm.w_sprint("For example: 'compute', 'worker', or 'gateway', etc.")
+            answer = wm.w_input("❱❱❱ ")
+            # Check group does not already exist
+            for group in config:
+              if str(group).replace('fn_','') == answer:
+                wm.w_sprint("Function group already exist!")
+                wm.w_destroy()
+                continue
+            config['fn_' + answer] = {}
+            wm.w_sprint("-- Creating new group folder")
+            if not os.path.exists('inventory/group_vars/fn_' + answer):
+              os.makedirs('inventory/group_vars/fn_' + answer)
+            wm.w_sprint("-- Writting new configuration")
+            with open('inventory/cluster/fn', 'w') as file:
+                config.write(file)
+            wm.w_destroy()
+
+
+          #######################################################################################################
+          ###################### RENAME FN GROUP
+          ########
+          if answer == 3:
+            wm.w_create(w_title="Rename function group")
+            wm.w_sprint("-- Reading current configuration\n")
+            config = configparser.ConfigParser(allow_no_value=True)
+            config.read('inventory/cluster/fn')
+            wm.w_sprint("Current list of function groups:")
+            for fng, fng_items in config.items():
+              if str(fng) != 'DEFAULT':
+                wm.w_sprint('  - ' + wm.t_blue(fng.replace('fn_','')))
+            wm.w_sprint("Please enter group to rename:")
+            answer = wm.w_input("❱❱❱ ")
+            # Check group does exist
+            fn_exist = False
+            for group in config:
+              if str(group).replace('fn_','') == answer:
+                fn_exist = True
+                break
+            if not fn_exist:
+              wm.w_sprint("Group does not exist, please check syntax")
+              wm.w_destroy()
+              continue
+            wm.w_sprint("Please enter new name for the group:")
+            sub_answer = wm.w_input("❱❱❱ ")
+            config['fn_' + sub_answer] = config['fn_' + answer]
+            config.remove_section('fn_' + answer)
+            if not os.path.exists('inventory/group_vars/fn_' + answer):
+              wm.w_sprint("-- Creating new group folder")
+              os.makedirs('inventory/group_vars/fn_' + sub_answer)
+            else:
+              wm.w_sprint("-- Renaming group folder")
+              os.rename('inventory/group_vars/fn_' + answer, 'inventory/group_vars/fn_' + sub_answer)
+            wm.w_sprint("-- Writting new configuration")
+            with open('inventory/cluster/fn', 'w') as file:
+                config.write(file)
+            wm.w_destroy()
+
+          # wm.w_breakline()
+        wm.w_destroy()
     wm.w_destroy()
