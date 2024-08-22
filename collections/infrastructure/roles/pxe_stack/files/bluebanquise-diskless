@@ -7,6 +7,7 @@
 # ██████╔╝███████╗╚██████╔╝███████╗██████╔╝██║  ██║██║ ╚████║╚██████╔╝╚██████╔╝██║███████║███████╗
 # ╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚══▀▀═╝  ╚═════╝ ╚═╝╚══════╝╚══════╝
 #
+# 2.0.7: Update boot.ipxe when cloning reference image. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 # 2.0.6: Use --numeric-owner when extracting bootstrap image to ensure correct uid/gid. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 # 2.0.5: Add debug optional parameter. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 # 2.0.4: Ensure parent of home dir exists. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
@@ -279,7 +280,7 @@ print("""\
       (o_  (o_  //\\
       (/)_ (/)_ V_/_
    BlueBanquise diskless
-   v2.0.6 - beta
+   v2.0.7 - beta
    https://github.com/bluebanquise/bluebanquise/
 
 """)
@@ -646,6 +647,38 @@ while True:
             quit(1)
 
         image_selected_metadata['name'] = image_clone_input
+        ipxe_content = '''#!ipxe
+        echo |
+        echo | Entering diskless/images/{image_name}/boot.ipxe
+        echo |
+        set image-kernel {image_kernel}
+        set image-initramfs {image_initramfs}
+        echo | Now starting nfs image boot.
+        echo |
+        echo | Parameters used:
+        echo | > Image target: {image_name}
+        echo | > Console: ${{eq-console}}
+        echo | > Additional kernel parameters: ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}}
+        echo |
+        echo | Loading linux ...
+        kernel http://${{next-server}}/pxe/diskless/{image_name}/${{image-kernel}} initrd=${{image-initramfs}} selinux=0 text=1 root=nfs:${{next-server}}:{nfs_path}/{image_name},vers=4.2,rw rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}} rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4
+        echo | Loading initial ramdisk ...
+        initrd http://${{next-server}}/pxe/diskless/{image_name}/${{image-initramfs}}
+        echo | ALL DONE! We are ready.
+        echo | Booting in 4s ...
+        echo |
+        echo +----------------------------------------------------+
+        sleep 4
+        boot
+        '''.format(image_kernel=("vmlinuz-" + image_selected_metadata['kernel']), image_initramfs=("initramfs-" + image_selected_metadata['kernel'] + ".img"), image_name=image_selected_metadata['name'], nfs_path=tool_parameters['nfs_path'])
+
+        try:
+            ipxe_file = open(clone_image_pxe_path + "/boot.ipxe", "w")
+            ipxe_file.write(ipxe_content)
+            ipxe_file.close()
+        except Exception:
+            print(bcolors.FAIL + " An error occurred writing the file " + clone_image_pxe_path + "/boot.ipxe. Please investigate." + bcolors.ENDC)
+            quit(1)
 
         try:
             with open(clone_image_pxe_path + "/metadata.yaml", "w") as file:
