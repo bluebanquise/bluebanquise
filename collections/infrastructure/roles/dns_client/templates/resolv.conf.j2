@@ -4,7 +4,11 @@
 
 {% set nameservers = [] %}
 
-{% if networks[j2_node_main_network]['services'] is defined and networks[j2_node_main_network]['services'] is iterable and networks[j2_node_main_network]['services'] is not string and networks[j2_node_main_network]['services'] is mapping and (networks[j2_node_main_network]['services']['dns4'] | default(networks[j2_node_main_network]['services']['dns'], true)) is defined and (networks[j2_node_main_network]['services']['dns4'] | default(networks[j2_node_main_network]['services']['dns'], true)) is iterable and (networks[j2_node_main_network]['services']['dns4'] | default(networks[j2_node_main_network]['services']['dns'], true)) is not string and (networks[j2_node_main_network]['services']['dns4'] | default(networks[j2_node_main_network]['services']['dns'], true)) is not mapping %}
+{% if dns_client_server is defined and dns_client_server is iterable %}
+  {% for dns in dns_client_server %}
+nameserver {{ dns }}
+  {% endfor %}
+{% elif networks[j2_node_main_network]['services'] is defined and networks[j2_node_main_network]['services'] is iterable and networks[j2_node_main_network]['services'] is not string and networks[j2_node_main_network]['services'] is mapping and (networks[j2_node_main_network]['services']['dns4'] | default(networks[j2_node_main_network]['services']['dns'], true)) is defined and (networks[j2_node_main_network]['services']['dns4'] | default(networks[j2_node_main_network]['services']['dns'], true)) is iterable and (networks[j2_node_main_network]['services']['dns4'] | default(networks[j2_node_main_network]['services']['dns'], true)) is not string and (networks[j2_node_main_network]['services']['dns4'] | default(networks[j2_node_main_network]['services']['dns'], true)) is not mapping %}
   {% for elem in (networks[j2_node_main_network]['services']['dns4'] | default(networks[j2_node_main_network]['services']['dns'], true)) %}
     {% if elem.ip4 is defined and (elem.ip4 | ansible.utils.ipaddr) %}
       {{ nameservers.append(elem.ip4) }}
