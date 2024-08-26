@@ -64,7 +64,7 @@ d-i passwd/root-password-crypted password {{ hostvars[groups[os_profile][0]]['os
 
 ### Packages
 tasksel tasksel/first multiselect minimal
-d-i pkgsel/include string openssh-server curl python3 {% if os_autoinstall_packages is defined and os_autoinstall_packages is iterable and os_autoinstall_packages is not string and os_autoinstall_packages is not mapping %}{% for package in os_autoinstall_packages %} {{ package }}{% endfor %}{% endif %}
+d-i pkgsel/include string openssh-server curl python3 {% if hostvars[groups[os_profile][0]]['os_autoinstall_packages'] is defined and hostvars[groups[os_profile][0]]['os_autoinstall_packages'] is iterable and hostvars[groups[os_profile][0]]['os_autoinstall_packages'] is not string and hostvars[groups[os_profile][0]]['os_autoinstall_packages'] is not mapping %}{% for package in hostvars[groups[os_profile][0]]['os_autoinstall_packages'] %} {{ package }}{% endfor %}{% endif %}
 
 d-i pkgsel/upgrade select none
 d-i pkgsel/updatedb boolean false

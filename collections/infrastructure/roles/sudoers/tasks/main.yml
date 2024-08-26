@@ -5,16 +5,19 @@
     name: sudo
     state: present
 
-- name: blockinfile <|> Add sudoers users and groups
-  ansible.builtin.blockinfile:
-    path: "{{ item.file_name | default('/etc/sudoers') }}"
-    state: present
-    create: true
-    owner: root
-    group: root
-    mode: '0600'
-    block: |
-      {{ item.name }} {{ item.privilege }}
-    validate: 'visudo -cf %s'
+- name: sudoers <|> Add sudoers users and groups
+  community.general.sudoers:
+    commands: "{{ item.commands | default(omit, true) }}"
+    group: "{{ item.group | default(omit, true) }}"
+    host: "{{ item.host | default(omit, true) }}"
+    name: "{{ item.name }}"
+    noexec: "{{ item.noexec | default(omit, true) }}"
+    nopassword: "{{ item.nopassword | default(omit, true) }}"
+    runas: "{{ item.runas | default(omit, true) }}"
+    setenv: "{{ item.setenv | default(omit, true) }}"
+    state: "{{ item.state | default(omit, true) }}"
+    sudoers_path: "{{ item.sudoers_path | default(omit, true) }}"
+    user: "{{ item.user | default(omit, true) }}"
+    validation: "{{ item.validation | default(omit, true) }}"
   loop: "{{ sudoers }}"
   when: sudoers is defined and sudoers

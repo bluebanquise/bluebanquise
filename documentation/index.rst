@@ -8,7 +8,7 @@ Welcome on BlueBanquise documentation.
 
 These pages contain information on how to deploy and use the BlueBanquise unified stack.
 
-If you wish to only use a specific role of the provided Ansible collections, directly refer to the role's README.
+If you wish to only use a specific role of the provided Ansible collections, please directly refer to the role's README.
 
 `Please report me <https://github.com/bluebanquise/bluebanquise/issues>`_ any
 issues in this documentation.

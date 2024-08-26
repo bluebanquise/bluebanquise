@@ -30,14 +30,19 @@
     - template
   loop:
     - slurm.conf
+    - cgroup.conf
+  notify: Run scontrol reconfigure
 
-- name: "copy <|> Copy cgroup.conf to {{ slurm_home_path }}/cgroup.conf"
-  ansible.builtin.copy:
-    src: cgroup.conf
-    dest: "{{ slurm_home_path }}/cgroup.conf"
+- name: template <|> Generate job_submit.lua file
+  ansible.builtin.template:
+    src: "job_submit.lua.j2"
+    dest: "{{ slurm_home_path }}/job_submit.lua"
     owner: slurm
     group: slurm
-    mode: 0644
+    mode: "0444"
+  when: slurm_job_submit_lua_file is defined and slurm_job_submit_lua_file is not none
+  tags:
+    - template
 
 - name: service <|> Manage slurmctld state
   ansible.builtin.service:

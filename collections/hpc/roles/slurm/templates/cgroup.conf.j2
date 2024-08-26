@@ -1,9 +1,20 @@
+#jinja2: lstrip_blocks: True
+#### Blue Banquise file ####
+## {{ansible_managed}}
+
 ###
 # Slurm cgroup support configuration file
 ###
+
+{% if slurm_cgroup_conf_raw is defined and slurm_cgroup_conf_raw is not none %}
+{{ slurm_cgroup_conf_raw }}
+{% else %}
+
 # CgroupAutomount=yes # deprecated
 ConstrainCores=yes
 ConstrainRAMSpace=yes
-{% if slurm_grestypes is defined and slurm_gresTypes is not none %}
+  {% if slurm_grestypes is defined and slurm_gresTypes is not none %}
 ConstrainDevices=yes
+  {% endif %}
+
 {% endif %}

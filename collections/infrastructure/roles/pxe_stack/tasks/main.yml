@@ -192,6 +192,7 @@
 
 - name: include_tasks <|> Include diskless
   ansible.builtin.include_tasks: diskless.yml
+  when: pxe_stack_enable_diskless
   tags:
     - internal
 

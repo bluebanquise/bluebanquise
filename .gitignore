@@ -44,3 +44,6 @@ rpm-build
 .cache
 .pytest_cache
 *.pyc
+
+# Tools
+tools/*/inventory

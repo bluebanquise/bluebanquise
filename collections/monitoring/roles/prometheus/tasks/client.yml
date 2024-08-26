@@ -39,7 +39,7 @@
     dest: "/etc/systemd/system/{{ item.service }}.service"
     owner: root
     group: root
-    mode: 0755
+    mode: 0644
   notify: systemd <|> Reload systemd configuration
   loop: "{{ exporters_groups }}"
   when: item.service is defined

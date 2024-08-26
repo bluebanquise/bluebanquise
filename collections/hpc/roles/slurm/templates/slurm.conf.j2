@@ -9,7 +9,8 @@
 
 ## Controller
 ClusterName={{ slurm_cluster_name }}
-ControlMachine={{ slurm_control_machine }}
+SlurmctldAddr={{ slurm_controller_address | default(slurm_controller_hostname, true) | default(slurm_control_machine, true) }}
+SlurmctldHost={{ slurm_controller_hostname | default(slurm_control_machine, true) }}
 
 {% if slurm_computes_config == "configless" %}
 ## Use configless mode
@@ -19,7 +20,6 @@ SlurmctldParameters=enable_configless
 ## Authentication
 SlurmUser=slurm
 AuthType=auth/munge
-CryptoType=crypto/munge
 
 ## Ports
 SrunPortRange={{ slurm_srunportrange }}
@@ -60,7 +60,7 @@ SelectTypeParameters=CR_Core_Memory,CR_CORE_DEFAULT_DIST_BLOCK,CR_ONE_TASK_PER_C
 {% endif %}
 {% if slurm_enable_accounting %}
 ## Accounting
-AccountingStorageHost={{ slurm_control_machine }}
+AccountingStorageHost={{ slurm_controller_hostname | default(slurm_control_machine, true) }}
 AccountingStorageType=accounting_storage/slurmdbd
 JobAcctGatherType=jobacct_gather/linux
 {% endif %}
