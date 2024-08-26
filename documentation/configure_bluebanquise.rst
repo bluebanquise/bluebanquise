@@ -66,11 +66,19 @@ Create needed folders first:
 
 We are now going to populate inventory for the following basic example cluster:
 
-.. image:: images/clusters/documentation_example_single_island.svg
+.. image:: images/configure_bluebanquise/example_single_island.svg
    :align: center
+|
+
+Whatever the future cluster shape, you should start small with this, and extend it once working fine.
 
 Add first management node
 -------------------------
+
+|
+.. image:: images/configure_bluebanquise/management1_1.svg
+   :align: center
+|
 
 Let's add the first node, ``management1``. This is a special node, as it will be the manager of the cluster.
 
@@ -114,7 +122,7 @@ Now check the result:
 
 .. code-block:: text
 
-  (pydevs) oxedions@prima:~/tmp_devs$ ansible-inventory -i inventory/ --graph
+  oxedions@prima:~/$ ansible-inventory -i inventory/ --graph
   @all:
     |--@ungrouped:
     |--@fn_management:
@@ -123,14 +131,23 @@ Now check the result:
     |  |--management1
     |--@os_almalinux_9:
     |  |--management1
-  (pydevs) oxedions@prima:~/tmp_devs$ 
+  oxedions@prima:~/$ 
 
-We can see that our management1 host is part of 3 groups: ``fn_management`` which is its function (a management node),
-``hw_supermicro_X10DRT`` which is the hardware definition, and ``os_almalinux_9`` which is the os definition.
-This creates a new equipment profile (see vocabulary section of this documentatio).
+We can see that our management1 host is part of 3 groups:
+
+1. ``fn_management`` which is its function (a management node)
+2. ``hw_supermicro_X10DRT`` which is the hardware definition
+3. ``os_almalinux_9`` which is the os definition
+
+This creates a new equipment profile (see vocabulary section of this documentation).
 
 Add network
 -----------
+
+|
+.. image:: images/configure_bluebanquise/management1_2.svg
+   :align: center
+|
 
 Lets now add the network. All our hosts will be connected to a network ``10.10.0.0/16`` called ``net-1``.
 
@@ -149,7 +166,6 @@ networking, it can be different.
 
 All networks are defined in ``group_vars/all/networks.yml`` file.
 
-
 It is **IMPORTANT** to understand that the prefix ``net-`` means to the stack "this is a administration network".
 
 In BlueBanquise there are two kind of networks: **administration networks**, and **simple networks**.
@@ -163,6 +179,11 @@ convention, which by default is: ``net-``.
 
 Connect node to network
 -----------------------
+
+|
+.. image:: images/configure_bluebanquise/management1_3.svg
+   :align: center
+|
 
 Now connect management1 to this network. Edit file ``cluster/nodes/management.yml`` and add management1
 network interface:
@@ -183,11 +204,11 @@ It should not be too difficult to understand this file.
 What is essential here is to understand that order network interfaces are
 defined under *network_interfaces* variable matters. Rules are the following:
 
-- The first interface in the list is the **resolution interface**. This is the one a ping will try to reach.
-- The first interface attached to a management network is the **main network interface** (remember, management networks are the ones prefixed ``net-``). This is the one ssh and so Ansible will use to connect to the node.
+1. The first interface in the list is the **resolution interface**. This is the one a ping will try to reach.
+2. The first interface attached to a management network is the **main network interface** (remember, management networks are the ones prefixed ``net-``). This is the one ssh and so Ansible will use to connect to the node.
 
 If these rules do not comply with your needs, remember that the stack logic can
-be precedenced: simply define logic variables like ``j2_node_main_resolution_network`` or
+be precedenced: simply re-define logic variables like ``j2_node_main_resolution_network`` or
 ``j2_node_main_network`` manually under host.
 
 .. note::
@@ -198,10 +219,10 @@ Set services endpoint
 ---------------------
 
 We need to define our services endpoint on the net-1 network.
-This endpoint is the ip address to be targeted by clients on the network (dns server ip, time server ip, etc).
-The stack allows to define different ips or hostnames for each kind of service,
-but a magic value exists and allows to define all of them at once with the same value: ``services_ip``
-This is enough for our example cluster.
+This endpoint is the IP address to be targeted by clients on the network to reach critical services (dns server, time server, etc).
+The stack allows to define different IPs or hostnames for each kind of service,
+but a magic key exists and allows to define all of them at once with the same value: ``services_ip``
+This is enough for our basic cluster.
 
 Edit ``group_vars/all/networks.yml`` and add the key under net-1 network:
 
@@ -216,6 +237,11 @@ Edit ``group_vars/all/networks.yml`` and add the key under net-1 network:
 Configure hardware and os
 -------------------------
 
+|
+.. image:: images/configure_bluebanquise/management1_4.svg
+   :align: center
+|
+
 management1 is part of ``hw_supermicro_X10DRT`` and ``os_almalinux_9`` groups.
 We now need to define its hardware and operating system settings.
 
@@ -223,26 +249,27 @@ Create file ``group_vars/hw_supermicro_X10DRT/settings.yml`` with the following 
 
 .. code-block:: yaml
 
-  hw_equipment_type: server
+  hw_equipment_type: server # This will allow the stack to understand its an OS target and so a PXE profile should be created for it.
 
-  hw_specs:
+  hw_specs: # Defining hpw_specs is optional for now, as most infrastructure do not need it.
+            # It is however mandatory later for some specialized roles like Slurm in HPC collection.
     cpu:
       name: Intel E5-2667 v4
-      cores: 32 # 2 sockets x 1 cpu that contains 8 cores with 2 threads each
+      cores: 32
       cores_per_socket: 8
       sockets: 2
       threads_per_core: 2
     gpu:
 
   hw_console: console=tty0 console=ttyS1,115200
-  hw_kernel_parameters: nomodeset
+  hw_kernel_parameters: nomodeset # This is just an example here, you can leave this empty or even not define it.
 
-  hw_board_authentication: # Authentication to BMC
+  hw_board_authentication: # Authentication on BMC, optional if you do not have a BMC to manage the server.
     - protocol: IPMI
       user: ADMIN
       password: ADMIN
 
-  # You can even add custom variables if it helps later
+  # You can even add custom variables if it helps you later
   # Like adding a link to page where manual can be found
   hw_vendor_url: https://www.supermicro.com/en/products/motherboard/X10DRT-L
 
@@ -251,7 +278,7 @@ Tune this content according to your needs. For example, if you are testing the s
 
 .. note::
   **This is an example.** The only mandatory value here is ``hw_equipment_type`` as it is needed for the stack to identify the hardware as a server.
-  The full list of available parameters is given into the variables description page. BENNNNNNNNNNNN
+  The full list of available parameters is given into the variables description page.
 
 Now create file ``group_vars/os_almalinux_9/settings.yml`` with the following content:
 
@@ -281,12 +308,17 @@ Now create file ``group_vars/os_almalinux_9/settings.yml`` with the following co
 .. note::
   **This is again an example.** The only mandatory value here is ``os_operating_system`` as it is needed 
   for the stack to identify the operating system to be deployed on the target via PXE.
-  The full list of available parameters is given into the variables description page. BENNNNNNNNNNNN
+  The full list of available parameters is given into the variables description page.
 
 That is all for our management1 server. We can now define the other servers.
 
 Add remaining nodes
 -------------------
+
+|
+.. image:: images/configure_bluebanquise/others_1.svg
+   :align: center
+|
 
 Proceed as with management1 node. We will do computes1 to compute4, other nodes can then be added the same way.
 
@@ -436,6 +468,17 @@ You can check which parameters are linked to a specific node using the ansible-i
   (pydevs) oxedions@prima:~/tmp_devs$ 
 
 Proceed the same way to add all nodes to the inventory.
+
+Connect cluster to the world (optional)
+---------------------------------------
+
+|
+.. image:: images/configure_bluebanquise/example_single_island.svg
+   :align: center
+|
+
+You may need to connect the cluster to a gateway, or even configure a server as a gateway.
+In this example, login1 will act as a gateway.
 
 Set global settings
 -------------------

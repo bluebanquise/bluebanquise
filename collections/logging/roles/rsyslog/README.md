@@ -83,6 +83,17 @@ networks:
 Log server port is set to *514* by default, and can be customized with `rsyslog_port` variable.
 This value should be set accordingly between server and client.
 
+### Server override
+
+It is possible, for specific configurations or debugging purposes, to override server ip4 by defining `rsyslog_server_ip4` variable in the inventory.
+In that scenario, this value will be used instead of networks values.
+
+Example:
+
+```yaml
+rsyslog_server_ip4: 10.20.0.1
+```
+
 ### Verbosity
 
 Log client verbosity defaults to *info*, it can be one of the following (defined in the syslog protocol):
@@ -160,6 +171,8 @@ rsyslog_client_configuration_files:
 
 ## Changelog
 
+* 1.6.0: Add rsyslog_server_ip4 to override network values. Benoit Leveugle <benoit.leveugle@gmail.com>
+* 1.5.1: Fix typo in client template (reported by @sgaosdgr). Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.5.0: Allow services and services_ip together. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.6: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.5: Fix variables names and datamodel compatibility and update readme. Benoit Leveugle <benoit.leveugle@gmail.com>
