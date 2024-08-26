@@ -8,16 +8,15 @@
 {% else %}
 
 autoinstall:
-  {% if os_autoinstall_packages is defined and os_autoinstall_packages is iterable and os_autoinstall_packages is not string and os_autoinstall_packages is not mapping %}
+{% if hostvars[groups[os_profile][0]]['os_autoinstall_packages'] is defined and hostvars[groups[os_profile][0]]['os_autoinstall_packages'] is iterable and hostvars[groups[os_profile][0]]['os_autoinstall_packages'] is not string and hostvars[groups[os_profile][0]]['os_autoinstall_packages'] is not mapping %}
   packages:
-    {% for package in os_autoinstall_packages %}
+    {% for package in hostvars[groups[os_profile][0]]['os_autoinstall_packages'] %}
     - {{ package }}
     {% endfor %}
   {% endif %}
 {% if (hostvars[groups[os_profile][0]]['os_pxe_repository_proxy'] | default(pxe_stack_os_pxe_repository_proxy, true) | default(none, true)) is not none %}
   proxy: {{ hostvars[groups[os_profile][0]]['os_pxe_repository_proxy'] | default(pxe_stack_os_pxe_repository_proxy, true) }}
 {% endif %}
-  apt_proxy: os_pxe_repository_proxy
   version: 1
   apt:
     geoip: false

@@ -124,6 +124,7 @@ Package installed:
 
 ## Changelog
 
+* 1.3.4: Fix condition in handler. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.3: Adapt to os hw split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.2: Fix issue with non networked nic. From @GaelBil. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.1: Firewalld: enforce interfaces to their relevant zone. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>

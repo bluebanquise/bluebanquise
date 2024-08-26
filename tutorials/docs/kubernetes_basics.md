@@ -20,7 +20,7 @@ spec:
       image: hashicorp/http-echo
       args:
         - "-text=banana"
-  ---
+---
 kind: Service
 apiVersion: v1
 metadata:
