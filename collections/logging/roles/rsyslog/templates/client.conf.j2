@@ -1,3 +1,4 @@
+#jinja2: lstrip_blocks: True
 #### RULES ####
 
 # Everybody gets emergency messages
@@ -25,22 +26,34 @@ local7.*                                                /var/log/boot.log
 
 #### FORWARD RULES ####
 
-{% if networks[j2_node_main_network] is defined
-      and networks[j2_node_main_network]['services'] is defined
-      and (networks[j2_node_main_network]['services']['log4'] | default(networks[j2_node_main_network]['services']['log'], true)) is defined
-      and (networks[j2_node_main_network]['services']['log4'] | default(networks[j2_node_main_network]['services']['log'], true)) is iterable %}
-    {% for rsyslog_server in (networks[j2_node_main_network]['services']['log4'] | default(networks[j2_node_main_network]['services']['log'], true)) %}
-        {% if (log_server.ip4 is defined and (log_server.ip4 | ansible.utils.ipaddr)) or (log_server.hostname is defined and rsyslog_server.hostname is not none) %}
+{% if rsyslog_server_ip4 is defined and rsyslog_server_ip4 is not none and (rsyslog_server_ip4 | ansible.utils.ipaddr ) %}{# Override other parameters, for custom configurations #}
 # ### begin forwarding rule ###
 # Remote Logging (we use TCP for reliable delivery)
 # An on-disk queue is created for this action. If the remote host is
 # down, messages are spooled to disk and sent when it is up again.
-$ActionQueueFileName fwdRule{{ loop.count }} # unique name prefix for spool files
+$ActionQueueFileName fwdRule # unique name prefix for spool files
 $ActionQueueMaxDiskSpace 1g   # 1gb space limit (use as much as possible)
 $ActionQueueSaveOnShutdown on # save messages to disk on shutdown
 $ActionQueueType LinkedList   # run asynchronously
 $ActionResumeRetryCount -1    # infinite retries if host is down
-        {% if rsyslog_server.ip4 is defined and (log_server.ip4 | ansible.utils.ipaddr) %}
+*.* @@{{ rsyslog_server_ip4 }}:{{ rsyslog_port }}
+# ### end of the forwarding rule ###
+{% elif networks[j2_node_main_network] is defined
+      and networks[j2_node_main_network]['services'] is defined
+      and (networks[j2_node_main_network]['services']['log4'] | default(networks[j2_node_main_network]['services']['log'], true)) is defined
+      and (networks[j2_node_main_network]['services']['log4'] | default(networks[j2_node_main_network]['services']['log'], true)) is iterable %}
+    {% for rsyslog_server in (networks[j2_node_main_network]['services']['log4'] | default(networks[j2_node_main_network]['services']['log'], true)) %}
+        {% if (rsyslog_server.ip4 is defined and (rsyslog_server.ip4 | ansible.utils.ipaddr)) or (rsyslog_server.hostname is defined and rsyslog_server.hostname is not none) %}
+# ### begin forwarding rule ###
+# Remote Logging (we use TCP for reliable delivery)
+# An on-disk queue is created for this action. If the remote host is
+# down, messages are spooled to disk and sent when it is up again.
+$ActionQueueFileName fwdRule{{ loop.index }} # unique name prefix for spool files
+$ActionQueueMaxDiskSpace 1g   # 1gb space limit (use as much as possible)
+$ActionQueueSaveOnShutdown on # save messages to disk on shutdown
+$ActionQueueType LinkedList   # run asynchronously
+$ActionResumeRetryCount -1    # infinite retries if host is down
+        {% if rsyslog_server.ip4 is defined and (rsyslog_server.ip4 | ansible.utils.ipaddr) %}
 *.* @@{{ rsyslog_server.ip4 }}:{{ rsyslog_port }}
         {% elif rsyslog_server.hostname is defined and rsyslog_server.hostname is not none %}
 *.* @@{{ rsyslog_server.hostname }}:{{ rsyslog_port }}

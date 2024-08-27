@@ -27,7 +27,7 @@
     dest: /etc/systemd/system/ipmi_exporter.service
     owner: root
     group: root
-    mode: 0755
+    mode: 0644
   notify:
     - systemd <|> Reload systemd configuration
     - service <|> Restart ipmi_exporter service

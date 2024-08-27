@@ -12,3 +12,10 @@
   when:
     - "'service' not in ansible_skip_tags"
     - slurm_start_services | default(bb_start_services) | default(true) | bool
+
+- name: Run scontrol reconfigure
+  ansible.builtin.command:
+    cmd: scontrol reconfigure
+  changed_when: true
+  when:
+    - slurm_allow_scontrol_handler

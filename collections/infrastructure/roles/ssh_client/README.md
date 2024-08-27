@@ -89,8 +89,14 @@ To achieve that, the following variables are available:
 * ssh_client_global_loglevel
 * ssh_client_global_stricthostkeychecking
 * ssh_client_global_userknownhostsfile
+* ssh_client_global_network
 
-Which are evaluated at global level, and:
+Which are evaluated at global level
+
+For example, ssh_client_global_network can be used to configure in */root/ssh/config*
+the same network for all hosts.
+
+And:
 
 * ssh_client_loglevel
 * ssh_client_stricthostkeychecking
@@ -177,6 +183,7 @@ Optional inventory vars:
 
 ## Changelog
 
+* 1.2.3: infrastructure/ssh_client role: set a default network <jean-pascal.mazzilli@gmail.com>
 * 1.2.2: Fixed ssh_client_userknownhostsfile host_vars. Leo Magdanello <lmagdanello40@gmail.com>
 * 1.2.1: Fixed sudo user home directory. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.2.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>

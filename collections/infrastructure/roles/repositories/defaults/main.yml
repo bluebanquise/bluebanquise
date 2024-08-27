@@ -1,3 +1,4 @@
 ---
-repositories_client_apt_update_cache: true
-repositories_client_disable_delta_rpm: true
+repositories_network:
+repositories_apt_update_cache: true
+repositories_disable_delta_rpm: true

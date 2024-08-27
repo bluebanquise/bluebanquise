@@ -6,6 +6,14 @@ This role provides a basic `/etc/resolv.conf` file.
 
 ## Instructions
 
+It is possible to force DNS servers by specifying:
+
+```yaml
+dns_client_servers:
+  - 2.2.2.2
+  - 2.2.3.3
+```
+
 It is possible to add here external DNS servers for clients.
 
 ```yaml
@@ -19,6 +27,7 @@ Note also that on most recent distributions, editing `/etc/resolv.conf` file is 
 
 ## Changelog
 
+* 1.3.1: be able to set dns servers using a new variable <jean-pascal.mazzilli@gmail.com>
 * 1.3.0: Allow services and services_ip together. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.2.1: fix nameserver. Alexandra Darrieutort <alexandra.darrieutort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.2.0: Update to BB 2.0 format. Benoit Leveugle <benoit.leveugle@gmail.com>

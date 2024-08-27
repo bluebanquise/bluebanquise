@@ -14,3 +14,4 @@ slurm_partitions_list:
         MaxTime: "72:00:00"
         DefaultTime: "24:00:00"
         Default: yes
+slurm_allow_scontrol_handler: false

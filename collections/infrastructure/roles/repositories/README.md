@@ -59,6 +59,15 @@ networks:
           hostname: my-repository-server
 ```
 
+You can also specify the variable repositories_network when executing the role.
+For example: 
+
+```yaml
+- role: bluebanquise.infrastructure.repositories
+  vars:
+    repositories_network: "net-other-network"
+```
+
 **Equipment variables:**
 
 ```yaml
@@ -118,6 +127,7 @@ And native repositories will be removed during nodes deployment (PXE install, no
 
 ## Changelog
 
+* 1.3.9: Fix variables names. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.7: Fix services ip precedence. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.6: Fix extra space in automatic url. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.5: Adapt role to support BB 2.0 networks. Benoit Leveugle <benoit.leveugle@gmail.com>

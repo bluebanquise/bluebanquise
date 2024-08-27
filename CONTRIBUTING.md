@@ -2,7 +2,7 @@
 
 :construction_worker: Many thanks for considering contributing to **BlueBanquise**. :construction_worker:
 
-Please do not hesitate to contact us using [issues](https://github.com/bluebanquise/bluebanquise/issues) or [discussions](https://github.com/bluebanquise/bluebanquise/discussions), I will be glad to help you! :raising_hand:
+Please do not hesitate to contact me using [issues](https://github.com/bluebanquise/bluebanquise/issues) or [discussions](https://github.com/bluebanquise/bluebanquise/discussions), I will be glad to help you! :raising_hand:
 
 Please keep in mind I am developing BlueBanquise as a **best effort** on my free personal time.
 
