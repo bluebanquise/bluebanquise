@@ -8,4 +8,4 @@
 
 - name: command <|> apt update cache
   ansible.builtin.command: apt update
-  when: repositories_client_apt_update_cache
+  when: repositories_apt_update_cache

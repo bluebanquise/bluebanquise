@@ -1,5 +1,5 @@
 ---
-repositories_client_os_native_repositories:
+repositories_os_native_repositories:
   - repo: deb http://archive.ubuntu.com/ubuntu/ jammy main restricted
     state: present
   - repo: deb http://archive.ubuntu.com/ubuntu/ jammy-updates main restricted
