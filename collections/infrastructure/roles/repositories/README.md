@@ -59,6 +59,15 @@ networks:
           hostname: my-repository-server
 ```
 
+You can also specify the variable repositories_network when executing the role.
+For example: 
+
+```yaml
+- role: bluebanquise.infrastructure.repositories
+  vars:
+    repositories_network: "net-other-network"
+```
+
 **Equipment variables:**
 
 ```yaml
