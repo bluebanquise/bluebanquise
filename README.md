@@ -6,7 +6,13 @@
   Web site: <a href="https://bluebanquise.com"><b>https://bluebanquise.com</b></a>
 </p>
 
-:loudspeaker: The main branch is under active dev for now. Consider using a stable branch for production. :loudspeaker:
+---
+Devs infos:
+
+:green_heart: The main branch is now considered stable.
+:green_heart: Current core version: 3.0.2 (locked :lock:)
+
+---
 
 ## What is BlueBanquise
 
@@ -33,7 +39,7 @@ The following collections are available. **Please note that for now, only infras
 
 Infrastructure collection should be compatible with all target Linux distributions (RHEL 8, RHEL 9, Debian 11, Debian 12, OpenSuse Leap 15, Ubuntu 20.04, Ubuntu 22.04). Other collections do not support all these distributions (support is added on demand).
 
-Note that few features are still limited on Ubuntu and Debian (mainly network configuration), I am working on it.
+Note that few features are still limited on Ubuntu and Debian (mainly network configuration and diskless), I am working on it.
 
 ## License
 
@@ -141,7 +147,7 @@ BlueBanquise is part of the [**Algoric**](https://algoric.org/) project from the
 
 It is a revamping of the old stack [Banquise](https://github.com/oxedions/banquise), based on Salt.
 
-The BlueBanquise project is a 100% open source project, not managed by a company, and will stay MIT license.
+:seedling: The BlueBanquise project is a **100% open source project, not managed by a company, and will stay MIT license**. :seedling:
 
 ## The name
 

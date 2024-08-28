@@ -34,10 +34,10 @@ j2_node_main_resolution_address: "{{ (network_interfaces[0].ip4 | default('')).s
 # The network used by Ansible to deploy configuration (related to ssh).
 # Also the network used by the host to get services ip.
 j2_node_main_network: "{{ network_interfaces | default([]) | selectattr('network','defined') | selectattr('network','match','^'+j2_current_iceberg_network+'-[a-zA-Z0-9]+') | map(attribute='network') | list | first | default(none) }}"
-# Main network interface. For consistency, we use j2_node_main_network as source.
-j2_node_main_network_interface: "{{ network_interfaces[j2_node_main_network].interface | default(none) }}"
+# Main network interface.
+j2_node_main_network_interface: "{{ network_interfaces | default([]) | selectattr('network','defined') | selectattr('network','match','^'+j2_current_iceberg_network+'-[a-zA-Z0-9]+') | map(attribute='interface') | list | first | default(none) }}"
 # Main address, same concept.
-j2_node_main_address: "{{ network_interfaces[j2_node_main_network].ip4 | default(none) }}"
+j2_node_main_address: "{{ network_interfaces | default([]) | selectattr('network','defined') | selectattr('network','match','^'+j2_current_iceberg_network+'-[a-zA-Z0-9]+') | map(attribute='ip4') | list | first | default(none) }}"
 
 # Generate the nodes list, as a cache for network_interfaces
 # Example:
