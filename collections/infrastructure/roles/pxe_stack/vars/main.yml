@@ -1,5 +1,5 @@
 ---
-pxe_stack_role_version: 1.16.5
+pxe_stack_role_version: 1.17.0
 
 pxe_stack_supported_os:
   redhat:
@@ -32,6 +32,9 @@ pxe_stack_supported_os:
       distributions:
         - ubuntu
     - major: 22
+      distributions:
+        - ubuntu
+    - major: 24
       distributions:
         - ubuntu
   dgxos:

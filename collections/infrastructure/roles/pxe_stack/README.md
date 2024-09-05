@@ -299,8 +299,8 @@ It is possible to tune isos path used to deploy OS (using for example a public r
 
 Some variables are available for that:
 
-* `os_pxe_images_root` which is defined at os groups level, which precedence blabla
-os_pxe_images_root_iso
+* Optional `os_pxe_images_root` defined at os groups level that precedence optional `pxe_stack_os_pxe_images_root` defined at group_vars/all level. If both not defined, default is `http://${next-server}/pxe/netboots/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/`.
+* Optional `os_pxe_images_root_iso` defined at os groups level that precedence optional `pxe_stack_os_pxe_images_root_iso` defined at group_vars/all level. If both not defined, default is `iso`.
 
 #### Raw content
 
@@ -726,6 +726,7 @@ Note that using an home folder into /home for the bluebanquise sudo user can be 
 
 ## Changelog
 
+* 1.17.0: Allow advanced custom iso paths. <jp.mazzilli@gmail.com> and <benoit.leveugle@gmail.com>
 * 1.16.5: Several fixes to bluebanquise-diskless (version 2.0.7). Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 * 1.16.4: Ensure bluebanquise-bootset is run as root/sudo. <patrick.begou@univ-grenoble-alpes.fr>
 * 1.16.3: Fix bug in kickstart (reported by jpm38). Benoit Leveugle <benoit.leveugle@gmail.com>
