@@ -124,21 +124,24 @@ Currently tested and supported distributions (other derivative could work) are:
 | Operating System family | Operating System distribution | Tested versions    | Architectures    | Notes                                                       |
 | ----------------------- | ----------------------------- | ------------------ | ---------------- | ----------------------------------------------------------- |
 | Red Hat                 |                               |                    |                  |                                                             |
-|                         | RHEL                          | 7, 8, 9               | x86_64, aarch64  | √                                                           |
-|                         | Rocky Linux                   | 8, 9                  | x86_64, aarch64  | √                                                           |
-|                         | CentOS                        | 7, 8               | x86_64, aarch64  | √                                                           |
+|                         | RHEL                          | 8, 9               | x86_64, aarch64  | √                                                           |
+|                         | Rocky Linux                   | 8, 9               | x86_64, aarch64  | √                                                           |
+|                         | CentOS                        | 8                  | x86_64, aarch64  | √                                                           |
 |                         | CentOS Stream                 | 8                  | x86_64, aarch64  | √                                                           |
-|                         | Alma Linux                    | 8, 9                  | x86_64, aarch64  | √                                                           |
+|                         | Alma Linux                    | 8, 9               | x86_64, aarch64  | √                                                           |
 | Debian                  |                               |                    |                  |                                                             |
-|                         | Ubuntu                        | 20.04, 22.04              | x86_64, arm64  | √. Diskless not supported for now.                          |
-|                         | Debian                        | 11, 12                   |  x86_64, arm64                | √. Diskless not supported for now.  |
+|                         | Ubuntu                        | 20.04, 22.04, 24.04              | x86_64, arm64  | √. Diskless not supported for now.                          |
+|                         | Debian                        | 11, 12             |  x86_64, arm64                | √. Diskless not supported for now.  |
 | Suse                    |                               |                    |                  |                                                             |
-|                         | SLES                          | 15               | x86_64, aarch64  | √. Diskless not supported for now.                                                           |
-|                         | OpenSuse Leap                 | 15               | x86_64, aarch64  | √. Diskless not supported for now.          |
+|                         | SLES                          | 15                 | x86_64, aarch64  | √. Diskless not supported for now.                                                           |
+|                         | OpenSuse Leap                 | 15                 | x86_64, aarch64  | √. Diskless not supported for now.          |
 
 Ansible >= 4.10.0 is mandatory for BlueBanquise to run properly.
 
-Please note that EL 7 systems (Centos 7, RHEL 7, etc.) is now considered best effort only.
+Please note that:
+
+* EL 7 systems (Centos 7, RHEL 7, etc.) is now considered best effort only as system is past EOL.
+* Ubuntu 18.04 and Suse 12 are no more supported (too old pythons, I miss the time to support them).
 
 ## The project
 
