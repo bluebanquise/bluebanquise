@@ -23,8 +23,8 @@ search {{ dns_client_domain_name | default(bb_domain_name, true) | default('clus
 nameserver {{ nameserver }}
 {% endfor %}
 
-{% if dns_client_external_server is defined and dns_client_external_server is iterable %}
-  {% for external_dns in dns_client_external_server %}
+{% if dns_client_external_servers is defined and dns_client_external_servers is iterable %}
+  {% for external_dns in dns_client_external_servers %}
 nameserver {{ external_dns }}
   {% endfor %}
 {% endif %}
