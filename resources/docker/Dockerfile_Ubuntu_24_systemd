@@ -1,0 +1,7 @@
+FROM ubuntu:24.04
+
+RUN set -ex; \
+    apt update && DEBIAN_FRONTEND=noninteractive apt -y install systemd systemd-sysv python3 python3-pip sudo;
+RUN mkdir /root/.ssh -p;
+
+CMD ["/lib/systemd/systemd"]
