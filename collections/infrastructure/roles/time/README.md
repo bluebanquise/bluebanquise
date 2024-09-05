@@ -28,11 +28,11 @@ chronyd -q 'server my_ntp_server_hostname_or_ip iburst'
 
 ### Time zone
 
-By default, role will use the `time_time_zone` variable to get time zone to be 
+By default, role will use the `time_time_zone` or `bb_time_zone` variables to get time zone to be 
 set on the target system. Default is `Europe/Brussels`. Please set this value according
 to your cluster localization.
 
-Note that stack global `bb_time_zone` will precedence `time_time_zone` if set.
+Note that variable `time_time_zone` will precedence global variable `bb_time_zone` if set.
 
 ### External time servers and pools
 
@@ -79,6 +79,7 @@ variable.
 
 ## Changelog
 
+* 1.4.2: Fix global logic. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.1: Fix icebergs mechanism. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.0: Allow services and services_ip together. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.2: Fix services entries. Benoit Leveugle <benoit.leveugle@gmail.com>

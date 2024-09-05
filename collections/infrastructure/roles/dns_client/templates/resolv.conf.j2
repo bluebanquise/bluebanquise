@@ -18,7 +18,7 @@ nameserver {{ dns }}
   {% set nameservers = [networks[j2_node_main_network]['services_ip']] %}
 {% endif %}
 
-search {{ bb_domain_name | default(dns_client_domain_name) }}
+search {{ dns_client_domain_name | default(bb_domain_name, true) | default('cluster.local', true)}}
 {% for nameserver in nameservers %}
 nameserver {{ nameserver }}
 {% endfor %}

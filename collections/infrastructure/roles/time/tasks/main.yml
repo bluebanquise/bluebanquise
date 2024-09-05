@@ -64,9 +64,9 @@
   tags:
     - template
 
-- name: "timezone <|> Set system to {{ bb_time_zone | default(time_time_zone, true) }} timezone"
+- name: "timezone <|> Set system to {{ time_time_zone | default(bb_time_zone, true) | default('Europe/Brussels', true) }} timezone"
   community.general.timezone:
-    name: "{{ bb_time_zone | default(time_time_zone, true) }}"
+    name: "{{ time_time_zone | default(bb_time_zone, true) | default('Europe/Brussels', true) }}"
 
 - name: meta <|> Run handler tasks to restart time services
   ansible.builtin.meta: flush_handlers

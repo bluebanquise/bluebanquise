@@ -28,7 +28,7 @@ include "{{ dns_server_rfc_zone_file }}";
 
 ## Forward zones
 
-zone "{{ bb_domain_name | default(dns_server_domain_name) }}" IN {
+zone "{{ dns_server_domain_name | default(bb_domain_name, true) | default('cluster.local', true) }}" IN {
   type master;
   file "{{ dns_server_named_dir }}/forward.zone";
   allow-update { none; };

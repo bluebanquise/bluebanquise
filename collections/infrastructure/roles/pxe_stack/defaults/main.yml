@@ -4,7 +4,7 @@
 ### Global parameters
 
 # Default time zone
-pxe_stack_time_zone: Europe/Brussels
+pxe_stack_time_zone:
 
 # Enable distributions support
 pxe_stack_diskful_os_redhat: true

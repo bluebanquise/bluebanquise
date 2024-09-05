@@ -1,6 +1,6 @@
 ---
 - name: "hostname <|> Set {{ inventory_hostname }} hostname"
   ansible.builtin.hostname:
-    name: "{{ set_hostname_fqdn | ternary( inventory_hostname + '.' + (bb_domain_name | default(set_hostname_domain_name)), inventory_hostname ) }}"
+    name: "{{ set_hostname_fqdn | ternary( inventory_hostname + '.' + (set_hostname_domain_name | default(bb_domain_name, true) | default('cluster.local', true)), inventory_hostname ) }}"
   tags:
     - identify

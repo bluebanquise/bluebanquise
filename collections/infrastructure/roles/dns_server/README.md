@@ -24,13 +24,16 @@ The role will generate 5 files (path may vary depending of Linux distribution):
 ### Domain name
 
 By default, domain name used is `cluster.local`.
-It is possible to update domaine name used by setting dns_server_domain_name value:
+
+If global variable `bb_domain_name` is set then this value is used.
+
+It is possible to update domaine name used by setting `dns_server_domain_name` value:
 
 ```yaml
 dns_server_domain_name: foobar.local
 ```
 
-If global variable `bb_domain_name` is set, then this value will precedence all other settings.
+Note that `dns_server_domain_name` precedence `bb_domain_name` global variable.
 
 ### Networks
 
@@ -239,6 +242,7 @@ dns_server_raw_options_content: |
 
 ## Changelog
 
+* 1.10.3: Fix global logic. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.10.2: Fix role for Ubuntu and Debian distributions. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.10.1: Fix extended names for all zones. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.10.0: Add forward only domains. Benoit Leveugle <benoit.leveugle@gmail.com>
