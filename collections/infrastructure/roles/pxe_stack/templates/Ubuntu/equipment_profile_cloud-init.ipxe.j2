@@ -20,10 +20,12 @@ set eq-autoclone-parameters {{ hostvars[groups[os_profile][0]]['os_autoclone_par
 {% endif %}
 
 # Dynamic variables
-set images-root {{ hostvars[groups[os_profile][0]]['os_pxe_images_root'] | default(pxe_stack_os_pxe_images_root) | default("http://${next-server}/pxe/netboots/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/", true) }}
+set images-root {{ hostvars[groups[os_profile][0]]['os_pxe_images_root'] | default(pxe_stack_os_pxe_images_root, true) | default("http://${next-server}/pxe/netboots/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/", true) }}
+set images-root-iso {{ hostvars[groups[os_profile][0]]['os_pxe_images_root_iso'] | default(pxe_stack_os_pxe_images_root_iso, true) | default("iso", true) }}
 set cloud-init-path http://${next-server}/pxe/equipment_profiles/${eq-equipment-profile}.cloud-init/ 
 
 echo | images-root: ${images-root}
+echo | images-root-iso: ${images-root-iso}
 echo | cloud-init-path: ${cloud-init-path}
 echo |
 

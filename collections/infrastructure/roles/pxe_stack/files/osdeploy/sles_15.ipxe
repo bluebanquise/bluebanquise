@@ -12,18 +12,18 @@ echo | > Operating system target: ${eq-distribution} ${eq-distribution-version} 
 echo | > Console: ${eq-console}
 echo | > Additional kernel parameters: ${eq-kernel-parameters} ${dedicated-kernel-parameters}
 echo | > Deployment server: ${next-server}
-echo | > Target images: ${images-root}
-echo | > Target repos: repositories/${eq-repositories-environment}/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/
-echo | > Target AutoYast: ${eq-equipment-profile}.autoyast.xml
+echo | > Target images root: ${images-root}
+echo | > Target images root iso: ${images-root-iso}
+echo | > Target AutoYast: ${autoyast-path}
 echo |
 echo | Loading linux ...
 
 # DEV: Need to check if path do not need to match opensuse
-kernel ${images-root}/iso/boot/${eq-architecture}/loader/linux install=${images-root}/iso autoyast=http://${next-server}/pxe/equipment_profiles/${eq-equipment-profile}.autoyast.xml textmode=1 ${eq-console} ${eq-kernel-parameters} ${eq-kernel-aggressive-dhcp} ipxe_next_server=${next-server} ${dedicated-parameters}
+kernel ${images-root}/${images-root-iso}/boot/${eq-architecture}/loader/linux install=${images-root}/${images-root-iso} autoyast=${autoyast-path} textmode=1 ${eq-console} ${eq-kernel-parameters} ${eq-kernel-aggressive-dhcp} ipxe_next_server=${next-server} ${dedicated-parameters}
 
 echo | Loading initial ramdisk ...
 
-initrd ${images-root}/iso/boot/${eq-architecture}/loader/initrd
+initrd ${images-root}/${images-root-iso}/boot/${eq-architecture}/loader/initrd
 
 echo | ALL DONE! We are ready.
 echo | Downloaded images report:

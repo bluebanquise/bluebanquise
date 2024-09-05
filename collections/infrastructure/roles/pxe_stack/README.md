@@ -293,6 +293,15 @@ bb_time_zone: Europe/Brussels
 
 Since it is a global cluster setting, time zone is not defined at equipment level.
 
+#### Tuned deployment iso paths
+
+It is possible to tune isos path used to deploy OS (using for example a public repository, etc.).
+
+Some variables are available for that:
+
+* `os_pxe_images_root` which is defined at os groups level, which precedence blabla
+os_pxe_images_root_iso
+
 #### Raw content
 
 You can add raw content to auto install files using the `os_autoinstall_raw_content`.
