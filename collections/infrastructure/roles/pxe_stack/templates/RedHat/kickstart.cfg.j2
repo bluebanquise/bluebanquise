@@ -26,9 +26,9 @@ lang {{ hostvars[groups[os_profile][0]]['os_system_language'] | default(pxe_stac
 
 # System timezone
 {% if (hostvars[groups[os_profile][0]]['os_operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version) ) | int < 9 %}
-timezone {{ bb_time_zone | default(pxe_stack_time_zone) }} --isUtc
+timezone {{ pxe_stack_time_zone | default(bb_time_zone, true) | default('Europe/Brussels', true) }} --isUtc
 {% else %}
-timezone {{ bb_time_zone | default(pxe_stack_time_zone) }} --utc
+timezone {{ pxe_stack_time_zone | default(bb_time_zone, true) | default('Europe/Brussels', true) }} --utc
 {% endif %}
 
 # Reboot after installation

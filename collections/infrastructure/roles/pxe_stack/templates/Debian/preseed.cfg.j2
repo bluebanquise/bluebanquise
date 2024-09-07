@@ -35,7 +35,7 @@ d-i mirror/http/proxy string {{ hostvars[groups[os_profile][0]]['os_pxe_reposito
 ### Time
 d-i clock-setup/utc-auto boolean true
 d-i clock-setup/utc boolean true
-d-i time/zone string {{ bb_time_zone | default(pxe_stack_time_zone) }} #US/Pacific
+d-i time/zone string {{ pxe_stack_time_zone | default(bb_time_zone, true) | default('Europe/Brussels', true) }} #US/Pacific
 d-i clock-setup/ntp boolean true
 
 ### Partitioning

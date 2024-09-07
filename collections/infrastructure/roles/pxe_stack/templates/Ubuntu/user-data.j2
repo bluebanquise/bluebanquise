@@ -23,6 +23,7 @@ autoinstall:
     preserve_sources_list: {{ pxe_stack_preserve_repositories }}
   keyboard: {layout: {{ (hostvars[groups[os_profile][0]]['os_keyboard_layout'] | default(pxe_stack_os_keyboard_layout)) | lower }}, toggle: null, variant: ''}
   locale: {{ hostvars[groups[os_profile][0]]['os_system_language'] | default(pxe_stack_os_system_language) }}
+  timezone: {{ pxe_stack_time_zone | default(bb_time_zone, true) | default('Europe/Brussels', true) }}
   user-data:
 {% if not pxe_stack_enable_root %}
     users:

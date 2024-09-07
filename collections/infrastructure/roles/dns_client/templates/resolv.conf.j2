@@ -18,13 +18,13 @@ nameserver {{ dns }}
   {% set nameservers = [networks[j2_node_main_network]['services_ip']] %}
 {% endif %}
 
-search {{ bb_domain_name | default(dns_client_domain_name) }}
+search {{ dns_client_domain_name | default(bb_domain_name, true) | default('cluster.local', true)}}
 {% for nameserver in nameservers %}
 nameserver {{ nameserver }}
 {% endfor %}
 
-{% if dns_client_external_server is defined and dns_client_external_server is iterable %}
-  {% for external_dns in dns_client_external_server %}
+{% if dns_client_external_servers is defined and dns_client_external_servers is iterable %}
+  {% for external_dns in dns_client_external_servers %}
 nameserver {{ external_dns }}
   {% endfor %}
 {% endif %}

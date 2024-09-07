@@ -1,5 +1,5 @@
 ---
-hosts_file_domain_name: cluster.local
+hosts_file_domain_name:
 hosts_file_external_hosts: {}
 hosts_file_range: iceberg
 

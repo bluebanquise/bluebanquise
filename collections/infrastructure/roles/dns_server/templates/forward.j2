@@ -3,9 +3,9 @@
 ;## {{ ansible_managed }}
 
 $TTL 86400
-$ORIGIN {{ bb_domain_name | default(dns_server_domain_name) }}.
+$ORIGIN {{ dns_server_domain_name | default(bb_domain_name, true) | default('cluster.local', true) }}.
 $INCLUDE "{{ dns_server_named_dir }}/forward.soa"
-@ IN NS {{ inventory_hostname }}.{{ bb_domain_name | default(dns_server_domain_name) }}.
+@ IN NS {{ inventory_hostname }}.{{ dns_server_domain_name | default(bb_domain_name, true) | default('cluster.local', true) }}.
 
 {# Macro to write host in file #}
 {% macro write_host(host,host_dict,host_j2_node_main_resolution_address) %}

@@ -30,7 +30,7 @@
 
   <timezone>
     <hwclock>UTC</hwclock>
-    <timezone>{{ bb_time_zone | default(pxe_stack_time_zone) }}</timezone>
+    <timezone>{{ pxe_stack_time_zone | default(bb_time_zone, true) | default('Europe/Brussels', true) }}</timezone>
   </timezone>
 
   <networking>
