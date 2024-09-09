@@ -1,0 +1,5 @@
+#jinja2: lstrip_blocks: True
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+
+{{ cloudinit_configuration | to_nice_yaml }}

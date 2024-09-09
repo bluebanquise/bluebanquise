@@ -1,0 +1,7 @@
+---
+cloudinit_configuration:
+  # Add groups to the system
+  groups: []
+  # Add users to the system.
+  users: []
+  # For all parameters, see cloud-init documentation
