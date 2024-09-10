@@ -54,7 +54,9 @@ echo " Proceeding..."
 sleep 1
 
 echo " Creating logs directory..."
-mkdir -p /var/log/bluebanquise/
+sudo mkdir -p /var/log/bluebanquise/
+sudo touch /var/log/bluebanquise/bootstrap
+sudo chown -R $USER: /var/log/bluebanquise/bootstrap
 echo "Starting new bootstrap at $(date)" >> /var/log/bluebanquise/bootstrap 2>&1 
 
 echo " Installing OS needed dependencies, could take some time..."
