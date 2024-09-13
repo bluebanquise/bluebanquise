@@ -1,0 +1,2 @@
+def coucou():
+    print("hohoho")
