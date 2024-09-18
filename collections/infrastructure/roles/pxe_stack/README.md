@@ -726,6 +726,7 @@ Note that using an home folder into /home for the bluebanquise sudo user can be 
 
 ## Changelog
 
+* 1.17.2: Fix python version for old systems. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.17.1: Fix global logic. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.17.0: Allow advanced custom iso paths. <jp.mazzilli@gmail.com> and <benoit.leveugle@gmail.com>
 * 1.16.5: Several fixes to bluebanquise-diskless (version 2.0.7). Giacomo Mc Evoy <gino.mcevoy@gmail.com>

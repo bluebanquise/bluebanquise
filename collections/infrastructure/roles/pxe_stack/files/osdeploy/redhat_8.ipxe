@@ -18,7 +18,7 @@ echo | > Target kickstart: ${eq-equipment-profile}.kickstart.cfg
 echo |
 echo | Loading linux ...
 
-kernel ${images-root}/${images-root-iso}/images/pxeboot/vmlinuz initrd=initrd.img inst.stage2=${images-root}/${images-root-iso}/ inst.repo=${images-root}/${images-root-iso}/BaseOS/ inst.ks=${kickstart-path} ${eq-console} ${eq-kernel-parameters} ${eq-kernel-aggressive-dhcp} ${dedicated-kernel-parameters} ipxe_next_server=${next-server} node_hostname=${hostname}
+kernel ${images-root}/${images-root-iso}/images/pxeboot/vmlinuz initrd=initrd.img inst.stage2=${images-root}/${images-root-iso}/ inst.repo=${images-root}/${images-root-iso}/BaseOS/ inst.addrepo=AppStream,${images-root}/${images-root-iso}/AppStream/ inst.ks=${kickstart-path} ${eq-console} ${eq-kernel-parameters} ${eq-kernel-aggressive-dhcp} ${dedicated-kernel-parameters} ipxe_next_server=${next-server} node_hostname=${hostname}
 
 echo | Loading initial ramdisk ...
 
