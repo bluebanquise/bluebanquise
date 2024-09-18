@@ -1,4 +1,3 @@
-[![Kofi](resources/pictures/kofi.png)](https://ko-fi.com/oxedions)
 # BlueBanquise
 ![BlueBanquise Logo](resources/pictures/BlueBanquise_logo_large.svg)
 
@@ -45,6 +44,17 @@ Note that few features are still limited on Ubuntu and Debian (mainly network co
 ## License
 
 BlueBanquise repository is under **MIT license**, except Bluebanquise documentation which is under **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License**.
+
+## Donate
+
+If you use and like BlueBanquise, please consider donating to the UNICEF (https://www.unicef.org/).
+
+<p align="center">
+  ![UNICEF Logo](resources/pictures/UNICEF_Logo.png)
+</p>
+
+I have a decent job, I don't need money, but they do.
+In the 21th century, it is a shame not all children live in peace.
 
 ## Quickstart
 
@@ -133,21 +143,18 @@ Currently tested and supported distributions (other derivative could work) are:
 |                         | Ubuntu                        | 20.04, 22.04, 24.04              | x86_64, arm64  | √. Diskless not supported for now.                          |
 |                         | Debian                        | 11, 12             |  x86_64, arm64                | √. Diskless not supported for now.  |
 | Suse                    |                               |                    |                  |                                                             |
-|                         | SLES                          | 15                 | x86_64, aarch64  | √. Diskless not supported for now.                                                           |
-|                         | OpenSuse Leap                 | 15                 | x86_64, aarch64  | √. Diskless not supported for now.          |
+|                         | SLES                          | 15.6                 | x86_64, aarch64  | √. Diskless not supported for now.                                                           |
+|                         | OpenSuse Leap                 | 15.6                 | x86_64, aarch64  | √. Diskless not supported for now.          |
 
-Ansible >= 4.10.0 is mandatory for BlueBanquise to run properly.
+ansible-core >= 2.16 is mandatory for BlueBanquise to run properly (it might work with earlier versions, but not tested).
 
 Please note that:
 
 * EL 7 systems (Centos 7, RHEL 7, etc.) is now considered best effort only as system is past EOL.
-* Ubuntu 18.04 and Suse 12 are no more supported (too old pythons, I miss the time to support them).
+* Ubuntu 18.04 and Suse 12 are no more supported (too old, I miss the time to support them).
+* OpenSuse Leap/SLES needs at least 15.6 now, since starting from ansible-core 2.17, Python 3.7 is mandatory, and 15.6 now brings Python 3.11 along the legacy 3.6. 
 
 ## The project
-
-BlueBanquise is part of the [**Algoric**](https://algoric.org/) project from the [**Fabrique du Loch**](https://www.lafabriqueduloch.org/fr/accueil/) FabLab, located in Brittany - France.
-
-![BlueBanquise Logo](resources/pictures/FabriqueDuLochAlgoric_logo_large.svg)
 
 It is a revamping of the old stack [Banquise](https://github.com/oxedions/banquise), based on Salt.
 
