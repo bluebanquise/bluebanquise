@@ -47,11 +47,9 @@ BlueBanquise repository is under **MIT license**, except Bluebanquise documentat
 
 ## Donate
 
-If you use and like BlueBanquise, please consider donating to the UNICEF (https://www.unicef.org/).
+If you use and like BlueBanquise, please consider donating to the **UNICEF** (https://www.unicef.org/).
 
-<p align="center">
-  ![UNICEF Logo](resources/pictures/UNICEF_Logo.png)
-</p>
+![UNICEF Logo](resources/pictures/UNICEF_Logo.png)
 
 I have a decent job, I don't need money, but they do.
 In the 21th century, it is a shame not all children live in peace.
