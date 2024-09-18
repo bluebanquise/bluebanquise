@@ -1,0 +1,10 @@
+#jinja2: lstrip_blocks: True
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+
+{% if cloudinit_boot_script is defined and cloudinit_boot_script is not none %}
+runcmd:
+  - 'echo {{ cloudinit_boot_script }} | base64 -d | /bin/bash'
+{% else %}
+{{ cloudinit_configuration | to_nice_yaml }}
+{% endif %}

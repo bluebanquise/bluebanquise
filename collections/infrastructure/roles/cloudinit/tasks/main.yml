@@ -1,0 +1,24 @@
+---
+- name: "package <|> Install cloud-init"
+  ansible.builtin.package:
+    name: "cloud-init"
+    state: present
+  tags:
+    - package
+
+- name: "template <|> Generate /etc/cloud/cloud.cfg"
+  ansible.builtin.template:
+    src: cloud.cfg.j2
+    dest: "/etc/cloud/cloud.cfg"
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - template
+
+- name: "service <|> Enable cloud-init state"
+  ansible.builtin.service:
+    name: "cloud-init"
+    enabled: "{{ (cloudinit_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+  tags:
+    - service
