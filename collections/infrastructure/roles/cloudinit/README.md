@@ -9,6 +9,24 @@ This is mostly used to execute post-installation tasks when a diskless node boot
 
 ## Instructions
 
+### Quick usage
+
+This role allows to simply pass a whole script to cloud init to execute it at boot.
+
+To do so, create variable `cloudinit_boot_script` and add your full script in bash, on multiple lines, this way (`|` character, then whole script is indented by 2).
+
+For example:
+
+```yaml
+cloudinit_boot_script: |
+  echo "Hello world" >> /tmp/hello
+  nmcli connection modify "Wired connection 1" ipv4.method manual ipv4.address 10.0.2.152/24 ipv4.gateway 10.0.2.1 ipv4.dns 10.0.2.1
+```
+
+The template will simply execute a runcmd cloud-init instruction to execute this script.
+
+### Standard usage
+
 The role will install cloud-init package, write its configuration, and enable the cloud-init service, but will not start the service.
 
 By default, configuration writen by the role will do nothing.
