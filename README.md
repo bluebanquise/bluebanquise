@@ -58,6 +58,8 @@ In the 21th century, it is a shame not all children live in peace.
 
 We will assume here you already have a recent Ansible setup and configured. If you are new to Ansible, you can use the [provided generic tutorial](http://bluebanquise.com/tutorials/sysadmin_ansible/).
 
+If you are aiming clients hosts with an old native Python version (RHEL 8 or OpenSuse Leap 15), be sure to cap your ansible-core pip package version to 2.16. 2.17 and more are no more compatible with Python 3.6.
+
 ### 1. Core variables and Jinja2 extensions
 
 In order to use BlueBanquise collections, you need the core variables, that contain the logic (BlueBanquise relies on a centralized logic to easily impact all roles at once).
@@ -150,7 +152,7 @@ Please note that:
 
 * EL 7 systems (Centos 7, RHEL 7, etc.) is now considered best effort only as system is past EOL.
 * Ubuntu 18.04 and Suse 12 are no more supported (too old, I miss the time to support them).
-* OpenSuse Leap/SLES needs at least 15.6 now, since starting from ansible-core 2.17, Python 3.7 is mandatory, and 15.6 now brings Python 3.11 along the legacy 3.6. 
+* RHEL 8 and OpenSuse Leap 15 need an ansible-core==2.16, 2.17+ is not compatible.
 
 ## The project
 

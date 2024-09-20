@@ -86,10 +86,6 @@ bootloader --append="{{ hostvars[groups[os_profile][0]]['os_kernel_parameters'] 
 %packages
 @core
 curl
-{% if (hostvars[groups[os_profile][0]]['os_operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version) ) | int == 8 %}
-{# Install newer python version for new ansible-core #}
-python3.11
-{% endif %}
 {% if not pxe_stack_enable_root %}
 sudo
 {% endif %}

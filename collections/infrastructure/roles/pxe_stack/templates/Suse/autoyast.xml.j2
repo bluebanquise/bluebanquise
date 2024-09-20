@@ -56,12 +56,6 @@
     </patterns>
     <packages config:type="list">
       <package>openssh-server</package>
-
-{% if (hostvars[groups[os_profile][0]]['os_operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version) ) | int == 8 %}
-{# Install newer python version for new ansible-core #}
-      <package>python311</package>
-{% endif %}
-
     {% if not pxe_stack_enable_root %}
       <package>sudo</package>
     {% endif %}
