@@ -726,6 +726,7 @@ Note that using an home folder into /home for the bluebanquise sudo user can be 
 
 ## Changelog
 
+* 1.17.3: Revert part of 1.17.2 adds, since not stable. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.17.2: Fix python version for old systems. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.17.1: Fix global logic. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.17.0: Allow advanced custom iso paths. <jp.mazzilli@gmail.com> and <benoit.leveugle@gmail.com>
