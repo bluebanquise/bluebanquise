@@ -1,9 +1,7 @@
 #jinja2: lstrip_blocks: True
-
 {% if hostvars[groups[os_profile][0]]['os_autoinstall_raw_file'] is defined %}
 {{ hostvars[groups[os_profile][0]]['os_autoinstall_raw_file'] }}
 {% else %}
-
 <?xml version="1.0"?>
 <!DOCTYPE profile>
 <profile xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http://www.suse.com/1.0/configns">
