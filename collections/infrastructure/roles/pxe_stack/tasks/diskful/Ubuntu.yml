@@ -76,7 +76,7 @@
   when:
     - (bb_equipments[item]['type'] | default(pxe_stack_hw_equipment_type)) == "server"
     - (hostvars[groups[bb_equipments[item]['os']][0]]['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution) | lower) in ['ubuntu']
-    - (hostvars[groups[bb_equipments[item]['os']][0]]['os_operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version) | int) in [20, 22]
+    - (hostvars[groups[bb_equipments[item]['os']][0]]['os_operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version) | int) in [20, 22, 24]
   tags:
     - file
 
@@ -94,7 +94,7 @@
   when:
     - (bb_equipments[item]['type'] | default(pxe_stack_hw_equipment_type)) == "server"
     - (hostvars[groups[bb_equipments[item]['os']][0]]['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution) | lower) in ['ubuntu']
-    - (hostvars[groups[bb_equipments[item]['os']][0]]['os_operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version) | int) in [20, 22]
+    - (hostvars[groups[bb_equipments[item]['os']][0]]['os_operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version) | int) in [20, 22, 24]
   tags:
     - file
 
@@ -112,7 +112,7 @@
   when:
     - (bb_equipments[item]['type'] | default(pxe_stack_hw_equipment_type)) == "server"
     - (hostvars[groups[bb_equipments[item]['os']][0]]['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution) | lower) in ['ubuntu']
-    - (hostvars[groups[bb_equipments[item]['os']][0]]['os_operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version) | int) in [20, 22]
+    - (hostvars[groups[bb_equipments[item]['os']][0]]['os_operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version) | int) in [20, 22, 24]
   tags:
     - template
 
@@ -130,6 +130,6 @@
   when:
     - (bb_equipments[item]['type'] | default(pxe_stack_hw_equipment_type)) == "server"
     - (hostvars[groups[bb_equipments[item]['os']][0]]['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution) | lower) in ['ubuntu']
-    - (hostvars[groups[bb_equipments[item]['os']][0]]['os_operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version) | int) in [20, 22]
+    - (hostvars[groups[bb_equipments[item]['os']][0]]['os_operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version) | int) in [20, 22, 24]
   tags:
     - template
