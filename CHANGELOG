@@ -2,6 +2,7 @@
 
 This is an attempt to better organise devs logs
 
+2024-09-23: Fix Ubuntu 24 support in pxe_stack
 2024-09-21: Add Ubuntu 24 support in pxe_stack
 2024-09-21: Fix multiple small issues in pxe_stack
 2024-09-21: Fix version of ansible-core to 2.16.11 max, to prevent issues with Python 3.6 OS

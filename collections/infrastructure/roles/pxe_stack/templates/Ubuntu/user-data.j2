@@ -29,6 +29,18 @@ autoinstall:
     users:
       - name: {{ pxe_stack_sudo_user }}
         homedir: {{ pxe_stack_sudo_user_home }}
+      {% if (hostvars[groups[os_profile][0]]['os_operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version) ) | int == 24 %}
+      {# Format is not exactly the same for Ubuntu 20/22 and Ubuntu 24 #}
+        ssh_authorized_keys:
+        {% for ssh_key in (hostvars[groups[os_profile][0]]['os_admin_ssh_keys'] | default(pxe_stack_os_admin_ssh_keys)) %}
+          - {{ ssh_key }}
+        {% endfor %}
+        {% if pxe_stack_sudo_is_passwordless %}
+        sudo: 'ALL=(ALL:ALL) NOPASSWD:ALL'
+        {% else %}
+        sudo: 'ALL=(ALL:ALL) ALL'
+        {% endif %}
+      {% else %}
         ssh-authorized-keys:
         {% for ssh_key in (hostvars[groups[os_profile][0]]['os_admin_ssh_keys'] | default(pxe_stack_os_admin_ssh_keys)) %}
           - {{ ssh_key }}
@@ -38,6 +50,7 @@ autoinstall:
         {% else %}
         sudo: ['ALL=(ALL:ALL) ALL']
         {% endif %}
+      {% endif %}
         groups: sudo
         shell: /bin/bash
         passwd: "{{ hostvars[groups[os_profile][0]]['os_admin_password_sha512'] | default(pxe_stack_os_admin_password_sha512) }}"
