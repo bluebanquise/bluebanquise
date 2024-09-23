@@ -1,5 +1,5 @@
 ---
-pxe_stack_role_version: 1.18.0
+pxe_stack_role_version: 1.18.1
 
 pxe_stack_supported_os:
   redhat:
