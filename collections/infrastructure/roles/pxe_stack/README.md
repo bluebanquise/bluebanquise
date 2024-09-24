@@ -726,6 +726,7 @@ Note that using an home folder into /home for the bluebanquise sudo user can be 
 
 ## Changelog
 
+* 1.18.2: Fix opensuse leap autoyast. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.18.1: Fix ubuntu 24.04 support. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.18.0: Add ubuntu 24.04 support. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.17.3: Revert part of 1.17.2 adds, since not stable. Benoit Leveugle <benoit.leveugle@gmail.com>
