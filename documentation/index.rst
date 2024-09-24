@@ -25,8 +25,8 @@ This documentation is under Creative Commons Attribution-NonCommercial-ShareAlik
    :caption: Contents:
    :numbered:
 
-   introduction
-   vocabulary
+   1_introduction
+   2_vocabulary
    configure_bluebanquise
    deploy_cluster
    multiple_icebergs
