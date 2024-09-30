@@ -23,7 +23,7 @@ echo '
     (/)_ (/)_ V_/_
 
     BlueBanquise bootstrap.
-    v 3.1.0
+    v 3.1.1
     Benoit Leveugle <oxedions@gmail.com>
 '
 echo -e "\e[39m"
@@ -70,7 +70,7 @@ fi
 echo " Proceeding..."
 sleep 1
 
-echo " Creating logs directory..."
+echo -n " Creating logs directory..."
 sudo mkdir -p /var/log/bluebanquise/
 sudo touch /var/log/bluebanquise/bootstrap
 sudo chown -R $USER: /var/log/bluebanquise/bootstrap
@@ -181,7 +181,9 @@ echo -e " \e[31mOK\e[0m"
 fi
 
 echo -n " Setting rights on /var/log/bluebanquise/..."
+(
 sudo chown -R bluebanquise:bluebanquise /var/log/bluebanquise/
+) >> /var/log/bluebanquise/bootstrap 2>&1
 echo -e " \e[31mOK\e[0m"
 
 echo
@@ -189,7 +191,7 @@ echo " Bootstrap done."
 echo " You can now login as bluebanquise user via 'sudo su - bluebanquise'"
 echo
 echo " To use BlueBanquise, remember to set Ansible environment variable:"
-echo " ANSIBLE_CONFIG=$HOME/bluebanquise/ansible.cfg"
+echo " ANSIBLE_CONFIG=\$HOME/bluebanquise/ansible.cfg"
 echo
 echo " You can find documentation at http://bluebanquise.com/documentation/"
 echo " You can ask for help or rise issues at https://github.com/bluebanquise/bluebanquise/"
