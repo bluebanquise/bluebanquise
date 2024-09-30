@@ -50,5 +50,6 @@ lustre_mounts:
 
 ## Changelog
 
+* 1.2.0: Added LNET configuration support for multi-rail. Lucas Santos <lucassouzasantos@gmail.com>
 * 1.0.1: Just a minor fix to mount filesystem o the role execution. Lucas Santos <lucassouzasantos@gmail.com>
 * 1.0.0: Role creation. Lucas Santos <lucassouzasantos@gmail.com>
