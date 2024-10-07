@@ -88,4 +88,5 @@ having applied first `repositories_client` role to ensure this new repository ha
 
 ## Changelog
 
+* 1.0.1: Simple bugfix on task calling. Lucas Santos <lucassouzasantos@gmail.com>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
