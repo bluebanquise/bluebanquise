@@ -15,6 +15,19 @@ I recoomend you to have on single file on the "all" group ( $HOME/bluebanquise/i
 to manage all the custom packages in the system, as the role will already filter the instalation by groups
 and normally will be more visible to have this on a single file
 
+Example of "custom_packages.yml" file:
+
+```yaml
+custom_packages:
+  mg_computes:
+    - openmpi
+  mg_logins:
+    - vim
+    - '@Development Tools'
+  equipment_typeGPU:
+    - htop
+```
+
 ## Changelog
 
 * 1.0.0: Role creation. Lucas Santos <lucassouzasantos@gmail.com>
