@@ -14,6 +14,7 @@ This collection regroups all roles related to basic deployment of nodes (servers
 * [roles/clustershell](roles/clustershell): configure and install clustershell (parallel shell).
 * [roles/conman](roles/conman): configure and install conman (IPMI consoles).
 * [roles/cron](roles/cron): configure cron rules.
+* [roles/custom_packages](roles/custom_packages): Manages the installation of custom additional packages on the system.
 * [roles/dhcp_server](roles/dhcp_server): configure and install a dhcp server.
 * [roles/dns_client](roles/dns_client): configure `/etc/resolv.conf`. Note that this role should not be used when using NetworkManager or systemd-networkd as this file is managed by these services.
 * [roles/dns_server](roles/dns_server): configure and install a dns server.
