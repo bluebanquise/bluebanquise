@@ -1,5 +1,5 @@
-  - name: "Install sequana packages"
-    yum:
-      name: "{{sequana_packages[item]}}"
-    with_items: "{{sequana_packages}}"
-    when: "'{{item}}' in group_names"
+- name: "Install sequana packages"
+  yum:
+    name: "{{sequana_packages[item]}}"
+  with_items: "{{sequana_packages}}"
+  when: "'{{item}}' in group_names"
