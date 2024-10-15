@@ -1,5 +1,5 @@
-- name: "Install sequana packages"
+- name: "Install custom packages"
   yum:
-    name: "{{sequana_packages[item]}}"
-  with_items: "{{sequana_packages}}"
+    name: "{{custom_packages[item]}}"
+  with_items: "{{custom_packages}}"
   when: "'{{item}}' in group_names"
