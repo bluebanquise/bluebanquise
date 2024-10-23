@@ -31,6 +31,7 @@ Tree execution mode is missing.
 
 ## Changelog
 
+* 1.4.0: Unnecessary leading comma in Clustershell template. Leo Magdanello <lmagdanello40@gmail.com>
 * 1.3.0: Add optional variable clustershell_prefix_path. Pierre Gay <pierre.gay@u-bordeaux.fr>, Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>
 * 1.2.0: Update to BB 2.0 format. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
