@@ -12,7 +12,18 @@
 
 # The imjournal module bellow is now used as a message source instead of imuxsock.
 $ModLoad imuxsock # provides support for local system logging (e.g. via logger command)
+{% if (rsyslog_format | default("legacy", none)) == "advanced" %}
+# See https://access.redhat.com/solutions/7070860
+module(load="imjournal"             # provides access to the systemd journal
+       UsePid="system" # PID nummber is retrieved as the ID of the process the journal entry originates from
+       FileCreateMode="0644" # Set the access permissions for the state file
+       StateFile="imjournal.state") # File to store the position in the journal
+{% else %}
 $ModLoad imjournal # provides access to the systemd journal
+
+# File to store the position in the journal
+$IMJournalStateFile imjournal.state
+{% endif %}
 
 
 #### GLOBAL DIRECTIVES ####
@@ -27,8 +38,7 @@ $ActionFileDefaultTemplate RSYSLOG_TraditionalFileFormat
 # local messages are retrieved through imjournal now.
 $OmitLocalLogging on
 
-# File to store the position in the journal
-$IMJournalStateFile imjournal.state
+
 
 # Include all config files in /etc/rsyslog.d/
 $IncludeConfig /etc/rsyslog.d/*.conf
