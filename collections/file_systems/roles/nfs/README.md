@@ -107,6 +107,7 @@ Optional values are:
 | network                | Network used to share this storage space. If not provided, server will export to all (`*`) and clients will mount using `server` value, not binding to any network |
 | export_options      | Arguments for the server (`export`). If no specified, will be `rw,sync,root_squash` |
 | mount_options       | Arguments for the client (`mount`). If no specified, will be `rw,fsc,nfsvers=4.2,bg,nosuid,nodev` |
+| server_group        | Group whose members will configure NFS as server. Useful for when using `server` parameter as virtual IP |
 
 Please refer to https://linux.die.net/man/5/nfs for detail on export and mount parameters available.
 
@@ -138,7 +139,7 @@ threads=8
 
 To get all available parameters, simple cat your `/etc/nfs.conf` file, and use https://man7.org/linux/man-pages/man5/nfs.conf.5.html as a documentation.
 
-It is for example higly recommended to increase threads value to an higher value in case of large number of clients. 32 threads is a good start, but if server is strong, you can 
+It is for example higly recommended to increase threads value to an higher value in case of large number of clients. 32 threads is a good start, but if server is strong, you can
 easily go to 64, 128 or even 256 threads if cluster is large.
 
 #### Manipulate mounts state
@@ -149,13 +150,14 @@ to get other possible values. This value can be important if using role in chroo
 
 #### SELinux
 
-By default, on SELinux capable and activated systems, the role will 
+By default, on SELinux capable and activated systems, the role will
 enable 2 sebooleans, one for /home support and one for httpd support.
-To change this behavior, simply update `nfs_client_sebooleans` variable 
+To change this behavior, simply update `nfs_client_sebooleans` variable
 which is a list of sebooleans to activate.
 
 ## Changelog
 
+* 1.4.5: Added parameter to run server in a group. Thiago Cardozo <boubee.thiago@gmail.com>
 * 1.4.4: Fix missing service for nfsv3 in RHEL firewall. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.3: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.2: Fix services names for Debian, Ubuntu and OpenSuse. Benoit Leveugle <benoit.leveugle@gmail.com>
