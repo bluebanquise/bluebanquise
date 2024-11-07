@@ -10,7 +10,7 @@ $ActionQueueSaveOnShutdown on # save messages to disk on shutdown
 $ActionQueueType LinkedList   # run asynchronously
 $ActionResumeRetryCount -1    # infinite retries if host is down
 {% if (rsyslog_format | default("legacy", none)) == "advanced" %}
-action(type="omfwd" target="{{ server_address }}" protocol="tcp" port="{{ server_port }}")
+Target="{{ server_address }}" Port="{{ server_port }}" Protocol="tcp"
 {% else %}
 *.* @@{{ server_address }}:{{ server_port }}
 {% endif %}
