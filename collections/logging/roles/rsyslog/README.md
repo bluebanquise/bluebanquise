@@ -10,6 +10,9 @@
 | OpenSuseLeap |      15 |    yes    |
 | Debian       |      11 |    yes    |
 
+Note: RHEL 9 tempalte now use a small part of the advanced format: https://www.rsyslog.com/doc/configuration/converting_to_new_format.html
+Role is expected to slowly move to this format in the future.
+
 ## Description
 
 This role provides an rsyslog configuration, for both server and client.
@@ -131,10 +134,13 @@ It uses variables:
 - **content**: the content of your configuration file, it can be single line or multiline
 - **path**: the directory containing your configuration file, it defaults to `/etc/rsyslog.d` if it is not specified
 
+It is important to understand that there are 2 reserved name for this variable.
+If you add an entry named `server.conf`, then the role will skip the generation of the server.conf file from the role template and replace it with your custom version. The same apply for `client.conf`, if set, then the role will skip the template of the role and only use the custom version.
+
 For example:
 
 ```yaml
-rsyslog_client_configuration_files:
+rsyslog_configuration_files:
   - name: local-rules.conf
     content: |
       *.info;mail.none;authpriv.none;cron.none                /var/log/messages
@@ -169,8 +175,18 @@ rsyslog_client_configuration_files:
       ...
 ```
 
+And to replace for example the server.conf file by a custom version:
+
+```yaml
+rsyslog_configuration_files:
+  - name: server.conf
+    content: |
+      foobar
+```
+
 ## Changelog
 
+* 1.6.1: Fix documentation and start move to advanced format for RHEL 9 version. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.6.0: Add rsyslog_server_ip4 to override network values. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.5.1: Fix typo in client template (reported by @sgaosdgr). Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.5.0: Allow services and services_ip together. Benoit Leveugle <benoit.leveugle@gmail.com>
