@@ -35,6 +35,7 @@ And possibly add more parameters if asked for:
 * StrictHostKeyChecking
 * UserKnownHostsFile
 * LogLevel
+* UseRoaming
 
 See advanced usage for these parameters.
 
@@ -83,6 +84,9 @@ It is possible to set specific parameters at global and/or nodes level:
 * StrictHostKeyChecking
 * UserKnownHostsFile
 * LogLevel
+* ForwardX11Trusted
+* StrictHostKeyChecking
+* UseRoaming
 
 To achieve that, the following variables are available:
 
@@ -90,6 +94,9 @@ To achieve that, the following variables are available:
 * ssh_client_global_stricthostkeychecking
 * ssh_client_global_userknownhostsfile
 * ssh_client_global_network
+* ssh_client_global_verifyhostkeydns
+* ssh_client_global_forwardx11trusted
+* ssh_client_global_useroaming
 
 Which are evaluated at global level
 
@@ -101,6 +108,9 @@ And:
 * ssh_client_loglevel
 * ssh_client_stricthostkeychecking
 * ssh_client_userknownhostsfile
+* ssh_client_verifyhostkeydns
+* ssh_client_forwardx11trusted
+* ssh_client_useroaming
 
 Which are evaluated for each host.
 
@@ -123,7 +133,7 @@ The ssh_master role allows to enable ssh ProxyJump to ssh from a top iceberg to
 hosts of a sub_iceberg, through one master of the sub_iceberg.
 This allows simple central point to ansible-playbook.
 
-Important note: this feature does not work on RHEL < 8 versions, has namespace 
+Important note: this feature does not work on RHEL < 8 versions, has namespace
 mechanism has been introduced with RHEL 8 Jinja2 version.
 
 To activate this feature, enable it first by adding in your inventory the
@@ -166,12 +176,16 @@ Optional inventory vars:
 * ssh_client_loglevel
 * ssh_client_stricthostkeychecking
 * ssh_client_userknownhostsfile
+* ssh_client_global_verifyhostkeydns
+* ssh_client_global_forwardx11trusted
 
 **hostvars[inventory_hostname]**
 
 * ssh_client_global_loglevel
 * ssh_client_global_stricthostkeychecking
 * ssh_client_global_userknownhostsfile
+* ssh_client_verifyhostkeydns
+* ssh_client_forwardx11trusted
 * ssh_master_enable_jump
 * ssh_master_iceberg_jump_target
 * ssh_master_custom_config
@@ -183,6 +197,7 @@ Optional inventory vars:
 
 ## Changelog
 
+* 1.2.4: Add extra config options. Thiago Cardozo <boubee.thiago@gmail.com>
 * 1.2.3: infrastructure/ssh_client role: set a default network <jean-pascal.mazzilli@gmail.com>
 * 1.2.2: Fixed ssh_client_userknownhostsfile host_vars. Leo Magdanello <lmagdanello40@gmail.com>
 * 1.2.1: Fixed sudo user home directory. Benoit Leveugle <benoit.leveugle@gmail.com>
