@@ -197,7 +197,7 @@ Optional inventory vars:
 
 ## Changelog
 
-* 1.2.4: Add extra config options. Thiago Cardozo <boubee.thiago@gmail.com>
+* 1.3.0: Add extra config options. Thiago Cardozo <boubee.thiago@gmail.com>
 * 1.2.3: infrastructure/ssh_client role: set a default network <jean-pascal.mazzilli@gmail.com>
 * 1.2.2: Fixed ssh_client_userknownhostsfile host_vars. Leo Magdanello <lmagdanello40@gmail.com>
 * 1.2.1: Fixed sudo user home directory. Benoit Leveugle <benoit.leveugle@gmail.com>
