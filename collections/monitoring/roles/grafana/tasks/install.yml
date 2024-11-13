@@ -2,16 +2,16 @@
 - name: install <|> Add grafana group
   ansible.builtin.group:
     name: grafana
-    gid: "{{ grafana_user_gid }}"
+    gid: "{{ grafana_user_gid | default(omit) }}"
     state: present
 
 - name: install <|> Add grafana user
   ansible.builtin.user:
     name: grafana
     shell: /bin/false
-    uid: "{{ grafana_user_uid }}"
+    uid: "{{ grafana_user_uid | default(omit) }}"
     group: grafana
-    home: "{{ grafana_user_home }}"
+    system: True
     state: present
 
 - name: install <|> Check for log file
@@ -22,8 +22,8 @@
 - name: install <|> Change log owner
   ansible.builtin.file:
     path: "{{ grafana_logs_dir }}"
-    owner: "{{ grafana_user_uid }}"
-    group: "{{ grafana_user_gid }}"
+    owner: "grafana"
+    group: "grafana"
   when: log_exists.stat.exists
 
 - name: "install <|> Add services to firewall's {{ grafana_firewall_zone | default('public') }} zone"
@@ -36,7 +36,22 @@
   when:
     - ansible_facts.os_family == "RedHat"
     - os_firewall | default(false) | bool
+    - grafana_port == grafana_default_port
   loop: "{{ grafana_firewall_services_to_add }}"
+  tags:
+    - firewall
+
+- name: "install ¦ Add custom grafana port to firewall's {{ grafana_firewall_zone | default('public') }} zone"
+  ansible.builtin.firewalld:
+    zone: "{{ grafana_firewall_zone | default('public') }}"
+    port: "{{ grafana_port }}/tcp"
+    immediate: "yes"
+    permanent: "yes"
+    state: enabled
+  when:
+    - ansible_facts.os_family == "RedHat"
+    - ep_firewall | default(false) | bool
+    - grafana_port != grafana_default_port
   tags:
     - firewall
 
