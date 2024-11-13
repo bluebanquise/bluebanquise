@@ -157,7 +157,7 @@ which is a list of sebooleans to activate.
 
 ## Changelog
 
-* 1.4.5: Fix skipping host if using IP as server. Added parameter to run server in a group. Thiago Cardozo <boubee.thiago@gmail.com>
+* 1.5.0: Fix skipping host if using IP as server. Added parameter to run server in a group. Thiago Cardozo <boubee.thiago@gmail.com>
 * 1.4.4: Fix missing service for nfsv3 in RHEL firewall. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.3: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.2: Fix services names for Debian, Ubuntu and OpenSuse. Benoit Leveugle <benoit.leveugle@gmail.com>
