@@ -9,14 +9,14 @@ GLOBAL log="/var/log/conman/%N.log"
 SERVER timestamp=1h
 GLOBAL logopts="timestamp"
 
-{% for equipment in bb_equipments %}
-  {% if equipment['hw']['hw_equipment_type'] is defined and equipment['hw']['hw_equipment_type'] == "server" %}
-    {% if equipment['hw']['hw_board_authentication'] is defined %}
+{% for equipment, equipment_vars in bb_equipments.items() %}
+  {% if equipment_vars['hw']['hw_equipment_type'] is defined and equipment_vars['hw']['hw_equipment_type'] == "server" %}
+    {% if equipment_vars['hw']['hw_board_authentication'] is defined %}
       {# Gather BMC credentials settings #}
-      {% set ipmi_bmc_user = (equipment['hw']['hw_board_authentication'] | selectattr('protocol','match','IPMI') | map(attribute='user') | list | first | default(none)) %}
-      {% set ipmi_bmc_password = (equipment['hw']['hw_board_authentication'] | selectattr('protocol','match','IPMI') | map(attribute='password') | list | first | default(none)) %}
+      {% set ipmi_bmc_user = (equipment_vars['hw']['hw_board_authentication'] | selectattr('protocol','match','IPMI') | map(attribute='user') | list | first | default(none)) %}
+      {% set ipmi_bmc_password = (equipment_vars['hw']['hw_board_authentication'] | selectattr('protocol','match','IPMI') | map(attribute='password') | list | first | default(none)) %}
       {% if ipmi_bmc_user is not none and ipmi_bmc_password is not none %}
-        {% for node in equipment['nodes'] %}
+        {% for node in equipment_vars['nodes'] %}
           {% if bb_nodes[node]['bmc']['ip4'] is defined %}
 console name="{{ node }}" dev="ipmitool.exp {{ bb_nodes[node]['bmc']['ip4'] }} {{ ipmi_bmc_user }} {{ ipmi_bmc_password }}"
           {% endif %}

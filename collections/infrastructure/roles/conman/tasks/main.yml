@@ -23,7 +23,7 @@
   tags:
     - always
 
-# Roles transverse variables caching
+##### Roles transverse variables caching
 - name: fact <|> Calculate bb_nodes
   ansible.builtin.set_fact:
     bb_nodes: "{{ j2_bb_nodes }}"
@@ -36,7 +36,6 @@
   ansible.builtin.debug:
     msg: "{{ bb_nodes }}"
   tags:
-    - never
     - debug
 
 - name: fact <|> Calculate bb_nodes_profiles
@@ -51,7 +50,6 @@
   ansible.builtin.debug:
     msg: "{{ bb_nodes_profiles }}"
   tags:
-    - never
     - debug
 
 - name: fact <|> Calculate bb_equipments
@@ -66,9 +64,8 @@
   ansible.builtin.debug:
     msg: "{{ bb_equipments }}"
   tags:
-    - never
     - debug
-#
+#####
 
 - name: "package <|> Install {{ conman_packages_to_install | join(' ') }} packages"
   ansible.builtin.package:

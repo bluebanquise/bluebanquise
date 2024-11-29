@@ -1,0 +1,39 @@
+##### Roles transverse variables caching
+- name: fact <|> Calculate bb_nodes
+  ansible.builtin.set_fact:
+    bb_nodes: "{{ j2_bb_nodes }}"
+  run_once: true
+  when: bb_nodes is not defined or bb_nodes is none
+  tags:
+    - templates
+
+- name: debug <|> Display bb_nodes
+  ansible.builtin.debug:
+    msg: "{{ bb_nodes }}"
+  when: bb_debug is defined and bb_debug == true
+
+- name: fact <|> Calculate bb_nodes_profiles
+  ansible.builtin.set_fact:
+    bb_nodes_profiles: "{{ j2_bb_nodes_profiles }}"
+  run_once: true
+  when: bb_nodes_profiles is not defined or bb_nodes_profiles is none
+  tags:
+    - templates
+
+- name: debug <|> Display bb_nodes_profiles
+  ansible.builtin.debug:
+    msg: "{{ bb_nodes_profiles }}"
+  when: bb_debug is defined and bb_debug == true
+
+- name: fact <|> Calculate bb_equipments
+  ansible.builtin.set_fact:
+    bb_equipments: "{{ j2_bb_equipments }}"
+  run_once: true
+  when: bb_equipments is not defined or bb_equipments is none
+  tags:
+    - templates
+
+- name: debug <|> Display bb_equipments
+  ansible.builtin.debug:
+    msg: "{{ bb_equipments }}"
+  when: bb_debug is defined and bb_debug == true

@@ -4,6 +4,11 @@
 
 include "/etc/powerman/ipmipower.dev"
 
+{% if j2_bb_equipments is defined and j2_bb_equipments is mapping %}
+
+
+
+
 {% set range = (j2_hosts_range | sort) %}
 
 {% for equipment in j2_equipment_groups_list %}

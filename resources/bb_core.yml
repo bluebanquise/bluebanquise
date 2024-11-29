@@ -62,33 +62,35 @@ j2_node_main_address: "{{ network_interfaces[j2_node_main_network].ip4 | default
 #     node_main_resolution_address: 10.10.3.1
 # This is a transverse j2 (j2_bb_), used as a cache fact
 # An optimisation is made so that icebergs_main_network_dict is only calculated for management nodes (because its slow)
+# Note for me: TODO icebergs_main_network_dict must disapear, find how.
 j2_bb_nodes: "{%- set bnodes = {} -%}
 {% set mgt = groups['fn_management'] %}
 {%- for host in j2_hosts_range -%}
+  {% set hostvars_buffer = hostvars[host] %}
   {%- if host in mgt -%}
     {%- do bnodes.update({
     host: {
-      'network_interfaces': hostvars['network_interfaces'] | default(none, true),
-      'node_main_resolution_address': hostvars['j2_node_main_resolution_address'] | default(none, true),
-      'current_iceberg': hostvars['j2_current_iceberg'] | default(none, true),
-      'current_herd': hostvars['j2_current_herd'] | default(none, true),
-      'icebergs_main_network_dict': hostvars['j2_icebergs_main_network_dict'] | default({}, true),
-      'bmc': hostvars['bmc'] | default(none, true),
-      'alias': hostvars['alias'] | default(none, true),
-      'global_alias': hostvars['alias'] | default(none, true)
+      'network_interfaces': hostvars_buffer['network_interfaces'] | default(none, true),
+      'node_main_resolution_address': hostvars_buffer['j2_node_main_resolution_address'] | default(none, true),
+      'current_iceberg': hostvars_buffer['j2_current_iceberg'] | default(none, true),
+      'current_herd': hostvars_buffer['j2_current_herd'] | default(none, true),
+      'icebergs_main_network_dict': hostvars_buffer['j2_icebergs_main_network_dict'] | default({}, true),
+      'bmc': hostvars_buffer['bmc'] | default(none, true),
+      'alias': hostvars_buffer['alias'] | default(none, true),
+      'global_alias': hostvars_buffer['alias'] | default(none, true)
     }
   }) -%}
   {%- else -%}
     {%- do bnodes.update({
     host: {
-      'network_interfaces': hostvars['network_interfaces'] | default(none, true),
-      'node_main_resolution_address': hostvars['j2_node_main_resolution_address'] | default(none, true),
-      'current_iceberg': hostvars['j2_current_iceberg'] | default(none, true),
-      'current_herd': hostvars['j2_current_herd'] | default(none, true),
+      'network_interfaces': hostvars_buffer['network_interfaces'] | default(none, true),
+      'node_main_resolution_address': hostvars_buffer['j2_node_main_resolution_address'] | default(none, true),
+      'current_iceberg': hostvars_buffer['j2_current_iceberg'] | default(none, true),
+      'current_herd': hostvars_buffer['j2_current_herd'] | default(none, true),
       'icebergs_main_network_dict': {},
-      'bmc': hostvars['bmc'] | default(none, true),
-      'alias': hostvars['alias'] | default(none, true),
-      'global_alias': hostvars['alias'] | default(none, true)
+      'bmc': hostvars_buffer['bmc'] | default(none, true),
+      'alias': hostvars_buffer['alias'] | default(none, true),
+      'global_alias': hostvars_buffer['alias'] | default(none, true)
     }
   }) -%}
   {%- endif -%}

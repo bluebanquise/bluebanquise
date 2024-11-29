@@ -5,6 +5,8 @@
 This role provides a standard and simple dhcp server combined with the iPXE roms of BlueBanquise.
 It should be enough for most networks.
 
+Note: the current role uses ISC DHCP. The role should move to Kea dhcp soon.
+
 ## Data Model
 
 This role relies on [data model](https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md):
@@ -219,6 +221,7 @@ This allows for example to have an heterogenous cluster, with a group of hosts b
 
 ## Changelog
 
+* 1.8.0: Rewrite code for 3.2 format. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.7.1: Fix global logic. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.7.0: Allow services and services_ip together. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.6.3: Fix double character for ipxe rom. Benoit Leveugle <benoit.leveugle@gmail.com>

@@ -101,21 +101,24 @@
 {%- endmacro %}
 
 {###############################################################################
-  Main iteration over hosts
+  Main iteration over equipments, to share ipxe values
 ###############################################################################}
-{%- for host in (j2_hosts_range | sort) %}
-  {% set current_hostvars = hostvars[host] %}{# buffer, avoid calls to hostvars #}
-  {% if current_hostvars['network_interfaces'] is defined and current_hostvars['network_interfaces'] is iterable and current_hostvars['network_interfaces'] is not mapping and current_hostvars['network_interfaces'] is not string %}
-    {% for nic in current_hostvars['network_interfaces'] %}
-      {%- if nic.network is defined and nic.network == item and nic.ip4 is defined and (nic.ip4 | ansible.utils.ipaddr) %}
-{{ write_host(host, nic, current_hostvars['hw_ipxe_driver'] | default(None, true), current_hostvars['hw_ipxe_embed'] | default(None, true), current_hostvars['hw_pxe_filename'] | default(None, true)) }}
-      {% endif %}
-    {% endfor %}
-  {% endif %}
-  {%- if current_hostvars['bmc'] is defined %}
-    {% set bmc_args = current_hostvars['bmc'] %}
-    {% if bmc_args.network is defined and bmc_args.network == item and (bmc_args.name is defined and bmc_args.name is not none) and (bmc_args.mac is defined and (bmc_args.mac | ansible.utils.hwaddr)) and (bmc_args.ip4 is defined and (bmc_args.ip4 | ansible.utils.ipaddr)) %}
-{{ write_host(bmc_args.name, bmc_args, None, None, None) }}
+{% for equipment, equipment_vars in bb_equipments.items() %}
+  {% set hw_ipxe_driver = (equipment_vars['hw']['hw_ipxe_driver'] | default(none, true)) %}
+  {% set hw_ipxe_embed = (equipment_vars['hw']['hw_ipxe_embed'] | default(none, true)) %}
+  {% set hw_pxe_filename = (equipment_vars['hw']['hw_pxe_filename'] | default(none, true)) %}
+  {% for node in equipment_vars['nodes'] %}
+    {% set node_interfaces = bb_nodes[node]['network_interfaces'] %}{# Reduce calls to a large dict #}
+    {% if node_interfaces is iterable and node_interfaces is not mapping and node_interfaces is not string %}
+      {% for nic in node_interfaces %}
+        {% if nic.network is defined and nic.network == item and nic.ip4 is defined and (nic.ip4 | ansible.utils.ipaddr) %}
+{{ write_host(host, nic, hw_ipxe_driver, hw_ipxe_embed, hw_pxe_filename) }}
+        {% endif %}
+      {% endfor %}
     {% endif %}
-  {% endif %}
+    {% set bmc_args = bb_nodes[node]['bmc'] %}
+    {% if bmc_args.network is defined and bmc_args.network == item and (bmc_args.name is defined and bmc_args.name is not none) and (bmc_args.mac is defined and (bmc_args.mac | ansible.utils.hwaddr)) and (bmc_args.ip4 is defined and (bmc_args.ip4 | ansible.utils.ipaddr)) %}
+{{ write_host(bmc_args.name, bmc_args, none, none, none) }}
+    {% endif %}
+  {% endfor %}
 {% endfor %}
