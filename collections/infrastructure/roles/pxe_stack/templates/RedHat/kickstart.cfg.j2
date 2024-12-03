@@ -112,7 +112,7 @@ set -x
 {% if pxe_stack_enable_root %}
 
 # Ensure root login is enabled via ssh
-sed -i 's/^.*PermitRootLogin.*$/PermitRootLogin\ yes/' /etc/ssh/sshd_config
+sed -i "s/^#PermitRootLogin.*\$/PermitRootLogin yes/g" /etc/ssh/sshd_config
 # Add ssh keys from ssh_keys list
 mkdir /root/.ssh
 cat << xxEOFxx >> /root/.ssh/authorized_keys
@@ -125,7 +125,7 @@ restorecon -R -v /root/.ssh
 
 {% else %}
 # Ensure no root login is enabled via ssh
-sed -i 's/^.*PermitRootLogin.*$/PermitRootLogin\ no/' /etc/ssh/sshd_config
+sed -i "s/^#PermitRootLogin.*\$/PermitRootLogin no/g" /etc/ssh/sshd_config
 # Add ssh keys from ssh_keys list
 mkdir {{ pxe_stack_sudo_user_home }}/.ssh
 cat << xxEOFxx >> {{ pxe_stack_sudo_user_home }}/.ssh/authorized_keys

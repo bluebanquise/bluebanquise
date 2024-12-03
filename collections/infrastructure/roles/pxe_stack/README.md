@@ -189,7 +189,7 @@ However, an host CANNOT be in 2 hardware or os groups at the same time. Create a
 
 Lets take as an example a cluster with 2 kind of servers, one kind based on Ubuntu 22.04 with GPUs (hosts c1 to c10) and another one based on RHEL 9 for CPU only (hosts c11 to c100), and both based on the same server hardware (ASUS_G9).
 
-This will mean 2 virtual equipment profiles : 
+This will mean 2 virtual equipment profiles :
 
 * `hw_ASUS_G9_with_os_ubuntu_22.04_GPU`
 * `hw_ASUS_G9_with_os_rhel9`
@@ -550,7 +550,7 @@ Remember to skip "identify" and "secret" tags:
 
 ```
 ansible-playbook --become --skip-tags identify,secret /path/to/playbook.yml
-``` 
+```
 
 ##### Using chroot
 
@@ -614,7 +614,7 @@ If using BlueBanquise roles, simply apply playbook with missing tags:
 
 ```
 ansible-playbook --become --tags identify,secret /path/to/playbook.yml
-```  
+```
 
 #### Debug and errors
 
@@ -645,7 +645,7 @@ It is possible to see that this even fail with nfs 4.2 mount:
  Flags: rw,relatime,vers=4.2,rsize=1048576,wsize=1048576,namlen=255,hard,proto=tcp,timeo=600,retrans=2,sec=sys,clientaddr=10.10.0.8,local_lock=none,addr=10.10.0.1
 [bluebanquise@c001 ~]$
 ```
- 
+
 Solution is to install the failing package using chroot method on NFS server:
 
 ```
@@ -726,6 +726,7 @@ Note that using an home folder into /home for the bluebanquise sudo user can be 
 
 ## Changelog
 
+* 1.18.3: Fix dublicated PermitRootLogin in RH sshd_config. Thiago Cardozo <boubee.thiago@gmail.com>
 * 1.18.2: Fix opensuse leap autoyast. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.18.1: Fix ubuntu 24.04 support. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.18.0: Add ubuntu 24.04 support. Benoit Leveugle <benoit.leveugle@gmail.com>
