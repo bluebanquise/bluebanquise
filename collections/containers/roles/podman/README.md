@@ -123,7 +123,7 @@ podman_local_registry_group: "root"
 
 ## Changelog
 
-* 2.0.0: Updated registry format to new format;Restart service with handlers. Thiago Cardozo <boubee.thiago@gmail.com>
+* 2.0.0: Updated registry format;Use handlers;Replace libpod.conf. Thiago Cardozo <boubee.thiago@gmail.com>
 * 1.0.3: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.2: Fix services to match bb 2.0 format. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.1: Use slirp4netns to avoid error with HA. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
