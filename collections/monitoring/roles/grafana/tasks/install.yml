@@ -42,7 +42,7 @@
     - firewall
 
 - name: "install ¦ Add custom grafana port to firewall's {{ grafana_firewall_zone | default('public') }} zone"
-  ansible.builtin.firewalld:
+  ansible.posix.firewalld:
     zone: "{{ grafana_firewall_zone | default('public') }}"
     port: "{{ grafana_port }}/tcp"
     immediate: "yes"
