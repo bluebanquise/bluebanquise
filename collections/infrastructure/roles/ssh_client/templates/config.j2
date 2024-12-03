@@ -15,6 +15,15 @@ Host {{ host }}
     {% if host_vars['ssh_client_loglevel'] is defined and host_vars['ssh_client_loglevel'] is not none %}
     LogLevel {{ host_vars['ssh_client_loglevel'] }}
     {% endif %}
+    {% if host_vars['ssh_client_verifyhostkeydns'] is defined and host_vars['ssh_client_verifyhostkeydns'] is not none %}
+    VerifyHostKeyDNS {{ host_vars['ssh_client_verifyhostkeydns'] }}
+    {% endif %}
+    {% if host_vars['ssh_client_forwardx11trusted'] is defined and host_vars['ssh_client_forwardx11trusted']is not none %}
+    ForwardX11Trusted {{ host_vars['ssh_client_forwardx11trusted'] }}
+    {% endif %}
+    {% if host_vars['ssh_client_useroaming'] is defined and host_vars['ssh_client_useroaming']is not none %}
+    UseRoaming {{ host_vars['ssh_client_useroaming'] }}
+    {% endif %}
     {% if ssh_jump is none %}
       {% set host_to_be_used_network = ssh_client_global_network  | default(host_vars['j2_icebergs_main_network_dict'][j2_current_iceberg], true) | default(none, true) %}
     Hostname %h{% if host_to_be_used_network is not none %}-{{ host_to_be_used_network }}{% endif %}
@@ -31,7 +40,7 @@ Host {{ host }}
 {% endif %}
 
 # Global parameters
-{% if ssh_client_global_stricthostkeychecking is not none or ssh_client_global_userknownhostsfile is not none or ssh_client_global_loglevel is not none %}
+{% if ssh_client_global_stricthostkeychecking is not none or ssh_client_global_userknownhostsfile is not none or ssh_client_global_loglevel is not none or ssh_client_global_verifyhostkeydns is not none or ssh_client_global_forwardx11trusted is not none %}
 Host *
   {% if ssh_client_global_stricthostkeychecking is not none %}
     StrictHostKeyChecking {{ ssh_client_global_stricthostkeychecking }}
@@ -41,6 +50,15 @@ Host *
   {% endif %}
   {% if ssh_client_global_loglevel is not none %}
     LogLevel {{ ssh_client_global_loglevel }}
+  {% endif %}
+  {% if ssh_client_global_verifyhostkeydns is not none %}
+    VerifyHostKeyDNS {{ ssh_client_global_verifyhostkeydns }}
+  {% endif %}
+  {% if ssh_client_global_forwardx11trusted is not none %}
+    ForwardX11Trusted {{ ssh_client_global_forwardx11trusted }}
+  {% endif %}
+  {% if host_vars['ssh_client_global_useroaming'] is defined and host_vars['ssh_client_global_useroaming']is not none %}
+    UseRoaming {{ host_vars['ssh_client_global_useroaming'] }}
   {% endif %}
 {% endif %}
 
