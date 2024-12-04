@@ -27,6 +27,11 @@ $INCLUDE "{{ dns_server_named_dir }}/forward.soa"
           {% if nic.alias is defined %}
 {{ nic.alias }} IN A {{ nic.ip4 }}
           {% endif %}
+          {% if nic['dns_alias'] is defined and nic['dns_alias'] %}
+            {% for dns_alias in nic['dns_alias'] %}
+{{ dns_alias }} IN A {{ nic.ip4 }}
+            {% endfor %}
+          {% endif %}
         {% endif %}
       {% endfor %}
     {% endif %}
