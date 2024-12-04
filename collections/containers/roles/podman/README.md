@@ -41,6 +41,7 @@ Variables for this role:
 | podman_insecure_registries | [] | items | non TLS registries for podman, i.e. localhost:5000 |
 | podman_blocked_registries | [] | items | blocked container registries |
 | podman_local_registry_dir | "/var/lib/registry" | String | default local registry path when enabled |
+| podman_local_registry_host| localhost | String | Registry host, useful for having a registry in HA
 | podman_local_registry_port | 5000 | integer | port of the local registry when enabled |
 | podman_registry_container_path | /var/www/html/images/registry-2.tgz | String | path of the container used to spawn to default local registry when enabled |
 | podman_conf_cgroup_manager | 'systemd' | string | /etc/container/libpod.conf: cgroup_manager |
@@ -109,6 +110,7 @@ podman_search_registries:
 podman_insecure_registries:
   - 'localhost:5000'
 podman_local_registry_dir: "/var/lib/registry"
+podman_local_registry_host: localhost
 podman_local_registry_port: 5000
 podman_registry_container_path: "/var/www/html/images/registry-2.tgz"
 podman_registry_container: "registry"
