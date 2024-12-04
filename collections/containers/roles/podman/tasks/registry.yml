@@ -7,11 +7,6 @@
     group: "{{ podman_local_registry_group | default(root) }}"
     mode: '0644'
 
-- name: registry <|> Check the path of the registry container
-  ansible.builtin.stat:
-    path: "{{ podman_registry_container_path }}"
-  register: p
-
 - name: registry <|> Load local registry container
   ansible.builtin.command: "podman load -i {{ podman_registry_container_path }}"
   changed_when: false
@@ -35,14 +30,14 @@
     group: root
     force: true
     mode: 0655
+  notify:
+    - systemd ¦ Reload systemd configuration
+    - service ¦ Restart registry container service
   tags:
     - service
 
-- name: systemd <|> Reload systemd
-  ansible.builtin.systemd:
-    daemon_reload: true
-  tags:
-    - service
+- name: meta ¦ Run handler tasks
+  ansible.builtin.meta: flush_handlers
 
 - name: service <|> Manage registry state
   ansible.builtin.service:
