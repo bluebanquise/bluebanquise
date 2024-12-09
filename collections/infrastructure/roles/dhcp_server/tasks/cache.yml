@@ -10,7 +10,7 @@
 - name: debug <|> Display bb_nodes
   ansible.builtin.debug:
     msg: "{{ bb_nodes }}"
-  when: bb_debug is defined and bb_debug == true
+  when: bb_debug is defined
 
 - name: fact <|> Calculate bb_nodes_profiles
   ansible.builtin.set_fact:
@@ -23,7 +23,7 @@
 - name: debug <|> Display bb_nodes_profiles
   ansible.builtin.debug:
     msg: "{{ bb_nodes_profiles }}"
-  when: bb_debug is defined and bb_debug == true
+  when: bb_debug is defined
 
 - name: fact <|> Calculate bb_equipments
   ansible.builtin.set_fact:
@@ -36,4 +36,4 @@
 - name: debug <|> Display bb_equipments
   ansible.builtin.debug:
     msg: "{{ bb_equipments }}"
-  when: bb_debug is defined and bb_debug == true
+  when: bb_debug is defined

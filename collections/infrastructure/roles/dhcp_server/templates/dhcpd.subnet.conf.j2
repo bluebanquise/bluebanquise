@@ -108,11 +108,12 @@
   {% set hw_ipxe_embed = (equipment_vars['hw']['hw_ipxe_embed'] | default(none, true)) %}
   {% set hw_pxe_filename = (equipment_vars['hw']['hw_pxe_filename'] | default(none, true)) %}
   {% for node in equipment_vars['nodes'] %}
-    {% set node_interfaces = bb_nodes[node]['network_interfaces'] %}{# Reduce calls to a large dict #}
+    {% set node_interfaces = bb_nodes[node]['network_interfaces'] | default([], true)%}{# Reduce calls to a large dict #}
     {% if node_interfaces is iterable and node_interfaces is not mapping and node_interfaces is not string %}
       {% for nic in node_interfaces %}
         {% if nic.network is defined and nic.network == item and nic.ip4 is defined and (nic.ip4 | ansible.utils.ipaddr) %}
-{{ write_host(host, nic, hw_ipxe_driver, hw_ipxe_embed, hw_pxe_filename) }}
+{{ node }}
+{{ write_host(node, nic, hw_ipxe_driver, hw_ipxe_embed, hw_pxe_filename) }}
         {% endif %}
       {% endfor %}
     {% endif %}
