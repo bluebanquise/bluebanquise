@@ -135,6 +135,7 @@ j2_bb_nodes_profiles: "{%- set bnodes_profiles = {} -%}
 # This is a transverse j2 (j2_bb_), used as a cache fact
 # It is expected that the dependency fact be bb_nodes_profiles
 # If the dependency fact was not already cached, it will not be used but that implies longuer calculations
+# generic equipment does not inherit any hw or os values, so should rely on the roles default ones
 j2_bb_equipments: "{%- set bequipments = {} -%}
 {%- if bb_nodes_profiles is defined -%}
   {%- set bnodes_profiles = bb_nodes_profiles -%}
@@ -157,6 +158,11 @@ j2_bb_equipments: "{%- set bequipments = {} -%}
       {%- do bequipments.update({host_keys['ep']: {'nodes': [], 'hw': hw_settings, 'os': os_settings}}) -%}
     {%- endif -%}
 {{ bequipments[host_keys['ep']]['nodes'].append(host) }}
+  {%- else -%}
+    {%- if 'generic' not in bequipments -%}
+      {%- do bequipments.update({'generic': {'nodes': [], 'hw': {}, 'os': {}}}) -%}
+    {%- endif -%}
+{{ bequipments['generic']['nodes'].append(host) }}
   {%- endif -%}
 {%- endfor -%}
 {{ bequipments }}"
