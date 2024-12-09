@@ -23,7 +23,7 @@ dhcp_server_ipxe_embed: dhcpretry
 
 ### Others ###
 # Domain name provided by dhcp to clients
-dhcp_server_domain_name: cluster.local
+dhcp_server_domain_name:
 
 # Specific settings
 # Consider setting to true if using match patterns

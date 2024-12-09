@@ -40,6 +40,12 @@
     - internal
     - firewall
 
+- name: include_tasks <|> bb cache
+  ansible.builtin.include_tasks: "cache.yml"
+  tags:
+    - templates
+  when: bb_nodes is not defined or bb_nodes is none or bb_nodes_profiles is not defined or bb_nodes_profiles is none or bb_equipments is not defined or bb_equipments is none
+
 - name: "package <|> Install {{ dhcp_server_packages_to_install | join(' ') }}"
   ansible.builtin.package:
     name: "{{ dhcp_server_packages_to_install }}"
