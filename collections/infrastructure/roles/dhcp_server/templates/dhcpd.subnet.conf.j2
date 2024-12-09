@@ -112,7 +112,6 @@
     {% if node_interfaces is iterable and node_interfaces is not mapping and node_interfaces is not string %}
       {% for nic in node_interfaces %}
         {% if nic.network is defined and nic.network == item and nic.ip4 is defined and (nic.ip4 | ansible.utils.ipaddr) %}
-{{ node }}
 {{ write_host(node, nic, hw_ipxe_driver, hw_ipxe_embed, hw_pxe_filename) }}
         {% endif %}
       {% endfor %}
