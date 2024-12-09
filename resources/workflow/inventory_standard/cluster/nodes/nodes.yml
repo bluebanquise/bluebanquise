@@ -1,6 +1,17 @@
 all:
   hosts:
 
+    iamtoobutwithnic:
+      bmc:
+        name: biamtoobutwithnic
+        ip4: 10.10.100.77
+        network: net-admin
+        mac: aa:2b:3c:4d:5e:6f
+      network_interfaces:
+        - interface: dummy0 # enp2s0
+          ip4: 10.10.0.77
+          network: net-admin
+          mac: aa:2b:3c:4d:1e:9f
     # Management nodes
     mgt1:
       bmc:

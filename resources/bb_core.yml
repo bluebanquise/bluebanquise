@@ -9,6 +9,7 @@ bb_core_hw_naming: 'hw'
 bb_core_management_networks_naming: 'net'
 bb_core_master_groups_naming: 'fn'
 bb_core_managements_group_name: 'fn_management'
+bb_core_herd_naming: 'herd'
 
 #############################################################
 ############ J2_ LOGIC

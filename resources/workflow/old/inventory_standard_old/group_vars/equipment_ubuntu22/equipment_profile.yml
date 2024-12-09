@@ -1,6 +1,0 @@
-ep_equipment_type: server
-
-ep_operating_system:
-  distribution: "ubuntu"
-  distribution_version: "22.04"
-  distribution_major_version: "22"
