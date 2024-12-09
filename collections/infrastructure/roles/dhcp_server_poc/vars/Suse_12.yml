@@ -1,0 +1,16 @@
+---
+
+#
+# Note: you will need to install the netaddr module for
+# Python 3.6 e.g. via pip which as it is not available
+# under SLES 12.
+#
+
+dhcp_server_packages_to_install:
+  - dhcp-server
+dhcp_server_services_to_start:
+  - dhcpd
+dhcp_server_firewall_services_to_add:
+  - dhcp
+dhcp_server_conf_file: /etc/dhcpd.conf
+dhcp_server_conf_dir: /etc/dhcpd.d

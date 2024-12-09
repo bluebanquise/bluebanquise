@@ -42,7 +42,7 @@ subnet {{ networks[network]['subnet'] }} netmask {{ (networks[network]['subnet']
   {% if networks[network]['dhcp_unknown_range'] is defined and networks[network]['dhcp_unknown_range'] is not none %}
   range {{ networks[network]['dhcp_unknown_range'] }};
   {% endif %}
-  option domain-name "{{ dhcp_server_domain_name | default(bb_domain_name, true) | default('cluster.local', true) }}";
+  option domain-name "{{ bb_domain_name | default(dhcp_server_domain_name) }}";
   option broadcast-address {{ (networks[network]['subnet'] + '/' + (networks[network]['prefix'] | string) ) | ansible.utils.ipaddr('broadcast') }};
   {% if (networks[network]['gateway4'] | default(networks[network]['gateway'], true)) is defined %}
     {% if (networks[network]['gateway4'] | default(networks[network]['gateway'], true)) is string %}
