@@ -199,7 +199,7 @@ prometheus_server_custom_alerts: !unsafe >
           summary: "Host out of memory (instance {{ $labels.instance }})"
           description: "Node memory is filling up (< 10% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
       - alert: HostOutOfInodes
-        expr: node_filesystem_files_free{mountpoint ="/rootfs"} / node_filesystem_files{mountpoint="/rootfs"} * 100 < 10 and ON (instance, device, mountpoint) node_filesystem_readonly{mountpoint="/rootfs"} == 0                              
+        expr: node_filesystem_files_free{mountpoint ="/rootfs"} / node_filesystem_files{mountpoint="/rootfs"} * 100 < 10 and ON (instance, device, mountpoint) node_filesystem_readonly{mountpoint="/rootfs"} == 0
         for: 2m
         labels:
           severity: warning
@@ -315,7 +315,7 @@ prometheus_exporters_to_scrape:
 Server side will scrap these exporters on all the nodes of the group, while
 client side will install them on all nodes of the group.
 
-It is important to understand that the client side of the role is capable of 
+It is important to understand that the client side of the role is capable of
 generating everything needed by an exporter binary: service file, users, working dir, etc.
 The role will generate these elements depending of the variables present.
 The list of capabilities is described after the example.
@@ -401,7 +401,7 @@ prometheus_server_manage_snmp: false
 ```
 
 You then need to specify which hardware groups of nodes have to be
-ipmi scraped. To do so, simply set the global variable `prometheus_ipmi_scrape_hardware_groups` 
+ipmi scraped. To do so, simply set the global variable `prometheus_ipmi_scrape_hardware_groups`
 in the default *inventory/group_vars/all/prometheus.yml* file:
 
 ```yaml
@@ -582,6 +582,40 @@ prometheus.conf file using the following multi lines variable:
 ```yaml
 prometheus_server_prometheus_raw_configuration:
 ```
+### Access Prometheus behind a reverse proxy
+
+It is possible to configure Prometheus to listen at a URL with a prefix, in order to simplify the configuration of a reverse proxy. To listen at :9090/prometheus, set the following variables in your inventory:
+
+```yaml
+prometheus_server_prometheus_prefix: /prometheus
+
+prometheus_server_prometheus_launch_parameters: |
+  --config.file /etc/prometheus/prometheus.yml \
+  --storage.tsdb.path /var/lib/prometheus/ \
+  --web.console.templates=/etc/prometheus/consoles \
+  --web.console.libraries=/etc/prometheus/console_libraries \
+  --web.external-url="http://{{ prometheus_server_prometheus_host }}:9090{{ prometheus_server_prometheus_prefix }}/" \
+  $PROMETHEUS_OPTIONS
+```
+
+The second variable adds "--web.external-url" parameter to the prometheus launcher. The default configuration of Prometheus is automatically updated to listen to its own metrics at :9090/prometheus/metrics.
+
+With this configuration, it is possible to easily configure a reverse proxy. Here is an example for nginx:
+
+```
+http {
+ server {
+   listen 0.0.0.0:19090;
+   location /prometheus/ {
+     proxy_pass :9090/prometheus/;
+   }
+ }
+}
+events {
+}
+```
+
+Notice that all accesses to Prometheus (e.g. the UI, grafana) will need to be updated to use the prefix in this case.
 
 ### TLS and/or Basic Authentication
 
@@ -589,17 +623,17 @@ To enable TLS encryption, you need to set these variables:
 
 ```yaml
 prometheus_server_enable_tls: true
-prometheus_server_tls_cert_file: 
-prometheus_server_tls_key_file: 
+prometheus_server_tls_cert_file:
+prometheus_server_tls_key_file:
 ```
 
 To enable basic authentication, you need to set these variables:
 
 ```yaml
 prometheus_server_enable_basic_auth: true
-prometheus_server_basic_auth_user: 
-prometheus_server_basic_auth_password: 
-prometheus_server_basic_auth_hash_password: 
+prometheus_server_basic_auth_user:
+prometheus_server_basic_auth_password:
+prometheus_server_basic_auth_hash_password:
 ```
 
 Note: You can use python3-bcrypt to generate hashed password. See more at https://prometheus.io/docs/guides/basic-auth/#hashing-a-password .
@@ -617,6 +651,7 @@ prometheus_server_prometheus_launch_parameters: |
 
 ## Changelog
 
+* 1.5.0: Support for custom server prefix. Thiago Cardozo <thiago.cardozo@gmail.com>
 * 1.4.1: Fix bad rights on services files. Bug reported by @sgaosdgr. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.0: Add more tunig for exporter services. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.4: Adapt tp hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
