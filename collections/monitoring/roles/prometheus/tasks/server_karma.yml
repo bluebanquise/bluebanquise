@@ -21,6 +21,19 @@
   tags:
     - package
 
+- name: "firewalld █ Add karma custom port to firewall's {{ rometheus_server_firewall_zone | default('public') }} zone"
+  ansible.builtin.firewalld:
+    zone: "{{ prometheus_server_firewall_zone | default('public') }}"
+    port: "{{ prometheus_server_karma_port }}/tcp"
+    immediate: "yes"
+    permanent: "yes"
+    state: enabled
+  when:
+    - ansible_facts.os_family == "RedHat"
+    - ep_firewall | default(false) | bool
+  tags:
+    - firewall
+
 - name: template <|> Generate karma service file
   ansible.builtin.template:
     src: karma.service.j2

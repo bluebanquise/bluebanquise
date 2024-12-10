@@ -47,6 +47,7 @@ prometheus_server_snmp_exporter_launch_parameters: |
 
 prometheus_server_prometheus_prefix: ""
 prometheus_server_alertmanager_prefix: ""
+prometheus_server_karma_prefix: ""
 
 prometheus_server_configuration_global:
   scrape_interval: 1m
@@ -95,6 +96,7 @@ prometheus_server_snmp_exporter_raw_configuration:
 
 prometheus_server_karma_username: admin
 prometheus_server_karma_password: admin
+prometheus_server_karma_port: 8080
 
 prometheus_firewall_open: false
 prometheus_server_firewall_zone: public

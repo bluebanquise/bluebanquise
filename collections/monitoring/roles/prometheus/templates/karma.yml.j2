@@ -13,6 +13,11 @@ alertmanager:
       timeout: 10s
       proxy: false
 
+listen:
+  address: {{ prometheus_server_karma_host }}
+  port: {{ prometheus_server_karma_port }}
+  prefix: {{ prometheus_server_karma_prefix }}/
+
 #filters by default when connected
 filters:
   default:

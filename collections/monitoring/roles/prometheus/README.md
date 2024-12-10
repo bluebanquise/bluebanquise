@@ -632,6 +632,18 @@ prometheus_server_alertmanager_launch_parameters: |
 The configuration of the reverse proxy for alertmanager can be similar to the configuration for Prometheus server listening at :9090/prometheus.
 Notice that all accesses to Alertmanager (e.g. the UI, karma) will need to be updated to use the prefix in this case.
 
+### Access Karma behind a reverse proxy
+
+It is possible to configure Karma to listen at a URL with a prefix, in order to simplify the configuration of a reverse proxy. To listen at :8080/karma, set the following variables in your inventory:
+
+```yaml
+prometheus_server_karma_port: 8080
+prometheus_server_karma_prefix: karma
+```
+
+The configuration of the reverse proxy for Karma can be similar to the configuration for Prometheus server listening at :9090/prometheus.
+Notice that access to Karma UI will need to be updated to use the prefix in this case.
+
 ### TLS and/or Basic Authentication
 
 To enable TLS encryption, you need to set these variables:
@@ -666,7 +678,7 @@ prometheus_server_prometheus_launch_parameters: |
 
 ## Changelog
 
-* 1.5.0: Support for custom server prefix. Thiago Cardozo <thiago.cardozo@gmail.com>
+* 1.5.0: Add URL prefixes for associated services;add karma parameters. Thiago Cardozo <thiago.cardozo@gmail.com>
 * 1.4.1: Fix bad rights on services files. Bug reported by @sgaosdgr. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.0: Add more tunig for exporter services. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.4: Adapt tp hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
