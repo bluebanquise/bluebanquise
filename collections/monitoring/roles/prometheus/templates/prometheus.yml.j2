@@ -12,7 +12,8 @@ rule_files:
 
 alerting:
   alertmanagers:
-  - static_configs:
+  - path_prefix: "{{ prometheus_server_alertmanager_prefix }}/"
+    static_configs:
     - targets:
       - {{ prometheus_server_alertmanager_host }}:9093
 

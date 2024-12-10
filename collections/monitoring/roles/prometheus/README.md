@@ -617,6 +617,21 @@ events {
 
 Notice that all accesses to Prometheus (e.g. the UI, grafana) will need to be updated to use the prefix in this case.
 
+### Access Alertmanager behind a reverse proxy
+
+It is possible to configure Alertmanager to listen at a URL with a prefix, in order to simplify the configuration of a reverse proxy. To listen at :9093/alertmanager, set the following variables in your inventory:
+
+```yaml
+prometheus_server_alertmanager_prefix: /alertmanager
+
+prometheus_server_alertmanager_launch_parameters: |
+  --config.file=/etc/alertmanager/alertmanager.yml \
+  --web.external-url="http://{{ prometheus_server_alertmanager_host }}:9093{{ prometheus_server_alertmanager_path_prefix }}/"
+```
+
+The configuration of the reverse proxy for alertmanager can be similar to the configuration for Prometheus server listening at :9090/prometheus.
+Notice that all accesses to Alertmanager (e.g. the UI, karma) will need to be updated to use the prefix in this case.
+
 ### TLS and/or Basic Authentication
 
 To enable TLS encryption, you need to set these variables:

@@ -46,6 +46,7 @@ prometheus_server_snmp_exporter_launch_parameters: |
   --config.file=/etc/snmp_exporter/snmp.yml
 
 prometheus_server_prometheus_prefix: ""
+prometheus_server_alertmanager_prefix: ""
 
 prometheus_server_configuration_global:
   scrape_interval: 1m
