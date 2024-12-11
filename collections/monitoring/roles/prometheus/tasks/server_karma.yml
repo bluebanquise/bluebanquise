@@ -22,7 +22,7 @@
     - package
 
 - name: "firewalld █ Add karma custom port to firewall's {{ rometheus_server_firewall_zone | default('public') }} zone"
-  ansible.builtin.firewalld:
+  ansible.posix.firewalld:
     zone: "{{ prometheus_server_firewall_zone | default('public') }}"
     port: "{{ prometheus_server_karma_port }}/tcp"
     immediate: "yes"
