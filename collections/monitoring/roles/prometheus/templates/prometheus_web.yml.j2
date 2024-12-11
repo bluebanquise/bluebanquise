@@ -1,0 +1,6 @@
+{% if prometheus_server_basic_auth_password is defined and prometheus_server_basic_auth_password %}
+{% if prometheus_server_basic_auth_hash_password is defined and prometheus_server_basic_auth_hash_password %}
+basic_auth_users:
+    {{ prometheus_server_prometheus_username }}: {{ prometheus_server_basic_auth_hash_password }}
+{% endif %}
+{% endif %}

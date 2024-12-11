@@ -2,6 +2,14 @@
 prometheus_client: false
 prometheus_server: false
 
+prometheus_ha_enabled: false
+prometheus_server_alertmanager_cluster_peers: []
+
+prometheus_server_alertmanager_cluster_port: 9094
+prometheus_server_alertmanager_port: 9093
+prometheus_server_prometheus_port: 9090
+prometheus_server_karma_port: 8080
+
 prometheus_server_manage_prometheus: true
 prometheus_server_manage_alertmanager: true
 prometheus_server_manage_karma: true
@@ -44,6 +52,10 @@ prometheus_server_ipmi_exporter_launch_parameters: |
 
 prometheus_server_snmp_exporter_launch_parameters: |
   --config.file=/etc/snmp_exporter/snmp.yml
+
+prometheus_server_prometheus_prefix: ""
+prometheus_server_alertmanager_prefix: ""
+prometheus_server_karma_prefix: ""
 
 prometheus_server_configuration_global:
   scrape_interval: 1m
@@ -90,9 +102,6 @@ prometheus_snmp_scrape_hardware_groups: []
 prometheus_server_snmp_exporter_with_generator: false
 prometheus_server_snmp_exporter_raw_configuration:
 
-prometheus_server_karma_username: admin
-prometheus_server_karma_password: admin
-
 prometheus_firewall_open: false
 prometheus_server_firewall_zone: public
 prometheus_client_firewall_zone: public
@@ -100,6 +109,13 @@ prometheus_client_firewall_zone: public
 prometheus_server_enable_tls: false
 prometheus_server_tls_cert_file: prometheus.crt
 prometheus_server_tls_key_file: prometheus.key
+
+prometheus_server_karma_username: admin
+prometheus_server_karma_password: admin
+
+prometheus_server_alertmanager_username: admin
+prometheus_server_alertmanager_password: admin
+prometheus_server_alertmanager_password_hash: "$2b$12$60aIb784MLEca0nmWak9Pucv7CU/Fng/ZS0804Ki8PmhPWgjrXYUW"
 
 prometheus_server_enable_basic_auth: false
 prometheus_server_basic_auth_user: prometheus
