@@ -10,6 +10,9 @@ global:
 rule_files:
   - 'alerts/*.yml'
 
+{% if prometheus_ha_enabled is defined and prometheus_ha_enabled %}
+  {% if prometheus_server_alertmanager_cluster_peers is defined and prometheus_server_alertmanager_cluster_peers|length > 0 %}
+# High Availability configuration
 alerting:
   alertmanagers:
   - path_prefix: "{{ prometheus_server_alertmanager_prefix }}/"
@@ -35,7 +38,6 @@ alerting:
 {% if prometheus_ha_enabled is defined and prometheus_ha_enabled %}
 {% if prometheus_server_alertmanager_cluster_peers is defined and prometheus_server_alertmanager_cluster_peers|length > 0 %}
 # High Availability configuration
-
 scrape_configs:
 
   # I watch myself
