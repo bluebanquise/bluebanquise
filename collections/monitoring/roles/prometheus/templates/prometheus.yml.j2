@@ -15,18 +15,49 @@ alerting:
   - path_prefix: "{{ prometheus_server_alertmanager_prefix }}/"
     static_configs:
     - targets:
-      - {{ prometheus_server_alertmanager_host }}:9093
+      {% for alertmanager_cluster_node in prometheus_server_alertmanager_cluster_peers %}
+        {% set alertmanager_cluster_ip = alertmanager_cluster_node.addrs[0] %}
+      - {{ alertmanager_cluster_ip }}:{{ prometheus_server_alertmanager_port }}
+      {% endfor %}
+  {% endif %}
+{% else %}
+# Default AlertManager configuration
+alerting:
+  alertmanagers:
+  - path_prefix: "{{ prometheus_server_alertmanager_prefix }}/"
+    static_configs:
+    - targets:
+      - {{ prometheus_server_alertmanager_host }}:{{ prometheus_server_alertmanager_port }}
+{% endif %}
 
 {{ prometheus_server_prometheus_raw_configuration }}
+
+{% if prometheus_ha_enabled is defined and prometheus_ha_enabled %}
+{% if prometheus_server_alertmanager_cluster_peers is defined and prometheus_server_alertmanager_cluster_peers|length > 0 %}
+# High Availability configuration
 
 scrape_configs:
 
   # I watch myself
-  - job_name: 'prometheus_master'
+  - job_name: 'prometheus_cluster'
     scrape_interval: 30s
     metrics_path: "{{ prometheus_server_prometheus_prefix }}/metrics"
     static_configs:
-      - targets: ['{{ prometheus_server_prometheus_host }}:9090']
+      {% for alertmanager_cluster_node in prometheus_server_alertmanager_cluster_peers %}
+        {% set alertmanager_cluster_ip = alertmanager_cluster_node.addrs[0] %}
+      - targets: ['{{ alertmanager_cluster_ip }}:{{ prometheus_server_prometheus_port }}']
+      {% endfor %}
+{% endif %}
+{% else %}
+# Default AlertManager configuration
+scrape_configs:
+  - job_name: 'prometheus_master'
+    metrics_path: "{{ prometheus_server_prometheus_prefix }}/metrics"
+    scrape_interval: 30s
+    static_configs:
+      - targets: ['{{ prometheus_server_prometheus_host }}:{{ prometheus_server_prometheus_port }}']
+{% endif %}
+
 {% if prometheus_server_enable_tls %}
     scheme: https
     tls_config:

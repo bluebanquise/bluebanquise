@@ -4,14 +4,33 @@ authentication:
       - username: {{ prometheus_server_karma_username }}
         password: {{ prometheus_server_karma_password }}
 
+# High Availability configuration
+{% if prometheus_ha_enabled is defined and prometheus_ha_enabled %}
+{% if prometheus_server_alertmanager_cluster_peers is defined and prometheus_server_alertmanager_cluster_peers|length > 0 %}
+alertmanager:
+  interval: 10s
+  servers:
+{% for alertmanager_cluster_node in prometheus_server_alertmanager_cluster_peers %}
+{% for alertmanager_cluster_ip in alertmanager_cluster_node.addrs %}
+    - cluster: prometheus
+      name: {{ alertmanager_cluster_node.name }}
+      uri: "http://{{ alertmanager_cluster_ip }}:{{ prometheus_server_alertmanager_port }}{{ prometheus_server_alertmanager_prefix }}"
+      timeout: 10s
+      proxy: false
+{% endfor %}
+{% endfor %}
+{% endif %}
+{% else %}
+
 alertmanager:
   interval: 10s
   servers:
     - cluster: prometheus
       name: {{ prometheus_server_alertmanager_host }}
-      uri: "http://{{ prometheus_server_alertmanager_host }}:9093{{ prometheus_server_alertmanager_prefix }}"
+      uri: "http://{{ prometheus_server_alertmanager_host }}:{{ prometheus_server_alertmanager_port }}{{ prometheus_server_alertmanager_prefix }}"
       timeout: 10s
       proxy: false
+{% endif %}
 
 listen:
   address: {{ prometheus_server_karma_host }}

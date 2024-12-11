@@ -23,12 +23,14 @@ This role relies on [data model](https://github.com/bluebanquise/bluebanquise/bl
     + [Exporters](#exporters)
   * [5. IPMI and SNMP](#5-ipmi-and-snmp)
   * [6. Advanced usage](#6-advanced-usage)
+    + [Monitoring High Availability](#monitoring-high-availability)
     + [Set custom launch parameters](#set-custom-launch-parameters)
     + [Manipulate firewall](#manipulate-firewall)
     + [Splitting services](#splitting-services)
     + [Adding raw prometheus.conf scraping jobs:](#adding-raw-prometheusconf-scraping-jobs)
     + [Adding raw prometheus.conf configuration](#adding-raw-prometheusconf-configuration)
     + [TLS and/or Basic Authentication](#tls-andor-basic-authentication)
+    + [TSDB Prometheus](#tsdb-prometheus)
   * [Changelog](#changelog)
 
 
@@ -436,6 +438,32 @@ prometheus_snmp_scrape_hardware_groups:
 
 ## 6. Advanced usage
 
+### Monitoring High Availability
+
+1. Enable ``prometheus_ha_enabled`` in the inventory:
+
+```yaml
+prometheus_ha_enabled:  true
+```
+
+2. Configure the cluster peers for AlertManager:
+
+```yaml
+prometheus_server_alertmanager_cluster_peers:
+       - name:  ha1  # Hostname of the HA cluster nodes
+         addrs:      # List of addresses to be used for HA ring
+           - ha1
+       - name:  ha2
+         addrs:
+           - ha2
+```
+
+3. (Optional) You can change the default port that the AlertManager cluster ring listens on:
+
+```yaml
+prometheus_server_alertmanager_cluster_port:  9094
+```
+
 ### Set custom launch parameters
 
 Since Prometheus ecosystem has been originally designed to run into containers,
@@ -676,9 +704,28 @@ prometheus_server_prometheus_launch_parameters: |
   --web.config.file=/etc/prometheus/web.yml
 ```
 
+### TSDB Prometheus
+
+This collection allows changing the path and retention time of [TSDB](https://prometheus.io/docs/prometheus/latest/storage/).
+
+Configure the variables below according to your needs:
+
+```yaml
+prometheus_server_prometheus_tsdb_path: '/var/lib/prometheus'
+prometheus_server_prometheus_tsdb_retention_time: 10d
+```
+
+And attach them to additional Prometheus initialization parameters, as in the following example:
+
+```yaml
+prometheus_server_prometheus_launch_parameters: |
+  --storage.tsdb.path {{ prometheus_server_prometheus_tsdb_path }} \
+  --storage.tsdb.retention.time {{ prometheus_server_prometheus_tsdb_retention_time }}
+```
+
 ## Changelog
 
-* 1.5.0: Add URL prefixes for associated services;add karma parameters. Thiago Cardozo <thiago.cardozo@gmail.com>
+* 1.5.0: Add URL prefixes for associated services;add karma parameters;prometheus HA & TSDB. Thiago Cardozo <thiago.cardozo@gmail.com>
 * 1.4.1: Fix bad rights on services files. Bug reported by @sgaosdgr. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.0: Add more tunig for exporter services. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.4: Adapt tp hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>

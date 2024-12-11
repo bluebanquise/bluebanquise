@@ -2,6 +2,14 @@
 prometheus_client: false
 prometheus_server: false
 
+prometheus_ha_enabled: false
+prometheus_server_alertmanager_cluster_peers: []
+
+prometheus_server_alertmanager_cluster_port: 9094
+prometheus_server_alertmanager_port: 9093
+prometheus_server_prometheus_port: 9090
+prometheus_server_karma_port: 8080
+
 prometheus_server_manage_prometheus: true
 prometheus_server_manage_alertmanager: true
 prometheus_server_manage_karma: true

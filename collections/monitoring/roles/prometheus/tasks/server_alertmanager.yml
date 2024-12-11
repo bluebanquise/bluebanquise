@@ -34,9 +34,9 @@
   tags:
     - template
 
-- name: "copy <|> Install firewalld service configuration file"
-  ansible.builtin.copy:
-    src: alertmanager.xml
+- name: "template <|> Gemerate firewalld service configuration file"
+  ansible.builtin.template:
+    src: alertmanager.xml.j2
     dest: /etc/firewalld/services/alertmanager.xml
     owner: root
     group: root

@@ -58,6 +58,8 @@
     - /etc/prometheus/
     - /etc/prometheus/alerts/
     - /var/lib/prometheus
+    - "{{ prometheus_server_prometheus_tsdb_path | default(omit) }}"
+  when: item is not none and item != omit
 
 - name: Template <|> Generate /etc/prometheus/prometheus.yml
   ansible.builtin.template:

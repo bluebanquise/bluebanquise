@@ -3,6 +3,25 @@
   Wants=network-online.target
   After=network-online.target
 
+# High Availability configuration
+{% if prometheus_ha_enabled is defined and prometheus_ha_enabled and prometheus_server_alertmanager_cluster_peers is defined and prometheus_server_alertmanager_cluster_peers|length > 1 %}
+
+{% set current_node = prometheus_server_alertmanager_cluster_peers | selectattr("name", "equalto", ansible_hostname) | first %}
+{% set peer_node = prometheus_server_alertmanager_cluster_peers | rejectattr("name", "equalto", ansible_hostname) | first %}
+
+[Service]
+User=alertmanager
+Group=alertmanager
+Type=simple
+WorkingDirectory=/etc/alertmanager/
+ExecStart=/usr/local/bin/alertmanager \
+  --cluster.listen-address={{ current_node.addrs[0] }}:{{ prometheus_server_alertmanager_cluster_port }} \
+  --cluster.peer={{ peer_node.addrs[0] }}:{{ prometheus_server_alertmanager_cluster_port }} \
+{{ prometheus_server_alertmanager_launch_parameters | indent(2, True) }}
+{% else %}
+
+# Default Alertmanager configuration
+
 [Service]
   User=alertmanager
   Group=alertmanager
@@ -10,6 +29,7 @@
   WorkingDirectory=/etc/alertmanager/
   ExecStart=/bin/alertmanager \
   {{ prometheus_server_alertmanager_launch_parameters | indent(2, True) }}
++{% endif %}
 
 [Install]
   WantedBy=multi-user.target
