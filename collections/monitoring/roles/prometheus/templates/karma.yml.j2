@@ -1,35 +1,45 @@
+{% if prometheus_server_karma_password is defined and prometheus_server_karma_password %}
 authentication:
   basicAuth:
     users:
       - username: {{ prometheus_server_karma_username }}
         password: {{ prometheus_server_karma_password }}
+{% endif %}
 
-# High Availability configuration
 {% if prometheus_ha_enabled is defined and prometheus_ha_enabled %}
 {% if prometheus_server_alertmanager_cluster_peers is defined and prometheus_server_alertmanager_cluster_peers|length > 0 %}
+# High Availability configuration
 alertmanager:
   interval: 10s
   servers:
 {% for alertmanager_cluster_node in prometheus_server_alertmanager_cluster_peers %}
-{% for alertmanager_cluster_ip in alertmanager_cluster_node.addrs %}
-    - cluster: prometheus
+{% set alertmanager_cluster_ip = alertmanager_cluster_node.addrs[0] %}
+    - cluster: prometheus_ha
       name: {{ alertmanager_cluster_node.name }}
-      uri: "http://{{ alertmanager_cluster_ip }}:{{ prometheus_server_alertmanager_port }}{{ prometheus_server_alertmanager_prefix }}"
       timeout: 10s
-      proxy: false
-{% endfor %}
+{% if prometheus_server_alertmanager_password is defined and prometheus_server_alertmanager_password %}
+      uri: "http://{{ prometheus_server_alertmanager_username }}:{{ prometheus_server_alertmanager_password }}@{{ alertmanager_cluster_ip }}:{{ prometheus_server_alertmanager_port }}{{ prometheus_server_alertmanager_prefix }}"
+      proxy: true
+{% else %}
+      uri: "http://{{ alertmanager_cluster_ip }}:{{ prometheus_server_alertmanager_port }}{{ prometheus_server_alertmanager_prefix }}"
+{% endif %}
 {% endfor %}
 {% endif %}
 {% else %}
 
+# Default configuration
 alertmanager:
   interval: 10s
   servers:
     - cluster: prometheus
       name: {{ prometheus_server_alertmanager_host }}
-      uri: "http://{{ prometheus_server_alertmanager_host }}:{{ prometheus_server_alertmanager_port }}{{ prometheus_server_alertmanager_prefix }}"
       timeout: 10s
-      proxy: false
+{% if prometheus_server_alertmanager_password is defined and prometheus_server_alertmanager_password %}
+      uri: "http://{{ prometheus_server_alertmanager_username }}:{{ prometheus_server_alertmanager_password }}@{{ prometheus_server_alertmanager_host }}:{{ prometheus_server_alertmanager_port }}{{ prometheus_server_alertmanager_prefix }}"
+      proxy: true
+{% else %}
+      uri: "http://{{ prometheus_server_alertmanager_host }}:{{ prometheus_server_alertmanager_port }}{{ prometheus_server_alertmanager_prefix }}"
+{% endif %}
 {% endif %}
 
 listen:
@@ -37,10 +47,21 @@ listen:
   port: {{ prometheus_server_karma_port }}
   prefix: {{ prometheus_server_karma_prefix }}/
 
+{% if prometheus_ha_enabled is defined and prometheus_ha_enabled %}
+{% if prometheus_server_alertmanager_cluster_peers is defined and prometheus_server_alertmanager_cluster_peers|length > 0 %}
+# High Availability configuration
+#filters by default when connected
+filters:
+  default:
+    - "@cluster=prometheus_ha"
+{% else %}
+# Default configuration
 #filters by default when connected
 filters:
   default:
     - "@cluster=prometheus"
+{% endif %}
+{% endif %}
 
 karma:
   name: Karma dashboard

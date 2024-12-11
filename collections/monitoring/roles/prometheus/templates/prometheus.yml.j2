@@ -22,6 +22,11 @@ alerting:
         {% set alertmanager_cluster_ip = alertmanager_cluster_node.addrs[0] %}
       - {{ alertmanager_cluster_ip }}:{{ prometheus_server_alertmanager_port }}
       {% endfor %}
+{% if prometheus_server_alertmanager_password is defined and prometheus_server_alertmanager_password %}
+    basic_auth:
+      username: "{{ prometheus_server_alertmanager_username }}"
+      password: "{{ prometheus_server_alertmanager_password }}"
+{% endif %}
   {% endif %}
 {% else %}
 # Default AlertManager configuration
@@ -31,6 +36,11 @@ alerting:
     static_configs:
     - targets:
       - {{ prometheus_server_alertmanager_host }}:{{ prometheus_server_alertmanager_port }}
+{% if prometheus_server_alertmanager_password is defined and prometheus_server_alertmanager_password %}
+    basic_auth:
+      username: "{{ prometheus_server_alertmanager_username }}"
+      password: "{{ prometheus_server_alertmanager_password }}"
+{% endif %}
 {% endif %}
 
 {{ prometheus_server_prometheus_raw_configuration }}
@@ -41,14 +51,20 @@ alerting:
 scrape_configs:
 
   # I watch myself
-  - job_name: 'prometheus_cluster'
+  - job_name: 'prometheus_ha'
     scrape_interval: 30s
     metrics_path: "{{ prometheus_server_prometheus_prefix }}/metrics"
     static_configs:
+    - targets:
       {% for alertmanager_cluster_node in prometheus_server_alertmanager_cluster_peers %}
         {% set alertmanager_cluster_ip = alertmanager_cluster_node.addrs[0] %}
-      - targets: ['{{ alertmanager_cluster_ip }}:{{ prometheus_server_prometheus_port }}']
+      - {{ alertmanager_cluster_ip }}:{{ prometheus_server_prometheus_port }}
       {% endfor %}
+{% if prometheus_server_alertmanager_password is defined and prometheus_server_alertmanager_password %}
+    basic_auth:
+      username: "{{ prometheus_server_alertmanager_username }}"
+      password: "{{ prometheus_server_alertmanager_password }}"
+{% endif %}
 {% endif %}
 {% else %}
 # Default AlertManager configuration
@@ -57,7 +73,13 @@ scrape_configs:
     metrics_path: "{{ prometheus_server_prometheus_prefix }}/metrics"
     scrape_interval: 30s
     static_configs:
-      - targets: ['{{ prometheus_server_prometheus_host }}:{{ prometheus_server_prometheus_port }}']
+    - targets:
+      - {{ prometheus_server_prometheus_host }}:{{ prometheus_server_prometheus_port }}
+{% if prometheus_server_alertmanager_password is defined and prometheus_server_alertmanager_password %}
+    basic_auth:
+      username: "{{ prometheus_server_alertmanager_username }}"
+      password: "{{ prometheus_server_alertmanager_password }}"
+{% endif %}
 {% endif %}
 
 {% if prometheus_server_enable_tls %}
