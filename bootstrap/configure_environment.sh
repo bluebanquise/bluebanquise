@@ -43,6 +43,14 @@ if [[ $COLLECTIONS_LOCAL_PATH != "none" ]]; then
 else
   ansible-galaxy collection install git+https://github.com/bluebanquise/bluebanquise.git#/collections/commons,master -vvv --upgrade
   ansible-galaxy collection install git+https://github.com/bluebanquise/bluebanquise.git#/collections/infrastructure,master -vvv --upgrade
+  ansible-galaxy collection install git+https://github.com/bluebanquise/bluebanquise.git#/collections/containers,master -vvv --upgrade
+  ansible-galaxy collection install git+https://github.com/bluebanquise/bluebanquise.git#/collections/file_systems,master -vvv --upgrade
+  ansible-galaxy collection install git+https://github.com/bluebanquise/bluebanquise.git#/collections/hardware,master -vvv --upgrade
+  ansible-galaxy collection install git+https://github.com/bluebanquise/bluebanquise.git#/collections/high_availability,master -vvv --upgrade
+  ansible-galaxy collection install git+https://github.com/bluebanquise/bluebanquise.git#/collections/hpc,master -vvv --upgrade
+  ansible-galaxy collection install git+https://github.com/bluebanquise/bluebanquise.git#/collections/logging,master -vvv --upgrade
+  ansible-galaxy collection install git+https://github.com/bluebanquise/bluebanquise.git#/collections/monitoring,master -vvv --upgrade
+  ansible-galaxy collection install git+https://github.com/bluebanquise/bluebanquise.git#/collections/security,master -vvv --upgrade
 fi
 
 deactivate

@@ -1,11 +1,5 @@
 # Conman
 
-## Data Model
-
-This role relies on [data model](https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md):
-* Section 2 (Hosts definition)
-* Section 3.2 (Hardware Groups)
-
 ## Description
 
 This role provides a conman daemon that logs ipmi serial consoles.

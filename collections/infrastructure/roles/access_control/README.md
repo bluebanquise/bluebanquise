@@ -1,14 +1,9 @@
 # Access control
 
-## Data Model
-
-This role relies on [data model](https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md):
-* Section 3.2 (Hardware Groups)
-
 ## Description
 
 This role ensure the node current status comply with
-os_access_control variable. This means SELinux status on RHEL systems,
+`os_access_control` variable. This means SELinux status on RHEL systems,
 and AppArmor on Ubuntu systems.
 
 Note that for now, this role does not cover any other system (restricted to AppArmor and SELinux).

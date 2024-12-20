@@ -1,22 +1,5 @@
 ---
 
-# Roles transverse variables caching
-- name: fact <|> Calculate bb_nodes
-  ansible.builtin.set_fact:
-    bb_nodes: "{{ j2_bb_nodes }}"
-  run_once: true
-  when: bb_nodes is not defined or bb_nodes is none
-  tags:
-    - templates
-
-- name: debug <|> Display bb_nodes
-  ansible.builtin.debug:
-    msg: "{{ bb_nodes }}"
-  tags:
-    - templates
-    - debug
-#
-
 - name: "template <|> Generate /etc/hosts"
   ansible.builtin.template:
     src: hosts.j2

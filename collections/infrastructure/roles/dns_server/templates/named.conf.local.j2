@@ -55,7 +55,7 @@ zone "override" {
 
 ## Reverse zones
 
-{% for ip_prefix in dns_server_j2_get_first_octets.split(',') %}
+{% for ip_prefix in first_octets.split(',') %}
 {{ create_reverse_zone(ip_prefix) }}
 {% endfor %}
 

@@ -2,106 +2,21 @@
 
 **WARNING!** Always keep in mind that using this role, you could lose connection! Always have a backup way to reach the system.
 
-## Data Model
-
-This role relies on [data model](https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md):
-* Section 1 (Networks)
-* Section 2 (Hosts definition)
+Important note: NetworkManager is know to have a small issue with gateways/routes. When you set a gateway or a route, in order for it to be updated, you often have to at least down and up the related interface, or even reboot the system. Please keep that in mind.
 
 ## Description
 
 This role configure network interfaces to provide desired ip, prefix, gateway, etc.
 The role also covers routes definitions on interfaces and other advanced settings.
 
-If using RHEL or SUSE derivate OS, nmcli (NetworkManager) module from community.general collection will be used to configure network. In that case, the role will provide all features available in the main nmcli module.
+This role relies on nmcli (NetworkManager) module from community.general collection will be used to configure network.The role should provide all features available in the main nmcli module.
 Please refer to [nmcli module documentation]( https://docs.ansible.com/ansible/latest/collections/community/general/nmcli_module.html) .
-
-If using Ubuntu or Debian derivate OS, networkd (Systemd Networkd) module from this bluebanquise collection will be used to configure network. In that case, only part of features available with nmcli module will be available (we are trying to bring more). See the following compatibility matrix:
-
-| key | nmcli | networkd | Notes |
-|-----|-------|----------|-------|
-| conn_name | x | x |   |
-| ifname | x | x |   |
-| ip4 | x | x |   |
-| gw4 | x | x |   |
-| routes4 | x | x |   |
-| route_metric4 | x |   |   |
-| never_default4 | x | x |   |
-| dns4 | x | x |   |
-| dns4_search | x |   |   |
-| ip6 | x |   |   |
-| gw6 | x |   |   |
-| mtu | x |   |   |
-| type | x | x |   |
-| state | x | x |   |
-| autoconnect | x |   |   |
-| ageingtime | x |   |   |
-| arp_interval | x |   |   |
-| arp_ip_target | x |   |   |
-| dhcp_client_id | x |   |   |
-| dns6 | x |   |   |
-| dns6_search | x |   |   |
-| downdelay | x |   |   |
-| egress | x |   |   |
-| flags | x |   |   |
-| forwarddelay | x |   |   |
-| hairpin | x |   |   |
-| hellotime | x |   |   |
-| ingress | x |   |   |
-| ip_tunnel_dev | x |   |   |
-| ip_tunnel_local | x |   |   |
-| ip_tunnel_remote | x |   |   |
-| mac | x |   |   |
-| master | x | x |   |
-| maxage | x |   |   |
-| mode | x | x |   |
-| miimon | x |   |   |
-| path_cost | x |   |   |
-| primary | x |   |   |
-| priority | x |   |   |
-| slavepriority | x |   |   |
-| stp | x |   |   |
-| updelay | x |   |   |
-| vlandev | x |   |   |
-| vlanid | x |   |   |
-| vxlan_id | x |   |   |
-| vxlan_local | x |   |   |
-| vxlan_remote | x |   |   |
-| zone | x |   |   |
-| method4 | x | x |   |
-| method6 | x |   |   |
-| addr_gen_mode6 | x |   |   |
-| dns4_ignore_auto | x |   |   |
-| dns6_ignore_auto | x |   |   |
-| gsm | x |   |   |
-| gw4_ignore_auto | x |   |   |
-| gw6_ignore_auto | x |   |   |
-| ignore_unsupported_suboptions | x |   |   |
-| ip_privacy6 | x |   |   |
-| ip_tunnel_input_key | x |   |   |
-| ip_tunnel_output_key | x |   |   |
-| may_fail4 | x |   |   |
-| route_metric6 | x |   |   |
-| routes4_extended | x |   |   |
-| routes6 | x |   |   |
-| routes6_extended | x |   |   |
-| routing_rules4 | x |   |   |
-| runner | x |   |   |
-| runner_fast_rate | x |   |   |
-| runner_hwaddr_policy | x |   |   |
-| ssid | x |   |   |
-| transport_mode | x |   |   |
-| vpn | x |   |   |
-| wifi | x |   |   |
-| wifi_sec | x |   |   |
-| wireguard | x |   |   |
-| xmit_hash_policy | x |   |   |
 
 ## Instructions
 
 ### Specific behaviors
 
-While we try to bind to nmcli module options for convention, some role's key provides more integrated features:
+While we try to bind to nmcli module options for convention, some role's keys provide more integrated features:
 
 * `conn_name`: is equal to `interface`, but has higher precedence over
   `interface` if both are set.
@@ -168,7 +83,7 @@ network_interfaces:
     ip4_manual: 
       - 10.10.0.2/16
       - 10.10.0.3/16
-    network:net-1
+    network: net-1
 ```
 
 Note: you can use `ip4_manual` without `ip4` only if 
