@@ -24,7 +24,7 @@ pxe_stack_supported_os:
         - oraclelinux
         - almalinux
         - rockylinux
-      - major: 10
+    - major: 10
       distributions:
         - redhat
         - rhel
