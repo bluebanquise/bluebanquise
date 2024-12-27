@@ -10,7 +10,7 @@ pxe_stack_packages_to_install:
   - apache2
   - python3
   - python3-yaml
-pxe_stack_default_tftp_package: tftpd-hpa
+pxe_stack_default_tftp_package: bluebanquise-atftp
 pxe_stack_services_to_start:
   - apache2
   - tftpd-hpa

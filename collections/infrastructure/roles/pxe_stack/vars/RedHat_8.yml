@@ -11,7 +11,7 @@ pxe_stack_packages_to_install:
   - python3-policycoreutils
   - python3-pyyaml
   - policycoreutils
-pxe_stack_default_tftp_package: tftp-server
+pxe_stack_default_tftp_package: bluebanquise-atftp
 pxe_stack_services_to_start:
   - httpd
 pxe_stack_default_tftp_service: tftp
