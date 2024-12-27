@@ -4,5 +4,5 @@
   ansible.builtin.service:
     name: systemd-networkd
     enabled: no
+    state: stopped
   notify: reboot <|> Reboot system
-  

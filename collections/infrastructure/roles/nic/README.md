@@ -181,6 +181,7 @@ To achieve that, few variables are at disposal:
 
 ## Changelog
 
+* 1.11.0: Make NetworkManager default for all OS. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.10.1: Make the connection restart timeout configurable <jean-pascal.mazzilli@gmail.com>
 * 1.9.1: Add missing slave_type key. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.9.0: Allow services and services_ip together. Benoit Leveugle <benoit.leveugle@gmail.com>

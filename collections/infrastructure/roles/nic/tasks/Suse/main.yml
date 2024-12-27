@@ -4,4 +4,5 @@
   ansible.builtin.service:
     name: wicked
     enabled: no
+    state: stopped
   notify: reboot <|> Reboot system
