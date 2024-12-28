@@ -23,6 +23,9 @@ class VarsModule(BaseVarsPlugin):
 
           ### Network
 
+          # List of management networks.
+          'j2_management_networks': "{{ networks | select('match','^'+bb_core_management_networks_naming+'-[a-zA-Z0-9]+') | list | unique | sort }}",
+
           ## Resolution
           # Resolution network. The network on which host can be ping by direct name. (ex: ping c001).
           'j2_node_main_resolution_network': "{{ network_interfaces[0].network | default(none) }}",
