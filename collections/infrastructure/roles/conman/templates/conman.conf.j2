@@ -10,7 +10,7 @@ SERVER timestamp=1h
 GLOBAL logopts="timestamp"
 
 {% for host in (j2_hosts_range | sort) -%}
-  {% if (hostvars[host]['hw_equipment_type'] | default("server")) == "server" and hostvars[credentials_host]['hw_board_authentication'] is defined %}
+  {% if (hostvars[host]['hw_equipment_type'] | default("server")) == "server" and hostvars[host]['hw_board_authentication'] is defined %}
     {% if hostvars[host]['bmc'] is defined and hostvars[host]['bmc']['name'] is defined %}
       {# Identify protocol to be used #}
       {# IPMI #}
