@@ -32,7 +32,7 @@
 ## Internal hosts
 
 {% for host in (j2_hosts_range | sort) -%}
-{{ write_host(host, hostvars[host], hostvars[host]['node_main_resolution_address']) }}
+{{ write_host(host, hostvars[host], hostvars[host]['j2_node_main_resolution_address']) }}
 {%- endfor %}
 
 ## Services hosts
