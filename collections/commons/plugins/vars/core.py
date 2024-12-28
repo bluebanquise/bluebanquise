@@ -33,7 +33,7 @@ class VarsModule(BaseVarsPlugin):
           # The network used by Ansible to deploy configuration (related to ssh).
           # Also the network used by the host to get services ip.
           # This network must have 3 keys defined at least: network, interface, and ip4, to be considered valid as main network.
-          'j2_node_main_network': "{{ network_interfaces | default([]) | selectattr('network','defined') | selectattr('interface','defined') | selectattr('ip4','defined') | selectattr('network','match','^'+j2_current_iceberg_network+'-[a-zA-Z0-9]+') | map(attribute='network') | list | first | default(none) }}",
+          'j2_node_main_network': "{{ network_interfaces | default([]) | selectattr('network','defined') | selectattr('interface','defined') | selectattr('ip4','defined') | selectattr('network','match','^'+bb_core_management_networks_naming+'-[a-zA-Z0-9]+') | map(attribute='network') | list | first | default(none) }}",
           # Main network interface. For consistency, we use j2_node_main_network as source.
           'j2_node_main_network_interface': "{{ network_interfaces[j2_node_main_network].interface | default(none) }}",
           # Main address, same concept.
