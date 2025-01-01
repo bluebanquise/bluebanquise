@@ -6,13 +6,13 @@ include "/etc/powerman/ipmipower.dev"
 
 {% set range = (j2_hosts_range | sort) %}
 
-{% for equipment in j2_equipment_groups_list %}
+{% for equipment in bb_equipments %}
   {# Detect protocol #}
   {% set hosts = [] %}
   {% set bmcs = [] %}
   {# Structure to gather hosts by their BMC credentials: user -> pass -> hosts nested dict #}
   {% set credentials_dict = {} %}
-  {% for host in groups[equipment] %}
+  {% for host in equipment['nodes'] %}
     {% if host in range and hostvars[host]['bmc']['name'] is defined -%}
       {# Look for BMC credentials #}
       {% if hostvars[host]['hw_board_authentication'] is defined %}
