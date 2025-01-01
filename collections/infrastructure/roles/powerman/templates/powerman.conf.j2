@@ -12,7 +12,7 @@ include "/etc/powerman/ipmipower.dev"
   {% set bmcs = [] %}
   {# Structure to gather hosts by their BMC credentials: user -> pass -> hosts nested dict #}
   {% set credentials_dict = {} %}
-  {% for host in equipment['nodes'] %}
+  {% for host in bb_equipments[equipment]['nodes'] %}
     {% if host in range and hostvars[host]['bmc']['name'] is defined -%}
       {# Look for BMC credentials #}
       {% if hostvars[host]['hw_board_authentication'] is defined %}
