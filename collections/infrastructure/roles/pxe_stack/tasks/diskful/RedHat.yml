@@ -21,6 +21,21 @@
   loop: "{{ pxe_stack_supported_os.redhat | subelements('distributions') }}"
   when: item.1 != 'redhat'
 
+- debug:
+    msg: "{{ bb_equipments }}"
+
+- debug:
+    msg: "{{ item }}"
+  with_items: "{{ bb_equipments.keys() | default({}, true) }}"
+
+- debug:
+    msg: "{{ item }}"
+  with_items: "{{ bb_equipments }}"
+
+- debug:
+    msg: "{{ (bb_equipments[item]['os']['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution, true) | lower) }}"
+  with_items: "{{ bb_equipments }}"
+
 - name: "template <|> Generate kickstarts {{ pxe_stack_htdocs_path }}/pxe/equipment_profiles/{item}.kickstart.cfg"
   ansible.builtin.template:
     src: "RedHat/kickstart.cfg.j2"
