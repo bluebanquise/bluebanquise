@@ -1,6 +1,6 @@
 #jinja2: lstrip_blocks: True
-{% if hostvars[groups[os_profile][0]]['os_autoinstall_raw_file'] is defined %}
-{{ hostvars[groups[os_profile][0]]['os_autoinstall_raw_file'] }}
+{% if equipment['os']['os_autoinstall_raw_file'] is defined %}
+{{ equipment['os']['os_autoinstall_raw_file'] }}
 {% else %}
 <?xml version="1.0"?>
 <!DOCTYPE profile>
@@ -35,11 +35,11 @@
   </add-on>
 
   <keyboard>
-    <keymap>{{ (hostvars[groups[os_profile][0]]['os_keyboard_layout'] | default(pxe_stack_os_keyboard_layout)) | lower }}</keymap>
+    <keymap>{{ (equipment['os']['os_keyboard_layout'] | default(pxe_stack_os_keyboard_layout)) | lower }}</keymap>
   </keyboard>
 
   <language>
-    <language>{{ (hostvars[groups[os_profile][0]]['os_system_language'] | default(pxe_stack_os_system_language)) | replace('.UTF-8','') }}</language>
+    <language>{{ (equipment['os']['os_system_language'] | default(pxe_stack_os_system_language)) | replace('.UTF-8','') }}</language>
     <languages/>
   </language>
 
@@ -55,7 +55,7 @@
   </networking>
 
   <software>
-{% if (hostvars[groups[os_profile][0]]['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system)) | lower == "sles" %}
+{% if (equipment['os']['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system)) | lower == "sles" %}
     <products config:type="list">
       <product>SLES</product>
     </products>
@@ -69,8 +69,8 @@
     {% if not pxe_stack_enable_root %}
       <package>sudo</package>
     {% endif %}
-    {% if hostvars[groups[os_profile][0]]['os_autoinstall_packages'] is defined and hostvars[groups[os_profile][0]]['os_autoinstall_packages'] is iterable and hostvars[groups[os_profile][0]]['os_autoinstall_packages'] is not string and hostvars[groups[os_profile][0]]['os_autoinstall_packages'] is not mapping %}
-      {% for package in hostvars[groups[os_profile][0]]['os_autoinstall_packages'] %}
+    {% if equipment['os']['os_autoinstall_packages'] is defined and equipment['os']['os_autoinstall_packages'] is iterable and equipment['os']['os_autoinstall_packages'] is not string and equipment['os']['os_autoinstall_packages'] is not mapping %}
+      {% for package in equipment['os']['os_autoinstall_packages'] %}
       <package>{{ package }}</package>
       {% endfor %}
     {% endif %}
@@ -81,19 +81,19 @@
     <loader_type>default</loader_type>
   </bootloader>
 
-{{ hostvars[groups[os_profile][0]]['os_partitioning'] | default(pxe_stack_os_partitioning) | default(pxe_stack_suse_automatic_partitioning, true) }}
+{{ equipment['os']['os_partitioning'] | default(pxe_stack_os_partitioning) | default(pxe_stack_suse_automatic_partitioning, true) }}
 
 {% if pxe_stack_enable_root %}
  <users config:type="list">
   <user>
     <username>root</username>
-    <user_password>{{ hostvars[groups[os_profile][0]]['os_admin_password_sha512'] | default(pxe_stack_os_admin_password_sha512) }}</user_password>
+    <user_password>{{ equipment['os']['os_admin_password_sha512'] | default(pxe_stack_os_admin_password_sha512) }}</user_password>
     <uid>0</uid>
     <gid>0</gid>
     <encrypted config:type="boolean">true</encrypted>
     <fullname>Root User</fullname>
     <authorized_keys config:type="list">
-{% for ssh_key in (hostvars[groups[os_profile][0]]['os_admin_ssh_keys'] | default(pxe_stack_os_admin_ssh_keys)) %}
+{% for ssh_key in (equipment['os']['os_admin_ssh_keys'] | default(pxe_stack_os_admin_ssh_keys)) %}
       <listentry>{{ssh_key}}</listentry>
 {% endfor %}
     </authorized_keys>
@@ -118,10 +118,10 @@
       <home>{{ pxe_stack_sudo_user_home }}</home>
       <uid>{{ pxe_stack_sudo_user_uid }}</uid>
       <gid>{{ pxe_stack_sudo_user_gid }}</gid>
-      <user_password>{{ hostvars[groups[os_profile][0]]['os_admin_password_sha512'] | default(pxe_stack_os_admin_password_sha512) }}</user_password>
+      <user_password>{{ equipment['os']['os_admin_password_sha512'] | default(pxe_stack_os_admin_password_sha512) }}</user_password>
       <encrypted config:type="boolean">true</encrypted>
       <authorized_keys config:type="list">
-  {% for ssh_key in (hostvars[groups[os_profile][0]]['os_admin_ssh_keys'] | default(pxe_stack_os_admin_ssh_keys)) %}
+  {% for ssh_key in (equipment['os']['os_admin_ssh_keys'] | default(pxe_stack_os_admin_ssh_keys)) %}
         <listentry>{{ssh_key}}</listentry>
   {% endfor %}
       </authorized_keys>
@@ -158,7 +158,7 @@ echo "Defaults:sles !targetpw
           </source>
       </script>
 {% endif %}
-{% if (hostvars[groups[hw_profile][0]]['hw_preserve_efi_first_boot_device'] | default(pxe_stack_hw_preserve_efi_first_boot_device)) == true %}
+{% if (equipment['hw']['hw_preserve_efi_first_boot_device'] | default(pxe_stack_hw_preserve_efi_first_boot_device)) == true %}
       <script>
         <filename>post-no-chroot.sh</filename>
         <interpreter>shell</interpreter>
@@ -188,7 +188,7 @@ curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$(hostna
 ]]>
         </source>
       </script>
-{% if (hostvars[groups[os_profile][0]]['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution)) | lower == "opensuse" and not pxe_stack_preserve_repositories %}
+{% if (equipment['os']['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution)) | lower == "opensuse" and not pxe_stack_preserve_repositories %}
       <script>
         <chrooted config:type="boolean">true</chrooted>
         <filename>chroot-post.sh</filename>
@@ -238,7 +238,7 @@ zypper rr $(zypper lr -d | grep netboots | awk -F '' '{print $1}')
   </signature-handling>
  </general>
 
-{% set repo_proxy = (hostvars[groups[os_profile][0]]['os_pxe_repository_proxy'] | default(pxe_stack_os_pxe_repository_proxy, true) | default(none, true)) %}
+{% set repo_proxy = (equipment['os']['os_pxe_repository_proxy'] | default(pxe_stack_os_pxe_repository_proxy, true) | default(none, true)) %}
 {% if repo_proxy is not none %}
   <proxy>
     <enabled config:type="boolean">true</enabled>
@@ -251,7 +251,7 @@ zypper rr $(zypper lr -d | grep netboots | awk -F '' '{print $1}')
   </proxy>
 {% endif %}
 
-{{ hostvars[groups[os_profile][0]]['os_autoinstall_raw_content'] | default(pxe_stack_os_autoinstall_raw_content) }}
+{{ equipment['os']['os_autoinstall_raw_content'] | default(pxe_stack_os_autoinstall_raw_content) }}
 
 </profile>
 
