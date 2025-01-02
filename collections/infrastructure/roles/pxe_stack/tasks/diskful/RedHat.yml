@@ -57,8 +57,7 @@
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_group }}"
   vars:
-    os_profile: "{{ bb_equipments[item]['os'] }}"
-    hw_profile: "{{ bb_equipments[item]['hw'] }}"
+    equipment: "{{ bb_equipments[item] }}"
   with_items: "{{ bb_equipments | default({}, true) }}"
   when:
     - (bb_equipments[item]['type'] | default(pxe_stack_hw_equipment_type, true)) == "server"
