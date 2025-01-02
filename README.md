@@ -16,30 +16,14 @@ Devs infos:
 
 ## What is BlueBanquise
 
-**BlueBanquise** is group of coherent **Ansible** collections and tools, designed to deploy and manage large group of hosts (clusters of nodes).
+**BlueBanquise** is group of coherent **Ansible** roles and tools, designed to deploy and manage large group of hosts (clusters of nodes).
 
-The BlueBanquise collections are generic and can adapt to any kind of architecture (High Performance Computing clusters, university or enterprise infrastructures, Blender render farm, K8S cluster, etc.).
+The BlueBanquise collection is generic and can adapt to any kind of architecture (High Performance Computing clusters, university or enterprise infrastructures, Blender render farm, K8S cluster, etc.).
 A specific focus is made on scalability for very large clusters.
 
-When "stacked" together, collections and tools are called **BlueBanquise stack**.
+When "stacked" together, roles and tools are called the **BlueBanquise stack**.
 
-## Collections
-
-The following collections are available. **Please note that for now, only infrastructure collection of BlueBanquise is considered stable**.
-
-* :globe_with_meridians: **[Infrastructure](collections/infrastructure):** the core of the stack, focused on providing roles and tools to deploy hosts and configure vital services.
-* :globe_with_meridians: **[hardware](collections/hardware):** specific hardware support roles (GPU, interconnect, etc.).
-* :globe_with_meridians: **[file system](collections/file_systems):** support for local or network FS roles.
-* :globe_with_meridians: **[hpc](collections/hpc):** High Performance Computing related roles.
-* :globe_with_meridians: **[containers](collections/containers):** containers related roles.
-* :globe_with_meridians: **[high availability](collections/high_availability):** HA and load balancing related roles.
-* :globe_with_meridians: **[logging](collections/logging):** system logging related roles (different from monitoring).
-* :globe_with_meridians: **[monitoring](collections/monitoring):** cluster monitoring related roles.
-* :globe_with_meridians: **[security](collections/security):** system security related roles.
-
-Infrastructure collection should be compatible with all target Linux distributions (RHEL 8, RHEL 9, Debian 11, Debian 12, OpenSuse Leap 15, Ubuntu 20.04, Ubuntu 22.04). Other collections do not support all these distributions (support is added on demand).
-
-Note that few features are still limited on Ubuntu and Debian (mainly network configuration and diskless), I am working on it.
+The infrastructure collection should be compatible with most target Linux distributions (RHEL 8, RHEL 9, Debian 11, Debian 12, OpenSuse Leap 15, Ubuntu 20.04, Ubuntu 22.04, Ubuntu 24.04). However, please note that some non core roles do not support all these distributions (support is added on demand).
 
 ## License
 
@@ -67,8 +51,8 @@ In order to use BlueBanquise collections, you need the core variables, that cont
 To install core variables, you can either:
 
 * Copy file [bb_core.yml](resources/bb_core.yml) into your inventory at `group_vars/all/` level
-* Or install [commons](collections/commons/) collection and invoke the vars plugin at ansible-playbook execution, using `ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.commons.core`
-* Or add it into your `ansible.cfg` file (see example at [ansible.cfg](./ansible.cfg)) by adding `jinja2_extensions = jinja2.ext.loopcontrols,jinja2.ext.do`
+* Or invoke the vars plugin at ansible-playbook execution, using `ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.infrastructure.core`
+* Or add it into your `ansible.cfg` file (see example at [ansible.cfg](./ansible.cfg)) by adding `vars_plugins_enabled  = ansible.builtin.host_group_vars,bluebanquise.infrastructure.core`
 
 While first solution is simpler, second solution allows to use the galaxy update mechanism to ensure your core logic is always up to date (bug fixes mainly).
 
@@ -81,10 +65,9 @@ Note that not all roles need this core logic, and that all logic variables are p
 
 ### 2. Install collections
 
-To install BlueBanquise collections, you can use the ansible-galaxy command:
+To install BlueBanquise collection, you can use the ansible-galaxy command:
 
 ```
-ansible-galaxy collection install git+https://github.com/bluebanquise/bluebanquise.git#/collections/commons,master -vvv --upgrade
 ansible-galaxy collection install git+https://github.com/bluebanquise/bluebanquise.git#/collections/infrastructure,master -vvv --upgrade
 ```
 
