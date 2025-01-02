@@ -36,6 +36,19 @@
     msg: "{{ (bb_equipments[item]['os']['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution, true) | lower) }}"
   with_items: "{{ bb_equipments }}"
 
+- name: "template <|> TEST"
+  debug:
+    msg: "{{ item }} and {{ bb_equipments[item] }}"
+  vars:
+    os_profile: "{{ bb_equipments[item]['os'] }}"
+    hw_profile: "{{ bb_equipments[item]['hw'] }}"
+  with_items: "{{ bb_equipments | default({}, true) }}"
+  when:
+    - (bb_equipments[item]['type'] | default(pxe_stack_hw_equipment_type, true)) == "server"
+    - (bb_equipments[item]['os']['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution, true) | lower) in ['redhat', 'rhel', 'centos', 'centosstream', 'rockylinux', 'cloudlinux', 'oraclelinux', 'almalinux']
+  tags:
+    - template
+
 - name: "template <|> Generate kickstarts {{ pxe_stack_htdocs_path }}/pxe/equipment_profiles/{item}.kickstart.cfg"
   ansible.builtin.template:
     src: "RedHat/kickstart.cfg.j2"
