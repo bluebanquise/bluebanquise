@@ -3,13 +3,13 @@
   hosts: "fn_management"
   roles:
 
-    - role: bluebanquise.security.auditd
+    - role: bluebanquise.infrastructure.auditd
       tags: auditd
-    - role: bluebanquise.security.google_authenticator
+    - role: bluebanquise.infrastructure.google_authenticator
       tags: google_authenticator
       vars:
         google_authenticator_mfa_mode: publickey
-    - role: bluebanquise.security.google_authenticator
+    - role: bluebanquise.infrastructure.google_authenticator
       tags: google_authenticator
       vars:
         google_authenticator_mfa_mode: password
