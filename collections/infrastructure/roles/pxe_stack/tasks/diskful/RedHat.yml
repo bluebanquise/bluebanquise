@@ -34,7 +34,7 @@
   with_items: "{{ bb_equipments.keys() | default({}, true) }}"
   when:
     - (bb_equipments[item]['type'] | default(pxe_stack_hw_equipment_type)) == "server"
-    - (hostvars[groups[bb_equipments[item]['os']][0]]['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution) | lower) in ['redhat', 'rhel', 'centos','centosstream','rockylinux','cloudlinux','oraclelinux','almalinux']
+    - (bb_equipments[item]['os']['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution, true) | lower) in ['redhat', 'rhel', 'centos','centosstream','rockylinux','cloudlinux','oraclelinux','almalinux']
   tags:
     - template
 
@@ -51,6 +51,6 @@
   with_items: "{{ bb_equipments.keys() | default({}, true) }}"
   when:
     - (bb_equipments[item]['type'] | default(pxe_stack_hw_equipment_type)) == "server"
-    - (hostvars[groups[bb_equipments[item]['os']][0]]['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution) | lower) in ['redhat', 'rhel', 'centos','centosstream','rockylinux','cloudlinux','oraclelinux','almalinux']
+    - (bb_equipments[item]['os']['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution, true) | lower) in ['redhat', 'rhel', 'centos','centosstream','rockylinux','cloudlinux','oraclelinux','almalinux']
   tags:
     - template
