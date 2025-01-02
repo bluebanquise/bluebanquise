@@ -61,7 +61,9 @@
     path: /etc/exports
     regexp: ' # export id: {{ item.export }}$'
     line: "{{ item.export }} {% if item.network is defined and item.network is not none and networks[item.network] is defined and networks[item.network]['subnet'] is defined and networks[item.network]['subnet'] is not none and networks[item.network]['prefix'] is defined and networks[item.network]['prefix'] is not none %}{{networks[item.network]['subnet']}}/{{networks[item.network]['prefix']}}{% else %}*{% endif %}({{ item.export_options | default('rw,sync,root_squash', true) }}) # export id: {{ item.export }}"
-  when: inventory_hostname == item.server
+  when: (inventory_hostname == item.server) or
+        (item.server in ansible_all_ipv4_addresses) or
+        ((item.server_group is defined) and (inventory_hostname in groups[item.server_group]))
   with_items: "{{ nfs_shares }}"
   notify: service <|> Restart NFS server services
   tags:
