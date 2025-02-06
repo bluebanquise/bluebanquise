@@ -1,23 +1,11 @@
-# - name: "set lustre source"
-#  set_fact:
-#    lustre_mount_source: "{{lustre_mds_servers | map('regex_replace','$',item.lnet) | join(':') }}:{{ item.path | default(item.name)}}"
-
-# - name: list items
-#  debug:
-#    msg: "{{item}}"
-#  with_items: "{{ lustre_mounts }}"
-
-# - name: test
-#  vars:
-#    lustre_mount_source: "{{item.mgs_servers | map('regex_replace','$', '@' ~ item.lnet) | join(':') }}:{{ item.path | default(item.name)}}"
-#  debug:
-#    msg: "{{lustre_mount_source}}"
-#  with_items: "{{ lustre_mounts }}"
-
 - name: "Install lustre-client"
   ansible.builtin.package:
     name: ["lustre-client,kmod-lustre-client"]
     state: present
+
+- name: "Configure sysctl settings for LNET interfaces ( if multirail )"
+  ansible.builtin.include_tasks: configure_multirail_sysctl.yml
+  when: lustre_multirail == true 
 
 - name: "Configure LNET <> Render /etc/modprobe.d/lustre.conf"
   ansible.builtin.template:
