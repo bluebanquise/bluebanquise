@@ -5,7 +5,7 @@
 
 - name: "Configure sysctl settings for LNET interfaces ( if multirail )"
   ansible.builtin.include_tasks: configure_multirail_sysctl.yml
-  when: lustre_multirail == true 
+  when: lustre_multirail is defined and lustre_multirail == true
 
 - name: "Configure LNET <> Render /etc/modprobe.d/lustre.conf"
   ansible.builtin.template:
