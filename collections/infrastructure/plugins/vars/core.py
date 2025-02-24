@@ -1,6 +1,8 @@
 from ansible.plugins.vars import BaseVarsPlugin
 
+
 class VarsModule(BaseVarsPlugin):
+
 
     def get_vars(self, loader, path, entities, cache=True):
 
@@ -17,11 +19,11 @@ class VarsModule(BaseVarsPlugin):
           'bb_core_master_groups_naming': 'fn',
           'bb_core_managements_group_name': 'fn_management',
 
-          #############################################################
-          ############ J2_ LOGIC
-          #####
+          # ############################################################
+          # ########### J2_ LOGIC
+          # ####
 
-          ### Network
+          # ## Network
 
           # List of management networks.
           'j2_management_networks': "{{ networks | select('match','^'+bb_core_management_networks_naming+'-[a-zA-Z0-9]+') | list | unique | sort }}",
@@ -32,7 +34,7 @@ class VarsModule(BaseVarsPlugin):
           # Resolution address.
           'j2_node_main_resolution_address': "{{ (network_interfaces[0].ip4 | default('')).split('/')[0] | default(none) }}",
 
-          ## Main network
+          # # Main network
           # The network used by Ansible to deploy configuration (related to ssh).
           # Also the network used by the host to get services ip.
           # This network must have 3 keys defined at least: network, interface, and ip4, to be considered valid as main network.
@@ -78,7 +80,7 @@ class VarsModule(BaseVarsPlugin):
           {%- endfor -%}
           {{ bnodes }}""",
 
-          ## Equipments
+          # # Equipments
           # Generate the list of nodes with their associated os and hw groups as values, along their equipment profile ep
           # Example:
           #   c001:
@@ -149,7 +151,7 @@ class VarsModule(BaseVarsPlugin):
           {%- endfor -%}
           {{ bequipments }}""",
 
-          ### Icebergs
+          # ## Icebergs
           # Grab current iceberg group
           'j2_current_iceberg': "{{ bb_icebergs | default(false) | ternary( group_names | select('match','^'+bb_core_iceberg_naming+'[a-zA-Z0-9]+') | list | unique | sort | first | default(bb_core_iceberg_naming+'1'), bb_core_iceberg_naming+'1') }}",
           # Grab current iceberg number

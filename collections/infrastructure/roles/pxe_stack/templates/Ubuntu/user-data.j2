@@ -8,19 +8,19 @@
 {% else %}
 
 autoinstall:
-{% if (equipment['os']['os_autoinstall_custom_content'] | default(pxe_stack_os_autoinstall_custom_content, true)) is not none %}
+  {% if (equipment['os']['os_autoinstall_custom_content'] | default(pxe_stack_os_autoinstall_custom_content, true)) is not none %}
 # Custom content
-{{ (equipment['os']['os_autoinstall_custom_content'] | default(pxe_stack_os_autoinstall_custom_content, true)) indent(2, True) }}
-{% endif %}
-{% if equipment['os']['os_autoinstall_packages'] is defined and equipment['os']['os_autoinstall_packages'] is iterable and equipment['os']['os_autoinstall_packages'] is not string and equipment['os']['os_autoinstall_packages'] is not mapping %}
+{{ (equipment['os']['os_autoinstall_custom_content'] | default(pxe_stack_os_autoinstall_custom_content, true)) | indent(2, True) }}
+  {% endif %}
+  {% if equipment['os']['os_autoinstall_packages'] is defined and equipment['os']['os_autoinstall_packages'] is iterable and equipment['os']['os_autoinstall_packages'] is not string and equipment['os']['os_autoinstall_packages'] is not mapping %}
   packages:
     {% for package in equipment['os']['os_autoinstall_packages'] %}
     - {{ package }}
     {% endfor %}
   {% endif %}
-{% if (equipment['os']['os_pxe_repository_proxy'] | default(pxe_stack_os_pxe_repository_proxy, true) | default(none, true)) is not none %}
+  {% if (equipment['os']['os_pxe_repository_proxy'] | default(pxe_stack_os_pxe_repository_proxy, true) | default(none, true)) is not none %}
   proxy: {{ equipment['os']['os_pxe_repository_proxy'] | default(pxe_stack_os_pxe_repository_proxy, true) }}
-{% endif %}
+  {% endif %}
   version: 1
   apt:
     geoip: false
@@ -29,7 +29,7 @@ autoinstall:
   locale: {{ equipment['os']['os_system_language'] | default(pxe_stack_os_system_language) }}
   timezone: {{ pxe_stack_time_zone | default(bb_time_zone, true) | default('Europe/Brussels', true) }}
   user-data:
-{% if not pxe_stack_enable_root %}
+  {% if not pxe_stack_enable_root %}
     users:
       - name: {{ pxe_stack_sudo_user }}
         homedir: {{ pxe_stack_sudo_user_home }}
@@ -59,9 +59,9 @@ autoinstall:
         shell: /bin/bash
         passwd: "{{ equipment['os']['os_admin_password_sha512'] | default(pxe_stack_os_admin_password_sha512) }}"
     disable_root: true
-{% else %}
+  {% else %}
     disable_root: false
-{% endif %}
+  {% endif %}
   ssh:
     install-server: true
     allow-pw: true
@@ -69,24 +69,24 @@ autoinstall:
 {{ (equipment['os']['os_partitioning'] | default(pxe_stack_os_partitioning) | default(pxe_stack_ubuntu_automatic_partitioning, true)) | indent(2, True) }}
  
   late-commands:
-{% if pxe_stack_enable_root %}
+  {% if pxe_stack_enable_root %}
     - mkdir /target/root/.ssh
     {% for ssh_key in (equipment['os']['os_admin_ssh_keys'] | default(pxe_stack_os_admin_ssh_keys)) %}
     - echo "{{ ssh_key }}" >> /target/root/.ssh/authorized_keys
     {% endfor %}
     - sed -i "s/^#PermitRootLogin.*\$/PermitRootLogin yes/g" /target/etc/ssh/sshd_config
     - sed -i 's|^root:.:|root:{{ equipment['os']['os_admin_password_sha512'] | default(pxe_stack_os_admin_password_sha512) }}:|' /target/etc/shadow
-{% else %}
+  {% else %}
 {# While this is stupid, there is currently no way in cloudinit to set user uid/gid when creating it, we have to patch that here.#}
     - curtin in-target --target=/target -- sh -c 'groupadd -g {{ pxe_stack_sudo_user_gid }} {{ pxe_stack_sudo_user }}'
     - curtin in-target --target=/target -- sh -c 'useradd -d {{ pxe_stack_sudo_user_home }} -m -g {{ pxe_stack_sudo_user_gid }} -u {{ pxe_stack_sudo_user_uid }} -s /bin/bash {{ pxe_stack_sudo_user }}'
-{% endif %}
-{% if not pxe_stack_preserve_repositories %}
+  {% endif %}
+  {% if not pxe_stack_preserve_repositories %}
     - echo " " > /target/etc/apt/sources.list
-{% endif %}
-{% if (equipment['hw']['hw_preserve_efi_first_boot_device'] | default(pxe_stack_hw_preserve_efi_first_boot_device)) == true %}
+  {% endif %}
+  {% if (equipment['hw']['hw_preserve_efi_first_boot_device'] | default(pxe_stack_hw_preserve_efi_first_boot_device)) == true %}
     - sh -c '[ -d /sys/firmware/efi ] && efibootmgr -o $(efibootmgr | grep BootCurrent | cut -d" " -f2),$(efibootmgr | grep BootOrder | sed "s/BootOrder:\ //" | sed "s/$(efibootmgr | grep BootCurrent | cut -d" " -f2),//") || echo "Not an EFI system, skipping"'
-{% endif %}
+  {% endif %}
     - curtin in-target --target=/target -- sh -c 'for I in `cat /proc/cmdline | tr " " "\n" | grep -E "^(node_hostname|ipxe_next_server)="` ; do eval $I; done; curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$node_hostname&boot=disk"'
 
 {% endif %}
