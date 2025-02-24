@@ -1,0 +1,48 @@
+# General configuration, optional
+port: 7777
+host: 0.0.0.0
+debug: True
+
+# Allowed address, optional
+allowed_address:
+ - 127.0.0.1
+
+# Tasks
+tasks:
+ test:
+   allowed_values: # optional
+     node:
+       - c001
+   steps:
+     - command: echo coucou
+     - command: echo %%node%%  # %%node%% means this is a parameter to evaluate, given as HTTP GET parameters
+     - command: haha
+       exit_code: 127 # optional
+
+{# 
+oxedions@prima:~/tmp_devs/diskless$ curl -X GET http://localhost:7777/test?node=c001
+{
+ "comment": "Task was executed properly.",
+ "logs": {
+   "1": {
+     "command": "echo coucou",
+     "exit_code": 0,
+     "stderr": "",
+     "stdout": "coucou\n"
+   },
+   "2": {
+     "command": "echo c001",
+     "exit_code": 0,
+     "stderr": "",
+     "stdout": "c001\n"
+   },
+   "3": {
+     "command": "haha",
+     "exit_code": 127,
+     "stderr": "/bin/sh: 1: haha: not found\n",
+     "stdout": ""
+   }
+ },
+ "status": "OK"
+}
+oxedions@prima:~/tmp_devs/diskless$ #}

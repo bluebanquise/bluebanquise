@@ -8,6 +8,10 @@
 {% else %}
 
 autoinstall:
+{% if (equipment['os']['os_autoinstall_custom_content'] | default(pxe_stack_os_autoinstall_custom_content, true)) is not none %}
+# Custom content
+{{ (equipment['os']['os_autoinstall_custom_content'] | default(pxe_stack_os_autoinstall_custom_content, true)) indent(2, True) }}
+{% endif %}
 {% if equipment['os']['os_autoinstall_packages'] is defined and equipment['os']['os_autoinstall_packages'] is iterable and equipment['os']['os_autoinstall_packages'] is not string and equipment['os']['os_autoinstall_packages'] is not mapping %}
   packages:
     {% for package in equipment['os']['os_autoinstall_packages'] %}
@@ -84,7 +88,5 @@ autoinstall:
     - sh -c '[ -d /sys/firmware/efi ] && efibootmgr -o $(efibootmgr | grep BootCurrent | cut -d" " -f2),$(efibootmgr | grep BootOrder | sed "s/BootOrder:\ //" | sed "s/$(efibootmgr | grep BootCurrent | cut -d" " -f2),//") || echo "Not an EFI system, skipping"'
 {% endif %}
     - curtin in-target --target=/target -- sh -c 'for I in `cat /proc/cmdline | tr " " "\n" | grep -E "^(node_hostname|ipxe_next_server)="` ; do eval $I; done; curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$node_hostname&boot=disk"'
-
-{{ equipment['os']['os_autoinstall_raw_content'] | default(pxe_stack_os_autoinstall_raw_content) | indent(2, True) }}
 
 {% endif %}

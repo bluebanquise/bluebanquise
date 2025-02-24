@@ -6,6 +6,11 @@
 {{ equipment['os']['os_autoinstall_raw_file'] }}
 {% else %}
 
+{% if (equipment['os']['os_autoinstall_custom_content'] | default(pxe_stack_os_autoinstall_custom_content, true)) is not none %}
+# Custom content
+{{ (equipment['os']['os_autoinstall_custom_content'] | default(pxe_stack_os_autoinstall_custom_content, true)) }}
+{% endif %}
+
 ### zone
 d-i debian-installer/locale string {{equipment['os']['os_system_language']  | default(pxe_stack_os_system_language) }}
 d-i keyboard-configuration/xkb-keymap select {{equipment['os']['os_keyboard_layout']  | default(pxe_stack_os_keyboard_layout) | lower}}
@@ -115,7 +120,5 @@ d-i preseed/late_command string \
   in-target sh -c '[ -d /sys/firmware/efi ] && efibootmgr -o $(efibootmgr | grep BootCurrent | cut -d" " -f2),$(efibootmgr | grep BootOrder | sed "s/BootOrder:\ //" | sed "s/$(efibootmgr | grep BootCurrent | cut -d" " -f2),//") || echo "Not an EFI system, skipping"'
 {% endif %}
   in-target sh -c 'for I in `cat /proc/cmdline | tr " " "\n" | grep -E "^(node_hostname|ipxe_next_server)="` ; do eval $I; done; curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$node_hostname&boot=disk"';
-
-{{ equipment['os']['os_autoinstall_raw_content'] | default(pxe_stack_os_autoinstall_raw_content) }}
 
 {% endif %}
