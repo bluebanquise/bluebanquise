@@ -251,7 +251,9 @@ zypper rr $(zypper lr -d | grep netboots | awk -F '' '{print $1}')
   </proxy>
 {% endif %}
 
-{{ equipment['os']['os_autoinstall_raw_content'] | default(pxe_stack_os_autoinstall_raw_content) }}
+{% if (equipment['os']['os_autoinstall_custom_content'] | default(pxe_stack_os_autoinstall_custom_content, true)) is not none %}
+{{ (equipment['os']['os_autoinstall_custom_content'] | default(pxe_stack_os_autoinstall_custom_content, true)) }}
+{% endif %}
 
 </profile>
 
