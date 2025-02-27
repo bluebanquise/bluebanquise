@@ -20,6 +20,7 @@ podman_insecure_registries: []
 podman_blocked_registries: []
 # Name of the default registry
 podman_local_registry_dir: "/var/lib/registry"
+podman_local_registry_host: localhost
 podman_local_registry_port: 5000
 podman_registry_container_path: "/var/www/html/images/registry-2.tgz"
 podman_registry_container: "registry"

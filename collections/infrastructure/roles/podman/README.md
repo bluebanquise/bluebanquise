@@ -41,6 +41,7 @@ Variables for this role:
 | podman_insecure_registries | [] | items | non TLS registries for podman, i.e. localhost:5000 |
 | podman_blocked_registries | [] | items | blocked container registries |
 | podman_local_registry_dir | "/var/lib/registry" | String | default local registry path when enabled |
+| podman_local_registry_host| localhost | String | Registry host, useful for having a registry in HA
 | podman_local_registry_port | 5000 | integer | port of the local registry when enabled |
 | podman_registry_container_path | /var/www/html/images/registry-2.tgz | String | path of the container used to spawn to default local registry when enabled |
 | podman_conf_cgroup_manager | 'systemd' | string | /etc/container/libpod.conf: cgroup_manager |
@@ -76,7 +77,7 @@ For a basic setup with default values run:
 
 ## Local registry
 
-In order to deploy the optionnal local registry, you must provide the container for it. 
+In order to deploy the optionnal local registry, you must provide the container for it.
 This is done wih the following steps from your local PC or from a server with Internet access:
 
 * Using Docker
@@ -109,6 +110,7 @@ podman_search_registries:
 podman_insecure_registries:
   - 'localhost:5000'
 podman_local_registry_dir: "/var/lib/registry"
+podman_local_registry_host: localhost
 podman_local_registry_port: 5000
 podman_registry_container_path: "/var/www/html/images/registry-2.tgz"
 podman_registry_container: "registry"
@@ -123,6 +125,7 @@ podman_local_registry_group: "root"
 
 ## Changelog
 
+* 2.0.0: Updated registry format;Use handlers;Replace libpod.conf. Thiago Cardozo <boubee.thiago@gmail.com>
 * 1.0.3: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.2: Fix services to match bb 2.0 format. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.1: Use slirp4netns to avoid error with HA. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
