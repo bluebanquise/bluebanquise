@@ -1,0 +1,13 @@
+---
+
+- name: systemd ¦ Reload systemd configuration
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: service ¦ Restart registry container service
+  service:
+    name: registry
+    state: restarted
+  when:
+    - "'service' not in ansible_skip_tags"
+    - (bb_start_services | bool)
