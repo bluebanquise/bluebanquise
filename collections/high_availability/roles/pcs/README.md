@@ -374,9 +374,9 @@ pcs_stonith:
     avoids: ha1                                                        # Avoid resource to be running on own host
 ```
 
-If `pcs_stonith` is not defined in the inventory, then this role will disable 
-STONITH (stonith-enabled: false). This will allow the HA cluster to operate 
-without STONITH (not recommended for production). 
+If `pcs_stonith` is not defined in the inventory, then this role will disable
+STONITH (stonith-enabled: false). This will allow the HA cluster to operate
+without STONITH (not recommended for production).
 Adding the `pcs_stonith` variable will enable STONITH again.
 
 ## 3. Deploy HA
@@ -613,14 +613,15 @@ not present. Then in HA resources, declare the following:
 
 ## 5. Known Issues
 
-* When pacemaker/corosync are first installed in Ubuntu 20/22, 
-a default pacemaker cluster is created. 
-This role will detect the presence of the default cluster and destroy it. 
-The conditions for destroying the cluster are matching the cluster name 'debian' 
+* When pacemaker/corosync are first installed in Ubuntu 20/22,
+a default pacemaker cluster is created.
+This role will detect the presence of the default cluster and destroy it.
+The conditions for destroying the cluster are matching the cluster name 'debian'
 and having 0 resources configured.
 
 ## 6. Changelog
 
+* 1.1.4: Fix error when running with multiple mngt nodes. Thiago Cardozo <boubee.thiago@gmail.com>
 * 1.1.3: README update. Hamid MERZOUKI <hamid.merzouki@naverlabs.com>
 * 1.1.2: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.1: Fix service name in RHEL firewall. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
