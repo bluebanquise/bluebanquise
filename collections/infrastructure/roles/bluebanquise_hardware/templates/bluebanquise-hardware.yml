@@ -1,0 +1,29 @@
+nodes:
+{% for hw_group in groups}
+  c001: # Nodes
+    bmc: bc001
+    power: # Actions
+      protocol: ipmi # Plugin to use for this action
+      parameters:
+        user: ADMIN
+        password: ADMIN
+    boot:
+    console:
+  c002: # Nodes
+    bmc: bc002
+    power: # Actions
+      protocol: ipmi # Plugin to use for this action
+      parameters:
+        user: ADMIN
+        password: ADMIN
+    boot:
+    console:
+  c003: # Nodes
+    bmc: bc003
+    power: # Actions
+      protocol: ipmi # Plugin to use for this action
+      parameters:
+        user: ADMIN
+        password: ADMIN
+    boot:
+    console:

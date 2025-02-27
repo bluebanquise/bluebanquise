@@ -83,6 +83,7 @@ Once these pam_limits parameter pushed, restart conman daemon.
 
 ## Changelog
 
+* 1.7.0: Rewrite code for 3.2 format. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.6.0: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.5.1: Fix logrotate paths. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.5.0: Add logrotate file. Matthieu Isoard <indigoping4cgmi@gmail.com>

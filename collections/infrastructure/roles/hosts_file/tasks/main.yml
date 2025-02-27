@@ -13,7 +13,7 @@
   ansible.builtin.debug:
     msg: "{{ bb_nodes }}"
   tags:
-    - templates
+    - never
     - debug
 #
 

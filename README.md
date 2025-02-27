@@ -10,7 +10,7 @@ Devs infos:
 
 :green_heart: The main branch is now considered stable.
 
-:green_heart: Current core version: 3.0.2 (locked :lock:)
+:yellow_heart: Current core version: 3.2.0 (unlocked until confirmed stable :unlock:)
 
 ---
 

@@ -54,6 +54,8 @@
 - name: debug <|> Display bb_nodes_profiles
   ansible.builtin.debug:
     msg: "{{ bb_nodes_profiles}}"
+  tags:
+    - debug
 
 - name: fact <|> Calculate bb_equipments
   ansible.builtin.set_fact:
@@ -65,6 +67,8 @@
 - name: debug <|> Display bb_equipments
   ansible.builtin.debug:
     msg: "{{ bb_equipments}}"
+  tags:
+    - debug
 #
 
 - name: "package <|> Install {{ (pxe_stack_packages_to_install + [pxe_stack_tftp_package | default(pxe_stack_default_tftp_package)]) | join(' ') }} packages"

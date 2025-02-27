@@ -1,0 +1,128 @@
+---
+- name: include_vars <|> Gather OS specific variables
+  # This task gathers variables defined in OS specific files.
+  #
+  # Search vars in:
+  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
+  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
+  #  - <distribution>.yml            # eg. CentOS.yml
+  #  - <os_family>.yml               # eg. RedHat.yml
+  #
+  # If no OS specific file is found, the role will default to vars/main.yml
+  #
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family }}.yml"
+      skip: true
+  tags:
+    - always
+
+- name: include_tasks <|> Use OS dedicated firewall task
+  ansible.builtin.include_tasks: "{{ outer_item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}/firewall.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}/firewall.yml"
+      skip: true
+  loop_control:
+    loop_var: outer_item
+  tags:
+    - internal
+    - firewall
+
+- name: include_tasks <|> bb cache
+  ansible.builtin.include_tasks: "cache.yml"
+  tags:
+    - templates
+  when: bb_nodes is not defined or bb_nodes is none or bb_nodes_profiles is not defined or bb_nodes_profiles is none or bb_equipments is not defined or bb_equipments is none
+
+- name: "package <|> Install {{ dhcp_server_packages_to_install | join(' ') }}"
+  ansible.builtin.package:
+    name: "{{ dhcp_server_packages_to_install }}"
+    state: present
+  tags:
+    - package
+
+- name: "file <|> Create {{ dhcp_server_conf_dir }}"
+  ansible.builtin.file:
+    path: "{{ dhcp_server_conf_dir }}"
+    owner: root
+    mode: "0755"
+    state: directory
+
+- name: "template <|> Generate {{ dhcp_server_conf_file }}"
+  ansible.builtin.template:
+    src: dhcpd.conf.j2
+    dest: "{{ dhcp_server_conf_file }}"
+    owner: root
+    group: root
+    mode: 0644
+  notify: service <|> Restart dhcp server
+  tags:
+    - template
+
+- name: "template <|> Generate {{ dhcp_server_conf_dir }}/dhcpd.networks.conf"
+  ansible.builtin.template:
+    src: dhcpd.networks.conf.j2
+    dest: "{{ dhcp_server_conf_dir }}/dhcpd.networks.conf"
+    owner: root
+    group: root
+    mode: 0644
+  notify: service <|> Restart dhcp server
+  when:
+    - networks is defined and networks is iterable and networks is not string and networks is mapping
+  tags:
+    - template
+
+- name: "template <|> Generate {{ dhcp_server_conf_dir }}/dhcpd.{{ item }}.conf"
+  ansible.builtin.template:
+    src: dhcpd.subnet.conf.j2
+    dest: "{{ dhcp_server_conf_dir }}/dhcpd.{{ item }}.conf"
+    owner: root
+    group: root
+    mode: 0644
+  with_items: "{{ networks }}"
+  when:
+    - j2_current_iceberg_network is not none and j2_current_iceberg_network in item
+    - networks is defined and networks is iterable and networks is not string and networks is mapping
+    - networks[item] is defined and networks[item] is not none
+    - networks[item].is_in_dhcp | default(true, true)
+  notify: service <|> Restart dhcp server
+  tags:
+    - template
+
+- name: include_tasks <|> Apply OS specific tasks
+  ansible.builtin.include_tasks: "{{ item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}/main.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}/main.yml"
+      skip: true
+  tags:
+    - internal
+
+- name: meta <|> Run handler tasks to restart dhcp services
+  ansible.builtin.meta: flush_handlers
+
+- name: "service <|> Manage {{ dhcp_server_services_to_start | join(' ') }} state"
+  ansible.builtin.service:
+    name: "{{ item }}"
+    enabled: "{{ (dhcp_server_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    state: "{{ (dhcp_server_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
+  loop: "{{ dhcp_server_services_to_start }}"
+  tags:
+    - service
