@@ -24,5 +24,5 @@
   {%- endfor -%}
   {% if host_applies.value %}
 options lnet networks={{ net.name }}({{ host_interface(hostvars[inventory_hostname],net.network) }})
-  {%- endif -%}
+  {% endif %}
 {%- endfor -%}
