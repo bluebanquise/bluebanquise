@@ -10,7 +10,7 @@ Devs infos:
 
 :green_heart: The main branch is now considered stable.
 
-:green_heart: Current core version: 3.0.2 (locked :lock:)
+:green_heart: Current core version: 3.2.0
 
 ---
 
@@ -42,7 +42,7 @@ In the 21th century, it is a shame not all children live in peace.
 
 We will assume here you already have a recent Ansible setup and configured. If you are new to Ansible, you can use the [provided generic tutorial](http://bluebanquise.com/tutorials/sysadmin_ansible/).
 
-If you are aiming clients hosts with an old native Python version (RHEL 8 or OpenSuse Leap 15), be sure to cap your ansible-core pip package version to 2.16. 2.17 and more are no more compatible with Python 3.6.
+If you are aiming clients hosts with an old native Python version (RHEL 8 or OpenSuse Leap 15), be sure to cap your ansible-core pip package version to 2.16 . 2.17 and more are no more compatible with Python 3.6.
 
 ### 1. Core variables and Jinja2 extensions
 
@@ -54,7 +54,7 @@ To install core variables, you can either:
 * Or invoke the vars plugin at ansible-playbook execution, using `ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.infrastructure.core`
 * Or add it into your `ansible.cfg` file (see example at [ansible.cfg](./ansible.cfg)) by adding `vars_plugins_enabled  = ansible.builtin.host_group_vars,bluebanquise.infrastructure.core`
 
-While first solution is simpler, second solution allows to use the galaxy update mechanism to ensure your core logic is always up to date (bug fixes mainly).
+While first solution is simpler, second solution is preferred as it allows to use the galaxy update mechanism to ensure your core logic is always up to date (bug fixes mainly).
 
 In both cases, you need to enable some Jinja2 extensions at run time. To do so, either:
 
