@@ -4,12 +4,6 @@
 
 This role provides powerman, to manage nodes power via ipmi (BMC).
 
-## Data Model
-
-This role relies on [data model](https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md):
-* Section 2 (Hosts definition)
-* Section 3.2 (Hardware Groups)
-
 ## Instructions
 
 To power on node, use:
@@ -28,35 +22,9 @@ Set the following variable to `true`. Default is `false`.
 powerman_enable_ipmi_lan_2_0: true
 ```
 
-## Input
-
-Mandatory inventory vars:
-
-**hostvars[inventory_hostname]**
-
-* icebergs_system
-
-**hostvars[hosts]**
-
-* hw_board_authentication.user
-* hw_board_authentication.password
-* bmc
-   * .name
-   * .ip4
-
-## Output
-
-Packages installed:
-
-* powerman
-* freeipmi
-
-Files generated:
-
-* /etc/powerman/powerman.conf
-
 ## Changelog
 
+* 1.4.0: Simplify role code. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.2: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.1: Fix defaults path. Pierre Gay <pierre.gay@u-bordeaux.fr>, Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>
 * 1.3.0: add optional variable powerman_enable_ipmi_lan_2_0. Pierre Gay <pierre.gay@u-bordeaux.fr>, Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>

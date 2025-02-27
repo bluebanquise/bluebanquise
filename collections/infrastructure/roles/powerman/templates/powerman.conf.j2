@@ -6,73 +6,50 @@ include "/etc/powerman/ipmipower.dev"
 
 {% set range = (j2_hosts_range | sort) %}
 
-{% for equipment in j2_equipment_groups_list %}
+{% for equipment in bb_equipments %}
+  {# Detect protocol #}
   {% set hosts = [] %}
   {% set bmcs = [] %}
   {# Structure to gather hosts by their BMC credentials: user -> pass -> hosts nested dict #}
   {% set credentials_dict = {} %}
-  {% for host in groups[equipment] %}
+  {% for host in bb_equipments[equipment]['nodes'] %}
     {% if host in range and hostvars[host]['bmc']['name'] is defined -%}
-      {# Gather BMC network settings for current host #}
-      {% if hostvars[host]['bmc']['ip4'] is defined %}{# BMC is defined inside host #}
-        {% set credentials_host = host %}{# Define host as credentials source #}
-      {% else %}{# BMC is defined outside host #}
-        {% set credentials_host = hostvars[host]['bmc']['name'] %}{# Define external bmc as credentials source #}
-      {% endif %}
       {# Look for BMC credentials #}
-      {% if hostvars[credentials_host]['hw_board_authentication'] is defined %}
-        {# Found hw_board_authentication settings, use them #}
-        {% set ipmi_credentials = (hostvars[credentials_host]['hw_board_authentication'] | selectattr('protocol','match','IPMI')) %}
-        {% if ipmi_credentials | length > 0 %}
-          {# Found IPMI credentials from hw_board_authentication, save first entry #}
-          {% set host_bmc_user = (ipmi_credentials | map(attribute='user') | list | first) %}
-          {% set host_bmc_password = (ipmi_credentials | map(attribute='password') | list | first) %}
-        {% else %}
-          {# Did not find IPMI credentials, will not add this BMC #}
-          {% set host_bmc_user = '' %}
-          {% set host_bmc_password = '' %}
-        {% endif %}
-        {# Check if this set of credentials have been used before in a previous host #}
-        {% if host_bmc_user and host_bmc_user not in credentials_dict -%}
-          {# new user credential, create a dictionary entry for it #}
-          {{ credentials_dict.update({host_bmc_user: {}}) }}
-        {%- endif %}
-        {% if host_bmc_password and host_bmc_password not in credentials_dict[host_bmc_user] -%}
-          {# new password credential, create an inner dictionary entry for it #}
-          {{ credentials_dict[host_bmc_user].update({host_bmc_password: []}) }}
-        {%- endif %}
-        {# Add this host to the set of hosts with the same credentials #}
-        {% if host_bmc_user and host_bmc_password -%}
+      {% if hostvars[host]['hw_board_authentication'] is defined %}
+        {% set host_bmc_user = (hostvars[host]['hw_board_authentication'] | selectattr('protocol','defined') | selectattr('protocol','match','IPMI') | map(attribute='user') | list | first | default(none)) %}
+        {% set host_bmc_password = (hostvars[host]['hw_board_authentication'] | selectattr('protocol','defined') | selectattr('protocol','match','IPMI') | map(attribute='password') | list | first | default(none)) %}
+        {% if host_bmc_user is defined and host_bmc_user is not none and host_bmc_password is defined and host_bmc_password is not none -%}
+          {# Check if this set of credentials have been used before in a previous host #}
+          {% if host_bmc_user not in credentials_dict -%}
+            {# new user credential, create a dictionary entry for it #}
+            {{ credentials_dict.update({host_bmc_user: {}}) }}
+          {%- endif %}
+          {% if host_bmc_password not in credentials_dict[host_bmc_user] -%}
+           {# new password credential, create an inner dictionary entry for it #}
+           {{ credentials_dict[host_bmc_user].update({host_bmc_password: []}) }}
+          {%- endif %}
+          {# Add this host to the set of hosts with the same credentials #}
           {{ credentials_dict[host_bmc_user][host_bmc_password].append(host) }}
         {%- endif %}
       {% endif %}
     {%- endif %}
   {% endfor %}
   {# Render entries for each set of nodes with the same credentials #}
-  {# The credentials_count variable is used to keep track of the set count within each equipment #}
-  {% set credentials_count = [] %}
   {% for host_bmc_user in credentials_dict %}
     {% for host_bmc_password in credentials_dict[host_bmc_user] %}
       {% set hosts = credentials_dict[host_bmc_user][host_bmc_password] %}
       {% set bmcs = [] %}
-      {# Increase the count of sets in this equipment #}
-      {{ credentials_count.append(1) }}
       {% for host in hosts -%}
         {{ bmcs.append(hostvars[host]['bmc']['name']) }}
       {%- endfor %}
-      {# Name device for each set of credentials: first device has equipment name, next ones are indexed #}
-      {% if credentials_count | length > 1 %}
-        {% set device_suffix = credentials_count | length | string %}
-      {% else %}
-        {% set device_suffix = '' %}
-      {% endif %}
+      {# Name device for each set of credentials, using index #}
+      {% set device_suffix = loop.index | string %}
       {% if powerman_enable_ipmi_lan_2_0 is defined and powerman_enable_ipmi_lan_2_0 %}
-device "{{ equipment }}{{ device_suffix }}" "ipmipower" "/usr/sbin/ipmipower --wait-until-on --wait-until-off -h {{ bmcs|bluebanquise.commons.nodeset }} -u {{ host_bmc_user }} -p {{ host_bmc_password }} -D LAN_2_0 |&"
+device "{{ equipment }}{{ device_suffix }}" "ipmipower" "/usr/sbin/ipmipower --wait-until-on --wait-until-off -h {{ bmcs|bluebanquise.infrastructure.nodeset }} -u {{ host_bmc_user }} -p {{ host_bmc_password }} -D LAN_2_0 |&"
       {% else %}
-device "{{ equipment }}{{ device_suffix }}" "ipmipower" "/usr/sbin/ipmipower --wait-until-on --wait-until-off -h {{ bmcs|bluebanquise.commons.nodeset }} -u {{ host_bmc_user }} -p {{ host_bmc_password }} |&"
+device "{{ equipment }}{{ device_suffix }}" "ipmipower" "/usr/sbin/ipmipower --wait-until-on --wait-until-off -h {{ bmcs|bluebanquise.infrastructure.nodeset }} -u {{ host_bmc_user }} -p {{ host_bmc_password }} |&"
       {% endif %}
-node "{{ hosts|bluebanquise.commons.nodeset }}" "{{ equipment }}{{ device_suffix }}" "{{ bmcs|bluebanquise.commons.nodeset }}"
+node "{{ hosts|bluebanquise.infrastructure.nodeset }}" "{{ equipment }}{{ device_suffix }}" "{{ bmcs|bluebanquise.infrastructure.nodeset }}"
     {% endfor %}
   {% endfor %}
 {% endfor %}
-

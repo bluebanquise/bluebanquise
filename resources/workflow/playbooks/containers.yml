@@ -3,5 +3,5 @@
   hosts: "fn_management"
   roles:
 
-    - role: bluebanquise.containers.podman
+    - role: bluebanquise.infrastructure.podman
       tags: podman

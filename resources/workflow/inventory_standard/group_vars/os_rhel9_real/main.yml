@@ -1,0 +1,17 @@
+os_operating_system:
+  distribution: "redhat"
+  distribution_version: "9"
+  distribution_major_version: "9"
+
+os_preserve_efi_first_boot_device: true
+
+os_access_control: enforcing
+os_firewall: true
+
+os_target_disk: /dev/sda
+os_partitioning: foobar
+os_autoinstall_pre_script: foobar
+os_autoinstall_post_script: foobar
+
+os_keyboard_layout: us
+os_system_language: en_US.UTF-8

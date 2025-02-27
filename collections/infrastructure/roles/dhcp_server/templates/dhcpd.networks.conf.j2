@@ -85,10 +85,8 @@ subnet {{ networks[network]['subnet'] }} netmask {{ (networks[network]['subnet']
 {# SHARED NETWORKS GATHERING IF ANY #}
 {% set shared_networks = [] %}
 {% for network in networks %}
-  {% if j2_current_iceberg_network in network %}{# check if this network is part of the current iceberg #}
-    {% if networks[network]['shared_network'] is defined and not none %}
+  {% if networks[network]['shared_network'] is defined and not none %}
 {{ shared_networks.append(networks[network]['shared_network']|string) }}
-    {% endif %}
   {% endif %}
 {% endfor %}
 
@@ -97,7 +95,7 @@ subnet {{ networks[network]['subnet'] }} netmask {{ (networks[network]['subnet']
 {% for shared_network in ( shared_networks | unique | sort ) %}
 shared-network {{ shared_network }} {
   {% for network in networks %}
-    {% if j2_current_iceberg_network in network and (networks[network]['dhcp_server'] | default(true)) %}
+    {% if (networks[network]['dhcp_server'] | default(true)) %}
       {% if networks[network]['shared_network'] is defined and networks[network]['shared_network'] is not none and networks[network]['shared_network'] == shared_network %}
 {{ write_network(network) }}
       {% endif %}
@@ -109,7 +107,7 @@ shared-network {{ shared_network }} {
 ## NON SHARED NETWORKS SUBNETS
 
 {% for network in networks %}
-  {% if j2_current_iceberg_network in network and (networks[network]['dhcp_server'] | default(true)) %}
+  {% if (networks[network]['dhcp_server'] | default(true)) %}
     {% if networks[network]['shared_network'] is not defined or networks[network]['shared_network'] is none  %}
 {{ write_network(network) }}
     {% endif %}

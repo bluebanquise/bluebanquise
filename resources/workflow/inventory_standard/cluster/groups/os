@@ -25,3 +25,8 @@ mgt8
 
 [os_debian12]
 mgt9
+
+[os_rhel9_real]
+mg1
+c1
+l1

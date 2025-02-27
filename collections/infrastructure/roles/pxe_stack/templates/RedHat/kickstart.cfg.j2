@@ -1,15 +1,15 @@
 #### Blue Banquise file ####
 ## {{ ansible_managed }}
 
-{% if hostvars[groups[os_profile][0]]['os_autoinstall_raw_file'] is defined %}
-{{ hostvars[groups[os_profile][0]]['os_autoinstall_raw_file'] }}
+{% if equipment['os']['os_autoinstall_raw_file'] is defined %}
+{{ equipment['os']['os_autoinstall_raw_file'] }}
 {% else %}
 
 ##### General settings
 
-# Custom scripts or kickstart content
-{% if (hostvars[groups[os_profile][0]]['os_autoinstall_custom_content'] | default(pxe_stack_os_autoinstall_custom_content)) is not none %}
-{{ (hostvars[groups[os_profile][0]]['os_autoinstall_custom_content'] | default(pxe_stack_os_autoinstall_custom_content)) }}
+{% if (equipment['os']['os_autoinstall_custom_content'] | default(pxe_stack_os_autoinstall_custom_content, true)) is not none %}
+# Custom content
+{{ (equipment['os']['os_autoinstall_custom_content'] | default(pxe_stack_os_autoinstall_custom_content, true)) }}
 {% endif %}
 
 # Do not use GUI
@@ -19,13 +19,13 @@ text
 firstboot --enable
 
 # System keyboard layout
-keyboard --vckeymap={{ (hostvars[groups[os_profile][0]]['os_keyboard_layout'] | default(pxe_stack_os_keyboard_layout)) | lower }} --xlayouts='{{ (hostvars[groups[os_profile][0]]['os_keyboard_layout'] | default(pxe_stack_os_keyboard_layout)) | lower }}'
+keyboard --vckeymap={{ (equipment['os']['os_keyboard_layout'] | default(pxe_stack_os_keyboard_layout)) | lower }} --xlayouts='{{ (equipment['os']['os_keyboard_layout'] | default(pxe_stack_os_keyboard_layout)) | lower }}'
 
 # System language
-lang {{ hostvars[groups[os_profile][0]]['os_system_language'] | default(pxe_stack_os_system_language) }}
+lang {{ equipment['os']['os_system_language'] | default(pxe_stack_os_system_language) }}
 
 # System timezone
-{% if (hostvars[groups[os_profile][0]]['os_operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version) ) | int < 9 %}
+{% if (equipment['os']['os_operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version) ) | int < 9 %}
 timezone {{ pxe_stack_time_zone | default(bb_time_zone, true) | default('Europe/Brussels', true) }} --isUtc
 {% else %}
 timezone {{ pxe_stack_time_zone | default(bb_time_zone, true) | default('Europe/Brussels', true) }} --utc
@@ -36,17 +36,17 @@ reboot
 
 ##### Authentication settings
 
-{% if (hostvars[groups[os_profile][0]]['os_operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version) ) | int < 8 %}
+{% if (equipment['os']['os_operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version) ) | int < 8 %}
 # Define authentication method (sha512)
 auth --enableshadow --passalgo=sha512
 {% endif %}
 
 {% if not pxe_stack_enable_root %}
 rootpw --lock
-user --name={{ pxe_stack_sudo_user }} --homedir={{ pxe_stack_sudo_user_home }} --iscrypted --password={{ hostvars[groups[os_profile][0]]['os_admin_password_sha512'] | default(pxe_stack_os_admin_password_sha512) }} --uid {{ pxe_stack_sudo_user_uid }} --gid {{ pxe_stack_sudo_user_gid }}
+user --name={{ pxe_stack_sudo_user }} --homedir={{ pxe_stack_sudo_user_home }} --iscrypted --password={{ equipment['os']['os_admin_password_sha512'] | default(pxe_stack_os_admin_password_sha512) }} --uid {{ pxe_stack_sudo_user_uid }} --gid {{ pxe_stack_sudo_user_gid }}
 {% else %}
 # Root password (sha512)
-rootpw --iscrypted {{ hostvars[groups[os_profile][0]]['os_admin_password_sha512'] | default(pxe_stack_os_admin_password_sha512) }}
+rootpw --iscrypted {{ equipment['os']['os_admin_password_sha512'] | default(pxe_stack_os_admin_password_sha512) }}
 {% endif %}
 
 ##### Network
@@ -58,14 +58,14 @@ network --hostname=localhost.localdomain
 ##### Security
 
 # SELinux
-{% if (hostvars[groups[os_profile][0]]['os_access_control'] | default(pxe_stack_os_access_control)) in ['enforcing', 'permissive'] %}
-selinux --{{ hostvars[groups[os_profile][0]]['os_access_control'] | default(pxe_stack_os_access_control) }}
+{% if (equipment['os']['os_access_control'] | default(pxe_stack_os_access_control)) in ['enforcing', 'permissive'] %}
+selinux --{{ equipment['os']['os_access_control'] | default(pxe_stack_os_access_control) }}
 {% else %}
 selinux --disabled
 {% endif %}
 
 # Firwalld
-{% if (hostvars[groups[os_profile][0]]['os_firewall'] | default(pxe_stack_os_firewall)) == true %}
+{% if (equipment['os']['os_firewall'] | default(pxe_stack_os_firewall)) == true %}
 firewall --enabled
 {% else %}
 firewall --disabled
@@ -77,10 +77,10 @@ firewall --disabled
 # a potentially destructive default will be chosen!
 
 # Bootloader configuration
-bootloader --append="{{ hostvars[groups[os_profile][0]]['os_kernel_parameters'] | default(pxe_stack_os_kernel_parameters) }} {{ hostvars[groups[hw_profile][0]]['hw_kernel_parameters'] | default(pxe_stack_hw_kernel_parameters) }} " --location=mbr
+bootloader --append="{{ equipment['os']['os_kernel_parameters'] | default(pxe_stack_os_kernel_parameters) }} {{ equipment['hw']['hw_kernel_parameters'] | default(pxe_stack_hw_kernel_parameters) }} " --location=mbr
 
 # Partitioning
-{{ hostvars[groups[os_profile][0]]['os_partitioning'] | default(pxe_stack_os_partitioning) | default(pxe_stack_redhat_automatic_partitioning, true) }}
+{{ equipment['os']['os_partitioning'] | default(pxe_stack_os_partitioning) | default(pxe_stack_redhat_automatic_partitioning, true) }}
 
 ##### Packages
 %packages
@@ -89,8 +89,8 @@ curl
 {% if not pxe_stack_enable_root %}
 sudo
 {% endif %}
-{% if hostvars[groups[os_profile][0]]['os_autoinstall_packages'] is defined and hostvars[groups[os_profile][0]]['os_autoinstall_packages'] is iterable and hostvars[groups[os_profile][0]]['os_autoinstall_packages'] is not string and hostvars[groups[os_profile][0]]['os_autoinstall_packages'] is not mapping %}
-{% for package in hostvars[groups[os_profile][0]]['os_autoinstall_packages'] %}
+{% if equipment['os']['os_autoinstall_packages'] is defined and equipment['os']['os_autoinstall_packages'] is iterable and equipment['os']['os_autoinstall_packages'] is not string and equipment['os']['os_autoinstall_packages'] is not mapping %}
+{% for package in equipment['os']['os_autoinstall_packages'] %}
 {{ package }}
 {% endfor %}
 {% endif %}
@@ -99,7 +99,7 @@ sudo
 
 # This EFI first boot order restoration trick is from stacki, not from me.
 # See https://github.com/Teradata/stacki for more details
-{% if (hostvars[groups[hw_profile][0]]['hw_preserve_efi_first_boot_device'] | default(pxe_stack_hw_preserve_efi_first_boot_device)) == true %}
+{% if (equipment['hw']['hw_preserve_efi_first_boot_device'] | default(pxe_stack_hw_preserve_efi_first_boot_device)) == true %}
 %post --interpreter /bin/bash --log /root/bluebanquise_efi_post-install.log
 [ -d /sys/firmware/efi ] && efibootmgr -o $(efibootmgr | grep BootCurrent | cut -d" " -f2),$(efibootmgr | grep BootOrder | sed "s/BootOrder:\ //" | sed "s/$(efibootmgr | grep BootCurrent | cut -d" " -f2),//") || echo "Not an EFI system, skipping"
 %end
@@ -116,7 +116,7 @@ sed -i "s/^#PermitRootLogin.*\$/PermitRootLogin yes/g" /etc/ssh/sshd_config
 # Add ssh keys from ssh_keys list
 mkdir /root/.ssh
 cat << xxEOFxx >> /root/.ssh/authorized_keys
-{% for ssh_key in (hostvars[groups[os_profile][0]]['os_admin_ssh_keys'] | default(pxe_stack_os_admin_ssh_keys)) %}
+{% for ssh_key in (equipment['os']['os_admin_ssh_keys'] | default(pxe_stack_os_admin_ssh_keys)) %}
 {{ ssh_key }}
 {% endfor %}
 xxEOFxx
@@ -129,7 +129,7 @@ sed -i "s/^#PermitRootLogin.*\$/PermitRootLogin no/g" /etc/ssh/sshd_config
 # Add ssh keys from ssh_keys list
 mkdir {{ pxe_stack_sudo_user_home }}/.ssh
 cat << xxEOFxx >> {{ pxe_stack_sudo_user_home }}/.ssh/authorized_keys
-{% for ssh_key in (hostvars[groups[os_profile][0]]['os_admin_ssh_keys'] | default(pxe_stack_os_admin_ssh_keys)) %}
+{% for ssh_key in (equipment['os']['os_admin_ssh_keys'] | default(pxe_stack_os_admin_ssh_keys)) %}
 {{ ssh_key }}
 {% endfor %}
 xxEOFxx
@@ -158,7 +158,5 @@ rm -f /etc/yum.repos.d/*
 {% endif %}
 set +x
 %end
-
-{{ hostvars[groups[os_profile][0]]['os_autoinstall_raw_content'] | default(pxe_stack_os_autoinstall_raw_content) }}
 
 {% endif %}
