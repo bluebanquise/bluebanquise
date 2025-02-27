@@ -6,8 +6,4 @@
     group: root
     mode: '0644'
   register: sysctl_file
-
-- name: "Reload sysclt configuration"
-  ansible.builtin.shell:
-    cmd: "sysctl -p /etc/sysctl.d/80-lustre-multi-rail.conf"
-  when: sysctl_file.changed
+  notify: "Reload sysclt configuration"

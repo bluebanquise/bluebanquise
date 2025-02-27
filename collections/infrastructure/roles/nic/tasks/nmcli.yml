@@ -1,4 +1,3 @@
-
 - name: nmcli <|> Set NICs configuration # noqa args[module]
   community.general.nmcli:
     # Tuned

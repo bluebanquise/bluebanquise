@@ -30,4 +30,4 @@ jobs:
 
       # Note: exclude grafana dashboard for now, to be fixed
       - name: Run ansible linter
-        run: ansible-lint collections/ --exclude collections/monitoring/roles/grafana/tasks/dashboards.yml
+        run: ansible-lint collections/

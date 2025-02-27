@@ -24,4 +24,3 @@
     enabled: no
     state: stopped
   notify: reboot <|> Reboot system
-  

@@ -1,5 +1,5 @@
 ---
- 
+
 - name: "service <|> Disable systemd-networkd"
   ansible.builtin.service:
     name: systemd-networkd
