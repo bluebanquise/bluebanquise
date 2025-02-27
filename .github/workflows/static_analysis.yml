@@ -26,7 +26,7 @@ jobs:
         run: pip install ansible ansible-lint flake8 yamllint jmespath
 
       - name: Check python code
-        run: flake8 collections/{infrastructure} --statistics --ignore E501,E226
+        run: flake8 collections/infrastructure --statistics --ignore E501,E226
 
       # Note: exclude grafana dashboard for now, to be fixed
       - name: Run ansible linter
