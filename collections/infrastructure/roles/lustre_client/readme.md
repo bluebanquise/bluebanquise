@@ -27,6 +27,7 @@ The configuration is a simple description of your lustre networks and your lustr
 recommended path: /$HOME/bluebanquise/inventories/group_vars/all/addons/lustre_client.yml
 
 ```yaml
+lustre_multirail: true
 lustre_networks:
   - name: o2ib0
     network: interconnect-1
@@ -50,6 +51,7 @@ lustre_mounts:
 
 ## Changelog
 
+* 1.2.0: Added sysctl configuration to avoid issues with multi-rail. Lucas Santos <lucassouzasantos@gmail.com>
 * 1.1.0: Added LNET configuration support for multi-rail. Lucas Santos <lucassouzasantos@gmail.com>
 * 1.0.1: Just a minor fix to mount filesystem o the role execution. Lucas Santos <lucassouzasantos@gmail.com>
 * 1.0.0: Role creation. Lucas Santos <lucassouzasantos@gmail.com>
