@@ -57,6 +57,7 @@ Files generated:
 
 ## Changelog
 
+* 1.3.3: Expand nodeset for ipmipower. Thiago Cardozo <boubee.thiago@gmail.com>
 * 1.3.2: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.1: Fix defaults path. Pierre Gay <pierre.gay@u-bordeaux.fr>, Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>
 * 1.3.0: add optional variable powerman_enable_ipmi_lan_2_0. Pierre Gay <pierre.gay@u-bordeaux.fr>, Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>
