@@ -36,6 +36,7 @@ Note also that on most recent distributions, editing `/etc/resolv.conf` file is 
 
 ## Changelog
 
+* 1.3.4: Fix variable default value. Thiago Cardozo <boubee.thiago@gmail.com>
 * 1.3.3: Fix variable typo. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.2: Fix global logic. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.1: be able to set dns servers using a new variable <jean-pascal.mazzilli@gmail.com>
