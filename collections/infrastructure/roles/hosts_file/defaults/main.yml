@@ -2,6 +2,7 @@
 hosts_file_domain_name:
 hosts_file_external_hosts: {}
 hosts_file_range: iceberg
+hosts_file_fqdn_first: false
 
 # Allow to write all host names
 # If set to true, hostname, alias, nic-network and nic-alias will be written info hosts file

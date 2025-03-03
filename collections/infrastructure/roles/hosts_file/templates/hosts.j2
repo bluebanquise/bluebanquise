@@ -6,7 +6,11 @@
 {% macro write_host(host, host_dict, host_j2_node_main_resolution_address) %}
 
   {%- if host_j2_node_main_resolution_address is not none and (host_j2_node_main_resolution_address | ansible.utils.ipaddr) %}
+    {% if hosts_file_fqdn_first %}
+{{ host_j2_node_main_resolution_address }} {{ host }}.{{ hosts_file_domain_name | default(bb_domain_name, true) | default('cluster.local', true) }} {{ host }} {{ host_dict['alias'] | default([], true) | join(' ') }}
+    {% else %}
 {{ host_j2_node_main_resolution_address }} {{ host }} {{ host }}.{{ hosts_file_domain_name | default(bb_domain_name, true) | default('cluster.local', true) }} {{ host_dict['alias'] | default([], true) | join(' ') }}
+    {% endif %}
   {% endif -%}
 
   {%- if hosts_file_enable_extended_names %}
