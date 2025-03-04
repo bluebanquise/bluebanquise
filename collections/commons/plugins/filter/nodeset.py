@@ -8,6 +8,7 @@ __metaclass__ = type
 
 from ansible.errors import AnsibleError
 from ClusterShell.NodeSet import NodeSet
+from ClusterShell.NodeSet import expand
 from ansible.module_utils.common.text.converters import to_native
 
 
@@ -15,7 +16,7 @@ def nodeset(nodes_list):
     '''Convert a list of nodes to ClusterShell's NodeSet'''
 
     try:
-        nodeset = NodeSet(",".join(nodes_list))
+        nodeset = ",".join(expand(NodeSet(",".join(nodes_list))))
     except Exception as e:
         raise AnsibleError('Error joining nodeset, original exception: %s' % to_native(e))
 
