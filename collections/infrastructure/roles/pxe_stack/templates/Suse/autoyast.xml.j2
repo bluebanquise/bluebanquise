@@ -81,7 +81,7 @@
     <loader_type>default</loader_type>
   </bootloader>
 
-{{ equipment['os']['os_partitioning'] | default(pxe_stack_os_partitioning) | default(pxe_stack_suse_automatic_partitioning, true) }}
+{{ equipment['os']['os_partitioning'] | default(equipment['hw']['hw_partitioning'], true) | default(pxe_stack_os_partitioning, true) | default(pxe_stack_suse_automatic_partitioning, true) }}
 
 {% if pxe_stack_enable_root %}
  <users config:type="list">
