@@ -4,7 +4,7 @@ Format: <date> - <author (username or mail or both)> - <change description>
 
 # To 3.2.1
 
+* 3/5/25 - oxedions - [pxe_stack] Add capability to precedence partitioning from hardware profile
 * 3/3/25 - oxedions - [hosts_file] allow the FDQN to be set first in /etc/hosts (# 1005, from @levaillx)
-#1005
 
 # 3.2.0
