@@ -1,0 +1,9 @@
+- name: "Render multirail sysctl file"
+  ansible.builtin.template:
+    src: multirail-interface-sysctl.conf.j2
+    dest: /etc/sysctl.d/80-lustre-multi-rail.conf
+    owner: root
+    group: root
+    mode: '0644'
+  register: sysctl_file
+  notify: "Reload sysclt configuration"

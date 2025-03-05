@@ -37,17 +37,8 @@
   tags:
     - service
 
-- name: "include_tasks <|> Configure firewall: {{ ansible_facts.os_family }}"
-  ansible.builtin.include_tasks: "{{ item }}"
-  with_first_found:
-    - files:
-        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
-        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
-        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
-        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
-        - "{{ ansible_facts.distribution | replace(' ','_') }}/main.yml"
-        - "{{ ansible_facts.os_family | replace(' ','_') }}/main.yml"
-      skip: true
+- name: "include_tasks <|> Configure firewall if requested"
+  ansible.builtin.include_tasks: "firewalld.yml"
   when: os_firewall
   tags:
     - internal

@@ -1,0 +1,53 @@
+---
+# THIS IS A POC
+- name: "service <|> Manage {{ nic_services_to_start | join(' ') }} state"
+  ansible.builtin.service:
+    name: "{{ item }}"
+    enabled: yes
+    state: "{{ (nic_start_services | bool) | ternary('started', omit) }}"
+  loop: "{{ nic_services_to_start }}"
+  tags:
+    - service
+
+- name: networkd <|> Set NICs configuration
+  bluebanquise.infrastructure.networkd:
+    # Tuned
+    conn_name: "{{ item.conn_name | default(item.interface) | string }}"
+    ifname: "{{ item.ifname | default(item.physical_device) | default(omit) }}"
+    ip4: "{{ nic_j2_ip4 | trim | default(omit,true) }}"
+    gw4: "{{ nic_j2_gw4 | trim | default(omit,true) }}"
+    routes4: "{{ nic_j2_routes4 | trim | default(omit,true) }}"
+    dns4: "{{ nic_j2_dns4 | trim | default(omit,true) }}"
+    mtu: "{{ item.mtu | default(omit) }}"
+    type: "{{ item.type | default('ethernet') }}"  # Even if in the documentation type is optional, it is in fact mandatory. Default to ethernet.
+    # Standard
+    state: "{{ item.state | default('present') }}"
+    arp_interval: "{{ item.arp_interval | default(omit) }}"
+    arp_ip_target: "{{ item.arp_ip_target | default(omit) }}"
+    downdelay: "{{ item.downdelay | default(omit) }}"
+    master: "{{ item.master | default(omit) }}"
+    mode: "{{ item.mode | default(omit) }}"
+    miimon: "{{ item.miimon | default(omit) }}"
+    method4: "{{ item.method4 | default(omit) }}"
+    updelay: "{{ item.updelay | default(omit) }}"
+    vlanid: "{{ item.vlanid | default(omit) }}"
+    vlandev: "{{ item.vlandev | default(omit) }}"
+    vlan_mapping: "{{ item.vlan_mapping | default(omit) }}"
+    never_default4: "{{ item.never_default4 | default(omit) }}"
+  notify: command <|> networkctl reload
+  loop: "{{ network_interfaces }}"
+  when: item.skip is not defined or (item.skip is defined and not item.skip)
+  tags:
+    - identify
+
+- name: lineinfile <|> Remove NICs entry from /etc/network/interfaces
+  lineinfile:
+    path: /etc/network/interfaces
+    regexp: ".*{{ item.conn_name | default(item.interface) | string }}.*"
+    state: absent
+    backup: yes
+  loop: "{{ network_interfaces }}"
+  when: item.skip is not defined or (item.skip is defined and not item.skip)
+
+- name: meta <|> Run handlers
+  ansible.builtin.meta: flush_handlers

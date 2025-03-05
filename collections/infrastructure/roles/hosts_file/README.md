@@ -2,30 +2,12 @@
 
 ## Description
 
-This role provides a basic /etc/hosts files.
-
-## Data Model
-
-This role relies on [data model](https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md):
-* Section 1 (Networks)
-* Section 2 (Hosts definition)
+This role provides a basic /etc/hosts files, that includes hosts, services, and external alias.
 
 ## Instructions
 
 This role will gather all hosts from the inventory, and add them, using all
-their known internal network connections, into */etc/hosts* file.
-
-In case of multiple icebergs system, administrator can reduce the scope of this
-gathering by setting `hosts_file_range`:
-
-* **all** will use all Ansible inventory hosts
-* **iceberg** will reduce the gathering to the current host iceberg
-
-Default is **iceberg**.
-
-```yaml
-hosts_file_range: all
-```
+their known internal network connections, into `/etc/hosts` file.
 
 It is also possible to define external hosts to be added into hosts file.
 To do so, define `hosts_file_external_hosts` this way:
@@ -35,7 +17,7 @@ hosts_file_external_hosts:
   myhost: 10.10.10.10
   mysecondhost: 7.7.7.7
   mythirdhost:
-    ip: 10.10.10.33
+    ip4: 10.10.10.33
     alias:
       - machine3
       - extmachine3
@@ -83,6 +65,7 @@ While if `hosts_file_enable_extended_names: false`, then the following content w
 
 ## Changelog
 
+* 1.6.0: Simplify the role. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.5.2: Fix global logic. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.5.1: Fix typo on domain name variable. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.5.0: Add capability to disable extended names, and ensure direct name comes first. Benoit Leveugle <benoit.leveugle@gmail.com>

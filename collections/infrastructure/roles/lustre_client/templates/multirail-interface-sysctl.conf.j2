@@ -1,0 +1,26 @@
+#jinja2: lstrip_blocks: "True"
+{# /etc/modprobe.d/80-<interface>-lustre-multirail.conf file template. #}
+{# Lucas Santos 2024 #}
+{# Macro to get host interface for network #}
+{% macro host_interface(host_dict,network_name) %}
+  {%- if host_dict['network_interfaces'] is defined and host_dict['network_interfaces'] is iterable -%}
+     {%- set matching_nics = [] -%}
+     {%- for nic in host_dict['network_interfaces'] -%}
+       {%- if nic.network is defined and nic.network == network_name -%}
+         {%- set _ = matching_nics.append(nic.interface | trim) -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {{ matching_nics | join(',') }}
+  {%- endif -%}
+{% endmacro %}
+net.ipv4.conf.all.rp_filter=0
+{% for net in lustre_networks %}
+  {%- set interfaces = host_interface(hostvars[inventory_hostname],net.network) -%}
+  {% for if_name in interfaces.split(',') %}  
+net.ipv4.conf.{{if_name}}.accept_local=1
+net.ipv4.conf.{{if_name}}.arp_ignore=1
+net.ipv4.conf.{{if_name}}.arp_filter=0
+net.ipv4.conf.{{if_name}}.arp_announce=2
+net.ipv4.conf.{{if_name}}.rp_filter=0
+  {% endfor %}
+{%- endfor -%}

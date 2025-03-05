@@ -4,6 +4,8 @@
 
 This role provides a basic `/etc/resolv.conf` file.
 
+Please note that on most recent distributions, you should avoid editing this file (and so using this role) and rely on the network daemon (NetworkManager or systemd-networkd).
+
 ## Instructions
 
 `server` values are automatically set. By default, role will use current node network_interfaces list, and look for any dns server associated in the networks definition.

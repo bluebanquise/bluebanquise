@@ -4,21 +4,21 @@
   roles:
 
     # HPC
-    - role: bluebanquise.hpc.slurm
+    - role: bluebanquise.infrastructure.slurm
       tags: slurm
       vars:
         slurm_profile: controller
-    - role: bluebanquise.hpc.slurm
+    - role: bluebanquise.infrastructure.slurm
       tags: slurm
       vars:
         slurm_profile: compute
-    - role: bluebanquise.hpc.slurm
+    - role: bluebanquise.infrastructure.slurm
       tags: slurm
       vars:
         slurm_profile: submitter
-    - role: bluebanquise.hpc.flexlm
+    - role: bluebanquise.infrastructure.flexlm
       tags: flexlm
-    - role: bluebanquise.hpc.nhc
+    - role: bluebanquise.infrastructure.nhc
       tags: nhc
-    - role: bluebanquise.hpc.lmod
+    - role: bluebanquise.infrastructure.lmod
       tags: lmod
