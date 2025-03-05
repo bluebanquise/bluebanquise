@@ -42,6 +42,7 @@
     primary: "{{ item.primary | default(omit) }}"
     priority: "{{ item.priority | default(omit) }}"
     slavepriority: "{{ item.slavepriority | default(omit) }}"
+    slave_type: "{{ item.slave_type | default(omit) }}"
     stp: "{{ item.stp | default(omit) }}"
     updelay: "{{ item.updelay | default(omit) }}"
     vlandev: "{{ item.vlandev | default(omit) }}"
