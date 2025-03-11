@@ -80,7 +80,7 @@ firewall --disabled
 bootloader --append="{{ equipment['os']['os_kernel_parameters'] | default(pxe_stack_os_kernel_parameters) }} {{ equipment['hw']['hw_kernel_parameters'] | default(pxe_stack_hw_kernel_parameters) }} " --location=mbr
 
 # Partitioning
-{{ equipment['os']['os_partitioning'] | default(pxe_stack_os_partitioning) | default(pxe_stack_redhat_automatic_partitioning, true) }}
+{{ equipment['os']['os_partitioning'] | default(equipment['hw']['hw_partitioning'], true) | default(pxe_stack_os_partitioning, true) | default(pxe_stack_redhat_automatic_partitioning, true) }}
 
 ##### Packages
 %packages
