@@ -5,12 +5,6 @@
 This role configures the ssh access of inventory known hosts to ensure ssh
 access through nodes main network.
 
-## Data Model
-
-This role relies on [data model](https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md):
-* Section 1 (Networks)
-* Section 2 (Hosts definition)
-
 ## Instructions
 
 Note that this file generation is kind of "sensible", and will surely be the
@@ -194,10 +188,12 @@ Optional inventory vars:
 
 /root/.ssh/config file
 
+In case of issue, try adding verbosity to the ssh invocation to investigate (-vvv).
 
 ## Changelog
 
-* 1.3.0: Add extra config options. Thiago Cardozo <boubee.thiago@gmail.com>
+* 1.4.0: Add extra config options. Thiago Cardozo <boubee.thiago@gmail.com>
+* 1.3.0: Role simplification. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.2.3: infrastructure/ssh_client role: set a default network <jean-pascal.mazzilli@gmail.com>
 * 1.2.2: Fixed ssh_client_userknownhostsfile host_vars. Leo Magdanello <lmagdanello40@gmail.com>
 * 1.2.1: Fixed sudo user home directory. Benoit Leveugle <benoit.leveugle@gmail.com>

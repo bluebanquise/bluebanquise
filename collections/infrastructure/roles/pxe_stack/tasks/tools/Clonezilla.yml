@@ -14,7 +14,7 @@
     state: present
   tags:
     - package
-    - large-package
+    - large_package
 
 - name: "Template <|> Generate Clonezilla live boot files to {{ pxe_stack_htdocs_path }}/pxe/tools/"
   ansible.builtin.template:

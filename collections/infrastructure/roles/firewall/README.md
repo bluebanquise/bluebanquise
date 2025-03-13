@@ -79,51 +79,9 @@ it is possible to override the default zone by setting
 For example, if you want to add the services of the pxe_stack roles to the
 internal zone, you must set the variable `pxe_stack_firewall_zone: internal`.
 
-## Input
-
-Mandatory inventory vars:
-
-**hostvars[inventory_hostname]**
-
-* os_firewall
-* network[item]
-   * .subnet
-   * .prefix
-   * .firewall
-      * .zone
-* network_interfaces
-   * .network
-
-Optional inventory vars:
-
-**hostvars[inventory_hostname]**
-
-* firewall_zones
-    * zone
-    * services_enabled     (list)
-    * services_disabled    (list)
-    * ports_enabled        (list)
-    * ports_disabled       (list)
-    * rich_rules_enabled   (list)
-    * rich_rules_disabled  (list)
-    * icmp_blocks_enabled  (list)
-    * icmp_blocks_disabled (list)
-    * icmp_block_inversion (bool)
-    * masquerade           (bool)
-
-Optional role vars:
-
-* firewall_firewalld_allow_zone_drifting: Enforce the state of Firewalld
-AllowZoneDrifting configuration option (default: `false`)
-
-## Output
-
-Package installed:
-
-* firewall
-
 ## Changelog
 
+* 1.3.5: Allow usage on all distributions. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.4: Fix condition in handler. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.3: Adapt to os hw split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.2: Fix issue with non networked nic. From @GaelBil. Benoit Leveugle <benoit.leveugle@gmail.com>

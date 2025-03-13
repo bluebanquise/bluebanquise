@@ -16,11 +16,6 @@ This is useful in many cases. For example:
 
 This role needs at least RHEL (or equivalent) >= 9, Ubuntu >= 22.04, Debian >= 12 and OpenSuse Leap >= 15.5 due to requirements on Squid version.
 
-## Data Model
-
-This role relies on [data model](https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md):
-* Section 1 (Networks)
-
 ## Instructions
 
 ### Proxy port
@@ -48,7 +43,7 @@ networks:
     http_proxy_server: false
 ```
 
-You can also add local networks allowed to use the proxy by setting them in the `http_proxy_allowed_networks` list:
+You can also add custom local networks to be allowed to use the proxy by setting them in the `http_proxy_allowed_networks` list:
 
 ```yaml
 http_proxy_allowed_networks:

@@ -21,6 +21,22 @@
   tags:
     - always
 
+- name: "package <|> Install {{ nic_packages_to_install | join(' ') }}"
+  ansible.builtin.package:
+    name: "{{ nic_packages_to_install }}"
+    state: present
+  tags:
+    - package
+
+- name: "service <|> Start services"
+  ansible.builtin.service:
+    name: "{{ item }}"
+    enabled: yes
+    state: "{{ (nic_start_services | bool) | ternary('started', omit) }}"
+  loop: "{{ nic_services_to_start }}"
+  tags:
+    - service
+
 - name: include_tasks <|> Use OS dedicated task
   ansible.builtin.include_tasks: "{{ item }}"
   with_first_found:
@@ -32,5 +48,10 @@
         - "{{ ansible_facts.distribution | replace(' ','_') }}/main.yml"
         - "{{ ansible_facts.os_family | replace(' ','_') }}/main.yml"
       skip: true
+  tags:
+    - internal
+
+- name: "include_tasks <|> Configure network interfaces via nmcli"
+  ansible.builtin.include_tasks: "nmcli.yml"
   tags:
     - internal

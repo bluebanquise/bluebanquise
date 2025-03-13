@@ -87,7 +87,6 @@
     mode: 0644
   with_items: "{{ networks }}"
   when:
-    - j2_current_iceberg_network is not none and j2_current_iceberg_network in item
     - networks is defined and networks is iterable and networks is not string and networks is mapping
     - networks[item] is defined and networks[item] is not none
     - networks[item].is_in_dhcp | default(true, true)

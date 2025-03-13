@@ -4,13 +4,6 @@
 
 This role provides a dns server based on bind.
 
-## Data Model
-
-This role relies on [data model](https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md):
-* Section 1 (Networks)
-* Section 2 (Hosts definition)
-* Section 3.1 (Function Groups)
-
 ## Basic instructions
 
 The role will generate 5 files (path may vary depending of Linux distribution):
@@ -38,7 +31,7 @@ Note that `dns_server_domain_name` precedence `bb_domain_name` global variable.
 ### Networks
 
 This DNS role will automatically add networks of the cluster defined in the Ansible inventory,
-assuming their variable **dns_server** is set to true:
+assuming their variable **dns_server** is set to true (or not set, since true is the default value):
 
 ```yaml
 networks:
@@ -242,6 +235,7 @@ dns_server_raw_options_content: |
 
 ## Changelog
 
+* 1.10.4: Increase role performances bby caching first octets. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.10.3: Fix global logic. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.10.2: Fix role for Ubuntu and Debian distributions. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.10.1: Fix extended names for all zones. Benoit Leveugle <benoit.leveugle@gmail.com>

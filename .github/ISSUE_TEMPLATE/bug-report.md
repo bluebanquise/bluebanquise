@@ -1,17 +1,13 @@
 ---
 name: Bug report
-about: Create a report to help us improve
+about: Create a report to help me improve
 title: "[BUG]"
 labels: bug
-assignees: ''
+assignees: 'oxedions'
 
 ---
 
 [Provide general introduction to the issue logging and why it is relevant to this repository.]
-
-## Context
-
-[Provide more detailed introduction to the issue context.]
 
 ## Process
 

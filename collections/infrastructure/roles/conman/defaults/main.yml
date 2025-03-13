@@ -1,3 +1,4 @@
 ---
 conman_user_gid: 287
 conman_user_uid: 287
+conman_redfish_console_port: 2200

@@ -62,7 +62,7 @@ pxe_stack_os_partitioning:
 pxe_stack_hw_preserve_efi_first_boot_device: true
 
 # Add custom content to any kind of auto install files: kickstart, preseed, user-data and autoyast
-# This content is added at end of files.
+# This content is added at top of files.
 pxe_stack_os_autoinstall_custom_content:
 
 # Add custom script to autoyast and user-data. Use pxe_stack_os_autoinstall_custom_content variable for kickstart.
@@ -70,9 +70,6 @@ pxe_stack_os_autoinstall_custom_scripts: []
 #  - name: script1
 #    content: |
 #      ...
-
-# Add custom content to autoinstall file (raw)
-pxe_stack_os_autoinstall_raw_content: ""
 
 # Add proxies
 pxe_stack_os_pxe_repository_proxy:
