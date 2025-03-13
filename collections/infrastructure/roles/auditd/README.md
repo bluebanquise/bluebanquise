@@ -4,12 +4,13 @@
 
 This role provides the default auditd configuration which is suitable for RHEL8/CentOS, Ubuntu systems, etc.
 
-It also allows to send the audit logs to the syslog server (cf: https://access.redhat.com/solutions/4986931), 
+It also allows to send the audit logs to the syslog server (cf: https://access.redhat.com/solutions/4986931),
 and is as well able to restart auditd service using FQCN module (solves: https://access.redhat.com/solutions/2664811).
 
 ## Instruction
 
 Since the auditd manage sensitive data, you need to manually set variable `auditd_forward_audit_logs` to true to send audit logs to the rsyslog server.
+Set `audit_config_root_log` to true to log commands entered by root user, including su/sudo.
 
 Files (path may sligtly vary depending of target distribution):
 
@@ -19,6 +20,7 @@ Files (path may sligtly vary depending of target distribution):
 
 ## Changelog
 
+* 1.2.0: Option to log root commands. Thiago Cardozo <boubee.thiago@gmail.com>
 * 1.1.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.2: Configure handler to use FQCN (ansible.builtin.service) module. osmocl <osmocl@osmo.cl>
 * 1.0.1: Add Ubuntu 18.04 and 20.04 support. osmocl <osmocl@osmo.cl>
