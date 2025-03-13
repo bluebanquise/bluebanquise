@@ -36,7 +36,7 @@ source /etc/os-release
 echo -e " \e[31mOK\e[0m"
 
 echo -n " Checking you are root..."
-if [ "$EUID" -ne 0 ]
+if [ "$EUID" -ne 0 ]; then
   echo -e " \e[31mPlease run this tool either as root or with a sudo-able user."
   echo -e " Fatal error, exiting.\e[0m"
   exit 1
