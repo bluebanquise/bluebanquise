@@ -166,7 +166,7 @@ then
 echo -n " Setting bluebanquise user environment, this might take a while..."
 (
   set -x
-  -u bluebanquise /bin/bash -c '
+  sudo -u bluebanquise /bin/bash -c '
   cd /var/lib/bluebanquise
   git clone https://github.com/bluebanquise/bluebanquise.git
   cd bluebanquise
