@@ -1,7 +1,10 @@
 ---
-auditd_role_version: 1.1.0
+auditd_role_version: 1.2.0
 
 auditd_services_to_start:
   - auditd
 
 auditd_syslog_file: syslog.conf
+audit_config_rules_architectures:
+  - b32
+  - b64
