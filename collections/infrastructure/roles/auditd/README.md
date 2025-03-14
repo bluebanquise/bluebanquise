@@ -10,7 +10,7 @@ and is as well able to restart auditd service using FQCN module (solves: https:/
 ## Instruction
 
 Since the auditd manage sensitive data, you need to manually set variable `auditd_forward_audit_logs` to true to send audit logs to the rsyslog server.
-Set `audit_config_root_log` to true to log commands entered by root user, including su/sudo.
+Set `auditd_config_root_log` to true to log commands entered by root user, including su/sudo.
 
 Files (path may sligtly vary depending of target distribution):
 

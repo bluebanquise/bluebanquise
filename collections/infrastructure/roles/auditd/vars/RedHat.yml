@@ -3,4 +3,4 @@ auditd_packages_to_install:
   - audit
   - audispd-plugins
 auditd_plugins_directory: /etc/audit/plugins.d
-audit_config_rules_file: /etc/audit/rules.d/audit.rules
+auditd_config_rules_file: /etc/audit/rules.d/audit.rules

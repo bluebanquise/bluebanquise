@@ -5,6 +5,6 @@ auditd_services_to_start:
   - auditd
 
 auditd_syslog_file: syslog.conf
-audit_config_rules_architectures:
+auditd_config_rules_architectures:
   - b32
   - b64
