@@ -52,7 +52,7 @@
   with_items:
     - "{{ auditd_config_rules_architectures }}"
   notify:
-    - service █ Restart auditd service
+    - service <|> Restart auditd service
     - service █ Restart rsyslog service
   when: auditd_config_root_log | default(false) | bool
 
