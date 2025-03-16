@@ -1,0 +1,28 @@
+#jinja2: lstrip_blocks: "True"
+{# /etc/modprobe.d/lustre.conf file template. #}
+{# Lucas Santos 2024 #}
+{# Macro to get host interface for network #}
+{% macro host_interface(host_dict,network_name) %}
+  {%- if host_dict['network_interfaces'] is defined and host_dict['network_interfaces'] is iterable -%}
+     {%- set matching_nics = [] -%}
+     {%- for nic in host_dict['network_interfaces'] -%} 
+       {%- if nic.network is defined and nic.network == network_name -%}
+         {%- set _ = matching_nics.append(nic.interface | trim) -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {{ matching_nics | join(',') }}
+  {%- endif -%}
+{% endmacro %}
+{# We need to find a better implementation for the following, reference of woraround: https://stackoverflow.com/questions/9486393/change-the-value-of-a-variable-inside-a-loop #}
+{%- set host_applies = {'value': False} -%}
+{%- for net in lustre_networks -%}
+  {%- if host_applies.update({'value': False}) -%} {%- endif -%}
+  {%- for group in net.clients_groups -%}
+    {%- if inventory_hostname in groups[group] -%}
+      {%- if host_applies.update({'value': True}) -%} {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {% if host_applies.value %}
+options lnet networks={{ net.name }}({{ host_interface(hostvars[inventory_hostname],net.network) }})
+  {% endif %}
+{%- endfor -%}

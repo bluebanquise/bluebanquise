@@ -6,4 +6,4 @@
     state: present
   tags:
     - package
-    - large-package
+    - large_package

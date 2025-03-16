@@ -41,7 +41,6 @@ ansible-galaxy collection install community.general || sleep 30 && ansible-galax
 if [[ $COLLECTIONS_LOCAL_PATH != "none" ]]; then
   ansible-galaxy collection install $COLLECTIONS_LOCAL_PATH
 else
-  ansible-galaxy collection install git+https://github.com/bluebanquise/bluebanquise.git#/collections/commons,master -vvv --upgrade
   ansible-galaxy collection install git+https://github.com/bluebanquise/bluebanquise.git#/collections/infrastructure,master -vvv --upgrade
 fi
 
