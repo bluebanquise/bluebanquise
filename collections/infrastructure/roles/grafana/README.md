@@ -151,6 +151,7 @@ Note: if you try to add dashboards, the role will alwats at checking if the data
 
 ## Changelog
 
+* 2.2.1: Missing default port reference. Thiago Cardozo <boubee.thiago@gmail.com>
 * 2.2.0: Optional uid/gid;Custom firewall port. Thiago Cardozo <boubee.thiago@gmail.com>
 * 2.1.2: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 2.1.1: Added additional\_json\_data variable in datasource. Alexandra Darrieutort <alexandra.darrieutort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
