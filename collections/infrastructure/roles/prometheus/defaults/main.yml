@@ -57,6 +57,9 @@ prometheus_server_modbus_exporter_config_template: "modbus.yml.j2"
 prometheus_server_modbus_exporter_additional_modules: []
 prometheus_server_modbus_exporter_launch_parameters: |
   --config.file=/etc/modbus_exporter/modbus.yml
+prometheus_server_prometheus_prefix: ""
+prometheus_server_alertmanager_prefix: ""
+prometheus_server_karma_prefix: ""
 
 prometheus_server_configuration_global:
   scrape_interval: 1m

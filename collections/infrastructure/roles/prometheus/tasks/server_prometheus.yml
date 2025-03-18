@@ -29,7 +29,7 @@
     group: root
     mode: 0644
   notify:
-    - systemd <|> Reload systemd configuration
+    - systemd <|> Reload systemd configuration for prometheus
     - service <|> Restart prometheus service
   tags:
     - template
