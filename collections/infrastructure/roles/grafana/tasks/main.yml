@@ -151,9 +151,9 @@
     msg:
       - '###############################################################'
       - 'Grafana UI access:'
-      - "URL: {{ grafana_address }}:{{ grafana_port }}"
+      - "URL: {{ grafana_url }}"
       - "- login: {{ grafana_security.admin_user }}"
-      - "- password: {{ grafana_security.admin_password }}"
+      - "- password: ********"
       - '###############################################################'
   tags:
     - package
