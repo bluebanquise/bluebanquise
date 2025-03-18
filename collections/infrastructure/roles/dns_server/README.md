@@ -213,12 +213,30 @@ dns_server_forward_only_domains:
     forwarder_ip: 10.10.5.10
 ```
 
+### DNSSEC
+
+To verify that DNSSEC is being used, use the dig command.
+For example, to check that the DNSSEC signature is attached to the record:
+
+```sh
+dig mngt0-1.cluster.local +dnssec  @10.10.0.1
+```
+
+Where 10.10.0.1 is the DNS server, and "mngt0-1.smc.local" is the FQDN of a node. The output should contain "RRSIG" in the "ANSWER SECTION" field.
+To check the Zone-signing-key and Key-signing-key, use the following command:
+
+```sh
+dig DNSKEY cluster.local @10.10.0.1
+```
+
+The output should contain "DNSKEY  256" (Zone-signing-key) and "DNSKEY 257" (Key-signing-key) in the "ANSWER SECTION" field.
+
 ### Raw content
 
 You can add additional raw content to named.conf file using the `dns_server_raw_content` key:
 
 ```yaml
-dns_server_raw_content: |  
+dns_server_raw_content: |
   zone "localhost" {
     type primary;
     file "master/localhost-forward.db";
@@ -229,7 +247,7 @@ dns_server_raw_content: |
 If your content have to be added to options, uses the
 
 ```yaml
-dns_server_raw_options_content: |  
+dns_server_raw_options_content: |
   also-notify port 5353;
 ```
 
