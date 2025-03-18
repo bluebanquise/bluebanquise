@@ -1,5 +1,5 @@
 ---
-- name: systemd <|> Reload systemd configuration
+- name: systemd <|> Reload systemd configuration for prometheus
   ansible.builtin.systemd:
     daemon_reload: yes
 

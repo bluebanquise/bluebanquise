@@ -40,7 +40,7 @@
     owner: root
     group: root
     mode: 0644
-  notify: systemd <|> Reload systemd configuration
+  notify: systemd <|> Reload systemd configuration for prometheus
   loop: "{{ exporters_groups }}"
   when: item.service is defined
   tags:

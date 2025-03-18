@@ -9,7 +9,7 @@ alertmanager:
   servers:
     - cluster: prometheus
       name: {{ prometheus_server_alertmanager_host }}
-      uri: "http://{{ prometheus_server_alertmanager_host }}:9093"
+      uri: "http://{{ prometheus_server_alertmanager_host }}:9093{{ prometheus_server_alertmanager_prefix }}"
       timeout: 10s
       proxy: false
 

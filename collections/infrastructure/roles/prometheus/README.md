@@ -28,7 +28,11 @@ This role relies on [data model](https://github.com/bluebanquise/bluebanquise/bl
     + [Splitting services](#splitting-services)
     + [Adding raw prometheus.conf scraping jobs:](#adding-raw-prometheusconf-scraping-jobs)
     + [Adding raw prometheus.conf configuration](#adding-raw-prometheusconf-configuration)
+    + [Access Prometheus behind a reverse proxy](#access-prometheus-behind-a-reverse-proxy)
+    + [Access Alertmanager behind a reverse proxy](#access-alertmanager-behind-a-reverse-proxy)
+    + [Access Karma behind a reverse proxy](#access-karma-behind-a-reverse-proxy)
     + [TLS and/or Basic Authentication](#tls-andor-basic-authentication)
+    + [TSDB Prometheus](#tsdb-prometheus)
   * [Changelog](#changelog)
 
 
@@ -582,6 +586,67 @@ prometheus.conf file using the following multi lines variable:
 ```yaml
 prometheus_server_prometheus_raw_configuration:
 ```
+### Access Prometheus behind a reverse proxy
+
+It is possible to configure Prometheus to listen at a URL with a prefix, in order to simplify the configuration of a reverse proxy. To listen at :9090/prometheus, set the following variables in your inventory:
+
+```yaml
+prometheus_server_prometheus_prefix: /prometheus
+
+prometheus_server_prometheus_launch_parameters: |
+  --config.file /etc/prometheus/prometheus.yml \
+  --storage.tsdb.path /var/lib/prometheus/ \
+  --web.console.templates=/etc/prometheus/consoles \
+  --web.console.libraries=/etc/prometheus/console_libraries \
+  --web.external-url="http://{{ prometheus_server_prometheus_host }}:9090{{ prometheus_server_prometheus_prefix }}/" \
+  $PROMETHEUS_OPTIONS
+```
+
+The second variable adds "--web.external-url" parameter to the prometheus launcher. The default configuration of Prometheus is automatically updated to listen to its own metrics at :9090/prometheus/metrics.
+
+With this configuration, it is possible to easily configure a reverse proxy. Here is an example for nginx:
+
+```
+http {
+ server {
+   listen 0.0.0.0:19090;
+   location /prometheus/ {
+     proxy_pass :9090/prometheus/;
+   }
+ }
+}
+events {
+}
+```
+
+Notice that all accesses to Prometheus (e.g. the UI, grafana) will need to be updated to use the prefix in this case.
+
+### Access Alertmanager behind a reverse proxy
+
+It is possible to configure Alertmanager to listen at a URL with a prefix, in order to simplify the configuration of a reverse proxy. To listen at :9093/alertmanager, set the following variables in your inventory:
+
+```yaml
+prometheus_server_alertmanager_prefix: /alertmanager
+
+prometheus_server_alertmanager_launch_parameters: |
+  --config.file=/etc/alertmanager/alertmanager.yml \
+  --web.external-url="http://{{ prometheus_server_alertmanager_host }}:9093{{ prometheus_server_alertmanager_path_prefix }}/"
+```
+
+The configuration of the reverse proxy for alertmanager can be similar to the configuration for Prometheus server listening at :9090/prometheus.
+Notice that all accesses to Alertmanager (e.g. the UI, karma) will need to be updated to use the prefix in this case.
+
+### Access Karma behind a reverse proxy
+
+It is possible to configure Karma to listen at a URL with a prefix, in order to simplify the configuration of a reverse proxy. To listen at :8080/karma, set the following variables in your inventory:
+
+```yaml
+prometheus_server_karma_port: 8080
+prometheus_server_karma_prefix: karma
+```
+
+The configuration of the reverse proxy for Karma can be similar to the configuration for Prometheus server listening at :9090/prometheus.
+Notice that access to Karma UI will need to be updated to use the prefix in this case.
 
 ### TLS and/or Basic Authentication
 
@@ -615,8 +680,28 @@ prometheus_server_prometheus_launch_parameters: |
   --web.config.file=/etc/prometheus/web.yml
 ```
 
+### TSDB Prometheus
+
+This collection allows changing the path and retention time of [TSDB](https://prometheus.io/docs/prometheus/latest/storage/).
+
+Configure the variables below according to your needs:
+
+```yaml
+prometheus_server_prometheus_tsdb_path: '/var/lib/prometheus'
+prometheus_server_prometheus_tsdb_retention_time: 10d
+```
+
+And attach them to additional Prometheus initialization parameters, as in the following example:
+
+```yaml
+prometheus_server_prometheus_launch_parameters: |
+  --storage.tsdb.path {{ prometheus_server_prometheus_tsdb_path }} \
+  --storage.tsdb.retention.time {{ prometheus_server_prometheus_tsdb_retention_time }}
+```
+
 ## Changelog
 
+* 1.5.0: Add fixes for Monitoring prefix. SMC 2.0. Leonardo Magdanello <lmagdanello40@gmail.com>
 * 1.4.1: Fix bad rights on services files. Bug reported by @sgaosdgr. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.0: Add more tunig for exporter services. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.4: Adapt tp hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
