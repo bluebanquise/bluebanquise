@@ -80,15 +80,12 @@ unqualified-search-registries = [{{ '\'{0}\''.format('\',\''.join(podman_search_
 # # in order, and use the first one that exists.
 short-name-mode = "permissive"
 
-{% set private_local_registry = podman_local_registry_host + ':' + podman_local_registry_port | string %}
 {% for insecure_registry in podman_insecure_registries %}
-{% if insecure_registry != private_local_registry or not podman_registry_enable_encryption %}
 [[registry]]
 location = "{{ insecure_registry }}"
 insecure = true
-
-{% endif %}
 {% endfor %}
+
 {% for blocked_registry in podman_blocked_registries %}
 [[registry]]
 location = "{{ blocked_registry }}"
