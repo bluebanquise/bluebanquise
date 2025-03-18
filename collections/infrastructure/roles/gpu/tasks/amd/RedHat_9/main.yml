@@ -10,20 +10,20 @@
 
 - name: package <|> Install python pre-requisite packages
   ansible.builtin.package:
-    name: 
-      - python3-setuptools 
+    name:
+      - python3-setuptools
       #- python3-wheel
     state: present
 
 - name: package <|> Install AMD driver and rocm
   ansible.builtin.package:
-    name: 
-      - amdgpu-dkms 
+    name:
+      - amdgpu-dkms
       - rocm
     state: present
   register: amd_drivers
 
-- name: reboot █ Reboot a slow machine that might have lots of updates to apply
+- name: reboot <|> Reboot a slow machine that might have lots of updates to apply
   ansible.builtin.reboot:
     reboot_timeout: "{{ update_reboot_reboot_timeout }}"
   when: update_reboot_reboot and amd_drivers.changed
