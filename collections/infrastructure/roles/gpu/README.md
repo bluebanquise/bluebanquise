@@ -128,6 +128,7 @@ Set then `gpu_vendor` variable to `nvidia` inside inventory for target group of 
 having applied first `repositories_client` role to ensure this new repository has been added on nodes.
 
 ## Changelog
+* 1.1.1: force gather facts on the beginning of execution. Lucas Santos <lucassouzasantos@gmail.com>
 * 1.1.0: Add support for AMD gpus. Lucas Santos <lucassouzasantos@gmail.com>
 * 1.0.1: Simple bugfix on task calling. Lucas Santos <lucassouzasantos@gmail.com>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
