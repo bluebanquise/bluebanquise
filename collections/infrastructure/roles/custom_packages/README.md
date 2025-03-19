@@ -30,4 +30,5 @@ custom_packages:
 
 ## Changelog
 
+* 1.0.1: Remove braces on item. Abatcha Olloh <abatchaolloh@outlook.fr>
 * 1.0.0: Role creation. Lucas Santos <lucassouzasantos@gmail.com>
