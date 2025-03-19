@@ -160,6 +160,7 @@ On some expensive clusters, **Interconnect** network, often based on the **Infin
 ### Understanding services
 
 As said above, management node host multiple basic services needed to run the cluster:
+
 * The **repository** server: based on http protocol, it provides packages (rpm) to all nodes of the cluster. Service is `httpd` (Apache/Apache2 on some OS).
 * The **tftp** server: based on tftp protocol, it provides PXE very basic files to initialize boot sequence on the remote servers. There are distribution embed tftp servers, but after years of IT, I just use `atftp`. I found it to be the most performant and comaptible server. Note that recent servers do not need a tftp server and can directly boot over http (we keep tftp here for compatibility).
 * The **dhcp** server: provides ip for all nodes and BMC on the network. Ip are attributed using MAC addresses of network interfaces. Service is `dhcpd` (ISC DHCP).
@@ -273,9 +274,9 @@ We will use **NetworkManager** to handle network. `nmcli` is the command to inte
 
 Note about NetworkManager: some say its bad, some say its good. It depends of admin tastes. Use it if you feel confortable with it, or use systemd-networkd if you prefer. Remember that some advanced hardware like Infiniband would prefer NetworkManager for some specific features.
 
-If RHEL system, NetworkManager is already installer.
+**If RHEL system**, NetworkManager is already installer.
 
-If Ubuntu system, install NetworkManager and disable systemd-networkd and reboot:
+**If Ubuntu system**, install NetworkManager and disable systemd-networkd and reboot:
 
 ```
 apt update && apt install NetworkManager
@@ -291,6 +292,12 @@ nmcli con mod enp0s8 ipv4.method manual
 nmcli con up enp0s8
 ```
 
+You can at any time get all NIC parameters using:
+
+```
+nmcli con show enp0s8
+```
+
 Then ensure interface is up with correct ip using:
 
 ```
@@ -303,7 +310,9 @@ Time to setup basic repositories.
 
 ### Setup basic repositories
 
-#### Main OS
+For RHEL system, we are going to setup a core OS repository, and a custom repository, while for Ubuntu a custom repository will be enough.
+
+#### Core OS (RHEL only)
 
 Backup and clean first default AlmaLinux repositories:
 
@@ -402,7 +411,9 @@ dnf repolist
 dnf install wget
 ```
 
-#### Other repositories
+#### Custom repositorie (both RHEL and Ubuntu)
+
+##### RHEL 
 
 We will need to add extra packages as not all is contained in the AlmaLinux 9 DVD.
 Create extra repository folder:
@@ -431,21 +442,35 @@ gpgcheck=0
 enabled=1
 ```
 
-To close this repositories part, we may install few useful packages.
+##### Ubuntu
 
-If a local web browser is needed, install the following packages:
+We need this extra repository for our tftp server, but other packages you might need will also fit here.
 
-```
-dnf install xorg-x11-utils xauth firefox
-```
-
-Then login on node using `ssh -X -C` to be able to launch `firefox`. Note however that this can be extremely slow.
-A better way is to use ssh port forwarding features (`-L`), this part is covered later in this training.
-
-Also, install ipmitool if using an IPMI compatible cluster, these will be used for computes nodes deployment and PXE tools.
+Create dedicated folder:
 
 ```
-dnf install ipmitool
+mkdir -p /var/www/html/repositories/Ubuntu/24.04/x86_64/extra/
+```
+
+Now install needed packages:
+
+```
+apt-get install -y dpkg-dev reprepro
+```
+
+Now create an empty repository, we will add packages later.
+Note that the includedeb command will fail, due to missing deb packages. This is expected for now.
+
+```
+cd /var/www/html/repositories/Ubuntu/24.04/x86_64/extra/
+mkdir conf -p; \
+    echo "Origin: BlueBanquise" > conf/distributions; \
+    echo "Label: bluebanquise" >> conf/distributions; \
+    echo "Codename: noble" >> conf/distributions; \
+    echo "Suite: stable" >> conf/distributions; \
+    echo "Architectures: amd64" >> conf/distributions; \
+    echo "Components: main" >> conf/distributions;
+reprepro -b /var/www/html/repositories/Ubuntu/24.04/x86_64/extra/ includedeb noble *.deb
 ```
 
 ### DHCP server
@@ -454,8 +479,16 @@ The DHCP server is used to assign ip addresses and hostnames to other nodes. It 
 
 Install the dhcp server package:
 
+**If RHEL system**
+
 ```
 dnf install dhcp-server
+```
+
+**If Ubuntu system**
+
+```
+apt install isc-dhcp-server
 ```
 
 Do not start it now, configure it first.
@@ -480,7 +513,7 @@ Unknown nodes/BMC will be given a temporary ip on the 10.0.254.x range if dhcp s
  }
 
  subnet 10.10.0.0 netmask 255.255.0.0 {
- # range 10.10.254.0 10.10.254.254; # range where unknown servers will be
+ range 10.10.254.0 10.10.254.254; # range where unknown servers will be
  option domain-name "cluster.local";
  option domain-name-servers 10.10.0.1; # dns server ip
  option broadcast-address 10.10.255.255;
@@ -533,9 +566,18 @@ Finally, start and enable the dhcp service:
 
 &#x26A0; WARNING &#x26A0;: only enable the DHCP service if you are on an isolated network, as in opposite to the other services, it may disturb the network if another DHCP is on this network.
 
+**If RHEL system**
+
 ```
 systemctl enable dhcpd
 systemctl start dhcpd
+```
+
+**If Ubuntu system**
+
+```
+systemctl enable isc-dhcp-server
+systemctl start isc-dhcp-server
 ```
 
 Note: if needed, you can search for nodes in `10.10.254.0-10.10.254.254` range using the following `nmap` command (install it using `dnf install nmap`):
@@ -546,6 +588,22 @@ nmap 10.10.254.0-254
 
 This is useful to check after a cluster installation that no equipment connected on the network was forgotten in the process, since registered nodes in the DHCP should not be in this range.
 
+You can watch dhcp server logs using:
+
+**If RHEL system**
+
+```
+journalctl -a -u dhcpd -f
+```
+
+**If Ubuntu system**
+
+```
+journalctl -a -u isc-dhcp-server -f
+```
+
+This is very useful to monitor dhcp server logs during other nodes PXE and deployment.
+
 ### DNS server
 
 DNS server provides on the network ip/hostname relation to all hosts:
@@ -555,13 +613,21 @@ DNS server provides on the network ip/hostname relation to all hosts:
 
 Install dns server package:
 
+**If RHEL system**
+
 ```
 dnf install bind
 ```
 
+**If Ubuntu system**
+
+```
+apt install bind9
+```
+
 Configuration includes 3 files: main configuration file, forward file, and reverse file. (You can separate files into more if you wish, not needed here).
 
-Main configuration file is `/etc/named.conf`, and should be as follow (we are creating an isolated cluster, if not, configure recursion and forwarders, refer to Bind9 documentation):
+Main configuration file is `/etc/named.conf` for RedHat, and `/etc/bind/named.conf` for Ubuntu, and should be as follow (we are creating an isolated cluster, if not, configure recursion and forwarders, refer to Bind9 documentation):
 
 ```
 options {
