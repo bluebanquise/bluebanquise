@@ -19,8 +19,8 @@ In annexes, I will detail how to deploy via PXE the other common distributions.<
     </div>
 </div> -->
 
-This tutorial is based on EL 9 OS (RHEL 9, RockyLinux 9, AlmaLinux 9, etc).
-Most of this page is portable on other distributions.
+This tutorial is based on EL 9 OS (RHEL 9, RockyLinux 9, AlmaLinux 9, etc) and on Ubuntu 24.04.
+Most of this page is portable on other distributions. An HPC cluster can run on any kind of Linux distribution. Just make sure that the hardware you have is compatible (mostly GPU and interconnect if present, check vendor provides drivers).
 In annexes, I will detail how to deploy via PXE the other common distributions.
 
 ## Hardware requirements
@@ -35,7 +35,7 @@ Note that with this configuration, you will need to tweak ram allocated to each 
 Laptop/workstation with 16go or more, and 100Go disk. VT-x instructions MUST be activated in the BIOS. VMs will be used.
 
 **Best configuration to do the training:**
-A real cluster, with real physical servers.
+A real cluster, with real physical servers. \o/
 
 ## Useful commands
 
@@ -55,8 +55,10 @@ General commands:
 * Remount / when in read only (often in recovery mode) : `mount -o remount,rw /`
 * Apply a patch on a file : `patch myfile.txt < mypatch.txt`
 * Do a patch from original and modified file : `diff -Naur original.txt modified.txt`
+* Get EFI boot order from os: `efibootmgr`
+* Change EFI boot order from os: `efibootmgr -o XXXX,YYYY,ZZZZ,...`
 
-IPMI commands for remote control :
+IPMI commands for remote control (old hardware):
 
 * Boot choice, very useful for very slow to boot systems (`bios` can be replaced with `pxe` or `cdrom` or `disk`) : `ipmitool -I lanplus -H bmc5 -U user -P password chassis bootdev bios`
 * Make boot persistent : `ipmitool -I lanplus -H bmc5 -U user -P password chassis bootdev disk options=persistent`. Note: remember that UEFI systems can dynamically change boot order.
@@ -66,6 +68,39 @@ IPMI commands for remote control :
 More: [IPMI tool how to](https://support.pivotal.io/hc/en-us/articles/206396927-How-to-work-on-IPMI-and-IPMITOOL)
 
 Note: when using sol activate, if keyboard does not work, try using the same command into a screen, this may solve the issue (strangely...).
+
+RedFish commands for remote control (new hardware):
+
+```
+SERVER="my-server"
+USER="ADMIN"
+PASS="ADMIN"
+
+# ON
+curl -si -u $USER:$PASS -k -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{"Action": "Reset", "ResetType": "On"}' https://$SERVER/redfish/v1/Systems/1/Actions/ComputerSystem.Reset
+
+#OFF
+curl -si -u $USER:$PASS -k -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{"Action": "Reset", "ResetType": "ForceOff"}' https://$SERVER/redfish/v1/Systems/1/Actions/ComputerSystem.Reset
+
+# Other methods available:
+curl -si -u $USER:$PASS -k -XGET https://$SERVER/redfish/v1/Systems/1/
+
+    "Actions": {
+        "#ComputerSystem.Reset": {
+            "target": "/redfish/v1/Systems/1/Actions/ComputerSystem.Reset",
+            "ResetType@Redfish.AllowableValues": [
+                "On",
+                "ForceOff",
+                "GracefulShutdown",
+                "GracefulRestart",
+                "ForceRestart",
+                "Nmi",
+                "ForceOn"
+            ]
+```
+(from https://gist.github.com/flaviotorres/6e09c16d46ca2a79b131650c6b8c4e7f)
+
+Redfish console can be obtained via ssh. See https://docs.nvidia.com/networking/display/bluefieldbmcv2310/serial+over+lan+(sol) for more details.
 
 Clush usage (if clustershell has been installed on system):
 
@@ -125,16 +160,16 @@ On some expensive clusters, **Interconnect** network, often based on the **Infin
 ### Understanding services
 
 As said above, management node host multiple basic services needed to run the cluster:
-* The **repository** server: based on http protocol, it provides packages (rpm) to all nodes of the cluster. Service is `httpd` (Apache).
-* The **tftp** server: based on tftp protocol, it provides PXE very basic files to initialize boot sequence on the remote servers. Service is `fbtftp` (Facebook Tftp), but could also be `atftp` or any other tftp server. Note that recent servers do not need a tftp server and can directly boot over http (we keep tftp here for compatibility).
+* The **repository** server: based on http protocol, it provides packages (rpm) to all nodes of the cluster. Service is `httpd` (Apache/Apache2 on some OS).
+* The **tftp** server: based on tftp protocol, it provides PXE very basic files to initialize boot sequence on the remote servers. There are distribution embed tftp servers, but after years of IT, I just use `atftp`. I found it to be the most performant and comaptible server. Note that recent servers do not need a tftp server and can directly boot over http (we keep tftp here for compatibility).
 * The **dhcp** server: provides ip for all nodes and BMC on the network. Ip are attributed using MAC addresses of network interfaces. Service is `dhcpd` (ISC DHCP).
 * The **dns** server: provides link between ip and hostname, and the opposite. Service is `named` (bind9).
 * The **time** server: provides a single and synchronized clock for all equipment of the cluster. More important than it seems. Service is `chronyd` (Chrony).
 * The **pxe stack**: represent the aggregate of the repository server, the tftp server, the dhcp server, the dns server and the time server. Used to deploy OS on nodes on the cluster using the network.
 * The **nfs** server: export simple storage spaces and allows nodes to mount these exported spaces locally (/home, /opt, etc. ). Service is `nfs-server`.
-* The **LDAP** server: provides centralized users authentication for all nodes. This is optional for some clusters. Service is `slapd` (OpenLDAP).
+* The **LDAP** server: provides centralized users authentication for all nodes. This is optional for some clusters. Service is `slapd` (OpenLDAP), or you can also use `glauth` for simpler usage.
 * The **job scheduler** server (if specializing cluster to HPC): manage computational resources, and spread jobs from users on the cluster. Service is `slurmctld` (Slurm).
-* The **monitoring** server: monitor the cluster to provide metrics, and raise alerts in case of issues. Service is `prometheus` (Prometheus).
+* The **monitoring/reporting** server: monitor the cluster to provide metrics, and raise alerts in case of issues. Service is `prometheus` (Prometheus) for metrics, and you will also need a tool for errors/issues detections. While Prometheus could be used, it is not made for that. `icinga2` seems to be one of the best tool currently.
 
 <!-- <div class="comment-tile">
     <div class="comment-tile-image">
@@ -183,12 +218,12 @@ already been taken by Virtualbox NAT. In this case, use another subnet like 10.7
 
 ### Final notes before we start
 
-All nodes will be installed with a minimal install AlmaLinux 9. Needed other packages (rpms)
+All nodes will be installed with a minimal install AlmaLinux 9 or Ubuntu 24.04. Needed other packages 
 will be created on the fly from sources.
 
 * To simplify this tutorial, firewall will be deactivated. You can reactivate it later.
-* We will keep SELinux enforced. When facing permission denied, try setting SELinux into permissive mode to check if that's the reason, or check selinux logs. I know SELinux can be difficult to deal with, but keeping it enforced also forces you to avoid unexpected dangerous things.
-* If you get `Pane is dead` error during pxe install, most of the time increase RAM to minimum 1200 Mo or more and it should be ok.
+* We will keep SELinux enforced on RHEL 9 systems. When facing permission denied, try setting SELinux into permissive mode to check if that's the reason, or check selinux logs. I know SELinux can be difficult to deal with, but keeping it enforced also forces you to avoid unexpected dangerous things.
+* If you get `Pane is dead` error during pxe install, most of the time increase RAM to minimum 1200 Mo or more and it should be ok. Ubuntu deployment needs 6Gb ram to succeed, but you can lower VM ram after deployment to 1Gb or even less for non management nodes (512 Mb).
 * You can edit files using `vim` which is a powerful tool, but if you feel more comfortable with, use `nano` (`nano myfile.txt`, then edit file, then use `Ctrl+O` to save, and `Ctrl+X` to exit). There is a very nice tutorial online for Vim, investing in it worth it on the long term.
 * Keep cool, and take fresh air when its not working as expected.
 
@@ -196,7 +231,7 @@ will be created on the fly from sources.
 
 This part describes how to manually install `odin` management node basic services, needed to deploy and install the other servers.
 
-Install first system with AlmaLinux DVD image (using an USB stick), and choose minimal install as package selection (Or server with GUI if you prefer. However, more packages installed means less security and less performance).
+Install first system with AlmaLinux DVD image or Ubuntu 24.04 live server (using an USB stick), and choose minimal install as package selection (Or server with GUI if you prefer. However, more packages installed means less security and less performance). Remember to ask for OpenSSH server installation on Ubuntu installer.
 
 Partition schema should be the following, without LVM but standard partitions:
 
@@ -206,15 +241,19 @@ Partition schema should be the following, without LVM but standard partitions:
 
 Note: you can learn how to use LVMs later.
 
-Be extremely careful with time zone choice. This parameter is more important than it seems as time zone will be set in the kickstart file later, and MUST be the same than the one chosen here when installing `odin`. If you don’t know which one to use, choose Europe/Brussels, the same one chose in the kickstart example of this document.
-After install and reboot, disable firewalld using:
+Be extremely careful with time zone choice. This parameter is more important than it seems as time zone will be set in the kickstart file later, and MUST be the same than the one chosen here when installing `odin`. If you don’t know which one to use, choose Europe/Brussels, the same one chose in the examples of this document.
+After install and reboot, disable firewall:
+
+**If RHEL system:**
 
 ```
 systemctl disable firewalld
 systemctl stop firewalld
 ```
 
-Change hostname to `odin` (need to login again to see changes):
+**If Ubuntu system**, nothing to do, UFW is not installed by default.
+
+Now change hostname to `odin` (need to login again to see changes):
 
 ```
 hostnamectl set-hostname odin.cluster.local
@@ -232,7 +271,17 @@ We will use **NetworkManager** to handle network. `nmcli` is the command to inte
     </div>
 </div> -->
 
-Note about NetworkManager: some say its bad, some say its good. It depends of admin tastes. Use it if you feel confortable with it, or use systemd-networkd if you prefer. Best idea to me is to use what is default on the system: NetworkManager on RHEL like distributions and Suse, systemd-networkd on Ubuntu and Debian.
+Note about NetworkManager: some say its bad, some say its good. It depends of admin tastes. Use it if you feel confortable with it, or use systemd-networkd if you prefer. Remember that some advanced hardware like Infiniband would prefer NetworkManager for some specific features.
+
+If RHEL system, NetworkManager is already installer.
+
+If Ubuntu system, install NetworkManager and disable systemd-networkd and reboot:
+
+```
+apt update && apt install NetworkManager
+systemctl disable systemd-networkd
+reboot -h now
+```
 
 Assuming main NIC name is `enp0s8`, to set `10.10.0.1/16` IP and subnet on it, use the following commands:
 
