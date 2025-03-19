@@ -13,6 +13,7 @@ slurm_statesavelocation: /var/spool/slurmctld/statesave
 slurm_slurmdspooldir: /var/spool/slurmd/slurmd
 slurm_slurmctldpidfile: /var/run/slurmctld.pid
 slurm_slurmdpidfile: /var/run/slurmd.pid
+slurm_slurmdbdpidfile: /var/run/slurmdbd.pid
 
 ## firewall and ports
 slurm_firewall_zone: public
