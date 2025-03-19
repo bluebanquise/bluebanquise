@@ -1,9 +1,8 @@
 ---
-
 - name: group <|> Add users groups
   ansible.builtin.group:
     name: "{{ item.name }}"
-    gid: "{{ item.gid }}"
+    gid: "{{ item.gid | default(omit) }}"
     state: "{{ item.state | default('present') }}"
   with_items: "{{ users | default([]) }}"
 
@@ -11,8 +10,8 @@
   ansible.builtin.user:
     name: "{{ item.name }}"
     comment: "{{ item.comment | default(omit) }}"
-    uid: "{{ item.uid }}"
-    group: "{{ item.name }}"
+    uid: "{{ item.uid | default(omit) }}"
+    group: "{{ item.name | default(omit)}}"
     groups: "{{ item.groups | default(omit) }}"
     create_home: "{{ item.create_home | default(omit) }}"
     update_password: "{{ item.update_password | default(omit) }}"
@@ -29,8 +28,8 @@
 - name: authorized_key <|> Manage user authorized_keys if exist
   ansible.posix.authorized_key:
     user: "{{ item.name }}"
-    key: "{{ item.ssh_authorized_keys }}"
+    key: "{{ item.ssh_authorized_keys | join('\n') }}"
     state: present
     exclusive: "{{ item.ssh_authorized_keys_exclusive | default(omit) }}"
   with_items: "{{ users | default([]) }}"
-  when: item.ssh_authorized_kesy is defined and item.ssh_authorized_keys
+  when: item.ssh_authorized_keys is defined and item.ssh_authorized_keys
