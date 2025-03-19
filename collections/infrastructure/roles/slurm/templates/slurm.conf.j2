@@ -128,7 +128,7 @@ AcctGatherProfileType=acct_gather_profile/{{ slurm_acct_gather_profile_type }}
     {% if buffer.slurm_extra_nodes_parameters is defined and buffer.slurm_extra_nodes_parameters is not none %}
         {% set nodes_parameters = nodes_parameters + ' ' +  buffer.slurm_extra_nodes_parameters %}
     {% endif %}
-NodeName={{ hw_pack_vars['nodes'] | bluebanquise.commons.nodeset }} {{ nodes_parameters }}
+NodeName={{ hw_pack_vars['nodes'] | bluebanquise.infrastructure.nodeset }} {{ nodes_parameters }}
   {% else %}
 # WARNING: pack {{ hw_pack }} does not have hw_specs
   {% endif %}
@@ -147,6 +147,6 @@ NodeName={{ hw_pack_vars['nodes'] | bluebanquise.commons.nodeset }} {{ nodes_par
       {% endfor %}
     {% endif %}
     {% set partition_nodes = (partition_nodes | unique) %}
-PartitionName={{partition.partition_name}} {% for arg, arg_value in partition.partition_configuration.items() %} {{ arg }}={{ arg_value }}{% endfor %} Nodes={{ partition_nodes | bluebanquise.commons.nodeset }}
+PartitionName={{partition.partition_name}} {% for arg, arg_value in partition.partition_configuration.items() %} {{ arg }}={{ arg_value }}{% endfor %} Nodes={{ partition_nodes | bluebanquise.infrastructure.nodeset }}
   {%- endfor -%}
 {%- endif -%}
