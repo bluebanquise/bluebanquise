@@ -28,8 +28,5 @@
   notify: service <|> restart mariadb
   register: mariadb_config
 
-- name: Restart MariaDB immediately if config changed
-  ansible.builtin.service:
-    name: mariadb.service
-    state: restarted
-  when: mariadb_config.changed
+- name: Force handlers
+  meta: flush_handlers
