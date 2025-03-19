@@ -1,4 +1,4 @@
-#jinja2: lstrip_blocks: True
+#jinja2: lstrip_blocks: True, trim_blocks: True
 #### Blue Banquise file ####
 ## {{ansible_managed}}
 
@@ -15,7 +15,7 @@ SlurmctldHost={{ slurm_controller_hostname | default(slurm_control_machine, true
 {% if slurm_computes_config == "configless" %}
 ## Use configless mode
 SlurmctldParameters=enable_configless
-{% endif %}
+{%- endif %}
 
 ## Authentication
 SlurmUser=slurm
@@ -74,8 +74,10 @@ AcctGatherProfileType=acct_gather_profile/{{ slurm_acct_gather_profile_type }}
 
 ## Additional content if exist
 {% if slurm_slurm_conf_additional_content is defined and slurm_slurm_conf_additional_content is iterable %}
-  {% for slurm_slurm_conf_content in slurm_slurm_conf_additional_content %}
-{{ slurm_slurm_conf_content | default('', true) }}                                                                                                                       
+  {% for item in slurm_slurm_conf_additional_content %}
+    {% for key, value in item.items() %}
+{{ key }}={{ value }}
+    {% endfor %}
   {% endfor %}
 {% endif %}
 
@@ -84,10 +86,10 @@ AcctGatherProfileType=acct_gather_profile/{{ slurm_acct_gather_profile_type }}
 # We need to compact all configuration into this single file.
 # -> no includes allowed.
 
-{# NODENAMES #}
+{#- NODENAMES -#}
 {# First we create a full list of all nodes that should be included in the file #}
-{% set slurm_nodes = [] %}
-{% for partition in slurm_partitions_list %}
+{%- set slurm_nodes = [] -%}
+{%- for partition in slurm_partitions_list %}
   {% if partition['computes_groups'] is defined and partition['computes_groups'] is not none %}
     {% for compute_group in partition['computes_groups'] %}
       {% for nn in groups[compute_group] %}{# We cannot merge both list inside a for loop in Jinja2 #}
@@ -109,7 +111,7 @@ AcctGatherProfileType=acct_gather_profile/{{ slurm_acct_gather_profile_type }}
     {% else %}
 # WARNING: node {{ node }} is associated with an hw and an os profile
     {% endif %}
-  {% endfor %}
+  {% endfor -%}
 {% endif %}
 {# Now we can generate final NodeNames for slurm #}
 {% for hw_pack, hw_pack_vars in hw_packs.items() %}
@@ -126,7 +128,7 @@ AcctGatherProfileType=acct_gather_profile/{{ slurm_acct_gather_profile_type }}
     {% if buffer.slurm_extra_nodes_parameters is defined and buffer.slurm_extra_nodes_parameters is not none %}
         {% set nodes_parameters = nodes_parameters + ' ' +  buffer.slurm_extra_nodes_parameters %}
     {% endif %}
-NodeName={{ hw_pack_vars['nodes'] | bluebanquise.infrastructure.nodeset }} {{ nodes_parameters }}
+NodeName={{ hw_pack_vars['nodes'] | bluebanquise.commons.nodeset }} {{ nodes_parameters }}
   {% else %}
 # WARNING: pack {{ hw_pack }} does not have hw_specs
   {% endif %}
@@ -134,8 +136,8 @@ NodeName={{ hw_pack_vars['nodes'] | bluebanquise.infrastructure.nodeset }} {{ no
 
 {# PARTITIONS #}
 ## Partitions list
-{% if slurm_partitions_list is defined and slurm_partitions_list %}
-  {% for partition in slurm_partitions_list %}
+{%- if slurm_partitions_list is defined and slurm_partitions_list -%}
+  {%- for partition in slurm_partitions_list -%}
     {% set partition_nodes = [] %}
     {% if partition['computes_groups'] is defined and partition['computes_groups'] is not none %}
       {% for compute_group in partition['computes_groups'] %}
@@ -145,7 +147,6 @@ NodeName={{ hw_pack_vars['nodes'] | bluebanquise.infrastructure.nodeset }} {{ no
       {% endfor %}
     {% endif %}
     {% set partition_nodes = (partition_nodes | unique) %}
-PartitionName={{partition.partition_name}} {% for arg, arg_value in partition.partition_configuration.items() %} {{ arg }}={{ arg_value }}{% endfor %} Nodes={{ partition_nodes | bluebanquise.infrastructure.nodeset }}
-
-  {% endfor %}
-{% endif %}
+PartitionName={{partition.partition_name}} {% for arg, arg_value in partition.partition_configuration.items() %} {{ arg }}={{ arg_value }}{% endfor %} Nodes={{ partition_nodes | bluebanquise.commons.nodeset }}
+  {%- endfor -%}
+{%- endif -%}
