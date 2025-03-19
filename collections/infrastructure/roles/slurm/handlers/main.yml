@@ -7,7 +7,7 @@
 
 - name: service <|> Restart munge
   ansible.builtin.service:
-    name: munge
+    name: munge.service
     state: restarted
   when:
     - "'service' not in ansible_skip_tags"
@@ -19,3 +19,23 @@
   changed_when: true
   when:
     - slurm_allow_scontrol_handler
+
+- name: service <|> restart slurmdbd
+  ansible.builtin.service:
+    name: slurmdbd.service
+    state: restarted
+
+- name: service <|> restart mariadb
+  ansible.builtin.service:
+    name: mariadb.service
+    state: restarted
+
+- name: service <|> restart slurmctld
+  ansible.builtin.service:
+    name: slurmctld.service
+    state: restarted
+
+- name: service <|> restart slurmd
+  ansible.builtin.service:
+    name: slurmd.service
+    state: restarted
