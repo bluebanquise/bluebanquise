@@ -1,4 +1,11 @@
 ---
+- name: "Reload 'facts'"
+  setup:
+
 - name: include_tasks <|> Configure Nvidia GPU
   ansible.builtin.include_tasks: "nvidia/main.yml"
   when: gpu_vendor == "nvidia"
+
+- name: include_tasks <|> Configure AMD GPU
+  ansible.builtin.include_tasks: "amd/main.yml"
+  when: gpu_vendor == "amd"
