@@ -217,6 +217,7 @@ dns_server_forward_only_domains:
 
 Available options:
 
+ * dns_server_dnssec_enable           # Allows connection to dnssec enabled servers. Default true.
  * dns_server_dnssec_sign             # Generate keys and sign zones. Default false.
  * dns_server_dnssec_overwrite_key    # Overwrite all existing keys. Default false.
 
