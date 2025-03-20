@@ -7,6 +7,15 @@
 # ██████╔╝███████╗╚██████╔╝███████╗██████╔╝██║  ██║██║ ╚████║╚██████╔╝╚██████╔╝██║███████║███████╗
 # ╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚══▀▀═╝  ╚═════╝ ╚═╝╚══════╝╚══════╝
 #
+# 2.2.1: (SMC fix) Fix check of user presence in image for cross-arch images. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
+# 2.2.0: (SMC feature) Add SELinux support to live images. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
+# 2.1.4: (SMC fix) Restore SELinux context before creating live image. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
+# 2.1.3: (SMC fix) Check if internal user exists in reference image before creating it. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
+# 2.1.2: (SMC feature) Use specific export file in /etc/exports.d. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
+# 2.1.1: (SMC change) Remove "beta", remove links to external images. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
+# 2.1.0: (SMC feature) Replace systemctl restart nfs for exportfs -a. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
+# 2.0.9: (SMC change) Replace diskless/ with diskless/images/, tolerate disklessset images. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
+# 2.0.8: (SMC change) Do not use --system to create user. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
 # 2.0.7: Update boot.ipxe when cloning reference image. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 # 2.0.6: Use --numeric-owner when extracting bootstrap image to ensure correct uid/gid. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 # 2.0.5: Add debug optional parameter. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
@@ -140,14 +149,14 @@ def display_images(image_type, tool_paths):
         else:
             print(" BOOTSTRAP IMAGES: none found")
             return 1
-    
+
     if image_type == "reference":
 
         # Gather reference images
         gathered_reference = []
         logging.info(bcolors.OKBLUE + "Checking reference images in " + tool_paths['http_pxe_diskless'] + bcolors.ENDC)
         for it in os.scandir(tool_paths['http_pxe_diskless']):
-            if it.is_dir():
+            if it.is_dir() and not os.path.exists(it.path + '/image_data.yml'):
                 try:
                     with open(it.path + "/metadata.yaml", "r") as file:
                         image_metadata = yaml.safe_load(file)
@@ -176,7 +185,7 @@ def display_images(image_type, tool_paths):
         gathered_live = []
         logging.info(bcolors.OKBLUE + "Checking live images in " + tool_paths['http_pxe_diskless'] + bcolors.ENDC)
         for it in os.scandir(tool_paths['http_pxe_diskless']):
-            if it.is_dir():
+            if it.is_dir() and not os.path.exists(it.path + '/image_data.yml'):
                 try:
                     with open(it.path + "/metadata.yaml", "r") as file:
                         image_metadata = yaml.safe_load(file)
@@ -203,6 +212,7 @@ def display_images(image_type, tool_paths):
 
 
 def protected_os_system(raw_command):
+
     if '--debug' in sys.argv or '-d' in sys.argv:
         print(raw_command)
 
@@ -280,8 +290,8 @@ print("""\
       (o_  (o_  //\\
       (/)_ (/)_ V_/_
    BlueBanquise diskless
-   v2.0.7 - beta
-   https://github.com/bluebanquise/bluebanquise/
+   v2.2.1
+   Patched for SMC
 
 """)
 
@@ -316,7 +326,7 @@ except Exception:
 tool_paths = {}
 tool_paths['bootstrap_images'] = os.path.join(tool_parameters['sudo_user_home'], "diskless/bootstrap_images")
 tool_paths['bootstrap_images_tmp'] = os.path.join(tool_paths['bootstrap_images'], "tmp")
-tool_paths['http_pxe_diskless'] = os.path.join(tool_parameters['http_pxe_folder'], "diskless")
+tool_paths['http_pxe_diskless'] = os.path.join(tool_parameters['http_pxe_folder'], "diskless", "images")
 tool_paths['nfs'] = tool_parameters['nfs_path']
 
 
@@ -357,7 +367,6 @@ while True:
     if main_action == "2":
 
         print("\n\n== bootstrap images menu ==")
-        print(" Note: you can find pre-made images at http://bluebanquise.com/diskless/")
         print(" Please select source of bootstrap image:")
         print(" 1 - From local file")
         print(" 2 - From http URL")
@@ -472,9 +481,9 @@ while True:
         echo | > Additional kernel parameters: ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}}
         echo |
         echo | Loading linux ...
-        kernel http://${{next-server}}/pxe/diskless/{image_name}/${{image-kernel}} initrd=${{image-initramfs}} selinux=0 text=1 root=nfs:${{next-server}}:{nfs_path}/{image_name},vers=4.2,rw rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}} rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4
+        kernel http://${{next-server}}/pxe/diskless/images/{image_name}/${{image-kernel}} initrd=${{image-initramfs}} selinux=0 text=1 root=nfs:${{next-server}}:{nfs_path}/{image_name},vers=4.2,rw rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}} rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4
         echo | Loading initial ramdisk ...
-        initrd http://${{next-server}}/pxe/diskless/{image_name}/${{image-initramfs}}
+        initrd http://${{next-server}}/pxe/diskless/images/{image_name}/${{image-initramfs}}
         echo | ALL DONE! We are ready.
         echo | Booting in 4s ...
         echo |
@@ -510,29 +519,36 @@ while True:
 
         image_selected_input = get_user_input(" Please enter reference image to link to a node:", validate_name=True)
         reference_image_nfs_path = get_reference_image_nfs_path(tool_paths, image_selected_input)
-
         node_selected_input = get_user_input(" Now, please enter target node to be linked to this image:")
-        print(" Ok, and to finish, I would need a temporary password for image's internal bluebanquise user.")
+        print(" Ok, and to finish, I would need a temporary password for image's internal bluebanquise user (user: " + tool_parameters['sudo_user'] + ").")
         print(" You will be able to update it, or remove it once image is created")
         print(" to allow ssh keys based authentication only.")
         image_selected_user_password = get_user_input("")
         print("")
         image_selected_user_password = crypt.crypt(image_selected_user_password, crypt.mksalt(crypt.METHOD_SHA512))
 
-        logging.info(bcolors.OKBLUE + 'Adding bluebanquise user to image...' + bcolors.ENDC)
+        logging.info(bcolors.OKBLUE + "Adding " + tool_parameters['sudo_user'] + " user to image..." + bcolors.ENDC)
         protected_os_system("mkdir -p " + reference_image_nfs_path + os.path.dirname(tool_parameters['sudo_user_home']))
-        protected_os_system("groupadd -R " + reference_image_nfs_path + "/ --system " + tool_parameters['sudo_user'])
-        protected_os_system("useradd  -R " + reference_image_nfs_path + "/ -m -c 'BlueBanquise user' -d " + tool_parameters['sudo_user_home'] + " --system -g " + tool_parameters['sudo_user'] + " -s /bin/bash -p '" + image_selected_user_password + "' " + tool_parameters['sudo_user'])
-#            protected_os_system("useradd  -R " + tool_parameters['nfs_path'] + "/" + image_selected_input + "/ -m -c 'BlueBanquise user' -d /var/lib/bluebanquise --system -g bluebanquise -s /bin/bash bluebanquise")
+
+        # create group in image, skip if already created
+        protected_os_system("/usr/bin/grep -q '^" + tool_parameters['sudo_user'] + ":' " + reference_image_nfs_path + "/etc/group || /usr/sbin/groupadd -R " + reference_image_nfs_path + "/ " + tool_parameters['sudo_user'])
+
+        # create user in image, skip if already created
+        protected_os_system("/usr/bin/grep -q '^" + tool_parameters['sudo_user'] + ":' " + reference_image_nfs_path + "/etc/passwd || /usr/sbin/useradd  -R " + reference_image_nfs_path + "/ -m -c 'SMC user' -d " + tool_parameters['sudo_user_home'] + " -s /bin/bash -p '" + image_selected_user_password + "' " + tool_parameters['sudo_user'])
+
+        # update of user password in image, useful if previous command was skipped
+        logging.info(bcolors.OKBLUE + "Setting password of " + tool_parameters['sudo_user'] + " user in image..." + bcolors.ENDC)
+        protected_os_system("/usr/sbin/usermod -P " + reference_image_nfs_path + " -p '" + image_selected_user_password + "' " + tool_parameters['sudo_user'])
 
         protected_os_system("echo '" + tool_parameters['sudo_user'] + " ALL=(ALL:ALL) NOPASSWD:ALL' > " + reference_image_nfs_path + "/etc/sudoers.d/" + tool_parameters['sudo_user'])
 
-        logging.info(bcolors.OKBLUE + 'Updating /etc/exports...' + bcolors.ENDC)
-        protected_os_system("cat /etc/exports | grep '# diskless' || echo '# diskless' | tee -a /etc/exports")
-        protected_os_system("cat /etc/exports | grep '" + reference_image_nfs_path + "' && sed -i 's/\/nfs\/diskless\/" + image_selected_input + "\ .*/\/nfs\/diskless\/" + image_selected_input + " " + node_selected_input + "(rw,no_root_squash)/' /etc/exports || sed -i -e '$a" + reference_image_nfs_path + " " + node_selected_input + "(rw,no_root_squash)' /etc/exports")
-        #  cat /etc/exports | grep '" + tool_parameters['nfs_path'] + "/almalinux_8_minimal ' && sudo sed -i 's/\/nfs\/diskless\/almalinux_9_minimal\ .*/\/nfs\/diskless\/almalinux_9_minimal mgt8(rw,no_root_squash)/' /etc/exports || sudo sed -i -e '$a" + tool_parameters['nfs_path'] + "/almalinux_9_minimal mgt2(rw,no_root_squash)' /etc/exports
-        logging.info(bcolors.OKBLUE + 'Restarting nfs server service...' + bcolors.ENDC)
-        protected_os_system("systemctl restart nfs-server")
+        node_sanitized = node_selected_input.replace("/", "_")
+        exports_d_filename = "/etc/exports.d/bb_diskless_" + image_selected_input + "_" + node_sanitized + ".exports"
+        logging.info(bcolors.OKBLUE + 'Creating ' + exports_d_filename + '...' + bcolors.ENDC)
+        protected_os_system("echo '" + reference_image_nfs_path + " " + node_selected_input + "(rw,no_root_squash,async)' > " + exports_d_filename)
+        logging.info(bcolors.OKBLUE + 'Exporting ' + reference_image_nfs_path + ' via NFS to ' + node_selected_input + '...' + bcolors.ENDC)
+        protected_os_system("exportfs " + node_selected_input + ":" + reference_image_nfs_path)
+
         print(bcolors.OKGREEN + "\n == Image linked to the node :) ==" + bcolors.ENDC)
         print(" Please boot the node and tune image according to your need.")
         print(" You will need to set node next boot on this image using command:")
@@ -547,7 +563,7 @@ while True:
         reference_image_nfs_path = get_reference_image_nfs_path(tool_paths, image_selected_input)
         reference_image_pxe_path = get_reference_image_pxe_path(tool_paths, image_selected_input)
 
-        ## Attention, RHEL 9 et 8 uniquement pour le moment
+        # Attention, RHEL 9 et 8 uniquement pour le moment
         print(" Detected kernels are the following:")
         for it in os.scandir(reference_image_nfs_path + "/lib/modules/"):
             if it.is_dir():
@@ -607,20 +623,19 @@ while True:
         if image_selected_metadata['family'] == "el9":
             protected_os_system("cp -a " + reference_image_nfs_path + "/boot/initramfs-" + kernel_selected + ".img " + reference_image_pxe_path + "/initramfs-" + kernel_selected + ".img")
             protected_os_system("cp -a " + reference_image_nfs_path + "/lib/modules/" + kernel_selected + "/vmlinuz " + reference_image_pxe_path + "/vmlinuz-" + kernel_selected)
-            protected_os_system("chmod 644 " + reference_image_pxe_path + "/initramfs-*")
         elif image_selected_metadata['family'] == "el8":
             protected_os_system("cp -a " + reference_image_nfs_path + "/boot/initramfs-" + kernel_selected + ".img " + reference_image_pxe_path + "/initramfs-" + kernel_selected + ".img")
             protected_os_system("cp -a " + reference_image_nfs_path + "/boot/vmlinuz-" + kernel_selected + " " + reference_image_pxe_path + "/vmlinuz-" + kernel_selected)
-            protected_os_system("chmod 644 " + reference_image_pxe_path + "/initramfs-*")
         else:
             print(" Sorry, image family " + image_selected_metadata['family'] + " is unknown :( , aborting.")
             quit(1)
 
+        protected_os_system("chmod 644 " + reference_image_pxe_path + "/initramfs-*")
         print(bcolors.OKGREEN + "\n == Kernel " + kernel_selected + " set as default for next boot :) ==" + bcolors.ENDC)
         print(" You will need to restart the node for changes to take effect.")
 
     if main_action == '6':
-            
+
         if display_images("reference", tool_paths) == 1: continue
 
         image_selected_input = get_user_input(" Please enter reference image to clone:", validate_name=True)
@@ -661,9 +676,9 @@ while True:
         echo | > Additional kernel parameters: ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}}
         echo |
         echo | Loading linux ...
-        kernel http://${{next-server}}/pxe/diskless/{image_name}/${{image-kernel}} initrd=${{image-initramfs}} selinux=0 text=1 root=nfs:${{next-server}}:{nfs_path}/{image_name},vers=4.2,rw rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}} rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4
+        kernel http://${{next-server}}/pxe/diskless/images/{image_name}/${{image-kernel}} initrd=${{image-initramfs}} selinux=0 text=1 root=nfs:${{next-server}}:{nfs_path}/{image_name},vers=4.2,rw rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}} rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4
         echo | Loading initial ramdisk ...
-        initrd http://${{next-server}}/pxe/diskless/{image_name}/${{image-initramfs}}
+        initrd http://${{next-server}}/pxe/diskless/images/{image_name}/${{image-initramfs}}
         echo | ALL DONE! We are ready.
         echo | Booting in 4s ...
         echo |
@@ -699,7 +714,7 @@ while True:
 
         try:
             with open(reference_image_pxe_path + "/metadata.yaml", "r") as file:
-                        image_selected_metadata = yaml.safe_load(file)
+                image_selected_metadata = yaml.safe_load(file)
         except FileNotFoundError:
             print(bcolors.FAIL + " File " + reference_image_pxe_path + "/metadata.yaml does not exist, please re-run pxe_stack role before using the tool." + bcolors.ENDC)
             quit(1)
@@ -716,6 +731,16 @@ while True:
         reference_image_pxe_path = get_reference_image_pxe_path(tool_paths, image_selected_metadata['reference_name'].split(",")[0])
         live_image_path = get_live_image_path(tool_paths, image_selected_metadata['name'])
 
+        selinux_input = get_user_input(" Enable SELinux in image? (enter 'yes' to enable SELinux, any other answer to disable SELinux)")
+        selinux_input = selinux_input.lower()
+        if selinux_input != 'yes':
+            # default is to disable SELinux
+            selinux_string = "selinux=0"
+            image_selected_metadata['selinux'] = False
+        else:
+            selinux_string = "enforcing=0"
+            image_selected_metadata['selinux'] = True
+
         live_size = get_user_input(" I now need a live size limit in RAM, in Mb:")
         logging.info(bcolors.OKBLUE + 'Preparing FS...' + bcolors.ENDC)
         protected_os_system("mkdir -p " + live_image_path + "/workdir/LiveOS/")
@@ -724,7 +749,108 @@ while True:
         os.makedirs(live_image_path + "/mountdir/")
         protected_os_system("mount -o loop " + live_image_path + "/workdir/LiveOS/rootfs.img " + live_image_path + "/mountdir/")
         logging.info(bcolors.OKBLUE + 'Copying files from reference image...' + bcolors.ENDC)
+
         protected_os_system("cp -a " + reference_image_nfs_path + "/* " + live_image_path + "/mountdir/")
+
+        if image_selected_metadata['selinux']:
+            # Support for SELinux in enforcing mode:
+            # 1. Apply a relabel to live image before squashing it.
+            #    Required (*), but incomplete as the host is running RHEL8 and the image is RHEL9.
+            # 2. Boot the diskless node in permissive mode.
+            # 3. Run "bb_diskless_selinux" systemd service when the diskless node boots, it runs
+            #    restorecon at runtime to relabel as RHEL9.
+            # 4. (Manual step) Run ansible roles on the live diskless node with SELinux tasks.
+            # 5. (Manual step) Switch to Enforcing, can be done with access_control role.
+            #
+            # IMPORTANT: NFS root filesystem does not allow SELinux context: even though NFS *can*
+            # support SELinux if using v4.2 + 'security_label' flag, this fails for diskless boot
+            # (the client does not add 'seclabel' mount parameter).
+            #
+            # As a consequence, reference images *must* boot with selinux=0 over NFS, to avoid failure
+            # of SELinux-related tasks/commands.
+            #
+            # (*) If live image is not relabeled, then sshd fails with "dyntransition" SELinux denial.
+            # Adding .autorelabel does not work because it reboots and changes are lost.
+
+            # path with exactly one slash per level, otherwise semanage does not work
+            image_mountdir = os.path.join(live_image_path, "mountdir")
+            image_mountdir = os.path.abspath(image_mountdir)
+
+            # (Prepare step 3) Create systemd service to relabel filesystem when diskless node boots,
+            # done before step 1 to get correct labels on these files. See notes below for semanage command.
+            logging.info(bcolors.OKBLUE + 'Configuring systemd service to restore SELinux context at boot...' + bcolors.ENDC)
+            selinux_script_content = '''#!/bin/bash
+echo "Configure SELinux context of {user_home}..."
+/usr/sbin/semanage fcontext -a -e /home {parent_of_user_home}
+echo "Restoring SELinux context of filesystem..."
+restorecon -R -F /
+touch /tmp/bb_diskless_selinux_script_done
+echo "Done restoring SELinux context."
+'''.format(parent_of_user_home=os.path.dirname(tool_parameters['sudo_user_home']),user_home=tool_parameters['sudo_user_home'])
+
+            try:
+                selinux_script_file = open(image_mountdir + "/root/bb_diskless_selinux.sh", "w")
+                selinux_script_file.write(selinux_script_content)
+                selinux_script_file.close()
+            except Exception:
+                print(bcolors.FAIL + " An error occurred writing the file " + image_mountdir + "/root/bb_diskless_selinux.sh. Please investigate." + bcolors.ENDC)
+                quit(1)
+
+            protected_os_system("chmod +x " + image_mountdir + "/root/bb_diskless_selinux.sh")
+
+            selinux_service_content = '''[Unit]
+Description=bb_diskless_selinux
+Requires=multi-user.target
+After=multi-user.target
+ConditionPathExists=!/tmp/bb_diskless_selinux_script_done
+
+[Service]
+User=root
+Group=root
+Type=oneshot
+ExecStart=/root/bb_diskless_selinux.sh
+
+[Install]
+WantedBy=multi-user.target
+'''
+            try:
+                selinux_service_file = open(image_mountdir + "/etc/systemd/system/bb_diskless_selinux.service", "w")
+                selinux_service_file.write(selinux_service_content)
+                selinux_service_file.close()
+            except Exception:
+                print(bcolors.FAIL + " An error occurred writing the file " + image_mountdir + "/etc/systemd/system/bb_diskless_selinux.service. Please investigate." + bcolors.ENDC)
+                quit(1)
+
+            # enable the oneshot service at boot time
+            protected_os_system("chroot " + image_mountdir + " /usr/bin/ln -s /etc/systemd/system/bb_diskless_selinux.service /etc/systemd/system/multi-user.target.wants/bb_diskless_selinux.service")
+
+            # (Step 1) Apply a relabel in the live image, before squashing it
+            logging.info(bcolors.OKBLUE + 'Applying SELinux labels on image filesystem...' + bcolors.ENDC)
+
+            # cleanup from any previous failed attempts
+            protected_os_system("/usr/sbin/semanage fcontext -d -e / " + image_mountdir + " || /usr/bin/true")
+            protected_os_system("/usr/sbin/semanage fcontext -d -e /home " + image_mountdir + os.path.dirname(tool_parameters['sudo_user_home']) + " || /usr/bin/true")
+
+            # Temporarily add a record to relabel the root filesystem of the image using context for "/".
+            # This is done inside the management node, simpler than chroot + mounting some SELinux dirs
+            protected_os_system("/usr/sbin/semanage fcontext -a -e / " + image_mountdir)
+
+            # relabel root filesystem of image using the added record
+            protected_os_system("/usr/sbin/restorecon -R -F " + image_mountdir)
+
+            # remove temporary record
+            protected_os_system("/usr/sbin/semanage fcontext -d -e / " + image_mountdir)
+
+            # Additionally the HOME directory may have incorrect labels if it is in a non-standard location,
+            # ensure proper context (user_home_dir_t) with a similar procedure
+            logging.info(bcolors.OKBLUE + 'Applying SELinux labels to HOME directory of internal user...' + bcolors.ENDC)
+            protected_os_system("mkdir -p " + image_mountdir + tool_parameters['sudo_user_home'])
+            protected_os_system("/usr/sbin/semanage fcontext -a -e /home " + image_mountdir + os.path.dirname(tool_parameters['sudo_user_home']))
+            protected_os_system("/usr/sbin/restorecon -R -F " + image_mountdir + tool_parameters['sudo_user_home'])
+            protected_os_system("/usr/sbin/semanage fcontext -d -e /home " + image_mountdir + os.path.dirname(tool_parameters['sudo_user_home']))
+
+            logging.info(bcolors.OKBLUE + 'Image configured to boot with SELinux in Permissive mode + restorecon.' + bcolors.ENDC)
+
         protected_os_system("umount " + live_image_path + "/mountdir/")
         logging.info(bcolors.OKBLUE + 'Squashing image...' + bcolors.ENDC)
         protected_os_system("mksquashfs " + live_image_path + "/workdir " + live_image_path + "/squashfs.img")
@@ -733,6 +859,8 @@ while True:
         protected_os_system("cp -a " + reference_image_pxe_path + "/initramfs* " + live_image_path + "/")
         protected_os_system("chmod 644 " + live_image_path + "/initramfs-*")
         protected_os_system("cp -a " + reference_image_pxe_path + "/vmlinuz* " + live_image_path + "/")
+        logging.info(bcolors.OKBLUE + 'Restoring SELinux context of image pxe directory...' + bcolors.ENDC)
+        protected_os_system("(selinuxenabled && chcon -t httpd_sys_content_t " + live_image_path + "/*) || /usr/bin/true")
 
         ipxe_content = '''#!ipxe
         echo |
@@ -748,16 +876,16 @@ while True:
         echo | > Additional kernel parameters: ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}}
         echo |
         echo | Loading linux ...
-        kernel http://${{next-server}}/pxe/diskless/{image_name}/${{image-kernel}} initrd=${{image-initramfs}} selinux=0 text=1 root=live:http://${{next-server}}/pxe/diskless/{image_name}/squashfs.img rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}} rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4
+        kernel http://${{next-server}}/pxe/diskless/images/{image_name}/${{image-kernel}} initrd=${{image-initramfs}} {selinux_parameter} text=1 root=live:http://${{next-server}}/preboot_execution_environment/diskless/images/{image_name}/squashfs.img rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}} rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4
         echo | Loading initial ramdisk ...
-        initrd http://${{next-server}}/pxe/diskless/{image_name}/${{image-initramfs}}
+        initrd http://${{next-server}}/pxe/diskless/images/{image_name}/${{image-initramfs}}
         echo | ALL DONE! We are ready.
         echo | Booting in 4s ...
         echo |
         echo +----------------------------------------------------+
         sleep 4
         boot
-        '''.format(image_kernel=("vmlinuz-" + image_selected_metadata['kernel']), image_initramfs=("initramfs-" + image_selected_metadata['kernel'] + ".img"), image_name=image_selected_metadata['name'])
+        '''.format(image_kernel=("vmlinuz-" + image_selected_metadata['kernel']), image_initramfs=("initramfs-" + image_selected_metadata['kernel'] + ".img"), image_name=image_selected_metadata['name'], selinux_parameter=selinux_string)
 
         try:
             ipxe_file = open(live_image_path + "/boot.ipxe", "w")
@@ -791,7 +919,7 @@ while True:
         if str(delete_image_type) == "1":
 
             if display_images("bootstrap", tool_paths) == 1: continue
-            
+
             delete_image = get_user_input("\n Please enter bootstrap image name to be deleted:", validate_name=True)
             bootstrap_image_path = get_bootstrap_image_path(tool_paths, delete_image)
             logging.info(bcolors.OKBLUE + 'Deleting image...' + bcolors.ENDC)
@@ -800,7 +928,7 @@ while True:
         if str(delete_image_type) == "2":
 
             if display_images("reference", tool_paths) == 1: continue
-            
+
             delete_image = get_user_input("\n Please enter reference image name to be deleted:", validate_name=True)
             reference_image_nfs_path = get_reference_image_nfs_path(tool_paths, delete_image)
             reference_image_pxe_path = get_reference_image_pxe_path(tool_paths, delete_image)
@@ -862,10 +990,6 @@ A bootstrap image contains at least:
 
 It is then up to packager to add additional elements into image.
 
-BlueBanquise project provides basic bootstrap images at https://bluebanquise.com/diskless
-
-Once imported, bootstrap images are stored by default into `/var/lib/bluebanquise/diskless/bootstrap_images/` folder.
-
 Bootstrap images are used as source to create new reference images (also known as golden images).
 
 ## Step 2: generate a reference image
@@ -914,7 +1038,7 @@ Remember to skip "identify" and "secret" tags:
 
 ```
 ansible-playbook --become --skip-tags identify,secret /path/to/playbook.yml
-``` 
+```
 
 ### Using chroot
 
@@ -978,7 +1102,7 @@ If using BlueBanquise roles, simply apply playbook with missing tags:
 
 ```
 ansible-playbook --become --tags identify,secret /path/to/playbook.yml
-```  
+```
 
 ## Debug and errors
 
@@ -1009,7 +1133,7 @@ It is possible to see that this even fail with nfs 4.2 mount:
  Flags: rw,relatime,vers=4.2,rsize=1048576,wsize=1048576,namlen=255,hard,proto=tcp,timeo=600,retrans=2,sec=sys,clientaddr=10.10.0.8,local_lock=none,addr=10.10.0.1
 [bluebanquise@c001 ~]$
 ```
- 
+
 Solution is to install the failing package using chroot method on NFS server:
 
 ```
@@ -1055,7 +1179,7 @@ This however could lead to issues, so in case of crash, remember to check the fo
 
 * /var/lib/bluebanquise/diskless/bootstrap_images/
 * /var/lib/bluebanquise/diskless/bootstrap_images/tmp/
-* /var/www/html/pxe/diskless/
+* /var/www/html/pxe/diskless/images/
 * /nfs/diskless/
 
 ## Conclusion
