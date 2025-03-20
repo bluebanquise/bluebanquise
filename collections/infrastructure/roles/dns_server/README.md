@@ -258,6 +258,7 @@ dns_server_raw_options_content: |
 
 ## Changelog
 
+* 1.11.0: Enable dnssec at dns server. Thiago Cardozo <boubee.thiago@gmail.com>
 * 1.10.4: Increase role performances bby caching first octets. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.10.3: Fix global logic. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.10.2: Fix role for Ubuntu and Debian distributions. Benoit Leveugle <benoit.leveugle@gmail.com>
