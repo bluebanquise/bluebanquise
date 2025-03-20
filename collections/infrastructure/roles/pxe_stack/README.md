@@ -726,6 +726,7 @@ Note that using an home folder into /home for the bluebanquise sudo user can be 
 
 ## Changelog
 
+* 1.18.4: Use aarch64 instead of arm64 for RHEL. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
 * 1.18.3: Fix dublicated PermitRootLogin in RH sshd_config. Thiago Cardozo <boubee.thiago@gmail.com>
 * 1.18.2: Fix opensuse leap autoyast. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.18.1: Fix ubuntu 24.04 support. Benoit Leveugle <benoit.leveugle@gmail.com>
