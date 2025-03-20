@@ -24,7 +24,7 @@ scrape_configs:
   - job_name: 'prometheus_master'
     scrape_interval: 30s
     static_configs:
-      - targets: ['{{ prometheus_server_prometheus_host }}:9090']
+      - targets: ['localhost:9090']
 {% if prometheus_server_enable_tls %}
     scheme: https
     tls_config:
