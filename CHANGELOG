@@ -4,10 +4,11 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.3.0
 
-* 3/17/25 - Thiago Cardozo <boubee.thiago@gmail.com> - [grafana] Reuse better variable for output;Don't print admin password at end.
+* 3/18/25 - thiagocardozo - [dns_server] Simple round robin load balancing
+* 3/17/25 - thiagocardozo - [grafana] Reuse better variable for output;Don't print admin password at end
 * 3/13/25 - oxedions - [INFRA] Updated slurm to 24.05.6
 * 3/13/25 - oxedions - [INFRA] Updated atftp to 0.8.0
-* 3/13/25 - Thiago Cardozo <boubee.thiago@gmail.com> - [grafana] Missing default port reference.
+* 3/13/25 - thiagocardozo - [grafana] Missing default port reference
 * 3/13/25 - oxedions - [bootstrap] Fix root vs sudo
 * 3/5/25 - oxedions - [pxe_stack] Add capability to precedence partitioning from hardware profile
 * 3/3/25 - oxedions - [hosts_file] allow the FDQN to be set first in /etc/hosts (# 1005, from @levaillx)
