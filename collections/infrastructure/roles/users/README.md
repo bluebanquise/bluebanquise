@@ -24,6 +24,15 @@ users:
     home: /home/oxedions
     shell: /bin/bash
     password: !
+  - name: bluebanquise
+    home: /home/bluebanquise
+    shell: /bin/bash
+    comment: BlueBanquise account
+    password: '*'
+    ssh_authorized_keys:
+      - <ssh key 1>
+      - <ssh key 2>
+      - <ssh key 3>
 ```
 
 Available arguments for each user are:
@@ -67,6 +76,7 @@ python -c "import crypt,random,string; print crypt.crypt(raw_input('clear-text p
 
 ## Changelog
 
+* 1.1.1: Role enhancement and bug fixing. Hamid MERZOUKI <hamid@sesterce.com>
 * 1.1.0: Role enhancement. New inventory structure. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.1: Documentation and resources. johnnykeats <johnny.keats@outlook.com>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
