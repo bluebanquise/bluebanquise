@@ -217,8 +217,9 @@ dns_server_forward_only_domains:
 
 Available options:
 
- * dns_server_enable_dnssec           # Generate keys and sign zones. Default true.
- * dns_server_dnssec_overwrite_key    # Overwrite all existing keys Default false.
+ * dns_server_dnssec_sign             # Generate keys and sign zones. Default false.
+ * dns_server_dnssec_overwrite_key    # Overwrite all existing keys. Default false.
+
 
 To verify that DNSSEC is being used, use the dig command.
 For example, to check that the DNSSEC signature is attached to the record:

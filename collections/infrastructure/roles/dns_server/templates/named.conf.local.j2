@@ -5,7 +5,7 @@
 {% macro create_reverse_zone(octets) -%}
 zone "{{ octets.split('.') | reverse | join('.') }}.in-addr.arpa" IN {
    type master;
-{% if dns_server_enable_dnssec %}
+{% if dns_server_dnssec_sign %}
    file "{{ dns_server_named_dir }}/{{ octets }}.rr.zone.signed";
 {% else %}
    file "{{ dns_server_named_dir }}/{{ octets }}.rr.zone";
@@ -34,7 +34,7 @@ include "{{ dns_server_rfc_zone_file }}";
 
 zone "{{ dns_server_domain_name | default(bb_domain_name, true) | default('cluster.local', true) }}" IN {
   type master;
-{% if dns_server_enable_dnssec %}
+{% if dns_server_dnssec_sign %}
   file "{{ dns_server_named_dir }}/forward.zone.signed";
 {% else %}
   file "{{ dns_server_named_dir }}/forward.zone";
