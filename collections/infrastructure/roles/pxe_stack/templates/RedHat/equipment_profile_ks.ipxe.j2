@@ -8,7 +8,7 @@ echo |
 
 # Ansible variables
 set eq-equipment-profile {{ item | trim }}
-{% if hostvars[groups[hw_profile][0]]['hw_specs']['cpu']['architecture'] == 'arm64' %}{# BRNEO-5285 #}
+{% if equipment['hw']['hw_specs']['cpu']['architecture'] == 'arm64' %}{# BRNEO-5285 #}
 set eq-architecture aarch64
 {% else %}
 set eq-architecture ${arch}
