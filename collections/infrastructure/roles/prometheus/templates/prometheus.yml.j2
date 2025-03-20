@@ -27,6 +27,7 @@ scrape_configs:
     metrics_path: "{{ prometheus_server_prometheus_prefix }}/metrics"
     static_configs:
       - targets: ['localhost:9090']
+
 {% if prometheus_server_enable_tls %}
     scheme: https
     tls_config:
