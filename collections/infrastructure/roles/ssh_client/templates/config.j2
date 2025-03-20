@@ -15,6 +15,15 @@ Host {{ host }}
     {% if host_vars['ssh_client_loglevel'] is defined and host_vars['ssh_client_loglevel'] is not none %}
     LogLevel {{ host_vars['ssh_client_loglevel'] }}
     {% endif %}
+    {% if host_vars['ssh_client_verifyhostkeydns'] is defined and host_vars['ssh_client_verifyhostkeydns'] is not none %}
+    VerifyHostKeyDNS {{ host_vars['ssh_client_verifyhostkeydns'] }}
+    {% endif %}
+    {% if host_vars['ssh_client_forwardx11trusted'] is defined and host_vars['ssh_client_forwardx11trusted']is not none %}
+    ForwardX11Trusted {{ host_vars['ssh_client_forwardx11trusted'] }}
+    {% endif %}
+    {% if host_vars['ssh_client_useroaming'] is defined and host_vars['ssh_client_useroaming']is not none %}
+    UseRoaming {{ host_vars['ssh_client_useroaming'] }}
+    {% endif %}
     {% if ssh_jump is none %}
       {% set host_to_be_used_network = ssh_client_global_network  | default(host_vars['j2_icebergs_main_network_dict'][j2_current_iceberg], true) | default(none, true) %}
     Hostname %h{% if host_to_be_used_network is not none %}-{{ host_to_be_used_network }}{% endif %}
@@ -31,7 +40,7 @@ Host {{ host }}
 {% endif %}
 
 # Global parameters
-{% if ssh_client_global_stricthostkeychecking is not none or ssh_client_global_userknownhostsfile is not none or ssh_client_global_loglevel is not none %}
+{% if ssh_client_global_stricthostkeychecking is not none or ssh_client_global_userknownhostsfile is not none or ssh_client_global_loglevel is not none or ssh_client_global_verifyhostkeydns is not none or ssh_client_global_forwardx11trusted is not none %}
 Host *
   {% if ssh_client_global_stricthostkeychecking is not none %}
     StrictHostKeyChecking {{ ssh_client_global_stricthostkeychecking }}
@@ -42,51 +51,17 @@ Host *
   {% if ssh_client_global_loglevel is not none %}
     LogLevel {{ ssh_client_global_loglevel }}
   {% endif %}
+  {% if ssh_client_global_verifyhostkeydns is not none %}
+    VerifyHostKeyDNS {{ ssh_client_global_verifyhostkeydns }}
+  {% endif %}
+  {% if ssh_client_global_forwardx11trusted is not none %}
+    ForwardX11Trusted {{ ssh_client_global_forwardx11trusted }}
+  {% endif %}
+  {% if host_vars['ssh_client_global_useroaming'] is defined and host_vars['ssh_client_global_useroaming']is not none %}
+    UseRoaming {{ host_vars['ssh_client_global_useroaming'] }}
+  {% endif %}
 {% endif %}
 
 {% for host in (j2_hosts_range | sort) -%}
-  {% set host_vars = hostvars[host] %}
-{{ write_host(host, host_vars, None) }}
+{{ write_host(host, hostvars[host], None) }}
 {% endfor %}
-
-{#
-
-{% if icebergs_system == true and ssh_client_enable_jump == true %}
-# Icebergs ssh_jump system is on
-
-
-This mechanism allows SSH ProxyJump from a top iceberg to a sub_iceberg
-using one sub_iceberg management node to reach all other nodes in this sub_iceberg.
-Template will try to check if a manually set target has been set for the iceberg
-before using the first management node found in the group list.
-
-
-  {% for iceberg in (groups | select('match','^'+iceberg_naming+'.*') | list | unique | sort ) %}
-    {% if hostvars[groups[iceberg][0]]['iceberg_master'] == j2_current_iceberg %}
-      {% set ssh_jump_target = namespace(value=none) %}
-      {% if hostvars[groups[iceberg][0]]['ssh_client_iceberg_jump_target'] is defined %}
-        {% set ssh_jump_target.value = hostvars[groups[iceberg][0]]['ssh_client_iceberg_jump_target'] %}
-      {% else %}
-        {% for host in groups[managements_group_name] %}
-          {% if host in groups[iceberg] %}
-            {% set ssh_jump_target.value = host %}
-            {% break %}
-          {% endif %}
-        {% endfor %}
-      {% endif %}
-      {% if ssh_jump_target.value is not none %}
-
-## Iceberg {{ iceberg }}
-        {% for host in groups[iceberg] %}
-          {% if host != ssh_jump_target.value %}
-{{ write_host(host, None, ssh_jump_target.value) }}
-          {% endif %}
-        {% endfor %}
-      {% endif %}
-
-    {% endif %}
-  {% endfor %}
-
-{% endif %}
-
-#}

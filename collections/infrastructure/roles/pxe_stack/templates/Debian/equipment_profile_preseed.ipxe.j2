@@ -9,25 +9,25 @@ echo |
 # Ansible variables
 set eq-equipment-profile {{ item | trim }}
 set eq-architecture ${arch}
-set eq-distribution {{ hostvars[groups[os_profile][0]]['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution, true) | lower }}
-set eq-distribution-major-version {{ hostvars[groups[os_profile][0]]['os_operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version, true) }}
-set eq-distribution-version {{ hostvars[groups[os_profile][0]]['os_operating_system']['distribution_version'] | default(hostvars[groups[os_profile][0]]['os_operating_system']['distribution_major_version'], true) | default(pxe_stack_os_operating_system.distribution_version, true) | default(pxe_stack_os_operating_system.distribution_major_version, true) }}
-set eq-console {{ hostvars[groups[os_profile][0]]['hw_console'] | default(pxe_stack_hw_console) }}
-set eq-kernel-parameters {{ hostvars[groups[os_profile][0]]['os_kernel_parameters'] | default(pxe_stack_os_kernel_parameters) }} {{ hostvars[groups[hw_profile][0]]['hw_kernel_parameters'] | default(pxe_stack_hw_kernel_parameters) }} {% if (hostvars[groups[os_profile][0]]['os_pxe_proxy'] | default(pxe_stack_os_pxe_proxy, true) | default(none, true)) is not none %}http_proxy={{ hostvars[groups[os_profile][0]]['os_pxe_proxy'] | default(pxe_stack_os_pxe_proxy, true) }} https_proxy={{ hostvars[groups[os_profile][0]]['os_pxe_proxy'] | default(pxe_stack_os_pxe_proxy, true) }}{% endif %}
+set eq-distribution {{ equipment['os']['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution, true) | lower }}
+set eq-distribution-major-version {{ equipment['os']['os_operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version, true) }}
+set eq-distribution-version {{ equipment['os']['os_operating_system']['distribution_version'] | default(equipment['os']['os_operating_system']['distribution_major_version'], true) | default(pxe_stack_os_operating_system.distribution_version, true) | default(pxe_stack_os_operating_system.distribution_major_version, true) }}
+set eq-console {{ equipment['hw']['hw_console'] | default(pxe_stack_hw_console) }}
+set eq-kernel-parameters {{ equipment['os']['os_kernel_parameters'] | default(pxe_stack_os_kernel_parameters) }} {{ equipment['hw']['hw_kernel_parameters'] | default(pxe_stack_hw_kernel_parameters) }} {% if (equipment['os']['os_pxe_proxy'] | default(pxe_stack_os_pxe_proxy, true) | default(none, true)) is not none %}http_proxy={{ equipment['os']['os_pxe_proxy'] | default(pxe_stack_os_pxe_proxy, true) }} https_proxy={{ equipment['os']['os_pxe_proxy'] | default(pxe_stack_os_pxe_proxy, true) }}{% endif %}
 
-set eq-repositories-environment {{ hostvars[groups[os_profile][0]]['os_operating_system']['repositories_environment'] | default(pxe_stack_os_operating_system.repositories_environment) | default('') }}
-{% if (hostvars[groups[os_profile][0]]['os_autoclone_parameters'] is defined and hostvars[groups[os_profile][0]]['os_autoclone_parameters'] is not none) or (pxe_stack_os_autoclone_parameters is defined and pxe_stack_os_autoclone_parameters is not none) %}
-set eq-autoclone-parameters {{ hostvars[groups[os_profile][0]]['os_autoclone_parameters'] | default(pxe_stack_os_autoclone_parameters, true)}}
+set eq-repositories-environment {{ equipment['os']['os_operating_system']['repositories_environment'] | default(pxe_stack_os_operating_system.repositories_environment) | default('') }}
+{% if (equipment['os']['os_autoclone_parameters'] is defined and equipment['os']['os_autoclone_parameters'] is not none) or (pxe_stack_os_autoclone_parameters is defined and pxe_stack_os_autoclone_parameters is not none) %}
+set eq-autoclone-parameters {{ equipment['os']['os_autoclone_parameters'] | default(pxe_stack_os_autoclone_parameters, true)}}
 {% endif %}
 
 # Preseed specific need (known bug with multiple UP/Active NIC)
-{% if (hostvars[groups[os_profile][0]]['os_preseed_auto_main_network_interface'] is defined and hostvars[groups[os_profile][0]]['os_preseed_auto_main_network_interface'] is not none) or (pxe_stack_os_preseed_auto_main_network_interface is defined and os_preseed_auto_main_network_interface is not none) %}
+{% if (equipment['os']['os_preseed_auto_main_network_interface'] is defined and equipment['os']['os_preseed_auto_main_network_interface'] is not none) or (pxe_stack_os_preseed_auto_main_network_interface is defined and os_preseed_auto_main_network_interface is not none) %}
 set node-main-network-interface auto
 {% endif %}
 
 # Dynamic variables
-set images-root {{ hostvars[groups[os_profile][0]]['os_pxe_images_root'] | default(pxe_stack_os_pxe_images_root, true) | default("http://${next-server}/pxe/netboots/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/", true) }}
-set images-root-iso {{ hostvars[groups[os_profile][0]]['os_pxe_images_root_iso'] | default(pxe_stack_os_pxe_images_root_iso, true) | default("iso", true) }}
+set images-root {{ equipment['os']['os_pxe_images_root'] | default(pxe_stack_os_pxe_images_root, true) | default("http://${next-server}/pxe/netboots/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/", true) }}
+set images-root-iso {{ equipment['os']['os_pxe_images_root_iso'] | default(pxe_stack_os_pxe_images_root_iso, true) | default("iso", true) }}
 set preseed-path http://${next-server}/pxe/equipment_profiles//${eq-equipment-profile}.preseed.cfg
 
 echo | images-root: ${images-root}

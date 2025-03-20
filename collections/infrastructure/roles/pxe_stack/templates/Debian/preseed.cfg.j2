@@ -2,13 +2,18 @@
 #### Blue Banquise file ####
 ## {{ ansible_managed }}
 
-{% if hostvars[groups[os_profile][0]]['os_autoinstall_raw_file'] is defined %}
-{{ hostvars[groups[os_profile][0]]['os_autoinstall_raw_file'] }}
+{% if equipment['os']['os_autoinstall_raw_file'] is defined %}
+{{ equipment['os']['os_autoinstall_raw_file'] }}
 {% else %}
 
+{% if (equipment['os']['os_autoinstall_custom_content'] | default(pxe_stack_os_autoinstall_custom_content, true)) is not none %}
+# Custom content
+{{ (equipment['os']['os_autoinstall_custom_content'] | default(pxe_stack_os_autoinstall_custom_content, true)) }}
+{% endif %}
+
 ### zone
-d-i debian-installer/locale string {{hostvars[groups[os_profile][0]]['os_system_language']  | default(pxe_stack_os_system_language) }}
-d-i keyboard-configuration/xkb-keymap select {{hostvars[groups[os_profile][0]]['os_keyboard_layout']  | default(pxe_stack_os_keyboard_layout) | lower}}
+d-i debian-installer/locale string {{equipment['os']['os_system_language']  | default(pxe_stack_os_system_language) }}
+d-i keyboard-configuration/xkb-keymap select {{equipment['os']['os_keyboard_layout']  | default(pxe_stack_os_keyboard_layout) | lower}}
 d-i debian-installer/language string en
 d-i debian-installer/country string US
 d-i localechooser/supported-locales multiselect en_US.UTF-8
@@ -30,7 +35,7 @@ d-i netcfg/get_domain seen true
 d-i mirror/country string manual
 d-i mirror/http/hostname string deb.debian.org
 d-i mirror/http/directory string /debian
-d-i mirror/http/proxy string {{ hostvars[groups[os_profile][0]]['os_pxe_repository_proxy'] | default(pxe_stack_os_pxe_repository_proxy, true) }}
+d-i mirror/http/proxy string {{ equipment['os']['os_pxe_repository_proxy'] | default(pxe_stack_os_pxe_repository_proxy, true) }}
 
 ### Time
 d-i clock-setup/utc-auto boolean true
@@ -47,7 +52,7 @@ d-i partman/choose_partition select finish
 d-i partman/confirm boolean true
 d-i partman/confirm_nooverwrite boolean true
 
-{{ hostvars[groups[os_profile][0]]['os_partitioning'] | default(pxe_stack_os_partitioning) | default(pxe_stack_debian_automatic_partitioning, true) }}
+{{ equipment['os']['os_partitioning'] | default(equipment['hw']['hw_partitioning'], true) | default(pxe_stack_os_partitioning, true) | default(pxe_stack_debian_automatic_partitioning, true) }}
 
 ### Users
 {% if not pxe_stack_enable_root %}
@@ -56,15 +61,15 @@ d-i passwd/user-fullname string Bluebanquise User
 d-i passwd/username string {{ pxe_stack_sudo_user }}
 d-i passwd/user-uid string {{ pxe_stack_sudo_user_uid }}
 d-i passwd/user-gid string {{ pxe_stack_sudo_user_gid }}
-d-i passwd/user-password-crypted password {{ hostvars[groups[os_profile][0]]['os_admin_password_sha512'] | default(pxe_stack_os_admin_password_sha512) }}
+d-i passwd/user-password-crypted password {{ equipment['os']['os_admin_password_sha512'] | default(pxe_stack_os_admin_password_sha512) }}
 {% else %}
 d-i passwd/make-user boolean false
-d-i passwd/root-password-crypted password {{ hostvars[groups[os_profile][0]]['os_admin_password_sha512'] | default(pxe_stack_os_admin_password_sha512) }}
+d-i passwd/root-password-crypted password {{ equipment['os']['os_admin_password_sha512'] | default(pxe_stack_os_admin_password_sha512) }}
 {% endif %}
 
 ### Packages
 tasksel tasksel/first multiselect minimal
-d-i pkgsel/include string openssh-server curl python3 {% if hostvars[groups[os_profile][0]]['os_autoinstall_packages'] is defined and hostvars[groups[os_profile][0]]['os_autoinstall_packages'] is iterable and hostvars[groups[os_profile][0]]['os_autoinstall_packages'] is not string and hostvars[groups[os_profile][0]]['os_autoinstall_packages'] is not mapping %}{% for package in hostvars[groups[os_profile][0]]['os_autoinstall_packages'] %} {{ package }}{% endfor %}{% endif %}
+d-i pkgsel/include string openssh-server curl python3 {% if equipment['os']['os_autoinstall_packages'] is defined and equipment['os']['os_autoinstall_packages'] is iterable and equipment['os']['os_autoinstall_packages'] is not string and equipment['os']['os_autoinstall_packages'] is not mapping %}{% for package in equipment['os']['os_autoinstall_packages'] %} {{ package }}{% endfor %}{% endif %}
 
 d-i pkgsel/upgrade select none
 d-i pkgsel/updatedb boolean false
@@ -89,14 +94,14 @@ d-i finish-install/reboot_in_progress note
 d-i preseed/late_command string \
 {% if pxe_stack_enable_root %}
   in-target sh -c 'mkdir /root/.ssh'; \
-  {% for ssh_key in (hostvars[groups[os_profile][0]]['os_admin_ssh_keys'] | default(pxe_stack_os_admin_ssh_keys)) %}
+  {% for ssh_key in (equipment['os']['os_admin_ssh_keys'] | default(pxe_stack_os_admin_ssh_keys)) %}
   in-target sh -c 'echo "{{ ssh_key }}" >> /root/.ssh/authorized_keys'; \
   {% endfor %}
   in-target sh -c 'sed -i "s/^#PermitRootLogin.*\$/PermitRootLogin yes/g" /etc/ssh/sshd_config'; \
 {% else %}
   in-target sh -c '/sbin/usermod -m -d {{ pxe_stack_sudo_user_home }} {{ pxe_stack_sudo_user }}'; \
   in-target sh -c 'mkdir {{ pxe_stack_sudo_user_home }}/.ssh'; \
-  {% for ssh_key in (hostvars[groups[os_profile][0]]['os_admin_ssh_keys'] | default(pxe_stack_os_admin_ssh_keys)) %}
+  {% for ssh_key in (equipment['os']['os_admin_ssh_keys'] | default(pxe_stack_os_admin_ssh_keys)) %}
   in-target sh -c 'echo "{{ ssh_key }}" >> {{ pxe_stack_sudo_user_home }}/.ssh/authorized_keys';\
   {% endfor %}
   in-target sh -c 'chown -R {{ pxe_stack_sudo_user }}:{{ pxe_stack_sudo_user }} {{ pxe_stack_sudo_user_home }}/.ssh'; \
@@ -111,11 +116,9 @@ d-i preseed/late_command string \
   in-target sh -c 'echo " " > /etc/apt/sources.list'; \
   in-target sh -c 'apt update'; \
 {% endif %}
-{% if (hostvars[groups[hw_profile][0]]['hw_preserve_efi_first_boot_device'] | default(pxe_stack_hw_preserve_efi_first_boot_device)) == true %}
+{% if (equipment['hw']['hw_preserve_efi_first_boot_device'] | default(pxe_stack_hw_preserve_efi_first_boot_device)) == true %}
   in-target sh -c '[ -d /sys/firmware/efi ] && efibootmgr -o $(efibootmgr | grep BootCurrent | cut -d" " -f2),$(efibootmgr | grep BootOrder | sed "s/BootOrder:\ //" | sed "s/$(efibootmgr | grep BootCurrent | cut -d" " -f2),//") || echo "Not an EFI system, skipping"'
 {% endif %}
   in-target sh -c 'for I in `cat /proc/cmdline | tr " " "\n" | grep -E "^(node_hostname|ipxe_next_server)="` ; do eval $I; done; curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$node_hostname&boot=disk"';
-
-{{ hostvars[groups[os_profile][0]]['os_autoinstall_raw_content'] | default(pxe_stack_os_autoinstall_raw_content) }}
 
 {% endif %}

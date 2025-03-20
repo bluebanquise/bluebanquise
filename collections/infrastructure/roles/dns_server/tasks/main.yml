@@ -40,6 +40,14 @@
     - internal
     - firewall
 
+# This calculation takes time, so we store it in memory for later usage
+- name: fact <|> Calculate first_octets
+  ansible.builtin.set_fact:
+    first_octets: "{{ dns_server_j2_get_first_octets }}"
+  run_once: true
+  tags:
+    - templates
+
 - name: "package <|> Install {{ dns_server_packages_to_install | join(' ') }} packages"
   ansible.builtin.package:
     name: "{{ dns_server_packages_to_install }}"
@@ -140,7 +148,7 @@
     owner: root
     group: root
     mode: 0644
-  with_items: "{{ dns_server_j2_get_first_octets.split(',') }}"
+  with_items: "{{ first_octets.split(',') }}"
   tags:
     - template
 
@@ -152,7 +160,7 @@
     group: root
     mode: 0644
   notify: service <|> Restart dns services
-  with_items: "{{ dns_server_j2_get_first_octets.split(',') }}"
+  with_items: "{{ first_octets.split(',') }}"
   when: zoneconf.changed  # noqa no-handler
   tags:
     - template

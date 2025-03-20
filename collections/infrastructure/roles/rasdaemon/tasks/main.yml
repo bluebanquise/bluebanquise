@@ -1,0 +1,25 @@
+---
+- name: "package <|> Install rasdaemon"
+  ansible.builtin.package:
+    name: rasdaemon
+    state: present
+  tags:
+    - package
+
+- name: "package <|>  Copy RASDAEMON Motherboard DIMM labels Database files"
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/etc/ras/dimm_labels.d/"
+    owner: "root"
+    mode: '0655'
+  with_fileglob:
+    - "labels_*"
+  tags:
+    - package
+
+- name: "service <|> Start rasdaemon service"
+  ansible.builtin.service:
+    name: rasdaemon
+    state: started
+  tags:
+    - service

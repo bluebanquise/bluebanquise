@@ -1,0 +1,64 @@
+#jinja2: lstrip_blocks: True
+{% macro write_server(server_address, server_port, server_index) %}
+# ### begin forwarding rule ###
+# Remote Logging (we use TCP for reliable delivery)
+# An on-disk queue is created for this action. If the remote host is
+# down, messages are spooled to disk and sent when it is up again.
+$ActionQueueFileName fwdRule{{ server_index }} # unique name prefix for spool files
+$ActionQueueMaxDiskSpace 1g   # 1gb space limit (use as much as possible)
+$ActionQueueSaveOnShutdown on # save messages to disk on shutdown
+$ActionQueueType LinkedList   # run asynchronously
+$ActionResumeRetryCount -1    # infinite retries if host is down
+{% if (rsyslog_format | default("legacy", none)) == "advanced" %}
+action(type="omfwd" target="{{ server_address }}" protocol="tcp" port="{{ server_port }}")
+{% else %}
+*.* @@{{ server_address }}:{{ server_port }}
+{% endif %}
+# ### end of the forwarding rule ###
+{% endmacro %}
+
+#### RULES ####
+
+# Everybody gets emergency messages
+*.emerg                                                 :omusrmsg:*
+
+# Log anything (except mail) of level info or higher.
+# Don't log private authentication messages!
+*.{{ rsyslog_client_verbosity }};mail.none;authpriv.none;cron.none                /var/log/messages
+
+# The authpriv file has restricted access.
+authpriv.*                                              /var/log/secure
+
+# Log all the mail messages in one place.
+mail.*                                                  -/var/log/maillog
+
+# Log cron stuff
+cron.*                                                  /var/log/cron
+
+# Save news errors of level crit and higher in a special file.
+uucp,news.crit                                          /var/log/spooler
+
+# Save boot messages also to boot.log
+local7.*                                                /var/log/boot.log
+
+
+#### FORWARD RULES ####
+
+{% if rsyslog_server_ip4 is defined and rsyslog_server_ip4 is not none and (rsyslog_server_ip4 | ansible.utils.ipaddr ) %}{# Override other parameters, for custom configurations #}
+{{ write_server(rsyslog_server_ip4, rsyslog_port, 0) }}
+{% elif networks[j2_node_main_network] is defined
+      and networks[j2_node_main_network]['services'] is defined
+      and (networks[j2_node_main_network]['services']['log4'] | default(networks[j2_node_main_network]['services']['log'], true)) is defined
+      and (networks[j2_node_main_network]['services']['log4'] | default(networks[j2_node_main_network]['services']['log'], true)) is iterable %}
+    {% for rsyslog_server in (networks[j2_node_main_network]['services']['log4'] | default(networks[j2_node_main_network]['services']['log'], true)) %}
+        {% if (rsyslog_server.ip4 is defined and (rsyslog_server.ip4 | ansible.utils.ipaddr)) or (rsyslog_server.hostname is defined and rsyslog_server.hostname is not none) %}
+            {% if rsyslog_server.ip4 is defined and (rsyslog_server.ip4 | ansible.utils.ipaddr) %}
+{{ write_server(rsyslog_server.ip4, rsyslog_port, loop.index) }}
+            {% elif rsyslog_server.hostname is defined and rsyslog_server.hostname is not none %}
+{{ write_server(rsyslog_server.hostname, rsyslog_port, loop.index) }}
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+{% elif networks[j2_node_main_network]['services_ip'] is defined and (networks[j2_node_main_network]['services_ip'] | ansible.utils.ipaddr) %}
+{{ write_server(networks[j2_node_main_network]['services_ip'], rsyslog_port, 0) }}
+{% endif %}

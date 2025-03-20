@@ -3,19 +3,19 @@
   hosts: "fn_management"
   roles:
 
-    - role: bluebanquise.file_systems.nfs
+    - role: bluebanquise.infrastructure.nfs
       tags: nfs
       vars:
         nfs_profile:
           - server
           - client
-    - role: bluebanquise.file_systems.filesystem
+    - role: bluebanquise.infrastructure.filesystem
       tags: filesystem
-    - role: bluebanquise.file_systems.lvm
+    - role: bluebanquise.infrastructure.lvm
       tags: lvm
-    - role: bluebanquise.file_systems.mount
+    - role: bluebanquise.infrastructure.mount
       tags: mount
-    - role: bluebanquise.file_systems.parted
+    - role: bluebanquise.infrastructure.parted
       tags: parted
-    - role: bluebanquise.file_systems.xfs_quota
+    - role: bluebanquise.infrastructure.xfs_quota
       tags: xfs_quota

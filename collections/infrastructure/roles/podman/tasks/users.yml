@@ -1,0 +1,37 @@
+---
+- name: users <|> Create /etc/subuid and /etc/subgid
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "/{{ item }}"
+    owner: root
+    group: root
+    mode: '0644'
+    backup: true
+  loop:
+    - etc/subuid
+    - etc/subgid
+  when: podman_manual_mapping|bool
+
+- name: users <|> Set getent_passwd fact
+  ansible.builtin.getent:
+    database: passwd
+
+- name: users <|> Create directory
+  ansible.builtin.file:
+    path: "{{ getent_passwd[item.key][4] }}/.config/containers"
+    state: directory
+    owner: "{{ getent_passwd[item.key][1] | default(root) }}"
+    group: "{{ getent_passwd[item.key][2] | default(root) }}"
+    mode: 0644
+  loop: "{{ podman_users|dict2items }}"
+  when: getent_passwd[item.key][1]|int >= 1000
+
+- name: users <|> Deploy user configuration for non-root pods
+  ansible.builtin.template:
+    src: home/containers.conf.j2
+    dest: "{{ getent_passwd[item.key][4] }}/.config/containers/containers.conf"
+    owner: "{{ getent_passwd[item.key][1] | default(root) }}"
+    group: "{{ getent_passwd[item.key][2] | default(root) }}"
+    mode: 0644
+  loop: "{{ podman_users|dict2items }}"
+  when: getent_passwd[item.key][1]|int >= 1000

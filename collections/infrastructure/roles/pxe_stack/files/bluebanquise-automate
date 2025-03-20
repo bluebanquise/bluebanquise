@@ -1,0 +1,73 @@
+#!/usr/bin/env python3
+
+# ██████╗ ██╗     ██╗   ██╗███████╗██████╗  █████╗ ███╗   ██╗ ██████╗ ██╗   ██╗██╗███████╗███████╗
+# ██╔══██╗██║     ██║   ██║██╔════╝██╔══██╗██╔══██╗████╗  ██║██╔═══██╗██║   ██║██║██╔════╝██╔════╝
+# ██████╔╝██║     ██║   ██║█████╗  ██████╔╝███████║██╔██╗ ██║██║   ██║██║   ██║██║███████╗█████╗
+# ██╔══██╗██║     ██║   ██║██╔══╝  ██╔══██╗██╔══██║██║╚██╗██║██║▄▄ ██║██║   ██║██║╚════██║██╔══╝
+# ██████╔╝███████╗╚██████╔╝███████╗██████╔╝██║  ██║██║ ╚████║╚██████╔╝╚██████╔╝██║███████║███████╗
+# ╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚══▀▀═╝  ╚═════╝ ╚═╝╚══════╝╚══════╝
+#
+# Benoit Leveugle <benoit.leveugle@gmail.com>
+
+import subprocess
+from flask import Flask, request, jsonify, abort
+import yaml
+
+app = Flask(__name__)
+
+# Read configuration and tasks
+with open('/etc/bluebanquise/automate.yml', 'r') as file:
+   configuration = yaml.safe_load(file)
+tasks = configuration['tasks']
+
+@app.before_request
+def limit_remote_addr():
+   if 'allowed_address' in configuration:
+       if request.remote_addr not in configuration['allowed_address']:
+           abort(403)  # Forbidden
+
+@app.route("/<task>", methods=['GET'])
+def execute_task(task):
+   print("Received request task" + task)
+   print("  With arguments: " + str(request.args))
+   task_logs = {}
+   # Check task exists
+   if not task in tasks:
+       return jsonify({'status': "Error", 'comment': "Task unknown. Fordidden.", 'task': task}), 400
+   # Check args are allowed, if relevant
+   if 'allowed_values' in tasks[task]:
+       for value, allowed in tasks[task]['allowed_values'].items():
+           for arg, arg_value in request.args.items():
+               if value == arg:
+                   if arg_value not in allowed:
+                       return jsonify({'status': "Error", 'comment': "Usage of a non-allowed value for an argument.", 'argument': arg, 'value': arg_value}), 400
+   step_counter = 0
+   # Iterate over steps of the task now
+   for step in tasks[task]['steps']:
+       step_counter = step_counter + 1
+       # Substitue arguments given if relevant
+       cmd = step['command']
+       for arg, arg_value in request.args.items():
+           cmd = cmd.replace('%%' + arg + '%%', arg_value)
+       cmd_call = subprocess.Popen(
+           cmd,
+           stdout=subprocess.PIPE,
+           stderr=subprocess.PIPE,
+           shell=True
+           )
+       stdout, stderr = cmd_call.communicate()
+       stdout = str(stdout.decode("utf-8"))
+       stderr = str(stderr.decode("utf-8"))
+       exit_code = cmd_call.returncode
+       if exit_code != step.get('exit_code', 0):
+           return jsonify({'status': "Error", 'comment': "Bad exit code on command.", 'command': cmd, 'stdout': stdout, 'stderr': stderr, 'exit_code': exit_code}), 500
+       # Store logs
+       task_logs[step_counter] = {'command': cmd, 'stdout': stdout, 'stderr': stderr, 'exit_code': exit_code}
+
+   return jsonify({'status': "OK", 'comment': "Task was executed properly.", 'logs': task_logs}), 400
+
+if __name__ == '__main__':
+   print("URLs map:")
+   print(app.url_map)
+   app.run(host=configuration.get('host',"0.0.0.0"), port=configuration.get('port',7777), debug=configuration.get('debug',False))
+   quit()

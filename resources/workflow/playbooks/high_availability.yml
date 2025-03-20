@@ -3,12 +3,12 @@
   hosts: "fn_management"
   roles:
 
-    - role: bluebanquise.high_availability.pcs
+    - role: bluebanquise.infrastructure.pcs
       tags: pcs
-    - role: bluebanquise.high_availability.drbd
+    - role: bluebanquise.infrastructure.drbd
       tags: drbd
-    - role: bluebanquise.high_availability.haproxy
+    - role: bluebanquise.infrastructure.haproxy
       tags: haproxy
-    - role: bluebanquise.high_availability.keepalived
+    - role: bluebanquise.infrastructure.keepalived
       tags: keepalived
  

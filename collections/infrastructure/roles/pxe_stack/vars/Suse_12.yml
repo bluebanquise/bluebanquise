@@ -12,7 +12,7 @@ pxe_stack_packages_to_install:
   - libxml2-tools
   - bluebanquise-ipxe-x86_64
   - bluebanquise-ipxe-arm64
-pxe_stack_default_tftp_package: atftp
+pxe_stack_default_tftp_package: bluebanquise-atftp
 pxe_stack_services_to_start:
   - httpd
 pxe_stack_default_tftp_service: atftpd

@@ -1,11 +1,5 @@
 # Conman
 
-## Data Model
-
-This role relies on [data model](https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md):
-* Section 2 (Hosts definition)
-* Section 3.2 (Hardware Groups)
-
 ## Description
 
 This role provides a conman daemon that logs ipmi serial consoles.
@@ -83,6 +77,7 @@ Once these pam_limits parameter pushed, restart conman daemon.
 
 ## Changelog
 
+* 1.7.0: Added ssh config file for user conman. Thiago Cardozo <boubee.thiago@gmail.com>
 * 1.6.0: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.5.1: Fix logrotate paths. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.5.0: Add logrotate file. Matthieu Isoard <indigoping4cgmi@gmail.com>

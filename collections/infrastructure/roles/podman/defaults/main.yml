@@ -1,0 +1,63 @@
+---
+# use default config by default
+# set to True to enable the configuration task
+podman_configure: true
+# If 'True' it will deploy a local registry
+podman_configure_local_registry: false
+# Not used yet ... reserved for future Active/Active HA setup
+podman_configure_ha: false
+
+####################
+# registries section
+####################
+podman_search_registries:
+ - 'docker.io'
+# insecure registries (no TLS) that podman is searching for container images
+# if running the local registry, you have to add it to this list
+# podman_insecure_registries: ['localhost:5000']
+podman_insecure_registries: []
+# blocked registries for podman
+podman_blocked_registries: []
+# Name of the default registry
+podman_local_registry_dir: "/var/lib/registry"
+podman_local_registry_host: localhost
+podman_local_registry_port: 5000
+podman_registry_container_path: "/var/www/html/images/registry-2.tgz"
+podman_registry_container: "registry"
+podman_registry_container_tag: "2"
+podman_local_registry_owner: "root"
+podman_local_registry_group: "root"
+
+####################
+# libpod section
+####################
+podman_conf_cgroup_manager: 'systemd'
+podman_conf_events_logger: 'file'
+# The default namespace is "", which corresponds to no namespace. When no
+# namespace is set, all containers and pods are visible
+podman_conf_namespace: ''
+
+####################
+# Storage section
+####################
+# storage driver for podman
+podman_storage_driver: 'overlay'
+# storage driver mount options for podman
+podman_storage_mountopt: 'nodev'
+
+####################
+# Users section
+####################
+# unprivileged users that are allowd to run podman
+# and get custom ~/.config/containers/libpod.conf
+podman_users:
+ root: '100000:65535' # noqa
+
+# if you want i.e. the user vagrant to start unprivileged containers
+# you can do the following:
+# podman_users:
+#   vagrant: '165536:65535'
+#
+# do manual creation of /etc/subuid and /etc/subguid
+# see vars/*.yml files for OS specific settings
+podman_manual_mapping: false
