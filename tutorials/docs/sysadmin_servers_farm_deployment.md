@@ -19,8 +19,8 @@ In annexes, I will detail how to deploy via PXE the other common distributions.<
     </div>
 </div> -->
 
-This tutorial is based on EL 9 OS (RHEL 9, RockyLinux 9, AlmaLinux 9, etc).
-Most of this page is portable on other distributions.
+This tutorial is based on EL 9 OS (RHEL 9, RockyLinux 9, AlmaLinux 9, etc) and on Ubuntu 24.04.
+Most of this page is portable on other distributions. An HPC cluster can run on any kind of Linux distribution. Just make sure that the hardware you have is compatible (mostly GPU and interconnect if present, check vendor provides drivers).
 In annexes, I will detail how to deploy via PXE the other common distributions.
 
 ## Hardware requirements
@@ -35,7 +35,7 @@ Note that with this configuration, you will need to tweak ram allocated to each 
 Laptop/workstation with 16go or more, and 100Go disk. VT-x instructions MUST be activated in the BIOS. VMs will be used.
 
 **Best configuration to do the training:**
-A real cluster, with real physical servers.
+A real cluster, with real physical servers. \o/
 
 ## Useful commands
 
@@ -55,8 +55,10 @@ General commands:
 * Remount / when in read only (often in recovery mode) : `mount -o remount,rw /`
 * Apply a patch on a file : `patch myfile.txt < mypatch.txt`
 * Do a patch from original and modified file : `diff -Naur original.txt modified.txt`
+* Get EFI boot order from os: `efibootmgr`
+* Change EFI boot order from os: `efibootmgr -o XXXX,YYYY,ZZZZ,...`
 
-IPMI commands for remote control :
+IPMI commands for remote control (old hardware):
 
 * Boot choice, very useful for very slow to boot systems (`bios` can be replaced with `pxe` or `cdrom` or `disk`) : `ipmitool -I lanplus -H bmc5 -U user -P password chassis bootdev bios`
 * Make boot persistent : `ipmitool -I lanplus -H bmc5 -U user -P password chassis bootdev disk options=persistent`. Note: remember that UEFI systems can dynamically change boot order.
@@ -66,6 +68,39 @@ IPMI commands for remote control :
 More: [IPMI tool how to](https://support.pivotal.io/hc/en-us/articles/206396927-How-to-work-on-IPMI-and-IPMITOOL)
 
 Note: when using sol activate, if keyboard does not work, try using the same command into a screen, this may solve the issue (strangely...).
+
+RedFish commands for remote control (new hardware):
+
+```
+SERVER="my-server"
+USER="ADMIN"
+PASS="ADMIN"
+
+# ON
+curl -si -u $USER:$PASS -k -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{"Action": "Reset", "ResetType": "On"}' https://$SERVER/redfish/v1/Systems/1/Actions/ComputerSystem.Reset
+
+#OFF
+curl -si -u $USER:$PASS -k -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{"Action": "Reset", "ResetType": "ForceOff"}' https://$SERVER/redfish/v1/Systems/1/Actions/ComputerSystem.Reset
+
+# Other methods available:
+curl -si -u $USER:$PASS -k -XGET https://$SERVER/redfish/v1/Systems/1/
+
+    "Actions": {
+        "#ComputerSystem.Reset": {
+            "target": "/redfish/v1/Systems/1/Actions/ComputerSystem.Reset",
+            "ResetType@Redfish.AllowableValues": [
+                "On",
+                "ForceOff",
+                "GracefulShutdown",
+                "GracefulRestart",
+                "ForceRestart",
+                "Nmi",
+                "ForceOn"
+            ]
+```
+(from https://gist.github.com/flaviotorres/6e09c16d46ca2a79b131650c6b8c4e7f)
+
+Redfish console can be obtained via ssh. See https://docs.nvidia.com/networking/display/bluefieldbmcv2310/serial+over+lan+(sol) for more details.
 
 Clush usage (if clustershell has been installed on system):
 
@@ -125,16 +160,17 @@ On some expensive clusters, **Interconnect** network, often based on the **Infin
 ### Understanding services
 
 As said above, management node host multiple basic services needed to run the cluster:
-* The **repository** server: based on http protocol, it provides packages (rpm) to all nodes of the cluster. Service is `httpd` (Apache).
-* The **tftp** server: based on tftp protocol, it provides PXE very basic files to initialize boot sequence on the remote servers. Service is `fbtftp` (Facebook Tftp), but could also be `atftp` or any other tftp server. Note that recent servers do not need a tftp server and can directly boot over http (we keep tftp here for compatibility).
+
+* The **repository** server: based on http protocol, it provides packages (rpm) to all nodes of the cluster. Service is `httpd` (Apache/Apache2 on some OS).
+* The **tftp** server: based on tftp protocol, it provides PXE very basic files to initialize boot sequence on the remote servers. There are distribution embed tftp servers, but after years of IT, I just use `atftp`. I found it to be the most performant and comaptible server. Note that recent servers do not need a tftp server and can directly boot over http (we keep tftp here for compatibility).
 * The **dhcp** server: provides ip for all nodes and BMC on the network. Ip are attributed using MAC addresses of network interfaces. Service is `dhcpd` (ISC DHCP).
 * The **dns** server: provides link between ip and hostname, and the opposite. Service is `named` (bind9).
 * The **time** server: provides a single and synchronized clock for all equipment of the cluster. More important than it seems. Service is `chronyd` (Chrony).
 * The **pxe stack**: represent the aggregate of the repository server, the tftp server, the dhcp server, the dns server and the time server. Used to deploy OS on nodes on the cluster using the network.
 * The **nfs** server: export simple storage spaces and allows nodes to mount these exported spaces locally (/home, /opt, etc. ). Service is `nfs-server`.
-* The **LDAP** server: provides centralized users authentication for all nodes. This is optional for some clusters. Service is `slapd` (OpenLDAP).
+* The **LDAP** server: provides centralized users authentication for all nodes. This is optional for some clusters. Service is `slapd` (OpenLDAP), or you can also use `glauth` for simpler usage.
 * The **job scheduler** server (if specializing cluster to HPC): manage computational resources, and spread jobs from users on the cluster. Service is `slurmctld` (Slurm).
-* The **monitoring** server: monitor the cluster to provide metrics, and raise alerts in case of issues. Service is `prometheus` (Prometheus).
+* The **monitoring/reporting** server: monitor the cluster to provide metrics, and raise alerts in case of issues. Service is `prometheus` (Prometheus) for metrics, and you will also need a tool for errors/issues detections. While Prometheus could be used, it is not made for that. `icinga2` seems to be one of the best tool currently.
 
 <!-- <div class="comment-tile">
     <div class="comment-tile-image">
@@ -183,12 +219,12 @@ already been taken by Virtualbox NAT. In this case, use another subnet like 10.7
 
 ### Final notes before we start
 
-All nodes will be installed with a minimal install AlmaLinux 9. Needed other packages (rpms)
+All nodes will be installed with a minimal install AlmaLinux 9 or Ubuntu 24.04. Needed other packages 
 will be created on the fly from sources.
 
 * To simplify this tutorial, firewall will be deactivated. You can reactivate it later.
-* We will keep SELinux enforced. When facing permission denied, try setting SELinux into permissive mode to check if that's the reason, or check selinux logs. I know SELinux can be difficult to deal with, but keeping it enforced also forces you to avoid unexpected dangerous things.
-* If you get `Pane is dead` error during pxe install, most of the time increase RAM to minimum 1200 Mo or more and it should be ok.
+* We will keep SELinux enforced on RHEL 9 systems. When facing permission denied, try setting SELinux into permissive mode to check if that's the reason, or check selinux logs. I know SELinux can be difficult to deal with, but keeping it enforced also forces you to avoid unexpected dangerous things.
+* If you get `Pane is dead` error during pxe install, most of the time increase RAM to minimum 1200 Mo or more and it should be ok. Ubuntu deployment needs 6Gb ram to succeed, but you can lower VM ram after deployment to 1Gb or even less for non management nodes (512 Mb).
 * You can edit files using `vim` which is a powerful tool, but if you feel more comfortable with, use `nano` (`nano myfile.txt`, then edit file, then use `Ctrl+O` to save, and `Ctrl+X` to exit). There is a very nice tutorial online for Vim, investing in it worth it on the long term.
 * Keep cool, and take fresh air when its not working as expected.
 
@@ -196,7 +232,7 @@ will be created on the fly from sources.
 
 This part describes how to manually install `odin` management node basic services, needed to deploy and install the other servers.
 
-Install first system with AlmaLinux DVD image (using an USB stick), and choose minimal install as package selection (Or server with GUI if you prefer. However, more packages installed means less security and less performance).
+Install first system with AlmaLinux DVD image or Ubuntu 24.04 live server (using an USB stick), and choose minimal install as package selection (Or server with GUI if you prefer. However, more packages installed means less security and less performance). Remember to ask for OpenSSH server installation on Ubuntu installer.
 
 Partition schema should be the following, without LVM but standard partitions:
 
@@ -206,15 +242,19 @@ Partition schema should be the following, without LVM but standard partitions:
 
 Note: you can learn how to use LVMs later.
 
-Be extremely careful with time zone choice. This parameter is more important than it seems as time zone will be set in the kickstart file later, and MUST be the same than the one chosen here when installing `odin`. If you don’t know which one to use, choose Europe/Brussels, the same one chose in the kickstart example of this document.
-After install and reboot, disable firewalld using:
+Be extremely careful with time zone choice. This parameter is more important than it seems as time zone will be set in the kickstart file later, and MUST be the same than the one chosen here when installing `odin`. If you don’t know which one to use, choose Europe/Brussels, the same one chose in the examples of this document.
+After install and reboot, disable firewall:
+
+**If RHEL system:**
 
 ```
 systemctl disable firewalld
 systemctl stop firewalld
 ```
 
-Change hostname to `odin` (need to login again to see changes):
+**If Ubuntu system**, nothing to do, UFW is not installed by default.
+
+Now change hostname to `odin` (need to login again to see changes):
 
 ```
 hostnamectl set-hostname odin.cluster.local
@@ -232,7 +272,17 @@ We will use **NetworkManager** to handle network. `nmcli` is the command to inte
     </div>
 </div> -->
 
-Note about NetworkManager: some say its bad, some say its good. It depends of admin tastes. Use it if you feel confortable with it, or use systemd-networkd if you prefer. Best idea to me is to use what is default on the system: NetworkManager on RHEL like distributions and Suse, systemd-networkd on Ubuntu and Debian.
+Note about NetworkManager: some say its bad, some say its good. It depends of admin tastes. Use it if you feel confortable with it, or use systemd-networkd if you prefer. Remember that some advanced hardware like Infiniband would prefer NetworkManager for some specific features.
+
+**If RHEL system**, NetworkManager is already installer.
+
+**If Ubuntu system**, install NetworkManager and disable systemd-networkd and reboot:
+
+```
+apt update && apt install NetworkManager
+systemctl disable systemd-networkd
+reboot -h now
+```
 
 Assuming main NIC name is `enp0s8`, to set `10.10.0.1/16` IP and subnet on it, use the following commands:
 
@@ -240,6 +290,12 @@ Assuming main NIC name is `enp0s8`, to set `10.10.0.1/16` IP and subnet on it, u
 nmcli con mod enp0s8 ipv4.addresses 10.10.0.1/16
 nmcli con mod enp0s8 ipv4.method manual
 nmcli con up enp0s8
+```
+
+You can at any time get all NIC parameters using:
+
+```
+nmcli con show enp0s8
 ```
 
 Then ensure interface is up with correct ip using:
@@ -254,7 +310,9 @@ Time to setup basic repositories.
 
 ### Setup basic repositories
 
-#### Main OS
+For RHEL system, we are going to setup a core OS repository, and a custom repository, while for Ubuntu a custom repository will be enough.
+
+#### Core OS (RHEL only)
 
 Backup and clean first default AlmaLinux repositories:
 
@@ -353,7 +411,9 @@ dnf repolist
 dnf install wget
 ```
 
-#### Other repositories
+#### Custom repositorie (both RHEL and Ubuntu)
+
+##### RHEL 
 
 We will need to add extra packages as not all is contained in the AlmaLinux 9 DVD.
 Create extra repository folder:
@@ -382,21 +442,35 @@ gpgcheck=0
 enabled=1
 ```
 
-To close this repositories part, we may install few useful packages.
+##### Ubuntu
 
-If a local web browser is needed, install the following packages:
+We need this extra repository for our tftp server, but other packages you might need will also fit here.
 
-```
-dnf install xorg-x11-utils xauth firefox
-```
-
-Then login on node using `ssh -X -C` to be able to launch `firefox`. Note however that this can be extremely slow.
-A better way is to use ssh port forwarding features (`-L`), this part is covered later in this training.
-
-Also, install ipmitool if using an IPMI compatible cluster, these will be used for computes nodes deployment and PXE tools.
+Create dedicated folder:
 
 ```
-dnf install ipmitool
+mkdir -p /var/www/html/repositories/Ubuntu/24.04/x86_64/extra/
+```
+
+Now install needed packages:
+
+```
+apt-get install -y dpkg-dev reprepro
+```
+
+Now create an empty repository, we will add packages later.
+Note that the includedeb command will fail, due to missing deb packages. This is expected for now.
+
+```
+cd /var/www/html/repositories/Ubuntu/24.04/x86_64/extra/
+mkdir conf -p; \
+    echo "Origin: BlueBanquise" > conf/distributions; \
+    echo "Label: bluebanquise" >> conf/distributions; \
+    echo "Codename: noble" >> conf/distributions; \
+    echo "Suite: stable" >> conf/distributions; \
+    echo "Architectures: amd64" >> conf/distributions; \
+    echo "Components: main" >> conf/distributions;
+reprepro -b /var/www/html/repositories/Ubuntu/24.04/x86_64/extra/ includedeb noble *.deb
 ```
 
 ### DHCP server
@@ -405,8 +479,16 @@ The DHCP server is used to assign ip addresses and hostnames to other nodes. It 
 
 Install the dhcp server package:
 
+**If RHEL system**
+
 ```
 dnf install dhcp-server
+```
+
+**If Ubuntu system**
+
+```
+apt install isc-dhcp-server
 ```
 
 Do not start it now, configure it first.
@@ -431,7 +513,7 @@ Unknown nodes/BMC will be given a temporary ip on the 10.0.254.x range if dhcp s
  }
 
  subnet 10.10.0.0 netmask 255.255.0.0 {
- # range 10.10.254.0 10.10.254.254; # range where unknown servers will be
+ range 10.10.254.0 10.10.254.254; # range where unknown servers will be
  option domain-name "cluster.local";
  option domain-name-servers 10.10.0.1; # dns server ip
  option broadcast-address 10.10.255.255;
@@ -484,9 +566,18 @@ Finally, start and enable the dhcp service:
 
 &#x26A0; WARNING &#x26A0;: only enable the DHCP service if you are on an isolated network, as in opposite to the other services, it may disturb the network if another DHCP is on this network.
 
+**If RHEL system**
+
 ```
 systemctl enable dhcpd
 systemctl start dhcpd
+```
+
+**If Ubuntu system**
+
+```
+systemctl enable isc-dhcp-server
+systemctl start isc-dhcp-server
 ```
 
 Note: if needed, you can search for nodes in `10.10.254.0-10.10.254.254` range using the following `nmap` command (install it using `dnf install nmap`):
@@ -497,12 +588,32 @@ nmap 10.10.254.0-254
 
 This is useful to check after a cluster installation that no equipment connected on the network was forgotten in the process, since registered nodes in the DHCP should not be in this range.
 
+You can watch dhcp server logs using:
+
+**If RHEL system**
+
+```
+journalctl -a -u dhcpd -f
+```
+
+**If Ubuntu system**
+
+```
+journalctl -a -u isc-dhcp-server -f
+```
+
+This is very useful to monitor dhcp server logs during other nodes PXE and deployment.
+
 ### DNS server
 
 DNS server provides on the network ip/hostname relation to all hosts:
 
 * ip for corresponding hostname
 * hostname for corresponding ip
+
+The configuration is similar but enough different between RHEL and Ubuntu to have dedicated sections for each.
+
+#### RHEL
 
 Install dns server package:
 
@@ -512,7 +623,7 @@ dnf install bind
 
 Configuration includes 3 files: main configuration file, forward file, and reverse file. (You can separate files into more if you wish, not needed here).
 
-Main configuration file is `/etc/named.conf`, and should be as follow (we are creating an isolated cluster, if not, configure recursion and forwarders, refer to Bind9 documentation):
+Main configuration file is `/etc/named.conf` for RedHat, and should be as follow (we are creating an recursive DNS for our cluster, refer to Bind9 documentation for more details):
 
 ```
 options {
@@ -524,7 +635,12 @@ options {
 	memstatistics-file "/var/named/data/named_mem_stats.txt";
 	allow-query     { localhost; 10.10.0.0/16;};
 
-	recursion no;
+  recursion yes;
+
+  forwarders {
+    8.8.8.8;
+    8.8.4.4;
+  };
 
 	dnssec-enable no;
 	dnssec-validation no;
@@ -567,8 +683,6 @@ include "/etc/named.root.key";
 ```
 
 Note that the `10.10.in-addr.arpa` is related to first part of our range of ip. If cluster was using for example `172.16.x.x` ip range, then it would have been `16.172.in-addr.arpa`.
-
-Recursion is disabled because no other network access is supposed available.
 
 What contains our names and ip are the two last zone parts. They refer to two files: `forward` and `reverse`. These files are located in `/var/named/`.
 
@@ -633,6 +747,169 @@ And start service:
 systemctl enable named
 systemctl start named
 ```
+
+#### Ubuntu
+
+
+Install dns server package:
+
+```
+dnf install bind
+```
+
+**If Ubuntu system**
+
+```
+apt install bind9
+```
+
+Configuration includes multiple files: main configuration files, forward file, and reverse file. (You can separate files into more if you wish, not needed here).
+
+Create first needed folder if they do not exist:
+
+```
+mkdir -p /var/cache/bind/data
+mkdir -p /var/cache/bind/dynamic
+chown -R bind:bind /var/cache/bind
+```
+
+Main configuration file is `/etc/bind/named.conf` for Ubuntu, and should be as follow (we are creating an recursive DNS for our cluster, refer to Bind9 documentation for more details).
+
+```
+## This is the primary configuration file for the BIND DNS server named.
+
+include "/etc/bind/named.conf.options";
+include "/etc/bind/named.conf.local";
+include "/etc/bind/named.conf.default-zones";
+```
+
+Now create/edit file /etc/bind/named.conf.options to have it this way:
+
+```
+options {
+  listen-on port 53 {
+    127.0.0.1;
+    10.10.0.1;
+  };
+
+  listen-on-v6 port 53 { ::1; };
+  directory     "/var/cache/bind";
+  dump-file     "/var/cache/bind/data/cache_dump.db";
+  statistics-file "/var/cache/bind/data/named_stats.txt";
+  memstatistics-file "/var/cache/bind/data/named_mem_stats.txt";
+
+  allow-query {
+    localhost;
+    10.10.0.0/16;
+  };
+
+  recursion yes;
+
+  forwarders {
+    8.8.8.8;
+    8.8.4.4;
+  };
+
+  dnssec-validation False;
+
+  managed-keys-directory "/var/cache/bind/dynamic";
+
+  pid-file "/run/named/named.pid";
+  session-keyfile "/run/named/session.key";
+
+};
+
+logging {
+  channel default_debug {
+    file "/var/cache/bind/data/named.log";
+    severity dynamic;
+  };
+
+};
+```
+
+Now create file /etc/bind/named.conf.local with the following content:
+
+```
+## Local server zones
+
+include "/etc/bind/zones.rfc1918";
+
+## Forward zones
+
+zone "cluster.local" IN {
+  type master;
+  file "/etc/bind/forward.zone";
+  allow-update { none; };
+};
+
+## Reverse zones
+
+zone "10.10.in-addr.arpa" IN {
+   type master;
+   file "/etc/bind/10.10.rr.zone";
+   allow-update { none; };
+};
+```
+
+Note that the `10.10.in-addr.arpa` is related to first part of our range of ip. If cluster was using for example `172.16.x.x` ip range, then it would have been `16.172.in-addr.arpa`.
+
+What contains our names and ip are the two last zone parts. They refer to two files: `forward.zone` (forward) and `/etc/bind/10.10.rr.zone` (reverse). These files are located in `/etc/bind/` too.
+
+First one is `/etc/bind/forward.zone` with the following content:
+
+```
+$TTL 86400
+@   IN  SOA     odin.cluster.local. root.cluster.local. (
+        2011071001  ;Serial
+        3600        ;Refresh
+        1800        ;Retry
+        604800      ;Expire
+        86400       ;Minimum TTL
+)
+@       IN  NS          odin.cluster.local.
+@       IN  A           10.10.0.1
+
+odin               IN  A   10.10.0.1
+thor               IN  A   10.10.1.1
+heimdall           IN  A   10.10.2.1
+
+valkyrie01         IN  A   10.10.3.1
+valkyrie02         IN  A   10.10.3.2
+```
+
+Second one is `/etc/bind/10.10.rr.zone`:
+
+```
+$TTL 86400
+@   IN  SOA     odin.cluster.local. root.cluster.local. (
+        2011071001  ;Serial
+        3600        ;Refresh
+        1800        ;Retry
+        604800      ;Expire
+        86400       ;Minimum TTL
+)
+@       IN  NS          odin.cluster.local.
+@       IN  PTR         cluster.local.
+
+odin      IN  A   10.10.0.1
+
+1.0        IN  PTR         odin.cluster.local.
+1.1        IN  PTR         thor.cluster.local.
+1.2        IN  PTR         heimdall.cluster.local.
+
+1.3        IN  PTR         valkyrie01.cluster.local.
+2.3        IN  PTR         valkyrie02.cluster.local.
+```
+
+Finally, start service:
+
+```
+systemctl enable bind9
+systemctl start bind9
+```
+
+#### Clients
 
 The server is up and running. We need to setup client part, even on our `odin`
 management node.
