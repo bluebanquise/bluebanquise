@@ -611,23 +611,19 @@ DNS server provides on the network ip/hostname relation to all hosts:
 * ip for corresponding hostname
 * hostname for corresponding ip
 
-Install dns server package:
+The configuration is similar but enough different between RHEL and Ubuntu to have dedicated sections for each.
 
-**If RHEL system**
+#### RHEL
+
+Install dns server package:
 
 ```
 dnf install bind
 ```
 
-**If Ubuntu system**
-
-```
-apt install bind9
-```
-
 Configuration includes 3 files: main configuration file, forward file, and reverse file. (You can separate files into more if you wish, not needed here).
 
-Main configuration file is `/etc/named.conf` for RedHat, and `/etc/bind/named.conf` for Ubuntu, and should be as follow (we are creating an isolated cluster, if not, configure recursion and forwarders, refer to Bind9 documentation):
+Main configuration file is `/etc/named.conf` for RedHat, and should be as follow (we are creating an recursive DNS for our cluster, refer to Bind9 documentation for more details):
 
 ```
 options {
@@ -639,7 +635,12 @@ options {
 	memstatistics-file "/var/named/data/named_mem_stats.txt";
 	allow-query     { localhost; 10.10.0.0/16;};
 
-	recursion no;
+  recursion yes;
+
+  forwarders {
+    8.8.8.8;
+    8.8.4.4;
+  };
 
 	dnssec-enable no;
 	dnssec-validation no;
@@ -682,8 +683,6 @@ include "/etc/named.root.key";
 ```
 
 Note that the `10.10.in-addr.arpa` is related to first part of our range of ip. If cluster was using for example `172.16.x.x` ip range, then it would have been `16.172.in-addr.arpa`.
-
-Recursion is disabled because no other network access is supposed available.
 
 What contains our names and ip are the two last zone parts. They refer to two files: `forward` and `reverse`. These files are located in `/var/named/`.
 
@@ -748,6 +747,169 @@ And start service:
 systemctl enable named
 systemctl start named
 ```
+
+#### Ubuntu
+
+
+Install dns server package:
+
+```
+dnf install bind
+```
+
+**If Ubuntu system**
+
+```
+apt install bind9
+```
+
+Configuration includes multiple files: main configuration files, forward file, and reverse file. (You can separate files into more if you wish, not needed here).
+
+Create first needed folder if they do not exist:
+
+```
+mkdir -p /var/cache/bind/data
+mkdir -p /var/cache/bind/dynamic
+chown -R bind:bind /var/cache/bind
+```
+
+Main configuration file is `/etc/bind/named.conf` for Ubuntu, and should be as follow (we are creating an recursive DNS for our cluster, refer to Bind9 documentation for more details).
+
+```
+## This is the primary configuration file for the BIND DNS server named.
+
+include "/etc/bind/named.conf.options";
+include "/etc/bind/named.conf.local";
+include "/etc/bind/named.conf.default-zones";
+```
+
+Now create/edit file /etc/bind/named.conf.options to have it this way:
+
+```
+options {
+  listen-on port 53 {
+    127.0.0.1;
+    10.10.0.1;
+  };
+
+  listen-on-v6 port 53 { ::1; };
+  directory     "/var/cache/bind";
+  dump-file     "/var/cache/bind/data/cache_dump.db";
+  statistics-file "/var/cache/bind/data/named_stats.txt";
+  memstatistics-file "/var/cache/bind/data/named_mem_stats.txt";
+
+  allow-query {
+    localhost;
+    10.10.0.0/16;
+  };
+
+  recursion yes;
+
+  forwarders {
+    8.8.8.8;
+    8.8.4.4;
+  };
+
+  dnssec-validation False;
+
+  managed-keys-directory "/var/cache/bind/dynamic";
+
+  pid-file "/run/named/named.pid";
+  session-keyfile "/run/named/session.key";
+
+};
+
+logging {
+  channel default_debug {
+    file "/var/cache/bind/data/named.log";
+    severity dynamic;
+  };
+
+};
+```
+
+Now create file /etc/bind/named.conf.local with the following content:
+
+```
+## Local server zones
+
+include "/etc/bind/zones.rfc1918";
+
+## Forward zones
+
+zone "cluster.local" IN {
+  type master;
+  file "/etc/bind/forward.zone";
+  allow-update { none; };
+};
+
+## Reverse zones
+
+zone "10.10.in-addr.arpa" IN {
+   type master;
+   file "/etc/bind/10.10.rr.zone";
+   allow-update { none; };
+};
+```
+
+Note that the `10.10.in-addr.arpa` is related to first part of our range of ip. If cluster was using for example `172.16.x.x` ip range, then it would have been `16.172.in-addr.arpa`.
+
+What contains our names and ip are the two last zone parts. They refer to two files: `forward.zone` (forward) and `/etc/bind/10.10.rr.zone` (reverse). These files are located in `/etc/bind/` too.
+
+First one is `/etc/bind/forward.zone` with the following content:
+
+```
+$TTL 86400
+@   IN  SOA     odin.cluster.local. root.cluster.local. (
+        2011071001  ;Serial
+        3600        ;Refresh
+        1800        ;Retry
+        604800      ;Expire
+        86400       ;Minimum TTL
+)
+@       IN  NS          odin.cluster.local.
+@       IN  A           10.10.0.1
+
+odin               IN  A   10.10.0.1
+thor               IN  A   10.10.1.1
+heimdall           IN  A   10.10.2.1
+
+valkyrie01         IN  A   10.10.3.1
+valkyrie02         IN  A   10.10.3.2
+```
+
+Second one is `/etc/bind/10.10.rr.zone`:
+
+```
+$TTL 86400
+@   IN  SOA     odin.cluster.local. root.cluster.local. (
+        2011071001  ;Serial
+        3600        ;Refresh
+        1800        ;Retry
+        604800      ;Expire
+        86400       ;Minimum TTL
+)
+@       IN  NS          odin.cluster.local.
+@       IN  PTR         cluster.local.
+
+odin      IN  A   10.10.0.1
+
+1.0        IN  PTR         odin.cluster.local.
+1.1        IN  PTR         thor.cluster.local.
+1.2        IN  PTR         heimdall.cluster.local.
+
+1.3        IN  PTR         valkyrie01.cluster.local.
+2.3        IN  PTR         valkyrie02.cluster.local.
+```
+
+Finally, start service:
+
+```
+systemctl enable bind9
+systemctl start bind9
+```
+
+#### Clients
 
 The server is up and running. We need to setup client part, even on our `odin`
 management node.
