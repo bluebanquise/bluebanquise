@@ -1,14 +1,4 @@
 {{ ansible_managed | comment }}
-# The containers configuration file specifies all of the available configuration
-# command-line options/flags for container engine tools like Podman & Buildah,
-# but in a TOML format that can be easily modified and versioned.
-
-# Please refer to containers.conf(5) for details of all configuration options.
-# Not all container engines implement all of the options.
-# All of the options have hard coded defaults and these options will override
-# the built in defaults. Users can then override these options via the command
-# line.
-
 [containers]
 default_capabilities = [
   "NET_RAW",
@@ -31,9 +21,11 @@ default_sysctls = [
 
 log_driver = "journald"
 log_size_max = -1
+label = true
 
 [network]
-network_backend = ""
+network_backend = "cni"
+
 cni_plugin_dirs = [
                "/usr/libexec/cni",
                "/usr/lib/cni",
@@ -45,7 +37,7 @@ default_network = "podman"
 network_config_dir = "/etc/cni/net.d/"
 
 [engine]
-cgroup_manager = "{{ podman_conf_cgroup_manager }}"
+cgroup_manager = "cgroupfs"
 
 conmon_env_vars = [
                 "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
@@ -62,28 +54,19 @@ conmon_path = [
             "/usr/lib/crio/bin/conmon"
 ]
 
+enable_port_reservation = true
 events_logger = "{{ podman_conf_events_logger }}"
 image_default_transport = "docker://"
 infra_command = "/pause"
 infra_image = "k8s.gcr.io/pause:3.1"
-namespace = "{{ podman_conf_namespace }}"
 no_pivot_root = false
 num_locks = 2048
-runtime = ""
+runtime = "runc"
 tmp_dir = "/var/run/libpod"
+static_dir = "{{ getent_passwd[item.key][4] }}/.local/share/containers/storage/libpod"
+volume_path = "{{ getent_passwd[item.key][4] }}/.local/share/containers/storage/volumes"
 
 [engine.runtimes]
-
-crun = [
-		"/usr/bin/crun",
-		"/usr/sbin/crun",
-		"/usr/local/bin/crun",
-		"/usr/local/sbin/crun",
-		"/sbin/crun",
-		"/bin/crun",
-		"/run/current-system/sw/bin/crun",
-]
-
 runc = [
             "/usr/bin/runc",
             "/usr/sbin/runc",
