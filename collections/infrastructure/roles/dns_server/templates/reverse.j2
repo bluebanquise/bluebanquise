@@ -55,3 +55,12 @@ $INCLUDE "{{ dns_server_named_dir }}/{{ item }}.rr.soa"
     {% endfor %}
   {% endif %}
 {% endfor %}
+
+{% if dns_server_enable_dnssec %}
+  {% for value in dns_item_public_keys.results %}
+	{% if item.split('.')|reverse|join('.') in value.files[0].path %}
+$INCLUDE {{ value.files[0].path }}
+$INCLUDE {{ value.files[1].path }}
+	{% endif %}
+  {% endfor %}
+{% endif %}

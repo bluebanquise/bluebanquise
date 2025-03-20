@@ -3,7 +3,7 @@ dns_server_dnssec_enable: true
 dns_server_dnssec_validation: auto
 dns_server_dnssec_lookaside: auto
 dns_server_dnssec_overwrite_key: false # Overwrite existing keys
-dns_server_enable_encryption: false # Create and sign zones
+dns_server_enable_dnssec: false # Create and sign zones
 
 dns_server_recursion: false  # Enable recursion, to be combined with forwarders
 

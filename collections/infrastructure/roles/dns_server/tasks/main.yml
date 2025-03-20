@@ -110,6 +110,37 @@
   tags:
     - template
 
+- name: "find <|> Search for existing keys"
+  ansible.builtin.find:
+    paths: "{{ dns_server_named_dir }}"
+    patterns: "*.key,*.private"
+  register: dns_keys
+  when: dns_server_enable_dnssec
+
+- name: "file <|> Remove existing keys"
+  ansible.builtin.file:
+    path: "{{item.path}}"
+    state: absent
+  with_items: "{{ dns_keys.files }}"
+  when: (dns_server_enable_dnssec) and (dns_server_dnssec_overwrite_key)
+
+- name: "command <|> Create Foward Zone Signing Key (ZSK)"
+  ansible.builtin.command:
+    cmd: "dnssec-keygen -K {{ dns_server_named_dir }} -a ECDSAP256SHA256 -n ZONE {{ dns_server_domain_name | default(bb_domain_name, true) | default('cluster.local', true) }}"
+  when: (dns_server_enable_dnssec) and ((dns_server_dnssec_overwrite_key) or (dns_keys.matched < 2))
+
+- name: "command <|> Create Foward Key Signing Key (KSK)"
+  ansible.builtin.command:
+    cmd: "dnssec-keygen -K {{ dns_server_named_dir }} -f KSK -a ECDSAP256SHA256 -n ZONE {{ dns_server_domain_name | default(bb_domain_name, true) | default('cluster.local', true) }}"
+  when: (dns_server_enable_dnssec) and ((dns_server_dnssec_overwrite_key) or (dns_keys.matched < 2))
+
+- name: "find <|> Search for existing foward public keys"
+  ansible.builtin.find:
+    paths: "{{ dns_server_named_dir }}"
+    patterns: "K{{ dns_server_domain_name | default(bb_domain_name, true) | default('cluster.local', true) }}*.key"
+  register: dns_foward_public_keys
+  when: dns_server_enable_dnssec
+
 - name: "template <|> Generate Forward zone file on Master DNS {{ dns_server_named_dir }}/forward.zone"
   ansible.builtin.template:
     src: forward.j2
@@ -141,6 +172,26 @@
   tags:
     - template
 
+- name: "command <|> Sign foward zone"
+  ansible.builtin.command: "chdir={{ dns_server_named_dir }} dnssec-signzone -S -g -o {{ dns_server_domain_name | default(bb_domain_name, true) | default('cluster.local', true) }} forward.zone"
+  when: dns_server_enable_dnssec
+  notify: service <|> Restart dns services
+
+- name: "include_tasks <|> Use zone key task"
+  ansible.builtin.include_tasks: zone_key.yml
+  with_items: "{{ first_octets.split(',') }}"
+  when: (dns_server_enable_dnssec)
+  loop_control:
+    loop_var: dns_zone
+  register: zone_key_task
+
+- name: "find <|> Search for {{ item }} public keys"
+  ansible.builtin.find:
+    paths: "{{ dns_server_named_dir }}"
+    patterns: "K{{ item.split('.')|reverse|join('.') }}*.key"
+  register: "dns_item_public_keys"
+  with_items: "{{ first_octets.split(',') }}"
+
 - name: "template <|> Generate Reverse zone file on Master DNS {{ dns_server_named_dir }}/{{ item }}.rr.zone"
   ansible.builtin.template:
     src: reverse.j2
@@ -164,6 +215,12 @@
   when: zoneconf.changed  # noqa no-handler
   tags:
     - template
+
+- name: "command <|> Sign item zone"
+  ansible.builtin.command: "chdir={{ dns_server_named_dir }} dnssec-signzone -S -g -o {{ item.split('.')|reverse|join('.') }}.in-addr.arpa. {{ item }}.rr.zone"
+  with_items: "{{ first_octets.split(',') }}"
+  when: dns_server_enable_dnssec
+  notify: service <|> Restart dns services
 
 - name: "template <|> Generate override file {{ dns_server_named_dir }}/override.zone"
   ansible.builtin.template:
