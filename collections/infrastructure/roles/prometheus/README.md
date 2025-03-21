@@ -197,7 +197,7 @@ prometheus_server_custom_alerts: !unsafe >
           summary: "Host out of memory (instance {{ $labels.instance }})"
           description: "Node memory is filling up (< 10% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
       - alert: HostOutOfInodes
-        expr: node_filesystem_files_free{mountpoint ="/rootfs"} / node_filesystem_files{mountpoint="/rootfs"} * 100 < 10 and ON (instance, device, mountpoint) node_filesystem_readonly{mountpoint="/rootfs"} == 0                              
+        expr: node_filesystem_files_free{mountpoint ="/rootfs"} / node_filesystem_files{mountpoint="/rootfs"} * 100 < 10 and ON (instance, device, mountpoint) node_filesystem_readonly{mountpoint="/rootfs"} == 0
         for: 2m
         labels:
           severity: warning
@@ -313,7 +313,7 @@ prometheus_exporters_to_scrape:
 Server side will scrap these exporters on all the hosts of the group, while
 client side will install them on all hosts of the group.
 
-It is important to understand that the client side of these settings are capable of 
+It is important to understand that the client side of these settings are capable of
 generating everything needed by an exporter binary: service file, users, working dir, etc.
 These settings will generate these elements depending of the variables present.
 The list of capabilities is described after the example.
@@ -400,7 +400,7 @@ prometheus_server_manage_modbus_exporter: false
 ```
 
 You then need to specify which hardware groups of hosts have to be
-ipmi scraped. To do so, simply set the global variable `prometheus_ipmi_scrape_hardware_groups` 
+ipmi scraped. To do so, simply set the global variable `prometheus_ipmi_scrape_hardware_groups`
 in the default *inventory/group_vars/all/prometheus.yml* file:
 
 ```yaml
@@ -627,17 +627,17 @@ To enable TLS encryption, you need to set these variables:
 
 ```yaml
 prometheus_server_enable_tls: true
-prometheus_server_tls_cert_file: 
-prometheus_server_tls_key_file: 
+prometheus_server_tls_cert_file:
+prometheus_server_tls_key_file:
 ```
 
 To enable basic authentication, you need to set these variables:
 
 ```yaml
 prometheus_server_enable_basic_auth: true
-prometheus_server_basic_auth_user: 
-prometheus_server_basic_auth_password: 
-prometheus_server_basic_auth_hash_password: 
+prometheus_server_basic_auth_user:
+prometheus_server_basic_auth_password:
+prometheus_server_basic_auth_hash_password:
 ```
 
 Note: You can use python3-bcrypt to generate hashed password. See more at https://prometheus.io/docs/guides/basic-auth/#hashing-a-password .
@@ -652,3 +652,40 @@ prometheus_server_prometheus_launch_parameters: |
   --web.console.libraries=/etc/prometheus/console_libraries $PROMETHEUS_OPTIONS \
   --web.config.file=/etc/prometheus/web.yml
 ```
+
+### TSDB Prometheus
+
+This collection allows changing the path and retention time of [TSDB](https://prometheus.io/docs/prometheus/latest/storage/).
+
+Configure the variables below according to your needs:
+
+```yaml
+prometheus_server_prometheus_tsdb_path: '/var/lib/prometheus'
+prometheus_server_prometheus_tsdb_retention_time: 10d
+```
+
+And attach them to additional Prometheus initialization parameters, as in the following example:
+
+```yaml
+prometheus_server_prometheus_launch_parameters: |
+  --storage.tsdb.path {{ prometheus_server_prometheus_tsdb_path }} \
+  --storage.tsdb.retention.time {{ prometheus_server_prometheus_tsdb_retention_time }}
+```
+
+## Changelog
+
+* 1.5.0: Add small features for Monitoring. Leonardo Magdanello <lmagdanello40@gmail.com>
+* 1.4.1: Fix bad rights on services files. Bug reported by @sgaosdgr. Benoit Leveugle <benoit.leveugle@gmail.com>
+* 1.4.0: Add more tunig for exporter services. Benoit Leveugle <benoit.leveugle@gmail.com>
+* 1.3.4: Adapt tp hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
+* 1.3.3: Port to bb 2.0. Benoit Leveugle <benoit.leveugle@gmail.com>
+* 1.3.2: Restart services when systemd service file changes. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
+* 1.3.1: Fix error when exporter is missing the service parameter. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
+* 1.3.0: Support TLS and Basic Authentication. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
+* 1.2.4: Update to BB 2.0 format. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
+* 1.2.3: Fix karma package to install on RedHat. Emmanuel Chevreau <manu44600@gmail.com>
+* 1.2.2: Fix ubuntu support. Benoit Leveugle <benoit.leveugle@gmail.com>
+* 1.2.1: Add missing part of the role. Benoit Leveugle <benoit.leveugle@gmail.com>
+* 1.2.0: Role global enhancement. Benoit Leveugle <benoit.leveugle@gmail.com>
+* 1.0.1: Documentation. johnnykeats <johnny.keats@outlook.com>
+* 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>, johnnykeats <johnny.keats@outlook.com>
