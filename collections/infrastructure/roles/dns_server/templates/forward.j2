@@ -66,3 +66,8 @@ $INCLUDE "{{ dns_server_named_dir }}/forward.soa"
     {% endfor %}
   {% endif %}
 {% endfor %}
+
+{% if dns_server_dnssec_sign %}
+$INCLUDE "{{ dns_foward_public_keys.files[0].path }}"
+$INCLUDE "{{ dns_foward_public_keys.files[1].path }}"
+{% endif %}
