@@ -701,7 +701,7 @@ prometheus_server_prometheus_launch_parameters: |
 
 ## Changelog
 
-* 1.5.0: Add fixes for Monitoring prefix. SMC 2.0. Leonardo Magdanello <lmagdanello40@gmail.com>
+* 1.5.0: Add small features for Monitoring. Leonardo Magdanello <lmagdanello40@gmail.com>
 * 1.4.1: Fix bad rights on services files. Bug reported by @sgaosdgr. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.0: Add more tunig for exporter services. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.4: Adapt tp hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
