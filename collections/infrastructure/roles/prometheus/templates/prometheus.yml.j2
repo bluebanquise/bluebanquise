@@ -12,7 +12,8 @@ rule_files:
 
 alerting:
   alertmanagers:
-  - static_configs:
+  - path_prefix: "{{ prometheus_server_alertmanager_prefix }}/"
+    static_configs:
     - targets:
       - {{ prometheus_server_alertmanager_host }}:9093
 
@@ -23,8 +24,10 @@ scrape_configs:
   # I watch myself
   - job_name: 'prometheus_master'
     scrape_interval: 30s
+    metrics_path: "{{ prometheus_server_prometheus_prefix }}/metrics"
     static_configs:
-      - targets: ['{{ prometheus_server_prometheus_host }}:9090']
+      - targets: ['localhost:9090']
+
 {% if prometheus_server_enable_tls %}
     scheme: https
     tls_config:
