@@ -1,5 +1,5 @@
 ---
-dns_server_dnssec_enable: false
+dns_server_dnssec_enable: true
 dns_server_dnssec_validation: auto
 dns_server_dnssec_lookaside: auto
 dns_server_dnssec_overwrite_key: false # Overwrite existing keys
