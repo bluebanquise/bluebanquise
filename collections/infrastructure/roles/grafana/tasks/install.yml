@@ -85,7 +85,7 @@
 - name: service <|> Manage grafana-server state
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: "{{ (bb_enable_services | default(true) | bool) | ternary('yes', 'no') }}"
+    enabled: "{{ (grafana_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
     state: "{{ (grafana_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   loop: "{{ grafana_services_to_start }}"
   tags:
