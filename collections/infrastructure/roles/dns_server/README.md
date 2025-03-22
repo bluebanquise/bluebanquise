@@ -239,20 +239,22 @@ For load balancing with multiple DNS server nodes, the variable `dns_alias` can 
 These entries will be skipped by roles like `hosts_file`. Ex:
 
 ```yaml
-mg_managements:
+fn_management:
   hosts:
-    node001
-     - interface: eth0
-       ip4: 10.0.0.10
-        network: ice1-1
-        dns_alias:
-          - www
-    mngt002
-      - interface: eth0
-        ip4: 10.0.0.20
-        network: ice1-1
-        dns_alias:
-          - www
+    mgt1
+	  network_interfaces:
+        - interface: eth0
+          ip4: 10.0.0.10
+          network: ice1-1
+          dns_alias:
+            - www
+    mgt2
+	  network_interfaces:
+        - interface: eth0
+          ip4: 10.0.0.20
+          network: ice1-1
+          dns_alias:
+            - www
 ```
 
 This will create a `foward.zone` file with:
