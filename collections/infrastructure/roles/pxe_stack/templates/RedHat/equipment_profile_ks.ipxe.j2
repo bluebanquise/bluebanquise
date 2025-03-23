@@ -8,7 +8,11 @@ echo |
 
 # Ansible variables
 set eq-equipment-profile {{ item | trim }}
+{% if equipment['hw']['hw_specs']['cpu']['architecture'] == 'arm64' %}{# BRNEO-5285 #}
+set eq-architecture aarch64
+{% else %}
 set eq-architecture ${arch}
+{% endif %}
 set eq-distribution {{ equipment['os']['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution, true) | lower }}
 set eq-distribution-major-version {{ equipment['os']['os_operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version, true) }}
 set eq-distribution-version {{ equipment['os']['os_operating_system']['distribution_version'] | default(equipment['os']['os_operating_system']['distribution_major_version'], true) | default(pxe_stack_os_operating_system.distribution_version, true) | default(pxe_stack_os_operating_system.distribution_major_version, true) }}
