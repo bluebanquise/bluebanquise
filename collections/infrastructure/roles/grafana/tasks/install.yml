@@ -2,17 +2,19 @@
 - name: install <|> Add grafana group
   ansible.builtin.group:
     name: grafana
-    gid: "{{ grafana_user_gid | default(omit) }}"
+    gid: "{{ grafana_user_gid }}"
     state: present
+  when: grafana_user_gid|int
 
 - name: install <|> Add grafana user
   ansible.builtin.user:
     name: grafana
     shell: /bin/false
-    uid: "{{ grafana_user_uid | default(omit) }}"
+    uid: "{{ grafana_user_uid }}"
     group: grafana
     system: True
     state: present
+  when: grafana_user_uid|int
 
 - name: install <|> Check for log file
   ansible.builtin.stat:
@@ -83,8 +85,8 @@
 - name: service <|> Manage grafana-server state
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
-    state: "{{ (start_services | bool) | ternary('started', omit) }}"
+    enabled: "{{ (grafana_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    state: "{{ (grafana_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   loop: "{{ grafana_services_to_start }}"
   tags:
     - service
