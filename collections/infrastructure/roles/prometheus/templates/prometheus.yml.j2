@@ -67,9 +67,9 @@ scrape_configs:
 # Default AlertManager configuration
 scrape_configs:
   - job_name: 'prometheus_master'
-     metrics_path: "{{ prometheus_server_prometheus_prefix }}/metrics"
-     scrape_interval: 30s
-     static_configs:
+    metrics_path: "{{ prometheus_server_prometheus_prefix }}/metrics"
+    scrape_interval: 30s
+    static_configs:
     - targets:
       - {{ prometheus_server_prometheus_host }}:{{ prometheus_server_prometheus_port }}
 {% if prometheus_server_alertmanager_password is defined and prometheus_server_alertmanager_password %}
