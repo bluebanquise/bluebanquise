@@ -500,7 +500,7 @@ prometheus_server_karma_host: "{{ networks[j2_node_main_network].services.monito
 6. Ensure that you have a volume group created that can be integrated with Pacemaker, this ay the metrics will be shared between Prometheus resources.
 
 ```yaml
-prometheus_server_prometheus_tsdb_path:  '/var/lib/smc-prometheus'
+prometheus_server_prometheus_tsdb_path:  '/var/lib/storage-prometheus'
 prometheus_server_prometheus_tsdb_retention_time:  10d  # Defaults to 15d
 
 prometheus_server_prometheus_launch_parameters: |
