@@ -74,6 +74,16 @@
   tags:
     - plugins
 
+- name: service <|> Wait for grafana-db
+  ansible.builtin.wait_for:
+    host: localhost
+    port: "{{ grafana_db_port }}"
+  when:
+    - grafana_ha_enabled|default(false)
+    - grafana_start_services | default(bb_start_services) | default(true) | bool
+  tags:
+    - configure
+
 - name: service <|> Force all notified handlers to run at this point
   ansible.builtin.meta: flush_handlers
 
@@ -143,6 +153,7 @@
 - name: include_tasks <|> dashboards
   ansible.builtin.include_tasks: dashboards.yml
   when: grafana_dashboards | length > 0 or found_dashboards | length > 0
+  run_once: "{{ grafana_ha_enabled | default(false) }}"
   tags:
     - dashboards
 
@@ -151,9 +162,9 @@
     msg:
       - '###############################################################'
       - 'Grafana UI access:'
-      - "URL: {{ grafana_address }}:{{ grafana_port }}"
+      - "URL: {{ grafana_url }}"
       - "- login: {{ grafana_security.admin_user }}"
-      - "- password: {{ grafana_security.admin_password }}"
+      - "- password: ********"
       - '###############################################################'
   tags:
     - package

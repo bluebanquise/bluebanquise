@@ -8,3 +8,11 @@
   when:
     - "'service' not in ansible_skip_tags"
     - auditd_start_services | default(bb_start_services) | default(true, true)
+
+- name: service █ Restart rsyslog service
+  ansible.builtin.service:
+    name: rsyslog
+    state: restarted
+  when:
+    - "'service' not in ansible_skip_tags"
+    - rsyslog_start_services | default(bb_start_services) | default(true) | bool

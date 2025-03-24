@@ -58,6 +58,24 @@
   when:
     - ansible_facts.os_family == "RedHat"
 
+- name: file <|> Create /var/run/conman/.ssh directory
+  ansible.builtin.file:
+    path: /var/run/conman/.ssh
+    owner: conman
+    group: conman
+    state: directory
+    mode: 0700
+
+- name: template <|> Generate /var/run/conman/.ssh/config
+  ansible.builtin.template:
+    src: config.j2
+    dest: /var/run/conman/.ssh/config
+    owner: conman
+    group: conman
+    mode: 0600
+  tags:
+    - template
+
 - name: file <|> Create /var/log/conman directory
   ansible.builtin.file:  # noqa risky-file-permissions
     path: /var/log/conman

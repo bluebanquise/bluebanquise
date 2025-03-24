@@ -1,0 +1,29 @@
+# RASDAEMON Motherboard DIMM labels Database file.
+#
+#  Vendor-name and model-name are found from the program 'dmidecode'
+#  labels are found from the silk screen on the motherboard.
+#
+#Vendor: <vendor-name>
+#  Product: <product-name>
+#  Model: <model-name>
+#    <label>:  <mc>.<row>.<channel>
+#
+
+Vendor: GIGABYTE
+  Model: CER
+
+    DIMM_P0_A0: 0.0.0; DIMM_P0_B0: 0.0.1; DIMM_P0_D0: 0.0.2; DIMM_P0_C0: 0.0.3;
+
+    DIMM_P0_H0: 0.0.4; DIMM_P0_G0: 0.0.5; DIMM_P0_E0: 0.0.6; DIMM_P0_F0: 0.0.7;
+
+    DIMM_P0_A0: 0.1.0; DIMM_P0_B0: 0.1.1; DIMM_P0_D0: 0.1.2; DIMM_P0_C0: 0.1.3;
+
+    DIMM_P0_H0: 0.1.4; DIMM_P0_G0: 0.1.5; DIMM_P0_E0: 0.1.6; DIMM_P0_F0: 0.1.7;
+
+    DIMM_P1_I0: 1.0.0; DIMM_P1_J0: 1.0.1; DIMM_P1_L0: 1.0.2; DIMM_P1_K0: 1.0.3;
+
+    DIMM_P1_P0: 1.0.4; DIMM_P1_O0: 1.0.5; DIMM_P1_M0: 1.0.6; DIMM_P1_N0: 1.0.7;
+
+    DIMM_P1_I0: 1.1.0; DIMM_P1_J0: 1.1.1; DIMM_P1_L0: 1.1.2; DIMM_P1_K0: 1.1.3;
+
+    DIMM_P1_P0: 1.1.4; DIMM_P1_O0: 1.1.5; DIMM_P1_M0: 1.1.6; DIMM_P1_N0: 1.1.7;

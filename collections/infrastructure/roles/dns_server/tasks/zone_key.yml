@@ -1,0 +1,17 @@
+---
+- name: "find <|> Search for existing {{ item }} public keys"
+  ansible.builtin.find:
+    paths: "{{ dns_server_named_dir }}"
+    patterns: "K{{ dns_zone.split('.')|reverse|join('.') }}*.key"
+  register: "dns_item_public_keys"
+  when: dns_server_dnssec_sign
+
+- name: "command <|> Create {{ item }} Signing Key (ZSK)"
+  ansible.builtin.command:
+    cmd: "dnssec-keygen -K {{ dns_server_named_dir }} -a ECDSAP256SHA256 -n ZONE {{ dns_zone.split('.')|reverse|join('.') }}.in-addr.arpa"
+  when: (dns_server_dnssec_sign) and ((dns_server_dnssec_overwrite_key) or (dns_item_public_keys.matched < 2))
+
+- name: "command <|> Create {{ item }} Key Signing Key (KSK)"
+  ansible.builtin.command:
+    cmd: "dnssec-keygen -K {{ dns_server_named_dir }} -f KSK -a ECDSAP256SHA256 -n ZONE {{ dns_zone.split('.')|reverse|join('.') }}.in-addr.arpa"
+  when: (dns_server_dnssec_sign) and ((dns_server_dnssec_overwrite_key) or (dns_item_public_keys.matched < 2))
