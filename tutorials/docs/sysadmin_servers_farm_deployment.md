@@ -442,6 +442,14 @@ gpgcheck=0
 enabled=1
 ```
 
+Make sure http server is installed and launched:
+
+```
+dnf install httpd -y
+systemctl enable httpd
+systemctl start httpd
+```
+
 ##### Ubuntu
 
 We need this extra repository for our tftp server, but other packages you might need will also fit here.
@@ -471,6 +479,14 @@ mkdir conf -p; \
     echo "Architectures: amd64" >> conf/distributions; \
     echo "Components: main" >> conf/distributions;
 reprepro -b /var/www/html/repositories/Ubuntu/24.04/x86_64/extra/ includedeb noble *.deb
+```
+
+Make sure http server is installed and launched:
+
+```
+apt install apache2 -y
+systemctl enable apache2
+systemctl start apache2
 ```
 
 ### DHCP server
@@ -754,12 +770,6 @@ systemctl start named
 Install dns server package:
 
 ```
-dnf install bind
-```
-
-**If Ubuntu system**
-
-```
 apt install bind9
 ```
 
@@ -957,14 +967,22 @@ The time server provides date and time to ensure all nodes/servers are synchroni
 
 Install needed packages:
 
+**If RHEL system**
+
 ```
 dnf install chrony
 ```
 
-Configuration file is `/etc/chrony.conf`, for both client or/and server configuration, as chrony can act as both client and server at the same time (see time synchronisation as a chain).
+**If Ubuntu system**
+
+```
+apt install chrony tzdata
+```
+
+Configuration file is `/etc/chrony.conf` for RHEL or `/etc/chrony/chrony.conf` for Ubuntu, for both client or/and server configuration, as chrony can act as both client and server at the same time (see time synchronisation as a chain).
 
 We will configure it to allow the local network to query time from this server.
-Also, because this is a poor clock source, we use a stratum 12 (the bigger, the badder time source is). This is purely virtual here, but idea is: if a client can reach multiple time servers, then it will sync with the higest stratum one available.
+Also, because this is a poor clock source, we use a stratum 12 (the bigger the stratum number, the badder time source is). This is purely virtual here, but idea is: if a client can reach multiple time servers, then it will sync with the higest stratum one available.
 
 The file content should be as bellow:
 
@@ -1004,7 +1022,7 @@ It is now time to setup the PXE stack, which is composed of the dhcp server, the
 
 The http server will distribute the minimal kernel and initramfs for remote Linux booting, the kickstart autoinstall file for remote hosts to know how they should be installed, and the repositories for packages distribution. Some very basic files will be provided using tftp as this is the most compatible PXE protocol.
 
-Note that the AlmaLinux already embed a very basic tftp server. But it cannot handle a huge cluster load, and so we replace it by the Facebook python based tftp server.
+Note that the AlmaLinux or Ubuntu already embed a very basic tftp server. But it cannot handle a huge cluster load, are not super verbose, and I could discover that they are not always compatible with some very specific hardware. This is why here we are going to replace it by the atftp server.
 
 <!-- <div class="comment-tile">
     <div class="comment-tile-image">
@@ -1017,248 +1035,190 @@ Note that the AlmaLinux already embed a very basic tftp server. But it cannot ha
 
 PXE is the most tricky part, as you will face all possible issues: hardware issues, bad cabling, firewalls, Vlans issues, stupid BIOS or BMCs, etc. Always try with a very simple network (flat, no vlans, no firewalls), and ensure you can deploy OS before complexify and secure the cluster and the network.
 
-#### fbtftp module
+#### Build atftp
 
-Lets grab python module first:
-
-```
-mkdir fbtftp-0.5
-cd fbtftp-0.5
-dnf install git tar rpm-build
-git clone https://github.com/facebook/fbtftp.git .
-python3 setup.py bdist_rpm --spec-only
-cd ../
-tar cvzf fbtftp-0.5.tar.gz fbtftp-0.5
-rpmbuild -ta fbtftp-0.5.tar.gz
-```
-
-#### fbtftp custom server
-
-Now create a custom tftp server based on fbtftp. Create first needed folders:
+**If RHEL system**
 
 ```
-mkdir fbtftp_server-0.1
-mkdir fbtftp_server-0.1/services
+dnf install gcc automake autoconf make wget
 ```
 
-Now create file `fbtftp_server-0.1/fbtftp_server.py` with the following content:
+**If Ubuntu system**
 
 ```
-#!/usr/bin/env python3
-# Copyright (c) Facebook, Inc. and its affiliates.
-
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this source tree.
-
-import argparse
-import logging
-import os
-
-from fbtftp.base_handler import BaseHandler
-from fbtftp.base_handler import ResponseData
-from fbtftp.base_server import BaseServer
-
-
-class FileResponseData(ResponseData):
-    def __init__(self, path):
-        self._size = os.stat(path).st_size
-        self._reader = open(path, "rb")
-
-    def read(self, n):
-        return self._reader.read(n)
-
-    def size(self):
-        return self._size
-
-    def close(self):
-        self._reader.close()
-
-
-def print_session_stats(stats):
-    logging.info("Stats: for %r requesting %r" % (stats.peer, stats.file_path))
-    logging.info("Error: %r" % stats.error)
-    logging.info("Time spent: %dms" % (stats.duration() * 1e3))
-    logging.info("Packets sent: %d" % stats.packets_sent)
-    logging.info("Packets ACKed: %d" % stats.packets_acked)
-    logging.info("Bytes sent: %d" % stats.bytes_sent)
-    logging.info("Options: %r" % stats.options)
-    logging.info("Blksize: %r" % stats.blksize)
-    logging.info("Retransmits: %d" % stats.retransmits)
-    logging.info("Server port: %d" % stats.server_addr[1])
-    logging.info("Client port: %d" % stats.peer[1])
-
-
-def print_server_stats(stats):
-    """
-    Print server stats - see the ServerStats class
-    """
-    # NOTE: remember to reset the counters you use, to allow the next cycle to
-    #       start fresh
-    counters = stats.get_and_reset_all_counters()
-    logging.info("Server stats - every %d seconds" % stats.interval)
-    if "process_count" in counters:
-        logging.info(
-            "Number of spawned TFTP workers in stats time frame : %d"
-            % counters["process_count"]
-        )
-
-
-class StaticHandler(BaseHandler):
-    def __init__(self, server_addr, peer, path, options, root, stats_callback):
-        self._root = root
-        super().__init__(server_addr, peer, path, options, stats_callback)
-
-    def get_response_data(self):
-        return FileResponseData(os.path.join(self._root, self._path))
-
-
-class StaticServer(BaseServer):
-    def __init__(
-        self,
-        address,
-        port,
-        retries,
-        timeout,
-        root,
-        handler_stats_callback,
-        server_stats_callback=None,
-    ):
-        self._root = root
-        self._handler_stats_callback = handler_stats_callback
-        super().__init__(address, port, retries, timeout, server_stats_callback)
-
-    def get_handler(self, server_addr, peer, path, options):
-        return StaticHandler(
-            server_addr, peer, path, options, self._root, self._handler_stats_callback
-        )
-
-
-def get_arguments():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--ip", type=str, default="::", help="IP address to bind to")
-    parser.add_argument("--port", type=int, default=1969, help="port to bind to")
-    parser.add_argument(
-        "--retries", type=int, default=5, help="number of per-packet retries"
-    )
-    parser.add_argument(
-        "--timeout_s", type=int, default=2, help="timeout for packet retransmission"
-    )
-    parser.add_argument(
-        "--root", type=str, default="", help="root of the static filesystem"
-    )
-    return parser.parse_args()
-
-
-def main():
-    args = get_arguments()
-    logging.getLogger().setLevel(logging.DEBUG)
-    server = StaticServer(
-        args.ip,
-        args.port,
-        args.retries,
-        args.timeout_s,
-        args.root,
-        print_session_stats,
-        print_server_stats,
-    )
-    try:
-        server.run()
-    except KeyboardInterrupt:
-        server.close()
-
-
-if __name__ == "__main__":
-    main()
+apt install chrony tzdataapt install gcc automake autoconf make wget alien
 ```
 
-This file is our custom server, that will use fbtftp module (you don't need to understand this code, just assume its our tftp server).
+Then grab sources and remove original spec file:
 
-Then create file `fbtftp_server-0.1/services/fbtftp_server.service` with the following content:
+```
+wget https://freefr.dl.sourceforge.net/project/atftp/atftp-0.8.0.tar.gz
+tar xvzf atftp-0.8.0.tar.gz
+cd atftp-0.8.0
+rm -f redhat/atftp.spec
+```
+
+Now create a custom service file, that contains the verbose flag, and allows a lot of threads. Create file `atftpd.service` with the following content:
 
 ```
 [Unit]
-Description=Facebook TFTP server
+Description=ATFTP daemon with verbosity
 After=network.target
 
 [Service]
-Type=simple
-ExecStart=/usr/bin/env python3 /usr/local/bin/fbtftp_server.py --root /var/lib/tftpboot/ --port 69
+Type=forking
+ExecStart=/usr/sbin/atftpd --daemon --user tftp --no-multicast --maxthread 100 --group tftp /var/lib/tftpboot --verbose
 
 [Install]
 WantedBy=multi-user.target
-```
-
-This file is the service file, that we will use to start or stop our custom server.
-
-And finally, create file `fbtftp_server-0.1/fbtftp_server.spec` with the following content:
 
 ```
-Name:     fbtftp_server
-Summary:  fbtftp_server
-Release:  1%{?dist}
-Version:  0.1
-License:  MIT
-Group:    System Environment/Base
-URL:      https://github.com/bluebanquise/
-Source:   https://bluebanquise.com/sources/fbtftp_server-0.1.tar.gz
+
+Now create a custom spec file, that rename the tool bluebanquise-atftp, so it does not conflict with distribution repositories. Create file `atftp.spec` with the following content:
+
+```
+%define is_debian_ubuntu %(grep -i -E "debian|ubuntu" /etc/os-release >/dev/null; if test $? -gt 0; then echo 0; else echo 1; fi)
+
+Name: bluebanquise-atftp
+Summary: Advanced Trivial File Transfer Protocol (ATFTP) - TFTP server
+Group: System Environment/Daemons
+Version: 0.8.0
+Release: 1
+License: GPL
+Vendor: Linux Networx Inc.
+Source: https://freefr.dl.sourceforge.net/project/atftp/atftp.tar.gz
+Buildroot: /var/tmp/atftp-buildroot
 Packager: Benoit Leveugle <benoit.leveugle@gmail.com>
 
-Requires: fbtftp
-
-%define debug_package %{nil}
+Obsoletes: atftp
 
 %description
-Facebook tftp simple implementation, based on server example from
-https://github.com/facebook/fbtftp/tree/master/examples
+Multithreaded TFTP server implementing all options (option extension and
+multicast) as specified in RFC1350, RFC2090, RFC2347, RFC2348 and RFC2349.
+Atftpd also support multicast protocol knowed as mtftp, defined in the PXE
+specification. The server supports being started from inetd(8) as well as
+a deamon using init scripts.
+
+
+%package client
+Summary: Advanced Trivial File Transfer Protocol (ATFTP) - TFTP client
+Group: Applications/Internet
+
+
+%description client
+Advanced Trivial File Transfer Protocol client program for requesting
+files using the TFTP protocol.
+
 
 %prep
+%setup
 
-%setup -q
 
 %build
+%configure
+make
+
 
 %install
-# Populate binaries
-mkdir -p $RPM_BUILD_ROOT/usr/local/bin/
-cp -a fbtftp_server.py $RPM_BUILD_ROOT/usr/local/bin/
+[ -n "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != '/' ] && rm -rf $RPM_BUILD_ROOT
+%makeinstall
+mkdir -p ${RPM_BUILD_ROOT}/usr/lib/systemd/system/
+cp atftpd.service ${RPM_BUILD_ROOT}/usr/lib/systemd/system/atftpd.service
+chmod 644 ${RPM_BUILD_ROOT}/usr/lib/systemd/system/atftpd.service
 
-# Add services
-mkdir -p $RPM_BUILD_ROOT/usr/lib/systemd/system/
-cp -a services/fbtftp_server.service $RPM_BUILD_ROOT/usr/lib/systemd/system/
 
 %files
-%defattr(-,root,root,-)
-/usr/local/bin/fbtftp_server.py
-/usr/lib/systemd/system/fbtftp_server.service
+%{_mandir}/man8/*
+%{_sbindir}/atftpd
+%{_sbindir}/in.tftpd
+/usr/lib/systemd/system/atftpd.service
+
+
+%files client
+%{_mandir}/man1/*
+%{_bindir}/atftp
+
+
+%preun
+
+
+%post
+useradd --system -d /var/lib/tftpboot tftp || true
+%if %is_debian_ubuntu
+usermod -a -G tftp www-data || true
+%else
+usermod -a -G tftp apache || true
+%endif
+
+%clean
+[ -n "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != '/' ] && rm -rf $RPM_BUILD_ROOT
+
 
 %changelog
-
-* Wed Oct 07 2020 Benoit Leveugle <benoit.leveugle@gmail.com>
-- Create
-```
-
-This file specify how the package should be built.
-
-Lets now create the package:
+* Wed Dec 01 2021 Benoit Leveugle <benoit.leveugle@gmail.com>
+- Adapt to bluebanquise
+* Tue Jan 07 2003 Thayne Harbaugh <thayne@plug.org>
+- put client in sub-rpm
 
 ```
-tar cvzf fbtftp_server-0.1.tar.gz fbtftp_server-0.1
-rpmbuild -ta fbtftp_server-0.1.tar.gz --target=noarch
-```
 
-Copy both packages into our extra repository, update the repository:
+Now generate the configure file for later build:
 
 ```
-cp /root/rpmbuild/RPMS/noarch/fbtftp-0.5-1.noarch.rpm /var/www/html/repositories/AlmaLinux/9/x86_64/extra/
-cp /root/rpmbuild/RPMS/noarch/fbtftp_server-0.1-1.el8.noarch.rpm /var/www/html/repositories/AlmaLinux/9/x86_64/extra/
+./autogen.sh
+```
+
+Finaly, exit this folder and rename folder, compress it, then build package:
+
+```
+cd ../
+mv atftp-0.8.0 bluebanquise-atftp-0.8.0
+tar cvzf atftp.tar.gz bluebanquise-atftp-0.8.0
+rpmbuild -ta atftp.tar.gz --target=x86_64 --define "_software_version 0.8.0" --define "_lto_cflags %{nil}"
+```
+
+Now we need to add this package to our custom repository.
+
+##### Ubuntu
+
+Go into a temporary folder, convert the rpm to deb package using alien tool, and inject it into the local repository:
+
+```
+cd /tmp
+alien --to-deb --scripts /root/rpmbuild/RPMS/x86_64/bluebanquise-atftp-*
+reprepro -b /var/www/html/repositories/Ubuntu/24.04/x86_64/extra/ includedeb noble *.deb
+```
+
+And add the repository to the system sources:
+
+```
+echo "deb [trusted=yes] https://10.10.0.1/repositories/Ubuntu/24.04/x86_64/extra/ noble main" >> /etc/apt/sources.list.d/extra.sources
+```
+
+Now, using apt install our new package, and start the service:
+
+```
+apt update
+apt install bluebanquise-atftp
+systemctl start atftpd
+systemctl enable atftpd
+```
+
+##### RHEL
+
+Move into the repository folder, and copy built rpm into the folder, then use createrepo command to generate the repository or update it:
+
+```
+cd /var/www/html/repositories/AlmaLinux/9/x86_64/extra/
+cp /root/rpmbuild/RPMS/x86_64/bluebanquise-atftp-*.rpm .
 createrepo /var/www/html/repositories/AlmaLinux/9/x86_64/extra/
-dnf clean all
+restorecon -r /var/www/html/
 ```
 
-Now install both packages:
+You can now install the package using dnf command, as we already registered this repo earlier.
 
 ```
-dnf install fbtftp_server -y
+dnf install bluebanquise-atftp
 ```
 
 #### iPXE custom rom
@@ -1373,13 +1333,6 @@ cp bin/undionly.kpxe /var/lib/tftpboot/
 ```
 
 Note: some host do not boot without an **snponly** ipxe.efi version. Refer to ipxe documentation on how to build such rom.
-
-Finally, start fbtftp_server service:
-
-```
-systemctl start fbtftp_server
-systemctl enable fbtftp_server
-```
 
 #### iPXE chain
 
