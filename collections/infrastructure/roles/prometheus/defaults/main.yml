@@ -2,6 +2,14 @@
 prometheus_client: false
 prometheus_server: false
 
+prometheus_ha_enabled: false
+prometheus_server_alertmanager_cluster_peers: []
+
+prometheus_server_alertmanager_cluster_port: 9094
+prometheus_server_alertmanager_port: 9093
+prometheus_server_prometheus_port: 9090
+prometheus_server_karma_port: 8080
+
 prometheus_server_manage_prometheus: true
 prometheus_server_manage_alertmanager: true
 prometheus_server_manage_karma: true
@@ -94,8 +102,16 @@ prometheus_snmp_scrape_hardware_groups: []
 prometheus_server_snmp_exporter_with_generator: false
 prometheus_server_snmp_exporter_raw_configuration:
 
+prometheus_server_prometheus_username: admin
+prometheus_server_prometheus_password: ''
+prometheus_server_prometheus_password_hash: ''
+
+prometheus_server_alertmanager_username: admin
+prometheus_server_alertmanager_password: ''
+prometheus_server_alertmanager_password_hash: ''
+
 prometheus_server_karma_username: admin
-prometheus_server_karma_password: admin
+prometheus_server_karma_password: ''
 
 prometheus_firewall_open: false
 prometheus_server_firewall_zone: public
