@@ -85,18 +85,6 @@
   tags:
     - template
 
-- name: Template █ Generate /etc/alertmanager/web.yml
-  ansible.builtin.template:
-    src: alertmanager_web.yml.j2
-    dest: /etc/alertmanager/web.yml
-    owner: alertmanager
-    group: alertmanager
-    mode: 0640
-  notify: service <|> Restart alertmanager service
-  when: prometheus_server_alertmanager_password is defined and prometheus_server_alertmanager_password
-  tags:
-    - template
-
 - name: meta <|> Run handler tasks
   ansible.builtin.meta: flush_handlers
 

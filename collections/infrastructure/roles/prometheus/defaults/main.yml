@@ -102,6 +102,8 @@ prometheus_snmp_scrape_hardware_groups: []
 prometheus_server_snmp_exporter_with_generator: false
 prometheus_server_snmp_exporter_raw_configuration:
 
+prometheus_server_enable_basic_auth: false
+
 prometheus_server_prometheus_username: admin
 prometheus_server_prometheus_password: ''
 prometheus_server_prometheus_password_hash: ''
@@ -120,8 +122,3 @@ prometheus_client_firewall_zone: public
 prometheus_server_enable_tls: false
 prometheus_server_tls_cert_file: prometheus.crt
 prometheus_server_tls_key_file: prometheus.key
-
-prometheus_server_enable_basic_auth: false
-prometheus_server_basic_auth_user: prometheus
-prometheus_server_basic_auth_password: prometheus
-prometheus_server_basic_auth_hash_password: "$2b$12$yo5DKSX5AtcBhyTPuinXBOfMc74jFxLRRhhNFkSn4N2Qe496scb9G"

@@ -1,6 +1,14 @@
-{% if prometheus_server_prometheus_password is defined and prometheus_server_prometheus_password %}
-{% if prometheus_server_prometheus_password_hash is defined and prometheus_server_prometheus_password_hash %}
-basic_auth_users:
-    {{ prometheus_server_prometheus_username }}: {{ prometheus_server_prometheus_password_hash }}
+#jinja2: lstrip_blocks: "True"
+#### Blue Banquise file ####
+## {{ansible_managed}}
+
+{% if prometheus_server_enable_tls %}
+tls_server_config:
+  cert_file: {{ prometheus_server_tls_cert_file }}
+  key_file: {{ prometheus_server_tls_key_file }}
 {% endif %}
+
+{% if prometheus_server_enable_basic_auth %}
+basic_auth_users:
+  {{ prometheus_server_prometheus_username }}: {{ prometheus_server_prometheus_password_hash }}
 {% endif %}

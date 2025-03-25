@@ -34,7 +34,6 @@ This role relies on [data model](https://github.com/bluebanquise/bluebanquise/bl
     + [Access Karma behind a reverse proxy](#access-karma-behind-a-reverse-proxy)
     + [TLS and/or Basic Authentication](#tls-andor-basic-authentication)
     + [TSDB Prometheus](#tsdb-prometheus)
-    + [Basic Auth](#basic-auth)
   * [Changelog](#changelog)
 
 
@@ -789,12 +788,41 @@ To enable basic authentication, you need to set these variables:
 
 ```yaml
 prometheus_server_enable_basic_auth: true
-prometheus_server_basic_auth_user: 
-prometheus_server_basic_auth_password: 
-prometheus_server_basic_auth_hash_password: 
+
+prometheus_server_prometheus_username: admin
+prometheus_server_prometheus_password: admin
+
+prometheus_server_alertmanager_username: admin
+prometheus_server_alertmanager_password: admin
+
+prometheus_server_karma_username: admin
+prometheus_server_karma_password: admin
 ```
 
-Note: You can use python3-bcrypt to generate hashed password. See more at https://prometheus.io/docs/guides/basic-auth/#hashing-a-password .
+For the **Alertmanager** and **Prometheus** services we need a secret generated using the bcrypt password-hashing function*.
+
+1. Install bcrypt:
+
+```pip
+pip install bcrypt
+```
+
+2. Run the command below. It will ask you to enter a password and return the respective hash:
+
+```shell
+# python3.11 -c "import getpass; import bcrypt; password = getpass.getpass('Enter your assword: '); hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()); rint('Password hash:', hashed_password.decode())"
+Enter your password: <password>
+Password hash: <hash>
+```
+
+3. Update the variables in the inventory that use the hash:
+
+```yaml
+      prometheus_server_prometheus_password_hash:
+      prometheus_server_alertmanager_password_hash:
+```
+
+> Note: You can use python3-bcrypt to generate hashed password. See more at [Prometheus/Basic Auth/Hashing a Password](https://prometheus.io/docs/guides/basic-auth/#hashing-a-password).
 
 To load web configuration file, use the --web.config.file flag:
 
@@ -824,75 +852,6 @@ And attach them to additional Prometheus initialization parameters, as in the fo
 prometheus_server_prometheus_launch_parameters: |
   --storage.tsdb.path {{ prometheus_server_prometheus_tsdb_path }} \
   --storage.tsdb.retention.time {{ prometheus_server_prometheus_tsdb_retention_time }}
-```
-
-### Basic Auth
-
-By default, the role does not configure the basic authentication of services, however it is ossible to perform this configuration by updating some variables in the inventory:
-
-```yaml
-prometheus_server_prometheus_username: admin
-prometheus_server_prometheus_password: admin
-
-prometheus_server_alertmanager_username: admin
-prometheus_server_alertmanager_password: admin
-
-prometheus_server_karma_username: admin
-prometheus_server_karma_password: admin
-```
-
-It is possible to use both plain text passwords or passwords generated through Ansible ault, e.g.:
-
-```yaml
-prometheus_server_prometheus_username: admin
-prometheus_server_prometheus_password: !vault |
-               $ANSIBLE_VAULT;1.1;AES256
-               2633131613138323931333036336437326136323263633537396263373432383565396562623033
-               739643136663039656439323438313062376536613434370a343635343765613931613863643738
-               5656130373032363739653132306334303064633936626533363432373261346537633866636431
-               134373733373963300a643139326135666136383033306133343931346532393961363836616564
-               3765
-
-prometheus_server_prometheus_username: admin
-prometheus_server_alertmanager_password: !vault |
-               $ANSIBLE_VAULT;1.1;AES256
-               2633131613138323931333036336437326136323263633537396263373432383565396562623033
-               739643136663039656439323438313062376536613434370a343635343765613931613863643738
-               5656130373032363739653132306334303064633936626533363432373261346537633866636431
-               134373733373963300a643139326135666136383033306133343931346532393961363836616564
-               3765
-
-prometheus_server_prometheus_username: admin
-prometheus_server_karma_password: !vault |
-               $ANSIBLE_VAULT;1.1;AES256
-               2633131613138323931333036336437326136323263633537396263373432383565396562623033
-               739643136663039656439323438313062376536613434370a343635343765613931613863643738
-               5656130373032363739653132306334303064633936626533363432373261346537633866636431
-               134373733373963300a643139326135666136383033306133343931346532393961363836616564
-               3765
-```
-
-For the **Alertmanager** and **Prometheus** services we need a secret generated using the bcrypt password-hashing function*.
-
-1. Install bcrypt:
-
-```shell
-# pip3.11 install bcrypt
-```
-
-2. Run the command below. It will ask you to enter a password and return the respective hash:
-
-```shell
-# python3.11 -c "import getpass; import bcrypt; password = getpass.getpass('Enter your assword: '); hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()); rint('Password hash:', hashed_password.decode())"
-Enter your password: <password>
-Password hash: <hash>
-```
-
-3. Update the variables in the inventory that use the hash:
-
-```yaml
-      prometheus_server_prometheus_password_hash:
-      prometheus_server_alertmanager_password_hash:
 ```
 
 ## Changelog
