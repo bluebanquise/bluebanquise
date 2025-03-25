@@ -4,6 +4,8 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.2.1
 
+* 3/25/25: - santos-lucas - [gpu] force gather facts on the beginning of execution.
+* 3/25/25: - santos-lucas - [gpu] Add support for AMD gpus.
 * 3/25/25: - hmeScaler - [users] Role enhancement and bug fixing
 * 3/25/25: - aolloh - [custom_packages] Remove braces on item.
 * 3/25/25: - lmagdanello - [pxe_stack] Fix Formatting for Kernel Parameters in iPXE Template.
