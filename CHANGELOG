@@ -4,6 +4,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.2.1
 
+* 3/25/25: - aolloh - [custom_packages] Remove braces on item.
 * 3/25/25: - lmagdanello - [pxe_stack] Fix Formatting for Kernel Parameters in iPXE Template.
 * 3/25/25: - thiagocardozo - [grafana] Fixed service start and user creation.
 * 3/25/25: - thiagocardozo - [grafana] Reuse better variable for output;Don't print admin password at end.
