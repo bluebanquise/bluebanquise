@@ -1,0 +1,29 @@
+---
+- name: package <|> Install needed pre-requisite packages
+  ansible.builtin.package:
+    name:
+      - kernel-headers-{{ ansible_kernel }}
+      - kernel-devel-{{ ansible_kernel }}
+      - kernel-devel-matched-{{ ansible_kernel }}
+      - dkms
+    state: present
+
+- name: package <|> Install python pre-requisite packages
+  ansible.builtin.package:
+    name:
+      - python3-setuptools
+     # - python3-wheel
+    state: present
+
+- name: package <|> Install AMD driver and rocm
+  ansible.builtin.package:
+    name:
+      - amdgpu-dkms
+      - rocm
+    state: present
+  register: amd_drivers
+
+- name: reboot <|> Reboot a slow machine that might have lots of updates to apply
+  ansible.builtin.reboot:
+    reboot_timeout: "{{ update_reboot_reboot_timeout }}"
+  when: update_reboot_reboot and amd_drivers.changed
