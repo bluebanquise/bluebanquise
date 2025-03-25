@@ -2,7 +2,9 @@
 
 Format: <date> - <author (username or mail or both)> - [role] <change description>
 
-# To 3.2.1
+# To 3.2.6
+
+# 3.2.5
 
 * 3/25/25: - santos-lucas - [gpu] force gather facts on the beginning of execution.
 * 3/25/25: - santos-lucas - [gpu] Add support for AMD gpus.
