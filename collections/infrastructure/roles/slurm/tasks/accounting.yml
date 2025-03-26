@@ -71,6 +71,7 @@
     column_case_sensitive: false
   loop:
     - "{{ ansible_hostname }}"
+    - "localhost"
     - "{{ slurm_accounting_mysql_login_host }}"
   when:
     - slurm_accounting_mysql_create_user
