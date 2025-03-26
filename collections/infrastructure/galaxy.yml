@@ -82,4 +82,11 @@ issues: https://github.com/bluebanquise/bluebanquise/issues
 # artifact. A pattern is matched from the relative path of the file or directory of the collection directory. This
 # uses 'fnmatch' to match the files or directories. Some directories and files like 'galaxy.yml', '*.pyc', '*.retry',
 # and '.git' are always filtered
-build_ignore: []
+build_ignore:
+  - plugins/modules
+  - roles/singularity
+  - roles/gpu
+  - roles/interconnect
+  - roles/nhc
+  - roles/slurm
+  - roles/google_authenticator
