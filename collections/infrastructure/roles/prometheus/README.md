@@ -23,6 +23,7 @@ This role relies on [data model](https://github.com/bluebanquise/bluebanquise/bl
     + [Exporters](#exporters)
   * [5. IPMI and SNMP](#5-ipmi-and-snmp)
   * [6. Advanced usage](#6-advanced-usage)
+    + [Monitoring High Availability](#monitoring-high-availability)
     + [Set custom launch parameters](#set-custom-launch-parameters)
     + [Manipulate firewall](#manipulate-firewall)
     + [Splitting services](#splitting-services)
@@ -440,6 +441,131 @@ prometheus_snmp_scrape_hardware_groups:
 
 ## 6. Advanced usage
 
+### Monitoring High Availability
+
+The monitoring stack allows the configuration of services in high availability. There are wo ways to achieve high availability:
+
+**A**. Using alertmanager's native clustering parameters. However, other services will only e duplicated between management nodes.
+**B**. Integrating with Pacemaker and Alertmanager's native clustering parameters. In this cenario, metrics and other resources will all be in high availability.
+
+##### Option A:
+
+1. Enable ``prometheus_ha_enabled`` in the inventory:
+
+```yaml
+prometheus_ha_enabled:  true
+```
+
+2. Configure the cluster peers for AlertManager:
+
+```yaml
+prometheus_server_alertmanager_cluster_peers:
+       - name:  ha1  # Hostname of the HA cluster nodes
+         addrs:      # List of addresses to be used for HA ring
+           - ha1
+       - name:  ha2
+         addrs:
+           - ha2
+```
+
+3. (Optional) You can change the default port that the AlertManager cluster ring listens on:
+
+```yaml
+prometheus_server_alertmanager_cluster_port:  9094
+```
+
+##### Option B:
+
+**For this option you will need to use the collections/high_availability/pcs.**
+
+4. Karma will use a vIP (Virtual IP) from Pacemaker for the monitoring group, for this eason we must configure it correctly in */etc/bluebanquise/inventory/group_vars/all/general_settings/services.yml*.
+
+```yaml
+       services:
+         regionadmin:
+           admin:
+             ...
+             monitoring:
+               - ip4: 10.10.0.1
+                 hostname: monitoring
+```
+
+5. Configure the Karma host to point to the vIP:
+
+```yaml
+prometheus_server_karma_host: "{{ networks[j2_node_main_network].services.monitoring[0].hostname }}.{{ bb_domain_name }}"
+```
+
+6. Ensure that you have a volume group created that can be integrated with Pacemaker, this ay the metrics will be shared between Prometheus resources.
+
+```yaml
+prometheus_server_prometheus_tsdb_path:  '/var/lib/storage-prometheus'
+prometheus_server_prometheus_tsdb_retention_time:  10d  # Defaults to 15d
+
+prometheus_server_prometheus_launch_parameters: |
+  --storage.tsdb.path {{ prometheus_server_prometheus_tsdb_path }} \
+  --storage.tsdb.retention.time {{ prometheus_server_prometheus_tsdb_retention_time }} \
+```
+
+7. To integrate with Pacemaker, we must add or uncomment the Monitoring block in ``ha_resources.yml``. This block is responsible for configuring the resources that will be managed by Pacemaker:
+
+```yaml
+
+      - group: ''
+        resources:
+          - id: service-alertmanager
+            type: systemd:alertmanager
+            arguments: "clone interleave=true"
+
+      - group: monitoring-stack
+         resources:
+         - id: lvm-activate-vg-monitoring-stack
+            type: LVM-activate
+            arguments: "vgname='vg-monitoring-stack' vg_access_mode='system_id' activation_mode='exclusive'"
+
+         - id: fs-data-grafana-db
+            type: Filesystem
+            arguments: "device='/dev/vg-monitoring-stack/grafana-db' directory='{{ grafana_db_mnt_point }}' fstype='ext4'"
+         - id: fs-data-prometheus
+            type: Filesystem
+            arguments: "device='/dev/vg-monitoring-stack/prometheus' directory='{{ prometheus_server_prometheus_tsdb_path }}' fstype='ext4'"
+
+         - id: vip-monitoring-stack
+            type: IPaddr2
+            arguments: "ip={{ networks[j2_node_main_network].services.monitoring[0].ip4 }} cidr_netmask={{ networks[j2_node_main_network]['prefix'] }} nic={{ j2_node_main_network_interface }}"
+
+         - id: service-grafana-db
+            type: systemd:grafana-db
+         - id: service-grafana-server
+            type: systemd:grafana-server
+         - id: service-prometheus-server
+            type: systemd:prometheus
+         - id: service-karma
+            type: systemd:karma
+```
+
+With these configurations, you will be able to implement the Monitoring stack in high vailability.
+
+At the end of the day, you will have something similar to:
+
+```shell
+   $ pcs status
+
+   * Resource Group: monitoring-stack:
+   * vg-monitoring-stack-monitoring    (ocf::heartbeat:LVM-activate):   Started mngt0-1
+   * fs-data-grafana-db                (ocf::heartbeat:Filesystem):     Started mngt0-1
+   * fs-data-prometheus                (ocf::heartbeat:Filesystem):     Started mngt0-1
+   * vip-monitoring-stack              (ocf::heartbeat:IPaddr2):        Started mngt0-1
+   * service-grafana-db                (systemd:grafana-db):            Started mngt0-1
+   * service-grafana-server            (systemd:grafana-server):        Started mngt0-1
+   * service-prometheus-server         (systemd:prometheus):            Started mngt0-1
+   * service-karma                     (systemd:karma):         Started mngt0-1
+
+   * Clone Set: service-alertmanager-clone [service-alertmanager]:
+   * Started: [ mngt0-1 mngt0-2 ]
+```
+
+
 ### Set custom launch parameters
 
 Since Prometheus ecosystem has been originally designed to run into containers,
@@ -662,12 +788,41 @@ To enable basic authentication, you need to set these variables:
 
 ```yaml
 prometheus_server_enable_basic_auth: true
-prometheus_server_basic_auth_user: 
-prometheus_server_basic_auth_password: 
-prometheus_server_basic_auth_hash_password: 
+
+prometheus_server_prometheus_username: admin
+prometheus_server_prometheus_password: admin
+
+prometheus_server_alertmanager_username: admin
+prometheus_server_alertmanager_password: admin
+
+prometheus_server_karma_username: admin
+prometheus_server_karma_password: admin
 ```
 
-Note: You can use python3-bcrypt to generate hashed password. See more at https://prometheus.io/docs/guides/basic-auth/#hashing-a-password .
+For the **Alertmanager** and **Prometheus** services we need a secret generated using the bcrypt password-hashing function*.
+
+1. Install bcrypt:
+
+```pip
+pip install bcrypt
+```
+
+2. Run the command below. It will ask you to enter a password and return the respective hash:
+
+```shell
+# python3.11 -c "import getpass; import bcrypt; password = getpass.getpass('Enter your assword: '); hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()); rint('Password hash:', hashed_password.decode())"
+Enter your password: <password>
+Password hash: <hash>
+```
+
+3. Update the variables in the inventory that use the hash:
+
+```yaml
+      prometheus_server_prometheus_password_hash:
+      prometheus_server_alertmanager_password_hash:
+```
+
+> Note: You can use python3-bcrypt to generate hashed password. See more at [Prometheus/Basic Auth/Hashing a Password](https://prometheus.io/docs/guides/basic-auth/#hashing-a-password).
 
 To load web configuration file, use the --web.config.file flag:
 
@@ -701,6 +856,7 @@ prometheus_server_prometheus_launch_parameters: |
 
 ## Changelog
 
+* 1.6.0: Monitoring HA with Basic Auth. Leonardo Magdanello <lmagdanello40@gmail.com>
 * 1.5.0: Add small features for Monitoring. Leonardo Magdanello <lmagdanello40@gmail.com>
 * 1.4.1: Fix bad rights on services files. Bug reported by @sgaosdgr. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.0: Add more tunig for exporter services. Benoit Leveugle <benoit.leveugle@gmail.com>

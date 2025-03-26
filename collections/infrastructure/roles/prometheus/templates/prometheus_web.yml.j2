@@ -10,5 +10,5 @@ tls_server_config:
 
 {% if prometheus_server_enable_basic_auth %}
 basic_auth_users:
-  {{ prometheus_server_basic_auth_user }}: {{ prometheus_server_basic_auth_hash_password }}
+  {{ prometheus_server_prometheus_username }}: {{ prometheus_server_prometheus_password_hash }}
 {% endif %}

@@ -10,33 +10,73 @@ global:
 rule_files:
   - 'alerts/*.yml'
 
+{% if prometheus_ha_enabled is defined and prometheus_ha_enabled %}
+  {% if prometheus_server_alertmanager_cluster_peers is defined and prometheus_server_alertmanager_cluster_peers|length > 0 %}
+# High Availability configuration
 alerting:
   alertmanagers:
   - path_prefix: "{{ prometheus_server_alertmanager_prefix }}/"
     static_configs:
     - targets:
-      - {{ prometheus_server_alertmanager_host }}:9093
+      {% for alertmanager_cluster_node in prometheus_server_alertmanager_cluster_peers %}
+         {% set alertmanager_cluster_ip = alertmanager_cluster_node.addrs[0] %}
+       - {{ alertmanager_cluster_ip }}:{{ prometheus_server_alertmanager_port }}
+       {% endfor %}
+{% if prometheus_server_alertmanager_password is defined and prometheus_server_alertmanager_password %}
+    basic_auth:
+      username: "{{ prometheus_server_alertmanager_username }}"
+      password: "{{ prometheus_server_alertmanager_password }}"
+{% endif %}
+   {% endif %}
+ {% else %}
+# Default AlertManager configuration
+alerting:
+  alertmanagers:
+  - path_prefix: "{{ prometheus_server_alertmanager_prefix }}/"
+     static_configs:
+     - targets:
+       - {{ prometheus_server_alertmanager_host }}:{{ prometheus_server_alertmanager_port }}
+{% if prometheus_server_alertmanager_password is defined and prometheus_server_alertmanager_password %}
+    basic_auth:
+      username: "{{ prometheus_server_alertmanager_username }}"
+      password: "{{ prometheus_server_alertmanager_password }}"
+{% endif %}
+{% endif %}
 
 {{ prometheus_server_prometheus_raw_configuration }}
-
+{% if prometheus_ha_enabled is defined and prometheus_ha_enabled %}
+ {% if prometheus_server_alertmanager_cluster_peers is defined and prometheus_server_alertmanager_cluster_peers|length > 0 %}
+# High Availability configuration
 scrape_configs:
-
-  # I watch myself
-  - job_name: 'prometheus_master'
+  - job_name: 'prometheus_ha'
     scrape_interval: 30s
     metrics_path: "{{ prometheus_server_prometheus_prefix }}/metrics"
     static_configs:
-      - targets: ['localhost:9090']
-
-{% if prometheus_server_enable_tls %}
-    scheme: https
-    tls_config:
-      ca_file: {{ prometheus_server_tls_cert_file }}
-{% endif %}
-{% if prometheus_server_enable_basic_auth %}
+    - targets:
+      {% for alertmanager_cluster_node in prometheus_server_alertmanager_cluster_peers %}
+      {% set alertmanager_cluster_ip = alertmanager_cluster_node.addrs[0] %}
+      - {{ alertmanager_cluster_ip }}:{{ prometheus_server_prometheus_port }}
+      {% endfor %}
+{% if prometheus_server_alertmanager_password is defined and prometheus_server_alertmanager_password %}
     basic_auth:
-      username: {{ prometheus_server_basic_auth_user }}
-      password: {{ prometheus_server_basic_auth_password }}
+      username: "{{ prometheus_server_alertmanager_username }}"
+      password: "{{ prometheus_server_alertmanager_password }}"
+{% endif %}
+ {% endif %}
+ {% else %}
+# Default AlertManager configuration
+scrape_configs:
+  - job_name: 'prometheus_master'
+    metrics_path: "{{ prometheus_server_prometheus_prefix }}/metrics"
+    scrape_interval: 30s
+    static_configs:
+    - targets:
+      - {{ prometheus_server_prometheus_host }}:{{ prometheus_server_prometheus_port }}
+{% if prometheus_server_alertmanager_password is defined and prometheus_server_alertmanager_password %}
+    basic_auth:
+      username: "{{ prometheus_server_alertmanager_username }}"
+      password: "{{ prometheus_server_alertmanager_password }}"
+{% endif %}
 {% endif %}
 
 {% if prometheus_server_prometheus_raw_jobs is defined and prometheus_server_prometheus_raw_jobs is not none %}
