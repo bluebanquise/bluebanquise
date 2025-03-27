@@ -185,6 +185,50 @@ server, you **must** define this host in a shared network, even if this shared
 network contains a single network (see this very well made page for more
 information: http://www.miquels.cistron.nl/isc-dhcpd/).
 
+#### Use patterns
+
+It is possible, for advanced dhcp patterns, to enable capability to use external macros to write hosts configuration into the dhcp configuration.
+
+Then, adding a pattern variable to an host NIC definition will trigger the associated macro.
+
+For example:
+
+```yaml
+hosts:
+  c001:
+    network_interfaces:
+      - interface: eth0
+        ip4: 10.10.3.1
+        mac: 08:00:27:36:c0:ac
+        network: ice1-1
+        match: my_equipment_x
+
+Will trigger macro called my_equipment_x.
+
+To enable this feature, define advanced_dhcp_server_enable_patterns to true and set the macro name for the host at the match option. The role will now look for a file called patterns.j2 in files folder of the role (and fail if the file do not exist).
+
+patterns.j2 file should contains the macro to be used, named like the pattern targeted in the node definition. Each macro have 6 inputs, in this order:
+
+1. hostname of the host to be written
+#. dictionary of the nic to be written
+#. ipxe driver of the host to be written
+#. ipxe embed option of the host to be written
+#. pxe filename of the host to be written
+#. set_filename macro to set correct filename for host to be written
+
+An example of macro would be, for the pattern my_equipment_x defined above:
+
+```
+{% macro my_equipment_x(host, nic, ipxe_driver, ipxe_embed, pxe_filename, set_filename)) %}
+host {{ host }} {
+  option host-name "{{host}}";
+    hardware ethernet {{nic.mac}};
+    fixed-address {{nic.ip4}};
+    filename "{{set_filename}}";
+}
+{% endmacro %}
+```
+
 #### Add dhcp node specific parameters and options
 
 It is possible to add specific dhcp settings to an host interface, which can be
