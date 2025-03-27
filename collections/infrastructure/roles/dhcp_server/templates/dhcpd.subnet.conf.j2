@@ -33,8 +33,8 @@
   Write entries for each possible methods for current nic
 ###############################################################################}
 {% macro write_host(host, nic, ipxe_driver, ipxe_embed, pxe_filename) %}
-  {%- if dhcp_server_enable_patterns and nic.match is defined and nic.match is not none %}
-    {{ patterns[nic.match](host, nic, ipxe_driver, ipxe_embed, pxe_filename, set_filename) }}
+  {%- if dhcp_server_enable_patterns and nic.dhcp_pattern is defined and nic.dhcp_pattern is not none %}
+    {{ patterns[nic.dhcp_pattern](host, nic, ipxe_driver, ipxe_embed, pxe_filename, set_filename) }}
   {% else %}
     {% if nic.mac is defined and (nic.mac | ansible.utils.hwaddr)%}
 

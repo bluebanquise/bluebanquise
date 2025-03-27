@@ -201,11 +201,11 @@ hosts:
         ip4: 10.10.3.1
         mac: 08:00:27:36:c0:ac
         network: ice1-1
-        match: my_equipment_x
+        dhcp_pattern: my_equipment_x
 
 Will trigger macro called my_equipment_x.
 
-To enable this feature, define advanced_dhcp_server_enable_patterns to true and set the macro name for the host at the match option. The role will now look for a file called patterns.j2 in files folder of the role (and fail if the file do not exist).
+To enable this feature, define advanced_dhcp_server_enable_patterns to true and set the macro name for the host at the dhcp_pattern option. The role will now look for a file called patterns.j2 in files folder of the role (and fail if the file do not exist).
 
 patterns.j2 file should contains the macro to be used, named like the pattern targeted in the node definition. Each macro have 6 inputs, in this order:
 
