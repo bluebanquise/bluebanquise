@@ -33,7 +33,10 @@
   Write entries for each possible methods for current nic
 ###############################################################################}
 {% macro write_host(host, nic, ipxe_driver, ipxe_embed, pxe_filename) %}
-  {% if nic.mac is defined and (nic.mac | ansible.utils.hwaddr)%}
+  {%- if dhcp_server_enable_patterns and nic.match is defined and nic.match is not none %}
+    {{ patterns[nic.match](host, nic, ipxe_driver, ipxe_embed, pxe_filename, set_filename) }}
+  {% else %}
+    {% if nic.mac is defined and (nic.mac | ansible.utils.hwaddr)%}
 
   host {{host}}-{{item}}-mac {
     option host-name "{{host}}";
@@ -47,8 +50,8 @@
     {% endif %}
   }
 
-  {%- endif %}
-  {% if nic.dhcp_client_identifier is defined %}
+    {%- endif %}
+    {% if nic.dhcp_client_identifier is defined %}
 
   host {{host}}-{{item}}-dhcp-client-identifier {
     option host-name "{{host}}";
@@ -62,8 +65,8 @@
     {% endif %}
   }
 
-  {%- endif %}
-  {% if nic.host_identifier is defined %}
+    {%- endif %}
+    {% if nic.host_identifier is defined %}
 
   host {{host}}-{{item}}-host-identifier {
     option host-name "{{host}}";
@@ -77,8 +80,8 @@
     {% endif %}
   }
 
-  {%- endif %}
-  {% if nic.match is defined %}{# Warning, only works in a shared network!! #}
+    {%- endif %}
+    {% if nic.match is defined %}{# Warning, only works in a shared network!! #}
 
   class "option_match_{{host}}" {
     match if (
@@ -97,8 +100,18 @@
     {% endif %}
   }
 
+    {%- endif %}
   {%- endif %}
 {%- endmacro %}
+
+
+{###############################################################################
+  Import external patterns if asked for. Expected to fail if file not present.
+###############################################################################}
+{% if dhcp_server_enable_patterns %}
+{% import 'patterns.j2' as patterns without context %}
+{% endif %}
+
 
 {###############################################################################
   Main iteration over hosts

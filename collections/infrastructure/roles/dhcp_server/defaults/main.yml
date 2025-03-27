@@ -33,3 +33,4 @@ dhcp_server_stash_agent_options: false
 # Add user custom global settings to main dhcp configuration file
 # No need to add ";" at the end, template will add it
 dhcp_server_global_settings: []
+dhcp_server_enable_patterns: true
