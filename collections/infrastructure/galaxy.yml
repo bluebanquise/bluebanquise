@@ -5,7 +5,7 @@ name: infrastructure
 
 # The version of the collection. Must be compatible with semantic versioning
 
-version: 3.2.3
+version: 3.2.5
 
 # The path to the Markdown (.md) readme file. This path is relative to the root of the collection
 readme: README.md
@@ -32,7 +32,7 @@ authors:
   - Osmocl <osmocl@osmo.cl>
   - Alisson Zuza <alisson.zuza1987@gmail.com>
   - Leonardo Araujo <lmagdanello40@gmail.com>
-  - Hamid Merzouki <hamid.merzouki@naverlabs.com>
+  - Hamid Merzouki <hamid@sesterce.com>
   - Emmanuel Chevreau <manu44600@gmail.com>
   - dilassert@gmail.com
   - boubee.thiago@gmail.com
