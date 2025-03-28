@@ -6,6 +6,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # 3.2.5
 
+* 3/27/25: - thiagocardozo - [auditd] Option to log root commands.
 * 3/25/25: - santos-lucas - [gpu] force gather facts on the beginning of execution.
 * 3/25/25: - santos-lucas - [gpu] Add support for AMD gpus.
 * 3/25/25: - hmeScaler - [users] Role enhancement and bug fixing
