@@ -1,0 +1,32 @@
+---
+- name: slurp <|> Fetch contents of registry certificate
+  ansible.builtin.slurp:
+    src: "{{ podman_registry_crt_path }}"
+  register: podman_registry_crt
+
+- name: copy <|> Backup registry certificate to track certificate change
+  ansible.builtin.copy:
+    src: "{{ podman_registry_crt_path }}"
+    dest: "/etc/containers/registry.crt.bkp"
+  register: podman_registry_crt_backup
+
+- name: podman_secret <|> Create secret for certificate private key
+  containers.podman.podman_secret:
+    state: present
+    name: smc_registry_crt
+    data: "{{ podman_registry_crt.content | b64decode }}"
+    force: true
+  changed_when: podman_registry_crt_backup.changed
+
+- name: slurp ░ Fetch contents of registry private key
+  ansible.builtin.slurp:
+    src: "{{ podman_registry_key_path }}"
+  register: podman_registry_key
+
+- name: podman_secret <|> Create secret for registry private key
+  containers.podman.podman_secret:
+    state: present
+    name: smc_registry_key
+    data: "{{ podman_registry_key.content | b64decode }}"
+    force: true
+  changed_when: podman_registry_crt_backup.changed

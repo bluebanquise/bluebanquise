@@ -22,6 +22,10 @@
   tags:
     - firewall
 
+- name: include_tasks <|> Create podman secrets for encryption
+  ansible.builtin.include_tasks: "registry_encryption.yml"
+  when: podman_registry_enable_encryption | bool
+
 - name: template <|> Install registry service file
   ansible.builtin.template:
     src: registry.service.j2
