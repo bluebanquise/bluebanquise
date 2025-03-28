@@ -258,8 +258,40 @@ dns_server_raw_options_content: |
   also-notify port 5353;
 ```
 
+### DNS Round Robin
+
+For load balancing with multiple DNS server nodes, the variable `dns_alias` can be added in the network interface section of each node in the inventory.
+These entries will be skipped by roles like `hosts_file`. Ex:
+
+```yaml
+fn_management:
+  hosts:
+    mgt1
+	  network_interfaces:
+        - interface: eth0
+          ip4: 10.0.0.10
+          network: ice1-1
+          dns_alias:
+            - www
+    mgt2
+	  network_interfaces:
+        - interface: eth0
+          ip4: 10.0.0.20
+          network: ice1-1
+          dns_alias:
+            - www
+```
+
+This will create a `foward.zone` file with:
+
+```yaml
+  www IN A 10.0.0.10
+  www IN A 10.0.0.20
+```
+
 ## Changelog
 
+* 1.12.0: Added alias for round robin load balance. Thiago Cardozo <boubee.thiago@gmail.com>
 * 1.11.0: Enable dnssec at dns server. Thiago Cardozo <boubee.thiago@gmail.com>
 * 1.10.4: Increase role performances bby caching first octets. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.10.3: Fix global logic. Benoit Leveugle <benoit.leveugle@gmail.com>
