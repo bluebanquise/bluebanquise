@@ -8,7 +8,7 @@ class VarsModule(BaseVarsPlugin):
         super(VarsModule, self).get_vars(loader, path, entities)
         data = {
 
-            # Core version: 3.2.0
+            # Core version: 3.2.1
             'bb_core_iceberg_naming': 'iceberg',
             'bb_core_equipment_naming': 'equipment',
             'bb_core_os_naming': 'os',
@@ -38,9 +38,9 @@ class VarsModule(BaseVarsPlugin):
             # This network must have 3 keys defined at least: network, interface, and ip4, to be considered valid as main network.
             'j2_node_main_network': "{{ network_interfaces | default([]) | selectattr('network','defined') | selectattr('interface','defined') | selectattr('ip4','defined') | selectattr('network','match','^'+bb_core_management_networks_naming+'-[a-zA-Z0-9]+') | map(attribute='network') | list | first | default(none) }}",
             # Main network interface. For consistency, we use j2_node_main_network as source.
-            'j2_node_main_network_interface': "{{ network_interfaces[j2_node_main_network].interface | default(none) }}",
+            'j2_node_main_network_interface': "{{ network_interfaces | default([]) | selectattr('network','defined') | selectattr('interface','defined') | selectattr('ip4','defined') | selectattr('network','match','^'+bb_core_management_networks_naming+'-[a-zA-Z0-9]+') | map(attribute='interface') | list | first | default(none) }}",
             # Main address, same concept.
-            'j2_node_main_address': "{{ network_interfaces[j2_node_main_network].ip4 | default(none) }}",
+            'j2_node_main_address': "{{ network_interfaces | default([]) | selectattr('network','defined') | selectattr('interface','defined') | selectattr('ip4','defined') | selectattr('network','match','^'+bb_core_management_networks_naming+'-[a-zA-Z0-9]+') | map(attribute='ip4') | list | first | default(none) }}",
 
             # Generate the nodes list, as a cache for network_interfaces
             # Example:

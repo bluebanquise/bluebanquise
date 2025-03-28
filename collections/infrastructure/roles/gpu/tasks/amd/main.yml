@@ -1,0 +1,16 @@
+---
+- name: include_tasks <|> Use OS dedicated task
+  ansible.builtin.include_tasks: "{{ outer_item }}"
+  with_first_found:
+    - files:
+        - "amd/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
+        - "amd/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
+        - "amd/{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
+        - "amd/{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
+        - "amd/{{ ansible_facts.distribution | replace(' ','_') }}/main.yml"
+        - "amd/{{ ansible_facts.os_family | replace(' ','_') }}/main.yml"
+      skip: true
+  loop_control:
+    loop_var: outer_item
+  tags:
+    - internal
