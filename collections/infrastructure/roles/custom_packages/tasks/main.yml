@@ -2,4 +2,4 @@
   yum:
     name: "{{custom_packages[item]}}"
   with_items: "{{custom_packages}}"
-  when: "'{{item}}' in group_names"
+  when: "item in group_names"

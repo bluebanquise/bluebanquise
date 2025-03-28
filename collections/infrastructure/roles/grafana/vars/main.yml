@@ -1,3 +1,2 @@
 ---
-grafana_role_version: 2.2.2
-grafana_default_port: 3000
+grafana_role_version: 2.2.3
