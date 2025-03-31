@@ -4,6 +4,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.2.6
 
+* 3/31/25 - thiagocardozo - [ssh_client] Add extra config options. 
 * 3/31/25 - thiagocardozo - [auditd] Option to log root commands.
 
 # 3.2.5
