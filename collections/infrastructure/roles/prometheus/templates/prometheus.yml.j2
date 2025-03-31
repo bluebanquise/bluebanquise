@@ -20,7 +20,7 @@ alerting:
     - targets:
       {% for alertmanager_cluster_node in prometheus_server_alertmanager_cluster_peers %}
          {% set alertmanager_cluster_ip = alertmanager_cluster_node.addrs[0] %}
-       - {{ alertmanager_cluster_ip }}:{{ prometheus_server_alertmanager_port }}
+       - "{{ alertmanager_cluster_ip }}:{{ prometheus_server_alertmanager_port }}"
        {% endfor %}
 {% if prometheus_server_alertmanager_password is defined and prometheus_server_alertmanager_password %}
     basic_auth:
@@ -33,9 +33,9 @@ alerting:
 alerting:
   alertmanagers:
   - path_prefix: "{{ prometheus_server_alertmanager_prefix }}/"
-     static_configs:
-     - targets:
-       - {{ prometheus_server_alertmanager_host }}:{{ prometheus_server_alertmanager_port }}
+    static_configs:
+    - targets:
+       - "{{ prometheus_server_alertmanager_host }}:{{ prometheus_server_alertmanager_port }}"
 {% if prometheus_server_alertmanager_password is defined and prometheus_server_alertmanager_password %}
     basic_auth:
       username: "{{ prometheus_server_alertmanager_username }}"
