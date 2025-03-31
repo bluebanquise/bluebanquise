@@ -3,3 +3,6 @@ ssh_client_enable_jump: false
 ssh_client_global_loglevel:
 ssh_client_global_stricthostkeychecking:
 ssh_client_global_userknownhostsfile:
+ssh_client_global_verifyhostkeydns:
+ssh_client_global_forwardx11trusted:
+ssh_client_global_useroaming:

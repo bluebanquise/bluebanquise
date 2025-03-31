@@ -77,6 +77,9 @@ It is possible to set specific parameters at global and/or nodes level:
 * StrictHostKeyChecking
 * UserKnownHostsFile
 * LogLevel
+* UseRoaming
+* ForwardX11Trusted
+* StrictHostKeyChecking
 
 To achieve that, the following variables are available:
 
@@ -84,6 +87,9 @@ To achieve that, the following variables are available:
 * ssh_client_global_stricthostkeychecking
 * ssh_client_global_userknownhostsfile
 * ssh_client_global_network
+* ssh_client_global_verifyhostkeydns
+* ssh_client_global_forwardx11trusted
+* ssh_client_global_useroaming
 
 Which are evaluated at global level
 
@@ -95,6 +101,9 @@ And:
 * ssh_client_loglevel
 * ssh_client_stricthostkeychecking
 * ssh_client_userknownhostsfile
+* ssh_client_verifyhostkeydns
+* ssh_client_forwardx11trusted
+* ssh_client_useroaming
 
 Which are evaluated for each host.
 
@@ -112,6 +121,7 @@ In case of issue, try adding verbosity to the ssh invocation to investigate (-vv
 
 ## Changelog
 
+* 1.4.0: Add extra config options. Thiago Cardozo <boubee.thiago@gmail.com>
 * 1.3.0: Role simplification. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.2.3: infrastructure/ssh_client role: set a default network <jean-pascal.mazzilli@gmail.com>
 * 1.2.2: Fixed ssh_client_userknownhostsfile host_vars. Leo Magdanello <lmagdanello40@gmail.com>
