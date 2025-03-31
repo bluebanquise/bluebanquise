@@ -49,6 +49,9 @@ Variables for this role:
 | podman_conf_namespace | '' | string | /etc/container/libpod.conf: namespace (=default namespace) |
 | podman_storage_driver | 'overlay' | string | storage driver |
 | podman_storage_mountopt | 'nodev' | string | storage driver mount options |
+| podman_registry_enable_encryption | false | boolean | indicate TLS encrpyption for local registry, needs valid key and certificate |
+| podman_registry_crt_path | '' | string | path where to find X.509 certificate |
+| podman_registry_key_path | '' | string | path where to find private key for X.509 certificate |
 
 ## Dependencies
 
@@ -119,12 +122,25 @@ podman_local_registry_owner: "root"
 podman_local_registry_group: "root"
 ```
 
+## Enable TLS encryption in local registry
+
+To enable TLS encryption when deploying the local registry, you must customize the following variables when calling the role:
+
+```
+podman_registry_enable_encryption: true
+podman_registry_crt_path: /etc/pki/tls/certs/registry.crt
+podman_registry_key_path: /etc/pki/tls/private/registry.key
+```
+
+where the paths in `podman_registry_crt_path` and `podman_registry_key_path` must point to existing files representing the X.509 certificate and private key, respectively. The paths shown here are recommendations and may be changed.
+
 ## License and Author
 
 * Author:: @strus38
 
 ## Changelog
 
+* 2.1.0: Add support for TLS encryption in local registry. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
 * 2.0.0: Updated registry format;Use handlers;Replace libpod.conf. Thiago Cardozo <boubee.thiago@gmail.com>
 * 1.0.3: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.2: Fix services to match bb 2.0 format. Benoit Leveugle <benoit.leveugle@gmail.com>
