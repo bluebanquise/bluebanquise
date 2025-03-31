@@ -4,6 +4,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.3.0
 
+* 3/27/25 - thiagocardozo - [dhcp-server] Ported patterns from advanced_dhcp_server role.
 * 3/27/25 - thiagocardozo - [dns_server] Option to sign zones.
 * 3/21/25 - thiagocardozo - [grafana] Fixed service start and user creation.
 * 3/18/25 - thiagocardozo - [dns_server] DNS server dnssec

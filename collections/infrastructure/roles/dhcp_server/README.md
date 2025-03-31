@@ -72,7 +72,7 @@ Example of network configuration, advanced dhcp server:
           - ip: 8.8.4.4
         ntp4:                                          # Is optional
           - hostname: time-a-g.nist.gov
-            ip: 129.6.15.28 
+            ip: 129.6.15.28
         pxe4:                                          # Is optional, needed for pxe
           - hostname: mg1
             ip: 10.11.0.1
@@ -150,7 +150,7 @@ It is possible to combine networks into shared-networks when multiple subnets
 are on the same NIC, or when using opt82/option_match parameter.
 To do so, add a dedicated optional `shared_network` key in the network definition.
 
-Networks of the same shared network must have the same `shared_network` value, 
+Networks of the same shared network must have the same `shared_network` value,
 which is the name of this share.
 
 For example to add net-1 and net-2 into the same shared network, define them
@@ -184,6 +184,50 @@ If using `match`, because this features is using a specific 'hack' in the dhcp
 server, you **must** define this host in a shared network, even if this shared
 network contains a single network (see this very well made page for more
 information: http://www.miquels.cistron.nl/isc-dhcpd/).
+
+#### Use patterns
+
+It is possible, for advanced dhcp patterns, to enable capability to use external macros to write hosts configuration into the dhcp configuration.
+
+Then, adding a pattern variable to an host NIC definition will trigger the associated macro.
+
+For example:
+
+```yaml
+hosts:
+  c001:
+    network_interfaces:
+      - interface: eth0
+        ip4: 10.10.3.1
+        mac: 08:00:27:36:c0:ac
+        network: ice1-1
+        dhcp_pattern: my_equipment_x
+
+Will trigger macro called my_equipment_x.
+
+To enable this feature, define advanced_dhcp_server_enable_patterns to true and set the macro name for the host at the dhcp_pattern option. The role will now look for a file called patterns.j2 in files folder of the role (and fail if the file do not exist).
+
+patterns.j2 file should contains the macro to be used, named like the pattern targeted in the node definition. Each macro have 6 inputs, in this order:
+
+1. hostname of the host to be written
+#. dictionary of the nic to be written
+#. ipxe driver of the host to be written
+#. ipxe embed option of the host to be written
+#. pxe filename of the host to be written
+#. set_filename macro to set correct filename for host to be written
+
+An example of macro would be, for the pattern my_equipment_x defined above:
+
+```
+{% macro my_equipment_x(host, nic, ipxe_driver, ipxe_embed, pxe_filename, set_filename)) %}
+host {{ host }} {
+  option host-name "{{host}}";
+    hardware ethernet {{nic.mac}};
+    fixed-address {{nic.ip4}};
+    filename "{{set_filename}}";
+}
+{% endmacro %}
+```
 
 #### Add dhcp node specific parameters and options
 
@@ -219,6 +263,7 @@ This allows for example to have an heterogenous cluster, with a group of hosts b
 
 ## Changelog
 
+* 1.8.0: Import external matching patterns. Thiago Cardozo <boubee.thiago@gmail.com>
 * 1.7.1: Fix global logic. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.7.0: Allow services and services_ip together. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.6.3: Fix double character for ipxe rom. Benoit Leveugle <benoit.leveugle@gmail.com>
