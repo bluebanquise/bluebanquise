@@ -36,7 +36,7 @@ slurm_slurmdtimeout: 600
 
 ## Accounting (storage)
 slurm_enable_accounting: false
-slurm_enable_local_mysql: false
+slurm_enable_local_mysql: true
 slurm_accounting_mysql_login_host: ""
 slurm_accounting_mysql_login_port: ""
 slurm_accounting_mysql_login_user: ""
