@@ -66,7 +66,7 @@ autoinstall:
     install-server: true
     allow-pw: true
 
-{{ (equipment['os']['os_partitioning'] | default(pxe_stack_os_partitioning) | default(pxe_stack_ubuntu_automatic_partitioning, true)) | indent(2, True) }}
+{{ (equipment['os']['os_partitioning'] | default(equipment['hw']['hw_partitioning'], true) | default(pxe_stack_os_partitioning, true) | default(pxe_stack_ubuntu_automatic_partitioning, true)) | indent(2, True) }}
  
   late-commands:
   {% if pxe_stack_enable_root %}
