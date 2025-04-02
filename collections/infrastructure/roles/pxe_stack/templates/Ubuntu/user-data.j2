@@ -66,7 +66,7 @@ autoinstall:
     install-server: true
     allow-pw: true
 
-{{ (equipment['os']['os_partitioning'] | default(equipment['hw']['hw_partitioning'], true) | default(pxe_stack_os_partitioning, true) | default(pxe_stack_ubuntu_automatic_partitioning, true)) | indent(2, True) }}
+{{ (equipment['os']['os_partitioning'] | default(pxe_stack_os_partitioning) | default(pxe_stack_ubuntu_automatic_partitioning, true)) | indent(2, True) }}
  
   late-commands:
   {% if pxe_stack_enable_root %}
@@ -87,6 +87,8 @@ autoinstall:
   {% if (equipment['hw']['hw_preserve_efi_first_boot_device'] | default(pxe_stack_hw_preserve_efi_first_boot_device)) == true %}
     - sh -c '[ -d /sys/firmware/efi ] && efibootmgr -o $(efibootmgr | grep BootCurrent | cut -d" " -f2),$(efibootmgr | grep BootOrder | sed "s/BootOrder:\ //" | sed "s/$(efibootmgr | grep BootCurrent | cut -d" " -f2),//") || echo "Not an EFI system, skipping"'
   {% endif %}
+  {% if pxe_stack_post_install_boot_to_disk %}
     - curtin in-target --target=/target -- sh -c 'for I in `cat /proc/cmdline | tr " " "\n" | grep -E "^(node_hostname|ipxe_next_server)="` ; do eval $I; done; curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$node_hostname&boot=disk"'
+  {% endif %}
 
 {% endif %}

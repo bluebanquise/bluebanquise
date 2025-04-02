@@ -168,6 +168,9 @@ pxe_stack_os_firewall: true                # If firewall (RHEL only for now) sho
 pxe_stack_os_partitioning:                 # Set partitioning. Use raw OS format: kickstart for RHEL, preseed for Debian, etc.
                                            # Leave empty for automated partitioning
 
+pxe_stack_post_install_action:             # Specify post install action other than default 'reboot' (poweroff, halt, shutdown). RHEL/Debian/Ubuntu
+pxe_stack_post_install_boot_to_disk: true  # If next boot should be on disk after install, or keep osdeploy (not configured for CloneZilla)
+
 pxe_stack_os_pxe_images_root:              # Specify a custom images root for PXE other than default http://${next-server}/pxe/netboots/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/
 pxe_stack_os_pxe_repository_root:          # Specify a custom os base repository root for PXE other than default http://${next-server}/repositories/${eq-repositories-environment}/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/
 ```
@@ -459,6 +462,7 @@ To be macroscopic:
    * *bin/${arch}/grub2_efi_autofind.img* if host is EFI based. This grub2 image will look for a disk with a know operating system, and boot on it.
 
 In case of an OS deployment, if this deployment succeed, in the post install script section, remote host will ask, using a curl command on its side and an CGI python script on server side (*/var/www/cgi-bin/bootswitch.cgi*), to boot next to disk. This CGI python script will simply edit *node/${hostname}.ipxe* file and change its default boot to **bootdisk**.
+To keep boot to osdeploy, set variable `pxe_stack_post_install_boot_to_disk` to *false*.
 
 All files are manually editable. Also, note that an unregistered host (so no hostnames provided by the dhcp) will try to load *nodes/.ipxe* file. By default, this file will simply provide an iPXE shell, but system administrator can tune this file to specific purposes.
 
@@ -726,6 +730,7 @@ Note that using an home folder into /home for the bluebanquise sudo user can be 
 
 ## Changelog
 
+* 1.19.0: Allow selection of shutdown action other than reboot & to keep osdeploy boot. Xavier DE WEERD <xavier.de.weerd@gmail.com>
 * 1.18.4: Fix Formatting for Kernel Parameters in iPXE Template. Leo Magdanello <lmagdanello40@gmail.com>
 * 1.18.3: Fix dublicated PermitRootLogin in RH sshd_config. Thiago Cardozo <boubee.thiago@gmail.com>
 * 1.18.2: Fix opensuse leap autoyast. Benoit Leveugle <benoit.leveugle@gmail.com>

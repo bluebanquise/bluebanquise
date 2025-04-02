@@ -81,7 +81,7 @@
     <loader_type>default</loader_type>
   </bootloader>
 
-{{ equipment['os']['os_partitioning'] | default(equipment['hw']['hw_partitioning'], true) | default(pxe_stack_os_partitioning, true) | default(pxe_stack_suse_automatic_partitioning, true) }}
+{{ equipment['os']['os_partitioning'] | default(pxe_stack_os_partitioning) | default(pxe_stack_suse_automatic_partitioning, true) }}
 
 {% if pxe_stack_enable_root %}
  <users config:type="list">
@@ -178,12 +178,14 @@ echo "Defaults:sles !targetpw
         <source><![CDATA[
 #!/bin/sh -x
 
+{% if pxe_stack_post_install_boot_to_disk %}
 # Turn the kernel parameters into variables
 # We are looking for next_server value
 for I in `cat /proc/cmdline | tr " " "\n" | grep -E "^ipxe_next_server="` ; do eval $I; done
 
 echo "All went well, we can inform next-server we succeeded"
 curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$(hostname -s)&boot=disk"
+{% endif %}
 
 ]]>
         </source>
