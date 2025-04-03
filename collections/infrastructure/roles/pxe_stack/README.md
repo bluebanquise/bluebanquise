@@ -168,7 +168,7 @@ pxe_stack_os_firewall: true                # If firewall (RHEL only for now) sho
 pxe_stack_os_partitioning:                 # Set partitioning. Use raw OS format: kickstart for RHEL, preseed for Debian, etc.
                                            # Leave empty for automated partitioning
 
-pxe_stack_post_install_action:             # Specify post install action other than default 'reboot' (poweroff, halt, shutdown). RHEL/Debian/Ubuntu
+pxe_stack_post_install_action: reboot      # Specify post install action, default=''='reboot' (poweroff, halt, shutdown). RHEL/Debian/Ubuntu
 pxe_stack_post_install_boot_to_disk: true  # If next boot should be on disk after install, or keep osdeploy (not configured for CloneZilla)
 
 pxe_stack_os_pxe_images_root:              # Specify a custom images root for PXE other than default http://${next-server}/pxe/netboots/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/
