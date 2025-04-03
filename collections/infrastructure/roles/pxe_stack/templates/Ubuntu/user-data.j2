@@ -65,6 +65,11 @@ autoinstall:
   ssh:
     install-server: true
     allow-pw: true
+  {% if pxe_stack_post_install_action in ['poweroff', 'halt', 'shutdown'] %}
+  shutdown: poweroff
+  {% else %}
+  shutdown: reboot
+  {% endif %}
 
 {{ (equipment['os']['os_partitioning'] | default(equipment['hw']['hw_partitioning'], true) | default(pxe_stack_os_partitioning, true) | default(pxe_stack_ubuntu_automatic_partitioning, true)) | indent(2, True) }}
  
