@@ -27,7 +27,7 @@ pxe_stack_sudo_is_passwordless: true
 pxe_stack_preserve_repositories: true
 
 # default is reboot, can be set to poweroff, halt or shutdown
-pxe_stack_post_install_action:
+pxe_stack_post_install_action: reboot
 pxe_stack_post_install_boot_to_disk: true
 
 # Do not edit here
