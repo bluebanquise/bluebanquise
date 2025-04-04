@@ -29,6 +29,17 @@
     - plugins
     - apikeys
 
+- name: service <|> Wait for grafana-db
+  ansible.builtin.wait_for:
+    host: localhost
+    port: "{{ grafana_db_port }}"
+    timeout: 300
+  when:
+    - grafana_ha_enabled|default(false)
+    - grafana_start_services | default(bb_start_services) | default(true) | bool
+  tags:
+    - configure
+
 - name: include_tasks <|> preflight
   ansible.builtin.include_tasks: preflight.yml
   tags:
@@ -73,16 +84,6 @@
   when: grafana_plugins != []
   tags:
     - plugins
-
-- name: service <|> Wait for grafana-db
-  ansible.builtin.wait_for:
-    host: localhost
-    port: "{{ grafana_db_port }}"
-  when:
-    - grafana_ha_enabled|default(false)
-    - grafana_start_services | default(bb_start_services) | default(true) | bool
-  tags:
-    - configure
 
 - name: service <|> Force all notified handlers to run at this point
   ansible.builtin.meta: flush_handlers
