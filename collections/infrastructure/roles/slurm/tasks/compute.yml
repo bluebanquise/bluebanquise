@@ -21,6 +21,7 @@
     mode: 0644
   tags:
     - template
+  notify: service <|> restart slurmd
 
 - name: include_tasks <|> Deploy Slurm compute configuration
   ansible.builtin.include_tasks: "compute_{{ slurm_computes_config }}.yml"

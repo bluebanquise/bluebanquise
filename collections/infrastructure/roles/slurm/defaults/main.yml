@@ -13,6 +13,7 @@ slurm_statesavelocation: /var/spool/slurmctld/statesave
 slurm_slurmdspooldir: /var/spool/slurmd/slurmd
 slurm_slurmctldpidfile: /var/run/slurmctld.pid
 slurm_slurmdpidfile: /var/run/slurmd.pid
+slurm_slurmdbdpidfile: /var/run/slurmdbd.pid
 
 ## firewall and ports
 slurm_firewall_zone: public
@@ -35,7 +36,7 @@ slurm_slurmdtimeout: 600
 
 ## Accounting (storage)
 slurm_enable_accounting: false
-slurm_enable_local_mysql: false
+slurm_enable_local_mysql: true
 slurm_accounting_mysql_login_host: ""
 slurm_accounting_mysql_login_port: ""
 slurm_accounting_mysql_login_user: ""
