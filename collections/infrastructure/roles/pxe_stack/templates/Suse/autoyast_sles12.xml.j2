@@ -109,12 +109,14 @@
         <source><![CDATA[
 #!/bin/sh
 
+{% if pxe_stack_post_install_boot_to_disk %}
 # Turn the kernel parameters into variables
 # We are looking for next_server value
 for I in `cat /proc/cmdline | tr " " "\n" | grep -E "^ipxe_next_server="` ; do eval $I; done
 
 echo "All went well, we can inform next-server we succeeded"
 curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$(hostname -s)&boot=disk"
+{% endif %}
 
 ]]>
         </source>

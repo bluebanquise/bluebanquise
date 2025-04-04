@@ -4,6 +4,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.2.6
 
+* 4/5/25 - jilkarnas - [pxe_stack] allow selection of shutdown action other than reboot & allow to keep osdeploy boot.
 * 3/31/25 - thiagocardozo - [grafana] grafana better variable and hide admin password from output.
 * 3/31/25 - thiagocardozo - [ssh_client] Add extra config options. 
 * 3/31/25 - thiagocardozo - [auditd] Option to log root commands.
