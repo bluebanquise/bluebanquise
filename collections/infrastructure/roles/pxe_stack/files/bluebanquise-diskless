@@ -14,7 +14,7 @@
 # 2.1.2: (SMC feature) Use specific export file in /etc/exports.d. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
 # 2.1.1: (SMC change) Remove "beta", remove links to external images. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
 # 2.1.0: (SMC feature) Replace systemctl restart nfs for exportfs -a. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
-# 2.0.9: (SMC fix) Tolerate disklessset images. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
+# 2.0.9: (SMC fix) Tolerate legacy paths inside /var/www/html/pxe/diskless. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
 # 2.0.8: (SMC change) Do not use --system to create user. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
 # 2.0.7: Update boot.ipxe when cloning reference image. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 # 2.0.6: Use --numeric-owner when extracting bootstrap image to ensure correct uid/gid. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
@@ -111,6 +111,12 @@ class bcolors:
     UNDERLINE = '\033[4m'
 
 
+# Ignore these paths when looking for diskless images.
+# For example, if /var/www/html/pxe/diskless/nfs_reference exists, then assume it is to store NFS
+# reference images, so its presence should not cause failure (it does not contain metadata.yml)
+IMAGE_DIRS_TO_IGNORE = ['images', 'nfs_reference']
+
+
 def display_image_metadata(image_metadata):
     """ Iteratively display an image metadata"""
     print("   └──── name: " + image_metadata['name'])
@@ -156,7 +162,7 @@ def display_images(image_type, tool_paths):
         gathered_reference = []
         logging.info(bcolors.OKBLUE + "Checking reference images in " + tool_paths['http_pxe_diskless'] + bcolors.ENDC)
         for it in os.scandir(tool_paths['http_pxe_diskless']):
-            if it.is_dir() and not os.path.exists(it.path + '/image_data.yml'):
+            if it.is_dir() and not os.path.exists(it.path + '/image_data.yml') and it.name not in IMAGE_DIRS_TO_IGNORE:
                 try:
                     with open(it.path + "/metadata.yaml", "r") as file:
                         image_metadata = yaml.safe_load(file)
@@ -185,7 +191,7 @@ def display_images(image_type, tool_paths):
         gathered_live = []
         logging.info(bcolors.OKBLUE + "Checking live images in " + tool_paths['http_pxe_diskless'] + bcolors.ENDC)
         for it in os.scandir(tool_paths['http_pxe_diskless']):
-            if it.is_dir() and not os.path.exists(it.path + '/image_data.yml'):
+            if it.is_dir() and not os.path.exists(it.path + '/image_data.yml') and it.name not in IMAGE_DIRS_TO_IGNORE:
                 try:
                     with open(it.path + "/metadata.yaml", "r") as file:
                         image_metadata = yaml.safe_load(file)
