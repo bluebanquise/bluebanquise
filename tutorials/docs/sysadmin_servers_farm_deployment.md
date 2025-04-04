@@ -1046,7 +1046,7 @@ dnf install gcc automake autoconf make wget
 **If Ubuntu system**
 
 ```
-apt install chrony tzdataapt install gcc automake autoconf make wget alien
+apt install gcc automake autoconf make wget alien
 ```
 
 Then grab sources and remove original spec file:
