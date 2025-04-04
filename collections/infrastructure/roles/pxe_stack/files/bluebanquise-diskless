@@ -14,7 +14,7 @@
 # 2.1.2: (SMC feature) Use specific export file in /etc/exports.d. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
 # 2.1.1: (SMC change) Remove "beta", remove links to external images. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
 # 2.1.0: (SMC feature) Replace systemctl restart nfs for exportfs -a. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
-# 2.0.9: (SMC change) Replace diskless/ with diskless/images/, tolerate disklessset images. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
+# 2.0.9: (SMC fix) Tolerate disklessset images. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
 # 2.0.8: (SMC change) Do not use --system to create user. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
 # 2.0.7: Update boot.ipxe when cloning reference image. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 # 2.0.6: Use --numeric-owner when extracting bootstrap image to ensure correct uid/gid. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
@@ -326,7 +326,7 @@ except Exception:
 tool_paths = {}
 tool_paths['bootstrap_images'] = os.path.join(tool_parameters['sudo_user_home'], "diskless/bootstrap_images")
 tool_paths['bootstrap_images_tmp'] = os.path.join(tool_paths['bootstrap_images'], "tmp")
-tool_paths['http_pxe_diskless'] = os.path.join(tool_parameters['http_pxe_folder'], "diskless", "images")
+tool_paths['http_pxe_diskless'] = os.path.join(tool_parameters['http_pxe_folder'], "diskless")
 tool_paths['nfs'] = tool_parameters['nfs_path']
 
 
@@ -469,7 +469,7 @@ while True:
         protected_os_system("chmod 644 " + reference_image_pxe_path + "/*")
         ipxe_content = '''#!ipxe
         echo |
-        echo | Entering diskless/images/{image_name}/boot.ipxe
+        echo | Entering diskless/{image_name}/boot.ipxe
         echo |
         set image-kernel {image_kernel}
         set image-initramfs {image_initramfs}
@@ -481,9 +481,9 @@ while True:
         echo | > Additional kernel parameters: ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}}
         echo |
         echo | Loading linux ...
-        kernel http://${{next-server}}/pxe/diskless/images/{image_name}/${{image-kernel}} initrd=${{image-initramfs}} selinux=0 text=1 root=nfs:${{next-server}}:{nfs_path}/{image_name},vers=4.2,rw rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}} rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4
+        kernel http://${{next-server}}/pxe/diskless/{image_name}/${{image-kernel}} initrd=${{image-initramfs}} selinux=0 text=1 root=nfs:${{next-server}}:{nfs_path}/{image_name},vers=4.2,rw rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}} rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4
         echo | Loading initial ramdisk ...
-        initrd http://${{next-server}}/pxe/diskless/images/{image_name}/${{image-initramfs}}
+        initrd http://${{next-server}}/pxe/diskless/{image_name}/${{image-initramfs}}
         echo | ALL DONE! We are ready.
         echo | Booting in 4s ...
         echo |
@@ -664,7 +664,7 @@ while True:
         image_selected_metadata['name'] = image_clone_input
         ipxe_content = '''#!ipxe
         echo |
-        echo | Entering diskless/images/{image_name}/boot.ipxe
+        echo | Entering diskless/{image_name}/boot.ipxe
         echo |
         set image-kernel {image_kernel}
         set image-initramfs {image_initramfs}
@@ -676,9 +676,9 @@ while True:
         echo | > Additional kernel parameters: ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}}
         echo |
         echo | Loading linux ...
-        kernel http://${{next-server}}/pxe/diskless/images/{image_name}/${{image-kernel}} initrd=${{image-initramfs}} selinux=0 text=1 root=nfs:${{next-server}}:{nfs_path}/{image_name},vers=4.2,rw rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}} rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4
+        kernel http://${{next-server}}/pxe/diskless/{image_name}/${{image-kernel}} initrd=${{image-initramfs}} selinux=0 text=1 root=nfs:${{next-server}}:{nfs_path}/{image_name},vers=4.2,rw rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}} rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4
         echo | Loading initial ramdisk ...
-        initrd http://${{next-server}}/pxe/diskless/images/{image_name}/${{image-initramfs}}
+        initrd http://${{next-server}}/pxe/diskless/{image_name}/${{image-initramfs}}
         echo | ALL DONE! We are ready.
         echo | Booting in 4s ...
         echo |
@@ -864,7 +864,7 @@ WantedBy=multi-user.target
 
         ipxe_content = '''#!ipxe
         echo |
-        echo | Entering diskless/images/{image_name}/boot.ipxe
+        echo | Entering diskless/{image_name}/boot.ipxe
         echo |
         set image-kernel {image_kernel}
         set image-initramfs {image_initramfs}
@@ -876,9 +876,9 @@ WantedBy=multi-user.target
         echo | > Additional kernel parameters: ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}}
         echo |
         echo | Loading linux ...
-        kernel http://${{next-server}}/pxe/diskless/images/{image_name}/${{image-kernel}} initrd=${{image-initramfs}} {selinux_parameter} text=1 root=live:http://${{next-server}}/preboot_execution_environment/diskless/images/{image_name}/squashfs.img rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}} rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4
+        kernel http://${{next-server}}/pxe/diskless/{image_name}/${{image-kernel}} initrd=${{image-initramfs}} {selinux_parameter} text=1 root=live:http://${{next-server}}/preboot_execution_environment/diskless/{image_name}/squashfs.img rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}} rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4
         echo | Loading initial ramdisk ...
-        initrd http://${{next-server}}/pxe/diskless/images/{image_name}/${{image-initramfs}}
+        initrd http://${{next-server}}/pxe/diskless/{image_name}/${{image-initramfs}}
         echo | ALL DONE! We are ready.
         echo | Booting in 4s ...
         echo |
@@ -1179,7 +1179,7 @@ This however could lead to issues, so in case of crash, remember to check the fo
 
 * /var/lib/bluebanquise/diskless/bootstrap_images/
 * /var/lib/bluebanquise/diskless/bootstrap_images/tmp/
-* /var/www/html/pxe/diskless/images/
+* /var/www/html/pxe/diskless/
 * /nfs/diskless/
 
 ## Conclusion
