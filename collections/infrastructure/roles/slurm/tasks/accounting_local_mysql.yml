@@ -15,11 +15,18 @@
     mode: 0644
   tags:
     - template
+  notify: service <|> restart slurmdbd
 
-- name: service <|> Manage mariadb state
-  ansible.builtin.service:
-    name: mariadb
-    enabled: "{{ (slurm_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
-    state: "{{ (slurm_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
-  tags:
-    - service
+- name: file <|> Configure MariaDB to listen on all interfaces
+  lineinfile:
+    path: /etc/mysql/mariadb.conf.d/50-server.cnf
+    regexp: '^bind-address\s*=\s*127\.0\.0\.1'
+    line: 'bind-address = 0.0.0.0'
+    backrefs: yes
+  when:
+    - ansible_distribution == 'Ubuntu'
+  notify: service <|> restart mariadb
+  register: mariadb_config
+
+- name: Force handlers
+  meta: flush_handlers

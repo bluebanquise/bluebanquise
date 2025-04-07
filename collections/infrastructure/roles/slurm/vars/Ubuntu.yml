@@ -24,6 +24,8 @@ slurm_packages_to_install:
     - slurm-smd-client
     - slurm-smd-libpmi0
     - slurm-smd-libpmi2-0
+    - libpmix2
+    - libpmix-dev
   submitter:
     - munge
     - libmunge2
