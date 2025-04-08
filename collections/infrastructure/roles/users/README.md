@@ -76,6 +76,9 @@ python -c "import crypt,random,string; print crypt.crypt(raw_input('clear-text p
 
 ## Changelog
 
+**Please now update CHANGELOG file at repository root instead of adding logs in this file.
+These logs bellow are only kept for archive.**
+
 * 1.1.1: Role enhancement and bug fixing. Hamid MERZOUKI <hamid@sesterce.com>
 * 1.1.0: Role enhancement. New inventory structure. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.1: Documentation and resources. johnnykeats <johnny.keats@outlook.com>

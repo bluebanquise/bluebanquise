@@ -617,6 +617,9 @@ prometheus_server_prometheus_launch_parameters: |
 
 ## Changelog
 
+**Please now update CHANGELOG file at repository root instead of adding logs in this file.
+These logs bellow are only kept for archive.**
+
 * 1.4.1: Fix bad rights on services files. Bug reported by @sgaosdgr. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.0: Add more tunig for exporter services. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.4: Adapt tp hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>

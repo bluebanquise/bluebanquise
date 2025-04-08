@@ -730,6 +730,9 @@ Note that using an home folder into /home for the bluebanquise sudo user can be 
 
 ## Changelog
 
+**Please now update CHANGELOG file at repository root instead of adding logs in this file.
+These logs bellow are only kept for archive.**
+
 * 1.19.0: Allow selection of shutdown action other than reboot & Allow to keep osdeploy boot. Xavier DE WEERD <xavier.de.weerd@gmail.com>
 * 1.18.4: Fix Formatting for Kernel Parameters in iPXE Template. Leo Magdanello <lmagdanello40@gmail.com>
 * 1.18.3: Fix dublicated PermitRootLogin in RH sshd_config. Thiago Cardozo <boubee.thiago@gmail.com>

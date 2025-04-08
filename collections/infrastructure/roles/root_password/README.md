@@ -33,6 +33,9 @@ Note that for security reasons, no default value is provided.
 
 ## Changelog
 
+**Please now update CHANGELOG file at repository root instead of adding logs in this file.
+These logs bellow are only kept for archive.**
+
 * 1.2.0: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.0: Role creation. Bruno Travouillon <devel@travouillon.fr>

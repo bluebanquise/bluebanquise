@@ -242,8 +242,6 @@ os_firewall: {true|false}
 
 os_target_disk:
 os_partitioning:
-os_autoinstall_pre_script:
-os_autoinstall_post_script:
 
 os_operating_system:
   distribution:

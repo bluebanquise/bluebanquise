@@ -29,7 +29,6 @@ Do not provide security related data (ssh key, passwords, etc) in your reports.
 ## Asking for new features / enhancements
 
 If you need new features, please open an issue using the feature request template.
-Try to comply with it to fasten my answer.
 
 ## Pull Requests
 
@@ -37,11 +36,6 @@ All contributions must pass through a Pull Request, to ensure easy reviewing of 
 
 I will then do my best to answer you and test your contribution as soon as possible, before merging it.
 I may iterate with you to converge before merging to master branch.
-
-### Versioning
-
-By default, each role has a version number, set in vars/main.yml and at the bottom of the readme.rst or README.md.
-If your PR brings changes to the tasks, files, templates or vars folders, please increment the version.
 
 ## License
 

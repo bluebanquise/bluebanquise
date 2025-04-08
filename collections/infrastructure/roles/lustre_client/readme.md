@@ -47,9 +47,12 @@ lustre_mounts:
     clients_groups:
       - mg_computes
     mount_opts: "_netdev,flock,rw"
-````
+```
 
 ## Changelog
+
+**Please now update CHANGELOG file at repository root instead of adding logs in this file.
+These logs bellow are only kept for archive.**
 
 * 1.2.0: Added sysctl configuration to avoid issues with multi-rail. Lucas Santos <lucassouzasantos@gmail.com>
 * 1.1.0: Added LNET configuration support for multi-rail. Lucas Santos <lucassouzasantos@gmail.com>

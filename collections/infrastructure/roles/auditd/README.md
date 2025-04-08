@@ -20,6 +20,9 @@ Files (path may sligtly vary depending of target distribution):
 
 ## Changelog
 
+**Please now update CHANGELOG file at repository root instead of adding logs in this file.
+These logs bellow are only kept for archive.**
+
 * 1.2.0: Option to log root commands. Thiago Cardozo <boubee.thiago@gmail.com>
 * 1.1.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.2: Configure handler to use FQCN (ansible.builtin.service) module. osmocl <osmocl@osmo.cl>

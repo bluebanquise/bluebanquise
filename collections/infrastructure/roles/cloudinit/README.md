@@ -52,4 +52,7 @@ cloudinit_configuration:
 
 ## Changelog
 
+**Please now update CHANGELOG file at repository root instead of adding logs in this file.
+These logs bellow are only kept for archive.**
+
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>

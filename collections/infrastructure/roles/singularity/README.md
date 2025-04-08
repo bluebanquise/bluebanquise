@@ -55,6 +55,9 @@ Playbook example:
 
 ## ChangeLog
 
+**Please now update CHANGELOG file at repository root instead of adding logs in this file.
+These logs bellow are only kept for archive.**
+
 * 1.0.2: Update FQDN. strus38
 * 1.0.1: Update package name to singularity-ce. strus38
 * 1.0.0: Initial version. strus38
