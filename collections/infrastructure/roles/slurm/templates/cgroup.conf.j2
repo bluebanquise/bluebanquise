@@ -13,7 +13,7 @@
 # CgroupAutomount=yes # deprecated
 ConstrainCores=yes
 ConstrainRAMSpace=yes
-  {% if slurm_grestypes is defined and slurm_gresTypes is not none %}
+  {% if slurm_grestypes is defined and slurm_grestypes is not none %}
 ConstrainDevices=yes
   {% endif %}
 
