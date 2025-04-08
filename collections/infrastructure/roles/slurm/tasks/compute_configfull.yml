@@ -22,7 +22,7 @@
     - template
   loop:
     - gres.conf
-  when: slurm_grestypes is defined and slurm_gresTypes == 'gpu' and hw_specs['gpu'] is defined
+  when: slurm_grestypes is defined and slurm_grestypes == 'gpu' and hw_specs['gpu'] is defined
 
 - name: "template <|> Generate acct_gather.conf in {{ slurm_home_path }}"
   ansible.builtin.template:
