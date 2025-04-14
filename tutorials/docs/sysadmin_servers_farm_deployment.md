@@ -1487,7 +1487,11 @@ and create the link from here with a relative path.
 
 To summarize, chain will be the following: `DHCP -> {undionly.kpxe|snponly.efi} -> boot.ipxe -> thor.ipxe (group_storage.ipxe)` .
 
-#### Kickstart
+We now need to provide the auto-installation files. Structure is different between RHEL and Ubuntu.
+
+#### Auto installation files
+
+##### RHEL -> Kickstart
 
 We now need to provide a kickstart file.
 
@@ -1602,8 +1606,102 @@ Now, ensure all services are started:
 ```
 systemctl start httpd
 systemctl enable httpd
-systemctl start fbtftp_server
-systemctl enable fbtftp_server
+systemctl start atftpd
+systemctl enable atftpd
+```
+
+We can proceed with the boot of `thor` node, and then the other nodes.
+
+##### Ubuntu -> Cloud Init
+
+We now need to provide a user-data file, based on cloud-init.
+
+This file will provide auto-installation features: what should be installed, how, etc.
+We will create one user-data file per group of nodes.
+
+To create the user-data file, we need an ssh public key from our `odin` management
+node. Create it, without passphrase:
+
+```
+ssh-keygen -N "" -t Ed25519
+```
+
+And get the content of the public key file `/root/.ssh/id_ed25519.pub`, we will use it just bellow to generate the
+kickstart file. For example, content of mine is:
+
+```
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIqpyyh44Hz3gvhISaIE9yJ/ao8fBLNo7qwPJcYjQdIl root@odin.cluster.local
+```
+
+Now we need an sha512 password hash. Generate one using the following command:
+
+```
+python3 -c 'import crypt,getpass; print(crypt.crypt(getpass.getpass(), crypt.mksalt(crypt.METHOD_SHA512)))'
+```
+
+And keep it somewhere (for example, `$6$7zvrwimYcypA8JWc$5GWYVF7zrI5eorsPN8IUT1n/Gmjpkic7h2cCbFVxbkqJeG0/kmJsYw6EN9oX3NQ34duwW7qAmOI13Y/0v5oHn.` is for `root` as password, which is not secure but ok for training purpose), we will use it just bellow to generate the user-data file.
+
+Now create a dedicated folder for our group:
+
+```
+mkdir -p /var/www/html/nodes_groups/group_storage.cloud-init/
+```
+
+We already prepared the iso and the iso content before.
+
+Now create autoinstall file at `/var/www/html/nodes_groups/group_storage.cloud-init/user-data`
+
+```yaml
+#cloud-config
+autoinstall:
+  version: 1
+  apt:
+    geoip: false
+    preserve_sources_list: true
+  keyboard: {layout: us, toggle: null, variant: ''}
+  locale: en_US.UTF-8
+  user-data:
+    users:
+      - name: bluebanquise
+        homedir: /home/bluebanquise
+        ssh-authorized-keys:
+          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIqpyyh44Hz3gvhISaIE9yJ/ao8fBLNo7qwPJcYjQdIl root@odin.cluster.local
+        sudo: ['ALL=(ALL:ALL) NOPASSWD:ALL']
+        groups: sudo
+        shell: /bin/bash
+        passwd: $6$7zvrwimYcypA8JWc$5GWYVF7zrI5eorsPN8IUT1n/Gmjpkic7h2cCbFVxbkqJeG0/kmJsYw6EN9oX3NQ34duwW7qAmOI13Y/0v5oHn.
+    disable_root: true
+  ssh:
+    install-server: true
+    allow-pw: true
+```
+
+Now create needed empty file at `/var/www/html/nodes_groups/group_storage.cloud-init/meta-data` (don't ask me why, but its mandatory):
+
+```
+touch /var/www/html/nodes_groups/group_storage.cloud-init/meta-data
+```
+
+Few notes:
+
+* The Ubuntu installer needs a lot of ram to operate, since it downloads and extract iso into memory. Ensure at least 6 Gb ram.
+* If anything happen wrong, installer automatically fallback to interactive installation mode. You will have to change shell and investigate into installer logs to find issue. This is not always easy as installer logs huge.
+* If serial console is wrong, installer will fallback on interactive installation mode.
+* If installer hang without errors, let it some time. Some steps try some connection and wait for timeout before continuing.
+
+Other notes:
+* The ssh public key here will allow us to ssh on the remote hosts without having to provide a password.
+* We install only the absolute minimal operating system. It is strongly recommended to do the minimal amount of tasks during the auto-installation as it is way simpler to debug things installing once system is running.
+* Ensure also your keyboard type is correct.
+* For compatibility purpose, this example does not specify which hard drive disk to use, installer will auto-choose what to use. Tune it later according to your needs.
+
+Now, ensure all services are started:
+
+```
+systemctl start apache2
+systemctl enable apache2
+systemctl start atftpd
+systemctl enable atftpd
 ```
 
 We can proceed with the boot of `thor` node, and then the other nodes.
@@ -1615,7 +1713,7 @@ We can proceed with the boot of `thor` node, and then the other nodes.
 Open 2 shell on `odin`. In the first one, launch watch logs of dhcp and tftp server using:
 
 ```
-journalctl -u dhcpd -u fbtftp_server -f
+journalctl -u dhcpd -u atftpd -f
 ```
 
 In the second one, watch http server logs using:
