@@ -23,5 +23,8 @@ to `600`, which means `600s -> 600/60 = 10 minutes`.
 
 ## Changelog
 
+**Please now update CHANGELOG file at repository root instead of adding logs in this file.
+These logs bellow are only kept for archive.**
+
 * 1.0.1: Just a simple update so only reboot if something was changed. Lucas Santos <lucassouzasantos@gmail.com>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>

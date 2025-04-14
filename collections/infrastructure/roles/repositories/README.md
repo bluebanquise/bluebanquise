@@ -127,6 +127,9 @@ And native repositories will be removed during nodes deployment (PXE install, no
 
 ## Changelog
 
+**Please now update CHANGELOG file at repository root instead of adding logs in this file.
+These logs bellow are only kept for archive.**
+
 * 1.3.9: Fix variables names. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.7: Fix services ip precedence. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.6: Fix extra space in automatic url. Benoit Leveugle <benoit.leveugle@gmail.com>

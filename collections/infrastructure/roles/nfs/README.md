@@ -157,6 +157,9 @@ which is a list of sebooleans to activate.
 
 ## Changelog
 
+**Please now update CHANGELOG file at repository root instead of adding logs in this file.
+These logs bellow are only kept for archive.**
+
 * 1.5.0: Fix skipping host if using IP as server. Added parameter to run server in a group. Thiago Cardozo <boubee.thiago@gmail.com>
 * 1.4.4: Fix missing service for nfsv3 in RHEL firewall. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.3: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>

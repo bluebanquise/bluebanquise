@@ -125,6 +125,9 @@ podman_local_registry_group: "root"
 
 ## Changelog
 
+**Please now update CHANGELOG file at repository root instead of adding logs in this file.
+These logs bellow are only kept for archive.**
+
 * 2.0.0: Updated registry format;Use handlers;Replace libpod.conf. Thiago Cardozo <boubee.thiago@gmail.com>
 * 1.0.3: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.2: Fix services to match bb 2.0 format. Benoit Leveugle <benoit.leveugle@gmail.com>

@@ -84,8 +84,20 @@ popularity-contest popularity-contest/participate boolean false
 d-i grub-installer/only_debian boolean true
 d-i grub-installer/bootdev  string default
 
-### Reboot
+### Post install action (reboot/halt/poweroff)
+# Avoid that last message about the install being complete.
 d-i finish-install/reboot_in_progress note
+{% if pxe_stack_post_install_action == 'halt' %}
+# This is how to make the installer shutdown when finished, but not
+# reboot into the installed system.
+d-i debian-installer/exit/halt boolean true
+{% elif pxe_stack_post_install_action in ['poweroff', 'shutdown'] %}
+# This will power off the machine instead of just halting it.
+d-i debian-installer/exit/poweroff boolean true
+{% else %}
+# nothing = reboot
+{% endif %}
+
 
 ### Specific
 
@@ -119,6 +131,8 @@ d-i preseed/late_command string \
 {% if (equipment['hw']['hw_preserve_efi_first_boot_device'] | default(pxe_stack_hw_preserve_efi_first_boot_device)) == true %}
   in-target sh -c '[ -d /sys/firmware/efi ] && efibootmgr -o $(efibootmgr | grep BootCurrent | cut -d" " -f2),$(efibootmgr | grep BootOrder | sed "s/BootOrder:\ //" | sed "s/$(efibootmgr | grep BootCurrent | cut -d" " -f2),//") || echo "Not an EFI system, skipping"'
 {% endif %}
+{% if pxe_stack_post_install_boot_to_disk %}
   in-target sh -c 'for I in `cat /proc/cmdline | tr " " "\n" | grep -E "^(node_hostname|ipxe_next_server)="` ; do eval $I; done; curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$node_hostname&boot=disk"';
+{% endif %}
 
 {% endif %}

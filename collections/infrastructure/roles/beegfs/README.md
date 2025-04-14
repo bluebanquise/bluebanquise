@@ -391,5 +391,8 @@ DRBDADM:        9.23.1
 
 ## Changelog
 
+**Please now update CHANGELOG file at repository root instead of adding logs in this file.
+These logs bellow are only kept for archive.**
+
 * 1.0.0: Role creation. Hamid Merzouki <hamid.merzouki@naverlabs.com>
 

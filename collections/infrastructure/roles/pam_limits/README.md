@@ -31,5 +31,8 @@ rlimits:
 
 ## Changelog
 
+**Please now update CHANGELOG file at repository root instead of adding logs in this file.
+These logs bellow are only kept for archive.**
+
 * 1.1.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.0: Role creation. Johnny Keats <johnny.keats@outlook.com>

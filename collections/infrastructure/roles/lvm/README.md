@@ -108,6 +108,9 @@ Etc.
 
 ## Changelog
 
+**Please now update CHANGELOG file at repository root instead of adding logs in this file.
+These logs bellow are only kept for archive.**
+
 * 1.1.1: Fix missing list. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.1.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>

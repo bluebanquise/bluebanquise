@@ -121,6 +121,9 @@ In case of issue, try adding verbosity to the ssh invocation to investigate (-vv
 
 ## Changelog
 
+**Please now update CHANGELOG file at repository root instead of adding logs in this file.
+These logs bellow are only kept for archive.**
+
 * 1.4.0: Add extra config options. Thiago Cardozo <boubee.thiago@gmail.com>
 * 1.3.0: Role simplification. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.2.3: infrastructure/ssh_client role: set a default network <jean-pascal.mazzilli@gmail.com>

@@ -186,6 +186,9 @@ rsyslog_configuration_files:
 
 ## Changelog
 
+**Please now update CHANGELOG file at repository root instead of adding logs in this file.
+These logs bellow are only kept for archive.**
+
 * 1.6.1: Fix documentation and start move to advanced format for RHEL 9 version. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.6.0: Add rsyslog_server_ip4 to override network values. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.5.1: Fix typo in client template (reported by @sgaosdgr). Benoit Leveugle <benoit.leveugle@gmail.com>
