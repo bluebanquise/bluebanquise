@@ -276,10 +276,20 @@ Note about NetworkManager: some say its bad, some say its good. It depends of ad
 
 **If RHEL system**, NetworkManager is already installer.
 
-**If Ubuntu system**, install NetworkManager and disable systemd-networkd and reboot:
+**If Ubuntu system**, install NetworkManager, configure netplan, and disable systemd-networkd and reboot:
 
 ```
 apt update && apt install NetworkManager
+cp -v /etc/netplan/01-netcfg.yaml /root/ # This is a backup
+cat << EOF > /etc/netplan/01-netcfg.yaml
+# This file describes the network interfaces available on your system
+# For more information, see netplan(5).
+# Set and change netplan renderer to NetworkManager GUI tool 
+network:
+  version: 2
+  renderer: NetworkManager
+EOF
+netplan apply
 systemctl disable systemd-networkd
 reboot -h now
 ```
@@ -310,9 +320,9 @@ Time to setup basic repositories.
 
 ### Setup basic repositories
 
-For RHEL system, we are going to setup a core OS repository, and a custom repository, while for Ubuntu a custom repository will be enough.
+For RHEL system, we are going to setup a core OS repository, and a custom repository, while for Ubuntu we will prepare the needed material for PXE and a custom repository too.
 
-#### Core OS (RHEL only)
+#### RHEL
 
 Backup and clean first default AlmaLinux repositories:
 
@@ -409,6 +419,14 @@ Ensure it works, by installing for example `wget`:
 dnf clean all
 dnf repolist
 dnf install wget
+```
+
+##### Ubuntu
+
+Create a repository folder, where we will upload our live server iso, for future PXE deployment. The iso will be needed in 2 format: plain iso, and extracted into a folder.
+
+```
+mkdir -p /var/www/html/repositories/Ubuntu/24.04/x86_64/extra/
 ```
 
 #### Custom repositorie (both RHEL and Ubuntu)
@@ -520,11 +538,11 @@ Unknown nodes/BMC will be given a temporary ip on the 10.0.254.x range if dhcp s
    if option client-arch = 00:00 {
      filename "undionly.kpxe";
    } elsif option client-arch = 00:07 {
-     filename "ipxe.efi";
+     filename "snponly.efi";
    } elsif option client-arch = 00:08 {
-     filename "ipxe.efi";
+     filename "snponly.efi";
    } elsif option client-arch = 00:09 {
-     filename "ipxe.efi";
+     filename "snponly.efi";
    }
  }
 
@@ -1192,7 +1210,13 @@ reprepro -b /var/www/html/repositories/Ubuntu/24.04/x86_64/extra/ includedeb nob
 And add the repository to the system sources:
 
 ```
-echo "deb [trusted=yes] https://10.10.0.1/repositories/Ubuntu/24.04/x86_64/extra/ noble main" >> /etc/apt/sources.list.d/extra.sources
+cat << EOF > /etc/apt/sources.list.d/extra.sources
+Types: deb
+URIs: http://10.10.0.1/repositories/Ubuntu/24.04/x86_64/extra/
+Suites: noble
+Components: main
+Trusted: yes
+EOF
 ```
 
 Now, using apt install our new package, and start the service:
@@ -1237,16 +1261,23 @@ We will build our own ipxe roms, and include our own init script.
 
 Small tip: ipxe allows you to build raw roms (the ones we will use in this tutorial), but also iso or usb image that contains the rom. This is VERY (VERY!!!!) useful when you need to boot a stupidely made node with a weird BIOS or some network cards that does not boot over PXE.
 
-Grab latest ipxe version from git.
+Lets install few packages first.
 
-To do so, install needed tools to build C code:
+**If RHEL system**
 
 ```
 dnf groupinstall "Development tools" -y
 dnf install xz-devel -y
 ```
 
-Then clone the ipxe repository into `/root/ipxe`:
+**If Ubuntu system**
+
+```
+apt install gcc git liblzma-dev -y
+```
+
+Now, lets grab latest ipxe version from git.
+Clone the ipxe repository into `/root/ipxe`:
 
 ```
 mkdir /root/ipxe
@@ -1315,13 +1346,26 @@ then display some of the information obtained, then sleep 4s, then chain load to
 file `http://${next-server}/boot.ipxe` with `${next-server}` obtained from the DHCP server.
 The `|| shell` means: if chaining fail, launch a shell so that sys admin can debug.
 
-Then enter the src directory and build the needed files:
+Then enter the src directory, enable few useful features of iPXE, and build the needed files:
 
 ```
 cd src
+sed -i 's/.*DOWNLOAD_PROTO_HTTPS.*/#define DOWNLOAD_PROTO_HTTPS/' config/general.h
+sed -i 's/.*PING_CMD.*/#define PING_CMD/' config/general.h
+sed -i 's/.*CONSOLE_CMD.*/#define CONSOLE_CMD/' config/general.h
+sed -i 's/.*CONSOLE_FRAMEBUFFER.*/#define CONSOLE_FRAMEBUFFER/' config/console.h
+sed -i 's/.*IMAGE_ZLIB.*/#define IMAGE_ZLIB/' config/general.h
+sed -i 's/.*IMAGE_GZIP.*/#define IMAGE_GZIP/' config/general.h
+sed -i 's/.*DIGEST_CMD.*/#define DIGEST_CMD/' config/general.h
+sed -i 's/.*REBOOT_CMD.*/#define REBOOT_CMD/' config/general.h
+sed -i 's/.*POWEROFF_CMD.*/#define POWEROFF_CMD/' config/general.h
 make -j 4 bin-x86_64-efi/ipxe.efi EMBED=our_script.ipxe DEBUG=intel,dhcp,vesafb
+make -j 4 bin-x86_64-efi/snponly.efi EMBED=our_script.ipxe DEBUG=intel,dhcp,vesafb
 make -j 4 bin/undionly.kpxe EMBED=our_script.ipxe DEBUG=intel,dhcp,vesafb
 ```
+
+Important note: we built here 3 roms. 2 for EFI systems, 1 for legacy systems.
+The default EFI one is ipxe.efi. But experience has proven that the snponly.ipxe rom is nearly all the time compatible with hardware, so we will use that one here.
 
 And finally copy these files into the `/var/lib/tftpboot/` folder so that tftp server
 can provide them to the nodes booting.
@@ -1329,10 +1373,9 @@ can provide them to the nodes booting.
 ```
 mkdir -p /var/lib/tftpboot/
 cp bin-x86_64-efi/ipxe.efi /var/lib/tftpboot/
+cp bin-x86_64-efi/snponly.efi /var/lib/tftpboot/
 cp bin/undionly.kpxe /var/lib/tftpboot/
 ```
-
-Note: some host do not boot without an **snponly** ipxe.efi version. Refer to ipxe documentation on how to build such rom.
 
 #### iPXE chain
 
@@ -1361,7 +1404,9 @@ chain http://${next-server}/nodes/${hostname}.ipxe || shell
 ```
 
 Last step for the iPXE chain is to create a file for our group of node, and link
-our node to this group.
+our node to this group (for example, a compute node group could need different parameters than a group of storages nodes, etc). We will use as example here a "storage" group. Note that the content of the file depends on the OS, so it is different between RHEL and Ubuntu.
+
+##### RHEL
 
 Create file `/var/www/html/nodes_groups/group_storage.ipxe` with the following content:
 
@@ -1395,7 +1440,42 @@ sleep 4
 boot
 ```
 
-Then, link the node `thor` to this group:
+##### Ubuntu
+
+```
+#!ipxe
+
+echo Booting OS
+echo Group profile: storage
+
+echo +----------------------------------------------------+
+echo |
+echo | Loading kernel
+
+kernel http://${next-server}/repositories/Ubuntu/24.04/x86_64/iso/casper/vmlinuz initrd=initrd root=/dev/ram0 ramdisk_size=1500000 ip=dhcp url=http://${next-server}/repositories/Ubuntu/24.04/x86_64/ubuntu-24.04-live-server-amd64.iso autoinstall ds=nocloud-net;s=http://${next-server}/nodes_groups/group_storage.cloud-init/ cloud-config-url=http://${next-server}/nodes_groups/group_storage.cloud-init/user-data
+
+echo | Loading initial ramdisk ...
+
+initrd http://${next-server}/repositories/Ubuntu/24.04/x86_64/iso/casper/initrd
+
+echo | ALL DONE! We are ready.
+echo | Downloaded images report:
+
+imgstat
+
+echo | Booting in 4s ...
+echo |
+echo +----------------------------------------------------+
+
+sleep 4
+
+boot
+```
+
+
+
+
+Now that our group file is created, link the node `thor` to this group:
 
 ```
 cd /var/www/html/nodes/
@@ -1405,7 +1485,7 @@ ln -s ../nodes_groups/group_storage.ipxe thor.ipxe
 Note: it is important that link are relative: you have to cd into nodes directory,
 and create the link from here with a relative path.
 
-To summarize, chain will be the following: `DHCP -> {undionly.kpxe|ipxe.efi} -> boot.ipxe -> thor.ipxe (group_storage.ipxe)` .
+To summarize, chain will be the following: `DHCP -> {undionly.kpxe|snponly.efi} -> boot.ipxe -> thor.ipxe (group_storage.ipxe)` .
 
 #### Kickstart
 
