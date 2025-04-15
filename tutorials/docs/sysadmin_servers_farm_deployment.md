@@ -1684,9 +1684,9 @@ autoinstall:
     users:
       - name: bluebanquise
         homedir: /home/bluebanquise
-        ssh-authorized-keys:
+        ssh_authorized_keys:
           - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIqpyyh44Hz3gvhISaIE9yJ/ao8fBLNo7qwPJcYjQdIl root@odin.cluster.local
-        sudo: ['ALL=(ALL:ALL) NOPASSWD:ALL']
+        sudo: 'ALL=(ALL:ALL) NOPASSWD:ALL'
         groups: sudo
         shell: /bin/bash
         passwd: $6$7zvrwimYcypA8JWc$5GWYVF7zrI5eorsPN8IUT1n/Gmjpkic7h2cCbFVxbkqJeG0/kmJsYw6EN9oX3NQ34duwW7qAmOI13Y/0v5oHn.
