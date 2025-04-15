@@ -318,6 +318,26 @@ You should see your NICs with `enp0s8` having ip `10.10.0.1` with `/16` prefix.
 
 Time to setup basic repositories.
 
+Note: to setup more settings with nmcli, in case of needs:
+
+If NetworkManager gave a generic name to your interface (like Wired Connection 1, or equivalent), to rename the interface, assuming here our interface name is "Wired connection 2" but should be enp0s8 because we want to keep hardware related naming convention:
+
+```
+nmcli connection modify "Wired connection 2" connection.id "enp0s8"
+```
+
+If you want to set a gateway:
+
+```
+nmcli con mod enp0s8 ipv4.gateway 192.168.20.1
+```
+
+If you want to set DNS:
+
+```
+nmcli con mod enp0s8 ipv4.dns "8.8.8.8 8.8.4.4"
+```
+
 ### Setup basic repositories
 
 For RHEL system, we are going to setup a core OS repository, and a custom repository, while for Ubuntu we will prepare the needed material for PXE and a custom repository too.
@@ -1712,11 +1732,27 @@ We can proceed with the boot of `thor` node, and then the other nodes.
 
 Open 2 shell on `odin`. In the first one, launch watch logs of dhcp and tftp server using:
 
+**If Ubuntu system**
+
+```
+journalctl -u isc-dhcp-server -u atftpd -f
+```
+
+**If RHEL system**
+
 ```
 journalctl -u dhcpd -u atftpd -f
 ```
 
 In the second one, watch http server logs using:
+
+**If Ubuntu system**
+
+```
+tail -f /var/log/apache2/*
+```
+
+**If RHEL system**
 
 ```
 tail -f /var/log/httpd/*
@@ -1747,7 +1783,7 @@ There are strategies to solve that automatically, but this is out of the scope o
 
 Now that other nodes are deployed and reachable over ssh, it is time to configure client side on them.
 
-We will use clustershell (clush) a lot, as it allows to manipulate a lot of hosts over ssh at the same time. You can install clustershell either via packages (EPEL) either via pip.
+We will use clustershell (clush) a lot, as it allows to manipulate a lot of hosts over ssh at the same time. You can install clustershell either via packages (EPEL for RHEL, natively for Ubuntu) either via pip.
 
 #### Set hostname
 
@@ -1760,6 +1796,8 @@ hostnamectl set-hostname thor.cluster.local
 #### Configure repositories
 
 You need the nodes be able to grab packages from `odin`.
+
+##### RHEL
 
 On each client node, backup current repositories, and clean them:
 
@@ -1814,6 +1852,23 @@ clush -bw thor,heimdall,valkyrie[01-02] 'dnf update -y'
 clush -bw thor,heimdall,valkyrie[01-02] 'dnf install wget -y'
 ```
 
+##### Ubuntu
+
+On each client, simply upload the extra.sources file we created on our Odin server, and done!
+Just remember to apt update to have it taken into account.
+
+For a single host:
+
+```
+scp /etc/apt/sources.list.d/extra.sources bluebanquise@thor:/etc/apt/sources.list.d/extra.sources
+```
+
+Or in parallel using clustershell:
+
+```
+clush -w thor,heimdall,valkyrie[01-02] --copy /etc/apt/sources.list.d/extra.sources --dest /etc/apt/sources.list.d/extra.sources
+```
+
 #### DNS client
 
 IF not already automatically done from DHCP, on each client node, set `odin` as default DNS server by using previously seen nmcli commands (take this opportunity to set static ips on hosts).
@@ -1840,6 +1895,14 @@ You can also simply upload the file from `odin` on clients, using clush.
 On each client, ensure time server is `odin` sp that our cluster is time synchronised.
 
 Install needed packages:
+
+**If Ubuntu system**
+
+```
+apt install chrony
+```
+
+**If RHEL system**
 
 ```
 dnf install chrony
@@ -1928,6 +1991,14 @@ mkdir /software
 
 Now, install needed packages:
 
+**If Ubuntu system**
+
+```
+apt install nfs-kernel-server -y
+```
+
+**If RHEL system**
+
 ```
 dnf install nfs-utils -y
 ```
@@ -1968,6 +2039,14 @@ You should see the exports available on this server.
 Ssh on `heimdall`.
 
 Install needed packages to mount nfs foreign export:
+
+**If Ubuntu system**
+
+```
+apt install nfs-common -y
+```
+
+**If RHEL system**
 
 ```
 dnf install nfs-utils -y
@@ -2030,6 +2109,8 @@ To prevent that, you can create scripts, rely on automation tools like Ansible, 
 
 ## Infiniband (optional)
 
+This part is RHEL only, I never was able to get Infiniband hardware on Ubuntu, so I cannot test it.
+
 If you need InfiniBand support on nodes, simply install the package group related:
 
 ```
@@ -2047,6 +2128,8 @@ You should now see the ib0 interface in the NIC list from `ip a`.
 
 ## Nvidia GPU (optional)
 
+This part is RHEL only, I never was able to get Nvidia GPU hardware on Ubuntu, so I cannot test it.
+
 To setup an GPU, you need to:
 
 * Ensure kernel do not crash at start (happen often if kernel is too old for hardware)
@@ -2060,7 +2143,7 @@ Lets do that step by step.
 ### Ensure kernel do not crash
 
 To prevent kernel from crashing at boot (Kernel Panic) due to too recent GPU hardware, edit the ipxe file that contains the kernel line
-(for example file `/var/www/html/nodes_groups/group_compute_gpu.ipxe` and append `nomodeset` to the kernel line. For example:
+(for example file `/var/www/html/nodes_groups/group_compute_gpu.ipxe` and append `nomodeset` to the kernel line. For example on RHEL (same for Ubuntu, just update the corresponding file):
 
 ```
 #!ipxe
