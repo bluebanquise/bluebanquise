@@ -4,7 +4,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.3.0
 
-* 4/12/25 - lmagdanell - [prometheus] Docs: how to create SSL Certificate and Key.
+* 4/12/25 - lmagdanello - [prometheus] Docs: how to create SSL Certificate and Key.
 * 3/28/25 - thiagocardozo - [podman] Add support for TLS encryption in local registry.
 * 3/27/25 - thiagocardozo - [dhcp-server] Ported patterns from advanced_dhcp_server role.
 * 3/27/25 - thiagocardozo - [dns_server] Option to sign zones.
