@@ -65,6 +65,9 @@ While if `hosts_file_enable_extended_names: false`, then the following content w
 
 ## Changelog
 
+**Please now update CHANGELOG file at repository root instead of adding logs in this file.
+These logs bellow are only kept for archive.**
+
 * 1.6.0: Simplify the role. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.5.2: Fix global logic. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.5.1: Fix typo on domain name variable. Benoit Leveugle <benoit.leveugle@gmail.com>

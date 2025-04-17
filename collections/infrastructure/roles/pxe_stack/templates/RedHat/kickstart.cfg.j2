@@ -31,8 +31,12 @@ timezone {{ pxe_stack_time_zone | default(bb_time_zone, true) | default('Europe/
 timezone {{ pxe_stack_time_zone | default(bb_time_zone, true) | default('Europe/Brussels', true) }} --utc
 {% endif %}
 
-# Reboot after installation
+# Post install action (reboot/halt/poweroff/shutdown)
+{% if pxe_stack_post_install_action in ['poweroff', 'halt', 'shutdown'] %}
+{{ pxe_stack_post_install_action }}
+{% else %}
 reboot
+{% endif %}
 
 ##### Authentication settings
 
@@ -145,12 +149,14 @@ echo '{{ pxe_stack_sudo_user }} ALL=(ALL:ALL) ALL' >> /etc/sudoers.d/{{ pxe_stac
 
 {% endif %}
 
+{% if pxe_stack_post_install_boot_to_disk %}
 # Turn the kernel parameters into variables
 # We are looking for next_server value
 for I in `cat /proc/cmdline | tr " " "\n" | grep -E "^(node_hostname|ipxe_next_server)="` ; do eval $I; done
 
 echo "All went well, we can inform next-server we succeeded"
 curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$node_hostname&boot=disk"
+{% endif %}
 
 {% if not pxe_stack_preserve_repositories %}
 rm -r /var/cache/yum/*

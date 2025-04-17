@@ -621,6 +621,9 @@ and having 0 resources configured.
 
 ## 6. Changelog
 
+**Please now update CHANGELOG file at repository root instead of adding logs in this file.
+These logs bellow are only kept for archive.**
+
 * 1.1.4: Fix error when running with multiple mngt nodes. Thiago Cardozo <boubee.thiago@gmail.com>
 * 1.1.3: README update. Hamid MERZOUKI <hamid.merzouki@naverlabs.com>
 * 1.1.2: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>

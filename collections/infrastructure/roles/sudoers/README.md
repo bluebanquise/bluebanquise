@@ -24,6 +24,9 @@ sudoers:
 
 ## Changelog
 
+**Please now update CHANGELOG file at repository root instead of adding logs in this file.
+These logs bellow are only kept for archive.**
+
 * 1.3.0: Use community module. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.2.1: Fix bug when using list of sudo users as a single name. Code provided by @sgaosdgr. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.2.0: Allow to create dedicated files for some users. Code from @sgaosdgr. Benoit Leveugle <benoit.leveugle@gmail.com>

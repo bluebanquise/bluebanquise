@@ -30,5 +30,8 @@ custom_packages:
 
 ## Changelog
 
+**Please now update CHANGELOG file at repository root instead of adding logs in this file.
+These logs bellow are only kept for archive.**
+
 * 1.0.1: Remove braces on item. Abatcha Olloh <abatchaolloh@outlook.fr>
 * 1.0.0: Role creation. Lucas Santos <lucassouzasantos@gmail.com>

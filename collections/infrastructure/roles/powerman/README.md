@@ -24,6 +24,9 @@ powerman_enable_ipmi_lan_2_0: true
 
 ## Changelog
 
+**Please now update CHANGELOG file at repository root instead of adding logs in this file.
+These logs bellow are only kept for archive.**
+
 * 1.4.0: Simplify role code. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.2: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.1: Fix defaults path. Pierre Gay <pierre.gay@u-bordeaux.fr>, Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>

@@ -38,6 +38,9 @@ Need to add support for Ubuntu and OpenSuse if exist.
 
 ## Changelog
 
+**Please now update CHANGELOG file at repository root instead of adding logs in this file.
+These logs bellow are only kept for archive.**
+
 * 1.2.2: Fix bad variables names. Reported by @corentin-g. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.2.1: Replace package list by a group. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.2.0: Merge ofed and ofed_sm roles. Benoit Leveugle <benoit.leveugle@gmail.com>

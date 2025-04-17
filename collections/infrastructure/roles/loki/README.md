@@ -47,4 +47,7 @@ All variables which can be overridden are stored in [defaults/main.yml](defaults
 
 ## Change log
 
+**Please now update CHANGELOG file at repository root instead of adding logs in this file.
+These logs bellow are only kept for archive.**
+
 * 1.0.0: Role creation. Neil Munday <neil@mundayweb.com>

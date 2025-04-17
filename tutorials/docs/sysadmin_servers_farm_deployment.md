@@ -276,10 +276,20 @@ Note about NetworkManager: some say its bad, some say its good. It depends of ad
 
 **If RHEL system**, NetworkManager is already installer.
 
-**If Ubuntu system**, install NetworkManager and disable systemd-networkd and reboot:
+**If Ubuntu system**, install NetworkManager, configure netplan, and disable systemd-networkd and reboot:
 
 ```
 apt update && apt install NetworkManager
+cp -v /etc/netplan/01-netcfg.yaml /root/ # This is a backup
+cat << EOF > /etc/netplan/01-netcfg.yaml
+# This file describes the network interfaces available on your system
+# For more information, see netplan(5).
+# Set and change netplan renderer to NetworkManager GUI tool 
+network:
+  version: 2
+  renderer: NetworkManager
+EOF
+netplan apply
 systemctl disable systemd-networkd
 reboot -h now
 ```
@@ -308,11 +318,31 @@ You should see your NICs with `enp0s8` having ip `10.10.0.1` with `/16` prefix.
 
 Time to setup basic repositories.
 
+Note: to setup more settings with nmcli, in case of needs:
+
+If NetworkManager gave a generic name to your interface (like Wired Connection 1, or equivalent), to rename the interface, assuming here our interface name is "Wired connection 2" but should be enp0s8 because we want to keep hardware related naming convention:
+
+```
+nmcli connection modify "Wired connection 2" connection.id "enp0s8"
+```
+
+If you want to set a gateway:
+
+```
+nmcli con mod enp0s8 ipv4.gateway 192.168.20.1
+```
+
+If you want to set DNS:
+
+```
+nmcli con mod enp0s8 ipv4.dns "8.8.8.8 8.8.4.4"
+```
+
 ### Setup basic repositories
 
-For RHEL system, we are going to setup a core OS repository, and a custom repository, while for Ubuntu a custom repository will be enough.
+For RHEL system, we are going to setup a core OS repository, and a custom repository, while for Ubuntu we will prepare the needed material for PXE and a custom repository too.
 
-#### Core OS (RHEL only)
+#### RHEL
 
 Backup and clean first default AlmaLinux repositories:
 
@@ -409,6 +439,14 @@ Ensure it works, by installing for example `wget`:
 dnf clean all
 dnf repolist
 dnf install wget
+```
+
+##### Ubuntu
+
+Create a repository folder, where we will upload our live server iso, for future PXE deployment. The iso will be needed in 2 format: plain iso, and extracted into a folder.
+
+```
+mkdir -p /var/www/html/repositories/Ubuntu/24.04/x86_64/extra/
 ```
 
 #### Custom repositorie (both RHEL and Ubuntu)
@@ -520,11 +558,11 @@ Unknown nodes/BMC will be given a temporary ip on the 10.0.254.x range if dhcp s
    if option client-arch = 00:00 {
      filename "undionly.kpxe";
    } elsif option client-arch = 00:07 {
-     filename "ipxe.efi";
+     filename "snponly.efi";
    } elsif option client-arch = 00:08 {
-     filename "ipxe.efi";
+     filename "snponly.efi";
    } elsif option client-arch = 00:09 {
-     filename "ipxe.efi";
+     filename "snponly.efi";
    }
  }
 
@@ -1046,7 +1084,7 @@ dnf install gcc automake autoconf make wget
 **If Ubuntu system**
 
 ```
-apt install chrony tzdataapt install gcc automake autoconf make wget alien
+apt install gcc automake autoconf make wget alien
 ```
 
 Then grab sources and remove original spec file:
@@ -1192,7 +1230,13 @@ reprepro -b /var/www/html/repositories/Ubuntu/24.04/x86_64/extra/ includedeb nob
 And add the repository to the system sources:
 
 ```
-echo "deb [trusted=yes] https://10.10.0.1/repositories/Ubuntu/24.04/x86_64/extra/ noble main" >> /etc/apt/sources.list.d/extra.sources
+cat << EOF > /etc/apt/sources.list.d/extra.sources
+Types: deb
+URIs: http://10.10.0.1/repositories/Ubuntu/24.04/x86_64/extra/
+Suites: noble
+Components: main
+Trusted: yes
+EOF
 ```
 
 Now, using apt install our new package, and start the service:
@@ -1237,16 +1281,23 @@ We will build our own ipxe roms, and include our own init script.
 
 Small tip: ipxe allows you to build raw roms (the ones we will use in this tutorial), but also iso or usb image that contains the rom. This is VERY (VERY!!!!) useful when you need to boot a stupidely made node with a weird BIOS or some network cards that does not boot over PXE.
 
-Grab latest ipxe version from git.
+Lets install few packages first.
 
-To do so, install needed tools to build C code:
+**If RHEL system**
 
 ```
 dnf groupinstall "Development tools" -y
 dnf install xz-devel -y
 ```
 
-Then clone the ipxe repository into `/root/ipxe`:
+**If Ubuntu system**
+
+```
+apt install gcc git liblzma-dev -y
+```
+
+Now, lets grab latest ipxe version from git.
+Clone the ipxe repository into `/root/ipxe`:
 
 ```
 mkdir /root/ipxe
@@ -1315,13 +1366,26 @@ then display some of the information obtained, then sleep 4s, then chain load to
 file `http://${next-server}/boot.ipxe` with `${next-server}` obtained from the DHCP server.
 The `|| shell` means: if chaining fail, launch a shell so that sys admin can debug.
 
-Then enter the src directory and build the needed files:
+Then enter the src directory, enable few useful features of iPXE, and build the needed files:
 
 ```
 cd src
+sed -i 's/.*DOWNLOAD_PROTO_HTTPS.*/#define DOWNLOAD_PROTO_HTTPS/' config/general.h
+sed -i 's/.*PING_CMD.*/#define PING_CMD/' config/general.h
+sed -i 's/.*CONSOLE_CMD.*/#define CONSOLE_CMD/' config/general.h
+sed -i 's/.*CONSOLE_FRAMEBUFFER.*/#define CONSOLE_FRAMEBUFFER/' config/console.h
+sed -i 's/.*IMAGE_ZLIB.*/#define IMAGE_ZLIB/' config/general.h
+sed -i 's/.*IMAGE_GZIP.*/#define IMAGE_GZIP/' config/general.h
+sed -i 's/.*DIGEST_CMD.*/#define DIGEST_CMD/' config/general.h
+sed -i 's/.*REBOOT_CMD.*/#define REBOOT_CMD/' config/general.h
+sed -i 's/.*POWEROFF_CMD.*/#define POWEROFF_CMD/' config/general.h
 make -j 4 bin-x86_64-efi/ipxe.efi EMBED=our_script.ipxe DEBUG=intel,dhcp,vesafb
+make -j 4 bin-x86_64-efi/snponly.efi EMBED=our_script.ipxe DEBUG=intel,dhcp,vesafb
 make -j 4 bin/undionly.kpxe EMBED=our_script.ipxe DEBUG=intel,dhcp,vesafb
 ```
+
+Important note: we built here 3 roms. 2 for EFI systems, 1 for legacy systems.
+The default EFI one is ipxe.efi. But experience has proven that the snponly.ipxe rom is nearly all the time compatible with hardware, so we will use that one here.
 
 And finally copy these files into the `/var/lib/tftpboot/` folder so that tftp server
 can provide them to the nodes booting.
@@ -1329,10 +1393,9 @@ can provide them to the nodes booting.
 ```
 mkdir -p /var/lib/tftpboot/
 cp bin-x86_64-efi/ipxe.efi /var/lib/tftpboot/
+cp bin-x86_64-efi/snponly.efi /var/lib/tftpboot/
 cp bin/undionly.kpxe /var/lib/tftpboot/
 ```
-
-Note: some host do not boot without an **snponly** ipxe.efi version. Refer to ipxe documentation on how to build such rom.
 
 #### iPXE chain
 
@@ -1361,7 +1424,9 @@ chain http://${next-server}/nodes/${hostname}.ipxe || shell
 ```
 
 Last step for the iPXE chain is to create a file for our group of node, and link
-our node to this group.
+our node to this group (for example, a compute node group could need different parameters than a group of storages nodes, etc). We will use as example here a "storage" group. Note that the content of the file depends on the OS, so it is different between RHEL and Ubuntu.
+
+##### RHEL
 
 Create file `/var/www/html/nodes_groups/group_storage.ipxe` with the following content:
 
@@ -1395,7 +1460,42 @@ sleep 4
 boot
 ```
 
-Then, link the node `thor` to this group:
+##### Ubuntu
+
+```
+#!ipxe
+
+echo Booting OS
+echo Group profile: storage
+
+echo +----------------------------------------------------+
+echo |
+echo | Loading kernel
+
+kernel http://${next-server}/repositories/Ubuntu/24.04/x86_64/iso/casper/vmlinuz initrd=initrd root=/dev/ram0 ramdisk_size=1500000 ip=dhcp url=http://${next-server}/repositories/Ubuntu/24.04/x86_64/ubuntu-24.04-live-server-amd64.iso autoinstall ds=nocloud-net;s=http://${next-server}/nodes_groups/group_storage.cloud-init/ cloud-config-url=http://${next-server}/nodes_groups/group_storage.cloud-init/user-data
+
+echo | Loading initial ramdisk ...
+
+initrd http://${next-server}/repositories/Ubuntu/24.04/x86_64/iso/casper/initrd
+
+echo | ALL DONE! We are ready.
+echo | Downloaded images report:
+
+imgstat
+
+echo | Booting in 4s ...
+echo |
+echo +----------------------------------------------------+
+
+sleep 4
+
+boot
+```
+
+
+
+
+Now that our group file is created, link the node `thor` to this group:
 
 ```
 cd /var/www/html/nodes/
@@ -1405,9 +1505,13 @@ ln -s ../nodes_groups/group_storage.ipxe thor.ipxe
 Note: it is important that link are relative: you have to cd into nodes directory,
 and create the link from here with a relative path.
 
-To summarize, chain will be the following: `DHCP -> {undionly.kpxe|ipxe.efi} -> boot.ipxe -> thor.ipxe (group_storage.ipxe)` .
+To summarize, chain will be the following: `DHCP -> {undionly.kpxe|snponly.efi} -> boot.ipxe -> thor.ipxe (group_storage.ipxe)` .
 
-#### Kickstart
+We now need to provide the auto-installation files. Structure is different between RHEL and Ubuntu.
+
+#### Auto installation files
+
+##### RHEL -> Kickstart
 
 We now need to provide a kickstart file.
 
@@ -1522,8 +1626,102 @@ Now, ensure all services are started:
 ```
 systemctl start httpd
 systemctl enable httpd
-systemctl start fbtftp_server
-systemctl enable fbtftp_server
+systemctl start atftpd
+systemctl enable atftpd
+```
+
+We can proceed with the boot of `thor` node, and then the other nodes.
+
+##### Ubuntu -> Cloud Init
+
+We now need to provide a user-data file, based on cloud-init.
+
+This file will provide auto-installation features: what should be installed, how, etc.
+We will create one user-data file per group of nodes.
+
+To create the user-data file, we need an ssh public key from our `odin` management
+node. Create it, without passphrase:
+
+```
+ssh-keygen -N "" -t Ed25519
+```
+
+And get the content of the public key file `/root/.ssh/id_ed25519.pub`, we will use it just bellow to generate the
+kickstart file. For example, content of mine is:
+
+```
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIqpyyh44Hz3gvhISaIE9yJ/ao8fBLNo7qwPJcYjQdIl root@odin.cluster.local
+```
+
+Now we need an sha512 password hash. Generate one using the following command:
+
+```
+python3 -c 'import crypt,getpass; print(crypt.crypt(getpass.getpass(), crypt.mksalt(crypt.METHOD_SHA512)))'
+```
+
+And keep it somewhere (for example, `$6$7zvrwimYcypA8JWc$5GWYVF7zrI5eorsPN8IUT1n/Gmjpkic7h2cCbFVxbkqJeG0/kmJsYw6EN9oX3NQ34duwW7qAmOI13Y/0v5oHn.` is for `root` as password, which is not secure but ok for training purpose), we will use it just bellow to generate the user-data file.
+
+Now create a dedicated folder for our group:
+
+```
+mkdir -p /var/www/html/nodes_groups/group_storage.cloud-init/
+```
+
+We already prepared the iso and the iso content before.
+
+Now create autoinstall file at `/var/www/html/nodes_groups/group_storage.cloud-init/user-data`
+
+```yaml
+#cloud-config
+autoinstall:
+  version: 1
+  apt:
+    geoip: false
+    preserve_sources_list: true
+  keyboard: {layout: us, toggle: null, variant: ''}
+  locale: en_US.UTF-8
+  user-data:
+    users:
+      - name: bluebanquise
+        homedir: /home/bluebanquise
+        ssh_authorized_keys:
+          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIqpyyh44Hz3gvhISaIE9yJ/ao8fBLNo7qwPJcYjQdIl root@odin.cluster.local
+        sudo: 'ALL=(ALL:ALL) NOPASSWD:ALL'
+        groups: sudo
+        shell: /bin/bash
+        passwd: $6$7zvrwimYcypA8JWc$5GWYVF7zrI5eorsPN8IUT1n/Gmjpkic7h2cCbFVxbkqJeG0/kmJsYw6EN9oX3NQ34duwW7qAmOI13Y/0v5oHn.
+    disable_root: true
+  ssh:
+    install-server: true
+    allow-pw: true
+```
+
+Now create needed empty file at `/var/www/html/nodes_groups/group_storage.cloud-init/meta-data` (don't ask me why, but its mandatory):
+
+```
+touch /var/www/html/nodes_groups/group_storage.cloud-init/meta-data
+```
+
+Few notes:
+
+* The Ubuntu installer needs a lot of ram to operate, since it downloads and extract iso into memory. Ensure at least 6 Gb ram.
+* If anything happen wrong, installer automatically fallback to interactive installation mode. You will have to change shell and investigate into installer logs to find issue. This is not always easy as installer logs huge.
+* If serial console is wrong, installer will fallback on interactive installation mode.
+* If installer hang without errors, let it some time. Some steps try some connection and wait for timeout before continuing.
+
+Other notes:
+* The ssh public key here will allow us to ssh on the remote hosts without having to provide a password.
+* We install only the absolute minimal operating system. It is strongly recommended to do the minimal amount of tasks during the auto-installation as it is way simpler to debug things installing once system is running.
+* Ensure also your keyboard type is correct.
+* For compatibility purpose, this example does not specify which hard drive disk to use, installer will auto-choose what to use. Tune it later according to your needs.
+
+Now, ensure all services are started:
+
+```
+systemctl start apache2
+systemctl enable apache2
+systemctl start atftpd
+systemctl enable atftpd
 ```
 
 We can proceed with the boot of `thor` node, and then the other nodes.
@@ -1534,11 +1732,27 @@ We can proceed with the boot of `thor` node, and then the other nodes.
 
 Open 2 shell on `odin`. In the first one, launch watch logs of dhcp and tftp server using:
 
+**If Ubuntu system**
+
 ```
-journalctl -u dhcpd -u fbtftp_server -f
+journalctl -u isc-dhcp-server -u atftpd -f
+```
+
+**If RHEL system**
+
+```
+journalctl -u dhcpd -u atftpd -f
 ```
 
 In the second one, watch http server logs using:
+
+**If Ubuntu system**
+
+```
+tail -f /var/log/apache2/*
+```
+
+**If RHEL system**
 
 ```
 tail -f /var/log/httpd/*
@@ -1569,7 +1783,7 @@ There are strategies to solve that automatically, but this is out of the scope o
 
 Now that other nodes are deployed and reachable over ssh, it is time to configure client side on them.
 
-We will use clustershell (clush) a lot, as it allows to manipulate a lot of hosts over ssh at the same time. You can install clustershell either via packages (EPEL) either via pip.
+We will use clustershell (clush) a lot, as it allows to manipulate a lot of hosts over ssh at the same time. You can install clustershell either via packages (EPEL for RHEL, natively for Ubuntu) either via pip.
 
 #### Set hostname
 
@@ -1582,6 +1796,8 @@ hostnamectl set-hostname thor.cluster.local
 #### Configure repositories
 
 You need the nodes be able to grab packages from `odin`.
+
+##### RHEL
 
 On each client node, backup current repositories, and clean them:
 
@@ -1636,6 +1852,23 @@ clush -bw thor,heimdall,valkyrie[01-02] 'dnf update -y'
 clush -bw thor,heimdall,valkyrie[01-02] 'dnf install wget -y'
 ```
 
+##### Ubuntu
+
+On each client, simply upload the extra.sources file we created on our Odin server, and done!
+Just remember to apt update to have it taken into account.
+
+For a single host:
+
+```
+scp /etc/apt/sources.list.d/extra.sources bluebanquise@thor:/etc/apt/sources.list.d/extra.sources
+```
+
+Or in parallel using clustershell:
+
+```
+clush -w thor,heimdall,valkyrie[01-02] --copy /etc/apt/sources.list.d/extra.sources --dest /etc/apt/sources.list.d/extra.sources
+```
+
 #### DNS client
 
 IF not already automatically done from DHCP, on each client node, set `odin` as default DNS server by using previously seen nmcli commands (take this opportunity to set static ips on hosts).
@@ -1662,6 +1895,14 @@ You can also simply upload the file from `odin` on clients, using clush.
 On each client, ensure time server is `odin` sp that our cluster is time synchronised.
 
 Install needed packages:
+
+**If Ubuntu system**
+
+```
+apt install chrony
+```
+
+**If RHEL system**
 
 ```
 dnf install chrony
@@ -1750,6 +1991,14 @@ mkdir /software
 
 Now, install needed packages:
 
+**If Ubuntu system**
+
+```
+apt install nfs-kernel-server -y
+```
+
+**If RHEL system**
+
 ```
 dnf install nfs-utils -y
 ```
@@ -1790,6 +2039,14 @@ You should see the exports available on this server.
 Ssh on `heimdall`.
 
 Install needed packages to mount nfs foreign export:
+
+**If Ubuntu system**
+
+```
+apt install nfs-common -y
+```
+
+**If RHEL system**
 
 ```
 dnf install nfs-utils -y
@@ -1852,6 +2109,8 @@ To prevent that, you can create scripts, rely on automation tools like Ansible, 
 
 ## Infiniband (optional)
 
+This part is RHEL only, I never was able to get Infiniband hardware on Ubuntu, so I cannot test it.
+
 If you need InfiniBand support on nodes, simply install the package group related:
 
 ```
@@ -1869,6 +2128,8 @@ You should now see the ib0 interface in the NIC list from `ip a`.
 
 ## Nvidia GPU (optional)
 
+This part is RHEL only, I never was able to get Nvidia GPU hardware on Ubuntu, so I cannot test it.
+
 To setup an GPU, you need to:
 
 * Ensure kernel do not crash at start (happen often if kernel is too old for hardware)
@@ -1882,7 +2143,7 @@ Lets do that step by step.
 ### Ensure kernel do not crash
 
 To prevent kernel from crashing at boot (Kernel Panic) due to too recent GPU hardware, edit the ipxe file that contains the kernel line
-(for example file `/var/www/html/nodes_groups/group_compute_gpu.ipxe` and append `nomodeset` to the kernel line. For example:
+(for example file `/var/www/html/nodes_groups/group_compute_gpu.ipxe` and append `nomodeset` to the kernel line. For example on RHEL (same for Ubuntu, just update the corresponding file):
 
 ```
 #!ipxe
