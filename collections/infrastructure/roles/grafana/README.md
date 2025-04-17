@@ -153,6 +153,8 @@ Note: if you try to add dashboards, the role will alwats at checking if the data
 
 * 2.2.4: Fixed service start and user creation. Thiago Cardozo <boubee.thiago@gmail.com>
 * 2.2.3: Wait for external db when in ha mode. Thiago Cardozo <boubee.thiago@gmail.com>
+* 2.2.4: Retry service management a few times;fixed handler variables. Thiago Cardozo <boubee.thiago@gmail.com>
+* 2.2.3: Fixed service start and user creation. Thiago Cardozo <boubee.thiago@gmail.com>
 * 2.2.2: Reuse better variable for output;Don't print admin password at end. Thiago Cardozo <boubee.thiago@gmail.com>
 * 2.2.1: Missing default port reference. Thiago Cardozo <boubee.thiago@gmail.com>
 * 2.2.0: Optional uid/gid;Custom firewall port. Thiago Cardozo <boubee.thiago@gmail.com>

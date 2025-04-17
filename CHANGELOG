@@ -2,15 +2,18 @@
 
 Format: <date> - <author (username or mail or both)> - [role] <change description>
 
-# To 3.3.0
+# 3.2.5
 
-* 3/28/25 - thiagocardozo - [podman] Add support for TLS encryption in local registry.
-* 3/27/25 - thiagocardozo - [dhcp-server] Ported patterns from advanced_dhcp_server role.
-* 3/27/25 - thiagocardozo - [dns_server] Option to sign zones.
-* 3/21/25 - thiagocardozo - [grafana] Fixed service start and user creation.
-* 3/21/25 - thiagocardozo - [grafana] Fixed service start and user creation.
-* 3/18/25 - thiagocardozo - [dns_server] DNS server dnssec
-* 3/17/25 - thiagocardozo - [grafana] Reuse better variable for output;Don't print admin password at end.
+* 4/16/25: - thiagocardozo - [grafana] Retry service management a few times;fixed handler variables.
+* 3/25/25: - santos-lucas - [gpu] force gather facts on the beginning of execution.
+* 3/25/25: - santos-lucas - [gpu] Add support for AMD gpus.
+* 3/25/25: - hmeScaler - [users] Role enhancement and bug fixing
+* 3/25/25: - aolloh - [custom_packages] Remove braces on item.
+* 3/25/25: - lmagdanello - [pxe_stack] Fix Formatting for Kernel Parameters in iPXE Template.
+* 3/25/25: - thiagocardozo - [grafana] Fixed service start and user creation.
+* 3/25/25: - thiagocardozo - [grafana] Reuse better variable for output;Don't print admin password at end.
+* 3/21/25 - oxedions - [CORE] Fix a critical error for main interface an main address j2_
+* 3/18/25 - fonseca-rm - [podman] update podman configurations for compatibility with new RHEL version
 * 3/13/25 - oxedions - [INFRA] Updated slurm to 24.05.6
 * 3/13/25 - oxedions - [INFRA] Updated atftp to 0.8.0
 * 3/13/25 - thiagocardozo - [grafana] Missing default port reference.
