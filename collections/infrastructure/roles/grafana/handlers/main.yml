@@ -6,7 +6,7 @@
   with_items: "{{ grafana_services_to_start }}"
   when:
     - "'service' not in ansible_skip_tags"
-    - (bb_start_services | bool)
+    - (grafana_start_services | default(bb_start_services) | default(true) | bool)
 
 - name: Set privileges on provisioned dashboards
   ansible.builtin.file:
