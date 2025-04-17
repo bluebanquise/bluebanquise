@@ -776,15 +776,36 @@ Notice that access to Karma UI will need to be updated to use the prefix in this
 
 ### TLS and/or Basic Authentication
 
-To enable TLS encryption, you need to set these variables:
+#### Generating a TLS certificate and key:
+
+To enable TLS, you must generate a certificate and private key. You can use OpenSSL to quickly generate a self-signed certificate for internal usage:
+
+```bash
+sudo openssl req -x509 -nodes -newkey rsa:2048 \
+  -subj "/CN=prometheus.example.com" \
+  -keyout /etc/pki/tls/private/prometheus.key \
+  -out /etc/pki/tls/certs/prometheus.crt -days 365 \
+  -addext "subjectAltName=DNS:prometheus.example.com" && \
+sudo chown -R prometheus: /etc/pki/tls/private/prometheus.key && \
+sudo chown -R prometheus: /etc/pki/tls/certs/prometheus.crt
+```
+
+This command generates:
+
+- `/etc/pki/tls/private/prometheus.key` → the private key
+- `/etc/pki/tls/certs/prometheus.crt` → the certificate
+
+Both files are owned by the `prometheus` user to ensure proper access.
+
+#### To enable TLS encryption, you need to set these variables:
 
 ```yaml
 prometheus_server_enable_tls: true
-prometheus_server_tls_cert_file: 
-prometheus_server_tls_key_file: 
+prometheus_server_tls_cert_file: /etc/pki/tls/certs/prometheus.crt
+prometheus_server_tls_key_file: /etc/pki/tls/private/prometheus.key
 ```
 
-To enable basic authentication, you need to set these variables:
+#### To enable basic authentication, you need to set these variables:
 
 ```yaml
 prometheus_server_enable_basic_auth: true
@@ -856,6 +877,7 @@ prometheus_server_prometheus_launch_parameters: |
 
 ## Changelog
 
+* 1.6.2: Docs: how to create SSL Certificate and Key. Leonardo Magdanello <lmagdanello40@gmail.com>
 * 1.6.1: Fix TYPO prometheus template. Leonardo Magdanello <lmagdanello40@gmail.com>
 * 1.6.0: Monitoring HA with Basic Auth. Leonardo Magdanello <lmagdanello40@gmail.com>
 * 1.5.0: Add small features for Monitoring. Leonardo Magdanello <lmagdanello40@gmail.com>
