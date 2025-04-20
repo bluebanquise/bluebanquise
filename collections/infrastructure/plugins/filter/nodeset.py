@@ -22,6 +22,7 @@ def nodeset(nodes_list):
 
     return nodeset
 
+
 def nodeset_expand(nodes_list):
     '''Convert a list of nodes to expanded ClusterShell's NodeSet'''
 
