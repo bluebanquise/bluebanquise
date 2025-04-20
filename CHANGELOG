@@ -4,6 +4,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # 3.2.5
 
+* 4/20/25 - thiagocardozo - [powerman] Use nodeset_expand function to get around issue with ipmipower.
 * 4/16/25 - thiagocardozo - [grafana] Retry service management a few times;fixed handler variables.
 * 3/28/25 - thiagocardozo - [podman] Add support for TLS encryption in local registry.
 * 3/27/25 - thiagocardozo - [dhcp-server] Ported patterns from advanced_dhcp_server role.
