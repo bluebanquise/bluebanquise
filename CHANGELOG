@@ -4,6 +4,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # 3.2.5
 
+* 4/21/25 - ginomcevoy - [pcs] Use --config to avoid error when pushing to the CIB.
 * 4/21/25 - ginomcevoy - [auditd] Avoid having service running on both nodes in HA.
 * 4/21/25 - ginomcevoy - [powerman] Avoid having service running on both nodes in HA.
 * 4/21/25 - ginomcevoy - [http_server] Avoid having service running on both nodes in HA.
