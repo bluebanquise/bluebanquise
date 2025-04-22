@@ -7,6 +7,7 @@
 # ██████╔╝███████╗╚██████╔╝███████╗██████╔╝██║  ██║██║ ╚████║╚██████╔╝╚██████╔╝██║███████║███████╗
 # ╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚══▀▀═╝  ╚═════╝ ╚═╝╚══════╝╚══════╝
 #
+# 2.2.2: (SMC fix) Tolerate lost+found path inside /var/www/html/pxe/diskless. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
 # 2.2.1: (SMC fix) Fix check of user presence in image for cross-arch images. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
 # 2.2.0: (SMC feature) Add SELinux support to live images. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
 # 2.1.4: (SMC fix) Restore SELinux context before creating live image. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
@@ -114,7 +115,7 @@ class bcolors:
 # Ignore these paths when looking for diskless images.
 # For example, if /var/www/html/pxe/diskless/nfs_reference exists, then assume it is to store NFS
 # reference images, so its presence should not cause failure (it does not contain metadata.yml)
-IMAGE_DIRS_TO_IGNORE = ['images', 'nfs_reference']
+IMAGE_DIRS_TO_IGNORE = ['lost+found', 'images', 'nfs_reference']
 
 
 def display_image_metadata(image_metadata):
