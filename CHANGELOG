@@ -4,6 +4,10 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # 3.2.5
 
+* 4/21/25 - ginomcevoy - [auditd] Avoid having service running on both nodes in HA.
+* 4/21/25 - ginomcevoy - [powerman] Avoid having service running on both nodes in HA.
+* 4/21/25 - ginomcevoy - [http_server] Avoid having service running on both nodes in HA.
+* 4/21/25 - ginomcevoy - [conman] Avoid having service running on both nodes in HA.
 * 4/20/25 - thiagocardozo - [powerman] Use nodeset_expand function to get around issue with ipmipower.
 * 4/16/25 - thiagocardozo - [grafana] Retry service management a few times;fixed handler variables.
 * 3/28/25 - thiagocardozo - [podman] Add support for TLS encryption in local registry.

@@ -2,10 +2,10 @@
 - name: service <|> Restart conman
   ansible.builtin.service:
     name: conman
-    state: "{{ (conman_start_services | default(bb_start_services) | default(true, true) | bool) | ternary('restarted', omit) }}"
+    state: "{{ (conman_start_services | default(bb_start_services) | default(true) | bool) | ternary('restarted', omit) }}"
   when:
     - "'service' not in ansible_skip_tags"
-    - conman_start_services | default(bb_start_services) | default(true, true)
+    - conman_start_services | default(bb_start_services) | default(true)
 
 - name: systemd <|> Reload systemd configuration
   ansible.builtin.systemd:
