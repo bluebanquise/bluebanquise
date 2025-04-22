@@ -2,7 +2,7 @@
 - name: service <|> Restart auditd service
   ansible.builtin.service:
     name: "{{ item }}"
-    state: "{{ (repositories_server_start_services | default(bb_start_services) | default(true) | bool) | ternary('restarted', omit) }}"
+    state: "{{ (auditd_start_services | default(bb_start_services) | default(true) | bool) | ternary('restarted', omit) }}"
     use: service  # systemctl can't restart auditd, service can: https://access.redhat.com/solutions/2664811
   loop: "{{ auditd_services_to_start }}"
   when:
