@@ -154,7 +154,7 @@
 - name: service <|> Manage conman state
   ansible.builtin.service:
     name: conman
-    enabled: "{{ (conman_enable_services | default(bb_enable_services) | default(true, true) | bool) | ternary('yes', 'no') }}"
-    state: "{{ (conman_start_services | default(bb_start_services) | default(true, true) | bool) | ternary('started', omit) }}"
+    enabled: "{{ (conman_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    state: "{{ (conman_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   tags:
     - service
