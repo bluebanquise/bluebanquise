@@ -4,8 +4,8 @@
 # Roles variables precedence global ones:
 # http_server_start_services > bb_start_services > default(true)
 # http_server_enable_services > bb_enable_services > default(true)
-http_server_start_services:
-http_server_enable_services:
+# http_server_start_services:
+# http_server_enable_services:
 
 http_server_settings:
   - regexp: "^ServerTokens"
