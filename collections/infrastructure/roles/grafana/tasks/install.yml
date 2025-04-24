@@ -88,5 +88,9 @@
     enabled: "{{ (grafana_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
     state: "{{ (grafana_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   loop: "{{ grafana_services_to_start }}"
+  register: service_results
+  retries: 5
+  delay: 10
+  until: service_results is not failed
   tags:
     - service
