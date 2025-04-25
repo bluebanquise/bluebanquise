@@ -54,6 +54,14 @@ all:
     management1:
 ```
 
+In order to have Ansible use that inventory, we will use the ANSIBLE_INVENTORY variable:
+
+```
+export ANSIBLE_INVENTORY="$HOME/ansible/inventory"
+```
+
+Note that we could also use the `ansible.cfg` configuration file, or add `-i $HOME/ansible/inventory` to all bellow commands.
+
 Our very basic Ansible configuration is done. But one thing remains: we need to
 ensure our host (management1) can ssh to itself without password, as Ansible
 relies fully on the ssh to connect to remote hosts.
