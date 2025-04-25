@@ -294,18 +294,18 @@ systemctl disable systemd-networkd
 reboot -h now
 ```
 
-Assuming main NIC name is `enp0s8`, to set `10.10.0.1/16` IP and subnet on it, use the following commands:
+Assuming main NIC name is `enp0s3`, to set `10.10.0.1/16` IP and subnet on it, use the following commands:
 
 ```
-nmcli con mod enp0s8 ipv4.addresses 10.10.0.1/16
-nmcli con mod enp0s8 ipv4.method manual
-nmcli con up enp0s8
+nmcli con mod enp0s3 ipv4.addresses 10.10.0.1/16
+nmcli con mod enp0s3 ipv4.method manual
+nmcli con up enp0s3
 ```
 
 You can at any time get all NIC parameters using:
 
 ```
-nmcli con show enp0s8
+nmcli con show enp0s3
 ```
 
 Then ensure interface is up with correct ip using:
@@ -314,16 +314,16 @@ Then ensure interface is up with correct ip using:
 ip a
 ```
 
-You should see your NICs with `enp0s8` having ip `10.10.0.1` with `/16` prefix.
+You should see your NICs with `enp0s3` having ip `10.10.0.1` with `/16` prefix.
 
 Time to setup basic repositories.
 
 Note: to setup more settings with nmcli, in case of needs:
 
-If NetworkManager gave a generic name to your interface (like Wired Connection 1, or equivalent), to rename the interface, assuming here our interface name is "Wired connection 2" but should be enp0s8 because we want to keep hardware related naming convention:
+If NetworkManager gave a generic name to your interface (like Wired Connection 1, or equivalent), to rename the interface, assuming here our interface name is "Wired connection 2" but should be enp0s3 because we want to keep hardware related naming convention:
 
 ```
-nmcli connection modify "Wired connection 2" connection.id "enp0s8"
+nmcli connection modify "Wired connection 2" connection.id "enp0s3"
 ```
 
 If you want to set a gateway:
@@ -337,6 +337,71 @@ If you want to set DNS:
 ```
 nmcli con mod enp0s8 ipv4.dns "8.8.8.8 8.8.4.4"
 ```
+
+### Configure management as a gateway
+
+We need to configure the management node as a gateway for other nodes, so that clients can use it to reach the web.
+To do so, we are going to use firewalld, and setup masquerading.
+
+**If RHEL system**:
+
+```
+dnf install firewalld
+```
+
+**If Ubuntu system**:
+
+```
+apt update
+apt install firewalld
+```
+
+Also on Ubuntu, make sure ugw is disabled:
+
+```
+ufw disable
+```
+
+Then for both OS, enable and start the firewall.
+
+```
+systemctl enable firewalld
+systemctl start firewalld
+```
+
+Now enable ipv4 forwarding on management node:
+
+```
+echo "net.ipv4.ip_forward=1" > /etc/sysctl.d/95-IPv4-forwarding.conf
+sysctl -p /etc/sysctl.d/95-IPv4-forwarding.conf
+```
+
+Then make sure ssh is allowed in external zone, to keep connectivity:
+
+```
+firewall-cmd --add-service=ssh --zone=external --permanent
+```
+
+We are now going to link our network interfaces to zones of the firewall. We will use 2 zones, an external one, which is considered unsafe but connected to the web somehow, and a trusted zone, which is our internal cluster.
+
+```
+firewall-cmd --change-interface=enp0s8 --zone=external --permanent
+firewall-cmd --change-interface=enp0s3 --zone=trusted --permanent
+```
+
+Now enable masquerade on external zone.
+
+```
+firewall-cmd --zone=external --add-masquerade --permanent
+```
+
+Finally, restart firewalld to ensure all configuration is persistent:
+
+```
+systemctl restart firewalld
+```
+
+From now, our management node acts as a gateway for all other clients on the cluster network.
 
 ### Setup basic repositories
 
