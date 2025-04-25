@@ -4,6 +4,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.2.6
 
+* 4/25/25 - oxedions - [firewall] Fix issue with interfaces without networks. #1001
 * 4/24/25 - pbirokas - [slurm] Typo in Case grestypes.
 * 4/23/25 - lmagdanello - [http_server] Comment out the variables http_server_*_services.
 * 4/16/25 - thiagocardozo - [grafana] Retry service management a few times;fixed handler variables.
