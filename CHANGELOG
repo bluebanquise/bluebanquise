@@ -4,6 +4,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.2.6
 
+* 4/25/25 - oxedions - [nfs] Fix id in export, add subnet parameter. (#1004, from levaillx)
 * 4/25/25 - oxedions - [firewall] Fix issue with interfaces without networks. (#1001, from @levaillx)
 * 4/25/25 - oxedions - [TUTO] Add masquerading, fix missing data in ansible.
 * 4/25/25 - oxedions - [nic] Add support for infiniband_mac. (#1003, from @levaillx)

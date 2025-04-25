@@ -108,6 +108,7 @@ Optional values are:
 | export_options      | Arguments for the server (`export`). If no specified, will be `rw,sync,root_squash` |
 | mount_options       | Arguments for the client (`mount`). If no specified, will be `rw,fsc,nfsvers=4.2,bg,nosuid,nodev` |
 | server_group        | Group whose members will configure NFS as server. Useful for when using `server` parameter as virtual IP |
+| subnet              | Force a specific subnet to be used instead of the one defined in the associated network. For example: `10.10.0.0/24` |
 
 Please refer to https://linux.die.net/man/5/nfs for detail on export and mount parameters available.
 
