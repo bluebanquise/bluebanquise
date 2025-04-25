@@ -57,9 +57,9 @@
   when: nfs_server_tuning is defined and nfs_server_tuning
 
 - name: lineinfile <|> Edit file /etc/exports to add exported FS
-  ansible.builtin.lineinfile:
   vars:
     export_id: '{%if item.id is defined and item.id is not none %}{{ item.id }}{% else %}{{ item.export }}{% endif %}'
+  ansible.builtin.lineinfile:
     path: /etc/exports
     regexp: ' # export id: {{ export_id }}$'
     line: "{{ item.export }} {% if item.subnet is defined and item.subnet %}{{ item.subnet }}{% else %}{% if item.network is defined and item.network is not none and networks[item.network] is defined and networks[item.network]['subnet'] is defined and networks[item.network]['subnet'] is not none and networks[item.network]['prefix'] is defined and networks[item.network]['prefix'] is not none %}{{networks[item.network]['subnet']}}/{{networks[item.network]['prefix']}}{% else %}*{% endif %}{% endif %}({{ item.export_options | default('rw,sync,root_squash', true) }}) # export id: {{ export_id }}"
