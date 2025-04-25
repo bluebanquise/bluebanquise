@@ -73,6 +73,7 @@
     runner_hwaddr_policy: "{{ item.runner_hwaddr_policy | default(omit) }}"
     ssid: "{{ item.ssid | default(omit) }}"
     transport_mode: "{{ item.transport_mode | default(omit) }}"
+    infiniband_mac: "{{ item.infiniband_mac | default(omit) }}"
     vpn: "{{ item.vpn | default(omit) }}"
     wifi: "{{ item.wifi | default(omit) }}"
     wifi_sec: "{{ item.wifi_sec | default(omit) }}"
