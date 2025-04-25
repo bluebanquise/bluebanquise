@@ -4,12 +4,13 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.2.6
 
+* 4/25/25 - thiagocardozo - [pxe_stack] Fixed when conditional check.
 * 4/8/25 - oxedions - [LOGS] Add note in all README for logs centralized in this file.
 * 4/4/25 - oxedions - [TUTO] Improve ubuntu 24.04 support.
-* 4/4/25 - thiagocardozo - [conman] Added ssh config file for user conman.
+* 4/4/25 - thiagocardozo - [conman] Added ssh config file for user conman.
 * 4/5/25 - jilkarnas - [pxe_stack] allow selection of shutdown action other than reboot & allow to keep osdeploy boot.
 * 3/31/25 - thiagocardozo - [grafana] grafana better variable and hide admin password from output.
-* 3/31/25 - thiagocardozo - [ssh_client] Add extra config options. 
+* 3/31/25 - thiagocardozo - [ssh_client] Add extra config options.
 * 3/31/25 - thiagocardozo - [auditd] Option to log root commands.
 
 # 3.2.5
