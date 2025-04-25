@@ -22,6 +22,7 @@ def nodeset_expand(nodes_list):
 
     return nodeset_expand
 
+
 class FilterModule(object):
     ''' NodeSet Jinja2 filter. '''
 
