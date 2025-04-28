@@ -150,6 +150,8 @@ You can enable recursion with the forwarders configuration using the following v
 dns_server_recursion: yes
 ```
 
+You can enable `forward only` option by setting `dns_server_forward_only` to true. Default is false.
+
 ## Advanced usage
 
 ### Override zone

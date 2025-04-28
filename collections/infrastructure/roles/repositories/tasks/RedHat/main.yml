@@ -12,9 +12,9 @@
       - (os_operating_system['distribution_version'] is defined and os_operating_system['distribution_version'] is not none) or (os_operating_system['distribution_major_version'] is defined and os_operating_system['distribution_major_version'] is not none)
     fail_msg: "You are using simple repositories definition. The tool needs multiple variables to be defined to calculate URL and it seems at least one is missing. Please refer to role README for list of variables required."
     success_msg: "All needed parameters are defined for simple URL"
-  with_items: "{{ bb_repositories }}"
+  with_items: "{{ bb_repositories | default([], true) }}"
   when:
-    - bb_repositories is not none and bb_repositories is iterable and bb_repositories is not string and bb_repositories is not mapping
+    - bb_repositories is defined and bb_repositories is not none and bb_repositories is iterable and bb_repositories is not string and bb_repositories is not mapping
     - item.baseurl is not defined
 
 - name: yum_repository <|> Setting repositories
@@ -28,9 +28,9 @@
     gpgkey: "{{ item.gpgkey | default(omit) }}"
     proxy: "{{ item.proxy | default(omit) }}"
     state: "{{ item.state | default('present') }}"
-  with_items: "{{ bb_repositories }}"
+  with_items: "{{ bb_repositories | default([], true) }}"
   when:
-    - bb_repositories is not none and bb_repositories is iterable and bb_repositories is not string and bb_repositories is not mapping
+    - bb_repositories is defined and bb_repositories is not none and bb_repositories is iterable and bb_repositories is not string and bb_repositories is not mapping
     - (item != 'os') and ( item.name is not defined or item.name != 'os' )
 
 - name: yum_repository █ Setting OS repositories
@@ -47,12 +47,12 @@
   loop:
     # Combine BaseOS and AppStream with 'os' parameters if any. Otherwise, this
     # will configure BaseOS and AppStream with default values.
-    - "{{ bb_repositories|selectattr('name', 'defined')
+    - "{{ bb_repositories | default([], true) |selectattr('name', 'defined')
           |selectattr('name', 'match', 'os')|list
           |combine({'repoid':'BaseOS'}) }}"
-    - "{{ bb_repositories|selectattr('name', 'defined')
+    - "{{ bb_repositories | default([], true) |selectattr('name', 'defined')
           |selectattr('name', 'match', 'os')|list
           |combine({'repoid':'AppStream'}) }}"
   when:
-    - bb_repositories is not none and bb_repositories is iterable and bb_repositories is not string and bb_repositories is not mapping
-    - ( 'os' in bb_repositories ) or ( item.name is defined and item.name == 'os' )
+    - bb_repositories is defined and bb_repositories is not none and bb_repositories is iterable and bb_repositories is not string and bb_repositories is not mapping
+    - ( 'os' in (bb_repositories | default([], true)) ) or ( item.name is defined and item.name == 'os' )
