@@ -37,7 +37,7 @@ pxe_stack_post_install_boot_to_disk: true
 ############################################################
 ### Default equipment profile parameters
 
-pxe_stack_hw_equipment_type: server
+pxe_stack_hw_equipment_type: none
 pxe_stack_os_operating_system:
   distribution: ubuntu
   distribution_version: 22.04
