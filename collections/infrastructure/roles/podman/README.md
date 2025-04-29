@@ -140,6 +140,7 @@ where the paths in `podman_registry_crt_path` and `podman_registry_key_path` mus
 
 ## Changelog
 
+* 2.1.1: Fix systemd for registry service to allow rc=2, use recommended Type=forking
 * 2.1.0: Add support for TLS encryption in local registry. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
 * 2.0.0: Updated registry format;Use handlers;Replace libpod.conf. Thiago Cardozo <boubee.thiago@gmail.com>
 * 1.0.3: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
