@@ -856,6 +856,7 @@ prometheus_server_prometheus_launch_parameters: |
 
 ## Changelog
 
+* 1.6.2: Fix Prometheus Job template. Leonardo Magdanello <lmagdanello40@gmail.com>
 * 1.6.1: Fix TYPO prometheus template. Leonardo Magdanello <lmagdanello40@gmail.com>
 * 1.6.0: Monitoring HA with Basic Auth. Leonardo Magdanello <lmagdanello40@gmail.com>
 * 1.5.0: Add small features for Monitoring. Leonardo Magdanello <lmagdanello40@gmail.com>
