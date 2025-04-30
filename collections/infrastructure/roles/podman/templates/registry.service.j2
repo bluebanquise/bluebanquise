@@ -9,19 +9,22 @@ Environment=PODMAN_SYSTEMD_UNIT=%n
 Restart=on-failure
 TimeoutStopSec=62
 ExecStartPre=/bin/rm -f %t/%n.ctr-id
-ExecStart=/usr/bin/podman run --net=slirp4netns --cidfile=%t/%n.ctr-id --sdnotify=conmon --cgroups=no-conmon \
- --rm --replace --name=registry --privileged -p {{ podman_local_registry_port }}:5000 \
--v /var/lib/registry:{{ podman_local_registry_dir }} \
+ExecStart=/usr/bin/podman run --net=slirp4netns --cidfile=%t/%n.ctr-id --conmon-pidfile %t/podman_registry.pid \
+ --detach --rm --replace --name=registry --privileged -p {{ podman_local_registry_port }}:5000 \
+ -v /var/lib/registry:{{ podman_local_registry_dir }} \
 {% if podman_registry_enable_encryption %}
  --secret smc_registry_key --secret smc_registry_crt \
  -e REGISTRY_HTTP_TLS_KEY=/run/secrets/smc_registry_key \
  -e REGISTRY_HTTP_TLS_CERTIFICATE=/run/secrets/smc_registry_crt \
 {% endif %}
 {{ podman_registry_container }}:{{ podman_registry_container_tag }}
-ExecStop=/usr/bin/podman stop -t 2 --ignore --cidfile=%t/%n.ctr-id
+ExecStop=/usr/bin/podman stop -t 5 --ignore --cidfile=%t/%n.ctr-id
 ExecStopPost=/usr/bin/podman rm -f --ignore --cidfile=%t/%n.ctr-id
-Type=notify
-NotifyAccess=all
+# registry container exits with rc=2 when stopped, allow this
+SuccessExitStatus=2
+TimeoutSec=480
+Type=forking
+PIDFile=%t/podman_registry.pid
 
 [Install]
 WantedBy=multi-user.target default.target
