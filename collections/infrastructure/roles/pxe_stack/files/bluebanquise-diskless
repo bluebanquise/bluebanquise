@@ -7,6 +7,7 @@
 # ██████╔╝███████╗╚██████╔╝███████╗██████╔╝██║  ██║██║ ╚████║╚██████╔╝╚██████╔╝██║███████║███████╗
 # ╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚══▀▀═╝  ╚═════╝ ╚═╝╚══════╝╚══════╝
 #
+# 2.2.3: (SMC fix) Fix user creation when host node is running SELinux in enforcing mode, force smc group. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
 # 2.2.2: (SMC fix) Tolerate lost+found path inside /var/www/html/pxe/diskless. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
 # 2.2.1: (SMC fix) Fix check of user presence in image for cross-arch images. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
 # 2.2.0: (SMC feature) Add SELinux support to live images. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
@@ -98,6 +99,7 @@ import subprocess
 import crypt
 import string
 import sys
+import platform
 
 
 # Colors, from https://stackoverflow.com/questions/287871/how-to-print-colored-text-in-terminal-in-python
@@ -297,7 +299,7 @@ print("""\
       (o_  (o_  //\\
       (/)_ (/)_ V_/_
    BlueBanquise diskless
-   v2.2.1
+   v2.2.3
    Patched for SMC
 
 """)
@@ -537,11 +539,27 @@ while True:
         logging.info(bcolors.OKBLUE + "Adding " + tool_parameters['sudo_user'] + " user to image..." + bcolors.ENDC)
         protected_os_system("mkdir -p " + reference_image_nfs_path + os.path.dirname(tool_parameters['sudo_user_home']))
 
+        # Required if host node is running SELinux in enforcing mode
+        protected_os_system("mkdir -p " + reference_image_nfs_path + "/sys/fs/selinux")
+        protected_os_system("echo '0' > " + reference_image_nfs_path + "/sys/fs/selinux/enforce")
+
         # create group in image, skip if already created
-        protected_os_system("/usr/bin/grep -q '^" + tool_parameters['sudo_user'] + ":' " + reference_image_nfs_path + "/etc/group || /usr/sbin/groupadd -R " + reference_image_nfs_path + "/ " + tool_parameters['sudo_user'])
+        # SMC: group name is hard-coded as "smc"
+        # TODO add feature to support group name in pxe_stack
+        protected_os_system("/usr/bin/grep -q '^smc:' " + reference_image_nfs_path + "/etc/group || /usr/sbin/groupadd -R " + reference_image_nfs_path + "/ smc")
+
+        # useradd should use "-g", but this fails in RHEL8 hosts
+        # check if we are running RHEL 8
+        running_rhel8 = "el8" in platform.release()
+        group_str = ""
+        if not running_rhel8:
+            # SMC: -g smc is hard-coded, see block above
+            group_str = "-g smc"
 
         # create user in image, skip if already created
-        protected_os_system("/usr/bin/grep -q '^" + tool_parameters['sudo_user'] + ":' " + reference_image_nfs_path + "/etc/passwd || /usr/sbin/useradd  -R " + reference_image_nfs_path + "/ -m -c 'SMC user' -d " + tool_parameters['sudo_user_home'] + " -s /bin/bash -p '" + image_selected_user_password + "' " + tool_parameters['sudo_user'])
+        # SMC: -g smc is hard-coded, see block above
+        # SMC: not using --system
+        protected_os_system("/usr/bin/grep -q '^" + tool_parameters['sudo_user'] + ":' " + reference_image_nfs_path + "/etc/passwd || /usr/sbin/useradd  -R " + reference_image_nfs_path + "/ -m -c 'SMC user' " + group_str + " -d " + tool_parameters['sudo_user_home'] + " -s /bin/bash -p '" + image_selected_user_password + "' " + tool_parameters['sudo_user'])
 
         # update of user password in image, useful if previous command was skipped
         logging.info(bcolors.OKBLUE + "Setting password of " + tool_parameters['sudo_user'] + " user in image..." + bcolors.ENDC)
