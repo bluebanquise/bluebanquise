@@ -5,7 +5,9 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 # 3.2.5
 
 * 4/30/25 - lmagdanello - [prometheus] Fix Prometheus Job template.
+* 4/29/25 - ginomcevoy - [podman] fix systemd for registry service to allow rc=2, use recommended Type=forking
 * 4/25/25 - thiagocardozo - [pxe_stack] Fixed when conditional check.
+* 4/23/25 - lmagdanello - [http_server] Comment out the variables http_server_*_services.
 * 4/21/25 - ginomcevoy - [pxe_stack] Fix bluebanquise-diskless to tolerate lost+found directory.
 * 4/21/25 - ginomcevoy - [pcs] Use --config to avoid error when pushing to the CIB.
 * 4/21/25 - ginomcevoy - [auditd] Avoid having service running on both nodes in HA.
