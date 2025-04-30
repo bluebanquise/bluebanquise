@@ -99,6 +99,7 @@ import subprocess
 import crypt
 import string
 import sys
+import platform
 
 
 # Colors, from https://stackoverflow.com/questions/287871/how-to-print-colored-text-in-terminal-in-python
@@ -547,10 +548,18 @@ while True:
         # TODO add feature to support group name in pxe_stack
         protected_os_system("/usr/bin/grep -q '^smc:' " + reference_image_nfs_path + "/etc/group || /usr/sbin/groupadd -R " + reference_image_nfs_path + "/ smc")
 
+        # useradd should use "-g", but this fails in RHEL8 hosts
+        # check if we are running RHEL 8
+        running_rhel8 = "el8" in platform.release()
+        group_str = ""
+        if not running_rhel8:
+            # SMC: -g smc is hard-coded, see block above
+            group_str = "-g smc"
+
         # create user in image, skip if already created
         # SMC: -g smc is hard-coded, see block above
         # SMC: not using --system
-        protected_os_system("/usr/bin/grep -q '^" + tool_parameters['sudo_user'] + ":' " + reference_image_nfs_path + "/etc/passwd || /usr/sbin/useradd  -R " + reference_image_nfs_path + "/ -m -c 'SMC user' -g smc -d " + tool_parameters['sudo_user_home'] + " -s /bin/bash -p '" + image_selected_user_password + "' " + tool_parameters['sudo_user'])
+        protected_os_system("/usr/bin/grep -q '^" + tool_parameters['sudo_user'] + ":' " + reference_image_nfs_path + "/etc/passwd || /usr/sbin/useradd  -R " + reference_image_nfs_path + "/ -m -c 'SMC user' " + group_str + " -d " + tool_parameters['sudo_user_home'] + " -s /bin/bash -p '" + image_selected_user_password + "' " + tool_parameters['sudo_user'])
 
         # update of user password in image, useful if previous command was skipped
         logging.info(bcolors.OKBLUE + "Setting password of " + tool_parameters['sudo_user'] + " user in image..." + bcolors.ENDC)
