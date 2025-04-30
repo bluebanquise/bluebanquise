@@ -537,6 +537,10 @@ while True:
         logging.info(bcolors.OKBLUE + "Adding " + tool_parameters['sudo_user'] + " user to image..." + bcolors.ENDC)
         protected_os_system("mkdir -p " + reference_image_nfs_path + os.path.dirname(tool_parameters['sudo_user_home']))
 
+        # Required if host node is running SELinux in enforcing mode
+        protected_os_system("mkdir -p " + reference_image_nfs_path + "/sys/fs/selinux")
+        protected_os_system("echo '0' > " + reference_image_nfs_path + "/sys/fs/selinux/enforce")
+
         # create group in image, skip if already created
         # SMC: group name is hard-coded as "smc"
         # TODO add feature to support group name in pxe_stack
