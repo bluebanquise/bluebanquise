@@ -538,10 +538,14 @@ while True:
         protected_os_system("mkdir -p " + reference_image_nfs_path + os.path.dirname(tool_parameters['sudo_user_home']))
 
         # create group in image, skip if already created
-        protected_os_system("/usr/bin/grep -q '^" + tool_parameters['sudo_user'] + ":' " + reference_image_nfs_path + "/etc/group || /usr/sbin/groupadd -R " + reference_image_nfs_path + "/ " + tool_parameters['sudo_user'])
+        # SMC: group name is hard-coded as "smc"
+        # TODO add feature to support group name in pxe_stack
+        protected_os_system("/usr/bin/grep -q '^smc:' " + reference_image_nfs_path + "/etc/group || /usr/sbin/groupadd -R " + reference_image_nfs_path + "/ smc")
 
         # create user in image, skip if already created
-        protected_os_system("/usr/bin/grep -q '^" + tool_parameters['sudo_user'] + ":' " + reference_image_nfs_path + "/etc/passwd || /usr/sbin/useradd  -R " + reference_image_nfs_path + "/ -m -c 'SMC user' -d " + tool_parameters['sudo_user_home'] + " -s /bin/bash -p '" + image_selected_user_password + "' " + tool_parameters['sudo_user'])
+        # SMC: -g smc is hard-coded, see block above
+        # SMC: not using --system
+        protected_os_system("/usr/bin/grep -q '^" + tool_parameters['sudo_user'] + ":' " + reference_image_nfs_path + "/etc/passwd || /usr/sbin/useradd  -R " + reference_image_nfs_path + "/ -m -c 'SMC user' -g smc -d " + tool_parameters['sudo_user_home'] + " -s /bin/bash -p '" + image_selected_user_password + "' " + tool_parameters['sudo_user'])
 
         # update of user password in image, useful if previous command was skipped
         logging.info(bcolors.OKBLUE + "Setting password of " + tool_parameters['sudo_user'] + " user in image..." + bcolors.ENDC)
