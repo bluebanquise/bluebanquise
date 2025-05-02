@@ -51,7 +51,6 @@
         "overwrite": true,
         "message": "Updated by ansible"
       }
-  no_log: true
   with_fileglob:
     - "{{ _tmp_dashboards.path }}/*"
     - "{{ grafana_dashboards_dir }}/*.json"
