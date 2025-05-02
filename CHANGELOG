@@ -4,6 +4,8 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # 3.2.5
 
+* 5/2/25 - ginomcevoy - [conman] Restore feature to inform credentials via BMC ansible hosts
+* 5/2/25 - ginomcevoy - [powerman] Restore feature to inform credentials via BMC ansible hosts
 * 5/2/25 - thiagocardozo - [grafana] Service handler retries;Show imported dashboards.
 * 4/30/25 - thiagocardozo - [nfs] Fixed server name in client when using IP.
 * 4/30/25 - ginomcevoy - [pxe_stack] Fix issue with bluebanquise-diskless and host node running SELinux.
