@@ -565,20 +565,24 @@ one for client.
 In the playbook, use:
 
 ```yaml
-roles:
-  - role: log_server
+  - role: bluebanquise.infrastructure.rsyslog
     tags: log
     vars:
       log_server_rsyslog_custom_conf_path : /etc/rsyslog-server.conf
-  - role: log_client
+      rsyslog_integrate_rsyslog_conf: true
+...
+  - role: bluebanquise.infrastructure.rsyslog
     tags: log
     vars:
       log_client_rsyslog_custom_conf_path : /etc/rsyslog-client.conf
+      rsyslog_integrate_rsyslog_conf: true
 tasks:
   - name: Remove base rsyslog configuration
     file:
       path: /etc/rsyslog.conf
       state: absent
+    when: "'/etc/rsyslog.conf' is not link"
+    tags: log
 ```
 
 This will generate both configurations, and ensure the default configuration is
