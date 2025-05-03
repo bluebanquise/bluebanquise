@@ -36,7 +36,9 @@
     group: root
     mode: 0644
   notify: service <|> Restart rsyslog service
-  when: "'rsyslog.conf' not in (rsyslog_configuration_files | default([]) | selectattr('name','defined') | map(attribute='name') | list)"
+  when:
+    - "'rsyslog.conf' not in (rsyslog_configuration_files | default([]) | selectattr('name','defined') | map(attribute='name') | list)"
+    - not rsyslog_integrate_rsyslog_conf | default(false) | bool
   tags:
     - template
 

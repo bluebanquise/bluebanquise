@@ -17,6 +17,11 @@ action(type="omfwd" target="{{ server_address }}" protocol="tcp" port="{{ server
 # ### end of the forwarding rule ###
 {% endmacro %}
 
+{# Useful with High Availability, so that this file is used as rsyslog.conf #}
+{% if rsyslog_integrate_rsyslog_conf %}
+{% include 'rsyslog.conf.j2' %}
+{% endif %}
+
 #### RULES ####
 
 # Everybody gets emergency messages
