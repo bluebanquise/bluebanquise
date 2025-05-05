@@ -51,7 +51,13 @@
   tags:
     - internal
 
+- name: meta <|> Run handler tasks to apply OS dedicated events
+  ansible.builtin.meta: flush_handlers
+
 - name: "include_tasks <|> Configure network interfaces via nmcli"
   ansible.builtin.include_tasks: "nmcli.yml"
   tags:
     - internal
+
+- name: meta <|> Run handler tasks
+  ansible.builtin.meta: flush_handlers

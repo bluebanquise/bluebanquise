@@ -1,3 +1,22 @@
+---
+
+- block:  # Force connection name to be the same as device name
+
+    - name: command <|> Gather devices device and name
+      ansible.builtin.command: nmcli --terse -f device,name con show  # Gather devices and related name in a parsable way
+      register: nmcli_con_show
+      changed_when: False
+
+    - name: command <|> Rename interfaces that 
+      ansible.builtin.command: "nmcli connection modify '{{ item.value }}' connection.id '{{ item.key }}'"
+      with_items: "{{ dict(nmcli_con_show.stdout | split('\n') | map('split',':')) | dict2items }}"
+      register: nmcli_result
+        - item.key is defined and item.key is not none and item.key is string and item.key != ''  # Protection in case a connection exists without associated device
+        - item.key != item.value  # If key (device) does not match value (connection name), then rename it
+      changed_when: nmcli_result.rc == 0
+
+  when: nic_nmcli_device_is_connection_name
+
 - name: nmcli <|> Set NICs configuration # noqa args[module]
   community.general.nmcli:
     # Tuned
@@ -106,3 +125,4 @@
     - nic_force_reboot
     - item.changed
     - not (reboot_status.changed | d(false))
+    - nic_allow_reboot
