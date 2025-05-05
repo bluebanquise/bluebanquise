@@ -11,12 +11,13 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 * 4/25/25 - oxedions - [firewall] Fix issue with interfaces without networks. (#1001, from @levaillx)
 * 4/25/25 - oxedions - [TUTO] Add masquerading, fix missing data in ansible.
 * 4/25/25 - oxedions - [nic] Add support for infiniband_mac. (#1003, from @levaillx)
+* 4/25/25 - thiagocardozo - [pxe_stack] Fixed when conditional check.
 * 4/24/25 - pbirokas - [slurm] Typo in Case grestypes.
 * 4/23/25 - lmagdanello - [http_server] Comment out the variables http_server_*_services.
 * 4/16/25 - thiagocardozo - [grafana] Retry service management a few times;fixed handler variables.
 * 4/8/25 - oxedions - [LOGS] Add note in all README for logs centralized in this file.
 * 4/4/25 - oxedions - [TUTO] Improve ubuntu 24.04 support.
-* 4/4/25 - thiagocardozo - [conman] Added ssh config file for user conman.
+* 4/4/25 - thiagocardozo - [conman] Added ssh config file for user conman.
 * 4/5/25 - jilkarnas - [pxe_stack] allow selection of shutdown action other than reboot & allow to keep osdeploy boot.
 * 3/31/25 - thiagocardozo - [grafana] grafana better variable and hide admin password from output.
 * 3/31/25 - thiagocardozo - [ssh_client] Add extra config options.
