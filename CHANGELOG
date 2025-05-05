@@ -3,7 +3,7 @@
 Format: <date> - <author (username or mail or both)> - [role] <change description>
 
 # 3.2.5
-
+* 5/5/25 - thiagocardozo - [grafana] Fixed old ep_firewall variable.
 * 5/2/25 - ginomcevoy - [rsyslog] Allow merging rsyslog.conf into server/client confs for HA
 * 5/2/25 - ginomcevoy - [conman] Restore feature to inform credentials via BMC ansible hosts
 * 5/2/25 - ginomcevoy - [powerman] Restore feature to inform credentials via BMC ansible hosts
