@@ -4,6 +4,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.2.6
 
+* 4/30/25 - thiagocardozo - [nfs] Fixed server name in client when using IP.
 * 4/26/25 - oxedions - [dns_server] CLean old variable, disable ipv6 listen, allow forward only. (#1050, from aolloh)
 * 4/26/25 - oxedions - [repositories] Fix support of missing bb_repositories variable. (#1006, from sopalain)
 * 4/25/25 - oxedions - [nfs] Fix id in export, add subnet parameter. (#1004, from levaillx)
