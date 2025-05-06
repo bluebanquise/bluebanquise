@@ -4,9 +4,13 @@
     name: "{{ item  }}"
     state: restarted
   with_items: "{{ grafana_services_to_start }}"
+  register: service_results
+  retries: 5
+  delay: 10
+  until: service_results is not failed
   when:
     - "'service' not in ansible_skip_tags"
-    - (start_services | bool)
+    - (grafana_start_services | default(bb_start_services) | default(true) | bool)
 
 - name: Set privileges on provisioned dashboards
   ansible.builtin.file:

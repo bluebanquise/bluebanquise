@@ -1,5 +1,13 @@
 ---
 
+- name: "apt <|> Remove netplan"
+  ansible.builtin.apt:
+    name: "netplan.io"
+    state: absent
+  notify: reboot <|> Reboot system
+  tags:
+    - package
+
 - name: "service <|> Disable systemd-networkd"
   ansible.builtin.service:
     name: systemd-networkd

@@ -79,6 +79,9 @@ variable.
 
 ## Changelog
 
+**Please now update CHANGELOG file at repository root instead of adding logs in this file.
+These logs bellow are only kept for archive.**
+
 * 1.4.2: Fix global logic. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.1: Fix icebergs mechanism. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.4.0: Allow services and services_ip together. Benoit Leveugle <benoit.leveugle@gmail.com>

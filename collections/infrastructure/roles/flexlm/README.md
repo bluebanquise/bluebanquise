@@ -73,6 +73,9 @@ This role is validated on:
 
 ## Changelog
 
+**Please now update CHANGELOG file at repository root instead of adding logs in this file.
+These logs bellow are only kept for archive.**
+
 * 1.0.3: Fix grammar. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.2: Fix few packages names. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.0.1: Update all module to full path. Matthieu Isoard

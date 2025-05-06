@@ -113,7 +113,7 @@ If you want to enforce you own password or update any other variables in default
   hosts: "mg_managements"
   vars:
     start_services: true
-    enable_services: true
+    bb_enable_services: true
   roles:
     - role: prometheus
       vars:
@@ -151,6 +151,11 @@ Note: if you try to add dashboards, the role will alwats at checking if the data
 
 ## Changelog
 
+**Please now update CHANGELOG file at repository root instead of adding logs in this file.
+These logs bellow are only kept for archive.**
+
+* 2.2.3: Fixed service start and user creation. Thiago Cardozo <boubee.thiago@gmail.com>
+* 2.2.2: Reuse better variable for output;Don't print admin password at end. Thiago Cardozo <boubee.thiago@gmail.com>
 * 2.2.1: Missing default port reference. Thiago Cardozo <boubee.thiago@gmail.com>
 * 2.2.0: Optional uid/gid;Custom firewall port. Thiago Cardozo <boubee.thiago@gmail.com>
 * 2.1.2: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>

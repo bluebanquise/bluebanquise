@@ -81,6 +81,9 @@ internal zone, you must set the variable `pxe_stack_firewall_zone: internal`.
 
 ## Changelog
 
+**Please now update CHANGELOG file at repository root instead of adding logs in this file.
+These logs bellow are only kept for archive.**
+
 * 1.3.5: Allow usage on all distributions. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.4: Fix condition in handler. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.3: Adapt to os hw split. Benoit Leveugle <benoit.leveugle@gmail.com>

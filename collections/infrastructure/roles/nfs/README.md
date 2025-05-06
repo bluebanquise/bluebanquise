@@ -108,6 +108,7 @@ Optional values are:
 | export_options      | Arguments for the server (`export`). If no specified, will be `rw,sync,root_squash` |
 | mount_options       | Arguments for the client (`mount`). If no specified, will be `rw,fsc,nfsvers=4.2,bg,nosuid,nodev` |
 | server_group        | Group whose members will configure NFS as server. Useful for when using `server` parameter as virtual IP |
+| subnet              | Force a specific subnet to be used instead of the one defined in the associated network. For example: `10.10.0.0/24` |
 
 Please refer to https://linux.die.net/man/5/nfs for detail on export and mount parameters available.
 
@@ -156,6 +157,9 @@ To change this behavior, simply update `nfs_client_sebooleans` variable
 which is a list of sebooleans to activate.
 
 ## Changelog
+
+**Please now update CHANGELOG file at repository root instead of adding logs in this file.
+These logs bellow are only kept for archive.**
 
 * 1.5.0: Fix skipping host if using IP as server. Added parameter to run server in a group. Thiago Cardozo <boubee.thiago@gmail.com>
 * 1.4.4: Fix missing service for nfsv3 in RHEL firewall. Benoit Leveugle <benoit.leveugle@gmail.com>

@@ -35,7 +35,7 @@
     immediate: true
     state: enabled
   when: networks[item.network]['firewall'] is defined and networks[item.network]['firewall']['zone'] is defined
-  loop: "{{ network_interfaces }}"
+  loop: "{{ (network_interfaces | selectattr('network', 'defined') | list) }}"
   loop_control:
     label: "{{ item.interface }} -> {{ networks[item.network]['firewall']['zone'] }}"
   notify: service <|> Restart firewall services

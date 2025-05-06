@@ -58,6 +58,10 @@ http_server_configurations_files:
 
 ## Changelog
 
+**Please now update CHANGELOG file at repository root instead of adding logs in this file.
+These logs bellow are only kept for archive.**
+
+* 1.3.3: Comment out the variables http_server_*_services. Leo Magdanello <lmagdanello40@gmail.com>
 * 1.3.2: Adapt to os hw split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.1: Update to BB 2.0 format. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.3.0: Update to BB 2.0 format. Benoit Leveugle <benoit.leveugle@gmail.com>

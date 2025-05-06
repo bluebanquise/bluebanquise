@@ -26,6 +26,10 @@ pxe_stack_sudo_is_passwordless: true
 # Preserve default repositories
 pxe_stack_preserve_repositories: true
 
+# default is reboot, can be set to poweroff, halt or shutdown
+pxe_stack_post_install_action: reboot
+pxe_stack_post_install_boot_to_disk: true
+
 # Do not edit here
 # pxe_stack_enable_services:
 # pxe_stack_start_services:
@@ -33,7 +37,7 @@ pxe_stack_preserve_repositories: true
 ############################################################
 ### Default equipment profile parameters
 
-pxe_stack_hw_equipment_type: server
+pxe_stack_hw_equipment_type: none
 pxe_stack_os_operating_system:
   distribution: ubuntu
   distribution_version: 22.04

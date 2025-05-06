@@ -23,7 +23,7 @@ options {
 {% endfor %}
   };
 
-  listen-on-v6 port 53 { ::1; };
+  # listen-on-v6 port 53 { ::1; };  # To be uncommented later if needeed
   directory 	"{{ dns_server_var_dir }}";
   dump-file 	"{{ dns_server_dump_file }}";
   statistics-file "{{ dns_server_statistics_file }}";
@@ -48,6 +48,9 @@ options {
 {% endif %}
 
 {% if (dns_server_forwarders | length) > 0 %}
+  {% if dns_server_forward_only | default(false, true) %}
+  forward only;
+  {% endif %}
   forwarders {
   {% for forwarder in dns_server_forwarders %}
     {{ forwarder }};

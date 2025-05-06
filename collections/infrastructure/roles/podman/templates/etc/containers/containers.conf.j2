@@ -33,7 +33,7 @@ log_driver = "journald"
 log_size_max = -1
 
 [network]
-network_backend = "cni"
+network_backend = ""
 cni_plugin_dirs = [
                "/usr/libexec/cni",
                "/usr/lib/cni",
@@ -69,10 +69,20 @@ infra_image = "k8s.gcr.io/pause:3.1"
 namespace = "{{ podman_conf_namespace }}"
 no_pivot_root = false
 num_locks = 2048
-runtime = "runc"
+runtime = ""
 tmp_dir = "/var/run/libpod"
 
 [engine.runtimes]
+
+crun = [
+		"/usr/bin/crun",
+		"/usr/sbin/crun",
+		"/usr/local/bin/crun",
+		"/usr/local/sbin/crun",
+		"/sbin/crun",
+		"/bin/crun",
+		"/run/current-system/sw/bin/crun",
+]
 
 runc = [
             "/usr/bin/runc",

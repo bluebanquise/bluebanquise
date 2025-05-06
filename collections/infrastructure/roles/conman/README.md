@@ -77,6 +77,10 @@ Once these pam_limits parameter pushed, restart conman daemon.
 
 ## Changelog
 
+**Please now update CHANGELOG file at repository root instead of adding logs in this file.
+These logs bellow are only kept for archive.**
+
+* 1.7.0: Added ssh config file for user conman. Thiago Cardozo <boubee.thiago@gmail.com>
 * 1.6.0: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.5.1: Fix logrotate paths. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
 * 1.5.0: Add logrotate file. Matthieu Isoard <indigoping4cgmi@gmail.com>

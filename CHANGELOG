@@ -2,11 +2,47 @@
 
 Format: <date> - <author (username or mail or both)> - [role] <change description>
 
-# To 3.2.1
+# To 3.2.7
 
+* 5/5/25 - oxedions - [nic] Fix role for Ubuntu/Debian, ensure con name matches device name.
+
+# 3.2.6
+
+* 5/5/25 - thiagocardozo - [grafana] Fixed old ep_firewall variable.
+* 4/30/25 - thiagocardozo - [nfs] Fixed server name in client when using IP.
+* 4/26/25 - oxedions - [dns_server] CLean old variable, disable ipv6 listen, allow forward only. (#1050, from aolloh)
+* 4/26/25 - oxedions - [repositories] Fix support of missing bb_repositories variable. (#1006, from sopalain)
+* 4/25/25 - oxedions - [nfs] Fix id in export, add subnet parameter. (#1004, from levaillx)
+* 4/25/25 - oxedions - [firewall] Fix issue with interfaces without networks. (#1001, from @levaillx)
+* 4/25/25 - oxedions - [TUTO] Add masquerading, fix missing data in ansible.
+* 4/25/25 - oxedions - [nic] Add support for infiniband_mac. (#1003, from @levaillx)
+* 4/25/25 - thiagocardozo - [pxe_stack] Fixed when conditional check.
+* 4/24/25 - pbirokas - [slurm] Typo in Case grestypes.
+* 4/23/25 - lmagdanello - [http_server] Comment out the variables http_server_*_services.
+* 4/16/25 - thiagocardozo - [grafana] Retry service management a few times;fixed handler variables.
+* 4/8/25 - oxedions - [LOGS] Add note in all README for logs centralized in this file.
+* 4/4/25 - oxedions - [TUTO] Improve ubuntu 24.04 support.
+* 4/4/25 - thiagocardozo - [conman] Added ssh config file for user conman.
+* 4/5/25 - jilkarnas - [pxe_stack] allow selection of shutdown action other than reboot & allow to keep osdeploy boot.
+* 3/31/25 - thiagocardozo - [grafana] grafana better variable and hide admin password from output.
+* 3/31/25 - thiagocardozo - [ssh_client] Add extra config options.
+* 3/31/25 - thiagocardozo - [auditd] Option to log root commands.
+
+# 3.2.5
+
+* 3/27/25 - thiagocardozo - [auditd] Option to log root commands.
+* 3/25/25 - santos-lucas - [gpu] force gather facts on the beginning of execution.
+* 3/25/25 - santos-lucas - [gpu] Add support for AMD gpus.
+* 3/25/25 - hmeScaler - [users] Role enhancement and bug fixing
+* 3/25/25 - aolloh - [custom_packages] Remove braces on item.
+* 3/25/25 - lmagdanello - [pxe_stack] Fix Formatting for Kernel Parameters in iPXE Template.
+* 3/25/25 - thiagocardozo - [grafana] Fixed service start and user creation.
+* 3/25/25 - thiagocardozo - [grafana] Reuse better variable for output;Don't print admin password at end.
+* 3/21/25 - oxedions - [CORE] Fix a critical error for main interface an main address j2_
+* 3/18/25 - fonseca-rm - [podman] update podman configurations for compatibility with new RHEL version
 * 3/13/25 - oxedions - [INFRA] Updated slurm to 24.05.6
 * 3/13/25 - oxedions - [INFRA] Updated atftp to 0.8.0
-* 3/13/25 - Thiago Cardozo <boubee.thiago@gmail.com> - [grafana] Missing default port reference.
+* 3/13/25 - thiagocardozo - [grafana] Missing default port reference.
 * 3/13/25 - oxedions - [bootstrap] Fix root vs sudo
 * 3/5/25 - oxedions - [pxe_stack] Add capability to precedence partitioning from hardware profile
 * 3/3/25 - oxedions - [hosts_file] allow the FDQN to be set first in /etc/hosts (# 1005, from @levaillx)
