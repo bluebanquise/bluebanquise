@@ -2,7 +2,11 @@
 
 Format: <date> - <author (username or mail or both)> - [role] <change description>
 
-# To 3.2.6
+# To 3.2.7
+
+* 5/5/25 - oxedions - [nic] Fix role for Ubuntu/Debian, ensure con name matches device name.
+
+# 3.2.6
 
 * 5/5/25 - thiagocardozo - [grafana] Fixed old ep_firewall variable.
 * 4/30/25 - thiagocardozo - [nfs] Fixed server name in client when using IP.

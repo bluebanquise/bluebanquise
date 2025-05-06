@@ -1,22 +1,30 @@
 ---
-- name: file <|> Ensure old netplan configuration is erased
-  ansible.builtin.file:
-    path: /etc/netplan/00-installer-config.yaml
-    state: absent
-  tags:
-    - identify
+# - name: file <|> Ensure old netplan configuration is erased
+#   ansible.builtin.file:
+#     path: /etc/netplan/00-installer-config.yaml
+#     state: absent
+#   tags:
+#     - identify
 
-- name: file <|> Netplan uses NetworkManager
-  ansible.builtin.copy:
-    src: 01-netcfg.yaml
-    dest: /etc/netplan/01-netcfg.yaml
-    owner: root
-    group: root
-    mode: 0644
-  # notify:
-  #   - command <|> netplan generate
+# - name: file <|> Netplan uses NetworkManager
+#   ansible.builtin.copy:
+#     src: 01-netcfg.yaml
+#     dest: /etc/netplan/01-netcfg.yaml
+#     owner: root
+#     group: root
+#     mode: 0644
+#   # notify:
+#   #   - command <|> netplan generate
+#   tags:
+#     - identify
+
+- name: "apt <|> Remove netplan"
+  ansible.builtin.apt:
+    name: "netplan.io"
+    state: absent
+  notify: reboot <|> Reboot system
   tags:
-    - identify
+    - package
 
 - name: "service <|> Disable systemd-networkd"
   ansible.builtin.service:
