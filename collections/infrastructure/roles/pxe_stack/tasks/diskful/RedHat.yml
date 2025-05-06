@@ -32,7 +32,7 @@
     equipment: "{{ bb_equipments[item] | default({}, true) }}"
   with_items: "{{ bb_equipments | default({}, true) }}"
   when:
-    - (bb_equipments[item]['type'] | default(pxe_stack_hw_equipment_type, true)) == "server"
+    - (bb_equipments[item]['hw']['hw_equipment_type'] | default(pxe_stack_hw_equipment_type, true)) == "server"
     - (bb_equipments[item]['os']['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution, true) | lower) in ['redhat', 'rhel', 'centos', 'centosstream', 'rockylinux', 'cloudlinux', 'oraclelinux', 'almalinux']
   tags:
     - template
@@ -48,7 +48,7 @@
     equipment: "{{ bb_equipments[item] | default({}, true) }}"
   with_items: "{{ bb_equipments | default({}, true) }}"
   when:
-    - (bb_equipments[item]['type'] | default(pxe_stack_hw_equipment_type, true)) == "server"
+    - (bb_equipments[item]['hw']['hw_equipment_type'] | default(pxe_stack_hw_equipment_type, true)) == "server"
     - (bb_equipments[item]['os']['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution, true) | lower) in ['redhat', 'rhel', 'centos', 'centosstream', 'rockylinux', 'cloudlinux', 'oraclelinux', 'almalinux']
   tags:
     - template
