@@ -95,16 +95,16 @@
     state: present
     login_host: "{{ slurm_accounting_mysql_login_host | default(omit, true) }}"
     login_port: "{{ slurm_accounting_mysql_login_port | default(omit, true) }}"
-    login_user: "{{ slurm_accounting_mysql_login_user | default(slurm_accounting_storage_user, true) | default(omit, true) }}"
-    login_password: "{{ slurm_accounting_mysql_login_password | default(slurm_accounting_storage_pass, true) | default(omit, true) }}"
+    login_user: "{{ slurm_accounting_mysql_login_user | default(omit, true) }}"
+    login_password: "{{ slurm_accounting_mysql_login_password | default(omit, true) }}"
   when: slurm_accounting_mysql_create_database
   tags:
     - service
 
 - name: mysql_user <|> setup slurm db user # noqa no-tabs
   community.mysql.mysql_user:
-    name: "{{ slurm_accounting_mysql_login_user | default(slurm_accounting_storage_user, true) }}"
-    password: "{{ slurm_accounting_mysql_login_password | default(slurm_accounting_storage_pass, true) }}"
+    name: "{{ slurm_accounting_storage_user | default(slurm_accounting_mysql_login_user, true) }}"
+    password: "{{ slurm_accounting_storage_pass | default(slurm_accounting_mysql_login_password, true) }}"
     priv: 'slurm_acct_db.*:ALL'
     state: present
     login_host: "{{ slurm_accounting_mysql_login_host | default(omit, true) }}"
