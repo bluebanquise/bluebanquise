@@ -9,8 +9,8 @@
 
 ## Controller
 ClusterName={{ slurm_cluster_name }}
-SlurmctldAddr={{ slurm_controller_address | default(slurm_controller_hostname, true) | default(slurm_control_machine, true) }}
-SlurmctldHost={{ slurm_controller_hostname | default(slurm_control_machine, true) }}
+SlurmctldAddr={{ slurm_controller_address | default(slurm_controller_hostname, true) }}
+SlurmctldHost={{ slurm_controller_hostname }}
 
 {% if slurm_computes_config == "configless" %}
 ## Use configless mode
@@ -60,7 +60,8 @@ SelectTypeParameters=CR_Core_Memory,CR_CORE_DEFAULT_DIST_BLOCK,CR_ONE_TASK_PER_C
 {% endif %}
 {% if slurm_enable_accounting %}
 ## Accounting
-AccountingStorageHost={{ slurm_controller_hostname | default(slurm_control_machine, true) }}
+AccountingStorageHost={{ slurm_controller_hostname }}
+AccountingStoragePort={{ slurm_dbd_port | default('6819') }}
 AccountingStorageType=accounting_storage/slurmdbd
 JobAcctGatherType=jobacct_gather/linux
 {% endif %}
