@@ -4,6 +4,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.2.7
 
+* 5/15/25 - thiagocardozo - [pxe_stack] Stop folder creating task from acting on present images.
 * 5/5/25 - oxedions - [nic] Fix role for Ubuntu/Debian, ensure con name matches device name.
 
 # 3.2.6
