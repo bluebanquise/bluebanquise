@@ -5,17 +5,17 @@
   block:
 
     - name: command <|> Gather devices device and name
-      ansible.builtin.command: nmcli --terse -f device,name con show  # Gather devices and related name in a parsable way
+      ansible.builtin.command: nmcli --terse -f device,name,type con show  # Gather devices and related name in a parsable way
       register: nmcli_con_show
       changed_when: False
 
     - name: command <|> Rename interfaces if needed
-      ansible.builtin.command: "nmcli connection modify '{{ item.value }}' connection.id '{{ item.key }}'"
-      with_items: "{{ dict(nmcli_con_show.stdout | split('\n') | map('split',':')) | dict2items }}"
+      ansible.builtin.command: "nmcli connection modify '{{ item.name }}' connection.id '{{ item.device }}'"
+      with_items: "{{ j2_nic_nmcli_device_name_type }}"
       register: nmcli_result
       when:
-        - item.key is defined and item.key is not none and item.key is string and item.key != ''  # Protection in case a connection exists without associated device
-        - item.key != item.value  # If key (device) does not match value (connection name), then rename it
+        - item.apply
+        - item.type in ['802-3-ethernet', 'ethernet']
       changed_when: nmcli_result.rc == 0
 
 - name: nmcli <|> Set NICs configuration # noqa args[module]
