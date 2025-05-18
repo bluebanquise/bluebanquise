@@ -1,5 +1,19 @@
 ---
-nic_role_version: 1.10.1
+nic_role_version: 1.12.0
+
+j2_nic_nmcli_device_name_type: "{%- set cons = [] -%}
+{%- for device in (nmcli_con_show.stdout | split('\n')) -%}
+  {%- if (device | split(':'))[0] != '' and (device | split(':'))[0] is not none -%}
+    {%- set con = {'device': (device | split(':'))[0], 'name': (device | split(':'))[1], 'type': (device | split(':'))[2], 'apply': true} -%}
+    {%- for interface in (network_interfaces | default([], true)) -%}
+      {%- if interface.interface is defined and interface.interface == con.device and interface.nmcli_device_is_connection_name is defined and not (interface.nmcli_device_is_connection_name | default(true) | bool) -%}
+        {%- set _ = con.update({'apply': False}) -%}
+      {%- endif %}
+    {%- endfor -%}
+    {{ cons.append(con) }}
+  {%- endif -%}
+{%- endfor -%}
+{{ cons }}"
 
 nic_j2_ip4: "{{ nic_j2_ip4_main | trim }}{% if item.ip4 is defined and item.ip4_manual is defined %},{% endif %}{{ nic_j2_ip4_manual | trim }}"
 
