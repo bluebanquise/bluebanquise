@@ -184,6 +184,7 @@ To achieve that, few variables are at disposal:
 **Please now update CHANGELOG file at repository root instead of adding logs in this file.
 These logs bellow are only kept for archive.**
 
+* 1.12.0: Fix ubuntu and debian support. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.11.0: Make NetworkManager default for all OS. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.10.1: Make the connection restart timeout configurable <jean-pascal.mazzilli@gmail.com>
 * 1.9.1: Add missing slave_type key. Benoit Leveugle <benoit.leveugle@gmail.com>
