@@ -270,16 +270,6 @@ You can choose to run the slurmdbd on a specific port using `slurm_dbd_port` key
 
 #### Database and login user settings
 
-Note that if you wand the role to create Slurm related database or Slurm related user into the MYSQL database, you need to set the following variables to true:
-
-* `slurm_accounting_mysql_create_database`: if **true**, create **"slurm_acct_db"** database if not existing in MYSQL.
-* `slurm_accounting_mysql_create_user`: if **true**, create needed user (set by `slurm_accounting_storage_user`) into MYSQL. This user will have rights on the **"slurm_acct_db"** database.
-
-Also, set the following variables to configure Slurm database user settings:
-
-* `slurm_accounting_mysql_login_user`: user to be used by slurmdbd process to login into databse. Default: **slurm**.
-* `slurm_accounting_mysql_login_password`: password to be used by slurmdbd process to login into database. Default: **ssap_slurm**. Please be sure to change this value in production.
-
 You can then either choose to use a distant MYSQL server, or ask the role to deploy one locally.
 
 #### Using an external MYSQL database server
@@ -288,16 +278,23 @@ Ensure variable `slurm_enable_local_mysql` is set to **false**.
 
 Then, set the following variables to configure remote server settings:
 
-* `slurm_accounting_mysql_login_host`: MYSQL server remote server address or hostname.
-* `slurm_accounting_mysql_login_port`: MYSQL server remote server port (leave empty if default).
-* `slurm_accounting_mysql_login_user`: MYSQL server remote server user to login.
-* `slurm_accounting_mysql_login_password`: MYSQL server remote server password to login.
+* `slurm_accounting_mysql_login_host`: MYSQL server remote server address or hostname. Default: 127.0.0.1
+* `slurm_accounting_mysql_login_port`: MYSQL server remote server port (leave empty if default). Default: 3306
+* `slurm_accounting_mysql_login_user`: MYSQL server remote server user to login. Default: **slurm**.
+* `slurm_accounting_mysql_login_password`: MYSQL server remote server password to login. Default: **ssap_slurm**. Please be sure to change this value in production.
 
 #### Deploying and using a local MYSQL database server
 
 Ensure variable `slurm_enable_local_mysql` is set to **true**.
 
 You should be able to let all `slurm_accounting_mysql_login_*` variables to default.
+
+#### Push configuration in MYSQL database
+
+Note that if you wand the role to create Slurm related database or Slurm related user into the MYSQL database, you need to set the following variables to true:
+
+* `slurm_accounting_mysql_create_database`: if **true**, create **"slurm_acct_db"** database if not existing in MYSQL.
+* `slurm_accounting_mysql_create_user`: if **true**, create needed user (set by `slurm_accounting_mysql_login_user`) into MYSQL. This user will have rights on the **"slurm_acct_db"** database.
 
 #### Commands to be used once deployed
 
