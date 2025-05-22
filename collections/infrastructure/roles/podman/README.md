@@ -35,7 +35,7 @@ Variables for this role:
 | podman_configure | True | boolean | use default configuration when False, write config, when True |
 | podman_configure_local_registry | False | boolean | starts a default local registry when True |
 | podman_configure_ha | False | boolean | configure podman for a HA cluster |
-| podman_users | { root: '100000:65535' } | dictionary | podman users that get uid mapping configured, those users MUST exist on the system before running this role |
+| podman_users | { root: '100000:65535' } | dictionary | podman users that get uid mapping configured
 | podman_manual_mapping | False | boolean | ansible managed /etc/subuid and /etc/subgid entries |
 | podman_sudo_user | bluebanquise | String | BlueBanquise sudo user, can get uid mapping configured if listed in podman_users
 | podman_search_registries | - 'docker.io' | items | list of registries that podman is pulling images from |
