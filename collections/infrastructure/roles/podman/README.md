@@ -37,6 +37,7 @@ Variables for this role:
 | podman_configure_ha | False | boolean | configure podman for a HA cluster |
 | podman_users | { root: '100000:65535' } | dictionary | podman users that get uid mapping configured, those users MUST exist on the system before running this role |
 | podman_manual_mapping | False | boolean | ansible managed /etc/subuid and /etc/subgid entries |
+| podman_sudo_user | bluebanquise | String | BlueBanquise sudo user, can get uid mapping configured if listed in podman_users
 | podman_search_registries | - 'docker.io' | items | list of registries that podman is pulling images from |
 | podman_insecure_registries | [] | items | non TLS registries for podman, i.e. localhost:5000 |
 | podman_blocked_registries | [] | items | blocked container registries |
