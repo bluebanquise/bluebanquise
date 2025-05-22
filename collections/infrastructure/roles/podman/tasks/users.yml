@@ -24,7 +24,9 @@
     group: "{{ getent_passwd[item.key][2] | default(root) }}"
     mode: 0750
   loop: "{{ podman_users|dict2items }}"
-  when: (getent_passwd[item.key][1] | int >= 1000) or (podman_sudo_user == item.key)
+  when:
+    - item.key in getent_passwd
+    - (getent_passwd[item.key][1] | int >= 1000) or (podman_sudo_user == item.key)
 
 - name: users <|> Deploy user configuration for non-root pods
   ansible.builtin.template:
@@ -34,4 +36,6 @@
     group: "{{ getent_passwd[item.key][2] | default(root) }}"
     mode: 0640
   loop: "{{ podman_users|dict2items }}"
-  when: (getent_passwd[item.key][1] | int >= 1000) or (podman_sudo_user == item.key)
+  when:
+    - item.key in getent_passwd
+    - (getent_passwd[item.key][1] | int >= 1000) or (podman_sudo_user == item.key)
