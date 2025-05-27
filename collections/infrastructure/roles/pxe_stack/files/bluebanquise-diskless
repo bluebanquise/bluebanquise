@@ -7,6 +7,7 @@
 # ██████╔╝███████╗╚██████╔╝███████╗██████╔╝██║  ██║██║ ╚████║╚██████╔╝╚██████╔╝██║███████║███████╗
 # ╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚══▀▀═╝  ╚═════╝ ╚═╝╚══════╝╚══════╝
 #
+# 2.2.4: (SMC fix) Allow + character when sanitizing user input, needed for kernel-64k in aarch64 images. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
 # 2.2.3: (SMC fix) Fix user creation when host node is running SELinux in enforcing mode, force smc group. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
 # 2.2.2: (SMC fix) Tolerate lost+found path inside /var/www/html/pxe/diskless. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
 # 2.2.1: (SMC fix) Fix check of user presence in image for cross-arch images. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
@@ -267,9 +268,12 @@ def get_live_image_path(tool_paths, live_image_name):
 def get_user_input(msg, validate_name=False):
     """Sanitizes the user's input by removing whitespace, keeps prompting until input is valid.
 
-    If validate_name is True, then it also checks that the input complies with the POSIX
-    specification "Portable Filename Character Set" (letters, digits, -, _, .). The goal is to
-    avoid issues with the shell commands executed by the tool.
+    If validate_name is True, then it also checks that the input complies with a modified version
+    of the POSIX specification "Portable Filename Character Set".
+    In addition to the specification (letters, digits, -, _, .), the character '+' is allowed
+    to support aarch64 images with kernel-64k kernel (kernel has '+64k' prefix).
+
+    The goal is to avoid issues with the shell commands executed by the tool.
     """
     user_input = ""
     while user_input == "":
@@ -281,8 +285,10 @@ def get_user_input(msg, validate_name=False):
         if not validate_name:
             continue
 
-        # optionally (validate_name True), validate compliance with POSIX "Portable Filename Character Set"
-        allowed_characters = string.ascii_letters + string.digits + '-_.'
+        # optionally (validate_name True), validate:
+        # - compliance with POSIX "Portable Filename Character Set"
+        # - character '+' is also allowed
+        allowed_characters = string.ascii_letters + string.digits + '-_.+'
         invalid_characters = set(user_input).difference(set(allowed_characters))
 
         if len(invalid_characters) > 0:
@@ -299,7 +305,7 @@ print("""\
       (o_  (o_  //\\
       (/)_ (/)_ V_/_
    BlueBanquise diskless
-   v2.2.3
+   v2.2.4
    Patched for SMC
 
 """)
