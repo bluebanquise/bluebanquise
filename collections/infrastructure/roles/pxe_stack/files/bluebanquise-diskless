@@ -565,7 +565,7 @@ while True:
         # create user in image, skip if already created
         # SMC: -g smc is hard-coded, see block above
         # SMC: not using --system
-        protected_os_system("/usr/bin/grep -q '^" + tool_parameters['sudo_user'] + ":' " + reference_image_nfs_path + "/etc/passwd || /usr/sbin/useradd  -R " + reference_image_nfs_path + "/ -m -c 'SMC user' " + group_str + " -d " + tool_parameters['sudo_user_home'] + " -s /bin/bash -p '" + image_selected_user_password + "' " + tool_parameters['sudo_user'])
+        protected_os_system("/usr/bin/grep -q '^" + tool_parameters['sudo_user'] + ":' " + reference_image_nfs_path + "/etc/passwd || /usr/sbin/useradd  -R " + reference_image_nfs_path + "/ -m -c 'SMC user' " + group_str + " -d " + tool_parameters['sudo_user_home'] + " -u " + str(tool_parameters['sudo_user_uid']) + " -s /bin/bash -p '" + image_selected_user_password + "' " + tool_parameters['sudo_user'])
 
         # update of user password in image, useful if previous command was skipped
         logging.info(bcolors.OKBLUE + "Setting password of " + tool_parameters['sudo_user'] + " user in image..." + bcolors.ENDC)
