@@ -7,6 +7,7 @@
 # ██████╔╝███████╗╚██████╔╝███████╗██████╔╝██║  ██║██║ ╚████║╚██████╔╝╚██████╔╝██║███████║███████╗
 # ╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚══▀▀═╝  ╚═════╝ ╚═╝╚══════╝╚══════╝
 #
+# 2.2.5: (SMC fix) Fix NFS mount (-u uid) and SELinux (avoid chroot) in aarch64 images. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
 # 2.2.4: (SMC fix) Allow + character when sanitizing user input, needed for kernel-64k in aarch64 images. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
 # 2.2.3: (SMC fix) Fix user creation when host node is running SELinux in enforcing mode, force smc group. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
 # 2.2.2: (SMC fix) Tolerate lost+found path inside /var/www/html/pxe/diskless. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
@@ -305,7 +306,7 @@ print("""\
       (o_  (o_  //\\
       (/)_ (/)_ V_/_
    BlueBanquise diskless
-   v2.2.4
+   v2.2.5
    Patched for SMC
 
 """)
@@ -565,7 +566,7 @@ while True:
         # create user in image, skip if already created
         # SMC: -g smc is hard-coded, see block above
         # SMC: not using --system
-        protected_os_system("/usr/bin/grep -q '^" + tool_parameters['sudo_user'] + ":' " + reference_image_nfs_path + "/etc/passwd || /usr/sbin/useradd  -R " + reference_image_nfs_path + "/ -m -c 'SMC user' " + group_str + " -d " + tool_parameters['sudo_user_home'] + " -s /bin/bash -p '" + image_selected_user_password + "' " + tool_parameters['sudo_user'])
+        protected_os_system("/usr/bin/grep -q '^" + tool_parameters['sudo_user'] + ":' " + reference_image_nfs_path + "/etc/passwd || /usr/sbin/useradd  -R " + reference_image_nfs_path + "/ -m -c 'SMC user' " + group_str + " -d " + tool_parameters['sudo_user_home'] + " -u " + str(tool_parameters['sudo_user_uid']) + " -s /bin/bash -p '" + image_selected_user_password + "' " + tool_parameters['sudo_user'])
 
         # update of user password in image, useful if previous command was skipped
         logging.info(bcolors.OKBLUE + "Setting password of " + tool_parameters['sudo_user'] + " user in image..." + bcolors.ENDC)
@@ -852,8 +853,8 @@ WantedBy=multi-user.target
                 print(bcolors.FAIL + " An error occurred writing the file " + image_mountdir + "/etc/systemd/system/bb_diskless_selinux.service. Please investigate." + bcolors.ENDC)
                 quit(1)
 
-            # enable the oneshot service at boot time
-            protected_os_system("chroot " + image_mountdir + " /usr/bin/ln -s /etc/systemd/system/bb_diskless_selinux.service /etc/systemd/system/multi-user.target.wants/bb_diskless_selinux.service")
+            # enable the oneshot service at boot time using a relative link
+            protected_os_system("/usr/bin/ln -s ../bb_diskless_selinux.service " + image_mountdir + "/etc/systemd/system/multi-user.target.wants/bb_diskless_selinux.service")
 
             # (Step 1) Apply a relabel in the live image, before squashing it
             logging.info(bcolors.OKBLUE + 'Applying SELinux labels on image filesystem...' + bcolors.ENDC)
