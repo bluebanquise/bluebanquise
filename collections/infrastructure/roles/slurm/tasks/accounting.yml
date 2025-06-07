@@ -31,9 +31,13 @@
     - template
   notify: service <|> restart slurmdbd
 
-- name: include_tasks <|> Deploy local mysql
+- name: include_tasks <|> Deploy and configure local mysql
   ansible.builtin.include_tasks: "accounting_local_mysql.yml"
-  when: slurm_enable_local_mysql
+  when: slurm_accounting_enable_local_mysql
+
+- name: include_tasks <|> Configure external mysql
+  ansible.builtin.include_tasks: "accounting_external_mysql.yml"
+  when: not slurm_accounting_enable_local_mysql
 
 # - name: command <|> Check if slurm_acct_db database has been created
 #   ansible.builtin.command: mysql -e "SHOW DATABASES  LIKE 'slurm_acct_db'"
@@ -59,26 +63,6 @@
 #  tags:
 #   - service
 
-- name: Ensure slurm user exists in the database
-  community.mysql.mysql_user:
-    name: "{{ slurm_accounting_mysql_login_user }}"
-    host: "{{ item }}"
-    password: "{{ slurm_accounting_mysql_login_password }}"
-    state: present
-    priv: 'slurm_acct_db.*:ALL'
-    login_user: root
-    login_unix_socket: /var/run/mysqld/mysqld.sock
-    column_case_sensitive: false
-  loop:
-    - "{{ ansible_hostname }}"
-    - "localhost"
-    - "{{ slurm_accounting_mysql_login_host }}"
-  when:
-    - slurm_accounting_mysql_create_user
-    - ansible_distribution == 'Ubuntu'
-  tags:
-    - service
-
 # - name: command <|> Give slurm user privilege
 #  ansible.builtin.command: mysql -e "GRANT ALL PRIVILEGES ON slurm_acct_db.* TO '{{ slurm_accounting_mysql_login_user }}'@'{{ slurm_accounting_mysql_login_host}}';"
 #  register: slurm_user_privilege
@@ -88,34 +72,6 @@
 #    - ansible_distribution == 'Ubuntu'
 #  tags:
 #    - service
-
-- name: mysql_db <|> Create slurm_acct_db database
-  community.mysql.mysql_db:
-    name: slurm_acct_db
-    state: present
-    login_host: "{{ slurm_accounting_mysql_login_host | default(omit, true) }}"
-    login_port: "{{ slurm_accounting_mysql_login_port | default(omit, true) }}"
-    login_user: "{{ slurm_accounting_mysql_login_user | default(omit, true) }}"
-    login_password: "{{ slurm_accounting_mysql_login_password | default(omit, true) }}"
-  when: slurm_accounting_mysql_create_database
-  tags:
-    - service
-
-- name: mysql_user <|> setup slurm db user # noqa no-tabs
-  community.mysql.mysql_user:
-    name: "{{ slurm_accounting_storage_user | default(slurm_accounting_mysql_login_user, true) }}"
-    password: "{{ slurm_accounting_storage_pass | default(slurm_accounting_mysql_login_password, true) }}"
-    priv: 'slurm_acct_db.*:ALL'
-    state: present
-    login_host: "{{ slurm_accounting_mysql_login_host | default(omit, true) }}"
-    login_port: "{{ slurm_accounting_mysql_login_port | default(omit, true) }}"
-    login_user: "{{ slurm_accounting_mysql_login_user | default(omit, true) }}"
-    login_password: "{{ slurm_accounting_mysql_login_password | default(omit, true) }}"
-  when:
-    - slurm_accounting_mysql_create_user
-    - ansible_distribution not in 'Ubuntu'
-  tags:
-    - service
 
 - name: service <|> Manage slurmdbd state
   ansible.builtin.service:

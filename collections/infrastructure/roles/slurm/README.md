@@ -274,7 +274,7 @@ You can then either choose to use a distant MYSQL server, or ask the role to dep
 
 #### Using an external MYSQL database server
 
-Ensure variable `slurm_enable_local_mysql` is set to **false**.
+Ensure variable `slurm_accounting_enable_local_mysql` is set to **false**.
 
 Then, set the following variables to configure remote server settings:
 
@@ -285,7 +285,7 @@ Then, set the following variables to configure remote server settings:
 
 #### Deploying and using a local MYSQL database server
 
-Ensure variable `slurm_enable_local_mysql` is set to **true**.
+Ensure variable `slurm_accounting_enable_local_mysql` is set to **true**.
 
 You should be able to let all `slurm_accounting_mysql_login_*` variables to default.
 

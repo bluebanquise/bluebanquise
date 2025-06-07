@@ -30,3 +30,21 @@
 
 - name: Force handlers
   meta: flush_handlers
+
+- name: mysql_db <|> Create slurm_acct_db database
+  community.mysql.mysql_db:
+    name: slurm_acct_db
+    state: present
+  when: slurm_accounting_mysql_create_database
+
+- name: mysql_user <|> Ensure slurm user exists in the database
+  community.mysql.mysql_user:
+    name: "{{ slurm_accounting_mysql_slurm_user }}"
+    password: "{{ slurm_accounting_mysql_slurm_password }}"
+    state: present
+    priv: 'slurm_acct_db.*:ALL'
+    login_user: root
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    column_case_sensitive: false
+  when:
+    - slurm_accounting_mysql_create_user
