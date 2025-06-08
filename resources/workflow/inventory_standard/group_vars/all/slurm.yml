@@ -1,6 +1,8 @@
 slurm_munge_key_b64: hYcbkjJgv5YyybNqKbo+JvXLakIY2zFcZhpopipS8JmLmeE3YHgMcbUO74LIGKqzpIgD7ILPgUKmzgSl8BOK9WHQcMxywvh2fY567+4TyEq/HEArVfqdsIPw1U/jodDt2DL3MTNvci5hTJ8JNJZZKrjJc2x/FBlF52hAt+KLm+g=
 slurm_enable_accounting: true
 slurm_enable_local_mysql: true
+slurm_accounting_mysql_create_database: true
+slurm_accounting_mysql_create_user: true
 slurm_controller_hostname: mgt1
 slurm_cluster_name: bluebanquise
 slurm_computes_groups:

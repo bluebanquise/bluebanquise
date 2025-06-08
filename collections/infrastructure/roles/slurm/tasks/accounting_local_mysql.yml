@@ -15,7 +15,6 @@
     mode: 0644
   tags:
     - template
-  notify: service <|> restart slurmdbd
 
 - name: file <|> Configure MariaDB to listen on all interfaces
   lineinfile:

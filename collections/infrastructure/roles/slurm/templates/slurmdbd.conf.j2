@@ -22,8 +22,8 @@ PidFile=/var/run/slurmdbd.pid
 
 ## Storage
 StorageType=accounting_storage/mysql
-StorageUser={{ slurm_accounting_mysql_login_user }}
-StoragePass={{ slurm_accounting_mysql_login_password }}
+StorageUser={{ slurm_accounting_mysql_slurm_user }}
+StoragePass={{ slurm_accounting_mysql_slurm_password }}
 {% if slurm_enable_local_mysql is defined and not slurm_enable_local_mysql %}
 StorageHost={{ slurm_accounting_mysql_login_host }}
 StoragePort={{ slurm_accounting_mysql_login_port }}
