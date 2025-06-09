@@ -40,7 +40,6 @@
     mode: 0755
     owner: root
     group: root
-    recurse: yes
 
 - name: "service <|> Manage diskless services state"
   ansible.builtin.service:
