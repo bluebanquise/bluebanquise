@@ -1,7 +1,7 @@
 ---
 nic_role_version: 1.12.0
 
-j2_nic_nmcli_device_name_type: "{%- set cons = [] -%}
+nic_j2_nmcli_device_name_type: "{%- set cons = [] -%}
 {%- for device in (nmcli_con_show.stdout | split('\n')) -%}
   {%- if (device | split(':'))[0] != '' and (device | split(':'))[0] is not none -%}
     {%- set con = {'device': (device | split(':'))[0], 'name': (device | split(':'))[1], 'type': (device | split(':'))[2], 'apply': true} -%}
