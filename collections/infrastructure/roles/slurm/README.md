@@ -262,39 +262,45 @@ ansible-galaxy collection install community.mysql
 
 Then, set `slurm_enable_accounting` variable to **true**.
 
-Configuration then depends on your needs.
+You also need to specify the user that will be used to query the database, and its password, using:
+
+* `slurm_accounting_mysql_slurm_user`: Default: **slurm**. User used to connect to SQL database.
+* `slurm_accounting_mysql_slurm_password`: Default: **ssap_slurm**. Please be sure to change this value in production. User password to connect to SQL database.
+
+#### Database settings
+
+You can then either choose to use a distant MYSQL server, or ask the role to deploy one locally.
+
+##### Using an external SQL database server
+
+Ensure variable `slurm_accounting_enable_local_mysql` is set to **false**.
+
+Then, first, set the following variables to configure remote server settings:
+
+* `slurm_accounting_mysql_login_host`: SQL server remote server address or hostname. Default: 127.0.0.1
+* `slurm_accounting_mysql_login_port`: SQL server remote server port (leave empty if default). Default: 3306
+
+##### Deploying and using a local SQL database server
+
+Ensure variable `slurm_accounting_enable_local_mysql` is set to **true**.
+
+You should be able to let all `slurm_accounting_mysql_login_*` variables to default since the role will use in this particular case local socket to communicate with the DB.
+
+#### Setup slurm db and slurm user in database
+
+If you wand the role to create Slurm related database or Slurm related user into the SQL database, you need to set the following variables to true:
+
+* `slurm_accounting_mysql_create_database`: if **true**, create **"slurm_acct_db"** database if not existing in MYSQL.
+* `slurm_accounting_mysql_create_user`: if **true**, create needed user (set by `slurm_accounting_mysql_slurm_user` and `slurm_accounting_mysql_slurm_password`) into SQL database. This user will have rights on the **"slurm_acct_db"** database.
+
+Then, if you set variable `slurm_accounting_enable_local_mysql` to **false** (which means you are using an external SQL DB), you will also need to set the following variable, to be able to connect to the external SQL server and create the slurm related database.
+
+* `slurm_accounting_mysql_login_user`: SQL server remote user to login with a user able to create databases.
+* `slurm_accounting_mysql_login_password`: SQL server remote user's password to login.
 
 #### Specific port
 
 You can choose to run the slurmdbd on a specific port using `slurm_dbd_port` key. By default, value is 6819.
-
-#### Database and login user settings
-
-You can then either choose to use a distant MYSQL server, or ask the role to deploy one locally.
-
-#### Using an external MYSQL database server
-
-Ensure variable `slurm_accounting_enable_local_mysql` is set to **false**.
-
-Then, set the following variables to configure remote server settings:
-
-* `slurm_accounting_mysql_login_host`: MYSQL server remote server address or hostname. Default: 127.0.0.1
-* `slurm_accounting_mysql_login_port`: MYSQL server remote server port (leave empty if default). Default: 3306
-* `slurm_accounting_mysql_login_user`: MYSQL server remote server user to login. Default: **slurm**.
-* `slurm_accounting_mysql_login_password`: MYSQL server remote server password to login. Default: **ssap_slurm**. Please be sure to change this value in production.
-
-#### Deploying and using a local MYSQL database server
-
-Ensure variable `slurm_accounting_enable_local_mysql` is set to **true**.
-
-You should be able to let all `slurm_accounting_mysql_login_*` variables to default.
-
-#### Push configuration in MYSQL database
-
-Note that if you wand the role to create Slurm related database or Slurm related user into the MYSQL database, you need to set the following variables to true:
-
-* `slurm_accounting_mysql_create_database`: if **true**, create **"slurm_acct_db"** database if not existing in MYSQL.
-* `slurm_accounting_mysql_create_user`: if **true**, create needed user (set by `slurm_accounting_mysql_login_user`) into MYSQL. This user will have rights on the **"slurm_acct_db"** database.
 
 #### Commands to be used once deployed
 
