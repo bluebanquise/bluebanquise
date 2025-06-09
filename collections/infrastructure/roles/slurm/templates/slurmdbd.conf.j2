@@ -10,15 +10,10 @@ AuthInfo=/var/run/munge/munge.socket.2
 AuthType=auth/munge
 SlurmUser=slurm
 
-{% if slurm_enable_local_mysql is defined and not slurm_enable_local_mysql %}
 # SlurmDdb info
-DbdAddr={{ slurm_controller_address | default(slurm_controller_hostname, true) | default(slurm_control_machine, true) }}
-DbdHost={{ slurm_controller_hostname | default(slurm_control_machine, true) }}
+DbdAddr={{ slurm_controller_address | default(slurm_controller_hostname, true) }}
+DbdHost={{ slurm_controller_hostname }}
 DbdPort={{ slurm_dbd_port | default('6819') }}
-{% else %}
-## Mariadb server
-DbdHost={{ slurm_accounting_mysql_login_host | default('localhost', true) }}
-{% endif %}
 
 ## Log and pid
 LogFile={{ slurm_slurmdbdlogfile }}
@@ -27,11 +22,14 @@ PidFile=/var/run/slurmdbd.pid
 
 ## Storage
 StorageType=accounting_storage/mysql
-StorageUser={{ slurm_accounting_mysql_login_user | default(slurm_accounting_storage_user, true) }}
-StoragePass={{ slurm_accounting_mysql_login_password | default(slurm_accounting_storage_pass, true) }}
+StorageUser={{ slurm_accounting_mysql_slurm_user }}
+StoragePass={{ slurm_accounting_mysql_slurm_password }}
 {% if slurm_enable_local_mysql is defined and not slurm_enable_local_mysql %}
 StorageHost={{ slurm_accounting_mysql_login_host }}
 StoragePort={{ slurm_accounting_mysql_login_port }}
+{% else %}
+StorageHost=127.0.0.1
+StoragePort={{ slurm_accounting_mysql_login_port | default('3306') }}
 {% endif %}
 
 ## Additional content if exist

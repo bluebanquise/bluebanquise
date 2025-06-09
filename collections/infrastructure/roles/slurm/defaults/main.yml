@@ -36,15 +36,15 @@ slurm_slurmdtimeout: 600
 
 ## Accounting (storage)
 slurm_enable_accounting: false
-slurm_enable_local_mysql: true
-slurm_accounting_mysql_login_host: ""
-slurm_accounting_mysql_login_port: ""
-slurm_accounting_mysql_login_user: ""
-slurm_accounting_mysql_login_password: ""
+slurm_accounting_enable_local_mysql: true
+slurm_accounting_mysql_login_host: 127.0.0.1
+slurm_accounting_mysql_login_port: 3306
+slurm_accounting_mysql_login_user:
+slurm_accounting_mysql_login_password:
+slurm_accounting_mysql_slurm_user: slurm
+slurm_accounting_mysql_slurm_password: ssap_slurm # CHANGE ME !
 slurm_accounting_mysql_create_database: false
 slurm_accounting_mysql_create_user: false
-slurm_accounting_storage_user: slurm
-slurm_accounting_storage_pass: ssap_slurm
 ### mariadb
 slurm_innodb_buffer_pool_size: 1024M
 slurm_innodb_log_file_size: 64M

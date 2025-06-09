@@ -24,18 +24,30 @@
   ansible.builtin.service:
     name: slurmdbd.service
     state: restarted
+  when:
+    - "'service' not in ansible_skip_tags"
+    - slurm_start_services | default(bb_start_services) | default(true) | bool
 
 - name: service <|> restart mariadb
   ansible.builtin.service:
     name: mariadb.service
     state: restarted
+  when:
+    - "'service' not in ansible_skip_tags"
+    - slurm_start_services | default(bb_start_services) | default(true) | bool
 
 - name: service <|> restart slurmctld
   ansible.builtin.service:
     name: slurmctld.service
     state: restarted
+  when:
+    - "'service' not in ansible_skip_tags"
+    - slurm_start_services | default(bb_start_services) | default(true) | bool
 
 - name: service <|> restart slurmd
   ansible.builtin.service:
     name: slurmd.service
     state: restarted
+  when:
+    - "'service' not in ansible_skip_tags"
+    - slurm_start_services | default(bb_start_services) | default(true) | bool

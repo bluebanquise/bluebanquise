@@ -4,3 +4,4 @@ netaddr
 clustershell
 jmespath
 jinja2
+pymysql

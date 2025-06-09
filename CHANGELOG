@@ -4,6 +4,8 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.2.7
 
+* 6/9/25 - oxedions - [nic] Fix variable name.
+* 6/9/25 - oxedions - [slurm] Fix slurm DB support.
 * 5/18/25 - oxedions - [nic] Improve support for Ubuntu/Debian.
 * 5/15/25 - thiagocardozo - [pxe_stack] Stop folder creating task from acting on present images.
 * 5/5/25 - oxedions - [nic] Fix role for Ubuntu/Debian, ensure con name matches device name.
