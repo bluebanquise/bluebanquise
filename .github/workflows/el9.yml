@@ -8,7 +8,7 @@ on:
 
 jobs:
   roles_infra:
-    name: EL9
+    name: EL9 Infra roles
     runs-on: ubuntu-22.04
     env:
       ANSIBLE_CONFIG: /var/lib/bluebanquise/ansible.cfg
@@ -43,7 +43,7 @@ jobs:
           docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_JINJA2_EXTENSIONS=jinja2.ext.loopcontrols,jinja2.ext.do ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.infrastructure.core ansible-playbook /var/lib/bluebanquise/playbooks/infrastructure.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --skip-tags kernel_config,hosts_file,nic,set_hostname,dns_client,large_package'"
 
   roles_other:
-    name: EL9
+    name: EL9 Other roles
     runs-on: ubuntu-22.04
     env:
       ANSIBLE_CONFIG: /var/lib/bluebanquise/ansible.cfg
