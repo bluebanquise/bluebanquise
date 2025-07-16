@@ -4,6 +4,8 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.2.7
 
+* 7/16/25 - oxedions - [nic] Make network manager restar when package is updated. (#1114, from vedmonds)
+* 7/16/25 - oxedions - [pxe_stack] Add compatibility for os_autoinstall_raw_content that was removed in favor of os_autoinstall_custom_content. (#1117, from sgaosdgr)
 * 6/9/25 - oxedions - [nic] Fix variable name.
 * 6/9/25 - oxedions - [slurm] Fix slurm DB support.
 * 5/18/25 - oxedions - [nic] Improve support for Ubuntu/Debian.
