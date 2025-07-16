@@ -27,6 +27,7 @@
     state: present
   tags:
     - package
+  notify: service <|> Restart nic services
 
 - name: "service <|> Start services"
   ansible.builtin.service:
@@ -36,6 +37,9 @@
   loop: "{{ nic_services_to_start }}"
   tags:
     - service
+
+- name: meta <|> Run handler tasks to apply OS dedicated events
+  ansible.builtin.meta: flush_handlers
 
 - name: include_tasks <|> Use OS dedicated task
   ansible.builtin.include_tasks: "{{ item }}"

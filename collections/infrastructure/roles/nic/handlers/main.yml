@@ -16,3 +16,12 @@
     reboot_timeout: "{{ nic_reboot_timeout }}"
   when:
     - nic_allow_reboot
+
+- name: "service <|> Restart nic services"
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: restarted
+  loop: "{{ nic_services_to_start }}"
+  when:
+    - "'service' not in ansible_skip_tags"
+    - nic_start_services | default(bb_start_services) | default(true) | bool

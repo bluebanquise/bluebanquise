@@ -307,7 +307,7 @@ Some variables are available for that:
 
 #### Raw content
 
-You can add raw content to auto install files using the `os_autoinstall_raw_content`.
+You can add raw content to auto install files using the `os_autoinstall_custom_content`.
 Please note that this is RAW. So you HAVE TO adapt the content to the target distribution.
 
 * For RHEL, this is Kickstart syntax (bottom of the kickstart file).

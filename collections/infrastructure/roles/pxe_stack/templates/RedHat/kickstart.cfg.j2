@@ -7,9 +7,9 @@
 
 ##### General settings
 
-{% if (equipment['os']['os_autoinstall_custom_content'] | default(pxe_stack_os_autoinstall_custom_content, true)) is not none %}
+{% if (equipment['os']['os_autoinstall_custom_content'] | default(equipment['os']['os_autoinstall_raw_content'], true) | default(pxe_stack_os_autoinstall_custom_content, true)) is not none %}
 # Custom content
-{{ (equipment['os']['os_autoinstall_custom_content'] | default(pxe_stack_os_autoinstall_custom_content, true)) }}
+{{ (equipment['os']['os_autoinstall_custom_content'] | default(equipment['os']['os_autoinstall_raw_content'], true) | default(pxe_stack_os_autoinstall_custom_content, true)) }}
 {% endif %}
 
 # Do not use GUI
