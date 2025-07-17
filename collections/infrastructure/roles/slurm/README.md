@@ -241,6 +241,7 @@ hw_specs:
     sockets: 2
     threadspercore: 1
   memory: 63500
+  reserved_os_memory: 4096
   slurm_extra_nodes_parameters: Feature=XXXX Weight=YY
 ```
 
