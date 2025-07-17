@@ -126,6 +126,9 @@ AcctGatherProfileType=acct_gather_profile/{{ slurm_acct_gather_profile_type }}
     {% if buffer.memory is defined and buffer.memory is not none %}
         {% set nodes_parameters = nodes_parameters + ' RealMemory=' + (buffer.memory|string) %}
     {% endif %}
+    {% if buffer.reserved_os_memory is defined and buffer.reserved_os_memory is not none %}
+        {% set nodes_parameters = nodes_parameters + ' MemSpecLimit=' + (buffer.reserved_os_memory|string) %}
+    {% endif %}
     {% if buffer.slurm_extra_nodes_parameters is defined and buffer.slurm_extra_nodes_parameters is not none %}
         {% set nodes_parameters = nodes_parameters + ' ' +  buffer.slurm_extra_nodes_parameters %}
     {% endif %}
