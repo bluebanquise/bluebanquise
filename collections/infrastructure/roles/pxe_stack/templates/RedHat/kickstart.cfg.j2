@@ -7,11 +7,6 @@
 
 ##### General settings
 
-{% if (equipment['os']['os_autoinstall_custom_content'] | default(equipment['os']['os_autoinstall_raw_content'], true) | default(pxe_stack_os_autoinstall_custom_content, true)) is not none %}
-# Custom content
-{{ (equipment['os']['os_autoinstall_custom_content'] | default(equipment['os']['os_autoinstall_raw_content'], true) | default(pxe_stack_os_autoinstall_custom_content, true)) }}
-{% endif %}
-
 # Do not use GUI
 text
 
@@ -164,5 +159,10 @@ rm -f /etc/yum.repos.d/*
 {% endif %}
 set +x
 %end
+
+{% if (equipment['os']['os_autoinstall_custom_content'] | default(equipment['os']['os_autoinstall_raw_content'], true) | default(pxe_stack_os_autoinstall_custom_content, true)) is not none %}
+# Custom content
+{{ (equipment['os']['os_autoinstall_custom_content'] | default(equipment['os']['os_autoinstall_raw_content'], true) | default(pxe_stack_os_autoinstall_custom_content, true)) }}
+{% endif %}
 
 {% endif %}
