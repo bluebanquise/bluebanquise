@@ -54,6 +54,7 @@
       skip: true
   tags:
     - internal
+    - nic_os_dedicated_tasks
 
 - name: meta <|> Run handler tasks to apply OS dedicated events
   ansible.builtin.meta: flush_handlers

@@ -16,6 +16,7 @@
       when:
         - item.apply
         - item.type in ['802-3-ethernet', 'ethernet']
+        - item.name != item.device
       changed_when: nmcli_result.rc == 0
 
 - name: nmcli <|> Set NICs configuration # noqa args[module]
