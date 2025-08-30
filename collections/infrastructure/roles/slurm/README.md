@@ -390,7 +390,7 @@ See more explanation on https://slurm.schedmd.com/acct_gather.conf.html
 **Please now update CHANGELOG file at repository root instead of adding logs in this file.
 These logs bellow are only kept for archive.**
 
-* 1.6.5: Fix slurm local accounting service state managent and fix support to el9. Lucas Santos <lucassouzasantos@gmail.com> 
+* 1.6.5: Fix slurm local accounting service state managent and support to el9. Lucas Santos <lucassouzasantos@gmail.com> 
 * 1.6.4: Add slurm accounting and MYSQL support on ubuntu 22.04. Hamid MERZOUKI <hamid@sesterce.com>
 * 1.6.3: Switch deb packages to official names. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.6.2: Fix the way mysql databse is defined. Code from @sgaosdgr. Benoit Leveugle <benoit.leveugle@gmail.com>
