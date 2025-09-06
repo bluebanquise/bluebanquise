@@ -323,6 +323,37 @@ And check again if the cluster exist:
 sacctmgr list cluster
 ```
 
+### Access restriction - pam_slurm_adoption
+
+pam_slurm_adoption is a pam module created to make sure that users only can access cluster resources that are allocated to them. 
+
+This means that users that dont have resources allocated on a compute node, wont be able to login into it. Also, when the user does have resources allocated, all his processes will be restricted to the same cgroup restrictions, what means that even if the user ssh into the node, it will be restricted by his allocated resources 
+
+By default, pam_slurm_adoption is disabled, to enable it, change the following variable on your inventories:
+
+```yaml
+slurm_pam_slurm_adopt_enable: true
+```
+
+example in your slurm configuration:
+
+```yaml
+slurm_cluster_name: bluebanquise
+slurm_controller_hostname: management1
+slurm_pam_slurm_adopt_enable: true
+slurm_partitions_list:
+  - computes_groups:
+      - os_debian12
+      - os_debian11
+    partition_name: debian
+    partition_configuration:
+      State: UP
+      MaxTime: "72:00:00"
+      DefaultTime: "24:00:00"
+```
+
+By default on EL8 systems, the local users on the system will not be afected by this configuration, including the root user.
+
 ### GPU Gres
 
 Unfortunately for now, this is only supported for NVIDIA GPUS.
@@ -390,6 +421,7 @@ See more explanation on https://slurm.schedmd.com/acct_gather.conf.html
 **Please now update CHANGELOG file at repository root instead of adding logs in this file.
 These logs bellow are only kept for archive.**
 
+* 1.7.0: Added support for pam_slurm_adoption. Lucas Santos <lucassouzasantos@gmail.com> 
 * 1.6.5: Fix slurm local accounting service state managent and support to el9. Lucas Santos <lucassouzasantos@gmail.com> 
 * 1.6.4: Add slurm accounting and MYSQL support on ubuntu 22.04. Hamid MERZOUKI <hamid@sesterce.com>
 * 1.6.3: Switch deb packages to official names. Benoit Leveugle <benoit.leveugle@gmail.com>

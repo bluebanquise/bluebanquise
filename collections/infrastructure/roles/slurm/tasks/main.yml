@@ -111,5 +111,10 @@
   ansible.builtin.include_tasks: "submitter.yml"
   when: slurm_profile == 'submitter'
 
+# Setup slurm_adoption
+- name: include_tasks ░ Configure slurm_adopt
+  ansible.builtin.include_tasks: "pam_slurm_adopt.yml"
+  when: slurm_pam_slurm_adopt_enable is defined and slurm_pam_slurm_adopt_enable and slurm_profile == 'compute'
+
 - name: meta <|> Run handler tasks to restart services
   ansible.builtin.meta: flush_handlers
