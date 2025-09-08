@@ -45,6 +45,7 @@ slurm_accounting_mysql_slurm_user: slurm
 slurm_accounting_mysql_slurm_password: ssap_slurm # CHANGE ME !
 slurm_accounting_mysql_create_database: false
 slurm_accounting_mysql_create_user: false
+slurm_accounting_mysql_unix_socket: /var/run/mysqld/mysqld.sock
 ### mariadb
 slurm_innodb_buffer_pool_size: 1024M
 slurm_innodb_log_file_size: 64M
