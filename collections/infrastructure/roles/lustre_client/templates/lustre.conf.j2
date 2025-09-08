@@ -15,6 +15,7 @@
 {% endmacro %}
 {# We need to find a better implementation for the following, reference of woraround: https://stackoverflow.com/questions/9486393/change-the-value-of-a-variable-inside-a-loop #}
 {%- set host_applies = {'value': False} -%}
+{%- set lnet_list = [] -%}
 {%- for net in lustre_networks -%}
   {%- if host_applies.update({'value': False}) -%} {%- endif -%}
   {%- for group in net.clients_groups -%}
@@ -23,6 +24,7 @@
     {%- endif -%}
   {%- endfor -%}
   {% if host_applies.value %}
-options lnet networks={{ net.name }}({{ host_interface(hostvars[inventory_hostname],net.network) }})
+  {%- set _ = lnet_list.append(net.name ~ '(' ~ host_interface(hostvars[inventory_hostname], net.network) ~ ')' ) -%}
   {% endif %}
 {%- endfor -%}
+options lnet networks={{ lnet_list | join(',') }}
