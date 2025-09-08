@@ -1,0 +1,6 @@
+[fn_management]
+mgt1
+
+[fn_compute]
+c00[1:4]
+g00[1:2]

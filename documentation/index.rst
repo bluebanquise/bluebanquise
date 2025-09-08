@@ -8,8 +8,6 @@ Welcome on BlueBanquise documentation.
 
 These pages contain information on how to deploy and use the BlueBanquise unified stack.
 
-If you wish to only use a specific role of the provided Ansible collections, please directly refer to the role's README.
-
 `Please report me <https://github.com/bluebanquise/bluebanquise/issues>`_ any
 issues in this documentation.
 
@@ -21,30 +19,48 @@ This documentation is under Creative Commons Attribution-NonCommercial-ShareAlik
 ------------
 
 .. toctree::
-   :maxdepth: 1
-   :caption: Contents:
+   :maxdepth: 2
+   :caption: Introduction:
    :numbered:
 
-   introduction
-   vocabulary
-   configure_bluebanquise
-   deploy_cluster
-   multiple_icebergs
-   variables_description
-   advanced_usage
+   introduction/what_is_bluebanquise
+   introduction/quick_start
+   introduction/installation
+   introduction/vocabulary
 
-.. training_sysadmin
-.. training_ansible
-.. bootstrap
+.. toctree::
+   :maxdepth: 2
+   :caption: Configuration:
+   :numbered:
+   :titlesonly: 
 
-.. multiple_icebergs
-.. diskless
-.. community_high_availability
-.. community_monitoring
-.. community_slurm
-.. external_kubernetes
-.. FAQ
-.. containers
-.. stories
-.. roles
-.. references
+   configuration/nodes
+   configuration/services
+   configuration/networks
+   configuration/groups
+   configuration/storage
+   configuration/system
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Specialisation:
+   :numbered:
+
+   specialisation/slurm
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Deployment:
+   :numbered:
+
+   deployment/provision_os
+   deployment/apply_configuration
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Resources:
+   :numbered:
+
+   resources/nvidia
+   resources/mellanox
+   

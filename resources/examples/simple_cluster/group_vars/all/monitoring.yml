@@ -1,0 +1,9 @@
+prometheus_server_manage_prometheus: true
+prometheus_server_manage_alertmanager: false
+prometheus_server_manage_karma: false
+prometheus_exporters_groups_to_scrape:
+  fn_compute:
+    - name: node_exporter
+      service: node_exporter
+      package: node_exporter
+      port: 9100

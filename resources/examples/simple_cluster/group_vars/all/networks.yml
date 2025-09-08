@@ -1,0 +1,10 @@
+networks:
+  net-admin:
+    prefix: 16
+    subnet: 10.10.0.0
+    dhcp_server: true
+    dns_server: true
+    services_ip: 10.10.0.1
+  external-network:
+    prefix: 24
+    subnet: 192.168.1.0

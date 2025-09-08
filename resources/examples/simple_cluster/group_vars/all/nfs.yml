@@ -1,0 +1,11 @@
+nfs_shares:
+    - mount: /home
+      export: /data/home
+      server: mgt1
+      clients_groups:
+        - fn_compute
+      take_over_network: net-admin
+      export_options: rw,sync
+      mount_options: rw,nfsvers=3,bg
+
+nfs_client_directories_state: present

@@ -6,23 +6,6 @@ Lets establish few common terms before going deeper in technical details.
 
 Some words are important in **BlueBanquise**. Most of them are described here.
 
-Cluster layers
-==============
-
-The BlueBanquise project assumes that there exist 3 **layers** in a cluster of nodes:
-
-1. **Layer 1** is the infrastructure layer, also known as low level layer. This layer is composed of all that is needed to make the cluster ready to host production. This includes what is needed to power manage and remote manage hardware, what is needed to deploy and configure operating systems on servers, the running OS themselfs, what is needed to connect the cluster and monitor it.
-2. **Layer 2**, optional and above layer 1, is the orchestration layer. This layer is composed of any tool needed to orchestrate production resources. This can be a Kubernetes or a Nomad cluster for example.
-3. **Layer 3** is the production layer, also sometime refered as "added value" layer. This layer is composed of what the clusters is running for, aka production. This can be calculations, web servers hosting, databases, storage management, AI trainings, etc.
-
-The Infrastructure Ansible collection of the BlueBanquise stack has been made to cover layer 1.
-Other collections either extend layer 1 (monitoring, logging, etc.), and some collections cover other layers. The HPC collection for example covers a layer 3 HPC specialization of the cluster.
-You can also use KubeSpray to deploy a Kubernetes cluster, which would be the layer 2, and host web servers into the K8S cluster, which would be layer 3.
-
-It is important to understand that while layer 2 and 3 can be very specialized, layer 1 is generic and is the same for all clusters.
-
-It is also recommended to always separate layers. Mixing layers always end up being a huge mess on the long term.
-
 Ansible vocabulary
 ==================
 
@@ -299,20 +282,6 @@ Inventory can be seen as a giant pizza, in 3D then flatten.
 
 I like pizza...
 
-Replace
--------
-
-Ansible and BlueBanquise default hash_behaviour is *replace*.
-
-If using *replace*, when a dictionary is impacted by the variable’s precedence
-mechanism, Ansible overwrite the **full dictionary** if a variable has a higher
-precedence somewhere.
-
-If using *merge*, Ansible will only update the related variable, and keep the
-original dictionary and values for all other variables in this dictionary.
-However, merge is now considered deprecated and is no more default in
-BlueBanquise.
-
 Jinja2
 ------
 
@@ -340,47 +309,6 @@ One Iceberg is composed of one or multiple managements servers, **in charge of
 the same pool of nodes**.
 
 **BlueBanquise** support many kinds of configurations, but most common are:
-
-One iceberg configuration
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
-|
-
-.. image:: images/one_iceberg.svg
-
-|
-
-For simple systems (small/medium HPC cluster, small enterprise network,
-university IT practical session room, etc.), one iceberg scenario is the
-standard. One or multiple management will reach the same ethernet administration
-networks, and federate the same pool of nodes.
-
-.. image:: images/clusters/single_iceberg_2_single_column.svg
-   :align: center
-
-|
-
-Multiple icebergs configuration
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-|
-
-.. image:: images/multiple_icebergs.svg
-
-|
-
-For advanced systems, (large HPC clusters needing load spreading with unified
-network, enterprise network, etc.), multiple icebergs scenario can be required.
-**BlueBanquise** allows multiple levels of icebergs, for complex needs.
-
-Manipulating order of network_interfaces defined for each host allows to create
-a unified network so all nodes from all icebergs can communicate through this
-network (most of the time an Interconnect network).
-
-.. image:: images/clusters/multiple_icebergs.png
-   :align: center
-
-|
 
 Equipment profiles
 ------------------
@@ -419,6 +347,6 @@ These are key groups of the stack.
 
 **It is important** to note that hardware groups variables start with prefix ``hw_`` and os groups variables start with prefix ``os_``
 and that these variables **MUST NEVER** be used at an upper level than group_vars in variables precedence.
-**It can, but you must NOT**, due to special usage of them.
+You can however, use them at group_vars/all level, if you consider that a specific variable should be shared by all groups.
 
 For now, just keep in mind these variables exist. These will be discussed later.
