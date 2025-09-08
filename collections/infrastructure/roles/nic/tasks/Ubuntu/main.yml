@@ -19,9 +19,14 @@
   tags:
     - identify
 
-- name: "service <|> Disable systemd-networkd"
-  ansible.builtin.service:
-    name: systemd-networkd
-    enabled: no
-    state: stopped
+- name: "systemd_service <|> Disable systemd-networkd service"
+  ansible.builtin.systemd_service:
+    name: systemd-networkd.service
+    enabled: false
+  notify: reboot <|> Reboot system
+
+- name: "systemd_service <|> Mask systemd-networkd socker"
+  ansible.builtin.systemd_service:
+    name: systemd-networkd.socket
+    masked: true
   notify: reboot <|> Reboot system
