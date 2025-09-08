@@ -55,7 +55,7 @@ For example, in the playbook:
 - name: managements playbook
   hosts: "mg_managements"
   roles:
-    - role: bluebanquise.file_systems.nfs
+    - role: bluebanquise.infrastructure.nfs
       tags: nfs
       vars:
         nfs_profile:
