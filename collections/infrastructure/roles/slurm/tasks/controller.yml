@@ -33,6 +33,17 @@
     - cgroup.conf
   notify: Run scontrol reconfigure
 
+- name: "template <|> Generate gres.conf in {{ slurm_home_path }}"
+  ansible.builtin.template:
+    src: "gres_configless.conf.j2"
+    dest: "{{ slurm_home_path }}/gres.conf"
+    owner: slurm
+    group: slurm
+    mode: 0644
+  tags:
+    - template
+  when: slurm_grestypes is defined and slurm_grestypes == 'gpu' and slurm_computes_config == "configless"
+
 - name: template <|> Generate job_submit.lua file
   ansible.builtin.template:
     src: "job_submit.lua.j2"

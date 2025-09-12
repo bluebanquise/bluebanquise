@@ -421,6 +421,7 @@ See more explanation on https://slurm.schedmd.com/acct_gather.conf.html
 **Please now update CHANGELOG file at repository root instead of adding logs in this file.
 These logs bellow are only kept for archive.**
 
+* 1.7.1: Added support for gres in confiless mode. Lucas Santos <lucassouzasantos@gmail.com> 
 * 1.7.0: Added support for pam_slurm_adoption. Lucas Santos <lucassouzasantos@gmail.com> 
 * 1.6.5: Fix slurm local accounting service state managent and support to el9. Lucas Santos <lucassouzasantos@gmail.com> 
 * 1.6.4: Add slurm accounting and MYSQL support on ubuntu 22.04. Hamid MERZOUKI <hamid@sesterce.com>
