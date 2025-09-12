@@ -2,8 +2,6 @@
 Vocabulary
 ==========
 
-Lets establish few common terms before going deeper in technical details.
-
 Some words are important in **BlueBanquise**. Most of them are described here.
 
 Ansible vocabulary

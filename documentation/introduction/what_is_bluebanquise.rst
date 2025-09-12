@@ -1,16 +1,15 @@
-============
-Introduction
-============
+====================
+What is BlueBanquise
+====================
 
 **BlueBanquise** is a generic stack, based on Ansible, whose purpose is to
 deploy and manage clusters of hosts.
 These clusters can be from few workstations to very large HPC or
 servers farm clusters.
 
-.. image:: images/clusters/3_size_single_row.png
+.. image:: images/3_size_single_row.png
 
-**BlueBanquise** is the result of a need. A need for a very simple stack, not
-based on multi languages scripts difficult to maintain. A stack that can keep
+**BlueBanquise** is the result of a need for a stack that can keep
 simplicity while managing very complex architecture.
 
 The **BlueBanquise** project also aims to train new system administrators to the
@@ -31,4 +30,4 @@ explicitly mentioned).
 I hope you will enjoy this stack as much as I do developing it.
 
 If you need help, do not hesitate to use `the discussions tab <https://github.com/bluebanquise/bluebanquise/discussions>`_
-of the project's github.
+of the project's github or reach me using the contacts section.

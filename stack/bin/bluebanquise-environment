@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+# This small tool loads the BlueBanquise stack environment
+
+set -e # Exit in case of any errors
+
+if [[ "$1" == "load" ]]; then
+
+    # First load virtual environment if not already done
+    if [[ -z "$VIRTUAL_ENV" ]]; then
+        echo "Python virtual environment not loaded, loading it"
+        source /var/lib/bluebanquise/ansible_venv/bin/activate 
+    else
+        echo "Python virtual environment already loaded, skipping"
+    fi
+
+    # Ensure tools bin is in PATH
+    if [[ ":$PATH:" == *":/var/lib/bluebanquise/bluebanquise/stack/bin:"* ]]; then
+        echo "BlueBanquise stack tools already in PATH, skipping"
+    else
+        echo "BlueBanquise stack tools not in PATH, loading it"
+        export PATH=$PATH:/var/lib/bluebanquise/buebanquise/bin
+    fi
+
+elif [[ "$1" == "unload" ]]; then
+
+    # First unload virtual environment if not already done
+    if [[ -z "$VIRTUAL_ENV" ]]; then
+        echo "Python virtual environment already unloaded, skipping"
+    else
+        echo "Python virtual environment loaded, unloading it"
+        deactivate
+    fi
+
+    # Ensure tools bin is in PATH
+    if [[ ":$PATH:" == *":/var/lib/bluebanquise/bluebanquise/stack/bin:"* ]]; then
+        echo "BlueBanquise stack tools already in PATH, unloading it"
+        PATH=$(echo "$PATH" | sed -e 's|:/var/lib/bluebanquise/bin||' | sed -e 's|/var/lib/bluebanquise/bin:||')
+    else
+        echo "BlueBanquise stack tools not in PATH, skipping"
+    fi
+    
+else
+    echo "Error, please specify if you wish to load or unload the BlueBanquise stack environment"
+    echo
+    echo "   bluebanquise-environment load"
+    echo 
+    echo " or"
+    echo
+    echo "   bluebanquise-environment unload"
+    echo
+fi

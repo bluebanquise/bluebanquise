@@ -24,7 +24,8 @@ This documentation is under Creative Commons Attribution-NonCommercial-ShareAlik
    :numbered:
 
    introduction/what_is_bluebanquise
-   introduction/quick_start
+   .. introduction/quick_start
+   
    introduction/installation
    introduction/vocabulary
 
