@@ -1,0 +1,60 @@
+ubuntu:
+  "24.04":
+    x86_64:
+      url: https://releases.ubuntu.com/24.04.2/ubuntu-24.04.2-live-server-amd64.iso
+      checksum: d6dab0c3a657988501b4bd76f1297c053df710e06e0c3aece60dead24f270b4d
+      iso_file_name: ubuntu-24.04-live-server-amd64.iso
+      script: |
+        sudo mkdir iso
+        sudo mount ubuntu-24.04-live-server-amd64.iso /mnt
+        sudo cp -a /mnt/* iso/
+        sudo umount /mnt
+  "22.04":
+    x86_64:
+      url: https://releases.ubuntu.com/jammy/ubuntu-22.04.5-live-server-amd64.iso
+      checksum: 9bc6028870aef3f74f4e16b900008179e78b130e6b0b9a140635434a46aa98b0
+      iso_file_name: ubuntu-22.04-live-server-amd64.iso
+      script: |
+        sudo mkdir iso
+        sudo mount ubuntu-22.04-live-server-amd64.iso /mnt
+        sudo cp -a /mnt/* iso/
+        sudo umount /mnt
+rockylinux:
+  "9":
+    x86_64:
+      url: https://download.rockylinux.org/pub/rocky/9/isos/x86_64/Rocky-9.6-x86_64-dvd.iso
+      checksum: 8ff2a47e2f3bfe442617fceb7ef289b7b1d2d0502089dbbd505d5368b2b3a90f
+      iso_file_name: Rocky-9-x86_64-dvd.iso
+      script: |
+        sudo mkdir iso
+        sudo mount Rocky-9-x86_64-dvd.iso /mnt
+        sudo cp -a /mnt/* iso/
+        sudo umount /mnt
+        rm -f Rocky-9-x86_64-dvd.iso
+debian:
+  "12":
+    x86_64:
+      # Note that this is not the latest one, but since intermediate steps are not archived on mirror, no choices
+      url: https://deb.debian.org/debian/dists/bookworm/main/installer-amd64/20230607/images/netboot/netboot.tar.gz
+      iso_file_name: debian-12-netboot-20230607.tar.gz
+      script: |
+        sudo mkdir iso
+        sudo tar xzf debian-12-netboot-20230607.tar.gz
+        sudo cp debian-installer/amd64/initrd.gz iso/
+        sudo cp debian-installer/amd64/linux iso/
+        rm -f debian-12-netboot-20230607.tar.gz
+  "13":
+    x86_64:
+      # Note that this is not the latest one, but since intermediate steps are not archived on mirror, no choices
+      url: https://deb.debian.org/debian/dists/trixie/main/installer-amd64/20250803/images/netboot/netboot.tar.gz
+      iso_file_name: debian-13-netboot-20250803.tar.gz
+      script: |
+        sudo mkdir iso
+        sudo tar xzf debian-13-netboot-20250803.tar.gz
+        sudo cp debian-installer/amd64/initrd.gz iso/
+        sudo cp debian-installer/amd64/linux iso/
+        rm -f debian-13-netboot-20250803.tar.gz
+
+
+
+#https://fr2.rpmfind.net/linux/opensuse/distribution/leap/15.6/iso/openSUSE-Leap-15.6-DVD-x86_64-Build710.3-Media.iso
