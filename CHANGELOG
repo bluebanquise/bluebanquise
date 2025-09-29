@@ -4,6 +4,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.2.7
 
+* 8/09/25 - santos-lucas - [lustre_client] Fix issues with multiple-lnet setup. Lucas Santos <lucassouzasantos@gmail.com>
 * 6/09/25 - santos-lucas - [slurm] Added support for pam_slurm_adoption. Lucas Santos <lucassouzasantos@gmail.com> 
 * 8/29/25 - santos-lucas - [slurm]  Fix slurm local accounting service state managent and support to el9.
 * 8/18/25 - oxedions - [nic] Fix mask systemd-networkd.socket and add tag nic_os_dedicated_tasks to disable os tasks. (#1122, from vedmonds)
