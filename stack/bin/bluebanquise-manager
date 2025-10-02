@@ -329,6 +329,9 @@ else:
         2. Groups (function, os, hardware, ...)
         3. Nodes
 
+        - Manage configurations -
+        44. Set function groups configuration
+
         - Manage nodes -
         4. Deploy nodes OS
         5. Deploy nodes configuration
@@ -346,7 +349,7 @@ else:
             wm.w_destroy()
             quit(0)
 
-        if answer == 1:
+        if answer == 1:  # Global parameters
             wm.w_sprint("-- Entering global parameters", nl=True)
             wm.w_create(w_title="Global parameters")
             wm.w_sprint(textwrap.dedent("""
@@ -627,7 +630,8 @@ else:
 
             wm.w_destroy()
 
-        if answer == 2:
+        if answer == 2:  # Groups
+        
             wm.w_sprint("-- Entering groups", nl=True)
             wm.w_create(w_title="Groups")
             wm.w_sprint(textwrap.dedent("""
@@ -779,4 +783,86 @@ else:
 
                         # wm.w_breakline()
                     wm.w_destroy()
+            wm.w_destroy()
+
+        if answer == 44:  # functions playbook configuration
+
+            wm.w_create(w_title="Functions' playbooks configuration")
+
+            wm.w_sprint("Loading functions group file...")
+            # For now inventory path is hardcoded, to be improved later
+            fn_groups = configparser.ConfigParser(allow_no_value=True)
+            fn_groups.read('inventory/cluster/fn')
+            for fng, fng_items in fn_groups.items():
+                if str(fng) != 'DEFAULT':
+                    print('    - ' + fng)
+                    for host in fng_items:
+                        print('        - ' + host)
+
+            wm.w_sprint(textwrap.dedent("""
+
+            This section allows you to select roles to apply to nodes functions groups.
+            Playbooks generated will be stored inside /var/lib/bluebanquise/playbooks/ folder.
+
+            """))
+
+            while True:
+
+                menu_message = """
+
+                Please select function group to work with:
+
+                """
+                wm.w_sprint(textwrap.dedent(menu_message))
+                for group in fn_groups:
+                    wm.w_sprint("  - " + str(group))
+                """
+
+                9. Exit
+
+                """
+                wm.w_sprint(textwrap.dedent(menu_message))
+                answer = str(wm.w_input("❱❱❱ "))
+
+                if answer == "9":
+                    wm.w_sprint(" ")
+                    wm.w_sprint("-- Exiting. Have a nice day :)")
+                    wm.w_sprint(" ")
+                    break
+
+                if answer not in fn_groups:
+                    wm.w_sprint("Error, the selected group does not exist. Please check syntax.")
+                    continue
+
+                # Check if a playbook already exists for this group.
+                # If not, propose first a pre-made profile
+                # If yes, just load it
+                if not os.path.exists('/var/lib/bluebanquise/playbooks/' + answer + '.yml'):
+                    wm.w_sprint("No playbook found for this group, opening initialization.")
+
+                    # Now open a new window to init a new playbook
+                    wm.w_create(w_title="Create a new playbook")
+
+                    menu_message = """
+
+                    You can either select one of the following pre-made playbook profile
+                    or just enter 'empty' to create an empty playbook.
+                    Whatever you choose, you will be able to edit it later.
+
+                    """
+                    wm.w_sprint(textwrap.dedent(menu_message))
+                    for group in fn_groups:
+                        wm.w_sprint("  - " + str(group))
+                    """
+
+                    - empty
+
+                    """
+                    wm.w_sprint(textwrap.dedent(menu_message))
+                    answer = str(wm.w_input("❱❱❱ "))            
+
+                else:
+                    with open('/var/lib/bluebanquise/playbooks/' + answer + '.yml', 'r') as file:
+                        group_playbook = yaml.safe_load(file)
+
             wm.w_destroy()

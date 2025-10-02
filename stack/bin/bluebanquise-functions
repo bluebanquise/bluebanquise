@@ -171,7 +171,7 @@ if __name__ == "__main__":
 
     BlueBanquise functions
     v3.2.5
-    https://github.com/bluebanquise/bluebanquise/
+    https://bluebanquise.com
     
     """)
 
@@ -181,33 +181,88 @@ if __name__ == "__main__":
     fn_groups.read('inventory/cluster/fn')
     for fng, fng_items in fn_groups.items():
         if str(fng) != 'DEFAULT':
-            print('    - ' + fng.replace('fn_',''))
+            print('    - ' + fng)
             for host in fng_items:
                 print('        - ' + host)
 
-    exit(0)
+    wm = windows_manager()
+
+    wm.w_create(w_title="BlueBanquise manager")
+
+    menu_message = """
+
+    Welcome on bluebanquise functions tool :)
+
+    This tool allows you to select roles to apply to nodes functions groups.
+    Playbooks generated will be stored inside /var/lib/bluebanquise/playbooks/ folder.
+
+    Note: this tool is not designed to create/manage function groups, please use
+    bluebanquise-manager tool for this.
+    """
+    wm.w_sprint(textwrap.dedent(menu_message))
+
     while True:
 
         menu_message = """
 
-        Please choose the action:
+        Please select function group to work with:
 
-        1. List available OS isos and installed isos
-        2. Download an OS iso
-        3. Install an OS iso
+        """
+        wm.w_sprint(textwrap.dedent(menu_message))
+        for group in fn_groups:
+            wm.w_sprint("  - " + str(group))
+        """
 
         9. Exit
 
         """
         wm.w_sprint(textwrap.dedent(menu_message))
-        answer = int(wm.w_input("❱❱❱ "))
+        answer = str(wm.w_input("❱❱❱ "))
 
-        if answer == 9:
+        if answer == "9":
             wm.w_sprint(" ")
             wm.w_sprint("-- Exiting. Have a nice day :)")
             wm.w_sprint(" ")
             wm.w_destroy()
             quit(0)
+
+        if answer not in fn_groups:
+            wm.w_sprint("Error, the selected group does not exist. Please check syntax.")
+            continue
+
+        # Check if a playbook already exists for this group.
+        # If not, propose first a pre-made profile
+        # If yes, just load it
+        if not os.path.exists('/var/lib/bluebanquise/playbooks/' + answer + '.yml'):
+            wm.w_sprint("No playbook found for this group, opening initialization.")
+
+            # Now open a new window to init a new playbook
+            wm.w_create(w_title="Create a new playbook")
+
+            menu_message = """
+
+            You can either select one of the following pre-made playbook profile
+            or just enter 'empty' to create an empty playbook.
+            Whatever you choose, you will be able to edit it later.
+
+            """
+            wm.w_sprint(textwrap.dedent(menu_message))
+            for group in fn_groups:
+                wm.w_sprint("  - " + str(group))
+            """
+
+            - empty
+
+            """
+            wm.w_sprint(textwrap.dedent(menu_message))
+            answer = str(wm.w_input("❱❱❱ "))            
+
+        else:
+            with open('/var/lib/bluebanquise/playbooks/' + answer + '.yml', 'r') as file:
+                group_playbook = yaml.safe_load(file)
+
+
+
 
         if answer == 1:
 
