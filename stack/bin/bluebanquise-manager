@@ -176,7 +176,7 @@ print("""\
 
 wm = windows_manager()
 
-# Check if we wante a new inventory
+# Check if we want a new inventory
 if passed_arguments.create_inventory:
 
     wm.w_create(w_title="BlueBanquise manager - Create a new inventory")
@@ -186,6 +186,13 @@ if passed_arguments.create_inventory:
     This tool will help you create a new inventory
     that will be stored into the bluebanquise user's home
     into 'inventories' folder.
+
+    Note that you can have multiple inventories.
+    A link to default one will be created in the inventories folder.
+    
+    If you need to use another inventory than the default one, just
+    specify it to tools using '-i inventory_name' at call.
+    Or use the bluebanquise-manager tool to change default inventory.
     
     Press ENTER to continue.
 
@@ -201,15 +208,14 @@ if passed_arguments.create_inventory:
     
     """
     ))
-    menu_message = """
+    wm.w_sprint(textwrap.dedent("""
     Please enter the name of the new cluster,
     which will also be the name of the new inventory.
 
-    """
-    wm.w_sprint(textwrap.dedent(menu_message))
+    """))
     cluster_inventory_name = str(wm.w_input("❱❱❱ "))
 
-    menu_message = """
+    wm.w_sprint(textwrap.dedent("""
     Thank you. Now please give me the time zone of this cluster.
     You can get a full list of available time zones using the command:
 
@@ -217,18 +223,16 @@ if passed_arguments.create_inventory:
 
     For example: Europe/Paris
 
-    """
-    wm.w_sprint(textwrap.dedent(menu_message))
-    zime_zone = str(wm.w_input("❱❱❱ "))
+    """))
+    zime_zone = str(wm.w_input("❱❱❱ "))  #### TODO : add a check if time zone exists
 
-    menu_message = """
+    wm.w_sprint(textwrap.dedent("""
     Ok. Now, please give me domain name of the cluster.
 
     For example: cluster.local
 
-    """
-    wm.w_sprint(textwrap.dedent(menu_message))
-    domain_name = str(wm.w_input("❱❱❱ "))
+    """))
+    domain_name = str(wm.w_input("❱❱❱ "))  #### TODO : add a check if this is a domain name
 
     wm.w_sprint(textwrap.dedent("""
     Now moving to network related settings...
@@ -245,25 +249,25 @@ if passed_arguments.create_inventory:
     
     """
     ))
-    menu_message = """
-    Now lets create the first logical network.
+    wm.w_sprint(textwrap.dedent("""
+    Lets create the first logical network.
     This network will be the core administration network of your cluster.
-    Please give me a name for it. Note that I will then prepend it with 'net-'
+    Please give me a name for it.
+    
+    Note that I will then prepend it with 'net-'
     as this is how administration networks are named in BlueBanquise.
 
     For example: admin
     Which will become 'net-admin'.
 
-    """
-    wm.w_sprint(textwrap.dedent(menu_message))
+    """))
     network_name = str(wm.w_input("❱❱❱ "))
 
-    menu_message = """
+    wm.w_sprint(textwrap.dedent("""
     Ok, now please give me the subnet and the prefix of this network.
-    By default, I propose subnet to be 10.10.0.0 and prefix to be 16.
+    By default, proposal is subnet to be 10.10.0.0 and prefix to be 16.
 
-    """
-    wm.w_sprint(textwrap.dedent(menu_message))
+    """))
     network_subnet = str(wm.w_input("Subnet ❱❱❱ "))
     network_prefix = str(wm.w_input("Prefix ❱❱❱ "))
     
