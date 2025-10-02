@@ -2,201 +2,208 @@
 Nodes
 =====
 
-Nodes are defined by default at ``inventory/`` root level.
-For convenience, we most of the time store the nodes file(s) and group files inside a dedicated ``inventory/cluster/`` folder.
+Nodes are defined by default at root level of the inventory.
+For convenience, we will store the nodes files and group files inside a dedicated ``cluster/`` folder.
 
+Nodes are always part of 3 groups:
 
-
-Create inventory
-================
-
-It is important to understand inventory structure.
-
-By default, main location are the following (assuming relative to ``inventory/``):
-
-.. image:: images/inventory/key_paths.png
-   :align: center
-
-|
-
-* ``cluster/nodes/`` and ``cluster/groups/``: this is where nodes are listed, with their dedicated network parameters, and linked to desired groups
-* ``group_vars/my_group_name/``: this is where groups are described (OS to be used, kernel parameters, partitioning, iPXE settings, etc.)
-* ``group_vars/all/``: this is where stack global values are set (logical networks, domain name, etc.)
-
-Then, each described node will inherit from these settings. It is important to understand that some settings are linked. For example,
-a node set as member of group ``os_debian_12`` will inherit this group parameters. Also, if a network interface of this node is 
-linked to logical network ``net-1``, it will inherit all ``net-1`` network parameters. Etc.
-
-.. image:: images/inventory/node_get_values.png
-   :align: center
-
-|
-
-Create needed folders first:
-
-.. code-block::
-
-  mkdir -p inventory/group_vars/all/
-  mkdir -p inventory/cluster/nodes
-  mkdir inventory cluster/groups
-
-We are now going to populate inventory for the following basic example cluster:
-
-.. image:: images/configure_bluebanquise/example_single_island.svg
-   :align: center
-|
-
-Whatever the future cluster shape, you should start small with this, and extend it once working fine.
-
-Add first management node
--------------------------
-
-|
-.. image:: images/configure_bluebanquise/management1_1.svg
-   :align: center
-|
-
-Let's add the first node, ``management1``. This is a special node, as it will be the manager of the cluster.
-
-Create file ``cluster/nodes/management.yml`` (YAML file) and add the following content inside:
-
-.. code-block:: yaml
-
-  all:
-    hosts:
-      management1:
+1. A function group, prefixed with ``fn_``. For example: ``fn_management`` or ``fn_compute``, etc.
+2. An hardware definition group, prefixed with ``hw_``. For example ``hw_supermicro_X10DRT`` or ``hw_model_A``, etc.
+3. An OS definition group, prefixed with ``os_``. For example: ``os_almalinux_9`` or ``os_ubuntu_2404``, etc.
 
 .. note::
-  We create here one file per function, as it seems easier to maintain. However, all these files are flattened by
-  Ansible during execution, which means we could create a single ``nodes.yml`` file that would contain all the nodes in once.
-  It is up to you.
 
-Now create file ``cluster/groups/fn`` (INI file) with the following content:
+  You can create as many groups as you need, as long as they respect the prefixing convention.
+  For example, you can split ``hw_supermicro_X10DRT`` into ``hw_supermicro_X10DRT_IBHDR_T40`` and ``hw_supermicro_X10DRT_IBHDR`` for 1 version with a T40 GPU and one version without GPU.
 
-.. code-block:: ini
+This creates a new **equipment profile** (see vocabulary section of this documentation).
 
-  [fn_management]
-  management1
+Nodes definition
+================
 
-We will assume in this example that this server is a supermicro_X10DRT and that we are going to deploy AlmaLinux 9 on it.
+Nodes must always be under ``all`` then and ``hosts`` keys inside their YAML files.
 
-Create file ``cluster/groups/hw`` (INI file) with the following content:
-
-.. code-block:: ini
-
-  [hw_supermicro_X10DRT]
-  management1
-
-Then create file ``cluster/groups/os`` (INI file) with the following content:
-
-.. code-block:: ini
-
-  [os_almalinux_9]
-  management1
-
-Now check the result:
-
-.. code-block:: text
-
-  oxedions@prima:~/$ ansible-inventory -i inventory/ --graph
-  @all:
-    |--@ungrouped:
-    |--@fn_management:
-    |  |--management1
-    |--@hw_supermicro_X10DRT:
-    |  |--management1
-    |--@os_almalinux_9:
-    |  |--management1
-  oxedions@prima:~/$ 
-
-We can see that our management1 host is part of 3 groups:
-
-1. ``fn_management`` which is its function (a management node)
-2. ``hw_supermicro_X10DRT`` which is the hardware definition
-3. ``os_almalinux_9`` which is the os definition
-
-This creates a new equipment profile (see vocabulary section of this documentation).
-
-
-Connect node to network
------------------------
-
-|
-.. image:: images/configure_bluebanquise/management1_3.svg
-   :align: center
-|
-
-Now connect management1 to this network. Edit file ``cluster/nodes/management.yml`` and add management1
-network interface:
+By default, we store all nodes into the same file, ``cluster/nodes.yml``, but nothing prevents from splitting this file into smaller ones.
+Just be sure to always start the file with:
 
 .. code-block:: yaml
 
   all:
     hosts:
-      management1:
+
+Then you can add nodes as dict keys under hosts, using their hostname.
+
+For example:
+
+.. code-block:: yaml
+
+  all:
+    hosts:
+      mgt1:
+
+Nodes network interfaces
+------------------------
+
+Under node hostname, it is possible to define network interfaces, as a list inside ``network_interfaces`` key.
+Each new interface must at least contain the interface key as the interface name.
+
+.. code-block:: yaml
+
+  all:
+    hosts:
+      mgt1:
         network_interfaces:
-          - interface: enp0s3
+          - interface: enp0s8
+
+You can then link the interfaces to networks defined before (see networks section), and set their ipv4.
+If you plan to deploy the node via this interface over the network (PXE) you will also need to set a way to identify it, like its mac.
+
+.. code-block:: yaml
+
+  all:
+    hosts:
+      mgt1:
+        network_interfaces:
+          - interface: enp0s8
             ip4: 10.10.0.1
             mac: 08:00:27:dc:f8:f5
             network: net-1
 
-It should not be too difficult to understand this file.
-
-What is essential here is to understand that order network interfaces are
-defined under *network_interfaces* variable matters. Rules are the following:
-
-1. The first interface in the list is the **resolution interface**. This is the one a ping will try to reach.
-2. The first interface attached to a management network is the **main network interface** (remember, management networks are the ones prefixed ``net-``). This is the one ssh and so Ansible will use to connect to the node.
-
-If these rules do not comply with your needs, remember that the stack logic can
-be precedenced: simply re-define logic variables like ``j2_node_main_resolution_network`` or
-``j2_node_main_network`` manually under host.
-
-.. note::
-  You may not already know the interface name, or even the MAC address.
-  You will be able to update it later, once server is reachable.
-
-
-Add remaining nodes
--------------------
-
-|
-.. image:: images/configure_bluebanquise/others_1.svg
-   :align: center
-|
-
-Proceed as with management1 node. We will do computes1 to compute4, other nodes can then be added the same way.
-
-First create file ``cluster/nodes/compute.yml`` (YAML file) and add the following content inside:
+You can add another interface, for example an infiniband interface, on interconnect network:
 
 .. code-block:: yaml
 
   all:
     hosts:
-      compute1:
+      mgt1:
+        network_interfaces:
+          - interface: enp0s8
+            ip4: 10.10.0.1
+            mac: 08:00:27:dc:f8:f5
+            network: net-1
+          - interface: ib0
+            ip4: 10.20.0.1
+            network: interconnect
+            type: infiniband
+
+The full list of available parameters is defined in the nmcli Ansible module `https://ansible.readthedocs.io/projects/ansible/3/collections/community/general/nmcli_module.html<https://ansible.readthedocs.io/projects/ansible/3/collections/community/general/nmcli_module.html>`_.
+
+.. note::
+  
+  If you are creating your inventory before having access to the cluster, you may not already know the interface name, or even the MAC address.
+  You will be able to update it later, once server is reachable.
+
+An example of a file could be for computes nodes:
+
+.. code-block:: yaml
+
+  all:
+    hosts:
+      c001:
         network_interfaces:
           - interface: eno1
             ip4: 10.10.3.1
             mac: 08:00:27:dc:f8:a1
             network: net-1
-      compute2:
+      c002:
         network_interfaces:
           - interface: eno1
             ip4: 10.10.3.2
             mac: 08:00:27:dc:f8:a2
             network: net-1
-      compute3:
+      c003:
         network_interfaces:
           - interface: eno1
             ip4: 10.10.3.3
             mac: 08:00:27:dc:f8:a3
             network: net-1
-      compute4:
+      c004:
         network_interfaces:
           - interface: eno1
             ip4: 10.10.3.4
             mac: 08:00:27:dc:f8:a4
             network: net-1
+
+BMC
+---
+
+Your server might have a BMC, to manage it over the network.
+If so, you can define it under the hostname, along with its network parameters, so it is taken into account:
+
+
+.. code-block:: yaml
+
+  all:
+    hosts:
+      mgt1:
+        bmc:
+          name: bmgt1
+          ip4: 10.10.100.1
+          network: net-admin
+          mac: 2a:2b:3c:4d:5e:6f
+        network_interfaces:
+          - interface: enp0s8
+            ip4: 10.10.0.1
+            mac: 08:00:27:dc:f8:f5
+            network: net-1
+          - interface: ib0
+            ip4: 10.20.0.1
+            network: interconnect
+            type: infiniband
+
+Nodes groups
+============
+
+Each node needs to be in at least 3 specific groups:
+
+1. A function group, prefixed with ``fn_``.
+2. An hardware definition group, prefixed with ``hw_``.
+3. An OS definition group, prefixed with ``os_``.
+
+You can then also add nodes into custom groups for ease, as long as they do not use the 3 reserved prefixes.
+
+Function group
+--------------
+
+Function groups define the purpose of the nodes.
+Most of the time, these groups are also used to create the associated Ansible playbooks, to define what to configure on nodes of the same function group.
+
+Function groups are always prefixed by ``fn_``.
+
+To add a node in a function group, edit/create file ``cluster/fn`` (not ``cluster/fn.yml`` as this is not a YAML format here, but INI).
+Each group is between ``[ ]`` and nodes inside this group are just listed bellow.
+
+.. code-block:: ini
+
+  [fn_management]
+  mgt1
+
+  [fn_compute]
+  c001
+  c002
+  c003
+  c004
+
+.. note::
+
+  Protip: you can use ranges to define nodes in group files. In this example, the 4 c00X nodes can also be written ``c00[1:4]``.
+  BEWARE, this is not Clustershell syntax!
+
+  .. code-block:: ini
+
+    [fn_management]
+    mgt1
+
+    [fn_compute]
+    c00[1:4]
+
+Operating system group
+----------------------
+
+Hardware group
+--------------
+
+
 
 Now edit file ``cluster/groups/fn`` (INI file) with the following content:
 
