@@ -35,6 +35,7 @@ This documentation is under Creative Commons Attribution-NonCommercial-ShareAlik
    :numbered:
    :titlesonly: 
 
+   configuration/inventories
    configuration/nodes
    configuration/services
    configuration/networks

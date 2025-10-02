@@ -31,7 +31,7 @@ Now you can load the BlueBanquise environment (Python, Ansible and tools), using
 .. note::
   You can unload this environment at anytime using ``unload`` instead of ``load`` at the end of this command.
 
-This command will have loaded a Python virtual environment located at ``/var/lib/bluebanquise/ansible_venv/`` and added ``/var/lib/bluebanquise/bluebanquise/stack/bin``.
+This command will have loaded a Python virtual environment located at ``/var/lib/bluebanquise/ansible_venv/`` and added ``/var/lib/bluebanquise/bluebanquise/stack/bin`` into PATH.
 
 Test you can now use the ``bluebanquise-ansible-playbook`` command:
 
@@ -42,28 +42,6 @@ Test you can now use the ``bluebanquise-ansible-playbook`` command:
   config file = None
   ...
 
+BlueBanquise is now installed on the current system.
 
-Create first inventory
-======================
-
-You can now create your first cluster inventory, which acts as a text/folders based database of your cluster description.
-
-To do so, you can either create it manually from scratch using the remaining documentation, or initialize it with the ``bluebanquise-manager`` tool.
-
-.. code-block:: text
-
-  bluebanquise-manager create-inventory
-
-.. note::
-
-  This tool was made to cover basic clusters. In order to create a complex inventory, please refer to the documentation.
-  It is possible to use both the tool and custom files. The tool will always prefix its files with ``bbm_`` prefix. Edit these files with care.
-  Other files will be ignored by the tool, but not during Ansible execution.
-
-Pull os images
-==============
-
-If you plan to use PXE on your cluster to deploy OS on servers through the network, you will need to obtain desired OS isos.
-
-A small tool is available to ease this task.
-
+Next step is to create your first inventory to define and configure your cluster.
