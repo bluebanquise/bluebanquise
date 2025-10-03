@@ -38,7 +38,11 @@ This documentation is under Creative Commons Attribution-NonCommercial-ShareAlik
    configuration/inventories
    configuration/networks
    configuration/nodes
+   configuration/groups
+   configuration/os_settings
+   configuration/hw_settings
    configuration/services
+   configuration/other_roles
    configuration/groups
    configuration/storage
    configuration/system

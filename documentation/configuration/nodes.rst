@@ -130,7 +130,6 @@ BMC
 Your server might have a BMC, to manage it over the network.
 If so, you can define it under the hostname, along with its network parameters, so it is taken into account:
 
-
 .. code-block:: yaml
 
   all:
@@ -200,166 +199,112 @@ Each group is between ``[ ]`` and nodes inside this group are just listed bellow
 Operating system group
 ----------------------
 
-Hardware group
---------------
+OS groups define the OS related settings of the associated nodes.
 
+OS groups are always prefixed by ``os_``.
 
+To add a node in an OS group, edit/create file ``cluster/os``, like for function groups.
 
-Now edit file ``cluster/groups/fn`` (INI file) with the following content:
+For example:
 
 .. code-block:: ini
 
-  [fn_management]
-  management1
+  [os_ubuntu_2404]
+  mgt1
+  c001
+  c002
+  c003
+  c004
 
-  [fn_compute]
-  compute[1:4]
+Please refer to os settings section of this documentation to learn how to add settings to these groups.
 
-We will assume in this example that these servers are supermicro_X13QEH and that we are going to deploy AlmaLinux 9 (like management1) on it.
-So it means these servers will share the same os group than management1, but will have a different hw group.
+Hardware group
+--------------
 
-Edit file ``cluster/groups/hw`` (INI file) with the following content:
+Hardware groups define the hardware related settings of the associated nodes.
+
+Hardware groups are always prefixed by ``hw_``.
+
+To add a node in an hardware group, edit/create file ``cluster/hw``, like for function groups.
+
+For example:
 
 .. code-block:: ini
 
   [hw_supermicro_X10DRT]
-  management1
+  mgt1
 
   [hw_supermicro_X13QEH]
-  compute[1:4]
+  c00[1:3]
 
-Then Edit file ``cluster/groups/os`` (INI file) with the following content:
+  [hw_supermicro_X13QEH_NvidiaT4_HDR]
+  c004
 
-.. code-block:: ini
+Please refer to hardware settings section of this documentation to learn how to add settings to these groups.
 
-  [os_almalinux_9]
-  management1
-  compute[1:4]
+.. note::
 
-Now check the result:
+  You can check the result of your groups configuration using the ansible-inventory command:
 
-.. code-block:: text
+  .. code-block:: text
 
-  (pydevs) oxedions@prima:~/tmp_devs$ ansible-inventory -i inventory/ --graph
-  @all:
-    |--@ungrouped:
-    |--@fn_management:
-    |  |--management1
-    |--@fn_compute:
-    |  |--compute1
-    |  |--compute2
-    |  |--compute3
-    |  |--compute4
-    |--@hw_supermicro_X10DRT:
-    |  |--management1
-    |--@hw_supermicro_X13QEH:
-    |  |--compute1
-    |  |--compute2
-    |  |--compute3
-    |  |--compute4
-    |--@os_almalinux_9:
-    |  |--management1
-    |  |--compute1
-    |  |--compute2
-    |  |--compute3
-    |  |--compute4
-  (pydevs) oxedions@prima:~/tmp_devs$ 
-
-Finally, create the new hw profile. Create file ``group_vars/hw_supermicro_X13QEH/settings.yml`` with the following content:
-
-.. code-block:: yaml
-
-  hw_equipment_type: server
-
-  hw_specs:
-    cpu:
-      name: Intel 6416H
-      cores: 144
-      cores_per_socket: 18
-      sockets: 4
-      threads_per_core: 2
-    gpu:
-
-  hw_console: console=tty0 console=ttyS1,115200
-
-  hw_board_authentication: # Authentication to BMC
-    - protocol: IPMI
-      user: ADMIN
-      password: ADMIN
-
-You can check which parameters are linked to a specific node using the ansible-inventory command:
-
-.. code-block:: text
-
-  (pydevs) oxedions@prima:~/tmp_devs$ ansible-inventory -i inventory/ --host management1 --yaml
-  hw_board_authentication:
-  - password: ADMIN
-    protocol: IPMI
-    user: ADMIN
-  hw_console: console=tty0 console=ttyS1,115200
-  hw_equipment_type: server
-  hw_kernel_parameters: nomodeset
-  hw_specs:
-    cpu:
-      cores: 32
-      cores_per_socket: 8
-      name: Intel E5-2667 v4
-      sockets: 2
-      threads_per_core: 2
-    gpu: null
-  hw_vendor_url: https://www.supermicro.com/en/products/motherboard/X10DRT-L
-  os_access_control: enforcing
-  os_admin_password_sha512: $6$JLtp9.SYoijB3T0Q$q43Hv.ziHgC9mC68BUtSMEivJoTqUgvGUKMBQXcZ0r5eWdQukv21wHOgfexNij7dO5Mq19ZhTR.JNTtV89UcH0
-  os_firewall: true
-  os_keyboard_layout: us
-  os_operating_system:
-    distribution: almalinux
-    distribution_major_version: 9
-  os_partitioning: clearpart --all --initlabel autopart --type=plain --fstype=ext4
-  os_system_language: en_US.UTF-8
-  (pydevs) oxedions@prima:~/tmp_devs$ 
-
-Proceed the same way to add all nodes to the inventory.
-
-Connect cluster to the world (optional)
----------------------------------------
-
-|
-.. image:: images/configure_bluebanquise/example_single_island.svg
-   :align: center
-|
-
-You may need to connect the cluster to a gateway, or even configure a server as a gateway.
-In this example, login1 will act as a gateway.
+    (pydevs) oxedions@prima:~/$ ansible-inventory -i inventories/default/ --graph
+    @all:
+      |--@ungrouped:
+      |--@fn_management:
+      |  |--mgt1
+      |--@fn_compute:
+      |  |--c001
+      |  |--c002
+      |  |--c003
+      |  |--c004
+      |--@hw_supermicro_X10DRT:
+      |  |--mgt1
+      |--@hw_supermicro_X13QEH:
+      |  |--c001
+      |  |--c002
+      |  |--c003
+      |  |--c004
+      |--@os_almalinux_9:
+      |  |--mgt1
+      |  |--c001
+      |  |--c002
+      |  |--c003
+      |  |--c004
+    (pydevs) oxedions@prima:~/$ 
 
 
-Create a file /root/gen.sh with the following content:
+Generate range of nodes
+=======================
+
+Since nodes are based on YAML files, it is easy to generate them using a bash script.
+A small example is given bellow, please adapt it to your needs.
+
+Create a file /tmp/gen.sh with the following content:
 
 .. code-block:: text
 
   #!/bin/bash
   cat <<EOF > computes.yml
-  mg_computes:
-    children:
-      equipment_typeC:
-        hosts:
+  all:
+    hosts:
   EOF
   for ((i=1;i<=$1;i++)); do
   cat <<EOF >> computes.yml
-          c$i:
-            bmc:
-              name: bc$i
-              ip4: 10.10.103.$i
-              mac:
-              network: ice1-1
-            network_interfaces:
-              - interface: enp0s9
-                ip4: 10.10.3.$i
-                mac:
-                network: ice1-1
-              - interface: ib0
-                ip4: 10.20.3.$i
-                network: interconnect-1
+      c$i:
+        bmc:
+          name: bc$i
+          ip4: 10.10.103.$i
+          mac:
+          network: ice1-1
+        network_interfaces:
+          - interface: enp0s9
+            ip4: 10.10.3.$i
+            mac:
+            network: ice1-1
+          - interface: ib0
+            ip4: 10.20.3.$i
+            network: interconnect-1
   EOF
   done
 
@@ -367,48 +312,106 @@ Save, make this script executable, and run it asking for 4 nodes:
 
 .. code-block:: text
 
-  chmod +x /root/gen.sh
-  /root/gen.sh 4
+  chmod +x /tmp/gen.sh
+  /tmp/gen.sh 4
 
+This will generate a file to edit, just need to add MAC addresses once you know them.
 
-Host settings
+Alias
+=====
+
+When needed, it is possible to add alias to hosts.
+
+An alias can be added at 3 location:
+
+Global host alias
+-----------------
+
+Just add the alias under the host name, this will result in an entry that will be linked to the node hostname.
+
+For example:
+
+.. code-block:: yaml
+
+  all:
+    hosts:
+      mgt1:
+        alias: foobar
+        bmc:
+          name: bmgt1
+          ip4: 10.10.100.1
+          network: net-admin
+          mac: 2a:2b:3c:4d:5e:6f
+        network_interfaces:
+          - interface: enp0s8
+            ip4: 10.10.0.1
+            mac: 08:00:27:dc:f8:f5
+            network: net-1
+          - interface: ib0
+            ip4: 10.20.0.1
+            network: interconnect
+            type: infiniband
+
+Pinging foobar will endup on 10.10.0.1, like pinging mgt1.
+
+Per nic alias
 -------------
 
-- **bmc**: dict that defines an attached BMC to the host, with its name, ip4, mac and attached network.
+You can add the alias inside a nic interface dict, this will result in an entry that will be linked to the node nic.
 
-Example:
-
-.. code-block:: yaml
-
-  c001:
-    bmc:
-      name: node001-bmc
-      ip4: 10.10.103.1
-      mac: 08:00:27:0d:44:91
-      network: net-admin
-
-- **network_interfaces**: list of dicts that defines all network interfaces of the host. Note that order is important. First interface in the list is the resolution (ping) interface,
-  while first in the list linked to an admininstration network (see Network settings) is the ssh/Ansible interface (which can be the same than the resolution interface).
-
-Example:
+For example:
 
 .. code-block:: yaml
 
-  node001:
-    network_interfaces:
-      - interface: eth1
-        ip4: 10.10.3.1
-        mac: 08:00:27:0d:44:90
-        network: net-admin
-      - interface: eth0
-        skip: true
-      - interface: ib0
-        ip4: 10.20.3.1
-        network: interconnect
-        type: infiniband
+  all:
+    hosts:
+      mgt1:
+        bmc:
+          name: bmgt1
+          ip4: 10.10.100.1
+          network: net-admin
+          mac: 2a:2b:3c:4d:5e:6f
+        network_interfaces:
+          - interface: enp0s8
+            ip4: 10.10.0.1
+            mac: 08:00:27:dc:f8:f5
+            network: net-1
+          - interface: ib0
+            alias: foobar
+            ip4: 10.20.0.1
+            network: interconnect
+            type: infiniband
 
-Available settings for each interface are the ones listed in `the Ansible nmcli_module. <https://docs.ansible.com/ansible/latest/collections/community/general/nmcli_module.html>`_
-Note that only RHEL and Suse support all these settings. Available settings for Debian and Ubuntu are currently limited in the stack, but can be extended on demand (please open a feature request).
+Pinging foobar will endup on 10.20.0.1, like pinging mgt1-ib0.
 
-- **alias**: add an alias to the host, that will be added in the /etc/hosts file and in the dns server.
-- **global_alias**: add a global alias not limited to the current iceberg (multiple icebergs mode only).
+.. warning::
+
+  If you disabled ``hosts_file_enable_extended_names``, then this nic alias feature will also be disabled.
+
+BMC alias
+---------
+
+You can add an alias to the BMC too:
+
+.. code-block:: yaml
+
+  all:
+    hosts:
+      mgt1:
+        bmc:
+          name: bmgt1
+          alias: foobarbmc
+          ip4: 10.10.100.1
+          network: net-admin
+          mac: 2a:2b:3c:4d:5e:6f
+        network_interfaces:
+          - interface: enp0s8
+            ip4: 10.10.0.1
+            mac: 08:00:27:dc:f8:f5
+            network: net-1
+          - interface: ib0
+            ip4: 10.20.0.1
+            network: interconnect
+            type: infiniband
+
+Pinging foobarbmc will result in pinging 10.10.100.1.

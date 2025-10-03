@@ -1,6 +1,122 @@
-======
-Groups
-======
+===========
+Hardware settings
+===========
+
+.. warning::
+  **IMPORTANT**: ``hw_`` and ``os_`` variables **are
+  not standard**. You should **NEVER** set them outside hardware or os groups.
+  For example, you cannot set the ``hw_console`` parameter for a single node under it's hostvars.
+  If you really need to do that, add more hardware or os groups. If you do not respect this
+  rule, unexpected behavior will happen during configuration deployment.
+
+  Note however that these variables can be used at ``group_vars/all`` level.
+
+Once an hardware group has been defined into ``cluster/`` folder, you can create a group's dedicated folder
+inside ``group_vars/`` directory. The folder name must match the group name. For example, for group
+``hw_supermicro_X13QEH``, directory path will be ``group_vars/hw_supermicro_X13QEH``.
+
+Once this directory has been created you can configure the hardware settings of this group.
+Create a file named ``settings.yml`` inside the group folder, and then see bellow for available parameters.
+
+Equipment type
+==============
+
+**This key is very important**, as it will enable or not specific features in some stack's roles.
+
+Use ``hw_equipment_type`` key to set the type of the equipment. For example ``server`` or ``switch``, etc.
+
+Please note that ``server`` value is the value that triggers PXE, conman, etc for a node. Each server node to be deployed via PXE should be of type ``server``.
+You can set other types namings according to your wishes (``switch``, ``switches``, ``storage_bay_controller``, whatever).
+
+For example:
+
+.. code-block:: yaml
+
+  hw_equipment_type: server
+
+Hardware componants
+===================
+
+You can define the node components using the ``hw_specs`` key.
+
+These values will be used by some roles of the stack to generate their configuration.
+
+.. code-block:: yaml
+
+  hw_specs:
+    cpu:
+      name: Intel 6416H
+      cores: 144
+      cores_per_socket: 18
+      sockets: 4
+      threads_per_core: 2
+    gpu:
+      - NVIDIA A100-SXM4-40GB
+
+Note that gpu key is a list of GPU, while cpu key is a dict that defines specific CPU keys:
+
+* ``cores``: total number of cores on the system (virtual ones included)
+* ``cores_per_socket``: total number of cores per CPU
+* ``sockets``: total number of sockets on the motherboard
+* ``threads_per_core``: total number of threads per core (HyperThreading)
+
+In normal time: ``cores = threads_per_core*cores_per_socket*sockets``.
+
+Console
+=======
+
+If the hardware is a server, a console can be enabled using ``hw_console`` key.
+
+For example:
+
+.. code-block:: yaml
+
+  hw_console: console=tty0 console=ttyS1,115200
+
+Please note that the console can be obtained from your server manufacturer/vendor.
+If they don't know it, try ttyS0, then ttyS1, then ttyS2. Its nearly always one of these.
+
+
+
+
+  hw_board_authentication: # Authentication to BMC
+    - protocol: IPMI
+      user: ADMIN
+      password: ADMIN
+
+You can check which parameters are linked to a specific node using the ansible-inventory command:
+
+.. code-block:: text
+
+  (pydevs) oxedions@prima:~/tmp_devs$ ansible-inventory -i inventory/ --host mgt1 --yaml
+  hw_board_authentication:
+  - password: ADMIN
+    protocol: IPMI
+    user: ADMIN
+  hw_console: console=tty0 console=ttyS1,115200
+  hw_equipment_type: server
+  hw_kernel_parameters: nomodeset
+  hw_specs:
+    cpu:
+      cores: 32
+      cores_per_socket: 8
+      name: Intel E5-2667 v4
+      sockets: 2
+      threads_per_core: 2
+    gpu: null
+  hw_vendor_url: https://www.supermicro.com/en/products/motherboard/X10DRT-L
+  os_access_control: enforcing
+  os_admin_password_sha512: $6$JLtp9.SYoijB3T0Q$q43Hv.ziHgC9mC68BUtSMEivJoTqUgvGUKMBQXcZ0r5eWdQukv21wHOgfexNij7dO5Mq19ZhTR.JNTtV89UcH0
+  os_firewall: true
+  os_keyboard_layout: us
+  os_operating_system:
+    distribution: almalinux
+    distribution_major_version: 9
+  os_partitioning: clearpart --all --initlabel autopart --type=plain --fstype=ext4
+  os_system_language: en_US.UTF-8
+  (pydevs) oxedions@prima:~/tmp_devs$ 
+
+Proceed the same way to add all nodes to the inventory.
 
 
 Reserved groups and prefixs
