@@ -56,8 +56,13 @@ GresTypes={{ slurm_grestypes }}
 ProctrackType=proctrack/cgroup
 TaskPlugin=affinity,cgroup
 SelectTypeParameters=CR_Core_Memory,CR_CORE_DEFAULT_DIST_BLOCK,CR_ONE_TASK_PER_CORE
-
 {% endif %}
+
+{% if slurm_pam_slurm_adopt_enable is defined and slurm_pam_slurm_adopt_enable %}
+# pam_slurm_adoption
+PrologFlags=contain
+{% endif %}
+
 {% if slurm_enable_accounting %}
 ## Accounting
 AccountingStorageHost={{ slurm_controller_hostname }}

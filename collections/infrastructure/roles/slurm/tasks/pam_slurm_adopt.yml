@@ -1,0 +1,22 @@
+- name: "package █ Install pam_slurm_adopt"
+  ansible.builtin.package:
+    name: "slurm-pam_slurm"
+    state: present
+  tags:
+    - package
+
+- name: "Ensure pam_slurm_adopt is configured on PAM ssh rules"
+  ansible.builtin.lineinfile:
+    path: /etc/pam.d/sshd 
+    insertafter: '^account'
+    line: "-account    required      pam_slurm_adopt.so #bluebanquise managed" 
+
+- name: "Disable pam_systemd in sshd & system-auth - https://slurm.schedmd.com/pam_slurm_adopt.html"
+  ansible.builtin.lineinfile:
+    path: "/etc/pam.d/{{item}}"
+    regexp: '^.*pam_systemd\.so.*'
+    state: absent
+  with_items:
+    - password-auth
+    - system-auth
+    - sshd

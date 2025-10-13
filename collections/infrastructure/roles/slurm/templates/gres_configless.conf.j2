@@ -1,0 +1,32 @@
+#jinja2: lstrip_blocks: True
+#### Blue Banquise file ####
+## {{ansible_managed}}
+
+# Documentation:
+# https://slurm.schedmd.com/gres.conf.html
+#
+# For now, only Nvidia gpus are supported
+
+{% macro get_devices(gpu_list,gpu_vendor) %}
+  {%- set device_list = [] -%}
+  {%- for gpu in gpu_list -%}
+    {% if gpu.split(' ')[0] == 'NVIDIA' %}
+	{% set gpu_vendor = 'nvidia' %}
+    {% endif %}
+    {% if gpu_vendor == 'nvidia' %}
+      {%- set _ = device_list.append("/dev/nvidia" ~ loop.index0 ) -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {{ device_list | join(',') }}
+{% endmacro %}
+
+{# GPU Resources Definition #}
+{% for slurm_group in slurm_computes_groups %}
+  {% for host in groups[slurm_group] %}
+    {% if hostvars[host]['hw_specs']['gpu'] is defined and hostvars[host]['hw_specs']['gpu'] != "none" %}
+      {% if hostvars[host]['gpu_vendor'] is defined %}
+NodeName={{host}} Name=gpu File={{get_devices(hostvars[host]['hw_specs']['gpu'],hostvars[host]['gpu_vendor'])}}
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+{% endfor %}
