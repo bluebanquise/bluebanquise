@@ -1,0 +1,70 @@
+playbook_templates:
+  compute:
+    roles:
+      # Infrastructure
+      - role: bluebanquise.infrastructure.set_hostname
+        tags: set_hostname
+        
+      - role: bluebanquise.infrastructure.access_control
+        tags: access_control
+      - role: bluebanquise.infrastructure.clustershell
+        tags: clustershell
+      - role: bluebanquise.infrastructure.conman
+        tags: conman
+      - role: bluebanquise.infrastructure.cron
+        tags: cron
+      - role: bluebanquise.infrastructure.dhcp_server
+        tags: dhcp_server
+      - role: bluebanquise.infrastructure.dns_client
+        tags: dns_client
+      - role: bluebanquise.infrastructure.dns_server
+        tags: dns_server
+      - role: bluebanquise.infrastructure.firewall
+        tags: firewall
+      - role: bluebanquise.infrastructure.hosts_file
+        tags: hosts_file
+      - role: bluebanquise.infrastructure.http_server
+        tags: http_server
+      - role: bluebanquise.infrastructure.kernel_config
+        tags: kernel_config
+      - role: bluebanquise.infrastructure.modprobe
+        tags: modprobe
+      - role: bluebanquise.infrastructure.nic
+        tags: nic
+      - role: bluebanquise.infrastructure.pam_limits
+        tags: pam_limits
+      - role: bluebanquise.infrastructure.powerman
+        tags: powerman
+      - role: bluebanquise.infrastructure.pxe_stack
+        tags: pxe_stack
+      - role: bluebanquise.infrastructure.repositories
+        tags: repositories
+      - role: bluebanquise.infrastructure.root_password
+        tags: root_password
+
+      - role: bluebanquise.infrastructure.ssh_client
+        tags: ssh_client
+      - role: bluebanquise.infrastructure.ssh_remote_keys
+        tags: ssh_remote_keys
+      - role: bluebanquise.infrastructure.sudoers
+        tags: sudoers
+      - role: bluebanquise.infrastructure.system
+        tags: system
+      - role: bluebanquise.infrastructure.time
+        tags: time
+        vars:
+          time_profile: server
+      - role: bluebanquise.infrastructure.time
+        tags: time
+        vars:
+          time_profile: client
+      - role: bluebanquise.infrastructure.update_reboot
+        tags: update_reboot
+      - role: bluebanquise.infrastructure.users
+        tags: users
+
+      # HPC
+      - role: bluebanquise.hpc.slurm
+        tags: slurm
+        vars:
+          slurm_profile: controller

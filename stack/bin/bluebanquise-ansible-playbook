@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+# This is a small wrapper that makes sure user have loaded Ansible environment
+# and that we are using the project Ansible configuration.
+
+set -e  # Exit in case of any error
+
+# Check if ansible-playbook command is available
+if ! command -v ansible-playbook >/dev/null 2>&1
+then
+  echo
+  echo -e " \e[31mError, could not find ansible-playbook command in PATH."
+  echo -e " Please load provided virtual environment first:"
+  echo
+  echo -e " /var/lib/bluebanquise/bluebanquise/stack/bin/bluebanquise-environment load \e[0m"
+  echo
+  exit 1
+else
+  ANSIBLE_CONFIG=/var/lib/bluebanquise/bluebanquise/ansible.cfg ansible-playbook "$@"
+  exit $?
+fi
