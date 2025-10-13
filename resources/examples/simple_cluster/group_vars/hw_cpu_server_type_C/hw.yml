@@ -1,0 +1,16 @@
+hw_equipment_type: server
+
+hw_board_authentication:
+  - protocol: IPMI
+    user: ADMIN
+    password: ADMIN
+
+hw_specs:
+  cpu:
+    architecture: x86_64
+    cores: 8
+    cores_per_socket: 8
+    sockets: 1
+    threads_per_core: 1
+  gpu: none
+  

@@ -1,0 +1,91 @@
+all:
+  hosts:
+
+    # Management nodes
+    mgt1:
+      # If there is a BMC attached to this server, uncomment this part
+      # bmc:
+      #   name: bmgt1
+      #   ip4: 10.10.100.1
+      #   network: net-admin
+      #   mac: 2a:2b:3c:4d:10:11
+      network_interfaces:
+        - interface: enp2s0
+          ip4: 10.10.0.1
+          network: net-admin
+          mac: 1a:2b:3c:4d:10:9f
+          never_default4: true  # In this example, we want the management node to be gateway to external
+        - interface: enp1s0
+          ip4: 192.168.1.20
+          network: external-network
+          skip: true  # This interface is managed manually
+
+    # CPU based computes nodes
+    c001:
+      bmc:
+        name: bc001
+        ip4: 10.10.103.1
+        network: net-admin
+        mac: 2a:2b:3c:2d:30:31
+      network_interfaces:
+        - interface: enp1s0
+          ip4: 10.10.3.1
+          mac: 1a:2b:3c:4d:31:31
+          network: net-admin
+    c002:
+      bmc:
+        name: bc002
+        ip4: 10.10.103.2
+        network: net-admin
+        mac: 2a:2b:3c:2d:30:32
+      network_interfaces:
+        - interface: enp1s0
+          ip4: 10.10.3.2
+          mac: 1a:2b:3c:4d:31:32
+          network: net-admin
+    c003:
+      bmc:
+        name: bc003
+        ip4: 10.10.103.3
+        network: net-admin
+        mac: 2a:2b:3c:2d:30:33
+      network_interfaces:
+        - interface: enp1s0
+          ip4: 10.10.3.3
+          mac: 1a:2b:3c:4d:31:33
+          network: net-admin
+    c004:
+      bmc:
+        name: bc004
+        ip4: 10.10.103.4
+        network: net-admin
+        mac: 2a:2b:3c:2d:30:34
+      network_interfaces:
+        - interface: enp1s0
+          ip4: 10.10.3.4
+          mac: 1a:2b:3c:4d:31:34
+          network: net-admin
+
+    # GPU based computes nodes
+    g001:
+      bmc:
+        name: bg001
+        ip4: 10.10.103.21
+        network: net-admin
+        mac: 2a:2b:3c:2d:30:41
+      network_interfaces:
+        - interface: enp1s0
+          ip4: 10.10.3.21
+          mac: 1a:2b:3c:4d:31:41
+          network: net-admin
+    g002:
+      bmc:
+        name: bg002
+        ip4: 10.10.103.22
+        network: net-admin
+        mac: 2a:2b:3c:2d:30:42
+      network_interfaces:
+        - interface: enp1s0
+          ip4: 10.10.3.22
+          mac: 1a:2b:3c:4d:31:42
+          network: net-admin

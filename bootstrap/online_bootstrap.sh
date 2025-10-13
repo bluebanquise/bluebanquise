@@ -47,12 +47,16 @@ echo
 
 echo " Welcome to the BlueBanquise stack base bootstraper."
 echo
-echo -e " \e[31mThis tool is going to install packages and act as"
-echo -e " priviledged user on this system to perform needed"
-echo -e " operations to create the bluebanquise user."
-echo -e " Commands executed are logged into /var/log/bluebanquise/bootstrap"
-echo -e " This script is set to stop if anything returns an error."
+echo -e " \e[31mThis tool is going to:"
+echo -e " 1. Install required packages to run Ansible (only from your distribution's repositories)"
+echo -e " 2. Create a user called 'bluebanquise', sudo able, with home set at /var/lib/bluebanquise"
+echo -e " 3. Login as this bluebanquise user, and create a Python virtual environment with Ansible in it"
+echo -e " 4. Clone bluebanquise main git repository, and install BlueBanquise Ansible collections"
+echo -e " Note that all these 2 last steps are contained inside the bluebanquise home, and do not impact system."
+echo -e " To do all of that, this script will do few actions with priviledged user (sudo/root)."
+echo -e " All logs will be stored inside /var/log/bluebanquise/bootstrap."
 echo -e " You can relaunch this script with the --debug flag to enable debug mode."
+echo -e " Are you ok with all of that?"
 echo -e "\e[0m"
 
 echo
@@ -189,8 +193,7 @@ echo
 echo " Bootstrap done."
 echo " You can now login as bluebanquise user via 'su - bluebanquise'"
 echo
-echo " To use BlueBanquise, remember to set Ansible environment variable:"
-echo " ANSIBLE_CONFIG=\$HOME/bluebanquise/ansible.cfg"
+echo " Please refer to online documentation for next steps."
 echo
 echo " You can find documentation at http://bluebanquise.com/documentation/"
 echo " You can ask for help or rise issues at https://github.com/bluebanquise/bluebanquise/"
