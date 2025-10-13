@@ -9,7 +9,7 @@ Understanding logic
 
 Before listing available parameters, it is important to understand the network logic.
 
-Under ``networks`` key: each network listed that starts with previx ``net-`` is considered **a management network**, while other networks are considered basic networks.
+Under ``networks`` key: each network listed that starts with previx ``net-`` is considered **a management network** (also refered as an administration network), while other networks are considered basic networks.
 A management network is designed to host low level vital resources, like DHCP, DNS, NTP, PXE, BMCs management (IPMI/RedFish), etc, while basic networks are designed to host all other usages, like data transfers, calculations exchanges, etc.
 
 Under ``network_interfaces`` of a node:

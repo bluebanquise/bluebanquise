@@ -26,7 +26,7 @@ configure the target server in networks settings, and the stack will automatical
 
 For developers, logic is the following (I split the line into 2 parts to make it human readble):
 
-.. code-block:: jinja2
+.. code-block:: python
 
   http://{{
     networks[repositories_network | default(j2_node_main_network, true)]['services']['repositories'][0]['hostname'], true | 
@@ -180,7 +180,7 @@ RHEL like system
 .. raw:: html
 
   <div style="padding: 6px;">
-  <b>RHEL</b> <img src="_static/logo_rhel.png">, <b>CentOS</b> <img src="_static/logo_centos.png">, <b>RockyLinux</b> <img src="_static/logo_rocky.png">, <b>OracleLinux</b> <img src="_static/logo_oraclelinux.png"><br> <b>CloudLinux</b> <img src="_static/logo_cloudlinux.png">, <b>AlmaLinux</b> <img src="_static/logo_almalinux.png">
+  <b>RHEL</b> <img src="/_static/logo_rhel.png">, <b>CentOS</b> <img src="/_static/logo_centos.png">, <b>RockyLinux</b> <img src="/_static/logo_rocky.png">, <b>OracleLinux</b> <img src="/_static/logo_oraclelinux.png"><br> <b>CloudLinux</b> <img src="/_static/logo_cloudlinux.png">, <b>AlmaLinux</b> <img src="/_static/logo_almalinux.png">
   </div><br><br>
 
 .. code-block:: yaml
@@ -199,7 +199,7 @@ Ubuntu or Debian like systems
 .. raw:: html
 
   <div style="padding: 6px;">
-  <b>Ubuntu</b> <img src="_static/logo_ubuntu.png">, <b>Debian</b> <img src="_static/logo_debian.png">
+  <b>Ubuntu</b> <img src="/_static/logo_ubuntu.png">, <b>Debian</b> <img src="/_static/logo_debian.png">
   </div><br><br>
 
 .. code-block:: yaml
@@ -216,7 +216,7 @@ Suse like system
 .. raw:: html
 
   <div style="padding: 6px;">
-  <b>Suse</b> <img src="_static/logo_suse.png">
+  <b>Suse</b> <img src="/_static/logo_suse.png">
   </div><br><br>
 
 .. code-block:: yaml

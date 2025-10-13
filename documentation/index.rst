@@ -31,28 +31,27 @@ This documentation is under Creative Commons Attribution-NonCommercial-ShareAlik
 
 .. toctree::
    :maxdepth: 2
-   :caption: Configuration:
+   :caption: General configuration:
    :numbered:
    :titlesonly: 
 
    configuration/inventories
+   configuration/system
    configuration/networks
    configuration/nodes
    configuration/groups
    configuration/os_settings
-   configuration/hw_settings
+   configuration/hardware_settings
    configuration/services
    configuration/other_roles
-   configuration/groups
    configuration/storage
-   configuration/system
 
 .. toctree::
    :maxdepth: 1
-   :caption: Specialisation:
+   :caption: Specialisation configuration:
    :numbered:
 
-   specialisation/slurm
+   specialisation/hpc_cluster
 
 .. toctree::
    :maxdepth: 1

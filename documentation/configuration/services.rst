@@ -2,100 +2,110 @@
 Services
 ========
 
-Set services endpoint
-=====================
+Services are daemons that run on management nodes and provide key services to other nodes, like DHCP server, DNS server, NTP server, HTTP server, etc.
+These services can be either listening entities (a DNS server is listening on the network), either active pull/push entities (Prometheus is pulling data from nodes to monitor them).
 
-We need to define our services endpoint on the net-1 network.
-This endpoint is the IP address to be targeted by clients on the network to reach critical services (dns server, time server, etc).
-The stack allows to define different IPs or hostnames for each kind of service,
-but a magic key exists and allows to define all of them at once with the same value: ``services_ip``
-This is enough for our basic cluster.
+Some of these services need to be deployed on the management nodes, and also have a client part that needs to be deployed on other nodes.
 
-Edit ``group_vars/all/networks.yml`` and add the key under net-1 network:
+When a service needs to listen on a ip (endpoint), this ip or hostname is set in the networks settings, so that both server and clients can bind to the same configuration.
 
-.. code-block:: yaml
+Services endpoints
+==================
 
-  networks:
-    net-1:
-      subnet: 10.10.0.0
-      prefix: 16
-      services_ip: 10.10.0.1
+The service endpoint is the ip or hostname both server and clients will refer to in their configuration.
 
+For example, if the NTP server endpoint is 10.10.0.7, then NTP server will be configured to listen on this specific ip, while NTP clients will try to reach the NTP server on 10.10.0.7.
 
+There are 2 ways to define endpoints for services in the stack.
+Either all services share the same ip, either services are split over multiple ips (multiple management nodes or using virtual ip).
+Or both can be shared, like most services using a shared enpoint, and some specific one is using a different ip.
 
-----------------
+Single endpoint
+---------------
 
-Networks are set as a dict (not a list).
-
-The order doesnt matter, but naming follows a specific rule:
-each network starting with prefix ``net-`` is considered an administration network, other networks are considered simple networks.
-Admininstration networks are used to deploy systems (PXE, DHCP, etc.) and to handle all vital services (DNS, NTP, etc.). Note that 
-most roles take into account if a network is an administration network or not.
-
-For each network, the following parameters are available:
-
-- **prefix**: (mandatory) define the prefix of the network.
-- **subnet**: (mandatory) define the subnet of the network.
-- **gateway**: define the ip4 gateway of the network if exists.
-- **dhcp_server**: add this network (and all linked hosts) to the dhcp server (default True).
-- **dns_server**: add this network (and all linked hosts) to the dns server (default True).
-- **shared_network**: name of the shared network if exists.
-- **services_ip**: allows to define all services ip of the network in once, using a single ip for all (meaning a single management hosts for this network).
-
-Example:
+If all services are using the same ip, which is often the case for small clusters with a single management server,
+then the ``services_ip`` key can be used under the admininstration network:
 
 .. code-block:: yaml
 
   networks:
     net-admin:
-      prefix: 16
       subnet: 10.10.0.0
-      dhcp_server: true
-      gateway: 10.10.0.1
-      services_ip: 10.10.0.1
-    interconnect:
       prefix: 16
-      subnet: 10.20.0.0
+      services_ip: 10.10.0.1
 
-- **services**: allows to define services ip of the network with more capabilities. Each known service takes an hostname and an ip.
-  This can be used for example when services are distributed over multiple management hosts, or when services are using floating virtual ip.
+In that case, all services will bind to this ip, and all clients will look for services on this ip.
 
-Example:
+Multiple endpoints
+------------------
+
+If you need to split services over multiple ips or hostnames, it is possible to define them under the ``services`` key.
+You will need to refer to each service dedicated documentation to know the exact variables names to use.
+
+For example, for the NTP server, if you need server so listen on 10.10.0.6 and clients to try to reach server on this ip, define it this way:
 
 .. code-block:: yaml
 
   networks:
     net-admin:
-      prefix: 16
       subnet: 10.10.0.0
+      prefix: 16
       services:
-        dns:
-          - ip4: 10.10.0.2
-            hostname: mg2-dns4
-          - ip4: 8.8.8.8
-            hostname: google-public-dns
-        pxe:
-          - ip4: 10.10.0.1
-            hostname: mg1-pxe
         ntp:
-          - ip4: 10.10.0.4
-            hostname: mg4-time
-    interconnect:
+          - ip4: 10.10.0.6
+
+You can also define an hostname instead of an ipv4:
+
+.. code-block:: yaml
+
+  networks:
+    net-admin:
+      subnet: 10.10.0.0
       prefix: 16
-      subnet: 10.20.0.0
+      services:
+        ntp:
+          - hostname: my-ntp-server
+            ip4: 10.10.0.6
 
-.. note::
-  `4` or `6` at end of some keys are related to ipv4 or ipv6, but the ipv6 support is for now limited (if needed, please open a feature request).
+In that case, the hostname will be used by clients to reach the server, but server will still have the ip4 in case it is needed for its configuration.
 
+.. warning::
 
+  The DNS service is an exception, as it will ignore hostname and always use the ip4.
 
+Mixed endpoints
+---------------
+
+If you wish to have all services bind to the same ip4, but also wish to have some specific service(s) bind to a dedicated endpoint, you can define both
+``services`` and ``services_ip``. In that case, ``services`` will precedence ``services_ip`` when defined.
+
+Example:
+
+.. code-block:: yaml
+
+  networks:
+    net-admin:
+      subnet: 10.10.0.0
+      prefix: 16
+      services_ip: 10.10.0.1
+      services:
+        ntp:
+          - hostname: my-ntp-server
+            ip4: 10.10.0.6
+          - hostname: google-public-dns
+            ip4: 8.8.8.8
+            
+In this example, all services will bind to 10.10.0.1, except the ntp server that will bind to 10.10.0.6,
+and clients will use the DNS from google (this assume that in this configuration we do not deployed an internal DNS).
+
+Services configuration
+======================
+
+You will find bellow the detailed configuration available for each service of the stack.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Services:
 
+   services/repositories
    services/dhcp
-
-
-
-   
