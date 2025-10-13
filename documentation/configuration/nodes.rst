@@ -327,7 +327,7 @@ An alias can be added at 3 location:
 Global host alias
 -----------------
 
-Just add the alias under the host name, this will result in an entry that will be linked to the node hostname.
+Just add the alias as a list of alias under the host name, this will result in an entry that will be linked to the node hostname.
 
 For example:
 
@@ -336,7 +336,8 @@ For example:
   all:
     hosts:
       mgt1:
-        alias: foobar
+        alias:
+          - foobar
         bmc:
           name: bmgt1
           ip4: 10.10.100.1
