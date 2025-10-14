@@ -1,3 +1,18 @@
+===
+PXE
+===
+
+PXE, for Preboot Execution Environment, often called "pixie".
+
+This is probably the most complexe and difficult part of the stack.
+
+Concept is the following: a server exposes on the network all needed material to install an operating system,
+and using an auto-installation mechanism, PXE allows to provision operating system on nodes over the network.
+
+Difficulty comes from all the events that occur during the process: hardware issue or incompatibility, network issues, bad configuration, etc.
+
+I strongly advise to make sure you can provision your nodes via PXE before configuring complexe networks or enabling advanced security services.
+
 
 
 

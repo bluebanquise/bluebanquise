@@ -58,6 +58,7 @@ This documentation is under Creative Commons Attribution-NonCommercial-ShareAlik
    :caption: Deployment:
    :numbered:
 
+   deployment/strategy
    deployment/provision_os
    deployment/apply_configuration
 

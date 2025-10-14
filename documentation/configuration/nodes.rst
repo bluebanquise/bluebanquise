@@ -86,7 +86,7 @@ You can add another interface, for example an infiniband interface, on interconn
             network: interconnect
             type: infiniband
 
-The full list of available parameters is defined in the nmcli Ansible module `https://ansible.readthedocs.io/projects/ansible/3/collections/community/general/nmcli_module.html<https://ansible.readthedocs.io/projects/ansible/3/collections/community/general/nmcli_module.html>`_.
+The full list of available parameters is defined in the nmcli Ansible module `https://ansible.readthedocs.io/projects/ansible/3/collections/community/general/nmcli_module.html <https://ansible.readthedocs.io/projects/ansible/3/collections/community/general/nmcli_module.html>`_.
 
 .. note::
   
