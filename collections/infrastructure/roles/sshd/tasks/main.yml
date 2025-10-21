@@ -1,0 +1,60 @@
+---
+- name: include_vars <|> Gather OS specific variables
+  # This task gathers variables defined in OS specific files.
+  #
+  # Search vars in:
+  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
+  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
+  #  - <distribution>.yml            # eg. CentOS.yml
+  #  - <os_family>.yml               # eg. RedHat.yml
+  #
+  # If no OS specific file is found, the role will default to vars/main.yml
+  #
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family }}.yml"
+      skip: true
+  tags:
+    - always
+
+- name: "firewalld <|> Add services to firewall's {{ sshd_server_firewall_zone | default('public') }} zone"
+  ansible.posix.firewalld:
+    zone: "{{ sshd_server_firewall_zone | default('public') }}"
+    service: "{{ item }}"
+    immediate: "yes"
+    permanent: "yes"
+    state: enabled
+  when:
+    - os_firewall | default(false) | bool
+  loop: "{{ sshd_server_firewall_services_to_add }}"
+  tags:
+    - firewall
+
+- name: "template <|> Generate sshd configuration"
+  ansible.builtin.template:
+    src: bluebanquise.conf.j2
+    dest: "{{ sshd_server_conf_dir }}/bluebanquise.conf.j2"
+    owner: root
+    group: root
+    mode: 0640
+  notify: service <|> Restart sshd server
+  tags:
+    - template
+
+- name: meta <|> Run handler tasks to restart sshd services
+  ansible.builtin.meta: flush_handlers
+
+- name: "service <|> Manage {{ sshd_server_services_to_start | join(' ') }} state"
+  ansible.builtin.service:
+    name: "{{ item }}"
+    enabled: "{{ (sshd_server_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    state: "{{ (sshd_server_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
+  loop: "{{ sshd_server_services_to_start }}"
+  tags:
+    - service

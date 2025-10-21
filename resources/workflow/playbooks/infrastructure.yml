@@ -4,6 +4,8 @@
   roles:
 
     # Infrastructure
+    - role: bluebanquise.infrastructure.sshd
+      tags: sshd
     - role: bluebanquise.infrastructure.cloudinit
       tags: cloudinit
     - role: bluebanquise.infrastructure.http_proxy

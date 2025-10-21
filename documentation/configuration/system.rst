@@ -2,21 +2,17 @@
 System
 ======
 
-Set global settings
--------------------
+System settings are related of node system configurations.
+These settings can be set either at group or at host level in the inventory, except for settings
+associated to the ``hw_`` and ``os_`` groups.
 
-The first step in building the inventory is to set global settings.
-This includes the name of the cluster, the domain name of the cluster, and the time zone of the cluster.
+System configuration
+====================
 
-Create file ``group_vars/all/global.yml`` with the following content:
+You will find bellow the detailed configuration available for each system related role of the stack.
 
-.. code-block:: yaml
+.. toctree::
+   :maxdepth: 1
+   :caption: System:
 
-  bb_domain_name: bluebanquise-cluster.local
-  bb_time_zone: Europe/Brussels
-  bb_cluster_name: bluebanquise-cluster
-
-Tune these values according to your needs.
-
-Note that these variables are used by all roles of the stack. However, each role can overwrite the global settings by its own.
-Please refer to each service parameters for more details.
+   system/sshd
