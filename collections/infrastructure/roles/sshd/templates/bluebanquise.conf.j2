@@ -6,21 +6,21 @@
 {{ sshd_raw }}
 {% endif %}
 
-{% if sshd_PermitRootLogin is defined and sshd_PermitRootLogin is not none %}
-PermitRootLogin {{ sshd_PermitRootLogin }}
+{% if sshd_permitrootlogin is defined and sshd_permitrootlogin is not none %}
+PermitRootLogin {{ sshd_permitrootlogin }}
 {% endif %}
-{% if sshd_PasswordAuthentication is defined and sshd_PasswordAuthentication is not none %}
-PasswordAuthentication {{ sshd_PasswordAuthentication }}
+{% if sshd_passwordauthentication is defined and sshd_passwordauthentication is not none %}
+PasswordAuthentication {{ sshd_passwordauthentication }}
 {% endif %}
-{% if sshd_DenyUsers is defined and sshd_DenyUsers is not none %}
-DenyUsers {{ sshd_DenyUsers }}
+{% if sshd_denyusers is defined and sshd_denyusers is not none %}
+DenyUsers {{ sshd_denyusers }}
 {% endif %}
-{% if sshd_AllowUsers is defined and sshd_AllowUsers is not none %}
-AllowUsers {{ sshd_AllowUsers }}
+{% if sshd_allowusers is defined and sshd_allowusers is not none %}
+AllowUsers {{ sshd_allowusers }}
 {% endif %}
-{% if sshd_DenyGroups is defined and sshd_DenyGroups is not none %}
-DenyGroups {{ sshd_DenyGroups }}
+{% if sshd_denygroups is defined and sshd_denygroups is not none %}
+DenyGroups {{ sshd_denygroups }}
 {% endif %}
-{% if sshd_AllowGroups is defined and sshd_AllowGroups is not none %}
-AllowGroups {{ sshd_AllowGroups }}
+{% if sshd_allowgroups is defined and sshd_allowgroups is not none %}
+AllowGroups {{ sshd_allowgroups }}
 {% endif %}

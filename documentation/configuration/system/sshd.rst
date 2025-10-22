@@ -18,29 +18,29 @@ Disable passwords
 
 It is advised to prevent password usages.
 
-To do so, set ``sshd_PasswordAuthentication`` to **no**:
+To do so, set ``sshd_passwordauthentication`` to **no**:
 
 .. code-block:: yaml
 
-  sshd_PasswordAuthentication: no
+  sshd_passwordauthentication: no
 
 Disable root access
 ===================
 
 It is advised to prevent root ssh access.
 
-To do so, set ``sshd_PermitRootLogin`` to **no**:
+To do so, set ``sshd_permitrootlogin`` to **no**:
 
 .. code-block:: yaml
 
-  sshd_PermitRootLogin: no
+  sshd_permitrootlogin: no
 
 Users access
 ============
 
 It is possible to restrict access to specific users.
 
-Variables ``sshd_DenyUsers``, ``sshd_AllowUsers``, ``sshd_DenyGroups``, ``sshd_AllowGroups`` are available.
+Variables ``sshd_DenyUsers``, ``sshd_allowusers``, ``sshd_denygroups``, ``sshd_allowgroups`` are available.
 Note that openssh server daemon will use these variables in **this exact order** to determine if a user can or not access,
 and first occurence found will precedence everything else.
 
@@ -55,9 +55,9 @@ Example:
 .. code-block:: yaml
 
     sshd_DenyUsers:
-    sshd_AllowUsers: bluebanquise anotheruser
-    sshd_DenyGroups:
-    sshd_AllowGroups:
+    sshd_allowusers: bluebanquise anotheruser
+    sshd_denygroups:
+    sshd_allowgroups:
 
 Other settings
 ==============
