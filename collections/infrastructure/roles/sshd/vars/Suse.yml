@@ -1,0 +1,8 @@
+---
+sshd_server_packages_to_install:
+  - openssh-server
+sshd_server_services_to_start:
+  - sshd
+sshd_server_firewall_services_to_add:
+  - ssh
+sshd_server_conf_dir: /etc/ssh/sshd_config.d/

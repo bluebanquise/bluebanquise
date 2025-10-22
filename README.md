@@ -12,6 +12,8 @@ Devs infos:
 
 :green_heart: Current core version: 3.2.1
 
+:red_heart: ansible-core 2.19 is not currently compatible, stack is limited to 2.18.10, work in progress to solve this issue.
+
 ---
 
 ## What is BlueBanquise

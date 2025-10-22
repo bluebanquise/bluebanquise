@@ -36,13 +36,14 @@ This documentation is under Creative Commons Attribution-NonCommercial-ShareAlik
    :titlesonly: 
 
    configuration/inventories
-   configuration/system
+   configuration/general_settings
    configuration/networks
    configuration/nodes
    configuration/groups
    configuration/os_settings
    configuration/hardware_settings
    configuration/services
+   configuration/system
    configuration/other_roles
    configuration/storage
 

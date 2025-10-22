@@ -1,0 +1,9 @@
+---
+sshd_permitrootlogin:
+sshd_passwordauthentication:
+sshd_denyusers:
+sshd_allowusers:
+sshd_denygroups:
+sshd_allowgroups:
+# Inject raw configuration before all other settings, so precedence
+sshd_raw:

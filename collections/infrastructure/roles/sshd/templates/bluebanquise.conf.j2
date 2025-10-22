@@ -1,0 +1,26 @@
+#jinja2: lstrip_blocks: "True"
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+
+{% if sshd_raw is defined and sshd_raw is not none %}
+{{ sshd_raw }}
+{% endif %}
+
+{% if sshd_permitrootlogin is defined and sshd_permitrootlogin is not none %}
+PermitRootLogin {{ sshd_permitrootlogin }}
+{% endif %}
+{% if sshd_passwordauthentication is defined and sshd_passwordauthentication is not none %}
+PasswordAuthentication {{ sshd_passwordauthentication }}
+{% endif %}
+{% if sshd_denyusers is defined and sshd_denyusers is not none %}
+DenyUsers {{ sshd_denyusers }}
+{% endif %}
+{% if sshd_allowusers is defined and sshd_allowusers is not none %}
+AllowUsers {{ sshd_allowusers }}
+{% endif %}
+{% if sshd_denygroups is defined and sshd_denygroups is not none %}
+DenyGroups {{ sshd_denygroups }}
+{% endif %}
+{% if sshd_allowgroups is defined and sshd_allowgroups is not none %}
+AllowGroups {{ sshd_allowgroups }}
+{% endif %}
