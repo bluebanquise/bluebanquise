@@ -23,6 +23,13 @@
   tags:
     - always
 
+- name: "package <|> Install {{ sshd_server_packages_to_install | join(' ') }}"
+  ansible.builtin.package:
+    name: "{{ sshd_server_packages_to_install }}"
+    state: present
+  tags:
+    - package
+
 - name: "firewalld <|> Add services to firewall's {{ sshd_server_firewall_zone | default('public') }} zone"
   ansible.posix.firewalld:
     zone: "{{ sshd_server_firewall_zone | default('public') }}"
@@ -67,7 +74,7 @@
 - name: "template <|> Generate sshd configuration"
   ansible.builtin.template:
     src: bluebanquise.conf.j2
-    dest: "{{ sshd_server_conf_dir }}/bluebanquise.conf"
+    dest: "/etc/ssh/sshd_config.d/bluebanquise.conf"
     owner: root
     group: root
     mode: 0640
