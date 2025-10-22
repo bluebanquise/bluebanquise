@@ -36,6 +36,31 @@
   tags:
     - firewall
 
+- name: lineinfile <|> Check if include is present in sshd_config
+  lineinfile:
+    state: absent
+    path: "/etc/ssh/sshd_config"
+    regexp: 'Include /etc/ssh/sshd_config\.d/\*\.conf'
+  check_mode: true
+  changed_when: false
+  register: sshd_check_include
+
+- name: lineinfile <|> Set include for sshd
+  lineinfile:
+    state: present
+    path: "/etc/ssh/sshd_config"
+    line: "Include /etc/ssh/sshd_config.d/*.conf"
+    insertbefore: BOF
+  when: sshd_check_include.found == 0
+
+- name: "file <|> Create needed directory /etc/ssh/sshd_config.d/"
+  ansible.builtin.file:
+    path: "/etc/ssh/sshd_config.d/"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
 - name: "template <|> Generate sshd configuration"
   ansible.builtin.template:
     src: bluebanquise.conf.j2
