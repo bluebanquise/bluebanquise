@@ -1,1 +1,1 @@
-sshd_PermitRootLogin: no
+sshd_PermitRootLogin: "no"

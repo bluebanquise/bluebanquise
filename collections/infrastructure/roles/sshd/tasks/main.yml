@@ -39,7 +39,7 @@
 - name: "template <|> Generate sshd configuration"
   ansible.builtin.template:
     src: bluebanquise.conf.j2
-    dest: "{{ sshd_server_conf_dir }}/bluebanquise.conf.j2"
+    dest: "{{ sshd_server_conf_dir }}/bluebanquise.conf"
     owner: root
     group: root
     mode: 0640
