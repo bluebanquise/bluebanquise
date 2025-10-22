@@ -45,6 +45,9 @@
   changed_when: false
   register: sshd_check_include
 
+- debug:
+    msg: "{{ sshd_check_include }}"
+
 - name: lineinfile <|> Set include for sshd
   lineinfile:
     state: present
