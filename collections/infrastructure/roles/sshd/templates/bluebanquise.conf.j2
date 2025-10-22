@@ -2,25 +2,25 @@
 #### Blue Banquise file ####
 ## {{ ansible_managed }}
 
-{% if sshd_raw is defined and sshd_raw is not None %}
+{% if sshd_raw is defined and sshd_raw is not none %}
 {{ sshd_raw }}
 {% endif %}
 
-{% if sshd_PermitRootLogin is defined and sshd_PermitRootLogin is not None %}
+{% if sshd_PermitRootLogin is defined and sshd_PermitRootLogin is not none %}
 PermitRootLogin {{ sshd_PermitRootLogin }}
 {% endif %}
-{% if sshd_PasswordAuthentication is defined and sshd_PasswordAuthentication is not None %}
+{% if sshd_PasswordAuthentication is defined and sshd_PasswordAuthentication is not none %}
 PasswordAuthentication {{ sshd_PasswordAuthentication }}
 {% endif %}
-{% if sshd_DenyUsers is defined and sshd_DenyUsers is not None %}
+{% if sshd_DenyUsers is defined and sshd_DenyUsers is not none %}
 DenyUsers {{ sshd_DenyUsers }}
 {% endif %}
-{% if sshd_AllowUsers is defined and sshd_AllowUsers is not None %}
+{% if sshd_AllowUsers is defined and sshd_AllowUsers is not none %}
 AllowUsers {{ sshd_AllowUsers }}
 {% endif %}
-{% if sshd_DenyGroups is defined and sshd_DenyGroups is not None %}
+{% if sshd_DenyGroups is defined and sshd_DenyGroups is not none %}
 DenyGroups {{ sshd_DenyGroups }}
 {% endif %}
-{% if sshd_AllowGroups is defined and sshd_AllowGroups is not None %}
+{% if sshd_AllowGroups is defined and sshd_AllowGroups is not none %}
 AllowGroups {{ sshd_AllowGroups }}
 {% endif %}
