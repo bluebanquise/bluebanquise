@@ -101,6 +101,43 @@ and clients will use the DNS from google (this assume that in this configuration
 Services configuration
 ======================
 
+Some variables can be set and are common to all services.
+
+Start service
+-------------
+
+As detailed in general settings, a global variable ``bb_start_services`` can be defined as a boolean to ensure services are started or not when applying configuration.
+
+Each service however posses a variable ``<service_name>_start_services`` that precedence ``bb_start_services`` and that allows to manipulate this setting at role level.
+
+For example, for the dhcp server service:
+
+.. code-block:: yaml
+
+  dhcp_server_start_services: true
+  bb_start_services: false
+
+Will make the dhcp server service start even if all other services are not.
+
+Enable service at start
+-----------------------
+
+Same for start services above, in general settings, a global variable ``bb_enable_services`` can be defined as a boolean to ensure services are enabled at system startup (or not) when applying configuration.
+
+Each service however posses a variable ``<service_name>_enable_services`` that precedence ``bb_enable_services`` and that allows to manipulate this setting at role level.
+
+For example, for the dhcp server service:
+
+.. code-block:: yaml
+
+  dhcp_server_enable_services: true
+  bb_enable_services: false
+
+Will make the dhcp server service enable at system startup even if all other services are not.
+
+Services
+========
+
 You will find bellow the detailed configuration available for each service of the stack.
 
 .. toctree::

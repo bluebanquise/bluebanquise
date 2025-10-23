@@ -20,3 +20,20 @@ Tune these values according to your needs.
 
 Note that these variables are used by all roles of the stack. However, each role can overwrite the global settings by its own.
 Please refer to each service parameters for more details.
+
+Services global settings
+------------------------
+
+It is possible to manage all services systemd's start/stop behavior via 2 global variables:
+
+* ``bb_start_services``: Start or not services when applying configuration.
+* ``bb_enable_services``: Enable or not services at system start when applying configuration.
+
+Example:
+
+.. code-block:: yaml
+
+  bb_start_services: true
+  bb_enable_services: true
+
+Default is true for both if not set.
