@@ -30,8 +30,8 @@ item bootdiskless         Start a diskless OS (Configured using diskless tool)
 item --gap                Tools
 {% if pxe_stack_enable_clonezilla %}
 item bootclone            Clonezilla live - Clone/Deploy OS
-item bootautoclone        Auto Clone (advanced)
-item bootautodeploy       Auto Deploy (advanced)
+# item bootautoclone        Auto Clone (advanced)
+# item bootautodeploy       Auto Deploy (advanced)
 {% endif %}
 {% if pxe_stack_enable_alpine %}
 item bootalpinelive       Boot a live Alpine

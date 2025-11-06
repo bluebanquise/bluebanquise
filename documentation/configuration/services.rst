@@ -148,3 +148,4 @@ You will find bellow the detailed configuration available for each service of th
    services/dhcp
    services/dns
    services/ntp
+   services/pxe

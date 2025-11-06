@@ -43,7 +43,7 @@
     path: "{{ item.0.mount }}"
     src: "{{ item.0.server }}{% if item.0.network is not ansible.utils.ipv4 and item.0.network is not none %}-{{ item.0.network }}{% endif %}:{{ item.0.export }}"
     fstype: nfs
-    opts: "{{ item.0.mount_options | default('rw,fsc,nfsvers=4.2,bg,nosuid,nodev',true) }}"
+    opts: "{{ item.0.mount_options | default('rw,fsc,nfsvers=3,bg,nosuid,nodev',true) }}"
     state: "{{ nfs_client_directories_state }}"
   with_subelements:
     - "{{ nfs_shares }}"

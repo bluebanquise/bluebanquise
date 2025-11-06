@@ -44,7 +44,6 @@ This documentation is under Creative Commons Attribution-NonCommercial-ShareAlik
    configuration/hardware_settings
    configuration/services
    configuration/system
-   configuration/other_roles
    configuration/storage
 
 .. toctree::

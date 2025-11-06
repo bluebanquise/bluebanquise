@@ -16,3 +16,6 @@ You will find bellow the detailed configuration available for each system relate
    :caption: System:
 
    system/sshd
+   system/hosts_file
+   system/access_control
+   system/cloudinit

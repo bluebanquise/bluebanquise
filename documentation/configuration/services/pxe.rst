@@ -29,40 +29,57 @@ Procedure on how to deploy a node over PXE once role has been applied is describ
 Automated installation parameters
 =================================
 
-Most parameters (os to use, partitioning, etc) are given in the os and hardware settings (via ``os_`` and ``hw_`` variables), please refer to these sections of the documentation.
+Most parameters (OS to use, partitioning, etc) are given in the os and hardware settings (via ``os_`` and ``hw_`` variables),
+please refer to these sections of the documentation.
 
 The role embed however some variables to tune or force specific settings.
 
 Time zone
 ---------
 
-By default, global variable ``bb_time_zone`` will be used. It is however possible to force another timezone to be used by setting ``pxe_stack_time_zone``, which will precedence global setting.
+By default, global variable ``bb_time_zone`` will be used.
+It is however possible to force another timezone to be used by setting ``pxe_stack_time_zone``, which will precedence global setting.
 
 Admin user
 ----------
 
-# Enable root user as default user
-pxe_stack_enable_root: false
-# Sudo user if root not enabled
-pxe_stack_sudo_user: bluebanquise
-pxe_stack_sudo_user_home: /var/lib/bluebanquise
-pxe_stack_sudo_user_uid: 377
-pxe_stack_sudo_user_gid: 377
-# Set sudo user as passwordless sudoer
-pxe_stack_sudo_is_passwordless: true
+By default, the root account will be deactivated, and a sudo user will be created instead.
+It is possible to manipulate this behavior using the following variables:
+
+* ``pxe_stack_enable_root``: enable or not root user. Default is ``false``. If false, a sudo user will be created instead (recommended!).
+* ``pxe_stack_sudo_user``: name of the sudo user to be created. Default is ``bluebanquise``, and I honestly havent tested to change that, so be careful with this.
+* ``pxe_stack_sudo_user_home``: path of the sudo user home. Default is ``/var/lib/bluebanquise``. Same for sudo user name, I havent tested changing that so be careful.
+* ``pxe_stack_sudo_user_uid``: uid of the sudo user. Default is ``377``.
+* ``pxe_stack_sudo_user_gid``: gid of the sudo user. Default is ``377``.
+* ``pxe_stack_sudo_is_passwordless``: make the sudo user passwordless. Default to ``true``. Note: if you choose to not have a passwordless user, please refer to https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_privilege_escalation.html for how to pass password at ansible-playbook execution (--ask-become-pass).
 
 Reboot after installation
 -------------------------
 
-# default is reboot, can be set to poweroff, halt or shutdown
-pxe_stack_post_install_action: reboot
-pxe_stack_post_install_boot_to_disk: true
+Once automated installation is done, you will want the server to reboot automatocally and boot freshly installed OS.
+If you do not want that, it is possible to set different behaviors:
+
+* ``pxe_stack_post_install_action``: Action to do at the end of auto-installation. Default is ``reboot``.
+* ``pxe_stack_post_install_boot_to_disk``: Should we boot over disk at next boot after auto-installation. Default is ``true``.
+
+Also, a pxe dedicated ``os_`` variable is available to force EFI order to be preserved if EFI system. This can be super useful because when Grub registers at the end of
+auto-installation, EFI order is automatically updated on the system, and you might want to preserv PXE boot at first for all boots.
+By default, BlueBanquise stack will try to keep boot order, but you can deactivate this by setting ``os_preserve_efi_first_boot_device`` to ``false`` (default is ``true``).
 
 Repositories
 ------------
 
-# Preserve default repositories
-pxe_stack_preserve_repositories: true
+By default, native Repositories will be kept. You might want to remove them during auto-installation. If so, it is possible to set ``pxe_stack_preserve_repositories`` to ``false``. Default is ``true``.
+
+Diskless
+========
+
+The BlueBanquise stack providesa way to boot nodes in diskless (only RHEL for now, if you need another OS let me know).
+
+Few setting are available:
+
+* ``pxe_stack_enable_diskless``: enable or not diskless support. Default is ``true``.
+* ``pxe_stack_diskless_nfs_path``: set the NFS path that will be exported by the diskless server, to manipulate futur golden images. Default is ``/nfs/diskless``.
 
 iPXE
 ====
@@ -87,104 +104,41 @@ You will need to re-apply DHCP server role to have these settings taken into acc
 Role scope
 ==========
 
-# Enable distributions support
-pxe_stack_diskful_os_redhat: true
-pxe_stack_diskful_os_ubuntu: true
-pxe_stack_diskful_os_suse: true
-pxe_stack_diskful_os_debian: true
-pxe_stack_diskful_os_dgx: false
+It is possible to reduce or enlarge role scope, to support more or less distributions.
+
+* ``pxe_stack_diskful_os_redhat``: enable RHEL support. Default ``true``.
+* ``pxe_stack_diskful_os_ubuntu``: enable Ubuntu support. Default ``true``.
+* ``pxe_stack_diskful_os_suse``: enable OpenSuse Leap support. Default ``true``.
+* ``pxe_stack_diskful_os_debian``: enable Debian support. Default ``true``.
+
+It is also possible to enable or disable some specific tools available at PXE boot time.
+
+* ``pxe_stack_enable_clonezilla``: enable clonezilla support. Default ``true``.
+* ``pxe_stack_enable_alpine``: enable alpine live support. Default ``true``.
+* ``pxe_stack_enable_memtest``: enable memtest86+ support. Default ``true``.
 
 Other settings
 ==============
 
-pxe_stack_os_kernel_aggressive_dhcp: true
+DHCP at boot
+------------
 
+Sometime, due to networking, DHCP gathering can be difficult at Kernel boot. A specific setting can be set to be more agressive catching the DHCP. This is super useful for diskless.
 
+* ``pxe_stack_os_kernel_aggressive_dhcp``: Default is ``true``.
 
+Custom content in auto-installation files
+-----------------------------------------
 
+It is possible to add custom content to auto-installation files, by using variable ``pxe_stack_os_autoinstall_custom_content``.
+Please note that you will need to add raw content adapted to the target distribution (kickstart, etc.). Please also note that this is a multilines variable.
 
+Example:
 
+.. code:: yaml
 
-
-
-
-
-
-
-############################################################
-### Default equipment profile parameters
-
-
-
-pxe_stack_os_keyboard_layout: us  # us, fr, etc.
-pxe_stack_os_system_language: en_US.UTF-8  # You should not update this if you want to google issues...
-
-pxe_stack_os_admin_password_sha512: "!"
-pxe_stack_os_admin_ssh_keys: []
-
-pxe_stack_os_access_control: enforcing
-pxe_stack_os_firewall: true
-
-# WARNING! If nothing is set for partitioning,
-# automatic partitioning will be activated.
-pxe_stack_os_partitioning:
-
-pxe_stack_hw_preserve_efi_first_boot_device: true
-
-# Add custom content to any kind of auto install files: kickstart, preseed, user-data and autoyast
-# This content is added at top of files.
-pxe_stack_os_autoinstall_custom_content:
-
-# Add custom script to autoyast and user-data. Use pxe_stack_os_autoinstall_custom_content variable for kickstart.
-pxe_stack_os_autoinstall_custom_scripts: []
-#  - name: script1
-#    content: |
-#      ...
-
-# Add proxies
-pxe_stack_os_pxe_repository_proxy:
-pxe_stack_os_pxe_proxy:
-
-# Automatically detect NIC to be used in preseed
-# Only works if a single NIC is connected.
-pxe_stack_os_preseed_auto_main_network_interface: true
-
-############################################################
-### Misc parameters
-
-pxe_stack_suse_autoinstall_repositories: []
-#  - media_url: http://10.10.0.1/repositories/sles/15.3/x86_64/updates
-#    name: sles_updates
-
-############################################################
-### DISKLESS
-
-pxe_stack_enable_diskless: true
-pxe_stack_diskless_nfs_path: /nfs/diskless
-
-############################################################
-### TOOLS
-
-# Add optional dedicated entries in ixpe menu
-pxe_stack_enable_clonezilla: true
-pxe_stack_enable_alpine: true
-pxe_stack_enable_memtest: true
-
-### CLONEZILLA
-# Allows to backup/restore systems, or even deploy multiple systems via images.
-# Be aware that pxe_stack role does not handle nfs server, you will have to
-# use the nfs role to create export or use an external nfs.
-
-# NFS server to store images. Should be an ip, as DNS resolution might not work.
-# If not set, default is pxe_server ip (next-server, provided by DHCP server).
-pxe_stack_clonezilla_nfs_export_server:
-
-# Mount point from which load images from NFS server.
-pxe_stack_clonezilla_nfs_mount_point: /nfs/cloned_images
-
-
-
-- **os_preserve_efi_first_boot_device**: Force grub to keep first entry in boot order (EFI systems). Available values: ``['true', 'false']``
-
-
+  pxe_stack_os_autoinstall_custom_content: |
+    %post
+    dnf install git -y
+    %end
 

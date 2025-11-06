@@ -54,7 +54,7 @@ Example:
 
 .. code-block:: yaml
 
-    sshd_DenyUsers:
+    sshd_denyusers:
     sshd_allowusers: bluebanquise anotheruser
     sshd_denygroups:
     sshd_allowgroups:

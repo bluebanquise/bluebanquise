@@ -4,7 +4,8 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.2.7
 
-
+* 11/06/25 - oxedions - [nfs] Set nfs v3 as default instead of 4.2.
+* 11/06/25 - oxedions - [pxe_stack] Disable auto clonezilla support.
 * 12/09/25 - santos-lucas - [slurm] Added support for gres in confiless mode. Lucas Santos <lucassouzasantos@gmail.com> 
 * 8/09/25 - santos-lucas - [lustre_client] Fix issues with multiple-lnet setup. Lucas Santos <lucassouzasantos@gmail.com>
 * 6/09/25 - santos-lucas - [slurm] Added support for pam_slurm_adoption. Lucas Santos <lucassouzasantos@gmail.com> 
