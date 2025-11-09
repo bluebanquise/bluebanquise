@@ -1,6 +1,19 @@
 BlueBanquise Documentation
 ==========================
 
+
+.. warning::
+
+   11/07/2025 - THIS NEW DOCUMENTATION IS UNDER PROGRESS
+
+   I am doing my best to provide you a super new documentation, please be patient and report me any issues you might see.
+
+   Old documentation can still be found at https://bluebanquise.com/documentation-v2/ .
+
+   .. image:: images/tux-linux-penguin.gif
+      :align: center
+
+
 .. image:: images/multiple_icebergs.svg
    :align: center
 

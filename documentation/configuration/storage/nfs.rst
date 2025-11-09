@@ -2,24 +2,28 @@
 NFS
 ===
 
-Depending on the target purpose, actions will be the following:
-
-* Server part will install needed packages, configure exports, and start services.
-* Client part will install needed packages, create needed folders, and mount exported FS from network.
+NFS server will export a local FS over the network, while NFS clients will mount this FS so users/softwares can access data.
 
 Node profile
 ============
 
 You need to specify node profile. By default, nothing will be done on the target nodes if no profile is speficied.
 
-If playbook target node is expected to be a server, add ``server`` value into ``nfs_profile`` list inside the playbook's vars or inside target node's vars:
+Depending on the target profile, stack actions will be the following:
+
+* Server part will install needed packages, configure exports, and start services.
+* Client part will install needed packages, create needed folders, and mount exported FS from network.
+
+The ``nfs_profile`` list allows to specify if a node should be a server, a client, or both.
+
+If target node is expected to be a server, add ``server`` value into ``nfs_profile`` list:
 
 .. code:: yaml
 
   nfs_profile:
     - server
 
-If node is expected to be a client, add client only into the list:
+If node is expected to be a client, add ``client`` only into the list:
 
 .. code:: yaml
 
@@ -49,10 +53,10 @@ For example, if you wish to set the value in a custom playbook:
             nfs_profile:
               - server
 
-Shared resources
-================
+Exported resources
+==================
 
-Storage resources shared/exported on the network are defined as a list under ``nfs_shares`` variable.
+Storage resources exported on the network are defined as a list under ``nfs_shares`` variable.
 
 For each export, the following parameters can be set:
 
@@ -71,22 +75,22 @@ For example:
 .. code:: yaml
 
   nfs_shares:
-    - export: /opt/software
+    - export: /software
       server: storage1
-      mount: /opt/software
+      mount: /software
       clients_groups:
-        - mg_computes
-        - mg_logins
+        - mg_compute
+        - mg_login
         - custom_group
-      network: ice1-1
+      network: net-admin
       export_options: ro,async
       mount_options: ro,nfsvers=3,bg
     - export: /data/home
       server: nfs2
       mount: /home
       clients_groups:
-        - ep_computes_x1
-      network: interconnect1
+        - mg_compute
+      network: interconnect-1
       export_options: rw,sync,root_squash
       mount_options: rw,nfsvers=3,bg,nosuid,nodev
 
@@ -100,61 +104,52 @@ this role if they do not exist.
 Server tuning
 =============
 
-### Advanced usage
+By default, server configuration provided by the OS should be enough. But for some high demanding clusters, some specific tunings might be needed.
 
-#### Configuration tuning
+The stacj can fine tune NFS server and client, based on https://man7.org/linux/man-pages/man5/nfs.conf.5.html file parameters.
+Note that only recent Linux distributions can take advantage of this feature (Ubuntu 22.04+, RHEL 7.9+, 8, 9, Debian 13+, etc.).
 
-This role can fine tune NFS server and client, based on https://man7.org/linux/man-pages/man5/nfs.conf.5.html file parameters. Note that only recent Linux distributions can take advantage of this feature (Ubuntu 22.04+, RHEL 7.9+, 8, 9).
+To do so, add into your inventory NFS file (the same where you already defined ``nfs_shares``) the ``nfs_server_tuning`` dict:
 
-To do so, add into your inventory NFS file (the same where you already defined `nfs_shares`) the `nfs_server_tuning` dict:
+.. code:: yaml
 
-```yaml
-nfs_server_tuning:
-  nfsd:
-    threads: 8
-```
+  nfs_server_tuning:
+    nfsd:
+      threads: 8
+
 
 This will result for example to the following configuration:
 
-```ini
-[nfsd]
-threads=8
-```
+.. code:: ini
 
-To get all available parameters, simple cat your `/etc/nfs.conf` file, and use https://man7.org/linux/man-pages/man5/nfs.conf.5.html as a documentation.
+  [nfsd]
+  threads=8
+
+To get all available parameters, simple cat your local ``/etc/nfs.conf`` file, and use https://man7.org/linux/man-pages/man5/nfs.conf.5.html as a documentation.
 
 It is for example higly recommended to increase threads value to an higher value in case of large number of clients. 32 threads is a good start, but if server is strong, you can
 easily go to 64, 128 or even 256 threads if cluster is large.
 
-#### Manipulate mounts state
+Mounts state
+============
 
-It is possible to manipulate mount state using *nfs_client_directories_state*
-variable. Default is **mounted**. Refer to `mount module documentation <https://docs.ansible.com/ansible/latest/collections/ansible/posix/mount_module.html#parameter-state>`_
+It is possible to manipulate mount state using ``nfs_client_directories_state``variable.
+Default is ``mounted``.
+Refer to `mount module documentation <https://docs.ansible.com/ansible/latest/collections/ansible/posix/mount_module.html#parameter-state>`_
 to get other possible values. This value can be important if using role in chroot environment.
 
-#### SELinux
+SELinux
+=======
 
 By default, on SELinux capable and activated systems, the role will
 enable 2 sebooleans, one for /home support and one for httpd support.
-To change this behavior, simply update `nfs_client_sebooleans` variable
+To change this behavior, simply update ``nfs_client_sebooleans`` variable
 which is a list of sebooleans to activate.
 
-## Changelog
+Default is:
 
-**Please now update CHANGELOG file at repository root instead of adding logs in this file.
-These logs bellow are only kept for archive.**
+.. code:: yaml
 
-* 1.5.0: Fix skipping host if using IP as server. Added parameter to run server in a group. Thiago Cardozo <boubee.thiago@gmail.com>
-* 1.4.4: Fix missing service for nfsv3 in RHEL firewall. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.4.3: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.4.2: Fix services names for Debian, Ubuntu and OpenSuse. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.4.1: Update to BB 2.0 format. Pierre Gay <pierre.gay@u-bordeaux.fr>, Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>
-* 1.4.0: Merged client and server. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.3.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.2.0: Added OpenSUSE 15 support. Neil Munday <neil@mundayweb.com>
-* 1.1.0: Change the way sebooleans values are set to allow MI mechanism. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.0.4: Added new variable to allow all possible mount values in state parameter. Osmocl <osmocl@osmo.cl>
-* 1.0.3: Clean. johnnykeats <johnny.keats@outlook.com>
-* 1.0.2: Added Ubuntu 18.04 compatibility. johnnykeats <johnny.keats@outlook.com>
-* 1.0.1: Fixed bad template. Documentation. johnnykeats <johnny.keats@outlook.com>
-* 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
+  nfs_client_sebooleans:
+    - use_nfs_home_dirs
+    - httpd_use_nfs
