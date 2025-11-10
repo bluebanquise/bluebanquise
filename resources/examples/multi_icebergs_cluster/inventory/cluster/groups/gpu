@@ -1,5 +1,0 @@
-# This folder is for sys admin custom groups.
-# Here I created a group for my GPU nodes, to easy usage for me.
-[gpu]
-gpu001
-gpu002

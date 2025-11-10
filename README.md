@@ -67,9 +67,9 @@ BlueBanquise Ansible's collections are also already installed for this bluebanqu
 
 ### 2. Use example inventory
 
+An example inventory can be found inside this repository at resources/examples/simple_cluster. You can use that as a base, and use documentation at https://bluebanquise.com/documentation to tune it to your needs.
 
-
-### 4. Create playbooks
+### 3. Create playbooks
 
 You can invoke BlueBanquise roles using full name:
 
@@ -80,13 +80,13 @@ You can invoke BlueBanquise roles using full name:
   roles:
     - role: bluebanquise.infrastructure.dhcp_server
       tags: dhcp_server
-    - role: bluebanquise.infrastructure.pxe_stack
-      tags: pxe_stack
+    - role: bluebanquise.infrastructure.hosts_file
+      tags: hosts_file
 ```
 
 If you are not running Ansible as root, remember to pass the `-b` (`--become`) argument to ansible-playbook command.
 
-### 5. Read documentation
+### 4. Read documentation
 
 It is advised to read the documentation at https://bluebanquise.com/documentation/ to understand stack basic concepts.
 
