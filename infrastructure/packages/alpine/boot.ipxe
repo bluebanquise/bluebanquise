@@ -1,0 +1,55 @@
+#!ipxe
+
+echo |
+echo | Entering tools/alpine/boot.ipxe file.
+echo |
+
+set alpine_version ALPINE_VERSION
+set alpine_major_version ALPINE_MAJOR_VERSION
+set alpine_repo http://dl-cdn.alpinelinux.org/alpine/v${alpine_major_version}/main
+
+iseq ${arch} arm64 && goto arm64 || goto x86_64
+:arm64
+set alpine_arch aarch64
+goto continue_boot
+:x86_64
+set alpine_arch x86_64
+goto continue_boot
+:continue_boot
+
+echo | Now starting os live boot process.
+echo | Alpine Family ipxe configuration.
+echo |
+echo | Parameters used:
+echo | > Operating system target: Alpine
+echo | > Console: ${eq-console}
+echo | > Additional kernel parameters: ${eq-kernel-parameters} ${dedicated-kernel-parameters}
+echo | > Deployment server: ${next-server}
+echo | > Alpine repository: ${alpine_repo}
+echo |
+echo | Loading linux ...
+
+imgfree
+
+kernel http://${next-server}/pxe/tools/alpine/${alpine_arch}/vmlinuz-lts modloop=http://${next-server}/pxe/tools/alpine/${alpine_arch}/modloop-lts ip=dhcp alpine_repo=${alpine_repo} initrd=initramfs-lts ${eq-console} ${eq-kernel-parameters} ${dedicated-kernel-parameters}
+
+echo | Loading initial ramdisk ...
+
+initrd http://${next-server}/pxe/tools/alpine/${alpine_arch}/initramfs-lts
+
+echo | ALL DONE! We are ready.
+echo | Downloaded images report:
+
+imgstat
+
+echo | MD5sums:
+md5sum vmlinuz-lts initramfs-lts modloop-lts
+echo |
+
+echo | Booting in 4s ...
+echo |
+echo +----------------------------------------------------+
+
+sleep 4
+
+boot

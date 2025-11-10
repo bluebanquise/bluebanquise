@@ -1,0 +1,23 @@
+---
+# use '--limit management1' to restrict playbook to
+# management1 if mg_managements contains multiple management nodes
+- name: managements playbook
+  hosts: "fn_management"
+  roles:
+
+    - role: bluebanquise.infrastructure.set_hostname
+      tags: set_hostname
+    - role: bluebanquise.infrastructure.http_server
+      tags: http_server
+    - role: bluebanquise.infrastructure.nic
+      tags: nic
+    - role: bluebanquise.infrastructure.hosts_file
+      tags: hosts_file
+    - role: bluebanquise.infrastructure.dhcp_server
+      tags: dhcp_server
+    - role: bluebanquise.infrastructure.dns_server
+      tags: dns_server
+    - role: bluebanquise.infrastructure.clustershell
+      tags: clustershell
+    - role: bluebanquise.infrastructure.pxe_stack
+      tags: pxe_stack

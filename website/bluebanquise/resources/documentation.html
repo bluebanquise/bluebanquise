@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html class="has-navbar-fixed-top"><head>
+<title>BlueBanquise - Documentation</title>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/css/bulma-docs.min.css">
+  <script defer src="/js/all.js"></script>
+<!-- from https://codepen.io/hunzaboy/pen/yoPKQW -->
+	<script>
+	document.addEventListener('DOMContentLoaded', function () {
+  // Get all "navbar-burger" elements
+  var $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+  // Check if there are any nav burgers
+  if ($navbarBurgers.length > 0) {
+    // Add a click event on each of them
+    $navbarBurgers.forEach(function ($el) {
+      $el.addEventListener('click', function () {
+        // Get the target from the "data-target" attribute
+        var target = $el.dataset.target;
+        var $target = document.getElementById(target);
+        // Toggle the class on both the "navbar-burger" and the "navbar-menu"
+        $el.classList.toggle('is-active');
+        $target.classList.toggle('is-active');
+      });
+    });
+  }
+  });
+	</script>
+  <style>
+  .navbar-item.is-mega {
+    position: static;
+
+    .is-mega-menu-title {
+      margin-bottom: 0;
+      padding: .375rem 1rem;
+    }
+  }
+  </style>
+</head>
+  <body class="layout-default">
+
+    <nav class="navbar has-shadow is-spaced is-fixed-top">
+      <div class="container">
+
+        <div class="navbar-brand">
+          <a class="navbar-item" href="https://bluebanquise.com">
+            <img src="/images/BlueBanquise_logo_large.svg" alt="BlueBanquise, an Ansible stack">
+          </a>
+          <a class="navbar-item is-hidden-desktop" href="https://github.com/bluebanquise/bluebanquise" target="_blank">
+            <span class="icon" style="color: #333;">
+              <i class="fab fa-github"></i>
+            </span>
+          </a>
+          <div class="navbar-burger burger" data-target="navMenubd-example">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+
+        <div id="navMenubd-example" class="navbar-menu">
+          <div class="navbar-start">
+            <div class="navbar-item has-dropdown is-hoverable">
+              <!-- <a class="navbar-link " href="project.html"> -->
+                <div class="navbar-link">
+                The stack
+                </div>
+              <!-- </a> -->
+              <div class="navbar-dropdown ">
+                <a class="navbar-item " href="/the_stack/the_project.html">
+                  The project
+                </a>
+                <a class="navbar-item " href="/the_stack/features.html">
+                  Features
+                </a>
+              </div>
+            </div>
+            <div class="navbar-item has-dropdown is-hoverable">
+              <!-- <a class="navbar-link " href="https://bluebanquise.com/project.html"> -->
+                <div class="navbar-link">
+                Resources
+                </div>
+              <!-- </a> -->
+              <div class="navbar-dropdown ">
+                <a class="navbar-item " href="/resources/documentation.html">
+                  Documentation
+                </a>
+                <a class="navbar-item " href="/resources/download.html">
+                  Download
+                </a>
+              </div>
+            </div>
+            <a class="navbar-item " href="/about.html">
+              About
+            </a>
+            <div class="navbar-end">
+              <a class="navbar-item is-hidden-desktop-only" href="https://github.com/bluebanquise/bluebanquise" target="_blank">
+                <span class="icon" style="color: #333;">
+                  <i class="fab fa-github"></i>
+                </span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+<main class="bd-main"> 
+  <div class="bd-side-background"></div>
+  <div class="bd-main-container container">
+    <div class="bd-duo">
+      <div class="bd-lead">
+        <header class="bd-header">
+          <div class="bd-header-titles">
+            <h1 class="title">
+              Documentation
+            </h1>
+            <p class="subtitle is-4">
+              Because a good documentation is the key...
+            </p>
+          </div>
+        </header>
+        <div class="bd-content">
+          <div class="content">
+<span style="color: #108bde">Blue</span>Banquise documentation is generated using Sphinx, and is available <a href="/documentation/index.html">here</a>.
+<br>
+<br>
+Documentation is also available in rst text files in <b>resources/documentation</b> folder inside the stack itself, to be read in a shell if needed.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+  </body>
+</html>

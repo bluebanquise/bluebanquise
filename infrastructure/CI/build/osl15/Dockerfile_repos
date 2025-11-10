@@ -1,0 +1,2 @@
+FROM docker.io/opensuse/leap:15
+RUN zypper -n install createrepo_c

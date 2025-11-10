@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html class="has-navbar-fixed-top"><head>
+<title>BlueBanquise - Home</title>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/css/bulma.min.css">
+  <script defer src="/js/all.js"></script>
+<!-- from https://codepen.io/hunzaboy/pen/yoPKQW -->
+	<script>
+	document.addEventListener('DOMContentLoaded', function () {
+  // Get all "navbar-burger" elements
+  var $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+  // Check if there are any nav burgers
+  if ($navbarBurgers.length > 0) {
+    // Add a click event on each of them
+    $navbarBurgers.forEach(function ($el) {
+      $el.addEventListener('click', function () {
+        // Get the target from the "data-target" attribute
+        var target = $el.dataset.target;
+        var $target = document.getElementById(target);
+        // Toggle the class on both the "navbar-burger" and the "navbar-menu"
+        $el.classList.toggle('is-active');
+        $target.classList.toggle('is-active');
+      });
+    });
+  }
+  });
+	</script>
+  <style>
+
+/*
+ * The banner with background image.
+ * we use relative positioning to be able to position the banner content properly
+ * background taken from:
+ * https://unsplash.com/@roylandnye
+ *
+ */
+
+.main-intro {
+    margin-top: 5em;
+}
+
+.blue-section {
+background: rgb(37,124,163);
+background: linear-gradient(180deg, rgba(53, 184, 245, 0.04) 0%, rgba(8,21,129,0) 30%, rgba(0,212,255,0) 100%);
+margin-top: 6em;
+}
+/* 
+.banner {
+    text-align: center;
+    width: 100%;
+    margin-bottom: 0em;
+    margin-top: 0em;
+}
+
+.banner-content {
+    position: absolute;
+    top: 50%;
+    margin-top: -110px;
+    width: 100%;
+}
+
+.banner h1 {
+    margin-bottom: 0;
+    font-size: 2em;
+    color: white;
+    font-weight: 500;
+    text-shadow: 0 2px 2px black;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+.banner h3 {
+    margin-bottom: 0;
+    font-size: 1em;
+    color: white;
+    font-weight: 500;
+    text-shadow: 0 2px 2px black;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+.banner-head {
+    margin-bottom: 0;
+    font-size: 2em;
+    color: white;
+    font-weight: 500;
+    text-shadow: 0 1px 1px black;
+}
+
+.banner-head-small {
+    margin-bottom: 0;
+    font-size: 1em;
+    color: white;
+    font-weight: 500;
+    text-shadow: 0 1px 1px black;
+} */
+
+html.has-navbar-fixed-top {
+  padding-top: 0em;
+}
+
+.navbar-item img { 
+  max-height: 3rem;
+}
+
+.navbar-item {
+  font-size: 1.5em;
+  padding: .5rem 1.2rem;
+}
+
+.navbar-item.is-mega {
+  position: static;
+
+  .is-mega-menu-title {
+    margin-bottom: 0;
+    padding: .375rem 1rem;
+  }
+}
+
+.custom_banner {
+  position: relative;
+  text-align: center;
+  color: white;
+  margin-bottom: 10em;
+
+}
+
+.custom_banner_centered {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.custom_banner h1 {
+    margin-bottom: 0;
+    font-size: 2em;
+    color: white;
+    font-weight: 500;
+    text-shadow: 0 2px 2px black;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+.custom_banner h3 {
+    margin-bottom: 0;
+    font-size: 1em;
+    color: white;
+    font-weight: 500;
+    text-shadow: 0 2px 2px black;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+@media only screen and (max-width: 800px) {
+ .hide-mobile 
+ {display:none;}
+}
+
+</style>
+</head>
+<body>
+  
+  <!-- NAVBAR -->
+  <nav class="navbar is-spaced has-shadow">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://bluebanquise.com">
+        <img src="/images/BlueBanquise_logo_large_2.svg" alt="BlueBanquise, an Ansible stack">
+      </a>
+      <div class="navbar-burger burger" data-target="navMenubd-example">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+    <div id="navMenubd-example" class="navbar-menu">
+      <div class="navbar-start">
+        <a class="navbar-item is-active" href="/index.html">
+          Home
+        </a>
+        <a class="navbar-item " href="/collections.html">
+          Collections
+        </a>
+        <a class="navbar-item " href="/tutorials.html">
+          Tutorials
+        </a>
+        <a class="navbar-item " href="/stack.html">
+          Stack
+        </a>
+        <a class="navbar-item " href="/resources.html">
+          Resources
+        </a>
+
+        <a class="navbar-item " href="/about.html">
+          About
+        </a>
+        <div class="navbar-end">
+          <a class="navbar-item is-hidden-desktop-only" href="https://github.com/bluebanquise/bluebanquise" target="_blank">
+            <span class="icon" style="color: #333;">
+              <i class="fab fa-github"></i>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- BANNER -->
+  <!-- <div class="banner"> -->
+    <!-- This image is owned by Brett Phibbs who authorized usage on this website for the non profit BlueBanquise project only. -->
+    <!-- <img src="images/iceberg-ice-floe-in-the-southern-ocean-180-miles-2022-03-04-01-48-36-utc-scaled_2.jpg" width="100%">
+      <div class="banner-content hide-mobile">
+          <h1>Simple. Modular. Open.</h1>
+          <h3>BlueBanquise is a project that aims to provide resources to deploy Linux based clusters of servers.</h3>
+      </div>
+  </div> -->
+
+  <!-- BANNER -->
+  <div class="custom_banner">
+    <!-- This image is owned by Brett Phibbs who authorized usage on this website for the non profit BlueBanquise project only. -->
+    <img src="images/iceberg-ice-floe-in-the-southern-ocean-180-miles-2022-03-04-01-48-36-utc-scaled_2.jpg" width="100%">
+      <div class="custom_banner_centered hide-mobile">
+          <h1>Simple. Modular. Open.</h1>
+          <h3>BlueBanquise is a project that aims to provide resources to deploy Linux based clusters of servers.</h3>
+      </div>
+  </div>
+
+  <section class="main-intro">
+    <div class="container">
+      <nav class="columns">
+        <div class="column">
+          <div style="text-align: center;">
+            <img src="images/BlueBanquise_logo.svg" alt="BlueBanquise Logo" width="50%" height="50%">
+          </div>
+        </div>
+        <div class="column">
+          <section class="hero">
+            <div class="hero-body">
+              <h1 class="title algolia-lvl0">
+                <strong><span style="color: #108bde">Blue</span>Banquise</strong>
+              </h1>
+              <br>
+              <div class="subtitle is-4 algolia-lvl1">
+                A project that provides basic resources to understand and deploy clusters of servers, with a strong focus on modularity and accessibility.<br>
+                It contains 3 axes:
+                <ul><a href="/collections.html">- Ansible collections</a></ul>
+                <ul><a href="/tutorials.html">- Tutorials</a></ul>
+                <ul><a href="stack.html">- Stack</a></ul>
+                This is an opensource and non profit project, not bounded to any company.
+              </div>
+            </div>
+          </section>
+        </div>
+      </nav>
+    </div>
+  </section>
+    
+  <section class="blue-section" >
+    <div class="container">
+      <nav class="columns">
+        <div class="column">
+          <section class="hero">
+            <div class="hero-body">
+              <h1 class="title algolia-lvl0">
+                <strong>Ansible collections</strong>
+              </h1>
+              <br>
+              <div class="subtitle is-5 algolia-lvl1">
+                <span style="color: #108bde">Blue</span>Banquise provides multiple Ansible collections.
+                <br>The main collection, Infrastructure, is generic and made to deploy any kind of servers clusters, while other collections are made to specialize the cluster: High Performance Computing, Kubernetes, rendering farm, etc.
+              </div>
+            </div>
+          </section>
+        </div>
+        <div class="column">
+          <section class="hero">
+            <div class="hero-body" style="text-align: center;">
+              <img src="images/ansible-ar21.svg" alt="BlueBanquise Logo"  width="60%" height="60%">
+            </div>
+          </section>
+        </div>
+      </nav>
+    </div>
+  </section>
+
+
+  <section class="blue-section" >
+    <div class="container">
+      <nav class="columns">
+        <div class="column">
+          <section class="hero">
+            <div class="hero-body">
+              <h1 class="title algolia-lvl0">
+                <strong>Tutorials</strong>
+              </h1>
+              <br>
+              <div class="subtitle is-5 algolia-lvl1">
+                One of the main <span style="color: #108bde">Blue</span>Banquise's objective is to help junior system administrators to level up and gather enough experience to deploy <b>manually</b> Linux servers and <b>understand</b> what happens behind the hood.
+                <br>Multiple generic tutorials are provided with a focus on accessibility and understanding.
+              </div>
+            </div>
+          </section>
+        </div>
+        <div class="column">
+          <section class="hero">
+            <div class="hero-body" style="text-align: center;">
+              <img src="images/multiple_icebergs.svg" alt="BlueBanquise Logo"  width="80%" height="80%">
+            </div>
+          </section>
+        </div>
+      </nav>
+    </div>
+  </section>
+
+  <section class="blue-section" >
+    <div class="container">
+      <nav class="columns">
+        <div class="column">
+          <section class="hero">
+            <div class="hero-body">
+              <h1 class="title algolia-lvl0">
+                <strong>Stack</strong>
+              </h1>
+              <br>
+              <div class="subtitle is-5 algolia-lvl1">
+                The <span style="color: #108bde">Blue</span>Banquise stack is made to simplify provisioning of clusters, by acting as an abstraction layer between system administrators and the target cluster.
+                <br>Stack provides interfaces to populate Ansible inventory, power manage servers, and schedule provisioning.
+              </div>
+            </div>
+          </section>
+        </div>
+        <div class="column">
+          <section class="hero">
+            <div class="hero-body" style="text-align: center;">
+              <img src="images/small_cluster.svg" alt="BlueBanquise Logo"  width="60%" height="60%">
+            </div>
+          </section>
+        </div>
+      </nav>
+    </div>
+  </section>
+
+  <section class="hero is-black">
+    <div class="hero-body">
+      <nav class="columns">
+        <div class="column">
+          This website is under MIT license.
+          <br>Iceberg ice floe image used at the top of this page is owned by Brett Phibbs.
+        </div>
+      </nav>
+    </div>
+  </section>
+</body>
+</html>

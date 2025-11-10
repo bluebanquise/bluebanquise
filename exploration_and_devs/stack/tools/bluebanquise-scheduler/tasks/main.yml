@@ -1,0 +1,150 @@
+- name: "package <|> Install needed packages"
+  ansible.builtin.package:
+    name:
+      - python3-packaging
+      - python3-celery
+      - python3-flask
+      - rabbitmq-server
+      - python3-clustershell
+      - python3-ssh-wait
+      - python3-colour_text
+    state: present
+  tags:
+    - package
+
+#### rabbitMQ
+
+- name: template <|> Generate rabbitMQ cookie
+  ansible.builtin.template:
+    src: erland.cookie.j2
+    dest: /var/lib/rabbitmq/.erlang.cookie
+    owner: rabbitmq
+    group: rabbitmq
+    mode: 0700
+
+- name: service <|> Enable and start rabbitmq-server service
+  ansible.builtin.service:
+    name: rabbitmq-server
+    enabled: true
+    state: started
+
+- name: block <|> Generate base user
+#  run_once: true
+#  delegate_to: "{{ worker_cluster_rabbitmq_reference_node }}"
+  block:
+
+    - name: command <|> Check root user exist
+      ansible.builtin.command: "rabbitmqctl list_users"
+      register: rabbitmqctl_list_users
+      changed_when: False
+      ignore_errors: yes
+
+    - name: command <|> Add root user to cluster
+      ansible.builtin.command: "rabbitmqctl add_user root root"
+      when: (rabbitmqctl_list_users.stdout_lines | select("match", "^root.*") | list | length) < 1
+
+    - name: command <|> Set root user as administrator
+      ansible.builtin.command: "rabbitmqctl set_user_tags root administrator"
+      when: (rabbitmqctl_list_users.stdout_lines | select("match", "^root.*") | list | length) < 1
+
+    - name: command <|> Set root permissions
+      ansible.builtin.command: 'rabbitmqctl set_permissions -p / root ".*" ".*" ".*"'
+      when: (rabbitmqctl_list_users.stdout_lines | select("match", "^root.*") | list | length) < 1
+
+# Join to be added later
+
+# - name: command <|> Check current cluster status
+#   command: "rabbitmqctl cluster_status"
+#   register: rabbitmqctl_cluster_status
+#   changed_when: False
+#   ignore_errors: yes
+#   run_once: true
+#   delegate_to: "{{ worker_cluster_rabbitmq_reference_node }}"
+
+# - name: command <|> Stop_app to join reference node
+#   command: "rabbitmqctl stop_app"
+#   when:
+#     - (rabbitmqctl_cluster_status.stdout_lines | select("match", "^rabbit@"+inventory_hostname+".*") | list | length) < 1
+#     - inventory_hostname != worker_cluster_rabbitmq_reference_node
+
+# - name: command <|> Reset configuration before joining reference node
+#   command: "rabbitmqctl reset"
+#   when:
+#     - (rabbitmqctl_cluster_status.stdout_lines | select("match", "^rabbit@"+inventory_hostname+".*") | list | length) < 1
+#     - inventory_hostname != worker_cluster_rabbitmq_reference_node
+
+# - name: command <|> Join reference node
+#   command: "rabbitmqctl join_cluster rabbit@{{ worker_cluster_rabbitmq_reference_node }}"
+#   when:
+#     - (rabbitmqctl_cluster_status.stdout_lines | select("match", "^rabbit@"+inventory_hostname+".*") | list | length) < 1
+#     - inventory_hostname != worker_cluster_rabbitmq_reference_node
+
+# - name: command <|> Start app after joining
+#   command: "rabbitmqctl start_app"
+#   when:
+#     - (rabbitmqctl_cluster_status.stdout_lines | select("match", "^rabbit@"+inventory_hostname+".*") | list | length) < 1
+#     - inventory_hostname != worker_cluster_rabbitmq_reference_node
+
+#### Automate (Flask and Celery)
+
+- name: file <|> Create automate folder
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0600
+    owner: root
+    group: root
+  loop:
+    - /etc/bbautomate
+
+- name: copy <|> Copy automate main file to /usr/local/bin/bbautomate
+  ansible.builtin.copy:
+    src: bbautomate.py
+    dest: /usr/local/bin/bbautomate.py
+    mode: 0755
+    owner: root
+    group: root
+  notify:
+    - service <|> Restart bbautomate_flask service
+    - service <|> Restart bbautomate_celery service
+
+- name: copy <|> Generate bbautomate_flask service file
+  ansible.builtin.copy:
+    src: bbautomate_flask.service
+    dest: /etc/systemd/system/bbautomate_flask.service
+    owner: root
+    group: root
+    mode: 0755
+  notify:
+    - service <|> Restart bbautomate_flask service
+    - service <|> Restart bbautomate_celery service
+  tags:
+    - template
+
+- name: copy <|> Generate bbautomate_celery service file
+  ansible.builtin.copy:
+    src: bbautomate_celery.service
+    dest: /etc/systemd/system/bbautomate_celery.service
+    owner: root
+    group: root
+    mode: 0755
+  notify: systemd <|> Reload systemd configuration
+  tags:
+    - template
+
+- name: meta <|> Run handler tasks
+  ansible.builtin.meta: flush_handlers
+
+- name: service <|> Manage bbautomate_flask service state
+  ansible.builtin.service:
+    name: bbautomate_flask
+    enabled: "{{ (enable_services | bool) | ternary('yes','no') }}"
+    state: "{{ (start_services | bool) | ternary('started', omit) }}"
+  tags:
+    - service
+
+- name: service <|> Enable and start bbautomate_celery service
+  ansible.builtin.service:
+    name: bbautomate_celery
+    enabled: true
+    state: started

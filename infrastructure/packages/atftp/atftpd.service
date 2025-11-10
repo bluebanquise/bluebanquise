@@ -1,0 +1,11 @@
+[Unit]
+Description=ATFTP daemon with verbosity
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=/usr/sbin/atftpd --daemon --user tftp --no-multicast --maxthread 100 --group tftp /var/lib/tftpboot --verbose
+
+[Install]
+WantedBy=multi-user.target
+

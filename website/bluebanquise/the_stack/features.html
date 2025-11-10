@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html class="has-navbar-fixed-top"><head>
+<title>BlueBanquise - Features</title>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/css/bulma-docs.min.css">
+  <script defer src="/js/all.js"></script>
+<!-- from https://codepen.io/hunzaboy/pen/yoPKQW -->
+	<script>
+	document.addEventListener('DOMContentLoaded', function () {
+  // Get all "navbar-burger" elements
+  var $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+  // Check if there are any nav burgers
+  if ($navbarBurgers.length > 0) {
+    // Add a click event on each of them
+    $navbarBurgers.forEach(function ($el) {
+      $el.addEventListener('click', function () {
+        // Get the target from the "data-target" attribute
+        var target = $el.dataset.target;
+        var $target = document.getElementById(target);
+        // Toggle the class on both the "navbar-burger" and the "navbar-menu"
+        $el.classList.toggle('is-active');
+        $target.classList.toggle('is-active');
+      });
+    });
+  }
+  });
+	</script>
+  <style>
+  .navbar-item.is-mega {
+    position: static;
+
+    .is-mega-menu-title {
+      margin-bottom: 0;
+      padding: .375rem 1rem;
+    }
+  }
+  </style>
+</head>
+  <body class="layout-default">
+
+    <nav class="navbar has-shadow is-spaced is-fixed-top">
+      <div class="container">
+
+        <div class="navbar-brand">
+          <a class="navbar-item" href="https://bluebanquise.com">
+            <img src="/images/BlueBanquise_logo_large.svg" alt="BlueBanquise, an Ansible stack">
+          </a>
+          <a class="navbar-item is-hidden-desktop" href="https://github.com/bluebanquise/bluebanquise" target="_blank">
+            <span class="icon" style="color: #333;">
+              <i class="fab fa-github"></i>
+            </span>
+          </a>
+          <div class="navbar-burger burger" data-target="navMenubd-example">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+
+        <div id="navMenubd-example" class="navbar-menu">
+          <div class="navbar-start">
+            <div class="navbar-item has-dropdown is-hoverable">
+              <!-- <a class="navbar-link " href="project.html"> -->
+                <div class="navbar-link">
+                The stack
+                </div>
+              <!-- </a> -->
+              <div class="navbar-dropdown ">
+                <a class="navbar-item " href="/the_stack/the_project.html">
+                  The project
+                </a>
+                <a class="navbar-item " href="/the_stack/features.html">
+                  Features
+                </a>
+              </div>
+            </div>
+            <div class="navbar-item has-dropdown is-hoverable">
+              <!-- <a class="navbar-link " href="https://bluebanquise.com/project.html"> -->
+                <div class="navbar-link">
+                Resources
+                </div>
+              <!-- </a> -->
+              <div class="navbar-dropdown ">
+                <a class="navbar-item " href="/resources/documentation.html">
+                  Documentation
+                </a>
+                <a class="navbar-item " href="/resources/download.html">
+                  Download
+                </a>
+              </div>
+            </div>
+            <a class="navbar-item " href="/about.html">
+              About
+            </a>
+            <div class="navbar-end">
+              <a class="navbar-item is-hidden-desktop-only" href="https://github.com/bluebanquise/bluebanquise" target="_blank">
+                <span class="icon" style="color: #333;">
+                  <i class="fab fa-github"></i>
+                </span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+<main class="bd-main">
+  <div class="bd-side-background"></div>
+  <div class="bd-main-container container">
+    <div class="bd-duo">
+      <div class="bd-lead">
+        <header class="bd-header">
+          <div class="bd-header-titles">
+            <h1 class="title">
+              Features
+            </h1>
+            <p class="subtitle is-4">
+              Stack structure and capabilities
+            </p>
+          </div>
+        </header>
+        <div class="bd-content">
+          <div class="content">
+We try to keep <span style="color: #108bde">Blue</span>Banquise as simple and generic as possible, having advanced features optional.
+<br>
+<a id="modularity"></a>
+The stack provides many possibilities. This page attempts to expose them.
+<br>
+<br>
+<h2 class="title">
+Modularity and flexibility
+</h2>
+<br>
+<div class="columns is-vcentered">
+  <div class="column">
+    <p class="subtitle is-5">
+      Half generic, half specialized
+    </p>
+<span style="color: #108bde">Blue</span>Banquise is split between 2 roles collections:
+<br>
+<ul>
+  <li><b>Core</b>: the CORE of the stack, focused on providing roles and tools to deploy hosts and configure vital services. CORE is generic to any kind of cluster.</li>
+  <li><b>Community</b>: COMMUNITY roles and tools provides additional production level features on top of CORE to specialize cluster.</li>
+</ul>
+  </div>
+  <div class="column is-8">
+    <div style="text-align:center;" height="100px">
+      <img src="/images/COREvsCOMMUNITY.svg" alt="CORE and COMMUNITY">
+    </div>
+  </div>
+</div>
+<br>
+<br>
+<div class="columns is-vcentered">
+  <div class="column">
+    <p class="subtitle is-5">
+      Ansible roles collections around a data-model
+    </p>
+<span style="color: #108bde">Blue</span>Banquise can be seen as a set of <b>Ansible roles collections</b>, which ensure full modularity.
+<br>Even elements of the core can be replaced by others.
+<br>A <b>data model</b> ensure coherency between roles.
+<br>
+<br>
+The Ansible inventories structure used can handle a wide range of cluster and network architectures, and allows adding more variables as desired.
+  </div>
+  <div class="column is-8">
+    <div style="text-align:center;">
+      <img src="/images/Modularity.svg" alt="BlueBanquise, an Ansible stack">
+    </div>
+  </div>
+</div>
+
+
+
+
+<a id="modernity"></a>
+<br>
+<br>
+
+<h2 class="title">
+Compatible and modern
+</h2>
+
+The whole stack is based on <b>python</b> 3.6+ and <b>Ansible</b>, for better long term investment.
+<br>
+The PXE stack is Legacy or EFI compatible, and should allow to boot any kind of hardware.
+<br>
+<br>
+A focus is made on reducing scripting to the minimum, allowing stack to grow and extend easily.<a id="compatibility"></a>
+<br>
+<br>
+All stack data are stored in plain text files, in YAML format, using Ansible inventory folders structure.
+<br>
+No binaries + no databases = <b>fully editable and tunable with minimal knowledge</b>.
+<br>
+<br>
+<h2>Technical details</h2>
+
+<h3 class="subtitle is-5">Supported OS and platform</h3>
+
+In its current state, stack can deploy on mixed Linux distributions and platform (in the same cluster), including:
+
+<ul>
+  <li><b>RHEL</b> and derivated, versions 7.X and 8.X</li>
+  <li><b>Ubuntu</b> version 20.04</li>
+</ul>
+OpenSuse and Debian are scheduled to be fully implemented.
+<br>
+Stack is compatible with <b>x86_64</b> and <b>arm64/aarch64</b> platforms.<br>
+<br>
+This ability to handle multiple Linux distributions and architectures at the same time, allows to easily handle exotic hardware or cluster needs.
+
+<h3 class="subtitle is-5">Roles</h3>
+
+The stack provides many Ansible roles, seen as independent elements.
+Roles are autonomous from each other's, to be easily switched with externals or user's custom roles.
+
+<h3 class="subtitle is-5">Specific advanced features</h3>
+
+The stack also as few native mechanisms under the hood. These features are a need for us, so we added them.
+<br>
+<br>
+<h4 class="subtitle is-6">Multi Icebergs</h4>
+
+This feature is sometime called multi islands in HPC or Cloud.<br>
+<br>
+<span style="color: #108bde">Blue</span>Banquise can split cluster into independent
+and autonomous groups of equipment. These new subclusters are called <b>icebergs</b>,
+each iceberg being managed by a group of management nodes and isolated from the others 
+(but can be reached through interconnect if exist and asked).<br>
+<br>
+This feature is mainly used:
+
+<ul>
+  <li>When there is a need to separated parts of the cluster.</li>
+  <li>When there is a need to run an old cluster aside a new one keeping both in production.</li>
+  <li>When there is a need to scale to very large number of hosts.</li>
+</ul>
+<br>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+  </body>
+</html>

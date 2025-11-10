@@ -1,0 +1,44 @@
+#!ipxe
+
+# https://forum.ipxe.org/showthread.php?tid=7960
+# https://www.eso.org/~ndelmott/ascii.html
+# https://www.asciiart.eu/animals/wolves
+
+cpair --foreground 2 --background 9 0
+
+set sp:hex 20
+set sp ${sp:string}
+set bs:hex 5C
+set bs ${bs:string}
+
+echo ${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}__
+echo ${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}.d$$b
+echo ${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}.'${sp}TO$;${bs}
+echo ${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}/${sp}${sp}:${sp}TP._;
+echo ${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}/${sp}_.;${sp}${sp}:Tb|
+echo ${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}/${sp}${sp}${sp}/${sp}${sp}${sp};j$j
+echo ${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}_.-"${sp}${sp}${sp}${sp}${sp}${sp}${sp}d$$$$
+echo ${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}.'${sp}..${sp}${sp}${sp}${sp}${sp}${sp}${sp}d$$$$;
+echo ${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}/${sp}${sp}/P'${sp}${sp}${sp}${sp}${sp}${sp}d$$$$P.${sp}|${bs}
+echo ${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}/${sp}${sp}${sp}"${sp}${sp}${sp}${sp}${sp}${sp}.d$$$P'${sp}|\^"l
+echo ${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}.'${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}`T$P^"""""${sp}${sp}:
+echo ${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}._.'${sp}${sp}${sp}${sp}${sp}${sp}_.'${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp};
+echo ${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}`-.-".-'-'${sp}._.${sp}${sp}${sp}${sp}${sp}${sp}${sp}_.-"${sp}${sp}${sp}${sp}.-"
+echo ${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}`.-"${sp}_____${sp}${sp}._${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}.-"
+echo ${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}-(.g$$$$$$$b.${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}.'
+echo ${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}""^^T$$$P^)${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}.(:
+echo ${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}_/${sp}${sp}-"${sp}${sp}/.'${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}/:/;
+echo ${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}._.'-'`-'${sp}${sp}")/${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}/;/;
+echo ${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}`-.-"..--""${sp}${sp}${sp}"${sp}/${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}/${sp}${sp};
+echo ${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}.-"${sp}..--""${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}-'${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}:
+echo ${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}..--""--.-"${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}(${bs}${sp}${sp}${sp}${sp}${sp}${sp}.-(${bs}
+echo ${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}..--""${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}`-${bs}(${bs}/;`
+echo ${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}_.${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}:
+echo ${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp};`-
+echo ${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}:${bs}
+echo ${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp}${sp};${sp}${sp}bug
+
+cpair 0
+
+sleep 10
+chain http://${next-server}/pxe/menu.ipxe || shell

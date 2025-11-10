@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html class="has-navbar-fixed-top"><head>
+<title>BlueBanquise - Collections</title>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/css/bulma.min.css">
+  <script defer src="/js/all.js"></script>
+<!-- from https://codepen.io/hunzaboy/pen/yoPKQW -->
+	<script>
+	document.addEventListener('DOMContentLoaded', function () {
+  // Get all "navbar-burger" elements
+  var $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+  // Check if there are any nav burgers
+  if ($navbarBurgers.length > 0) {
+    // Add a click event on each of them
+    $navbarBurgers.forEach(function ($el) {
+      $el.addEventListener('click', function () {
+        // Get the target from the "data-target" attribute
+        var target = $el.dataset.target;
+        var $target = document.getElementById(target);
+        // Toggle the class on both the "navbar-burger" and the "navbar-menu"
+        $el.classList.toggle('is-active');
+        $target.classList.toggle('is-active');
+      });
+    });
+  }
+  });
+	</script>
+  <style>
+
+/*
+ * The banner with background image.
+ * we use relative positioning to be able to position the banner content properly
+ * background taken from:
+ * https://unsplash.com/@roylandnye
+ *
+ */
+
+.main-intro {
+    margin-top: 5em;
+}
+
+.blue-section {
+background: rgb(37,124,163);
+background: linear-gradient(180deg, rgba(53, 184, 245, 0.04) 0%, rgba(8,21,129,0) 30%, rgba(0,212,255,0) 100%);
+margin-top: 6em;
+}
+/* 
+.banner {
+    text-align: center;
+    width: 100%;
+    margin-bottom: 0em;
+    margin-top: 0em;
+}
+
+.banner-content {
+    position: absolute;
+    top: 50%;
+    margin-top: -110px;
+    width: 100%;
+}
+
+.banner h1 {
+    margin-bottom: 0;
+    font-size: 2em;
+    color: white;
+    font-weight: 500;
+    text-shadow: 0 2px 2px black;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+.banner h3 {
+    margin-bottom: 0;
+    font-size: 1em;
+    color: white;
+    font-weight: 500;
+    text-shadow: 0 2px 2px black;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+.banner-head {
+    margin-bottom: 0;
+    font-size: 2em;
+    color: white;
+    font-weight: 500;
+    text-shadow: 0 1px 1px black;
+}
+
+.banner-head-small {
+    margin-bottom: 0;
+    font-size: 1em;
+    color: white;
+    font-weight: 500;
+    text-shadow: 0 1px 1px black;
+} */
+
+html.has-navbar-fixed-top {
+  padding-top: 0em;
+}
+
+.navbar-item img { 
+  max-height: 3rem;
+}
+
+.navbar-item {
+  font-size: 1.5em;
+  padding: .5rem 1.2rem;
+}
+
+.navbar-item.is-mega {
+  position: static;
+
+  .is-mega-menu-title {
+    margin-bottom: 0;
+    padding: .375rem 1rem;
+  }
+}
+
+.custom_banner {
+  position: relative;
+  text-align: center;
+  color: white;
+  margin-bottom: 10em;
+
+}
+
+.custom_banner_centered {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.custom_banner h1 {
+    margin-bottom: 0;
+    font-size: 2em;
+    color: white;
+    font-weight: 500;
+    text-shadow: 0 2px 2px black;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+.custom_banner h3 {
+    margin-bottom: 0;
+    font-size: 1em;
+    color: white;
+    font-weight: 500;
+    text-shadow: 0 2px 2px black;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+@media only screen and (max-width: 800px) {
+ .hide-mobile 
+ {display:none;}
+}
+
+</style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar is-spaced has-shadow">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://bluebanquise.com">
+        <img src="/images/BlueBanquise_logo_large_2.svg" alt="BlueBanquise, an Ansible stack">
+      </a>
+      <div class="navbar-burger burger" data-target="navMenubd-example">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+    <div id="navMenubd-example" class="navbar-menu">
+      <div class="navbar-start">
+        <a class="navbar-item" href="/index.html">
+          Home
+        </a>
+        <a class="navbar-item is-active" href="/collections.html">
+          Collections
+        </a>
+        <a class="navbar-item " href="/tutorials.html">
+          Tutorials
+        </a>
+        <a class="navbar-item " href="/stack.html">
+          Stack
+        </a>
+        <a class="navbar-item " href="/resources.html">
+          Resources
+        </a>
+
+        <a class="navbar-item" href="/about.html">
+          About
+        </a>
+        <div class="navbar-end">
+          <a class="navbar-item is-hidden-desktop-only" href="https://github.com/bluebanquise/bluebanquise" target="_blank">
+            <span class="icon" style="color: #333;">
+              <i class="fab fa-github"></i>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <section class="main-intro">
+    <div class="container">
+
+      <section class="main-intro">
+        <div class="container">
+          <nav class="columns">
+            <div class="column">
+              <div style="text-align: center;">
+                <img src="images/ansible-ar21.svg" alt="Ansible collections" width="20%" height="20%">
+              </div>
+            </div>
+          </nav>
+        </div>
+      </section>
+
+      <section class="hero">
+        <div class="hero-body">
+          <h1 class="title algolia-lvl0">
+            <span style="color: #108bde">Blue</span>Banquise collections
+          </h1>
+        </div>
+      </section>
+
+      <section class="hero">
+        <div class="hero-body">
+          <span style="color: #108bde">Blue</span>Banquise roles are provided as Ansible collections, and are hosted <a href="https://github.com/bluebanquise/bluebanquise/tree/master/collections">on Github</a>.
+          <br>A <strong>commons</strong> collection is needed by all others. It contains vars logic and some plugins.
+          <br>
+          <br>In order to install collections on a local system, assuming Ansible is already installed, you will need to use the ansible-galaxy command:
+          <br><br>
+<pre><code>ansible-galaxy collection install git+https://github.com/bluebanquise/bluebanquise.git#/collections/commons,master --upgrade</code></pre>
+          <br>Then you can the install collections of your choice. For example, to install the Infrastructure collection:
+          <br><br>
+<pre><code>ansible-galaxy collection install git+https://github.com/bluebanquise/bluebanquise.git#/collections/infrastructure,master --upgrade</code></pre>
+          <br>All collections share the same data-model, which is required by some specific roles (requirements are always specified at top or role README.md file).
+          <br>The data-model can be found <a href="https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md">on Github</a>.
+          <br>
+          <br>Note also that some roles need some packages, provided by <span style="color: #108bde">Blue</span>Banquise. Repositories are available at <a href="http://bluebanquise.com/repository/releases/latest/">http://bluebanquise.com/repository/releases/latest/</a>.
+        </div>
+      </section>
+
+    </div>
+  </section>
+
+  <section class="hero is-black">
+    <div class="hero-body">
+      <nav class="columns">
+        <div class="column">
+          This website is under MIT license.
+        </div>
+      </nav>
+    </div>
+  </section>
+
+</body>
+</html>

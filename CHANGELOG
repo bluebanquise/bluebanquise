@@ -4,6 +4,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.2.7
 
+* 11/10/25 - thiagocardozo - [dhcp] BMCs no longer must have a MAC defined. Thiago Cardozo <boubee.thiago@gmail.com>
 * 11/06/25 - oxedions - [nfs] Set nfs v3 as default instead of 4.2.
 * 11/06/25 - oxedions - [pxe_stack] Disable auto clonezilla support.
 * 12/09/25 - santos-lucas - [slurm] Added support for gres in confiless mode. Lucas Santos <lucassouzasantos@gmail.com> 

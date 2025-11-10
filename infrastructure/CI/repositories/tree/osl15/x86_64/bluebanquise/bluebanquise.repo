@@ -1,0 +1,5 @@
+[bluebanquise]
+name = bluebanquise
+baseurl = https://bluebanquise.com/repository/releases/latest/osl15/x86_64/bluebanquise/
+gpgcheck = 0
+enabled = 1

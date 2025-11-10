@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html class="has-navbar-fixed-top"><head>
+<title>BlueBanquise - The project</title>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/css/bulma-docs.min.css">
+  <script defer src="/js/all.js"></script>
+<!-- from https://codepen.io/hunzaboy/pen/yoPKQW -->
+	<script>
+	document.addEventListener('DOMContentLoaded', function () {
+  // Get all "navbar-burger" elements
+  var $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+  // Check if there are any nav burgers
+  if ($navbarBurgers.length > 0) {
+    // Add a click event on each of them
+    $navbarBurgers.forEach(function ($el) {
+      $el.addEventListener('click', function () {
+        // Get the target from the "data-target" attribute
+        var target = $el.dataset.target;
+        var $target = document.getElementById(target);
+        // Toggle the class on both the "navbar-burger" and the "navbar-menu"
+        $el.classList.toggle('is-active');
+        $target.classList.toggle('is-active');
+      });
+    });
+  }
+  });
+	</script>
+  <style>
+  .navbar-item.is-mega {
+    position: static;
+
+    .is-mega-menu-title {
+      margin-bottom: 0;
+      padding: .375rem 1rem;
+    }
+  }
+  </style>
+</head>
+  <body class="layout-default">
+
+    <nav class="navbar has-shadow is-spaced is-fixed-top">
+      <div class="container">
+
+        <div class="navbar-brand">
+          <a class="navbar-item" href="https://bluebanquise.com">
+            <img src="/images/BlueBanquise_logo_large.svg" alt="BlueBanquise, an Ansible stack">
+          </a>
+          <a class="navbar-item is-hidden-desktop" href="https://github.com/bluebanquise/bluebanquise" target="_blank">
+            <span class="icon" style="color: #333;">
+              <i class="fab fa-github"></i>
+            </span>
+          </a>
+          <div class="navbar-burger burger" data-target="navMenubd-example">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+
+        <div id="navMenubd-example" class="navbar-menu">
+          <div class="navbar-start">
+            <div class="navbar-item has-dropdown is-hoverable">
+              <!-- <a class="navbar-link " href="project.html"> -->
+                <div class="navbar-link">
+                The stack
+                </div>
+              <!-- </a> -->
+              <div class="navbar-dropdown ">
+                <a class="navbar-item " href="/the_stack/the_project.html">
+                  The project
+                </a>
+                <a class="navbar-item " href="/the_stack/features.html">
+                  Features
+                </a>
+              </div>
+            </div>
+            <div class="navbar-item has-dropdown is-hoverable">
+              <!-- <a class="navbar-link " href="https://bluebanquise.com/project.html"> -->
+                <div class="navbar-link">
+                Resources
+                </div>
+              <!-- </a> -->
+              <div class="navbar-dropdown ">
+                <a class="navbar-item " href="/resources/documentation.html">
+                  Documentation
+                </a>
+                <a class="navbar-item " href="/resources/download.html">
+                  Download
+                </a>
+              </div>
+            </div>
+            <a class="navbar-item " href="/about.html">
+              About
+            </a>
+            <div class="navbar-end">
+              <a class="navbar-item is-hidden-desktop-only" href="https://github.com/bluebanquise/bluebanquise" target="_blank">
+                <span class="icon" style="color: #333;">
+                  <i class="fab fa-github"></i>
+                </span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+<main class="bd-main">
+  <div class="bd-side-background"></div>
+  <div class="bd-main-container container">
+    <div class="bd-duo">
+      <div class="bd-lead">
+        <header class="bd-header">
+          <div class="bd-header-titles">
+            <h1 class="title">
+              The project
+            </h1>
+            <p class="subtitle is-4">
+              An <strong>opensource</strong> cluster administration stack<br>
+              focused on simplicity
+            </p>
+          </div>
+        </header>
+        <div class="bd-content">
+          <div class="content">
+
+
+
+<div class="columns is-vcentered">
+  <div class="column">
+<span style="color: #108bde">Blue</span>Banquise is an opensource project,
+ based on the wish to provide a simple but flexible stack to deploy and manage cluster of servers or workstations.
+<br><br>
+The stack is based on <b>Ansible</b> and <b>Python</b>, and relies heavily on inventory <b>variables precedence mechanism</b> and <b>groups</b>.
+It was designed in an attempt to be 100% modular.
+  </div>
+  <div class="column is-vcentered">
+    <div style="text-align:center;" height="100px"><img src="/images/multiple_icebergs.svg" alt="BlueBanquise, an Ansible stack"></div>
+  </div>
+</div>
+
+<br><br>
+
+<h2 class="title">
+Origin of the need
+</h2>
+While building a small HPC center in the FabLab <a href="https://www.lafabriqueduloch.org">La Fabrique du Loch</a>, at <a href="https://en.wikipedia.org/wiki/Auray">Auray</a> – France, we needed something simple, widely compatible, to manage our cluster and our workstations, but also very flexible as we are working with enterprises and universities (some wants Centos, others Ubuntu, others Microsoft Windows, etc).<br>
+<br>
+We also wanted something with less scripts as possible, to easily maintain the system and save spare time doing interesting things.<br>
+<br>
+This is how Banquise and then it's spiritual successor <span style="color: #108bde">Blue</span>Banquise were born.
+<br>
+The stack is linked to the <a href="https://algoric.org">Algoric</a> project.
+
+<h2 class="title">
+Objectives
+</h2>
+The stack main goal is to be a simple <b>skeleton</b> for other projects.
+<br><br>
+As it relies on Ansible, the structure of <span style="color: #108bde">Blue</span>Banquise makes it fully modular. Addons, or other tools can be seen as the flesh to make it alive.
+<br>
+The inventory design is also highly flexible, allowing simple configurations by default, but also very exotic ones.
+<br><br>
+In any cases, <b>and this is mandatory for us</b>, the stack is a semi-automatic tool: system administrator always have a way to force things to act as expected. All automatic parts can be overwritten using Ansible precedence mechanism.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+  </body>
+</html>

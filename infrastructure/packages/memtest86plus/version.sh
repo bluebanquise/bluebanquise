@@ -1,0 +1,3 @@
+package_version=7.00
+package_name=memtest86plus
+package_native_architecture=noarch

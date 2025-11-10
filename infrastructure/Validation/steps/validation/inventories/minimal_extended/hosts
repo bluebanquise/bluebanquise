@@ -1,0 +1,76 @@
+[all]
+mgt1 network_interfaces="[{'ip4':'10.10.0.1', 'mac':'1a:2b:3c:4d:1e:9f', 'network':'net-admin', 'interface':'enp2s0', 'never_default4':'true'}]"
+c001 network_interfaces="[{'ip4':'10.10.3.1', 'mac':'1a:2b:3c:4d:5e:9f', 'network':'net-admin', 'interface':'enp1s0'}]"
+
+[fn_management]
+mgt[1:11]
+
+[fn_compute]
+c001
+
+[os_rhel8]
+mgt2 network_interfaces="[{'ip4':'10.10.0.2', 'mac':'1a:2b:3c:4d:2e:8f', 'network':'net-admin', 'interface':'enp1s0'}]"
+[os_rhel8:vars]
+os_operating_system={'distribution':"redhat", 'distribution_version':"8", 'distribution_major_version':"8" }
+
+[os_rhel10]
+mgt3 network_interfaces="[{'ip4':'10.10.0.11', 'mac':'1a:2b:3c:4d:3e:9f', 'network':'net-admin', 'interface':'enp1s0'}]"
+[os_rhel10:vars]
+os_operating_system={'distribution':"redhat", 'distribution_version':"10", 'distribution_major_version':"10" }
+
+[os_rhel9]
+mgt3 network_interfaces="[{'ip4':'10.10.0.3', 'mac':'1a:2b:3c:4d:3e:8f', 'network':'net-admin', 'interface':'enp1s0'}]"
+[os_rhel9:vars]
+os_operating_system={'distribution':"redhat", 'distribution_version':"9", 'distribution_major_version':"9" }
+
+[os_rhel7]
+mgt4 network_interfaces="[{'ip4':'10.10.0.4', 'mac':'1a:2b:3c:4d:4e:8f', 'network':'net-admin', 'interface':'eth0'}]"
+[os_rhel7:vars]
+os_operating_system={'distribution':"redhat", 'distribution_version':"7", 'distribution_major_version':"7" }
+
+[os_ubuntu20]
+mgt5 network_interfaces="[{'ip4':'10.10.0.5', 'mac':'1a:2b:3c:4d:5e:8f', 'network':'net-admin', 'interface':'enp1s0'}]"
+[os_ubuntu20:vars]
+os_operating_system={'distribution':"ubuntu", 'distribution_version':"20.04", 'distribution_major_version':"20" }
+
+[os_ubuntu22]
+mgt6 network_interfaces="[{'ip4':'10.10.0.6', 'mac':'1a:2b:3c:4d:6e:8f', 'network':'net-admin', 'interface':'enp1s0'}]"
+[os_ubuntu22:vars]
+os_operating_system={'distribution':"ubuntu", 'distribution_version':"22.04", 'distribution_major_version':"22" }
+
+[os_ubuntu24]
+mgt10 network_interfaces="[{'ip4':'10.10.0.10', 'mac':'1a:2b:3c:4d:9a:8f', 'network':'net-admin', 'interface':'enp1s0'}]"
+[os_ubuntu24:vars]
+os_operating_system={'distribution':"ubuntu", 'distribution_version':"24.04", 'distribution_major_version':"24" }
+
+[os_opensuseleap15]
+mgt7 network_interfaces="[{'ip4':'10.10.0.7', 'mac':'1a:2b:3c:4d:7e:8f', 'network':'net-admin', 'interface':'enp1s0'}]"
+[os_opensuseleap15:vars]
+os_operating_system={'distribution':"opensuse", 'distribution_version':"15", 'distribution_major_version':"15" }
+
+[os_debian11]
+mgt8 network_interfaces="[{'ip4':'10.10.0.8', 'mac':'1a:2b:3c:4d:8e:8f', 'network':'net-admin', 'interface':'enp1s0'}]"
+[os_debian11:vars]
+os_operating_system={'distribution':"debian", 'distribution_version':"11", 'distribution_major_version':"11" }
+os_partitioning="d-i partman-auto/disk string /dev/vda\nd-i partman-auto/method string regular\nd-i partman-auto/choose_recipe select atomic\nd-i partman-auto/init_automatically_partition select Guided - use entire disk\n"
+
+[os_debian12]
+mgt9 network_interfaces="[{'ip4':'10.10.0.9', 'mac':'1a:2b:3c:4d:9e:8f', 'network':'net-admin', 'interface':'enp1s0'}]"
+[os_debian12:vars]
+os_operating_system={'distribution':"debian", 'distribution_version':"12", 'distribution_major_version':"12" }
+os_partitioning="d-i partman-auto/disk string /dev/vda\nd-i partman-auto/method string regular\nd-i partman-auto/choose_recipe select atomic\nd-i partman-auto/init_automatically_partition select Guided - use entire disk\n"
+
+[hw_all]
+c001
+mgt[1:10]
+[hw_all:vars]
+hw_equipment_type="server"
+
+[all:vars]
+# Define unique network settings
+networks={'net-admin':{'subnet':"10.10.0.0", 'prefix':"16", 'gateway':"10.10.0.1", 'services_ip':"10.10.0.1" }}
+os_operating_system={'distribution':"ubuntu", 'distribution_version':"22.04", 'distribution_major_version':"22" }
+dns_server_dnssec_enable=False
+dns_server_dnssec_validation=False
+dns_server_recursion=True
+dns_server_forwarders=['8.8.8.8', '8.8.4.4']

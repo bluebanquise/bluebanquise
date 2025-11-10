@@ -1,0 +1,12 @@
+[Unit]
+Description=Promtail
+Documentation=https://github.com/grafana/loki/blob/master/docs/clients/promtail/README.md
+After=network.target
+
+[Service]
+User=promtail
+ExecStart=/usr/bin/promtail -config.file /etc/promtail.yml
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

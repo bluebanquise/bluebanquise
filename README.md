@@ -14,6 +14,8 @@ Devs infos:
 
 :red_heart: ansible-core 2.19 is not currently compatible, stack is limited to 2.18.10, work in progress to solve this issue.
 
+:yellow_heart: documentation v3 is currently written, might take few weeks to complete.
+
 ---
 
 ## What is BlueBanquise
@@ -42,40 +44,30 @@ In the 21th century, it is a shame not all children live in peace.
 
 ## Quickstart
 
-We will assume here you already have a recent Ansible setup and configured. If you are new to Ansible, you can use the [provided generic tutorial](http://bluebanquise.com/tutorials/sysadmin_ansible/).
+### 1. Bootstrap the stack
 
-If you are aiming clients hosts with an old native Python version (RHEL 8 or OpenSuse Leap 15), be sure to cap your ansible-core pip package version to 2.16 . 2.17 and more are no more compatible with Python 3.6.
-
-### 1. Core variables and Jinja2 extensions
-
-In order to use BlueBanquise collections, you need the core variables, that contain the logic (BlueBanquise relies on a centralized logic to easily impact all roles at once).
-
-To install core variables, you can either:
-
-* Copy file [bb_core.yml](resources/bb_core.yml) into your inventory at `group_vars/all/` level
-* Or invoke the vars plugin at ansible-playbook execution, using `ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.infrastructure.core`
-* Or add it into your `ansible.cfg` file (see example at [ansible.cfg](./ansible.cfg)) by adding `vars_plugins_enabled  = ansible.builtin.host_group_vars,bluebanquise.infrastructure.core`
-
-While first solution is simpler, second solution is preferred as it allows to use the galaxy update mechanism to ensure your core logic is always up to date (bug fixes mainly).
-
-In both cases, you need to enable some Jinja2 extensions at run time. To do so, either:
-
-* Add it into your `ansible.cfg` file (see example at [ansible.cfg](./ansible.cfg)) by adding `jinja2_extensions = jinja2.ext.loopcontrols,jinja2.ext.do`
-* Or invoke the extensions at ansible-playbook execution, using `ANSIBLE_JINJA2_EXTENSIONS=jinja2.ext.loopcontrols,jinja2.ext.do`
-
-Note that not all roles need this core logic, and that all logic variables are prefixed by `j2_`.
-
-### 2. Install collections
-
-To install BlueBanquise collection, you can use the ansible-galaxy command:
+First step is to use the bootstrap script that will create the bluebanquise user on your system.
+Make sure first you have both sudo and curl installed on the system.
 
 ```
-ansible-galaxy collection install git+https://github.com/bluebanquise/bluebanquise.git#/collections/infrastructure,master -vvv --upgrade
+sudo bash <(curl -s https://raw.githubusercontent.com/bluebanquise/bluebanquise/refs/heads/master/bootstrap/online_bootstrap.sh)
 ```
 
-### 3. Create inventory
+Read the warning message, and accept if you agree with it.
 
-To create your inventory, you can use the provided [datamodel](resources/data_model.md), and roles embed READMEs (for example, for pxe_stack role, you can rely on [README.md](collections/infrastructure/roles/pxe_stack/README.md), etc.).
+Once bootstrap is done, you can login as bluebanquise user:
+
+```
+sudo su - bluebanquise
+```
+
+Note that the ANSIBLE_CONFIG variable is set to `/var/lib/bluebanquise/bluebanquise/ansible.cfg` automatically, and a python virtual environment is auto activated and contains latest Ansible version available for your local system.
+
+BlueBanquise Ansible's collections are also already installed for this bluebanquise user.
+
+### 2. Use example inventory
+
+
 
 ### 4. Create playbooks
 

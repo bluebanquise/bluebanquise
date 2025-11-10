@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="bulmaswatch.min.css">
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Abhaya+Libre:400,600,700|Work+Sans:300,400,500,700">
+<style>
+body {
+  font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Cantarell,Open Sans,Helvetica Neue,sans-serif;
+  font-size: 1em;
+  background-color: #1a1a1a;
+  color: #42b883;
+}
+h1   {
+  color: white;
+  font-weight: bold;
+}
+
+.lds-dual-ring {
+  /* change color here */
+  color: yellow
+}
+.lds-dual-ring,
+.lds-dual-ring:after {
+  box-sizing: border-box;
+}
+.lds-dual-ring {
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+}
+.lds-dual-ring:after {
+  content: " ";
+  display: block;
+  width: 32px;
+  height: 32px;
+  margin: 0px;
+  border-radius: 50%;
+  border: 3.2px solid currentColor;
+  border-color: currentColor transparent currentColor transparent;
+  animation: lds-dual-ring 1.2s linear infinite;
+}
+@keyframes lds-dual-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.lds-single-ring-ok {
+  /* change color here */
+  color: greenyellow
+}
+.lds-single-ring-ok,
+.lds-single-ring-ok:after {
+  box-sizing: border-box;
+}
+.lds-single-ring-ok {
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+}
+.lds-single-ring-ok:after {
+  content: " ";
+  display: block;
+  width: 32px;
+  height: 32px;
+  margin: 0px;
+  border-radius: 50%;
+  border: 3.2px solid currentColor;
+  border-color: currentColor currentColor currentColor currentColor;
+}
+
+.lds-single-ring-bad {
+  /* change color here */
+  color: red
+}
+.lds-single-ring-bad,
+.lds-single-ring-bad:after {
+  box-sizing: border-box;
+}
+.lds-single-ring-bad {
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+}
+.lds-single-ring-bad:after {
+  content: " ";
+  display: block;
+  width: 32px;
+  height: 32px;
+  margin: 0px;
+  border-radius: 50%;
+  border: 3.2px solid currentColor;
+  border-color: currentColor currentColor currentColor currentColor;
+}
+
+</style>
+</head>
+<body>
+
+<h1>Documentation builds</h1>
+
+Documentation build status: <div class="lds-dual-ring"></div>
+<br>
+Documentation last successful build: <br>
+Documentation last build attempt: <br>
+
+<div class="lds-single-ring-ok"></div>
+<div class="lds-single-ring-bad"></div>
+
+
+<h1>Tutorials builds</h1>
+
+Tutorials build status: <br>
+Tutorials last successful build: <br>
+Tutorials last build attempt: <br>
+
+<h1>Repositories builds</h1>
+
+Repositories global build status: <br>
+Repositories last successful build: <br>
+Repositories last build attempt: <br>
+
+RHEL 8 packages - x86_64
+
+Building repositories
+
+</body>
+</html>

@@ -1,0 +1,7 @@
+Build python packages:
+python setup.py bdist_rpm --spec-only
+python setup.py bdist_rpm
+
+Atftp needs automake and autoconf
+
+ipxe-bluebanquise needs genisoimage and xz / xz-devel

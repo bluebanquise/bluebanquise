@@ -1,0 +1,464 @@
+#!/usr/bin/env python3
+
+import requests
+import os
+import sys
+import hashlib
+import yaml
+import shutil
+import subprocess
+import datetime
+import time
+import textwrap
+import configparser
+
+
+#######################################################################
+################ BB Shell Windows Manager
+##########
+
+class windows_manager(object):
+  """ This is a small windows manager for terminal.
+  I hate things that clear the terminal because it often clears logs or errors.
+  So this is an home made concept of windows manager that lives verticaly in the terminal :)
+  Ox
+  """
+
+  def __init__(self, init_nesting_level=-1):
+    self.w_nesting_level = init_nesting_level
+    #self.w_colors = ['39', '214', '201', '226']
+    self.w_colors = ['226', '208', '196', '163']
+    self.w_allowed_colors = {
+      'blue': '\033[94m',
+      'green': '\033[92m',
+      'reset': '\033[0m'
+    }
+
+  def t_green(self, message):
+    return self.w_allowed_colors['green'] + message + self.w_allowed_colors['reset']
+
+  def t_blue(self, message):
+    return self.w_allowed_colors['blue'] + message + self.w_allowed_colors['reset']
+
+  def w_sprint(self, message, nl=True):
+    # Now we have to parse text lines by lines, and decorate it
+    # We use native decorator, but we have to complete each line with spaces
+    umessage = []
+    for line in message.splitlines():
+      umessage.append(self.w_decorator_left_right(line, force_nesting_level = self.w_nesting_level + 1, fill_line = True))
+    message = '\n'.join(umessage)
+    if nl:
+      message = message + '\n'
+    for c in message:
+      sys.stdout.write(c)
+      sys.stdout.flush()
+      if c == "\n":
+        time.sleep(1./30)
+      # if c != " ":
+      #   time.sleep(1./500)
+
+  def w_breakline(self):
+    message = self.w_decorator_left_right("", force_nesting_level = self.w_nesting_level + 1, fill_line = True, fill_dash = True) + '\n'
+    for c in message:
+      sys.stdout.write(c)
+      sys.stdout.flush()
+
+  def w_input(self, message, nl=True):
+    umessage = self.w_decorator_left_right(message, force_nesting_level = self.w_nesting_level + 1, no_right = True)
+    answer = input(umessage)
+    # https://stackoverflow.com/questions/12586601/remove-last-stdout-line-in-python
+    CURSOR_UP_ONE = '\x1b[1A'
+    ERASE_LINE = '\x1b[2K'
+    print(CURSOR_UP_ONE + ERASE_LINE + CURSOR_UP_ONE)
+    print(self.w_decorator_left_right(message + str(answer), force_nesting_level = self.w_nesting_level + 1, fill_line = True))
+    return answer
+
+  def w_create(self, w_title=None):
+    self.w_sprint("\n")
+    # Get size of terminal
+    # We do that each time to cover terminal resized during usage
+    columns = os.get_terminal_size().columns
+    # Set lead section depending if we are creating or closing a window
+    # This is of size 5
+    lead = "╭─────"
+    self.w_nesting_level = self.w_nesting_level + 1
+    # Create current windows frame
+    box = "\033[38;5;" + self.w_colors[self.w_nesting_level] + "m" + lead
+    # Manage title if any
+    if w_title is not None:
+      box = box + " " + str(w_title) + " "
+      title_size = len(w_title) + 2
+    else:
+      title_size = 0
+    # Complete the line
+    for i in range(1, columns - self.w_nesting_level * 4 * 2 - len(lead) - title_size - 1, 1):
+      box = box + "─"
+    box = box + "╮" + "\033[0m"
+    box = self.w_decorator_left_right(box)
+    print(box)
+
+  def w_destroy(self):
+    # Get size of terminal
+    # We do that each time to cover terminal resized during usage
+    columns = os.get_terminal_size().columns
+    # Set lead section depending if we are creating or closing a window
+    # This is of size 5
+    lead = "╰─────"
+    # Create current windows frame
+    box = "\033[38;5;" + self.w_colors[self.w_nesting_level] + "m" + lead
+    # Complete the line
+    for i in range(1, columns - self.w_nesting_level * 4 * 2 - len(lead) - 1, 1):
+      box = box + "─"
+    box = box + "╯" + "\033[0m"
+    box = self.w_decorator_left_right(box)
+    print(box)
+    self.w_nesting_level = self.w_nesting_level - 1
+
+  def w_decorator_left_right(self, message, force_nesting_level=None, fill_line=False, no_right=False, fill_dash=False):
+    if force_nesting_level is not None:
+      nesting_level = force_nesting_level
+    else:
+      nesting_level = self.w_nesting_level
+    buffer = ""
+    for nl in range(0, nesting_level, 1):
+      buffer = buffer + "\033[38;5;" + self.w_colors[nl] + "m│\033[0m   "
+    message = buffer + message
+    buffer = ""
+    if not no_right:
+      for nl in range(nesting_level-1, -1, -1):
+        buffer = buffer + "\033[38;5;" + self.w_colors[nl] + "m   │\033[0m"
+      # Before applying right buffer, lets check if line must be filled
+      if fill_line:
+        columns = os.get_terminal_size().columns
+        message_buffer = (message + buffer)
+        message_buffer = message_buffer.replace("\033[0m", "")
+        for i in self.w_colors:
+          message_buffer = message_buffer.replace("\033[38;5;" + str(i) + "m", "")
+        for i, v in self.w_allowed_colors.items():
+          message_buffer = message_buffer.replace(v, "")
+        if fill_dash:
+          for i in range(1, columns - len(message_buffer), 1):
+            message = message + "-"
+        else:
+          for i in range(1, columns - len(message_buffer), 1):
+            message = message + " "
+      # if fill_dash:
+      #   columns = os.get_terminal_size().columns
+      #   message_buffer = (message + buffer)
+      #   message_buffer = message_buffer.replace("\033[0m", "")
+      #   for i in self.w_colors:
+      #     message_buffer = message_buffer.replace("\033[38;5;" + str(i) + "m", "")
+      #   for i, v in self.w_allowed_colors.items():
+      #     message_buffer = message_buffer.replace(v, "")
+      #   for i in range(1, columns - len(message_buffer), 1):
+      #     message = message + "-"
+
+      message = message + buffer
+    return message
+
+#######################################################################
+################ BB Shell Windows Manager END
+##########
+
+if __name__ == "__main__":
+
+
+    print("""\
+
+                  (o_
+        (o_  (o_  //\\
+        (/)_ (/)_ V_/_
+
+    BlueBanquise functions
+    v3.2.5
+    https://github.com/bluebanquise/bluebanquise/
+    
+    """)
+
+    print(" Loading functions group file...")
+    # For now inventory path is hardcoded, to be improved later
+    fn_groups = configparser.ConfigParser(allow_no_value=True)
+    fn_groups.read('inventory/cluster/fn')
+    for fng, fng_items in fn_groups.items():
+        if str(fng) != 'DEFAULT':
+            print('    - ' + fng.replace('fn_',''))
+            for host in fng_items:
+                print('        - ' + host)
+
+    while True:
+
+        menu_message = """
+
+        Please choose the action:
+
+        1. 
+        2. Download an OS iso
+        3. Install an OS iso
+
+        9. Exit
+
+        """
+        wm.w_sprint(textwrap.dedent(menu_message))
+        answer = int(wm.w_input("❱❱❱ "))
+
+        if answer == 9:
+            wm.w_sprint(" ")
+            wm.w_sprint("-- Exiting. Have a nice day :)")
+            wm.w_sprint(" ")
+            wm.w_destroy()
+            quit(0)
+
+        if answer == 1:
+
+            wm.w_create(w_title="Isos and installed isos list")
+            wm.w_sprint(textwrap.dedent("""
+                Checking stored isos...
+
+                """
+            ))
+            for os_distribution in netboots:
+                wm.w_sprint("- Distribution: " + str(os_distribution))
+                for os_distribution_version in netboots[os_distribution]:
+                    wm.w_sprint("  - Distribution version: " + str(os_distribution_version))
+                    for os_distribution_arch in netboots[os_distribution][os_distribution_version]:
+                        wm.w_sprint("    - Distribution cpu architecture: " + str(os_distribution_arch))
+                        if 'iso_file_name' in netboots[os_distribution][os_distribution_version][os_distribution_arch]:
+                            iso_file_name = netboots[os_distribution][os_distribution_version][os_distribution_arch]['iso_file_name']
+                        else:
+                            iso_file_name = url.split('/')[-1]
+                        if os.path.exists('/var/lib/bluebanquise/bluebanquise-netboots/' + iso_file_name):
+                            wm.w_sprint("        " + wm.t_green(str('Found iso at ' + '/var/lib/bluebanquise/bluebanquise-netboots/' + iso_file_name)))
+                        else:
+                            wm.w_sprint("        No iso found")
+
+            wm.w_sprint(textwrap.dedent("""
+                Checking installed isos in PXE directory...
+
+                """
+            ))
+
+            for os_distribution in netboots:
+                wm.w_sprint("- Distribution: " + str(os_distribution))
+                for os_distribution_version in netboots[os_distribution]:
+                    wm.w_sprint("  - Distribution version: " + str(os_distribution_version))
+                    for os_distribution_arch in netboots[os_distribution][os_distribution_version]:
+                        wm.w_sprint("    - Distribution cpu architecture: " + str(os_distribution_arch))
+                        installation_folder = '/var/www/html/pxe/netboots/' + os_distribution + '/' + os_distribution_version + '/' + os_distribution_arch + '/'
+                        if os.path.exists(installation_folder + 'data.yml'):
+                            wm.w_sprint("        " + wm.t_green(str('Found installed iso at ' + installation_folder)))
+                        else:
+                            wm.w_sprint("        No installation found")
+
+            wm.w_destroy()
+
+        if answer == 2:
+
+            wm.w_create(w_title="Download iso")
+            wm.w_sprint(textwrap.dedent("""
+                Isos are stored inside /var/lib/bluebanquise/bluebanquise-netboots/
+                
+                """
+            ))
+
+            menu_message = "Please select distribution to be pulled:"
+            for distribution in netboots:
+                menu_message = menu_message + "\n" + '  - ' + distribution
+            menu_message = menu_message + " \n \n"
+            wm.w_sprint(textwrap.dedent(menu_message))
+
+            while True:
+                os_distribution = str(wm.w_input("❱❱❱ "))
+                if os_distribution not in netboots:
+                    wm.w_sprint('[ERROR] Entered unsupported distribution, please check syntax and case')
+                else:
+                    break
+
+            menu_message = "Please select distribution version to be pulled:"
+            for distribution_version in netboots[os_distribution]:
+                menu_message = menu_message + "\n" + '  - ' + distribution_version
+            menu_message = menu_message + " \n \n"
+            wm.w_sprint(textwrap.dedent(menu_message))
+
+            while True:
+                os_distribution_version = str(wm.w_input("❱❱❱ "))
+                if os_distribution_version not in netboots[os_distribution]:
+                    wm.w_sprint('[ERROR] Entered unsupported distribution version, please check syntax and case')
+                else:
+                    break
+
+            wm.w_sprint('Please select distribution cpu architecture to be pulled:')
+            wm.w_sprint('Note: some naming differ from distributions:')
+            wm.w_sprint('-> for amd64 choose x86_64, for arm64 choose aarch64')
+            for distribution_arch in netboots[os_distribution][os_distribution_version]:
+                wm.w_sprint('  - ' + distribution_arch)
+            wm.w_sprint(' ')
+            while True:
+                os_distribution_arch = str(wm.w_input("❱❱❱ "))
+                if os_distribution_arch not in netboots[os_distribution][os_distribution_version]:
+                    wm.w_sprint('[ERROR] Entered unsupported distribution cpu arch, please check syntax and case')
+                else:
+                    break
+            
+            # Grab url from reference file
+            iso_url = netboots[os_distribution][os_distribution_version][os_distribution_arch]['url']
+            iso_checksum = netboots[os_distribution][os_distribution_version][os_distribution_arch]['checksum']
+            # For some distributions, multiple isos can exist, the pxe_stack role needs a fixed one, so might be needed sometime
+            # If not set, just use iso name.
+            if 'iso_file_name' in netboots[os_distribution][os_distribution_version][os_distribution_arch]:
+                iso_file_name = netboots[os_distribution][os_distribution_version][os_distribution_arch]['iso_file_name']
+            else:
+                iso_file_name = url.split('/')[-1]
+            iso_storage_folder = '/var/lib/bluebanquise/bluebanquise-netboots/'
+            iso_file_path = iso_storage_folder + iso_file_name
+
+            wm.w_sprint(' ')
+            wm.w_sprint('Summary:')
+            wm.w_sprint(' ')
+            wm.w_sprint('OS distribution: ' + os_distribution)
+            wm.w_sprint('OS distribution version: ' + os_distribution_version)
+            wm.w_sprint('OS distribution cpu arch: ' + os_distribution_arch)
+            wm.w_sprint('URL to be pulled: ' + iso_url)
+            wm.w_sprint('Expected checksum (sha256): ' + iso_checksum)
+            wm.w_sprint('Storage folder will be: ' + iso_storage_folder)
+            wm.w_sprint(' ')
+            user_input = wm.w_input("Do you want to continue? (yes/no):")
+            if user_input.lower() in ["yes", "y"]:
+                if os.path.exists(iso_file_path):
+                    wm.w_sprint("File already stored, skipping download")
+                else:
+                    wm.w_sprint("Downloading iso from url...")
+                    if download_file(iso_url, iso_file_path):
+                        wm.w_sprint("Download completed.")
+                    else:
+                        wm.w_sprint("Download failed! Please check connectivity.")
+                        wm.w_destroy()
+                        continue
+                wm.w_sprint("Checking file checksum...")
+                if verify_checksum(iso_file_path, iso_checksum):
+                    wm.w_sprint("Checksum ok.")
+                else:
+                    wm.w_sprint("Checksum error, file does not match.")
+                    wm.w_destroy()
+                    continue
+            else:
+                wm.w_sprint("Canceling.")
+            wm.w_destroy()
+
+        if answer == 3:
+
+            wm.w_create(w_title="Iso installer")
+            wm.w_sprint(" ")
+            wm.w_sprint("Checking isos...")
+
+            isos_available = []
+
+            for os_distribution in netboots:
+                for os_distribution_version in netboots[os_distribution]:
+                    for os_distribution_arch in netboots[os_distribution][os_distribution_version]:
+                        if 'iso_file_name' in netboots[os_distribution][os_distribution_version][os_distribution_arch]:
+                            iso_file_name = netboots[os_distribution][os_distribution_version][os_distribution_arch]['iso_file_name']
+                        else:
+                            iso_file_name = url.split('/')[-1]
+                        if os.path.exists('/var/lib/bluebanquise/bluebanquise-netboots/' + iso_file_name):
+                            isos_available.append(os_distribution + '/' + str(os_distribution_version) + '/' + os_distribution_arch)
+
+            if len(isos_available) == 0:
+                wm.w_sprint(textwrap.dedent("No isos found, please download isos first."))
+            else:
+                wm.w_sprint(textwrap.dedent("""
+                    Installations are made inside /var/www/html/pxe/netboots/
+                    
+                    Please select iso to be installed.
+                    Enter os/version/arch as answer, like ubuntu/24.04/x86_64
+
+                    """
+                ))
+                for iso in isos_available:
+                    wm.w_sprint(" - " + iso)
+                while True:
+                    answer = str(wm.w_input("❱❱❱ "))
+                    if answer in isos_available:
+                        break
+                    else:
+                        wm.w_sprint(textwrap.dedent("Iso requested not found, please check syntax of your answer."))
+
+                os_distribution = answer.split('/')[0]
+                os_distribution_version = answer.split('/')[1]
+                os_distribution_arch = answer.split('/')[2]
+                if 'iso_file_name' in netboots[os_distribution][os_distribution_version][os_distribution_arch]:
+                    iso_file_name = netboots[os_distribution][os_distribution_version][os_distribution_arch]['iso_file_name']
+                else:
+                    iso_file_name = url.split('/')[-1]
+
+                iso_storage_folder = '/var/lib/bluebanquise/bluebanquise-netboots/'
+                installation_folder = '/var/www/html/pxe/netboots/' + os_distribution + '/' + os_distribution_version + '/' + os_distribution_arch + '/'
+                iso_file_path = installation_folder + iso_file_name
+                iso_source_file_path = iso_storage_folder + iso_file_name
+                iso_url = netboots[os_distribution][os_distribution_version][os_distribution_arch]['url']
+                iso_checksum = netboots[os_distribution][os_distribution_version][os_distribution_arch]['checksum']
+                wm.w_sprint(' ')
+                wm.w_sprint('Summary:')
+                wm.w_sprint(' ')
+                wm.w_sprint('OS distribution: ' + os_distribution)
+                wm.w_sprint('OS distribution version: ' + os_distribution_version)
+                wm.w_sprint('OS distribution cpu arch: ' + os_distribution_arch)
+                wm.w_sprint('Installation folder will be: ' + installation_folder)
+                wm.w_sprint(' ')
+                wm.w_sprint('WARNING: all data in the installation folder will be erased if exist!')
+                user_input = wm.w_input("Do you want to continue? (yes/no):")
+                if user_input.lower() in ["yes", "y"]:
+                    wm.w_sprint(" ")
+                    wm.w_sprint("Proceeding...")
+                    if os.path.exists(installation_folder):
+                        wm.w_sprint("Installation folder already exist, deleting it...")
+                        try:
+                            shutil.rmtree(installation_folder)
+                        except OSError as e:
+                            wm.w_sprint("Error: %s - %s." % (e.filename, e.strerror))
+                            exit(1)
+                    wm.w_sprint("Creating installation folder...")
+                    try:
+                        os.makedirs(installation_folder)
+                    except OSError as e:
+                        wm.w_sprint("Error: %s - %s." % (e.filename, e.strerror))
+                        exit(1)         
+                    wm.w_sprint("Copying iso to destination folder...")
+                    shutil.copyfile(iso_source_file_path, iso_file_path)
+                    wm.w_sprint("Executing installation script...")
+                    os_script = "bash -e -x -c '" + "cd " + installation_folder + "\n" + netboots[os_distribution][os_distribution_version][os_distribution_arch]['script'] + "'"
+                    cmd_call = subprocess.Popen(
+                        os_script,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        shell=True
+                    )
+                    stdout, stderr = cmd_call.communicate()
+                    stdout = stdout.decode("utf-8")
+                    stderr = stderr.decode("utf-8")
+                    exit_code = cmd_call.returncode
+
+                    if exit_code != 0:
+                        wm.w_sprint("Something went wrong, please see the script outputs and investigate.")
+                        wm.w_sprint("Script stdout returned:")
+                        wm.w_sprint(stdout)
+                        wm.w_sprint("Script stderr returned:")
+                        wm.w_sprint(stderr)
+                        wm.w_sprint("Script exit code: " + str(exit_code))
+                        exit(1)
+
+                    # All went well, register the OS
+                    os_register = {
+                        'Installation date' : datetime.datetime.now(),
+                        'ISO url used': iso_url,
+                        'ISO checksum': iso_checksum
+                    }
+
+                    with open(installation_folder + 'data.yml', 'w') as datafile:
+                        yaml.dump(os_register, datafile, default_flow_style=False)
+
+                    wm.w_sprint("Installation done successfuly!")
+                    wm.w_sprint(" ")
+
+            wm.w_destroy()
+
+
