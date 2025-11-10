@@ -1,10 +1,10 @@
 from ansible.plugins.vars import BaseVarsPlugin
-
 try:
     from ansible.template import trust_as_template
 except ImportError:
     def trust_as_template(value):
         return value
+
 
 class VarsModule(BaseVarsPlugin):
 
