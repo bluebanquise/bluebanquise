@@ -12,7 +12,7 @@ Devs infos:
 
 :green_heart: Current core version: 3.2.1
 
-:red_heart: ansible-core 2.19 is not currently compatible, stack is limited to 2.18.10, work in progress to solve this issue.
+:broken_heart: ansible-core 2.19 is not currently compatible, stack is limited to 2.18.10, work in progress to solve this issue.
 
 :yellow_heart: documentation v3 is currently written, might take few weeks to complete.
 
