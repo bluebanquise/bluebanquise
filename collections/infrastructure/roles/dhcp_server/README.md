@@ -72,7 +72,7 @@ Example of network configuration, advanced dhcp server:
           - ip: 8.8.4.4
         ntp4:                                          # Is optional
           - hostname: time-a-g.nist.gov
-            ip: 129.6.15.28 
+            ip: 129.6.15.28
         pxe4:                                          # Is optional, needed for pxe
           - hostname: mg1
             ip: 10.11.0.1
@@ -150,7 +150,7 @@ It is possible to combine networks into shared-networks when multiple subnets
 are on the same NIC, or when using opt82/option_match parameter.
 To do so, add a dedicated optional `shared_network` key in the network definition.
 
-Networks of the same shared network must have the same `shared_network` value, 
+Networks of the same shared network must have the same `shared_network` value,
 which is the name of this share.
 
 For example to add net-1 and net-2 into the same shared network, define them
@@ -222,6 +222,7 @@ This allows for example to have an heterogenous cluster, with a group of hosts b
 **Please now update CHANGELOG file at repository root instead of adding logs in this file.
 These logs bellow are only kept for archive.**
 
+* 1.7.2: BMCs no longer must have a MAC defined. Thiago Cardozo <boubee.thiago@gmail.com>
 * 1.7.1: Fix global logic. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.7.0: Allow services and services_ip together. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.6.3: Fix double character for ipxe rom. Benoit Leveugle <benoit.leveugle@gmail.com>
