@@ -1,4 +1,4 @@
-#jinja2: lstrip_blocks: "True"
+#jinja2: lstrip_blocks: True
 {% if haproxy_apache_restrict_to_ip4 is defined and haproxy_apache_restrict_to_ip4 is iterable and haproxy_apache_restrict_to_ip4 is not string and haproxy_apache_restrict_to_ip4 is not mapping %}
   {% for ip in haproxy_apache_restrict_to_ip4 %}
     {% if ip.split(':') | length > 1 %}
