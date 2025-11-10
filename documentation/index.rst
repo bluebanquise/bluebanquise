@@ -46,7 +46,7 @@ This documentation is under Creative Commons Attribution-NonCommercial-ShareAlik
    :maxdepth: 2
    :caption: General configuration:
    :numbered:
-   :titlesonly: 
+   :titlesonly:
 
    configuration/inventories
    configuration/general_settings
