@@ -86,7 +86,7 @@
     group: prometheus
     mode: 0640
   loop: "{{ prometheus_server_additional_alerts }}"
-  when: prometheus_server_additional_alerts is defined and prometheus_server_additional_alerts
+  when: prometheus_server_additional_alerts is defined
 
 - name: template <|> Generate users alerts to /etc/prometheus/alerts/user_alerts.yml
   ansible.builtin.template:
