@@ -51,8 +51,7 @@
   ansible.builtin.shell: |
           rm -rf {{ item }}/*
           find {{ item }} -type f -iname ".*" -ls -exec rm -r {} \;
-  with_items:
-    - "{{ beegfs_vars.store_directory.split(',') }}"
+  loop: "{{ beegfs_vars.store_directory.split(',') | flatten(levels=1) }}"
   when: inventory_hostname in groups["store"]
 
 - name: Unmount BeeGFS volume
@@ -227,7 +226,7 @@
   ansible.builtin.file:
     path: "{{ item.path }}"
     state: absent
-  with_items: "{{ files_to_delete.files }}"
+  loop: "{{ files_to_delete.files | flatten(levels=1) }}"
 
 - name: Remove /etc/beegfs/ directory
   ansible.builtin.file:

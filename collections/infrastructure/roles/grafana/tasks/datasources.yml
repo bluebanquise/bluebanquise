@@ -15,4 +15,4 @@
     user: "{{ item.user | default(omit) }}"
     password: "{{ item.password | default(omit) }}"
     additional_json_data: "{{ item.additionalJsonData | default(omit) }}"
-  with_items: "{{ grafana_datasources }}"
+  loop: "{{ grafana_datasources | flatten(levels=1) }}"

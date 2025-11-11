@@ -5,4 +5,4 @@
     key: "{{ item }}"
     exclusive: no
     state: present
-  with_items: "{{ os_admin_ssh_keys | default(ssh_remote_keys_os_admin_ssh_keys) }}"
+  loop: "{{ os_admin_ssh_keys | default(ssh_remote_keys_os_admin_ssh_keys) | flatten(levels=1) }}"

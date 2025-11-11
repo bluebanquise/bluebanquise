@@ -70,7 +70,7 @@
     owner: "{{ dns_server_dns_user }}"
     group: "{{ dns_server_dns_user }}"
     mode: 0750
-  with_items:
+  loop:
     - "{{ dns_server_log_dir }}"
     - "{{ dns_server_managed_keys_dir }}"
     - "{{ dns_server_var_dir }}"
@@ -148,7 +148,7 @@
     owner: root
     group: root
     mode: 0644
-  with_items: "{{ first_octets.split(',') }}"
+  loop: "{{ first_octets.split(',') | flatten(levels=1) }}"
   tags:
     - template
 
@@ -160,7 +160,7 @@
     group: root
     mode: 0644
   notify: service <|> Restart dns services
-  with_items: "{{ first_octets.split(',') }}"
+  loop: "{{ first_octets.split(',') | flatten(levels=1) }}"
   when: zoneconf.changed  # noqa no-handler
   tags:
     - template

@@ -84,7 +84,7 @@
     mode: 0644
   tags:
     - template
-  with_items: "{{ http_server_configurations_files }}"
+  loop: "{{ http_server_configurations_files | flatten(levels=1) }}"
   when:
     - http_server_configurations_files is defined
     - http_server_configurations_files is not none
@@ -98,7 +98,7 @@
     ignore_configcheck: "{{ item.ignore_configcheck | default(omit, true) }}"
     name: "{{ item.name }}"
     state: "{{ item.state | default(omit, true) }}"
-  with_items: "{{ http_server_modules }}"
+  loop: "{{ http_server_modules | flatten(levels=1) }}"
   when:
     - http_server_modules is defined
     - http_server_modules is not none

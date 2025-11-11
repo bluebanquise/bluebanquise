@@ -66,7 +66,7 @@
   when: (inventory_hostname == item.server) or
         (item.server in ansible_all_ipv4_addresses) or
         ((item.server_group is defined) and (inventory_hostname in groups[item.server_group]))
-  with_items: "{{ nfs_shares }}"
+  loop: "{{ nfs_shares | flatten(levels=1) }}"
   notify: service <|> Restart NFS server services
   tags:
     - template
@@ -76,7 +76,7 @@
     path: "{{ item.export }}"
     state: directory
     mode: 0755
-  with_items: "{{ nfs_shares }}"
+  loop: "{{ nfs_shares | flatten(levels=1) }}"
   when: nfs_server_create_directories_if_not_exist
 
 - name: meta <|> Run handler tasks to restart NFS server services

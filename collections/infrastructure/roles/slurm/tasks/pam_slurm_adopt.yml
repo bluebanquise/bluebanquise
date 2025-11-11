@@ -16,7 +16,7 @@
     path: "/etc/pam.d/{{item}}"
     regexp: '^.*pam_systemd\.so.*'
     state: absent
-  with_items:
+  loop:
     - password-auth
     - system-auth
     - sshd

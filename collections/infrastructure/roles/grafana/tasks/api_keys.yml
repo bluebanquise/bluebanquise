@@ -26,7 +26,7 @@
     method: POST
     body_format: json
     body: "{{ item | to_json }}"
-  with_items: "{{ grafana_api_keys }}"
+  loop: "{{ grafana_api_keys | flatten(levels=1) }}"
   no_log: true
   when: ((existing_api_keys['json'] | selectattr("name", "equalto", item['name'])) | list) | length == 0
   register: new_api_keys
@@ -38,5 +38,5 @@
     backup: false
     mode: 0644
   when: item['json'] is defined
-  with_items: "{{ new_api_keys['results'] }}"
+  loop: "{{ new_api_keys['results'] | flatten(levels=1) }}"
   delegate_to: localhost
