@@ -14,13 +14,15 @@ on:
 jobs:
   check:
     name: Run static code analysis tools
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
       - name: Setup python environment
         uses: actions/setup-python@v1
+        with:
+          python-version: '3.13' 
 
       - name: Install packages
         run: pip install ansible ansible-lint flake8 yamllint jmespath
