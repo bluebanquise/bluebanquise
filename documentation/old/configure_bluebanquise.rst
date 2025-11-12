@@ -62,7 +62,7 @@ Create needed folders first:
 
   mkdir -p inventory/group_vars/all/
   mkdir -p inventory/cluster/nodes
-  mkdir inventory cluster/groups
+  mkdir inventory/cluster/groups
 
 We are now going to populate inventory for the following basic example cluster:
 
