@@ -6,7 +6,7 @@
     owner: root
     group: grafana
     mode: 0750
-  with_items:
+  loop:
     - "/etc/grafana"
     - "/etc/grafana/datasources"
     - "/etc/grafana/provisioning"
@@ -45,7 +45,7 @@
     mode: 0755
     owner: "grafana"
     group: "grafana"
-  with_items:
+  loop:
     - "{{ grafana_logs_dir }}"
     - "{{ grafana_data_dir }}"
     - "{{ grafana_data_dir }}/dashboards"

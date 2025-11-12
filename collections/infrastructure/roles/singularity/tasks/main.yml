@@ -27,7 +27,7 @@
   ansible.builtin.package:
     name: "{{ item }}"
     state: present
-  with_items: "{{ singularity_packages_to_install }}"
+  loop: "{{ singularity_packages_to_install | flatten(levels=1) }}"
   tags:
     - package
 

@@ -10,9 +10,9 @@ Devs infos:
 
 :green_heart: The main branch is now considered stable.
 
-:green_heart: Current core version: 3.2.1
+:green_heart: Current core version: 3.2.2 .
 
-:broken_heart: ansible-core 2.19 is not currently compatible, stack is limited to 2.18.10, work in progress to solve this issue.
+:green_heart: ansible-core 2.19 is now supported.
 
 :yellow_heart: documentation v3 is currently written, might take few weeks to complete.
 

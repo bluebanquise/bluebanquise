@@ -3,7 +3,7 @@
   ansible.builtin.service:
     name: "{{ item  }}"
     state: restarted
-  with_items: "{{ grafana_services_to_start }}"
+  loop: "{{ grafana_services_to_start | flatten(levels=1) }}"
   register: service_results
   retries: 5
   delay: 10

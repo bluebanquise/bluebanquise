@@ -21,6 +21,8 @@ jobs:
 
       - name: Setup python environment
         uses: actions/setup-python@v1
+        with:
+          python-version: '3.13' 
 
       - name: Install packages
         run: pip install ansible ansible-lint flake8 yamllint jmespath

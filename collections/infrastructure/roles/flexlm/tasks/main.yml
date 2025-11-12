@@ -49,7 +49,7 @@
     src: /lib64/ld-linux-x86-64.so.2
     dest: '{{ item }}'
     state: link
-  with_items:
+  loop:
     - /lib64/ld-lsb-x86-64.so.2
     - /lib64/ld-lsb-x86-64.so.3
   tags:

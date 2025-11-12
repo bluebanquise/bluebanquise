@@ -1,4 +1,4 @@
-#jinja2: lstrip_blocks: "True"
+#jinja2: lstrip_blocks: True
 {% if http_server_listen == "auto" %}
   {% for nic in network_interfaces %}
     {% if nic.ip4 is defined and (nic.ip4 | ansible.utils.ipaddr) %}

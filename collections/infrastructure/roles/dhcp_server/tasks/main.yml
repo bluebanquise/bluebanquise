@@ -85,7 +85,7 @@
     owner: root
     group: root
     mode: 0644
-  with_items: "{{ networks }}"
+  loop: "{{ networks | flatten(levels=1) }}"
   when:
     - networks is defined and networks is iterable and networks is not string and networks is mapping
     - networks[item] is defined and networks[item] is not none

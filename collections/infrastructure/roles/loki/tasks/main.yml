@@ -65,7 +65,7 @@
   ansible.builtin.package:
     name: "{{ item }}"
     state: present
-  with_items:
+  loop:
     - loki
     - promtail
 
@@ -133,7 +133,7 @@
     owner: loki
     group: loki
     mode: "0700"
-  with_items:
+  loop:
     - "{{ loki_data_dir }}"
     - "{{ loki_chunks_dir }}"
     - "{{ loki_index_dir }}"

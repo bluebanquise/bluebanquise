@@ -12,7 +12,7 @@
 
 # The imjournal module bellow is now used as a message source instead of imuxsock.
 $ModLoad imuxsock # provides support for local system logging (e.g. via logger command)
-{% if (rsyslog_format | default("legacy", none)) == "advanced" %}
+{% if (rsyslog_format | default("legacy", true)) == "advanced" %}
 # See https://access.redhat.com/solutions/7070860
 module(load="imjournal"             # provides access to the systemd journal
        UsePid="system" # PID nummber is retrieved as the ID of the process the journal entry originates from

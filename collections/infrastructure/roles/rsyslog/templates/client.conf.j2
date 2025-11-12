@@ -9,7 +9,7 @@ $ActionQueueMaxDiskSpace 1g   # 1gb space limit (use as much as possible)
 $ActionQueueSaveOnShutdown on # save messages to disk on shutdown
 $ActionQueueType LinkedList   # run asynchronously
 $ActionResumeRetryCount -1    # infinite retries if host is down
-{% if (rsyslog_format | default("legacy", none)) == "advanced" %}
+{% if (rsyslog_format | default("legacy", true)) == "advanced" %}
 action(type="omfwd" target="{{ server_address }}" protocol="tcp" port="{{ server_port }}")
 {% else %}
 *.* @@{{ server_address }}:{{ server_port }}

@@ -11,7 +11,7 @@
 
     - name: command <|> Rename interfaces if needed
       ansible.builtin.command: "nmcli connection modify '{{ item.name }}' connection.id '{{ item.device }}'"
-      with_items: "{{ nic_j2_nmcli_device_name_type }}"
+      loop: "{{ nic_j2_nmcli_device_name_type | flatten(levels=1) }}"
       register: nmcli_result
       when:
         - item.apply
