@@ -192,6 +192,9 @@ html.has-navbar-fixed-top {
         <a class="navbar-item " href="/resources.html">
           Resources
         </a>
+        <a class="navbar-item" href="/clusters.html">
+          Clusters
+        </a>
 
         <a class="navbar-item" href="/about.html">
           About
@@ -232,17 +235,10 @@ html.has-navbar-fixed-top {
 
       <section class="hero">
         <div class="hero-body">
-          <span style="color: #108bde">Blue</span>Banquise roles are provided as Ansible collections, and are hosted <a href="https://github.com/bluebanquise/bluebanquise/tree/master/collections">on Github</a>.
-          <br>A <strong>commons</strong> collection is needed by all others. It contains vars logic and some plugins.
-          <br>
-          <br>In order to install collections on a local system, assuming Ansible is already installed, you will need to use the ansible-galaxy command:
-          <br><br>
-<pre><code>ansible-galaxy collection install git+https://github.com/bluebanquise/bluebanquise.git#/collections/commons,master --upgrade</code></pre>
-          <br>Then you can the install collections of your choice. For example, to install the Infrastructure collection:
+          <span style="color: #108bde">Blue</span>Banquise roles are provided as Ansible collection, and are hosted <a href="https://github.com/bluebanquise/bluebanquise/tree/master/collections">on Github</a>.
+          <br>In order to install this collection on a local system, assuming Ansible is already installed, you will need to use the ansible-galaxy command:
           <br><br>
 <pre><code>ansible-galaxy collection install git+https://github.com/bluebanquise/bluebanquise.git#/collections/infrastructure,master --upgrade</code></pre>
-          <br>All collections share the same data-model, which is required by some specific roles (requirements are always specified at top or role README.md file).
-          <br>The data-model can be found <a href="https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md">on Github</a>.
           <br>
           <br>Note also that some roles need some packages, provided by <span style="color: #108bde">Blue</span>Banquise. Repositories are available at <a href="http://bluebanquise.com/repository/releases/latest/">http://bluebanquise.com/repository/releases/latest/</a>.
         </div>
