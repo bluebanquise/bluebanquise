@@ -8,6 +8,30 @@
   loop: "{{ system.package }}"
   when: system.package is defined and system.package is iterable
 
+- name: "file <|> Create/manage requested files/folders"
+  ansible.builtin.file:
+    access_time: "{{ item.access_time | default(omit) }}"
+    access_time_format: "{{ item.access_time_format | default(omit) }}"
+    attributes: "{{ item.attributes | default(omit) }}"
+    follow: "{{ item.follow | default(omit) }}"
+    force: "{{ item.force | default(omit) }}"
+    group: "{{ item.group | default(omit) }}"
+    mode: "{{ item.mode | default(omit) }}"
+    modification_time: "{{ item.modification_time | default(omit) }}"
+    modification_time_format: "{{ item.modification_time_format | default(omit) }}"
+    owner: "{{ item.owner | default(omit) }}"
+    path: "{{ item.path }}"
+    recurse: "{{ item.recurse | default(omit) }}"
+    selevel: "{{ item.selevel | default(omit) }}"
+    serole: "{{ item.serole | default(omit) }}"
+    setype: "{{ item.setype | default(omit) }}"
+    seuser: "{{ item.seuser | default(omit) }}"
+    src: "{{ item.src | default(omit) }}"
+    state: "{{ item.state | default(omit) }}"
+    unsafe_writes: "{{ item.unsafe_writes | default(omit) }}"
+  loop: "{{ system.file }}"
+  when: system.file is defined and system.file is iterable
+
 - name: "template <|> Render requested templates"
   ansible.builtin.template:
     attributes: "{{ item.attributes | default(omit) }}"
@@ -64,31 +88,6 @@
     validate: "{{ item.validate | default(omit) }}"
   loop: "{{ system.lineinfile }}"
   when: system.lineinfile is defined and system.lineinfile is iterable
-
-- name: "file <|> Create/manage requested files/folders"
-  ansible.builtin.file:
-    access_time: "{{ item.access_time | default(omit) }}"
-    access_time_format: "{{ item.access_time_format | default(omit) }}"
-    attributes: "{{ item.attributes | default(omit) }}"
-    follow: "{{ item.follow | default(omit) }}"
-    force: "{{ item.force | default(omit) }}"
-    group: "{{ item.group | default(omit) }}"
-    mode: "{{ item.mode | default(omit) }}"
-    modification_time: "{{ item.modification_time | default(omit) }}"
-    modification_time_format: "{{ item.modification_time_format | default(omit) }}"
-    owner: "{{ item.owner | default(omit) }}"
-    path: "{{ item.path }}"
-    recurse: "{{ item.recurse | default(omit) }}"
-    selevel: "{{ item.selevel | default(omit) }}"
-    serole: "{{ item.serole | default(omit) }}"
-    setype: "{{ item.setype | default(omit) }}"
-    seuser: "{{ item.seuser | default(omit) }}"
-    src: "{{ item.src | default(omit) }}"
-    state: "{{ item.state | default(omit) }}"
-    unsafe_writes: "{{ item.unsafe_writes | default(omit) }}"
-  loop: "{{ system.file }}"
-  when: system.file is defined and system.file is iterable
-
 
 - name: "service <|> Manage services"
   ansible.builtin.service:
