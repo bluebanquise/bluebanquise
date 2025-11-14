@@ -2,7 +2,7 @@
 prometheus_server_prometheus_packages_to_install:
   - prometheus
 prometheus_server_alertmanager_packages_to_install:
-  - alertmanager
+  - prometheus-alertmanager
 prometheus_server_ipmi_exporter_packages_to_install:
   - ipmi-exporter
   - freeipmi
