@@ -88,6 +88,7 @@ autoinstall:
   {% endif %}
   {% if not pxe_stack_preserve_repositories %}
     - echo " " > /target/etc/apt/sources.list
+    - echo " " > /target/etc/apt/sources.list.d/ubuntu.sources
   {% endif %}
   {% if (equipment['hw']['hw_preserve_efi_first_boot_device'] | default(pxe_stack_hw_preserve_efi_first_boot_device)) == true %}
     - sh -c '[ -d /sys/firmware/efi ] && efibootmgr -o $(efibootmgr | grep BootCurrent | cut -d" " -f2),$(efibootmgr | grep BootOrder | sed "s/BootOrder:\ //" | sed "s/$(efibootmgr | grep BootCurrent | cut -d" " -f2),//") || echo "Not an EFI system, skipping"'
