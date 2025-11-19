@@ -21,7 +21,7 @@ set eq-autoclone-parameters {{ equipment['os']['os_autoclone_parameters'] | defa
 {% endif %}
 
 # Preseed specific need (known bug with multiple UP/Active NIC)
-{% if (equipment['os']['os_preseed_auto_main_network_interface'] is defined and equipment['os']['os_preseed_auto_main_network_interface'] is not none) or (pxe_stack_os_preseed_auto_main_network_interface is defined and os_preseed_auto_main_network_interface is not none) %}
+{% if (equipment['os']['os_preseed_auto_main_network_interface'] is defined and equipment['os']['os_preseed_auto_main_network_interface'] is not none) or (pxe_stack_os_preseed_auto_main_network_interface is defined and pxe_stack_os_preseed_auto_main_network_interface is not none) %}
 set node-main-network-interface auto
 {% endif %}
 
