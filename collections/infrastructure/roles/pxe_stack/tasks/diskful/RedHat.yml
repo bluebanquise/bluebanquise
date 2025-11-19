@@ -30,7 +30,7 @@
     group: "{{ pxe_stack_apache_group }}"
   vars:
     equipment: "{{ bb_equipments[item] | default({}, true) }}"
-  with_items: "{{ bb_equipments | default({}, true) }}"
+  loop: "{{ bb_equipments | default({}, true) | flatten(levels=1) }}"
   when:
     - (bb_equipments[item]['hw']['hw_equipment_type'] | default(pxe_stack_hw_equipment_type, true)) == "server"
     - (bb_equipments[item]['os']['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution, true) | lower) in ['redhat', 'rhel', 'centos', 'centosstream', 'rockylinux', 'cloudlinux', 'oraclelinux', 'almalinux']
@@ -46,7 +46,7 @@
     group: "{{ pxe_stack_apache_group }}"
   vars:
     equipment: "{{ bb_equipments[item] | default({}, true) }}"
-  with_items: "{{ bb_equipments | default({}, true) }}"
+  loop: "{{ bb_equipments | default({}, true) | flatten(levels=1) }}"
   when:
     - (bb_equipments[item]['hw']['hw_equipment_type'] | default(pxe_stack_hw_equipment_type, true)) == "server"
     - (bb_equipments[item]['os']['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution, true) | lower) in ['redhat', 'rhel', 'centos', 'centosstream', 'rockylinux', 'cloudlinux', 'oraclelinux', 'almalinux']

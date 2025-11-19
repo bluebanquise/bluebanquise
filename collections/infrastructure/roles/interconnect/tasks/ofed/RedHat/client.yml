@@ -13,7 +13,7 @@
     limit_type: "{{ item.limit_type }}"
     limit_item: "{{ item.limit_item }}"
     value: "{{ item.value }}"
-  with_items:
+  loop:
     - { limit_type: 'soft', limit_item: 'memlock', value: "{{ interconnect_ofed_memlock_soft }}" }
     - { limit_type: 'hard', limit_item: 'memlock', value: "{{ interconnect_ofed_memlock_hard }}" }
   tags:

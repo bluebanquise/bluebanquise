@@ -4,6 +4,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.2.9
 
+* 11/19/25 - oxedions - [pxe_stack,nic,repositories,interconnect] Fix remaining deprecated with_items (#1158)
 * 11/19/25 - dietergorecki - [pxe_stack] Create an empty vendor-data to avoid timeout in cloud-init (#1156)
 * 11/16/25 - btravouillon / dietergorecki - [system] Allow directory creation before file templating in system role (#1154)
 * 11/13/25 - oxedions - [rsyslog] Add rsyslog_logrotate_config to overwrite logrotate configuration. (#1149, from vedmonds)
