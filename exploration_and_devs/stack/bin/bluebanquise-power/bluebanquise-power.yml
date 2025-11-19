@@ -1,0 +1,8 @@
+nodes:
+  c001:
+    bmc:
+      name: bc001
+      ip4: 10.10.100.1
+    protocol: IPMI
+    user: ADMIN
+    password: ADMIN
