@@ -23,7 +23,7 @@
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_group }}"
-  with_items:
+  loop:
     - clone
     - autoclone
     - autodeploy

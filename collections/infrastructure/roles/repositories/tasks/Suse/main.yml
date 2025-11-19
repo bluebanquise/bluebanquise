@@ -14,7 +14,7 @@
       - (os_operating_system['distribution_version'] is defined and os_operating_system['distribution_version'] is not none) or (os_operating_system['distribution_major_version'] is defined and os_operating_system['distribution_major_version'] is not none)
     fail_msg: "You are using simple repositories definition. The tool needs multiple variables to be defined to calculate URL and it seems at least one is missing. Please refer to role README for list of variables required."
     success_msg: "All needed parameters are defined for simple URL"
-  with_items: "{{ bb_repositories | default([], true) }}"
+  loop: "{{ bb_repositories | default([], true) | flatten(levels=1) }}"
   when:
     - bb_repositories is defined and bb_repositories is not none and bb_repositories is iterable and bb_repositories is not string and bb_repositories is not mapping
     - item.repo is not defined
@@ -32,7 +32,7 @@
     priority: "{{ item.priority | default(omit) }}"
     runrefresh: "{{ item.runrefresh | default(omit) }}"
     state: "{{ item.state | default('present') }}"
-  with_items: "{{ bb_repositories | default([], true) }}"
+  loop: "{{ bb_repositories | default([], true) | flatten(levels=1) }}"
   when:
     - bb_repositories is defined and bb_repositories is not none and bb_repositories is iterable and bb_repositories is not string and bb_repositories is not mapping
 
