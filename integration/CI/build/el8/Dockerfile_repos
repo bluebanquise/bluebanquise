@@ -1,2 +1,0 @@
-FROM docker.io/rockylinux/rockylinux:8
-RUN dnf install -y createrepo
