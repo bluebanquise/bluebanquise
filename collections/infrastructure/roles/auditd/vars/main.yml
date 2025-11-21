@@ -1,5 +1,5 @@
 ---
-auditd_role_version: 1.2.0
+auditd_role_version: 1.2.1
 
 auditd_services_to_start:
   - auditd
