@@ -4,8 +4,9 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.2.9
 
-* 11/16/25 - btravouillon - [sudoers] Fix conditional in sudoers for Ansible Core 2.19 (#1165)
+* 11/21/25 - btravouillon - [sudoers] Fix conditional in sudoers for Ansible Core 2.19 (#1165)
 * 11/21/25 - dietergorecki - [pxe_stack] fix apt sources cleanup process (#1161)
+* 11/20/25 - ginomcevoy - [auditd] Fix improper start services for auditd role (#1157)
 * 11/19/25 - dietergorecki - [pxe_stack] add support for apt customization (#1159)
 * 11/19/25 - oxedions - [pxe_stack,nic,repositories,interconnect] Fix remaining deprecated with_items (#1158)
 * 11/19/25 - dietergorecki - [pxe_stack] Create an empty vendor-data to avoid timeout in cloud-init (#1156)
