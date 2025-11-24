@@ -1,7 +1,11 @@
 ---
 - name: command <|> Reload connections
-  ansible.builtin.command: nmcli con reload
-  when: nic_reload_connections
+  community.general.nmcli:
+    conn_name: "{{ item.item.conn_name | default(item.item.interface) | string }}"
+    state: up
+    conn_reload: true
+  loop: "{{ nic_apply.results }}"
+  when: nic_reload_connections and item.changed
 
 # - name: command <|> netplan generate
 #   command: netplan generate
