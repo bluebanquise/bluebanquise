@@ -150,3 +150,5 @@ You will find bellow the detailed configuration available for each service of th
    services/ntp
    services/http
    services/pxe
+   services/rsyslog
+   services/prometheus

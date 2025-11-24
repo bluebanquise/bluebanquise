@@ -142,3 +142,26 @@ Example:
     dnf install git -y
     %end
 
+OS specific settings
+--------------------
+
+Ubuntu
+''''''
+
+* ``os_pxe_ubuntu_apt_configuration``: allows to pass specific settings to the apt configuration during auto-installation
+
+Refer to https://cloudinit.readthedocs.io/en/latest/reference/modules.html#apt-configure for more details.
+
+An example can be:
+
+.. code:: yaml
+
+  os_pxe_ubuntu_apt_configuration: |+2
+      disable_suites:
+        - backports
+      primary:
+        - arches: amd64
+          uri: "http://myrepo/repositories/ubuntu/24.04/x86_64/os"
+      security:
+        - arches: amd64
+          uri: "http://myrepo/repositories/ubuntu/24.04/x86_64/os"
