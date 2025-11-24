@@ -19,12 +19,13 @@ The BlueBanquise stack will install Prometheus and its eco-system:
 * ipmi_exporter
 * snmp_exporter
 * other exporters provided by admin:
-   * slurm_exporter
-   * node_exporter
-   * ...
+  * slurm_exporter
+  * node_exporter
+  * ...
 * Custom exporters python modules
 
-![global_schema.svg](prometheus/global_schema.svg "Main role schema")
+.. image:: prometheus/global_schema.svg
+   :align: center
 
 
 ## Table of content:

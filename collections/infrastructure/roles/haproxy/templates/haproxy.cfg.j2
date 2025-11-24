@@ -91,9 +91,10 @@ frontend {{ resource['name'] }}
 backend {{ resource['name'] }}
 {{ resource['parameters'] | default('') | indent(4, True) }}
       {% for server in resource['servers'] %}
-    server {{ resource['name'] }}-{{ server['hostname'] }} 127.0.0.1:{{ (resource['local_ports_first'] | int) + (loop.index0 | int) }} {% if server['parameters'] is defined and server['parameters'] is not none %}{{ server['parameters'] }}{% else %}check{% endif %}
+    server {{ server['hostname'] }} {{ server['ip4'] }}:{{ server['port'] }} {% if server['parameters'] is defined and server['parameters'] is not none %}{{ server['parameters'] }}{% else %}check{% endif %}
       {% endfor %}
 
     {% endif %}
   {% endfor %}
 {% endif %}
+

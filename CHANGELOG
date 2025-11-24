@@ -4,6 +4,11 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.2.9
 
+* 11/24/25 - oxedions - [interconnect] Update service name for RHEL (#1131)
+* 11/24/25 - oxedions - [dhcp_server] Prevent non admin networks to be added into DHCP (#1125)
+* 11/24/25 - oxedions - [http_server,conman,powerman] Fix services restart handlers (#1157)
+* 11/24/25 - oxedions - [http_server] Fix typo in task (#1150)
+* 11/24/25 - oxedions - [haproxy] Fix bad copy past for backend (#1151)
 * 11/21/25 - btravouillon - [sudoers] Fix conditional in sudoers for Ansible Core 2.19 (#1165)
 * 11/21/25 - dietergorecki - [pxe_stack] fix apt sources cleanup process (#1161)
 * 11/20/25 - ginomcevoy - [auditd] Fix improper start services for auditd role (#1157)

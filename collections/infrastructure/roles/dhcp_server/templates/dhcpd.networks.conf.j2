@@ -85,8 +85,10 @@ subnet {{ networks[network]['subnet'] }} netmask {{ (networks[network]['subnet']
 {# SHARED NETWORKS GATHERING IF ANY #}
 {% set shared_networks = [] %}
 {% for network in networks %}
-  {% if networks[network]['shared_network'] is defined and not none %}
+  {% if network in j2_management_networks %}
+    {% if networks[network]['shared_network'] is defined and not none %}
 {{ shared_networks.append(networks[network]['shared_network']|string) }}
+    {% endif %}
   {% endif %}
 {% endfor %}
 
@@ -107,9 +109,11 @@ shared-network {{ shared_network }} {
 ## NON SHARED NETWORKS SUBNETS
 
 {% for network in networks %}
-  {% if (networks[network]['dhcp_server'] | default(true)) %}
-    {% if networks[network]['shared_network'] is not defined or networks[network]['shared_network'] is none  %}
+  {% if network in j2_management_networks %}
+    {% if (networks[network]['dhcp_server'] | default(true)) %}
+      {% if networks[network]['shared_network'] is not defined or networks[network]['shared_network'] is none  %}
 {{ write_network(network) }}
+      {% endif %}
     {% endif %}
   {% endif %}
 {% endfor %}
