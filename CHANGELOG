@@ -4,6 +4,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.2.9
 
+* 11/24/25 - dietergorecki - [nic] Enhance way to apply connection modifications (#1169)
 * 11/24/25 - oxedions - [interconnect] Update service name for RHEL (#1131)
 * 11/24/25 - oxedions - [dhcp_server] Prevent non admin networks to be added into DHCP (#1125)
 * 11/24/25 - oxedions - [http_server,conman,powerman] Fix services restart handlers (#1157)
