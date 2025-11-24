@@ -21,7 +21,7 @@
 
 - name: service <|> Enforce rdma state
   ansible.builtin.service:
-    name: rdma
+    name: rdma-ndd
     enabled: yes
     state: started
   tags:

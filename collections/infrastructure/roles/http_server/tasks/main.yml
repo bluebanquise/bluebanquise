@@ -62,7 +62,7 @@
 - name: template <|> Generate custom listen configuration
   ansible.builtin.template:
     src: listen.conf.j2
-    dest: "{{ pxe_stack_apache_conf_path }}/custom_listen.conf"
+    dest: "{{ http_server_apache_conf_path }}/custom_listen.conf"
     owner: root
     group: root
     mode: 0644
@@ -78,7 +78,7 @@
 - name: template <|> Generate http server configuration files
   ansible.builtin.template:
     src: custom.conf.j2
-    dest: "{{ pxe_stack_apache_conf_path }}/{{ item.name }}.conf"
+    dest: "{{ http_server_apache_conf_path }}/{{ item.name }}.conf"
     owner: root
     group: root
     mode: 0644
