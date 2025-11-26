@@ -28,30 +28,28 @@
     group: "grafana"
   when: log_exists.stat.exists
 
-- name: "install <|> Add services to firewall's {{ grafana_firewall_zone | default('public') }} zone"
+- name: "install <|> Add services to firewall's zone"
   ansible.posix.firewalld:
-    zone: "{{ grafana_firewall_zone | default('public') }}"
+    zone: "{{ grafana_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
     service: "{{ item }}"
     immediate: "yes"
     permanent: "yes"
     state: enabled
   when:
-    - ansible_facts.os_family == "RedHat"
     - os_firewall | default(false) | bool
     - grafana_port == grafana_default_port
   loop: "{{ grafana_firewall_services_to_add }}"
   tags:
     - firewall
 
-- name: "install ¦ Add custom grafana port to firewall's {{ grafana_firewall_zone | default('public') }} zone"
+- name: "install ¦ Add custom grafana port to firewall's zone"
   ansible.posix.firewalld:
-    zone: "{{ grafana_firewall_zone | default('public') }}"
+    zone: "{{ grafana_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
     port: "{{ grafana_port }}/tcp"
     immediate: "yes"
     permanent: "yes"
     state: enabled
   when:
-    - ansible_facts.os_family == "RedHat"
     - os_firewall | default(false) | bool
     - grafana_port != grafana_default_port
   tags:

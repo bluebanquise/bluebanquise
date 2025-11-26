@@ -30,9 +30,9 @@
   tags:
     - package
 
-- name: "firewalld <|> Add services to firewall's {{ sshd_server_firewall_zone | default('public') }} zone"
+- name: "firewalld <|> Add services to firewall's zone"
   ansible.posix.firewalld:
-    zone: "{{ sshd_server_firewall_zone | default('public') }}"
+    zone: "{{ sshd_server_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
     service: "{{ item }}"
     immediate: "yes"
     permanent: "yes"
