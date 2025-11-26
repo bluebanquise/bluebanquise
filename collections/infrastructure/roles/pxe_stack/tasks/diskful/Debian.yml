@@ -36,7 +36,7 @@
   when:
     - (bb_equipments[item]['hw']['hw_equipment_type'] | default(pxe_stack_hw_equipment_type)) == "server"
     - (bb_equipments[item]['os']['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution) | lower) in ['debian']
-    - (bb_equipments[item]['os']['os_operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version) | int) in [11, 12]
+    - (bb_equipments[item]['os']['os_operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version) | int) in (pxe_stack_supported_os['debian'] | map(attribute='major') | list)
   tags:
     - template
 
@@ -53,6 +53,6 @@
   when:
     - (bb_equipments[item]['hw']['hw_equipment_type'] | default(pxe_stack_hw_equipment_type)) == "server"
     - (bb_equipments[item]['os']['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution) | lower) in ['debian']
-    - (bb_equipments[item]['os']['os_operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version) | int) in [11, 12]
+    - (bb_equipments[item]['os']['os_operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version) | int) in (pxe_stack_supported_os['debian'] | map(attribute='major') | list)
   tags:
     - template

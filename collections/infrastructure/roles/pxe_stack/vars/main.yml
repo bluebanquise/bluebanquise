@@ -60,6 +60,9 @@ pxe_stack_supported_os:
     - major: 12
       distributions:
         - debian
+    - major: 13
+      distributions:
+        - debian
 
 pxe_stack_redhat_automatic_partitioning: |
   {% if os_target_disk is defined and os_target_disk is not none %}ignoredisk --only-use={{ os_target_disk }}{% endif +%}
