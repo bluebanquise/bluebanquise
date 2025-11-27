@@ -1,0 +1,17 @@
+#jinja2: lstrip_blocks: "True"
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+
+{% for host in (j2_hosts_range | sort) -%}
+  {% if (hostvars[host]['hw_equipment_type'] | default("server")) == "server" and hostvars[host]['hw_board_authentication'] is defined %}    {% if hostvars[host]['bmc'] is defined and hostvars[host]['bmc']['name'] is defined %}
+      {% if (hostvars[host]['hw_board_authentication'] | selectattr('protocol','defined') | selectattr('protocol','match','IPMI') | list | length) >= 1 %}
+        {# Gather BMC credentials settings #}
+        {% set host_bmc_user = (hostvars[host]['hw_board_authentication'] | selectattr('protocol','defined') | map(attribute='user') | list | first | default(none)) %}
+        {% set host_bmc_password = (hostvars[host]['hw_board_authentication'] | selectattr('protocol','defined') | map(attribute='password') | list | first | default(none)) %}
+        {% if host_bmc_user is defined and host_bmc_user is not none and host_bmc_password is defined and host_bmc_password is not none %}
+{{ host }} : {{ host_bmc_user }} : {{ host_bmc_password }}
+        {% endif %}
+      {% endif %}
+    {% endif %}
+  {% endif %}
+{% endfor %}

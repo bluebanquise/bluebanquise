@@ -77,6 +77,7 @@ Once these pam_limits parameter pushed, restart conman daemon.
 
 ## Changelog
 
+* 1.8.0: Passwords in database file for increased security. Thiago Cardozo <boubee.thiago@gmail.com>
 * 1.7.0: Added ssh config file for user conman. Thiago Cardozo <boubee.thiago@gmail.com>
 * 1.6.0: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.5.1: Fix logrotate paths. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
