@@ -3,7 +3,20 @@
 ## {{ ansible_managed }}
 
 {% for host in (j2_hosts_range | sort) -%}
-  {% if (hostvars[host]['hw_equipment_type'] | default("server")) == "server" and hostvars[host]['hw_board_authentication'] is defined %}    {% if hostvars[host]['bmc'] is defined and hostvars[host]['bmc']['name'] is defined %}
+  {% if (hostvars[host]['hw_equipment_type'] | default("server")) == "server" and hostvars[host]['hw_board_authentication'] is defined %}
+    {% if hostvars[host]['bmc'] is defined and hostvars[host]['bmc']['name'] is defined %}
+      {# Gather BMC network settings #}
+      {% if hostvars[host]['bmc']['ip4'] is defined %}{# BMC is defined inside host #}
+        {% set host_bmc = hostvars[host]['bmc'] %}
+        {% set credentials_host = host %}{# Define host as credentials source #}
+      {% else %}{# BMC is defined outside host #}
+        {% set host_bmc = hostvars[hostvars[host]['bmc']['name']]['network_interfaces'][0] %}
+        {% set credentials_host = hostvars[host]['bmc']['name'] %}{# Define external bmc as credentials source #}
+      {% endif %}
+      {# Check if no authentication found #}
+      {% if hostvars[credentials_host]['hw_board_authentication'] is not defined %}
+      {% continue %}
+      {% endif %}
       {% if (hostvars[host]['hw_board_authentication'] | selectattr('protocol','defined') | selectattr('protocol','match','IPMI') | list | length) >= 1 %}
         {# Gather BMC credentials settings #}
         {% set host_bmc_user = (hostvars[host]['hw_board_authentication'] | selectattr('protocol','defined') | map(attribute='user') | list | first | default(none)) %}
