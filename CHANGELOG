@@ -3,6 +3,7 @@
 Format: <date> - <author (username or mail or both)> - [role] <change description>
 
 # 3.2.6
+* 11/27/25 - thiagocardozo - [pxe_stack] Added verbosity lvl 3 to debug tasks.
 * 5/22/25 - ginomcevoy - [podman] Fix configuration for rootless containers
 * 5/15/25 - thiagocardozo - [pxe_stack] Stop folder creating task from acting on present images.
 
