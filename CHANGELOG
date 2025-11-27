@@ -4,6 +4,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.2.9
 
+* 11/27/25 - thiagocardozo - [pxe_stack] Added verbosity lvl 3 to debug tasks (#1177)
 * 11/26/25 - btravouillon - [pxe_stack] Allow to define Ubuntu autoinstall ssh.allow-pw (#1171)
 * 11/25/25 - jpiles - [pxe_stack] add support for debian 13 (#1166)
 * 11/24/25 - dietergorecki - [nic] Enhance way to apply connection modifications (#1169)
@@ -29,9 +30,9 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 * 11/10/25 - thiagocardozo - [dhcp] BMCs no longer must have a MAC defined. Thiago Cardozo <boubee.thiago@gmail.com>
 * 11/06/25 - oxedions - [nfs] Set nfs v3 as default instead of 4.2.
 * 11/06/25 - oxedions - [pxe_stack] Disable auto clonezilla support.
-* 12/09/25 - santos-lucas - [slurm] Added support for gres in confiless mode. Lucas Santos <lucassouzasantos@gmail.com> 
+* 12/09/25 - santos-lucas - [slurm] Added support for gres in confiless mode. Lucas Santos <lucassouzasantos@gmail.com>
 * 8/09/25 - santos-lucas - [lustre_client] Fix issues with multiple-lnet setup. Lucas Santos <lucassouzasantos@gmail.com>
-* 6/09/25 - santos-lucas - [slurm] Added support for pam_slurm_adoption. Lucas Santos <lucassouzasantos@gmail.com> 
+* 6/09/25 - santos-lucas - [slurm] Added support for pam_slurm_adoption. Lucas Santos <lucassouzasantos@gmail.com>
 * 8/29/25 - santos-lucas - [slurm]  Fix slurm local accounting service state managent and support to el9.
 * 8/18/25 - oxedions - [nic] Fix mask systemd-networkd.socket and add tag nic_os_dedicated_tasks to disable os tasks. (#1122, from vedmonds)
 * 8/18/25 - oxedions - [nic] Fix missing test when renaming interface name. (#1123, from vedmonds)
