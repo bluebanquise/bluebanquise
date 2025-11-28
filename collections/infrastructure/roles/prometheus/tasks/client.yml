@@ -59,16 +59,15 @@
 - name: meta <|> Run handler tasks
   ansible.builtin.meta: flush_handlers
 
-- name: "firewalld <|> Open exporters ports into firewall's {{ prometheus_client_firewall_zone | default('public') }} zone"
+- name: "firewalld <|> Open exporters ports into firewall's zone"
   ansible.posix.firewalld:
-    zone: "{{ prometheus_client_firewall_zone | default('public') }}"
+    zone: "{{ prometheus_client_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
     port: "{{ item.port }}/tcp"
     immediate: "yes"
     permanent: "yes"
     state: enabled
   loop: "{{ exporters_groups }}"
   when:
-    - ansible_facts.os_family == "RedHat"
     - os_firewall | default(false) | bool
     - item.port is defined
   tags:

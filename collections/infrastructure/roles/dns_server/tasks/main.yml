@@ -23,19 +23,8 @@
   tags:
     - always
 
-- name: "include_tasks <|> Use OS dedicated firewall task"
-  ansible.builtin.include_tasks: "{{ outer_item }}"
-  with_first_found:
-    - files:
-        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
-        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
-        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
-        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
-        - "{{ ansible_facts.distribution | replace(' ','_') }}/firewall.yml"
-        - "{{ ansible_facts.os_family | replace(' ','_') }}/firewall.yml"
-      skip: true
-  loop_control:
-    loop_var: outer_item
+- name: include_tasks <|> Firewall
+  ansible.builtin.include_tasks: "firewall.yml"
   tags:
     - internal
     - firewall
