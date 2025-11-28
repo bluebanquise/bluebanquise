@@ -4,6 +4,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.2.9
 
+* 11/28/25 - oxedions - [all] Update firewall to allow new bb_services_firewall_zone variable and switch all os on firewalld (#1162 and #1163)
 * 11/24/25 - dietergorecki - [nic] Enhance way to apply connection modifications (#1169)
 * 11/24/25 - oxedions - [interconnect] Update service name for RHEL (#1131)
 * 11/24/25 - oxedions - [dhcp_server] Prevent non admin networks to be added into DHCP (#1125)
