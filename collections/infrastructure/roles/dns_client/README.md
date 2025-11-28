@@ -4,7 +4,15 @@
 
 This role provides a basic `/etc/resolv.conf` file.
 
-Please note that on most recent distributions, you should avoid editing this file (and so using this role) and rely on the network daemon (NetworkManager or systemd-networkd).
+Please note that on most recent distributions, this file is managed by the network daemon (NetworkManager or systemd-networkd).
+If an external DHCP server is providing DNS information, then NetworkManager may use this information to overwrite `/etc/resolv.conf`.
+
+Use this role if at least one of these conditions are true:
+
+* The target node does not have an interface configured by an external DHCP server.
+* The target node has `dns=none` set in its `/etc/NetworkManager/NetworkManager.conf` file.
+
+If the node interfaces with dynamic IP addresses are managed by a controlled DHCP server (such as one deployed by the dhcp_server role), then this role may be omitted.
 
 ## Instructions
 
@@ -33,8 +41,6 @@ dns_client_external_servers:
   - 8.8.4.4
 ```
 Note that this/these external(s) dns will be placed after the cluster internal dns in resolution order.
-
-Note also that on most recent distributions, editing `/etc/resolv.conf` file is not recommended, as the file will be managed by network daemon (NetworkManager, etc.).
 
 ## Changelog
 
