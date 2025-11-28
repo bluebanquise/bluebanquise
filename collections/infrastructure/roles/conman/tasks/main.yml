@@ -58,6 +58,17 @@
   when:
     - ansible_facts.os_family == "RedHat"
 
+- name: template <|> Generate /etc/conman.pswd
+  ansible.builtin.template:
+    src: conman.pswd.j2
+    dest: /etc/conman.pswd
+    owner: conman
+    group: conman
+    mode: 0600
+  notify: service <|> Restart conman
+  tags:
+    - template
+
 - name: file <|> Create /var/run/conman/.ssh directory
   ansible.builtin.file:
     path: /var/run/conman/.ssh
