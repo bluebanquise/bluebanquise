@@ -4,6 +4,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.2.9
 
+* 11/28/25 - btravouillon - [pxe_stack] Ensure Ubuntu ssh.allow-pw is a boolean (#1178)
 * 11/28/25 - oxedions - [all] Update firewall to allow new bb_services_firewall_zone variable and switch all os on firewalld (#1162 and #1163)
 * 11/26/25 - btravouillon - [pxe_stack] Allow to define Ubuntu autoinstall ssh.allow-pw (#1171)
 * 11/25/25 - jpiles - [pxe_stack] add support for debian 13 (#1166)
