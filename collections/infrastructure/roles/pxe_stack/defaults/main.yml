@@ -13,6 +13,9 @@ pxe_stack_diskful_os_suse: true
 pxe_stack_diskful_os_debian: true
 pxe_stack_diskful_os_dgx: false
 
+# Allow SSH password authentication
+pxe_stack_ssh_allow_passwords: true
+
 # Enable root user as default user
 pxe_stack_enable_root: false
 # Sudo user if root not enabled
