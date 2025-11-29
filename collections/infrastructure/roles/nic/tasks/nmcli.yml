@@ -127,4 +127,4 @@
     - nic_force_reboot
     - item.changed
     - not (reboot_status.changed | d(false))
-    - nic_allow_reboot
+    - nic_allow_reboot | bool

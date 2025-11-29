@@ -19,7 +19,7 @@
   ansible.builtin.reboot:
     reboot_timeout: "{{ nic_reboot_timeout }}"
   when:
-    - nic_allow_reboot
+    - nic_allow_reboot | bool
 
 - name: "service <|> Restart nic services"
   ansible.builtin.service:
