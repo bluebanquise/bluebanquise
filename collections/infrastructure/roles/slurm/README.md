@@ -394,6 +394,16 @@ To enable it on the slurm configuration its required to define `slurm_selecttype
       partition_name: gpu_partoche
 ```
 
+### AutoDetect nvml
+
+If you wish to enable the auto-detection of GPU gres, you can do (example with GB200):
+```yaml
+hw_specs:
+  slurm_extra_nodes_parameters: "Gres=gpu:nvidia_gb200:4"
+```
+
+To enable it on the slurm configuration its required to define the previous chapter options plus `slurm_grestypes_nvml: True`.
+
 ### Acct Gather
 
 For example, to monitor the power and energy usage of compute nodes, you can use RAPL (Running Average Power Limit) method.

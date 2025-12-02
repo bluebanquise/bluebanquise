@@ -4,13 +4,16 @@
 
 # Documentation:
 # https://slurm.schedmd.com/gres.conf.html
-
-{# GPU Resources Definition #}
-{% for gpu in hostvars[inventory_hostname]['hw_specs']['gpu'] %}
-  {% if gpu.split(' ')[0] == 'NVIDIA' %}
-    {% set gpu_vendor = 'nvidia' %}
-  {% endif %}
-  {% if gpu_vendor == 'nvidia' %}
+{% if slurm_grestypes_nvml %}
+AutoDetect=nvml
+{% else %}
+  {# GPU Resources Definition #}
+  {% for gpu in hostvars[inventory_hostname]['hw_specs']['gpu'] %}
+    {% if gpu.split(' ')[0] == 'NVIDIA' %}
+      {% set gpu_vendor = 'nvidia' %}
+    {% endif %}
+    {% if gpu_vendor == 'nvidia' %}
 Name=gpu File=/dev/nvidia{{loop.index0}}
-  {% endif %}
-{% endfor %}
+    {% endif %}
+  {% endfor %}
+{% endif %}

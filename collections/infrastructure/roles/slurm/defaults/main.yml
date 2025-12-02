@@ -46,6 +46,8 @@ slurm_accounting_mysql_slurm_password: ssap_slurm # CHANGE ME !
 slurm_accounting_mysql_create_database: false
 slurm_accounting_mysql_create_user: false
 slurm_accounting_mysql_unix_socket: /var/run/mysqld/mysqld.sock
+# Accounting tres specific
+#slurm_accounting_storage_tres: gres/gpu
 ### mariadb
 slurm_innodb_buffer_pool_size: 1024M
 slurm_innodb_log_file_size: 64M
@@ -92,6 +94,8 @@ slurm_mpidefault: pmi2
 #   - tmpfs=/scratch
 #   - AccountingstorageEnforce=associations
 
+# Gres
+slurm_grestypes_nvml: false
 ## Munge
 
 # slurm_munge_key_b64: # User need to define it, would be too risky to provide one
