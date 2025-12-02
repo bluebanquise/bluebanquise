@@ -4,6 +4,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.2.9
 
+* 12/02/25 - btravouillon - [nic] Restart NetworkManager before reloading nmcli conn (#1185)
 * 11/28/25 - btravouillon - [nic] Ensure systemd-networkd is stopped in nic role (#1182)
 * 11/28/25 - btravouillon - [nic] Restart nic services when NICs config change (#1183)
 * 11/28/25 - btravouillon - [nic] Ensure nic_allow_reboot is checked as a boolean(#1181)
