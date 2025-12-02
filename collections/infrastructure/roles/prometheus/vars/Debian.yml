@@ -2,12 +2,12 @@
 prometheus_server_prometheus_packages_to_install:
   - prometheus
 prometheus_server_alertmanager_packages_to_install:
-  - alertmanager
+  - prometheus-alertmanager
 prometheus_server_ipmi_exporter_packages_to_install:
-  - ipmi-exporter
+  - prometheus-ipmi-exporter
   - freeipmi
 prometheus_server_snmp_exporter_packages_to_install:
-  - snmp-exporter
+  - prometheus-snmp-exporter
 prometheus_server_snmp_exporter_additional_packages_to_install:
   - gcc
   - make
@@ -16,4 +16,4 @@ prometheus_server_snmp_exporter_additional_packages_to_install:
   - net-snmp-libs
   - net-snmp-devel
 prometheus_server_karma_packages_to_install:
-  - prometheus
+  - karma
