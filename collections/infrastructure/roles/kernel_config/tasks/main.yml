@@ -1,28 +1,17 @@
-- name: package <|> Install grubby
-  ansible.builtin.package:
-    name: grubby
-    state: present
-
-- name: shell <|> Get current kernel parameters
-  ansible.builtin.shell: "set -o pipefail && grubby --info=DEFAULT | grep args"
-  args:
-    executable: /bin/bash
-  register: current_kernel_parameters
-  changed_when: False
-
-- name: command <|> Update os kernel parameters
-  ansible.builtin.command: "grubby --args='{{ item }}' --update-kernel=DEFAULT"
-  loop: "{{ os_kernel_parameters.split(' ') | default([]) }}"
-  when:
-    - os_kernel_parameters is defined and os_kernel_parameters is not none
-    - item not in current_kernel_parameters.stdout
-
-- name: command <|> Update hw kernel parameters
-  ansible.builtin.command: "grubby --args='{{ item }}' --update-kernel=DEFAULT"
-  loop: "{{ hw_kernel_parameters.split(' ') | default([]) }}"
-  when:
-    - hw_kernel_parameters is defined and hw_kernel_parameters is not none
-    - item not in current_kernel_parameters.stdout
+---
+- name: include_tasks <|> Use OS dedicated task
+  ansible.builtin.include_tasks: "{{ item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}/main.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}/main.yml"
+      skip: true
+  tags:
+    - internal
 
 - name: sysctl <|> Update sysctl parameters
   ansible.posix.sysctl:

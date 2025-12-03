@@ -1,0 +1,35 @@
+---
+- name: package <|> Install grub2-common
+  ansible.builtin.package:
+    name: grub2-common
+    state: present
+
+- name: shell <|> Read current GRUB_CMDLINE_LINUX_DEFAULT value
+  ansible.builtin.shell: |
+    grep '^GRUB_CMDLINE_LINUX_DEFAULT=' /etc/default/grub | sed -e 's/GRUB_CMDLINE_LINUX_DEFAULT="//' -e 's/"$//'
+  register: current_default_params
+  changed_when: false
+
+- name: set_fact <|> Merge existing, combine, and join the final parameter string
+  ansible.builtin.set_fact:
+    final_grub_line: >
+      {{
+        ((current_default_params.stdout | trim).split(' ') | default([]))
+        | union((os_kernel_parameters | trim).split(' ') | default([]))
+        | union((hw_kernel_parameters | trim).split(' ') | default([]))
+        | union((hw_console | trim).split(' ') | default([]))
+        | reject('equalto', '')
+        | unique
+        | list
+        | sort
+        | join(' ')
+      }}
+
+- name: lineinfile <|> Update GRUB_CMDLINE_LINUX_DEFAULT with merged, deduplicated parameters
+  ansible.builtin.lineinfile:
+    path: /etc/default/grub
+    regexp: "^GRUB_CMDLINE_LINUX_DEFAULT="
+    line: "GRUB_CMDLINE_LINUX_DEFAULT=\"{{ final_grub_line | replace('\n', '') }}\""
+    state: present
+    backup: true
+  notify: command <|> Update GRUB settings
