@@ -4,6 +4,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.2.9
 
+* 12/03/25 - btravouillon - [pxe_stack] Display nodes with boot=next in bootset status (#1190)
 * 12/02/25 - dietergorecki - [nic] Enforce networkmanager configuration (#1189)
 * 12/02/25 - btravouillon - [nic] Restart NetworkManager before reloading nmcli conn (#1185)
 * 11/28/25 - btravouillon - [nic] Ensure systemd-networkd is stopped in nic role (#1182)
