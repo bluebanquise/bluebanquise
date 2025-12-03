@@ -3,7 +3,7 @@
 Format: <date> - <author (username or mail or both)> - [role] <change description>
 
 # To 3.2.9
-
+ 
 * 12/03/25 - btravouillon - [pxe_stack] Display nodes with boot=next in bootset status (#1190)
 * 12/02/25 - dietergorecki - [nic] Enforce networkmanager configuration (#1189)
 * 12/02/25 - btravouillon - [nic] Restart NetworkManager before reloading nmcli conn (#1185)
@@ -12,6 +12,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 * 11/28/25 - btravouillon - [nic] Ensure nic_allow_reboot is checked as a boolean(#1181)
 * 11/28/25 - btravouillon - [pxe_stack] Ensure Ubuntu ssh.allow-pw is a boolean (#1178)
 * 11/28/25 - oxedions - [all] Update firewall to allow new bb_services_firewall_zone variable and switch all os on firewalld (#1162 and #1163)
+* 11/27/25 - thiagocardozo - [pxe_stack] Added verbosity lvl 3 to debug tasks (#1177)
 * 11/27/25 - thiagocardozo - [conman] Passwords in database file for increased security (#1175)
 * 11/26/25 - btravouillon - [pxe_stack] Allow to define Ubuntu autoinstall ssh.allow-pw (#1171)
 * 11/25/25 - jpiles - [pxe_stack] add support for debian 13 (#1166)
