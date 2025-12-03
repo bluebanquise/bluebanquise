@@ -16,7 +16,7 @@ slurm_slurmdpidfile: /var/run/slurmd.pid
 slurm_slurmdbdpidfile: /var/run/slurmdbd.pid
 
 ## firewall and ports
-slurm_firewall_zone: public
+# slurm_firewall_zone: public
 slurm_slurmtld_port: 6817
 slurm_slurmd_port: 6818
 slurm_slurmdbd_port: 6819

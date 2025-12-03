@@ -18,7 +18,7 @@
 
 # MIT License
 
-# Copyright (c) 2019-2023 BlueBanquise Team, https://github.com/bluebanquise/bluebanquise
+# Copyright (c) 2019-2025 BlueBanquise Team, https://github.com/bluebanquise/bluebanquise
 
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -176,6 +176,7 @@ pxe_nodes_path = htdocs_path + '/pxe/nodes/'
 if passed_arguments.status is not None:
     diskfull = []
     diskless = dict()
+    _next = []
     osdeploy = []
 
     # Iteration on nodes
@@ -195,6 +196,8 @@ if passed_arguments.status is not None:
                     diskfull.append(node)
                 elif boot == 'osdeploy':
                     osdeploy.append(node)
+                elif boot == 'next':
+                    _next.append(node)
                 elif boot == 'diskless':
                     # If diskless, group nodes per image
                     image = re.search(r"^set node-image (.+)", ipxe_conf, re.MULTILINE).group(1)
@@ -204,11 +207,13 @@ if passed_arguments.status is not None:
 
     # Display NodeSet per boot type
     if len(diskfull):
-        print('Diskfull: {nodes}'.format(nodes=','.join(diskfull)))
+        print('Next boot diskfull: {nodes}'.format(nodes=','.join(diskfull)))
     if len(osdeploy):
         print('Next boot deployment: {nodes}'.format(nodes=','.join(osdeploy)))
+    if len(_next):
+        print('Next boot next: {nodes}'.format(nodes=','.join(_next)))
     if len(diskless):
-        print('Diskless image(s):')
+        print('Next boot diskless image(s):')
         for image in diskless:
             print(' - {image}: {nodes}'.format(image=image, nodes=','.join(diskless[image])))
 

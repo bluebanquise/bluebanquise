@@ -67,7 +67,7 @@ autoinstall:
   {% endif %}
   ssh:
     install-server: true
-    allow-pw: "{{ pxe_stack_ssh_allow_passwords }}"
+    allow-pw: {{ pxe_stack_ssh_allow_passwords | bool }}
   {% if pxe_stack_post_install_action in ['poweroff', 'halt', 'shutdown'] %}
   shutdown: poweroff
   {% else %}

@@ -79,15 +79,14 @@
     enabled: "{{ (slurm_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
     state: "{{ (slurm_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
 
-- name: "firewalld <|> Add Slurmdbd ports to firewall's {{ slurm_firewall_zone | default('public') }} zone"
+- name: "firewalld <|> Add Slurmdbd ports to firewall's zone"
   ansible.posix.firewalld:
-    zone: "{{ slurm_firewall_zone | default('public') }}"
+    zone: "{{ slurm_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
     port: "{{ slurm_slurmdbd_port }}/tcp"
     immediate: "yes"
     permanent: "yes"
     state: enabled
   when:
-    - ansible_facts.os_family == "RedHat"
     - os_firewall | default(false) | bool
   tags:
     - firewall

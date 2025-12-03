@@ -29,6 +29,18 @@
     - package
   notify: service <|> Restart nic services
 
+- name: ini_file <|> Configure NetworkManager to enforce configuration
+  community.general.ini_file:
+    path: '/etc/NetworkManager/NetworkManager.conf'
+    section: 'device'
+    option: 'keep-configuration'
+    value: 'no'
+    no_extra_spaces: true
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+  when: nic_enforce_configuration
+
 - name: "service <|> Start services"
   ansible.builtin.service:
     name: "{{ item }}"

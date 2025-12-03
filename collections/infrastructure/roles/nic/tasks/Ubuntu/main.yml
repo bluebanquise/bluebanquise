@@ -25,6 +25,7 @@
   ansible.builtin.systemd_service:
     name: systemd-networkd.service
     enabled: false
+    state: "stopped"
 
 - name: "systemd_service <|> Mask systemd-networkd socker"
   ansible.builtin.systemd_service:

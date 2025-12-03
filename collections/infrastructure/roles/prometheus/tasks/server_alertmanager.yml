@@ -42,7 +42,6 @@
     group: root
     mode: 0644
   when:
-    - ansible_facts.os_family == "RedHat"
     - os_firewall | default(false) | bool
   notify: reload firewalld
   tags:
@@ -51,15 +50,15 @@
 - name: meta <|> Run handler tasks
   ansible.builtin.meta: flush_handlers
 
-- name: "firewalld <|> Add alertmanager service to firewall's {{ prometheus_server_firewall_zone | default('public') }} zone"
+- name: "firewalld <|> Add alertmanager service to firewall's zone"
   ansible.posix.firewalld:
-    zone: "{{ prometheus_server_firewall_zone | default('public') }}"
+    zone: "{{ prometheus_server_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
     service: alertmanager
     immediate: "yes"
     permanent: "yes"
     state: enabled
   when:
-    - ansible_facts.os_family == "RedHat"
+    - prometheus_firewall_open | bool
     - os_firewall | default(false) | bool
   tags:
     - firewall
