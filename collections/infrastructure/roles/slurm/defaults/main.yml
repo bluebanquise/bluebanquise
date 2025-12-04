@@ -83,7 +83,7 @@ slurm_acct_gather_profile_influxdb_timeout: 10
 slurm_allow_scontrol_handler: true
 
 # Topology
-slurm_topology:
+slurm_topology: topology/default
 
 ## Other
 slurm_returntoservice: 0
