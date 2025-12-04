@@ -80,7 +80,7 @@
     owner: alertmanager
     group: alertmanager
     mode: 0640
-    validate: /usr/bin/amtool check config %s
+    validate: /usr/bin/amtool check-config %s
   notify: service <|> Restart alertmanager service
   tags:
     - template
