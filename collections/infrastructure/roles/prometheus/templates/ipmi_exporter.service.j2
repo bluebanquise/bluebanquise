@@ -8,7 +8,7 @@
   Group=ipmi_exporter
   Type=simple
   WorkingDirectory=/etc/ipmi_exporter/
-  ExecStart=/bin/ipmi_exporter \
+  ExecStart=/usr/bin/ipmi_exporter \
   {{ prometheus_server_ipmi_exporter_launch_parameters | indent(2, True) }}
 
 [Install]
