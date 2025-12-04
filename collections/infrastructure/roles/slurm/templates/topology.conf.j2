@@ -1,0 +1,9 @@
+#jinja2: lstrip_blocks: True
+#### Blue Banquise file ####
+## {{ansible_managed}}
+{% for key, value in slurm_topology_file.items() %}
+{{ value['section'] }}={{ key }} {{ value['subsection'] }}={{ value['nodeset'] }}
+{% endfor %}
+{% if slurm_topology_blocksizes is not none %}
+BlockSizes = {{ slurm_topology_blocksizes }}
+{% endif %}
