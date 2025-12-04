@@ -78,6 +78,9 @@ AcctGatherInterconnectType=acct_gather_interconnect/{{slurm_acct_gather_intercon
 AcctGatherFilesystemType=acct_gather_filesystem/{{ slurm_acct_gather_filesystem_type }}
 AcctGatherProfileType=acct_gather_profile/{{ slurm_acct_gather_profile_type }}
 
+## Topology
+TopologyPlugin={{ slurm_topology }}
+
 ## Additional content if exist
 {% if slurm_slurm_conf_additional_content is defined and slurm_slurm_conf_additional_content is iterable %}
   {% for item in slurm_slurm_conf_additional_content %}
