@@ -4,6 +4,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.2.9
 
+* 12/11/25 - jpiles - [pxe_stack] Add support for pre- and post-installation scripts in debian preseed
 * 12/08/25 - btravouillon - [slurm] Skip debug task in Slurm role by default (#1194)
 * 12/08/25 - fabienarchambault - [slurm] Slurm Feature: add support for topology in Slurm (#1191)
 * 12/03/25 - btravouillon - [pxe_stack] Display nodes with boot=next in bootset status (#1190)
