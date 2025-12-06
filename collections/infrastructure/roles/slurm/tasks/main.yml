@@ -44,6 +44,7 @@
   ansible.builtin.debug:
     msg: "{{ bb_nodes_profiles }}"
   tags:
+    - never
     - templates
     - debug
 #
