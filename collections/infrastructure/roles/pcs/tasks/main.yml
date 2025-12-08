@@ -174,7 +174,6 @@
 
     - name: command <|> Store current configuration into cib file
       ansible.builtin.command: "pcs cluster cib {{ pcs_cib_file_path }}"
-      delegate_to: "{{ ansible_hostname }}"
       changed_when: false
 
     - name: command <|> Add resources to cluster
