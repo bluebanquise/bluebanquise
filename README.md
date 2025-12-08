@@ -33,6 +33,8 @@ The infrastructure collection should be compatible with most target Linux distri
 
 BlueBanquise repository is under **MIT license**, except Bluebanquise documentation which is under **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License**.
 
+:penguin: The BlueBanquise project is a **100% open source project, not managed by a company, and will stay MIT license**. :penguin:
+
 ## Donate
 
 If you use and like BlueBanquise, please consider donating to the **UNICEF** (https://www.unicef.org/).
@@ -134,8 +136,6 @@ Please note that:
 ## The project
 
 It is a revamping of the old stack [Banquise](https://github.com/oxedions/banquise), based on Salt.
-
-:seedling: The BlueBanquise project is a **100% open source project, not managed by a company, and will stay MIT license**. :seedling:
 
 ## The name
 
