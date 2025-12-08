@@ -7,3 +7,4 @@ nic_allow_reboot: true  # Reboot after switch from netplan to network-manager on
 nic_start_services: true
 nic_reboot_timeout: 600
 nic_nmcli_device_is_connection_name: true  # If true, the role will force existing connections to have the same name as their related device.
+nic_enforce_configuration: true # Don't keep existing configurations made outside of NetworkManager
