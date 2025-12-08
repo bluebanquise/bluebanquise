@@ -1,3 +1,4 @@
 ---
 - name: command <|> Push HA configuration
   ansible.builtin.command: "pcs cluster cib-push --config {{ pcs_cib_file_path }}"
+  delegate_to: "{{ pcs_reference_node }}"
