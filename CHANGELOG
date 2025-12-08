@@ -4,6 +4,8 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.2.9
 
+* 12/08/25 - btravouillon - [slurm] Skip debug task in Slurm role by default (#1194)
+* 12/08/25 - fabienarchambault - [slurm] Slurm Feature: add support for topology in Slurm (#1191)
 * 11/28/25 - btravouillon - [nic] Ensure systemd-networkd is stopped in nic role (#1182)
 * 11/28/25 - btravouillon - [nic] Restart nic services when NICs config change (#1183)
 * 11/28/25 - btravouillon - [nic] Ensure nic_allow_reboot is checked as a boolean(#1181)
