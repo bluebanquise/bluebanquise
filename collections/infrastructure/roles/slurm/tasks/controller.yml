@@ -54,6 +54,18 @@
   tags:
     - template
 
+- name: "template <|> Generate block topology.conf in {{ slurm_home_path }}"
+  ansible.builtin.template:
+    src: "topology.conf.j2"
+    dest: "{{ slurm_home_path }}/topology.conf"
+    owner: slurm
+    group: slurm
+    mode: 0644
+  tags:
+    - template
+  when: slurm_topology == 'topology/block' or slurm_topology == 'topology/tree'
+  notify: service <|> restart slurmd
+
 - name: service <|> Manage slurmctld state
   ansible.builtin.service:
     name: slurmctld
