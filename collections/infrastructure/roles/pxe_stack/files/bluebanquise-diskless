@@ -102,7 +102,7 @@ import crypt
 import string
 import sys
 import platform
-
+import subprocess
 
 # Colors, from https://stackoverflow.com/questions/287871/how-to-print-colored-text-in-terminal-in-python
 class bcolors:
@@ -345,6 +345,36 @@ tool_paths['bootstrap_images_tmp'] = os.path.join(tool_paths['bootstrap_images']
 tool_paths['http_pxe_diskless'] = os.path.join(tool_parameters['http_pxe_folder'], "diskless")
 tool_paths['nfs'] = tool_parameters['nfs_path']
 
+# Check if /var/www/html/pxe/diskless is mounted at current node
+bash_script = '''
+check_pcs() {{
+    printf "$(hostname)"
+    which pcs >/dev/null 2>&1 || return 1
+
+    id=$(pcs cluster cib | grep -E "{path}" |
+         sed 's/.*id="\\([^[:blank:]]*\\)-instance_attributes-directory.*/\\1/')
+    [[ -z "$id" ]] && return 1
+
+    node=$(pcs resource status "$id" | grep Started | awk '{{print $NF}}')
+    [[ "$node" == "$(hostname)" ]] || return 1
+}}
+
+check_pcs
+'''.format(path=tool_paths['http_pxe_diskless'])
+
+result = subprocess.run(
+    ["bash", "-c", bash_script],
+    stdout=subprocess.PIPE,
+    stderr=subprocess.PIPE,
+    text=True
+)
+
+if result.returncode != 0:
+   print (f"WARNING: The path '{tool_paths['http_pxe_diskless']}' is currently NOT mounted at {result.stdout}!\n")
+   answer = input("Proceed anyway? (n/y) ").strip().lower()
+   if answer != "y":
+     print("Exiting.")
+     exit(1)
 
 logging.info(bcolors.OKBLUE + 'Checking folders exist...' + bcolors.ENDC)
 if not os.path.exists(tool_paths['bootstrap_images']):
