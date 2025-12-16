@@ -146,7 +146,7 @@ result = subprocess.run(
     stderr=subprocess.PIPE,
     text=True
 )
-if result.returncode != 0:
+if result.returncode == 0:
    print (f"WARNING: The path /var/www/html/pxe/nodes is currently NOT mounted at {result.stdout}!\n")
    answer = input("Proceed anyway? (n/y) ").strip().lower()
    if answer != "y":
