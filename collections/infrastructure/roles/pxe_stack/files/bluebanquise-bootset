@@ -127,14 +127,19 @@ if ( not is_admin) :
 bash_script = r'''
 check_pcs() {
     printf "$(hostname)"
-    which pcs >/dev/null 2>&1 || return 1
+    ispcs=0
+    which pcs >/dev/null 2>&1 || ispcs=1
 
     id=$(pcs cluster cib | grep -E "/var/www/html/\w*/nodes" |
          sed 's/.*id="\([^[:blank:]]*\)-instance_attributes-directory.*/\1/')
-    [[ -z "$id" ]] && return 1
 
+    currentnode=0
     node=$(pcs resource status "$id" | grep Started | awk '{print $NF}')
-    [[ "$node" == "$(hostname)" ]] || return 1
+    [[ "$node" == "$(hostname)" ]] || currentnode=1
+    if [[ ${ispcs} == 1 || ${id} == "" || ${currentnode} == 0 ]];
+      return 0
+    else
+      return 1
 }
 
 check_pcs
@@ -146,7 +151,7 @@ result = subprocess.run(
     stderr=subprocess.PIPE,
     text=True
 )
-if result.returncode == 0:
+if result.returncode == 1:
    print (f"WARNING: The path /var/www/html/pxe/nodes is currently NOT mounted at {result.stdout}!\n")
    answer = input("Proceed anyway? (n/y) ").strip().lower()
    if answer != "y":
