@@ -25,12 +25,12 @@ jobs:
         run: |
           docker build -t rockylinux/rockylinux:9_systemd -f ./resources/docker/Dockerfile_RockyLinux_9_systemd .
           sudo modprobe -v dummy numdummies=2 && sudo ip addr add 10.10.0.1/16 dev dummy0 && sudo ip link set dev dummy0 up && ip a;
-          echo -e 'bb_repositories:\n  - name: bluebanquise\n    baseurl: "https://bluebanquise.com/repository/releases/new/el9/x86_64/bluebanquise/"' > resources/workflow/inventory_standard/group_vars/all/repositories.yml
+          echo -e 'bb_repositories:\n  - name: bluebanquise\n    baseurl: "https://bluebanquise.com/repository/releases/latest/el9/x86_64/bluebanquise/"' > resources/workflow/inventory_standard/group_vars/all/repositories.yml
           docker run -d --privileged --cgroupns=host --net=host --name mgt1 -v /sys/fs/cgroup:/sys/fs/cgroup:rw -v $PWD:/bluebanquise rockylinux/rockylinux:9_systemd
           docker exec mgt1 bash -c "/bluebanquise/bootstrap/online_bootstrap.sh --silent --skip_environment"
           docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'cd /bluebanquise/bootstrap/ && ./configure_environment.sh --bb_collections_local_path=/bluebanquise/collections/'"
           docker exec mgt1 bash -c "dnf install wget -y && dnf config-manager --set-enabled crb"
-          # docker exec mgt1 bash -c "dnf install wget -y && cd /etc/yum.repos.d/ && wget http://bluebanquise.com/repository/releases/new/el9/x86_64/bluebanquise/bluebanquise.repo && dnf config-manager --set-enabled crb"
+          # docker exec mgt1 bash -c "dnf install wget -y && cd /etc/yum.repos.d/ && wget http://bluebanquise.com/repository/releases/latest/el9/x86_64/bluebanquise/bluebanquise.repo && dnf config-manager --set-enabled crb"
 
       - name: Prepare run input files
         run: docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'cp -a /bluebanquise/resources/workflow/inventory_standard /var/lib/bluebanquise/inventory && cp -a /bluebanquise/resources/workflow/playbooks /var/lib/bluebanquise'"
@@ -60,12 +60,12 @@ jobs:
         run: |
           docker build -t rockylinux/rockylinux:9_systemd -f ./resources/docker/Dockerfile_RockyLinux_9_systemd .
           sudo modprobe -v dummy numdummies=2 && sudo ip addr add 10.10.0.1/16 dev dummy0 && sudo ip link set dev dummy0 up && ip a;
-          echo -e 'bb_repositories:\n  - name: bluebanquise\n    baseurl: "https://bluebanquise.com/repository/releases/new/el9/x86_64/bluebanquise/"' > resources/workflow/inventory_standard/group_vars/all/repositories.yml
+          echo -e 'bb_repositories:\n  - name: bluebanquise\n    baseurl: "https://bluebanquise.com/repository/releases/latest/el9/x86_64/bluebanquise/"' > resources/workflow/inventory_standard/group_vars/all/repositories.yml
           docker run -d --privileged --cgroupns=host --net=host --name mgt1 -v /sys/fs/cgroup:/sys/fs/cgroup:rw -v $PWD:/bluebanquise rockylinux/rockylinux:9_systemd
           docker exec mgt1 bash -c "/bluebanquise/bootstrap/online_bootstrap.sh --silent --skip_environment"
           docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'cd /bluebanquise/bootstrap/ && ./configure_environment.sh --bb_collections_local_path=/bluebanquise/collections/'"
           docker exec mgt1 bash -c "dnf install wget -y && dnf config-manager --set-enabled crb"
-          # docker exec mgt1 bash -c "dnf install wget -y && cd /etc/yum.repos.d/ && wget http://bluebanquise.com/repository/releases/new/el9/x86_64/bluebanquise/bluebanquise.repo && dnf config-manager --set-enabled crb"
+          # docker exec mgt1 bash -c "dnf install wget -y && cd /etc/yum.repos.d/ && wget http://bluebanquise.com/repository/releases/latest/el9/x86_64/bluebanquise/bluebanquise.repo && dnf config-manager --set-enabled crb"
 
       - name: Prepare run input files
         run: docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'cp -a /bluebanquise/resources/workflow/inventory_standard /var/lib/bluebanquise/inventory && cp -a /bluebanquise/resources/workflow/playbooks /var/lib/bluebanquise'"
