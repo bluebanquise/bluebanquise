@@ -103,7 +103,34 @@ d-i debian-installer/exit/poweroff boolean true
 
 ### TODO: adjust to enable systemd-networkd by default
 
+{% if pxe_stack_autoinstall_pre_scripts is defined %}
+{% for script in pxe_stack_autoinstall_pre_scripts %}
+d-i preseed/numbered_pre_scripts_{{ loop.index0 }} string {{ script | b64encode }}
+{% endfor %}
+{% endif %}
+d-i preseed/early_command string \
+  for N in `seq 0 99`; do \
+    script="$(/bin/debconf-get preseed/numbered_pre_scripts_$N)"; \
+    if [ -n "$script" ]; then \
+      echo "Running pre-script $N"; \
+      sh -c "$(echo "$script" | base64 -d)"; \
+    fi; \
+  done
+
+{% if pxe_stack_autoinstall_post_scripts is defined %}
+{% for script in pxe_stack_autoinstall_post_scripts %}
+d-i preseed/numbered_post_scripts_{{ loop.index0 }} string {{ script | b64encode }}
+{% endfor %}
+{% endif %}
 d-i preseed/late_command string \
+  for N in `seq 0 99`; do \
+    script="$(/bin/debconf-get preseed/numbered_post_scripts_$N)"; \
+    if [ -n "$script" ]; then \
+      echo "Running post-script $N"; \
+      in-target sh -c "$(echo "$script" | base64 -d)"; \
+    fi; \
+  done
+
 {% if pxe_stack_enable_root %}
   in-target sh -c 'mkdir /root/.ssh'; \
   {% for ssh_key in (equipment['os']['os_admin_ssh_keys'] | default(pxe_stack_os_admin_ssh_keys)) %}
