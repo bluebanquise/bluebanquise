@@ -347,7 +347,7 @@ tool_paths['nfs'] = tool_parameters['nfs_path']
 
 # Check if /var/www/html/pxe/diskless is mounted at current node
 bash_script = '''
-check_pcs() {
+check_pcs() {{
     printf "$(hostname)"
     ispcs=0
     which pcs >/dev/null 2>&1 || ispcs=1
@@ -356,14 +356,14 @@ check_pcs() {
          sed 's/.*id="\([^[:blank:]]*\)-instance_attributes-directory.*/\1/')
 
     currentnode=0
-    node=$(pcs resource status "$id" | grep Started | awk '{print $NF}')
+    node=$(pcs resource status "$id" | grep Started | awk '{{print $NF}}')
     [[ "$node" == "$(hostname)" ]] || currentnode=1
-    if [[ ${ispcs} == 1 || ${id} == "" || ${currentnode} == 0 ]]; then
+    if [[ $ispcs == 1 || $id == "" || $currentnode == 0 ]]; then
       return 0
     else
       return 1
     fi
-}
+}}
 
 check_pcs
 '''.format(path=tool_paths['http_pxe_diskless'])
