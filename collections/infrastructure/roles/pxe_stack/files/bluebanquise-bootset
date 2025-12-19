@@ -46,7 +46,7 @@ import pwd
 import re
 from argparse import ArgumentParser
 import yaml
-
+import subprocess
 
 # Colors, from https://stackoverflow.com/questions/287871/how-to-print-colored-text-in-terminal-in-python
 class bcolors:
@@ -122,6 +122,42 @@ is_admin = os.getuid() == 0
 if ( not is_admin) :
    print ("Admin rights required to run bluebanquise-bootset!")
    exit(1)
+
+# Check if /var/www/html/pxe/nodes is mounted at current node
+bash_script = r'''
+check_pcs() {
+    printf "$(hostname)"
+    ispcs=0
+    which pcs >/dev/null 2>&1 || ispcs=1
+
+    id=$(pcs cluster cib | grep -E "/var/www/html/\w*/nodes" |
+         sed 's/.*id="\([^[:blank:]]*\)-instance_attributes-directory.*/\1/')
+
+    currentnode=0
+    node=$(pcs resource status "$id" | grep Started | awk '{print $NF}')
+    [[ "$node" == "$(hostname)" ]] || currentnode=1
+    if [[ ${ispcs} == 1 || ${id} == "" || ${currentnode} == 0 ]]; then
+      return 0
+    else
+      return 1
+    fi
+}
+
+check_pcs
+'''
+
+result = subprocess.run(
+    ["bash", "-c", bash_script],
+    stdout=subprocess.PIPE,
+    stderr=subprocess.PIPE,
+    text=True
+)
+if result.returncode == 1:
+   print (f"WARNING: The path /var/www/html/pxe/nodes is currently NOT mounted at {result.stdout}!\n")
+   answer = input("Proceed anyway? (n/y) ").strip().lower()
+   if answer != "y":
+     print("Exiting.")
+     exit(1)
 
 # Get arguments passed to bootset
 parser = ArgumentParser()
