@@ -375,7 +375,7 @@ result = subprocess.run(
     text=True
 )
 
-if result.returncode = 1:
+if result.returncode == 1:
    print (f"WARNING: The path '{tool_paths['http_pxe_diskless']}' is currently NOT mounted at {result.stdout}!\n")
    answer = input("Proceed anyway? (n/y) ").strip().lower()
    if answer != "y":
