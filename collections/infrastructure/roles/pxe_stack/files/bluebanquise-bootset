@@ -136,10 +136,11 @@ check_pcs() {
     currentnode=0
     node=$(pcs resource status "$id" | grep Started | awk '{print $NF}')
     [[ "$node" == "$(hostname)" ]] || currentnode=1
-    if [[ ${ispcs} == 1 || ${id} == "" || ${currentnode} == 0 ]];
+    if [[ ${ispcs} == 1 || ${id} == "" || ${currentnode} == 0 ]]; then
       return 0
     else
       return 1
+    fi
 }
 
 check_pcs
