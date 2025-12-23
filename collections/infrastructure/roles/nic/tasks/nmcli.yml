@@ -11,7 +11,7 @@
 
     - name: command <|> Rename interfaces if needed
       ansible.builtin.command: "nmcli connection modify '{{ item.name }}' connection.id '{{ item.device }}'"
-      with_items: "{{ nic_j2_nmcli_device_name_type }}"
+      loop: "{{ nic_j2_nmcli_device_name_type | flatten(levels=1) }}"
       register: nmcli_result
       when:
         - item.apply
@@ -20,6 +20,8 @@
       changed_when: nmcli_result.rc == 0
 
 - name: nmcli <|> Set NICs configuration # noqa args[module]
+  retries: 3
+  delay: 5
   community.general.nmcli:
     # Tuned
     conn_name: "{{ item.conn_name | default(item.interface) | string }}"
@@ -101,7 +103,9 @@
     wireguard: "{{ item.wireguard | default(omit) }}"
     xmit_hash_policy: "{{ item.xmit_hash_policy | default(omit) }}"
     slave_type: "{{ item.slave_type | default(omit) }}"
-  notify: command <|> Reload connections
+  notify:
+    - command <|> Reload connections
+    - service <|> Restart nic services
   loop: "{{ network_interfaces }}"
   register: nic_apply
   when: item.skip is not defined or (item.skip is defined and not item.skip)
@@ -127,4 +131,4 @@
     - nic_force_reboot
     - item.changed
     - not (reboot_status.changed | d(false))
-    - nic_allow_reboot
+    - nic_allow_reboot | bool

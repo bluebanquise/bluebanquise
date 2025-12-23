@@ -15,6 +15,7 @@ You will find bellow the detailed configuration available for each system relate
    :maxdepth: 1
    :caption: System:
 
+   system/firewall
    system/sshd
    system/hosts_file
    system/access_control

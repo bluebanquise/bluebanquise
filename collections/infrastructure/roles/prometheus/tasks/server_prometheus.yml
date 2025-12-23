@@ -34,15 +34,15 @@
   tags:
     - template
 
-- name: "firewalld <|> Add prometheus service to firewall's {{ prometheus_server_firewall_zone | default('public') }} zone"
+- name: "firewalld <|> Add prometheus service to firewall's zone"
   ansible.posix.firewalld:
-    zone: "{{ prometheus_server_firewall_zone | default('public') }}"
+    zone: "{{ prometheus_server_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
     service: prometheus
     immediate: "yes"
     permanent: "yes"
     state: enabled
   when:
-    - ansible_facts.os_family == "RedHat"
+    - prometheus_firewall_open | bool
     - os_firewall | default(false) | bool
   tags:
     - firewall
@@ -66,6 +66,7 @@
     owner: prometheus
     group: prometheus
     mode: 0640
+    validate: /usr/bin/promtool check config %s
   notify: service <|> Restart prometheus service
   tags:
     - template
@@ -86,7 +87,7 @@
     group: prometheus
     mode: 0640
   loop: "{{ prometheus_server_additional_alerts }}"
-  when: prometheus_server_additional_alerts is defined and prometheus_server_additional_alerts
+  when: prometheus_server_additional_alerts is defined
 
 - name: template <|> Generate users alerts to /etc/prometheus/alerts/user_alerts.yml
   ansible.builtin.template:

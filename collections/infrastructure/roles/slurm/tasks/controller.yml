@@ -3,15 +3,14 @@
   ansible.builtin.include_tasks: "accounting.yml"
   when: slurm_enable_accounting
 
-- name: "firewalld <|> Add ports to firewall's {{ slurm_firewall_zone | default('public') }} zone"
+- name: "firewalld <|> Add ports to firewall's zone"
   ansible.posix.firewalld:
-    zone: "{{ slurm_firewall_zone | default('public') }}"
+    zone: "{{ slurm_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
     port: "{{ item }}/tcp"
     immediate: "yes"
     permanent: "yes"
     state: enabled
   when:
-    - ansible_facts.os_family == "RedHat"
     - os_firewall | default(false) | bool
   loop:
     - "{{ slurm_srunportrange }}"
@@ -54,6 +53,18 @@
   when: slurm_job_submit_lua_file is defined and slurm_job_submit_lua_file is not none
   tags:
     - template
+
+- name: "template <|> Generate block topology.conf in {{ slurm_home_path }}"
+  ansible.builtin.template:
+    src: "topology.conf.j2"
+    dest: "{{ slurm_home_path }}/topology.conf"
+    owner: slurm
+    group: slurm
+    mode: 0644
+  tags:
+    - template
+  when: slurm_topology == 'topology/block' or slurm_topology == 'topology/tree'
+  notify: service <|> restart slurmctld
 
 - name: service <|> Manage slurmctld state
   ansible.builtin.service:

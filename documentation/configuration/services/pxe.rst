@@ -142,3 +142,55 @@ Example:
     dnf install git -y
     %end
 
+
+Scripts during installation
+---------------------------
+
+It is possible to include scripts or snippets that will be run at different stages of the installation procedure.
+The exact injection points will depend on the distribution used. For now these are:
+
+**Debian**: The ``early_command`` and ``late_command`` preseed options. See the [official documentation](https://www.debian.org/releases/trixie/amd64/apbs05.en.html#preseed-hooks) for more details.
+
+These are the variables:
+
+* `pxe_stack_autoinstall_pre_scripts`: An array of snippets to be executed **in the installation environment** before the installation has started. Example:
+
+  .. code:: yaml
+
+    pxe_stack_autoinstall_pre_scripts:
+      - 'echo "nameserver 10.1.2.3" > /etc/resolv.conf'
+      - "{{ lookup('ansible.builtin.file', 'my_pre_script.sh') }}"
+      
+* `pxe_stack_autoinstall_pre_scripts`: An array of snippets to be executed **in the already installed environment** after the installation has finished. Example:
+  
+  .. code:: yaml
+
+    pxe_stack_autoinstall_post_scripts:
+      - systemctl enable systemd-networkd-wait-online
+      - "{{ lookup('ansible.builtin.file', 'my_post_script.sh') }}"
+
+
+
+OS specific settings
+--------------------
+
+Ubuntu
+''''''
+
+* ``os_pxe_ubuntu_apt_configuration``: allows to pass specific settings to the apt configuration during auto-installation
+
+Refer to https://cloudinit.readthedocs.io/en/latest/reference/modules.html#apt-configure for more details.
+
+An example can be:
+
+.. code:: yaml
+
+  os_pxe_ubuntu_apt_configuration: |+2
+      disable_suites:
+        - backports
+      primary:
+        - arches: amd64
+          uri: "http://myrepo/repositories/ubuntu/24.04/x86_64/os"
+      security:
+        - arches: amd64
+          uri: "http://myrepo/repositories/ubuntu/24.04/x86_64/os"

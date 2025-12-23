@@ -69,6 +69,9 @@ AccountingStorageHost={{ slurm_controller_hostname }}
 AccountingStoragePort={{ slurm_dbd_port | default('6819') }}
 AccountingStorageType=accounting_storage/slurmdbd
 JobAcctGatherType=jobacct_gather/linux
+{% if slurm_accounting_storage_tres is defined %}
+AccountingStorageTRES={{ slurm_accounting_storage_tres }}
+{% endif %}
 {% endif %}
 
 ## Acct Gather
@@ -77,6 +80,9 @@ AcctGatherEnergyType=acct_gather_energy/{{ slurm_acct_gather_energy_type }}
 AcctGatherInterconnectType=acct_gather_interconnect/{{slurm_acct_gather_interconnect_type}}
 AcctGatherFilesystemType=acct_gather_filesystem/{{ slurm_acct_gather_filesystem_type }}
 AcctGatherProfileType=acct_gather_profile/{{ slurm_acct_gather_profile_type }}
+
+## Topology
+TopologyPlugin={{ slurm_topology }}
 
 ## Additional content if exist
 {% if slurm_slurm_conf_additional_content is defined and slurm_slurm_conf_additional_content is iterable %}

@@ -8,7 +8,7 @@
   Group={{ item.group | default('root') }}
   Type={{ item.service_type | default("simple", true) }}
   WorkingDirectory={{ item.service_workingdirectory | default("/etc/" + item.service + "/", true) }}
-  ExecStart={{ item.path | default('/bin/'+item.service) }} \
+  ExecStart={{ item.path | default('/usr/bin/'+item.service) }} \
   {{ item.service_launch_parameters | default(item.launch_parameters, true) | default('', true) | indent(2, True) }}
 
 {% if item.service_raw_configuration is defined and item.service_raw_configuration is not none %}

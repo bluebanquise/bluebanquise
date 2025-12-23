@@ -1,22 +1,4 @@
 ---
-- name: command <|> Reload connections
-  ansible.builtin.command: nmcli con reload
-  when: nic_reload_connections
-
-# - name: command <|> netplan generate
-#   command: netplan generate
-#   notify:
-#     - command <|> networkctl reload
-
-# - name: command <|> networkctl reload
-#   command: networkctl reload
-
-- name: reboot <|> Reboot system
-  ansible.builtin.reboot:
-    reboot_timeout: "{{ nic_reboot_timeout }}"
-  when:
-    - nic_allow_reboot
-
 - name: "service <|> Restart nic services"
   ansible.builtin.service:
     name: "{{ item }}"
@@ -25,3 +7,17 @@
   when:
     - "'service' not in ansible_skip_tags"
     - nic_start_services | default(bb_start_services) | default(true) | bool
+
+- name: command <|> Reload connections
+  community.general.nmcli:
+    conn_name: "{{ item.item.conn_name | default(item.item.interface) | string }}"
+    state: up
+    conn_reload: true
+  loop: "{{ nic_apply.results }}"
+  when: nic_reload_connections and item.changed
+
+- name: reboot <|> Reboot system
+  ansible.builtin.reboot:
+    reboot_timeout: "{{ nic_reboot_timeout }}"
+  when:
+    - nic_allow_reboot | bool

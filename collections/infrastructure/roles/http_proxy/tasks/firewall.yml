@@ -1,0 +1,13 @@
+---
+- name: "firewalld <|> Add services to firewall's zone"
+  ansible.posix.firewalld:
+    zone: "{{ http_proxy_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
+    port: "{{ http_proxy_port }}/tcp"
+    immediate: "yes"
+    permanent: "yes"
+    state: enabled
+  when:
+    - os_firewall | default(false) | bool
+  loop: "{{ http_proxy_firewall_services_to_add }}"
+  tags:
+    - firewall

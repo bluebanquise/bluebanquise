@@ -1,4 +1,9 @@
 from ansible.plugins.vars import BaseVarsPlugin
+try:
+    from ansible.template import trust_as_template
+except ImportError:
+    def trust_as_template(value):
+        return value
 
 
 class VarsModule(BaseVarsPlugin):
@@ -8,7 +13,7 @@ class VarsModule(BaseVarsPlugin):
         super(VarsModule, self).get_vars(loader, path, entities)
         data = {
 
-            # Core version: 3.2.1
+            # Core version: 3.2.2
             'bb_core_iceberg_naming': 'iceberg',
             'bb_core_equipment_naming': 'equipment',
             'bb_core_os_naming': 'os',
@@ -24,23 +29,23 @@ class VarsModule(BaseVarsPlugin):
             # ## Network
 
             # List of management networks.
-            'j2_management_networks': "{{ networks | select('match','^'+bb_core_management_networks_naming+'-[a-zA-Z0-9]+') | list | unique | sort }}",
+            'j2_management_networks': trust_as_template("{{ networks | select('match','^'+bb_core_management_networks_naming+'-[a-zA-Z0-9]+') | list | unique | sort }}"),
 
             # # Resolution
             # Resolution network. The network on which host can be ping by direct name. (ex: ping c001).
-            'j2_node_main_resolution_network': "{{ network_interfaces[0].network | default(none) }}",
+            'j2_node_main_resolution_network': trust_as_template("{{ network_interfaces[0].network | default(none) }}"),
             # Resolution address.
-            'j2_node_main_resolution_address': "{{ (network_interfaces[0].ip4 | default('')).split('/')[0] | default(none) }}",
+            'j2_node_main_resolution_address': trust_as_template("{{ (network_interfaces[0].ip4 | default('')).split('/')[0] | default(none) }}"),
 
             # # Main network
             # The network used by Ansible to deploy configuration (related to ssh).
             # Also the network used by the host to get services ip.
             # This network must have 3 keys defined at least: network, interface, and ip4, to be considered valid as main network.
-            'j2_node_main_network': "{{ network_interfaces | default([]) | selectattr('network','defined') | selectattr('interface','defined') | selectattr('ip4','defined') | selectattr('network','match','^'+bb_core_management_networks_naming+'-[a-zA-Z0-9]+') | map(attribute='network') | list | first | default(none) }}",
+            'j2_node_main_network': trust_as_template("{{ network_interfaces | default([]) | selectattr('network','defined') | selectattr('interface','defined') | selectattr('ip4','defined') | selectattr('network','match','^'+bb_core_management_networks_naming+'-[a-zA-Z0-9]+') | map(attribute='network') | list | first | default(none) }}"),
             # Main network interface. For consistency, we use j2_node_main_network as source.
-            'j2_node_main_network_interface': "{{ network_interfaces | default([]) | selectattr('network','defined') | selectattr('interface','defined') | selectattr('ip4','defined') | selectattr('network','match','^'+bb_core_management_networks_naming+'-[a-zA-Z0-9]+') | map(attribute='interface') | list | first | default(none) }}",
+            'j2_node_main_network_interface': trust_as_template("{{ network_interfaces | default([]) | selectattr('network','defined') | selectattr('interface','defined') | selectattr('ip4','defined') | selectattr('network','match','^'+bb_core_management_networks_naming+'-[a-zA-Z0-9]+') | map(attribute='interface') | list | first | default(none) }}"),
             # Main address, same concept.
-            'j2_node_main_address': "{{ network_interfaces | default([]) | selectattr('network','defined') | selectattr('interface','defined') | selectattr('ip4','defined') | selectattr('network','match','^'+bb_core_management_networks_naming+'-[a-zA-Z0-9]+') | map(attribute='ip4') | list | first | default(none) }}",
+            'j2_node_main_address': trust_as_template("{{ network_interfaces | default([]) | selectattr('network','defined') | selectattr('interface','defined') | selectattr('ip4','defined') | selectattr('network','match','^'+bb_core_management_networks_naming+'-[a-zA-Z0-9]+') | map(attribute='ip4') | list | first | default(none) }}"),
 
             # Generate the nodes list, as a cache for network_interfaces
             # Example:
@@ -63,7 +68,7 @@ class VarsModule(BaseVarsPlugin):
             # This is a transverse j2 (j2_bb_), used as a cache fact
             # An optimisation is made so that icebergs_main_network_dict is only calculated for management nodes (because its slow)
             # Note for me: TODO icebergs_main_network_dict must disapear, find how.
-            'j2_bb_nodes': """{%- set bnodes = {} -%}
+            'j2_bb_nodes': trust_as_template("""{%- set bnodes = {} -%}
             {%- for host in j2_hosts_range -%}
               {% set hostvars_buffer = hostvars[host] %}
               {%- do bnodes.update({
@@ -76,7 +81,7 @@ class VarsModule(BaseVarsPlugin):
                 }
               }) -%}
             {%- endfor -%}
-            {{ bnodes }}""",
+            {{ bnodes }}"""),
 
             # # Equipments
             # Generate the list of nodes with their associated os and hw groups as values, along their equipment profile ep
@@ -86,7 +91,7 @@ class VarsModule(BaseVarsPlugin):
             #     os: os_ubuntu_22.04_gpu
             #     ep: hw_supermicro_XXX_with_os_ubuntu_22.04_gpu
             # This is a transverse j2 (j2_bb_), used as a cache fact
-            'j2_bb_nodes_profiles': """{%- set bnodes_profiles = {} -%}
+            'j2_bb_nodes_profiles': trust_as_template("""{%- set bnodes_profiles = {} -%}
             {%- for host in j2_hosts_range -%}
               {%- set host_hw = (hostvars[host]['group_names'] | select('match','^'+bb_core_hw_naming+'_.*') | list | unique | sort | first) | default(none, true) -%}
               {%- set host_os = (hostvars[host]['group_names'] | select('match','^'+bb_core_os_naming+'_.*') | list | unique | sort | first) | default(none, true) -%}
@@ -98,7 +103,7 @@ class VarsModule(BaseVarsPlugin):
               {%- endif -%}
               {%- do bnodes_profiles.update({host: {'hw': host_hw, 'os': host_os, 'ep': host_ep, 'type': host_type}}) -%}
             {%- endfor -%}
-            {{ bnodes_profiles }}""",
+            {{ bnodes_profiles }}"""),
 
             # Generate the equipments that are existing combination of hardware and os profiles
             # and store the list of associated nodes inside these equipments. Nodes without both hw_ and os_ are ignored.
@@ -118,7 +123,7 @@ class VarsModule(BaseVarsPlugin):
             # It is expected that the dependency fact be bb_nodes_profiles
             # If the dependency fact was not already cached, it will not be used but that implies longuer calculations
             # generic equipment does not inherit any hw or os values, so should rely on the roles default ones
-            'j2_bb_equipments': """{%- set bequipments = {} -%}
+            'j2_bb_equipments': trust_as_template("""{%- set bequipments = {} -%}
             {%- if bb_nodes_profiles is defined -%}
               {%- set bnodes_profiles = bb_nodes_profiles -%}
             {%- else -%}{# Calculate since not cached #}
@@ -147,18 +152,18 @@ class VarsModule(BaseVarsPlugin):
             {{ bequipments['generic']['nodes'].append(host) }}
               {%- endif -%}
             {%- endfor -%}
-            {{ bequipments }}""",
+            {{ bequipments }}"""),
 
             # ## Icebergs
             # Grab current iceberg group
-            'j2_current_iceberg': "{{ bb_icebergs | default(false) | ternary( group_names | select('match','^'+bb_core_iceberg_naming+'[a-zA-Z0-9]+') | list | unique | sort | first | default(bb_core_iceberg_naming+'1'), bb_core_iceberg_naming+'1') }}",
+            'j2_current_iceberg': trust_as_template("{{ bb_icebergs | default(false) | ternary( group_names | select('match','^'+bb_core_iceberg_naming+'[a-zA-Z0-9]+') | list | unique | sort | first | default(bb_core_iceberg_naming+'1'), bb_core_iceberg_naming+'1') }}"),
             # Grab current iceberg number
-            'j2_current_iceberg_number': "{{ j2_current_iceberg | replace(bb_core_iceberg_naming,' ') | trim }}",
+            'j2_current_iceberg_number': trust_as_template("{{ j2_current_iceberg | replace(bb_core_iceberg_naming,' ') | trim }}"),
             # Generate range of hosts to include in current configurations
-            'j2_hosts_range': "{{ ((bb_icebergs | default(false)) == true) | ternary( (groups[j2_current_iceberg] | default([])), groups['all']) }}",
+            'j2_hosts_range': trust_as_template("{{ ((bb_icebergs | default(false)) == true) | ternary( (groups[j2_current_iceberg] | default([])), groups['all']) }}"),
             # List all icebergs
-            'j2_icebergs_groups_list': "{{ groups | select('match','^'+bb_core_iceberg_naming+'[a-zA-Z0-9]+') | list }}",
+            'j2_icebergs_groups_list': trust_as_template("{{ groups | select('match','^'+bb_core_iceberg_naming+'[a-zA-Z0-9]+') | list }}"),
             # Get total number of icebergs
-            'j2_number_of_icebergs': "{{ groups | select('match','^'+bb_core_iceberg_naming+'[a-zA-Z0-9]+') | list | length }}"
+            'j2_number_of_icebergs': trust_as_template("{{ groups | select('match','^'+bb_core_iceberg_naming+'[a-zA-Z0-9]+') | list | length }}")
         }
         return data

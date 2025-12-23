@@ -3,11 +3,11 @@
 - name: service <|> Restart http server service
   ansible.builtin.service:
     name: "{{ item }}"
-    state: "{{ (http_server_start_services | default(bb_start_services) | default(true, true) | bool) | ternary('restarted', omit) }}"
+    state: restarted
   loop: "{{ http_server_services_to_start }}"
   when:
     - "'service' not in ansible_skip_tags"
-    - http_server_start_services | default(bb_start_services) | default(true, true)
+    - http_server_start_services | default(bb_start_services) | default(true) | bool
 
 - name: lineinfile <|> Disable default listen on all interfaces
   ansible.builtin.lineinfile:

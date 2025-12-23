@@ -7,7 +7,7 @@
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_group }}"
-  with_items:
+  loop:
     - opensuse_15.ipxe
     - sles_12.ipxe
     - sles_15.ipxe
@@ -43,7 +43,7 @@
     # validate: /usr/bin/xmllint --noout --relaxng /usr/share/YaST2/schema/autoyast/rng/profile.rng %s
   vars:
     equipment: "{{ bb_equipments[item] | default({}, true) }}"
-  with_items: "{{ bb_equipments | default({}, true) }}"
+  loop: "{{ bb_equipments | default({}, true) | flatten(levels=1) }}"
   when:
     - (bb_equipments[item]['hw']['hw_equipment_type'] | default(pxe_stack_hw_equipment_type)) == "server"
     - (bb_equipments[item]['os']['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution) | lower) in ['opensuse','sles']
@@ -60,7 +60,7 @@
     group: "{{ pxe_stack_apache_group }}"
   vars:
     equipment: "{{ bb_equipments[item] | default({}, true) }}"
-  with_items: "{{ bb_equipments | default({}, true) }}"
+  loop: "{{ bb_equipments | default({}, true) | flatten(levels=1) }}"
   when:
     - (bb_equipments[item]['hw']['hw_equipment_type'] | default(pxe_stack_hw_equipment_type)) == "server"
     - (bb_equipments[item]['os']['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution) | lower) in ['opensuse','sles']

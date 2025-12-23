@@ -2,15 +2,51 @@
 
 Format: <date> - <author (username or mail or both)> - [role] <change description>
 
-# To 3.2.7
+# To 3.2.9
 
+* 12/18/25 - fabienarchambault - [slurm] add support for nvml to AutoDetect GPU gres (#1187)
+* 12/17/25 - dietergorecki - [kernel_config] update kernel_config role to add support for ubuntu (#1188)
+* 12/11/25 - jpiles - [pxe_stack] Add support for pre- and post-installation scripts in debian preseed
+* 12/08/25 - ginomcevoy [pcs] Fix pcs handler reference node (#1196)
+* 12/08/25 - btravouillon - [slurm] Skip debug task in Slurm role by default (#1194)
+* 12/08/25 - fabienarchambault - [slurm] Slurm Feature: add support for topology in Slurm (#1191)
+* 12/03/25 - btravouillon - [pxe_stack] Display nodes with boot=next in bootset status (#1190)
+* 12/02/25 - dietergorecki - [nic] Enforce networkmanager configuration (#1189)
+* 12/02/25 - btravouillon - [nic] Restart NetworkManager before reloading nmcli conn (#1185)
+* 11/28/25 - btravouillon - [nic] Ensure systemd-networkd is stopped in nic role (#1182)
+* 11/28/25 - btravouillon - [nic] Restart nic services when NICs config change (#1183)
+* 11/28/25 - btravouillon - [nic] Ensure nic_allow_reboot is checked as a boolean(#1181)
+* 11/28/25 - btravouillon - [pxe_stack] Ensure Ubuntu ssh.allow-pw is a boolean (#1178)
+* 11/28/25 - oxedions - [all] Update firewall to allow new bb_services_firewall_zone variable and switch all os on firewalld (#1162 and #1163)
+* 11/27/25 - thiagocardozo - [conman] Passwords in database file for increased security (#1175)
+* 11/26/25 - btravouillon - [pxe_stack] Allow to define Ubuntu autoinstall ssh.allow-pw (#1171)
+* 11/25/25 - jpiles - [pxe_stack] add support for debian 13 (#1166)
+* 11/24/25 - dietergorecki - [nic] Enhance way to apply connection modifications (#1169)
+* 11/24/25 - oxedions - [interconnect] Update service name for RHEL (#1131)
+* 11/24/25 - oxedions - [dhcp_server] Prevent non admin networks to be added into DHCP (#1125)
+* 11/24/25 - oxedions - [http_server,conman,powerman] Fix services restart handlers (#1157)
+* 11/24/25 - oxedions - [http_server] Fix typo in task (#1150)
+* 11/24/25 - oxedions - [haproxy] Fix bad copy past for backend (#1151)
+* 11/21/25 - btravouillon - [sudoers] Fix conditional in sudoers for Ansible Core 2.19 (#1165)
+* 11/21/25 - dietergorecki - [pxe_stack] fix apt sources cleanup process (#1161)
+* 11/20/25 - ginomcevoy - [auditd] Fix improper start services for auditd role (#1157)
+* 11/19/25 - dietergorecki - [pxe_stack] add support for apt customization (#1159)
+* 11/19/25 - oxedions - [pxe_stack,nic,repositories,interconnect] Fix remaining deprecated with_items (#1158)
+* 11/19/25 - dietergorecki - [pxe_stack] Create an empty vendor-data to avoid timeout in cloud-init (#1156)
+* 11/16/25 - btravouillon / dietergorecki - [system] Allow directory creation before file templating in system role (#1154)
+* 11/13/25 - oxedions - [rsyslog] Add rsyslog_logrotate_config to overwrite logrotate configuration. (#1149, from vedmonds)
+
+# 3.2.7 / 3.2.8
+
+* 11/10/25 - oxedions - [core] Enable compatibility with ansible core 2.19+, keep backward compatibility.
+* 11/10/25 - oxedions - [nic] Fix issue with system restarting on ubuntu/debian.
 * 11/10/25 - oxedions - [project] Join all repos into a single one, to simplify the current heavy maintenance.
 * 11/10/25 - thiagocardozo - [dhcp] BMCs no longer must have a MAC defined. Thiago Cardozo <boubee.thiago@gmail.com>
 * 11/06/25 - oxedions - [nfs] Set nfs v3 as default instead of 4.2.
 * 11/06/25 - oxedions - [pxe_stack] Disable auto clonezilla support.
-* 12/09/25 - santos-lucas - [slurm] Added support for gres in confiless mode. Lucas Santos <lucassouzasantos@gmail.com> 
+* 12/09/25 - santos-lucas - [slurm] Added support for gres in confiless mode. Lucas Santos <lucassouzasantos@gmail.com>
 * 8/09/25 - santos-lucas - [lustre_client] Fix issues with multiple-lnet setup. Lucas Santos <lucassouzasantos@gmail.com>
-* 6/09/25 - santos-lucas - [slurm] Added support for pam_slurm_adoption. Lucas Santos <lucassouzasantos@gmail.com> 
+* 6/09/25 - santos-lucas - [slurm] Added support for pam_slurm_adoption. Lucas Santos <lucassouzasantos@gmail.com>
 * 8/29/25 - santos-lucas - [slurm]  Fix slurm local accounting service state managent and support to el9.
 * 8/18/25 - oxedions - [nic] Fix mask systemd-networkd.socket and add tag nic_os_dedicated_tasks to disable os tasks. (#1122, from vedmonds)
 * 8/18/25 - oxedions - [nic] Fix missing test when renaming interface name. (#1123, from vedmonds)

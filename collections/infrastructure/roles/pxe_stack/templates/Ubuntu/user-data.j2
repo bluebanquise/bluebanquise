@@ -1,4 +1,4 @@
-#jinja2: lstrip_blocks: "True"
+#jinja2: lstrip_blocks: True
 #cloud-config
 
 #### Blue Banquise file ####
@@ -25,6 +25,9 @@ autoinstall:
   apt:
     geoip: false
     preserve_sources_list: {{ pxe_stack_preserve_repositories }}
+    {% if equipment['os']['os_pxe_ubuntu_apt_configuration'] is defined %}
+{{ equipment['os']['os_pxe_ubuntu_apt_configuration'] | indent(2, True) }}
+    {% endif %}
   keyboard: {layout: {{ (equipment['os']['os_keyboard_layout'] | default(pxe_stack_os_keyboard_layout)) | lower }}, toggle: null, variant: ''}
   locale: {{ equipment['os']['os_system_language'] | default(pxe_stack_os_system_language) }}
   timezone: {{ pxe_stack_time_zone | default(bb_time_zone, true) | default('Europe/Brussels', true) }}
@@ -64,7 +67,7 @@ autoinstall:
   {% endif %}
   ssh:
     install-server: true
-    allow-pw: true
+    allow-pw: {{ pxe_stack_ssh_allow_passwords | bool }}
   {% if pxe_stack_post_install_action in ['poweroff', 'halt', 'shutdown'] %}
   shutdown: poweroff
   {% else %}
@@ -88,6 +91,7 @@ autoinstall:
   {% endif %}
   {% if not pxe_stack_preserve_repositories %}
     - echo " " > /target/etc/apt/sources.list
+    - echo " " > /target/etc/apt/sources.list.d/ubuntu.sources
   {% endif %}
   {% if (equipment['hw']['hw_preserve_efi_first_boot_device'] | default(pxe_stack_hw_preserve_efi_first_boot_device)) == true %}
     - sh -c '[ -d /sys/firmware/efi ] && efibootmgr -o $(efibootmgr | grep BootCurrent | cut -d" " -f2),$(efibootmgr | grep BootOrder | sed "s/BootOrder:\ //" | sed "s/$(efibootmgr | grep BootCurrent | cut -d" " -f2),//") || echo "Not an EFI system, skipping"'

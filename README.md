@@ -10,9 +10,9 @@ Devs infos:
 
 :green_heart: The main branch is now considered stable.
 
-:green_heart: Current core version: 3.2.1
+:green_heart: Current core version: 3.2.2 .
 
-:broken_heart: ansible-core 2.19 is not currently compatible, stack is limited to 2.18.10, work in progress to solve this issue.
+:green_heart: ansible-core 2.19 is now supported.
 
 :yellow_heart: documentation v3 is currently written, might take few weeks to complete.
 
@@ -32,6 +32,8 @@ The infrastructure collection should be compatible with most target Linux distri
 ## License
 
 BlueBanquise repository is under **MIT license**, except Bluebanquise documentation which is under **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License**.
+
+:penguin: The BlueBanquise project is a **100% open source project, not managed by a company, and will stay MIT license**. :penguin:
 
 ## Donate
 
@@ -90,6 +92,43 @@ If you are not running Ansible as root, remember to pass the `-b` (`--become`) a
 
 It is advised to read the documentation at https://bluebanquise.com/documentation/ to understand stack basic concepts.
 
+### 5. Topology file
+
+In order to create a topology, you can use the variable `slurm_topology`. It takes into account the Swicth and Block options like in https://slurm.schedmd.com/topology.html
+
+A sample of inventory for Blocks will be:
+```yaml
+slurm_topology: topology/block
+slurm_topology_blocksizes: 18
+slurm_topology_file:
+  rack1:
+    section: BlockName
+    subsection: Nodes
+    nodeset: c[01-18]
+  rack2:
+    section: BlockName
+    subsection: Nodes
+    nodeset: c[19-36]
+```
+
+A sample for an inventory for Switches will be:
+```yaml
+slurm_topology: topology/tree
+slurm_topology_file:
+  isw101:
+    section: SwitchName
+    subsection: Nodes
+    nodeset: c[01-20]
+  isw102:
+     section: SwitchName
+     subsection: Nodes
+     nodeset: c[21-40]
+  isw201:
+     section: SwitchName
+     subsection: Switches
+     nodeset: isw[101-102]
+```
+
 ## Resources
 
 ### Documentation
@@ -134,8 +173,6 @@ Please note that:
 ## The project
 
 It is a revamping of the old stack [Banquise](https://github.com/oxedions/banquise), based on Salt.
-
-:seedling: The BlueBanquise project is a **100% open source project, not managed by a company, and will stay MIT license**. :seedling:
 
 ## The name
 

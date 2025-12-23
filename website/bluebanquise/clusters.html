@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html class="has-navbar-fixed-top"><head>
+<title>BlueBanquise - Clusters</title>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/css/bulma.min.css">
+  <script defer src="/js/all.js"></script>
+<!-- from https://codepen.io/hunzaboy/pen/yoPKQW -->
+	<script>
+	document.addEventListener('DOMContentLoaded', function () {
+  // Get all "navbar-burger" elements
+  var $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+  // Check if there are any nav burgers
+  if ($navbarBurgers.length > 0) {
+    // Add a click event on each of them
+    $navbarBurgers.forEach(function ($el) {
+      $el.addEventListener('click', function () {
+        // Get the target from the "data-target" attribute
+        var target = $el.dataset.target;
+        var $target = document.getElementById(target);
+        // Toggle the class on both the "navbar-burger" and the "navbar-menu"
+        $el.classList.toggle('is-active');
+        $target.classList.toggle('is-active');
+      });
+    });
+  }
+  });
+	</script>
+  <style>
+
+/*
+ * The banner with background image.
+ * we use relative positioning to be able to position the banner content properly
+ * background taken from:
+ * https://unsplash.com/@roylandnye
+ *
+ */
+
+.main-intro {
+    margin-top: 5em;
+}
+
+.blue-section {
+background: rgb(37,124,163);
+background: linear-gradient(180deg, rgba(53, 184, 245, 0.04) 0%, rgba(8,21,129,0) 30%, rgba(0,212,255,0) 100%);
+margin-top: 6em;
+}
+/* 
+.banner {
+    text-align: center;
+    width: 100%;
+    margin-bottom: 0em;
+    margin-top: 0em;
+}
+
+.banner-content {
+    position: absolute;
+    top: 50%;
+    margin-top: -110px;
+    width: 100%;
+}
+
+.banner h1 {
+    margin-bottom: 0;
+    font-size: 2em;
+    color: white;
+    font-weight: 500;
+    text-shadow: 0 2px 2px black;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+.banner h3 {
+    margin-bottom: 0;
+    font-size: 1em;
+    color: white;
+    font-weight: 500;
+    text-shadow: 0 2px 2px black;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+.banner-head {
+    margin-bottom: 0;
+    font-size: 2em;
+    color: white;
+    font-weight: 500;
+    text-shadow: 0 1px 1px black;
+}
+
+.banner-head-small {
+    margin-bottom: 0;
+    font-size: 1em;
+    color: white;
+    font-weight: 500;
+    text-shadow: 0 1px 1px black;
+} */
+
+html.has-navbar-fixed-top {
+  padding-top: 0em;
+}
+
+.navbar-item img { 
+  max-height: 3rem;
+}
+
+.navbar-item {
+  font-size: 1.5em;
+  padding: .5rem 1.2rem;
+}
+
+.navbar-item.is-mega {
+  position: static;
+
+  .is-mega-menu-title {
+    margin-bottom: 0;
+    padding: .375rem 1rem;
+  }
+}
+
+.custom_banner {
+  position: relative;
+  text-align: center;
+  color: white;
+  margin-bottom: 10em;
+
+}
+
+.custom_banner_centered {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.custom_banner h1 {
+    margin-bottom: 0;
+    font-size: 2em;
+    color: white;
+    font-weight: 500;
+    text-shadow: 0 2px 2px black;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+.custom_banner h3 {
+    margin-bottom: 0;
+    font-size: 1em;
+    color: white;
+    font-weight: 500;
+    text-shadow: 0 2px 2px black;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+@media only screen and (max-width: 800px) {
+ .hide-mobile 
+ {display:none;}
+}
+
+</style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar is-spaced has-shadow">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://bluebanquise.com">
+        <img src="/images/BlueBanquise_logo_large_2.svg" alt="BlueBanquise, an Ansible stack">
+      </a>
+      <div class="navbar-burger burger" data-target="navMenubd-example">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+    <div id="navMenubd-example" class="navbar-menu">
+      <div class="navbar-start">
+        <a class="navbar-item" href="/index.html">
+          Home
+        </a>
+        <a class="navbar-item" href="/collections.html">
+          Collections
+        </a>
+        <a class="navbar-item " href="/tutorials.html">
+          Tutorials
+        </a>
+        <a class="navbar-item is-active" href="/stack.html">
+          Stack
+        </a>
+        <a class="navbar-item" href="/resources.html">
+          Resources
+        </a>
+        <a class="navbar-item" href="/clusters.html">
+          Clusters
+        </a>
+
+        <a class="navbar-item" href="/about.html">
+          About
+        </a>
+        <div class="navbar-end">
+          <a class="navbar-item is-hidden-desktop-only" href="https://github.com/bluebanquise/bluebanquise" target="_blank">
+            <span class="icon" style="color: #333;">
+              <i class="fab fa-github"></i>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <section class="main-intro">
+    <div class="container">
+
+      <section class="main-intro">
+        <div class="container">
+          <nav class="columns">
+            <div class="column">
+              <div style="text-align: center;">
+                <img src="images/small_cluster.svg" alt="Ansible collections" width="30%" height="30%">
+              </div>
+            </div>
+          </nav>
+        </div>
+      </section>
+
+      <section class="hero">
+        <div class="hero-body">
+          <h1 class="title algolia-lvl0">
+            Clusters
+          </h1>
+          <br>
+          <div class="subtitle is-4 algolia-lvl1">
+            List of known clusters using <span style="color: #108bde">Blue</span>Banquise as a part of their tooling.
+            <br> While there are recent clusters, BlueBanquise is also used to maintain second hand clusters.
+            <br> It is very difficult to get a real list, so I try time to time to get on the web infos on who is using it &#128522;
+            <br> If you use Bluebanquise, please add your cluster here if you accept (via a PR on the github repository).
+          </div>
+        </div>
+      </section>
+
+      <section class="hero">
+        <div class="hero-body">
+          <h2 class="title is-4">Lofoy</h2>
+          Cluster name: Lofoy
+          <br>Country: Democratic Republic of the Congo
+          <br>Entity: Université Nouveaux Horizons
+          <br>System administrator: Trésor AMSINI
+        </div>
+      </section>
+
+      <section class="hero">
+        <div class="hero-body">
+          <h2 class="title is-4">Kareline</h2>
+          Cluster name: Kareline
+          <br>Country: France
+          <br>Entity: Université Grenoble Alpes
+          <br>System administrator: Patrick Bégou
+          <br>Users team: <a href="https://www.legi.grenoble-inp.fr/web/spip.php?article1395&lang=fr">https://www.legi.grenoble-inp.fr/web/spip.php?article1395&lang=fr</a>
+        </div>
+      </section>
+
+      <section class="hero">
+        <div class="hero-body">
+          <h2 class="title is-4">Tenibre</h2>
+          Cluster name: Tenibre
+          <br>Country: France
+          <br>Entity: Université Grenoble Alpes
+          <br>System administrator: Patrick Bégou
+        </div>
+      </section>
+
+      <section class="hero">
+        <div class="hero-body">
+          <h2 class="title is-4">Osorno</h2>
+          Cluster name: Osorno
+          <br>Country: France
+          <br>Entity: Université Grenoble Alpes
+          <br>System administrator: Patrick Bégou
+        </div>
+      </section>
+
+      <section class="hero">
+         <div class="hero-body">
+           <h2 class="title is-4">MCIA - Poudlard</h2>
+           Cluster name: Poudlard
+           <br>Country: France
+           <br>Entity: Mésocentre de Calcul Intensif Aquitain
+           <br>System administrator: Alexandra Darrieutort, Pierre Gay
+           <br>Cluster details: <a href=https://gazette-du-sorcier.mcia.fr/projects/poudlard/wiki>https://gazette-du-sorcier.mcia.fr/projects/poudlard/wiki</a>
+         </div>
+      </section>
+
+      <section class="hero">
+         <div class="hero-body">
+           <h2 class="title is-4">Trex</h2>
+           Cluster name: Trex
+           <br>Country: France
+           <br>Entity: CNES
+           <br>Web links found: <a href="https://www.comet-cnes.fr/sites/default/files/ressources/03-Eviden_Monitoring.pdf">https://www.comet-cnes.fr/sites/default/files/ressources/03-Eviden_Monitoring.pdf</a>
+         </div>
+      </section>
+
+      <section class="hero">
+         <div class="hero-body">
+           <h2 class="title is-4">ISEM</h2>
+           Cluster name: ?
+           <br>Country: France
+           <br>Entity: Université de Montpellier
+           <br>Web links found: <a href="https://doc.isem-evolution.fr/singularity/">https://doc.isem-evolution.fr/singularity/</a>
+         </div>
+      </section>
+
+      <section class="hero">
+         <div class="hero-body">
+           <h2 class="title is-4">Aion</h2>
+           Cluster name: Aion
+           <br>Country: Luxembourg
+           <br>Entity: University of Luxembourg
+           <br>Web links found: <a href="https://orbilu.uni.lu/bitstream/10993/51857/1/acm-hpcct22-final.pdf">https://orbilu.uni.lu/bitstream/10993/51857/1/acm-hpcct22-final.pdf</a> , <a href="https://dl.acm.org/doi/10.1145/3560442.3560445">https://dl.acm.org/doi/10.1145/3560442.3560445</a>
+         </div>
+      </section>
+
+      <section class="hero">
+         <div class="hero-body">
+           <h2 class="title is-4">Noctua 2</h2>
+           Cluster name: Noctua 2
+           <br>Country: Germany
+           <br>Entity: University of Paderborn
+           <br>Web links found: <a href="https://ris.uni-paderborn.de/download/53663/53664/Noctua2_Supercomputer.pdf
+         </div>
+      </section>
+
+      <section class="hero">
+         <div class="hero-body">
+           <h2 class="title is-4">Vega</h2>
+           Cluster name: Vega
+           <br>Country: Slovenia
+           <br>Entity: IZUM
+           <br>Web links found: <a href="https://izum.si/en/vega-en/ , <a href="https://www.eurohpc-ju.europa.eu/system/files/2023-07/EuroHPC%20Systems%20Report-Sep2021.pdf
+         </div>
+      </section>
+
+      <section class="hero">
+         <div class="hero-body">
+           <h2 class="title is-4">EC Intelligence</h2>
+           Cluster name: ?
+           <br>Country: Africa
+           <br>Entity: EC Intelligence
+           <br>Web links found: <a href="https://www.youtube.com/watch?v=7giEAhypUrs">https://www.youtube.com/watch?v=7giEAhypUrs</a> , <a href="https://www.ecintelligence.ma/en/">https://www.ecintelligence.ma/en/</a>"
+         </div>
+      </section>
+
+      <section class="hero">
+         <div class="hero-body">
+           <h2 class="title is-4">LNCC</h2>
+           Cluster name: ?
+           <br>Country: Brazil
+           <br>Entity: LNCC
+           <br>Web links found: <a href="https://cenapad-rj.lncc.br/tutoriais/materiais-hpc/semana-sdumont/verao2021/P03-SD-2021-slides.pdf">https://cenapad-rj.lncc.br/tutoriais/materiais-hpc/semana-sdumont/verao2021/P03-SD-2021-slides.pdf</a>
+         </div>
+      </section>
+
+      <section class="hero">
+         <div class="hero-body">
+           <h2 class="title is-4">Bull SMC</h2>
+           Cluster name: Multiple clusters, names unknown
+           <br>Country: World
+           <br>Entity: Bull Eviden
+           <br>Web links found: <a href="https://support.bull.com/ols/product/system/sw-extremcomp/smart-management-center">https://support.bull.com/ols/product/system/sw-extremcomp/smart-management-center</a>
+         </div>
+      </section>
+
+    </div>
+  </section>
+
+  <section class="hero is-black">
+    <div class="hero-body">
+      <nav class="columns">
+        <div class="column">
+          This website is under MIT license.
+        </div>
+      </nav>
+    </div>
+  </section>
+
+</body>
+</html>

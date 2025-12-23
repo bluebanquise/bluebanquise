@@ -30,7 +30,7 @@
     msg: "Boolean variables in grafana_datasources shouldn't be passed as strings. Please remove unneeded apostrophes."
   when: ( item.isDefault is defined and item.isDefault is string ) or
         ( item.basicAuth is defined and item.basicAuth is string )
-  with_items: "{{ grafana_datasources }}"
+  loop: "{{ grafana_datasources | flatten(levels=1) }}"
 
 - name: preflight <|> Fail on bad database configuration
   ansible.builtin.fail:
@@ -54,7 +54,7 @@
     msg: "Check grafana_api_keys. The role can only be one of the following values: Viewer, Editor or Admin."
   when:
     - item.role not in ['Viewer', 'Editor', 'Admin']
-  with_items: "{{ grafana_api_keys }}"
+  loop: "{{ grafana_api_keys | flatten(levels=1) }}"
 
 - name: preflight <|> Fail when grafana_ldap isn't set when grafana_auth.ldap is
   ansible.builtin.fail:

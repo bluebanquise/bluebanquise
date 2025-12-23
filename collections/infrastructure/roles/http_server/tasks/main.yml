@@ -28,17 +28,8 @@
   tags:
     - package
 
-- name: include_tasks <|> Use OS dedicated firewall task
-  ansible.builtin.include_tasks: "{{ item }}"
-  with_first_found:
-    - files:
-        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
-        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
-        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
-        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
-        - "{{ ansible_facts.distribution | replace(' ','_') }}/firewall.yml"
-        - "{{ ansible_facts.os_family | replace(' ','_') }}/firewall.yml"
-      skip: true
+- name: include_tasks <|> Firewall
+  ansible.builtin.include_tasks: "firewall.yml"
   tags:
     - internal
     - firewall
@@ -62,7 +53,7 @@
 - name: template <|> Generate custom listen configuration
   ansible.builtin.template:
     src: listen.conf.j2
-    dest: "{{ pxe_stack_apache_conf_path }}/custom_listen.conf"
+    dest: "{{ http_server_apache_conf_path }}/custom_listen.conf"
     owner: root
     group: root
     mode: 0644
@@ -78,13 +69,13 @@
 - name: template <|> Generate http server configuration files
   ansible.builtin.template:
     src: custom.conf.j2
-    dest: "{{ pxe_stack_apache_conf_path }}/{{ item.name }}.conf"
+    dest: "{{ http_server_apache_conf_path }}/{{ item.name }}.conf"
     owner: root
     group: root
     mode: 0644
   tags:
     - template
-  with_items: "{{ http_server_configurations_files }}"
+  loop: "{{ http_server_configurations_files | flatten(levels=1) }}"
   when:
     - http_server_configurations_files is defined
     - http_server_configurations_files is not none
@@ -98,7 +89,7 @@
     ignore_configcheck: "{{ item.ignore_configcheck | default(omit, true) }}"
     name: "{{ item.name }}"
     state: "{{ item.state | default(omit, true) }}"
-  with_items: "{{ http_server_modules }}"
+  loop: "{{ http_server_modules | flatten(levels=1) }}"
   when:
     - http_server_modules is defined
     - http_server_modules is not none

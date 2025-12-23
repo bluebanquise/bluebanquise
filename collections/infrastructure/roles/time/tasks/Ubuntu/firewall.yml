@@ -1,9 +1,0 @@
-- name: ufw <|> "Add ntp ports to firewall"
-  community.general.ufw:
-    rule: allow
-    port: '123'
-    proto: udp
-  when:
-    - os_firewall | default(false) | bool
-  tags:
-    - firewall

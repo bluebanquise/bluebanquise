@@ -1,1 +1,0 @@
-ansible_cmdb_version=1.31

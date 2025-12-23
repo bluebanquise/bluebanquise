@@ -23,7 +23,7 @@
       until: _download_dashboards is succeeded
       retries: 5
       delay: 2
-      with_items: "{{ grafana_dashboards }}"
+      loop: "{{ grafana_dashboards | flatten(levels=1) }}"
       when: grafana_dashboards | length > 0
       changed_when: false
       check_mode: false
@@ -34,7 +34,7 @@
         regexp: '"(?:\${)?DS_[A-Z0-9_-]+(?:})?"'
         replace: '"{{ item.datasource }}"'
       changed_when: false
-      with_items: "{{ grafana_dashboards }}"
+      loop: "{{ grafana_dashboards | flatten(levels=1) }}"
       when: grafana_dashboards | length > 0
 
 - name: dashboards <|> Import grafana dashboards through API
@@ -87,5 +87,5 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: absent
-  with_items: "{{ dashboards_present_list | difference( dashboards_copied_list ) }}"
+  loop: "{{ dashboards_present_list | difference( dashboards_copied_list ) | flatten(levels=1) }}"
   when: grafana_provisioning_synced

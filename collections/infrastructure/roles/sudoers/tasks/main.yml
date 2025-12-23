@@ -20,7 +20,7 @@
     user: "{{ item.user | default(omit, true) }}"
     validation: "{{ item.validation | default(omit, true) }}"
   loop: "{{ sudoers }}"
-  when: sudoers is defined and sudoers
+  when: sudoers is defined and sudoers | length > 0
 
 - name: sudoers <|> Enable logging
   ansible.builtin.lineinfile:

@@ -1,9 +1,0 @@
----
-- name: ufw <|> "Add services to firewall"
-  community.general.ufw:
-    rule: allow
-    name: Apache
-  when:
-    - os_firewall | default(false) | bool
-  tags:
-    - firewall
