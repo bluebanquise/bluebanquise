@@ -21,3 +21,14 @@
     validation: "{{ item.validation | default(omit, true) }}"
   loop: "{{ sudoers }}"
   when: sudoers is defined and sudoers | length > 0
+
+- name: sudoers <|> Enable logging
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers
+    line: "{{ item }}"
+    state: present
+    validate: '/usr/sbin/visudo -cf %s'
+  with_items:
+    - "Defaults   log_output"
+    - "Defaults:{{ ansible_user }} !log_output"
+  when: sudoers_logging | bool
