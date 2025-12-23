@@ -1,11 +1,23 @@
 ---
 
-- name: "template <|> Generate /etc/hosts"
+- name: "template <|> generate /etc/hosts"
   ansible.builtin.template:
     src: hosts.j2
     dest: /etc/hosts
     owner: root
     group: root
     mode: 0644
+  when: not hosts_file_copy or "fn_management" in group_names
+  tags:
+    - template
+
+- name: "copy <|> copy /etc/hosts"
+  ansible.builtin.copy:
+    src: /etc/hosts
+    dest: /etc/hosts
+    owner: root
+    group: root
+    mode: 0644
+  when: hosts_file_copy and "fn_management" not in group_names
   tags:
     - template
