@@ -64,7 +64,7 @@
   tags:
     - template
   when: slurm_topology == 'topology/block' or slurm_topology == 'topology/tree'
-  notify: service <|> restart slurmd
+  notify: service <|> restart slurmctld
 
 - name: service <|> Manage slurmctld state
   ansible.builtin.service:

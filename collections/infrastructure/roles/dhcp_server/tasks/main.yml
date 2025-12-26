@@ -78,7 +78,7 @@
   when:
     - networks is defined and networks is iterable and networks is not string and networks is mapping
     - networks[item] is defined and networks[item] is not none
-    - networks[item].is_in_dhcp | default(true, true)
+    - networks[item].is_in_dhcp | default(true)
   notify: service <|> Restart dhcp server
   tags:
     - template

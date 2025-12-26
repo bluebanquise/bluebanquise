@@ -4,6 +4,9 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.2.9
 
+* 12/23/25 - btravouillon - [dhcp_server] Fix is_in_dhcp condition (#1200)
+* 12/23/25 - btravouillon - [slurm] Restart slurmctld when the topology changes (#1201)
+* 12/23/25 - dietergorecki - [sudoers] Enable logging support in sudoers (#1203)
 * 12/18/25 - fabienarchambault - [slurm] add support for nvml to AutoDetect GPU gres (#1187)
 * 12/17/25 - dietergorecki - [kernel_config] update kernel_config role to add support for ubuntu (#1188)
 * 12/11/25 - jpiles - [pxe_stack] Add support for pre- and post-installation scripts in debian preseed
