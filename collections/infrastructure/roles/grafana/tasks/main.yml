@@ -136,13 +136,13 @@
 
 - name: "grafana <|> Check if there are any dashboards in local {{ grafana_dashboards_dir }}"
   ansible.builtin.set_fact:
-    found_dashboards: "{{ lookup('fileglob', grafana_dashboards_dir + '/*.json', wantlist=True) }}"
+    grafana_found_dashboards: "{{ lookup('fileglob', grafana_dashboards_dir + '/*.json', wantlist=True) }}"
   tags:
     - dashboards
 
 - name: include_tasks <|> dashboards
   ansible.builtin.include_tasks: dashboards.yml
-  when: grafana_dashboards | length > 0 or found_dashboards | length > 0
+  when: grafana_dashboards | length > 0 or grafana_found_dashboards | length > 0
   tags:
     - dashboards
 

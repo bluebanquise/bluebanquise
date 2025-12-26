@@ -1,5 +1,2 @@
 ---
 kernel_config_sysctl_reload: true
-os_kernel_parameters: ""
-hw_kernel_parameters: ""
-hw_console: ""
