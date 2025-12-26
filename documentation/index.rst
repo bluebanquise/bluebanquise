@@ -74,6 +74,7 @@ This documentation is under Creative Commons Attribution-NonCommercial-ShareAlik
    deployment/strategy
    deployment/provision_os
    deployment/apply_configuration
+   deployment/scalability
 
 .. toctree::
    :maxdepth: 1

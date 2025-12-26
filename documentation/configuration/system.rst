@@ -20,3 +20,4 @@ You will find bellow the detailed configuration available for each system relate
    system/hosts_file
    system/access_control
    system/cloudinit
+   system/cron
