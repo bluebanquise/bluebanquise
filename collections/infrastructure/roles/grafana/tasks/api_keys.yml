@@ -15,7 +15,7 @@
     force_basic_auth: true
     return_content: true
   no_log: true
-  register: existing_api_keys
+  register: grafana_existing_api_keys
 
 - name: api_keys <|> Create grafana api keys
   ansible.builtin.uri:
@@ -28,8 +28,8 @@
     body: "{{ item | to_json }}"
   loop: "{{ grafana_api_keys | flatten(levels=1) }}"
   no_log: true
-  when: ((existing_api_keys['json'] | selectattr("name", "equalto", item['name'])) | list) | length == 0
-  register: new_api_keys
+  when: ((grafana_existing_api_keys['json'] | selectattr("name", "equalto", item['name'])) | list) | length == 0
+  register: grafana_new_api_keys
 
 - name: api_keys <|> Create api keys file to allow the keys to be seen and used by other automation
   ansible.builtin.copy:
@@ -38,5 +38,5 @@
     backup: false
     mode: 0644
   when: item['json'] is defined
-  loop: "{{ new_api_keys['results'] | flatten(levels=1) }}"
+  loop: "{{ grafana_new_api_keys['results'] | flatten(levels=1) }}"
   delegate_to: localhost

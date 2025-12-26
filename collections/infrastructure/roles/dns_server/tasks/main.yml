@@ -32,7 +32,7 @@
 # This calculation takes time, so we store it in memory for later usage
 - name: fact <|> Calculate first_octets
   ansible.builtin.set_fact:
-    first_octets: "{{ dns_server_j2_get_first_octets }}"
+    dns_server_first_octets: "{{ dns_server_j2_get_first_octets }}"
   run_once: true
   tags:
     - templates
@@ -137,7 +137,7 @@
     owner: root
     group: root
     mode: 0644
-  loop: "{{ first_octets.split(',') | flatten(levels=1) }}"
+  loop: "{{ dns_server_first_octets.split(',') | flatten(levels=1) }}"
   tags:
     - template
 
@@ -149,7 +149,7 @@
     group: root
     mode: 0644
   notify: service <|> Restart dns services
-  loop: "{{ first_octets.split(',') | flatten(levels=1) }}"
+  loop: "{{ dns_server_first_octets.split(',') | flatten(levels=1) }}"
   when: zoneconf.changed  # noqa no-handler
   tags:
     - template

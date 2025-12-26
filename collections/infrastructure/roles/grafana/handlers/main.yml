@@ -4,10 +4,10 @@
     name: "{{ item  }}"
     state: restarted
   loop: "{{ grafana_services_to_start | flatten(levels=1) }}"
-  register: service_results
+  register: grafana_service_results
   retries: 5
   delay: 10
-  until: service_results is not failed
+  until: grafana_service_results is not failed
   when:
     - "'service' not in ansible_skip_tags"
     - (grafana_start_services | default(bb_start_services) | default(true) | bool)
