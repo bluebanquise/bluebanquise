@@ -1,0 +1,36 @@
+---
+- name: assert <|> Checking repositories are coherent
+  ansible.builtin.assert:
+    that:
+      - j2_node_main_network is defined and j2_node_main_network is not none
+      - networks is defined and networks is not none
+      - networks[j2_node_main_network] is defined and networks[j2_node_main_network] is not none
+      - (networks[j2_node_main_network]['services_ip'] is defined and networks[j2_node_main_network]['services_ip'] is not none) or ((networks[j2_node_main_network]['services']['repositories4'][0]['ip4'] | default(networks[j2_node_main_network]['services']['repositories'][0]['ip4'], true)) is defined and (networks[j2_node_main_network]['services']['repositories4'][0]['ip4'] | default(networks[j2_node_main_network]['services']['repositories'][0]['ip4'], true)) is not none)
+      - os_operating_system is defined and os_operating_system is not none
+      - os_operating_system['distribution'] is defined and os_operating_system['distribution'] is not none
+      - (os_operating_system['distribution_version'] is defined and os_operating_system['distribution_version'] is not none) or (os_operating_system['distribution_major_version'] is defined and os_operating_system['distribution_major_version'] is not none)
+    fail_msg: "You are using simple repositories definition. The tool needs multiple variables to be defined to calculate URL and it seems at least one is missing. Please refer to role README for list of variables required."
+    success_msg: "All needed parameters are defined for simple URL"
+  loop: "{{ bb_repositories | default([], true) | flatten(levels=1) }}"
+  when:
+    - bb_repositories is defined and bb_repositories is not none and bb_repositories is iterable and bb_repositories is not string and bb_repositories is not mapping
+    - item.repo is not defined
+
+- name: deb822_repository <|> Setting custom repositories
+  ansible.builtin.deb822_repository:
+    name: "{{ item.name | default(item, true) }}"
+    install_python_debian: "{{ item.install_python_debian | default(omit) }}"
+    enabled: "{{ item.enabled | default(omit) }}"
+    mode: "{{ item.mode | default(omit) }}"
+    trusted: "{{ item.trusted | default(omit) }}"
+    signed_by: "{{ item.signed_by | default(omit) }}"
+    state: "{{ item.state | default(omit) }}"
+    types: "{{ item.types | default(omit) }}"
+    uris: "{{ item.uris | ( (repositories_j2_simple_url | default('', true)) + ( item.name | default(item, true) | string ) ) | default(omit) }}"
+    suites: "{{ item.suites | default(omit) }}"
+    components: "{{ item.components | ( item.distribution | default(['./'], true) ) | default(omit) }}"
+  loop: "{{ bb_repositories | default([], true) | flatten(levels=1) }}"
+  notify: command <|> apt update cache
+  when:
+    - bb_repositories is defined and bb_repositories is not none and bb_repositories is iterable and bb_repositories is not string and bb_repositories is not mapping
+

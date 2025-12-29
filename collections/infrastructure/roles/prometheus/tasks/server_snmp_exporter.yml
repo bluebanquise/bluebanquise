@@ -87,12 +87,12 @@
 - name: stat <|> Check /etc/snmp_exporter/snmp.yml exists
   ansible.builtin.stat:
     path: /etc/snmp_exporter/snmp.yml
-  register: stat_result
+  register: prometheus_stat_result
 
 - name: assert <|> Assert that snmp.yml file exist
   ansible.builtin.assert:
     that:
-      - stat_result.stat.exists
+      - prometheus_stat_result.stat.exists
     fail_msg: "/etc/snmp_exporter/snmp.yml file does not exist, cannot start snmp_exporter"
     success_msg: "/etc/snmp_exporter/snmp.yml file does exist, proceeding"
 

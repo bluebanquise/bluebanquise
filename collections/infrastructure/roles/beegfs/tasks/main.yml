@@ -203,11 +203,11 @@
 
 - name: Initialize the management storage path directory
   ansible.builtin.command: /opt/beegfs/sbin/beegfs-setup-mgmtd -p "{{ beegfs_vars.mgmtd_path_prefix }}"
-  register: register_mgmtd
-  changed_when: '"All done." in register_mgmtd.stdout'
+  register: beegfs_register_mgmtd
+  changed_when: '"All done." in beegfs_register_mgmtd.stdout'
   failed_when:
-    - '"ERROR: Storage directory is not empty" in register_mgmtd.stdout'
-    - register_mgmtd.rc != 0
+    - '"ERROR: Storage directory is not empty" in beegfs_register_mgmtd.stdout'
+    - beegfs_register_mgmtd.rc != 0
   ignore_errors: true
   when:
     - inventory_hostname in groups["mgmtd"]
@@ -284,15 +284,15 @@
       run_once: true
     - name: command <|> Ignore quorum policy
       ansible.builtin.command: "/usr/sbin/pcs property set no-quorum-policy=ignore"
-      register: cmd
-      changed_when: cmd.rc == 0
-      failed_when: cmd.rc != 0
+      register: beegfs_cmd
+      changed_when: beegfs_cmd.rc == 0
+      failed_when: beegfs_cmd.rc != 0
       run_once: true
     - name: command <|> Disable stonith
       ansible.builtin.command: "/usr/sbin/pcs property set stonith-enabled=false"
-      register: cmd2
-      changed_when: cmd2.rc == 0
-      failed_when: cmd2.rc != 0
+      register: beegfs_md2
+      changed_when: beegfs_cmd2.rc == 0
+      failed_when: beegfs_cmd2.rc != 0
       run_once: true
     - name: command <|> Import CIB resources
       ansible.builtin.command: "/usr/sbin/cibadmin --replace --scope resources --xml-file /etc/cib_resources.xml"

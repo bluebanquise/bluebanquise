@@ -11,3 +11,7 @@ skip_list:
   - yaml[octal-values]
   - galaxy[no-changelog]
   - galaxy[no-runtime]
+exclude_paths:
+  - infrastructure/roles/powerman/tasks/main.yml # bb_nodes_profiles :/
+  - infrastructure/roles/pxe_stack/tasks/main.yml # bb_nodes_profiles :/
+  - infrastructure/roles/slurm/tasks/main.yml # bb_nodes_profiles :/

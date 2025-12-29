@@ -31,7 +31,7 @@
   when:
     - ansible_distribution == 'Ubuntu'
   notify: service <|> restart mariadb
-  register: mariadb_config
+  register: slurm_mariadb_config
 
 - name: meta <|> Run handler tasks to restart services
   ansible.builtin.meta: flush_handlers
