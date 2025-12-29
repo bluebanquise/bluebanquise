@@ -25,7 +25,7 @@ jobs:
         run: |
           docker build -t debian_13:systemd -f ./resources/docker/Dockerfile_Debian_13_systemd .
           sudo modprobe -v dummy numdummies=2 && sudo ip addr add 10.10.0.1/16 dev dummy0 && sudo ip link set dev dummy0 up && ip a;
-          echo -e 'bb_repositories:\n  - name: bluebanquise\n    trusted: true\n    uris: "https://bluebanquise.com/repository/releases/latest/deb13/x86_64/bluebanquise/"\n    suites: bookworm\n    components: main' > resources/workflow/inventory_standard/group_vars/all/repositories.yml
+          echo -e 'bb_repositories:\n  - name: bluebanquise\n    trusted: true\n    uris: "https://bluebanquise.com/repository/releases/latest/deb13/x86_64/bluebanquise/"\n    suites: trixie\n    components: main' > resources/workflow/inventory_standard/group_vars/all/repositories.yml
           docker run -d --privileged --cgroupns=host --net=host --name mgt1 -v /sys/fs/cgroup:/sys/fs/cgroup:rw -v $PWD:/bluebanquise debian_13:systemd
           docker exec mgt1 bash -c "/bluebanquise/bootstrap/online_bootstrap.sh --silent --skip_environment"
           docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'cd /bluebanquise/bootstrap/ && ./configure_environment.sh --bb_collections_local_path=/bluebanquise/collections/'"
@@ -58,7 +58,7 @@ jobs:
         run: |
           docker build -t debian_13:systemd -f ./resources/docker/Dockerfile_Debian_13_systemd .
           sudo modprobe -v dummy numdummies=2 && sudo ip addr add 10.10.0.1/16 dev dummy0 && sudo ip link set dev dummy0 up && ip a;
-          echo -e 'bb_repositories:\n  - name: bluebanquise\n    trusted: true\n    uris: "https://bluebanquise.com/repository/releases/latest/deb13/x86_64/bluebanquise/"\n    suites: bookworm\n    components: main' > resources/workflow/inventory_standard/group_vars/all/repositories.yml
+          echo -e 'bb_repositories:\n  - name: bluebanquise\n    trusted: true\n    uris: "https://bluebanquise.com/repository/releases/latest/deb13/x86_64/bluebanquise/"\n    suites: trixie\n    components: main' > resources/workflow/inventory_standard/group_vars/all/repositories.yml
           docker run -d --privileged --cgroupns=host --net=host --name mgt1 -v /sys/fs/cgroup:/sys/fs/cgroup:rw -v $PWD:/bluebanquise debian_13:systemd
           docker exec mgt1 bash -c "/bluebanquise/bootstrap/online_bootstrap.sh --silent --skip_environment"
           docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'cd /bluebanquise/bootstrap/ && ./configure_environment.sh --bb_collections_local_path=/bluebanquise/collections/'"
