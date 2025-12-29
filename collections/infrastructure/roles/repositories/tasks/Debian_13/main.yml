@@ -19,7 +19,7 @@
 - name: deb822_repository <|> Setting custom repositories
   ansible.builtin.deb822_repository:
     name: "{{ item.name | default(item, true) }}"
-    install_python_debian: "{{ item.install_python_debian | default(omit) }}"
+    install_python_debian: "{{ item.install_python_debian | default(true) }}"
     enabled: "{{ item.enabled | default(omit) }}"
     mode: "{{ item.mode | default(omit) }}"
     trusted: "{{ item.trusted | default(omit) }}"
