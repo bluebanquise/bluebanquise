@@ -26,9 +26,9 @@
     signed_by: "{{ item.signed_by | default(omit) }}"
     state: "{{ item.state | default(omit) }}"
     types: "{{ item.types | default(omit) }}"
-    uris: "{{ item.uris | (repositories_j2_simple_url | default('', true)) + ( item.name | default(item, true) | string ) | default(omit) }}"
+    uris: "{{ item.uris | (repositories_j2_simple_url | default('', true)) + (item.name | default(item, true) | string) | default(omit) }}"
     suites: "{{ item.suites | default(omit) }}"
-    components: "{{ item.components | item.distribution | default(['./'], true) }}"
+    components: "{{ item.components | default(item.distribution, true) | default(['./'], true) }}"
   loop: "{{ bb_repositories | default([], true) | flatten(levels=1) }}"
   notify: command <|> apt update cache
   when:
