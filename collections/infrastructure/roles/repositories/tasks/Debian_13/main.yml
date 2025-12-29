@@ -14,7 +14,7 @@
   loop: "{{ bb_repositories | default([], true) | flatten(levels=1) }}"
   when:
     - bb_repositories is defined and bb_repositories is not none and bb_repositories is iterable and bb_repositories is not string and bb_repositories is not mapping
-    - item.repo is not defined
+    - item.repo is not defined and item.uris is not defined
 
 - name: deb822_repository <|> Setting custom repositories
   ansible.builtin.deb822_repository:
