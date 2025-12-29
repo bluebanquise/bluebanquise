@@ -26,11 +26,10 @@
     signed_by: "{{ item.signed_by | default(omit) }}"
     state: "{{ item.state | default(omit) }}"
     types: "{{ item.types | default(omit) }}"
-    uris: "{{ item.uris | ( (repositories_j2_simple_url | default('', true)) + ( item.name | default(item, true) | string ) ) | default(omit) }}"
+    uris: "{{ item.uris | (repositories_j2_simple_url | default('', true)) + ( item.name | default(item, true) | string ) | default(omit) }}"
     suites: "{{ item.suites | default(omit) }}"
-    components: "{{ item.components | ( item.distribution | default(['./'], true) ) | default(omit) }}"
+    components: "{{ item.components | item.distribution | default(['./'], true) }}"
   loop: "{{ bb_repositories | default([], true) | flatten(levels=1) }}"
   notify: command <|> apt update cache
   when:
     - bb_repositories is defined and bb_repositories is not none and bb_repositories is iterable and bb_repositories is not string and bb_repositories is not mapping
-

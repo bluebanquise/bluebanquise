@@ -12,7 +12,7 @@
 
 - name: set_fact <|> Merge existing, combine, and join the final parameter string
   ansible.builtin.set_fact:
-    final_grub_line: >
+    kernel_config_final_grub_line: >
       {{
         ((kernel_config_current_default_params.stdout | trim).split(' ') | default([]))
         | union((os_kernel_parameters | trim).split(' ') | default([]))
@@ -29,7 +29,7 @@
   ansible.builtin.lineinfile:
     path: /etc/default/grub
     regexp: "^GRUB_CMDLINE_LINUX_DEFAULT="
-    line: "GRUB_CMDLINE_LINUX_DEFAULT=\"{{ final_grub_line | replace('\n', '') }}\""
+    line: "GRUB_CMDLINE_LINUX_DEFAULT=\"{{ kernel_config_final_grub_line | replace('\n', '') }}\""
     state: present
     backup: true
   notify: command <|> Update GRUB settings
