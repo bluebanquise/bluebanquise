@@ -26,7 +26,7 @@
     signed_by: "{{ item.signed_by | default(omit) }}"
     state: "{{ item.state | default(omit) }}"
     types: "{{ item.types | default(omit) }}"
-    uris: "{{ item.uris | (repositories_j2_simple_url | default('', true)) + (item.name | default(item, true) | string) | default(omit) }}"
+    uris: "{{ item.uris | default( (repositories_j2_simple_url | default('', true)) + ( item.name | default(item, true) | string), true) | default(omit) }}"
     suites: "{{ item.suites | default(omit) }}"
     components: "{{ item.components | default(item.distribution, true) | default(['./'], true) }}"
   loop: "{{ bb_repositories | default([], true) | flatten(levels=1) }}"
