@@ -1,0 +1,55 @@
+---
+
+- name: "template <|> Generate {{ dhcp_server_conf_file }}"
+  ansible.builtin.template:
+    src: kea-dhcp4.conf.j2
+    dest: "{{ dhcp_server_conf_file }}"
+    owner: root
+    group: root
+    mode: 0644
+  notify: service <|> Restart dhcp server
+  tags:
+    - template
+
+- name: "template <|> Generate {{ dhcp_server_conf_dir }}/dhcpd.networks.conf"
+  ansible.builtin.template:
+    src: dhcpd.networks.conf.j2
+    dest: "{{ dhcp_server_conf_dir }}/dhcpd.networks.conf"
+    owner: root
+    group: root
+    mode: 0644
+  notify: service <|> Restart dhcp server
+  when:
+    - networks is defined and networks is iterable and networks is not string and networks is mapping
+  tags:
+    - template
+
+- name: "template <|> Generate {{ dhcp_server_conf_dir }}/dhcpd.{{ item }}.conf"
+  ansible.builtin.template:
+    src: dhcpd.subnet.conf.j2
+    dest: "{{ dhcp_server_conf_dir }}/dhcpd.{{ item }}.conf"
+    owner: root
+    group: root
+    mode: 0644
+  loop: "{{ networks | flatten(levels=1) }}"
+  when:
+    - networks is defined and networks is iterable and networks is not string and networks is mapping
+    - networks[item] is defined and networks[item] is not none
+    - networks[item].is_in_dhcp | default(true)
+  notify: service <|> Restart dhcp server
+  tags:
+    - template
+
+# - name: include_tasks <|> Apply OS specific tasks
+#   ansible.builtin.include_tasks: "{{ item }}"
+#   with_first_found:
+#     - files:
+#         - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
+#         - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
+#         - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
+#         - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
+#         - "{{ ansible_facts.distribution | replace(' ','_') }}/main.yml"
+#         - "{{ ansible_facts.os_family | replace(' ','_') }}/main.yml"
+#       skip: true
+#   tags:
+#     - internal

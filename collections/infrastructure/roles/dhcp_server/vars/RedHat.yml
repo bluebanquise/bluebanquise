@@ -1,4 +1,5 @@
 ---
+dhcp_server_toolname: dhcpd
 dhcp_server_packages_to_install:
   - dhcp-server
 dhcp_server_services_to_start:

@@ -1,0 +1,95 @@
+#jinja2: lstrip_blocks: True
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+
+{
+  "Dhcp4": {
+
+    {% if dhcp_server_ipxe_driver == 'snponly' %}
+      {% set ipxe_driver = 'snponly_' %}
+    {% elif dhcp_server_ipxe_driver == 'snp' %}
+      {% set ipxe_driver = 'snp_' %}
+    {% else %}{# Assume everything else is default driver #}
+      {% set ipxe_driver = '' %}
+    {% endif %}
+
+    {% if dhcp_server_ipxe_embed == 'dhcpretry' %}
+      {% set ipxe_embed = 'dhcpretry' %}
+    {% elif dhcp_server_ipxe_embed == 'noshell' %}
+      {% set ipxe_embed = 'noshell' %}
+    {% elif dhcp_server_ipxe_embed == 'allretry' %}
+      {% set ipxe_embed = 'allretry' %}
+    {% else %}{# Assume everything else is standard script #}
+      {% set ipxe_embed = 'standard' %}
+    {% endif %}
+
+    "client-classes":
+    [
+      {
+        "name": "Legacy_Intel_x86PC",
+        "test": "option[93].hex == 0x0000",
+        "boot-file-name": "x86_64/{{ ipxe_embed }}_undionly.kpxe"
+      },
+      {
+        "name": "EFI_x86-64",
+        "test": "option[93].hex == 0x0009",
+        "boot-file-name": "x86_64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi"
+      },
+      {
+        "name": "EFI_arm64",
+        "test": "option[93].hex == 0x000b",
+        "boot-file-name": "arm64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi"
+      }
+      /* Bellow is code for later, http native boot
+      {
+        "name": "HTTPClient",
+        "test": "option[93].hex == 0x0010",
+        "option-data": [ { "name": "vendor-class-identifier", "data": "HTTPClient" } ],
+        "boot-file-name": "http://${httpserver}/ipxe/x86_64/snponly.efi"
+      }
+      {
+        "name": "XClient_iPXE",
+        "test": "substring(option[77].hex,0,4) == 'iPXE'",
+        "boot-file-name": "http://${httpserver}/ipxe/boot.php"
+      }*/
+    ],
+
+    # First we set up global values
+    "valid-lifetime": 4000,
+    "renew-timer": 1000,
+    "rebind-timer": 2000,
+
+    # Next we set up the interfaces to be used by the server.
+    "interfaces-config": {
+        "interfaces": [ "enp0s8" ]
+    },
+
+    # And we specify the type of lease database, prefer text because simpler
+    "lease-database": {
+        "type": "memfile",
+        "persist": true,
+        "name": "/var/lib/kea/dhcp4.leases"
+    },
+
+    # Logging
+    "loggers": [
+      {
+          "name": "kea-dhcp4",
+          "output_options": [
+              {
+                  "output": "stdout"
+              }
+          ],
+          "severity": "DEBUG",
+          "debuglevel": 7
+      }
+    ],
+
+    # We list the subnets from which we will be leasing addresses
+    {% if networks is defined and networks is iterable and networks is not string and networks is mapping %}
+    <?include "{{ dhcp_server_conf_dir }}/kea-dhcp4.networks.conf"?>
+    {% endif %}
+
+  }
+
+}
