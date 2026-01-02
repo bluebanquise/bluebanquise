@@ -11,10 +11,10 @@
   tags:
     - template
 
-- name: "template <|> Generate {{ dhcp_server_conf_dir }}/dhcpd.networks.conf"
+- name: "template <|> Generate {{ dhcp_server_conf_dir }}/kea-dhcp4.networks.conf"
   ansible.builtin.template:
-    src: dhcpd.networks.conf.j2
-    dest: "{{ dhcp_server_conf_dir }}/dhcpd.networks.conf"
+    src: kea-dhcp4.networks.conf.j2
+    dest: "{{ dhcp_server_conf_dir }}/kea-dhcp4.networks.conf"
     owner: root
     group: root
     mode: 0644
@@ -24,10 +24,10 @@
   tags:
     - template
 
-- name: "template <|> Generate {{ dhcp_server_conf_dir }}/dhcpd.{{ item }}.conf"
+- name: "template <|> Generate networks reservations"
   ansible.builtin.template:
-    src: dhcpd.subnet.conf.j2
-    dest: "{{ dhcp_server_conf_dir }}/dhcpd.{{ item }}.conf"
+    src: kea-dhcp4.subnet.conf.j2
+    dest: "{{ dhcp_server_conf_dir }}/kea-dhcp4.{{ item }}.conf"
     owner: root
     group: root
     mode: 0644

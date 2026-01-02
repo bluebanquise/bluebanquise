@@ -49,7 +49,7 @@ ip_or_host allows to define priorities between ip or host
     "subnet": "{{ networks[network]['subnet'] }}/{{ networks[network]['prefix'] | string }}",
 
     {% if networks[network]['services'] is defined and networks[network]['services'] is iterable and networks[network]['services'] is not string and networks[network]['services'] is mapping and (networks[network]['services']['pxe4'] | default(networks[network]['services']['pxe'], true)) is defined%}
-    {{ item_add("next-server", (networks[network]['services']['pxe4'] | default(networks[network]['services']['pxe'], true)), "host", "key") }}
+    {{ item_add("next-server", (networks[network]['services']['pxe4'] | default(networks[network]['services']['pxe'], true)), "ip", "key") }}
     {% elif networks[network]['services_ip'] is defined and (networks[network]['services_ip'] | ansible.utils.ipaddr) %}
     "next-server": "{{ networks[network]['services_ip'] }}",
     {% endif %}
@@ -62,8 +62,6 @@ ip_or_host allows to define priorities between ip or host
     ],
     {% endif %}
 
-  default-lease-time {{ dhcp_server_default_lease_time | string }};
-  max-lease-time {{ dhcp_server_max_lease_time | string }};
 
     "option-data": [
 
@@ -74,7 +72,7 @@ ip_or_host allows to define priorities between ip or host
             "data": "{{ (networks[network]['gateway4'] | default(networks[network]['gateway'], true)) }}"
         },
             {% elif (networks[network]['gateway4'] | default(networks[network]['gateway'], true)) is iterable and (networks[network]['gateway4'] | default(networks[network]['gateway'], true)) is not mapping %}
-        {{ item_add("routers", (networks[network]['gateway4'] | default(networks[network]['gateway'], true)), "host", "dict") }}
+        {{ item_add("routers", (networks[network]['gateway4'] | default(networks[network]['gateway'], true)), "ip", "dict") }}
             {% endif %}
         {% endif %}
 
@@ -90,7 +88,7 @@ ip_or_host allows to define priorities between ip or host
 
 
         {% if networks[network]['services'] is defined and networks[network]['services'] is iterable and networks[network]['services'] is not string and networks[network]['services'] is mapping and (networks[network]['services']['ntp4'] | default(networks[network]['services']['ntp'], true)) is defined%}
-        {{ item_add("ntp-servers", (networks[network]['services']['ntp4'] | default(networks[network]['services']['ntp'], true)), "host", "dict") }}
+        {{ item_add("ntp-servers", (networks[network]['services']['ntp4'] | default(networks[network]['services']['ntp'], true)), "ip", "dict") }}
         {% elif networks[network]['services_ip'] is defined and (networks[network]['services_ip'] | ansible.utils.ipaddr) %}
         {
             "name": "ntp-servers",
