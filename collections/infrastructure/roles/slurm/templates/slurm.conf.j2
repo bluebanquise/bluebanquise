@@ -96,69 +96,68 @@ TopologyPlugin={{ slurm_topology }}
 ## Nodes and partitions list
 # Note: in configless mode, only slurm.conf is shipped to slurmds.
 # We need to compact all configuration into this single file.
-# -> no includes allowed.
+# -> no includes allowed.{{ "\n" }}
 
 {#- NODENAMES -#}
 {# First we create a full list of all nodes that should be included in the file #}
-{%- set slurm_nodes = [] -%}
+{#- NODENAMES -#}
+{%- set slurm_nodes = [] %}
 {%- for partition in slurm_partitions_list %}
-  {% if partition['computes_groups'] is defined and partition['computes_groups'] is not none %}
-    {% for compute_group in partition['computes_groups'] %}
-      {% for nn in groups[compute_group] %}{# We cannot merge both list inside a for loop in Jinja2 #}
+  {%- if partition['computes_groups'] is defined and partition['computes_groups'] is not none %}
+    {%- for compute_group in partition['computes_groups'] %}
+      {%- for nn in groups[compute_group] %}{# We cannot merge both list inside a for loop in Jinja2 #}
 {{ slurm_nodes.append(nn) }}
-      {% endfor %}
-    {% endfor %}
-  {% endif %}
-{% endfor %}
-{% set slurm_nodes = (slurm_nodes | unique) %}
-{# Now we use bb_nodes_profiles previously cached to pack these nodes per hardware groups #}
-{%- set hw_packs = {} -%}
-{% if bb_nodes_profiles is mapping %}
-  {% for node in slurm_nodes %}
-    {% if bb_nodes_profiles[node] is defined and bb_nodes_profiles[node]['hw'] is defined and bb_nodes_profiles[node]['hw'] is not none %}
-      {% if bb_nodes_profiles[node]['hw'] not in hw_packs %}
-        {% do hw_packs.update({bb_nodes_profiles[node]['hw']: {'nodes': [], 'hw_specs': (hostvars[node]['hw_specs'] | default(none, true)) }}) %}
-      {% endif %}
+      {%- endfor %}
+    {%- endfor %}
+  {%- endif %}
+{%- endfor %}
+{%- set slurm_nodes = (slurm_nodes | unique) %}
+{%- set hw_packs = {} %}
+{%- if bb_nodes_profiles is mapping %}
+  {%- for node in slurm_nodes %}
+    {%- if bb_nodes_profiles[node] is defined and bb_nodes_profiles[node]['hw'] is defined and bb_nodes_profiles[node]['hw'] is not none %}
+      {%- if bb_nodes_profiles[node]['hw'] not in hw_packs %}
+        {%- do hw_packs.update({bb_nodes_profiles[node]['hw']: {'nodes': [], 'hw_specs': (hostvars[node]['hw_specs'] | default(none, true)) }}) %}
+      {%- endif %}
 {{ hw_packs[bb_nodes_profiles[node]['hw']]['nodes'].append(node) }}
-    {% else %}
+    {%- else %}
 # WARNING: node {{ node }} is associated with an hw and an os profile
-    {% endif %}
-  {% endfor -%}
-{% endif %}
-{# Now we can generate final NodeNames for slurm #}
-{% for hw_pack, hw_pack_vars in hw_packs.items() %}
-  {% if hw_pack_vars['hw_specs'] is defined and hw_pack_vars['hw_specs'] is not none %}
-    {% set buffer = hw_pack_vars['hw_specs'] %}
-    {% if buffer.cpu.sockets is defined and buffer.cpu.sockets is not none and buffer.cpu.cores_per_socket is defined and buffer.cpu.cores_per_socket is not none and buffer.cpu.threads_per_core is defined and buffer.cpu.threads_per_core is not none%}
-      {% set nodes_parameters = ' Sockets=' + (buffer.cpu.sockets|string) + ' CoresPerSocket=' + (buffer.cpu.cores_per_socket|string) + ' ThreadsPerCore=' + (buffer.cpu.threads_per_core|string) %}
-    {% else %}{# Will fail if cores is also not set. Expected minimal value. #}
-      {% set nodes_parameters = ' Procs=' + (buffer.cpu.cores | string) %}
-    {% endif %}
-    {% if buffer.memory is defined and buffer.memory is not none %}
-        {% set nodes_parameters = nodes_parameters + ' RealMemory=' + (buffer.memory|string) %}
-    {% endif %}
-    {% if buffer.slurm_extra_nodes_parameters is defined and buffer.slurm_extra_nodes_parameters is not none %}
-        {% set nodes_parameters = nodes_parameters + ' ' +  buffer.slurm_extra_nodes_parameters %}
-    {% endif %}
+    {%- endif %}
+  {%- endfor %}
+{%- endif %}
+{%- for hw_pack, hw_pack_vars in hw_packs.items() %}
+  {%- if hw_pack_vars['hw_specs'] is defined and hw_pack_vars['hw_specs'] is not none %}
+    {%- set buffer = hw_pack_vars['hw_specs'] %}
+    {%- if buffer.cpu.sockets is defined and buffer.cpu.sockets is not none and buffer.cpu.cores_per_socket is defined and buffer.cpu.cores_per_socket is not none and buffer.cpu.threads_per_core is defined and buffer.cpu.threads_per_core is not none %}
+      {%- set nodes_parameters = ' Sockets=' + (buffer.cpu.sockets|string) + ' CoresPerSocket=' + (buffer.cpu.cores_per_socket|string) + ' ThreadsPerCore=' + (buffer.cpu.threads_per_core|string) %}
+    {%- else %}{# Will fail if cores is also not set. Expected minimal value. #}
+      {%- set nodes_parameters = ' Procs=' + (buffer.cpu.cores | string) %}
+    {%- endif %}
+    {%- if buffer.memory is defined and buffer.memory is not none %}
+      {%- set nodes_parameters = nodes_parameters + ' RealMemory=' + (buffer.memory|string) %}
+    {%- endif %}
+    {%- if buffer.slurm_extra_nodes_parameters is defined and buffer.slurm_extra_nodes_parameters is not none %}
+      {%- set nodes_parameters = nodes_parameters + ' ' + buffer.slurm_extra_nodes_parameters %}
+    {%- endif %}
 NodeName={{ hw_pack_vars['nodes'] | bluebanquise.infrastructure.nodeset }} {{ nodes_parameters }}
-  {% else %}
+  {%- else %}
 # WARNING: pack {{ hw_pack }} does not have hw_specs
-  {% endif %}
-{% endfor %}
+  {%- endif %}
+{%- endfor %}
 
 {# PARTITIONS #}
-## Partitions list
-{%- if slurm_partitions_list is defined and slurm_partitions_list -%}
-  {%- for partition in slurm_partitions_list -%}
-    {% set partition_nodes = [] %}
-    {% if partition['computes_groups'] is defined and partition['computes_groups'] is not none %}
-      {% for compute_group in partition['computes_groups'] %}
-        {% for nn in groups[compute_group] %}{# We cannot merge both list inside a for loop in Jinja2 #}
+## Partitions list{{ "\n" }}
+{%- if slurm_partitions_list is defined and slurm_partitions_list %}
+  {%- for partition in slurm_partitions_list %}
+    {%- set partition_nodes = [] %}
+    {%- if partition['computes_groups'] is defined and partition['computes_groups'] is not none %}
+      {%- for compute_group in partition['computes_groups'] %}
+        {%- for nn in groups[compute_group] %}
 {{ partition_nodes.append(nn) }}
-        {% endfor %}
-      {% endfor %}
-    {% endif %}
-    {% set partition_nodes = (partition_nodes | unique) %}
-PartitionName={{partition.partition_name}} {% for arg, arg_value in partition.partition_configuration.items() %} {{ arg }}={{ arg_value }}{% endfor %} Nodes={{ partition_nodes | bluebanquise.infrastructure.nodeset }}
-  {%- endfor -%}
-{%- endif -%}
+        {%- endfor %}
+      {%- endfor %}
+    {%- endif %}
+    {%- set partition_nodes = (partition_nodes | unique) %}
+PartitionName={{ partition.partition_name }}{% for arg, arg_value in partition.partition_configuration.items() %} {{ arg }}={{ arg_value }}{% endfor %} Nodes={{ partition_nodes | bluebanquise.infrastructure.nodeset }}
+  {%- endfor %}
+{%- endif %}
