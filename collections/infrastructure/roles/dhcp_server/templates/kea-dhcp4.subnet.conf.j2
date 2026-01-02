@@ -5,11 +5,11 @@
 {###############################################################################
   Write entries for each possible methods for current nic
 ###############################################################################}
-{% macro write_host(host, nic, ipxe_driver, ipxe_embed, pxe_filename, last) %}
+{% macro write_host(host, nic, ipxe_driver, ipxe_embed, pxe_filename) %}
   {% if nic.mac is defined and (nic.mac | ansible.utils.hwaddr)%}
 
     {
-        # {{host}}-{{item}}-mac
+        #  {{host}}-{{item}}-mac
         "hw-address": "{{ nic.mac | ansible.utils.hwaddr('linux') }}",
         "server-hostname": "{{host}}",
         "ip-address": "{{ nic.ip4 }}"
@@ -26,19 +26,18 @@
 
 {%- for host in (j2_hosts_range | sort) %}
   {% set current_hostvars = hostvars[host] %}{# buffer, avoid calls to hostvars #}
-  {% set is_last_host = loop.last %}
 
   {%- if current_hostvars['bmc'] is defined %}
     {% set bmc_args = current_hostvars['bmc'] %}
     {% if bmc_args.network is defined and bmc_args.network == item and (bmc_args.name is defined and bmc_args.name is not none) and (bmc_args.ip4 is defined and (bmc_args.ip4 | ansible.utils.ipaddr)) %}
-{{ write_host(bmc_args.name, bmc_args, None, None, None, false) }}
+{{ write_host(bmc_args.name, bmc_args, None, None, None) }}
     {% endif %}
   {% endif %}
 
   {% if current_hostvars['network_interfaces'] is defined and current_hostvars['network_interfaces'] is iterable and current_hostvars['network_interfaces'] is not mapping and current_hostvars['network_interfaces'] is not string %}
     {% for nic in current_hostvars['network_interfaces'] %}
       {%- if nic.network is defined and nic.network == item and nic.ip4 is defined and (nic.ip4 | ansible.utils.ipaddr) %}
-{{ write_host(host, nic, current_hostvars['hw_ipxe_driver'] | default(None, true), current_hostvars['hw_ipxe_embed'] | default(None, true), current_hostvars['hw_pxe_filename'] | default(None, true), is_last_host) }}
+{{ write_host(host, nic, current_hostvars['hw_ipxe_driver'] | default(None, true), current_hostvars['hw_ipxe_embed'] | default(None, true), current_hostvars['hw_pxe_filename'] | default(None, true)) }}
       {% endif %}
     {% endfor %}
   {% endif %}

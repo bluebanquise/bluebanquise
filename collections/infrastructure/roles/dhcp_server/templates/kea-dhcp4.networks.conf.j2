@@ -62,7 +62,6 @@ ip_or_host allows to define priorities between ip or host
     ],
     {% endif %}
 
-
     "option-data": [
 
         {% if (networks[network]['gateway4'] | default(networks[network]['gateway'], true)) is defined %}
@@ -76,7 +75,6 @@ ip_or_host allows to define priorities between ip or host
             {% endif %}
         {% endif %}
 
-
         {% if networks[network]['services'] is defined and networks[network]['services'] is iterable and networks[network]['services'] is not string and networks[network]['services'] is mapping and (networks[network]['services']['dns4'] | default(networks[network]['services']['dns'], true)) is defined%}
         {{ item_add("domain-name-servers", (networks[network]['services']['dns4'] | default(networks[network]['services']['dns'], true)), "ip", "dict") }}
         {% elif networks[network]['services_ip'] is defined and (networks[network]['services_ip'] | ansible.utils.ipaddr) %}
@@ -85,7 +83,6 @@ ip_or_host allows to define priorities between ip or host
             "data": "{{ networks[network]['services_ip'] }}"
         },
         {% endif %}
-
 
         {% if networks[network]['services'] is defined and networks[network]['services'] is iterable and networks[network]['services'] is not string and networks[network]['services'] is mapping and (networks[network]['services']['ntp4'] | default(networks[network]['services']['ntp'], true)) is defined%}
         {{ item_add("ntp-servers", (networks[network]['services']['ntp4'] | default(networks[network]['services']['ntp'], true)), "ip", "dict") }}
