@@ -48,4 +48,3 @@
   loop: "{{ cloudinit_services_to_start }}"
   tags:
     - service
-
