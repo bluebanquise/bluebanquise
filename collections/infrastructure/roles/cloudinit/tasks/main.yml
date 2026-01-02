@@ -16,9 +16,12 @@
   tags:
     - template
 
-- name: "service <|> Enable cloud-init state"
+- name: "service <|> Manage {{ cloudinit_services_to_start | join(' ') }} state"
   ansible.builtin.service:
-    name: "cloud-init"
+    name: "{{ item }}"
     enabled: "{{ (cloudinit_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    state: "{{ (cloudinit_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
+  loop: "{{ cloudinit_services_to_start }}"
   tags:
     - service
+

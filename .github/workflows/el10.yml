@@ -23,7 +23,7 @@ jobs:
 
       - name: Setup container
         run: |
-          docker build -t rockylinux/rockylinux:10_systemd -f ./resources/docker/Dockerfile_RockyLinux_9_systemd .
+          docker build -t rockylinux/rockylinux:10_systemd -f ./resources/docker/Dockerfile_RockyLinux_10_systemd .
           sudo modprobe -v dummy numdummies=2 && sudo ip addr add 10.10.0.1/16 dev dummy0 && sudo ip link set dev dummy0 up && ip a;
           echo -e 'bb_repositories:\n  - name: bluebanquise\n    baseurl: "https://bluebanquise.com/repository/releases/latest/el10/x86_64/bluebanquise/"' > resources/workflow/inventory_standard/group_vars/all/repositories.yml
           docker run -d --privileged --cgroupns=host --net=host --name mgt1 -v /sys/fs/cgroup:/sys/fs/cgroup:rw -v $PWD:/bluebanquise rockylinux/rockylinux:10_systemd
@@ -58,7 +58,7 @@ jobs:
 
       - name: Setup container
         run: |
-          docker build -t rockylinux/rockylinux:10_systemd -f ./resources/docker/Dockerfile_RockyLinux_9_systemd .
+          docker build -t rockylinux/rockylinux:10_systemd -f ./resources/docker/Dockerfile_RockyLinux_10_systemd .
           sudo modprobe -v dummy numdummies=2 && sudo ip addr add 10.10.0.1/16 dev dummy0 && sudo ip link set dev dummy0 up && ip a;
           echo -e 'bb_repositories:\n  - name: bluebanquise\n    baseurl: "https://bluebanquise.com/repository/releases/latest/el10/x86_64/bluebanquise/"' > resources/workflow/inventory_standard/group_vars/all/repositories.yml
           docker run -d --privileged --cgroupns=host --net=host --name mgt1 -v /sys/fs/cgroup:/sys/fs/cgroup:rw -v $PWD:/bluebanquise rockylinux/rockylinux:10_systemd

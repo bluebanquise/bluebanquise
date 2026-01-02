@@ -1,0 +1,3 @@
+---
+cloudinit_services_to_start:
+  - cloud-init-main
