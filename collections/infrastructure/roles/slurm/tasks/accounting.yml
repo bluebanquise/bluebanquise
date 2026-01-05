@@ -9,7 +9,7 @@
 - name: file <|> Check if slurmdbd PID file exists
   stat:
     path: "{{ slurm_slurmdbdpidfile }}"
-  register: pid_file
+  register: slurm_pid_file
 
 - name: file <|> Create slurmdbd PID file if missing
   file:
@@ -18,7 +18,7 @@
     owner: slurm
     group: slurm
     mode: '0644'
-  when: not pid_file.stat.exists
+  when: not slurm_pid_file.stat.exists
 
 - name: "template <|> Generate {{ slurm_home_path }}/slurmdbd.conf"
   ansible.builtin.template:

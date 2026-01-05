@@ -3,9 +3,9 @@
     name: "*"
     state: latest
   when: update_reboot_upgrade_packages
-  register: packages_update
+  register: update_reboot_packages_update
 
 - name: reboot <|> Reboot system to run latest kernel
   ansible.builtin.reboot:
     reboot_timeout: "{{ update_reboot_reboot_timeout }}"
-  when: update_reboot_reboot and packages_update.changed
+  when: update_reboot_reboot and update_reboot_packages_update.changed

@@ -1,0 +1,7 @@
+FROM opensuse/leap:16
+
+RUN set -ex; \
+     zypper -n install systemd-sysvinit systemd-network sudo xz gzip procps;
+RUN mkdir /root/.ssh -p;
+
+CMD [ "/sbin/init" ]

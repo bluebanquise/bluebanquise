@@ -6,18 +6,18 @@
 
     - name: command <|> Gather devices device and name
       ansible.builtin.command: nmcli --terse -f device,name,type con show  # Gather devices and related name in a parsable way
-      register: nmcli_con_show
+      register: nic_nmcli_con_show
       changed_when: False
 
     - name: command <|> Rename interfaces if needed
       ansible.builtin.command: "nmcli connection modify '{{ item.name }}' connection.id '{{ item.device }}'"
       loop: "{{ nic_j2_nmcli_device_name_type | flatten(levels=1) }}"
-      register: nmcli_result
+      register: nic_nmcli_result
       when:
         - item.apply
         - item.type in ['802-3-ethernet', 'ethernet']
         - item.name != item.device
-      changed_when: nmcli_result.rc == 0
+      changed_when: nic_nmcli_result.rc == 0
 
 - name: nmcli <|> Set NICs configuration # noqa args[module]
   retries: 3
@@ -125,10 +125,10 @@
 - name: reboot <|> Reboot system to ensure apply nic configuration
   ansible.builtin.reboot:
     reboot_timeout: "{{ nic_reboot_timeout }}"
-  register: reboot_status
+  register: nic_reboot_status
   loop: "{{ nic_apply.results }}"
   when:  # noqa no-handler
     - nic_force_reboot
     - item.changed
-    - not (reboot_status.changed | d(false))
+    - not (nic_reboot_status.changed | d(false))
     - nic_allow_reboot | bool

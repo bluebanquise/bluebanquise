@@ -220,13 +220,13 @@
   ansible.builtin.find:
     paths: "{{ beegfs_vars.global_directory }}"
     file_type: file
-  register: files_to_delete
+  register: beegfs_files_to_delete
 
 - name: Remove /beegfs/ files
   ansible.builtin.file:
     path: "{{ item.path }}"
     state: absent
-  loop: "{{ files_to_delete.files | flatten(levels=1) }}"
+  loop: "{{ beegfs_files_to_delete.files | flatten(levels=1) }}"
 
 - name: Remove /etc/beegfs/ directory
   ansible.builtin.file:
@@ -237,7 +237,7 @@
   ansible.builtin.find:
     paths: /var/log/beegfs/
     patterns: beegfs*
-  register: files_to_delete
+  register: beegfs_files_to_delete
 
 - name: Remove the log files
   ansible.builtin.file:
@@ -247,24 +247,24 @@
 - name: Get running processes
   ansible.builtin.shell: |
           set -o pipefail /usr/bin/ps -eo pid,command | sed 's/^[ \t]*//' | grep -i bee | grep -v grep | awk '{print $1}'
-  register: running_processes
+  register: beegfs_running_processes
   changed_when: false
 
 - name: Display running processes
   ansible.builtin.debug:
     msg: "{{ item }}"
-  loop: "{{ running_processes.stdout_lines }}"
+  loop: "{{ beegfs_running_processes.stdout_lines }}"
 
 # - name: Kill running processes
 #   ansible.builtin.shell: |
 #           /usr/bin/kill -9 {{ item }}
-#   loop: "{{ running_processes.stdout_lines }}"
+#   loop: "{{ beegfs_running_processes.stdout_lines }}"
 
 # - name: wait process
 #   wait_for:
 #     path: "/proc/{{ item }}/status"
 #     state: absent
-#   loop: "{{ running_processes.stdout_lines }}"
+#   loop: "{{ beegfs_running_processes.stdout_lines }}"
 #   ignore_errors: yes
 #   register: killed_processes
 

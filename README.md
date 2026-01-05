@@ -27,13 +27,13 @@ A specific focus is made on scalability for very large clusters.
 
 When "stacked" together, roles and tools are called the **BlueBanquise stack**.
 
-The infrastructure collection should be compatible with most target Linux distributions (RHEL 8, RHEL 9, Debian 11, Debian 12, OpenSuse Leap 15, Ubuntu 20.04, Ubuntu 22.04, Ubuntu 24.04). However, please note that some non core roles do not support all these distributions (support is added on demand).
+The infrastructure collection should be compatible with most target Linux distributions (RHEL 9, RHEL 10, Debian 12, Debian 13, OpenSuse Leap 15, Ubuntu 22.04, Ubuntu 24.04). However, please note that some non core roles do not support all these distributions (support is added on demand).
 
 ## License
 
 BlueBanquise repository is under **MIT license**, except Bluebanquise documentation which is under **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License**.
 
-:penguin: The BlueBanquise project is a **100% open source project, not managed by a company, and will stay MIT license**. :penguin:
+:star: The BlueBanquise project is a **100% open source project, not managed by a company, and will stay MIT license**. :star:
 
 ## Donate
 
@@ -92,43 +92,6 @@ If you are not running Ansible as root, remember to pass the `-b` (`--become`) a
 
 It is advised to read the documentation at https://bluebanquise.com/documentation/ to understand stack basic concepts.
 
-### 5. Topology file
-
-In order to create a topology, you can use the variable `slurm_topology`. It takes into account the Swicth and Block options like in https://slurm.schedmd.com/topology.html
-
-A sample of inventory for Blocks will be:
-```yaml
-slurm_topology: topology/block
-slurm_topology_blocksizes: 18
-slurm_topology_file:
-  rack1:
-    section: BlockName
-    subsection: Nodes
-    nodeset: c[01-18]
-  rack2:
-    section: BlockName
-    subsection: Nodes
-    nodeset: c[19-36]
-```
-
-A sample for an inventory for Switches will be:
-```yaml
-slurm_topology: topology/tree
-slurm_topology_file:
-  isw101:
-    section: SwitchName
-    subsection: Nodes
-    nodeset: c[01-20]
-  isw102:
-     section: SwitchName
-     subsection: Nodes
-     nodeset: c[21-40]
-  isw201:
-     section: SwitchName
-     subsection: Switches
-     nodeset: isw[101-102]
-```
-
 ## Resources
 
 ### Documentation
@@ -150,24 +113,24 @@ Currently tested and supported distributions (other derivative could work) are:
 | Operating System family | Operating System distribution | Tested versions    | Architectures    | Notes                                                       |
 | ----------------------- | ----------------------------- | ------------------ | ---------------- | ----------------------------------------------------------- |
 | Red Hat                 |                               |                    |                  |                                                             |
-|                         | RHEL                          | 8, 9               | x86_64, aarch64  | √                                                           |
-|                         | Rocky Linux                   | 8, 9               | x86_64, aarch64  | √                                                           |
-|                         | CentOS                        | 8                  | x86_64, aarch64  | √                                                           |
-|                         | CentOS Stream                 | 8                  | x86_64, aarch64  | √                                                           |
-|                         | Alma Linux                    | 8, 9               | x86_64, aarch64  | √                                                           |
+|                         | RHEL                          | 9, 10              | x86_64, aarch64  | √                                                           |
+|                         | Rocky Linux                   | 9, 10              | x86_64, aarch64  | √                                                           |
+|                         | Alma Linux                    | 9, 10              | x86_64, aarch64  | √                                                           |
 | Debian                  |                               |                    |                  |                                                             |
-|                         | Ubuntu                        | 20.04, 22.04, 24.04              | x86_64, arm64  | √. Diskless not supported for now.                          |
-|                         | Debian                        | 11, 12             |  x86_64, arm64                | √. Diskless not supported for now.  |
+|                         | Ubuntu                        | 22.04, 24.04       | x86_64, arm64    | √. Diskless not supported for now.                          |
+|                         | Debian                        | 12, 13             | x86_64, arm64    | √. Diskless not supported for now.                          |
 | Suse                    |                               |                    |                  |                                                             |
-|                         | SLES                          | 15.6                 | x86_64, aarch64  | √. Diskless not supported for now.                                                           |
-|                         | OpenSuse Leap                 | 15.6                 | x86_64, aarch64  | √. Diskless not supported for now.          |
+|                         | SLES                          | 15.6               | x86_64, aarch64  | √. Diskless not supported for now.                          |
+|                         | OpenSuse Leap                 | 15.6               | x86_64, aarch64  | √. Diskless not supported for now.                          |
 
 ansible-core >= 2.16 is mandatory for BlueBanquise to run properly (it might work with earlier versions, but not tested).
 
 Please note that:
 
-* EL 7 systems (Centos 7, RHEL 7, etc.) is now considered best effort only as system is past EOL.
-* Ubuntu 18.04 and Suse 12 are no more supported (too old, I miss the time to support them).
+* EL 7 and 8 are now considered best effort only.
+* Ubuntu 18.04 and 20.04 are now considered best effort only.
+* Debian 11 is now considered best effort only.
+* Suse 12 is no more supported at all (too old, I miss the time to support it).
 * RHEL 8 and OpenSuse Leap 15 need an ansible-core==2.16, 2.17+ is not compatible.
 
 ## The project

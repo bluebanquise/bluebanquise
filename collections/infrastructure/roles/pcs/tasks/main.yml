@@ -89,7 +89,7 @@
 
     - name: command <|> Check cluster exist
       ansible.builtin.command: "cat /etc/corosync/corosync.conf"
-      register: corosync_known_hosts
+      register: pcs_corosync_known_hosts
       changed_when: False
       ignore_errors: yes
 
@@ -97,12 +97,12 @@
       ansible.builtin.command: "pcs cluster setup {{ pcs_cluster_name }} {{ item.name }} {% for addr in item.addrs %}addr={{ addr }} {% endfor %}"
       loop: "{{ pcs_cluster_nodes }}"
       when:
-        - ( corosync_known_hosts.stdout_lines | select("match", ".*"+pcs_reference_node+".*") | list | length ) < 1
+        - ( pcs_corosync_known_hosts.stdout_lines | select("match", ".*"+pcs_reference_node+".*") | list | length ) < 1
         - item.name == "{{ pcs_reference_node }}"
 
     - name: command <|> Check nodes already in corosync
       ansible.builtin.command: "cat /etc/corosync/corosync.conf"
-      register: corosync_known_hosts
+      register: pcs_corosync_known_hosts
       changed_when: False
       ignore_errors: yes
 
@@ -110,7 +110,7 @@
       ansible.builtin.command: "pcs cluster node add {{ item.name }} {% for addr in item.addrs %}addr={{ addr }} {% endfor %} --force"
       loop: "{{ pcs_cluster_nodes }}"
       when:
-        - ( corosync_known_hosts.stdout_lines | select("match", ".*name:\\s"+item.name+".*") | list | length ) < 1
+        - ( pcs_corosync_known_hosts.stdout_lines | select("match", ".*name:\\s"+item.name+".*") | list | length ) < 1
         - item.name != "{{ pcs_reference_node }}"
 
 - name: service <|> Enable and start cluster
@@ -169,11 +169,11 @@
 
     - name: command <|> Add resources to cluster
       ansible.builtin.command: "pcs -f {{ pcs_cib_file_path }} resource create {{ item.1.id }} {{ item.1.type }} {{ ('arguments' in item.1) | ternary(item.1.arguments, '') }} {{ (item.0.group) | ternary('--group ' + item.0.group, '') }}"
-      register: cmd
-      changed_when: cmd.rc == 0
+      register: pcs_cmd
+      changed_when: pcs_cmd.rc == 0
       failed_when:
-        - cmd.rc != 0
-        - "'already exists' not in cmd.stderr"
+        - pcs_cmd.rc != 0
+        - "'already exists' not in pcs_cmd.stderr"
       loop: "{{ pcs_resources | subelements('resources') }}"
       loop_control:
         label: "resource : {{ item.1.id }}"
@@ -181,11 +181,11 @@
 
     - name: command <|> Set order constraints
       ansible.builtin.command: "pcs -f {{ pcs_cib_file_path }} constraint order start {{ item.1.start_after }} then start {{ item.0.group }}"
-      register: cmd
-      changed_when: cmd.rc == 0
+      register: pcs_cmd
+      changed_when: pcs_cmd.rc == 0
       failed_when:
-        - cmd.rc != 0
-        - "'already exists' not in cmd.stderr"
+        - pcs_cmd.rc != 0
+        - "'already exists' not in pcs_cmd.stderr"
       loop: "{{ lookup('subelements', pcs_resources, 'order', {'skip_missing': True}, wantlist=True) }}"
       loop_control:
         label: "order : {{ item.0.group }} {{ item.1.start_after }}"
@@ -193,11 +193,11 @@
 
     - name: command <|> Set colocation constraints
       ansible.builtin.command: "pcs -f {{ pcs_cib_file_path }} constraint colocation add {{ ('master' in item.1) | ternary(item.1.master, item.0.group) }} with {{ ('slave' in item.1) | ternary(item.1.slave, item.0.group) }} {{ ('score' in item.1) | ternary('score=' + item.1.score, '') }}"
-      register: cmd
-      changed_when: cmd.rc == 0
+      register: pcs_cmd
+      changed_when: pcs_cmd.rc == 0
       failed_when:
-        - cmd.rc != 0
-        - "'already exists' not in cmd.stderr"
+        - pcs_cmd.rc != 0
+        - "'already exists' not in pcs_cmd.stderr"
       loop: "{{ lookup('subelements', pcs_resources, 'colocations', {'skip_missing': True}, wantlist=True) }}"
       loop_control:
         label: "colocation : {{ item.0.group }} with {{ item.1.slave }}"
@@ -205,11 +205,11 @@
 
     - name: command <|> Set location constraints
       ansible.builtin.command: "pcs -f {{ pcs_cib_file_path }} constraint location {{ item.0.group }} {{ item.1.type }} {% for node in item.1.nodes %}{{node}}={{item.1.score | default('INFINITY')}} {% endfor %}"
-      register: cmd
-      changed_when: cmd.rc == 0
+      register: pcs_cmd
+      changed_when: pcs_cmd.rc == 0
       failed_when:
-        - cmd.rc != 0
-        - "'already exists' not in cmd.stderr"
+        - pcs_cmd.rc != 0
+        - "'already exists' not in pcs_cmd.stderr"
       loop: "{{ lookup('subelements', pcs_resources, 'locations', {'skip_missing': True}, wantlist=True) }}"
       loop_control:
         label: "location : {{ item.0.group }} {{ item.1.type }} {{ item.1.nodes | join(' ') }}"
@@ -217,33 +217,33 @@
 
     - name: command <|> Create stonith
       ansible.builtin.command: "pcs -f {{ pcs_cib_file_path }} stonith create {{ item.name }} {{ item.type }} pcmk_host_check={{ item.pcmk_host_check }} {% if item.pcmk_host_check == 'static-list' %}pcmk_host_list={{item.pcmk_host_list}}{% endif %} pcmk_reboot_action={{ item.pcmk_reboot_action }} {{ item.parameters }}"
-      register: cmd
-      changed_when: cmd.rc == 0
+      register: pcs_cmd
+      changed_when: pcs_cmd.rc == 0
       loop: "{{ pcs_stonith }}"
       failed_when:
-        - cmd.rc != 0
-        - "'already exists' not in cmd.stderr"
+        - pcs_cmd.rc != 0
+        - "'already exists' not in pcs_cmd.stderr"
       when: pcs_stonith is defined and pcs_stonith
       notify: command <|> Push HA configuration
 
     - name: command <|> Set stonith prefers constraint
       ansible.builtin.command: "pcs -f {{ pcs_cib_file_path }} constraint location {{ item.name }} prefers {{ item.prefers }}"
       loop: "{{ pcs_stonith }}"
-      register: cmd
-      changed_when: cmd.rc == 0
+      register: pcs_cmd
+      changed_when: pcs_cmd.rc == 0
       failed_when:
-        - cmd.rc != 0
-        - "'already exists' not in cmd.stderr"
+        - pcs_cmd.rc != 0
+        - "'already exists' not in pcs_cmd.stderr"
       when: pcs_stonith is defined and pcs_stonith.prefers is defined
       notify: command <|> Push HA configuration
 
     - name: command <|> Set stonith avoids constraint
       ansible.builtin.command: "pcs -f {{ pcs_cib_file_path }} constraint location {{ item.name }} avoids {{ item.avoids }}"
-      register: cmd
-      changed_when: cmd.rc == 0
+      register: pcs_cmd
+      changed_when: pcs_cmd.rc == 0
       failed_when:
-        - cmd.rc != 0
-        - "'already exists' not in cmd.stderr"
+        - pcs_cmd.rc != 0
+        - "'already exists' not in pcs_cmd.stderr"
       loop: "{{ pcs_stonith }}"
       when: pcs_stonith is defined and pcs_stonith
       notify: command <|> Push HA configuration

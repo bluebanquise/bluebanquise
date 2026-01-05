@@ -4,21 +4,21 @@
   ansible.builtin.user:
     name: "{% if ansible_env.SUDO_USER is defined and ansible_env.SUDO_USER is not none %}{{ ansible_env.SUDO_USER }}{% else %}root{% endif %}"
     state: present
-  register: admin_user_info
+  register: ssh_client_admin_user_info
   check_mode: true
 
 - name: file <|> Create user ssh directory if not exist
   ansible.builtin.file:
-    path: "{{ admin_user_info.home }}/.ssh"
+    path: "{{ ssh_client_admin_user_info.home }}/.ssh"
     state: directory
     mode: 0700
 
 - name: "template <|> Generate .ssh/config"
   ansible.builtin.template:
     src: "config.j2"
-    dest: "{{ admin_user_info.home }}/.ssh/config"
-    owner: "{{ admin_user_info.uid }}"
-    group: "{{ admin_user_info.group }}"
+    dest: "{{ ssh_client_admin_user_info.home }}/.ssh/config"
+    owner: "{{ ssh_client_admin_user_info.uid }}"
+    group: "{{ ssh_client_admin_user_info.group }}"
     mode: 0600
   tags:
     - template

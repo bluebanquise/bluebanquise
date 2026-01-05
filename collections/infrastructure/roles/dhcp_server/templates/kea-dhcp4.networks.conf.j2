@@ -1,0 +1,121 @@
+#jinja2: lstrip_blocks: True
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+
+
+{###############################################################################
+  Generic service item write
+################################################################################
+ip_or_host allows to define priorities between ip or host
+#}
+{% macro item_add(item_name, items_list, ip_or_host, key_or_dict) %}
+  {% if items_list is defined and items_list is iterable and items_list is not string and items_list is not mapping %}
+    {% set elements = [] %}
+    {% for elem in items_list %}
+      {% if ip_or_host == "ip" %}
+        {% if elem.ip4 is defined and (elem.ip4 | ansible.utils.ipaddr) %}
+          {{ elements.append(elem.ip4) }}
+        {% elif elem.hostname is defined and elem.hostname is not none and elem.hostname is string %}
+          {{ elements.append(elem.hostname) }}
+        {% endif %}
+      {% else %}
+        {% if elem.hostname is defined and elem.hostname is not none and elem.hostname is string %}
+          {{ elements.append(elem.hostname) }}
+        {% elif elem.ip4 is defined and (elem.ip4 | ansible.utils.ipaddr) %}
+          {{ elements.append(elem.ip4) }}
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+    {% if (elements | length) > 0 %}
+      {% if key_or_dict == "dict" %}
+        {
+            "name": "{{ item_name }}",
+            "data": "{{ elements | join(', ') }}"
+        },
+      {% else %}
+        "{{ item_name }}": "{{ elements | first }}",
+      {% endif %}
+    {% endif %}
+  {% endif %}
+{% endmacro %}
+
+
+{###############################################################################
+  Write a network
+###############################################################################}
+{% macro write_network(network, network_id) %}
+
+    "id": {{ network_id }},
+    "subnet": "{{ networks[network]['subnet'] }}/{{ networks[network]['prefix'] | string }}",
+
+    {% if networks[network]['services'] is defined and networks[network]['services'] is iterable and networks[network]['services'] is not string and networks[network]['services'] is mapping and (networks[network]['services']['pxe4'] | default(networks[network]['services']['pxe'], true)) is defined%}
+    {{ item_add("next-server", (networks[network]['services']['pxe4'] | default(networks[network]['services']['pxe'], true)), "ip", "key") }}
+    {% elif networks[network]['services_ip'] is defined and (networks[network]['services_ip'] | ansible.utils.ipaddr) %}
+    "next-server": "{{ networks[network]['services_ip'] }}",
+    {% endif %}
+
+    {% if networks[network]['dhcp_unknown_range'] is defined and networks[network]['dhcp_unknown_range'] is not none %}
+    "pools": [
+        {
+                "pool": "{{ networks[network]['dhcp_unknown_range'] }}"
+        }
+    ],
+    {% endif %}
+
+    "option-data": [
+
+        {% if (networks[network]['gateway4'] | default(networks[network]['gateway'], true)) is defined %}
+            {% if (networks[network]['gateway4'] | default(networks[network]['gateway'], true)) is string %}
+        {
+            "name": "routers",
+            "data": "{{ (networks[network]['gateway4'] | default(networks[network]['gateway'], true)) }}"
+        },
+            {% elif (networks[network]['gateway4'] | default(networks[network]['gateway'], true)) is iterable and (networks[network]['gateway4'] | default(networks[network]['gateway'], true)) is not mapping %}
+        {{ item_add("routers", (networks[network]['gateway4'] | default(networks[network]['gateway'], true)), "ip", "dict") }}
+            {% endif %}
+        {% endif %}
+
+        {% if networks[network]['services'] is defined and networks[network]['services'] is iterable and networks[network]['services'] is not string and networks[network]['services'] is mapping and (networks[network]['services']['dns4'] | default(networks[network]['services']['dns'], true)) is defined%}
+        {{ item_add("domain-name-servers", (networks[network]['services']['dns4'] | default(networks[network]['services']['dns'], true)), "ip", "dict") }}
+        {% elif networks[network]['services_ip'] is defined and (networks[network]['services_ip'] | ansible.utils.ipaddr) %}
+        {
+            "name": "domain-name-servers",
+            "data": "{{ networks[network]['services_ip'] }}"
+        },
+        {% endif %}
+
+        {% if networks[network]['services'] is defined and networks[network]['services'] is iterable and networks[network]['services'] is not string and networks[network]['services'] is mapping and (networks[network]['services']['ntp4'] | default(networks[network]['services']['ntp'], true)) is defined%}
+        {{ item_add("ntp-servers", (networks[network]['services']['ntp4'] | default(networks[network]['services']['ntp'], true)), "ip", "dict") }}
+        {% elif networks[network]['services_ip'] is defined and (networks[network]['services_ip'] | ansible.utils.ipaddr) %}
+        {
+            "name": "ntp-servers",
+            "data": "{{ networks[network]['services_ip'] }}"
+        },
+        {% endif %}
+
+        {
+            "name": "domain-search",
+            "data": "{{ dhcp_server_domain_name | default(bb_domain_name, true) | default('cluster.local', true) }}"
+        }
+    ],
+    <?include "{{ dhcp_server_conf_dir }}/kea-dhcp4.{{ network }}.conf"?>
+
+{% endmacro %}
+
+"subnet4": [
+
+    {% for network in networks %}
+        {% if network in j2_management_networks %}
+            {% if (networks[network]['dhcp_server'] | default(true)) %}
+                {% if networks[network]['shared_network'] is not defined or networks[network]['shared_network'] is none  %}
+
+        {
+{{ write_network(network, loop.index) }}
+        }{% if not loop.last %},{% endif %}
+
+                {% endif %}
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+
+]
