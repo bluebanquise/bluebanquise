@@ -4,6 +4,9 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.2.9
 
+* 01/05/26 - fabienarchambault - [slurm] slurm.conf: remove useless newlines (#1206)
+* 01/05/26 - oxedions - [core] Support for RHEL 10 and Debian 13, add KEA DHCP (#1205)
+* 01/05/26 - fabienarchambault - [slurm] Slurm: add dropin file for additional configuration on configfull computes (#1207)
 * 12/23/25 - btravouillon - [dhcp_server] Fix is_in_dhcp condition (#1200)
 * 12/23/25 - btravouillon - [slurm] Restart slurmctld when the topology changes (#1201)
 * 12/23/25 - dietergorecki - [sudoers] Enable logging support in sudoers (#1203)
