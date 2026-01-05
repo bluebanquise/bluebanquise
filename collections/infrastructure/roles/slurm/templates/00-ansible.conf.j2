@@ -1,0 +1,11 @@
+#jinja2: lstrip_blocks: True
+#### Blue Banquise file ####
+## {{ansible_managed}}
+{% for section in slurm_slurmd_additional_conf %}
+[{{ section.section }}]
+{% for item in section.content %}
+{% for key, value in item.items() %}
+{{ key }}={{ value }}
+{% endfor %}
+{% endfor %}
+{% endfor %}
