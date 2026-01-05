@@ -12,6 +12,31 @@
     - slurm.conf
   notify: service <|> restart slurmd
 
+- name: "Create dropin folder"
+  ansible.builtin.file:
+    path: "/etc/systemd/system/slurmd.service.d"
+    owner: root
+    group: root
+    state: directory
+    mode: '0755'
+  when: slurm_slurmd_additional_conf is defined
+
+- name: "template <|> Generate configuration files in /etc/systemd/system/slurmd.service.d"
+  ansible.builtin.template:
+    src: "00-ansible.conf.j2"
+    dest: "/etc/systemd/system/slurmd.service.d/{{ item }}"
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - template
+  loop:
+    - "{{ slurm_slurmd_dropin_file | default(['00-ansible.conf']) }}"
+  notify:
+    - systemd <|> Reload systemd configuration
+    - service <|> restart slurmd
+  when: slurm_slurmd_additional_conf is defined
+
 - name: "template <|> Generate gres.conf in {{ slurm_home_path }}"
   ansible.builtin.template:
     src: "{{ item }}.j2"

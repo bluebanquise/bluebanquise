@@ -15,6 +15,14 @@ slurm_slurmctldpidfile: /var/run/slurmctld.pid
 slurm_slurmdpidfile: /var/run/slurmd.pid
 slurm_slurmdbdpidfile: /var/run/slurmdbd.pid
 
+## slurmd additional configuration
+# slurm_slurmd_additional_conf:
+#   - section: 'Service'
+#     content:
+#       - LimitNOFILESoft: 2048576
+#       - ...
+# slurm_slurmd_dropin_file: "01-custom.conf" # default: 00-ansible.conf
+
 ## firewall and ports
 # slurm_firewall_zone: public
 slurm_slurmtld_port: 6817
