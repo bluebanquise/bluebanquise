@@ -133,9 +133,9 @@ check_pcs() {
     id=$(pcs cluster cib | grep -E "/var/www/html/\w*/nodes" |
          sed 's/.*id="\([^[:blank:]]*\)-instance_attributes-directory.*/\1/')
 
-    currentnode=1
+    currentnode=0
     node=$(pcs resource status "$id" | grep Started | awk '{print $NF}')
-    [[ "$node" == "$(hostname)" ]]  && currentnode=0
+    [[ "$node" == "$(hostname)" ]] || currentnode=1
     if [[ ${ispcs} == 1 || ${id} == "" || ${currentnode} == 0 ]]; then
       return 0
     else
