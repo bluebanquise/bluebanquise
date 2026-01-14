@@ -286,8 +286,8 @@ print("""\
       (o_  (o_  //\\
       (/)_ (/)_ V_/_
    BlueBanquise diskless
-   v2.0.8
-   Patched for SMC
+   v2.0.8 - beta
+   https://github.com/bluebanquise/bluebanquise/
 
 """)
 
