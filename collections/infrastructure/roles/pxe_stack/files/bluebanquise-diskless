@@ -7,6 +7,7 @@
 # ██████╔╝███████╗╚██████╔╝███████╗██████╔╝██║  ██║██║ ╚████║╚██████╔╝╚██████╔╝██║███████║███████╗
 # ╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚══▀▀═╝  ╚═════╝ ╚═╝╚══════╝╚══════╝
 #
+# 2.0.8: Fix check user and group presence in image for cross-arch images. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
 # 2.0.7: Update boot.ipxe when cloning reference image. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 # 2.0.6: Use --numeric-owner when extracting bootstrap image to ensure correct uid/gid. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 # 2.0.5: Add debug optional parameter. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
@@ -88,6 +89,7 @@ import subprocess
 import crypt
 import string
 import sys
+import platform
 
 
 # Colors, from https://stackoverflow.com/questions/287871/how-to-print-colored-text-in-terminal-in-python
@@ -280,7 +282,7 @@ print("""\
       (o_  (o_  //\\
       (/)_ (/)_ V_/_
    BlueBanquise diskless
-   v2.0.7 - beta
+   v2.0.8 - beta
    https://github.com/bluebanquise/bluebanquise/
 
 """)
@@ -521,9 +523,23 @@ while True:
 
         logging.info(bcolors.OKBLUE + 'Adding bluebanquise user to image...' + bcolors.ENDC)
         protected_os_system("mkdir -p " + reference_image_nfs_path + os.path.dirname(tool_parameters['sudo_user_home']))
-        protected_os_system("groupadd -R " + reference_image_nfs_path + "/ --system " + tool_parameters['sudo_user'])
-        protected_os_system("useradd  -R " + reference_image_nfs_path + "/ -m -c 'BlueBanquise user' -d " + tool_parameters['sudo_user_home'] + " --system -g " + tool_parameters['sudo_user'] + " -s /bin/bash -p '" + image_selected_user_password + "' " + tool_parameters['sudo_user'])
 #            protected_os_system("useradd  -R " + tool_parameters['nfs_path'] + "/" + image_selected_input + "/ -m -c 'BlueBanquise user' -d /var/lib/bluebanquise --system -g bluebanquise -s /bin/bash bluebanquise")
+        # create group in image, skip if already created
+        protected_os_system("/usr/bin/grep -q '^" + tool_parameters['sudo_user'] + ":' " + reference_image_nfs_path + "/etc/group || /usr/sbin/groupadd -R " + reference_image_nfs_path + "/ " + tool_parameters['sudo_user'])
+
+        # useradd should use "-g", but this fails in RHEL8 hosts
+        # check if we are running RHEL 8
+        running_rhel8 = "el8" in platform.release()
+        group_str = ""
+        if not running_rhel8:
+            group_str = "-g " + tool_parameters['sudo_user']
+
+        # create user in image, skip if already created
+        protected_os_system("/usr/bin/grep -q '^" + tool_parameters['sudo_user'] + ":' " + reference_image_nfs_path + "/etc/passwd || /usr/sbin/useradd  -R " + reference_image_nfs_path + "/ -m -c 'BlueBanquise user' " + group_str + " -d " + tool_parameters['sudo_user_home'] + " -u " + str(tool_parameters['sudo_user_uid']) + " -s /bin/bash -p '" + image_selected_user_password + "' " + tool_parameters['sudo_user'])
+
+        # update of user password in image, useful if previous command was skipped
+        logging.info(bcolors.OKBLUE + "Setting password of " + tool_parameters['sudo_user'] + " user in image..." + bcolors.ENDC)
+        protected_os_system("/usr/sbin/usermod -P " + reference_image_nfs_path + " -p '" + image_selected_user_password + "' " + tool_parameters['sudo_user'])
 
         protected_os_system("echo '" + tool_parameters['sudo_user'] + " ALL=(ALL:ALL) NOPASSWD:ALL' > " + reference_image_nfs_path + "/etc/sudoers.d/" + tool_parameters['sudo_user'])
 
