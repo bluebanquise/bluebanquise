@@ -7,7 +7,7 @@
 # ██████╔╝███████╗╚██████╔╝███████╗██████╔╝██║  ██║██║ ╚████║╚██████╔╝╚██████╔╝██║███████║███████╗
 # ╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚══▀▀═╝  ╚═════╝ ╚═╝╚══════╝╚══════╝
 #
-# 2.0.8: Fix check user and group presence in image for cross-arch images. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
+# 2.0.8: Fix check user and group presence before creation. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
 # 2.0.7: Update boot.ipxe when cloning reference image. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 # 2.0.6: Use --numeric-owner when extracting bootstrap image to ensure correct uid/gid. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 # 2.0.5: Add debug optional parameter. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
