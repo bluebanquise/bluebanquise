@@ -2,6 +2,10 @@
 
 Format: <date> - <author (username or mail or both)> - [role] <change description>
 
+# To 3.4 or 4.0
+
+* 16/01/2026 - fabienarchambault - [slurm] Fix new line in slurm.conf.j2 template (#1209)
+
 # To 3.2.9
 
 * 01/05/26 - fabienarchambault - [slurm] slurm.conf: remove useless newlines (#1206)
