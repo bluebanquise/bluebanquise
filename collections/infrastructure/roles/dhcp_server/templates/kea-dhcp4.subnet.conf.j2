@@ -17,6 +17,17 @@
 
   {%- endif %}
 
+  {% if nic.dhcp_client_indentifier is defined %}
+
+    {
+        #  {{host}}-{{item}}-client-identifier
+        "client-id": "{{ nic.dhcp_client_identifier}}",
+        "server-hostname": "{{host}}",
+        "ip-address": "{{ nic.ip4 }}"
+    },
+
+  {%- endif %}
+
 {%- endmacro %}
 
 {###############################################################################
