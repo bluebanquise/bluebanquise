@@ -5,6 +5,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 # To 3.4 or 4.0
 
 * 16/01/2026 - fabienarchambault - [slurm] Fix new line in slurm.conf.j2 template (#1209)
+* 21/01/2026 - thiagocardozo - [dhcp_server] Added Option61 matching (#1213)
 
 # To 3.2.9
 
