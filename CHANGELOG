@@ -6,10 +6,10 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 * 20/01/2026 - pducjacquet - [pxe_stack] Allow + character when sanitizing user input, needed for kernel-64k in aarch64 images
 * 16/01/2026 - fabienarchambault - [slurm] Fix new line in slurm.conf.j2 template (#1209)
+* 15/01/2026 - ginomcevoy and lehouque-atos - [podman] Fix configuration for rootless containers
 
 # To 3.2.9
 
-* 01/15/26 - ginomcevoy and lehouque-atos - [podman] Fix configuration for rootless containers
 * 01/05/26 - fabienarchambault - [slurm] slurm.conf: remove useless newlines (#1206)
 * 01/05/26 - oxedions - [core] Support for RHEL 10 and Debian 13, add KEA DHCP (#1205)
 * 01/05/26 - fabienarchambault - [slurm] Slurm: add dropin file for additional configuration on configfull computes (#1207)
