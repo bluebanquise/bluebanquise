@@ -4,6 +4,8 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.4 or 4.0
 
+* 22/01/2026 - teo-blachere - [pxe_stack] Check user and group presence before creation diskless (#1211)
+* 20/01/2026 - pducjacquet - [pxe_stack] Allow + character when sanitizing user input, needed for kernel-64k in aarch64 images (#1208)
 * 16/01/2026 - fabienarchambault - [slurm] Fix new line in slurm.conf.j2 template (#1209)
 * 15/01/2026 - ginomcevoy and lehouque-atos - [podman] Fix configuration for rootless containers (#1210)
 * 20/01/2026 - pducjacquet - [pxe_stack] Allow + character when sanitizing user input, needed for kernel-64k in aarch64 images (#1208)
