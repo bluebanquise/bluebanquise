@@ -529,6 +529,11 @@ while True:
         logging.info(bcolors.OKBLUE + 'Adding bluebanquise user to image...' + bcolors.ENDC)
         protected_os_system("mkdir -p " + reference_image_nfs_path + os.path.dirname(tool_parameters['sudo_user_home']))
 #            protected_os_system("useradd  -R " + tool_parameters['nfs_path'] + "/" + image_selected_input + "/ -m -c 'BlueBanquise user' -d /var/lib/bluebanquise --system -g bluebanquise -s /bin/bash bluebanquise")
+        
+        # Required if host node is running SELinux in enforcing mode
+        protected_os_system("mkdir -p " + reference_image_nfs_path + "/sys/fs/selinux")
+        protected_os_system("echo '0' > " + reference_image_nfs_path + "/sys/fs/selinux/enforce")
+        
         # create group in image, skip if already created
         protected_os_system("/usr/bin/grep -q '^" + tool_parameters['sudo_user'] + ":' " + reference_image_nfs_path + "/etc/group || /usr/sbin/groupadd -R " + reference_image_nfs_path + "/ --system " + tool_parameters['sudo_user'])
 
