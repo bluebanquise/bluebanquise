@@ -8,3 +8,6 @@ hosts_file_fqdn_first: false
 # If set to true, hostname, alias, nic-network and nic-alias will be written info hosts file
 # If set to false, only hostname and alias will be written into hosts file
 hosts_file_enable_extended_names: true
+
+# Copy hosts file instead of generate it for all hosts
+hosts_file_copy: false
