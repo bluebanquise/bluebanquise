@@ -53,6 +53,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # 3.2.7 / 3.2.8
 
+* 11/12/25 - oxedions - [powerman] Fix rights on configuration file to prevent users access. (#1129, from santos-lucas and btravouillon)
 * 11/10/25 - oxedions - [core] Enable compatibility with ansible core 2.19+, keep backward compatibility.
 * 11/10/25 - oxedions - [nic] Fix issue with system restarting on ubuntu/debian.
 * 11/10/25 - oxedions - [project] Join all repos into a single one, to simplify the current heavy maintenance.
