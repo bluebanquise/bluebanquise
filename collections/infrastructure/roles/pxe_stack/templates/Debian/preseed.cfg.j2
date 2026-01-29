@@ -129,8 +129,7 @@ d-i preseed/late_command string \
       echo "Running post-script $N"; \
       in-target sh -c "$(echo "$script" | base64 -d)"; \
     fi; \
-  done
-
+  done; \
 {% if pxe_stack_enable_root %}
   in-target sh -c 'mkdir /root/.ssh'; \
   {% for ssh_key in (equipment['os']['os_admin_ssh_keys'] | default(pxe_stack_os_admin_ssh_keys)) %}
