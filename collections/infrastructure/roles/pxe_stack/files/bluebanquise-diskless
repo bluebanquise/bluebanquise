@@ -7,6 +7,7 @@
 # ██████╔╝███████╗╚██████╔╝███████╗██████╔╝██║  ██║██║ ╚████║╚██████╔╝╚██████╔╝██║███████║███████╗
 # ╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚══▀▀═╝  ╚═════╝ ╚═╝╚══════╝╚══════╝
 #
+# 2.0.8: Fix check user and group presence before creation. Teo Blachere <teo.blachere@eviden.com>
 # 2.0.7: Update boot.ipxe when cloning reference image. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 # 2.0.6: Use --numeric-owner when extracting bootstrap image to ensure correct uid/gid. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
 # 2.0.5: Add debug optional parameter. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
@@ -88,6 +89,7 @@ import subprocess
 import crypt
 import string
 import sys
+import platform
 
 
 # Colors, from https://stackoverflow.com/questions/287871/how-to-print-colored-text-in-terminal-in-python
@@ -248,9 +250,12 @@ def get_live_image_path(tool_paths, live_image_name):
 def get_user_input(msg, validate_name=False):
     """Sanitizes the user's input by removing whitespace, keeps prompting until input is valid.
 
-    If validate_name is True, then it also checks that the input complies with the POSIX
-    specification "Portable Filename Character Set" (letters, digits, -, _, .). The goal is to
-    avoid issues with the shell commands executed by the tool.
+    If validate_name is True, then it also checks that the input complies with a modified version
+    of the POSIX specification "Portable Filename Character Set".
+    In addition to the specification (letters, digits, -, _, .), the character '+' is allowed
+    to support aarch64 images with kernel-64k kernel (kernel has '+64k' prefix).
+
+    The goal is to avoid issues with the shell commands executed by the tool.
     """
     user_input = ""
     while user_input == "":
@@ -262,8 +267,10 @@ def get_user_input(msg, validate_name=False):
         if not validate_name:
             continue
 
-        # optionally (validate_name True), validate compliance with POSIX "Portable Filename Character Set"
-        allowed_characters = string.ascii_letters + string.digits + '-_.'
+        # optionally (validate_name True), validate:
+        # - compliance with POSIX "Portable Filename Character Set"
+        # - character '+' is also allowed
+        allowed_characters = string.ascii_letters + string.digits + '-_.+'
         invalid_characters = set(user_input).difference(set(allowed_characters))
 
         if len(invalid_characters) > 0:
@@ -280,7 +287,7 @@ print("""\
       (o_  (o_  //\\
       (/)_ (/)_ V_/_
    BlueBanquise diskless
-   v2.0.7 - beta
+   v2.0.8 - beta
    https://github.com/bluebanquise/bluebanquise/
 
 """)
@@ -521,9 +528,23 @@ while True:
 
         logging.info(bcolors.OKBLUE + 'Adding bluebanquise user to image...' + bcolors.ENDC)
         protected_os_system("mkdir -p " + reference_image_nfs_path + os.path.dirname(tool_parameters['sudo_user_home']))
-        protected_os_system("groupadd -R " + reference_image_nfs_path + "/ --system " + tool_parameters['sudo_user'])
-        protected_os_system("useradd  -R " + reference_image_nfs_path + "/ -m -c 'BlueBanquise user' -d " + tool_parameters['sudo_user_home'] + " --system -g " + tool_parameters['sudo_user'] + " -s /bin/bash -p '" + image_selected_user_password + "' " + tool_parameters['sudo_user'])
 #            protected_os_system("useradd  -R " + tool_parameters['nfs_path'] + "/" + image_selected_input + "/ -m -c 'BlueBanquise user' -d /var/lib/bluebanquise --system -g bluebanquise -s /bin/bash bluebanquise")
+        # create group in image, skip if already created
+        protected_os_system("/usr/bin/grep -q '^" + tool_parameters['sudo_user'] + ":' " + reference_image_nfs_path + "/etc/group || /usr/sbin/groupadd -R " + reference_image_nfs_path + "/ --system " + tool_parameters['sudo_user'])
+
+        # useradd should use "-g", but this fails in RHEL8 hosts
+        # check if we are running RHEL 8
+        running_rhel8 = "el8" in platform.release()
+        group_str = ""
+        if not running_rhel8:
+            group_str = "-g " + tool_parameters['sudo_user']
+
+        # create user in image, skip if already created
+        protected_os_system("/usr/bin/grep -q '^" + tool_parameters['sudo_user'] + ":' " + reference_image_nfs_path + "/etc/passwd || /usr/sbin/useradd  -R " + reference_image_nfs_path + "/ -m -c 'BlueBanquise user' " + group_str + " -d " + tool_parameters['sudo_user_home'] + " --system -u " + str(tool_parameters['sudo_user_uid']) + " -s /bin/bash -p '" + image_selected_user_password + "' " + tool_parameters['sudo_user'])
+
+        # update of user password in image, useful if previous command was skipped
+        logging.info(bcolors.OKBLUE + "Setting password of " + tool_parameters['sudo_user'] + " user in image..." + bcolors.ENDC)
+        protected_os_system("/usr/sbin/usermod -P " + reference_image_nfs_path + " -p '" + image_selected_user_password + "' " + tool_parameters['sudo_user'])
 
         protected_os_system("echo '" + tool_parameters['sudo_user'] + " ALL=(ALL:ALL) NOPASSWD:ALL' > " + reference_image_nfs_path + "/etc/sudoers.d/" + tool_parameters['sudo_user'])
 
