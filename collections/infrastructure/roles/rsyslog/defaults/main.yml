@@ -2,3 +2,6 @@
 rsyslog_port: 514
 
 rsyslog_client_verbosity: "info"
+
+# Configure logrotate on servers
+rsyslog_server_logrotate: true
