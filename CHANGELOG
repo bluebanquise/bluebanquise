@@ -4,6 +4,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.4 or 4.0
 
+* 01/02/2026 - javicacheiro - [slurm] Support for Ubuntu 22.04 and 24.04
 * 29/01/2026 - jpiles - [nic] Adapt variable name after 81a39c7 (#1215)
 * 23/01/2026 - teo-blachere - [pxe_stack] Fix user creation when host is running selinux enforcing mode in bluebanquise-diskless (#1214)
 * 22/01/2026 - teo-blachere - [pxe_stack] Check user and group presence before creation diskless (#1211)
