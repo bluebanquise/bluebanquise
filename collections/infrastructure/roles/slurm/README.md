@@ -6,6 +6,7 @@ Role compatibility:
 |:-------------|:--------|:---------:|
 | Ubuntu       |   20.04 |    yes (does not support local MYSQL installation) |
 | Ubuntu       |   22.04 |    yes    |
+| Ubuntu       |   24.04 |    yes    |
 | RHEL         |       7 |    yes    |
 | RHEL         |       8 |    yes    |
 | RHEL         |       9 |    yes    |
