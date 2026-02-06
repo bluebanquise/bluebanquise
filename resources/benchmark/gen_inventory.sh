@@ -1,22 +1,25 @@
+
+c_size=4
+n_size=250
 rm -Rf inventory_large
 mkdir -p inventory_large/
 echo -e "all:\n  hosts:\n" > inventory_large/hosts.yml
 cat << EOF >> inventory_large/hosts.yml
     mgt1:
       network_interfaces:
-        - name: eno1
+        - interface: eno1
           ip4: 10.10.250.1
           network: net-admin
-        - name: ib0
+        - interface: ib0
           ip4: 10.20.250.1
           network: interconnect
 EOF
-for (( c=1; c<=50; c++ ))
+for (( c=1; c<=$c_size; c++ ))
 do
-  echo "Step $c/50"
-  for (( n=1; n<=100; n++))
+  echo "Step $c/$c_size"
+  for (( n=1; n<=250; n++))
   do
-    nnode=$((n*c))
+    nnode=$(((c-1)*250+n))
 cat << EOF >> inventory_large/hosts.yml
     c$nnode:
       alias: foobar$nnode
@@ -25,10 +28,10 @@ cat << EOF >> inventory_large/hosts.yml
         ip4: 10.11.$c.$n
         network: net-bmc
       network_interfaces:
-        - name: eno1
+        - interface: eno1
           ip4: 10.10.$c.$n
           network: net-admin
-        - name: ib0
+        - interface: ib0
           ip4: 10.20.$c.$n
           network: interconnect
 EOF
@@ -39,17 +42,17 @@ cat << EOF > inventory_large/groups
 [fn_management]
 mgt1
 [fn_compute]
-c[1:$((50*100))]
+c[1:$((c_size*250))]
 
 [os_ubuntu]
 mgt1
-c[1:$((50*100))]
+c[1:$((c_size*250))]
 
 [hw_A]
 mgt1
 
 [hw_B]
-c[1:$((50*100))]
+c[1:$((c_size*250))]
 EOF
 
 mkdir -p inventory_large/group_vars/all/
