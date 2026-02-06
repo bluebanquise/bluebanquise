@@ -17,11 +17,10 @@ docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/blu
 # Ready to bench.
 # Store EPOCH
 t_start=$(date +%s)
-docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_JINJA2_EXTENSIONS=jinja2.ext.loopcontrols,jinja2.ext.do ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.infrastructure.core ansible-playbook /var/lib/bluebanquise/playbooks/infrastructure.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --check --tags hosts_file,dns_client'"
-t_hosts=$(date +%s)
-docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_JINJA2_EXTENSIONS=jinja2.ext.loopcontrols,jinja2.ext.do ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.infrastructure.core ansible-playbook /var/lib/bluebanquise/playbooks/infrastructure.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --skip-tags access_control,repositories,firewall,kernel_config,hosts_file,nic,set_hostname,dns_client,large_package'"
+docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_JINJA2_EXTENSIONS=jinja2.ext.loopcontrols,jinja2.ext.do ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.infrastructure.core ansible-playbook /var/lib/bluebanquise/playbooks/infrastructure.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --check --tags hosts_file'"
+docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate && ANSIBLE_JINJA2_EXTENSIONS=jinja2.ext.loopcontrols,jinja2.ext.do ANSIBLE_VARS_ENABLED=ansible.builtin.host_group_vars,bluebanquise.infrastructure.core ansible-playbook /var/lib/bluebanquise/playbooks/infrastructure.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --tags dhcp_server,dns_server'"
 t_infra=$(date +%s)
 
 echo
 echo "Benchmark results"
-echo $t_start $t_hosts $t_infra
+echo $t_start $t_infra
