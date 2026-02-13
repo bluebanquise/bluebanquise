@@ -1,0 +1,160 @@
+---
+- name: include_vars <|> Gather OS specific variables
+  # This task gathers variables defined in OS specific files.
+  #
+  # Search vars in:
+  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
+  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
+  #  - <distribution>.yml            # eg. CentOS.yml
+  #  - <os_family>.yml               # eg. RedHat.yml
+  #
+  # If no OS specific file is found, the role will default to vars/main.yml
+  #
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family }}.yml"
+      skip: true
+  tags:
+    - always
+
+- name: include_tasks <|> Firewall
+  ansible.builtin.include_tasks: "firewall.yml"
+  tags:
+    - internal
+    - firewall
+
+- name: "package <|> Install {{ dhcp_server_packages_to_install | join(' ') }}"
+  ansible.builtin.package:
+    name: "{{ dhcp_server_packages_to_install }}"
+    state: present
+  tags:
+    - package
+
+- name: "file <|> Create {{ dhcp_server_conf_dir }}"
+  ansible.builtin.file:
+    path: "{{ dhcp_server_conf_dir }}"
+    owner: root
+    mode: "0755"
+    state: directory
+
+# Ok, at this stage, we create all files localy
+# Then we push them to target
+# This speed up things when the playbook is executed on multiple target at the same time
+
+- name: Generate configuration localy
+  delegate_to: localhost
+  run_once: true
+  tags:
+    - template
+  block:
+
+    - name: Build host to network mapping
+      set_fact:
+        dhcp_server_hosts_by_network: "{{ hostvars | hosts_by_network(groups['all']) }}"
+        delegate_facts: true  # We only store this fact on localhost
+
+    - name: Create temporary working folder
+      ansible.builtin.tempfile:
+        state: directory
+        suffix: "dhcp_server_work"
+      register: dhcp_server_work_folder
+      tags:
+        - template
+
+    - name: "template <|> Generate kea-dhcp4.conf"
+      ansible.builtin.template:
+        src: kea-dhcp4.conf.j2
+        dest: "{{ dhcp_server_work_folder.path }}/kea-dhcp4.conf"
+      tags:
+        - template
+
+    - name: "template <|> Generate kea-dhcp4.networks.conf"
+      ansible.builtin.template:
+        src: kea-dhcp4.networks.conf.j2
+        dest: "{{ dhcp_server_work_folder.path }}/kea-dhcp4.networks.conf"
+      when:
+        - networks is defined and networks is iterable and networks is not string and networks is mapping
+      tags:
+        - template
+
+    - name: "template <|> Generate networks reservations"
+      ansible.builtin.template:
+        src: kea-dhcp4.subnet.conf.j2
+        dest: "{{ dhcp_server_work_folder.path }}/kea-dhcp4.{{ item }}.conf"
+      loop: "{{ networks | flatten(levels=1) }}"
+      when:
+        - networks is defined and networks is iterable and networks is not string and networks is mapping
+        - item.startswith("net-")
+        - networks[item].is_in_dhcp | default(true)
+        - networks[item].subnet is defined and networks[item].prefix is defined
+      tags:
+        - template
+
+# Now that files are rendered, lets push them to targets
+- name: "copy <|> Push kea-dhcp4.networks.conf"
+  ansible.builtin.copy:
+    src: "{{ dhcp_server_work_folder.path }}/kea-dhcp4.networks.conf"
+    dest: "{{ dhcp_server_conf_dir }}/kea-dhcp4.networks.conf"
+    owner: root
+    group: root
+    mode: 0644
+  notify: service <|> Restart dhcp server
+  when:
+    - networks is defined and networks is iterable and networks is not string and networks is mapping
+  tags:
+    - template
+
+- name: "copy <|> Push networks reservations"
+  ansible.builtin.copy:
+    src: "{{ dhcp_server_work_folder.path }}/kea-dhcp4.{{ item }}.conf"
+    dest: "{{ dhcp_server_conf_dir }}/kea-dhcp4.{{ item }}.conf"
+    owner: root
+    group: root
+    mode: 0644
+  loop: "{{ networks | flatten(levels=1) }}"
+  when:
+    - networks is defined and networks is iterable and networks is not string and networks is mapping
+    - item.startswith("net-")
+    - networks[item].is_in_dhcp | default(true)
+    - networks[item].subnet is defined and networks[item].prefix is defined
+  notify: service <|> Restart dhcp server
+  tags:
+    - template
+
+- name: "copy <|> Push kea-dhcp4.conf"
+  ansible.builtin.copy:
+    src: "{{ dhcp_server_work_folder.path }}/kea-dhcp4.conf"
+    dest: "{{ dhcp_server_conf_dir }}/kea-dhcp4.conf"
+    owner: root
+    group: root
+    mode: 0644
+    validate: "kea-dhcp4 -t -c /etc/kea/kea-dhcp4.conf"
+  notify: service <|> Restart dhcp server
+  tags:
+    - template
+
+# Finaly, we can cleanup working folder
+- name: Remove temporary working folder
+  ansible.builtin.file:
+    path: "{{ dhcp_server_work_folder.path }}"
+    state: absent
+  delegate_to: localhost
+  run_once: true
+
+- name: meta <|> Run handler tasks to restart dhcp services
+  ansible.builtin.meta: flush_handlers
+
+- name: "service <|> Manage {{ dhcp_server_services_to_start | join(' ') }} state"
+  ansible.builtin.service:
+    name: "{{ item }}"
+    enabled: "{{ (dhcp_server_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    state: "{{ (dhcp_server_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
+  loop: "{{ dhcp_server_services_to_start }}"
+  tags:
+    - service

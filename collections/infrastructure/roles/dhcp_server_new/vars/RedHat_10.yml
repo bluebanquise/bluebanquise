@@ -1,0 +1,10 @@
+---
+dhcp_server_toolname: kea
+dhcp_server_packages_to_install:
+  - kea
+dhcp_server_services_to_start:
+  - kea-dhcp4
+dhcp_server_firewall_services_to_add:
+  - dhcp
+dhcp_server_conf_file: /etc/kea/kea-dhcp4.conf
+dhcp_server_conf_dir: /etc/kea
