@@ -1,33 +1,37 @@
-{
-  # Shared networks
-  {% set shared_networks = {} %}
-  {% for network in networks %}
-    {% if network.startswith("net-") %}
-      {% if networks[network]['shared_network'] is defined and networks[network]['shared_network'] is not none %}
-        {% set name = networks[network]['shared_network'] %}
-        {% if shared_networks[name] is not defined %}
-          {% set _ = shared_networks.update({ name: [network] }) %}
-      {% else %}
-        {% set _ = shared_networks[name].append(network) %}
-      {% endif %}
-    {% endif %}
-  {% endfor %}
-  "shared-networks": [
-    {% for shared_network in shared_networks %}
-      {% for network in shared_networks[shared_network] %}
-      <?include "{{ dhcp_server_conf_dir }}/kea-dhcp4.{{ network }}.conf"?>{% if not loop.last %},{% endif %}
-      {% endfor %}
-    {% endfor %}
-  ]
+#jinja2: lstrip_blocks: True
+#### Blue Banquise file ####
+## {{ ansible_managed }}
 
-  # Not shared networks
-  "subnet4": [
-  {% for network in networks %}
-    {% if network.startswith("net-") %}
-      {% if networks[network]['shared_network'] is not defined or networks[network]['shared_network'] is none %}
-        <?include "{{ dhcp_server_conf_dir }}/kea-dhcp4.{{ network }}.conf"?>{% if not loop.last %},{% endif %}
+# Shared networks
+{% set shared_networks = {} %}
+{% for network in networks %}
+  {% if network.startswith("net-") %}
+    {% if networks[network]['shared_network'] is defined and networks[network]['shared_network'] is not none %}
+      {% set name = networks[network]['shared_network'] %}
+      {% if shared_networks[name] is not defined %}
+        {% set _ = shared_networks.update({ name: [network] }) %}
+      {% else %}
+      {% set _ = shared_networks[name].append(network) %}
       {% endif %}
     {% endif %}
+  {% endif %}
+{% endfor %}
+"shared-networks": [
+  {% for shared_network in shared_networks %}
+    {% for network in shared_networks[shared_network] %}
+    <?include "{{ dhcp_server_conf_dir }}/kea-dhcp4.{{ network }}.conf"?>{% if not loop.last %},{% endif %}
+    {% endfor %}
   {% endfor %}
-  ]
-}
+],
+
+# Not shared networks
+"subnet4": [
+{% for network in networks %}
+  {% if network.startswith("net-") %}
+    {% if networks[network]['shared_network'] is not defined or networks[network]['shared_network'] is none %}
+      <?include "{{ dhcp_server_conf_dir }}/kea-dhcp4.{{ network }}.conf"?>{% if not loop.last %},{% endif %}
+
+    {% endif %}
+  {% endif %}
+{% endfor %}
+]

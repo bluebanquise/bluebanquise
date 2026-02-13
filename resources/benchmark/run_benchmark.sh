@@ -8,7 +8,7 @@ cd ../../
 
 # Build image for tests
 docker build -t ubuntu_24:systemd -f ./resources/docker/Dockerfile_Ubuntu_24_systemd .
-sudo modprobe -v dummy numdummies=2 && sudo ip addr add 10.10.250.1/16 dev dummy0 && sudo ip addr add 10.10.250.1/16 dev dummy0 && sudo ip link set dev dummy0 up && ip a;
+sudo modprobe -v dummy numdummies=2 && sudo ip addr add 10.10.250.1/16 dev dummy0 && sudo ip addr add 10.11.250.1/16 dev dummy0 && sudo ip link set dev dummy0 up && ip a;
 echo -e 'bb_repositories:\n  - name: bluebanquise\n    repo: "deb [trusted=yes] https://bluebanquise.com/repository/releases/latest/u24/x86_64/bluebanquise/ noble main"' > resources/workflow/inventory_standard/group_vars/all/repositories.yml
 docker run -d --privileged --cgroupns=host --net=host --name mgt1 -v /sys/fs/cgroup:/sys/fs/cgroup:rw -v $PWD:/bluebanquise ubuntu_24:systemd
 docker exec mgt1 bash -c "/bluebanquise/bootstrap/online_bootstrap.sh --silent --skip_environment"

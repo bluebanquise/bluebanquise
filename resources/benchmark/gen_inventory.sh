@@ -10,6 +10,7 @@ cat << EOF >> inventory_large/hosts.yml
         - interface: eno1
           ip4: 10.10.250.1
           network: net-admin
+          mac: XX:XX:XX:XX:XX:XX
         - interface: ib0
           ip4: 10.20.250.1
           network: interconnect
@@ -27,10 +28,12 @@ cat << EOF >> inventory_large/hosts.yml
         name: bc$nnode
         ip4: 10.11.$c.$n
         network: net-bmc
+        mac: XX.XX.XX.XX.XX
       network_interfaces:
         - interface: eno1
           ip4: 10.10.$c.$n
           network: net-admin
+          mac: XX:XX:XX:XX:XX:XX
         - interface: ib0
           ip4: 10.20.$c.$n
           network: interconnect

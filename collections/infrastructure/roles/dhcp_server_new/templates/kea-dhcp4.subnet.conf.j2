@@ -1,6 +1,6 @@
 #jinja2: lstrip_blocks: True
-// #### Blue Banquise file ####
-// ## {{ ansible_managed }}
+#### Blue Banquise file ####
+## {{ ansible_managed }}
 
 {###############################################################################
   Generic service item write
@@ -43,12 +43,8 @@ ip_or_host allows to define priorities between ip or host
 {
  
   "id": {{ (item | hash('md5'))[0:7] | int(base=16) }}, {# We calculate a unique id based on the network name #}
-  "subnet": "{{ networks[item]['subnet'] }}/{{ networks[item]['prefix'] | string }}",
 
-  {
-      "name": "domain-search",
-      "data": "{{ dhcp_server_domain_name | default(bb_domain_name, true) | default('cluster.local', true) }}"
-  }
+  "subnet": "{{ networks[item]['subnet'] }}/{{ networks[item]['prefix'] | string }}",
 
   {# We need to pre-compute next-server as it is used in multiple places #}
   {% if networks[item]['services'] is defined and networks[item]['services'] is iterable and networks[item]['services'] is not string and networks[item]['services'] is mapping and networks[item]['services']['pxe4'] is defined%}
@@ -70,6 +66,21 @@ ip_or_host allows to define priorities between ip or host
 
   "option-data": [
 
+    {
+        "name": "domain-search",
+        "data": "{{ dhcp_server_domain_name | default(bb_domain_name, true) | default('cluster.local', true) }}"
+    }
+
+    {# DNS #}
+    {% if networks[item]['services'] is defined and networks[item]['services'] is iterable and networks[item]['services'] is not string and networks[item]['services'] is mapping and networks[item]['services']['dns4'] is defined%}
+    {{ item_add("domain-name-servers", networks[item]['services']['dns4'], "ip", "dict") }}
+    {% elif networks[item]['services_ip'] is defined and (networks[item]['services_ip'] | ansible.utils.ipaddr) %}
+    {
+        "name": "domain-name-servers",
+        "data": "{{ networks[item]['services_ip'] }}"
+    },
+    {% endif %}
+
     {# ROUTER #}
     {% if networks[item]['gateway4'] is defined %}
         {% if networks[item]['gateway4'] is string %}
@@ -80,16 +91,6 @@ ip_or_host allows to define priorities between ip or host
         {% elif networks[item]['gateway4'] is iterable and networks[item]['gateway4'] is not mapping %}
     {{ item_add("routers", networks[item]['gateway4'], "ip", "dict") }}
         {% endif %}
-    {% endif %}
-
-    {# DNS #}
-    {% if networks[item]['services'] is defined and networks[item]['services'] is iterable and networks[item]['services'] is not string and networks[item]['services'] is mapping and networks[item]['services']['dns4'] is defined%}
-    {{ item_add("domain-name-servers", networks[item]['services']['dns4'], "ip", "dict") }}
-    {% elif networks[item]['services_ip'] is defined and (networks[item]['services_ip'] | ansible.utils.ipaddr) %}
-    {
-        "name": "domain-name-servers",
-        "data": "{{ networks[item]['services_ip'] }}"
-    },
     {% endif %}
 
     {# NTP #}
@@ -105,7 +106,6 @@ ip_or_host allows to define priorities between ip or host
     {# PXE file name clients classes, detection is made in main file kea-dhcp4.conf
         Render only if a next-server has been identified for this network #}
     {% if nextserver is defined and nextserver is not none %}
-
       {% if dhcp_server_ipxe_driver == 'snponly' %}
         {% set ipxe_driver = 'snponly_' %}
       {% elif dhcp_server_ipxe_driver == 'snp' %}
@@ -113,7 +113,6 @@ ip_or_host allows to define priorities between ip or host
       {% else %}{# Assume everything else is default driver #}
         {% set ipxe_driver = '' %}
       {% endif %}
-
       {% if dhcp_server_ipxe_embed == 'dhcpretry' %}
         {% set ipxe_embed = 'dhcpretry' %}
       {% elif dhcp_server_ipxe_embed == 'noshell' %}
@@ -123,7 +122,6 @@ ip_or_host allows to define priorities between ip or host
       {% else %}{# Assume everything else is standard script #}
         {% set ipxe_embed = 'standard' %}
       {% endif %}
-
       {
         "name": "boot-file-name",
         "data": "x86_64/{{ ipxe_embed }}_undionly.kpxe",
@@ -156,17 +154,20 @@ ip_or_host allows to define priorities between ip or host
   "reservations": [
     {% set entries = dhcp_server_hosts_by_network.get(item, []) %}
     {% for entry in entries %}
+      {% if entry.nic.mac is defined or entry.nic.dhcp_client_identifier is defined or entry.nic.host_identifier is defined %}
     {
       "hostname": "{{ entry.host }}",
-      "ip-address": "{{ entry.nic.ip }}",
-      {%- if nic.mac is defined -%}
-      "hw-address": "{{ nic.mac }}"
-      {%- elif nic.dhcp_client_identifier is defined -%}
-      "client-id": "{{ nic.dhcp_client_identifier }}"
-      {%- elif nic.host_identifier is defined -%}
-      "flex-id": "{{ nic.host_identifier }}"
-      {%- endif -%}
-    }{% if not loop.last %},{% endif %}
+      "ip-address": "{{ entry.nic.ip4 }}",
+        {% if entry.nic.mac is defined %}
+      "hw-address": "{{ entry.nic.mac }}"
+        {% elif entry.nic.dhcp_client_identifier is defined %}
+      "client-id": "{{ entry.nic.dhcp_client_identifier }}"
+        {% elif entry.nic.host_identifier is defined %}
+      "flex-id": "{{ entry.nic.host_identifier }}"
+        {% endif %}
+    }{% endif %}{% if not loop.last %},{% endif %}
+
     {% endfor %}
+
   ]
 }

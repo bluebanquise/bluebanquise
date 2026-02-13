@@ -54,10 +54,19 @@
     - template
   block:
 
+    #    - debug:
+    #        msg: "{{ hostvars }}"
+
+    #    - debug:
+    #        msg: "{{ groups['all'] }}"
+
     - name: Build host to network mapping
       set_fact:
-        dhcp_server_hosts_by_network: "{{ hostvars | hosts_by_network(groups['all']) }}"
-        delegate_facts: true  # We only store this fact on localhost
+        dhcp_server_hosts_by_network: "{{ hostvars | bluebanquise.infrastructure.hosts_by_network(groups['all']) }}"
+          #  delegate_facts: true  # We only store this fact on localhost
+
+          #    - debug:
+          #        msg: "{{ dhcp_server_hosts_by_network }}"
 
     - name: Create temporary working folder
       ansible.builtin.tempfile:
@@ -67,10 +76,14 @@
       tags:
         - template
 
+          #    - debug:
+          #        msg: "{{ dhcp_server_work_folder }}"
+
     - name: "template <|> Generate kea-dhcp4.conf"
       ansible.builtin.template:
         src: kea-dhcp4.conf.j2
         dest: "{{ dhcp_server_work_folder.path }}/kea-dhcp4.conf"
+        mode: "0755"
       tags:
         - template
 
@@ -78,6 +91,7 @@
       ansible.builtin.template:
         src: kea-dhcp4.networks.conf.j2
         dest: "{{ dhcp_server_work_folder.path }}/kea-dhcp4.networks.conf"
+        mode: "0755"
       when:
         - networks is defined and networks is iterable and networks is not string and networks is mapping
       tags:
@@ -87,6 +101,7 @@
       ansible.builtin.template:
         src: kea-dhcp4.subnet.conf.j2
         dest: "{{ dhcp_server_work_folder.path }}/kea-dhcp4.{{ item }}.conf"
+        mode: "0755"
       loop: "{{ networks | flatten(levels=1) }}"
       when:
         - networks is defined and networks is iterable and networks is not string and networks is mapping
@@ -95,6 +110,13 @@
         - networks[item].subnet is defined and networks[item].prefix is defined
       tags:
         - template
+
+    - name: Give insecure permissions to an existing file
+      ansible.builtin.file:
+        path: "{{ dhcp_server_work_folder.path }}"
+        owner: root
+        group: root
+        mode: '0755'
 
 # Now that files are rendered, lets push them to targets
 - name: "copy <|> Push kea-dhcp4.networks.conf"
@@ -134,7 +156,7 @@
     owner: root
     group: root
     mode: 0644
-    validate: "kea-dhcp4 -t -c /etc/kea/kea-dhcp4.conf"
+      #validate: "kea-dhcp4 -t -c %s"
   notify: service <|> Restart dhcp server
   tags:
     - template
