@@ -7,12 +7,10 @@ $ORIGIN {{ dns_server_domain_name | default(bb_domain_name, true) | default('clu
 $INCLUDE "{{ dns_server_named_dir }}/forward.soa"
 @ IN NS {{ inventory_hostname }}.{{ dns_server_domain_name | default(bb_domain_name, true) | default('cluster.local', true) }}.
 
-{% for ip_prefix, hosts_entries in dns_server_hosts_by_first_octets.items() %}
-
-;##################################
-; Zone {{ ip_prefix }}
-
-  {% for host_entry in hosts_entries %}
+{% set enable_extended_names = dns_server_enable_extended_names %}
+{% for host_entry in dns_server_hosts_by_first_octets['forward'] %}
 {{ host_entry.hostname }} IN A {{ host_entry.ip4 }}
-  {% endfor %}
+  {% if enable_extended_names %}
+{{ host_entry.hostname }}-{{ host_entry.network }} IN A {{ host_entry.ip4 }}
+  {% endif %}
 {% endfor %}

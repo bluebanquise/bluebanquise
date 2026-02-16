@@ -7,8 +7,10 @@ class FilterModule(object):
         return {'hosts_by_first_octets': self.hosts_by_first_octets}
 
     def hosts_by_first_octets(self, hostvars, hosts_list, networks):
-        ip_networks = defaultdict(list)
-        _rsplit = str.rsplit 
+
+        reverse_data = defaultdict(list)  # List of ip prefixes for Reverse DNS
+        forward_data = []  # List of primary entries for Forward DNS
+        _rsplit = str.rsplit  # Nice optim
 
         # #########################################
         # ############## Hosts & BMC
@@ -16,31 +18,37 @@ class FilterModule(object):
         for hostname in hosts_list:
             try:
                 hv = hostvars.get(hostname, {})
-                
-                # Process Network Interfaces
                 alias = hv.get("alias")
-                is_first_nic = True
-                for nic in hv.get("network_interfaces", []):
+
+                # Process Network Interfaces
+                for index, nic in enumerate(hv.get("network_interfaces", [])):
                     ip4 = nic.get("ip4")
                     net_name = nic.get("network")
                     
                     if ip4 and net_name:
                         ip_net, ip_host = _rsplit(ip4, '.', 1)
-                        ip_networks[ip_net].append({
+                        entry = {
                             "hostname": hostname,
                             "network": net_name,
                             "ip4": ip4,
                             "ip_host": ip_host
-                        })
+                        }
                         
-                        if is_first_nic and alias:
-                            ip_networks[ip_net].append({
-                                "hostname": alias,
-                                "network": net_name,
-                                "ip4": ip4,
-                                "ip_host": ip_host
-                            })
-                            is_first_nic = False
+                        # 1. Everything goes to REVERSE
+                        reverse_data[ip_net].append(entry)
+
+                        # 2. Only the FIRST nic goes to FORWARD
+                        if index == 0:
+                            forward_data.append(entry)
+                            if alias:
+                                entry = {
+                                    "hostname": alias,
+                                    "network": net_name,
+                                    "ip4": ip4,
+                                    "ip_host": ip_host
+                                }
+                                reverse_data[ip_net].append(entry)
+                                forward_data.append(entry)    
 
                 # Process BMC
                 bmc = hv.get('bmc')
@@ -50,12 +58,14 @@ class FilterModule(object):
                     bmc_name = bmc.get("name")
                     if ip4 and net_name and bmc_name:
                         ip_net, ip_host = _rsplit(ip4, '.', 1)
-                        ip_networks[ip_net].append({
+                        entry = {
                             "hostname": bmc_name,
                             "network": net_name,
                             "ip4": ip4,
                             "ip_host": ip_host
-                        })
+                        }
+                        reverse_data[ip_net].append(entry)
+                        forward_data.append(entry)
 
             except ValueError:
                 raise AnsibleFilterError(
@@ -77,12 +87,14 @@ class FilterModule(object):
                         svc_host = item.get('hostname')
                         if ip4 and svc_host:
                             ip_net, ip_host = _rsplit(ip4, '.', 1)
-                            ip_networks[ip_net].append({
+                            entry = {
                                 "hostname": svc_host,
                                 "network": net_name,
                                 "ip4": ip4,
                                 "ip_host": ip_host
-                            })
+                            }
+                            reverse_data[ip_net].append(entry)
+                            forward_data.append(entry)
             
             except ValueError:
                 raise AnsibleFilterError(
@@ -92,4 +104,7 @@ class FilterModule(object):
             except Exception as e:
                 raise AnsibleFilterError(f"Error processing network '{net_name}': {str(e)}")
         
-        return dict(ip_networks)
+        return {
+            "forward": forward_data,
+            "reverse": dict(reverse_data)
+          }

@@ -137,7 +137,7 @@
     owner: root
     group: root
     mode: 0644
-  loop: "{{ dns_server_hosts_by_first_octets | flatten(levels=1) }}"
+  loop: "{{ dns_server_hosts_by_first_octets['reverse'] | flatten(levels=1) }}"
   tags:
     - template
 
@@ -149,7 +149,7 @@
     group: root
     mode: 0644
   notify: service <|> Restart dns services
-  loop: "{{ dns_server_hosts_by_first_octets | flatten(levels=1) }}"
+  loop: "{{ dns_server_hosts_by_first_octets['reverse'] | flatten(levels=1) }}"
   when: dns_server_zoneconf.changed  # noqa no-handler
   tags:
     - template
