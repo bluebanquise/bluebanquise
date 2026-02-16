@@ -1,0 +1,14 @@
+#jinja2: lstrip_blocks: True
+;#### Blue Banquise file ####
+;## {{ ansible_managed }}
+
+$TTL 86400
+$ORIGIN {{ item.split('.')|reverse|join('.') }}.in-addr.arpa.
+$INCLUDE "{{ dns_server_named_dir }}/{{ item }}.rr.soa"
+@ IN NS {{ inventory_hostname }}.{{ dns_server_domain_name | default(bb_domain_name, true) | default('cluster.local', true) }}.
+
+{% set domain_name = dns_server_domain_name | default(bb_domain_name, true) | default('cluster.local', true) %}
+
+{% for host_entry in dns_server_hosts_by_first_octets[item] %}
+{{ host_entry.ip_host }} IN PTR {{ host_entry.hostname }}.{{ domain_name }}.
+{% endfor %}

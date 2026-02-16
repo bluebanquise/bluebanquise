@@ -1,0 +1,18 @@
+#jinja2: lstrip_blocks: True
+;#### Blue Banquise file ####
+;## {{ ansible_managed }}
+
+$TTL 86400
+$ORIGIN {{ dns_server_domain_name | default(bb_domain_name, true) | default('cluster.local', true) }}.
+$INCLUDE "{{ dns_server_named_dir }}/forward.soa"
+@ IN NS {{ inventory_hostname }}.{{ dns_server_domain_name | default(bb_domain_name, true) | default('cluster.local', true) }}.
+
+{% for ip_prefix, hosts_entries in dns_server_hosts_by_first_octets.items() %}
+
+;##################################
+; Zone {{ ip_prefix }}
+
+  {% for host_entry in hosts_entries %}
+{{ host_entry.hostname }} IN A {{ host_entry.ip4 }}
+  {% endfor %}
+{% endfor %}
