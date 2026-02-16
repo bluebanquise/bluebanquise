@@ -1,0 +1,32 @@
+#jinja2: lstrip_blocks: True
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+
+## Internal hosts
+
+{% set enable_extended_names = hosts_file_enable_extended_names %}
+{% for host_entry in hosts_file_hosts_by_first_octets['forward'] %}
+{{ host_entry.ip4 }} {{ host_entry.hostname }}
+  {% if enable_extended_names %}
+{{ host_entry.ip4 }} {{ host_entry.hostname }}-{{ host_entry.network }}
+  {% endif %}
+{% endfor %}
+
+## External hosts
+
+{% for host in (hosts_file_external_hosts | sort) %}
+  {% if 'ip4' in hosts_file_external_hosts[host] %}
+    {% set ipstr = hosts_file_external_hosts[host]['ip4'] %}
+    {% if 'alias' in hosts_file_external_hosts[host] %}
+      {% set hoststr = host ~ " " ~ hosts_file_external_hosts[host]['alias']|join(" ") %}
+    {% else %}
+      {% set hoststr = host %}
+    {% endif %}
+{{ ipstr }} {{ hoststr }}
+  {% else %}
+{{ hosts_file_external_hosts[host] }} {{ host }}
+  {% endif %}
+{% endfor %}

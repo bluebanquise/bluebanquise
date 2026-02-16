@@ -1,0 +1,54 @@
+---
+
+- name: Generate configuration localy
+  delegate_to: localhost
+  run_once: true
+  tags:
+    - template
+  block:
+
+    - name: Build host to network mapping
+      set_fact:
+        hosts_file_hosts_by_first_octets: "{{ hostvars | bluebanquise.infrastructure.hosts_by_first_octets(groups['all'], networks) }}"
+
+    - name: Create temporary file
+      ansible.builtin.tempfile:
+        state: file
+        suffix: "hosts_file_work"
+      register: hosts_file_work_file
+      tags:
+        - template
+
+    - name: "template <|> Generate /etc/hosts"
+      ansible.builtin.template:
+        src: hosts.j2
+        dest: {{ hosts_file_work_file.path }}
+        mode: 0644
+      tags:
+        - template
+
+    # - name: Give insecure permissions to an existing file
+    #   ansible.builtin.file:
+    #     path: "{{ dhcp_server_work_folder.path }}"
+    #     owner: root
+    #     group: root
+    #     mode: '0755'
+
+# Now that file is rendered, lets push it to targets
+- name: "copy <|> Push /etc/hosts"
+  ansible.builtin.copy:
+    src: {{ hosts_file_work_file.path }}
+    dest: /etc/hosts
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - template
+
+# Finaly, we can cleanup working file
+- name: Remove temporary working file
+  ansible.builtin.file:
+    path: "{{ hosts_file_work_file.path }}"
+    state: absent
+  delegate_to: localhost
+  run_once: true
