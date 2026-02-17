@@ -9,6 +9,14 @@ $INCLUDE "{{ dns_server_named_dir }}/{{ item }}.rr.soa"
 
 {% set domain_name = dns_server_domain_name | default(bb_domain_name, true) | default('cluster.local', true) %}
 
-{% for host_entry in dns_server_hosts_by_first_octets['reverse'][item] %}
-{{ host_entry.ip_host }} IN PTR {{ host_entry.hostname }}.{{ domain_name }}.
+{# Main PTR records #}
+{% for host in dns_server_hosts_by_first_octets['reverse'][current_prefix]['base'] %}
+{{ host.ip_host }}  IN  PTR  {{ host.hostname }}.{{ domain_name }}.
 {% endfor %}
+
+{# Extended PTR records (e.g. 10.10.0.5 -> c001-interconnect.domain.com) #}
+{% if dns_server_enable_extended_names %}
+{% for host in dns_server_hosts_by_first_octets['reverse'][current_prefix]['extended'] %}
+{{ host.ip_host }}  IN  PTR  {{ host.hostname }}.{{ domain_name }}.
+{% endfor %}
+{% endif %}
