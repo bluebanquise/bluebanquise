@@ -1,0 +1,137 @@
+---
+- name: include_vars <|> Gather OS specific variables
+  # This task gathers variables defined in OS specific files.
+  #
+  # Search vars in:
+  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
+  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
+  #  - <distribution>.yml            # eg. CentOS.yml
+  #  - <os_family>.yml               # eg. RedHat.yml
+  #
+  # If no OS specific file is found, the role will default to vars/main.yml
+  #
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family }}.yml"
+      skip: true
+  tags:
+    - always
+
+- name: "package <|> Install required Slurm packages"
+  ansible.builtin.package:
+    name: "{{ slurm_packages_to_install[slurm_packages_source][slurm_profile] | default(slurm_packages_to_install[slurm_profile]) }}"
+    state: present
+  when: slurm_profile is defined and slurm_profile is not none
+  tags:
+    - package
+
+## Now we compute equipment profiles, to be able to create nodes groups based on their hw_ infra
+# We also generate slurm.conf
+# However, if we are targetting computes in configless, skip this part
+
+- name: block <|> Generate configuration localy
+  delegate_to: localhost
+  run_once: true
+  tags:
+    - template
+  when:
+    - not (slurm_profile == 'compute' and slurm_computes_config == 'configless')
+  block:
+
+    - name: set_fact <|> Calculate equipment profiles
+      set_fact:
+        slurm_equipment_profiles: "{{ hostvars | bluebanquise.infrastructure.build_equipment_profiles(groups['all'], groups) }}"
+      delegate_facts: true  # We delegate to localhost only, to avoid memory usage with all hosts
+
+    - name: tempfile <|> Create temporary file
+      ansible.builtin.tempfile:
+        state: file
+        suffix: "slurm_conf_file_work"
+      register: slurm_conf_file_work_file
+      tags:
+        - template
+
+    - name: "template <|> Generate slurm.conf configuration file"
+      ansible.builtin.template:
+        src: "slurm.conf.j2"
+        dest: "{{ slurm_conf_file_work_file.path }}"
+        mode: 0644
+      tags:
+        - template
+
+# Install MUNGE, generic part
+
+- name: include_tasks <|> Deploy Munge
+  ansible.builtin.include_tasks: "munge.yml"
+
+- name: meta <|> Run handler tasks to restart services
+  ansible.builtin.meta: flush_handlers
+
+# Setup slurm user/group, generic part
+
+- name: group <|> Add slurm group
+  ansible.builtin.group:
+    name: slurm
+    gid: "{{ slurm_user_gid }}"
+    state: present
+
+- name: user <|> Add slurm user
+  ansible.builtin.user:
+    name: slurm
+    shell: /bin/false
+    uid: "{{ slurm_user_uid }}"
+    group: slurm
+    home: "{{ slurm_home_path }}"
+    state: present
+
+# Setup directories, generic part
+
+- name: "file <|> Enforce permissions on {{ slurm_home_path }}"
+  ansible.builtin.file:
+    path: "{{ slurm_home_path }}"
+    state: directory
+    mode: 0755
+
+- name: file <|> Create needed directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: slurm
+    group: slurm
+    mode: 0755
+  loop:
+    - /var/log/slurm
+    - "{{ slurm_slurmdspooldir }}"
+    - "{{ slurm_statesavelocation }}"
+
+# Setup slurm controller
+
+- name: include_tasks <|> Deploy Slurm controller
+  ansible.builtin.include_tasks: "controller.yml"
+  when: slurm_profile == 'controller'
+
+# Setup slurm computes
+
+- name: include_tasks <|> Deploy Slurm compute
+  ansible.builtin.include_tasks: "compute.yml"
+  when: slurm_profile == 'compute'
+
+# Setup slurm submitter
+
+- name: include_tasks <|> Deploy Slurm submitter
+  ansible.builtin.include_tasks: "submitter.yml"
+  when: slurm_profile == 'submitter'
+
+# Setup slurm_adoption
+- name: include_tasks <|> Configure slurm_adopt
+  ansible.builtin.include_tasks: "pam_slurm_adopt.yml"
+  when: slurm_pam_slurm_adopt_enable is defined and slurm_pam_slurm_adopt_enable and slurm_profile == 'compute'
+
+- name: meta <|> Run handler tasks to restart services
+  ansible.builtin.meta: flush_handlers

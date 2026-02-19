@@ -1,0 +1,115 @@
+---
+slurm_cluster_name: bluebanquise
+
+## packages sources. Either bluebanquise (default) or distribution
+slurm_packages_source: bluebanquise
+
+## slurm user
+slurm_user_gid: 777
+slurm_user_uid: 777
+
+## computes configuration way to use (configfull vs configless)
+slurm_computes_config: configfull
+
+## files path
+slurm_statesavelocation: /var/spool/slurmctld/statesave
+slurm_slurmdspooldir: /var/spool/slurmd/slurmd
+slurm_slurmctldpidfile: /var/run/slurmctld.pid
+slurm_slurmdpidfile: /var/run/slurmd.pid
+slurm_slurmdbdpidfile: /var/run/slurmdbd.pid
+
+## slurmd additional configuration
+# slurm_slurmd_additional_conf:
+#   - section: 'Service'
+#     content:
+#       - LimitNOFILESoft: 2048576
+#       - ...
+# slurm_slurmd_dropin_file: "01-custom.conf" # default: 00-ansible.conf
+
+## firewall and ports
+# slurm_firewall_zone: public
+slurm_slurmtld_port: 6817
+slurm_slurmd_port: 6818
+slurm_slurmdbd_port: 6819
+slurm_srunportrange: 60001-63000
+
+## logging
+slurm_slurmctlddebug: 5
+slurm_slurmctldlogfile: /var/log/slurm/slurmctld.log
+slurm_slurmddebug: 5
+slurm_slurmdlogfile: /var/log/slurm/slurmd.log
+slurm_slurmdbddebug: 5
+slurm_slurmdbdlogfile: /var/log/slurm/slurmdbd.log
+
+## timeouts
+slurm_slurmctldtimeout: 600
+slurm_slurmdtimeout: 600
+
+## Accounting (storage)
+slurm_enable_accounting: false
+slurm_accounting_enable_local_mysql: true
+slurm_accounting_mysql_login_host: 127.0.0.1
+slurm_accounting_mysql_login_port: 3306
+slurm_accounting_mysql_login_user:
+slurm_accounting_mysql_login_password:
+slurm_accounting_mysql_slurm_user: slurm
+slurm_accounting_mysql_slurm_password: ssap_slurm # CHANGE ME !
+slurm_accounting_mysql_create_database: false
+slurm_accounting_mysql_create_user: false
+slurm_accounting_mysql_unix_socket: /var/run/mysqld/mysqld.sock
+# Accounting tres specific
+# slurm_accounting_storage_tres: gres/gpu
+### mariadb
+slurm_innodb_buffer_pool_size: 1024M
+slurm_innodb_log_file_size: 64M
+slurm_innodb_lock_wait_timeout: 900
+
+## Acct Gather
+slurm_acct_gather_node_freq: 0
+### acct_gather_energy plugin
+slurm_acct_gather_energy_type: none
+slurm_acct_gather_energy_ipmi_frequency: 30
+slurm_acct_gather_energy_ipmi_calc_adjustment: 'no'
+slurm_acct_gather_energy_ipmi_power_sensors: []
+slurm_acct_gather_energy_ipmi_timeout: 10
+### acct_gather_interconnect plugin
+slurm_acct_gather_interconnect_type: none
+slurm_acct_gather_interconnect_infiniband_ofed_port: 1
+slurm_acct_gather_interconnect_sysfs_interfaces: []
+### acct_gather_filesystem plugin
+slurm_acct_gather_filesystem_type: none
+### acct_gather_profil plugin
+slurm_acct_gather_profile_type: none
+slurm_acct_gather_profile_hdf5_dir: ""
+slurm_acct_gather_profile_hdf5_default:
+  - None
+slurm_acct_gather_profile_influxdb_database: ""
+slurm_acct_gather_profile_influxdb_default:
+  - None
+slurm_acct_gather_profile_influxdb_host: ""
+slurm_acct_gather_profile_influxdb_pass: ""
+slurm_acct_gather_profile_influxdb_rt_policy: ""
+slurm_acct_gather_profile_influxdb_user: ""
+slurm_acct_gather_profile_influxdb_timeout: 10
+
+## Handlers control
+slurm_allow_scontrol_handler: true
+
+# Topology
+slurm_topology: topology/default
+
+## Other
+slurm_returntoservice: 0
+slurm_schedulertype: sched/backfill
+slurm_selecttype: select/linear
+slurm_mpidefault: pmi2
+# additional slurm.conf go here
+# slurm_slurm_conf_additional_content:
+#   - tmpfs=/scratch
+#   - AccountingstorageEnforce=associations
+
+# Gres
+slurm_grestypes_nvml: false
+## Munge
+
+# slurm_munge_key_b64: # User need to define it, would be too risky to provide one

@@ -1,0 +1,47 @@
+---
+- name: "firewalld <|> Add services to firewall's zone"
+  ansible.posix.firewalld:
+    zone: "{{ slurm_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
+    port: "{{ slurm_slurmd_port }}/tcp"
+    immediate: "yes"
+    permanent: "yes"
+    state: enabled
+  when:
+    - os_firewall | default(false) | bool
+  tags:
+    - firewall
+
+- name: "template <|> Generate cgroup.conf to {{ slurm_home_path }}/cgroup.conf"
+  ansible.builtin.template:
+    src: "cgroup.conf.j2"
+    dest: "{{ slurm_home_path }}/cgroup.conf"
+    owner: slurm
+    group: slurm
+    mode: 0644
+  tags:
+    - template
+  notify: service <|> restart slurmd
+
+# Setup topology.conf
+- name: "template <|> Generate block topology.conf in {{ slurm_home_path }}"
+  ansible.builtin.template:
+    src: "topology.conf.j2"
+    dest: "{{ slurm_home_path }}/topology.conf"
+    owner: slurm
+    group: slurm
+    mode: 0644
+  tags:
+    - template
+  when: slurm_topology == 'topology/block' or slurm_topology == 'topology/tree'
+  notify: service <|> restart slurmd
+
+- name: include_tasks <|> Deploy Slurm compute configuration
+  ansible.builtin.include_tasks: "compute_{{ slurm_computes_config }}.yml"
+
+- name: service <|> Manage slurmd state
+  ansible.builtin.service:
+    name: slurmd
+    enabled: yes
+    state: started
+  tags:
+    - service

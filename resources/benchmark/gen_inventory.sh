@@ -1,5 +1,4 @@
-
-c_size=4
+c_size=12
 n_size=250
 rm -Rf inventory_large
 mkdir -p inventory_large/
@@ -47,8 +46,10 @@ mgt1
 [fn_compute]
 c[1:$((c_size*250))]
 
-[os_ubuntu]
+[os_ubuntu_mgt]
 mgt1
+
+[os_ubuntu_c]
 c[1:$((c_size*250))]
 
 [hw_A]
@@ -56,6 +57,9 @@ mgt1
 
 [hw_B]
 c[1:$((c_size*250))]
+
+[sample]
+c[1:100]
 EOF
 
 mkdir -p inventory_large/group_vars/all/
@@ -64,14 +68,34 @@ mkdir -p inventory_large/group_vars/hw_A/
 mkdir -p inventory_large/group_vars/hw_B/
 
 echo "hw_equipment_type: server" > inventory_large/group_vars/hw_A/main.yml
-echo "hw_equipment_type: server" > inventory_large/group_vars/hw_B/main.yml
 
-cat << EOF > inventory_large/group_vars/os_ubuntu/main.yml
+cat << EOF > inventory_large/group_vars/hw_B/main.yml
+hw_equipment_type: server
+hw_specs:
+  cpu:
+    architecture: x86_64
+    cores: 24
+    corespersocket: 12
+    sockets: 1
+    threadspercore: 2
+  memory: 63500
+EOF
+
+cat << EOF > inventory_large/group_vars/os_ubuntu_mgt/main.yml
 os_operating_system:
   distribution: "ubuntu"
   distribution_version: "24.04"
   distribution_major_version: "24"
 EOF
+
+cat << EOF > inventory_large/group_vars/os_ubuntu_c/main.yml
+os_operating_system:
+  distribution: "ubuntu"
+  distribution_version: "24.04"
+  distribution_major_version: "24"
+os_kernel_parameters: nomodeset
+EOF
+
 
 cat << EOF > inventory_large/group_vars/all/main.yml
 bb_domain_name: cluster.local
@@ -89,3 +113,4 @@ networks:
     subnet: 10.20.0.0
     prefix: 16
 EOF
+

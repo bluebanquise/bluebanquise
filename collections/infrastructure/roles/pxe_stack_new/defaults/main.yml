@@ -1,0 +1,120 @@
+---
+
+############################################################
+### Global parameters
+
+# Default time zone
+pxe_stack_time_zone:
+
+# Enable distributions support
+pxe_stack_diskful_os_redhat: true
+pxe_stack_diskful_os_ubuntu: true
+pxe_stack_diskful_os_suse: true
+pxe_stack_diskful_os_debian: true
+pxe_stack_diskful_os_dgx: false
+
+# Allow SSH password authentication
+pxe_stack_ssh_allow_passwords: true
+
+# Enable root user as default user
+pxe_stack_enable_root: false
+# Sudo user if root not enabled
+pxe_stack_sudo_user: bluebanquise
+pxe_stack_sudo_user_home: /var/lib/bluebanquise
+pxe_stack_sudo_user_uid: 377
+pxe_stack_sudo_user_gid: 377
+# Set sudo user as passwordless sudoer
+pxe_stack_sudo_is_passwordless: true
+
+# Preserve default repositories
+pxe_stack_preserve_repositories: true
+
+# default is reboot, can be set to poweroff, halt or shutdown
+pxe_stack_post_install_action: reboot
+pxe_stack_post_install_boot_to_disk: true
+
+# Do not edit here
+# pxe_stack_enable_services:
+# pxe_stack_start_services:
+
+############################################################
+### Default equipment profile parameters
+
+pxe_stack_hw_equipment_type: none
+pxe_stack_os_operating_system:
+  distribution: ubuntu
+  distribution_version: 22.04
+  distribution_major_version: 22
+  repositories_environment:
+
+pxe_stack_hw_console:
+pxe_stack_hw_kernel_parameters:
+pxe_stack_os_kernel_parameters:
+
+pxe_stack_os_kernel_aggressive_dhcp: true
+
+pxe_stack_os_keyboard_layout: us  # us, fr, etc.
+pxe_stack_os_system_language: en_US.UTF-8  # You should not update this if you want to google issues...
+
+pxe_stack_os_admin_password_sha512: "!"
+pxe_stack_os_admin_ssh_keys: []
+
+pxe_stack_os_access_control: enforcing
+pxe_stack_os_firewall: true
+
+# WARNING! If nothing is set for partitioning,
+# automatic partitioning will be activated.
+pxe_stack_os_partitioning:
+
+pxe_stack_hw_preserve_efi_first_boot_device: true
+
+# Add custom content to any kind of auto install files: kickstart, preseed, user-data and autoyast
+# This content is added at top of files.
+pxe_stack_os_autoinstall_custom_content:
+
+# Add custom script to autoyast and user-data. Use pxe_stack_os_autoinstall_custom_content variable for kickstart.
+pxe_stack_os_autoinstall_custom_scripts: []
+#  - name: script1
+#    content: |
+#      ...
+
+# Add proxies
+pxe_stack_os_pxe_repository_proxy:
+pxe_stack_os_pxe_proxy:
+
+# Automatically detect NIC to be used in preseed
+# Only works if a single NIC is connected.
+pxe_stack_os_preseed_auto_main_network_interface: true
+
+############################################################
+### Misc parameters
+
+pxe_stack_suse_autoinstall_repositories: []
+#  - media_url: http://10.10.0.1/repositories/sles/15.3/x86_64/updates
+#    name: sles_updates
+
+############################################################
+### DISKLESS
+
+pxe_stack_enable_diskless: true
+pxe_stack_diskless_nfs_path: /nfs/diskless
+
+############################################################
+### TOOLS
+
+# Add optional dedicated entries in ixpe menu
+pxe_stack_enable_clonezilla: true
+pxe_stack_enable_alpine: true
+pxe_stack_enable_memtest: true
+
+### CLONEZILLA
+# Allows to backup/restore systems, or even deploy multiple systems via images.
+# Be aware that pxe_stack role does not handle nfs server, you will have to
+# use the nfs role to create export or use an external nfs.
+
+# NFS server to store images. Should be an ip, as DNS resolution might not work.
+# If not set, default is pxe_server ip (next-server, provided by DHCP server).
+pxe_stack_clonezilla_nfs_export_server:
+
+# Mount point from which load images from NFS server.
+pxe_stack_clonezilla_nfs_mount_point: /nfs/cloned_images

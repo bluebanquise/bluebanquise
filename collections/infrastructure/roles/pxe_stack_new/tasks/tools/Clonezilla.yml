@@ -1,0 +1,29 @@
+---
+- name: file <|> Create clone directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+  loop:
+    - "{{ pxe_stack_htdocs_path }}/pxe/bin/clonezilla/"
+    - "{{ pxe_stack_htdocs_path }}/pxe/tools/clonezilla/"
+
+- name: "package <|> Install Clonezilla iso"
+  ansible.builtin.package:
+    name: "clonezilla"
+    state: present
+  tags:
+    - package
+    - large_package
+
+- name: "Template <|> Generate Clonezilla live boot files to {{ pxe_stack_htdocs_path }}/pxe/tools/"
+  ansible.builtin.template:
+    src: "Clonezilla/{{ item }}.ipxe.j2"
+    dest: "{{ pxe_stack_htdocs_path }}/pxe/tools/clonezilla/{{ item }}.ipxe"
+    mode: 0644
+    owner: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_group }}"
+  loop:
+    - clone
+    - autoclone
+    - autodeploy

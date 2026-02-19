@@ -7,13 +7,17 @@
 
 ## Internal hosts
 
-{% set enable_extended_names = hosts_file_enable_extended_names %}
-{% for host_entry in hosts_file_hosts_by_first_octets['forward'] %}
-{{ host_entry.ip4 }} {{ host_entry.hostname }}
-  {% if enable_extended_names %}
-{{ host_entry.ip4 }} {{ host_entry.hostname }}-{{ host_entry.network }}
-  {% endif %}
+{# Always write base records #}
+{% for host in hostvars['localhost']['dns_server_hosts_by_first_octets']['forward']['base'] %}
+{{ host.ip4 }} {{ host.hostname }}
 {% endfor %}
+
+{# Conditionally write extended records #}
+{% if hosts_file_enable_extended_names %}
+{% for host in hostvars['localhost']['dns_server_hosts_by_first_octets']['forward']['extended'] %}
+{{ host.ip4 }} {{ host.hostname }}
+{% endfor %}
+{% endif %}
 
 ## External hosts
 

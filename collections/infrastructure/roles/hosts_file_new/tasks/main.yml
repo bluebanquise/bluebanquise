@@ -1,17 +1,18 @@
 ---
 
-- name: Generate configuration localy
+- name: block <|> Generate configuration localy
   delegate_to: localhost
   run_once: true
   tags:
     - template
   block:
 
-    - name: Build host to network mapping
+    - name: set_fact <|> Build host to network mapping
       set_fact:
         hosts_file_hosts_by_first_octets: "{{ hostvars | bluebanquise.infrastructure.hosts_by_first_octets(groups['all'], networks) }}"
+      delegate_facts: true  # We delegate to localhost only, to avoid memory usage with all hosts
 
-    - name: Create temporary file
+    - name: tempfile <|> Create temporary file
       ansible.builtin.tempfile:
         state: file
         suffix: "hosts_file_work"
@@ -19,7 +20,7 @@
       tags:
         - template
 
-    - name: "template <|> Generate /etc/hosts"
+    - name: template <|> Generate /etc/hosts
       ansible.builtin.template:
         src: hosts.j2
         dest: {{ hosts_file_work_file.path }}
@@ -35,7 +36,7 @@
     #     mode: '0755'
 
 # Now that file is rendered, lets push it to targets
-- name: "copy <|> Push /etc/hosts"
+- name: copy <|> Push /etc/hosts
   ansible.builtin.copy:
     src: {{ hosts_file_work_file.path }}
     dest: /etc/hosts
@@ -46,7 +47,7 @@
     - template
 
 # Finaly, we can cleanup working file
-- name: Remove temporary working file
+- name: file <|> Remove temporary working file
   ansible.builtin.file:
     path: "{{ hosts_file_work_file.path }}"
     state: absent

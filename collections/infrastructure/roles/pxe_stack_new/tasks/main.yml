@@ -1,0 +1,211 @@
+---
+- name: include_vars <|> Gather OS specific variables
+  # This task gathers variables defined in OS specific files.
+  #
+  # Search vars in:
+  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
+  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
+  #  - <distribution>.yml            # eg. CentOS.yml
+  #  - <os_family>.yml               # eg. RedHat.yml
+  #
+  # If no OS specific file is found, the role will default to vars/main.yml
+  #
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family }}.yml"
+      skip: true
+  tags:
+    - always
+
+- name: include_tasks <|> Firewall
+  ansible.builtin.include_tasks: "firewall.yml"
+  tags:
+    - internal
+    - firewall
+
+################################################################################################
+######################## GENERIC PART
+
+# Roles transverse variables caching
+- name: fact <|> Calculate bb_nodes_profiles
+  ansible.builtin.set_fact:
+    bb_nodes_profiles: "{{ j2_bb_nodes_profiles }}"
+  when: bb_nodes_profiles is not defined or bb_nodes_profiles is none
+  tags:
+    - templates
+
+- name: debug <|> Display bb_nodes_profiles
+  ansible.builtin.debug:
+    msg: "{{ bb_nodes_profiles}}"
+
+- name: fact <|> Calculate bb_equipments
+  ansible.builtin.set_fact:
+    bb_equipments: "{{ j2_bb_equipments }}"
+  when: bb_equipments is not defined or bb_equipments is none
+  tags:
+    - templates
+
+- name: debug <|> Display bb_equipments
+  ansible.builtin.debug:
+    msg: "{{ bb_equipments}}"
+#
+
+- name: "package <|> Install {{ (pxe_stack_packages_to_install + [pxe_stack_tftp_package | default(pxe_stack_default_tftp_package)]) | join(' ') }} packages"
+  ansible.builtin.package:
+    name: "{{ pxe_stack_packages_to_install + [pxe_stack_tftp_package | default(pxe_stack_default_tftp_package)] }}"
+    state: present
+  tags:
+    - package
+  notify: systemd <|> Reload systemd configuration
+
+- name: file <|> Create pxe directories structure
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+  loop:
+    - "{{ pxe_stack_apache_cgi_bin_path }}"
+    - /etc/bluebanquise
+    - /etc/bluebanquise/bootset
+
+- name: file <|> Create pxe http directories structure
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+    owner: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_group }}"
+  loop:
+    - "{{ pxe_stack_htdocs_path }}/pxe/"
+    - "{{ pxe_stack_htdocs_path }}/pxe/bin"
+    - "{{ pxe_stack_htdocs_path }}/pxe/nodes"
+    - "{{ pxe_stack_htdocs_path }}/pxe/equipment_profiles"
+    - "{{ pxe_stack_htdocs_path }}/pxe/osdeploy"
+    - "{{ pxe_stack_htdocs_path }}/pxe/tools"
+    - "{{ pxe_stack_htdocs_path }}/pxe/netboots"
+
+- name: include_tasks <|> Use OS dedicated task
+  ansible.builtin.include_tasks: "{{ item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}/main.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}/main.yml"
+      skip: true
+  tags:
+    - internal
+
+- name: template <|> Generate /etc/bluebanquise/bootset/nodes_parameters.yml
+  ansible.builtin.template:
+    src: nodes_parameters.yml.j2
+    dest: /etc/bluebanquise/bootset/nodes_parameters.yml
+    mode: 0644
+  tags:
+    - template
+
+- name: template <|> Generate /etc/bluebanquise/bootset/pxe_parameters.yml
+  ansible.builtin.template:
+    src: "pxe_parameters.yml.j2"
+    dest: "/etc/bluebanquise/bootset/pxe_parameters.yml"
+    mode: 0644
+
+- name: "template <|> Generate {{ pxe_stack_htdocs_path }}/pxe/ files"
+  ansible.builtin.template:
+    src: "{{ item }}.ipxe.j2"
+    dest: "{{ pxe_stack_htdocs_path }}/pxe/{{ item }}.ipxe"
+    mode: 0755
+    owner: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_group }}"
+  loop:
+    - convergence
+    - menu
+  tags:
+    - template
+
+- name: "template <|> Generate {{ pxe_stack_htdocs_path }}/pxe/nodes/.ipxe"
+  ansible.builtin.template:
+    src: nohostname.ipxe.j2
+    dest: "{{ pxe_stack_htdocs_path }}/pxe/nodes/.ipxe"
+    mode: 0755
+    owner: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_group }}"
+  tags:
+    - template
+
+- name: "copy <|> Copy {{ pxe_stack_apache_conf_path }}/cgi.conf"
+  ansible.builtin.copy:
+    src: cgi.conf
+    dest: "{{ pxe_stack_apache_conf_path }}/cgi.conf"
+    mode: 0644
+  notify: service <|> Restart pxe services
+
+- name: "template <|> Create {{ pxe_stack_apache_cgi_bin_path }}/bootswitch.cgi"
+  ansible.builtin.template:
+    src: bootswitch.cgi.j2
+    dest: "{{ pxe_stack_apache_cgi_bin_path }}/bootswitch.cgi"
+    mode: 0744
+    owner: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_group }}"
+  tags:
+    - template
+
+- name: "copy <|> Copy bluebanquise-bootset"
+  ansible.builtin.copy:
+    src: bluebanquise-bootset
+    dest: "/usr/bin/bluebanquise-bootset"
+    owner: root
+    group: root
+    mode: 0755
+
+
+################################################################################################
+######################## DISKFUL
+
+- name: include_tasks <|> Include diskful
+  ansible.builtin.include_tasks: diskful.yml
+  tags:
+    - internal
+
+
+################################################################################################
+######################## DISKLESS
+
+- name: include_tasks <|> Include diskless
+  ansible.builtin.include_tasks: diskless.yml
+  when: pxe_stack_enable_diskless
+  tags:
+    - internal
+
+
+################################################################################################
+######################## TOOLS
+
+- name: include_tasks <|> Include tools
+  ansible.builtin.include_tasks: tools.yml
+  tags:
+    - internal
+
+
+################################################################################################
+######################## HANDLERS AND SERVICES
+
+- name: meta <|> Run handler tasks to restart pxe services
+  ansible.builtin.meta: flush_handlers
+
+- name: "service <|> Manage all {{ (pxe_stack_services_to_start + [pxe_stack_tftp_service | default(pxe_stack_default_tftp_service)]) | join(' ') }} state"
+  ansible.builtin.service:
+    name: "{{ item }}"
+    enabled: "{{ (pxe_stack_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    state: "{{ (pxe_stack_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
+  loop: "{{ pxe_stack_services_to_start + [pxe_stack_tftp_service | default(pxe_stack_default_tftp_service)] }}"
+  tags:
+    - service

@@ -37,14 +37,14 @@
   tags:
     - templates
 
-- name: "package <|> Install {{ dns_server_packages_to_install | join(' ') }} packages"
+- name: "package <|> Install packages"
   ansible.builtin.package:
     name: "{{ dns_server_packages_to_install }}"
     state: present
   tags:
     - package
 
-- name: "file <|> Create needed directory {{ dns_server_named_dir }}"
+- name: "file <|> Create needed directory"
   ansible.builtin.file:
     path: "{{ dns_server_named_dir }}"
     state: directory
@@ -99,7 +99,7 @@
   tags:
     - template
 
-- name: "template <|> Generate Forward zone file on Master DNS {{ dns_server_named_dir }}/forward.zone"
+- name: "template <|> Generate Forward zone file on Master DNS forward.zone"
   ansible.builtin.template:
     src: forward.j2
     dest: "{{ dns_server_named_dir }}/forward.zone"
@@ -118,7 +118,7 @@
     - template
     - internal
 
-- name: "template <|> Generate SOA for forward zone file {{ dns_server_named_dir }}/forward.soa"
+- name: "template <|> Generate SOA for forward zone file forward.soa"
   ansible.builtin.template:
     src: forward.soa.j2
     dest: "{{ dns_server_named_dir }}/forward.soa"
@@ -130,7 +130,7 @@
   tags:
     - template
 
-- name: "template <|> Generate Reverse zone file on Master DNS {{ dns_server_named_dir }}/{{ item }}.rr.zone"
+- name: "template <|> Generate Reverse zone file on Master DNS .rr.zone"
   ansible.builtin.template:
     src: reverse.j2
     dest: "{{ dns_server_named_dir }}/{{ item | trim }}.rr.zone"
@@ -141,7 +141,7 @@
   tags:
     - template
 
-- name: "template <|> Generate SOA for reverse zone file {{ dns_server_named_dir }}/{{ item }}.rr.soa"
+- name: "template <|> Generate SOA for reverse zone file .rr.soa"
   ansible.builtin.template:
     src: reverse.soa.j2
     dest: "{{ dns_server_named_dir }}/{{ item | trim }}.rr.soa"
@@ -154,7 +154,7 @@
   tags:
     - template
 
-- name: "template <|> Generate override file {{ dns_server_named_dir }}/override.zone"
+- name: "template <|> Generate override file override.zone"
   ansible.builtin.template:
     src: override.j2
     dest: "{{ dns_server_named_dir }}/override.zone"

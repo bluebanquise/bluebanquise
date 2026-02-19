@@ -1,0 +1,13 @@
+---
+- name: "firewalld <|> Add services to firewall's zone"
+  ansible.posix.firewalld:
+    zone: "{{ pxe_stack_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
+    service: "{{ item }}"
+    immediate: "yes"
+    permanent: "yes"
+    state: enabled
+  when:
+    - os_firewall | default(false) | bool
+  loop: "{{ pxe_stack_firewall_services_to_add }}"
+  tags:
+    - firewall
