@@ -11,5 +11,5 @@
       tags: rsyslog
       vars:
         rsyslog_profile: client     
-    - role: bluebanquise.infrastructure.loki
-      tags: loki
+    # - role: bluebanquise.infrastructure.loki
+    #   tags: loki

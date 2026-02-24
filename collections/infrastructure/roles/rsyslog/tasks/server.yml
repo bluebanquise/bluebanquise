@@ -36,6 +36,7 @@
     group: root
     mode: 0644
   notify: service <|> Restart rsyslog service
+  when: rsyslog_server_logrotate | bool
   tags:
     - template
 
@@ -49,5 +50,6 @@
     - uncompresscmd /usr/bin/unxz
     - compressext .xz
   notify: service <|> Restart rsyslog service
+  when: rsyslog_server_logrotate | bool
   tags:
     - template

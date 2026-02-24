@@ -22,6 +22,19 @@
     - template
   notify: service <|> restart slurmd
 
+# Setup topology.conf
+- name: "template <|> Generate block topology.conf in {{ slurm_home_path }}"
+  ansible.builtin.template:
+    src: "topology.conf.j2"
+    dest: "{{ slurm_home_path }}/topology.conf"
+    owner: slurm
+    group: slurm
+    mode: 0644
+  tags:
+    - template
+  when: slurm_topology == 'topology/block' or slurm_topology == 'topology/tree'
+  notify: service <|> restart slurmd
+
 - name: include_tasks <|> Deploy Slurm compute configuration
   ansible.builtin.include_tasks: "compute_{{ slurm_computes_config }}.yml"
 

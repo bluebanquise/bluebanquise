@@ -366,6 +366,27 @@ os_autoinstall_packages:
 
 Of course, it is expected the packages you ask in the list are available in the repositories exposed to the auto-installer.
 
+#### Scripts during installation
+
+It is possible to include scripts or snippets that will be run at different stages of the installation procedure. The exact injection points will depend on the distribution used. For now these are:
+
+**Debian**: The `early_command` and `late_command` preseed options. See the [official documentation](https://www.debian.org/releases/trixie/amd64/apbs05.en.html#preseed-hooks) for more details.
+
+These are the variables:
+
+* `pxe_stack_autoinstall_pre_scripts`: An array of snippets to be executed _in the installation environment_ before the installation has started. Example:
+  ```yaml
+  pxe_stack_autoinstall_pre_scripts:
+    - 'echo "nameserver 10.1.2.3" > /etc/resolv.conf'
+    - "{{ lookup('ansible.builtin.file', 'my_pre_script.sh') }}"
+  ```
+* `pxe_stack_autoinstall_pre_scripts`: An array of snippets to be executed _in the already installed environment_ after the installation has finished. Example:
+  ```yaml
+  pxe_stack_autoinstall_post_scripts:
+    - systemctl enable systemd-networkd-wait-online
+    - "{{ lookup('ansible.builtin.file', 'my_post_script.sh') }}"
+  ```
+
 ### bluebanquise-bootset usage
 
 Once the role is deployed, and hosts gathered into `/etc/bluebanquise/bootset/nodes_parameters.yml`, the **bluebanquise-bootset** tool can be used to manipulate remote hosts PXE boot. By default, 3 states can be defined for each host:

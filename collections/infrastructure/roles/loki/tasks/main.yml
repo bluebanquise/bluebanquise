@@ -103,17 +103,17 @@
 - name: "stat <|> Check for {{ loki_data_dir }}"
   ansible.builtin.stat:
     path: "{{ loki_data_dir }}"
-  register: dir_rslt
+  register: loki_dir_rslt
 
 - name: "set_fact <|> Set period start date if {{ loki_data_dir }} does not exist"
   ansible.builtin.set_fact:
     loki_from_date: "{{ lookup('pipe', 'date +%Y-%m-%d') }}"
-  when: not dir_rslt.stat.exists
+  when: not loki_dir_rslt.stat.exists
 
 - name: "set_fact <|> Set period start date based on {{ loki_data_dir }} ctime"
   ansible.builtin.set_fact:
-    loki_from_date: "{{ lookup('pipe', 'date -d @' + dir_rslt.stat.ctime|string + ' +%Y-%m-%d') }}"
-  when: dir_rslt.stat.exists
+    loki_from_date: "{{ lookup('pipe', 'date -d @' + loki_dir_rslt.stat.ctime|string + ' +%Y-%m-%d') }}"
+  when: loki_dir_rslt.stat.exists
 
 - name: "template <|> Configure loki"
   ansible.builtin.template:

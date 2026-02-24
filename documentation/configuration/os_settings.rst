@@ -276,3 +276,28 @@ Just set ``os_sysctl`` key as a dict of key:value couples.
   os_sysctl:
     kernel.panic: absent
     vm.swappiness: 5
+
+Scripts during installation
+===========================
+
+It is possible to include scripts or snippets that will be run at different stages of the installation procedure. The exact injection points will depend on the distribution used. For now these are:
+
+:Debian:
+  The ``early_command`` and ``late_command`` preseed options. See the `official documentation <https://www.debian.org/releases/trixie/amd64/apbs05.en.html#preseed-hooks>`_ for more details.
+
+These are the variables:
+
+* ``pxe_stack_autoinstall_pre_scripts``: An array of snippets to be executed *in the installation environment* before the installation has started. Example:
+
+  .. code-block:: yaml
+
+    pxe_stack_autoinstall_pre_scripts:
+      - 'echo "nameserver 10.1.2.3" > /etc/resolv.conf'
+      - "{{ lookup('ansible.builtin.file', 'my_pre_script.sh') }}"
+* ``pxe_stack_autoinstall_pre_scripts``: An array of snippets to be executed *in the already installed environment* after the installation has finished. Example:
+
+  .. code-block:: yaml
+
+    pxe_stack_autoinstall_post_scripts:
+      - systemctl enable systemd-networkd-wait-online
+      - "{{ lookup('ansible.builtin.file', 'my_post_script.sh') }}"

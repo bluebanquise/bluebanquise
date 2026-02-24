@@ -2,7 +2,7 @@
 nic_role_version: 1.12.0
 
 nic_j2_nmcli_device_name_type: "{%- set cons = [] -%}
-{%- for device in (nmcli_con_show.stdout | split('\n')) -%}
+{%- for device in (nic_nmcli_con_show.stdout | split('\n')) -%}
   {%- if (device | split(':'))[0] != '' and (device | split(':'))[0] is not none -%}
     {%- set con = {'device': (device | split(':'))[0], 'name': (device | split(':'))[1], 'type': (device | split(':'))[2], 'apply': true} -%}
     {%- for interface in (network_interfaces | default([], true)) -%}

@@ -58,7 +58,7 @@
   tags:
     - template
 
-- name: meta <|> Run handler tasks to restart dhcp services
+- name: meta <|> Run handler tasks to restart keepalived services
   ansible.builtin.meta: flush_handlers
 
 - name: "service <|> Manage {{ keepalived_services_to_start | join(' ') }} state"

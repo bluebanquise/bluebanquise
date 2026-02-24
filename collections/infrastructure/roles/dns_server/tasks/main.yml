@@ -32,7 +32,7 @@
 # This calculation takes time, so we store it in memory for later usage
 - name: fact <|> Calculate first_octets
   ansible.builtin.set_fact:
-    first_octets: "{{ dns_server_j2_get_first_octets }}"
+    dns_server_first_octets: "{{ dns_server_j2_get_first_octets }}"
   run_once: true
   tags:
     - templates
@@ -106,14 +106,14 @@
     owner: root
     group: root
     mode: 0644
-  register: zoneconf
+  register: dns_server_zoneconf
   tags:
     - template
 
 - name: set_fact <|> Set SOA Serial for reverse zone
   ansible.builtin.set_fact:
     dns_server_serial: "{{ lookup('pipe', 'date +%s') }}"
-  when: zoneconf.changed  # noqa no-handler
+  when: dns_server_zoneconf.changed  # noqa no-handler
   tags:
     - template
     - internal
@@ -126,7 +126,7 @@
     group: root
     mode: 0644
   notify: service <|> Restart dns services
-  when: zoneconf.changed  # noqa no-handler
+  when: dns_server_zoneconf.changed  # noqa no-handler
   tags:
     - template
 
@@ -137,7 +137,7 @@
     owner: root
     group: root
     mode: 0644
-  loop: "{{ first_octets.split(',') | flatten(levels=1) }}"
+  loop: "{{ dns_server_first_octets.split(',') | flatten(levels=1) }}"
   tags:
     - template
 
@@ -149,8 +149,8 @@
     group: root
     mode: 0644
   notify: service <|> Restart dns services
-  loop: "{{ first_octets.split(',') | flatten(levels=1) }}"
-  when: zoneconf.changed  # noqa no-handler
+  loop: "{{ dns_server_first_octets.split(',') | flatten(levels=1) }}"
+  when: dns_server_zoneconf.changed  # noqa no-handler
   tags:
     - template
 
@@ -162,7 +162,7 @@
     group: root
     mode: 0644
   notify: service <|> Restart dns services
-  when: dns_overrides is defined and zoneconf.changed  # noqa no-handler
+  when: dns_overrides is defined and dns_server_zoneconf.changed  # noqa no-handler
   tags:
     - template
 

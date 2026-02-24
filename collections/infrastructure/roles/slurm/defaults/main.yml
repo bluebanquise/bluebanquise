@@ -15,6 +15,14 @@ slurm_slurmctldpidfile: /var/run/slurmctld.pid
 slurm_slurmdpidfile: /var/run/slurmd.pid
 slurm_slurmdbdpidfile: /var/run/slurmdbd.pid
 
+## slurmd additional configuration
+# slurm_slurmd_additional_conf:
+#   - section: 'Service'
+#     content:
+#       - LimitNOFILESoft: 2048576
+#       - ...
+# slurm_slurmd_dropin_file: "01-custom.conf" # default: 00-ansible.conf
+
 ## firewall and ports
 # slurm_firewall_zone: public
 slurm_slurmtld_port: 6817
@@ -46,6 +54,8 @@ slurm_accounting_mysql_slurm_password: ssap_slurm # CHANGE ME !
 slurm_accounting_mysql_create_database: false
 slurm_accounting_mysql_create_user: false
 slurm_accounting_mysql_unix_socket: /var/run/mysqld/mysqld.sock
+# Accounting tres specific
+# slurm_accounting_storage_tres: gres/gpu
 ### mariadb
 slurm_innodb_buffer_pool_size: 1024M
 slurm_innodb_log_file_size: 64M
@@ -82,6 +92,9 @@ slurm_acct_gather_profile_influxdb_timeout: 10
 ## Handlers control
 slurm_allow_scontrol_handler: true
 
+# Topology
+slurm_topology: topology/default
+
 ## Other
 slurm_returntoservice: 0
 slurm_schedulertype: sched/backfill
@@ -92,6 +105,8 @@ slurm_mpidefault: pmi2
 #   - tmpfs=/scratch
 #   - AccountingstorageEnforce=associations
 
+# Gres
+slurm_grestypes_nvml: false
 ## Munge
 
 # slurm_munge_key_b64: # User need to define it, would be too risky to provide one

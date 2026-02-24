@@ -134,6 +134,9 @@ echo -n " Installing needed dependencies, could take some time..."
   if [ "$PLATFORM_ID" == "platform:el9" ]; then
     dnf install git python3 python3-pip python3-pip python3-policycoreutils openssh-clients -y
   fi
+  if [ "$PLATFORM_ID" == "platform:el10" ]; then
+    dnf install git python3 python3-pip python3-pip python3-policycoreutils openssh-clients -y
+  fi
   # OPENSUSE LEAP
   if [ "$ID" == "opensuse-leap" ]; then
     zypper -n install python3 python3-pip
@@ -146,7 +149,7 @@ echo -n " Installing needed dependencies, could take some time..."
     # ln -s /usr/bin/pip3.9 /usr/bin/pip3
   fi
   # DEBIAN
-  if [ "$VERSION_ID" == "11" ] || [ "$VERSION_ID" == "12" ]; then
+  if [ "$VERSION_ID" == "11" ] || [ "$VERSION_ID" == "12" ] || [ "$VERSION_ID" == "13" ]; then
     apt update
     export DEBIAN_FRONTEND=noninteractive
     apt install -y python3 python3-pip python3-venv git ssh curl

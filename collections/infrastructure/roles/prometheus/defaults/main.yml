@@ -94,8 +94,8 @@ prometheus_server_karma_username: admin
 prometheus_server_karma_password: admin
 
 prometheus_firewall_open: false
-#prometheus_server_firewall_zone: public
-#prometheus_client_firewall_zone: public
+# prometheus_server_firewall_zone: public
+# prometheus_client_firewall_zone: public
 
 prometheus_server_enable_tls: false
 prometheus_server_tls_cert_file: prometheus.crt

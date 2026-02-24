@@ -2,8 +2,33 @@
 
 Format: <date> - <author (username or mail or both)> - [role] <change description>
 
+# To 3.4 or 4.0
+
+* 02/04/2026 - jpiles - [pxe_stack] fix debian preseed (#1217)
+* 01/29/2026 - jpiles - [nic] Adapt variable name after 81a39c7 (#1215)
+* 01/23/2026 - teo-blachere - [pxe_stack] Fix user creation when host is running selinux enforcing mode in bluebanquise-diskless (#1214)
+* 01/22/2026 - teo-blachere - [pxe_stack] Check user and group presence before creation diskless (#1211)
+* 01/20/2026 - pducjacquet - [pxe_stack] Allow + character when sanitizing user input, needed for kernel-64k in aarch64 images (#1208)
+* 01/20/2026 - btravouillon - [rsyslog] Add a var to toggle logrotate config for rsyslog (#1212)
+* 01/16/2026 - fabienarchambault - [slurm] Fix new line in slurm.conf.j2 template (#1209)
+* 01/15/2026 - ginomcevoy and lehouque-atos - [podman] Fix configuration for rootless containers (#1210)
+* 01/20/2026 - pducjacquet - [pxe_stack] Allow + character when sanitizing user input, needed for kernel-64k in aarch64 images (#1208)
+* 01/21/2026 - thiagocardozo - [dhcp_server] Added Option61 matching;Fixed host var name in template(#1213)
+
 # To 3.2.9
- 
+
+* 01/05/26 - fabienarchambault - [slurm] slurm.conf: remove useless newlines (#1206)
+* 01/05/26 - oxedions - [core] Support for RHEL 10 and Debian 13, add KEA DHCP (#1205)
+* 01/05/26 - fabienarchambault - [slurm] Slurm: add dropin file for additional configuration on configfull computes (#1207)
+* 12/23/25 - btravouillon - [dhcp_server] Fix is_in_dhcp condition (#1200)
+* 12/23/25 - btravouillon - [slurm] Restart slurmctld when the topology changes (#1201)
+* 12/23/25 - dietergorecki - [sudoers] Enable logging support in sudoers (#1203)
+* 12/18/25 - fabienarchambault - [slurm] add support for nvml to AutoDetect GPU gres (#1187)
+* 12/17/25 - dietergorecki - [kernel_config] update kernel_config role to add support for ubuntu (#1188)
+* 12/11/25 - jpiles - [pxe_stack] Add support for pre- and post-installation scripts in debian preseed
+* 12/08/25 - ginomcevoy [pcs] Fix pcs handler reference node (#1196)
+* 12/08/25 - btravouillon - [slurm] Skip debug task in Slurm role by default (#1194)
+* 12/08/25 - fabienarchambault - [slurm] Slurm Feature: add support for topology in Slurm (#1191)
 * 12/03/25 - btravouillon - [pxe_stack] Display nodes with boot=next in bootset status (#1190)
 * 12/02/25 - dietergorecki - [nic] Enforce networkmanager configuration (#1189)
 * 12/02/25 - btravouillon - [nic] Restart NetworkManager before reloading nmcli conn (#1185)

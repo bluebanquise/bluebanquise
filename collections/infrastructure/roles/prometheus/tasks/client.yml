@@ -1,7 +1,7 @@
 ---
 - name: set_fact <|> Gather exporters to install
   ansible.builtin.set_fact:
-    exporters_groups: "{{ (exporters_groups | default([])) + item.value }}"
+    prometheus_exporters_groups: "{{ (prometheus_exporters_groups | default([])) + item.value }}"
   loop: "{{ prometheus_exporters_groups_to_scrape | dict2items}}"
   when: inventory_hostname in groups[item.key]
 
@@ -11,7 +11,7 @@
     gid: "{{ item.gid | default(omit) }}"
     system: yes
     state: present
-  loop: "{{ exporters_groups }}"
+  loop: "{{ prometheus_exporters_groups }}"
   when: item.group is defined
 
 - name: user <|> Add exporters needed users
@@ -23,14 +23,14 @@
     home: "{{ item.home | default('/var/lib/'+item.user) }}"
     system: yes
     state: present
-  loop: "{{ exporters_groups }}"
+  loop: "{{ prometheus_exporters_groups }}"
   when: item.user is defined
 
 - name: package <|> install exporters packages
   ansible.builtin.package:
     name: "{{ item.package }}"
     state: present
-  loop: "{{ exporters_groups }}"
+  loop: "{{ prometheus_exporters_groups }}"
   when: item.package is defined and item.package is not none
 
 - name: template <|> Generate exporters service file
@@ -41,7 +41,7 @@
     group: root
     mode: 0644
   notify: systemd <|> Reload systemd configuration
-  loop: "{{ exporters_groups }}"
+  loop: "{{ prometheus_exporters_groups }}"
   when: item.service is defined
   tags:
     - template
@@ -53,7 +53,7 @@
     mode: 0755
     owner: "{{ item.user | default('root') }}"
     group: "{{ item.group | default('root') }}"
-  loop: "{{ exporters_groups }}"
+  loop: "{{ prometheus_exporters_groups }}"
   when: item.service is defined
 
 - name: meta <|> Run handler tasks
@@ -66,7 +66,7 @@
     immediate: "yes"
     permanent: "yes"
     state: enabled
-  loop: "{{ exporters_groups }}"
+  loop: "{{ prometheus_exporters_groups }}"
   when:
     - os_firewall | default(false) | bool
     - item.port is defined
@@ -78,7 +78,7 @@
     name: "{{ item.service }}"
     enabled: "{{ (prometheus_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
     state: "{{ (prometheus_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
-  loop: "{{ exporters_groups }}"
+  loop: "{{ prometheus_exporters_groups }}"
   when: item.service is defined and item.service is not none
   tags:
     - service

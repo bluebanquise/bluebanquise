@@ -5,5 +5,5 @@
     owner: root
     group: root
     mode: '0644'
-  register: sysctl_file
+  register: lustre_client_sysctl_file
   notify: "Reload sysclt configuration"

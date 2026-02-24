@@ -19,14 +19,14 @@
 - name: install <|> Check for log file
   ansible.builtin.stat:
     path: "{{ grafana_logs_dir }}"
-  register: log_exists
+  register: grafana_log_exists
 
 - name: install <|> Change log owner
   ansible.builtin.file:
     path: "{{ grafana_logs_dir }}"
     owner: "grafana"
     group: "grafana"
-  when: log_exists.stat.exists
+  when: grafana_log_exists.stat.exists
 
 - name: "install <|> Add services to firewall's zone"
   ansible.posix.firewalld:
@@ -86,9 +86,9 @@
     enabled: "{{ (grafana_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
     state: "{{ (grafana_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   loop: "{{ grafana_services_to_start }}"
-  register: service_results
+  register: grafana_service_results
   retries: 5
   delay: 10
-  until: service_results is not failed
+  until: grafana_service_results is not failed
   tags:
     - service

@@ -33,7 +33,13 @@ log_driver = "journald"
 log_size_max = -1
 
 [network]
+
+# Network backend determines what network driver will be used to set up and tear down container networks.
+# Valid values are "cni" and "netavark".
+# The default value is empty which means that it will automatically choose CNI or netavark.
+# If there are already containers/images or CNI networks preset it will choose CNI.
 network_backend = ""
+
 cni_plugin_dirs = [
                "/usr/libexec/cni",
                "/usr/lib/cni",
@@ -42,7 +48,11 @@ cni_plugin_dirs = [
 ]
 
 default_network = "podman"
-network_config_dir = "/etc/cni/net.d/"
+
+# Path to the directory where network configuration files are located.
+# For the CNI backend the default is "/etc/cni/net.d" as root
+# and "$HOME/.config/cni/net.d" as rootless.
+#network_config_dir = "/etc/cni/net.d/"
 
 [engine]
 cgroup_manager = "{{ podman_conf_cgroup_manager }}"
@@ -69,8 +79,14 @@ infra_image = "k8s.gcr.io/pause:3.1"
 namespace = "{{ podman_conf_namespace }}"
 no_pivot_root = false
 num_locks = 2048
+
+# Default runtime will be searched for on the system using the priority:
+# "crun", "runc", "runj", "kata", "runsc", "ocijail"
 runtime = ""
-tmp_dir = "/var/run/libpod"
+
+# Path to the tmp directory, for libpod runtime content.
+# Defaults to $XDG_RUNTIME_DIR/libpod/tmp as rootless and /run/libpod/tmp as rootful.
+#tmp_dir = "/var/run/libpod"
 
 [engine.runtimes]
 

@@ -21,7 +21,9 @@ sudoers:
     group: techs
     commands: /usr/local/bin/backup
 ```
-
+  
+If logging is needed, define `sudoers_logging` to `true`.  
+  
 ## Changelog
 
 **Please now update CHANGELOG file at repository root instead of adding logs in this file.

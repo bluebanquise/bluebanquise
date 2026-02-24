@@ -33,7 +33,7 @@
 - name: "stat <|> Check that the {{ auditd_plugins_directory }}/{{ auditd_syslog_file }} exists"
   ansible.builtin.stat:
     path: "{{ auditd_plugins_directory }}/{{ auditd_syslog_file }}"
-  register: audit_result
+  register: auditd_result
 
 - name: "replace <|> Allow audit logs to be forwarded to remote syslog server"
   ansible.builtin.replace:
@@ -42,7 +42,7 @@
     replace: "active = yes"
   notify: service <|> Restart auditd service
   when:
-    - audit_result.stat.exists
+    - auditd_result.stat.exists
     - auditd_forward_audit_logs | default(false) | bool
 
 - name: "lineinfile █ Enable root command logging for {{ item }}"
