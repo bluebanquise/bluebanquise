@@ -1,6 +1,7 @@
 ---
 slurm_home_path: /etc/slurm
 slurm_mysql_cnf_dir: /etc/mysql/conf.d/
+slurm_major_version: 23
 slurm_packages_to_install:
   bluebanquise:
     controller:

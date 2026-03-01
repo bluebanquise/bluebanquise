@@ -1,5 +1,7 @@
 from ansible.errors import AnsibleFilterError
 from ansible.utils.display import Display
+from ClusterShell.NodeSet import NodeSet
+
 
 display = Display()
 
@@ -9,7 +11,7 @@ class FilterModule(object):
             'build_slurm_data': self.build_slurm_data
         }
 
-    def build_slurm_data(self, hostvars, slurm_partitions_list, groups, hw_prefix='hw'):
+    def slurm_organize_equipments(self, hostvars, slurm_partitions_list, groups, hw_prefix='hw'):
         try:
             unique_all_nodes = set()
             partitions_output = {}
@@ -28,7 +30,7 @@ class FilterModule(object):
                     g_members = groups.get(g_name, [])
                     part_nodes_set.update(g_members)
                 
-                partitions_output[p_name] = sorted(list(part_nodes_set))
+                partitions_output[p_name] = NodeSet(",".join(list(part_nodes_set)))
                 unique_all_nodes.update(part_nodes_set)
 
             # 2. Pack unique nodes and validate hw_specs
@@ -59,6 +61,7 @@ class FilterModule(object):
                         )
 
                     nodes_packs[hw_group] = {
+                        'nodeset': "",
                         'nodes': [],
                         'hw_specs': specs
                     }
@@ -71,6 +74,12 @@ class FilterModule(object):
                     f"The following nodes were found in slurm_partitions_list but do not "
                     f"belong to any '{hw_p}' group and will be excluded from NodesPacks: {', '.join(missing_hw_nodes)}"
                 )
+
+            # 4. Pack nodes into nodesets for easier usage later :)
+            for node_pack in nodes_packs:
+                nodes_packs[node_pack]['nodeset'] = NodeSet(",".join(nodes_packs[node_pack]['nodes']))
+                # Free some memory, in case we are limited
+                del nodes_packs[node_pack]['nodes']
 
             return {
                 'NodesPacks': nodes_packs,

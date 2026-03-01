@@ -46,7 +46,7 @@
 
     - name: set_fact <|> Calculate equipment profiles
       set_fact:
-        slurm_equipment_profiles: "{{ hostvars | bluebanquise.infrastructure.build_equipment_profiles(groups['all'], groups) }}"
+        slurm_equipments_and_partitions: "{{ hostvars | bluebanquise.infrastructure.slurm_organize_equipments(slurm_partitions_list, groups) }}"
       delegate_facts: true  # We delegate to localhost only, to avoid memory usage with all hosts
 
     - name: tempfile <|> Create temporary file
@@ -92,7 +92,7 @@
 
 # Setup directories, generic part
 
-- name: "file <|> Enforce permissions on {{ slurm_home_path }}"
+- name: "file <|> Enforce permissions"
   ansible.builtin.file:
     path: "{{ slurm_home_path }}"
     state: directory
