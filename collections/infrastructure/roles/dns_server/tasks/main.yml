@@ -43,19 +43,19 @@
 # This calculation takes time, so we store it in memory for later usage
 - name: fact <|> Calculate first_octets
   ansible.builtin.set_fact:
-    first_octets: "{{ dns_server_j2_get_first_octets }}"
+    dns_server_hosts_by_first_octets: "{{ hostvars | bluebanquise.infrastructure.hosts_by_first_octets(groups['all'], networks) }}"
   run_once: true
   tags:
     - templates
 
-- name: "package <|> Install {{ dns_server_packages_to_install | join(' ') }} packages"
+- name: "package <|> Install packages"
   ansible.builtin.package:
     name: "{{ dns_server_packages_to_install }}"
     state: present
   tags:
     - package
 
-- name: "file <|> Create needed directory {{ dns_server_named_dir }}"
+- name: "file <|> Create needed directory"
   ansible.builtin.file:
     path: "{{ dns_server_named_dir }}"
     state: directory
@@ -70,7 +70,7 @@
     owner: "{{ dns_server_dns_user }}"
     group: "{{ dns_server_dns_user }}"
     mode: 0750
-  with_items:
+  loop:
     - "{{ dns_server_log_dir }}"
     - "{{ dns_server_managed_keys_dir }}"
     - "{{ dns_server_var_dir }}"
@@ -141,26 +141,26 @@
   register: dns_foward_public_keys
   when: dns_server_dnssec_sign
 
-- name: "template <|> Generate Forward zone file on Master DNS {{ dns_server_named_dir }}/forward.zone"
+- name: "template <|> Generate Forward zone file on Master DNS forward.zone"
   ansible.builtin.template:
     src: forward.j2
     dest: "{{ dns_server_named_dir }}/forward.zone"
     owner: root
     group: root
     mode: 0644
-  register: zoneconf
+  register: dns_server_zoneconf
   tags:
     - template
 
 - name: set_fact <|> Set SOA Serial for reverse zone
   ansible.builtin.set_fact:
     dns_server_serial: "{{ lookup('pipe', 'date +%s') }}"
-  when: zoneconf.changed  # noqa no-handler
+  when: dns_server_zoneconf.changed  # noqa no-handler
   tags:
     - template
     - internal
 
-- name: "template <|> Generate SOA for forward zone file {{ dns_server_named_dir }}/forward.soa"
+- name: "template <|> Generate SOA for forward zone file forward.soa"
   ansible.builtin.template:
     src: forward.soa.j2
     dest: "{{ dns_server_named_dir }}/forward.soa"
@@ -168,7 +168,7 @@
     group: root
     mode: 0644
   notify: service <|> Restart dns services
-  when: zoneconf.changed  # noqa no-handler
+  when: dns_server_zoneconf.changed  # noqa no-handler
   tags:
     - template
 
@@ -179,7 +179,7 @@
 
 - name: "include_tasks <|> Use zone key task"
   ansible.builtin.include_tasks: zone_key.yml
-  with_items: "{{ first_octets.split(',') }}"
+  with_items: "{{ dns_server_hosts_by_first_octets }}"
   when: (dns_server_dnssec_sign)
   loop_control:
     loop_var: dns_zone
@@ -190,7 +190,7 @@
     paths: "{{ dns_server_named_dir }}"
     patterns: "K{{ item.split('.')|reverse|join('.') }}*.key"
   register: "dns_item_public_keys"
-  with_items: "{{ first_octets.split(',') }}"
+  with_items: "{{ dns_server_hosts_by_first_octets }}"
 
 - name: "template <|> Generate Reverse zone file on Master DNS {{ dns_server_named_dir }}/{{ item }}.rr.zone"
   ansible.builtin.template:
@@ -199,11 +199,11 @@
     owner: root
     group: root
     mode: 0644
-  with_items: "{{ first_octets.split(',') }}"
+  loop: "{{ dns_server_hosts_by_first_octets['reverse'] | flatten(levels=1) }}"
   tags:
     - template
 
-- name: "template <|> Generate SOA for reverse zone file {{ dns_server_named_dir }}/{{ item }}.rr.soa"
+- name: "template <|> Generate SOA for reverse zone file .rr.soa"
   ansible.builtin.template:
     src: reverse.soa.j2
     dest: "{{ dns_server_named_dir }}/{{ item | trim }}.rr.soa"
@@ -211,14 +211,14 @@
     group: root
     mode: 0644
   notify: service <|> Restart dns services
-  with_items: "{{ first_octets.split(',') }}"
-  when: zoneconf.changed  # noqa no-handler
+  loop: "{{ dns_server_hosts_by_first_octets['reverse'] | flatten(levels=1) }}"
+  when: dns_server_zoneconf.changed  # noqa no-handler
   tags:
     - template
 
 - name: "command <|> Sign item zone"
   ansible.builtin.command: "chdir={{ dns_server_named_dir }} dnssec-signzone -S -g -o {{ item.split('.')|reverse|join('.') }}.in-addr.arpa. {{ item }}.rr.zone"
-  with_items: "{{ first_octets.split(',') }}"
+  with_items: "{{ dns_server_hosts_by_first_octets }}"
   when: dns_server_dnssec_sign
   notify: service <|> Restart dns services
 
@@ -230,7 +230,7 @@
     group: root
     mode: 0644
   notify: service <|> Restart dns services
-  when: dns_overrides is defined and zoneconf.changed  # noqa no-handler
+  when: dns_overrides is defined and dns_server_zoneconf.changed  # noqa no-handler
   tags:
     - template
 

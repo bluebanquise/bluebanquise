@@ -7,60 +7,16 @@ $ORIGIN {{ item.split('.')|reverse|join('.') }}.in-addr.arpa.
 $INCLUDE "{{ dns_server_named_dir }}/{{ item }}.rr.soa"
 @ IN NS {{ inventory_hostname }}.{{ dns_server_domain_name | default(bb_domain_name, true) | default('cluster.local', true) }}.
 
-{% macro create_record(ip, name) -%}
-{{ ip.split('.')[3] }} IN PTR {{ name }}.
-{%- endmacro %}
+{% set domain_name = dns_server_domain_name | default(bb_domain_name, true) | default('cluster.local', true) %}
 
-{# Macro to write host in file #}
-{% macro write_host(host, host_dict, host_j2_node_main_resolution_network, host_j2_node_main_resolution_address) %}
-  {% if host_dict['network_interfaces'] is defined and host_dict['network_interfaces'] is iterable %}
-    {% for nic in host_dict['network_interfaces'] %}
-      {% if nic.network is defined and nic.ip4 is defined and (networks[nic.network].dns_server | default(true)) and nic.ip4 is not none and (nic.ip4 | ansible.utils.ipaddr) and nic.ip4.split('.')[0:3]|join('.') == item %}
-        {% if host_j2_node_main_resolution_address.split('.')[0:3]|join('.') == item %}
-{{ create_record(nic.ip4, [host, dns_server_domain_name | default(bb_domain_name, true) | default('cluster.local', true)] | join('.')) }}
-        {% endif %}
-        {% if dns_server_enable_extended_names %}
-{{ create_record(nic.ip4, [[host, nic.network]|join('-'), dns_server_domain_name | default(bb_domain_name, true) | default('cluster.local', true)] | join('.')) }}
-        {% endif %}
-      {% endif %}
-    {% endfor %}
-  {% endif %}
-  {% if host_dict['bmc'] is defined %}
-    {% set bmc_args = host_dict['bmc'] %}
-    {% if bmc_args.name is defined and bmc_args.name is not none and bmc_args.network is defined and bmc_args.network is not none and bmc_args.network is defined and bmc_args.network.dns_server is defined and bmc_args.network.dns_server and bmc_args.ip4 is defined and bmc_args.ip4 is not none and bmc_args.ip4.split('.')[0:3]|join('.') == item  %}
-      {% if item == host_j2_node_main_resolution_network %}
-{{ create_record(bmc_args.ip4, [bmc_args.name, dns_server_domain_name | default(bb_domain_name, true) | default('cluster.local', true)] | join('.')) }}
-      {% endif %}
-      {% if dns_server_enable_extended_names %}
-{{ create_record(bmc_args.ip4, [[bmc_args.name, bmc_args.network]|join('-'), dns_server_domain_name | default(bb_domain_name, true) | default('cluster.local', true)] | join('.')) }}
-      {% endif %}
-    {% endif %}
-  {% endif %}
-{% endmacro -%}
-
-{% for host in (groups['all'] | sort) -%}
-{{ write_host(host,hostvars[host],hostvars[host]['j2_node_main_resolution_network'],hostvars[host]['j2_node_main_resolution_address']) }}
-{%- endfor %}
-
-{% for net in networks %}
-  {% if networks[net]['services'] is defined and networks[net]['services'] is mapping and networks[net]['dns_server'] is defined and networks[net]['dns_server'] %}
-    {% for service in networks[net]['services'] %}
-      {% if networks[net]['services'][service] is iterable %}
-        {% for iphost in networks[net]['services'][service] %}
-          {% if iphost.ip4 is defined and iphost.hostname is defined and (iphost.ip4 | ansible.utils.ipaddr) and iphost.ip4.split('.')[0:3]|join('.') == item %}
-{{ create_record(iphost.ip4, [iphost.hostname, dns_server_domain_name | default(bb_domain_name, true) | default('cluster.local', true)] | join('.')) }}
-          {% endif %}
-        {% endfor %}
-      {% endif %}
-    {% endfor %}
-  {% endif %}
+{# Main PTR records #}
+{% for host in dns_server_hosts_by_first_octets['reverse'][item]['base'] %}
+{{ host.ip_host }}  IN  PTR  {{ host.hostname }}.{{ domain_name }}.
 {% endfor %}
 
-{% if dns_server_dnssec_sign %}
-  {% for value in dns_item_public_keys.results %}
-	{% if item.split('.')|reverse|join('.') in value.files[0].path %}
-$INCLUDE {{ value.files[0].path }}
-$INCLUDE {{ value.files[1].path }}
-	{% endif %}
-  {% endfor %}
+{# Extended PTR records (e.g. 10.10.0.5 -> c001-interconnect.domain.com) #}
+{% if dns_server_enable_extended_names %}
+{% for host in dns_server_hosts_by_first_octets['reverse'][item]['extended'] %}
+{{ host.ip_host }}  IN  PTR  {{ host.hostname }}.{{ domain_name }}.
+{% endfor %}
 {% endif %}
