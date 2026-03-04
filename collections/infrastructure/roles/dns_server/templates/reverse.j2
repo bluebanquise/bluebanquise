@@ -11,12 +11,12 @@ $INCLUDE "{{ dns_server_named_dir }}/{{ item }}.rr.soa"
 
 {# Main PTR records #}
 {% for host in dns_server_hosts_by_first_octets['reverse'][item]['base'] %}
-{{ host.ip_host }}  IN  PTR  {{ host.hostname }}.{{ domain_name }}.
+{{ host.ip_host }} IN PTR {{ host.hostname }}.{{ domain_name }}.
 {% endfor %}
 
 {# Extended PTR records (e.g. 10.10.0.5 -> c001-interconnect.domain.com) #}
 {% if dns_server_enable_extended_names %}
 {% for host in dns_server_hosts_by_first_octets['reverse'][item]['extended'] %}
-{{ host.ip_host }}  IN  PTR  {{ host.hostname }}.{{ domain_name }}.
+{{ host.ip_host }} IN PTR {{ host.hostname }}.{{ domain_name }}.
 {% endfor %}
 {% endif %}
