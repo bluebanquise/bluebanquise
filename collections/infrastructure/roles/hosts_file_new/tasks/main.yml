@@ -23,7 +23,7 @@
     - name: template <|> Generate /etc/hosts
       ansible.builtin.template:
         src: hosts.j2
-        dest: {{ hosts_file_work_file.path }}
+        dest: "{{ hosts_file_work_file.path }}"
         mode: 0644
       tags:
         - template
