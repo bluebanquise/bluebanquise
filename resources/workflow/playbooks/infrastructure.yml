@@ -18,15 +18,15 @@
       tags: conman
     - role: bluebanquise.infrastructure.cron
       tags: cron
-    - role: bluebanquise.infrastructure.dhcp_server
+    - role: bluebanquise.infrastructure.dhcp_server_new
       tags: dhcp_server
     - role: bluebanquise.infrastructure.dns_client
       tags: dns_client
-    - role: bluebanquise.infrastructure.dns_server
+    - role: bluebanquise.infrastructure.dns_server_new
       tags: dns_server
     - role: bluebanquise.infrastructure.firewall
       tags: firewall
-    - role: bluebanquise.infrastructure.hosts_file
+    - role: bluebanquise.infrastructure.hosts_file_new
       tags: hosts_file
     - role: bluebanquise.infrastructure.http_server
       tags: http_server
@@ -40,7 +40,7 @@
       tags: pam_limits
     - role: bluebanquise.infrastructure.powerman
       tags: powerman
-    - role: bluebanquise.infrastructure.pxe_stack
+    - role: bluebanquise.infrastructure.pxe_stack_new
       tags: pxe_stack
     - role: bluebanquise.infrastructure.repositories
       tags: repositories
