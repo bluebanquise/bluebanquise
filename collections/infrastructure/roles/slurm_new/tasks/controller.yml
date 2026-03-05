@@ -18,6 +18,18 @@
   tags:
     - firewall
 
+# Now that file is rendered, lets push it to targets
+- name: copy <|> Push slurm.conf
+  ansible.builtin.copy:
+    src: "{{ slurm_conf_file_work_file.path }}"
+    dest: "{{ slurm_home_path }}/{{ item }}"
+    owner: slurm
+    group: slurm
+    mode: 0644
+  tags:
+    - template
+  notify: service <|> restart slurmctld
+
 - name: "template <|> Generate configuration files in {{ slurm_home_path }}"
   ansible.builtin.template:
     src: "{{ item }}.j2"
@@ -28,7 +40,6 @@
   tags:
     - template
   loop:
-    - slurm.conf
     - cgroup.conf
   notify: Run scontrol reconfigure
 

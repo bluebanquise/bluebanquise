@@ -38,7 +38,7 @@
 # Now that file is rendered, lets push it to targets
 - name: copy <|> Push /etc/hosts
   ansible.builtin.copy:
-    src: {{ hosts_file_work_file.path }}
+    src: "{{ hosts_file_work_file.path }}"
     dest: /etc/hosts
     owner: root
     group: root
