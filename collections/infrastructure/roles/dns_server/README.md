@@ -291,6 +291,7 @@ This will create a `foward.zone` file with:
 
 ## Changelog
 
+* 1.13.0: Improve forward/reverse dns files generation with python filters. P. Duc-Jacquet <patrice.ducjacquet@eviden.com>
 * 1.12.0: Added alias for round robin load balance. Thiago Cardozo <boubee.thiago@gmail.com>
 * 1.11.0: Enable dnssec at dns server. Thiago Cardozo <boubee.thiago@gmail.com>
 * 1.10.4: Increase role performances bby caching first octets. Benoit Leveugle <benoit.leveugle@gmail.com>
