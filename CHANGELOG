@@ -4,6 +4,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.4 or 4.0
 
+* 10/03/2026 - thiagocardozo - [conman] Fix conman pswd template skipping BMC credentials and added REDFISH (#1222)
 * 02/04/2026 - jpiles - [pxe_stack] fix debian preseed (#1217)
 * 01/29/2026 - jpiles - [nic] Adapt variable name after 81a39c7 (#1215)
 * 01/23/2026 - teo-blachere - [pxe_stack] Fix user creation when host is running selinux enforcing mode in bluebanquise-diskless (#1214)
