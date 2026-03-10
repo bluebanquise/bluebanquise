@@ -25,29 +25,45 @@
 
 - name: "package <|> Install required Slurm packages"
   ansible.builtin.package:
-    name: "{{ slurm_packages_to_install[slurm_profile] }}"
+    name: "{{ slurm_packages_to_install[slurm_packages_source][slurm_profile] | default(slurm_packages_to_install[slurm_profile]) }}"
     state: present
   when: slurm_profile is defined and slurm_profile is not none
   tags:
     - package
 
-# Roles transverse variables caching
-- name: fact <|> Calculate bb_nodes_profiles
-  ansible.builtin.set_fact:
-    bb_nodes_profiles: "{{ j2_bb_nodes_profiles }}"
-  run_once: true
-  when: bb_nodes_profiles is not defined or bb_nodes_profiles is none
-  tags:
-    - templates
+## Now we compute equipment profiles, to be able to create nodes groups based on their hw_ infra
+# We also generate slurm.conf
+# However, if we are targetting computes in configless, skip this part
 
-- name: debug <|> Display bb_nodes_profiles
-  ansible.builtin.debug:
-    msg: "{{ bb_nodes_profiles }}"
+- name: block <|> Generate configuration localy
+  delegate_to: localhost
+  run_once: true
   tags:
-    - never
-    - templates
-    - debug
-#
+    - template
+  when:
+    - not (slurm_profile == 'compute' and slurm_computes_config == 'configless')
+  block:
+
+    - name: set_fact <|> Calculate equipment profiles
+      set_fact:
+        slurm_equipments_and_partitions: "{{ hostvars | bluebanquise.infrastructure.slurm_organize_equipments(slurm_partitions_list, groups) }}"
+      delegate_facts: true  # We delegate to localhost only, to avoid memory usage with all hosts
+
+    - name: tempfile <|> Create temporary file
+      ansible.builtin.tempfile:
+        state: file
+        suffix: "slurm_conf_file_work"
+      register: slurm_conf_file_work_file
+      tags:
+        - template
+
+    - name: "template <|> Generate slurm.conf configuration file"
+      ansible.builtin.template:
+        src: "slurm.conf.j2"
+        dest: "{{ slurm_conf_file_work_file.path }}"
+        mode: 0644
+      tags:
+        - template
 
 # Install MUNGE, generic part
 
@@ -76,7 +92,7 @@
 
 # Setup directories, generic part
 
-- name: "file <|> Enforce permissions on {{ slurm_home_path }}"
+- name: "file <|> Enforce permissions"
   ansible.builtin.file:
     path: "{{ slurm_home_path }}"
     state: directory
@@ -113,7 +129,7 @@
   when: slurm_profile == 'submitter'
 
 # Setup slurm_adoption
-- name: include_tasks ░ Configure slurm_adopt
+- name: include_tasks <|> Configure slurm_adopt
   ansible.builtin.include_tasks: "pam_slurm_adopt.yml"
   when: slurm_pam_slurm_adopt_enable is defined and slurm_pam_slurm_adopt_enable and slurm_profile == 'compute'
 

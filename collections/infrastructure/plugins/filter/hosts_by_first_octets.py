@@ -18,7 +18,7 @@ class FilterModule(object):
                 alias = hv.get("alias")
                 
                 # --- Process Network Interfaces ---
-                for index, nic in enumerate(hv.get("network_interfaces", [])):
+                for index, nic in enumerate(hv.get("network_interfaces", []) or []):
                     ip4 = nic.get("ip4")
                     net_name = nic.get("network")
                     
@@ -70,7 +70,7 @@ class FilterModule(object):
                             entry = {"hostname": svc_host, "network": net_name, "ip4": ip4, "ip_host": ip_host}
                             # Services are typically base records
                             forward_data['base'].append(entry)
-                            reverse_data[ip_net]['base'].append(entry)
+                            # reverse_data[ip_net]['base'].append(entry) # Do not add services in reverse
             except Exception as e:
                 raise AnsibleFilterError(f"Error processing network '{net_name}': {str(e)}")
         

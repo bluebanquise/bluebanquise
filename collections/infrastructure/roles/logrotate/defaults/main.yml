@@ -1,0 +1,29 @@
+---
+# Global logrotate configuration (individual variables)
+logrotate_global_daily: true
+logrotate_global_weekly: false
+logrotate_global_monthly: false
+logrotate_global_rotate: 7
+logrotate_global_compress: true
+logrotate_global_delaycompress: false
+logrotate_global_missingok: true
+logrotate_global_notifempty: true
+logrotate_global_create: "0640 root root"
+logrotate_global_dateext: true
+logrotate_global_dateformat: "-%Y%m%d"
+logrotate_global_extension: "log"
+
+# Custom logrotate rules (list of dicts)
+logrotate_custom_rules: []
+# Example:
+# logrotate_custom_rules:
+#   - name: "example"
+#     path: "/var/log/example/*.log"
+#     options:
+#       - "daily"
+#       - "rotate 7"
+#       - "compress"
+#       - "delaycompress"
+#       - "missingok"
+#       - "notifempty"
+#       - "create 0640 root root"
