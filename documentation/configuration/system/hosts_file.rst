@@ -2,26 +2,14 @@
 Hosts file
 ==========
 
-Hosts file (/etc/hosts) is generated using all the nodes provided in the inventory.
+Introduction
+============
 
-There are few settings related to its generation.
+Hosts file (``/etc/hosts``) allows to simply link IPs and hostnames on the local system.
 
-External hosts
-==============
+In BlueBanquise, the file is generated using all the hosts provided in the inventory, and especially their associated network_interfaces.
 
-It is possible to define external hosts to be added into hosts file.
-To do so, define ``hosts_file_external_hosts`` this way:
-
-.. code:: yaml
-
-  hosts_file_external_hosts:
-    myhost: 10.10.10.10
-    mysecondhost: 7.7.7.7
-    mythirdhost:
-        ip4: 10.10.10.33
-        alias:
-        - machine3
-        - extmachine3
+There are also few settings to tune the file generation.
 
 Domain name
 ===========
@@ -65,3 +53,20 @@ While if ``hosts_file_enable_extended_names: false``, then the following content
 .. code:: text
 
     10.10.0.3 c001 c001.bluebanquise.local foobar
+
+External hosts
+==============
+
+It is possible to define external hosts to be added into hosts file.
+To do so, define ``hosts_file_external_hosts`` this way:
+
+.. code:: yaml
+
+  hosts_file_external_hosts:
+    myhost: 10.10.10.10
+    mysecondhost: 7.7.7.7
+    mythirdhost:
+        ip4: 10.10.10.33
+        alias:
+        - machine3
+        - extmachine3
