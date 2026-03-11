@@ -4,15 +4,15 @@
   roles:
 
     # HPC
-    - role: bluebanquise.infrastructure.slurm_new
+    - role: bluebanquise.infrastructure.slurm
       tags: slurm_controller
       vars:
         slurm_profile: controller
-    - role: bluebanquise.infrastructure.slurm_new
+    - role: bluebanquise.infrastructure.slurm
       tags: slurm_compute
       vars:
         slurm_profile: compute
-    - role: bluebanquise.infrastructure.slurm_new
+    - role: bluebanquise.infrastructure.slurm
       tags: slurm_submitter
       vars:
         slurm_profile: submitter
