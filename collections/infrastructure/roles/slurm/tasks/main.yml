@@ -50,7 +50,7 @@
       delegate_facts: true  # We delegate to localhost only, to avoid memory usage with all hosts
 
     - debug:
-        msg: "{{ hostvars['localhost'][slurm_equipments_and_partitions] | to_yaml(indent=4) }}"
+        msg: "{{ hostvars['localhost']['slurm_equipments_and_partitions'] | to_yaml(indent=4) }}"
 
     - name: tempfile <|> Create temporary file
       ansible.builtin.tempfile:
