@@ -139,5 +139,5 @@ NodeName={{ node_pack_vars['nodeset']}} {{ nodes_parameters }}
 ### Partitions list
 
 {%- for partition in slurm_partitions_list %}
-PartitionName={{ partition.partition_name }}{% for arg, arg_value in partition.partition_configuration.items() %} {{ arg }}={{ arg_value }}{% endfor %} Nodes={{ hostvars['localhost']['slurm_equipments_and_partitions']['NodesPacks'][partition.partition_name] }}
+PartitionName={{ partition.partition_name }}{% for arg, arg_value in partition.partition_configuration.items() %} {{ arg }}={{ arg_value }}{% endfor %} Nodes={{ hostvars['localhost']['slurm_equipments_and_partitions']['Partitions'][partition.partition_name] }}
 {% endfor %}
