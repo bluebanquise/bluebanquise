@@ -115,7 +115,7 @@ SlurmctldParameters={{ slurm_slurmctldparameters }}
 {#- NODES PACKS -#}
 ### Nodes
 
-{% for node_pack, node_pack_vars in slurm_equipments_and_partitions['NodesPacks'].items %}
+{% for node_pack, node_pack_vars in hostvars['localhost']['slurm_equipments_and_partitions']['NodesPacks'].items %}
     {%- set buffer = node_pack_vars['hw_specs'] %}
     {%- if buffer.cpu.sockets is defined and buffer.cpu.sockets is not none and buffer.cpu.cores_per_socket is defined and buffer.cpu.cores_per_socket is not none and buffer.cpu.threads_per_core is defined and buffer.cpu.threads_per_core is not none %}
       {%- set nodes_parameters = ' Sockets=' + (buffer.cpu.sockets|string) + ' CoresPerSocket=' + (buffer.cpu.cores_per_socket|string) + ' ThreadsPerCore=' + (buffer.cpu.threads_per_core|string) %}
@@ -139,5 +139,5 @@ NodeName={{ node_pack_vars['nodeset']}} {{ nodes_parameters }}
 ### Partitions list
 
 {%- for partition in slurm_partitions_list %}
-PartitionName={{ partition.partition_name }}{% for arg, arg_value in partition.partition_configuration.items() %} {{ arg }}={{ arg_value }}{% endfor %} Nodes={{ slurm_equipments_and_partitions['NodesPacks'][partition.partition_name] }}
+PartitionName={{ partition.partition_name }}{% for arg, arg_value in partition.partition_configuration.items() %} {{ arg }}={{ arg_value }}{% endfor %} Nodes={{ hostvars['localhost']['slurm_equipments_and_partitions']['NodesPacks'][partition.partition_name] }}
 {% endfor %}
