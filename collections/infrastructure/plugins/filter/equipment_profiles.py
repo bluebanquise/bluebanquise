@@ -1,5 +1,6 @@
 from ansible.errors import AnsibleFilterError
 
+
 class FilterModule(object):
     def filters(self):
         return {
@@ -7,13 +8,13 @@ class FilterModule(object):
         }
 
     def equipment_profiles(self, hostvars, hosts_list, groups, hw_prefix='hw', os_prefix='os'):
-        
+
         try:
             bequipments = {}
             # Cache to store variable sets extracted from group leaders
             # This is critical for performance with 1000+ hosts
-            group_vars_cache = {} 
-            
+            group_vars_cache = {}
+
             # Pre-calculate prefixes to save string operations in the loop
             hw_p = f"{hw_prefix}_"
             os_p = f"{os_prefix}_"
@@ -22,7 +23,7 @@ class FilterModule(object):
                 try:
                     h_vars = hostvars.get(host)
                     if h_vars is None:
-                        continue # Skip hosts that aren't reachable/defined in hostvars
+                        continue  # Skip hosts that aren't reachable/defined in hostvars
 
                     group_names = h_vars.get('group_names', [])
 
@@ -50,7 +51,7 @@ class FilterModule(object):
                             leader = groups.get(host_hw, [None])[0]
                             l_vars = hostvars.get(leader, {}) if leader else {}
                             group_vars_cache[host_hw] = {k: v for k, v in l_vars.items() if k.startswith(hw_p)}
-                        
+
                         # Extract OS vars (Check cache first)
                         if host_os not in group_vars_cache:
                             leader = groups.get(host_os, [None])[0]

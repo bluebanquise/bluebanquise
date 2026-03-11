@@ -5,6 +5,7 @@ from ClusterShell.NodeSet import NodeSet
 
 display = Display()
 
+
 class FilterModule(object):
     def filters(self):
         return {
@@ -17,26 +18,26 @@ class FilterModule(object):
             partitions_output = {}
             nodes_packs = {}
             missing_hw_nodes = []
-            
+
             hw_p = f"{hw_prefix}_"
 
             # 1. Map partitions and collect all involved nodes
             for part in slurm_partitions_list:
                 p_name = part.get('partition_name')
                 c_groups = part.get('computes_groups', [])
-                
+
                 part_nodes_set = set()
                 for g_name in c_groups:
                     g_members = groups.get(g_name, [])
                     part_nodes_set.update(g_members)
-                
+
                 partitions_output[p_name] = str(NodeSet(",".join(list(part_nodes_set))))
                 unique_all_nodes.update(part_nodes_set)
 
             # 2. Pack unique nodes and validate hw_specs
             for node in unique_all_nodes:
                 n_vars = hostvars.get(node)
-                
+
                 if n_vars is None:
                     missing_hw_nodes.append(node)
                     continue
@@ -53,7 +54,7 @@ class FilterModule(object):
                     # VALIDATION: Check if hw_specs exists
                     # .get() returns None if the key is missing
                     specs = n_vars.get('hw_specs')
-                    
+
                     if specs is None:
                         raise AnsibleFilterError(
                             f"Configuration Error: The hardware group '{hw_group}' is missing the mandatory 'hw_specs' key. "
@@ -65,7 +66,7 @@ class FilterModule(object):
                         'nodes': [],
                         'hw_specs': specs
                     }
-                
+
                 nodes_packs[hw_group]['nodes'].append(node)
 
             # 3. Handle Warnings for missing HW group membership
