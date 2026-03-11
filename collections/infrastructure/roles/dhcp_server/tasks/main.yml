@@ -88,7 +88,7 @@
     owner: root
     group: root
     mode: 0644
-    validate: "kea-dhcp4 -t -c %s"
+    validate: "/usr/sbin/kea-dhcp4 -t -c %s"
   notify: service <|> Restart dhcp server
   tags:
     - template
