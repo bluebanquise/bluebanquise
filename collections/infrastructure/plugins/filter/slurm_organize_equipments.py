@@ -8,7 +8,7 @@ display = Display()
 class FilterModule(object):
     def filters(self):
         return {
-            'build_slurm_data': self.build_slurm_data
+            'slurm_organize_equipments': self.slurm_organize_equipments
         }
 
     def slurm_organize_equipments(self, hostvars, slurm_partitions_list, groups, hw_prefix='hw'):
