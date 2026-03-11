@@ -30,7 +30,7 @@ class FilterModule(object):
                     g_members = groups.get(g_name, [])
                     part_nodes_set.update(g_members)
                 
-                partitions_output[p_name] = NodeSet(",".join(list(part_nodes_set)))
+                partitions_output[p_name] = str(NodeSet(",".join(list(part_nodes_set))))
                 unique_all_nodes.update(part_nodes_set)
 
             # 2. Pack unique nodes and validate hw_specs
@@ -77,7 +77,7 @@ class FilterModule(object):
 
             # 4. Pack nodes into nodesets for easier usage later :)
             for node_pack in nodes_packs:
-                nodes_packs[node_pack]['nodeset'] = NodeSet(",".join(nodes_packs[node_pack]['nodes']))
+                nodes_packs[node_pack]['nodeset'] = str(NodeSet(",".join(nodes_packs[node_pack]['nodes'])))
                 # Free some memory, in case we are limited
                 del nodes_packs[node_pack]['nodes']
 
