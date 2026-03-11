@@ -23,7 +23,7 @@
     - name: template <|> Generate /etc/hosts
       ansible.builtin.template:
         src: hosts.j2
-        dest: "{{ hosts_file_work_file.path | default('/tmp/hosts', true)}}"
+        dest: "{{ hosts_file_work_file.path | default('/tmp/hosts', true) }}"
         mode: 0644
       tags:
         - template
@@ -38,7 +38,7 @@
 # Now that file is rendered, lets push it to targets
 - name: copy <|> Push /etc/hosts
   ansible.builtin.copy:
-    src: "{{ hosts_file_work_file.path }}"
+    src: "{{ hosts_file_work_file.path | default('/tmp/hosts', true) }}"
     dest: /etc/hosts
     owner: root
     group: root
@@ -49,7 +49,7 @@
 # Finaly, we can cleanup working file
 - name: file <|> Remove temporary working file
   ansible.builtin.file:
-    path: "{{ hosts_file_work_file.path }}"
+    path: "{{ hosts_file_work_file.path | default('/tmp/hosts', true) }}"
     state: absent
   delegate_to: localhost
   run_once: true
