@@ -35,7 +35,7 @@ class FilterModule(object):
             # ----------------------------
             # Host NICs
             # ----------------------------
-            for nic in hv.get("network_interfaces", []):
+            for nic in (hv.get("network_interfaces", []) or []):
                 net = nic.get("network")
                 if not net:
                     continue
