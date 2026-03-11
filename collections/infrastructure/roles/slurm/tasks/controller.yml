@@ -22,7 +22,7 @@
 - name: copy <|> Push slurm.conf
   ansible.builtin.copy:
     src: "{{ slurm_conf_file_work_file.path }}"
-    dest: "{{ slurm_home_path }}/{{ item }}"
+    dest: "{{ slurm_home_path }}/slurm.conf"
     owner: slurm
     group: slurm
     mode: 0644
