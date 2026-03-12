@@ -1,0 +1,63 @@
+---
+slurm_home_path: /etc/slurm
+slurm_mysql_cnf_dir: /etc/mysql/conf.d/
+slurm_major_version: 23
+slurm_packages_to_install:
+  bluebanquise:
+    controller:
+      - munge
+      - libmunge2
+      - slurm-smd
+      - slurm-smd-dev
+      - slurm-smd-slurmctld
+      - slurm-smd-client
+    accounting:
+      - python3-mysqldb
+      - slurm-smd-slurmdbd
+    accounting_mysql:
+      - mariadb-common
+      - mariadb-server
+    compute:
+      - munge
+      - libmunge2
+      - slurm-smd
+      - slurm-smd-dev
+      - slurm-smd-slurmd
+      - slurm-smd-client
+      - slurm-smd-libpmi0
+      - slurm-smd-libpmi2-0
+    submitter:
+      - munge
+      - libmunge2
+      - slurm-smd
+      - slurm-smd-dev
+      - slurm-smd-client
+  distribution:
+    controller:
+      - munge
+      - libmunge2
+      - slurm-wlm
+      - slurm-wlm-dev
+      - slurm-wlm-slurmctld
+      - slurm-client
+    accounting:
+      - python3-mysqldb
+      - slurm-wlm-slurmdbd
+    accounting_mysql:
+      - mariadb-common
+      - mariadb-server
+    compute:
+      - munge
+      - libmunge2
+      - slurm-wlm
+      - slurm-wlm-dev
+      - slurm-wlm-slurmd
+      - slurm-client
+      - slurm-wlm-libpmi0
+      - slurm-wlm-libpmi2-0
+    submitter:
+      - munge
+      - libmunge2
+      - slurm-wlm
+      - slurm-wlm-dev
+      - slurm-client
