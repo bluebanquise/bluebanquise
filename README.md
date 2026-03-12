@@ -10,15 +10,11 @@ Devs infos:
 
 :yellow_heart: The main branch is now considered unstable as a new major version is under development. Please use a release tag for production.
 
-:green_heart: Current core version: 3.2.2
+:green_heart: Current development version: 4.0.0, core is now deprecated in favor of filter plugins. Logic remains the same, no breaking changes.
 
 :green_heart: ansible-core 2.19 is now supported.
 
-:yellow_heart: documentation v3 is currently written, might take few weeks to complete.
-
-BB 4 performances:
-
-![BlueBanquise 4 Performances](BlueBanquise_perfs.svg)
+:yellow_heart: documentation v4 is currently written, doing my best.
 
 ---
 
