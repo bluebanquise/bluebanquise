@@ -4,34 +4,43 @@ import json
 import yaml
 import subprocess
 
-def execute_ipmi_command(node, node_configuration, command):
+def execute_ipmi_command(node, node_configuration, command, logger, parameters):
+
+    timeout = parameters.get('timeout', 10)
+
     cmd = (
-        "ipmitool -I lanplus " +
+        "timeout " + timeout + " ipmitool -I lanplus " +
         "-H " + node_configuration['bmc']['name'] +
         " -U " + node_configuration['user'] +
         " -P " + node_configuration['password'] +
         " " + command
     )
 
-    cmd_call = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-    stdout, stderr = cmd_call.communicate()
-    exit_code = cmd_call.returncode
+    if not parameters.get('dryrun', False):
+        cmd_call = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        stdout, stderr = cmd_call.communicate()
+            exit_code = cmd_call.returncode
 
-    if exit_code != 0:
-        print(f'[{node}] Error executing IPMI command.')
-        print(f'[{node}] exit code: {exit_code}')
-        print(f'[{node}] stdout: {stdout.decode()}')
-        print(f'[{node}] stderr: {stderr.decode()}')
-        return 1
+        if exit_code != 0:
+            logger.error(f'[{node}] Error executing IPMI command.')
+            logger.error(f'[{node}] exit code: {exit_code}')
+            logger.error(f'[{node}] stdout: {stdout.decode()}')
+            logger.error(f'[{node}] stderr: {stderr.decode()}')
+            return 1
+        else:
+            return 0, stdout.decode()
+
     else:
-        return 0, stdout.decode()
+            logger.info(f'[{node}] Dryrun. Cmd: {cmd}')
+            return 0, ""
 
-def power(node, node_configuration, action_parameters, parameters):
+def power(node, node_configuration, action_parameters, parameters, logger):
+
     if action_parameters[0] == "on":
         if not parameters.get('dryrun', False):
-            exit_code, _ = execute_ipmi_command(node, node_configuration, "chassis power on")
+            exit_code, _ = execute_ipmi_command(node, node_configuration, "chassis power on", logger, parameters)
             if exit_code == 0:
-                print(f'[{node}] Powered on.')
+                logger.info(f'[{node}] Powered on.')
                 return 0
             else:
                 return 1
@@ -43,62 +52,63 @@ def power(node, node_configuration, action_parameters, parameters):
                 " -P " + node_configuration['password'] +
                 " chassis power on"
             )
-            print(f'[{node}] Dryrun. Cmd: {cmd}')
+            logger.info(f'[{node}] Dryrun. Cmd: {cmd}')
             return 0
 
     elif action_parameters[0] == "off":
-        exit_code, _ = execute_ipmi_command(node, node_configuration, "chassis power off")
+        exit_code, _ = execute_ipmi_command(node, node_configuration, "chassis power off", logger, parameters)
         if exit_code == 0:
-            print(f'[{node}] Powered off.')
+            logger.info(f'[{node}] Powered off.')
             return 0
         else:
             return 1
 
     elif action_parameters[0] == "reset":
-        exit_code, _ = execute_ipmi_command(node, node_configuration, "chassis power reset")
+        exit_code, _ = execute_ipmi_command(node, node_configuration, "chassis power reset", logger, parameters)
         if exit_code == 0:
-            print(f'[{node}] Reset.')
+            logger.info(f'[{node}] Reset.')
             return 0
         else:
             return 1
 
     elif action_parameters[0] == "status":
-        exit_code, stdout = execute_ipmi_command(node, node_configuration, "chassis power status")
+        exit_code, stdout = execute_ipmi_command(node, node_configuration, "chassis power status", logger, parameters)
         if exit_code == 0:
-            print(f'[{node}] Power status: {stdout}')
+            logger.info(f'[{node}] Power status: {stdout}')
             return 0
         else:
             return 1
 
     else:
-        print(f'[{node}] Error, unknown power action {action_parameters[0]}')
+        logger.error(f'[{node}] Error, unknown power action {action_parameters[0]}')
         return 1
 
-def boot(node, node_configuration, action_parameters, parameters):
+def boot(node, node_configuration, action_parameters, parameters, logger):
+
     if action_parameters[0] == "disk":
-        exit_code, _ = execute_ipmi_command(node, node_configuration, "chassis bootdev disk")
+        exit_code, _ = execute_ipmi_command(node, node_configuration, "chassis bootdev disk", logger, parameters)
         if exit_code == 0:
-            print(f'[{node}] Next boot set to disk.')
+            logger.info(f'[{node}] Next boot set to disk.')
             return 0
         else:
             return 1
 
     elif action_parameters[0] == "bios":
-        exit_code, _ = execute_ipmi_command(node, node_configuration, "chassis bootdev bios")
+        exit_code, _ = execute_ipmi_command(node, node_configuration, "chassis bootdev bios", logger, parameters)
         if exit_code == 0:
-            print(f'[{node}] Next boot set to BIOS.')
+            logger.info(f'[{node}] Next boot set to BIOS.')
             return 0
         else:
             return 1
 
     elif action_parameters[0] == "pxe":
-        exit_code, _ = execute_ipmi_command(node, node_configuration, "chassis bootdev pxe")
+        exit_code, _ = execute_ipmi_command(node, node_configuration, "chassis bootdev pxe", logger, parameters)
         if exit_code == 0:
-            print(f'[{node}] Next boot set to PXE.')
+            logger.info(f'[{node}] Next boot set to PXE.')
             return 0
         else:
             return 1
 
     else:
-        print(f'[{node}] Error, unknown boot action {action_parameters[0]}')
+        logger.error(f'[{node}] Error, unknown boot action {action_parameters[0]}')
         return 1
