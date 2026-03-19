@@ -64,8 +64,8 @@
 
 - name: "copy <|> Copy plugin files"
   ansible.builtin.copy:
-    src: "{{ item }}"
-    dest: "/usr/share/bluebanquise/bluebanquise-power//{{item}}"
+    src: "plugins/{{ item }}"
+    dest: "/usr/share/bluebanquise/bluebanquise-power/{{item}}"
     owner: root
     group: root
     mode: 0755
