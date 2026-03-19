@@ -1,0 +1,29 @@
+interval: 60        # seconds between healthcheck passes, main loop
+
+ssh:
+  user: "bluebanquise"
+  port: 22
+  key: "/var/lib/bluebanquise/.ssh/id_ed25519"
+  # password: "optional_password_instead_of_key"
+  timeout: 10       # SSH connection timeout in seconds
+
+email:
+  enabled: false
+  smtp_server: "smtp.example.com"
+  smtp_port: 587
+  username: "monitor@example.com"
+  password: "mypassword"
+  from: "monitor@example.com"
+  to:
+    - "admin1@example.com"
+    - "admin2@example.com"
+  use_tls: true
+  send_recovery: false   # optional, default false
+
+# Optional Dask configuration, for large systems
+dask:
+  address: null        # e.g. "tcp://scheduler:8786", or null for local
+
+hosts_file: "/etc/bluebanquise/bluebanquise-healtchecker/hosts.yaml"
+groups_file: "/etc/bluebanquise/bluebanquise-healtchecker/groups.yaml"
+results_file: "/var/lib/bluebanquise/bluebanquise-healtchecker/results.yaml"

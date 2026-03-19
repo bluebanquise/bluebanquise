@@ -1,0 +1,101 @@
+---
+- name: include_vars <|> Gather OS specific variables
+  # This task gathers variables defined in OS specific files.
+  #
+  # Search vars in:
+  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
+  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
+  #  - <distribution>.yml            # eg. CentOS.yml
+  #  - <os_family>.yml               # eg. RedHat.yml
+  #
+  # If no OS specific file is found, the role will default to vars/main.yml
+  #
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family }}.yml"
+      skip: true
+  tags:
+    - always
+
+- name: "package <|> Install packages"
+  ansible.builtin.package:
+    name: "{{ bluebanquise_healthchecker_packages_to_install }}"
+    state: present
+  tags:
+    - package
+
+- name: "file <|> Create directories structure"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: bluebanquise
+    group: bluebanquise
+    mode: 0750
+  loop:
+    - /etc/bluebanquise/
+    - /etc/bluebanquise/bluebanquise-healtchecker/
+    - /var/lib/bluebanquise/bluebanquise-healtchecker/
+    - /usr/share/bluebanquise/
+    - /usr/share/bluebanquise/bluebanquise-power/
+    - /usr/share/bluebanquise/bluebanquise-power/static/
+
+- name: "template <|> Render configuration"
+  ansible.builtin.template:
+    src: "{{ item }}.yaml.j2"
+    dest: "/etc/bluebanquise/bluebanquise-power/{{ item }}.yaml"
+    owner: bluebanquise
+    group: bluebanquise
+    mode: 0640
+  tags:
+    - template
+  loop:
+    - configuration
+    - hosts
+    - groups
+  notify:
+    - service <|> Restart service
+
+- name: "copy <|> Copy executable files"
+  ansible.builtin.copy:
+    src: "{{ item }}.py"
+    dest: "/usr/bin/{{item}}"
+    owner: root
+    group: root
+    mode: 0750
+  loop:
+    - bluebanquise-healthchecker-cli
+    - bluebanquise-healthchecker-ui
+    - bluebanquise-healthchecker
+  notify:
+    - service <|> Restart service
+
+- name: "copy <|> Copy static files"
+  ansible.builtin.copy:
+    src: "static/{{ item }}"
+    dest: "/usr/share/bluebanquise/bluebanquise-power/static/{{item}}"
+    owner: root
+    group: root
+    mode: 640
+  loop:
+    - bulma_switch.min.css
+    - bulma.min.css
+
+- name: "copy <|> Copy service file"
+  ansible.builtin.copy:
+    src: "bluebanquise-healthchecker.service"
+    dest: "/etc/systemd/system/bluebanquise-healthchecker.service"
+    owner: root
+    group: root
+    mode: 640
+  notify:
+    - systemd <|> Reload systemd configuration
+    - service <|> Restart service
+
+- name: meta <|> Run handler tasks
+  ansible.builtin.meta: flush_handlers

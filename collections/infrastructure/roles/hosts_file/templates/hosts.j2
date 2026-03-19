@@ -2,58 +2,22 @@
 #### Blue Banquise file ####
 ## {{ ansible_managed }}
 
-{# Macro to write host in file #}
-{% macro write_host(host, host_dict, host_j2_node_main_resolution_address) %}
-
-  {%- if host_j2_node_main_resolution_address is not none and (host_j2_node_main_resolution_address | ansible.utils.ipaddr) %}
-    {% if hosts_file_fqdn_first %}
-{{ host_j2_node_main_resolution_address }} {{ host }}.{{ hosts_file_domain_name | default(bb_domain_name, true) | default('cluster.local', true) }} {{ host }} {{ host_dict['alias'] | default([], true) | join(' ') }}
-    {% else %}
-{{ host_j2_node_main_resolution_address }} {{ host }} {{ host }}.{{ hosts_file_domain_name | default(bb_domain_name, true) | default('cluster.local', true) }} {{ host_dict['alias'] | default([], true) | join(' ') }}
-    {% endif %}
-  {% endif -%}
-
-  {%- if hosts_file_enable_extended_names %}
-    {%- if host_dict['network_interfaces'] is defined and host_dict['network_interfaces'] is iterable %}
-      {%- for nic in host_dict['network_interfaces'] %}
-        {%- if nic.network is defined and nic.network is not none and nic.ip4 is defined and (nic.ip4 | ansible.utils.ipaddr) %}
-{{ nic.ip4 }} {{ host }}-{{ nic.network }} {{ nic.alias | default('', true)}}
-        {% endif -%}
-      {% endfor -%}
-    {% endif -%}
-  {% endif -%}
-
-  {%- if host_dict['bmc'] is defined and host_dict['bmc'] is not none %}
-    {% if (host_dict['bmc'].name is defined and host_dict['bmc'].name is not none) and (host_dict['bmc'].ip4 is defined and (host_dict['bmc'].ip4 | ansible.utils.ipaddr) ) %}
-{{ host_dict['bmc'].ip4 }} {{ host_dict['bmc'].name }} {{ host_dict['bmc']['alias'] | default([], true) | join(' ') }}
-    {% endif %}
-  {% endif -%}
-{% endmacro %}
-
 127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
 ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
 
 ## Internal hosts
 
-{% for host in (j2_hosts_range | sort) -%}
-{{ write_host(host, hostvars[host], hostvars[host]['j2_node_main_resolution_address']) }}
-{%- endfor %}
-
-## Services hosts
-
-{% for net in networks %}
-  {% if networks[net]['services'] is defined and networks[net]['services'] is mapping %}
-    {% for service in networks[net]['services'] %}
-      {% if networks[net]['services'][service] is iterable %}
-        {% for iphost in networks[net]['services'][service] %}
-          {% if iphost.ip4 is defined and iphost.hostname is defined and (iphost.ip4 | ansible.utils.ipaddr) %}
-{{ iphost.ip4 }} {{ iphost.hostname }} {{ iphost.hostname }}-{{ service }} {{ iphost.hostname }}-{{ service }}-{{ net }}
-          {% endif %}
-        {% endfor %}
-      {% endif %}
-    {% endfor %}
-  {% endif %}
+{# Always write base records #}
+{% for host in hostvars['localhost']['hosts_file_hosts_by_first_octets']['forward']['base'] %}
+{{ host.ip4 }} {{ host.hostname }}
 {% endfor %}
+
+{# Conditionally write extended records #}
+{% if hosts_file_enable_extended_names %}
+{% for host in hostvars['localhost']['hosts_file_hosts_by_first_octets']['forward']['extended'] %}
+{{ host.ip4 }} {{ host.hostname }}
+{% endfor %}
+{% endif %}
 
 ## External hosts
 

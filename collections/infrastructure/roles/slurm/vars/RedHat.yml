@@ -1,6 +1,7 @@
 ---
 slurm_home_path: /etc/slurm
 slurm_mysql_cnf_dir: /etc/my.cnf.d
+slurm_major_version: 24
 slurm_packages_to_install:
   controller:
     - munge

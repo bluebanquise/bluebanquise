@@ -23,13 +23,13 @@
 #     group: "{{ pxe_stack_apache_group }}"
 #     # validate: /usr/bin/xmllint --noout --relaxng /usr/share/YaST2/schema/autoyast/rng/profile.rng %s
 #   vars:
-#     os_profile: "{{ bb_equipments[item]['os'] }}"
-#     hw_profile: "{{ bb_equipments[item]['hw'] }}"
-#   with_items: "{{ bb_equipments.keys() | default({}, true) }}"
+#     os_profile: "{{ pxe_stack_equipment_profiles[item]['os'] }}"
+#     hw_profile: "{{ pxe_stack_equipment_profiles[item]['hw'] }}"
+#   with_items: "{{ pxe_stack_equipment_profiles.keys() | default({}, true) }}"
 #   when:
-#     - bb_equipments[item]['type'] | default(pxe_stack_hw_equipment_type) == "server"
-#     - bb_equipments[item]['operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution) | lower) in ['sles']
-#     - (bb_equipments[item]['operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version) | int) in [12]
+#     - pxe_stack_equipment_profiles[item]['type'] | default(pxe_stack_hw_equipment_type) == "server"
+#     - pxe_stack_equipment_profiles[item]['operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution) | lower) in ['sles']
+#     - (pxe_stack_equipment_profiles[item]['operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version) | int) in [12]
 #   tags:
 #     - template
 
@@ -42,12 +42,12 @@
     group: "{{ pxe_stack_apache_group }}"
     # validate: /usr/bin/xmllint --noout --relaxng /usr/share/YaST2/schema/autoyast/rng/profile.rng %s
   vars:
-    equipment: "{{ bb_equipments[item] | default({}, true) }}"
-  loop: "{{ bb_equipments | default({}, true) | flatten(levels=1) }}"
+    equipment: "{{ pxe_stack_equipment_profiles[item] | default({}, true) }}"
+  loop: "{{ pxe_stack_equipment_profiles | default({}, true) | flatten(levels=1) }}"
   when:
-    - (bb_equipments[item]['hw']['hw_equipment_type'] | default(pxe_stack_hw_equipment_type)) == "server"
-    - (bb_equipments[item]['os']['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution) | lower) in ['opensuse','sles']
-    - (bb_equipments[item]['os']['os_operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version) | int) in [15]
+    - (pxe_stack_equipment_profiles[item]['hw']['hw_equipment_type'] | default(pxe_stack_hw_equipment_type)) == "server"
+    - (pxe_stack_equipment_profiles[item]['os']['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution) | lower) in ['opensuse','sles']
+    - (pxe_stack_equipment_profiles[item]['os']['os_operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version) | int) in [15]
   tags:
     - template
 
@@ -59,10 +59,10 @@
     owner: "{{ pxe_stack_apache_user }}"
     group: "{{ pxe_stack_apache_group }}"
   vars:
-    equipment: "{{ bb_equipments[item] | default({}, true) }}"
-  loop: "{{ bb_equipments | default({}, true) | flatten(levels=1) }}"
+    equipment: "{{ pxe_stack_equipment_profiles[item] | default({}, true) }}"
+  loop: "{{ pxe_stack_equipment_profiles | default({}, true) | flatten(levels=1) }}"
   when:
-    - (bb_equipments[item]['hw']['hw_equipment_type'] | default(pxe_stack_hw_equipment_type)) == "server"
-    - (bb_equipments[item]['os']['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution) | lower) in ['opensuse','sles']
+    - (pxe_stack_equipment_profiles[item]['hw']['hw_equipment_type'] | default(pxe_stack_hw_equipment_type)) == "server"
+    - (pxe_stack_equipment_profiles[item]['os']['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution) | lower) in ['opensuse','sles']
   tags:
     - template

@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -e
+source /usr/local/bluebanquise_venv/bin/activate
+export PYTHONPATH="/usr/share/bluebanquise/bluebanquise-power:$PYTHONPATH"
+/usr/bin/bluebanquise-bootset.py "$@"

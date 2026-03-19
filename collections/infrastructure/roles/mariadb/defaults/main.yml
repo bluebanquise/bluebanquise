@@ -1,0 +1,6 @@
+---
+mariadb_packages:
+  - mariadb-server
+  - python3-pymysql  # Required for Ansible MySQL modules
+
+mariadb_root_password: ""  # Set this in your inventory or group_vars

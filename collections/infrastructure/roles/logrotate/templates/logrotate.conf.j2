@@ -1,0 +1,16 @@
+# Global logrotate configuration
+{% if logrotate_global_daily %}daily{% endif %}
+{% if logrotate_global_weekly %}weekly{% endif %}
+{% if logrotate_global_monthly %}monthly{% endif %}
+rotate {{ logrotate_global_rotate }}
+{% if logrotate_global_compress %}compress{% endif %}
+{% if logrotate_global_delaycompress %}delaycompress{% endif %}
+{% if logrotate_global_missingok %}missingok{% endif %}
+{% if logrotate_global_notifempty %}notifempty{% endif %}
+{% if logrotate_global_create %}create {{ logrotate_global_create }}{% endif %}
+{% if logrotate_global_dateext %}dateext{% endif %}
+{% if logrotate_global_dateformat %}dateformat {{ logrotate_global_dateformat }}{% endif %}
+extension {{ logrotate_global_extension }}
+
+# Include custom rules
+include /etc/logrotate.d

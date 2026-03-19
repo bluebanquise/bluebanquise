@@ -1,0 +1,12 @@
+---
+- name: managements playbook
+  hosts: "all"
+  roles:
+
+    # Infrastructure
+    - role: bluebanquise.infrastructure.dhcp_server
+      tags: dhcp_server
+    - role: bluebanquise.infrastructure.dns_server
+      tags: dns_server
+    - role: bluebanquise.infrastructure.hosts_file
+      tags: hosts_file

@@ -1,0 +1,18 @@
+[Unit]
+Description=BlueBanquise Healthchecker Flask Server
+After=network.target
+
+[Service]
+User=bluebanquise
+Group=bluebanquise
+WorkingDirectory=/usr/share/bluebanquise/bluebanquise-power/
+Environment="PATH=/usr/local/bluebanquise_venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ExecStart=/usr/local/bluebanquise_venv/bin/python /usr/bin/bluebanquise-healthchecker
+Restart=always
+RestartSec=5s
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=bluebanquise-healthchecker
+
+[Install]
+WantedBy=multi-user.target

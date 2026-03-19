@@ -1,0 +1,12 @@
+---
+- name: systemd <|> Reload systemd configuration
+  ansible.builtin.systemd:
+    daemon_reload: yes
+
+- name: service <|> Restart service
+  ansible.builtin.service:
+    name: bluebanquise-healthchecker
+    state: restarted
+  when:
+    - "'service' not in ansible_skip_tags"
+    - bluebanquise_healthchecker_start_services | default(bb_start_services) | default(true) | bool

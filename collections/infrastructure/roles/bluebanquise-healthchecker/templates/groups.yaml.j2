@@ -1,0 +1,41 @@
+#jinja2: lstrip_blocks: True
+
+# Format in inventory:
+# servers_type_A:  < group
+#   healthchecks:
+#     - name: Check home is mounted
+#       command: "df | grep home"
+#       ok_exitcode: 0
+#       timeout: 5
+
+{% for hcgroup, hcgroup_vars in bluebanquise_healthchecker['groups'].items() %}
+
+{{ hcgroup }}:
+  hosts:
+{% for host in groups[hcgroup] %}
+  - {{ host }}
+{% endfor %}
+{{ hcgroup_vars | to_nice_yaml | indent(2, True) }}
+
+{% endfor %}
+
+{# 
+  servers_type_A:
+    hosts:
+      - c001
+      - c002
+    healthchecks:
+      - name: Check home is mounted
+        command: "df | grep home"
+        ok_exitcode: 0
+        timeout: 5
+
+  servers_type_B:
+    hosts:
+      - c003
+    healthchecks:
+      - name: Check tmp is mounted
+        command: "df | grep tmp"
+        ok_exitcode: 0
+        timeout: 5 
+#}
