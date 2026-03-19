@@ -42,13 +42,13 @@
     - /etc/bluebanquise/bluebanquise-healtchecker/
     - /var/lib/bluebanquise/bluebanquise-healtchecker/
     - /usr/share/bluebanquise/
-    - /usr/share/bluebanquise/bluebanquise-power/
-    - /usr/share/bluebanquise/bluebanquise-power/static/
+    - /usr/share/bluebanquise/bluebanquise-healtchecker/
+    - /usr/share/bluebanquise/bluebanquise-healtchecker/static/
 
 - name: "template <|> Render configuration"
   ansible.builtin.template:
     src: "{{ item }}.yaml.j2"
-    dest: "/etc/bluebanquise/bluebanquise-power/{{ item }}.yaml"
+    dest: "/etc/bluebanquise/bluebanquise-healtchecker/{{ item }}.yaml"
     owner: bluebanquise
     group: bluebanquise
     mode: 0640
@@ -65,8 +65,8 @@
   ansible.builtin.copy:
     src: "{{ item }}.py"
     dest: "/usr/bin/{{item}}"
-    owner: root
-    group: root
+    owner: bluebanquise
+    group: bluebanquise
     mode: 0750
   loop:
     - bluebanquise-healthchecker-cli
@@ -78,7 +78,7 @@
 - name: "copy <|> Copy static files"
   ansible.builtin.copy:
     src: "static/{{ item }}"
-    dest: "/usr/share/bluebanquise/bluebanquise-power/static/{{item}}"
+    dest: "/usr/share/bluebanquise/bluebanquise-healtchecker/static/{{item}}"
     owner: root
     group: root
     mode: 640
