@@ -38,8 +38,9 @@
   loop:
     - /etc/bluebanquise/
     - /etc/bluebanquise/bluebanquise-power/
-    - /usr/share/bluebanquise/
-    - /usr/share/bluebanquise/bluebanquise-power/
+    - /opt/bluebanquise/
+    - /opt/bluebanquise/bluebanquise-power/
+    - /opt/bluebanquise/bluebanquise-power/plugins/
 
 - name: "template <|> Render configuration"
   ansible.builtin.template:
@@ -51,24 +52,29 @@
   tags:
     - template
 
-- name: "copy <|> Copy executable files"
+- name: "copy <|> Copy executable file"
   ansible.builtin.copy:
-    src: "{{ item }}"
-    dest: "/usr/bin/{{item}}"
+    src: "bluebanquise-power"
+    dest: "/usr/bin/bluebanquise-power"
     owner: root
     group: root
-    mode: 0755
-  loop:
-    - bluebanquise-power
-    - bluebanquise_power.py
+    mode: 0750
+
+- name: "copy <|> Copy main python script"
+  ansible.builtin.copy:
+    src: "bluebanquise_power.py"
+    dest: "/opt/bluebanquise/bluebanquise-power/bluebanquise_power.py"
+    owner: root
+    group: root
+    mode: 0750
 
 - name: "copy <|> Copy plugin files"
   ansible.builtin.copy:
     src: "plugins/{{ item }}"
-    dest: "/usr/share/bluebanquise/bluebanquise-power/{{item}}"
+    dest: "/opt/bluebanquise/bluebanquise-power/plugins/{{ item }}"
     owner: root
     group: root
-    mode: 0755
+    mode: 0750
   loop:
     - IPMI.py
     - REDFISH.py

@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
+
+# Exit in case of any errors
 set -e
+# Load BlueBanquise virtual environment
 source /usr/local/bluebanquise_venv/bin/activate
-export PYTHONPATH="/usr/share/bluebanquise/bluebanquise-power:$PYTHONPATH"
-/usr/bin/bluebanquise-bootset.py "$@"
+# Launch tool
+python3 /opt/bluebanquise/bluebanquise-power/bluebanquise_power.py "$@"

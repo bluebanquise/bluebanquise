@@ -11,13 +11,17 @@ def execute_redfish_request(node, node_configuration, endpoint, logger, method='
     auth = HTTPBasicAuth(node_configuration['user'], node_configuration['password'])
     headers = {'Content-Type': 'application/json'}
 
-    try:
-        response = requests.request(method, url, auth=auth, headers=headers, json=payload, verify=False)
-        response.raise_for_status()
-        return response.json(), response.status_code
-    except requests.exceptions.RequestException as e:
-        logger.error(f'[{node}] Error executing Redfish request: {e}')
-        return None, getattr(e.response, 'status_code', None)
+    if not parameters.get('dryrun', False):
+        try:
+            response = requests.request(method, url, auth=auth, headers=headers, json=payload, verify=False)
+            response.raise_for_status()
+            return response.json(), response.status_code
+        except requests.exceptions.RequestException as e:
+            logger.error(f'[{node}] Error executing Redfish request: {e}')
+            return None, getattr(e.response, 'status_code', None)
+    else:
+        logger.info(f'[{node}] Dryrun. url: {url}, payload: {payload}')
+        return 0, 200
 
 def power(node, node_configuration, action_parameters, parameters, logger):
     if action_parameters[0] == "on":
@@ -92,3 +96,4 @@ def boot(node, node_configuration, action_parameters, parameters):
     else:
         logger.error(f'[{node}] Error, unknown boot action {action_parameters[0]}')
         return 1
+

@@ -9,7 +9,7 @@ def execute_ipmi_command(node, node_configuration, command, logger, parameters):
     timeout = parameters.get('timeout', 10)
 
     cmd = (
-        "timeout " + timeout + " ipmitool -I lanplus " +
+        "timeout " + str(timeout) + " ipmitool -I lanplus " +
         "-H " + node_configuration['bmc']['name'] +
         " -U " + node_configuration['user'] +
         " -P " + node_configuration['password'] +
@@ -19,14 +19,14 @@ def execute_ipmi_command(node, node_configuration, command, logger, parameters):
     if not parameters.get('dryrun', False):
         cmd_call = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         stdout, stderr = cmd_call.communicate()
-            exit_code = cmd_call.returncode
+        exit_code = cmd_call.returncode
 
         if exit_code != 0:
             logger.error(f'[{node}] Error executing IPMI command.')
             logger.error(f'[{node}] exit code: {exit_code}')
             logger.error(f'[{node}] stdout: {stdout.decode()}')
             logger.error(f'[{node}] stderr: {stderr.decode()}')
-            return 1
+            return 1, ""
         else:
             return 0, stdout.decode()
 

@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 import os
 import yaml
 import json
-import importlib
+import importlib.util
 from ClusterShell.NodeSet import NodeSet
 import logging
 
@@ -23,16 +23,23 @@ print("""\
 
 
 # Define the path to the YAML file
-configuration_file_path = 'bluebanquise-power.yml'
+configuration_file_path = '/etc/bluebanquise/bluebanquise-power/bluebanquise-power.yml'
 
 if os.path.exists(configuration_file_path):
     with open(configuration_file_path, 'r') as file:
         power_configuration = yaml.safe_load(file)
+else:
+    print("ERROR - no configuration file found")
+    exit(1)
+
+if power_configuration['nodes'] is None:
+    print("ERROR - no nodes defined in configuration")
+    exit(1)
 
 # Get arguments
 parser = ArgumentParser()
 #parser.add_argument('-p', action='store', dest='param', default=UNSPECIFIED, nargs='?')
-parser.add_argument("--dryrun", action='store', dest='dryrun', nargs='?', const=True, help="Enable dryrun mode")
+parser.add_argument("--dryrun", action='store_true', dest='dryrun', help="Enable dryrun mode")
 #parser.add_argument("--debug", action='store', dest='debug', nargs='?', const=True, help="Enable debug mode")
 parser.add_argument("--timeout", type=int, default=10, help="Timeout in seconds for module operations. Default is 10 (seconds).")
 
@@ -50,17 +57,25 @@ logging.basicConfig(
 )
 logger = logging.getLogger('bluebanquise-power')
 
-power_modules = {}
-plugins_dir = '/usr/share/bluebanquise/bluebanquise-power'
+plugins_dir = '/opt/bluebanquise/bluebanquise-power/plugins'
 
 # Load plugins from the specified directory
 power_modules = {}
 for file_path in os.listdir(plugins_dir):
-    if file_path.endswith('.py') and os.path.isfile(os.path.join(plugins_dir, file_path)):
-        module_name = file_path.replace('.py', '')
-        module_path = f"{plugins_dir}.{module_name}"
-        logger.debug("Loading '" + module_name + "' plugin")
-        power_modules[module_name] = importlib.import_module(f"{plugins_dir}.{module_name}")
+    if file_path.endswith('.py'):
+        module_name = file_path[:-3]
+        full_path = os.path.join(plugins_dir, file_path)
+
+        spec = importlib.util.spec_from_file_location(module_name, full_path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+
+        power_modules[module_name] = module
+#    if file_path.endswith('.py') and os.path.isfile(os.path.join(plugins_dir, file_path)):
+#        module_name = file_path.replace('.py', '')
+#        module_path = f"{plugins_dir}.{module_name}"
+#        logger.debug("Loading '" + module_name + "' plugin")
+#        power_modules[module_name] = importlib.import_module(f"{plugins_dir}.{module_name}")
 
 nodes = NodeSet(cli_request[0])
 action = cli_request[1]
