@@ -1,4 +1,4 @@
-interval: 60        # seconds between healthcheck passes, main loop
+interval: {{ bluebanquise_healthchecker_loop_interval }}        # seconds between healthcheck passes, main loop
 
 ssh:
   user: "bluebanquise"
@@ -7,7 +7,7 @@ ssh:
   # password: "optional_password_instead_of_key"
   timeout: 10       # SSH connection timeout in seconds
 
-email:
+email:  # For now I make this part deactivated, for later use if requested by a user (@oxedions)
   enabled: false
   smtp_server: "smtp.example.com"
   smtp_port: 587

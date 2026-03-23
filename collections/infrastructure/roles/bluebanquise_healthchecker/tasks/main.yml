@@ -40,10 +40,9 @@
   loop:
     - /etc/bluebanquise/
     - /etc/bluebanquise/bluebanquise-healtchecker/
-    - /var/lib/bluebanquise/bluebanquise-healtchecker/
-    - /usr/share/bluebanquise/
-    - /usr/share/bluebanquise/bluebanquise-healtchecker/
-    - /usr/share/bluebanquise/bluebanquise-healtchecker/static/
+    - /opt/bluebanquise/
+    - /opt/bluebanquise/bluebanquise-healthchecker/
+    - /opt/bluebanquise/bluebanquise-healthchecker/static/
 
 - name: "template <|> Render configuration"
   ansible.builtin.template:
@@ -61,15 +60,24 @@
   notify:
     - service <|> Restart service
 
-- name: "copy <|> Copy executable files"
+- name: "copy <|> Copy executable cli file"
   ansible.builtin.copy:
-    src: "{{ item }}.py"
+    src: "{{ item }}"
     dest: "/usr/bin/{{item}}"
     owner: bluebanquise
     group: bluebanquise
     mode: 0750
   loop:
     - bluebanquise-healthchecker-cli
+
+- name: "copy <|> Copy python main files"
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/opt/bluebanquise/bluebanquise-healthchecker/{{item}}"
+    owner: bluebanquise
+    group: bluebanquise
+    mode: 0750
+  loop:
     - bluebanquise-healthchecker-ui
     - bluebanquise-healthchecker
   notify:
@@ -78,9 +86,9 @@
 - name: "copy <|> Copy static files"
   ansible.builtin.copy:
     src: "static/{{ item }}"
-    dest: "/usr/share/bluebanquise/bluebanquise-healtchecker/static/{{item}}"
-    owner: root
-    group: root
+    dest: "/opt/bluebanquise/bluebanquise-healthchecker/static/{{item}}"
+    owner: bluebanquise
+    group: bluebanquise
     mode: 640
   loop:
     - bulma_switch.min.css
@@ -88,14 +96,29 @@
 
 - name: "copy <|> Copy service file"
   ansible.builtin.copy:
-    src: "bluebanquise-healthchecker.service"
-    dest: "/etc/systemd/system/bluebanquise-healthchecker.service"
+    src: "{{ item }}.service"
+    dest: "/etc/systemd/system/{{ item }}.service"
     owner: root
     group: root
     mode: 640
+  loop:
+    - "bluebanquise-healthchecker"
+    - "bluebanquise-healthchecker-ui"
   notify:
     - systemd <|> Reload systemd configuration
     - service <|> Restart service
+
+- name: "service <|> Manage services state"
+  ansible.builtin.service:
+    name: "{{ item }}"
+    enabled: "{{ (bluebanquise_healthchecker_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    state: "{{ (bluebanquise_healthchecker_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
+  loop:
+    - "bluebanquise-healthchecker"
+    - "bluebanquise-healthchecker-ui"
+  tags:
+    - service
+
 
 - name: meta <|> Run handler tasks
   ansible.builtin.meta: flush_handlers

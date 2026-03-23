@@ -4,7 +4,7 @@ import sys
 import time
 import signal
 import smtplib
-# from email.mime_text import MIMEText
+#from email.mime_text import MIMEText
 
 import yaml
 import paramiko
@@ -212,32 +212,29 @@ def run_healthchecks_on_host(
 # -----------------------------
 
 def send_alert_email(subject: str, body: str, config: dict) -> None:
-
-    # Disabled for now
-
-    # email_cfg = config.get("email", {})
-    # if not email_cfg.get("enabled", False):
-    #     return
-
-    # required_keys = ["smtp_server", "smtp_port", "username", "password", "from", "to"]
-    # for key in required_keys:
-    #     if key not in email_cfg:
-    #         # Missing required email config; silently skip
-    #         return
-
-    # msg = MIMEText(body)
-    # msg["Subject"] = subject
-    # msg["From"] = email_cfg["from"]
-    # msg["To"] = ", ".join(email_cfg["to"])
-
-    # server = smtplib.SMTP(email_cfg["smtp_server"], email_cfg["smtp_port"])
-
-    # if email_cfg.get("use_tls", False):
-    #     server.starttls()
-
-    # server.login(email_cfg["username"], email_cfg["password"])
-    # server.sendmail(email_cfg["from"], email_cfg["to"], msg.as_string())
-    # server.quit()
+#    email_cfg = config.get("email", {})
+#    if not email_cfg.get("enabled", False):
+#        return
+#
+#    required_keys = ["smtp_server", "smtp_port", "username", "password", "from", "to"]
+#    for key in required_keys:
+#        if key not in email_cfg:
+#            # Missing required email config; silently skip
+#            return
+#
+#    msg = MIMEText(body)
+#    msg["Subject"] = subject
+#    msg["From"] = email_cfg["from"]
+#    msg["To"] = ", ".join(email_cfg["to"])
+#
+#    server = smtplib.SMTP(email_cfg["smtp_server"], email_cfg["smtp_port"])
+#
+#    if email_cfg.get("use_tls", False):
+#        server.starttls()
+#
+#    server.login(email_cfg["username"], email_cfg["password"])
+#    server.sendmail(email_cfg["from"], email_cfg["to"], msg.as_string())
+#    server.quit()
 
     return 0
 

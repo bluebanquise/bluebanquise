@@ -5,8 +5,11 @@
 
 - name: service <|> Restart service
   ansible.builtin.service:
-    name: bluebanquise-healthchecker
+    name: "{{ item }}"
     state: restarted
+  loop:
+    - "bluebanquise-healthchecker"
+    - "bluebanquise-healthchecker-ui"
   when:
     - "'service' not in ansible_skip_tags"
     - bluebanquise_healthchecker_start_services | default(bb_start_services) | default(true) | bool
