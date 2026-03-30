@@ -2,6 +2,11 @@
 
 Format: <date> - <author (username or mail or both)> - [role] <change description>
 
+# 4.0
+
+* Fix haproxy issue (#1151)
+* Fix http_server issue (#1150)
+
 # To 3.4 or 4.0
 
 * 10/03/2026 - thiagocardozo - [conman] Fix conman pswd template skipping BMC credentials and added REDFISH (#1222)

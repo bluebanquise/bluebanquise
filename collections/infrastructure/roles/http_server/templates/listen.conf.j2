@@ -7,7 +7,7 @@ Listen {{ nic.ip4 }}:80
   {% endfor%}
 {% elif http_server_listen is iterable and http_server_listen is not string and http_server_listen is not mapping %}
   {% for ipport in http_server_listen %}
-    {% if ipport.split(':') | lenght > 1 %}
+    {% if ipport.split(':') | length > 1 %}
       {% if ipport.split(':')[0] | ansible.utils.ipaddr %}
 Listen {{ ipport.split(':')[0] }}:{{ ipport.split(':')[1] }}
     {% elif (ipport | ansible.utils.ipaddr) %}
