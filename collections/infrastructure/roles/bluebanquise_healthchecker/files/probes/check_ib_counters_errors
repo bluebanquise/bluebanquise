@@ -1,0 +1,24 @@
+#!/bin/bash
+# Check InfiniBand error counters on local HCA using perfquery.
+# Usage: ./check_ib_errors.sh
+
+echo "Checking InfiniBand error counters"
+
+# perfquery gives detailed counters; we check common ones
+OUTPUT=$(sudo perfquery -x 2>/dev/null)
+
+if [[ $? -ne 0 ]]; then
+    echo "CRITICAL: Could not query IB interface"
+    exit 2
+fi
+
+# Extract all counters that should be zero
+ERRORS=$(echo "$OUTPUT" | awk '/SymbolErrors|LinkDowned|RcvErrors|XmtDiscards/ {sum += $2} END {print sum}')
+
+if [[ "$ERRORS" -eq 0 ]]; then
+    echo "OK: No IB errors detected"
+    exit 0
+else
+    echo "CRITICAL: IB errors detected (sum=$ERRORS)"
+    exit 2
+fi

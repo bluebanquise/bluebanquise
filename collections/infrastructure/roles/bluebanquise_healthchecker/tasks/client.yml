@@ -1,0 +1,21 @@
+- name: "file <|> Create directories structure"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: bluebanquise
+    group: bluebanquise
+    mode: 0750
+  loop:
+    - /opt/bluebanquise/
+    - /opt/bluebanquise/bluebanquise-healthchecker/
+    - /opt/bluebanquise/bluebanquise-healthchecker/probes/
+
+- name: "copy <|> Copy probes scripts"
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/opt/bluebanquise/bluebanquise-healthchecker/probes/{{item}}"
+    owner: bluebanquise
+    group: bluebanquise
+    mode: 0750
+  loop:
+    - bluebanquise-healthchecker-cli

@@ -4,7 +4,7 @@ from flask import Flask, render_template_string, abort
 
 app = Flask(__name__, static_url_path='/static')
 
-RESULTS_FILE = "results.yaml"
+RESULTS_FILE = "/var/lib/bluebanquise/bluebanquise-healthchecker/results.yaml"
 
 # -----------------------------
 # Templates
@@ -747,4 +747,4 @@ def host_page(host):
 # -----------------------------
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080, debug=True)
+    app.run(host="0.0.0.0", port=7771, debug=True)

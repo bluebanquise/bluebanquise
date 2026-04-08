@@ -12,7 +12,7 @@ from dask.distributed import Client, as_completed
 
 import subprocess
 
-CONFIG_PATH = "/etc/bluebanquise/bluebanquise-healtchecker/configuration.yaml"
+CONFIG_PATH = "/etc/bluebanquise/bluebanquise-healthchecker/configuration.yaml"
 
 
 # -----------------------------

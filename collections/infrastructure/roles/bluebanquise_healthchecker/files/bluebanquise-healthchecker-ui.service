@@ -6,8 +6,8 @@ After=network.target
 User=bluebanquise
 Group=bluebanquise
 WorkingDirectory=/opt/bluebanquise/bluebanquise-healthchecker/
-Environment="PATH=/usr/local/bluebanquise_venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-ExecStart=/usr/local/bluebanquise_venv/bin/python /opt/bluebanquise/bluebanquise-healthchecker/bluebanquise-healthchecker-ui
+Environment="PATH=/opt/bluebanquise/bluebanquise_venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ExecStart=/opt/bluebanquise/bluebanquise_venv/bin/python /opt/bluebanquise/bluebanquise-healthchecker/bluebanquise-healthchecker-ui
 Restart=always
 RestartSec=5s
 StandardOutput=syslog

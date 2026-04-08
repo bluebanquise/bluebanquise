@@ -1,0 +1,78 @@
+#!/bin/bash
+# Probe: Detect ECC memory errors.
+# Usage: ./check_ecc_errors.sh
+#
+# This probe checks:
+#   1. dmesg for ECC-related messages
+#   2. EDAC counters in /sys (corrected/uncorrected)
+#   3. Machine Check Exception logs (if available)
+#
+# Any detected error triggers CRITICAL.
+
+echo "Checking for ECC memory errors..."
+
+ERROR_FOUND=0
+
+#############################################
+# 1. Check dmesg for ECC-related patterns
+#############################################
+
+# Common ECC patterns
+PATTERNS="EDAC|ecc|Corrected error|Uncorrected error|Machine check|Hardware Error|mce:"
+
+DMESG_ECC=$(dmesg -T | grep -Ei "$PATTERNS")
+
+if [[ -n "$DMESG_ECC" ]]; then
+    echo "ECC-related messages found in dmesg:"
+    echo "$DMESG_ECC"
+    ERROR_FOUND=1
+fi
+
+#############################################
+# 2. Check EDAC counters (persistent counters)
+#############################################
+
+if [[ -d /sys/devices/system/edac/mc ]]; then
+    for mc in /sys/devices/system/edac/mc/mc*; do
+        CE=$(cat "$mc/ce_count" 2>/dev/null)
+        UE=$(cat "$mc/ue_count" 2>/dev/null)
+
+        # Debug output
+        echo "EDAC: $(basename "$mc") CE=$CE UE=$UE"
+
+        if [[ "$CE" -gt 0 || "$UE" -gt 0 ]]; then
+            echo "ECC error detected in EDAC counters (CE=$CE, UE=$UE)"
+            ERROR_FOUND=1
+        fi
+    done
+else
+    echo "EDAC subsystem not present on this system."
+fi
+
+#############################################
+# 3. Check MCE logs (if mcelog exists)
+#############################################
+
+if command -v mcelog >/dev/null 2>&1; then
+    MCE_LOG=$(mcelog --client 2>/dev/null | grep -Ei "memory|error|mce")
+
+    if [[ -n "$MCE_LOG" ]]; then
+        echo "MCE-reported ECC-related errors:"
+        echo "$MCE_LOG"
+        ERROR_FOUND=1
+    fi
+else
+    echo "mcelog not installed; skipping MCE check."
+fi
+
+#############################################
+# Final result
+#############################################
+
+if [[ "$ERROR_FOUND" -eq 0 ]]; then
+    echo "OK: No ECC errors detected"
+    exit 0
+else
+    echo "CRITICAL: ECC errors detected"
+    exit 2
+fi

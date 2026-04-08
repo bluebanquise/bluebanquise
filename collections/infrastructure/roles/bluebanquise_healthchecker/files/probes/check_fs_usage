@@ -1,0 +1,24 @@
+#!/bin/bash
+# Check filesystem usage percentage for a given path.
+# Usage: ./check_fs_usage.sh /path 80
+# Means: alert if usage >= 80%
+
+PATH_TO_CHECK="$1"
+THRESHOLD="$2"
+
+echo "Checking FS usage on: $PATH_TO_CHECK (threshold: ${THRESHOLD}%)"
+
+USAGE=$(df -P "$PATH_TO_CHECK" | awk 'NR==2 {gsub("%","",$5); print $5}')
+
+if [[ -z "$USAGE" ]]; then
+    echo "CRITICAL: Could not determine FS usage for $PATH_TO_CHECK"
+    exit 2
+fi
+
+if (( USAGE < THRESHOLD )); then
+    echo "OK: FS usage is ${USAGE}%"
+    exit 0
+else
+    echo "CRITICAL: FS usage is ${USAGE}% (threshold ${THRESHOLD}%)"
+    exit 2
+fi

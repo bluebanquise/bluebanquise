@@ -3,7 +3,7 @@ import sys
 import yaml
 import os
 
-RESULTS_FILE = "/var/lib/bluebanquise/bluebanquise-healtchecker/results.yaml"
+RESULTS_FILE = "/var/lib/bluebanquise/bluebanquise-healthchecker/results.yaml"
 
 # ANSI colors
 GREEN = "\033[92m"

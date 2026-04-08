@@ -1,0 +1,28 @@
+#!/bin/bash
+# Check that a specific path is mounted and that the mount source matches expectation.
+# Usage: ./check_fs_mount.sh /mount/point expected_source
+# Example: ./check_fs_mount.sh /data /dev/sdb1
+# Example: ./check_fs_mount.sh /shared mynfs:/export/path
+
+MOUNT_POINT="$1"
+EXPECTED_SOURCE="$2"
+
+# Debug: show inputs
+echo "Checking mount point: $MOUNT_POINT"
+echo "Expected source: $EXPECTED_SOURCE"
+
+# Extract actual mount source from /proc/mounts
+ACTUAL_SOURCE=$(awk -v mp="$MOUNT_POINT" '$2 == mp {print $1}' /proc/mounts)
+
+if [[ -z "$ACTUAL_SOURCE" ]]; then
+    echo "CRITICAL: $MOUNT_POINT is NOT mounted"
+    exit 2
+fi
+
+if [[ "$ACTUAL_SOURCE" == "$EXPECTED_SOURCE" ]]; then
+    echo "OK: $MOUNT_POINT is mounted from $ACTUAL_SOURCE"
+    exit 0
+else
+    echo "CRITICAL: $MOUNT_POINT is mounted from $ACTUAL_SOURCE but expected $EXPECTED_SOURCE"
+    exit 2
+fi
