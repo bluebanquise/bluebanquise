@@ -1,0 +1,44 @@
+#!/bin/bash
+# Probe: Check SMART health of local disks.
+# Usage: ./check_disk_smart.sh            → checks all /dev/sdX and /dev/nvmeX
+#        ./check_disk_smart.sh /dev/sda   → checks only /dev/sda
+
+DISK="$1"
+
+echo "Checking SMART health..."
+
+# If no disk provided, auto-detect common disk devices
+if [[ -z "$DISK" ]]; then
+    DISKS=$(lsblk -ndo NAME,TYPE | awk '$2=="disk"{print "/dev/"$1}')
+else
+    DISKS="$DISK"
+fi
+
+ERROR_FOUND=0
+
+for d in $DISKS; do
+    echo "Checking disk: $d"
+
+    if ! smartctl -H "$d" >/dev/null 2>&1; then
+        echo "CRITICAL: smartctl cannot read $d"
+        ERROR_FOUND=1
+        continue
+    fi
+
+    HEALTH=$(smartctl -H "$d" | awk -F': ' '/SMART overall-health/ {print $2}')
+
+    if echo "$HEALTH" | grep -qi "PASSED"; then
+        echo "OK: $d SMART health PASSED"
+    else
+        echo "CRITICAL: $d SMART health FAILED or unknown"
+        ERROR_FOUND=1
+    fi
+done
+
+if [[ "$ERROR_FOUND" -eq 0 ]]; then
+    echo "OK: All disks healthy"
+    exit 0
+else
+    echo "CRITICAL: One or more disks have SMART issues"
+    exit 2
+fi

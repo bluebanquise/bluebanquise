@@ -1,6 +1,6 @@
 #!/bin/bash
 # Probe: Detect ECC memory errors.
-# Usage: ./check_ecc_errors.sh
+# Usage: ./check_ram_ecc_errors.sh
 #
 # This probe checks:
 #   1. dmesg for ECC-related messages

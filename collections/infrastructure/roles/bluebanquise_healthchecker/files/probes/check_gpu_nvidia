@@ -1,0 +1,85 @@
+#!/bin/bash
+# Probe: Check NVIDIA GPU health using nvidia-smi.
+# Usage: ./check_gpu_nvidia.sh
+#
+# This probe checks:
+#   1. That nvidia-smi is available
+#   2. That at least one GPU is detected
+#   3. That no Xid GPU errors appear in dmesg
+#   4. (Optional) ECC errors, temperature, power state
+#
+# Any detected issue triggers CRITICAL.
+
+echo "Checking NVIDIA GPU health..."
+
+#############################################
+# 1. Check that nvidia-smi is available
+#############################################
+
+if ! command -v nvidia-smi >/dev/null 2>&1; then
+    echo "CRITICAL: nvidia-smi not found. NVIDIA drivers not installed?"
+    exit 2
+fi
+
+#############################################
+# 2. Check that at least one GPU is detected
+#############################################
+
+GPU_COUNT=$(nvidia-smi --query-gpu=count --format=csv,noheader 2>/dev/null | head -n1)
+
+if [[ -z "$GPU_COUNT" || "$GPU_COUNT" -eq 0 ]]; then
+    echo "CRITICAL: No NVIDIA GPU detected"
+    exit 2
+fi
+
+echo "OK: Detected $GPU_COUNT NVIDIA GPU(s)"
+
+#############################################
+# 3. Check for Xid errors in dmesg
+#    Xid errors indicate GPU driver/hardware faults
+#############################################
+
+DMESG_XID=$(dmesg -T | grep -E "NVRM: Xid" )
+
+if [[ -n "$DMESG_XID" ]]; then
+    echo "CRITICAL: Xid GPU errors detected in dmesg"
+    echo "$DMESG_XID"
+    exit 2
+fi
+
+echo "OK: No Xid errors found in dmesg"
+
+#############################################
+# 4. Optional: Check ECC errors (if ECC enabled)
+#############################################
+
+ECC_ERRORS=$(nvidia-smi --query-gpu=ecc.errors.uncorrected_total --format=csv,noheader 2>/dev/null | grep -v "N/A")
+
+if [[ -n "$ECC_ERRORS" ]]; then
+    # Sum all ECC errors across GPUs
+    ECC_SUM=$(echo "$ECC_ERRORS" | awk '{sum+=$1} END {print sum}')
+    echo "ECC uncorrected error count: $ECC_SUM"
+
+    if [[ "$ECC_SUM" -gt 0 ]]; then
+        echo "CRITICAL: ECC uncorrected errors detected"
+        exit 2
+    fi
+fi
+
+#############################################
+# 5. Optional: Check temperature thresholds
+#############################################
+
+TEMP=$(nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader | head -n1)
+
+if [[ "$TEMP" -gt 85 ]]; then
+    echo "CRITICAL: GPU temperature too high (${TEMP}°C)"
+    exit 2
+fi
+
+#############################################
+# Final result
+#############################################
+
+echo "OK: NVIDIA GPU health is normal"
+exit 0
