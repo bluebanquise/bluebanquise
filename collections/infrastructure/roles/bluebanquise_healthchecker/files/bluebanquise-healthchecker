@@ -211,6 +211,8 @@ def run_healthchecks_on_host(
 # Email alerting
 # -----------------------------
 
+# I comment this part for now because not sure its needed
+
 def send_alert_email(subject: str, body: str, config: dict) -> None:
 #    email_cfg = config.get("email", {})
 #    if not email_cfg.get("enabled", False):
@@ -334,6 +336,15 @@ def main():
     if not isinstance(hosts_config, dict) or not hosts_config:
         print("Hosts file does not define any hosts", file=sys.stderr)
         sys.exit(1)
+
+    # Tune known probes path
+    for hostname in hosts_config:
+        for task in hosts_config[hostname]["healthchecks"]:
+            if task['command'].startswith(tuple(config.get("groups_file"))):
+                hosts_config[hostname]["healthchecks"][task]['command'] = (
+                    "/opt/bluebanquise/bluebanquise-healthchecker/probes/" +
+                    hosts_config[hostname]["healthchecks"][task]['command']
+                )
 
     # Setup Dask client
     dask_cfg = config.get("dask", {})

@@ -1,3 +1,17 @@
 ---
 bluebanquise_healthchecker_packages_to_install:
   - bluebanquise-venv
+bluebanquise_healthchecker_probes:
+  - check_cpu_count_mce
+  - check_disk_smart
+  - check_dmesg_errors
+  - check_eth_speed
+  - check_fs_mount
+  - check_fs_usage
+  - check_gpu_nvidia
+  - check_ib_counters_errors
+  - check_ib_rate
+  - check_pcie
+  - check_ram_capacity
+  - check_ram_ecc_errors
+  - check_services

@@ -12,10 +12,9 @@
 
 - name: "copy <|> Copy probes scripts"
   ansible.builtin.copy:
-    src: "{{ item }}"
+    src: "probes/{{ item }}"
     dest: "/opt/bluebanquise/bluebanquise-healthchecker/probes/{{item}}"
     owner: bluebanquise
     group: bluebanquise
     mode: 0750
-  loop:
-    - bluebanquise-healthchecker-cli
+  loop: "{{ bluebanquise_healthchecker_probes }}"
