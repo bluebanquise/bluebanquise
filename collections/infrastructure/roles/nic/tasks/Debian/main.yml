@@ -6,6 +6,7 @@
   loop:
     - "/etc/netplan/00-installer-config.yaml"
     - "/etc/netplan/50-cloud-init.yaml"
+    - "/etc/netplan/99-netcfg-vmware.yaml"
   tags:
     - identify
   notify: reboot <|> Reboot system
@@ -16,7 +17,7 @@
     dest: /etc/netplan/01-netcfg.yaml
     owner: root
     group: root
-    mode: 0644
+    mode: 0600
   tags:
     - identify
   notify: reboot <|> Reboot system
