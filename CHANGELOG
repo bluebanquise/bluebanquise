@@ -4,6 +4,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # 3.2.8
 * 26/03/2026 - patrice-duc-jacquet - [dns_server] Reverse zone generation very slow (#1220)
+* 19/03/2026 - thiagocardozo - [dhcp_server] Updated reference to old variable (#1225)
 * 10/03/2026 - thiagocardozo - [conman] Fix conman pswd template skipping BMC credentials and added REDFISH (#1222)
 
 # 3.2.7
