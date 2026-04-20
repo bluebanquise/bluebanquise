@@ -58,10 +58,10 @@ scrape_configs:
     static_configs:
     - targets:
         - {{ prometheus_server_prometheus_host }}:{{ prometheus_server_prometheus_port }}
-    {% if prometheus_server_alertmanager_password is defined and prometheus_server_alertmanager_password %}
+    {% if prometheus_server_prometheus_password is defined and prometheus_server_prometheus_password %}
     basic_auth:
-      username: "{{ prometheus_server_alertmanager_username }}"
-      password: "{{ prometheus_server_alertmanager_password }}"
+      username: "{{ prometheus_server_prometheus_username }}"
+      password: "{{ prometheus_server_prometheus_password }}"
       {% if prometheus_server_enable_tls is defined and prometheus_server_enable_tls %}
     scheme: https
     tls_config:
