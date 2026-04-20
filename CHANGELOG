@@ -3,6 +3,7 @@
 Format: <date> - <author (username or mail or both)> - [role] <change description>
 
 # 3.2.8
+* 20/04/2026 - thiagocardozo - [prometheus] Fixed role using wrong credentials (#1227)
 * 26/03/2026 - patrice-duc-jacquet - [dns_server] Reverse zone generation very slow (#1220)
 * 19/03/2026 - thiagocardozo - [dhcp_server] Updated reference to old variable (#1225)
 * 10/03/2026 - thiagocardozo - [conman] Fix conman pswd template skipping BMC credentials and added REDFISH (#1222)
