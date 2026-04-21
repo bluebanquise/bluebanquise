@@ -4,6 +4,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.4 or 4.0
 
+* 21/04/2026 - hmeScaler - [users] fix absent user handling and refresh role documentation (#1234)
 * 31/03/2026 - sgaosdgr      - [nic] set permission on /etc/netplan/01-netcfg.yaml to 0600 (#1228)
 * 19/03/2026 - thiagocardozo - [dhcp_server] Fixed reference to old variable (#1226)
 * 10/03/2026 - thiagocardozo - [conman] Fix conman pswd template skipping BMC credentials and added REDFISH (#1222)
