@@ -3,7 +3,7 @@
 ## Description
 
 This role provides a very basic users management, for simple clusters.
-The role generates a dedicated group for each users, then users themselves, and can add ssh keys to their authorized_keys file.
+The role generates a dedicated group for each users, then users themselves, and can add ssh keys to their `authorized_keys` file.
 
 ## Instructions
 
@@ -56,6 +56,9 @@ additional_users: []
 users: "{{ default_users + additional_users }}"
 ```
 
+To ensure a user is not on a system, set state to "absent". To also remove its
+home, set remove to "yes".
+
 To delete a user:
 
 ```
@@ -83,8 +86,7 @@ Available arguments for each user are:
 * remove (optional)
 * comment (optional)
 
-To ensure a user is not on a system, set state to "absent". To also remove its
-home, set remove to "yes".
+
 
 It is also possible to add ssh public keys for users. The following parameters
 are available for each user:
