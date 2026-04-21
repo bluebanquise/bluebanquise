@@ -35,6 +35,36 @@ users:
       - <ssh key 3>
 ```
 
+It is also possible to build the final `users` list from multiple inventory variables:
+
+```
+default_users:
+  - name: clusteradmin
+    home: /home/clusteradmin
+    shell: /bin/bash
+    comment: Cluster administrators
+    password: '*'
+    ssh_authorized_keys: "{{ admin_ssh_keys | default([]) }}"
+  - name: ubuntu
+    home: /home/ubuntu
+    shell: /bin/bash
+    password: '*'
+    ssh_authorized_keys: "{{ customer_ssh_keys | default([]) }}"
+
+additional_users: []
+
+users: "{{ default_users + additional_users }}"
+```
+
+To delete a user:
+
+```
+users:
+  - name: johnnykeats
+    state: absent
+    remove: true
+```
+
 Available arguments for each user are:
 
 * name
@@ -61,6 +91,8 @@ are available for each user:
 
 * ssh_authorized_keys: a list of ssh public keys to be added to user's authorized_keys file
 * ssh_authorized_keys_exclusive: if the provided list must be exclusive (will erase other existing keys in authorized_keys file)
+
+`ssh_authorized_keys` must be provided as a list.
 
 To generate an sha512 password, use the following command (python >3.3):
 
