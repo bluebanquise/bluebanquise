@@ -1,10 +1,39 @@
 ---
+- name: user <|> Remove users (before groups)
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    comment: "{{ item.comment | default(omit) }}"
+    uid: "{{ item.uid | default(omit) }}"
+    group: "{{ item.name | default(omit)}}"
+    groups: "{{ item.groups | default(omit) }}"
+    create_home: "{{ item.create_home | default(omit) }}"
+    update_password: "{{ item.update_password | default(omit) }}"
+    shell: "{{ item.shell | default(omit) }}"
+    home: "{{ item.home | default(omit) }}"
+    password: "{{ item.password | default(omit) }}"
+    generate_ssh_key: "{{ item.generate_ssh_key | default(omit) }}"
+    ssh_key_bits: "{{ item.ssh_key_bits | default(omit) }}"
+    ssh_key_file: "{{ item.ssh_key_file | default(omit) }}"
+    remove: "{{ item.remove | default('no') }}"
+    state: absent
+  loop: "{{ users | default([]) | flatten(levels=1) }}"
+  when: item.state | default('present') == 'absent'
+
+- name: group <|> Remove users groups
+  ansible.builtin.group:
+    name: "{{ item.name }}"
+    gid: "{{ item.gid | default(omit) }}"
+    state: absent
+  loop: "{{ users | default([]) | flatten(levels=1) }}"
+  when: item.state | default('present') == 'absent'
+
 - name: group <|> Add users groups
   ansible.builtin.group:
     name: "{{ item.name }}"
     gid: "{{ item.gid | default(omit) }}"
-    state: "{{ item.state | default('present') }}"
+    state: present
   loop: "{{ users | default([]) | flatten(levels=1) }}"
+  when: item.state | default('present') != 'absent'
 
 - name: user <|> Add/remove users
   ansible.builtin.user:
@@ -17,13 +46,14 @@
     update_password: "{{ item.update_password | default(omit) }}"
     shell: "{{ item.shell | default(omit) }}"
     home: "{{ item.home | default(omit) }}"
-    password: "{{ item.password }}"
+    password: "{{ item.password | default(omit) }}"
     generate_ssh_key: "{{ item.generate_ssh_key | default(omit) }}"
     ssh_key_bits: "{{ item.ssh_key_bits | default(omit) }}"
     ssh_key_file: "{{ item.ssh_key_file | default(omit) }}"
     remove: "{{ item.remove | default('no') }}"
     state: "{{ item.state | default('present') }}"
   loop: "{{ users | default([]) | flatten(levels=1) }}"
+  when: item.state | default('present') != 'absent'
 
 - name: authorized_key <|> Manage user authorized_keys if exist
   ansible.posix.authorized_key:
@@ -32,4 +62,7 @@
     state: present
     exclusive: "{{ item.ssh_authorized_keys_exclusive | default(omit) }}"
   loop: "{{ users | default([]) | flatten(levels=1) }}"
-  when: item.ssh_authorized_keys is defined and item.ssh_authorized_keys
+  when:
+    - item.state | default('present') != 'absent'
+    - item.ssh_authorized_keys is defined
+    - item.ssh_authorized_keys
