@@ -4,7 +4,10 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.4 or 4.0
 
-* 13/05/2025 - neoteam - [pxe_stack] bluebanquise-diskless support el10 (#)
+* 13/05/2026 - neoteam - [pxe_stack] bluebanquise-diskless support el10 (#1236)
+* 21/04/2026 - hmeScaler - [users] fix absent user handling and refresh role documentation (#1234)
+* 31/03/2026 - sgaosdgr      - [nic] set permission on /etc/netplan/01-netcfg.yaml to 0600 (#1228)
+* 19/03/2026 - thiagocardozo - [dhcp_server] Fixed reference to old variable (#1226)
 * 10/03/2026 - thiagocardozo - [conman] Fix conman pswd template skipping BMC credentials and added REDFISH (#1222)
 * 02/04/2026 - jpiles - [pxe_stack] fix debian preseed (#1217)
 * 01/29/2026 - jpiles - [nic] Adapt variable name after 81a39c7 (#1215)
