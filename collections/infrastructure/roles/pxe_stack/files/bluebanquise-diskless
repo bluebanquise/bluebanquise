@@ -7,6 +7,7 @@
 # ██████╔╝███████╗╚██████╔╝███████╗██████╔╝██║  ██║██║ ╚████║╚██████╔╝╚██████╔╝██║███████║███████╗
 # ╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚══▀▀═╝  ╚═════╝ ╚═╝╚══════╝╚══════╝
 #
+# 2.1.0: Added support to el10 images. Neo Team <dl-fr-bds-hpc-neocore@bull.com>
 # 2.0.9: Fix user creation when host node is running SELinux in enforcing mode. Teo Blachere <teo.blachere@eviden.com>
 # 2.0.8: Fix check user and group presence before creation. Teo Blachere <teo.blachere@eviden.com>
 # 2.0.7: Update boot.ipxe when cloning reference image. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
