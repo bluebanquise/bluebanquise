@@ -1,0 +1,23 @@
+---
+- name: package <|> Ensure logrotate is installed
+  ansible.builtin.package:
+    name: logrotate
+    state: present
+
+- name: template <|> Deploy global logrotate configuration
+  ansible.builtin.template:
+    src: logrotate.conf.j2
+    dest: /etc/logrotate.conf
+    owner: root
+    group: root
+    mode: 0644
+
+- name: template <|> Deploy custom logrotate rules
+  ansible.builtin.template:
+    src: "{{ item.name }}.j2"
+    dest: "/etc/logrotate.d/{{ item.name }}"
+    owner: root
+    group: root
+    mode: 0644
+  loop: "{{ logrotate_custom_rules }}"
+  when: logrotate_custom_rules

@@ -43,10 +43,55 @@
     mode: "0755"
     state: directory
 
-- name: include_tasks <|> dhcpd or kea
-  ansible.builtin.include_tasks: "{{ dhcp_server_toolname }}.yml"
+# This calculation takes time, so we store it in memory for later usage
+- name: fact <|> Calculate first_octets
+  ansible.builtin.set_fact:
+    dhcp_server_hosts_by_network: "{{ hostvars | bluebanquise.infrastructure.hosts_by_network(groups['all']) }}"
+  run_once: true
   tags:
-    - internal
+    - templates
+
+- name: "template <|> Render kea-dhcp4.networks.conf"
+  ansible.builtin.template:
+    src: "kea-dhcp4.networks.conf.j2"
+    dest: "{{ dhcp_server_conf_dir }}/kea-dhcp4.networks.conf"
+    owner: root
+    group: root
+    mode: 0644
+  notify: service <|> Restart dhcp server
+  when:
+    - networks is defined and networks is iterable and networks is not string and networks is mapping
+  tags:
+    - template
+
+- name: "template <|> Render networks reservations"
+  ansible.builtin.template:
+    src: "kea-dhcp4.subnet.conf.j2"
+    dest: "{{ dhcp_server_conf_dir }}/kea-dhcp4.{{ item }}.conf"
+    owner: root
+    group: root
+    mode: 0644
+  loop: "{{ networks | flatten(levels=1) }}"
+  when:
+    - networks is defined and networks is iterable and networks is not string and networks is mapping
+    - item.startswith("net-")
+    - networks[item].is_in_dhcp | default(true)
+    - networks[item].subnet is defined and networks[item].prefix is defined
+  notify: service <|> Restart dhcp server
+  tags:
+    - template
+
+- name: "template <|> Render kea-dhcp4.conf"
+  ansible.builtin.template:
+    src: "kea-dhcp4.conf.j2"
+    dest: "{{ dhcp_server_conf_dir }}/kea-dhcp4.conf"
+    owner: root
+    group: root
+    mode: 0644
+    # validate: "/usr/sbin/kea-dhcp4 -t -c %s"
+  notify: service <|> Restart dhcp server
+  tags:
+    - template
 
 - name: meta <|> Run handler tasks to restart dhcp services
   ansible.builtin.meta: flush_handlers
