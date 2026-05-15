@@ -4,6 +4,8 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.4 or 4.0
 
+* 15/05/2026 - oxedions - [haproxy] Fix typo issue (#1151)
+* 15/05/2026 - oxedions - [http_server] Fix typo issue (#1150)
 * 15/05/2026 - oxedions - [core] Add new filters, deprecate vars plugin
 * 15/05/2026 - oxedions - [new] add bb healthchecker and power
 * 21/04/2026 - hmeScaler - [users] fix absent user handling and refresh role documentation (#1234)
