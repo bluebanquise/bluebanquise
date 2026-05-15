@@ -1,5 +1,4 @@
 from ansible.plugins.vars import BaseVarsPlugin
-from ansible.utils.display import Display
 try:
     from ansible.template import trust_as_template
 except ImportError:

@@ -1,19 +1,16 @@
-import os
-import re
-import json
-import yaml
 import subprocess
+
 
 def execute_ipmi_command(node, node_configuration, command, logger, parameters):
 
     timeout = parameters.get('timeout', 10)
 
     cmd = (
-        "timeout " + str(timeout) + " ipmitool -I lanplus " +
-        "-H " + node_configuration['bmc']['name'] +
-        " -U " + node_configuration['user'] +
-        " -P " + node_configuration['password'] +
-        " " + command
+        "timeout " + str(timeout) + " ipmitool -I lanplus "
+        + "-H " + node_configuration['bmc']['name']
+        + " -U " + node_configuration['user']
+        + " -P " + node_configuration['password']
+        + " " + command
     )
 
     if not parameters.get('dryrun', False):
@@ -31,8 +28,9 @@ def execute_ipmi_command(node, node_configuration, command, logger, parameters):
             return 0, stdout.decode()
 
     else:
-            logger.info(f'[{node}] Dryrun. Cmd: {cmd}')
-            return 0, ""
+        logger.info(f'[{node}] Dryrun. Cmd: {cmd}')
+        return 0, ""
+
 
 def power(node, node_configuration, action_parameters, parameters, logger):
 
@@ -46,11 +44,11 @@ def power(node, node_configuration, action_parameters, parameters, logger):
                 return 1
         else:
             cmd = (
-                "ipmitool -I lanplus " +
-                "-H " + node_configuration['bmc']['name'] +
-                " -U " + node_configuration['user'] +
-                " -P " + node_configuration['password'] +
-                " chassis power on"
+                "ipmitool -I lanplus "
+                + "-H " + node_configuration['bmc']['name']
+                + " -U " + node_configuration['user']
+                + " -P " + node_configuration['password']
+                + " chassis power on"
             )
             logger.info(f'[{node}] Dryrun. Cmd: {cmd}')
             return 0
@@ -82,6 +80,7 @@ def power(node, node_configuration, action_parameters, parameters, logger):
     else:
         logger.error(f'[{node}] Error, unknown power action {action_parameters[0]}')
         return 1
+
 
 def boot(node, node_configuration, action_parameters, parameters, logger):
 
