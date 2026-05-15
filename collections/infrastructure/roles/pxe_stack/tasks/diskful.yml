@@ -23,10 +23,3 @@
   when: pxe_stack_diskful_os_debian
   tags:
     - internal
-
-# DGX was a POC only, to be use as source for help
-- name: include_tasks <|> Include DGX familly diskful support
-  ansible.builtin.include_tasks: diskful/DGX.yml
-  when: pxe_stack_diskful_os_dgx
-  tags:
-    - internal

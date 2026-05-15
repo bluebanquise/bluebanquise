@@ -1,11 +1,55 @@
 ---
 
-- name: "template <|> Generate /etc/hosts"
-  ansible.builtin.template:
-    src: hosts.j2
+- name: block <|> Generate configuration localy
+  delegate_to: localhost
+  run_once: true
+  tags:
+    - template
+  block:
+
+    - name: set_fact <|> Build host to network mapping
+      set_fact:
+        hosts_file_hosts_by_first_octets: "{{ hostvars | bluebanquise.infrastructure.hosts_by_first_octets(groups['all'], networks) }}"
+      delegate_facts: true  # We delegate to localhost only, to avoid memory usage with all hosts
+
+    - name: tempfile <|> Create temporary file
+      ansible.builtin.tempfile:
+        state: file
+        suffix: "hosts_file_work"
+      register: hosts_file_work_file
+      when: not ansible_check_mode
+
+    - name: template <|> Generate /etc/hosts
+      ansible.builtin.template:
+        src: hosts.j2
+        dest: "{{ hosts_file_work_file.path | default('/tmp/hosts', true) }}" # Default here allows to display content even in check mode
+        mode: 0644
+      # ignore_errors: '{{ ansible_check_mode }}' # Test when check, but ignore if path was not found
+
+    # - name: Give insecure permissions to an existing file
+    #   ansible.builtin.file:
+    #     path: "{{ dhcp_server_work_folder.path }}"
+    #     owner: root
+    #     group: root
+    #     mode: '0755'
+
+# Now that file is rendered, lets push it to targets
+- name: copy <|> Push /etc/hosts
+  ansible.builtin.copy:
+    src: "{{ hosts_file_work_file.path }}"
     dest: /etc/hosts
     owner: root
     group: root
     mode: 0644
   tags:
     - template
+  when: not ansible_check_mode
+
+# Finaly, we can cleanup working file
+- name: file <|> Remove temporary working file
+  ansible.builtin.file:
+    path: "{{ hosts_file_work_file.path }}"
+    state: absent
+  delegate_to: localhost
+  run_once: true
+  when: not ansible_check_mode

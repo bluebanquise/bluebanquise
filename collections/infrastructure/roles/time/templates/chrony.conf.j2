@@ -2,6 +2,13 @@
 #### Blue Banquise file ####
 ## {{ ansible_managed }}
 
+{% macro get_main_network(network_interfaces) %}
+{# We get first interfaces that posses an ip4 and a network that starts with 'net-' #}
+{{ network_interfaces | default([]) | selectattr('network','defined') | selectattr('interface','defined') | selectattr('ip4','defined') | selectattr('network','match','^net-[a-zA-Z0-9]+') | map(attribute='network') | list | first | default(none) }}
+{% endmacro %}
+
+{% set node_main_network = get_main_network(network_interfaces) %}
+
 {% set external = false %}
 {% if time_external_pools | length > 0 %}
   {% set external = true %}
@@ -21,16 +28,16 @@ server {{ external_server }}
 # Source server to bind to
 
   {% if time_profile == 'client' %}{# Client binds to its main network server, if exist #}
-    {% if networks[j2_node_main_network]['services'] is defined and (networks[j2_node_main_network]['services']['ntp4'] | default(networks[j2_node_main_network]['services']['ntp'], true)) is defined and (networks[j2_node_main_network]['services']['ntp4'] | default(networks[j2_node_main_network]['services']['ntp'], true)) is iterable and (networks[j2_node_main_network]['services']['ntp4'] | default(networks[j2_node_main_network]['services']['ntp'], true)) is not string and (networks[j2_node_main_network]['services']['ntp4'] | default(networks[j2_node_main_network]['services']['ntp'], true)) is not mapping %}
-      {% for ntp in (networks[j2_node_main_network]['services']['ntp4'] | default(networks[j2_node_main_network]['services']['ntp'], true)) %}
+    {% if networks[node_main_network]['services'] is defined and (networks[node_main_network]['services']['ntp4'] | default(networks[node_main_network]['services']['ntp'], true)) is defined and (networks[node_main_network]['services']['ntp4'] | default(networks[node_main_network]['services']['ntp'], true)) is iterable and (networks[node_main_network]['services']['ntp4'] | default(networks[node_main_network]['services']['ntp'], true)) is not string and (networks[node_main_network]['services']['ntp4'] | default(networks[node_main_network]['services']['ntp'], true)) is not mapping %}
+      {% for ntp in (networks[node_main_network]['services']['ntp4'] | default(networks[node_main_network]['services']['ntp'], true)) %}
         {% if ntp.hostname is defined and ntp.hostname is not none %}
 server {{ ntp.hostname }} iburst
         {% elif ntp.ip4 is defined and (ntp.ip4 | ansible.utils.ipaddr) %}
 server {{ ntp.ip4 }} iburst
         {% endif %}
       {% endfor %}
-    {% elif networks[j2_node_main_network]['services_ip'] is defined and (networks[j2_node_main_network]['services_ip'] | ansible.utils.ipaddr) %}
-server {{ networks[j2_node_main_network]['services_ip'] }} iburst
+    {% elif networks[node_main_network]['services_ip'] is defined and (networks[node_main_network]['services_ip'] | ansible.utils.ipaddr) %}
+server {{ networks[node_main_network]['services_ip'] }} iburst
     {% endif %}
 
   {# Server binds to its main network server from upper iceberg, if exist #}

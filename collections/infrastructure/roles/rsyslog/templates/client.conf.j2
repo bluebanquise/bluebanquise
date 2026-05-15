@@ -17,6 +17,13 @@ action(type="omfwd" target="{{ server_address }}" protocol="tcp" port="{{ server
 # ### end of the forwarding rule ###
 {% endmacro %}
 
+{% macro get_main_network(network_interfaces) %}
+{# We get first interfaces that posses an ip4 and a network that starts with 'net-' #}
+{{ network_interfaces | default([]) | selectattr('network','defined') | selectattr('interface','defined') | selectattr('ip4','defined') | selectattr('network','match','^net-[a-zA-Z0-9]+') | map(attribute='network') | list | first | default(none) }}
+{% endmacro %}
+
+{% set node_main_network = get_main_network(network_interfaces) %}
+
 #### RULES ####
 
 # Everybody gets emergency messages
@@ -46,11 +53,11 @@ local7.*                                                /var/log/boot.log
 
 {% if rsyslog_server_ip4 is defined and rsyslog_server_ip4 is not none and (rsyslog_server_ip4 | ansible.utils.ipaddr ) %}{# Override other parameters, for custom configurations #}
 {{ write_server(rsyslog_server_ip4, rsyslog_port, 0) }}
-{% elif networks[j2_node_main_network] is defined
-      and networks[j2_node_main_network]['services'] is defined
-      and (networks[j2_node_main_network]['services']['log4'] | default(networks[j2_node_main_network]['services']['log'], true)) is defined
-      and (networks[j2_node_main_network]['services']['log4'] | default(networks[j2_node_main_network]['services']['log'], true)) is iterable %}
-    {% for rsyslog_server in (networks[j2_node_main_network]['services']['log4'] | default(networks[j2_node_main_network]['services']['log'], true)) %}
+{% elif networks[node_main_network] is defined
+      and networks[node_main_network]['services'] is defined
+      and (networks[node_main_network]['services']['log4'] | default(networks[node_main_network]['services']['log'], true)) is defined
+      and (networks[node_main_network]['services']['log4'] | default(networks[node_main_network]['services']['log'], true)) is iterable %}
+    {% for rsyslog_server in (networks[node_main_network]['services']['log4'] | default(networks[node_main_network]['services']['log'], true)) %}
         {% if (rsyslog_server.ip4 is defined and (rsyslog_server.ip4 | ansible.utils.ipaddr)) or (rsyslog_server.hostname is defined and rsyslog_server.hostname is not none) %}
             {% if rsyslog_server.ip4 is defined and (rsyslog_server.ip4 | ansible.utils.ipaddr) %}
 {{ write_server(rsyslog_server.ip4, rsyslog_port, loop.index) }}
@@ -59,6 +66,6 @@ local7.*                                                /var/log/boot.log
             {% endif %}
         {% endif %}
     {% endfor %}
-{% elif networks[j2_node_main_network]['services_ip'] is defined and (networks[j2_node_main_network]['services_ip'] | ansible.utils.ipaddr) %}
-{{ write_server(networks[j2_node_main_network]['services_ip'], rsyslog_port, 0) }}
+{% elif networks[node_main_network]['services_ip'] is defined and (networks[node_main_network]['services_ip'] | ansible.utils.ipaddr) %}
+{{ write_server(networks[node_main_network]['services_ip'], rsyslog_port, 0) }}
 {% endif %}
