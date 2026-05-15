@@ -11,7 +11,6 @@ pxe_stack_diskful_os_redhat: true
 pxe_stack_diskful_os_ubuntu: true
 pxe_stack_diskful_os_suse: true
 pxe_stack_diskful_os_debian: true
-pxe_stack_diskful_os_dgx: false
 
 # Allow SSH password authentication
 pxe_stack_ssh_allow_passwords: true
@@ -43,8 +42,8 @@ pxe_stack_post_install_boot_to_disk: true
 pxe_stack_hw_equipment_type: none
 pxe_stack_os_operating_system:
   distribution: ubuntu
-  distribution_version: 22.04
-  distribution_major_version: 22
+  distribution_version: 24.04
+  distribution_major_version: 24
   repositories_environment:
 
 pxe_stack_hw_console:
