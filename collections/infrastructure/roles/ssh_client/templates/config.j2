@@ -24,6 +24,7 @@ Host {{ host }}
     {% if host_vars['ssh_client_useroaming'] is defined and host_vars['ssh_client_useroaming']is not none %}
     UseRoaming {{ host_vars['ssh_client_useroaming'] }}
     {% endif %}
+    {#
     {% if ssh_jump is none %}
       {% set host_to_be_used_network = ssh_client_global_network  | default(host_vars['j2_icebergs_main_network_dict'][j2_current_iceberg], true) | default(none, true) %}
     Hostname %h{% if host_to_be_used_network is not none %}-{{ host_to_be_used_network }}{% endif %}
@@ -32,6 +33,7 @@ Host {{ host }}
     Hostname %h
     ProxyJump {{ ssh_jump }}
     {% endif %}
+    #}
 {% endmacro %}
 
 

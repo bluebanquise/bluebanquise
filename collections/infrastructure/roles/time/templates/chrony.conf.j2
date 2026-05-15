@@ -41,7 +41,7 @@ server {{ networks[node_main_network]['services_ip'] }} iburst
     {% endif %}
 
   {# Server binds to its main network server from upper iceberg, if exist #}
-  {% elif time_profile == 'server' and (bb_icebergs_system is defined and bb_icebergs_system) and (bb_iceberg_master is defined and bb_iceberg_master != "top") %}
+  {# {% elif time_profile == 'server' and (bb_icebergs_system is defined and bb_icebergs_system) and (bb_iceberg_master is defined and bb_iceberg_master != "top") %}
     {% set host_to_be_used_network = j2_icebergs_main_network_dict[bb_iceberg_master] | default(none, true) %}
     {% if host_to_be_used_network is not none %}
       {% if networks[host_to_be_used_network]['services'] is defined and (networks[host_to_be_used_network]['services']['ntp4'] | default(networks[host_to_be_used_network]['services']['ntp'], true)) is defined and (networks[host_to_be_used_network]['services']['ntp4'] | default(networks[host_to_be_used_network]['services']['ntp'], true)) is iterable and (networks[host_to_be_used_network]['services']['ntp4'] | default(networks[host_to_be_used_network]['services']['ntp'], true)) is not string and (networks[host_to_be_used_network]['services']['ntp4'] | default(networks[host_to_be_used_network]['services']['ntp'], true)) is not mapping %}
@@ -54,7 +54,7 @@ server {{ ntp.ip4 }} iburst
         {% endfor %}
       {% endif %}
     {% endif %}
-  {% endif %}
+  {% endif %} #}
 
 {% endif %}
 
