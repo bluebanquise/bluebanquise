@@ -92,6 +92,7 @@ backend {{ resource['name'] }}
 {{ resource['parameters'] | default('') | indent(4, True) }}
       {% for server in resource['servers'] %}
     server {{ server['hostname'] }} {{ server['ip4'] }}:{{ server['port'] }} {% if server['parameters'] is defined and server['parameters'] is not none %}{{ server['parameters'] }}{% else %}check{% endif %}
+
       {% endfor %}
 
     {% endif %}
