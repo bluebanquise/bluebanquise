@@ -1,12 +1,12 @@
 import requests
-import json
 from requests.auth import HTTPBasicAuth
 
 # Disable SSL warnings for simplicity in this example
 # In production, handle SSL certificates properly
 requests.packages.urllib3.disable_warnings()
 
-def execute_redfish_request(node, node_configuration, endpoint, logger, method='GET', payload=None):
+
+def execute_redfish_request(node, node_configuration, endpoint, logger, parameters, method='GET', payload=None):
     url = f"https://{node_configuration['bmc']['name']}/redfish/v1/{endpoint}"
     auth = HTTPBasicAuth(node_configuration['user'], node_configuration['password'])
     headers = {'Content-Type': 'application/json'}
@@ -23,9 +23,10 @@ def execute_redfish_request(node, node_configuration, endpoint, logger, method='
         logger.info(f'[{node}] Dryrun. url: {url}, payload: {payload}')
         return 0, 200
 
+
 def power(node, node_configuration, action_parameters, parameters, logger):
     if action_parameters[0] == "on":
-        _, status_code = execute_redfish_request(node, node_configuration, 'Systems/System.Embedded.1/Actions/ComputerSystem.Reset', logger, method='POST', payload={"ResetType": "On"})
+        _, status_code = execute_redfish_request(node, node_configuration, 'Systems/System.Embedded.1/Actions/ComputerSystem.Reset', logger, parameters, method='POST', payload={"ResetType": "On"})
         if status_code == 200:
             logger.info(f'[{node}] Powered on.')
             return 0
@@ -34,7 +35,7 @@ def power(node, node_configuration, action_parameters, parameters, logger):
             return 1
 
     elif action_parameters[0] == "off":
-        _, status_code = execute_redfish_request(node, node_configuration, 'Systems/System.Embedded.1/Actions/ComputerSystem.Reset', logger, method='POST', payload={"ResetType": "ForceOff"})
+        _, status_code = execute_redfish_request(node, node_configuration, 'Systems/System.Embedded.1/Actions/ComputerSystem.Reset', logger, parameters, method='POST', payload={"ResetType": "ForceOff"})
         if status_code == 200:
             logger.info(f'[{node}] Powered off.')
             return 0
@@ -43,7 +44,7 @@ def power(node, node_configuration, action_parameters, parameters, logger):
             return 1
 
     elif action_parameters[0] == "reset":
-        _, status_code = execute_redfish_request(node, node_configuration, 'Systems/System.Embedded.1/Actions/ComputerSystem.Reset', logger, method='POST', payload={"ResetType": "Reset"})
+        _, status_code = execute_redfish_request(node, node_configuration, 'Systems/System.Embedded.1/Actions/ComputerSystem.Reset', logger, parameters, method='POST', payload={"ResetType": "Reset"})
         if status_code == 200:
             logger.info(f'[{node}] Reset.')
             return 0
@@ -52,7 +53,7 @@ def power(node, node_configuration, action_parameters, parameters, logger):
             return 1
 
     elif action_parameters[0] == "status":
-        response, status_code = execute_redfish_request(node, node_configuration, 'Systems/System.Embedded.1', logger)
+        response, status_code = execute_redfish_request(node, node_configuration, 'Systems/System.Embedded.1', logger, parameters)
         if status_code == 200:
             power_state = response.get('PowerState', 'Unknown')
             logger.info(f'[{node}] Power status: {power_state}')
@@ -65,9 +66,10 @@ def power(node, node_configuration, action_parameters, parameters, logger):
         logger.error(f'[{node}] Error, unknown power action {action_parameters[0]}')
         return 1
 
-def boot(node, node_configuration, action_parameters, parameters):
+
+def boot(node, node_configuration, action_parameters, parameters, logger):
     if action_parameters[0] == "disk":
-        _, status_code = execute_redfish_request(node, node_configuration, 'Systems/System.Embedded.1/Actions/ComputerSystem.SetDefaultBootOrder', logger, method='POST')
+        _, status_code = execute_redfish_request(node, node_configuration, 'Systems/System.Embedded.1/Actions/ComputerSystem.SetDefaultBootOrder', logger, parameters, method='POST')
         if status_code == 200:
             logger.info(f'[{node}] Next boot set to disk.')
             return 0
@@ -76,7 +78,7 @@ def boot(node, node_configuration, action_parameters, parameters):
             return 1
 
     elif action_parameters[0] == "bios":
-        _, status_code = execute_redfish_request(node, node_configuration, 'Systems/System.Embedded.1/Actions/ComputerSystem.ChangeBootOrder', logger, method='POST', payload={"Boot": {"BootSourceOverrideTarget": "Bios"}})
+        _, status_code = execute_redfish_request(node, node_configuration, 'Systems/System.Embedded.1/Actions/ComputerSystem.ChangeBootOrder', logger, parameters, method='POST', payload={"Boot": {"BootSourceOverrideTarget": "Bios"}})
         if status_code == 200:
             logger.info(f'[{node}] Next boot set to BIOS.')
             return 0
@@ -85,7 +87,7 @@ def boot(node, node_configuration, action_parameters, parameters):
             return 1
 
     elif action_parameters[0] == "pxe":
-        _, status_code = execute_redfish_request(node, node_configuration, 'Systems/System.Embedded.1/Actions/ComputerSystem.ChangeBootOrder', logger, method='POST', payload={"Boot": {"BootSourceOverrideTarget": "Pxe"}})
+        _, status_code = execute_redfish_request(node, node_configuration, 'Systems/System.Embedded.1/Actions/ComputerSystem.ChangeBootOrder', logger, parameters, method='POST', payload={"Boot": {"BootSourceOverrideTarget": "Pxe"}})
         if status_code == 200:
             logger.info(f'[{node}] Next boot set to PXE.')
             return 0
@@ -96,4 +98,3 @@ def boot(node, node_configuration, action_parameters, parameters):
     else:
         logger.error(f'[{node}] Error, unknown boot action {action_parameters[0]}')
         return 1
-
