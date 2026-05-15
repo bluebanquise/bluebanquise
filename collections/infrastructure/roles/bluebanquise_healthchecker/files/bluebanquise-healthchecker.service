@@ -1,0 +1,18 @@
+[Unit]
+Description=BlueBanquise Healthchecker pass server
+After=network.target
+
+[Service]
+User=bluebanquise
+Group=bluebanquise
+WorkingDirectory=/opt/bluebanquise/bluebanquise-healthchecker/
+Environment="PATH=/opt/bluebanquise/bluebanquise_venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ExecStart=/opt/bluebanquise/bluebanquise_venv/bin/python /opt/bluebanquise/bluebanquise-healthchecker/bluebanquise-healthchecker
+Restart=always
+RestartSec=5s
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=bluebanquise-healthchecker
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,27 @@
+#!/bin/bash
+# Check InfiniBand link speed and width.
+# Usage: ./check_ib_rate.sh mlx5_0 "HDR"
+# Valid rates depend on hardware: SDR, DDR, QDR, FDR, EDR, HDR, NDR...
+# I also found that on some systems, rate is given as an interger: 10, ...
+
+IFACE="$1"
+EXPECTED_RATE="$2"
+
+echo "Checking InfiniBand link rate on: $IFACE"
+
+# ibstat gives link speed and width
+RATE=$(ibstat "$IFACE" 2>/dev/null | awk -F': ' '/Rate/ {print $2}')
+
+if [[ -z "$RATE" ]]; then
+    echo "CRITICAL: Could not read IB rate for $IFACE"
+    exit 2
+fi
+
+# RATE example: "100 Gb/sec (4X HDR)"
+if echo "$RATE" | grep -qi "$EXPECTED_RATE"; then
+    echo "OK: IB rate matches expected ($RATE)"
+    exit 0
+else
+    echo "CRITICAL: IB rate is '$RATE' but expected something containing '$EXPECTED_RATE'"
+    exit 2
+fi
