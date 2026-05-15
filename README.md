@@ -8,13 +8,13 @@
 ---
 Devs infos:
 
-:green_heart: The main branch is now considered stable.
+:yellow_heart: The main branch is now considered unstable as a new major version is under development. Please use a release tag for production.
 
-:green_heart: Current core version: 3.2.2 .
+:yellow_heart: Current core version: 3.4.0, under development .
 
 :green_heart: ansible-core 2.19 is now supported.
 
-:yellow_heart: documentation v3 is currently written, might take few weeks to complete.
+:yellow_heart: documentation v3 is currently written, doing my best.
 
 ---
 
