@@ -1,0 +1,41 @@
+#!/bin/bash
+# Probe: Check CPU core count and detect MCE errors.
+# Usage: ./check_cpu_count_mce.sh 64   → expects 64 CPU cores
+
+EXPECTED_CORES="$1"
+
+if [[ -z "$EXPECTED_CORES" ]]; then
+    echo "CRITICAL: Expected core count not provided"
+    exit 2
+fi
+
+echo "Checking CPU core count (expected: $EXPECTED_CORES)"
+
+# Count logical cores
+CORES=$(nproc)
+
+echo "Detected cores: $CORES"
+
+if (( CORES != EXPECTED_CORES )); then
+    echo "CRITICAL: CPU core count mismatch"
+    exit 2
+fi
+
+echo "OK: CPU core count matches expectation"
+
+#############################################
+# Check for Machine Check Exceptions (MCE)
+#############################################
+
+echo "Checking for MCE hardware errors..."
+
+MCE_LOG=$(dmesg -T | grep -Ei "mce|machine check|hardware error")
+
+if [[ -n "$MCE_LOG" ]]; then
+    echo "CRITICAL: MCE hardware errors detected"
+    echo "$MCE_LOG"
+    exit 2
+fi
+
+echo "OK: No MCE errors detected"
+exit 0

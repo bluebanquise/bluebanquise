@@ -1,0 +1,4 @@
+---
+bluebanquise_healthchecker_loop_interval: 60
+bluebanquise_healthchecker_server: false
+bluebanquise_healthchecker_client: false

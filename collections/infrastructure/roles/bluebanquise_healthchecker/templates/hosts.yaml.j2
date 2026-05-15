@@ -1,0 +1,26 @@
+#jinja2: lstrip_blocks: True
+
+{# c001:
+  healthchecks:
+    - name: Check scratch is mounted
+      command: "df"
+      ok_exitcode: 0
+      timeout: 5
+    - name: Check no errors on ib device
+      command: "cat /etc/os-release"
+      ok_exitcode: 0
+c002:
+  healthchecks:
+    - name: Check scratch is mounted
+      command: "df | grep scratch"
+      ok_exitcode: 0
+    - name: Check no errors on ib device
+      command: "ibstatus | grep errors"
+      ok_exitcode: 0 #}
+
+{% for hchost, hchost_vars in bluebanquise_healthchecker['hosts'].items() %}
+
+{{ hchost }}:
+{{ hchost_vars | to_nice_yaml | indent(2, True) }}
+
+{% endfor %}

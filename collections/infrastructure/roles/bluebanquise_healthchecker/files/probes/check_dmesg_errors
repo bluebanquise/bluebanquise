@@ -1,0 +1,26 @@
+#!/bin/bash
+# Probe: Check for kernel log errors using dmesg.
+# Usage: ./check_dmesg_errors.sh "err"
+# You can pass any valid dmesg level: emerg, alert, crit, err, warn, etc.
+# You can also pass on modern systems: err+ for example, this means err and all above levels
+# Default level is "err" if not provided.
+
+LEVEL="${1:-err}"
+
+echo "Checking dmesg for messages with level: $LEVEL"
+
+# Capture output of dmesg for the given level
+DMESG_OUTPUT=$(dmesg -T --level="$LEVEL" 2>/dev/null)
+
+# If output is empty, no errors found
+if [[ -z "$DMESG_OUTPUT" ]]; then
+    echo "OK: No dmesg entries found at level '$LEVEL'"
+    exit 0
+fi
+
+# Otherwise, errors exist
+echo "CRITICAL: dmesg contains entries at level '$LEVEL'"
+echo "---- dmesg output start ----"
+echo "$DMESG_OUTPUT"
+echo "---- dmesg output end ----"
+exit 2

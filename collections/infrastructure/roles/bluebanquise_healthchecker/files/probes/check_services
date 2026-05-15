@@ -1,0 +1,71 @@
+#!/bin/bash
+# Probe: Check if a list of services is running.
+# Usage: ./check_services.sh "sshd,cron,slurmctld"
+#
+# The probe:
+#   - Splits the comma-separated list
+#   - Checks each service using systemctl or service
+#   - Reports CRITICAL if any service is not running
+
+SERVICES_RAW="$1"
+
+if [[ -z "$SERVICES_RAW" ]]; then
+    echo "CRITICAL: No services provided"
+    exit 2
+fi
+
+echo "Checking services: $SERVICES_RAW"
+
+# Convert comma-separated list into array
+IFS=',' read -r -a SERVICES <<< "$SERVICES_RAW"
+
+ERROR_FOUND=0
+
+#############################################
+# Detect whether systemctl is available
+#############################################
+
+if command -v systemctl >/dev/null 2>&1; then
+    USE_SYSTEMCTL=1
+else
+    USE_SYSTEMCTL=0
+fi
+
+#############################################
+# Check each service
+#############################################
+
+for svc in "${SERVICES[@]}"; do
+    svc_trimmed=$(echo "$svc" | xargs)  # remove whitespace
+
+    echo "Checking service: $svc_trimmed"
+
+    if [[ "$USE_SYSTEMCTL" -eq 1 ]]; then
+        # systemd check
+        systemctl is-active --quiet "$svc_trimmed"
+        STATUS=$?
+    else
+        # SysV init check
+        service "$svc_trimmed" status >/dev/null 2>&1
+        STATUS=$?
+    fi
+
+    if [[ "$STATUS" -ne 0 ]]; then
+        echo "CRITICAL: Service '$svc_trimmed' is NOT running"
+        ERROR_FOUND=1
+    else
+        echo "OK: Service '$svc_trimmed' is running"
+    fi
+done
+
+#############################################
+# Final result
+#############################################
+
+if [[ "$ERROR_FOUND" -eq 0 ]]; then
+    echo "OK: All services are running"
+    exit 0
+else
+    echo "CRITICAL: One or more services are not running"
+    exit 2
+fi
