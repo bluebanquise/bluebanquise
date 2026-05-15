@@ -4,6 +4,9 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.4 or 4.0
 
+* 15/05/2026 - oxedions - [users] Enable deactivating ssh keys
+* 15/05/2026 - oxedions - [new] New logrotate role, reduce rsyslog scope
+* 15/05/2026 - oxedions - [all] Update all major roles to use filters
 * 15/05/2026 - oxedions - [haproxy] Fix typo issue (#1151)
 * 15/05/2026 - oxedions - [http_server] Fix typo issue (#1150)
 * 15/05/2026 - oxedions - [core] Add new filters, deprecate vars plugin
