@@ -66,3 +66,4 @@
     - item.state | default('present') != 'absent'
     - item.ssh_authorized_keys is defined
     - item.ssh_authorized_keys
+    - users_enable_ssh_authorized_keys

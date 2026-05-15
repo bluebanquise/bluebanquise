@@ -13,6 +13,9 @@ logrotate_global_dateext: true
 logrotate_global_dateformat: "-%Y%m%d"
 logrotate_global_extension: "log"
 
+# Enable xz compression
+logrotate_enable_xz: true
+
 # Custom logrotate rules (list of dicts)
 logrotate_custom_rules: []
 # Example:

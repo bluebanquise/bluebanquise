@@ -39,17 +39,3 @@
   when: rsyslog_server_logrotate | bool
   tags:
     - template
-
-- name: lineinfile <|> Configure logrotate to use xz
-  ansible.builtin.lineinfile:
-    path: /etc/logrotate.conf
-    regexp: "{{ item }}"
-    line: "{{ item }}"
-  loop:
-    - compresscmd /usr/bin/xz
-    - uncompresscmd /usr/bin/unxz
-    - compressext .xz
-  notify: service <|> Restart rsyslog service
-  when: rsyslog_server_logrotate | bool
-  tags:
-    - template

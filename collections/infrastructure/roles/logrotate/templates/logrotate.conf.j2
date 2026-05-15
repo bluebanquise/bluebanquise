@@ -12,5 +12,11 @@ rotate {{ logrotate_global_rotate }}
 {% if logrotate_global_dateformat %}dateformat {{ logrotate_global_dateformat }}{% endif %}
 extension {{ logrotate_global_extension }}
 
+{% if logrotate_enable_xz %}
+compresscmd /usr/bin/xz
+uncompresscmd /usr/bin/unxz
+compressext .xz
+{% endif %}
+
 # Include custom rules
 include /etc/logrotate.d

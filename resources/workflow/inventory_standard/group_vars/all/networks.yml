@@ -4,6 +4,8 @@ networks:
     subnet: 10.10.0.0
     dhcp_server: true
     dns_server: true
+    services_ip: 10.10.0.1
+    gateway: 10.10.0.1
     services:
       dns:
         - ip4: 10.10.0.1

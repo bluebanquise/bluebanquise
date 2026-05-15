@@ -1,0 +1,38 @@
+bluebanquise_healthchecker:
+  groups:
+    servers_type_A:
+      hosts:
+        - c001
+        - c002
+      healthchecks:
+        - name: Check home is mounted
+          command: "df | grep home"
+          ok_exitcode: 0
+          timeout: 5
+
+    servers_type_B:
+      hosts:
+        - c003
+      healthchecks:
+        - name: Check tmp is mounted
+          command: "df | grep tmp"
+          ok_exitcode: 0
+          timeout: 5 
+  hosts:
+    c001:
+      healthchecks:
+        - name: Check scratch is mounted
+          command: "df"
+          ok_exitcode: 0
+          timeout: 5
+        - name: Check no errors on ib device
+          command: "cat /etc/os-release"
+          ok_exitcode: 0
+    c002:
+      healthchecks:
+        - name: Check scratch is mounted
+          command: "df | grep scratch"
+          ok_exitcode: 0
+        - name: Check no errors on ib device
+          command: "ibstatus | grep errors"
+          ok_exitcode: 0

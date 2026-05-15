@@ -10,7 +10,7 @@ Devs infos:
 
 :yellow_heart: The main branch is now considered unstable as a new major version is under development. Please use a release tag for production.
 
-:yellow_heart: Current core version: 3.4.0, under development .
+:yellow_heart: Current core version: 3.4.0, under development.
 
 :green_heart: ansible-core 2.19 is now supported.
 
@@ -119,9 +119,6 @@ Currently tested and supported distributions (other derivative could work) are:
 | Debian                  |                               |                    |                  |                                                             |
 |                         | Ubuntu                        | 22.04, 24.04       | x86_64, arm64    | √. Diskless not supported for now.                          |
 |                         | Debian                        | 12, 13             | x86_64, arm64    | √. Diskless not supported for now.                          |
-| Suse                    |                               |                    |                  |                                                             |
-|                         | SLES                          | 15.6               | x86_64, aarch64  | √. Diskless not supported for now.                          |
-|                         | OpenSuse Leap                 | 15.6               | x86_64, aarch64  | √. Diskless not supported for now.                          |
 
 ansible-core >= 2.16 is mandatory for BlueBanquise to run properly (it might work with earlier versions, but not tested).
 
@@ -131,6 +128,7 @@ Please note that:
 * Ubuntu 18.04 and 20.04 are now considered best effort only.
 * Debian 11 is now considered best effort only.
 * Suse 12 is no more supported at all (too old, I miss the time to support it).
+* Suse 15.6 is now considered best effort. I supported OpenSuse Leap for years, but no users were reported. If you need Suse support back, please let me know.
 * RHEL 8 and OpenSuse Leap 15 need an ansible-core==2.16, 2.17+ is not compatible.
 
 ## The project
