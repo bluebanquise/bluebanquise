@@ -7,6 +7,7 @@
 # ██████╔╝███████╗╚██████╔╝███████╗██████╔╝██║  ██║██║ ╚████║╚██████╔╝╚██████╔╝██║███████║███████╗
 # ╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚══▀▀═╝  ╚═════╝ ╚═╝╚══════╝╚══════╝
 #
+# 2.3.0: (SMC feature) Added support to el10 images. Neo Team <dl-fr-bds-hpc-neocore@bull.com>
 # 2.2.5: (SMC fix) Fix NFS mount (-u uid) and SELinux (avoid chroot) in aarch64 images. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
 # 2.2.4: (SMC fix) Allow + character when sanitizing user input, needed for kernel-64k in aarch64 images. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
 # 2.2.3: (SMC fix) Fix user creation when host node is running SELinux in enforcing mode, force smc group. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
@@ -509,7 +510,7 @@ while True:
         logging.info(bcolors.OKBLUE + "Creating image folder at " + reference_image_pxe_path + bcolors.ENDC)
         protected_os_system("mkdir -p " + reference_image_pxe_path)
 
-        if image_selected_metadata['family'] == "el9":
+        if image_selected_metadata['family'] in ["el9", "el10"]:
             protected_os_system("cp " + reference_image_nfs_path + "/boot/initramfs-" + image_selected_metadata['kernel'] + ".img " + reference_image_pxe_path + "/initramfs-" + image_selected_metadata['kernel'] + ".img")
             protected_os_system("cp " + reference_image_nfs_path + "/usr/lib/modules/" + image_selected_metadata['kernel'] + "/vmlinuz " + reference_image_pxe_path + "/vmlinuz-" + image_selected_metadata['kernel'])
         elif image_selected_metadata['family'] == "el8":
@@ -688,7 +689,7 @@ while True:
 
         logging.info(bcolors.OKBLUE + 'Copying new kernel from nfs image to http folder...' + bcolors.ENDC)
 
-        if image_selected_metadata['family'] == "el9":
+        if image_selected_metadata['family'] in ["el9", "el10"]:
             protected_os_system("cp -a " + reference_image_nfs_path + "/boot/initramfs-" + kernel_selected + ".img " + reference_image_pxe_path + "/initramfs-" + kernel_selected + ".img")
             protected_os_system("cp -a " + reference_image_nfs_path + "/lib/modules/" + kernel_selected + "/vmlinuz " + reference_image_pxe_path + "/vmlinuz-" + kernel_selected)
         elif image_selected_metadata['family'] == "el8":
