@@ -47,6 +47,7 @@ import re
 from argparse import ArgumentParser
 import yaml
 import subprocess
+import sys
 
 # Colors, from https://stackoverflow.com/questions/287871/how-to-print-colored-text-in-terminal-in-python
 class bcolors:
@@ -58,6 +59,16 @@ class bcolors:
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
+
+
+BOOT_OPTIONS = [
+    "osdeploy",
+    "diskless",
+    "next",
+    "clone",
+    "clonedeploy",
+    "disk",
+]
 
 
 def load_file(filename):
@@ -161,12 +172,12 @@ if result.returncode == 1:
 
 # Get arguments passed to bootset
 parser = ArgumentParser()
-parser.add_argument("-n", "--nodes", dest="nodes",
+parser.add_argument("-n", "--nodes", dest="nodes", required=True,
                     help="Target node(s). Use nodeset format for ranges.", metavar="NODE")
-parser.add_argument("-s", "--status", dest="status", nargs='?', const='',
+parser.add_argument("-s", "--status", dest="status", action="store_true",
                     help="Display current nodes boot target status.")
-parser.add_argument("-b", "--boot", dest="boot",
-                    help="Next pxe boot: can be osdeploy, diskless, next, clone, clonedeploy, or disk.")
+parser.add_argument("-b", "--boot", dest="boot", choices=BOOT_OPTIONS,
+                    help=f"Next pxe boot: can be {', '.join(BOOT_OPTIONS)}.")
 parser.add_argument("-f", "--force", dest="force", default=" ",
                     help="Force. 'dhcp' = better dracut dhcp, 'network' = static ip. Combine using comma separator.")
 parser.add_argument("-i", "--image", dest="image", default="none",
@@ -178,7 +189,15 @@ parser.add_argument("-k", "--kickstart", action="store_true",
 parser.add_argument("-q", "--quiet", action="store_true",
                     help="Do not print INFO messages.")
 
+# Show help if no argument is supplied
+if len(sys.argv) == 1:
+    parser.print_help()
+    sys.exit(1)
+
 passed_arguments = parser.parse_args()
+
+if not any([passed_arguments.status, passed_arguments.boot, passed_arguments.kickstart]):
+    parser.error(bcolors.FAIL + "At least one of --status, --boot, or --kickstart must be provided." + bcolors.ENDC)
 
 print("""\
 
@@ -209,7 +228,7 @@ htdocs_path = pxe_parameters["pxe_parameters"]["htdocs_path"]
 pxe_nodes_path = htdocs_path + '/pxe/nodes/'
 
 
-if passed_arguments.status is not None:
+if passed_arguments.status:
     diskfull = []
     diskless = dict()
     osdeploy = []
@@ -248,12 +267,7 @@ if passed_arguments.status is not None:
         for image in diskless:
             print(' - {image}: {nodes}'.format(image=image, nodes=','.join(diskless[image])))
 
-elif passed_arguments.boot is not None:
-
-    # Ensure passed boot argument exists
-    if passed_arguments.boot is not None and 'osdeploy' not in passed_arguments.boot and 'diskless' not in passed_arguments.boot and 'clone' not in passed_arguments.boot and 'clonedeploy' not in passed_arguments.boot and 'disk' not in passed_arguments.boot and 'next' not in passed_arguments.boot:
-        logging.error(bcolors.FAIL+'Passed argument "'+passed_arguments.boot+'" for boot not know. Please check syntax.'+bcolors.ENDC)
-        quit()
+elif passed_arguments.boot:
 
     # Iteration on nodes
     for node in nodesetexpand(passed_arguments.nodes):
@@ -307,10 +321,10 @@ elif passed_arguments.boot is not None:
     if pxe_parameters["pxe_parameters"]["ansible_selinux_status"] == "enabled":
         os.system('restorecon -Rv /var/www/html/pxe/nodes/')
 
-elif passed_arguments.kickstart is not None:
+elif passed_arguments.kickstart:
 
     node = passed_arguments.nodes
-    if len(NodeSet(node)) != 1:
+    if len(nodesetexpand(node)) != 1:
         logging.error(bcolors.FAIL + 'Specify a single node with -n to display its kickstart file.' + bcolors.ENDC)
         exit(1)
 
