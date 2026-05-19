@@ -2,7 +2,6 @@
 from argparse import ArgumentParser
 import os
 import yaml
-import json
 import importlib.util
 from ClusterShell.NodeSet import NodeSet
 import logging
@@ -38,9 +37,9 @@ if power_configuration['nodes'] is None:
 
 # Get arguments
 parser = ArgumentParser()
-#parser.add_argument('-p', action='store', dest='param', default=UNSPECIFIED, nargs='?')
+# parser.add_argument('-p', action='store', dest='param', default=UNSPECIFIED, nargs='?')
 parser.add_argument("--dryrun", action='store_true', dest='dryrun', help="Enable dryrun mode")
-#parser.add_argument("--debug", action='store', dest='debug', nargs='?', const=True, help="Enable debug mode")
+# parser.add_argument("--debug", action='store', dest='debug', nargs='?', const=True, help="Enable debug mode")
 parser.add_argument("--timeout", type=int, default=10, help="Timeout in seconds for module operations. Default is 10 (seconds).")
 
 passed_arguments, cli_request = parser.parse_known_args()
@@ -85,7 +84,7 @@ for node in nodes:
     if node in power_configuration['nodes']:
         node_configuration = power_configuration['nodes'][node]
         node_protocol = node_configuration['protocol']
-        return_code = getattr(power_modules[node_protocol],action)(node, node_configuration, action_parameters, parameters, logger)
+        return_code = getattr(power_modules[node_protocol], action)(node, node_configuration, action_parameters, parameters, logger)
         if return_code != 0:
             logger.error('Error on node ' + node)
     else:
