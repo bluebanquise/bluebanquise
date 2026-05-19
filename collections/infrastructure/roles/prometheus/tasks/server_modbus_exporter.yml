@@ -1,0 +1,81 @@
+---
+- name: group <|> Add modbus_exporter group
+  ansible.builtin.group:
+    name: modbus_exporter
+    gid: "{{ prometheus_server_modbus_exporter_user_gid }}"
+    state: present
+
+- name: user <|> Add modbus_exporter user
+  ansible.builtin.user:
+    name: modbus_exporter
+    shell: /bin/false
+    uid: "{{ prometheus_server_modbus_exporter_user_uid }}"
+    group: modbus_exporter
+    home: /var/lib/modbus_exporter
+    state: present
+
+#- name: Package <|> Install modbus_exporter package
+#  ansible.builtin.package:
+#    name: "{{ prometheus_server_modbus_exporter_packages_to_install }}"
+#    state: present
+#  tags:
+#    - package
+
+- name: template <|> Generate modbus_exporter service file
+  ansible.builtin.template:
+    src: modbus_exporter.service.j2
+    dest: /etc/systemd/system/modbus_exporter.service
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - systemd <|> Reload systemd configuration for prometheus
+    - service <|> Restart modbus_exporter service
+  tags:
+    - template
+
+- name: file <|> Create modbus_exporter directories structure
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0750
+    owner: modbus_exporter
+    group: modbus_exporter
+  loop:
+    - /etc/modbus_exporter/
+
+- name: Template <|> Generate /etc/modbus_exporter/modbus.yml
+  ansible.builtin.template:
+    src: "{{ modbus_exporter_template | default('modbus.yml.j2') }}"
+    dest: /etc/modbus_exporter/modbus.yml
+    owner: modbus_exporter
+    group: modbus_exporter
+    mode: 0640
+  when: prometheus_server_modbus_exporter_raw_configuration is defined and prometheus_server_modbus_exporter_raw_configuration is not none
+  notify:
+    - service <|> Restart modbus_exporter service
+  tags:
+    - template
+
+- name: meta <|> Run handler tasks
+  ansible.builtin.meta: flush_handlers
+
+- name: stat <|> Check /etc/modbus_exporter/modbus.yml exists
+  ansible.builtin.stat:
+    path: /etc/modbus_exporter/modbus.yml
+  register: prometheus_stat_result
+
+- name: assert <|> Assert that modbus.yml file exist
+  ansible.builtin.assert:
+    that:
+      - prometheus_stat_result.stat.exists
+    fail_msg: "/etc/modbus_exporter/modbus.yml file does not exist, cannot start modbus_exporter"
+    success_msg: "/etc/modbus_exporter/modbus.yml file does exist, proceeding"
+
+- name: service <|> Manage modbus_exporter service state
+  ansible.builtin.service:
+    name: modbus_exporter
+    enabled: "{{ (prometheus_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    state: "{{ (prometheus_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
+  tags:
+    - service
