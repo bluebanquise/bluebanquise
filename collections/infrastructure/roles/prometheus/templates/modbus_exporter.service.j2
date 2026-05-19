@@ -1,0 +1,15 @@
+[unit]
+  Description=modbus_exporter
+  Wants=network-online.target
+  After=network-online.target
+
+[Service]
+  User=modbus_exporter
+  Group=modbus_exporter
+  Type=simple
+  WorkingDirectory=/etc/modbus_exporter/
+  ExecStart=/usr/local/bin/modbus_exporter \
+  {{ prometheus_server_modbus_exporter_launch_parameters | indent(2, True) }} 
+
+[Install]
+  WantedBy=multi-user.target
