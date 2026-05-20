@@ -89,6 +89,41 @@ scrape_configs:
         replacement: {{ prometheus_server_snmp_exporter_host }}:9116
 {% endfor %}
 
+# MODBUS_EXPORTER
+{% if prometheus_modbus_scrape_hardware_groups is defined %}
+{% for hw_group in prometheus_modbus_scrape_hardware_groups %}
+  - job_name: 'modbus_{{ hw_group.name }}'
+    scrape_interval: {{ hw_group.scrape_interval | default('') }}
+    scrape_timeout: {{ hw_group.scrape_timeout | default('') }}
+    metrics_path: /modbus
+    static_configs:
+{% for gateway_host in groups[hw_group.name] | default([]) %}
+{% for device in hostvars[gateway_host]['modbus_rtu_devices' ] | default ([]) %}
+    - target: ["{{ gateway_host }}:502"]
+      labels:
+        instance: "{{ device.name }}"
+	    module: "{{ device.modbus_module }}"
+	    sub_target: "{{ device.modbus_rtu_address }}"
+{% if device.labels is defined %}
+{% for label_key, label_value in device.labels.items() %}
+	    {{ label_key }}: "{{ label_value }}"
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endfor %}
+    relabel_configs:
+	  - source_labels: [module]
+	    target_label: __param_module
+	  - source_labels: [__address__]
+	    target_label: __param_target
+	  - source_labels: [sub_target]
+	    target_label: __param_sub_target
+	  - source_labels: [__address__]
+	    target_label: gateway_address
+	  - target_label: __address__
+	    replacement: "{{ prometheus_server_modbus_exporter_host | default('127.0.0.1') }}:9602"
+{% endfor %}
+{% endif %} 
 
 # BMC - IPMI_EXPORTER
 {% for hardware in prometheus_ipmi_scrape_hardware_groups %}
