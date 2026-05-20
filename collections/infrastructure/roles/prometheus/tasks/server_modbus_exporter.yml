@@ -28,9 +28,9 @@
     owner: root
     group: root
     mode: 0644
-  notify:
-    - systemd <|> Reload systemd configuration for prometheus
-    - service <|> Restart modbus_exporter service
+    #notify:
+    #  - systemd <|> Reload systemd configuration for prometheus
+    #  - service <|> Restart modbus_exporter service
   tags:
     - template
 
@@ -52,13 +52,13 @@
     group: modbus_exporter
     mode: 0640
   when: prometheus_server_modbus_exporter_raw_configuration is defined and prometheus_server_modbus_exporter_raw_configuration is not none
-  notify:
-    - service <|> Restart modbus_exporter service
+  #notify:
+  #  - service <|> Restart modbus_exporter service
   tags:
     - template
 
-- name: meta <|> Run handler tasks
-  ansible.builtin.meta: flush_handlers
+      #- name: meta <|> Run handler tasks
+      #  ansible.builtin.meta: flush_handlers
 
 - name: stat <|> Check /etc/modbus_exporter/modbus.yml exists
   ansible.builtin.stat:
