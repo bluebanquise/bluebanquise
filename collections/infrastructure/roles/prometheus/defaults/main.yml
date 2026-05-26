@@ -18,6 +18,7 @@ prometheus_server_am_executor_host: localhost
 prometheus_server_ipmi_exporter_host: localhost
 prometheus_server_snmp_exporter_host: localhost
 prometheus_server_modbus_exporter_host: localhost
+prometheus_server_modbus_exporter_port: 9602
 
 prometheus_server_prometheus_user_gid: 909
 prometheus_server_prometheus_user_uid: 909
