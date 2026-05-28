@@ -32,7 +32,7 @@
   ansible.builtin.find:
     paths: /sys/class/infiniband
     file_type: directory
-  register: ib_devices
+  register: interconnect_ib_devices
 
 - name: Find the first valid and active infiniband device
   ansible.builtin.shell: |
@@ -46,19 +46,19 @@
         fi
       done
     done
-  register: ib_device
+  register: interconnect_ib_device
   changed_when: false
-  failed_when: ib_device.stdout == ""
+  failed_when: interconnect_ib_device.stdout == ""
 
 - name: Read the node_guid of the detected device
   ansible.builtin.slurp:
-    src: "/sys/class/infiniband/{{ ib_device.stdout }}/node_guid"
-  register: ib_guid_raw
+    src: "/sys/class/infiniband/{{ interconnect_ib_device.stdout }}/node_guid"
+  register: interconnect_ib_guid_raw
 
 - name: Convert node_guid format for OpenSM use
   ansible.builtin.set_fact:
-    opensm_guid: >-
-      0x{{ ib_guid_raw.content
+    interconnect_opensm_guid: >-
+      0x{{ interconnect_ib_guid_raw.content
             | b64decode
             | trim
             | replace(':', '') }}
@@ -67,7 +67,7 @@
   ansible.builtin.lineinfile:
     path: /etc/rdma/opensm.conf
     regexp: '^guid\s+'
-    line: "guid {{ opensm_guid }}"
+    line: "guid {{ interconnect_opensm_guid }}"
     state: present
 
 - name: service <|> Manage opensm state
