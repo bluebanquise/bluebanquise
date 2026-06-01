@@ -10,6 +10,13 @@ class VarsModule(BaseVarsPlugin):
 
     def get_vars(self, loader, path, entities, cache=True):
 
+        # Display the deprecation warning
+        self._display.deprecated(
+            msg="[BLUEBANQUISE WARNING] The 'infrastructure.core' vars plugin is deprecated and will be removed soon."
+                "If you use BlueBanquise 3.4+, please consider deactivating it, it is no more needed",
+            version="3.5.0"
+        )
+
         super(VarsModule, self).get_vars(loader, path, entities)
         data = {
 

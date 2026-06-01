@@ -1,0 +1,4 @@
+---
+bluebanquise_power_packages_to_install:
+  - ipmitool
+  - bluebanquise-venv

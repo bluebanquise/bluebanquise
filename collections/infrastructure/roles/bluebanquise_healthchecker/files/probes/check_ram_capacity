@@ -1,0 +1,26 @@
+#!/bin/bash
+# Probe: Check RAM capacity.
+# Usage: ./check_ram_capacity.sh 128   → expects at least 128 GB of RAM
+
+EXPECTED_GB="$1"
+
+if [[ -z "$EXPECTED_GB" ]]; then
+    echo "CRITICAL: Expected RAM (GB) not provided"
+    exit 2
+fi
+
+echo "Checking RAM capacity (expected: ${EXPECTED_GB} GB)"
+
+# Extract total memory in kB
+TOTAL_KB=$(grep MemTotal /proc/meminfo | awk '{print $2}')
+TOTAL_GB=$(( TOTAL_KB / 1024 / 1024 ))
+
+echo "Detected RAM: ${TOTAL_GB} GB"
+
+if (( TOTAL_GB < EXPECTED_GB )); then
+    echo "CRITICAL: RAM below expected threshold"
+    exit 2
+else
+    echo "OK: RAM meets expected capacity"
+    exit 0
+fi

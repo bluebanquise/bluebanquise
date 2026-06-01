@@ -1,0 +1,55 @@
+#!/bin/bash
+# Probe: Check PCIe link speed and detect AER events.
+# Usage: ./check_pcie.sh 16 16   → expects width x16 and speed 16 GT/s
+
+EXPECTED_WIDTH="$1"   # e.g., 16
+EXPECTED_SPEED="$2"   # e.g., 16 (GT/s)
+
+if [[ -z "$EXPECTED_WIDTH" || -z "$EXPECTED_SPEED" ]]; then
+    echo "CRITICAL: Expected width and speed must be provided"
+    exit 2
+fi
+
+echo "Checking PCIe devices for width x$EXPECTED_WIDTH and speed ${EXPECTED_SPEED}GT/s"
+
+ERROR_FOUND=0
+
+for dev in /sys/bus/pci/devices/*; do
+    WIDTH=$(cat "$dev/current_link_width" 2>/dev/null)
+    SPEED=$(cat "$dev/current_link_speed" 2>/dev/null | sed 's/ GT\/s//')
+
+    if [[ -z "$WIDTH" || -z "$SPEED" ]]; then
+        continue
+    fi
+
+    echo "Device $(basename "$dev"): width x$WIDTH, speed ${SPEED}GT/s"
+
+    if (( WIDTH < EXPECTED_WIDTH || SPEED < EXPECTED_SPEED )); then
+        echo "CRITICAL: PCIe link downgrade detected on $(basename "$dev")"
+        ERROR_FOUND=1
+    fi
+done
+
+#############################################
+# Check for AER events in dmesg
+#############################################
+
+AER=$(dmesg -T | grep -Ei "pcie.*error|aer|corrected|uncorrected")
+
+if [[ -n "$AER" ]]; then
+    echo "CRITICAL: PCIe AER events detected"
+    echo "$AER"
+    ERROR_FOUND=1
+fi
+
+#############################################
+# Final result
+#############################################
+
+if [[ "$ERROR_FOUND" -eq 0 ]]; then
+    echo "OK: PCIe links healthy and no AER events"
+    exit 0
+else
+    echo "CRITICAL: PCIe issues detected"
+    exit 2
+fi

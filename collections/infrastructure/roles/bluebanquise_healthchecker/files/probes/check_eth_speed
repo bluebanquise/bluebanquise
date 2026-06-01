@@ -1,0 +1,25 @@
+#!/bin/bash
+# Check Ethernet link speed using ethtool.
+# Usage: ./check_eth_speed.sh eth0 1000
+# Expected speed is in Mb/s (e.g., 1000 for 1Gb, 10000 for 10Gb)
+
+IFACE="$1"
+EXPECTED_SPEED="$2"
+
+echo "Checking Ethernet speed on interface: $IFACE"
+
+# Extract speed from ethtool output
+ACTUAL_SPEED=$(ethtool "$IFACE" 2>/dev/null | awk -F': ' '/Speed/ {gsub("Mb/s","",$2); print $2}')
+
+if [[ -z "$ACTUAL_SPEED" ]]; then
+    echo "CRITICAL: Could not read speed for $IFACE"
+    exit 2
+fi
+
+if [[ "$ACTUAL_SPEED" -eq "$EXPECTED_SPEED" ]]; then
+    echo "OK: $IFACE speed is ${ACTUAL_SPEED}Mb/s"
+    exit 0
+else
+    echo "CRITICAL: $IFACE speed is ${ACTUAL_SPEED}Mb/s but expected ${EXPECTED_SPEED}Mb/s"
+    exit 2
+fi

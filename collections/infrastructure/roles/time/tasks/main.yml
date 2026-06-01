@@ -34,7 +34,7 @@
   tags:
     - package
 
-- name: "template <|> Generate {{ time_chrony_conf_path }}"
+- name: "template <|> Generate chrony.conf"
   ansible.builtin.template:
     src: chrony.conf.j2
     dest: "{{ time_chrony_custom_conf_path | default(time_chrony_conf_path) }}"
