@@ -33,11 +33,11 @@ Now you can load the BlueBanquise environment (Python, Ansible and tools), using
 
 This command will have loaded a Python virtual environment located at ``/var/lib/bluebanquise/ansible_venv/`` and added ``/var/lib/bluebanquise/bluebanquise/stack/bin`` into PATH.
 
-Test you can now use the ``bluebanquise-ansible-playbook`` command:
+Test you can now use the ``ansible-playbook`` command:
 
 .. code-block:: text
   
-  $ bluebanquise-ansible-playbook --version
+  $ ansible-playbook --version
   ansible-playbook [core 2.19.2]
   config file = None
   ...
