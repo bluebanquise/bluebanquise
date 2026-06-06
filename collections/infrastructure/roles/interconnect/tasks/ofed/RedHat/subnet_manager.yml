@@ -4,11 +4,71 @@
   ansible.builtin.package:
     name: "{{ item }}"
     state: present
-  loop:
+  with_items:
     - opensm
     - opensm-libs
   tags:
     - package
+
+- name: Check OpenSM priority is in range [0,15]
+  ansible.builtin.assert:
+    that:
+      - interconnect_ofed_subnet_manager_priority is match('^(?:[0-9]|1[0-5])$')
+    fail_msg: >
+      interconnect_ofed_subnet_manager_priority
+      must be in the range [0,15].
+    success_msg: >
+      Subnetmanager priority set to : {{ interconnect_ofed_subnet_manager_priority }}
+
+- name: Configure OpenSM priority
+  ansible.builtin.lineinfile:
+    path: /etc/rdma/opensm.conf
+    regexp: '^sm_priority\s+'
+    line: "sm_priority {{ interconnect_ofed_subnet_manager_priority }}"
+    backup: true
+    state: present
+
+- name: List all InfiniBand devices
+  ansible.builtin.find:
+    paths: /sys/class/infiniband
+    file_type: directory
+  register: interconnect_ib_devices
+
+- name: Find the first valid and active infiniband device
+  ansible.builtin.shell: |
+    for dev in /sys/class/infiniband/*; do
+      for port in $dev/ports/*; do
+        if [ -f "$port/link_layer" ] && grep -qi "InfiniBand" "$port/link_layer"; then
+           if [ -f "$port/state" ] && grep -qi "ACTIVE" "$port/state"; then
+              basename $dev
+              exit 0
+           fi
+        fi
+      done
+    done
+  register: interconnect_ib_device
+  changed_when: false
+  failed_when: interconnect_ib_device.stdout == ""
+
+- name: Read the node_guid of the detected device
+  ansible.builtin.slurp:
+    src: "/sys/class/infiniband/{{ interconnect_ib_device.stdout }}/node_guid"
+  register: interconnect_ib_guid_raw
+
+- name: Convert node_guid format for OpenSM use
+  ansible.builtin.set_fact:
+    interconnect_opensm_guid: >-
+      0x{{ interconnect_ib_guid_raw.content
+            | b64decode
+            | trim
+            | replace(':', '') }}
+
+- name: Configure OpenSM GUID to access the selected interface
+  ansible.builtin.lineinfile:
+    path: /etc/rdma/opensm.conf
+    regexp: '^guid\s+'
+    line: "guid {{ interconnect_opensm_guid }}"
+    state: present
 
 - name: service <|> Manage opensm state
   ansible.builtin.service:
