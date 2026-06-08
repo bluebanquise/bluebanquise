@@ -4,6 +4,10 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.4 or 4.0
 
+* 08/06/2026 - oxedions [http_server] Fix an old bug in custom listen template
+* 08/06/2026 - yosinn1-blip - [doc] fix ansible-playbook command name (#1246)
+* 08/06/2026 - vkreischerg - [pxe_stack] Fix bluebanquise-bootset when missing arguments (#1245)
+* 08/06/2026 - patrick-begou - [interconnect] OpenSM deployment improved (#1247)
 * 15/05/2026 - oxedions - [users] Enable deactivating ssh keys
 * 15/05/2026 - oxedions - [new] New logrotate role, reduce rsyslog scope
 * 15/05/2026 - oxedions - [all] Update all major roles to use filters

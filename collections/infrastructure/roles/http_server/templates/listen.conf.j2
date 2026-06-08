@@ -10,9 +10,11 @@ Listen {{ nic.ip4 }}:80
     {% if ipport.split(':') | length > 1 %}
       {% if ipport.split(':')[0] | ansible.utils.ipaddr %}
 Listen {{ ipport.split(':')[0] }}:{{ ipport.split(':')[1] }}
-    {% elif (ipport | ansible.utils.ipaddr) %}
+      {% elif (ipport | ansible.utils.ipaddr) %}
 Listen {{ ipport }}:80
-    {% else %}
+      {% else %}
 Listen {{ ipport }}
+      {% endif %}
+    {% endif %}
   {% endfor %}
 {% endif %}
