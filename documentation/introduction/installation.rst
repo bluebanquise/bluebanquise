@@ -22,26 +22,11 @@ Login as the bluebanquise user:
 
   sudo su - bluebanquise
 
-Now you can load the BlueBanquise environment (Python, Ansible and tools), using the ``bluebanquise-environment`` command:
+This user can be considered as the "cluster admin user". Deployed nodes for example will automatically have
+the bluebanquise user configured and ssh keys set so that you can ssh on them.
 
-.. code-block:: text
-
-  /var/lib/bluebanquise/bluebanquise/stack/bin/bluebanquise-environment load
-
-.. note::
-  You can unload this environment at anytime using ``unload`` instead of ``load`` at the end of this command.
-
-This command will have loaded a Python virtual environment located at ``/var/lib/bluebanquise/ansible_venv/`` and added ``/var/lib/bluebanquise/bluebanquise/stack/bin`` into PATH.
-
-Test you can now use the ``bluebanquise-ansible-playbook`` command:
-
-.. code-block:: text
-  
-  $ bluebanquise-ansible-playbook --version
-  ansible-playbook [core 2.19.2]
-  config file = None
-  ...
-
-BlueBanquise is now installed on the current system.
+BlueBanquise tool is now installed on the current system (but not deployed yet!).
 
 Next step is to create your first inventory to define and configure your cluster.
+
+You can also, if needed, have a quick look to the vocabulary page (this is not mandatory).

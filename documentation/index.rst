@@ -4,7 +4,7 @@ BlueBanquise Documentation
 
 .. warning::
 
-   11/07/2025 - THIS NEW DOCUMENTATION IS UNDER PROGRESS
+   19/05/2026 - THIS NEW DOCUMENTATION IS UNDER PROGRESS
 
    I am doing my best to provide you a super new documentation, please be patient and report me any issues you might see.
 

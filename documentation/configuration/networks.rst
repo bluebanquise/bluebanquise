@@ -4,20 +4,20 @@ Networks
 
 BlueBanquise networking relies on the ``networks`` dict definition in the Ansible inventory, and on nodes ``network_interfaces`` definitions.
 
+Concept is simple: logical networks are defined under ``networks`` dict, and each hosts is linked to one or multiple of these logical networks via its ``network_interfaces``.
+
 Understanding logic
 ===================
 
 Before listing available parameters, it is important to understand the network logic.
 
-Under ``networks`` key: each network listed that starts with previx ``net-`` is considered **a management network** (also refered as an administration network), while other networks are considered basic networks.
+* Under ``networks`` key: each network listed that starts with previx ``net-`` is considered **a management network** (also refered as an administration network), while other networks are considered basic networks.
 A management network is designed to host low level vital resources, like DHCP, DNS, NTP, PXE, BMCs management (IPMI/RedFish), etc, while basic networks are designed to host all other usages, like data transfers, calculations exchanges, etc.
 
-Under ``network_interfaces`` of a node:
+* Under ``network_interfaces`` of an host:
 
-1. First interface in the list is considered by the stack the "ping" (node_main_resolution) interface, and so resolving direct node hostname will end up on this interface
-2. First interface in the list, linked to a management network, is considered by the stack being the node deployment interface (node_main_network), and so is used by PXE and Ansible (ssh) to deploy and reach the node.
-
-If you need, you can check the logic code (Jinja2) in the vars plugin of bluebanquise infrastructure collection.
+  1. First interface in the list is considered by the stack the "ping" (node_main_resolution) interface, and so resolving direct node hostname will end up on this interface
+  2. First interface in the list, linked to a management network, is considered by the stack being the node deployment interface (node_main_network), and so is used by PXE and Ansible (ssh) to deploy and reach the node via ssh
 
 Networks definition
 ===================

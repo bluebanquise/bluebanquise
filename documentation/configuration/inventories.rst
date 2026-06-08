@@ -7,41 +7,26 @@ Create first inventory
 
 You can now create your first cluster inventory, which acts as a text/folders based database of your cluster description.
 
-To do so, you can either create it manually from scratch using the remaining documentation, or initialize it with the ``bluebanquise-manager`` tool.
-Both methods are exposed bellow.
-
-.. Create inventory using tools
-.. ----------------------------
-
-.. .. code-block:: text
-
-..   bluebanquise-manager create-inventory
-
-.. .. note::
-
-..   This tool was made to cover basic clusters. In order to create a complex inventory, please refer to the documentation.
-..   It is possible to use both the tool and custom files. The tool will always prefix its files with ``bbm_`` prefix. Edit these files with care.
-..   Other files will be ignored by the tool, but not during Ansible execution.
-
 Create inventory manually
 -------------------------
 
 Create inventories folder, and then create inside this path a new folder with your desired inventory name.
-In this example, we will call our inventory **default**.
+In this example, we will call our inventory **new_cluster**.
 
 .. code-block:: text
 
   mkdir -p /var/lib/bluebanquise/inventories/
-  mkdir /var/lib/bluebanquise/inventories/default/
+  mkdir /var/lib/bluebanquise/inventories/new_cluster/
 
 Now create the group_vars all Ansible structure inside the inventory, along with the cluster folder.
 
 .. code-block:: text
 
-  mkdir -p /var/lib/bluebanquise/inventories/default/group_vars/all/
-  mkdir -p /var/lib/bluebanquise/inventories/default/cluster
+  mkdir -p /var/lib/bluebanquise/inventories/new_cluster/group_vars/all/
+  mkdir -p /var/lib/bluebanquise/inventories/new_cluster/cluster
 
 Now, set your cluster domain name, and the cluster timezone (tune according to your needs).
+These are defined by 2 global variables: bb_domaine_name and bb_time_zone.
 
 .. note::
 
@@ -49,8 +34,8 @@ Now, set your cluster domain name, and the cluster timezone (tune according to y
 
 .. code-block:: text
 
-  echo 'bb_domaine_name: "bluebanquise.cluster.local"' > /var/lib/bluebanquise/inventories/default/group_vars/all/dns.yml
-  echo 'bb_time_zone: "Europe/Brussels"' > /var/lib/bluebanquise/inventories/default/group_vars/all/time.yml
+  echo 'bb_domaine_name: "bluebanquise.cluster.local"' > /var/lib/bluebanquise/inventories/new_cluster/group_vars/all/dns.yml
+  echo 'bb_time_zone: "Europe/Brussels"' > /var/lib/bluebanquise/inventories/new_cluster/group_vars/all/time.yml
 
 Now create your first network. Current configuration is basic, you will be able to add more elements later.
 Our first network will be called ``net-admin``. Please note that the prefix ``net-`` is mandatory here. This will be explained in the
@@ -60,7 +45,7 @@ Note also that we will consider here that our primary management node will be on
 
 .. code-block:: text
 
-  cat << EOF > /var/lib/bluebanquise/inventories/default/group_vars/all/networks.yml
+  cat << EOF > /var/lib/bluebanquise/inventories/new_cluster/group_vars/all/networks.yml
   networks:
     net-admin:
       subnet: 10.10.0.0
@@ -73,7 +58,7 @@ We will consider that it's network interface connected on the net-admin network 
 
 .. code-block:: text
 
-  cat << EOF > /var/lib/bluebanquise/inventories/default/cluster/nodes.yml
+  cat << EOF > /var/lib/bluebanquise/inventories/new_cluster/cluster/nodes.yml
   all:
     hosts:
 
@@ -97,18 +82,18 @@ management nodes should always be in this group.
 
 .. code-block:: text
 
-  cat << EOF > /var/lib/bluebanquise/inventories/default/cluster/fn
+  cat << EOF > /var/lib/bluebanquise/inventories/new_cluster/cluster/fn
   [fn_management]
   mgt1
   EOF
 
-  cat << EOF > /var/lib/bluebanquise/inventories/default/cluster/os
-  [fn_management]
+  cat << EOF > /var/lib/bluebanquise/inventories/new_cluster/cluster/os
+  [os_ubuntu_24.04]
   mgt1
   EOF
 
-  cat << EOF > /var/lib/bluebanquise/inventories/default/cluster/hw
-  [fn_management]
+  cat << EOF > /var/lib/bluebanquise/inventories/new_cluster/cluster/hw
+  [hw_MSI_X99A_SLI]
   mgt1
   EOF
 
@@ -116,10 +101,25 @@ You can now check that your syntax is valid using the ansible-inventory command:
 
 .. code-block:: text
 
-  ansible-inventory -i /var/lib/bluebanquise/inventories/default/ --graph
+  ansible-inventory -i /var/lib/bluebanquise/inventories/new_cluster/ --graph
 
 If you don't see any errors, then your first inventory is ready.
 You can now customize it using next parts of the documentation.
+
+Optional - Convert inventory into a git repository
+--------------------------------------------------
+
+Converting the inventory into a git repository is optional, but recommended (especially if multiple users are editing the inventory).
+It will allow you to keep track of changes made in the inventory, and revert in case you made an error.
+
+.. code-block:: text
+
+  cd /var/lib/bluebanquise/inventories/new_cluster/
+  git init
+  git add .
+  git commit -m "First commit"
+
+Remember to always commit your changes if you use git.
 
 Where to set variables
 ======================
@@ -146,7 +146,7 @@ Explanations:
 1. A node defined in the inventory is by default member of group "all". So it will inherit of all files stored into ``group_vars/all/`` folder.
 2. A node can be member of a group (or multiple groups). It will then inherit of all the files stored in the group(s) folder(s). For example, if the node is part of group "red", it will inherit of all files stored into ``group_vars/red/`` folder.
 3. A node can inherit from its dedicated files. If the node name is "c001", then it will inherit of all files stored into ``host_vars/c001/`` folder.
-4. A node can also inherit from variables specified under its name into ``cluster/nodes.yml`` file.
+4. A node can also inherit from variables specified under its name into ``cluster/nodes/foobar.yml`` file.
 
 Now that a node has inherited files, precedence mechanism takes place:
 
@@ -168,3 +168,5 @@ So ``cluster`` or ``host_vars`` (considered same level) win against ``group_vars
 
 You can use all of that to create and configure your desired cluster, stack will adapt to this.
 Only limitation is about ``os_`` and ``hw_`` prefixed variables that should only be set in ``group_vars/X`` or ``group_vars/all/`` folders (never at host_vars).
+
+You can now review the stack general settings.

@@ -23,7 +23,7 @@ echo '
     (/)_ (/)_ V_/_
 
     BlueBanquise bootstrap.
-    v 3.2.0
+    v 3.4.0
     Benoit Leveugle <oxedions@gmail.com>
 '
 echo -e "\e[39m"
@@ -47,7 +47,7 @@ echo
 
 echo " Welcome to the BlueBanquise stack base bootstraper."
 echo
-echo -e " \e[31mThis tool is going to:"
+echo -e " This tool is going to:"
 echo -e " 1. Install required packages to run Ansible (only from your distribution's repositories)"
 echo -e " 2. Create a user called 'bluebanquise', sudo able, with home set at /var/lib/bluebanquise"
 echo -e " 3. Login as this bluebanquise user, and create a Python virtual environment with Ansible in it"
@@ -56,7 +56,7 @@ echo -e " Note that all these 2 last steps are contained inside the bluebanquise
 echo -e " To do all of that, this script will do few actions with priviledged user (sudo/root)."
 echo -e " All logs will be stored inside /var/log/bluebanquise/bootstrap."
 echo -e " You can relaunch this script with the --debug flag to enable debug mode."
-echo -e " Are you ok with all of that?"
+echo -e " \e[31mAre you ok with all of that?"
 echo -e "\e[0m"
 
 echo

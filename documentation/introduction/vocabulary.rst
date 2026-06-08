@@ -19,7 +19,7 @@ something else.
 
 |
 
-Hosts are defined in *~/bluebanquise/inventory/cluster/nodes*.
+Hosts are defined in *~/bluebanquise/inventory/cluster/nodes/.
 
 Please do a difference between an **Ansible managed host**, and a **host**.
 All equipment that can have an ip address on the network are considered "host",
@@ -168,40 +168,6 @@ Output will be:
 
 Jinja2 will be discussed later, do not worry about this point for now.
 
-j2 variables
-^^^^^^^^^^^^
-
-These are **BlueBanquise** specific variables.
-All variables with name starting by **j2_** are j2 variables.
-
-These variables are here to simplify tasks and templates writing, and centralize
-main logic of the stack.
-To clarify your mind, you can consider that these variables contain Jinja2 code
-as a string, that will be interpreted by Ansible during tasks/templates
-execution.
-
-Remember that in any case, if these variables are not providing the expected
-value, you can use Ansible variables precedence mechanism to force your values.
-
-Last point, for developers, these j2 variables should be considered as a way to
-keep compatibility with roles, while upgrading the logic of the stack. Do not
-hesitate to use them in roles, to ensure long term compatibility.
-
-bb variables
-^^^^^^^^^^^^
-
-These are **BlueBanquise** specific variables.
-All variables with name starting by **bb_** are bb variables.
-
-These variables are transverse variables, which means they will precedence any roles' owned related variables.
-
-Their purpose is to allow a simple centralisation of global values.
-
-A good example is the domain name of the cluster: using roles's variables,
-admin would have to define with the exact same value ``pxe_stack_domain_name``,
-``dns_server_domain_name``, ``dhcp_server_domain_name``, etc. This would be a pain.
-Defining ``bb_domain_name`` can replace all of them at once.
-
 Inventory, roles, and playbooks
 -------------------------------
 
@@ -294,19 +260,34 @@ Full documentation is available in a "single page":
 Stack vocabulary
 ================
 
-Icebergs
---------
+j2 variables
+------------
 
-Icebergs are logical (and often physical) isolation of ethernet management
-networks. Most of the time, icebergs are used to:
+These are **BlueBanquise** specific variables.
+All variables with name containing **j2_** are j2 variables.
 
-* Spread load over multiple managements servers (for very large clusters). Icebergs are also often called "islands" in these cases.
-* Secure cluster by dividing specific usages, to prevent compromised system to access all the network.
+These variables are here to simplify tasks and templates writing.
+To clarify your mind, you can consider that these variables contain Jinja2 code
+as a string, that will be interpreted by Ansible during tasks/templates
+execution.
 
-One Iceberg is composed of one or multiple managements servers, **in charge of
-the same pool of nodes**.
+Remember that in any case, if these variables are not providing the expected
+value, you can use Ansible variables precedence mechanism to force your values.
 
-**BlueBanquise** support many kinds of configurations, but most common are:
+bb variables
+------------
+
+These are **BlueBanquise** specific variables.
+All variables with name starting by **bb_** are bb variables.
+
+These variables are transverse variables, which means they will precedence any roles' owned related variables.
+
+Their purpose is to allow a simple centralisation of global values.
+
+A good example is the domain name of the cluster: using roles's variables,
+admin would have to define with the exact same value ``pxe_stack_domain_name``,
+``dns_server_domain_name``, ``dhcp_server_domain_name``, etc. This would be a pain.
+Defining ``bb_domain_name`` can replace all of them at once.
 
 Equipment profiles
 ------------------
