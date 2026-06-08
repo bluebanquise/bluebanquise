@@ -11,6 +11,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 * 15/05/2026 - oxedions - [http_server] Fix typo issue (#1150)
 * 15/05/2026 - oxedions - [core] Add new filters, deprecate vars plugin
 * 15/05/2026 - oxedions - [new] add bb healthchecker and power
+* 13/05/2026 - neoteam - [pxe_stack] bluebanquise-diskless support el10 (#1236)
 * 21/04/2026 - hmeScaler - [users] fix absent user handling and refresh role documentation (#1234)
 * 31/03/2026 - sgaosdgr      - [nic] set permission on /etc/netplan/01-netcfg.yaml to 0600 (#1228)
 * 19/03/2026 - thiagocardozo - [dhcp_server] Fixed reference to old variable (#1226)
