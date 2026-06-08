@@ -7,6 +7,7 @@
 # ██████╔╝███████╗╚██████╔╝███████╗██████╔╝██║  ██║██║ ╚████║╚██████╔╝╚██████╔╝██║███████║███████╗
 # ╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚══▀▀═╝  ╚═════╝ ╚═╝╚══════╝╚══════╝
 #
+# 2.1.0: Added support to el10 images. Neo Team <dl-fr-bds-hpc-neocore@bull.com>
 # 2.0.9: Fix user creation when host node is running SELinux in enforcing mode. Teo Blachere <teo.blachere@eviden.com>
 # 2.0.8: Fix check user and group presence before creation. Teo Blachere <teo.blachere@eviden.com>
 # 2.0.7: Update boot.ipxe when cloning reference image. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
@@ -143,7 +144,7 @@ def display_images(image_type, tool_paths):
         else:
             print(" BOOTSTRAP IMAGES: none found")
             return 1
-    
+
     if image_type == "reference":
 
         # Gather reference images
@@ -456,7 +457,7 @@ while True:
         logging.info(bcolors.OKBLUE + "Creating image folder at " + reference_image_pxe_path + bcolors.ENDC)
         protected_os_system("mkdir -p " + reference_image_pxe_path)
 
-        if image_selected_metadata['family'] == "el9":
+        if image_selected_metadata['family'] in ["el9", "el10"]:
             protected_os_system("cp " + reference_image_nfs_path + "/boot/initramfs-" + image_selected_metadata['kernel'] + ".img " + reference_image_pxe_path + "/initramfs-" + image_selected_metadata['kernel'] + ".img")
             protected_os_system("cp " + reference_image_nfs_path + "/usr/lib/modules/" + image_selected_metadata['kernel'] + "/vmlinuz " + reference_image_pxe_path + "/vmlinuz-" + image_selected_metadata['kernel'])
         elif image_selected_metadata['family'] == "el8":
@@ -530,11 +531,11 @@ while True:
         logging.info(bcolors.OKBLUE + 'Adding bluebanquise user to image...' + bcolors.ENDC)
         protected_os_system("mkdir -p " + reference_image_nfs_path + os.path.dirname(tool_parameters['sudo_user_home']))
 #            protected_os_system("useradd  -R " + tool_parameters['nfs_path'] + "/" + image_selected_input + "/ -m -c 'BlueBanquise user' -d /var/lib/bluebanquise --system -g bluebanquise -s /bin/bash bluebanquise")
-        
+
         # Required if host node is running SELinux in enforcing mode
         protected_os_system("mkdir -p " + reference_image_nfs_path + "/sys/fs/selinux")
         protected_os_system("echo '0' > " + reference_image_nfs_path + "/sys/fs/selinux/enforce")
-        
+
         # create group in image, skip if already created
         protected_os_system("/usr/bin/grep -q '^" + tool_parameters['sudo_user'] + ":' " + reference_image_nfs_path + "/etc/group || /usr/sbin/groupadd -R " + reference_image_nfs_path + "/ --system " + tool_parameters['sudo_user'])
 
@@ -631,7 +632,7 @@ while True:
 
         logging.info(bcolors.OKBLUE + 'Copying new kernel from nfs image to http folder...' + bcolors.ENDC)
 
-        if image_selected_metadata['family'] == "el9":
+        if image_selected_metadata['family'] in ["el9", "el10]":
             protected_os_system("cp -a " + reference_image_nfs_path + "/boot/initramfs-" + kernel_selected + ".img " + reference_image_pxe_path + "/initramfs-" + kernel_selected + ".img")
             protected_os_system("cp -a " + reference_image_nfs_path + "/lib/modules/" + kernel_selected + "/vmlinuz " + reference_image_pxe_path + "/vmlinuz-" + kernel_selected)
             protected_os_system("chmod 644 " + reference_image_pxe_path + "/initramfs-*")
@@ -647,7 +648,7 @@ while True:
         print(" You will need to restart the node for changes to take effect.")
 
     if main_action == '6':
-            
+
         if display_images("reference", tool_paths) == 1: continue
 
         image_selected_input = get_user_input(" Please enter reference image to clone:", validate_name=True)
@@ -818,7 +819,7 @@ while True:
         if str(delete_image_type) == "1":
 
             if display_images("bootstrap", tool_paths) == 1: continue
-            
+
             delete_image = get_user_input("\n Please enter bootstrap image name to be deleted:", validate_name=True)
             bootstrap_image_path = get_bootstrap_image_path(tool_paths, delete_image)
             logging.info(bcolors.OKBLUE + 'Deleting image...' + bcolors.ENDC)
@@ -827,7 +828,7 @@ while True:
         if str(delete_image_type) == "2":
 
             if display_images("reference", tool_paths) == 1: continue
-            
+
             delete_image = get_user_input("\n Please enter reference image name to be deleted:", validate_name=True)
             reference_image_nfs_path = get_reference_image_nfs_path(tool_paths, delete_image)
             reference_image_pxe_path = get_reference_image_pxe_path(tool_paths, delete_image)
@@ -941,7 +942,7 @@ Remember to skip "identify" and "secret" tags:
 
 ```
 ansible-playbook --become --skip-tags identify,secret /path/to/playbook.yml
-``` 
+```
 
 ### Using chroot
 
@@ -1005,7 +1006,7 @@ If using BlueBanquise roles, simply apply playbook with missing tags:
 
 ```
 ansible-playbook --become --tags identify,secret /path/to/playbook.yml
-```  
+```
 
 ## Debug and errors
 
@@ -1036,7 +1037,7 @@ It is possible to see that this even fail with nfs 4.2 mount:
  Flags: rw,relatime,vers=4.2,rsize=1048576,wsize=1048576,namlen=255,hard,proto=tcp,timeo=600,retrans=2,sec=sys,clientaddr=10.10.0.8,local_lock=none,addr=10.10.0.1
 [bluebanquise@c001 ~]$
 ```
- 
+
 Solution is to install the failing package using chroot method on NFS server:
 
 ```

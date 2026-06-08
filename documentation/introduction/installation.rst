@@ -25,6 +25,15 @@ Login as the bluebanquise user:
 This user can be considered as the "cluster admin user". Deployed nodes for example will automatically have
 the bluebanquise user configured and ssh keys set so that you can ssh on them.
 
+Test you can now use the ``ansible-playbook`` command:
+
+.. code-block:: text
+  
+  $ ansible-playbook --version
+  ansible-playbook [core 2.19.2]
+  config file = None
+  ...
+
 BlueBanquise tool is now installed on the current system (but not deployed yet!).
 
 Next step is to create your first inventory to define and configure your cluster.
