@@ -124,40 +124,39 @@ scrape_configs:
 {% endfor %}
 
 # MODBUS_EXPORTER
-{% if prometheus_modbus_tcp_scrape_hardware_groups is defined and prometheus_modbus_tcp_scrape_hardware_groups %}
-{% for hw_group in prometheus_modbus_tcp_scrape_hardware_groups %}
-  - job_name: 'modbus_exporter_tcp_{{ hw_group.name }}'
-    scrape_interval: {{ hw_group.scrape_interval | default('') }}
-    scrape_timeout: {{ hw_group.scrape_timeout | default('') }}
+{% for hardware in prometheus_modbus_tcp_scrape_hardware_groups %}
+  - job_name: 'modbus_tcp_{{ hardware.name }}'
+    scrape_interval: {{ hardware.scrape_interval | default('') }}
+    scrape_timeout: {{ hardware.scrape_timeout | default('') }}
     metrics_path: /modbus
     static_configs:
-{% for modbus_tcp_host in groups[hw_group.name] | default([]) %}
-{% for modbus_rtu_device in hostvars[modbus_tcp_host]['modbus_rtu_devices'] | default ([]) %}
-    - targets: ["{{ modbus_rtu_device.name }}"]
+{% for tcp_host in groups[hardware.name] | default([]) %}
+{% for modbus_device in hostvars[tcp_host].modbus_tcp_devices | default ([]) %}
+    - targets: ["{{ modbus_device.name | default(tcp_host) }}"]
       labels:
-        module: "{{ modbus_rtu_device.modbus_module }}"
-        target: "{{ modbus_tcp_host }}:{{ hw_group.port | default('502') }}"
-        sub_target: "{{ modbus_rtu_device.modbus_rtu_address }}"
-{% if modbus_rtu_device.labels is defined and modbus_rtu_device.labels %}
-{% for label_key, label_value in modbus_rtu_device.labels.items() %}
-        {{ label_key }}: "{{ label_value }}"
-{% endfor %}
+        module: "{{ modbus_device.exporter_module }}"
+        target: "{{ tcp_host }}:{{ hostvars[tcp_host].modbus_tcp_port | default(hardware.port) | default('502') }}"
+        sub_target: "{{ modbus_device.id | default('1') }}"
+{% if modbus_device.labels is defined and modbus_device.labels %}
+  {% for label, value in modbus_device.labels.items() %}
+        {{ label }}: "{{ value }}"
+  {% endfor %}
 {% endif %}
-{% if modbus_tcp_host.labels is defined and modbus_tcp_host.labels %}
-{% for label_key, label_value in modbus_tcp_host.labels.items() %}
-{% if modbus_rtu_device.labels is not defined or not modbus_rtu_device.labels or label_key not in modbus_rtu_device.keys() %}
-        {{ label_key }}: "{{ label_value }}"
-{% endif %}]
-{% endfor %}
+{% if hostvars[tcp_host].labels is defined and hostvars[tcp_host].labels %}
+  {% for label, value in hostvars[tcp_host].labels.items() %}
+    {% if modbus_device.labels is not defined or not modbus_device.labels or label not in modbus_device.labels.keys() %}
+        {{ label }}: "{{ value }}"
+    {% endif %}
+  {% endfor %}
 {% endif %}
-{% if hw_group.labels is defined %}
-{% for label_key, label_value in hw_group.labels.items() %}
-{% if modbus_rtu_device.labels is not defined or not modbus_rtu_device.labels or label_key not in modbus_rtu_device.keys() %}
-{% if modbus_tcp_host.labels is not defined or not modbus_tcp_host.labels or label_key not in modbus_tcp_host.keys() %}
-        {{ label_key }}: "{{ label_value }}"
-{% endif %}
-{% endif %}]
-{% endfor %}
+{% if hardware.labels is defined and hardware.labels %}
+  {% for label, value in hardware.labels.items() %}
+    {% if modbus_device.labels is not defined or not modbus_device.labels or label not in modbus_device.labels.keys() %}
+      {% if hostvars[tcp_host].labels is not defined or not hostvars[tcp_host].labels or label not in hostvars[tcp_host].labels.keys() %}
+        {{ label }}: "{{ value }}"
+      {% endif %}
+    {% endif %}
+  {% endfor %}
 {% endif %}
 {% endfor %}
 {% endfor %}
@@ -173,7 +172,6 @@ scrape_configs:
       - target_label: __address__
         replacement: "{{ prometheus_server_modbus_exporter_host | default('localhost') }}:{{ prometheus_server_modbus_exporter_port | default('9602') }}"
 {% endfor %}
-{% endif %} 
 
 # BMC - IPMI_EXPORTER
 {% for hardware in prometheus_ipmi_scrape_hardware_groups %}
