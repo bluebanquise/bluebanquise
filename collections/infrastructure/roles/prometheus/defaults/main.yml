@@ -26,6 +26,7 @@ prometheus_server_am_executor_host: localhost
 prometheus_server_ipmi_exporter_host: localhost
 prometheus_server_snmp_exporter_host: localhost
 prometheus_server_modbus_exporter_host: localhost
+prometheus_server_modbus_exporter_listen_address: "{{ prometheus_server_modbus_exporter_host }}"
 prometheus_server_modbus_exporter_port: 9602
 
 prometheus_server_prometheus_user_gid: 909
@@ -59,6 +60,9 @@ prometheus_server_ipmi_exporter_launch_parameters: |
 prometheus_server_snmp_exporter_launch_parameters: |
   --config.file=/etc/snmp_exporter/snmp.yml
 
+prometheus_server_modbus_exporter_service_template: "modbus_exporter.service.j2"
+prometheus_server_modbus_exporter_config_template: "modbus.yml.j2"
+prometheus_server_modbus_exporter_additional_modules: []
 prometheus_server_modbus_exporter_launch_parameters: |
   --config.file=/etc/modbus_exporter/modbus.yml
 
