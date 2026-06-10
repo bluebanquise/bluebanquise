@@ -3,6 +3,7 @@
 Format: <date> - <author (username or mail or both)> - [role] <change description>
 
 # 3.2.8
+* 2026-06-10 - jethi05, sc-alex - [prometheus] Initial support for modbus_exporter
 * 13/05/2026 - neoteam - [pxe_stack] bluebanquise-disklesset accepts el10 (#1235)
 * 20/04/2026 - thiagocardozo - [prometheus] Fixed role using wrong credentials (#1227)
 * 26/03/2026 - patrice-duc-jacquet - [dns_server] Reverse zone generation very slow (#1220)

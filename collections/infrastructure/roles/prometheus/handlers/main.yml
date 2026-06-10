@@ -46,6 +46,15 @@
     - "'service' not in ansible_skip_tags"
     - prometheus_start_services | default(bb_start_services) | default(true) | bool
 
+- name: service <|> Restart modbus_exporter service
+  ansible.builtin.service:
+    name: modbus_exporter
+    state: restarted
+  when:
+    - "'service' not in ansible_skip_tags"
+    - prometheus_start_services | default(bb_start_services) | default(true) | bool
+
+
 - name: systemd <|> Reload systemd configuration
   ansible.builtin.systemd:
     daemon_reload: yes
