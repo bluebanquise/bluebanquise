@@ -18,6 +18,7 @@ The BlueBanquise stack will install Prometheus and its eco-system:
 * Karma (a dashboard for AlertManager)
 * ipmi_exporter
 * snmp_exporter
+* modbus_exporter
 * other exporters provided by admin:
   * slurm_exporter
   * node_exporter
@@ -70,6 +71,7 @@ In the basic usage, the server role will install and setup the following tools:
 * Karma: dashboard to monitor alerts managed by Alertmanager.
 * ipmi_exporter: translate ipmi data to http scrapable by Prometheus (not installed by default).
 * snmp_exporter: translate snmp data to http scrapable by Prometheus (not installed by default).
+* modbus_exporter: translate Modbus-TCP data to http scrapable by Prometheus (not installed by default).
 
 Which means all of these services will, be running on the same
 management host.
@@ -86,6 +88,7 @@ here, are available:
   prometheus_server_manage_am_executor: false
   prometheus_server_manage_ipmi_exporter: false
   prometheus_server_manage_snmp_exporter: false
+  prometheus_server_manage_modbus_exporter: false
 
 
 Prometheus configuration
@@ -352,12 +355,13 @@ You can fine tune the service configuration using dedicated parameters
           - Restart=always
           - RestartSec=1
 
-IPMI and SNMP
+IPMI, SNMP and Modbus
 =============
 
-ipmi_exporter and snmp_exporter behave differently: they act as translation
-gateways between Prometheus and the target. Which means, if you wish for example
-to query IPMI data of a node, you do not install the exporter on the node itself.
+ipmi_exporter, snmp_exporter and modbus_exporter behave differently: they act as
+translation gateways between Prometheus and the target.
+Which means, if you wish for example to query IPMI data of a node, you do not
+install the exporter on the node itself.
 You query the ipmi_exporter, which will itself query the target for IPMI data.
 This is why, in the basic configuration, these two exporters are installed by
 the server part of the role and not the client part.
@@ -367,8 +371,9 @@ respective variables to true or false, according to your needs:
 
 .. code-block:: yaml
     
-  prometheus_server_manage_ipmi: true
-  prometheus_server_manage_snmp: false
+  prometheus_server_manage_ipmi_exporter: true
+  prometheus_server_manage_snmp_exporter: false
+  prometheus_server_manage_modbus_exporter: false
 
 You then need to specify which hardware groups of nodes have to be
 ipmi scraped. To do so, simply set the global variable ``prometheus_ipmi_scrape_hardware_groups`` 
@@ -404,6 +409,39 @@ You can also create an snmp configuration using the ``prometheus_snmp_scrape_har
     - name: hw_wcd
       snmp_module: wcd
 
+For Modbus it's ``prometheus_modbus_tcp_scrape_hardware_group``, e.g.:
+
+.. code-block:: yaml
+
+  prometheus_modbus_scrape_hardware_groups:
+    - name: wilo_pumps
+      scrape_interval: 15s
+      scrape_timeout: 15s
+      labels:
+        device_type: "pump"
+
+but also definitions on device level are required, e.g.:
+
+.. code-block:: yaml
+
+  all:
+    hosts:
+      wilo1:
+        labels:
+          rack: "rack42"
+        modbus_tcp_devices:
+          - id: 1
+            exporter_module: "wilo_stratos_maxo"
+            labels:
+              __scrape_interval__: "30s"
+
+All the ``label`` variables specified above are optional prometheus labels.
+
+The rather complicated structure of the configuration of modbus_exporter is due
+to the exporter being the "gateway" to query Modbus-TCP devices which are
+technically "gateways" to a Modbus-RTU network containing an arbitrary amount
+of devices.
+
 Advanced usage
 ==============
 
@@ -425,17 +463,20 @@ to tune launch parameters of each tool:
     --web.console.templates=/etc/prometheus/consoles \
     --web.console.libraries=/etc/prometheus/console_libraries $PROMETHEUS_OPTIONS
 
-  alertmanager_launch_parameters: |
+  prometheus_server_alertmanager_launch_parameters: |
     --config.file=/etc/alertmanager/alertmanager.yml
 
-  karma_launch_parameters: |
+  prometheus_server_karma_launch_parameters: |
     --config.file=/etc/karma/karma.yml
 
-  ipmi_exporter_launch_parameters: |
+  prometheus_server_ipmi_exporter_launch_parameters: |
     --config.file=/etc/ipmi_exporter/ipmi_config.yml
 
-  snmp_exporter_launch_parameters: |
+  prometheus_server_snmp_exporter_launch_parameters: |
     --config.file=/etc/snmp_exporter/snmp.yml
+
+  prometheus_server_modbus_exporter_launch_parameters: |
+    --config.file=/etc/modbus_exporter/modbus.yml
 
 For example, to manipulate data retention (default 15 days) and ask for 60 days,
 set this variable:
@@ -505,6 +546,7 @@ configuration as host1 dedicated hostvars :
   prometheus_server_manage_am_executor: false
   prometheus_server_manage_ipmi_exporter: false
   prometheus_server_manage_snmp_exporter: false
+  prometheus_server_manage_modbus_exporter: false
 
 And activate them on the host you wish them to run (host2), using the opposite values for host2 dedicated hostvars:
 
@@ -516,6 +558,7 @@ And activate them on the host you wish them to run (host2), using the opposite v
   prometheus_server_manage_am_executor: false
   prometheus_server_manage_ipmi_exporter: true
   prometheus_server_manage_snmp_exporter: true
+  prometheus_server_manage_modbus_exporter: true
 
 To ensure everyone can communicate, set now these global variables in
 group_vars/all (these variables are all set to localhost by default):
@@ -528,6 +571,7 @@ group_vars/all (these variables are all set to localhost by default):
   prometheus_server_am_executor_host:
   prometheus_server_ipmi_exporter_host: host2
   prometheus_server_snmp_exporter_host: host2
+  prometheus_server_modbus_exporter_host: host2
 
 This can be used to spread all main services.
 
