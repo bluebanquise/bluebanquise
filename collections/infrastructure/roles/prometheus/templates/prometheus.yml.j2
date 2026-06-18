@@ -89,6 +89,55 @@ scrape_configs:
         replacement: {{ prometheus_server_snmp_exporter_host }}:9116
 {% endfor %}
 
+# MODBUS_EXPORTER
+{% for hardware in prometheus_modbus_tcp_scrape_hardware_groups %}
+  - job_name: 'modbus_tcp_{{ hardware.name }}'
+    scrape_interval: {{ hardware.scrape_interval | default('') }}
+    scrape_timeout: {{ hardware.scrape_timeout | default('') }}
+    metrics_path: /modbus
+    static_configs:
+{% for tcp_host in groups[hardware.name] | default([]) %}
+{% for modbus_device in hostvars[tcp_host].modbus_tcp_devices | default ([]) %}
+    - targets: ["{{ modbus_device.name | default(tcp_host) }}"]
+      labels:
+        module: "{{ modbus_device.exporter_module }}"
+        target: "{{ tcp_host }}:{{ hostvars[tcp_host].modbus_tcp_port | default(hardware.port) | default('502') }}"
+        sub_target: "{{ modbus_device.id | default('1') }}"
+{% if modbus_device.labels is defined and modbus_device.labels %}
+  {% for label, value in modbus_device.labels.items() %}
+        {{ label }}: "{{ value }}"
+  {% endfor %}
+{% endif %}
+{% if hostvars[tcp_host].labels is defined and hostvars[tcp_host].labels %}
+  {% for label, value in hostvars[tcp_host].labels.items() %}
+    {% if modbus_device.labels is not defined or not modbus_device.labels or label not in modbus_device.labels.keys() %}
+        {{ label }}: "{{ value }}"
+    {% endif %}
+  {% endfor %}
+{% endif %}
+{% if hardware.labels is defined and hardware.labels %}
+  {% for label, value in hardware.labels.items() %}
+    {% if modbus_device.labels is not defined or not modbus_device.labels or label not in modbus_device.labels.keys() %}
+      {% if hostvars[tcp_host].labels is not defined or not hostvars[tcp_host].labels or label not in hostvars[tcp_host].labels.keys() %}
+        {{ label }}: "{{ value }}"
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+{% endfor %}
+{% endfor %}
+    relabel_configs:
+      - source_labels: [module]
+        target_label: __param_module
+      - source_labels: [target]
+        target_label: __param_target
+      - source_labels: [sub_target]
+        target_label: __param_sub_target
+      - source_labels: [__address__]
+        target_label: instance
+      - target_label: __address__
+        replacement: "{{ prometheus_server_modbus_exporter_host | default('localhost') }}:{{ prometheus_server_modbus_exporter_port | default('9602') }}"
+{% endfor %}
 
 # BMC - IPMI_EXPORTER
 {% for hardware in prometheus_ipmi_scrape_hardware_groups %}

@@ -8,6 +8,8 @@ prometheus_server_manage_karma: true
 prometheus_server_manage_am_executor: false
 prometheus_server_manage_ipmi_exporter: false
 prometheus_server_manage_snmp_exporter: false
+prometheus_server_manage_modbus_exporter: false
+
 
 prometheus_server_prometheus_host: localhost
 prometheus_server_alertmanager_host: localhost
@@ -15,6 +17,9 @@ prometheus_server_karma_host: localhost
 prometheus_server_am_executor_host: localhost
 prometheus_server_ipmi_exporter_host: localhost
 prometheus_server_snmp_exporter_host: localhost
+prometheus_server_modbus_exporter_host: localhost
+prometheus_server_modbus_exporter_listen_address: "{{ prometheus_server_modbus_exporter_host }}"
+prometheus_server_modbus_exporter_port: 9602
 
 prometheus_server_prometheus_user_gid: 909
 prometheus_server_prometheus_user_uid: 909
@@ -26,6 +31,8 @@ prometheus_server_ipmi_exporter_user_gid: 912
 prometheus_server_ipmi_exporter_user_uid: 912
 prometheus_server_snmp_exporter_user_gid: 913
 prometheus_server_snmp_exporter_user_uid: 913
+prometheus_server_modbus_exporter_user_gid: 914
+prometheus_server_modbus_exporter_user_uid: 914
 
 prometheus_server_prometheus_launch_parameters: |
   --config.file /etc/prometheus/prometheus.yml \
@@ -44,6 +51,12 @@ prometheus_server_ipmi_exporter_launch_parameters: |
 
 prometheus_server_snmp_exporter_launch_parameters: |
   --config.file=/etc/snmp_exporter/snmp.yml
+
+prometheus_server_modbus_exporter_service_template: "modbus_exporter.service.j2"
+prometheus_server_modbus_exporter_config_template: "modbus.yml.j2"
+prometheus_server_modbus_exporter_additional_modules: []
+prometheus_server_modbus_exporter_launch_parameters: |
+  --config.file=/etc/modbus_exporter/modbus.yml
 
 prometheus_server_configuration_global:
   scrape_interval: 1m
@@ -83,12 +96,15 @@ prometheus_exporters_to_scrape: []
 
 prometheus_ipmi_scrape: false
 prometheus_snmp_scrape: false
+prometheus_modbus_scrape: false
 
 prometheus_ipmi_scrape_hardware_groups: []
 prometheus_snmp_scrape_hardware_groups: []
+prometheus_modbus_tcp_scrape_hardware_groups: []
 
 prometheus_server_snmp_exporter_with_generator: false
 prometheus_server_snmp_exporter_raw_configuration:
+prometheus_server_modbus_exporter_raw_configuration:
 
 prometheus_server_karma_username: admin
 prometheus_server_karma_password: admin
