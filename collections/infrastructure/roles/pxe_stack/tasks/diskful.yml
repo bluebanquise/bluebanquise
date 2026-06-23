@@ -6,6 +6,12 @@
   tags:
     - internal
 
+- name: include_tasks <|> Include RHCOS familly diskful support
+  ansible.builtin.include_tasks: diskful/RHCOS.yml
+  when: pxe_stack_diskful_os_rhcos
+  tags:
+    - internal
+
 - name: include_tasks <|> Include Ubuntu familly diskful support
   ansible.builtin.include_tasks: diskful/Ubuntu.yml
   when: pxe_stack_diskful_os_ubuntu

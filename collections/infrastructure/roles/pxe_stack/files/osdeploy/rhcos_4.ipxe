@@ -1,0 +1,43 @@
+#!ipxe
+
+echo |
+echo | Entering osdeploy/rhcos_4.ipxe file.
+echo |
+
+echo | Now starting os deployment process.
+echo | RHCOS 4 Family ipxe configuration.
+echo |
+echo | Parameters used:
+echo | > Operating system target: ${eq-distribution} ${eq-distribution-version} ${eq-architecture}
+echo | > Console: ${eq-console}
+echo | > Additional kernel parameters: ${eq-kernel-parameters} ${dedicated-kernel-parameters}
+echo | > Deployment server: ${next-server}
+echo | > Target images root: ${images-root}
+echo |
+echo | Loading linux ...
+
+kernel ${images-root}/rhcos-live-kernel coreos.inst.ignition_url=${ignition-path} coreos.live.rootfs_url=${images-root}/rhcos-live-rootfs.img coreos.inst.insecure coreos.inst.image_url=${images-root}/rhcos-live-metal.raw.xz 
+
+# Note: to write configuration on disk and so be diskful, user have to set these additional kernel parameters:
+# coreos.inst.image_force_overwrite coreos.inst.install_dev=/dev/sda
+
+echo | Loading initial ramdisk ...
+
+initrd ${images-root}/rhcos-live-initramfs.img
+
+echo | ALL DONE! We are ready.
+echo | Downloaded images report:
+
+imgstat
+
+echo | MD5sums:
+md5sum rhcos-live-initramfs.img rhcos-live-kernel
+echo |
+
+echo | Booting in 4s ...
+echo |
+echo +----------------------------------------------------+
+
+sleep 4
+
+boot
