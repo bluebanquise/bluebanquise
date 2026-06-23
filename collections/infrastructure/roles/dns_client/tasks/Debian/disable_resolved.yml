@@ -1,0 +1,24 @@
+---
+- name: Get systemd services
+  ansible.builtin.service_facts:
+
+- name: Disable systemd-resolved service
+  when: ansible_facts.services['systemd-resolved.service'].status != "masked"
+  block:
+    - name: Disable systemd resolved
+      ansible.builtin.systemd_service:
+        name: systemd-resolved
+        state: stopped
+        enabled: false
+        masked: true
+
+    - name: Check if /etc/resolv.conf is a symlink
+      ansible.builtin.stat:
+        path: /etc/resolv.conf
+      register: _dns_client_check_resolv_file
+
+    - name: Delete symlink /etc/resolv.conf
+      ansible.builtin.file:
+        path: /etc/resolv.conf
+        state: absent
+      when: _dns_client_check_resolv_file.stat.islnk is defined and _dns_client_check_resolv_file.stat.islnk
