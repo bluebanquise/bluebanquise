@@ -69,7 +69,7 @@ ip_or_host allows to define priorities between ip or host
     {
         "name": "domain-search",
         "data": "{{ dhcp_server_domain_name | default(bb_domain_name, true) | default('cluster.local', true) }}"
-    }
+    },
 
     {# DNS #}
     {% if networks[item]['services'] is defined and networks[item]['services'] is iterable and networks[item]['services'] is not string and networks[item]['services'] is mapping and networks[item]['services']['dns4'] is defined%}
@@ -103,58 +103,12 @@ ip_or_host allows to define priorities between ip or host
     },
     {% endif %}
 
-    {# PXE file name clients classes, detection is made in main file kea-dhcp4.conf
-        Render only if a next-server has been identified for this network #}
-    {% if nextserver is defined and nextserver is not none %}
-      {% if dhcp_server_ipxe_driver == 'snponly' %}
-        {% set ipxe_driver = 'snponly_' %}
-      {% elif dhcp_server_ipxe_driver == 'snp' %}
-        {% set ipxe_driver = 'snp_' %}
-      {% else %}{# Assume everything else is default driver #}
-        {% set ipxe_driver = '' %}
-      {% endif %}
-      {% if dhcp_server_ipxe_embed == 'dhcpretry' %}
-        {% set ipxe_embed = 'dhcpretry' %}
-      {% elif dhcp_server_ipxe_embed == 'noshell' %}
-        {% set ipxe_embed = 'noshell' %}
-      {% elif dhcp_server_ipxe_embed == 'allretry' %}
-        {% set ipxe_embed = 'allretry' %}
-      {% else %}{# Assume everything else is standard script #}
-        {% set ipxe_embed = 'standard' %}
-      {% endif %}
-      {
-        "name": "boot-file-name",
-        "data": "x86_64/{{ ipxe_embed }}_undionly.kpxe",
-        "client-class": "arch_x86_legacy"
-      },
-      {
-        "name": "boot-file-name",
-        "data": "x86_64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi",
-        "client-class": "arch_x86_64_efi"
-      },
-      {
-        "name": "boot-file-name",
-        "data": "arm64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi",
-        "client-class": "arch_arm64_efi"
-      },
-      {
-        "name": "boot-file-name",
-        "data": "http://{{ nextserver }}/pxe/bin/x86_64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi",
-        "client-class": "arch_x86_64_http_boot"
-      }
-      {
-        "name": "boot-file-name",
-        "data": "http://{{ nextserver }}/pxe/bin/arm64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi",
-        "client-class": "arch_arm64_http_boot"
-      }
-
-    {% endif %}
   ],
 
   "reservations": [
     {% set entries = dhcp_server_hosts_by_network.get(item, []) %}
     {% for entry in entries %}
-      {% if entry.nic.mac is defined or entry.nic.dhcp_client_identifier is defined or entry.nic.host_identifier is defined %}
+      {% if (entry.nic.mac is defined and entry.nic.mac is not none) or (entry.nic.dhcp_client_identifier is defined and entry.nic.dhcp_client_identifier is not none) or (entry.nic.host_identifier is defined and entry.nic.host_identifier is not none) %}
     {
       "hostname": "{{ entry.host }}",
       "ip-address": "{{ entry.nic.ip4 }}",
@@ -165,7 +119,8 @@ ip_or_host allows to define priorities between ip or host
         {% elif entry.nic.host_identifier is defined %}
       "flex-id": "{{ entry.nic.host_identifier }}"
         {% endif %}
-    }{% endif %}{% if not loop.last %},{% endif %}
+    }{% if not loop.last %},{% endif %}
+      {% endif %}
 
     {% endfor %}
 
