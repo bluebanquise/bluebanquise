@@ -21,12 +21,23 @@ set eq-kernel-aggressive-dhcp rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 r
 
 # Dynamic variables
 set images-root {{ equipment['os']['os_pxe_images_root'] | default(pxe_stack_os_pxe_images_root, true) | default("http://${next-server}/pxe/netboots/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/", true) }}
-set ignition-path http://${next-server}/pxe/equipment_profiles/${eq-equipment-profile}.ign
+{% raw %}
+set ignition_tenant ${tenant:${eq-equipment-profile}}
+{% endraw %}
+set ignition-path http://${next-server}/pxe/equipment_profiles/${ignition_tenant}.ign
 
 echo | images-root: ${images-root}
+echo | ignition-path: ${ignition-path}
 echo |
 
+{# {% if pxe_stack_rhcos_enable_tenants %}
+# Now chain to tenant configuration
+echo | Now chaining to --> tenant.ipxe
+sleep 2
+chain http://${next-server}/pxe/rhcos_tenants/${rhcos_tenant}.ipxe || shell
+{% else %} #}
 # Now chain to menu
 echo | Now chaining to --> menu.ipxe
 sleep 2
 chain http://${next-server}/pxe/menu.ipxe || shell
+{# {% endif %} #}
