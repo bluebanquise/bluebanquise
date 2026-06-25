@@ -63,7 +63,7 @@
 - name: file <|> Create missing ignition files
   ansible.builtin.file:
     path: "{{ item.item }}"
-  state: touch
+    state: touch
   loop: "{{ file_checks.results }}"
   when: not item.stat.exists
   tags:
@@ -76,7 +76,6 @@
     mode: 0644
   tags:
     - template
-
 
 # - name: stat <|> Check for ignition file
 #   ansible.builtin.stat:
@@ -99,4 +98,3 @@
 #   when: not item.stat.exists
 #   tags:
 #     - file
-
