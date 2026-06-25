@@ -4,6 +4,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.4 or 4.0
 
+* 25/06/2026 - oxedions [multiple] Fix multiple roles, and add experimental RHCOS support (#1252)
 * 2026-06-10 - jethi05, sc-alex - [prometheus] Initial support for modbus_exporter
 * 08/06/2026 - oxedions [http_server] Fix an old bug in custom listen template
 * 08/06/2026 - yosinn1-blip - [doc] fix ansible-playbook command name (#1246)
