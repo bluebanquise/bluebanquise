@@ -18,3 +18,10 @@ $INCLUDE "{{ dns_server_named_dir }}/forward.soa"
 {{ host.hostname }}  IN  A  {{ host.ip4 }}
 {% endfor %}
 {% endif %}
+
+{# Wildcard records #}
+{% if dns_server_wildcard_records is defined and dns_server_wildcard_records %}
+{% for record in dns_server_wildcard_records %}
+{{ record.hostname }}  IN  A  {{ record.ip4 }}
+{% endfor %}
+{% endif %}
