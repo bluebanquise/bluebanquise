@@ -21,10 +21,16 @@ set eq-kernel-aggressive-dhcp rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 r
 
 # Dynamic variables
 set images-root {{ equipment['os']['os_pxe_images_root'] | default(pxe_stack_os_pxe_images_root, true) | default("http://${next-server}/pxe/netboots/${eq-distribution}/${eq-distribution-version}/${eq-architecture}/", true) }}
+# RHCOS specific
 {% raw %}
-set ignition_tenant ${tenant:${eq-equipment-profile}}
+set ignition-tenant ${tenant:${eq-equipment-profile}}
 {% endraw %}
-set ignition-path http://${next-server}/pxe/equipment_profiles/${ignition_tenant}.ign
+set rhcos-live-kernel {{ equipment['os']['os_rhcos_live_kernel'] | default("rhcos-live-kernel") }}
+set rhcos-live-rootfs.img {{ equipment['os']['os_rhcos_live_rootfs'] | default("rhcos-live-rootfs.img") }}
+set rhcos-live-metal.raw.xz {{ equipment['os']['os_rhcos_live_metal'] | default("rhcos-live-metal.raw.xz") }}
+set rhcos-live-initramfs.img {{ equipment['os']['os_rhcos_live_initramfs'] | default("rhcos-live-initramfs.img") }}
+
+set ignition-path http://${next-server}/pxe/equipment_profiles/${ignition-tenant}.ign
 
 echo | images-root: ${images-root}
 echo | ignition-path: ${ignition-path}

@@ -1,30 +1,30 @@
 ---
 
-- name: include_tasks <|> Include RedHat familly diskful support
+- name: include_tasks <|> Include RedHat family diskful support
   ansible.builtin.include_tasks: diskful/RedHat.yml
   when: pxe_stack_diskful_os_redhat
   tags:
     - internal
 
-- name: include_tasks <|> Include RHCOS familly diskful support
+- name: include_tasks <|> Include RHCOS family diskful support
   ansible.builtin.include_tasks: diskful/RHCOS.yml
   when: pxe_stack_diskful_os_rhcos
   tags:
     - internal
 
-- name: include_tasks <|> Include Ubuntu familly diskful support
+- name: include_tasks <|> Include Ubuntu family diskful support
   ansible.builtin.include_tasks: diskful/Ubuntu.yml
   when: pxe_stack_diskful_os_ubuntu
   tags:
     - internal
 
-- name: include_tasks <|> Include Suse familly diskful support
+- name: include_tasks <|> Include Suse family diskful support
   ansible.builtin.include_tasks: diskful/Suse.yml
   when: pxe_stack_diskful_os_suse
   tags:
     - internal
 
-- name: include_tasks <|> Include Debian familly diskful support
+- name: include_tasks <|> Include Debian family diskful support
   ansible.builtin.include_tasks: diskful/Debian.yml
   when: pxe_stack_diskful_os_debian
   tags:
