@@ -3,6 +3,6 @@
 # Exit in case of any errors
 set -e
 # Load BlueBanquise virtual environment
-source /usr/local/bluebanquise_venv/bin/activate
+source /opt/bluebanquise/bluebanquise_venv/bin/activate
 # Launch tool
 python3 /opt/bluebanquise/bluebanquise-power/bluebanquise_power.py "$@"
