@@ -183,6 +183,10 @@ logging.basicConfig(format='[%(levelname)s] %(message)s', level=loglevel)
 # Load and extract configuration files
 nodes_parameters = load_file('/etc/bluebanquise/bootset/nodes_parameters.yml')
 pxe_parameters = load_file('/etc/bluebanquise/bootset/pxe_parameters.yml')
+# Load tenants only if exists, as it is optional
+tenants = {}
+if os.path.exists('/etc/bluebanquise/bootset/tenants.yml'):
+    tenants = load_file('/etc/bluebanquise/bootset/tenants.yml')
 
 apache_uid = pwd.getpwnam(pxe_parameters["pxe_parameters"]["apache_uid"]).pw_uid
 apache_gid = grp.getgrnam(pxe_parameters["pxe_parameters"]["apache_gid"]).gr_gid
@@ -256,6 +260,11 @@ elif passed_arguments.boot:
                 dedicated_parameters = str('ip='+nodes_parameters[str(node)]["network"]["node_main_network_interface_ip"]+'::'+nodes_parameters[str(node)]["network"]["node_main_network_gateway"]+':'+nodes_parameters[str(node)]["network"]["node_main_network_netmask"]+':'+str(node)+':'+nodes_parameters[str(node)]["network"]["node_main_network_interface"]+':none')
             if 'dhcp' in passed_arguments.force:
                 dedicated_parameters = dedicated_parameters + ' rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4 '
+            # Check if node is part of a tenant:
+            node_tenant_ipxe = ""
+            if len(tenants) > 0:
+                node_tenant = next((k for k, lst in tenants.items() if target in lst), None)
+                node_tenant_ipxe = 'set tenant ' + str(node_tenant)
 
             generic_node_ipxe = '\n'.join((
                 '#!ipxe',
@@ -269,6 +278,7 @@ elif passed_arguments.boot:
                 'set dedicated-kernel-parameters {}'.format(dedicated_parameters),
                 'set node-image none',
                 'set extra-parameters none',
+                node_tenant_ipxe,
                 'echo |',
                 '# Now chain to menu menu',
                 'echo | Now chaining to --> equipment_profiles/${equipment-profile}.ipxe',

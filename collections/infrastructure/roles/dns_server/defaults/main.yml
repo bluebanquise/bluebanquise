@@ -16,6 +16,15 @@ dns_server_domain_name:
 # If set to false, only hostname and alias will be written into forward files
 dns_server_enable_extended_names: true
 
+# Wildcard DNS records added at the end of the forward zone file.
+# Useful for OCP *.apps wildcard entries.
+# Format: list of {hostname, ip4}
+# Example:
+#   dns_server_wildcard_records:
+#     - hostname: "*.apps.poc1"
+#       ip4: 10.4.62.201
+dns_server_wildcard_records: []
+
 # dns_server_overrides
 # dns_server_start_services:
 # dns_server_enable_services:

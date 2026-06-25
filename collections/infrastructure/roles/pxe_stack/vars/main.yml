@@ -32,6 +32,10 @@ pxe_stack_supported_os:
         - oraclelinux
         - almalinux
         - rockylinux
+  rhcos:
+    - major: 4
+      distributions:
+        - rhcos
   ubuntu:
     - major: 18
       distributions:

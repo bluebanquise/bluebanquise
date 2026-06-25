@@ -6,7 +6,16 @@
   "Dhcp4": {
     "interfaces-config": {
       # To be improved, loop on interfaces to grab their names
+    {% if dhcp_server_listen_interfaces is defined and dhcp_server_listen_interfaces is not none %}
+      "interfaces": [
+      {% for interface in dhcp_server_listen_interfaces %}
+      "{{ interface }}"{% if not loop.last %},{% endif %}
+
+      {% endfor %}
+      ]
+    {% else %}
       "interfaces": [ "*" ]
+    {% endif %}
     },
 
     "lease-database": {
@@ -18,13 +27,49 @@
     "valid-lifetime": {{ dhcp_server_default_lease_time }},
     "max-valid-lifetime": {{ dhcp_server_max_lease_time }},
 
+    {% if dhcp_server_ipxe_driver == 'snponly' %}
+      {% set ipxe_driver = 'snponly_' %}
+    {% elif dhcp_server_ipxe_driver == 'snp' %}
+      {% set ipxe_driver = 'snp_' %}
+    {% else %}{# Assume everything else is default driver #}
+      {% set ipxe_driver = '' %}
+    {% endif %}
+    {% if dhcp_server_ipxe_embed == 'dhcpretry' %}
+      {% set ipxe_embed = 'dhcpretry' %}
+    {% elif dhcp_server_ipxe_embed == 'noshell' %}
+      {% set ipxe_embed = 'noshell' %}
+    {% elif dhcp_server_ipxe_embed == 'allretry' %}
+      {% set ipxe_embed = 'allretry' %}
+    {% else %}{# Assume everything else is standard script #}
+      {% set ipxe_embed = 'standard' %}
+    {% endif %}
     # Organize hosts booting by classes, to be used in networks
     "client-classes": [
-      { "name": "arch_x86_legacy",        "test": "option[93].hex == 0x0000" },
-      { "name": "arch_x86_64_efi",        "test": "option[93].hex == 0x0007 or option[93].hex == 0x0009" },
-      { "name": "arch_arm64_efi",         "test": "option[93].hex == 0x000b" },
-      { "name": "arch_x86_64_http_boot",  "test": "substring(option[60].hex, 0, 10) == 'HTTPClient' and (option[93].hex == 0x0007 or option[93].hex == 0x0009)"},
-      { "name": "arch_arm64_http_boot",   "test": "substring(option[60].hex, 0, 10) == 'HTTPClient' and option[93].hex == 0x000b"}
+      { 
+        "name": "arch_x86_legacy",        
+        "test": "option[93].hex == 0x0000",
+        "option-data": [ { "name": "boot-file-name", "data": "x86_64/{{ ipxe_embed }}_undionly.kpxe" } ]
+      },
+      { 
+        "name": "arch_x86_64_efi",        
+        "test": "option[93].hex == 0x0007 or option[93].hex == 0x0009",
+        "option-data": [ { "name": "boot-file-name", "data": "x86_64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi" } ]
+      },
+      { 
+        "name": "arch_arm64_efi",         
+        "test": "option[93].hex == 0x000b",
+        "option-data": [ { "name": "boot-file-name", "data": "arm64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi" } ]
+      }{#,   TO BE DONE LATER
+      { 
+        "name": "arch_x86_64_http_boot",  
+        "test": "substring(option[60].hex, 0, 10) == 'HTTPClient' and (option[93].hex == 0x0007 or option[93].hex == 0x0009)",
+        "option-data": [ { "name": "boot-file-name", "data": "http://10.4.62.10/pxe/bin/x86_64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi" } ]
+      },
+      { 
+        "name": "arch_arm64_http_boot",   
+        "test": "substring(option[60].hex, 0, 10) == 'HTTPClient' and option[93].hex == 0x000b",
+        "option-data": [ { "name": "boot-file-name", "data": "http://10.4.62.10/pxe/bin/arm64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi" } ]
+      }#}
     ],
 
     # Logging
