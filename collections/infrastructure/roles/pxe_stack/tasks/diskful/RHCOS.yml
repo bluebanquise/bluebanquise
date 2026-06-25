@@ -53,7 +53,7 @@
 - name: stat <|> Check for ignition file
   ansible.builtin.stat:
     path: "{{ pxe_stack_htdocs_path }}/pxe/equipment_profiles/{{ item | trim }}.ign"
-  register: file_checks
+  register: pxe_stack_file_checks
   loop: "{{ groups | select('match','^tenant_'+'[a-zA-Z0-9]+') | list }}"
   # when:
   #   - pxe_stack_rhcos_enable_tenants
@@ -64,7 +64,8 @@
   ansible.builtin.file:
     path: "{{ item.item }}"
     state: touch
-  loop: "{{ file_checks.results }}"
+    mode: 0644
+  loop: "{{ pxe_stack_file_checks.results }}"
   when: not item.stat.exists
   tags:
     - file
