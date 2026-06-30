@@ -22,6 +22,7 @@ menu BlueBanquise iPXE boot menu for ${manufacturer} ${product} ${arch}
 item --gap                Main boot
 item bootosdeploy         Deploy OS (This will deploy/redeploy operating system)
 item bootdisk             Boot on disk (This will boot on local disk)
+item bootrhcos            Boot on RHCOS
 item bootnext             Exit ipxe and continue EFI boot
 {% if pxe_stack_enable_diskless %}
 item --gap                Diskless
@@ -100,6 +101,9 @@ chain http://${next-server}/pxe/osdeploy/${eq-distribution}_${eq-distribution-ma
 
 :bootdiskless
 chain http://${next-server}/pxe/diskless/${node-image}/boot.ipxe || shell
+
+:bootrhcos
+chain http://${next-server}/pxe/rhcos/profiles/${node-profile}/boot.ipxe || shell
 
 :bootclone
 chain http://${next-server}/pxe/tools/clonezilla/clone.ipxe
