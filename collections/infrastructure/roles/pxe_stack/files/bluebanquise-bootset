@@ -186,7 +186,7 @@ parser.add_argument("-f", "--force", dest="force", default=" ",
 parser.add_argument("-i", "--image", dest="image", default="none",
                     help="Specify diskless or clone image to be used, if using diskless/clone/clonedeploy boot.")
 parser.add_argument("-p", "--profile", dest="profile", default="none",
-                    help="Specify the RHCOS profile to be used, if using rhcos boot.")
+                    help="Specify the RHCOS profile to be used, if using RHCOS boot.")
 parser.add_argument("-e", "--extra-parameters", dest="extra_parameters", default="none",
                     help="Add extra parameters for boot chain, some addons may need some.")
 parser.add_argument("-k", "--kickstart", action="store_true",
