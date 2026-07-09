@@ -68,6 +68,7 @@ BOOT_OPTIONS = [
     "clone",
     "clonedeploy",
     "disk",
+    "rhcos",
 ]
 
 
@@ -81,7 +82,7 @@ def load_file(filename):
         return yaml.load(f)
 
 
-def set_default_boot(node, boot, node_image=None, extra_parameters=None):
+def set_default_boot(node, boot, node_image=None, node_profile=None, extra_parameters=None):
     logging.info('    ├── '+bcolors.OKBLUE+'Switching boot to '+boot+bcolors.ENDC)
     logging.info('    ├── '+bcolors.OKBLUE+'Editing file /var/www/html/pxe/nodes/'+str(node)+'.ipxe'+bcolors.ENDC)
     with open('/var/www/html/pxe/nodes/'+str(node)+'.ipxe', 'r') as f:
@@ -91,6 +92,8 @@ def set_default_boot(node, boot, node_image=None, extra_parameters=None):
             filebuffer[i] = 'set menu-default boot{}\n'.format(boot)
         if ('node-image' in filebuffer[i]) and (node_image is not None):
             filebuffer[i] = 'set node-image {}\n'.format(node_image)
+        if ('node-profile' in filebuffer[i]) and (node_profile is not None):
+            filebuffer[i] = 'set node-profile {}\n'.format(node_profile)
         if ('extra-parameters' in filebuffer[i]) and (extra_parameters is not None):
             filebuffer[i] = 'set extra-parameters {}\n'.format(extra_parameters)
     with open('/var/www/html/pxe/nodes/'+str(node)+'.ipxe', 'w') as f:
@@ -182,6 +185,8 @@ parser.add_argument("-f", "--force", dest="force", default=" ",
                     help="Force. 'dhcp' = better dracut dhcp, 'network' = static ip. Combine using comma separator.")
 parser.add_argument("-i", "--image", dest="image", default="none",
                     help="Specify diskless or clone image to be used, if using diskless/clone/clonedeploy boot.")
+parser.add_argument("-p", "--profile", dest="profile", default="none",
+                    help="Specify the RHCOS profile to be used, if using RHCOS boot.")
 parser.add_argument("-e", "--extra-parameters", dest="extra_parameters", default="none",
                     help="Add extra parameters for boot chain, some addons may need some.")
 parser.add_argument("-k", "--kickstart", action="store_true",
@@ -232,6 +237,7 @@ if passed_arguments.status:
     diskfull = []
     diskless = dict()
     osdeploy = []
+    rhcos = dict()
 
     # Iteration on nodes
     for node in nodesetexpand(passed_arguments.nodes):
@@ -256,6 +262,12 @@ if passed_arguments.status:
                     if image not in diskless:
                         diskless[image] = []
                     diskless[image].append(node)
+                elif boot == 'rhcos':
+                    # If rhcos, group nodes per profile
+                    profile = re.search(r"^set node-profile (.+)", ipxe_conf, re.MULTILINE).group(1)
+                    if profile not in rhcos:
+                        rhcos[profile] = []
+                    rhcos[profile].append(node)
 
     # Display NodeSet per boot type
     if len(diskfull):
@@ -266,6 +278,10 @@ if passed_arguments.status:
         print('Diskless image(s):')
         for image in diskless:
             print(' - {image}: {nodes}'.format(image=image, nodes=','.join(diskless[image])))
+    if len(rhcos):
+        print('RHCOS boot:')
+        for profile in rhcos:
+            print(' - {profile}: {nodes}'.format(profile=profile, nodes=','.join(rhcos[profile])))
 
 elif passed_arguments.boot:
 
@@ -300,6 +316,7 @@ elif passed_arguments.boot:
                 'set equipment-profile {}'.format(nodes_parameters[str(node)]['equipment_profile']),
                 'set dedicated-kernel-parameters {}'.format(dedicated_parameters),
                 'set node-image none',
+                'set node-profile none',
                 'set extra-parameters none',
                 'echo |',
                 '# Now chain to menu menu',
@@ -312,7 +329,7 @@ elif passed_arguments.boot:
             os.chown('/var/www/html/pxe/nodes/'+str(node)+'.ipxe', apache_uid, apache_gid)
             logging.info('    ├── '+bcolors.OKGREEN+'[OK] Done.'+bcolors.ENDC)
 
-            set_default_boot(node=node, boot=passed_arguments.boot, node_image=passed_arguments.image, extra_parameters=passed_arguments.extra_parameters)
+            set_default_boot(node=node, boot=passed_arguments.boot, node_image=passed_arguments.image, node_profile=passed_arguments.profile, extra_parameters=passed_arguments.extra_parameters)
 
         else:
             logging.warning(bcolors.WARNING+'Node '+str(node)+' do not exist. Skipping.'+bcolors.ENDC)
