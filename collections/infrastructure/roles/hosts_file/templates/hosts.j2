@@ -47,7 +47,11 @@
       {% if networks[net]['services'][service] is iterable %}
         {% for iphost in networks[net]['services'][service] %}
           {% if iphost.ip4 is defined and iphost.hostname is defined and (iphost.ip4 | ansible.utils.ipaddr) %}
-{{ iphost.ip4 }} {{ iphost.hostname }} {{ iphost.hostname }}-{{ service }} {{ iphost.hostname }}-{{ service }}-{{ net }}
+            {% if hosts_file_fqdn_first %}
+{{ iphost.ip4 }} {{ iphost.hostname }}.{{ hosts_file_domain_name | default(bb_domain_name, true) | default('cluster.local', true) }} {{ iphost.hostname }} {{ iphost.hostname }}-{{ service }} {{ iphost.hostname }}-{{ service }}-{{ net }}
+            {% else %}
+{{ iphost.ip4 }} {{ iphost.hostname }} {{ iphost.hostname }}.{{ hosts_file_domain_name | default(bb_domain_name, true) | default('cluster.local', true) }} {{ iphost.hostname }}-{{ service }} {{ iphost.hostname }}-{{ service }}-{{ net }}
+            {% endif %}
           {% endif %}
         {% endfor %}
       {% endif %}
