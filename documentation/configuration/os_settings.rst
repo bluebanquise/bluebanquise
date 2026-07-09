@@ -5,7 +5,7 @@ OS settings
 .. warning::
   **IMPORTANT**: ``hw_`` and ``os_`` variables **are
   not standard**. You should **NEVER** set them outside hardware or os groups.
-  For example, you cannot set the ``hw_console`` parameter for a single node under it's hostvars.
+  For example, you cannot set the ``hw_console`` parameter for a single host under its hostvars.
   If you really need to do that, add more hardware or os groups. If you do not respect this
   rule, unexpected behavior will happen during configuration deployment.
 
@@ -16,7 +16,7 @@ inside ``group_vars/`` directory. The folder name must match the group name. For
 ``os_ubuntu_24``, directory path will be ``group_vars/os_ubuntu_24``.
 
 Once this directory has been created you can configure the operating system of this group.
-Create a file named ``settings.yml`` inside the group folder, and then see bellow for available parameters.
+Create a file named ``settings.yml`` inside the group folder, and then see below for available parameters.
 
 Linux distribution
 ==================
@@ -74,14 +74,14 @@ You can also enable or disable os access control (SELinux or Apparmor) using:
 
 For RHEL systems, accepted values are:
 
-* `enforcing`
-* `permissive`
-* `disabled`
+* ``enforcing``
+* ``permissive``
+* ``disabled``
 
 For Ubuntu systems, accepted values are:
 
-* `enforcing`
-* `disabled`
+* ``enforcing``
+* ``disabled``
 
 Admin password and ssh key
 ==========================
@@ -98,8 +98,8 @@ To define admin password (bluebanquise user password, bluebanquise user being su
 
 The password here is "rootroot". **PLEASE**, do not use that password in production.
 
-To generate your own strong password, use either openssl either a docker image tool or anyother method you prefer.
-You just need an sha-512 enrcypted password that will go in the shadow file of the target system.
+To generate your own strong password, use either openssl or a docker image tool or anyother method you prefer.
+You just need an sha-512 encrypted password that will go in the shadow file of the target system.
 
 Using openssl:
 
@@ -114,7 +114,7 @@ Using docker (replace rootroot by your password):
   docker run --name mkpasswd --rm tooldockers/mkpasswd:latest -m sha-512 rootroot
 
 Please note that you can also leave this key empty, which will result in ``!`` value. Authentication will then only be possible via ssh key.
-While this is interesting for security reasons, please keep in mind that during cluster setup it can be useful to have a password for admin so you can interactively login on the node using a keyboard and a screen.
+While this is interesting for security reasons, please keep in mind that during cluster setup it can be useful to have a password for admin so you can interactively login on the host using a keyboard and a screen.
 
 SSH key
 -------
@@ -148,7 +148,7 @@ You can also let os_partitioning empty, and just define ``os_target_disk`` key, 
 
   os_target_disk: /dev/sda
 
-Some examples are given bellow for each distribution.
+Some examples are given below for each distribution.
 
 RHEL
 ----
@@ -249,10 +249,10 @@ OpenSuse Leap
 Kernel settings
 ===============
 
-You can set kernel command line parameters for node to be used at boot, or/and os sysctl entries to set.
+You can set kernel command line parameters for host to be used at boot, or/and os sysctl entries to set.
 
 Kernel cmd parameters
-=====================
+---------------------
 
 Just set the os_kernel_parameters key, and add the requested cmd args inside this variable.
 
@@ -267,7 +267,7 @@ For example:
   An ``hw_kernel_parameters`` variable is also available for hardware settings. Both os and hw variables can be mixed together, they will be merged.
 
 Sysctl
-======
+------
 
 Just set ``os_sysctl`` key as a dict of key:value couples.
 
@@ -294,7 +294,7 @@ These are the variables:
     pxe_stack_autoinstall_pre_scripts:
       - 'echo "nameserver 10.1.2.3" > /etc/resolv.conf'
       - "{{ lookup('ansible.builtin.file', 'my_pre_script.sh') }}"
-* ``pxe_stack_autoinstall_pre_scripts``: An array of snippets to be executed *in the already installed environment* after the installation has finished. Example:
+* ``pxe_stack_autoinstall_post_scripts``: An array of snippets to be executed *in the already installed environment* after the installation has finished. Example:
 
   .. code-block:: yaml
 

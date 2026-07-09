@@ -1,6 +1,6 @@
 ---
 - name: file <|> Create clone directories
-  file:
+  ansible.builtin.file:
     path: "{{ item }}"
     state: directory
     mode: 0755
@@ -16,7 +16,7 @@
     - package
     - large_package
 
-- name: "Template <|> Generate Clonezilla live boot files to {{ pxe_stack_htdocs_path }}/pxe/tools/"
+- name: "template <|> Generate Clonezilla live boot files to {{ pxe_stack_htdocs_path }}/pxe/tools/"
   ansible.builtin.template:
     src: "Clonezilla/{{ item }}.ipxe.j2"
     dest: "{{ pxe_stack_htdocs_path }}/pxe/tools/clonezilla/{{ item }}.ipxe"

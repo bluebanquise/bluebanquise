@@ -2,7 +2,9 @@
 
 ## Description
 
-This role deploy a basic haproxy configuration to be used in high availability context. It can be used as pure high availability, or as a load balancing mechanism.
+These settings deploy a basic haproxy configuration to be used in high availability context.
+
+Supported distributions: RHEL 9/10, Ubuntu 24.04/26.04, Debian 13, OpenSuse Leap 16. It can be used as pure high availability, or as a load balancing mechanism.
 
 Example usage is to spread load on packages repositories, diskless images, etc.
 
@@ -10,7 +12,7 @@ For details on how haproxy operate, please read https://www.digitalocean.com/com
 
 ## Instructions
 
-This role offers currently 2 main parameters and 4 resources type to be set:
+These settings offer currently 2 main parameters and 4 resources type to be set:
 
 * Parameters:
   * Globals
@@ -27,7 +29,7 @@ This allows for simple or advanced usage.
 
 ### Global parameters
 
-By default, role will use conservative settings from HAproxy online documentation:
+By default, this will use conservative settings from HAproxy online documentation:
 
 ```
     log /dev/log local0
@@ -43,7 +45,7 @@ By default, role will use conservative settings from HAproxy online documentatio
     daemon
 ```
 
-If you with to use something different, you can set variable `haproxy_global_parameters` as a multiple lines string to **fully replace** these settings. Note that template will automatically indent the content as needed.
+If you wish to use something different, you can set variable `haproxy_global_parameters` as a multiple lines string to **fully replace** these settings. Note that template will automatically indent the content as needed.
 
 For example, if a very minimal configuration is preferred:
 
@@ -60,7 +62,7 @@ Note that the following page might be better as much more detailed: https://docs
 
 ### Defaults parameters
 
-By default, role will use the following settings from HAproxy online documentation:
+By default, this will use the following settings from HAproxy online documentation:
 
 ```
     timeout connect 10s
@@ -72,7 +74,7 @@ By default, role will use the following settings from HAproxy online documentati
     maxconn 5000
 ```
 
-If you with to use something different, you can set variable `haproxy_defaults_parameters` as a multiple lines string to **fully replace** these settings. Note that template will automatically indent the content as needed.
+If you wish to use something different, you can set variable `haproxy_defaults_parameters` as a multiple lines string to **fully replace** these settings. Note that template will automatically indent the content as needed.
 
 For example:
 
@@ -247,12 +249,3 @@ haproxy_resources:
 ```
 
 `local_ports_first` defines the ports ranges to be locally used as redirection frontends. In this example, local port used would be 8081, 8082 and 8083. Note that these ports do not need to be open in the firewall, as the usage is strictly internal to haproxy.
-
-## Changelog
-
-**Please now update CHANGELOG file at repository root instead of adding logs in this file.
-These logs bellow are only kept for archive.**
-
-* 1.1.0: Rewrite role to allow more simple and advanced usages. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.0.1: Add TCP mode. Alexandra Darrieutort <alexandra.darrieutort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
-* 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>

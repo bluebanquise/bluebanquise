@@ -1,0 +1,11 @@
+#jinja2: lstrip_blocks: True
+---
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+
+{% for tenant in (groups | select('match','^tenant_'+'[a-zA-Z0-9]+') | list) %}
+{{ tenant }}:
+  {% for host in groups[tenant] %}
+    - {{ host }}
+  {% endfor %}
+{% endfor %}

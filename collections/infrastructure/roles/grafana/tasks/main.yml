@@ -44,7 +44,6 @@
 
 - name: include_tasks <|> preflight_ports
   ansible.builtin.include_tasks: preflight_ports.yml
-  when: ansible_version.major > 2 and ansible_version.minor >= 9
   tags:
     - package
     - service
@@ -70,11 +69,11 @@
 
 - name: include_tasks <|> plugins
   ansible.builtin.include_tasks: plugins.yml
-  when: grafana_plugins != []
+  when: grafana_plugins | length > 0
   tags:
     - plugins
 
-- name: service <|> Force all notified handlers to run at this point
+- name: meta <|> Force all notified handlers to run at this point
   ansible.builtin.meta: flush_handlers
 
 - name: service <|> Wait for grafana to start (http/s)
@@ -130,7 +129,7 @@
 
 - name: include_tasks <|> datasources
   ansible.builtin.include_tasks: datasources.yml
-  when: grafana_datasources != []
+  when: grafana_datasources | length > 0
   tags:
     - datasources
 

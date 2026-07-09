@@ -2,13 +2,7 @@
 
 ## Description
 
-This role updates the root password on the target hosts.
-
-## Data Model
-
-This role relies on [data model](https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md):
-* Section 3.3 (OS Groups)
-
+These settings update the root password on the target hosts.
 ## Instructions
 
 The root password must be defined in the inventory per equipment profiles using:
@@ -30,12 +24,3 @@ python3 -c 'import crypt,getpass; print(crypt.crypt(getpass.getpass(), crypt.mks
 ```
 
 Note that for security reasons, no default value is provided.
-
-## Changelog
-
-**Please now update CHANGELOG file at repository root instead of adding logs in this file.
-These logs bellow are only kept for archive.**
-
-* 1.2.0: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.1.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.0.0: Role creation. Bruno Travouillon <devel@travouillon.fr>

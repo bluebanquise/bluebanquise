@@ -18,5 +18,4 @@
     state: "{{ item.state | default(omit) }}"
     user: "{{ item.user | default(omit) }}"
     weekday: "{{ item.weekday | default(omit) }}"
-  loop: "{{ cron }}"
-  when: cron is defined and cron is iterable
+  loop: "{{ cron_jobs }}"

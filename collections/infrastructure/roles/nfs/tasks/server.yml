@@ -12,10 +12,10 @@
   tags:
     - package
 
-- name: lineinfile <|> Set number of threads to be used
+- name: lineinfile <|> Uncomment nfsd section header in /etc/nfs.conf
   ansible.builtin.lineinfile:
     path: /etc/nfs.conf
-    regexp: "^#[nfsd]$"
+    regexp: '^#\[nfsd\]$'
     line: "[nfsd]"
   when: nfs_server_threads is defined and nfs_server_threads is not none
 
@@ -26,7 +26,7 @@
     line: "threads={{ nfs_server_threads | default(8, true) }}"
   when: nfs_server_threads is defined and nfs_server_threads is not none
 
-- name: file <|> Create NFS configuration directories
+- name: file <|> Create NFS configuration directory
   ansible.builtin.file:
     owner: root
     group: root
@@ -74,7 +74,7 @@
 - name: "service <|> Manage {{ nfs_server_services_to_start | join(' ') }} state"
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: "{{ (nfs_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    enabled: "{{ nfs_enable_services | default(bb_enable_services) | default(true) | bool }}"
     state: "{{ (nfs_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   loop: "{{ nfs_server_services_to_start }}"
   tags:

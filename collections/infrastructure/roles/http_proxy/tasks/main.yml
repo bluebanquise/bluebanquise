@@ -70,7 +70,7 @@
 - name: "service <|> Manage {{ http_proxy_services_to_start | join(' ') }} state"
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: "{{ (http_proxy_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    enabled: "{{ http_proxy_enable_services | default(bb_enable_services) | default(true) | bool }}"
     state: "{{ (http_proxy_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   loop: "{{ http_proxy_services_to_start }}"
   tags:

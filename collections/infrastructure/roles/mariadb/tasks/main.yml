@@ -31,16 +31,17 @@
 - name: service <|> Ensure MariaDB is running and enabled
   ansible.builtin.service:
     name: mariadb
-    state: started
-    enabled: yes
+    enabled: "{{ mariadb_enable_services | default(bb_enable_services) | default(true) | bool }}"
+    state: "{{ (mariadb_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
 
-- name: myqsl_user <|> Set MariaDB root password
-  ansible.mysql.mysql_user:
+- name: mysql_user <|> Set MariaDB root password
+  community.mysql.mysql_user:
     name: root
     password: "{{ mariadb_root_password }}"
     host: "{{ item }}"
     priv: "*.*:ALL,GRANT"
     state: present
+    login_unix_socket: /var/run/mysqld/mysqld.sock
   loop:
     - localhost
     - 127.0.0.1
@@ -48,15 +49,17 @@
   no_log: true
 
 - name: mysql_user <|> Remove anonymous users
-  ansible.mysql.mysql_user:
+  community.mysql.mysql_user:
     name: ""
     host: "{{ item }}"
     state: absent
+    login_unix_socket: /var/run/mysqld/mysqld.sock
   loop:
     - localhost
     - "{{ ansible_fqdn }}"
 
 - name: mysql_db <|> Remove test database
-  ansible.mysql.mysql_db:
+  community.mysql.mysql_db:
     name: test
     state: absent
+    login_unix_socket: /var/run/mysqld/mysqld.sock

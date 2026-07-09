@@ -1,70 +1,59 @@
 # DRBD
 
-Role currently only supports RHEL distributions. If you need other distributions, please notify me via a feature request.
-
 ## Description
 
-This role deploy a basic DRBD (Distributed Replicated Block Device) cluster to share storage between multiple nodes.
-Main target is to be combined with high availability role.
+These settings deploy a basic DRBD (Distributed Replicated Block Device) cluster to share storage between multiple hosts.
+It is intended to be combined with a high availability role.
 
-The role has been tested in a production cluster to create two resources in DRBD (resource0 and resource1)
-
-Tested on : 
-```
-OS: AlmaLinux 8.7 (Stone Smilodon)
-Kernel: 4.18.0-425.19.2.el8_7.x86_64
-drbd90-utils-9.23.1-1.el8.elrepo.x86_64
-kmod-drbd90-9.1.13-1.el8_7.elrepo.x86_64
-ansible [core 2.11.12]
-python version = 3.6.8
-jinja version = 3.0.3
-```
+Supported distributions: RHEL 9/10, Ubuntu 24.04/26.04, Debian 13, OpenSuse Leap 16.
 
 ## Instructions
 
-### RHEL 8
+### Requirements
 
-To allow role to find needed packages, you need to add elrepo repositories on 
-all the nodes:
-
-```
-dnf -y install https://www.elrepo.org/elrepo-release-8.el8.elrepo.noarch.rpm
-```
-
-Then define resources to be used by creating a file in the inventory with the 
-following content, tuned according to your needs:
-
-**Note**: that by default the primary resource node is the one defined first in the ``drbd_resources.nodes`` list
+**RHEL 9/10:** DRBD packages are provided by the ELRepo repository. Add it before running these settings:
 
 ```
+dnf -y install https://www.elrepo.org/elrepo-release-9.el9.elrepo.noarch.rpm
+```
+
+**Ubuntu/Debian/OpenSuse:** DRBD is included in the mainline kernel (since 4.x). No additional repository is required.
+
+### Variables
+
+Define resources using the `drbd_resources` list. By default the primary resource host is the one defined first in the `hosts` dict.
+
+Minimal example with two resources:
+
+```yaml
 drbd_resources:
   - name: resource0                     # Name of the shared resource
     nodes:                              # List of nodes that share this resource, and ip to be used
-      bee-meta1: 10.10.4.1              # Name of the default primary resource
-      bee-meta2: 10.10.4.2              # Name of the default secondary resource
+      mgt1: 10.10.4.1                  # Name of the default primary resource
+      mgt2: 10.10.4.2                  # Name of the default secondary resource
     metadisk: internal                  # See https://manpages.debian.org/unstable/drbd-utils/drbd.conf-8.3.5.en.html, internal by default
     disk: /dev/mapper/drbdpool-drbdata1 # Local disk to be used as physical device
     device: /dev/drbd1                  # Virtual disk exposed on hosts
     port: 7789                          # Resource TCP port, default: 7789
-    
+
   - name: resource1                     # Name of the shared resource
     nodes:                              # List of nodes that share this resource, and ip to be used
-      bee-meta1: 10.10.4.1              # Name of the default primary resource
-      bee-meta2: 10.10.4.2              # Name of the default secondary resource
+      mgt1: 10.10.4.1                  # Name of the default primary resource
+      mgt2: 10.10.4.2                  # Name of the default secondary resource
     metadisk: internal                  # See https://manpages.debian.org/unstable/drbd-utils/drbd.conf-8.3.5.en.html, internal by default
     disk: /dev/mapper/drbdpool-drbdata2 # Local disk to be used as physical device
     device: /dev/drbd2                  # Virtual disk exposed on hosts
-    port: 7790                          # Resource TCP port, default: 7789    
+    port: 7790                          # Resource TCP port, default: 7789
 ```
 
-You can use partioning, LVM creation and automatic mounting of DRBD filesystem:
+Full example with partitioning, LVM and automatic mount:
 
-```
+```yaml
 drbd_resources:
   - name: resource0                     # Name of the shared resource
     nodes:                              # List of nodes that share this resource, and ip to be used
-      bee-meta1: 10.10.4.1              # Name of the default primary resource
-      bee-meta2: 10.10.4.2              # Name of the default secondary resource
+      mgt1: 10.10.4.1                  # Name of the default primary resource
+      mgt2: 10.10.4.2                  # Name of the default secondary resource
     metadisk: internal                  # See https://manpages.debian.org/unstable/drbd-utils/drbd.conf-8.3.5.en.html, internal by default
     disk: /dev/mapper/drbdpool-drbdata1 # Local disk to be used as physical device
     device: /dev/drbd1                  # Virtual disk exposed on hosts
@@ -84,7 +73,7 @@ drbd_resources:
       pvs: /dev/sdc
       partition: /dev/sdc1
       state: present
-    partitionning:
+    partitioning:
       device: /dev/sdc
       number: 1
       state: present
@@ -96,8 +85,8 @@ drbd_resources:
 
   - name: resource1                     # Name of the shared resource
     nodes:                              # List of nodes that share this resource, and ip to be used
-      bee-meta1: 10.10.4.1              # Name of the default primary resource
-      bee-meta2: 10.10.4.2              # Name of the default secondary resource
+      mgt1: 10.10.4.1                  # Name of the default primary resource
+      mgt2: 10.10.4.2                  # Name of the default secondary resource
     metadisk: internal                  # See https://manpages.debian.org/unstable/drbd-utils/drbd.conf-8.3.5.en.html, internal by default
     disk: /dev/mapper/drbdpool-drbdata2 # Local disk to be used as physical device
     device: /dev/drbd2                  # Virtual disk exposed on hosts
@@ -117,7 +106,7 @@ drbd_resources:
       pvs: /dev/sdc
       partition: /dev/sdc1
       state: present
-    partitionning:
+    partitioning:
       device: /dev/sdc
       number: 1
       state: present
@@ -127,46 +116,43 @@ drbd_resources:
       part_start: 0%
       part_end: 100%
 ```
-    
-Once cluster is running, resources status can be monitored using the following two commands:
+
+### Monitoring
+
+Once the cluster is running, resource status can be monitored with:
 
 ```
 drbdadm status
 drbdmon
 ```
 
-Example:
+Example output:
+
 ```
 [root@mycluster ~]# drbdadm status
 resource0 role:Primary
   disk:UpToDate
-  bee-meta2 role:Secondary
+  mgt2 role:Secondary
     peer-disk:UpToDate
 
 resource1 role:Primary
   disk:UpToDate
-  bee-meta2 role:Secondary
+  mgt2 role:Secondary
     peer-disk:UpToDate
 ```
 
-To delete the configuration (**will delete all data on the DRBD devices**)
-run the following commands :
+### Removing a resource
+
+To delete a resource configuration (**this will destroy all data on the DRBD device**):
 
 ```
-drbdadm down resource0;drbdadm invalidate resource0;drbdadm wipe-md resource0 && rm -f /etc/drbd.d/resource0.res
-drbdadm down resource1;drbdadm invalidate resource1;drbdadm wipe-md resource1 && rm -f /etc/drbd.d/resource1.res
+drbdadm down resource0
+drbdadm invalidate resource0
+drbdadm wipe-md resource0
+rm -f /etc/drbd.d/resource0.res
 rm -f /etc/drbd.d/global_common.conf
 ```
 
-## Documentations
+## References
 
-https://computingforgeeks.com/install-and-configure-drbd-on-centos-rhel/
-https://linbit.com/drbd-user-guide/drbd-guide-9_0-en/#p-apps
-
-## Changelog
-
-**Please now update CHANGELOG file at repository root instead of adding logs in this file.
-These logs bellow are only kept for archive.**
-
-* 1.1: Role improvements. Hamid Merzouki <hamid.merzouki@naverlabs.com>
-* 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
+- https://linbit.com/drbd-user-guide/drbd-guide-9_0-en/

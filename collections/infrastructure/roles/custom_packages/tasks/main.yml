@@ -1,5 +1,7 @@
-- name: "Install custom packages"
-  yum:
-    name: "{{custom_packages[item]}}"
-  loop: "{{ custom_packages | flatten(levels=1) }}"
-  when: "item in group_names"
+---
+- name: "package <|> Install custom packages for {{ item }}"
+  ansible.builtin.package:
+    name: "{{ custom_packages[item] }}"
+    state: present
+  loop: "{{ custom_packages.keys() | list }}"
+  when: item in group_names

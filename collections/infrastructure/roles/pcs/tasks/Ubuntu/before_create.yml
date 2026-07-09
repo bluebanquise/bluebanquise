@@ -11,5 +11,6 @@
   when:
     - pcs_status_ubuntu is defined
     - "'Cluster name: debian' in pcs_status_ubuntu.stdout"
-    - "'* 0 resource instances configured' in pcs_status_ubuntu.stdout"
-    - "'* No resources' in pcs_status_ubuntu.stdout"
+    - >-
+      ('* 0 resource instances configured' in pcs_status_ubuntu.stdout) or
+      ('* No resources' in pcs_status_ubuntu.stdout)

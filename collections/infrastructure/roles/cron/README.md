@@ -1,15 +1,15 @@
-# cron
+# Cron
 
 ## Description
 
-This role simply act as a wrapper to cron Ansible module.
+These settings simply acts as a wrapper to the cron Ansible module.
 
 ## Instructions
 
-Set needed cron on node/group by defining cron list based on cron module parameters. Example:
+Set needed cron jobs on a host or group by defining `cron_jobs` as a list based on cron module parameters. Example:
 
 ```yaml
-cron:
+cron_jobs:
   - name: "check dirs"
     minute: "0"
     hour: "5,2"
@@ -23,12 +23,4 @@ cron:
     cron_file: ansible_yum-autoupdate
 ```
 
-See `**cron** Ansible module page <https://docs.ansible.com/ansible/latest/collections/ansible/builtin/cron_module.html>`_
-for the full list of available parameters.
-
-## Changelog
-
-**Please now update CHANGELOG file at repository root instead of adding logs in this file.
-These logs bellow are only kept for archive.**
-
-* 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
+See the [cron Ansible module page](https://docs.ansible.com/ansible/latest/collections/ansible/builtin/cron_module.html) for the full list of available parameters.

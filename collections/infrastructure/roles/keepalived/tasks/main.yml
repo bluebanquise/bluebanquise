@@ -64,7 +64,7 @@
 - name: "service <|> Manage {{ keepalived_services_to_start | join(' ') }} state"
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: "{{ (keepalived_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    enabled: "{{ keepalived_enable_services | default(bb_enable_services) | default(true) | bool }}"
     state: "{{ (keepalived_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   loop: "{{ keepalived_services_to_start }}"
   tags:

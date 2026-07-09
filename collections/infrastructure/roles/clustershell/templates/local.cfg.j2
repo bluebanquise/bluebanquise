@@ -2,7 +2,7 @@
 ## {{ ansible_managed }}
 
 {% for gr, nodes in groups.items() %}
-{% if (gr | string) != 'ungrouped' %}
+{% if (gr | string) != 'ungrouped' and nodes | length > 0 %}
 {{ gr }}: {{ nodes | sort | join(',') }}
 
 {% endif %}

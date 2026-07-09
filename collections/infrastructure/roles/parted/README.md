@@ -2,7 +2,7 @@
 
 ## Description
 
-This role provides simply provides an interface to `**parted** Ansible module <https://docs.ansible.com/ansible/latest/collections/community/general/parted_module.html>`_ .
+These settings provide an interface to the [parted Ansible module](https://docs.ansible.com/ansible/latest/collections/community/general/parted_module.html).
 
 ## Instructions
 
@@ -27,14 +27,5 @@ parted:
     part_start: 1GiB
 ```
 
-See `**parted** Ansible module page <https://docs.ansible.com/ansible/latest/collections/community/general/parted_module.html>`_
+See the [parted Ansible module page](https://docs.ansible.com/ansible/latest/collections/community/general/parted_module.html)
 for the full list of available parameters.
-
-## Changelog
-
-**Please now update CHANGELOG file at repository root instead of adding logs in this file.
-These logs bellow are only kept for archive.**
-
-* 1.1.1: Fix missing list. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.1.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>

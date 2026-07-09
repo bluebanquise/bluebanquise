@@ -5,7 +5,7 @@ Hardware settings
 .. warning::
   **IMPORTANT**: ``hw_`` and ``os_`` variables **are
   not standard**. You should **NEVER** set them outside hardware or os groups.
-  For example, you cannot set the ``hw_console`` parameter for a single node under it's hostvars.
+  For example, you cannot set the ``hw_console`` parameter for a single host under its hostvars.
   If you really need to do that, add more hardware or os groups. If you do not respect this
   rule, unexpected behavior will happen during configuration deployment.
 
@@ -25,7 +25,7 @@ Equipment type
 
 Use ``hw_equipment_type`` key to set the type of the equipment. For example ``server`` or ``switch``, etc.
 
-Please note that ``server`` value is the value that triggers PXE, conman, etc for a node. Each server node to be deployed via PXE should be of type ``server``.
+Please note that ``server`` value is the value that triggers PXE, conman, etc for a host. Each server host to be deployed via PXE should be of type ``server``.
 You can set other types namings according to your wishes (``switch``, ``switches``, ``storage_bay_controller``, whatever).
 
 For example:
@@ -34,10 +34,10 @@ For example:
 
   hw_equipment_type: server
 
-Hardware componants
+Hardware components
 ===================
 
-You can define the node components using the ``hw_specs`` key.
+You can define the host components using the ``hw_specs`` key.
 
 These values will be used by some roles of the stack to generate their configuration.
 
@@ -72,7 +72,7 @@ Possible values are either ``x86_64`` or ``aarch64``.
 Console
 =======
 
-If the hardware group refer to servers, a console can be enabled using ``hw_console`` key.
+If the hardware group refers to servers, a console can be enabled using ``hw_console`` key.
 
 For example:
 
@@ -81,7 +81,7 @@ For example:
   hw_console: console=tty0 console=ttyS1,115200
 
 Please note that the console can be obtained from your server manufacturer/vendor.
-If they don't know it, try ttyS0, then ttyS1, then ttyS2. Its nearly always one of these.
+If they don't know it, try ttyS0, then ttyS1, then ttyS2. It's nearly always one of these.
 
 Hardware authentication
 =======================
@@ -100,4 +100,4 @@ Reserved keys are: protocol, user, and password. Other keys can be added if rele
       user: ADMIN
       password: ADMIN
 
-Note that on some board, both IPMI and RedFish can be activated at the same time, which is the reason why this is a list.
+Note that on some boards, both IPMI and RedFish can be activated at the same time, which is the reason why this is a list.

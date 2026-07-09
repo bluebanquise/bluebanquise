@@ -1,0 +1,11 @@
+---
+# Note: package names to verify against OpenSuse Leap 16 repos
+interconnect_ofed_client_packages:
+  - rdma-core
+  - libibverbs-utils
+  - infiniband-diags
+interconnect_ofed_client_service: rdma-ndd
+interconnect_ofed_subnet_manager_packages:
+  - opensm
+interconnect_ofed_subnet_manager_service: opensm
+interconnect_ofed_opensm_conf: /etc/rdma/opensm.conf

@@ -134,12 +134,12 @@ iseq ${platform} efi && goto bootmemtest-efi || goto bootmemtest-legacy
 :bootmemtest-legacy
 echo Booting memtest in legacy bios way
 sleep 2
-boot http://${next-server}/pxe/tools/memtest86plus/memtest.bin || shell
+boot http://${next-server}/pxe/tools/memtest86plus/memtest.bin ${eq-console} || shell
 
 :bootmemtest-efi
 echo Booting memtest in EFI way
 sleep 2
-kernel http://${next-server}/pxe/tools/memtest86plus/memtest.efi || shell
+chain http://${next-server}/pxe/tools/memtest86plus/memtest.efi ${eq-console} || shell
 
 :bootnext
 exit

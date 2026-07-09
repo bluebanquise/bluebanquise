@@ -1,3 +1,4 @@
+---
 ##### OpenSuse / SLES
 
 - name: "copy <|> Copy osdeploy files {{ pxe_stack_htdocs_path }}/pxe/osdeploy/"

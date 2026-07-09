@@ -2,36 +2,27 @@
 
 ## Description
 
-This Role simply allows to install custom packages on the system that 
-are not provided to other bluebanquise roles.
-That can be usefull to keep all the customizations relating OS packages
-synced with BlueBanquise so you dont need to have extra steps in 
-configuring nodes.
+These settings allow installing custom packages on target systems that are not managed by other BlueBanquise roles.
+It is useful for keeping all OS package customizations synced with BlueBanquise without needing extra deployment steps.
 
 ## Instructions
 
-This role is very simple and works based on ansible groups.
-I recommend you to have on single file on the "all" group ( $HOME/bluebanquise/inventory/group_vars/all/addons/custom_packages.yml)
-to manage all the custom packages in the system, as the role will already filter the instalation by groups
-and normally will be more visible to have this on a single file
+These settings work by matching Ansible group names against the keys of the `custom_packages` dictionary.
+For each key that matches one of the host's groups, the corresponding list of packages is installed.
 
-Example of "custom_packages.yml" file:
+It is recommended to define `custom_packages` in a single file under the `all` group
+(e.g. `$HOME/bluebanquise/inventory/group_vars/all/addons/custom_packages.yml`)
+so all customizations are visible in one place.
+
+Example:
 
 ```yaml
 custom_packages:
-  mg_computes:
+  fn_compute:
     - openmpi
-  mg_logins:
+  fn_login:
     - vim
     - '@Development Tools'
-  equipment_typeGPU:
+  hw_gpu_server:
     - htop
 ```
-
-## Changelog
-
-**Please now update CHANGELOG file at repository root instead of adding logs in this file.
-These logs bellow are only kept for archive.**
-
-* 1.0.1: Remove braces on item. Abatcha Olloh <abatchaolloh@outlook.fr>
-* 1.0.0: Role creation. Lucas Santos <lucassouzasantos@gmail.com>

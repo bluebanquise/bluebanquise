@@ -2,11 +2,11 @@
 
 ## Description
 
-This role provides simply provides an interface to `**filesystem** Ansible module <https://docs.ansible.com/ansible/latest/collections/community/general/filesystem_module.html>`_ .
+These settings provide an interface to the [community.general.filesystem](https://docs.ansible.com/ansible/latest/collections/community/general/filesystem_module.html) Ansible module.
 
 ## Instructions
 
-Set needed filesystems using a list:
+Define filesystems to create using the `filesystem` list:
 
 ```yaml
 filesystem:
@@ -19,14 +19,5 @@ filesystem:
     state: absent
 ```
 
-See `**filesystem** Ansible module page <https://docs.ansible.com/ansible/latest/collections/community/general/filesystem_module.html>`_
+See the [community.general.filesystem module documentation](https://docs.ansible.com/ansible/latest/collections/community/general/filesystem_module.html)
 for the full list of available parameters.
-
-## Changelog
-
-**Please now update CHANGELOG file at repository root instead of adding logs in this file.
-These logs bellow are only kept for archive.**
-
-* 1.1.1: Fix empty list. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.1.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>

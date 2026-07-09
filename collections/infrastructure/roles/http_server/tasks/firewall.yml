@@ -3,8 +3,8 @@
   ansible.posix.firewalld:
     zone: "{{ http_server_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
     service: "{{ item }}"
-    immediate: "yes"
-    permanent: "yes"
+    immediate: true
+    permanent: true
     state: enabled
   when:
     - os_firewall | default(false) | bool

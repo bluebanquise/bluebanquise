@@ -96,8 +96,6 @@
     group: conman
     recurse: yes
   notify: service <|> Restart conman
-  when:
-    - ansible_facts.os_family == "RedHat"
 
 - name: file <|> Ensure systemd drop-in directory exists
   ansible.builtin.file:

@@ -1,0 +1,23 @@
+---
+# For more details, please refer to https://wiki.debian.org/AppArmor
+- name: "service <|> Manage AppArmor service state"
+  ansible.builtin.service:
+    name: apparmor
+    enabled: "{{ 'no' if (os_access_control | default(access_control_os_access_control)) == 'disabled' else 'yes' }}"
+    state: "{{ 'stopped' if (os_access_control | default(access_control_os_access_control)) == 'disabled' else 'started' }}"
+  tags:
+    - service
+
+- name: "shell <|> Set AppArmor profiles to enforce mode"
+  ansible.builtin.shell: aa-enforce /etc/apparmor.d/*
+  changed_when: false
+  when: (os_access_control | default(access_control_os_access_control)) == 'enforcing'
+  tags:
+    - service
+
+- name: "shell <|> Set AppArmor profiles to complain mode"
+  ansible.builtin.shell: aa-complain /etc/apparmor.d/*
+  changed_when: false
+  when: (os_access_control | default(access_control_os_access_control)) in ['complain', 'permissive']
+  tags:
+    - service

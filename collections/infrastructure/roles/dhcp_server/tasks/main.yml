@@ -71,11 +71,11 @@
     owner: root
     group: root
     mode: 0644
-  loop: "{{ networks | flatten(levels=1) }}"
+  loop: "{{ networks.keys() | list }}"
   when:
     - networks is defined and networks is iterable and networks is not string and networks is mapping
     - item.startswith("net-")
-    - networks[item].is_in_dhcp | default(true)
+    - networks[item].dhcp_server | default(true)
     - networks[item].subnet is defined and networks[item].prefix is defined
   notify: service <|> Restart dhcp server
   tags:

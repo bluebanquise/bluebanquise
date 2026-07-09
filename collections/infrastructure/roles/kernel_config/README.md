@@ -2,50 +2,40 @@
 
 ## Description
 
-This role apply/update kernel parameters and sysctl parameters.
+These settings apply and updates kernel parameters and sysctl parameters.
+
+Supported distributions: RHEL 9/10, Ubuntu 24.04/26.04, Debian 13, OpenSuse Leap 16.
 
 ## Instructions
 
-### kernel parameters
+### Kernel command line parameters
 
-The role uses the `os_kernel_parameters` and `hw_kernel_parameters` variable as source.
+These settings read `os_kernel_parameters` and `hw_kernel_parameters` inventory variables and applies them to the kernel command line.
+
+On **RHEL**, these settings use `grubby` to add parameters to the default kernel entry. Parameters are only added if not already present.
+
+On **Ubuntu, Debian, and OpenSuse**, these settings merge parameters into `GRUB_CMDLINE_LINUX_DEFAULT` in `/etc/default/grub`, deduplicates them, and runs the appropriate grub update command.
+
+Example inventory variables (typically set in `os_*` or `hw_*` group_vars):
+
+```yaml
+os_kernel_parameters: "quiet splash"
+hw_kernel_parameters: "iommu=pt intel_iommu=on"
+hw_console: "console=tty0 console=ttyS0,115200n8"
+```
 
 ### sysctl
 
-Sysctl parameters to be set are defined in the `os_sysctl`
-variable. As it is an *os_* variable, it should only be
-set for each equipment profiles, and not set at hostvars
-level.
-
-An example would be:
+Sysctl parameters are defined in the `os_sysctl` variable. As an `os_*` variable, it should be set per equipment profile, not at host level.
 
 ```yaml
 os_sysctl:
-  kernel.panic: absent
+  kernel.panic: 10
   vm.swappiness: 5
-  ...
 ```
 
-It is optionally possible to prevent sysctl reload by
-setting variable `kernel_config_sysctl_reload` to **false**.
+To prevent sysctl reload after applying changes, set:
 
-## Input
-
-Optional inventory vars:
-
-**hostvars[inventory_hostname]**
-
-* os_kernel_parameters
-* hw_kernel_parameters
-* kernel_config_sysctl_reload
-
-## Changelog
-
-**Please now update CHANGELOG file at repository root instead of adding logs in this file.
-These logs bellow are only kept for archive.**
-
-* 1.3.0: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.2.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.1.1: Add OpenSuSE support. Neil Munday <neil@mundayweb.com>
-* 1.1.0: Add Ubuntu support. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
+```yaml
+kernel_config_sysctl_reload: false
+```

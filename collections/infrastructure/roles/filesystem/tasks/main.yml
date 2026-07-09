@@ -8,3 +8,5 @@
     resizefs: "{{ item.resizefs | default(omit) }}"
     state: "{{ item.state | default(omit) }}"
   loop: "{{ filesystem | default([], true) }}"
+  tags:
+    - filesystem

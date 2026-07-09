@@ -1,2 +1,5 @@
 ---
 nhc_custom_packages_to_install: []
+nhc_checks: {}
+nhc_resources_manager:
+nhc_files: []

@@ -44,6 +44,11 @@ If you use and like BlueBanquise, please consider donating to the **UNICEF** (ht
 I have a decent job, I don't need money, but they do.
 In the 21th century, it is a shame not all children live in peace.
 
+## AI
+
+I am using AI time to time to help me maintain and develop BlueBanquise. Reason is simple: keeping up to date a stack that covers around 2 versions of 4 different Linux distributions is way too much for a single person.
+Note however that I read all changes proposed by AI, and I do not commit something I don't understand.
+
 ## Quickstart
 
 ### 1. Bootstrap the stack

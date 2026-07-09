@@ -2,34 +2,26 @@
 
 ## Description
 
-This role ensure the node current status comply with
-`os_access_control` variable. This means SELinux status on RHEL systems,
-and AppArmor on Ubuntu systems.
-
-Note that for now, this role does not cover any other system (restricted to AppArmor and SELinux).
+These settings ensure the host current access control status complies with
+the `os_access_control` variable. This means SELinux on RedHat family systems,
+and AppArmor on Ubuntu, Debian, and Suse family systems.
 
 ## Instructions
 
-Set either `access_control_os_access_control` for standalone usage, or `os_access_control` when in BlueBanquise stack context (variables for equipment profile group related to host usage). Note that `os_access_control` precedence `access_control_os_access_control`.
+Set either `access_control_os_access_control` for standalone usage, or `os_access_control` when used in a BlueBanquise stack context (set at the equipment profile group level). Note that `os_access_control` takes precedence over `access_control_os_access_control`.
 
-For RHEL systems, accepted values are:
+### RedHat (SELinux)
 
-* `enforcing`
-* `permissive`
-* `disabled`
-
-For Ubuntu systems, accepted values are:
+Accepted values:
 
 * `enforcing`
+* `permissive` or `complain` (both map to SELinux permissive mode)
 * `disabled`
 
-## Changelog
+### Ubuntu / Debian / Suse (AppArmor)
 
-**Please now update CHANGELOG file at repository root instead of adding logs in this file.
-These logs bellow are only kept for archive.**
+Accepted values:
 
-* 1.3.0: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.2.0: Update to BB 2.0 format. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.1.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.0.1: Adapt role to handle multiple distributions. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
+* `enforcing` — AppArmor service started, all profiles set to enforce mode
+* `permissive` or `complain` — AppArmor service started, all profiles set to complain mode
+* `disabled` — AppArmor service stopped and disabled

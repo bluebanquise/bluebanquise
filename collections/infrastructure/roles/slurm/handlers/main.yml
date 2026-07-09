@@ -1,7 +1,7 @@
 ---
 - name: systemd <|> Reload systemd configuration
   ansible.builtin.systemd:
-    daemon_reload: yes
+    daemon_reload: true
   when:
     - "'service' not in ansible_skip_tags"
 
@@ -13,7 +13,7 @@
     - "'service' not in ansible_skip_tags"
     - slurm_start_services | default(bb_start_services) | default(true) | bool
 
-- name: Run scontrol reconfigure
+- name: command <|> Run scontrol reconfigure
   ansible.builtin.command:
     cmd: scontrol reconfigure
   changed_when: true

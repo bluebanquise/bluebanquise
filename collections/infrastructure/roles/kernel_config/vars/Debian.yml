@@ -1,0 +1,3 @@
+---
+kernel_config_grub_package: grub2-common
+kernel_config_grub_update_command: update-grub

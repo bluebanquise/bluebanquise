@@ -22,7 +22,7 @@ Login as the bluebanquise user:
 
   sudo su - bluebanquise
 
-This user can be considered as the "cluster admin user". Deployed nodes for example will automatically have
+This user can be considered as the "cluster admin user". Deployed hosts for example will automatically have
 the bluebanquise user configured and ssh keys set so that you can ssh on them.
 
 Test you can now use the ``ansible-playbook`` command:

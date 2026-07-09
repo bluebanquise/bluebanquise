@@ -2,9 +2,9 @@
 
 ## Description
 
-This role configures the firewall service on the hosts.
+These settings configure the firewall service on the hosts.
 
-For each network interface of the host where the play runs, this role binds the
+For each network interface of the host where the play runs, these settings bind the
 source address **subnet/prefix** to the zone defined in **firewall.zone** if
 the network must be in the firewall.
 
@@ -72,26 +72,20 @@ firewall_zones:
 ### Integration with other roles
 
 BlueBanquise ships with roles that already support some level of firewall
-configuration by adding services to the default zone (public). For each role,
-it is possible to override the default zone by setting
-**${rolename}_firewall_zone** in the inventory.
+configuration by adding services to the default zone (public).
 
-For example, if you want to add the services of the pxe_stack roles to the
-internal zone, you must set the variable `pxe_stack_firewall_zone: internal`.
+To change the default zone for all roles at once, set `bb_services_firewall_zone`:
 
-## Changelog
+```yaml
+bb_services_firewall_zone: internal
+```
 
-**Please now update CHANGELOG file at repository root instead of adding logs in this file.
-These logs bellow are only kept for archive.**
+For each role individually, override the default zone by setting
+`<rolename>_firewall_zone` in the inventory. Role-level variables always take
+precedence over `bb_services_firewall_zone`.
 
-* 1.3.5: Allow usage on all distributions. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.3.4: Fix condition in handler. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.3.3: Adapt to os hw split. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.3.2: Fix issue with non networked nic. From @GaelBil. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.3.1: Firewalld: enforce interfaces to their relevant zone. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
-* 1.3.0: Add firewalld_allow_zone_drifting variable. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
-* 1.2.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.1.3: Add OpenSuSE support. Neil Munday <neil@mundayweb.com>
-* 1.1.2: Adapt role to handle multiple distributions. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.1.0: Allow creation of new zones. Bruno Travouillon <devel@travouillon.fr>
-* 1.0.0: Role creation. Bruno Travouillon <devel@travouillon.fr>
+For example, to add the pxe_stack services to the internal zone:
+
+```yaml
+pxe_stack_firewall_zone: internal
+```

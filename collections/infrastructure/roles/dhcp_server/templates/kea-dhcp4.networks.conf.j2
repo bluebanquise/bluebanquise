@@ -25,13 +25,15 @@
 ],
 
 # Not shared networks
-"subnet4": [
+{% set standalone_networks = [] %}
 {% for network in networks %}
-  {% if network.startswith("net-") %}
-    {% if networks[network]['shared_network'] is not defined or networks[network]['shared_network'] is none %}
-      <?include "{{ dhcp_server_conf_dir }}/kea-dhcp4.{{ network }}.conf"?>{% if not loop.last %},{% endif %}
-
-    {% endif %}
+  {% if network.startswith("net-") and (networks[network]['shared_network'] is not defined or networks[network]['shared_network'] is none) %}
+    {% set _ = standalone_networks.append(network) %}
   {% endif %}
+{% endfor %}
+"subnet4": [
+{% for network in standalone_networks %}
+  <?include "{{ dhcp_server_conf_dir }}/kea-dhcp4.{{ network }}.conf"?>{% if not loop.last %},{% endif %}
+
 {% endfor %}
 ]

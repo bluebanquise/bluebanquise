@@ -1,12 +1,14 @@
-# Mount
+# mount
 
 ## Description
 
-This role provides simply provides an interface to `**mount** Ansible module <https://docs.ansible.com/ansible/latest/collections/ansible/posix/mount_module.html>`_ .
+These settings provide an interface to the [mount Ansible module](https://docs.ansible.com/ansible/latest/collections/ansible/posix/mount_module.html) for managing mount points.
+
+Supported distributions: RHEL 9/10, Ubuntu 24.04/26.04, Debian 13, OpenSuse Leap 16.
 
 ## Instructions
 
-Set needed mounting point using a list:
+Set needed mount points using the `mount` list in your inventory:
 
 ```yaml
 mount:
@@ -35,15 +37,4 @@ mount:
     fstype: nfs
 ```
 
-See `**mount** Ansible module page <https://docs.ansible.com/ansible/latest/collections/ansible/posix/mount_module.html>`_
-for the full list of available parameters.
-
-## Changelog
-
-**Please now update CHANGELOG file at repository root instead of adding logs in this file.
-These logs bellow are only kept for archive.**
-
-* 1.1.1: Fix missing list. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.1.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.0.1: Bug fix for src option. Neil Munday <neil@mundayweb.com>
-* 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
+See the [mount module documentation](https://docs.ansible.com/ansible/latest/collections/ansible/posix/mount_module.html) for the full list of available parameters.

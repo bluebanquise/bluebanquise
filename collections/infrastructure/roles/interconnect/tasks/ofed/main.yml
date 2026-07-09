@@ -1,17 +1,13 @@
 ---
 
-- name: include_tasks <|> Use OS dedicated task
-  ansible.builtin.include_tasks: "{{ outer_item }}"
-  with_first_found:
-    - files:
-        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
-        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
-        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
-        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
-        - "{{ ansible_facts.distribution | replace(' ','_') }}/main.yml"
-        - "{{ ansible_facts.os_family | replace(' ','_') }}/main.yml"
-      skip: true
-  loop_control:
-    loop_var: outer_item
+- name: include_tasks <|> Setup InfiniBand client
+  ansible.builtin.include_tasks: "ofed/client.yml"
+  when: interconnect_ofed_client
+  tags:
+    - internal
+
+- name: include_tasks <|> Setup InfiniBand subnet manager
+  ansible.builtin.include_tasks: "ofed/subnet_manager.yml"
+  when: interconnect_ofed_subnet_manager
   tags:
     - internal

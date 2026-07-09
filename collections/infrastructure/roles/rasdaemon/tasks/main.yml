@@ -9,6 +9,7 @@
 - name: "service <|> Start rasdaemon service"
   ansible.builtin.service:
     name: rasdaemon
+    enabled: true
     state: started
   tags:
     - service

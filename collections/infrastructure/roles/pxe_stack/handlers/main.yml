@@ -10,6 +10,6 @@
 
 - name: systemd <|> Reload systemd configuration
   ansible.builtin.systemd:
-    daemon_reload: yes
+    daemon_reload: true
   when:
     - "'service' not in ansible_skip_tags"

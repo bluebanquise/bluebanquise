@@ -28,7 +28,7 @@
     enabled: false
     state: "stopped"
 
-- name: "systemd_service <|> Mask systemd-networkd socker"
+- name: "systemd_service <|> Mask systemd-networkd socket"
   ansible.builtin.systemd_service:
     name: systemd-networkd.socket
     masked: true

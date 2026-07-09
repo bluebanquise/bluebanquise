@@ -7,7 +7,7 @@
 {% for instance in keepalived_vrrp_instances %}
 vrrp_instance {{ instance.name | default("BB_VI_" + (instance.id | default(loop.index, true) | string), true)}} {
 
-  virtual_router_id {{ instance.id | default("77" + (loop.index | string), true) }}
+  virtual_router_id {{ instance.id | default(77 + loop.index, true) }}
 
   {% if inventory_hostname == instance.servers[0] %}
   state MASTER
@@ -21,7 +21,7 @@ vrrp_instance {{ instance.name | default("BB_VI_" + (instance.id | default(loop.
     {% endfor %}
   {% endif %}
 
-  # CHeck interval
+  # Check interval
   advert_int {{ instance.advert_int | default("1", true) }}
 
   # Synchro interface between LBs

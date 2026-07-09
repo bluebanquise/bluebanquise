@@ -2,29 +2,31 @@
 
 ## Description
 
-This role deploy a basic keepalived configuration to be used in high availability context with for example HAproxy.
+These settings deploy a basic keepalived configuration for use in high availability context, typically combined with the **haproxy** role.
 
-Keepalived provides a floating ip address (virtual router), which can be used as a single reference for clients.
+Keepalived provides a floating IP address (virtual router) that can be used as a single reference point for clients. When the primary host fails, a backup host automatically takes over the virtual IP.
 
-An interesting article can be found here to understand the concept: https://www.digitalocean.com/community/questions/navigating-high-availability-with-keepalived
+Supported distributions: RHEL 9/10, Ubuntu 24.04/26.04, Debian 13, OpenSuse Leap 16.
+
+For background on the concept: https://www.digitalocean.com/community/questions/navigating-high-availability-with-keepalived
 
 ## Instructions
 
-Configuration is made by **vrrp_instances**. Each instance can be seen as a group of nodes sharing the same group of floating virtual ips with the same parameters.
+Configuration is made via **vrrp_instances**. Each instance defines a group of hosts sharing the same floating virtual IPs with the same parameters.
 
-Instances are listed under the `keepalived_vrrp_instances` list the following way:
+Define instances under `keepalived_vrrp_instances`:
 
 ```yaml
 keepalived_vrrp_instances:
-  - name: VI_1 # Optional, is automatically attributed if not set
+  - name: VI_1           # Optional - auto-assigned if not set
     interface: enp0s3
-    id: 101 # Optional, is automatically attributed if not set
+    id: 101              # Optional - auto-assigned if not set (range 1-255)
     servers:
-      - mg1 # First in the list is considered MASTER, with top priority
-      - mg2 # Then others are BACKUP, with pritority ordered as in this list (mg1 > mg2 > mg3)
+      - mg1              # First in list is MASTER with highest priority
+      - mg2              # Subsequent entries are BACKUP, priority ordered by position
       - mg3
     auth_pass: "<replace me>"
-    advert_int: 1 # Optional, advert interval default to 1s if not set
+    advert_int: 1        # Optional - advertisement interval in seconds, default 1
     virtual_ipaddress:
       - 10.10.0.3/16 brd 10.10.255.255 scope global
   - interface: enp0s8
@@ -37,13 +39,14 @@ keepalived_vrrp_instances:
       - 172.16.0.77/16 brd 172.16.255.255 scope global
 ```
 
-Comments should be self explanatory. Keys not optional are mandatory.
+All keys not marked Optional are mandatory.
 
-This role aims to provide a simple way to define keepalived VIP. Loadbalancing is currently not supported by the role.
+### Priority
 
-## Changelog
+The first server in `servers` is assigned `MASTER` with priority 100. Subsequent servers are `BACKUP` with decreasing priorities (78, 77, 76, ... based on position). When multiple managers share the same priority, the active one is elected by highest IP address.
 
-**Please now update CHANGELOG file at repository root instead of adding logs in this file.
-These logs bellow are only kept for archive.**
+### Virtual router ID
 
-* 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
+If `id` is not set, these settings auto-assigns IDs starting from 78 (78, 79, 80, ...). IDs must be unique per VRRP instance on the same network segment and must be in range 1-255.
+
+These settings provide a simple way to define keepalived VIPs. Load balancing is not managed by these settings - use the **haproxy** role for that.

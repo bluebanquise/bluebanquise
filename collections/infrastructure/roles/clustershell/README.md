@@ -1,9 +1,9 @@
-# ClusterShel
+# ClusterShell
 
 ## Description
 
 This role optionally installs clustershell and setup groups for clustershell (based on Ansible inventory groups provided).
-It can be used in combinaison with other BlueBanquise stack tools, like `bluebanquise-bootset`.
+It can be used in combination with other BlueBanquise stack tools, like `bluebanquise-bootset`.
 
 ## Instructions
 

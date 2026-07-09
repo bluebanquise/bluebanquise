@@ -65,7 +65,7 @@
 - name: "service <|> Manage {{ time_services_to_start | join(' ') }} services state"
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: "{{ (time_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    enabled: "{{ (time_enable_services | default(bb_enable_services) | default(true) | bool) | ternary(true, false) }}"
     state: "{{ (time_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   loop: "{{ time_services_to_start }}"
   tags:

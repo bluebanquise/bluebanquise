@@ -38,8 +38,8 @@
   ansible.posix.firewalld:
     zone: "{{ prometheus_server_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
     service: prometheus
-    immediate: "yes"
-    permanent: "yes"
+    immediate: true
+    permanent: true
     state: enabled
   when:
     - prometheus_firewall_open | bool
@@ -59,7 +59,7 @@
     - /etc/prometheus/alerts/
     - /var/lib/prometheus
 
-- name: Template <|> Generate /etc/prometheus/prometheus.yml
+- name: template <|> Generate /etc/prometheus/prometheus.yml
   ansible.builtin.template:
     src: prometheus.yml.j2
     dest: /etc/prometheus/prometheus.yml
@@ -114,7 +114,7 @@
 - name: service <|> Manage prometheus service state
   ansible.builtin.service:
     name: prometheus
-    enabled: "{{ (prometheus_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    enabled: "{{ (prometheus_enable_services | default(bb_enable_services) | default(true) | bool) | ternary(true, false) }}"
     state: "{{ (prometheus_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   tags:
     - service

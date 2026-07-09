@@ -44,7 +44,7 @@
 - name: "service <|> Manage diskless services state"
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: "{{ (pxe_stack_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    enabled: "{{ (pxe_stack_enable_services | default(bb_enable_services) | default(true) | bool) | ternary(true, false) }}"
     state: "{{ (pxe_stack_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   loop: "{{ pxe_stack_diskless_services_to_start }}"
   tags:

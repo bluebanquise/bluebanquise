@@ -1,2 +1,4 @@
 ---
 dns_client_domain_name:
+dns_client_servers:
+dns_client_external_servers:

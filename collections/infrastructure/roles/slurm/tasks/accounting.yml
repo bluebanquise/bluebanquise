@@ -7,12 +7,12 @@
     - package
 
 - name: file <|> Check if slurmdbd PID file exists
-  stat:
+  ansible.builtin.stat:
     path: "{{ slurm_slurmdbdpidfile }}"
   register: slurm_pid_file
 
 - name: file <|> Create slurmdbd PID file if missing
-  file:
+  ansible.builtin.file:
     path: "{{ slurm_slurmdbdpidfile }}"
     state: touch
     owner: slurm
@@ -76,15 +76,15 @@
 - name: service <|> Manage slurmdbd state
   ansible.builtin.service:
     name: slurmdbd
-    enabled: "{{ (slurm_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    enabled: "{{ (slurm_enable_services | default(bb_enable_services) | default(true) | bool) | ternary(true, false) }}"
     state: "{{ (slurm_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
 
 - name: "firewalld <|> Add Slurmdbd ports to firewall's zone"
   ansible.posix.firewalld:
     zone: "{{ slurm_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
     port: "{{ slurm_slurmdbd_port }}/tcp"
-    immediate: "yes"
-    permanent: "yes"
+    immediate: true
+    permanent: true
     state: enabled
   when:
     - os_firewall | default(false) | bool

@@ -2,7 +2,7 @@
 
 ![system](system_logo.svg)
 
-This roles is just a convenient collection of wrappers above the following Ansible modules:
+These settings are just a convenient collection of wrappers above the following Ansible modules:
 
 * package
 * file
@@ -10,13 +10,13 @@ This roles is just a convenient collection of wrappers above the following Ansib
 * service
 * lineinfile
 
-Using this role, it is theoretically possible to setup and start a large number of services.
+Using these settings, it is theoretically possible to setup and start a large number of services.
 
 ## Wrappers
 
 ### package
 
-Install desired packages on node/group by defining system.package list based on package module parameters. Example:
+Install desired packages on host/group by defining system.package list based on package module parameters. Example:
 
 ```yaml
 system:
@@ -32,7 +32,7 @@ for the full list of available parameters.
 
 ### file
 
-Create desired file or folder / change permissions / etc on node/group by defining system.file list based on file module parameters. Example:
+Create desired file or folder / change permissions / etc on host/group by defining system.file list based on file module parameters. Example:
 
 ```yaml
 system:
@@ -56,7 +56,7 @@ for the full list of available parameters.
 
 ### template
 
-Generate desired files based from custom templates on node/group by defining system.template list based on template module parameters. Note that for this wrapper, a special additional key was added: `template`, that should contain the template to render and replace the `src` key:
+Generate desired files based from custom templates on host/group by defining system.template list based on template module parameters. Note that for this wrapper, a special additional key was added: `template`, that should contain the template to render and replace the `src` key:
 
 ```yaml
 system:
@@ -77,7 +77,7 @@ for the full list of available parameters.
 
 ### lineinfile
 
-Edit lines of files on node/group by defining system.lineinfile list based on lineinfile module parameters. Example:
+Edit lines of files on host/group by defining system.lineinfile list based on lineinfile module parameters. Example:
 
 ```yaml
 system:
@@ -98,7 +98,7 @@ for the full list of available parameters.
 
 ### service
 
-Manage services on node/group by defining system.service list based on service module parameters. Example:
+Manage services on host/group by defining system.service list based on service module parameters. Example:
 
 ```yaml
 system:
@@ -112,10 +112,3 @@ system:
 
 See `**service** Ansible module page <https://docs.ansible.com/ansible/latest/collections/ansible/builtin/service_module.html>`_
 for the full list of available parameters.
-
-## Changelog
-
-**Please now update CHANGELOG file at repository root instead of adding logs in this file.
-These logs bellow are only kept for archive.**
-
-* 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>

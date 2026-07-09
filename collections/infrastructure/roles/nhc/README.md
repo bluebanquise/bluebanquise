@@ -12,7 +12,7 @@
 
 ## Description
 
-This role install and configure NHC.
+These settings install and configures NHC.
 
 To find more information on NHC or grab latest release, refer to the [NHC
 project](https://github.com/mej/nhc) on GitHub.
@@ -28,7 +28,7 @@ check name as key and arguments of this check as value. For example:
   nhc_checks:
     check_hw_mem_free: 1mb
     check_fs_mount_rw: -f /scratch
-    ...
+    # ...
 ```
 
 If you need to define the same check with several parameters, provide a list of
@@ -40,8 +40,19 @@ arguments:
     check_fs_mount_rw:
       - -f /scratch
       - -f /home
-    ...
+    # ...
 ```
+
+### Resources manager
+
+To explicitly set the resources manager (e.g. SLURM, PBS, etc), set the
+variable **nhc_resources_manager**:
+
+```yaml
+nhc_resources_manager: SLURM
+```
+
+If not set, NHC will auto-detect the resources manager.
 
 ### Advanced usage
 
@@ -73,12 +84,3 @@ You can require installation of additional custom packages (for example
 smartmontools, dmidecode, etc), by providing a list named
 **nhc_custom_packages_to_install**. This can be useful when using custom nhc
 checks.
-
-## Changelog
-
-**Please now update CHANGELOG file at repository root instead of adding logs in this file.
-These logs bellow are only kept for archive.**
-
-* 1.1.1: Bug fixes on nhc.j2. Lucas santos <lucassouzasantos@gmail.com>
-* 1.1.0: Template nhc_files. Bruno Travouillon <devel@travouillon.fr>
-* 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>

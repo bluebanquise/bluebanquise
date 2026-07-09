@@ -1,0 +1,1 @@
+../../../collections/infrastructure/roles/cloudinit/README.md

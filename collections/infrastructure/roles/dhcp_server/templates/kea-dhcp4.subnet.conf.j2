@@ -54,6 +54,7 @@ ip_or_host allows to define priorities between ip or host
   {% endif %}
   {% if nextserver is defined and nextserver is not none %}
     "next-server": "{{ nextserver }}",
+    "require-client-classes": ["arch_x86_64_http_boot_{{ item }}", "arch_arm64_http_boot_{{ item }}"],
   {% endif %}
 
   {% if networks[item]['dhcp_unknown_range'] is defined and networks[item]['dhcp_unknown_range'] is not none %}
@@ -111,7 +112,7 @@ ip_or_host allows to define priorities between ip or host
       {% if (entry.nic.mac is defined and entry.nic.mac is not none) or (entry.nic.dhcp_client_identifier is defined and entry.nic.dhcp_client_identifier is not none) or (entry.nic.host_identifier is defined and entry.nic.host_identifier is not none) %}
     {
       "hostname": "{{ entry.host }}",
-      "ip-address": "{{ entry.nic.ip4 }}",
+      "ip-address": "{{ entry.nic.ip4 | split('/') | first }}",
         {% if entry.nic.mac is defined %}
       "hw-address": "{{ entry.nic.mac }}"
         {% elif entry.nic.dhcp_client_identifier is defined %}

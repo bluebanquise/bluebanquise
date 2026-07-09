@@ -1,6 +1,6 @@
 #jinja2: lstrip_blocks: True
 #### Blue Banquise file ####
-## {{ansible_managed}}
+## {{ ansible_managed }}
 {% for key, value in slurm_topology_file.items() %}
 {{ value['section'] }}={{ key }} {{ value['subsection'] }}={{ value['nodeset'] }}
 {% endfor %}

@@ -1,6 +1,7 @@
 $TTL 60
+{% set domain_name = dns_server_domain_name | default(bb_domain_name, true) | default('cluster.local', true) %}
 @            IN    SOA  {{ inventory_hostname }}.{{ domain_name }}. root.{{ domain_name }}.  (
-                          {{ serial }} ; serial
+                          {{ dns_server_serial }} ; serial
                           1h           ; refresh
                           30m          ; retry
                           1w           ; expiry
@@ -14,4 +15,3 @@ localhost       A   127.0.0.1
 {{ site }}    A        {{ ip }}
 {% endfor %}
 {% endif %}
-

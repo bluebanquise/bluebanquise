@@ -19,15 +19,15 @@
 - name: service <|> Manage MariaDB state
   ansible.builtin.service:
     name: mariadb
-    enabled: "{{ (slurm_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    enabled: "{{ (slurm_enable_services | default(bb_enable_services) | default(true) | bool) | ternary(true, false) }}"
     state: "{{ (slurm_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
 
 - name: file <|> Configure MariaDB to listen on all interfaces
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/mysql/mariadb.conf.d/50-server.cnf
     regexp: '^bind-address\s*=\s*127\.0\.0\.1'
     line: 'bind-address = 0.0.0.0'
-    backrefs: yes
+    backrefs: true
   when:
     - ansible_distribution == 'Ubuntu'
   notify: service <|> restart mariadb

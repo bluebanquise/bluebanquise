@@ -5,7 +5,7 @@
     dest: /etc/apache2/mods-enabled/cgi.load
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
-    group: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_group }}"
     state: link
   notify: service <|> Restart pxe services
 

@@ -1,43 +1,49 @@
 # Cloud-init
 
-This role is inspired by https://github.com/mrlesmithjr/ansible-cloud-init from Larry Smith Jr.
+These settings are inspired by https://github.com/mrlesmithjr/ansible-cloud-init from Larry Smith Jr.
 
 ## Description
 
-This role install and configure cloud-init on the target system.
-This is mostly used to execute post-installation tasks when a diskless node boots, but can also be used for diskful configuration.
+These settings install and configures cloud-init on the target system.
+This is mostly used to execute post-installation tasks when a diskless host boots, but can also be used for diskful configuration.
+
+These settings will install the cloud-init package, write its configuration, and enable the cloud-init service for next boot, but will not start the service directly.
 
 ## Instructions
 
 ### Quick usage
 
-This role allows to simply pass a whole script to cloud init to execute it at boot.
+These settings allow passing a base64-encoded script to cloud-init to execute at boot.
 
-To do so, create variable `cloudinit_boot_script` and add your full script in bash, on multiple lines, this way (`|` character, then whole script is indented by 2).
+First, encode your script using:
 
-For example:
-
-```yaml
-cloudinit_boot_script: |
-  echo "Hello world" >> /tmp/hello
-  nmcli connection modify "Wired connection 1" ipv4.method manual ipv4.address 10.0.2.152/24 ipv4.gateway 10.0.2.1 ipv4.dns 10.0.2.1
+```bash
+cat myscript.sh | base64 -w 0
 ```
 
-The template will simply execute a runcmd cloud-init instruction to execute this script.
+Then set the resulting string as the value of `cloudinit_boot_script`:
+
+```yaml
+cloudinit_boot_script: ZWNobyAiSGVsbG8gd29ybGQiID4+IC90bXAvaGVsbG8K
+```
+
+At boot, cloud-init will decode and execute the script via:
+
+```
+echo <base64_content> | base64 -d | /bin/bash
+```
 
 ### Standard usage
 
-The role will install cloud-init package, write its configuration, and enable the cloud-init service, but will not start the service.
-
-By default, configuration writen by the role will do nothing.
-You need to provide your own cloud-init configuration, by setting cloudinit_configuration variable, which must contain a full cloud-init configuration.
+By default, the configuration written by these settings will do nothing (empty users and groups).
+You need to provide your own cloud-init configuration by setting the `cloudinit_configuration` variable, which must contain a full cloud-init configuration.
 
 See the following documentation to help you build your needed configuration:
 
 * Main documentation: https://cloudinit.readthedocs.io/en/latest/index.html
-* Example: https://cloudinit.readthedocs.io/en/latest/reference/examples.html
+* Examples: https://cloudinit.readthedocs.io/en/latest/reference/examples.html
 
-For example, to make the role write a configuration that will setup an admin user "kirby" at boot:
+For example, to make these settings write a configuration that will set up an admin user "kirby" at boot:
 
 ```yaml
 cloudinit_configuration:
@@ -49,10 +55,3 @@ cloudinit_configuration:
       ssh_authorized_keys:
         - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAXXXXXXXX...
 ```
-
-## Changelog
-
-**Please now update CHANGELOG file at repository root instead of adding logs in this file.
-These logs bellow are only kept for archive.**
-
-* 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>

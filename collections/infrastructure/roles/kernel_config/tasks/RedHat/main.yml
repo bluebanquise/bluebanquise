@@ -9,18 +9,20 @@
   args:
     executable: /bin/bash
   register: kernel_config_current_kernel_parameters
-  changed_when: False
+  changed_when: false
 
 - name: command <|> Update os kernel parameters
   ansible.builtin.command: "grubby --args='{{ item }}' --update-kernel=DEFAULT"
-  loop: "{{ os_kernel_parameters.split(' ') | default([]) }}"
+  loop: "{{ (os_kernel_parameters | default('') | trim).split(' ') | reject('equalto', '') | list }}"
   when:
-    - os_kernel_parameters is defined and os_kernel_parameters is not none
+    - os_kernel_parameters is defined
+    - os_kernel_parameters is not none
     - item not in kernel_config_current_kernel_parameters.stdout
 
 - name: command <|> Update hw kernel parameters
   ansible.builtin.command: "grubby --args='{{ item }}' --update-kernel=DEFAULT"
-  loop: "{{ hw_kernel_parameters.split(' ') | default([]) }}"
+  loop: "{{ (hw_kernel_parameters | default('') | trim).split(' ') | reject('equalto', '') | list }}"
   when:
-    - hw_kernel_parameters is defined and hw_kernel_parameters is not none
+    - hw_kernel_parameters is defined
+    - hw_kernel_parameters is not none
     - item not in kernel_config_current_kernel_parameters.stdout

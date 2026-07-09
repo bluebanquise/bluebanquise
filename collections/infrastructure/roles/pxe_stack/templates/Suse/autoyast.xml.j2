@@ -55,7 +55,7 @@
   </networking>
 
   <software>
-{% if (equipment['os']['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system)) | lower == "sles" %}
+{% if (equipment['os']['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution, true)) | lower == "sles" %}
     <products config:type="list">
       <product>SLES</product>
     </products>

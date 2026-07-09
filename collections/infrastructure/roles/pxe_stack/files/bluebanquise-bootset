@@ -262,9 +262,17 @@ elif passed_arguments.boot:
                 dedicated_parameters = dedicated_parameters + ' rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4 '
             # Check if node is part of a tenant:
             node_tenant_ipxe = ""
+
             if len(tenants) > 0:
-                node_tenant = next((k for k, lst in tenants.items() if target in lst), None)
-                node_tenant_ipxe = 'set tenant ' + str(node_tenant)
+                node_tenant = None
+                for tenant_group in tenants:
+                    if node in tenants[tenant_group]:
+                        node_tenant = tenant_group
+                        break
+                if node_tenant is not None:
+                    node_tenant_ipxe = 'set tenant ' + str(node_tenant)
+                else:
+                    node_tenant_ipxe = ""
 
             generic_node_ipxe = '\n'.join((
                 '#!ipxe',

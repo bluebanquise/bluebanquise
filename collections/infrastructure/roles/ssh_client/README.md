@@ -79,7 +79,6 @@ It is possible to set specific parameters at global and/or nodes level:
 * LogLevel
 * UseRoaming
 * ForwardX11Trusted
-* StrictHostKeyChecking
 
 To achieve that, the following variables are available:
 
@@ -93,7 +92,7 @@ To achieve that, the following variables are available:
 
 Which are evaluated at global level
 
-For example, ssh_client_global_network can be used to configure in */root/ssh/config*
+For example, ssh_client_global_network can be used to configure in */root/.ssh/config*
 the same network for all hosts.
 
 And:

@@ -28,7 +28,7 @@ Create file ``group_vars/all/global.yml`` with the following content:
 
 Tune these values according to your needs.
 
-Note that these variables are used by all roles of the stack. However, each role can overwrite the global settings by its own.
+Note that these variables are used by all roles of the stack. However, each role can overwrite the global settings on its own.
 Please refer to each service parameters for more details.
 
 Services global settings

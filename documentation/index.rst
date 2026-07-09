@@ -37,8 +37,6 @@ This documentation is under Creative Commons Attribution-NonCommercial-ShareAlik
    :numbered:
 
    introduction/what_is_bluebanquise
-   .. introduction/quick_start
-   
    introduction/installation
    introduction/vocabulary
 
@@ -51,7 +49,7 @@ This documentation is under Creative Commons Attribution-NonCommercial-ShareAlik
    configuration/inventories
    configuration/general_settings
    configuration/networks
-   configuration/nodes
+   configuration/hosts
    configuration/groups
    configuration/os_settings
    configuration/hardware_settings

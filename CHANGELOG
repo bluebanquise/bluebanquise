@@ -4,6 +4,103 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.4 or 4.0
 
+▎ slurm: Fix missing --- marker in pam_slurm_adopt tasks, add <|> separator to handler and task names, add FQCN and name to bare debug task, fix wrong variable name slurm_enable_local_mysql → slurm_accounting_enable_local_mysql in 
+  ▎ slurmdbd.conf template, and fix README partition examples using unquoted yes that would render as True in slurm.conf.
+
+  ▎ pxe_stack: Fix missing --- markers in diskful task files, boolean values (yes/no → true/false), missing FQCN in Clonezilla tasks, wrong Apache group variable in Ubuntu/Debian tasks, double slash in Debian preseed URL, wrong ignition
+  ▎ file path in RHCOS tasks, wrong distribution default in Suse autoyast template, and two errors in README (wrong variable name, duplicate script label).
+ xfs_quota: fixed README title capitalization, fixed broken markdown link, fixed grammar, fixed trailing space before period, fixed missing space before filter pipe in tasks. Benoit Leveugle <benoit.leveugle@gmail.com>
+
+users: added missing YAML document start marker in defaults, fixed default('no') boolean and spacing in tasks, fixed remove boolean in README prose, updated python command to python3, removed Python 2 example. Benoit Leveugle
+  <benoit.leveugle@gmail.com>
+
+    
+    * update_reboot: added missing YAML document start marker in tasks, fixed "ajust" typo in README. Benoit Leveugle <benoit.leveugle@gmail.com>  
+  * time: added missing YAML document start marker in defaults, fixed firewall task name format, fixed immediate/permanent booleans, fixed ternary boolean, removed dead commented-out block with deprecated j2_icebergs_main_network_dict,
+  fixed "Not that" typo in README. Benoit Leveugle <benoit.leveugle@gmail.com>
+     
+
+ * sudoers: fixed grammar in README. Benoit Leveugle <benoit.leveugle@gmail.com>
+* sshd: fixed firewalld immediate/permanent booleans, added FQCNs to lineinfile tasks, fixed ternary boolean, fixed grammar and typo in README. Benoit Leveugle <benoit.leveugle@gmail.com>
+
+* ssh_remote_keys: added missing YAML document start marker in defaults, fixed exclusive boolean, fixed grammar in README. Benoit Leveugle <benoit.leveugle@gmail.com>
+ssh_client: fixed missing spaces before `is` in template conditions, fixed global UseRoaming using wrong host_vars access (bug), removed dead commented-out block with deprecated j2_ variables, removed duplicate StrictHostKeyChecking
+  entry in README, fixed /root/ssh/config path typo, added missing ssh_client_global_network to defaults. Benoit Leveugle <benoit.leveugle@gmail.com>
+* slurm: fixed wrong task separator in pam_slurm_adopt, added FQCNs (set_fact, stat, file, lineinfile), fixed all ternary/enabled/daemon_reload/backrefs boolean strings, fixed firewalld immediate/permanent booleans, aligned slurmd
+  service task with bb_enable/start_services pattern, fixed ansible_managed spacing in 9 templates. Benoit Leveugle <benoit.leveugle@gmail.com>
+
+ * set_hostname: fixed grammar in README. Benoit Leveugle <benoit.leveugle@gmail.com>
+
+ * rsyslog: fixed README title (was "Log"), fixed "tempalte" typo, fixed ternary boolean, fixed recurse boolean, fixed firewalld immediate/permanent booleans, fixed ansible_managed spacing in templates. Benoit Leveugle                 
+  <benoit.leveugle@gmail.com>
+ * root_password: fixed bug where root username was referenced as a variable instead of a string literal, added missing YAML document start marker in defaults. Benoit Leveugle <benoit.leveugle@gmail.com>
+
+ * repositories: removed deprecated j2_node_main_network variable usage, fixed yum_repository task FQCN and separator, fixed boolean defaults (default(1)/default(0) → true/false, default('no') → false), fixed Suse <|+> separator, fixed
+  comment placement in handlers. Benoit Leveugle <benoit.leveugle@gmail.com>
+ * 29/06/2026 - oxedions, Claude Sonnet [rasdaemon] Fix README grammar, fix link rendering, add missing enabled: true to service task.
+  * 29/06/2026 - oxedions, Claude Sonnet [prometheus] Fix duplicate systemd daemon_reload handler (second definition with wrong when guard was silently winning), fix missing handler "firewalld <|> Reload firewalld" rename, fix wrong
+  handler name in modbus_exporter notify, fix snmp.yml.yml.j2 double extension typo, fix boolean strings (system/immediate/permanent yes→true, ternary yes/no→true/false for enabled), fix capitalised Package/Template task name prefixes,
+  fix README typos (managed→manage, --storage.tsdb.pat→path).
+  * 29/06/2026 - oxedions, Claude Sonnet [podman] Remove outdated Ansible version requirement, fix README typos (optionnal, wih, missing .tgz, True→true, YAML ...), fix default(root) unquoted variable in registry and users tasks, fix
+  firewall boolean strings, fix ¦→<|> separator in handler names and notifies, add FQCN to service handler, fix ternary yes/no→true/false for enabled, fix registry directory mode 0644→0755
+
+  * 29/06/2026 - oxedions, Claude Sonnet [pcs] Fix include_vars FQCN, missing spaces in template string, ignore_errors booleans, wrong variable name pcs_cluster_name → pcs_ha_cluster_name, double Jinja2 interpolation in when conditions,
+  Ubuntu before_create AND→OR logic bug for pacemaker version-dependent resource strings, firewall boolean strings, README typos (DBRD→DRBD, Finaly, psc, socore, volumeZ, expect→except) and missing TOC entry for 2.4.3.
+
+* 29/06/2026 - oxedions, Claude Sonnet [parted] Fix RST links to Markdown, fix doubled word in description, add defaults/main.yml.
+
+* 29/06/2026 - oxedions, Claude Sonnet [pam_limits] Fix README variable name (rlimits → pam_limits), fix RST link to Markdown, fix boolean in example, add defaults/main.yml.
+
+* 29/06/2026 - oxedions, Claude Sonnet [nic] Remove deprecated systemd-networkd task file and template (NetworkManager is now the only supported backend), fix string booleans (yes/no → true/false), fix two "socker" typos in Ubuntu and Debian task names, fix README grammar and formatting issues (missing spaces, "gw4 is cannot", "mutually exclusives").
+
+The next role in the pending list is pam_
+ 29/06/2026 - oxedions, Claude Sonnet [nhc] Fix loop crash when nhc_files is undefined (add | default([]) guard), add missing defaults for nhc_checks, nhc_resources_manager and nhc_files, document nhc_resources_manager in README, fix YAML document-end marker
+ nfs: Fixed client mount bug - undefined network key caused src to be built as server-:export (stray dash); with bg mount option this silently wrote bad fstab entry without mounting. Fixed lineinfile regexp for [nfsd] section 
+  ▎ (unescaped brackets matched wrong lines). Fixed immediate/permanent and service enabled string booleans throughout. Fixed seboolean state: yes. Corrected README mount_options default (was nfsvers=4.2, code uses nfsvers=3).
+
+  ▎ mount: Fixed README - RST-style links replaced with Markdown, fixed doubled word "provides simply provides", updated supported distributions.
+
+
+  ▎ modprobe: Fixed README - RST-style links replaced with Markdown, fixed doubled word "provides simply provides", updated supported distributions.
+
+  ▎ mariadb: Fixed invalid collection FQCN (ansible.mysql → community.mysql), fixed task name typo (myqsl_user), fixed service enabled/state pattern, added login_unix_socket for idempotent mysql module connections, added Suse vars, 
+  ▎ added README.
+
+lvm: Fixed incorrect storage: wrapper in README example, updated supported distributions.
+lustre_client: Fixed critical package list bug (comma inside string instead of two separate packages), fixed sysctl typo in handler/notify, added task naming convention, fixed lustre_multirail undefined variable guard, renamed 
+  ▎ readme.md to README.md.
+
+loki: Fixed critical handler bug - dhcp_server_start_services was used instead of loki_start_services (copy-paste error, restarts never guarded correctly); fixed with_dict deprecation, fixed service enabled string booleans, fixed 
+  ▎ float ctime in date command, added missing rsyslog restart handler.
+
+  ▎ logrotate: Fixed broken custom rules template (was requiring per-rule templates inside the role), replaced with generic rule template; added README.
+
+kernel_config: Fixed shell pipefail bug (&& not |), added | default('') guards for undefined kernel parameter variables, added Debian 13 and OpenSuse Leap 16 support, made grub update command configurable via OS vars.
+
+  ▎ lmod: Updated supported distributions, fixed is iterable condition to | length > 0 check.
+
+CHANGELOG entry: Fix virtual_router_id auto-generation producing out-of-range values (string concatenation instead of integer addition), fix service enabled string boolean, add keepalived_vrrp_instances default, update README 
+  with supported distributions and priority documentation.
+CHANGELOG entry: Fix enabled: yes boolean, replace deprecated with_items with loop, fix task naming conventions, fix priority range assert to handle integer variable via string conversion, remove dead find task registering 
+  unused interconnect_ib_devices, fix service enabled ternary, update README.
+* 28/06/2026 - oxedions, Claude Sonnet [http_server] Fix listen.conf.j2 silently dropping plain IP and port entries, fix CIDR stripping in auto-listen mode, add missing apache_main_conf_path and firewall_services vars to all distros, remove dead http_server_settings default, fix http_server_modules documentation format.
+* 28/06/2026 - oxedions, Claude Sonnet [http_proxy] Fix firewall task crash caused by loop over undefined http_proxy_firewall_services_to_add variable, fix service enabled string boolean, fix packages variable to list format, update README distributions.
+* 28/06/2026 - oxedions, Claude Sonnet [hosts_file] Fix set_fact FQCN, remove unused hosts_file_range variable, document network services entries and delegation-based performance scaling in README.
+* 28/06/2026 - oxedions, Claude Sonnet [grafana] Fix preflight when-condition ordering for undefined variable safety, remove broken Ansible 3+ version guards, fix string booleans in firewalld tasks and service enabled, fix ini template quoted boolean, correct task naming and README inaccuracies.
+* 28/06/2026 - oxedions, Claude Sonnet [gpu] Fix gpuamd_drivers typo in reboot when condition, replace cross-role update_reboot_* variables with role-own gpu_reboot/gpu_reboot_timeout, fix enabled: yes to true, correct nvidia_install_cuda variable name in README, clarify AMD repository mirroring procedure.
+* 28/06/2026 - oxedions, Claude Sonnet [filesystem] Add defaults/main.yml, add task tag, fix README RST links to Markdown.
+* 28/06/2026 - oxedions, Claude Sonnet [drbd] Fix typo partitionning -> partitioning, add multi-distro support (Ubuntu 24/26, Debian 13, OpenSuse Leap 16), add missing --- headers and drbd_resources: [] default, remove duplicate mount task, fix task naming convention, update README.
+* 28/06/2026 - oxedions, Claude Sonnet [dns_server] Fix three bugs in hosts_by_first_octets filter: strip CIDR prefix from ip4 before generating A and PTR records, handle alias as a list of strings instead of a single value, fix override.j2 undefined domain_name and serial variables. Remove deprecated dns_server_dnssec_lookaside default. Update README.
+* 27/06/2026 - oxedions, Claude Sonnet [dns_client] Fix three bugs in resolv.conf.j2: replace macro with inline {% set %} to avoid trailing-newline corruption of the network name lookup; replace {% set nameservers = [...] %} with nameservers.append() so the services_ip fallback is not silently discarded by Jinja2 scope rules; move all nameserver output after the search line. Add missing defaults for dns_client_servers and dns_client_external_servers.
+* 27/06/2026 - oxedions, Claude Sonnet [dhcp_server] Fix HTTP boot support and several template bugs. Uncomment and implement arch_x86_64_http_boot / arch_arm64_http_boot client classes using per-subnet next-server address instead of a hardcoded IP; exclude HTTP boot clients from EFI classes to prevent class priority conflict. Fix ip-address in reservations to strip CIDR prefix. Fix trailing-comma bug in subnet4 list. Fix dict iteration in tasks. Update README to remove iceberg references and document HTTP boot.
+* 27/06/2026 - oxedions, Claude Sonnet [custom_packages] Replace yum with ansible.builtin.package for cross-distro support, fix dict key iteration, add state: present, add defaults and vars files, fix README typos and update example to fn_* group naming convention.
+* 27/06/2026 - oxedions, Claude Sonnet [cron] Rename cron variable to cron_jobs to follow role naming convention, add defaults and vars files, fix README link syntax.
+* 27/06/2026 - oxedions, Claude Sonnet [conman] Fix README typos and wrong password key name in hw_board_authentication example, create /var/log/conman on all distributions instead of RedHat only.
+* 27/06/2026 - oxedions, Claude Sonnet [clustershell] Fix missing template tag on directory creation task, skip empty groups in ClusterShell config template, fix README typos.
+* 27/06/2026 - oxedions, Claude Sonnet [cloudinit] Fix service task to only enable cloud-init for next boot instead of starting it, add cloudinit_services_to_start fallback for unsupported OS, clarify in README that cloudinit_boot_script expects base64-encoded content with encoding
+  instructions.
+* 27/06/2026 - oxedions, Claude Sonnet [auditd] Fix broken rsyslog handler notify (wrong separator), fix plugins directory path for Ubuntu/Debian (audisp → audit), add missing auditd_config_rules_file for Ubuntu, Debian and Suse, fix package install to use list instead of loop.
+* 27/06/2026 - oxedions, Claude Sonnet [access_control] Added Debian and Suse support, complain/permissive mode for AppArmor and SELinux.
 * 25/06/2026 - oxedions [multiple] Fix multiple roles, and add experimental RHCOS support (#1252)
 * 2026-06-10 - jethi05, sc-alex - [prometheus] Initial support for modbus_exporter
 * 08/06/2026 - oxedions [http_server] Fix an old bug in custom listen template

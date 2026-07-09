@@ -1,3 +1,4 @@
+---
 ##### RHCOS os familly
 
 - name: "copy <|> Copy osdeploy files {{ pxe_stack_htdocs_path }}/pxe/osdeploy/"
@@ -62,7 +63,7 @@
 
 - name: file <|> Create missing ignition files
   ansible.builtin.file:
-    path: "{{ item.item }}"
+    path: "{{ pxe_stack_htdocs_path }}/pxe/equipment_profiles/{{ item.item | trim }}.ign"
     state: touch
     mode: 0644
   loop: "{{ pxe_stack_file_checks.results }}"

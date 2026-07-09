@@ -46,7 +46,7 @@
     gid: "{{ item.value.gid }}"
     name: "{{ item.key }}"
     state: present
-  with_dict: "{{ loki_groups }}"
+  loop: "{{ loki_groups | default({}) | dict2items }}"
 
 - name: "user <|> Add users"
   ansible.builtin.user:
@@ -54,12 +54,12 @@
     comment: "{{ item.value.comment | default(omit) }}"
     group: "{{ item.value.group }}"
     groups: "{{ item.value.groups | default(omit) }}"
-    create_home: "{{ item.value.create_home | default('yes') }}"
+    create_home: "{{ item.value.create_home | default(true) }}"
     home: "{{ item.value.home | default(omit) }}"
     shell: "{{ item.value.shell | default(omit) }}"
     state: present
     uid: "{{ item.value.uid }}"
-  with_dict: "{{ loki_users }}"
+  loop: "{{ loki_users | default({}) | dict2items }}"
 
 - name: "package <|> Install packages"
   ansible.builtin.package:
@@ -99,7 +99,6 @@
     group: root
     mode: "0755"
 
-# check for data dirs
 - name: "stat <|> Check for {{ loki_data_dir }}"
   ansible.builtin.stat:
     path: "{{ loki_data_dir }}"
@@ -112,7 +111,7 @@
 
 - name: "set_fact <|> Set period start date based on {{ loki_data_dir }} ctime"
   ansible.builtin.set_fact:
-    loki_from_date: "{{ lookup('pipe', 'date -d @' + loki_dir_rslt.stat.ctime|string + ' +%Y-%m-%d') }}"
+    loki_from_date: "{{ lookup('pipe', 'date -d @' + (loki_dir_rslt.stat.ctime | int | string) + ' +%Y-%m-%d') }}"
   when: loki_dir_rslt.stat.exists
 
 - name: "template <|> Configure loki"
@@ -141,7 +140,7 @@
 - name: "service <|> Start and enable loki"
   ansible.builtin.service:
     name: loki
-    enabled: "{{ (loki_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    enabled: "{{ loki_enable_services | default(bb_enable_services) | default(true) | bool }}"
     state: "{{ (loki_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   tags:
     - service
@@ -179,7 +178,7 @@
 - name: "service <|> Start and enable promtail"
   ansible.builtin.service:
     name: promtail
-    enabled: "{{ (loki_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    enabled: "{{ loki_enable_services | default(bb_enable_services) | default(true) | bool }}"
     state: "{{ (loki_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   tags:
     - service
