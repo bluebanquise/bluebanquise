@@ -15,5 +15,7 @@ prometheus_server_snmp_exporter_additional_packages_to_install:
   - net-snmp-utils
   - net-snmp-libs
   - net-snmp-devel
+prometheus_server_modbus_exporter_packages_to_install:
+  - prometheus-modbus-exporter
 prometheus_server_karma_packages_to_install:
   - prometheus

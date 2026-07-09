@@ -21,7 +21,7 @@ This role relies on [data model](https://github.com/bluebanquise/bluebanquise/bl
     + [Karma configuration](#karma-configuration)
   * [4. Basic Client configuration](#4-basic-client-configuration)
     + [Exporters](#exporters)
-  * [5. IPMI and SNMP](#5-ipmi-and-snmp)
+  * [5. IPMI, SNMP and Modbus](#5-ipmi-snmp-and-modbus)
   * [6. Advanced usage](#6-advanced-usage)
     + [Monitoring High Availability](#monitoring-high-availability)
     + [Set custom launch parameters](#set-custom-launch-parameters)
@@ -47,6 +47,7 @@ This role deploys Prometheus (server/client) with related ecosystem:
 * Am-executor
 * ipmi_exporter
 * snmp_exporter
+* modbus_exporter
 * other exporters:
    * slurm_exporter
    * node_exporter
@@ -66,8 +67,8 @@ You can refer to this diagram to help understanding of the following readme.
 ### Server or/and client
 
 **Server part** of the role deploys Prometheus, Alertmanager, Karma, Am-executor,
-ipmi_exporter, snmp_exporter, and their respective configuration files and
-service files.
+ipmi_exporter, snmp_exporter, modbus_exporter and their respective configuration
+files and service files.
 
 To install server part, set `prometheus_server` to `true` at role invocation
 vars. See server configuration bellow for more details.
@@ -110,6 +111,7 @@ In the basic usage, the server role will install and setup the following tools:
 * Am-executor: trigger actions in case of alert fired. (**Am-executor is still not implemented**)
 * ipmi_exporter: translate ipmi data to http scrapable by Prometheus.
 * snmp_exporter: translate snmp data to http scrapable by Prometheus.
+* modbus_exporter: translate Modbus-TCP data to http scrapable by Prometheus.
 
 Which means all of these services will, by default, be running on the same
 management host.
@@ -125,6 +127,7 @@ prometheus_server_manage_karma: true
 prometheus_server_manage_am_executor: false
 prometheus_server_manage_ipmi_exporter: false
 prometheus_server_manage_snmp_exporter: false
+prometheus_server_manage_modbus_exporter: false
 ```
 
 ### Prometheus configuration
@@ -388,9 +391,9 @@ prometheus_exporters_groups_to_scrape:
         - RestartSec=1
 ```
 
-## 5. IPMI and SNMP
+## 5. IPMI, SNMP and Modbus
 
-ipmi_exporter and snmp_exporter behave differently: they act as translation
+ipmi_-, snmp_- and modbus_exporter behave differently: they act as translation
 gateways between Prometheus and the target. Which means, if you wish for example
 to query IPMI data of a node, you do not install the exporter on the node itself.
 You query the ipmi_exporter, which will itself query the target for IPMI data.
@@ -401,8 +404,9 @@ To have the exporter installed by the server part of the role, set their
 respective variables to true or false, according to your needs:
 
 ```yaml
-prometheus_server_manage_ipmi: true
-prometheus_server_manage_snmp: false
+prometheus_server_manage_ipmi_exporter: true
+prometheus_server_manage_snmp_exporter: false
+prometheus_server_manage_modbus_exporter: false
 ```
 
 You then need to specify which hardware groups of nodes have to be
@@ -421,7 +425,7 @@ prometheus_ipmi_scrape_hardware_groups:
 This will add these into prometheus targets configuration for scraping via
 ipmi_exporter.
 
-Note that you can set custom scrape_interval and scrape_timeout for ipmi or snmp
+Note that you can set custom scrape_interval and scrape_timeout for ipmi, snmp or Modbus
 using dedicated variables shown in the example above.
 
 Note also that ipmi_exporter will need `hw_board_authentication` dictionary
@@ -438,6 +442,39 @@ prometheus_snmp_scrape_hardware_groups:
   - name: hw_wcd
     snmp_module: wcd
 ```
+
+For Modbus it's `prometheus_modbus_tcp_scrape_hardware_group`, e.g.:
+
+```yaml
+prometheus_modbus_scrape_hardware_groups:
+  - name: wilo_pumps
+    scrape_interval: 15s
+    scrape_timeout: 15s
+    labels:
+      device_type: "pump"
+```
+
+but also definitions on device level are required, e.g.:
+
+```yaml
+all:
+  hosts:
+    wilo1:
+      labels:
+        rack: "rack42"
+      modbus_tcp_devices:
+        - id: 1
+          exporter_module: "wilo_stratos_maxo"
+          labels:
+            __scrape_interval__: "30s"
+```
+
+All the `label` variables specified above are optional prometheus labels.
+
+The rather complicated structure of the configuration of modbus_exporter is due
+to the exporter being the "gateway" to query Modbus-TCP devices which are
+technically "gateways" to a Modbus-RTU network containing an arbitrary amount
+of devices.
 
 ## 6. Advanced usage
 
@@ -593,6 +630,9 @@ ipmi_exporter_launch_parameters: |
 
 snmp_exporter_launch_parameters: |
   --config.file=/etc/snmp_exporter/snmp.yml
+
+prometheus_server_modbus_exporter_launch_parameters: |
+  --config.file=/etc/modbus_exporter/modbus.yml
 ```
 
 For example, to manipulate data retention (default 15 days) and ask for 60 days,
@@ -660,6 +700,7 @@ prometheus_server_manage_karma: true
 prometheus_server_manage_am_executor: false
 prometheus_server_manage_ipmi_exporter: false
 prometheus_server_manage_snmp_exporter: false
+prometheus_server_manage_modbus_exporter: false
 ```
 
 And activate them on the host you wish them to run (host2), using the opposite values for host2 dedicated hostvars:
@@ -671,6 +712,7 @@ prometheus_server_manage_karma: false
 prometheus_server_manage_am_executor: false
 prometheus_server_manage_ipmi_exporter: true
 prometheus_server_manage_snmp_exporter: true
+prometheus_server_manage_modbus_exporter: true
 ```
 
 To ensure everyone can communicate, set now these global variables in
@@ -683,6 +725,7 @@ prometheus_server_karma_host: host1
 prometheus_server_am_executor_host:
 prometheus_server_ipmi_exporter_host: host2
 prometheus_server_snmp_exporter_host: host2
+prometheus_server_modbus_exporter_host: host2
 ```
 
 This can be used to spread all main services.
