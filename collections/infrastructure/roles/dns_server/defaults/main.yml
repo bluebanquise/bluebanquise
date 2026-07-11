@@ -27,3 +27,6 @@ dns_server_wildcard_records: []
 # dns_server_overrides
 # dns_server_start_services:
 # dns_server_enable_services:
+
+dns_server_firewall_services_to_add:
+  - dns

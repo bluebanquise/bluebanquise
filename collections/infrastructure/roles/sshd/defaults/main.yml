@@ -7,3 +7,6 @@ sshd_denygroups:
 sshd_allowgroups:
 # Inject raw configuration before all other settings, so precedence
 sshd_raw:
+
+sshd_server_firewall_services_to_add:
+  - ssh
