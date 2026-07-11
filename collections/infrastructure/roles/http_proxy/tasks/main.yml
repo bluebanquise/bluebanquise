@@ -23,10 +23,16 @@
   tags:
     - always
 
-- name: include_tasks <|> Firewall
-  ansible.builtin.include_tasks: "firewall.yml"
+- name: "firewalld <|> Add http_proxy port to firewall's zone"
+  ansible.posix.firewalld:
+    zone: "{{ http_proxy_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
+    port: "{{ http_proxy_port }}/tcp"
+    immediate: true
+    permanent: true
+    state: enabled
+  when:
+    - os_firewall | default(false) | bool
   tags:
-    - internal
     - firewall
 
 - name: "package <|> Install {{ http_proxy_packages_to_install | join(' ') }}"

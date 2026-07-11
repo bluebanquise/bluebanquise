@@ -7,7 +7,7 @@
     line: "AllowZoneDrifting={{ firewall_firewalld_allow_zone_drifting | ternary('yes', 'no') }}"
   notify: service <|> Restart firewall services
 
-- name: fail <|> Check presence of required parameters
+- name: "fail <|> Check presence of required parameters"
   ansible.builtin.fail:
     msg: "Bailing out.
   This role requires networks[{{ item['network'] }}]['firewall']['zone'] to be set"
@@ -40,15 +40,15 @@
     label: "{{ item.interface }} -> {{ networks[item.network]['firewall']['zone'] }}"
   notify: service <|> Restart firewall services
 
-- name: meta <|> Run handler tasks to restart firewall services
+- name: "meta <|> Run handler tasks to restart firewall services"
   ansible.builtin.meta: flush_handlers
 
 - name: "firewalld <|> Configure firewall zones"
   ansible.posix.firewalld:
     zone: "{{ networks[item]['firewall']['zone'] }}"
     source: "{{ networks[item]['subnet'] }}/{{ networks[item]['prefix'] }}"
-    immediate: yes
-    permanent: yes
+    immediate: true
+    permanent: true
     state: enabled
   when: networks[item]['firewall']['zone'] is defined
   loop: "{{ (network_interfaces | selectattr('network', 'defined') | map(attribute='network') | list) }}"
@@ -60,10 +60,10 @@
   ansible.posix.firewalld:
     zone: "{{ item.0.zone }}"
     service: "{{ item.1 }}"
-    immediate: "yes"
-    permanent: "yes"
+    immediate: true
+    permanent: true
     state: enabled
-  loop: "{{ firewall_zones | default({}) | subelements('services_enabled', skip_missing=True) }}"
+  loop: "{{ firewall_zones | default([]) | subelements('services_enabled', skip_missing=True) }}"
   loop_control:
     label: "Add service {{ item.1 }} to zone {{ item.0.zone }}"
 
@@ -71,10 +71,10 @@
   ansible.posix.firewalld:
     zone: "{{ item.0.zone }}"
     service: "{{ item.1 }}"
-    immediate: "yes"
-    permanent: "yes"
+    immediate: true
+    permanent: true
     state: disabled
-  loop: "{{ firewall_zones | default({}) | subelements('services_disabled', skip_missing=True) }}"
+  loop: "{{ firewall_zones | default([]) | subelements('services_disabled', skip_missing=True) }}"
   loop_control:
     label: "Remove service {{ item.1 }} from zone {{ item.0.zone }}"
 
@@ -82,10 +82,10 @@
   ansible.posix.firewalld:
     zone: "{{ item.0.zone }}"
     port: "{{ item.1 }}"
-    immediate: "yes"
-    permanent: "yes"
+    immediate: true
+    permanent: true
     state: enabled
-  loop: "{{ firewall_zones | default({}) | subelements('ports_enabled', skip_missing=True) }}"
+  loop: "{{ firewall_zones | default([]) | subelements('ports_enabled', skip_missing=True) }}"
   loop_control:
     label: "Add port {{ item.1 }} to zone {{ item.0.zone }}"
 
@@ -93,10 +93,10 @@
   ansible.posix.firewalld:
     zone: "{{ item.0.zone }}"
     port: "{{ item.1 }}"
-    immediate: "yes"
-    permanent: "yes"
+    immediate: true
+    permanent: true
     state: disabled
-  loop: "{{ firewall_zones | default({}) | subelements('ports_disabled', skip_missing=True) }}"
+  loop: "{{ firewall_zones | default([]) | subelements('ports_disabled', skip_missing=True) }}"
   loop_control:
     label: "Remove port {{ item.1 }} from zone {{ item.0.zone }}"
 
@@ -104,10 +104,10 @@
   ansible.posix.firewalld:
     zone: "{{ item.0.zone }}"
     rich_rule: "{{ item.1 }}"
-    immediate: "yes"
-    permanent: "yes"
+    immediate: true
+    permanent: true
     state: enabled
-  loop: "{{ firewall_zones | default({}) | subelements('rich_rules_enabled', skip_missing=True) }}"
+  loop: "{{ firewall_zones | default([]) | subelements('rich_rules_enabled', skip_missing=True) }}"
   loop_control:
     label: "Add rich rule '{{ item.1 }}' to zone {{ item.0.zone }}"
 
@@ -115,10 +115,10 @@
   ansible.posix.firewalld:
     zone: "{{ item.0.zone }}"
     rich_rule: "{{ item.1 }}"
-    immediate: "yes"
-    permanent: "yes"
+    immediate: true
+    permanent: true
     state: disabled
-  loop: "{{ firewall_zones | default({}) | subelements('rich_rules_disabled', skip_missing=True) }}"
+  loop: "{{ firewall_zones | default([]) | subelements('rich_rules_disabled', skip_missing=True) }}"
   loop_control:
     label: "Remove rich rule '{{ item.1 }}' from zone {{ item.0.zone }}"
 
@@ -126,10 +126,10 @@
   ansible.posix.firewalld:
     zone: "{{ item.0.zone }}"
     icmp_block: "{{ item.1 }}"
-    immediate: "yes"
-    permanent: "yes"
+    immediate: true
+    permanent: true
     state: enabled
-  loop: "{{ firewall_zones | default({}) | subelements('icmp_blocks_enabled', skip_missing=True) }}"
+  loop: "{{ firewall_zones | default([]) | subelements('icmp_blocks_enabled', skip_missing=True) }}"
   loop_control:
     label: "Add ICMP block '{{ item.1 }}' to zone {{ item.0.zone }}"
 
@@ -137,10 +137,10 @@
   ansible.posix.firewalld:
     zone: "{{ item.0.zone }}"
     icmp_block: "{{ item.1 }}"
-    immediate: "yes"
-    permanent: "yes"
+    immediate: true
+    permanent: true
     state: disabled
-  loop: "{{ firewall_zones | default({}) | subelements('icmp_blocks_disabled', skip_missing=True) }}"
+  loop: "{{ firewall_zones | default([]) | subelements('icmp_blocks_disabled', skip_missing=True) }}"
   loop_control:
     label: "Remove ICMP block '{{ item.1 }}' from zone {{ item.0.zone }}"
 
@@ -148,8 +148,8 @@
   ansible.posix.firewalld:
     zone: "{{ item.zone }}"
     icmp_block_inversion: "{{ item.icmp_block_inversion | string }}"
-    immediate: "yes"
-    permanent: "yes"
+    immediate: true
+    permanent: true
     state: "{{ item.icmp_block_inversion | ternary('enabled', 'disabled') }}"
   loop: "{{ firewall_zones | default([]) }}"
   when: item.icmp_block_inversion is defined
@@ -160,8 +160,8 @@
   ansible.posix.firewalld:
     zone: "{{ item.zone }}"
     masquerade: "{{ item.masquerade | string }}"
-    immediate: "yes"
-    permanent: "yes"
+    immediate: true
+    permanent: true
     state: "{{ item.masquerade | ternary('enabled', 'disabled') }}"
   loop: "{{ firewall_zones | default([]) }}"
   when: item.masquerade is defined

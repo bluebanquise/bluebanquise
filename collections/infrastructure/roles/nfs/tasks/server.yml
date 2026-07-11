@@ -1,8 +1,15 @@
 ---
-- name: include_tasks <|> Firewall
-  ansible.builtin.include_tasks: "firewall.yml"
+- name: "firewalld <|> Add services to firewall's zone"
+  ansible.posix.firewalld:
+    zone: "{{ nfs_server_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
+    service: "{{ item }}"
+    immediate: true
+    permanent: true
+    state: enabled
+  when:
+    - os_firewall | default(false) | bool
+  loop: "{{ nfs_server_firewall_services_to_add }}"
   tags:
-    - internal
     - firewall
 
 - name: "package <|> Install {{ nfs_server_packages_to_install | join(' ') }} packages"

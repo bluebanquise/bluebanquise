@@ -65,8 +65,47 @@ firewall_zones:
       - "rule family=ipv4 forward-port port=443 protocol=tcp to-port=8443"
     rich_rules_disabled:      <<< list of rich rules to disable
       - 'rule service name="ftp" audit limit value="1/m" accept'
-    icmp_block_inversion: yes
-    masquerade: yes
+    icmp_blocks_enabled:      <<< list of ICMP types to block
+      - echo-request
+    icmp_blocks_disabled:     <<< list of ICMP types to unblock
+      - echo-reply
+    icmp_block_inversion: true
+    masquerade: true
+```
+
+Since firewall configuration is often specific to a single host, `firewall_zones`
+can be defined in a dedicated host variable file instead of a group variable.
+Place the file at `hostvars/<hostname>/firewall.yml` in the inventory:
+
+```
+inventory/
+└── cluster/
+    └── nodes/
+        └── hostvars/
+            └── mgt1/
+                └── firewall.yml
+```
+
+For example, `hostvars/mgt1/firewall.yml`:
+
+```yaml
+firewall_zones:
+  - zone: internal
+    services_enabled:
+      - high-availability
+    ports_enabled:
+      - 8443/tcp
+```
+
+This keeps host-specific firewall rules isolated from shared group variables
+and makes them easy to audit per node.
+
+To control whether firewalld allows zone drifting (packets being classified into
+multiple zones), set `firewall_firewalld_allow_zone_drifting`. It defaults to
+`false`, which is the recommended value for security:
+
+```yaml
+firewall_firewalld_allow_zone_drifting: false
 ```
 
 ### Integration with other roles

@@ -31,7 +31,7 @@
 - name: "service <|> Manage {{ firewall_services_to_start | join(' ') }} state"
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: "{{ (os_firewall | default(true) | bool) | ternary('yes','no') }}"
+    enabled: "{{ (os_firewall | default(true) | bool) | ternary(true, false) }}"
     state: "{{ (os_firewall | default(true) | bool) | ternary('started', 'stopped') }}"
   loop: "{{ firewall_services_to_start }}"
   tags:
@@ -39,6 +39,6 @@
 
 - name: "include_tasks <|> Configure firewall if requested"
   ansible.builtin.include_tasks: "firewalld.yml"
-  when: os_firewall
+  when: os_firewall | default(true) | bool
   tags:
     - internal
