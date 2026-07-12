@@ -1,4 +1,0 @@
----
-access_control_packages_to_install:
-  - apparmor-parser
-  - apparmor-utils

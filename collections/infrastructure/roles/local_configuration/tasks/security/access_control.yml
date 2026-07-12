@@ -1,0 +1,29 @@
+---
+- name: set_fact <|> Resolve effective access control state
+  ansible.builtin.set_fact:
+    _lc_access_control_state: >-
+      {{ (local_configuration_security | default({})).access_control
+         | default(os_access_control)
+         | default(local_configuration_access_control_os_access_control) }}
+
+- name: "package <|> Install {{ local_configuration_access_control_packages_to_install | default([]) | join(' ') }}"
+  ansible.builtin.package:
+    name: "{{ local_configuration_access_control_packages_to_install | default([]) }}"
+    state: present
+  when: local_configuration_access_control_packages_to_install | default([]) | length > 0
+  tags:
+    - package
+
+- name: include_tasks <|> Use OS dedicated access control task
+  ansible.builtin.include_tasks: "{{ item }}"
+  with_first_found:
+    - files:
+        - "security/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
+        - "security/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
+        - "security/{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
+        - "security/{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
+        - "security/{{ ansible_facts.distribution | replace(' ','_') }}/main.yml"
+        - "security/{{ ansible_facts.os_family | replace(' ','_') }}/main.yml"
+      skip: true
+  tags:
+    - internal

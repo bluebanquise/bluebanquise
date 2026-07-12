@@ -1,0 +1,7 @@
+---
+- name: selinux <|> Set SELinux state
+  ansible.posix.selinux:
+    policy: targeted
+    state: "{{ 'permissive' if _lc_access_control_state == 'complain' else _lc_access_control_state }}"
+  tags:
+    - service

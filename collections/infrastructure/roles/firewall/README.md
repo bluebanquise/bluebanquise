@@ -5,7 +5,7 @@
 These settings configure the firewall service on the hosts.
 
 For each network interface of the host where the play runs, these settings bind the
-source address **subnet/prefix** to the zone defined in **firewall.zone** if
+source address **subnet/prefix** to the zone defined in **firewall_zone** if
 the network must be in the firewall.
 
 ## Instructions
@@ -19,7 +19,7 @@ os_firewall: true
 ```
 
 To add a network of the host to a zone, define the zone name in
-**firewall.zone** in the network:
+**firewall_zone** in the network:
 
 ```yaml
 networks:
@@ -29,13 +29,11 @@ networks:
     netmask: 255.255.0.0
     broadcast: 10.10.255.255
     gateway: 10.10.2.1
-    firewall:
-      zone: internal
+    firewall_zone: internal
   interconnect-1:
     subnet: 10.20.0.0
     prefix: 16
-    firewall:
-      zone: trusted
+    firewall_zone: trusted
 ```
 
 To add or delete custom services that are not handled by any other role, define

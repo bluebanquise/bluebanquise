@@ -1,4 +1,0 @@
----
-# Note: verify grub package name against OpenSuse Leap 16 repos
-kernel_config_grub_package: grub2
-kernel_config_grub_update_command: grub2-mkconfig -o /boot/grub2/grub.cfg

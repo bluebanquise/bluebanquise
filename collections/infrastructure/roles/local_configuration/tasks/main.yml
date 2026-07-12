@@ -1,0 +1,42 @@
+---
+- name: include_vars <|> Gather OS specific variables
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family }}.yml"
+      skip: true
+  tags:
+    - always
+
+- name: "hostname <|> Set {{ inventory_hostname }} hostname"
+  ansible.builtin.hostname:
+    name: >-
+      {{ local_configuration_hostname_fqdn | ternary(
+           inventory_hostname + '.' + (local_configuration_hostname_domain_name | default(bb_domain_name, true) | default('cluster.local', true)),
+           inventory_hostname) }}
+  tags:
+    - identify
+
+- name: include_tasks <|> Apply security configuration
+  ansible.builtin.include_tasks: security.yml
+  when: >-
+    local_configuration_security is defined
+    or os_access_control is defined
+    or os_admin_password_sha512 is defined
+
+- name: include_tasks <|> Apply system configuration
+  ansible.builtin.include_tasks: system.yml
+  when: >-
+    local_configuration_system is defined
+    or os_kernel_parameters is defined
+    or hw_kernel_parameters is defined
+    or os_sysctl is defined
+
+- name: include_tasks <|> Apply storage configuration
+  ansible.builtin.include_tasks: storage.yml
+  when: local_configuration_storage is defined

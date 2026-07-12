@@ -1,0 +1,23 @@
+---
+# https://ubuntu.com/server/docs/security-apparmor
+- name: "service <|> Manage AppArmor service state"
+  ansible.builtin.service:
+    name: apparmor
+    enabled: "{{ 'no' if _lc_access_control_state == 'disabled' else 'yes' }}"
+    state: "{{ 'stopped' if _lc_access_control_state == 'disabled' else 'started' }}"
+  tags:
+    - service
+
+- name: "shell <|> Set AppArmor profiles to enforce mode"
+  ansible.builtin.shell: aa-enforce /etc/apparmor.d/*
+  changed_when: false
+  when: _lc_access_control_state == 'enforcing'
+  tags:
+    - service
+
+- name: "shell <|> Set AppArmor profiles to complain mode"
+  ansible.builtin.shell: aa-complain /etc/apparmor.d/*
+  changed_when: false
+  when: _lc_access_control_state in ['complain', 'permissive']
+  tags:
+    - service

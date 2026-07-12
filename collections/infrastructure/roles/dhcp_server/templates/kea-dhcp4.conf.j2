@@ -21,7 +21,7 @@
     "lease-database": {
       "type": "memfile",
       "persist": true,
-      "name": "/var/lib/kea/dhcp4.leases"
+      "name": "/var/lib/kea/{{ dhcp_server_lease_file }}"
     },
 
     "valid-lifetime": {{ dhcp_server_default_lease_time }},
