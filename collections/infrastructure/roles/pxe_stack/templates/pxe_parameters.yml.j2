@@ -4,3 +4,4 @@ pxe_parameters:
   apache_gid: {{ pxe_stack_apache_group }}
   ansible_selinux_status: {{ ansible_facts.selinux.status }}
   htdocs_path: {{ pxe_stack_htdocs_path }}
+  cluster_base_path: {{ pxe_stack_cluster_base_path }}

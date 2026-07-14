@@ -79,6 +79,7 @@ It is possible to set specific parameters at global and/or nodes level:
 * LogLevel
 * UseRoaming
 * ForwardX11Trusted
+* User
 
 To achieve that, the following variables are available:
 
@@ -103,6 +104,7 @@ And:
 * ssh_client_verifyhostkeydns
 * ssh_client_forwardx11trusted
 * ssh_client_useroaming
+* ssh_client_user
 
 Which are evaluated for each host.
 
@@ -117,25 +119,3 @@ ssh_client_userknownhostsfile: /dev/null
 At host hostvars level.
 
 In case of issue, try adding verbosity to the ssh invocation to investigate (-vvv).
-
-## Changelog
-
-**Please now update CHANGELOG file at repository root instead of adding logs in this file.
-These logs bellow are only kept for archive.**
-
-* 1.4.0: Add extra config options. Thiago Cardozo <boubee.thiago@gmail.com>
-* 1.3.0: Role simplification. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.2.3: infrastructure/ssh_client role: set a default network <jean-pascal.mazzilli@gmail.com>
-* 1.2.2: Fixed ssh_client_userknownhostsfile host_vars. Leo Magdanello <lmagdanello40@gmail.com>
-* 1.2.1: Fixed sudo user home directory. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.2.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.1.1: Fix issue with empty network interfaces. johnnykeats <johnny.keats@outlook.com>
-* 1.1.0: Add more granularity to host key checking, improve role's performances. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.0.7: Rename role. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.0.6: Prevent unsorted ranges. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.0.5: Add custom config variable. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.0.4: Add ssh ProxyJump capability for icebergs. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.0.3: Update to new network_interfaces syntax. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.0.2: Clean. johnnykeats <johnny.keats@outlook.com>
-* 1.0.1: Documentation. johnnykeats <johnny.keats@outlook.com>
-* 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>

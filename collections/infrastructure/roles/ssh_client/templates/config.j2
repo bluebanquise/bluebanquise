@@ -24,6 +24,9 @@ Host {{ host }}
     {% if host_vars['ssh_client_useroaming'] is defined and host_vars['ssh_client_useroaming'] is not none %}
     UseRoaming {{ host_vars['ssh_client_useroaming'] }}
     {% endif %}
+    {% if host_vars['ssh_client_user'] is defined and host_vars['ssh_client_user'] is not none %}
+    User {{ host_vars['ssh_client_user'] }}
+    {% endif %}
 
 {% endmacro %}
 

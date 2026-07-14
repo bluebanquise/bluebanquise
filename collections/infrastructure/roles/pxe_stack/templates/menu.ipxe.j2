@@ -51,7 +51,8 @@ goto ${selected}
 ############ MAIN MENU ITEMS ############
 
 :startshell
-echo Type 'exit' to get the back to the menu.
+imgfetch http://${next-server}:{{ pxe_stack_daemon_port }}/host/${hostname}?menu-default=startshell || true
+echo Type 'exit' to get back to the menu.
 shell
 set menu-timeout 0
 set submenu-timeout 0
@@ -96,24 +97,31 @@ set submenu-timeout 0
 goto start
 
 :bootosdeploy
+imgfetch http://${next-server}:{{ pxe_stack_daemon_port }}/host/${hostname}?menu-default=bootosdeploy || true
 chain http://${next-server}/pxe/osdeploy/${eq-distribution}_${eq-distribution-major-version}.ipxe || shell
 
 :bootdiskless
+imgfetch http://${next-server}:{{ pxe_stack_daemon_port }}/host/${hostname}?menu-default=bootdiskless || true
 chain http://${next-server}/pxe/diskless/${node-image}/boot.ipxe || shell
 
 :bootclone
+imgfetch http://${next-server}:{{ pxe_stack_daemon_port }}/host/${hostname}?menu-default=bootclone || true
 chain http://${next-server}/pxe/tools/clonezilla/clone.ipxe
 
 :bootautoclone
+imgfetch http://${next-server}:{{ pxe_stack_daemon_port }}/host/${hostname}?menu-default=bootclone || true
 chain http://${next-server}/pxe/tools/clonezilla/autoclone.ipxe
 
 :bootautodeploy
+imgfetch http://${next-server}:{{ pxe_stack_daemon_port }}/host/${hostname}?menu-default=bootclone || true
 chain http://${next-server}/pxe/tools/clonezilla/autodeploy.ipxe
 
-:bootalpinelive 
+:bootalpinelive
+imgfetch http://${next-server}:{{ pxe_stack_daemon_port }}/host/${hostname}?menu-default=bootalpinelive || true
 chain http://${next-server}/pxe/tools/alpine/boot.ipxe
 
 :bootdisk
+imgfetch http://${next-server}:{{ pxe_stack_daemon_port }}/host/${hostname}?menu-default=bootdisk || true
 iseq ${platform} efi && goto bootdisk-efi || goto bootdisk-legacy
 
 :bootdisk-legacy
@@ -129,6 +137,7 @@ chain http://${next-server}/pxe/bin/${arch}/grub2_efi_autofind.img || shell
 exit 1
 
 :bootmemtest
+imgfetch http://${next-server}:{{ pxe_stack_daemon_port }}/host/${hostname}?menu-default=bootmemtest || true
 iseq ${platform} efi && goto bootmemtest-efi || goto bootmemtest-legacy
 
 :bootmemtest-legacy
@@ -142,4 +151,5 @@ sleep 2
 chain http://${next-server}/pxe/tools/memtest86plus/memtest.efi ${eq-console} || shell
 
 :bootnext
+imgfetch http://${next-server}:{{ pxe_stack_daemon_port }}/host/${hostname}?menu-default=bootnext || true
 exit

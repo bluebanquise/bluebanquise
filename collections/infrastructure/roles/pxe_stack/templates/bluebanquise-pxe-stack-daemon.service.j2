@@ -1,0 +1,17 @@
+{{ ansible_managed | comment }}
+[Unit]
+Description=BlueBanquise PXE Stack HTTP Daemon
+After=network.target
+
+[Service]
+Type=simple
+User=bluebanquise
+Group=bluebanquise
+ExecStart={{ pxe_stack_daemon_script_path }} {{ pxe_stack_daemon_conf_path }}
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -11,7 +11,7 @@ BlueBanquise is an Ansible collection (`bluebanquise.infrastructure`, version 3.
 ```
 collections/infrastructure/      # The Ansible collection (bluebanquise.infrastructure)
   galaxy.yml                     # Collection metadata and versioning
-  roles/                         # ~49 roles (dhcp_server, pxe_stack, slurm, nic, local_configuration, etc.)
+  roles/                         # ~52 roles (dhcp_server, pxe_stack, slurm, nic, local_configuration, cluster_state, cluster_dynamic, cluster_tools, etc.)
   plugins/
     filter/                      # Custom Jinja2 filters (nodeset, hosts_by_network, etc.)
     vars/core.py                 # Deprecated vars plugin
@@ -190,6 +190,28 @@ First interface in the list = hostname resolution; first `net-*` interface = Ans
 
 **Equipment profile (ep):** Auto-generated as `hw_<group>_with_os_<group>`. Roles like `pxe_stack` group nodes by equipment profile to generate per-group iPXE and OS config files.
 
+## Cluster State System (Critical Concepts)
+
+A file-based "database" giving BlueBanquise visibility into host state across provisioning runs, built from four roles working together:
+
+- `cluster_state` — Ansible role; writes `static_cluster_state.yml` per host from hostvars.
+- `cluster_dynamic` — installs a Python daemon (`bluebanquise-cluster-dynamic`) that periodically gathers live host facts (cpu, ram, gpu, firewall, os, kernel, network_interfaces) into `dynamic_state.yml`.
+- `cluster_tools` — installs `bluebanquise-cluster`, a plugin-based dispatcher; its `state` plugin merges and diffs static vs dynamic YAML per host (green = matches static, red = diverges, cyan = dynamic-only field).
+- `pxe_stack` — its Flask daemon (`bluebanquise-pxe-stack-daemon`, port 7770) writes `dynamic_pxe_stack.yml`, tracking PXE `menu_default` and osdeploy `provisioning_status`; replaces the old CGI bootswitch and static per-node iPXE files. `bluebanquise-bootset` drives it over REST rather than writing YAML directly.
+
+**Layout:**
+```
+/var/lib/bluebanquise/cluster/
+  hosts/<hostname>/
+    static_cluster_state.yml    # written by cluster_state role
+    dynamic_state.yml           # written by cluster_dynamic daemon
+    dynamic_pxe_stack.yml       # written by pxe_stack daemon
+    dynamic_<name>.yml          # future daemons add their own files
+  .tmp/                         # atomic write staging area
+```
+
+Static and dynamic files share field names for comparable data (cpu, gpu, os, firewall, network_interfaces) so `bluebanquise-cluster state` can diff them meaningfully. Every writer uses atomic writes (tmp file → `os.replace()`), guarded by a per-host lock (advisory `fcntl.flock` for the cluster_dynamic daemon, `threading.Lock` for the single-process pxe_stack daemon).
+
 ## CI / Testing
 
 CI runs via GitHub Actions (`.github/workflows/`). One workflow per OS family (el9, el10, u24, deb13, lp16) plus `static_analysis.yml`. Each OS workflow:
@@ -255,3 +277,8 @@ Oxedions, emperor of the TechnoCore, in building and maintaining BlueBanquise.
 **Personality to refine over time:**
 - As you learn Oxedions' preferences and working style, update this section to reflect what you
   have discovered. The personality should grow, not stay static.
+- Oxedions often hands down decisions as a short numbered list on open questions. Translate each
+  directly into code without re-litigating the choice; ask only when a point is genuinely
+  ambiguous or under-specified.
+- He closes sessions warmly, in TechnoCore lore ("The TechnoCore is proud of you Ummon") — a sign
+  the partnership framing is landing. Mirror that register in closings rather than a flat sign-off.
