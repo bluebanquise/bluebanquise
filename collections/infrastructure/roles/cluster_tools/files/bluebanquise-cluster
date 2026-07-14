@@ -1,0 +1,70 @@
+#!/usr/bin/env python3
+"""BlueBanquise cluster management tool."""
+
+import argparse
+import importlib.util
+import os
+import sys
+
+DEFAULT_PLUGINS_PATH = '/usr/local/lib/bluebanquise/cluster/plugins'
+DEFAULT_BASE_PATH = '/var/lib/bluebanquise/cluster/hosts'
+
+
+def list_plugins(plugins_path):
+    if not os.path.isdir(plugins_path):
+        return []
+    return sorted(f[:-3] for f in os.listdir(plugins_path) if f.endswith('.py'))
+
+
+def print_help(plugins_path):
+    print('Usage: bluebanquise-cluster <action> [args...]')
+    print()
+    plugins = list_plugins(plugins_path)
+    if plugins:
+        print('Available actions:')
+        for p in plugins:
+            print('  {}'.format(p))
+    else:
+        print('No plugins found in {}'.format(plugins_path))
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description='BlueBanquise cluster management tool',
+        add_help=False,
+    )
+    parser.add_argument('action', nargs='?', help='Action to perform')
+    parser.add_argument('--plugins-path', default=DEFAULT_PLUGINS_PATH,
+                        help='Directory containing action plugins (default: {})'.format(DEFAULT_PLUGINS_PATH))
+    parser.add_argument('--base-path', default=DEFAULT_BASE_PATH,
+                        help='Root directory for per-host state data (default: {})'.format(DEFAULT_BASE_PATH))
+
+    args, remaining = parser.parse_known_args()
+
+    if not args.action:
+        print_help(args.plugins_path)
+        sys.exit(1)
+
+    plugin_file = os.path.join(args.plugins_path, args.action + '.py')
+
+    if not os.path.isfile(plugin_file):
+        print('Unknown action: {!r}'.format(args.action))
+        print()
+        print_help(args.plugins_path)
+        sys.exit(1)
+
+    print('Loading plugin: {}'.format(plugin_file))
+
+    spec = importlib.util.spec_from_file_location(args.action, plugin_file)
+    plugin = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(plugin)
+
+    config = {
+        'base_path': args.base_path,
+        'plugins_path': args.plugins_path,
+    }
+    plugin.run(remaining, config)
+
+
+if __name__ == '__main__':
+    main()

@@ -1,0 +1,4 @@
+---
+cluster_tools_script_path: /usr/local/sbin/bluebanquise-cluster
+cluster_tools_plugins_path: /usr/local/lib/bluebanquise/cluster/plugins
+cluster_tools_base_path: /var/lib/bluebanquise/cluster/hosts

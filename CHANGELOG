@@ -4,6 +4,9 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.4 or 4.0
 
+  pxe_stack: add bluebanquise-netboots-installer CLI tool to install, uninstall, and list OS netboots (ubuntu_24.04,
+  debian_13, rhel_9, rhel_10, opensuse_16) with download progress, SHA256 verification, airgap support, and 
+  automatic major-version symlinks.
 ▎ slurm: Fix missing --- marker in pam_slurm_adopt tasks, add <|> separator to handler and task names, add FQCN and name to bare debug task, fix wrong variable name slurm_enable_local_mysql → slurm_accounting_enable_local_mysql in 
   ▎ slurmdbd.conf template, and fix README partition examples using unquoted yes that would render as True in slurm.conf.
 

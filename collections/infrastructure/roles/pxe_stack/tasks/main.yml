@@ -154,6 +154,23 @@
     group: root
     mode: 0755
 
+- name: "copy <|> Copy bluebanquise-netboots-installer"
+  ansible.builtin.copy:
+    src: bluebanquise-netboots-installer
+    dest: "/usr/bin/bluebanquise-netboots-installer"
+    owner: root
+    group: root
+    mode: 0755
+
+- name: "copy <|> Copy netboots_installer.yml (skip if already present)"
+  ansible.builtin.copy:
+    src: netboots_installer.yml
+    dest: "/etc/bluebanquise/bootset/netboots_installer.yml"
+    owner: root
+    group: root
+    mode: 0644
+    force: false
+
 
 ################################################################################################
 ######################## DISKFUL

@@ -1,0 +1,30 @@
+---
+
+- name: cluster_state <|> Ensure base and tmp directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: bluebanquise
+    group: bluebanquise
+    mode: '0750'
+  loop:
+    - "{{ cluster_state_base_path }}"
+    - "{{ cluster_state_tmp_path }}"
+
+- name: cluster_state <|> Ensure host directory exists
+  ansible.builtin.file:
+    path: "{{ cluster_state_base_path }}/{{ item }}"
+    state: directory
+    owner: bluebanquise
+    group: bluebanquise
+    mode: '0750'
+  loop: "{{ groups[cluster_state_hosts_group] | sort }}"
+
+- name: cluster_state <|> Write static state file
+  ansible.builtin.template:
+    src: static_cluster_state.yml.j2
+    dest: "{{ cluster_state_base_path }}/{{ item }}/static_cluster_state.yml"
+    owner: bluebanquise
+    group: bluebanquise
+    mode: '0640'
+  loop: "{{ groups[cluster_state_hosts_group] | sort }}"

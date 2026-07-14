@@ -1,0 +1,79 @@
+#jinja2: lstrip_blocks: True
+# {{ ansible_managed }}
+---
+{% set _hv = hostvars[item] %}
+{% set _fn_groups = [] %}
+{% set _hw_groups = [] %}
+{% set _os_groups = [] %}
+{% for gname in groups | sort %}
+  {% if gname.startswith('fn_') and item in groups[gname] %}
+    {% do _fn_groups.append(gname) %}
+  {% endif %}
+  {% if gname.startswith('hw_') and item in groups[gname] %}
+    {% do _hw_groups.append(gname) %}
+  {% endif %}
+  {% if gname.startswith('os_') and item in groups[gname] %}
+    {% do _os_groups.append(gname) %}
+  {% endif %}
+{% endfor %}
+{% set _net_ifaces = [] %}
+{% for iface in _hv.network_interfaces | default([]) %}
+  {% set _iface = {} %}
+  {% for k, v in iface.items() %}
+    {% if k == 'interface' %}
+      {% do _iface.update({'name': v}) %}
+    {% else %}
+      {% do _iface.update({k: v}) %}
+    {% endif %}
+  {% endfor %}
+  {% do _net_ifaces.append(_iface) %}
+{% endfor %}
+{% set _state = {
+    'hostname': item,
+    'ansible_groups': {
+        'function': _fn_groups,
+        'hardware': _hw_groups,
+        'os': _os_groups
+    },
+    'network_interfaces': _net_ifaces
+} %}
+{% if _hv.bmc is defined %}
+  {% do _state.update({'bmc': _hv.bmc}) %}
+{% endif %}
+{% if _hv.hw_specs is defined and _hv.hw_specs.cpu is defined %}
+  {% do _state.update({'cpu': {
+    'architecture': _hv.hw_specs.cpu.architecture | default(_hv.hw_architecture | default('')),
+    'sockets': _hv.hw_specs.cpu.sockets | default(1),
+    'cores_per_socket': _hv.hw_specs.cpu.cores_per_socket | default(1),
+    'threads_per_core': _hv.hw_specs.cpu.threads_per_core | default(1)
+  }}) %}
+{% elif _hv.hw_architecture is defined %}
+  {% do _state.update({'cpu': {'architecture': _hv.hw_architecture}}) %}
+{% endif %}
+{% if _hv.hw_specs is defined and _hv.hw_specs.gpu is defined %}
+  {% if _hv.hw_specs.gpu == none or _hv.hw_specs.gpu == 'none' %}
+    {% do _state.update({'gpu': []}) %}
+  {% elif _hv.hw_specs.gpu is iterable and _hv.hw_specs.gpu is not string %}
+    {% do _state.update({'gpu': _hv.hw_specs.gpu | list}) %}
+  {% else %}
+    {% do _state.update({'gpu': [_hv.hw_specs.gpu]}) %}
+  {% endif %}
+{% else %}
+  {% do _state.update({'gpu': []}) %}
+{% endif %}
+{% if _hv.os_operating_system is defined %}
+  {% do _state.update({'os': {
+    'distribution': _hv.os_operating_system.distribution | default(''),
+    'version': _hv.os_operating_system.distribution_version | default('') | string
+  }}) %}
+{% endif %}
+{% if _hv.os_firewall is defined %}
+  {% do _state.update({'firewall': _hv.os_firewall | bool}) %}
+{% endif %}
+{% if _hv.os_access_control is defined %}
+  {% do _state.update({'access_control': {'type': _hv.os_access_control}}) %}
+{% endif %}
+{% if _hv.os_partitioning is defined %}
+  {% do _state.update({'os_partitioning': _hv.os_partitioning}) %}
+{% endif %}
+{{ _state | to_nice_yaml(indent=2) }}
