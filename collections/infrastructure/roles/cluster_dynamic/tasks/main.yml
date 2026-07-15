@@ -35,3 +35,11 @@
 - name: cluster_dynamic <|> Reload systemd daemon
   ansible.builtin.systemd:
     daemon_reload: true
+
+- name: "service <|> Manage bluebanquise-cluster-dynamic state"
+  ansible.builtin.service:
+    name: "bluebanquise-cluster-dynamic"
+    enabled: "{{ (cluster_dynamic_enable_services | default(bb_enable_services) | default(true) | bool) | ternary(true, false) }}"
+    state: "{{ (cluster_dynamic_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
+  tags:
+    - service
