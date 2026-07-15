@@ -35,9 +35,10 @@ Files installed by these settings are:
    * `hosts/` directory contains hosts dedicated files, i.e. ipxe file with hosts dedicated variables.
    * `osdeploy/` directory contains static files, with patterns to boot each kind of supported distributions.
 * Basic configuration files are located in /etc/bluebanquise/bootset.
-   * `nodes_parameters.yml` contains all hosts PXE needed parameters.
+   * `nodes_parameters.yml` contains all hosts PXE needed parameters (equipment profile, next boot action). It is read by the **bluebanquise-pxe-stack-daemon** at startup to initialize per-host state.
    * `pxe_parameters.yml` contains needed values for scripts to adapt to **current pxe server host** (these parameters do not apply to PXE booted hosts !!).
 * Scripts are located in /usr/bin/.
+* Per-host PXE state (current boot target, provisioning status) is tracked by the **bluebanquise-pxe-stack-daemon** under `/var/lib/bluebanquise/cluster/hosts/<hostname>/dynamic_pxe_stack.yml`. See "PXE Stack Daemon" below.
 
 Administrator is also in charge or providing needed OS images for diskfull deployment into the `{{ pxe_stack_htdocs_path }}/pxe/netboots/` folder as detailed bellow.
 
@@ -47,6 +48,21 @@ In order to deploy diskfull servers, these settings need administrator to provid
 
 All these steps have to be done on the PXE server. You can mix OS distributions and architectures (deploy an Ubuntu 22.04 arm64 from an x86_64 RHEL 9 server).
 Just be carefull of path, as on Suse servers, path is `/srv/www/htdocs` and not `/var/www/html`, adapt to your needs or deploy these settings first so it creates pxe folders for you.
+
+#### bluebanquise-netboots-installer
+
+For the OS/architecture combinations already known to the tool, **bluebanquise-netboots-installer** automates the steps described below (download, checksum verification, mount/copy) from a catalog file at `/etc/bluebanquise/bootset/netboots_installer.yml`. This file is deployed with `force: false`, so it is never overwritten by a role re-run - safe to edit to add local mirrors, airgap URLs, or additional OS entries.
+
+```
+bluebanquise-netboots-installer list
+bluebanquise-netboots-installer install ubuntu_24.04 x86_64
+bluebanquise-netboots-installer install debian_13 x86_64 --netboot /path/to/local.iso   # airgapped, use a local ISO instead of downloading
+bluebanquise-netboots-installer uninstall ubuntu_24.04 x86_64
+```
+
+Before downloading or copying an ISO, the tool checks that at least 20 GB of disk space is available on the target and aborts cleanly with a clear error otherwise, rather than filling the disk mid-transfer.
+
+For any OS/architecture not covered by the catalog, or for full manual control, follow the per-OS steps below.
 
 Path targeted by these settings configuration files is the following: `http://{next-server}/pxe/netboots/<distribution_name>/<distribution_version or distribution_major_version>/<CPU arch>/`
 
@@ -399,15 +415,31 @@ These are the variables:
     - "{{ lookup('ansible.builtin.file', 'my_post_script.sh') }}"
   ```
 
+### PXE Stack Daemon
+
+**bluebanquise-pxe-stack-daemon** is a lightweight HTTP daemon (Flask, listening on port 7770 by default) that tracks each host's current PXE boot target and OS deployment status. It replaces the legacy static per-host iPXE files and CGI bootswitch mechanism (still installed for backward compatibility, but no longer the primary mechanism).
+
+At startup, the daemon reads `/etc/bluebanquise/bootset/nodes_parameters.yml` and creates the per-host state file (`/var/lib/bluebanquise/cluster/hosts/<hostname>/dynamic_pxe_stack.yml`) for any host that doesn't already have one. This means a newly added inventory host only gets picked up after the pxe_stack role is re-run (which regenerates `nodes_parameters.yml` and restarts the daemon) - there is no lazy discovery in between.
+
+The daemon exposes:
+
+* `GET /host/${hostname}.ipxe`: dynamically generated iPXE script for the host, based on its currently tracked state (replaces the old static `hosts/${hostname}.ipxe` file).
+* `GET /host/${hostname}?menu-default=<action>`: records a boot action for the host. Used both by `menu.ipxe` (fire-and-forget notification when a host boots into an action) and by **bluebanquise-bootset** (to actually set the next boot target).
+* `POST /host/${hostname}/provisioning_completed`: called by the autoinstaller's post-install script once OS deployment succeeds, to switch the host back to disk boot and mark provisioning as completed.
+
+A request for a host with no tracked state returns an HTTP 404 rather than silently creating one - if this happens, check the host is in inventory and re-run the pxe_stack role.
+
+If the daemon does not respond, tools calling it (bluebanquise-bootset) print a clear error message; check its status with `systemctl status bluebanquise-pxe-stack-daemon` and its logs with `journalctl -u bluebanquise-pxe-stack-daemon -f`.
+
 ### bluebanquise-bootset usage
 
-Once these settings are deployed, and hosts gathered into `/etc/bluebanquise/bootset/nodes_parameters.yml`, the **bluebanquise-bootset** tool can be used to manipulate remote hosts PXE boot. By default, 3 states can be defined for each host:
+Once these settings are deployed, the **bluebanquise-bootset** tool can be used to manipulate remote hosts PXE boot, via the bluebanquise-pxe-stack-daemon described above. By default, 3 states can be defined for each host:
 
 * osdeploy: the remote host will deploy/redeploy its operating system, using inventory equipment parameters of its equipment profile group.
 * disk: the remote host will boot on disk. This parameter is automatically set after a successful **osdeploy**.
 * diskless: the remote host will boot using a diskless mechanism. This diskless boot is generic, and is handled by an optional external role.
 
-Again, consider that if you set an host to osdeploy, and that it succeed its deployment, stack will automatically set the host into disk boot for next boot, to avoid infinite reinstallation loop (this is done using a CGI script set along apache http server).
+Again, consider that if you set an host to osdeploy, and that it succeed its deployment, stack will automatically set the host into disk boot for next boot, to avoid infinite reinstallation loop (this is done via the bluebanquise-pxe-stack-daemon).
 
 To get bluebanquise-bootset help, use:
 
@@ -432,33 +464,21 @@ bluebanquise-bootset -n c001 -b disk
 It is also possible to work on a range of host, using nodeset formatting:
 
 ```
-bootset-bootset -n c001,c002,c[010-020],login1 -b disk
+bluebanquise-bootset -n c001,c002,c[010-020],login1 -b disk
 ```
 
-If some inventory parameters related to the host have been updated recently, it may be required to force files regeneration instead of simply modifying them. To do so, use:
+To check current boot target and provisioning status of one or more hosts, use:
 
 ```
-bootset-bootset -n c001 -b osdeploy -f update
+bluebanquise-bootset -n c001,c002 -s
 ```
 
-Also, on some "difficult" networks, system administrator may require to force static ip at boot. This can be achieved using:
-
-```
-bootset-bootset -n c001 -b osdeploy -f network
-```
-
-Or in combination with update, using comma separated:
-
-```
-bootset-bootset -n c001 -b osdeploy -f update,network
-```
-
-The tool is relatively verbose, and should provide all needed information on the fly on what it is doing.
+The tool is relatively verbose, and should provide all needed information on the fly on what it is doing. If the daemon cannot be reached, it prints an explicit error rather than a misleading one, so check the message before assuming the daemon is down.
 
 Last part, regarding diskless. An image name need to be provided:
 
 ```
-bootset-bootset -n c001 -b diskless -i myimage
+bluebanquise-bootset -n c001 -b diskless -i myimage
 ```
 
 Diskless part is detailed later in this README.
@@ -485,30 +505,30 @@ To be macroscopic:
 
 * The remote host boot over PXE, in EFI/legacy-bios, using its own PXE/iPXE rom.
 * The dhcp deployed by BlueBanquise (or your own) will provide the host with the **BlueBanquise** iPXE rom. This iPXE rom contains an EMBED script that will display the logo, get an ip from the dhcp server, show some information, and chain to file *convergence.ipxe*.
-* *convergence.ipxe* will simply get the current architecture. This operation cannot be done into the EMBED script has it needs some logic, that could bug. Sys admin need to easily debug this without the need to rebuild iPXE roms. Then iPXE chain to *hosts/${hostname}.ipxe* with *hostname* the hostname provided by the dhcp server.
-* *hosts/${hostname}.ipxe* will define all host dedicated parameters, and also what host should do: boot on disk, deploy os, or boot in diskless. Then iPXE chain to *equipments/${equipment-profile}.ipxe*, with *equipment-profile* a variable defined in the current file.
+* *convergence.ipxe* will simply get the current architecture. This operation cannot be done into the EMBED script has it needs some logic, that could bug. Sys admin need to easily debug this without the need to rebuild iPXE roms. Then iPXE chain to the **bluebanquise-pxe-stack-daemon**, at `http://${next-server}:7770/host/${hostname}.ipxe`, with *hostname* the hostname provided by the dhcp server.
+* The daemon replies with a dynamically generated iPXE script, built from the host's currently tracked state (see "PXE Stack Daemon" above), defining all host dedicated parameters and what host should do: boot on disk, deploy os, or boot in diskless. Then iPXE chain to *equipments/${equipment-profile}.ipxe*, with *equipment-profile* a variable defined by the daemon.
 * *equipments/${equipment-profile}.ipxe* contains the host equipment profile group parameters, like operating system, console, kernel parameters, etc. Then iPXE chain to *menu.ipxe*.
-* *menu.ipxe* will display a basic menu on screen, with default set to what host is expected to do (this was gathered in *hosts/${hostname}.ipxe*). Timeout is 10s by default before host execute the expected action. Then, iPXE chain to:
+* *menu.ipxe* will display a basic menu on screen, with default set to what host is expected to do (this was gathered from the daemon). Timeout is 10s by default before host execute the expected action. Each actionable entry first notifies the daemon (fire-and-forget `imgfetch`, does not block booting if the daemon is unreachable), then iPXE chain to:
    * *osdeploy/${eq-distribution}_${eq-distribution-major-version}.ipxe* if host needs to deploy/redeploy its operating system. These osdeploy files are dynamic, and adapt to parameters gathered in host dedicated file and host equipment file.
    * *diskless/images/${diskless-image}/boot.ipxe* if host needs to boot in diskless.
    * *sanboot --no-describe --drive 0x80* if host is legacy/bios/pcbios based. This is a simple command that boot on disk.
    * *bin/${arch}/grub2_efi_autofind.img* if host is EFI based. This grub2 image will look for a disk with a know operating system, and boot on it.
 
-In case of an OS deployment, if this deployment succeed, in the post install script section, remote host will ask, using a curl command on its side and an CGI python script on server side (*/var/www/cgi-bin/bootswitch.cgi*), to boot next to disk. This CGI python script will simply edit *host/${hostname}.ipxe* file and change its default boot to **bootdisk**.
+In case of an OS deployment, if this deployment succeed, in the post install script section, remote host will POST to the **bluebanquise-pxe-stack-daemon** (`/host/${hostname}/provisioning_completed`), to boot next to disk and mark provisioning as completed. The legacy CGI script (*/var/www/cgi-bin/bootswitch.cgi*) is still installed for backward compatibility but is no longer the primary mechanism.
 To keep boot to osdeploy, set variable `pxe_stack_post_install_boot_to_disk` to *false*.
 
-All files are manually editable. Also, note that an unregistered host (so no hostnames provided by the dhcp) will try to load *hosts/.ipxe* file. By default, this file will simply provide an iPXE shell, but system administrator can tune this file to specific purposes.
+All files are manually editable. Also, note that an unregistered host (so no hostnames provided by the dhcp, or one the daemon has no tracked state for) will get a plain iPXE shell with an explanatory error message, rather than silently failing.
 
 To follow the deployment process, simply tail -f logs of http server, and see the whole process occurring.
 
 ### Diskless
 
 To enable diskless, set `pxe_stack_enable_diskless` to `true` and deploy these settings. The NFS root path for diskless images defaults to `/nfs/diskless`; override with `pxe_stack_diskless_nfs_path`.
-All diskless is then managed by the **bluebanquise-diskless** tool.
+All diskless is then managed by the **bluebanquise-diskless** tool, a subcommand-based CLI (run `bluebanquise-diskless --help`, or `bluebanquise-diskless <subcommand> --help` for a specific subcommand's options). Pass `-d`/`--debug` to any command to print the exact shell commands it executes.
 
 #### Introduction and general concept
 
-bluebanquise-diskless tool is made to manage diskless images life cycles, from creation to production and maintenance.
+bluebanquise-diskless tool is made to manage diskless images life cycles, from creation to production and maintenance. It requires root (run it with `sudo`).
 
 Workflow is the following, assuming user wishes to boot a pool of hosts with the same live image:
 
@@ -537,7 +557,14 @@ It is then up to packager to add additional elements into image.
 
 BlueBanquise project provides basic bootstrap images at https://bluebanquise.com/diskless
 
-Once imported, bootstrap images are stored by default into `/var/lib/bluebanquise/diskless/bootstrap_images/` folder.
+To import one, either from a URL or a local archive:
+
+```
+bluebanquise-diskless bootstrap-import --url https://bluebanquise.com/diskless/almalinux_9_minimal.tar.gz
+bluebanquise-diskless bootstrap-import --local /path/to/almalinux_9_minimal.tar.gz
+```
+
+The image name is read from the `metadata.yaml` embedded at the root of the archive, not chosen on the command line. Once imported, bootstrap images are stored by default into `/var/lib/bluebanquise/diskless/bootstrap_images/` folder. Use `bluebanquise-diskless list` at any time to see all bootstrap, reference, and live images currently present.
 
 Bootstrap images are used as source to create new reference images (also known as golden images).
 
@@ -552,7 +579,11 @@ This means for example:
 * Setup mounting points.
 * Etc.
 
-bluebanquise-diskless tool simply extracts content of a bootstrap image and create the bootable/chrootable folder of new reference image into `" + tool_parameters['nfs_path'] + "/image_name` folder.
+```
+bluebanquise-diskless reference-create --bootstrap almalinux_9_minimal --new-name my_reference_image
+```
+
+bluebanquise-diskless tool simply extracts content of a bootstrap image and creates the bootable/chrootable folder of the new reference image into the configured NFS path (`nfs_path` in `/etc/bluebanquise/diskless.yml`, default `/nfs/diskless`), under `<nfs_path>/my_reference_image`.
 A dedicated folder into `/var/www/html/pxe/diskless` directory is also created, and contains metadata and minimal needed to boot reference image via NFS if needed.
 
 #### Step 3: tune a reference image
@@ -573,8 +604,15 @@ Chroot method should only be used to do quick modifications, as many packages’
 
 ##### Using NFS diskless
 
-An entry in tool allows to link a reference image to a specific host of the target pool, and generate a temporary password to be able to login once booted.
-Assuming for example that target hosts pool is c[001-100], then user should request tool to link image to host c001.
+`bluebanquise-diskless reference-link` links a reference image to a specific host of the target pool, and generates a temporary password to be able to login once booted.
+Assuming for example that target hosts pool is c[001-100], then user should request tool to link image to host c001:
+
+```
+bluebanquise-diskless reference-link --image my_reference_image --node c001
+```
+
+The command prompts for the temporary password interactively (hidden input); alternatively pass `--password-file /path/to/file` to read it from a file (useful for automation, avoids exposing the password in shell history or `ps` output).
+
 Then use bluebanquise-bootset to request this host to boot over diskless on this image:
 
 ```
@@ -606,8 +644,17 @@ It might be needed to update image kernel. Again, I recommend to do that on an N
 
 Once new kernel has been installed, a manual step is required to ensure it will load at next boot, as diskless images do not use grub2 to configure next kernel boot.
 
-Use bluebanquise-diskless tool and select **Update a reference image default kernel** entry.
-Select your image, and tool will display available kernels for this image. Simply choose your new kernel.
+List kernels available inside the image:
+
+```
+bluebanquise-diskless reference-list-kernels --image my_reference_image
+```
+
+Then set the one to boot by default:
+
+```
+bluebanquise-diskless reference-set-kernel --image my_reference_image --kernel 5.14.0-427.31.1.el9_4.x86_64
+```
 
 Now, reboot the host, and check it has booted on the new kernel.
 
@@ -621,9 +668,11 @@ Once reference image is ready, and user ensured all kernel modules are properly 
 
 A live image is loaded via http by all hosts of the target pool at boot, and stored in ram memory. Then, an overlay FS is configured over image to allow live **non reboot persistent** system modifications.
 
-Use the bluebanquise-diskless tool dedicated entry to generate the new live image.
+```
+bluebanquise-diskless live-create --image my_reference_image --new-name my_live_image --size-mb 4096
+```
 
-Once image is generated, use bluebanquise-bootset tool to request all hosts of the pool to boot from this live image:
+`--size-mb` is the live image RAM size limit. Once image is generated, use bluebanquise-bootset tool to request all hosts of the pool to boot from this live image:
 
 ```
 bluebanquise-bootset -b diskless -i my_live_image -n c[001-100]
@@ -652,6 +701,14 @@ If using BlueBanquise roles, simply apply playbook with missing tags:
 ```
 ansible-playbook --become --tags identify,secret /path/to/playbook.yml
 ```
+
+#### Other bluebanquise-diskless commands
+
+A couple of commands are useful outside the linear workflow above:
+
+* `bluebanquise-diskless reference-clone --image my_reference_image --new-name my_reference_image_v2`: clone a reference image under a new name, e.g. to branch tuning without touching the original.
+* `bluebanquise-diskless delete --type {bootstrap,reference,live} --name my_image --yes`: delete an image. `--yes` is required (no interactive confirmation); there is no undo.
+* Every create subcommand (`bootstrap-import`, `reference-create`, `reference-clone`, `live-create`) refuses to overwrite an existing image of the same name unless `--force` is passed.
 
 #### Debug and errors
 

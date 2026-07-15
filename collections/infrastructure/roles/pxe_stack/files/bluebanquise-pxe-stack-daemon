@@ -76,6 +76,44 @@ def _save_state(hostname, state):
     os.replace(tmp, _state_path(hostname))
 
 
+def bootstrap_hosts(nodes_parameters_path):
+    """Create missing host folders/dynamic_pxe_stack.yml from nodes_parameters.yml, once at startup."""
+    logging.info('Bootstrapping host state from %s', nodes_parameters_path)
+    if not os.path.exists(nodes_parameters_path):
+        logging.warning('nodes_parameters.yml not found at %s — skipping host bootstrap',
+                         nodes_parameters_path)
+        return
+
+    with open(nodes_parameters_path, 'r') as f:
+        nodes_parameters = yaml.safe_load(f) or {}
+
+    created = 0
+    skipped = 0
+    for hostname, node_vars in nodes_parameters.items():
+        if os.path.exists(_state_path(hostname)):
+            skipped += 1
+            continue
+
+        state = {
+            'hostname': hostname,
+            'menu_default': 'bootdisk',
+            'provisioning_status': 'NA',
+            'equipment_profile': node_vars.get('equipment_profile', ''),
+            'hw_ipxe_next_boot': node_vars.get('hw_ipxe_next_boot', 'bootdisk'),
+            'dedicated_kernel_parameters': '',
+            'node_image': 'none',
+            'extra_parameters': 'none',
+            'tenant': '',
+        }
+        with _host_lock(hostname):
+            _save_state(hostname, state)
+        created += 1
+        logging.info('[%s] Created initial dynamic_pxe_stack.yml (equipment_profile=%s)',
+                     hostname, state['equipment_profile'])
+
+    logging.info('Host bootstrap complete: %d created, %d already present', created, skipped)
+
+
 # ─── routes ───────────────────────────────────────────────────────────────────
 
 @app.route('/host/<hostname>.ipxe', methods=['GET'])
@@ -147,8 +185,11 @@ def notify_action(hostname):
     with _host_lock(hostname):
         state = _load_state(hostname)
         if state is None:
-            logging.warning('[%s] No state file — creating minimal entry', hostname)
-            state = {'hostname': hostname}
+            logging.warning('[%s] No state file — host not found', hostname)
+            return Response(
+                'Host {} not found. Check it is in inventory and re-run the pxe_stack '
+                'Ansible role, then restart bluebanquise-pxe-stack-daemon.\n'.format(hostname),
+                status=404)
 
         old_default = state.get('menu_default', 'bootdisk')
         next_boot = state.get('hw_ipxe_next_boot', 'bootdisk')
@@ -174,8 +215,11 @@ def provisioning_completed(hostname):
     with _host_lock(hostname):
         state = _load_state(hostname)
         if state is None:
-            logging.warning('[%s] No state file — creating minimal entry', hostname)
-            state = {'hostname': hostname}
+            logging.warning('[%s] No state file — host not found', hostname)
+            return Response(
+                'Host {} not found. Check it is in inventory and re-run the pxe_stack '
+                'Ansible role, then restart bluebanquise-pxe-stack-daemon.\n'.format(hostname),
+                status=404)
         state['provisioning_status'] = 'completed'
         _save_state(hostname, state)
 
@@ -204,6 +248,7 @@ def load_config(path):
         cfg = yaml.safe_load(f)
     logging.info('Base path: %s', cfg.get('base_path'))
     logging.info('Tmp path:  %s', cfg.get('tmp_path'))
+    logging.info('Nodes parameters path: %s', cfg.get('nodes_parameters_path'))
     logging.info('Port:      %s', cfg.get('port', 7770))
     return cfg
 
@@ -225,6 +270,10 @@ def main():
         setup_logging(config.get('log_level', 'INFO'))
 
     os.makedirs(config.get('tmp_path', '/var/lib/bluebanquise/cluster/.tmp'), exist_ok=True)
+
+    nodes_parameters_path = config.get('nodes_parameters_path',
+                                        '/etc/bluebanquise/bootset/nodes_parameters.yml')
+    bootstrap_hosts(nodes_parameters_path)
 
     port = config.get('port', 7770)
     logging.info('Listening on 0.0.0.0:%d', port)

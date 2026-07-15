@@ -127,15 +127,13 @@ def daemon_set_boot(node, label):
     try:
         req = urllib.request.Request(url, method='GET')
         with urllib.request.urlopen(req, timeout=DAEMON_TIMEOUT) as resp:
-            status = resp.status
             body = resp.read().decode('utf-8').strip()
-            if status == 200:
-                logging.info('    └── ' + bcolors.OKGREEN + '[OK] Daemon confirmed: ' + body + bcolors.ENDC)
-                return True
-            else:
-                logging.error(bcolors.FAIL + '    └── [ERROR] Daemon returned HTTP {}: {}'.format(status, body) + bcolors.ENDC)
-                _print_daemon_hint()
-                return False
+            logging.info('    └── ' + bcolors.OKGREEN + '[OK] Daemon confirmed: ' + body + bcolors.ENDC)
+            return True
+    except urllib.error.HTTPError as e:
+        body = e.read().decode('utf-8').strip()
+        logging.error(bcolors.FAIL + '    └── [ERROR] Daemon rejected request (HTTP {}): {}'.format(e.code, body) + bcolors.ENDC)
+        return False
     except urllib.error.URLError as e:
         logging.error(bcolors.FAIL + '    └── [ERROR] Could not reach bluebanquise-pxe-stack-daemon: {}'.format(e) + bcolors.ENDC)
         _print_daemon_hint()
@@ -185,8 +183,6 @@ parser.add_argument("-i", "--image", dest="image", default="none",
                     help="Specify diskless or clone image to be used.")
 parser.add_argument("-e", "--extra-parameters", dest="extra_parameters", default="none",
                     help="Add extra parameters for boot chain.")
-parser.add_argument("-k", "--kickstart", action="store_true",
-                    help="Display the kickstart file of a node.")
 parser.add_argument("-q", "--quiet", action="store_true",
                     help="Do not print INFO messages.")
 
@@ -196,8 +192,8 @@ if len(sys.argv) == 1:
 
 passed_arguments = parser.parse_args()
 
-if not any([passed_arguments.status, passed_arguments.boot, passed_arguments.kickstart]):
-    parser.error(bcolors.FAIL + "At least one of --status, --boot, or --kickstart must be provided." + bcolors.ENDC)
+if not any([passed_arguments.status, passed_arguments.boot]):
+    parser.error(bcolors.FAIL + "At least one of --status or --boot must be provided." + bcolors.ENDC)
 
 print("""\
 
@@ -217,13 +213,10 @@ if passed_arguments.quiet:
 logging.basicConfig(format='[%(levelname)s] %(message)s', level=loglevel)
 
 # Load configuration
-nodes_parameters = load_file('/etc/bluebanquise/bootset/nodes_parameters.yml')
 pxe_parameters = load_file('/etc/bluebanquise/bootset/pxe_parameters.yml')
 
 cluster_base_path = pxe_parameters.get('pxe_parameters', {}).get(
     'cluster_base_path', '/var/lib/bluebanquise/cluster/hosts')
-
-htdocs_path = pxe_parameters["pxe_parameters"]["htdocs_path"]
 
 # Load tenants only if exists
 tenants = {}
@@ -267,27 +260,5 @@ elif passed_arguments.boot:
 
     for node in nodesetexpand(passed_arguments.nodes):
         logging.info(bcolors.OKBLUE + 'Processing node ' + str(node) + ' ...' + bcolors.ENDC)
-
-        if str(node) not in nodes_parameters:
-            logging.warning(bcolors.WARNING + 'Node ' + str(node) + ' not found in nodes_parameters. Skipping.' + bcolors.ENDC)
-            continue
-
         logging.info('    ├── ' + bcolors.OKBLUE + 'Setting menu-default=' + label + bcolors.ENDC)
         daemon_set_boot(node=node, label=label)
-
-# ─── kickstart ────────────────────────────────────────────────────────────────
-
-elif passed_arguments.kickstart:
-    node = passed_arguments.nodes
-    if len(nodesetexpand(node)) != 1:
-        logging.error(bcolors.FAIL + 'Specify a single node with -n to display its kickstart file.' + bcolors.ENDC)
-        sys.exit(1)
-    if node not in nodes_parameters:
-        logging.error(bcolors.FAIL + 'Node ' + node + ' not found in nodes_parameters.' + bcolors.ENDC)
-        sys.exit(1)
-    ks_path = os.path.join(
-        htdocs_path, 'pxe', 'equipment_profiles',
-        '{}.kickstart.cfg'.format(nodes_parameters[node]['equipment_profile']))
-    with open(ks_path, 'r') as f:
-        for line in f.readlines():
-            print(line.strip())

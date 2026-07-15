@@ -14,33 +14,20 @@ You will find bellow the detailed configuration available for each system relate
    :maxdepth: 1
    :caption: System:
 
-   system/access_control
+   system/local_configuration
    system/auditd
    system/cloudinit
-   system/cron
-   system/custom_packages
    system/dns_client
-   system/filesystem
    system/firewall
    system/gpu
    system/hosts_file
-   system/kernel_config
    system/lmod
-   system/lvm
-   system/modprobe
-   system/mount
    system/nhc
    system/nic
-   system/pam_limits
-   system/parted
    system/rasdaemon
    system/repositories
-   system/root_password
-   system/set_hostname
    system/ssh_remote_keys
    system/sshd
-   system/sudoers
-   system/system
    system/update_reboot
    system/users
    system/xfs_quota

@@ -1,1 +1,0 @@
-../../../collections/infrastructure/roles/mount/README.md

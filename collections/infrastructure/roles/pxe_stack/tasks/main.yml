@@ -49,7 +49,7 @@
     - firewall
 
 # This calculation takes time, so we store it in memory for later usage
-- name: fact <|> Calculate first_octets
+- name: fact <|> Calculate equipment profiles
   ansible.builtin.set_fact:
     pxe_stack_equipment_profiles: "{{ hostvars | bluebanquise.infrastructure.equipment_profiles(groups['all'], groups) }}"
   run_once: true
@@ -109,6 +109,7 @@
     src: nodes_parameters.yml.j2
     dest: /etc/bluebanquise/bootset/nodes_parameters.yml
     mode: 0644
+  notify: service <|> Restart pxe services
   tags:
     - template
 
@@ -253,43 +254,6 @@
 - name: pxe_stack_daemon <|> Reload systemd daemon
   ansible.builtin.systemd:
     daemon_reload: true
-
-- name: fact <|> Build per-host node list for PXE state files
-  ansible.builtin.set_fact:
-    pxe_stack_node_list: >-
-      {%- set result = [] -%}
-      {%- for ep, ep_vars in pxe_stack_equipment_profiles.items() -%}
-        {%- if ep_vars.type == 'server' -%}
-          {%- for node in ep_vars.nodes -%}
-            {%- do result.append({'hostname': node, 'equipment_profile': ep}) -%}
-          {%- endfor -%}
-        {%- endif -%}
-      {%- endfor -%}
-      {{ result }}
-  run_once: true
-
-- name: pxe_stack_daemon <|> Ensure per-host state directories exist
-  ansible.builtin.file:
-    path: "{{ pxe_stack_cluster_base_path }}/{{ item.hostname }}"
-    state: directory
-    owner: bluebanquise
-    group: bluebanquise
-    mode: '0750'
-  loop: "{{ pxe_stack_node_list }}"
-  loop_control:
-    label: "{{ item.hostname }}"
-
-- name: pxe_stack_daemon <|> Write initial dynamic_pxe_stack.yml for each host
-  ansible.builtin.template:
-    src: dynamic_pxe_stack.yml.j2
-    dest: "{{ pxe_stack_cluster_base_path }}/{{ item.hostname }}/dynamic_pxe_stack.yml"
-    owner: bluebanquise
-    group: bluebanquise
-    mode: '0640'
-    force: false
-  loop: "{{ pxe_stack_node_list }}"
-  loop_control:
-    label: "{{ item.hostname }}"
 
 
 ################################################################################################

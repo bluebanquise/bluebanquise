@@ -1,1 +1,0 @@
-../../../collections/infrastructure/roles/modprobe/README.md

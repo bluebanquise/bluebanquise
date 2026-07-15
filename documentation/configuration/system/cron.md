@@ -1,1 +1,0 @@
-../../../collections/infrastructure/roles/cron/README.md
