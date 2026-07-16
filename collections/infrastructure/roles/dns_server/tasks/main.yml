@@ -124,17 +124,17 @@
   with_items: "{{ dns_keys.files }}"
   when: (dns_server_dnssec_sign) and (dns_server_dnssec_overwrite_key)
 
-- name: "command <|> Create Foward Zone Signing Key (ZSK)"
+- name: "command <|> Create Forward Zone Signing Key (ZSK)"
   ansible.builtin.command:
     cmd: "dnssec-keygen -K {{ dns_server_named_dir }} -a ECDSAP256SHA256 -n ZONE {{ dns_server_domain_name | default(bb_domain_name, true) | default('cluster.local', true) }}"
   when: (dns_server_dnssec_sign) and ((dns_server_dnssec_overwrite_key) or (dns_keys.matched < 2))
 
-- name: "command <|> Create Foward Key Signing Key (KSK)"
+- name: "command <|> Create Forward Key Signing Key (KSK)"
   ansible.builtin.command:
     cmd: "dnssec-keygen -K {{ dns_server_named_dir }} -f KSK -a ECDSAP256SHA256 -n ZONE {{ dns_server_domain_name | default(bb_domain_name, true) | default('cluster.local', true) }}"
   when: (dns_server_dnssec_sign) and ((dns_server_dnssec_overwrite_key) or (dns_keys.matched < 2))
 
-- name: "find <|> Search for existing foward public keys"
+- name: "find <|> Search for existing forward public keys"
   ansible.builtin.find:
     paths: "{{ dns_server_named_dir }}"
     patterns: "K{{ dns_server_domain_name | default(bb_domain_name, true) | default('cluster.local', true) }}*.key"
@@ -172,14 +172,14 @@
   tags:
     - template
 
-- name: "command <|> Sign foward zone"
+- name: "command <|> Sign forward zone"
   ansible.builtin.command: "chdir={{ dns_server_named_dir }} dnssec-signzone -S -g -o {{ dns_server_domain_name | default(bb_domain_name, true) | default('cluster.local', true) }} forward.zone"
   when: dns_server_dnssec_sign
   notify: service <|> Restart dns services
 
 - name: "include_tasks <|> Use zone key task"
   ansible.builtin.include_tasks: zone_key.yml
-  with_items: "{{ dns_server_hosts_by_first_octets }}"
+  loop: "{{ dns_server_hosts_by_first_octets['reverse'] | flatten(levels=1) }}"
   when: (dns_server_dnssec_sign)
   loop_control:
     loop_var: dns_zone
@@ -218,7 +218,7 @@
 
 - name: "command <|> Sign item zone"
   ansible.builtin.command: "chdir={{ dns_server_named_dir }} dnssec-signzone -S -g -o {{ item.split('.')|reverse|join('.') }}.in-addr.arpa. {{ item }}.rr.zone"
-  with_items: "{{ dns_server_hosts_by_first_octets }}"
+  loop: "{{ dns_server_hosts_by_first_octets['reverse'] | flatten(levels=1) }}"
   when: dns_server_dnssec_sign
   notify: service <|> Restart dns services
 

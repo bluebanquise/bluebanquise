@@ -282,7 +282,7 @@ fn_management:
             - www
 ```
 
-This will create a `foward.zone` file with:
+This will create a `forward.zone` file with:
 
 ```yaml
   www IN A 10.0.0.10
@@ -290,7 +290,7 @@ This will create a `foward.zone` file with:
 ```
 
 ## Changelog
-
+* 1.13.1: Fix error when signing zones. L. Bouzonnet <loris.bouzonnet@bull.com>
 * 1.13.0: Improve forward/reverse dns files generation with python filters. P. Duc-Jacquet <patrice.ducjacquet@eviden.com>
 * 1.12.0: Added alias for round robin load balance. Thiago Cardozo <boubee.thiago@gmail.com>
 * 1.11.0: Enable dnssec at dns server. Thiago Cardozo <boubee.thiago@gmail.com>
