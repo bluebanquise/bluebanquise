@@ -33,6 +33,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import json
 import logging
 import os
 import sys
@@ -122,10 +123,13 @@ def nodesetexpand(znodeset):
 
 def daemon_set_boot(node, label):
     """Call the pxe-stack-daemon to set menu-default for a node. Verbose on failure."""
-    url = '{}/host/{}?menu-default={}'.format(DAEMON_URL, node, label)
-    logging.info('    ├── ' + bcolors.OKBLUE + 'Calling daemon: GET ' + url + bcolors.ENDC)
+    url = '{}/host/{}/menu-default'.format(DAEMON_URL, node)
+    payload = json.dumps({'menu_default': label}).encode('utf-8')
+    logging.info('    ├── ' + bcolors.OKBLUE + 'Calling daemon: PUT ' + url + ' ' +
+                 payload.decode('utf-8') + bcolors.ENDC)
     try:
-        req = urllib.request.Request(url, method='GET')
+        req = urllib.request.Request(url, data=payload, method='PUT',
+                                      headers={'Content-Type': 'application/json'})
         with urllib.request.urlopen(req, timeout=DAEMON_TIMEOUT) as resp:
             body = resp.read().decode('utf-8').strip()
             logging.info('    └── ' + bcolors.OKGREEN + '[OK] Daemon confirmed: ' + body + bcolors.ENDC)

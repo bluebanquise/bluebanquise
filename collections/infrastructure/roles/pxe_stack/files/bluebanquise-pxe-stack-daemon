@@ -5,8 +5,12 @@ Serves per-host iPXE files dynamically and tracks PXE/provisioning state.
 Listens on port 7770.
 
 Endpoints:
-  GET  /host/<hostname>.ipxe               Return dynamic iPXE host file
-  GET  /host/<hostname>?menu-default=<v>   Set menu_default; notify action start
+  GET  /host/<hostname>.ipxe                    Return dynamic iPXE host file
+  GET  /host/<hostname>?menu-default=<v>        iPXE boot-time notification (imgfetch, GET-only by
+                                                 construction); advances menu_default to the host's
+                                                 hw_ipxe_next_boot, does not set it to <v> directly
+  PUT  /host/<hostname>/menu-default            Explicitly set menu_default. JSON body:
+                                                 {"menu_default": "<v>"}. Used by bluebanquise-bootset.
   POST /host/<hostname>/provisioning_completed  Mark provisioning as completed
 """
 
@@ -74,6 +78,25 @@ def _save_state(hostname, state):
     with open(tmp, 'w') as f:
         yaml.dump(state, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
     os.replace(tmp, _state_path(hostname))
+
+
+def _validate_menu_default_value(hostname, menu_default):
+    """Validate a menu_default value against VALID_MENU_DEFAULTS. Returns an error Response, or None if valid."""
+    if not menu_default:
+        logging.warning('[%s] Missing menu_default value', hostname)
+        return Response('Missing menu_default value.\n', status=400)
+    if menu_default not in VALID_MENU_DEFAULTS:
+        logging.warning('[%s] Invalid menu_default value: %r', hostname, menu_default)
+        return Response('Invalid menu_default value: {}\n'.format(menu_default), status=400)
+    return None
+
+
+def _host_not_found_response(hostname):
+    logging.warning('[%s] No state file — host not found', hostname)
+    return Response(
+        'Host {} not found. Check it is in inventory and re-run the pxe_stack '
+        'Ansible role, then restart bluebanquise-pxe-stack-daemon.\n'.format(hostname),
+        status=404)
 
 
 def bootstrap_hosts(nodes_parameters_path):
@@ -169,27 +192,20 @@ def serve_host_ipxe(hostname):
 
 
 @app.route('/host/<hostname>', methods=['GET'])
-def notify_action(hostname):
+def notify_boot_action(hostname):
+    """iPXE boot-time notification (menu.ipxe imgfetch). GET-only: iPXE cannot issue PUT/POST."""
     menu_default = request.args.get('menu-default', '').strip()
     logging.info('[%s] GET /host/%s?menu-default=%s from %s',
                  hostname, hostname, menu_default, request.remote_addr)
 
-    if not menu_default:
-        logging.warning('[%s] Missing menu-default parameter', hostname)
-        return Response('Missing menu-default parameter\n', status=400)
-
-    if menu_default not in VALID_MENU_DEFAULTS:
-        logging.warning('[%s] Invalid menu-default value: %r', hostname, menu_default)
-        return Response('Invalid menu-default value: {}\n'.format(menu_default), status=400)
+    error = _validate_menu_default_value(hostname, menu_default)
+    if error:
+        return error
 
     with _host_lock(hostname):
         state = _load_state(hostname)
         if state is None:
-            logging.warning('[%s] No state file — host not found', hostname)
-            return Response(
-                'Host {} not found. Check it is in inventory and re-run the pxe_stack '
-                'Ansible role, then restart bluebanquise-pxe-stack-daemon.\n'.format(hostname),
-                status=404)
+            return _host_not_found_response(hostname)
 
         old_default = state.get('menu_default', 'bootdisk')
         next_boot = state.get('hw_ipxe_next_boot', 'bootdisk')
@@ -208,6 +224,40 @@ def notify_action(hostname):
     return Response('OK\n', status=200)
 
 
+@app.route('/host/<hostname>/menu-default', methods=['PUT'])
+def set_menu_default(hostname):
+    """Explicitly set menu_default. Used by bluebanquise-bootset (an operator asking for a
+    specific next boot target), as opposed to notify_boot_action's iPXE-driven auto-advance."""
+    payload = request.get_json(silent=True) or {}
+    menu_default = str(payload.get('menu_default', '')).strip()
+    logging.info('[%s] PUT /host/%s/menu-default menu_default=%s from %s',
+                 hostname, hostname, menu_default, request.remote_addr)
+
+    error = _validate_menu_default_value(hostname, menu_default)
+    if error:
+        return error
+
+    with _host_lock(hostname):
+        state = _load_state(hostname)
+        if state is None:
+            return _host_not_found_response(hostname)
+
+        old_default = state.get('menu_default', 'bootdisk')
+        state['menu_default'] = menu_default
+
+        if menu_default == 'bootosdeploy':
+            state['provisioning_status'] = 'scheduled'
+            logging.info('[%s] osdeploy scheduled — menu_default set %s -> %s (requested by %s)',
+                         hostname, old_default, menu_default, request.remote_addr)
+        else:
+            logging.info('[%s] menu_default set %s -> %s (requested by %s)',
+                         hostname, old_default, menu_default, request.remote_addr)
+
+        _save_state(hostname, state)
+
+    return Response('OK\n', status=200)
+
+
 @app.route('/host/<hostname>/provisioning_completed', methods=['POST'])
 def provisioning_completed(hostname):
     logging.info('[%s] POST /host/%s/provisioning_completed from %s',
@@ -215,11 +265,7 @@ def provisioning_completed(hostname):
     with _host_lock(hostname):
         state = _load_state(hostname)
         if state is None:
-            logging.warning('[%s] No state file — host not found', hostname)
-            return Response(
-                'Host {} not found. Check it is in inventory and re-run the pxe_stack '
-                'Ansible role, then restart bluebanquise-pxe-stack-daemon.\n'.format(hostname),
-                status=404)
+            return _host_not_found_response(hostname)
         state['provisioning_status'] = 'completed'
         _save_state(hostname, state)
 

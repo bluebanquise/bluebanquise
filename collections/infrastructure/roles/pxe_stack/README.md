@@ -424,12 +424,15 @@ At startup, the daemon reads `/etc/bluebanquise/bootset/nodes_parameters.yml` an
 The daemon exposes:
 
 * `GET /host/${hostname}.ipxe`: dynamically generated iPXE script for the host, based on its currently tracked state (replaces the old static `hosts/${hostname}.ipxe` file).
-* `GET /host/${hostname}?menu-default=<action>`: records a boot action for the host. Used both by `menu.ipxe` (fire-and-forget notification when a host boots into an action) and by **bluebanquise-bootset** (to actually set the next boot target).
+* `GET /host/${hostname}?menu-default=<action>`: the iPXE boot-time notification, called by `menu.ipxe` (fire-and-forget, does not block booting if the daemon is unreachable). Records that a host is currently booting into `<action>`, and auto-advances `menu_default` to the host's configured `hw_ipxe_next_boot` (normally `disk`) to prevent an infinite reinstall loop. GET-only by necessity: iPXE's `imgfetch` cannot issue anything else.
+* `PUT /host/${hostname}/menu-default` (JSON body `{"menu_default": "<value>"}`): explicitly sets the host's next boot target. This is the one **bluebanquise-bootset** calls when an operator runs `-b <action>` - unlike the notification above, it sets `menu_default` to exactly the requested value rather than auto-advancing it.
 * `POST /host/${hostname}/provisioning_completed`: called by the autoinstaller's post-install script once OS deployment succeeds, to switch the host back to disk boot and mark provisioning as completed.
 
 A request for a host with no tracked state returns an HTTP 404 rather than silently creating one - if this happens, check the host is in inventory and re-run the pxe_stack role.
 
 If the daemon does not respond, tools calling it (bluebanquise-bootset) print a clear error message; check its status with `systemctl status bluebanquise-pxe-stack-daemon` and its logs with `journalctl -u bluebanquise-pxe-stack-daemon -f`.
+
+**`provisioning_status` lifecycle** (applies to `osdeploy` only, visible via `bluebanquise-bootset -s`): `NA` (initial, no osdeploy ever requested) → `scheduled` (an operator asked for osdeploy via `bluebanquise-bootset -b osdeploy`, PUT endpoint above, but the host hasn't booted into it yet) → `started` (the host actually booted into osdeploy - the iPXE notification above fired) → `completed` (the post-install script called back). RHCOS stays at `started` since no post-install callback is available for it.
 
 ### bluebanquise-bootset usage
 
