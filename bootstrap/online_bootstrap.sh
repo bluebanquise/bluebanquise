@@ -2,6 +2,8 @@
 set -e
 export SILENT="false"
 export SKIP_ENVIRONMENT="false"
+# define empty variables
+export BBDNFDEBUGOPTS=""
 
 for arg in "$@"; do
   if [[ "$arg" == *"--silent"* ]]; then
@@ -11,6 +13,14 @@ for arg in "$@"; do
     export SKIP_ENVIRONMENT="true"
   fi
   if [[ "$arg" == *"--debug"* ]]; then
+    # because we by default write to log files, we need
+    #  to duplicate stderr to additional file descriptor
+    # Also we add general settings for verbose dnf
+    # TODO, enable verbosity for configure etc within sudo call
+    export BBDNFDEBUGOPTS="--rpmverbosity=debug --debuglevel=10"
+    export BBDEBUG="true"
+    exec 3>&2
+    export BASH_XTRACEFD=3
     set -x
   fi
 done
@@ -128,14 +138,14 @@ echo -n " Installing needed dependencies, could take some time..."
     # Now we can 'scl enable rh-python38 bash' to trigger python3.8
   fi
   if [ "$PLATFORM_ID" == "platform:el8" ]; then
-    dnf install git python39 python39-pip python3-policycoreutils openssh-clients -y
+    dnf install git python39 python39-pip python3-policycoreutils openssh-clients -y $BBDNFDEBUGOPTS
     alternatives --set python3 /usr/bin/python3.9
   fi
   if [ "$PLATFORM_ID" == "platform:el9" ]; then
-    dnf install git python3 python3-pip python3-pip python3-policycoreutils openssh-clients -y
+    dnf install git python3 python3-pip python3-pip python3-policycoreutils openssh-clients -y $BBDNFDEBUGOPTS
   fi
   if [ "$PLATFORM_ID" == "platform:el10" ]; then
-    dnf install git python3 python3-pip python3-pip python3-policycoreutils openssh-clients -y
+    dnf install git python3 python3-pip python3-pip python3-policycoreutils openssh-clients -y $BBDNFDEBUGOPTS
   fi
   # OPENSUSE LEAP
   if [ "$ID" == "opensuse-leap" ]; then
@@ -173,6 +183,7 @@ then
 echo -n " Setting bluebanquise user environment, this might take a while..."
 (
   set -x
+  # sudo call below does not yet verbosely output when calling with --debug
   sudo -u bluebanquise /bin/bash -c '
   cd /var/lib/bluebanquise
   git clone https://github.com/bluebanquise/bluebanquise.git
@@ -204,3 +215,11 @@ echo
 echo " Thank you for using BlueBanquise :)"
 echo " Have fun!"
 echo
+
+# we clean up the debug settings
+if [[ $BBDEBUG == "true" ]]
+then
+  set +x
+  exec 3>&-
+fi
+
