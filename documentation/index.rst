@@ -76,6 +76,13 @@ This documentation is under Creative Commons Attribution-NonCommercial-ShareAlik
 
 .. toctree::
    :maxdepth: 1
+   :caption: Walkthrough:
+   :numbered:
+
+   walkthrough/example_cluster
+
+.. toctree::
+   :maxdepth: 1
    :caption: Resources:
    :numbered:
 

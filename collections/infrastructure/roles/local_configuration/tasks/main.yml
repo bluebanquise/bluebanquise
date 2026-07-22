@@ -36,6 +36,7 @@
     or os_kernel_parameters is defined
     or hw_kernel_parameters is defined
     or os_sysctl is defined
+    or os_kernel_version is defined
 
 - name: include_tasks <|> Apply storage configuration
   ansible.builtin.include_tasks: storage.yml

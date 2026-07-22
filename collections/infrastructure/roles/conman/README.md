@@ -57,20 +57,21 @@ To exit, simply press `Enter` then `&` then `.` .
 
 Be aware however that conman was NOT designed to manage too much hosts, due to the number of threads started. If you need to manage more than 1000 servers, it is recommended to split cluster into multiple icebergs (see BlueBanquise stack main documentation) to spread load over multiple conman instances.
 
-Another solution, if system is strong enough, is to increase RLIMIT_NOFILE for conman user to greater values than default ones (https://github.com/dun/conman/issues/17). User can make usage of `pam_limits` BlueBanquise role to configure conman user rlimits.
+Another solution, if system is strong enough, is to increase RLIMIT_NOFILE for conman user to greater values than default ones (https://github.com/dun/conman/issues/17). User can make usage of the `local_configuration` BlueBanquise role's PAM limits support to configure conman user rlimits.
 
 ```yaml
-pam_limits:
-  - domain: conman
-    limit_type: soft
-    limit_item: nofile
-    value: unlimited
-    use_max: yes
-  - domain: conman
-    limit_type: hard
-    limit_item: nofile
-    value: unlimited
-    use_max: yes
+local_configuration_system:
+  pam_limits:
+    - domain: conman
+      limit_type: soft
+      limit_item: nofile
+      value: unlimited
+      use_max: yes
+    - domain: conman
+      limit_type: hard
+      limit_item: nofile
+      value: unlimited
+      use_max: yes
 ```
 
 Once these pam_limits parameter pushed, restart conman daemon.

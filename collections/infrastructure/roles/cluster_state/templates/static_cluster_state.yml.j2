@@ -76,4 +76,7 @@
 {% if _hv.os_partitioning is defined %}
   {% do _state.update({'os_partitioning': _hv.os_partitioning}) %}
 {% endif %}
+{% if _hv.os_kernel_version is defined %}
+  {% do _state.update({'kernel': _hv.os_kernel_version}) %}
+{% endif %}
 {{ _state | to_nice_yaml(indent=2) }}

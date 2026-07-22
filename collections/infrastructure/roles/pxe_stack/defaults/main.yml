@@ -38,6 +38,18 @@ pxe_stack_post_install_boot_to_disk: true
 # pxe_stack_start_services:
 
 ############################################################
+### TFTP
+
+# On Debian/Ubuntu these are written to /etc/default/tftpd-hpa.
+# On RedHat/Suse, tftp is socket-activated (no env file): pxe_stack_tftp_options
+# and pxe_stack_tftp_directory are applied via a systemd drop-in overriding
+# tftp.service's ExecStart. pxe_stack_tftp_address is not applied there, as it
+# would require touching tftp.socket's ListenDatagram.
+pxe_stack_tftp_address: "0.0.0.0:69"
+pxe_stack_tftp_options: "--secure --verbose"
+pxe_stack_tftp_directory: "/var/lib/tftpboot"
+
+############################################################
 ### Default equipment profile parameters
 
 pxe_stack_hw_equipment_type: none

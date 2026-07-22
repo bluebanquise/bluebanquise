@@ -4,6 +4,9 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.4 or 4.0
 
+pxe_stack: wired TFTP_ADDRESS/OPTIONS/DIRECTORY into the tftp-hpa migration — Debian/Ubuntu via /etc/default/tftpd-hpa, RHEL 9+/Suse via a systemd drop-in overriding tftp.service's ExecStart (socket-activated, no env file). Also 
+  ▎ fixed the restart handler, which was silently never restarting the tftp service on config change.
+
   pxe_stack: add bluebanquise-netboots-installer CLI tool to install, uninstall, and list OS netboots (ubuntu_24.04,
   debian_13, rhel_9, rhel_10, opensuse_16) with download progress, SHA256 verification, airgap support, and 
   automatic major-version symlinks.

@@ -52,6 +52,7 @@ Re-run whenever the inventory changes to refresh the static snapshot.
 | `firewall` | `os_firewall` as bool | optional |
 | `access_control.type` | `os_access_control` | optional |
 | `os_partitioning` | `os_partitioning` | optional |
+| `kernel` | `os_kernel_version` | optional |
 
 ### Example output
 
@@ -98,11 +99,13 @@ access_control:
 os_partitioning:
   - device: /dev/sda
     ...
+
+kernel: 5.14.0-427.24.1.el9_4.x86_64
 ```
 
 ## Schema alignment with dynamic state
 
-The `cpu`, `gpu`, `os`, `firewall`, `access_control`, and `network_interfaces[].name` fields use the same keys and value formats as `cluster_dynamic`'s `dynamic_state.yml`. This allows the `bluebanquise-cluster state` tool to compare static (expected) vs dynamic (live) values field by field and highlight drift.
+The `cpu`, `gpu`, `os`, `firewall`, `access_control`, `kernel`, and `network_interfaces[].name` fields use the same keys and value formats as `cluster_dynamic`'s `dynamic_state.yml`. This allows the `bluebanquise-cluster state` tool to compare static (expected) vs dynamic (live) values field by field and highlight drift.
 
 Fields present only in static (`ansible_groups`, `bmc`, `os_partitioning`, `network_interfaces[].mac/network`) have no dynamic counterpart and are displayed as inventory-only data.
 

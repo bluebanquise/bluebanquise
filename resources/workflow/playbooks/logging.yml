@@ -10,6 +10,8 @@
     - role: bluebanquise.infrastructure.rsyslog
       tags: rsyslog
       vars:
-        rsyslog_profile: client     
+        rsyslog_profile: client
+    - role: bluebanquise.infrastructure.logrotate
+      tags: logrotate
     # - role: bluebanquise.infrastructure.loki
     #   tags: loki

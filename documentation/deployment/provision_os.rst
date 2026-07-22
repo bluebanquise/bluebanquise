@@ -80,7 +80,7 @@ Create file ``/var/lib/bluebanquise/inventory/group_vars/all/repositories.yml`` 
 
 .. code-block:: yaml
 
-  repositories:
+  bb_repositories:
     - name: bluebanquise
       baseurl: http://bluebanquise.com/repository/releases/latest/el9/x86_64/bluebanquise/
       enabled: 1
@@ -90,7 +90,7 @@ Create file ``/var/lib/bluebanquise/inventory/group_vars/all/repositories.yml`` 
 
 .. code-block:: yaml
 
-  repositories:
+  bb_repositories:
     - name: bluebanquise
       baseurl: http://bluebanquise.com/repository/releases/latest/el10/x86_64/bluebanquise/
       enabled: 1
@@ -108,7 +108,7 @@ Create file ``/var/lib/bluebanquise/inventory/group_vars/all/repositories.yml`` 
 
 .. code-block:: yaml
 
-  repositories:
+  bb_repositories:
     - repo: deb [trusted=yes] http://bluebanquise.com/repository/releases/latest/u24/x86_64/bluebanquise/ noble main
       state: present
 
@@ -116,7 +116,7 @@ Create file ``/var/lib/bluebanquise/inventory/group_vars/all/repositories.yml`` 
 
 .. code-block:: yaml
 
-  repositories:
+  bb_repositories:
     - repo: deb [trusted=yes] http://bluebanquise.com/repository/releases/latest/u26/x86_64/bluebanquise/ resolute main
       state: present
 
@@ -124,7 +124,7 @@ Create file ``/var/lib/bluebanquise/inventory/group_vars/all/repositories.yml`` 
 
 .. code-block:: yaml
 
-  repositories:
+  bb_repositories:
     - repo: deb [trusted=yes] http://bluebanquise.com/repository/releases/latest/deb13/x86_64/bluebanquise/ trixie main
       state: present
 
@@ -138,7 +138,7 @@ Create file ``/var/lib/bluebanquise/inventory/group_vars/all/repositories.yml`` 
 
 .. code-block:: yaml
 
-  repositories:
+  bb_repositories:
     - name: bluebanquise
       disable_gpg_check: true
       baseurl: https://bluebanquise.com/repository/releases/latest/lp16/x86_64/bluebanquise/
@@ -160,8 +160,8 @@ with the following content:
 
       - role: bluebanquise.infrastructure.hosts_file
         tags: hosts_file
-      - role: bluebanquise.infrastructure.set_hostname
-        tags: set_hostname
+      - role: bluebanquise.infrastructure.local_configuration
+        tags: local_configuration
       - role: bluebanquise.infrastructure.repositories
         tags: repositories
       - role: bluebanquise.infrastructure.nic
@@ -236,7 +236,7 @@ Ensure not to cut your connection if working remotely.
 
 .. code-block:: text
 
-  ansible-playbook playbooks/managements.yml -b -i inventory --limit management1 --tags set_hostname,nic
+  ansible-playbook playbooks/managements.yml -b -i inventory --limit management1 --tags local_configuration,nic
 
 Check interfaces are up (check using ``ip a`` command), and then setp repositories:
 
@@ -543,8 +543,8 @@ Create file ``playbooks/computes.yml`` with the following content:
 
       - role: bluebanquise.infrastructure.hosts_file
         tags: hosts_file
-      - role: bluebanquise.infrastructure.set_hostname
-        tags: set_hostname
+      - role: bluebanquise.infrastructure.local_configuration
+        tags: local_configuration
       - role: bluebanquise.infrastructure.repositories
         tags: repositories
       - role: bluebanquise.infrastructure.nic

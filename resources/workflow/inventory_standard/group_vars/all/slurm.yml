@@ -15,5 +15,5 @@ slurm_partitions_list:
         State: UP
         MaxTime: "72:00:00"
         DefaultTime: "24:00:00"
-        Default: yes
+        Default: "YES"
 slurm_allow_scontrol_handler: false

@@ -13,3 +13,24 @@
     state: present
   when:
     - ansible_facts.selinux.status == "enabled"
+
+# tftp-server (tftp.service/tftp.socket) is socket-activated and has no env file:
+# options and directory are applied via a systemd drop-in overriding ExecStart.
+# pxe_stack_tftp_address is intentionally not applied here (would require
+# touching tftp.socket's ListenDatagram).
+- name: file <|> Create tftp.service systemd drop-in directory
+  ansible.builtin.file:
+    path: /etc/systemd/system/tftp.service.d
+    state: directory
+    mode: 0755
+  when: (ansible_facts.distribution_major_version | int) >= 9
+
+- name: template <|> Configure tftp-server via tftp.service systemd drop-in
+  ansible.builtin.template:
+    src: tftp_service_override.conf.j2
+    dest: /etc/systemd/system/tftp.service.d/override.conf
+    mode: 0644
+  when: (ansible_facts.distribution_major_version | int) >= 9
+  notify:
+    - systemd <|> Reload systemd configuration
+    - service <|> Restart pxe services

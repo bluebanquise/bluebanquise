@@ -1,0 +1,59 @@
+---
+- name: package <|> Install dnf versionlock plugin
+  ansible.builtin.package:
+    name: python3-dnf-plugin-versionlock
+    state: present
+
+- name: package <|> Install grubby
+  ansible.builtin.package:
+    name: grubby
+    state: present
+
+- name: package_facts <|> Gather installed packages
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: set_fact <|> Discover installed kernel family package names
+  ansible.builtin.set_fact:
+    _lc_kernel_version_packages: >-
+      {{ ansible_facts.packages.keys()
+         | select('match', '^kernel(-core|-modules|-modules-core|-modules-extra)?$')
+         | list }}
+
+- name: set_fact <|> Compute target kernel version-release (uname -r without the trailing arch)
+  ansible.builtin.set_fact:
+    _lc_kernel_version_nvr: "{{ _lc_kernel_version_target | regex_replace('\\.' + ansible_facts.architecture + '$', '') }}"
+
+- name: command <|> List existing kernel family versionlock entries
+  ansible.builtin.command: dnf versionlock list
+  register: _lc_kernel_version_lock_list
+  changed_when: false
+
+- name: command <|> Remove stale versionlock entries for the kernel family
+  ansible.builtin.command: "dnf versionlock delete {{ item }}"
+  loop: "{{ _lc_kernel_version_packages }}"
+  when: item in _lc_kernel_version_lock_list.stdout
+  changed_when: true
+
+- name: package <|> Install target kernel family version
+  ansible.builtin.package:
+    name: "{{ item }}-{{ _lc_kernel_version_nvr }}"
+    state: present
+  loop: "{{ _lc_kernel_version_packages }}"
+  when: not _lc_kernel_version_matches
+
+- name: command <|> Set target kernel as default boot entry
+  ansible.builtin.command: "grubby --set-default=/boot/vmlinuz-{{ _lc_kernel_version_target }}"
+  changed_when: true
+  when: not _lc_kernel_version_matches
+
+- name: command <|> Lock kernel family to the target version
+  ansible.builtin.command: "dnf versionlock add {{ item }}-{{ _lc_kernel_version_nvr }}"
+  loop: "{{ _lc_kernel_version_packages }}"
+  changed_when: true
+
+- name: reboot <|> Reboot to boot into the locked kernel version
+  ansible.builtin.reboot:
+  when:
+    - not _lc_kernel_version_matches
+    - _lc_kernel_version_allow_reboot

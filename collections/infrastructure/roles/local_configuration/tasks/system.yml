@@ -8,6 +8,12 @@
     or hw_kernel_parameters is defined
     or os_sysctl is defined
 
+- name: include_tasks <|> Apply kernel version lock
+  ansible.builtin.include_tasks: system/kernel_version.yml
+  when: >-
+    (local_configuration_system | default({})).kernel_version is defined
+    or os_kernel_version is defined
+
 - name: include_tasks <|> Apply modprobe configuration
   ansible.builtin.include_tasks: system/modprobe.yml
   when: (local_configuration_system | default({})).modprobe is defined

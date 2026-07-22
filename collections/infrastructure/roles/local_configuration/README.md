@@ -6,7 +6,7 @@ This role consolidates all local host configuration tasks into a single unified 
 
 - **Hostname** — sets the static hostname (always applied)
 - **Security** — access control (SELinux / AppArmor), root/sudo password, sudoers
-- **System** — kernel parameters, sysctl, kernel modules, PAM limits, cron jobs, packages, services, files, folders, templates, lineinfile
+- **System** — kernel parameters, sysctl, kernel version lock, kernel modules, PAM limits, cron jobs, packages, services, files, folders, templates, lineinfile
 - **Storage** — partitioning, LVM, filesystems, mount points
 
 Each of the three configuration sections (security, system, storage) is activated only when its corresponding dict variable is defined in inventory. Within each section, subtasks are also individually conditional: only the subtasks whose variables are defined are executed, keeping playbook runs fast.
@@ -190,6 +190,75 @@ To prevent sysctl reload after applying changes:
 ```yaml
 local_configuration_kernel_config_sysctl_reload: false
 ```
+
+#### Kernel version lock
+
+Pins the running kernel to a specific version and prevents package managers from upgrading
+it away, using `dnf versionlock` on RHEL family systems and `apt-mark hold` on Debian and
+Ubuntu. **Not supported on OpenSuse** — the role fails with a clear message if
+`os_kernel_version` is set on a Suse family host.
+
+The effective values are resolved in this order of precedence:
+1. `local_configuration_system.kernel_version` / `local_configuration_system.kernel_version_allow_reboot`
+2. `os_kernel_version` / `os_kernel_version_allow_reboot` (global equipment-profile variables)
+
+```yaml
+os_kernel_version: "5.14.0-427.24.1.el9_4.x86_64"   # exact `uname -r` value
+os_kernel_version_allow_reboot: false               # default: false
+```
+
+`os_kernel_version` must be the **exact `uname -r` string** for the target kernel (e.g.
+`5.14.0-427.24.1.el9_4.x86_64` on RHEL, `6.8.0-31-generic` on Ubuntu, `6.1.0-21-amd64` on
+Debian). This is the same format `ansible_facts.kernel` reports and the same format the
+`cluster_dynamic` role's daemon gathers via `uname -r` — see the "Cluster state" note below.
+
+On each run:
+1. The running kernel (`ansible_facts.kernel`) is compared to `os_kernel_version`.
+2. **If it already matches**, no package is installed and no reboot happens — the role only
+   (re)applies the lock, so a missing or stale lock is repaired even when the version is
+   already correct.
+3. **If it does not match**, the existing lock/hold on the kernel family is removed, the
+   target version is installed, the bootloader default entry is switched to it, and the lock
+   is re-applied.
+4. A reboot is triggered **only** when a version change actually happened **and**
+   `os_kernel_version_allow_reboot: true`. With the default `false`, the new kernel is
+   installed and locked but the host keeps running on the old one until rebooted manually
+   (or by another mechanism, e.g. a maintenance-window playbook).
+
+**RHEL family**: the whole installed kernel package family is discovered dynamically
+(`kernel`, `kernel-core`, `kernel-modules`, `kernel-modules-core`, `kernel-modules-extra` —
+whichever are present) and locked/installed together at the target version-release, so
+`dnf update` cannot drift `kernel-core` and `kernel-modules` to different versions. The
+bootloader default is set directly via `grubby --set-default=/boot/vmlinuz-<version>`.
+
+**Debian / Ubuntu**: the versioned packages currently installed for the running kernel
+(`linux-image-<version>`, `linux-headers-<version>`, `linux-modules-<version>`, etc. —
+whichever are present) are discovered, renamed to the target version, and installed. The
+rolling meta-packages (`linux-image-generic` on Ubuntu, `linux-image-amd64` on Debian, etc.
+— see `local_configuration_kernel_version_meta_packages`) are held too: holding only the
+versioned package is not enough, since `apt upgrade` can still pull a newer kernel through
+the meta-package's own dependency. The bootloader default is switched by setting
+`GRUB_DEFAULT=saved` and pointing `grub-set-default` at the target kernel's GRUB menu entry
+id (parsed out of the regenerated `grub.cfg`).
+
+```yaml
+local_configuration_kernel_version_meta_packages:   # override per OS family as needed
+  - linux-image-generic     # Ubuntu default
+  - linux-headers-generic
+  - linux-generic
+  - linux-modules-extra-generic
+```
+
+> **Known limitation:** the default Debian meta-package names (`linux-image-amd64`,
+> `linux-headers-amd64`) assume x86_64. On arm64 Debian hosts, override
+> `local_configuration_kernel_version_meta_packages` to the `-arm64` equivalents — it cannot
+> be derived automatically from `ansible_facts.architecture` (`aarch64`), which does not
+> match Debian's own arch naming (`arm64`).
+
+**Cluster state**: when `os_kernel_version` is set, the `cluster_state` role writes it to
+`static_cluster_state.yml` under the `kernel` key — the same key `cluster_dynamic` already
+populates from a live `uname -r`, so `bluebanquise-cluster state` diffs expected vs actual
+kernel version for free.
 
 #### Kernel modules (modprobe)
 
@@ -517,6 +586,8 @@ local_configuration_security:
 
 local_configuration_system:
   kernel_parameters: "quiet splash"
+  kernel_version: "5.14.0-427.24.1.el9_4.x86_64"
+  kernel_version_allow_reboot: false
   sysctl:
     vm.swappiness: 5
     kernel.panic: 10

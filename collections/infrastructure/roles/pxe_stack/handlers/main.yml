@@ -1,15 +1,15 @@
 ---
-- name: service <|> Restart pxe services
-  ansible.builtin.service:
-    name: "{{ item }}"
-    state: restarted
-  loop: "{{ pxe_stack_services_to_start }}"
-  when:
-    - "'service' not in ansible_skip_tags"
-    - pxe_stack_start_services | default(bb_start_services) | default(true) | bool
-
 - name: systemd <|> Reload systemd configuration
   ansible.builtin.systemd:
     daemon_reload: true
   when:
     - "'service' not in ansible_skip_tags"
+
+- name: service <|> Restart pxe services
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: restarted
+  loop: "{{ pxe_stack_services_to_start + [pxe_stack_tftp_service | default(pxe_stack_default_tftp_service)] }}"
+  when:
+    - "'service' not in ansible_skip_tags"
+    - pxe_stack_start_services | default(bb_start_services) | default(true) | bool
