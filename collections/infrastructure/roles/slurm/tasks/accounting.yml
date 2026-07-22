@@ -1,7 +1,7 @@
 ---
-- name: "package <|> Install {{ slurm_packages_to_install['accounting'] | join(' ') }}"
+- name: "package <|> Install {{ (slurm_packages_to_install[slurm_packages_source]['accounting'] | default(slurm_packages_to_install['accounting'])) | join(' ') }}"
   ansible.builtin.package:
-    name: "{{ slurm_packages_to_install['accounting'] }}"
+    name: "{{ slurm_packages_to_install[slurm_packages_source]['accounting'] | default(slurm_packages_to_install['accounting']) }}"
     state: present
   tags:
     - package

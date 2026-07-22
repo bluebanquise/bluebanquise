@@ -163,7 +163,7 @@ def debug_bmc(node, node_configuration, parameters, logger):
             system_endpoint = node_configuration.get('_redfish_system_endpoint')
             if system_endpoint:
                 response = requests.get(f"https://{bmc_name}/redfish/v1/{system_endpoint}",
-                                         auth=auth, verify=False, timeout=5)
+                                        auth=auth, verify=False, timeout=5)
                 if response.status_code == 200:
                     s_data = response.json()
                     logger.error(f'[{node}] System "{system_endpoint}": '

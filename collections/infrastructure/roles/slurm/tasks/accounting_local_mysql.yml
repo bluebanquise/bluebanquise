@@ -1,7 +1,7 @@
 ---
-- name: "package <|> Install {{ slurm_packages_to_install['accounting_mysql'] | join(' ') }}"
+- name: "package <|> Install {{ (slurm_packages_to_install[slurm_packages_source]['accounting_mysql'] | default(slurm_packages_to_install['accounting_mysql'])) | join(' ') }}"
   ansible.builtin.package:
-    name: "{{ slurm_packages_to_install['accounting_mysql'] }}"
+    name: "{{ slurm_packages_to_install[slurm_packages_source]['accounting_mysql'] | default(slurm_packages_to_install['accounting_mysql']) }}"
     state: present
   tags:
     - package
@@ -37,14 +37,14 @@
   ansible.builtin.meta: flush_handlers
 
 - name: mysql_db <|> Create slurm_acct_db database
-  ansible.mysql.mysql_db:
+  community.mysql.mysql_db:
     name: slurm_acct_db
     state: present
     login_unix_socket: "{{ slurm_accounting_mysql_unix_socket }}"
   when: slurm_accounting_mysql_create_database
 
 - name: mysql_user <|> Ensure slurm user exists in the database
-  ansible.mysql.mysql_user:
+  community.mysql.mysql_user:
     name: "{{ slurm_accounting_mysql_slurm_user }}"
     password: "{{ slurm_accounting_mysql_slurm_password }}"
     state: present
