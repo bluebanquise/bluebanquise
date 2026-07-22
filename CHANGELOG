@@ -107,6 +107,7 @@ CHANGELOG entry: Fix enabled: yes boolean, replace deprecated with_items with lo
   instructions.
 * 27/06/2026 - oxedions, Claude Sonnet [auditd] Fix broken rsyslog handler notify (wrong separator), fix plugins directory path for Ubuntu/Debian (audisp → audit), add missing auditd_config_rules_file for Ubuntu, Debian and Suse, fix package install to use list instead of loop.
 * 27/06/2026 - oxedions, Claude Sonnet [access_control] Added Debian and Suse support, complain/permissive mode for AppArmor and SELinux.
+* 2026-07-10 - psblldv - [bootstrap] Increasing verbosity in inner script
 * 25/06/2026 - oxedions [multiple] Fix multiple roles, and add experimental RHCOS support (#1252)
 * 2026-06-10 - jethi05, sc-alex - [prometheus] Initial support for modbus_exporter
 * 08/06/2026 - oxedions [http_server] Fix an old bug in custom listen template
