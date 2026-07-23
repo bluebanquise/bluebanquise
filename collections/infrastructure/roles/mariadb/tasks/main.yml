@@ -34,20 +34,6 @@
     enabled: "{{ mariadb_enable_services | default(bb_enable_services) | default(true) | bool }}"
     state: "{{ (mariadb_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
 
-- name: mysql_user <|> Set MariaDB root password
-  ansible.mysql.mysql_user:
-    name: root
-    password: "{{ mariadb_root_password }}"
-    host: "{{ item }}"
-    priv: "*.*:ALL,GRANT"
-    state: present
-    login_unix_socket: "{{ mariadb_unix_socket }}"
-  loop:
-    - localhost
-    - 127.0.0.1
-    - ::1
-  no_log: true
-
 - name: mysql_user <|> Remove anonymous users
   ansible.mysql.mysql_user:
     name: ""
@@ -63,3 +49,20 @@
     name: test
     state: absent
     login_unix_socket: "{{ mariadb_unix_socket }}"
+
+# Must run last: setting the root password switches root@localhost away from
+# unix_socket auth, so any later task connecting via bare login_unix_socket
+# (no login_user/login_password) would be rejected with "Access denied...
+# (using password: NO)". host_all (rather than looping over host: localhost/
+# 127.0.0.1/::1) updates every matching root account through the single
+# socket connection made before that switch happens, instead of one
+# connection per loop iteration where only the first would still authenticate.
+- name: mysql_user <|> Set MariaDB root password
+  ansible.mysql.mysql_user:
+    name: root
+    password: "{{ mariadb_root_password }}"
+    host_all: true
+    priv: "*.*:ALL,GRANT"
+    state: present
+    login_unix_socket: "{{ mariadb_unix_socket }}"
+  no_log: true

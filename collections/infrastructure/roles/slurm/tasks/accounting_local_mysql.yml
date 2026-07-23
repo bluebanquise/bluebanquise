@@ -21,6 +21,8 @@
     name: mariadb
     enabled: "{{ (slurm_enable_services | default(bb_enable_services) | default(true) | bool) | ternary(true, false) }}"
     state: "{{ (slurm_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
+  tags:
+    - service
 
 - name: file <|> Configure MariaDB to listen on all interfaces
   ansible.builtin.lineinfile:
