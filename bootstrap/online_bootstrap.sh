@@ -43,7 +43,7 @@ echo
 echo -n " Getting OS environment..."
 CURRENT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 source /etc/os-release
-echo -e " \e[31mOK\e[0m"
+echo -e " \e[32mOK\e[0m"
 
 echo -n " Checking you are root..."
 if [ "$EUID" -ne 0 ]; then
@@ -52,7 +52,7 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-echo -e " \e[31mOK\e[0m"
+echo -e " \e[32mOK\e[0m"
 echo
 
 echo " Welcome to the BlueBanquise stack base bootstraper."
@@ -60,7 +60,7 @@ echo
 echo -e " This tool is going to:"
 echo -e " 1. Install required packages to run Ansible (only from your distribution's repositories)"
 echo -e " 2. Create a user called 'bluebanquise', sudo able, with home set at /var/lib/bluebanquise"
-echo -e " 3. Login as this bluebanquise user, and create a Python virtual environment with Ansible in it"
+echo -e " 3. Login as this bluebanquise user, and create a Python virtual environment, then install Ansible in it"
 echo -e " 4. Clone bluebanquise main git repository, and install BlueBanquise Ansible collections"
 echo -e " Note that all these 2 last steps are contained inside the bluebanquise home, and do not impact system."
 echo -e " To do all of that, this script will do few actions with priviledged user (sudo/root)."
@@ -88,7 +88,7 @@ mkdir -p /var/log/bluebanquise/
 touch /var/log/bluebanquise/bootstrap
 chown -R $USER: /var/log/bluebanquise/bootstrap
 echo "Starting new bootstrap at $(date)" >> /var/log/bluebanquise/bootstrap 2>&1
-echo -e " \e[31mOK\e[0m"
+echo -e " \e[32mOK\e[0m"
 
 echo -n " Installing needed dependencies, could take some time..."
 (
@@ -166,7 +166,7 @@ echo -n " Installing needed dependencies, could take some time..."
   fi
   set +x
 ) >> /var/log/bluebanquise/bootstrap 2>&1
-echo -e " \e[31mOK\e[0m"
+echo -e " \e[32mOK\e[0m"
 
 echo -n " Creating bluebanquise user..."
 (
@@ -176,7 +176,7 @@ echo -n " Creating bluebanquise user..."
   echo 'bluebanquise ALL=(ALL:ALL) NOPASSWD:ALL' | tee /etc/sudoers.d/bluebanquise
   set +x
 ) >> /var/log/bluebanquise/bootstrap 2>&1
-echo -e " \e[31mOK\e[0m"
+echo -e " \e[32mOK\e[0m"
 
 if [[ $SKIP_ENVIRONMENT == "false" ]]
 then
@@ -194,14 +194,14 @@ echo -n " Setting bluebanquise user environment, this might take a while..."
   '
   set +x
 ) >> /var/log/bluebanquise/bootstrap 2>&1
-echo -e " \e[31mOK\e[0m"
+echo -e " \e[32mOK\e[0m"
 fi
 
 echo -n " Setting rights on /var/log/bluebanquise/..."
 (
 chown -R bluebanquise:bluebanquise /var/log/bluebanquise/
 ) >> /var/log/bluebanquise/bootstrap 2>&1
-echo -e " \e[31mOK\e[0m"
+echo -e " \e[32mOK\e[0m"
 
 echo
 echo " Bootstrap done."

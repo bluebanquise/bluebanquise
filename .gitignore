@@ -1,4 +1,5 @@
 pxe
+.ansible
 
 ## Don't track inventory and playbooks ##
 /inventory/
