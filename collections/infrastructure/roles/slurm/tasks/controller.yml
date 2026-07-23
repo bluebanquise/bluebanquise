@@ -41,7 +41,7 @@
     - template
   loop:
     - cgroup.conf
-  notify: Run scontrol reconfigure
+  notify: command <|> Run scontrol reconfigure
 
 - name: "template <|> Generate gres.conf in {{ slurm_home_path }}"
   ansible.builtin.template:

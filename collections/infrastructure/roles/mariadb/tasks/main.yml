@@ -41,7 +41,7 @@
     host: "{{ item }}"
     priv: "*.*:ALL,GRANT"
     state: present
-    login_unix_socket: /var/run/mysqld/mysqld.sock
+    login_unix_socket: "{{ mariadb_unix_socket }}"
   loop:
     - localhost
     - 127.0.0.1
@@ -53,7 +53,7 @@
     name: ""
     host: "{{ item }}"
     state: absent
-    login_unix_socket: /var/run/mysqld/mysqld.sock
+    login_unix_socket: "{{ mariadb_unix_socket }}"
   loop:
     - localhost
     - "{{ ansible_fqdn }}"
@@ -62,4 +62,4 @@
   ansible.mysql.mysql_db:
     name: test
     state: absent
-    login_unix_socket: /var/run/mysqld/mysqld.sock
+    login_unix_socket: "{{ mariadb_unix_socket }}"

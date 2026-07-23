@@ -30,6 +30,7 @@ These settings connect to MariaDB via Unix socket for initial setup, so no passw
 |:------------------------|:---------------|:-----------------------------------------|
 | mariadb_root_password   | ""             | Root password to set (use Ansible Vault) |
 | mariadb_packages        | see vars/      | Packages to install (OS-specific)        |
+| mariadb_unix_socket     | see vars/      | Path to the MariaDB unix socket, used for the initial secure-installation steps (OS-specific: RHEL, Debian/Ubuntu and Suse each default the socket to a different path) |
 | mariadb_enable_services | bb_enable_services | Whether to enable the mariadb service |
 | mariadb_start_services  | bb_start_services  | Whether to start the mariadb service  |
 
