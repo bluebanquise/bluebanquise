@@ -1,9 +1,28 @@
 ---
 
-- name: include_tasks <|> Firewall
-  ansible.builtin.include_tasks: "firewall.yml"
+- name: "firewalld <|> Add services to firewall's zone"
+  ansible.posix.firewalld:
+    zone: "{{ rsyslog_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
+    service: "{{ item }}"
+    immediate: true
+    permanent: true
+    state: enabled
+  when:
+    - os_firewall | default(false) | bool
+  loop: "{{ rsyslog_firewall_services_to_add }}"
   tags:
-    - internal
+    - firewall
+
+- name: "firewalld <|> Add custom port to firewall's zone"
+  ansible.posix.firewalld:
+    zone: "{{ rsyslog_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
+    port: "{{ rsyslog_port }}/tcp"
+    immediate: true
+    permanent: true
+    state: enabled
+  when:
+    - os_firewall | default(false) | bool
+  tags:
     - firewall
 
 - name: "template <|> Generate server.conf.j2"
@@ -23,7 +42,7 @@
     path: /var/log/rsyslog
     setype: var_log_t
     state: directory
-    recurse: yes
+    recurse: true
   when:
     - ansible_facts.os_family == "RedHat"
     - ansible_facts.selinux.status == "enabled"

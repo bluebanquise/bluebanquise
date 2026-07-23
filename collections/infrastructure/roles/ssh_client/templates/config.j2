@@ -18,22 +18,16 @@ Host {{ host }}
     {% if host_vars['ssh_client_verifyhostkeydns'] is defined and host_vars['ssh_client_verifyhostkeydns'] is not none %}
     VerifyHostKeyDNS {{ host_vars['ssh_client_verifyhostkeydns'] }}
     {% endif %}
-    {% if host_vars['ssh_client_forwardx11trusted'] is defined and host_vars['ssh_client_forwardx11trusted']is not none %}
+    {% if host_vars['ssh_client_forwardx11trusted'] is defined and host_vars['ssh_client_forwardx11trusted'] is not none %}
     ForwardX11Trusted {{ host_vars['ssh_client_forwardx11trusted'] }}
     {% endif %}
-    {% if host_vars['ssh_client_useroaming'] is defined and host_vars['ssh_client_useroaming']is not none %}
+    {% if host_vars['ssh_client_useroaming'] is defined and host_vars['ssh_client_useroaming'] is not none %}
     UseRoaming {{ host_vars['ssh_client_useroaming'] }}
     {% endif %}
-    {#
-    {% if ssh_jump is none %}
-      {% set host_to_be_used_network = ssh_client_global_network  | default(host_vars['j2_icebergs_main_network_dict'][j2_current_iceberg], true) | default(none, true) %}
-    Hostname %h{% if host_to_be_used_network is not none %}-{{ host_to_be_used_network }}{% endif %}
-
-    {% else %}
-    Hostname %h
-    ProxyJump {{ ssh_jump }}
+    {% if host_vars['ssh_client_user'] is defined and host_vars['ssh_client_user'] is not none %}
+    User {{ host_vars['ssh_client_user'] }}
     {% endif %}
-    #}
+
 {% endmacro %}
 
 
@@ -59,8 +53,8 @@ Host *
   {% if ssh_client_global_forwardx11trusted is not none %}
     ForwardX11Trusted {{ ssh_client_global_forwardx11trusted }}
   {% endif %}
-  {% if host_vars['ssh_client_global_useroaming'] is defined and host_vars['ssh_client_global_useroaming']is not none %}
-    UseRoaming {{ host_vars['ssh_client_global_useroaming'] }}
+  {% if ssh_client_global_useroaming is defined and ssh_client_global_useroaming is not none %}
+    UseRoaming {{ ssh_client_global_useroaming }}
   {% endif %}
 {% endif %}
 

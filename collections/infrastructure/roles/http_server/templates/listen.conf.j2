@@ -1,20 +1,23 @@
 #jinja2: lstrip_blocks: True
 {% if http_server_listen == "auto" %}
   {% for nic in network_interfaces %}
-    {% if nic.ip4 is defined and (nic.ip4 | ansible.utils.ipaddr) %}
-Listen {{ nic.ip4 }}:80
+    {% if nic.ip4 is defined %}
+      {% set bare_ip = nic.ip4.split('/')[0] %}
+      {% if bare_ip | ansible.utils.ipaddr %}
+Listen {{ bare_ip }}:80
+      {% endif %}
     {% endif %}
   {% endfor%}
 {% elif http_server_listen is iterable and http_server_listen is not string and http_server_listen is not mapping %}
   {% for ipport in http_server_listen %}
-    {% if ipport.split(':') | length > 1 %}
+    {% if ':' in ipport %}
       {% if ipport.split(':')[0] | ansible.utils.ipaddr %}
 Listen {{ ipport.split(':')[0] }}:{{ ipport.split(':')[1] }}
-      {% elif (ipport | ansible.utils.ipaddr) %}
-Listen {{ ipport }}:80
-      {% else %}
-Listen {{ ipport }}
       {% endif %}
+    {% elif ipport | ansible.utils.ipaddr %}
+Listen {{ ipport }}:80
+    {% else %}
+Listen {{ ipport }}
     {% endif %}
   {% endfor %}
 {% endif %}

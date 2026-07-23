@@ -1,0 +1,5 @@
+{{ ansible_managed }}
+
+[Service]
+ExecStart=
+ExecStart=/usr/sbin/in.tftpd {{ pxe_stack_tftp_options }} {{ pxe_stack_tftp_directory }}

@@ -2,10 +2,10 @@
 
 ## Description
 
-This role configures the firewall service on the hosts.
+These settings configure the firewall service on the hosts.
 
-For each network interface of the host where the play runs, this role binds the
-source address **subnet/prefix** to the zone defined in **firewall.zone** if
+For each network interface of the host where the play runs, these settings bind the
+source address **subnet/prefix** to the zone defined in **firewall_zone** if
 the network must be in the firewall.
 
 ## Instructions
@@ -19,7 +19,7 @@ os_firewall: true
 ```
 
 To add a network of the host to a zone, define the zone name in
-**firewall.zone** in the network:
+**firewall_zone** in the network:
 
 ```yaml
 networks:
@@ -29,13 +29,11 @@ networks:
     netmask: 255.255.0.0
     broadcast: 10.10.255.255
     gateway: 10.10.2.1
-    firewall:
-      zone: internal
+    firewall_zone: internal
   interconnect-1:
     subnet: 10.20.0.0
     prefix: 16
-    firewall:
-      zone: trusted
+    firewall_zone: trusted
 ```
 
 To add or delete custom services that are not handled by any other role, define
@@ -65,33 +63,66 @@ firewall_zones:
       - "rule family=ipv4 forward-port port=443 protocol=tcp to-port=8443"
     rich_rules_disabled:      <<< list of rich rules to disable
       - 'rule service name="ftp" audit limit value="1/m" accept'
-    icmp_block_inversion: yes
-    masquerade: yes
+    icmp_blocks_enabled:      <<< list of ICMP types to block
+      - echo-request
+    icmp_blocks_disabled:     <<< list of ICMP types to unblock
+      - echo-reply
+    icmp_block_inversion: true
+    masquerade: true
+```
+
+Since firewall configuration is often specific to a single host, `firewall_zones`
+can be defined in a dedicated host variable file instead of a group variable.
+Place the file at `hostvars/<hostname>/firewall.yml` in the inventory:
+
+```
+inventory/
+└── cluster/
+    └── nodes/
+        └── hostvars/
+            └── mgt1/
+                └── firewall.yml
+```
+
+For example, `hostvars/mgt1/firewall.yml`:
+
+```yaml
+firewall_zones:
+  - zone: internal
+    services_enabled:
+      - high-availability
+    ports_enabled:
+      - 8443/tcp
+```
+
+This keeps host-specific firewall rules isolated from shared group variables
+and makes them easy to audit per node.
+
+To control whether firewalld allows zone drifting (packets being classified into
+multiple zones), set `firewall_firewalld_allow_zone_drifting`. It defaults to
+`false`, which is the recommended value for security:
+
+```yaml
+firewall_firewalld_allow_zone_drifting: false
 ```
 
 ### Integration with other roles
 
 BlueBanquise ships with roles that already support some level of firewall
-configuration by adding services to the default zone (public). For each role,
-it is possible to override the default zone by setting
-**${rolename}_firewall_zone** in the inventory.
+configuration by adding services to the default zone (public).
 
-For example, if you want to add the services of the pxe_stack roles to the
-internal zone, you must set the variable `pxe_stack_firewall_zone: internal`.
+To change the default zone for all roles at once, set `bb_services_firewall_zone`:
 
-## Changelog
+```yaml
+bb_services_firewall_zone: internal
+```
 
-**Please now update CHANGELOG file at repository root instead of adding logs in this file.
-These logs bellow are only kept for archive.**
+For each role individually, override the default zone by setting
+`<rolename>_firewall_zone` in the inventory. Role-level variables always take
+precedence over `bb_services_firewall_zone`.
 
-* 1.3.5: Allow usage on all distributions. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.3.4: Fix condition in handler. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.3.3: Adapt to os hw split. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.3.2: Fix issue with non networked nic. From @GaelBil. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.3.1: Firewalld: enforce interfaces to their relevant zone. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
-* 1.3.0: Add firewalld_allow_zone_drifting variable. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
-* 1.2.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.1.3: Add OpenSuSE support. Neil Munday <neil@mundayweb.com>
-* 1.1.2: Adapt role to handle multiple distributions. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.1.0: Allow creation of new zones. Bruno Travouillon <devel@travouillon.fr>
-* 1.0.0: Role creation. Bruno Travouillon <devel@travouillon.fr>
+For example, to add the pxe_stack services to the internal zone:
+
+```yaml
+pxe_stack_firewall_zone: internal
+```

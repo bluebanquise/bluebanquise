@@ -8,6 +8,7 @@
     {% for node in equipment_profile_vars['nodes'] %}
   {{ node }}:
     equipment_profile: {{ equipment_profile }}
+    hw_ipxe_next_boot: {{ hostvars[node]['hw_ipxe_next_boot'] | default('bootdisk') }}
     {% endfor %}
   {% endif %}
 {% endfor %}

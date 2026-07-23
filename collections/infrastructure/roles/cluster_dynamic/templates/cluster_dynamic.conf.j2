@@ -1,0 +1,15 @@
+#jinja2: lstrip_blocks: True
+# {{ ansible_managed }}
+---
+scan_interval: {{ cluster_dynamic_scan_interval }}
+thread_pool_size: {{ cluster_dynamic_thread_pool_size }}
+ping_timeout: {{ cluster_dynamic_ping_timeout }}
+ssh_timeout: {{ cluster_dynamic_ssh_timeout }}
+lock_timeout: {{ cluster_dynamic_lock_timeout }}
+log_level: {{ cluster_dynamic_log_level }}
+base_path: {{ cluster_dynamic_base_path }}
+tmp_path: {{ cluster_dynamic_tmp_path }}
+hosts:
+{% for host in groups[cluster_dynamic_hosts_group] | sort %}
+  - {{ host }}
+{% endfor %}

@@ -9,7 +9,7 @@
   ansible.builtin.group:
     name: "{{ item.group }}"
     gid: "{{ item.gid | default(omit) }}"
-    system: yes
+    system: true
     state: present
   loop: "{{ prometheus_exporters_groups }}"
   when: item.group is defined
@@ -21,7 +21,7 @@
     uid: "{{ item.uid | default(omit) }}"
     group: "{{ item.group | default(omit) }}"
     home: "{{ item.home | default('/var/lib/'+item.user) }}"
-    system: yes
+    system: true
     state: present
   loop: "{{ prometheus_exporters_groups }}"
   when: item.user is defined
@@ -63,8 +63,8 @@
   ansible.posix.firewalld:
     zone: "{{ prometheus_client_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
     port: "{{ item.port }}/tcp"
-    immediate: "yes"
-    permanent: "yes"
+    immediate: true
+    permanent: true
     state: enabled
   loop: "{{ prometheus_exporters_groups }}"
   when:
@@ -76,7 +76,7 @@
 - name: service <|> Manage exporters services
   ansible.builtin.service:
     name: "{{ item.service }}"
-    enabled: "{{ (prometheus_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    enabled: "{{ (prometheus_enable_services | default(bb_enable_services) | default(true) | bool) | ternary(true, false) }}"
     state: "{{ (prometheus_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   loop: "{{ prometheus_exporters_groups }}"
   when: item.service is defined and item.service is not none

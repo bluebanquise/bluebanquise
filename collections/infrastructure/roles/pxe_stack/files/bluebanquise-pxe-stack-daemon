@@ -1,0 +1,336 @@
+#!/usr/bin/env python3
+"""
+BlueBanquise PXE stack HTTP daemon.
+Serves per-host iPXE files dynamically and tracks PXE/provisioning state.
+Listens on port 7770.
+
+Endpoints:
+  GET  /host/<hostname>.ipxe                    Return dynamic iPXE host file
+  GET  /host/<hostname>?menu-default=<v>        iPXE boot-time notification (imgfetch, GET-only by
+                                                 construction); advances menu_default to the host's
+                                                 hw_ipxe_next_boot, does not set it to <v> directly
+  PUT  /host/<hostname>/menu-default            Explicitly set menu_default. JSON body:
+                                                 {"menu_default": "<v>"}. Used by bluebanquise-bootset.
+  POST /host/<hostname>/provisioning_completed  Mark provisioning as completed
+"""
+
+import argparse
+import logging
+import os
+import sys
+import threading
+import yaml
+from flask import Flask, request, Response
+
+LOG_FORMAT = '%(asctime)s [%(levelname)s] %(message)s'
+
+app = Flask(__name__)
+
+# Populated in main() before app.run()
+config = {}
+
+# Per-hostname threading locks to serialise YAML reads/writes.
+_host_locks = {}
+_host_locks_mutex = threading.Lock()
+
+# Valid full iPXE menu entry labels that can be used as menu-default.
+VALID_MENU_DEFAULTS = {
+    'bootosdeploy',
+    'bootdisk',
+    'bootdiskless',
+    'bootnext',
+    'bootmemtest',
+    'bootalpinelive',
+    'bootclone',
+    'startshell',
+}
+
+
+# ─── helpers ──────────────────────────────────────────────────────────────────
+
+def _host_lock(hostname):
+    with _host_locks_mutex:
+        if hostname not in _host_locks:
+            _host_locks[hostname] = threading.Lock()
+        return _host_locks[hostname]
+
+
+def _state_path(hostname):
+    return os.path.join(config['base_path'], hostname, 'dynamic_pxe_stack.yml')
+
+
+def _tmp_path(hostname):
+    return os.path.join(config['tmp_path'], 'dynamic_pxe_stack_{}.yml'.format(hostname))
+
+
+def _load_state(hostname):
+    path = _state_path(hostname)
+    if not os.path.exists(path):
+        return None
+    with open(path, 'r') as f:
+        return yaml.safe_load(f) or {}
+
+
+def _save_state(hostname, state):
+    host_dir = os.path.join(config['base_path'], hostname)
+    os.makedirs(host_dir, exist_ok=True)
+    tmp = _tmp_path(hostname)
+    with open(tmp, 'w') as f:
+        yaml.dump(state, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
+    os.replace(tmp, _state_path(hostname))
+
+
+def _validate_menu_default_value(hostname, menu_default):
+    """Validate a menu_default value against VALID_MENU_DEFAULTS. Returns an error Response, or None if valid."""
+    if not menu_default:
+        logging.warning('[%s] Missing menu_default value', hostname)
+        return Response('Missing menu_default value.\n', status=400)
+    if menu_default not in VALID_MENU_DEFAULTS:
+        logging.warning('[%s] Invalid menu_default value: %r', hostname, menu_default)
+        return Response('Invalid menu_default value: {}\n'.format(menu_default), status=400)
+    return None
+
+
+def _host_not_found_response(hostname):
+    logging.warning('[%s] No state file — host not found', hostname)
+    return Response(
+        'Host {} not found. Check it is in inventory and re-run the pxe_stack '
+        'Ansible role, then restart bluebanquise-pxe-stack-daemon.\n'.format(hostname),
+        status=404)
+
+
+def bootstrap_hosts(nodes_parameters_path):
+    """Create missing host folders/dynamic_pxe_stack.yml from nodes_parameters.yml, once at startup."""
+    logging.info('Bootstrapping host state from %s', nodes_parameters_path)
+    if not os.path.exists(nodes_parameters_path):
+        logging.warning('nodes_parameters.yml not found at %s — skipping host bootstrap',
+                         nodes_parameters_path)
+        return
+
+    with open(nodes_parameters_path, 'r') as f:
+        nodes_parameters = yaml.safe_load(f) or {}
+
+    created = 0
+    skipped = 0
+    for hostname, node_vars in nodes_parameters.items():
+        if os.path.exists(_state_path(hostname)):
+            skipped += 1
+            continue
+
+        state = {
+            'hostname': hostname,
+            'menu_default': 'bootdisk',
+            'provisioning_status': 'NA',
+            'equipment_profile': node_vars.get('equipment_profile', ''),
+            'hw_ipxe_next_boot': node_vars.get('hw_ipxe_next_boot', 'bootdisk'),
+            'dedicated_kernel_parameters': '',
+            'node_image': 'none',
+            'extra_parameters': 'none',
+            'tenant': '',
+        }
+        with _host_lock(hostname):
+            _save_state(hostname, state)
+        created += 1
+        logging.info('[%s] Created initial dynamic_pxe_stack.yml (equipment_profile=%s)',
+                     hostname, state['equipment_profile'])
+
+    logging.info('Host bootstrap complete: %d created, %d already present', created, skipped)
+
+
+# ─── routes ───────────────────────────────────────────────────────────────────
+
+@app.route('/host/<hostname>.ipxe', methods=['GET'])
+def serve_host_ipxe(hostname):
+    logging.info('[%s] GET /host/%s.ipxe from %s', hostname, hostname, request.remote_addr)
+    with _host_lock(hostname):
+        state = _load_state(hostname)
+
+    if state is None:
+        logging.warning('[%s] No state file found', hostname)
+        body = '\n'.join([
+            '#!ipxe',
+            'echo | ERROR: host {} not found in bluebanquise-pxe-stack-daemon.'.format(hostname),
+            'echo | Run pxe_stack Ansible role and ensure host is in inventory.',
+            'shell',
+            '',
+        ])
+        return Response(body, mimetype='text/plain', status=404)
+
+    menu_default            = state.get('menu_default', 'bootdisk')
+    equipment_profile       = state.get('equipment_profile', '')
+    kernel_params           = state.get('dedicated_kernel_parameters', '')
+    node_image              = state.get('node_image', 'none')
+    extra_parameters        = state.get('extra_parameters', 'none')
+    tenant                  = state.get('tenant', '')
+
+    lines = [
+        '#!ipxe',
+        'echo | Entering {}.ipxe (served by bluebanquise-pxe-stack-daemon).'.format(hostname),
+        'echo |',
+        'echo | Getting host specific variables...',
+        '# Current default action',
+        'set menu-default {}'.format(menu_default),
+        '# Current node parameters:',
+        'set equipment-profile {}'.format(equipment_profile),
+        'set dedicated-kernel-parameters {}'.format(kernel_params),
+        'set node-image {}'.format(node_image),
+        'set extra-parameters {}'.format(extra_parameters),
+    ]
+    if tenant:
+        lines.append('set tenant {}'.format(tenant))
+    lines += [
+        'echo |',
+        'echo | Now chaining to --> equipment_profiles/${equipment-profile}.ipxe',
+        'sleep 2',
+        'chain http://${next-server}/pxe/equipment_profiles/${equipment-profile}.ipxe || shell',
+        '',
+    ]
+
+    logging.info('[%s] Serving iPXE file (menu_default=%s equipment_profile=%s)',
+                 hostname, menu_default, equipment_profile)
+    return Response('\n'.join(lines), mimetype='text/plain')
+
+
+@app.route('/host/<hostname>', methods=['GET'])
+def notify_boot_action(hostname):
+    """iPXE boot-time notification (menu.ipxe imgfetch). GET-only: iPXE cannot issue PUT/POST."""
+    menu_default = request.args.get('menu-default', '').strip()
+    logging.info('[%s] GET /host/%s?menu-default=%s from %s',
+                 hostname, hostname, menu_default, request.remote_addr)
+
+    error = _validate_menu_default_value(hostname, menu_default)
+    if error:
+        return error
+
+    with _host_lock(hostname):
+        state = _load_state(hostname)
+        if state is None:
+            return _host_not_found_response(hostname)
+
+        old_default = state.get('menu_default', 'bootdisk')
+        next_boot = state.get('hw_ipxe_next_boot', 'bootdisk')
+        state['menu_default'] = next_boot
+
+        if menu_default == 'bootosdeploy':
+            state['provisioning_status'] = 'started'
+            logging.info('[%s] osdeploy started — menu_default switched %s -> %s',
+                         hostname, old_default, next_boot)
+        else:
+            logging.info('[%s] action %s triggered — menu_default switched %s -> %s',
+                         hostname, menu_default, old_default, next_boot)
+
+        _save_state(hostname, state)
+
+    return Response('OK\n', status=200)
+
+
+@app.route('/host/<hostname>/menu-default', methods=['PUT'])
+def set_menu_default(hostname):
+    """Explicitly set menu_default. Used by bluebanquise-bootset (an operator asking for a
+    specific next boot target), as opposed to notify_boot_action's iPXE-driven auto-advance."""
+    payload = request.get_json(silent=True) or {}
+    menu_default = str(payload.get('menu_default', '')).strip()
+    logging.info('[%s] PUT /host/%s/menu-default menu_default=%s from %s',
+                 hostname, hostname, menu_default, request.remote_addr)
+
+    error = _validate_menu_default_value(hostname, menu_default)
+    if error:
+        return error
+
+    with _host_lock(hostname):
+        state = _load_state(hostname)
+        if state is None:
+            return _host_not_found_response(hostname)
+
+        old_default = state.get('menu_default', 'bootdisk')
+        state['menu_default'] = menu_default
+
+        if menu_default == 'bootosdeploy':
+            state['provisioning_status'] = 'scheduled'
+            logging.info('[%s] osdeploy scheduled — menu_default set %s -> %s (requested by %s)',
+                         hostname, old_default, menu_default, request.remote_addr)
+        else:
+            logging.info('[%s] menu_default set %s -> %s (requested by %s)',
+                         hostname, old_default, menu_default, request.remote_addr)
+
+        _save_state(hostname, state)
+
+    return Response('OK\n', status=200)
+
+
+@app.route('/host/<hostname>/provisioning_completed', methods=['POST'])
+def provisioning_completed(hostname):
+    logging.info('[%s] POST /host/%s/provisioning_completed from %s',
+                 hostname, hostname, request.remote_addr)
+    with _host_lock(hostname):
+        state = _load_state(hostname)
+        if state is None:
+            return _host_not_found_response(hostname)
+        state['provisioning_status'] = 'completed'
+        _save_state(hostname, state)
+
+    logging.info('[%s] Provisioning marked as completed', hostname)
+    return Response('OK\n', status=200)
+
+
+# ─── startup ──────────────────────────────────────────────────────────────────
+
+def setup_logging(log_level):
+    level = getattr(logging, log_level.upper(), logging.INFO)
+    root = logging.getLogger()
+    root.setLevel(level)
+    if not root.handlers:
+        handler = logging.StreamHandler(sys.stdout)
+        handler.setFormatter(logging.Formatter(LOG_FORMAT))
+        root.addHandler(handler)
+    else:
+        for h in root.handlers:
+            h.setLevel(level)
+
+
+def load_config(path):
+    logging.info('Loading configuration from %s', path)
+    with open(path, 'r') as f:
+        cfg = yaml.safe_load(f)
+    logging.info('Base path: %s', cfg.get('base_path'))
+    logging.info('Tmp path:  %s', cfg.get('tmp_path'))
+    logging.info('Nodes parameters path: %s', cfg.get('nodes_parameters_path'))
+    logging.info('Port:      %s', cfg.get('port', 7770))
+    return cfg
+
+
+def main():
+    parser = argparse.ArgumentParser(description='BlueBanquise PXE stack HTTP daemon')
+    parser.add_argument('config', help='Path to YAML configuration file')
+    parser.add_argument('--log-level', default=None,
+                        help='Override log level (DEBUG, INFO, WARNING, ERROR)')
+    args = parser.parse_args()
+
+    setup_logging(args.log_level or 'INFO')
+    logging.info('BlueBanquise PXE stack daemon starting')
+
+    global config
+    config = load_config(args.config)
+
+    if not args.log_level:
+        setup_logging(config.get('log_level', 'INFO'))
+
+    os.makedirs(config.get('tmp_path', '/var/lib/bluebanquise/cluster/.tmp'), exist_ok=True)
+
+    nodes_parameters_path = config.get('nodes_parameters_path',
+                                        '/etc/bluebanquise/bootset/nodes_parameters.yml')
+    bootstrap_hosts(nodes_parameters_path)
+
+    port = config.get('port', 7770)
+    logging.info('Listening on 0.0.0.0:%d', port)
+
+    # Disable Flask's default request logger to avoid duplicate lines;
+    # our own handlers above are sufficient.
+    log = logging.getLogger('werkzeug')
+    log.setLevel(logging.WARNING)
+
+    app.run(host='0.0.0.0', port=port, threaded=True)
+
+
+if __name__ == '__main__':
+    main()

@@ -11,7 +11,7 @@
     - template
   notify: service <|> restart slurmd
 
-- name: "Create dropin folder"
+- name: "file <|> Create dropin folder"
   ansible.builtin.file:
     path: "/etc/systemd/system/slurmd.service.d"
     owner: root

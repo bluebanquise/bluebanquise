@@ -2,7 +2,7 @@
 
 ## Description
 
-This role simply configure repositories for client hosts.
+These settings simply configure repositories for client hosts.
 
 ## Instructions
 
@@ -59,7 +59,7 @@ networks:
           hostname: my-repository-server
 ```
 
-You can also specify the variable repositories_network when executing the role.
+You can also specify the variable repositories_network when executing these settings.
 For example: 
 
 ```yaml
@@ -113,9 +113,47 @@ os_operating_system:
 
 Then path will be: repositories/production/centos/8.1/$basearch/
 
+### Full definition (explicit URL)
+
+Instead of relying on the automatic URL mechanism, repositories can be fully defined with an explicit URL and all parameters supported by the underlying Ansible module.
+
+**RHEL / AlmaLinux / Rocky / Oracle / CentOS:**
+
+```yaml
+bb_repositories:
+  - name: os_base
+    baseurl: http://my-server/repositories/el9/x86_64/os/
+    enabled: 1
+    state: present
+```
+
+All parameters from the [yum_repository module](https://docs.ansible.com/ansible/latest/collections/ansible/builtin/yum_repository_module.html) are supported.
+
+**Ubuntu / Debian:**
+
+```yaml
+bb_repositories:
+  - repo: deb http://my-server/repositories/ubuntu/24.04/x86_64/os/ noble main
+    state: present
+```
+
+All parameters from the [apt_repository module](https://docs.ansible.com/ansible/latest/collections/ansible/builtin/apt_repository_module.html) are supported.
+
+**OpenSuse Leap:**
+
+```yaml
+bb_repositories:
+  - name: base
+    baseurl: http://my-server/repositories/leap/16/x86_64/os/
+    enabled: 1
+    state: present
+```
+
+All parameters from the [zypper_repository module](https://docs.ansible.com/ansible/latest/collections/community/general/zypper_repository_module.html) are supported.
+
 ### Remove native repositories
 
-If you wish to remove native OS repositories, to rely only on local ones (air gapped cluster for example), you need to use the pxe_stack role of the collection. (This role does not support removing repositories for now.)
+If you wish to remove native OS repositories, to rely only on local ones (air gapped cluster for example), you need to use the pxe_stack role of the collection. (These settings do not support removing repositories for now.)
 
 Simply define:
 
@@ -123,33 +161,4 @@ Simply define:
 pxe_stack_preserve_repositories: false
 ```
 
-And native repositories will be removed during nodes deployment (PXE install, not playbook execution).
-
-## Changelog
-
-**Please now update CHANGELOG file at repository root instead of adding logs in this file.
-These logs bellow are only kept for archive.**
-
-* 1.3.9: Fix variables names. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.3.7: Fix services ip precedence. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.3.6: Fix extra space in automatic url. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.3.5: Adapt role to support BB 2.0 networks. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.3.4: Update to BB 2.0 format. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
-* 1.3.3: Support gpgkey for Ubuntu. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
-* 1.3.2: Flush handlers at the end of role repositories_client. #sla31
-* 1.3.1: Updated SUSE subtask to handle missing repo definition when repo is a dictionary. Neil Munday <neil@mundayweb.com>
-* 1.3.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.2.0: Add OpenSuSE support and correct ansible warning for included tasks loop. Neil Munday <neil@mundayweb.com>
-* 1.1.3: Improve Ubuntu support. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.1.2: Incorporated fix for issue 534. Neil Munday <neil@mundayweb.com>
-* 1.1.1: Adapt role to handle multiple distributions. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.1.0: Add Ubuntu support. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.0.8: Add state parameter. Bruno Travouillon <devel@travouillon.fr>
-* 1.0.7: Simplified version of the role. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.0.6: Deprecate external_repositories. Bruno Travouillon <devel@travouillon.fr>
-* 1.0.5: Added support for excluding packages from CentOS and RHEL repositories. Neil Munday <neil@mundayweb.com>
-* 1.0.4: Clean. johnnykeats <johnny.keats@outlook.com>
-* 1.0.3: Add support of major release version. Bruno <devel@travouillon.fr>
-* 1.0.2: Added Ubuntu 18.04 compatibility. johnnykeats <johnny.keats@outlook.com>
-* 1.0.1: Documentation. johnnykeats <johnny.keats@outlook.com>
-* 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
+And native repositories will be removed during hosts deployment (PXE install, not playbook execution).

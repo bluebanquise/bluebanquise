@@ -1,0 +1,367 @@
+#!/usr/bin/env python3
+
+# ██████╗ ██╗     ██╗   ██╗███████╗██████╗  █████╗ ███╗   ██╗ ██████╗ ██╗   ██╗██╗███████╗███████╗
+# ██╔══██╗██║     ██║   ██║██╔════╝██╔══██╗██╔══██╗████╗  ██║██╔═══██╗██║   ██║██║██╔════╝██╔════╝
+# ██████╔╝██║     ██║   ██║█████╗  ██████╔╝███████║██╔██╗ ██║██║   ██║██║   ██║██║███████╗█████╗
+# ██╔══██╗██║     ██║   ██║██╔══╝  ██╔══██╗██╔══██║██║╚██╗██║██║▄▄ ██║██║   ██║██║╚════██║██╔══╝
+# ██████╔╝███████╗╚██████╔╝███████╗██████╔╝██║  ██║██║ ╚████║╚██████╔╝╚██████╔╝██║███████║███████╗
+# ╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚══▀▀═╝  ╚═════╝ ╚═╝╚══════╝╚══════╝
+#
+# bluebanquise-netboots-installer, install/uninstall/list OS netboots for PXE stack
+#   - Benoît Leveugle <benoit.leveugle@gmail.com>
+
+# https://github.com/bluebanquise/bluebanquise - MIT license
+
+
+# MIT License
+
+# Copyright (c) 2019-2025 BlueBanquise Team, https://github.com/bluebanquise/bluebanquise
+
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+
+import hashlib
+import logging
+import os
+import shutil
+import subprocess
+import sys
+import urllib.request
+from argparse import ArgumentParser
+import yaml
+
+
+VERSION = '1.0.0'
+PXE_PARAMETERS_FILE = '/etc/bluebanquise/bootset/pxe_parameters.yml'
+NETBOOTS_CONFIG_FILE = '/etc/bluebanquise/bootset/netboots_installer.yml'
+MIN_FREE_SPACE_GB = 20
+
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+
+def load_file(filename):
+    logging.info(bcolors.OKBLUE + 'Loading ' + filename + bcolors.ENDC)
+    with open(filename, 'r') as f:
+        if int(yaml.__version__.split('.')[0]) > 5 or (int(yaml.__version__.split('.')[0]) == 5 and int(yaml.__version__.split('.')[1]) >= 1):
+            return yaml.load(f, Loader=yaml.FullLoader)
+        return yaml.load(f)
+
+
+def download_progress(block_count, block_size, total_size):
+    downloaded = block_count * block_size
+    downloaded_mb = downloaded / (1024 * 1024)
+    if total_size > 0:
+        percent = min(100, downloaded * 100 // total_size)
+        total_mb = total_size / (1024 * 1024)
+        sys.stdout.write('\r  Downloading: {:3d}%  {:.1f} MB / {:.1f} MB'.format(
+            percent, downloaded_mb, total_mb))
+    else:
+        sys.stdout.write('\r  Downloading: {:.1f} MB'.format(downloaded_mb))
+    sys.stdout.flush()
+
+
+# Check root privileges
+if os.getuid() != 0:
+    print('Admin rights required to run bluebanquise-netboots-installer!')
+    sys.exit(1)
+
+# Parse arguments
+parser = ArgumentParser(
+    description='BlueBanquise netboots installer - install, uninstall, or list OS netboots for PXE stack')
+parser.add_argument('action', choices=['install', 'uninstall', 'list'],
+                    help='Action to perform: install, uninstall, or list')
+parser.add_argument('netboot_id', nargs='?',
+                    help='OS netboot identifier, e.g. ubuntu_24.04, debian_13, rhel_9 (required for install/uninstall)')
+parser.add_argument('arch', nargs='?', choices=['x86_64', 'arm64'],
+                    help='CPU architecture: x86_64 or arm64 (required for install/uninstall)')
+parser.add_argument('--netboot', dest='netboot_local',
+                    help='Path to local ISO file instead of downloading (for airgapped environments)',
+                    metavar='ISO_PATH')
+parser.add_argument('-q', '--quiet', action='store_true',
+                    help='Do not print INFO messages')
+
+if len(sys.argv) == 1:
+    parser.print_help()
+    sys.exit(1)
+
+passed_arguments = parser.parse_args()
+
+if passed_arguments.action in ['install', 'uninstall']:
+    if not passed_arguments.netboot_id:
+        parser.error('netboot_id is required for {} action'.format(passed_arguments.action))
+    if not passed_arguments.arch:
+        parser.error('arch is required for {} action'.format(passed_arguments.action))
+
+print("""\
+
+                (o_
+      (o_  (o_  //\\
+      (/)_ (/)_ V_/_
+
+   BlueBanquise netboots installer
+   v{}
+   https://github.com/bluebanquise/bluebanquise/
+
+""".format(VERSION))
+
+loglevel = logging.INFO
+if passed_arguments.quiet:
+    loglevel = logging.WARNING
+logging.basicConfig(format='[%(levelname)s] %(message)s', level=loglevel)
+
+# Load configuration files
+pxe_parameters = load_file(PXE_PARAMETERS_FILE)
+netboots_config = load_file(NETBOOTS_CONFIG_FILE)
+
+htdocs_path = pxe_parameters['pxe_parameters']['htdocs_path']
+netboots_base = os.path.join(htdocs_path, 'pxe', 'netboots')
+netboots_definitions = netboots_config['netboots']
+
+logging.info('htdocs_path: ' + htdocs_path)
+logging.info('netboots base directory: ' + netboots_base)
+
+
+if passed_arguments.action == 'list':
+
+    # Scan filesystem for installed netboots
+    installed = []
+    if os.path.isdir(netboots_base):
+        for os_name in sorted(os.listdir(netboots_base)):
+            os_path = os.path.join(netboots_base, os_name)
+            if not os.path.isdir(os_path) or os.path.islink(os_path):
+                continue
+            for version in sorted(os.listdir(os_path)):
+                version_path = os.path.join(os_path, version)
+                if not os.path.isdir(version_path) or os.path.islink(version_path):
+                    continue
+                for arch_name in sorted(os.listdir(version_path)):
+                    arch_path = os.path.join(version_path, arch_name)
+                    if os.path.isdir(arch_path) and not os.path.islink(arch_path):
+                        installed.append((os_name, version, arch_name, arch_path))
+
+    print('Installed netboots:')
+    if installed:
+        for (os_name, version, arch_name, path) in installed:
+            print('  {} {} {}  ({})'.format(os_name, version, arch_name, path))
+    else:
+        print('  (none)')
+
+    # Cross-reference with YAML to list available but not yet installed
+    print('')
+    print('Available netboots:')
+    available_count = 0
+    for netboot_id in sorted(netboots_definitions.keys()):
+        entry = netboots_definitions[netboot_id]
+        os_name = entry['os']
+        version = str(entry['version'])
+        description = entry.get('description', '')
+        for arch_name in ['x86_64', 'arm64']:
+            if arch_name not in entry:
+                continue
+            arch_path = os.path.join(netboots_base, os_name, version, arch_name)
+            if os.path.isdir(arch_path):
+                continue
+            print('  {:20s}  {:8s}  {}'.format(netboot_id, arch_name, description))
+            available_count += 1
+    if available_count == 0:
+        print('  (all known netboots are already installed)')
+
+
+elif passed_arguments.action == 'install':
+    netboot_id = passed_arguments.netboot_id
+    arch = passed_arguments.arch
+
+    logging.info('Starting installation of netboot: ' + netboot_id + ' (' + arch + ')')
+
+    if netboot_id not in netboots_definitions:
+        logging.error(bcolors.FAIL + 'Unknown netboot identifier: ' + netboot_id + bcolors.ENDC)
+        logging.error('Available identifiers: ' + ', '.join(sorted(netboots_definitions.keys())))
+        sys.exit(1)
+
+    entry = netboots_definitions[netboot_id]
+
+    if arch not in entry:
+        logging.error(bcolors.FAIL + 'Architecture ' + arch + ' not defined for ' + netboot_id + bcolors.ENDC)
+        available_arches = [a for a in ['x86_64', 'arm64'] if a in entry]
+        logging.error('Available architectures for ' + netboot_id + ': ' + ', '.join(available_arches))
+        sys.exit(1)
+
+    arch_entry = entry[arch]
+    os_name = entry['os']
+    version = str(entry['version'])
+    url = arch_entry['url']
+    sha256_expected = arch_entry.get('sha256')
+    install_script = arch_entry['install_script']
+    major_version = version.split('.')[0]
+
+    target_dir = os.path.join(netboots_base, os_name, version, arch)
+    symlink_path = os.path.join(netboots_base, os_name, major_version)
+
+    logging.info('Target directory: ' + target_dir)
+
+    # Create directory structure
+    logging.info('Creating directory structure...')
+    os.makedirs(target_dir, exist_ok=True)
+    logging.info(bcolors.OKGREEN + '[OK] Directory created: ' + target_dir + bcolors.ENDC)
+
+    # Check available disk space before acquiring the ISO
+    free_gb = shutil.disk_usage(target_dir).free / (1024 ** 3)
+    logging.info('Available disk space: {:.1f} GB'.format(free_gb))
+    if free_gb < MIN_FREE_SPACE_GB:
+        logging.error(bcolors.FAIL + 'Not enough disk space: {:.1f} GB available, {} GB required.'.format(
+            free_gb, MIN_FREE_SPACE_GB) + bcolors.ENDC)
+        sys.exit(1)
+
+    # Acquire ISO: copy from local path or download from URL
+    if passed_arguments.netboot_local:
+        local_iso = passed_arguments.netboot_local
+        logging.info('Using local ISO file: ' + local_iso)
+        if not os.path.isfile(local_iso):
+            logging.error(bcolors.FAIL + 'Local ISO file not found: ' + local_iso + bcolors.ENDC)
+            sys.exit(1)
+        iso_filename = os.path.basename(local_iso)
+        iso_file = os.path.join(target_dir, iso_filename)
+        logging.info('Copying local ISO to: ' + iso_file)
+        shutil.copy2(local_iso, iso_file)
+        logging.info(bcolors.OKGREEN + '[OK] ISO copied.' + bcolors.ENDC)
+    else:
+        iso_filename = url.split('/')[-1]
+        iso_file = os.path.join(target_dir, iso_filename)
+        logging.info('Downloading ISO from: ' + url)
+        logging.info('Destination: ' + iso_file)
+        try:
+            urllib.request.urlretrieve(url, iso_file, reporthook=download_progress)
+            print('')
+            logging.info(bcolors.OKGREEN + '[OK] Download complete: ' + iso_file + bcolors.ENDC)
+        except Exception as e:
+            print('')
+            logging.error(bcolors.FAIL + 'Download failed: ' + str(e) + bcolors.ENDC)
+            if os.path.isfile(iso_file):
+                logging.info('Removing partial download: ' + iso_file)
+                os.remove(iso_file)
+            sys.exit(1)
+
+    # Verify SHA256 checksum
+    if sha256_expected:
+        logging.info('Verifying SHA256 checksum...')
+        sha256 = hashlib.sha256()
+        with open(iso_file, 'rb') as f:
+            for chunk in iter(lambda: f.read(8192), b''):
+                sha256.update(chunk)
+        sha256_actual = sha256.hexdigest()
+        if sha256_actual != sha256_expected:
+            logging.error(bcolors.FAIL + 'SHA256 checksum mismatch!' + bcolors.ENDC)
+            logging.error('  Expected: ' + sha256_expected)
+            logging.error('  Got:      ' + sha256_actual)
+            logging.info('Removing file with bad checksum: ' + iso_file)
+            os.remove(iso_file)
+            sys.exit(1)
+        logging.info(bcolors.OKGREEN + '[OK] SHA256 checksum verified.' + bcolors.ENDC)
+    else:
+        logging.warning(bcolors.WARNING + 'No SHA256 checksum defined for ' + netboot_id + ' ' + arch + '. Skipping verification.' + bcolors.ENDC)
+
+    # Run install script with environment variables pointing to ISO and target directory
+    logging.info('Running install script...')
+    env = dict(os.environ)
+    env['NETBOOT_BASE_DIR'] = target_dir
+    env['NETBOOT_ISO_FILE'] = iso_file
+    env['NETBOOT_ISO_FILENAME'] = iso_filename
+    result = subprocess.run(['bash', '-c', install_script], env=env)
+    if result.returncode != 0:
+        logging.error(bcolors.FAIL + 'Install script exited with return code: ' + str(result.returncode) + bcolors.ENDC)
+        sys.exit(1)
+    logging.info(bcolors.OKGREEN + '[OK] Install script completed successfully.' + bcolors.ENDC)
+
+    # Create or update major-version symlink (last-installed wins, relative symlink)
+    logging.info('Creating major-version symlink: ' + symlink_path + ' -> ' + version)
+    if os.path.islink(symlink_path):
+        os.remove(symlink_path)
+    os.symlink(version, symlink_path)
+    logging.info(bcolors.OKGREEN + '[OK] Symlink: ' + symlink_path + ' -> ' + version + bcolors.ENDC)
+
+    print('')
+    logging.info(bcolors.OKGREEN + '[OK] Netboot ' + netboot_id + ' (' + arch + ') installed successfully.' + bcolors.ENDC)
+
+
+elif passed_arguments.action == 'uninstall':
+    netboot_id = passed_arguments.netboot_id
+    arch = passed_arguments.arch
+
+    logging.info('Starting uninstall of netboot: ' + netboot_id + ' (' + arch + ')')
+
+    if netboot_id not in netboots_definitions:
+        logging.error(bcolors.FAIL + 'Unknown netboot identifier: ' + netboot_id + bcolors.ENDC)
+        logging.error('Available identifiers: ' + ', '.join(sorted(netboots_definitions.keys())))
+        sys.exit(1)
+
+    entry = netboots_definitions[netboot_id]
+    os_name = entry['os']
+    version = str(entry['version'])
+    major_version = version.split('.')[0]
+
+    target_dir = os.path.join(netboots_base, os_name, version, arch)
+    version_dir = os.path.join(netboots_base, os_name, version)
+    os_dir = os.path.join(netboots_base, os_name)
+    symlink_path = os.path.join(netboots_base, os_name, major_version)
+
+    if not os.path.isdir(target_dir):
+        logging.error(bcolors.FAIL + 'Netboot not found (not installed): ' + target_dir + bcolors.ENDC)
+        sys.exit(1)
+
+    # Remove arch directory and all its contents
+    logging.info('Removing directory: ' + target_dir)
+    shutil.rmtree(target_dir)
+    logging.info(bcolors.OKGREEN + '[OK] Removed: ' + target_dir + bcolors.ENDC)
+
+    # Remove version directory if no other architectures remain under it
+    remaining_arches = [d for d in os.listdir(version_dir)
+                        if os.path.isdir(os.path.join(version_dir, d)) and not os.path.islink(os.path.join(version_dir, d))]
+    if not remaining_arches:
+        logging.info('No other architectures remain under ' + version_dir + '. Removing it.')
+        os.rmdir(version_dir)
+        logging.info(bcolors.OKGREEN + '[OK] Removed: ' + version_dir + bcolors.ENDC)
+
+        # Remove the major-version symlink for this version
+        if os.path.islink(symlink_path):
+            os.remove(symlink_path)
+            logging.info('Removed symlink: ' + symlink_path)
+
+        # If other versions of the same OS remain, update the symlink to the most recently modified
+        remaining_versions = [d for d in os.listdir(os_dir)
+                               if os.path.isdir(os.path.join(os_dir, d)) and not os.path.islink(os.path.join(os_dir, d))]
+        if remaining_versions:
+            remaining_versions.sort(key=lambda v: os.path.getmtime(os.path.join(os_dir, v)), reverse=True)
+            new_version = remaining_versions[0]
+            new_major = new_version.split('.')[0]
+            new_symlink = os.path.join(os_dir, new_major)
+            if not os.path.islink(new_symlink):
+                os.symlink(new_version, new_symlink)
+                logging.info(bcolors.OKGREEN + '[OK] Updated symlink: ' + new_symlink + ' -> ' + new_version + bcolors.ENDC)
+
+    logging.info(bcolors.OKGREEN + '[OK] Netboot ' + netboot_id + ' (' + arch + ') uninstalled successfully.' + bcolors.ENDC)

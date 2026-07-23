@@ -3,8 +3,8 @@
   ansible.posix.firewalld:
     zone: "{{ slurm_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
     port: "{{ slurm_slurmd_port }}/tcp"
-    immediate: "yes"
-    permanent: "yes"
+    immediate: true
+    permanent: true
     state: enabled
   when:
     - os_firewall | default(false) | bool
@@ -41,7 +41,7 @@
 - name: service <|> Manage slurmd state
   ansible.builtin.service:
     name: slurmd
-    enabled: yes
-    state: started
+    enabled: "{{ (slurm_enable_services | default(bb_enable_services) | default(true) | bool) | ternary(true, false) }}"
+    state: "{{ (slurm_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   tags:
     - service

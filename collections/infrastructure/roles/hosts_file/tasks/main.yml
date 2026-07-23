@@ -8,7 +8,7 @@
   block:
 
     - name: set_fact <|> Build host to network mapping
-      set_fact:
+      ansible.builtin.set_fact:
         hosts_file_hosts_by_first_octets: "{{ hostvars | bluebanquise.infrastructure.hosts_by_first_octets(groups['all'], networks) }}"
       delegate_facts: true  # We delegate to localhost only, to avoid memory usage with all hosts
 
@@ -24,14 +24,6 @@
         src: hosts.j2
         dest: "{{ hosts_file_work_file.path | default('/tmp/hosts', true) }}" # Default here allows to display content even in check mode
         mode: 0644
-      # ignore_errors: '{{ ansible_check_mode }}' # Test when check, but ignore if path was not found
-
-    # - name: Give insecure permissions to an existing file
-    #   ansible.builtin.file:
-    #     path: "{{ dhcp_server_work_folder.path }}"
-    #     owner: root
-    #     group: root
-    #     mode: '0755'
 
 # Now that file is rendered, lets push it to targets
 - name: copy <|> Push /etc/hosts

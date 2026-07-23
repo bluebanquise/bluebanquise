@@ -11,6 +11,7 @@ Note: this role is only available on RHEL and Ubuntu.
     + [2.4. Constraint](#24-constraint)
       - [2.4.1. Collocation constraint](#241-collocation-constraint)
       - [2.4.2. Location constraint](#242-location-constraint)
+      - [2.4.3. Order constraint](#243-order-constraint)
     + [2.5. Stonith](#25-stonith)
   * [3. Deploy HA](#3-deploy-ha)
   * [4. List of standard resources](#4-list-of-standard-resources)
@@ -23,12 +24,12 @@ Note: this role is only available on RHEL and Ubuntu.
 
 ## 1. Description
 
-This role deploy and Active-Passive HA cluster based on PCS (corosync-pacemaker).
+This role deploys an Active-Passive HA cluster based on PCS (corosync-pacemaker).
 
 The role creates HA cluster on requested nodes, and then populate it with
 desired resources and constraint.
 
-This role can be combined with DBRD role to obtain shared storage across nodes.
+This role can be combined with DRBD role to obtain shared storage across nodes.
 
 The target cluster is an `1+N` ha nodes. The example here is based on a cluster
 of 3 ha servers working together.
@@ -139,7 +140,7 @@ You can set the reference node in the `ha_parameters.yml`, and on need, use
 pcs_reference_node: ha1
 ```
 
-Finaly, before deploying HA cluster, update `pcs_ha_cluster_password` variable with an unencrypted password for hacluster user, and `pcs_ha_cluster_password_sha512` with the corresponding SHA512 password hash (do not use default values for production).
+Finally, before deploying HA cluster, update `pcs_ha_cluster_password` variable with an unencrypted password for hacluster user, and `pcs_ha_cluster_password_sha512` with the corresponding SHA512 password hash (do not use default values for production).
 
 ```yaml
 pcs_ha_cluster_password: root
@@ -185,7 +186,7 @@ constraints and stonith.
 Three kind of properties are supported currently by this role:
 
 * pcs property
-* psc resource op defaults
+* pcs resource op defaults
 * pcs resource defaults
 
 For each, it is possible to define a list of properties with their value. For
@@ -322,7 +323,7 @@ pcs_resources:
         type: systemd:httpd
     locations:
       - type: prefers
-        score: 100 # If not defined, default socore is INFINITY.
+        score: 100 # If not defined, default score is INFINITY.
         nodes:
           - ha2
 ```
@@ -471,11 +472,11 @@ So you should see something like this at the end for nfs-mount-pxe:
   * Started: [ ha1 ha2 ]
 ```
 
-Where all nodes mount the nfs volumeZ.
+Where all nodes mount the nfs volume.
 
 ### 4.2. DHCP server
 
-DHCP server do not need a virtual ip, expect for very specific cases.
+DHCP server does not need a virtual ip, except for very specific cases.
 Resource is simple to declare as only dhcp service is needed.
 
 ```yaml

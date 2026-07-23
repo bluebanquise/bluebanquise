@@ -23,6 +23,8 @@
   loop:
     - "{{ clustershell_prefix_path }}/etc/clustershell"
     - "{{ clustershell_prefix_path }}/etc/clustershell/groups.d"
+  tags:
+    - template
 
 - name: template <|> Generate {{ clustershell_prefix_path }}/etc/clustershell/groups.d/local.cfg
   ansible.builtin.template:

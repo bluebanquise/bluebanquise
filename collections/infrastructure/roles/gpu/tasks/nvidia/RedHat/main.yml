@@ -15,7 +15,7 @@
 - name: service <|> enable nvidia-persistenced
   ansible.builtin.service:
     name: nvidia-persistenced
-    enabled: yes
+    enabled: true
     state: started
 
 - name: package <|> Install cuda

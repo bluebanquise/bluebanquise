@@ -1,6 +1,5 @@
 ---
 dns_server_dnssec_validation: auto
-dns_server_dnssec_lookaside: auto
 
 dns_server_recursion: false  # Enable recursion, to be combined with forwarders
 
@@ -28,3 +27,6 @@ dns_server_wildcard_records: []
 # dns_server_overrides
 # dns_server_start_services:
 # dns_server_enable_services:
+
+dns_server_firewall_services_to_add:
+  - dns

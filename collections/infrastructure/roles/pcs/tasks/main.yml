@@ -11,7 +11,7 @@
   #
   # If no OS specific file is found, the role will default to vars/main.yml
   #
-  include_vars: "{{ item }}"
+  ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - files:
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}.yml"
@@ -24,15 +24,21 @@
   tags:
     - always
 
-- name: include_tasks <|> Firewall
-  ansible.builtin.include_tasks: "firewall.yml"
+- name: "firewalld <|> Add services to firewall's zone"
+  ansible.posix.firewalld:
+    zone: "{{ pcs_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
+    service: high-availability
+    immediate: true
+    permanent: true
+    state: enabled
+  when:
+    - os_firewall | default(false) | bool
   tags:
-    - internal
     - firewall
 
 - name: package <|> Install packages
   ansible.builtin.package:
-    name: "{{item}}"
+    name: "{{ item }}"
     state: present
   tags:
     - package
@@ -61,7 +67,7 @@
   ansible.builtin.command: "cat /var/lib/pcsd/known-hosts"
   register: pcs_known_hosts
   changed_when: False
-  ignore_errors: yes
+  ignore_errors: true
 
 - name: include_tasks <|> Use OS dedicated task before creating cluster
   ansible.builtin.include_tasks: "{{ item }}"
@@ -91,27 +97,27 @@
       ansible.builtin.command: "cat /etc/corosync/corosync.conf"
       register: pcs_corosync_known_hosts
       changed_when: False
-      ignore_errors: yes
+      ignore_errors: true
 
     - name: command <|> Register reference node
-      ansible.builtin.command: "pcs cluster setup {{ pcs_cluster_name }} {{ item.name }} {% for addr in item.addrs %}addr={{ addr }} {% endfor %}"
+      ansible.builtin.command: "pcs cluster setup {{ pcs_ha_cluster_name }} {{ item.name }} {% for addr in item.addrs %}addr={{ addr }} {% endfor %}"
       loop: "{{ pcs_cluster_nodes }}"
       when:
         - ( pcs_corosync_known_hosts.stdout_lines | select("match", ".*"+pcs_reference_node+".*") | list | length ) < 1
-        - item.name == "{{ pcs_reference_node }}"
+        - item.name == pcs_reference_node
 
     - name: command <|> Check nodes already in corosync
       ansible.builtin.command: "cat /etc/corosync/corosync.conf"
       register: pcs_corosync_known_hosts
       changed_when: False
-      ignore_errors: yes
+      ignore_errors: true
 
     - name: command <|> Register other nodes
       ansible.builtin.command: "pcs cluster node add {{ item.name }} {% for addr in item.addrs %}addr={{ addr }} {% endfor %} --force"
       loop: "{{ pcs_cluster_nodes }}"
       when:
         - ( pcs_corosync_known_hosts.stdout_lines | select("match", ".*name:\\s"+item.name+".*") | list | length ) < 1
-        - item.name != "{{ pcs_reference_node }}"
+        - item.name != pcs_reference_node
 
 - name: service <|> Enable and start cluster
   ansible.builtin.service:
@@ -131,7 +137,7 @@
       ansible.builtin.command: "pcs property"
       register: pcs_property
       changed_when: False
-      ignore_errors: yes
+      ignore_errors: true
 
     - name: command <|> Set properties
       ansible.builtin.command: "pcs property set {{ item.name }}={{ item.value }}"
@@ -143,7 +149,7 @@
       ansible.builtin.command: "pcs resource op defaults"
       register: pcs_resource_op_defaults
       changed_when: False
-      ignore_errors: yes
+      ignore_errors: true
 
     - name: command <|> Set cluster resource op defaults
       ansible.builtin.command: "{{ pcs_resource_op_defaults_update }} {{ item.name }}={{ item.value }}"
@@ -155,7 +161,7 @@
       ansible.builtin.command: "pcs resource defaults"
       register: pcs_resource_defaults
       changed_when: False
-      ignore_errors: yes
+      ignore_errors: true
 
     - name: command <|> Set cluster resource defaults
       ansible.builtin.command: "{{ pcs_resource_defaults_update }} {{ item.name }}={{ item.value }}"

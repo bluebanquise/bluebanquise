@@ -23,10 +23,17 @@
   tags:
     - always
 
-- name: include_tasks <|> Firewall
-  ansible.builtin.include_tasks: "firewall.yml"
+- name: "firewalld <|> Add services to firewall's zone"
+  ansible.posix.firewalld:
+    zone: "{{ dhcp_server_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
+    service: "{{ item }}"
+    immediate: true
+    permanent: true
+    state: enabled
+  when:
+    - os_firewall | default(false) | bool
+  loop: "{{ dhcp_server_firewall_services_to_add }}"
   tags:
-    - internal
     - firewall
 
 - name: "package <|> Install {{ dhcp_server_packages_to_install | join(' ') }}"
@@ -71,11 +78,11 @@
     owner: root
     group: root
     mode: 0644
-  loop: "{{ networks | flatten(levels=1) }}"
+  loop: "{{ networks.keys() | list }}"
   when:
     - networks is defined and networks is iterable and networks is not string and networks is mapping
     - item.startswith("net-")
-    - networks[item].is_in_dhcp | default(true)
+    - networks[item].dhcp_server | default(true)
     - networks[item].subnet is defined and networks[item].prefix is defined
   notify: service <|> Restart dhcp server
   tags:
@@ -99,7 +106,7 @@
 - name: "service <|> Manage {{ dhcp_server_services_to_start | join(' ') }} state"
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: "{{ (dhcp_server_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    enabled: "{{ (dhcp_server_enable_services | default(bb_enable_services) | default(true) | bool) | ternary(true, false) }}"
     state: "{{ (dhcp_server_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   loop: "{{ dhcp_server_services_to_start }}"
   tags:

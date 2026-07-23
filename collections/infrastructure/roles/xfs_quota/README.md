@@ -1,14 +1,14 @@
-# Xfs_quota
+# XFS Quota
 
 ## Description
 
-Used to set default user and group disk quotas on xfs disk used by server.
+Used to set default user and group disk quotas on an XFS filesystem used by a server.
 
-This role provides simply an interface to **xfs_quota** Ansible module https://docs.ansible.com/ansible/latest/collections/community/general/xfs_quota_module.html
+These settings provide simply an interface to **xfs_quota** Ansible module https://docs.ansible.com/ansible/latest/collections/community/general/xfs_quota_module.html
 
 ## Observation
 
-For this role to work, the filesystem mount configurations must have the options uquota, gquota, pquota .
+For these settings to work, the filesystem mount configurations must have the options uquota, gquota, pquota.
 
 Example:
 
@@ -35,12 +35,4 @@ xfs_quota:
     bhard: 6G
 ```
 
-See **xfs_quota** Ansible module page <https://docs.ansible.com/ansible/latest/collections/community/general/xfs_quota_module.html for the full list of available parameters.
-
-## Changelog
-
-**Please now update CHANGELOG file at repository root instead of adding logs in this file.
-These logs bellow are only kept for archive.**
-
-* 1.0.1: Fix missing support for empty list. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.0.0: Role Creation. Alisson Zuza <alisson.zuza1987@gmail.com>
+See the [xfs_quota module](https://docs.ansible.com/ansible/latest/collections/community/general/xfs_quota_module.html) for the full list of available parameters.

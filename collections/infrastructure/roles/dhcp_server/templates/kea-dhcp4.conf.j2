@@ -21,7 +21,7 @@
     "lease-database": {
       "type": "memfile",
       "persist": true,
-      "name": "/var/lib/kea/dhcp4.leases"
+      "name": "/var/lib/kea/{{ dhcp_server_lease_file }}"
     },
 
     "valid-lifetime": {{ dhcp_server_default_lease_time }},
@@ -43,33 +43,63 @@
     {% else %}{# Assume everything else is standard script #}
       {% set ipxe_embed = 'standard' %}
     {% endif %}
-    # Organize hosts booting by classes, to be used in networks
+
+    {# Build list of networks that have a PXE server, for per-subnet HTTP boot classes #}
+    {% set http_boot_networks = [] %}
+    {% for network in networks %}
+      {% if network.startswith("net-") and (networks[network].dhcp_server | default(true)) and networks[network].subnet is defined and networks[network].prefix is defined %}
+        {% if networks[network]['services'] is defined and networks[network]['services'] is iterable and networks[network]['services'] is not string and networks[network]['services'] is mapping and networks[network]['services']['pxe4'] is defined %}
+          {% set ns = networks[network]['services']['pxe4'][0]['hostname'] | default(networks[network]['services']['pxe4'][0]['ip4'], true) %}
+          {% if ns is defined and ns is not none %}
+            {% set _ = http_boot_networks.append({'network': network, 'nextserver': ns}) %}
+          {% endif %}
+        {% elif networks[network]['services_ip'] is defined and (networks[network]['services_ip'] | ansible.utils.ipaddr) %}
+          {% set _ = http_boot_networks.append({'network': network, 'nextserver': networks[network]['services_ip']}) %}
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+
+    # Organize hosts booting by classes, to be used in networks.
+    # HTTP boot classes (arch_*_http_boot) are detection-only; per-subnet subclasses
+    # carry the actual boot-file-name so the URL uses each subnet's next-server address.
     "client-classes": [
-      { 
-        "name": "arch_x86_legacy",        
+      {
+        "name": "arch_x86_legacy",
         "test": "option[93].hex == 0x0000",
         "option-data": [ { "name": "boot-file-name", "data": "x86_64/{{ ipxe_embed }}_undionly.kpxe" } ]
       },
-      { 
-        "name": "arch_x86_64_efi",        
-        "test": "option[93].hex == 0x0007 or option[93].hex == 0x0009",
+      {
+        "name": "arch_x86_64_efi",
+        "test": "(option[93].hex == 0x0007 or option[93].hex == 0x0009) and not (substring(option[60].hex, 0, 10) == 'HTTPClient')",
         "option-data": [ { "name": "boot-file-name", "data": "x86_64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi" } ]
       },
-      { 
-        "name": "arch_arm64_efi",         
-        "test": "option[93].hex == 0x000b",
+      {
+        "name": "arch_arm64_efi",
+        "test": "option[93].hex == 0x000b and not (substring(option[60].hex, 0, 10) == 'HTTPClient')",
         "option-data": [ { "name": "boot-file-name", "data": "arm64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi" } ]
-      }{#,   TO BE DONE LATER
-      { 
-        "name": "arch_x86_64_http_boot",  
-        "test": "substring(option[60].hex, 0, 10) == 'HTTPClient' and (option[93].hex == 0x0007 or option[93].hex == 0x0009)",
-        "option-data": [ { "name": "boot-file-name", "data": "http://10.4.62.10/pxe/bin/x86_64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi" } ]
       },
-      { 
-        "name": "arch_arm64_http_boot",   
-        "test": "substring(option[60].hex, 0, 10) == 'HTTPClient' and option[93].hex == 0x000b",
-        "option-data": [ { "name": "boot-file-name", "data": "http://10.4.62.10/pxe/bin/arm64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi" } ]
-      }#}
+      {
+        "name": "arch_x86_64_http_boot",
+        "test": "substring(option[60].hex, 0, 10) == 'HTTPClient' and (option[93].hex == 0x0007 or option[93].hex == 0x0009)"
+      },
+      {
+        "name": "arch_arm64_http_boot",
+        "test": "substring(option[60].hex, 0, 10) == 'HTTPClient' and option[93].hex == 0x000b"
+      }{% if http_boot_networks | length > 0 %},{% endif %}
+
+    {% for entry in http_boot_networks %}
+      {
+        "name": "arch_x86_64_http_boot_{{ entry.network }}",
+        "test": "member('arch_x86_64_http_boot')",
+        "option-data": [ { "name": "boot-file-name", "data": "http://{{ entry.nextserver }}/pxe/x86_64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi" } ]
+      },
+      {
+        "name": "arch_arm64_http_boot_{{ entry.network }}",
+        "test": "member('arch_arm64_http_boot')",
+        "option-data": [ { "name": "boot-file-name", "data": "http://{{ entry.nextserver }}/pxe/arm64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi" } ]
+      }{% if not loop.last %},{% endif %}
+
+    {% endfor %}
     ],
 
     # Logging

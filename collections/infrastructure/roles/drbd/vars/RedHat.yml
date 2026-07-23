@@ -1,0 +1,5 @@
+---
+drbd_packages_to_install:
+  - drbd90-utils
+  - kmod-drbd90
+  - policycoreutils-python-utils

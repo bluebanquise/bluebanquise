@@ -38,6 +38,18 @@ pxe_stack_post_install_boot_to_disk: true
 # pxe_stack_start_services:
 
 ############################################################
+### TFTP
+
+# On Debian/Ubuntu these are written to /etc/default/tftpd-hpa.
+# On RedHat/Suse, tftp is socket-activated (no env file): pxe_stack_tftp_options
+# and pxe_stack_tftp_directory are applied via a systemd drop-in overriding
+# tftp.service's ExecStart. pxe_stack_tftp_address is not applied there, as it
+# would require touching tftp.socket's ListenDatagram.
+pxe_stack_tftp_address: "0.0.0.0:69"
+pxe_stack_tftp_options: "--secure --verbose"
+pxe_stack_tftp_directory: "/var/lib/tftpboot"
+
+############################################################
 ### Default equipment profile parameters
 
 pxe_stack_hw_equipment_type: none
@@ -118,3 +130,23 @@ pxe_stack_clonezilla_nfs_export_server:
 
 # Mount point from which load images from NFS server.
 pxe_stack_clonezilla_nfs_mount_point: /nfs/cloned_images
+
+pxe_stack_firewall_services_to_add:
+  - http
+  - tftp
+
+############################################################
+### PXE STACK DAEMON
+
+# hw_* variable: menu entry to auto-set when any iPXE action is triggered.
+# Typically 'bootdisk'. Use 'bootnext' on hardware where disk boot is unreliable.
+hw_ipxe_next_boot: bootdisk  # noqa: var-naming[no-role-prefix]
+
+pxe_stack_daemon_script_path: /usr/local/sbin/bluebanquise-pxe-stack-daemon
+pxe_stack_daemon_conf_path: /etc/bluebanquise/pxe_stack_daemon.conf
+pxe_stack_daemon_port: 7770
+pxe_stack_daemon_log_level: INFO
+
+# These match the cluster state paths from cluster_state / cluster_dynamic roles.
+pxe_stack_cluster_base_path: /var/lib/bluebanquise/cluster/hosts
+pxe_stack_cluster_tmp_path: /var/lib/bluebanquise/cluster/.tmp

@@ -1,0 +1,71 @@
+---
+
+- name: package <|> Install opensm packages
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ interconnect_ofed_subnet_manager_packages }}"
+  tags:
+    - package
+
+- name: assert <|> Check OpenSM priority is in range [0,15]
+  ansible.builtin.assert:
+    that:
+      - interconnect_ofed_subnet_manager_priority | string is match('^(?:[0-9]|1[0-5])$')
+    fail_msg: >
+      interconnect_ofed_subnet_manager_priority
+      must be in the range [0,15].
+    success_msg: >
+      Subnetmanager priority set to : {{ interconnect_ofed_subnet_manager_priority }}
+
+- name: lineinfile <|> Configure OpenSM priority
+  ansible.builtin.lineinfile:
+    path: "{{ interconnect_ofed_opensm_conf }}"
+    regexp: '^sm_priority\s+'
+    line: "sm_priority {{ interconnect_ofed_subnet_manager_priority }}"
+    backup: true
+    state: present
+
+- name: shell <|> Find first valid and active InfiniBand device
+  ansible.builtin.shell: |
+    for dev in /sys/class/infiniband/*; do
+      for port in $dev/ports/*; do
+        if [ -f "$port/link_layer" ] && grep -qi "InfiniBand" "$port/link_layer"; then
+           if [ -f "$port/state" ] && grep -qi "ACTIVE" "$port/state"; then
+              basename $dev
+              exit 0
+           fi
+        fi
+      done
+    done
+  register: interconnect_ib_device
+  changed_when: false
+  failed_when: interconnect_ib_device.stdout == ""
+
+- name: slurp <|> Read node_guid of detected InfiniBand device
+  ansible.builtin.slurp:
+    src: "/sys/class/infiniband/{{ interconnect_ib_device.stdout }}/node_guid"
+  register: interconnect_ib_guid_raw
+
+- name: set_fact <|> Convert node_guid format for OpenSM use
+  ansible.builtin.set_fact:
+    interconnect_opensm_guid: >-
+      0x{{ interconnect_ib_guid_raw.content
+            | b64decode
+            | trim
+            | replace(':', '') }}
+
+- name: lineinfile <|> Configure OpenSM GUID
+  ansible.builtin.lineinfile:
+    path: "{{ interconnect_ofed_opensm_conf }}"
+    regexp: '^guid\s+'
+    line: "guid {{ interconnect_opensm_guid }}"
+    state: present
+
+- name: service <|> Manage opensm state
+  ansible.builtin.service:
+    name: "{{ interconnect_ofed_subnet_manager_service }}"
+    enabled: "{{ interconnect_enable_services | default(bb_enable_services) | default(true) | bool }}"
+    state: "{{ (interconnect_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
+  tags:
+    - service

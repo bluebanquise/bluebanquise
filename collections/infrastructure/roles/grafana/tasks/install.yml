@@ -32,8 +32,8 @@
   ansible.posix.firewalld:
     zone: "{{ grafana_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
     service: "{{ item }}"
-    immediate: "yes"
-    permanent: "yes"
+    immediate: true
+    permanent: true
     state: enabled
   when:
     - os_firewall | default(false) | bool
@@ -42,12 +42,12 @@
   tags:
     - firewall
 
-- name: "install ¦ Add custom grafana port to firewall's zone"
+- name: "install <|> Add custom grafana port to firewall's zone"
   ansible.posix.firewalld:
     zone: "{{ grafana_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
     port: "{{ grafana_port }}/tcp"
-    immediate: "yes"
-    permanent: "yes"
+    immediate: true
+    permanent: true
     state: enabled
   when:
     - os_firewall | default(false) | bool
@@ -83,7 +83,7 @@
 - name: service <|> Manage grafana-server state
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: "{{ (grafana_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    enabled: "{{ grafana_enable_services | default(bb_enable_services) | default(true) | bool }}"
     state: "{{ (grafana_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   loop: "{{ grafana_services_to_start }}"
   register: grafana_service_results

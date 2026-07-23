@@ -7,9 +7,11 @@ Install BlueBanquise
 
 Make sure the system possesses curl command, then bootstrap bluebanquise using the provided online installer:
 
-.. code-block:: text
+.. code-block:: bash
 
-  sudo source <(curl -s https://raw.githubusercontent.com/bluebanquise/bluebanquise/refs/heads/master/bootstrap/online_bootstrap.sh)
+  curl -o online_bootstrap.sh https://raw.githubusercontent.com/bluebanquise/bluebanquise/master/bootstrap/online_bootstrap.sh
+  chmod +x online_bootstrap.sh
+  sudo ./online_bootstrap.sh
 
 Once this installer has been used, you should have a new user called ``bluebanquise``, with home folder set at ``/var/lib/bluebanquise``.
 
@@ -22,7 +24,7 @@ Login as the bluebanquise user:
 
   sudo su - bluebanquise
 
-This user can be considered as the "cluster admin user". Deployed nodes for example will automatically have
+This user can be considered as the "cluster admin user". Deployed hosts for example will automatically have
 the bluebanquise user configured and ssh keys set so that you can ssh on them.
 
 Test you can now use the ``ansible-playbook`` command:

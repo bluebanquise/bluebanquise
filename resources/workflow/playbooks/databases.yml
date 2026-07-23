@@ -1,0 +1,7 @@
+---
+- name: managements playbook
+  hosts: "fn_management"
+  roles:
+
+    - role: bluebanquise.infrastructure.mariadb
+      tags: mariadb

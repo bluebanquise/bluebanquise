@@ -23,14 +23,33 @@
   tags:
     - always
 
-- name: include_tasks <|> Firewall
-  ansible.builtin.include_tasks: "firewall.yml"
+- name: "firewalld <|> Add services to firewall's zone"
+  ansible.posix.firewalld:
+    zone: "{{ pxe_stack_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
+    service: "{{ item }}"
+    immediate: true
+    permanent: true
+    state: enabled
+  when:
+    - os_firewall | default(false) | bool
+  loop: "{{ pxe_stack_firewall_services_to_add }}"
   tags:
-    - internal
+    - firewall
+
+- name: "firewalld <|> Add pxe stack daemon port {{ pxe_stack_daemon_port }}/tcp to firewall"
+  ansible.posix.firewalld:
+    zone: "{{ pxe_stack_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
+    port: "{{ pxe_stack_daemon_port }}/tcp"
+    immediate: true
+    permanent: true
+    state: enabled
+  when:
+    - os_firewall | default(false) | bool
+  tags:
     - firewall
 
 # This calculation takes time, so we store it in memory for later usage
-- name: fact <|> Calculate first_octets
+- name: fact <|> Calculate equipment profiles
   ansible.builtin.set_fact:
     pxe_stack_equipment_profiles: "{{ hostvars | bluebanquise.infrastructure.equipment_profiles(groups['all'], groups) }}"
   run_once: true
@@ -90,6 +109,7 @@
     src: nodes_parameters.yml.j2
     dest: /etc/bluebanquise/bootset/nodes_parameters.yml
     mode: 0644
+  notify: service <|> Restart pxe services
   tags:
     - template
 
@@ -147,6 +167,23 @@
     group: root
     mode: 0755
 
+- name: "copy <|> Copy bluebanquise-netboots-installer"
+  ansible.builtin.copy:
+    src: bluebanquise-netboots-installer
+    dest: "/usr/bin/bluebanquise-netboots-installer"
+    owner: root
+    group: root
+    mode: 0755
+
+- name: "copy <|> Copy netboots_installer.yml (skip if already present)"
+  ansible.builtin.copy:
+    src: netboots_installer.yml
+    dest: "/etc/bluebanquise/bootset/netboots_installer.yml"
+    owner: root
+    group: root
+    mode: 0644
+    force: false
+
 
 ################################################################################################
 ######################## DISKFUL
@@ -177,6 +214,49 @@
 
 
 ################################################################################################
+######################## PXE STACK DAEMON
+
+- name: pxe_stack_daemon <|> Ensure cluster base and tmp directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: bluebanquise
+    group: bluebanquise
+    mode: '0750'
+  loop:
+    - "{{ pxe_stack_cluster_base_path }}"
+    - "{{ pxe_stack_cluster_tmp_path }}"
+
+- name: pxe_stack_daemon <|> Install daemon script
+  ansible.builtin.copy:
+    src: bluebanquise-pxe-stack-daemon
+    dest: "{{ pxe_stack_daemon_script_path }}"
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: pxe_stack_daemon <|> Generate daemon configuration file
+  ansible.builtin.template:
+    src: pxe_stack_daemon.conf.j2
+    dest: "{{ pxe_stack_daemon_conf_path }}"
+    owner: bluebanquise
+    group: bluebanquise
+    mode: '0640'
+
+- name: pxe_stack_daemon <|> Install systemd service
+  ansible.builtin.template:
+    src: bluebanquise-pxe-stack-daemon.service.j2
+    dest: /etc/systemd/system/bluebanquise-pxe-stack-daemon.service
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: pxe_stack_daemon <|> Reload systemd daemon
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+
+################################################################################################
 ######################## HANDLERS AND SERVICES
 
 - name: meta <|> Run handler tasks to restart pxe services
@@ -185,7 +265,7 @@
 - name: "service <|> Manage all {{ (pxe_stack_services_to_start + [pxe_stack_tftp_service | default(pxe_stack_default_tftp_service)]) | join(' ') }} state"
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: "{{ (pxe_stack_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    enabled: "{{ (pxe_stack_enable_services | default(bb_enable_services) | default(true) | bool) | ternary(true, false) }}"
     state: "{{ (pxe_stack_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   loop: "{{ pxe_stack_services_to_start + [pxe_stack_tftp_service | default(pxe_stack_default_tftp_service)] }}"
   tags:

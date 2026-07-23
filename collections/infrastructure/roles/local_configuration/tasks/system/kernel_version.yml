@@ -1,0 +1,34 @@
+---
+- name: assert <|> Kernel version lock is only supported on RedHat and Debian family systems
+  ansible.builtin.assert:
+    that:
+      - ansible_facts.os_family in ['RedHat', 'Debian']
+    fail_msg: >-
+      os_kernel_version / local_configuration_system.kernel_version is not supported on
+      {{ ansible_facts.distribution }} ({{ ansible_facts.os_family }} family). Supported:
+      RHEL family (dnf versionlock), Debian, Ubuntu (apt-mark hold).
+
+- name: set_fact <|> Resolve target kernel version and reboot policy
+  ansible.builtin.set_fact:
+    _local_configuration_kernel_version_target: >-
+      {{ (local_configuration_system | default({})).kernel_version
+         | default(os_kernel_version) }}
+    _local_configuration_kernel_version_allow_reboot: >-
+      {{ (local_configuration_system | default({})).kernel_version_allow_reboot
+         | default(os_kernel_version_allow_reboot) | default(false) | bool }}
+
+- name: set_fact <|> Determine whether the running kernel matches the target version
+  ansible.builtin.set_fact:
+    _local_configuration_kernel_version_matches: "{{ ansible_facts.kernel == _local_configuration_kernel_version_target }}"
+
+- name: include_tasks <|> Use OS dedicated kernel version task
+  ansible.builtin.include_tasks: "{{ item }}"
+  with_first_found:
+    - files:
+        - "system/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/kernel_version.yml"
+        - "system/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/kernel_version.yml"
+        - "system/{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/kernel_version.yml"
+        - "system/{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/kernel_version.yml"
+        - "system/{{ ansible_facts.distribution | replace(' ','_') }}/kernel_version.yml"
+        - "system/{{ ansible_facts.os_family | replace(' ','_') }}/kernel_version.yml"
+      skip: true

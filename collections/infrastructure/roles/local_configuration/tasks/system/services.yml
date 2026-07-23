@@ -1,0 +1,12 @@
+---
+- name: "service <|> Manage services"
+  ansible.builtin.service:
+    arguments: "{{ item.arguments | default(omit) }}"
+    enabled: "{{ item.enabled | default(omit) }}"
+    name: "{{ item.name }}"
+    pattern: "{{ item.pattern | default(omit) }}"
+    runlevel: "{{ item.runlevel | default(omit) }}"
+    sleep: "{{ item.sleep | default(omit) }}"
+    state: "{{ item.state | default(omit) }}"
+    use: "{{ item.use | default(omit) }}"
+  loop: "{{ local_configuration_system.services }}"

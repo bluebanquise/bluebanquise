@@ -16,7 +16,16 @@ class FilterModule(object):
         for hostname in hosts_list:
             try:
                 hv = hostvars.get(hostname, {})
-                alias = hv.get("alias")
+                raw_alias = hv.get("alias")
+
+                # Normalise alias to a list regardless of whether the inventory
+                # defines it as a plain string or a list of strings
+                if raw_alias is None:
+                    aliases = []
+                elif isinstance(raw_alias, list):
+                    aliases = raw_alias
+                else:
+                    aliases = [raw_alias]
 
                 # --- Process Network Interfaces ---
                 for index, nic in enumerate(hv.get("network_interfaces", []) or []):
@@ -24,6 +33,7 @@ class FilterModule(object):
                     net_name = nic.get("network")
 
                     if ip4 and net_name:
+                        ip4 = ip4.split('/')[0]  # strip CIDR notation if present
                         ip_net, ip_host = _rsplit(ip4, '.', 1)
 
                         # 1. THE FIRST INTERFACE (Base Identity)
@@ -32,7 +42,7 @@ class FilterModule(object):
                             forward_data['base'].append(entry)
                             reverse_data[ip_net]['base'].append(entry)
 
-                            if alias:
+                            for alias in aliases:
                                 alias_entry = {"hostname": alias, "network": net_name, "ip4": ip4, "ip_host": ip_host}
                                 forward_data['base'].append(alias_entry)
 
@@ -50,6 +60,7 @@ class FilterModule(object):
                 if bmc:
                     ip4, net_name, bmc_name = bmc.get("ip4"), bmc.get("network"), bmc.get("name")
                     if ip4 and net_name and bmc_name:
+                        ip4 = ip4.split('/')[0]  # strip CIDR notation if present
                         ip_net, ip_host = _rsplit(ip4, '.', 1)
                         entry = {"hostname": bmc_name, "network": net_name, "ip4": ip4, "ip_host": ip_host}
                         # BMCs are usually considered 'base' identity
@@ -67,9 +78,9 @@ class FilterModule(object):
                     for item in service_ips:
                         ip4, svc_host = item.get('ip4'), item.get('hostname')
                         if ip4 and svc_host:
+                            ip4 = ip4.split('/')[0]  # strip CIDR notation if present
                             ip_net, ip_host = _rsplit(ip4, '.', 1)
                             entry = {"hostname": svc_host, "network": net_name, "ip4": ip4, "ip_host": ip_host}
-                            # Services are typically base records
                             forward_data['base'].append(entry)
                             # reverse_data[ip_net]['base'].append(entry) # Do not add services in reverse
             except Exception as e:

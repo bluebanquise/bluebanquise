@@ -1,0 +1,25 @@
+---
+
+- name: cluster_tools <|> Ensure plugins directory exists
+  ansible.builtin.file:
+    path: "{{ cluster_tools_plugins_path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: cluster_tools <|> Install main script
+  ansible.builtin.copy:
+    src: bluebanquise-cluster
+    dest: "{{ cluster_tools_script_path }}"
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: cluster_tools <|> Install state plugin
+  ansible.builtin.copy:
+    src: plugins/state.py
+    dest: "{{ cluster_tools_plugins_path }}/state.py"
+    owner: root
+    group: root
+    mode: '0644'

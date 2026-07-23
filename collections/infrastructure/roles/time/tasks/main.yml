@@ -21,10 +21,17 @@
   tags:
     - always
 
-- name: include_tasks <|> Firewall
-  ansible.builtin.include_tasks: "firewall.yml"
+- name: "firewalld <|> Add services to firewall's zone"
+  ansible.posix.firewalld:
+    zone: "{{ time_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
+    service: "{{ item }}"
+    immediate: true
+    permanent: true
+    state: enabled
+  when:
+    - os_firewall | default(false) | bool
+  loop: "{{ time_firewall_services_to_add }}"
   tags:
-    - internal
     - firewall
 
 - name: "package <|> Install {{ time_packages_to_install | join(' ') }} packages"
@@ -65,7 +72,7 @@
 - name: "service <|> Manage {{ time_services_to_start | join(' ') }} services state"
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: "{{ (time_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    enabled: "{{ (time_enable_services | default(bb_enable_services) | default(true) | bool) | ternary(true, false) }}"
     state: "{{ (time_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   loop: "{{ time_services_to_start }}"
   tags:

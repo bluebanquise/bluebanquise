@@ -1,4 +1,7 @@
 ---
+### Lease database ###
+dhcp_server_lease_file: kea-leases4.csv
+
 ### Lease times ###
 # Consider increasing these values once cluster is in production.
 dhcp_server_default_lease_time: 600
@@ -33,3 +36,6 @@ dhcp_server_stash_agent_options: false
 # Add user custom global settings to main dhcp configuration file
 # No need to add ";" at the end, template will add it
 dhcp_server_global_settings: []
+
+dhcp_server_firewall_services_to_add:
+  - dhcp

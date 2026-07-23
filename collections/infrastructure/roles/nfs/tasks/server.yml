@@ -1,8 +1,15 @@
 ---
-- name: include_tasks <|> Firewall
-  ansible.builtin.include_tasks: "firewall.yml"
+- name: "firewalld <|> Add services to firewall's zone"
+  ansible.posix.firewalld:
+    zone: "{{ nfs_server_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
+    service: "{{ item }}"
+    immediate: true
+    permanent: true
+    state: enabled
+  when:
+    - os_firewall | default(false) | bool
+  loop: "{{ nfs_server_firewall_services_to_add }}"
   tags:
-    - internal
     - firewall
 
 - name: "package <|> Install {{ nfs_server_packages_to_install | join(' ') }} packages"
@@ -12,10 +19,10 @@
   tags:
     - package
 
-- name: lineinfile <|> Set number of threads to be used
+- name: lineinfile <|> Uncomment nfsd section header in /etc/nfs.conf
   ansible.builtin.lineinfile:
     path: /etc/nfs.conf
-    regexp: "^#[nfsd]$"
+    regexp: '^#\[nfsd\]$'
     line: "[nfsd]"
   when: nfs_server_threads is defined and nfs_server_threads is not none
 
@@ -26,7 +33,7 @@
     line: "threads={{ nfs_server_threads | default(8, true) }}"
   when: nfs_server_threads is defined and nfs_server_threads is not none
 
-- name: file <|> Create NFS configuration directories
+- name: file <|> Create NFS configuration directory
   ansible.builtin.file:
     owner: root
     group: root
@@ -55,7 +62,7 @@
   when: (inventory_hostname == item.server) or
         (item.server in ansible_all_ipv4_addresses) or
         ((item.server_group is defined) and (inventory_hostname in groups[item.server_group]))
-  loop: "{{ nfs_shares | flatten(levels=1) }}"
+  loop: "{{ nfs_shares | default([]) | flatten(levels=1) }}"
   notify: service <|> Restart NFS server services
   tags:
     - template
@@ -65,7 +72,7 @@
     path: "{{ item.export }}"
     state: directory
     mode: 0755
-  loop: "{{ nfs_shares | flatten(levels=1) }}"
+  loop: "{{ nfs_shares | default([]) | flatten(levels=1) }}"
   when: nfs_server_create_directories_if_not_exist
 
 - name: meta <|> Run handler tasks to restart NFS server services
@@ -74,7 +81,7 @@
 - name: "service <|> Manage {{ nfs_server_services_to_start | join(' ') }} state"
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: "{{ (nfs_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    enabled: "{{ nfs_enable_services | default(bb_enable_services) | default(true) | bool }}"
     state: "{{ (nfs_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   loop: "{{ nfs_server_services_to_start }}"
   tags:

@@ -12,7 +12,6 @@
   ansible.builtin.package:
     name:
       - python3-setuptools
-     # - python3-wheel
     state: present
 
 - name: package <|> Install AMD driver and rocm
@@ -23,7 +22,7 @@
     state: present
   register: gpu_amd_drivers
 
-- name: reboot <|> Reboot a slow machine that might have lots of updates to apply
+- name: reboot <|> Reboot node after AMD driver installation
   ansible.builtin.reboot:
-    reboot_timeout: "{{ update_reboot_reboot_timeout }}"
-  when: update_reboot_reboot and gpuamd_drivers.changed
+    reboot_timeout: "{{ gpu_reboot_timeout }}"
+  when: gpu_reboot and gpu_amd_drivers.changed

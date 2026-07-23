@@ -1,0 +1,4 @@
+---
+cluster_state_base_path: /var/lib/bluebanquise/cluster/hosts
+cluster_state_tmp_path: /var/lib/bluebanquise/cluster/.tmp
+cluster_state_hosts_group: all

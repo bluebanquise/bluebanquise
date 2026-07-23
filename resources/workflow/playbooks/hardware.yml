@@ -5,3 +5,5 @@
 
     - role: bluebanquise.infrastructure.rasdaemon
       tags: rasdaemon
+    - role: bluebanquise.infrastructure.bluebanquise_power
+      tags: bluebanquise_power
