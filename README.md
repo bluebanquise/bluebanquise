@@ -52,7 +52,7 @@ First step is to use the bootstrap script that will create the bluebanquise user
 Make sure first you have both sudo and curl installed on the system.
 
 ```
-sudo bash <(curl -s https://raw.githubusercontent.com/bluebanquise/bluebanquise/refs/heads/master/bootstrap/online_bootstrap.sh)
+sudo bash -c "$(curl -s https://raw.githubusercontent.com/bluebanquise/bluebanquise/refs/heads/master/bootstrap/online_bootstrap.sh)"
 ```
 
 Read the warning message, and accept if you agree with it.
