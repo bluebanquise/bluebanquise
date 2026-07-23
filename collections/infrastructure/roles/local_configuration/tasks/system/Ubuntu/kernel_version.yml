@@ -10,41 +10,41 @@
 
 - name: set_fact <|> Discover currently installed versioned kernel packages
   ansible.builtin.set_fact:
-    _lc_kernel_version_current_packages: >-
+    _local_configuration_kernel_version_current_packages: >-
       {{ ansible_facts.packages.keys() | select('search', ansible_facts.kernel) | list }}
 
 - name: set_fact <|> Discover installed kernel meta-packages
   ansible.builtin.set_fact:
-    _lc_kernel_version_meta_packages: >-
+    _local_configuration_kernel_version_meta_packages: >-
       {{ local_configuration_kernel_version_meta_packages
          | select('in', ansible_facts.packages.keys()) | list }}
 
 - name: set_fact <|> Compute target versioned package names
   ansible.builtin.set_fact:
-    _lc_kernel_version_target_packages: >-
-      {{ _lc_kernel_version_current_packages
-         | map('replace', ansible_facts.kernel, _lc_kernel_version_target)
+    _local_configuration_kernel_version_target_packages: >-
+      {{ _local_configuration_kernel_version_current_packages
+         | map('replace', ansible_facts.kernel, _local_configuration_kernel_version_target)
          | list }}
 
 - name: command <|> List currently held packages
   ansible.builtin.command: apt-mark showhold
-  register: _lc_kernel_version_holds
+  register: _local_configuration_kernel_version_holds
   changed_when: false
 
 - name: command <|> Unhold outdated versioned kernel packages
   ansible.builtin.command: "apt-mark unhold {{ item }}"
-  loop: "{{ _lc_kernel_version_current_packages }}"
+  loop: "{{ _local_configuration_kernel_version_current_packages }}"
   when:
-    - not _lc_kernel_version_matches
-    - item in _lc_kernel_version_holds.stdout
+    - not _local_configuration_kernel_version_matches
+    - item in _local_configuration_kernel_version_holds.stdout
   changed_when: true
 
 - name: apt <|> Install target kernel version packages
   ansible.builtin.apt:
-    name: "{{ _lc_kernel_version_target_packages }}"
+    name: "{{ _local_configuration_kernel_version_target_packages }}"
     state: present
     update_cache: true
-  when: not _lc_kernel_version_matches
+  when: not _local_configuration_kernel_version_matches
 
 - name: lineinfile <|> Set GRUB_DEFAULT to saved so grub-set-default is honored
   ansible.builtin.lineinfile:
@@ -53,44 +53,44 @@
     line: "GRUB_DEFAULT=saved"
     state: present
     backup: true
-  when: not _lc_kernel_version_matches
+  when: not _local_configuration_kernel_version_matches
 
 - name: command <|> Regenerate GRUB configuration
   ansible.builtin.command: "{{ local_configuration_kernel_config_grub_update_command }}"
   changed_when: true
-  when: not _lc_kernel_version_matches
+  when: not _local_configuration_kernel_version_matches
 
 - name: shell <|> Resolve GRUB advanced submenu id
   ansible.builtin.shell: >-
     set -o pipefail && grep -oP "submenu '[^']*' [^\{]*\$menuentry_id_option '\K[^']+" /boot/grub/grub.cfg | head -1
   args:
     executable: /bin/bash
-  register: _lc_kernel_version_grub_submenu_id
+  register: _local_configuration_kernel_version_grub_submenu_id
   changed_when: false
-  when: not _lc_kernel_version_matches
+  when: not _local_configuration_kernel_version_matches
 
 - name: shell <|> Resolve GRUB entry id for the target kernel
   ansible.builtin.shell: >-
-    set -o pipefail && grep -oP "menuentry '[^']*{{ _lc_kernel_version_target }}[^']*' [^\{]*\$menuentry_id_option '\K[^']+" /boot/grub/grub.cfg | tail -1
+    set -o pipefail && grep -oP "menuentry '[^']*{{ _local_configuration_kernel_version_target }}[^']*' [^\{]*\$menuentry_id_option '\K[^']+" /boot/grub/grub.cfg | tail -1
   args:
     executable: /bin/bash
-  register: _lc_kernel_version_grub_entry_id
+  register: _local_configuration_kernel_version_grub_entry_id
   changed_when: false
-  when: not _lc_kernel_version_matches
+  when: not _local_configuration_kernel_version_matches
 
 - name: command <|> Set target kernel as default boot entry
   ansible.builtin.command: >-
-    grub-set-default "{{ _lc_kernel_version_grub_submenu_id.stdout }}>{{ _lc_kernel_version_grub_entry_id.stdout }}"
+    grub-set-default "{{ _local_configuration_kernel_version_grub_submenu_id.stdout }}>{{ _local_configuration_kernel_version_grub_entry_id.stdout }}"
   changed_when: true
-  when: not _lc_kernel_version_matches
+  when: not _local_configuration_kernel_version_matches
 
 - name: command <|> Confirm kernel family packages are held
   ansible.builtin.command: "apt-mark hold {{ item }}"
-  loop: "{{ _lc_kernel_version_target_packages + _lc_kernel_version_meta_packages }}"
+  loop: "{{ _local_configuration_kernel_version_target_packages + _local_configuration_kernel_version_meta_packages }}"
   changed_when: true
 
 - name: reboot <|> Reboot to boot into the locked kernel version
   ansible.builtin.reboot:
   when:
-    - not _lc_kernel_version_matches
-    - _lc_kernel_version_allow_reboot
+    - not _local_configuration_kernel_version_matches
+    - _local_configuration_kernel_version_allow_reboot

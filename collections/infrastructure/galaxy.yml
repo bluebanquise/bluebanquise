@@ -71,7 +71,7 @@ tags:
 # range specifiers can be set and are separated by ','
 dependencies:
   "community.general": "*"
-  "community.mysql": "*"
+  "ansible.mysql": "*"
   "ansible.posix": "*"
 
 # The URL of the originating SCM repository

@@ -203,6 +203,7 @@ def get_system_endpoint(node, node_configuration, parameters, logger):
     if cached:
         return cached
 
+    logger.info(f'[{node}] Discovering Redfish system endpoint')
     response, status_code = execute_redfish_request(node, node_configuration, 'Systems', logger, parameters)
 
     if not is_success(status_code) or not response:
@@ -254,11 +255,26 @@ def get_etag(node, node_configuration, endpoint, parameters, logger):
     the request with HTTP 428 Precondition Required otherwise. Fetch the
     etag with a plain GET right before the PATCH.
     """
+    logger.info(f'[{node}] Fetching current etag for {endpoint}')
     response, status_code = execute_redfish_request(node, node_configuration, endpoint, logger, parameters)
     if not is_success(status_code) or not isinstance(response, dict):
         logger.error(f'[{node}] Error, could not fetch etag for {endpoint}.')
         return None
     return response.get('@odata.etag')
+
+
+def get_power_state(node, node_configuration, system_endpoint, parameters, logger):
+    """
+    Fetch the current PowerState of the system. Used to make on/off
+    idempotent: some BMCs (e.g. this AMI implementation) reject a
+    ResetType with HTTP 400 if the system is already in that requested
+    state, instead of treating it as a harmless no-op.
+    """
+    logger.info(f'[{node}] Checking current power state')
+    response, status_code = execute_redfish_request(node, node_configuration, system_endpoint, logger, parameters)
+    if not is_success(status_code) or not isinstance(response, dict):
+        return None
+    return response.get('PowerState')
 
 
 def power(node, node_configuration, action_parameters, parameters, logger):
@@ -267,6 +283,12 @@ def power(node, node_configuration, action_parameters, parameters, logger):
         return 1
 
     if action_parameters[0] == "on":
+        current_state = get_power_state(node, node_configuration, system_endpoint, parameters, logger)
+        if current_state == 'On':
+            logger.info(f'[{node}] Already powered on.')
+            return 0
+
+        logger.info(f'[{node}] Sending power on request')
         _, status_code = execute_redfish_request(
             node, node_configuration, f'{system_endpoint}/Actions/ComputerSystem.Reset',
             logger, parameters, method='POST', payload={"ResetType": "On"})
@@ -277,6 +299,12 @@ def power(node, node_configuration, action_parameters, parameters, logger):
             return fail(node, node_configuration, parameters, logger, 'Error, could not power on node.')
 
     elif action_parameters[0] == "off":
+        current_state = get_power_state(node, node_configuration, system_endpoint, parameters, logger)
+        if current_state == 'Off':
+            logger.info(f'[{node}] Already powered off.')
+            return 0
+
+        logger.info(f'[{node}] Sending power off request')
         _, status_code = execute_redfish_request(
             node, node_configuration, f'{system_endpoint}/Actions/ComputerSystem.Reset',
             logger, parameters, method='POST', payload={"ResetType": "ForceOff"})
@@ -291,6 +319,7 @@ def power(node, node_configuration, action_parameters, parameters, logger):
         # are vendor-dependent but "ForceRestart" is the closest to a hard
         # reset and is widely supported. Adjust if your BMC's
         # ResetActionInfo advertises something else.
+        logger.info(f'[{node}] Sending reset request')
         _, status_code = execute_redfish_request(
             node, node_configuration, f'{system_endpoint}/Actions/ComputerSystem.Reset',
             logger, parameters, method='POST', payload={"ResetType": "ForceRestart"})
@@ -301,6 +330,7 @@ def power(node, node_configuration, action_parameters, parameters, logger):
             return fail(node, node_configuration, parameters, logger, 'Error, could not reset node.')
 
     elif action_parameters[0] == "status":
+        logger.info(f'[{node}] Fetching power status')
         response, status_code = execute_redfish_request(
             node, node_configuration, system_endpoint, logger, parameters)
         if is_success(status_code):
@@ -321,6 +351,7 @@ def boot(node, node_configuration, action_parameters, parameters, logger):
         return 1
 
     if action_parameters[0] == "disk":
+        logger.info(f'[{node}] Setting next boot device to disk')
         _, status_code = execute_redfish_request(
             node, node_configuration, f'{system_endpoint}/Actions/ComputerSystem.SetDefaultBootOrder',
             logger, parameters, method='POST')
@@ -333,6 +364,7 @@ def boot(node, node_configuration, action_parameters, parameters, logger):
     elif action_parameters[0] == "bios":
         etag = get_etag(node, node_configuration, system_endpoint, parameters, logger)
         extra_headers = {'If-Match': etag} if etag else None
+        logger.info(f'[{node}] Setting next boot device to BIOS setup')
         _, status_code = execute_redfish_request(
             node, node_configuration, system_endpoint,
             logger, parameters, method='PATCH',
@@ -347,6 +379,7 @@ def boot(node, node_configuration, action_parameters, parameters, logger):
     elif action_parameters[0] == "pxe":
         etag = get_etag(node, node_configuration, system_endpoint, parameters, logger)
         extra_headers = {'If-Match': etag} if etag else None
+        logger.info(f'[{node}] Setting next boot device to PXE')
         _, status_code = execute_redfish_request(
             node, node_configuration, system_endpoint,
             logger, parameters, method='PATCH',

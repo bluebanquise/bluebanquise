@@ -8,18 +8,15 @@ galaxy_info:
   platforms:
     - name: EL
       versions:
-        - "8"
         - "9"
         - "10"
     - name: Ubuntu
       versions:
-        - "22.04"
-        - "24.04"
+        - noble
+        - resolute
     - name: Debian
       versions:
-        - "11"
-        - "12"
-        - "13"
+        - trixie
     - name: opensuse
       versions:
         - all

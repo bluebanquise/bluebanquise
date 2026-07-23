@@ -17,7 +17,7 @@
   {% endif %}
 {% endfor %}
 {% set _net_ifaces = [] %}
-{% for iface in _hv.network_interfaces | default([]) %}
+{% for iface in _hv.network_interfaces | default([], true) %}
   {% set _iface = {} %}
   {% for k, v in iface.items() %}
     {% if k == 'interface' %}

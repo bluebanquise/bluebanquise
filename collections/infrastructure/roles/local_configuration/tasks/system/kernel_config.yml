@@ -1,13 +1,13 @@
 ---
 - name: set_fact <|> Resolve effective kernel parameters
   ansible.builtin.set_fact:
-    _lc_kernel_parameters: >-
+    _local_configuration_kernel_parameters: >-
       {{ (local_configuration_system | default({})).kernel_parameters
          | default(os_kernel_parameters) | default('') }}
-    _lc_hw_kernel_parameters: >-
+    _local_configuration_hw_kernel_parameters: >-
       {{ (local_configuration_system | default({})).hw_kernel_parameters
          | default(hw_kernel_parameters) | default('') }}
-    _lc_sysctl: >-
+    _local_configuration_sysctl: >-
       {{ (local_configuration_system | default({})).sysctl
          | default(os_sysctl) | default({}) }}
 
@@ -23,8 +23,8 @@
         - "system/{{ ansible_facts.os_family | replace(' ','_') }}/main.yml"
       skip: true
   when: >-
-    _lc_kernel_parameters | trim | length > 0
-    or _lc_hw_kernel_parameters | trim | length > 0
+    _local_configuration_kernel_parameters | trim | length > 0
+    or _local_configuration_hw_kernel_parameters | trim | length > 0
     or hw_console is defined
   tags:
     - internal
@@ -35,5 +35,5 @@
     value: "{{ item.value }}"
     state: present
     reload: "{{ local_configuration_kernel_config_sysctl_reload | bool }}"
-  loop: "{{ _lc_sysctl | dict2items }}"
-  when: _lc_sysctl | length > 0
+  loop: "{{ _local_configuration_sysctl | dict2items }}"
+  when: _local_configuration_sysctl | length > 0

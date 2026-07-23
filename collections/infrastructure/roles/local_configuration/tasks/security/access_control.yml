@@ -1,7 +1,7 @@
 ---
 - name: set_fact <|> Resolve effective access control state
   ansible.builtin.set_fact:
-    _lc_access_control_state: >-
+    _local_configuration_access_control_state: >-
       {{ (local_configuration_security | default({})).access_control
          | default(os_access_control)
          | default(local_configuration_access_control_os_access_control) }}

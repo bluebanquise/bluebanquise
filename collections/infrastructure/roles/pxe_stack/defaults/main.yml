@@ -140,7 +140,7 @@ pxe_stack_firewall_services_to_add:
 
 # hw_* variable: menu entry to auto-set when any iPXE action is triggered.
 # Typically 'bootdisk'. Use 'bootnext' on hardware where disk boot is unreliable.
-hw_ipxe_next_boot: bootdisk
+hw_ipxe_next_boot: bootdisk  # noqa: var-naming[no-role-prefix]
 
 pxe_stack_daemon_script_path: /usr/local/sbin/bluebanquise-pxe-stack-daemon
 pxe_stack_daemon_conf_path: /etc/bluebanquise/pxe_stack_daemon.conf

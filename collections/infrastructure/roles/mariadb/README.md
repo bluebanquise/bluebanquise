@@ -8,10 +8,10 @@ Supported distributions: RHEL 9/10, Ubuntu 24.04/26.04, Debian 13, OpenSuse Leap
 
 ## Requirements
 
-The `community.mysql` Ansible collection must be installed:
+The `ansible.mysql` Ansible collection must be installed:
 
 ```
-ansible-galaxy collection install community.mysql
+ansible-galaxy collection install ansible.mysql
 ```
 
 ## Instructions
@@ -38,4 +38,4 @@ These settings connect to MariaDB via Unix socket for initial setup, so no passw
 Packages installed:
 
 * mariadb-server (or mariadb on Suse)
-* python3-pymysql (required by community.mysql modules)
+* python3-pymysql (required by ansible.mysql modules)

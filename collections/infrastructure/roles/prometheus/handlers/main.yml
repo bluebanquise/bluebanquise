@@ -53,4 +53,3 @@
   when:
     - "'service' not in ansible_skip_tags"
     - prometheus_start_services | default(bb_start_services) | default(true) | bool
-

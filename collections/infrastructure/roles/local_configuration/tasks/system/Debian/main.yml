@@ -9,16 +9,16 @@
     set -o pipefail && grep '^GRUB_CMDLINE_LINUX_DEFAULT=' /etc/default/grub | sed -e 's/GRUB_CMDLINE_LINUX_DEFAULT="//' -e 's/"$//'
   args:
     executable: /bin/bash
-  register: _lc_kernel_config_current_default_params
+  register: _local_configuration_kernel_config_current_default_params
   changed_when: false
 
 - name: set_fact <|> Merge existing and new kernel parameters
   ansible.builtin.set_fact:
-    _lc_kernel_config_final_grub_line: >-
+    _local_configuration_kernel_config_final_grub_line: >-
       {{
-        ((_lc_kernel_config_current_default_params.stdout | trim).split(' '))
-        | union((_lc_kernel_parameters | trim).split(' '))
-        | union((_lc_hw_kernel_parameters | trim).split(' '))
+        ((_local_configuration_kernel_config_current_default_params.stdout | trim).split(' '))
+        | union((_local_configuration_kernel_parameters | trim).split(' '))
+        | union((_local_configuration_hw_kernel_parameters | trim).split(' '))
         | union((hw_console | default('') | trim).split(' '))
         | reject('equalto', '')
         | unique
@@ -31,7 +31,7 @@
   ansible.builtin.lineinfile:
     path: /etc/default/grub
     regexp: "^GRUB_CMDLINE_LINUX_DEFAULT="
-    line: "GRUB_CMDLINE_LINUX_DEFAULT=\"{{ _lc_kernel_config_final_grub_line | trim }}\""
+    line: "GRUB_CMDLINE_LINUX_DEFAULT=\"{{ _local_configuration_kernel_config_final_grub_line | trim }}\""
     state: present
     backup: true
   notify: command <|> Update GRUB settings

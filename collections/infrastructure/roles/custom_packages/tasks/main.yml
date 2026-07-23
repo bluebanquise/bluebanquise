@@ -1,7 +1,7 @@
 ---
 - name: "package <|> Install custom packages for {{ item }}"
   ansible.builtin.package:
-    name: "{{ custom_packages[item] }}"
+    name: "{{ custom_packages_by_group[item] }}"
     state: present
-  loop: "{{ custom_packages.keys() | list }}"
+  loop: "{{ custom_packages_by_group.keys() | list }}"
   when: item in group_names

@@ -10,16 +10,16 @@
 
 - name: set_fact <|> Resolve target kernel version and reboot policy
   ansible.builtin.set_fact:
-    _lc_kernel_version_target: >-
+    _local_configuration_kernel_version_target: >-
       {{ (local_configuration_system | default({})).kernel_version
          | default(os_kernel_version) }}
-    _lc_kernel_version_allow_reboot: >-
+    _local_configuration_kernel_version_allow_reboot: >-
       {{ (local_configuration_system | default({})).kernel_version_allow_reboot
          | default(os_kernel_version_allow_reboot) | default(false) | bool }}
 
 - name: set_fact <|> Determine whether the running kernel matches the target version
   ansible.builtin.set_fact:
-    _lc_kernel_version_matches: "{{ ansible_facts.kernel == _lc_kernel_version_target }}"
+    _local_configuration_kernel_version_matches: "{{ ansible_facts.kernel == _local_configuration_kernel_version_target }}"
 
 - name: include_tasks <|> Use OS dedicated kernel version task
   ansible.builtin.include_tasks: "{{ item }}"

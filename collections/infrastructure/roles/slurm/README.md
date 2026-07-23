@@ -247,10 +247,10 @@ In the final *slurm.conf* configuration file.
 
 ### Accounting
 
-To enable Accounting the community.mysql ansible module is required:
+To enable Accounting the ansible.mysql ansible module is required:
 
 ```bash
-ansible-galaxy collection install community.mysql
+ansible-galaxy collection install ansible.mysql
 ```
 
 Then, set `slurm_enable_accounting` variable to **true**.

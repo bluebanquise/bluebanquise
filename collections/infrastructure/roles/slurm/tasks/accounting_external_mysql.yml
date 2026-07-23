@@ -1,7 +1,7 @@
 ---
 
 - name: mysql_db <|> Create slurm_acct_db database
-  community.mysql.mysql_db:
+  ansible.mysql.mysql_db:
     name: slurm_acct_db
     state: present
     login_host: "{{ slurm_accounting_mysql_login_host | default(omit, true) }}"
@@ -11,7 +11,7 @@
   when: slurm_accounting_mysql_create_database
 
 - name: mysql_user <|> Ensure slurm user exists in the database
-  community.mysql.mysql_user:
+  ansible.mysql.mysql_user:
     name: "{{ slurm_accounting_mysql_slurm_user }}"
     password: "{{ slurm_accounting_mysql_slurm_password }}"
     login_host: "{{ slurm_accounting_mysql_login_host | default(omit, true) }}"

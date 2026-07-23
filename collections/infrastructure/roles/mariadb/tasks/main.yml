@@ -35,7 +35,7 @@
     state: "{{ (mariadb_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
 
 - name: mysql_user <|> Set MariaDB root password
-  community.mysql.mysql_user:
+  ansible.mysql.mysql_user:
     name: root
     password: "{{ mariadb_root_password }}"
     host: "{{ item }}"
@@ -49,7 +49,7 @@
   no_log: true
 
 - name: mysql_user <|> Remove anonymous users
-  community.mysql.mysql_user:
+  ansible.mysql.mysql_user:
     name: ""
     host: "{{ item }}"
     state: absent
@@ -59,7 +59,7 @@
     - "{{ ansible_fqdn }}"
 
 - name: mysql_db <|> Remove test database
-  community.mysql.mysql_db:
+  ansible.mysql.mysql_db:
     name: test
     state: absent
     login_unix_socket: /var/run/mysqld/mysqld.sock

@@ -7,17 +7,17 @@ It is useful for keeping all OS package customizations synced with BlueBanquise 
 
 ## Instructions
 
-These settings work by matching Ansible group names against the keys of the `custom_packages` dictionary.
+These settings work by matching Ansible group names against the keys of the `custom_packages_by_group` dictionary.
 For each key that matches one of the host's groups, the corresponding list of packages is installed.
 
-It is recommended to define `custom_packages` in a single file under the `all` group
-(e.g. `$HOME/bluebanquise/inventory/group_vars/all/addons/custom_packages.yml`)
+It is recommended to define `custom_packages_by_group` in a single file under the `all` group
+(e.g. `$HOME/bluebanquise/inventory/group_vars/all/addons/custom_packages_by_group.yml`)
 so all customizations are visible in one place.
 
 Example:
 
 ```yaml
-custom_packages:
+custom_packages_by_group:
   fn_compute:
     - openmpi
   fn_login:
