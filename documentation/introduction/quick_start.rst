@@ -11,7 +11,7 @@ Make sure the system possesses curl command, then bootstrap bluebanquise using t
 
 .. code-block:: text
 
-  sudo source <(curl -s https://raw.githubusercontent.com/bluebanquise/bluebanquise/refs/heads/master/bootstrap/online_bootstrap.sh)
+  sudo bash -c "$(curl -s https://raw.githubusercontent.com/bluebanquise/bluebanquise/refs/heads/master/bootstrap/online_bootstrap.sh)"
 
 Get example inventory
 =====================
