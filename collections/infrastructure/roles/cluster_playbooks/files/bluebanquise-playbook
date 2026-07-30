@@ -1,0 +1,338 @@
+#!/usr/bin/env python3
+
+# bluebanquise-playbook, manage function profiles and roles associated to function groups
+#   - Benoît Leveugle <benoit.leveugle@gmail.com>
+
+# https://github.com/bluebanquise/bluebanquise - MIT license
+
+# MIT License
+# Copyright (c) 2019-2026 BlueBanquise Team, https://github.com/bluebanquise/bluebanquise
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+import logging
+import os
+import sys
+import yaml
+from argparse import ArgumentParser
+
+
+# Colors
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+
+def colorize(color, message):
+    return color + message + bcolors.ENDC
+
+
+CONF_PATH = '/etc/bluebanquise/bluebanquise_playbook.conf'
+STORAGE_PATH = '/var/lib/bluebanquise/cluster/playbooks'
+CURRENT_CONFIG_PATH = os.path.join(STORAGE_PATH, 'current_config.yml')
+HOSTS_BASE_PATH = '/var/lib/bluebanquise/cluster/hosts'
+LOG_FILENAME = 'last_ansible-playbook.log'
+
+
+def load_yaml(path, required=True):
+    """Load a YAML file, logging progress and failing loudly with a clear reason."""
+    if not os.path.exists(path):
+        if required:
+            logging.error(colorize(bcolors.FAIL, 'Required file not found: {}'.format(path)))
+            if path == CONF_PATH:
+                hint = 'Run the cluster_playbooks Ansible role on this host first to generate it.'
+                logging.error(colorize(bcolors.FAIL, hint))
+            sys.exit(1)
+        logging.info('No existing file at {}, starting from an empty configuration.'.format(path))
+        return {}
+
+    logging.info(colorize(bcolors.OKBLUE, 'Loading {}'.format(path)))
+    try:
+        with open(path, 'r') as f:
+            data = yaml.safe_load(f)
+    except yaml.YAMLError as e:
+        message = 'Failed to parse YAML file {}: {}'.format(path, e)
+        logging.error(colorize(bcolors.FAIL, message))
+        sys.exit(1)
+    except OSError as e:
+        message = 'Failed to read file {}: {}'.format(path, e)
+        logging.error(colorize(bcolors.FAIL, message))
+        sys.exit(1)
+
+    return data or {}
+
+
+def load_conf():
+    """Load the Ansible-generated catalog: function_profiles and function_groups."""
+    conf = load_yaml(CONF_PATH, required=True)
+    conf.setdefault('function_profiles', {})
+    conf.setdefault('function_groups', {})
+    return conf
+
+
+def load_current_config():
+    """Load the operator-managed selection state, defaulting to an empty structure."""
+    current = load_yaml(CURRENT_CONFIG_PATH, required=False)
+    current.setdefault('function_groups', {})
+    return current
+
+
+def save_current_config(data):
+    """Atomically write the selection state (tmp file + os.replace)."""
+    logging.info(colorize(bcolors.OKBLUE, 'Saving {}'.format(CURRENT_CONFIG_PATH)))
+    tmp_path = CURRENT_CONFIG_PATH + '.tmp'
+    try:
+        with open(tmp_path, 'w') as f:
+            yaml.safe_dump(data, f, sort_keys=True, default_flow_style=False)
+        os.replace(tmp_path, CURRENT_CONFIG_PATH)
+    except OSError as e:
+        message = 'Failed to save {}: {}'.format(CURRENT_CONFIG_PATH, e)
+        logging.error(colorize(bcolors.FAIL, message))
+        sys.exit(1)
+    logging.info(colorize(bcolors.OKGREEN, 'Saved {}'.format(CURRENT_CONFIG_PATH)))
+
+
+def resolve_group(conf, group_name):
+    """Fail loudly if group_name is not a known fn_* group from the Ansible-generated conf."""
+    logging.debug("Resolving group '{}' against known function groups".format(group_name))
+    if group_name not in conf['function_groups']:
+        logging.error(colorize(bcolors.FAIL, 'Unknown function group: {}'.format(group_name)))
+        known = ', '.join(sorted(conf['function_groups']))
+        logging.error(colorize(bcolors.FAIL, 'Known groups: {}'.format(known)))
+        sys.exit(1)
+    logging.debug("Group '{}' is known, {} host(s) in inventory".format(
+        group_name, len(conf['function_groups'][group_name])))
+
+
+def group_entry(current, group_name):
+    """Return (and create if missing) the profiles/roles entry for a group."""
+    entry = current['function_groups'].setdefault(group_name, {})
+    entry.setdefault('profiles', [])
+    entry.setdefault('roles', {})
+    logging.debug("Current entry for group '{}': {} profile(s), {} role(s)".format(
+        group_name, len(entry['profiles']), len(entry['roles'])))
+    return entry
+
+
+# ─── commands ──────────────────────────────────────────────────────────────────
+
+def cmd_get_logs(args):
+    """Print the raw (ANSI-colored) log of the last ansible-playbook execution for a host."""
+    if not args.extra:
+        logging.error(colorize(bcolors.FAIL, 'Usage: bluebanquise-playbook get logs <hostname>'))
+        sys.exit(1)
+
+    hostname = args.extra
+    log_path = os.path.join(HOSTS_BASE_PATH, hostname, LOG_FILENAME)
+    logging.debug('Looking for log file: {}'.format(log_path))
+
+    if not os.path.exists(log_path):
+        message = "No playbook execution recorded for host '{}' (no log at {}).".format(
+            hostname, log_path)
+        logging.error(colorize(bcolors.FAIL, message))
+        sys.exit(1)
+
+    logging.info(colorize(bcolors.OKBLUE, 'Loading {}'.format(log_path)))
+    try:
+        with open(log_path, 'r') as f:
+            content = f.read()
+    except OSError as e:
+        message = 'Failed to read log {}: {}'.format(log_path, e)
+        logging.error(colorize(bcolors.FAIL, message))
+        sys.exit(1)
+
+    logging.debug('Read {} byte(s) from {}'.format(len(content), log_path))
+    print(content)
+
+
+def cmd_get(args, conf):
+    if args.target == 'groups':
+        for group_name in sorted(conf['function_groups']):
+            print(group_name)
+        return
+
+    if args.target == 'profiles':
+        print(yaml.safe_dump(conf['function_profiles'], sort_keys=True, default_flow_style=False))
+        return
+
+    if args.target == 'logs':
+        cmd_get_logs(args)
+        return
+
+    resolve_group(conf, args.target)
+    current = load_current_config()
+    entry = current['function_groups'].get(args.target, {'profiles': [], 'roles': {}})
+
+    print('Group: ' + args.target)
+    print('Profiles:')
+    if entry.get('profiles'):
+        for profile_name in entry['profiles']:
+            print('  - ' + profile_name)
+    else:
+        print('  (none)')
+    print('Roles:')
+    if entry.get('roles'):
+        for role_name, role_def in entry['roles'].items():
+            role_vars = (role_def or {}).get('vars', {})
+            suffix = ' (vars: {})'.format(role_vars) if role_vars else ''
+            print('  - ' + role_name + suffix)
+    else:
+        print('  (none)')
+
+
+def cmd_add(args, conf):
+    logging.debug("add: group='{}' item='{}' vars={!r}".format(args.group, args.item, args.vars))
+    resolve_group(conf, args.group)
+    current = load_current_config()
+    entry = group_entry(current, args.group)
+
+    is_profile = args.item in conf['function_profiles']
+    logging.debug("'{}' {} a known function profile".format(
+        args.item, 'is' if is_profile else 'is not'))
+
+    if is_profile:
+        if args.vars:
+            message = ("--vars is ignored when adding function profile '{}' "
+                       "(profiles carry their own vars)").format(args.item)
+            logging.warning(colorize(bcolors.WARNING, message))
+        if args.item in entry['profiles']:
+            message = "Profile '{}' is already attached to group '{}', nothing to do.".format(
+                args.item, args.group)
+            logging.info(message)
+        else:
+            entry['profiles'].append(args.item)
+            message = "Profile '{}' added to group '{}'.".format(args.item, args.group)
+            logging.info(colorize(bcolors.OKGREEN, message))
+        save_current_config(current)
+        return
+
+    parsed_vars = {}
+    if args.vars:
+        logging.debug('Parsing --vars value: {!r}'.format(args.vars))
+        try:
+            parsed_vars = yaml.safe_load(args.vars) or {}
+        except yaml.YAMLError as e:
+            message = 'Could not parse --vars value: {}'.format(e)
+            logging.error(colorize(bcolors.FAIL, message))
+            sys.exit(1)
+        if not isinstance(parsed_vars, dict):
+            message = '--vars must be a YAML/JSON mapping, got: {!r}'.format(parsed_vars)
+            logging.error(colorize(bcolors.FAIL, message))
+            sys.exit(1)
+        logging.debug('Parsed vars: {}'.format(parsed_vars))
+
+    if args.item in entry['roles']:
+        message = "Role '{}' is already attached to group '{}', updating its vars.".format(
+            args.item, args.group)
+        logging.info(message)
+    else:
+        message = "'{}' is not a known function profile, treating it as a custom role.".format(
+            args.item)
+        logging.info(message)
+
+    entry['roles'][args.item] = {'vars': parsed_vars}
+    message = "Role '{}' added to group '{}'.".format(args.item, args.group)
+    logging.info(colorize(bcolors.OKGREEN, message))
+    save_current_config(current)
+
+
+def cmd_delete(args, conf):
+    logging.debug("delete: group='{}' item='{}'".format(args.group, args.item))
+    resolve_group(conf, args.group)
+    current = load_current_config()
+    entry = current['function_groups'].get(args.group, {'profiles': [], 'roles': {}})
+    logging.debug("Current entry for group '{}': profiles={} roles={}".format(
+        args.group, entry.get('profiles', []), sorted(entry.get('roles', {}))))
+
+    if args.item in entry.get('profiles', []):
+        entry['profiles'].remove(args.item)
+        message = "Profile '{}' removed from group '{}'.".format(args.item, args.group)
+        logging.info(colorize(bcolors.OKGREEN, message))
+    elif args.item in entry.get('roles', {}):
+        del entry['roles'][args.item]
+        message = "Role '{}' removed from group '{}'.".format(args.item, args.group)
+        logging.info(colorize(bcolors.OKGREEN, message))
+    else:
+        message = "'{}' is not currently attached to group '{}'.".format(args.item, args.group)
+        logging.error(colorize(bcolors.FAIL, message))
+        sys.exit(1)
+
+    save_current_config(current)
+
+
+# ─── argument parsing ─────────────────────────────────────────────────────────
+
+def main():
+    parser = ArgumentParser(
+        prog='bluebanquise-playbook',
+        description='Associate function profiles and roles to function groups.',
+    )
+    parser.add_argument('-q', '--quiet', action='store_true',
+                        help='Do not print INFO messages.')
+    parser.add_argument('-v', '--verbose', action='store_true',
+                        help='Print DEBUG messages too, for troubleshooting (overrides --quiet).')
+
+    subparsers = parser.add_subparsers(dest='command', required=True)
+
+    get_p = subparsers.add_parser(
+        'get', help="Show known groups/profiles, a group's current selection, or a host's logs.")
+    get_p.add_argument('target', metavar='TARGET',
+                       help="'groups', 'profiles', 'logs', or a function group name (e.g. fn_workers)")
+    get_p.add_argument('extra', metavar='HOSTNAME', nargs='?', default=None,
+                       help="hostname, required and only used when TARGET is 'logs'")
+
+    add_p = subparsers.add_parser(
+        'add', help='Attach a function profile or a specific role to a function group.')
+    add_p.add_argument('group', metavar='GROUP', help='Function group name (e.g. fn_workers)')
+    add_p.add_argument('item', metavar='ITEM',
+                       help='Function profile name, or a role FQCN if not a known profile')
+    add_p.add_argument('--vars', default=None,
+                       help='YAML/JSON mapping of vars for a specific role (ignored for profiles)')
+
+    delete_p = subparsers.add_parser(
+        'delete', help='Detach a function profile or a specific role from a function group.')
+    delete_p.add_argument('group', metavar='GROUP', help='Function group name (e.g. fn_workers)')
+    delete_p.add_argument('item', metavar='ITEM', help='Function profile name or role FQCN')
+
+    args = parser.parse_args()
+
+    if args.verbose:
+        loglevel = logging.DEBUG
+    elif args.quiet:
+        loglevel = logging.WARNING
+    else:
+        loglevel = logging.INFO
+    logging.basicConfig(format='[%(levelname)s] %(message)s', level=loglevel)
+    logging.debug('bluebanquise-playbook starting: command={!r} args={!r}'.format(args.command, vars(args)))
+
+    conf = load_conf()
+
+    if args.command == 'get':
+        cmd_get(args, conf)
+    elif args.command == 'add':
+        cmd_add(args, conf)
+    elif args.command == 'delete':
+        cmd_delete(args, conf)
+
+
+if __name__ == '__main__':
+    main()

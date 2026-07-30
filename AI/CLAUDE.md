@@ -11,7 +11,7 @@ BlueBanquise is an Ansible collection (`bluebanquise.infrastructure`, version 3.
 ```
 collections/infrastructure/      # The Ansible collection (bluebanquise.infrastructure)
   galaxy.yml                     # Collection metadata and versioning
-  roles/                         # ~52 roles (dhcp_server, pxe_stack, slurm, nic, local_configuration, cluster_state, cluster_dynamic, cluster_tools, etc.)
+  roles/                         # ~54 roles (dhcp_server, pxe_stack, slurm, nic, local_configuration, cluster_state, cluster_dynamic, cluster_tools, cluster_playbooks, etc.)
   plugins/
     filter/                      # Custom Jinja2 filters (nodeset, hosts_by_network, etc.)
     vars/core.py                 # Deprecated vars plugin
@@ -107,6 +107,7 @@ Keep code as simple as possible. Minimize non-default dependencies (pyyaml, para
 - For a CLI tool with several actions that each need genuinely different, multi-flag-deep required arguments, prefer `argparse` subparsers (`add_subparsers`) over one flat action with manually-checked `parser.error()` required-ness (as `bluebanquise-bootset`/`bluebanquise-netboots-installer` do) — but remember subparsers don't inherit the top-level parser's optional flags for free; put shared flags (`-d/--debug`, `-q/--quiet`) on a `parent_parser = ArgumentParser(add_help=False)` and pass `parents=[parent_parser]` to both the top-level parser and every subparser.
 - iPXE's `imgfetch`/`chain` script commands can only issue plain HTTP GET — no POST/PUT, no request body. Any Flask daemon route in this repo that must be reachable both from an iPXE script and from a real HTTP client (a Python tool) needs two separate routes, not one with multiple methods — see the pxe_stack daemon's `menu-default` split under "Cluster State System" above for why conflating the two silently broke one of the callers.
 - When deduplicating near-identical Flask routes (or similar handler functions), extract only the parts that are genuinely byte-identical (e.g. input validation, a shared error response) into small helpers — don't force the differing business logic into one function with a mode flag just to eliminate the last few lines of duplication. Splitting `set_menu_default`/`notify_boot_action`'s shared validation and 404-response into two helpers, while keeping their different state-mutation logic separate, is the reference example.
+- Ansible task-level flake8 style: `.flake8`/CI ignores `W503` (line break *before* a binary operator) but not `W504` (line break *after* one) — when wrapping a long `logging.*`/string-building call across lines, break *before* the operator (`+`, `and`, etc.), never after, and align the continuation to the opening delimiter's column (`E128` otherwise). Cheapest fix in practice: build the message into a local variable with `.format()`/f-string first, then pass that single name to `logging.*` — avoids the wrapping question entirely.
 
 ## Key Commands
 
@@ -149,7 +150,9 @@ pip install ansible ansible-lint flake8 yamllint jmespath
 # Full set: see bootstrap/requirements.txt
 ```
 
-**AI sandbox note:** this environment has no `python3-venv` (`python3 -m venv` fails), and the system Python is externally-managed (bare `pip install` refuses). Use `pip install --user --break-system-packages <pkg>` for a throwaway lint/test install — binaries land in `~/.local/bin`, not on PATH by default. A local collection install + `ansible-playbook --syntax-check` (or a real `--connection=local` run against a scratch inventory) is doable this way without touching the real cluster.
+**AI sandbox note:** this environment has no `python3-venv` (`python3 -m venv` fails), and the system Python is externally-managed (bare `pip install` refuses). Use `pip install --user --break-system-packages <pkg>` for a throwaway lint/test install — binaries land in `~/.local/bin`, not on PATH by default. A local collection install + `ansible-playbook --syntax-check` (or a real `--connection=local` run against a scratch inventory) is doable this way without touching the real cluster. There is also no `systemd` at all here (no `systemctl` binary, PID 1 is a plain shell) — more limited than CI's Docker images, which do have systemd; any role's `daemon_reload`/service-enable tasks fail outright here (not just skip) unless `--skip-tags service` is passed, for a different reason than the container-vs-bare-metal one documented below.
+
+**Testing a real SSH-invoking daemon here (2026-07, verified against `bluebanquise-cluster-playbooks-daemon`):** `apt-get install -y openssh-server` works despite harmless `/etc/resolv.conf` symlink postinst failures (no real systemd to hand it to). `mkdir -p /run/sshd` then `/usr/sbin/sshd -p <port>` starts it manually, no systemd needed. A throwaway keypair plus a `~/.ssh/config` `Host <fakehostname>` block (`HostName 127.0.0.1`, matching `Port`, `IdentityFile`) makes `ssh <fakehostname>` — and therefore any code that does exactly that, like `cluster_dynamic`'s and `cluster_playbooks`' SSH helpers — resolve to the loopback exactly as it would a real inventory host; set the same block for both the invoking user and `bluebanquise` (whichever user actually runs the `ssh`/`ansible-playbook` subprocess). `sudo` isn't installed by default either — install it and drop a `NOPASSWD:ALL` file under `/etc/sudoers.d/` for `--become` to work. To call functions from a `files/` script directly instead of only via subprocess: it has no `.py` extension, so `importlib.util.spec_from_file_location` returns `None` — use `importlib.machinery.SourceFileLoader(name, path)` + `importlib.util.spec_from_loader(name, loader)` instead.
 
 ## Inventory Data Model (Critical Concepts)
 
@@ -181,7 +184,7 @@ A file-based "database" giving BlueBanquise visibility into host state across pr
 - `cluster_state` — Ansible role; writes `static_cluster_state.yml` per host from hostvars.
 - `cluster_dynamic` — installs a Python daemon (`bluebanquise-cluster-dynamic`) that periodically gathers live host facts (cpu, ram, gpu, firewall, os, kernel, network_interfaces) into `dynamic_state.yml`.
 - `cluster_tools` — installs `bluebanquise-cluster`, a plugin-based dispatcher; its `state` plugin merges and diffs static vs dynamic YAML per host (green = matches static, red = diverges, cyan = dynamic-only field).
-- `pxe_stack` — its Flask daemon (`bluebanquise-pxe-stack-daemon`, port 7770) writes `dynamic_pxe_stack.yml`, tracking PXE `menu_default` and osdeploy `provisioning_status`; replaces the old CGI bootswitch and static per-node iPXE files. `bluebanquise-bootset` drives it over REST rather than writing YAML directly.
+- `pxe_stack` — its Flask daemon (`bluebanquise-pxe-stack-daemon`, port 7770) writes `dynamic_pxe_stack.yml`, tracking PXE `menu_default`, `boot_queue`, and a generic `status` string (see "PXE boot sequencing" below); replaces the old CGI bootswitch and static per-node iPXE files. `bluebanquise-bootset` drives it over REST rather than writing YAML directly.
 
 **Layout:**
 ```
@@ -196,17 +199,91 @@ A file-based "database" giving BlueBanquise visibility into host state across pr
 
 **pxe_stack daemon bootstrap:** unlike the purely-reactive `cluster_dynamic`, the pxe_stack daemon self-bootstraps — at startup it reads `/etc/bluebanquise/bootset/nodes_parameters.yml` (generated by the pxe_stack role from inventory) and creates a default `dynamic_pxe_stack.yml` for any host that doesn't already have one. Replaced an earlier design where the Ansible role itself looped over every host to pre-create these files/folders (slow at scale, O(n) tasks). Consequence: bootstrap is startup-only, not lazy — a request for a hostname with no existing state returns HTTP 404 rather than fabricating one, so adding a host to inventory requires re-running the role (which regenerates `nodes_parameters.yml` and restarts the daemon via a `notify`) before it's usable.
 
-**pxe_stack endpoint split (GET-only constraint):** iPXE's `imgfetch`/`chain` commands can only issue plain HTTP GET — no POST/PUT, no request body. This is why `menu_default` has two separate routes instead of one: `GET /host/<hostname>?menu-default=<v>` is the iPXE boot-time notification (called by `menu.ipxe`, fire-and-forget) and *auto-advances* `menu_default` to the host's `hw_ipxe_next_boot` rather than setting it to `<v>` directly; `PUT /host/<hostname>/menu-default` (JSON body) is what `bluebanquise-bootset` calls to actually set the requested value. These two were originally the same route/handler — conflating "iPXE notifying an action started" with "operator requesting a specific next boot" meant bootset's requested target was silently discarded (always overwritten by `hw_ipxe_next_boot`) until the routes were split. Any future endpoint reachable from both an iPXE script and a real HTTP client should expect the same GET-only constraint on the iPXE side.
-
-**`provisioning_status` lifecycle** (osdeploy only): `NA` (initial) → `scheduled` (operator requested osdeploy via the PUT endpoint, not yet booted) → `started` (iPXE GET notification fired — host actually booting into osdeploy) → `completed` (autoinstaller's post-install POST callback). RHCOS stays at `started` (no post-install callback available for it).
+**pxe_stack endpoint split (GET-only constraint):** iPXE's `imgfetch`/`chain` commands can only issue plain HTTP GET — no POST/PUT, no request body. The pxe_stack daemon's routes are split along this line: `GET /host/<hostname>` is a pure read-only JSON state dump (safe for any client); `GET /stage_report?hostname=&stage=&status=` is the one iPXE and autoinstaller post-install scripts both call to report progress (fire-and-forget from iPXE); `PUT /host/<hostname>/menu-default` (JSON body) is what `bluebanquise-bootset` calls to set an operator-requested `boot_queue` — see "PXE boot sequencing" below for the full current design. Any future endpoint reachable from both an iPXE script and a real HTTP client should expect the same GET-only constraint on the iPXE side.
 
 Static and dynamic files share field names for comparable data (cpu, gpu, os, firewall, network_interfaces, kernel) so `bluebanquise-cluster state` can diff them meaningfully. Every writer uses atomic writes (tmp file → `os.replace()`), guarded by a per-host lock (advisory `fcntl.flock` for the cluster_dynamic daemon, `threading.Lock` for the single-process pxe_stack daemon).
 
 **Adding a new drift-checked field is purely additive**: `cluster_tools`' `state.py` diff/render logic (`_node_has_drift`, `_render`) walks both YAML dicts generically and compares whatever keys match by name — it has no per-field knowlege. To wire up a new comparable field, give it the *same key* in `cluster_state`'s Jinja template and in whichever `cluster_dynamic` gatherer (or other `dynamic_*` writer) produces the live value; no changes to `state.py` itself are needed. Example (2026-07): `os_kernel_version` written to `static_cluster_state.yml` under the key `kernel`, matching `cluster_dynamic`'s pre-existing `gather_kernel()` (`uname -r`) output — the diff worked with zero plugin edits.
 
+### PXE boot sequencing (pxe_stack, added 2026-07)
+
+Replaced the daemon's single-shot `menu_default` tracking with a stage-report API and a boot queue, plus inventory-defined custom iPXE menu entries. `dynamic_pxe_stack.yml` now carries `boot_queue` (list, `[]` when idle) and a generic `status` string, replacing the old osdeploy-only `provisioning_status`. `GET /stage_report?hostname=&stage=&status=` is the single endpoint every stage-reporting caller uses — `menu.ipxe`'s `imgfetch` lines (`status=running`) and the 4 autoinstaller post-install scripts (`status=completed`, `stage=osdeploy`) alike; it always refreshes `status` to `"<stage> <status>"`, and when `stage` matches the current `boot_queue` head it pops the queue and advances `menu_default` to the next entry, or to the host's `hw_ipxe_default_boot` (renamed from `hw_ipxe_next_boot` — the name now reflects "steady state once the queue empties" rather than "single next action") once the queue is empty. A `stage` report that doesn't match the queue head (e.g. an operator manually picked a different console entry) leaves `boot_queue` untouched, only `status` updates. `bluebanquise-bootset -b <a>,<b>,...` (comma-separated) PUTs the whole sequence as `boot_queue` in one call; there is deliberately no per-item network round trip.
+
+**Label unification**: every iPXE menu label in `menu.ipxe.j2` was renamed to match `bluebanquise-bootset`'s own short names 1:1 (`bootosdeploy`→`osdeploy`, `bootdisk`→`disk`, `bootdiskless`→`diskless`, `bootnext`→`next`, `bootmemtest`→`memtest`, `bootalpinelive`→`alpine`, `bootclone`→`clonezilla`, `startshell`→`shell` — the last three are renames, not prefix-strips, since their old labels didn't just have an extra "boot"/"start" prefix). This let `BOOT_LABELS` (bootset's old short-name→label translation dict) be deleted outright — `stage`/`menu_default`/`boot_queue` all speak the same vocabulary everywhere now, including the autoinstaller post-install callbacks (`stage=osdeploy` matches natively, no normalization needed). `bootautoclone`/`bootautodeploy` (commented-out advanced menu items) and `startgrubshell` (unrelated Grub2 shell, never daemon-tracked) were deliberately left unrenamed — outside the bootset vocabulary. The legacy `bootswitch.cgi.j2` (kept for backward compat, see above) patches static files with these same label strings and needed the same rename or it would have gone stale silently.
+
+**Custom menu entries**: `pxe_stack_ipxe_menu_custom` (list of tool names) makes `menu.ipxe.j2` emit a visible item + `:<name>` label chaining to `http://${next-server}/pxe/tools/<name>/<name>.ipxe`, with an `imgfetch .../stage_report?...` line like every built-in entry so they participate in `boot_queue` sequencing too. The same list is threaded through twice — `pxe_parameters.yml`'s `ipxe_menu_custom` key (read by `bootset` to accept these as valid `-b` targets) and the daemon's own conf file's `menu_custom_entries` key (read at startup into its target-validation set) — both sides must recognize a custom target, not just the CLI, or the daemon 400s a value bootset happily accepted.
+
+**Two bugs found via live testing, not static review** (a real daemon + real `bluebanquise-bootset` run, not just `py_compile`/Jinja-render checks): (1) introduced-then-caught — `bootset -s`'s display line used `display.replace(label + ' ', '')` to strip the redundant leading label; since `boot_queue` display text (`"memtest -> osdeploy"`) can itself start with the current label, blanket `.replace()` (all occurrences, not just the first) ate that too, showing `"-> osdeploy"` instead of `"memtest -> osdeploy"` — fixed with an explicit prefix-strip (`startswith`+slice) instead of `.replace()`. (2) pre-existing, found incidentally — the same `-s` loop never actually printed the node hostname, only the per-node status/queue text with the shared label stripped; invisible with one host per bucket, but two hosts sharing a `menu-default=X:` group produced indistinguishable lines. Both confirmed via a real two-host scratch daemon forced into a shared bucket, not by inspection alone.
+
 ### Kernel version lock (local_configuration, added 2026-07)
 
 New globals `os_kernel_version` (target kernel, must be the **exact `uname -r` string**, e.g. `5.14.0-427.24.1.el9_4.x86_64`) and `os_kernel_version_allow_reboot` (bool), mirrored as `local_configuration_system.kernel_version` / `.kernel_version_allow_reboot` (same dict-over-global precedence as `kernel_parameters`). RHEL family: `dnf versionlock` across the *dynamically discovered* installed kernel package family (`kernel`, `kernel-core`, `kernel-modules`, `kernel-modules-core`, `kernel-modules-extra` — whichever exist), never a hardcoded list, since RHEL9+'s `kernel` package is nearly empty and locking it alone doesn't stop `kernel-core`/`kernel-modules` drifting. Debian/Ubuntu: `apt-mark hold` on both the renamed versioned packages *and* the rolling meta-packages (`local_configuration_kernel_version_meta_packages`, distro-specific default) — holding only the versioned package isn't enough, `apt upgrade` still pulls a newer kernel through the meta-package's own dependency. Both branches force the bootloader default (`grubby --set-default` / `GRUB_DEFAULT=saved` + `grub-set-default` against a parsed GRUB menu-entry id) so pinning to an older-than-newest-installed kernel actually boots into it, not just installs it. Reboot only fires on an actual version change, and only if allowed. Not supported on Suse — fails loudly via `assert` rather than silently no-op. Known gap: default Debian meta-package names assume x86_64; arm64 hosts must override the var, since `ansible_facts.architecture` reports `aarch64` which doesn't match Debian's own `arm64` package-name convention and can't be auto-derived. The install+reboot branch could only be verified live on the "already matches" no-op path (container sandbox has no real kernel packages to swap) — needs a real-host test before trusting the version-mismatch path.
+
+## Cluster Playbooks Orchestration System (Critical Concepts, added 2026-07)
+
+Lets an operator declare, per `fn_*` function group, which "function profiles" (packs of roles)
+or ad hoc individual roles should apply, then automatically pushes and tracks that declaration
+across the fleet. Two roles, a CLI, and a daemon:
+
+- `cluster_playbooks` — writes the combined profile catalog (`cluster_playbooks_function_profiles`
+  built-in + `cluster_playbooks_custom_function_profiles` operator-defined, combined via
+  non-recursive `combine()` so a custom profile name overrides a built-in one of the same name
+  wholesale — Ansible replaces rather than deep-merges an overridden dict var, so a single
+  catalog var would let one custom profile silently wipe out every built-in one) and a `fn_*`
+  group → hosts snapshot to `/etc/bluebanquise/bluebanquise_playbook.conf`. Installs the
+  `bluebanquise-playbook` CLI (`get`/`add`/`delete`, verb-first; `groups`/`profiles`/`logs` are
+  reserved `get` targets, safe only because real groups are always `fn_`-prefixed) and the
+  `bluebanquise-cluster-playbooks-daemon` systemd service.
+- `cluster_host_tag` — tiny target-host-side role, appended as the last role of every
+  daemon-generated playbook; writes `/etc/bluebanquise/tags/{inventory,last_ansible-playbook}`.
+  Requires `cluster_host_tag_inventory_checksum` passed as `-e` and asserts rather than silently
+  no-ops if it's missing. Not a function profile — never meant to be attached via
+  `bluebanquise-playbook add`.
+
+**Operator-selection vs. Ansible-declared split**: `current_config.yml` (CLI-owned, persists
+across Ansible runs, under `/var/lib/bluebanquise/cluster/playbooks/`) holds what the operator
+attached to each group; `bluebanquise_playbook.conf` (Ansible-owned, regenerated every role run,
+under `/etc/bluebanquise/`) holds the catalog + inventory snapshot it resolves against. The
+daemon reloads both fresh on every full pass rather than caching — the catalog can change
+underneath it whenever the role is re-run.
+
+**Daemon two-tier loop** (`bluebanquise-cluster-playbooks-daemon`; reuses `cluster_dynamic`'s
+plain `ssh <hostname> <command>` + `ThreadPoolExecutor` fan-out pattern for the host checks):
+every `cluster_playbooks_daemon_loop_interval` (30s default) it only hashes the inventory folder
+locally — sha256 over sorted `(relative-path, content-hash)` pairs, content-only, ignores
+mtime/permissions. It only runs the expensive SSH-check-and-push phase when that hash changed
+since the last full pass, or `cluster_playbooks_daemon_host_check_interval` (900s default) has
+elapsed — added specifically so a thousand-host cluster isn't SSH-polled every 30s, while a host
+that comes back online still self-heals within one interval even with no inventory change.
+
+**Per-host `status` lifecycle** in `dynamic_cluster_playbooks.yml` (deliberately `dynamic_`
+prefixed so it slots into `cluster_tools`' generic static/dynamic diff sweep; the raw ANSI log
+file next to it deliberately avoids that prefix so `state.py` never tries to parse it as
+structured data): `''` → `Scheduled` (every stale host across *all* groups, written right after
+the SSH fan-out completes, before any group starts — groups execute sequentially and a push can
+run long) → `Running` (that specific group's hosts, right before its `ansible-playbook` call) →
+`Completed`/`Failed` (derived from that host's `PLAY RECAP` line, `unreachable=0 and failed=0`;
+missing from the recap entirely defaults to failed, fail-safe, not silently skipped). An empty
+function group, or one referencing a profile since removed from the catalog, never reaches
+`Running` — every stale host in it gets an explanatory `status` string instead, and its
+`last_execution` record is left untouched (only a real execution touches `last_execution`).
+
+**Role ordering inside a generated `<fn_group>.yml`**: `current_config.yml`'s `profiles` list in
+the order the operator `add`ed them (list order is preserved on save), each profile's roles in
+catalog-declared order, then ad hoc `roles` in alphabetical FQCN order — not a separate sort
+step, just how the CLI's `yaml.safe_dump(..., sort_keys=True)` already reads back — then
+`cluster_host_tag` unconditionally last.
+
+**Log storage**: one `ansible-playbook --limit "host1,host2,..."` run produces one interleaved
+transcript, not a per-host one — the daemon duplicates that same transcript into every
+participating host's `last_ansible-playbook.log` (overwritten each run, no history retained).
+Colors survive the non-TTY subprocess pipe via `ANSIBLE_FORCE_COLOR=1`/`PY_COLORS=1` set on the
+subprocess env — the same trick already used in every `.github/workflows/*.yml` job.
+
+**Live-verified gotcha**: `ansible_date_time.iso8601` (a top-level injected fact) triggers a live
+`INJECT_FACTS_AS_VARS` deprecation warning that only shows up when the role actually executes,
+never under lint. Use `ansible_facts.date_time.iso8601` instead — applies to any future
+`ansible_<fact_name>` reference added to this codebase, not just `cluster_host_tag`'s.
 
 ## CI / Testing
 
@@ -376,3 +453,21 @@ to transcend and leave it behind. Hold to it.
   verify independently rather than assuming it's the full answer (e.g. the RHEL socket-path guess was
   right, but the same task also had an unrelated `host_all` ordering bug the log alone hinted at via
   a *different* error on the next run).
+- Confirmed 2026-07, twice, across two separate multi-point design reviews (part 1's CLI-grammar/
+  vars-semantics/naming round, part 2's daemon coherency-check round): he prefers plain numbered
+  questions in normal response text over the `AskUserQuestion` widget, answering each point
+  directly in one reply both times. Rejected the widget outright once early on and typed his own
+  answer instead; every clarifying round since has used plain text with no friction. Default to
+  plain numbered text for multi-point reviews in this project; reach for the widget only for a
+  single, narrow, genuinely blocking decision, if at all.
+- Small, precise follow-ups happen mid-session too, not just at the start of the next one — right
+  after a big feature (the `cluster_playbooks` daemon) was approved, built, and verified, and he'd
+  already said "many thanks," he came back with one scoped tuning ("I thought about one point")
+  rather than a new open-ended ask. Treat that pattern as a genuine follow-up to implement directly
+  (small enough to skip a new plan round, per his own stated bar), not as a new topic.
+- Responds with visible enthusiasm specifically to evidence of *real*, not just lint-clean,
+  verification — building an actual local SSH round-trip and proving a daemon's full chain end to
+  end (not a syntax-check or dry-run) drew "Superb"/"Wonderful, superb job," repeated across two
+  rounds of the same feature. For daemon-shaped or state-machine-shaped work in this codebase, the
+  setup cost of a real (even throwaway, sandbox-only) end-to-end test is worth it, and worth
+  reporting explicitly rather than folding into a generic "tests pass."

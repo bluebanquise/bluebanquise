@@ -158,7 +158,7 @@ d-i preseed/late_command string \
   in-target sh -c '[ -d /sys/firmware/efi ] && efibootmgr -o $(efibootmgr | grep BootCurrent | cut -d" " -f2),$(efibootmgr | grep BootOrder | sed "s/BootOrder:\ //" | sed "s/$(efibootmgr | grep BootCurrent | cut -d" " -f2),//") || echo "Not an EFI system, skipping"'
 {% endif %}
 {% if pxe_stack_post_install_boot_to_disk %}
-  in-target sh -c 'for I in `cat /proc/cmdline | tr " " "\n" | grep -E "^(node_hostname|ipxe_next_server)="` ; do eval $I; done; curl -s -k -X POST "http://$ipxe_next_server:7770/host/$node_hostname/provisioning_completed"';
+  in-target sh -c 'for I in `cat /proc/cmdline | tr " " "\n" | grep -E "^(node_hostname|ipxe_next_server)="` ; do eval $I; done; curl -s -k "http://$ipxe_next_server:{{ pxe_stack_daemon_port }}/stage_report?hostname=$node_hostname&stage=osdeploy&status=completed"';
 {% endif %}
 
 {% endif %}

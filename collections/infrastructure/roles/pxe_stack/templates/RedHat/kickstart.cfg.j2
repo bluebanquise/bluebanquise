@@ -150,7 +150,7 @@ echo '{{ pxe_stack_sudo_user }} ALL=(ALL:ALL) ALL' >> /etc/sudoers.d/{{ pxe_stac
 for I in `cat /proc/cmdline | tr " " "\n" | grep -E "^(node_hostname|ipxe_next_server)="` ; do eval $I; done
 
 echo "All went well, we can inform next-server we succeeded"
-curl -s -k -X POST "http://$ipxe_next_server:7770/host/$node_hostname/provisioning_completed"
+curl -s -k "http://$ipxe_next_server:{{ pxe_stack_daemon_port }}/stage_report?hostname=$node_hostname&stage=osdeploy&status=completed"
 {% endif %}
 
 {% if not pxe_stack_preserve_repositories %}

@@ -38,7 +38,7 @@ Files installed by these settings are:
    * `nodes_parameters.yml` contains all hosts PXE needed parameters (equipment profile, next boot action). It is read by the **bluebanquise-pxe-stack-daemon** at startup to initialize per-host state.
    * `pxe_parameters.yml` contains needed values for scripts to adapt to **current pxe server host** (these parameters do not apply to PXE booted hosts !!).
 * Scripts are located in /usr/bin/.
-* Per-host PXE state (current boot target, provisioning status) is tracked by the **bluebanquise-pxe-stack-daemon** under `/var/lib/bluebanquise/cluster/hosts/<hostname>/dynamic_pxe_stack.yml`. See "PXE Stack Daemon" below.
+* Per-host PXE state (current boot target, boot queue, status) is tracked by the **bluebanquise-pxe-stack-daemon** under `/var/lib/bluebanquise/cluster/hosts/<hostname>/dynamic_pxe_stack.yml`. See "PXE Stack Daemon" below.
 
 Administrator is also in charge or providing needed OS images for diskfull deployment into the `{{ pxe_stack_htdocs_path }}/pxe/netboots/` folder as detailed bellow.
 
@@ -424,15 +424,17 @@ At startup, the daemon reads `/etc/bluebanquise/bootset/nodes_parameters.yml` an
 The daemon exposes:
 
 * `GET /host/${hostname}.ipxe`: dynamically generated iPXE script for the host, based on its currently tracked state (replaces the old static `hosts/${hostname}.ipxe` file).
-* `GET /host/${hostname}?menu-default=<action>`: the iPXE boot-time notification, called by `menu.ipxe` (fire-and-forget, does not block booting if the daemon is unreachable). Records that a host is currently booting into `<action>`, and auto-advances `menu_default` to the host's configured `hw_ipxe_next_boot` (normally `disk`) to prevent an infinite reinstall loop. GET-only by necessity: iPXE's `imgfetch` cannot issue anything else.
-* `PUT /host/${hostname}/menu-default` (JSON body `{"menu_default": "<value>"}`): explicitly sets the host's next boot target. This is the one **bluebanquise-bootset** calls when an operator runs `-b <action>` - unlike the notification above, it sets `menu_default` to exactly the requested value rather than auto-advancing it.
-* `POST /host/${hostname}/provisioning_completed`: called by the autoinstaller's post-install script once OS deployment succeeds, to switch the host back to disk boot and mark provisioning as completed.
+* `GET /host/${hostname}`: returns the host's current state (`menu_default`, `boot_queue`, `status`, equipment profile, ...) as JSON. Read-only status API, useful for external tooling/monitoring.
+* `GET /stage_report?hostname=<h>&stage=<s>&status=<v>`: the stage tracking notification. Called both by `menu.ipxe`'s `imgfetch` lines (fire-and-forget, does not block booting if the daemon is unreachable - GET-only by necessity, iPXE's `imgfetch` cannot issue anything else) and by the autoinstaller's post-install script once OS deployment succeeds. `stage` is one of the built-in targets (`osdeploy`, `disk`, `diskless`, `next`, `memtest`, `alpine`, `clonezilla`, `shell`) or a configured custom entry (see `pxe_stack_ipxe_menu_custom` below); `status` is a free-form keyword (`running`, `completed`, ...). The daemon always refreshes `status` to `"<stage> <status>"`; when `stage` matches the current `boot_queue` head, it also pops the queue and advances `menu_default` to the next queued entry, falling back to the host's `hw_ipxe_default_boot` once the queue is empty.
+* `PUT /host/${hostname}/menu-default` (JSON body `{"boot_queue": ["<target>", ...]}`): explicitly sets the host's boot queue. This is the one **bluebanquise-bootset** calls when an operator runs `-b <target>[,<target>...]` - `menu_default` is set to the first entry of the queue.
 
 A request for a host with no tracked state returns an HTTP 404 rather than silently creating one - if this happens, check the host is in inventory and re-run the pxe_stack role.
 
 If the daemon does not respond, tools calling it (bluebanquise-bootset) print a clear error message; check its status with `systemctl status bluebanquise-pxe-stack-daemon` and its logs with `journalctl -u bluebanquise-pxe-stack-daemon -f`.
 
-**`provisioning_status` lifecycle** (applies to `osdeploy` only, visible via `bluebanquise-bootset -s`): `NA` (initial, no osdeploy ever requested) → `scheduled` (an operator asked for osdeploy via `bluebanquise-bootset -b osdeploy`, PUT endpoint above, but the host hasn't booted into it yet) → `started` (the host actually booted into osdeploy - the iPXE notification above fired) → `completed` (the post-install script called back). RHCOS stays at `started` since no post-install callback is available for it.
+**Boot sequences**: `bluebanquise-bootset -b memtest,osdeploy` asks a host to run memtest first, then deploy its OS, with no manual intervention in between - the daemon auto-advances `boot_queue` as each stage reports in via `/stage_report`. Tools that cannot report back over the network once started (memtest, for instance, has no way to signal completion) simply stay at `status: "memtest running"` until the host reboots into the next queued stage or a new report arrives; there's no way to detect memtest actually finishing on its own. `bluebanquise-bootset -s` shows the current `menu_default`, `status`, and remaining `boot_queue` for each host.
+
+**`hw_ipxe_default_boot`** (hw_\* inventory variable, default `disk`): the target a host falls back to once its `boot_queue` is exhausted. Use `next` on hardware where disk boot is unreliable.
 
 ### bluebanquise-bootset usage
 
@@ -468,6 +470,14 @@ It is also possible to work on a range of host, using nodeset formatting:
 
 ```
 bluebanquise-bootset -n c001,c002,c[010-020],login1 -b disk
+```
+
+`-b` also accepts a comma-separated sequence of targets, applied in order - the daemon
+auto-advances to the next one as each stage reports in, then falls back to `hw_ipxe_default_boot`
+once the sequence is exhausted. For instance, to run a memtest pass before redeploying:
+
+```
+bluebanquise-bootset -n c001 -b memtest,osdeploy
 ```
 
 To check current boot target and provisioning status of one or more hosts, use:
@@ -517,7 +527,7 @@ To be macroscopic:
    * *sanboot --no-describe --drive 0x80* if host is legacy/bios/pcbios based. This is a simple command that boot on disk.
    * *bin/${arch}/grub2_efi_autofind.img* if host is EFI based. This grub2 image will look for a disk with a know operating system, and boot on it.
 
-In case of an OS deployment, if this deployment succeed, in the post install script section, remote host will POST to the **bluebanquise-pxe-stack-daemon** (`/host/${hostname}/provisioning_completed`), to boot next to disk and mark provisioning as completed. The legacy CGI script (*/var/www/cgi-bin/bootswitch.cgi*) is still installed for backward compatibility but is no longer the primary mechanism.
+In case of an OS deployment, if this deployment succeed, in the post install script section, remote host will call the **bluebanquise-pxe-stack-daemon**'s stage report endpoint (`/stage_report?hostname=${hostname}&stage=osdeploy&status=completed`), to boot next to disk and mark provisioning as completed. The legacy CGI script (*/var/www/cgi-bin/bootswitch.cgi*) is still installed for backward compatibility but is no longer the primary mechanism.
 To keep boot to osdeploy, set variable `pxe_stack_post_install_boot_to_disk` to *false*.
 
 All files are manually editable. Also, note that an unregistered host (so no hostnames provided by the dhcp, or one the daemon has no tracked state for) will get a plain iPXE shell with an explanatory error message, rather than silently failing.
@@ -829,6 +839,20 @@ pxe_stack_enable_clonezilla: true
 pxe_stack_enable_alpine: true
 pxe_stack_enable_memtest: true
 ```
+
+#### Custom menu entries
+
+Extra tools/images can be exposed in the iPXE menu without touching this role's templates, via:
+
+```yaml
+pxe_stack_ipxe_menu_custom:
+  - windowspe
+  - coreboot
+```
+
+Each entry adds a visible menu item chaining to `http://${next-server}/pxe/tools/<item>/<item>.ipxe`
+(place your own file there) and is accepted as a valid `bluebanquise-bootset -b` / `/stage_report`
+`stage` target alongside the built-in ones.
 
 ### Sudo user
 

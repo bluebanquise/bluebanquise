@@ -6,15 +6,23 @@ Listens on port 7770.
 
 Endpoints:
   GET  /host/<hostname>.ipxe                    Return dynamic iPXE host file
-  GET  /host/<hostname>?menu-default=<v>        iPXE boot-time notification (imgfetch, GET-only by
-                                                 construction); advances menu_default to the host's
-                                                 hw_ipxe_next_boot, does not set it to <v> directly
-  PUT  /host/<hostname>/menu-default            Explicitly set menu_default. JSON body:
-                                                 {"menu_default": "<v>"}. Used by bluebanquise-bootset.
-  POST /host/<hostname>/provisioning_completed  Mark provisioning as completed
+  GET  /host/<hostname>                          Return current host state as JSON
+  GET  /stage_report?hostname=<h>&stage=<s>&status=<v>
+                                                 Stage tracking notification (iPXE imgfetch calls,
+                                                 autoinstaller post-install callbacks). GET-only by
+                                                 construction: iPXE's imgfetch cannot issue anything
+                                                 else. Always refreshes the host's status string;
+                                                 when <s> matches the current boot_queue head, pops
+                                                 it and advances menu_default to the next queued
+                                                 entry (or hw_ipxe_default_boot once the queue is
+                                                 empty).
+  PUT  /host/<hostname>/menu-default            Explicitly set the host's boot queue. JSON body:
+                                                 {"boot_queue": ["memtest", "osdeploy"]}. Used by
+                                                 bluebanquise-bootset.
 """
 
 import argparse
+import json
 import logging
 import os
 import sys
@@ -33,17 +41,22 @@ config = {}
 _host_locks = {}
 _host_locks_mutex = threading.Lock()
 
-# Valid full iPXE menu entry labels that can be used as menu-default.
-VALID_MENU_DEFAULTS = {
-    'bootosdeploy',
-    'bootdisk',
-    'bootdiskless',
-    'bootnext',
-    'bootmemtest',
-    'bootalpinelive',
-    'bootclone',
-    'startshell',
+# Valid menu targets, named after their bluebanquise-bootset short name (labels in menu.ipxe.j2
+# match these 1:1, so no translation table is needed anywhere in the stack).
+BUILTIN_MENU_TARGETS = {
+    'osdeploy',
+    'disk',
+    'diskless',
+    'next',
+    'memtest',
+    'alpine',
+    'clonezilla',
+    'shell',
 }
+
+# BUILTIN_MENU_TARGETS plus whatever pxe_stack_ipxe_menu_custom entries the role configured.
+# Populated in main() from config['menu_custom_entries'].
+valid_menu_targets = set(BUILTIN_MENU_TARGETS)
 
 
 # ─── helpers ──────────────────────────────────────────────────────────────────
@@ -80,14 +93,15 @@ def _save_state(hostname, state):
     os.replace(tmp, _state_path(hostname))
 
 
-def _validate_menu_default_value(hostname, menu_default):
-    """Validate a menu_default value against VALID_MENU_DEFAULTS. Returns an error Response, or None if valid."""
-    if not menu_default:
-        logging.warning('[%s] Missing menu_default value', hostname)
-        return Response('Missing menu_default value.\n', status=400)
-    if menu_default not in VALID_MENU_DEFAULTS:
-        logging.warning('[%s] Invalid menu_default value: %r', hostname, menu_default)
-        return Response('Invalid menu_default value: {}\n'.format(menu_default), status=400)
+def _validate_menu_target(hostname, value, param_name):
+    """Validate a target label (menu_default / stage / boot_queue entry) against
+    valid_menu_targets. Returns an error Response, or None if valid."""
+    if not value:
+        logging.warning('[%s] Missing %s value', hostname, param_name)
+        return Response('Missing {} value.\n'.format(param_name), status=400)
+    if value not in valid_menu_targets:
+        logging.warning('[%s] Invalid %s value: %r', hostname, param_name, value)
+        return Response('Invalid {} value: {}\n'.format(param_name, value), status=400)
     return None
 
 
@@ -119,10 +133,11 @@ def bootstrap_hosts(nodes_parameters_path):
 
         state = {
             'hostname': hostname,
-            'menu_default': 'bootdisk',
-            'provisioning_status': 'NA',
+            'menu_default': 'disk',
+            'boot_queue': [],
+            'status': '',
             'equipment_profile': node_vars.get('equipment_profile', ''),
-            'hw_ipxe_next_boot': node_vars.get('hw_ipxe_next_boot', 'bootdisk'),
+            'hw_ipxe_default_boot': node_vars.get('hw_ipxe_default_boot', 'disk'),
             'dedicated_kernel_parameters': '',
             'node_image': 'none',
             'extra_parameters': 'none',
@@ -156,7 +171,7 @@ def serve_host_ipxe(hostname):
         ])
         return Response(body, mimetype='text/plain', status=404)
 
-    menu_default            = state.get('menu_default', 'bootdisk')
+    menu_default            = state.get('menu_default', 'disk')
     equipment_profile       = state.get('equipment_profile', '')
     kernel_params           = state.get('dedicated_kernel_parameters', '')
     node_image              = state.get('node_image', 'none')
@@ -192,32 +207,60 @@ def serve_host_ipxe(hostname):
 
 
 @app.route('/host/<hostname>', methods=['GET'])
-def notify_boot_action(hostname):
-    """iPXE boot-time notification (menu.ipxe imgfetch). GET-only: iPXE cannot issue PUT/POST."""
-    menu_default = request.args.get('menu-default', '').strip()
-    logging.info('[%s] GET /host/%s?menu-default=%s from %s',
-                 hostname, hostname, menu_default, request.remote_addr)
+def get_host_state(hostname):
+    """Return the host's current dynamic_pxe_stack.yml as JSON. Read-only status API."""
+    logging.info('[%s] GET /host/%s from %s', hostname, hostname, request.remote_addr)
+    with _host_lock(hostname):
+        state = _load_state(hostname)
 
-    error = _validate_menu_default_value(hostname, menu_default)
+    if state is None:
+        return _host_not_found_response(hostname)
+
+    return Response(json.dumps(state, indent=2) + '\n', mimetype='application/json')
+
+
+@app.route('/stage_report', methods=['GET'])
+def stage_report():
+    """Stage tracking notification. Called both by menu.ipxe's imgfetch lines (fire-and-forget,
+    GET-only since iPXE cannot issue anything else) and by autoinstaller post-install scripts
+    (osdeploy completion). Always refreshes the host's status string; advances boot_queue/
+    menu_default only when the reported stage matches the current queue head."""
+    hostname = request.args.get('hostname', '').strip()
+    stage = request.args.get('stage', '').strip()
+    status = request.args.get('status', '').strip()
+    logging.info('[%s] GET /stage_report stage=%s status=%s from %s',
+                 hostname, stage, status, request.remote_addr)
+
+    if not hostname:
+        logging.warning('Missing hostname value in /stage_report request')
+        return Response('Missing hostname value.\n', status=400)
+
+    error = _validate_menu_target(hostname, stage, 'stage')
     if error:
         return error
+    if not status:
+        logging.warning('[%s] Missing status value', hostname)
+        return Response('Missing status value.\n', status=400)
 
     with _host_lock(hostname):
         state = _load_state(hostname)
         if state is None:
             return _host_not_found_response(hostname)
 
-        old_default = state.get('menu_default', 'bootdisk')
-        next_boot = state.get('hw_ipxe_next_boot', 'bootdisk')
-        state['menu_default'] = next_boot
+        state['status'] = '{} {}'.format(stage, status)
 
-        if menu_default == 'bootosdeploy':
-            state['provisioning_status'] = 'started'
-            logging.info('[%s] osdeploy started — menu_default switched %s -> %s',
-                         hostname, old_default, next_boot)
+        boot_queue = state.get('boot_queue') or []
+        if boot_queue and boot_queue[0] == stage:
+            boot_queue = boot_queue[1:]
+            old_default = state.get('menu_default', 'disk')
+            new_default = boot_queue[0] if boot_queue else state.get('hw_ipxe_default_boot', 'disk')
+            state['boot_queue'] = boot_queue
+            state['menu_default'] = new_default
+            logging.info('[%s] Stage %s reported (%s) — queue advanced, menu_default %s -> %s',
+                         hostname, stage, status, old_default, new_default)
         else:
-            logging.info('[%s] action %s triggered — menu_default switched %s -> %s',
-                         hostname, menu_default, old_default, next_boot)
+            logging.info('[%s] Stage %s reported (%s) — no matching queue head (queue=%s), '
+                         'menu_default unchanged', hostname, stage, status, boot_queue)
 
         _save_state(hostname, state)
 
@@ -226,50 +269,37 @@ def notify_boot_action(hostname):
 
 @app.route('/host/<hostname>/menu-default', methods=['PUT'])
 def set_menu_default(hostname):
-    """Explicitly set menu_default. Used by bluebanquise-bootset (an operator asking for a
-    specific next boot target), as opposed to notify_boot_action's iPXE-driven auto-advance."""
+    """Explicitly set the host's boot queue. Used by bluebanquise-bootset (an operator asking
+    for a specific next boot sequence), as opposed to /stage_report's iPXE-driven auto-advance."""
     payload = request.get_json(silent=True) or {}
-    menu_default = str(payload.get('menu_default', '')).strip()
-    logging.info('[%s] PUT /host/%s/menu-default menu_default=%s from %s',
-                 hostname, hostname, menu_default, request.remote_addr)
+    boot_queue = payload.get('boot_queue')
+    logging.info('[%s] PUT /host/%s/menu-default boot_queue=%s from %s',
+                 hostname, hostname, boot_queue, request.remote_addr)
 
-    error = _validate_menu_default_value(hostname, menu_default)
-    if error:
-        return error
+    if not isinstance(boot_queue, list) or not boot_queue:
+        logging.warning('[%s] Missing or invalid boot_queue value', hostname)
+        return Response('Missing or invalid boot_queue value (expected a non-empty list).\n',
+                         status=400)
+
+    for target in boot_queue:
+        error = _validate_menu_target(hostname, target, 'boot_queue entry')
+        if error:
+            return error
 
     with _host_lock(hostname):
         state = _load_state(hostname)
         if state is None:
             return _host_not_found_response(hostname)
 
-        old_default = state.get('menu_default', 'bootdisk')
-        state['menu_default'] = menu_default
+        old_default = state.get('menu_default', 'disk')
+        state['boot_queue'] = boot_queue
+        state['menu_default'] = boot_queue[0]
 
-        if menu_default == 'bootosdeploy':
-            state['provisioning_status'] = 'scheduled'
-            logging.info('[%s] osdeploy scheduled — menu_default set %s -> %s (requested by %s)',
-                         hostname, old_default, menu_default, request.remote_addr)
-        else:
-            logging.info('[%s] menu_default set %s -> %s (requested by %s)',
-                         hostname, old_default, menu_default, request.remote_addr)
+        logging.info('[%s] boot_queue set to %s — menu_default %s -> %s (requested by %s)',
+                     hostname, boot_queue, old_default, state['menu_default'], request.remote_addr)
 
         _save_state(hostname, state)
 
-    return Response('OK\n', status=200)
-
-
-@app.route('/host/<hostname>/provisioning_completed', methods=['POST'])
-def provisioning_completed(hostname):
-    logging.info('[%s] POST /host/%s/provisioning_completed from %s',
-                 hostname, hostname, request.remote_addr)
-    with _host_lock(hostname):
-        state = _load_state(hostname)
-        if state is None:
-            return _host_not_found_response(hostname)
-        state['provisioning_status'] = 'completed'
-        _save_state(hostname, state)
-
-    logging.info('[%s] Provisioning marked as completed', hostname)
     return Response('OK\n', status=200)
 
 
@@ -296,6 +326,7 @@ def load_config(path):
     logging.info('Tmp path:  %s', cfg.get('tmp_path'))
     logging.info('Nodes parameters path: %s', cfg.get('nodes_parameters_path'))
     logging.info('Port:      %s', cfg.get('port', 7770))
+    logging.info('Custom menu entries: %s', cfg.get('menu_custom_entries', []))
     return cfg
 
 
@@ -314,6 +345,9 @@ def main():
 
     if not args.log_level:
         setup_logging(config.get('log_level', 'INFO'))
+
+    global valid_menu_targets
+    valid_menu_targets = set(BUILTIN_MENU_TARGETS) | set(config.get('menu_custom_entries') or [])
 
     os.makedirs(config.get('tmp_path', '/var/lib/bluebanquise/cluster/.tmp'), exist_ok=True)
 

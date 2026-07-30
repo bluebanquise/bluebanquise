@@ -119,6 +119,12 @@ pxe_stack_enable_clonezilla: true
 pxe_stack_enable_alpine: true
 pxe_stack_enable_memtest: true
 
+### Memtest
+
+# Number of memtest passes before rebooting automatically.
+# If test detect any memory errors, system will not reboot.
+pxe_stack_memtest_maxpasses: 2
+
 ### CLONEZILLA
 # Allows to backup/restore systems, or even deploy multiple systems via images.
 # Be aware that pxe_stack role does not handle nfs server, you will have to
@@ -138,9 +144,16 @@ pxe_stack_firewall_services_to_add:
 ############################################################
 ### PXE STACK DAEMON
 
-# hw_* variable: menu entry to auto-set when any iPXE action is triggered.
-# Typically 'bootdisk'. Use 'bootnext' on hardware where disk boot is unreliable.
-hw_ipxe_next_boot: bootdisk  # noqa: var-naming[no-role-prefix]
+# hw_* variable: menu entry the host falls back to once its requested boot queue
+# (bluebanquise-bootset -b <a>,<b>,...) is exhausted.
+# Typically 'disk'. Use 'next' on hardware where disk boot is unreliable.
+hw_ipxe_default_boot: disk  # noqa: var-naming[no-role-prefix]
+
+# Extra iPXE menu entries, in addition to the standard ones (osdeploy, disk, diskless, next,
+# memtest, alpine, clonezilla, shell). Each item is a tool name; menu.ipxe.j2 adds a matching
+# visible menu entry chaining to http://${next-server}/pxe/tools/<item>/<item>.ipxe, and both
+# bluebanquise-bootset and the pxe-stack daemon accept it as a valid -b / stage_report target.
+pxe_stack_ipxe_menu_custom: []
 
 pxe_stack_daemon_script_path: /usr/local/sbin/bluebanquise-pxe-stack-daemon
 pxe_stack_daemon_conf_path: /etc/bluebanquise/pxe_stack_daemon.conf

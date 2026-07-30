@@ -5,3 +5,4 @@ pxe_parameters:
   ansible_selinux_status: {{ ansible_facts.selinux.status }}
   htdocs_path: {{ pxe_stack_htdocs_path }}
   cluster_base_path: {{ pxe_stack_cluster_base_path }}
+  ipxe_menu_custom: {{ pxe_stack_ipxe_menu_custom | default([]) }}

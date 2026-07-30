@@ -1,0 +1,14 @@
+#jinja2: lstrip_blocks: True
+# {{ ansible_managed }}
+---
+{% set _function_groups = {} %}
+{% for gname in groups | sort %}
+  {% if gname.startswith('fn_') %}
+    {% do _function_groups.update({gname: groups[gname] | sort}) %}
+  {% endif %}
+{% endfor %}
+{% set _conf = {
+    'function_profiles': cluster_playbooks_function_profiles | combine(cluster_playbooks_custom_function_profiles),
+    'function_groups': _function_groups
+} %}
+{{ _conf | to_nice_yaml(indent=2) }}

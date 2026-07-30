@@ -1,0 +1,73 @@
+---
+cluster_playbooks_conf_path: /etc/bluebanquise/bluebanquise_playbook.conf
+cluster_playbooks_script_path: /usr/local/sbin/bluebanquise-playbook
+cluster_playbooks_storage_path: /var/lib/bluebanquise/cluster/playbooks
+
+cluster_playbooks_function_profiles:
+  baremetal_server:
+    bluebanquise.infrastructure.local_configuration: {}
+    bluebanquise.infrastructure.nic: {}
+    bluebanquise.infrastructure.hosts_file: {}
+  cluster_management:
+    bluebanquise.infrastructure.dns_server: {}
+    bluebanquise.infrastructure.dhcp_server: {}
+    bluebanquise.infrastructure.http_server: {}
+    bluebanquise.infrastructure.time:
+      vars:
+        time_profile: server
+    bluebanquise.infrastructure.pxe_stack: {}
+  cluster_client:
+    bluebanquise.infrastructure.dns_client: {}
+    bluebanquise.infrastructure.time:
+      vars:
+        time_profile: client
+  nfs_server:
+    bluebanquise.infrastructure.nfs:
+      vars:
+        nfs_profile:
+          - server
+  nfs_client:
+    bluebanquise.infrastructure.nfs:
+      vars:
+        nfs_profile:
+          - client
+  slurm_controller:
+    bluebanquise.infrastructure.slurm:
+      vars:
+        slurm_profile: controller
+  slurm_worker:
+    bluebanquise.infrastructure.slurm:
+      vars:
+        slurm_profile: compute
+  slurm_submitter:
+    bluebanquise.infrastructure.slurm:
+      vars:
+        slurm_profile: submitter
+
+cluster_playbooks_custom_function_profiles: {}
+
+# --- bluebanquise-cluster-playbooks-daemon ---
+
+cluster_playbooks_daemon_conf_path: /etc/bluebanquise/cluster_playbooks_daemon.conf
+cluster_playbooks_daemon_script_path: /usr/local/sbin/bluebanquise-cluster-playbooks-daemon
+
+# Cheap tick: just hash the inventory folder locally, no SSH.
+cluster_playbooks_daemon_loop_interval: 30
+# Expensive pass: SSH-check every host's tag and push stale ones. Only runs when the inventory
+# checksum changed since the last pass, or this many seconds have elapsed since the last one -
+# keeps a quiet, large cluster from being SSH-polled every 30s.
+cluster_playbooks_daemon_host_check_interval: 900
+
+cluster_playbooks_daemon_thread_pool_size: 100
+cluster_playbooks_daemon_ssh_timeout: 10
+cluster_playbooks_daemon_log_level: INFO
+
+cluster_playbooks_daemon_inventory_path: /var/lib/bluebanquise/inventory
+cluster_playbooks_daemon_ansible_playbook_bin: /var/lib/bluebanquise/ansible_venv/bin/ansible-playbook
+cluster_playbooks_daemon_ansible_config_path: /var/lib/bluebanquise/bluebanquise/ansible.cfg
+cluster_playbooks_daemon_host_tag_path: /etc/bluebanquise/tags
+
+cluster_playbooks_hosts_base_path: /var/lib/bluebanquise/cluster/hosts
+cluster_playbooks_tmp_path: /var/lib/bluebanquise/cluster/.tmp
+cluster_playbooks_log_filename: last_ansible-playbook.log
+cluster_playbooks_metadata_filename: dynamic_cluster_playbooks.yml

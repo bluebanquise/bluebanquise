@@ -55,7 +55,9 @@ class bcolors:
     UNDERLINE = '\033[4m'
 
 
-# User-facing boot option names and their corresponding iPXE menu-default labels.
+# Built-in boot targets. These match the iPXE menu labels in menu.ipxe.j2 1:1 - no translation
+# table needed. Inventory-defined custom entries (pxe_stack_ipxe_menu_custom) are read from
+# pxe_parameters.yml and added to this list at runtime, see valid_targets below.
 BOOT_OPTIONS = [
     "osdeploy",
     "disk",
@@ -66,17 +68,6 @@ BOOT_OPTIONS = [
     "clonezilla",
     "shell",
 ]
-
-BOOT_LABELS = {
-    "osdeploy":   "bootosdeploy",
-    "disk":       "bootdisk",
-    "diskless":   "bootdiskless",
-    "next":       "bootnext",
-    "memtest":    "bootmemtest",
-    "alpine":     "bootalpinelive",
-    "clonezilla": "bootclone",
-    "shell":      "startshell",
-}
 
 DAEMON_URL = 'http://localhost:7770'
 DAEMON_TIMEOUT = 10
@@ -121,10 +112,10 @@ def nodesetexpand(znodeset):
     return nodeset
 
 
-def daemon_set_boot(node, label):
-    """Call the pxe-stack-daemon to set menu-default for a node. Verbose on failure."""
+def daemon_set_boot(node, boot_queue):
+    """Call the pxe-stack-daemon to set the boot queue for a node. Verbose on failure."""
     url = '{}/host/{}/menu-default'.format(DAEMON_URL, node)
-    payload = json.dumps({'menu_default': label}).encode('utf-8')
+    payload = json.dumps({'boot_queue': boot_queue}).encode('utf-8')
     logging.info('    ├── ' + bcolors.OKBLUE + 'Calling daemon: PUT ' + url + ' ' +
                  payload.decode('utf-8') + bcolors.ENDC)
     try:
@@ -181,8 +172,11 @@ parser.add_argument("-n", "--nodes", dest="nodes", required=True,
                     help="Target node(s). Use nodeset format for ranges.", metavar="NODE")
 parser.add_argument("-s", "--status", dest="status", action="store_true",
                     help="Display current nodes boot target status.")
-parser.add_argument("-b", "--boot", dest="boot", choices=BOOT_OPTIONS,
-                    help="Next pxe boot: can be {}.".format(', '.join(BOOT_OPTIONS)))
+parser.add_argument("-b", "--boot", dest="boot",
+                    help="Next pxe boot sequence: comma-separated list of one or more targets, "
+                         "applied in order and auto-advanced by the daemon as each one boots. "
+                         "Built-in: {} (plus any pxe_stack_ipxe_menu_custom entries). "
+                         "Example: memtest,osdeploy".format(', '.join(BOOT_OPTIONS)))
 parser.add_argument("-i", "--image", dest="image", default="none",
                     help="Specify diskless or clone image to be used.")
 parser.add_argument("-e", "--extra-parameters", dest="extra_parameters", default="none",
@@ -222,6 +216,9 @@ pxe_parameters = load_file('/etc/bluebanquise/bootset/pxe_parameters.yml')
 cluster_base_path = pxe_parameters.get('pxe_parameters', {}).get(
     'cluster_base_path', '/var/lib/bluebanquise/cluster/hosts')
 
+custom_entries = pxe_parameters.get('pxe_parameters', {}).get('ipxe_menu_custom') or []
+valid_targets = BOOT_OPTIONS + list(custom_entries)
+
 # Load tenants only if exists
 tenants = {}
 if os.path.exists('/etc/bluebanquise/bootset/tenants.yml'):
@@ -240,19 +237,19 @@ if passed_arguments.status:
             unknown.append(node)
             continue
 
-        label = state.get('menu_default', 'bootdisk')
-        prov_status = state.get('provisioning_status') or 'NA'
-
-        display = '{} [provisioning: {}]'.format(label, prov_status)
+        label = state.get('menu_default', 'disk')
+        status = state.get('status') or 'NA'
+        boot_queue = state.get('boot_queue') or []
+        queue_display = ' -> '.join(boot_queue) if boot_queue else '-'
 
         if label not in by_boot:
             by_boot[label] = []
-        by_boot[label].append((node, display))
+        by_boot[label].append((node, status, queue_display))
 
     for label, nodes in sorted(by_boot.items()):
         print('menu-default={} :'.format(label))
-        for node, display in nodes:
-            print('  {}'.format(display.replace(label + ' ', '')))
+        for node, status, queue_display in nodes:
+            print('  {}: [status: {}] [queue: {}]'.format(node, status, queue_display))
         print()
     if unknown:
         print('No state file: {}'.format(', '.join(unknown)))
@@ -260,9 +257,14 @@ if passed_arguments.status:
 # ─── boot ─────────────────────────────────────────────────────────────────────
 
 elif passed_arguments.boot:
-    label = BOOT_LABELS[passed_arguments.boot]
+    boot_queue = [item.strip() for item in passed_arguments.boot.split(',') if item.strip()]
+    invalid = [item for item in boot_queue if item not in valid_targets]
+    if invalid:
+        logging.error(bcolors.FAIL + 'Invalid boot target(s): {}. Valid targets: {}'.format(
+            ', '.join(invalid), ', '.join(valid_targets)) + bcolors.ENDC)
+        sys.exit(1)
 
     for node in nodesetexpand(passed_arguments.nodes):
         logging.info(bcolors.OKBLUE + 'Processing node ' + str(node) + ' ...' + bcolors.ENDC)
-        logging.info('    ├── ' + bcolors.OKBLUE + 'Setting menu-default=' + label + bcolors.ENDC)
-        daemon_set_boot(node=node, label=label)
+        logging.info('    ├── ' + bcolors.OKBLUE + 'Setting boot queue=' + str(boot_queue) + bcolors.ENDC)
+        daemon_set_boot(node=node, boot_queue=boot_queue)

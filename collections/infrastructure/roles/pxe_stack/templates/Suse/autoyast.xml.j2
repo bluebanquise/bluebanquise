@@ -184,7 +184,7 @@ echo "Defaults:sles !targetpw
 for I in `cat /proc/cmdline | tr " " "\n" | grep -E "^ipxe_next_server="` ; do eval $I; done
 
 echo "All went well, we can inform next-server we succeeded"
-curl -s -k -X POST "http://$ipxe_next_server:7770/host/$(hostname -s)/provisioning_completed"
+curl -s -k "http://$ipxe_next_server:{{ pxe_stack_daemon_port }}/stage_report?hostname=$(hostname -s)&stage=osdeploy&status=completed"
 {% endif %}
 
 ]]>

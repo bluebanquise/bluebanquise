@@ -1,0 +1,19 @@
+#jinja2: lstrip_blocks: True
+# {{ ansible_managed }}
+---
+loop_interval: {{ cluster_playbooks_daemon_loop_interval }}
+host_check_interval: {{ cluster_playbooks_daemon_host_check_interval }}
+thread_pool_size: {{ cluster_playbooks_daemon_thread_pool_size }}
+ssh_timeout: {{ cluster_playbooks_daemon_ssh_timeout }}
+log_level: {{ cluster_playbooks_daemon_log_level }}
+inventory_path: {{ cluster_playbooks_daemon_inventory_path }}
+ansible_playbook_bin: {{ cluster_playbooks_daemon_ansible_playbook_bin }}
+ansible_config_path: {{ cluster_playbooks_daemon_ansible_config_path }}
+host_tag_path: {{ cluster_playbooks_daemon_host_tag_path }}
+conf_path: {{ cluster_playbooks_conf_path }}
+current_config_path: {{ cluster_playbooks_storage_path }}/current_config.yml
+playbooks_path: {{ cluster_playbooks_storage_path }}
+hosts_base_path: {{ cluster_playbooks_hosts_base_path }}
+tmp_path: {{ cluster_playbooks_tmp_path }}
+log_filename: {{ cluster_playbooks_log_filename }}
+metadata_filename: {{ cluster_playbooks_metadata_filename }}
