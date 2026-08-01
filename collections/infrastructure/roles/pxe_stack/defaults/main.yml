@@ -160,6 +160,6 @@ pxe_stack_daemon_conf_path: /etc/bluebanquise/pxe_stack_daemon.conf
 pxe_stack_daemon_port: 7770
 pxe_stack_daemon_log_level: INFO
 
-# These match the cluster state paths from cluster_state / cluster_dynamic roles.
+# These match the cluster state paths from the cluster_state role.
 pxe_stack_cluster_base_path: /var/lib/bluebanquise/cluster/hosts
 pxe_stack_cluster_tmp_path: /var/lib/bluebanquise/cluster/.tmp

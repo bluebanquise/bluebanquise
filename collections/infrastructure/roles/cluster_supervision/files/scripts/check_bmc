@@ -1,0 +1,248 @@
+#!/opt/bluebanquise/bluebanquise_venv/bin/python3
+"""
+Local check: BMC health via IPMI or Redfish, whichever protocol the host's
+hw_board_authentication declares. Reuses bluebanquise_power's two ideas:
+
+  - the per-host bmc block (name/ip4) + hw_board_authentication (protocol/user/password),
+    generated into cluster_supervision_checks.conf by the cluster_supervision role exactly the
+    way bluebanquise-power.yml.j2 does it.
+  - Redfish's vendor-agnostic discovery: never assume a vendor-specific Systems/Chassis id
+    (Dell's "System.Embedded.1", etc.) - list the collection and walk every member found,
+    trusting the BMC's own Status.Health/HealthRollup rather than hardcoding thresholds.
+
+Usage (as invoked by the supervision daemon): check_bmc <hostname> [lookback_hours]
+lookback_hours (default 24) bounds how far back into the SEL/Event log we look for
+Critical/Warning entries, so a stale unacknowledged entry from months ago doesn't page forever.
+
+Exit 0 / "OK: ..." on a clean bill of health, exit 2 / "CRITICAL: ..." otherwise - same
+convention as every other probe in this role, so the daemon doesn't need to special-case a
+Python check among the bash ones.
+"""
+
+import subprocess
+import sys
+from datetime import datetime, timedelta, timezone
+
+import yaml
+
+CONFIG_PATH = '/etc/bluebanquise/cluster_supervision_checks.conf'
+
+
+def load_bmc_config(hostname):
+    try:
+        with open(CONFIG_PATH, 'r') as f:
+            data = yaml.safe_load(f) or {}
+    except OSError as e:
+        print('CRITICAL: could not read {}: {}'.format(CONFIG_PATH, e))
+        sys.exit(2)
+
+    host_entry = (data.get('hosts', {}) or {}).get(hostname)
+    if not host_entry:
+        print('CRITICAL: host {!r} not found in {}'.format(hostname, CONFIG_PATH))
+        sys.exit(2)
+
+    bmc = host_entry.get('bmc')
+    if not bmc:
+        print('CRITICAL: no bmc block for {!r} in {} - is bmc/hw_board_authentication set in '
+              'the inventory for this host?'.format(hostname, CONFIG_PATH))
+        sys.exit(2)
+
+    for key in ('name', 'ip4', 'protocol', 'user', 'password'):
+        if not bmc.get(key):
+            print('CRITICAL: bmc.{} missing for {!r} in {}'.format(key, hostname, CONFIG_PATH))
+            sys.exit(2)
+
+    return bmc
+
+
+# ─── IPMI ───────────────────────────────────────────────────────────────────────
+
+def ipmitool(bmc, args, timeout=15):
+    cmd = ['timeout', str(timeout), 'ipmitool', '-I', 'lanplus',
+           '-H', bmc['name'], '-U', bmc['user'], '-P', bmc['password']] + args
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        return result.returncode, result.stdout, result.stderr
+    except OSError as e:
+        return -1, '', 'Could not run ipmitool: {}'.format(e)
+
+
+def check_ipmi(bmc, lookback_hours):
+    problems = []
+
+    # 1. Sensor states: "ok" and "ns" (no reading - typically an unpopulated slot) are fine,
+    # anything else (nc=non-critical, cr=critical, nr=non-recoverable, ...) is flagged.
+    rc, stdout, stderr = ipmitool(bmc, ['sdr', 'elist'])
+    if rc != 0:
+        problems.append('Could not query sensors (ipmitool sdr elist rc={}): {}'.format(rc, stderr.strip()))
+    else:
+        for line in stdout.splitlines():
+            fields = [f.strip() for f in line.split('|')]
+            if len(fields) < 3:
+                continue
+            name, status = fields[0], fields[2]
+            status_lower = status.lower()
+            if status_lower not in ('ok', 'ns') and status_lower:
+                problems.append('Sensor {!r} reports status {!r}'.format(name, status))
+
+    # 2. SEL entries: flag Asserted entries within the lookback window whose text carries a
+    # non-informational severity marker.
+    rc, stdout, stderr = ipmitool(bmc, ['sel', 'elist'])
+    if rc != 0:
+        problems.append('Could not query SEL (ipmitool sel elist rc={}): {}'.format(rc, stderr.strip()))
+    else:
+        cutoff = datetime.now() - timedelta(hours=lookback_hours)
+        for line in stdout.splitlines():
+            fields = [f.strip() for f in line.split('|')]
+            if len(fields) < 6:
+                continue
+            _record_id, date_str, time_str, sensor, description, direction = fields[:6]
+            if direction.lower() != 'asserted':
+                continue
+            try:
+                entry_time = datetime.strptime('{} {}'.format(date_str, time_str), '%m/%d/%Y %H:%M:%S')
+            except ValueError:
+                entry_time = None
+            if entry_time is not None and entry_time < cutoff:
+                continue
+            if any(word in description.lower() for word in ('critical', 'non-recoverable', 'failure', 'fail')):
+                problems.append('SEL: {} - {} ({})'.format(sensor, description, date_str))
+
+    return problems
+
+
+# ─── Redfish ────────────────────────────────────────────────────────────────────
+
+def redfish_get(bmc, endpoint, timeout=15):
+    import requests
+    requests.packages.urllib3.disable_warnings()
+    from requests.auth import HTTPBasicAuth
+
+    url = 'https://{}/redfish/v1/{}'.format(bmc['name'], endpoint.lstrip('/'))
+    try:
+        response = requests.get(url, auth=HTTPBasicAuth(bmc['user'], bmc['password']),
+                                verify=False, timeout=timeout)
+        if response.status_code != 200:
+            return None, 'HTTP {} for {}'.format(response.status_code, url)
+        return response.json(), None
+    except requests.exceptions.RequestException as e:
+        return None, str(e)
+
+
+def _health_problem(label, status):
+    health = (status or {}).get('Health')
+    rollup = (status or {}).get('HealthRollup')
+    bad = [h for h in (health, rollup) if h not in (None, 'OK')]
+    if bad:
+        return '{} health is {} (rollup {})'.format(label, health, rollup)
+    return None
+
+
+def check_redfish(bmc, lookback_hours):
+    problems = []
+
+    # Discover Systems and Chassis generically - no vendor-specific ids assumed. Check every
+    # member found (health monitoring wants full coverage, unlike a power action which must
+    # target exactly one system).
+    for collection, label in (('Systems', 'System'), ('Chassis', 'Chassis')):
+        data, error = redfish_get(bmc, collection)
+        if error:
+            problems.append('Could not read {} collection: {}'.format(collection, error))
+            continue
+        for member in data.get('Members', []):
+            member_path = member.get('@odata.id')
+            if not member_path:
+                continue
+            member_data, member_error = redfish_get(bmc, member_path.split('/redfish/v1/', 1)[-1])
+            if member_error:
+                problems.append('Could not read {} {}: {}'.format(label, member_path, member_error))
+                continue
+            problem = _health_problem('{} {}'.format(label, member_data.get('Id', member_path)),
+                                      member_data.get('Status'))
+            if problem:
+                problems.append(problem)
+
+            if collection == 'Systems':
+                problems.extend(check_redfish_logs(bmc, member_data, lookback_hours))
+
+    return problems
+
+
+def check_redfish_logs(bmc, system_data, lookback_hours):
+    problems = []
+    log_services_path = system_data.get('LogServices', {}).get('@odata.id')
+    if not log_services_path:
+        return problems
+
+    data, error = redfish_get(bmc, log_services_path.split('/redfish/v1/', 1)[-1])
+    if error:
+        problems.append('Could not read LogServices: {}'.format(error))
+        return problems
+
+    cutoff = datetime.now(timezone.utc) - timedelta(hours=lookback_hours)
+
+    for member in data.get('Members', []):
+        service_path = member.get('@odata.id')
+        if not service_path:
+            continue
+        service_data, service_error = redfish_get(bmc, service_path.split('/redfish/v1/', 1)[-1])
+        if service_error or not service_data:
+            continue
+        entries_path = service_data.get('Entries', {}).get('@odata.id')
+        if not entries_path:
+            continue
+        entries_data, entries_error = redfish_get(bmc, entries_path.split('/redfish/v1/', 1)[-1])
+        if entries_error or not entries_data:
+            continue
+
+        for entry in entries_data.get('Members', []):
+            severity = entry.get('Severity')
+            if severity not in ('Critical', 'Warning'):
+                continue
+            created = entry.get('Created')
+            try:
+                entry_time = datetime.fromisoformat(created.replace('Z', '+00:00')) if created else None
+            except ValueError:
+                entry_time = None
+            if entry_time is not None and entry_time < cutoff:
+                continue
+            problems.append('Log entry ({}): {} [{}]'.format(severity, entry.get('Message', '?'), created))
+
+    return problems
+
+
+# ─── main ───────────────────────────────────────────────────────────────────────
+
+def main():
+    if len(sys.argv) < 2:
+        print('CRITICAL: no hostname provided')
+        sys.exit(2)
+
+    hostname = sys.argv[1]
+    lookback_hours = int(sys.argv[2]) if len(sys.argv) > 2 else 24
+
+    bmc = load_bmc_config(hostname)
+    protocol = bmc['protocol'].upper()
+
+    print('Checking BMC {} ({}) via {} for {}'.format(bmc['name'], bmc['ip4'], protocol, hostname))
+
+    if protocol == 'IPMI':
+        problems = check_ipmi(bmc, lookback_hours)
+    elif protocol == 'REDFISH':
+        problems = check_redfish(bmc, lookback_hours)
+    else:
+        print('CRITICAL: unknown BMC protocol {!r}'.format(bmc['protocol']))
+        sys.exit(2)
+
+    if problems:
+        print('CRITICAL: {} issue(s) found on BMC {}'.format(len(problems), bmc['name']))
+        for problem in problems:
+            print('  - {}'.format(problem))
+        sys.exit(2)
+
+    print('OK: BMC {} reports no sensor or log issues'.format(bmc['name']))
+    sys.exit(0)
+
+
+if __name__ == '__main__':
+    main()

@@ -1,0 +1,49 @@
+---
+cluster_supervision_packages_to_install:
+  - ipmitool
+  - bluebanquise-venv
+
+cluster_supervision_scripts_path: /usr/local/lib/bluebanquise/supervision/scripts
+
+# Built-in check scripts shipped by this role. check_bmc is the only one executed locally
+# (no ssh_ prefix) - every other one runs on the remote host over SSH.
+cluster_supervision_scripts:
+  - ssh_check_disk_smart
+  - ssh_check_dmesg_errors
+  - ssh_check_fs_mount
+  - ssh_check_fs_usage
+  - ssh_check_gpu_nvidia
+  - ssh_check_ib_errors
+  - ssh_check_mce_errors
+  - ssh_check_pcie_aer_errors
+  - ssh_check_ram_ecc_errors
+  - ssh_check_services
+  - check_bmc
+
+# Operator-defined: {ansible_group_name: {check_name: args_string_or_none}}. A host that is a
+# member of several referenced groups accumulates every group's checks. See README for examples.
+cluster_supervision_checks: {}
+
+# Contains, per host, the merged check list and (only for hosts checking check_bmc) the bmc
+# name/ip4/protocol/user/password pulled from hostvars. Holds credentials - kept root/bluebanquise
+# readable only (0640).
+cluster_supervision_conf_path: /etc/bluebanquise/cluster_supervision_checks.conf
+
+cluster_supervision_daemon_conf_path: /etc/bluebanquise/cluster_supervision_daemon.conf
+cluster_supervision_daemon_script_path: /usr/local/sbin/bluebanquise-cluster-supervision-daemon
+
+cluster_supervision_daemon_loop_interval: 1800
+cluster_supervision_daemon_thread_pool_size: 100
+# Timeout for the initial per-host "is SSH even up" gate probe - kept short and separate from
+# the per-check timeout below, since it runs before every cycle's real checks.
+cluster_supervision_daemon_ssh_gate_timeout: 10
+# Timeout for one ssh_* check's full script execution - longer than the gate, since a real probe
+# (e.g. SMART across several disks) can legitimately take a while.
+cluster_supervision_daemon_ssh_check_timeout: 60
+cluster_supervision_daemon_local_check_timeout: 60
+cluster_supervision_daemon_log_level: INFO
+
+cluster_supervision_hosts_base_path: /var/lib/bluebanquise/cluster/hosts
+cluster_supervision_tmp_path: /var/lib/bluebanquise/cluster/.tmp
+cluster_supervision_supervision_filename: supervision.yml
+cluster_supervision_dynamic_filename: dynamic_supervision.yml

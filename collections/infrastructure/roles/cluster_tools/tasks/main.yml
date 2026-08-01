@@ -23,3 +23,11 @@
     owner: root
     group: root
     mode: '0644'
+
+- name: cluster_tools <|> Install supervision plugin
+  ansible.builtin.copy:
+    src: plugins/supervision.py
+    dest: "{{ cluster_tools_plugins_path }}/supervision.py"
+    owner: root
+    group: root
+    mode: '0644'

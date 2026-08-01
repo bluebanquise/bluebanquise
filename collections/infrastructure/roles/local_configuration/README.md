@@ -210,7 +210,8 @@ os_kernel_version_allow_reboot: false               # default: false
 `os_kernel_version` must be the **exact `uname -r` string** for the target kernel (e.g.
 `5.14.0-427.24.1.el9_4.x86_64` on RHEL, `6.8.0-31-generic` on Ubuntu, `6.1.0-21-amd64` on
 Debian). This is the same format `ansible_facts.kernel` reports and the same format the
-`cluster_dynamic` role's daemon gathers via `uname -r` — see the "Cluster state" note below.
+`cluster_state` role's dynamic state daemon gathers via `uname -r` — see the "Cluster state"
+note below.
 
 On each run:
 1. The running kernel (`ansible_facts.kernel`) is compared to `os_kernel_version`.
@@ -256,9 +257,9 @@ local_configuration_kernel_version_meta_packages:   # override per OS family as 
 > match Debian's own arch naming (`arm64`).
 
 **Cluster state**: when `os_kernel_version` is set, the `cluster_state` role writes it to
-`static_cluster_state.yml` under the `kernel` key — the same key `cluster_dynamic` already
-populates from a live `uname -r`, so `bluebanquise-cluster state` diffs expected vs actual
-kernel version for free.
+`static_cluster_state.yml` under the `kernel` key — the same key its dynamic state daemon
+already populates in `dynamic_cluster_state.yml` from a live `uname -r`, so
+`bluebanquise-cluster state` diffs expected vs actual kernel version for free.
 
 #### Kernel modules (modprobe)
 

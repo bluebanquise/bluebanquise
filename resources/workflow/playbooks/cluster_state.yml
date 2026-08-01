@@ -5,7 +5,5 @@
 
     - role: bluebanquise.infrastructure.cluster_state
       tags: cluster_state
-    - role: bluebanquise.infrastructure.cluster_dynamic
-      tags: cluster_dynamic
     - role: bluebanquise.infrastructure.cluster_tools
       tags: cluster_tools

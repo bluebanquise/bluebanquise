@@ -1,0 +1,386 @@
+#!/usr/bin/env python3
+"""
+BlueBanquise cluster supervision daemon.
+
+Loops with a sleep, running health checks (as opposed to cluster_state's state snapshots)
+against every host declared in the checks configuration file. Checks prefixed ssh_ run on the
+remote host over SSH (script content piped over stdin to `ssh <host> bash -s -- <args>`, no file
+uploaded, so it behaves exactly like an interactive script - sudo included, assuming the usual
+passwordless-sudo setup this codebase already relies on elsewhere). Every other check runs
+locally, with the target hostname prepended as its first argument (e.g. check_bmc, which reaches
+out to the host's BMC via IPMI/Redfish instead of SSH).
+
+Every host gets one cheap SSH liveness probe first. If it fails, that host's ssh_* checks are
+skipped for the cycle (logged, not silently dropped) - but local checks still run, since e.g. a
+BMC check is exactly what you want when the OS itself is unreachable.
+"""
+
+import argparse
+import concurrent.futures
+import fcntl
+import logging
+import os
+import shlex
+import subprocess
+import sys
+import time
+import yaml
+from datetime import datetime, timezone
+
+LOG_FORMAT = '%(asctime)s [%(levelname)s] %(message)s'
+ERROR_MESSAGE = 'Error, use bluebanquise-cluster supervision command to investigate.'
+
+
+def setup_logging(log_level):
+    level = getattr(logging, log_level.upper(), logging.INFO)
+    root = logging.getLogger()
+    root.setLevel(level)
+    if not root.handlers:
+        handler = logging.StreamHandler(sys.stdout)
+        handler.setFormatter(logging.Formatter(LOG_FORMAT))
+        root.addHandler(handler)
+    else:
+        for handler in root.handlers:
+            handler.setLevel(level)
+
+
+# ─── configuration loading ─────────────────────────────────────────────────────
+
+def load_daemon_config(path):
+    logging.info('Loading daemon configuration from %s', path)
+    with open(path, 'r') as f:
+        config = yaml.safe_load(f)
+    logging.debug('Daemon configuration: %s', config)
+    return config
+
+
+def load_checks_config(path):
+    """Load the Ansible-generated per-host checks (+ bmc credentials) catalog."""
+    logging.info('Loading checks configuration from %s', path)
+    try:
+        with open(path, 'r') as f:
+            data = yaml.safe_load(f) or {}
+    except OSError as e:
+        logging.error('Could not read %s: %s (has the cluster_supervision role been run?)', path, e)
+        return {}
+    hosts = data.get('hosts', {}) or {}
+    logging.info('Loaded checks for %d host(s): %s', len(hosts), sorted(hosts))
+    logging.debug('Full checks configuration: %s', hosts)
+    return hosts
+
+
+def load_scripts(scripts_path):
+    """Read every check script's content into memory once, so a cycle never re-reads a file
+    from disk before piping it over SSH. Local checks are still exec'd straight from disk
+    (the kernel does that read, not this process, so caching their bytes here buys nothing) -
+    this dict exists for the ssh_* piping path and to fail loudly at startup if a script is
+    missing or unreadable."""
+    logging.info('Loading check scripts from %s', scripts_path)
+    scripts = {}
+    for filename in sorted(os.listdir(scripts_path)):
+        full_path = os.path.join(scripts_path, filename)
+        if not os.path.isfile(full_path):
+            continue
+        try:
+            with open(full_path, 'rb') as f:
+                scripts[filename] = f.read()
+            logging.debug('Cached script %s (%d bytes)', filename, len(scripts[filename]))
+        except OSError as e:
+            logging.error('Could not read script %s: %s', full_path, e)
+    logging.info('Cached %d check script(s): %s', len(scripts), sorted(scripts))
+    return scripts
+
+
+# ─── SSH helpers ────────────────────────────────────────────────────────────────
+
+def ssh_base_cmd(hostname, timeout):
+    return [
+        'ssh',
+        '-o', 'ConnectTimeout={}'.format(timeout),
+        '-o', 'BatchMode=yes',
+        '-o', 'StrictHostKeyChecking=no',
+        '-o', 'LogLevel=ERROR',
+        hostname,
+    ]
+
+
+def run_ssh_gate(hostname, timeout):
+    """Cheap liveness probe: can we even get a shell up? Gates every ssh_* check this cycle."""
+    cmd = ssh_base_cmd(hostname, timeout) + ['true']
+    logging.debug('[%s] SSH gate command: %s', hostname, ' '.join(cmd))
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout + 5)
+        ok = result.returncode == 0
+        logging.info('[%s] SSH gate %s (rc=%d)', hostname, 'OK' if ok else 'FAILED', result.returncode)
+        if not ok and result.stderr:
+            logging.debug('[%s] SSH gate stderr: %s', hostname, result.stderr.strip())
+        return ok
+    except subprocess.TimeoutExpired:
+        logging.warning('[%s] SSH gate timed out after %ds', hostname, timeout)
+        return False
+    except Exception as e:
+        logging.error('[%s] SSH gate error: %s', hostname, e)
+        return False
+
+
+def run_ssh_check(hostname, script_content, args, timeout):
+    """Pipe the cached script content to `ssh <host> bash -s -- <args>` over stdin. No file is
+    ever written to the remote host, and there's no shell string to escape - the script travels
+    as a raw byte stream on the SSH session's stdin, exactly like typing it at a terminal, so
+    sudo works the same as it would interactively (given the usual passwordless sudoers setup)."""
+    cmd = ssh_base_cmd(hostname, timeout) + ['bash', '-s', '--'] + args
+    logging.debug('[%s] SSH check command: %s', hostname, ' '.join(cmd))
+    try:
+        result = subprocess.run(cmd, input=script_content, capture_output=True, timeout=timeout + 5)
+        stdout = result.stdout.decode('utf-8', errors='replace')
+        stderr = result.stderr.decode('utf-8', errors='replace')
+        return result.returncode, stdout, stderr
+    except subprocess.TimeoutExpired:
+        logging.warning('[%s] SSH check timed out after %ds', hostname, timeout)
+        return -1, '', 'Command timed out after {}s'.format(timeout)
+    except Exception as e:
+        logging.error('[%s] SSH check error: %s', hostname, e)
+        return -1, '', 'SSH execution error: {}'.format(e)
+
+
+def run_local_check(hostname, script_path, args, timeout):
+    cmd = [script_path, hostname] + args
+    logging.debug('[%s] Local check command: %s', hostname, ' '.join(cmd))
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout + 5)
+        return result.returncode, result.stdout, result.stderr
+    except subprocess.TimeoutExpired:
+        logging.warning('[%s] Local check timed out after %ds', hostname, timeout)
+        return -1, '', 'Command timed out after {}s'.format(timeout)
+    except Exception as e:
+        logging.error('[%s] Local check error: %s', hostname, e)
+        return -1, '', 'Local execution error: {}'.format(e)
+
+
+# ─── per-check execution ────────────────────────────────────────────────────────
+
+def run_check(hostname, check_name, check_args, scripts, config, ssh_ok):
+    args = shlex.split(check_args) if check_args else []
+
+    if check_name.startswith('ssh_'):
+        if not ssh_ok:
+            logging.info('[%s] Skipping %s: SSH gate failed this cycle', hostname, check_name)
+            return {
+                'args': check_args, 'exit_code': None, 'error': True,
+                'stdout': '', 'stderr': 'Skipped: initial SSH liveness probe failed this cycle',
+            }
+        script_content = scripts.get(check_name)
+        if script_content is None:
+            logging.error('[%s] Check %s has no cached script content (missing file?)', hostname, check_name)
+            return {
+                'args': check_args, 'exit_code': None, 'error': True,
+                'stdout': '', 'stderr': 'No script named {!r} found in {}'.format(check_name, config['scripts_path']),
+            }
+        rc, stdout, stderr = run_ssh_check(hostname, script_content, args, config['ssh_check_timeout'])
+    else:
+        script_path = os.path.join(config['scripts_path'], check_name)
+        if not os.path.isfile(script_path):
+            logging.error('[%s] Check %s: no script at %s', hostname, check_name, script_path)
+            return {
+                'args': check_args, 'exit_code': None, 'error': True,
+                'stdout': '', 'stderr': 'No script found at {}'.format(script_path),
+            }
+        rc, stdout, stderr = run_local_check(hostname, script_path, args, config['local_check_timeout'])
+
+    return {'args': check_args, 'exit_code': rc, 'error': rc != 0, 'stdout': stdout, 'stderr': stderr}
+
+
+def compute_statuses(ssh_ok, results):
+    """Split into host_status (SSH gate + every non-BMC check) and bmc_status (check_bmc only,
+    present only when that check is actually configured for this host) so an operator can tell
+    at a glance whether a problem is on the OS side or the BMC side."""
+    host_error = not ssh_ok
+    bmc_present = False
+    bmc_error = False
+
+    for check_name, result in results.items():
+        if check_name == 'check_bmc':
+            bmc_present = True
+            if result['error']:
+                bmc_error = True
+        elif result['error']:
+            host_error = True
+
+    host_status = ERROR_MESSAGE if host_error else 'Ok'
+    bmc_status = (ERROR_MESSAGE if bmc_error else 'Ok') if bmc_present else None
+    return host_status, bmc_status
+
+
+# ─── per-host state writing (atomic, same pattern as cluster_state) ───────────────
+
+def _atomic_write_yaml(hostname, data, dest_path, tmp_path, lock_suffix):
+    host_dir = os.path.dirname(dest_path)
+    os.makedirs(host_dir, exist_ok=True)
+    lock_path = os.path.join(host_dir, lock_suffix)
+
+    try:
+        with open(tmp_path, 'w') as f:
+            yaml.dump(data, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
+    except OSError as e:
+        logging.error('[%s] Failed to write tmp file %s: %s', hostname, tmp_path, e)
+        return
+
+    try:
+        lock_fd = open(lock_path, 'w')
+    except OSError as e:
+        logging.error('[%s] Failed to open lock file %s: %s', hostname, lock_path, e)
+        return
+
+    try:
+        fcntl.flock(lock_fd.fileno(), fcntl.LOCK_EX)
+        os.replace(tmp_path, dest_path)
+        logging.info('[%s] Wrote %s', hostname, dest_path)
+    except OSError as e:
+        logging.error('[%s] Failed during atomic write of %s: %s', hostname, dest_path, e)
+    finally:
+        fcntl.flock(lock_fd.fileno(), fcntl.LOCK_UN)
+        lock_fd.close()
+
+
+def write_supervision(hostname, ssh_ok, results, config):
+    host_dir = os.path.join(config['hosts_base_path'], hostname)
+    dest_path = os.path.join(host_dir, config['supervision_filename'])
+    tmp_path = os.path.join(config['tmp_path'], 'supervision_{}.yml.tmp'.format(hostname))
+
+    data = {
+        'hostname': hostname,
+        'last_scan': datetime.now(timezone.utc).isoformat(),
+        'ssh_gate': ssh_ok,
+        'checks': results,
+    }
+    _atomic_write_yaml(hostname, data, dest_path, tmp_path, 'supervision.lock')
+
+
+def write_dynamic_supervision(hostname, host_status, bmc_status, config):
+    host_dir = os.path.join(config['hosts_base_path'], hostname)
+    dest_path = os.path.join(host_dir, config['dynamic_filename'])
+    tmp_path = os.path.join(config['tmp_path'], 'dynamic_supervision_{}.yml.tmp'.format(hostname))
+
+    data = {
+        'last_scan': datetime.now(timezone.utc).isoformat(),
+        'host_status': host_status,
+    }
+    if bmc_status is not None:
+        data['bmc_status'] = bmc_status
+    _atomic_write_yaml(hostname, data, dest_path, tmp_path, 'dynamic_supervision.lock')
+
+
+# ─── host scanning ───────────────────────────────────────────────────────────────
+
+def scan_host(hostname, host_entry, scripts, config):
+    checks = host_entry.get('checks', {}) or {}
+    if not checks:
+        logging.debug('[%s] No checks configured, skipping', hostname)
+        return
+
+    logging.info('[%s] Starting supervision scan (%d check(s): %s)', hostname, len(checks), sorted(checks))
+
+    ssh_ok = run_ssh_gate(hostname, config['ssh_gate_timeout'])
+    if not ssh_ok:
+        logging.warning('[%s] SSH gate failed - ssh_* checks will be skipped this cycle, '
+                        'local checks (e.g. check_bmc) still run', hostname)
+
+    results = {}
+    for check_name in sorted(checks.keys()):
+        check_args = checks[check_name]
+        logging.info('[%s] Running check %s%s', hostname, check_name,
+                     ' {}'.format(check_args) if check_args else '')
+        result = run_check(hostname, check_name, check_args, scripts, config, ssh_ok)
+        results[check_name] = result
+        logging.info('[%s] Check %s -> %s (exit_code=%s)', hostname, check_name,
+                     'ERROR' if result['error'] else 'OK', result['exit_code'])
+        if result['error'] and result['stderr']:
+            logging.debug('[%s] Check %s stderr: %s', hostname, check_name, result['stderr'].strip())
+
+    host_status, bmc_status = compute_statuses(ssh_ok, results)
+    logging.info('[%s] Scan complete: host_status=%s%s', hostname, host_status,
+                 ' bmc_status={}'.format(bmc_status) if bmc_status is not None else '')
+
+    write_supervision(hostname, ssh_ok, results, config)
+    write_dynamic_supervision(hostname, host_status, bmc_status, config)
+
+
+# ─── main loop ──────────────────────────────────────────────────────────────────
+
+def run_scan_cycle(hosts, scripts, config):
+    thread_pool_size = config['thread_pool_size']
+    logging.info('Starting supervision cycle: %d host(s), %d thread(s)', len(hosts), thread_pool_size)
+    cycle_start = time.monotonic()
+    with concurrent.futures.ThreadPoolExecutor(max_workers=thread_pool_size) as executor:
+        futures = {
+            executor.submit(scan_host, hostname, host_entry, scripts, config): hostname
+            for hostname, host_entry in hosts.items()
+        }
+        for future in concurrent.futures.as_completed(futures):
+            hostname = futures[future]
+            try:
+                future.result()
+            except Exception as e:
+                logging.error('[%s] Unhandled exception in scan thread: %s', hostname, e, exc_info=True)
+    elapsed = time.monotonic() - cycle_start
+    logging.info('Supervision cycle complete in %.1fs', elapsed)
+
+
+def main():
+    parser = argparse.ArgumentParser(description='BlueBanquise cluster supervision daemon')
+    parser.add_argument('config', help='Path to YAML daemon configuration file')
+    parser.add_argument('--log-level', default=None,
+                        help='Override log level from config (DEBUG, INFO, WARNING, ERROR)')
+    args = parser.parse_args()
+
+    setup_logging(args.log_level or 'INFO')
+    logging.info('BlueBanquise cluster supervision daemon starting')
+
+    config = load_daemon_config(args.config)
+
+    if not args.log_level:
+        setup_logging(config.get('log_level', 'INFO'))
+
+    config.setdefault('loop_interval', 1800)
+    config.setdefault('thread_pool_size', 100)
+    config.setdefault('ssh_gate_timeout', 10)
+    config.setdefault('ssh_check_timeout', 60)
+    config.setdefault('local_check_timeout', 60)
+
+    logging.info('Loop interval:          %ds', config['loop_interval'])
+    logging.info('Thread pool size:       %d', config['thread_pool_size'])
+    logging.info('SSH gate timeout:       %ds', config['ssh_gate_timeout'])
+    logging.info('SSH check timeout:      %ds', config['ssh_check_timeout'])
+    logging.info('Local check timeout:    %ds', config['local_check_timeout'])
+    logging.info('Scripts path:           %s', config['scripts_path'])
+    logging.info('Checks config path:     %s', config['checks_conf_path'])
+    logging.info('Hosts base path:        %s', config['hosts_base_path'])
+    logging.info('Tmp path:               %s', config['tmp_path'])
+
+    # Scripts and the checks catalog are both Ansible role output: loaded once here, same as
+    # cluster_state's host list. A role re-run that changes either requires a service restart
+    # to take effect - documented in the README, matches cluster_state's own documented behavior.
+    scripts = load_scripts(config['scripts_path'])
+    hosts = load_checks_config(config['checks_conf_path'])
+
+    if not hosts:
+        logging.warning('No hosts with checks configured - daemon will idle until restarted '
+                        'after cluster_supervision_checks is populated and the role re-run')
+
+    while True:
+        cycle_start = time.monotonic()
+        run_scan_cycle(hosts, scripts, config)
+        elapsed = time.monotonic() - cycle_start
+        sleep_time = max(0.0, config['loop_interval'] - elapsed)
+        if sleep_time > 0:
+            logging.info('Next supervision cycle in %.1fs', sleep_time)
+            time.sleep(sleep_time)
+        else:
+            logging.warning(
+                'Supervision cycle took %.1fs, exceeding loop interval of %ds - starting next '
+                'cycle immediately', elapsed, config['loop_interval'],
+            )
+
+
+if __name__ == '__main__':
+    main()
