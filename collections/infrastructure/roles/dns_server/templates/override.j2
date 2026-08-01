@@ -1,6 +1,6 @@
 $TTL 60
-@            IN    SOA  {{ inventory_hostname }}.{{ domain_name }}. root.{{ domain_name }}.  (
-                          {{ serial }} ; serial
+@            IN    SOA  {{ inventory_hostname }}.{{ dns_server_domain_name | default(bb_domain_name, true) | default('cluster.local', true) }}. root.{{ dns_server_domain_name | default(bb_domain_name, true) | default('cluster.local', true) }}.  (
+                          {{ dns_server_serial }} ; serial
                           1h           ; refresh
                           30m          ; retry
                           1w           ; expiry
