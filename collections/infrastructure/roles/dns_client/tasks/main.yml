@@ -14,10 +14,10 @@
     path: "/etc/NetworkManager/NetworkManager.conf"
     insertafter: '^\[main\]'
     line: "dns=none"
-  when: dns_client_disable_networkmanager_dns | default(true) | bool
+  when: dns_client_disable_networkmanager_processing | default(true) | bool
 
 - name: service <|> Restart NetworkManager service
   ansible.builtin.service:
     name: NetworkManager
     state: reloaded
-  when: dns_client_disable_networkmanager_dns | default(true) | bool
+  when: dns_client_disable_networkmanager_processing | default(true) | bool

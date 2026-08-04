@@ -10,7 +10,7 @@ If an external DHCP server is providing DNS information, then NetworkManager may
 Use this role if at least one of these conditions are true:
 
 * The target node does not have an interface configured by an external DHCP server.
-* The target node has `dns=none` set in its `/etc/NetworkManager/NetworkManager.conf` file.
+* The target node has `dns=none` set in its `/etc/NetworkManager/NetworkManager.conf` file or the `dns_client_disable_networkmanager_processing` variable is set to true.
 
 If the node interfaces with dynamic IP addresses are managed by a controlled DHCP server (such as one deployed by the dhcp_server role), then this role may be omitted.
 
@@ -41,6 +41,18 @@ dns_client_external_servers:
   - 8.8.4.4
 ```
 Note that this/these external(s) dns will be placed after the cluster internal dns in resolution order.
+
+### NetworkManager DNS Processing Control
+
+The role can automatically disable NetworkManager's DNS processing to prevent it from overwriting the `/etc/resolv.conf` file. This is controlled by the variable:
+
+```yaml
+dns_client_disable_networkmanager_processing: true  # default
+```
+
+When set to `true` (default), the role will add `dns=none` to the `[main]` section of `/etc/NetworkManager/NetworkManager.conf`
+
+When set to `false`, the role will not modify NetworkManager's DNS processing behavior.
 
 ## Changelog
 
