@@ -44,6 +44,7 @@ Note that this/these external(s) dns will be placed after the cluster internal d
 
 ## Changelog
 
+* 1.3.5: Disabling NetworkManager's DNS processing. Téo Blachère <teo.blachere@bull.com> 
 * 1.3.4: Fix variable default value. Thiago Cardozo <boubee.thiago@gmail.com>
 * 1.3.3: Fix variable typo. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.2: Fix global logic. Benoit Leveugle <benoit.leveugle@gmail.com>

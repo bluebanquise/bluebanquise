@@ -8,3 +8,16 @@
     mode: 0644
   tags:
     - template
+
+- name: lineinfile <|> Disabling DNS processing in the NetworkManager configuration file
+  ansible.builtin.lineinfile:
+    path: "/etc/NetworkManager/NetworkManager.conf"
+    insertafter: '^\[main\]'
+    line: "dns=none"
+  when: dns_client_disable_networkmanager_dns | default(true) | bool
+
+- name: service <|> Restart NetworkManager service
+  ansible.builtin.service:
+    name: NetworkManager
+    state: reloaded
+  when: dns_client_disable_networkmanager_dns | default(true) | bool
