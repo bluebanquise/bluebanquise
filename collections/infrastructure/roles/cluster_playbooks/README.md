@@ -129,8 +129,8 @@ Notes:
 
 Installed to `/usr/local/sbin/bluebanquise-cluster-playbooks-daemon`, runs as a systemd service
 (`bluebanquise-cluster-playbooks-daemon.service`) under the `bluebanquise` system user, same as
-`cluster_state`'s dynamic state daemon. **Not started automatically in this repo's CI/container
-test path** (`--skip-tags service` is used there, same reasoning as `cluster_state`) -
+`cluster_management`'s dynamic state daemon. **Not started automatically in this repo's CI/container
+test path** (`--skip-tags service` is used there, same reasoning as `cluster_management`) -
 start it manually, or let `bb_start_services` start it on real hardware:
 
 ```bash
@@ -188,7 +188,7 @@ untouched by `"Scheduled"`/`"Running"`/explanatory status updates.
 | `cluster_playbooks_storage_path` | `/var/lib/bluebanquise/cluster/playbooks` | Directory holding `current_config.yml`, owned by the `bluebanquise` system user |
 | `cluster_playbooks_function_profiles` | see `defaults/main.yml` | Built-in catalog of function profiles. Not meant to be overridden directly - use `cluster_playbooks_custom_function_profiles` to add or override profiles instead, since Ansible replaces (rather than merges) an overridden dict variable |
 | `cluster_playbooks_custom_function_profiles` | `{}` | Operator-defined function profiles, combined on top of the built-in catalog. A profile name defined here overrides the built-in profile of the same name entirely |
-| `cluster_playbooks_hosts_base_path` | `/var/lib/bluebanquise/cluster/hosts` | Root directory for per-host log/metadata files, shared with `cluster_state` |
+| `cluster_playbooks_hosts_base_path` | `/var/lib/bluebanquise/cluster/hosts` | Root directory for per-host log/metadata files, shared with `cluster_management` |
 | `cluster_playbooks_tmp_path` | `/var/lib/bluebanquise/cluster/.tmp` | Shared temporary directory for atomic writes |
 | `cluster_playbooks_log_filename` | `last_ansible-playbook.log` | Per-host filename for the raw captured output of the last push |
 | `cluster_playbooks_metadata_filename` | `dynamic_cluster_playbooks.yml` | Per-host filename for the structured execution record |

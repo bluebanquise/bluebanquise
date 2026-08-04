@@ -1,0 +1,652 @@
+#!/usr/bin/env python3
+"""
+BlueBanquise cluster dynamic state daemon (part of the cluster_management role).
+Scans cluster hosts periodically and writes live system data to per-host YAML files.
+
+Each scan also decides whether this host's state drifted from its static inventory snapshot,
+and latches an Error via events.py if so, using two sibling files installed by this same role
+(see load_required_module() below):
+  - state_diff.py: the exact same drift-comparison logic `bluebanquise-cluster state` uses to
+    color its output, reused here so there is one implementation of "what counts as drift", not
+    two that could quietly diverge.
+  - events.py: the latch/event bookkeeping (see README.md, "Events & maintenance").
+Both are standalone files (not an importable package - they're loaded dynamically by path, same
+as any bluebanquise-cluster plugin), but always present: this daemon exits with a clear error at
+startup if either is missing, since that can only mean a broken/incomplete install of this role.
+"""
+
+import argparse
+import concurrent.futures
+import fcntl
+import importlib.util
+import json
+import logging
+import os
+import shlex
+import subprocess
+import sys
+import time
+import yaml
+from datetime import datetime, timezone
+
+LOG_FORMAT = '%(asctime)s [%(levelname)s] %(message)s'
+
+# Fields written into dynamic_cluster_state.yml that have no static counterpart to drift
+# against - stripped before comparing. Must stay identical to state.py's own HEADER_FIELDS -
+# both decide "is this cluster_state drifted" and must agree.
+HEADER_FIELDS = {'last_updated', 'ping', 'ssh'}
+
+
+def setup_logging(log_level):
+    level = getattr(logging, log_level.upper(), logging.INFO)
+    root = logging.getLogger()
+    root.setLevel(level)
+    if not root.handlers:
+        handler = logging.StreamHandler(sys.stdout)
+        handler.setFormatter(logging.Formatter(LOG_FORMAT))
+        root.addHandler(handler)
+    else:
+        for handler in root.handlers:
+            handler.setLevel(level)
+
+
+def load_config(path):
+    logging.info('Loading configuration from %s', path)
+    with open(path, 'r') as f:
+        config = yaml.safe_load(f)
+    logging.info('Loaded %d hosts from configuration', len(config.get('hosts', [])))
+    logging.debug('Full configuration: %s', config)
+    return config
+
+
+# ─── shared modules (state_diff.py, events.py) ─────────────────────────────────
+
+def load_required_module(path, module_name):
+    """state_diff.py and events.py are both installed by this same role (cluster_management) -
+    always present in a correct install. Standalone files, not an importable package, so still
+    loaded dynamically by path rather than a plain `import`. Missing means the install is broken;
+    fail loudly and immediately rather than silently limping along without drift-latching."""
+    if not path or not os.path.isfile(path):
+        logging.critical('%s not found at %s - this cluster_management installation is '
+                         'incomplete, cannot start', module_name, path)
+        sys.exit(1)
+    try:
+        spec = importlib.util.spec_from_file_location(module_name, path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        logging.info('%s loaded from %s', module_name, path)
+        return module
+    except Exception as e:
+        logging.critical('Failed to load %s from %s: %s - cannot start', module_name, path, e)
+        sys.exit(1)
+
+
+def load_static_state(hostname, base_path):
+    """Feeds both the BMC ping check (bmc.ip4) and the drift-latch check below - None means
+    neither can do anything for this host this cycle, which each caller handles on its own."""
+    static_path = os.path.join(base_path, hostname, 'static_cluster_state.yml')
+    if not os.path.isfile(static_path):
+        logging.debug('[%s] No static_cluster_state.yml found', hostname)
+        return None
+    try:
+        with open(static_path, 'r') as f:
+            data = yaml.safe_load(f)
+        return data if isinstance(data, dict) else {}
+    except Exception as e:
+        logging.error('[%s] Could not read %s: %s', hostname, static_path, e)
+        return None
+
+
+# ─── SSH / connectivity helpers ──────────────────────────────────────────────
+
+def check_ping(hostname, timeout):
+    cmd = ['ping', '-c', '1', '-W', str(timeout), hostname]
+    logging.debug('[%s] Ping command: %s', hostname, ' '.join(cmd))
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout + 2)
+        reachable = result.returncode == 0
+        logging.info('[%s] Ping %s (rc=%d)', hostname, 'succeeded' if reachable else 'failed', result.returncode)
+        if result.stdout:
+            logging.debug('[%s] Ping stdout: %s', hostname, result.stdout.strip())
+        return reachable
+    except subprocess.TimeoutExpired:
+        logging.warning('[%s] Ping timed out after %ds', hostname, timeout)
+        return False
+    except Exception as e:
+        logging.error('[%s] Ping error: %s', hostname, e)
+        return False
+
+
+def run_ssh_command(hostname, command, timeout):
+    """Run a single command on a remote host via SSH. Returns (stdout, returncode)."""
+    cmd = [
+        'ssh',
+        '-o', 'ConnectTimeout={}'.format(timeout),
+        '-o', 'BatchMode=yes',
+        '-o', 'StrictHostKeyChecking=no',
+        '-o', 'LogLevel=ERROR',
+        hostname,
+        command,
+    ]
+    logging.debug('[%s] SSH command: %s', hostname, ' '.join(cmd))
+    try:
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=timeout + 5,
+        )
+        if result.stdout:
+            logging.debug('[%s] SSH stdout: %s', hostname, result.stdout.strip())
+        if result.stderr:
+            logging.debug('[%s] SSH stderr: %s', hostname, result.stderr.strip())
+        return result.stdout, result.returncode
+    except subprocess.TimeoutExpired:
+        logging.warning('[%s] SSH command timed out (command: %s)', hostname, command)
+        return '', -1
+    except Exception as e:
+        logging.error('[%s] SSH command error: %s', hostname, e)
+        return '', -1
+
+
+def check_ssh(hostname, timeout):
+    """Returns True if an SSH connection to the host succeeds."""
+    logging.debug('[%s] Checking SSH connectivity', hostname)
+    _stdout, rc = run_ssh_command(hostname, 'true', timeout)
+    available = rc == 0
+    logging.info('[%s] SSH %s (rc=%d)', hostname, 'available' if available else 'unavailable', rc)
+    return available
+
+
+# ─── gatherers ───────────────────────────────────────────────────────────────
+#
+# Each gatherer has the signature:
+#   gather_<name>(hostname, ssh_timeout) -> value
+#
+# Return value can be any YAML-serialisable type (dict, list, str, …).
+# Returning None signals a collection failure.
+# To add a new gatherer: write the function and add it to GATHERERS.
+
+def gather_cpu(hostname, ssh_timeout):
+    logging.debug('[%s] Gathering CPU data', hostname)
+    stdout, rc = run_ssh_command(hostname, 'lscpu', ssh_timeout)
+    if rc != 0 or not stdout:
+        logging.warning('[%s] CPU: lscpu failed (rc=%d)', hostname, rc)
+        return None
+    data = {}
+    for line in stdout.splitlines():
+        if ':' not in line:
+            continue
+        key, _, value = line.partition(':')
+        key = key.strip()
+        value = value.strip()
+        if key == 'Architecture':
+            data['architecture'] = value
+        elif key == 'CPU(s)':
+            data['count'] = int(value)
+        elif key == 'Thread(s) per core':
+            data['threads_per_core'] = int(value)
+        elif key == 'Core(s) per socket':
+            data['cores_per_socket'] = int(value)
+        elif key == 'Socket(s)':
+            data['sockets'] = int(value)
+        elif key == 'Model name':
+            data['model'] = value
+    logging.debug('[%s] CPU data: %s', hostname, data)
+    return data
+
+
+def gather_ram(hostname, ssh_timeout):
+    logging.debug('[%s] Gathering RAM data', hostname)
+    stdout, rc = run_ssh_command(hostname, 'free -b', ssh_timeout)
+    if rc != 0 or not stdout:
+        logging.warning('[%s] RAM: free -b failed (rc=%d)', hostname, rc)
+        return None
+    for line in stdout.splitlines():
+        if line.startswith('Mem:'):
+            parts = line.split()
+            data = {'total_bytes': int(parts[1])}
+            if len(parts) > 6:
+                data['available_bytes'] = int(parts[6])
+            logging.debug('[%s] RAM data: %s', hostname, data)
+            return data
+    logging.warning('[%s] RAM: could not parse free output', hostname)
+    return None
+
+
+def gather_gpu(hostname, ssh_timeout):
+    logging.debug('[%s] Gathering GPU data via lspci', hostname)
+    stdout, rc = run_ssh_command(
+        hostname,
+        "lspci 2>/dev/null | grep -iE 'vga|3d controller|display controller'",
+        ssh_timeout,
+    )
+    if rc != 0 and not stdout:
+        logging.warning('[%s] GPU: lspci returned no data (rc=%d)', hostname, rc)
+        return []
+    devices = [line.strip() for line in stdout.splitlines() if line.strip()]
+    logging.debug('[%s] GPU devices: %s', hostname, devices)
+    return devices
+
+
+def gather_firewall(hostname, ssh_timeout):
+    logging.debug('[%s] Gathering firewall state', hostname)
+    stdout, _rc = run_ssh_command(
+        hostname,
+        'systemctl is-active firewalld 2>/dev/null || echo inactive',
+        ssh_timeout,
+    )
+    active = stdout.strip() == 'active'
+    logging.debug('[%s] Firewall (firewalld) active: %s', hostname, active)
+    return active
+
+
+def gather_access_control(hostname, ssh_timeout):
+    logging.debug('[%s] Gathering access control state', hostname)
+    stdout, _rc = run_ssh_command(hostname, 'getenforce 2>/dev/null || echo none', ssh_timeout)
+    selinux_state = stdout.strip()
+    if selinux_state and selinux_state != 'none':
+        logging.debug('[%s] SELinux state: %s', hostname, selinux_state)
+        return {'type': 'selinux', 'state': selinux_state}
+    stdout, _rc = run_ssh_command(
+        hostname, 'cat /sys/kernel/security/lsm 2>/dev/null || echo none', ssh_timeout
+    )
+    lsm = stdout.strip()
+    if 'apparmor' in lsm.lower():
+        stdout2, _rc = run_ssh_command(
+            hostname, 'systemctl is-active apparmor 2>/dev/null || echo unknown', ssh_timeout
+        )
+        state = stdout2.strip()
+        logging.debug('[%s] AppArmor state: %s', hostname, state)
+        return {'type': 'apparmor', 'state': state}
+    logging.debug('[%s] No known MAC framework detected (lsm=%s)', hostname, lsm)
+    return {'type': 'none', 'state': 'none'}
+
+
+def gather_os(hostname, ssh_timeout):
+    logging.debug('[%s] Gathering OS data', hostname)
+    stdout, rc = run_ssh_command(hostname, 'cat /etc/os-release', ssh_timeout)
+    if rc != 0 or not stdout:
+        logging.warning('[%s] OS: could not read /etc/os-release (rc=%d)', hostname, rc)
+        return None
+    data = {}
+    for line in stdout.splitlines():
+        if '=' not in line or line.startswith('#'):
+            continue
+        key, _, value = line.partition('=')
+        value = value.strip().strip('"')
+        if key == 'ID':
+            data['distribution'] = value
+        elif key == 'VERSION_ID':
+            data['version'] = value
+        elif key == 'PRETTY_NAME':
+            data['pretty_name'] = value
+    logging.debug('[%s] OS data: %s', hostname, data)
+    return data
+
+
+def gather_kernel(hostname, ssh_timeout):
+    logging.debug('[%s] Gathering kernel version', hostname)
+    stdout, rc = run_ssh_command(hostname, 'uname -r', ssh_timeout)
+    if rc != 0 or not stdout:
+        logging.warning('[%s] Kernel: uname -r failed (rc=%d)', hostname, rc)
+        return None
+    kernel = stdout.strip()
+    logging.debug('[%s] Kernel: %s', hostname, kernel)
+    return kernel
+
+
+def gather_network_interfaces(hostname, ssh_timeout):
+    logging.debug('[%s] Gathering network interface data', hostname)
+    stdout, rc = run_ssh_command(hostname, 'ip -json addr show', ssh_timeout)
+    if rc != 0 or not stdout:
+        logging.warning('[%s] Network: ip -json addr show failed (rc=%d)', hostname, rc)
+        return None
+    try:
+        raw_ifaces = json.loads(stdout)
+    except json.JSONDecodeError as e:
+        logging.error('[%s] Network: failed to parse ip -json output: %s', hostname, e)
+        return None
+
+    stdout_speed, _rc = run_ssh_command(
+        hostname,
+        (
+            "for iface in $(ls /sys/class/net/ 2>/dev/null); do "
+            "speed=$(cat /sys/class/net/$iface/speed 2>/dev/null); "
+            "echo \"$iface:${speed:-}\"; done"
+        ),
+        ssh_timeout,
+    )
+    speeds = {}
+    for line in stdout_speed.splitlines():
+        if ':' not in line:
+            continue
+        iface_name, _, speed_str = line.partition(':')
+        iface_name = iface_name.strip()
+        speed_str = speed_str.strip()
+        if speed_str and speed_str.lstrip('-').isdigit():
+            speed_val = int(speed_str)
+            speeds[iface_name] = speed_val if speed_val > 0 else None
+        else:
+            speeds[iface_name] = None
+
+    # InfiniBand rate per netdev: only interfaces backed by an IB HCA have a
+    # /sys/class/net/<iface>/device/infiniband/<hca> directory. The netdev's own dev_id file
+    # holds the zero-based port offset (the same convention IPoIB/ibdev2netdev use), so
+    # dev_id + 1 gives the HCA port number whose .../ports/<n>/rate we want.
+    stdout_ib, _rc = run_ssh_command(
+        hostname,
+        (
+            "for iface in $(ls /sys/class/net/ 2>/dev/null); do "
+            "ib_dir=\"/sys/class/net/$iface/device/infiniband\"; "
+            "if [ -d \"$ib_dir\" ]; then "
+            "hca=$(ls \"$ib_dir\" 2>/dev/null | head -n1); "
+            "dev_id=$(cat \"/sys/class/net/$iface/dev_id\" 2>/dev/null); "
+            "port_num=$(( dev_id + 1 )); "
+            "rate=$(cat \"/sys/class/infiniband/$hca/ports/$port_num/rate\" 2>/dev/null); "
+            "echo \"$iface|${rate:-}\"; "
+            "fi; done"
+        ),
+        ssh_timeout,
+    )
+    ib_rates = {}
+    for line in stdout_ib.splitlines():
+        if '|' not in line:
+            continue
+        iface_name, _, rate_str = line.partition('|')
+        iface_name = iface_name.strip()
+        rate_str = rate_str.strip()
+        ib_rates[iface_name] = rate_str if rate_str else None
+
+    interfaces = []
+    for iface in raw_ifaces:
+        name = iface.get('ifname', '')
+        ip4_list = []
+        ip6_list = []
+        for addr in iface.get('addr_info', []):
+            cidr = '{}/{}'.format(addr['local'], addr['prefixlen'])
+            if addr.get('family') == 'inet':
+                ip4_list.append(cidr)
+            elif addr.get('family') == 'inet6':
+                ip6_list.append(cidr)
+        interfaces.append({
+            'name': name,
+            'ip4': ip4_list,
+            'ip6': ip6_list,
+            'speed_mbps': speeds.get(name),
+            'ib_rate': ib_rates.get(name),
+        })
+    logging.debug('[%s] Network interfaces: %s', hostname, interfaces)
+    return interfaces
+
+
+def gather_pcie(hostname, ssh_timeout):
+    """Link width/speed per PCIe device, keyed by PCI slot address (domain:bus:device.function,
+    exactly as `lspci`/sysfs show it - see README.md, 'PCIe link tracking'). Only devices exposing
+    current_link_width/current_link_speed in sysfs are real PCIe links; this naturally excludes
+    non-PCIe entries with no such concept."""
+    logging.debug('[%s] Gathering PCIe link data', hostname)
+    stdout, rc = run_ssh_command(
+        hostname,
+        (
+            "for dev in /sys/bus/pci/devices/*/; do "
+            "slot=$(basename \"$dev\"); "
+            "if [ -f \"${dev}current_link_width\" ] && [ -f \"${dev}current_link_speed\" ]; then "
+            "width=$(cat \"${dev}current_link_width\" 2>/dev/null); "
+            "speed=$(cat \"${dev}current_link_speed\" 2>/dev/null); "
+            "max_width=$(cat \"${dev}max_link_width\" 2>/dev/null); "
+            "max_speed=$(cat \"${dev}max_link_speed\" 2>/dev/null); "
+            "echo \"${slot}|${width}|${speed}|${max_width}|${max_speed}\"; "
+            "fi; done"
+        ),
+        ssh_timeout,
+    )
+    if rc != 0 or not stdout:
+        logging.warning('[%s] PCIe: no linked devices found (rc=%d)', hostname, rc)
+        return []
+
+    devices = {}
+    for line in stdout.splitlines():
+        parts = line.split('|')
+        if len(parts) != 5:
+            continue
+        slot, width, speed, max_width, max_speed = (p.strip() for p in parts)
+        devices[slot] = {
+            'name': slot,
+            'width': int(width) if width.isdigit() else None,
+            'speed': speed,
+            'max_width': int(max_width) if max_width.isdigit() else None,
+            'max_speed': max_speed,
+        }
+
+    stdout_lspci, _rc = run_ssh_command(hostname, 'lspci -D -mm 2>/dev/null', ssh_timeout)
+    for line in stdout_lspci.splitlines():
+        try:
+            fields = shlex.split(line)
+        except ValueError:
+            continue
+        if len(fields) < 4 or fields[0] not in devices:
+            continue
+        devices[fields[0]]['description'] = '{} {}'.format(fields[2], fields[3])
+
+    result = list(devices.values())
+    logging.debug('[%s] PCIe devices: %s', hostname, result)
+    return result
+
+
+GATHERERS = {
+    'cpu': gather_cpu,
+    'ram': gather_ram,
+    'gpu': gather_gpu,
+    'firewall': gather_firewall,
+    'access_control': gather_access_control,
+    'os': gather_os,
+    'kernel': gather_kernel,
+    'network_interfaces': gather_network_interfaces,
+    'pcie': gather_pcie,
+}
+
+
+# ─── state writing ───────────────────────────────────────────────────────────
+
+def write_dynamic_state(hostname, state, base_path, tmp_path, lock_timeout):
+    host_dir = os.path.join(base_path, hostname)
+    lock_path = os.path.join(host_dir, 'dynamic_cluster_state.lock')
+    tmp_file = os.path.join(tmp_path, 'dynamic_cluster_state_{}.yml'.format(hostname))
+    dest_file = os.path.join(host_dir, 'dynamic_cluster_state.yml')
+
+    logging.debug('[%s] Ensuring host directory exists: %s', hostname, host_dir)
+    os.makedirs(host_dir, exist_ok=True)
+
+    logging.debug('[%s] Writing state to tmp file: %s', hostname, tmp_file)
+    try:
+        with open(tmp_file, 'w') as f:
+            yaml.dump(state, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
+    except Exception as e:
+        logging.error('[%s] Failed to write tmp file: %s', hostname, e)
+        return
+
+    logging.debug('[%s] Acquiring lock: %s', hostname, lock_path)
+    try:
+        lock_fd = open(lock_path, 'w')
+    except Exception as e:
+        logging.error('[%s] Failed to open lock file: %s', hostname, e)
+        return
+
+    try:
+        acquired = False
+        deadline = time.monotonic() + lock_timeout
+        while time.monotonic() < deadline:
+            try:
+                fcntl.flock(lock_fd.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                acquired = True
+                break
+            except BlockingIOError:
+                time.sleep(0.1)
+        if not acquired:
+            logging.warning('[%s] Could not acquire lock within %ds, skipping write', hostname, lock_timeout)
+            return
+        logging.debug('[%s] Lock acquired, moving tmp file to %s', hostname, dest_file)
+        os.replace(tmp_file, dest_file)
+        logging.info('[%s] Dynamic state written to %s', hostname, dest_file)
+    except Exception as e:
+        logging.error('[%s] Failed during atomic state write: %s', hostname, e)
+    finally:
+        fcntl.flock(lock_fd.fileno(), fcntl.LOCK_UN)
+        lock_fd.close()
+        logging.debug('[%s] Lock released', hostname)
+
+
+# ─── BMC ping ─────────────────────────────────────────────────────────────────
+
+def check_bmc_ping(hostname, state, static_state, ping_timeout):
+    """Same idea as the host ping/ssh checks above, but for the BMC - only if one is attached
+    (static_cluster_state.yml has a bmc.ip4). Ping only, deliberately: this answers "is the BMC's
+    network stack up", not a health question (that's cluster_supervision's check_bmc's job).
+    Written nested under a `bmc` dict in dynamic_cluster_state.yml so it naturally pairs against
+    the static side's bmc.{ip4,mac,name,network} fields during rendering/drift comparison -
+    `ping` has no static counterpart key, so it never registers as drift, no HEADER_FIELDS
+    special-casing needed; the other bmc.* fields have no dynamic counterpart, so they render
+    as static-only, same as they already did before this field existed."""
+    bmc_ip4 = ((static_state or {}).get('bmc') or {}).get('ip4')
+    if not bmc_ip4:
+        logging.debug('[%s] No BMC attached (no static bmc.ip4), skipping BMC ping', hostname)
+        return
+    logging.info('[%s] Checking BMC ping (%s)', hostname, bmc_ip4)
+    bmc_ping_ok = check_ping(bmc_ip4, ping_timeout)
+    logging.info('[%s] BMC ping %s (%s)', hostname, 'succeeded' if bmc_ping_ok else 'failed', bmc_ip4)
+    state['bmc'] = {'ping': bmc_ping_ok}
+
+
+# ─── drift latching (state_diff.py + events.py) ────────────────────────────────
+
+def check_drift_and_latch(hostname, state, static_state, config):
+    if static_state is None:
+        return
+
+    diff_module = config['diff_module']
+    events_module = config['events_module']
+    dynamic_body = {k: v for k, v in state.items() if k not in HEADER_FIELDS}
+    is_error = diff_module.has_drift(dynamic_body, static_state)
+    logging.debug('[%s] cluster_state drift check: %s', hostname, 'DRIFT' if is_error else 'clean')
+
+    message = ("cluster_state: drift detected between static and dynamic state (see "
+               "'bluebanquise-cluster state host {}' for details)").format(hostname)
+    events_module.record_transition(
+        hostname, 'cluster_state', is_error, message,
+        config['base_path'], config['tmp_path'], logger=logging)
+
+
+# ─── host scanning ───────────────────────────────────────────────────────────
+
+def scan_host(hostname, config):
+    ssh_timeout = config['ssh_timeout']
+    ping_timeout = config['ping_timeout']
+    base_path = config['base_path']
+    tmp_path = config['tmp_path']
+    lock_timeout = config['lock_timeout']
+
+    logging.info('[%s] Starting scan', hostname)
+
+    # Loaded once up front (previously loaded a second time inside the drift check alone) - the
+    # BMC ping check needs it too, and both need it regardless of whether ping/ssh below succeed.
+    static_state = load_static_state(hostname, base_path)
+
+    state = {
+        'hostname': hostname,
+        'last_updated': datetime.now(timezone.utc).isoformat(),
+        'ping': False,
+        'ssh': False,
+    }
+
+    check_bmc_ping(hostname, state, static_state, ping_timeout)
+
+    state['ping'] = check_ping(hostname, ping_timeout)
+    if not state['ping']:
+        logging.info('[%s] Host unreachable via ping, skipping SSH', hostname)
+        write_dynamic_state(hostname, state, base_path, tmp_path, lock_timeout)
+        check_drift_and_latch(hostname, state, static_state, config)
+        return
+
+    state['ssh'] = check_ssh(hostname, ssh_timeout)
+    if not state['ssh']:
+        logging.info('[%s] SSH unavailable, skipping data gathering', hostname)
+        write_dynamic_state(hostname, state, base_path, tmp_path, lock_timeout)
+        check_drift_and_latch(hostname, state, static_state, config)
+        return
+
+    for name, gatherer in GATHERERS.items():
+        logging.info('[%s] Running gatherer: %s', hostname, name)
+        try:
+            result = gatherer(hostname, ssh_timeout)
+            state[name] = result
+        except Exception as e:
+            logging.error('[%s] Gatherer %r raised an exception: %s', hostname, name, e)
+            state[name] = None
+
+    logging.info('[%s] Scan complete', hostname)
+    write_dynamic_state(hostname, state, base_path, tmp_path, lock_timeout)
+    check_drift_and_latch(hostname, state, static_state, config)
+
+
+# ─── main loop ───────────────────────────────────────────────────────────────
+
+def run_scan_cycle(config):
+    hosts = config.get('hosts', [])
+    thread_pool_size = config.get('thread_pool_size', 100)
+    logging.info('Starting scan cycle: %d hosts, %d threads', len(hosts), thread_pool_size)
+    cycle_start = time.monotonic()
+    with concurrent.futures.ThreadPoolExecutor(max_workers=thread_pool_size) as executor:
+        futures = {executor.submit(scan_host, hostname, config): hostname for hostname in hosts}
+        for future in concurrent.futures.as_completed(futures):
+            hostname = futures[future]
+            try:
+                future.result()
+            except Exception as e:
+                logging.error('[%s] Unhandled exception in scan thread: %s', hostname, e)
+    elapsed = time.monotonic() - cycle_start
+    logging.info('Scan cycle complete in %.1fs', elapsed)
+
+
+def main():
+    parser = argparse.ArgumentParser(description='BlueBanquise cluster dynamic state daemon')
+    parser.add_argument('config', help='Path to YAML configuration file')
+    parser.add_argument('--log-level', default=None, help='Override log level from config (DEBUG, INFO, WARNING, ERROR)')
+    args = parser.parse_args()
+
+    setup_logging(args.log_level or 'INFO')
+    logging.info('BlueBanquise cluster dynamic state daemon starting')
+
+    config = load_config(args.config)
+
+    if not args.log_level:
+        setup_logging(config.get('log_level', 'INFO'))
+
+    scan_interval = config.get('scan_interval', 300)
+    logging.info('Scan interval:    %ds', scan_interval)
+    logging.info('Thread pool size: %d', config.get('thread_pool_size', 100))
+    logging.info('SSH timeout:      %ds', config.get('ssh_timeout', 10))
+    logging.info('Ping timeout:     %ds', config.get('ping_timeout', 5))
+    logging.info('Base path:        %s', config.get('base_path'))
+    logging.info('Tmp path:         %s', config.get('tmp_path'))
+
+    config['diff_module'] = load_required_module(config.get('diff_module_path'), 'state_diff')
+    config['events_module'] = load_required_module(config.get('events_module_path'), 'cluster_events_lib')
+
+    while True:
+        cycle_start = time.monotonic()
+        run_scan_cycle(config)
+        elapsed = time.monotonic() - cycle_start
+        sleep_time = max(0.0, scan_interval - elapsed)
+        if sleep_time > 0:
+            logging.info('Next scan cycle in %.1fs', sleep_time)
+            time.sleep(sleep_time)
+        else:
+            logging.warning(
+                'Scan cycle took %.1fs, exceeding interval of %ds — starting next cycle immediately',
+                elapsed, scan_interval,
+            )
+
+
+if __name__ == '__main__':
+    main()

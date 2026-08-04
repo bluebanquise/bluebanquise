@@ -1,0 +1,17 @@
+#jinja2: lstrip_blocks: True
+# {{ ansible_managed }}
+---
+scan_interval: {{ cluster_management_state_scan_interval }}
+thread_pool_size: {{ cluster_management_state_thread_pool_size }}
+ping_timeout: {{ cluster_management_state_ping_timeout }}
+ssh_timeout: {{ cluster_management_state_ssh_timeout }}
+lock_timeout: {{ cluster_management_state_lock_timeout }}
+log_level: {{ cluster_management_state_log_level }}
+base_path: {{ cluster_management_state_base_path }}
+tmp_path: {{ cluster_management_state_tmp_path }}
+diff_module_path: {{ cluster_management_state_diff_module_path }}
+events_module_path: {{ cluster_management_state_events_module_path }}
+hosts:
+{% for host in groups[cluster_management_state_hosts_group] | sort %}
+  - {{ host }}
+{% endfor %}

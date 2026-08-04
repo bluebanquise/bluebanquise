@@ -1,7 +1,0 @@
----
-cluster_supervision_checks:
-  hw_supermicro_X1:
-    check_bmc:
-    ssh_check_fs_usage: "/ 95"
-  os_rhel9:
-    ssh_check_services: "sshd"

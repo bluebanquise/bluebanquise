@@ -1,0 +1,7 @@
+---
+- name: cluster management
+  hosts: "fn_management"
+  roles:
+
+    - role: bluebanquise.infrastructure.cluster_management
+      tags: cluster_management

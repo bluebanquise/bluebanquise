@@ -1,0 +1,18 @@
+---
+# Formerly cluster_events' tasks/main.yml.
+
+- name: cluster_management <|> Ensure shared cluster lib directory exists
+  ansible.builtin.file:
+    path: "{{ cluster_management_events_lib_path }}"
+    state: directory
+    owner: bluebanquise
+    group: bluebanquise
+    mode: '0750'
+
+- name: cluster_management <|> Install shared events module
+  ansible.builtin.copy:
+    src: events.py
+    dest: "{{ cluster_management_events_module_path }}"
+    owner: bluebanquise
+    group: bluebanquise
+    mode: '0640'

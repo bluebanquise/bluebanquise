@@ -69,6 +69,25 @@ Possible values are either ``x86_64`` or ``arm64``.
 
   hw_architecture: arm64
 
+You can also declare the expected PCIe link width/speed of specific devices, using the ``pcie``
+key inside ``hw_specs``. Each entry is identified by its **PCI slot address**, exactly as reported
+by ``lspci`` or found under ``/sys/bus/pci/devices/`` (domain:bus:device.function, for example
+``0000:3b:00.0``):
+
+.. code-block:: yaml
+
+  hw_specs:
+    pcie:
+      - name: "0000:3b:00.0"
+        width: 16
+        speed: "16.0 GT/s PCIe"
+
+This key does not configure anything by itself: it is read by the ``cluster_management`` role's
+state tracking system to detect PCIe link drift (for example a card negotiating a lower
+width/speed than expected, after a reseat or a failing riser). See that role's README for the
+full mechanism, including how to discover a device's live slot address and speed string before
+declaring it here.
+
 Console
 =======
 

@@ -1,0 +1,13 @@
+---
+# Skeleton applied by ansible_inventory.py when a host's network_interface is created
+# (`inventory add host/<name>/network_interface/<iface> [data]`). See resources/data_model.md
+# section 2. Only "interface" is required: a `skip: true` interface legitimately has nothing
+# else set.
+skeleton:
+  interface: ""
+  ip4: ""
+  mac: ""
+  network: ""
+  ib_rate: ""  # expected InfiniBand rate for this interface, overrides the network's default
+required:
+  - interface

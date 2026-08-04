@@ -1,0 +1,75 @@
+---
+# Formerly cluster_supervision's tasks/main.yml. The /etc/bluebanquise directory task moved to
+# the shared top of tasks/main.yml (cluster_state's tasks/state.yml wanted the exact same task).
+
+- name: "package <|> Install packages"
+  ansible.builtin.package:
+    name: "{{ cluster_management_supervision_packages_to_install }}"
+    state: present
+  tags:
+    - package
+
+- name: cluster_management <|> Ensure scripts/base/tmp directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: bluebanquise
+    group: bluebanquise
+    mode: '0750'
+  loop:
+    - "{{ cluster_management_supervision_scripts_path }}"
+    - "{{ cluster_management_supervision_hosts_base_path }}"
+    - "{{ cluster_management_supervision_tmp_path }}"
+
+- name: cluster_management <|> Install check scripts
+  ansible.builtin.copy:
+    src: "scripts/{{ item }}"
+    dest: "{{ cluster_management_supervision_scripts_path }}/{{ item }}"
+    owner: bluebanquise
+    group: bluebanquise
+    mode: '0750'
+  loop: "{{ cluster_management_supervision_scripts }}"
+
+- name: cluster_management <|> Generate per-host checks configuration file
+  ansible.builtin.template:
+    src: cluster_supervision_checks.conf.j2
+    dest: "{{ cluster_management_supervision_conf_path }}"
+    owner: bluebanquise
+    group: bluebanquise
+    mode: '0640'
+
+- name: cluster_management <|> Install bluebanquise-cluster-supervision-daemon script
+  ansible.builtin.copy:
+    src: bluebanquise-cluster-supervision-daemon
+    dest: "{{ cluster_management_supervision_daemon_script_path }}"
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: cluster_management <|> Generate daemon configuration file
+  ansible.builtin.template:
+    src: cluster_supervision_daemon.conf.j2
+    dest: "{{ cluster_management_supervision_daemon_conf_path }}"
+    owner: bluebanquise
+    group: bluebanquise
+    mode: '0640'
+
+- name: cluster_management <|> Install bluebanquise-cluster-supervision-daemon systemd service
+  ansible.builtin.template:
+    src: bluebanquise-cluster-supervision-daemon.service.j2
+    dest: /etc/systemd/system/bluebanquise-cluster-supervision-daemon.service
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: cluster_management <|> Reload systemd daemon
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: "service <|> Manage bluebanquise-cluster-supervision-daemon state"
+  ansible.builtin.service:
+    name: "bluebanquise-cluster-supervision-daemon"
+    enabled: "{{ (cluster_management_supervision_enable_services | default(bb_enable_services) | default(true) | bool) | ternary(true, false) }}"
+    state: "{{ (cluster_management_supervision_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
+  tags:
+    - service

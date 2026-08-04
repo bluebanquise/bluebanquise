@@ -89,9 +89,34 @@ You can add another interface, for example an infiniband interface, on interconn
 The full list of available parameters is defined in the nmcli Ansible module `https://ansible.readthedocs.io/projects/ansible/3/collections/community/general/nmcli_module.html <https://ansible.readthedocs.io/projects/ansible/3/collections/community/general/nmcli_module.html>`_.
 
 .. note::
-  
+
   If you are creating your inventory before having access to the cluster, you may not already know the interface name, or even the MAC address.
   You will be able to update it later, once server is reachable.
+
+If a host's InfiniBand interface needs a different rate than the network's default (see Networks
+section of this documentation), override it on that specific interface with the ``ib_rate`` key:
+
+.. code-block:: yaml
+
+  all:
+    hosts:
+      mgt1:
+        network_interfaces:
+          - interface: enp0s8
+            ip4: 10.10.0.1
+            mac: 08:00:27:dc:f8:f5
+            network: net-1
+          - interface: ib0
+            ip4: 10.20.0.1
+            network: interconnect
+            type: infiniband
+            ib_rate: "40 Gb/sec (4X QDR)"
+
+This is useful when most hosts on the InfiniBand network share the same card/rate, but a few
+hosts have a lower-spec card: declare the common rate once on the network
+(``networks.<name>.ib_rate``), and only override it here for the exceptions. Like the network-level
+key, this is not used to configure the interface: it is read by the ``cluster_management`` role's
+state tracking system to detect InfiniBand rate drift - see that role's README for details.
 
 An example of a file could be for computes hosts:
 

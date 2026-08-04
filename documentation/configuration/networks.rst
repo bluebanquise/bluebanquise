@@ -81,3 +81,24 @@ It is possible to define an MTU for a whole network, using the ``mtu`` key:
       subnet: 10.10.0.0
       prefix: 16
       mtu: 9000
+
+InfiniBand rate
+---------------
+
+For a network carrying InfiniBand traffic, you can declare the default expected link rate for
+every host's interface on it, using the ``ib_rate`` key:
+
+.. code-block:: yaml
+
+  networks:
+    interconnect:
+      subnet: 10.20.0.0
+      prefix: 16
+      ib_rate: "100 Gb/sec (4X EDR)"
+
+This can be overridden for a specific host's interface (see the Hosts section of this
+documentation) - useful when most hosts on the network share the same card/rate but a few have a
+lower-spec card. Like ``mtu``/``gateway4`` above, this key is not used to configure the network
+itself: it is read by the ``cluster_management`` role's state tracking system to detect
+InfiniBand rate drift. See that role's README for the exact precedence rule and how to discover
+the live rate string before declaring it here.

@@ -1,7 +1,0 @@
----
-- name: cluster supervision
-  hosts: "fn_management"
-  roles:
-
-    - role: bluebanquise.infrastructure.cluster_supervision
-      tags: cluster_supervision

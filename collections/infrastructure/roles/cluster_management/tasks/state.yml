@@ -1,0 +1,69 @@
+---
+# Formerly cluster_state's tasks/main.yml. The /etc/bluebanquise directory task moved to the
+# shared top of tasks/main.yml (cluster_supervision's tasks/supervision.yml wanted the exact
+# same task).
+
+- name: cluster_management <|> Ensure base and tmp directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: bluebanquise
+    group: bluebanquise
+    mode: '0750'
+  loop:
+    - "{{ cluster_management_state_base_path }}"
+    - "{{ cluster_management_state_tmp_path }}"
+
+- name: cluster_management <|> Ensure host directory exists
+  ansible.builtin.file:
+    path: "{{ cluster_management_state_base_path }}/{{ item }}"
+    state: directory
+    owner: bluebanquise
+    group: bluebanquise
+    mode: '0750'
+  loop: "{{ groups[cluster_management_state_hosts_group] | sort }}"
+
+- name: cluster_management <|> Write static state file
+  ansible.builtin.template:
+    src: static_cluster_state.yml.j2
+    dest: "{{ cluster_management_state_base_path }}/{{ item }}/static_cluster_state.yml"
+    owner: bluebanquise
+    group: bluebanquise
+    mode: '0640'
+  loop: "{{ groups[cluster_management_state_hosts_group] | sort }}"
+
+- name: cluster_management <|> Install dynamic state daemon script
+  ansible.builtin.copy:
+    src: bluebanquise-cluster-dynamic
+    dest: "{{ cluster_management_state_daemon_script_path }}"
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: cluster_management <|> Generate dynamic state daemon configuration file
+  ansible.builtin.template:
+    src: cluster_dynamic.conf.j2
+    dest: "{{ cluster_management_state_conf_path }}"
+    owner: bluebanquise
+    group: bluebanquise
+    mode: '0640'
+
+- name: cluster_management <|> Install dynamic state daemon systemd service
+  ansible.builtin.template:
+    src: bluebanquise-cluster-dynamic.service.j2
+    dest: /etc/systemd/system/bluebanquise-cluster-dynamic.service
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: cluster_management <|> Reload systemd daemon
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: "service <|> Manage bluebanquise-cluster-dynamic state"
+  ansible.builtin.service:
+    name: "bluebanquise-cluster-dynamic"
+    enabled: "{{ (cluster_management_state_enable_services | default(bb_enable_services) | default(true) | bool) | ternary(true, false) }}"
+    state: "{{ (cluster_management_state_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
+  tags:
+    - service

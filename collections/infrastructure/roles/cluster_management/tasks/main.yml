@@ -1,0 +1,25 @@
+---
+
+- name: cluster_management <|> Ensure /etc/bluebanquise directory exists
+  ansible.builtin.file:
+    path: /etc/bluebanquise
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+# Order matters only in the sense that state.yml/supervision.yml's daemons assume state_diff.py
+# (installed by tools.yml) and events.py (installed by events.yml) already exist on disk by the
+# time their own daemon config is generated - Ansible doesn't care, but it reads more naturally
+# shared-library-first.
+- name: cluster_management <|> include_tasks events.yml
+  ansible.builtin.include_tasks: events.yml
+
+- name: cluster_management <|> include_tasks tools.yml
+  ansible.builtin.include_tasks: tools.yml
+
+- name: cluster_management <|> include_tasks state.yml
+  ansible.builtin.include_tasks: state.yml
+
+- name: cluster_management <|> include_tasks supervision.yml
+  ansible.builtin.include_tasks: supervision.yml

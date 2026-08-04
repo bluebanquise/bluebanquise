@@ -1,0 +1,25 @@
+---
+# Skeleton applied by ansible_inventory.py when a hw_group is created (`inventory add hw_group
+# <name> [data]`). See resources/data_model.md section 3.2.
+skeleton:
+  hw_ipxe_driver: default
+  hw_ipxe_platform: efi
+  hw_ipxe_embed: standard
+  hw_console: ""
+  hw_kernel_parameters: ""
+  hw_sysctl: {}
+  hw_equipment_type: server
+  hw_architecture: x86_64
+  hw_specs:
+    cpu:
+      architecture: ""
+      cores: ""
+      cores_per_socket: ""
+      sockets: ""
+      threads_per_core: ""
+    gpu: ""
+    pcie: []  # expected PCIe link width/speed per slot, e.g. [{name: "0000:3b:00.0", width: 16, speed: "16.0 GT/s PCIe"}]
+  # Not BMC-specific: also holds credentials for network switches and other out-of-band
+  # hardware, so it defaults alongside every other value rather than only when a BMC exists.
+  hw_board_authentication: []
+required: []

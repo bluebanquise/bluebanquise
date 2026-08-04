@@ -1,0 +1,116 @@
+---
+# Formerly cluster_tools' tasks/main.yml.
+
+- name: cluster_management <|> Ensure plugins directory exists
+  ansible.builtin.file:
+    path: "{{ cluster_management_tools_plugins_path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+# cluster_management_tools_tmp_path is not created here on purpose: by default it's the exact
+# same physical directory as cluster_management_state_tmp_path/cluster_management_supervision_tmp_path
+# (both bluebanquise:bluebanquise mode 0750, since that's what the daemons and the events/
+# maintenance CLI plugins actually need to write into) - state.yml/supervision.yml already
+# create it with that ownership. Declaring it a second time here with root:root:0755 (as this
+# role briefly did right after the 2026-08 merge) fought that ownership on every single run,
+# a real idempotency bug the merge exposed - each half was fine on its own when these were
+# separate roles, since neither role's directory task ever ran twice in the same play.
+
+- name: cluster_management <|> Install main script
+  ansible.builtin.copy:
+    src: bluebanquise-cluster
+    dest: "{{ cluster_management_tools_script_path }}"
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: cluster_management <|> Install shared state_diff module
+  ansible.builtin.copy:
+    src: state_diff.py
+    dest: "{{ cluster_management_tools_lib_path }}/state_diff.py"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: cluster_management <|> Install state plugin
+  ansible.builtin.copy:
+    src: plugins/state.py
+    dest: "{{ cluster_management_tools_plugins_path }}/state.py"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: cluster_management <|> Install supervision plugin
+  ansible.builtin.copy:
+    src: plugins/supervision.py
+    dest: "{{ cluster_management_tools_plugins_path }}/supervision.py"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: cluster_management <|> Install events plugin
+  ansible.builtin.copy:
+    src: plugins/events.py
+    dest: "{{ cluster_management_tools_plugins_path }}/events.py"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: cluster_management <|> Install maintenance plugin
+  ansible.builtin.copy:
+    src: plugins/maintenance.py
+    dest: "{{ cluster_management_tools_plugins_path }}/maintenance.py"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: cluster_management <|> Install dashboard plugin
+  ansible.builtin.copy:
+    src: plugins/dashboard.py
+    dest: "{{ cluster_management_tools_plugins_path }}/dashboard.py"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: cluster_management <|> Ensure inventories root directory exists
+  ansible.builtin.file:
+    path: "{{ cluster_management_tools_inventory_inventories_root }}"
+    state: directory
+    owner: bluebanquise
+    group: bluebanquise
+    mode: '0750'
+
+- name: cluster_management <|> Install shared ansible_inventory module
+  ansible.builtin.copy:
+    src: ansible_inventory.py
+    dest: "{{ cluster_management_tools_lib_path }}/ansible_inventory.py"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: cluster_management <|> Install inventory skeleton files
+  ansible.builtin.copy:
+    src: "inventory_skeletons/{{ item }}.yml"
+    dest: "{{ cluster_management_tools_lib_path }}/inventory_skeletons/{{ item }}.yml"
+    owner: root
+    group: root
+    mode: '0644'
+  loop: "{{ cluster_management_tools_inventory_skeletons }}"
+
+- name: cluster_management <|> Install inventory plugin
+  ansible.builtin.copy:
+    src: plugins/inventory.py
+    dest: "{{ cluster_management_tools_plugins_path }}/inventory.py"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: cluster_management <|> Generate inventory plugin configuration file
+  ansible.builtin.template:
+    src: cluster_inventory.conf.j2
+    dest: "{{ cluster_management_tools_inventory_conf_path }}"
+    owner: bluebanquise
+    group: bluebanquise
+    mode: '0640'

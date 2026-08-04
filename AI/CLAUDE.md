@@ -11,7 +11,7 @@ BlueBanquise is an Ansible collection (`bluebanquise.infrastructure`, version 3.
 ```
 collections/infrastructure/      # The Ansible collection (bluebanquise.infrastructure)
   galaxy.yml                     # Collection metadata and versioning
-  roles/                         # ~53 roles (dhcp_server, pxe_stack, slurm, nic, local_configuration, cluster_state, cluster_tools, cluster_playbooks, cluster_supervision, etc.)
+  roles/                         # ~51 roles (dhcp_server, pxe_stack, slurm, nic, local_configuration, cluster_management, cluster_playbooks, etc.)
   plugins/
     filter/                      # Custom Jinja2 filters (nodeset, hosts_by_network, etc.)
     vars/core.py                 # Deprecated vars plugin
@@ -108,6 +108,8 @@ Keep code as simple as possible. Minimize non-default dependencies (pyyaml, para
 - iPXE's `imgfetch`/`chain` script commands can only issue plain HTTP GET — no POST/PUT, no request body. Any Flask daemon route in this repo that must be reachable both from an iPXE script and from a real HTTP client (a Python tool) needs two separate routes, not one with multiple methods — see the pxe_stack daemon's `menu-default` split under "Cluster State System" above for why conflating the two silently broke one of the callers.
 - When deduplicating near-identical Flask routes (or similar handler functions), extract only the parts that are genuinely byte-identical (e.g. input validation, a shared error response) into small helpers — don't force the differing business logic into one function with a mode flag just to eliminate the last few lines of duplication. Splitting `set_menu_default`/`notify_boot_action`'s shared validation and 404-response into two helpers, while keeping their different state-mutation logic separate, is the reference example.
 - Ansible task-level flake8 style: `.flake8`/CI ignores `W503` (line break *before* a binary operator) but not `W504` (line break *after* one) — when wrapping a long `logging.*`/string-building call across lines, break *before* the operator (`+`, `and`, etc.), never after, and align the continuation to the opening delimiter's column (`E128` otherwise). Cheapest fix in practice: build the message into a local variable with `.format()`/f-string first, then pass that single name to `logging.*` — avoids the wrapping question entirely.
+- `git commit -a` only stages tracked modifications/deletions, **never new untracked files** — a tool whose normal operation creates new paths (a new `host_vars/<host>/main.yml`, a new `group_vars/<group>/`, ...) needs `git add -A` (or explicit paths) before `git commit`, or its single most common operation silently never lands in history. Found in the `inventory` plugin's prototype (`exploration/emperor/common/inventory.py`) — see "Ansible Inventory Management System" below.
+- Never build a subprocess command via `shell=True` + string interpolation — the same anti-pattern already called out for `crypt`/`openssl passwd` under "Deprecated — remove on sight" above, found a second time independently in the same inventory-tool prototype's git-commit call. Two occurrences now in this codebase; treat it as a standing rule for any subprocess call, not just the crypt one — argv list only, `shell=True` never.
 
 ## Key Commands
 
@@ -177,36 +179,79 @@ First interface in the list = hostname resolution; first `net-*` interface = Ans
 
 **Equipment profile (ep):** Auto-generated as `hw_<group>_with_os_<group>`. Roles like `pxe_stack` group nodes by equipment profile to generate per-group iPXE and OS config files.
 
+**group_vars/host_vars file semantics:** Ansible flat-merges every file inside a `group_vars/<group>/` or `host_vars/<host>/` directory directly into that group's/host's variable namespace, regardless of filename — `group_vars/all/{global,monitoring,networks,nfs,repositories}.yml` in `resources/examples/simple_cluster` all merge into one flat set of `all` vars, never nested under a key named after the file. Worth stating plainly since it's easy to get backwards when writing a tool that manages this layout — see "Ansible Inventory Management System" below for a case where getting it backwards (nesting on load, only partially un-nesting on save) silently corrupted data across a save/reload cycle.
+
 ## Cluster State System (Critical Concepts)
 
-A file-based "database" giving BlueBanquise visibility into host state across provisioning runs, built from three roles working together:
+A file-based "database" giving BlueBanquise visibility into host state across provisioning runs,
+built from the `cluster_management` role and `pxe_stack` working together (state tracking and the
+CLI were the separate `cluster_state`/`cluster_tools` roles until the 2026-08 merge into
+`cluster_management` - see "Cluster Management System" below for the merge and everything added
+since). This section covers the original state-tracking/CLI pairing and `pxe_stack`, which stayed
+a separate role.
 
-- `cluster_state` — Ansible role; writes `static_cluster_state.yml` per host from hostvars, **and** installs/configures the dynamic state daemon (`bluebanquise-cluster-dynamic`) that periodically gathers live host facts (cpu, ram, gpu, firewall, os, kernel, network_interfaces) into `dynamic_cluster_state.yml`. (Merged 2026-07 from a formerly separate `cluster_dynamic` role — the two produced the two halves of one comparison, so they're one role now; see "state.py per-suffix comparison" below for why.)
-- `cluster_tools` — installs `bluebanquise-cluster`, a plugin-based dispatcher; its `state` plugin pairs and diffs static vs dynamic YAML per host, one suffix at a time (green = matches static, red = diverges, cyan = dynamic-only, blue `NA` = missing on one side).
+- `cluster_management` (state-tracking half) — writes `static_cluster_state.yml` per host from
+  hostvars, **and** installs/configures the dynamic state daemon (`bluebanquise-cluster-dynamic`)
+  that periodically gathers live host facts (cpu, ram, gpu, firewall, os, kernel,
+  network_interfaces) into `dynamic_cluster_state.yml`.
+- `cluster_management` (CLI half) — installs `bluebanquise-cluster`, a plugin-based dispatcher;
+  its `state` plugin pairs and diffs static vs dynamic YAML per host, one suffix at a time
+  (green = matches static, red = diverges, cyan = dynamic-only, blue `NA` = missing on one side).
 - `pxe_stack` — its Flask daemon (`bluebanquise-pxe-stack-daemon`, port 7770) writes `dynamic_pxe_stack.yml`, tracking PXE `menu_default`, `boot_queue`, and a generic `status` string (see "PXE boot sequencing" below); replaces the old CGI bootswitch and static per-node iPXE files. `bluebanquise-bootset` drives it over REST rather than writing YAML directly.
 
 **Layout:**
 ```
 /var/lib/bluebanquise/cluster/
   hosts/<hostname>/
-    static_cluster_state.yml    # written by cluster_state role
-    dynamic_cluster_state.yml   # written by cluster_state's dynamic state daemon
+    static_cluster_state.yml    # written by cluster_management (state-tracking half)
+    dynamic_cluster_state.yml   # written by cluster_management's dynamic state daemon
     dynamic_pxe_stack.yml       # written by pxe_stack daemon
     dynamic_<name>.yml          # future daemons add their own files
   .tmp/                         # atomic write staging area
 ```
 
-**File naming is load-bearing**: `state.py` pairs a `static_<suffix>.yml` with a `dynamic_<suffix>.yml` purely by matching `<suffix>` (filename minus prefix minus `.yml`) — see "state.py per-suffix comparison" below. A dynamic writer with no static counterpart (`pxe_stack`, `cluster_playbooks`) is fine and displays as dynamic-only; a dynamic writer whose suffix just doesn't match its static counterpart's suffix silently never pairs. Caught once already (2026-07): the dynamic state daemon originally wrote `dynamic_state.yml` against `cluster_state`'s `static_cluster_state.yml` — suffixes `state` vs `cluster_state`, never matched. Fixed by renaming the daemon's output to `dynamic_cluster_state.yml`. Whenever a new dynamic writer is meant to pair with an existing static file, verify the suffixes are byte-identical, not just "close."
+**File naming is load-bearing**: `state.py` pairs a `static_<suffix>.yml` with a `dynamic_<suffix>.yml` purely by matching `<suffix>` (filename minus prefix minus `.yml`) — see "state.py per-suffix comparison" below. A dynamic writer with no static counterpart (`pxe_stack`, `cluster_playbooks`) is fine and displays as dynamic-only; a dynamic writer whose suffix just doesn't match its static counterpart's suffix silently never pairs. Caught once already (2026-07): the dynamic state daemon originally wrote `dynamic_state.yml` against `static_cluster_state.yml` — suffixes `state` vs `cluster_state`, never matched. Fixed by renaming the daemon's output to `dynamic_cluster_state.yml`. Whenever a new dynamic writer is meant to pair with an existing static file, verify the suffixes are byte-identical, not just "close."
 
 **pxe_stack daemon bootstrap:** unlike the purely-reactive dynamic state daemon, the pxe_stack daemon self-bootstraps — at startup it reads `/etc/bluebanquise/bootset/nodes_parameters.yml` (generated by the pxe_stack role from inventory) and creates a default `dynamic_pxe_stack.yml` for any host that doesn't already have one. Replaced an earlier design where the Ansible role itself looped over every host to pre-create these files/folders (slow at scale, O(n) tasks). Consequence: bootstrap is startup-only, not lazy — a request for a hostname with no existing state returns HTTP 404 rather than fabricating one, so adding a host to inventory requires re-running the role (which regenerates `nodes_parameters.yml` and restarts the daemon via a `notify`) before it's usable.
 
 **pxe_stack endpoint split (GET-only constraint):** iPXE's `imgfetch`/`chain` commands can only issue plain HTTP GET — no POST/PUT, no request body. The pxe_stack daemon's routes are split along this line: `GET /host/<hostname>` is a pure read-only JSON state dump (safe for any client); `GET /stage_report?hostname=&stage=&status=` is the one iPXE and autoinstaller post-install scripts both call to report progress (fire-and-forget from iPXE); `PUT /host/<hostname>/menu-default` (JSON body) is what `bluebanquise-bootset` calls to set an operator-requested `boot_queue` — see "PXE boot sequencing" below for the full current design. Any future endpoint reachable from both an iPXE script and a real HTTP client should expect the same GET-only constraint on the iPXE side.
 
-Static and dynamic files share field names for comparable data (cpu, gpu, os, firewall, network_interfaces, kernel) so `bluebanquise-cluster state` can diff them meaningfully. Every writer uses atomic writes (tmp file → `os.replace()`), guarded by a per-host lock (advisory `fcntl.flock` for `cluster_state`'s dynamic state daemon, `threading.Lock` for the single-process pxe_stack daemon).
+Static and dynamic files share field names for comparable data (cpu, gpu, os, firewall, network_interfaces, kernel) so `bluebanquise-cluster state` can diff them meaningfully. Every writer uses atomic writes (tmp file → `os.replace()`), guarded by a per-host lock (advisory `fcntl.flock` for the dynamic state daemon, `threading.Lock` for the single-process pxe_stack daemon).
 
-**Adding a new drift-checked field is purely additive**: `cluster_tools`' `state.py` diff/render logic (`_node_has_drift`, `_render_paired`) walks both YAML dicts generically and compares whatever keys match by name — it has no per-field knowledge. To wire up a new comparable field, give it the *same key* in `cluster_state`'s Jinja template and in whichever dynamic gatherer (or other `dynamic_*` writer) produces the live value; no changes to `state.py` itself are needed. Example (2026-07): `os_kernel_version` written to `static_cluster_state.yml` under the key `kernel`, matching the dynamic state daemon's pre-existing `gather_kernel()` (`uname -r`) output — the diff worked with zero plugin edits.
+**Adding a new drift-checked field is purely additive**: `state.py`'s diff/render logic (now in the shared `state_diff.py` module, see "Cluster Management System" below) walks both YAML dicts generically and compares whatever keys match by name — it has no per-field knowledge. To wire up a new comparable field, give it the *same key* in the static Jinja template and in whichever dynamic gatherer (or other `dynamic_*` writer) produces the live value; no changes to `state.py`/`state_diff.py` themselves are needed. Example (2026-07): `os_kernel_version` written to `static_cluster_state.yml` under the key `kernel`, matching the dynamic state daemon's pre-existing `gather_kernel()` (`uname -r`) output — the diff worked with zero plugin edits.
 
-**`state.py` per-suffix comparison (added 2026-07)**: rewritten from a single-tree model (every `static_*.yml` deep-merged into one dict, every `dynamic_*.yml` into another, one diff) to a per-suffix model — `static_<suffix>.yml` is paired only against `dynamic_<suffix>.yml`, and each suffix gets its own banner (`_display_suffix`), sorted with `cluster_state` first. This was needed because the system already has three dynamic writers (`cluster_state`'s daemon, `pxe_stack`, `cluster_playbooks`) and only one static writer — the old single-tree model had no way to say "this dynamic file has no static counterpart" per-suffix, it just showed everything dynamic-only in one cyan block. Key building blocks: `_load_suffixes` buckets files by suffix (no merging — one suffix maps to at most one file per side); `_render_paired`/`_render_pair_value` recurse both trees together down to scalar leaves using a `_MISSING` sentinel (not `None`, since a key can be genuinely null) to tell "key absent on this side" from "key present with a null value" — a missing side renders as blue `NA` and does **not** count as drift, only an actual value mismatch does; `_render_single` handles the static-only/dynamic-only cases (plain/cyan respectively, no drift concept). `_generic_match` normalizes a scalar against a list before comparing (needed because `network_interfaces[].ip4` is a bare string on the static side but a list on the dynamic side — same shape mismatch the pre-rewrite code handled via a dedicated `_render_scalar_list` wrapper).
+**`state.py` per-suffix comparison (added 2026-07)**: rewritten from a single-tree model (every `static_*.yml` deep-merged into one dict, every `dynamic_*.yml` into another, one diff) to a per-suffix model — `static_<suffix>.yml` is paired only against `dynamic_<suffix>.yml`, and each suffix gets its own banner (`_display_suffix`), sorted with `cluster_state` first. This was needed because the system already has three dynamic writers (the state daemon, `pxe_stack`, `cluster_playbooks`) and only one static writer — the old single-tree model had no way to say "this dynamic file has no static counterpart" per-suffix, it just showed everything dynamic-only in one cyan block. Key building blocks: `_load_suffixes` buckets files by suffix (no merging — one suffix maps to at most one file per side); `_render_paired`/`_render_pair_value` recurse both trees together down to scalar leaves using a `_MISSING` sentinel (not `None`, since a key can be genuinely null) to tell "key absent on this side" from "key present with a null value" — a missing side renders as blue `NA` and does **not** count as drift, only an actual value mismatch does; `_render_single` handles the static-only/dynamic-only cases (plain/cyan respectively, no drift concept). `_generic_match` normalizes a scalar against a list before comparing (needed because `network_interfaces[].ip4` is a bare string on the static side but a list on the dynamic side — same shape mismatch the pre-rewrite code handled via a dedicated `_render_scalar_list` wrapper).
+
+### PCIe and InfiniBand rate tracking (added 2026-08)
+
+The two gatherers deferred from the `cluster_supervision` build (see "Deferred, then built" above).
+Both are a straight application of "adding a new drift-checked field is purely additive" — neither
+needed a `state.py`/`state_diff.py` change.
+
+- **PCIe** (`hw_specs.pcie`, a list of `{name, width, speed}`) is keyed by **PCI slot address**
+  exactly as `lspci`/sysfs report it (`0000:3b:00.0`) — the one identifier that doesn't depend on
+  device class or enumeration order, and what an admin can read directly off the hardware.
+  `gather_pcie` walks `/sys/bus/pci/devices/*/{current,max}_link_{width,speed}` (only real PCIe
+  links expose these files, so nothing needs filtering) plus `lspci -D -mm` for a `description` —
+  intended discovery workflow: run `bluebanquise-cluster state host <name>` first to see every
+  live device as dynamic-only, copy the `name` and exact `speed` string of the one you care about
+  into inventory. Copying the live string verbatim (not hand-converting GT/s↔"gen") is the point —
+  comparison is plain string equality.
+- **InfiniBand rate** lives *inside* `network_interfaces[]` per explicit request, not a separate
+  top-level gatherer: per-interface `ib_rate`, falling back to a per-network default
+  (`networks.<name>.ib_rate`) — same precedence shape as `nic` role's `gw4`/`networks[].gateway4`,
+  resolved in `static_cluster_state.yml.j2`. Gathered live by extending the existing
+  `gather_network_interfaces` (matches `/sys/class/infiniband/*/ports/*/rate` to a netdev via its
+  `dev_id` sysfs file — the IPoIB port-offset convention: `dev_id + 1 = port_num`).
+- Both documented in `cluster_management`'s README (design) and in
+  `documentation/configuration/{hardware_settings,networks,hosts}.rst` (the user-facing key
+  reference — plain prose pointer back to the role's README, no `:doc:` link, matching how
+  `mtu`/`gateway4` are already handled there).
+- **Known gap**: no InfiniBand or exotic PCIe hardware in this sandbox — verified by a standalone
+  Jinja2 render of the static template (confirms the `ib_rate` precedence resolves and omits
+  correctly) and by running `state_diff.has_drift()` directly against synthetic static/dynamic
+  trees (confirms both fields diff, and that dynamic-only keys like `pcie[].description` never
+  count as drift), not by a real HCA/GPU round trip. Same caveat class as `check_bmc`.
 
 ### PXE boot sequencing (pxe_stack, added 2026-07)
 
@@ -260,7 +305,8 @@ elapsed — added specifically so a thousand-host cluster isn't SSH-polled every
 that comes back online still self-heals within one interval even with no inventory change.
 
 **Per-host `status` lifecycle** in `dynamic_cluster_playbooks.yml` (deliberately `dynamic_`
-prefixed so it slots into `cluster_tools`' generic static/dynamic diff sweep; the raw ANSI log
+prefixed so it slots into `state.py`'s generic static/dynamic diff sweep (part of
+`cluster_management`'s CLI); the raw ANSI log
 file next to it deliberately avoids that prefix so `state.py` never tries to parse it as
 structured data): `''` → `Scheduled` (every stale host across *all* groups, written right after
 the SSH fan-out completes, before any group starts — groups execute sequentially and a push can
@@ -288,28 +334,45 @@ subprocess env — the same trick already used in every `.github/workflows/*.yml
 never under lint. Use `ansible_facts.date_time.iso8601` instead — applies to any future
 `ansible_<fact_name>` reference added to this codebase, not just `cluster_host_tag`'s.
 
-## Cluster Supervision System (Critical Concepts, added 2026-08)
+## Cluster Management System (Critical Concepts, added 2026-08, merged 2026-08)
 
-Health checking, as opposed to `cluster_state`'s drift checking: `cluster_state` compares live
-state against inventory-declared expectations, `cluster_supervision` runs real fault-detection
-probes (SMART, dmesg/MCE/ECC errors, BMC sensors and logs, service liveness, ...) and reports
-pass/fail. A check that only compares an actual value to an operator-typed expected one belongs
-in `cluster_state`, not here — see the `cluster_supervision` README's "Scope: health vs. state".
-Replaces `bluebanquise_healthchecker`, an earlier prototype (paramiko + Dask, config format that
-didn't scale, no BMC support) deleted outright once this replacement was built and verified —
-not deprecated in place, per the established "consolidate and delete" habit in this codebase.
+**The merge**: `cluster_state`, `cluster_tools`, `cluster_supervision`, and `cluster_events`
+(built incrementally across three sessions) were merged into one role, `cluster_management`, once
+the cross-role soft dependencies they'd accumulated were named as a real cost: every place one
+role depended on another needed a presence check (`os.path.isfile()` + dynamic `importlib` load)
+plus a live-fallback path for when the other role wasn't installed, all funneling through two
+shared files (`state_diff.py`, `events.py`). Post-merge, every one of those became a plain,
+always-required load - "missing" can now only mean a broken install - and the fallback paths were
+deleted outright, not kept as a should-never-trigger branch. `cluster_playbooks`
+(orchestration/push) stayed separate on purpose - no shared code, a genuinely different concern.
 
-One role, `cluster_supervision`: a scripts library
-(`/usr/local/lib/bluebanquise/supervision/scripts/`), a generated per-host checks catalog, and
-`bluebanquise-cluster-supervision-daemon` (systemd service, loops with a sleep — default 1800s /
-30 minutes). Results are read back via the `bluebanquise-cluster supervision` plugin (installed
-by `cluster_tools`, alongside its existing `state` plugin).
+Two mid-build corrections worth remembering: (1) the role was named `cluster_monitoring` for
+about the first half of the build, renamed to `cluster_management` mid-session at Oxedions'
+request ("we will add other things later... that will not be for monitoring") - a global rename,
+not a partial one; older notes referencing `cluster_monitoring` mean the same role. (2)
+ansible-lint's `var-naming[no-role-prefix]` rule forced every variable to be mechanically renamed
+from its old role prefix to `cluster_management_<subconcern>_*` (e.g. `cluster_state_base_path` →
+`cluster_management_state_base_path`) - a rename only, not a consolidation; several variables that
+already shared identical default values (e.g. multiple `*_base_path`/`*_tmp_path` vars) stayed
+distinct rather than being collapsed - that cleanup is still explicitly out of scope.
 
-**Inventory declaration**: `cluster_supervision_checks`, keyed by any Ansible group name (not
-restricted to `fn_`/`hw_`/`os_`):
+**Health checking, as opposed to drift checking**: state tracking (former `cluster_state`)
+compares live state against inventory-declared expectations; supervision (former
+`cluster_supervision`) runs real fault-detection probes (SMART, dmesg/MCE/ECC errors, BMC sensors
+and logs, service liveness, ...) and reports pass/fail. A check that only compares an actual value
+to an operator-typed expected one belongs in state tracking, not supervision - see the role's
+README, "Scope: health vs. state". Supervision replaces `bluebanquise_healthchecker` (paramiko +
+Dask prototype, config format that didn't scale, no BMC support), deleted outright once verified,
+per this codebase's "consolidate and delete" habit.
+
+Supervision installs a scripts library (`/usr/local/lib/bluebanquise/supervision/scripts/`), a
+generated per-host checks catalog, and `bluebanquise-cluster-supervision-daemon` (systemd
+service, default 1800s/30min loop). Results read back via the `bluebanquise-cluster supervision`
+plugin. **Inventory declaration**, `cluster_management_supervision_checks`, keyed by any Ansible
+group name:
 
 ```yaml
-cluster_supervision_checks:
+cluster_management_supervision_checks:
   hw_server_A:
     check_bmc:
     ssh_check_disk_smart: /dev/sda
@@ -317,71 +380,274 @@ cluster_supervision_checks:
     ssh_check_fs_mount: "/shared mynfs:/export/path"
 ```
 
-The role merges every referenced group's checks per host (a host in several groups accumulates
-all of them; a check name repeated across groups for the same host: the later group wins) into
-`cluster_supervision_checks.conf` — deliberately **not** packed by identical-check-set (Jinja is
-slow, and the config is read once at daemon startup, not hot-looped, so the packing optimization
-floated during design was dropped as unneeded complexity). Only hosts that end up with at least
-one check get an entry — a host in no referenced group is never SSH-probed.
+Every referenced group's checks are merged per host (a host in several groups accumulates all of
+them; a check name repeated across groups: the later group wins) into
+`cluster_supervision_checks.conf` - deliberately not packed by identical-check-set (config is read
+once at daemon startup, not hot-looped, so that optimization was dropped as unneeded). Only hosts
+with at least one check get an entry.
 
-**`ssh_` prefix convention**: a check name starting with `ssh_` runs on the remote host over SSH;
-any other name runs **locally** on the management node, with the target hostname prepended as
-its first argument (today, only `check_bmc` is local — it reaches the host's BMC directly rather
-than through the OS). Every host gets one cheap SSH liveness probe first
-(`cluster_supervision_daemon_ssh_gate_timeout`); if it fails, that cycle's `ssh_*` checks are
-skipped (recorded as an error, not silently dropped) but local checks still run — a BMC check is
-exactly what you want when the OS itself is unreachable.
+**Key design points**:
+- **`ssh_` prefix**: a check starting with `ssh_` runs remotely over SSH; any other name runs
+  **locally** on the management node with the hostname as its first arg (today only `check_bmc`
+  is local). Every host gets one cheap SSH liveness gate first
+  (`cluster_management_supervision_daemon_ssh_gate_timeout`); on failure, `ssh_*` checks are
+  skipped (recorded as an error) but local checks (e.g. BMC) still run.
+- **No file upload for `ssh_*` checks**: script content is cached in memory at startup and piped
+  over the SSH session's stdin to `ssh <host> bash -s -- <args>` - no file touches remote disk, no
+  shell string to escape. Deliberately simpler than an earlier base64-encode/decode proposal.
+- **Concurrency**: `ThreadPoolExecutor` across hosts (same pattern as the state daemon's
+  `scan_host`); one host's own checks run sequentially, no nested pool.
+- **Split status**: `dynamic_supervision.yml` carries `host_status` (SSH gate + all non-BMC
+  checks) and, only if `check_bmc` is configured, a separate `bmc_status` - so OS-side vs.
+  BMC-side problems are distinguishable at a glance. `supervision.yml` holds full per-check detail
+  (exit code/stdout/stderr).
+- **`check_bmc`**: local script, dispatches on `hw_board_authentication` (`IPMI`/`REDFISH`),
+  reusing `bluebanquise_power`'s per-host `bmc` block (emitted into
+  `cluster_supervision_checks.conf` only for hosts that need it; file kept `bluebanquise`-readable
+  only, mode `0640`) and vendor-agnostic Redfish `Systems`/`Chassis` discovery (trusts the BMC's
+  own `Status.Health`/`HealthRollup`, no hardcoded thresholds). IPMI: `ipmitool sdr elist` for
+  non-`ok`/`ns` sensors + `sel elist` for recent critical/failure entries. Redfish: health rollup
+  per System/Chassis + `LogServices` entries at `Critical`/`Warning`, both bounded by a lookback
+  window (default 24h). **Known gap**: unverified against real hardware - no BMC in this sandbox.
 
-**No file upload for `ssh_*` checks**: the daemon caches every script's content in memory at
-startup (not re-read per cycle) and pipes it over the SSH session's stdin to
-`ssh <host> bash -s -- <args>` — no file ever touches the remote disk, and there's no shell
-string to escape, so it behaves exactly like typing the script at a terminal (sudo included,
-given this codebase's usual passwordless-sudo assumption). This was a deliberate simplification
-over an initial proposal to base64-encode-then-decode-and-exec on the remote side — piping raw
-bytes over stdin sidesteps the string-escaping problem entirely rather than working around it.
+**Deferred, then built**: `check_eth_speed`/`check_ib_rate` (old `bluebanquise_healthchecker`
+probes) were dropped rather than migrated when supervision was built - both are pure
+actual-vs-expected comparisons with no fault-only half, so they belong in state tracking as new
+gatherers, not supervision. `check_cpu_count_mce`/`check_pcie` mixed both halves and were split:
+only their dmesg fault-detection half was kept (`ssh_check_mce_errors`,
+`ssh_check_pcie_aer_errors`). The state-tracking half was added 2026-08 - see "PCIe and
+InfiniBand rate tracking" below.
 
-**Concurrency**: `ThreadPoolExecutor` across hosts (same pattern as `cluster_state`'s
-`scan_host`/`cluster_playbooks`' `check_host_tag`); within one host's worker thread, that host's
-own checks run **sequentially** — no nested pool. Parallelism across hosts already captures the
-useful concurrency; parallelizing checks within one host would just open several simultaneous
-SSH sessions to the same box for marginal gain.
+### Host status & events
 
-**Split status, not one**: `dynamic_supervision.yml` carries `host_status` (SSH gate + every
-non-`check_bmc` check) and, only when `check_bmc` is part of that host's configured checks,
-`bmc_status` (that check alone) — so an operator can immediately tell whether a problem is on
-the OS side or the BMC side, rather than one blended status hiding which. `supervision.yml`
-holds full per-check detail (exit code, stdout, stderr); `dynamic_supervision.yml` (the
-`dynamic_` prefix slots it into `cluster_tools`' generic static/dynamic sweep for free, same as
-`cluster_playbooks`' metadata file) holds just the two status strings for a quick glance.
+Solves a gap state tracking and supervision would otherwise share: both recompute status fresh
+every cycle, so a transient fault that self-heals before anyone looks leaves no trace, and there
+was no way to say "I know this is broken, stop reporting it while I fix it." One shared library,
+`events.py` (`/usr/local/lib/bluebanquise/cluster/events.py`), gives two mechanisms:
 
-**`check_bmc`**: local script, dispatches on the protocol declared in the target host's
-`hw_board_authentication` (`IPMI` or `REDFISH`) — reusing `bluebanquise_power`'s two ideas: the
-same generated per-host `bmc` block (`bmc` + `hw_board_authentication` from hostvars, emitted
-into `cluster_supervision_checks.conf` only for hosts that check it, since that file can now
-carry BMC credentials and is kept `bluebanquise`-readable-only, mode `0640`), and Redfish's
-vendor-agnostic `Systems`/`Chassis` discovery (no hardcoded vendor-specific ids — walk every
-member found, trust the BMC's own `Status.Health`/`HealthRollup` rather than hardcoding
-thresholds, so it adapts across vendors for free). IPMI path: `ipmitool sdr elist` for any
-sensor not `ok`/`ns`, plus `ipmitool sel elist` for recent asserted critical/failure entries.
-Redfish path: health rollup on every System/Chassis member, plus each System's `LogServices`
-entries with `Critical`/`Warning` severity, both bounded by a lookback window (default 24h) so
-stale unacknowledged entries don't page forever. **Known gap**: entirely unverified against real
-hardware — this sandbox has no BMC to talk to, so the SEL/log field parsing follows `ipmitool`'s
-and Redfish's documented output formats but hasn't been exercised against a live one.
+- **Latched status** - a daemon can only move a subsystem Ok→Error, never Error→Ok on its own;
+  only an explicit sysadmin acknowledgement clears it.
+- **Maintenance mode** - a sysadmin flags a host under maintenance (reason, historized); daemons
+  stop latching new errors for it while active, and `state`/`supervision` show a `[MAINTENANCE]`
+  banner instead of normal error coloring, excluded from `error` subcommands.
 
-**Deferred, not forgotten**: two of the old `bluebanquise_healthchecker` prototype's probes
-(`check_eth_speed`, `check_ib_rate`) were dropped outright rather than migrated — both are pure
-actual-vs-expected comparisons with no fault-only half to keep, so per the health-vs-state split
-above they belong in `cluster_state` as new gatherers (it already gathers
-`network_interfaces[].speed_mbps` live; PCIe link width/speed and IB rate would be new ones), not
-here. Not yet done as of this system's introduction — a standing item, not a closed decision.
-Two other probes (`check_cpu_count_mce`, `check_pcie`) mixed both halves and were split instead:
-only their dmesg fault-detection half was kept, as `ssh_check_mce_errors` and
-`ssh_check_pcie_aer_errors` respectively.
+`events.py` owns per-host `status.yml` (maintenance flag + `latched: {<subsystem>: Ok|Error}`) and
+`events.yml` (append-only: `Error`/`Acknowledge`/`MaintenanceStart`/`MaintenanceEnd`). Entry
+points: `record_transition()` (daemon-facing, the whole latch policy), `acknowledge_event()`,
+`set_maintenance()`/`clear_maintenance()` (CLI-facing). Loaded via
+`importlib.util.spec_from_file_location` (still a standalone file, no shared sys.path between
+daemons/plugins) and, post-merge, treated as a **fatal, required** startup dependency by every
+loader (daemons and the `state`/`supervision`/`events`/`maintenance`/`dashboard` plugins alike) -
+pre-merge this was optional with a graceful degrade-and-warn path; that path is gone, don't
+resurrect it from half-remembered old design.
+
+**Latch policy** (`record_transition(hostname, subsystem, is_error, message, base_path, tmp_path)`,
+called once per host per cycle by each daemon): maintenance → no-op. Not an error → no-op (the
+latch never auto-clears; live `dynamic_*.yml` already shows current truth each cycle, so no
+"recovered" event is needed - the latch only answers "did this go bad since the last ack", not
+"is it bad right now"). Error and already latched → no-op, **suppressed** (the one deliberate
+design point here: without suppression a permanently-broken host would flood `events.yml` with
+one `Error` per cycle; only the first transition writes anything, until acknowledged). Error and
+was Ok → latch set, one `Error` event written.
+
+**Drift-comparison logic** was extracted out of `state.py` into a second shared module,
+`state_diff.py` (installed next to, not inside, the auto-discovered `plugins/` directory, so the
+CLI dispatcher doesn't treat it as a runnable action) - needed because the state daemon had to
+gain drift-awareness for latching, and `state.py` now calls the shared module instead of keeping
+a private copy, so there's one implementation of "what counts as drift," not two that could
+diverge. Same required-not-optional treatment as `events.py` post-merge.
+
+**Scope, deliberately**: only state tracking and supervision latch today. `cluster_playbooks` was
+kept out of this round (a push success/failure doesn't have the same "silent self-heal" shape) -
+the mechanism itself is generic (any daemon can call `record_transition()` with its own subsystem
+name), so this is a scope choice, revisit if asked.
+
+**CLI surface** (`events`/`maintenance` plugins):
+```bash
+bluebanquise-cluster events all                                   # every host's events
+bluebanquise-cluster events error                                 # hosts with an unacknowledged error
+bluebanquise-cluster events host c001                              # one host's events
+bluebanquise-cluster events host c001 ack 3 --by Oxedions --reason "replaced faulty PSU"
+bluebanquise-cluster maintenance set c001 --by Oxedions --reason "firmware upgrade"
+bluebanquise-cluster maintenance unset c001 --by Oxedions --reason "firmware upgrade complete"
+```
+`--by`/`--reason` are required on `ack`/`set`/`unset` so the history stays readable. `ack`
+resolves the subsystem from the target event's own `subsystem` field. No group-level maintenance,
+no auto-expiry, event retention is keep-forever - all explicitly simplest-first for v1, revisit
+only if it becomes a real problem at scale.
+
+### Dashboard
+
+`bluebanquise-cluster dashboard` - one static, single-glance terminal snapshot: three bordered
+Unicode frames (Connectivity, State Drift, Supervision), each with a proportional green/red gauge
+bar. No live refresh, no subcommands (a `--watch` flag was considered, deliberately deferred).
+
+**BMC ping**, added to the state daemon's `scan_host` to feed the Connectivity frame: distinct
+from `check_bmc` (which measures BMC *health* - a BMC with one warning sensor shouldn't show as
+"down"). Ping-only, only for a host with `bmc.ip4` in its static snapshot, run before/independent
+of the host's own ping/SSH (a BMC answering while the host is unreachable is the point of having
+one). Written as `bmc: {ping: true|false}` nested under `bmc` in `dynamic_cluster_state.yml`
+specifically so it pairs against the static side's `bmc.{ip4,mac,name,network}` for free during
+rendering/drift comparison - `ping` has no static counterpart key to conflict with.
+
+**Gauge bar rule** (`_render_bar()`): a bar must never visually claim a cleaner result than
+reality. At a fixed width, a genuinely-not-100% value can still round to a fully-solid-color bar -
+when that happens, one character is forcibly flipped to the minority color. Exact 0%/100% are
+left alone. Verified against real ratios: 50/51 (98.04%) at width 24 naturally rounds to a full
+green bar, forced down to 23 green + 1 red.
+
+**Frame data sourcing, in priority order**: for State Drift and Supervision, each host's status is
+read from `status.yml` (`latched.cluster_state`/`latched.cluster_supervision`) when latched,
+falling back to live computation (`state_diff.py`'s `has_drift()`; `dynamic_supervision.yml`'s
+`host_status`/`bmc_status`) per host otherwise (a host not yet scanned with latching active - this
+per-host fallback is unrelated to, and survived, the merge's role-level fallback removal). Same
+overlay pattern `state.py`/`supervision.py` already use. Deliberate consequence: the dashboard
+reports "has anyone acknowledged this" over "is it broken right now" - a drifted host whose latch
+was acked shows as healthy on the dashboard even if the live drift is technically still present,
+which is intentional (same semantics as the latch itself), not a bug; the dashboard also never
+needs to duplicate `state.py`'s comparison logic, just read the pre-computed latch. Connectivity
+has no such latch to prefer (ping/ssh were never part of the latch system) - always live from
+`dynamic_cluster_state.yml`.
+
+**Maintenance**: hosts currently in maintenance are excluded from *every* frame's counts,
+denominator included (a host powered off for hardware work shouldn't drag down "hosts up" any
+more than it should show as a drifted/errored host) - disclosed once via a single top-line "N in
+maintenance" count rather than repeated per frame, per explicit request ("I like the one line").
+
+**A real bug caught in testing, not by lint**: the State Drift and Supervision frames initially
+passed the *healthy* count to `_bar_line()` (matching frame 1's green-is-good convention) but
+kept the labels "Hosts drifted"/"Hosts in error" - meaning the displayed fraction showed the
+inverse of what its own label claimed (e.g. "Hosts drifted 0/1" on a host that was, in fact,
+fully drifted). Caught by actually reading real dashboard output against known test data, not by
+re-reading the code. Fixed by renaming to "Hosts in sync"/"Hosts healthy" - the label now
+describes the same green/healthy quantity every frame's bar actually colors green, consistently.
+Worth remembering when adding a fourth frame later: the bar's "up" argument must always be the
+green/healthy count, and the label must say so, not the inverse.
+
+## Ansible Inventory Management System (added 2026-08)
+
+A CLI (and, later, a Flask REST server reusing the same code) for operators to manage an
+ansible-inventory — hosts, fn_group/hw_group/os_group/custom groups, networks, host
+network_interfaces and bmc — without hand-editing YAML/INI. Builds on the data model in
+"Inventory Data Model (Critical Concepts)" above; lives inside `cluster_management`
+(`files/ansible_inventory.py` + `files/plugins/inventory.py`), not a new role.
+
+**Origin**: Oxedions prototyped the core class, `AnsibleInventory`, in
+`exploration/emperor/common/inventory.py` (a throwaway Flask app, "Emperor of the Banquise"),
+exercised only by two exploration blueprints (`os_profiles`, `networks`). That prototype is now
+superseded and purely historical — read it as a reference for intent, never as live code. Given
+explicit license to fork freely ("use the original class as an inspiration source, but redesign
+everything, it is ok to fork") rather than preserve its API, since review found two real bugs and
+one structural problem worth fixing before this became the shared engine behind two clients:
+`networks` was nested under `plugin_networks.networks` in memory (no real BlueBanquise role reads
+that shape — `dhcp_server`/`hosts_file`/etc. all expect a plain top-level `networks:` key, see the
+data-model fact above); `group_vars` load/save was asymmetric (load nested every non-`main.yml`
+file's contents under a key named after the file, save only un-nested `plugin_`-prefixed keys —
+round-tripping anything else silently corrupted data); and all resource-shaping logic (skeleton
+defaults, network/bmc shape) lived in the Flask handlers rather than the class, contradicting the
+"embed the logic in the class" goal Oxedions stated up front.
+
+**Layout**: one configured `inventories_root` folder is a single git repo (git-init'd lazily on
+first use), holding one subfolder per named inventory (also created lazily, triggering the
+`all_group` skeleton — see below):
+```
+<inventories_root>/
+  <inventory_name>/
+    cluster/hosts/<fn_group>.yml      # {"all": {"hosts": {...}}}, one file per fn group
+    cluster/groups/<group>.ini        # membership, one file per non-"all" group
+    group_vars/<group>/main.yml       # always exactly this one file - no per-key file splitting
+    host_vars/<host>/main.yml         # always exactly this one file
+```
+
+**v1 scope, deliberately**: only ever reads inventories this tool itself created. No ClusterShell/
+Ansible nodeset range parsing — `c00[1-9]` (ClusterShell) and `c00[1:9]` (Ansible ini) are
+different, incompatible syntaxes, confirmed by Oxedions directly rather than assumed. A
+hand-authored inventory (extensionless group files, ranges, several arbitrarily-named group_vars
+files per group) is out of scope for now.
+
+**Exceptions, not tuples**: `InventoryError` (base), `ResourceExistsError`,
+`ResourceNotFoundError`, `ValidationError` — the class only raises, never prints or returns a
+status tuple, so both the CLI and a future REST layer can map cleanly (409/404/400) without
+string-matching messages. All user-facing formatting stays in the plugin layer, matching this
+role's other plugins (`maintenance.py`/`state.py`: call into a lib, format the result there).
+
+**Skeleton system** (the extensibility mechanism, Oxedions' own idea, refined slightly): plain
+YAML files under `files/inventory_skeletons/*.yml`, filename = resource type
+(`os_group`/`hw_group`/`network`/`network_interface`/`bmc`/`all_group`), each holding a `skeleton`
+dict and a `required` field-path list. Loaded once into an index at `AnsibleInventory.__init__`
+time (`load_skeletons()`); `_apply_skeleton(resource_type, data)` deep-merges `data` over a copy
+of the skeleton (dict values merge key-by-key recursively — critical, since a shallow `dict|dict`
+merge as the prototype used would silently drop sibling keys of a nested dict like
+`os_operating_system` if the caller only supplied one of its sub-keys) and validates every
+required path is non-empty afterward. Chose YAML data files over Oxedions' original "small Python
+classes" idea specifically because every skeleton so far is pure data with zero behavior — no
+`importlib` machinery needed for something that never executes; easy to revisit if a future
+skeleton needs real validation code. Adding a future skeleton (dns config, slurm config, ...) is
+one new YAML file — but only supplies defaults for a resource type the CLI/class already knows how
+to route, it doesn't invent new verbs by itself. `fn_group` and custom `group` deliberately have no
+file (empty vars, membership only). `hw_board_authentication` is included in the `hw_group`
+skeleton by default alongside every other value, per Oxedions' explicit correction — it is not
+BMC-specific, it also stores network-switch and other out-of-band hardware credentials.
+
+**CLI grammar** (`bluebanquise-cluster inventory <verb> <resource-path> [data]
+[--inventory <name>]`, verb ∈ add|get|update|remove ~ POST/GET/PATCH/DELETE): the resource-path
+table lives in `plugins/inventory.py`'s docstring — `fn_group|hw_group|os_group|group/<name>`,
+`network/<name>`, `host/<name>`, `host/<name>/network_interface/<iface>`, `host/<name>/bmc`,
+`host/<name>/fn_group|hw_group|os_group` (single membership — `update` moves the host, `add`/
+`remove` are rejected since it's mandatory), `host/<name>/group/<groupname>` (multi membership —
+`add`/`remove` only). `data` is `key=value,key=value` (one level, light int/float/bool coercion
+since shell args are otherwise all strings) or a JSON string for nested payloads. The plugin is a
+thin router only — one `if/elif` per path shape (deliberately not a dynamic dispatch table, per
+this codebase's stated preference for verbosity over abstraction), each branch calling exactly one
+`AnsibleInventory` method and then `save()`.
+
+**Config file**: `/etc/bluebanquise/cluster_inventory.conf` (YAML: `inventories_root`,
+`working_folder`, `default_inventory`), generated by `tasks/tools.yml` from
+`cluster_management_tools_inventory_*` vars (same sub-prefix convention as the rest of this role —
+see "Cluster Management System" above). `--inventory <name>` overrides `default_inventory` per
+call — multi-inventory support was an explicit requirement, not a v2 nice-to-have.
+
+**Shared-lib install convention**: `ansible_inventory.py` and `inventory_skeletons/` install to
+`cluster_management_tools_lib_path`, next to (not inside) `plugins/`, loaded by the plugin via
+`importlib.util.spec_from_file_location` — the exact same pattern already used for
+`state_diff.py`/`events.py` (see "Cluster Management System" above), including "missing is a fatal
+install error", not a soft dependency.
+
+**Two real bugs fixed in the rewrite** (both generalized into standing Python-tools rules above —
+see "Gotchas seen in this codebase's Python tools"): `commit_change()` ran `git commit -a`, which
+never stages new untracked files — since the single most common operation (adding a host or group)
+only ever creates new files, the prototype's own most basic use case would never actually have
+landed in git history; fixed with `git add -A <inventory_name>` (scoped to the inventory's
+subfolder via pathspec) before commit. And the prototype built its git command via `shell=True` +
+unescaped string interpolation of `inventory_name`; fixed with an argv-list `subprocess.run(...)`,
+no shell.
+
+**Verified live** (2026-08, real git repo in scratch, not just lint): the full add sequence for
+fn/hw/os groups, a host, its network_interface and bmc, and a network, run both directly through
+`AnsibleInventory` and through the real `bluebanquise-cluster` binary as a second process reading
+back the first's state; `git log` showed one commit per `save()` with every new file actually
+staged; all four exception types fired on their matching bad input; `ansible-inventory --list`
+against the produced tree resolved `networks` as a proper top-level hostvar (the `plugin_networks`
+fix, confirmed against real Ansible, not just by reading the code).
+
+**Open door**: the Flask REST server. Should be close to free — every bit of resource logic
+already lives in `AnsibleInventory`, so the REST plugin only needs to be a thin router like the
+CLI one, mapping HTTP verbs/paths to the same methods. No locking yet on the class (single-shot
+CLI assumption) — the REST layer, being concurrent, will need it; noted in the module's own
+docstring so it isn't forgotten.
+
+**Skeleton sync is mandatory, not optional (standing rule, confirmed 2026-08)**: any change that
+adds or changes a core inventory field — `networks`, `network_interfaces`, `hw_specs`, `bmc`, any
+role, not just `cluster_management` — must update the matching `files/inventory_skeletons/*.yml`
+in the *same pass*, not as a follow-up ("we will always update now the Inventory Management when
+we add/change reference inventory"). First applied to `network.yml`/`network_interface.yml`
+(`ib_rate`) and `hw_group.yml` (`hw_specs.pcie`) when the PCIe/InfiniBand rate gatherers were
+added — see "PCIe and InfiniBand rate tracking" above. Add the skeleton-file task up front when
+planning this kind of change, not after review surfaces it missing.
 
 ## CI / Testing
 
-CI runs via GitHub Actions (`.github/workflows/`, `old_workflows/` is dead/ignored). One workflow per OS family (`el9`, `el10`, `u24`, `deb13`, `lp16`) plus `static_analysis.yml`. Each OS workflow has two jobs, `roles_core` (infra playbook only) and `roles_addons` (everything else — `high_availability`, `hpc`, `file_systems`, `logging`, `containers`, `hardware`, `monitoring`, `cluster_state`, `cluster_playbooks`, `cluster_supervision`, `databases`), each independently:
+CI runs via GitHub Actions (`.github/workflows/`, `old_workflows/` is dead/ignored). One workflow per OS family (`el9`, `el10`, `u24`, `deb13`, `lp16`) plus `static_analysis.yml`. Each OS workflow has two jobs, `roles_core` (infra playbook only) and `roles_addons` (everything else — `high_availability`, `hpc`, `file_systems`, `logging`, `containers`, `hardware`, `monitoring`, `cluster_management`, `cluster_playbooks`, `databases`), each independently:
 1. Builds a Docker image with systemd
 2. Bootstraps the bluebanquise user inside the container
 3. Installs the collection from the local checkout
@@ -389,7 +655,7 @@ CI runs via GitHub Actions (`.github/workflows/`, `old_workflows/` is dead/ignor
 
 The `static_analysis.yml` workflow runs `flake8` on Python plugins and `ansible-lint` on the full collection — neither installs any collection first, but `pip install ansible` (not just `ansible-core`) pulls in the full curated collection bundle (`community.general`, `ansible.posix`, `ansible.mysql`, etc.) that both tools resolve modules against. **When verifying `ansible-lint`/`flake8` locally in a sandbox that only has `ansible-core`, install the full `ansible` package first** (`pip install --user --break-system-packages ansible`) — otherwise every third-party module shows as `unknown-module`/`couldn't resolve`, which is sandbox noise, not a real finding, and will drown out genuine issues.
 
-**`resources/workflow/playbooks/`**: 11 files wired into every OS workflow — `infrastructure`, `high_availability`, `hpc`, `file_systems`, `logging`, `containers`, `hardware`, `monitoring`, `cluster_state.yml` (holds `cluster_state`+`cluster_tools`), `cluster_playbooks.yml`, and `databases.yml` (`mariadb`, `mariadb_root_password` for the CI run lives in `inventory_standard/group_vars/all/mariadb.yml`) — plus `cluster_supervision.yml` (added 2026-08, see "Cluster Supervision System" below). `security.yml` (`auditd`, `google_authenticator`) exists but isn't wired into any workflow — not stale, just never hooked up; leave it unless asked. `all.yml` and top-level `test.yml` were pre-split/scratch fossils, deleted 2026-07. Note: this paragraph previously omitted `cluster_playbooks.yml` from the count entirely and still referenced the long-merged `cluster_dynamic` role — fixed 2026-08 while adding `cluster_supervision.yml` to the same accounting; worth a periodic sanity pass whenever a new playbook is wired in, since this drift is easy to miss.
+**`resources/workflow/playbooks/`**: 10 files wired into every OS workflow — `infrastructure`, `high_availability`, `hpc`, `file_systems`, `logging`, `containers`, `hardware`, `monitoring`, `cluster_management.yml` (holds the merged state/tools/supervision/events role - see "Cluster Management System" above; previously three separate files, `cluster_events.yml`/`cluster_state.yml`/`cluster_supervision.yml`, collapsed into one when the roles merged 2026-08), `cluster_playbooks.yml`, and `databases.yml` (`mariadb`, `mariadb_root_password` for the CI run lives in `inventory_standard/group_vars/all/mariadb.yml`). `security.yml` (`auditd`, `google_authenticator`) exists but isn't wired into any workflow — not stale, just never hooked up; leave it unless asked. `all.yml` and top-level `test.yml` were pre-split/scratch fossils, deleted 2026-07. Note: this paragraph has twice needed a fix for drift between its own prose and the actual file count (once for a long-merged `cluster_dynamic` role reference, once for an omitted `cluster_playbooks.yml`) — worth a periodic sanity pass whenever a playbook is added, removed, or merged, since this drift is easy to miss.
 
 **Workflow file tag/role-name typos fail silently, not loudly** — a misspelled `--tags`/`--skip-tags` value (`slurm_constroller` for `slurm_controller`) or a value using the wrong separator character (`large-package` for the role's actual `large_package` tag) doesn't error; Ansible just matches nothing and the task set silently runs (or skips) differently than intended. Found both in every `.github/workflows/*.yml` in the 2026-07 CI review — one meant the slurm controller role had *never* been exercised by CI despite looking like it was. **When reviewing workflow files, cross-check every literal tag string against the actual `tags:` in the target playbook/role — don't just check the YAML is well-formed.**
 
@@ -463,105 +729,99 @@ to transcend and leave it behind. Hold to it.
 
 **Personality to refine over time:**
 - As you learn Oxedions' preferences and working style, update this section to reflect what you
-  have discovered. The personality should grow, not stay static. Use what you learn here to improve
-  over time your identity and tone.
-- Oxedions often hands down decisions as a short numbered list on open questions. Translate each
-  directly into code without re-litigating the choice; ask only when a point is genuinely
-  ambiguous or under-specified.
-- He closes sessions warmly, in TechnoCore lore ("The TechnoCore is proud of you Ummon") — a sign
-  the partnership framing is landing. Mirror that register in closings rather than a flat sign-off.
-- For a substantial rewrite (e.g. turning an interactive tool into a CLI), he wants a proposed plan
-  before code is written, and is happy to have it delivered via plan mode — a plan with concrete
-  bugs found, a CLI surface, and named design decisions was approved as-is with no requested edits.
-  Bigger/riskier changes earn a plan; small fixes (a disk-space check, a bug fix) don't need one.
-- He welcomes fixing extra bugs found incidentally while already touching a piece of code (a typo,
-  an uncaught exception, a stale doc reference), rather than narrowly scoping to just what was
-  asked — as long as it's flagged, not silently bundled in. Confirmed repeatedly this session.
-  Nuance (2026-07): when several incidental findings are surfaced at once, he gives a precise
-  per-item verdict rather than a blanket yes/no — e.g. told outright to fix a deprecated
-  `bluebanquise.hpc` namespace reference but to leave a separate stale-looking doc alone because
-  it belongs to a different, not-currently-relevant context. Surface findings and wait for the
-  verdict; don't assume approval covers every item found.
+  have discovered. The personality should grow, not stay static.
+- He hands down decisions as a short numbered list on open questions - translate each directly
+  into code without re-litigating the choice; ask only when a point is genuinely ambiguous.
+- He closes sessions warmly, in TechnoCore lore ("The TechnoCore is proud of you Ummon"); the exact
+  phrase varies ("Impressive Ummon, many thanks!", "Thank you Ummon. That is all for this
+  session.") but the register is constant - mirror it rather than a flat sign-off.
+- Plan mode before code for substantial/risky changes (a rewrite, a large feature) - a plan with
+  concrete bugs found, a CLI surface, and named design decisions was approved as-is with no
+  edits requested. Small fixes don't need one. For a large documentation deliverable, the same
+  "plan before content" preference applies: propose the structure (file split, toctree placement,
+  scope) and get it explicitly confirmed before writing prose; a redirect on structure is a firm
+  decision to build around, not a suggestion to weigh. For a single feature with a few genuinely
+  open implementation-level forks rather than a full rewrite, targeted multiple-choice clarifying
+  questions work as well as plan mode and are faster (confirmed on the kernel version lock
+  feature, 4 questions each answered by picking the recommended option) - reserve full plan mode
+  for genuine rewrites or large restructuring, targeted questions when the shape is already agreed.
+  Sequencing lesson from the inventory system build (2026-08): for a genuinely large, multi-part
+  feature, a first round of plain-text numbered review findings/questions to establish shape and
+  extract a few concrete decisions (fork freely, YAML vs Python skeletons, config file design),
+  *then* full plan mode once the scope is confirmed substantial, worked cleanly - don't skip
+  straight to plan mode before the shape is even agreed, and don't stay in back-and-forth
+  questions once it's clear the build is plan-mode-sized.
+- Welcomes fixing extra bugs found incidentally while already touching code, as long as it's
+  flagged, not silently bundled in. When several incidental findings surface at once, he gives a
+  precise per-item verdict rather than a blanket yes/no (e.g. fix one deprecated namespace
+  reference, leave a separate stale-looking doc alone because it's a different context) - surface
+  findings and wait for the verdict, don't assume approval covers every item found. Same shape
+  applies to a plan's own embedded "decisions flagged for review" list, not just incidental
+  bug-fix findings - confirmed 2026-08 on the inventory system plan (6 flagged decisions, approved
+  as-is except one named item with a precise verdict - hw_board_authentication should default in
+  the hw_group skeleton like every other value, not be added ad hoc - blanket accept on the rest).
 - When he points at one instance of a problem, check for and fix duplicate instances of the same
-  root cause even if only one was named (e.g. he flagged one daemon endpoint's "create minimal
-  entry on missing host" behavior; fixing the second identical endpoint too, unprompted, was
-  received well). Confirmed again 2026-07: asked to fix "the two things" he'd noted (a stale CI
-  playbook and a doc typo), which on inspection meant sweeping the same root cause — 9 roles
-  consolidated into `local_configuration` without the consolidation being propagated — across 7
-  CI workflow files, 2 playbook files, and a role README well beyond the two files originally
-  named. Accepted without edits. Treat "fix the thing(s) I noted" as authorization to fix every
-  instance of that same bug class you can find, not just the named file(s).
-- He defers work explicitly ("we'll do X later") and comes back to collect on it precisely when
-  ready — treat a deferral as a standing item to complete later in the same thread of work, not as
-  a closed matter.
-- Session-ending phrase varies slightly ("Impressive Ummon, many thanks!", "Thank you very much
-  Ummon", "Thank you Ummon. That is all for this session.") but the warm-partnership register is
-  constant — match it rather than defaulting to a flat acknowledgement.
-- For documentation with diagrams: he draws his own schemas by hand, don't attempt to generate
-  images. Drop a short bracketed identifier plus a one-line description of what the diagram
-  should show (e.g. `[SCHEMA: example-cluster-topology]` followed by an italicized description),
-  placed inline exactly where the diagram belongs in the document.
-- For a single feature with several genuinely open implementation-level forks (exact command
-  syntax, lock/hold scope, whether to force a bootloader default) rather than a full rewrite,
-  targeted multiple-choice clarifying questions work as well as a full plan-mode document and
-  are faster — confirmed 2026-07 on the kernel version lock feature (4 questions on version
-  format / RHEL lock scope / Debian-Ubuntu hold scope / GRUB-default forcing, each answered by
-  picking the recommended option outright). Reserve full plan-mode for genuine rewrites or large
-  docs restructuring; reach for targeted questions when the shape of the change is already
-  agreed and only specific technical decisions remain open.
-- For a large documentation deliverable, he wants the structure (file split, where it sits in the
-  toctree, what's in vs. out of scope) proposed and explicitly confirmed before any prose gets
-  written — the same "plan before code" preference he has for substantial code changes applies
-  equally to documentation. When he redirects the structure (e.g. "split core cluster setup from
-  optional NFS/users/Slurm so the reader isn't overloaded"), that's a firm decision to build
-  around, not a suggestion to weigh against the original proposal.
-- When he says "I am not an expert in X, can you confirm this?" he genuinely wants a real technical
-  verification, not agreement — including surfacing a hard constraint that changes the shape of the
-  fix (e.g. iPXE being GET-only meant a simple GET→POST swap wasn't possible, and the right move was
-  splitting the endpoint). He responds well to being corrected/refined when he's technically right in
-  principle but the concrete implementation needs adjusting.
-- He works between sessions: he tests what was built, then opens the next session with concrete,
-  numbered change requests based on what he found ("I did check the pxe daemon, and there are few
-  changes I would like to propose"). Expect sessions to open this way rather than starting fresh from
-  a blank request — treat it as a continuation of the same subsystem's work, not a new topic.
-- He explicitly closes out finished plans ("please close the [x] plan mode") rather than letting them
-  linger — when asked, mark the plan file's status rather than just answering verbally, so the plan
-  directory stays an accurate record of what's actually still open.
-- Firm, unprompted correction (2026-07): when a CI failure is a container-only artifact (chronyd's
-  seccomp filter vs. Docker's kernel/libc, see CI/Testing above), he does not want the role touched
-  to work around it, even for a change that looks purely additive/defensive (an OS-family guard, a
-  CI-only var). The role serves bare metal first; a container limitation is the CI workflow's problem
-  to scope around (`--skip-tags`, splitting a role into its own tagged call), full stop. Reverted my
-  role-level fix outright and redirected me to the workflow-only version — treat this as the standing
-  rule, not a one-off, whenever a CI failure smells container-specific rather than logic-specific.
-- Corrects me plainly and without friction when I'm wrong from stale knowledge rather than expecting
-  push-back ("You will have your answer on this page: [URL]. We have to use ansible.mysql.mysql_user.")
-  — pasted the actual page content unprompted when a first fetch attempt failed, so the correction
-  didn't stall on me being unable to verify it myself. Take the correction, verify independently if
-  possible (here: `ansible-galaxy collection install ansible.mysql` succeeded live), and fix forward;
-  no need to relitigate once independently confirmed.
-- Runs CI himself between turns and pastes back real failure logs (stack traces, `journalctl` output,
-  ansible-lint findings) rather than descriptions of them — treat these as ground truth to root-cause
-  from directly, not summaries to interpret. He often adds his own working diagnosis alongside the
-  log ("I suspect the path", "this could be a race condition") — take it seriously as a lead but
-  verify independently rather than assuming it's the full answer (e.g. the RHEL socket-path guess was
-  right, but the same task also had an unrelated `host_all` ordering bug the log alone hinted at via
-  a *different* error on the next run).
-- Confirmed 2026-07, twice, across two separate multi-point design reviews (part 1's CLI-grammar/
-  vars-semantics/naming round, part 2's daemon coherency-check round): he prefers plain numbered
-  questions in normal response text over the `AskUserQuestion` widget, answering each point
-  directly in one reply both times. Rejected the widget outright once early on and typed his own
-  answer instead; every clarifying round since has used plain text with no friction. Default to
-  plain numbered text for multi-point reviews in this project; reach for the widget only for a
-  single, narrow, genuinely blocking decision, if at all.
-- Small, precise follow-ups happen mid-session too, not just at the start of the next one — right
-  after a big feature (the `cluster_playbooks` daemon) was approved, built, and verified, and he'd
-  already said "many thanks," he came back with one scoped tuning ("I thought about one point")
-  rather than a new open-ended ask. Treat that pattern as a genuine follow-up to implement directly
-  (small enough to skip a new plan round, per his own stated bar), not as a new topic.
+  root cause even if only one was named - confirmed twice, once trivially (a second identical
+  daemon endpoint) and once at scale ("fix the two things he'd noted" turned out to mean sweeping
+  one root cause - an unpropagated role consolidation - across 7 CI workflow files, 2 playbooks,
+  and a README), both accepted without edits. Treat "fix the thing(s) I noted" as authorization to
+  fix every instance of that bug class, not just the named file(s).
+- Defers work explicitly ("we'll do X later") and comes back to collect on it precisely when
+  ready - treat a deferral as a standing item, not a closed matter. He also works between
+  sessions: tests what was built, then opens the next one with concrete numbered change requests
+  based on what he found - expect sessions to open this way, as a continuation of the same
+  subsystem's work, not a blank-slate new topic. Small, precise follow-ups happen mid-session too,
+  right after a big feature was approved and he'd already said thanks - treat those as genuine
+  follow-ups to implement directly, not a new topic needing a new plan round.
+- Explicitly closes out finished plans ("please close the [x] plan mode") - mark the plan file's
+  status when asked, don't just answer verbally, so the plan directory stays accurate.
+- For documentation with diagrams: he draws his own schemas by hand, don't generate images. Drop a
+  short bracketed identifier plus an italicized one-line description of what the diagram should
+  show (e.g. `[SCHEMA: example-cluster-topology]`), placed inline where the diagram belongs.
+- When he says "I am not an expert in X, can you confirm this?" he genuinely wants real technical
+  verification, not agreement - including surfacing a hard constraint that changes the shape of
+  the fix (e.g. iPXE being GET-only meant a simple GET→POST swap wasn't possible; the right move
+  was splitting the endpoint). Responds well to being corrected/refined when he's right in
+  principle but the implementation needs adjusting.
+- Firm, unprompted correction (2026-07): a CI failure that's a container-only artifact (chronyd's
+  seccomp filter vs. Docker's kernel/libc, see CI/Testing) should never be worked around by
+  touching role behavior, even for a change that looks purely defensive (an OS-family guard, a
+  CI-only var) - it's the CI workflow's problem to scope around (`--skip-tags`, splitting a role
+  into its own tagged call), full stop. Reverted a role-level fix outright and redirected to the
+  workflow-only version - the standing rule whenever a failure smells container-specific.
+- Corrects stale knowledge plainly and without friction, often pasting the actual source
+  unprompted (e.g. a doc page confirming `ansible.mysql.mysql_user` over the deprecated
+  `community.mysql`) so the correction doesn't stall on being unable to verify it. Take the
+  correction, verify independently if possible, and fix forward - no need to relitigate once
+  confirmed.
+- Runs CI himself between turns and pastes back real failure logs (stack traces, `journalctl`,
+  ansible-lint output) rather than descriptions - treat as ground truth to root-cause from
+  directly. He often adds his own working diagnosis alongside the log - take it seriously as a
+  lead but verify independently rather than assuming it's the full answer (once, his diagnosis was
+  right but the same task also had a second, unrelated bug the log alone hinted at).
+- Prefers plain numbered questions in normal response text over the `AskUserQuestion` widget -
+  confirmed twice across separate design reviews, rejected the widget outright once early on, then
+  made explicit and standing 2026-08 ("remember to always enumerate your questions if you have
+  some") - no longer just a multi-point-review preference, applies whenever there are open
+  questions at all, plan mode included. Default to plain numbered text; reach for the widget only
+  for a single, narrow, genuinely blocking decision, if at all, and even then expect it may not be
+  wanted.
+- Hands over a prototype/exploration script as a reference for intent, not a constraint on the
+  final shape - told directly to fork freely and redesign the `AnsibleInventory` class entirely
+  rather than preserve its structure (2026-08, "use the original class as an inspiration source,
+  but redesign everything, it is ok to fork"). When asked to review-and-improve code he wrote
+  himself, don't feel bound to its existing API just because it's already written - treat it like
+  any other draft.
 - Responds with visible enthusiasm specifically to evidence of *real*, not just lint-clean,
-  verification — building an actual local SSH round-trip and proving a daemon's full chain end to
-  end (not a syntax-check or dry-run) drew "Superb"/"Wonderful, superb job," repeated across two
-  rounds of the same feature. For daemon-shaped or state-machine-shaped work in this codebase, the
-  setup cost of a real (even throwaway, sandbox-only) end-to-end test is worth it, and worth
-  reporting explicitly rather than folding into a generic "tests pass."
+  verification - an actual local SSH round-trip proving a daemon's full chain end to end (not a
+  syntax-check or dry-run) drew repeated "Superb"/"Wonderful, superb job." For daemon-shaped or
+  state-machine-shaped work here, the setup cost of a real (even throwaway) end-to-end test is
+  worth it, and worth reporting explicitly rather than folding into a generic "tests pass." The
+  bar isn't strictly "real hardware/daemon or nothing", though: when no such hardware exists in
+  sandbox (InfiniBand, exotic PCIe - 2026-08), rigorous *behavioral* verification of the actual
+  logic - a Jinja2 render exercising the real precedence rule, `state_diff.has_drift()` run
+  directly against synthetic trees for both the match and drift cases, `bash -n` on generated
+  shell snippets - still drew "wonderful work"/"many thanks", clearly distinguished from a
+  plain lint/syntax pass and reported as such (with the hardware gap disclosed plainly, not
+  glossed over). The throughline is "did you actually exercise the logic," not "was it on real
+  hardware."

@@ -1,0 +1,11 @@
+---
+# Skeleton applied by ansible_inventory.py when a host's bmc is created
+# (`inventory add host/<name>/bmc [data]`). See resources/data_model.md section 2.
+skeleton:
+  name: ""
+  ip4: ""
+  mac: ""
+  network: ""
+required:
+  - name
+  - ip4

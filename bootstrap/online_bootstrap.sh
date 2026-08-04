@@ -34,7 +34,6 @@ echo '
 
     BlueBanquise bootstrap.
     v 3.4.0
-    Benoit Leveugle <oxedions@gmail.com>
 '
 echo -e "\e[39m"
 
