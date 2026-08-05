@@ -90,6 +90,14 @@
     group: root
     mode: '0644'
 
+- name: cluster_management <|> Ensure inventory skeletons directory exists
+  ansible.builtin.file:
+    path: "{{ cluster_management_tools_lib_path }}/inventory_skeletons"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
 - name: cluster_management <|> Install inventory skeleton files
   ansible.builtin.copy:
     src: "inventory_skeletons/{{ item }}.yml"

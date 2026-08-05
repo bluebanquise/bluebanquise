@@ -90,6 +90,17 @@ pxe_stack_os_autoinstall_custom_scripts: []
 #    content: |
 #      ...
 
+# Add custom repositories during (and, for RHEL/Suse, after) autoinstall.
+# url is a bare baseurl/media_url for RHEL and Suse; for Debian/Ubuntu (apt), it is the
+# mirror root and suite is required (components defaults to "main").
+pxe_stack_os_autoinstall_custom_repositories: []
+#  - name: internal_extras
+#    url: http://10.10.0.1/repositories/rhel/9/extras
+#  - name: internal_ubuntu
+#    url: http://10.10.0.1/repositories/ubuntu
+#    suite: noble
+#    components: main
+
 # Add proxies
 pxe_stack_os_pxe_repository_proxy:
 pxe_stack_os_pxe_proxy:
@@ -97,13 +108,6 @@ pxe_stack_os_pxe_proxy:
 # Automatically detect NIC to be used in preseed
 # Only works if a single NIC is connected.
 pxe_stack_os_preseed_auto_main_network_interface: true
-
-############################################################
-### Misc parameters
-
-pxe_stack_suse_autoinstall_repositories: []
-#  - media_url: http://10.10.0.1/repositories/sles/15.3/x86_64/updates
-#    name: sles_updates
 
 ############################################################
 ### DISKLESS

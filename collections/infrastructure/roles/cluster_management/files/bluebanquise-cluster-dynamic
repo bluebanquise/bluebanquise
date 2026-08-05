@@ -361,6 +361,8 @@ def gather_network_interfaces(hostname, ssh_timeout):
     interfaces = []
     for iface in raw_ifaces:
         name = iface.get('ifname', '')
+        if name == 'lo':
+            continue
         ip4_list = []
         ip6_list = []
         for addr in iface.get('addr_info', []):
@@ -382,9 +384,15 @@ def gather_network_interfaces(hostname, ssh_timeout):
 
 def gather_pcie(hostname, ssh_timeout):
     """Link width/speed per PCIe device, keyed by PCI slot address (domain:bus:device.function,
-    exactly as `lspci`/sysfs show it - see README.md, 'PCIe link tracking'). Only devices exposing
-    current_link_width/current_link_speed in sysfs are real PCIe links; this naturally excludes
-    non-PCIe entries with no such concept."""
+    exactly as `lspci`/sysfs show it - see README.md, 'PCIe link tracking'). Devices exposing
+    current_link_width/current_link_speed in sysfs are real PCIe links, but that alone doesn't mean
+    "interesting": on real hardware it also catches every bridge/root-port/chipset-DMA function
+    (Intel I/O Hub root ports, QuickData DMA engines, etc.) - dozens of them on a single board,
+    drowning out the handful of add-in devices an admin actually cares about. Two cheap sysfs-only
+    filters, no vendor-name whitelist to maintain: skip PCI class 0x06 (bridge - host/PCI-to-PCI/
+    ISA bridges, i.e. the root ports themselves, not what's behind them) and skip width == 0 (an
+    unpopulated/untrained link - covers the remaining chipset system-peripheral/DMA noise, which
+    isn't class 0x06 but never trains a real link either)."""
     logging.debug('[%s] Gathering PCIe link data', hostname)
     stdout, rc = run_ssh_command(
         hostname,
@@ -393,6 +401,9 @@ def gather_pcie(hostname, ssh_timeout):
             "slot=$(basename \"$dev\"); "
             "if [ -f \"${dev}current_link_width\" ] && [ -f \"${dev}current_link_speed\" ]; then "
             "width=$(cat \"${dev}current_link_width\" 2>/dev/null); "
+            "class=$(cat \"${dev}class\" 2>/dev/null); "
+            "class_base=\"${class:2:2}\"; "
+            "if [ \"$class_base\" = \"06\" ] || [ \"$width\" = \"0\" ]; then continue; fi; "
             "speed=$(cat \"${dev}current_link_speed\" 2>/dev/null); "
             "max_width=$(cat \"${dev}max_link_width\" 2>/dev/null); "
             "max_speed=$(cat \"${dev}max_link_speed\" 2>/dev/null); "

@@ -376,6 +376,35 @@ os_autoinstall_packages:
 
 Of course, it is expected the packages you ask in the list are available in the repositories exposed to the auto-installer.
 
+#### Additional repositories during autoinstall
+
+It is possible to set a list of additional repositories to be added during (and, for RHEL/Suse, kept after) the automated installation, using the `os_autoinstall_custom_repositories` list:
+
+```yaml
+os_autoinstall_custom_repositories:
+  - name: internal_extras
+    url: http://10.10.0.1/repositories/rhel/9/extras
+  - name: internal_ubuntu
+    url: http://10.10.0.1/repositories/ubuntu
+    suite: noble
+    components: main
+```
+
+* `name`: required for all distributions. Used as the repository id/alias.
+* `url`: required for all distributions.
+  * For RHEL and Suse, this is a bare baseurl/media_url (no `suite`/`components`, these two keys are ignored).
+  * For Debian and Ubuntu (apt-based), this is the mirror root, and `suite` is **required** (the apt distribution name, e.g. `noble`, `bookworm`) - there is no automatic detection of the target OS codename, so an apt entry without `suite` will produce a malformed `sources.list` line.
+* `components`: optional, Debian/Ubuntu only, defaults to `main`.
+
+Behavior per distribution:
+
+* **RHEL**: rendered as a kickstart `repo --name=... --baseurl=... --install` line. `--install` is always set, so the repository is written to `/etc/yum.repos.d/` and survives past the installation, not just used to resolve packages during it.
+* **Suse**: rendered as an additional `<listentry>` under autoyast's `<add_on_products>`, alongside the distribution's own default repositories. These are real, persistent zypp repositories post-install.
+* **Debian**: rendered as `d-i apt-setup/localN/repository` (plus a matching `.../comment`) preseed entries, one indexed slot per repository.
+* **Ubuntu**: rendered as entries under the `apt.sources` key of the autoinstall `user-data` file (cloud-init/curtin apt configuration).
+
+GPG/signing keys are not currently handled by this mechanism - repositories are expected to already be trusted (or signed by a key trusted by other means). Open an issue if you need key support.
+
 #### Ubuntu-specific apt configuration
 
 For Ubuntu deployments, it is possible to pass custom apt configuration to the autoinstall process using:

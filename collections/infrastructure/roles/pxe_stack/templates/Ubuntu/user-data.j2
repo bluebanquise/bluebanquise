@@ -25,6 +25,13 @@ autoinstall:
   apt:
     geoip: false
     preserve_sources_list: {{ pxe_stack_preserve_repositories }}
+    {% if (equipment['os']['os_autoinstall_custom_repositories'] | default(pxe_stack_os_autoinstall_custom_repositories)) | length > 0 %}
+    sources:
+      {% for repo in (equipment['os']['os_autoinstall_custom_repositories'] | default(pxe_stack_os_autoinstall_custom_repositories)) %}
+      {{ repo.name }}:
+        source: "deb {{ repo.url }} {{ repo.suite }} {{ repo.components | default('main', true) }}"
+      {% endfor %}
+    {% endif %}
     {% if equipment['os']['os_pxe_ubuntu_apt_configuration'] is defined %}
 {{ equipment['os']['os_pxe_ubuntu_apt_configuration'] | indent(2, True) }}
     {% endif %}

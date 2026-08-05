@@ -81,6 +81,11 @@ bootloader --append="{{ equipment['os']['os_kernel_parameters'] | default(pxe_st
 # Partitioning
 {{ equipment['os']['os_partitioning'] | default(equipment['hw']['hw_partitioning'], true) | default(pxe_stack_os_partitioning, true) | default(pxe_stack_redhat_automatic_partitioning, true) }}
 
+##### Custom repositories
+{% for repo in (equipment['os']['os_autoinstall_custom_repositories'] | default(pxe_stack_os_autoinstall_custom_repositories)) %}
+repo --name={{ repo.name }} --baseurl={{ repo.url }} --install
+{% endfor %}
+
 ##### Packages
 %packages
 @core

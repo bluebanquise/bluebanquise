@@ -65,8 +65,6 @@
   {% else %}
     {% do _state.update({'gpu': [_hv.hw_specs.gpu]}) %}
   {% endif %}
-{% else %}
-  {% do _state.update({'gpu': []}) %}
 {% endif %}
 {% if _hv.hw_specs is defined and _hv.hw_specs.pcie is defined %}
   {% do _state.update({'pcie': _hv.hw_specs.pcie}) %}

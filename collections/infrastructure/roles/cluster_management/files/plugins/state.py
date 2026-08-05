@@ -208,7 +208,7 @@ def _display_host(hostname, base_path, suffixes=None):
 def _display_suffix(suffix, dyn, sta):
     header_extra = ''
     if suffix == 'cluster_state' and isinstance(dyn, dict):
-        last_updated = dyn.get('last_updated', 'unknown')
+        last_updated = _truncate_timestamp(dyn.get('last_updated', 'unknown'))
         ping = _bool_str(dyn.get('ping', '?'))
         ssh = _bool_str(dyn.get('ssh', '?'))
         header_extra = '  (last scan: {}  ping: {}  ssh: {})'.format(last_updated, ping, ssh)
@@ -349,7 +349,16 @@ def _colorize(text, color):
 
 def _bool_str(value):
     if value is True:
-        return 'true'
+        return _colorize('true', GREEN)
     if value is False:
-        return 'false'
+        return _colorize('false', RED)
     return str(value)
+
+
+def _truncate_timestamp(value):
+    """Drop sub-second precision and UTC offset from an ISO8601 timestamp, e.g.
+    2026-08-05T14:39:01.995055+00:00 -> 2026-08-05T14:39:01. Non-timestamp fallback
+    values (e.g. 'unknown') pass through unchanged."""
+    if isinstance(value, str) and len(value) >= 19 and value[10] == 'T':
+        return value[:19]
+    return value

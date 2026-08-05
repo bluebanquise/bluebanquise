@@ -36,6 +36,10 @@ d-i mirror/country string manual
 d-i mirror/http/hostname string deb.debian.org
 d-i mirror/http/directory string /debian
 d-i mirror/http/proxy string {{ equipment['os']['os_pxe_repository_proxy'] | default(pxe_stack_os_pxe_repository_proxy, true) }}
+{% for repo in (equipment['os']['os_autoinstall_custom_repositories'] | default(pxe_stack_os_autoinstall_custom_repositories)) %}
+d-i apt-setup/local{{ loop.index0 }}/repository string {{ repo.url }} {{ repo.suite }} {{ repo.components | default('main', true) }}
+d-i apt-setup/local{{ loop.index0 }}/comment string {{ repo.name }}
+{% endfor %}
 
 ### Time
 d-i clock-setup/utc-auto boolean true
