@@ -1,0 +1,8 @@
+---
+- name: service <|> Restart NetworkManager service
+  ansible.builtin.service:
+    name: NetworkManager
+    state: restarted
+  when:
+    - "'service' not in ansible_skip_tags"
+    - network_manager_start_services | default(bb_start_services) | default(true) | bool
