@@ -28,36 +28,50 @@ def ordered_keys(dyn_dict, sta_dict):
 
 
 def has_drift(dyn, sta):
-    return node_has_drift(dyn if isinstance(dyn, dict) else {}, sta if isinstance(sta, dict) else {})
+    return bool(collect_drift(dyn, sta))
 
 
-def node_has_drift(dyn_dict, sta_dict):
+def collect_drift(dyn, sta):
+    """Same traversal/comparison rules as has_drift (in fact the only implementation of them -
+    has_drift is just bool(collect_drift(...))), but returns every mismatched leaf instead of
+    stopping at the first one: a list of {'path', 'dynamic', 'static'} dicts, path using dotted
+    keys and [name] for named-list items (e.g. 'network_interfaces[eth0].ip4'). Built for
+    daemon-side event messages that need to say *what* drifted, not just *that* it did."""
+    dyn_dict = dyn if isinstance(dyn, dict) else {}
+    sta_dict = sta if isinstance(sta, dict) else {}
+    return _collect_node_drift(dyn_dict, sta_dict, '')
+
+
+def _collect_node_drift(dyn_dict, sta_dict, path_prefix):
+    findings = []
     for key in ordered_keys(dyn_dict, sta_dict):
         dv = dyn_dict[key] if key in dyn_dict else MISSING
         sv = sta_dict[key] if key in sta_dict else MISSING
         if dv is MISSING or sv is MISSING:
             continue  # missing on one side is NA, not drift
+        path = '{}.{}'.format(path_prefix, key) if path_prefix else key
         sample = dv
         if isinstance(sample, dict):
-            if node_has_drift(dv if isinstance(dv, dict) else {}, sv if isinstance(sv, dict) else {}):
-                return True
+            findings.extend(_collect_node_drift(
+                dv if isinstance(dv, dict) else {}, sv if isinstance(sv, dict) else {}, path))
         elif is_named_list(sample):
-            if named_list_has_drift(dv if isinstance(dv, list) else [], sv if isinstance(sv, list) else []):
-                return True
+            findings.extend(_collect_named_list_drift(
+                dv if isinstance(dv, list) else [], sv if isinstance(sv, list) else [], path))
         elif not generic_match(dv, sv):
-            return True
-    return False
+            findings.append({'path': path, 'dynamic': dv, 'static': sv})
+    return findings
 
 
-def named_list_has_drift(dv_list, sv_list):
+def _collect_named_list_drift(dv_list, sv_list, path_prefix):
+    findings = []
     for name in named_list_names(dv_list, sv_list):
         dv_item = find_by_name(dv_list, name)
         sv_item = find_by_name(sv_list, name)
         if dv_item is None or sv_item is None:
             continue  # missing item on one side is NA, not drift
-        if node_has_drift(strip_name(dv_item), strip_name(sv_item)):
-            return True
-    return False
+        path = '{}[{}]'.format(path_prefix, name)
+        findings.extend(_collect_node_drift(strip_name(dv_item), strip_name(sv_item), path))
+    return findings
 
 
 def is_named_list(value):

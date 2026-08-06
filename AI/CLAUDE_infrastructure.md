@@ -137,8 +137,8 @@ Validation/
 
 | Distro | ISO | URL base |
 |--------|-----|----------|
-| rhel9 | AlmaLinux-9-latest-x86_64-dvd.iso | repo.almalinux.org/almalinux/9/isos/x86_64/ |
-| rhel10 | AlmaLinux-10-latest-x86_64-dvd.iso | repo.almalinux.org/almalinux/10/isos/x86_64/ |
+| rhel9 | Rocky-9-latest-x86_64-dvd.iso | download.rockylinux.org/pub/rocky/9/isos/x86_64/ |
+| rhel10 | Rocky-10-latest-x86_64-dvd.iso | download.rockylinux.org/pub/rocky/10/isos/x86_64/ |
 | ubuntu24 | ubuntu-24.04.4-live-server-amd64.iso | releases.ubuntu.com/24.04.4/ |
 | debian13 | debian-testing-amd64-netinst.iso | cdimage.debian.org/cdimage/daily-builds/daily/arch-latest/amd64/iso-cd/ |
 

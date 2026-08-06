@@ -538,11 +538,16 @@ def check_drift_and_latch(hostname, state, static_state, config):
     diff_module = config['diff_module']
     events_module = config['events_module']
     dynamic_body = {k: v for k, v in state.items() if k not in HEADER_FIELDS}
-    is_error = diff_module.has_drift(dynamic_body, static_state)
+    findings = diff_module.collect_drift(dynamic_body, static_state)
+    is_error = bool(findings)
     logging.debug('[%s] cluster_state drift check: %s', hostname, 'DRIFT' if is_error else 'clean')
 
-    message = ("cluster_state: drift detected between static and dynamic state (see "
-               "'bluebanquise-cluster state host {}' for details)").format(hostname)
+    detail = '; '.join(
+        '{}: static={} dynamic={}'.format(
+            f['path'], diff_module.fmt_any(f['static']), diff_module.fmt_any(f['dynamic']))
+        for f in findings)
+    message = ("cluster_state: drift detected - {} (see "
+               "'bluebanquise-cluster state host {}' for details)").format(detail, hostname)
     events_module.record_transition(
         hostname, 'cluster_state', is_error, message,
         config['base_path'], config['tmp_path'], logger=logging)

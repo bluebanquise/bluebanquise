@@ -299,16 +299,17 @@ def write_dynamic_supervision(hostname, host_status, bmc_status, config):
 
 # ─── error latching (events.py) ────────────────────────────────────────────────
 
-def check_and_latch(hostname, host_status, bmc_status, config):
+def check_and_latch(hostname, ssh_ok, results, host_status, bmc_status, config):
     events_module = config['events_module']
     is_error = host_status != 'Ok' or (bmc_status is not None and bmc_status != 'Ok')
-    parts = []
-    if host_status != 'Ok':
-        parts.append('host_status={}'.format(host_status))
-    if bmc_status is not None and bmc_status != 'Ok':
-        parts.append('bmc_status={}'.format(bmc_status))
-    message = 'cluster_supervision: {} (see \'bluebanquise-cluster supervision host {}\' for details)'.format(
-        ', '.join(parts) if parts else 'status ok', hostname)
+
+    failed_checks = []
+    if not ssh_ok:
+        failed_checks.append('ssh_gate')
+    failed_checks.extend(name for name, result in sorted(results.items()) if result['error'])
+
+    message = 'cluster_supervision: check(s) in error: {} (see \'bluebanquise-cluster supervision host {}\' for details)'.format(
+        ', '.join(failed_checks) if failed_checks else 'none', hostname)
 
     events_module.record_transition(
         hostname, 'cluster_supervision', is_error, message,
@@ -348,7 +349,7 @@ def scan_host(hostname, host_entry, scripts, config):
 
     write_supervision(hostname, ssh_ok, results, config)
     write_dynamic_supervision(hostname, host_status, bmc_status, config)
-    check_and_latch(hostname, host_status, bmc_status, config)
+    check_and_latch(hostname, ssh_ok, results, host_status, bmc_status, config)
 
 
 # ─── main loop ──────────────────────────────────────────────────────────────────

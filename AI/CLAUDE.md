@@ -231,12 +231,19 @@ needed a `state.py`/`state_diff.py` change.
 - **PCIe** (`hw_specs.pcie`, a list of `{name, width, speed}`) is keyed by **PCI slot address**
   exactly as `lspci`/sysfs report it (`0000:3b:00.0`) — the one identifier that doesn't depend on
   device class or enumeration order, and what an admin can read directly off the hardware.
-  `gather_pcie` walks `/sys/bus/pci/devices/*/{current,max}_link_{width,speed}` (only real PCIe
-  links expose these files, so nothing needs filtering) plus `lspci -D -mm` for a `description` —
-  intended discovery workflow: run `bluebanquise-cluster state host <name>` first to see every
-  live device as dynamic-only, copy the `name` and exact `speed` string of the one you care about
-  into inventory. Copying the live string verbatim (not hand-converting GT/s↔"gen") is the point —
-  comparison is plain string equality.
+  `gather_pcie` walks `/sys/bus/pci/devices/*/{current,max}_link_{width,speed}` plus `lspci -D -mm`
+  for a `description` — intended discovery workflow: run `bluebanquise-cluster state host <name>`
+  first to see every live device as dynamic-only, copy the `name` and exact `speed` string of the
+  one you care about into inventory. Copying the live string verbatim (not hand-converting
+  GT/s↔"gen") is the point — comparison is plain string equality. **Correction (2026-08, real
+  hardware)**: the original assumption that "only real PCIe links expose these sysfs files, so
+  nothing needs filtering" was wrong — root ports, host bridges, and chipset DMA-engine/system-
+  peripheral functions expose them too, and on a real board that's dozens of irrelevant entries per
+  1-2 devices an admin cares about. Fixed with two vendor-agnostic sysfs-only filters in the same
+  bash loop (no name/description whitelist, which would need updating for every new GPU/NIC/HBA
+  model): skip PCI class `0x06` (bridge — host/ISA/PCI-to-PCI bridges, i.e. the root ports
+  themselves, not what's behind them) and skip `width == 0` (untrained link — catches chipset
+  system-peripheral/DMA noise that isn't class `0x06` but never trains a real link either).
 - **InfiniBand rate** lives *inside* `network_interfaces[]` per explicit request, not a separate
   top-level gatherer: per-interface `ib_rate`, falling back to a per-network default
   (`networks.<name>.ib_rate`) — same precedence shape as `nic` role's `gw4`/`networks[].gateway4`,
@@ -247,11 +254,12 @@ needed a `state.py`/`state_diff.py` change.
   `documentation/configuration/{hardware_settings,networks,hosts}.rst` (the user-facing key
   reference — plain prose pointer back to the role's README, no `:doc:` link, matching how
   `mtu`/`gateway4` are already handled there).
-- **Known gap**: no InfiniBand or exotic PCIe hardware in this sandbox — verified by a standalone
-  Jinja2 render of the static template (confirms the `ib_rate` precedence resolves and omits
-  correctly) and by running `state_diff.has_drift()` directly against synthetic static/dynamic
-  trees (confirms both fields diff, and that dynamic-only keys like `pcie[].description` never
-  count as drift), not by a real HCA/GPU round trip. Same caveat class as `check_bmc`.
+- **Known gap**: no InfiniBand hardware in this sandbox — `ib_rate` is still only verified by a
+  standalone Jinja2 render (precedence resolves/omits correctly) and `state_diff.has_drift()`
+  against synthetic trees, not a real HCA round trip. Same caveat class as `check_bmc`. PCIe itself
+  *has* now been exercised against real (if old — Nehalem/Westmere-era) hardware — see "Real-
+  deployment bugfix round" below — which is exactly what caught the filtering assumption being
+  wrong in the first place; sandbox-only verification would never have surfaced it.
 
 ### PXE boot sequencing (pxe_stack, added 2026-07)
 
@@ -523,6 +531,75 @@ re-reading the code. Fixed by renaming to "Hosts in sync"/"Hosts healthy" - the 
 describes the same green/healthy quantity every frame's bar actually colors green, consistently.
 Worth remembering when adding a fourth frame later: the bar's "up" argument must always be the
 green/healthy count, and the label must say so, not the inverse.
+
+### Real-deployment bugfix round (2026-08-05/06)
+
+Oxedions deployed `cluster_management` for real for the first time (`mimer-ocp-controller`) and
+reported issues live. None of these were caught by lint, `ansible-lint`, or the sandbox's synthetic
+verification — real hardware and a real dmesg/lspci output surfaced assumptions that didn't hold.
+Pattern worth remembering generally: this role's "verified" claims elsewhere in this doc lean on
+Jinja renders and synthetic `state_diff` trees specifically *because* no real GPU/InfiniBand/BMC
+exists in the sandbox — this round is the concrete payoff of that caveat turning real, and a
+reminder to treat those gaps as live risk, not boilerplate disclaimer.
+
+1. **Skeleton install missing directory**: `tasks/tools.yml`'s "Install inventory skeleton files"
+   loop `copy`'d into `{{ cluster_management_tools_lib_path }}/inventory_skeletons/<item>.yml` with
+   no task ever creating that subdirectory — unlike `plugins/`, whose own directory task
+   incidentally creates the parent `lib_path` too, nothing created `inventory_skeletons/`. `copy`
+   does not auto-create missing parents (that's the literal "Destination directory does not exist"
+   error). Fixed with an explicit `Ensure inventory skeletons directory exists` task before the
+   loop.
+2. **`gpu` false-drift on every host with onboard BMC video**: `state host <name>` showed `gpu` as
+   red/drifted almost universally. Root cause: `static_cluster_state.yml.j2`'s `gpu` `else` branch
+   wrote an explicit `gpu: []` even when `hw_specs.gpu` was never declared — collapsing "undeclared"
+   and "explicitly declared empty" into the same value, which defeats `state_diff.py`'s absent-key
+   `MISSING`-sentinel NA logic (the key must be genuinely *absent*, not present-with-`[]`, for NA to
+   apply). `pcie` right below it already used the correct pattern (only set the key `if defined`).
+   Fixed by making `gpu` match it. Near-universal in practice because onboard BMC framebuffer chips
+   (Matrox G200eW etc.) get picked up by `lspci`'s VGA-class grep on nearly every server.
+3. **`lo` in dynamic `network_interfaces`**: cosmetic noise (named-list drift matching already
+   treated a dynamic-only `lo` as NA, not red), fixed by skipping `name == 'lo'` in
+   `gather_network_interfaces` before it enters the list.
+4. **`state.py` header line polish**: `last scan:` showed full microsecond+UTC-offset timestamps;
+   `ping`/`ssh`/`bmc` were uncolored. New `_truncate_timestamp()` keeps `YYYY-MM-DDTHH:MM:SS`;
+   `_bool_str()` now colors true=green/false=red via the existing `_colorize()` helper. (Confirm
+   color-polarity requests before coding them if the phrasing is self-contradictory — this one
+   was initially phrased "if true red, if false red.")
+5. **PCIe noise filtering** — see "PCIe and InfiniBand rate tracking" above for the fix; listed here
+   for the full picture of this round.
+6. **`ssh_check_ram_ecc_errors` false CRITICAL**: its dmesg scan used a bare `EDAC|ecc` substring
+   match (`grep -Ei`), which caught driver init/banner lines ("EDAC MC: Ver: 3.0.0", "Driver loaded,
+   N memory controller(s) found") and any unrelated hex string merely containing "ecc" (clocksource
+   masks, cert fingerprints, random veth/bridge interface names) as if they were errors — while the
+   script's own sysfs `ce_count`/`ue_count` check (the actually authoritative signal) correctly read
+   zero. Fixed by anchoring the EDAC pattern on the kernel's real error-report line shape,
+   `EDAC MC0: 1 CE ...` / `EDAC MC0: 2 UE ...` (`edac_mc_printk()`, common to every mainline EDAC
+   driver), instead of a bare substring.
+7. **Event messages lacked detail**: `cluster_state`/`cluster_supervision` latched-Error events
+   said only "drift detected" / "host_status=Error" with no specifics — defeating the whole point of
+   an away-from-keyboard admin being able to tell *what* happened after the fact, especially once a
+   transient issue self-heals before anyone looks (the `state`/`supervision` CLI would then show
+   nothing wrong). Fixed: added `state_diff.collect_drift()`, same traversal/`generic_match` rules
+   as `has_drift()` but returning every mismatched leaf (`{path, static, dynamic}`, dotted/`[name]`
+   paths) instead of stopping at the first one; `has_drift()` is now `bool(collect_drift(...))` so
+   there's still exactly one comparison implementation, not two that could diverge. The
+   `cluster_state` daemon message now reads e.g. `network_interfaces[eth0].ip4: static=10.0.0.5/24
+   dynamic=10.0.0.6/24`; the `cluster_supervision` daemon message now names the actual failing
+   check(s) (including a synthetic `ssh_gate` entry when the SSH liveness probe itself failed), not
+   just the collapsed `host_status`/`bmc_status` strings. The `(see '<command> ...' for details)`
+   tail was kept as-is (explicit request).
+
+**Aside, not a `cluster_management` bug**: while investigating a `/var/lib/bluebanquise/.claude/`
+path spotted during this same deployment, confirmed it's Claude Code's own self-deployed
+remote-bridge (`~/.claude/remote/srv/<hash>/server --serve`/`--bridge`), planted under whichever
+account an AI coding session SSHes into a real host as — not installed by any role, not
+BlueBanquise state. Worth remembering the pattern generally: an unexplained `~/.claude/` (or
+similar AI-agent-tool directory) under a service account on a real host means an AI-assisted SSH
+session touched that box under that account, not a code bug — check for that before investigating
+further.
+
+All seven fixes above are uncommitted, same as everything else in this role — see "How to apply"
+notes elsewhere in this doc and in memory for what's still pending a commit decision.
 
 ## Ansible Inventory Management System (added 2026-08)
 

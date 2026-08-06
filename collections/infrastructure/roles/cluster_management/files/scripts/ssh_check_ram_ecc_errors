@@ -17,7 +17,12 @@ ERROR_FOUND=0
 # 1. Check dmesg for ECC-related patterns
 #############################################
 
-PATTERNS="EDAC|ecc|Corrected error|Uncorrected error|Machine check|Hardware Error|mce:"
+# Anchored on the kernel EDAC core's own error-report line shape ("EDAC MC0: 1 CE ..." /
+# "EDAC MC0: 1 UE ..." - common to every mainline EDAC driver, edac_mc_printk()) rather than a
+# bare "EDAC"/"ecc" substring, which also matches driver init/banner lines ("EDAC MC: Ver: 3.0.0",
+# "Driver loaded, N memory controller(s) found") and unrelated hex strings that merely contain
+# "ecc" (clocksource masks, cert fingerprints, random veth/bridge interface names).
+PATTERNS="EDAC[^:]*: [0-9]+ (CE|UE)\\b|Corrected error|Uncorrected error|Machine check|Hardware Error|mce:"
 
 DMESG_ECC=$(dmesg -T | grep -Ei "$PATTERNS")
 
