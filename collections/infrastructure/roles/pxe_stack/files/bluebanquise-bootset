@@ -112,10 +112,14 @@ def nodesetexpand(znodeset):
     return nodeset
 
 
-def daemon_set_boot(node, boot_queue):
-    """Call the pxe-stack-daemon to set the boot queue for a node. Verbose on failure."""
+def daemon_set_boot(node, boot_queue, dedicated_kernel_parameters=None):
+    """Call the pxe-stack-daemon to set the boot queue (and, optionally, the dedicated kernel
+    parameters) for a node. Verbose on failure."""
     url = '{}/host/{}/menu-default'.format(DAEMON_URL, node)
-    payload = json.dumps({'boot_queue': boot_queue}).encode('utf-8')
+    body = {'boot_queue': boot_queue}
+    if dedicated_kernel_parameters is not None:
+        body['dedicated_kernel_parameters'] = dedicated_kernel_parameters
+    payload = json.dumps(body).encode('utf-8')
     logging.info('    ├── ' + bcolors.OKBLUE + 'Calling daemon: PUT ' + url + ' ' +
                  payload.decode('utf-8') + bcolors.ENDC)
     try:
@@ -264,7 +268,19 @@ elif passed_arguments.boot:
             ', '.join(invalid), ', '.join(valid_targets)) + bcolors.ENDC)
         sys.exit(1)
 
+    # extra_parameters defaults to the sentinel "none" (same convention as --image) when -e is
+    # not passed, meaning "leave whatever is already set on the daemon untouched" — never send it
+    # in that case, since it lands verbatim on a kernel command line and a literal "none" there
+    # would be a bogus parameter, not "no parameter".
+    dedicated_kernel_parameters = None
+    if passed_arguments.extra_parameters != "none":
+        dedicated_kernel_parameters = passed_arguments.extra_parameters
+
     for node in nodesetexpand(passed_arguments.nodes):
         logging.info(bcolors.OKBLUE + 'Processing node ' + str(node) + ' ...' + bcolors.ENDC)
         logging.info('    ├── ' + bcolors.OKBLUE + 'Setting boot queue=' + str(boot_queue) + bcolors.ENDC)
-        daemon_set_boot(node=node, boot_queue=boot_queue)
+        if dedicated_kernel_parameters is not None:
+            logging.info('    ├── ' + bcolors.OKBLUE + 'Setting dedicated kernel parameters=' +
+                         dedicated_kernel_parameters + bcolors.ENDC)
+        daemon_set_boot(node=node, boot_queue=boot_queue,
+                        dedicated_kernel_parameters=dedicated_kernel_parameters)

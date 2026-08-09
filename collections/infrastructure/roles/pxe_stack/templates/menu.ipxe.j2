@@ -58,6 +58,7 @@ goto ${selected}
 
 :shell
 imgfetch http://${next-server}:{{ pxe_stack_daemon_port }}/stage_report?hostname=${hostname}&stage=shell&status=running || true
+imgfree stage_report || true
 echo Type 'exit' to get back to the menu.
 shell
 set menu-timeout 0
@@ -104,30 +105,37 @@ goto start
 
 :osdeploy
 imgfetch http://${next-server}:{{ pxe_stack_daemon_port }}/stage_report?hostname=${hostname}&stage=osdeploy&status=running || true
+imgfree stage_report || true
 chain http://${next-server}/pxe/osdeploy/${eq-distribution}_${eq-distribution-major-version}.ipxe || shell
 
 :diskless
 imgfetch http://${next-server}:{{ pxe_stack_daemon_port }}/stage_report?hostname=${hostname}&stage=diskless&status=running || true
+imgfree stage_report || true
 chain http://${next-server}/pxe/diskless/${node-image}/boot.ipxe || shell
 
 :clonezilla
 imgfetch http://${next-server}:{{ pxe_stack_daemon_port }}/stage_report?hostname=${hostname}&stage=clonezilla&status=running || true
+imgfree stage_report || true
 chain http://${next-server}/pxe/tools/clonezilla/clone.ipxe
 
 :bootautoclone
 imgfetch http://${next-server}:{{ pxe_stack_daemon_port }}/stage_report?hostname=${hostname}&stage=clonezilla&status=running || true
+imgfree stage_report || true
 chain http://${next-server}/pxe/tools/clonezilla/autoclone.ipxe
 
 :bootautodeploy
 imgfetch http://${next-server}:{{ pxe_stack_daemon_port }}/stage_report?hostname=${hostname}&stage=clonezilla&status=running || true
+imgfree stage_report || true
 chain http://${next-server}/pxe/tools/clonezilla/autodeploy.ipxe
 
 :alpine
 imgfetch http://${next-server}:{{ pxe_stack_daemon_port }}/stage_report?hostname=${hostname}&stage=alpine&status=running || true
+imgfree stage_report || true
 chain http://${next-server}/pxe/tools/alpine/boot.ipxe
 
 :disk
 imgfetch http://${next-server}:{{ pxe_stack_daemon_port }}/stage_report?hostname=${hostname}&stage=disk&status=running || true
+imgfree stage_report || true
 iseq ${platform} efi && goto disk-efi || goto disk-legacy
 
 :disk-legacy
@@ -144,6 +152,7 @@ exit 1
 
 :memtest
 imgfetch http://${next-server}:{{ pxe_stack_daemon_port }}/stage_report?hostname=${hostname}&stage=memtest&status=running || true
+imgfree stage_report || true
 iseq ${platform} efi && goto memtest-efi || goto memtest-legacy
 
 :memtest-legacy
@@ -158,6 +167,7 @@ chain http://${next-server}/pxe/tools/memtest86plus/memtest.efi ${eq-console} ma
 
 :next
 imgfetch http://${next-server}:{{ pxe_stack_daemon_port }}/stage_report?hostname=${hostname}&stage=next&status=running || true
+imgfree stage_report || true
 exit
 
 {#
@@ -169,6 +179,7 @@ Note: if you add nice new tools, please share them so other users can benefit fr
 {% for item in pxe_stack_ipxe_menu_custom %}
 :{{ item }}
 imgfetch http://${next-server}:{{ pxe_stack_daemon_port }}/stage_report?hostname=${hostname}&stage={{ item }}&status=running || true
+imgfree stage_report || true
 chain http://${next-server}/pxe/tools/{{ item }}/{{ item }}.ipxe
 
 {% endfor %}

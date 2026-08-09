@@ -16,9 +16,16 @@ Endpoints:
                                                  it and advances menu_default to the next queued
                                                  entry (or hw_ipxe_default_boot once the queue is
                                                  empty).
-  PUT  /host/<hostname>/menu-default            Explicitly set the host's boot queue. JSON body:
-                                                 {"boot_queue": ["memtest", "osdeploy"]}. Used by
-                                                 bluebanquise-bootset.
+  PUT  /host/<hostname>/menu-default            Explicitly set the host's boot queue, and
+                                                 optionally its dedicated_kernel_parameters
+                                                 (rendered into ${dedicated-kernel-parameters} in
+                                                 the per-host iPXE file, consumed by osdeploy
+                                                 kernel command lines). JSON body:
+                                                 {"boot_queue": ["memtest", "osdeploy"],
+                                                  "dedicated_kernel_parameters": "ifname=eth0:<mac> ip=eth0:dhcp"}.
+                                                 dedicated_kernel_parameters is optional and left
+                                                 unchanged when omitted from the body. Used by
+                                                 bluebanquise-bootset (-b / -e).
 """
 
 import argparse
@@ -269,12 +276,14 @@ def stage_report():
 
 @app.route('/host/<hostname>/menu-default', methods=['PUT'])
 def set_menu_default(hostname):
-    """Explicitly set the host's boot queue. Used by bluebanquise-bootset (an operator asking
-    for a specific next boot sequence), as opposed to /stage_report's iPXE-driven auto-advance."""
+    """Explicitly set the host's boot queue, and optionally its dedicated_kernel_parameters.
+    Used by bluebanquise-bootset (an operator asking for a specific next boot sequence / extra
+    kernel parameters), as opposed to /stage_report's iPXE-driven auto-advance."""
     payload = request.get_json(silent=True) or {}
     boot_queue = payload.get('boot_queue')
-    logging.info('[%s] PUT /host/%s/menu-default boot_queue=%s from %s',
-                 hostname, hostname, boot_queue, request.remote_addr)
+    dedicated_kernel_parameters = payload.get('dedicated_kernel_parameters')
+    logging.info('[%s] PUT /host/%s/menu-default boot_queue=%s dedicated_kernel_parameters=%r from %s',
+                 hostname, hostname, boot_queue, dedicated_kernel_parameters, request.remote_addr)
 
     if not isinstance(boot_queue, list) or not boot_queue:
         logging.warning('[%s] Missing or invalid boot_queue value', hostname)
@@ -285,6 +294,10 @@ def set_menu_default(hostname):
         error = _validate_menu_target(hostname, target, 'boot_queue entry')
         if error:
             return error
+
+    if dedicated_kernel_parameters is not None and not isinstance(dedicated_kernel_parameters, str):
+        logging.warning('[%s] Invalid dedicated_kernel_parameters value: %r', hostname, dedicated_kernel_parameters)
+        return Response('Invalid dedicated_kernel_parameters value (expected a string).\n', status=400)
 
     with _host_lock(hostname):
         state = _load_state(hostname)
@@ -297,6 +310,11 @@ def set_menu_default(hostname):
 
         logging.info('[%s] boot_queue set to %s — menu_default %s -> %s (requested by %s)',
                      hostname, boot_queue, old_default, state['menu_default'], request.remote_addr)
+
+        if dedicated_kernel_parameters is not None:
+            state['dedicated_kernel_parameters'] = dedicated_kernel_parameters
+            logging.info('[%s] dedicated_kernel_parameters set to %r (requested by %s)',
+                         hostname, dedicated_kernel_parameters, request.remote_addr)
 
         _save_state(hostname, state)
 
