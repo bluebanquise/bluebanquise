@@ -8,15 +8,33 @@
 ## Internal hosts
 
 {# Always write base records #}
+{% if bb_isolate_network_namming_resolution %}
+{% for host in hostvars[inventory_hostname]['hosts_file_hosts_by_first_octets']['forward']['base'] %}
+  {% if host.network in networks %}
+{{ host.ip4 }} {{ host.hostname }}
+  {% endif %}
+{% endfor %}
+{% else %}
 {% for host in hostvars['localhost']['hosts_file_hosts_by_first_octets']['forward']['base'] %}
 {{ host.ip4 }} {{ host.hostname }}
 {% endfor %}
+{% endif %}
 
 {# Conditionally write extended records #}
-{% if hosts_file_enable_extended_names %}
+{% if bb_isolate_network_namming_resolution %}
+  {% if hosts_file_enable_extended_names %}
+{% for host in hostvars[inventory_hostname]['hosts_file_hosts_by_first_octets']['forward']['extended'] %}
+  {% if host.network in networks %}
+{{ host.ip4 }} {{ host.hostname }}
+  {% endif %}
+{% endfor %}
+  {% endif %}
+{% else %} 
+  {% if hosts_file_enable_extended_names %}
 {% for host in hostvars['localhost']['hosts_file_hosts_by_first_octets']['forward']['extended'] %}
 {{ host.ip4 }} {{ host.hostname }}
 {% endfor %}
+  {% endif %}
 {% endif %}
 
 ## External hosts
