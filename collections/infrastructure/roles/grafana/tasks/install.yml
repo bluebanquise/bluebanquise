@@ -4,7 +4,7 @@
     name: grafana
     gid: "{{ grafana_user_gid }}"
     state: present
-  when: grafana_user_gid|int
+  when: grafana_user_gid | int > 0
 
 - name: install <|> Add grafana user
   ansible.builtin.user:
@@ -14,7 +14,7 @@
     group: grafana
     system: True
     state: present
-  when: grafana_user_uid|int
+  when: grafana_user_uid | int > 0
 
 - name: install <|> Check for log file
   ansible.builtin.stat:
