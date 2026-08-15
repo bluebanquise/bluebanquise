@@ -7,6 +7,7 @@
 # ██████╔╝███████╗╚██████╔╝███████╗██████╔╝██║  ██║██║ ╚████║╚██████╔╝╚██████╔╝██║███████║███████╗
 # ╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚══▀▀═╝  ╚═════╝ ╚═╝╚══════╝╚══════╝
 #
+# 2.3.1: (SMC fix) Fix missing extended file attributes when extracting bootstrap image archives. Neo Team <dl-fr-bds-hpc-neocore@bull.com>
 # 2.3.0: (SMC feature) Added support to el10 images. Neo Team <dl-fr-bds-hpc-neocore@bull.com>
 # 2.2.5: (SMC fix) Fix NFS mount (-u uid) and SELinux (avoid chroot) in aarch64 images. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
 # 2.2.4: (SMC fix) Allow + character when sanitizing user input, needed for kernel-64k in aarch64 images. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
@@ -505,7 +506,7 @@ while True:
 
         logging.info(bcolors.OKBLUE + "Extracting bootstrap image copy in " + reference_image_nfs_path + bcolors.ENDC)
         protected_os_system("mkdir -p " + reference_image_nfs_path)
-        protected_os_system("tar --numeric-owner -x -z -f " + bootstrap_image_path + "/image.tar.gz -C " + reference_image_nfs_path + "/")
+        protected_os_system("tar --numeric-owner --xattrs-include='*.*' -x -z -f " + bootstrap_image_path + "/image.tar.gz -C " + reference_image_nfs_path + "/")
         protected_os_system("rm -f " + reference_image_nfs_path + "/metadata.yaml")
         logging.info(bcolors.OKBLUE + "Creating image folder at " + reference_image_pxe_path + bcolors.ENDC)
         protected_os_system("mkdir -p " + reference_image_pxe_path)
