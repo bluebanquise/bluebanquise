@@ -308,7 +308,7 @@ print("""\
       (o_  (o_  //\\
       (/)_ (/)_ V_/_
    BlueBanquise diskless
-   v2.2.5
+   v2.3.1
    Patched for SMC
 
 """)
