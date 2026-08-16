@@ -22,8 +22,8 @@
     - name: template <|> Generate /etc/hosts
       ansible.builtin.template:
         src: hosts.j2
-        vars:
-          hosts_by_first_octets: "{{ hosts_file_hosts_by_first_octets }}"
+      vars:
+        hosts_by_first_octets: "{{ hosts_file_hosts_by_first_octets }}"
         dest: "{{ hosts_file_work_file.path | default('/tmp/hosts', true) }}" # Default here allows to display content even in check mode
         mode: 0644
 

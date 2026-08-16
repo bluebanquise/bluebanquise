@@ -11,7 +11,7 @@
     owner: root
     group: root
     mode: 0644
-    vars:
-      hosts_by_first_octets: "{{ hosts_file_hosts_by_first_octets }}"
+  vars:
+    hosts_by_first_octets: "{{ hosts_file_hosts_by_first_octets }}"
   tags:
     - template
