@@ -56,7 +56,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger('bluebanquise-power')
 
-plugins_dir = '/opt/bluebanquise/bluebanquise-power/plugins'
+plugins_dir = '/usr/lib/bluebanquise/bluebanquise-power/plugins'
 
 # Load plugins from the specified directory
 power_modules = {}

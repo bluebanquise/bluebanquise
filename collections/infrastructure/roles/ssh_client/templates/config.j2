@@ -58,6 +58,6 @@ Host *
   {% endif %}
 {% endif %}
 
-{% for host in groups['all'] -%}
+{% for host in groups[(ssh_client_retrict_to_group | default(bb_retrict_to_group, true) | default('all', true))] -%}
 {{ write_host(host, hostvars[host], None) }}
 {% endfor %}

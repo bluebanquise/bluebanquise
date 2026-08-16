@@ -51,7 +51,7 @@
 # This calculation takes time, so we store it in memory for later usage
 - name: fact <|> Calculate equipment profiles
   ansible.builtin.set_fact:
-    pxe_stack_equipment_profiles: "{{ hostvars | bluebanquise.infrastructure.equipment_profiles(groups['all'], groups) }}"
+    pxe_stack_equipment_profiles: "{{ hostvars | bluebanquise.infrastructure.equipment_profiles(groups[(pxe_stack_retrict_to_group | default(bb_retrict_to_group, true) | default('all', true))], groups) }}"
   run_once: true
   tags:
     - templates
