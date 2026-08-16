@@ -1,5 +1,5 @@
 ansible
-ansible-core
+ansible-core<2.23
 netaddr
 clustershell
 jmespath
