@@ -1,8 +1,4 @@
 ---
-- name: include_tasks <|> Load optimized tasks
-  ansible.builtin.include_tasks: "optimized.yml"
-  when: bb_enable_flat_optimizations is defined and (bb_enable_flat_optimizations | bool) == true
-
-- name: include_tasks <|> Load simple tasks
-  ansible.builtin.include_tasks: "simple.yml"
-  when: bb_enable_flat_optimizations is not defined or (bb_enable_flat_optimizations | bool) != true
+- name: include_tasks <|> Load tasks
+  ansible.builtin.include_tasks: "{{ 'optimized.yml' if (bb_enable_flat_optimizations | default(false) | bool) else 'simple.yml' }}"
+  

@@ -25,6 +25,8 @@
       vars:
         hosts_by_first_octets: "{{ hosts_file_hosts_by_first_octets }}"
         dest: "{{ hosts_file_work_file.path | default('/tmp/hosts', true) }}" # Default here allows to display content even in check mode
+        owner: root
+        group: root
         mode: 0644
 
 # Now that file is rendered, lets push it to targets
