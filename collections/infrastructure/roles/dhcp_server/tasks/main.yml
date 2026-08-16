@@ -31,7 +31,7 @@
     permanent: true
     state: enabled
   when:
-    - os_firewall | default(false) | bool
+    - os_firewall | default(true) | bool
   loop: "{{ dhcp_server_firewall_services_to_add }}"
   tags:
     - firewall

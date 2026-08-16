@@ -11,7 +11,7 @@
     permanent: true
     state: enabled
   when:
-    - os_firewall | default(false) | bool
+    - os_firewall | default(true) | bool
   loop:
     - "{{ slurm_srunportrange }}"
     - "{{ slurm_slurmtld_port }}"

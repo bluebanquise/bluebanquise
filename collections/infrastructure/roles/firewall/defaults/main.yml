@@ -1,3 +1,4 @@
 ---
 
 firewall_firewalld_allow_zone_drifting: false
+firewall_policies: []

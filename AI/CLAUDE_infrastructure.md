@@ -381,7 +381,10 @@ module only confirms the start command succeeded, not that the service stays up)
 the OS-appropriate Flask package to every `vars/<OS>.yml` in the role: `python3-flask` (Ubuntu,
 Debian, Debian_13, RedHat_8/9/10), `python36-flask` (RedHat_7, matches its existing `python36`
 naming), `python3-Flask` (Suse/Suse_12, openSUSE capitalization convention). Live-installed +
-daemon restarted on mgt1 to unblock immediately; **not yet committed** to the bluebanquise repo.
+daemon restarted on mgt1 to unblock immediately. **Committed and pushed to `BB-UMMON-1` on
+2026-08-09** (by Oxedions — this session confirmed the fix had regressed on mgt1's 2026-08-09
+rebuild specifically *because* it was still uncommitted; a fresh `git clone -b BB-UMMON-1` doesn't
+see local-only changes, only what's on GitHub).
 
 **iPXE corrupts the initrd for any large (~200MB+) osdeploy install — real BlueBanquise bug, root-
 caused and fixed**. Symptom chain, in the order actually encountered (each looked like a plausible
@@ -428,7 +431,8 @@ standalone cause until disproven):
    install completed **fully cleanly** — first-ever successful mgmt VM OS install in this validation
    effort's history. Reverted rhel9 to legacy BIOS as a deliberately-validated config; rhel10 restored
    to EFI (Oxedions: "now you found the issue for kernel panic, so we can validate EFI in the
-   process") so both firmware paths get exercised. **Not yet committed** to the bluebanquise repo.
+   process") so both firmware paths get exercised. **Committed and pushed to `BB-UMMON-1` on
+   2026-08-09.**
 4. One more real, distinct issue once past the initrd bug: `nm-wait-online-initrd.service` hung
    indefinitely (dracut/NetworkManager waiting for *all* detected NICs to reach a terminal state).
    mgmt_rhel9 has two NICs — virbr1/net-admin (mgt1's DHCP, working fine, confirmed via repeated
@@ -454,8 +458,26 @@ already makes. Verified end to end: `bluebanquise-bootset -n mgmt_rhel9 -b osdep
 correctly in `GET /host/mgmt_rhel9.ipxe`'s `set dedicated-kernel-parameters` line. `per_distro/10`
 now passes `-e "ifname=eth0:$MAC_VIRBR1 ip=eth0:dhcp"` for rhel9/rhel10 only (dracut-specific syntax
 — Debian/Ubuntu use a different network-config subsystem, untested whether they hit the same
-class of bug). **Not yet committed** to the bluebanquise repo (`bluebanquise-bootset`,
+class of bug). **Committed and pushed to `BB-UMMON-1` on 2026-08-09** (`bluebanquise-bootset`,
 `bluebanquise-pxe-stack-daemon`, both docstrings).
+
+**Gotcha hit rebuilding mgt1 (2026-08-09): two separate on-disk collection copies, only one live**.
+`configure_environment.sh` (step 04) does `git clone` into `/var/lib/bluebanquise/bluebanquise/` and
+then `ansible-galaxy collection install --bb_collections_local_path=...`, which *copies* that clone's
+`collections/infrastructure/` into `~/.ansible/collections/ansible_collections/bluebanquise/infrastructure/`
+— a second, independent copy. `ansible-playbook` only ever reads the installed copy. Live-patching
+role files in the raw git clone (to unblock mgt1 while these three fixes were still uncommitted, see
+above) had **zero effect** on a live run — `ansible-playbook --tags pxe_stack` reported `changed=0`
+against already-stale content — until `ansible-galaxy collection install <path> --force` was run to
+resync the installed copy from the patched clone. Even after that, the already-running
+`bluebanquise-pxe-stack-daemon` systemd process kept executing its old in-memory code (a copied file
+on disk doesn't affect an already-forked Python process) until explicitly `systemctl restart`ed —
+Ansible's own `service` task in the role didn't force this since the preceding `copy` task reported
+no change on that *particular* invocation (the change had already landed one invocation earlier).
+Net lesson for any future live-patch-before-commit situation: edit the git clone, `ansible-galaxy
+collection install <path> --force`, re-run the role tag, **then** explicitly restart any daemon the
+role manages — don't trust the role's own service task to notice a change that happened outside its
+own copy task's most recent run.
 
 **RAM bumped to 12000M everywhere, then reverted to provisioning-only** (2026-08-07, then reverted
 2026-08-09, both explicit request): briefly kept 12000M at runtime instead of ballooning down after
@@ -487,6 +509,160 @@ it as-is at its old size, with no warning. Fixed by adding the same `sudo rm -f
 if the size is meant to take effect — a stale file from a previous run silently wins over the
 requested size every time, and nothing in `virt-install`'s own output flags it.
 
+**Two more real bugs hit resuming rhel9's `per_distro/10` for the first time (2026-08-09)**:
+
+1. **`/tmp/waitforssh.sh` doesn't reliably survive a VM's own nic-role self-reboot.**
+   `03_bootstrap_mgt1.sh` copied it to `/tmp` on mgt1 once, *before* step 04 runs (and step 04's own
+   nic-only pass reboots mgt1 partway through) — same pattern in `per_distro/11` for the mgmt VM
+   itself (ubuntu24/debian13 reboot via nic too, in `per_distro/12`). Observed missing from `/tmp`
+   afterward on a live run — every later step that runs it via SSH (`per_distro/10`, `/11`, `/12`,
+   `/14`, `/15`) got `bash: line 1: /tmp/waitforssh.sh: No such file or directory`, which — since
+   none of these calls are wrapped to tolerate failure — hit `launch_v3.sh`'s top-level `set -e` and
+   killed the *entire* run, not just that step. Root cause of the disappearance itself wasn't pinned
+   down (mgt1's `/tmp` is ordinary disk-backed, not tmpfs, so it isn't the usual "tmpfs wiped on
+   reboot" explanation) — but the observed behavior is reproducible enough to defend against
+   regardless. Fixed properly (Oxedions' suggestion) rather than papering over it with a second
+   defensive copy: install it to `/usr/local/bin/waitforssh.sh` instead of `/tmp` everywhere (both
+   the mgt1 copy in `03_bootstrap_mgt1.sh` and the mgmt-VM copy in `per_distro/11`, plus every
+   consuming call site in `per_distro/10`, `/11`, `/12`, `/14`, `/15`) — root-owned, world-executable,
+   ordinary rootfs path, no reboot-survival question at all. The mgt1 copy has to stage through `/tmp`
+   first and `sudo install -m 755` it into place, since it's written by the `generic` user *before*
+   BlueBanquise (and thus `/var/lib/bluebanquise`) exists yet on a fresh mgt1 — `/usr/local/bin` was
+   chosen specifically because it needs no such precondition on either host.
+2. **`virt-install --pxe` only sets network-first boot for its own initial `--wait`ed install boot,
+   not the domain's persisted boot order.** If that first boot fails before completing an install
+   (e.g. it manages to PXE-boot but then hits a transient error and drops to an iPXE shell — this
+   session's specific trigger was restarting `bluebanquise-pxe-stack-daemon` while the VM's chain
+   request to it was in flight, giving it a "Connection reset"), the domain's XML is left with plain
+   `<boot dev='hd'/>` — confirmed via `virsh dumpxml`. Any later `virsh start`/`virsh reset` boots
+   straight to the (still-empty) disk: "Boot failed: not a bootable disk. No bootable device." — it
+   never retries the network boot on its own, and nothing about this state is surfaced anywhere
+   `launch_v3.sh` would notice (the script was still happily sitting in `waitforssh.sh`'s infinite
+   retry loop waiting for an install that would never happen). No script fix applied for this one —
+   the existing recovery path (destroy/undefine + fresh `virt-install --pxe`, i.e. just re-running
+   `per_distro/10`) already handles it correctly by construction, so it's not a script bug on this
+   codebase's side, just a gotcha worth recognizing fast if a VM's console shows "No bootable
+   device" after any mid-boot interruption: don't `virsh start`/`reset` it, recreate it.
+
+**mgt1's own internet-gateway masquerade doesn't survive the `firewall` role running — found and
+fixed properly this time (2026-08-09).** Once `mgmt_rhel9` had `wget` (previous bullet), it still
+couldn't resolve/reach anything (`Couldn't connect to server`, `No route to host`) — `mgt1`'s own
+`iptables -t nat` `POSTROUTING` chain (set up manually in `03_bootstrap_mgt1.sh`) was completely
+empty. Root cause: `04_deploy_bb_on_mgt1.sh` runs `managements_full.yml` (including the `firewall`
+role) *after* `03`'s masquerade rule is set, and the `firewall` role's own firewalld setup wipes
+plain `iptables` rules in that table — nothing ever re-applies it for mgt1 afterward (unlike
+`per_distro/12`, which already does this re-apply for the per-distro mgmt VM's own masquerade).
+Re-adding the raw `iptables` rule alone still weren't enough, either: firewalld's zone model treats
+`enp1s0` (mgt1's WAN/virbr0-facing NIC, never declared in `network_interfaces` so BlueBanquise never
+zones it) as living in the default `public` zone, while `internal`-zone-sourced traffic (10.10.0.0/16)
+needs an explicit **firewalld policy** to forward into a *different* zone at all — masquerade and
+`forward: yes` on a zone only govern same-zone traffic. `firewall-cmd --get-policies` showed only the
+built-in `allow-host-ipv6`; nothing ships a general gateway-style policy by default. Fixed two ways,
+kept deliberately separate:
+- **Role-managed, persistent**: `firewall_zones`'s `internal` entry in `mgt1_bootstrap/hosts` now
+  also sets `'masquerade':True` — the `firewall` role already supports this
+  (`ansible.posix.firewalld`, `permanent: true`, in `firewalld.yml`'s "Define masquerade in firewall's
+  zones" task), so this survives future `firewall`-role re-runs on its own, no re-apply step needed.
+- **Harness-only workaround, not a BlueBanquise change**: a `firewall-cmd --new-policy
+  internal-to-public` (ingress-zone `internal`, egress-zone `public`, target `ACCEPT`) added as a
+  script step at the end of `04_deploy_bb_on_mgt1.sh`, since the `firewall` role has **no support for
+  firewalld policies at all** — only zone-level services/ports/rich-rules/masquerade/icmp. Deliberately
+  kept in the harness rather than extended into the role (Oxedions, 2026-08-09): mgt1 NAT-ing its own
+  uplink to reach the real internet is an artifact of this validation harness's dual-NAT-hop topology
+  (simulating an isolated network), not a shape a real BlueBanquise deployment normally needs. Whether
+  `mgmt_rhel9`'s *own* gateway role (for `login1`/`c001`/`c002`, a much more realistic
+  "management-node-gateways-its-cluster" pattern) can avoid this same policy requirement — e.g. by
+  binding both of its interfaces to the same zone instead of relying on a cross-zone policy — is
+  still open; deliberately deferred to be tested live against `per_distro/12` rather than guessed at,
+  per Oxedions' explicit requirement that this case work "using only the firewall role."
+- **Inventory-parsing trap, not a BlueBanquise/role bug**: first attempt used `'masquerade':true`
+  (lowercase, JSON/YAML-style) and silently did nothing — no error anywhere, `firewall-cmd
+  --query-masquerade` just kept returning `no`. This validation harness's inventories embed Python
+  dict/list literals directly as INI `key=value` host_vars (`firewall_zones=[{...}]`) rather than
+  proper YAML `group_vars`/`host_vars` files (contrast `resources/examples/simple_cluster`, which is
+  BlueBanquise's own documented convention). Ansible's non-native Jinja templating auto-converts such
+  strings back into real Python objects via `ast.literal_eval`, which demands *strict* Python literal
+  syntax (`True`/`False`/`None`) — `true` isn't a valid Python token, so the whole literal silently
+  fails to parse and `firewall_zones` is left as a plain unconverted string (confirmed via `ansible
+  ... -m debug -a "var=firewall_zones"`: lowercase showed a single quoted string, capitalized showed
+  a real structured list). Downstream `subelements`/`loop` filters on a plain string don't necessarily
+  error loudly either — this can burn silent time on any boolean added to one of these harness
+  inventories' embedded-literal vars, not just `masquerade`. Real YAML inventories don't have this
+  failure mode at all, since YAML natively parses lowercase booleans.
+
+**Two more environment-specific fixes found finishing `per_distro/11` for rhel9 (2026-08-09)**:
+`wget` isn't installed on the minimal Rocky 9 DVD kickstart image, but `online_bootstrap.sh`'s
+download (the very next command `per_distro/11` runs) uses it unconditionally — fixed by adding
+`wget` to `DISTRO_PRE_BOOTSTRAP[rhel9]`/`[rhel10]`'s `dnf install` in `common.sh` (Ubuntu/Debian
+images ship it already). Both this and the masquerade/policy fix above are pure validation-harness
+environment gaps, not BlueBanquise bugs — surfaced only now because this is the first time a fresh
+mgt1 rebuild's `managements_full.yml` run has gotten far enough, with `firewall_zone`s actually
+enforced, to expose them.
+
+**`per_distro/11`'s cluster-inventory upload path collided with BlueBanquise's own reserved runtime
+directory — validation-harness bug, found and fixed (2026-08-09)**. First-ever `per_distro/12` run
+for rhel9 got to `pxe_stack`'s `pxe_stack_daemon <|> Ensure cluster base and tmp directories exist`
+task and failed: `"/var/lib/bluebanquise/cluster/hosts already exists as a file"`. Root cause:
+`per_distro/11` did `scp -r "$INVENTORY_DIR" ... :/var/lib/bluebanquise/cluster` — since
+`$INVENTORY_DIR` (`inventories/cluster/<distro>/`) itself contains a file literally named `hosts`
+(the Ansible inventory) alongside `group_vars/`, the destination directory `cluster` ends up
+*being* that inventory's contents verbatim. But `cluster_management`/`pxe_stack` reserve
+`/var/lib/bluebanquise/cluster/hosts/<hostname>/...` as their own runtime cluster-state directory
+(see "Cluster State System" above) — a plain naming coincidence between "the Ansible inventory file
+called `hosts`" and "BlueBanquise's own per-host state directory called `hosts`" put an ordinary file
+exactly where BlueBanquise needed to `mkdir` a directory. Fixed by uploading to
+`/var/lib/bluebanquise/cluster_inventory` instead of `/var/lib/bluebanquise/cluster` — updated the
+scp destination and both hardcoded path references in `per_distro/11`, and every `-i cluster` →
+`-i cluster_inventory` in `per_distro/12`/`/15`'s `ansible-playbook` invocations. Not a BlueBanquise
+bug: the collision is entirely a validation-harness directory-naming choice, and any real deployment
+using a differently-named (or YAML group_vars/host_vars-based) inventory path would never hit it.
+
+**Two more bugs hit resuming into `per_distro/12` after a break (2026-08-11)**:
+
+1. **Validation-harness inventory bug**: `mgt`'s (the per-distro mgmt VM's) `net-cluster`
+   `network_interfaces` entry in all 4 `inventories/cluster/<distro>/hosts` files was missing
+   `'never_default4':'true'` — contrast `mgt1_bootstrap/hosts`'s own entry for mgt1, which already
+   has it. Consequence: `net-cluster`'s `gateway4` (`10.20.0.1`) *is* the mgmt VM's own IP on that
+   network (correct for `login1`/`c001`/`c002`, who should route through the mgmt VM) — but applied
+   to the mgmt VM's *own* routing table by the `nic` role, with no `never_default4` to suppress it,
+   it silently replaced the VM's real default route (via its other, DHCP-obtained `net-admin`
+   interface toward mgt1 → internet) with a route via itself on `net-cluster`. Result: total loss of
+   outbound connectivity the moment `per_distro/12`'s `nic` role ran, no error anywhere in the
+   Ansible output — just a broken route (`ip route` showed `default via 10.20.0.1 dev enp2s0`,
+   effectively routing to itself). Fixed by adding `'never_default4':'true'` to `mgt`'s entry in all
+   4 cluster inventories, matching mgt1's own pattern.
+2. **Firewalld policy masquerade, second half of the 2026-08-09 fix — the policy itself also needs
+   `--add-masquerade`, not just the zone.** Even after (1)'s route fix, `mgmt_rhel9` still couldn't
+   reach the internet through mgt1 — confirmed via `tcpdump` on mgt1's `enp1s0` that forwarded
+   packets left with their original `10.10.0.21` source, unmasqueraded, silently dropped upstream
+   (private source addresses aren't internet-routable, no error surfaces anywhere). Zone-level
+   `masquerade: yes` (declared via `firewall_zones` on the `internal` zone) only NATs traffic whose
+   *egress* interface is also in that same zone — cross-zone-forwarded traffic (exactly what the
+   `internal-to-public` policy from 2026-08-09 exists for) needs masquerade declared **on the policy
+   object itself**. Fixed by adding `sudo firewall-cmd --permanent --policy internal-to-public
+   --add-masquerade` to `04_deploy_bb_on_mgt1.sh`'s policy-creation step. Also updated the
+   bluebanquise repo's own `CLAUDE.md` firewall-policy future-task note with this second half of the
+   gap, since it applies to any future policy-based BlueBanquise gateway design, not just this
+   harness's mgt1 case.
+
+Both fixed in the source scripts/inventories and hand-patched into the already-running `mgt1`/
+`mgmt_rhel9` (confirmed: `ping 8.8.8.8` from `mgmt_rhel9` succeeds end to end through the full
+mgt1 masquerade+policy chain).
+
+**Operational gotcha, not a script bug: resuming with a `STEP` past 2 after `gabriel` itself
+rebooted leaves the host's own ISO-serving HTTP server dead.** `02_start_http_server.sh` backgrounds
+a plain `python3 -m http.server` process — it doesn't survive a host reboot, and nothing restarts it
+automatically. Resuming with e.g. `STEP=11`/`STEP=12` (as this session did after the weekly-restart
+pattern of stopping mid-session) skips step 02 entirely (`if (( STEP < 2 ))`), so the server stays
+dead. Symptom: `per_distro/13`'s `wget` (fetching the cluster OS ISO onto the mgmt VM) just hangs —
+the whole `launch_v3.sh` process eventually dies with no error text reaching the log at all (the SSH
+heredoc's failure never gets flushed/captured before the process exit). Confirmed via `curl` to
+`http://192.168.122.1:8000/` timing out. Fixed by hand each time so far (`cd Validation/http &&
+python3 -m http.server 8000 &`, matching step 02 exactly) — worth remembering as a first check
+whenever resuming a paused run with `STEP` set high enough to skip phase 1, especially right after a
+host power cycle: `pgrep -af "http.server 8000"` on gabriel before assuming a per-distro step hang is
+something else.
+
 **State at end of session (2026-08-07), resumed and progressed 2026-08-09**: mgt1 running,
 `mgmt_rhel9` shut off cleanly post-install at end of 2026-08-07 (that install was manual, not via
 `launch_v3.sh`). Hypervisor host (`gabriel`) was then powered off; found rebooted (5 min uptime) at
@@ -507,6 +683,80 @@ the first time, so treat that first resumed run as still worth watching closely 
 it's identical to the manual runs. Then continue through rhel9's remaining steps (BB bootstrap on
 mgmt VM, management stack deploy, login1/c001/c002 PXE deploy, node stacks, Slurm test, cleanup) and
 the rest of the per-distro loop.
+
+### PXE installs were already air-gapped; migrated to the official tool anyway (2026-08-11)
+
+When `login1`/`c001`/`c002`'s post-install `dnf update` started hitting real internet mirrors (see
+the gateway/policy fixes above), it looked at first like the *kickstart install itself* might be
+reaching the internet too — investigated and confirmed **it already wasn't**: `osdeploy/redhat_9.ipxe`
+sets `inst.repo=`/`inst.addrepo=` to the local `pxe/netboots/.../iso/{BaseOS,AppStream}/` tree served
+by the PXE host itself, and the kickstart template (`RedHat/kickstart.cfg.j2`) has no `url --url=`
+of its own — repo sourcing is 100% controlled by those boot-time kernel parameters. Confirmed live:
+`BaseOS/Packages` and `BaseOS/repodata` were genuinely populated and served locally; the mirror
+errors were entirely from `per_distro/15`'s own post-install `dnf install -y epel-release && dnf
+update -y` step (EPEL genuinely isn't on the Rocky DVD, needs real internet — expected, matches "we
+will need later c001 and other hosts to reach the web").
+
+Even so, `per_distro/10`/`/13` were doing this the *unofficial* way — a raw `mount` of the ISO
+directly onto the netboot path — instead of using the collection's own shipped
+`bluebanquise-netboots-installer` tool (`pxe_stack/files/`, installed to `/usr/bin/`). Migrated both
+to the tool (Oxedions' explicit request): `sudo bluebanquise-netboots-installer install <netboot_id>
+<arch> --netboot <local_iso_path> -q`, using the already-uploaded ISO via `--netboot` so the tool
+never needs to download anything itself (still fully airgapped). `per_distro/17`'s cleanup now calls
+`bluebanquise-netboots-installer uninstall <netboot_id> <arch> -q` (removing the tool's own managed
+copy + extracted tree under `pxe/netboots/<os>/<version>/<arch>/`) followed by a manual `rm -f` of
+the *separate* staging ISO copy at `/var/lib/bluebanquise/<iso>` that `per_distro/10` uploaded — the
+tool's `install` action makes its own copy of whatever `--netboot` points at rather than referencing
+it in place, so the two copies are genuinely distinct and both need cleaning up. `common.sh` gained
+`DISTRO_NETBOOT_ID` (the `netboots_installer.yml` key per distro: `rhel_9`, `rhel_10`,
+`ubuntu_24.04`, `debian_13`) and a fixed `DISTRO_NETBOOT_ARCH=x86_64`.
+
+**Disk-usage note, not yet a problem but worth watching**: the tool's `install` (via `--netboot`)
+copies the ISO into its managed directory *and* extracts its contents there — meaningfully more
+transient disk usage per distro than the old bare-mount approach (which referenced the ISO in place,
+no extra copy). Roughly: staging copy (`/var/lib/bluebanquise/<iso>`, unchanged) + the tool's own ISO
+copy + the extracted tree, all live on mgt1 simultaneously until `per_distro/17` cleans up — for
+rhel9's ~15GB ISO, on the order of 2-3x that transiently. Fit fine within mgt1's 60GB disk in
+practice, but worth checking if a smaller disk is ever used.
+
+**Transition gotcha, already handled**: `per_distro/17` now defensively `umount`s the old raw-mount
+path before calling `uninstall`, since the tool's `rmtree`-based cleanup fails with "Device or
+resource busy" against a directory that's still an active mount (exactly rhel9's state this session,
+set up before this migration landed) — a one-time compatibility shim, harmless no-op for every future
+distro once nothing is ever mounted there again.
+
+### `firewall` role runs after `time` in our own playbooks — real bug, found live (2026-08-11)
+
+`login1`'s very first `logins.yml` run failed at `time : firewalld <|> Add services to firewall's
+zone` — `"firewall is not currently running, unable to perform immediate actions without a running
+firewall daemon"`. `mgt1`/`mgmt_rhel9` never hit this in `managements_full.yml` purely by luck of role
+order: several earlier roles there (`dhcp_server`, `dns_server`, `pxe_stack`) already touch firewalld
+before `time` does, so by the time `time` runs, firewalld's already been started as a side effect.
+`logins.yml`/`computes.yml` have no such earlier role — `time` is the *first* thing to touch
+firewalld, and kickstart's `firewall --enabled` only enables the service for the *next* boot, it
+doesn't start it immediately — so on a node's first-ever Ansible run, firewalld may not be active yet
+at all.
+
+**The real damage wasn't the failed task itself** (that alone would just fail cleanly) **— it was
+what happened after.** The play aborted mid-`nic`-role-adjacent state, and networking was left up but
+with firewalld now started (via systemd at some point) with **zero** BlueBanquise-managed zone
+config — no `internal` zone services, nothing — leaving the node reachable for established/related
+connections only. Rebooting to try to recover made it *worse*: every subsequent connection attempt
+(`ping`, fresh SSH) was dropped outright (confirmed: `enp1s0` had the correct IP and was UP, per
+`virsh qemu-agent-command ... guest-network-get-interfaces`, but `rx-dropped` was ~90% of
+`rx-packets`). Could not diagnose further or fix in place — this host's `qemu-guest-agent` has
+`guest-exec`/`guest-file-open` disabled at the libvirt policy level (`"the command is not allowed"`),
+so there was no way to inspect or repair the node without a working SSH path, which is exactly what
+was broken. Recovered by destroying and PXE-redeploying the node fresh (`per_distro/14`) rather than
+debugging blind.
+
+**Fixed at the actual root**: `firewall` role moved to run immediately after `nic` (before
+`hosts_file`/`dns_client`/`time`/`dhcp_server`/etc.) in all three of this harness's own playbooks —
+`logins.yml`, `computes.yml`, *and* `managements_full.yml` (which hadn't failed yet, but had the
+identical latent ordering fragility, just masked). Not a BlueBanquise role bug — these are our own
+harness-authored playbooks, and BlueBanquise's roles don't prescribe any particular relative order
+among themselves; this is purely about *our* role list making sure `firewall` always runs early
+enough that no later role's `immediate: true` firewalld task can ever race it again.
 
 ---
 

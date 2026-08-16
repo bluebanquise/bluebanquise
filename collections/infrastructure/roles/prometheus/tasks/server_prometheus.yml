@@ -43,7 +43,7 @@
     state: enabled
   when:
     - prometheus_firewall_open | bool
-    - os_firewall | default(false) | bool
+    - os_firewall | default(true) | bool
   tags:
     - firewall
 

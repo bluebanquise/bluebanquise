@@ -7,7 +7,7 @@
     permanent: true
     state: enabled
   when:
-    - os_firewall | default(false) | bool
+    - os_firewall | default(true) | bool
   tags:
     - firewall
 

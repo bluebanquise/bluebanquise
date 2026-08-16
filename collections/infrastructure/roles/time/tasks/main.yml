@@ -29,7 +29,7 @@
     permanent: true
     state: enabled
   when:
-    - os_firewall | default(false) | bool
+    - os_firewall | default(true) | bool
   loop: "{{ time_firewall_services_to_add }}"
   tags:
     - firewall

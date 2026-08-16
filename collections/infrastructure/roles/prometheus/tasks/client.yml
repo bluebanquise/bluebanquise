@@ -68,7 +68,7 @@
     state: enabled
   loop: "{{ prometheus_exporters_groups }}"
   when:
-    - os_firewall | default(false) | bool
+    - os_firewall | default(true) | bool
     - item.port is defined
   tags:
     - firewall

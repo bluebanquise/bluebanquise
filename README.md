@@ -20,18 +20,16 @@ Devs infos:
 
 ## What is BlueBanquise
 
-**BlueBanquise** is group of coherent **Ansible** roles and tools, designed to deploy and manage large group of hosts (clusters of nodes).
+**BlueBanquise** is group of coherent **Ansible** roles and tools, designed to provision and manage <u>low level infrastructure</u> of large group of hosts (clusters of nodes).
 
 The BlueBanquise collection is generic and can adapt to any kind of architecture (High Performance Computing clusters, university or enterprise infrastructures, Blender render farm, K8S cluster, etc.).
 A specific focus is made on scalability for very large clusters.
 
-When "stacked" together, roles and tools are called the **BlueBanquise stack**.
-
-The infrastructure collection should be compatible with most target Linux distributions (RHEL 9, RHEL 10, Debian 12, Debian 13, OpenSuse Leap 15, Ubuntu 22.04, Ubuntu 24.04). However, please note that some non core roles do not support all these distributions (support is added on demand).
+The infrastructure collection should be compatible with most target Linux distributions (RHEL 9, RHEL 10, Debian 13, OpenSuse Leap 15, Ubuntu 24.04). However, please note that some roles do not support all these distributions (support is added on demand).
 
 ## License
 
-BlueBanquise repository is under **MIT license**, except Bluebanquise documentation which is under **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License**.
+BlueBanquise repository is under **MIT license**.
 
 :star: The BlueBanquise project is a **100% open source project, not managed by a company, and will stay MIT license**. :star:
 
@@ -46,56 +44,8 @@ In the 21th century, it is a shame not all children live in peace.
 
 ## AI
 
-I am using AI time to time to help me maintain and develop BlueBanquise. Reason is simple: keeping up to date a stack that covers around 2 versions of 4 different Linux distributions is way too much for a single person.
+I am using AI time to time to help me maintain and develop BlueBanquise, especially to detect bugs and for the user cli tools. Reason is simple: keeping up to date a stack that covers around multiple versions of 4 different Linux distributions is way too much for a single person.
 Note however that I read all changes proposed by AI, and I do not commit something I don't understand.
-
-## Quickstart
-
-### 1. Bootstrap the stack
-
-First step is to use the bootstrap script that will create the bluebanquise user on your system.
-Make sure first you have both sudo and curl installed on the system.
-
-```
-sudo bash <(curl -s https://raw.githubusercontent.com/bluebanquise/bluebanquise/refs/heads/master/bootstrap/online_bootstrap.sh)
-```
-
-Read the warning message, and accept if you agree with it.
-
-Once bootstrap is done, you can login as bluebanquise user:
-
-```
-sudo su - bluebanquise
-```
-
-Note that the ANSIBLE_CONFIG variable is set to `/var/lib/bluebanquise/bluebanquise/ansible.cfg` automatically, and a python virtual environment is auto activated and contains latest Ansible version available for your local system.
-
-BlueBanquise Ansible's collections are also already installed for this bluebanquise user.
-
-### 2. Use example inventory
-
-An example inventory can be found inside this repository at resources/examples/simple_cluster. You can use that as a base, and use documentation at https://bluebanquise.com/documentation to tune it to your needs.
-
-### 3. Create playbooks
-
-You can invoke BlueBanquise roles using full name:
-
-```
----
-- name: managements playbook
-  hosts: "fn_management"
-  roles:
-    - role: bluebanquise.infrastructure.dhcp_server
-      tags: dhcp_server
-    - role: bluebanquise.infrastructure.hosts_file
-      tags: hosts_file
-```
-
-If you are not running Ansible as root, remember to pass the `-b` (`--become`) argument to ansible-playbook command.
-
-### 4. Read documentation
-
-It is advised to read the documentation at https://bluebanquise.com/documentation/ to understand stack basic concepts.
 
 ## Resources
 
@@ -118,22 +68,20 @@ Currently tested and supported distributions (other derivative could work) are:
 | Operating System family | Operating System distribution | Tested versions    | Architectures    | Notes                                                       |
 | ----------------------- | ----------------------------- | ------------------ | ---------------- | ----------------------------------------------------------- |
 | Red Hat                 |                               |                    |                  |                                                             |
-|                         | RHEL                          | 9, 10              | x86_64, aarch64  | √                                                           |
-|                         | Rocky Linux                   | 9, 10              | x86_64, aarch64  | √                                                           |
-|                         | Alma Linux                    | 9, 10              | x86_64, aarch64  | √                                                           |
+|                         | RHEL (and clones)             | 9, 10              | x86_64, aarch64  | √                                                           |
 | Debian                  |                               |                    |                  |                                                             |
-|                         | Ubuntu                        | 22.04, 24.04       | x86_64, arm64    | √. Diskless not supported for now.                          |
-|                         | Debian                        | 12, 13             | x86_64, arm64    | √. Diskless not supported for now.                          |
+|                         | Ubuntu                        | 24.04              | x86_64, arm64    | √. Diskless not supported for now.                          |
+|                         | Debian                        | 13                 | x86_64, arm64    | √. Diskless not supported for now.                          |
+| Suse                    |                               |                    |                  |                                                             |
+|                         | Leap                          | 15.7               | x86_64, arm64    | √. Diskless not supported for now.                          |
 
 ansible-core >= 2.16 is mandatory for BlueBanquise to run properly (it might work with earlier versions, but not tested).
 
 Please note that:
 
 * EL 7 and 8 are now considered best effort only.
-* Ubuntu 18.04 and 20.04 are now considered best effort only.
-* Debian 11 is now considered best effort only.
-* Suse 12 is no more supported at all (too old, I miss the time to support it).
-* Suse 15.6 is now considered best effort. I supported OpenSuse Leap for years, but no users were reported. If you need Suse support back, please let me know.
+* Ubuntu 18.04, 20.04 and 22.04 are now considered best effort only.
+* Debian 11 and 12 are now considered best effort only.
 * RHEL 8 and OpenSuse Leap 15 need an ansible-core==2.16, 2.17+ is not compatible.
 
 ## The project

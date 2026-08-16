@@ -36,7 +36,7 @@
     permanent: true
     state: enabled
   when:
-    - os_firewall | default(false) | bool
+    - os_firewall | default(true) | bool
     - grafana_port == grafana_default_port
   loop: "{{ grafana_firewall_services_to_add }}"
   tags:
@@ -50,7 +50,7 @@
     permanent: true
     state: enabled
   when:
-    - os_firewall | default(false) | bool
+    - os_firewall | default(true) | bool
     - grafana_port != grafana_default_port
   tags:
     - firewall

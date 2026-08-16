@@ -106,6 +106,45 @@ multiple zones), set `firewall_firewalld_allow_zone_drifting`. It defaults to
 firewall_firewalld_allow_zone_drifting: false
 ```
 
+### Firewalld policies (zone-to-zone forwarding)
+
+Zone-level configuration (above) only governs traffic whose ingress **and** egress
+interfaces are bound to the same zone. A host acting as a gateway — one interface
+in one zone, a second interface in another — needs an explicit firewalld **policy**
+to forward traffic between the two zones at all; without one, cross-zone forwarding
+is denied unconditionally, silently (no error, packets are just dropped).
+
+Define policies with `firewall_policies`:
+
+```yaml
+firewall_policies:
+  - name: internal-to-external    <<< policy name
+    ingress_zones:                <<< required: zone(s) traffic enters from
+      - internal
+    egress_zones:                 <<< required: zone(s) traffic leaves through
+      - external
+    target: ACCEPT                <<< CONTINUE (firewalld's own default), ACCEPT, DROP or REJECT
+    masquerade: true              <<< NAT traffic that crosses this policy
+    services_enabled:
+      - dns
+    services_disabled: []
+    ports_enabled:
+      - 7770/tcp
+    ports_disabled: []
+    rich_rules_enabled: []
+    rich_rules_disabled: []
+```
+
+`name`, `ingress_zones` and `egress_zones` are required for every entry. Masquerade
+must be declared **on the policy itself** (as above) to NAT traffic crossing zones —
+setting `masquerade: true` on a zone (see above) only NATs traffic whose ingress and
+egress interfaces are both in that same zone, it has no effect on policy-forwarded
+traffic.
+
+Leaving `target` unset keeps firewalld's own default, `CONTINUE` — which does not
+forward anything on its own. For a working gateway, `target: ACCEPT` (or ports/
+services/rich rules explicitly enabling the wanted traffic) is required.
+
 ### Integration with other roles
 
 BlueBanquise ships with roles that already support some level of firewall
