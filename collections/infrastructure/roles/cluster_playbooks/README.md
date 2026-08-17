@@ -201,5 +201,5 @@ untouched by `"Scheduled"`/`"Running"`/explanatory status updates.
 | `cluster_playbooks_daemon_log_level` | `INFO` | Daemon logging level (`DEBUG`, `INFO`, `WARNING`, `ERROR`) |
 | `cluster_playbooks_daemon_inventory_path` | `/var/lib/bluebanquise/inventory` | Inventory folder the daemon hashes and passes to `ansible-playbook -i` |
 | `cluster_playbooks_daemon_ansible_playbook_bin` | `/var/lib/bluebanquise/ansible_venv/bin/ansible-playbook` | `ansible-playbook` binary the daemon shells out to |
-| `cluster_playbooks_daemon_ansible_config_path` | `/var/lib/bluebanquise/bluebanquise/ansible.cfg` | `ANSIBLE_CONFIG` set on every `ansible-playbook` subprocess (needed for the `jinja2.ext.do`/`loopcontrols` extensions used by other roles' templates) |
+| `cluster_playbooks_daemon_ansible_config_path` | `/var/lib/bluebanquise/bluebanquise/ansible.cfg` | `ANSIBLE_CONFIG` set on every `ansible-playbook` subprocess |
 | `cluster_playbooks_daemon_host_tag_path` | `/etc/bluebanquise/tags` | Remote path the daemon reads over SSH and passes to `cluster_host_tag` as `cluster_host_tag_path` |

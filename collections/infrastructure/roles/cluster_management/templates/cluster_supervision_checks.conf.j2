@@ -3,21 +3,21 @@
 # WARNING: this file can contain BMC credentials (for hosts checking check_bmc). Keep it
 # root/bluebanquise readable only.
 ---
-{% set host_checks = {} %}
+{% set ns = namespace(host_checks={}) %}
 {% for group_name, group_checks in cluster_management_supervision_checks.items() %}
 {%   if group_name in groups %}
 {%     for host in groups[group_name] %}
-{%       set merged = (host_checks[host] | default({})) | combine(group_checks) %}
-{%       do host_checks.update({host: merged}) %}
+{%       set merged = (ns.host_checks[host] | default({})) | combine(group_checks) %}
+{%       set ns.host_checks = ns.host_checks | combine({host: merged}) %}
 {%     endfor %}
 {%   endif %}
 {% endfor %}
 hosts:
-{% for host in host_checks.keys() | sort %}
+{% for host in ns.host_checks.keys() | sort %}
   {{ host }}:
     checks:
-{{ host_checks[host] | to_nice_yaml(indent=2) | indent(6, True) }}
-{%   if 'check_bmc' in host_checks[host] %}
+{{ ns.host_checks[host] | to_nice_yaml(indent=2) | indent(6, True) }}
+{%   if 'check_bmc' in ns.host_checks[host] %}
 {%     set host_bmc = hostvars[host]['bmc'] | default(none) %}
 {%     set host_auth = hostvars[host]['hw_board_authentication'] | default([]) | selectattr('protocol', 'defined') | list %}
 {%     if host_bmc is not none and host_auth | length > 0 %}

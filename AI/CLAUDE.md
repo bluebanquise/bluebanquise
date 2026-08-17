@@ -749,8 +749,69 @@ The `static_analysis.yml` workflow runs `flake8` on Python plugins and `ansible-
 ## ansible.cfg Notes
 
 The repo `ansible.cfg` sets:
-- `jinja2_extensions = jinja2.ext.loopcontrols,jinja2.ext.do` — required; roles use `{% for %}` with `break`/`continue` and `{% do %}`
 - `callbacks_enabled = ansible.posix.profile_tasks` — adds timing output per task
+
+**Jinja2 extensions removed entirely (2026-08, ansible-core 2.19+/Ansible 12 breaking change)**:
+`jinja2_extensions` used to be `jinja2.ext.loopcontrols,jinja2.ext.do` here (and in
+`resources/workflow/ansible.cfg`, CI's config) — newer ansible-core dropped that config option's
+effect entirely (deprecated since ~2.19, and even where the option is still accepted with a
+warning, live-confirmed on ansible-core 2.21.2 it stops applying past a certain point and
+`{% do %}`/`{% continue %}`/`{% break %}` in a template then hard-fail: `Syntax error in template:
+Encountered unknown tag 'do'/'continue'`). No config-level fix exists — every template using these
+tags had to be rewritten. Found via `grep -rlE '\{%-?\s*do\s|\{%-?\s*(break|continue)\s*-?%\}'
+--include="*.j2"`: **4 files actually depended on the extensions** — `conman/templates/
+conman.pswd.j2` (`{% continue %}`, 1 use), `cluster_management/templates/
+static_cluster_state.yml.j2` (`{% do %}`, 19 uses), `cluster_management/templates/
+cluster_supervision_checks.conf.j2` (`{% do %}`, 1 use), `cluster_playbooks/templates/
+bluebanquise_playbook.conf.j2` (`{% do %}`, 1 use). A much longer initial grep for `loop.*` too
+(19 more files: `beegfs`, `dhcp_server`, `haproxy`, `keepalived`, `lmod`, `nic`, `powerman`,
+`prometheus`, `pxe_stack`, `rsyslog`, `slurm`) turned out to be a false lead — `loop.first`/`.last`/
+`.index`/`.index0` are native Jinja2 loop-variable attributes, not part of `loopcontrols` (which
+only adds the `break`/`continue` *tags*); those 19 files needed no change.
+
+**Fix pattern, both confirmed live against `resources/workflow/inventory_standard` (not just
+lint/syntax-check) on ansible-core 2.21.2**:
+- `{% continue %}` → restructure as a wrapping `{% if <the negated condition> %}...{% endif %}`
+  around the rest of the loop body. No Jinja mechanism needed at all.
+- `{% do x.append(...) %}` / `{% do x.update(...) %}` inside a `{% for %}` loop → Jinja2's native
+  `namespace()` object (core Jinja2 since 2.10, not an extension): `{% set ns = namespace(list=[])
+  %}` outside the loop, `{% set ns.list = ns.list + [item] %}` inside it — plain `{% set %}`
+  reassignment doesn't escape a `{% for %}` loop's scope, but assignment to a namespace *attribute*
+  does. Dict building uses the same shape with Ansible's `combine` filter instead of `.update()`:
+  `{% set ns.data = ns.data | combine({k: v}) %}`.
+- **Important scoping subtlety that shrank the actual diff**: unlike `{% for %}`, an `{% if %}`
+  block does *not* create a new Jinja2 scope — a plain `{% set _state = _state | combine(...) %}`
+  written only inside `{% if %}`/`{% elif %}` (never inside a `{% for %}`) needs no `namespace()` at
+  all, it already leaks out correctly. `static_cluster_state.yml.j2`'s 19 `do` sites split exactly
+  this way: the handful building `_fn_groups`/`_hw_groups`/`_os_groups`/`_net_ifaces` inside `{% for
+  %}` loops needed `namespace()`; the majority, building `_state` via a long `{% if _hv.x is defined
+  %}` chain with no enclosing loop, only needed plain reassignment. Check for an enclosing `{% for
+  %}` before reaching for `namespace()` — it's not always necessary.
+- Verified by rendering all 4 templates directly against `resources/workflow/inventory_standard`'s
+  real hostvars (not synthetic data): `conman.pswd.j2` correctly includes c001/c005/c006/c007 (in
+  `hw_supermicro_X1`, which has `hw_board_authentication`) and correctly excludes mgt1 (has `bmc`
+  but is only in `hw_dell_X2`, no auth defined — the exact case the old `{% continue %}` guarded);
+  `static_cluster_state.yml.j2` rendered correctly for every host including the `network_interfaces:
+  null` edge case (`c00dummy2`, the same host that already mattered for the `default(x, true)`
+  gotcha documented above — confirms that fix still holds through this rewrite);
+  `cluster_supervision_checks.conf.j2` correctly merged per-host checks across two overlapping
+  inventory groups (`hw_supermicro_X1` + `os_rhel9`); `bluebanquise_playbook.conf.j2` correctly
+  built `function_groups` for every `fn_*` group. `conman.pswd.j2`'s actual role task (`tasks/
+  main.yml`) is commented out currently — the template was verified by rendering it directly
+  (`ansible.builtin.template` against the real inventory), not through the disabled task; worth
+  knowing if that task is ever re-enabled.
+- Removed `jinja2_extensions` from both `ansible.cfg` (root) and `resources/workflow/ansible.cfg`;
+  fixed one stale doc reference in `cluster_playbooks/README.md` (the `cluster_playbooks_daemon_
+  ansible_config_path` row cited the extensions as the reason that var exists).
+- **Flagged, not chased**: CI's `.github/workflows/*.yml` set `ANSIBLE_CONFIG: /var/lib/bluebanquise/
+  ansible.cfg` (single-level path), while `bootstrap/configure_environment.sh` and this doc's own
+  "Running a role against a test inventory" command both use `/var/lib/bluebanquise/bluebanquise/
+  ansible.cfg` (nested) — and no CI step visibly copies any `ansible.cfg` to either path before
+  `ansible-playbook` runs. Whether CI's `ANSIBLE_CONFIG` ever pointed at a real file, or Ansible has
+  silently been falling back to defaults there all along, is unconfirmed — didn't chase it since it's
+  outside this fix's actual scope (`jinja2_extensions` is now gone from every `ansible.cfg` in the
+  repo either way) and CI plumbing like this has its own history of drift already noted elsewhere in
+  this doc.
 
 ## Custom Filter Plugins
 
