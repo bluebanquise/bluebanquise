@@ -3,8 +3,8 @@
 - name: command <|> Check for default cluster in Ubuntu
   ansible.builtin.command: "pcs status"
   register: pcs_status_ubuntu
-  changed_when: False
-  ignore_errors: yes
+  changed_when: false
+  ignore_errors: true
 
 - name: command <|> Destroy default cluster to avoid error with pcs cluster setup in Ubuntu
   ansible.builtin.command: "pcs cluster destroy"

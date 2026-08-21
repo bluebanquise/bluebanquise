@@ -775,3 +775,32 @@ From `login1` as `testuser`:
 srun --nodes=2 --ntasks-per-node=1 hostname
 ```
 Expected output: both `c001` and `c002` appear. Step 16 validates this and exits non-zero on failure (allowing cleanup to still run via `set +e` in `launch_v3.sh`).
+
+---
+
+## TODO: `pcs` (HA) role has zero test coverage anywhere — needs a Validation V3 step (added 2026-08)
+
+Found during a `bluebanquise` repo coherency review of the `pcs` role: it is not in the tag list of
+*any* `.github/workflows/*.yml` invocation of `high_availability.yml` — every workflow (el9, el10,
+u24, deb13, lp16) runs `-t haproxy,keepalived` only, `pcs` is absent even on el9/el10/u24 where the
+role claims support. Two real bugs (a `run_once`+`delegate_to`+`register` variable-scoping bug
+picking the wrong host's data, and a colocation-constraint task that crashes on an integer `score`)
+had evidently never been exercised as a result, and were only caught by hand.
+
+**Why this repo's Docker-based CI can't just add the missing tag**: pacemaker/corosync are a
+genuinely multi-host, network-quorum-dependent stack — the kind of thing `bluebanquise`'s own
+container-based CI model (single container, `--connection=local --limit mgt1`, no real inter-host
+networking or systemd corosync/pacemaker daemons under it) isn't built to exercise honestly. Forcing
+it in there would risk the same trap already documented in `bluebanquise/AI/CLAUDE.md`'s CI/Testing
+section ("container-only failure is a CI workflow problem, never grounds for touching role
+behavior") in reverse — a container-shaped pass/fail on `pcs` wouldn't actually prove the role works
+on real HA hardware, and a container-shaped *failure* could easily be a container artifact, not a
+real bug, muddying the signal either way.
+
+**Proposed home instead: a new Validation V3 step here**, since this harness already does real
+multi-VM KVM deployment (unlike CI's single container) — the natural place to actually exercise
+`pcs` end-to-end: real `corosync`/`pacemaker` on real (if virtual) separate hosts, real quorum
+behavior, a real `pcs cluster node add` join. Not designed yet — needs its own host topology
+decision (how many HA nodes, which existing step's VMs to repurpose or whether it needs dedicated
+ones) before it can be scoped as a numbered step like 01-17 above. Flagging here as a known gap
+rather than designing it blind; revisit when `pcs`/HA work is next prioritized.

@@ -66,7 +66,7 @@
 - name: command <|> Check nodes already registered
   ansible.builtin.command: "cat /var/lib/pcsd/known-hosts"
   register: pcs_known_hosts
-  changed_when: False
+  changed_when: false
   ignore_errors: true
 
 - name: include_tasks <|> Use OS dedicated task before creating cluster
@@ -91,12 +91,12 @@
     - name: command <|> Register nodes
       ansible.builtin.command: "pcs host auth {{ item.name }} -u hacluster -p {{ pcs_ha_cluster_password }}"
       loop: "{{ pcs_cluster_nodes }}"
-      when: ( pcs_known_hosts.stdout_lines | select("match", ".*"+item.name+".*") | list | length ) < 1
+      when: ( hostvars[pcs_reference_node].pcs_known_hosts.stdout_lines | select("match", ".*"+item.name+".*") | list | length ) < 1
 
     - name: command <|> Check cluster exist
       ansible.builtin.command: "cat /etc/corosync/corosync.conf"
       register: pcs_corosync_known_hosts
-      changed_when: False
+      changed_when: false
       ignore_errors: true
 
     - name: command <|> Register reference node
@@ -109,7 +109,7 @@
     - name: command <|> Check nodes already in corosync
       ansible.builtin.command: "cat /etc/corosync/corosync.conf"
       register: pcs_corosync_known_hosts
-      changed_when: False
+      changed_when: false
       ignore_errors: true
 
     - name: command <|> Register other nodes
@@ -122,7 +122,7 @@
 - name: service <|> Enable and start cluster
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: "{{ pcs_autostart |  default(false) }}"
+    enabled: "{{ pcs_autostart | default(false) }}"
     state: started
   loop:
     - corosync
@@ -136,7 +136,7 @@
     - name: command <|> Check cluster properties
       ansible.builtin.command: "pcs property"
       register: pcs_property
-      changed_when: False
+      changed_when: false
       ignore_errors: true
 
     - name: command <|> Set properties
@@ -148,7 +148,7 @@
     - name: command <|> Check cluster resource op defaults
       ansible.builtin.command: "pcs resource op defaults"
       register: pcs_resource_op_defaults
-      changed_when: False
+      changed_when: false
       ignore_errors: true
 
     - name: command <|> Set cluster resource op defaults
@@ -160,7 +160,7 @@
     - name: command <|> Check cluster resource defaults
       ansible.builtin.command: "pcs resource defaults"
       register: pcs_resource_defaults
-      changed_when: False
+      changed_when: false
       ignore_errors: true
 
     - name: command <|> Set cluster resource defaults
@@ -198,7 +198,7 @@
       notify: command <|> Push HA configuration
 
     - name: command <|> Set colocation constraints
-      ansible.builtin.command: "pcs -f {{ pcs_cib_file_path }} constraint colocation add {{ ('master' in item.1) | ternary(item.1.master, item.0.group) }} with {{ ('slave' in item.1) | ternary(item.1.slave, item.0.group) }} {{ ('score' in item.1) | ternary('score=' + item.1.score, '') }}"
+      ansible.builtin.command: "pcs -f {{ pcs_cib_file_path }} constraint colocation add {{ ('master' in item.1) | ternary(item.1.master, item.0.group) }} with {{ ('slave' in item.1) | ternary(item.1.slave, item.0.group) }} {{ ('score' in item.1) | ternary('score=' ~ item.1.score, '') }}"
       register: pcs_cmd
       changed_when: pcs_cmd.rc == 0
       failed_when:

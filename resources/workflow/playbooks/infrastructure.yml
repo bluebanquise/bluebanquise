@@ -28,8 +28,8 @@
       tags: http_server
     - role: bluebanquise.infrastructure.nic
       tags: nic
-    - role: bluebanquise.infrastructure.powerman
-      tags: powerman
+    # - role: bluebanquise.infrastructure.powerman
+    #   tags: powerman
     - role: bluebanquise.infrastructure.pxe_stack
       tags: pxe_stack
     - role: bluebanquise.infrastructure.repositories

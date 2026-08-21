@@ -6,6 +6,7 @@ Note: this role is only available on RHEL and Ubuntu.
   * [1. Description](#1-description)
   * [2. Instructions to configure](#2-instructions-to-configure)
     + [2.1. HA cluster](#21-ha-cluster)
+      - [2.1.1. Bootstrapping with a single host (no quorum)](#211-bootstrapping-with-a-single-host-no-quorum)
     + [2.2. Properties](#22-properties)
     + [2.3. Resources](#23-resources)
     + [2.4. Constraint](#24-constraint)
@@ -178,8 +179,54 @@ pcs status
 
 All nodes should be online.
 
+By default, `corosync`/`pacemaker` are **not** enabled to start automatically on boot, so a node
+reboot requires manually starting the cluster on that node again. This is deliberate: an
+unattended node reboot rejoining the cluster without any fencing/quorum review is not a safe
+default. Set `pcs_autostart: true` to enable them on boot instead.
+
 If all goes well, it is then possible to add properties, resources,
 constraints and stonith.
+
+#### 2.1.1. Bootstrapping with a single host (no quorum)
+
+During the bootstrap phase of a new cluster, or for a genuinely minimal deployment, you may want
+to bring the HA stack up on a single node before any other node exists or is reachable.
+
+To do this, set `pcs_cluster_nodes` to contain **only** the node you are bootstrapping with:
+
+```yaml
+pcs_ha_cluster_name: ha_cluster
+pcs_reference_node: ha1
+pcs_cluster_nodes:
+  - name: ha1
+    addrs:
+      - ha1
+```
+
+This matters in practice: the role's node-registration tasks iterate the whole `pcs_cluster_nodes`
+list regardless of `--limit`, and need every listed node's `pcsd` to already be reachable (to
+`pcs host auth` and `pcs cluster node add` it). If `ha2`/`ha3` are declared here but aren't actually
+up yet, the play will fail trying to reach them. Keep the list to only the node(s) that currently
+exist; add the rest once they are up, then re-run the playbook.
+
+A cluster created this way (corosync configured for exactly one node) is automatically quorate:
+corosync computes 1 vote expected, 1 vote present, so `have-quorum` is true from the moment
+`pcs cluster setup` completes — confirmed live via `corosync-quorumtool -s` (`Quorate: Yes`) on a
+freshly bootstrapped single-node cluster, before any resource or property was touched. **You do not
+need to set `no-quorum-policy=ignore` for a genuinely single-node cluster** — that property only
+matters once *more than one* node is declared in `corosync.conf` but a majority of them are
+currently unreachable (for example, a 3-node cluster running degraded on its one surviving node).
+
+What *will* still block resources from starting on a lone node is STONITH: pacemaker refuses to
+schedule any resource while `stonith-enabled` is true and no fencing device is configured
+(pacemaker logs this plainly: `Resource start-up disabled since no STONITH resources have been
+defined`). This role already handles that for you — see [2.5. Stonith](#25-stonith): leaving
+`pcs_stonith` undefined disables STONITH automatically. If you have defined `pcs_stonith` ahead of
+your fencing hardware actually being reachable, resources will stay down until the fencing
+resources themselves come up clean.
+
+When the other nodes are ready, add them to `pcs_cluster_nodes` and re-run the playbook — the
+role's node-registration tasks are idempotent and will only register or add what is still missing.
 
 ### 2.2. Properties
 
@@ -193,7 +240,7 @@ For each, it is possible to define a list of properties with their value. For
 example:
 
 ```yaml
-pcs_property:
+pcs_pcs_property:
   - name: cluster-recheck-interval
     value: 250
 pcs_pcs_resource_op_defaults:
@@ -218,7 +265,7 @@ created, etc.) shared between nodes. These resources can be instructed to
 run on a single node of the pool at a time, or to be running as clones on
 multiple nodes at the same time.
 
-Resources are to be defined under variable `high_availability_resources`.
+Resources are to be defined under variable `pcs_resources`.
 The role manage resources using groups, which acts as colocation constraint
 (resources of the same group MUST be running on the same host at the same time),
 and using definition order under that groups, which acts as a start order

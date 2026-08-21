@@ -37,7 +37,6 @@ By default, this will use conservative settings from HAproxy online documentatio
     group       haproxy
     chroot      /var/lib/haproxy
     stats socket /run/haproxy/admin.sock user haproxy group haproxy mode 660 level admin
-    nbproc      2
     nbthread    4
     maxconn     50000
     ssl-default-bind-ciphers PROFILE=SYSTEM
