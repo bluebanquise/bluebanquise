@@ -3,7 +3,6 @@
 Format: <date> - <author (username or mail or both)> - [role] <change description>
 
 # 3.2.8
-* 14/08/2026 - lgt-bull [pxe_stack] Fix bluebanquise-diskless to handle extended file attributes in bootstrap image archives (#1272)
 * 04/08/2026 - teo-blachere [dns_client] Disabling NetworkManager's DNS processing (#1267)
 * 23/07/2026 - patrice-duc-jacquet [nic]  add 2s sleep after  'nmcli con up' command
 * 10/07/2026 - bouzonnl [hosts_file] Generate FQDN for services (#1255)
