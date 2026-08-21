@@ -1,0 +1,9 @@
+network:
+  version: 2
+  ethernets:
+{% for iface in network_interfaces | selectattr('type', 'defined') | selectattr('type', 'equalto', 'infiniband') %}
+    {{ iface.interface }}:
+      dhcp4: no
+      addresses:
+        - {{ iface.ip4 }}/{{ networks[iface.network].prefix }}
+{% endfor %}

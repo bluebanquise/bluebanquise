@@ -1,0 +1,20 @@
+---
+- name: Ensure Netplan directory exists
+  ansible.builtin.file:
+    path: /etc/netplan
+    state: directory
+    mode: '0755'
+
+- name: Deploy network configurations via Netplan
+  ansible.builtin.template:
+    src: 01-bluebanquise.yaml.j2
+    dest: /etc/netplan/01-bluebanquise.yaml
+    mode: '0600'
+  notify: Apply Netplan
+
+- name: Deploy IPoIB network configurations via Netplan
+  ansible.builtin.template:
+    src: 02-bluebanquise_ipoib.yaml.j2
+    dest: /etc/netplan/02-bluebanquise_ipoib.yaml
+    mode: '0600'
+  notify: Apply Netplan
