@@ -1,7 +1,7 @@
 network:
   version: 2
   ethernets:
-{% for iface in network_interfaces | selectattr('type', 'defined') | selectattr('type', 'equalto', 'infiniband') %}
+{% for iface in nic_netplan_infiniband_interfaces %}
     {{ iface.interface }}:
       dhcp4: no
       addresses:
