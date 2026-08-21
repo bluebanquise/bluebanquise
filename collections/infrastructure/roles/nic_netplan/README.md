@@ -10,9 +10,9 @@ This role configures network interfaces using **Netplan** as the declarative bac
    * **Formatting Reliability:** Eliminates trailing comma errors and indentation mismatch issues inherent to Jinja2 `for` loops.
 
 2. **Routing Modernization**
-   Netplan has deprecated the top-level `gateway4` and `gateway6` directives. The template automatically translates these legacy BlueBanquise variables into standard `routes` (e.g., `{to: default, via: <IP>}`) and natively attaches `route_metric4`/`route_metric6` or `metric` directly to these routes.
+   Netplan has deprecated the top-level `gateway4` directives. The template automatically translates these legacy BlueBanquise variables into standard `routes` (e.g., `{to: default, via: <IP>}`) and natively attaches `route_metric4` or `metric` directly to these routes.
 
-3. **InfiniBand Isolation (``02-bluebanquise_ipoib.yaml)**
+3. **InfiniBand Isolation (`02-bluebanquise_ipoib.yaml`)**
    Because Netplan's native `infiniband` renderer is experimental and Udev MAC matching often breaks IPoIB driver bindings, InfiniBand interfaces are skipped in the primary template. Instead, they are rendered in a secondary configuration file treated strictly as standard `ethernets` with **only** IP configurations applied (no `match` or `set-name` directives).
 
 ## Variable Structure Restrictions & Edge Cases
@@ -20,9 +20,9 @@ This role configures network interfaces using **Netplan** as the declarative bac
 To ensure successful Netplan generation, the following structural rules apply to your inventory:
 
 * **MAC Address Matching is for Physical NICs Only:** 
-  In Netplan (via `systemd-networkd`), Udev `match: {macaddress: ...}` directives are only valid for physical hardware. If you define `type: vlan`, `bond`, or `bridge`, the template will deliberately ignore the `mac` variable to prevent fatal Netplan parsing errors.
-* **Custom Routing Structure (`routes4` / `routes6`):**
-  Custom routes must be provided as lists of space-separated strings following the pattern `"DESTINATION VIA [METRIC]"`. The template dynamically parses these via `.split()`.
+  In Netplan (via `systemd-networkd`), Udev `match: {macaddress: ...}` directives are only valid for physical hardware. If you define `type: vlan` or `bond`, the template will deliberately ignore the `mac` variable to prevent fatal Netplan parsing errors.
+* **Custom Routing Structure (`routes4`):**
+  Custom routes must be provided as lists of space-separated strings following the pattern `"DESTINATION VIA [METRIC]"`. The template dynamically parses these via `.split()` as stated on network documantation.
   * *Example:* `- "10.11.0.0/24 10.10.0.2 300"`
 * **Virtual Interface Linkages:**
   * **VLANs:** Must define `vlan_id` and either `vlandev` or `link` to bind to a physical parent.
@@ -32,6 +32,7 @@ To ensure successful Netplan generation, the following structural rules apply to
 
 
 ## TODO
+- Decide if role deletes all other files under /etc/netplan to avoid conflicts.
 - Integrate with nic role
 - Review better usage of j2 variables instead of inventory looping
 
