@@ -53,66 +53,68 @@
     {%- endif -%}
 
     {# --- Gateway, Metrics & Routing --- #}
-    {%- set routes = [] -%}
+    {%- if type != 'bond-slave' -%}
+      {%- set routes = [] -%}
 
-    {# Metric fallback for Default Route ONLY (interface overrides network) #}
-    {%- set eff_route_metric4 = iface.route_metric4 | default(net_props.route_metric4 | default(none)) -%}
+      {# Metric fallback for Default Route ONLY (interface overrides network) #}
+      {%- set eff_route_metric4 = iface.route_metric4 | default(net_props.route_metric4 | default(none)) -%}
 
-    {# Handle Default Gateway + never_default4 exclusion #}
-    {%- set never_default4 = iface.never_default4 | default(false) | bool -%}
-    {%- if not never_default4 -%}
-      {# Precedence: interface gw4 -> interface gateway4 -> network gateway4 -> network gateway #}
-      {%- set eff_gw4 = iface.gw4 | default(iface.gateway4 | default(net_props.gateway4 | default(net_props.gateway | default(none)))) -%}
-      {%- if eff_gw4 is not none -%}
-        {%- set route4 = {'to': 'default', 'via': eff_gw4 | string} -%}
-        {%- if eff_route_metric4 is not none -%}
-          {%- set _ = route4.update({'metric': eff_route_metric4 | int}) -%}
-        {%- endif -%}
-        {%- set _ = routes.append(route4) -%}
-      {%- endif -%}
-    {%- endif -%}
-
-    {# Merge routes4 from both network and interface levels #}
-    {%- set net_routes4 = net_props.routes4 if (net_props.routes4 is defined and net_props.routes4 is iterable and net_props.routes4 is not string) else [] -%}
-    {%- set iface_routes4 = iface.routes4 if (iface.routes4 is defined and iface.routes4 is iterable and iface.routes4 is not string) else [] -%}
-    {%- set merged_routes4 = net_routes4 + iface_routes4 -%}
-
-    {%- if merged_routes4 | length > 0 -%}
-      {%- for r in merged_routes4 -%}
-        {%- set parts = r.split() -%}
-        {%- if parts | length >= 2 -%}
-          {%- set new_route = {'to': parts[0] | string, 'via': parts[1] | string} -%}
-
-          {%- if parts | length >= 3 -%}
-            {%- set _ = new_route.update({'metric': parts[2] | int}) -%}
+      {# Handle Default Gateway + never_default4 exclusion #}
+      {%- set never_default4 = iface.never_default4 | default(false) | bool -%}
+      {%- if not never_default4 -%}
+        {# Precedence: interface gw4 -> interface gateway4 -> network gateway4 -> network gateway #}
+        {%- set eff_gw4 = iface.gw4 | default(iface.gateway4 | default(net_props.gateway4 | default(net_props.gateway | default(none)))) -%}
+        {%- if eff_gw4 is not none -%}
+          {%- set route4 = {'to': 'default', 'via': eff_gw4 | string} -%}
+          {%- if eff_route_metric4 is not none -%}
+            {%- set _ = route4.update({'metric': eff_route_metric4 | int}) -%}
           {%- endif -%}
-
-          {%- set _ = routes.append(new_route) -%}
+          {%- set _ = routes.append(route4) -%}
         {%- endif -%}
-      {%- endfor -%}
-    {%- endif -%}
-
-    {%- if routes | length > 0 -%}
-      {%- set _ = config.update({'routes': routes}) -%}
-    {%- endif -%}
-
-    {# --- DNS / Nameservers --- #}
-    {%- if iface.dns4 is defined or iface.nameservers is defined -%}
-      {%- set ns_list = iface.nameservers | default([iface.dns4]) -%}
-      {%- set ns = {'addresses': ns_list} -%}
-      {%- if iface.dns4_search is defined or iface.search_domains is defined -%}
-        {%- set sd_list = iface.search_domains | default([iface.dns4_search]) -%}
-        {%- set _ = ns.update({'search': sd_list | list}) -%}
       {%- endif -%}
-      {%- set _ = config.update({'nameservers': ns}) -%}
-    {%- endif -%}
 
-    {# --- MTU --- #}
-    {%- set eff_mtu = iface.mtu | default(net_props.mtu | default(none)) -%}
-    {%- if eff_mtu is not none -%}
-      {%- set _ = config.update({'mtu': eff_mtu | int}) -%}
-    {%- endif -%}
+      {# Merge routes4 from both network and interface levels #}
+      {%- set net_routes4 = net_props.routes4 if (net_props.routes4 is defined and net_props.routes4 is iterable and net_props.routes4 is not string) else [] -%}
+      {%- set iface_routes4 = iface.routes4 if (iface.routes4 is defined and iface.routes4 is iterable and iface.routes4 is not string) else [] -%}
+      {%- set merged_routes4 = net_routes4 + iface_routes4 -%}
 
+      {%- if merged_routes4 | length > 0 -%}
+        {%- for r in merged_routes4 -%}
+          {%- set parts = r.split() -%}
+          {%- if parts | length >= 2 -%}
+            {%- set new_route = {'to': parts[0] | string, 'via': parts[1] | string} -%}
+
+            {%- if parts | length >= 3 -%}
+              {%- set _ = new_route.update({'metric': parts[2] | int}) -%}
+            {%- endif -%}
+
+            {%- set _ = routes.append(new_route) -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+
+      {%- if routes | length > 0 -%}
+        {%- set _ = config.update({'routes': routes}) -%}
+      {%- endif -%}
+
+      {# --- DNS / Nameservers --- #}
+      {%- if iface.dns4 is defined or iface.nameservers is defined -%}
+        {%- set ns_list = iface.nameservers | default([iface.dns4]) -%}
+        {%- set ns = {'addresses': ns_list} -%}
+        {%- if iface.dns4_search is defined or iface.search_domains is defined -%}
+          {%- set sd_list = iface.search_domains | default([iface.dns4_search]) -%}
+          {%- set _ = ns.update({'search': sd_list | list}) -%}
+        {%- endif -%}
+        {%- set _ = config.update({'nameservers': ns}) -%}
+      {%- endif -%}
+
+      {# --- MTU --- #}
+      {%- set eff_mtu = iface.mtu | default(net_props.mtu | default(none)) -%}
+      {%- if eff_mtu is not none -%}
+        {%- set _ = config.update({'mtu': eff_mtu | int}) -%}
+      {%- endif -%}
+    {%- endif -%}
+  
     {# --- Structural Assignment --- #}
     {%- if type in ['ethernet', 'bond-slave'] -%}
 
