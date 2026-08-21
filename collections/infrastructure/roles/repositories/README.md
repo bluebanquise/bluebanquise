@@ -113,6 +113,8 @@ os_operating_system:
 
 Then path will be: repositories/production/centos/8.1/$basearch/
 
+Note: `os_operating_system['repositories_environment']` can be overriden at any group (including all) with the variable `override_repositories_environment`. `override_repositories_environment` will always win precedence.
+
 ### Remove native repositories
 
 If you wish to remove native OS repositories, to rely only on local ones (air gapped cluster for example), you need to use the pxe_stack role of the collection. (This role does not support removing repositories for now.)
@@ -130,6 +132,7 @@ And native repositories will be removed during nodes deployment (PXE install, no
 **Please now update CHANGELOG file at repository root instead of adding logs in this file.
 These logs bellow are only kept for archive.**
 
+* 1.4.0: Added override_repositories_environment feature. Lucas Santos <lucassouzasantos@gmail.com>
 * 1.3.9: Fix variables names. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.7: Fix services ip precedence. Benoit Leveugle <benoit.leveugle@gmail.com>
 * 1.3.6: Fix extra space in automatic url. Benoit Leveugle <benoit.leveugle@gmail.com>
