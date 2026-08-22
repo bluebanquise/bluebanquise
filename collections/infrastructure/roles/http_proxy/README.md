@@ -101,7 +101,7 @@ You can set custom refresh patterns using the `http_proxy_refresh_patterns` list
 
 ```yaml
 http_proxy_refresh_patterns:
-  - "Packages\.bz2$    0       20%     4320 refresh-ims"
+  - 'Packages\.bz2$    0       20%     4320 refresh-ims'
 ```
 
 For more details on refresh patterns, please refer to http://www.squid-cache.org/Doc/config/refresh_pattern/
