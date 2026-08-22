@@ -14,7 +14,7 @@ An Ansible **host** (also often referred as a **host**) is a remote host managed
 by Ansible. An **host** can be a physical server, but also a VM, a container or
 something else.
 
-.. image:: images/hosts/hosts_example.svg
+.. image:: ../images/nodes/hosts_example.svg
    :align: center
 
 |
@@ -239,7 +239,7 @@ Inventory can be seen as a giant pizza, in 3D then flatten.
 * Then *small ingredients* above are the /var/lib/bluebanquise/inventory/cluster/hosts/
 * And *pepper and tomatoes* (last layer) is the extra-vars at call.
 
-.. image:: images/pizza_example.svg
+.. image:: ../images/pizza_example.svg
 
 I like pizza...
 
@@ -291,7 +291,7 @@ For example:
 
 This configuration has 2 equipment profiles: ``hw_X2_with_os_debian_12`` and ``hw_X1_with_os_debian_12``.
 
-.. image:: images/groups_ep.svg
+.. image:: ../images/groups_ep.svg
    :align: center
 
 These groups are used to provide to hosts dedicated parameters
@@ -301,7 +301,7 @@ authentication parameters.
 
 These are key groups of the stack.
 
-.. image:: images/ep_hard.svg
+.. image:: ../images/ep_hard.svg
    :align: center
 
 |
