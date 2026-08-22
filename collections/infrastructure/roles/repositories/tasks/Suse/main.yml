@@ -5,10 +5,7 @@
 - name: assert <|> Checking repositories are coherent
   ansible.builtin.assert:
     that:
-      - j2_node_main_network is defined and j2_node_main_network is not none
       - networks is defined and networks is not none
-      - networks[j2_node_main_network] is defined and networks[j2_node_main_network] is not none
-      - (networks[j2_node_main_network]['services_ip'] is defined and networks[j2_node_main_network]['services_ip'] is not none) or ((networks[j2_node_main_network]['services']['repositories4'][0]['ip4'] | default(networks[j2_node_main_network]['services']['repositories'][0]['ip4'], true)) is defined and (networks[j2_node_main_network]['services']['repositories4'][0]['ip4'] | default(networks[j2_node_main_network]['services']['repositories'][0]['ip4'], true)) is not none)
       - os_operating_system is defined and os_operating_system is not none
       - os_operating_system['distribution'] is defined and os_operating_system['distribution'] is not none
       - (os_operating_system['distribution_version'] is defined and os_operating_system['distribution_version'] is not none) or (os_operating_system['distribution_major_version'] is defined and os_operating_system['distribution_major_version'] is not none)
@@ -19,7 +16,7 @@
     - bb_repositories is defined and bb_repositories is not none and bb_repositories is iterable and bb_repositories is not string and bb_repositories is not mapping
     - item.repo is not defined
 
-- name: zypper_repository <|+> Setting repositories
+- name: zypper_repository <|> Setting repositories
   community.general.zypper_repository:
     name: "{{ item.name | default(item) }}"
     description: "{{ item.description | default(item) }} gen by Ansible"
@@ -36,7 +33,7 @@
   when:
     - bb_repositories is defined and bb_repositories is not none and bb_repositories is iterable and bb_repositories is not string and bb_repositories is not mapping
 
-- name: lineinfile <|+> Disable delta RPMs
+- name: lineinfile <|> Disable delta RPMs
   ansible.builtin.lineinfile:
     path: /etc/zypp/zypp.conf
     insertafter: '# download.use_deltarpm = true'

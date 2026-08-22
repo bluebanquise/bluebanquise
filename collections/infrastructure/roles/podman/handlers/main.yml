@@ -1,11 +1,11 @@
 ---
 
-- name: systemd ¦ Reload systemd configuration
+- name: systemd <|> Reload systemd configuration
   ansible.builtin.systemd:
     daemon_reload: true
 
-- name: service ¦ Restart registry container service
-  service:
+- name: service <|> Restart registry container service
+  ansible.builtin.service:
     name: registry
     state: restarted
   when:

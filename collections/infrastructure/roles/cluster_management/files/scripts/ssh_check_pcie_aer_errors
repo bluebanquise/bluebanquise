@@ -1,0 +1,21 @@
+#!/bin/bash
+# Check for PCIe AER (Advanced Error Reporting) events in dmesg.
+# Usage: ssh_check_pcie_aer_errors
+#
+# Split off from the old bluebanquise_healthchecker's check_pcie probe: the link
+# width/speed-vs-expected comparison it used to do is a state/drift concern (planned to move
+# into cluster_state, not yet done - see cluster_supervision README), not a health signal on
+# its own. This keeps only the actual fault-detection half: AER events in dmesg.
+
+echo "Checking for PCIe AER events..."
+
+AER=$(dmesg -T | grep -Ei "pcie.*error|aer|corrected|uncorrected")
+
+if [[ -n "$AER" ]]; then
+    echo "CRITICAL: PCIe AER events detected"
+    echo "$AER"
+    exit 2
+else
+    echo "OK: No PCIe AER events detected"
+    exit 0
+fi

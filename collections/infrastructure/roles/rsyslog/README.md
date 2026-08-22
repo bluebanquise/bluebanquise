@@ -1,35 +1,27 @@
-# Log
+# Rsyslog
 
 |      OS      | Version | Supported |
 |:-------------|:--------|:---------:|
-| Ubuntu       |   20.04 |    yes    |
-| Ubuntu       |   22.04 |    yes    |
-| RHEL         |       7 |    yes    |
-| RHEL         |       8 |    yes    |
 | RHEL         |       9 |    yes    |
-| OpenSuseLeap |      15 |    yes    |
-| Debian       |      11 |    yes    |
+| RHEL         |      10 |    yes    |
+| Ubuntu       |   24.04 |    yes    |
+| Ubuntu       |   26.04 |    yes    |
+| Debian       |      13 |    yes    |
+| OpenSuseLeap |      16 |    yes    |
 
-Note: RHEL 9 tempalte now use a small part of the advanced format: https://www.rsyslog.com/doc/configuration/converting_to_new_format.html
+Note: RHEL 9+ templates use a small part of the advanced format: https://www.rsyslog.com/doc/configuration/converting_to_new_format.html
 Role is expected to slowly move to this format in the future.
 
 ## Description
 
-This role provides an rsyslog configuration, for both server and client.
+These settings provide an rsyslog configuration, for both server and client.
 
 On server side, all logs will endup in the `/var/log/rsyslog/` folder.
-
-## Data Model
-
-This role relies on [data model](https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md):
-* Section 1 (Networks)
-* Section 2 (Hosts definition)
-
 ## Instructions
 
 ### Server or client
 
-The role allows to deploy a client or a server, using `rsyslog_profile` value, which can be **server** or **client**:
+These settings allow to deploy a client or a server, using `rsyslog_profile` value, which can be **server** or **client**:
 
 On servers target, set the following in the inventory or in the playbook:
 
@@ -69,7 +61,7 @@ networks:
           hostname: mg1-rsyslog  
 ```
 
-Note that the role is compatible with the magic all in one services_ip key as a replacement of services key:
+Note that these settings are compatible with the magic all in one services_ip key as a replacement of services key:
 
 ```yaml
 networks:
@@ -135,7 +127,7 @@ It uses variables:
 - **path**: the directory containing your configuration file, it defaults to `/etc/rsyslog.d` if it is not specified
 
 It is important to understand that there are 2 reserved name for this variable.
-If you add an entry named `server.conf`, then the role will skip the generation of the server.conf file from the role template and replace it with your custom version. The same apply for `client.conf`, if set, then the role will skip the template of the role and only use the custom version.
+If you add an entry named `server.conf`, then these settings will skip the generation of the server.conf file from these settings template and replace it with your custom version. The same apply for `client.conf`, if set, then these settings will skip the template of these settings and only use the custom version.
 
 For example:
 
@@ -184,28 +176,25 @@ rsyslog_configuration_files:
       foobar
 ```
 
-## Changelog
+### Logrotate override
 
-**Please now update CHANGELOG file at repository root instead of adding logs in this file.
-These logs bellow are only kept for archive.**
+The default logrotate configuration provided by these settings may not cover all cluster needs. Override it by defining `rsyslog_logrotate_config` with the full desired content:
 
-* 1.6.1: Fix documentation and start move to advanced format for RHEL 9 version. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.6.0: Add rsyslog_server_ip4 to override network values. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.5.1: Fix typo in client template (reported by @sgaosdgr). Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.5.0: Allow services and services_ip together. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.4.6: Adapt to hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.4.5: Fix variables names and datamodel compatibility and update readme. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.4.4: Fix variables names. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.4.3: Proper command to restart rsyslog post rotation. Thiago Cardozo <boubee.thiago@gmail.com>
-* 1.4.2: Update to BB 2.0 format. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
-* 1.4.1: Register server local apps locally;more precise logrotate wildcards. <boubee.thiago@gmail.com>
-* 1.4.0: Merge both client and server. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.3.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.2.1: Add OpenSuSE support. Neil Munday <neil@mundayweb.com>
-* 1.2.0: Add Ubuntu support. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.1.1: Add custom configuration path. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.1.0: Enable custom rsyslog configuration with log_client_custom_config <dilassert@gmail.com>
-* 1.0.4: Enable verbosity configuration with log_client_verbosity <dilassert@gmail.com>
-* 1.0.3: Enable log server port customization with log_client_server_port. strus38
-* 1.0.1: Fixed bad template. Documentation. johnnykeats <johnny.keats@outlook.com>
-* 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
+```yaml
+rsyslog_logrotate_config: |
+  /var/log/rsyslog/*/*.log
+  /var/log/rsyslog/*/messages
+  /var/log/rsyslog/*/cron
+  /var/log/rsyslog/*/secure
+  /var/log/rsyslog/*/maillog
+  /var/log/rsyslog/*/spooler
+  {
+      daily
+      missingok
+      rotate 5
+      sharedscripts
+      postrotate
+          /usr/bin/systemctl kill -s HUP rsyslog.service > /dev/null 2>/dev/null || true
+      endscript
+  }
+```

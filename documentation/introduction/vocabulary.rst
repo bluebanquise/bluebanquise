@@ -10,16 +10,16 @@ Ansible vocabulary
 Host
 ----
 
-An Ansible **host** (also often referred as a **node**) is a remote host managed
+An Ansible **host** (also often referred as a **host**) is a remote host managed
 by Ansible. An **host** can be a physical server, but also a VM, a container or
 something else.
 
-.. image:: images/nodes/hosts_example.svg
+.. image:: images/hosts/hosts_example.svg
    :align: center
 
 |
 
-Hosts are defined in *~/bluebanquise/inventory/cluster/nodes/.
+Hosts are defined in ``~/bluebanquise/inventory/cluster/hosts/``.
 
 Please do a difference between an **Ansible managed host**, and a **host**.
 All equipment that can have an ip address on the network are considered "host",
@@ -27,7 +27,7 @@ but only those with an ssh + python capability and on which we will use Ansible
 to deploy a configuration are considered "Ansible managed host".
 They are declared the same way in the stack inventory.
 
-Note also that sometime the term **node** is used as a replacement word for **host**.
+Note also that sometime the term **host** is used as a replacement word for **host**.
 
 Group
 -----
@@ -125,7 +125,7 @@ defined under it (some kind of variables tree):
 
 .. code-block:: yaml
 
-  my_dictionarry_1:
+  my_dictionary_1:
     my_variable_1: hello!
     my_variable_2: 7777
     my_sub_part:
@@ -140,15 +140,15 @@ In Jinja2, dictionary can be access two ways:
 
 .. code-block:: text
 
-  {% for i in my_dictionarry_1.my_names_list %}
+  {% for i in my_dictionary_1.my_names_list %}
   {{ i }}
   {% endfor %}
-  {% for i in my_dictionarry_1['my_names_list'] %}
+  {% for i in my_dictionary_1['my_names_list'] %}
   {{ i }}
   {% endfor %}
 
-  {{ my_dictionarry_1.my_names_list[0] }}
-  {{ my_dictionarry_1['my_names_list'][0] }}
+  {{ my_dictionary_1.my_names_list[0] }}
+  {{ my_dictionary_1['my_names_list'][0] }}
 
 
 Output will be:
@@ -186,10 +186,7 @@ An Ansible role is a list of tasks to do to achieve a purpose.
 For example, there will be a role called dhcp_server, that contains tasks to
 install, configure and start the dhcp server.
 
-In **BlueBanquise**, default path is ``/var/lib/bluebanquise/roles``.
-
-Note that Bluebanquise roles are provided via Ansible collections,
-and so are managed by your Ansible local installation.
+In **BlueBanquise**, roles are provided via Ansible collections and managed by your local Ansible installation.
 
 Roles are the **AUTOMATION LOGIC**.
 
@@ -231,15 +228,15 @@ values if desired.
 
 For example, values can be set by default, and then redefined for some groups of
 hosts without changing the default for all others.
-Or it can be used to simply fix a dynamic j2 variable to the desired value in
-hosts definitions if dynamic value is not the one expected (you can even
+Or it can be used to simply fix a variable to the desired value in
+hosts definitions if the computed value is not the one expected (you can even
 redefine the whole logic of the stack without editing the stack code). Etc.
 
 Inventory can be seen as a giant pizza, in 3D then flatten.
 
 * *Paste* is the variable in /var/lib/bluebanquise/inventory/group_vars/all
-* Then *large ingredients* comes from /var/lib/bluebanquise/inventory/group_vars/equipment_myequipment
-* Then *small ingredients* above are the /var/lib/bluebanquise/inventory/cluster/nodes/
+* Then *large ingredients* comes from /var/lib/bluebanquise/inventory/group_vars/hw_mygroup_with_os_myos
+* Then *small ingredients* above are the /var/lib/bluebanquise/inventory/cluster/hosts/
 * And *pepper and tomatoes* (last layer) is the extra-vars at call.
 
 .. image:: images/pizza_example.svg
@@ -252,7 +249,7 @@ Jinja2
 Jinja2 is the templating language used by Ansible to render templates in roles.
 It is heavily used in the stack, and learning Jinja2 will often be needed to
 create custom roles.
-(But Jinja2 is simple if you are use to code or especially script with bash).
+(But Jinja2 is simple if you are used to code or especially script with bash).
 
 Full documentation is available in a "single page":
 `Jinja2 template designer <https://jinja.palletsprojects.com/en/2.10.x/templates/>`_
@@ -260,25 +257,11 @@ Full documentation is available in a "single page":
 Stack vocabulary
 ================
 
-j2 variables
-------------
-
-These are **BlueBanquise** specific variables.
-All variables with name containing **j2_** are j2 variables.
-
-These variables are here to simplify tasks and templates writing.
-To clarify your mind, you can consider that these variables contain Jinja2 code
-as a string, that will be interpreted by Ansible during tasks/templates
-execution.
-
-Remember that in any case, if these variables are not providing the expected
-value, you can use Ansible variables precedence mechanism to force your values.
-
 bb variables
 ------------
 
 These are **BlueBanquise** specific variables.
-All variables with name starting by **bb_** are bb variables.
+All variables with name starting with **bb_** are bb variables.
 
 These variables are transverse variables, which means they will precedence any roles' owned related variables.
 
@@ -292,13 +275,13 @@ Defining ``bb_domain_name`` can replace all of them at once.
 Equipment profiles
 ------------------
 
-In **BlueBanquise**, nodes are, in normal time, part of a at least 3 key Ansible groups.
+In **BlueBanquise**, hosts are, in normal time, part of at least 3 key Ansible groups.
 
-* 1 **function group**, that defines the purpose of the node. These groups are always prefixed by ``fn_``. For example: ``fn_worker``.
-* 1 **hardware group**, that defines the hardware used for the node. These groups are always prefixed by ``hw_``. For example: ``hw_supermicro_X10DRT``.
-* 1 **os group**, that defines the os used for the node. These groups are always prefixed by ``os_``. For example: ``os_ubuntu_22.04``.
+* 1 **function group**, that defines the purpose of the host. These groups are always prefixed by ``fn_``. For example: ``fn_worker``.
+* 1 **hardware group**, that defines the hardware used for the host. These groups are always prefixed by ``hw_``. For example: ``hw_supermicro_X10DRT``.
+* 1 **os group**, that defines the os used for the host. These groups are always prefixed by ``os_``. For example: ``os_ubuntu_22.04``.
 
-The conjunction of 3 of these groups (one of each) creates an **equipment profile**.
+The conjunction of the **hw_** and **os_** groups creates an **equipment profile**.
 
 For example:
 
@@ -306,7 +289,7 @@ For example:
 * host ``B`` is part of the following groups: ``['fn_worker', 'hw_X1', 'os_debian_12']``
 * host ``C`` is part of the following groups: ``['fn_worker', 'hw_X1', 'os_debian_12']``
 
-This configuration has 2 equipment profiles: ``fn_management_on_hw_X2_with_os_debian_12`` and ``fn_worker_on_hw_X1_with_os_debian_12``.
+This configuration has 2 equipment profiles: ``hw_X2_with_os_debian_12`` and ``hw_X1_with_os_debian_12``.
 
 .. image:: images/groups_ep.svg
    :align: center

@@ -45,11 +45,12 @@
   block:
 
     - name: set_fact <|> Calculate equipment profiles
-      set_fact:
+      ansible.builtin.set_fact:
         slurm_equipments_and_partitions: "{{ hostvars | bluebanquise.infrastructure.slurm_organize_equipments(slurm_partitions_list, groups) }}"
       delegate_facts: true  # We delegate to localhost only, to avoid memory usage with all hosts
 
-    - debug:
+    - name: debug <|> Display equipment profiles and partitions
+      ansible.builtin.debug:
         msg: "{{ hostvars['localhost']['slurm_equipments_and_partitions'] | to_yaml(indent=4) }}"
 
     - name: tempfile <|> Create temporary file

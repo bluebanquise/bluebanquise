@@ -1,0 +1,9 @@
+---
+interconnect_ofed_client_packages:
+  - "@Infiniband Support"
+interconnect_ofed_client_service: rdma-ndd
+interconnect_ofed_subnet_manager_packages:
+  - opensm
+  - opensm-libs
+interconnect_ofed_subnet_manager_service: opensm
+interconnect_ofed_opensm_conf: /etc/rdma/opensm.conf

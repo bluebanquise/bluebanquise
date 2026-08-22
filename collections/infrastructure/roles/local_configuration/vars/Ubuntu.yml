@@ -1,0 +1,12 @@
+---
+local_configuration_access_control_packages_to_install:
+  - apparmor
+  - apparmor-utils
+  - apparmor-profiles
+local_configuration_kernel_config_grub_package: grub2-common
+local_configuration_kernel_config_grub_update_command: update-grub
+local_configuration_kernel_version_meta_packages:
+  - linux-image-generic
+  - linux-headers-generic
+  - linux-generic
+  - linux-modules-extra-generic

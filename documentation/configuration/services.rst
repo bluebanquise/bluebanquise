@@ -2,12 +2,34 @@
 Services
 ========
 
-Services are daemons that run on management nodes and provide key services to other nodes, like DHCP server, DNS server, NTP server, HTTP server, etc.
-These services can be either listening entities (a DNS server is listening on the network), either active pull/push entities (Prometheus is pulling data from nodes to monitor them).
+Services are daemons that run on management hosts and provide key services to other hosts, like DHCP server, DNS server, NTP server, HTTP server, etc.
+These services can be either listening entities (a DNS server is listening on the network), either active pull/push entities (Prometheus is pulling data from hosts to monitor them).
 
-Some of these services need to be deployed on the management nodes, and also have a client part that needs to be deployed on other nodes.
+Some of these services need to be deployed on the management hosts, and also have a client part that needs to be deployed on other hosts.
 
 When a service needs to listen on a ip (endpoint), this ip or hostname is set in the networks settings, so that both server and clients can bind to the same configuration.
+
+You will find bellow the detailed configuration available for each service of the stack, and global details on how to configure endpoints.
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Services:
+
+   services/conman
+   services/dhcp_server
+   services/dns_server
+   services/drbd
+   services/grafana
+   services/haproxy
+   services/http_proxy
+   services/http_server
+   services/keepalived
+   services/loki
+   services/mariadb
+   services/prometheus
+   services/pxe_stack
+   services/rsyslog
+   services/time
 
 Services endpoints
 ==================
@@ -17,7 +39,7 @@ The service endpoint is the ip or hostname both server and clients will refer to
 For example, if the NTP server endpoint is 10.10.0.7, then NTP server will be configured to listen on this specific ip, while NTP clients will try to reach the NTP server on 10.10.0.7.
 
 There are 2 ways to define endpoints for services in the stack.
-Either all services share the same ip, either services are split over multiple ips (multiple management nodes or using virtual ip).
+Either all services share the same ip, either services are split over multiple ips (multiple management hosts or using virtual ip).
 Or both can be shared, like most services using a shared enpoint, and some specific one is using a different ip.
 
 Single endpoint
@@ -134,21 +156,3 @@ For example, for the dhcp server service:
   bb_enable_services: false
 
 Will make the dhcp server service enable at system startup even if all other services are not.
-
-Services
-========
-
-You will find bellow the detailed configuration available for each service of the stack.
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Services:
-
-   services/repositories
-   services/dhcp
-   services/dns
-   services/ntp
-   services/http
-   services/pxe
-   services/rsyslog
-   services/prometheus

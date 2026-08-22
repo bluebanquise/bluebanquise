@@ -1,0 +1,17 @@
+{{ ansible_managed | comment }}
+[Unit]
+Description=BlueBanquise Cluster Dynamic State Daemon
+After=network.target
+
+[Service]
+Type=simple
+User=bluebanquise
+Group=bluebanquise
+ExecStart={{ cluster_management_state_daemon_script_path }} {{ cluster_management_state_conf_path }}
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

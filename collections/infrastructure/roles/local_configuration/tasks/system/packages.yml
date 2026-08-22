@@ -1,0 +1,7 @@
+---
+- name: "package <|> Install packages"
+  ansible.builtin.package:
+    name: "{{ item.name | default(item) }}"
+    state: "{{ item.state | default('present') }}"
+    use: "{{ item.use | default(omit) }}"
+  loop: "{{ local_configuration_system.packages }}"

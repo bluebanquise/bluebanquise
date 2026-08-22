@@ -5,3 +5,6 @@ rsyslog_client_verbosity: "info"
 
 # Configure logrotate on servers
 rsyslog_server_logrotate: true
+
+rsyslog_firewall_services_to_add:
+  - syslog

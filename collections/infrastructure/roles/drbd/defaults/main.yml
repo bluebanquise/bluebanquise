@@ -1,1 +1,2 @@
-drbd_pause_seconds: 20
+---
+drbd_resources: []

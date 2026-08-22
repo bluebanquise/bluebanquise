@@ -253,3 +253,6 @@ grafana_environment: {}
 grafana_panels: {}
 #  disable_sanitize_html: false
 #  enable_alpha: false
+
+grafana_firewall_services_to_add:
+  - grafana

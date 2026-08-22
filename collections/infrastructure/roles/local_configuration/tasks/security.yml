@@ -1,0 +1,16 @@
+---
+- name: include_tasks <|> Apply access control configuration
+  ansible.builtin.include_tasks: security/access_control.yml
+  when: >-
+    (local_configuration_security | default({})).access_control is defined
+    or os_access_control is defined
+
+- name: include_tasks <|> Apply root password configuration
+  ansible.builtin.include_tasks: security/root_password.yml
+  when: >-
+    (local_configuration_security | default({})).admin_password_sha512 is defined
+    or os_admin_password_sha512 is defined
+
+- name: include_tasks <|> Apply sudoers configuration
+  ansible.builtin.include_tasks: security/sudoers.yml
+  when: (local_configuration_security | default({})).sudoers is defined

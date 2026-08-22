@@ -14,10 +14,10 @@
 
 - name: template <|> Deploy custom logrotate rules
   ansible.builtin.template:
-    src: "{{ item.name }}.j2"
+    src: logrotate_rule.j2
     dest: "/etc/logrotate.d/{{ item.name }}"
     owner: root
     group: root
     mode: 0644
   loop: "{{ logrotate_custom_rules }}"
-  when: logrotate_custom_rules
+  when: logrotate_custom_rules | length > 0

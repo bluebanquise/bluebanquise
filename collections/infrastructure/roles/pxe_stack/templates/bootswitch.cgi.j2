@@ -20,7 +20,7 @@ if node_boot == 'disk':
     filebuffer = file.readlines()
     for i in range(len(filebuffer)):
         if 'menu-default' in filebuffer[i]:
-            filebuffer[i] = 'set menu-default bootdisk\n'
+            filebuffer[i] = 'set menu-default disk\n'
     file.close
     file = open('{{ pxe_stack_htdocs_path }}/pxe/nodes/'+str(node_name)+'.ipxe','w')
     file.writelines(filebuffer)
@@ -31,7 +31,7 @@ elif node_boot == 'next':
     filebuffer = file.readlines()
     for i in range(len(filebuffer)):
         if 'menu-default' in filebuffer[i]:
-            filebuffer[i] = 'set menu-default bootnext\n'
+            filebuffer[i] = 'set menu-default next\n'
     file.close
     file = open('{{ pxe_stack_htdocs_path }}/pxe/nodes/'+str(node_name)+'.ipxe','w')
     file.writelines(filebuffer)

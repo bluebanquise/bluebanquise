@@ -1,5 +1,5 @@
-# Handler to clean yum metadata cache
 ---
+# Handler to clean yum metadata cache
 - name: command <|> yum clean metadata
   ansible.builtin.command: yum clean metadata
 # Note: do not know why this was introduced, commenting for now

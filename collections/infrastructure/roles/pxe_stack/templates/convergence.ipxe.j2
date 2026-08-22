@@ -20,7 +20,7 @@ goto displayarch
 echo | Detected architecture: ${arch}
 sleep 1
 echo |
-echo | Now chaining to --> nodes/${hostname}.ipxe
+echo | Now chaining to --> bluebanquise-pxe-stack-daemon (port {{ pxe_stack_daemon_port }})
 echo |
 sleep 1
-chain http://${next-server}/pxe/nodes/${hostname}.ipxe
+chain http://${next-server}:{{ pxe_stack_daemon_port }}/host/${hostname}.ipxe

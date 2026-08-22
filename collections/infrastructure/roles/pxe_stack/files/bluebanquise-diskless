@@ -7,6 +7,12 @@
 # ██████╔╝███████╗╚██████╔╝███████╗██████╔╝██║  ██║██║ ╚████║╚██████╔╝╚██████╔╝██║███████║███████╗
 # ╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚══▀▀═╝  ╚═════╝ ╚═╝╚══════╝╚══════╝
 #
+# 3.0.0: Full CLI rewrite (argparse subcommands, no more interactive menu). Replaced the
+#        deprecated/removed crypt module with openssl. Fixed several latent bugs: undefined
+#        variable on the URL-download path, a family-check typo silently skipping el10, a missing
+#        sudo_user_uid config key, unvalidated node/tar-derived names reaching shell commands, a
+#        write-before-validate ordering bug in kernel updates, and uncaught shell errors in
+#        protected_os_system. Benoît Leveugle <benoit.leveugle@gmail.com>
 # 2.1.0: Added support to el10 images. Neo Team <dl-fr-bds-hpc-neocore@bull.com>
 # 2.0.9: Fix user creation when host node is running SELinux in enforcing mode. Teo Blachere <teo.blachere@eviden.com>
 # 2.0.8: Fix check user and group presence before creation. Teo Blachere <teo.blachere@eviden.com>
@@ -35,7 +41,7 @@
 
 # MIT License
 
-# Copyright (c) 2019-2023 BlueBanquise Team, https://github.com/bluebanquise/bluebanquise
+# Copyright (c) 2019-2025 BlueBanquise Team, https://github.com/bluebanquise/bluebanquise
 
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -82,16 +88,73 @@ If needed: dracut  --regenerate-all --force
 """
 
 
-import os
+import argparse
+import getpass
 import logging
-import yaml
-import requests
-import shutil
-import subprocess
-import crypt
-import string
-import sys
+import os
 import platform
+import shutil
+import string
+import subprocess
+import sys
+import urllib.request
+import yaml
+
+
+VERSION = '3.0.0'
+DISKLESS_CONFIG_FILE = '/etc/bluebanquise/diskless.yml'
+KNOWN_FAMILIES = ('el8', 'el9', 'el10')
+
+BOOT_IPXE_TEMPLATES = {
+    'nfs': '''#!ipxe
+echo |
+echo | Entering diskless/images/{image_name}/boot.ipxe
+echo |
+set image-kernel {image_kernel}
+set image-initramfs {image_initramfs}
+echo | Now starting nfs image boot.
+echo |
+echo | Parameters used:
+echo | > Image target: {image_name}
+echo | > Console: ${{eq-console}}
+echo | > Additional kernel parameters: ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}}
+echo |
+echo | Loading linux ...
+kernel http://${{next-server}}/pxe/diskless/{image_name}/${{image-kernel}} initrd=${{image-initramfs}} selinux=0 text=1 root=nfs:${{next-server}}:{nfs_path}/{image_name},vers=4.2,rw rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}} rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4
+echo | Loading initial ramdisk ...
+initrd http://${{next-server}}/pxe/diskless/{image_name}/${{image-initramfs}}
+echo | ALL DONE! We are ready.
+echo | Booting in 4s ...
+echo |
+echo +----------------------------------------------------+
+sleep 4
+boot
+''',
+    'live': '''#!ipxe
+echo |
+echo | Entering diskless/images/{image_name}/boot.ipxe
+echo |
+set image-kernel {image_kernel}
+set image-initramfs {image_initramfs}
+echo | Now starting live image boot.
+echo |
+echo | Parameters used:
+echo | > Image target: {image_name}
+echo | > Console: ${{eq-console}}
+echo | > Additional kernel parameters: ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}}
+echo |
+echo | Loading linux ...
+kernel http://${{next-server}}/pxe/diskless/{image_name}/${{image-kernel}} initrd=${{image-initramfs}} selinux=0 text=1 root=live:http://${{next-server}}/pxe/diskless/{image_name}/squashfs.img rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}} rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4
+echo | Loading initial ramdisk ...
+initrd http://${{next-server}}/pxe/diskless/{image_name}/${{image-initramfs}}
+echo | ALL DONE! We are ready.
+echo | Booting in 4s ...
+echo |
+echo +----------------------------------------------------+
+sleep 4
+boot
+''',
+}
 
 
 # Colors, from https://stackoverflow.com/questions/287871/how-to-print-colored-text-in-terminal-in-python
@@ -106,127 +169,190 @@ class bcolors:
     UNDERLINE = '\033[4m'
 
 
-def display_image_metadata(image_metadata):
-    """ Iteratively display an image metadata"""
-    print("   └──── name: " + image_metadata['name'])
-    for k, v in image_metadata.items():
-        if k != 'name' and k != 'description':
-            print("          ├─ " + k + ": " + str(v))
-    print("          └─ description: " + image_metadata['description'])
+# ─── validation / helpers ──────────────────────────────────────────────────────
+
+def validate_name(value):
+    """Allow-list check for names used in shell commands and filesystem paths (raises ValueError)."""
+    if not value:
+        raise ValueError('name cannot be empty')
+    allowed_characters = set(string.ascii_letters + string.digits + '-_.+')
+    invalid_characters = set(value).difference(allowed_characters)
+    if invalid_characters:
+        first_invalid_char = sorted(invalid_characters)[0]
+        raise ValueError("character '{}' is not allowed in '{}'".format(first_invalid_char, value))
+    return value
 
 
-def display_images(image_type, tool_paths):
-    """ Display existing images, return 1 if none found"""
-
-    if image_type == "bootstrap":
-
-        # Gather bootstrap images
-        gathered_bootstrap = []
-        logging.info(bcolors.OKBLUE + "Checking bootstrap images in " + tool_paths['bootstrap_images'] + bcolors.ENDC)
-        for it in os.scandir(tool_paths['bootstrap_images']):
-            if it.is_dir() and it.name != "tmp":
-                try:
-                    with open(it.path + "/metadata.yaml", "r") as file:
-                        gathered_bootstrap.append(yaml.safe_load(file))
-                except FileNotFoundError:
-                    print(bcolors.FAIL + " File " + it.path + "/metadata.yaml does not exist, please re-run pxe_stack role before using the tool." + bcolors.ENDC)
-                    quit(1)
-                except Exception:
-                    print(bcolors.FAIL + " An error occurred reading the file " + it.path + "/metadata.yaml. Please investigate." + bcolors.ENDC)
-                    quit(1)
-
-        if len(gathered_bootstrap) > 0:
-            print("")
-            print(" BOOTSTRAP IMAGES:")
-            print("   │ ")
-            for image in gathered_bootstrap:
-                display_image_metadata(image)
-        else:
-            print(" BOOTSTRAP IMAGES: none found")
-            return 1
-
-    if image_type == "reference":
-
-        # Gather reference images
-        gathered_reference = []
-        logging.info(bcolors.OKBLUE + "Checking reference images in " + tool_paths['http_pxe_diskless'] + bcolors.ENDC)
-        for it in os.scandir(tool_paths['http_pxe_diskless']):
-            if it.is_dir():
-                try:
-                    with open(it.path + "/metadata.yaml", "r") as file:
-                        image_metadata = yaml.safe_load(file)
-                        if image_metadata['type'] == "nfs_reference":
-                            gathered_reference.append(image_metadata)
-                except FileNotFoundError:
-                    print(bcolors.FAIL + " File " + it.path + "/metadata.yaml does not exist, please re-run pxe_stack role before using the tool." + bcolors.ENDC)
-                    quit(1)
-                except Exception:
-                    print(bcolors.FAIL + " An error occurred reading the file " + it.path + "/metadata.yaml. Please investigate." + bcolors.ENDC)
-                    quit(1)
-
-        if len(gathered_reference) > 0:
-            print("")
-            print(" REFERENCE IMAGES:")
-            print("   │ ")
-            for image in gathered_reference:
-                display_image_metadata(image)
-        else:
-            print(" REFERENCE IMAGES: none found")
-            return 1
-
-    if image_type == "live":
-
-        # Gather live images
-        gathered_live = []
-        logging.info(bcolors.OKBLUE + "Checking live images in " + tool_paths['http_pxe_diskless'] + bcolors.ENDC)
-        for it in os.scandir(tool_paths['http_pxe_diskless']):
-            if it.is_dir():
-                try:
-                    with open(it.path + "/metadata.yaml", "r") as file:
-                        image_metadata = yaml.safe_load(file)
-                        if image_metadata['type'] == "live":
-                            gathered_live.append(image_metadata)
-                except FileNotFoundError:
-                    print(bcolors.FAIL + " File " + it.path + "/metadata.yaml does not exist, please re-run pxe_stack role before using the tool." + bcolors.ENDC)
-                    quit(1)
-                except Exception:
-                    print(bcolors.FAIL + " An error occurred reading the file " + it.path + "/metadata.yaml. Please investigate." + bcolors.ENDC)
-                    quit(1)
-
-        if len(gathered_live) > 0:
-            print("")
-            print(" LIVE IMAGES:")
-            print("   │ ")
-            for image in gathered_live:
-                display_image_metadata(image)
-        else:
-            print(" LIVE IMAGES: none found")
-            return 1
-
-    return 0
-
-
-def protected_os_system(raw_command):
-    if '--debug' in sys.argv or '-d' in sys.argv:
+def protected_os_system(raw_command, debug=False):
+    if debug:
         print(raw_command)
 
     try:
         child = subprocess.Popen(raw_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
-        stdout, stderr = child.communicate()
+        stdout, _ = child.communicate()
         rc = child.returncode
-    except subprocess.CalledProcessError as e:
-        print(" Subprocess Execution failed: ", e)
-        print(" This means this program was unable to launch a shell command.")
-        raise OSError(" Fatal error, exiting.")
-    if str(rc) != "0":
-        print(bcolors.FAIL + "\n ERROR: command " + raw_command + " failed :(" + bcolors.ENDC)
-        print(" Report:")
-        print(" Error code: " + str(rc))
-        print(" stdout: " + str(stdout))
-        print(" stderr: " + str(stderr))
-        print(" The tool doesn't cleanup to let you debug, please investigate and remember to cleanup once done.")
-        raise OSError(" Fatal error, exiting.")
+    except Exception as e:
+        logging.error(bcolors.FAIL + 'Unable to launch shell command: ' + str(e) + bcolors.ENDC)
+        sys.exit(1)
+
+    if rc != 0:
+        logging.error(bcolors.FAIL + 'Command failed: ' + raw_command + bcolors.ENDC)
+        logging.error('Return code: ' + str(rc))
+        logging.error('Output: ' + stdout.decode(errors='replace'))
+        logging.error('The tool does not cleanup on failure, so you can investigate; '
+                       'remember to cleanup once done.')
+        sys.exit(1)
     return 0
+
+
+def hash_password(password):
+    """SHA-512 crypt(3) hash via openssl (stdlib crypt module was removed in Python 3.13)."""
+    result = subprocess.run(['openssl', 'passwd', '-6', '-stdin'],
+                             input=password.encode(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if result.returncode != 0:
+        logging.error(bcolors.FAIL + 'openssl passwd failed: ' + result.stderr.decode(errors='replace').strip() + bcolors.ENDC)
+        sys.exit(1)
+    return result.stdout.decode().strip()
+
+
+def download_progress(block_count, block_size, total_size):
+    downloaded = block_count * block_size
+    downloaded_mb = downloaded / (1024 * 1024)
+    if total_size > 0:
+        percent = min(100, downloaded * 100 // total_size)
+        total_mb = total_size / (1024 * 1024)
+        sys.stdout.write('\r  Downloading: {:3d}%  {:.1f} MB / {:.1f} MB'.format(
+            percent, downloaded_mb, total_mb))
+    else:
+        sys.stdout.write('\r  Downloading: {:.1f} MB'.format(downloaded_mb))
+    sys.stdout.flush()
+
+
+def render_boot_ipxe(kind, image_name, kernel, nfs_path=None):
+    """Render boot.ipxe content for a 'nfs' (reference) or 'live' image."""
+    return BOOT_IPXE_TEMPLATES[kind].format(
+        image_name=image_name,
+        image_kernel='vmlinuz-' + kernel,
+        image_initramfs='initramfs-' + kernel + '.img',
+        nfs_path=nfs_path)
+
+
+def copy_kernel_files(family, kernel, nfs_path, pxe_path, debug=False):
+    """Copy kernel + initramfs from a reference image's NFS path to its http pxe path."""
+    if family not in KNOWN_FAMILIES:
+        logging.error(bcolors.FAIL + 'Unknown image family: ' + str(family) + bcolors.ENDC)
+        sys.exit(1)
+
+    initramfs_src = os.path.join(nfs_path, 'boot', 'initramfs-' + kernel + '.img')
+    initramfs_dst = os.path.join(pxe_path, 'initramfs-' + kernel + '.img')
+    protected_os_system('cp -a ' + initramfs_src + ' ' + initramfs_dst, debug=debug)
+
+    if family == 'el8':
+        vmlinuz_src = os.path.join(nfs_path, 'boot', 'vmlinuz-' + kernel)
+    else:
+        vmlinuz_src = os.path.join(nfs_path, 'usr', 'lib', 'modules', kernel, 'vmlinuz')
+    vmlinuz_dst = os.path.join(pxe_path, 'vmlinuz-' + kernel)
+    protected_os_system('cp -a ' + vmlinuz_src + ' ' + vmlinuz_dst, debug=debug)
+
+    protected_os_system('chmod 644 ' + os.path.join(pxe_path, 'initramfs-*'), debug=debug)
+    protected_os_system('chmod 644 ' + os.path.join(pxe_path, 'vmlinuz-*'), debug=debug)
+
+
+def ensure_target_ready(path, force):
+    """Ensure a create-target path doesn't already exist; if --force, wipe it first."""
+    if os.path.exists(path):
+        if not force:
+            logging.error(bcolors.FAIL + path + ' already exists. Use --force to overwrite.' + bcolors.ENDC)
+            sys.exit(1)
+        logging.warning(bcolors.WARNING + '--force: removing existing ' + path + bcolors.ENDC)
+        shutil.rmtree(path)
+
+
+def read_metadata(path):
+    """Read metadata.yaml from a directory. Exit cleanly if missing/unreadable."""
+    metadata_file = os.path.join(path, 'metadata.yaml')
+    try:
+        with open(metadata_file, 'r') as file:
+            return yaml.safe_load(file)
+    except FileNotFoundError:
+        logging.error(bcolors.FAIL + 'File ' + metadata_file +
+                      ' does not exist, please re-run pxe_stack role before using the tool.' + bcolors.ENDC)
+        sys.exit(1)
+    except Exception as e:
+        logging.error(bcolors.FAIL + 'An error occurred reading ' + metadata_file + ': ' + str(e) + bcolors.ENDC)
+        sys.exit(1)
+
+
+def write_metadata(path, metadata):
+    metadata_file = os.path.join(path, 'metadata.yaml')
+    try:
+        with open(metadata_file, 'w') as file:
+            yaml.dump(metadata, file)
+    except Exception as e:
+        logging.error(bcolors.FAIL + 'An error occurred writing ' + metadata_file + ': ' + str(e) + bcolors.ENDC)
+        sys.exit(1)
+
+
+def write_boot_ipxe(path, content):
+    ipxe_file = os.path.join(path, 'boot.ipxe')
+    try:
+        with open(ipxe_file, 'w') as file:
+            file.write(content)
+    except Exception as e:
+        logging.error(bcolors.FAIL + 'An error occurred writing ' + ipxe_file + ': ' + str(e) + bcolors.ENDC)
+        sys.exit(1)
+
+
+def display_image_metadata(image_metadata):
+    """Print a single image's metadata."""
+    print('   └──── name: ' + image_metadata['name'])
+    for k, v in image_metadata.items():
+        if k not in ('name', 'description'):
+            print('          ├─ ' + k + ': ' + str(v))
+    print('          └─ description: ' + image_metadata.get('description', ''))
+
+
+def display_images(image_type, tool_paths):
+    """Display existing images of a given type, return 1 if none found."""
+
+    if image_type == 'bootstrap':
+        gathered = []
+        logging.info(bcolors.OKBLUE + 'Checking bootstrap images in ' + tool_paths['bootstrap_images'] + bcolors.ENDC)
+        for it in os.scandir(tool_paths['bootstrap_images']):
+            if it.is_dir() and it.name != 'tmp':
+                gathered.append(read_metadata(it.path))
+        label = 'BOOTSTRAP IMAGES'
+
+    elif image_type == 'reference':
+        gathered = []
+        logging.info(bcolors.OKBLUE + 'Checking reference images in ' + tool_paths['http_pxe_diskless'] + bcolors.ENDC)
+        for it in os.scandir(tool_paths['http_pxe_diskless']):
+            if it.is_dir():
+                metadata = read_metadata(it.path)
+                if metadata.get('type') == 'nfs_reference':
+                    gathered.append(metadata)
+        label = 'REFERENCE IMAGES'
+
+    else:  # live
+        gathered = []
+        logging.info(bcolors.OKBLUE + 'Checking live images in ' + tool_paths['http_pxe_diskless'] + bcolors.ENDC)
+        for it in os.scandir(tool_paths['http_pxe_diskless']):
+            if it.is_dir():
+                metadata = read_metadata(it.path)
+                if metadata.get('type') == 'live':
+                    gathered.append(metadata)
+        label = 'LIVE IMAGES'
+
+    if gathered:
+        print('')
+        print(' ' + label + ':')
+        print('   │ ')
+        for image in gathered:
+            display_image_metadata(image)
+        return 0
+    else:
+        print(' ' + label + ': none found')
+        return 1
 
 
 def get_tmp_image_source_path(tool_paths, image_source_file_name):
@@ -249,866 +375,500 @@ def get_live_image_path(tool_paths, live_image_name):
     return os.path.join(tool_paths['http_pxe_diskless'], live_image_name)
 
 
-def get_user_input(msg, validate_name=False):
-    """Sanitizes the user's input by removing whitespace, keeps prompting until input is valid.
-
-    If validate_name is True, then it also checks that the input complies with a modified version
-    of the POSIX specification "Portable Filename Character Set".
-    In addition to the specification (letters, digits, -, _, .), the character '+' is allowed
-    to support aarch64 images with kernel-64k kernel (kernel has '+64k' prefix).
-
-    The goal is to avoid issues with the shell commands executed by the tool.
-    """
-    user_input = ""
-    while user_input == "":
-        # prompt for a non-empty string
-        print(msg)
-        raw_input = input(" -->: ")
-        user_input = raw_input.strip()
-
-        if not validate_name:
-            continue
-
-        # optionally (validate_name True), validate:
-        # - compliance with POSIX "Portable Filename Character Set"
-        # - character '+' is also allowed
-        allowed_characters = string.ascii_letters + string.digits + '-_.+'
-        invalid_characters = set(user_input).difference(set(allowed_characters))
-
-        if len(invalid_characters) > 0:
-            first_invalid_char = list(invalid_characters)[0]
-            print(bcolors.FAIL + "\n Sorry, the character '" + first_invalid_char + "' cannot be used for this input: " + bcolors.ENDC + user_input)
-            user_input = ""
-
-    return user_input
+def load_tool_parameters():
+    logging.info(bcolors.OKBLUE + 'Loading parameters from ' + DISKLESS_CONFIG_FILE + '...' + bcolors.ENDC)
+    try:
+        with open(DISKLESS_CONFIG_FILE, 'r') as file:
+            return yaml.safe_load(file)
+    except FileNotFoundError:
+        logging.error(bcolors.FAIL + 'File ' + DISKLESS_CONFIG_FILE +
+                      ' does not exist, please re-run pxe_stack role before using the tool.' + bcolors.ENDC)
+        sys.exit(1)
+    except Exception as e:
+        logging.error(bcolors.FAIL + 'An error occurred reading ' + DISKLESS_CONFIG_FILE + ': ' + str(e) + bcolors.ENDC)
+        sys.exit(1)
 
 
-print("""\
+def build_tool_paths(tool_parameters):
+    tool_paths = {}
+    tool_paths['bootstrap_images'] = os.path.join(tool_parameters['sudo_user_home'], 'diskless/bootstrap_images')
+    tool_paths['bootstrap_images_tmp'] = os.path.join(tool_paths['bootstrap_images'], 'tmp')
+    tool_paths['http_pxe_diskless'] = os.path.join(tool_parameters['http_pxe_folder'], 'diskless')
+    tool_paths['nfs'] = tool_parameters['nfs_path']
+    return tool_paths
+
+
+def ensure_folders(tool_paths, debug=False):
+    logging.info(bcolors.OKBLUE + 'Checking folders exist...' + bcolors.ENDC)
+    if not os.path.exists(tool_paths['bootstrap_images']):
+        logging.info(bcolors.OKBLUE + 'Creating ' + tool_paths['bootstrap_images'] + ' folder.' + bcolors.ENDC)
+        protected_os_system('mkdir -p ' + tool_paths['bootstrap_images_tmp'], debug=debug)
+    if not os.path.exists(tool_paths['nfs']):
+        logging.info(bcolors.OKBLUE + 'Creating ' + tool_paths['nfs'] + ' folder.' + bcolors.ENDC)
+        protected_os_system('mkdir -p ' + tool_paths['nfs'], debug=debug)
+    if not os.path.exists(tool_paths['http_pxe_diskless']):
+        logging.info(bcolors.OKBLUE + 'Creating ' + tool_paths['http_pxe_diskless'] + ' folder.' + bcolors.ENDC)
+        protected_os_system('mkdir -p ' + tool_paths['http_pxe_diskless'], debug=debug)
+
+
+# ─── actions ────────────────────────────────────────────────────────────────
+
+def cmd_list(args, tool_paths, tool_parameters):
+    types = [args.type] if args.type else ['bootstrap', 'reference', 'live']
+    for image_type in types:
+        display_images(image_type, tool_paths)
+    return 0
+
+
+def cmd_bootstrap_import(args, tool_paths, tool_parameters):
+    protected_os_system('mkdir -p ' + tool_paths['bootstrap_images_tmp'], debug=args.debug)
+    logging.info(bcolors.OKBLUE + 'Image will be temporarily stored inside ' +
+                 tool_paths['bootstrap_images_tmp'] + bcolors.ENDC)
+
+    if args.local:
+        if not os.path.isfile(args.local):
+            logging.error(bcolors.FAIL + 'Local bootstrap archive not found: ' + args.local + bcolors.ENDC)
+            sys.exit(1)
+        image_source_file_name = os.path.basename(args.local)
+        tmp_image_source_path = get_tmp_image_source_path(tool_paths, image_source_file_name)
+        logging.info(bcolors.OKBLUE + 'Copying image from ' + args.local + ', please be patient...' + bcolors.ENDC)
+        protected_os_system('cp ' + args.local + ' ' + tmp_image_source_path, debug=args.debug)
+    else:
+        image_source_file_name = args.url.split('/')[-1]
+        tmp_image_source_path = get_tmp_image_source_path(tool_paths, image_source_file_name)
+        logging.info(bcolors.OKBLUE + 'Downloading image from ' + args.url + ', please be patient...' + bcolors.ENDC)
+        try:
+            urllib.request.urlretrieve(args.url, tmp_image_source_path, reporthook=download_progress)
+            print('')
+        except Exception as e:
+            print('')
+            logging.error(bcolors.FAIL + 'Download failed: ' + str(e) + bcolors.ENDC)
+            if os.path.isfile(tmp_image_source_path):
+                logging.info('Removing partial download: ' + tmp_image_source_path)
+                os.remove(tmp_image_source_path)
+            sys.exit(1)
+
+    logging.info(bcolors.OKBLUE + 'Extracting image metadata...' + bcolors.ENDC)
+    protected_os_system('rm -f ' + os.path.join(tool_paths['bootstrap_images_tmp'], 'metadata.yaml'), debug=args.debug)
+    protected_os_system('tar xzf ' + tmp_image_source_path + ' -C ' + tool_paths['bootstrap_images_tmp'] + '/ metadata.yaml',
+                         debug=args.debug)
+    image_metadata = read_metadata(tool_paths['bootstrap_images_tmp'])
+
+    # image_metadata['name'] comes from archive content, which for --url is remote/untrusted;
+    # validate before it is ever used in a shell command or filesystem path.
+    try:
+        validate_name(str(image_metadata.get('name', '')))
+    except ValueError as e:
+        logging.error(bcolors.FAIL + 'Invalid image name in archive metadata: ' + str(e) + bcolors.ENDC)
+        sys.exit(1)
+
+    logging.info('Found following metadata for new image:')
+    display_image_metadata(image_metadata)
+    bootstrap_image_path = get_bootstrap_image_path(tool_paths, image_metadata['name'])
+    ensure_target_ready(bootstrap_image_path, args.force)
+
+    logging.info(bcolors.OKBLUE + 'Storing image...' + bcolors.ENDC)
+    protected_os_system('mkdir -p ' + bootstrap_image_path, debug=args.debug)
+    protected_os_system('mv ' + tmp_image_source_path + ' ' + os.path.join(bootstrap_image_path, 'image.tar.gz'),
+                         debug=args.debug)
+    protected_os_system('mv ' + os.path.join(tool_paths['bootstrap_images_tmp'], 'metadata.yaml') + ' ' +
+                         os.path.join(bootstrap_image_path, 'metadata.yaml'), debug=args.debug)
+    logging.info(bcolors.OKGREEN + 'Bootstrap image ' + image_metadata['name'] + ' is now ready to be used.' + bcolors.ENDC)
+    return 0
+
+
+def cmd_reference_create(args, tool_paths, tool_parameters):
+    bootstrap_image_path = get_bootstrap_image_path(tool_paths, args.bootstrap)
+    image_metadata = read_metadata(bootstrap_image_path)
+    image_metadata['reference_name'] = image_metadata['name']
+    image_metadata['name'] = args.new_name
+    image_metadata['type'] = 'nfs_reference'
+
+    reference_image_nfs_path = get_reference_image_nfs_path(tool_paths, args.new_name)
+    reference_image_pxe_path = get_reference_image_pxe_path(tool_paths, args.new_name)
+    ensure_target_ready(reference_image_nfs_path, args.force)
+    ensure_target_ready(reference_image_pxe_path, args.force)
+
+    logging.info(bcolors.OKBLUE + 'Extracting bootstrap image copy in ' + reference_image_nfs_path + bcolors.ENDC)
+    protected_os_system('mkdir -p ' + reference_image_nfs_path, debug=args.debug)
+    protected_os_system('tar --numeric-owner -x -z -f ' + os.path.join(bootstrap_image_path, 'image.tar.gz') +
+                         ' -C ' + reference_image_nfs_path + '/', debug=args.debug)
+    protected_os_system('rm -f ' + os.path.join(reference_image_nfs_path, 'metadata.yaml'), debug=args.debug)
+
+    logging.info(bcolors.OKBLUE + 'Creating image folder at ' + reference_image_pxe_path + bcolors.ENDC)
+    protected_os_system('mkdir -p ' + reference_image_pxe_path, debug=args.debug)
+
+    copy_kernel_files(image_metadata['family'], image_metadata['kernel'],
+                       reference_image_nfs_path, reference_image_pxe_path, debug=args.debug)
+
+    ipxe_content = render_boot_ipxe('nfs', image_metadata['name'], image_metadata['kernel'], tool_parameters['nfs_path'])
+    write_boot_ipxe(reference_image_pxe_path, ipxe_content)
+    write_metadata(reference_image_pxe_path, image_metadata)
+
+    logging.info(bcolors.OKGREEN + 'Reference image has been created.' + bcolors.ENDC)
+    logging.info('You can now edit the image directly inside ' + reference_image_nfs_path)
+    logging.info('Or link it to a node for live tuning using the reference-link subcommand.')
+    return 0
+
+
+def cmd_reference_link(args, tool_paths, tool_parameters):
+    reference_image_nfs_path = get_reference_image_nfs_path(tool_paths, args.image)
+    if not os.path.isdir(reference_image_nfs_path):
+        logging.error(bcolors.FAIL + 'Reference image not found: ' + reference_image_nfs_path + bcolors.ENDC)
+        sys.exit(1)
+
+    if args.password_file:
+        try:
+            with open(args.password_file, 'r') as file:
+                password = file.readline().rstrip('\n')
+        except Exception as e:
+            logging.error(bcolors.FAIL + 'Unable to read password file ' + args.password_file + ': ' + str(e) + bcolors.ENDC)
+            sys.exit(1)
+    else:
+        password = getpass.getpass('Temporary password for image internal bluebanquise user: ')
+
+    if not password:
+        logging.error(bcolors.FAIL + 'Password cannot be empty.' + bcolors.ENDC)
+        sys.exit(1)
+
+    hashed_password = hash_password(password)
+
+    logging.info(bcolors.OKBLUE + 'Adding bluebanquise user to image...' + bcolors.ENDC)
+    protected_os_system('mkdir -p ' + reference_image_nfs_path + os.path.dirname(tool_parameters['sudo_user_home']),
+                         debug=args.debug)
+
+    # Required if host node is running SELinux in enforcing mode
+    protected_os_system('mkdir -p ' + reference_image_nfs_path + '/sys/fs/selinux', debug=args.debug)
+    protected_os_system("echo '0' > " + reference_image_nfs_path + '/sys/fs/selinux/enforce', debug=args.debug)
+
+    sudo_user = tool_parameters['sudo_user']
+    sudo_user_home = tool_parameters['sudo_user_home']
+    sudo_user_uid = tool_parameters['sudo_user_uid']
+
+    # create group in image, skip if already created
+    protected_os_system(
+        "/usr/bin/grep -q '^" + sudo_user + ":' " + reference_image_nfs_path + '/etc/group' +
+        ' || /usr/sbin/groupadd -R ' + reference_image_nfs_path + '/ --system ' + sudo_user,
+        debug=args.debug)
+
+    # useradd should use "-g", but this fails in RHEL8 hosts
+    group_str = '' if 'el8' in platform.release() else ('-g ' + sudo_user)
+
+    # create user in image, skip if already created
+    protected_os_system(
+        "/usr/bin/grep -q '^" + sudo_user + ":' " + reference_image_nfs_path + '/etc/passwd' +
+        ' || /usr/sbin/useradd  -R ' + reference_image_nfs_path + "/ -m -c 'BlueBanquise user' " + group_str +
+        ' -d ' + sudo_user_home + ' --system -u ' + str(sudo_user_uid) +
+        " -s /bin/bash -p '" + hashed_password + "' " + sudo_user,
+        debug=args.debug)
+
+    # update of user password in image, useful if previous command was skipped
+    logging.info(bcolors.OKBLUE + 'Setting password of ' + sudo_user + ' user in image...' + bcolors.ENDC)
+    protected_os_system("/usr/sbin/usermod -P " + reference_image_nfs_path + " -p '" + hashed_password + "' " + sudo_user,
+                         debug=args.debug)
+
+    protected_os_system("echo '" + sudo_user + " ALL=(ALL:ALL) NOPASSWD:ALL' > " +
+                         reference_image_nfs_path + '/etc/sudoers.d/' + sudo_user, debug=args.debug)
+
+    logging.info(bcolors.OKBLUE + 'Updating /etc/exports...' + bcolors.ENDC)
+    protected_os_system("cat /etc/exports | grep '# diskless' || echo '# diskless' | tee -a /etc/exports",
+                         debug=args.debug)
+    protected_os_system(
+        "cat /etc/exports | grep '" + reference_image_nfs_path + "' && sed -i 's/\\/nfs\\/diskless\\/" + args.image +
+        "\\ .*/\\/nfs\\/diskless\\/" + args.image + ' ' + args.node + "(rw,no_root_squash)/' /etc/exports || " +
+        "sed -i -e '$a" + reference_image_nfs_path + ' ' + args.node + "(rw,no_root_squash)' /etc/exports",
+        debug=args.debug)
+
+    logging.info(bcolors.OKBLUE + 'Restarting nfs server service...' + bcolors.ENDC)
+    protected_os_system('systemctl restart nfs-server', debug=args.debug)
+
+    logging.info(bcolors.OKGREEN + 'Image linked to the node.' + bcolors.ENDC)
+    logging.info('Boot the node and tune the image as needed.')
+    logging.info('Set the node next boot on this image using:')
+    logging.info('  bluebanquise-bootset -b diskless -i ' + args.image + ' -n ' + args.node)
+    logging.info("If using BlueBanquise Ansible roles, skip-tags 'identify' and 'secret'.")
+    return 0
+
+
+def cmd_reference_list_kernels(args, tool_paths, tool_parameters):
+    reference_image_nfs_path = get_reference_image_nfs_path(tool_paths, args.image)
+    modules_path = os.path.join(reference_image_nfs_path, 'usr', 'lib', 'modules')
+    if not os.path.isdir(modules_path):
+        logging.error(bcolors.FAIL + 'Reference image or its kernel modules not found: ' + modules_path + bcolors.ENDC)
+        sys.exit(1)
+
+    print('Detected kernels for ' + args.image + ':')
+    for it in sorted(os.scandir(modules_path), key=lambda e: e.name):
+        if it.is_dir():
+            print('  - ' + it.name)
+    return 0
+
+
+def cmd_reference_set_kernel(args, tool_paths, tool_parameters):
+    reference_image_nfs_path = get_reference_image_nfs_path(tool_paths, args.image)
+    reference_image_pxe_path = get_reference_image_pxe_path(tool_paths, args.image)
+
+    kernel_modules_path = os.path.join(reference_image_nfs_path, 'usr', 'lib', 'modules', args.kernel)
+    if not os.path.isdir(kernel_modules_path):
+        logging.error(bcolors.FAIL + 'Kernel ' + args.kernel + ' not found under ' + kernel_modules_path + bcolors.ENDC)
+        sys.exit(1)
+
+    image_metadata = read_metadata(reference_image_pxe_path)
+
+    logging.info(bcolors.OKBLUE + 'Copying new kernel from NFS image to http folder...' + bcolors.ENDC)
+    copy_kernel_files(image_metadata['family'], args.kernel, reference_image_nfs_path, reference_image_pxe_path,
+                       debug=args.debug)
+
+    logging.info(bcolors.OKBLUE + 'Updating image metadata...' + bcolors.ENDC)
+    image_metadata['kernel'] = args.kernel
+    write_metadata(reference_image_pxe_path, image_metadata)
+
+    logging.info(bcolors.OKBLUE + 'Updating boot.ipxe file...' + bcolors.ENDC)
+    ipxe_content = render_boot_ipxe('nfs', image_metadata['name'], args.kernel, tool_parameters['nfs_path'])
+    write_boot_ipxe(reference_image_pxe_path, ipxe_content)
+
+    logging.info(bcolors.OKGREEN + 'Kernel ' + args.kernel + ' set as default for next boot.' + bcolors.ENDC)
+    logging.info('Restart the node for the change to take effect.')
+    return 0
+
+
+def cmd_reference_clone(args, tool_paths, tool_parameters):
+    reference_image_nfs_path = get_reference_image_nfs_path(tool_paths, args.image)
+    reference_image_pxe_path = get_reference_image_pxe_path(tool_paths, args.image)
+    if not os.path.isdir(reference_image_nfs_path):
+        logging.error(bcolors.FAIL + 'Reference image not found: ' + reference_image_nfs_path + bcolors.ENDC)
+        sys.exit(1)
+
+    clone_image_nfs_path = get_reference_image_nfs_path(tool_paths, args.new_name)
+    clone_image_pxe_path = get_reference_image_pxe_path(tool_paths, args.new_name)
+    ensure_target_ready(clone_image_nfs_path, args.force)
+    ensure_target_ready(clone_image_pxe_path, args.force)
+
+    logging.info(bcolors.OKBLUE + 'Cloning image...' + bcolors.ENDC)
+    protected_os_system('cp -a ' + reference_image_nfs_path + ' ' + clone_image_nfs_path, debug=args.debug)
+    protected_os_system('cp -a ' + reference_image_pxe_path + ' ' + clone_image_pxe_path, debug=args.debug)
+
+    logging.info(bcolors.OKBLUE + 'Updating new image metadata...' + bcolors.ENDC)
+    image_metadata = read_metadata(clone_image_pxe_path)
+    image_metadata['name'] = args.new_name
+
+    ipxe_content = render_boot_ipxe('nfs', image_metadata['name'], image_metadata['kernel'], tool_parameters['nfs_path'])
+    write_boot_ipxe(clone_image_pxe_path, ipxe_content)
+    write_metadata(clone_image_pxe_path, image_metadata)
+
+    logging.info(bcolors.OKGREEN + 'Image cloned successfully as ' + args.new_name + '.' + bcolors.ENDC)
+    return 0
+
+
+def cmd_live_create(args, tool_paths, tool_parameters):
+    reference_image_nfs_path = get_reference_image_nfs_path(tool_paths, args.image)
+    reference_image_pxe_path = get_reference_image_pxe_path(tool_paths, args.image)
+    if not os.path.isdir(reference_image_nfs_path):
+        logging.error(bcolors.FAIL + 'Reference image not found: ' + reference_image_nfs_path + bcolors.ENDC)
+        sys.exit(1)
+
+    image_metadata = read_metadata(reference_image_pxe_path)
+    image_metadata['reference_name'] = image_metadata['name'] + ',' + image_metadata['reference_name']
+    image_metadata['name'] = args.new_name
+    image_metadata['type'] = 'live'
+
+    live_image_path = get_live_image_path(tool_paths, args.new_name)
+    ensure_target_ready(live_image_path, args.force)
+
+    logging.info(bcolors.OKBLUE + 'Preparing filesystem...' + bcolors.ENDC)
+    workdir = os.path.join(live_image_path, 'workdir', 'LiveOS')
+    mountdir = os.path.join(live_image_path, 'mountdir')
+    rootfs_img = os.path.join(workdir, 'rootfs.img')
+    protected_os_system('mkdir -p ' + workdir, debug=args.debug)
+    protected_os_system('dd if=/dev/zero of=' + rootfs_img + ' bs=1M count=' + str(args.size_mb), debug=args.debug)
+    protected_os_system('mkfs.xfs ' + rootfs_img, debug=args.debug)
+    os.makedirs(mountdir)
+    protected_os_system('mount -o loop ' + rootfs_img + ' ' + mountdir + '/', debug=args.debug)
+
+    logging.info(bcolors.OKBLUE + 'Copying files from reference image...' + bcolors.ENDC)
+    protected_os_system('cp -a ' + reference_image_nfs_path + '/* ' + mountdir + '/', debug=args.debug)
+    protected_os_system('umount ' + mountdir + '/', debug=args.debug)
+
+    logging.info(bcolors.OKBLUE + 'Squashing image...' + bcolors.ENDC)
+    protected_os_system('mksquashfs ' + os.path.join(live_image_path, 'workdir') + ' ' +
+                         os.path.join(live_image_path, 'squashfs.img'), debug=args.debug)
+    shutil.rmtree(os.path.join(live_image_path, 'workdir'))
+
+    logging.info(bcolors.OKBLUE + 'Copying kernel and initramfs...' + bcolors.ENDC)
+    protected_os_system('cp -a ' + os.path.join(reference_image_pxe_path, 'initramfs*') + ' ' + live_image_path + '/',
+                         debug=args.debug)
+    protected_os_system('chmod 644 ' + os.path.join(live_image_path, 'initramfs-*'), debug=args.debug)
+    protected_os_system('cp -a ' + os.path.join(reference_image_pxe_path, 'vmlinuz*') + ' ' + live_image_path + '/',
+                         debug=args.debug)
+
+    ipxe_content = render_boot_ipxe('live', image_metadata['name'], image_metadata['kernel'])
+    write_boot_ipxe(live_image_path, ipxe_content)
+    write_metadata(live_image_path, image_metadata)
+
+    logging.info(bcolors.OKGREEN + 'Livenet image created.' + bcolors.ENDC)
+    logging.info('Boot the node pool with this image using:')
+    logging.info('  bluebanquise-bootset -b diskless -i ' + image_metadata['name'] + ' -n mynodes')
+    return 0
+
+
+def cmd_delete(args, tool_paths, tool_parameters):
+    if not args.yes:
+        logging.error(bcolors.FAIL + 'Refusing to delete without --yes/-y.' + bcolors.ENDC)
+        sys.exit(1)
+
+    if args.type == 'bootstrap':
+        path = get_bootstrap_image_path(tool_paths, args.name)
+        if not os.path.isdir(path):
+            logging.error(bcolors.FAIL + 'Bootstrap image not found: ' + path + bcolors.ENDC)
+            sys.exit(1)
+        logging.info(bcolors.OKBLUE + 'Deleting image...' + bcolors.ENDC)
+        shutil.rmtree(path)
+
+    elif args.type == 'reference':
+        nfs_path = get_reference_image_nfs_path(tool_paths, args.name)
+        pxe_path = get_reference_image_pxe_path(tool_paths, args.name)
+        if not os.path.isdir(nfs_path) and not os.path.isdir(pxe_path):
+            logging.error(bcolors.FAIL + 'Reference image not found: ' + nfs_path + bcolors.ENDC)
+            sys.exit(1)
+        logging.info(bcolors.OKBLUE + 'Deleting image...' + bcolors.ENDC)
+        if os.path.isdir(nfs_path):
+            shutil.rmtree(nfs_path)
+        if os.path.isdir(pxe_path):
+            shutil.rmtree(pxe_path)
+
+    else:  # live
+        path = get_live_image_path(tool_paths, args.name)
+        if not os.path.isdir(path):
+            logging.error(bcolors.FAIL + 'Live image not found: ' + path + bcolors.ENDC)
+            sys.exit(1)
+        logging.info(bcolors.OKBLUE + 'Deleting image...' + bcolors.ENDC)
+        shutil.rmtree(path)
+
+    logging.info(bcolors.OKGREEN + 'Image deleted.' + bcolors.ENDC)
+    return 0
+
+
+# ─── argument parsing ─────────────────────────────────────────────────────────
+
+def build_parser():
+    parent_parser = argparse.ArgumentParser(add_help=False)
+    parent_parser.add_argument('-d', '--debug', action='store_true',
+                                help='Print every shell command executed.')
+    parent_parser.add_argument('-q', '--quiet', action='store_true',
+                                help='Do not print INFO messages.')
+
+    parser = argparse.ArgumentParser(
+        description='BlueBanquise diskless tool - manage diskless image lifecycle '
+                     '(bootstrap -> reference -> live).',
+        parents=[parent_parser])
+    subparsers = parser.add_subparsers(dest='command', required=True)
+
+    p_list = subparsers.add_parser('list', parents=[parent_parser], help='List existing images.')
+    p_list.add_argument('--type', choices=['bootstrap', 'reference', 'live'],
+                         help='Restrict listing to one image type (default: all).')
+    p_list.set_defaults(func=cmd_list)
+
+    p_bootstrap_import = subparsers.add_parser(
+        'bootstrap-import', parents=[parent_parser], help='Import a new bootstrap image.')
+    source_group = p_bootstrap_import.add_mutually_exclusive_group(required=True)
+    source_group.add_argument('--local', metavar='PATH', help='Local tar.gz archive path.')
+    source_group.add_argument('--url', metavar='URL', help='URL of a tar.gz archive to download.')
+    p_bootstrap_import.add_argument('--force', action='store_true',
+                                     help='Overwrite an existing bootstrap image of the same name.')
+    p_bootstrap_import.set_defaults(func=cmd_bootstrap_import)
+
+    p_reference_create = subparsers.add_parser(
+        'reference-create', parents=[parent_parser], help='Create a reference image from a bootstrap image.')
+    p_reference_create.add_argument('--bootstrap', required=True, type=validate_name,
+                                     help='Source bootstrap image name.')
+    p_reference_create.add_argument('--new-name', required=True, type=validate_name,
+                                     help='Name of the new reference image.')
+    p_reference_create.add_argument('--force', action='store_true',
+                                     help='Overwrite an existing reference image of the same name.')
+    p_reference_create.set_defaults(func=cmd_reference_create)
+
+    p_reference_link = subparsers.add_parser(
+        'reference-link', parents=[parent_parser],
+        help='Link a reference image to a node for temporary NFS diskless tuning.')
+    p_reference_link.add_argument('--image', required=True, type=validate_name, help='Reference image name.')
+    p_reference_link.add_argument('--node', required=True, type=validate_name, help='Target node name.')
+    p_reference_link.add_argument('--password-file', metavar='FILE',
+                                   help='File containing the temporary password (first line). '
+                                        'If omitted, prompted interactively (hidden input).')
+    p_reference_link.set_defaults(func=cmd_reference_link)
+
+    p_reference_list_kernels = subparsers.add_parser(
+        'reference-list-kernels', parents=[parent_parser], help='List kernels available inside a reference image.')
+    p_reference_list_kernels.add_argument('--image', required=True, type=validate_name, help='Reference image name.')
+    p_reference_list_kernels.set_defaults(func=cmd_reference_list_kernels)
+
+    p_reference_set_kernel = subparsers.add_parser(
+        'reference-set-kernel', parents=[parent_parser], help='Set the default boot kernel of a reference image.')
+    p_reference_set_kernel.add_argument('--image', required=True, type=validate_name, help='Reference image name.')
+    p_reference_set_kernel.add_argument('--kernel', required=True, type=validate_name,
+                                         help='Kernel version, as listed by reference-list-kernels.')
+    p_reference_set_kernel.set_defaults(func=cmd_reference_set_kernel)
+
+    p_reference_clone = subparsers.add_parser(
+        'reference-clone', parents=[parent_parser], help='Clone a reference image.')
+    p_reference_clone.add_argument('--image', required=True, type=validate_name, help='Reference image to clone.')
+    p_reference_clone.add_argument('--new-name', required=True, type=validate_name, help='Name of the cloned image.')
+    p_reference_clone.add_argument('--force', action='store_true',
+                                    help='Overwrite an existing image of the same name.')
+    p_reference_clone.set_defaults(func=cmd_reference_clone)
+
+    p_live_create = subparsers.add_parser(
+        'live-create', parents=[parent_parser], help='Convert a reference image into a live image.')
+    p_live_create.add_argument('--image', required=True, type=validate_name, help='Source reference image name.')
+    p_live_create.add_argument('--new-name', required=True, type=validate_name, help='Name of the new live image.')
+    p_live_create.add_argument('--size-mb', required=True, type=int, help='Live image RAM size limit, in MB.')
+    p_live_create.add_argument('--force', action='store_true',
+                                help='Overwrite an existing live image of the same name.')
+    p_live_create.set_defaults(func=cmd_live_create)
+
+    p_delete = subparsers.add_parser('delete', parents=[parent_parser], help='Delete an image.')
+    p_delete.add_argument('--type', required=True, choices=['bootstrap', 'reference', 'live'],
+                           help='Type of image to delete.')
+    p_delete.add_argument('--name', required=True, type=validate_name, help='Image name.')
+    p_delete.add_argument('-y', '--yes', action='store_true',
+                           help='Confirm deletion (required, no interactive prompt).')
+    p_delete.set_defaults(func=cmd_delete)
+
+    return parser
+
+
+def main():
+    parser = build_parser()
+    args = parser.parse_args()
+
+    loglevel = logging.WARNING if args.quiet else logging.INFO
+    logging.basicConfig(format='[%(levelname)s] %(message)s', level=loglevel)
+
+    print("""\
 
                 (o_
       (o_  (o_  //\\
       (/)_ (/)_ V_/_
    BlueBanquise diskless
-   v2.0.9 - beta
+   v{}
    https://github.com/bluebanquise/bluebanquise/
 
-""")
+""".format(VERSION))
 
-# Enable logging
-loglevel = logging.INFO
-logging.basicConfig(format='[%(levelname)s] %(message)s', level=loglevel)
+    logging.info(bcolors.OKBLUE + 'Checking if user has sufficient rights...' + bcolors.ENDC)
+    if os.getuid() != 0:
+        print(bcolors.FAIL + 'You need to run this script with sudo or as root.' + bcolors.ENDC)
+        sys.exit(1)
 
+    tool_parameters = load_tool_parameters()
+    tool_paths = build_tool_paths(tool_parameters)
+    ensure_folders(tool_paths, debug=args.debug)
 
-print(" Welcome on BlueBanquise diskless tool.")
-print(" This tool is made to simplify diskless provisioning.")
-print(" Note that an help is available in main menu.\n")
+    rc = args.func(args, tool_paths, tool_parameters)
 
+    print(bcolors.HEADER + '\nThank you for using BlueBanquise diskless, have a great day!\n' + bcolors.ENDC)
+    sys.exit(rc or 0)
 
-logging.info(bcolors.OKBLUE + 'Checking if user has sufficient rights...' + bcolors.ENDC)
-if not os.environ.get("SUDO_UID") and os.geteuid() != 0:
-    raise PermissionError("You need to run this script with sudo or as root.")
-    quit(1)
 
-logging.info(bcolors.OKBLUE + 'Loading parameters from /etc/bluebanquise/diskless.yml...' + bcolors.ENDC)
-try:
-    with open("/etc/bluebanquise/diskless.yml", "r") as file:
-        tool_parameters = yaml.safe_load(file)
-except FileNotFoundError:
-    print(bcolors.FAIL + " File /etc/bluebanquise/diskless.yml does not exist, please re-run pxe_stack role before using the tool." + bcolors.ENDC)
-    quit(1)
-except Exception:
-    print(bcolors.FAIL + " An error occurred reading the file /etc/bluebanquise/diskless.yml. Please investigate." + bcolors.ENDC)
-    quit(1)
-
-
-# Use os.path.join to avoid issues with missing '/' and to reduce code duplication
-tool_paths = {}
-tool_paths['bootstrap_images'] = os.path.join(tool_parameters['sudo_user_home'], "diskless/bootstrap_images")
-tool_paths['bootstrap_images_tmp'] = os.path.join(tool_paths['bootstrap_images'], "tmp")
-tool_paths['http_pxe_diskless'] = os.path.join(tool_parameters['http_pxe_folder'], "diskless")
-tool_paths['nfs'] = tool_parameters['nfs_path']
-
-
-logging.info(bcolors.OKBLUE + 'Checking folders exist...' + bcolors.ENDC)
-if not os.path.exists(tool_paths['bootstrap_images']):
-    logging.info(bcolors.OKBLUE + "Creating " + tool_paths['bootstrap_images'] + " folder." + bcolors.ENDC)
-    protected_os_system("mkdir -p " + tool_paths['bootstrap_images_tmp'])
-if not os.path.exists(tool_parameters['nfs_path'] + ""):
-    logging.info(bcolors.OKBLUE + "Creating " + tool_paths['nfs'] + " folder." + bcolors.ENDC)
-    protected_os_system("mkdir -p " + tool_paths['nfs'] + "")
-if not os.path.exists(tool_paths['http_pxe_diskless']):
-    logging.info(bcolors.OKBLUE + "Creating " + tool_paths['http_pxe_diskless'] + " folder." + bcolors.ENDC)
-    protected_os_system("mkdir -p " + tool_paths['http_pxe_diskless'])
-
-
-while True:
-
-    print("\n == Main menu, please select an action to perform ==")
-    print(" 1 - List available images")
-    print(" 2 - Load a new \033[94mbootstrap\033[0m image")
-    print(" 3 - Create a new \033[92mreference\033[0m image from \033[94mbootstrap\033[0m image")
-    print(" 4 - Link a \033[92mreference\033[0m image to a node for temporary NFS diskless")
-    print(" 5 - Update a \033[92mreference\033[0m image default kernel")
-    print(" 6 - Clone a \033[92mreference\033[0m image")
-    print(" 7 - Convert a \033[92mreference\033[0m image to a \033[91mlive\033[0m image")
-    print(" 8 - Delete an image")
-    print(" 9 - Get help")
-    print(" 10 - Exit tool")
-
-    main_action = get_user_input("")
-
-    if main_action == "1":
-
-        display_images("bootstrap", tool_paths)
-        display_images("reference", tool_paths)
-        display_images("live", tool_paths)
-
-    if main_action == "2":
-
-        print("\n\n== bootstrap images menu ==")
-        print(" Note: you can find pre-made images at http://bluebanquise.com/diskless/")
-        print(" Please select source of bootstrap image:")
-        print(" 1 - From local file")
-        print(" 2 - From http URL")
-
-        source_action = get_user_input("")
-
-        protected_os_system("mkdir -p " + tool_paths['bootstrap_images_tmp'])
-        logging.info(bcolors.OKBLUE + "Image will be temporary stored inside " + tool_paths['bootstrap_images_tmp'] + bcolors.ENDC)
-
-        if source_action == "1":
-            image_path = get_user_input(" Please enter bootstrap image ABSOLUTE path of tar.gz archive:")
-            image_source_file_name = image_path.split('/')[-1]
-            tmp_image_source_path = get_tmp_image_source_path(tool_paths, image_source_file_name)
-            logging.info(bcolors.OKBLUE + 'Copying image from ' + image_path + ', please be patient...' + bcolors.ENDC)
-            protected_os_system("cp " + image_path + " " + tmp_image_source_path)
-
-        elif source_action == "2":
-            image_url = get_user_input(" Please enter bootstrap image URL of tar.gz archive:")
-            image_source_file_name = image_url.split('/')[-1]
-            tmp_image_source_path = get_tmp_image_source_path(tool_paths, image_source_file_name)
-            logging.info(bcolors.OKBLUE + 'Downloading image from ' + image_url + ', please be patient...' + bcolors.ENDC)
-            response = requests.get(image_url)
-            try:
-                with open(tmp_image_path, 'wb') as file:
-                    file.write(response.content)
-            except Exception:
-                print(bcolors.FAIL + " An error occurred writing the image locally. Please investigate." + bcolors.ENDC)
-                quit(1)
-
-        logging.info(bcolors.OKBLUE + 'Extracting image metadata...' + bcolors.ENDC)
-        protected_os_system("rm -f " + tool_paths['bootstrap_images_tmp'] + "/metadata.yaml")
-        protected_os_system("tar xzf " + tmp_image_source_path + " -C " + tool_paths['bootstrap_images_tmp'] + "/ metadata.yaml")
-        try:
-            with open(tool_paths['bootstrap_images_tmp'] + "/metadata.yaml", "r") as file:
-                image_metadata = yaml.safe_load(file)
-        except FileNotFoundError:
-            print(bcolors.FAIL + " File " + tool_paths['bootstrap_images_tmp'] + "/metadata.yaml does not exist, please re-run pxe_stack role before using the tool." + bcolors.ENDC)
-            quit(1)
-        except Exception:
-            print(bcolors.FAIL + " An error occurred reading the file " + tool_paths['bootstrap_images_tmp'] + "/metadata.yaml. Please investigate." + bcolors.ENDC)
-            quit(1)
-        print(" Found following metadata for new image:")
-        display_image_metadata(image_metadata)
-        bootstrap_image_path = get_bootstrap_image_path(tool_paths, image_metadata['name'])
-
-        logging.info(bcolors.OKBLUE + 'Storing image...' + bcolors.ENDC)
-        protected_os_system("mkdir -p " + bootstrap_image_path)
-        protected_os_system("mv " + tmp_image_source_path + " " + bootstrap_image_path + "/image.tar.gz")
-        protected_os_system("mv " + tool_paths['bootstrap_images_tmp'] + "/metadata.yaml " + bootstrap_image_path + "/metadata.yaml")
-        print(bcolors.OKGREEN + "\n == Bootstrap image " + image_metadata['name'] + " is now ready to be used :) ==" + bcolors.ENDC)
-
-    if main_action == '3':
-
-        logging.info(bcolors.OKBLUE + "Checking bootstrap images in " + tool_paths['bootstrap_images'] + bcolors.ENDC)
-
-        print("")
-        print(" Available bootstrap images to use as reference:")
-
-        if display_images("bootstrap", tool_paths) == 1: continue
-
-        image_selected_input = get_user_input(" Please enter bootstrap image name to use as source:", validate_name=True)
-        image_selected_input_name = get_user_input(" Now, please enter new reference image name:", validate_name=True)
-        print("")
-
-        bootstrap_image_path = get_bootstrap_image_path(tool_paths, image_selected_input)
-
-        try:
-            with open(bootstrap_image_path + "/metadata.yaml", "r") as file:
-                image_selected_metadata = yaml.safe_load(file)
-        except FileNotFoundError:
-            print(bcolors.FAIL + " File " + bootstrap_image_path + "/metadata.yaml does not exist, please re-run pxe_stack role before using the tool." + bcolors.ENDC)
-            quit(1)
-        except Exception:
-            print(bcolors.FAIL + " An error occurred reading the file " + bootstrap_image_path + "/metadata.yaml. Please investigate." + bcolors.ENDC)
-            quit(1)
-        image_selected_metadata['reference_name'] = image_selected_metadata['name']
-        image_selected_metadata['name'] = image_selected_input_name
-        image_selected_metadata['type'] = "nfs_reference"
-
-        bootstrap_image_path = get_bootstrap_image_path(tool_paths, image_selected_metadata['reference_name'])
-        reference_image_nfs_path = get_reference_image_nfs_path(tool_paths, image_selected_metadata['name'])
-        reference_image_pxe_path = get_reference_image_pxe_path(tool_paths, image_selected_metadata['name'])
-
-        logging.info(bcolors.OKBLUE + "Extracting bootstrap image copy in " + reference_image_nfs_path + bcolors.ENDC)
-        protected_os_system("mkdir -p " + reference_image_nfs_path)
-        protected_os_system("tar --numeric-owner -x -z -f " + bootstrap_image_path + "/image.tar.gz -C " + reference_image_nfs_path + "/")
-        protected_os_system("rm -f " + reference_image_nfs_path + "/metadata.yaml")
-        logging.info(bcolors.OKBLUE + "Creating image folder at " + reference_image_pxe_path + bcolors.ENDC)
-        protected_os_system("mkdir -p " + reference_image_pxe_path)
-
-        if image_selected_metadata['family'] in ["el9", "el10"]:
-            protected_os_system("cp " + reference_image_nfs_path + "/boot/initramfs-" + image_selected_metadata['kernel'] + ".img " + reference_image_pxe_path + "/initramfs-" + image_selected_metadata['kernel'] + ".img")
-            protected_os_system("cp " + reference_image_nfs_path + "/usr/lib/modules/" + image_selected_metadata['kernel'] + "/vmlinuz " + reference_image_pxe_path + "/vmlinuz-" + image_selected_metadata['kernel'])
-        elif image_selected_metadata['family'] == "el8":
-            protected_os_system("cp " + reference_image_nfs_path + "/boot/initramfs-" + image_selected_metadata['kernel'] + ".img " + reference_image_pxe_path + "/initramfs-" + image_selected_metadata['kernel'] + ".img")
-            protected_os_system("cp " + reference_image_nfs_path + "/boot/vmlinuz-" + image_selected_metadata['kernel'] + " " + reference_image_pxe_path + "/vmlinuz-" + image_selected_metadata['kernel'])
-        else:
-            print(" Sorry, image family " + image_selected_metadata['family'] + " is unknown :( , aborting.")
-            quit(1)
-        protected_os_system("chmod 644 " + reference_image_pxe_path + "/*")
-        ipxe_content = '''#!ipxe
-        echo |
-        echo | Entering diskless/images/{image_name}/boot.ipxe
-        echo |
-        set image-kernel {image_kernel}
-        set image-initramfs {image_initramfs}
-        echo | Now starting nfs image boot.
-        echo |
-        echo | Parameters used:
-        echo | > Image target: {image_name}
-        echo | > Console: ${{eq-console}}
-        echo | > Additional kernel parameters: ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}}
-        echo |
-        echo | Loading linux ...
-        kernel http://${{next-server}}/pxe/diskless/{image_name}/${{image-kernel}} initrd=${{image-initramfs}} selinux=0 text=1 root=nfs:${{next-server}}:{nfs_path}/{image_name},vers=4.2,rw rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}} rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4
-        echo | Loading initial ramdisk ...
-        initrd http://${{next-server}}/pxe/diskless/{image_name}/${{image-initramfs}}
-        echo | ALL DONE! We are ready.
-        echo | Booting in 4s ...
-        echo |
-        echo +----------------------------------------------------+
-        sleep 4
-        boot
-        '''.format(image_kernel=("vmlinuz-" + image_selected_metadata['kernel']), image_initramfs=("initramfs-" + image_selected_metadata['kernel'] + ".img"), image_name=image_selected_metadata['name'], nfs_path=tool_parameters['nfs_path'])
-
-        try:
-            ipxe_file = open(reference_image_pxe_path + "/boot.ipxe", "w")
-            ipxe_file.write(ipxe_content)
-            ipxe_file.close()
-        except Exception:
-            print(bcolors.FAIL + " An error occurred writing the file " + reference_image_pxe_path + "/boot.ipxe. Please investigate." + bcolors.ENDC)
-            quit(1)
-
-        try:
-            with open(reference_image_pxe_path + "/metadata.yaml", "w") as file:
-                yaml.dump(image_selected_metadata, file)
-        except Exception:
-            print(bcolors.FAIL + " An error occurred writing the file " + reference_image_pxe_path + "/metadata.yaml. Please investigate." + bcolors.ENDC)
-            quit(1)
-
-        print(bcolors.OKGREEN + "\n == Reference image has been created :) ==" + bcolors.ENDC)
-        print(" You can now edit image directly inside " + reference_image_nfs_path)
-        print(" Or you can also link image to a node of the target pool, boot it,")
-        print(" and live modify it. To do so, use next section in main menu.")
-        print(" Please read related help section for detailed explanations and warnings.")
-
-    if main_action == '4':
-
-        if display_images("reference", tool_paths) == 1: continue
-
-        image_selected_input = get_user_input(" Please enter reference image to link to a node:", validate_name=True)
-        reference_image_nfs_path = get_reference_image_nfs_path(tool_paths, image_selected_input)
-
-        node_selected_input = get_user_input(" Now, please enter target node to be linked to this image:")
-        print(" Ok, and to finish, I would need a temporary password for image's internal bluebanquise user.")
-        print(" You will be able to update it, or remove it once image is created")
-        print(" to allow ssh keys based authentication only.")
-        image_selected_user_password = get_user_input("")
-        print("")
-        image_selected_user_password = crypt.crypt(image_selected_user_password, crypt.mksalt(crypt.METHOD_SHA512))
-
-        logging.info(bcolors.OKBLUE + 'Adding bluebanquise user to image...' + bcolors.ENDC)
-        protected_os_system("mkdir -p " + reference_image_nfs_path + os.path.dirname(tool_parameters['sudo_user_home']))
-#            protected_os_system("useradd  -R " + tool_parameters['nfs_path'] + "/" + image_selected_input + "/ -m -c 'BlueBanquise user' -d /var/lib/bluebanquise --system -g bluebanquise -s /bin/bash bluebanquise")
-
-        # Required if host node is running SELinux in enforcing mode
-        protected_os_system("mkdir -p " + reference_image_nfs_path + "/sys/fs/selinux")
-        protected_os_system("echo '0' > " + reference_image_nfs_path + "/sys/fs/selinux/enforce")
-
-        # create group in image, skip if already created
-        protected_os_system("/usr/bin/grep -q '^" + tool_parameters['sudo_user'] + ":' " + reference_image_nfs_path + "/etc/group || /usr/sbin/groupadd -R " + reference_image_nfs_path + "/ --system " + tool_parameters['sudo_user'])
-
-        # useradd should use "-g", but this fails in RHEL8 hosts
-        # check if we are running RHEL 8
-        running_rhel8 = "el8" in platform.release()
-        group_str = ""
-        if not running_rhel8:
-            group_str = "-g " + tool_parameters['sudo_user']
-
-        # create user in image, skip if already created
-        protected_os_system("/usr/bin/grep -q '^" + tool_parameters['sudo_user'] + ":' " + reference_image_nfs_path + "/etc/passwd || /usr/sbin/useradd  -R " + reference_image_nfs_path + "/ -m -c 'BlueBanquise user' " + group_str + " -d " + tool_parameters['sudo_user_home'] + " --system -u " + str(tool_parameters['sudo_user_uid']) + " -s /bin/bash -p '" + image_selected_user_password + "' " + tool_parameters['sudo_user'])
-
-        # update of user password in image, useful if previous command was skipped
-        logging.info(bcolors.OKBLUE + "Setting password of " + tool_parameters['sudo_user'] + " user in image..." + bcolors.ENDC)
-        protected_os_system("/usr/sbin/usermod -P " + reference_image_nfs_path + " -p '" + image_selected_user_password + "' " + tool_parameters['sudo_user'])
-
-        protected_os_system("echo '" + tool_parameters['sudo_user'] + " ALL=(ALL:ALL) NOPASSWD:ALL' > " + reference_image_nfs_path + "/etc/sudoers.d/" + tool_parameters['sudo_user'])
-
-        logging.info(bcolors.OKBLUE + 'Updating /etc/exports...' + bcolors.ENDC)
-        protected_os_system("cat /etc/exports | grep '# diskless' || echo '# diskless' | tee -a /etc/exports")
-        protected_os_system("cat /etc/exports | grep '" + reference_image_nfs_path + "' && sed -i 's/\/nfs\/diskless\/" + image_selected_input + "\ .*/\/nfs\/diskless\/" + image_selected_input + " " + node_selected_input + "(rw,no_root_squash)/' /etc/exports || sed -i -e '$a" + reference_image_nfs_path + " " + node_selected_input + "(rw,no_root_squash)' /etc/exports")
-        #  cat /etc/exports | grep '" + tool_parameters['nfs_path'] + "/almalinux_8_minimal ' && sudo sed -i 's/\/nfs\/diskless\/almalinux_9_minimal\ .*/\/nfs\/diskless\/almalinux_9_minimal mgt8(rw,no_root_squash)/' /etc/exports || sudo sed -i -e '$a" + tool_parameters['nfs_path'] + "/almalinux_9_minimal mgt2(rw,no_root_squash)' /etc/exports
-        logging.info(bcolors.OKBLUE + 'Restarting nfs server service...' + bcolors.ENDC)
-        protected_os_system("systemctl restart nfs-server")
-        print(bcolors.OKGREEN + "\n == Image linked to the node :) ==" + bcolors.ENDC)
-        print(" Please boot the node and tune image according to your need.")
-        print(" You will need to set node next boot on this image using command:")
-        print(" bluebanquise-bootset -b diskless -i " + image_selected_input + " -n " + node_selected_input)
-        print(" If you use Ansible BlueBanquise roles, please remember to skip-tags 'identify' and 'secret'.")
-
-    if main_action == '5':
-
-        if display_images("reference", tool_paths) == 1: continue
-
-        image_selected_input = get_user_input(" Please enter reference image to check available kernels:", validate_name=True)
-        reference_image_nfs_path = get_reference_image_nfs_path(tool_paths, image_selected_input)
-        reference_image_pxe_path = get_reference_image_pxe_path(tool_paths, image_selected_input)
-
-        ## Attention, RHEL 9 et 8 uniquement pour le moment
-        print(" Detected kernels are the following:")
-        for it in os.scandir(reference_image_nfs_path + "/lib/modules/"):
-            if it.is_dir():
-                print(" - " + it.name)
-
-        kernel_selected = get_user_input(" Now, please enter kernel to be used as default for boot:", validate_name=True)
-
-        logging.info(bcolors.OKBLUE + 'Updating image metadata...' + bcolors.ENDC)
-
-        try:
-            with open(reference_image_pxe_path + "/metadata.yaml", "r") as file:
-                image_selected_metadata = yaml.safe_load(file)
-        except FileNotFoundError:
-            print(bcolors.FAIL + " File " + reference_image_pxe_path + "/metadata.yaml does not exist, please re-run pxe_stack role before using the tool." + bcolors.ENDC)
-            quit(1)
-        except Exception:
-            print(bcolors.FAIL + " An error occurred reading the file " + reference_image_pxe_path + "/metadata.yaml. Please investigate." + bcolors.ENDC)
-            quit(1)
-
-        image_selected_metadata['kernel'] = kernel_selected
-
-        try:
-            with open(reference_image_pxe_path + "/metadata.yaml", "w") as file:
-                yaml.dump(image_selected_metadata, file)
-        except Exception:
-            print(bcolors.FAIL + " An error occurred writing the file " + reference_image_pxe_path + "/metadata.yaml. Please investigate." + bcolors.ENDC)
-            quit(1)
-
-        logging.info(bcolors.OKBLUE + 'Updating boot.ipxe file...' + bcolors.ENDC)
-
-        try:
-            with open(reference_image_pxe_path + "/boot.ipxe", 'r') as file:
-                file_lines = file.readlines()
-        except FileNotFoundError:
-            print(bcolors.FAIL + " File " + reference_image_pxe_path + "/boot.ipxe does not exist, please re-run pxe_stack role before using the tool." + bcolors.ENDC)
-            quit(1)
-        except Exception:
-            print(bcolors.FAIL + " An error occurred reading the file " + reference_image_pxe_path + "/boot.ipxe. Please investigate." + bcolors.ENDC)
-            quit(1)
-
-        for count, value in enumerate(file_lines):
-            if "set image-kernel" in value:
-                file_lines[count] = "set image-kernel vmlinuz-" + kernel_selected + "\n"
-            if "set image-initramfs" in value:
-                file_lines[count] = "set image-initramfs initramfs-" + kernel_selected + ".img" + "\n"
-
-        try:
-            ipxe_file = open(reference_image_pxe_path + "/boot.ipxe", "w")
-            ipxe_file.writelines(file_lines)
-            ipxe_file.close()
-        except Exception:
-            print(bcolors.FAIL + " An error occurred writing the file " + reference_image_pxe_path + "/boot.ipxe. Please investigate." + bcolors.ENDC)
-            quit(1)
-
-        logging.info(bcolors.OKBLUE + 'Copying new kernel from nfs image to http folder...' + bcolors.ENDC)
-
-        if image_selected_metadata['family'] in ["el9", "el10]":
-            protected_os_system("cp -a " + reference_image_nfs_path + "/boot/initramfs-" + kernel_selected + ".img " + reference_image_pxe_path + "/initramfs-" + kernel_selected + ".img")
-            protected_os_system("cp -a " + reference_image_nfs_path + "/lib/modules/" + kernel_selected + "/vmlinuz " + reference_image_pxe_path + "/vmlinuz-" + kernel_selected)
-            protected_os_system("chmod 644 " + reference_image_pxe_path + "/initramfs-*")
-        elif image_selected_metadata['family'] == "el8":
-            protected_os_system("cp -a " + reference_image_nfs_path + "/boot/initramfs-" + kernel_selected + ".img " + reference_image_pxe_path + "/initramfs-" + kernel_selected + ".img")
-            protected_os_system("cp -a " + reference_image_nfs_path + "/boot/vmlinuz-" + kernel_selected + " " + reference_image_pxe_path + "/vmlinuz-" + kernel_selected)
-            protected_os_system("chmod 644 " + reference_image_pxe_path + "/initramfs-*")
-        else:
-            print(" Sorry, image family " + image_selected_metadata['family'] + " is unknown :( , aborting.")
-            quit(1)
-
-        print(bcolors.OKGREEN + "\n == Kernel " + kernel_selected + " set as default for next boot :) ==" + bcolors.ENDC)
-        print(" You will need to restart the node for changes to take effect.")
-
-    if main_action == '6':
-
-        if display_images("reference", tool_paths) == 1: continue
-
-        image_selected_input = get_user_input(" Please enter reference image to clone:", validate_name=True)
-        reference_image_nfs_path = get_reference_image_nfs_path(tool_paths, image_selected_input)
-        reference_image_pxe_path = get_reference_image_pxe_path(tool_paths, image_selected_input)
-
-        image_clone_input = get_user_input(" Please enter clone reference image name:", validate_name=True)
-        clone_image_nfs_path = get_reference_image_nfs_path(tool_paths, image_clone_input)
-        clone_image_pxe_path = get_reference_image_pxe_path(tool_paths, image_clone_input)
-
-        logging.info(bcolors.OKBLUE + 'Cloning image...' + bcolors.ENDC)
-        protected_os_system("cp -a " + reference_image_nfs_path + " " + clone_image_nfs_path)
-        protected_os_system("cp -a " + reference_image_pxe_path + " " + clone_image_pxe_path)
-        logging.info(bcolors.OKBLUE + 'Updating new image metadata...' + bcolors.ENDC)
-
-        try:
-            with open(clone_image_pxe_path + "/metadata.yaml", "r") as file:
-                image_selected_metadata = yaml.safe_load(file)
-        except FileNotFoundError:
-            print(bcolors.FAIL + " File " + clone_image_pxe_path + "/metadata.yaml does not exist, please re-run pxe_stack role before using the tool." + bcolors.ENDC)
-            quit(1)
-        except Exception:
-            print(bcolors.FAIL + " An error occurred reading the file " + clone_image_pxe_path + "/metadata.yaml. Please investigate." + bcolors.ENDC)
-            quit(1)
-
-        image_selected_metadata['name'] = image_clone_input
-        ipxe_content = '''#!ipxe
-        echo |
-        echo | Entering diskless/images/{image_name}/boot.ipxe
-        echo |
-        set image-kernel {image_kernel}
-        set image-initramfs {image_initramfs}
-        echo | Now starting nfs image boot.
-        echo |
-        echo | Parameters used:
-        echo | > Image target: {image_name}
-        echo | > Console: ${{eq-console}}
-        echo | > Additional kernel parameters: ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}}
-        echo |
-        echo | Loading linux ...
-        kernel http://${{next-server}}/pxe/diskless/{image_name}/${{image-kernel}} initrd=${{image-initramfs}} selinux=0 text=1 root=nfs:${{next-server}}:{nfs_path}/{image_name},vers=4.2,rw rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}} rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4
-        echo | Loading initial ramdisk ...
-        initrd http://${{next-server}}/pxe/diskless/{image_name}/${{image-initramfs}}
-        echo | ALL DONE! We are ready.
-        echo | Booting in 4s ...
-        echo |
-        echo +----------------------------------------------------+
-        sleep 4
-        boot
-        '''.format(image_kernel=("vmlinuz-" + image_selected_metadata['kernel']), image_initramfs=("initramfs-" + image_selected_metadata['kernel'] + ".img"), image_name=image_selected_metadata['name'], nfs_path=tool_parameters['nfs_path'])
-
-        try:
-            ipxe_file = open(clone_image_pxe_path + "/boot.ipxe", "w")
-            ipxe_file.write(ipxe_content)
-            ipxe_file.close()
-        except Exception:
-            print(bcolors.FAIL + " An error occurred writing the file " + clone_image_pxe_path + "/boot.ipxe. Please investigate." + bcolors.ENDC)
-            quit(1)
-
-        try:
-            with open(clone_image_pxe_path + "/metadata.yaml", "w") as file:
-                yaml.dump(image_selected_metadata, file)
-        except Exception:
-            print(bcolors.FAIL + " An error occurred writing the file " + clone_image_pxe_path + "/metadata.yaml. Please investigate." + bcolors.ENDC)
-            quit(1)
-
-        print(bcolors.OKGREEN + "\n == Image cloned successfully :) ==" + bcolors.ENDC)
-
-    if main_action == '7':
-
-        if display_images("reference", tool_paths) == 1: continue
-
-        image_selected_input = get_user_input(" Please enter reference image to convert to live:", validate_name=True)
-        reference_image_nfs_path = get_reference_image_nfs_path(tool_paths, image_selected_input)
-        reference_image_pxe_path = get_reference_image_pxe_path(tool_paths, image_selected_input)
-
-        try:
-            with open(reference_image_pxe_path + "/metadata.yaml", "r") as file:
-                        image_selected_metadata = yaml.safe_load(file)
-        except FileNotFoundError:
-            print(bcolors.FAIL + " File " + reference_image_pxe_path + "/metadata.yaml does not exist, please re-run pxe_stack role before using the tool." + bcolors.ENDC)
-            quit(1)
-        except Exception:
-            print(bcolors.FAIL + " An error occurred reading the file " + reference_image_pxe_path + "/metadata.yaml. Please investigate." + bcolors.ENDC)
-            quit(1)
-
-        image_selected_input_name = get_user_input(" Now, please enter new live image name:", validate_name=True)
-        image_selected_metadata['reference_name'] = image_selected_metadata['name'] + "," + image_selected_metadata['reference_name']
-        image_selected_metadata['name'] = image_selected_input_name
-        image_selected_metadata['type'] = "live"
-
-        reference_image_nfs_path = get_reference_image_nfs_path(tool_paths, image_selected_metadata['reference_name'].split(",")[0])
-        reference_image_pxe_path = get_reference_image_pxe_path(tool_paths, image_selected_metadata['reference_name'].split(",")[0])
-        live_image_path = get_live_image_path(tool_paths, image_selected_metadata['name'])
-
-        live_size = get_user_input(" I now need a live size limit in RAM, in Mb:")
-        logging.info(bcolors.OKBLUE + 'Preparing FS...' + bcolors.ENDC)
-        protected_os_system("mkdir -p " + live_image_path + "/workdir/LiveOS/")
-        protected_os_system("dd if=/dev/zero of=" + live_image_path + "/workdir/LiveOS/rootfs.img bs=1M count=" + live_size)
-        protected_os_system("mkfs.xfs " + live_image_path + "/workdir/LiveOS/rootfs.img")
-        os.makedirs(live_image_path + "/mountdir/")
-        protected_os_system("mount -o loop " + live_image_path + "/workdir/LiveOS/rootfs.img " + live_image_path + "/mountdir/")
-        logging.info(bcolors.OKBLUE + 'Copying files from reference image...' + bcolors.ENDC)
-        protected_os_system("cp -a " + reference_image_nfs_path + "/* " + live_image_path + "/mountdir/")
-        protected_os_system("umount " + live_image_path + "/mountdir/")
-        logging.info(bcolors.OKBLUE + 'Squashing image...' + bcolors.ENDC)
-        protected_os_system("mksquashfs " + live_image_path + "/workdir " + live_image_path + "/squashfs.img")
-        logging.info(bcolors.OKBLUE + 'Copying kernel and initramfs...' + bcolors.ENDC)
-        shutil.rmtree(live_image_path + "/workdir")
-        protected_os_system("cp -a " + reference_image_pxe_path + "/initramfs* " + live_image_path + "/")
-        protected_os_system("chmod 644 " + live_image_path + "/initramfs-*")
-        protected_os_system("cp -a " + reference_image_pxe_path + "/vmlinuz* " + live_image_path + "/")
-
-        ipxe_content = '''#!ipxe
-        echo |
-        echo | Entering diskless/images/{image_name}/boot.ipxe
-        echo |
-        set image-kernel {image_kernel}
-        set image-initramfs {image_initramfs}
-        echo | Now starting live image boot.
-        echo |
-        echo | Parameters used:
-        echo | > Image target: {image_name}
-        echo | > Console: ${{eq-console}}
-        echo | > Additional kernel parameters: ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}}
-        echo |
-        echo | Loading linux ...
-        kernel http://${{next-server}}/pxe/diskless/{image_name}/${{image-kernel}} initrd=${{image-initramfs}} selinux=0 text=1 root=live:http://${{next-server}}/pxe/diskless/{image_name}/squashfs.img rw ${{eq-console}} ${{eq-kernel-parameters}} ${{dedicated-kernel-parameters}} rd.net.timeout.carrier=30 rd.net.timeout.ifup=60 rd.net.dhcp.retry=4
-        echo | Loading initial ramdisk ...
-        initrd http://${{next-server}}/pxe/diskless/{image_name}/${{image-initramfs}}
-        echo | ALL DONE! We are ready.
-        echo | Booting in 4s ...
-        echo |
-        echo +----------------------------------------------------+
-        sleep 4
-        boot
-        '''.format(image_kernel=("vmlinuz-" + image_selected_metadata['kernel']), image_initramfs=("initramfs-" + image_selected_metadata['kernel'] + ".img"), image_name=image_selected_metadata['name'])
-
-        try:
-            ipxe_file = open(live_image_path + "/boot.ipxe", "w")
-            ipxe_file.write(ipxe_content)
-            ipxe_file.close()
-        except Exception:
-            print(bcolors.FAIL + " An error occurred writing the file " + live_image_path + "/boot.ipxe. Please investigate." + bcolors.ENDC)
-            quit(1)
-
-        try:
-            with open(live_image_path + "/metadata.yaml", "w") as file:
-                yaml.dump(image_selected_metadata, file)
-        except Exception:
-            print(bcolors.FAIL + " An error occurred writing the file " + live_image_path + "/metadata.yaml. Please investigate." + bcolors.ENDC)
-            quit(1)
-
-        print(bcolors.OKGREEN + "\n == Livenet image created :) ==" + bcolors.ENDC)
-        print(" Please boot the node pool with this image using:")
-        print(" bluebanquise-bootset -b diskless -i " + image_selected_metadata['name'] + " -n mynodes")
-
-    if main_action == '8':
-
-        print("\n\n== Images deletion submenu ==")
-        print(" Please select type of image to delete:")
-        print(" 1 - \033[94mbootstrap\033[0m image")
-        print(" 2 - \033[92mreference\033[0m image")
-        print(" 3 - \033[91mlive\033[0m image")
-
-        delete_image_type = get_user_input("")
-
-        if str(delete_image_type) == "1":
-
-            if display_images("bootstrap", tool_paths) == 1: continue
-
-            delete_image = get_user_input("\n Please enter bootstrap image name to be deleted:", validate_name=True)
-            bootstrap_image_path = get_bootstrap_image_path(tool_paths, delete_image)
-            logging.info(bcolors.OKBLUE + 'Deleting image...' + bcolors.ENDC)
-            protected_os_system("rm -Rf " + bootstrap_image_path)
-
-        if str(delete_image_type) == "2":
-
-            if display_images("reference", tool_paths) == 1: continue
-
-            delete_image = get_user_input("\n Please enter reference image name to be deleted:", validate_name=True)
-            reference_image_nfs_path = get_reference_image_nfs_path(tool_paths, delete_image)
-            reference_image_pxe_path = get_reference_image_pxe_path(tool_paths, delete_image)
-
-            logging.info(bcolors.OKBLUE + 'Deleting image...' + bcolors.ENDC)
-            protected_os_system("rm -Rf " + reference_image_nfs_path)
-            protected_os_system("rm -Rf " + reference_image_pxe_path)
-
-        if str(delete_image_type) == "3":
-
-            if display_images("live", tool_paths) == 1: continue
-
-            delete_image = get_user_input("\n Please enter live image name to be deleted:", validate_name=True)
-            live_image_path = get_live_image_path(tool_paths, delete_image)
-            logging.info(bcolors.OKBLUE + 'Deleting image...' + bcolors.ENDC)
-            protected_os_system("rm -Rf " + live_image_path)
-
-        print(bcolors.OKGREEN + "\n == Image deleted :) ==" + bcolors.ENDC)
-
-    if main_action == '9':
-
-        print("\n\n== Help submenu ==")
-        print(" Welcome to tool documentation.")
-        print(" I did my best to provide detailed help here.")
-        print("\n Since documentation is big, you can either display it in the current terminal, or request to write it to a file so you can use a tool like vim or more to read it.")
-        print(" 1 - Display in current terminal")
-        print(" 2 - Write into /tmp/bluebanquise-diskless-help.md")
-
-        help_entry = get_user_input("")
-
-        help_content = """
-# INTRODUCTION AND GENERAL CONCEPT
-
-bluebanquise-diskless tool is made to manage diskless images life cycles, from creation to production and maintenance.
-You need to run this script with sudo or as root. Pass "-d" or "--debug" parameter to the script to display commands executed.
-
-Workflow is the following, assuming user wishes to boot a pool of nodes with the same live image:
-
-* Step 1: user import a bootstrap image (read only image).
-* Step 2: user generates a new reference image from a bootstrap image (read write image).
-* Step 3: user tune the reference image, using NFS diskless on a single node of the target pool, or using chroot into local image folder.
-* Step 4: user generates a new live image from a reference image (read only image).
-* Step 5: user can now boot all nodes of the pool with the live image.
-
-Each step is explained in the following part.
-
-## Step 1: user import a bootstrap image
-
-A bootstrap image is a ready to boot image, that can be bare minimal, or fully customized system.
-It is a tar.gz file of an image chroot, that contains at its root a metadata.yaml file with vital information of the image.
-A bootstrap image contains at least:
-
-- Bootable chroot of the target system.
-- The kernel and initramfs needed to boot.
-- Needed packages to rebuild an updated kernel with diskless modules.
-- A packages manager (dnf, apt, zypper, etc).
-- A network daemon (NetworkManager, systemd-networkd, etc).
-- The openssh server (sshd), enabled at boot.
-
-It is then up to packager to add additional elements into image.
-
-BlueBanquise project provides basic bootstrap images at https://bluebanquise.com/diskless
-
-Once imported, bootstrap images are stored by default into `/var/lib/bluebanquise/diskless/bootstrap_images/` folder.
-
-Bootstrap images are used as source to create new reference images (also known as golden images).
-
-## Step 2: generate a reference image
-
-A reference image is a read write image, that will be tuned by user to create desired final images.
-This means for example:
-
-* Install new updated kernels in image.
-* Install packages, drivers, etc.
-* Setup configuration files.
-* Setup mounting points.
-* Etc.
-
-bluebanquise-diskless tool simply extracts content of a bootstrap image and create the bootable/chrootable folder of new reference image into `" + tool_parameters['nfs_path'] + "/image_name` folder.
-A dedicated folder into `/var/www/html/pxe/diskless` directory is also created, and contains metadata and minimal needed to boot reference image via NFS if needed.
-
-## Step 3: tune a reference image
-
-**WARNING**: it is very important to understand 2 key concepts here:
-
-1. A reference image is going to be later converted into a live image, which will be booted by all nodes of a pool.
-This means image must NOT be identified to a specific node. Do not set static ip nor static hostname in a reference image.
-If using BlueBanquise roles, this can be avoided skipping "identify" tag when using ansible-playbook command.
-2. A reference image, once converted to live, can be downloaded by standard users, making its content readable by everyone.
-This means image must NOT contain any sensitive data, like private keys, private certificates, clear passwords, etc.
-If using BlueBanquise roles, this can be avoided skipping "secret" tag when using ansible-playbook command.
-
-Once generated, there are 2 ways to tune a reference image. I personally recommend using NFS diskless to install packages, kernel, and drivers.
-A full running system mounted over NFS might be slow, but it will successfully install packages and drivers/kernel modules, and load them to ensure everything works as expected.
-Note that it is also a hard requirement if CPU architecture of image is not the same than current system.
-Chroot method should only be used to do quick modifications, as many packages’ scripts will fail under chroot, leading to unexpected issues later in production.
-
-### Using NFS diskless
-
-An entry in tool allows to link a reference image to a specific node of the target pool, and generate a temporary password to be able to login once booted.
-Assuming for example that target nodes pool is c[001-100], then user should request tool to link image to node c001.
-Then use bluebanquise-bootset to request this node to boot over diskless on this image:
-
-```
-bluebanquise-bootset -b diskless -i my_reference_image -n c001
-```
-
-Then boot c001 node. Once booted, you should be able to login via ssh using provided password at link step.
-You can now deploy an ssh key on remote node, and start using ansible-playbook or any other commands to tune it.
-Remember to skip "identify" and "secret" tags:
-
-```
-ansible-playbook --become --skip-tags identify,secret /path/to/playbook.yml
-```
-
-### Using chroot
-
-You can also directly chroot into image using:
-
-```
-sudo chroot /nfs/diskless/my_reference_image
-```
-
-Remember that this is only possible if image CPU architecture is the same than current host.
-You can also directly edit files into `/nfs/diskless/my_reference_image` folder for quick changes.
-
-### Update kernel
-
-It might be needed to update image kernel. Again, I recommend to do that on an NFS booted image.
-
-Once new kernel has been installed, a manual step is required to ensure it will load at next boot, as diskless images do not use grub2 to configure next kernel boot.
-
-Use bluebanquise-diskless tool and select **Update a reference image default kernel** entry.
-Select your image, and tool will display available kernels for this image. Simply choose your new kernel.
-
-Now, reboot the node, and check it has booted on the new kernel.
-
-Note on this process, for advanced users: bootstrap images contain specific file (`/etc/dracut.conf.d/bluebanquise for RHEL images`) that forces diskless modules to be installed in new initramfs during kernel update process.
-
-## Step 4: generate a new live image from a reference image
-
-Once reference image is ready, and user ensured all kernel modules are properly running, reference image can be used as source for final live image.
-
-**WARNING**: be sure to power off NFS diskless node linked on the reference image before using image to generate the live version.
-
-A live image is loaded via http by all nodes of the target pool at boot, and stored in ram memory. Then, an overlay FS is configured over image to allow live **non reboot persistent** system modifications.
-
-Use the bluebanquise-diskless tool dedicated entry to generate the new live image.
-
-Once image is generated, use bluebanquise-bootset tool to request all nodes of the pool to boot from this live image:
-
-```
-bluebanquise-bootset -b diskless -i my_live_image -n c[001-100]
-```
-
-## Step 5: boot all nodes of the pool
-
-You can now boot all nodes. Note that depending of network capabilities, this process can take some time.
-You can monitor live image downloads by watching apache server logs:
-
-On RHEL/Suse like systems:
-
-```
-sudo tail -f /var/log/httpd/*
-```
-
-On Debian/Ubuntu like systems:
-
-```
-sudo tail -f /var/log/apache2/*
-```
-
-Once all nodes are booted, you need to finalize their configuration, by setting up node dedicated settings and secrets.
-If using BlueBanquise roles, simply apply playbook with missing tags:
-
-```
-ansible-playbook --become --tags identify,secret /path/to/playbook.yml
-```
-
-## Debug and errors
-
-### Package fail to install in NFS diskless
-
-Some sensitive system packages might refuse to install while in NFS due to NFS cap limitations.
-
-For example, on RHEL 9, shadow-utils rpm will fail to upgrade:
-
-```
-[bluebanquise@c001 ~]$ dnf update -y
-...
-warning: /etc/shadow created as /etc/shadow.rpmnew
-
-  Running scriptlet: setup-2.13.7-9.el9.noarch                                                                                70/193
-  Upgrading        : shadow-utils-2:4.9-6.el9.x86_64                                                                          71/193
-Error unpacking rpm package shadow-utils-2:4.9-6.el9.x86_64
-error: unpacking of archive failed on file /usr/bin/newgidmap;64944fc1: cpio: cap_set_file
-error: shadow-utils-2:4.9-6.el9.x86_64: install failed
-[bluebanquise@c001 ~]$
-```
-
-It is possible to see that this even fail with nfs 4.2 mount:
-
-```
-[bluebanquise@c001 ~]$ nfsstat -m
-/ from 10.10.0.1:/nfs/diskless/my_image
- Flags: rw,relatime,vers=4.2,rsize=1048576,wsize=1048576,namlen=255,hard,proto=tcp,timeo=600,retrans=2,sec=sys,clientaddr=10.10.0.8,local_lock=none,addr=10.10.0.1
-[bluebanquise@c001 ~]$
-```
-
-Solution is to install the failing package using chroot method on NFS server:
-
-```
-bluebanquise@mgt1:/$ sudo chroot /nfs/diskless/my_image
-bash-5.1# dnf update
-Failed to set locale, defaulting to C.UTF-8
-Dependencies resolved.
-================================================================ Package          Arch       Version           Repository  Size
-================================================================Upgrading:
- shadow-utils     x86_64     2:4.9-6.el9       baseos     1.1 M
-
-Transaction Summary
-================================================================Upgrade  1 Package
-
-Total download size: 1.1 M
-Is this ok [y/N]: y
-Downloading Packages:
-shadow-utils-4.9-6.el9.x86_64.r 5.6 MB/s | 1.1 MB     00:00
-----------------------------------------------------------------Total                           3.2 MB/s | 1.1 MB     00:00
-Running transaction check
-Transaction check succeeded.
-Running transaction test
-Transaction test succeeded.
-Running transaction
-  Preparing        :                                        1/1
-  Upgrading        : shadow-utils-2:4.9-6.el9.x86_64        1/2
-  Cleanup          : shadow-utils-2:4.9-5.el9.x86_64        2/2
-  Running scriptlet: shadow-utils-2:4.9-5.el9.x86_64        2/2
-  Verifying        : shadow-utils-2:4.9-6.el9.x86_64        1/2
-  Verifying        : shadow-utils-2:4.9-5.el9.x86_64        2/2
-
-Upgraded:
-  shadow-utils-2:4.9-6.el9.x86_64
-
-Complete!
-bash-5.1#
-```
-
-### Cleaning folders
-
-The tool has been made with a sys admin philosophy. I tried to avoid any complex steps, and in case of crash, the tool will not cleanup the files, so you can investigate and retry failed command.
-This however could lead to issues, so in case of crash, remember to check the following folders for remaining zombie files to be cleaned:
-
-* /var/lib/bluebanquise/diskless/bootstrap_images/
-* /var/lib/bluebanquise/diskless/bootstrap_images/tmp/
-* /var/www/html/pxe/diskless/
-* /nfs/diskless/
-
-## Conclusion
-
-I hope these explanations will be enough to guide you through the process.
-If you need any kind of assistance, or wish to report a bug, please do not hesitate to contact me at contact@bluebanquise.com
-
-Thank you for using BlueBanquise :)
-
-            """
-
-        if str(help_entry) == "1":
-            print(help_content)
-        if str(help_entry) == "2":
-            logging.info(bcolors.OKBLUE + 'Writing documentation into /tmp/bluebanquise-diskless-help.md file...' + bcolors.ENDC)
-            try:
-                file = open("/tmp/bluebanquise-diskless-help.md", "w")
-                file.write(help_content)
-                file.close()
-            except Exception:
-                print(bcolors.FAIL + " An error occurred reading the file /tmp/bluebanquise-diskless-help.md. Please investigate." + bcolors.ENDC)
-                quit(1)
-            print(" You can now use command 'more /tmp/bluebanquise-diskless-help.md' to read documentation.")
-
-    if main_action == '10':
-        break
-
-print(bcolors.HEADER + "\n\n Thank you for using BlueBanquise diskless, have a great day! :)\n\n" + bcolors.ENDC )
+if __name__ == '__main__':
+    main()

@@ -43,7 +43,6 @@
     owner: root
     group: root
     mode: 0644
-  loop: "{{ nhc_files }}"
+  loop: "{{ nhc_files | default([]) }}"
   loop_control:
     label: "Copy file {{ item.name }}"
-  when: nhc_files is defined and nhc_files is iterable

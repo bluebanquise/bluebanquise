@@ -1,6 +1,6 @@
 #jinja2: lstrip_blocks: True, trim_blocks: True
 #### Blue Banquise file ####
-## {{ansible_managed}}
+## {{ ansible_managed }}
 
 # Documentation:
 # https://slurm.schedmd.com/slurm.conf.html
@@ -54,7 +54,7 @@ SelectType={{ slurm_selecttype }}
 # Gres configuration
 GresTypes={{ slurm_grestypes }}
 ProctrackType=proctrack/cgroup
-TaskPlugin=affinity,cgroup
+TaskPlugin=task/affinity,task/cgroup
   {# SelectTypeParameters: CR_Core_Memory and CR_CORE_DEFAULT_DIST_BLOCK are stable, but new options may be available in Slurm 24+ #}
   {% if slurm_major_version is defined and slurm_major_version|int >= 24 %}
 SelectTypeParameters=CR_Core_Memory,CR_CORE_DEFAULT_DIST_BLOCK,CR_ONE_TASK_PER_CORE,{{ slurm_selecttype_parameters | default('', true) }}

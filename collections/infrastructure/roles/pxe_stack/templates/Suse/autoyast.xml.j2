@@ -8,10 +8,10 @@
 
   <add-on>
     <add_on_products config:type="list">
-{% for repo in pxe_stack_suse_autoinstall_repositories %}
-  {% if repo.media_url is defined and repo.media_url is string and repo.name is defined and repo.name is string %}
+{% for repo in (equipment['os']['os_autoinstall_custom_repositories'] | default(pxe_stack_os_autoinstall_custom_repositories)) %}
+  {% if repo.url is defined and repo.url is string and repo.name is defined and repo.name is string %}
       <listentry>
-        <media_url>{{ repo.media_url }}</media_url>
+        <media_url>{{ repo.url }}</media_url>
         <alias>{{ repo.name }}</alias>
         <ask_on_error config:type="boolean">false</ask_on_error>
         <confirm_license config:type="boolean">false</confirm_license>
@@ -55,7 +55,7 @@
   </networking>
 
   <software>
-{% if (equipment['os']['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system)) | lower == "sles" %}
+{% if (equipment['os']['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution, true)) | lower == "sles" %}
     <products config:type="list">
       <product>SLES</product>
     </products>
@@ -178,13 +178,17 @@ echo "Defaults:sles !targetpw
         <source><![CDATA[
 #!/bin/sh -x
 
+{% if pxe_stack_inventory_tag is defined and pxe_stack_inventory_tag is not none %}
+mkdir -p /etc/bluebanquise/tags/ && echo "{{ pxe_stack_inventory_tag }}" > /etc/bluebanquise/tags/pxe_inventory
+{% endif %}
+
 {% if pxe_stack_post_install_boot_to_disk %}
 # Turn the kernel parameters into variables
 # We are looking for next_server value
 for I in `cat /proc/cmdline | tr " " "\n" | grep -E "^ipxe_next_server="` ; do eval $I; done
 
 echo "All went well, we can inform next-server we succeeded"
-curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$(hostname -s)&boot=disk"
+curl -s -k "http://$ipxe_next_server:{{ pxe_stack_daemon_port }}/stage_report?hostname=$(hostname -s)&stage=osdeploy&status=completed"
 {% endif %}
 
 ]]>

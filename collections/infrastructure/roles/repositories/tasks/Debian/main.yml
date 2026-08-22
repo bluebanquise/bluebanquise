@@ -2,10 +2,7 @@
 - name: assert <|> Checking repositories are coherent
   ansible.builtin.assert:
     that:
-      - j2_node_main_network is defined and j2_node_main_network is not none
       - networks is defined and networks is not none
-      - networks[j2_node_main_network] is defined and networks[j2_node_main_network] is not none
-      - (networks[j2_node_main_network]['services_ip'] is defined and networks[j2_node_main_network]['services_ip'] is not none) or ((networks[j2_node_main_network]['services']['repositories4'][0]['ip4'] | default(networks[j2_node_main_network]['services']['repositories'][0]['ip4'], true)) is defined and (networks[j2_node_main_network]['services']['repositories4'][0]['ip4'] | default(networks[j2_node_main_network]['services']['repositories'][0]['ip4'], true)) is not none)
       - os_operating_system is defined and os_operating_system is not none
       - os_operating_system['distribution'] is defined and os_operating_system['distribution'] is not none
       - (os_operating_system['distribution_version'] is defined and os_operating_system['distribution_version'] is not none) or (os_operating_system['distribution_major_version'] is defined and os_operating_system['distribution_major_version'] is not none)
@@ -35,7 +32,7 @@
     filename: "{{ item.filename | default(omit) }}"
     install_python_apt: "{{ item.install_python_apt | default(omit) }}"
     mode: "{{ item.mode | default(omit) }}"
-    update_cache: "{{ item.update_cache | default('no') }}"
+    update_cache: "{{ item.update_cache | default(false) }}"
     update_cache_retries: "{{ item.update_cache_retries | default(omit) }}"
     update_cache_retry_max_delay: "{{ item.update_cache_retry_max_delay | default(omit) }}"
     validate_certs: "{{ item.validate_certs | default(omit) }}"

@@ -14,7 +14,7 @@
     home: /var/lib/ipmi_exporter
     state: present
 
-- name: Package <|> Install ipmi_exporter and freeipmi packages
+- name: package <|> Install ipmi_exporter and freeipmi packages
   ansible.builtin.package:
     name: "{{ prometheus_server_ipmi_exporter_packages_to_install }}"
     state: present
@@ -44,7 +44,7 @@
   loop:
     - /etc/ipmi_exporter/
 
-- name: Template <|> Generate /etc/ipmi_exporter/ipmi_config.yml
+- name: template <|> Generate /etc/ipmi_exporter/ipmi_config.yml
   ansible.builtin.template:
     src: ipmi_config.yml.j2
     dest: /etc/ipmi_exporter/ipmi_config.yml
@@ -61,7 +61,7 @@
 - name: service <|> Manage ipmi_exporter service state
   ansible.builtin.service:
     name: ipmi_exporter
-    enabled: "{{ (prometheus_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    enabled: "{{ (prometheus_enable_services | default(bb_enable_services) | default(true) | bool) | ternary(true, false) }}"
     state: "{{ (prometheus_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   tags:
     - service

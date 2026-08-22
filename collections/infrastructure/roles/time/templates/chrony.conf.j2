@@ -40,21 +40,7 @@ server {{ ntp.ip4 }} iburst
 server {{ networks[node_main_network]['services_ip'] }} iburst
     {% endif %}
 
-  {# Server binds to its main network server from upper iceberg, if exist #}
-  {# {% elif time_profile == 'server' and (bb_icebergs_system is defined and bb_icebergs_system) and (bb_iceberg_master is defined and bb_iceberg_master != "top") %}
-    {% set host_to_be_used_network = j2_icebergs_main_network_dict[bb_iceberg_master] | default(none, true) %}
-    {% if host_to_be_used_network is not none %}
-      {% if networks[host_to_be_used_network]['services'] is defined and (networks[host_to_be_used_network]['services']['ntp4'] | default(networks[host_to_be_used_network]['services']['ntp'], true)) is defined and (networks[host_to_be_used_network]['services']['ntp4'] | default(networks[host_to_be_used_network]['services']['ntp'], true)) is iterable and (networks[host_to_be_used_network]['services']['ntp4'] | default(networks[host_to_be_used_network]['services']['ntp'], true)) is not string and (networks[host_to_be_used_network]['services']['ntp4'] | default(networks[host_to_be_used_network]['services']['ntp'], true)) is not mapping %}
-        {% for ntp in (networks[host_to_be_used_network]['services']['ntp4'] | default(networks[host_to_be_used_network]['services']['ntp'], true)) %}
-          {% if ntp.hostname is defined and ntp.hostname is not none %}
-server {{ ntp.hostname }} iburst
-          {% elif ntp.ip4 is defined and (ntp.ip4 | ansible.utils.ipaddr) %}
-server {{ ntp.ip4 }} iburst
-          {% endif %}
-        {% endfor %}
-      {% endif %}
-    {% endif %}#}
-  {% endif %} 
+  {% endif %}
 
 {% endif %}
 

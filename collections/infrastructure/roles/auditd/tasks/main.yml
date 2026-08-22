@@ -22,11 +22,10 @@
   tags:
     - always
 
-- name: "package <|> install"
+- name: "package <|> Install {{ auditd_packages_to_install | join(' ') }}"
   ansible.builtin.package:
-    name: "{{ item }}"
+    name: "{{ auditd_packages_to_install }}"
     state: present
-  loop: "{{ auditd_packages_to_install }}"
   tags:
     - package
 
@@ -45,14 +44,14 @@
     - auditd_result.stat.exists
     - auditd_forward_audit_logs | default(false) | bool
 
-- name: "lineinfile █ Enable root command logging for {{ item }}"
+- name: "lineinfile <|> Enable root command logging for {{ item }}"
   ansible.builtin.lineinfile:
     path: "{{ auditd_config_rules_file }}"
     line: "-a exit,always -F arch={{ item }} -F euid=0 -S execve"
   loop: "{{ auditd_config_rules_architectures | flatten(levels=1) }}"
   notify:
     - service <|> Restart auditd service
-    - service █ Restart rsyslog service
+    - service <|> Restart rsyslog service
   when: auditd_config_root_log | default(false) | bool
 
 - name: "service <|> Manage {{ auditd_services_to_start | join(' ') }} state"

@@ -1,0 +1,17 @@
+---
+# Skeleton applied by ansible_inventory.py when an os_group is created (`inventory add os_group
+# <name> [data]`). See resources/data_model.md section 3.3.
+skeleton:
+  os_operating_system:
+    distribution: ubuntu
+    distribution_version: "24.04"
+    distribution_major_version: "24"
+  os_keyboard_layout: us
+  os_system_language: en_US.UTF-8
+  os_firewall: true
+  os_access_control: enforcing
+  os_admin_password_sha512: ""
+  os_admin_ssh_keys: []
+  os_partitioning: ""
+  os_kernel_parameters: nomodeset
+required: []

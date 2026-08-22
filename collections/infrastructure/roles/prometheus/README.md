@@ -1,11 +1,4 @@
 # Prometheus
-
-## Data Model
-
-This role relies on [data model](https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md):
-* Section 2 (Hosts definition)
-* Section 3.2 (Hardware Groups)
-
 ## Table of content:
 
 - [Prometheus](#prometheus)
@@ -34,7 +27,9 @@ This role relies on [data model](https://github.com/bluebanquise/bluebanquise/bl
 
 ## 1. Description
 
-This role deploys Prometheus (server/client) with related ecosystem:
+> **Important:** Prometheus is a **metrics** monitoring tool, not a **supervision** tool. It excels at gathering and tracking numeric metrics (integers, floats) over time, but was not designed for supervision tasks (e.g. "is server c001 answering ping?"). For supervision, consider a dedicated tool like Zabbix. **A production cluster needs both a monitoring and a supervision tool.**
+
+These settings deploy Prometheus (server/client) with related ecosystem:
 
 * Prometheus (scrap metrics, store them, evaluate alerts)
 * Alertmanager (manage alerts by grouping them, sending mails, etc)
@@ -49,7 +44,7 @@ This role deploys Prometheus (server/client) with related ecosystem:
    * ...
 * Custom exporter python modules
 
-The role provides a basic configuration that should match 80% of the cluster's
+These settings provide a basic configuration that should match 80% of the cluster's
 needs. An advanced configuration for specific usages is available and described
 after the basic part.
 
@@ -57,26 +52,26 @@ after the basic part.
 
 You can refer to this diagram to help understanding of the following readme.
 
-![File not found](resources/global_schema.svg "Main role schema")
+![File not found](resources/global_schema.svg "Main schema")
 
 ### Server or/and client
 
-**Server part** of the role deploys Prometheus, Alertmanager, Karma, Am-executor,
+**Server part** of these settings deploy Prometheus, Alertmanager, Karma, Am-executor,
 ipmi_exporter, snmp_exporter, modbus_exporter and their respective configuration
 files and service files.
 
-To install server part, set `prometheus_server` to `true` at role invocation
+To install server part, set `prometheus_server` to `true` at invocation
 vars. See server configuration bellow for more details.
 
-**Client part** of the role deploys other exporters or custom exporter
+**Client part** of these settings deploy other exporters or custom exporter
 python modules on clients.
 
-To install client part, set `prometheus_client` to `true` at role invocation
+To install client part, set `prometheus_client` to `true` at invocation
 vars. See client configuration bellow for more details.
 
 **Important**: while server related variables are dedicated to server
 configuration, client variables are used by **both** client and server part of
-the role.
+these settings.
 
 ### Default ports
 
@@ -98,7 +93,7 @@ Playbook example:
         prometheus_server: true
 ```
 
-In the basic usage, the server role will install and setup the following tools:
+In the basic usage, the server part will install and setup the following tools:
 
 * Prometheus: scrap and store metrics, fire alerts.
 * Alertmanager: manage alerts fired by Prometheus.
@@ -111,7 +106,7 @@ In the basic usage, the server role will install and setup the following tools:
 Which means all of these services will, by default, be running on the same
 management host.
 
-To manage what server part of the role should install and setup, defaults
+To manage what server part of these settings should install and setup, defaults
 variables can be used. The following variables, with their default values shown
 here, are available:
 
@@ -129,7 +124,7 @@ prometheus_server_manage_modbus_exporter: false
 
 #### Scraping
 
-By default, role will inherit from values set in its defaults folder.
+By default, this will inherit from values set in its defaults folder.
 You may wish to update these values to your needs, as these values set the
 different timings used by Prometheus.
 
@@ -162,13 +157,13 @@ section of this readme.
 
 It is key to understand that in the Prometheus ecosystem, alerts are calculated
 and fired **by Prometheus** and not Alertmanager. Alertmanager is a tool to
-managed alerts that were fired by Prometheus (group alerts, send emails, etc).
+manage alerts that were fired by Prometheus (group alerts, send emails, etc).
 
-By default, the role will only add a simple alerts file into the
+By default, these settings will only add a simple alerts file into the
 /etc/prometheus/alerts folder. This file contains very basic alerts related to
 exporters down or Prometheus own scraping.
 
-The role also offers to install few other alerts, each related to a specific exporter.
+These settings also offers to install few other alerts, each related to a specific exporter.
 To install these additional alerts, simply enable them by adding them in the
 **prometheus_server_additional_alerts** list variable. The following additional
 alerts are available:
@@ -279,14 +274,14 @@ Playbook example:
         prometheus_client: true
 ```
 
-The client side of the role simply install and start local exporters on nodes.
+The client side of these settings simply install and start local exporters on hosts.
 
 ### Exporters
 
 Each exporter has its own http port. For example, node_exporter is available at
 http://localhost:9100 .
 
-Both server and client side of the role share the same variables for exporters.
+Both server and client side of these settings share the same variables for exporters.
 
 Two main variables are available:
 
@@ -298,7 +293,7 @@ Both variables are very similar.
 `prometheus_exporters_to_scrape` is used by server side only. Exporters listed
 here will be scraped by Prometheus using defined `address` and `port`.
 Exporters listed here have to be installed manually or with another role/task since
-client side of the role will not consider them.
+client side of these settings will not consider them.
 
 ```yaml
 prometheus_exporters_to_scrape:
@@ -315,12 +310,12 @@ prometheus_exporters_to_scrape:
 ```
 
 `prometheus_exporters_groups_to_scrape` is used by both server and client sides.
-Server side will scrap these exporters on all the nodes of the group, while
-client side will install them on all nodes of the group.
+Server side will scrap these exporters on all the hosts of the group, while
+client side will install them on all hosts of the group.
 
-It is important to understand that the client side of the role is capable of 
+It is important to understand that the client side of these settings are capable of 
 generating everything needed by an exporter binary: service file, users, working dir, etc.
-The role will generate these elements depending of the variables present.
+These settings will generate these elements depending of the variables present.
 The list of capabilities is described after the example.
 
 Note that if port is not present, server side will ignore the exporter, but
@@ -390,12 +385,12 @@ prometheus_exporters_groups_to_scrape:
 
 ipmi_-, snmp_- and modbus_exporter behave differently: they act as translation
 gateways between Prometheus and the target. Which means, if you wish for example
-to query IPMI data of a node, you do not install the exporter on the node itself.
+to query IPMI data of a host, you do not install the exporter on the host itself.
 You query the ipmi_exporter, which will itself query the target for IPMI data.
 This is why, in the basic configuration, these two exporters are installed by
-the server part of the role and not the client part.
+the server part of these settings and not the client part.
 
-To have the exporter installed by the server part of the role, set their
+To have the exporter installed by the server part of these settings, set their
 respective variables to true or false, according to your needs:
 
 ```yaml
@@ -404,7 +399,7 @@ prometheus_server_manage_snmp_exporter: false
 prometheus_server_manage_modbus_exporter: false
 ```
 
-You then need to specify which hardware groups of nodes have to be
+You then need to specify which hardware groups of hosts have to be
 ipmi scraped. To do so, simply set the global variable `prometheus_ipmi_scrape_hardware_groups` 
 in the default *inventory/group_vars/all/prometheus.yml* file:
 
@@ -477,7 +472,7 @@ of devices.
 
 Since Prometheus ecosystem has been originally designed to run into containers,
 some major parameters are passed to the binary at launch. This is why the current
-role generate the systemd service file to integrate custom launch parameters.
+this generates the systemd service file to integrate custom launch parameters.
 
 The following variables, with their default values shown here, are available
 to tune launch parameters of each tool:
@@ -525,7 +520,7 @@ set:
 
 ```yaml
 prometheus_server_launch_parameters: |
-  --storage.tsdb.pat /prometheus \
+  --storage.tsdb.path /prometheus \
   --storage.tsdb.retention.time 60d \
   --config.file /etc/prometheus/prometheus.yml \
   --storage.tsdb.path /var/lib/prometheus/ \
@@ -615,7 +610,7 @@ prometheus_server_prometheus_raw_jobs:
 ```
 
 Note that you can combine this part and the [generic psf](https://github.com/bluebanquise/community/blob/main/roles/generic_psf)
-role to create advanced configurations, like High Availability with Virtual IP.
+to create advanced configurations, like High Availability with Virtual IP.
 
 ### Adding raw prometheus.conf configuration
 
@@ -657,23 +652,3 @@ prometheus_server_prometheus_launch_parameters: |
   --web.console.libraries=/etc/prometheus/console_libraries $PROMETHEUS_OPTIONS \
   --web.config.file=/etc/prometheus/web.yml
 ```
-
-## Changelog
-
-**Please now update CHANGELOG file at repository root instead of adding logs in this file.
-These logs bellow are only kept for archive.**
-
-* 1.4.1: Fix bad rights on services files. Bug reported by @sgaosdgr. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.4.0: Add more tunig for exporter services. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.3.4: Adapt tp hw os split. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.3.3: Port to bb 2.0. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.3.2: Restart services when systemd service file changes. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
-* 1.3.1: Fix error when exporter is missing the service parameter. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
-* 1.3.0: Support TLS and Basic Authentication. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
-* 1.2.4: Update to BB 2.0 format. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
-* 1.2.3: Fix karma package to install on RedHat. Emmanuel Chevreau <manu44600@gmail.com>
-* 1.2.2: Fix ubuntu support. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.2.1: Add missing part of the role. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.2.0: Role global enhancement. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.0.1: Documentation. johnnykeats <johnny.keats@outlook.com>
-* 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>, johnnykeats <johnny.keats@outlook.com>

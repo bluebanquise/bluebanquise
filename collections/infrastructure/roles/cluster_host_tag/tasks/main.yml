@@ -1,0 +1,36 @@
+---
+
+- name: cluster_host_tag <|> Assert inventory checksum was provided
+  ansible.builtin.assert:
+    that:
+      - cluster_host_tag_inventory_checksum is defined
+      - cluster_host_tag_inventory_checksum | length > 0
+    fail_msg: >-
+      cluster_host_tag_inventory_checksum is not defined. This role is meant to be invoked with
+      it passed as an extra variable (-e cluster_host_tag_inventory_checksum=<checksum>) by the
+      bluebanquise-cluster-playbooks-daemon, not run standalone.
+    success_msg: "cluster_host_tag <|> inventory checksum received: {{ cluster_host_tag_inventory_checksum }}"
+
+- name: cluster_host_tag <|> Ensure tags directory exists
+  ansible.builtin.file:
+    path: "{{ cluster_host_tag_path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: cluster_host_tag <|> Write inventory checksum tag
+  ansible.builtin.copy:
+    content: "{{ cluster_host_tag_inventory_checksum }}"
+    dest: "{{ cluster_host_tag_path }}/inventory"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: cluster_host_tag <|> Write last ansible-playbook execution timestamp
+  ansible.builtin.copy:
+    content: "{{ ansible_facts.date_time.iso8601 }}"
+    dest: "{{ cluster_host_tag_path }}/last_ansible-playbook"
+    owner: root
+    group: root
+    mode: '0644'

@@ -1,0 +1,16 @@
+#jinja2: lstrip_blocks: True
+# {{ ansible_managed }}
+---
+loop_interval: {{ cluster_management_supervision_daemon_loop_interval }}
+thread_pool_size: {{ cluster_management_supervision_daemon_thread_pool_size }}
+ssh_gate_timeout: {{ cluster_management_supervision_daemon_ssh_gate_timeout }}
+ssh_check_timeout: {{ cluster_management_supervision_daemon_ssh_check_timeout }}
+local_check_timeout: {{ cluster_management_supervision_daemon_local_check_timeout }}
+log_level: {{ cluster_management_supervision_daemon_log_level }}
+scripts_path: {{ cluster_management_supervision_scripts_path }}
+checks_conf_path: {{ cluster_management_supervision_conf_path }}
+hosts_base_path: {{ cluster_management_supervision_hosts_base_path }}
+tmp_path: {{ cluster_management_supervision_tmp_path }}
+supervision_filename: {{ cluster_management_supervision_supervision_filename }}
+dynamic_filename: {{ cluster_management_supervision_dynamic_filename }}
+events_module_path: {{ cluster_management_supervision_events_module_path }}

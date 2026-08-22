@@ -3,32 +3,32 @@
 ## {{ ansible_managed }}
 
 {% set nameservers = [] %}
+{% set node_main_network = network_interfaces | default([]) | selectattr('network','defined') | selectattr('interface','defined') | selectattr('ip4','defined') | selectattr('network','match','^net-[a-zA-Z0-9]+') | map(attribute='network') | list | first | default(none) %}
 
-{% macro get_main_network(network_interfaces) %}
-{# We get first interfaces that posses an ip4 and a network that starts with 'net-' #}
-{{ network_interfaces | default([]) | selectattr('network','defined') | selectattr('interface','defined') | selectattr('ip4','defined') | selectattr('network','match','^net-[a-zA-Z0-9]+') | map(attribute='network') | list | first | default(none) }}
-{% endmacro %}
-
-{% set node_main_network = get_main_network(network_interfaces) %}
 {% if dns_client_servers is defined and dns_client_servers is iterable %}
   {% for dns in dns_client_servers %}
-nameserver {{ dns }}
+    {% set _ = nameservers.append(dns) %}
   {% endfor %}
-{% elif networks[node_main_network]['services'] is defined and networks[node_main_network]['services'] is iterable and networks[node_main_network]['services'] is not string and networks[node_main_network]['services'] is mapping and (networks[node_main_network]['services']['dns4'] | default(networks[node_main_network]['services']['dns'], true)) is defined and (networks[node_main_network]['services']['dns4'] | default(networks[node_main_network]['services']['dns'], true)) is iterable and (networks[node_main_network]['services']['dns4'] | default(networks[node_main_network]['services']['dns'], true)) is not string and (networks[node_main_network]['services']['dns4'] | default(networks[node_main_network]['services']['dns'], true)) is not mapping %}
-  {% for elem in (networks[node_main_network]['services']['dns4'] | default(networks[node_main_network]['services']['dns'], true)) %}
-    {% if elem.ip4 is defined and (elem.ip4 | ansible.utils.ipaddr) %}
-      {{ nameservers.append(elem.ip4) }}
+{% elif node_main_network is not none %}
+  {% if networks[node_main_network]['services'] is defined and networks[node_main_network]['services'] is iterable and networks[node_main_network]['services'] is not string and networks[node_main_network]['services'] is mapping %}
+    {% set dns_services = networks[node_main_network]['services']['dns4'] | default(networks[node_main_network]['services']['dns'] | default(none), true) %}
+    {% if dns_services is defined and dns_services is iterable and dns_services is not string and dns_services is not mapping %}
+      {% for elem in dns_services %}
+        {% if elem.ip4 is defined and (elem.ip4 | ansible.utils.ipaddr) %}
+          {% set _ = nameservers.append(elem.ip4) %}
+        {% endif %}
+      {% endfor %}
     {% endif %}
-  {% endfor %}
-{% elif networks[node_main_network]['services_ip'] is defined and (networks[node_main_network]['services_ip'] | ansible.utils.ipaddr) %}
-  {% set nameservers = [networks[node_main_network]['services_ip']] %}
+  {% endif %}
+  {% if nameservers | length == 0 and networks[node_main_network]['services_ip'] is defined and (networks[node_main_network]['services_ip'] | ansible.utils.ipaddr) %}
+    {% set _ = nameservers.append(networks[node_main_network]['services_ip']) %}
+  {% endif %}
 {% endif %}
 
-search {{ dns_client_domain_name | default(bb_domain_name, true) | default('cluster.local', true)}}
+search {{ dns_client_domain_name | default(bb_domain_name, true) | default('cluster.local', true) }}
 {% for nameserver in nameservers %}
 nameserver {{ nameserver }}
 {% endfor %}
-
 {% if dns_client_external_servers is defined and dns_client_external_servers is iterable %}
   {% for external_dns in dns_client_external_servers %}
 nameserver {{ external_dns }}

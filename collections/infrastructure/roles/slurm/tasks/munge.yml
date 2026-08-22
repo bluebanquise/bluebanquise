@@ -22,7 +22,7 @@
 - name: service <|> Manage munge state
   ansible.builtin.service:
     name: munge
-    enabled: "{{ (slurm_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    enabled: "{{ (slurm_enable_services | default(bb_enable_services) | default(true) | bool) | ternary(true, false) }}"
     state: "{{ (slurm_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   tags:
     - service

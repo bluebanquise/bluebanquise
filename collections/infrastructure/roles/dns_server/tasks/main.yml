@@ -23,16 +23,23 @@
   tags:
     - always
 
-- name: include_tasks <|> Firewall
-  ansible.builtin.include_tasks: "firewall.yml"
+- name: "firewalld <|> Add services to firewall's zone"
+  ansible.posix.firewalld:
+    zone: "{{ dns_server_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
+    service: "{{ item }}"
+    immediate: true
+    permanent: true
+    state: enabled
+  when:
+    - os_firewall | default(true) | bool
+  loop: "{{ dns_server_firewall_services_to_add }}"
   tags:
-    - internal
     - firewall
 
 # This calculation takes time, so we store it in memory for later usage
 - name: fact <|> Calculate first_octets
   ansible.builtin.set_fact:
-    dns_server_hosts_by_first_octets: "{{ hostvars | bluebanquise.infrastructure.hosts_by_first_octets(groups['all'], networks) }}"
+    dns_server_hosts_by_first_octets: "{{ hostvars | bluebanquise.infrastructure.hosts_by_first_octets(groups[(dns_server_retrict_to_group | default(bb_retrict_to_group, true) | default('all', true))], networks) }}"
   run_once: true
   tags:
     - templates
@@ -136,7 +143,7 @@
     owner: root
     group: root
     mode: 0644
-  loop: "{{ dns_server_hosts_by_first_octets['reverse'] | flatten(levels=1) }}"
+  loop: "{{ dns_server_hosts_by_first_octets['reverse'].keys() | list }}"
   tags:
     - template
 
@@ -148,7 +155,7 @@
     group: root
     mode: 0644
   notify: service <|> Restart dns services
-  loop: "{{ dns_server_hosts_by_first_octets['reverse'] | flatten(levels=1) }}"
+  loop: "{{ dns_server_hosts_by_first_octets['reverse'].keys() | list }}"
   when: dns_server_zoneconf.changed  # noqa no-handler
   tags:
     - template

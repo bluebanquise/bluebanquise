@@ -2,15 +2,23 @@
 
 ## Description
 
-This role provides a basic /etc/hosts files, that includes hosts, services, and external alias.
+These settings generate and deploys `/etc/hosts`, including hosts from the inventory, network services, and optional external entries.
+
+Supported distributions: RHEL 9/10, Ubuntu 24.04/26.04, Debian 13, OpenSuse Leap 16.
 
 ## Instructions
 
-This role will gather all hosts from the inventory, and add them, using all
-their known internal network connections, into `/etc/hosts` file.
+These settings gather all hosts from the inventory and adds them, using all their known network interfaces, into `/etc/hosts`.
 
-It is also possible to define external hosts to be added into hosts file.
-To do so, define `hosts_file_external_hosts` this way:
+Network services defined under each network (e.g. `pxe4`, `dns4`) are also automatically included.
+
+### Domain name
+
+These settings use `hosts_file_domain_name` or `bb_domain_name` to build FQDNs. Default is `cluster.local`. `hosts_file_domain_name` takes precedence over `bb_domain_name` if both are set.
+
+### External hosts
+
+Additional hosts not in the inventory can be added via `hosts_file_external_hosts`:
 
 ```yaml
 hosts_file_external_hosts:
@@ -23,68 +31,63 @@ hosts_file_external_hosts:
       - extmachine3
 ```
 
-This role is using either `bb_domain_name` or `hosts_file_domain_name` variable to set FQDN. Default is `cluster.local`.
-Note that `hosts_file_domain_name` precedence the global variable `bb_domain_name` if set. 
-
-## Advanced usage
-
 ### Extended naming
 
-User can enable or disable extended naming using the `hosts_file_enable_extended_names` variable.
-Default is `true`.
+Extended naming is controlled by `hosts_file_enable_extended_names` (default: `true`).
 
-For example, for an host defined this way:
+When enabled, each interface generates a `hostname-network` entry in addition to the base hostname entry. Given:
 
 ```yaml
 c001:
   alias:
     - foobar
   network_interfaces:
-    - name: eth0
+    - interface: eth0
       ip4: 10.10.3.1
       network: net-admin
-    - name: eth1
+    - interface: eth1
       ip4: 10.20.3.1
       network: para
       alias: fuuuuu
 ```
 
-If `hosts_file_enable_extended_names: true`, then the following content will be written by default into `/etc/hosts` file (assuming here domain name set is `bluebanquise.local`):
+With `hosts_file_enable_extended_names: true` (and domain `bluebanquise.local`):
 
 ```
-10.10.0.3 c001 c001.bluebanquise.local foobar
+10.10.3.1 c001 c001.bluebanquise.local foobar
 10.10.3.1 c001-net-admin
 10.20.3.1 c001-para fuuuuu
 ```
 
-While if `hosts_file_enable_extended_names: false`, then the following content will be written into `/etc/hosts` file:
+With `hosts_file_enable_extended_names: false`:
 
 ```
-10.10.0.3 c001 c001.bluebanquise.local foobar
+10.10.3.1 c001 c001.bluebanquise.local foobar
 ```
 
-## Changelog
+### Network services
 
-**Please now update CHANGELOG file at repository root instead of adding logs in this file.
-These logs bellow are only kept for archive.**
+Services defined under `networks` are automatically added to `/etc/hosts`. For example, given:
 
-* 1.6.0: Simplify the role. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.5.2: Fix global logic. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.5.1: Fix typo on domain name variable. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.5.0: Add capability to disable extended names, and ensure direct name comes first. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.4.1: Improve code. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.4.0: Use bb_nodes cache. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.3.2: Add missing services entries. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.3.1: Update to BB 2.0 format. Alexandra Darrieutort <alexandra.darrieurtort@u-bordeaux.fr>, Pierre Gay <pierre.gay@u-bordeaux.fr>
-* 1.3.0: Add optional alias to every interface. Matthieu Isoard <indigoping4cgmi@gmail.com>
-* 1.2.0: Update to BB 2.0 format. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.1.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.0.8: Prevent unsorted ranges. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.0.7: Clean code. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.0.6: Update to new network_interfaces syntax. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.0.5: Clean. johnnykeats <johnny.keats@outlook.com>
-* 1.0.4: Rewrite whole macro, add BMC alias. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.0.3: Accelerated mode. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.0.2: Added role version. johnnykeats <johnny.keats@outlook.com>
-* 1.0.1: Documentation. johnnykeats <johnny.keats@outlook.com>
-* 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
+```yaml
+networks:
+  net-admin:
+    services:
+      pxe4:
+        - ip4: 10.10.0.1
+          hostname: pxe4
+      dns4:
+        - ip4: 10.10.0.1
+          hostname: dns4
+```
+
+The following entries will be added:
+
+```
+10.10.0.1 pxe4
+10.10.0.1 dns4
+```
+
+### Performance
+
+These settings use `delegate_to: localhost` with `run_once: true` and `delegate_facts: true` to build the full host map once on the controller, then pushes the rendered file to all targets. This avoids per-host fact computation and scales to thousands of hosts.

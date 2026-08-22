@@ -25,6 +25,13 @@ autoinstall:
   apt:
     geoip: false
     preserve_sources_list: {{ pxe_stack_preserve_repositories }}
+    {% if (equipment['os']['os_autoinstall_custom_repositories'] | default(pxe_stack_os_autoinstall_custom_repositories)) | length > 0 %}
+    sources:
+      {% for repo in (equipment['os']['os_autoinstall_custom_repositories'] | default(pxe_stack_os_autoinstall_custom_repositories)) %}
+      {{ repo.name }}:
+        source: "deb {{ repo.url }} {{ repo.suite }} {{ repo.components | default('main', true) }}"
+      {% endfor %}
+    {% endif %}
     {% if equipment['os']['os_pxe_ubuntu_apt_configuration'] is defined %}
 {{ equipment['os']['os_pxe_ubuntu_apt_configuration'] | indent(2, True) }}
     {% endif %}
@@ -93,11 +100,14 @@ autoinstall:
     - echo " " > /target/etc/apt/sources.list
     - echo " " > /target/etc/apt/sources.list.d/ubuntu.sources
   {% endif %}
+  {% if pxe_stack_inventory_tag is defined and pxe_stack_inventory_tag is not none %}
+    - mkdir -p /target/etc/bluebanquise/tags/ && echo "{{ pxe_stack_inventory_tag }}" > /target/etc/bluebanquise/tags/pxe_inventory
+  {% endif %}
   {% if (equipment['hw']['hw_preserve_efi_first_boot_device'] | default(pxe_stack_hw_preserve_efi_first_boot_device)) == true %}
     - sh -c '[ -d /sys/firmware/efi ] && efibootmgr -o $(efibootmgr | grep BootCurrent | cut -d" " -f2),$(efibootmgr | grep BootOrder | sed "s/BootOrder:\ //" | sed "s/$(efibootmgr | grep BootCurrent | cut -d" " -f2),//") || echo "Not an EFI system, skipping"'
   {% endif %}
   {% if pxe_stack_post_install_boot_to_disk %}
-    - curtin in-target --target=/target -- sh -c 'for I in `cat /proc/cmdline | tr " " "\n" | grep -E "^(node_hostname|ipxe_next_server)="` ; do eval $I; done; curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$node_hostname&boot=disk"'
+    - curtin in-target --target=/target -- sh -c 'for I in `cat /proc/cmdline | tr " " "\n" | grep -E "^(node_hostname|ipxe_next_server)="` ; do eval $I; done; curl -s -k "http://$ipxe_next_server:{{ pxe_stack_daemon_port }}/stage_report?hostname=$node_hostname&stage=osdeploy&status=completed"'
   {% endif %}
 
 {% endif %}

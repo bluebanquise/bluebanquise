@@ -83,7 +83,7 @@
 - name: "service <|> Manage {{ rsyslog_services_to_start | join(' ') }} state"
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: "{{ (rsyslog_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    enabled: "{{ (rsyslog_enable_services | default(bb_enable_services) | default(true) | bool) | ternary(true, false) }}"
     state: "{{ (rsyslog_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   loop: "{{ rsyslog_services_to_start }}"
   tags:

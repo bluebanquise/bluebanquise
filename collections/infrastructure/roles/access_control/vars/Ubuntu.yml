@@ -1,5 +1,0 @@
----
-access_control_packages_to_install:
-  - apparmor
-  - apparmor-utils
-  - apparmor-profiles

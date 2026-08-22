@@ -1,0 +1,111 @@
+---
+# cluster_management merges four previously-separate roles (cluster_state, cluster_tools,
+# cluster_supervision, cluster_events) into one - see README.md and AI/CLAUDE.md's "Cluster
+# Monitoring System" for the full rationale. Variables below keep each former role's own
+# sub-prefix (cluster_management_state_*, _tools_*, _supervision_*, _events_*) so the section
+# each belongs to stays obvious - this is a mechanical rename (ansible-lint requires every
+# variable to be prefixed with the role's own name), not a consolidation: several of these
+# still hold identical values by convention (e.g. the shared cluster/hosts directory), left as
+# separate variables on purpose rather than collapsed into one.
+
+# ── cluster_management_state_* (formerly cluster_state) ──────────────────────────
+cluster_management_state_base_path: /var/lib/bluebanquise/cluster/hosts
+cluster_management_state_tmp_path: /var/lib/bluebanquise/cluster/.tmp
+cluster_management_state_hosts_group: all
+
+cluster_management_state_conf_path: /etc/bluebanquise/cluster_dynamic.conf
+cluster_management_state_daemon_script_path: /usr/local/sbin/bluebanquise-cluster-dynamic
+cluster_management_state_scan_interval: 300
+cluster_management_state_thread_pool_size: 100
+cluster_management_state_ping_timeout: 5
+cluster_management_state_ssh_timeout: 10
+cluster_management_state_lock_timeout: 30
+cluster_management_state_log_level: INFO
+
+# state_diff.py and events.py are internal files of this same role now (see the _tools_*/
+# _events_* sections below) - always present, no longer an optional soft dependency. The daemon
+# still loads them dynamically by path (they're standalone files, not an importable package),
+# it just now treats "missing" as a fatal startup error instead of silently disabling the
+# feature, since "missing" can only mean a broken install of this role.
+cluster_management_state_diff_module_path: /usr/local/lib/bluebanquise/cluster/state_diff.py
+cluster_management_state_events_module_path: /usr/local/lib/bluebanquise/cluster/events.py
+
+# ── cluster_management_tools_* (formerly cluster_tools) ───────────────────────────
+cluster_management_tools_script_path: /usr/local/sbin/bluebanquise-cluster
+cluster_management_tools_lib_path: /usr/local/lib/bluebanquise/cluster
+cluster_management_tools_plugins_path: "{{ cluster_management_tools_lib_path }}/plugins"
+cluster_management_tools_base_path: /var/lib/bluebanquise/cluster/hosts
+cluster_management_tools_tmp_path: /var/lib/bluebanquise/cluster/.tmp
+cluster_management_tools_events_module_path: /usr/local/lib/bluebanquise/cluster/events.py
+
+# inventory plugin - manages an ansible-inventory via ansible_inventory.py (installed next to
+# this same lib path, see files/ansible_inventory.py's docstring). inventories_root is a single
+# git repo that can hold several named inventories as subfolders; the CLI's --inventory flag
+# picks one, falling back to default_inventory.
+cluster_management_tools_inventory_conf_path: /etc/bluebanquise/cluster_inventory.conf
+cluster_management_tools_inventory_inventories_root: /var/lib/bluebanquise/cluster/inventories
+cluster_management_tools_inventory_working_folder: /var/lib/bluebanquise/cluster/.tmp
+cluster_management_tools_inventory_default_inventory: main
+cluster_management_tools_inventory_skeletons:
+  - os_group
+  - hw_group
+  - network
+  - network_interface
+  - bmc
+  - all_group
+
+# ── cluster_management_supervision_* (formerly cluster_supervision) ───────────────
+cluster_management_supervision_packages_to_install:
+  - ipmitool
+  - bluebanquise-venv
+
+cluster_management_supervision_scripts_path: /usr/local/lib/bluebanquise/supervision/scripts
+
+# Built-in check scripts shipped by this role. check_bmc is the only one executed locally
+# (no ssh_ prefix) - every other one runs on the remote host over SSH.
+cluster_management_supervision_scripts:
+  - ssh_check_disk_smart
+  - ssh_check_dmesg_errors
+  - ssh_check_fs_mount
+  - ssh_check_fs_usage
+  - ssh_check_gpu_nvidia
+  - ssh_check_ib_errors
+  - ssh_check_mce_errors
+  - ssh_check_pcie_aer_errors
+  - ssh_check_ram_ecc_errors
+  - ssh_check_services
+  - check_bmc
+
+# Operator-defined: {ansible_group_name: {check_name: args_string_or_none}}. A host that is a
+# member of several referenced groups accumulates every group's checks. See README for examples.
+cluster_management_supervision_checks: {}
+
+# Contains, per host, the merged check list and (only for hosts checking check_bmc) the bmc
+# name/ip4/protocol/user/password pulled from hostvars. Holds credentials - kept root/bluebanquise
+# readable only (0640).
+cluster_management_supervision_conf_path: /etc/bluebanquise/cluster_supervision_checks.conf
+
+cluster_management_supervision_daemon_conf_path: /etc/bluebanquise/cluster_supervision_daemon.conf
+cluster_management_supervision_daemon_script_path: /usr/local/sbin/bluebanquise-cluster-supervision-daemon
+
+cluster_management_supervision_daemon_loop_interval: 1800
+cluster_management_supervision_daemon_thread_pool_size: 100
+# Timeout for the initial per-host "is SSH even up" gate probe - kept short and separate from
+# the per-check timeout below, since it runs before every cycle's real checks.
+cluster_management_supervision_daemon_ssh_gate_timeout: 10
+# Timeout for one ssh_* check's full script execution - longer than the gate, since a real probe
+# (e.g. SMART across several disks) can legitimately take a while.
+cluster_management_supervision_daemon_ssh_check_timeout: 60
+cluster_management_supervision_daemon_local_check_timeout: 60
+cluster_management_supervision_daemon_log_level: INFO
+
+cluster_management_supervision_hosts_base_path: /var/lib/bluebanquise/cluster/hosts
+cluster_management_supervision_tmp_path: /var/lib/bluebanquise/cluster/.tmp
+cluster_management_supervision_supervision_filename: supervision.yml
+cluster_management_supervision_dynamic_filename: dynamic_supervision.yml
+
+cluster_management_supervision_events_module_path: /usr/local/lib/bluebanquise/cluster/events.py
+
+# ── cluster_management_events_* (formerly cluster_events) ─────────────────────────
+cluster_management_events_lib_path: /usr/local/lib/bluebanquise/cluster
+cluster_management_events_module_path: "{{ cluster_management_events_lib_path }}/events.py"

@@ -38,4 +38,4 @@
     mode: 0644
   tags:
     - template
-  when: lmod_path is defined and lmod_path is iterable
+  when: lmod_path is defined and lmod_path | length > 0

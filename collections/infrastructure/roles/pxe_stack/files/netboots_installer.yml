@@ -1,0 +1,140 @@
+---
+
+# netboots_installer.yml
+# Configuration file for bluebanquise-netboots-installer.
+#
+# This file is deployed by the pxe_stack Ansible role with force: false,
+# meaning it will NOT be overwritten on subsequent role runs. You can safely
+# edit this file to add local mirrors, airgap URLs, or additional OS entries.
+#
+# SHA256 checksums are optional. If null, the tool skips verification with a
+# warning. It is strongly recommended to fill in checksums for security.
+#
+# Install scripts run as root via bash. Three environment variables are
+# available inside each script:
+#   NETBOOT_BASE_DIR    - absolute path to pxe/netboots/<os>/<version>/<arch>/
+#   NETBOOT_ISO_FILE    - absolute path to the ISO file inside NETBOOT_BASE_DIR
+#   NETBOOT_ISO_FILENAME - basename of the ISO file only (no directory)
+
+netboots:
+
+  ubuntu_24.04:
+    os: ubuntu
+    version: "24.04"
+    description: "Ubuntu 24.04 LTS (Noble Numbat) live-server"
+    x86_64:
+      url: "https://releases.ubuntu.com/24.04.4/ubuntu-24.04.4-live-server-amd64.iso"
+      sha256: null
+      install_script: |
+        set -e
+        mkdir -p ${NETBOOT_BASE_DIR}/iso
+        ln -sf ${NETBOOT_ISO_FILENAME} ${NETBOOT_BASE_DIR}/ubuntu-24.04-live-server-amd64.iso
+        mount -o loop,ro ${NETBOOT_ISO_FILE} /mnt
+        cp -a /mnt/. ${NETBOOT_BASE_DIR}/iso/
+        umount /mnt
+    arm64:
+      url: "https://cdimage.ubuntu.com/releases/24.04.4/release/ubuntu-24.04.4-live-server-arm64.iso"
+      sha256: null
+      install_script: |
+        set -e
+        mkdir -p ${NETBOOT_BASE_DIR}/iso
+        ln -sf ${NETBOOT_ISO_FILENAME} ${NETBOOT_BASE_DIR}/ubuntu-24.04-live-server-arm64.iso
+        mount -o loop,ro ${NETBOOT_ISO_FILE} /mnt
+        cp -a /mnt/. ${NETBOOT_BASE_DIR}/iso/
+        umount /mnt
+
+  debian_13:
+    os: debian
+    version: "13"
+    description: "Debian 13 (Trixie) netinst"
+    x86_64:
+      url: "https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-13.0.0-amd64-netinst.iso"
+      sha256: null
+      install_script: |
+        set -e
+        mkdir -p ${NETBOOT_BASE_DIR}/iso
+        mount -o loop,ro ${NETBOOT_ISO_FILE} /mnt
+        cp -a /mnt/. ${NETBOOT_BASE_DIR}/iso/
+        umount /mnt
+        cp ${NETBOOT_BASE_DIR}/iso/install.amd/vmlinuz ${NETBOOT_BASE_DIR}/iso/linux
+        cp ${NETBOOT_BASE_DIR}/iso/install.amd/initrd.gz ${NETBOOT_BASE_DIR}/iso/initrd.gz
+    arm64:
+      url: "https://cdimage.debian.org/debian-cd/current/arm64/iso-cd/debian-13.0.0-arm64-netinst.iso"
+      sha256: null
+      install_script: |
+        set -e
+        mkdir -p ${NETBOOT_BASE_DIR}/iso
+        mount -o loop,ro ${NETBOOT_ISO_FILE} /mnt
+        cp -a /mnt/. ${NETBOOT_BASE_DIR}/iso/
+        umount /mnt
+        cp ${NETBOOT_BASE_DIR}/iso/install.arm64/vmlinuz ${NETBOOT_BASE_DIR}/iso/linux
+        cp ${NETBOOT_BASE_DIR}/iso/install.arm64/initrd.gz ${NETBOOT_BASE_DIR}/iso/initrd.gz
+
+  rhel_9:
+    os: redhat
+    version: "9"
+    description: "Rocky Linux 9 (RHEL 9 compatible) DVD"
+    x86_64:
+      url: "https://download.rockylinux.org/pub/rocky/9/isos/x86_64/Rocky-9.8-x86_64-dvd.iso"
+      sha256: null
+      install_script: |
+        set -e
+        mkdir -p ${NETBOOT_BASE_DIR}/iso
+        mount -o loop,ro ${NETBOOT_ISO_FILE} /mnt
+        cp -a /mnt/. ${NETBOOT_BASE_DIR}/iso/
+        umount /mnt
+    arm64:
+      url: "https://download.rockylinux.org/pub/rocky/9/isos/aarch64/Rocky-9.8-aarch64-dvd.iso"
+      sha256: null
+      install_script: |
+        set -e
+        mkdir -p ${NETBOOT_BASE_DIR}/iso
+        mount -o loop,ro ${NETBOOT_ISO_FILE} /mnt
+        cp -a /mnt/. ${NETBOOT_BASE_DIR}/iso/
+        umount /mnt
+
+  rhel_10:
+    os: redhat
+    version: "10"
+    description: "Rocky Linux 10 (RHEL 10 compatible) DVD"
+    x86_64:
+      url: "https://download.rockylinux.org/pub/rocky/10/isos/x86_64/Rocky-10.2-x86_64-dvd1.iso"
+      sha256: null
+      install_script: |
+        set -e
+        mkdir -p ${NETBOOT_BASE_DIR}/iso
+        mount -o loop,ro ${NETBOOT_ISO_FILE} /mnt
+        cp -a /mnt/. ${NETBOOT_BASE_DIR}/iso/
+        umount /mnt
+    arm64:
+      url: "https://download.rockylinux.org/pub/rocky/10/isos/aarch64/Rocky-10.2-aarch64-dvd1.iso"
+      sha256: null
+      install_script: |
+        set -e
+        mkdir -p ${NETBOOT_BASE_DIR}/iso
+        mount -o loop,ro ${NETBOOT_ISO_FILE} /mnt
+        cp -a /mnt/. ${NETBOOT_BASE_DIR}/iso/
+        umount /mnt
+
+  opensuse_16:
+    os: opensuse
+    version: "16.0"
+    description: "openSUSE Leap 16.0 DVD"
+    x86_64:
+      url: "https://download.opensuse.org/distribution/leap/16.0/iso/openSUSE-Leap-16.0-DVD-x86_64.iso"
+      sha256: null
+      install_script: |
+        set -e
+        mkdir -p ${NETBOOT_BASE_DIR}/iso
+        mount -o loop,ro ${NETBOOT_ISO_FILE} /mnt
+        cp -a /mnt/. ${NETBOOT_BASE_DIR}/iso/
+        umount /mnt
+    arm64:
+      url: "https://download.opensuse.org/distribution/leap/16.0/iso/openSUSE-Leap-16.0-DVD-aarch64.iso"
+      sha256: null
+      install_script: |
+        set -e
+        mkdir -p ${NETBOOT_BASE_DIR}/iso
+        mount -o loop,ro ${NETBOOT_ISO_FILE} /mnt
+        cp -a /mnt/. ${NETBOOT_BASE_DIR}/iso/
+        umount /mnt

@@ -1,0 +1,4 @@
+---
+- name: command <|> Update GRUB settings
+  ansible.builtin.command: "{{ local_configuration_kernel_config_grub_update_command }}"
+  changed_when: true

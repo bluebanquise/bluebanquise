@@ -38,6 +38,18 @@ pxe_stack_post_install_boot_to_disk: true
 # pxe_stack_start_services:
 
 ############################################################
+### TFTP
+
+# On Debian/Ubuntu these are written to /etc/default/tftpd-hpa.
+# On RedHat/Suse, tftp is socket-activated (no env file): pxe_stack_tftp_options
+# and pxe_stack_tftp_directory are applied via a systemd drop-in overriding
+# tftp.service's ExecStart. pxe_stack_tftp_address is not applied there, as it
+# would require touching tftp.socket's ListenDatagram.
+pxe_stack_tftp_address: "0.0.0.0:69"
+pxe_stack_tftp_options: "--secure --verbose"
+pxe_stack_tftp_directory: "/var/lib/tftpboot"
+
+############################################################
 ### Default equipment profile parameters
 
 pxe_stack_hw_equipment_type: none
@@ -78,6 +90,17 @@ pxe_stack_os_autoinstall_custom_scripts: []
 #    content: |
 #      ...
 
+# Add custom repositories during (and, for RHEL/Suse, after) autoinstall.
+# url is a bare baseurl/media_url for RHEL and Suse; for Debian/Ubuntu (apt), it is the
+# mirror root and suite is required (components defaults to "main").
+pxe_stack_os_autoinstall_custom_repositories: []
+#  - name: internal_extras
+#    url: http://10.10.0.1/repositories/rhel/9/extras
+#  - name: internal_ubuntu
+#    url: http://10.10.0.1/repositories/ubuntu
+#    suite: noble
+#    components: main
+
 # Add proxies
 pxe_stack_os_pxe_repository_proxy:
 pxe_stack_os_pxe_proxy:
@@ -85,13 +108,6 @@ pxe_stack_os_pxe_proxy:
 # Automatically detect NIC to be used in preseed
 # Only works if a single NIC is connected.
 pxe_stack_os_preseed_auto_main_network_interface: true
-
-############################################################
-### Misc parameters
-
-pxe_stack_suse_autoinstall_repositories: []
-#  - media_url: http://10.10.0.1/repositories/sles/15.3/x86_64/updates
-#    name: sles_updates
 
 ############################################################
 ### DISKLESS
@@ -107,6 +123,12 @@ pxe_stack_enable_clonezilla: true
 pxe_stack_enable_alpine: true
 pxe_stack_enable_memtest: true
 
+### Memtest
+
+# Number of memtest passes before rebooting automatically.
+# If test detect any memory errors, system will not reboot.
+pxe_stack_memtest_maxpasses: 2
+
 ### CLONEZILLA
 # Allows to backup/restore systems, or even deploy multiple systems via images.
 # Be aware that pxe_stack role does not handle nfs server, you will have to
@@ -118,3 +140,31 @@ pxe_stack_clonezilla_nfs_export_server:
 
 # Mount point from which load images from NFS server.
 pxe_stack_clonezilla_nfs_mount_point: /nfs/cloned_images
+
+pxe_stack_firewall_services_to_add:
+  - http
+  - tftp
+
+############################################################
+### PXE STACK DAEMON
+
+# hw_* variable: menu entry the host falls back to once its requested boot queue
+# (bluebanquise-bootset -b <a>,<b>,...) is exhausted.
+# Typically 'disk'. Use 'next' on hardware where disk boot is unreliable.
+hw_ipxe_default_boot: disk  # noqa: var-naming[no-role-prefix]
+
+# Extra iPXE menu entries, in addition to the standard ones (osdeploy, disk, diskless, next,
+# memtest, alpine, clonezilla, shell). Each item is a tool name; menu.ipxe.j2 adds a matching
+# visible menu entry chaining to http://${next-server}/pxe/tools/<item>/<item>.ipxe, and both
+# bluebanquise-bootset and the pxe-stack daemon accept it as a valid -b / stage_report target.
+pxe_stack_ipxe_menu_custom: []
+
+pxe_stack_daemon_script_path: /usr/local/sbin/bluebanquise-pxe-stack-daemon
+pxe_stack_daemon_conf_path: /etc/bluebanquise/pxe_stack_daemon.conf
+pxe_stack_daemon_port: 7770
+pxe_stack_daemon_log_level: INFO
+
+# These match the cluster state paths from the cluster_management role (state-tracking half,
+# formerly the separate cluster_state role).
+pxe_stack_cluster_base_path: /var/lib/bluebanquise/cluster/hosts
+pxe_stack_cluster_tmp_path: /var/lib/bluebanquise/cluster/.tmp

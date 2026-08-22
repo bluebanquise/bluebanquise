@@ -5,24 +5,24 @@
     dest: /etc/apache2/mods-enabled/cgi.load
     mode: 0644
     owner: "{{ pxe_stack_apache_user }}"
-    group: "{{ pxe_stack_apache_user }}"
+    group: "{{ pxe_stack_apache_group }}"
     state: link
   notify: service <|> Restart pxe services
 
-# - name: lineinfile <|> Configure tftpd-hpa tftp server
-#   ansible.builtin.lineinfile:
-#     path: "/etc/default/tftpd-hpa"
-#     regexp: "{{ line_item.regexp }}"
-#     line: "{{ line_item.line }}"
-#   loop:
-#     - regexp: "^TFTP_ADDRESS"
-#       line: 'TFTP_ADDRESS="0.0.0.0:69"'
-#     - regexp: "^TFTP_OPTIONS"
-#       line: 'TFTP_OPTIONS="--secure --verbose"'
-#     - regexp: "^TFTP_DIRECTORY"
-#       line: 'TFTP_DIRECTORY="/var/lib/tftpboot"'
-#   loop_control:
-#     loop_var: line_item
-#   notify: service <|> Restart pxe services
-#   tags:
-#     - need_package
+- name: lineinfile <|> Configure tftpd-hpa tftp server
+  ansible.builtin.lineinfile:
+    path: "/etc/default/tftpd-hpa"
+    regexp: "{{ line_item.regexp }}"
+    line: "{{ line_item.line }}"
+  loop:
+    - regexp: "^TFTP_ADDRESS"
+      line: 'TFTP_ADDRESS="{{ pxe_stack_tftp_address }}"'
+    - regexp: "^TFTP_OPTIONS"
+      line: 'TFTP_OPTIONS="{{ pxe_stack_tftp_options }}"'
+    - regexp: "^TFTP_DIRECTORY"
+      line: 'TFTP_DIRECTORY="{{ pxe_stack_tftp_directory }}"'
+  loop_control:
+    loop_var: line_item
+  notify: service <|> Restart pxe services
+  tags:
+    - need_package

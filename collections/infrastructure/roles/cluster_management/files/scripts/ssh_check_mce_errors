@@ -1,0 +1,20 @@
+#!/bin/bash
+# Check for Machine Check Exceptions (MCE) hardware errors in dmesg.
+# Usage: ssh_check_mce_errors
+#
+# Split off from the old bluebanquise_healthchecker's check_cpu_count_mce probe: the
+# core-count-vs-expected comparison it used to do belongs to cluster_state (which already
+# tracks live cpu.count), not supervision - this keeps only the actual fault-detection half.
+
+echo "Checking for MCE hardware errors..."
+
+MCE_LOG=$(dmesg -T | grep -Ei "mce|machine check|hardware error")
+
+if [[ -n "$MCE_LOG" ]]; then
+    echo "CRITICAL: MCE hardware errors detected"
+    echo "$MCE_LOG"
+    exit 2
+fi
+
+echo "OK: No MCE errors detected"
+exit 0

@@ -1,0 +1,12 @@
+---
+# Skeleton applied by ansible_inventory.py when a network is created (`inventory add network
+# <name> [data]`). See resources/data_model.md section 1.
+skeleton:
+  subnet: ""
+  prefix: ""
+  gateway: ""
+  services_ip: ""
+  ib_rate: ""  # default expected InfiniBand rate for hosts on this network, overridable per-interface
+required:
+  - subnet
+  - prefix

@@ -44,7 +44,7 @@
 - name: "service <|> Start services"
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: yes
+    enabled: true
     state: "{{ (nic_start_services | bool) | ternary('started', omit) }}"
   loop: "{{ nic_services_to_start }}"
   tags:

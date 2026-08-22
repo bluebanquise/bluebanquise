@@ -1,0 +1,51 @@
+---
+- name: include_tasks <|> Apply kernel configuration
+  ansible.builtin.include_tasks: system/kernel_config.yml
+  when: >-
+    (local_configuration_system | default({})).kernel_parameters is defined
+    or (local_configuration_system | default({})).sysctl is defined
+    or os_kernel_parameters is defined
+    or hw_kernel_parameters is defined
+    or os_sysctl is defined
+
+- name: include_tasks <|> Apply kernel version lock
+  ansible.builtin.include_tasks: system/kernel_version.yml
+  when: >-
+    (local_configuration_system | default({})).kernel_version is defined
+    or os_kernel_version is defined
+
+- name: include_tasks <|> Apply modprobe configuration
+  ansible.builtin.include_tasks: system/modprobe.yml
+  when: (local_configuration_system | default({})).modprobe is defined
+
+- name: include_tasks <|> Apply pam_limits configuration
+  ansible.builtin.include_tasks: system/pam_limits.yml
+  when: (local_configuration_system | default({})).pam_limits is defined
+
+- name: include_tasks <|> Apply cron jobs configuration
+  ansible.builtin.include_tasks: system/cron.yml
+  when: (local_configuration_system | default({})).cron_jobs is defined
+
+- name: include_tasks <|> Apply packages configuration
+  ansible.builtin.include_tasks: system/packages.yml
+  when: (local_configuration_system | default({})).packages is defined
+
+- name: include_tasks <|> Apply services configuration
+  ansible.builtin.include_tasks: system/services.yml
+  when: (local_configuration_system | default({})).services is defined
+
+- name: include_tasks <|> Apply folders configuration
+  ansible.builtin.include_tasks: system/folders.yml
+  when: (local_configuration_system | default({})).folders is defined
+
+- name: include_tasks <|> Apply files configuration
+  ansible.builtin.include_tasks: system/files.yml
+  when: (local_configuration_system | default({})).files is defined
+
+- name: include_tasks <|> Apply templates configuration
+  ansible.builtin.include_tasks: system/templates.yml
+  when: (local_configuration_system | default({})).templates is defined
+
+- name: include_tasks <|> Apply lineinfile configuration
+  ansible.builtin.include_tasks: system/lineinfile.yml
+  when: (local_configuration_system | default({})).lineinfile is defined

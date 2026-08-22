@@ -1,13 +1,15 @@
-- name: "Install lustre-client"
+- name: package <|> Install lustre client packages
   ansible.builtin.package:
-    name: ["lustre-client,kmod-lustre-client"]
+    name:
+      - lustre-client
+      - kmod-lustre-client
     state: present
 
-- name: "Configure sysctl settings for LNET interfaces ( if multirail )"
+- name: include_tasks <|> Configure sysctl settings for LNET interfaces if multirail
   ansible.builtin.include_tasks: configure_multirail_sysctl.yml
-  when: lustre_multirail is defined and (lustre_multirail | bool)
+  when: lustre_multirail | default(false) | bool
 
-- name: "Configure LNET <> Render /etc/modprobe.d/lustre.conf"
+- name: template <|> Render /etc/modprobe.d/lustre.conf
   ansible.builtin.template:
     src: lustre.conf.j2
     dest: /etc/modprobe.d/lustre.conf
@@ -15,12 +17,12 @@
     group: root
     mode: '0644'
 
-- name: "mount lustre"
+- name: mount <|> Mount lustre filesystems
   vars:
-    lustre_mount_source: "{{item.0.mgs_servers | map('regex_replace','$', '@' ~ item.0.lnet) | join(':') }}:{{ item.0.path | default(item.0.name)}}"
+    lustre_mount_source: "{{ item.0.mgs_servers | map('regex_replace', '$', '@' ~ item.0.lnet) | join(':') }}:{{ item.0.path | default(item.0.name) }}"
   ansible.posix.mount:
-    path: "{{item.0.mount_path}}"
-    src: "{{lustre_mount_source}}"
+    path: "{{ item.0.mount_path }}"
+    src: "{{ lustre_mount_source }}"
     fstype: lustre
     state: mounted
     opts: "{{ item.0.mount_opts | default('') }}"

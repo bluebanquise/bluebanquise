@@ -1,9 +1,21 @@
+---
+- name: include_vars <|> Gather OS specific variables
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family }}.yml"
+      skip: true
+  tags:
+    - always
+
 - name: "package <|> Install DRBD packages"
   ansible.builtin.package:
-    name:
-      - drbd90-utils
-      - kmod-drbd90
-      - policycoreutils-python-utils
+    name: "{{ drbd_packages_to_install }}"
     state: present
   tags:
     - package
@@ -13,6 +25,7 @@
     name: drbd_t
     permissive: true
   when:
+    - ansible_facts.os_family == "RedHat"
     - ansible_facts.selinux.status == "enabled"
 
 - name: "template <|> Generate /etc/drbd.d/global_common.conf"
@@ -44,16 +57,16 @@
 
 - name: "filesystem <|> Create a new primary partition"
   community.general.parted:
-    device: "{{ item.partitionning.device | default(omit) }}"
-    number: "{{ item.partitionning.number | default(omit) }}"
-    label: "{{ item.partitionning.label | default(omit) }}"
-    state: "{{ item.partitionning.state | default(omit) }}"
-    align: "{{ item.partitionning.align | default(omit) }}"
-    part_type: "{{ item.partitionning.part_type| default(omit) }}"
-    part_start: "{{ item.partitionning.part_start | default(omit) }}"
-    part_end: "{{ item.partitionning.part_end | default(omit) }}"
+    device: "{{ item.partitioning.device | default(omit) }}"
+    number: "{{ item.partitioning.number | default(omit) }}"
+    label: "{{ item.partitioning.label | default(omit) }}"
+    state: "{{ item.partitioning.state | default(omit) }}"
+    align: "{{ item.partitioning.align | default(omit) }}"
+    part_type: "{{ item.partitioning.part_type | default(omit) }}"
+    part_start: "{{ item.partitioning.part_start | default(omit) }}"
+    part_end: "{{ item.partitioning.part_end | default(omit) }}"
   loop: "{{ drbd_resources }}"
-  when: item.partitionning is defined and item.partitionning is not none
+  when: item.partitioning is defined and item.partitioning is not none
 
 - name: "filesystem <|> Create a volume group"
   community.general.lvg:
@@ -89,7 +102,7 @@
   when:
     - (drbd_drbdadm_status.stdout_lines | select("match", "^"+item.name+".*") | list | length) < 1
 
-- name: Format FS if needed
+- name: "block <|> Format FS if needed"
   run_once: true
   block:
 
@@ -124,14 +137,14 @@
       loop: "{{ drbd_resources }}"
       when: item.filesystem is defined and item.filesystem is not none
 
-- name: "Check if DRBD local directories exists"
+- name: "stat <|> Check if DRBD local directories exist"
   ansible.builtin.stat:
     path: "{{ item.mount.path | default(omit) }}"
   register: drbd_stat_result
   loop: "{{ drbd_resources }}"
   when: item.mount is defined and item.mount is not none
 
-- name: "Create directories if they does not exist"
+- name: "file <|> Create directories if they do not exist"
   ansible.builtin.file:
     path: "{{ item[0].mount.path | default(omit) }}"
     state: directory
@@ -141,19 +154,7 @@
     - not item[1].stat.exists
   loop: "{{ drbd_resources | product(drbd_stat_result.results) | list }}"
 
-- name: "filesystem <|> Mounting DRBD filesystem in local directory"
-  ansible.posix.mount:
-    path: "{{ item.mount.path | default(omit) }}"
-    src: "{{ item.mount.source | default(omit) }}"
-    fstype: "{{ item.mount.fstype | default(omit) }}"
-    state: "{{ item.mount.state | default(omit) }}"
-    opts: noauto
-  loop: "{{ drbd_resources }}"
-  when: item.mount is defined and item.mount is not none
-  delegate_to: "{{ drbd_resources[0].nodes.keys() | list | first }}"
-  run_once: true
-
-- name: "filesystem <|> Mounting DRBD filesystem in local directory"
+- name: "filesystem <|> Mount DRBD filesystem"
   ansible.posix.mount:
     path: "{{ item.mount.path | default(omit) }}"
     src: "{{ item.mount.source | default(omit) }}"
@@ -171,7 +172,7 @@
   changed_when: false
   run_once: true
 
-- name: "show <|> drbdadm status"
-  debug:
+- name: "debug <|> Show drbdadm status"
+  ansible.builtin.debug:
     msg: "{{ drbd_drbdadm_final_status.stdout }}"
   run_once: true

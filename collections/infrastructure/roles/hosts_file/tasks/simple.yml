@@ -1,0 +1,17 @@
+---
+
+- name: set_fact <|> Build host to network mapping
+  ansible.builtin.set_fact:
+    hosts_file_hosts_by_first_octets: "{{ hostvars | bluebanquise.infrastructure.hosts_by_first_octets(groups[(hosts_file_retrict_to_group | default(bb_retrict_to_group, true) | default('all', true))], networks) }}"
+
+- name: template <|> Generate /etc/hosts
+  ansible.builtin.template:
+    src: hosts.j2
+    dest: /etc/hosts
+    owner: root
+    group: root
+    mode: 0644
+  vars:
+    hosts_by_first_octets: "{{ hosts_file_hosts_by_first_octets }}"
+  tags:
+    - template

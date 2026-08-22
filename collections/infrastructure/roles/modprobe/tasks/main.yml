@@ -1,7 +1,0 @@
----
-- name: modprobe <|> Load or unload kernel modules
-  community.general.modprobe:
-    name: "{{ item.name }}"
-    params: "{{ item.params | default(omit) }}"
-    state: "{{ item.state | default(omit) }}"
-  loop: "{{ modprobe | default([]) }}"

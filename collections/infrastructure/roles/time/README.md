@@ -2,15 +2,45 @@
 
 ## Description
 
-This role provides a time server/client based on Chrony.
-
-## Data Model
-
-This role relies on [data model](https://github.com/bluebanquise/bluebanquise/blob/master/resources/data_model.md):
-* Section 1 (Networks)
-* Section 2 (Hosts definition)
-
+These settings provide a time server/client based on Chrony.
 ## Instructions
+
+### Server or client
+
+Set `time_profile` to `server` or `client` at invocation:
+
+```yaml
+- role: bluebanquise.infrastructure.time
+  vars:
+    time_profile: server   # or: client
+```
+
+### Network configuration
+
+These settings read NTP server endpoints from the `ntp4` (or legacy `ntp`) key under `services` in the management network definition:
+
+```yaml
+networks:
+  net-admin:
+    subnet: 10.10.0.0
+    prefix: 16
+    services:
+      ntp4:
+        - hostname: mgt1
+          ip4: 10.10.0.1
+```
+
+Or using the all-in-one shorthand:
+
+```yaml
+networks:
+  net-admin:
+    subnet: 10.10.0.0
+    prefix: 16
+    services_ip: 10.10.0.1
+```
+
+`services:ntp4` takes precedence over `services_ip` when both are defined.
 
 ### Manual tests
 
@@ -28,7 +58,7 @@ chronyd -q 'server my_ntp_server_hostname_or_ip iburst'
 
 ### Time zone
 
-By default, role will use the `time_time_zone` or `bb_time_zone` variables to get time zone to be 
+By default, this will use the `time_time_zone` or `bb_time_zone` variables to get time zone to be 
 set on the target system. Default is `Europe/Brussels`. Please set this value according
 to your cluster localization.
 
@@ -47,17 +77,17 @@ time_external_servers:
   - 1.pool.ntp.org
 ```
 
-**pools** and **servers** are mutually exclusive. If you define both, the role
+**pools** and **servers** are mutually exclusive. If you define both, these settings
 will default to **pools** to write the Chrony configuration.
 
-Not that by defining these external resources, role will not add binding to local servers.
+Note that by defining these external resources, this will not add binding to local servers.
 
 It is possible to not install any time server but
 simply bind clients to an external pool/server using this method.
 
 ### Allowed networks
 
-By default, the role will scan target host inventory network_interfaces list, and allow access to all networks connected to the host.
+By default, these settings will scan target host inventory network_interfaces list, and allow access to all networks connected to the host.
 
 It is possible to allow more networks by using the `time_additional_networks_allowed` list. Allowed networks must be provided as `subnet/prefix` format:
 
@@ -66,34 +96,3 @@ time_additional_networks_allowed:
   - 10.10.0.0/16
   - 172.16.1.0/24
 ```
-
-### Icebergs
-
-This role will react differently if in BlueBanquise stack multi icebergs mode or not.
-
-By default, in non multiple icebergs, server will be the time source reference.
-If using multiple icebergs hierarchy, then server can be a time reference if at
-top of the icebergs hierarchy, or simply a time relay with an higher stratum,
-if not a top server. This stratum calculation is done using **bb_iceberg_level**
-variable.
-
-## Changelog
-
-**Please now update CHANGELOG file at repository root instead of adding logs in this file.
-These logs bellow are only kept for archive.**
-
-* 1.4.2: Fix global logic. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.4.1: Fix icebergs mechanism. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.4.0: Allow services and services_ip together. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.3.2: Fix services entries. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.3.1: Rename systemd service to chrony for Ubuntu. Giacomo Mc Evoy <gino.mcevoy@gmail.com>
-* 1.3.0: Update to pip Ansible. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.2.1: Adapt role to handle multiple distributions. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.2.0: Add Ubuntu support. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.1.1: Add custom configuration path. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.1.0: Set sysconfig OPTIONS for chronyd. Bruno Travouillon <devel@travouillon.fr>
-* 1.0.4: Add iburst to allow faster boot time recovery, update macro. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.0.3: Update to new network_interfaces syntax. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.0.2: Clean. johnnykeats <johnny.keats@outlook.com>
-* 1.0.1: Documentation. johnnykeats <johnny.keats@outlook.com>
-* 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>

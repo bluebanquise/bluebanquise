@@ -12,10 +12,6 @@ This role is compatible with HA clusters:
 * CentOS 8
 * Ubuntu 18.04 & 20.04
 
-## Requirements
-
-Ansible 2.7 or higher is required for `defaults/main/*.yml` to work correctly.
-
 ## Known Limitations
 
 - When firewalld is running, containers deployed with podman may lose connectivity if the firewall rules are reloaded with the `firewall-cmd --reload` command, due to non-persistent rules added by podman being lost. As a workaround, the following command should be used after reloading the firewall, it will restore container connectivity without having to re-deploy the containers:
@@ -63,11 +59,11 @@ For a basic setup with default values run:
 ---
 - hosts: management1
   vars:
-    podman_configure_local_registry: True
+    podman_configure_local_registry: true
     podman_users:
       root: '100000:65535'
       guest: '1000:1000'
-      ...
+      # ...
     podman_insecure_registries:
       - 'localhost:5000'
     podman_search_registries:
@@ -78,15 +74,15 @@ For a basic setup with default values run:
 
 ## Local registry
 
-In order to deploy the optionnal local registry, you must provide the container for it.
-This is done wih the following steps from your local PC or from a server with Internet access:
+In order to deploy the optional local registry, you must provide the container for it.
+This is done with the following steps from your local PC or from a server with Internet access:
 
 * Using Docker
 
 ```shell
 docker pull registry:2
 docker save registry:2 | gzip > registry-2.tgz
-scp registry-2 root@<management1>:/var/www/html/images/registry-2.tgz
+scp registry-2.tgz root@<management1>:/var/www/html/images/registry-2.tgz
 ```
 
 * Using podman
@@ -94,7 +90,7 @@ scp registry-2 root@<management1>:/var/www/html/images/registry-2.tgz
 ```shell
 podman pull registry:2
 podman save registry:2 | gzip > registry-2.tgz
-scp registry-2 root@<management1>:/var/www/html/images/registry-2.tgz
+scp registry-2.tgz root@<management1>:/var/www/html/images/registry-2.tgz
 ```
 
 To deploy the local registry, you must customize the following variables when calling the role:

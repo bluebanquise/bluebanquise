@@ -1,0 +1,7 @@
+---
+- name: cluster playbooks
+  hosts: "fn_management"
+  roles:
+
+    - role: bluebanquise.infrastructure.cluster_playbooks
+      tags: cluster_playbooks

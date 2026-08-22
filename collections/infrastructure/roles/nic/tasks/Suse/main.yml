@@ -3,6 +3,6 @@
 - name: "service <|> Disable wicked"
   ansible.builtin.service:
     name: wicked
-    enabled: no
+    enabled: false
     state: stopped
   notify: reboot <|> Reboot system

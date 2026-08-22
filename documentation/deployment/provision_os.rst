@@ -22,11 +22,11 @@ the cluster.
 
 We are going to proceed in the following order:
 
-#. Deploy configuration on management1 node
-#. Deploy fresh OS on the other nodes, from management1
-#. Deploy configuration on the other nodes.
+#. Deploy configuration on management1 host
+#. Deploy fresh OS on the other hosts, from management1
+#. Deploy configuration on the other hosts.
 
-It is assumed that you already have deployed a fresh operating system on the management node management1.
+It is assumed that you already have deployed a fresh operating system on the management host management1.
 
 Install vital dependencies
 ==========================
@@ -76,23 +76,23 @@ Create file ``/var/lib/bluebanquise/inventory/group_vars/all/repositories.yml`` 
   <b>RHEL</b> <img src="_static/logo_rhel.png">, <b>CentOS</b> <img src="_static/logo_centos.png">, <b>RockyLinux</b> <img src="_static/logo_rocky.png">, <b>OracleLinux</b> <img src="_static/logo_oraclelinux.png"><br> <b>CloudLinux</b> <img src="_static/logo_cloudlinux.png">, <b>AlmaLinux</b> <img src="_static/logo_almalinux.png">
   </div><br><br>
 
-* EL8:
-
-.. code-block:: yaml
-
-  repositories:
-    - name: bluebanquise
-      baseurl: http://bluebanquise.com/repository/releases/latest/el8/x86_64/bluebanquise/
-      enabled: 1
-      state: present
-
 * EL9:
 
 .. code-block:: yaml
 
-  repositories:
+  bb_repositories:
     - name: bluebanquise
       baseurl: http://bluebanquise.com/repository/releases/latest/el9/x86_64/bluebanquise/
+      enabled: 1
+      state: present
+
+* EL10:
+
+.. code-block:: yaml
+
+  bb_repositories:
+    - name: bluebanquise
+      baseurl: http://bluebanquise.com/repository/releases/latest/el10/x86_64/bluebanquise/
       enabled: 1
       state: present
 
@@ -104,36 +104,28 @@ Create file ``/var/lib/bluebanquise/inventory/group_vars/all/repositories.yml`` 
   <b>Ubuntu</b> <img src="_static/logo_ubuntu.png">, <b>Debian</b> <img src="_static/logo_debian.png">
   </div><br><br>
 
-* Ubuntu 20.04:
+* Ubuntu 24.04:
 
 .. code-block:: yaml
 
-  repositories:
-    - repo: deb [trusted=yes] http://bluebanquise.com/repository/releases/latest/u20/x86_64/bluebanquise/ focal main
+  bb_repositories:
+    - repo: deb [trusted=yes] http://bluebanquise.com/repository/releases/latest/u24/x86_64/bluebanquise/ noble main
       state: present
 
-* Ubuntu 22.04:
+* Ubuntu 26.04:
 
 .. code-block:: yaml
 
-  repositories:
-    - repo: deb [trusted=yes] http://bluebanquise.com/repository/releases/latest/u22/x86_64/bluebanquise/ jammy main
+  bb_repositories:
+    - repo: deb [trusted=yes] http://bluebanquise.com/repository/releases/latest/u26/x86_64/bluebanquise/ resolute main
       state: present
 
-* Debian 11:
+* Debian 13:
 
 .. code-block:: yaml
 
-  repositories:
-    - repo: deb [trusted=yes] http://bluebanquise.com/repository/releases/latest/deb11/x86_64/bluebanquise/ bullseye main
-      state: present
-
-* Debian 12:
-
-.. code-block:: yaml
-
-  repositories:
-    - repo: deb [trusted=yes] http://bluebanquise.com/repository/releases/latest/deb12/x86_64/bluebanquise/ bookworm main
+  bb_repositories:
+    - repo: deb [trusted=yes] http://bluebanquise.com/repository/releases/latest/deb13/x86_64/bluebanquise/ trixie main
       state: present
 
 * Suse like system:
@@ -146,10 +138,10 @@ Create file ``/var/lib/bluebanquise/inventory/group_vars/all/repositories.yml`` 
 
 .. code-block:: yaml
 
-  repositories:
+  bb_repositories:
     - name: bluebanquise
       disable_gpg_check: true
-      baseurl: https://bluebanquise.com/repository/releases/latest/lp15/x86_64/bluebanquise/
+      baseurl: https://bluebanquise.com/repository/releases/latest/lp16/x86_64/bluebanquise/
 
 Create management playbook
 --------------------------
@@ -168,8 +160,8 @@ with the following content:
 
       - role: bluebanquise.infrastructure.hosts_file
         tags: hosts_file
-      - role: bluebanquise.infrastructure.set_hostname
-        tags: set_hostname
+      - role: bluebanquise.infrastructure.local_configuration
+        tags: local_configuration
       - role: bluebanquise.infrastructure.repositories
         tags: repositories
       - role: bluebanquise.infrastructure.nic
@@ -194,7 +186,7 @@ with the following content:
 Note that this is a basic example to have a working basic cluster. More roles are available in the infrastructure collection.
 
 Then, we will ask Ansible to read this playbook, and execute all roles listed
-inside on management1 node (check hosts at top of the file).
+inside on management1 host (check hosts at top of the file).
 
 To do so, we are going to use the ``ansible-playbook`` command.
 
@@ -244,7 +236,7 @@ Ensure not to cut your connection if working remotely.
 
 .. code-block:: text
 
-  ansible-playbook playbooks/managements.yml -b -i inventory --limit management1 --tags set_hostname,nic
+  ansible-playbook playbooks/managements.yml -b -i inventory --limit management1 --tags local_configuration,nic
 
 Check interfaces are up (check using ``ip a`` command), and then setp repositories:
 
@@ -267,14 +259,14 @@ If all went well, you can check that all services are up and running.
   just update/correct what is needed, and do nothing for all that is at an
   expected state.
 
-Now that management1 is up and running, it is time to deploy the other nodes.
+Now that management1 is up and running, it is time to deploy the other hosts.
 
-Deploy OS on other nodes: PXE
+Deploy OS on other hosts: PXE
 =============================
 
-Next step is to deploy the other nodes using PXE process.
+Next step is to deploy the other hosts using PXE process.
 
-NOTE: it is assumed here you know how to have your other nodes / VM / servers /
+NOTE: it is assumed here you know how to have your other hosts / VM / servers /
 workstation to boot on LAN.
 
 If your device cannot boot on LAN, use iso or usb image provided on management1
@@ -314,9 +306,9 @@ are in /var/www/html/pxe):
 
 Whatever the boot source, and whatever Legacy BIOS or UEFI, all converge to
 ``http://${next-server}/pxe/convergence.ipxe``. Then this
-file chain to node specific file in nodes (this file is generated using *bluebanquise-bootset*
-command). The node specific file contains the default entry for the iPXE menu,
-then node chain to its equipment_profile file, to gather group values, and chain
+file chain to host specific file in hosts (this file is generated using *bluebanquise-bootset*
+command). The host specific file contains the default entry for the iPXE menu,
+then host chain to its equipment_profile file, to gather group values, and chain
 again to menu file. The menu file display a simple menu, and wait 10s for user
 before starting the default entry (which can be os deployment, or boot to disk,
 or boot diskless).
@@ -462,11 +454,11 @@ The following slides explain the whole PXE process of the BlueBanquise stack:
 bluebanquise-bootset
 --------------------
 
-Before booting remote nodes in PXE, we need to ask management1 to activate
-remote nodes deployment. If not, remote nodes will not be able to grab their
-dedicated configuration from management node at boot.
+Before booting remote hosts in PXE, we need to ask management1 to activate
+remote hosts deployment. If not, remote hosts will not be able to grab their
+dedicated configuration from management host at boot.
 
-To manipulate nodes PXE boot on management1 (aka set PXE chain configuration), a command, ``bluebanquise-bootset``, is available.
+To manipulate hosts PXE boot on management1 (aka set PXE chain configuration), a command, ``bluebanquise-bootset``, is available.
 
 We are going to deploy login1, storage1 and compute1, compute2, compute3 and compute4.
 
@@ -491,9 +483,9 @@ Which should return:
   Next boot deployment: c[001-004],login1,storage1
 
 Note that this osdeploy state will be automatically updated once OS is deployed
-on remote nodes, and set to disk.
+on remote hosts, and set to disk.
 
-You can also force nodes that boot on PXE to boot on disk using ``-b disk``
+You can also force hosts that boot on PXE to boot on disk using ``-b disk``
 instead of ``-b osdeploy``.
 
 Please refer to the pxe_stack role dedicated section in this documentation for
@@ -502,12 +494,12 @@ more information on the bluebanquise-bootset usage.
 SSH public key
 --------------
 
-In order to log into the remote nodes without giving the password, check that
+In order to log into the remote hosts without giving the password, check that
 the ssh public key defined in your os groups inventory (``os_admin_ssh_keys key``) matches your
 management1 public key (the one generated in /var/lib/bluebanquise/.ssh/). If not, update the
 inventory and remember to re-run the pxe_stack role (to update
-PXE related files that contains the ssh public key of the management node to be
-set on nodes during deployment).
+PXE related files that contains the ssh public key of the management host to be
+set on hosts during deployment).
 
 .. code-block:: bash
 
@@ -516,19 +508,19 @@ set on nodes during deployment).
 OS deployment
 -------------
 
-Power on now the remote nodes, have them boot over LAN, and watch the automatic
+Power on now the remote hosts, have them boot over LAN, and watch the automatic
 installation procedure. It should take around 5-20 minutes depending on your
 hardware.
 
 Once done, proceed to next part.
 
-Apply other nodes configuration
+Apply other hosts configuration
 ===============================
 
-Now that all the nodes have an operating system installed and running, applying
-configuration on these nodes is simple.
+Now that all the hosts have an operating system installed and running, applying
+configuration on these hosts is simple.
 
-Ensure first you can ssh passwordless on each of the freshly deployed nodes.
+Ensure first you can ssh passwordless on each of the freshly deployed hosts.
 
 .. note::
   On some Linux distributions, if DHCP leases are short, you may loose
@@ -536,7 +528,7 @@ Ensure first you can ssh passwordless on each of the freshly deployed nodes.
   again. This issue is solved once the nic role has been applied on hosts,
   as it sets ip statically.
 
-We will deploy configuration on compute1 node as an example.
+We will deploy configuration on compute1 host as an example.
 
 Create file ``playbooks/computes.yml`` with the following content:
 
@@ -551,8 +543,8 @@ Create file ``playbooks/computes.yml`` with the following content:
 
       - role: bluebanquise.infrastructure.hosts_file
         tags: hosts_file
-      - role: bluebanquise.infrastructure.set_hostname
-        tags: set_hostname
+      - role: bluebanquise.infrastructure.local_configuration
+        tags: local_configuration
       - role: bluebanquise.infrastructure.repositories
         tags: repositories
       - role: bluebanquise.infrastructure.nic
@@ -570,9 +562,9 @@ And execute it while targeting compute1 (if you do not limit it, it will deploy 
 
   ansible-playbook playbooks/computes.yml -b -i inventory --limit compute1
 
-If you do not set the limite, and have multiple compute nodes up and running,
-you will see that Ansible will work on computes nodes in parallel, using more CPU
-on the management1 node (by spawning multiple forks).
+If you do not set the limite, and have multiple compute hosts up and running,
+you will see that Ansible will work on computes hosts in parallel, using more CPU
+on the management1 host (by spawning multiple forks).
 
 -------------
 

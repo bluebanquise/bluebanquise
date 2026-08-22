@@ -1,7 +1,7 @@
 ---
 - name: restart grafana
   ansible.builtin.service:
-    name: "{{ item  }}"
+    name: "{{ item }}"
     state: restarted
   loop: "{{ grafana_services_to_start | flatten(levels=1) }}"
   register: grafana_service_results

@@ -1,0 +1,88 @@
+#jinja2: lstrip_blocks: True
+# {{ ansible_managed }}
+---
+{% set _hv = hostvars[item] %}
+{% set groups_ns = namespace(fn_groups=[], hw_groups=[], os_groups=[]) %}
+{% for gname in groups | sort %}
+  {% if gname.startswith('fn_') and item in groups[gname] %}
+    {% set groups_ns.fn_groups = groups_ns.fn_groups + [gname] %}
+  {% endif %}
+  {% if gname.startswith('hw_') and item in groups[gname] %}
+    {% set groups_ns.hw_groups = groups_ns.hw_groups + [gname] %}
+  {% endif %}
+  {% if gname.startswith('os_') and item in groups[gname] %}
+    {% set groups_ns.os_groups = groups_ns.os_groups + [gname] %}
+  {% endif %}
+{% endfor %}
+{% set ifaces_ns = namespace(list=[]) %}
+{% for iface in _hv.network_interfaces | default([], true) %}
+  {% set iface_ns = namespace(data={}) %}
+  {% for k, v in iface.items() %}
+    {% if k == 'interface' %}
+      {% set iface_ns.data = iface_ns.data | combine({'name': v}) %}
+    {% else %}
+      {% set iface_ns.data = iface_ns.data | combine({k: v}) %}
+    {% endif %}
+  {% endfor %}
+  {# ib_rate precedence: interface-declared value wins, else the network's default, else omitted -
+     same shape as nic role's nic_j2_gw4 (interface gw4 over networks[].gateway4). #}
+  {% if iface.ib_rate is defined %}
+    {% set iface_ns.data = iface_ns.data | combine({'ib_rate': iface.ib_rate}) %}
+  {% elif iface.network is defined and networks[iface.network] is defined and networks[iface.network].ib_rate is defined %}
+    {% set iface_ns.data = iface_ns.data | combine({'ib_rate': networks[iface.network].ib_rate}) %}
+  {% endif %}
+  {% set ifaces_ns.list = ifaces_ns.list + [iface_ns.data] %}
+{% endfor %}
+{% set _state = {
+    'hostname': item,
+    'ansible_groups': {
+        'function': groups_ns.fn_groups,
+        'hardware': groups_ns.hw_groups,
+        'os': groups_ns.os_groups
+    },
+    'network_interfaces': ifaces_ns.list
+} %}
+{% if _hv.bmc is defined %}
+  {% set _state = _state | combine({'bmc': _hv.bmc}) %}
+{% endif %}
+{% if _hv.hw_specs is defined and _hv.hw_specs.cpu is defined %}
+  {% set _state = _state | combine({'cpu': {
+    'architecture': _hv.hw_specs.cpu.architecture | default(_hv.hw_architecture | default('')),
+    'sockets': _hv.hw_specs.cpu.sockets | default(1),
+    'cores_per_socket': _hv.hw_specs.cpu.cores_per_socket | default(1),
+    'threads_per_core': _hv.hw_specs.cpu.threads_per_core | default(1)
+  }}) %}
+{% elif _hv.hw_architecture is defined %}
+  {% set _state = _state | combine({'cpu': {'architecture': _hv.hw_architecture}}) %}
+{% endif %}
+{% if _hv.hw_specs is defined and _hv.hw_specs.gpu is defined %}
+  {% if _hv.hw_specs.gpu == none or _hv.hw_specs.gpu == 'none' %}
+    {% set _state = _state | combine({'gpu': []}) %}
+  {% elif _hv.hw_specs.gpu is iterable and _hv.hw_specs.gpu is not string %}
+    {% set _state = _state | combine({'gpu': _hv.hw_specs.gpu | list}) %}
+  {% else %}
+    {% set _state = _state | combine({'gpu': [_hv.hw_specs.gpu]}) %}
+  {% endif %}
+{% endif %}
+{% if _hv.hw_specs is defined and _hv.hw_specs.pcie is defined %}
+  {% set _state = _state | combine({'pcie': _hv.hw_specs.pcie}) %}
+{% endif %}
+{% if _hv.os_operating_system is defined %}
+  {% set _state = _state | combine({'os': {
+    'distribution': _hv.os_operating_system.distribution | default(''),
+    'version': _hv.os_operating_system.distribution_version | default('') | string
+  }}) %}
+{% endif %}
+{% if _hv.os_firewall is defined %}
+  {% set _state = _state | combine({'firewall': _hv.os_firewall | bool}) %}
+{% endif %}
+{% if _hv.os_access_control is defined %}
+  {% set _state = _state | combine({'access_control': {'type': _hv.os_access_control}}) %}
+{% endif %}
+{% if _hv.os_partitioning is defined %}
+  {% set _state = _state | combine({'os_partitioning': _hv.os_partitioning}) %}
+{% endif %}
+{% if _hv.os_kernel_version is defined %}
+  {% set _state = _state | combine({'kernel': _hv.os_kernel_version}) %}
+{% endif %}
+{{ _state | to_nice_yaml(indent=2) }}

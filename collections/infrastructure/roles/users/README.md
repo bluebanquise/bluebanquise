@@ -2,8 +2,8 @@
 
 ## Description
 
-This role provides a very basic users management, for simple clusters.
-The role generates a dedicated group for each users, then users themselves, and can add ssh keys to their `authorized_keys` file.
+These settings provide a very basic users management, for simple clusters.
+These settings generate a dedicated group for each users, then users themselves, and can add ssh keys to their `authorized_keys` file.
 
 ## Instructions
 
@@ -57,7 +57,7 @@ users: "{{ default_users + additional_users }}"
 ```
 
 To ensure a user is not on a system, set state to "absent". To also remove its
-home, set remove to "yes".
+home, set remove to `true`.
 
 To delete a user:
 
@@ -99,21 +99,5 @@ are available for each user:
 To generate an sha512 password, use the following command (python >3.3):
 
 ```
-python -c 'import crypt,getpass; print(crypt.crypt(getpass.getpass(), crypt.mksalt(crypt.METHOD_SHA512)))'
+python3 -c 'import crypt,getpass; print(crypt.crypt(getpass.getpass(), crypt.mksalt(crypt.METHOD_SHA512)))'
 ```
-
-Or (python 2):
-
-```
-python -c "import crypt,random,string; print crypt.crypt(raw_input('clear-text password: '), '\$6\$' + ''.join([random.choice(string.ascii_letters + string.digits) for _ in range(16)]))"
-```
-
-## Changelog
-
-**Please now update CHANGELOG file at repository root instead of adding logs in this file.
-These logs bellow are only kept for archive.**
-
-* 1.1.1: Role enhancement and bug fixing. Hamid MERZOUKI <hamid@sesterce.com>
-* 1.1.0: Role enhancement. New inventory structure. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.0.1: Documentation and resources. johnnykeats <johnny.keats@outlook.com>
-* 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>

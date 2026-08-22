@@ -9,7 +9,7 @@ GLOBAL log="/var/log/conman/%N.log"
 SERVER timestamp=1h
 GLOBAL logopts="timestamp"
 
-{% for host in groups['all'] -%}
+{% for host in groups[(conman_retrict_to_group | default(bb_retrict_to_group, true) | default('all', true))] -%}
   {% if (hostvars[host]['hw_equipment_type'] | default("server")) == "server" and hostvars[host]['hw_board_authentication'] is defined %}
     {% if hostvars[host]['bmc'] is defined and hostvars[host]['bmc']['name'] is defined %}
       {# Identify protocol to be used #}
@@ -19,7 +19,7 @@ GLOBAL logopts="timestamp"
         {% set host_bmc_user = (hostvars[host]['hw_board_authentication'] | selectattr('protocol','defined') | selectattr('protocol','match','IPMI') | map(attribute='user') | list | first | default(none)) %}
         {% set host_bmc_password = (hostvars[host]['hw_board_authentication'] | selectattr('protocol','defined') | selectattr('protocol','match','IPMI') | map(attribute='password') | list | first | default(none)) %}
         {% if host_bmc_user is defined and host_bmc_user is not none and host_bmc_password is defined and host_bmc_password is not none %}
-console name="{{ host }}" dev="ipmitool.exp {{ hostvars[host]['bmc']['name'] }} {{ host_bmc_user }}"
+console name="{{ host }}" dev="ipmitool.exp {{ hostvars[host]['bmc']['name'] }} {{ host_bmc_user }} {{ host_bmc_password }}"
         {% endif %}
       {# REDFISH #}
       {% elif (hostvars[host]['hw_board_authentication'] | selectattr('protocol','defined') | selectattr('protocol','match','REDFISH') | list | length) >= 1  %}
@@ -28,7 +28,7 @@ console name="{{ host }}" dev="ipmitool.exp {{ hostvars[host]['bmc']['name'] }} 
         {% set host_bmc_password = (hostvars[host]['hw_board_authentication'] | selectattr('protocol','defined') | selectattr('protocol','match','REDFISH') | map(attribute='password') | list | first | default(none)) %}
         {% set host_bmc_console_port = (hostvars[host]['hw_board_authentication'] | selectattr('protocol','defined') | selectattr('protocol','match','REDFISH') | map(attribute='console_port') | list | first | default(none)) %}
         {% if host_bmc_user is defined and host_bmc_user is not none and host_bmc_password is defined and host_bmc_password is not none %}
-console name="{{ host }}" dev="ssh.exp {{ hostvars[host]['bmc']['name'] }} {{ host_bmc_console_port | default(conman_redfish_console_port, true) }} {{ host_bmc_user }}"
+console name="{{ host }}" dev="ssh.exp {{ hostvars[host]['bmc']['name'] }} {{ host_bmc_console_port | default(conman_redfish_console_port, true) }} {{ host_bmc_user }} {{ host_bmc_password }}"
         {% endif %}
       {% endif %}
     {% endif %}

@@ -4,17 +4,17 @@
 
 ## Description
 
-This role provides a standard and simple http proxy based on Squid.
+These settings provide a standard and simple http proxy based on Squid.
 Squid is also able to act as a cache proxy.
 
 This is useful in many cases. For example:
 
-* Use external repositories for cluster nodes, as the cache mechanism allows to only download once packages to the main repo.
+* Use external repositories for cluster hosts, as the cache mechanism allows to only download once packages to the main repo.
 * Filter access to web for the cluster (allow for example pulls to dockerhub, but not from another registry, etc).
-* Act as an intermediate between a central http server and clients to ditribute load.
+* Act as an intermediate between a central http server and clients to distribute load.
 * Etc.
 
-This role needs at least RHEL (or equivalent) >= 9, Ubuntu >= 22.04, Debian >= 12 and OpenSuse Leap >= 15.5 due to requirements on Squid version.
+Supported distributions: RHEL 9/10, Ubuntu 24.04/26.04, Debian 13, OpenSuse Leap 16.
 
 ## Instructions
 
@@ -52,7 +52,7 @@ http_proxy_allowed_networks:
 
 ### Allowed query ports
 
-By default, the role will allow the following ports to transit through the proxy:
+By default, these settings will allow the following ports to transit through the proxy:
 
 ```
 acl SSL_ports port 443
@@ -123,10 +123,3 @@ http_proxy_raw_content: |
 ```
 
 The whole documentation is available at http://www.squid-cache.org/Doc/config/
-
-## Changelog
-
-**Please now update CHANGELOG file at repository root instead of adding logs in this file.
-These logs bellow are only kept for archive.**
-
-* 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>

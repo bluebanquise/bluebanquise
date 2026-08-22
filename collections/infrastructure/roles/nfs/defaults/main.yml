@@ -12,3 +12,8 @@ nfs_client_sebooleans:
   - httpd_use_nfs
 
 nfs_profile: []
+
+nfs_server_firewall_services_to_add:
+  - nfs
+  - rpc-bind
+  - mountd

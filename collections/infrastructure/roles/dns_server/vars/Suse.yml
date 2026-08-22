@@ -3,9 +3,6 @@ dns_server_packages_to_install:
   - bind
 dns_server_services_to_start:
   - named
-dns_server_firewall_services_to_add:
-  - dns
-
 dns_server_dns_user: named
 
 dns_server_var_dir: /var/lib/named

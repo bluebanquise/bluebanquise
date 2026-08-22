@@ -1,0 +1,9 @@
+---
+# Bootstrap-only skeleton: applied once by ansible_inventory.py when a brand-new inventory folder
+# is created, seeding group_vars/all/main.yml. Never reached through the "add" resource-path
+# dispatch (there is no `inventory add all_group` verb) - looked up directly by name in
+# create_inventory(). See resources/data_model.md section 4.
+skeleton:
+  bb_domain_name: cluster.local
+  bb_time_zone: UTC
+required: []

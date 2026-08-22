@@ -1,6 +1,6 @@
 #jinja2: lstrip_blocks: True
 #### Blue Banquise file ####
-## {{ansible_managed}}
+## {{ ansible_managed }}
 
 # Documentation:
 # https://slurm.schedmd.com/slurmdbd.conf.html
@@ -24,7 +24,7 @@ PidFile=/var/run/slurmdbd.pid
 StorageType=accounting_storage/mysql
 StorageUser={{ slurm_accounting_mysql_slurm_user }}
 StoragePass={{ slurm_accounting_mysql_slurm_password }}
-{% if slurm_enable_local_mysql is defined and not slurm_enable_local_mysql %}
+{% if slurm_accounting_enable_local_mysql is defined and not slurm_accounting_enable_local_mysql %}
 StorageHost={{ slurm_accounting_mysql_login_host }}
 StoragePort={{ slurm_accounting_mysql_login_port }}
 {% else %}

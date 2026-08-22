@@ -1,0 +1,12 @@
+---
+# Note: package names to verify against Ubuntu 24.04/26.04 repos
+interconnect_ofed_client_packages:
+  - rdma-core
+  - ibverbs-providers
+  - ibverbs-utils
+  - infiniband-diags
+interconnect_ofed_client_service: rdma-ndd
+interconnect_ofed_subnet_manager_packages:
+  - opensm
+interconnect_ofed_subnet_manager_service: opensm
+interconnect_ofed_opensm_conf: /etc/opensm/opensm.conf

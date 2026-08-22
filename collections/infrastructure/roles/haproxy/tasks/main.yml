@@ -87,7 +87,7 @@
   notify: service <|> Restart haproxy server
 
 - name: meta <|> Run handler tasks to restart services
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers
 
 # - name: service <|> Manage httpd service
 #   ansible.builtin.service:
@@ -101,7 +101,7 @@
 - name: "service <|> Manage haproxy service"
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: "{{ (haproxy_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    enabled: "{{ haproxy_enable_services | default(bb_enable_services) | default(true) | bool }}"
     state: "{{ (haproxy_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   loop: "{{ haproxy_services_to_start }}"
   tags:

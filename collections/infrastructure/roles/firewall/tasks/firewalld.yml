@@ -7,11 +7,11 @@
     line: "AllowZoneDrifting={{ firewall_firewalld_allow_zone_drifting | ternary('yes', 'no') }}"
   notify: service <|> Restart firewall services
 
-- name: fail <|> Check presence of required parameters
+- name: "fail <|> Check presence of required parameters"
   ansible.builtin.fail:
     msg: "Bailing out.
-  This role requires networks[{{ item['network'] }}]['firewall']['zone'] to be set"
-  when: (item['network'] is defined and networks[item['network']]['firewall'] is not defined) or (item['network'] is defined and networks[item['network']]['firewall']['zone'] is not defined)
+  This role requires networks[{{ item['network'] }}]['firewall_zone'] to be set"
+  when: item['network'] is defined and networks[item['network']]['firewall_zone'] is not defined
   loop: "{{ network_interfaces }}"
   loop_control:
     label: "{{ item['interface'] }}"
@@ -20,50 +20,37 @@
 
 - name: "firewalld <|> Ensure firewall zones exist"
   ansible.posix.firewalld:
-    zone: "{{ networks[item]['firewall']['zone'] }}"
+    zone: "{{ networks[item]['firewall_zone'] }}"
     permanent: true
     state: present
-  when: networks[item]['firewall']['zone'] is defined
+  when: networks[item]['firewall_zone'] is defined
   loop: "{{ (network_interfaces | selectattr('network', 'defined') | map(attribute='network') | list) }}"
   notify: service <|> Restart firewall services
 
-- name: "firewalld <|> Ensure interfaces are in the correct firewall zone"
-  ansible.posix.firewalld:
-    interface: "{{ item.interface }}"
-    zone: "{{ networks[item.network]['firewall']['zone'] }}"
-    permanent: true
-    immediate: true
-    state: enabled
-  when: networks[item.network]['firewall'] is defined and networks[item.network]['firewall']['zone'] is defined
-  loop: "{{ (network_interfaces | selectattr('network', 'defined') | list) }}"
-  loop_control:
-    label: "{{ item.interface }} -> {{ networks[item.network]['firewall']['zone'] }}"
-  notify: service <|> Restart firewall services
-
-- name: meta <|> Run handler tasks to restart firewall services
+- name: "meta <|> Run handler tasks to restart firewall services"
   ansible.builtin.meta: flush_handlers
 
 - name: "firewalld <|> Configure firewall zones"
   ansible.posix.firewalld:
-    zone: "{{ networks[item]['firewall']['zone'] }}"
+    zone: "{{ networks[item]['firewall_zone'] }}"
     source: "{{ networks[item]['subnet'] }}/{{ networks[item]['prefix'] }}"
-    immediate: yes
-    permanent: yes
+    immediate: true
+    permanent: true
     state: enabled
-  when: networks[item]['firewall']['zone'] is defined
+  when: networks[item]['firewall_zone'] is defined
   loop: "{{ (network_interfaces | selectattr('network', 'defined') | map(attribute='network') | list) }}"
   loop_control:
     label: "Add source '{{ networks[item]['subnet'] }}/{{ networks[item]['prefix'] }}'
-            to zone '{{ networks[item]['firewall']['zone'] }}'"
+            to zone '{{ networks[item]['firewall_zone'] }}'"
 
 - name: "firewalld <|> Add services to firewall's zones"
   ansible.posix.firewalld:
     zone: "{{ item.0.zone }}"
     service: "{{ item.1 }}"
-    immediate: "yes"
-    permanent: "yes"
+    immediate: true
+    permanent: true
     state: enabled
-  loop: "{{ firewall_zones | default({}) | subelements('services_enabled', skip_missing=True) }}"
+  loop: "{{ firewall_zones | default([]) | subelements('services_enabled', skip_missing=True) }}"
   loop_control:
     label: "Add service {{ item.1 }} to zone {{ item.0.zone }}"
 
@@ -71,10 +58,10 @@
   ansible.posix.firewalld:
     zone: "{{ item.0.zone }}"
     service: "{{ item.1 }}"
-    immediate: "yes"
-    permanent: "yes"
+    immediate: true
+    permanent: true
     state: disabled
-  loop: "{{ firewall_zones | default({}) | subelements('services_disabled', skip_missing=True) }}"
+  loop: "{{ firewall_zones | default([]) | subelements('services_disabled', skip_missing=True) }}"
   loop_control:
     label: "Remove service {{ item.1 }} from zone {{ item.0.zone }}"
 
@@ -82,10 +69,10 @@
   ansible.posix.firewalld:
     zone: "{{ item.0.zone }}"
     port: "{{ item.1 }}"
-    immediate: "yes"
-    permanent: "yes"
+    immediate: true
+    permanent: true
     state: enabled
-  loop: "{{ firewall_zones | default({}) | subelements('ports_enabled', skip_missing=True) }}"
+  loop: "{{ firewall_zones | default([]) | subelements('ports_enabled', skip_missing=True) }}"
   loop_control:
     label: "Add port {{ item.1 }} to zone {{ item.0.zone }}"
 
@@ -93,10 +80,10 @@
   ansible.posix.firewalld:
     zone: "{{ item.0.zone }}"
     port: "{{ item.1 }}"
-    immediate: "yes"
-    permanent: "yes"
+    immediate: true
+    permanent: true
     state: disabled
-  loop: "{{ firewall_zones | default({}) | subelements('ports_disabled', skip_missing=True) }}"
+  loop: "{{ firewall_zones | default([]) | subelements('ports_disabled', skip_missing=True) }}"
   loop_control:
     label: "Remove port {{ item.1 }} from zone {{ item.0.zone }}"
 
@@ -104,10 +91,10 @@
   ansible.posix.firewalld:
     zone: "{{ item.0.zone }}"
     rich_rule: "{{ item.1 }}"
-    immediate: "yes"
-    permanent: "yes"
+    immediate: true
+    permanent: true
     state: enabled
-  loop: "{{ firewall_zones | default({}) | subelements('rich_rules_enabled', skip_missing=True) }}"
+  loop: "{{ firewall_zones | default([]) | subelements('rich_rules_enabled', skip_missing=True) }}"
   loop_control:
     label: "Add rich rule '{{ item.1 }}' to zone {{ item.0.zone }}"
 
@@ -115,10 +102,10 @@
   ansible.posix.firewalld:
     zone: "{{ item.0.zone }}"
     rich_rule: "{{ item.1 }}"
-    immediate: "yes"
-    permanent: "yes"
+    immediate: true
+    permanent: true
     state: disabled
-  loop: "{{ firewall_zones | default({}) | subelements('rich_rules_disabled', skip_missing=True) }}"
+  loop: "{{ firewall_zones | default([]) | subelements('rich_rules_disabled', skip_missing=True) }}"
   loop_control:
     label: "Remove rich rule '{{ item.1 }}' from zone {{ item.0.zone }}"
 
@@ -126,10 +113,10 @@
   ansible.posix.firewalld:
     zone: "{{ item.0.zone }}"
     icmp_block: "{{ item.1 }}"
-    immediate: "yes"
-    permanent: "yes"
+    immediate: true
+    permanent: true
     state: enabled
-  loop: "{{ firewall_zones | default({}) | subelements('icmp_blocks_enabled', skip_missing=True) }}"
+  loop: "{{ firewall_zones | default([]) | subelements('icmp_blocks_enabled', skip_missing=True) }}"
   loop_control:
     label: "Add ICMP block '{{ item.1 }}' to zone {{ item.0.zone }}"
 
@@ -137,10 +124,10 @@
   ansible.posix.firewalld:
     zone: "{{ item.0.zone }}"
     icmp_block: "{{ item.1 }}"
-    immediate: "yes"
-    permanent: "yes"
+    immediate: true
+    permanent: true
     state: disabled
-  loop: "{{ firewall_zones | default({}) | subelements('icmp_blocks_disabled', skip_missing=True) }}"
+  loop: "{{ firewall_zones | default([]) | subelements('icmp_blocks_disabled', skip_missing=True) }}"
   loop_control:
     label: "Remove ICMP block '{{ item.1 }}' from zone {{ item.0.zone }}"
 
@@ -148,8 +135,8 @@
   ansible.posix.firewalld:
     zone: "{{ item.zone }}"
     icmp_block_inversion: "{{ item.icmp_block_inversion | string }}"
-    immediate: "yes"
-    permanent: "yes"
+    immediate: true
+    permanent: true
     state: "{{ item.icmp_block_inversion | ternary('enabled', 'disabled') }}"
   loop: "{{ firewall_zones | default([]) }}"
   when: item.icmp_block_inversion is defined
@@ -160,10 +147,339 @@
   ansible.posix.firewalld:
     zone: "{{ item.zone }}"
     masquerade: "{{ item.masquerade | string }}"
-    immediate: "yes"
-    permanent: "yes"
+    immediate: true
+    permanent: true
     state: "{{ item.masquerade | ternary('enabled', 'disabled') }}"
   loop: "{{ firewall_zones | default([]) }}"
   when: item.masquerade is defined
   loop_control:
     label: "{{ item.masquerade | default(False) | ternary('Enable', 'Disable') }} masquerade in zone {{ item.zone }}"
+
+- name: "policy <|> Manage firewalld policies"
+  when: firewall_policies | default([]) | length > 0
+  block:
+    - name: "fail <|> Check presence of required policy parameters"
+      ansible.builtin.fail:
+        msg: "Bailing out. Every entry in firewall_policies requires 'name', 'ingress_zones' and 'egress_zones'"
+      when: item.name is not defined or item.ingress_zones is not defined or item.egress_zones is not defined
+      loop: "{{ firewall_policies }}"
+      loop_control:
+        label: "{{ item.name | default('unnamed') }}"
+      tags:
+        - internal
+
+    - name: "command <|> Gather existing firewalld policies"
+      ansible.builtin.command:
+        argv:
+          - firewall-cmd
+          - --permanent
+          - --get-policies
+      register: firewall_policies_existing
+      changed_when: false
+      check_mode: false
+
+    - name: "command <|> Create firewalld policies"
+      ansible.builtin.command:
+        argv:
+          - firewall-cmd
+          - --permanent
+          - "--new-policy={{ item.name }}"
+      loop: "{{ firewall_policies }}"
+      loop_control:
+        label: "{{ item.name }}"
+      when: item.name not in firewall_policies_existing.stdout.split()
+      notify: service <|> Restart firewall services
+
+    - name: "command <|> Get firewalld policies' current target"
+      ansible.builtin.command:
+        argv:
+          - firewall-cmd
+          - --permanent
+          - "--policy={{ item.name }}"
+          - --get-target
+      loop: "{{ firewall_policies }}"
+      loop_control:
+        label: "{{ item.name }}"
+      register: firewall_policies_current_targets
+      changed_when: false
+      check_mode: false
+      when: item.target is defined
+
+    - name: "command <|> Set firewalld policies' target"
+      ansible.builtin.command:
+        argv:
+          - firewall-cmd
+          - --permanent
+          - "--policy={{ item.item.name }}"
+          - "--set-target={{ item.item.target }}"
+      loop: "{{ firewall_policies_current_targets.results }}"
+      loop_control:
+        label: "{{ item.item.name }}"
+      when: item.item.target is defined and (item.stdout | default('') | trim) != item.item.target
+      notify: service <|> Restart firewall services
+
+    - name: "command <|> Check firewalld policies' current ingress zones"
+      ansible.builtin.command:
+        argv:
+          - firewall-cmd
+          - --permanent
+          - "--policy={{ item.0.name }}"
+          - "--query-ingress-zone={{ item.1 }}"
+      loop: "{{ firewall_policies | subelements('ingress_zones', skip_missing=True) }}"
+      loop_control:
+        label: "{{ item.0.name }} <- {{ item.1 }}"
+      register: firewall_policies_ingress_check
+      changed_when: false
+      failed_when: false
+      check_mode: false
+
+    - name: "command <|> Add ingress zones to firewalld policies"
+      ansible.builtin.command:
+        argv:
+          - firewall-cmd
+          - --permanent
+          - "--policy={{ item.item.0.name }}"
+          - "--add-ingress-zone={{ item.item.1 }}"
+      loop: "{{ firewall_policies_ingress_check.results }}"
+      loop_control:
+        label: "{{ item.item.0.name }} <- {{ item.item.1 }}"
+      when: item.rc != 0
+      notify: service <|> Restart firewall services
+
+    - name: "command <|> Check firewalld policies' current egress zones"
+      ansible.builtin.command:
+        argv:
+          - firewall-cmd
+          - --permanent
+          - "--policy={{ item.0.name }}"
+          - "--query-egress-zone={{ item.1 }}"
+      loop: "{{ firewall_policies | subelements('egress_zones', skip_missing=True) }}"
+      loop_control:
+        label: "{{ item.0.name }} -> {{ item.1 }}"
+      register: firewall_policies_egress_check
+      changed_when: false
+      failed_when: false
+      check_mode: false
+
+    - name: "command <|> Add egress zones to firewalld policies"
+      ansible.builtin.command:
+        argv:
+          - firewall-cmd
+          - --permanent
+          - "--policy={{ item.item.0.name }}"
+          - "--add-egress-zone={{ item.item.1 }}"
+      loop: "{{ firewall_policies_egress_check.results }}"
+      loop_control:
+        label: "{{ item.item.0.name }} -> {{ item.item.1 }}"
+      when: item.rc != 0
+      notify: service <|> Restart firewall services
+
+    - name: "command <|> Check firewalld policies' current masquerade state"
+      ansible.builtin.command:
+        argv:
+          - firewall-cmd
+          - --permanent
+          - "--policy={{ item.name }}"
+          - --query-masquerade
+      loop: "{{ firewall_policies }}"
+      loop_control:
+        label: "{{ item.name }}"
+      register: firewall_policies_masquerade_check
+      changed_when: false
+      failed_when: false
+      check_mode: false
+      when: item.masquerade is defined
+
+    - name: "command <|> Enable masquerade on firewalld policies"
+      ansible.builtin.command:
+        argv:
+          - firewall-cmd
+          - --permanent
+          - "--policy={{ item.item.name }}"
+          - --add-masquerade
+      loop: "{{ firewall_policies_masquerade_check.results }}"
+      loop_control:
+        label: "{{ item.item.name }}"
+      when: item.item.masquerade is defined and item.item.masquerade | bool and item.rc != 0
+      notify: service <|> Restart firewall services
+
+    - name: "command <|> Disable masquerade on firewalld policies"
+      ansible.builtin.command:
+        argv:
+          - firewall-cmd
+          - --permanent
+          - "--policy={{ item.item.name }}"
+          - --remove-masquerade
+      loop: "{{ firewall_policies_masquerade_check.results }}"
+      loop_control:
+        label: "{{ item.item.name }}"
+      when: item.item.masquerade is defined and not (item.item.masquerade | bool) and item.rc == 0
+      notify: service <|> Restart firewall services
+
+    - name: "command <|> Check firewalld policies' current services"
+      ansible.builtin.command:
+        argv:
+          - firewall-cmd
+          - --permanent
+          - "--policy={{ item.0.name }}"
+          - "--query-service={{ item.1 }}"
+      loop: "{{ firewall_policies | subelements('services_enabled', skip_missing=True) }}"
+      loop_control:
+        label: "{{ item.0.name }} <-> {{ item.1 }}"
+      register: firewall_policies_service_enable_check
+      changed_when: false
+      failed_when: false
+      check_mode: false
+
+    - name: "command <|> Add services to firewalld policies"
+      ansible.builtin.command:
+        argv:
+          - firewall-cmd
+          - --permanent
+          - "--policy={{ item.item.0.name }}"
+          - "--add-service={{ item.item.1 }}"
+      loop: "{{ firewall_policies_service_enable_check.results }}"
+      loop_control:
+        label: "{{ item.item.0.name }} <-> {{ item.item.1 }}"
+      when: item.rc != 0
+      notify: service <|> Restart firewall services
+
+    - name: "command <|> Check firewalld policies' services pending removal"
+      ansible.builtin.command:
+        argv:
+          - firewall-cmd
+          - --permanent
+          - "--policy={{ item.0.name }}"
+          - "--query-service={{ item.1 }}"
+      loop: "{{ firewall_policies | subelements('services_disabled', skip_missing=True) }}"
+      loop_control:
+        label: "{{ item.0.name }} </> {{ item.1 }}"
+      register: firewall_policies_service_disable_check
+      changed_when: false
+      failed_when: false
+      check_mode: false
+
+    - name: "command <|> Remove services from firewalld policies"
+      ansible.builtin.command:
+        argv:
+          - firewall-cmd
+          - --permanent
+          - "--policy={{ item.item.0.name }}"
+          - "--remove-service={{ item.item.1 }}"
+      loop: "{{ firewall_policies_service_disable_check.results }}"
+      loop_control:
+        label: "{{ item.item.0.name }} </> {{ item.item.1 }}"
+      when: item.rc == 0
+      notify: service <|> Restart firewall services
+
+    - name: "command <|> Check firewalld policies' current ports"
+      ansible.builtin.command:
+        argv:
+          - firewall-cmd
+          - --permanent
+          - "--policy={{ item.0.name }}"
+          - "--query-port={{ item.1 }}"
+      loop: "{{ firewall_policies | subelements('ports_enabled', skip_missing=True) }}"
+      loop_control:
+        label: "{{ item.0.name }} <-> {{ item.1 }}"
+      register: firewall_policies_port_enable_check
+      changed_when: false
+      failed_when: false
+      check_mode: false
+
+    - name: "command <|> Add ports to firewalld policies"
+      ansible.builtin.command:
+        argv:
+          - firewall-cmd
+          - --permanent
+          - "--policy={{ item.item.0.name }}"
+          - "--add-port={{ item.item.1 }}"
+      loop: "{{ firewall_policies_port_enable_check.results }}"
+      loop_control:
+        label: "{{ item.item.0.name }} <-> {{ item.item.1 }}"
+      when: item.rc != 0
+      notify: service <|> Restart firewall services
+
+    - name: "command <|> Check firewalld policies' ports pending removal"
+      ansible.builtin.command:
+        argv:
+          - firewall-cmd
+          - --permanent
+          - "--policy={{ item.0.name }}"
+          - "--query-port={{ item.1 }}"
+      loop: "{{ firewall_policies | subelements('ports_disabled', skip_missing=True) }}"
+      loop_control:
+        label: "{{ item.0.name }} </> {{ item.1 }}"
+      register: firewall_policies_port_disable_check
+      changed_when: false
+      failed_when: false
+      check_mode: false
+
+    - name: "command <|> Remove ports from firewalld policies"
+      ansible.builtin.command:
+        argv:
+          - firewall-cmd
+          - --permanent
+          - "--policy={{ item.item.0.name }}"
+          - "--remove-port={{ item.item.1 }}"
+      loop: "{{ firewall_policies_port_disable_check.results }}"
+      loop_control:
+        label: "{{ item.item.0.name }} </> {{ item.item.1 }}"
+      when: item.rc == 0
+      notify: service <|> Restart firewall services
+
+    - name: "command <|> Check firewalld policies' current rich rules"
+      ansible.builtin.command:
+        argv:
+          - firewall-cmd
+          - --permanent
+          - "--policy={{ item.0.name }}"
+          - "--query-rich-rule={{ item.1 }}"
+      loop: "{{ firewall_policies | subelements('rich_rules_enabled', skip_missing=True) }}"
+      loop_control:
+        label: "{{ item.0.name }} <-> '{{ item.1 }}'"
+      register: firewall_policies_rich_rule_enable_check
+      changed_when: false
+      failed_when: false
+      check_mode: false
+
+    - name: "command <|> Add rich rules to firewalld policies"
+      ansible.builtin.command:
+        argv:
+          - firewall-cmd
+          - --permanent
+          - "--policy={{ item.item.0.name }}"
+          - "--add-rich-rule={{ item.item.1 }}"
+      loop: "{{ firewall_policies_rich_rule_enable_check.results }}"
+      loop_control:
+        label: "{{ item.item.0.name }} <-> '{{ item.item.1 }}'"
+      when: item.rc != 0
+      notify: service <|> Restart firewall services
+
+    - name: "command <|> Check firewalld policies' rich rules pending removal"
+      ansible.builtin.command:
+        argv:
+          - firewall-cmd
+          - --permanent
+          - "--policy={{ item.0.name }}"
+          - "--query-rich-rule={{ item.1 }}"
+      loop: "{{ firewall_policies | subelements('rich_rules_disabled', skip_missing=True) }}"
+      loop_control:
+        label: "{{ item.0.name }} </> '{{ item.1 }}'"
+      register: firewall_policies_rich_rule_disable_check
+      changed_when: false
+      failed_when: false
+      check_mode: false
+
+    - name: "command <|> Remove rich rules from firewalld policies"
+      ansible.builtin.command:
+        argv:
+          - firewall-cmd
+          - --permanent
+          - "--policy={{ item.item.0.name }}"
+          - "--remove-rich-rule={{ item.item.1 }}"
+      loop: "{{ firewall_policies_rich_rule_disable_check.results }}"
+      loop_control:
+        label: "{{ item.item.0.name }} </> '{{ item.item.1 }}'"
+      when: item.rc == 0
+      notify: service <|> Restart firewall services

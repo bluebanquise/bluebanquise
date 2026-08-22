@@ -1,0 +1,16 @@
+---
+- name: include_tasks <|> Apply parted configuration
+  ansible.builtin.include_tasks: storage/parted.yml
+  when: (local_configuration_storage | default({})).parted is defined
+
+- name: include_tasks <|> Apply lvm configuration
+  ansible.builtin.include_tasks: storage/lvm.yml
+  when: (local_configuration_storage | default({})).lvm is defined
+
+- name: include_tasks <|> Apply filesystem configuration
+  ansible.builtin.include_tasks: storage/filesystem.yml
+  when: (local_configuration_storage | default({})).filesystem is defined
+
+- name: include_tasks <|> Apply mount configuration
+  ansible.builtin.include_tasks: storage/mount.yml
+  when: (local_configuration_storage | default({})).mount is defined

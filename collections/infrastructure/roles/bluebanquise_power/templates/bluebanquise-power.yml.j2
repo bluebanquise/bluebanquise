@@ -3,7 +3,7 @@
 ## {{ ansible_managed }}
 
 nodes:
-{% for host in groups['all'] %}
+{% for host in groups[(bluebanquise_power_retrict_to_group | default(bb_retrict_to_group, true) | default('all', true))] %}
     {% if hostvars[host]['bmc'] is defined -%}
         {% if hostvars[host]['hw_board_authentication'] is defined %}
         {% set host_bmc_protocol = (hostvars[host]['hw_board_authentication'] | selectattr('protocol','defined') | map(attribute='protocol') | list | first | default(none)) %}

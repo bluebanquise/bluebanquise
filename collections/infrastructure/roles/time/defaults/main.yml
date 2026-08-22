@@ -1,4 +1,8 @@
+---
 time_external_pools: []
 time_external_servers: []
 time_additional_networks_allowed: []
 time_time_zone:
+
+time_firewall_services_to_add:
+  - ntp

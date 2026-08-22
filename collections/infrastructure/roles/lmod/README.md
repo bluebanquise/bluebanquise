@@ -1,43 +1,30 @@
 # lmod
 
-|      OS      | Version | Supported |
-|:-------------|:--------|:---------:|
-| Ubuntu       |   20.04 |    yes    |
-| Ubuntu       |   22.04 |    yes    |
-| RHEL         |       7 |    yes    |
-| RHEL         |       8 |    yes    |
-| RHEL         |       9 |    yes    |
-| OpenSuseLeap |      15 |    yes    |
-| Debian       |      11 |    yes    |
-
 ## Description
 
-This role simply install Lmod tool (https://lmod.readthedocs.io/) and
-set custom path if needed.
+These settings install the Lmod tool (https://lmod.readthedocs.io/) and optionally sets custom module paths.
+
+Supported distributions: RHEL 9/10, Ubuntu 24.04/26.04, Debian 13, OpenSuse Leap 16.
 
 ## Instructions
 
-Note that Lmod is available on EPEL repository, and requires Centos PowerTools to
-to get all dependencies.
+Note that Lmod is available on the EPEL repository on RHEL-based systems.
 
-If custom path are needed, define variable lmod_path, as a list, in the inventory.
-
-For example:
+If custom module paths are needed, define `lmod_path` as a list in the inventory:
 
 ```yaml
-  lmod_path:
-    - /etc/modulefiles
-    - /soft/modules
+lmod_path:
+  - /etc/modulefiles
+  - /soft/modules
 ```
 
-These will be added in file /etc/profile.d/modules_extra_path.sh, and so be available
-to all users.
+These paths will be added to `/etc/profile.d/modules_extra_path.sh` and made available to all users.
 
-Optional inventory vars:
+## Variables
 
-**hostvars[inventory_hostname]**
-
-* lmod_path (list)
+| Variable   | Description                      | Type | Required |
+|:-----------|:---------------------------------|:-----|:--------:|
+| lmod_path  | List of extra module search paths | list |    no    |
 
 ## Output
 
@@ -47,12 +34,4 @@ Packages installed:
 
 Files generated:
 
-* /etc/profile.d/modules_extra_path.sh (optional)
-
-## Changelog
-
-**Please now update CHANGELOG file at repository root instead of adding logs in this file.
-These logs bellow are only kept for archive.**
-
-* 1.0.1: Expand to other distributions. Benoit Leveugle <benoit.leveugle@gmail.com>
-* 1.0.0: Role creation. Benoit Leveugle <benoit.leveugle@gmail.com>
+* /etc/profile.d/modules_extra_path.sh (optional, only when `lmod_path` is defined)

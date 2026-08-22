@@ -14,9 +14,7 @@
         {% set credentials_host = hostvars[host]['bmc']['name'] %}{# Define external bmc as credentials source #}
       {% endif %}
       {# Check if no authentication found #}
-      {% if hostvars[credentials_host]['hw_board_authentication'] is not defined %}
-      {% continue %}
-      {% endif %}
+      {% if hostvars[credentials_host]['hw_board_authentication'] is defined %}
       {% if (hostvars[credentials_host]['hw_board_authentication'] | selectattr('protocol','defined') | selectattr('protocol','match','IPMI') | list | length) >= 1 %}
         {# Gather BMC credentials settings #}
         {% set host_bmc_user = (hostvars[credentials_host]['hw_board_authentication'] | selectattr('protocol','defined') | map(attribute='user') | list | first | default(none)) %}
@@ -32,6 +30,7 @@
         {% if host_bmc_user is defined and host_bmc_user is not none and host_bmc_password is defined and host_bmc_password is not none %}
 {{ host_bmc['ip4'] }} : {{ host_bmc_user }} : {{ host_bmc_password }}
         {% endif %}
+      {% endif %}
       {% endif %}
     {% endif %}
   {% endif %}

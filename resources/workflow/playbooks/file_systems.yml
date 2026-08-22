@@ -9,13 +9,5 @@
         nfs_profile:
           - server
           - client
-    - role: bluebanquise.infrastructure.filesystem
-      tags: filesystem
-    - role: bluebanquise.infrastructure.lvm
-      tags: lvm
-    - role: bluebanquise.infrastructure.mount
-      tags: mount
-    - role: bluebanquise.infrastructure.parted
-      tags: parted
     - role: bluebanquise.infrastructure.xfs_quota
       tags: xfs_quota

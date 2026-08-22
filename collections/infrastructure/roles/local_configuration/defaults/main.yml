@@ -1,0 +1,21 @@
+---
+### Hostname ###
+local_configuration_hostname_fqdn: true
+local_configuration_hostname_domain_name:
+
+### Security - access_control ###
+local_configuration_access_control_os_access_control: enforcing
+
+### Security - root_password ###
+local_configuration_root_password_enable_root: false
+local_configuration_root_password_sudo_user: bluebanquise
+
+### Security - sudoers ###
+local_configuration_sudoers_logging: false
+
+### System - kernel_config ###
+local_configuration_kernel_config_sysctl_reload: true
+
+### Storage - lvm ###
+local_configuration_lvm_packages_to_install:
+  - lvm2

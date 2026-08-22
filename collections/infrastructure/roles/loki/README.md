@@ -1,8 +1,10 @@
-# Loki
+# loki
 
 ## Description
 
-This role configures Loki and Promtail on a BlueBanquise management node.
+These settings configure Loki and Promtail on a BlueBanquise management host.
+
+Supported distributions: RHEL 9/10, Ubuntu 24.04/26.04, Debian 13, OpenSuse Leap 16.
 
 A rsyslog forwarder configuration file is created to forward all rsyslog traffic to Promtail. From here Promtail uses Loki to store the data.
 
@@ -19,7 +21,7 @@ Loki can be set as a data source in Grafana by setting the data source URL to ht
 
 ## Requirements
 
-loki and promtail RPMs are required.
+The `loki` and `promtail` packages must be available in the configured repositories (e.g. from Grafana's official package repository).
 
 ## Role Variables
 

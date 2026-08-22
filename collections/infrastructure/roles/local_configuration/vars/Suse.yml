@@ -1,0 +1,6 @@
+---
+local_configuration_access_control_packages_to_install:
+  - apparmor-parser
+  - apparmor-utils
+local_configuration_kernel_config_grub_package: grub2
+local_configuration_kernel_config_grub_update_command: grub2-mkconfig -o /boot/grub2/grub.cfg
