@@ -150,6 +150,7 @@ bb_repositories:
 ```
 
 All parameters from the [zypper_repository module](https://docs.ansible.com/ansible/latest/collections/community/general/zypper_repository_module.html) are supported.
+Note: `os_operating_system['repositories_environment']` can be overriden at any group (including all) with the variable `override_repositories_environment`. `override_repositories_environment` will always win precedence.
 
 ### Remove native repositories
 
