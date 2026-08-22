@@ -12,7 +12,7 @@ Devs infos:
 
 :yellow_heart: Current core version: 3.4.0, under development.
 
-:green_heart: ansible-core 2.19 is now supported.
+:green_heart: ansible-core 2.21 is now supported.
 
 :yellow_heart: documentation v3 is currently written, doing my best.
 
@@ -41,11 +41,6 @@ If you use and like BlueBanquise, please consider donating to the **UNICEF** (ht
 
 I have a decent job, I don't need money, but they do.
 In the 21th century, it is a shame not all children live in peace.
-
-## AI
-
-I am using AI time to time to help me maintain and develop BlueBanquise, especially to detect bugs and for the user cli tools. Reason is simple: keeping up to date a stack that covers around multiple versions of 4 different Linux distributions is way too much for a single person.
-Note however that I read all changes proposed by AI, and I do not commit something I don't understand.
 
 ## Resources
 
@@ -83,6 +78,11 @@ Please note that:
 * Ubuntu 18.04, 20.04 and 22.04 are now considered best effort only.
 * Debian 11 and 12 are now considered best effort only.
 * RHEL 8 and OpenSuse Leap 15 need an ansible-core==2.16, 2.17+ is not compatible.
+
+## AI
+
+I am using AI time to time to help me maintain and develop BlueBanquise, especially to detect bugs and for the user cli tools. Reason is simple: keeping up to date a stack that covers multiple versions of 4 different Linux distributions is way too much for a single person.
+Note however that I read all changes proposed by AI, and I do not commit something I don't understand.
 
 ## The project
 

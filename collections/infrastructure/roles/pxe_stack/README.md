@@ -883,6 +883,12 @@ Each entry adds a visible menu item chaining to `http://${next-server}/pxe/tools
 (place your own file there) and is accepted as a valid `bluebanquise-bootset -b` / `/stage_report`
 `stage` target alongside the built-in ones.
 
+### Tag pxe
+
+It is possible to tag the hosts with an inventory version, by defining variable `pxe_stack_inventory_tag`.
+When set, the content of this variable will be written into deployed hosts, during provisioning,
+inside file `/etc/bluebanquise/tags/pxe_inventory`.
+
 ### Sudo user
 
 You can configure the target sudo user by setting these variables:
@@ -897,3 +903,4 @@ pxe_stack_sudo_is_passwordless: true
 ```
 
 Note that using an home folder into /home for the bluebanquise sudo user can be dangerous as /home is often mounted on a cluster, and so would colide with local bluebanquise user home.
+

@@ -162,6 +162,11 @@ curl -s -k "http://$ipxe_next_server:{{ pxe_stack_daemon_port }}/stage_report?ho
 rm -r /var/cache/yum/*
 rm -f /etc/yum.repos.d/*
 {% endif %}
+
+{% if pxe_stack_inventory_tag is defined and pxe_stack_inventory_tag is not none %}
+mkdir -p /etc/bluebanquise/tags/ && echo "{{ pxe_stack_inventory_tag }}" > /etc/bluebanquise/tags/pxe_inventory
+{% endif %}
+
 set +x
 %end
 

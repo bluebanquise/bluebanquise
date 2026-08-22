@@ -178,6 +178,10 @@ echo "Defaults:sles !targetpw
         <source><![CDATA[
 #!/bin/sh -x
 
+{% if pxe_stack_inventory_tag is defined and pxe_stack_inventory_tag is not none %}
+mkdir -p /etc/bluebanquise/tags/ && echo "{{ pxe_stack_inventory_tag }}" > /etc/bluebanquise/tags/pxe_inventory
+{% endif %}
+
 {% if pxe_stack_post_install_boot_to_disk %}
 # Turn the kernel parameters into variables
 # We are looking for next_server value

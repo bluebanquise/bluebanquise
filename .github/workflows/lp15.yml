@@ -1,5 +1,5 @@
 ---
-name: LP16
+name: LP15
 on:
   push:
     branches:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   roles_core:
-    name: LP16 core roles
+    name: lp15 core roles
     runs-on: ubuntu-22.04
     env:
       ANSIBLE_CONFIG: /var/lib/bluebanquise/ansible.cfg
@@ -23,13 +23,13 @@ jobs:
 
       - name: Setup container
         run: |
-          docker build -t opensuseleap_16:systemd -f ./resources/docker/Dockerfile_OpenSUSELeap_16_systemd .
+          docker build -t opensuseleap_15:systemd -f ./resources/docker/Dockerfile_OpenSUSELeap_15_systemd .
           sudo modprobe -v dummy numdummies=2 && sudo ip addr add 10.10.0.1/16 dev dummy0 && sudo ip link set dev dummy0 up && ip a;
           echo -e 'bb_repositories:\n  - name: bluebanquise\n    disable_gpg_check: true\n    repo: "https://bluebanquise.com/repository/releases/latest/osl16/x86_64/bluebanquise/"' > resources/workflow/inventory_standard/group_vars/all/repositories.yml
-          docker run -d --privileged --cgroupns=host --net=host --name mgt1 -v /sys/fs/cgroup:/sys/fs/cgroup:rw -v $PWD:/bluebanquise opensuseleap_16:systemd
+          docker run -d --privileged --cgroupns=host --net=host --name mgt1 -v /sys/fs/cgroup:/sys/fs/cgroup:rw -v $PWD:/bluebanquise opensuseleap_15:systemd
           docker exec mgt1 bash -c "/bluebanquise/bootstrap/online_bootstrap.sh --silent --skip_environment"
           docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'cd /bluebanquise/bootstrap/ && ./configure_environment.sh --bb_collections_local_path=/bluebanquise/collections/'"
-          # docker exec mgt1 bash -c "curl http://bluebanquise.com/repository/releases/latest/lp16/x86_64/bluebanquise/bluebanquise.repo --output /etc/zypp/repos.d/bluebanquise.repo"
+          # docker exec mgt1 bash -c "curl http://bluebanquise.com/repository/releases/latest/lp15/x86_64/bluebanquise/bluebanquise.repo --output /etc/zypp/repos.d/bluebanquise.repo"
 
       - name: Prepare run input files
         run: docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'cp -a /bluebanquise/resources/workflow/inventory_standard /var/lib/bluebanquise/inventory && cp -a /bluebanquise/resources/workflow/playbooks /var/lib/bluebanquise'"
@@ -42,7 +42,7 @@ jobs:
           docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'source /var/lib/bluebanquise/ansible_venv/bin/activate &&  ansible-playbook /var/lib/bluebanquise/playbooks/infrastructure.yml -i /var/lib/bluebanquise/inventory --become --connection=local --limit mgt1 --diff --tags time --skip-tags service'"
 
   roles_addons:
-    name: LP16 addons roles
+    name: lp15 addons roles
     runs-on: ubuntu-22.04
     env:
       ANSIBLE_CONFIG: /var/lib/bluebanquise/ansible.cfg
@@ -57,13 +57,13 @@ jobs:
 
       - name: Setup container
         run: |
-          docker build -t opensuseleap_16:systemd -f ./resources/docker/Dockerfile_OpenSUSELeap_16_systemd .
+          docker build -t opensuseleap_15:systemd -f ./resources/docker/Dockerfile_OpenSUSELeap_15_systemd .
           sudo modprobe -v dummy numdummies=2 && sudo ip addr add 10.10.0.1/16 dev dummy0 && sudo ip link set dev dummy0 up && ip a;
           echo -e 'bb_repositories:\n  - name: bluebanquise\n    disable_gpg_check: true\n    repo: "https://bluebanquise.com/repository/releases/latest/osl16/x86_64/bluebanquise/"' > resources/workflow/inventory_standard/group_vars/all/repositories.yml
-          docker run -d --privileged --cgroupns=host --net=host --name mgt1 -v /sys/fs/cgroup:/sys/fs/cgroup:rw -v $PWD:/bluebanquise opensuseleap_16:systemd
+          docker run -d --privileged --cgroupns=host --net=host --name mgt1 -v /sys/fs/cgroup:/sys/fs/cgroup:rw -v $PWD:/bluebanquise opensuseleap_15:systemd
           docker exec mgt1 bash -c "/bluebanquise/bootstrap/online_bootstrap.sh --silent --skip_environment"
           docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'cd /bluebanquise/bootstrap/ && ./configure_environment.sh --bb_collections_local_path=/bluebanquise/collections/'"
-          # docker exec mgt1 bash -c "curl http://bluebanquise.com/repository/releases/latest/lp16/x86_64/bluebanquise/bluebanquise.repo --output /etc/zypp/repos.d/bluebanquise.repo"
+          # docker exec mgt1 bash -c "curl http://bluebanquise.com/repository/releases/latest/lp15/x86_64/bluebanquise/bluebanquise.repo --output /etc/zypp/repos.d/bluebanquise.repo"
 
       - name: Prepare run input files
         run: docker exec mgt1 bash -c "sudo -u bluebanquise /bin/bash -c 'cp -a /bluebanquise/resources/workflow/inventory_standard /var/lib/bluebanquise/inventory && cp -a /bluebanquise/resources/workflow/playbooks /var/lib/bluebanquise'"
