@@ -30,7 +30,7 @@
     dest: /etc/powerman/powerman.conf
     owner: root
     group: root
-    mode: 0644
+    mode: 0640
   notify: service <|> Restart powerman
   tags:
     - template
