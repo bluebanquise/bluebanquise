@@ -1,4 +1,19 @@
 ---
+- name: Include_tasks <|> Use OS dedicated resolver task
+  ansible.builtin.include_tasks: "{{ item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_facts.distribution | replace(' ', '_') }}_{{ ansible_facts.distribution_version }}/disable_resolved.yml"
+        - "{{ ansible_facts.distribution | replace(' ', '_') }}_{{ ansible_facts.distribution_major_version }}/disable_resolved.yml"
+        - "{{ ansible_facts.os_family | replace(' ', '_') }}_{{ ansible_facts.distribution_version }}/disable_resolved.yml"
+        - "{{ ansible_facts.os_family | replace(' ', '_') }}_{{ ansible_facts.distribution_major_version }}/disable_resolved.yml"
+        - "{{ ansible_facts.distribution | replace(' ', '_') }}/disable_resolved.yml"
+        - "{{ ansible_facts.os_family | replace(' ', '_') }}/disable_resolved.yml"
+      skip: true
+  tags:
+    - internal
+    - dns_client
+
 - name: template <|> Generate /etc/resolv.conf
   ansible.builtin.template:
     src: resolv.conf.j2
