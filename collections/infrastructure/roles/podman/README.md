@@ -53,6 +53,7 @@ Variables for this role:
 | podman_registry_enable_encryption | false | boolean | indicate TLS encrpyption for local registry, needs valid key and certificate |
 | podman_registry_crt_path | '' | string | path where to find X.509 certificate |
 | podman_registry_key_path | '' | string | path where to find private key for X.509 certificate |
+| podman_sh_timeout | 70 | integer | Number of seconds to wait for podmansh logins |
 
 ## Dependencies
 
@@ -141,6 +142,7 @@ where the paths in `podman_registry_crt_path` and `podman_registry_key_path` mus
 
 ## Changelog
 
+* 2.1.3: Add podmansh timeout variable <rafael.fonseca@bull.com>
 * 2.1.1: Fix systemd for registry service to allow rc=2, use recommended Type=forking
 * 2.1.0: Add support for TLS encryption in local registry. Neo Team <dl-fr-bds-hpc-neocore@eviden.com>
 * 2.0.0: Updated registry format;Use handlers;Replace libpod.conf. Thiago Cardozo <boubee.thiago@gmail.com>
