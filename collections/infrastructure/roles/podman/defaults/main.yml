@@ -51,7 +51,7 @@ podman_storage_mountopt: 'nodev'
 ####################
 # Podmansh section
 ####################
-podman_sh_timeout: 70
+podman_sh_timeout: 30
 
 ####################
 # Users section
