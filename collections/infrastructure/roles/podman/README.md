@@ -53,7 +53,7 @@ Variables for this role:
 | podman_registry_enable_encryption | false | boolean | indicate TLS encrpyption for local registry, needs valid key and certificate |
 | podman_registry_crt_path | '' | string | path where to find X.509 certificate |
 | podman_registry_key_path | '' | string | path where to find private key for X.509 certificate |
-| podman_sh_timeout | 70 | integer | Number of seconds to wait for podmansh logins |
+| podman_sh_timeout | 30 | integer | Number of seconds to wait for podmansh logins |
 
 ## Dependencies
 
