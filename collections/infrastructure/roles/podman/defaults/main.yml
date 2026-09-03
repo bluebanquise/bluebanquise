@@ -49,6 +49,11 @@ podman_storage_driver: 'overlay'
 podman_storage_mountopt: 'nodev'
 
 ####################
+# Podmansh section
+####################
+podman_sh_timeout: 30
+
+####################
 # Users section
 ####################
 # unprivileged users that are allowd to run podman
