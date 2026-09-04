@@ -142,7 +142,7 @@ https://prometheus.io/docs/prometheus/latest/federation/
 https://github.com/prometheus/pushgateway
 https://medium.com/@rdavix/how-to-export-alerts-from-prometheus-to-grafana-8f1de059a8c8
 https://github.com/soundcloud/ipmi_exporter
-https://awesome-prometheus-alerts.grep.to/rules.html
+https://samber.github.io/awesome-prometheus-alerts/rules.html
 https://grafana.com/grafana/plugins/camptocamp-prometheus-alertmanager-datasource
 https://github.com/MiteshSharma/PrometheusAlertManagerWithAnsible
 https://www.digitalocean.com/community/tutorials/how-to-use-alertmanager-and-blackbox-exporter-to-monitor-your-web-server-on-ubuntu-16-04
