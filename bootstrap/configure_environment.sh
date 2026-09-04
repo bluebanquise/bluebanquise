@@ -37,6 +37,8 @@ pip3 install -r $CURRENT_DIR/requirements.txt
 
 echo "Trying 3 times to grab community.general..."
 ansible-galaxy collection install community.general || sleep 30 && ansible-galaxy collection install community.general || sleep 30 && ansible-galaxy collection install community.general
+echo "Installing ansible.utils..."
+ansible-galaxy collection install ansible.utils 
 # Install BlueBanquise collections
 if [[ $COLLECTIONS_LOCAL_PATH != "none" ]]; then
   ansible-galaxy collection install $COLLECTIONS_LOCAL_PATH
