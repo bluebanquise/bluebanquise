@@ -25,7 +25,7 @@ The `loki` and `promtail` packages must be available in the configured repositor
 
 ## Role Variables
 
-All variables which can be overridden are stored in [defaults/main.yml](defaults/main.yml) file as well as in table below.
+All variables which can be overridden are stored in `defaults/main.yml` file as well as in table below.
 
 | Name | Default Value | Description |
 | ---- | ------------- | ----------- |

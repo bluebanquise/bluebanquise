@@ -43,7 +43,6 @@ ansible.cfg                      # Enables jinja2 loopcontrols+do, profile_tasks
 1. **CHANGELOG entry**: after each role review (or pack of changes on a role), provide a short 1-2 sentence CHANGELOG-suitable summary.
 2. **Target distributions**: RHEL 9 & 10 (RedHat), Ubuntu 24.04 (noble) & 26.04 (resolute) (Debian), Debian 13 (trixie), OpenSuse Leap 16 (Suse).
 3. **Deprecated — remove on sight**:
-   - Icebergs mechanism — don't use it, don't reference it in docs.
    - Variables starting with `j2_` (from `core.py`) — remove when encountered.
    - Python's stdlib `crypt` — deprecated since 3.11, **removed in 3.13**; Debian 13 (a target distro) ships 3.13, so `crypt.crypt()`/`crypt.mksalt()` is a live bug, not a future one. Replace with `openssl passwd -6 -stdin` (password piped via stdin, argument-list `subprocess` call, never interpolated into a shell string).
    - `quit()` to exit a script — depends on the `site` module being loaded, not guaranteed everywhere. Use `sys.exit()`.
@@ -59,6 +58,12 @@ ansible.cfg                      # Enables jinja2 loopcontrols+do, profile_tasks
      then the actual `/etc/haproxy/haproxy.cfg` output re-validated with `haproxy -c`, config valid.
    - `community.mysql.*` modules (`mysql_user`, `mysql_db`, etc.) — this collection was renamed to `ansible.mysql` upstream; `community.mysql` is now a deprecated redirect only and is **removed entirely in its 6.0.0**. Always use `ansible.mysql.mysql_user` / `ansible.mysql.mysql_db`. `galaxy.yml`'s `dependencies` lists `ansible.mysql`, not `community.mysql`. (Caught 2026-07 after initially "fixing" a placeholder `ansible.mysql.*` reference *to* `community.mysql.*`, thinking the former didn't exist — it was a training-data-cutoff gap, not a bug. Confirmed by installing both collections and checking `ansible-galaxy collection install ansible.mysql` resolves live. **Don't trust memory on collection/module namespaces that could have been renamed after the model's cutoff — verify via `ansible-galaxy collection install <name>` or a web search before "fixing" one back.**)
 4. **Protocol**: review file by file (README.md, defaults/main.yml, tasks/*.yml, handlers/main.yml, templates/*.j2). Collect all issues, group logically, present **one change at a time**.
+
+**Icebergs mechanism — reinstated (2026-08-22), no longer deprecated.** Previously listed above as
+"remove on sight"; reversed at Oxedions' explicit request after users asked for the feature back.
+Don't strip iceberg references from docs/roles on sight anymore — treat as live, wanted
+functionality. `documentation/scalability/scalability.rst` (vertical scalability via icebergs) is
+real, current content, not a stray leftover.
 
 ### Role Structure Convention
 
