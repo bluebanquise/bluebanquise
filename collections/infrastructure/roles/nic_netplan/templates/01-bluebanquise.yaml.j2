@@ -1,0 +1,203 @@
+{%- set netplan = {'network': {'version': 2}} -%}
+{%- set ethernets = {} -%}
+{%- set bonds = {} -%}
+{%- set vlans = {} -%}
+
+{%- for iface in network_interfaces | default([]) -%}
+  {%- set type = iface.type | default('ethernet') -%}
+
+  {# Resolve Name Precedence #}
+  {%- set eff_conn_name = iface.conn_name | default(iface.interface) -%}
+  {%- set eff_ifname = iface.ifname | default(iface.physical_device | default(none)) -%}
+
+  {# Load network-level properties #}
+  {%- set net_props = {} -%}
+  {%- if iface.network is defined and iface.network in networks -%}
+    {%- set net_props = networks[iface.network] -%}
+  {%- endif -%}
+
+  {# Skip InfiniBand here - handled in 02-ipoib.yaml.j2 #}
+  {%- if type != 'infiniband' -%}
+    {%- set config = {} -%}
+
+    {# --- IP Addresses & DHCP --- #}
+    {%- set addrs = [] -%}
+
+    {# Handle primary ip4 and its prefix fallback #}
+    {%- if iface.ip4 is defined -%}
+      {%- if '/' in iface.ip4 | string -%}
+        {# IP already includes prefix #}
+        {%- set _ = addrs.append(iface.ip4 | string) -%}
+      {%- else -%}
+        {# Fetch prefix with fallback: prefix4 -> prefix #}
+        {%- set prefix = net_props.prefix4 | default(net_props.prefix | default('')) -%}
+        {%- if prefix != '' -%}
+          {%- set _ = addrs.append(iface.ip4 | string ~ '/' ~ prefix | string) -%}
+        {%- endif -%}
+      {%- endif -%}
+    {%- endif -%}
+
+    {# Handle additional manual IPs #}
+    {%- if iface.ip4_manual is defined and iface.ip4_manual is iterable and iface.ip4_manual is not string -%}
+      {%- for manual_ip in iface.ip4_manual -%}
+        {%- set _ = addrs.append(manual_ip | string) -%}
+      {%- endfor -%}
+    {%- endif -%}
+
+    {%- if addrs | length > 0 -%}
+      {%- set _ = config.update({'addresses': addrs}) -%}
+    {%- endif -%}
+
+    {%- if iface.dhcp4 is defined -%}
+      {%- set _ = config.update({'dhcp4': iface.dhcp4 | bool}) -%}
+    {%- endif -%}
+
+    {# --- Gateway, Metrics & Routing --- #}
+    {%- if type != 'bond-slave' -%}
+      {%- set routes = [] -%}
+
+      {# Metric fallback for Default Route ONLY (interface overrides network) #}
+      {%- set eff_route_metric4 = iface.route_metric4 | default(net_props.route_metric4 | default(none)) -%}
+
+      {# Handle Default Gateway + never_default4 exclusion #}
+      {%- set never_default4 = iface.never_default4 | default(false) | bool -%}
+      {%- if not never_default4 -%}
+        {# Precedence: interface gw4 -> interface gateway4 -> network gateway4 -> network gateway #}
+        {%- set eff_gw4 = iface.gw4 | default(iface.gateway4 | default(net_props.gateway4 | default(net_props.gateway | default(none)))) -%}
+        {%- if eff_gw4 is not none -%}
+          {%- set route4 = {'to': 'default', 'via': eff_gw4 | string} -%}
+          {%- if eff_route_metric4 is not none -%}
+            {%- set _ = route4.update({'metric': eff_route_metric4 | int}) -%}
+          {%- endif -%}
+          {%- set _ = routes.append(route4) -%}
+        {%- endif -%}
+      {%- endif -%}
+
+      {# Merge routes4 from both network and interface levels #}
+      {%- set net_routes4 = net_props.routes4 if (net_props.routes4 is defined and net_props.routes4 is iterable and net_props.routes4 is not string) else [] -%}
+      {%- set iface_routes4 = iface.routes4 if (iface.routes4 is defined and iface.routes4 is iterable and iface.routes4 is not string) else [] -%}
+      {%- set merged_routes4 = net_routes4 + iface_routes4 -%}
+
+      {%- if merged_routes4 | length > 0 -%}
+        {%- for r in merged_routes4 -%}
+          {%- set parts = r.split() -%}
+          {%- if parts | length >= 2 -%}
+            {%- set new_route = {'to': parts[0] | string, 'via': parts[1] | string} -%}
+
+            {%- if parts | length >= 3 -%}
+              {%- set _ = new_route.update({'metric': parts[2] | int}) -%}
+            {%- endif -%}
+
+            {%- set _ = routes.append(new_route) -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+
+      {%- if routes | length > 0 -%}
+        {%- set _ = config.update({'routes': routes}) -%}
+      {%- endif -%}
+
+      {# --- DNS / Nameservers --- #}
+      {%- if iface.dns4 is defined or iface.nameservers is defined -%}
+        {%- set ns_list = iface.nameservers | default([iface.dns4]) -%}
+        {%- set ns = {'addresses': ns_list} -%}
+        {%- if iface.dns4_search is defined or iface.search_domains is defined -%}
+          {%- set sd_list = iface.search_domains | default([iface.dns4_search]) -%}
+          {%- set _ = ns.update({'search': sd_list | list}) -%}
+        {%- endif -%}
+        {%- set _ = config.update({'nameservers': ns}) -%}
+      {%- endif -%}
+
+      {# --- MTU --- #}
+      {%- set eff_mtu = iface.mtu | default(net_props.mtu | default(none)) -%}
+      {%- if eff_mtu is not none -%}
+        {%- set _ = config.update({'mtu': eff_mtu | int}) -%}
+      {%- endif -%}
+    {%- endif -%}
+  
+    {# --- Structural Assignment --- #}
+    {%- if type in ['ethernet', 'bond-slave'] -%}
+
+      {# Match logic based on MAC or physical ifname #}
+      {%- if iface.mac is defined or eff_ifname is not none -%}
+        {%- set match_dict = {} -%}
+        {%- if iface.mac is defined -%}
+          {%- set _ = match_dict.update({'macaddress': iface.mac | string}) -%}
+        {%- endif -%}
+        {%- if eff_ifname is not none -%}
+          {%- set _ = match_dict.update({'name': eff_ifname | string}) -%}
+        {%- endif -%}
+        {%- set _ = config.update({'match': match_dict}) -%}
+        {%- set _ = config.update({'set-name': eff_conn_name | string}) -%}
+      {%- endif -%}
+
+      {%- set _ = ethernets.update({eff_conn_name: config}) -%}
+
+      {# Append bond-slaves to bond master if needed (master defined previously implied) #}
+      {%- if type == 'bond-slave' and iface.master is defined and iface.master in bonds -%}
+        {%- set _ = bonds[iface.master]['interfaces'].append(eff_conn_name | string) -%}
+      {%- endif -%}
+
+    {%- elif type == 'vlan' -%}
+      {%- if iface.mac is defined -%}
+        {%- set _ = config.update({'macaddress': iface.mac | string}) -%}
+      {%- endif -%}
+      {%- if iface.vlan_id is defined -%}
+        {%- set _ = config.update({'id': iface.vlan_id | int}) -%}
+      {%- endif -%}
+      {%- set link_dev = iface.vlandev | default(iface.link | default('')) -%}
+      {%- if link_dev != '' -%}
+        {%- set _ = config.update({'link': link_dev | string}) -%}
+      {%- endif -%}
+      {%- set _ = vlans.update({eff_conn_name: config}) -%}
+
+    {%- elif type == 'bond' -%}
+      {%- if iface.mac is defined -%}
+        {%- set _ = config.update({'macaddress': iface.mac | string}) -%}
+      {%- endif -%}
+
+      {%- set slaves = iface.bond_slaves | default(iface.slaves | default([])) -%}
+      {%- set _ = config.update({'interfaces': slaves | list}) -%}
+
+      {%- set bond_params = {} -%}
+      
+      {%- set bond_mode = iface.bond_mode | default(iface.mode | default(none)) -%}
+      {%- if bond_mode is not none -%}
+         {%- set _ = bond_params.update({'mode': bond_mode | string}) -%}
+      {%- endif -%}
+
+      {%- set bond_miimon = iface.bond_miimon | default(iface.miimon | default(none)) -%}
+      {%- if bond_miimon is not none -%}
+         {%- set _ = bond_params.update({'mii-monitor-interval': bond_miimon | int}) -%}
+      {%- endif -%}
+
+      {%- set bond_updelay = iface.bond_updelay | default(iface.updelay | default(none)) -%}
+      {%- if bond_updelay is not none -%}
+         {%- set _ = bond_params.update({'up-delay': bond_updelay | int}) -%}
+      {%- endif -%}
+
+      {%- set bond_downdelay = iface.bond_downdelay | default(iface.downdelay | default(none)) -%}
+      {%- if bond_downdelay is not none -%}
+         {%- set _ = bond_params.update({'down-delay': bond_downdelay | int}) -%}
+      {%- endif -%}
+
+      {%- set bond_xmit_hash = iface.bond_xmit_hash_policy | default(iface.xmit_hash_policy | default("balance-rr")) -%}
+      {%- if bond_xmit_hash is not none -%}
+         {%- set _ = bond_params.update({'transmit-hash-policy': bond_xmit_hash | string}) -%}
+      {%- endif -%}
+
+      {%- if bond_params | length > 0 -%}
+         {%- set _ = config.update({'parameters': bond_params}) -%}
+      {%- endif -%}
+
+      {%- set _ = bonds.update({eff_conn_name: config}) -%}
+
+    {%- endif -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{%- if ethernets -%}{%- set _ = netplan['network'].update({'ethernets': ethernets}) -%}{%- endif -%}
+{%- if bonds -%}{%- set _ = netplan['network'].update({'bonds': bonds}) -%}{%- endif -%}
+{%- if vlans -%}{%- set _ = netplan['network'].update({'vlans': vlans}) -%}{%- endif -%}
+
+{{ netplan | to_nice_yaml(indent=2, sort_keys=False) }}

@@ -1,0 +1,32 @@
+---
+- name: Ensure Netplan directory exists
+  ansible.builtin.file:
+    path: /etc/netplan
+    state: directory
+    mode: '0755'
+
+- name: Deploy network configurations via Netplan
+  ansible.builtin.template:
+    src: 01-bluebanquise.yaml.j2
+    dest: /etc/netplan/01-bluebanquise.yaml
+    mode: '0600'
+  notify: Apply Netplan
+
+
+- name: Identify InfiniBand interfaces
+  ansible.builtin.set_fact:
+    nic_netplan_infiniband_interfaces: >-
+      {{
+        network_interfaces
+        | selectattr('type', 'defined')
+        | selectattr('type', 'equalto', 'infiniband')
+        | list
+      }}
+
+- name: Deploy IPoIB network configurations via Netplan
+  ansible.builtin.template:
+    src: 02-bluebanquise_ipoib.yaml.j2
+    dest: /etc/netplan/02-bluebanquise_ipoib.yaml
+    mode: '0600'
+  when: nic_netplan_infiniband_interfaces | length > 0
+  notify: Apply Netplan
