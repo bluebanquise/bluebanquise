@@ -4,9 +4,10 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.4
 
-* 2026-09-09 - marcosmazz - [nic_netplan] New nic role for netplan backend
-* 2026-08-27 - santos-lucas - [bootstrap] Added ansible.utils dependency on bootstrap process (#1279)
-* 2026-08-23 - santos-lucas - [repositories] Added override_repositories_environment feature (#1275)
+* 22/09/2026 - santos-lucas - [nic_netplan] added nic_mac_match_namming_enabled control variable to nic_netplan + remove defaults netplan files (#1282)
+* 09/09/2026 - marcosmazz - [nic_netplan] New nic role for netplan backend
+* 27/08/2026 - santos-lucas - [bootstrap] Added ansible.utils dependency on bootstrap process (#1279)
+* 23/08/2026 - santos-lucas - [repositories] Added override_repositories_environment feature (#1275)
 * 22/08/2026 - oxedions, Ummon [pxe_stack] wired TFTP_ADDRESS/OPTIONS/DIRECTORY into the tftp-hpa migration — Debian/Ubuntu via /etc/default/tftpd-hpa, RHEL 9+/Suse via a systemd drop-in overriding tftp.service's ExecStart (socket-activated, no env file). Also fixed the restart handler, which was silently never restarting the tftp service on config change.
 * 22/08/2026 - oxedions, Ummon [pxe_stack] add bluebanquise-netboots-installer CLI tool to install, uninstall, and list OS netboots (ubuntu_24.04, debian_13, rhel_9, rhel_10, opensuse_16) with download progress, SHA256 verification, airgap support, and automatic major-version symlinks.
 * 22/08/2026 - oxedions, Ummon [slurm] Fix missing --- marker in pam_slurm_adopt tasks, add <|> separator to handler and task names, add FQCN and name to bare debug task, fix wrong variable name slurm_enable_local_mysql → slurm_accounting_enable_local_mysql in slurmdbd.conf template, and fix README partition examples using unquoted yes that would render as True in slurm.conf.
