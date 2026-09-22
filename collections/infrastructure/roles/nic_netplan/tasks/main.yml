@@ -5,13 +5,23 @@
     state: directory
     mode: '0755'
 
+- name: file <|> Ensure old netplan configuration is erased
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "/etc/netplan/00-installer-config.yaml"
+    - "/etc/netplan/50-cloud-init.yaml"
+    - "/etc/netplan/99-netcfg-vmware.yaml"
+  tags:
+    - identify
+
 - name: Deploy network configurations via Netplan
   ansible.builtin.template:
     src: 01-bluebanquise.yaml.j2
     dest: /etc/netplan/01-bluebanquise.yaml
     mode: '0600'
   notify: Apply Netplan
-
 
 - name: Identify InfiniBand interfaces
   ansible.builtin.set_fact:
