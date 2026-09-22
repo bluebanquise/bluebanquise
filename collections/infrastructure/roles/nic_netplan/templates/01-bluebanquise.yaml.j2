@@ -117,19 +117,21 @@
   
     {# --- Structural Assignment --- #}
     {%- if type in ['ethernet', 'bond-slave'] -%}
-
+      {%- if nic_netplan_mac_match_naming_enabled %}
       {# Match logic based on MAC or physical ifname #}
-      {%- if iface.mac is defined or eff_ifname is not none -%}
-        {%- set match_dict = {} -%}
-        {%- if iface.mac is defined -%}
-          {%- set _ = match_dict.update({'macaddress': iface.mac | string}) -%}
+        {%- if iface.mac is defined or eff_ifname is not none -%}
+          {%- set match_dict = {} -%}
+          {%- if iface.mac is defined -%}
+            {%- set _ = match_dict.update({'macaddress': iface.mac | string}) -%}
+          {%- endif -%}
+          {%- if eff_ifname is not none -%}
+            {%- set _ = match_dict.update({'name': eff_ifname | string}) -%}
+          {%- endif -%}
+          {%- set _ = config.update({'match': match_dict}) -%}
+          {%- set _ = config.update({'set-name': eff_conn_name | string}) -%}
         {%- endif -%}
-        {%- if eff_ifname is not none -%}
-          {%- set _ = match_dict.update({'name': eff_ifname | string}) -%}
-        {%- endif -%}
-        {%- set _ = config.update({'match': match_dict}) -%}
-        {%- set _ = config.update({'set-name': eff_conn_name | string}) -%}
       {%- endif -%}
+
 
       {%- set _ = ethernets.update({eff_conn_name: config}) -%}
 
