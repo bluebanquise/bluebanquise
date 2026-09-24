@@ -478,7 +478,7 @@ The following variables, with their default values shown here, are available
 to tune launch parameters of each tool:
 
 ```yaml
-prometheus_server_launch_parameters: |
+prometheus_server_prometheus_launch_parameters: |
   --config.file /etc/prometheus/prometheus.yml \
   --storage.tsdb.path /var/lib/prometheus/ \
   --web.console.templates=/etc/prometheus/consoles \
@@ -504,7 +504,7 @@ For example, to manipulate data retention (default 15 days) and ask for 60 days,
 set this variable:
 
 ```yaml
-prometheus_server_launch_parameters: |
+prometheus_server_prometheus_launch_parameters: |
   --storage.tsdb.retention.time 60d \
   --config.file /etc/prometheus/prometheus.yml \
   --storage.tsdb.path /var/lib/prometheus/ \
@@ -519,7 +519,7 @@ Another example, to manipulate database path, combine with a 60 days retention,
 set:
 
 ```yaml
-prometheus_server_launch_parameters: |
+prometheus_server_prometheus_launch_parameters: |
   --storage.tsdb.path /prometheus \
   --storage.tsdb.retention.time 60d \
   --config.file /etc/prometheus/prometheus.yml \
