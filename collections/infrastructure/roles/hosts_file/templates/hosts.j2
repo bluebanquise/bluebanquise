@@ -9,13 +9,13 @@
 
 {# Always write base records #}
 {% for host in hosts_by_first_octets['forward']['base'] %}
-{{ host.ip4 }} {{ host.hostname }}
+{{ host.ip4 }} {{ host.hostname }}.{{bb_domain_name | default('cluster.local') }} {{ host.hostname }}
 {% endfor %}
 
 {# Conditionally write extended records #}
 {% if hosts_file_enable_extended_names %}
 {% for host in hosts_by_first_octets['forward']['extended'] %}
-{{ host.ip4 }} {{ host.hostname }}
+{{ host.ip4 }} {{ host.hostname }}.{{bb_domain_name | default('cluster.local') }} {{ host.hostname }}
 {% endfor %}
 {% endif %}
 
