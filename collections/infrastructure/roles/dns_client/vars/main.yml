@@ -1,3 +1,38 @@
 ---
 
 dns_client_role_version: 1.3.4
+
+_dns_client_network_name: >-
+  {{ network_interfaces | default([])
+     | selectattr('network', 'defined')
+     | selectattr('interface', 'defined')
+     | selectattr('ip4', 'defined')
+     | selectattr('network', 'match', '^net-[a-zA-Z0-9]+')
+     | map(attribute='network')
+     | list | first | default('') }}
+
+_dns_client_from_services: >-
+  {{ networks[_dns_client_network_name].services.dns4
+     | default(networks[_dns_client_network_name].services.dns, true)
+     | default([], true)
+     | selectattr('ip4', 'defined')
+     | map(attribute='ip4')
+     | ansible.utils.ipaddr
+     | list }}
+
+_dns_client_from_services_ip: >-
+  {{ [networks[_dns_client_network_name].services_ip] | ansible.utils.ipaddr | list
+     if networks[_dns_client_network_name].services_ip is defined else [] }}
+
+_dns_client_internal: >-
+  {{ dns_client_servers | list
+     if (dns_client_servers is defined and dns_client_servers is iterable and dns_client_servers is not string)
+     else (_dns_client_from_services or _dns_client_from_services_ip) }}
+
+_dns_client_external: >-
+  {{ dns_client_external_servers | list
+     if (dns_client_external_servers is defined and dns_client_external_servers is iterable and dns_client_external_servers is not string)
+     else [] }}
+
+# Final list
+dns_client_resolved_servers: "{{ _dns_client_internal + _dns_client_external }}"

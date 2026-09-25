@@ -1,0 +1,9 @@
+- name: Configure DNS in systemd-resolved
+  ansible.builtin.lineinfile:
+    path: /etc/systemd/resolved.conf
+    regexp: '^#?DNS='
+    line: "DNS={{ dns_client_resolved_servers | join(' ') }}"
+    insertafter: '^\[Resolve\]'
+    backup: true
+  notify: Restart systemd-resolved
+  when: dns_client_resolved_servers | length > 0

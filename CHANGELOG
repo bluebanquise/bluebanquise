@@ -3,7 +3,7 @@
 Format: <date> - <author (username or mail or both)> - [role] <change description>
 
 # To 3.4
-
+* 24/09/2026 - santos-lucas - [dns_client] Added support for ubuntu (#1284)
 * 2026-09-09 - marcosmazz - [nic_netplan] New nic role for netplan backend
 * 2026-08-27 - santos-lucas - [bootstrap] Added ansible.utils dependency on bootstrap process (#1279)
 * 2026-08-23 - santos-lucas - [repositories] Added override_repositories_environment feature (#1275)
