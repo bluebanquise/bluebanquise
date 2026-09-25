@@ -26,6 +26,10 @@
 
     "valid-lifetime": {{ dhcp_server_default_lease_time }},
     "max-valid-lifetime": {{ dhcp_server_max_lease_time }},
+    
+    {% if dhcp_server_ignore_client_uids | bool %}
+    "match-client-id": false,
+    {% endif %}
 
     {% if dhcp_server_ipxe_driver == 'snponly' %}
       {% set ipxe_driver = 'snponly_' %}
