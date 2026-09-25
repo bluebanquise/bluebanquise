@@ -1,10 +1,16 @@
 ---
-- name: template <|> Generate /etc/resolv.conf
-  ansible.builtin.template:
-    src: resolv.conf.j2
-    dest: /etc/resolv.conf
-    owner: root
-    group: root
-    mode: 0644
+- name: include_tasks <|> Use OS dedicated task
+  ansible.builtin.include_tasks: "{{ item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
+        - "{{ ansible_facts.distribution | replace(' ','_') }}/main.yml"
+        - "{{ ansible_facts.os_family | replace(' ','_') }}/main.yml"
+        - "default/main.yml"
+      skip: true
   tags:
-    - template
+    - internal
+    - dns_client_os_dedicated_tasks
