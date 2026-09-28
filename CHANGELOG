@@ -4,6 +4,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.4
 
+* 22/09/2026 - santos-lucas - [nic_netplan] added nic_mac_match_namming_enabled control variable to nic_netplan + remove defaults netplan files (#1282)
 * 24/09/2026 - santos-lucas - [hosts_file] fix: added domain on hosts_file (#1283)
 * 2026-09-25 - pbirokas - [dhcp_server] Enable already available parameter in template kea-dhcp4.conf.j2 
 * 2026-09-09 - marcosmazz - [nic_netplan] New nic role for netplan backend
