@@ -1,0 +1,2 @@
+---
+nic_netplan_mac_match_naming_enabled: false
