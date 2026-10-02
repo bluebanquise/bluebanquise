@@ -826,15 +826,13 @@ To enable basic authentication, you need to set these variables:
 
 ```yaml
 prometheus_server_enable_basic_auth: false
-prometheus_server_basic_auth_user:
-prometheus_server_basic_auth_password:
-prometheus_server_basic_auth_hash_password:
 
 prometheus_server_prometheus_username: admin
 prometheus_server_prometheus_password: admin
 
 prometheus_server_alertmanager_username: admin
 prometheus_server_alertmanager_password: admin
+prometheus_server_prometheus_password_hash
 
 prometheus_server_karma_username: admin
 prometheus_server_karma_password: admin
