@@ -16,12 +16,17 @@
     + [Exporters](#exporters)
   * [5. IPMI, SNMP and Modbus](#5-ipmi-snmp-and-modbus)
   * [6. Advanced usage](#6-advanced-usage)
+    + [Monitoring High Availability](#monitoring-high-availability)
     + [Set custom launch parameters](#set-custom-launch-parameters)
     + [Manipulate firewall](#manipulate-firewall)
     + [Splitting services](#splitting-services)
     + [Adding raw prometheus.conf scraping jobs:](#adding-raw-prometheusconf-scraping-jobs)
     + [Adding raw prometheus.conf configuration](#adding-raw-prometheusconf-configuration)
+    + [Access Prometheus behind a reverse proxy](#access-prometheus-behind-a-reverse-proxy)
+    + [Access Alertmanager behind a reverse proxy](#access-alertmanager-behind-a-reverse-proxy)
+    + [Access Karma behind a reverse proxy](#access-karma-behind-a-reverse-proxy)
     + [TLS and/or Basic Authentication](#tls-andor-basic-authentication)
+    + [TSDB Prometheus](#tsdb-prometheus)
   * [Changelog](#changelog)
 
 
@@ -197,7 +202,7 @@ prometheus_server_custom_alerts: !unsafe >
           summary: "Host out of memory (instance {{ $labels.instance }})"
           description: "Node memory is filling up (< 10% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
       - alert: HostOutOfInodes
-        expr: node_filesystem_files_free{mountpoint ="/rootfs"} / node_filesystem_files{mountpoint="/rootfs"} * 100 < 10 and ON (instance, device, mountpoint) node_filesystem_readonly{mountpoint="/rootfs"} == 0                              
+        expr: node_filesystem_files_free{mountpoint ="/rootfs"} / node_filesystem_files{mountpoint="/rootfs"} * 100 < 10 and ON (instance, device, mountpoint) node_filesystem_readonly{mountpoint="/rootfs"} == 0
         for: 2m
         labels:
           severity: warning
@@ -313,7 +318,7 @@ prometheus_exporters_to_scrape:
 Server side will scrap these exporters on all the hosts of the group, while
 client side will install them on all hosts of the group.
 
-It is important to understand that the client side of these settings are capable of 
+It is important to understand that the client side of these settings are capable of
 generating everything needed by an exporter binary: service file, users, working dir, etc.
 These settings will generate these elements depending of the variables present.
 The list of capabilities is described after the example.
@@ -400,7 +405,7 @@ prometheus_server_manage_modbus_exporter: false
 ```
 
 You then need to specify which hardware groups of hosts have to be
-ipmi scraped. To do so, simply set the global variable `prometheus_ipmi_scrape_hardware_groups` 
+ipmi scraped. To do so, simply set the global variable `prometheus_ipmi_scrape_hardware_groups`
 in the default *inventory/group_vars/all/prometheus.yml* file:
 
 ```yaml
@@ -467,6 +472,131 @@ technically "gateways" to a Modbus-RTU network containing an arbitrary amount
 of devices.
 
 ## 6. Advanced usage
+
+### Monitoring High Availability
+
+The monitoring stack allows the configuration of services in high availability. There are wo ways to achieve high availability:
+
+**A**. Using alertmanager's native clustering parameters. However, other services will only e duplicated between management nodes.
+**B**. Integrating with Pacemaker and Alertmanager's native clustering parameters. In this cenario, metrics and other resources will all be in high availability.
+
+##### Option A:
+
+1. Enable ``prometheus_ha_enabled`` in the inventory:
+
+```yaml
+prometheus_ha_enabled:  true
+```
+
+2. Configure the cluster peers for AlertManager:
+
+```yaml
+prometheus_server_alertmanager_cluster_peers:
+       - name:  ha1  # Hostname of the HA cluster nodes
+         addrs:      # List of addresses to be used for HA ring
+           - ha1
+       - name:  ha2
+         addrs:
+           - ha2
+```
+
+3. (Optional) You can change the default port that the AlertManager cluster ring listens on:
+
+```yaml
+prometheus_server_alertmanager_cluster_port:  9094
+```
+
+##### Option B:
+
+**For this option you will need to use the collections/high_availability/pcs.**
+
+4. Karma will use a vIP (Virtual IP) from Pacemaker for the monitoring group, for this eason we must configure it correctly in */etc/bluebanquise/inventory/group_vars/all/general_settings/services.yml*.
+
+```yaml
+       services:
+         regionadmin:
+           admin:
+             ...
+             monitoring:
+               - ip4: 10.10.0.1
+                 hostname: monitoring
+```
+
+5. Configure the Karma host to point to the vIP:
+
+```yaml
+prometheus_server_karma_host: "{{ networks[j2_node_main_network].services.monitoring[0].hostname }}.{{ bb_domain_name }}"
+```
+
+6. Ensure that you have a volume group created that can be integrated with Pacemaker, this ay the metrics will be shared between Prometheus resources.
+
+```yaml
+prometheus_server_prometheus_tsdb_path:  '/var/lib/storage-prometheus'
+prometheus_server_prometheus_tsdb_retention_time:  10d  # Defaults to 15d
+
+prometheus_server_prometheus_launch_parameters: |
+  --storage.tsdb.path {{ prometheus_server_prometheus_tsdb_path }} \
+  --storage.tsdb.retention.time {{ prometheus_server_prometheus_tsdb_retention_time }} \
+```
+
+7. To integrate with Pacemaker, we must add or uncomment the Monitoring block in ``ha_resources.yml``. This block is responsible for configuring the resources that will be managed by Pacemaker:
+
+```yaml
+
+      - group: ''
+        resources:
+          - id: service-alertmanager
+            type: systemd:alertmanager
+            arguments: "clone interleave=true"
+
+      - group: monitoring-stack
+         resources:
+         - id: lvm-activate-vg-monitoring-stack
+            type: LVM-activate
+            arguments: "vgname='vg-monitoring-stack' vg_access_mode='system_id' activation_mode='exclusive'"
+
+         - id: fs-data-grafana-db
+            type: Filesystem
+            arguments: "device='/dev/vg-monitoring-stack/grafana-db' directory='{{ grafana_db_mnt_point }}' fstype='ext4'"
+         - id: fs-data-prometheus
+            type: Filesystem
+            arguments: "device='/dev/vg-monitoring-stack/prometheus' directory='{{ prometheus_server_prometheus_tsdb_path }}' fstype='ext4'"
+
+         - id: vip-monitoring-stack
+            type: IPaddr2
+            arguments: "ip={{ networks[j2_node_main_network].services.monitoring[0].ip4 }} cidr_netmask={{ networks[j2_node_main_network]['prefix'] }} nic={{ j2_node_main_network_interface }}"
+
+         - id: service-grafana-db
+            type: systemd:grafana-db
+         - id: service-grafana-server
+            type: systemd:grafana-server
+         - id: service-prometheus-server
+            type: systemd:prometheus
+         - id: service-karma
+            type: systemd:karma
+```
+
+With these configurations, you will be able to implement the Monitoring stack in high vailability.
+
+At the end of the day, you will have something similar to:
+
+```shell
+   $ pcs status
+
+   * Resource Group: monitoring-stack:
+   * vg-monitoring-stack-monitoring    (ocf::heartbeat:LVM-activate):   Started mngt0-1
+   * fs-data-grafana-db                (ocf::heartbeat:Filesystem):     Started mngt0-1
+   * fs-data-prometheus                (ocf::heartbeat:Filesystem):     Started mngt0-1
+   * vip-monitoring-stack              (ocf::heartbeat:IPaddr2):        Started mngt0-1
+   * service-grafana-db                (systemd:grafana-db):            Started mngt0-1
+   * service-grafana-server            (systemd:grafana-server):        Started mngt0-1
+   * service-prometheus-server         (systemd:prometheus):            Started mngt0-1
+   * service-karma                     (systemd:karma):         Started mngt0-1
+
+   * Clone Set: service-alertmanager-clone [service-alertmanager]:
+   * Started: [ mngt0-1 mngt0-2 ]
+```
+
 
 ### Set custom launch parameters
 
@@ -620,6 +750,67 @@ prometheus.conf file using the following multi lines variable:
 ```yaml
 prometheus_server_prometheus_raw_configuration:
 ```
+### Access Prometheus behind a reverse proxy
+
+It is possible to configure Prometheus to listen at a URL with a prefix, in order to simplify the configuration of a reverse proxy. To listen at :9090/prometheus, set the following variables in your inventory:
+
+```yaml
+prometheus_server_prometheus_prefix: /prometheus
+
+prometheus_server_prometheus_launch_parameters: |
+  --config.file /etc/prometheus/prometheus.yml \
+  --storage.tsdb.path /var/lib/prometheus/ \
+  --web.console.templates=/etc/prometheus/consoles \
+  --web.console.libraries=/etc/prometheus/console_libraries \
+  --web.external-url="http://{{ prometheus_server_prometheus_host }}:9090{{ prometheus_server_prometheus_prefix }}/" \
+  $PROMETHEUS_OPTIONS
+```
+
+The second variable adds "--web.external-url" parameter to the prometheus launcher. The default configuration of Prometheus is automatically updated to listen to its own metrics at :9090/prometheus/metrics.
+
+With this configuration, it is possible to easily configure a reverse proxy. Here is an example for nginx:
+
+```
+http {
+ server {
+   listen 0.0.0.0:19090;
+   location /prometheus/ {
+     proxy_pass :9090/prometheus/;
+   }
+ }
+}
+events {
+}
+```
+
+Notice that all accesses to Prometheus (e.g. the UI, grafana) will need to be updated to use the prefix in this case.
+
+### Access Alertmanager behind a reverse proxy
+
+It is possible to configure Alertmanager to listen at a URL with a prefix, in order to simplify the configuration of a reverse proxy. To listen at :9093/alertmanager, set the following variables in your inventory:
+
+```yaml
+prometheus_server_alertmanager_prefix: /alertmanager
+
+prometheus_server_alertmanager_launch_parameters: |
+  --config.file=/etc/alertmanager/alertmanager.yml \
+  --web.external-url="http://{{ prometheus_server_alertmanager_host }}:9093{{ prometheus_server_alertmanager_path_prefix }}/"
+```
+
+The configuration of the reverse proxy for alertmanager can be similar to the configuration for Prometheus server listening at :9090/prometheus.
+Notice that all accesses to Alertmanager (e.g. the UI, karma) will need to be updated to use the prefix in this case.
+
+### Access Karma behind a reverse proxy
+
+It is possible to configure Karma to listen at a URL with a prefix, in order to simplify the configuration of a reverse proxy. To listen at :8080/karma, set the following variables in your inventory:
+
+```yaml
+prometheus_server_karma_port: 8080
+prometheus_server_karma_prefix: karma
+```
+
+The configuration of the reverse proxy for Karma can be similar to the configuration for Prometheus server listening at :9090/prometheus.
+Notice that access to Karma UI will need to be updated to use the prefix in this case.
 
 ### TLS and/or Basic Authentication
 
@@ -627,20 +818,50 @@ To enable TLS encryption, you need to set these variables:
 
 ```yaml
 prometheus_server_enable_tls: true
-prometheus_server_tls_cert_file: 
-prometheus_server_tls_key_file: 
+prometheus_server_tls_cert_file:
+prometheus_server_tls_key_file:
 ```
 
 To enable basic authentication, you need to set these variables:
 
 ```yaml
-prometheus_server_enable_basic_auth: true
-prometheus_server_basic_auth_user: 
-prometheus_server_basic_auth_password: 
-prometheus_server_basic_auth_hash_password: 
+prometheus_server_enable_basic_auth: false
+
+prometheus_server_prometheus_username: admin
+prometheus_server_prometheus_password: admin
+
+prometheus_server_alertmanager_username: admin
+prometheus_server_alertmanager_password: admin
+prometheus_server_prometheus_password_hash
+
+prometheus_server_karma_username: admin
+prometheus_server_karma_password: admin
 ```
 
-Note: You can use python3-bcrypt to generate hashed password. See more at https://prometheus.io/docs/guides/basic-auth/#hashing-a-password .
+For the **Alertmanager** and **Prometheus** services we need a secret generated using the bcrypt password-hashing function*.
+
+1. Install bcrypt:
+
+```pip
+pip install bcrypt
+```
+
+2. Run the command below. It will ask you to enter a password and return the respective hash:
+
+```shell
+# python3.11 -c "import getpass; import bcrypt; password = getpass.getpass('Enter your assword: '); hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()); rint('Password hash:', hashed_password.decode())"
+Enter your password: <password>
+Password hash: <hash>
+```
+
+3. Update the variables in the inventory that use the hash:
+
+```yaml
+      prometheus_server_prometheus_password_hash:
+      prometheus_server_alertmanager_password_hash:
+```
+
+> Note: You can use python3-bcrypt to generate hashed password. See more at [Prometheus/Basic Auth/Hashing a Password](https://prometheus.io/docs/guides/basic-auth/#hashing-a-password).
 
 To load web configuration file, use the --web.config.file flag:
 
@@ -651,4 +872,23 @@ prometheus_server_prometheus_launch_parameters: |
   --web.console.templates=/etc/prometheus/consoles \
   --web.console.libraries=/etc/prometheus/console_libraries $PROMETHEUS_OPTIONS \
   --web.config.file=/etc/prometheus/web.yml
+```
+
+### TSDB Prometheus
+
+This collection allows changing the path and retention time of [TSDB](https://prometheus.io/docs/prometheus/latest/storage/).
+
+Configure the variables below according to your needs:
+
+```yaml
+prometheus_server_prometheus_tsdb_path: '/var/lib/prometheus'
+prometheus_server_prometheus_tsdb_retention_time: 10d
+```
+
+And attach them to additional Prometheus initialization parameters, as in the following example:
+
+```yaml
+prometheus_server_prometheus_launch_parameters: |
+  --storage.tsdb.path {{ prometheus_server_prometheus_tsdb_path }} \
+  --storage.tsdb.retention.time {{ prometheus_server_prometheus_tsdb_retention_time }}
 ```

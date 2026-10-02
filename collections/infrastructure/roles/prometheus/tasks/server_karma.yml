@@ -29,7 +29,7 @@
     group: root
     mode: 0644
   notify:
-    - systemd <|> Reload systemd configuration
+    - systemd <|> Reload systemd configuration for prometheus
     - service <|> Restart karma service
   tags:
     - template
@@ -54,6 +54,19 @@
   notify: service <|> Restart karma service
   tags:
     - template
+
+- name: "firewalld <|> Add karma custom port to firewall's {{ prometheus_server_firewall_zone | default('public') }} zone"
+  ansible.posix.firewalld:
+    zone: "{{ prometheus_server_firewall_zone | default('public') }}"
+    port: "{{ prometheus_server_karma_port }}/tcp"
+    immediate: "yes"
+    permanent: "yes"
+    state: enabled
+  when:
+    - ansible_facts.os_family == "RedHat"
+    - os_firewall | default(false) | bool
+  tags:
+    - firewall
 
 - name: meta <|> Run handler tasks
   ansible.builtin.meta: flush_handlers

@@ -29,14 +29,14 @@
     group: root
     mode: 0644
   notify:
-    - systemd <|> Reload systemd configuration
+    - systemd <|> Reload systemd configuration for prometheus
     - service <|> Restart alertmanager service
   tags:
     - template
 
-- name: "copy <|> Install firewalld service configuration file"
-  ansible.builtin.copy:
-    src: alertmanager.xml
+- name: "template █ Generate firewalld service configuration file"
+  ansible.builtin.template:
+    src: alertmanager.xml.j2
     dest: /etc/firewalld/services/alertmanager.xml
     owner: root
     group: root

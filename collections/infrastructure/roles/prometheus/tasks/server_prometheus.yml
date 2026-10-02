@@ -29,7 +29,7 @@
     group: root
     mode: 0644
   notify:
-    - systemd <|> Reload systemd configuration
+    - systemd <|> Reload systemd configuration for prometheus
     - service <|> Restart prometheus service
   tags:
     - template
@@ -58,6 +58,8 @@
     - /etc/prometheus/
     - /etc/prometheus/alerts/
     - /var/lib/prometheus
+    - "{{ prometheus_server_prometheus_tsdb_path | default(omit) }}"
+  when: item is not none and item != omit
 
 - name: template <|> Generate /etc/prometheus/prometheus.yml
   ansible.builtin.template:

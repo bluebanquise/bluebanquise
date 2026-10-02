@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<service>
+  <short>alertmanager</short>
+  <description>Alertmanager handles alerts sent by client applications such as the Prometheus server</description>
+  <port protocol="tcp" port="{{ prometheus_server_alertmanager_port }}"/>
+{% if prometheus_ha_enabled is defined and prometheus_ha_enabled %}
+{% if prometheus_server_alertmanager_cluster_peers is defined and prometheus_server_alertmanager_cluster_peers|length > 0 %}
+  <port protocol="tcp" port="{{ prometheus_server_alertmanager_cluster_port }}"/>
+{% endif %}
+{% endif %}
+</service>
