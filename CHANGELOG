@@ -4,7 +4,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.4
 
-* 29/09/2026 - thiagocardozo [prometheus] Task to add firewall ports to zone (#1288)
+* 02/10/2026 - lmagdanello40 Monitoring HA with Basic Auth. (#1288)
 * 24/09/2026 - santos-lucas - [dns_client] Added support for ubuntu (#1284)
 * 22/09/2026 - santos-lucas - [nic_netplan] added nic_mac_match_namming_enabled control variable to nic_netplan + remove defaults netplan files (#1282)
 * 24/09/2026 - santos-lucas - [hosts_file] fix: added domain on hosts_file (#1283)
