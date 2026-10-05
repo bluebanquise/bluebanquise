@@ -82,6 +82,70 @@
   tags:
     - install
 
+- name: install <|> Create encryption file for grafana admin
+  ansible.builtin.command:
+    argv:
+      - systemd-creds
+      - encrypt
+      - --name={{ grafana_admin_cred_name }}
+      - "-"
+      - "{{ grafana_admin_cred_file }}"
+    stdin: "{{ grafana_security.admin_password }}"
+    stdin_add_newline: false
+  tags:
+    - install
+
+- name: install <|> Ensure only grafana user can read the admin password encryption file
+  file:
+    path: "{{ grafana_admin_cred_file }}"
+    mode: "0400"
+    owner: grafana
+  tags:
+    - install
+
+- name: install <|> Create encryption file for grafana db user
+  ansible.builtin.command:
+    argv:
+      - systemd-creds
+      - encrypt
+      - --name={{ grafana_db_cred_name }}
+      - "-"
+      - "{{ grafana_db_cred_file }}"
+    stdin: "{{ grafana_database.password }}"
+    stdin_add_newline: false
+  tags:
+    - install
+
+- name: install <|> Ensure only grafana user can read the db password encryption file
+  file:
+    path: "{{ grafana_db_cred_file }}"
+    mode: "0400"
+    owner: grafana
+  tags:
+    - install
+
+- name: install <|> Create directory /etc/systemd/system/grafana-server.service.d/
+  ansible.builtin.file:
+    state: directory
+    path: /etc/systemd/system/grafana-server.service.d
+    mode: "0755"
+  tags:
+    - install
+
+- name: install <|> Create grafana-server systemd override for loading credentials
+  qansible.builtin.copy:
+    dest: /etc/systemd/system/grafana-server.service.d/override.conf
+    content: |
+      [Service]
+      LoadCredentialEncrypted={{ grafana_admin_cred_name }}:{{ grafana_admin_cred_file }}
+      Environment=GF_SECURITY_ADMIN_PASSWORD=$__file{{ '{%d/' ~ grafana_admin_cred_name ~ '}' }}
+      LoadCredentialEncrypted={{ grafana_db_cred_name }}:{{ grafana_db_cred_file }}
+      Environment=GF_DATABASE_PASSWORD=$__file{{ '{%d/' ~ grafana_db_cred_name ~ '}' }}
+    mode: "0644"
+  notify: Reload systemd daemon
+  tags:
+    - install
+
 - name: service <|> Manage grafana-server state
   ansible.builtin.service:
     name: "{{ item }}"
