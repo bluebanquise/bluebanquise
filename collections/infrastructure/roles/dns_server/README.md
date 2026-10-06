@@ -220,6 +220,7 @@ Available options:
  * dns_server_dnssec_enable           # Allows connection to dnssec enabled servers. Default true.
  * dns_server_dnssec_sign             # Generate keys and sign zones. Default false.
  * dns_server_dnssec_overwrite_key    # Overwrite all existing keys. Default false.
+ * dns_server_dnssec_ncpus            # Number of CPU to use for signing zones
 
 
 To verify that DNSSEC is being used, use the dig command.
@@ -290,6 +291,7 @@ This will create a `forward.zone` file with:
 ```
 
 ## Changelog
+* 1.13.2: Fix OOM when signing zones on nodes with many CPUs. Teo Blachere <teo.blachere@bull.com>
 * 1.13.1: Fix error when signing zones. L. Bouzonnet <loris.bouzonnet@bull.com>
 * 1.13.0: Improve forward/reverse dns files generation with python filters. P. Duc-Jacquet <patrice.ducjacquet@eviden.com>
 * 1.12.0: Added alias for round robin load balance. Thiago Cardozo <boubee.thiago@gmail.com>
