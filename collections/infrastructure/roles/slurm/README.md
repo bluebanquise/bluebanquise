@@ -172,6 +172,28 @@ slurm_partitions_list:
       Default: "YES"
 ```
 
+If inventory groups alone are not enough to describe a partition, you can also
+list nodes directly using nodeset notation with `raw_nodeset_list`:
+
+```yaml
+slurm_partitions_list:
+
+  - partition_name: debian 
+    computes_groups:
+      - os_debian12
+      - os_debian11
+    raw_nodeset_list:
+      - c[001-020]
+      - c[201-230]
+    partition_configuration:
+      State: UP
+      MaxTime: "72:00:00"
+      DefaultTime: "24:00:00"
+```
+
+Note: If you set both `computes_groups` and `raw_nodeset_list`, the partition
+  contains the **union** of both
+
 ### Review default settings
 
 Check content of *defaults/main.yml* file and precedence variables you need to
