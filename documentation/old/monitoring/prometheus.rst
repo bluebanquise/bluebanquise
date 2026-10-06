@@ -593,4 +593,4 @@ You can find more about it here:
 
 And here are examples of some alerts:
 
-.. seealso:: https://awesome-prometheus-alerts.grep.to/rules.html
+.. seealso:: https://samber.github.io/awesome-prometheus-alerts/rules.html

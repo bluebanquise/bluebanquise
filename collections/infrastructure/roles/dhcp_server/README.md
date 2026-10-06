@@ -179,6 +179,14 @@ server, you **must** define this host in a shared network, even if this shared
 network contains a single network (see this very well made page for more
 information: http://www.miquels.cistron.nl/isc-dhcpd/).
 
+
+#### Specific settings
+
+During PXE and realy boot, the client UIDs can differ. For this case the folloing parameter
+can be set to true to ignore the client UIDs match.
+
+- `dhcp_server_ignore_client_uids`: boolen, set to true to disable the client uid match. (default: false)
+
 #### Add dhcp host specific parameters and options
 
 It is possible to add specific dhcp settings to an host interface, which can be
