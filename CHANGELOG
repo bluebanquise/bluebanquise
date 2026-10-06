@@ -4,6 +4,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.4
 
+* 24/09/2026 - santos-lucas - [slurm] feature to define partition members as raw nodeset (#1289)
 * 24/09/2026 - santos-lucas - [dns_client] Added support for ubuntu (#1284)
 * 22/09/2026 - santos-lucas - [nic_netplan] added nic_mac_match_namming_enabled control variable to nic_netplan + remove defaults netplan files (#1282)
 * 24/09/2026 - santos-lucas - [hosts_file] fix: added domain on hosts_file (#1283)

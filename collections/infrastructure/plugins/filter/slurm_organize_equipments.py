@@ -25,15 +25,15 @@ class FilterModule(object):
             for part in slurm_partitions_list:
                 p_name = part.get('partition_name')
                 c_groups = part.get('computes_groups', [])
-                raw_nodeset_list = part.get('raw_nodeset_list',[])
+                raw_nodeset_list = part.get('raw_nodeset_list', [])
 
                 part_nodes_set = set()
                 for g_name in c_groups:
                     g_members = groups.get(g_name, [])
                     part_nodes_set.update(g_members)
-                
+
                 for raw_nodeset in raw_nodeset_list:
-                    part_nodes_set.update(list(NodeSet(raw_nodeset)))                
+                    part_nodes_set.update(list(NodeSet(raw_nodeset)))
 
                 partitions_output[p_name] = str(NodeSet(",".join(list(part_nodes_set))))
                 unique_all_nodes.update(part_nodes_set)
