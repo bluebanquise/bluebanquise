@@ -33,7 +33,10 @@
 {% endfor %}
 "subnet4": [
 {% for network in standalone_networks %}
-  <?include "{{ dhcp_server_conf_dir }}/kea-dhcp4.{{ network }}.conf"?>{% if not loop.last %},{% endif %}
+  {% set network_in_dhcp_server = networks[network]['dhcp_server'] %}
+  {% if network_in_dhcp_server is defined and network_in_dhcp_server is not none and (network_in_dhcp_server | bool)  %}
+    <?include "{{ dhcp_server_conf_dir }}/kea-dhcp4.{{ network }}.conf"?>{% if not loop.last %},{% endif %}
+  {% endif %}
 
 {% endfor %}
 ]
