@@ -46,6 +46,11 @@ ip_or_host allows to define priorities between ip or host
 
   "subnet": "{{ networks[item]['subnet'] }}/{{ networks[item]['prefix'] | string }}",
 
+  {# Optional: key leases on hw-address only, ignoring option 61 (see README, "Client identifier matching") #}
+  {% if networks[item]['dhcp_match_client_id'] is defined and networks[item]['dhcp_match_client_id'] is not none %}
+  "match-client-id": {{ networks[item]['dhcp_match_client_id'] | bool | lower }},
+  {% endif %}
+
   {# We need to pre-compute next-server as it is used in multiple places #}
   {% if networks[item]['services'] is defined and networks[item]['services'] is iterable and networks[item]['services'] is not string and networks[item]['services'] is mapping and networks[item]['services']['pxe4'] is defined%}
     {% set nextserver = networks[item]['services']['pxe4'][0]['hostname'] | default(networks[item]['services']['pxe4'][0]['ip4'], true) %}

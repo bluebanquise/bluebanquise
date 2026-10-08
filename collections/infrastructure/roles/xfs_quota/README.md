@@ -24,7 +24,7 @@ Set specific values for user and groups outside the default scope in quota_spec.
 ```yaml
 xfs_quota:
   - type: user
-    name: nobody 
+    name: nobody 
     mountpoint: /exports/nfs
     bsoft: 5G
     bhard: 6G

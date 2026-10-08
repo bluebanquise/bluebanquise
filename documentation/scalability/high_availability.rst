@@ -1,6 +1,6 @@
-===========
-Scalability
-===========
+=================
+High Availability
+=================
 
 At some point, you might want to increase the size of the cluster or achieve high availability (also refered as HA), or just allow some kind of load balancing.
 

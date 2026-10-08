@@ -22,7 +22,6 @@
     + [Adding raw prometheus.conf scraping jobs:](#adding-raw-prometheusconf-scraping-jobs)
     + [Adding raw prometheus.conf configuration](#adding-raw-prometheusconf-configuration)
     + [TLS and/or Basic Authentication](#tls-andor-basic-authentication)
-  * [Changelog](#changelog)
 
 
 ## 1. Description

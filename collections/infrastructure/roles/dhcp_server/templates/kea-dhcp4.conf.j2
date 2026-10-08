@@ -27,7 +27,7 @@
     "valid-lifetime": {{ dhcp_server_default_lease_time }},
     "max-valid-lifetime": {{ dhcp_server_max_lease_time }},
     
-    {% if dhcp_server_ignore_client_uids | bool %}
+    {% if (dhcp_server_ignore_client_uids | default(true) | bool) and not (dhcp_server_match_client_id | bool) %}
     "match-client-id": false,
     {% endif %}
 

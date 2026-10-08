@@ -29,8 +29,7 @@ dhcp_server_ipxe_embed: dhcpretry
 dhcp_server_domain_name:
 
 # Specific settings
-# Consider setting to true if using match patterns
-dhcp_server_ignore_client_uids: false
+dhcp_server_match_client_id: true
 dhcp_server_stash_agent_options: false
 
 # Add user custom global settings to main dhcp configuration file
