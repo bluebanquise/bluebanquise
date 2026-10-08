@@ -4,6 +4,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.4
 
+* 08/10/2026 - gustavo4passos - [dhcp_server] Verifies if network has dhcp enabled before including it into the main configuration file
 * 24/09/2026 - santos-lucas - [slurm] feature to define partition members as raw nodeset (#1289)
 * 24/09/2026 - santos-lucas - [dns_client] Added support for ubuntu (#1284)
 * 22/09/2026 - santos-lucas - [nic_netplan] added nic_mac_match_namming_enabled control variable to nic_netplan + remove defaults netplan files (#1282)
