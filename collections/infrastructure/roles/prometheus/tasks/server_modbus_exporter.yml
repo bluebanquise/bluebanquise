@@ -64,7 +64,7 @@
     group: modbus_exporter
     mode: 0640
   loop: "{{ prometheus_server_modbus_exporter_additional_modules }}"
-  when: prometheus_server_modbus_exporter_additional_modules is defined and prometheus_server_modbus_exporter_additional_modules
+  when: prometheus_server_modbus_exporter_additional_modules is defined and prometheus_server_modbus_exporter_additional_modules is not ansible.builtin.none
 
 - name: meta <|> Run handler tasks
   ansible.builtin.meta: flush_handlers
