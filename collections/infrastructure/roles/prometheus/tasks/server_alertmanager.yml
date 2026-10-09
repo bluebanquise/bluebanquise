@@ -42,6 +42,7 @@
     group: root
     mode: 0644
   when:
+    - prometheus_firewall_open | bool
     - os_firewall | default(true) | bool
   notify: firewalld <|> Reload firewalld
   tags:
