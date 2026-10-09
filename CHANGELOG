@@ -4,6 +4,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.4
 
+* 2026-10-16 - sc-alex - [hosts_file] Fix default filters to replace empty string for domain name
 * 08/10/2026 - gustavo4passos - [dhcp_server] Verifies if network has dhcp enabled before including it into the main configuration file
 * 12/10/2026 - gustavo.passos - [rsyslog] Fix trailing whitespace in client network lookup
 * 2026-10-12 - chrisHPC, sc-alex - [prometheus] Add exporter `params` configuration for additional HTTP params
