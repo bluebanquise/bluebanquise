@@ -30,9 +30,7 @@ root_url = {{ grafana_url }}
 # Database
 [database]
 {% for k,v in grafana_database.items() %}
-{%   if k == 'password' %}
-{{ k }} = """{{ v }}"""
-{%   else %}
+{%   if k != 'password' %}
 {{ k }} = {{ v }}
 {%   endif %}
 {% endfor %}
@@ -46,7 +44,9 @@ root_url = {{ grafana_url }}
 # Security
 [security]
 {% for k,v in grafana_security.items() %}
+{% if k != 'admin_password' %}
 {{ k }} = {{ v }}
+{% endif %}
 {% endfor %}
 
 # Users management and registration

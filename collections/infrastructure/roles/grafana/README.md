@@ -71,6 +71,10 @@ Security note:
 The role is always overwriting the admin password with the one defined in `default/main.yml` file.
 For better security, it is advised to put it encoded in this file: [Please refer to Ansible for implementation details](https://docs.ansible.com/ansible/latest/user_guide/vault.html#creating-encrypted-variables)
 
+The variables `grafana_security.admin_password` and `grafana_database.password` are not defined in the file `grafana.ini` for enforcing the security.
+[systemd-creds]<https://systemd.io/CREDENTIALS/> is used for injecting the passwords through the variables `GF_SECURITY_ADMIN_PASSWORD` and `GF_DATABASE_PASSWORD`.
+
+
 Datasource example:
 
 ```yaml
