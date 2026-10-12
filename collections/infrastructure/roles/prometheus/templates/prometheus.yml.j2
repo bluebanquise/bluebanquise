@@ -47,6 +47,16 @@ scrape_configs:
     scrape_timeout: {{ exporter.scrape_timeout | default('') }}
     static_configs:
       - targets: ['{{ exporter.address }}:{{ exporter.port }}']
+    {% if exporter.params is defined and exporter.params  %}
+    params:
+      {% for item in exporter.params | dict2items %}
+      {% if item.value is defined and item.value %}
+      {{ item.key }}: {{ item.value }}
+      {% else %}
+      {{ item.key }}:
+      {% endif %}
+      {% endfor %}
+    {% endif %}
 {% endfor %}
 
 # GENERIC GROUP EXPORTER
@@ -61,6 +71,16 @@ scrape_configs:
       {% for node in groups[exporter_group] %}
       - targets: ['{{ node }}:{{ exporter.port }}']
       {% endfor %}
+    {% if exporter.params is defined and exporter.params  %}
+    params:
+      {% for item in exporter.params | dict2items %}
+      {% if item.value is defined and item.value %}
+      {{ item.key }}: {{ item.value }}
+      {% else %}
+      {{ item.key }}:
+      {% endif %}
+      {% endfor %}
+    {% endif %}
     {% endif %}
   {% endfor %}
 {% endfor %}
