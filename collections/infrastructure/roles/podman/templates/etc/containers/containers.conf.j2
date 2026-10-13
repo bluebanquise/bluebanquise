@@ -112,4 +112,4 @@ runc = [
 
 [podmansh]
 
-timeout = "{{ podman_sh_timeout }}"
+timeout = {{ podman_sh_timeout | int }}
