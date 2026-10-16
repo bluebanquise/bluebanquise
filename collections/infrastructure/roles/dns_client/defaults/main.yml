@@ -1,2 +1,3 @@
 ---
 dns_client_domain_name:
+dns_client_disable_networkmanager_processing: true

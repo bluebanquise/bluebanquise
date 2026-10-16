@@ -173,7 +173,7 @@
     - template
 
 - name: "command <|> Sign forward zone"
-  ansible.builtin.command: "chdir={{ dns_server_named_dir }} dnssec-signzone -S -g -o {{ dns_server_domain_name | default(bb_domain_name, true) | default('cluster.local', true) }} forward.zone"
+  ansible.builtin.command: "chdir={{ dns_server_named_dir }} dnssec-signzone -S -g -n {{ dns_server_dnssec_ncpus | default(2) }} -o {{ dns_server_domain_name | default(bb_domain_name, true) | default('cluster.local', true) }} forward.zone"
   when: dns_server_dnssec_sign
   notify: service <|> Restart dns services
 
@@ -217,7 +217,7 @@
     - template
 
 - name: "command <|> Sign item zone"
-  ansible.builtin.command: "chdir={{ dns_server_named_dir }} dnssec-signzone -S -g -o {{ item.split('.')|reverse|join('.') }}.in-addr.arpa. {{ item }}.rr.zone"
+  ansible.builtin.command: "chdir={{ dns_server_named_dir }} dnssec-signzone -S -g -n {{ dns_server_dnssec_ncpus | default(2) }} -o {{ item.split('.')|reverse|join('.') }}.in-addr.arpa. {{ item }}.rr.zone"
   loop: "{{ dns_server_hosts_by_first_octets['reverse'] | flatten(levels=1) }}"
   when: dns_server_dnssec_sign
   notify: service <|> Restart dns services

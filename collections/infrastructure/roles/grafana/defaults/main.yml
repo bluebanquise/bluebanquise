@@ -38,6 +38,12 @@ grafana_server:
   router_logging: false
   serve_from_sub_path: false
 
+# Variables for encrypting the grafana admin password by using systemd-creds
+grafana_admin_cred_name: grafana_admin_password_key
+grafana_admin_cred_file: /etc/grafana/adminpassfile
+grafana_db_cred_name: grafana_db_password_key
+grafana_db_cred_file: /etc/grafana/dbpassfile
+
 # Variables correspond to ones in grafana.ini configuration file
 # Security
 grafana_security:
