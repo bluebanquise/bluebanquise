@@ -22,7 +22,7 @@ action(type="omfwd" target="{{ server_address }}" protocol="tcp" port="{{ server
 {{ network_interfaces | default([]) | selectattr('network','defined') | selectattr('interface','defined') | selectattr('ip4','defined') | selectattr('network','match','^net-[a-zA-Z0-9]+') | map(attribute='network') | list | first | default(none) }}
 {% endmacro %}
 
-{% set node_main_network = get_main_network(network_interfaces) %}
+{% set node_main_network = get_main_network(network_interfaces) | trim %}
 
 #### RULES ####
 
