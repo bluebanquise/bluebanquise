@@ -2,6 +2,9 @@
 
 Format: <date> - <author (username or mail or both)> - [role] <change description>
 
+# 3.2.9
+* 29/09/2026 - thiagocardozo [prometheus] Task to add firewall ports to zone (#1287)
+
 # 3.2.8
 * 07/10/2026 - bouzonnl [grafana] Use systemd-creds to manage encrypted grafana passwords (db and admin account)
 * 06/10/2026 - teo-blachere [dns_server] Limit number of cpus used in dnssec-signzone to avoid OOM (#1290)
