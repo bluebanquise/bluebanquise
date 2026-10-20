@@ -112,13 +112,15 @@ def nodesetexpand(znodeset):
     return nodeset
 
 
-def daemon_set_boot(node, boot_queue, dedicated_kernel_parameters=None):
+def daemon_set_boot(node, boot_queue, dedicated_kernel_parameters=None, node_image=None):
     """Call the pxe-stack-daemon to set the boot queue (and, optionally, the dedicated kernel
     parameters) for a node. Verbose on failure."""
     url = '{}/host/{}/menu-default'.format(DAEMON_URL, node)
     body = {'boot_queue': boot_queue}
     if dedicated_kernel_parameters is not None:
         body['dedicated_kernel_parameters'] = dedicated_kernel_parameters
+    if node_image is not None:
+        body['node_image'] = node_image
     payload = json.dumps(body).encode('utf-8')
     logging.info('    ├── ' + bcolors.OKBLUE + 'Calling daemon: PUT ' + url + ' ' +
                  payload.decode('utf-8') + bcolors.ENDC)
@@ -282,5 +284,6 @@ elif passed_arguments.boot:
         if dedicated_kernel_parameters is not None:
             logging.info('    ├── ' + bcolors.OKBLUE + 'Setting dedicated kernel parameters=' +
                          dedicated_kernel_parameters + bcolors.ENDC)
+        node_image = None if passed_arguments.image == "none" else passed_arguments.image
         daemon_set_boot(node=node, boot_queue=boot_queue,
-                        dedicated_kernel_parameters=dedicated_kernel_parameters)
+                        dedicated_kernel_parameters=dedicated_kernel_parameters, node_image=node_image)

@@ -35,6 +35,7 @@ import os
 import sys
 import threading
 import yaml
+import re
 from flask import Flask, request, Response
 
 LOG_FORMAT = '%(asctime)s [%(levelname)s] %(message)s'
@@ -281,6 +282,7 @@ def set_menu_default(hostname):
     kernel parameters), as opposed to /stage_report's iPXE-driven auto-advance."""
     payload = request.get_json(silent=True) or {}
     boot_queue = payload.get('boot_queue')
+    node_image = payload.get('node_image')
     dedicated_kernel_parameters = payload.get('dedicated_kernel_parameters')
     logging.info('[%s] PUT /host/%s/menu-default boot_queue=%s dedicated_kernel_parameters=%r from %s',
                  hostname, hostname, boot_queue, dedicated_kernel_parameters, request.remote_addr)
@@ -299,6 +301,9 @@ def set_menu_default(hostname):
         logging.warning('[%s] Invalid dedicated_kernel_parameters value: %r', hostname, dedicated_kernel_parameters)
         return Response('Invalid dedicated_kernel_parameters value (expected a string).\n', status=400)
 
+    if node_image is not None and (not isinstance(node_image, str) or not re.fullmatch(r'[A-Za-z0-9._-]+', node_image)):
+        return Response('Invalid node_image value.\n', status=400)
+
     with _host_lock(hostname):
         state = _load_state(hostname)
         if state is None:
@@ -315,6 +320,10 @@ def set_menu_default(hostname):
             state['dedicated_kernel_parameters'] = dedicated_kernel_parameters
             logging.info('[%s] dedicated_kernel_parameters set to %r (requested by %s)',
                          hostname, dedicated_kernel_parameters, request.remote_addr)
+
+        if node_image is not None:
+            state['node_image'] = node_image
+            logging.info('[%s] node_image set to %r', hostname, node_image)
 
         _save_state(hostname, state)
 
