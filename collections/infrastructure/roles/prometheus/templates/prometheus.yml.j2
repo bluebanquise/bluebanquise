@@ -64,7 +64,7 @@ scrape_configs:
 {% for exporter_group, exporter_group_vars in prometheus_exporters_groups_to_scrape.items() %}
   {% for exporter in exporter_group_vars %}
     {% if exporter.port is defined %}
-  - job_name: '{{ exporter_group | regex_replace("[^A-Za-z0-9_]+", "_") }}_{{ exporter.name }}'
+  - job_name: '{{ exporter.job_name | default((exporter_group | regex_replace("[^A-Za-z0-9_]+", "_")) ~ "_" ~ exporter.name) }}'
     scrape_interval: {{ exporter.scrape_interval | default('') }}
     scrape_timeout: {{ exporter.scrape_timeout | default('') }}
     static_configs:

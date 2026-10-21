@@ -385,6 +385,17 @@ prometheus_exporters_groups_to_scrape:
         - Restart=always
         - RestartSec=1
 ```
+Also, when using **prometheus_exporters_groups_to_scrape** you also can override the job name using `job_name` instead of `name`, like the example below.
+
+:warning: prometheus **dont accept multiple jobs with the same name**, so only use this if you really know what you are doing
+```yaml
+prometheus_exporters_groups_to_scrape:
+  fn_management:
+    - job_name: mngt_node_exporter
+      service: node_exporter
+      package: node_exporter
+      port: 9100
+```
 
 ## 5. IPMI, SNMP and Modbus
 
