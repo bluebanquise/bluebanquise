@@ -4,6 +4,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.4
 
+* 21/10/2026 - santos-lucas - [prometheus] add possibility to use ansible group patterns (#1303)
 * 08/10/2026 - gustavo4passos - [dhcp_server] Verifies if network has dhcp enabled before including it into the main configuration file
 * 12/10/2026 - gustavo.passos - [rsyslog] Fix trailing whitespace in client network lookup
 * 2026-10-12 - chrisHPC, sc-alex - [prometheus] Add exporter `params` configuration for additional HTTP params
