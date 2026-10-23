@@ -42,9 +42,13 @@ extensions = [
     'sphinx.ext.imgmath',
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
-    'sphinx.ext.autosectionlabel',
     'myst_parser',
 ]
+
+# Generate anchor slugs for headings, so the hand-written GitHub-style
+# TOCs at the top of most pages (e.g. "[Instructions](#instructions)")
+# resolve. 4 covers the deepest TOC nesting found (prometheus.md).
+myst_heading_anchors = 4
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -67,7 +71,7 @@ language = 'en'
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = [u'_build', 'Thumbs.db', '.DS_Store', '**/molecule', 'old', '**/_*.rst']
+exclude_patterns = [u'_build', 'Thumbs.db', '.DS_Store', '**/molecule', 'old', '**/_*.rst', 'README.md']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = None

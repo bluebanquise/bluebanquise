@@ -82,7 +82,7 @@ The boot URLs follow the pattern:
 - x86_64: `http://<next-server>/pxe/x86_64/<embed>_<driver>ipxe.efi`
 - arm64: `http://<next-server>/pxe/arm64/<embed>_<driver>ipxe.efi`
 
-No additional configuration is required beyond defining `pxe4` in the network's `services` block. EFI and HTTP boot clients on the same subnet are handled correctly — these settings exclude HTTP boot clients from the EFI class so each client type receives the appropriate file.
+No additional configuration is required beyond defining `pxe4` in the network's `services` block. EFI and HTTP boot clients on the same subnet are handled correctly - these settings exclude HTTP boot clients from the EFI class so each client type receives the appropriate file.
 
 For hosts that need a fully custom boot filename (e.g. a specific HTTP URL or an alternate ROM), use `hw_pxe_filename` in the host's hardware group variables. This takes precedence over all class-level and subnet-level settings.
 
@@ -137,6 +137,35 @@ hosts:
 
 This will create one entry related to mac address and one to dhcp client
 identifier.
+
+#### Client identifier matching
+
+By default, Kea identifies a client lease by its DHCP client identifier (option 61)
+when the client sends one, and only falls back to the MAC address otherwise.
+This can be an issue during PXE deployments when firmware/iPXE and the OS installer
+send different client identifiers for the same NIC (for example iPXE sends the
+`01:<mac>` form, while some installers send an RFC 4361 DUID based identifier).
+Kea then sees two different clients: the lease obtained by iPXE conflicts with the
+host reservation requested by the installer, and the installer fails to get an IP
+address (`ALLOC_ENGINE_V4_DISCOVER_ADDRESS_CONFLICT` in Kea logs).
+
+To make Kea ignore client identifiers and track leases by MAC address only on a
+given network, set the optional `dhcp_match_client_id` key to `false`:
+
+```yaml
+  networks:
+    net-1:
+      subnet: 10.10.0.0
+      prefix: 16
+      dhcp_match_client_id: false
+```
+
+This is rendered as `"match-client-id": false` for this subnet only. If the key is not
+set, nothing is rendered and Kea keeps its default behavior (`true`).
+
+Note: this setting only changes how leases are tracked. Host reservations are still
+looked up as usual, but it is recommended to define a `mac` on interfaces of networks
+using `dhcp_match_client_id: false`.
 
 #### Shared networks
 

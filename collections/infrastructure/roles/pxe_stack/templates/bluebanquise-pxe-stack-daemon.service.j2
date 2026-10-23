@@ -5,13 +5,19 @@ After=network.target
 
 [Service]
 Type=simple
-User=bluebanquise
-Group=bluebanquise
+User={{ pxe_stack_daemon_user }}
+Group={{ pxe_stack_daemon_user }}
 ExecStart={{ pxe_stack_daemon_script_path }} {{ pxe_stack_daemon_conf_path }}
 Restart=on-failure
 RestartSec=10
 StandardOutput=journal
 StandardError=journal
+# Hardening: the daemon can only write into the host iPXE files folder
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths={{ pxe_stack_htdocs_path }}/pxe/nodes
 
 [Install]
 WantedBy=multi-user.target

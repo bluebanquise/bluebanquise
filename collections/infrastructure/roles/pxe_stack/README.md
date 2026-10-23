@@ -32,13 +32,13 @@ Files installed by these settings are:
 * PXE TFTP files are located in `/var/lib/tftpboot/`.
    * `bin/` directory contains some needed bin files, typically grub2 files for EFI boot.
    * `equipments/` directory contains equipments related files, i.e. ipxe file with group variables, and os configuration files (kickstart, preseed, autoyast).
-   * `hosts/` directory contains hosts dedicated files, i.e. ipxe file with hosts dedicated variables.
+   * `nodes/` directory contains hosts dedicated files, i.e. ipxe file with hosts dedicated variables (and current boot state). See "Host iPXE files and PXE Stack Daemon" below.
    * `osdeploy/` directory contains static files, with patterns to boot each kind of supported distributions.
 * Basic configuration files are located in /etc/bluebanquise/bootset.
-   * `nodes_parameters.yml` contains all hosts PXE needed parameters (equipment profile, next boot action). It is read by the **bluebanquise-pxe-stack-daemon** at startup to initialize per-host state.
+   * `nodes_parameters.yml` contains all hosts PXE needed parameters (equipment profile, next boot action). It is read by the **bluebanquise-pxe-stack-daemon** to create/refresh host iPXE files.
    * `pxe_parameters.yml` contains needed values for scripts to adapt to **current pxe server host** (these parameters do not apply to PXE booted hosts !!).
 * Scripts are located in /usr/bin/.
-* Per-host PXE state (current boot target, boot queue, status) is tracked by the **bluebanquise-pxe-stack-daemon** under `/var/lib/bluebanquise/cluster/hosts/<hostname>/dynamic_pxe_stack.yml`. See "PXE Stack Daemon" below.
+* Per-host PXE state (current boot target, boot queue, status) is stored as iPXE variables directly in each host iPXE file, `{{ pxe_stack_htdocs_path }}/pxe/nodes/<hostname>.ipxe`. See "Host iPXE files and PXE Stack Daemon" below.
 
 Administrator is also in charge or providing needed OS images for diskfull deployment into the `{{ pxe_stack_htdocs_path }}/pxe/netboots/` folder as detailed bellow.
 
@@ -444,30 +444,44 @@ These are the variables:
     - "{{ lookup('ansible.builtin.file', 'my_post_script.sh') }}"
   ```
 
-### PXE Stack Daemon
+### Host iPXE files and PXE Stack Daemon
 
-**bluebanquise-pxe-stack-daemon** is a lightweight HTTP daemon (Flask, listening on port 7770 by default) that tracks each host's current PXE boot target and OS deployment status. It replaces the legacy static per-host iPXE files and CGI bootswitch mechanism (still installed for backward compatibility, but no longer the primary mechanism).
+Each host gets a static iPXE file, `{{ pxe_stack_htdocs_path }}/pxe/nodes/<hostname>.ipxe`, served by the http server like any other PXE file. Host current state is stored there as iPXE variables, each one printed on screen right after being declared:
 
-At startup, the daemon reads `/etc/bluebanquise/bootset/nodes_parameters.yml` and creates the per-host state file (`/var/lib/bluebanquise/cluster/hosts/<hostname>/dynamic_pxe_stack.yml`) for any host that doesn't already have one. This means a newly added inventory host only gets picked up after the pxe_stack role is re-run (which regenerates `nodes_parameters.yml` and restarts the daemon) - there is no lazy discovery in between.
+```
+set menu-default osdeploy
+set boot-queue osdeploy
+set status memtest running
+set status-date 2026-10-18T21:23:23+02:00
+set hw-ipxe-default-boot disk
+set equipment-profile hw_supermicro_X1_with_os_rhel9
+set dedicated-kernel-parameters
+set node-image none
+set extra-parameters none
+```
+
+(plus `set tenant <tenant>` for hosts part of a RHCOS tenant group). Only these `set` lines are managed; the rest of the file is regenerated.
+
+**bluebanquise-pxe-stack-daemon** is a lightweight HTTP daemon (Flask app served by waitress, listening on port 7770 by default, running from the `bluebanquise-venv` package's Python, `/usr/lib/bluebanquise/venv/`) that keeps these files up to date as hosts boot. Hosts never need it to boot: if the daemon is down, hosts still boot normally, only stage tracking (status and automatic boot queue advance) is lost.
+
+Security: the daemon runs as a dedicated unprivileged user, `bluebanquise-pxe` (`pxe_stack_daemon_user`), not a sudoer and without login shell, with systemd hardening restricting its writes to the `pxe/nodes/` folder. This folder is owned by that user (`0755`, group set to the http server group); files are `0644`, so the http server only reads them. No dedicated SELinux setting is needed: files are always created inside the folder (atomic writes use a temporary file in the same folder), so they inherit its default `httpd_sys_content_t` label.
+
+Host files are created, and their inventory-derived values (`equipment-profile`, `hw-ipxe-default-boot`, `tenant`) refreshed, from `/etc/bluebanquise/bootset/nodes_parameters.yml`, at each pxe_stack role run (daemon script run in `--bootstrap-only` mode, so files exist even if the service is not started) and at each daemon startup. Dynamic values (`menu-default`, `boot-queue`, `status`, kernel parameters, image) are preserved. A newly added inventory host only gets its file after the pxe_stack role is re-run.
 
 The daemon exposes:
 
-* `GET /host/${hostname}.ipxe`: dynamically generated iPXE script for the host, based on its currently tracked state (replaces the old static `hosts/${hostname}.ipxe` file).
-* `GET /host/${hostname}`: returns the host's current state (`menu_default`, `boot_queue`, `status`, equipment profile, ...) as JSON. Read-only status API, useful for external tooling/monitoring.
-* `GET /stage_report?hostname=<h>&stage=<s>&status=<v>`: the stage tracking notification. Called both by `menu.ipxe`'s `imgfetch` lines (fire-and-forget, does not block booting if the daemon is unreachable - GET-only by necessity, iPXE's `imgfetch` cannot issue anything else) and by the autoinstaller's post-install script once OS deployment succeeds. `stage` is one of the built-in targets (`osdeploy`, `disk`, `diskless`, `next`, `memtest`, `alpine`, `clonezilla`, `shell`) or a configured custom entry (see `pxe_stack_ipxe_menu_custom` below); `status` is a free-form keyword (`running`, `completed`, ...). The daemon always refreshes `status` to `"<stage> <status>"`; when `stage` matches the current `boot_queue` head, it also pops the queue and advances `menu_default` to the next queued entry, falling back to the host's `hw_ipxe_default_boot` once the queue is empty.
-* `PUT /host/${hostname}/menu-default` (JSON body `{"boot_queue": ["<target>", ...]}`): explicitly sets the host's boot queue. This is the one **bluebanquise-bootset** calls when an operator runs `-b <target>[,<target>...]` - `menu_default` is set to the first entry of the queue.
+* `GET /stage_report?hostname=<h>&stage=<s>&status=<v>`: the stage tracking notification. Called both by `menu.ipxe`'s `imgfetch` lines (fire-and-forget, does not block booting if the daemon is unreachable - GET-only by necessity, iPXE's `imgfetch` cannot issue anything else) and by the autoinstaller's post-install script once OS deployment succeeds. `stage` is one of the built-in targets (`osdeploy`, `disk`, `diskless`, `next`, `memtest`, `alpine`, `clonezilla`, `shell`) or a configured custom entry (see `pxe_stack_ipxe_menu_custom` below); `status` is a single keyword (`running`, `completed`, ...; letters, digits, `_`, `.`, `-` only). The daemon always refreshes `status` to `"<stage> <status>"` and `status-date` to the current date; when `stage` matches the current `boot-queue` head, it also pops the queue and advances `menu-default` to the next queued entry, falling back to the host's `hw-ipxe-default-boot` once the queue is empty.
+* `GET /host/${hostname}`: returns the host's current variables as JSON. Read-only status API, useful for external tooling/monitoring.
 
-A request for a host with no tracked state returns an HTTP 404 rather than silently creating one - if this happens, check the host is in inventory and re-run the pxe_stack role.
+A request for a host with no iPXE file returns an HTTP 404 rather than silently creating one - if this happens, check the host is in inventory and re-run the pxe_stack role. Check daemon status with `systemctl status bluebanquise-pxe-stack-daemon` and its logs with `journalctl -u bluebanquise-pxe-stack-daemon -f`.
 
-If the daemon does not respond, tools calling it (bluebanquise-bootset) print a clear error message; check its status with `systemctl status bluebanquise-pxe-stack-daemon` and its logs with `journalctl -u bluebanquise-pxe-stack-daemon -f`.
+**Boot sequences**: `bluebanquise-bootset -b memtest,osdeploy` asks a host to run memtest first, then deploy its OS, with no manual intervention in between - the daemon auto-advances `boot-queue` as each stage reports in via `/stage_report`. Tools that cannot report back over the network once started (memtest, for instance, has no way to signal completion) simply stay at `status memtest running` until the host reboots into the next queued stage or a new report arrives; there's no way to detect memtest actually finishing on its own. `bluebanquise-bootset -s` shows the current `menu-default`, `status` (with its date), and remaining `boot-queue` for each host.
 
-**Boot sequences**: `bluebanquise-bootset -b memtest,osdeploy` asks a host to run memtest first, then deploy its OS, with no manual intervention in between - the daemon auto-advances `boot_queue` as each stage reports in via `/stage_report`. Tools that cannot report back over the network once started (memtest, for instance, has no way to signal completion) simply stay at `status: "memtest running"` until the host reboots into the next queued stage or a new report arrives; there's no way to detect memtest actually finishing on its own. `bluebanquise-bootset -s` shows the current `menu_default`, `status`, and remaining `boot_queue` for each host.
-
-**`hw_ipxe_default_boot`** (hw_\* inventory variable, default `disk`): the target a host falls back to once its `boot_queue` is exhausted. Use `next` on hardware where disk boot is unreliable.
+**`hw_ipxe_default_boot`** (hw_\* inventory variable, default `disk`): the target a host falls back to once its `boot-queue` is exhausted. Use `next` on hardware where disk boot is unreliable.
 
 ### bluebanquise-bootset usage
 
-Once these settings are deployed, the **bluebanquise-bootset** tool can be used to manipulate remote hosts PXE boot, via the bluebanquise-pxe-stack-daemon described above. By default, 3 states can be defined for each host:
+Once these settings are deployed, the **bluebanquise-bootset** tool can be used to manipulate remote hosts PXE boot. It edits host iPXE files directly, so it works even if the bluebanquise-pxe-stack-daemon is down. It must be run as root (it then switches to `bluebanquise-pxe` user to edit files). Both tools serialize their writes through a lock (`pxe/nodes/.lock`), so they can safely run at the same time. By default, 3 states can be defined for each host:
 
 * osdeploy: the remote host will deploy/redeploy its operating system, using inventory equipment parameters of its equipment profile group.
 * disk: the remote host will boot on disk. This parameter is automatically set after a successful **osdeploy**.
@@ -515,7 +529,13 @@ To check current boot target and provisioning status of one or more hosts, use:
 bluebanquise-bootset -n c001,c002 -s
 ```
 
-The tool is relatively verbose, and should provide all needed information on the fly on what it is doing. If the daemon cannot be reached, it prints an explicit error rather than a misleading one, so check the message before assuming the daemon is down.
+The tool is relatively verbose, and should provide all needed information on the fly on what it is doing.
+
+Dedicated kernel parameters can be passed to the boot chain (used by osdeploy kernel command lines) with `-e`:
+
+```
+bluebanquise-bootset -n c001 -b osdeploy -e "ifname=eth0:aa:bb:cc:dd:ee:ff ip=eth0:dhcp"
+```
 
 Last part, regarding diskless. An image name need to be provided:
 
@@ -547,19 +567,19 @@ To be macroscopic:
 
 * The remote host boot over PXE, in EFI/legacy-bios, using its own PXE/iPXE rom.
 * The dhcp deployed by BlueBanquise (or your own) will provide the host with the **BlueBanquise** iPXE rom. This iPXE rom contains an EMBED script that will display the logo, get an ip from the dhcp server, show some information, and chain to file *convergence.ipxe*.
-* *convergence.ipxe* will simply get the current architecture. This operation cannot be done into the EMBED script has it needs some logic, that could bug. Sys admin need to easily debug this without the need to rebuild iPXE roms. Then iPXE chain to the **bluebanquise-pxe-stack-daemon**, at `http://${next-server}:7770/host/${hostname}.ipxe`, with *hostname* the hostname provided by the dhcp server.
-* The daemon replies with a dynamically generated iPXE script, built from the host's currently tracked state (see "PXE Stack Daemon" above), defining all host dedicated parameters and what host should do: boot on disk, deploy os, or boot in diskless. Then iPXE chain to *equipments/${equipment-profile}.ipxe*, with *equipment-profile* a variable defined by the daemon.
+* *convergence.ipxe* will simply get the current architecture. This operation cannot be done into the EMBED script has it needs some logic, that could bug. Sys admin need to easily debug this without the need to rebuild iPXE roms. Then iPXE chain to *nodes/${hostname}.ipxe*, with *hostname* the hostname provided by the dhcp server.
+* *nodes/${hostname}.ipxe* defines all host dedicated parameters and what host should do: boot on disk, deploy os, or boot in diskless (see "Host iPXE files and PXE Stack Daemon" above). Then iPXE chain to *equipments/${equipment-profile}.ipxe*.
 * *equipments/${equipment-profile}.ipxe* contains the host equipment profile group parameters, like operating system, console, kernel parameters, etc. Then iPXE chain to *menu.ipxe*.
-* *menu.ipxe* will display a basic menu on screen, with default set to what host is expected to do (this was gathered from the daemon). Timeout is 10s by default before host execute the expected action. Each actionable entry first notifies the daemon (fire-and-forget `imgfetch`, does not block booting if the daemon is unreachable), then iPXE chain to:
+* *menu.ipxe* will display a basic menu on screen, with default set to what host is expected to do (`menu-default`, from host file). Timeout is 10s by default before host execute the expected action. Each actionable entry first notifies the daemon (fire-and-forget `imgfetch`, does not block booting if the daemon is unreachable), then iPXE chain to:
    * *osdeploy/${eq-distribution}_${eq-distribution-major-version}.ipxe* if host needs to deploy/redeploy its operating system. These osdeploy files are dynamic, and adapt to parameters gathered in host dedicated file and host equipment file.
    * *diskless/images/${diskless-image}/boot.ipxe* if host needs to boot in diskless.
    * *sanboot --no-describe --drive 0x80* if host is legacy/bios/pcbios based. This is a simple command that boot on disk.
    * *bin/${arch}/grub2_efi_autofind.img* if host is EFI based. This grub2 image will look for a disk with a know operating system, and boot on it.
 
-In case of an OS deployment, if this deployment succeed, in the post install script section, remote host will call the **bluebanquise-pxe-stack-daemon**'s stage report endpoint (`/stage_report?hostname=${hostname}&stage=osdeploy&status=completed`), to boot next to disk and mark provisioning as completed. The legacy CGI script (*/var/www/cgi-bin/bootswitch.cgi*) is still installed for backward compatibility but is no longer the primary mechanism.
+In case of an OS deployment, if this deployment succeed, in the post install script section, remote host will call the **bluebanquise-pxe-stack-daemon**'s stage report endpoint (`/stage_report?hostname=${hostname}&stage=osdeploy&status=completed`), to boot next to disk and mark provisioning as completed.
 To keep boot to osdeploy, set variable `pxe_stack_post_install_boot_to_disk` to *false*.
 
-All files are manually editable. Also, note that an unregistered host (so no hostnames provided by the dhcp, or one the daemon has no tracked state for) will get a plain iPXE shell with an explanatory error message, rather than silently failing.
+All files are manually editable. Also, note that an unregistered host (so no hostnames provided by the dhcp) will get a plain iPXE shell with an explanatory error message (`nodes/.ipxe`), and a host with no file gets an iPXE shell, rather than silently failing.
 
 To follow the deployment process, simply tail -f logs of http server, and see the whole process occurring.
 

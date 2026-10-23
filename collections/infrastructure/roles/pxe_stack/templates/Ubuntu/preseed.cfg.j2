@@ -141,7 +141,6 @@ d-i preseed/late_command string \
 {% if pxe_stack_post_install_boot_to_disk %}
   in-target for I in `cat /proc/cmdline | tr " " "\n" | grep -E "^(node_hostname|ipxe_next_server)="` ; do eval $I; done; \
   in-target echo Next server is $ipxe_next_server; \
-  in-target curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$node_hostname&boot=disk";
+  in-target curl -s -k "http://$ipxe_next_server:{{ pxe_stack_daemon_port }}/stage_report?hostname=$node_hostname&stage=osdeploy&status=completed";
 {% endif %}
 
-#d-i preseed/late_command string in-target curl -s -k http://10.10.0.1/cgi-bin/bootswitch.cgi --data "node=$(hostname -s)&boot=disk";  

@@ -17,6 +17,7 @@ You will find bellow the detailed configuration available for each system relate
    system/local_configuration
    system/auditd
    system/cloudinit
+   system/custom_packages
    system/dns_client
    system/firewall
    system/gpu
