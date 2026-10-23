@@ -598,9 +598,9 @@ Reads static inventory snapshots (`static_*.yml`) and live daemon data (`dynamic
 `/var/lib/bluebanquise/cluster/hosts/<hostname>/` and displays them with drift highlighting.
 
 Files are paired **by suffix**: `static_<suffix>.yml` is compared against `dynamic_<suffix>.yml`
-— nothing is merged across suffixes. Each suffix gets its own banner. `cluster_state` (the
-primary static+dynamic pair) is always shown first; every other suffix (`pxe_stack`,
-`cluster_playbooks`, or any future `dynamic_<name>.yml`/`static_<name>.yml` writer) follows,
+- nothing is merged across suffixes. Each suffix gets its own banner. `cluster_state` (the
+primary static+dynamic pair) is always shown first; every other suffix (`cluster_playbooks`,
+`supervision`, or any future `dynamic_<name>.yml`/`static_<name>.yml` writer) follows,
 sorted alphabetically.
 
 ```bash
@@ -625,9 +625,9 @@ os:
   distribution: rhel / rhel       <- green: matches
   version: 9.3 / 9.2               <- red: drift detected
 
-pxe_stack
-  dynamic only — live daemon data, no static counterpart for this suffix
-menu_default: osdeploy            <- cyan: whole suffix is dynamic-only
+cluster_playbooks
+  dynamic only - live daemon data, no static counterpart for this suffix
+status: Completed                 <- cyan: whole suffix is dynamic-only
 ```
 
 **Color legend**

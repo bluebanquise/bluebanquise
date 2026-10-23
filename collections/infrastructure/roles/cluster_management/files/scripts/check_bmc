@@ -1,4 +1,4 @@
-#!/opt/bluebanquise/bluebanquise_venv/bin/python3
+#!/usr/lib/bluebanquise/venv/bin/python3
 """
 Local check: BMC health via IPMI or Redfish, whichever protocol the host's
 hw_board_authentication declares. Reuses bluebanquise_power's two ideas:

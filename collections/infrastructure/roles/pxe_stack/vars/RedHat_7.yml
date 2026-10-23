@@ -1,5 +1,4 @@
 ---
-pxe_stack_apache_cgi_module: cgi
 pxe_stack_apache_conf_path: /etc/httpd/conf.d
 pxe_stack_apache_user: apache
 pxe_stack_apache_group: apache
@@ -12,7 +11,7 @@ pxe_stack_packages_to_install:
   - clustershell
   - python36
   - python36-PyYAML
-  - python36-flask
+  - bluebanquise-venv
 pxe_stack_default_tftp_package: bluebanquise-atftp
 pxe_stack_services_to_start:
   - httpd

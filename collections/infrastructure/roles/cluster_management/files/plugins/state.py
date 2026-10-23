@@ -11,7 +11,7 @@ Usage:
 Static and dynamic files are paired by suffix: static_<suffix>.yml is compared against
 dynamic_<suffix>.yml. Each suffix is displayed independently — nothing is merged across
 suffixes. `cluster_state` is always shown first since it is the primary pair; every other
-suffix (pxe_stack, cluster_playbooks, ...) is a plugin-style addition and may only have one
+suffix (cluster_playbooks, supervision, ...) is a plugin-style addition and may only have one
 side (static or dynamic) present.
 
 The actual drift-comparison logic (what counts as "the same value") lives in state_diff.py, a

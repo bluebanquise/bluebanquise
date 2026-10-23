@@ -115,7 +115,7 @@
 for I in `cat /proc/cmdline | tr " " "\n" | grep -E "^ipxe_next_server="` ; do eval $I; done
 
 echo "All went well, we can inform next-server we succeeded"
-curl -s -k http://$ipxe_next_server/cgi-bin/bootswitch.cgi --data "node=$(hostname -s)&boot=disk"
+curl -s -k "http://$ipxe_next_server:{{ pxe_stack_daemon_port }}/stage_report?hostname=$(hostname -s)&stage=osdeploy&status=completed"
 {% endif %}
 
 ]]>
