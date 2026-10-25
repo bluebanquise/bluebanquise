@@ -12,11 +12,17 @@ nodes:
             {% if host_bmc_protocol is defined and host_bmc_protocol is not none and host_bmc_user is defined and host_bmc_user is not none and host_bmc_password is defined and host_bmc_password is not none %}
   {{ host }}:
     bmc:
+      {% if hostvars[host]['bmc']['name'] is defined %}
       name: {{ hostvars[host]['bmc']['name'] }}
+      {% endif %}
+      {% if hostvars[host]['bmc']['ip4'] is defined %}
       ip4: {{ hostvars[host]['bmc']['ip4'] }}
+      {% endif %}
     protocol: {{ host_bmc_protocol }}
-    user: {{ host_bmc_user }}
-    password: {{ host_bmc_password }}
+    {# Credentials are rendered as quoted strings, so special characters (*, :, %, #...) or values
+       like 0123 or yes are not interpreted by YAML when the tool loads this file. #}
+    user: {{ host_bmc_user | string | to_json }}
+    password: {{ host_bmc_password | string | to_json }}
             {% endif %}
         {% endif %}
     {% endif %}

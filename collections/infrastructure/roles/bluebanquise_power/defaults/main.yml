@@ -1,0 +1,5 @@
+---
+# Restrict generated configuration to hosts of an Ansible group.
+# Precedence: bluebanquise_power_retrict_to_group > bb_retrict_to_group > all
+# Left commented on purpose: a default value here would always override bb_retrict_to_group.
+# bluebanquise_power_retrict_to_group: fn_compute
