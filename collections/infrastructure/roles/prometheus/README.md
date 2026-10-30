@@ -304,6 +304,8 @@ prometheus_exporters_to_scrape:
     scrape_timeout: 30s
     address: 10.10.7.11
     port: 9817
+    params:
+      jobstats: ["true"]
   - name: ha_cluster_exporter
     scrape_interval: 1m
     scrape_timeout: 30s
@@ -347,10 +349,13 @@ prometheus_exporters_groups_to_scrape:
       scrape_interval: 1m
       scrape_timeout: 30s
       port: 9122
+      params:
+        loglevel: ["42"]
 ```
 
-Note here that **scrape_interval** and **scrape_timeout** are optional
+Note here that **scrape_interval**, **scrape_timeout** and **params** are optional
 values for each exporter here. These will override default values only if set.
+**params** might be used for exporters that depend on additional HTTP GET parameters.
 
 The following actions can occur:
 
