@@ -1,13 +1,13 @@
 ---
 
 - name: block <|> Force connection name to be the same as device name
-  when: nic_nmcli_device_is_connection_name
+  when: nic_nmcli_device_is_connection_name | bool
   block:
 
     - name: command <|> Gather devices device and name
       ansible.builtin.command: nmcli --terse -f device,name,type con show  # Gather devices and related name in a parsable way
       register: nic_nmcli_con_show
-      changed_when: False
+      changed_when: false
 
     - name: command <|> Rename interfaces if needed
       ansible.builtin.command: "nmcli connection modify '{{ item.name }}' connection.id '{{ item.device }}'"
@@ -106,9 +106,9 @@
   notify:
     - command <|> Reload connections
     - service <|> Restart nic services
-  loop: "{{ network_interfaces }}"
+  loop: "{{ network_interfaces | default([], true) }}"
   register: nic_apply
-  when: item.skip is not defined or (item.skip is defined and not item.skip)
+  when: not (item.skip | default(false) | bool)
   tags:
     - identify
 
@@ -119,16 +119,14 @@
   ansible.builtin.shell: "nmcli con down {{ item.item.interface }} && sleep {{ nic_restart_timeout }} && nmcli con up {{ item.item.interface }}"
   loop: "{{ nic_apply.results }}"
   when:  # noqa no-handler
-    - nic_force_nic_restart
-    - item.changed
+    - nic_force_nic_restart | bool
+    - item.changed | default(false)
 
+# One reboot whatever the number of changed connections
 - name: reboot <|> Reboot system to ensure apply nic configuration
   ansible.builtin.reboot:
     reboot_timeout: "{{ nic_reboot_timeout }}"
-  register: nic_reboot_status
-  loop: "{{ nic_apply.results }}"
   when:  # noqa no-handler
-    - nic_force_reboot
-    - item.changed
-    - not (nic_reboot_status.changed | d(false))
+    - nic_force_reboot | bool
     - nic_allow_reboot | bool
+    - nic_apply.results | default([]) | selectattr('changed', 'defined') | selectattr('changed') | list | length > 0

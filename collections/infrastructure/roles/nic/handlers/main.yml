@@ -14,7 +14,9 @@
     state: up
     conn_reload: true
   loop: "{{ nic_apply.results }}"
-  when: nic_reload_connections and item.changed
+  when:
+    - nic_reload_connections | bool
+    - item.changed | default(false)
 
 - name: reboot <|> Reboot system
   ansible.builtin.reboot:
