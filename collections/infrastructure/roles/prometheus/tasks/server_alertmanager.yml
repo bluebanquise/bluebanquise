@@ -27,47 +27,41 @@
     dest: /etc/systemd/system/alertmanager.service
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   notify:
     - systemd <|> Reload systemd configuration
     - service <|> Restart alertmanager service
   tags:
     - template
 
-- name: "copy <|> Install firewalld service configuration file"
-  ansible.builtin.copy:
-    src: alertmanager.xml
-    dest: /etc/firewalld/services/alertmanager.xml
-    owner: root
-    group: root
-    mode: 0644
+- name: firewalld <|> Configure firewall
   when:
-    - os_firewall | default(true) | bool
-  notify: firewalld <|> Reload firewalld
-  tags:
-    - firewall
-
-- name: meta <|> Run handler tasks
-  ansible.builtin.meta: flush_handlers
-
-- name: "firewalld <|> Add alertmanager service to firewall's zone"
-  ansible.posix.firewalld:
-    zone: "{{ prometheus_server_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
-    service: alertmanager
-    immediate: true
-    permanent: true
-    state: enabled
-  when:
-    - prometheus_firewall_open | bool
     - os_firewall | default(true) | bool
   tags:
     - firewall
+  block:
+    - name: "firewalld <|> Add alertmanager port to firewall's zone"
+      ansible.posix.firewalld:
+        zone: "{{ prometheus_server_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
+        port: 9093/tcp
+        immediate: true
+        permanent: true
+        state: enabled
+      when:
+        - prometheus_firewall_open | bool
+  rescue:
+    - name: fail <|> Firewall configuration failed
+      ansible.builtin.fail:
+        msg: >-
+          Firewall configuration failed: {{ (ansible_failed_result.results | default([]) | selectattr('failed', 'defined') | selectattr('failed') | map(attribute='msg') | list + [ansible_failed_result.msg | default('unknown error')]) | first }}.
+          firewalld must be installed and running, with its Python bindings (python3-firewall package),
+          for example using the firewall role. Set os_firewall to false to disable firewall configuration.
 
 - name: file <|> Create Alertmanager directories structure
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    mode: 0750
+    mode: "0750"
     owner: alertmanager
     group: alertmanager
   loop:
@@ -79,7 +73,7 @@
     dest: /etc/alertmanager/alertmanager.yml
     owner: alertmanager
     group: alertmanager
-    mode: 0640
+    mode: "0640"
     validate: /usr/bin/amtool check-config %s
   notify: service <|> Restart alertmanager service
   tags:

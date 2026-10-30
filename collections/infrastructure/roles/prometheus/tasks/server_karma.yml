@@ -27,18 +27,41 @@
     dest: /etc/systemd/system/karma.service
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   notify:
     - systemd <|> Reload systemd configuration
     - service <|> Restart karma service
   tags:
     - template
 
+- name: firewalld <|> Configure firewall
+  when:
+    - os_firewall | default(true) | bool
+  tags:
+    - firewall
+  block:
+    - name: "firewalld <|> Add karma port to firewall's zone"
+      ansible.posix.firewalld:
+        zone: "{{ prometheus_server_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
+        port: 8080/tcp
+        immediate: true
+        permanent: true
+        state: enabled
+      when:
+        - prometheus_firewall_open | bool
+  rescue:
+    - name: fail <|> Firewall configuration failed
+      ansible.builtin.fail:
+        msg: >-
+          Firewall configuration failed: {{ (ansible_failed_result.results | default([]) | selectattr('failed', 'defined') | selectattr('failed') | map(attribute='msg') | list + [ansible_failed_result.msg | default('unknown error')]) | first }}.
+          firewalld must be installed and running, with its Python bindings (python3-firewall package),
+          for example using the firewall role. Set os_firewall to false to disable firewall configuration.
+
 - name: file <|> Create karma directories structure
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    mode: 0750
+    mode: "0750"
     owner: karma
     group: karma
   loop:
@@ -50,7 +73,7 @@
     dest: /etc/karma/karma.yml
     owner: karma
     group: karma
-    mode: 0640
+    mode: "0640"
   notify: service <|> Restart karma service
   tags:
     - template

@@ -1,21 +1,7 @@
 ---
-prometheus_server_prometheus_packages_to_install:
-  - prometheus
-prometheus_server_alertmanager_packages_to_install:
-  - prometheus-alertmanager
-prometheus_server_ipmi_exporter_packages_to_install:
-  - prometheus-ipmi-exporter
-  - freeipmi
-prometheus_server_snmp_exporter_packages_to_install:
-  - prometheus-snmp-exporter
+# snmp_exporter generator build dependencies
 prometheus_server_snmp_exporter_additional_packages_to_install:
   - gcc
   - make
-  - net-snmp
-  - net-snmp-utils
-  - net-snmp-libs
-  - net-snmp-devel
-prometheus_server_modbus_exporter_packages_to_install:
-  - prometheus-modbus-exporter
-prometheus_server_karma_packages_to_install:
-  - karma
+  - snmp
+  - libsnmp-dev

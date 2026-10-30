@@ -1,4 +1,15 @@
 ---
+- name: assert <|> Check for variables of previous role versions
+  ansible.builtin.assert:
+    that:
+      - prometheus_server_launch_parameters is not defined
+    fail_msg: >-
+      prometheus_server_launch_parameters is not used anymore, set Prometheus launch parameters
+      in prometheus_server_prometheus_launch_parameters. See the role README.
+    quiet: true
+  tags:
+    - always
+
 - name: include_vars <|> Gather OS specific variables
   # This task gathers variables defined in OS specific files.
   #
@@ -25,12 +36,12 @@
 
 - name: include_tasks <|> Prometheus client
   ansible.builtin.include_tasks: "client.yml"
-  when: prometheus_client
+  when: prometheus_client | bool
   tags:
     - internal
 
 - name: include_tasks <|> Prometheus server
   ansible.builtin.include_tasks: "server.yml"
-  when: prometheus_server
+  when: prometheus_server | bool
   tags:
     - internal
