@@ -96,3 +96,31 @@ time_additional_networks_allowed:
   - 10.10.0.0/16
   - 172.16.1.0/24
 ```
+
+### chronyd options
+
+`time_chronyd_options` sets chronyd launch options, in `/etc/sysconfig/chronyd` (`OPTIONS`) on RHEL and Suse, or
+`/etc/default/chrony` (`DAEMON_OPTS`) on Debian and Ubuntu. For example, to enable chronyd seccomp filter:
+
+```yaml
+time_chronyd_options: "-F 2"
+```
+
+The generated configuration is checked with `chronyd -p` before being written.
+
+## Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `time_profile` | (required) | `server` or `client`. |
+| `time_external_pools` | `[]` | External pools to use instead of internal servers. |
+| `time_external_servers` | `[]` | External servers to use instead of internal servers (if no pool). |
+| `time_additional_networks_allowed` | `[]` | Additional networks allowed to query the server (`subnet/prefix`). |
+| `time_time_zone` | `bb_time_zone`, else `Europe/Brussels` | Time zone. |
+| `time_chronyd_options` | not set | chronyd launch options. |
+| `time_chrony_custom_conf_path` | not set | Override chrony configuration file path. |
+| `time_firewall_services_to_add` | `[ntp]` | Firewall services to open. |
+| `time_firewall_zone` | `bb_services_firewall_zone`, else `public` | Firewall zone. |
+| `time_enable_services` | `bb_enable_services`, else `true` | Enable chrony service. |
+| `time_start_services` | `bb_start_services`, else `true` | Start chrony service, and restart it on configuration changes. |
+
