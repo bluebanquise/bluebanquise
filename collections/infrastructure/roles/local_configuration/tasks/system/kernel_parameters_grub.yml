@@ -1,0 +1,26 @@
+---
+- name: package <|> Install grub utilities
+  ansible.builtin.package:
+    name: "{{ local_configuration_kernel_config_grub_package }}"
+    state: present
+  tags:
+    - package
+
+- name: shell <|> Read current GRUB_CMDLINE_LINUX_DEFAULT value
+  ansible.builtin.shell: |
+    set -o pipefail && grep '^GRUB_CMDLINE_LINUX_DEFAULT=' /etc/default/grub | sed -e 's/GRUB_CMDLINE_LINUX_DEFAULT="//' -e 's/"$//'
+  args:
+    executable: /bin/bash
+  register: local_configuration_grub_current_parameters
+  changed_when: false
+  check_mode: false
+
+# Existing parameters are kept first, in their order (console order matters), then new ones
+- name: lineinfile <|> Update GRUB_CMDLINE_LINUX_DEFAULT with merged parameters
+  ansible.builtin.lineinfile:
+    path: /etc/default/grub
+    regexp: "^GRUB_CMDLINE_LINUX_DEFAULT="
+    line: "GRUB_CMDLINE_LINUX_DEFAULT=\"{{ (local_configuration_grub_current_parameters.stdout.split() + local_configuration_kernel_parameters_list) | unique | join(' ') }}\""
+    state: present
+    backup: true
+  notify: command <|> Update GRUB settings

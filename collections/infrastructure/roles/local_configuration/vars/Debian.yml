@@ -2,9 +2,10 @@
 local_configuration_access_control_packages_to_install:
   - apparmor
   - apparmor-utils
-  - apparmor-profiles
 local_configuration_kernel_config_grub_package: grub2-common
 local_configuration_kernel_config_grub_update_command: update-grub
-local_configuration_kernel_version_meta_packages:
-  - linux-image-amd64
-  - linux-headers-amd64
+# Debian architecture names differ from ansible_facts.architecture
+local_configuration_debian_architecture: "{{ {'x86_64': 'amd64', 'aarch64': 'arm64'}[ansible_facts.architecture] | default(ansible_facts.architecture) }}"
+local_configuration_kernel_version_os_meta_packages:
+  - "linux-image-{{ local_configuration_debian_architecture }}"
+  - "linux-headers-{{ local_configuration_debian_architecture }}"

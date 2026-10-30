@@ -1,33 +1,32 @@
 ---
 - name: set_fact <|> Resolve effective kernel parameters
   ansible.builtin.set_fact:
-    _local_configuration_kernel_parameters: >-
-      {{ (local_configuration_system | default({})).kernel_parameters
-         | default(os_kernel_parameters) | default('') }}
-    _local_configuration_hw_kernel_parameters: >-
-      {{ (local_configuration_system | default({})).hw_kernel_parameters
-         | default(hw_kernel_parameters) | default('') }}
-    _local_configuration_sysctl: >-
+    local_configuration_kernel_parameters_list: >-
+      {{ (
+           ((local_configuration_system | default({})).kernel_parameters | default(os_kernel_parameters) | default('', true) | string).split()
+           + ((local_configuration_system | default({})).hw_kernel_parameters | default(hw_kernel_parameters) | default('', true) | string).split()
+           + (hw_console | default('', true) | string).split()
+         ) | unique }}
+    local_configuration_sysctl: >-
       {{ (local_configuration_system | default({})).sysctl
-         | default(os_sysctl) | default({}) }}
+         | default(os_sysctl) | default({}, true) }}
 
-- name: include_tasks <|> Use OS dedicated kernel configuration task
-  ansible.builtin.include_tasks: "{{ item }}"
-  with_first_found:
-    - files:
-        - "system/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
-        - "system/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
-        - "system/{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
-        - "system/{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
-        - "system/{{ ansible_facts.distribution | replace(' ','_') }}/main.yml"
-        - "system/{{ ansible_facts.os_family | replace(' ','_') }}/main.yml"
-      skip: true
-  when: >-
-    _local_configuration_kernel_parameters | trim | length > 0
-    or _local_configuration_hw_kernel_parameters | trim | length > 0
-    or hw_console is defined
+# RedHat: grubby, on all kernels (also used by future kernels). Others: /etc/default/grub.
+- name: include_tasks <|> Apply kernel parameters with grubby
+  ansible.builtin.include_tasks: system/kernel_parameters_grubby.yml
+  when:
+    - ansible_facts.os_family == 'RedHat'
+    - local_configuration_kernel_parameters_list | length > 0
   tags:
-    - internal
+    - always
+
+- name: include_tasks <|> Apply kernel parameters in /etc/default/grub
+  ansible.builtin.include_tasks: system/kernel_parameters_grub.yml
+  when:
+    - ansible_facts.os_family != 'RedHat'
+    - local_configuration_kernel_parameters_list | length > 0
+  tags:
+    - always
 
 - name: sysctl <|> Update sysctl parameters
   ansible.posix.sysctl:
@@ -35,5 +34,4 @@
     value: "{{ item.value }}"
     state: present
     reload: "{{ local_configuration_kernel_config_sysctl_reload | bool }}"
-  loop: "{{ _local_configuration_sysctl | dict2items }}"
-  when: _local_configuration_sysctl | length > 0
+  loop: "{{ local_configuration_sysctl | dict2items }}"
