@@ -1,3 +1,3 @@
 ---
-auditd_forward_audit_logs: false  # true
-auditd_config_root_log: false # true
+auditd_forward_audit_logs: false
+auditd_config_root_log: false

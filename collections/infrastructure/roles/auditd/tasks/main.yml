@@ -34,7 +34,7 @@
     path: "{{ auditd_plugins_directory }}/{{ auditd_syslog_file }}"
   register: auditd_result
 
-- name: "replace <|> Allow audit logs to be forwarded to remote syslog server"
+- name: "replace <|> Enable audit logs forwarding to syslog"
   ansible.builtin.replace:
     path: "{{ auditd_plugins_directory }}/{{ auditd_syslog_file }}"
     regexp: "^active = .*"
@@ -42,22 +42,40 @@
   notify: service <|> Restart auditd service
   when:
     - auditd_result.stat.exists
-    - auditd_forward_audit_logs | default(false) | bool
+    - auditd_forward_audit_logs | bool
+
+- name: "replace <|> Disable audit logs forwarding to syslog"
+  ansible.builtin.replace:
+    path: "{{ auditd_plugins_directory }}/{{ auditd_syslog_file }}"
+    regexp: "^active = .*"
+    replace: "active = no"
+  notify: service <|> Restart auditd service
+  when:
+    - auditd_result.stat.exists
+    - not (auditd_forward_audit_logs | bool)
 
 - name: "lineinfile <|> Enable root command logging for {{ item }}"
   ansible.builtin.lineinfile:
     path: "{{ auditd_config_rules_file }}"
     line: "-a exit,always -F arch={{ item }} -F euid=0 -S execve"
-  loop: "{{ auditd_config_rules_architectures | flatten(levels=1) }}"
-  notify:
-    - service <|> Restart auditd service
-    - service <|> Restart rsyslog service
-  when: auditd_config_root_log | default(false) | bool
+    state: present
+  loop: "{{ auditd_config_rules_architectures }}"
+  notify: service <|> Restart auditd service
+  when: auditd_config_root_log | bool
+
+- name: "lineinfile <|> Disable root command logging for {{ item }}"
+  ansible.builtin.lineinfile:
+    path: "{{ auditd_config_rules_file }}"
+    line: "-a exit,always -F arch={{ item }} -F euid=0 -S execve"
+    state: absent
+  loop: "{{ auditd_config_rules_architectures }}"
+  notify: service <|> Restart auditd service
+  when: not (auditd_config_root_log | bool)
 
 - name: "service <|> Manage {{ auditd_services_to_start | join(' ') }} state"
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: "{{ (auditd_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    enabled: "{{ (auditd_enable_services | default(bb_enable_services) | default(true) | bool) | ternary(true, false) }}"
     state: "{{ (auditd_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   loop: "{{ auditd_services_to_start }}"
   tags:
