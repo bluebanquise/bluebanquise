@@ -1,9 +1,14 @@
 #### Blue Banquise file ####
 ## {{ ansible_managed }}
+{% set tuning = nfs_server_tuning | default({}, true) %}
+{# Legacy nfs_server_threads variable, nfs_server_tuning.nfsd.threads takes precedence #}
+{% if nfs_server_threads | default(none) is not none and 'threads' not in (tuning['nfsd'] | default({})) %}
+{%   set tuning = tuning | combine({'nfsd': {'threads': nfs_server_threads}}, recursive=true) %}
+{% endif %}
+{% for section in tuning %}
 
-{% for section in nfs_server_tuning %}
 [{{ section }}]
-  {% for parameter, parameter_value in nfs_server_tuning[section].items() %}
+{%   for parameter, parameter_value in tuning[section].items() %}
 {{ parameter }}={{ parameter_value }}
-  {% endfor %}
+{%   endfor %}
 {% endfor %}
