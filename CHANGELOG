@@ -67,6 +67,12 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 * 2026-10-27 - oxedions, Claude - [auditd] Fix boolean enabled value, make auditd_forward_audit_logs and auditd_config_root_log reversible, remove the unrelated rsyslog restart handler, document all variables.
 * 2026-10-27 - oxedions, Claude - [data_model] Remove deprecated j2_ notes, list all bb_ global variables, add a roles dedicated variables section, fix typos.
 * 2026-10-27 - oxedions, Claude - [bluebanquise_power, conman, dhcp_server, dns_server, hosts_file, pxe_stack, ssh_client] BREAKING: rename bb_retrict_to_group and <role>_retrict_to_group variables to bb_restrict_to_group and <role>_restrict_to_group.
+* 2026-10-16 - sc-alex - [prometheus] Fix modbus_exporter conditional on importing files to be boolean; Fix variable name in documentation
+* 2026-10-16 - sc-alex - [hosts_file] Fix default filters to replace empty string for domain name
+* 08/10/2026 - gustavo4passos - [dhcp_server] Verifies if network has dhcp enabled before including it into the main configuration file
+* 12/10/2026 - gustavo.passos - [rsyslog] Fix trailing whitespace in client network lookup
+* 2026-10-12 - chrisHPC, sc-alex - [prometheus] Add exporter `params` configuration for additional HTTP params
+* 24/09/2026 - santos-lucas - [slurm] feature to define partition members as raw nodeset (#1289)
 * 24/09/2026 - santos-lucas - [dns_client] Added support for ubuntu (#1284)
 * 22/09/2026 - santos-lucas - [nic_netplan] added nic_mac_match_namming_enabled control variable to nic_netplan + remove defaults netplan files (#1282)
 * 24/09/2026 - santos-lucas - [hosts_file] fix: added domain on hosts_file (#1283)
