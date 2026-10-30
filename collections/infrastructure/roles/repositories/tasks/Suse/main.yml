@@ -19,10 +19,10 @@
 - name: zypper_repository <|> Setting repositories
   community.general.zypper_repository:
     name: "{{ item.name | default(item) }}"
-    description: "{{ item.description | default(item) }} gen by Ansible"
-    repo: "{{ item.repo | default(repositories_j2_simple_url + item.repo | default(item.name | default(item))) }}"
+    description: "{{ item.description | default(item.name | default(item)) }}"
+    repo: "{{ item.repo | default(repositories_simple_url + (item.name | default(item))) }}"
     disable_gpg_check: "{{ item.disable_gpg_check | default(omit) }}"
-    auto_import_keys: "{{ item.disable_gpg_check | default(omit) }}"
+    auto_import_keys: "{{ item.auto_import_keys | default(omit) }}"
     autorefresh: "{{ item.autorefresh | default(omit) }}"
     enabled: "{{ item.enabled | default(omit) }}"
     overwrite_multiple: "{{ item.overwrite_multiple | default(omit) }}"
@@ -40,4 +40,4 @@
     regexp: '^download.use_deltarpm ='
     line: 'download.use_deltarpm = false'
   when:
-    - repositories_disable_delta_rpm
+    - repositories_disable_delta_rpm | bool

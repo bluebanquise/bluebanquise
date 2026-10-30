@@ -124,6 +124,13 @@ sudo mkdir -p /var/www/html/pxe/netboots/opensuse/15/x86_64/iso
 sudo mount /var/lib/bluebanquise/openSUSE-Leap-15.4-DVD-x86_64-Build243.2-Media.iso /var/www/html/pxe/netboots/opensuse/15/x86_64/iso
 ```
 
+OpenSuse Leap 16 uses the new Agama installer (see [OpenSuse Leap 16](#opensuse-leap-16) below). Download the offline
+installer iso (`https://download.opensuse.org/distribution/leap/16.0/offline/Leap-16.0-offline-installer-x86_64.install.iso`),
+or use `bluebanquise-netboots-installer install opensuse_16`, and copy its content the same way, under the path
+matching `os_operating_system.distribution_version` (for example `/var/www/html/pxe/netboots/opensuse/16.0/x86_64/iso`).
+The installer boots `boot/<arch>/loader/linux` and `initrd`, downloads its live system from `LiveOS/squashfs.img`,
+and installs packages from the `install` repository of the iso.
+
 ### Inventory configuration
 
 These settings will rely on multiple parts of the inventory, and is probably the most "invasive" component of the whole collection.
@@ -324,10 +331,11 @@ Please note that this is RAW. So you HAVE TO adapt the content to the target dis
 * For Debian, this is preseed syntax (bottom of the preseed file).
 * For Ubuntu, this is curtin/cloud-config syntax (already placed under `autoinstall` and auto indented by 2 space).
 * For SUSE, this is autoyast syntax (inside `<profile>...</profile>`).
+* For OpenSuse Leap 16, this is a YAML dictionary, merged into the Agama profile (see [OpenSuse Leap 16](#opensuse-leap-16)).
 
 It is also possible to fully replace autoinstallation file, by setting the `os_autoinstall_raw_file` value.
 If set, this multi lines string will **FULLY** replace the content of the BlueBanquise generated autoinstallation file.
-Of course, it is expected that user will provide syntax matching target os (kickstart, preseed, autoyast, or cloudinit/curtin).
+Of course, it is expected that user will provide syntax matching target os (kickstart, preseed, autoyast, Agama JSON, or cloudinit/curtin).
 
 #### Proxy during PXE
 
@@ -400,6 +408,7 @@ Behavior per distribution:
 
 * **RHEL**: rendered as a kickstart `repo --name=... --baseurl=... --install` line. `--install` is always set, so the repository is written to `/etc/yum.repos.d/` and survives past the installation, not just used to resolve packages during it.
 * **Suse**: rendered as an additional `<listentry>` under autoyast's `<add_on_products>`, alongside the distribution's own default repositories. These are real, persistent zypp repositories post-install.
+* **OpenSuse Leap 16**: rendered as Agama `software.extraRepositories` entries (unsigned packages allowed), kept after installation.
 * **Debian**: rendered as `d-i apt-setup/localN/repository` (plus a matching `.../comment`) preseed entries, one indexed slot per repository.
 * **Ubuntu**: rendered as entries under the `apt.sources` key of the autoinstall `user-data` file (cloud-init/curtin apt configuration).
 
@@ -443,6 +452,72 @@ These are the variables:
     - systemctl enable systemd-networkd-wait-online
     - "{{ lookup('ansible.builtin.file', 'my_post_script.sh') }}"
   ```
+
+#### OpenSuse Leap 16
+
+OpenSuse Leap 16 replaced the YaST installer (AutoYaST XML profiles) by [Agama](https://agama-project.github.io/),
+which uses JSON profiles. The role keeps generating AutoYaST profiles for OpenSuse 15 and SLES 15, and generates an
+Agama profile, `equipment_profiles/<equipment_profile>.agama.json`, for equipment profiles with:
+
+```yaml
+os_operating_system:
+  distribution: opensuse
+  distribution_version: "16.0"
+  distribution_major_version: 16
+```
+
+The node boots the installer with `root=live:<iso>/LiveOS/squashfs.img inst.install_url=<iso>/install
+inst.auto=<profile>` (see `osdeploy/opensuse_16.ipxe`), installs, and reboots. The profile sets:
+
+* the product (`Leap_16.0`), language, keyboard and time zone,
+* the root password and ssh keys (`pxe_stack_enable_root: true`), or the sudo user (first user of the installer, its
+  uid, gid and home are then set by a post installation script) with its ssh keys and sudoers rule,
+* packages (`openssh-server`, `sudo`, `curl`, plus `os_autoinstall_packages`) and `os_autoinstall_custom_repositories`,
+* kernel parameters of the installed system (`os_kernel_parameters`, `hw_kernel_parameters`),
+* post installation scripts: hostname, inventory tag, EFI boot order, installation repository removal, and end of
+  installation report to the PXE stack daemon.
+
+Differences with AutoYaST, as Agama profiles are JSON:
+
+* `os_partitioning` must be an Agama [storage section](https://agama-project.github.io/docs/user/reference/profile/storage)
+  written as YAML, not AutoYaST XML. If not set, the installer default layout (Btrfs root with snapshots, swap) is
+  created on `os_target_disk`, or on the first disk found. Example:
+  ```yaml
+  os_partitioning:
+    drives:
+      - search: /dev/sda
+        partitions:
+          - search: "*"
+            delete: true
+          - filesystem:
+              path: /
+              type: xfs
+            size: 50 GiB
+          - filesystem:
+              path: swap
+            size: 4 GiB
+    boot:
+      configure: true
+  ```
+* `os_autoinstall_custom_content` must be a YAML dictionary, merged into the generated profile (any
+  [profile section](https://agama-project.github.io/docs/user/reference/profile) can be added or overridden). Example:
+  ```yaml
+  os_autoinstall_custom_content:
+    bootloader:
+      timeout: 3
+    software:
+      patterns:
+        - base
+  ```
+* `pxe_stack_os_autoinstall_custom_scripts` are run as Agama post scripts, inside the installed system (chroot).
+* `os_pxe_repository_proxy` is passed to the installer as `proxy=` boot option.
+* `os_autoinstall_raw_file`, if set, must be a full Agama JSON profile.
+
+The role fails if `os_partitioning` or `os_autoinstall_custom_content` is a string for an OpenSuse 16 equipment
+profile. The generated profile can be checked with `agama config validate <profile>` from the Agama installer (the command
+needs a running Agama service), or against the Agama profile JSON schema.
+
+SLES 16 also uses Agama, but requires product registration and is not supported yet.
 
 ### Host iPXE files and PXE Stack Daemon
 
@@ -924,3 +999,35 @@ pxe_stack_sudo_is_passwordless: true
 
 Note that using an home folder into /home for the bluebanquise sudo user can be dangerous as /home is often mounted on a cluster, and so would colide with local bluebanquise user home.
 
+## Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `pxe_stack_diskful_os_redhat` / `_ubuntu` / `_suse` / `_debian` | `true` | Generate diskful deployment files for this distribution family. |
+| `pxe_stack_diskful_os_rhcos` | `false` | Generate RHCOS deployment files. |
+| `pxe_stack_enable_diskless` | `true` | Install diskless tools and NFS server. |
+| `pxe_stack_diskless_nfs_path` | `/nfs/diskless` | Diskless NFS images path. |
+| `pxe_stack_enable_clonezilla` / `_alpine` / `_memtest` | `true` | Provide these tools in the iPXE menu. |
+| `pxe_stack_memtest_maxpasses` | `2` | Memtest passes. |
+| `pxe_stack_clonezilla_nfs_export_server` / `_mount_point` | not set / `/nfs/cloned_images` | Clonezilla NFS images location. |
+| `pxe_stack_time_zone` | `bb_time_zone`, else `Europe/Brussels` | Time zone of deployed hosts. |
+| `pxe_stack_enable_root` | `false` | Deploy root access (password, ssh keys) instead of a sudo user. |
+| `pxe_stack_sudo_user` / `_home` / `_uid` / `_gid` | `bluebanquise` / `/var/lib/bluebanquise` / `377` / `377` | Sudo user of deployed hosts. |
+| `pxe_stack_sudo_is_passwordless` | `true` | Passwordless sudo for the sudo user. |
+| `pxe_stack_ssh_allow_passwords` | `true` | Allow ssh password authentication on deployed hosts. |
+| `pxe_stack_preserve_repositories` | `true` | Keep distribution repositories enabled after deployment. |
+| `pxe_stack_post_install_action` | `reboot` | Action at the end of the installation (`reboot`, `poweroff`, `halt`). |
+| `pxe_stack_post_install_boot_to_disk` | `true` | Report the end of installation, so that the host next boots on disk. |
+| `pxe_stack_tftp_address` / `_options` / `_directory` | `0.0.0.0:69` / `--secure --verbose` / `/var/lib/tftpboot` | TFTP server settings. |
+| `pxe_stack_os_*`, `pxe_stack_hw_*` | see `defaults/main.yml` | Defaults of `os_*` and `hw_*` inventory variables (operating system, console, kernel parameters, keyboard, language, admin password and ssh keys, partitioning, autoinstall content, scripts and repositories, proxies...). |
+| `hw_ipxe_default_boot` | `disk` | Default boot entry of hosts. |
+| `pxe_stack_ipxe_menu_custom` | `[]` | Custom iPXE menu entries. |
+| `pxe_stack_inventory_tag` | not set | Tag written to `/etc/bluebanquise/tags/pxe_inventory` on deployed hosts. |
+| `pxe_stack_daemon_port` | `7770` | PXE stack daemon port. |
+| `pxe_stack_daemon_log_level` | `INFO` | PXE stack daemon log level. |
+| `pxe_stack_daemon_user` | `bluebanquise-pxe` | PXE stack daemon system user, owner of host iPXE files. |
+| `pxe_stack_daemon_script_path` / `_conf_path` | `/usr/local/sbin/bluebanquise-pxe-stack-daemon` / `/etc/bluebanquise/pxe_stack_daemon.conf` | PXE stack daemon paths. |
+| `pxe_stack_restrict_to_group` | `bb_restrict_to_group`, else `all` | Group of hosts to generate files for. |
+| `pxe_stack_firewall_zone` | `bb_services_firewall_zone`, else `public` | Firewall zone to open services in. |
+| `pxe_stack_enable_services` | `bb_enable_services`, else `true` | Enable services. |
+| `pxe_stack_start_services` | `bb_start_services`, else `true` | Start services, and restart them on configuration changes. |

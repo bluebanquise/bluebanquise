@@ -52,12 +52,11 @@ pxe_stack_supported_os:
     - major: 26
       distributions:
         - ubuntu
-  dgxos:
-    - major: 5
-      distributions:
-        - dgxos
   suse:
     - major: 15
+      distributions:
+        - opensuse
+    - major: 16
       distributions:
         - opensuse
   debian:

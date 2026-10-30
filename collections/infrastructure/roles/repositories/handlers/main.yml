@@ -1,11 +1,5 @@
 ---
-# Handler to clean yum metadata cache
-- name: command <|> yum clean metadata
-  ansible.builtin.command: yum clean metadata
-# Note: do not know why this was introduced, commenting for now
-#  args:
-#    warn: no
-
 - name: command <|> apt update cache
-  ansible.builtin.command: apt update
-  when: repositories_apt_update_cache
+  ansible.builtin.apt:
+    update_cache: true
+  when: repositories_apt_update_cache | bool

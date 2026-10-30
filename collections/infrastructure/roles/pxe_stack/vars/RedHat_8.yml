@@ -8,7 +8,6 @@ pxe_stack_packages_to_install:
   - bluebanquise-ipxe-arm64
   - httpd
   - python3-policycoreutils
-  - python3-pyyaml
   - policycoreutils
   - bluebanquise-venv
 pxe_stack_default_tftp_package: bluebanquise-atftp

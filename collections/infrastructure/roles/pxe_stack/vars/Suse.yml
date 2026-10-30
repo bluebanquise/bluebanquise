@@ -14,7 +14,7 @@ pxe_stack_packages_to_install:
   - bluebanquise-venv
 pxe_stack_default_tftp_package: tftp
 pxe_stack_services_to_start:
-  - httpd
+  - apache2
   - bluebanquise-pxe-stack-daemon
 pxe_stack_default_tftp_service: tftp.socket
 pxe_stack_diskless_packages_to_install:
