@@ -1,63 +1,48 @@
 #jinja2: lstrip_blocks: True
-#### Blue Banquise file ####
-## {{ ansible_managed }}
+{{ ansible_managed | comment }}
 
-
-{# Macro to avoid redundancy #}
-{% macro write_host(host, host_vars, ssh_jump) %}
-Host {{ host }}
-    {% if host_vars['ssh_client_stricthostkeychecking'] is defined and host_vars['ssh_client_stricthostkeychecking'] is not none %}
-    StrictHostKeyChecking {{ host_vars['ssh_client_stricthostkeychecking'] }}
-    {% endif %}
-    {% if host_vars['ssh_client_userknownhostsfile'] is defined and host_vars['ssh_client_userknownhostsfile'] is not none %}
-    UserKnownHostsFile {{ host_vars['ssh_client_userknownhostsfile'] }}
-    {% endif %}
-    {% if host_vars['ssh_client_loglevel'] is defined and host_vars['ssh_client_loglevel'] is not none %}
-    LogLevel {{ host_vars['ssh_client_loglevel'] }}
-    {% endif %}
-    {% if host_vars['ssh_client_verifyhostkeydns'] is defined and host_vars['ssh_client_verifyhostkeydns'] is not none %}
-    VerifyHostKeyDNS {{ host_vars['ssh_client_verifyhostkeydns'] }}
-    {% endif %}
-    {% if host_vars['ssh_client_forwardx11trusted'] is defined and host_vars['ssh_client_forwardx11trusted'] is not none %}
-    ForwardX11Trusted {{ host_vars['ssh_client_forwardx11trusted'] }}
-    {% endif %}
-    {% if host_vars['ssh_client_useroaming'] is defined and host_vars['ssh_client_useroaming'] is not none %}
-    UseRoaming {{ host_vars['ssh_client_useroaming'] }}
-    {% endif %}
-    {% if host_vars['ssh_client_user'] is defined and host_vars['ssh_client_user'] is not none %}
-    User {{ host_vars['ssh_client_user'] }}
-    {% endif %}
-
-{% endmacro %}
-
-
+{% set options = {
+  'ssh_client_stricthostkeychecking': 'StrictHostKeyChecking',
+  'ssh_client_userknownhostsfile': 'UserKnownHostsFile',
+  'ssh_client_loglevel': 'LogLevel',
+  'ssh_client_verifyhostkeydns': 'VerifyHostKeyDNS',
+  'ssh_client_forwardx11trusted': 'ForwardX11Trusted',
+  'ssh_client_user': 'User'
+} %}
 {% if ssh_client_custom_config is defined and ssh_client_custom_config is not none %}
 {{ ssh_client_custom_config }}
-{% endif %}
 
-# Global parameters
-{% if ssh_client_global_stricthostkeychecking is not none or ssh_client_global_userknownhostsfile is not none or ssh_client_global_loglevel is not none or ssh_client_global_verifyhostkeydns is not none or ssh_client_global_forwardx11trusted is not none %}
-Host *
-  {% if ssh_client_global_stricthostkeychecking is not none %}
-    StrictHostKeyChecking {{ ssh_client_global_stricthostkeychecking }}
-  {% endif %}
-  {% if ssh_client_global_userknownhostsfile is not none %}
-    UserKnownHostsFile {{ ssh_client_global_userknownhostsfile }}
-  {% endif %}
-  {% if ssh_client_global_loglevel is not none %}
-    LogLevel {{ ssh_client_global_loglevel }}
-  {% endif %}
-  {% if ssh_client_global_verifyhostkeydns is not none %}
-    VerifyHostKeyDNS {{ ssh_client_global_verifyhostkeydns }}
-  {% endif %}
-  {% if ssh_client_global_forwardx11trusted is not none %}
-    ForwardX11Trusted {{ ssh_client_global_forwardx11trusted }}
-  {% endif %}
-  {% if ssh_client_global_useroaming is defined and ssh_client_global_useroaming is not none %}
-    UseRoaming {{ ssh_client_global_useroaming }}
-  {% endif %}
 {% endif %}
+{# Hosts specific parameters, written only for hosts having at least one #}
+{% for host in groups[ssh_client_restrict_to_group | default(bb_restrict_to_group, true) | default('all', true)] %}
+  {% set host_network = hostvars[host]['ssh_client_network'] | default(ssh_client_global_network, true) | default(none, true) %}
+  {% set ns = namespace(lines=[]) %}
+  {% if host_network is not none %}
+    {% set ns.lines = ns.lines + ['Hostname %h-' ~ host_network] %}
+  {% endif %}
+  {% for variable, option in options.items() %}
+    {% if hostvars[host][variable] is defined and hostvars[host][variable] is not none %}
+      {% set ns.lines = ns.lines + [option ~ ' ' ~ hostvars[host][variable]] %}
+    {% endif %}
+  {% endfor %}
+  {% if ns.lines | length > 0 %}
+Host {{ host }}
+    {% for line in ns.lines %}
+    {{ line }}
+    {% endfor %}
 
-{% for host in groups[(ssh_client_retrict_to_group | default(bb_retrict_to_group, true) | default('all', true))] -%}
-{{ write_host(host, hostvars[host], None) }}
+  {% endif %}
 {% endfor %}
+{# Global parameters, after hosts ones, as ssh uses the first value found for each option #}
+{% set ns = namespace(lines=[]) %}
+{% for variable, option in options.items() if variable != 'ssh_client_user' %}
+  {% if lookup('ansible.builtin.vars', variable | replace('ssh_client_', 'ssh_client_global_'), default=none) is not none %}
+    {% set ns.lines = ns.lines + [option ~ ' ' ~ lookup('ansible.builtin.vars', variable | replace('ssh_client_', 'ssh_client_global_'))] %}
+  {% endif %}
+{% endfor %}
+{% if ns.lines | length > 0 %}
+Host *
+  {% for line in ns.lines %}
+    {{ line }}
+  {% endfor %}
+{% endif %}

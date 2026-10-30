@@ -14,50 +14,28 @@ generation.
 
 ## Basic usage
 
-This role will generate a configuration file in */root/.ssh/config*.
+This role generates the ssh client configuration file of the user running Ansible (`~/.ssh/config` of the sudo user
+when using `become`, or root).
 
-This file will contains all hosts of the Ansible inventory (or all hosts of the
-current iceberg if using icebergs mode), with the following parameters:
+Supported distributions: RHEL 9/10, Ubuntu 24.04/26.04, Debian 13, OpenSuse Leap 16.
 
-```
-Host freya
-    Hostname %h-ice1-1
-```
+By default, the file only contains settings explicitly set (see below). To make ssh reach hosts through a given
+network, whatever the resolution of their hostname, set `ssh_client_global_network` (or `ssh_client_network` at host
+level) to this network name:
 
-And possibly add more parameters if asked for:
-
-* StrictHostKeyChecking
-* UserKnownHostsFile
-* LogLevel
-
-See advanced usage for these parameters.
-
-Note that for this example host, **freya**, the target hostname for ssh is
-%h-ice1-1, which translates to **freya-ice1-1**. This can be seen when invoking
-ssh with verbosity:
-
-```
-  [root@odin ]# ssh freya -vvv
-  OpenSSH_7.8p1, OpenSSL 1.1.1 FIPS  11 Sep 2018
-  debug1: Reading configuration data /root/.ssh/config
-  debug1: /root/.ssh/config line 10: Applying options for freya
-  debug1: Reading configuration data /etc/ssh/ssh_config
-  debug3: /etc/ssh/ssh_config line 52: Including file /etc/ssh/ssh_config.d/05-redhat.conf depth 0
-  debug1: Reading configuration data /etc/ssh/ssh_config.d/05-redhat.conf
-  debug3: /etc/ssh/ssh_config.d/05-redhat.conf line 2: Including file /etc/crypto-policies/back-ends/openssh.config depth 1
-  debug1: Reading configuration data /etc/crypto-policies/back-ends/openssh.config
-  debug3: gss kex names ok: [gss-gex-sha1-,gss-group14-sha1-]
-  debug3: kex names ok: [curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256,diffie-hellman-group14-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,diffie-hellman-group-exchange-sha1,diffie-hellman-group14-sha1]
-  debug1: /etc/ssh/ssh_config.d/05-redhat.conf line 8: Applying options for *
-  debug2: resolving "freya-ice1-1" port 22
-  debug2: ssh_connect_direct
-  debug1: Connecting to freya-ice1-1 [10.11.2.1] port 22.
+```yaml
+ssh_client_global_network: net-admin
 ```
 
-You can see here ssh is not trying to reach **freya** but is using
-**freya-ice-1-1**. This has been made to ensure whatever the direct resolution
-is in /etc/hosts or DNS, ssh and so Ansible will always use the management
-network of the target host.
+Hosts then get:
+
+```
+Host c001
+    Hostname %h-net-admin
+```
+
+ssh then connects to `c001-net-admin`, the name of the host on this network, provided by the **hosts_file** and
+**dns_server** roles. This can be seen when invoking ssh with verbosity (`ssh c001 -vvv`).
 
 Also, keep in mind that when redeploying an host, its SSH key changes, which
 requires to remove the former host key from the known_hosts file, then add the
@@ -72,50 +50,40 @@ done
 
 ## Advanced usage
 
-It is possible to set specific parameters at global and/or nodes level:
+It is possible to set specific parameters at global and/or hosts level:
 
-* StrictHostKeyChecking
-* UserKnownHostsFile
-* LogLevel
-* UseRoaming
-* ForwardX11Trusted
-* User
+| Global variable (all hosts) | Host variable | ssh option |
+|-----------------------------|---------------|------------|
+| `ssh_client_global_network` | `ssh_client_network` | `Hostname %h-<network>` |
+| `ssh_client_global_stricthostkeychecking` | `ssh_client_stricthostkeychecking` | `StrictHostKeyChecking` |
+| `ssh_client_global_userknownhostsfile` | `ssh_client_userknownhostsfile` | `UserKnownHostsFile` |
+| `ssh_client_global_loglevel` | `ssh_client_loglevel` | `LogLevel` |
+| `ssh_client_global_verifyhostkeydns` | `ssh_client_verifyhostkeydns` | `VerifyHostKeyDNS` |
+| `ssh_client_global_forwardx11trusted` | `ssh_client_forwardx11trusted` | `ForwardX11Trusted` |
+| | `ssh_client_user` | `User` |
 
-To achieve that, the following variables are available:
+Hosts settings are written before global ones (`Host *`), so that they take precedence: ssh uses the first value
+found for each option.
 
-* ssh_client_global_loglevel
-* ssh_client_global_stricthostkeychecking
-* ssh_client_global_userknownhostsfile
-* ssh_client_global_network
-* ssh_client_global_verifyhostkeydns
-* ssh_client_global_forwardx11trusted
-* ssh_client_global_useroaming
+For example, to disable host key checking for a specific host, set at host level:
 
-Which are evaluated at global level
-
-For example, ssh_client_global_network can be used to configure in */root/.ssh/config*
-the same network for all hosts.
-
-And:
-
-* ssh_client_loglevel
-* ssh_client_stricthostkeychecking
-* ssh_client_userknownhostsfile
-* ssh_client_verifyhostkeydns
-* ssh_client_forwardx11trusted
-* ssh_client_useroaming
-* ssh_client_user
-
-Which are evaluated for each host.
-
-For example, to disable host key checking for a specific host, set:
-
-```
+```yaml
 ssh_client_loglevel: QUIET
-ssh_client_stricthostkeychecking: no
+ssh_client_stricthostkeychecking: "no"
 ssh_client_userknownhostsfile: /dev/null
 ```
 
-At host hostvars level.
+Raw content can be added at the top of the file with `ssh_client_custom_config`.
+
+The `UseRoaming` option is not supported anymore: it was removed from OpenSSH 7.2, and makes ssh fail with
+`Bad configuration option`.
 
 In case of issue, try adding verbosity to the ssh invocation to investigate (-vvv).
+
+## Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `ssh_client_global_*` | not set | Global parameters, see above. |
+| `ssh_client_custom_config` | not set | Raw content added at the top of the file. |
+| `ssh_client_restrict_to_group` | `bb_restrict_to_group`, else `all` | Group of hosts to write. |
