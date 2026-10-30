@@ -1,2 +1,7 @@
 ---
-keepalived_role_version: 1.0.0
+keepalived_role_version: 1.1.0
+
+keepalived_packages_to_install:
+  - keepalived
+keepalived_services_to_start:
+  - keepalived

@@ -1,33 +1,25 @@
 #jinja2: lstrip_blocks: True
-#---------------------------------------------------------------------
-# Global settings
-#---------------------------------------------------------------------
+{{ ansible_managed | comment }}
+
 global
-{% if haproxy_global_parameters is defined and haproxy_global_parameters is not none %}
-{{ haproxy_global_parameters | indent(4, True) }}
+{% if haproxy_global_parameters | default('', true) | length > 0 %}
+{{ haproxy_global_parameters | trim | indent(4, true) }}
 {% else %}
-    # These settings are the BlueBanquise role defaults.
-    log /dev/log local0
-    user        haproxy
-    group       haproxy
-    chroot      /var/lib/haproxy
-    stats socket /run/haproxy/admin.sock user haproxy group haproxy mode 660 level admin
-    nbthread    4
-    maxconn     50000
-    ssl-default-bind-ciphers PROFILE=SYSTEM
-    ssl-default-server-ciphers PROFILE=SYSTEM
-    daemon
+    # BlueBanquise role defaults
+    log stdout format raw local0
+    user haproxy
+    group haproxy
+    chroot /var/lib/haproxy
+    stats socket /var/lib/haproxy/stats user haproxy group haproxy mode 660 level admin
+    nbthread 4
+    maxconn 50000
 {% endif %}
 
-#---------------------------------------------------------------------
-# common defaults that all the 'listen' and 'backend' sections will
-# use if not designated in their block
-#---------------------------------------------------------------------
 defaults
-{% if haproxy_defaults_parameters is defined and haproxy_defaults_parameters is not none %}
-{{ haproxy_defaults_parameters | indent(4, True) }}
+{% if haproxy_defaults_parameters | default('', true) | length > 0 %}
+{{ haproxy_defaults_parameters | trim | indent(4, true) }}
 {% else %}
-    # These settings are the BlueBanquise role defaults.
+    # BlueBanquise role defaults
     timeout connect 10s
     timeout client 30s
     timeout server 30s
@@ -36,80 +28,50 @@ defaults
     option httplog
     maxconn 5000
 {% endif %}
+{% if haproxy_resources_raw | default('', true) | length > 0 %}
 
-#---------------------------------------------------------------------
-# List of frontend and associated backends
-#---------------------------------------------------------------------
-{% if haproxy_resources_raw is defined and haproxy_resources_raw is string %}
 {{ haproxy_resources_raw }}
 {% endif %}
+{% for resource in haproxy_resources %}
 
-{% if haproxy_resources is defined and haproxy_resources is iterable and haproxy_resources is not mapping and haproxy_resources is not string %}
-  {% for resource in haproxy_resources %}
-    {% if resource.type == "http_simple" %}
-############### HTTP_SIMPLE - {{ resource['name'] }}
-frontend {{ resource['name'] }}-frontend
+{%   if resource.type == 'http_simple' or resource.type == 'http_load_balancer' %}
+# {{ resource.type }} - {{ resource.name }}
+frontend {{ resource.name }}-frontend
     mode http
-    bind {{ resource['bind']['ip4'] | default('') }}:{{ resource['bind']['port'] }}
-    default_backend {{ resource['name'] }}-backend
-backend {{ resource.name}}-backend
-    mode http
-    balance roundrobin
-      {% for server in resource['servers'] %}
-    server {{ server['hostname'] }} {{ server['ip4'] }}:{{ server['port'] }} check
-      {% endfor %}
+    bind {{ resource.bind.ip4 | default('') }}:{{ resource.bind.port }}
+    default_backend {{ resource.name }}-backend
 
-    {% elif resource.type == "http_load_balancer" %}
-############### HTTP_LOAD_BALANCER - {{ resource['name'] }}
-frontend {{ resource['name'] }}-frontend
-    mode http
-    bind {{ resource['bind']['ip4'] | default('') }}:{{ resource['bind']['port'] }}
-    default_backend {{ resource['name'] }}-backend
-backend {{ resource['name'] }}-backend
-    balance roundrobin
-    mode http
-      {% for server in resource['servers'] %}
-    server {{ resource['name'] }}-{{ server['hostname'] }} 127.0.0.1:{{ (resource['local_ports_first'] | int) + (loop.index0 | int) }} check
-      {% endfor %}
-      {% for server in resource['servers'] %}
-frontend {{ resource['name'] }}-{{ server['hostname'] }}-frontend
-    mode http
-    bind 127.0.0.1:{{ (resource['local_ports_first'] | int) + (loop.index0 | int) }}
-    http-request redirect code 301 location http://{{ server['ip4'] }}{% if server['port'] is defined and server['port'] is not none %}:{{ server['port'] }}{% endif %}/%[path]
-      {% endfor %}
-
-    {% elif resource.type == "http_load_balancer_v2" %}
-############### HTTP_LOAD_BALANCER - {{ resource['name'] }}
-frontend {{ resource['name'] }}-frontend
-    mode http
-    bind {{ resource['bind']['ip4'] | default('') }}:{{ resource['bind']['port'] }}
-    default_backend {{ resource['name'] }}-backend
-
-backend myresource-backend
+backend {{ resource.name }}-backend
     mode http
     balance roundrobin
-    option httpchk HEAD /
-    http-check expect status 200
-      {% for server in resource['servers'] %}
-    server {{ resource['name'] }}-{{ server['hostname'] }} {{ server['ip4'] }}{% if server['port'] is defined and server['port'] is not none %}:{{ server['port'] }}{% endif %} check redir http://{{ server['ip4'] }}
-      {% endfor %}
-
-    {% elif resource.type == "frontend" %}
-############### FRONTEND - {{ resource['name'] }}
-frontend {{ resource['name'] }}
-{{ resource['parameters'] | default('') | indent(4, True) }}
-    bind {{ resource['bind']['ip4'] | default('') }}:{{ resource['bind']['port'] }}
-    default_backend {{ resource['default_backend'] }}
-
-    {% elif resource.type == "backend" %}
-############### BACKEND - {{ resource['name'] }}
-backend {{ resource['name'] }}
-{{ resource['parameters'] | default('') | indent(4, True) }}
-      {% for server in resource['servers'] %}
-    server {{ server['hostname'] }} {{ server['ip4'] }}:{{ server['port'] }} {% if server['parameters'] is defined and server['parameters'] is not none %}{{ server['parameters'] }}{% else %}check{% endif %}
-      {% endfor %}
-
-    {% endif %}
-  {% endfor %}
-{% endif %}
-
+{%     for server in resource.servers %}
+{%       if server.port is defined and server.port is not none %}
+{%         set server_address = server.ip4 ~ ':' ~ server.port %}
+{%       else %}
+{%         set server_address = server.ip4 %}
+{%       endif %}
+{%       if resource.type == 'http_simple' %}
+    server {{ server.hostname }} {{ server_address }} check
+{%       else %}
+    server {{ server.hostname }} {{ server_address }} check redir http://{{ server_address }}
+{%       endif %}
+{%     endfor %}
+{%   elif resource.type == 'frontend' %}
+# frontend - {{ resource.name }}
+frontend {{ resource.name }}
+{%     if resource.parameters | default('', true) | length > 0 %}
+{{ resource.parameters | trim | indent(4, true) }}
+{%     endif %}
+    bind {{ resource.bind.ip4 | default('') }}:{{ resource.bind.port }}
+    default_backend {{ resource.default_backend }}
+{%   elif resource.type == 'backend' %}
+# backend - {{ resource.name }}
+backend {{ resource.name }}
+{%     if resource.parameters | default('', true) | length > 0 %}
+{{ resource.parameters | trim | indent(4, true) }}
+{%     endif %}
+{%     for server in resource.servers %}
+    server {{ server.hostname }} {{ server.ip4 }}:{{ server.port }} {{ server.parameters | default('check', true) }}
+{%     endfor %}
+{%   endif %}
+{% endfor %}
