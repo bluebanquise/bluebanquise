@@ -1,0 +1,18 @@
+{{ ansible_managed | comment }}
+# Local log files written by BlueBanquise rsyslog configuration
+
+{% for file in rsyslog_local_logrotate_files %}
+{{ file }}
+{% endfor %}
+{
+    weekly
+    rotate 4
+    missingok
+    notifempty
+    compress
+    delaycompress
+    sharedscripts
+    postrotate
+        /usr/bin/systemctl kill -s HUP rsyslog.service > /dev/null 2>&1 || true
+    endscript
+}

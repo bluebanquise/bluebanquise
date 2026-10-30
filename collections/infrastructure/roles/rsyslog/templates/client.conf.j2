@@ -17,12 +17,8 @@ action(type="omfwd" target="{{ server_address }}" protocol="tcp" port="{{ server
 # ### end of the forwarding rule ###
 {% endmacro %}
 
-{% macro get_main_network(network_interfaces) %}
-{# We get first interfaces that posses an ip4 and a network that starts with 'net-' #}
-{{ network_interfaces | default([]) | selectattr('network','defined') | selectattr('interface','defined') | selectattr('ip4','defined') | selectattr('network','match','^net-[a-zA-Z0-9]+') | map(attribute='network') | list | first | default(none) }}
-{% endmacro %}
-
-{% set node_main_network = get_main_network(network_interfaces) %}
+{# Main network: network of the first interface with an ip4 and a network starting with 'net-' #}
+{% set node_main_network = network_interfaces | default([], true) | selectattr('network','defined') | selectattr('interface','defined') | selectattr('ip4','defined') | selectattr('network','match','^net-[a-zA-Z0-9]+') | map(attribute='network') | list | first | default('') %}
 
 #### RULES ####
 

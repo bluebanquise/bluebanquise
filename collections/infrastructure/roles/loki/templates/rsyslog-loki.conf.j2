@@ -1,0 +1,3 @@
+{{ ansible_managed | comment }}
+# Forward all messages to Alloy, which pushes them to Loki
+action(type="omfwd" Target="{{ loki_syslog_ip }}" protocol="tcp" port="{{ loki_syslog_port }}" Template="RSYSLOG_SyslogProtocol23Format" TCP_Framing="octet-counted" KeepAlive="on")

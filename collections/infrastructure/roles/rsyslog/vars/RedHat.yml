@@ -14,3 +14,8 @@ rsyslog_work_dir: /var/lib/rsyslog
 rsyslog_firewall_services_to_add:
   - syslog
   - rsh  # 514/tcp
+
+# Files written by client.conf and server.conf, not rotated by the distribution logrotate configuration
+rsyslog_local_logrotate_files: []
+# Command restoring the distribution /etc/logrotate.d/rsyslog, replaced by role versions < 1.7.0
+rsyslog_restore_logrotate_command: [dnf, -y, reinstall, rsyslog]
