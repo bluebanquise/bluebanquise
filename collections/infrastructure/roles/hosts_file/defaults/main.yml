@@ -1,9 +1,12 @@
 ---
+# Domain name of hosts, default to bb_domain_name, else cluster.local
 hosts_file_domain_name:
-hosts_file_external_hosts: {}
-hosts_file_fqdn_first: false
 
-# Allow to write all host names
-# If set to true, hostname, alias, nic-network and nic-alias will be written info hosts file
-# If set to false, only hostname and alias will be written into hosts file
+# Hosts not in the inventory
+hosts_file_external_hosts: {}
+
+# Write FQDN before short name, so that FQDN is the canonical name (hostname -f)
+hosts_file_fqdn_first: true
+
+# Also write hostname-network names of all interfaces, and interfaces aliases
 hosts_file_enable_extended_names: true

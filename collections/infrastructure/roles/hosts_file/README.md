@@ -2,19 +2,92 @@
 
 ## Description
 
-These settings generate and deploys `/etc/hosts`, including hosts from the inventory, network services, and optional external entries.
+This role generates and deploys `/etc/hosts`, including hosts from the inventory, network services, and optional external entries.
 
 Supported distributions: RHEL 9/10, Ubuntu 24.04/26.04, Debian 13, OpenSuse Leap 16.
 
 ## Instructions
 
-These settings gather all hosts from the inventory and adds them, using all their known network interfaces, into `/etc/hosts`.
+The role gathers all hosts from the inventory (or from the group set in `hosts_file_restrict_to_group`,
+else `bb_restrict_to_group`) and adds them into `/etc/hosts`, using:
 
-Network services defined under each network (e.g. `pxe4`, `dns4`) are also automatically included.
+* The first interface of each host, with its name and its aliases (`alias` host key).
+* The BMC of each host (`bmc` key), with its name and its aliases (`bmc.alias` key).
+* The network services (`pxe4`, `dns4`, etc.) defined under each network.
+* With extended names enabled (default), all interfaces of each host, named `<hostname>-<network>`, and the interfaces aliases (`alias` key of an interface).
+
+Each name is written with its FQDN and its short name. The first line of an IP address is used for reverse
+resolution, so the main name of a host is always written first.
 
 ### Domain name
 
-These settings use `hosts_file_domain_name` or `bb_domain_name` to build FQDNs. Default is `cluster.local`. `hosts_file_domain_name` takes precedence over `bb_domain_name` if both are set.
+FQDNs use `hosts_file_domain_name`, else `bb_domain_name`, else `cluster.local`.
+
+### FQDN first
+
+By default (`hosts_file_fqdn_first: true`), the FQDN is written before the short name. With glibc, the first
+name of a line is the canonical name of the host: `hostname -f` returns the FQDN only in this case. Set
+`hosts_file_fqdn_first: false` to write the short name first.
+
+### Example
+
+Given the following host (domain `bluebanquise.local`):
+
+```yaml
+c001:
+  alias:
+    - foobar
+  bmc:
+    name: bc001
+    ip4: 10.10.103.1
+    network: net-admin
+    alias: c001-bmc
+  network_interfaces:
+    - interface: eth0
+      ip4: 10.10.3.1
+      network: net-admin
+    - interface: eth1
+      ip4: 10.20.3.1
+      network: para
+      alias: fuuuuu
+```
+
+With `hosts_file_enable_extended_names: true` (default):
+
+```
+10.10.3.1 c001.bluebanquise.local c001
+10.10.3.1 foobar.bluebanquise.local foobar
+10.10.103.1 bc001.bluebanquise.local bc001
+10.10.103.1 c001-bmc.bluebanquise.local c001-bmc
+10.10.3.1 c001-net-admin.bluebanquise.local c001-net-admin
+10.20.3.1 c001-para.bluebanquise.local c001-para
+10.20.3.1 fuuuuu.bluebanquise.local fuuuuu
+```
+
+With `hosts_file_enable_extended_names: false`, the last 3 lines (all interfaces and interfaces aliases) are not written.
+
+### Network services
+
+Services defined under `networks` are automatically added. For example, given:
+
+```yaml
+networks:
+  net-admin:
+    services:
+      pxe4:
+        - ip4: 10.10.0.1
+          hostname: pxe
+      dns4:
+        - ip4: 10.10.0.1
+          hostname: dns
+```
+
+The following entries are added:
+
+```
+10.10.0.1 pxe.bluebanquise.local pxe
+10.10.0.1 dns.bluebanquise.local dns
+```
 
 ### External hosts
 
@@ -31,63 +104,20 @@ hosts_file_external_hosts:
       - extmachine3
 ```
 
-### Extended naming
+External hosts are written as is, without domain name.
 
-Extended naming is controlled by `hosts_file_enable_extended_names` (default: `true`).
+### Large clusters
 
-When enabled, each interface generates a `hostname-network` entry in addition to the base hostname entry. Given:
+With `bb_enable_flat_optimizations: true`, the hosts list is built and the file rendered only once, on the
+Ansible host, then copied to all hosts. This scales to thousands of hosts. In this mode, the file is the
+same for all hosts: role variables are read from the first host of the play only.
 
-```yaml
-c001:
-  alias:
-    - foobar
-  network_interfaces:
-    - interface: eth0
-      ip4: 10.10.3.1
-      network: net-admin
-    - interface: eth1
-      ip4: 10.20.3.1
-      network: para
-      alias: fuuuuu
-```
+## Variables
 
-With `hosts_file_enable_extended_names: true` (and domain `bluebanquise.local`):
-
-```
-10.10.3.1 c001 c001.bluebanquise.local foobar
-10.10.3.1 c001-net-admin
-10.20.3.1 c001-para fuuuuu
-```
-
-With `hosts_file_enable_extended_names: false`:
-
-```
-10.10.3.1 c001 c001.bluebanquise.local foobar
-```
-
-### Network services
-
-Services defined under `networks` are automatically added to `/etc/hosts`. For example, given:
-
-```yaml
-networks:
-  net-admin:
-    services:
-      pxe4:
-        - ip4: 10.10.0.1
-          hostname: pxe4
-      dns4:
-        - ip4: 10.10.0.1
-          hostname: dns4
-```
-
-The following entries will be added:
-
-```
-10.10.0.1 pxe4
-10.10.0.1 dns4
-```
-
-### Performance
-
-These settings use `delegate_to: localhost` with `run_once: true` and `delegate_facts: true` to build the full host map once on the controller, then pushes the rendered file to all targets. This avoids per-host fact computation and scales to thousands of hosts.
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `hosts_file_domain_name` | `bb_domain_name`, else `cluster.local` | Domain name of hosts. |
+| `hosts_file_fqdn_first` | `true` | Write FQDN before short name (canonical name). |
+| `hosts_file_enable_extended_names` | `true` | Also write all interfaces (`<hostname>-<network>`) and interfaces aliases. |
+| `hosts_file_external_hosts` | `{}` | Hosts not in the inventory. |
+| `hosts_file_restrict_to_group` | `bb_restrict_to_group`, else `all` | Only write hosts of this group. |
