@@ -1,4 +1,10 @@
 ---
+- name: assert <|> Check distribution is supported
+  ansible.builtin.assert:
+    that:
+      - ansible_facts.os_family in ['RedHat', 'Debian']
+    fail_msg: "pcs is not available on {{ ansible_facts.distribution }}."
+    quiet: true
 
 - name: include_vars <|> Gather OS specific variables
   # This task gathers variables defined in OS specific files.
@@ -24,25 +30,33 @@
   tags:
     - always
 
-- name: "firewalld <|> Add services to firewall's zone"
-  ansible.posix.firewalld:
-    zone: "{{ pcs_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
-    service: high-availability
-    immediate: true
-    permanent: true
-    state: enabled
+- name: firewalld <|> Configure firewall
   when:
     - os_firewall | default(true) | bool
   tags:
     - firewall
+  block:
+    - name: "firewalld <|> Add services to firewall's zone"
+      ansible.posix.firewalld:
+        zone: "{{ pcs_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
+        service: high-availability
+        immediate: true
+        permanent: true
+        state: enabled
+  rescue:
+    - name: fail <|> Firewall configuration failed
+      ansible.builtin.fail:
+        msg: >-
+          Firewall configuration failed: {{ (ansible_failed_result.results | default([]) | selectattr('failed', 'defined') | selectattr('failed') | map(attribute='msg') | list + [ansible_failed_result.msg | default('unknown error')]) | first }}.
+          firewalld must be installed and running, with its Python bindings (python3-firewall package),
+          for example using the firewall role. Set os_firewall to false to disable firewall configuration.
 
-- name: package <|> Install packages
+- name: "package <|> Install {{ pcs_packages_to_install | join(' ') }}"
   ansible.builtin.package:
-    name: "{{ item }}"
+    name: "{{ pcs_packages_to_install }}"
     state: present
   tags:
     - package
-  loop: "{{ pcs_packages_to_install }}"
 
 - name: group <|> Create cluster system group
   ansible.builtin.group:
@@ -57,31 +71,43 @@
     groups: haclient
     comment: 'HA Cluster Administrator'
 
-- name: service <|> Enable and start PCSD service
+- name: service <|> Manage pcsd state
   ansible.builtin.service:
     name: pcsd
-    enabled: true
-    state: started
+    enabled: "{{ (pcs_enable_services | default(bb_enable_services) | default(true) | bool) | ternary(true, false) }}"
+    state: "{{ (pcs_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
+  tags:
+    - service
 
 - name: command <|> Check nodes already registered
   ansible.builtin.command: "cat /var/lib/pcsd/known-hosts"
   register: pcs_known_hosts
   changed_when: false
-  ignore_errors: true
+  failed_when: false
 
-- name: include_tasks <|> Use OS dedicated task before creating cluster
-  ansible.builtin.include_tasks: "{{ item }}"
-  with_first_found:
-    - files:
-        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/before_create.yml"
-        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/before_create.yml"
-        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/before_create.yml"
-        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/before_create.yml"
-        - "{{ ansible_facts.distribution | replace(' ','_') }}/before_create.yml"
-        - "{{ ansible_facts.os_family | replace(' ','_') }}/before_create.yml"
-      skip: true
-  tags:
-    - internal
+# Debian and Ubuntu packages create and start a default cluster named debian, which prevents pcs cluster setup
+- name: command <|> Check for default cluster
+  ansible.builtin.command: "pcs status"
+  register: pcs_status_default
+  changed_when: false
+  failed_when: false
+  when:
+    - ansible_facts.os_family == 'Debian'
+
+- name: command <|> Get pcs version
+  ansible.builtin.command: pcs --version
+  register: pcs_version
+  changed_when: false
+  when:
+    - ansible_facts.os_family == 'Debian'
+
+# Confirmation option is --force up to pcs 0.11, --yes since pcs 0.12
+- name: command <|> Destroy default cluster
+  ansible.builtin.command: "pcs cluster destroy {{ '--yes' if pcs_version.stdout is version('0.12', '>=') else '--force' }}"
+  when:
+    - ansible_facts.os_family == 'Debian'
+    - "'Cluster name: debian' in pcs_status_default.stdout"
+    - ('0 resource instances configured' in pcs_status_default.stdout) or ('No resources' in pcs_status_default.stdout)
 
 - name: Create cluster
   run_once: true
@@ -91,13 +117,13 @@
     - name: command <|> Register nodes
       ansible.builtin.command: "pcs host auth {{ item.name }} -u hacluster -p {{ pcs_ha_cluster_password }}"
       loop: "{{ pcs_cluster_nodes }}"
-      when: ( hostvars[pcs_reference_node].pcs_known_hosts.stdout_lines | select("match", ".*"+item.name+".*") | list | length ) < 1
+      when: ('"' ~ item.name ~ '"') not in hostvars[pcs_reference_node].pcs_known_hosts.stdout
 
     - name: command <|> Check cluster exist
       ansible.builtin.command: "cat /etc/corosync/corosync.conf"
       register: pcs_corosync_known_hosts
       changed_when: false
-      ignore_errors: true
+      failed_when: false
 
     - name: command <|> Register reference node
       ansible.builtin.command: "pcs cluster setup {{ pcs_ha_cluster_name }} {{ item.name }} {% for addr in item.addrs %}addr={{ addr }} {% endfor %}"
@@ -110,7 +136,7 @@
       ansible.builtin.command: "cat /etc/corosync/corosync.conf"
       register: pcs_corosync_known_hosts
       changed_when: false
-      ignore_errors: true
+      failed_when: false
 
     - name: command <|> Register other nodes
       ansible.builtin.command: "pcs cluster node add {{ item.name }} {% for addr in item.addrs %}addr={{ addr }} {% endfor %} --force"
@@ -119,62 +145,62 @@
         - ( pcs_corosync_known_hosts.stdout_lines | select("match", ".*name:\\s"+item.name+".*") | list | length ) < 1
         - item.name != pcs_reference_node
 
-- name: service <|> Enable and start cluster
+- name: service <|> Manage corosync and pacemaker state
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: "{{ pcs_autostart | default(false) }}"
-    state: started
+    enabled: "{{ pcs_autostart | bool }}"
+    state: "{{ (pcs_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   loop:
     - corosync
     - pacemaker
+  tags:
+    - service
 
 - name: Configure cluster
   run_once: true
   delegate_to: "{{ pcs_reference_node }}"
   block:
 
+    # Output format: "  <name>=<value>" lines
     - name: command <|> Check cluster properties
-      ansible.builtin.command: "pcs property"
+      ansible.builtin.command: "pcs property config"
       register: pcs_property
       changed_when: false
-      ignore_errors: true
 
     - name: command <|> Set properties
       ansible.builtin.command: "pcs property set {{ item.name }}={{ item.value }}"
-      loop: "{{ pcs_pcs_property | default([]) }}"
+      loop: "{{ pcs_pcs_property }}"
       when:
-        - ( pcs_property.stdout_lines | select("match", ".*"+item.name+":\\s"+(item.value|string)+".*" ) | list | length) < 1
+        - (item.name ~ '=' ~ item.value) not in (pcs_property.stdout_lines | map('trim') | list)
 
     - name: command <|> Check cluster resource op defaults
       ansible.builtin.command: "pcs resource op defaults"
       register: pcs_resource_op_defaults
       changed_when: false
-      ignore_errors: true
 
     - name: command <|> Set cluster resource op defaults
-      ansible.builtin.command: "{{ pcs_resource_op_defaults_update }} {{ item.name }}={{ item.value }}"
-      loop: "{{ pcs_pcs_resource_op_defaults | default([]) }}"
+      ansible.builtin.command: "pcs resource op defaults update {{ item.name }}={{ item.value }}"
+      loop: "{{ pcs_pcs_resource_op_defaults }}"
       when:
-        - ( pcs_resource_op_defaults.stdout_lines | select("match", ".*"+item.name+"="+(item.value|string)+".*") | list | length ) < 1
+        - (item.name ~ '=' ~ item.value) not in (pcs_resource_op_defaults.stdout_lines | map('trim') | list)
 
     - name: command <|> Check cluster resource defaults
       ansible.builtin.command: "pcs resource defaults"
       register: pcs_resource_defaults
       changed_when: false
-      ignore_errors: true
 
     - name: command <|> Set cluster resource defaults
-      ansible.builtin.command: "{{ pcs_resource_defaults_update }} {{ item.name }}={{ item.value }}"
-      loop: "{{ pcs_pcs_resource_defaults | default([]) }}"
+      ansible.builtin.command: "pcs resource defaults update {{ item.name }}={{ item.value }}"
+      loop: "{{ pcs_pcs_resource_defaults }}"
       when:
-        - ( pcs_resource_defaults.stdout_lines | select("match", ".*"+item.name+"="+(item.value|string)+".*") | list | length ) < 1
+        - (item.name ~ '=' ~ item.value) not in (pcs_resource_defaults.stdout_lines | map('trim') | list)
 
     - name: command <|> Store current configuration into cib file
       ansible.builtin.command: "pcs cluster cib {{ pcs_cib_file_path }}"
       changed_when: false
 
     - name: command <|> Add resources to cluster
-      ansible.builtin.command: "pcs -f {{ pcs_cib_file_path }} resource create {{ item.1.id }} {{ item.1.type }} {{ ('arguments' in item.1) | ternary(item.1.arguments, '') }} {{ (item.0.group) | ternary('--group ' + item.0.group, '') }}"
+      ansible.builtin.command: "pcs -f {{ pcs_cib_file_path }} resource create {{ item.1.id }} {{ item.1.type }} {{ ('arguments' in item.1) | ternary(item.1.arguments, '') }} {{ ('--group ' ~ item.0.group) if item.0.group is defined else '' }}"
       register: pcs_cmd
       changed_when: pcs_cmd.rc == 0
       failed_when:
@@ -209,38 +235,51 @@
         label: "colocation : {{ item.0.group }} with {{ item.1.slave }}"
       notify: command <|> Push HA configuration
 
+    # Setting an existing location constraint succeeds without error: compare the cib file instead
+    - name: stat <|> Get cib file checksum before location constraints
+      ansible.builtin.stat:
+        path: "{{ pcs_cib_file_path }}"
+      register: pcs_cib_before_locations
+
     - name: command <|> Set location constraints
-      ansible.builtin.command: "pcs -f {{ pcs_cib_file_path }} constraint location {{ item.0.group }} {{ item.1.type }} {% for node in item.1.nodes %}{{node}}={{item.1.score | default('INFINITY')}} {% endfor %}"
-      register: pcs_cmd
-      changed_when: pcs_cmd.rc == 0
-      failed_when:
-        - pcs_cmd.rc != 0
-        - "'already exists' not in pcs_cmd.stderr"
+      ansible.builtin.command: "pcs -f {{ pcs_cib_file_path }} constraint location {{ item.0.group }} {{ item.1.type }} {% for node in item.1.nodes %}{{ node }}={{ item.1.score | default('INFINITY') }} {% endfor %}"
+      changed_when: false
       loop: "{{ lookup('subelements', pcs_resources, 'locations', {'skip_missing': True}, wantlist=True) }}"
       loop_control:
         label: "location : {{ item.0.group }} {{ item.1.type }} {{ item.1.nodes | join(' ') }}"
+
+    - name: stat <|> Get cib file checksum after location constraints
+      ansible.builtin.stat:
+        path: "{{ pcs_cib_file_path }}"
+      register: pcs_cib_after_locations
+
+    - name: debug <|> Report location constraints changes
+      ansible.builtin.debug:
+        msg: Location constraints changed
+      changed_when: true
+      when:
+        - pcs_cib_before_locations.stat.checksum != pcs_cib_after_locations.stat.checksum
       notify: command <|> Push HA configuration
 
     - name: command <|> Create stonith
       ansible.builtin.command: "pcs -f {{ pcs_cib_file_path }} stonith create {{ item.name }} {{ item.type }} pcmk_host_check={{ item.pcmk_host_check }} {% if item.pcmk_host_check == 'static-list' %}pcmk_host_list={{item.pcmk_host_list}}{% endif %} pcmk_reboot_action={{ item.pcmk_reboot_action }} {{ item.parameters }}"
       register: pcs_cmd
       changed_when: pcs_cmd.rc == 0
-      loop: "{{ pcs_stonith }}"
+      loop: "{{ pcs_stonith | default([]) }}"
       failed_when:
         - pcs_cmd.rc != 0
         - "'already exists' not in pcs_cmd.stderr"
-      when: pcs_stonith is defined and pcs_stonith
       notify: command <|> Push HA configuration
 
     - name: command <|> Set stonith prefers constraint
       ansible.builtin.command: "pcs -f {{ pcs_cib_file_path }} constraint location {{ item.name }} prefers {{ item.prefers }}"
-      loop: "{{ pcs_stonith }}"
+      loop: "{{ pcs_stonith | default([]) }}"
       register: pcs_cmd
       changed_when: pcs_cmd.rc == 0
       failed_when:
         - pcs_cmd.rc != 0
         - "'already exists' not in pcs_cmd.stderr"
-      when: pcs_stonith is defined and pcs_stonith.prefers is defined
+      when: item.prefers is defined
       notify: command <|> Push HA configuration
 
     - name: command <|> Set stonith avoids constraint
@@ -250,22 +289,22 @@
       failed_when:
         - pcs_cmd.rc != 0
         - "'already exists' not in pcs_cmd.stderr"
-      loop: "{{ pcs_stonith }}"
-      when: pcs_stonith is defined and pcs_stonith
+      loop: "{{ pcs_stonith | default([]) }}"
+      when: item.avoids is defined
       notify: command <|> Push HA configuration
 
     - name: command <|> Disable stonith if it is not configured
       ansible.builtin.command: "pcs -f {{ pcs_cib_file_path }} property set stonith-enabled=false"
       when:
-        - (pcs_property.stdout_lines | select("match", ".*stonith-enabled:\\sfalse.*") | list | length) == 0
-        - pcs_stonith is not defined or not pcs_stonith
+        - "'stonith-enabled=false' not in (pcs_property.stdout_lines | map('trim') | list)"
+        - pcs_stonith | default([]) | length == 0
       notify: command <|> Push HA configuration
 
     - name: command <|> Enable stonith if it has been properly configured
       ansible.builtin.command: "pcs -f {{ pcs_cib_file_path }} property set stonith-enabled=true"
       when:
-        - (pcs_property.stdout_lines | select("match", ".*stonith-enabled:\\strue.*") | list | length) == 0
-        - pcs_stonith is defined and pcs_stonith
+        - "'stonith-enabled=false' in (pcs_property.stdout_lines | map('trim') | list)"
+        - pcs_stonith | default([]) | length > 0
       notify: command <|> Push HA configuration
 
 - name: meta <|> Run handler tasks
