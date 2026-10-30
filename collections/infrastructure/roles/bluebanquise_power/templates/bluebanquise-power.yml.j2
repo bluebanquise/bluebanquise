@@ -4,20 +4,27 @@
 
 nodes:
 {% for host in groups[(bluebanquise_power_restrict_to_group | default(bb_restrict_to_group, true) | default('all', true))] %}
-    {% if hostvars[host]['bmc'] is defined -%}
-        {% if hostvars[host]['hw_board_authentication'] is defined %}
-        {% set host_bmc_protocol = (hostvars[host]['hw_board_authentication'] | selectattr('protocol','defined') | map(attribute='protocol') | list | first | default(none)) %}
-        {% set host_bmc_user = (hostvars[host]['hw_board_authentication'] | selectattr('protocol','defined') | map(attribute='user') | list | first | default(none)) %}
-        {% set host_bmc_password = (hostvars[host]['hw_board_authentication'] | selectattr('protocol','defined') | map(attribute='password') | list | first | default(none)) %}
-            {% if host_bmc_protocol is defined and host_bmc_protocol is not none and host_bmc_user is defined and host_bmc_user is not none and host_bmc_password is defined and host_bmc_password is not none %}
+  {# A host is managed if it has a bmc entry, and credentials in hw_board_authentication #}
+  {% if hostvars[host]['bmc'] is defined and hostvars[host]['hw_board_authentication'] is defined %}
+    {# The first hw_board_authentication entry defining a protocol is used #}
+    {% set host_bmc_auth = hostvars[host]['hw_board_authentication'] | selectattr('protocol', 'defined') | first | default({}) %}
+    {% if host_bmc_auth['protocol'] is defined and host_bmc_auth['user'] is defined and host_bmc_auth['password'] is defined %}
   {{ host }}:
     bmc:
+      {% if hostvars[host]['bmc']['name'] is defined %}
       name: {{ hostvars[host]['bmc']['name'] }}
+      {% endif %}
+      {% if hostvars[host]['bmc']['ip4'] is defined %}
       ip4: {{ hostvars[host]['bmc']['ip4'] }}
-    protocol: {{ host_bmc_protocol }}
-    user: {{ host_bmc_user }}
-    password: {{ host_bmc_password }}
-            {% endif %}
-        {% endif %}
+      {% endif %}
+    protocol: {{ host_bmc_auth['protocol'] }}
+    {% if host_bmc_auth['system_id'] is defined and host_bmc_auth['system_id'] %}
+    system_id: {{ host_bmc_auth['system_id'] | string | to_json }}
     {% endif %}
+    {# Credentials are rendered as quoted strings, so special characters (*, :, %, #...) or values
+       like 0123 or yes are not interpreted by YAML when the tool loads this file. #}
+    user: {{ host_bmc_auth['user'] | string | to_json }}
+    password: {{ host_bmc_auth['password'] | string | to_json }}
+    {% endif %}
+  {% endif %}
 {% endfor %}

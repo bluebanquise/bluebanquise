@@ -1,2 +1,6 @@
 ---
-clustershell_role_version: 1.4.0
+clustershell_role_version: 1.5.0
+
+# BlueBanquise tools run from the bluebanquise-venv Python virtual environment, whose ClusterShell
+# reads its configuration from the venv prefix, not from /etc/clustershell.
+clustershell_bluebanquise_venv_path: /usr/lib/bluebanquise/venv

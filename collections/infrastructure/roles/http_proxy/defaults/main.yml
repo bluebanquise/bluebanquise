@@ -1,7 +1,15 @@
 ---
-http_proxy_allowed_networks: []
 http_proxy_port: 3128
+
+# Networks allowed to use the proxy, in addition to inventory networks
+http_proxy_allowed_networks: []
+
+# Destination ports allowed through the proxy
 http_proxy_default_allowed_ports: true
+http_proxy_allowed_ports: []
+# Destination ports allowed for tunnels (CONNECT method: HTTPS, etc.)
+http_proxy_ssl_ports:
+  - 443
 
 http_proxy_coredump_dir: /var/spool/squid
 
@@ -12,3 +20,8 @@ http_proxy_cache_storage_path: /var/spool/squid
 http_proxy_cache_storage_size: 100 # MB
 http_proxy_cache_storage_l1: 16
 http_proxy_cache_storage_l2: 256
+
+http_proxy_refresh_patterns: []
+
+# Raw Squid configuration, added at the end of the file
+http_proxy_raw_content: ""

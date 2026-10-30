@@ -4,6 +4,8 @@
 
 These settings simply configure repositories for client hosts.
 
+Supported distributions: RHEL 9/10, Ubuntu 24.04/26.04, Debian 13, OpenSuse Leap 16.
+
 ## Instructions
 
 ### Define repositories
@@ -34,7 +36,8 @@ bb_repositories:
 Available advanced variables depends of the target OS. Please refer to the following pages to know available parameters:
 
 * RHEL: https://docs.ansible.com/ansible/latest/collections/ansible/builtin/yum_repository_module.html
-* Debian or Ubuntu: https://docs.ansible.com/ansible/latest/collections/ansible/builtin/apt_repository_module.html
+* Ubuntu: https://docs.ansible.com/ansible/latest/collections/ansible/builtin/apt_repository_module.html
+* Debian 13: https://docs.ansible.com/ansible/latest/collections/ansible/builtin/deb822_repository_module.html
 * Suse: https://docs.ansible.com/ansible/latest/collections/community/general/zypper_repository_module.html
 
 When using simple format, repository static URL path is computed using variables defined in the equipment group and in networks.
@@ -129,7 +132,7 @@ bb_repositories:
 
 All parameters from the [yum_repository module](https://docs.ansible.com/ansible/latest/collections/ansible/builtin/yum_repository_module.html) are supported.
 
-**Ubuntu / Debian:**
+**Ubuntu:**
 
 ```yaml
 bb_repositories:
@@ -139,13 +142,28 @@ bb_repositories:
 
 All parameters from the [apt_repository module](https://docs.ansible.com/ansible/latest/collections/ansible/builtin/apt_repository_module.html) are supported.
 
+**Debian 13** (deb822 format, `/etc/apt/sources.list.d/<name>.sources`):
+
+```yaml
+bb_repositories:
+  - name: os
+    uris: http://my-server/repositories/debian/13/x86_64/os/
+    suites: trixie
+    components: main
+    signed_by: /etc/apt/keyrings/my-key.gpg
+```
+
+All parameters from the [deb822_repository module](https://docs.ansible.com/ansible/latest/collections/ansible/builtin/deb822_repository_module.html) are supported.
+A simple repository (only a name) is a flat repository (`Suites: ./`, no components) marked as trusted, as BlueBanquise
+local repositories are not signed. When `suites` ends with `/`, components are not set.
+
 **OpenSuse Leap:**
 
 ```yaml
 bb_repositories:
   - name: base
-    baseurl: http://my-server/repositories/leap/16/x86_64/os/
-    enabled: 1
+    repo: http://my-server/repositories/opensuse/16.0/x86_64/os/
+    auto_import_keys: true
     state: present
 ```
 
@@ -163,3 +181,13 @@ pxe_stack_preserve_repositories: false
 ```
 
 And native repositories will be removed during hosts deployment (PXE install, not playbook execution).
+
+## Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `bb_repositories` | not set | Repositories, see above. |
+| `repositories_network` | first `net-` network of the host | Network used to compute simple repositories URL. |
+| `override_repositories_environment` | not set | Overrides `os_operating_system.repositories_environment`. |
+| `repositories_apt_update_cache` | `true` | Update apt cache when repositories change (Debian, Ubuntu). |
+| `repositories_disable_delta_rpm` | `true` | Disable delta RPMs (Suse). |

@@ -1,21 +1,9 @@
 ---
 - name: include_vars <|> Gather OS specific variables
-  # This task gathers variables defined in OS specific files.
-  #
-  # Search vars in:
-  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
-  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
-  #  - <distribution>.yml            # eg. CentOS.yml
-  #  - <os_family>.yml               # eg. RedHat.yml
-  #
-  # If no OS specific file is found, the role will default to vars/main.yml
-  #
   ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - files:
-        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}.yml"
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
-        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_version }}.yml"
         - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
         - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
         - "vars/{{ ansible_facts.os_family }}.yml"
@@ -23,40 +11,56 @@
   tags:
     - always
 
+# An empty password would allow any local user to connect as root
+- name: assert <|> Check that MariaDB root password is set
+  ansible.builtin.assert:
+    that:
+      - mariadb_root_password | default('', true) | length > 0
+    fail_msg: "mariadb_root_password must be set (use Ansible Vault)."
+    quiet: true
+  tags:
+    - always
+
 - name: package <|> Install MariaDB packages
   ansible.builtin.package:
     name: "{{ mariadb_packages }}"
     state: present
+  tags:
+    - package
 
-- name: service <|> Ensure MariaDB is running and enabled
+- name: service <|> Manage MariaDB state
   ansible.builtin.service:
     name: mariadb
-    enabled: "{{ mariadb_enable_services | default(bb_enable_services) | default(true) | bool }}"
+    enabled: "{{ (mariadb_enable_services | default(bb_enable_services) | default(true) | bool) | ternary(true, false) }}"
     state: "{{ (mariadb_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
+  tags:
+    - service
+
+# Secure installation. Root connects through the unix socket: on first run root has no password
+# and is authenticated by unix_socket (check_implicit_admin), on next runs with its password.
+# The root password is set last, as it switches root away from unix_socket authentication.
 
 - name: mysql_user <|> Remove anonymous users
   ansible.mysql.mysql_user:
     name: ""
-    host: "{{ item }}"
+    host_all: true
     state: absent
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
     login_unix_socket: "{{ mariadb_unix_socket }}"
-  loop:
-    - localhost
-    - "{{ ansible_fqdn }}"
+    check_implicit_admin: true
+  no_log: true
 
 - name: mysql_db <|> Remove test database
   ansible.mysql.mysql_db:
     name: test
     state: absent
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
     login_unix_socket: "{{ mariadb_unix_socket }}"
+    check_implicit_admin: true
+  no_log: true
 
-# Must run last: setting the root password switches root@localhost away from
-# unix_socket auth, so any later task connecting via bare login_unix_socket
-# (no login_user/login_password) would be rejected with "Access denied...
-# (using password: NO)". host_all (rather than looping over host: localhost/
-# 127.0.0.1/::1) updates every matching root account through the single
-# socket connection made before that switch happens, instead of one
-# connection per loop iteration where only the first would still authenticate.
 - name: mysql_user <|> Set MariaDB root password
   ansible.mysql.mysql_user:
     name: root
@@ -64,5 +68,8 @@
     host_all: true
     priv: "*.*:ALL,GRANT"
     state: present
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
     login_unix_socket: "{{ mariadb_unix_socket }}"
+    check_implicit_admin: true
   no_log: true

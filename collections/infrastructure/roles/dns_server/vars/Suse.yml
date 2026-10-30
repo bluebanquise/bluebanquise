@@ -22,4 +22,7 @@ dns_server_configuration_local_file: /etc/named.d/named.conf.local
 
 # NA dns_server_rfc_zone_file: /etc/bind/zones.rfc1918
 dns_server_root_hint_file: /var/lib/named/root.hint
-dns_server_root_key_file: /var/lib/named/named.root.key
+# No root key file on openSUSE Leap 16 (bind 9.20 has built-in trust anchors)
+
+# System wide cryptographic policy, included in options block
+dns_server_crypto_policy_file: /etc/crypto-policies/back-ends/bind.config

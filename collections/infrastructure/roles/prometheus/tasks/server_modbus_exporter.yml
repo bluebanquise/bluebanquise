@@ -27,7 +27,7 @@
     dest: /etc/systemd/system/modbus_exporter.service
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   notify:
     - systemd <|> Reload systemd configuration
     - service <|> Restart modbus_exporter service
@@ -38,7 +38,7 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    mode: 0750
+    mode: "0750"
     owner: modbus_exporter
     group: modbus_exporter
   loop:
@@ -50,7 +50,7 @@
     dest: /etc/modbus_exporter/modbus.yml
     owner: modbus_exporter
     group: modbus_exporter
-    mode: 0640
+    mode: "0640"
   notify:
     - service <|> Restart modbus_exporter service
   tags:
@@ -62,7 +62,7 @@
     dest: "/etc/modbus_exporter/{{ item }}.yml"
     owner: modbus_exporter
     group: modbus_exporter
-    mode: 0640
+    mode: "0640"
   loop: "{{ prometheus_server_modbus_exporter_additional_modules }}"
   when: prometheus_server_modbus_exporter_additional_modules is defined and prometheus_server_modbus_exporter_additional_modules is not ansible.builtin.none
 

@@ -1,0 +1,4 @@
+---
+# /var/log belongs to the syslog group on Ubuntu: rotation must run as root:adm
+logrotate_os_su: root adm
+logrotate_xz_package: xz-utils

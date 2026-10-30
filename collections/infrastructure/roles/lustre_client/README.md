@@ -4,9 +4,7 @@
 
 This role installs and configures the Lustre client. Lustre server configuration is not covered by this role.
 
-Supported distributions: RHEL 9/10 (Lustre packages available via EPEL or DDN repositories).
-
-Note: Ubuntu, Debian, and OpenSuse Leap are not officially supported as Lustre client packages are not widely available for those distributions.
+Supported distributions: RHEL 9/10. The `lustre-client` and `kmod-lustre-client` packages come from Whamcloud (https://downloads.whamcloud.com/public/lustre/) or DDN repositories, matching the running kernel. The role fails on other distributions.
 
 ## Instructions
 
@@ -39,37 +37,22 @@ lustre_mounts:
     mount_opts: "_netdev,flock,rw"
 ```
 
+Each host gets the LNET networks whose `clients_groups` contain it, using its interfaces connected to the
+inventory `network` (for example `options lnet networks=o2ib0(ib0)`). Networks where the host has no interface
+are skipped. Hosts mount the filesystems whose `clients_groups` contain them, from
+`<mgs1>@<lnet>:<mgs2>@<lnet>:/<path>`, where `path` (file system name) defaults to `name`.
+
+LNET settings are read when the `lnet` kernel module is loaded: after a change, unmount Lustre filesystems
+and unload the Lustre modules (`lustre_rmmod`), or reboot.
+
 ### Multi-rail
 
 When `lustre_multirail: true`, the role deploys sysctl settings for LNET interfaces to handle multi-rail networking correctly.
 
 ## Variables
 
-| Variable         | Description                                      | Required |
-|:-----------------|:-------------------------------------------------|:--------:|
-| lustre_networks  | List of LNET networks with client group scoping  |   yes    |
-| lustre_mounts    | List of Lustre mount points                      |   yes    |
-| lustre_multirail | Enable multi-rail sysctl configuration           |    no    |
-
-## Output
-
-Packages installed:
-
-* lustre-client
-* kmod-lustre-client
-
-Files generated:
-
-* /etc/modprobe.d/lustre.conf
-* /etc/sysctl.d/80-lustre-multi-rail.conf (when multirail enabled)
-
-## Changelog
-
-**Please now update CHANGELOG file at repository root instead of adding logs in this file.
-These logs bellow are only kept for archive.**
-
-* 1.2.1: Fix issues with multiple-lnet setup. Lucas Santos <lucassouzasantos@gmail.com>
-* 1.2.0: Added sysctl configuration to avoid issues with multi-rail. Lucas Santos <lucassouzasantos@gmail.com>
-* 1.1.0: Added LNET configuration support for multi-rail. Lucas Santos <lucassouzasantos@gmail.com>
-* 1.0.1: Just a minor fix to mount filesystem on the role execution. Lucas Santos <lucassouzasantos@gmail.com>
-* 1.0.0: Role creation. Lucas Santos <lucassouzasantos@gmail.com>
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `lustre_networks` | `[]` | LNET networks: `name` (LNET name), `network` (inventory network), `clients_groups`. |
+| `lustre_mounts` | `[]` | Lustre filesystems: `name`, `path` (file system name, default `name`), `mount_path`, `lnet`, `mgs_servers`, `clients_groups`, `mount_opts`. |
+| `lustre_multirail` | `false` | Deploy sysctl settings needed by LNET multi-rail. |

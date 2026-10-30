@@ -3,22 +3,16 @@
   ansible.builtin.package:
     name: clustershell
     state: present
-  when: clustershell_install_from_package
+  when: clustershell_install_from_package | bool
   tags:
     - package
 
-- name: package <|> Install clustershell pip package
-  ansible.builtin.pip:
-    name: clustershell
-    state: present
-  when: clustershell_install_from_pip
-  tags:
-    - pip
-
-- name: file <|> Create configuration directory
+- name: file <|> Create configuration directories
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
+    owner: root
+    group: root
     mode: 0755
   loop:
     - "{{ clustershell_prefix_path }}/etc/clustershell"
@@ -33,5 +27,37 @@
     owner: root
     group: root
     mode: 0644
+  tags:
+    - template
+
+# ClusterShell installed in a virtual environment reads groups from <venv>/etc/clustershell,
+# with a higher priority than /etc/clustershell. Groups are also written there when the
+# bluebanquise-venv is installed, so BlueBanquise tools can use them.
+- name: stat <|> Check if bluebanquise-venv ClusterShell configuration exists
+  ansible.builtin.stat:
+    path: "{{ clustershell_bluebanquise_venv_path }}/etc/clustershell"
+  register: clustershell_bluebanquise_venv_configuration
+  tags:
+    - template
+
+- name: file <|> Create bluebanquise-venv groups directory
+  ansible.builtin.file:
+    path: "{{ clustershell_bluebanquise_venv_path }}/etc/clustershell/groups.d"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  when: clustershell_bluebanquise_venv_configuration.stat.exists
+  tags:
+    - template
+
+- name: template <|> Generate {{ clustershell_bluebanquise_venv_path }}/etc/clustershell/groups.d/local.cfg
+  ansible.builtin.template:
+    src: local.cfg.j2
+    dest: "{{ clustershell_bluebanquise_venv_path }}/etc/clustershell/groups.d/local.cfg"
+    owner: root
+    group: root
+    mode: 0644
+  when: clustershell_bluebanquise_venv_configuration.stat.exists
   tags:
     - template

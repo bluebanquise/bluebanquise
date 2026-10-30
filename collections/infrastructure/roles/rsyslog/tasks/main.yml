@@ -21,12 +21,18 @@
   tags:
     - always
 
-- name: "package <|> Install {{ rsyslog_packages_to_install }} packages"
+- name: "package <|> Install {{ rsyslog_packages_to_install | join(' ') }}"
   ansible.builtin.package:
     name: "{{ rsyslog_packages_to_install }}"
     state: present
   tags:
     - package
+
+- name: "file <|> Create {{ rsyslog_work_dir }}"
+  ansible.builtin.file:
+    path: "{{ rsyslog_work_dir }}"
+    state: directory
+    mode: "0700"
 
 - name: "template <|> Generate {{ rsyslog_conf_path }}"
   ansible.builtin.template:
@@ -34,7 +40,7 @@
     dest: "{{ rsyslog_custom_conf_path | default(rsyslog_conf_path) }}"
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   notify: service <|> Restart rsyslog service
   when: "'rsyslog.conf' not in (rsyslog_configuration_files | default([]) | selectattr('name','defined') | map(attribute='name') | list)"
   tags:
@@ -46,7 +52,7 @@
     dest: "{{ item.path | default('/etc/rsyslog.d') }}/{{ item.name }}"
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   loop: "{{ rsyslog_configuration_files }}"
   loop_control:
     label: "Install configuration file {{ item.name }}"
@@ -58,10 +64,25 @@
 - name: include_tasks <|> Configure log Server
   ansible.builtin.include_tasks: "server.yml"
   when: rsyslog_profile == "server"
+  tags:
+    - always
 
 - name: include_tasks <|> Configure log Client
   ansible.builtin.include_tasks: "client.yml"
   when: rsyslog_profile == "client"
+  tags:
+    - always
+
+- name: "template <|> Generate /etc/logrotate.d/rsyslog-local"
+  ansible.builtin.template:
+    src: rsyslog_local_logrotate.j2
+    dest: /etc/logrotate.d/rsyslog-local
+    owner: root
+    group: root
+    mode: "0644"
+  when: rsyslog_local_logrotate_files | length > 0
+  tags:
+    - template
 
 - name: seport <|> Allow syslog port into SELinux
   community.general.seport:

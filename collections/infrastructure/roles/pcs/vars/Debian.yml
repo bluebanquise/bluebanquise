@@ -1,0 +1,7 @@
+---
+pcs_packages_to_install:
+  - pacemaker
+  - corosync
+  - pcs
+  - fence-agents
+  - resource-agents

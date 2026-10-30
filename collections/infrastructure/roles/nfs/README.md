@@ -115,8 +115,11 @@ Please refer to https://linux.die.net/man/5/nfs for detail on export and mount p
 
 Also read and refer to  https://www.admin-magazine.com/HPC/Articles/Useful-NFS-Options-for-Tuning-and-Management for fine tuning.
 
-Finally, note that paths that should be mounted will be automatically created by
-these settings if they do not exist.
+A host exports a share when `server` is its inventory name or one of its IP addresses, or when it is a member
+of `server_group`. Exported directories are created on the server if they do not exist
+(`nfs_server_create_directories_if_not_exist`), and mount paths on clients.
+
+Changes to exports are applied with `exportfs -ra`, without restarting the NFS server.
 
 ### Advanced usage
 
@@ -141,8 +144,11 @@ threads=8
 
 To get all available parameters, simple cat your `/etc/nfs.conf` file, and use https://man7.org/linux/man-pages/man5/nfs.conf.5.html as a documentation.
 
-It is for example higly recommended to increase threads value to an higher value in case of large number of clients. 32 threads is a good start, but if server is strong, you can
+It is for example highly recommended to increase threads value to an higher value in case of large number of clients. 32 threads is a good start, but if server is strong, you can
 easily go to 64, 128 or even 256 threads if cluster is large.
+
+The configuration is written to `/etc/nfs.conf.d/bluebanquise.conf`, and the NFS server is restarted when it changes.
+The legacy `nfs_server_threads` variable is still accepted, as `nfsd` `threads` value.
 
 #### Manipulate mounts state
 
@@ -164,3 +170,18 @@ nfs_client_sebooleans:
   - use_nfs_home_dirs
   - httpd_use_nfs
 ```
+
+## Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `nfs_profile` | `[]` | `server` and/or `client`. |
+| `nfs_shares` | not set | Shared file systems, see above. |
+| `nfs_server_create_directories_if_not_exist` | `true` | Create exported directories on servers. |
+| `nfs_server_tuning` | not set | `nfs.conf` sections and parameters. |
+| `nfs_client_directories_state` | `mounted` | Mount state on clients. |
+| `nfs_client_sebooleans` | `[use_nfs_home_dirs, httpd_use_nfs]` | SELinux booleans enabled on clients. |
+| `nfs_server_firewall_services_to_add` | `[nfs, rpc-bind, mountd]` | Firewall services opened on servers. |
+| `nfs_server_firewall_zone` | `bb_services_firewall_zone`, else `public` | Firewall zone. |
+| `nfs_enable_services` | `bb_enable_services`, else `true` | Enable NFS services. |
+| `nfs_start_services` | `bb_start_services`, else `true` | Start NFS services, and apply changes. |

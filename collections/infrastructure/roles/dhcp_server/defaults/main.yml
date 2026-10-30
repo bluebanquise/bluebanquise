@@ -8,9 +8,8 @@ dhcp_server_default_lease_time: 600
 dhcp_server_max_lease_time: 7200
 
 ### iPXE Rom settings ###
-# These default should suits most hardware.
-# Refer to main documentation for possible values.
-# It is possible using these settings to bind to an non BlueBanquise iPXE Rom.
+# These default should suit most hardware.
+# Refer to README for possible values.
 dhcp_server_ipxe_driver: snponly
 dhcp_server_ipxe_embed: dhcpretry
 
@@ -26,16 +25,19 @@ dhcp_server_ipxe_embed: dhcpretry
 
 ### Others ###
 # Domain name provided by dhcp to clients
+# Precedence: dhcp_server_domain_name > bb_domain_name > cluster.local
 dhcp_server_domain_name:
 
-# Specific settings
-# Consider setting to true if using match patterns
-dhcp_server_ignore_client_uids: false
-dhcp_server_stash_agent_options: false
+# Interfaces the DHCP server listens on ("*" for all)
+dhcp_server_listen_interfaces:
+  - "*"
 
-# Add user custom global settings to main dhcp configuration file
-# No need to add ";" at the end, template will add it
-dhcp_server_global_settings: []
+# Identify clients leases by their MAC address only, ignoring client identifier (option 61).
+# Can be overridden per network using dhcp_match_client_id key. See README.
+dhcp_server_match_client_id: false
+
+# Kea log severity: FATAL, ERROR, WARN, INFO or DEBUG
+dhcp_server_log_severity: INFO
 
 dhcp_server_firewall_services_to_add:
   - dhcp

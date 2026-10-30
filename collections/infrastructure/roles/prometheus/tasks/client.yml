@@ -1,9 +1,13 @@
 ---
+- name: set_fact <|> Initialize exporters to install
+  ansible.builtin.set_fact:
+    prometheus_exporters_groups: []
+
 - name: set_fact <|> Gather exporters to install
   ansible.builtin.set_fact:
-    prometheus_exporters_groups: "{{ (prometheus_exporters_groups | default([])) + item.value }}"
-  loop: "{{ prometheus_exporters_groups_to_scrape | dict2items}}"
-  when: inventory_hostname in groups[item.key]
+    prometheus_exporters_groups: "{{ prometheus_exporters_groups + item.value }}"
+  loop: "{{ prometheus_exporters_groups_to_scrape | dict2items }}"
+  when: inventory_hostname in groups[item.key] | default([])
 
 - name: group <|> Add exporters needed groups
   ansible.builtin.group:
@@ -39,7 +43,7 @@
     dest: "/etc/systemd/system/{{ item.service }}.service"
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   notify: systemd <|> Reload systemd configuration
   loop: "{{ prometheus_exporters_groups }}"
   when: item.service is defined
@@ -50,7 +54,7 @@
   ansible.builtin.file:
     path: "/etc/{{ item.service }}/"
     state: directory
-    mode: 0755
+    mode: "0755"
     owner: "{{ item.user | default('root') }}"
     group: "{{ item.group | default('root') }}"
   loop: "{{ prometheus_exporters_groups }}"
@@ -59,19 +63,29 @@
 - name: meta <|> Run handler tasks
   ansible.builtin.meta: flush_handlers
 
-- name: "firewalld <|> Open exporters ports into firewall's zone"
-  ansible.posix.firewalld:
-    zone: "{{ prometheus_client_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
-    port: "{{ item.port }}/tcp"
-    immediate: true
-    permanent: true
-    state: enabled
-  loop: "{{ prometheus_exporters_groups }}"
+- name: firewalld <|> Configure firewall
   when:
     - os_firewall | default(true) | bool
-    - item.port is defined
   tags:
     - firewall
+  block:
+    - name: "firewalld <|> Open exporters ports into firewall's zone"
+      ansible.posix.firewalld:
+        zone: "{{ prometheus_client_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
+        port: "{{ item.port }}/tcp"
+        immediate: true
+        permanent: true
+        state: enabled
+      loop: "{{ prometheus_exporters_groups }}"
+      when:
+        - item.port is defined
+  rescue:
+    - name: fail <|> Firewall configuration failed
+      ansible.builtin.fail:
+        msg: >-
+          Firewall configuration failed: {{ (ansible_failed_result.results | default([]) | selectattr('failed', 'defined') | selectattr('failed') | map(attribute='msg') | list + [ansible_failed_result.msg | default('unknown error')]) | first }}.
+          firewalld must be installed and running, with its Python bindings (python3-firewall package),
+          for example using the firewall role. Set os_firewall to false to disable firewall configuration.
 
 - name: service <|> Manage exporters services
   ansible.builtin.service:

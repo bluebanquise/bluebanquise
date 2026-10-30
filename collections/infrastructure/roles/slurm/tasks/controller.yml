@@ -3,20 +3,29 @@
   ansible.builtin.include_tasks: "accounting.yml"
   when: slurm_enable_accounting
 
-- name: "firewalld <|> Add ports to firewall's zone"
-  ansible.posix.firewalld:
-    zone: "{{ slurm_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
-    port: "{{ item }}/tcp"
-    immediate: true
-    permanent: true
-    state: enabled
+- name: firewalld <|> Configure firewall
   when:
     - os_firewall | default(true) | bool
-  loop:
-    - "{{ slurm_srunportrange }}"
-    - "{{ slurm_slurmtld_port }}"
   tags:
     - firewall
+  block:
+    - name: "firewalld <|> Add ports to firewall's zone"
+      ansible.posix.firewalld:
+        zone: "{{ slurm_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
+        port: "{{ item }}/tcp"
+        immediate: true
+        permanent: true
+        state: enabled
+      loop:
+        - "{{ slurm_srunportrange }}"
+        - "{{ slurm_slurmtld_port }}"
+  rescue:
+    - name: fail <|> Firewall configuration failed
+      ansible.builtin.fail:
+        msg: >-
+          Firewall configuration failed: {{ (ansible_failed_result.results | default([]) | selectattr('failed', 'defined') | selectattr('failed') | map(attribute='msg') | list + [ansible_failed_result.msg | default('unknown error')]) | first }}.
+          firewalld must be installed and running, with its Python bindings (python3-firewall package),
+          for example using the firewall role. Set os_firewall to false to disable firewall configuration.
 
 # Now that file is rendered, lets push it to targets
 - name: copy <|> Push slurm.conf
@@ -25,7 +34,7 @@
     dest: "{{ slurm_home_path }}/slurm.conf"
     owner: slurm
     group: slurm
-    mode: 0644
+    mode: "0644"
   tags:
     - template
   notify: service <|> restart slurmctld
@@ -36,7 +45,7 @@
     dest: "{{ slurm_home_path }}/{{ item }}"
     owner: slurm
     group: slurm
-    mode: 0644
+    mode: "0644"
   tags:
     - template
   loop:
@@ -49,7 +58,7 @@
     dest: "{{ slurm_home_path }}/gres.conf"
     owner: slurm
     group: slurm
-    mode: 0644
+    mode: "0644"
   tags:
     - template
   when: slurm_grestypes is defined and slurm_grestypes == 'gpu' and slurm_computes_config == "configless"
@@ -71,7 +80,7 @@
     dest: "{{ slurm_home_path }}/topology.conf"
     owner: slurm
     group: slurm
-    mode: 0644
+    mode: "0644"
   tags:
     - template
   when: slurm_topology == 'topology/block' or slurm_topology == 'topology/tree'

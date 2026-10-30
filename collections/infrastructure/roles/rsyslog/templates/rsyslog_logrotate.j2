@@ -1,5 +1,5 @@
-#### Blue Banquise file ####
-## {{ ansible_managed }}
+{{ ansible_managed | comment }}
+# Logs received from remote hosts
 
 {% if rsyslog_logrotate_config is defined and rsyslog_logrotate_config is not none %}
 {{ rsyslog_logrotate_config }}
@@ -19,6 +19,5 @@
     postrotate
         /usr/bin/systemctl kill -s HUP rsyslog.service > /dev/null 2>/dev/null || true
     endscript
- }
- 
+}
 {% endif %}

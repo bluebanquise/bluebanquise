@@ -19,7 +19,9 @@
   ansible.builtin.template:
     src: diskless_parameters.yml.j2
     dest: /etc/bluebanquise/diskless.yml
-    mode: 0644
+    owner: root
+    group: root
+    mode: "0644"
   tags:
     - template
 

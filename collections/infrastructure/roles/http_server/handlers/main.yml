@@ -1,4 +1,13 @@
 ---
+# Handlers run in the order they are defined: the configuration is checked before Apache is
+# restarted, so that an invalid configuration does not stop a running Apache.
+- name: command <|> Check Apache configuration
+  ansible.builtin.command: "{{ http_server_configtest_command }}"
+  changed_when: false
+  listen: service <|> Restart http server service
+  when:
+    - "'service' not in ansible_skip_tags"
+    - http_server_start_services | default(bb_start_services) | default(true) | bool
 
 - name: service <|> Restart http server service
   ansible.builtin.service:
@@ -8,9 +17,3 @@
   when:
     - "'service' not in ansible_skip_tags"
     - http_server_start_services | default(bb_start_services) | default(true) | bool
-
-- name: lineinfile <|> Disable default listen on all interfaces
-  ansible.builtin.lineinfile:
-    path: "{{ http_server_apache_main_conf_path }}"
-    regexp: '^Listen 80'
-    line: '#Listen 80'

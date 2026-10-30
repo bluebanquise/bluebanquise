@@ -2,26 +2,29 @@
 - name: systemd <|> Reload systemd configuration
   ansible.builtin.systemd:
     daemon_reload: true
+  when:
+    - "'service' not in ansible_skip_tags"
 
-- name: service <|> restart loki
+- name: service <|> Restart loki
   ansible.builtin.service:
     name: loki
     state: restarted
-  listen: restart loki
   when:
     - "'service' not in ansible_skip_tags"
     - loki_start_services | default(bb_start_services) | default(true) | bool
 
-- name: service <|> restart promtail
+- name: service <|> Reload alloy
   ansible.builtin.service:
-    name: promtail
-    state: restarted
-  listen: restart promtail
+    name: alloy
+    state: reloaded
   when:
     - "'service' not in ansible_skip_tags"
     - loki_start_services | default(bb_start_services) | default(true) | bool
 
-- name: service <|> Restart rsyslog service
+- name: service <|> Restart rsyslog
   ansible.builtin.service:
     name: rsyslog
     state: restarted
+  when:
+    - "'service' not in ansible_skip_tags"
+    - loki_start_services | default(bb_start_services) | default(true) | bool

@@ -300,6 +300,9 @@ Then, first, set the following variables to configure remote server settings:
 Ensure variable `slurm_accounting_enable_local_mysql` is set to **true**.
 
 You should be able to let all `slurm_accounting_mysql_login_*` variables to default since these settings will use in this particular case local socket to communicate with the DB.
+If the MariaDB root account has a password (for example set by the **mariadb** role with `mariadb_root_password`),
+set `slurm_accounting_mysql_login_password` to it (`slurm_accounting_mysql_login_user` defaults to `root`): the
+role first tries a passwordless unix socket connection, then this password.
 
 #### Setup slurm db and slurm user in database
 

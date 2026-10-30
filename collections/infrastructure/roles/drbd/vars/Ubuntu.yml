@@ -1,3 +1,0 @@
----
-drbd_packages_to_install:
-  - drbd-utils

@@ -14,6 +14,14 @@ Please refer to [nmcli module documentation]( https://docs.ansible.com/ansible/l
 
 ## Instructions
 
+### Distributions specific behaviors
+
+* Ubuntu and Debian: netplan is configured to use NetworkManager, and systemd-networkd is disabled. Interfaces
+  declared in `/etc/network/interfaces` (ifupdown, used by Debian installer) are managed by NetworkManager
+  (`[ifupdown] managed=true`), so that the role connections apply to them. The host is rebooted when netplan
+  configuration changes (if `nic_allow_reboot`).
+* openSUSE: wicked is disabled when present (older versions, Leap 16 uses NetworkManager only).
+
 ### Specific behaviors
 
 While we try to bind to nmcli module options for convention, some of these keys provide more integrated features:
@@ -177,4 +185,21 @@ To achieve that, few variables are at disposal:
 * `nic_reload_connections`: this variable will trigger a handler that will ask NetworkManager to reload its configuration.
 * `nic_force_nic_restart`: this variable will trigger a task that will manually down and up interfaces. To be used with care.
 * `nic_restart_timeout`: this variable is used with nic_force_nic_restart to specify the time to wait between connection down and up actions. Default value is 2s.
-* `nic_allow_reboot`: this variable will trigger a reboot if any nic configuration changed. To be used with care.
+* `nic_force_reboot`: this variable will trigger a reboot (only one) if any nic configuration changed. To be used with care. Needs `nic_allow_reboot`.
+* `nic_allow_reboot`: allow the role to reboot the host, with `nic_force_reboot`, and when switching Ubuntu/Debian netplan, or older Suse wicked, to NetworkManager. Default is `true`.
+
+## Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `network_interfaces` | (host inventory) | Interfaces to configure, see above and the data model. |
+| `nic_reload_connections` | `false` | Reload changed connections. |
+| `nic_force_nic_restart` | `false` | Down and up changed connections. |
+| `nic_restart_timeout` | `2` | Seconds between down and up. |
+| `nic_force_reboot` | `false` | Reboot once if any connection changed. |
+| `nic_allow_reboot` | `true` | Allow the role to reboot the host. |
+| `nic_reboot_timeout` | `600` | Reboot timeout, in seconds. |
+| `nic_nmcli_device_is_connection_name` | `true` | Rename ethernet connections to their device name. |
+| `nic_enforce_configuration` | `true` | Do not keep configurations made outside of NetworkManager (`keep-configuration=no`). |
+| `nic_enable_services` | `bb_enable_services`, else `true` | Enable NetworkManager. |
+| `nic_start_services` | `bb_start_services`, else `true` | Start NetworkManager. |

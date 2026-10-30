@@ -1,8 +1,9 @@
 ---
-- name: service <|> Restart firewall services
+# Reload applies the permanent configuration, and keeps connections state
+- name: service <|> Reload firewall services
   ansible.builtin.service:
     name: "{{ item }}"
-    state: restarted
+    state: reloaded
   loop: "{{ firewall_services_to_start }}"
   when:
     - "'service' not in ansible_skip_tags"

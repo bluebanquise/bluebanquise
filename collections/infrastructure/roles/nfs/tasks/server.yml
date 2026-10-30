@@ -1,16 +1,25 @@
 ---
-- name: "firewalld <|> Add services to firewall's zone"
-  ansible.posix.firewalld:
-    zone: "{{ nfs_server_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
-    service: "{{ item }}"
-    immediate: true
-    permanent: true
-    state: enabled
+- name: firewalld <|> Configure firewall
   when:
     - os_firewall | default(true) | bool
-  loop: "{{ nfs_server_firewall_services_to_add }}"
   tags:
     - firewall
+  block:
+    - name: "firewalld <|> Add services to firewall's zone"
+      ansible.posix.firewalld:
+        zone: "{{ nfs_server_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
+        service: "{{ item }}"
+        immediate: true
+        permanent: true
+        state: enabled
+      loop: "{{ nfs_server_firewall_services_to_add }}"
+  rescue:
+    - name: fail <|> Firewall configuration failed
+      ansible.builtin.fail:
+        msg: >-
+          Firewall configuration failed: {{ (ansible_failed_result.results | default([]) | selectattr('failed', 'defined') | selectattr('failed') | map(attribute='msg') | list + [ansible_failed_result.msg | default('unknown error')]) | first }}.
+          firewalld must be installed and running, with its Python bindings (python3-firewall package),
+          for example using the firewall role. Set os_firewall to false to disable firewall configuration.
 
 - name: "package <|> Install {{ nfs_server_packages_to_install | join(' ') }} packages"
   ansible.builtin.package:
@@ -19,30 +28,32 @@
   tags:
     - package
 
-- name: lineinfile <|> Uncomment nfsd section header in /etc/nfs.conf
-  ansible.builtin.lineinfile:
-    path: /etc/nfs.conf
-    regexp: '^#\[nfsd\]$'
-    line: "[nfsd]"
-  when: nfs_server_threads is defined and nfs_server_threads is not none
-
-- name: lineinfile <|> Set number of threads to be used
-  ansible.builtin.lineinfile:
-    path: /etc/nfs.conf
-    regexp: "threads="
-    line: "threads={{ nfs_server_threads | default(8, true) }}"
-  when: nfs_server_threads is defined and nfs_server_threads is not none
+# Shares exported by this host: server is this host (name or IP), or this host is in server_group
+- name: set_fact <|> Find shares exported by this host
+  ansible.builtin.set_fact:
+    nfs_server_shares: >-
+      {{ nfs_shares | default([], true)
+         | selectattr('server', 'defined')
+         | selectattr('server', 'in', [inventory_hostname] + ansible_facts.all_ipv4_addresses | default([]))
+         | list
+         + (nfs_shares | default([], true)
+            | selectattr('server_group', 'defined')
+            | selectattr('server_group', 'in', group_names)
+            | list) }}
+  tags:
+    - always
 
 - name: file <|> Create NFS configuration directory
   ansible.builtin.file:
+    path: /etc/nfs.conf.d
+    state: directory
     owner: root
     group: root
     mode: 0755
-    path: /etc/nfs.conf.d
-    state: directory
-  when: nfs_server_tuning is defined and nfs_server_tuning
+  tags:
+    - template
 
-- name: template <|> Generate custom NFS configuration into /etc/nfs.conf.d
+- name: template <|> Generate /etc/nfs.conf.d/bluebanquise.conf
   ansible.builtin.template:
     src: nfs.conf.j2
     dest: /etc/nfs.conf.d/bluebanquise.conf
@@ -50,20 +61,8 @@
     group: root
     mode: 0644
   notify: service <|> Restart NFS server services
-  when: nfs_server_tuning is defined and nfs_server_tuning
-
-- name: lineinfile <|> Edit file /etc/exports to add exported FS
-  vars:
-    export_id: '{%if item.id is defined and item.id is not none %}{{ item.id }}{% else %}{{ item.export }}{% endif %}'
-  ansible.builtin.lineinfile:
-    path: /etc/exports
-    regexp: ' # export id: {{ export_id }}$'
-    line: "{{ item.export }} {% if item.subnet is defined and item.subnet %}{{ item.subnet }}{% else %}{% if item.network is defined and item.network is not none and networks[item.network] is defined and networks[item.network]['subnet'] is defined and networks[item.network]['subnet'] is not none and networks[item.network]['prefix'] is defined and networks[item.network]['prefix'] is not none %}{{networks[item.network]['subnet']}}/{{networks[item.network]['prefix']}}{% else %}*{% endif %}{% endif %}({{ item.export_options | default('rw,sync,root_squash', true) }}) # export id: {{ export_id }}"
-  when: (inventory_hostname == item.server) or
-        (item.server in ansible_all_ipv4_addresses) or
-        ((item.server_group is defined) and (inventory_hostname in groups[item.server_group]))
-  loop: "{{ nfs_shares | default([]) | flatten(levels=1) }}"
-  notify: service <|> Restart NFS server services
+  when:
+    - (nfs_server_tuning | default({}, true) | length > 0) or (nfs_server_threads | default(none) is not none)
   tags:
     - template
 
@@ -72,16 +71,38 @@
     path: "{{ item.export }}"
     state: directory
     mode: 0755
-  loop: "{{ nfs_shares | default([]) | flatten(levels=1) }}"
-  when: nfs_server_create_directories_if_not_exist
+  loop: "{{ nfs_server_shares | unique }}"
+  loop_control:
+    label: "{{ item.export }}"
+  when:
+    - nfs_server_create_directories_if_not_exist | bool
 
-- name: meta <|> Run handler tasks to restart NFS server services
-  ansible.builtin.meta: flush_handlers
+# Clients: subnet if set, else subnet of network if set, else all (*)
+- name: lineinfile <|> Add exported file systems to /etc/exports
+  ansible.builtin.lineinfile:
+    path: /etc/exports
+    regexp: ' # export id: {{ export_id }}$'
+    line: "{{ item.export }} {{ export_clients }}({{ item.export_options | default('rw,sync,root_squash', true) }}) # export id: {{ export_id }}"
+    create: true
+    owner: root
+    group: root
+    mode: 0644
+  vars:
+    export_id: "{{ item.id | default(item.export, true) }}"
+    export_network: "{{ networks[item.network] | default({}) if item.network is defined else {} }}"
+    export_clients: >-
+      {{ item.subnet | default((export_network.subnet ~ '/' ~ export_network.prefix) if (export_network.subnet is defined and export_network.prefix is defined) else '*', true) }}
+  loop: "{{ nfs_server_shares | unique }}"
+  loop_control:
+    label: "{{ item.export }}"
+  notify: command <|> Reload NFS exports
+  tags:
+    - template
 
 - name: "service <|> Manage {{ nfs_server_services_to_start | join(' ') }} state"
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: "{{ nfs_enable_services | default(bb_enable_services) | default(true) | bool }}"
+    enabled: "{{ (nfs_enable_services | default(bb_enable_services) | default(true) | bool) | ternary(true, false) }}"
     state: "{{ (nfs_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   loop: "{{ nfs_server_services_to_start }}"
   tags:

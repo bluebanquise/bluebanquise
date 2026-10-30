@@ -1,166 +1,268 @@
 ---
-- name: include_vars <|> Gather OS specific variables
-  # This task gathers variables defined in OS specific files.
-  #
-  # Search vars in:
-  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
-  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
-  #  - <distribution>.yml            # eg. CentOS.yml
-  #  - <os_family>.yml               # eg. RedHat.yml
-  #
-  # If no OS specific file is found, the role will default to vars/main.yml
-  #
-  ansible.builtin.include_vars: "{{ item }}"
-  with_first_found:
-    - files:
-        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
-        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
-        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
-        - "vars/{{ ansible_facts.os_family }}.yml"
-      skip: true
+- name: assert <|> Check that variables of previous role versions are not used
+  ansible.builtin.assert:
+    that:
+      - grafana_legacy_variables | length == 0
+    fail_msg: >-
+      Variables {{ grafana_legacy_variables | join(', ') }} are not supported anymore since grafana role 3.0.0.
+      Set grafana.ini options in grafana_configuration instead, see the role README.
+    quiet: true
+  vars:
+    grafana_legacy_variables: "{{ lookup('ansible.builtin.varnames', grafana_legacy_variables_regex, wantlist=true) }}"
+  tags:
+    - always
+
+- name: set_fact <|> Compute grafana.ini configuration
+  ansible.builtin.set_fact:
+    grafana_ini: "{{ grafana_base_configuration }}"
+  tags:
+    - always
+
+- name: set_fact <|> Enable LDAP authentication
+  ansible.builtin.set_fact:
+    grafana_ini: "{{ grafana_ini | combine(grafana_ldap_base_configuration, recursive=true) }}"
+  when:
+    - grafana_ldap_configuration | length > 0
+  tags:
+    - always
+
+- name: set_fact <|> Add grafana_configuration
+  ansible.builtin.set_fact:
+    grafana_ini: "{{ grafana_ini | combine(grafana_configuration, recursive=true) }}"
+  tags:
+    - always
+
+- name: firewalld <|> Configure firewall
+  when:
+    - os_firewall | default(true) | bool
+  tags:
+    - firewall
+  block:
+    - name: "firewalld <|> Add grafana port to firewall's zone"
+      ansible.posix.firewalld:
+        zone: "{{ grafana_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
+        port: "{{ grafana_port }}/tcp"
+        immediate: true
+        permanent: true
+        state: enabled
+  rescue:
+    - name: fail <|> Firewall configuration failed
+      ansible.builtin.fail:
+        msg: >-
+          Firewall configuration failed: {{ (ansible_failed_result.results | default([]) | selectattr('failed', 'defined') | selectattr('failed') | map(attribute='msg') | list + [ansible_failed_result.msg | default('unknown error')]) | first }}.
+          firewalld must be installed and running, with its Python bindings (python3-firewall package),
+          for example using the firewall role. Set os_firewall to false to disable firewall configuration.
+
+- name: "package <|> Install {{ grafana_packages_to_install | join(' ') }}"
+  ansible.builtin.package:
+    name: "{{ grafana_packages_to_install }}"
+    state: present
   tags:
     - package
-    - service
-    - firewall
-    - configure
-    - datasources
-    - notifications
+
+# Configuration
+
+- name: template <|> Generate /etc/grafana/grafana.ini
+  ansible.builtin.template:
+    src: grafana.ini.j2
+    dest: /etc/grafana/grafana.ini
+    owner: root
+    group: grafana
+    mode: 0640
+  no_log: true
+  notify: service <|> Restart grafana
+  tags:
+    - template
+
+- name: copy <|> Generate /etc/grafana/ldap.toml
+  ansible.builtin.copy:
+    content: "{{ grafana_ldap_configuration }}"
+    dest: /etc/grafana/ldap.toml
+    owner: root
+    group: grafana
+    mode: 0640
+  no_log: true
+  notify: service <|> Restart grafana
+  when:
+    - grafana_ldap_configuration | length > 0
+  tags:
+    - template
+
+# Plugins are installed as grafana user, so that files belong to grafana
+
+- name: command <|> Install grafana plugins
+  ansible.builtin.command:
+    argv:
+      - runuser
+      - -u
+      - grafana
+      - --
+      - /usr/sbin/grafana-cli
+      - --homepath
+      - "{{ grafana_homepath }}"
+      - --config
+      - /etc/grafana/grafana.ini
+      - plugins
+      - install
+      - "{{ item }}"
+    creates: "/var/lib/grafana/plugins/{{ item }}"
+  loop: "{{ grafana_plugins }}"
+  notify: service <|> Restart grafana
+  tags:
+    - plugins
+
+# Datasources and dashboards are provisioned using files, read by Grafana at startup
+
+- name: file <|> Create provisioning directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: grafana
+    mode: 0750
+  loop:
+    - /etc/grafana/provisioning
+    - /etc/grafana/provisioning/datasources
+    - /etc/grafana/provisioning/dashboards
+    # Not created by RHEL package, Grafana logs an error at each start without it
+    - /etc/grafana/provisioning/alerting
+  tags:
+    - template
+
+- name: template <|> Generate /etc/grafana/provisioning/datasources/bluebanquise.yml
+  ansible.builtin.template:
+    src: datasources.yml.j2
+    dest: /etc/grafana/provisioning/datasources/bluebanquise.yml
+    owner: root
+    group: grafana
+    mode: 0640
+  no_log: true
+  notify: service <|> Restart grafana
+  tags:
+    - template
+
+- name: template <|> Generate /etc/grafana/provisioning/dashboards/bluebanquise.yml
+  ansible.builtin.template:
+    src: dashboards.yml.j2
+    dest: /etc/grafana/provisioning/dashboards/bluebanquise.yml
+    owner: root
+    group: grafana
+    mode: 0640
+  notify: service <|> Restart grafana
+  tags:
+    - template
+
+- name: "file <|> Create {{ grafana_dashboards_path }} directory"
+  ansible.builtin.file:
+    path: "{{ grafana_dashboards_path }}"
+    state: directory
+    owner: grafana
+    group: grafana
+    mode: 0755
+  tags:
     - dashboards
-    - plugins
-    - apikeys
 
-- name: include_tasks <|> preflight
-  ansible.builtin.include_tasks: preflight.yml
+- name: copy <|> Install local dashboards
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ grafana_dashboards_path }}/{{ item | basename }}"
+    owner: grafana
+    group: grafana
+    mode: 0644
+  with_fileglob:
+    - "{{ grafana_dashboards_dir }}/*.json"
+  when:
+    - grafana_dashboards_dir | length > 0
   tags:
-    - package
-    - service
-    - firewall
-    - configure
-    - datasources
-    - notifications
     - dashboards
-    - plugins
-    - apikeys
 
-- name: include_tasks <|> preflight_ports
-  ansible.builtin.include_tasks: preflight_ports.yml
+- name: uri <|> Download dashboards from grafana.com
+  ansible.builtin.uri:
+    url: "https://grafana.com/api/dashboards/{{ item.dashboard_id }}/revisions/{{ item.revision_id }}/download"
+    return_content: true
+  register: grafana_downloaded_dashboards
+  loop: "{{ grafana_dashboards }}"
+  check_mode: false
   tags:
-    - package
-    - service
-    - firewall
-    - configure
-    - datasources
-    - notifications
     - dashboards
-    - plugins
-    - apikeys
 
-- name: include_tasks <|> install
-  ansible.builtin.include_tasks: install.yml
+# Dashboards shared on grafana.com refer to their datasource using a placeholder,
+# like "${DS_PROMETHEUS}", replaced here by the datasource set in grafana_dashboards.
+- name: copy <|> Install dashboards downloaded from grafana.com
+  ansible.builtin.copy:
+    content: >-
+      {{ item.content | regex_replace(grafana_datasource_placeholder, '"' ~ item.item.datasource ~ '"') }}
+    dest: "{{ grafana_dashboards_path }}/grafana_com_{{ item.item.dashboard_id }}.json"
+    owner: grafana
+    group: grafana
+    mode: 0644
+  vars:
+    grafana_datasource_placeholder: '"(\$\{)?DS_[A-Z0-9_-]+\}?"'
+  loop: "{{ grafana_downloaded_dashboards.results }}"
+  loop_control:
+    label: "{{ item.item.dashboard_id }}"
+  when:
+    - grafana_downloaded_dashboards.results is defined
   tags:
-    - package
-    - firewall
+    - dashboards
 
-- name: include_tasks <|> configure
-  ansible.builtin.include_tasks: configure.yml
+# Service
+
+- name: service <|> Manage grafana state
+  ansible.builtin.service:
+    name: "{{ item }}"
+    enabled: "{{ (grafana_enable_services | default(bb_enable_services) | default(true) | bool) | ternary(true, false) }}"
+    state: "{{ (grafana_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
+  loop: "{{ grafana_services_to_start }}"
   tags:
     - service
-    - configure
 
-- name: include_tasks <|> plugins
-  ansible.builtin.include_tasks: plugins.yml
-  when: grafana_plugins | length > 0
-  tags:
-    - plugins
-
-- name: meta <|> Force all notified handlers to run at this point
+- name: meta <|> Run handlers
   ansible.builtin.meta: flush_handlers
 
-- name: service <|> Wait for grafana to start (http/s)
+- name: wait_for <|> Wait for grafana to listen
   ansible.builtin.wait_for:
     host: "{{ grafana_address }}"
     port: "{{ grafana_port }}"
-  when: grafana_server.protocol is undefined or grafana_server.protocol in ['http', 'https']
-  tags:
-    - package
-    - service
-    - firewall
-    - configure
-    - datasources
-    - notifications
-    - dashboards
-    - plugins
-
-- name: service <|> Wait for grafana to start (socket)
-  ansible.builtin.wait_for:
-    path: "{{ grafana_server.socket }}"
-  when: grafana_server.protocol is defined and grafana_server.protocol == 'socket'
-  tags:
-    - package
-    - service
-    - firewall
-    - configure
-    - datasources
-    - notifications
-    - dashboards
-    - plugins
-
-- name: grafana <|> Ensure password is set to the one in the role variables
-  ansible.builtin.command: "grafana-cli --homepath {{ grafana_homepath }} admin reset-admin-password {{ grafana_security.admin_password }}"
-  changed_when: false
-  no_log: true
-  register: grafana_cli_var
-  ignore_errors: true
-
-- name: grafana <|> Debug grafana-cli when  command is failing
-  ansible.builtin.debug:
-    msg: "grafana-cli failed to set password {{ grafana_cli_var.stderr }}"
+    timeout: 120
   when:
-    - grafana_cli_var is defined
-    - grafana_cli_var.rc != 0
-  failed_when: false
-  changed_when: false
-
-- name: include_tasks <|> api_keys
-  ansible.builtin.include_tasks: api_keys.yml
-  when: grafana_api_keys | length > 0
+    - grafana_start_services | default(bb_start_services) | default(true) | bool
   tags:
-    - apikeys
-
-- name: include_tasks <|> datasources
-  ansible.builtin.include_tasks: datasources.yml
-  when: grafana_datasources | length > 0
-  tags:
-    - datasources
-
-- name: "grafana <|> Check if there are any dashboards in local {{ grafana_dashboards_dir }}"
-  ansible.builtin.set_fact:
-    grafana_found_dashboards: "{{ lookup('fileglob', grafana_dashboards_dir + '/*.json', wantlist=True) }}"
-  tags:
-    - dashboards
-
-- name: include_tasks <|> dashboards
-  ansible.builtin.include_tasks: dashboards.yml
-  when: grafana_dashboards | length > 0 or grafana_found_dashboards | length > 0
-  tags:
-    - dashboards
-
-- name: grafana <|> UI login information
-  ansible.builtin.debug:
-    msg:
-      - '###############################################################'
-      - 'Grafana UI access:'
-      - "URL: {{ grafana_url }}"
-      - "- login: {{ grafana_security.admin_user }}"
-      - "- password: *************"
-      - '###############################################################'
-  tags:
-    - package
     - service
-    - firewall
-    - configure
-    - datasources
-    - notifications
-    - dashboards
-    - plugins
-    - apikeys
+
+# The admin password set in grafana.ini is only used when the database is created.
+# It is enforced here, as grafana user so that files written by grafana-cli belong to grafana.
+# runuser resets PATH, without /usr/sbin for non root users: grafana-cli full path is needed.
+- name: command <|> Enforce grafana admin password
+  ansible.builtin.command:
+    argv:
+      - runuser
+      - -u
+      - grafana
+      - --
+      - /usr/sbin/grafana-cli
+      - --homepath
+      - "{{ grafana_homepath }}"
+      - --config
+      - /etc/grafana/grafana.ini
+      - admin
+      - reset-admin-password
+      - --password-from-stdin
+    stdin: "{{ grafana_admin_password }}"
+  register: grafana_password_reset
+  changed_when: false
+  failed_when: false
+  no_log: true
+  when:
+    - grafana_start_services | default(bb_start_services) | default(true) | bool
+  tags:
+    - service
+
+- name: fail <|> Report admin password enforcement failure
+  ansible.builtin.fail:
+    msg: "grafana-cli failed to set the admin password: {{ grafana_password_reset.stderr }}"
+  when:
+    - grafana_password_reset.rc is defined
+    - grafana_password_reset.rc != 0
+  tags:
+    - service

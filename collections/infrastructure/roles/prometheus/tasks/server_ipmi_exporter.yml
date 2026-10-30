@@ -27,7 +27,7 @@
     dest: /etc/systemd/system/ipmi_exporter.service
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   notify:
     - systemd <|> Reload systemd configuration
     - service <|> Restart ipmi_exporter service
@@ -38,7 +38,7 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    mode: 0750
+    mode: "0750"
     owner: ipmi_exporter
     group: ipmi_exporter
   loop:
@@ -50,7 +50,7 @@
     dest: /etc/ipmi_exporter/ipmi_config.yml
     owner: ipmi_exporter
     group: ipmi_exporter
-    mode: 0640
+    mode: "0640"
   notify: service <|> Restart ipmi_exporter service
   tags:
     - template

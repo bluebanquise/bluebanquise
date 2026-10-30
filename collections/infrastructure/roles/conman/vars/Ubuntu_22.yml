@@ -1,0 +1,7 @@
+---
+# Ubuntu 22.04 ships conman 0.2.7, which installs its scripts in /usr/lib
+conman_execpath: "/usr/lib/conman/exec"
+
+conman_packages_to_install:
+  - conman
+  - ipmitool

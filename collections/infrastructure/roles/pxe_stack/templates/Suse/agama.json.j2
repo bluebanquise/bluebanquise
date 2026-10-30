@@ -1,0 +1,138 @@
+{#- Agama unattended installation profile (openSUSE Leap 16).
+    The profile is built as a data structure, then rendered as JSON.
+    Reference: https://agama-project.github.io/docs/user/reference/profile -#}
+{% if equipment['os']['os_autoinstall_raw_file'] is defined %}
+{{ equipment['os']['os_autoinstall_raw_file'] }}
+{% else %}
+{% set os_kernel_parameters = (equipment['os']['os_kernel_parameters'] | default(pxe_stack_os_kernel_parameters, true) | default('', true)) ~ ' ' ~ (equipment['hw']['hw_kernel_parameters'] | default(pxe_stack_hw_kernel_parameters, true) | default('', true)) %}
+{% set admin_password = equipment['os']['os_admin_password_sha512'] | default(pxe_stack_os_admin_password_sha512) %}
+{% set admin_ssh_keys = equipment['os']['os_admin_ssh_keys'] | default(pxe_stack_os_admin_ssh_keys) | default([], true) %}
+{% set custom_repositories = equipment['os']['os_autoinstall_custom_repositories'] | default(pxe_stack_os_autoinstall_custom_repositories) | default([], true) %}
+{% set packages = ['openssh-server', 'sudo', 'curl'] + (equipment['os']['os_autoinstall_packages'] | default([], true) | list) %}
+{% set target_disk = equipment['os']['os_target_disk'] | default(equipment['hw']['hw_target_disk'], true) | default(none, true) %}
+{% set partitioning = equipment['os']['os_partitioning'] | default(equipment['hw']['hw_partitioning'], true) | default(pxe_stack_os_partitioning, true) | default(none, true) %}
+
+{#- Script running in the installer, with the installed system mounted on /mnt #}
+{% set installer_script %}
+#!/bin/sh -x
+# Turn the kernel parameters into variables (ipxe_next_server, node_hostname)
+for I in $(cat /proc/cmdline | tr " " "\n" | grep -E "^(ipxe_next_server|node_hostname)="); do eval $I; done
+
+if [ -n "$node_hostname" ]; then
+  echo "$node_hostname" > /mnt/etc/hostname
+fi
+{% if pxe_stack_inventory_tag is defined and pxe_stack_inventory_tag is not none %}
+mkdir -p /mnt/etc/bluebanquise/tags/ && echo "{{ pxe_stack_inventory_tag }}" > /mnt/etc/bluebanquise/tags/pxe_inventory
+{% endif %}
+{% if (equipment['hw']['hw_preserve_efi_first_boot_device'] | default(pxe_stack_hw_preserve_efi_first_boot_device)) == true %}
+# Keep network boot as first EFI boot device
+[ -d /sys/firmware/efi ] && efibootmgr -o $(efibootmgr | grep BootCurrent | cut -d" " -f2),$(efibootmgr | grep BootOrder | sed "s/BootOrder:\ //" | sed "s/$(efibootmgr | grep BootCurrent | cut -d" " -f2),//") || echo "Not an EFI system, skipping"
+{% endif %}
+{% if pxe_stack_post_install_boot_to_disk %}
+echo "All went well, we can inform next-server we succeeded"
+curl -s -k "http://$ipxe_next_server:{{ pxe_stack_daemon_port }}/stage_report?hostname=$node_hostname&stage=osdeploy&status=completed"
+{% endif %}
+{% endset %}
+
+{#- Script running in the installed system #}
+{% set system_script %}
+#!/bin/sh -x
+systemctl enable sshd
+{% if pxe_stack_enable_root %}
+mkdir -p /root/.ssh
+cat > /root/.ssh/authorized_keys << 'xxEOFxx'
+{% for ssh_key in admin_ssh_keys %}
+{{ ssh_key }}
+{% endfor %}
+xxEOFxx
+chmod 700 /root/.ssh
+chmod 600 /root/.ssh/authorized_keys
+{% else %}
+# The sudo user is created by the installer (first user), set its ids and home
+getent group {{ pxe_stack_sudo_user_gid }} > /dev/null || groupadd -g {{ pxe_stack_sudo_user_gid }} {{ pxe_stack_sudo_user }}
+mkdir -p $(dirname {{ pxe_stack_sudo_user_home }})
+usermod -u {{ pxe_stack_sudo_user_uid }} -g {{ pxe_stack_sudo_user_gid }} -d {{ pxe_stack_sudo_user_home }} -m {{ pxe_stack_sudo_user }}
+mkdir -p {{ pxe_stack_sudo_user_home }}/.ssh
+cat > {{ pxe_stack_sudo_user_home }}/.ssh/authorized_keys << 'xxEOFxx'
+{% for ssh_key in admin_ssh_keys %}
+{{ ssh_key }}
+{% endfor %}
+xxEOFxx
+chmod 700 {{ pxe_stack_sudo_user_home }}/.ssh
+chmod 600 {{ pxe_stack_sudo_user_home }}/.ssh/authorized_keys
+chown -R {{ pxe_stack_sudo_user_uid }}:{{ pxe_stack_sudo_user_gid }} {{ pxe_stack_sudo_user_home }}/.ssh
+{% if pxe_stack_sudo_is_passwordless %}
+echo '{{ pxe_stack_sudo_user }} ALL=(ALL:ALL) NOPASSWD:ALL' > /etc/sudoers.d/{{ pxe_stack_sudo_user }}
+{% else %}
+echo '{{ pxe_stack_sudo_user }} ALL=(ALL:ALL) ALL' > /etc/sudoers.d/{{ pxe_stack_sudo_user }}
+{% endif %}
+echo 'Defaults:{{ pxe_stack_sudo_user }} !targetpw' >> /etc/sudoers.d/{{ pxe_stack_sudo_user }}
+chmod 440 /etc/sudoers.d/{{ pxe_stack_sudo_user }}
+{% endif %}
+# Remove the installation repository (its URL contains netboots)
+grep -l netboots /etc/zypp/repos.d/*.repo | xargs -r rm -f
+{% if not pxe_stack_preserve_repositories %}
+# Disable distribution repositories
+for repo in /etc/zypp/repos.d/*.repo; do
+{% for repo in custom_repositories %}
+  [ "$repo" = "/etc/zypp/repos.d/{{ repo.name }}.repo" ] && continue
+{% endfor %}
+  sed -i "s/^enabled=1/enabled=0/" $repo
+done
+{% endif %}
+{% endset %}
+
+{% set ns = namespace(repositories=[], scripts=[]) %}
+{% for repo in custom_repositories %}
+  {% if repo.url is defined and repo.url is string and repo.name is defined and repo.name is string %}
+    {% set ns.repositories = ns.repositories + [{'alias': repo.name, 'name': repo.name, 'url': repo.url, 'allowUnsigned': true}] %}
+  {% endif %}
+{% endfor %}
+{% for script in pxe_stack_os_autoinstall_custom_scripts %}
+  {% if script.name is defined and script.name is string and script.content is defined and script.content is string %}
+    {% set ns.scripts = ns.scripts + [{'name': script.name, 'chroot': true, 'content': script.content}] %}
+  {% endif %}
+{% endfor %}
+
+{% set profile = {
+  'product': {'id': 'Leap_16.0'},
+  'localization': {
+    'language': equipment['os']['os_system_language'] | default(pxe_stack_os_system_language),
+    'keyboard': (equipment['os']['os_keyboard_layout'] | default(pxe_stack_os_keyboard_layout)) | lower,
+    'timezone': pxe_stack_time_zone | default(bb_time_zone, true) | default('Europe/Brussels', true)
+  },
+  'software': {
+    'packages': packages,
+    'extraRepositories': ns.repositories
+  },
+  'scripts': {
+    'post': [
+      {'name': 'bluebanquise-installer', 'chroot': false, 'content': installer_script | trim ~ '\n'},
+      {'name': 'bluebanquise-system', 'chroot': true, 'content': system_script | trim ~ '\n'}
+    ] + ns.scripts
+  }
+} %}
+
+{% if os_kernel_parameters | trim | length > 0 %}
+  {% set profile = profile | combine({'bootloader': {'extraKernelParams': os_kernel_parameters | trim}}) %}
+{% endif %}
+
+{% if pxe_stack_enable_root %}
+  {% set profile = profile | combine({'root': {'hashedPassword': true, 'password': admin_password}}) %}
+{% else %}
+  {% set profile = profile | combine({'user': {'fullName': pxe_stack_sudo_user, 'userName': pxe_stack_sudo_user, 'hashedPassword': true, 'password': admin_password}}) %}
+{% endif %}
+
+{# Partitioning: an Agama storage section, else the installer default layout on os_target_disk, or on the first disk found #}
+{% if partitioning is mapping %}
+  {% set profile = profile | combine({'storage': partitioning}) %}
+{% elif target_disk is not none %}
+  {% set profile = profile | combine({'storage': {'drives': [{'search': target_disk, 'partitions': [{'generate': 'default'}]}], 'boot': {'configure': true}}}) %}
+{% endif %}
+
+{% set custom_content = equipment['os']['os_autoinstall_custom_content'] | default(pxe_stack_os_autoinstall_custom_content, true) | default(none, true) %}
+{% if custom_content is mapping %}
+  {% set profile = profile | combine(custom_content, recursive=true) %}
+{% endif %}
+{{ profile | to_nice_json(indent=2) }}
+{% endif %}

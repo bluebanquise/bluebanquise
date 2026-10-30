@@ -1,4 +1,6 @@
 ---
+bluebanquise_power_role_version: 1.0.0
+
 bluebanquise_power_packages_to_install:
   - ipmitool
   - bluebanquise-venv

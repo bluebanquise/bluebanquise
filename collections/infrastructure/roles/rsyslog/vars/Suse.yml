@@ -11,3 +11,14 @@ rsyslog_server_rsyslog_conf_path: /etc/rsyslog.d/server.conf
 rsyslog_firewall_services_to_add:
   - syslog
 rsyslog_work_dir: /var/spool/rsyslog
+
+# Files written by client.conf and server.conf, not rotated by the distribution logrotate configuration
+# (/var/log/messages is rotated by /etc/logrotate.d/syslog)
+rsyslog_local_logrotate_files:
+  - /var/log/secure
+  - /var/log/maillog
+  - /var/log/cron
+  - /var/log/spooler
+  - /var/log/boot.log
+# /etc/logrotate.d/rsyslog is not provided by the distribution: the file of role versions < 1.7.0 is only removed
+rsyslog_restore_logrotate_command: []

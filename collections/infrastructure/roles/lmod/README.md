@@ -18,20 +18,10 @@ lmod_path:
   - /soft/modules
 ```
 
-These paths will be added to `/etc/profile.d/modules_extra_path.sh` and made available to all users.
+These paths are appended to `MODULEPATH` by `/etc/profile.d/modules_extra_path.sh`, for all users (sh and bash login shells), without duplicates in nested shells. The file is removed when `lmod_path` is empty.
 
 ## Variables
 
-| Variable   | Description                      | Type | Required |
-|:-----------|:---------------------------------|:-----|:--------:|
-| lmod_path  | List of extra module search paths | list |    no    |
-
-## Output
-
-Packages installed:
-
-* Lmod
-
-Files generated:
-
-* /etc/profile.d/modules_extra_path.sh (optional, only when `lmod_path` is defined)
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `lmod_path` | `[]` | Extra module search paths, appended to `MODULEPATH` of all users (`/etc/profile.d/modules_extra_path.sh`, removed when empty). |

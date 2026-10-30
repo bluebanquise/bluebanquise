@@ -1,0 +1,39 @@
+---
+# Debian, Ubuntu and Suse: AppArmor profiles are left as shipped by the distribution when enforcing.
+# https://wiki.debian.org/AppArmor, https://ubuntu.com/server/docs/apparmor
+
+- name: service <|> Enable and start AppArmor
+  ansible.builtin.service:
+    name: apparmor
+    enabled: true
+    state: started
+  when:
+    - local_configuration_access_control_state != 'disabled'
+  tags:
+    - service
+
+- name: shell <|> Set all AppArmor profiles to complain mode
+  ansible.builtin.shell: aa-complain /etc/apparmor.d/*
+  changed_when: false
+  when:
+    - local_configuration_access_control_state in ['complain', 'permissive']
+  tags:
+    - service
+
+# Stopping the apparmor service does not unload profiles: aa-teardown does
+- name: command <|> Unload all AppArmor profiles
+  ansible.builtin.command: aa-teardown
+  changed_when: false
+  when:
+    - local_configuration_access_control_state == 'disabled'
+  tags:
+    - service
+
+- name: service <|> Disable AppArmor
+  ansible.builtin.service:
+    name: apparmor
+    enabled: false
+  when:
+    - local_configuration_access_control_state == 'disabled'
+  tags:
+    - service

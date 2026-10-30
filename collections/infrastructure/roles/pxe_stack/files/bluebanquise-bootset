@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/lib/bluebanquise/venv/bin/python3
 
 # ██████╗ ██╗     ██╗   ██╗███████╗██████╗  █████╗ ███╗   ██╗ ██████╗ ██╗   ██╗██╗███████╗███████╗
 # ██╔══██╗██║     ██║   ██║██╔════╝██╔══██╗██╔══██╗████╗  ██║██╔═══██╗██║   ██║██║██╔════╝██╔════╝
@@ -33,17 +33,25 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import json
+# bootset edits host iPXE files (<htdocs>/pxe/nodes/<node>.ipxe) directly, so it works even when
+# bluebanquise-pxe-stack-daemon is down. Host files are created by the daemon (at startup, or via
+# its --bootstrap-only mode run by the pxe_stack Ansible role). Both tools serialize their
+# read-modify-write cycles with an exclusive flock on <nodes>/.lock, and write atomically with a
+# temporary file created in the same folder (a file moved in from elsewhere would keep its original
+# SELinux label, and the http server could not read it). Started as root, bootset drops its
+# privileges to the daemon's user before touching anything, so files keep the right owner.
+
+import fcntl
 import logging
 import os
+import pwd
+import re
 import sys
-import urllib.error
-import urllib.request
 import yaml
 from argparse import ArgumentParser
 
 
-# Colors
+# Colors, from https://stackoverflow.com/questions/287871/how-to-print-colored-text-in-terminal-in-python
 class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -69,18 +77,42 @@ BOOT_OPTIONS = [
     "shell",
 ]
 
-DAEMON_URL = 'http://localhost:7770'
-DAEMON_TIMEOUT = 10
-
 
 def load_file(filename):
-    logging.info(bcolors.OKBLUE + 'Loading ' + filename + bcolors.ENDC)
+    logging.info(bcolors.OKBLUE+'Loading '+filename+bcolors.ENDC)
+
     with open(filename, 'r') as f:
-        if int(yaml.__version__.split('.')[0]) > 5 or (
-                int(yaml.__version__.split('.')[0]) == 5 and
-                int(yaml.__version__.split('.')[1]) >= 1):
+        # Select YAML loader (needs PyYAML 5.1+ to be safe)
+        if int(yaml.__version__.split('.')[0]) > 5 or (int(yaml.__version__.split('.')[0]) == 5 and int(yaml.__version__.split('.')[1]) >= 1):
             return yaml.load(f, Loader=yaml.FullLoader)
         return yaml.load(f)
+
+
+def read_host_variables(ipxe_file):
+    """Return the 'set <variable> <value>' lines of a host file as a dict."""
+    variables = {}
+    with open(ipxe_file, 'r') as f:
+        for line in f:
+            match = re.match(r"^set (\S+)(?: (.*))?$", line.rstrip('\n'))
+            if match:
+                variables[match.group(1)] = (match.group(2) or '').strip()
+    return variables
+
+
+def set_host_variables(node, ipxe_file, new_values):
+    """Replace the matching 'set <variable> ...' lines of a host file, atomically."""
+    with open(ipxe_file, 'r') as f:
+        filebuffer = f.readlines()
+    for i in range(len(filebuffer)):
+        for variable, value in new_values.items():
+            if re.match(r"^set " + re.escape(variable) + r"( |$)", filebuffer[i]):
+                filebuffer[i] = 'set {} {}'.format(variable, value).rstrip() + '\n'
+                logging.info('    ├── '+bcolors.OKBLUE+'set '+variable+' '+value+bcolors.ENDC)
+    tmp_file = os.path.join(os.path.dirname(ipxe_file), '.' + node + '.ipxe.tmp')
+    with open(tmp_file, 'w') as f:
+        f.writelines(filebuffer)
+    os.chmod(tmp_file, 0o644)
+    os.replace(tmp_file, ipxe_file)
 
 
 def rangeexpand(txt):
@@ -102,6 +134,7 @@ def rangeexpand(txt):
 def nodesetexpand(znodeset):
     nodeset = []
     for n in znodeset.split(','):
+        # supports a single range per element
         if '[' in n and ']' in n:
             n1 = n.split('[')[0]
             n3 = n.split(']')[1]
@@ -112,65 +145,7 @@ def nodesetexpand(znodeset):
     return nodeset
 
 
-def daemon_set_boot(node, boot_queue, dedicated_kernel_parameters=None):
-    """Call the pxe-stack-daemon to set the boot queue (and, optionally, the dedicated kernel
-    parameters) for a node. Verbose on failure."""
-    url = '{}/host/{}/menu-default'.format(DAEMON_URL, node)
-    body = {'boot_queue': boot_queue}
-    if dedicated_kernel_parameters is not None:
-        body['dedicated_kernel_parameters'] = dedicated_kernel_parameters
-    payload = json.dumps(body).encode('utf-8')
-    logging.info('    ├── ' + bcolors.OKBLUE + 'Calling daemon: PUT ' + url + ' ' +
-                 payload.decode('utf-8') + bcolors.ENDC)
-    try:
-        req = urllib.request.Request(url, data=payload, method='PUT',
-                                      headers={'Content-Type': 'application/json'})
-        with urllib.request.urlopen(req, timeout=DAEMON_TIMEOUT) as resp:
-            body = resp.read().decode('utf-8').strip()
-            logging.info('    └── ' + bcolors.OKGREEN + '[OK] Daemon confirmed: ' + body + bcolors.ENDC)
-            return True
-    except urllib.error.HTTPError as e:
-        body = e.read().decode('utf-8').strip()
-        logging.error(bcolors.FAIL + '    └── [ERROR] Daemon rejected request (HTTP {}): {}'.format(e.code, body) + bcolors.ENDC)
-        return False
-    except urllib.error.URLError as e:
-        logging.error(bcolors.FAIL + '    └── [ERROR] Could not reach bluebanquise-pxe-stack-daemon: {}'.format(e) + bcolors.ENDC)
-        _print_daemon_hint()
-        return False
-    except Exception as e:
-        logging.error(bcolors.FAIL + '    └── [ERROR] Unexpected error contacting daemon: {}'.format(e) + bcolors.ENDC)
-        _print_daemon_hint()
-        return False
-
-
-def _print_daemon_hint():
-    print('')
-    print(bcolors.WARNING + '  ┌─────────────────────────────────────────────────────────┐' + bcolors.ENDC)
-    print(bcolors.WARNING + '  │  bluebanquise-pxe-stack-daemon is not responding.        │' + bcolors.ENDC)
-    print(bcolors.WARNING + '  │                                                          │' + bcolors.ENDC)
-    print(bcolors.WARNING + '  │  Check daemon status:                                    │' + bcolors.ENDC)
-    print(bcolors.WARNING + '  │    systemctl status bluebanquise-pxe-stack-daemon         │' + bcolors.ENDC)
-    print(bcolors.WARNING + '  │                                                          │' + bcolors.ENDC)
-    print(bcolors.WARNING + '  │  View daemon logs:                                       │' + bcolors.ENDC)
-    print(bcolors.WARNING + '  │    journalctl -u bluebanquise-pxe-stack-daemon -f         │' + bcolors.ENDC)
-    print(bcolors.WARNING + '  │                                                          │' + bcolors.ENDC)
-    print(bcolors.WARNING + '  │  Start daemon if not running:                            │' + bcolors.ENDC)
-    print(bcolors.WARNING + '  │    systemctl start bluebanquise-pxe-stack-daemon          │' + bcolors.ENDC)
-    print(bcolors.WARNING + '  └─────────────────────────────────────────────────────────┘' + bcolors.ENDC)
-    print('')
-
-
-def read_host_state(base_path, node):
-    """Read dynamic_pxe_stack.yml for a node. Returns dict or None."""
-    state_file = os.path.join(base_path, node, 'dynamic_pxe_stack.yml')
-    if not os.path.exists(state_file):
-        return None
-    with open(state_file, 'r') as f:
-        return yaml.safe_load(f) or {}
-
-
-# ─── argument parsing ─────────────────────────────────────────────────────────
-
+# Get arguments passed to bootset
 parser = ArgumentParser()
 parser.add_argument("-n", "--nodes", dest="nodes", required=True,
                     help="Target node(s). Use nodeset format for ranges.", metavar="NODE")
@@ -178,16 +153,17 @@ parser.add_argument("-s", "--status", dest="status", action="store_true",
                     help="Display current nodes boot target status.")
 parser.add_argument("-b", "--boot", dest="boot",
                     help="Next pxe boot sequence: comma-separated list of one or more targets, "
-                         "applied in order and auto-advanced by the daemon as each one boots. "
-                         "Built-in: {} (plus any pxe_stack_ipxe_menu_custom entries). "
-                         "Example: memtest,osdeploy".format(', '.join(BOOT_OPTIONS)))
+                         "applied in order and auto-advanced by bluebanquise-pxe-stack-daemon as "
+                         "each one boots. Built-in: {} (plus any pxe_stack_ipxe_menu_custom "
+                         "entries). Example: memtest,osdeploy".format(', '.join(BOOT_OPTIONS)))
 parser.add_argument("-i", "--image", dest="image", default="none",
                     help="Specify diskless or clone image to be used.")
 parser.add_argument("-e", "--extra-parameters", dest="extra_parameters", default="none",
-                    help="Add extra parameters for boot chain.")
+                    help="Add dedicated kernel parameters for boot chain (osdeploy).")
 parser.add_argument("-q", "--quiet", action="store_true",
                     help="Do not print INFO messages.")
 
+# Show help if no argument is supplied
 if len(sys.argv) == 1:
     parser.print_help()
     sys.exit(1)
@@ -204,61 +180,72 @@ print("""\
       (/)_ (/)_ V_/_
 
    BlueBanquise bootset
-   v2.0.0
+   v3.0.0
    https://github.com/bluebanquise/bluebanquise/
 
 """)
 
+# Enable logging
 loglevel = logging.INFO
 if passed_arguments.quiet:
     loglevel = logging.WARNING
 logging.basicConfig(format='[%(levelname)s] %(message)s', level=loglevel)
 
-# Load configuration
-pxe_parameters = load_file('/etc/bluebanquise/bootset/pxe_parameters.yml')
+# Load and extract configuration files
+pxe_parameters = load_file('/etc/bluebanquise/bootset/pxe_parameters.yml')["pxe_parameters"]
 
-cluster_base_path = pxe_parameters.get('pxe_parameters', {}).get(
-    'cluster_base_path', '/var/lib/bluebanquise/cluster/hosts')
+pxe_nodes_path = os.path.join(pxe_parameters["htdocs_path"], 'pxe', 'nodes')
+pxe_user = pxe_parameters.get("pxe_user", "bluebanquise-pxe")
 
-custom_entries = pxe_parameters.get('pxe_parameters', {}).get('ipxe_menu_custom') or []
+custom_entries = pxe_parameters.get('ipxe_menu_custom') or []
 valid_targets = BOOT_OPTIONS + list(custom_entries)
 
-# Load tenants only if exists
-tenants = {}
-if os.path.exists('/etc/bluebanquise/bootset/tenants.yml'):
-    tenants = load_file('/etc/bluebanquise/bootset/tenants.yml')
+# Check we have sufficient privileges, then switch to the daemon's user so files keep their owner
+pxe_user_entry = pwd.getpwnam(pxe_user)
+if os.getuid() == 0:
+    os.setgroups([])
+    os.setgid(pxe_user_entry.pw_gid)
+    os.setuid(pxe_user_entry.pw_uid)
+elif os.getuid() != pxe_user_entry.pw_uid:
+    print(bcolors.FAIL + "Admin rights required to run bluebanquise-bootset!" + bcolors.ENDC)
+    sys.exit(1)
+os.umask(0o022)
 
-# ─── status ───────────────────────────────────────────────────────────────────
 
 if passed_arguments.status:
     by_boot = {}
     unknown = []
 
+    # Iteration on nodes
     for node in nodesetexpand(passed_arguments.nodes):
-        state = read_host_state(cluster_base_path, node)
-        if state is None:
-            logging.warning(bcolors.WARNING + 'No state file for ' + node + '. Run pxe_stack role or bootset --boot first.' + bcolors.ENDC)
+        # Check if node file exist
+        ipxe_file = os.path.join(pxe_nodes_path, '{node}.ipxe'.format(node=node))
+        if not os.path.exists(ipxe_file):
+            logging.warning(bcolors.WARNING + 'File ' + ipxe_file + ' does not exist. Skipping.' + bcolors.ENDC)
             unknown.append(node)
             continue
 
-        label = state.get('menu_default', 'disk')
-        status = state.get('status') or 'NA'
-        boot_queue = state.get('boot_queue') or []
-        queue_display = ' -> '.join(boot_queue) if boot_queue else '-'
+        variables = read_host_variables(ipxe_file)
+        label = variables.get('menu-default') or 'disk'
+        status = variables.get('status') or 'NA'
+        if variables.get('status-date'):
+            status = status + ' @ ' + variables.get('status-date')
+        queue_display = ' -> '.join(variables.get('boot-queue', '').split(',')) or '-'
+        if label == 'diskless':
+            label = 'diskless (image ' + variables.get('node-image', 'none') + ')'
 
         if label not in by_boot:
             by_boot[label] = []
         by_boot[label].append((node, status, queue_display))
 
+    # Display nodes per boot target
     for label, nodes in sorted(by_boot.items()):
         print('menu-default={} :'.format(label))
         for node, status, queue_display in nodes:
             print('  {}: [status: {}] [queue: {}]'.format(node, status, queue_display))
         print()
     if unknown:
-        print('No state file: {}'.format(', '.join(unknown)))
-
-# ─── boot ─────────────────────────────────────────────────────────────────────
+        print('No host file: {}'.format(','.join(unknown)))
 
 elif passed_arguments.boot:
     boot_queue = [item.strip() for item in passed_arguments.boot.split(',') if item.strip()]
@@ -268,19 +255,35 @@ elif passed_arguments.boot:
             ', '.join(invalid), ', '.join(valid_targets)) + bcolors.ENDC)
         sys.exit(1)
 
-    # extra_parameters defaults to the sentinel "none" (same convention as --image) when -e is
-    # not passed, meaning "leave whatever is already set on the daemon untouched" — never send it
-    # in that case, since it lands verbatim on a kernel command line and a literal "none" there
-    # would be a bogus parameter, not "no parameter".
-    dedicated_kernel_parameters = None
+    new_values = {
+        'menu-default': boot_queue[0],
+        'boot-queue': ','.join(boot_queue),
+    }
+    # -i/-e default to the sentinel "none", meaning "leave whatever is already set untouched".
+    # Never write -e's sentinel: it lands verbatim on a kernel command line.
+    if passed_arguments.image != "none":
+        new_values['node-image'] = passed_arguments.image
     if passed_arguments.extra_parameters != "none":
-        dedicated_kernel_parameters = passed_arguments.extra_parameters
+        new_values['dedicated-kernel-parameters'] = passed_arguments.extra_parameters
+    for value in new_values.values():
+        # A line break would let a value inject arbitrary commands into the iPXE script
+        if '\n' in value or '\r' in value:
+            logging.error(bcolors.FAIL + 'Line breaks are not allowed in values.' + bcolors.ENDC)
+            sys.exit(1)
 
+    lock_file = open(os.path.join(pxe_nodes_path, '.lock'), 'a')
+    fcntl.flock(lock_file, fcntl.LOCK_EX)
+
+    # Iteration on nodes
     for node in nodesetexpand(passed_arguments.nodes):
-        logging.info(bcolors.OKBLUE + 'Processing node ' + str(node) + ' ...' + bcolors.ENDC)
-        logging.info('    ├── ' + bcolors.OKBLUE + 'Setting boot queue=' + str(boot_queue) + bcolors.ENDC)
-        if dedicated_kernel_parameters is not None:
-            logging.info('    ├── ' + bcolors.OKBLUE + 'Setting dedicated kernel parameters=' +
-                         dedicated_kernel_parameters + bcolors.ENDC)
-        daemon_set_boot(node=node, boot_queue=boot_queue,
-                        dedicated_kernel_parameters=dedicated_kernel_parameters)
+        ipxe_file = os.path.join(pxe_nodes_path, '{node}.ipxe'.format(node=node))
+        logging.info(bcolors.OKBLUE+'Checking if node '+str(node)+' exist...'+bcolors.ENDC)
+        if not os.path.exists(ipxe_file):
+            logging.warning(bcolors.WARNING+'File '+ipxe_file+' does not exist (is node in inventory, and pxe_stack role deployed?). Skipping.'+bcolors.ENDC)
+            continue
+        logging.info(bcolors.OKGREEN+'[OK] Working on node '+str(node)+' ...'+bcolors.ENDC)
+        logging.info('    ├── '+bcolors.OKBLUE+'Editing file '+ipxe_file+bcolors.ENDC)
+        set_host_variables(node, ipxe_file, new_values)
+        logging.info('    └── '+bcolors.OKGREEN+'[OK] Done.'+bcolors.ENDC)
+
+    lock_file.close()

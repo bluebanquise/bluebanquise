@@ -18,7 +18,7 @@
   ansible.builtin.yum_repository:
     name: "{{ item.name | default(item, true) }}"
     description: "{{ item.description | default(item.name, true) | default(item, true) }} gen by Ansible"
-    baseurl: "{{ item.baseurl | default(repositories_j2_simple_url + (item.name | default(item))) }}/"
+    baseurl: "{{ item.baseurl | default(repositories_simple_url + (item.name | default(item))) }}/"
     enabled: "{{ item.enabled | default(true) }}"
     exclude: "{{ item.exclude | default(omit) }}"
     gpgcheck: "{{ item.gpgcheck | default(false) }}"
@@ -34,7 +34,7 @@
   ansible.builtin.yum_repository:
     name: "{{ item.repoid }}"
     description: "{{ item.repoid }} gen by Ansible"
-    baseurl: "{{ item.baseurl | default(repositories_j2_simple_url + 'os/' + item.repoid) }}"
+    baseurl: "{{ item.baseurl | default(repositories_simple_url + 'os/' + item.repoid) }}"
     enabled: "{{ item.enabled | default(true) }}"
     exclude: "{{ item.exclude | default(omit) }}"
     gpgcheck: "{{ item.gpgcheck | default(false) }}"

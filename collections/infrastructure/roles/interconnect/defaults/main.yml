@@ -1,5 +1,5 @@
 ---
-
+# Interconnect stack to deploy: ofed
 interconnect_stack:
 
 # OFED
@@ -8,3 +8,5 @@ interconnect_ofed_memlock_hard: 'unlimited'
 interconnect_ofed_client: false
 interconnect_ofed_subnet_manager: false
 interconnect_ofed_subnet_manager_priority: 0
+# Port GUIDs (ibstat -p) to run OpenSM on. Empty: distribution default
+interconnect_ofed_subnet_manager_guids: []

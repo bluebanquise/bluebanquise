@@ -1,19 +1,6 @@
 BlueBanquise Documentation
 ==========================
 
-
-.. warning::
-
-   19/05/2026 - THIS NEW DOCUMENTATION IS UNDER PROGRESS
-
-   I am doing my best to provide you a super new documentation, please be patient and report me any issues you might see.
-
-   Old documentation can still be found at https://bluebanquise.com/documentation-v2/ .
-
-   .. image:: images/tux-linux-penguin.gif
-      :align: center
-
-
 .. image:: images/multiple_icebergs.svg
    :align: center
 
@@ -23,8 +10,6 @@ These pages contain information on how to deploy and use the BlueBanquise unifie
 
 `Please report me <https://github.com/bluebanquise/bluebanquise/issues>`_ any
 issues in this documentation.
-
-This documentation is under Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
 
 .. image:: images/Cc-by-nc-sa_icon.svg
    :align: center
@@ -39,6 +24,13 @@ This documentation is under Creative Commons Attribution-NonCommercial-ShareAlik
    introduction/what_is_bluebanquise
    introduction/installation
    introduction/vocabulary
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Walkthrough:
+   :numbered:
+
+   walkthrough/example_cluster
 
 .. toctree::
    :maxdepth: 2
@@ -72,14 +64,14 @@ This documentation is under Creative Commons Attribution-NonCommercial-ShareAlik
    deployment/strategy
    deployment/provision_os
    deployment/apply_configuration
-   deployment/scalability
 
 .. toctree::
    :maxdepth: 1
-   :caption: Walkthrough:
+   :caption: Scalability and high availability:
    :numbered:
 
-   walkthrough/example_cluster
+   scalability/scalability
+   scalability/high_availability
 
 .. toctree::
    :maxdepth: 1

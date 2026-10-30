@@ -2,9 +2,8 @@
 - name: systemd <|> Reload systemd configuration
   ansible.builtin.systemd:
     daemon_reload: true
-
-- name: firewalld <|> Reload firewalld
-  ansible.builtin.command: firewall-cmd --reload
+  when:
+    - "'service' not in ansible_skip_tags"
 
 - name: service <|> Restart prometheus service
   ansible.builtin.service:

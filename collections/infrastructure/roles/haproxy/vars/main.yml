@@ -1,2 +1,7 @@
 ---
-haproxy_role_version: 1.0.1
+haproxy_role_version: 1.1.0
+
+haproxy_packages_to_install:
+  - haproxy
+haproxy_services_to_start:
+  - haproxy

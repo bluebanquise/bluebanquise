@@ -30,51 +30,67 @@
   tags:
     - package
 
-- name: "firewalld <|> Add services to firewall's zone"
-  ansible.posix.firewalld:
-    zone: "{{ sshd_server_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
-    service: "{{ item }}"
-    immediate: true
-    permanent: true
-    state: enabled
+- name: firewalld <|> Configure firewall
   when:
     - os_firewall | default(true) | bool
-  loop: "{{ sshd_server_firewall_services_to_add }}"
   tags:
     - firewall
+  block:
+    - name: "firewalld <|> Add services to firewall's zone"
+      ansible.posix.firewalld:
+        zone: "{{ sshd_server_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
+        service: "{{ item }}"
+        immediate: true
+        permanent: true
+        state: enabled
+      loop: "{{ sshd_server_firewall_services_to_add }}"
+  rescue:
+    - name: fail <|> Firewall configuration failed
+      ansible.builtin.fail:
+        msg: >-
+          Firewall configuration failed: {{ (ansible_failed_result.results | default([]) | selectattr('failed', 'defined') | selectattr('failed') | map(attribute='msg') | list + [ansible_failed_result.msg | default('unknown error')]) | first }}.
+          firewalld must be installed and running, with its Python bindings (python3-firewall package),
+          for example using the firewall role. Set os_firewall to false to disable firewall configuration.
 
-- name: lineinfile <|> Check if include is present in sshd_config
-  lineinfile:
-    state: absent
-    path: "/etc/ssh/sshd_config"
-    regexp: 'Include /etc/ssh/sshd_config\.d/\*\.conf'
-  check_mode: true
-  changed_when: false
-  register: sshd_check_include
+# On OpenSuse Leap 16, the distribution configuration is /usr/etc/ssh/sshd_config, which includes
+# /etc/ssh/sshd_config.d/*.conf: /etc/ssh/sshd_config must then not be created.
+- name: stat <|> Check for /etc/ssh/sshd_config
+  ansible.builtin.stat:
+    path: /etc/ssh/sshd_config
+  register: sshd_main_config
 
-- name: lineinfile <|> Set include for sshd
-  lineinfile:
-    state: present
-    path: "/etc/ssh/sshd_config"
+- name: lineinfile <|> Include /etc/ssh/sshd_config.d/*.conf in sshd_config
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^Include /etc/ssh/sshd_config\.d/\*\.conf'
     line: "Include /etc/ssh/sshd_config.d/*.conf"
     insertbefore: BOF
-  when: sshd_check_include.found == 0
+  notify: service <|> Restart sshd server
+  when: sshd_main_config.stat.exists
 
 - name: "file <|> Create needed directory /etc/ssh/sshd_config.d/"
   ansible.builtin.file:
-    path: "/etc/ssh/sshd_config.d/"
+    path: /etc/ssh/sshd_config.d/
     state: directory
     owner: root
     group: root
-    mode: 0755
+    mode: "0755"
 
-- name: "template <|> Generate sshd configuration"
+# Files are read in alphabetical order and the first value of a setting wins: 00- makes these settings
+# take precedence over distribution ones (for example 50-cloud-init.conf on Ubuntu).
+- name: "file <|> Remove sshd configuration of previous role versions"
+  ansible.builtin.file:
+    path: /etc/ssh/sshd_config.d/bluebanquise.conf
+    state: absent
+  notify: service <|> Restart sshd server
+
+- name: "template <|> Generate /etc/ssh/sshd_config.d/00-bluebanquise.conf"
   ansible.builtin.template:
     src: bluebanquise.conf.j2
-    dest: "/etc/ssh/sshd_config.d/bluebanquise.conf"
+    dest: /etc/ssh/sshd_config.d/00-bluebanquise.conf
     owner: root
     group: root
-    mode: 0640
+    mode: "0600"
   notify: service <|> Restart sshd server
   tags:
     - template

@@ -22,5 +22,3 @@ dns_server_configuration_local_file: /etc/bind/named.conf.local
 dns_server_configuration_default_zones_file: /etc/bind/named.conf.default-zones
 
 dns_server_rfc_zone_file: /etc/bind/zones.rfc1918
-dns_server_root_hint_file: /usr/share/dns/root.hints
-dns_server_root_key_file: /usr/share/dns/root.key

@@ -17,7 +17,6 @@
     - "{{ nfs_shares | default([]) }}"
     - clients_groups
   when:
-    - nfs_shares is defined
     - groups[item.1] is defined
     - inventory_hostname in groups[item.1]
 
@@ -28,14 +27,14 @@
     persistent: true
   loop: "{{ nfs_client_sebooleans }}"
   when:
-    - ansible_facts.selinux.status == "enabled"
+    - ansible_facts.selinux.status | default('disabled') == "enabled"
 
 - name: service <|> Manage rpcbind state
   ansible.builtin.service:
     name: rpcbind
-    enabled: "{{ nfs_enable_services | default(bb_enable_services) | default(true) | bool }}"
+    enabled: "{{ (nfs_enable_services | default(bb_enable_services) | default(true) | bool) | ternary(true, false) }}"
     state: "{{ (nfs_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
-  when: ansible_facts.distribution in ['CentOS', 'RedHat']
+  when: ansible_facts.os_family == 'RedHat'
   tags:
     - service
 

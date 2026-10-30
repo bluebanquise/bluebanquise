@@ -1,18 +1,11 @@
 ---
+# systemctl can't restart auditd, service can: https://access.redhat.com/solutions/2664811
 - name: service <|> Restart auditd service
   ansible.builtin.service:
     name: "{{ item }}"
-    state: "{{ (auditd_start_services | default(bb_start_services) | default(true) | bool) | ternary('restarted', omit) }}"
-    use: service  # systemctl can't restart auditd, service can: https://access.redhat.com/solutions/2664811
+    state: restarted
+    use: service
   loop: "{{ auditd_services_to_start }}"
   when:
     - "'service' not in ansible_skip_tags"
-    - auditd_start_services | default(bb_start_services) | default(true)
-
-- name: service <|> Restart rsyslog service
-  ansible.builtin.service:
-    name: rsyslog
-    state: restarted
-  when:
-    - "'service' not in ansible_skip_tags"
-    - rsyslog_start_services | default(bb_start_services) | default(true) | bool
+    - auditd_start_services | default(bb_start_services) | default(true) | bool

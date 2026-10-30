@@ -21,20 +21,29 @@
   tags:
     - always
 
-- name: "firewalld <|> Add services to firewall's zone"
-  ansible.posix.firewalld:
-    zone: "{{ time_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
-    service: "{{ item }}"
-    immediate: true
-    permanent: true
-    state: enabled
+- name: firewalld <|> Configure firewall
   when:
     - os_firewall | default(true) | bool
-  loop: "{{ time_firewall_services_to_add }}"
   tags:
     - firewall
+  block:
+    - name: "firewalld <|> Add services to firewall's zone"
+      ansible.posix.firewalld:
+        zone: "{{ time_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
+        service: "{{ item }}"
+        immediate: true
+        permanent: true
+        state: enabled
+      loop: "{{ time_firewall_services_to_add }}"
+  rescue:
+    - name: fail <|> Firewall configuration failed
+      ansible.builtin.fail:
+        msg: >-
+          Firewall configuration failed: {{ (ansible_failed_result.results | default([]) | selectattr('failed', 'defined') | selectattr('failed') | map(attribute='msg') | list + [ansible_failed_result.msg | default('unknown error')]) | first }}.
+          firewalld must be installed and running, with its Python bindings (python3-firewall package),
+          for example using the firewall role. Set os_firewall to false to disable firewall configuration.
 
-- name: "package <|> Install {{ time_packages_to_install | join(' ') }} packages"
+- name: "package <|> Install {{ time_packages_to_install | join(' ') }}"
   ansible.builtin.package:
     name: "{{ time_packages_to_install }}"
     state: present
@@ -47,16 +56,20 @@
     dest: "{{ time_chrony_custom_conf_path | default(time_chrony_conf_path) }}"
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   notify: service <|> Restart time services
   tags:
     - template
 
-- name: lineinfile <|> Set sysconfig OPTIONS for chronyd
+- name: "lineinfile <|> Set chronyd options in {{ time_chronyd_options_file }}"
   ansible.builtin.lineinfile:
-    path: /etc/sysconfig/chronyd
-    regexp: '^OPTIONS'
-    line: OPTIONS="{{ time_chronyd_options }}"
+    path: "{{ time_chronyd_options_file }}"
+    regexp: '^{{ time_chronyd_options_variable }}='
+    line: '{{ time_chronyd_options_variable }}="{{ time_chronyd_options }}"'
+    create: true
+    owner: root
+    group: root
+    mode: "0644"
   notify: service <|> Restart time services
   when: time_chronyd_options is defined
   tags:

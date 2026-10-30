@@ -22,7 +22,7 @@
     + [Adding raw prometheus.conf scraping jobs:](#adding-raw-prometheusconf-scraping-jobs)
     + [Adding raw prometheus.conf configuration](#adding-raw-prometheusconf-configuration)
     + [TLS and/or Basic Authentication](#tls-andor-basic-authentication)
-  * [Changelog](#changelog)
+  * [7. Variables](#7-variables)
 
 
 ## 1. Description
@@ -34,7 +34,6 @@ These settings deploy Prometheus (server/client) with related ecosystem:
 * Prometheus (scrap metrics, store them, evaluate alerts)
 * Alertmanager (manage alerts by grouping them, sending mails, etc)
 * Karma (a dashboard for AlertManager)
-* Am-executor
 * ipmi_exporter
 * snmp_exporter
 * modbus_exporter
@@ -42,7 +41,6 @@ These settings deploy Prometheus (server/client) with related ecosystem:
    * slurm_exporter
    * node_exporter
    * ...
-* Custom exporter python modules
 
 These settings provide a basic configuration that should match 80% of the cluster's
 needs. An advanced configuration for specific usages is available and described
@@ -50,21 +48,25 @@ after the basic part.
 
 ## 2. General instructions
 
+Supported distributions: RHEL 9/10, Ubuntu 24.04/26.04, Debian 13, OpenSuse Leap 16.
+
+Packages (`prometheus`, `prometheus-alertmanager`, `karma`, exporters...) are provided by BlueBanquise
+repositories. Package names can be changed using the `prometheus_server_*_packages_to_install` variables.
+
 You can refer to this diagram to help understanding of the following readme.
 
 ![File not found](resources/global_schema.svg "Main schema")
 
 ### Server or/and client
 
-**Server part** of these settings deploy Prometheus, Alertmanager, Karma, Am-executor,
+**Server part** of these settings deploy Prometheus, Alertmanager, Karma,
 ipmi_exporter, snmp_exporter, modbus_exporter and their respective configuration
 files and service files.
 
 To install server part, set `prometheus_server` to `true` at invocation
 vars. See server configuration bellow for more details.
 
-**Client part** of these settings deploy other exporters or custom exporter
-python modules on clients.
+**Client part** of these settings deploy other exporters on clients.
 
 To install client part, set `prometheus_client` to `true` at invocation
 vars. See client configuration bellow for more details.
@@ -88,7 +90,7 @@ Playbook example:
 - name: Deploy prometheus server
   hosts: mg_managements
   roles:
-    - role: prometheus
+    - role: bluebanquise.infrastructure.prometheus
       vars:
         prometheus_server: true
 ```
@@ -98,7 +100,6 @@ In the basic usage, the server part will install and setup the following tools:
 * Prometheus: scrap and store metrics, fire alerts.
 * Alertmanager: manage alerts fired by Prometheus.
 * Karma: dashboard to monitor alerts managed by Alertmanager.
-* Am-executor: trigger actions in case of alert fired. (**Am-executor is still not implemented**)
 * ipmi_exporter: translate ipmi data to http scrapable by Prometheus.
 * snmp_exporter: translate snmp data to http scrapable by Prometheus.
 * modbus_exporter: translate Modbus-TCP data to http scrapable by Prometheus.
@@ -114,7 +115,6 @@ here, are available:
 prometheus_server_manage_prometheus: true
 prometheus_server_manage_alertmanager: true
 prometheus_server_manage_karma: true
-prometheus_server_manage_am_executor: false
 prometheus_server_manage_ipmi_exporter: false
 prometheus_server_manage_snmp_exporter: false
 prometheus_server_manage_modbus_exporter: false
@@ -173,6 +173,8 @@ prometheus_server_additional_alerts:
   - ipmi_exporter
   - node_exporter
 ```
+
+Alerts files are checked with `promtool check rules` before being written.
 
 You will probably wish to add more alerts. You can add more files in the
 /etc/prometheus/alerts directory, and these will be loaded by Prometheus at
@@ -269,7 +271,7 @@ Playbook example:
 - name: Deploy prometheus server
   hosts: mg_managements
   roles:
-    - role: prometheus
+    - role: bluebanquise.infrastructure.prometheus
       vars:
         prometheus_client: true
 ```
@@ -438,10 +440,10 @@ prometheus_snmp_scrape_hardware_groups:
     snmp_module: wcd
 ```
 
-For Modbus it's `prometheus_modbus_tcp_scrape_hardware_group`, e.g.:
+For Modbus it's `prometheus_modbus_tcp_scrape_hardware_groups`, e.g.:
 
 ```yaml
-prometheus_modbus_scrape_hardware_groups:
+prometheus_modbus_tcp_scrape_hardware_groups:
   - name: wilo_pumps
     scrape_interval: 15s
     scrape_timeout: 15s
@@ -476,18 +478,16 @@ of devices.
 ### Set custom launch parameters
 
 Since Prometheus ecosystem has been originally designed to run into containers,
-some major parameters are passed to the binary at launch. This is why the current
-this generates the systemd service file to integrate custom launch parameters.
-
-The following variables, with their default values shown here, are available
-to tune launch parameters of each tool:
+some major parameters are passed to the binary at launch. This is why the role
+generates the systemd service file of each tool, with launch parameters taken from
+the following variables (default values shown here):
 
 ```yaml
 prometheus_server_prometheus_launch_parameters: |
   --config.file /etc/prometheus/prometheus.yml \
   --storage.tsdb.path /var/lib/prometheus/ \
   --web.console.templates=/etc/prometheus/consoles \
-  --web.console.libraries=/etc/prometheus/console_libraries $PROMETHEUS_OPTIONS
+  --web.console.libraries=/etc/prometheus/console_libraries
 
 prometheus_server_alertmanager_launch_parameters: |
   --config.file=/etc/alertmanager/alertmanager.yml
@@ -505,35 +505,19 @@ prometheus_server_modbus_exporter_launch_parameters: |
   --config.file=/etc/modbus_exporter/modbus.yml
 ```
 
-For example, to manipulate data retention (default 15 days) and ask for 60 days,
-set this variable:
+Each line but the last one must end with `\`.
+
+For example, to keep data 60 days (default 15 days), and store the database in `/prometheus`:
 
 ```yaml
 prometheus_server_prometheus_launch_parameters: |
   --storage.tsdb.retention.time 60d \
   --config.file /etc/prometheus/prometheus.yml \
-  --storage.tsdb.path /var/lib/prometheus/ \
-  --web.console.templates=/etc/prometheus/consoles \
-  --web.console.libraries=/etc/prometheus/console_libraries $PROMETHEUS_OPTIONS
+  --storage.tsdb.path /prometheus/
 ```
 
-Note that with recent version of Prometheus, you can also set the data base
-maximum size instead. See more at https://www.robustperception.io/configuring-prometheus-storage-retention .
-
-Another example, to manipulate database path, combine with a 60 days retention,
-set:
-
-```yaml
-prometheus_server_prometheus_launch_parameters: |
-  --storage.tsdb.path /prometheus \
-  --storage.tsdb.retention.time 60d \
-  --config.file /etc/prometheus/prometheus.yml \
-  --storage.tsdb.path /var/lib/prometheus/ \
-  --web.console.templates=/etc/prometheus/consoles \
-  --web.console.libraries=/etc/prometheus/console_libraries $PROMETHEUS_OPTIONS
-```
-
-Etc. See all available options at https://gist.github.com/0x0I/eec137d55a26a16d836b84cbc186ab52 .
+Note that you can also limit the database size instead (`--storage.tsdb.retention.size`).
+See all available options with `prometheus --help`.
 
 ### Manipulate firewall
 
@@ -541,7 +525,7 @@ On some system, you may wish that the whole server side ecosystem is reachable
 from the network or not (you may wish to reach it using an ssh port forwarding
 only for example).
 
-If variable `prometheus_firewall_open` is set to `true`, Prometheus and AlertManager will be reachable from the network on the `prometheus_server_firewall_zone` defined (default public). If not, firewall ports related to both will remain closed.
+If variable `prometheus_firewall_open` is set to `true`, Prometheus, AlertManager and Karma will be reachable from the network on the `prometheus_server_firewall_zone` defined (default public). If not, firewall ports related to both will remain closed.
 
 Example:
 
@@ -567,7 +551,6 @@ configuration as host1 dedicated hostvars :
 prometheus_server_manage_prometheus: true
 prometheus_server_manage_alertmanager: true
 prometheus_server_manage_karma: true
-prometheus_server_manage_am_executor: false
 prometheus_server_manage_ipmi_exporter: false
 prometheus_server_manage_snmp_exporter: false
 prometheus_server_manage_modbus_exporter: false
@@ -579,7 +562,6 @@ And activate them on the host you wish them to run (host2), using the opposite v
 prometheus_server_manage_prometheus: false
 prometheus_server_manage_alertmanager: false
 prometheus_server_manage_karma: false
-prometheus_server_manage_am_executor: false
 prometheus_server_manage_ipmi_exporter: true
 prometheus_server_manage_snmp_exporter: true
 prometheus_server_manage_modbus_exporter: true
@@ -592,7 +574,6 @@ group_vars/all (these variables are all set to localhost by default):
 prometheus_server_prometheus_host: host1
 prometheus_server_alertmanager_host: host1
 prometheus_server_karma_host: host1
-prometheus_server_am_executor_host:
 prometheus_server_ipmi_exporter_host: host2
 prometheus_server_snmp_exporter_host: host2
 prometheus_server_modbus_exporter_host: host2
@@ -600,7 +581,8 @@ prometheus_server_modbus_exporter_host: host2
 
 This can be used to spread all main services.
 
-Note: if any `prometheus_server_manage_X` variable is not defined, it is considered `false`.
+Note: `prometheus_server_manage_prometheus`, `prometheus_server_manage_alertmanager` and
+`prometheus_server_manage_karma` are `true` by default, other `prometheus_server_manage_X` are `false`.
 
 Warning: if your firewall is running, you may need to open ports for desired
 services.
@@ -647,13 +629,46 @@ prometheus_server_basic_auth_hash_password:
 
 Note: You can use python3-bcrypt to generate hashed password. See more at https://prometheus.io/docs/guides/basic-auth/#hashing-a-password .
 
-To load web configuration file, use the --web.config.file flag:
+The web configuration file (`/etc/prometheus/web.yml`) is then checked with `promtool check web-config`, and
+loaded by Prometheus (`--web.config.file` launch parameter added automatically).
 
-```yaml
-prometheus_server_prometheus_launch_parameters: |
-  --config.file /etc/prometheus/prometheus.yml \
-  --storage.tsdb.path /var/lib/prometheus/ \
-  --web.console.templates=/etc/prometheus/consoles \
-  --web.console.libraries=/etc/prometheus/console_libraries $PROMETHEUS_OPTIONS \
-  --web.config.file=/etc/prometheus/web.yml
-```
+## 7. Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `prometheus_server` / `prometheus_client` | `false` | Deploy server part / client part. |
+| `prometheus_server_manage_prometheus` | `true` | Deploy Prometheus. |
+| `prometheus_server_manage_alertmanager` | `true` | Deploy Alertmanager. |
+| `prometheus_server_manage_karma` | `true` | Deploy Karma. |
+| `prometheus_server_manage_ipmi_exporter` | `false` | Deploy ipmi_exporter. |
+| `prometheus_server_manage_snmp_exporter` | `false` | Deploy snmp_exporter. |
+| `prometheus_server_manage_modbus_exporter` | `false` | Deploy modbus_exporter. |
+| `prometheus_server_<tool>_host` | `localhost` | Host running each tool (`prometheus`, `alertmanager`, `karma`, `ipmi_exporter`, `snmp_exporter`, `modbus_exporter`). |
+| `prometheus_server_modbus_exporter_listen_address` / `_port` | `prometheus_server_modbus_exporter_host` / `9602` | modbus_exporter listening address and port. |
+| `prometheus_server_<tool>_user_uid` / `_user_gid` | `909` to `914` | uid and gid of each tool system user. |
+| `prometheus_server_<tool>_launch_parameters` | see above | Launch parameters of each tool. |
+| `prometheus_server_<tool>_packages_to_install` | see `defaults/main.yml` | Packages of each tool. |
+| `prometheus_server_configuration_global` | see above | Prometheus `global` configuration. |
+| `prometheus_server_prometheus_raw_jobs` | not set | Raw scrape jobs added to `prometheus.yml`. |
+| `prometheus_server_prometheus_raw_configuration` | not set | Raw configuration added to `prometheus.yml`. |
+| `prometheus_server_additional_alerts` | `[]` | Additional alerts files provided by the role (`ipmi_exporter`, `node_exporter`). |
+| `prometheus_server_custom_alerts` | not set | Custom alerts file content. |
+| `prometheus_server_alertmanager_raw_configuration` | see above | Alertmanager configuration. |
+| `prometheus_server_karma_username` / `_password` | `admin` / `admin` | Karma credentials. |
+| `prometheus_exporters_to_scrape` | `[]` | Exporters scraped by the server. |
+| `prometheus_exporters_groups_to_scrape` | `{}` | Exporters installed on groups of hosts, and scraped by the server. |
+| `prometheus_ipmi_scrape_hardware_groups` | `[]` | Hardware groups scraped through ipmi_exporter. |
+| `prometheus_snmp_scrape_hardware_groups` | `[]` | Hardware groups scraped through snmp_exporter. |
+| `prometheus_modbus_tcp_scrape_hardware_groups` | `[]` | Hardware groups scraped through modbus_exporter. |
+| `prometheus_server_snmp_exporter_raw_configuration` | not set | snmp_exporter configuration (`snmp.yml`). |
+| `prometheus_server_snmp_exporter_with_generator` | `false` | Install snmp_exporter generator build dependencies. |
+| `prometheus_server_modbus_exporter_raw_configuration` | not set | modbus_exporter configuration (`modbus.yml`). |
+| `prometheus_server_modbus_exporter_additional_modules` | `[]` | Additional modbus_exporter modules files. |
+| `prometheus_firewall_open` | `false` | Open Prometheus, Alertmanager and Karma ports. |
+| `prometheus_server_firewall_zone` / `prometheus_client_firewall_zone` | `bb_services_firewall_zone`, else `public` | Firewall zones of server and client ports. |
+| `prometheus_server_enable_tls` | `false` | Enable Prometheus TLS. |
+| `prometheus_server_tls_cert_file` / `_key_file` | `prometheus.crt` / `prometheus.key` | TLS certificate and key, relative to `/etc/prometheus`. |
+| `prometheus_server_enable_basic_auth` | `false` | Enable Prometheus basic authentication. |
+| `prometheus_server_basic_auth_user` / `_password` / `_hash_password` | `prometheus` / `prometheus` / bcrypt hash | Basic authentication credentials. |
+| `prometheus_enable_services` | `bb_enable_services`, else `true` | Enable services. |
+| `prometheus_start_services` | `bb_start_services`, else `true` | Start services, and restart them on configuration changes. |

@@ -75,7 +75,9 @@
   ansible.builtin.template:
     src: "tenants.yml.j2"
     dest: /etc/bluebanquise/bootset/tenants.yml
-    mode: 0644
+    owner: root
+    group: root
+    mode: "0644"
   tags:
     - template
 

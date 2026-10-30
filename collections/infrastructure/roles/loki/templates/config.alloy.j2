@@ -1,0 +1,40 @@
+{{ ansible_managed | comment('c', prefix='// ', decoration='// ') }}
+// Receive syslog messages forwarded by rsyslog, and push them to Loki
+// https://grafana.com/docs/alloy/latest/reference/components/loki/loki.source.syslog/
+
+logging {
+  level = "warn"
+}
+
+loki.source.syslog "syslog" {
+  listener {
+    address = "{{ loki_syslog_ip }}:{{ loki_syslog_port }}"
+    protocol = "tcp"
+    labels = { job = "syslog" }
+  }
+  relabel_rules = loki.relabel.syslog.rules
+  forward_to = [loki.write.local.receiver]
+}
+
+loki.relabel "syslog" {
+  forward_to = []
+
+  rule {
+    source_labels = ["__syslog_message_hostname"]
+    target_label = "host"
+  }
+  rule {
+    source_labels = ["__syslog_message_app_name"]
+    target_label = "app"
+  }
+  rule {
+    source_labels = ["__syslog_message_severity"]
+    target_label = "level"
+  }
+}
+
+loki.write "local" {
+  endpoint {
+    url = "http://{{ loki_ip }}:{{ loki_port }}/loki/api/v1/push"
+  }
+}

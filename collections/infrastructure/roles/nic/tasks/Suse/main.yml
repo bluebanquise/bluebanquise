@@ -1,4 +1,7 @@
 ---
+# wicked was replaced by NetworkManager in openSUSE Leap 16, and only exists on older versions
+- name: service_facts <|> Gather services
+  ansible.builtin.service_facts:
 
 - name: "service <|> Disable wicked"
   ansible.builtin.service:
@@ -6,3 +9,5 @@
     enabled: false
     state: stopped
   notify: reboot <|> Reboot system
+  when:
+    - (ansible_facts.services['wicked.service'] | default({})).status | default('not-found') != 'not-found'

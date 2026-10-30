@@ -1,18 +1,24 @@
 ---
-- name: apache2_module <|> Enable apache2 cgi module
-  community.general.apache2_module:
-    state: present
-    name: "{{ pxe_stack_apache_cgi_module }}"
-  notify: service <|> Restart pxe services
-  when: ansible_facts.os_family == 'RedHat' and ( ansible_facts.distribution_major_version | int ) < 9
-
-- name: sefcontext <|> Set SELinux context on /var/www/html/pxe/nodes
+# The http server only reads host iPXE files now (legacy bootswitch.cgi used to write them), so
+# drop the read-write SELinux context previous versions set, back to default httpd_sys_content_t.
+- name: sefcontext <|> Remove legacy read-write SELinux context on /var/www/html/pxe/nodes
   community.general.sefcontext:
     target: '/var/www/html/pxe/nodes(/.*)?'
     setype: httpd_sys_rw_content_t
-    state: present
+    state: absent
+  register: pxe_stack_nodes_sefcontext
   when:
     - ansible_facts.selinux.status == "enabled"
+
+- name: command <|> Restore SELinux context on /var/www/html/pxe/nodes
+  ansible.builtin.command:
+    argv:
+      - restorecon
+      - -R
+      - /var/www/html/pxe/nodes
+  when:
+    - ansible_facts.selinux.status == "enabled"
+    - pxe_stack_nodes_sefcontext is changed
 
 # tftp-server (tftp.service/tftp.socket) is socket-activated and has no env file:
 # options and directory are applied via a systemd drop-in overriding ExecStart.

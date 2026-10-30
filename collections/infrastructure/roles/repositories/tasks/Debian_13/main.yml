@@ -19,13 +19,17 @@
     install_python_debian: "{{ item.install_python_debian | default(true) }}"
     enabled: "{{ item.enabled | default(omit) }}"
     mode: "{{ item.mode | default(omit) }}"
-    trusted: "{{ item.trusted | default(omit) }}"
+    # Simple repositories are flat repositories built by BlueBanquise, without signature
+    trusted: "{{ item.trusted | default(true if item.uris is not defined else omit) }}"
     signed_by: "{{ item.signed_by | default(omit) }}"
     state: "{{ item.state | default(omit) }}"
     types: "{{ item.types | default(omit) }}"
-    uris: "{{ item.uris | default( (repositories_j2_simple_url | default('', true)) + ( item.name | default(item, true) | string), true) | default(omit) }}"
-    suites: "{{ item.suites | default(omit) }}"
-    components: "{{ item.components | default(item.distribution, true) | default(['./'], true) }}"
+    uris: "{{ item.uris | default((repositories_simple_url | default('', true)) + (item.name | default(item, true) | string), true) }}"
+    suites: "{{ repositories_suites }}"
+    # A flat repository (suite ending with /) has no components
+    components: "{{ omit if (repositories_suites is string and repositories_suites is match('.*/$')) else item.components | default(omit) }}"
+  vars:
+    repositories_suites: "{{ item.suites | default(item.distribution, true) | default('./', true) }}"
   loop: "{{ bb_repositories | default([], true) | flatten(levels=1) }}"
   notify: command <|> apt update cache
   when:

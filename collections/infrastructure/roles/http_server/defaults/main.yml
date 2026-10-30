@@ -1,4 +1,12 @@
 ---
-
 http_server_firewall_services_to_add:
   - http
+
+# Restrict listening addresses and ports: "auto", or a list of "ip:port", "ip" (port 80) or port
+http_server_listen:
+
+# Apache modules to enable (Debian, Ubuntu and Suse only)
+http_server_modules: []
+
+# Raw Apache configuration files: list of {name, configuration}
+http_server_configurations_files: []

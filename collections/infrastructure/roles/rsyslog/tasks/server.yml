@@ -1,29 +1,34 @@
 ---
-
-- name: "firewalld <|> Add services to firewall's zone"
-  ansible.posix.firewalld:
-    zone: "{{ rsyslog_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
-    service: "{{ item }}"
-    immediate: true
-    permanent: true
-    state: enabled
-  when:
-    - os_firewall | default(true) | bool
-  loop: "{{ rsyslog_firewall_services_to_add }}"
-  tags:
-    - firewall
-
-- name: "firewalld <|> Add custom port to firewall's zone"
-  ansible.posix.firewalld:
-    zone: "{{ rsyslog_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
-    port: "{{ rsyslog_port }}/tcp"
-    immediate: true
-    permanent: true
-    state: enabled
+- name: firewalld <|> Configure firewall
   when:
     - os_firewall | default(true) | bool
   tags:
     - firewall
+  block:
+
+    - name: "firewalld <|> Add services to firewall's zone"
+      ansible.posix.firewalld:
+        zone: "{{ rsyslog_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
+        service: "{{ item }}"
+        immediate: true
+        permanent: true
+        state: enabled
+      loop: "{{ rsyslog_firewall_services_to_add }}"
+
+    - name: "firewalld <|> Add custom port to firewall's zone"
+      ansible.posix.firewalld:
+        zone: "{{ rsyslog_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
+        port: "{{ rsyslog_port }}/tcp"
+        immediate: true
+        permanent: true
+        state: enabled
+  rescue:
+    - name: fail <|> Firewall configuration failed
+      ansible.builtin.fail:
+        msg: >-
+          Firewall configuration failed: {{ (ansible_failed_result.results | default([]) | selectattr('failed', 'defined') | selectattr('failed') | map(attribute='msg') | list + [ansible_failed_result.msg | default('unknown error')]) | first }}.
+          firewalld must be installed and running, with its Python bindings (python3-firewall package),
+          for example using the firewall role. Set os_firewall to false to disable firewall configuration.
 
 - name: "template <|> Generate server.conf.j2"
   ansible.builtin.template:
@@ -31,7 +36,7 @@
     dest: "{{ rsyslog_server_rsyslog_custom_conf_path | default(rsyslog_server_rsyslog_conf_path) }}"
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   notify: service <|> Restart rsyslog service
   when: "'server.conf' not in (rsyslog_configuration_files | default([]) | selectattr('name','defined') | map(attribute='name') | list)"
   tags:
@@ -47,14 +52,35 @@
     - ansible_facts.os_family == "RedHat"
     - ansible_facts.selinux.status == "enabled"
 
-- name: "template <|> Generate /etc/logrotate.d/rsyslog"
+# Role versions < 1.7.0 replaced the distribution /etc/logrotate.d/rsyslog, so that local logs were not rotated anymore
+- name: command <|> Check if /etc/logrotate.d/rsyslog was replaced by a previous role version
+  ansible.builtin.command:
+    argv: [grep, -q, "/var/log/rsyslog/", /etc/logrotate.d/rsyslog]
+  register: rsyslog_legacy_logrotate
+  changed_when: false
+  failed_when: rsyslog_legacy_logrotate.rc > 2
+
+- name: file <|> Remove /etc/logrotate.d/rsyslog of previous role versions
+  ansible.builtin.file:
+    path: /etc/logrotate.d/rsyslog
+    state: absent
+  when: rsyslog_legacy_logrotate.rc == 0
+
+- name: command <|> Restore distribution /etc/logrotate.d/rsyslog
+  ansible.builtin.command:
+    argv: "{{ rsyslog_restore_logrotate_command }}"
+  changed_when: true
+  when:
+    - rsyslog_legacy_logrotate.rc == 0
+    - rsyslog_restore_logrotate_command | length > 0
+
+- name: "template <|> Generate /etc/logrotate.d/rsyslog-remote"
   ansible.builtin.template:
     src: rsyslog_logrotate.j2
-    dest: /etc/logrotate.d/rsyslog
+    dest: /etc/logrotate.d/rsyslog-remote
     owner: root
     group: root
-    mode: 0644
-  notify: service <|> Restart rsyslog service
+    mode: "0644"
   when: rsyslog_server_logrotate | bool
   tags:
     - template

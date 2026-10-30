@@ -39,42 +39,33 @@
     owner: 'root'
     group: 'root'
     mode: '0644'
-  when: nic_enforce_configuration
+  when: nic_enforce_configuration | bool
 
-- name: "service <|> Start services"
+- name: "service <|> Manage {{ nic_services_to_start | join(' ') }} state"
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: true
-    state: "{{ (nic_start_services | bool) | ternary('started', omit) }}"
+    enabled: "{{ (nic_enable_services | default(bb_enable_services) | default(true) | bool) | ternary(true, false) }}"
+    state: "{{ (nic_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   loop: "{{ nic_services_to_start }}"
   tags:
     - service
 
-- name: meta <|> Run handler tasks to apply OS dedicated events
+- name: meta <|> Run handler tasks
   ansible.builtin.meta: flush_handlers
 
-- name: "include_tasks <|> Configure network interfaces via nmcli"
-  ansible.builtin.include_tasks: "nmcli.yml"
+- name: include_tasks <|> Configure network interfaces via nmcli
+  ansible.builtin.include_tasks: nmcli.yml
   tags:
-    - internal
+    - always
 
 - name: include_tasks <|> Use OS dedicated task
   ansible.builtin.include_tasks: "{{ item }}"
   with_first_found:
     - files:
-        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
-        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
-        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
-        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
-        - "{{ ansible_facts.distribution | replace(' ','_') }}/main.yml"
         - "{{ ansible_facts.os_family | replace(' ','_') }}/main.yml"
       skip: true
   tags:
-    - internal
-    - nic_os_dedicated_tasks
+    - always
 
 - name: meta <|> Run handler tasks to apply OS dedicated events
-  ansible.builtin.meta: flush_handlers
-
-- name: meta <|> Run handler tasks
   ansible.builtin.meta: flush_handlers

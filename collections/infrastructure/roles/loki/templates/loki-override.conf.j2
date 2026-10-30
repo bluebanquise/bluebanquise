@@ -1,0 +1,5 @@
+{{ ansible_managed | comment }}
+# Previous role versions replaced the packaged unit: make sure the role configuration is used
+[Service]
+ExecStart=
+ExecStart=/usr/bin/loki -config.file /etc/loki/config.yml

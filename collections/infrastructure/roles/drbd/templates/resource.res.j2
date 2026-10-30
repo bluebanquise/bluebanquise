@@ -1,11 +1,14 @@
 #jinja2: lstrip_blocks: True
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+
 resource {{ item.name }} {
 {% for node, node_ip in item.nodes.items() %}
   on {{ node }} {
-    address   {{ node_ip }}:{{ item.port }};
+    address   {{ node_ip }}:{{ item.port | default(7789) }};
     device    {{ item.device }};
     disk      {{ item.disk }};
-    meta-disk {{ item.metadisk }};
+    meta-disk {{ item.metadisk | default('internal') }};
   }
 {% endfor %}
 }
