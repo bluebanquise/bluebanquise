@@ -1,2 +1,5 @@
 ---
+powerman_packages_to_install:
+  - freeipmi
+  - powerman
 powerman_enable_ipmi_lan_2_0: false

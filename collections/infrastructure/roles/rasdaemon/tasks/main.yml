@@ -6,10 +6,10 @@
   tags:
     - package
 
-- name: "service <|> Start rasdaemon service"
+- name: "service <|> Manage rasdaemon state"
   ansible.builtin.service:
     name: rasdaemon
-    enabled: true
-    state: started
+    enabled: "{{ (rasdaemon_enable_services | default(bb_enable_services) | default(true) | bool) | ternary(true, false) }}"
+    state: "{{ (rasdaemon_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   tags:
     - service

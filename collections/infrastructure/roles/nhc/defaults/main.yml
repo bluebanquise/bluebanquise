@@ -1,4 +1,7 @@
 ---
+# NHC package name: lbnl-nhc (NHC project releases), nhc-ohpc (OpenHPC)...
+nhc_packages_to_install:
+  - lbnl-nhc
 nhc_custom_packages_to_install: []
 nhc_checks: {}
 nhc_resources_manager:

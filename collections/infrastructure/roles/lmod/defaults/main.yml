@@ -1,0 +1,3 @@
+---
+# Extra module search paths, added to MODULEPATH of all users
+lmod_path: []

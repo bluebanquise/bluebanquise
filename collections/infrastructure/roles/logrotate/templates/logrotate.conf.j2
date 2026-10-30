@@ -1,22 +1,55 @@
+#jinja2: lstrip_blocks: True, trim_blocks: True
+{{ ansible_managed | comment }}
 # Global logrotate configuration
-{% if logrotate_global_daily %}daily{% endif %}
-{% if logrotate_global_weekly %}weekly{% endif %}
-{% if logrotate_global_monthly %}monthly{% endif %}
+{% if logrotate_global_daily | bool %}
+daily
+{% endif %}
+{% if logrotate_global_weekly | bool %}
+weekly
+{% endif %}
+{% if logrotate_global_monthly | bool %}
+monthly
+{% endif %}
+{% if logrotate_global_su | default(logrotate_os_su, true) | length > 0 %}
+su {{ logrotate_global_su | default(logrotate_os_su, true) }}
+{% endif %}
 rotate {{ logrotate_global_rotate }}
-{% if logrotate_global_compress %}compress{% endif %}
-{% if logrotate_global_delaycompress %}delaycompress{% endif %}
-{% if logrotate_global_missingok %}missingok{% endif %}
-{% if logrotate_global_notifempty %}notifempty{% endif %}
-{% if logrotate_global_create %}create {{ logrotate_global_create }}{% endif %}
-{% if logrotate_global_dateext %}dateext{% endif %}
-{% if logrotate_global_dateformat %}dateformat {{ logrotate_global_dateformat }}{% endif %}
+{% if logrotate_global_compress | bool %}
+compress
+{% endif %}
+{% if logrotate_global_delaycompress | bool %}
+delaycompress
+{% endif %}
+{% if logrotate_global_missingok | bool %}
+missingok
+{% endif %}
+{% if logrotate_global_notifempty | bool %}
+notifempty
+{% endif %}
+{% if logrotate_global_create | default('', true) | length > 0 %}
+create {{ logrotate_global_create }}
+{% else %}
+create
+{% endif %}
+{% if logrotate_global_dateext | bool %}
+dateext
+{% endif %}
+{% if logrotate_global_dateformat | length > 0 %}
+dateformat {{ logrotate_global_dateformat }}
+{% endif %}
+{% if logrotate_global_extension | default('', true) | length > 0 %}
 extension {{ logrotate_global_extension }}
+{% endif %}
+{% if logrotate_enable_xz | bool %}
 
-{% if logrotate_enable_xz %}
 compresscmd /usr/bin/xz
 uncompresscmd /usr/bin/unxz
 compressext .xz
 {% endif %}
 
-# Include custom rules
+# Custom rules
 include /etc/logrotate.d
+{% if ansible_facts.os_family == 'Suse' and (ansible_facts.distribution_major_version | int) >= 16 %}
+# OpenSuse 16 packages install their logrotate files in /usr/etc/logrotate.d
+include /usr/etc/logrotate.d
+{% endif %}

@@ -1,7 +1,8 @@
-if [ -z "$MODULEPATH" ]; then
-export MODULEPATH={% for path in lmod_path %}{% if loop.first %}{{ path }}{% else %}:{{ path }}{% endif %}{% endfor %}
-
-else
-export MODULEPATH=$MODULEPATH{% for path in lmod_path %}:{{ path }}{% endfor %}
-
-fi
+{{ ansible_managed | comment }}
+# Extra module search paths, appended to MODULEPATH once (also in nested shells)
+{% for path in lmod_path %}
+case ":${MODULEPATH}:" in
+  *:{{ path }}:*) ;;
+  *) export MODULEPATH="${MODULEPATH:+${MODULEPATH}:}{{ path }}" ;;
+esac
+{% endfor %}

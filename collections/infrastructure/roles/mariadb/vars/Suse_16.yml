@@ -1,0 +1,7 @@
+---
+# openSUSE Leap 16: Python modules are named after the Python version
+mariadb_packages:
+  - mariadb
+  - python313-PyMySQL
+
+mariadb_unix_socket: /var/run/mysql/mysql.sock

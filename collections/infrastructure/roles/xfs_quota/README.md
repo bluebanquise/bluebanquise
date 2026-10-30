@@ -18,8 +18,8 @@ Example:
 
 ## Instructions
 
-Set mountpoint for user and group default values in quota_filesystem.
-Set specific values for user and groups outside the default scope in quota_spec.
+Define quotas in the `xfs_quota` list, one entry per user, group or project quota, with the parameters of the
+`xfs_quota` module:
 
 ```yaml
 xfs_quota:
@@ -36,3 +36,9 @@ xfs_quota:
 ```
 
 See the [xfs_quota module](https://docs.ansible.com/ansible/latest/collections/community/general/xfs_quota_module.html) for the full list of available parameters.
+
+## Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `xfs_quota` | not set | Quotas to set (`type`, `mountpoint`, `name`, `bsoft`, `bhard`, `isoft`, `ihard`, `rtbsoft`, `rtbhard`, `state`). |
