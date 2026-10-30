@@ -16,8 +16,6 @@
       tags: slurm_submitter
       vars:
         slurm_profile: submitter
-    - role: bluebanquise.infrastructure.flexlm
-      tags: flexlm
     - role: bluebanquise.infrastructure.nhc
       tags: nhc
     - role: bluebanquise.infrastructure.lmod
