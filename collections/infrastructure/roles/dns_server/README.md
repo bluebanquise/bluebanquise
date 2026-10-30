@@ -2,9 +2,9 @@
 
 ## Description
 
-These settings provide a DNS server based on BIND (`bind` on RedHat/Suse, `bind9` on Debian/Ubuntu).
+This role provides a DNS server based on BIND (`bind` on RedHat/Suse, `bind9` on Debian/Ubuntu).
 
-These settings generate the following files (paths vary by distribution):
+The role generates the following files (paths vary by distribution):
 
 * Main configuration file (`named.conf`) - includes listen addresses and options
 * Options file (`named.conf.options`) - listens on all DNS service IPs of the cluster's networks
@@ -30,7 +30,7 @@ dns_server_domain_name: foobar.local
 
 ### Networks
 
-These settings automatically includes all `net-*` networks from the Ansible inventory whose `dns_server` key is set to `true` (or not set, since `true` is the default):
+The role serves all `net-*` networks of the inventory whose `dns_server` key is set to `true` (or not set, since `true` is the default):
 
 ```yaml
 networks:
@@ -44,7 +44,7 @@ networks:
           hostname: mgt1
 ```
 
-These settings listen on all IPs defined under `dns4` in services, and allows queries from the whole subnet/prefix.
+The DNS server listens on all IPs defined under `dns4` in services (or `services_ip` if no `dns4` is defined), and allows queries from the whole subnet/prefix of these networks. The deprecated `dns` key is also accepted.
 
 > **Note:** Unlike other services, the DNS service ignores the `hostname` field under `dns4` and always uses `ip4` directly.
 
@@ -61,7 +61,7 @@ This is useful for interfaces that are manually managed and not in the Ansible i
 
 ### Hosts
 
-These settings scan all hosts in the Ansible inventory and generates DNS records based on their `network_interfaces` list.
+The role scans all hosts of the inventory and generates DNS records based on their `network_interfaces` list, their `bmc`, and the `hostname` of services entries of all networks.
 
 For example:
 
@@ -86,7 +86,7 @@ Generates the following forward records:
 * `node001-net-admin` → 10.10.3.1  (extended name)
 * `node001-interconnect` → 10.20.3.1  (extended name)
 
-These settings also supports aliases. Multiple aliases can be defined as a list:
+The role also supports aliases. Multiple aliases can be defined as a list:
 
 ```yaml
 all:
@@ -118,10 +118,10 @@ dns_server_forwarders:
   - 8.8.4.4
 ```
 
-Enable recursion:
+Forwarders are only used when recursion is enabled:
 
 ```yaml
-dns_server_recursion: yes
+dns_server_recursion: true
 ```
 
 Enable `forward only` (queries not answered locally are forwarded and never resolved recursively):
@@ -159,6 +159,10 @@ dns_server_overrides:
 
 DNS lookups for `0.uk.pool.ntp.org` will return `10.11.0.1`.
 
+Overrides rely on a BIND response policy zone, which only applies to recursive queries:
+`dns_server_recursion` must be set to `true`, or the role fails. Overridden names are
+answered without waiting for upstream resolution, so overrides also work without internet access.
+
 ### Wildcard records
 
 Add wildcard DNS records at the end of the forward zone:
@@ -182,9 +186,38 @@ dns_server_raw_content: |
   };
 ```
 
-Append raw content to the options block:
+Append raw content to the `options` block:
 
 ```yaml
 dns_server_raw_options_content: |
   also-notify port 5353;
 ```
+
+## Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `dns_server_domain_name` | `bb_domain_name`, else `cluster.local` | Domain name of the forward zone. |
+| `dns_server_recursion` | `false` | Enable recursion. Required by forwarders and overrides. |
+| `dns_server_forwarders` | `[]` | Upstream DNS servers to forward queries to. |
+| `dns_server_forward_only` | `false` | Never resolve recursively, only forward. |
+| `dns_server_forward_only_domains` | not set | List of `{domain, forwarder_ip}`: domains forwarded to a dedicated server. |
+| `dns_server_dnssec_validation` | `auto` | BIND `dnssec-validation` value: `auto`, `yes` or `no`. |
+| `dns_server_listen_on_ip4` | `[]` | Additional IPs to listen on. |
+| `dns_server_allow_query` | `[]` | Additional subnets (`subnet/prefix`) allowed to query. |
+| `dns_server_enable_extended_names` | `true` | Write `<host>-<network>` records for each interface. |
+| `dns_server_wildcard_records` | `[]` | List of `{hostname, ip4}` records added to the forward zone. |
+| `dns_server_overrides` | not set | Dictionary of `name: ip` responses to override. Requires recursion. |
+| `dns_server_raw_content` | not set | Raw content appended to `named.conf`. |
+| `dns_server_raw_options_content` | not set | Raw content appended to the `options` block. |
+| `dns_server_restrict_to_group` | `bb_restrict_to_group`, else `all` | Only register hosts of this Ansible group. |
+| `dns_server_firewall_zone` | `bb_services_firewall_zone`, else `public` | Firewalld zone to open the DNS service in. |
+| `dns_server_firewall_services_to_add` | `["dns"]` | Firewalld services to open. |
+| `dns_server_enable_services` | `bb_enable_services`, else `true` | Enable the DNS server at boot. |
+| `dns_server_start_services` | `bb_start_services`, else `true` | Start the DNS server, and restart it on configuration change. |
+
+Networks keys used by the role, in addition to the core ones of `resources/data_model.md`:
+
+| Key | Description |
+|-----|-------------|
+| `dns_server` | Set to `false` to neither listen on nor allow queries from this network. Hosts records are still written. |

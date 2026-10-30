@@ -1,16 +1,140 @@
 ---
-- name: include_tasks <|> Use OS dedicated task
-  ansible.builtin.include_tasks: "{{ item }}"
-  with_first_found:
-    - files:
-        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
-        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
-        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
-        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
-        - "{{ ansible_facts.distribution | replace(' ','_') }}/main.yml"
-        - "{{ ansible_facts.os_family | replace(' ','_') }}/main.yml"
-        - "default/main.yml"
-      skip: true
+# DNS servers list, in order:
+#  1. dns_client_servers if set, else DNS services of the host main network (first interface
+#     connected to a management network): dns4 (or dns) services, else services_ip
+#  2. then dns_client_external_servers
+
+- name: set_fact <|> Find host main network
+  ansible.builtin.set_fact:
+    dns_client_main_network: "{{ network_interfaces | default([], true) | selectattr('network', 'defined') | selectattr('network', 'match', '^net-') | selectattr('ip4', 'defined') | map(attribute='network') | first | default('') }}"
   tags:
-    - internal
-    - dns_client_os_dedicated_tasks
+    - always
+
+- name: set_fact <|> Initialize DNS servers list
+  ansible.builtin.set_fact:
+    dns_client_nameservers: []
+  tags:
+    - always
+
+- name: set_fact <|> Use DNS servers forced in inventory
+  ansible.builtin.set_fact:
+    dns_client_nameservers: "{{ [dns_client_servers] if dns_client_servers is string else dns_client_servers }}"
+  when:
+    - dns_client_servers | default([], true) | length > 0
+  tags:
+    - always
+
+- name: set_fact <|> Use DNS services of host main network
+  ansible.builtin.set_fact:
+    dns_client_nameservers: "{{ dns_client_nameservers + [item['ip4'] | ansible.utils.ipaddr('address')] }}"
+  loop: "{{ (networks[dns_client_main_network]['services'] | default({}, true))['dns4'] | default((networks[dns_client_main_network]['services'] | default({}, true))['dns'], true) | default([], true) }}"
+  when:
+    - dns_client_servers | default([], true) | length == 0
+    - dns_client_main_network in (networks | default({}))
+    - item['ip4'] is defined and item['ip4'] | length > 0
+  tags:
+    - always
+
+- name: set_fact <|> Use services_ip of host main network
+  ansible.builtin.set_fact:
+    dns_client_nameservers: ["{{ networks[dns_client_main_network]['services_ip'] }}"]
+  when:
+    - dns_client_nameservers | length == 0
+    - dns_client_main_network in (networks | default({}))
+    - networks[dns_client_main_network]['services_ip'] is defined
+    - networks[dns_client_main_network]['services_ip'] | length > 0
+  tags:
+    - always
+
+- name: set_fact <|> Add external DNS servers
+  ansible.builtin.set_fact:
+    dns_client_nameservers: "{{ dns_client_nameservers + ([dns_client_external_servers] if dns_client_external_servers is string else dns_client_external_servers) }}"
+  when:
+    - dns_client_external_servers | default([], true) | length > 0
+  tags:
+    - always
+
+- name: debug <|> Display DNS servers
+  ansible.builtin.debug:
+    msg: "DNS servers: {{ dns_client_nameservers | join(', ') }}"
+
+# The role does not edit /etc/resolv.conf: it configures the tools managing it,
+# systemd-resolved and/or NetworkManager, depending on which are installed.
+- name: service_facts <|> Gather installed services
+  ansible.builtin.service_facts:
+  tags:
+    - always
+
+- name: set_fact <|> Detect systemd-resolved and NetworkManager
+  ansible.builtin.set_fact:
+    dns_client_has_resolved: "{{ 'systemd-resolved.service' in ansible_facts.services }}"
+    dns_client_has_networkmanager: "{{ 'NetworkManager.service' in ansible_facts.services }}"
+  tags:
+    - always
+
+- name: debug <|> Warn if no DNS manager was found
+  ansible.builtin.debug:
+    msg: >-
+      WARNING: neither systemd-resolved nor NetworkManager is installed on this host,
+      DNS settings were not configured.
+  when:
+    - not (dns_client_has_resolved | bool)
+    - not (dns_client_has_networkmanager | bool)
+
+# systemd-resolved
+
+- name: file <|> Create /etc/systemd/resolved.conf.d directory
+  ansible.builtin.file:
+    path: /etc/systemd/resolved.conf.d
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  when: dns_client_has_resolved | bool
+
+- name: template <|> Generate {{ dns_client_resolved_configuration_file }}
+  ansible.builtin.template:
+    src: resolved.conf.j2
+    dest: "{{ dns_client_resolved_configuration_file }}"
+    owner: root
+    group: root
+    mode: 0644
+  notify: service <|> Restart systemd-resolved
+  when:
+    - dns_client_has_resolved | bool
+    - dns_client_nameservers | length > 0
+  tags:
+    - template
+
+# Previous versions of this role set DNS servers directly in /etc/systemd/resolved.conf
+- name: stat <|> Check if /etc/systemd/resolved.conf exists
+  ansible.builtin.stat:
+    path: /etc/systemd/resolved.conf
+  register: dns_client_resolved_main_configuration
+  when: dns_client_has_resolved | bool
+
+- name: lineinfile <|> Remove DNS servers set by previous role versions in /etc/systemd/resolved.conf
+  ansible.builtin.lineinfile:
+    path: /etc/systemd/resolved.conf
+    regexp: '^DNS='
+    state: absent
+  notify: service <|> Restart systemd-resolved
+  when:
+    - dns_client_has_resolved | bool
+    - dns_client_resolved_main_configuration.stat.exists
+
+# NetworkManager
+
+- name: template <|> Generate {{ dns_client_networkmanager_configuration_file }}
+  ansible.builtin.template:
+    src: networkmanager.conf.j2
+    dest: "{{ dns_client_networkmanager_configuration_file }}"
+    owner: root
+    group: root
+    mode: 0644
+  notify: service <|> Reload NetworkManager
+  when:
+    - dns_client_has_networkmanager | bool
+    - dns_client_nameservers | length > 0
+  tags:
+    - template

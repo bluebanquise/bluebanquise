@@ -23,18 +23,27 @@
   tags:
     - always
 
-- name: "firewalld <|> Add services to firewall's zone"
-  ansible.posix.firewalld:
-    zone: "{{ dhcp_server_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
-    service: "{{ item }}"
-    immediate: true
-    permanent: true
-    state: enabled
+- name: firewalld <|> Configure firewall
   when:
     - os_firewall | default(true) | bool
-  loop: "{{ dhcp_server_firewall_services_to_add }}"
   tags:
     - firewall
+  block:
+    - name: "firewalld <|> Add services to firewall's zone"
+      ansible.posix.firewalld:
+        zone: "{{ dhcp_server_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
+        service: "{{ item }}"
+        immediate: true
+        permanent: true
+        state: enabled
+      loop: "{{ dhcp_server_firewall_services_to_add }}"
+  rescue:
+    - name: fail <|> Firewall configuration failed
+      ansible.builtin.fail:
+        msg: >-
+          Firewall configuration failed: {{ (ansible_failed_result.results | default([]) | selectattr('failed', 'defined') | selectattr('failed') | map(attribute='msg') | list + [ansible_failed_result.msg | default('unknown error')]) | first }}.
+          firewalld must be installed and running, with its Python bindings (python3-firewall package),
+          for example using the firewall role. Set os_firewall to false to disable firewall configuration.
 
 - name: "package <|> Install {{ dhcp_server_packages_to_install | join(' ') }}"
   ansible.builtin.package:
@@ -47,16 +56,37 @@
   ansible.builtin.file:
     path: "{{ dhcp_server_conf_dir }}"
     owner: root
+    group: root
     mode: "0755"
     state: directory
 
 # This calculation takes time, so we store it in memory for later usage
-- name: fact <|> Calculate first_octets
+- name: set_fact <|> Calculate hosts interfaces by network
   ansible.builtin.set_fact:
-    dhcp_server_hosts_by_network: "{{ hostvars | bluebanquise.infrastructure.hosts_by_network(groups[(dhcp_server_retrict_to_group | default(bb_retrict_to_group, true) | default('all', true))]) }}"
+    dhcp_server_hosts_by_network: "{{ hostvars | bluebanquise.infrastructure.hosts_by_network(groups[(dhcp_server_restrict_to_group | default(bb_restrict_to_group, true) | default('all', true))]) }}"
   run_once: true
   tags:
-    - templates
+    - template
+
+# Networks served are management networks (net- prefix), with a subnet and a prefix,
+# and without dhcp_server set to false.
+- name: set_fact <|> Initialize list of networks served by the DHCP server
+  ansible.builtin.set_fact:
+    dhcp_server_networks: []
+  tags:
+    - template
+
+- name: set_fact <|> List networks served by the DHCP server
+  ansible.builtin.set_fact:
+    dhcp_server_networks: "{{ dhcp_server_networks + [item] }}"
+  loop: "{{ (networks | default({})).keys() | list }}"
+  when:
+    - item.startswith('net-')
+    - networks[item]['dhcp_server'] | default(true) | bool
+    - networks[item]['subnet'] is defined
+    - networks[item]['prefix'] is defined
+  tags:
+    - template
 
 - name: "template <|> Render kea-dhcp4.networks.conf"
   ansible.builtin.template:
@@ -66,8 +96,6 @@
     group: root
     mode: 0644
   notify: service <|> Restart dhcp server
-  when:
-    - networks is defined and networks is iterable and networks is not string and networks is mapping
   tags:
     - template
 
@@ -78,16 +106,12 @@
     owner: root
     group: root
     mode: 0644
-  loop: "{{ networks.keys() | list }}"
-  when:
-    - networks is defined and networks is iterable and networks is not string and networks is mapping
-    - item.startswith("net-")
-    - networks[item].dhcp_server | default(true)
-    - networks[item].subnet is defined and networks[item].prefix is defined
+  loop: "{{ dhcp_server_networks }}"
   notify: service <|> Restart dhcp server
   tags:
     - template
 
+# Main file is rendered last and includes all other files: its validation checks the whole configuration.
 - name: "template <|> Render kea-dhcp4.conf"
   ansible.builtin.template:
     src: "kea-dhcp4.conf.j2"
@@ -95,7 +119,7 @@
     owner: root
     group: root
     mode: 0644
-    # validate: "/usr/sbin/kea-dhcp4 -t -c %s"
+    validate: "/usr/sbin/kea-dhcp4 -t %s"
   notify: service <|> Restart dhcp server
   tags:
     - template

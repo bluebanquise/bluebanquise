@@ -2,127 +2,120 @@
 
 ## Description
 
-These settings provide a standard and simple dhcp server combined with the iPXE roms of BlueBanquise.
+This role provides a DHCP server, based on ISC Kea, combined with the iPXE roms of BlueBanquise.
 It should be enough for most networks.
+
 ## Instructions
 
 ### Basic usage
 
-These settings provide basic features for network relying on MAC, opt61, opt82, match (advanced options combination), or range of unknown hosts.
+The role serves all management networks (`net-*`) having a `subnet` and a `prefix`. To exclude a network from the DHCP server, set `dhcp_server: false` in the network configuration.
 
-All `net-*` networks are included in the DHCP configuration by default. To exclude a network from the DHCP server, set `dhcp_server: false` in the network configuration.
+Each host interface (and BMC) connected to a served network gets a reservation of its `ip4`, using its `mac` address (see below for other identifiers). Interfaces without `ip4` are ignored.
 
-These settings will use `dhcp_unknown_range` if defined in the network configuration. It defines the range of IP addresses dynamically allocated to unregistered hosts, which is useful for temporary connections (laptops, etc.) or to detect hardware missing from the inventory.
+The role uses `dhcp_unknown_range` if defined in the network configuration. It defines the range of IP addresses dynamically allocated to unregistered hosts, which is useful for temporary connections (laptops, etc.) or to detect hardware missing from the inventory.
 
-By default, these settings will use as much of the defined network settings as available.
+By default, the role uses as much of the defined network settings as available.
 
 Example of network configuration, minimal DHCP server with a range of dynamically allocated IPs:
 
 ```yaml
-  networks:
-    net-1:
-      subnet: 10.11.0.0
-      prefix: 16
-      dhcp_unknown_range: 10.11.254.1 - 10.11.254.254    # Optional
+networks:
+  net-1:
+    subnet: 10.11.0.0
+    prefix: 16
+    dhcp_unknown_range: 10.11.254.1 - 10.11.254.254    # Optional
 ```
 
 Example of network configuration, basic DHCP server with all services bound to a single management host:
 
 ```yaml
-  networks:
-    net-1:
-      subnet: 10.11.0.0
-      prefix: 16
-      dhcp_unknown_range: 10.11.254.1 - 10.11.254.254    # Optional
-      services_ip: 10.10.0.1                           # All services running on 10.10.0.1
+networks:
+  net-1:
+    subnet: 10.11.0.0
+    prefix: 16
+    dhcp_unknown_range: 10.11.254.1 - 10.11.254.254    # Optional
+    services_ip: 10.11.0.1                           # All services running on 10.11.0.1
 ```
 
 Example of network configuration, full DHCP server with explicit per-service addresses:
 
 ```yaml
-  networks:
-    net-1:
-      subnet: 10.11.0.0
-      prefix: 16
-      dhcp_unknown_range: 10.11.254.1 - 10.11.254.254    # Optional
-      gateway4:                                        # Optional
-        - hostname: gw1
-          ip4: 10.11.2.1
-      services:
-        dns4:                                          # Optional
-          - ip4: 8.8.8.8
-          - ip4: 8.8.4.4
-        ntp4:                                          # Optional
-          - hostname: time-a-g.nist.gov
-            ip4: 129.6.15.28
-        pxe4:                                          # Optional, required for PXE and HTTP boot
-          - hostname: mg1
-            ip4: 10.11.0.1
+networks:
+  net-1:
+    subnet: 10.11.0.0
+    prefix: 16
+    dhcp_unknown_range: 10.11.254.1 - 10.11.254.254    # Optional
+    gateway4: 10.11.2.1                              # Optional
+    services:
+      dns4:                                          # Optional
+        - ip4: 10.11.0.1
+        - ip4: 10.11.0.2
+      ntp4:                                          # Optional
+        - ip4: 10.11.0.1
+      pxe4:                                          # Optional, required for PXE and HTTP boot
+        - ip4: 10.11.0.1
+          hostname: mg1
 ```
 
-Note that if both `services` and `services_ip` are set, `services` takes precedence over `services_ip`.
+Notes:
 
-Finally, note that the following parameters can be set in the inventory, to
-override default ones:
+* If both `services` and `services_ip` are set, `services` takes precedence over `services_ip`, service per service.
+* Service keys without the `4` suffix (`dns`, `ntp`, `pxe`) are also accepted, but `dns4`, `ntp4` and `pxe4` are preferred.
+* DHCP options only accept IP addresses: the `ip4` of each service entry is used, entries with only a `hostname` are ignored.
+* `gateway4` can be a single IP address, or a list of entries with an `ip4` key. The deprecated `gateway` key is also accepted.
 
-* `dhcp_server_default_lease_time` (default to 600) to set default lease time
-* `dhcp_server_max_lease_time` (default to 7200) to set max lease time
-* `dhcp_server_ipxe_driver` to set ipxe default EFI driver (see main BlueBanquise documentation, equipment profiles variables)
-* `dhcp_server_ipxe_embed` to set ipxe default embed script (see main BlueBanquise documentation, equipment profiles variables)
+Clients receive as domain search list `dhcp_server_domain_name`, else the global `bb_domain_name`, else `cluster.local`.
 
-Consider increasing the default leases values once your network is production ready.
+Consider increasing the default lease times once your network is production ready.
 
-### Advanced usage
+The generated configuration is checked with `kea-dhcp4 -t` before being installed: an invalid configuration makes the role fail, and the DHCP server keeps running with its previous configuration.
 
-#### HTTP boot (UEFI HTTP)
+### PXE and HTTP boot
 
-When `pxe4` (or `services_ip`) is defined for a network, these settings automatically generates HTTP boot support for that subnet. Clients that send `HTTPClient` in option 60 receive an HTTP URL using the subnet's PXE server address instead of a TFTP filename.
+When `pxe4` (or `services_ip`) is defined for a network, the role sends to booting hosts of this network the iPXE rom to load, depending on their architecture:
 
-The boot URLs follow the pattern:
-- x86_64: `http://<next-server>/pxe/x86_64/<embed>_<driver>ipxe.efi`
-- arm64: `http://<next-server>/pxe/arm64/<embed>_<driver>ipxe.efi`
+* Legacy BIOS PXE: `x86_64/dhcpretry_undionly.kpxe` (TFTP)
+* x86_64 UEFI PXE: `x86_64/dhcpretry_snponly_ipxe.efi` (TFTP)
+* arm64 UEFI PXE: `arm64/dhcpretry_snponly_ipxe.efi` (TFTP)
+* x86_64 UEFI HTTP boot: `http://<pxe4 ip>/pxe/x86_64/dhcpretry_snponly_ipxe.efi`
+* arm64 UEFI HTTP boot: `http://<pxe4 ip>/pxe/arm64/dhcpretry_snponly_ipxe.efi`
 
-No additional configuration is required beyond defining `pxe4` in the network's `services` block. EFI and HTTP boot clients on the same subnet are handled correctly - these settings exclude HTTP boot clients from the EFI class so each client type receives the appropriate file.
+UEFI HTTP boot clients are identified by `HTTPClient` in their vendor class (option 60) and their architecture (option 93, `0x0010` for x86_64 and `0x0013` for arm64). Their URL uses the PXE server of their own network.
 
-For hosts that need a fully custom boot filename (e.g. a specific HTTP URL or an alternate ROM), use `hw_pxe_filename` in the host's hardware group variables. This takes precedence over all class-level and subnet-level settings.
+File names above use default settings. They are set for all hosts using:
 
-#### Add global options
+* `dhcp_server_ipxe_driver`: `snponly` (default), `snp`, or any other value for the iPXE default drivers (no driver part in the file name, like `dhcpretry_ipxe.efi`).
+* `dhcp_server_ipxe_embed`: `dhcpretry` (default), `noshell`, `allretry`, or any other value for the standard embedded script (`standard_snponly_ipxe.efi`).
 
-It is possible to include as many global settings as desired using the `dhcp_server_global_settings` list.
+### Client identifier matching
 
-For example:
+By default, the role makes Kea identify clients leases by their MAC address only, ignoring their DHCP client identifier (option 61).
+
+This is needed for PXE deployments, as firmware/iPXE and the operating system send different client identifiers for the same network interface. For example iPXE sends a `01:<mac>` client identifier, while dracut/NetworkManager on recent distributions (RHEL 10, Ubuntu 26.04, etc.) send an RFC 4361 identifier (IAID and DUID).
+If Kea tracks leases by client identifier, it considers them as two different clients: the lease obtained by iPXE conflicts with the reservation requested by the installer, and the installer fails to get an IP address (`ALLOC_ENGINE_V4_DISCOVER_ADDRESS_CONFLICT` in Kea logs).
+
+To make Kea track leases using client identifiers (Kea default behavior), set `dhcp_server_match_client_id` to `true`. It can also be set per network, using the `dhcp_match_client_id` network key, which takes precedence over the global setting. For example, DHCP over InfiniBand (IPoIB) requires client identifiers:
 
 ```yaml
-dhcp_server_global_settings:
-  - ping-check false
+networks:
+  net-ib:
+    subnet: 10.20.0.0
+    prefix: 16
+    dhcp_match_client_id: true
 ```
 
-Note: do not include the `;` at the end, it is automatically added by these settings.
+Note: this setting only changes how leases are tracked. Host reservations are always looked up using the identifier defined in the inventory (see below).
 
-#### Add options per subnet
+### Hosts identifiers
 
-It is possible to include as many per subnet settings as desired using the `dhcp_server_subnet_settings` defined under the logical network in `networks` dict.
+A reservation uses a single identifier, the first one defined on the host interface (or BMC):
+
+* `mac`: MAC address (recommended).
+* `dhcp_client_identifier`: DHCP client identifier (option 61).
+* `host_identifier`: relay agent circuit id (option 82).
 
 For example:
-
-```yaml
-  networks:
-    net-1:
-      subnet: 10.11.0.0
-      prefix: 16
-      dhcp_server: true
-      dhcp_server_subnet_settings:
-        - deny unknown-clients
-```
-
-Note: do not include the `;` at the end, it is automatically added by these settings.
-
-#### Multiple entries
-
-It is possible to have multiple entries for an host interface in the
-configuration.
-
-For example, set a mac address and a dhcp_client_identifier this way:
 
 ```yaml
 hosts:
@@ -130,120 +123,62 @@ hosts:
     network_interfaces:
       - interface: eth0
         ip4: 10.10.3.1
-        mac: 08:00:27:36:c0:ac
-        dhcp_client_identifier: 00:40:1c
+        dhcp_client_identifier: 01:08:00:27:36:c0:ac
         network: net-1
 ```
 
-This will create one entry related to mac address and one to dhcp client
-identifier.
+### Shared networks
 
-#### Client identifier matching
-
-By default, Kea identifies a client lease by its DHCP client identifier (option 61)
-when the client sends one, and only falls back to the MAC address otherwise.
-This can be an issue during PXE deployments when firmware/iPXE and the OS installer
-send different client identifiers for the same NIC (for example iPXE sends the
-`01:<mac>` form, while some installers send an RFC 4361 DUID based identifier).
-Kea then sees two different clients: the lease obtained by iPXE conflicts with the
-host reservation requested by the installer, and the installer fails to get an IP
-address (`ALLOC_ENGINE_V4_DISCOVER_ADDRESS_CONFLICT` in Kea logs).
-
-To make Kea ignore client identifiers and track leases by MAC address only on a
-given network, set the optional `dhcp_match_client_id` key to `false`:
-
-```yaml
-  networks:
-    net-1:
-      subnet: 10.10.0.0
-      prefix: 16
-      dhcp_match_client_id: false
-```
-
-This is rendered as `"match-client-id": false` for this subnet only. If the key is not
-set, nothing is rendered and Kea keeps its default behavior (`true`).
-
-Note: this setting only changes how leases are tracked. Host reservations are still
-looked up as usual, but it is recommended to define a `mac` on interfaces of networks
-using `dhcp_match_client_id: false`.
-
-#### Shared networks
-
-It is possible to combine networks into shared-networks when multiple subnets
-are on the same NIC, or when using opt82/option_match parameter.
-To do so, add a dedicated optional `shared_network` key in the network definition.
+It is possible to combine networks into shared networks, when multiple subnets
+are on the same physical network.
+To do so, add the optional `shared_network` key in the network definition.
 
 Networks of the same shared network must have the same `shared_network` value,
-which is the name of this share.
+which is the name of this shared network.
 
-For example to add net-1 and net-2 into the same shared network, define them
+For example, to add net-1 and net-2 into the same shared network, define them
 this way:
 
 ```yaml
-  networks:
-    net-1:
-      subnet: 10.10.0.0
-      prefix: 16
-      shared_network: wolf
-    net-2:
-      subnet: 10.30.0.0
-      prefix: 16
-      shared_network: wolf
+networks:
+  net-1:
+    subnet: 10.10.0.0
+    prefix: 16
+    shared_network: wolf
+  net-2:
+    subnet: 10.30.0.0
+    prefix: 16
+    shared_network: wolf
 ```
 
-`shared_network` variable is optional and is simply ignored if not set.
+### Logs
 
-#### opt 61 and opt 82
+Kea logs go to the service output (journal). Set `dhcp_server_log_severity` to `DEBUG` to get detailed logs, for example to understand why a host does not get an address. Note that `DEBUG` is very verbose, and should not be kept in production.
 
-It is possible to use advanced dhcp features to identify an host. The following
-parameters are available, for the host and its BMC:
+## Variables
 
-- `mac`: identify based on MAC address. Same than standard dhcp server.
-- `dhcp_client_identifier`: identify based on a pattern (string, etc) to recognize an host. Also known as option 61.
-- `host_identifier`: identify based on an option (agent.circuit-id, agent.remote-id, etc) to recognize an host. Also known as option 82.
-- `match`: identify based on multiple options in combination to recognize an host. Also known as option 82 with hack.
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `dhcp_server_lease_file` | `kea-leases4.csv` | Lease database file name, in `/var/lib/kea/`. |
+| `dhcp_server_default_lease_time` | `600` | Default lease time, in seconds. |
+| `dhcp_server_max_lease_time` | `7200` | Maximum lease time, in seconds. |
+| `dhcp_server_ipxe_driver` | `snponly` | iPXE rom driver: `snponly`, `snp`, or default drivers. |
+| `dhcp_server_ipxe_embed` | `dhcpretry` | iPXE rom embedded script: `dhcpretry`, `noshell`, `allretry`, or standard. |
+| `dhcp_server_domain_name` | `bb_domain_name`, else `cluster.local` | Domain search list sent to clients. |
+| `dhcp_server_listen_interfaces` | `["*"]` | Interfaces the DHCP server listens on. |
+| `dhcp_server_match_client_id` | `false` | Track leases using client identifiers (option 61) instead of MAC addresses only. |
+| `dhcp_server_log_severity` | `INFO` | Kea log severity: `FATAL`, `ERROR`, `WARN`, `INFO` or `DEBUG`. |
+| `dhcp_server_restrict_to_group` | `bb_restrict_to_group`, else `all` | Only register hosts of this Ansible group. |
+| `dhcp_server_firewall_zone` | `bb_services_firewall_zone`, else `public` | Firewalld zone to open the DHCP service in. |
+| `dhcp_server_firewall_services_to_add` | `["dhcp"]` | Firewalld services to open. |
+| `dhcp_server_enable_services` | `bb_enable_services`, else `true` | Enable the DHCP server at boot. |
+| `dhcp_server_start_services` | `bb_start_services`, else `true` | Start the DHCP server, and restart it on configuration change. |
 
-If using `match`, because this features is using a specific 'hack' in the dhcp
-server, you **must** define this host in a shared network, even if this shared
-network contains a single network (see this very well made page for more
-information: http://www.miquels.cistron.nl/isc-dhcpd/).
+Networks keys used by the role, in addition to the core ones of `resources/data_model.md`:
 
-
-#### Specific settings
-
-During PXE and realy boot, the client UIDs can differ. For this case the folloing parameter
-can be set to true to ignore the client UIDs match.
-
-- `dhcp_server_ignore_client_uids`: boolen, set to true to disable the client uid match. (default: false)
-
-#### Add dhcp host specific parameters and options
-
-It is possible to add specific dhcp settings to an host interface, which can be
-useful in some specific cases.
-This is achieved adding a list named `dhcp_server_settings` inside the host's NIC definition.
-
-For example:
-
-```yaml
-hosts:
-  c001:
-    network_interfaces:
-      - interface: eth0
-        ip4: 10.10.3.1
-        dhcp_client_identifier: 00:40:1c
-        dhcp_server_settings:
-          - option pxelinux.magic code 208 = string
-          - option pxelinux.configfile code 209 = text
-        network: net-1
-```
-
-#### Hosts equipment profile level iPXE rom
-
-By default, all hosts will use global `dhcp_server_ipxe_driver` and `dhcp_server_ipxe_embed`
-settings.
-
-However, note that these settings will read `hw_ipxe_driver` and `hw_ipxe_embed` equipment profile variables, and precedence global settings for hosts that have these values set.
-
-Also, if user whish to use a custom rom, it is possible to define `hw_pxe_filename` which precedence everything for the target hosts. This can be a relative path for tftp protocol (ex: `x86_64/myrom.efi`) or an http path for HTTP protocol (ex: `http://10.10.0.1/x86_64/myrom.efi`).
-
-This allows for example to have an heterogenous cluster, with a group of hosts booting on *snponly* driver, while others boot on *default* one.
+| Key | Description |
+|-----|-------------|
+| `dhcp_server` | Set to `false` to exclude the network from the DHCP server. |
+| `dhcp_unknown_range` | Range of IP addresses dynamically allocated to unknown hosts (`first - last`). |
+| `dhcp_match_client_id` | Override `dhcp_server_match_client_id` for this network. |
+| `shared_network` | Name of the shared network this network belongs to. |

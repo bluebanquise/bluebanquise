@@ -1,4 +1,9 @@
 ---
+# Search domain. Precedence: dns_client_domain_name > bb_domain_name > cluster.local
 dns_client_domain_name:
-dns_client_servers:
-dns_client_external_servers:
+
+# DNS servers to use, instead of the DNS services of the host network (list of ip addresses)
+dns_client_servers: []
+
+# DNS servers added after the cluster ones (list of ip addresses)
+dns_client_external_servers: []

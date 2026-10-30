@@ -2,133 +2,102 @@
 #### Blue Banquise file ####
 ## {{ ansible_managed }}
 
-{###############################################################################
-  Generic service item write
-################################################################################
-ip_or_host allows to define priorities between ip or host
+{#
+  Services of the network. IPv4 keys (pxe4, dns4, ntp4) are preferred, keys without suffix
+  (pxe, dns, ntp) are also accepted. DHCP options require IP addresses, so only the ip4 value of
+  each entry is used. If no entry is defined for a service, services_ip is used.
 #}
-{% macro item_add(item_name, items_list, ip_or_host, key_or_dict) %}
-  {% if items_list is defined and items_list is iterable and items_list is not string and items_list is not mapping %}
-    {% set elements = [] %}
-    {% for elem in items_list %}
-      {% if ip_or_host == "ip" %}
-        {% if elem.ip4 is defined and (elem.ip4 | ansible.utils.ipaddr) %}
-          {{ elements.append(elem.ip4) }}
-        {% elif elem.hostname is defined and elem.hostname is not none and elem.hostname is string %}
-          {{ elements.append(elem.hostname) }}
-        {% endif %}
-      {% else %}
-        {% if elem.hostname is defined and elem.hostname is not none and elem.hostname is string %}
-          {{ elements.append(elem.hostname) }}
-        {% elif elem.ip4 is defined and (elem.ip4 | ansible.utils.ipaddr) %}
-          {{ elements.append(elem.ip4) }}
-        {% endif %}
-      {% endif %}
-    {% endfor %}
-    {% if (elements | length) > 0 %}
-      {% if key_or_dict == "dict" %}
-        {
-            "name": "{{ item_name }}",
-            "data": "{{ elements | join(', ') }}"
-        },
-      {% else %}
-        "{{ item_name }}": "{{ elements | first }}",
-      {% endif %}
+{% set network = networks[item] %}
+{% set services = network['services'] | default({}, true) %}
+{% set pxe_entries = services['pxe4'] | default(services['pxe'], true) | default([], true) %}
+{% set dns_entries = services['dns4'] | default(services['dns'], true) | default([], true) %}
+{% set ntp_entries = services['ntp4'] | default(services['ntp'], true) | default([], true) %}
+{% set gateway_entries = network['gateway4'] | default(network['gateway'], true) | default([], true) %}
+{% if gateway_entries is string %}
+  {% set gateway_entries = [{'ip4': gateway_entries}] %}
+{% endif %}
+{% set services_ip = network['services_ip'] | default('', true) %}
+
+{% set ns = namespace(pxe=[], dns=[], ntp=[], routers=[], reservations=[]) %}
+{% for entry in pxe_entries %}
+  {% if entry['ip4'] is defined and entry['ip4'] %}
+    {% set ns.pxe = ns.pxe + [entry['ip4'] | split('/') | first] %}
+  {% endif %}
+{% endfor %}
+{% for entry in dns_entries %}
+  {% if entry['ip4'] is defined and entry['ip4'] %}
+    {% set ns.dns = ns.dns + [entry['ip4'] | split('/') | first] %}
+  {% endif %}
+{% endfor %}
+{% for entry in ntp_entries %}
+  {% if entry['ip4'] is defined and entry['ip4'] %}
+    {% set ns.ntp = ns.ntp + [entry['ip4'] | split('/') | first] %}
+  {% endif %}
+{% endfor %}
+{% for entry in gateway_entries %}
+  {% if entry['ip4'] is defined and entry['ip4'] %}
+    {% set ns.routers = ns.routers + [entry['ip4'] | split('/') | first] %}
+  {% endif %}
+{% endfor %}
+{% if ns.pxe | length == 0 and services_ip %}
+  {% set ns.pxe = [services_ip] %}
+{% endif %}
+{% if ns.dns | length == 0 and services_ip %}
+  {% set ns.dns = [services_ip] %}
+{% endif %}
+{% if ns.ntp | length == 0 and services_ip %}
+  {% set ns.ntp = [services_ip] %}
+{% endif %}
+
+{# DHCP options sent to clients #}
+{% set options = [{'name': 'domain-search', 'data': dhcp_server_domain_name | default(bb_domain_name, true) | default('cluster.local', true)}] %}
+{% if ns.dns | length > 0 %}
+  {% set options = options + [{'name': 'domain-name-servers', 'data': ns.dns | join(', ')}] %}
+{% endif %}
+{% if ns.routers | length > 0 %}
+  {% set options = options + [{'name': 'routers', 'data': ns.routers | join(', ')}] %}
+{% endif %}
+{% if ns.ntp | length > 0 %}
+  {% set options = options + [{'name': 'ntp-servers', 'data': ns.ntp | join(', ')}] %}
+{% endif %}
+
+{#
+  Hosts reservations, one per interface (and BMC) of this network having an ip4.
+  A reservation can use a single identifier: mac (hw-address), else dhcp_client_identifier
+  (client-id, option 61), else host_identifier (circuit-id, option 82).
+#}
+{% for entry in dhcp_server_hosts_by_network.get(item, []) %}
+  {% set nic = entry['nic'] %}
+  {% if nic['ip4'] is defined and nic['ip4'] %}
+    {% set reservation = {'ip-address': nic['ip4'] | split('/') | first} %}
+    {% if entry['host'] %}
+      {% set reservation = reservation | combine({'hostname': entry['host']}) %}
+    {% endif %}
+    {% if nic['mac'] is defined and nic['mac'] %}
+      {% set ns.reservations = ns.reservations + [reservation | combine({'hw-address': nic['mac']})] %}
+    {% elif nic['dhcp_client_identifier'] is defined and nic['dhcp_client_identifier'] %}
+      {% set ns.reservations = ns.reservations + [reservation | combine({'client-id': nic['dhcp_client_identifier']})] %}
+    {% elif nic['host_identifier'] is defined and nic['host_identifier'] %}
+      {% set ns.reservations = ns.reservations + [reservation | combine({'circuit-id': nic['host_identifier']})] %}
     {% endif %}
   {% endif %}
-{% endmacro %}
+{% endfor %}
 
 # Network {{ item | upper }}
-
 {
- 
-  "id": {{ (item | hash('md5'))[0:7] | int(base=16) }}, {# We calculate a unique id based on the network name #}
-
-  "subnet": "{{ networks[item]['subnet'] }}/{{ networks[item]['prefix'] | string }}",
-
-  {# Optional: key leases on hw-address only, ignoring option 61 (see README, "Client identifier matching") #}
-  {% if networks[item]['dhcp_match_client_id'] is defined and networks[item]['dhcp_match_client_id'] is not none %}
-  "match-client-id": {{ networks[item]['dhcp_match_client_id'] | bool | lower }},
-  {% endif %}
-
-  {# We need to pre-compute next-server as it is used in multiple places #}
-  {% if networks[item]['services'] is defined and networks[item]['services'] is iterable and networks[item]['services'] is not string and networks[item]['services'] is mapping and networks[item]['services']['pxe4'] is defined%}
-    {% set nextserver = networks[item]['services']['pxe4'][0]['hostname'] | default(networks[item]['services']['pxe4'][0]['ip4'], true) %}
-  {% elif networks[item]['services_ip'] is defined and (networks[item]['services_ip'] | ansible.utils.ipaddr) %}
-    {% set nextserver = networks[item]['services_ip'] %}
-  {% endif %}
-  {% if nextserver is defined and nextserver is not none %}
-    "next-server": "{{ nextserver }}",
-    "require-client-classes": ["arch_x86_64_http_boot_{{ item }}", "arch_arm64_http_boot_{{ item }}"],
-  {% endif %}
-
-  {% if networks[item]['dhcp_unknown_range'] is defined and networks[item]['dhcp_unknown_range'] is not none %}
-  "pools": [
-    {
-      "pool": "{{ networks[item]['dhcp_unknown_range'] }}"
-    }
-  ],
-  {% endif %}
-
-  "option-data": [
-
-    {
-        "name": "domain-search",
-        "data": "{{ dhcp_server_domain_name | default(bb_domain_name, true) | default('cluster.local', true) }}"
-    },
-
-    {# DNS #}
-    {% if networks[item]['services'] is defined and networks[item]['services'] is iterable and networks[item]['services'] is not string and networks[item]['services'] is mapping and networks[item]['services']['dns4'] is defined%}
-    {{ item_add("domain-name-servers", networks[item]['services']['dns4'], "ip", "dict") }}
-    {% elif networks[item]['services_ip'] is defined and (networks[item]['services_ip'] | ansible.utils.ipaddr) %}
-    {
-        "name": "domain-name-servers",
-        "data": "{{ networks[item]['services_ip'] }}"
-    },
-    {% endif %}
-
-    {# ROUTER #}
-    {% if networks[item]['gateway4'] is defined %}
-        {% if networks[item]['gateway4'] is string %}
-    {
-        "name": "routers",
-        "data": "{{ networks[item]['gateway4'] }}"
-    },
-        {% elif networks[item]['gateway4'] is iterable and networks[item]['gateway4'] is not mapping %}
-    {{ item_add("routers", networks[item]['gateway4'], "ip", "dict") }}
-        {% endif %}
-    {% endif %}
-
-    {# NTP #}
-    {% if networks[item]['services'] is defined and networks[item]['services'] is iterable and networks[item]['services'] is not string and networks[item]['services'] is mapping and networks[item]['services']['ntp4'] is defined%}
-    {{ item_add("ntp-servers", networks[item]['services']['ntp4'], "ip", "dict") }}
-    {% elif networks[item]['services_ip'] is defined and (networks[item]['services_ip'] | ansible.utils.ipaddr) %}
-    {
-        "name": "ntp-servers",
-        "data": "{{ networks[item]['services_ip'] }}"
-    },
-    {% endif %}
-
-  ],
-
-  "reservations": [
-    {% set entries = dhcp_server_hosts_by_network.get(item, []) %}
-    {% for entry in entries %}
-      {% if (entry.nic.mac is defined and entry.nic.mac is not none) or (entry.nic.dhcp_client_identifier is defined and entry.nic.dhcp_client_identifier is not none) or (entry.nic.host_identifier is defined and entry.nic.host_identifier is not none) %}
-    {
-      "hostname": "{{ entry.host }}",
-      "ip-address": "{{ entry.nic.ip4 | split('/') | first }}",
-        {% if entry.nic.mac is defined %}
-      "hw-address": "{{ entry.nic.mac }}"
-        {% elif entry.nic.dhcp_client_identifier is defined %}
-      "client-id": "{{ entry.nic.dhcp_client_identifier }}"
-        {% elif entry.nic.host_identifier is defined %}
-      "flex-id": "{{ entry.nic.host_identifier }}"
-        {% endif %}
-    }{% if not loop.last %},{% endif %}
-      {% endif %}
-
-    {% endfor %}
-
-  ]
+  {# Unique subnet id, calculated from the network name #}
+  "id": {{ (item | hash('md5'))[0:7] | int(base=16) }},
+  "subnet": "{{ network['subnet'] }}/{{ network['prefix'] }}",
+{% if network['dhcp_match_client_id'] is defined and network['dhcp_match_client_id'] is not none %}
+  "match-client-id": {{ network['dhcp_match_client_id'] | bool | lower }},
+{% endif %}
+{% if ns.pxe | length > 0 %}
+  "next-server": "{{ ns.pxe | first }}",
+  "require-client-classes": ["arch_x86_64_http_boot_{{ item }}", "arch_arm64_http_boot_{{ item }}"],
+{% endif %}
+{% if network['dhcp_unknown_range'] is defined and network['dhcp_unknown_range'] %}
+  "pools": [ { "pool": "{{ network['dhcp_unknown_range'] }}" } ],
+{% endif %}
+  "option-data": {{ options | to_nice_json(indent=2) | indent(2) }},
+  "reservations": {{ ns.reservations | to_nice_json(indent=2) | indent(2) }}
 }

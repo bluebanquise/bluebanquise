@@ -23,3 +23,6 @@ dns_server_configuration_local_file: /etc/named/named.conf.local
 dns_server_rfc_zone_file: /etc/named.rfc1912.zones
 dns_server_root_hint_file: /var/named/named.ca
 dns_server_root_key_file: /etc/named.root.key
+
+# System wide cryptographic policy, included in options block
+dns_server_crypto_policy_file: /etc/crypto-policies/back-ends/bind.config
