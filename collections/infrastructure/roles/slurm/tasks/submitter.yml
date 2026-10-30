@@ -1,17 +1,26 @@
 ---
-- name: "firewalld <|> Add ports to firewall's zone"
-  ansible.posix.firewalld:
-    zone: "{{ slurm_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
-    port: "{{ item }}/tcp"
-    immediate: true
-    permanent: true
-    state: enabled
+- name: firewalld <|> Configure firewall
   when:
     - os_firewall | default(true) | bool
-  loop:
-    - "{{ slurm_srunportrange }}"
   tags:
     - firewall
+  block:
+    - name: "firewalld <|> Add ports to firewall's zone"
+      ansible.posix.firewalld:
+        zone: "{{ slurm_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
+        port: "{{ item }}/tcp"
+        immediate: true
+        permanent: true
+        state: enabled
+      loop:
+        - "{{ slurm_srunportrange }}"
+  rescue:
+    - name: fail <|> Firewall configuration failed
+      ansible.builtin.fail:
+        msg: >-
+          Firewall configuration failed: {{ (ansible_failed_result.results | default([]) | selectattr('failed', 'defined') | selectattr('failed') | map(attribute='msg') | list + [ansible_failed_result.msg | default('unknown error')]) | first }}.
+          firewalld must be installed and running, with its Python bindings (python3-firewall package),
+          for example using the firewall role. Set os_firewall to false to disable firewall configuration.
 
 # Now that file is rendered, lets push it to targets
 - name: copy <|> Push slurm.conf
@@ -20,6 +29,6 @@
     dest: "{{ slurm_home_path }}/slurm.conf"
     owner: slurm
     group: slurm
-    mode: 0644
+    mode: "0644"
   tags:
     - template
