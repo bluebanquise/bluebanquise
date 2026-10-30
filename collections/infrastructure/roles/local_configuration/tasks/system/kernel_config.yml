@@ -17,16 +17,12 @@
   when:
     - ansible_facts.os_family == 'RedHat'
     - local_configuration_kernel_parameters_list | length > 0
-  tags:
-    - always
 
 - name: include_tasks <|> Apply kernel parameters in /etc/default/grub
   ansible.builtin.include_tasks: system/kernel_parameters_grub.yml
   when:
     - ansible_facts.os_family != 'RedHat'
     - local_configuration_kernel_parameters_list | length > 0
-  tags:
-    - always
 
 - name: sysctl <|> Update sysctl parameters
   ansible.posix.sysctl:
