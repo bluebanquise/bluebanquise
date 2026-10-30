@@ -106,8 +106,6 @@ time_additional_networks_allowed:
 time_chronyd_options: "-F 2"
 ```
 
-The generated configuration is checked with `chronyd -p` before being written.
-
 ## Variables
 
 | Variable | Default | Description |

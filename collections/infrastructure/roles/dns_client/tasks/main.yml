@@ -67,8 +67,9 @@
 
 - name: set_fact <|> Detect systemd-resolved and NetworkManager
   ansible.builtin.set_fact:
-    dns_client_has_resolved: "{{ 'systemd-resolved.service' in ansible_facts.services }}"
-    dns_client_has_networkmanager: "{{ 'NetworkManager.service' in ansible_facts.services }}"
+    # Units only referenced by other units are listed with status not-found
+    dns_client_has_resolved: "{{ (ansible_facts.services['systemd-resolved.service'] | default({})).status | default('not-found') != 'not-found' }}"
+    dns_client_has_networkmanager: "{{ (ansible_facts.services['NetworkManager.service'] | default({})).status | default('not-found') != 'not-found' }}"
   tags:
     - always
 

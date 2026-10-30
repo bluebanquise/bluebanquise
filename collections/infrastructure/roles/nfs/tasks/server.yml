@@ -34,7 +34,7 @@
     nfs_server_shares: >-
       {{ nfs_shares | default([], true)
          | selectattr('server', 'defined')
-         | selectattr('server', 'in', [inventory_hostname] + ansible_facts.all_ipv4_addresses)
+         | selectattr('server', 'in', [inventory_hostname] + ansible_facts.all_ipv4_addresses | default([]))
          | list
          + (nfs_shares | default([], true)
             | selectattr('server_group', 'defined')

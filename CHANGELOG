@@ -4,6 +4,9 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.4
 
+* 2026-10-30 - oxedions, Claude - [local_configuration] Fix kernel parameters tasks failing when running with tags (effective parameters fact was not computed).
+* 2026-10-30 - oxedions, Claude - [nfs] Fix server failing when all_ipv4_addresses fact is not gathered.
+* 2026-10-30 - oxedions, Claude - [dns_client, nic] Ignore services only referenced by other units (listed as not-found by service_facts), the role tried to reload a non installed NetworkManager.
 * 2026-10-30 - oxedions, Claude - [pcs] Fix package lists from Docker checks: resource-agents added on RHEL (IPaddr2 and other OCF agents were missing), resource-agents on Debian 13 and fence-agents-base on Ubuntu (resource-agents-base and fence-agents do not exist on all versions), use pcs cluster destroy --yes with pcs 0.12 (Debian 13, Ubuntu 26.04).
 * 2026-10-30 - oxedions, Claude - [powerman] powerman.conf readable by the powerman group on Suse (daemon runs as powerman user).
 * 2026-10-30 - oxedions, Claude - [loki] Fix role failing on Debian and Ubuntu (loki package user has no loki group).
@@ -14,7 +17,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 * 2026-10-30 - oxedions, Claude - [update_reboot] Document that hosts are only rebooted when packages were updated, boolean conditions, remove role specific lint configuration, document variables.
 * 2026-10-30 - oxedions, Claude - [users] Fix README example (unquoted ! password is a YAML tag), replace crypt based hash example by openssl, boolean condition, document variables.
 * 2026-10-30 - oxedions, Claude - [xfs_quota] Fix README (outdated variable names), document variables.
-* 2026-10-30 - oxedions, Claude - [time] Fix clients never getting a time server from networks services (main network name looked up with surrounding new lines), fix time_chronyd_options failing on Debian and Ubuntu (/etc/default/chrony DAEMON_OPTS, /etc/sysconfig/chronyd does not exist), check chrony.conf with chronyd -p before writing it, document variables.
+* 2026-10-30 - oxedions, Claude - [time] Fix clients never getting a time server from networks services (main network name looked up with surrounding new lines), fix time_chronyd_options failing on Debian and Ubuntu (/etc/default/chrony DAEMON_OPTS, /etc/sysconfig/chronyd does not exist), document variables.
 * 2026-10-30 - oxedions, Claude - [rsyslog] Fix clients never forwarding logs to servers defined in networks services (same main network lookup bug).
 * 2026-10-30 - oxedions, Claude - [inventory] CI inventory and services documentation use the dns4, pxe4, ntp4 and log4 service keys.
 * 2026-10-30 - oxedions, Claude - [sshd] Fix settings overridden by distribution drop-in files read first (for example 50-cloud-init.conf on Ubuntu), the file is now 00-bluebanquise.conf, fix sshd failing to start when yes/no values are YAML booleans (written as True/False), check the configuration with sshd -t before restarting sshd, fix OpenSuse Leap 16 (no /etc/ssh/sshd_config, it was going to be created with only an Include line), restart sshd when the Include line is added, FQCN, document variables.

@@ -10,4 +10,4 @@
     state: stopped
   notify: reboot <|> Reboot system
   when:
-    - "'wicked.service' in ansible_facts.services"
+    - (ansible_facts.services['wicked.service'] | default({})).status | default('not-found') != 'not-found'
