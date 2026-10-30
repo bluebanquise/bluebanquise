@@ -30,10 +30,12 @@
   tags:
     - package
 
-- name: "template <|> Generate /etc/cloud/cloud.cfg"
+# Configuration is written as a drop-in file: /etc/cloud/cloud.cfg (distribution file) must be kept
+# as it is, as it defines the list of modules cloud-init runs at each boot stage.
+- name: "template <|> Generate {{ cloudinit_configuration_file }}"
   ansible.builtin.template:
     src: cloud.cfg.j2
-    dest: "/etc/cloud/cloud.cfg"
+    dest: "{{ cloudinit_configuration_file }}"
     owner: root
     group: root
     mode: 0644
@@ -43,7 +45,7 @@
 - name: "service <|> Enable {{ cloudinit_services_to_start | join(' ') }}"
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: "{{ (cloudinit_enable_services | default(bb_enable_services) | default(true) | bool) | ternary('yes', 'no') }}"
+    enabled: "{{ (cloudinit_enable_services | default(bb_enable_services) | default(true) | bool) | ternary(true, false) }}"
   loop: "{{ cloudinit_services_to_start }}"
   tags:
     - service
