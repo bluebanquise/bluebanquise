@@ -1,15 +1,5 @@
 ---
 - name: include_vars <|> Gather OS specific variables
-  # This task gathers variables defined in OS specific files.
-  #
-  # Search vars in:
-  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
-  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
-  #  - <distribution>.yml            # eg. CentOS.yml
-  #  - <os_family>.yml               # eg. RedHat.yml
-  #
-  # If no OS specific file is found, the role will default to vars/main.yml
-  #
   ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - files:
@@ -23,17 +13,35 @@
   tags:
     - always
 
-- name: "firewalld <|> Add http_proxy port to firewall's zone"
-  ansible.posix.firewalld:
-    zone: "{{ http_proxy_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
-    port: "{{ http_proxy_port }}/tcp"
-    immediate: true
-    permanent: true
-    state: enabled
+- name: assert <|> Check that at least one destination port is allowed
+  ansible.builtin.assert:
+    that:
+      - (http_proxy_default_allowed_ports | bool) or (http_proxy_allowed_ports | length > 0)
+    fail_msg: "http_proxy_default_allowed_ports is false and http_proxy_allowed_ports is empty: no port would be allowed through the proxy."
+    quiet: true
+  tags:
+    - always
+
+- name: firewalld <|> Configure firewall
   when:
     - os_firewall | default(true) | bool
   tags:
     - firewall
+  block:
+    - name: "firewalld <|> Add http_proxy port to firewall's zone"
+      ansible.posix.firewalld:
+        zone: "{{ http_proxy_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
+        port: "{{ http_proxy_port }}/tcp"
+        immediate: true
+        permanent: true
+        state: enabled
+  rescue:
+    - name: fail <|> Firewall configuration failed
+      ansible.builtin.fail:
+        msg: >-
+          Firewall configuration failed: {{ (ansible_failed_result.results | default([]) | selectattr('failed', 'defined') | selectattr('failed') | map(attribute='msg') | list + [ansible_failed_result.msg | default('unknown error')]) | first }}.
+          firewalld must be installed and running, with its Python bindings (python3-firewall package),
+          for example using the firewall role. Set os_firewall to false to disable firewall configuration.
 
 - name: "package <|> Install {{ http_proxy_packages_to_install | join(' ') }}"
   ansible.builtin.package:
@@ -41,17 +49,6 @@
     state: present
   tags:
     - package
-
-- name: "template <|> Generate squid main configuration file"
-  ansible.builtin.template:
-    src: squid.conf.j2
-    dest: "/etc/squid/squid.conf"
-    owner: root
-    group: root
-    mode: 0644
-  notify: service <|> Restart http_proxy server
-  tags:
-    - template
 
 - name: "file <|> Create coredump folder"
   ansible.builtin.file:
@@ -61,14 +58,27 @@
     mode: "0755"
     state: directory
 
-- name: "file <|> Create cachefolder folder"
+- name: "file <|> Create cache folder"
   ansible.builtin.file:
     path: "{{ http_proxy_cache_storage_path }}"
     owner: "{{ http_proxy_squid_user }}"
     group: "{{ http_proxy_squid_user }}"
     mode: "0755"
     state: directory
-  when: http_proxy_cache_enable | bool
+  when:
+    - http_proxy_cache_enable | bool
+
+- name: "template <|> Generate /etc/squid/squid.conf"
+  ansible.builtin.template:
+    src: squid.conf.j2
+    dest: /etc/squid/squid.conf
+    owner: root
+    group: root
+    mode: 0644
+    validate: squid -k parse -f %s
+  notify: service <|> Restart http_proxy server
+  tags:
+    - template
 
 - name: meta <|> Run handler tasks to restart services
   ansible.builtin.meta: flush_handlers
@@ -76,7 +86,7 @@
 - name: "service <|> Manage {{ http_proxy_services_to_start | join(' ') }} state"
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: "{{ http_proxy_enable_services | default(bb_enable_services) | default(true) | bool }}"
+    enabled: "{{ (http_proxy_enable_services | default(bb_enable_services) | default(true) | bool) | ternary(true, false) }}"
     state: "{{ (http_proxy_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   loop: "{{ http_proxy_services_to_start }}"
   tags:
