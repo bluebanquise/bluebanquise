@@ -1,0 +1,8 @@
+---
+# publickey: SSH key, then verification code (recommended)
+# password: password, then verification code
+google_authenticator_mfa_mode: publickey
+
+# If true, users who did not configure google-authenticator yet can log in without
+# verification code. If false, these users cannot log in with SSH anymore.
+google_authenticator_nullok: false

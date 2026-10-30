@@ -1,0 +1,10 @@
+---
+google_authenticator_packages_to_install:
+  - google-authenticator
+  - qrencode-libs
+  - openssh-server
+google_authenticator_sshd_service: sshd
+
+# Password authentication line of /etc/pam.d/sshd
+google_authenticator_pam_password_line: "auth       substack     password-auth"
+google_authenticator_pam_password_regexp: '^#?\s*auth\s+substack\s+password-auth\s*$'

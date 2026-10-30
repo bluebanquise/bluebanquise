@@ -1,0 +1,11 @@
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+
+# Read before distribution settings (sshd keeps the first value of each keyword)
+UsePAM yes
+KbdInteractiveAuthentication yes
+{% if google_authenticator_mfa_mode == 'publickey' %}
+AuthenticationMethods publickey,keyboard-interactive
+{% else %}
+AuthenticationMethods keyboard-interactive
+{% endif %}
