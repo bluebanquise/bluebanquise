@@ -1,0 +1,8 @@
+---
+- name: service <|> Restart opensm
+  ansible.builtin.service:
+    name: "{{ interconnect_ofed_subnet_manager_service }}"
+    state: restarted
+  when:
+    - "'service' not in ansible_skip_tags"
+    - interconnect_start_services | default(bb_start_services) | default(true) | bool

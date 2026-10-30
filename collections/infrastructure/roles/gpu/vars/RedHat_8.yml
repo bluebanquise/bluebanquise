@@ -1,0 +1,20 @@
+---
+gpu_kernel_packages:
+  - "kernel-headers-{{ ansible_facts.kernel }}"
+  - "kernel-devel-{{ ansible_facts.kernel }}"
+  - "kernel-devel-matched-{{ ansible_facts.kernel }}"
+
+# RHEL 8 and 9: NVIDIA driver is provided as DNF module streams
+gpu_nvidia_driver_packages:
+  open:
+    - "@nvidia-driver:open-dkms"
+  proprietary:
+    - "@nvidia-driver:latest-dkms"
+gpu_nvidia_cuda_packages:
+  - cuda-toolkit
+
+gpu_amd_supported: true
+gpu_amd_rocm_supported: true
+gpu_amd_rocm_prerequisites_packages:
+  - python3-setuptools
+  - python3-wheel

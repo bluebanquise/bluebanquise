@@ -1,0 +1,15 @@
+---
+# kernel-default-devel of the running kernel version (uname -r without -default suffix)
+gpu_kernel_packages:
+  - "kernel-default-devel={{ ansible_facts.kernel | regex_replace('-default$', '') }}"
+
+gpu_nvidia_driver_packages:
+  open:
+    - nvidia-open
+gpu_nvidia_cuda_packages:
+  - cuda-toolkit
+
+# AMD does not support openSUSE Leap
+gpu_amd_supported: false
+gpu_amd_rocm_supported: false
+gpu_amd_rocm_prerequisites_packages: []
