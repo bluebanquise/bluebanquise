@@ -1,5 +1,6 @@
 ---
-conman_execpath: "/usr/lib/conman/exec"
+# conman >= 0.3 installs its scripts in /usr/share (checked on openSUSE Leap 16, conman 0.3.1)
+conman_execpath: "/usr/share/conman/exec"
 
 conman_packages_to_install:
   - conman
