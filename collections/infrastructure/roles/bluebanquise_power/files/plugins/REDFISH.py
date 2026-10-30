@@ -57,16 +57,17 @@ def execute_redfish_request(node, node_configuration, endpoint, logger, paramete
             # on successful PATCH/POST actions - there's nothing to parse.
             return {}, response.status_code
         return response.json(), response.status_code
+    except requests.exceptions.JSONDecodeError as e:
+        # response.json() failed despite a 2xx/success status and non-empty
+        # content (e.g. whitespace-only body from some BMCs). The request itself
+        # succeeded. Must be caught before RequestException, as it inherits from it.
+        logger.warning(f'[{node}] Request succeeded, but could not decode Redfish JSON response for {url}: {e}')
+        return {}, response.status_code
     except requests.exceptions.RequestException as e:
         logger.error(f'[{node}] Error executing Redfish request: {e}')
         if e.response is not None:
             return None, e.response.status_code
         return None, None
-    except ValueError as e:
-        # response.json() failed despite a 2xx/success status and non-empty
-        # content-length header (e.g. whitespace-only body from some BMCs).
-        logger.error(f'[{node}] Error, could not decode Redfish JSON response for {url}: {e}')
-        return {}, response.status_code
 
 
 def is_success(status_code):
@@ -246,8 +247,9 @@ def get_system_endpoint(node, node_configuration, parameters, logger):
     Result is cached on node_configuration so discovery only happens once
     per run for a given node.
 
-    An optional bmc.system_id can be set in node_configuration to pin down
-    a specific system when a BMC exposes several (e.g. a blade chassis).
+    An optional system_id can be set in the inventory (hw_board_authentication
+    entry of the host hardware group) to pin down a specific system when a BMC
+    exposes several (e.g. a blade chassis).
     """
     cached = node_configuration.get('_redfish_system_endpoint')
     if cached:
@@ -271,7 +273,7 @@ def get_system_endpoint(node, node_configuration, parameters, logger):
         fail(node, node_configuration, parameters, logger, 'Systems collection is empty')
         return None
 
-    target_id = node_configuration.get('bmc', {}).get('system_id')
+    target_id = node_configuration.get('system_id')
     system_odata_id = None
 
     if target_id:
@@ -286,7 +288,7 @@ def get_system_endpoint(node, node_configuration, parameters, logger):
     else:
         if len(members) > 1:
             logger.info(f'[{node}] Multiple systems found in Systems collection, using the first one. '
-                        f'Set bmc.system_id in configuration to pick a specific one.')
+                        f'Set system_id in hw_board_authentication to pick a specific one.')
         system_odata_id = members[0]['@odata.id']
 
     # system_odata_id looks like /redfish/v1/Systems/Self or /redfish/v1/Systems/System.Embedded.1

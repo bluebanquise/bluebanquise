@@ -63,21 +63,37 @@ hw_board_authentication:
 
 `protocol` must be exactly `IPMI` or `REDFISH` (upper case), as it is the name of the plugin used.
 
+With Redfish, the system to manage is discovered automatically from the BMC `Systems` collection,
+whatever the vendor. If the BMC exposes several systems (for example a blade chassis), the first one
+is used. To manage another one, set `system_id` to its Id (the last part of its Redfish path, like
+`System.Embedded.1` or `Self`). As the Id depends on the hardware model, it is set with the
+credentials:
+
+```yaml
+hw_board_authentication:
+  - protocol: REDFISH
+    user: admin
+    password: password
+    system_id: System.Embedded.1
+```
+
 Always quote `user` and `password` values in the inventory if they could be interpreted by YAML:
 an unquoted `password: 0123` is read by Ansible as the number `83` (octal), and `password: yes` as
 the boolean `true`, before this role can do anything about it. Use `password: "0123"`. Any quoted
 value, special characters included, is then passed to the BMC as is.
 
-Hosts without a `bmc` entry, or without a complete `protocol`/`user`/`password` set, are silently
-skipped when generating the configuration.
+Hosts without a `bmc` entry, or without a complete `protocol`/`user`/`password` set in the first
+`hw_board_authentication` entry defining a `protocol`, are silently skipped when generating the
+configuration.
 
 By default all hosts of the inventory are considered. To restrict the configuration to a group of
-hosts, set `bluebanquise_power_retrict_to_group` (or the global `bb_retrict_to_group`) to an
+hosts, set `bluebanquise_power_restrict_to_group` (or the global `bb_restrict_to_group`) to an
 Ansible group name.
 
 ### Deploy
 
-Apply the role on the management host(s). It installs the `ipmitool` and `bluebanquise-venv`
+Apply the role on the management host(s). The `bluebanquise` group must exist on these hosts
+(it is created with the `bluebanquise` user during BlueBanquise bootstrap). The role installs the `ipmitool` and `bluebanquise-venv`
 packages (the tool runs from the BlueBanquise Python virtual environment, located in
 `/usr/lib/bluebanquise/venv/`), and generates:
 
@@ -187,10 +203,10 @@ conclusive.
 **IPMI** relies on `ipmitool -I lanplus` (IPMI v2.0 over LAN).
 
 **Redfish** is vendor agnostic: the system resource is discovered from the BMC `Systems` collection
-instead of assuming a vendor specific identifier. If a BMC exposes several systems (for example a
-blade chassis), the first one is used. Some BMCs require an `If-Match` header on boot device
-changes: the resource etag is fetched and sent automatically. BMC TLS certificates are not verified,
-as BMCs usually use self signed certificates.
+instead of assuming a vendor specific identifier. Some BMCs require an `If-Match` header on boot device
+changes: the resource etag is fetched and sent automatically. If a BMC exposes several systems,
+the first one is used, unless `system_id` is set in `hw_board_authentication` (see Inventory above).
+BMC TLS certificates are not verified, as BMCs usually use self signed certificates.
 
 ### Adding a protocol
 
@@ -201,4 +217,12 @@ parameter, like `on` or `pxe`, and `parameters` the command line options), retur
 `(return_code, detail)` tuple: `return_code` is `0` on success and `1` on failure, `detail` is the
 short text displayed in the final status table. As hosts run in parallel, a plugin must not print
 multi-line output line by line: build it as a list, then log it with a single call (see
-`debug_bmc()` and `fail()` in existing plugins). New plugin files also need to be added to the copy task of the role.
+`debug_bmc()` and `fail()` in existing plugins). All files of `files/plugins/` are deployed by the
+role. At startup, the tool loads every plugin: a plugin that cannot be loaded (for example because
+of a missing Python module) is reported as a warning, and only hosts using this protocol fail.
+
+## Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `bluebanquise_power_restrict_to_group` | `bb_restrict_to_group`, else `all` | Only consider hosts of this Ansible group when generating the configuration. |

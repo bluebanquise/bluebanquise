@@ -121,7 +121,14 @@ for file_path in os.listdir(plugins_dir):
 
         spec = importlib.util.spec_from_file_location(module_name, full_path)
         module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
+        # A plugin needing a missing Python module (for example requests for REDFISH) must not
+        # prevent other protocols from working: report it, and continue without this plugin.
+        try:
+            spec.loader.exec_module(module)
+        except ImportError as e:
+            logger.warning(f'Could not load protocol plugin {module_name} ({full_path}): {e}. '
+                           f'Nodes using protocol {module_name} cannot be managed.')
+            continue
 
         power_modules[module_name] = module
 
