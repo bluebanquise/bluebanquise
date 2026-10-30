@@ -1,2 +1,5 @@
 ---
-podman_role_version: 2.0.2
+podman_role_version: 3.0.0
+
+# Variables of role versions < 3.0.0, now rejected
+podman_legacy_variables_regex: "^podman_(configure|configure_ha|manual_mapping|sudo_user|local_registry_host)$"

@@ -1,42 +1,59 @@
 ---
-- name: registry <|> Create local directory
+- name: "file <|> Create {{ podman_local_registry_dir }}"
   ansible.builtin.file:
     path: "{{ podman_local_registry_dir }}"
     state: directory
-    owner: "{{ podman_local_registry_owner | default('root') }}"
-    group: "{{ podman_local_registry_group | default('root') }}"
-    mode: '0755'
+    owner: "{{ podman_local_registry_owner }}"
+    group: "{{ podman_local_registry_group }}"
+    mode: "0755"
 
-- name: registry <|> Load local registry container
-  ansible.builtin.command: "podman load -i {{ podman_registry_container_path }}"
+- name: command <|> Check if registry image is loaded
+  ansible.builtin.command:
+    argv: [podman, image, exists, "{{ podman_registry_container }}:{{ podman_registry_container_tag }}"]
+  register: podman_registry_image
   changed_when: false
+  failed_when: podman_registry_image.rc not in [0, 1]
 
-- name: firewalld <|> "Add registry port to firewall's {{ ha_firewall_zone | default('public') }} zone"
-  ansible.posix.firewalld:
-    zone: "{{ ha_firewall_zone | default('public') }}"
-    port: "{{ podman_local_registry_port }}/tcp"
-    immediate: true
-    permanent: true
-    state: enabled
-  when: os_firewall | default(true) | bool
+- name: command <|> Load registry image
+  ansible.builtin.command:
+    argv: [podman, load, -i, "{{ podman_registry_container_path }}"]
+  changed_when: true
+  when:
+    - podman_registry_image.rc == 1
+
+- name: firewalld <|> Configure firewall
+  when:
+    - os_firewall | default(true) | bool
   tags:
     - firewall
+  block:
+    - name: "firewalld <|> Add registry port to firewall's zone"
+      ansible.posix.firewalld:
+        zone: "{{ podman_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
+        port: "{{ podman_local_registry_port }}/tcp"
+        immediate: true
+        permanent: true
+        state: enabled
+  rescue:
+    - name: fail <|> Firewall configuration failed
+      ansible.builtin.fail:
+        msg: >-
+          Firewall configuration failed: {{ (ansible_failed_result.results | default([]) | selectattr('failed', 'defined') | selectattr('failed') | map(attribute='msg') | list + [ansible_failed_result.msg | default('unknown error')]) | first }}.
+          firewalld must be installed and running, with its Python bindings (python3-firewall package),
+          for example using the firewall role. Set os_firewall to false to disable firewall configuration.
 
-- name: template <|> Install registry service file
+- name: template <|> Generate /etc/systemd/system/registry.service
   ansible.builtin.template:
     src: registry.service.j2
     dest: /etc/systemd/system/registry.service
     owner: root
     group: root
-    force: true
-    mode: 0655
+    mode: "0644"
   notify:
     - systemd <|> Reload systemd configuration
     - service <|> Restart registry container service
-  tags:
-    - service
 
-- name: meta <|> Run handler tasks
+- name: meta <|> Run handlers
   ansible.builtin.meta: flush_handlers
 
 - name: service <|> Manage registry state
