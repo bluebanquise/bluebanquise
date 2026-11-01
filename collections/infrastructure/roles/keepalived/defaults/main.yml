@@ -1,3 +1,5 @@
 ---
 keepalived_conf_file: /etc/keepalived/keepalived.conf
 keepalived_vrrp_instances: []
+keepalived_firewall_services_to_add:
+  - vrrp

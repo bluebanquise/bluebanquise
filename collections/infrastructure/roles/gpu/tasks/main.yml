@@ -1,11 +1,24 @@
 ---
-- name: "setup <|> Reload facts"
-  ansible.builtin.setup:
+- name: include_vars <|> Gather OS specific variables
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family }}.yml"
+      skip: true
+  tags:
+    - always
 
-- name: include_tasks <|> Configure Nvidia GPU
-  ansible.builtin.include_tasks: "nvidia/main.yml"
+- name: include_tasks <|> Configure NVIDIA GPU
+  ansible.builtin.include_tasks: nvidia.yml
   when: gpu_vendor == "nvidia"
+  tags:
+    - always
 
 - name: include_tasks <|> Configure AMD GPU
-  ansible.builtin.include_tasks: "amd/main.yml"
+  ansible.builtin.include_tasks: amd.yml
   when: gpu_vendor == "amd"
+  tags:
+    - always

@@ -7,16 +7,16 @@ networks:
     services_ip: 10.10.0.1
     gateway: 10.10.0.1
     services:
-      dns:
+      dns4:
         - ip4: 10.10.0.1
           hostname: mg1-dns
-      pxe:
+      pxe4:
         - ip4: 10.10.0.1
           hostname: mg1-pxe
-      ntp:
+      ntp4:
         - ip4: 10.10.0.1
           hostname: mg1-ntp
-      log:
+      log4:
         - ip4: 10.10.0.1
           hostname: mg1-log
   net-test:

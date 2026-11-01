@@ -1,4 +1,12 @@
 ---
+# Handlers run in the order they are defined in this file: systemd configuration
+# must be reloaded before conman is restarted with a new drop-in.
+- name: systemd <|> Reload systemd configuration
+  ansible.builtin.systemd:
+    daemon_reload: true
+  when:
+    - "'service' not in ansible_skip_tags"
+
 - name: service <|> Restart conman
   ansible.builtin.service:
     name: conman
@@ -6,9 +14,3 @@
   when:
     - "'service' not in ansible_skip_tags"
     - conman_start_services | default(bb_start_services) | default(true) | bool
-
-- name: systemd <|> Reload systemd configuration
-  ansible.builtin.systemd:
-    daemon_reload: yes
-  when:
-    - "'service' not in ansible_skip_tags"

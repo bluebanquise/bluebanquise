@@ -1,4 +1,17 @@
-- name: Restart systemd-resolved
-  ansible.builtin.systemd:
+---
+- name: service <|> Restart systemd-resolved
+  ansible.builtin.service:
     name: systemd-resolved
     state: restarted
+  when:
+    - "'service' not in ansible_skip_tags"
+    - dns_client_start_services | default(bb_start_services) | default(true) | bool
+
+# A reload makes NetworkManager read its configuration again, and rewrite DNS settings
+- name: service <|> Reload NetworkManager
+  ansible.builtin.service:
+    name: NetworkManager
+    state: reloaded
+  when:
+    - "'service' not in ansible_skip_tags"
+    - dns_client_start_services | default(bb_start_services) | default(true) | bool

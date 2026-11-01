@@ -27,6 +27,10 @@ Login as the bluebanquise user:
 This user can be considered as the "cluster admin user". Deployed hosts for example will automatically have
 the bluebanquise user configured and ssh keys set so that you can ssh on them.
 
+.. warning::
+  
+  You should avoid using this user for day to day tasks, consider this user as equivalent to a root user.
+
 Test you can now use the ``ansible-playbook`` command:
 
 .. code-block:: text

@@ -1,4 +1,5 @@
-- name: Reload sysctl configuration
+---
+- name: command <|> Reload Lustre multi-rail sysctl settings
   ansible.builtin.command:
     cmd: sysctl -p /etc/sysctl.d/80-lustre-multi-rail.conf
   changed_when: true

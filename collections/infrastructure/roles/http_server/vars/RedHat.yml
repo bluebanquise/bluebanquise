@@ -5,3 +5,4 @@ http_server_services_to_start:
   - httpd
 http_server_apache_conf_path: /etc/httpd/conf.d
 http_server_apache_main_conf_path: /etc/httpd/conf/httpd.conf
+http_server_configtest_command: apachectl configtest

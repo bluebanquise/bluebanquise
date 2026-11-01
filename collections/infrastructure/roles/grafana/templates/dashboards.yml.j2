@@ -1,0 +1,7 @@
+{{ ansible_managed | comment }}
+apiVersion: 1
+providers:
+  - name: bluebanquise
+    type: file
+    options:
+      path: {{ grafana_dashboards_path }}

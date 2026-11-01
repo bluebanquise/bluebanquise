@@ -1,16 +1,17 @@
 #jinja2: lstrip_blocks: True
-#### Blue Banquise file ####
-## {{ ansible_managed }}
+{{ ansible_managed | comment }}
+{# YAML booleans (yes/no without quotes) are written as yes/no #}
+{% macro value(setting) %}{{ 'yes' if setting is sameas true else ('no' if setting is sameas false else setting) }}{% endmacro %}
 
 {% if sshd_raw is defined and sshd_raw is not none %}
 {{ sshd_raw }}
-{% endif %}
 
+{% endif %}
 {% if sshd_permitrootlogin is defined and sshd_permitrootlogin is not none %}
-PermitRootLogin {{ sshd_permitrootlogin }}
+PermitRootLogin {{ value(sshd_permitrootlogin) }}
 {% endif %}
 {% if sshd_passwordauthentication is defined and sshd_passwordauthentication is not none %}
-PasswordAuthentication {{ sshd_passwordauthentication }}
+PasswordAuthentication {{ value(sshd_passwordauthentication) }}
 {% endif %}
 {% if sshd_denyusers is defined and sshd_denyusers is not none %}
 DenyUsers {{ sshd_denyusers }}

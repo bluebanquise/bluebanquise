@@ -3,7 +3,7 @@
 
 {% for gr, nodes in groups.items() %}
 {% if (gr | string) != 'ungrouped' and nodes | length > 0 %}
-{{ gr }}: {{ nodes | sort | join(',') }}
+{{ gr }}: {{ nodes | bluebanquise.infrastructure.nodeset }}
 
 {% endif %}
 {% endfor %}

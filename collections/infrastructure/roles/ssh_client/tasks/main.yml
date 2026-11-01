@@ -1,24 +1,30 @@
 ---
+# The configuration is written for the user running Ansible (sudo user), or root
+- name: getent <|> Get admin user information
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ ansible_facts.env.SUDO_USER | default('root', true) }}"
 
-- name: user <|> Grab admin user home directory
-  ansible.builtin.user:
-    name: "{% if ansible_env.SUDO_USER is defined and ansible_env.SUDO_USER is not none %}{{ ansible_env.SUDO_USER }}{% else %}root{% endif %}"
-    state: present
-  register: ssh_client_admin_user_info
-  check_mode: true
+- name: set_fact <|> Set admin user home, uid and gid
+  ansible.builtin.set_fact:
+    ssh_client_admin_user_home: "{{ getent_passwd[ansible_facts.env.SUDO_USER | default('root', true)][4] }}"
+    ssh_client_admin_user_uid: "{{ getent_passwd[ansible_facts.env.SUDO_USER | default('root', true)][1] }}"
+    ssh_client_admin_user_gid: "{{ getent_passwd[ansible_facts.env.SUDO_USER | default('root', true)][2] }}"
 
-- name: file <|> Create user ssh directory if not exist
+- name: "file <|> Create {{ ssh_client_admin_user_home }}/.ssh"
   ansible.builtin.file:
-    path: "{{ ssh_client_admin_user_info.home }}/.ssh"
+    path: "{{ ssh_client_admin_user_home }}/.ssh"
     state: directory
-    mode: 0700
+    owner: "{{ ssh_client_admin_user_uid }}"
+    group: "{{ ssh_client_admin_user_gid }}"
+    mode: "0700"
 
-- name: "template <|> Generate .ssh/config"
+- name: "template <|> Generate {{ ssh_client_admin_user_home }}/.ssh/config"
   ansible.builtin.template:
-    src: "config.j2"
-    dest: "{{ ssh_client_admin_user_info.home }}/.ssh/config"
-    owner: "{{ ssh_client_admin_user_info.uid }}"
-    group: "{{ ssh_client_admin_user_info.group }}"
-    mode: 0600
+    src: config.j2
+    dest: "{{ ssh_client_admin_user_home }}/.ssh/config"
+    owner: "{{ ssh_client_admin_user_uid }}"
+    group: "{{ ssh_client_admin_user_gid }}"
+    mode: "0600"
   tags:
     - template

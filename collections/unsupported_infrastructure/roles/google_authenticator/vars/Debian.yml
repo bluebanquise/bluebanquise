@@ -1,0 +1,8 @@
+---
+google_authenticator_packages_to_install:
+  - libpam-google-authenticator
+google_authenticator_sshd_service: ssh
+
+# Password authentication line of /etc/pam.d/sshd
+google_authenticator_pam_password_line: "@include common-auth"
+google_authenticator_pam_password_regexp: '^#?\s*@include\s+common-auth\s*$'

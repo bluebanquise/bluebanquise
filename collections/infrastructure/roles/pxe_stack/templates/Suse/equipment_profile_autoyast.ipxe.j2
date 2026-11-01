@@ -27,10 +27,17 @@ set images-root {{ equipment['os']['os_pxe_images_root'] | default(pxe_stack_os_
 set images-root-iso {{ equipment['os']['os_pxe_images_root_iso'] | default(pxe_stack_os_pxe_images_root_iso, true) | default("iso", true) }}
 
 set autoyast-path http://${next-server}/pxe/equipment_profiles/${eq-equipment-profile}.autoyast.xml
+set agama-path http://${next-server}/pxe/equipment_profiles/${eq-equipment-profile}.agama.json
+# Agama action after installation: reboot, halt or poweroff
+set eq-finish-action {{ 'poweroff' if pxe_stack_post_install_action == 'shutdown' else pxe_stack_post_install_action }}
+{% if (equipment['os']['os_pxe_repository_proxy'] | default(pxe_stack_os_pxe_repository_proxy, true) | default(none, true)) is not none %}
+set eq-installer-proxy proxy={{ equipment['os']['os_pxe_repository_proxy'] | default(pxe_stack_os_pxe_repository_proxy, true) }}
+{% endif %}
 
 echo | images-root: ${images-root}
 echo | images-root-iso: ${images-root-iso}
 echo | autoyast-path: ${autoyast-path}
+echo | agama-path: ${agama-path}
 echo |
 
 echo | Now chaining to --> menu.ipxe

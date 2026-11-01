@@ -5,3 +5,5 @@
     state: present
   loop: "{{ custom_packages_by_group.keys() | list }}"
   when: item in group_names
+  tags:
+    - package

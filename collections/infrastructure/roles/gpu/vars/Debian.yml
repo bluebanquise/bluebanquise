@@ -1,0 +1,14 @@
+---
+gpu_kernel_packages:
+  - "linux-headers-{{ ansible_facts.kernel }}"
+
+gpu_nvidia_driver_packages:
+  open:
+    - nvidia-open
+gpu_nvidia_cuda_packages:
+  - cuda-toolkit
+
+# ROCm supports Debian 13 only for AMD Instinct MI300X, MI325X, MI350X and MI355X GPUs
+gpu_amd_supported: true
+gpu_amd_rocm_supported: true
+gpu_amd_rocm_prerequisites_packages: []

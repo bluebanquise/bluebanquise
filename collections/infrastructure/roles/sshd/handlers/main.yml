@@ -1,4 +1,14 @@
 ---
+# Handlers run in the order they are defined: the configuration is checked before sshd is
+# restarted, so that an invalid configuration does not stop a running sshd.
+- name: command <|> Check sshd configuration
+  ansible.builtin.command: /usr/sbin/sshd -t
+  changed_when: false
+  listen: service <|> Restart sshd server
+  when:
+    - "'service' not in ansible_skip_tags"
+    - sshd_server_start_services | default(bb_start_services) | default(true) | bool
+
 - name: service <|> Restart sshd server
   ansible.builtin.service:
     name: "{{ item }}"

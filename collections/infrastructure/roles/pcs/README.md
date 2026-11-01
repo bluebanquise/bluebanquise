@@ -1,6 +1,6 @@
 # High Availability
 
-Note: this role is only available on RHEL and Ubuntu.
+Supported distributions: RHEL 9/10, Ubuntu 24.04/26.04, Debian 13. OpenSuse is not supported (pcs is not packaged, SUSE uses crmsh).
 
 - [High Availability](#high-availability)
   * [1. Description](#1-description)
@@ -21,7 +21,9 @@ Note: this role is only available on RHEL and Ubuntu.
     + [4.3. DNS server](#43-dns-server)
     + [4.4. Time server](#44-time-server)
     + [4.5. Log server](#45-log-server)
-  * [5. Changelog](#5-changelog)
+  * [5. Known Issues](#5-known-issues)
+  * [6. Variables](#6-variables)
+  * [7. Changelog](#7-changelog)
 
 ## 1. Description
 
@@ -50,12 +52,10 @@ of 3 ha servers working together.
                                     Network
 ```
 
-This role is supported on RHEL and Ubuntu operating systems.
-
 ## 2. Instructions to configure
 
-Ensure your nodes are able to install HA components (may require a special
-subscription on RHEL OS).
+Ensure your nodes are able to install HA components: on RHEL, packages come from the High Availability
+repository (`highavailability` on AlmaLinux and Rocky Linux), which may require a special subscription.
 
 ### 2.1. HA cluster
 
@@ -141,33 +141,20 @@ You can set the reference node in the `ha_parameters.yml`, and on need, use
 pcs_reference_node: ha1
 ```
 
-Finally, before deploying HA cluster, update `pcs_ha_cluster_password` variable with an unencrypted password for hacluster user, and `pcs_ha_cluster_password_sha512` with the corresponding SHA512 password hash (do not use default values for production).
+Finally, before deploying HA cluster, update `pcs_ha_cluster_password` variable with an unencrypted password for hacluster user, and `pcs_ha_cluster_password_sha512` with the corresponding SHA512 password hash (**do not use default values**, the default password is `root`).
 
 ```yaml
 pcs_ha_cluster_password: root
 pcs_ha_cluster_password_sha512: $6$M3crarMVoUV3rALd$ZTre2CIyss7zOb4lkLoG23As9OAkYPw2BM88Y1F43n8CCyV5XWwAYEwBOrS8bcCBIMjIPdJG.ndOfzWyAVR4j0
 ```
 
-You can hash your password easily using Python/Perl:
-
-*Python (>= 3.3):*
+You can hash your password using openssl (the password is read from standard input):
 
 ```
-python -c 'import crypt; print(crypt.crypt("YOUR_HA_CLUSTER_PASSWD", crypt.mksalt(crypt.METHOD_SHA512)))'
+openssl passwd -6 -stdin
 ```
 
-*Python (2.x or 3.x):*
-
-```
-python -c "import crypt, getpass, pwd; \
-             print(crypt.crypt('YOUR_HA_CLUSTER_PASSWD', '\$6\$saltsalt\$'))"
-```
-
-*Perl:*
-
-```
-perl -e 'print crypt("YOUR_HA_CLUSTER_PASSWD","\$6\$saltsalt\$") . "\n"'
-```
+Consider storing both values in an Ansible vault.
 
 Now deploy the HA cluster with these parameters.
 
@@ -211,21 +198,21 @@ exist; add the rest once they are up, then re-run the playbook.
 
 A cluster created this way (corosync configured for exactly one node) is automatically quorate:
 corosync computes 1 vote expected, 1 vote present, so `have-quorum` is true from the moment
-`pcs cluster setup` completes — confirmed live via `corosync-quorumtool -s` (`Quorate: Yes`) on a
+`pcs cluster setup` completes, as reported by via `corosync-quorumtool -s` (`Quorate: Yes`) on a
 freshly bootstrapped single-node cluster, before any resource or property was touched. **You do not
-need to set `no-quorum-policy=ignore` for a genuinely single-node cluster** — that property only
+need to set `no-quorum-policy=ignore` for a genuinely single-node cluster**: that property only
 matters once *more than one* node is declared in `corosync.conf` but a majority of them are
 currently unreachable (for example, a 3-node cluster running degraded on its one surviving node).
 
 What *will* still block resources from starting on a lone node is STONITH: pacemaker refuses to
 schedule any resource while `stonith-enabled` is true and no fencing device is configured
 (pacemaker logs this plainly: `Resource start-up disabled since no STONITH resources have been
-defined`). This role already handles that for you — see [2.5. Stonith](#25-stonith): leaving
+defined`). This role already handles that for you, see [2.5. Stonith](#25-stonith): leaving
 `pcs_stonith` undefined disables STONITH automatically. If you have defined `pcs_stonith` ahead of
 your fencing hardware actually being reachable, resources will stay down until the fencing
 resources themselves come up clean.
 
-When the other nodes are ready, add them to `pcs_cluster_nodes` and re-run the playbook — the
+When the other nodes are ready, add them to `pcs_cluster_nodes` and re-run the playbook: the
 role's node-registration tasks are idempotent and will only register or add what is still missing.
 
 ### 2.2. Properties
@@ -257,6 +244,9 @@ pcs_pcs_resource_defaults:
 
 You can also skip this part and do not set any properties, to keep distribution
 default values.
+
+Values are compared to the current cluster configuration as text, to only set changed ones: write
+booleans as quoted lowercase strings (`value: "false"`), as pacemaker displays them.
 
 ### 2.3. Resources
 
@@ -437,11 +427,13 @@ point:
 - name: Roles for HA cluster
   hosts: "ha_cluster"
   vars:
-    enable_services: false
-    start_services: false
+    bb_enable_services: false
+    bb_start_services: false
+    pcs_enable_services: true
+    pcs_start_services: true
   roles:
     - (add roles to configure services in HA cluster)
-    - role: pcs
+    - role: bluebanquise.infrastructure.pcs
       tags: ha
 ```
 
@@ -452,7 +444,7 @@ First, start by configuring services in active mode on the reference node,
 set to ha1 for this example:
 
 ```
-ansible-playbook ha-cluster.yml --limit ha1 --skip-tags ha -e "{'start_services': true}"
+ansible-playbook ha-cluster.yml --limit ha1 --skip-tags ha -e "{'bb_start_services': true}"
 ```
 
 Now, deploy the HA cluster with the configured parameters, by running the full
@@ -661,13 +653,33 @@ not present. Then in HA resources, declare the following:
 
 ## 5. Known Issues
 
-* When pacemaker/corosync are first installed in Ubuntu 20/22,
+* When pacemaker/corosync are first installed on Debian and Ubuntu,
 a default pacemaker cluster is created.
 This role will detect the presence of the default cluster and destroy it.
 The conditions for destroying the cluster are matching the cluster name 'debian'
 and having 0 resources configured.
 
-## 6. Changelog
+## 6. Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `pcs_ha_cluster_name` | `ha_cluster` | Cluster name. |
+| `pcs_cluster_nodes` | (required) | Cluster nodes (`name`, `addrs`). |
+| `pcs_reference_node` | (required) | Node creating the cluster and pushing its configuration. |
+| `pcs_ha_cluster_password` | `root` | hacluster user password, used to authenticate nodes. |
+| `pcs_ha_cluster_password_sha512` | hash of `root` | hacluster user password hash. |
+| `pcs_autostart` | `false` | Enable corosync and pacemaker at boot. |
+| `pcs_pcs_property` | `[]` | Cluster properties (`name`, `value`). |
+| `pcs_pcs_resource_op_defaults` | `[]` | Resource operations defaults (`name`, `value`). |
+| `pcs_pcs_resource_defaults` | `[]` | Resource defaults (`name`, `value`). |
+| `pcs_resources` | `[]` | Resource groups, with their resources and constraints. |
+| `pcs_stonith` | not set | Stonith resources. Not set: STONITH is disabled. |
+| `pcs_cib_file_path` | `/root/ha_config.ansible.xml` | Working copy of the cluster configuration, on the reference node. |
+| `pcs_firewall_zone` | `bb_services_firewall_zone`, else `public` | Firewall zone to open the `high-availability` service in. |
+| `pcs_enable_services` | `bb_enable_services`, else `true` | Enable pcsd. |
+| `pcs_start_services` | `bb_start_services`, else `true` | Start pcsd, corosync and pacemaker. |
+
+## 7. Changelog
 
 **Please now update CHANGELOG file at repository root instead of adding logs in this file.
 These logs bellow are only kept for archive.**

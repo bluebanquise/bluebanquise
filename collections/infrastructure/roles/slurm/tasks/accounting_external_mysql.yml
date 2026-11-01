@@ -8,7 +8,7 @@
     login_port: "{{ slurm_accounting_mysql_login_port | default(omit, true) }}"
     login_user: "{{ slurm_accounting_mysql_login_user | default(omit, true) }}"
     login_password: "{{ slurm_accounting_mysql_login_password | default(omit, true) }}"
-  when: slurm_accounting_mysql_create_database
+  when: slurm_accounting_mysql_create_database | bool
 
 - name: mysql_user <|> Ensure slurm user exists in the database
   ansible.mysql.mysql_user:
@@ -22,4 +22,4 @@
     priv: 'slurm_acct_db.*:ALL'
     column_case_sensitive: false
   when:
-    - slurm_accounting_mysql_create_user
+    - slurm_accounting_mysql_create_user | bool

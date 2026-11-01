@@ -20,6 +20,9 @@ mgt6
 [os_opensuseleap15]
 mgt7
 
+[os_opensuseleap16]
+mgt10
+
 [os_debian11]
 mgt8
 

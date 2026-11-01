@@ -5,18 +5,10 @@
     path: /etc/firewalld/firewalld.conf
     regexp: "^AllowZoneDrifting=.*$"
     line: "AllowZoneDrifting={{ firewall_firewalld_allow_zone_drifting | ternary('yes', 'no') }}"
-  notify: service <|> Restart firewall services
+  notify: service <|> Reload firewall services
 
-- name: "fail <|> Check presence of required parameters"
-  ansible.builtin.fail:
-    msg: "Bailing out.
-  This role requires networks[{{ item['network'] }}]['firewall_zone'] to be set"
-  when: item['network'] is defined and networks[item['network']]['firewall_zone'] is not defined
-  loop: "{{ network_interfaces }}"
-  loop_control:
-    label: "{{ item['interface'] }}"
-  tags:
-    - internal
+# Networks without firewall_zone are not bound to any zone:
+# their traffic is handled by firewalld default zone.
 
 - name: "firewalld <|> Ensure firewall zones exist"
   ansible.posix.firewalld:
@@ -24,11 +16,48 @@
     permanent: true
     state: present
   when: networks[item]['firewall_zone'] is defined
-  loop: "{{ (network_interfaces | selectattr('network', 'defined') | map(attribute='network') | list) }}"
-  notify: service <|> Restart firewall services
+  loop: "{{ (network_interfaces | default([], true) | selectattr('network', 'defined') | map(attribute='network') | list) }}"
+  register: firewall_zones_creation
 
-- name: "meta <|> Run handler tasks to restart firewall services"
-  ansible.builtin.meta: flush_handlers
+# A new zone only exists in the permanent configuration: firewalld must reload it before
+# the next tasks can configure it at runtime (immediate). This is a firewalld configuration
+# operation, not a service start, so it is done even when service tasks are skipped.
+- name: "command <|> Reload firewalld to load new zones"
+  ansible.builtin.command:
+    argv:
+      - firewall-cmd
+      - --reload
+  when: firewall_zones_creation is changed  # noqa no-handler
+
+# A source can only be bound to one zone: when a network moves to another zone,
+# its subnet must first be removed from its previous zone.
+- name: "command <|> Get current zone of networks subnets"
+  ansible.builtin.command:
+    argv:
+      - firewall-cmd
+      - --permanent
+      - "--get-zone-of-source={{ networks[item]['subnet'] }}/{{ networks[item]['prefix'] }}"
+  register: firewall_sources_current_zones
+  changed_when: false
+  failed_when: false
+  check_mode: false
+  when: networks[item]['firewall_zone'] is defined
+  loop: "{{ (network_interfaces | default([], true) | selectattr('network', 'defined') | map(attribute='network') | list) }}"
+
+- name: "firewalld <|> Remove networks subnets from their previous zone"
+  ansible.posix.firewalld:
+    zone: "{{ item.stdout | trim }}"
+    source: "{{ networks[item.item]['subnet'] }}/{{ networks[item.item]['prefix'] }}"
+    immediate: true
+    permanent: true
+    state: disabled
+  when:
+    - item.skipped is not defined
+    - item.rc == 0
+    - (item.stdout | trim) != networks[item.item]['firewall_zone']
+  loop: "{{ firewall_sources_current_zones.results }}"
+  loop_control:
+    label: "Remove source '{{ networks[item.item]['subnet'] }}/{{ networks[item.item]['prefix'] }}' from zone '{{ item.stdout | default('') | trim }}'"
 
 - name: "firewalld <|> Configure firewall zones"
   ansible.posix.firewalld:
@@ -38,7 +67,7 @@
     permanent: true
     state: enabled
   when: networks[item]['firewall_zone'] is defined
-  loop: "{{ (network_interfaces | selectattr('network', 'defined') | map(attribute='network') | list) }}"
+  loop: "{{ (network_interfaces | default([], true) | selectattr('network', 'defined') | map(attribute='network') | list) }}"
   loop_control:
     label: "Add source '{{ networks[item]['subnet'] }}/{{ networks[item]['prefix'] }}'
             to zone '{{ networks[item]['firewall_zone'] }}'"
@@ -188,7 +217,7 @@
       loop_control:
         label: "{{ item.name }}"
       when: item.name not in firewall_policies_existing.stdout.split()
-      notify: service <|> Restart firewall services
+      notify: service <|> Reload firewall services
 
     - name: "command <|> Get firewalld policies' current target"
       ansible.builtin.command:
@@ -216,7 +245,7 @@
       loop_control:
         label: "{{ item.item.name }}"
       when: item.item.target is defined and (item.stdout | default('') | trim) != item.item.target
-      notify: service <|> Restart firewall services
+      notify: service <|> Reload firewall services
 
     - name: "command <|> Check firewalld policies' current ingress zones"
       ansible.builtin.command:
@@ -244,7 +273,7 @@
       loop_control:
         label: "{{ item.item.0.name }} <- {{ item.item.1 }}"
       when: item.rc != 0
-      notify: service <|> Restart firewall services
+      notify: service <|> Reload firewall services
 
     - name: "command <|> Check firewalld policies' current egress zones"
       ansible.builtin.command:
@@ -272,7 +301,7 @@
       loop_control:
         label: "{{ item.item.0.name }} -> {{ item.item.1 }}"
       when: item.rc != 0
-      notify: service <|> Restart firewall services
+      notify: service <|> Reload firewall services
 
     - name: "command <|> Check firewalld policies' current masquerade state"
       ansible.builtin.command:
@@ -301,7 +330,7 @@
       loop_control:
         label: "{{ item.item.name }}"
       when: item.item.masquerade is defined and item.item.masquerade | bool and item.rc != 0
-      notify: service <|> Restart firewall services
+      notify: service <|> Reload firewall services
 
     - name: "command <|> Disable masquerade on firewalld policies"
       ansible.builtin.command:
@@ -314,7 +343,7 @@
       loop_control:
         label: "{{ item.item.name }}"
       when: item.item.masquerade is defined and not (item.item.masquerade | bool) and item.rc == 0
-      notify: service <|> Restart firewall services
+      notify: service <|> Reload firewall services
 
     - name: "command <|> Check firewalld policies' current services"
       ansible.builtin.command:
@@ -342,7 +371,7 @@
       loop_control:
         label: "{{ item.item.0.name }} <-> {{ item.item.1 }}"
       when: item.rc != 0
-      notify: service <|> Restart firewall services
+      notify: service <|> Reload firewall services
 
     - name: "command <|> Check firewalld policies' services pending removal"
       ansible.builtin.command:
@@ -370,7 +399,7 @@
       loop_control:
         label: "{{ item.item.0.name }} </> {{ item.item.1 }}"
       when: item.rc == 0
-      notify: service <|> Restart firewall services
+      notify: service <|> Reload firewall services
 
     - name: "command <|> Check firewalld policies' current ports"
       ansible.builtin.command:
@@ -398,7 +427,7 @@
       loop_control:
         label: "{{ item.item.0.name }} <-> {{ item.item.1 }}"
       when: item.rc != 0
-      notify: service <|> Restart firewall services
+      notify: service <|> Reload firewall services
 
     - name: "command <|> Check firewalld policies' ports pending removal"
       ansible.builtin.command:
@@ -426,7 +455,7 @@
       loop_control:
         label: "{{ item.item.0.name }} </> {{ item.item.1 }}"
       when: item.rc == 0
-      notify: service <|> Restart firewall services
+      notify: service <|> Reload firewall services
 
     - name: "command <|> Check firewalld policies' current rich rules"
       ansible.builtin.command:
@@ -454,7 +483,7 @@
       loop_control:
         label: "{{ item.item.0.name }} <-> '{{ item.item.1 }}'"
       when: item.rc != 0
-      notify: service <|> Restart firewall services
+      notify: service <|> Reload firewall services
 
     - name: "command <|> Check firewalld policies' rich rules pending removal"
       ansible.builtin.command:
@@ -482,4 +511,4 @@
       loop_control:
         label: "{{ item.item.0.name }} </> '{{ item.item.1 }}'"
       when: item.rc == 0
-      notify: service <|> Restart firewall services
+      notify: service <|> Reload firewall services

@@ -1,5 +1,13 @@
-# haproxy_restrict_nodes_http_listen: false
+---
+# Multi lines strings replacing the role default global and defaults sections
+haproxy_global_parameters:
+haproxy_defaults_parameters:
 
-# haproxy_mode: tcp
+# Frontends and backends, see README
+haproxy_resources: []
 
+# Raw configuration, added as is after global and defaults sections
+haproxy_resources_raw: ""
+
+# Allow binding on IP addresses not present on the host (virtual IPs)
 haproxy_enable_ip_nonlocal_bind: true

@@ -1,0 +1,18 @@
+{{ ansible_managed | comment }}
+# Overrides /etc/containers/registries.conf, see containers-registries.conf.d(5)
+{% if podman_search_registries | length > 0 %}
+
+unqualified-search-registries = [{% for registry in podman_search_registries %}"{{ registry }}"{{ '' if loop.last else ', ' }}{% endfor %}]
+{% endif %}
+{% for registry in podman_insecure_registries %}
+
+[[registry]]
+location = "{{ registry }}"
+insecure = true
+{% endfor %}
+{% for registry in podman_blocked_registries %}
+
+[[registry]]
+location = "{{ registry }}"
+blocked = true
+{% endfor %}

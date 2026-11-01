@@ -1,3 +1,37 @@
 ---
-grafana_role_version: 2.2.5
-grafana_default_port: 3000
+grafana_role_version: 3.0.0
+
+grafana_packages_to_install:
+  - grafana
+  - util-linux  # runuser, to run grafana-cli as grafana user
+grafana_services_to_start:
+  - grafana-server
+
+grafana_homepath: /usr/share/grafana
+grafana_dashboards_path: /var/lib/grafana/dashboards
+
+# grafana.ini base configuration, grafana_configuration is merged over it.
+# Paths are set explicitly so that grafana-cli, which only reads grafana.ini,
+# works on the same database and plugins folder as the server.
+grafana_base_configuration:
+  paths:
+    data: /var/lib/grafana
+    logs: /var/log/grafana
+    plugins: /var/lib/grafana/plugins
+    provisioning: /etc/grafana/provisioning
+  server:
+    http_addr: "{{ grafana_address }}"
+    http_port: "{{ grafana_port }}"
+    domain: "{{ grafana_domain }}"
+  security:
+    admin_user: "{{ grafana_admin_user }}"
+    admin_password: "{{ grafana_admin_password }}"
+
+# Added to the base configuration when grafana_ldap_configuration is set
+grafana_ldap_base_configuration:
+  auth.ldap:
+    enabled: true
+    config_file: /etc/grafana/ldap.toml
+
+# Variables of role versions < 3.0.0, now rejected
+grafana_legacy_variables_regex: "^grafana_(provisioning_synced|install_oss_packages|user_gid|user_uid|user_home|instance|logs_dir|data_dir|cap_net_bind_service|url|api_url|server|security|database|remote_cache|welcome_email_on_sign_up|users|auth|ldap|session|analytics|smtp|alerting|log|metrics|tracing|snapshots|image_storage|alert_notifications|api_keys|api_keys_dir|environment|panels|firewall_services_to_add)$"

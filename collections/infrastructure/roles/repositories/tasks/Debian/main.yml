@@ -25,8 +25,8 @@
 
 - name: apt_repository <|> Setting custom repositories
   ansible.builtin.apt_repository:
-    # repo: "{{ item.repo | default('deb [' + repositories_trust_option_by_repo[item.name] + '] ' + (repositories_j2_simple_url | default('', true)) + ( item.name | default(item, true) | string ) + ' ' + ( item.distribution | default('./', true) )) }}"
-    repo: "{{ item.repo | default('deb [trusted=yes] ' + (repositories_j2_simple_url | default('', true)) + ( item.name | default(item, true) | string ) + ' ' + ( item.distribution | default('./', true) )) }}"
+    # repo: "{{ item.repo | default('deb [' + repositories_trust_option_by_repo[item.name] + '] ' + (repositories_simple_url | default('', true)) + ( item.name | default(item, true) | string ) + ' ' + ( item.distribution | default('./', true) )) }}"
+    repo: "{{ item.repo | default('deb [trusted=yes] ' + (repositories_simple_url | default('', true)) + ( item.name | default(item, true) | string ) + ' ' + ( item.distribution | default('./', true) )) }}"
     state: "{{ item.state | default('present') }}"
     codename: "{{ item.codename | default(omit) }}"
     filename: "{{ item.filename | default(omit) }}"

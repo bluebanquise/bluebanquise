@@ -1,49 +1,60 @@
 ---
+# Flat optimization: the file is the same for all hosts. It is built and rendered only once,
+# on the Ansible host, using the variables of the first host of the play, then copied to all hosts.
 
-- name: block <|> Generate configuration localy (flat optimization enabled)
-  delegate_to: localhost
+- name: set_fact <|> Build hosts list (once for all hosts)
+  ansible.builtin.set_fact:
+    hosts_file_hosts: "{{ hostvars | bluebanquise.infrastructure.hosts_by_first_octets(groups[hosts_file_group], networks) }}"
+  vars:
+    hosts_file_group: "{{ hosts_file_restrict_to_group | default(bb_restrict_to_group, true) | default('all', true) }}"
   run_once: true
   tags:
     - template
-  block:
 
-    - name: set_fact <|> Build host to network mapping
-      ansible.builtin.set_fact:
-        hosts_file_hosts_by_first_octets: "{{ hostvars | bluebanquise.infrastructure.hosts_by_first_octets(groups[(hosts_file_restrict_to_group | default(bb_restrict_to_group, true) | default('all', true))], networks) }}"
-      delegate_facts: true  # We delegate to localhost only, to avoid memory usage with all hosts
+- name: tempfile <|> Create local working directory
+  ansible.builtin.tempfile:
+    state: directory
+    suffix: hosts_file
+  register: hosts_file_work_dir
+  delegate_to: localhost
+  run_once: true
+  become: false
+  changed_when: false
+  check_mode: false
+  tags:
+    - template
 
-    - name: tempfile <|> Create temporary file
-      ansible.builtin.tempfile:
-        state: file
-        suffix: "hosts_file_work"
-      register: hosts_file_work_file
-      when: not ansible_check_mode
+- name: template <|> Render hosts file locally (once for all hosts)
+  ansible.builtin.template:
+    src: hosts.j2
+    dest: "{{ hosts_file_work_dir.path }}/hosts"
+    mode: 0644
+  delegate_to: localhost
+  run_once: true
+  become: false
+  changed_when: false
+  check_mode: false
+  tags:
+    - template
 
-    - name: template <|> Generate /etc/hosts
-      ansible.builtin.template:
-        src: hosts.j2
-        dest: "{{ hosts_file_work_file.path | default('/tmp/hosts', true) }}" # Default here allows to display content even in check mode
-        mode: 0644
-      vars:
-        hosts_by_first_octets: "{{ hosts_file_hosts_by_first_octets }}"
-
-# Now that file is rendered, lets push it to targets
 - name: copy <|> Push /etc/hosts
   ansible.builtin.copy:
-    src: "{{ hosts_file_work_file.path }}"
+    src: "{{ hosts_file_work_dir.path }}/hosts"
     dest: /etc/hosts
     owner: root
     group: root
     mode: 0644
   tags:
     - template
-  when: not ansible_check_mode
 
-# Finaly, we can cleanup working file
-- name: file <|> Remove temporary working file
+- name: file <|> Remove local working directory
   ansible.builtin.file:
-    path: "{{ hosts_file_work_file.path }}"
+    path: "{{ hosts_file_work_dir.path }}"
     state: absent
   delegate_to: localhost
   run_once: true
-  when: not ansible_check_mode
+  become: false
+  changed_when: false
+  check_mode: false
+  tags:
+    - template

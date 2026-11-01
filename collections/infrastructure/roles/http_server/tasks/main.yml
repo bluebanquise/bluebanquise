@@ -1,15 +1,5 @@
 ---
 - name: include_vars <|> Gather OS specific variables
-  # This task gathers variables defined in OS specific files.
-  #
-  # Search vars in:
-  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
-  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
-  #  - <distribution>.yml            # eg. CentOS.yml
-  #  - <os_family>.yml               # eg. RedHat.yml
-  #
-  # If no OS specific file is found, the role will default to vars/main.yml
-  #
   ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
     - files:
@@ -21,6 +11,47 @@
   tags:
     - always
 
+- name: assert <|> Check that Apache modules are not requested on RedHat
+  ansible.builtin.assert:
+    that:
+      - ansible_facts.os_family != 'RedHat'
+    fail_msg: >-
+      http_server_modules is not supported on RedHat family (no a2enmod):
+      modules are loaded by /etc/httpd/conf.modules.d files, use http_server_configurations_files instead.
+    quiet: true
+  when:
+    - http_server_modules | default([], true) | length > 0
+
+# Listen directives, from http_server_listen:
+#   "auto": port 80 on all IPs of the host network interfaces
+#   "ip:port" as is, "ip" on port 80, "port" on all addresses
+- name: set_fact <|> Initialize listen directives
+  ansible.builtin.set_fact:
+    http_server_listen_entries: []
+  tags:
+    - always
+
+- name: set_fact <|> Listen on all network interfaces IPs (auto)
+  ansible.builtin.set_fact:
+    http_server_listen_entries: "{{ http_server_listen_entries + [item.ip4.split('/')[0] + ':80'] }}"
+  loop: "{{ network_interfaces | default([], true) }}"
+  loop_control:
+    label: "{{ item.interface | default(item.ip4 | default('')) }}"
+  when:
+    - http_server_listen == 'auto'
+    - item.ip4 is defined
+  tags:
+    - always
+
+- name: set_fact <|> Listen on given addresses and ports
+  ansible.builtin.set_fact:
+    http_server_listen_entries: "{{ http_server_listen_entries + [entry if (':' in entry or entry is match('^[0-9]+$')) else entry + ':80'] }}"
+  vars:
+    entry: "{{ item | string }}"
+  loop: "{{ [] if (http_server_listen is none or http_server_listen is string) else http_server_listen }}"
+  tags:
+    - always
+
 - name: "package <|> Install {{ http_server_packages_to_install | join(' ') }} packages"
   ansible.builtin.package:
     name: "{{ http_server_packages_to_install }}"
@@ -28,34 +59,52 @@
   tags:
     - package
 
-- name: "firewalld <|> Add services to firewall's zone"
-  ansible.posix.firewalld:
-    zone: "{{ http_server_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
-    service: "{{ item }}"
-    immediate: true
-    permanent: true
-    state: enabled
+- name: firewalld <|> Configure firewall
   when:
     - os_firewall | default(true) | bool
-  loop: "{{ http_server_firewall_services_to_add }}"
   tags:
     - firewall
+  block:
+    - name: "firewalld <|> Add services to firewall's zone"
+      ansible.posix.firewalld:
+        zone: "{{ http_server_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
+        service: "{{ item }}"
+        immediate: true
+        permanent: true
+        state: enabled
+      loop: "{{ http_server_firewall_services_to_add }}"
 
-- name: include_tasks <|> Use OS dedicated task
-  ansible.builtin.include_tasks: "{{ outer_item }}"
-  with_first_found:
-    - files:
-        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
-        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
-        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/main.yml"
-        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/main.yml"
-        - "{{ ansible_facts.distribution | replace(' ','_') }}/main.yml"
-        - "{{ ansible_facts.os_family | replace(' ','_') }}/main.yml"
-      skip: true
-  loop_control:
-    loop_var: outer_item
+    - name: "firewalld <|> Add custom listen ports to firewall's zone"
+      ansible.posix.firewalld:
+        zone: "{{ http_server_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
+        port: "{{ item }}/tcp"
+        immediate: true
+        permanent: true
+        state: enabled
+      when:
+        - item != '80'
+      loop: "{{ http_server_listen_entries | map('split', ':') | map('last') | unique }}"
+  rescue:
+    - name: fail <|> Firewall configuration failed
+      ansible.builtin.fail:
+        msg: >-
+          Firewall configuration failed: {{ (ansible_failed_result.results | default([]) | selectattr('failed', 'defined') | selectattr('failed') | map(attribute='msg') | list + [ansible_failed_result.msg | default('unknown error')]) | first }}.
+          firewalld must be installed and running, with its Python bindings (python3-firewall package),
+          for example using the firewall role. Set os_firewall to false to disable firewall configuration.
+
+# Suse default configuration does not allow folders listing
+- name: copy <|> Allow folders listing on Suse
+  ansible.builtin.copy:
+    src: Suse/bluebanquise.conf
+    dest: /etc/apache2/conf.d/bluebanquise.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify: service <|> Restart http server service
+  when:
+    - ansible_facts.os_family == 'Suse'
   tags:
-    - internal
+    - template
 
 - name: template <|> Generate custom listen configuration
   ansible.builtin.template:
@@ -64,14 +113,46 @@
     owner: root
     group: root
     mode: 0644
+  notify: service <|> Restart http server service
+  when:
+    - http_server_listen_entries | length > 0
   tags:
     - template
+
+# The distribution "Listen 80" would conflict with custom listen directives
+- name: lineinfile <|> Disable distribution default listen
+  ansible.builtin.lineinfile:
+    path: "{{ http_server_apache_main_conf_path }}"
+    regexp: '^Listen 80$'
+    line: '#Listen 80'
+    backrefs: true
+  notify: service <|> Restart http server service
   when:
-    - http_server_listen is defined
-    - http_server_listen is not none
-  notify:
-    - service <|> Restart http server service
-    - lineinfile <|> Disable default listen on all interfaces
+    - http_server_listen_entries | length > 0
+  tags:
+    - template
+
+- name: file <|> Remove custom listen configuration
+  ansible.builtin.file:
+    path: "{{ http_server_apache_conf_path }}/custom_listen.conf"
+    state: absent
+  notify: service <|> Restart http server service
+  when:
+    - http_server_listen_entries | length == 0
+  tags:
+    - template
+
+- name: lineinfile <|> Restore distribution default listen
+  ansible.builtin.lineinfile:
+    path: "{{ http_server_apache_main_conf_path }}"
+    regexp: '^#Listen 80$'
+    line: 'Listen 80'
+    backrefs: true
+  notify: service <|> Restart http server service
+  when:
+    - http_server_listen_entries | length == 0
+  tags:
+    - template
 
 - name: template <|> Generate http server configuration files
   ansible.builtin.template:
@@ -80,14 +161,12 @@
     owner: root
     group: root
     mode: 0644
+  loop: "{{ http_server_configurations_files | default([], true) }}"
+  loop_control:
+    label: "{{ item.name }}"
+  notify: service <|> Restart http server service
   tags:
     - template
-  loop: "{{ http_server_configurations_files | flatten(levels=1) }}"
-  when:
-    - http_server_configurations_files is defined
-    - http_server_configurations_files is not none
-    - http_server_configurations_files is iterable
-  notify: service <|> Restart http server service
 
 - name: apache2_module <|> Enable apache2 modules
   community.general.apache2_module:
@@ -96,19 +175,16 @@
     ignore_configcheck: "{{ item.ignore_configcheck | default(omit, true) }}"
     name: "{{ item.name }}"
     state: "{{ item.state | default(omit, true) }}"
-  loop: "{{ http_server_modules | flatten(levels=1) }}"
-  when:
-    - http_server_modules is defined
-    - http_server_modules is not none
-    - http_server_modules is iterable
-    - item.name is defined and item.name is not none
+  loop: "{{ http_server_modules | default([], true) }}"
+  loop_control:
+    label: "{{ item.name }}"
   notify: service <|> Restart http server service
 
 - name: "service <|> Manage {{ http_server_services_to_start | join(' ') }} state"
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: "{{ http_server_enable_services | default(bb_enable_services) | default(true) | bool }}"
-    state: "{{ (http_server_start_services | default(bb_start_services) | default(true, true) | bool) | ternary('started', omit) }}"
+    enabled: "{{ (http_server_enable_services | default(bb_enable_services) | default(true) | bool) | ternary(true, false) }}"
+    state: "{{ (http_server_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   loop: "{{ http_server_services_to_start }}"
   tags:
     - service

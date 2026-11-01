@@ -119,9 +119,9 @@ netboots:
   opensuse_16:
     os: opensuse
     version: "16.0"
-    description: "openSUSE Leap 16.0 DVD"
+    description: "openSUSE Leap 16.0 offline installer"
     x86_64:
-      url: "https://download.opensuse.org/distribution/leap/16.0/iso/openSUSE-Leap-16.0-DVD-x86_64.iso"
+      url: "https://download.opensuse.org/distribution/leap/16.0/offline/Leap-16.0-offline-installer-x86_64.install.iso"
       sha256: null
       install_script: |
         set -e
@@ -130,7 +130,7 @@ netboots:
         cp -a /mnt/. ${NETBOOT_BASE_DIR}/iso/
         umount /mnt
     arm64:
-      url: "https://download.opensuse.org/distribution/leap/16.0/iso/openSUSE-Leap-16.0-DVD-aarch64.iso"
+      url: "https://download.opensuse.org/distribution/leap/16.0/offline/Leap-16.0-offline-installer-aarch64.install.iso"
       sha256: null
       install_script: |
         set -e

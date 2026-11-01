@@ -1,0 +1,46 @@
+#!ipxe
+
+echo |
+echo | Entering osdeploy/opensuse_16.ipxe file.
+echo |
+
+echo | Now starting os deployment process.
+echo | OpenSuSE 16 Family ipxe configuration (Agama installer).
+echo |
+
+# Distribution paths use aarch64 where iPXE uses arm64
+iseq ${buildarch} arm64 && set suse-arch aarch64 || set suse-arch x86_64
+
+echo | Parameters used:
+echo | > Operating system target: ${eq-distribution} ${eq-distribution-version} ${suse-arch}
+echo | > Console: ${eq-console}
+echo | > Additional kernel parameters: ${eq-kernel-parameters} ${dedicated-kernel-parameters}
+echo | > Deployment server: ${next-server}
+echo | > Target images root: ${images-root}
+echo | > Target images root iso: ${images-root-iso}
+echo | > Target Agama profile: ${agama-path}
+echo |
+echo | Loading linux ...
+
+kernel ${images-root}/${images-root-iso}/boot/${suse-arch}/loader/linux initrd=initrd root=live:${images-root}/${images-root-iso}/LiveOS/squashfs.img inst.install_url=${images-root}/${images-root-iso}/install inst.auto=${agama-path} inst.finish=${eq-finish-action} ip=dhcp ${eq-installer-proxy} ${eq-console} ${eq-kernel-parameters} ${eq-kernel-aggressive-dhcp} ${dedicated-kernel-parameters} ipxe_next_server=${next-server} node_hostname=${hostname}
+
+echo | Loading initial ramdisk ...
+
+initrd ${images-root}/${images-root-iso}/boot/${suse-arch}/loader/initrd
+
+echo | ALL DONE! We are ready.
+echo | Downloaded images report:
+
+imgstat
+
+echo | MD5sums:
+md5sum initrd linux
+echo |
+
+echo | Booting in 4s ...
+echo |
+echo +----------------------------------------------------+
+
+sleep 4
+
+boot

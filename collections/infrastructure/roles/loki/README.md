@@ -2,50 +2,98 @@
 
 ## Description
 
-These settings configure Loki and Promtail on a BlueBanquise management host.
+This role deploys Loki on the management host, to store and query the logs centralized by rsyslog.
 
 Supported distributions: RHEL 9/10, Ubuntu 24.04/26.04, Debian 13, OpenSuse Leap 16.
 
-A rsyslog forwarder configuration file is created to forward all rsyslog traffic to Promtail. From here Promtail uses Loki to store the data.
+Logs flow is:
 
-The following labels are added to the syslog data:
+```
+hosts --> rsyslog (management host) --> Alloy (127.0.0.1:1514) --> Loki (127.0.0.1:3100) <-- Grafana
+```
 
-- app
-- host
-- job
-- level
+* rsyslog forwards all the messages it receives (see the **rsyslog** role) to Alloy, using `/etc/rsyslog.d/loki.conf`.
+* Alloy (successor of Promtail) receives them on a local syslog listener, adds labels, and pushes them to Loki.
+* Loki stores them on the local filesystem (`/var/lib/loki`), in a single process.
 
-Further details about Loki and Promtail can be found at: https://grafana.com/docs/loki/latest
+The following labels are added to each log line:
 
-Loki can be set as a data source in Grafana by setting the data source URL to http://localhost:3100.
+| Label | Content |
+|-------|---------|
+| `job` | `syslog` |
+| `host` | Host that emitted the message |
+| `app` | Program that emitted the message (`sshd`, `kernel`...) |
+| `level` | Severity (`info`, `warning`, `error`...) |
+
+Loki can then be used as a Grafana datasource (see the **grafana** role), with URL `http://localhost:3100`:
+
+```yaml
+grafana_datasources:
+  - name: Loki
+    type: loki
+    access: proxy
+    url: http://localhost:3100
+```
+
+Example query, in Grafana Explore: `{job="syslog", host="c001", level="error"}`.
+
+Further details: [Loki](https://grafana.com/docs/loki/latest/) and [Alloy](https://grafana.com/docs/alloy/latest/) documentation.
 
 ## Requirements
 
-The `loki` and `promtail` packages must be available in the configured repositories (e.g. from Grafana's official package repository).
+The `loki` and `alloy` packages must be available in the configured repositories. They are not provided
+by the distributions, use Grafana repositories, defined in `bb_repositories` and configured by the
+`repositories` role first (see the **grafana** role README for the format of each distribution). On
+clusters without internet access, mirror the repository on the management host and use the local URL instead.
 
-## Role Variables
+The role uses the systemd units and users (`loki`, `alloy`) shipped by these packages.
 
-All variables which can be overridden are stored in [defaults/main.yml](defaults/main.yml) file as well as in table below.
+rsyslog must be installed and configured to receive the hosts logs (**rsyslog** role).
 
-| Name | Default Value | Description |
-| ---- | ------------- | ----------- |
-| loki_groups                 | See `defaults/main.yml`    | Dictionary of groups to create                                            |
-| loki_users                  | See `defaults/main.yml`    | Dictionary of users to create                                             |
-| loki_conf_dir               | /etc/loki                  | Loki config directory                                                     |
-| loki_data_dir               | /var/lib/loki              | Loki data directory                                                       |
-| loki_index_dir              | {{ loki_data_dir }}/index  | Loki index directory                                                      |
-| loki_chunks_dir             | {{ loki_data_dir }}/chunks | Loki chunks directory                                                     |
-| loki_ip                     | 127.0.0.1                  | Loki HTTP IP address                                                      |
-| loki_port                   | 3100                       | Loki HTTP port                                                            |
-| loki_grpc_port              | 9095                       | Loki gRPC port                                                            |
-| loki_promtail_conf_dir      | /etc/promtail              | Promtail config dir                                                       |
-| loki_promtail_enable_server | false                      | Enable Promtail HTTP/gRPC server (not needed for processing central logs) |
-| loki_promtail_ip            | 127.0.0.1                  | Promtail HTTP/gRPC address                                                |
-| loki_promtail_port          | 9080                       | Promtail HTTP port                                                        |
-| loki_promtail_grpc_port     | 0                          | Set to zero to randomise gRPC port                                        |
-| loki_promtail_grpc_ip       | 127.0.0.1                  | Promtail gRPC address                                                     |
-| loki_promtail_syslog_port   | 1514                       | Syslog listener port                                                      |
-| loki_promtail_syslog_ip      | 127.0.0.1                  | Syslog address                                                            |
+## Instructions
+
+### Configuration
+
+Loki configuration is generated in `/etc/loki/config.yml`, and checked with `loki -verify-config` before being
+written. Alloy configuration is generated in `/etc/alloy/config.alloy`, and checked with `alloy fmt`.
+
+By default, Loki only listens on `127.0.0.1`, which is enough when Grafana runs on the same host. To reach
+it from another host, set `loki_ip` to an IP of the host (or `0.0.0.0`): the Loki port is then opened in the firewall.
+
+### Retention
+
+Logs are kept forever by default. To delete logs older than a given duration, set `loki_retention_period`,
+for example `30d` or `720h`.
+
+### Upgrade from role versions 1.x (Promtail)
+
+Role versions 1.x used Promtail, which reached end of life, and Loki 2 configuration options removed in Loki 3.
+When upgrading:
+
+* The Promtail service is stopped and disabled, and its unit and rsyslog forwarder removed. The `promtail`
+  package and user can then be removed manually.
+* The role 1.x replaced the packaged `loki.service` with its own one, at the same path. A drop-in file
+  (`/etc/systemd/system/loki.service.d/bluebanquise.conf`) makes sure the new configuration file is used.
+* Logs stored by Loki 2 (`boltdb` index) cannot be read by Loki 3, and are not visible anymore. Loki 3 stores
+  its data in other folders: once not needed anymore, delete `/var/lib/loki/index`, `/var/lib/loki/chunks` and `/tmp/wal`.
+* Variables `loki_users`, `loki_groups`, `loki_conf_dir`, `loki_index_dir`, `loki_chunks_dir` and `loki_promtail_*`
+  are not used anymore: the role fails if they are still set, remove them from the inventory.
+  `loki_promtail_syslog_ip` and `loki_promtail_syslog_port` are replaced by `loki_syslog_ip` and `loki_syslog_port`.
+
+## Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `loki_ip` | `127.0.0.1` | Loki HTTP listening address. |
+| `loki_port` | `3100` | Loki HTTP port. |
+| `loki_grpc_port` | `9095` | Loki gRPC port (always on `127.0.0.1`). |
+| `loki_data_dir` | `/var/lib/loki` | Loki data directory. |
+| `loki_retention_period` | `0s` | Delete logs older than this duration, `0s` to keep them forever. |
+| `loki_syslog_ip` | `127.0.0.1` | Alloy syslog listener address, receiving rsyslog traffic. |
+| `loki_syslog_port` | `1514` | Alloy syslog listener port (TCP). |
+| `loki_firewall_zone` | `bb_services_firewall_zone`, else `public` | Firewall zone to open Loki port in, when `loki_ip` is not a loopback address. |
+| `loki_enable_services` | `bb_enable_services`, else `true` | Enable loki and alloy services. |
+| `loki_start_services` | `bb_start_services`, else `true` | Start loki and alloy services, and restart them on configuration changes. |
 
 ## Change log
 

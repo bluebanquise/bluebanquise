@@ -1,0 +1,54 @@
+---
+- name: assert <|> Check NVIDIA kernel modules choice
+  ansible.builtin.assert:
+    that:
+      - gpu_nvidia_kernel_modules in gpu_nvidia_driver_packages
+    fail_msg: >-
+      gpu_nvidia_kernel_modules is {{ gpu_nvidia_kernel_modules }}, but only
+      {{ gpu_nvidia_driver_packages.keys() | list | join(', ') }} kernel modules are available on
+      {{ ansible_facts.distribution }} {{ ansible_facts.distribution_major_version }}.
+    quiet: true
+
+- name: package <|> Install kernel headers and development packages
+  ansible.builtin.package:
+    name: "{{ gpu_kernel_packages }}"
+    state: present
+  tags:
+    - package
+
+- name: "package <|> Install NVIDIA driver ({{ gpu_nvidia_kernel_modules }} kernel modules)"
+  ansible.builtin.package:
+    name: "{{ gpu_nvidia_driver_packages[gpu_nvidia_kernel_modules] }}"
+    state: present
+  register: gpu_nvidia_driver
+  tags:
+    - package
+
+- name: package <|> Install CUDA toolkit
+  ansible.builtin.package:
+    name: "{{ gpu_nvidia_cuda_packages }}"
+    state: present
+  when: gpu_nvidia_install_cuda | bool
+  tags:
+    - package
+
+- name: reboot <|> Reboot host after NVIDIA driver installation
+  ansible.builtin.reboot:
+    reboot_timeout: "{{ gpu_reboot_timeout }}"
+  when:
+    - gpu_reboot | bool
+    - gpu_nvidia_driver is defined and gpu_nvidia_driver is changed
+
+# nvidia-persistenced can only start once the driver is loaded (after a reboot on first install)
+- name: stat <|> Check if NVIDIA driver is loaded
+  ansible.builtin.stat:
+    path: /proc/driver/nvidia/version
+  register: gpu_nvidia_driver_loaded
+
+- name: service <|> Manage nvidia-persistenced state
+  ansible.builtin.service:
+    name: nvidia-persistenced
+    enabled: "{{ (gpu_enable_services | default(bb_enable_services) | default(true) | bool) | ternary(true, false) }}"
+    state: "{{ (gpu_start_services | default(bb_start_services) | default(true) | bool and gpu_nvidia_driver_loaded.stat.exists) | ternary('started', omit) }}"
+  tags:
+    - service

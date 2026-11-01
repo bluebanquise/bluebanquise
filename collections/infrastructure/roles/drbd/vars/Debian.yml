@@ -1,3 +1,5 @@
 ---
+# DRBD 9 kernel module is not in mainline kernel (DRBD 8.4): drbd-dkms is provided by LINBIT
 drbd_packages_to_install:
   - drbd-utils
+  - drbd-dkms

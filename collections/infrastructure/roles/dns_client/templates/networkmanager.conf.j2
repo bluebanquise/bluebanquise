@@ -1,0 +1,9 @@
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+
+# Global DNS configuration: overrides DNS settings of all connections
+[global-dns]
+searches={{ dns_client_domain_name | default(bb_domain_name, true) | default('cluster.local', true) }}
+
+[global-dns-domain-*]
+servers={{ dns_client_nameservers | join(',') }}

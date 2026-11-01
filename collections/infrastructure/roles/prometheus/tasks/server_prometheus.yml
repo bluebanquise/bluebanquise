@@ -27,31 +27,41 @@
     dest: /etc/systemd/system/prometheus.service
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   notify:
     - systemd <|> Reload systemd configuration
     - service <|> Restart prometheus service
   tags:
     - template
 
-- name: "firewalld <|> Add prometheus service to firewall's zone"
-  ansible.posix.firewalld:
-    zone: "{{ prometheus_server_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
-    service: prometheus
-    immediate: true
-    permanent: true
-    state: enabled
+- name: firewalld <|> Configure firewall
   when:
-    - prometheus_firewall_open | bool
     - os_firewall | default(true) | bool
   tags:
     - firewall
+  block:
+    - name: "firewalld <|> Add prometheus service to firewall's zone"
+      ansible.posix.firewalld:
+        zone: "{{ prometheus_server_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
+        service: prometheus
+        immediate: true
+        permanent: true
+        state: enabled
+      when:
+        - prometheus_firewall_open | bool
+  rescue:
+    - name: fail <|> Firewall configuration failed
+      ansible.builtin.fail:
+        msg: >-
+          Firewall configuration failed: {{ (ansible_failed_result.results | default([]) | selectattr('failed', 'defined') | selectattr('failed') | map(attribute='msg') | list + [ansible_failed_result.msg | default('unknown error')]) | first }}.
+          firewalld must be installed and running, with its Python bindings (python3-firewall package),
+          for example using the firewall role. Set os_firewall to false to disable firewall configuration.
 
 - name: file <|> Create Prometheus directories structure
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    mode: 0750
+    mode: "0750"
     owner: prometheus
     group: prometheus
   loop:
@@ -65,29 +75,21 @@
     dest: /etc/prometheus/prometheus.yml
     owner: prometheus
     group: prometheus
-    mode: 0640
+    mode: "0640"
     validate: /usr/bin/promtool check config %s
   notify: service <|> Restart prometheus service
   tags:
     - template
 
-- name: copy <|> Copy /etc/prometheus/alerts/general.yml
-  ansible.builtin.copy:
-    src: alerts/general.yml
-    dest: /etc/prometheus/alerts/general.yml
-    owner: prometheus
-    group: prometheus
-    mode: 0640
-
-- name: copy <|> Copy additional alerts to /etc/prometheus/alerts/
+- name: copy <|> Copy alerts to /etc/prometheus/alerts/
   ansible.builtin.copy:
     src: alerts/{{ item }}.yml
     dest: /etc/prometheus/alerts/{{ item }}.yml
     owner: prometheus
     group: prometheus
-    mode: 0640
-  loop: "{{ prometheus_server_additional_alerts }}"
-  when: prometheus_server_additional_alerts is defined
+    mode: "0640"
+  loop: "{{ ['general'] + prometheus_server_additional_alerts }}"
+  notify: service <|> Restart prometheus service
 
 - name: template <|> Generate users alerts to /etc/prometheus/alerts/user_alerts.yml
   ansible.builtin.template:
@@ -95,18 +97,10 @@
     dest: /etc/prometheus/alerts/user_alerts.yml
     owner: prometheus
     group: prometheus
-    mode: 0640
+    mode: "0640"
+    validate: /usr/bin/promtool check rules %s
   when: prometheus_server_custom_alerts is defined and prometheus_server_custom_alerts is not none
   notify: service <|> Restart prometheus service
-
-- name: file <|> Create service needed directory
-  ansible.builtin.file:
-    path: /etc/systemd/system/prometheus.service.d
-    state: directory
-    owner: root
-    group: root
-    mode: 0755
-  when: prometheus_server_launch_parameters is defined and prometheus_server_launch_parameters is not none
 
 - name: meta <|> Run handler tasks
   ansible.builtin.meta: flush_handlers

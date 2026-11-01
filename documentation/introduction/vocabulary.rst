@@ -14,7 +14,7 @@ An Ansible **host** (also often referred as a **host**) is a remote host managed
 by Ansible. An **host** can be a physical server, but also a VM, a container or
 something else.
 
-.. image:: images/hosts/hosts_example.svg
+.. image:: ../images/nodes/hosts_example.svg
    :align: center
 
 |
@@ -239,7 +239,7 @@ Inventory can be seen as a giant pizza, in 3D then flatten.
 * Then *small ingredients* above are the /var/lib/bluebanquise/inventory/cluster/hosts/
 * And *pepper and tomatoes* (last layer) is the extra-vars at call.
 
-.. image:: images/pizza_example.svg
+.. image:: ../images/pizza_example.svg
 
 I like pizza...
 
@@ -263,7 +263,8 @@ bb variables
 These are **BlueBanquise** specific variables.
 All variables with name starting with **bb_** are bb variables.
 
-These variables are transverse variables, which means they will precedence any roles' owned related variables.
+These variables are transverse variables, which means they will be used by all roles when needed.
+However, they will ALWAYS be precedenced by roles' owned related variables.
 
 Their purpose is to allow a simple centralisation of global values.
 
@@ -275,7 +276,7 @@ Defining ``bb_domain_name`` can replace all of them at once.
 Equipment profiles
 ------------------
 
-In **BlueBanquise**, hosts are, in normal time, part of at least 3 key Ansible groups.
+In **BlueBanquise**, hosts are, in normal time, part of at least 3 key Ansible logical groups.
 
 * 1 **function group**, that defines the purpose of the host. These groups are always prefixed by ``fn_``. For example: ``fn_worker``.
 * 1 **hardware group**, that defines the hardware used for the host. These groups are always prefixed by ``hw_``. For example: ``hw_supermicro_X10DRT``.
@@ -291,7 +292,7 @@ For example:
 
 This configuration has 2 equipment profiles: ``hw_X2_with_os_debian_12`` and ``hw_X1_with_os_debian_12``.
 
-.. image:: images/groups_ep.svg
+.. image:: ../images/vocabulary/groups_ep.svg
    :align: center
 
 These groups are used to provide to hosts dedicated parameters
@@ -301,14 +302,11 @@ authentication parameters.
 
 These are key groups of the stack.
 
-.. image:: images/ep_hard.svg
+.. image:: ../images/vocabulary/ep_hard.svg
    :align: center
 
 |
 
-
 **It is important** to note that hardware groups variables start with prefix ``hw_`` and os groups variables start with prefix ``os_``
 and that these variables **MUST NEVER** be used at an upper level than group_vars in variables precedence.
 You can however, use them at group_vars/all level, if you consider that a specific variable should be shared by all groups.
-
-For now, just keep in mind these variables exist. These will be discussed later.

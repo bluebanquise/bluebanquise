@@ -38,7 +38,7 @@
   tags:
     - template
 
-- name: "template <|> Generate /etc/drbd.d/resources.res"
+- name: "template <|> Generate /etc/drbd.d/<resource>.res"
   ansible.builtin.template:
     src: resource.res.j2
     dest: "/etc/drbd.d/{{ item.name }}.res"
@@ -49,13 +49,9 @@
   tags:
     - template
 
-- name: "command <|> Check if resources are created"
-  ansible.builtin.shell: 'cat /var/lib/drbd/*.lkbd'
-  register: drbd_created
-  changed_when: false
-  ignore_errors: true
+# Each node of a resource prepares its own local disk
 
-- name: "filesystem <|> Create a new primary partition"
+- name: "parted <|> Create partitions"
   community.general.parted:
     device: "{{ item.partitioning.device | default(omit) }}"
     number: "{{ item.partitioning.number | default(omit) }}"
@@ -66,16 +62,20 @@
     part_start: "{{ item.partitioning.part_start | default(omit) }}"
     part_end: "{{ item.partitioning.part_end | default(omit) }}"
   loop: "{{ drbd_resources }}"
-  when: item.partitioning is defined and item.partitioning is not none
+  when:
+    - inventory_hostname in item.nodes
+    - item.partitioning is defined and item.partitioning is not none
 
-- name: "filesystem <|> Create a volume group"
+- name: "lvg <|> Create volume groups"
   community.general.lvg:
     vg: "{{ item.logical_volumes.vg | default(omit) }}"
     pvs: "{{ item.logical_volumes.partition | default(omit) }}"
   loop: "{{ drbd_resources }}"
-  when: item.logical_volumes is defined and item.logical_volumes is not none
+  when:
+    - inventory_hostname in item.nodes
+    - item.logical_volumes is defined and item.logical_volumes is not none
 
-- name: "filesystem <|> Create logical volume"
+- name: "lvol <|> Create logical volumes"
   community.general.lvol:
     vg: "{{ item.logical_volumes.vg | default(omit) }}"
     lv: "{{ item.logical_volumes.lv | default(omit) }}"
@@ -83,96 +83,113 @@
     pvs: "{{ item.logical_volumes.partition | default(omit) }}"
     state: "{{ item.logical_volumes.state | default(omit) }}"
   loop: "{{ drbd_resources }}"
-  when: item.logical_volumes is defined and item.logical_volumes is not none
+  when:
+    - inventory_hostname in item.nodes
+    - item.logical_volumes is defined and item.logical_volumes is not none
 
-- name: "command <|> Create needed resources"
+# DRBD records the backing disk of each attached resource in /var/lib/drbd/*.lkbd files.
+# Metadata is only created for resources whose disk is not listed there.
+- name: "shell <|> Check if resources are created"
+  ansible.builtin.shell: 'cat /var/lib/drbd/*.lkbd'
+  register: drbd_created
+  changed_when: false
+  failed_when: false
+
+- name: "command <|> Create resources metadata"
   ansible.builtin.command: "/usr/sbin/drbdadm create-md {{ item.name }} --force"
   loop: "{{ drbd_resources }}"
   when:
-    - (drbd_created.stdout_lines | select("match", ".*"+item.disk+"$") | list | length) < 1
+    - inventory_hostname in item.nodes
+    - (drbd_created.stdout_lines | select("match", ".*" + item.disk + "$") | list | length) < 1
 
 - name: "command <|> Check if resources are up"
   ansible.builtin.command: "/usr/sbin/drbdadm status"
   register: drbd_drbdadm_status
   changed_when: false
 
-- name: "command <|> Up needed resources"
+- name: "command <|> Up resources"
   ansible.builtin.command: "/usr/sbin/drbdadm up {{ item.name }}"
   loop: "{{ drbd_resources }}"
   when:
-    - (drbd_drbdadm_status.stdout_lines | select("match", "^"+item.name+".*") | list | length) < 1
+    - inventory_hostname in item.nodes
+    - (drbd_drbdadm_status.stdout_lines | select("match", "^" + item.name + " ") | list | length) < 1
 
-- name: "block <|> Format FS if needed"
-  run_once: true
-  block:
+# The first node of each resource is its default primary: it is promoted, then formats and
+# mounts the resource. A new resource is Inconsistent on all nodes, and its very first promotion
+# must be forced, which starts the initial synchronization to other nodes.
 
-    - name: "command <|> Check if resources are not already used"
-      ansible.builtin.shell: |
-              set -o pipefail
-              /usr/sbin/drbdadm status | grep {{ item.name }}
-      register: drbd_drbdadm_status
-      changed_when: false
-      failed_when: "drbd_drbdadm_status.rc != 0"
-      loop: "{{ drbd_resources }}"
-
-    - name: "command <|> Set primary resource device"
-      ansible.builtin.command: "/usr/sbin/drbdadm primary {{ item[0].name }}"
-      register: drbd_drbdadm_primary
-      delegate_to: "{{ drbd_resources[0].nodes.keys() | list | first }}"
-      changed_when:
-        - "drbd_drbdadm_primary.rc == 0"
-        - '"Primary" not in item[1].stdout'
-      failed_when: "drbd_drbdadm_primary.rc != 0"
-      loop: "{{ drbd_resources | product(drbd_drbdadm_status.results) | list }}"
-      when: item[0].name == item[1].item.name
-
-    - name: "filesystem <|> Creating filesystems"
-      community.general.filesystem:
-        dev: "{{ item.device }}"
-        force: "{{ item.filesystem.force | default(omit) }}"
-        fstype: "{{ item.filesystem.fstype | default(omit) }}"
-        opts: "{{ item.filesystem.opts | default(omit) }}"
-        resizefs: "{{ item.filesystem.resizefs | default(omit) }}"
-        state: "{{ item.filesystem.state | default(omit) }}"
-      loop: "{{ drbd_resources }}"
-      when: item.filesystem is defined and item.filesystem is not none
-
-- name: "stat <|> Check if DRBD local directories exist"
-  ansible.builtin.stat:
-    path: "{{ item.mount.path | default(omit) }}"
-  register: drbd_stat_result
+- name: "command <|> Get resources role on their default primary node"
+  ansible.builtin.command: "/usr/sbin/drbdadm role {{ item.name }}"
+  register: drbd_roles
+  changed_when: false
   loop: "{{ drbd_resources }}"
-  when: item.mount is defined and item.mount is not none
+  when: inventory_hostname == (item.nodes.keys() | list | first)
 
-- name: "file <|> Create directories if they do not exist"
+- name: "command <|> Get resources disk states on their default primary node"
+  ansible.builtin.command: "/usr/sbin/drbdadm dstate {{ item.name }}"
+  register: drbd_dstates
+  changed_when: false
+  loop: "{{ drbd_resources }}"
+  when: inventory_hostname == (item.nodes.keys() | list | first)
+
+- name: "command <|> Promote new resources to primary (initial synchronization)"
+  ansible.builtin.command: "/usr/sbin/drbdadm primary --force {{ item.0.name }}"
+  loop: "{{ drbd_resources | zip(drbd_roles.results, drbd_dstates.results) | list }}"
+  when:
+    - inventory_hostname == (item.0.nodes.keys() | list | first)
+    - not item.1.stdout.startswith('Primary')
+    # All disks of the resource (local and peers) are Inconsistent
+    - item.2.stdout | regex_findall('[A-Za-z]+') | unique == ['Inconsistent']
+
+- name: "command <|> Promote resources to primary"
+  ansible.builtin.command: "/usr/sbin/drbdadm primary {{ item.0.name }}"
+  loop: "{{ drbd_resources | zip(drbd_roles.results, drbd_dstates.results) | list }}"
+  when:
+    - inventory_hostname == (item.0.nodes.keys() | list | first)
+    - not item.1.stdout.startswith('Primary')
+    - item.2.stdout | regex_findall('[A-Za-z]+') | unique != ['Inconsistent']
+
+- name: "filesystem <|> Create filesystems"
+  community.general.filesystem:
+    dev: "{{ item.device }}"
+    force: "{{ item.filesystem.force | default(omit) }}"
+    fstype: "{{ item.filesystem.fstype | default(omit) }}"
+    opts: "{{ item.filesystem.opts | default(omit) }}"
+    resizefs: "{{ item.filesystem.resizefs | default(omit) }}"
+    state: "{{ item.filesystem.state | default(omit) }}"
+  loop: "{{ drbd_resources }}"
+  when:
+    - inventory_hostname == (item.nodes.keys() | list | first)
+    - item.filesystem is defined and item.filesystem is not none
+
+- name: "file <|> Create mount directories"
   ansible.builtin.file:
-    path: "{{ item[0].mount.path | default(omit) }}"
+    path: "{{ item.mount.path }}"
     state: directory
     mode: '0755'
+  loop: "{{ drbd_resources }}"
   when:
-    - item[0].mount is defined and item[0].mount is not none
-    - not item[1].stat.exists
-  loop: "{{ drbd_resources | product(drbd_stat_result.results) | list }}"
+    - inventory_hostname in item.nodes
+    - item.mount is defined and item.mount is not none
 
-- name: "filesystem <|> Mount DRBD filesystem"
+# noauto: at boot, resources are mounted by the high availability stack, not by fstab
+- name: "mount <|> Mount DRBD filesystems"
   ansible.posix.mount:
-    path: "{{ item.mount.path | default(omit) }}"
-    src: "{{ item.mount.source | default(omit) }}"
+    path: "{{ item.mount.path }}"
+    src: "{{ item.mount.source | default(item.device) }}"
     fstype: "{{ item.mount.fstype | default(omit) }}"
     state: "{{ item.mount.state | default(omit) }}"
     opts: noauto
   loop: "{{ drbd_resources }}"
-  when: item.mount is defined and item.mount is not none
-  delegate_to: "{{ drbd_resources[0].nodes.keys() | list | first }}"
-  run_once: true
+  when:
+    - inventory_hostname == (item.nodes.keys() | list | first)
+    - item.mount is defined and item.mount is not none
 
 - name: "command <|> Get drbdadm status"
   ansible.builtin.command: /usr/sbin/drbdadm status all
   register: drbd_drbdadm_final_status
   changed_when: false
-  run_once: true
 
 - name: "debug <|> Show drbdadm status"
   ansible.builtin.debug:
-    msg: "{{ drbd_drbdadm_final_status.stdout }}"
-  run_once: true
+    msg: "{{ drbd_drbdadm_final_status.stdout_lines }}"

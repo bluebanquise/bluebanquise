@@ -11,8 +11,8 @@ modules:
       {% if bmc_user is defined and bmc_user is not none and bmc_password is defined and bmc_password is not none %}
 
   {{ hardware.name }}:
-    user: {{ bmc_user }}
-    pass: {{ bmc_password }}
+    user: {{ bmc_user | string | to_json }}
+    pass: {{ bmc_password | string | to_json }}
     driver: "LAN_2_0"
     privilege: "user"
     timeout: 10000

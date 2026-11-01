@@ -25,8 +25,8 @@ hosts:
       name: {{ host_bmc['name'] }}
       ip4: {{ host_bmc['ip4'] }}
       protocol: {{ host_auth[0]['protocol'] }}
-      user: {{ host_auth[0]['user'] }}
-      password: {{ host_auth[0]['password'] }}
+      user: {{ host_auth[0]['user'] | string | to_json }}
+      password: {{ host_auth[0]['password'] | string | to_json }}
 {%     endif %}
 {%   endif %}
 {% endfor %}

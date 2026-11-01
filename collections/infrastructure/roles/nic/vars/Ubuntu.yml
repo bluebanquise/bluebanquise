@@ -1,5 +1,0 @@
----
-nic_services_to_start:
-  - NetworkManager
-nic_packages_to_install:
-  - network-manager

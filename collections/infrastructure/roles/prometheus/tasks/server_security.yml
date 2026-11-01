@@ -6,7 +6,8 @@
     dest: /etc/prometheus/web.yml
     owner: prometheus
     group: prometheus
-    mode: 0644
+    mode: "0640"
+    validate: /usr/bin/promtool check web-config %s
   notify: service <|> Restart prometheus service
   tags:
     - template

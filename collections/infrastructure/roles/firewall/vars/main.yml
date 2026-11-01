@@ -1,2 +1,7 @@
 ---
-firewall_role_version: 1.3.5
+firewall_role_version: 1.4.0
+
+firewall_packages_to_install:
+  - firewalld
+firewall_services_to_start:
+  - firewalld

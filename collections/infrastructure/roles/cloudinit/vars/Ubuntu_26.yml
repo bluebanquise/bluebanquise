@@ -1,0 +1,5 @@
+---
+# Ubuntu 26.04 ships cloud-init >= 24.3, where cloud-init.service was split into
+# cloud-init-main.service and cloud-init-network.service
+cloudinit_services_to_start:
+  - cloud-init-main

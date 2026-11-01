@@ -1,5 +1,6 @@
 ---
+# Provided by ELRepo repository
 drbd_packages_to_install:
-  - drbd90-utils
-  - kmod-drbd90
+  - drbd9x-utils
+  - kmod-drbd9x
   - policycoreutils-python-utils

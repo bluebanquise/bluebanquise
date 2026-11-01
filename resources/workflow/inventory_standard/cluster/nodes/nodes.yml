@@ -57,6 +57,12 @@ all:
           mac: 1a:2b:3c:4d:8e:8f
           network: net-admin
           interface: enp1s0
+    mgt10:
+      network_interfaces:
+        - ip4: 10.10.0.10
+          mac: 1a:2b:3c:4d:0a:8f
+          network: net-admin
+          interface: enp1s0
 
     # A compute node
     c001:

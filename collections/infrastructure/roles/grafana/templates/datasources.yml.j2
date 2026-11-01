@@ -1,0 +1,2 @@
+{{ ansible_managed | comment }}
+{{ {'apiVersion': 1, 'datasources': grafana_datasources} | to_nice_yaml(indent=2) }}

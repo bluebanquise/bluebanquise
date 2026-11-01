@@ -1,9 +1,9 @@
 ---
-
-- name: service <|> Restart keepalived server
+# Reload: keepalived applies the new configuration without dropping virtual IPs
+- name: service <|> Reload keepalived
   ansible.builtin.service:
     name: "{{ item }}"
-    state: restarted
+    state: reloaded
   loop: "{{ keepalived_services_to_start }}"
   when:
     - "'service' not in ansible_skip_tags"

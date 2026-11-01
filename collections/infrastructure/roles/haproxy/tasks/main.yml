@@ -1,71 +1,50 @@
 ---
-- name: include_vars <|> Gather OS specific variables
-  # This task gathers variables defined in OS specific files.
-  #
-  # Search vars in:
-  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
-  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
-  #  - <distribution>.yml            # eg. CentOS.yml
-  #  - <os_family>.yml               # eg. RedHat.yml
-  #
-  # If no OS specific file is found, the role will default to vars/main.yml
-  #
-  ansible.builtin.include_vars: "{{ item }}"
-  with_first_found:
-    - files:
-        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}.yml"
-        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
-        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_version }}.yml"
-        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
-        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
-        - "vars/{{ ansible_facts.os_family }}.yml"
-      skip: true
-  tags:
-    - always
-
-- name: "package <|> Install haproxy"
+- name: "package <|> Install {{ haproxy_packages_to_install | join(' ') }}"
   ansible.builtin.package:
     name: "{{ haproxy_packages_to_install }}"
     state: present
   tags:
     - package
 
-- name: include_tasks <|> Use OS dedicated firewall task
-  ansible.builtin.include_tasks: "{{ outer_item }}"
-  with_first_found:
-    - files:
-        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
-        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
-        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
-        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
-        - "{{ ansible_facts.distribution | replace(' ','_') }}/firewall.yml"
-        - "{{ ansible_facts.os_family | replace(' ','_') }}/firewall.yml"
-      skip: true
-  loop_control:
-    loop_var: outer_item
+# Ports to open: bind port of every resource listening (all types except backend)
+- name: set_fact <|> Initialize firewall ports list
+  ansible.builtin.set_fact:
+    haproxy_firewall_ports: []
   tags:
-    - internal
     - firewall
 
-# - name: lineinfile <|> Disable default listen on all interfaces
-#   ansible.builtin.lineinfile:
-#     path: /etc/httpd/conf/httpd.conf
-#     regexp: '^Listen 80'
-#     line: '#Listen 80'
-#   notify: service <|> Restart http server
-#   when: haproxy_mode == 'http'
+- name: set_fact <|> Gather resources bind ports
+  ansible.builtin.set_fact:
+    haproxy_firewall_ports: "{{ haproxy_firewall_ports + [item.bind.port | string + '/tcp'] }}"
+  loop: "{{ haproxy_resources }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when:
+    - item.bind is defined
+  tags:
+    - firewall
 
-# - name: template <|> Set http server ips and ports to listen to
-#   ansible.builtin.template:
-#     src: listen.conf.j2
-#     dest: /etc/httpd/conf.d/listen.conf
-#     owner: root
-#     group: root
-#     mode: 0644
-#   tags:
-#     - template
-#   notify: service <|> Restart http server
-#   when: haproxy_mode == 'http'
+- name: firewalld <|> Configure firewall
+  when:
+    - os_firewall | default(true) | bool
+  tags:
+    - firewall
+  block:
+    - name: "firewalld <|> Add haproxy ports to firewall's zone"
+      ansible.posix.firewalld:
+        zone: "{{ haproxy_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
+        port: "{{ item }}"
+        immediate: true
+        permanent: true
+        state: enabled
+      loop: "{{ haproxy_firewall_ports | unique }}"
+  rescue:
+    - name: fail <|> Firewall configuration failed
+      ansible.builtin.fail:
+        msg: >-
+          Firewall configuration failed: {{ (ansible_failed_result.results | default([]) | selectattr('failed', 'defined') | selectattr('failed') | map(attribute='msg') | list + [ansible_failed_result.msg | default('unknown error')]) | first }}.
+          firewalld must be installed and running, with its Python bindings (python3-firewall package),
+          for example using the firewall role. Set os_firewall to false to disable firewall configuration.
 
 - name: sysctl <|> Enable bind on non local ip
   ansible.posix.sysctl:
@@ -73,35 +52,35 @@
     value: '1'
     state: present
     reload: true
-  when: haproxy_enable_ip_nonlocal_bind
+  when:
+    - haproxy_enable_ip_nonlocal_bind | bool
 
-- name: template <|> Configure haproxy
+# Chroot folder, also holding the stats socket in role default global settings.
+# Not shipped by all distributions (openSUSE Leap 16).
+- name: file <|> Create /var/lib/haproxy directory
+  ansible.builtin.file:
+    path: /var/lib/haproxy
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: template <|> Generate /etc/haproxy/haproxy.cfg
   ansible.builtin.template:
     src: haproxy.cfg.j2
     dest: /etc/haproxy/haproxy.cfg
     owner: root
     group: root
     mode: 0644
+    validate: haproxy -c -f %s
+  notify: service <|> Reload haproxy
   tags:
     - template
-  notify: service <|> Restart haproxy server
 
-- name: meta <|> Run handler tasks to restart services
-  ansible.builtin.meta: flush_handlers
-
-# - name: service <|> Manage httpd service
-#   ansible.builtin.service:
-#     name: httpd
-#     enabled: yes
-#     state: started
-#   tags:
-#     - service
-#   when: haproxy_mode == 'http'
-
-- name: "service <|> Manage haproxy service"
+- name: service <|> Manage haproxy state
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: "{{ haproxy_enable_services | default(bb_enable_services) | default(true) | bool }}"
+    enabled: "{{ (haproxy_enable_services | default(bb_enable_services) | default(true) | bool) | ternary(true, false) }}"
     state: "{{ (haproxy_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   loop: "{{ haproxy_services_to_start }}"
   tags:

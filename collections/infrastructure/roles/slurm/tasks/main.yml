@@ -65,7 +65,7 @@
       ansible.builtin.template:
         src: "slurm.conf.j2"
         dest: "{{ slurm_conf_file_work_file.path }}"
-        mode: 0644
+        mode: "0644"
       tags:
         - template
 
@@ -100,7 +100,7 @@
   ansible.builtin.file:
     path: "{{ slurm_home_path }}"
     state: directory
-    mode: 0755
+    mode: "0755"
 
 - name: file <|> Create needed directories
   ansible.builtin.file:
@@ -108,7 +108,7 @@
     state: directory
     owner: slurm
     group: slurm
-    mode: 0755
+    mode: "0755"
   loop:
     - /var/log/slurm
     - "{{ slurm_slurmdspooldir }}"

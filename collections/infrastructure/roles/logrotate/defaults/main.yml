@@ -8,10 +8,13 @@ logrotate_global_compress: true
 logrotate_global_delaycompress: false
 logrotate_global_missingok: true
 logrotate_global_notifempty: true
-logrotate_global_create: "0640 root root"
+# Empty: new log files keep the mode and owner of the rotated ones
+logrotate_global_create: ""
+# User and group used to rotate, empty: distribution default (root adm on Ubuntu)
+logrotate_global_su: ""
 logrotate_global_dateext: true
 logrotate_global_dateformat: "-%Y%m%d"
-logrotate_global_extension: "log"
+logrotate_global_extension: ".log"
 
 # Enable xz compression
 logrotate_enable_xz: true

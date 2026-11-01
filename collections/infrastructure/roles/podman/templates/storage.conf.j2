@@ -1,0 +1,12 @@
+{{ ansible_managed | comment }}
+# Replaces the distribution /usr/share/containers/storage.conf, see containers-storage.conf(5)
+
+[storage]
+driver = "{{ podman_storage_driver }}"
+runroot = "/run/containers/storage"
+graphroot = "/var/lib/containers/storage"
+{% if podman_storage_mountopt is defined %}
+
+[storage.options.overlay]
+mountopt = "{{ podman_storage_mountopt }}"
+{% endif %}

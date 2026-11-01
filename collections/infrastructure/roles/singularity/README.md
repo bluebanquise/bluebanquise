@@ -2,56 +2,70 @@
 
 ## Description
 
-Install and configure Singularity or SingularityPRO.
+Install and configure [SingularityCE](https://sylabs.io/singularity/) (or SingularityPRO): generate
+`/etc/singularity/singularity.conf` and the `/etc/singularity/init` script sourced before launching a container
+(it cleans the environment, and logs container runs to syslog).
+
+Supported distributions: RHEL 9/10, Ubuntu 24.04/26.04, Debian 13, OpenSuse Leap 16.
 
 ## Pre-requisites
 
-### RPMs of Singularity
+SingularityCE is not provided by distributions repositories. Sylabs publishes RPM and DEB packages with each
+[release on GitHub](https://github.com/sylabs/singularity/releases): download them, and add them to a local repository
+of the management host (see the **repositories** role), or build them from sources (`rpmbuild -tb singularity-ce-<version>.tar.gz`).
 
-Note: RPM is not directly available on Singularity GitHub.
-RHEL8 build instructions (example done on management1, but can be done on
-another RHEL8 server** anywhere)
+For SingularityPRO, Sylabs provides a private repository after purchase: set `singularity_packages_to_install`
+accordingly.
 
-```
-  dnf groupinstall -y 'Development Tools'
-  dnf install openssl-devel libuuid-devel libseccomp-devel wget squashfs-tools cryptsetup golang createrepo
-  rpmbuild -tb singularity-3.6.3.tar.gz
-  mkdir /var/www/html/repositories/centos/8/x86_64/singularity
-  cp /root/rpmbuild/RPMS/x86_64/singularity-3.6.3-1.el8.x86_64.rpm /var/www/html/repositories/centos/8/x86_64/singularity/.
-  cd /var/www/html/repositories/centos/8/x86_64/singularity && createrepo .
-```
-
-or
-
-### RPMs of SingularityPRO
-
-Note: Sylabs is **NOT** providing a public repository for its RPMs, but is
-sending a private repository URL once the software has been bought.
-You must first manually download the RPMs using the link provided in the email,
-and put them on the server before executing this playbook.
-
-In all cases, it would be also necessary to run the `repositories_client` role
-in order to correctly setup the built or downloaded RPMs.
+Note that Apptainer (the Linux Foundation fork of Singularity, available in EPEL) uses another configuration file
+(`/etc/apptainer/apptainer.conf`) and is not managed by this role.
 
 ## Usage
 
 Playbook example:
 
 ```yaml
-  ---
-  - name: repositories client
-    hosts: "mg_managements,mg_computes"
-    roles:
-      - role: repositories_client
-        vars:
-          repositories:
-            - singularity
-
-  - name: addons roles to run everywhere
-    hosts: "mg_computes"
-    roles:
-      - role: singularity
+---
+- name: Singularity
+  hosts: fn_compute
+  roles:
+    - role: bluebanquise.infrastructure.singularity
 ```
+
+Main `singularity.conf` settings are exposed as variables (see below). Values are written as is in the file:
+quote `"yes"` and `"no"` values, so that YAML does not convert them to booleans.
+
+To add bind paths (mounted in all containers):
+
+```yaml
+singularity_bind_path:
+  - /etc/localtime
+  - /etc/hosts
+  - /scratch
+```
+
+Set `singularity_manage_conf_file` or `singularity_manage_init_file` to `false` to keep the files installed by the package.
+
+## Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `singularity_packages_to_install` | `[singularity-ce]` | Packages to install. |
+| `singularity_manage_conf_file` | `true` | Generate `singularity.conf`. |
+| `singularity_manage_init_file` | `true` | Generate `init`. |
+| `singularity_allow_setuid` | `"yes"` | `allow setuid`. |
+| `singularity_allow_pid_ns` | `"yes"` | `allow pid ns`. |
+| `singularity_config_passwd` / `_group` / `_resolv_conf` | `"yes"` | `config passwd`, `config group`, `config resolv_conf`. |
+| `singularity_mount_proc` / `_sys` / `_dev` / `_devpts` / `_home` / `_tmp` | `"yes"` | `mount proc`, `mount sys`, etc. |
+| `singularity_mount_hostfs` | `"no"` | `mount hostfs`. |
+| `singularity_mount_slave` | `"yes"` | `mount slave`. |
+| `singularity_bind_path` | `[/etc/localtime, /etc/hosts]` | `bind path` entries. |
+| `singularity_user_bind_control` | `"yes"` | `user bind control`. |
+| `singularity_enable_fusemount` | `"yes"` | `enable fusemount`. |
+| `singularity_enable_overlay` | `"try"` | `enable overlay`. |
+| `singularity_enable_underlay` | `"yes"` | `enable underlay`. |
+| `singularity_init_log_tag` | `singularity` | Syslog tag of container runs. |
+| `singularity_init_log_message` | see `defaults/main.yml` | Syslog message of container runs. |
 
 ## ChangeLog
 

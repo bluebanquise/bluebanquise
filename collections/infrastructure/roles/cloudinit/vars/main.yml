@@ -1,5 +1,7 @@
 ---
-cloudinit_role_version: 1.0.0
+cloudinit_role_version: 1.1.0
+
+cloudinit_configuration_file: /etc/cloud/cloud.cfg.d/99-bluebanquise.cfg
 
 cloudinit_services_to_start:
   - cloud-init

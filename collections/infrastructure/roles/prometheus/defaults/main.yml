@@ -5,7 +5,6 @@ prometheus_server: false
 prometheus_server_manage_prometheus: true
 prometheus_server_manage_alertmanager: true
 prometheus_server_manage_karma: true
-prometheus_server_manage_am_executor: false
 prometheus_server_manage_ipmi_exporter: false
 prometheus_server_manage_snmp_exporter: false
 prometheus_server_manage_modbus_exporter: false
@@ -14,12 +13,26 @@ prometheus_server_manage_modbus_exporter: false
 prometheus_server_prometheus_host: localhost
 prometheus_server_alertmanager_host: localhost
 prometheus_server_karma_host: localhost
-prometheus_server_am_executor_host: localhost
 prometheus_server_ipmi_exporter_host: localhost
 prometheus_server_snmp_exporter_host: localhost
 prometheus_server_modbus_exporter_host: localhost
 prometheus_server_modbus_exporter_listen_address: "{{ prometheus_server_modbus_exporter_host }}"
 prometheus_server_modbus_exporter_port: 9602
+
+# Packages, from BlueBanquise repositories
+prometheus_server_prometheus_packages_to_install:
+  - prometheus
+prometheus_server_alertmanager_packages_to_install:
+  - prometheus-alertmanager
+prometheus_server_karma_packages_to_install:
+  - karma
+prometheus_server_ipmi_exporter_packages_to_install:
+  - prometheus-ipmi-exporter
+  - freeipmi
+prometheus_server_snmp_exporter_packages_to_install:
+  - prometheus-snmp-exporter
+prometheus_server_modbus_exporter_packages_to_install:
+  - prometheus-modbus-exporter
 
 prometheus_server_prometheus_user_gid: 909
 prometheus_server_prometheus_user_uid: 909
@@ -38,7 +51,7 @@ prometheus_server_prometheus_launch_parameters: |
   --config.file /etc/prometheus/prometheus.yml \
   --storage.tsdb.path /var/lib/prometheus/ \
   --web.console.templates=/etc/prometheus/consoles \
-  --web.console.libraries=/etc/prometheus/console_libraries $PROMETHEUS_OPTIONS
+  --web.console.libraries=/etc/prometheus/console_libraries
 
 prometheus_server_alertmanager_launch_parameters: |
   --config.file=/etc/alertmanager/alertmanager.yml
@@ -93,10 +106,6 @@ prometheus_server_alertmanager_raw_configuration:
 
 prometheus_exporters_groups_to_scrape: {}
 prometheus_exporters_to_scrape: []
-
-prometheus_ipmi_scrape: false
-prometheus_snmp_scrape: false
-prometheus_modbus_scrape: false
 
 prometheus_ipmi_scrape_hardware_groups: []
 prometheus_snmp_scrape_hardware_groups: []

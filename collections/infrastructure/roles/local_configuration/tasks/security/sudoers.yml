@@ -3,6 +3,8 @@
   ansible.builtin.package:
     name: sudo
     state: present
+  tags:
+    - package
 
 - name: sudoers <|> Add sudoers users and groups
   community.general.sudoers:
@@ -20,6 +22,7 @@
     validation: "{{ item.validation | default(omit, true) }}"
   loop: "{{ local_configuration_security.sudoers }}"
 
+# Sessions of the Ansible connection user are not logged
 - name: sudoers <|> Enable logging
   ansible.builtin.lineinfile:
     path: /etc/sudoers
@@ -28,5 +31,5 @@
     validate: '/usr/sbin/visudo -cf %s'
   with_items:
     - "Defaults   log_output"
-    - "Defaults:{{ ansible_user }} !log_output"
+    - "Defaults:{{ ansible_user | default(lookup('ansible.builtin.env', 'USER'), true) | default(ansible_facts.user_id, true) }} !log_output"
   when: (local_configuration_security.sudoers_logging | default(local_configuration_sudoers_logging)) | bool

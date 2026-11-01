@@ -1,3 +1,4 @@
+#jinja2: lstrip_blocks: True
 [Unit]
   Description=Prometheus Monitoring
   Wants=network-online.target
@@ -8,6 +9,9 @@
   Group=prometheus
   Type=simple
   ExecStart=/usr/bin/prometheus \
+{% if prometheus_server_enable_tls | bool or prometheus_server_enable_basic_auth | bool %}
+  --web.config.file=/etc/prometheus/web.yml \
+{% endif %}
   {{ prometheus_server_prometheus_launch_parameters | indent(2, True) }}
 
 [Install]

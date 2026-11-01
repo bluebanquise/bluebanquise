@@ -1,18 +1,32 @@
 ---
-- name: package <|> Ensure logrotate is installed
-  ansible.builtin.package:
-    name: logrotate
-    state: present
+- name: include_vars <|> Gather OS specific variables
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
+        - "vars/{{ ansible_facts.os_family }}.yml"
+      skip: true
+  tags:
+    - always
 
-- name: template <|> Deploy global logrotate configuration
+- name: package <|> Install logrotate
+  ansible.builtin.package:
+    name: "{{ ['logrotate'] + ([logrotate_xz_package] if (logrotate_enable_xz | bool) else []) }}"
+    state: present
+  tags:
+    - package
+
+- name: template <|> Generate /etc/logrotate.conf
   ansible.builtin.template:
     src: logrotate.conf.j2
     dest: /etc/logrotate.conf
     owner: root
     group: root
     mode: 0644
+  tags:
+    - template
 
-- name: template <|> Deploy custom logrotate rules
+- name: template <|> Generate custom logrotate rules
   ansible.builtin.template:
     src: logrotate_rule.j2
     dest: "/etc/logrotate.d/{{ item.name }}"
@@ -20,4 +34,7 @@
     group: root
     mode: 0644
   loop: "{{ logrotate_custom_rules }}"
-  when: logrotate_custom_rules | length > 0
+  loop_control:
+    label: "{{ item.name }}"
+  tags:
+    - template

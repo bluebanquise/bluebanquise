@@ -23,7 +23,7 @@ users:
     gid: 1079
     home: /home/oxedions
     shell: /bin/bash
-    password: !
+    password: '!'  # locked password, quote it: ! alone is a YAML tag
   - name: bluebanquise
     home: /home/bluebanquise
     shell: /bin/bash
@@ -96,8 +96,16 @@ are available for each user:
 
 `ssh_authorized_keys` must be provided as a list.
 
-To generate an sha512 password, use the following command (python >3.3):
+To generate an sha512 password hash, use the following command (the password is read from standard input):
 
 ```
-python3 -c 'import crypt,getpass; print(crypt.crypt(getpass.getpass(), crypt.mksalt(crypt.METHOD_SHA512)))'
+openssl passwd -6 -stdin
 ```
+
+
+## Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `users` | not set | Users to manage, see above. |
+| `users_enable_ssh_authorized_keys` | `true` | Manage users `authorized_keys`. |

@@ -1,5 +1,4 @@
 ---
-pxe_stack_apache_cgi_module: cgid
 pxe_stack_apache_conf_path: /etc/httpd/conf.d
 pxe_stack_apache_user: apache
 pxe_stack_apache_group: apache
@@ -9,9 +8,8 @@ pxe_stack_packages_to_install:
   - bluebanquise-ipxe-arm64
   - httpd
   - python3-policycoreutils
-  - python3-pyyaml
   - policycoreutils
-  - python3-flask
+  - bluebanquise-venv
 pxe_stack_default_tftp_package: tftp-server
 pxe_stack_services_to_start:
   - httpd

@@ -26,8 +26,23 @@
   ansible.builtin.systemd_service:
     name: systemd-networkd.service
     enabled: false
+    state: stopped
 
 - name: "systemd_service <|> Mask systemd-networkd socket"
   ansible.builtin.systemd_service:
     name: systemd-networkd.socket
     masked: true
+
+# Debian installer configures interfaces in /etc/network/interfaces (ifupdown), which NetworkManager
+# ignores by default ([ifupdown] managed=false): let NetworkManager manage them
+- name: ini_file <|> Let NetworkManager manage interfaces declared in /etc/network/interfaces
+  community.general.ini_file:
+    path: /etc/NetworkManager/NetworkManager.conf
+    section: ifupdown
+    option: managed
+    value: 'true'
+    no_extra_spaces: true
+    owner: root
+    group: root
+    mode: '0644'
+  notify: service <|> Restart nic services

@@ -35,8 +35,9 @@
     name: conman
     gid: "{{ conman_user_gid }}"
     state: present
-    system: yes
+    system: true
 
+# Home is persistent (/var/lib), as it stores the SSH configuration used by Redfish consoles
 - name: user <|> Ensure user conman exists
   ansible.builtin.user:
     name: conman
@@ -44,43 +45,30 @@
     state: present
     comment: "Connection Manager service"
     group: conman
-    home: /var/run/conman
+    home: "{{ conman_user_home }}"
     shell: /bin/false
-    system: yes
+    system: true
 
-- name: user <|> Ensure user conman can use /var/run/conman
-  ansible.builtin.copy:
-    content: |
-      D /var/run/conman 0700 conman conman -
-    dest: /etc/tmpfiles.d/conman.conf
-    mode: 0644
-  notify: systemd <|> Reload systemd configuration
-  when:
-    - ansible_facts.os_family == "RedHat"
-
-# - name: template <|> Generate /etc/conman.pswd
-  # ansible.builtin.template:
-  #   src: conman.pswd.j2
-  #   dest: /etc/conman.pswd
-  #   owner: conman
-  #   group: conman
-  #   mode: 0600
-  # notify: service <|> Restart conman
-  # tags:
-  #   - template
-
-- name: file <|> Create /var/run/conman/.ssh directory
+- name: file <|> Create conman home directory
   ansible.builtin.file:
-    path: /var/run/conman/.ssh
+    path: "{{ conman_user_home }}"
     owner: conman
     group: conman
     state: directory
     mode: 0700
 
-- name: template <|> Generate /var/run/conman/.ssh/config
+- name: file <|> Create conman .ssh directory
+  ansible.builtin.file:
+    path: "{{ conman_user_home }}/.ssh"
+    owner: conman
+    group: conman
+    state: directory
+    mode: 0700
+
+- name: template <|> Generate conman .ssh/config
   ansible.builtin.template:
     src: config.j2
-    dest: /var/run/conman/.ssh/config
+    dest: "{{ conman_user_home }}/.ssh/config"
     owner: conman
     group: conman
     mode: 0600
@@ -94,9 +82,11 @@
     state: directory
     owner: conman
     group: conman
-    recurse: yes
+    recurse: true
   notify: service <|> Restart conman
 
+# On RedHat family systems, conmand runs as conman user instead of root.
+# systemd creates /run/conman (RuntimeDirectory), owned by conman, at each service start.
 - name: file <|> Ensure systemd drop-in directory exists
   ansible.builtin.file:
     path: /etc/systemd/system/conman.service.d
@@ -113,12 +103,27 @@
       [Service]
       User=conman
       Group=conman
+      RuntimeDirectory=conman
+      RuntimeDirectoryMode=0700
       ExecStart=
-      ExecStart=/usr/sbin/conmand -P /var/run/conman/conmand.pid
-      PIDFile=/var/run/conman/conmand.pid
+      ExecStart=/usr/sbin/conmand -P /run/conman/conmand.pid
+      PIDFile=/run/conman/conmand.pid
     dest: /etc/systemd/system/conman.service.d/user.conf
+    owner: root
+    group: root
     mode: 0644
-  notify: systemd <|> Reload systemd configuration
+  notify:
+    - systemd <|> Reload systemd configuration
+    - service <|> Restart conman
+  when:
+    - ansible_facts.os_family == "RedHat"
+
+# Previous versions of this role created /run/conman using a tmpfiles.d file,
+# now replaced by RuntimeDirectory in the systemd drop-in above.
+- name: file <|> Remove legacy /etc/tmpfiles.d/conman.conf
+  ansible.builtin.file:
+    path: /etc/tmpfiles.d/conman.conf
+    state: absent
   when:
     - ansible_facts.os_family == "RedHat"
 
@@ -142,9 +147,9 @@
   ansible.builtin.template:
     src: conman.logrotate.j2
     dest: /etc/logrotate.d/conman
-    owner: conman
-    group: conman
-    mode: 0600
+    owner: root
+    group: root
+    mode: 0644
   when: not conman_logrotate_conman.stat.exists
   tags:
     - template
@@ -152,8 +157,8 @@
 - name: seboolean <|> Allow all daemons the ability to use unallocated ttys
   ansible.posix.seboolean:
     name: daemons_use_tty
-    state: yes
-    persistent: yes
+    state: true
+    persistent: true
   when:
     - ansible_facts.selinux.status == "enabled"
 
@@ -163,7 +168,7 @@
 - name: service <|> Manage conman state
   ansible.builtin.service:
     name: conman
-    enabled: "{{ (conman_enable_services | default(bb_enable_services) | default(true, true) | bool) | ternary('yes', 'no') }}"
-    state: "{{ (conman_start_services | default(bb_start_services) | default(true, true) | bool) | ternary('started', omit) }}"
+    enabled: "{{ (conman_enable_services | default(bb_enable_services) | default(true) | bool) | ternary(true, false) }}"
+    state: "{{ (conman_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   tags:
     - service

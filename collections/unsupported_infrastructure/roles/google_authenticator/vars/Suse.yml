@@ -1,0 +1,10 @@
+---
+google_authenticator_packages_to_install:
+  - google-authenticator-libpam
+  - qrencode
+  - libqrencode4
+google_authenticator_sshd_service: sshd
+
+# Password authentication line of /etc/pam.d/sshd
+google_authenticator_pam_password_line: "auth       include      common-auth"
+google_authenticator_pam_password_regexp: '^#?\s*auth\s+include\s+common-auth\s*$'

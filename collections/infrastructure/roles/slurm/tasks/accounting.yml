@@ -26,7 +26,7 @@
     dest: "{{ slurm_home_path }}/slurmdbd.conf"
     owner: slurm
     group: slurm
-    mode: 0600
+    mode: "0600"
   tags:
     - template
   notify: service <|> restart slurmdbd
@@ -81,14 +81,23 @@
   tags:
     - service
 
-- name: "firewalld <|> Add Slurmdbd ports to firewall's zone"
-  ansible.posix.firewalld:
-    zone: "{{ slurm_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
-    port: "{{ slurm_slurmdbd_port }}/tcp"
-    immediate: true
-    permanent: true
-    state: enabled
+- name: firewalld <|> Configure firewall
   when:
     - os_firewall | default(true) | bool
   tags:
     - firewall
+  block:
+    - name: "firewalld <|> Add Slurmdbd ports to firewall's zone"
+      ansible.posix.firewalld:
+        zone: "{{ slurm_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
+        port: "{{ slurm_slurmdbd_port }}/tcp"
+        immediate: true
+        permanent: true
+        state: enabled
+  rescue:
+    - name: fail <|> Firewall configuration failed
+      ansible.builtin.fail:
+        msg: >-
+          Firewall configuration failed: {{ (ansible_failed_result.results | default([]) | selectattr('failed', 'defined') | selectattr('failed') | map(attribute='msg') | list + [ansible_failed_result.msg | default('unknown error')]) | first }}.
+          firewalld must be installed and running, with its Python bindings (python3-firewall package),
+          for example using the firewall role. Set os_firewall to false to disable firewall configuration.

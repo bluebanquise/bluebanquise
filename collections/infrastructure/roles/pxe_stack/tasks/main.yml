@@ -23,30 +23,35 @@
   tags:
     - always
 
-- name: "firewalld <|> Add services to firewall's zone"
-  ansible.posix.firewalld:
-    zone: "{{ pxe_stack_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
-    service: "{{ item }}"
-    immediate: true
-    permanent: true
-    state: enabled
+- name: firewalld <|> Configure firewall
   when:
     - os_firewall | default(true) | bool
-  loop: "{{ pxe_stack_firewall_services_to_add }}"
   tags:
     - firewall
+  block:
+    - name: "firewalld <|> Add services to firewall's zone"
+      ansible.posix.firewalld:
+        zone: "{{ pxe_stack_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
+        service: "{{ item }}"
+        immediate: true
+        permanent: true
+        state: enabled
+      loop: "{{ pxe_stack_firewall_services_to_add }}"
 
-- name: "firewalld <|> Add pxe stack daemon port {{ pxe_stack_daemon_port }}/tcp to firewall"
-  ansible.posix.firewalld:
-    zone: "{{ pxe_stack_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
-    port: "{{ pxe_stack_daemon_port }}/tcp"
-    immediate: true
-    permanent: true
-    state: enabled
-  when:
-    - os_firewall | default(true) | bool
-  tags:
-    - firewall
+    - name: "firewalld <|> Add pxe stack daemon port {{ pxe_stack_daemon_port }}/tcp to firewall"
+      ansible.posix.firewalld:
+        zone: "{{ pxe_stack_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
+        port: "{{ pxe_stack_daemon_port }}/tcp"
+        immediate: true
+        permanent: true
+        state: enabled
+  rescue:
+    - name: fail <|> Firewall configuration failed
+      ansible.builtin.fail:
+        msg: >-
+          Firewall configuration failed: {{ (ansible_failed_result.results | default([]) | selectattr('failed', 'defined') | selectattr('failed') | map(attribute='msg') | list + [ansible_failed_result.msg | default('unknown error')]) | first }}.
+          firewalld must be installed and running, with its Python bindings (python3-firewall package),
+          for example using the firewall role. Set os_firewall to false to disable firewall configuration.
 
 # This calculation takes time, so we store it in memory for later usage
 - name: fact <|> Calculate equipment profiles
@@ -68,11 +73,26 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    mode: 0755
+    owner: root
+    group: root
+    mode: "0755"
   loop:
-    - "{{ pxe_stack_apache_cgi_bin_path }}"
     - /etc/bluebanquise
     - /etc/bluebanquise/bootset
+
+- name: "group <|> Create {{ pxe_stack_daemon_user }} group"
+  ansible.builtin.group:
+    name: "{{ pxe_stack_daemon_user }}"
+    system: true
+
+- name: "user <|> Create {{ pxe_stack_daemon_user }} user"
+  # Dedicated unprivileged user running bluebanquise-pxe-stack-daemon. Not a sudoer, no login.
+  ansible.builtin.user:
+    name: "{{ pxe_stack_daemon_user }}"
+    group: "{{ pxe_stack_daemon_user }}"
+    system: true
+    shell: /usr/sbin/nologin
+    create_home: false
 
 - name: file <|> Create pxe http directories structure
   ansible.builtin.file:
@@ -84,11 +104,32 @@
   loop:
     - "{{ pxe_stack_htdocs_path }}/pxe/"
     - "{{ pxe_stack_htdocs_path }}/pxe/bin"
-    - "{{ pxe_stack_htdocs_path }}/pxe/nodes"
     - "{{ pxe_stack_htdocs_path }}/pxe/equipment_profiles"
     - "{{ pxe_stack_htdocs_path }}/pxe/osdeploy"
     - "{{ pxe_stack_htdocs_path }}/pxe/tools"
     - "{{ pxe_stack_htdocs_path }}/pxe/netboots"
+
+# Host iPXE files folder is owned by the daemon's user, so the daemon and bluebanquise-bootset
+# (which drops its privileges to that user) can write into it. The http server only reads these
+# files (0644), and new files inherit the folder's SELinux label since they are always created
+# inside it (atomic writes use a temporary file in the same folder).
+- name: "file <|> Create {{ pxe_stack_htdocs_path }}/pxe/nodes directory"
+  ansible.builtin.file:
+    path: "{{ pxe_stack_htdocs_path }}/pxe/nodes"
+    state: directory
+    mode: 0755
+    owner: "{{ pxe_stack_daemon_user }}"
+    group: "{{ pxe_stack_apache_group }}"
+
+- name: "copy <|> Create {{ pxe_stack_htdocs_path }}/pxe/nodes/.lock file"
+  # Shared flock between the daemon and bluebanquise-bootset
+  ansible.builtin.copy:
+    content: ""
+    dest: "{{ pxe_stack_htdocs_path }}/pxe/nodes/.lock"
+    mode: 0644
+    owner: "{{ pxe_stack_daemon_user }}"
+    group: "{{ pxe_stack_daemon_user }}"
+    force: false
 
 - name: include_tasks <|> Use OS dedicated task
   ansible.builtin.include_tasks: "{{ item }}"
@@ -108,7 +149,9 @@
   ansible.builtin.template:
     src: nodes_parameters.yml.j2
     dest: /etc/bluebanquise/bootset/nodes_parameters.yml
-    mode: 0644
+    owner: root
+    group: root
+    mode: "0644"
   notify: service <|> Restart pxe services
   tags:
     - template
@@ -117,7 +160,9 @@
   ansible.builtin.template:
     src: "pxe_parameters.yml.j2"
     dest: "/etc/bluebanquise/bootset/pxe_parameters.yml"
-    mode: 0644
+    owner: root
+    group: root
+    mode: "0644"
 
 - name: "template <|> Generate {{ pxe_stack_htdocs_path }}/pxe/ files"
   ansible.builtin.template:
@@ -142,22 +187,16 @@
   tags:
     - template
 
-- name: "copy <|> Copy {{ pxe_stack_apache_conf_path }}/cgi.conf"
-  ansible.builtin.copy:
-    src: cgi.conf
-    dest: "{{ pxe_stack_apache_conf_path }}/cgi.conf"
-    mode: 0644
+# Legacy bootswitch.cgi was an unauthenticated CGI editing host boot files as the http server
+# user. Removed, ensure upgraded systems do not keep it.
+- name: file <|> Remove legacy bootswitch.cgi and cgi.conf
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ pxe_stack_apache_cgi_bin_path }}/bootswitch.cgi"
+    - "{{ pxe_stack_apache_conf_path }}/cgi.conf"
   notify: service <|> Restart pxe services
-
-- name: "template <|> Create {{ pxe_stack_apache_cgi_bin_path }}/bootswitch.cgi"
-  ansible.builtin.template:
-    src: bootswitch.cgi.j2
-    dest: "{{ pxe_stack_apache_cgi_bin_path }}/bootswitch.cgi"
-    mode: 0744
-    owner: "{{ pxe_stack_apache_user }}"
-    group: "{{ pxe_stack_apache_group }}"
-  tags:
-    - template
 
 - name: "copy <|> Copy bluebanquise-bootset"
   ansible.builtin.copy:
@@ -199,7 +238,7 @@
 
 - name: include_tasks <|> Include diskless
   ansible.builtin.include_tasks: diskless.yml
-  when: pxe_stack_enable_diskless
+  when: pxe_stack_enable_diskless | bool
   tags:
     - internal
 
@@ -216,17 +255,6 @@
 ################################################################################################
 ######################## PXE STACK DAEMON
 
-- name: pxe_stack_daemon <|> Ensure cluster base and tmp directories exist
-  ansible.builtin.file:
-    path: "{{ item }}"
-    state: directory
-    owner: bluebanquise
-    group: bluebanquise
-    mode: '0750'
-  loop:
-    - "{{ pxe_stack_cluster_base_path }}"
-    - "{{ pxe_stack_cluster_tmp_path }}"
-
 - name: pxe_stack_daemon <|> Install daemon script
   ansible.builtin.copy:
     src: bluebanquise-pxe-stack-daemon
@@ -239,9 +267,23 @@
   ansible.builtin.template:
     src: pxe_stack_daemon.conf.j2
     dest: "{{ pxe_stack_daemon_conf_path }}"
-    owner: bluebanquise
-    group: bluebanquise
+    owner: root
+    group: "{{ pxe_stack_daemon_user }}"
     mode: '0640'
+
+# Creates missing host iPXE files and refreshes inventory-derived values of existing ones, so
+# files exist even if the daemon service is not started. Started as root, the script drops its
+# privileges to pxe_stack_daemon_user itself before touching any file.
+- name: pxe_stack_daemon <|> Bootstrap host iPXE files
+  ansible.builtin.command:
+    argv:
+      - "{{ pxe_stack_daemon_script_path }}"
+      - "{{ pxe_stack_daemon_conf_path }}"
+      - --bootstrap-only
+  register: pxe_stack_daemon_bootstrap
+  changed_when: "' 0 created, 0 updated,' not in pxe_stack_daemon_bootstrap.stdout"
+  tags:
+    - template
 
 - name: pxe_stack_daemon <|> Install systemd service
   ansible.builtin.template:
@@ -250,10 +292,13 @@
     owner: root
     group: root
     mode: '0644'
+  notify: service <|> Restart pxe services
 
 - name: pxe_stack_daemon <|> Reload systemd daemon
   ansible.builtin.systemd:
     daemon_reload: true
+  tags:
+    - service
 
 
 ################################################################################################

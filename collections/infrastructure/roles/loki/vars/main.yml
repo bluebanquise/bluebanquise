@@ -1,2 +1,12 @@
 ---
-loki_role_version: 1.0
+loki_role_version: 2.0.0
+
+loki_packages_to_install:
+  - loki
+  - alloy
+loki_services_to_start:
+  - loki
+  - alloy
+
+# Variables of role versions < 2.0.0 (Promtail based), now rejected
+loki_legacy_variables_regex: "^loki_(groups|users|conf_dir|index_dir|chunks_dir|promtail_[a-z_]+)$"

@@ -1,3 +1,7 @@
 ---
+# openSUSE Leap 16 (cloud-init >= 25.1): stage units are disabled by default, and
+# cloud-init.service, cloud-init-main.service and cloud-init-network.service are static.
 cloudinit_services_to_start:
-  - cloud-init
+  - cloud-init-local
+  - cloud-config
+  - cloud-final

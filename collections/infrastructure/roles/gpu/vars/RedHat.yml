@@ -1,0 +1,19 @@
+---
+# RHEL 10 and newer
+gpu_kernel_packages:
+  - "kernel-headers-{{ ansible_facts.kernel }}"
+  - "kernel-devel-{{ ansible_facts.kernel }}"
+  - "kernel-devel-matched-{{ ansible_facts.kernel }}"
+
+# No DNF modules anymore on RHEL 10: only open kernel modules are documented by NVIDIA
+gpu_nvidia_driver_packages:
+  open:
+    - nvidia-open
+gpu_nvidia_cuda_packages:
+  - cuda-toolkit
+
+gpu_amd_supported: true
+gpu_amd_rocm_supported: true
+gpu_amd_rocm_prerequisites_packages:
+  - python3-setuptools
+  - python3-wheel

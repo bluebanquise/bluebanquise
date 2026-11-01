@@ -74,7 +74,7 @@ Provision the other hosts via PXE
 ==================================
 
 mgt1 now serves DHCP, DNS, and the PXE chain for the other 8 hosts. Before powering them on,
-tell the ``bluebanquise-pxe-stack-daemon`` to deploy an OS on them next boot:
+ask ``bluebanquise-bootset`` to deploy an OS on them next boot:
 
 .. code-block:: bash
 
@@ -84,8 +84,8 @@ tell the ``bluebanquise-pxe-stack-daemon`` to deploy an OS on them next boot:
 The second command should report all 8 hosts scheduled for ``osdeploy``.
 
 Power the 8 hosts on (directly, or over their BMC once you have out-of-band access set up) and
-let them PXE boot. Each one gets an IP from DHCP, chains through iPXE to the
-``bluebanquise-pxe-stack-daemon``, picks up its equipment profile (console, kernel parameters,
+let them PXE boot. Each one gets an IP from DHCP, chains through iPXE to its own
+``nodes/<hostname>.ipxe`` file, picks up its equipment profile (console, kernel parameters,
 partitioning, ``os_admin_ssh_keys``, ...) and autoinstalls RHEL 10. Expect 5-20 minutes per host,
 in parallel. See the ``pxe_stack`` role section of this documentation (and its iPXE chain
 diagram) for the full boot sequence if you want to follow it step by step - the mechanism is

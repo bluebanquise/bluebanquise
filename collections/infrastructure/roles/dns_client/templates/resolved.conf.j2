@@ -1,0 +1,6 @@
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+
+[Resolve]
+DNS={{ dns_client_nameservers | join(' ') }}
+Domains={{ dns_client_domain_name | default(bb_domain_name, true) | default('cluster.local', true) }}

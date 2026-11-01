@@ -76,7 +76,7 @@
   when:
     - (pxe_stack_equipment_profiles[item]['hw']['hw_equipment_type'] | default(pxe_stack_hw_equipment_type)) == "server"
     - (pxe_stack_equipment_profiles[item]['os']['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution) | lower) in ['ubuntu']
-    - (pxe_stack_equipment_profiles[item]['os']['os_operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version) | int) in [20, 22, 24]
+    - (pxe_stack_equipment_profiles[item]['os']['os_operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version) | int) in [20, 22, 24, 26]
   tags:
     - file
 
@@ -93,7 +93,7 @@
   when:
     - (pxe_stack_equipment_profiles[item]['hw']['hw_equipment_type'] | default(pxe_stack_hw_equipment_type)) == "server"
     - (pxe_stack_equipment_profiles[item]['os']['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution) | lower) in ['ubuntu']
-    - (pxe_stack_equipment_profiles[item]['os']['os_operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version) | int) in [20, 22, 24]
+    - (pxe_stack_equipment_profiles[item]['os']['os_operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version) | int) in [20, 22, 24, 26]
   tags:
     - file
 
@@ -110,7 +110,7 @@
   when:
     - (pxe_stack_equipment_profiles[item]['hw']['hw_equipment_type'] | default(pxe_stack_hw_equipment_type)) == "server"
     - (pxe_stack_equipment_profiles[item]['os']['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution) | lower) in ['ubuntu']
-    - (pxe_stack_equipment_profiles[item]['os']['os_operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version) | int) in [20, 22, 24]
+    - (pxe_stack_equipment_profiles[item]['os']['os_operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version) | int) in [20, 22, 24, 26]
   tags:
     - file
 
@@ -127,7 +127,7 @@
   when:
     - (pxe_stack_equipment_profiles[item]['hw']['hw_equipment_type'] | default(pxe_stack_hw_equipment_type)) == "server"
     - (pxe_stack_equipment_profiles[item]['os']['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution) | lower) in ['ubuntu']
-    - (pxe_stack_equipment_profiles[item]['os']['os_operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version) | int) in [20, 22, 24]
+    - (pxe_stack_equipment_profiles[item]['os']['os_operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version) | int) in [20, 22, 24, 26]
   tags:
     - template
 
@@ -144,6 +144,6 @@
   when:
     - (pxe_stack_equipment_profiles[item]['hw']['hw_equipment_type'] | default(pxe_stack_hw_equipment_type)) == "server"
     - (pxe_stack_equipment_profiles[item]['os']['os_operating_system']['distribution'] | default(pxe_stack_os_operating_system.distribution) | lower) in ['ubuntu']
-    - (pxe_stack_equipment_profiles[item]['os']['os_operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version) | int) in [20, 22, 24]
+    - (pxe_stack_equipment_profiles[item]['os']['os_operating_system']['distribution_major_version'] | default(pxe_stack_os_operating_system.distribution_major_version) | int) in [20, 22, 24, 26]
   tags:
     - template

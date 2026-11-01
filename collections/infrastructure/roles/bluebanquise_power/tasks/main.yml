@@ -1,28 +1,4 @@
 ---
-- name: include_vars <|> Gather OS specific variables
-  # This task gathers variables defined in OS specific files.
-  #
-  # Search vars in:
-  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
-  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
-  #  - <distribution>.yml            # eg. CentOS.yml
-  #  - <os_family>.yml               # eg. RedHat.yml
-  #
-  # If no OS specific file is found, the role will default to vars/main.yml
-  #
-  ansible.builtin.include_vars: "{{ item }}"
-  with_first_found:
-    - files:
-        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}.yml"
-        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
-        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_version }}.yml"
-        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
-        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
-        - "vars/{{ ansible_facts.os_family }}.yml"
-      skip: true
-  tags:
-    - always
-
 - name: "package <|> Install packages"
   ansible.builtin.package:
     name: "{{ bluebanquise_power_packages_to_install }}"
@@ -30,13 +6,16 @@
   tags:
     - package
 
+# Code and directories are owned by root: they are executed by root and other users, so they must
+# not be writable by an unprivileged account. Only the configuration file (BMC credentials) is
+# readable by the bluebanquise group, which allows bluebanquise user to run the tool without root.
 - name: "file <|> Create directories structure"
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
     mode: 0755
-    owner: bluebanquise
-    group: bluebanquise
+    owner: root
+    group: root
   loop:
     - /etc/bluebanquise/
     - /etc/bluebanquise/bluebanquise-power/
@@ -48,44 +27,35 @@
   ansible.builtin.template:
     src: "bluebanquise-power.yml.j2"
     dest: "/etc/bluebanquise/bluebanquise-power/bluebanquise-power.yml"
-    owner: bluebanquise
+    owner: root
     group: bluebanquise
     mode: 0640
   tags:
     - template
 
+# The tool runs with the bluebanquise-venv interpreter, set in its first line (shebang)
 - name: "copy <|> Copy executable file"
   ansible.builtin.copy:
-    src: "bluebanquise-power"
+    src: "bluebanquise_power.py"
     dest: "/usr/bin/bluebanquise-power"
-    owner: bluebanquise
-    group: bluebanquise
-    mode: 0750
+    owner: root
+    group: root
+    mode: 0755
 
 - name: "file <|> Create bbp shortcut symlink"
   ansible.builtin.file:
     src: "/usr/bin/bluebanquise-power"
     dest: "/usr/bin/bbp"
     state: link
-    owner: bluebanquise
-    group: bluebanquise
+    owner: root
+    group: root
     force: true
 
-- name: "copy <|> Copy main python script"
-  ansible.builtin.copy:
-    src: "bluebanquise_power.py"
-    dest: "/usr/lib/bluebanquise/bluebanquise-power/bluebanquise-power.py"
-    owner: bluebanquise
-    group: bluebanquise
-    mode: 0640
-
+# All files of the plugins folder are copied, so a new protocol plugin only needs to be added there
 - name: "copy <|> Copy plugin files"
   ansible.builtin.copy:
-    src: "plugins/{{ item }}"
-    dest: "/usr/lib/bluebanquise/bluebanquise-power/plugins/{{ item }}"
-    owner: bluebanquise
-    group: bluebanquise
-    mode: 0750
-  loop:
-    - IPMI.py
-    - REDFISH.py
+    src: "plugins/"
+    dest: "/usr/lib/bluebanquise/bluebanquise-power/plugins/"
+    owner: root
+    group: root
+    mode: 0644

@@ -14,22 +14,6 @@
     home: /var/lib/snmp_exporter
     state: present
 
-- name: stat <|> Check if file /etc/snmp_exporter/snmp.yml exist
-  ansible.builtin.stat:
-    path: /etc/snmp_exporter/snmp.yml
-  register: prometheus_snmp_file_exist
-
-- name: assert <|> Assert /etc/snmp_exporter/snmp.yml is present
-  ansible.builtin.assert:
-    that:
-      - prometheus_snmp_file_exist.stat.exists
-    fail_msg: |
-      File /etc/snmp_exporter/snmp.yml is not present.
-      Please refer to main documentation on how to generate this file, then
-      re-execute this role.
-      Exiting.
-    success_msg: "/etc/snmp_exporter/snmp.yml is present, proceeding..."
-
 - name: package <|> Install snmp_exporter package
   ansible.builtin.package:
     name: "{{ prometheus_server_snmp_exporter_packages_to_install }}"
@@ -52,7 +36,7 @@
     dest: /etc/systemd/system/snmp_exporter.service
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   notify:
     - systemd <|> Reload systemd configuration
     - service <|> Restart snmp_exporter service
@@ -63,7 +47,7 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    mode: 0750
+    mode: "0750"
     owner: snmp_exporter
     group: snmp_exporter
   loop:
@@ -75,7 +59,7 @@
     dest: /etc/snmp_exporter/snmp.yml
     owner: snmp_exporter
     group: snmp_exporter
-    mode: 0640
+    mode: "0640"
   when: prometheus_server_snmp_exporter_raw_configuration is defined and prometheus_server_snmp_exporter_raw_configuration is not none
   notify: service <|> Restart snmp_exporter service
   tags:
@@ -93,7 +77,9 @@
   ansible.builtin.assert:
     that:
       - prometheus_stat_result.stat.exists
-    fail_msg: "/etc/snmp_exporter/snmp.yml file does not exist, cannot start snmp_exporter"
+    fail_msg: >-
+      /etc/snmp_exporter/snmp.yml file does not exist, cannot start snmp_exporter. Generate it (see the role README),
+      or set prometheus_server_snmp_exporter_raw_configuration.
     success_msg: "/etc/snmp_exporter/snmp.yml file does exist, proceeding"
 
 - name: service <|> Manage snmp_exporter service state

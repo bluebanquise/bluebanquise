@@ -1,5 +1,5 @@
 ---
-nic_role_version: 1.12.0
+nic_role_version: 1.13.0
 
 nic_j2_nmcli_device_name_type: "{%- set cons = [] -%}
 {%- for device in (nic_nmcli_con_show.stdout | split('\n')) -%}

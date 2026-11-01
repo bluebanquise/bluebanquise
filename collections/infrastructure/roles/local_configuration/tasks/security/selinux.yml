@@ -1,0 +1,8 @@
+---
+# Switching from or to disabled requires a reboot
+- name: selinux <|> Set SELinux state
+  ansible.posix.selinux:
+    policy: targeted
+    state: "{{ 'permissive' if local_configuration_access_control_state == 'complain' else local_configuration_access_control_state }}"
+  tags:
+    - service

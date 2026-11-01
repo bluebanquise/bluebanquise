@@ -1,0 +1,14 @@
+---
+gpu_kernel_packages:
+  - "linux-headers-{{ ansible_facts.kernel }}"
+  - "linux-modules-extra-{{ ansible_facts.kernel }}"
+
+gpu_nvidia_driver_packages:
+  open:
+    - nvidia-open
+gpu_nvidia_cuda_packages:
+  - cuda-toolkit
+
+gpu_amd_supported: true
+gpu_amd_rocm_supported: true
+gpu_amd_rocm_prerequisites_packages: []

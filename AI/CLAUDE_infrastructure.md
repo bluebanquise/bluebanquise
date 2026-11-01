@@ -370,7 +370,9 @@ CDN-backed hostname) for rhel9/rhel10 — noticeably faster. Also added backgrou
 downloading its own, so later distros' downloads overlap with the current distro's cluster
 deployment instead of happening serially only once their own turn comes up (Oxedions' suggestion).
 
-**`pxe_stack` role never installs Flask, on any OS family — real BlueBanquise bug, fixed**:
+**`pxe_stack` role never installs Flask, on any OS family — real BlueBanquise bug, fixed** (superseded
+2026-10: the daemon now runs from the `bluebanquise-venv` package under waitress, distro
+`python3-flask` is no longer installed):
 `bluebanquise-pxe-stack-daemon` does `from flask import Flask...` but no `vars/<OS>.yml` in the role
 lists `python3-flask` (or equivalent) in `pxe_stack_packages_to_install`. The daemon crash-looped
 every 10s (RestartSec=10) from the moment mgt1 was first bootstrapped — `ModuleNotFoundError: No
@@ -804,3 +806,40 @@ behavior, a real `pcs cluster node add` join. Not designed yet — needs its own
 decision (how many HA nodes, which existing step's VMs to repurpose or whether it needs dedicated
 ones) before it can be scoped as a numbered step like 01-17 above. Flagging here as a known gap
 rather than designing it blind; revisit when `pcs`/HA work is next prioritized.
+
+## TODO: try `bluebanquise-bootset -f` (BOOTIF network forcing) on real VMs before implementing (added 2026-10)
+
+Context: the 2026-10 `pxe_stack` rework (see `bluebanquise/AI/CLAUDE.md`, "PXE host files")
+restored `bluebanquise-bootset`'s direct file editing but not its old `-f dhcp|network` option -
+the old `network` mode built a static `ip=` line from `nodes_parameters.yml` network data that no
+longer exists. Proposed redesign, **experiment here first, implement only once confirmed live**
+(Oxedions, 2026-10-20):
+
+- `-f` only writes a host variable, e.g. `set force-network dhcp|static`, kept separate from `-e`
+  (`dedicated-kernel-parameters`) so they never overwrite each other. Each
+  `osdeploy/<distro>.ipxe` translates it for its own installer. No server-side data needed: iPXE
+  already knows the boot NIC and its DHCP lease, which is the inventory IP (static reservation).
+- `dhcp` mode: `BOOTIF=01-${netX/mac:hexhyp} ip=dhcp` (iPXE's documented pattern) - the installer
+  only brings up the boot NIC, fixing the "waits for DHCP on every NIC" case.
+- `static` mode: `ip=${netX/ip}::${netX/gateway}:${netX/netmask}:${hostname}:<iface>:none
+  nameserver=${netX/dns}`. The unresolved part is `<iface>`: iPXE can't know the kernel NIC name.
+  `ifname=bootnet:<mac>` is the usual dracut answer, but anaconda is believed to persist `ifname=`
+  into the installed system (deployed admin NIC renamed `bootnet`) - verify, don't assume.
+
+**What to try on the hypervisor** (one VM per distro, ideally with 2+ NICs so BOOTIF selection is
+actually exercised, only the second one on the PXE network):
+1. **OS scope** (open question 1): which installers honor `BOOTIF` - RHEL 9/10 anaconda (dracut),
+   Ubuntu 26.04 live installer (moved to dracut for installed systems, but the casper installer
+   initrd may still be initramfs-tools, which is believed to honor BOOTIF too), and opportunistically
+   Ubuntu 24.04 casper and Debian 13 d-i netcfg. Target was "dracut-based OSes" (RHEL, Ubuntu 26+);
+   widen it if others work for free.
+2. **Modes** (open question 2): whether `static` is worth it at all - check (a) whether anaconda
+   accepts the static `ip=` form with BOOTIF selecting the NIC and no interface name, (b) whether
+   `ifname=` really persists into the installed system, (c) whether a kernel-cmdline static config
+   leaks into the installed system's network config. If `static` is messy, ship `dhcp` only.
+3. **Inventory default** (open question 3): also worth an equipment-profile variable (e.g.
+   `os_pxe_force_network`) so a whole hardware group gets it without per-node `-f` - multi-NIC
+   trouble is usually per-hardware. Decide after seeing (1)/(2).
+
+Already decided: `-k` stays removed; the old `-f dhcp`'s `rd.net.timeout.*` retries are **not**
+re-added - already covered by `pxe_stack_os_kernel_aggressive_dhcp`.

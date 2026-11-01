@@ -1,30 +1,9 @@
 ---
-- name: restart grafana
+- name: service <|> Restart grafana
   ansible.builtin.service:
     name: "{{ item }}"
     state: restarted
-  loop: "{{ grafana_services_to_start | flatten(levels=1) }}"
-  register: grafana_service_results
-  retries: 5
-  delay: 10
-  until: grafana_service_results is not failed
+  loop: "{{ grafana_services_to_start }}"
   when:
     - "'service' not in ansible_skip_tags"
-    - (grafana_start_services | default(bb_start_services) | default(true) | bool)
-
-- name: Set privileges on provisioned dashboards
-  ansible.builtin.file:
-    path: "{{ grafana_data_dir }}/dashboards"
-    recurse: true
-    owner: grafana
-    group: grafana
-    mode: 0640
-  listen: "provisioned dashboards changed"
-
-- name: Set privileges on provisioned dashboards directory
-  ansible.builtin.file:
-    path: "{{ grafana_data_dir }}/dashboards"
-    state: directory
-    recurse: false
-    mode: 0755
-  listen: "provisioned dashboards changed"
+    - grafana_start_services | default(bb_start_services) | default(true) | bool

@@ -176,9 +176,20 @@ rsyslog_configuration_files:
       foobar
 ```
 
-### Logrotate override
+### Logrotate
 
-The default logrotate configuration provided by these settings may not cover all cluster needs. Override it by defining `rsyslog_logrotate_config` with the full desired content:
+On servers, logs received from remote hosts (`/var/log/rsyslog/<host>/`) are rotated daily using
+`/etc/logrotate.d/rsyslog-remote` (set `rsyslog_server_logrotate` to `false` to disable it).
+
+Local log files written by these settings (`/var/log/messages`, `secure`, `maillog`, `cron`, `spooler`, `boot.log`)
+which are not rotated by the distribution logrotate configuration (on Debian, Ubuntu and Suse) are rotated weekly
+using `/etc/logrotate.d/rsyslog-local`.
+
+Role versions before 1.7.0 replaced the distribution `/etc/logrotate.d/rsyslog` on servers, so that local logs were
+not rotated anymore. This file is restored (package reinstalled on RHEL, Debian and Ubuntu, removed on Suse where it is
+not part of the distribution).
+
+The remote logs logrotate configuration may not cover all cluster needs. Override it by defining `rsyslog_logrotate_config` with the full desired content:
 
 ```yaml
 rsyslog_logrotate_config: |
@@ -198,3 +209,21 @@ rsyslog_logrotate_config: |
       endscript
   }
 ```
+
+## Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `rsyslog_profile` | (required) | `server` or `client`. |
+| `rsyslog_port` | `514` | Syslog port (TCP and UDP). |
+| `rsyslog_client_verbosity` | `info` | Minimum level of local messages written to `/var/log/messages`. |
+| `rsyslog_server_ip4` | not set | Server to forward logs to, instead of network `log4`/`log` services. |
+| `rsyslog_format` | `legacy` (`advanced` on RHEL 9) | Forwarding and imjournal configuration syntax. |
+| `rsyslog_server_logrotate` | `true` | Rotate remote logs on servers. |
+| `rsyslog_logrotate_config` | not set | Raw remote logs logrotate configuration. |
+| `rsyslog_configuration_files` | not set | Additional configuration files (`name`, `content`, optional `path`). |
+| `rsyslog_custom_conf_path` / `rsyslog_client_rsyslog_custom_conf_path` / `rsyslog_server_rsyslog_custom_conf_path` | not set | Override generated files paths. |
+| `rsyslog_firewall_services_to_add` | `[syslog]` | Firewall services opened on servers. |
+| `rsyslog_firewall_zone` | `bb_services_firewall_zone`, else `public` | Firewall zone of servers. |
+| `rsyslog_enable_services` | `bb_enable_services`, else `true` | Enable rsyslog service. |
+| `rsyslog_start_services` | `bb_start_services`, else `true` | Start rsyslog service, and restart it on configuration changes. |

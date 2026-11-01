@@ -5,17 +5,26 @@
 ## Options for BIND9 dns server
 
 options {
+  {#
+    Listen on DNS services ip of each served network: dns4 (or dns) services, else services_ip.
+    Served networks are management networks (net- prefix) without dns_server set to false.
+  #}
   listen-on port 53 {
     127.0.0.1;
-{% for network in (networks | select('match','^net-[a-zA-Z0-9]+') | list | unique | sort) %}
-  {% if (networks[network]['dns_server'] | default(true)) and networks[network]['services'] is defined and networks[network]['services'] is iterable and networks[network]['services'] is not string and networks[network]['services'] is mapping and (networks[network]['services']['dns4'] | default(networks[network]['services']['dns'], true)) is defined and (networks[network]['services']['dns4'] | default(networks[network]['services']['dns'], true)) is iterable and (networks[network]['services']['dns4'] | default(networks[network]['services']['dns'], true)) is not string and (networks[network]['services']['dns4'] | default(networks[network]['services']['dns'], true)) is not mapping %}
-    {% for dns4 in (networks[network]['services']['dns4'] | default(networks[network]['services']['dns'], true)) %}
-      {% if dns4.ip4 is defined and (dns4.ip4 | ansible.utils.ipaddr) %}
-    {{ dns4.ip4 }};
-      {% endif %}
-    {% endfor %}
-  {% elif (networks[network]['dns_server'] | default(true)) and networks[network]['services_ip'] is defined and (networks[network]['services_ip'] | ansible.utils.ipaddr) %}
-    {{ networks[network]['services_ip'] }};
+{% for network_name in (networks | select('match', '^net-') | list | sort) %}
+  {% set network = networks[network_name] %}
+  {% if network['dns_server'] | default(true) | bool %}
+    {% set services = network['services'] | default({}, true) %}
+    {% set dns_entries = services['dns4'] | default(services['dns'], true) | default([], true) %}
+    {% if dns_entries | length > 0 %}
+      {% for entry in dns_entries %}
+        {% if entry['ip4'] is defined and entry['ip4'] %}
+    {{ entry['ip4'] | ansible.utils.ipaddr('address') }};
+        {% endif %}
+      {% endfor %}
+    {% elif network['services_ip'] is defined and network['services_ip'] %}
+    {{ network['services_ip'] }};
+    {% endif %}
   {% endif %}
 {% endfor %}
 {% for listen in dns_server_listen_on_ip4 %}
@@ -23,7 +32,7 @@ options {
 {% endfor %}
   };
 
-  # listen-on-v6 port 53 { ::1; };  # To be uncommented later if needeed
+  # listen-on-v6 port 53 { ::1; };  # To be uncommented later if needed
   directory 	"{{ dns_server_var_dir }}";
   dump-file 	"{{ dns_server_dump_file }}";
   statistics-file "{{ dns_server_statistics_file }}";
@@ -31,8 +40,8 @@ options {
 
   allow-query {
     localhost;
-{% for network in (networks | select('match','^net-[a-zA-Z0-9]+') | list | unique | sort) %}
-  {% if (networks[network]['dns_server'] | default(true)) %}
+{% for network in (networks | select('match', '^net-') | list | sort) %}
+  {% if networks[network]['dns_server'] | default(true) | bool %}
     {{ networks[network]['subnet'] }}/{{ networks[network]['prefix'] }};
   {% endif %}
 {% endfor %}
@@ -58,6 +67,10 @@ options {
   };
 {% endif %}
 
+{% if dns_server_crypto_policy_file is defined %}
+  include "{{ dns_server_crypto_policy_file }}";
+
+{% endif %}
   dnssec-validation {{ dns_server_dnssec_validation }};
 
   managed-keys-directory "{{ dns_server_managed_keys_dir }}";
@@ -66,7 +79,13 @@ options {
   session-keyfile "/run/named/session.key";
 
 {% if dns_server_overrides is defined %}
-  response-policy { zone "override"; };
+  {# qname-wait-recurse no: answer overridden names without waiting for upstream resolution #}
+  response-policy { zone "override"; } qname-wait-recurse no;
+{% endif %}
+
+{% if dns_server_raw_options_content is defined %}
+  ## Raw options content from user
+{{ dns_server_raw_options_content | indent(2, true) }}
 {% endif %}
 };
 
@@ -75,11 +94,4 @@ logging {
     file "{{ dns_server_log_dir }}/named.log";
     severity dynamic;
   };
-
-{% if dns_server_raw_options_content is defined %}
-## Raw options content from user
-
-{{ dns_server_raw_options_content }}
-{% endif %}
-
 };

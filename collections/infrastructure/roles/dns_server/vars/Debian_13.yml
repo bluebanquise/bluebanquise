@@ -19,6 +19,3 @@ dns_server_named_dir: /etc/bind
 dns_server_configuration_file: /etc/bind/named.conf
 dns_server_configuration_options_file: /etc/bind/named.conf.options
 dns_server_configuration_local_file: /etc/bind/named.conf.local
-
-dns_server_root_hint_file: /usr/share/dns/root.hints
-dns_server_root_key_file: /usr/share/dns/root.key

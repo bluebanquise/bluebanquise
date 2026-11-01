@@ -13,11 +13,14 @@ zone "{{ octets.split('.') | reverse | join('.') }}.in-addr.arpa" IN {
 
 ## Local server zones
 
-{% if ansible_distribution != 'Debian' and ansible_distribution != 'Ubuntu'%}
+{# Root hints and key, when not already provided by distribution configuration #}
+{% if dns_server_root_hint_file is defined %}
 zone "." IN {
   type hint;
   file "{{ dns_server_root_hint_file }}";
 };
+{% endif %}
+{% if dns_server_root_key_file is defined %}
 
 include "{{ dns_server_root_key_file }}";
 {% endif %}

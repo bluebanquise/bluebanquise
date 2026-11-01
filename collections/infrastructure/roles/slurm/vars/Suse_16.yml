@@ -1,0 +1,29 @@
+---
+slurm_home_path: /etc/slurm
+slurm_mysql_cnf_dir: /etc/my.cnf.d
+slurm_accounting_mysql_unix_socket: /var/run/mysql/mysql.sock
+slurm_packages_to_install:
+  controller:
+    - munge
+    - libmunge2
+    - slurm
+    - slurm-devel
+    # - slurm-slurmctld
+  accounting:
+    - slurm-slurmdbd
+    - python313-PyMySQL
+    - python3
+  accounting_mysql:
+    - mariadb
+    - mariadb-client
+  compute:
+    - munge
+    - libmunge2
+    - slurm
+    - slurm-devel
+    # - slurm-slurmd
+  submitter:
+    - munge
+    - libmunge2
+    - slurm
+    - slurm-devel

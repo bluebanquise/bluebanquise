@@ -2,20 +2,42 @@
 #### Blue Banquise file ####
 ## {{ ansible_managed }}
 
+{# iPXE rom file name parts: <embed>_<driver>_ipxe.efi, default driver has no name part #}
+{% if dhcp_server_ipxe_driver in ['snp', 'snponly'] %}
+  {% set ipxe_driver = dhcp_server_ipxe_driver ~ '_' %}
+{% else %}
+  {% set ipxe_driver = '' %}
+{% endif %}
+{% if dhcp_server_ipxe_embed in ['dhcpretry', 'noshell', 'allretry'] %}
+  {% set ipxe_embed = dhcp_server_ipxe_embed %}
+{% else %}
+  {% set ipxe_embed = 'standard' %}
+{% endif %}
+
+{#
+  Networks served by this DHCP server, with their PXE server ip (pxe4 or pxe service, else
+  services_ip), used to build per-network HTTP boot classes. Same logic as in kea-dhcp4.subnet.conf.j2.
+#}
+{% set ns = namespace(http_boot_networks=[]) %}
+{% for network_name in dhcp_server_networks %}
+  {% set network = networks[network_name] %}
+  {% set services = network['services'] | default({}, true) %}
+  {% set pxe_entries = services['pxe4'] | default(services['pxe'], true) | default([], true) %}
+  {% set pxe_ip = '' %}
+  {% if pxe_entries | length > 0 and pxe_entries[0]['ip4'] is defined and pxe_entries[0]['ip4'] %}
+    {% set pxe_ip = pxe_entries[0]['ip4'] | split('/') | first %}
+  {% elif network['services_ip'] is defined and network['services_ip'] %}
+    {% set pxe_ip = network['services_ip'] %}
+  {% endif %}
+  {% if pxe_ip %}
+    {% set ns.http_boot_networks = ns.http_boot_networks + [{'network': network_name, 'pxe_ip': pxe_ip}] %}
+  {% endif %}
+{% endfor %}
+
 {
   "Dhcp4": {
     "interfaces-config": {
-      # To be improved, loop on interfaces to grab their names
-    {% if dhcp_server_listen_interfaces is defined and dhcp_server_listen_interfaces is not none %}
-      "interfaces": [
-      {% for interface in dhcp_server_listen_interfaces %}
-      "{{ interface }}"{% if not loop.last %},{% endif %}
-
-      {% endfor %}
-      ]
-    {% else %}
-      "interfaces": [ "*" ]
-    {% endif %}
+      "interfaces": {{ dhcp_server_listen_interfaces | to_json }}
     },
 
     "lease-database": {
@@ -26,46 +48,14 @@
 
     "valid-lifetime": {{ dhcp_server_default_lease_time }},
     "max-valid-lifetime": {{ dhcp_server_max_lease_time }},
-    
-    {% if dhcp_server_ignore_client_uids | bool %}
-    "match-client-id": false,
-    {% endif %}
 
-    {% if dhcp_server_ipxe_driver == 'snponly' %}
-      {% set ipxe_driver = 'snponly_' %}
-    {% elif dhcp_server_ipxe_driver == 'snp' %}
-      {% set ipxe_driver = 'snp_' %}
-    {% else %}{# Assume everything else is default driver #}
-      {% set ipxe_driver = '' %}
-    {% endif %}
-    {% if dhcp_server_ipxe_embed == 'dhcpretry' %}
-      {% set ipxe_embed = 'dhcpretry' %}
-    {% elif dhcp_server_ipxe_embed == 'noshell' %}
-      {% set ipxe_embed = 'noshell' %}
-    {% elif dhcp_server_ipxe_embed == 'allretry' %}
-      {% set ipxe_embed = 'allretry' %}
-    {% else %}{# Assume everything else is standard script #}
-      {% set ipxe_embed = 'standard' %}
-    {% endif %}
+    # Identify clients by their MAC address only (see README, "Client identifier matching")
+    "match-client-id": {{ dhcp_server_match_client_id | bool | lower }},
 
-    {# Build list of networks that have a PXE server, for per-subnet HTTP boot classes #}
-    {% set http_boot_networks = [] %}
-    {% for network in networks %}
-      {% if network.startswith("net-") and (networks[network].dhcp_server | default(true)) and networks[network].subnet is defined and networks[network].prefix is defined %}
-        {% if networks[network]['services'] is defined and networks[network]['services'] is iterable and networks[network]['services'] is not string and networks[network]['services'] is mapping and networks[network]['services']['pxe4'] is defined %}
-          {% set ns = networks[network]['services']['pxe4'][0]['hostname'] | default(networks[network]['services']['pxe4'][0]['ip4'], true) %}
-          {% if ns is defined and ns is not none %}
-            {% set _ = http_boot_networks.append({'network': network, 'nextserver': ns}) %}
-          {% endif %}
-        {% elif networks[network]['services_ip'] is defined and (networks[network]['services_ip'] | ansible.utils.ipaddr) %}
-          {% set _ = http_boot_networks.append({'network': network, 'nextserver': networks[network]['services_ip']}) %}
-        {% endif %}
-      {% endif %}
-    {% endfor %}
-
-    # Organize hosts booting by classes, to be used in networks.
-    # HTTP boot classes (arch_*_http_boot) are detection-only; per-subnet subclasses
-    # carry the actual boot-file-name so the URL uses each subnet's next-server address.
+    # Organize hosts booting by classes, using client architecture (option 93) and vendor class (option 60).
+    # PXE clients receive a TFTP file name. UEFI HTTP boot clients (x86_64: 0x0010, arm64: 0x0013)
+    # receive a HTTP URL, from per-network classes, as the URL uses the PXE server ip of the client network.
+    # Per-network classes are only evaluated for the network requiring them (only-if-required).
     "client-classes": [
       {
         "name": "arch_x86_legacy",
@@ -84,39 +74,36 @@
       },
       {
         "name": "arch_x86_64_http_boot",
-        "test": "substring(option[60].hex, 0, 10) == 'HTTPClient' and (option[93].hex == 0x0007 or option[93].hex == 0x0009)"
+        "test": "substring(option[60].hex, 0, 10) == 'HTTPClient' and option[93].hex == 0x0010"
       },
       {
         "name": "arch_arm64_http_boot",
-        "test": "substring(option[60].hex, 0, 10) == 'HTTPClient' and option[93].hex == 0x000b"
-      }{% if http_boot_networks | length > 0 %},{% endif %}
-
-    {% for entry in http_boot_networks %}
-      {
+        "test": "substring(option[60].hex, 0, 10) == 'HTTPClient' and option[93].hex == 0x0013"
+      }
+{% for entry in ns.http_boot_networks %}
+      ,{
         "name": "arch_x86_64_http_boot_{{ entry.network }}",
         "test": "member('arch_x86_64_http_boot')",
-        "option-data": [ { "name": "boot-file-name", "data": "http://{{ entry.nextserver }}/pxe/x86_64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi" } ]
+        "only-if-required": true,
+        "option-data": [ { "name": "boot-file-name", "data": "http://{{ entry.pxe_ip }}/pxe/x86_64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi" } ]
       },
       {
         "name": "arch_arm64_http_boot_{{ entry.network }}",
         "test": "member('arch_arm64_http_boot')",
-        "option-data": [ { "name": "boot-file-name", "data": "http://{{ entry.nextserver }}/pxe/arm64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi" } ]
-      }{% if not loop.last %},{% endif %}
-
-    {% endfor %}
+        "only-if-required": true,
+        "option-data": [ { "name": "boot-file-name", "data": "http://{{ entry.pxe_ip }}/pxe/arm64/{{ ipxe_embed }}_{{ ipxe_driver }}ipxe.efi" } ]
+      }
+{% endfor %}
     ],
 
     # Logging
     "loggers": [
       {
-          "name": "kea-dhcp4",
-          "output_options": [
-              {
-                  "output": "stdout"
-              }
-          ],
-          "severity": "DEBUG",
-          "debuglevel": 7
+        "name": "kea-dhcp4",
+        "output_options": [ { "output": "stdout" } ],
+        "severity": "{{ dhcp_server_log_severity }}"{% if dhcp_server_log_severity == 'DEBUG' %},
+        "debuglevel": 7{% endif %}
+
       }
     ],
 

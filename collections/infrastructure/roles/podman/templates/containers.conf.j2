@@ -1,0 +1,19 @@
+{{ ansible_managed | comment }}
+# Overrides /usr/share/containers/containers.conf, see containers.conf(5)
+{% if podman_conf_cgroup_manager is defined or podman_conf_events_logger is defined or podman_conf_namespace is defined %}
+
+[engine]
+{% if podman_conf_cgroup_manager is defined %}
+cgroup_manager = "{{ podman_conf_cgroup_manager }}"
+{% endif %}
+{% if podman_conf_events_logger is defined %}
+events_logger = "{{ podman_conf_events_logger }}"
+{% endif %}
+{% if podman_conf_namespace is defined %}
+namespace = "{{ podman_conf_namespace }}"
+{% endif %}
+{% endif %}
+{% if podman_containers_conf_content is defined %}
+
+{{ podman_containers_conf_content }}
+{% endif %}

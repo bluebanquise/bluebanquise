@@ -64,6 +64,9 @@ Multiple endpoints
 If you need to split services over multiple ips or hostnames, it is possible to define them under the ``services`` key.
 You will need to refer to each service dedicated documentation to know the exact variables names to use.
 
+Service keys end with ``4`` for IPv4 endpoints (``dns4``, ``pxe4``, ``ntp4``, ``log4``, ``repositories4``...), to leave room
+for IPv6 endpoints later. Keys without suffix (``dns``, ``ntp``...) are deprecated, but still accepted by roles.
+
 For example, for the NTP server, if you need server so listen on 10.10.0.6 and clients to try to reach server on this ip, define it this way:
 
 .. code-block:: yaml
@@ -73,7 +76,7 @@ For example, for the NTP server, if you need server so listen on 10.10.0.6 and c
       subnet: 10.10.0.0
       prefix: 16
       services:
-        ntp:
+        ntp4:
           - ip4: 10.10.0.6
 
 You can also define an hostname instead of an ipv4:
@@ -85,7 +88,7 @@ You can also define an hostname instead of an ipv4:
       subnet: 10.10.0.0
       prefix: 16
       services:
-        ntp:
+        ntp4:
           - hostname: my-ntp-server
             ip4: 10.10.0.6
 
@@ -111,7 +114,7 @@ Example:
       prefix: 16
       services_ip: 10.10.0.1
       services:
-        ntp:
+        ntp4:
           - hostname: my-ntp-server
             ip4: 10.10.0.6
           - hostname: google-public-dns

@@ -6,7 +6,7 @@ Since the stack is based on Ansible, it is possible to create custom logical gro
 Just be sure not to use reserved names.
 
 Reserved groups and prefixes
----------------------------
+----------------------------
 
 The following groups are reserved (``.*`` means "everything else", it is a regex):
 

@@ -6,7 +6,7 @@
     dest: "{{ slurm_home_path }}/slurm.conf"
     owner: slurm
     group: slurm
-    mode: 0644
+    mode: "0644"
   tags:
     - template
   notify: service <|> restart slurmd
@@ -26,7 +26,7 @@
     dest: "/etc/systemd/system/slurmd.service.d/{{ item }}"
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   tags:
     - template
   loop:
@@ -42,7 +42,7 @@
     dest: "{{ slurm_home_path }}/{{ item }}"
     owner: slurm
     group: slurm
-    mode: 0644
+    mode: "0644"
   tags:
     - template
   loop:
@@ -56,7 +56,7 @@
     dest: "{{ slurm_home_path }}/{{ item }}"
     owner: slurm
     group: slurm
-    mode: 0600
+    mode: "0600"
   tags:
     - template
   loop:

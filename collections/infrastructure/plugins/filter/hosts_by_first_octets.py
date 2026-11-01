@@ -3,6 +3,15 @@ from collections import defaultdict
 from ansible.errors import AnsibleFilterError
 
 
+def to_list(value):
+    # Aliases can be defined in the inventory as a plain string or a list of strings
+    if value is None:
+        return []
+    if isinstance(value, list):
+        return value
+    return [value]
+
+
 class FilterModule(object):
     def filters(self):
         return {'hosts_by_first_octets': self.hosts_by_first_octets}
@@ -18,14 +27,7 @@ class FilterModule(object):
                 hv = hostvars.get(hostname, {})
                 raw_alias = hv.get("alias")
 
-                # Normalise alias to a list regardless of whether the inventory
-                # defines it as a plain string or a list of strings
-                if raw_alias is None:
-                    aliases = []
-                elif isinstance(raw_alias, list):
-                    aliases = raw_alias
-                else:
-                    aliases = [raw_alias]
+                aliases = to_list(raw_alias)
 
                 # --- Process Network Interfaces ---
                 for index, nic in enumerate(hv.get("network_interfaces", []) or []):
@@ -55,6 +57,11 @@ class FilterModule(object):
                         if index > 0:
                             reverse_data[ip_net]['extended'].append(ext_entry)
 
+                        # NIC aliases are extended names too (forward only, no PTR)
+                        for alias in to_list(nic.get("alias")):
+                            alias_entry = {"hostname": alias, "network": net_name, "ip4": ip4, "ip_host": ip_host}
+                            forward_data['extended'].append(alias_entry)
+
                 # --- Process BMC ---
                 bmc = hv.get('bmc')
                 if bmc:
@@ -67,15 +74,21 @@ class FilterModule(object):
                         forward_data['base'].append(entry)
                         reverse_data[ip_net]['base'].append(entry)
 
+                        # BMC aliases (forward only, no PTR)
+                        for alias in to_list(bmc.get("alias")):
+                            alias_entry = {"hostname": alias, "network": net_name, "ip4": ip4, "ip_host": ip_host}
+                            forward_data['base'].append(alias_entry)
+
             except Exception as e:
                 raise AnsibleFilterError(f"Error processing host '{hostname}': {str(e)}")
 
         # --- Process Network Services ---
         for net_name, net_data in networks.items():
             try:
-                services = net_data.get('services', {})
+                # "or" handles keys present in inventory but left empty (None)
+                services = (net_data or {}).get('services') or {}
                 for svc_name, service_ips in services.items():
-                    for item in service_ips:
+                    for item in (service_ips or []):
                         ip4, svc_host = item.get('ip4'), item.get('hostname')
                         if ip4 and svc_host:
                             ip4 = ip4.split('/')[0]  # strip CIDR notation if present

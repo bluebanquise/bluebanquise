@@ -4,10 +4,10 @@
 
 This role consolidates all local host configuration tasks into a single unified role. It covers:
 
-- **Hostname** — sets the static hostname (always applied)
-- **Security** — access control (SELinux / AppArmor), root/sudo password, sudoers
-- **System** — kernel parameters, sysctl, kernel version lock, kernel modules, PAM limits, cron jobs, packages, services, files, folders, templates, lineinfile
-- **Storage** — partitioning, LVM, filesystems, mount points
+- **Hostname** - sets the static hostname (always applied)
+- **Security** - access control (SELinux / AppArmor), root/sudo password, sudoers
+- **System** - kernel parameters, sysctl, kernel version lock, kernel modules, PAM limits, cron jobs, packages, services, files, folders, templates, lineinfile
+- **Storage** - partitioning, LVM, filesystems, mount points
 
 Each of the three configuration sections (security, system, storage) is activated only when its corresponding dict variable is defined in inventory. Within each section, subtasks are also individually conditional: only the subtasks whose variables are defined are executed, keeping playbook runs fast.
 
@@ -53,17 +53,21 @@ Accepted values:
 
 | Value | RedHat (SELinux) | Debian / Ubuntu / Suse (AppArmor) |
 |---|---|---|
-| `enforcing` | SELinux enforcing | AppArmor started, all profiles enforced |
-| `permissive` or `complain` | SELinux permissive | AppArmor started, all profiles set to complain |
-| `disabled` | SELinux disabled | AppArmor stopped and disabled |
+| `enforcing` | SELinux enforcing | AppArmor enabled and started, profiles as shipped by the distribution |
+| `permissive` or `complain` | SELinux permissive | AppArmor enabled and started, all profiles set to complain |
+| `disabled` | SELinux disabled | All profiles unloaded (`aa-teardown`), AppArmor disabled |
 
-Example — set per equipment profile using the global variable:
+Switching SELinux from or to `disabled` requires a reboot. Setting profiles to complain mode modifies
+them: switching back to `enforcing` does not restore their previous mode (use `aa-enforce` on the
+needed profiles).
+
+Example - set per equipment profile using the global variable:
 
 ```yaml
 os_access_control: enforcing
 ```
 
-Example — set inside the role dict (takes precedence over `os_access_control`):
+Example - set inside the role dict (takes precedence over `os_access_control`):
 
 ```yaml
 local_configuration_security:
@@ -86,19 +90,19 @@ local_configuration_root_password_enable_root: false   # default
 local_configuration_root_password_sudo_user: bluebanquise  # default
 ```
 
-To generate a SHA-512 password hash (Python ≥ 3.3):
+To generate a SHA-512 password hash:
 
 ```
-python3 -c 'import crypt,getpass; print(crypt.crypt(getpass.getpass(), crypt.mksalt(crypt.METHOD_SHA512)))'
+openssl passwd -6
 ```
 
-Example — set per equipment profile using the global variable:
+Example - set per equipment profile using the global variable:
 
 ```yaml
 os_admin_password_sha512: $6$M3crarMVoUV3rALd$ZTre2CIyss7zOb4lkLoG23As9OAkYPw2BM88Y1F43n8CCyV5XWwAYEwBOrS8bcCBIMjIPdJG.ndOfzWyAVR4j0
 ```
 
-Example — set inside the role dict (takes precedence over `os_admin_password_sha512`):
+Example - set inside the role dict (takes precedence over `os_admin_password_sha512`):
 
 ```yaml
 local_configuration_security:
@@ -141,22 +145,22 @@ following global variables is defined: `os_kernel_parameters`, `hw_kernel_parame
 
 #### Kernel command line parameters
 
-Applies kernel command line parameters to the default kernel entry.
+Applies kernel command line parameters. Parameters are only added, never removed.
 
 The effective values are resolved in this order of precedence:
 1. `local_configuration_system.kernel_parameters` / `local_configuration_system.hw_kernel_parameters`
 2. `os_kernel_parameters` / `hw_kernel_parameters` (global equipment-profile / hardware variables)
 
-On **RHEL**, `grubby` is used to add parameters to the default kernel. Parameters already
-present are skipped (idempotent).
+On **RHEL**, `grubby --update-kernel=ALL` is used, so that parameters apply to all installed
+kernels and to kernels installed later. Parameters already present in all boot entries are skipped.
 
 On **Ubuntu, Debian, and OpenSuse**, parameters are merged into `GRUB_CMDLINE_LINUX_DEFAULT`
-in `/etc/default/grub`, deduplicated, sorted, and the appropriate grub update command is run.
+in `/etc/default/grub` (existing parameters first, in their order, then new ones, without
+duplicates), and the grub configuration is regenerated.
 
-`hw_console` (global hardware variable) is also merged into the grub command line on
-non-RHEL systems when defined.
+`hw_console` (global hardware variable) is also added when defined.
 
-Example — using global variables (typical equipment-profile / hardware group_vars):
+Example - using global variables (typical equipment-profile / hardware group_vars):
 
 ```yaml
 os_kernel_parameters: "quiet splash"
@@ -164,7 +168,7 @@ hw_kernel_parameters: "iommu=pt intel_iommu=on"
 hw_console: "console=tty0 console=ttyS0,115200n8"
 ```
 
-Example — using the role dict (takes precedence over global variables):
+Example - using the role dict (takes precedence over global variables):
 
 ```yaml
 local_configuration_system:
@@ -195,7 +199,7 @@ local_configuration_kernel_config_sysctl_reload: false
 
 Pins the running kernel to a specific version and prevents package managers from upgrading
 it away, using `dnf versionlock` on RHEL family systems and `apt-mark hold` on Debian and
-Ubuntu. **Not supported on OpenSuse** — the role fails with a clear message if
+Ubuntu. **Not supported on OpenSuse** - the role fails with a clear message if
 `os_kernel_version` is set on a Suse family host.
 
 The effective values are resolved in this order of precedence:
@@ -211,11 +215,11 @@ os_kernel_version_allow_reboot: false               # default: false
 `5.14.0-427.24.1.el9_4.x86_64` on RHEL, `6.8.0-31-generic` on Ubuntu, `6.1.0-21-amd64` on
 Debian). This is the same format `ansible_facts.kernel` reports and the same format the
 `cluster_management` role's dynamic state daemon gathers via `uname -r` (formerly the separate
-`cluster_state` role) — see the "Cluster state" note below.
+`cluster_state` role) - see the "Cluster state" note below.
 
 On each run:
 1. The running kernel (`ansible_facts.kernel`) is compared to `os_kernel_version`.
-2. **If it already matches**, no package is installed and no reboot happens — the role only
+2. **If it already matches**, no package is installed and no reboot happens - the role only
    (re)applies the lock, so a missing or stale lock is repaired even when the version is
    already correct.
 3. **If it does not match**, the existing lock/hold on the kernel family is removed, the
@@ -227,37 +231,33 @@ On each run:
    (or by another mechanism, e.g. a maintenance-window playbook).
 
 **RHEL family**: the whole installed kernel package family is discovered dynamically
-(`kernel`, `kernel-core`, `kernel-modules`, `kernel-modules-core`, `kernel-modules-extra` —
+(`kernel`, `kernel-core`, `kernel-modules`, `kernel-modules-core`, `kernel-modules-extra` -
 whichever are present) and locked/installed together at the target version-release, so
 `dnf update` cannot drift `kernel-core` and `kernel-modules` to different versions. The
 bootloader default is set directly via `grubby --set-default=/boot/vmlinuz-<version>`.
 
 **Debian / Ubuntu**: the versioned packages currently installed for the running kernel
-(`linux-image-<version>`, `linux-headers-<version>`, `linux-modules-<version>`, etc. —
+(`linux-image-<version>`, `linux-headers-<version>`, `linux-modules-<version>`, etc. -
 whichever are present) are discovered, renamed to the target version, and installed. The
 rolling meta-packages (`linux-image-generic` on Ubuntu, `linux-image-amd64` on Debian, etc.
-— see `local_configuration_kernel_version_meta_packages`) are held too: holding only the
+- see `local_configuration_kernel_version_meta_packages`) are held too: holding only the
 versioned package is not enough, since `apt upgrade` can still pull a newer kernel through
 the meta-package's own dependency. The bootloader default is switched by setting
 `GRUB_DEFAULT=saved` and pointing `grub-set-default` at the target kernel's GRUB menu entry
 id (parsed out of the regenerated `grub.cfg`).
 
+The default meta-packages are `linux-image-generic`, `linux-headers-generic`, `linux-generic`
+and `linux-modules-extra-generic` on Ubuntu, and `linux-image-<arch>` and `linux-headers-<arch>`
+on Debian, where `<arch>` is the Debian architecture name (`amd64`, `arm64`) of the host. They
+can be replaced in the inventory:
+
 ```yaml
-local_configuration_kernel_version_meta_packages:   # override per OS family as needed
-  - linux-image-generic     # Ubuntu default
-  - linux-headers-generic
-  - linux-generic
-  - linux-modules-extra-generic
+local_configuration_kernel_version_meta_packages:
+  - linux-image-cloud-amd64
 ```
 
-> **Known limitation:** the default Debian meta-package names (`linux-image-amd64`,
-> `linux-headers-amd64`) assume x86_64. On arm64 Debian hosts, override
-> `local_configuration_kernel_version_meta_packages` to the `-arm64` equivalents — it cannot
-> be derived automatically from `ansible_facts.architecture` (`aarch64`), which does not
-> match Debian's own arch naming (`arm64`).
-
 **Cluster state**: when `os_kernel_version` is set, the `cluster_management` role writes it to
-`static_cluster_state.yml` under the `kernel` key — the same key its dynamic state daemon
+`static_cluster_state.yml` under the `kernel` key - the same key its dynamic state daemon
 already populates in `dynamic_cluster_state.yml` from a live `uname -r`, so
 `bluebanquise-cluster state` diffs expected vs actual kernel version for free.
 
@@ -644,3 +644,24 @@ local_configuration_storage:
       fstype: ext4
       state: mounted
 ```
+
+## Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `local_configuration_hostname_fqdn` | `true` | Set FQDN hostname, else short hostname. |
+| `local_configuration_hostname_domain_name` | `bb_domain_name`, else `cluster.local` | Domain name of the FQDN hostname. |
+| `local_configuration_security` | not set | Security configuration: `access_control`, `admin_password_sha512`, `sudoers`, `sudoers_logging`. |
+| `local_configuration_system` | not set | System configuration: `kernel_parameters`, `hw_kernel_parameters`, `sysctl`, `kernel_version`, `kernel_version_allow_reboot`, `modprobe`, `pam_limits`, `cron_jobs`, `packages`, `services`, `folders`, `files`, `templates`, `lineinfile`. |
+| `local_configuration_storage` | not set | Storage configuration: `parted`, `lvm`, `filesystem`, `mount`. |
+| `local_configuration_access_control_os_access_control` | `enforcing` | Access control state when neither `local_configuration_security.access_control` nor `os_access_control` is set. |
+| `local_configuration_root_password_enable_root` | `false` | Set the admin password on root instead of the sudo user. |
+| `local_configuration_root_password_sudo_user` | `bluebanquise` | User receiving the admin password when root is not enabled. |
+| `local_configuration_sudoers_logging` | `false` | Default for `local_configuration_security.sudoers_logging`. |
+| `local_configuration_kernel_config_sysctl_reload` | `true` | Reload sysctl after changes. |
+| `local_configuration_kernel_version_meta_packages` | distribution default | Kernel meta-packages held with the kernel version lock (Debian, Ubuntu). |
+| `local_configuration_lvm_packages_to_install` | `[lvm2]` | LVM packages. |
+
+Global variables used when the matching key of the role dictionaries is not set: `os_access_control`,
+`os_admin_password_sha512`, `os_kernel_parameters`, `hw_kernel_parameters`, `hw_console`, `os_sysctl`,
+`os_kernel_version`, `os_kernel_version_allow_reboot`.

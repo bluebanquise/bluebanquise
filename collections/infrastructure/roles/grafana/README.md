@@ -2,141 +2,204 @@
 
 ## Description
 
-These settings deploy Grafana on the host. It allows configuring:
-- Server, security, database, and auth settings (via `grafana.ini`)
-- Dashboards (from grafana.com or local JSON files)
-- Datasources
-- Plugins
-- LDAP connection
-- API keys
+This role deploys Grafana on the host, and provisions its datasources and dashboards.
 
 Supported distributions: RHEL 9/10, Ubuntu 24.04/26.04, Debian 13, OpenSuse Leap 16.
 
 ## Instructions
 
-Grafana is available by default at `http://<host>:3000` with user `admin` / password `admin`.
+Grafana is available by default at `http://<host>:3000`, with user `admin` and password `admin`.
 
-### Variables
+### Repositories
 
-| Name | Default | Description |
-|---|---|---|
-| `grafana_provisioning_synced` | `false` | Remove previously provisioned dashboards no longer referenced |
-| `grafana_install_oss_packages` | `false` | Install Grafana OSS directly from grafana.com instead of system repositories |
-| `grafana_instance` | `{{ ansible_fqdn \| default(inventory_hostname) }}` | Grafana instance name |
-| `grafana_logs_dir` | `/var/log/grafana` | Path to logs directory |
-| `grafana_data_dir` | `/var/lib/grafana` | Path to data directory |
-| `grafana_address` | `0.0.0.0` | Address Grafana listens on |
-| `grafana_port` | `3000` | Port Grafana listens on |
-| `grafana_cap_net_bind_service` | `false` | Allow binding to ports below 1024 without root |
-| `grafana_url` | `http://{{ grafana_address }}:{{ grafana_port }}` | Public URL for Grafana |
-| `grafana_api_url` | `{{ grafana_url }}` | URL used for API provisioning calls |
-| `grafana_domain` | `{{ ansible_fqdn \| default('localhost') }}` | Domain used in root_url (OAuth) |
-| `grafana_server` | see defaults | `[server]` section options |
-| `grafana_security` | `{admin_user: admin, admin_password: admin}` | `[security]` section options |
-| `grafana_database` | `{type: sqlite3}` | `[database]` section options |
-| `grafana_welcome_email_on_sign_up` | `false` | Send welcome email after sign-up |
-| `grafana_users` | see defaults | `[users]` section options |
-| `grafana_auth` | `{}` | `[auth]` section options |
-| `grafana_ldap` | `{}` | LDAP configuration (servers and group_mappings) |
-| `grafana_session` | `{}` | `[session]` section options |
-| `grafana_analytics` | `{}` | `[analytics]` section options |
-| `grafana_smtp` | `{}` | `[smtp]` section options |
-| `grafana_alerting` | `{execute_alerts: true}` | `[alerting]` section options |
-| `grafana_log` | `{}` | `[log]` section options |
-| `grafana_metrics` | `{}` | `[metrics]` section options |
-| `grafana_tracing` | `{}` | `[tracing]` section options |
-| `grafana_snapshots` | `{}` | `[snapshots]` section options |
-| `grafana_image_storage` | `{}` | `[external_image_storage]` section options |
-| `grafana_plugins` | `[]` | List of Grafana plugins to install |
-| `grafana_dashboards` | `[]` | List of dashboards to import from grafana.com |
-| `grafana_dashboards_dir` | `dashboards` | Local directory with dashboard JSON files |
-| `grafana_datasources` | `[]` | List of datasources to configure |
-| `grafana_api_keys` | `[]` | List of API keys to create |
-| `grafana_api_keys_dir` | `~/grafana/keys` | Local directory to store generated API key files |
-| `grafana_environment` | `{}` | Extra environment variables for grafana-server |
-| `grafana_panels` | `{}` | `[panels]` section options |
-| `grafana_user_gid` | (unset) | Force grafana group GID |
-| `grafana_user_uid` | (unset) | Force grafana user UID |
-| `grafana_user_home` | `/usr/share/grafana` | grafana user home directory |
+The `grafana` package must be available in the configured repositories. RHEL provides it in its
+AppStream repository (Grafana 10.2 on RHEL 10), and OpenSuse Leap 16 in its main repository (Grafana 12).
+On Debian and Ubuntu, or to get a recent version on RHEL, use Grafana repositories,
+defined in `bb_repositories` and configured by the `repositories` role first (see the `repositories`
+role README for the format of each distribution). On clusters without internet access, mirror the
+repository on the management host and use the local URL instead.
 
-Security note: these settings alway resets the admin password to the value in `grafana_security.admin_password`. Use Ansible Vault to protect it:
+**RHEL:**
 
 ```yaml
-grafana_security:
-  admin_user: admin
-  admin_password: !vault |
-    $ANSIBLE_VAULT;1.1;AES256
-    ...
+bb_repositories:
+  - name: grafana
+    baseurl: https://rpm.grafana.com
+    gpgcheck: true
+    gpgkey: https://rpm.grafana.com/gpg.key
+```
+
+**OpenSuse Leap** (only needed for a version newer than the distribution one): the key `https://rpm.grafana.com/gpg.key` must be imported (`rpm --import`):
+
+```yaml
+bb_repositories:
+  - name: grafana
+    repo: https://rpm.grafana.com
+```
+
+**Ubuntu:** the key `https://apt.grafana.com/gpg.key` must be available, dearmored, as `/etc/apt/keyrings/grafana.gpg`:
+
+```yaml
+bb_repositories:
+  - repo: deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main
+```
+
+**Debian 13** (deb822 format):
+
+```yaml
+bb_repositories:
+  - name: grafana
+    uris: https://apt.grafana.com
+    suites: stable
+    components: main
+    signed_by: /etc/apt/keyrings/grafana.gpg
+```
+
+### Admin account
+
+The admin password is enforced at each run, using `grafana-cli`, even if it was changed using the web interface.
+Use Ansible Vault to protect it:
+
+```yaml
+grafana_admin_user: admin
+grafana_admin_password: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  ...
+```
+
+### Configuration
+
+The role writes a minimal `/etc/grafana/grafana.ini`: paths, listening address and port, domain and
+admin account. Any other option of the [Grafana configuration](https://grafana.com/docs/grafana/latest/setup-grafana/configure-grafana/)
+can be set in `grafana_configuration`, as a dictionary of sections, each being a dictionary of options.
+These are merged over the role configuration, and can override it.
+
+For example, to send emails, and allow anonymous read only access:
+
+```yaml
+grafana_configuration:
+  smtp:
+    enabled: true
+    host: smtp.cluster.local:25
+    from_address: grafana@cluster.local
+  auth.anonymous:
+    enabled: true
+    org_role: Viewer
+```
+
+### LDAP authentication
+
+Set the content of `/etc/grafana/ldap.toml` in `grafana_ldap_configuration`
+(see [Grafana LDAP documentation](https://grafana.com/docs/grafana/latest/setup-grafana/configure-security/configure-authentication/ldap/)).
+The `[auth.ldap]` section is then enabled automatically:
+
+```yaml
+grafana_ldap_configuration: |
+  [[servers]]
+  host = "ldap.cluster.local"
+  port = 389
+  bind_dn = "cn=admin,dc=cluster,dc=local"
+  bind_password = "secret"
+  search_filter = "(uid=%s)"
+  search_base_dns = ["dc=cluster,dc=local"]
+
+  [servers.attributes]
+  username = "uid"
+  email = "mail"
+
+  [[servers.group_mappings]]
+  group_dn = "*"
+  org_role = "Viewer"
 ```
 
 ### Datasources
 
+Datasources are written to `/etc/grafana/provisioning/datasources/bluebanquise.yml`, using
+[Grafana provisioning format](https://grafana.com/docs/grafana/latest/administration/provisioning/#data-sources):
+any key of this format can be used.
+
 ```yaml
 grafana_datasources:
   - name: prometheus
+    uid: prometheus
     type: prometheus
     access: proxy
-    url: 'http://localhost:9090'
-    basicAuth: false
+    url: http://localhost:9090
     isDefault: true
 ```
 
+Setting `uid` to the same value as `name` allows dashboards to refer to the datasource either way.
+
+Removing a datasource from the list does not remove it from Grafana. To do so, delete it using the
+web interface, or use `deleteDatasources` (see Grafana documentation).
+
 ### Dashboards
 
-Import by ID from grafana.com:
+Dashboards are installed in `/var/lib/grafana/dashboards`, and loaded by Grafana (file provisioning).
+Provisioned dashboards cannot be saved from the web interface: save a copy to edit them.
+
+Dashboards can be downloaded from [grafana.com](https://grafana.com/grafana/dashboards/), by ID and revision.
+Their datasource placeholder (like `${DS_PROMETHEUS}`) is replaced by `datasource`. The management
+host needs access to grafana.com.
 
 ```yaml
 grafana_dashboards:
   - dashboard_id: 1860
-    revision_id: 4
+    revision_id: 37
     datasource: prometheus
 ```
 
-Or place JSON files in the `grafana_dashboards_dir` local directory and they will be imported automatically.
-
-### Playbook example
+Dashboards JSON files can also be stored in a folder of the Ansible host, set in `grafana_dashboards_dir`.
+All `*.json` files of this folder are installed.
 
 ```yaml
-- name: management playbook
-  hosts: mg_managements
-  roles:
-    - role: bluebanquise.infrastructure.prometheus
-    - role: bluebanquise.infrastructure.grafana
-      vars:
-        grafana_port: 3000
-        grafana_security:
-          admin_user: admin
-          admin_password: mysecretpassword
-        grafana_plugins:
-          - raintank-worldping-app
-        grafana_dashboards:
-          - dashboard_id: 4323
-            revision_id: 3
-            datasource: prometheus
-        grafana_datasources:
-          - name: prometheus
-            type: prometheus
-            access: proxy
-            url: http://127.0.0.1:9090
-            isDefault: true
+grafana_dashboards_dir: /var/lib/bluebanquise/inventory/dashboards
 ```
 
-### Installing a specific version
+To remove a dashboard, remove it from the list or folder, and delete its file on the host.
 
-To install a pinned version from system repositories:
+### Plugins
 
-```bash
-ansible-playbook /etc/bluebanquise/playbooks/grafana.yml --limit management1 \
-  -e "grafana_packages_to_install=['grafana-10.4.0']"
+```yaml
+grafana_plugins:
+  - grafana-clock-panel
 ```
 
-To install directly from grafana.com (bypassing system repositories):
+Plugins are downloaded by `grafana-cli`, so the host needs access to grafana.com.
 
-```bash
-ansible-playbook /etc/bluebanquise/playbooks/grafana.yml --limit management1 \
-  -e "grafana_install_oss_packages=true grafana_packages_to_install=['grafana-10.4.0-1.x86_64.rpm']"
-```
+### Upgrade from previous versions
 
-Check the [download page](https://grafana.com/grafana/download?edition=oss) for the filename matching your OS.
+Version 3.0.0 of this role was simplified, and variables of previous versions are rejected.
+Most of them were grafana.ini sections, now set in `grafana_configuration`:
 
-Note: if you add dashboards, these settings check that datasources are accessible. Apply datasource-providing roles (e.g. prometheus) before grafana.
+| Previous variable | Now |
+|-------------------|-----|
+| `grafana_security.admin_user`, `.admin_password` | `grafana_admin_user`, `grafana_admin_password` |
+| `grafana_server`, `grafana_database`, `grafana_remote_cache`, `grafana_users`, `grafana_auth`, `grafana_analytics`, `grafana_smtp`, `grafana_alerting`, `grafana_log`, `grafana_metrics`, `grafana_tracing`, `grafana_snapshots`, `grafana_image_storage`, `grafana_panels` | Matching sections (`server`, `database`, `smtp`, `unified_alerting`, etc.) in `grafana_configuration` |
+| `grafana_welcome_email_on_sign_up` | `grafana_configuration.emails.welcome_email_on_sign_up` |
+| `grafana_url` | `grafana_configuration.server.root_url` |
+| `grafana_ldap` | `grafana_ldap_configuration`, now the raw `ldap.toml` content |
+| `grafana_datasources` | Same name, now in Grafana provisioning format (`basicAuthPassword` goes into `secureJsonData`, etc.) |
+| `grafana_api_keys`, `grafana_api_keys_dir` | Removed: API keys were removed from Grafana 12. Use service accounts. |
+| `grafana_install_oss_packages` | Removed: use Grafana repositories. |
+| `grafana_cap_net_bind_service` | Removed: use a reverse proxy to serve Grafana on ports below 1024. |
+| `grafana_provisioning_synced`, `grafana_instance`, `grafana_logs_dir`, `grafana_data_dir`, `grafana_user_uid`, `grafana_user_gid`, `grafana_user_home`, `grafana_session`, `grafana_environment`, `grafana_alert_notifications` | Removed. |
+
+## Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `grafana_address` | `0.0.0.0` | Listening address. |
+| `grafana_port` | `3000` | Listening port. |
+| `grafana_domain` | host FQDN | Domain name used to reach Grafana. |
+| `grafana_admin_user` | `admin` | Admin user name. |
+| `grafana_admin_password` | `admin` | Admin password, enforced at each run. |
+| `grafana_configuration` | `{}` | Additional grafana.ini sections and options. |
+| `grafana_ldap_configuration` | `""` | Content of `/etc/grafana/ldap.toml`. Enables LDAP authentication when set. |
+| `grafana_plugins` | `[]` | Plugins to install. |
+| `grafana_datasources` | `[]` | Datasources, in Grafana provisioning format. |
+| `grafana_dashboards` | `[]` | Dashboards to download from grafana.com (`dashboard_id`, `revision_id`, `datasource`). |
+| `grafana_dashboards_dir` | `""` | Folder of the Ansible host containing dashboards JSON files to install. |
+| `grafana_firewall_zone` | `bb_services_firewall_zone`, else `public` | Firewall zone to open the Grafana port in. |
+| `grafana_enable_services` | `bb_enable_services`, else `true` | Enable Grafana service. |
+| `grafana_start_services` | `bb_start_services`, else `true` | Start Grafana service, and enforce admin password. |

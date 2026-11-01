@@ -1,0 +1,4 @@
+---
+logrotate_role_version: 1.1.0
+logrotate_os_su: ""
+logrotate_xz_package: xz

@@ -1,30 +1,97 @@
 ---
-- name: podman <|> Set os_family dependent variables
-  ansible.builtin.include_vars: '{{ ansible_os_family }}.yml'
+- name: assert <|> Check for variables of previous role versions
+  ansible.builtin.assert:
+    that:
+      - lookup('ansible.builtin.varnames', podman_legacy_variables_regex) | length == 0
+    fail_msg: >-
+      Variables {{ lookup('ansible.builtin.varnames', podman_legacy_variables_regex) }} are not used
+      anymore since podman role 3.0.0. See the role README.
+    quiet: true
+  tags:
+    - always
 
-- name: podman <|> Set distribution dependent variables
-  ansible.builtin.include_vars: '{{ vars_file }}'
-  with_first_found:
-    - files:
-        - '{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml'
-        # yamllint disable-line rule:line-length
-        - '{{ ansible_distribution }}.yml'
-        - '{{ ansible_os_family }}-{{ ansible_distribution_major_version }}.yml'
-      skip: true
+- name: "package <|> Install {{ podman_packages_to_install | join(' ') }}"
+  ansible.builtin.package:
+    name: "{{ podman_packages_to_install }}"
+    state: present
+  tags:
+    - package
+
+# Previous role versions replaced the distribution configuration files with their own ones.
+- name: find <|> Find configuration files written by previous role versions
+  ansible.builtin.find:
+    paths: /etc/containers
+    patterns: "{{ ['containers.conf'] + ([] if podman_storage_driver is defined else ['storage.conf']) }}"
+    contains: ".*Ansible managed.*"
+  register: podman_legacy_files
+
+- name: file <|> Remove configuration files written by previous role versions
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ podman_legacy_files.files }}"
   loop_control:
-    loop_var: vars_file
+    label: "{{ item.path }}"
 
-- name: podman <|> Include tasks for installing podman
-  ansible.builtin.include_tasks: setup.yml
+- name: file <|> Create drop-in configuration directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - /etc/containers/registries.conf.d
+    - /etc/containers/containers.conf.d
 
-- name: podman <|> Include tasks for /etc/containers configuration
-  ansible.builtin.include_tasks: conf.yml
-  when: podman_configure | bool
+- name: template <|> Generate /etc/containers/registries.conf.d/50-bluebanquise.conf
+  ansible.builtin.template:
+    src: registries.conf.j2
+    dest: /etc/containers/registries.conf.d/50-bluebanquise.conf
+    owner: root
+    group: root
+    mode: "0644"
+  tags:
+    - template
 
-- name: podman <|> Include tasks for subuid/subgid mappings and user config
-  ansible.builtin.include_tasks: users.yml
-  when: podman_configure | bool
+- name: template <|> Generate /etc/containers/containers.conf.d/50-bluebanquise.conf
+  ansible.builtin.template:
+    src: containers.conf.j2
+    dest: /etc/containers/containers.conf.d/50-bluebanquise.conf
+    owner: root
+    group: root
+    mode: "0644"
+  tags:
+    - template
 
-- name: podman <|> Include tasks for local registry
+- name: template <|> Generate /etc/containers/storage.conf
+  ansible.builtin.template:
+    src: storage.conf.j2
+    dest: /etc/containers/storage.conf
+    owner: root
+    group: root
+    mode: "0644"
+  when:
+    - podman_storage_driver is defined
+  tags:
+    - template
+
+- name: lineinfile <|> Set subordinate uids and gids of users
+  ansible.builtin.lineinfile:
+    path: "{{ item.0 }}"
+    regexp: "^{{ item.1.key }}:"
+    line: "{{ item.1.key }}:{{ item.1.value }}"
+    create: true
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ ['/etc/subuid', '/etc/subgid'] | product(podman_users | dict2items) | list }}"
+  loop_control:
+    label: "{{ item.0 }} {{ item.1.key }}"
+
+- name: include_tasks <|> Deploy local registry
   ansible.builtin.include_tasks: registry.yml
-  when: podman_configure_local_registry | bool
+  when:
+    - podman_configure_local_registry | bool
+  tags:
+    - always

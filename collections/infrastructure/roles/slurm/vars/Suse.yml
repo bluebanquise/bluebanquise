@@ -5,7 +5,7 @@ slurm_accounting_mysql_unix_socket: /var/run/mysql/mysql.sock
 slurm_packages_to_install:
   controller:
     - munge
-    - munge-libs
+    - libmunge2
     - slurm
     - slurm-devel
     # - slurm-slurmctld
@@ -16,15 +16,15 @@ slurm_packages_to_install:
     - python3
   accounting_mysql:
     - mariadb
-    - mariadb-server
+    - mariadb-client
   compute:
     - munge
-    - munge-libs
+    - libmunge2
     - slurm
     - slurm-devel
     # - slurm-slurmd
   submitter:
     - munge
-    - munge-libs
+    - libmunge2
     - slurm
     - slurm-devel

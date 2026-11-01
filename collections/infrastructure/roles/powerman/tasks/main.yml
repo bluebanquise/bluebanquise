@@ -1,36 +1,24 @@
 ---
-
-# Roles transverse variables caching
-- name: fact <|> Calculate powerman_bb_nodes_profiles
+# powermand runs as daemon user, or powerman user on Suse
+- name: set_fact <|> Set powerman daemon group
   ansible.builtin.set_fact:
-    bb_nodes_profiles: "{{ j2_bb_nodes_profiles }}"
-  when: bb_nodes_profiles is not defined or bb_nodes_profiles is none
-  tags:
-    - templates
+    powerman_daemon_group: "{{ 'powerman' if ansible_facts.os_family == 'Suse' else 'daemon' }}"
 
-- name: fact <|> Calculate bb_equipments
-  ansible.builtin.set_fact:
-    bb_equipments: "{{ j2_bb_equipments }}"
-  when: bb_equipments is not defined or bb_equipments is none
-  tags:
-    - templates
-
-- name: package <|> Install freeipmi and powerman
+- name: "package <|> Install {{ powerman_packages_to_install | join(' ') }}"
   ansible.builtin.package:
-    name:
-      - freeipmi
-      - powerman
+    name: "{{ powerman_packages_to_install }}"
     state: present
   tags:
     - package
 
+# Contains BMC passwords: only readable by powerman daemon
 - name: template <|> Generate /etc/powerman/powerman.conf
   ansible.builtin.template:
     src: powerman.conf.j2
     dest: /etc/powerman/powerman.conf
     owner: root
-    group: root
-    mode: 0644
+    group: "{{ powerman_daemon_group }}"
+    mode: "0640"
   notify: service <|> Restart powerman
   tags:
     - template
@@ -41,7 +29,7 @@
 - name: service <|> Manage powerman state
   ansible.builtin.service:
     name: powerman
-    enabled: "{{ (powerman_enable_services | default(bb_enable_services) | default(true, true) | bool) | ternary('yes', 'no') }}"
-    state: "{{ (powerman_start_services | default(bb_start_services) | default(true, true) | bool) | ternary('started', omit) }}"
+    enabled: "{{ (powerman_enable_services | default(bb_enable_services) | default(true) | bool) | ternary(true, false) }}"
+    state: "{{ (powerman_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   tags:
     - service

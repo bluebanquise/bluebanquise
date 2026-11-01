@@ -1,51 +1,33 @@
 ---
-- name: include_vars <|> Gather OS specific variables
-  # This task gathers variables defined in OS specific files.
-  #
-  # Search vars in:
-  #  - <distribution>_<major>.yml    # eg. CentOS_8.yml
-  #  - <os_family>_<major>.yml       # eg. RedHat_8.yml
-  #  - <distribution>.yml            # eg. CentOS.yml
-  #  - <os_family>.yml               # eg. RedHat.yml
-  #
-  # If no OS specific file is found, the role will default to vars/main.yml
-  #
-  ansible.builtin.include_vars: "{{ item }}"
-  with_first_found:
-    - files:
-        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}.yml"
-        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}.yml"
-        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_version }}.yml"
-        - "vars/{{ ansible_facts.os_family }}_{{ ansible_facts.distribution_major_version }}.yml"
-        - "vars/{{ ansible_facts.distribution | replace(' ','_') }}.yml"
-        - "vars/{{ ansible_facts.os_family }}.yml"
-      skip: true
-  tags:
-    - always
-
-- name: include_tasks <|> Use OS dedicated firewall task
-  ansible.builtin.include_tasks: "{{ outer_item }}"
-  with_first_found:
-    - files:
-        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
-        - "{{ ansible_facts.distribution | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
-        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_version }}/firewall.yml"
-        - "{{ ansible_facts.os_family | replace(' ','_') }}_{{ ansible_facts.distribution_major_version }}/firewall.yml"
-        - "{{ ansible_facts.distribution | replace(' ','_') }}/firewall.yml"
-        - "{{ ansible_facts.os_family | replace(' ','_') }}/firewall.yml"
-      skip: true
-  loop_control:
-    loop_var: outer_item
-  tags:
-    - internal
-    - firewall
-
 - name: "package <|> Install {{ keepalived_packages_to_install | join(' ') }}"
   ansible.builtin.package:
     name: "{{ keepalived_packages_to_install }}"
     state: present
   tags:
     - package
+
+- name: firewalld <|> Configure firewall
+  when:
+    - os_firewall | default(true) | bool
+  tags:
+    - firewall
+  block:
+    # VRRP advertisements must reach backups, else all hosts become MASTER
+    - name: "firewalld <|> Add services to firewall's zone"
+      ansible.posix.firewalld:
+        zone: "{{ keepalived_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
+        service: "{{ item }}"
+        immediate: true
+        permanent: true
+        state: enabled
+      loop: "{{ keepalived_firewall_services_to_add }}"
+  rescue:
+    - name: fail <|> Firewall configuration failed
+      ansible.builtin.fail:
+        msg: >-
+          Firewall configuration failed: {{ (ansible_failed_result.results | default([]) | selectattr('failed', 'defined') | selectattr('failed') | map(attribute='msg') | list + [ansible_failed_result.msg | default('unknown error')]) | first }}.
+          firewalld must be installed and running, with its Python bindings (python3-firewall package),
+          for example using the firewall role. Set os_firewall to false to disable firewall configuration.
 
 - name: "template <|> Generate {{ keepalived_conf_file }}"
   ansible.builtin.template:
@@ -54,17 +36,14 @@
     owner: root
     group: root
     mode: 0644
-  notify: service <|> Restart keepalived server
+  notify: service <|> Reload keepalived
   tags:
     - template
-
-- name: meta <|> Run handler tasks to restart keepalived services
-  ansible.builtin.meta: flush_handlers
 
 - name: "service <|> Manage {{ keepalived_services_to_start | join(' ') }} state"
   ansible.builtin.service:
     name: "{{ item }}"
-    enabled: "{{ keepalived_enable_services | default(bb_enable_services) | default(true) | bool }}"
+    enabled: "{{ (keepalived_enable_services | default(bb_enable_services) | default(true) | bool) | ternary(true, false) }}"
     state: "{{ (keepalived_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
   loop: "{{ keepalived_services_to_start }}"
   tags:

@@ -1,34 +1,81 @@
+---
+- name: assert <|> Check distribution is supported
+  ansible.builtin.assert:
+    that:
+      - ansible_facts.os_family == 'RedHat'
+    fail_msg: "lustre_client role only supports RedHat family distributions (Whamcloud or DDN client packages)."
+    quiet: true
+
+# LNET networks of this host: networks whose clients_groups contain the host,
+# each with the host interfaces connected to the matching inventory network
+- name: set_fact <|> Initialize LNET networks of the host
+  ansible.builtin.set_fact:
+    lustre_client_lnet_networks: []
+    lustre_client_lnet_interfaces: []
+  tags:
+    - always
+
+- name: set_fact <|> Compute LNET networks of the host
+  ansible.builtin.set_fact:
+    lustre_client_lnet_networks: "{{ lustre_client_lnet_networks + [item.name ~ '(' ~ (interfaces | join(',')) ~ ')'] }}"
+    lustre_client_lnet_interfaces: "{{ lustre_client_lnet_interfaces + interfaces }}"
+  vars:
+    interfaces: "{{ network_interfaces | default([], true) | selectattr('network', 'defined') | selectattr('network', 'equalto', item.network) | map(attribute='interface') | list }}"
+  loop: "{{ lustre_networks | default([], true) }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when:
+    - item.clients_groups | select('in', group_names) | list | length > 0
+    - interfaces | length > 0
+  tags:
+    - always
+
 - name: package <|> Install lustre client packages
   ansible.builtin.package:
     name:
       - lustre-client
       - kmod-lustre-client
     state: present
+  tags:
+    - package
 
-- name: include_tasks <|> Configure sysctl settings for LNET interfaces if multirail
-  ansible.builtin.include_tasks: configure_multirail_sysctl.yml
-  when: lustre_multirail | default(false) | bool
+- name: template <|> Generate /etc/sysctl.d/80-lustre-multi-rail.conf
+  ansible.builtin.template:
+    src: multirail-interface-sysctl.conf.j2
+    dest: /etc/sysctl.d/80-lustre-multi-rail.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify: command <|> Reload Lustre multi-rail sysctl settings
+  when:
+    - lustre_multirail | default(false) | bool
+    - lustre_client_lnet_interfaces | length > 0
+  tags:
+    - template
 
-- name: template <|> Render /etc/modprobe.d/lustre.conf
+# Changes are applied when the lnet module is loaded (next mount after unload, or reboot)
+- name: template <|> Generate /etc/modprobe.d/lustre.conf
   ansible.builtin.template:
     src: lustre.conf.j2
     dest: /etc/modprobe.d/lustre.conf
     owner: root
     group: root
-    mode: '0644'
+    mode: 0644
+  when:
+    - lustre_client_lnet_networks | length > 0
+  tags:
+    - template
 
+# Mount source: mgs1@lnet:mgs2@lnet:/fsname
 - name: mount <|> Mount lustre filesystems
-  vars:
-    lustre_mount_source: "{{ item.0.mgs_servers | map('regex_replace', '$', '@' ~ item.0.lnet) | join(':') }}:{{ item.0.path | default(item.0.name) }}"
   ansible.posix.mount:
-    path: "{{ item.0.mount_path }}"
-    src: "{{ lustre_mount_source }}"
+    path: "{{ item.mount_path }}"
+    src: "{{ item.mgs_servers | map('regex_replace', '$', '@' ~ item.lnet) | join(':') }}:/{{ item.path | default(item.name) | regex_replace('^/', '') }}"
     fstype: lustre
     state: mounted
-    opts: "{{ item.0.mount_opts | default('') }}"
-  with_subelements:
-    - "{{ lustre_mounts }}"
-    - clients_groups
+    opts: "{{ item.mount_opts | default(omit, true) }}"
+  loop: "{{ lustre_mounts | default([], true) }}"
+  loop_control:
+    label: "{{ item.name }}"
   when:
-    - groups[item.1] is defined and not none
-    - inventory_hostname in groups[item.1]
+    - item.clients_groups | select('in', group_names) | list | length > 0

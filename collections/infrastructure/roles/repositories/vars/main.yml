@@ -12,23 +12,21 @@ _repositories_network_name: >-
       | list | first | default(none)), true)
     }}
 
+# repositories/[<environment>/]<distribution>/<version>/<architecture>/
 _repositories_path: >-
-  repositories/{{ override_repositories_environment
-    | default(os_operating_system['repositories_environment'], true)
-    | default('', true) }}/{{ os_operating_system['distribution']
-    | default('', true) }}/{{ os_operating_system['distribution_version']
-    | default(os_operating_system['distribution_major_version'])
-    | default('', true)}}/{{ ansible_architecture }}/
+  {{ ['repositories',
+      override_repositories_environment | default(os_operating_system['repositories_environment'], true) | default('', true),
+      os_operating_system['distribution'] | default('', true),
+      os_operating_system['distribution_version'] | default(os_operating_system['distribution_major_version'], true) | default('', true),
+      ansible_facts['architecture']] | select | join('/') }}/
 
 _repositories_network_obj: "{{ networks[_repositories_network_name] }}"
 
-repositories_j2_simple_url: >-
+repositories_simple_url: >-
   http://{{
     _repositories_network_obj['services']['repositories4'][0]['ip4']
     | default(_repositories_network_obj['services']['repositories'][0]['hostname'], true)
     | default(_repositories_network_obj['services']['repositories'][0]['ip4'], true)
     | default(_repositories_network_obj['services_ip'], true)
     | default('', true)
-  }}/{{_repositories_path}}
-
-# Lol, no more that simple :D
+  }}/{{ _repositories_path }}

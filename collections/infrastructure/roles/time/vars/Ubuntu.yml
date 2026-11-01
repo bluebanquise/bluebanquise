@@ -5,3 +5,6 @@ time_packages_to_install:
 time_services_to_start:
   - chrony
 time_chrony_conf_path: /etc/chrony/chrony.conf
+# chronyd launch options file and variable
+time_chronyd_options_file: /etc/default/chrony
+time_chronyd_options_variable: DAEMON_OPTS

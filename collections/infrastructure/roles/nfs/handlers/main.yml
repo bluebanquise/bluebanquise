@@ -1,4 +1,12 @@
 ---
+# Exports changes are applied without restarting the NFS server (clients are not disturbed)
+- name: command <|> Reload NFS exports
+  ansible.builtin.command: exportfs -ra
+  changed_when: true
+  when:
+    - "'service' not in ansible_skip_tags"
+    - nfs_start_services | default(bb_start_services) | default(true) | bool
+
 - name: service <|> Restart NFS server services
   ansible.builtin.service:
     name: "{{ item }}"

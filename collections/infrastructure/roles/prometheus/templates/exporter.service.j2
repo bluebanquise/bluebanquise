@@ -11,8 +11,12 @@
   ExecStart={{ item.path | default('/usr/bin/'+item.service) }} \
   {{ item.service_launch_parameters | default(item.launch_parameters, true) | default('', true) | indent(2, True) }}
 
-{% if item.service_raw_configuration is defined and item.service_raw_configuration is not none %}
+{% if item.service_raw_configuration is string %}
 {{ item.service_raw_configuration | indent(2, True) }}
+{% else %}
+{% for line in item.service_raw_configuration | default([], true) %}
+  {{ line }}
+{% endfor %}
 {% endif %}
 
 [Install]

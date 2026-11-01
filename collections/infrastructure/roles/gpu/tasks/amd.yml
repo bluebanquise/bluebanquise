@@ -1,0 +1,41 @@
+---
+- name: assert <|> Check AMD support on this distribution
+  ansible.builtin.assert:
+    that:
+      - gpu_amd_supported | bool
+      - gpu_amd_rocm_supported | bool or not (gpu_amd_install_rocm | bool)
+    fail_msg: >-
+      AMD GPU driver{{ ' and ROCm' if (gpu_amd_install_rocm | bool) else '' }} not supported by AMD on
+      {{ ansible_facts.distribution }} {{ ansible_facts.distribution_version }}.
+      See the role README for supported distributions.
+    quiet: true
+
+- name: package <|> Install kernel headers and development packages
+  ansible.builtin.package:
+    name: "{{ gpu_kernel_packages }}"
+    state: present
+  tags:
+    - package
+
+- name: package <|> Install AMD driver
+  ansible.builtin.package:
+    name: amdgpu-dkms
+    state: present
+  register: gpu_amd_driver
+  tags:
+    - package
+
+- name: package <|> Install ROCm
+  ansible.builtin.package:
+    name: "{{ gpu_amd_rocm_prerequisites_packages + ['rocm'] }}"
+    state: present
+  when: gpu_amd_install_rocm | bool
+  tags:
+    - package
+
+- name: reboot <|> Reboot host after AMD driver installation
+  ansible.builtin.reboot:
+    reboot_timeout: "{{ gpu_reboot_timeout }}"
+  when:
+    - gpu_reboot | bool
+    - gpu_amd_driver is defined and gpu_amd_driver is changed

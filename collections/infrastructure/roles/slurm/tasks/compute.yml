@@ -1,15 +1,24 @@
 ---
-- name: "firewalld <|> Add services to firewall's zone"
-  ansible.posix.firewalld:
-    zone: "{{ slurm_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
-    port: "{{ slurm_slurmd_port }}/tcp"
-    immediate: true
-    permanent: true
-    state: enabled
+- name: firewalld <|> Configure firewall
   when:
     - os_firewall | default(true) | bool
   tags:
     - firewall
+  block:
+    - name: "firewalld <|> Add services to firewall's zone"
+      ansible.posix.firewalld:
+        zone: "{{ slurm_firewall_zone | default(bb_services_firewall_zone, true) | default('public') }}"
+        port: "{{ slurm_slurmd_port }}/tcp"
+        immediate: true
+        permanent: true
+        state: enabled
+  rescue:
+    - name: fail <|> Firewall configuration failed
+      ansible.builtin.fail:
+        msg: >-
+          Firewall configuration failed: {{ (ansible_failed_result.results | default([]) | selectattr('failed', 'defined') | selectattr('failed') | map(attribute='msg') | list + [ansible_failed_result.msg | default('unknown error')]) | first }}.
+          firewalld must be installed and running, with its Python bindings (python3-firewall package),
+          for example using the firewall role. Set os_firewall to false to disable firewall configuration.
 
 - name: "template <|> Generate cgroup.conf to {{ slurm_home_path }}/cgroup.conf"
   ansible.builtin.template:
@@ -17,7 +26,7 @@
     dest: "{{ slurm_home_path }}/cgroup.conf"
     owner: slurm
     group: slurm
-    mode: 0644
+    mode: "0644"
   tags:
     - template
   notify: service <|> restart slurmd
@@ -29,7 +38,7 @@
     dest: "{{ slurm_home_path }}/topology.conf"
     owner: slurm
     group: slurm
-    mode: 0644
+    mode: "0644"
   tags:
     - template
   when: slurm_topology == 'topology/block' or slurm_topology == 'topology/tree'

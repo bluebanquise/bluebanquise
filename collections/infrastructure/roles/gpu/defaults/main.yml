@@ -1,5 +1,13 @@
 ---
-gpu_nvidia_install_cuda: false
+# GPU vendor: nvidia or amd. Nothing is done if not set.
 gpu_vendor:
+
+# NVIDIA kernel modules: open (Turing and newer GPUs) or proprietary (RHEL 8/9 only)
+gpu_nvidia_kernel_modules: open
+gpu_nvidia_install_cuda: false
+
+gpu_amd_install_rocm: true
+
+# Reboot after driver installation (only when driver packages changed)
 gpu_reboot: false
 gpu_reboot_timeout: 600
