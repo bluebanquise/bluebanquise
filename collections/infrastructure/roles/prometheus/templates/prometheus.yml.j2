@@ -68,6 +68,13 @@ scrape_configs:
     scrape_interval: {{ exporter.scrape_interval | default('') }}
     scrape_timeout: {{ exporter.scrape_timeout | default('') }}
     static_configs:
+      {#- resolve Ansible host pattern (group names, :&, :!, wildcards)
+        For example:
+        fn_compute:!gpu01
+        or
+        fn_compute:&hw_gpu
+        ref: https://docs.ansible.com/projects/ansible/latest/inventory_guide/intro_patterns.html
+      #}
       {% for node in query('inventory_hostnames', exporter_group) %}
       - targets: ['{{ node }}:{{ exporter.port }}']
       {% endfor %}
