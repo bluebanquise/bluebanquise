@@ -14,7 +14,7 @@
     owner: root
     group: root
     mode: "0644"
-  notify: 
+  notify:
     - systemd <|> Reload systemd configuration
     - service <|> restart slurmd
   tags:
