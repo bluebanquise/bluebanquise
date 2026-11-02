@@ -92,6 +92,7 @@
       - "{{ grafana_admin_cred_file }}"
     stdin: "{{ grafana_security.admin_password }}"
     stdin_add_newline: false
+  no_log: true
   tags:
     - install
 
@@ -113,6 +114,7 @@
       - "{{ grafana_db_cred_file }}"
     stdin: "{{ grafana_database.password }}"
     stdin_add_newline: false
+  no_log: true
   tags:
     - install
 

@@ -31,6 +31,8 @@
   when: ( item.isDefault is defined and item.isDefault is string ) or
         ( item.basicAuth is defined and item.basicAuth is string )
   with_items: "{{ grafana_datasources }}"
+  loop_control:
+    label: "{{ item.name }}"
 
 - name: preflight <|> Fail on bad database configuration
   ansible.builtin.fail:
