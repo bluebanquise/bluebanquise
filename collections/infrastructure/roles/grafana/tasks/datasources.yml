@@ -16,3 +16,4 @@
     password: "{{ item.password | default(omit) }}"
     additional_json_data: "{{ item.additionalJsonData | default(omit) }}"
   with_items: "{{ grafana_datasources }}"
+  no_log: true
