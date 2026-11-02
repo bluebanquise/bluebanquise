@@ -133,7 +133,7 @@
     - install
 
 - name: install <|> Create grafana-server systemd override for loading credentials
-  qansible.builtin.copy:
+  ansible.builtin.copy:
     dest: /etc/systemd/system/grafana-server.service.d/override.conf
     content: |
       [Service]
