@@ -2,15 +2,14 @@
 Core: bootstrap and inventory
 =============================
 
-This page builds the inventory for the cluster's core: networking, hosts, hardware/OS
-definitions, repositories, and firewall. It deliberately leaves out NFS, standard users, and
-Slurm - those are added afterwards, once the core cluster is up and reachable, in
-:doc:`extensions`.
+In this page, we install BlueBanquise on mgt1, and write the inventory of the core cluster:
+networks, hosts, groups, hardware and operating system settings, repositories and firewall. Shared
+storage, users and Slurm come later, in :doc:`extensions`, once the core cluster is up and running.
 
 Bootstrap BlueBanquise on mgt1
-===============================
+==============================
 
-SSH to mgt1 on its ``datacenter`` address, then bootstrap it:
+Let's connect to mgt1 on its ``datacenter`` address, and run the bootstrap script:
 
 .. code-block:: bash
 
@@ -18,45 +17,50 @@ SSH to mgt1 on its ``datacenter`` address, then bootstrap it:
   chmod +x online_bootstrap.sh
   sudo ./online_bootstrap.sh
 
-This creates the ``bluebanquise`` user (home ``/var/lib/bluebanquise``), a Python virtual
-environment with Ansible installed, and an SSH key pair for that user. Switch to it for
-everything that follows:
+It creates the ``bluebanquise`` user (home ``/var/lib/bluebanquise``), installs Ansible and the
+BlueBanquise collection in a Python virtual environment, and generates an SSH key pair for this
+user. From now on, we work as this user:
 
 .. code-block:: bash
 
   sudo su - bluebanquise
   ansible-playbook --version
 
-See :doc:`../../introduction/installation` for details on what the bootstrap script does.
+See :doc:`../../introduction/installation` for more details on the bootstrap.
 
 Inventory skeleton
-===================
+==================
+
+Our inventory lives in ``/var/lib/bluebanquise/inventories/example_cluster``:
 
 .. code-block:: bash
 
-  mkdir -p /var/lib/bluebanquise/inventories/example_cluster/group_vars/all
-  mkdir -p /var/lib/bluebanquise/inventories/example_cluster/cluster
+  mkdir -p /var/lib/bluebanquise/inventories/example_cluster/{cluster,group_vars/all,host_vars}
   cd /var/lib/bluebanquise/inventories/example_cluster
 
-See :doc:`../../configuration/inventories` for the general inventory layout and precedence
-rules this relies on.
+All the paths of this page are relative to this folder. See :doc:`../../configuration/inventories`
+for the general layout, and how variables are inherited.
 
 Global settings
-================
+===============
 
-``group_vars/all/dns.yml``:
-
-.. code-block:: yaml
-
-  bb_domain_name: bluebanquise.example.local
-
-``group_vars/all/time.yml``:
+``group_vars/all/general.yml``:
 
 .. code-block:: yaml
 
+  bb_domain_name: example.cluster.local
   bb_time_zone: Europe/Brussels
 
-See :doc:`../../configuration/general_settings`.
+  # Roles open the ports of their services in the internal zone (see Firewall below)
+  bb_services_firewall_zone: internal
+
+  # mgt1 DNS server also resolves internet names, by asking the datacenter DNS servers
+  dns_server_recursion: true
+  dns_server_forwarders:
+    - 192.168.0.200    # replace with the DNS servers of your datacenter
+
+See :doc:`../../configuration/general_settings`, and the
+:doc:`dns_server <../../configuration/services/dns_server>` role documentation.
 
 Networks
 ========
@@ -82,27 +86,20 @@ Networks
       prefix: 24
       firewall_zone: external
 
-Notes:
+A few things worth noticing:
 
-* ``net-admin`` and ``net-bmc`` start with ``net-``, so they are management networks: DHCP, DNS
-  and PXE are served on them by default. ``datacenter`` does not, so it is a plain network.
-* ``services_ip`` collapses all service endpoints (DHCP, DNS, NTP, PXE, ...) for a network onto
-  a single host - here, mgt1 for both management networks. See the *services endpoints* part of
-  :doc:`../../configuration/services`.
-* ``net-admin``'s ``gateway4`` is ``10.10.2.1``, i.e. **login**'s own address on that network:
-  login is the router between ``net-admin`` and ``datacenter``. Every other host on
-  ``net-admin`` (mgt1, storage, the workers) picks this up automatically as its default route.
-* ``datacenter`` deliberately has **no** ``gateway4``. If it did, mgt1 (which also has an
-  interface on ``datacenter``) would pick up a second, conflicting default route. Instead, the
-  route to the internet (``192.168.0.200``) is set explicitly on login's own ``datacenter``
-  interface only - see the hosts definitions below.
-* Only ``net-admin`` and ``net-bmc`` are in the ``internal`` firewall zone; ``datacenter`` is
-  ``external``. See the firewall section below.
+* ``net-admin`` and ``net-bmc`` start with ``net-``: they are management networks, on which DHCP,
+  DNS and PXE are served. ``datacenter`` does not, so the stack treats it as a plain network.
+* ``services_ip`` tells all hosts of a network where to find all services: here, mgt1. See the
+  *Services endpoints* part of :doc:`../../configuration/services`.
+* ``gateway4`` of ``net-admin`` is ``10.10.2.1``, which is login's address: login is the gateway to
+  the internet for all hosts of ``net-admin``.
+* ``datacenter`` has no ``gateway4``: mgt1 and login are its only members, and each one sets its
+  own default route, on its own interface (see the hosts below).
+* ``net-admin`` and ``net-bmc`` are bound to the ``internal`` firewall zone, ``datacenter`` to the
+  ``external`` one. More on this in the Firewall part below.
 
-See :doc:`../../configuration/networks`, and the
-:doc:`dhcp_server <../../configuration/services/dhcp_server>` /
-:doc:`dns_server <../../configuration/services/dns_server>` role sections of this documentation
-for what else can be configured per network.
+See :doc:`../../configuration/networks`.
 
 Groups
 ======
@@ -141,7 +138,7 @@ Groups
   [hw_gpu_worker]
   g00[1:4]
 
-``cluster/os`` (OS group - a single one here, since every host runs the same distribution):
+``cluster/os`` (a single OS group, as all hosts run the same distribution):
 
 .. code-block:: ini
 
@@ -154,25 +151,22 @@ Groups
 
 .. note::
 
-  mgt1, login and storage share a single ``hw_server`` group here since none of them need
-  distinguishing hardware settings in this example (no console, no BMC). If that changes later
-  (e.g. storage gets a console), split it into its own group - see
-  :doc:`../../configuration/hosts`.
+  mgt1, login and storage share the ``hw_server`` group, as they need no different hardware settings
+  in this example. If one of them later needs its own (a serial console, a BMC...), simply give it
+  its own hardware group.
 
 ``[SCHEMA: example-cluster-groups-matrix]``
-  *A grid with the 9 hosts on one axis and fn/hw/os on the other, shading which cell each host
-  falls into - same spirit as the existing groups_ep.svg/ep_hard.svg images, populated with
-  this cluster's actual group names.*
+  *A grid with the 9 hosts on one axis and fn/hw/os on the other, shading which group each host
+  belongs to, in the same spirit as the existing groups_ep.svg/ep_hard.svg images, with this
+  cluster's actual group names.*
 
-See :doc:`../../configuration/groups` and :doc:`../../configuration/hosts` for the rules behind
-the 3 mandatory group types.
+See :doc:`../../configuration/groups`.
 
-Hosts definitions
-==================
+Hosts
+=====
 
-``cluster/nodes.yml``. Replace the placeholder MAC addresses (``aa:bb:cc:..``) with the real
-ones once the hardware is racked - see the note on this in
-:doc:`../../configuration/hosts`.
+``cluster/nodes.yml``. Remember to replace the placeholder MAC addresses (``aa:bb:cc:...``) with the
+real ones:
 
 .. code-block:: yaml
 
@@ -186,16 +180,18 @@ ones once the hardware is racked - see the note on this in
             ip4: 10.10.0.1
             mac: aa:bb:cc:00:00:01
             network: net-admin
+            never_default4: true
           - interface: eth0
             ip4: 192.168.0.1
             mac: aa:bb:cc:00:00:02
             network: datacenter
+            gw4: 192.168.0.200
           - interface: eth2
             ip4: 10.11.0.1
             mac: aa:bb:cc:00:00:03
             network: net-bmc
 
-      # Login / gateway to datacenter
+      # Login, and gateway to the internet
       login:
         network_interfaces:
           - interface: eth1
@@ -208,6 +204,7 @@ ones once the hardware is racked - see the note on this in
             mac: aa:bb:cc:00:01:02
             network: datacenter
             gw4: 192.168.0.200
+            zone: external
 
       # Storage
       storage:
@@ -309,30 +306,29 @@ ones once the hardware is racked - see the note on this in
             mac: aa:bb:cc:00:04:04
             network: net-admin
 
-Two points worth calling out:
+Let's look at the interesting parts:
 
-* ``login``'s ``net-admin`` interface carries the address ``10.10.2.1`` - exactly the
-  ``gateway4`` value set on ``net-admin`` above. Without ``never_default4: true``, the ``nic``
-  role would try to add a default route on that interface pointing back at itself. Setting
-  ``gw4`` on the ``datacenter`` interface instead gives login its real default route, out to
-  ``192.168.0.200``.
-* Only the 8 compute workers have a ``bmc:`` block. mgt1, login and storage have none in this
-  example.
+* The first interface of each host is on ``net-admin``: it gives the host its main address, used
+  for name resolution and by Ansible.
+* mgt1 and login reach the internet directly, through the datacenter router: their ``datacenter``
+  interface sets ``gw4``, and their ``net-admin`` interface sets ``never_default4: true``, so they do
+  not use the ``gateway4`` of ``net-admin`` (for login, that would even be itself!).
+* All other hosts use the ``gateway4`` of ``net-admin``, so login.
+* login's ``datacenter`` interface is placed in the ``external`` firewall zone with ``zone``: this
+  matters for the gateway, see the Firewall part below.
+* Only the 8 compute workers have a ``bmc``.
 
-See the :doc:`nic <../../configuration/system/nic>` role section of this documentation for the
-full list of interface parameters (``never_default4``, ``gw4``, routes, bonds, VLANs, ...), and
-section 2 of the data model reference (``resources/data_model.md`` at the repository root) for
-the BMC block format.
+See :doc:`../../configuration/hosts`, and the :doc:`nic <../../configuration/system/nic>` role
+documentation for all interface parameters (routes, bonds, VLANs...).
 
 Hardware settings
-==================
+=================
 
 ``group_vars/hw_server/settings.yml`` (mgt1, login, storage):
 
 .. code-block:: yaml
 
   hw_equipment_type: server
-
   hw_architecture: x86_64
 
   hw_specs:
@@ -341,15 +337,13 @@ Hardware settings
       cores_per_socket: 8
       sockets: 2
       threads_per_core: 2
-    gpu: none
     memory: 131072
 
-``group_vars/hw_cpu_worker/settings.yml`` (c001-c004):
+``group_vars/hw_cpu_worker/settings.yml`` (c001 to c004):
 
 .. code-block:: yaml
 
   hw_equipment_type: server
-
   hw_architecture: x86_64
 
   hw_console: console=tty0 console=ttyS0,115200n8
@@ -360,7 +354,6 @@ Hardware settings
       cores_per_socket: 32
       sockets: 2
       threads_per_core: 2
-    gpu: none
     memory: 524288
 
   hw_board_authentication:
@@ -368,15 +361,15 @@ Hardware settings
       user: ADMIN
       password: ADMIN
 
-``group_vars/hw_gpu_worker/settings.yml`` (g001-g004):
+``group_vars/hw_gpu_worker/settings.yml`` (g001 to g004):
 
 .. code-block:: yaml
 
   hw_equipment_type: server
-
   hw_architecture: arm64
 
-  hw_console: console=tty0 console=ttyS1,115200n8 nomodeset
+  hw_console: console=tty0 console=ttyS1,115200n8
+  hw_kernel_parameters: nomodeset
 
   hw_specs:
     cpu:
@@ -384,35 +377,41 @@ Hardware settings
       cores_per_socket: 72
       sockets: 1
       threads_per_core: 1
-    gpu:
-      - NVIDIA H100-SXM5-80GB
-      - NVIDIA H100-SXM5-80GB
-      - NVIDIA H100-SXM5-80GB
-      - NVIDIA H100-SXM5-80GB
     memory: 1048576
+    gpu:
+      - NVIDIA H100 80GB HBM3
+      - NVIDIA H100 80GB HBM3
+      - NVIDIA H100 80GB HBM3
+      - NVIDIA H100 80GB HBM3
 
   hw_board_authentication:
     - protocol: REDFISH
       user: admin
       password: password
 
+  # GPU drivers (gpu role)
+  gpu_vendor: nvidia
+  gpu_nvidia_install_cuda: true
+  gpu_reboot: true
+
 .. note::
 
-  ``nomodeset`` is folded directly into ``hw_console`` for the GPU workers, per this cluster's
-  requirements. The dedicated field for kernel command-line parameters is normally
-  ``hw_kernel_parameters`` (see :doc:`../../configuration/hardware_settings`) - both end up
-  merged onto the same GRUB command line by the ``local_configuration`` role, so functionally it
-  makes no difference, but keep this in mind if you later want ``nomodeset`` to show up
-  separately in ``hw_kernel_parameters`` for readability.
+  Hosts without GPU simply do not define ``hw_specs.gpu``. CPU and GPU figures are round,
+  illustrative numbers: adjust them to your actual hardware. ``hw_architecture`` is ``arm64`` (not
+  ``aarch64``) for 64 bits ARM hosts, as everywhere in the stack.
 
-  CPU and GPU specs above (128-core dual-socket x86_64 workers, single-socket 72-core arm64
-  workers with 4x H100 each) are illustrative round numbers, not a specific SKU - adjust to your
-  actual hardware.
-
-See :doc:`../../configuration/hardware_settings`.
+See :doc:`../../configuration/hardware_settings`, and :doc:`../../resources/nvidia` for everything
+about GPUs.
 
 OS settings
 ===========
+
+First, let's print the public key of the ``bluebanquise`` user: deployed hosts must accept it, so
+Ansible can configure them.
+
+.. code-block:: bash
+
+  cat /var/lib/bluebanquise/.ssh/id_ed25519.pub
 
 ``group_vars/os_rhel_10/settings.yml``:
 
@@ -431,25 +430,26 @@ OS settings
   os_admin_password_sha512: $6$JLtp9.SYoijB3T0Q$q43Hv.ziHgC9mC68BUtSMEivJoTqUgvGUKMBQXcZ0r5eWdQukv21wHOgfexNij7dO5Mq19ZhTR.JNTtV89UcH0
 
   os_admin_ssh_keys:
-    - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF0iWc1oG+JA6FetOh6Qtqzqedy+n3In7MXRaT3USxtE oxedions@example.local
+    - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF0iWc1oG+JA6FetOh6Qtqzqedy+n3In7MXRaT3USxtE bluebanquise@mgt1
 
   os_target_disk: /dev/sda
-  os_partitioning:
 
 .. warning::
 
-  The password hash above decodes to ``rootroot`` - it is the same placeholder used elsewhere
-  in this documentation. **Do not use it in production.** Generate your own with
-  ``openssl passwd -6``, and replace the SSH key with your own public key. Leaving
-  ``os_partitioning`` empty triggers automatic partitioning onto ``os_target_disk``.
+  This password hash is the one of ``rootroot``, used everywhere in this documentation: **do not use
+  it in production**. Generate your own with ``openssl passwd -6``, and replace the SSH key with the
+  one printed above (and your own, if you want to log in from your workstation).
 
-``os_access_control: enforcing`` turns SELinux on (enforcing) on all 9 hosts, per this cluster's
-requirements.
+Without ``os_partitioning``, the installer partitions ``os_target_disk`` automatically.
+``os_access_control: enforcing`` keeps SELinux enforcing on all hosts.
 
 See :doc:`../../configuration/os_settings`.
 
 Repositories
 ============
+
+Our hosts keep the distribution repositories they are installed with. On top of them, they need the
+BlueBanquise repository: mgt1 for the PXE tools, and all hosts later for Slurm packages.
 
 ``group_vars/all/repositories.yml``:
 
@@ -457,34 +457,69 @@ Repositories
 
   bb_repositories:
     - name: bluebanquise
-      baseurl: http://bluebanquise.com/repository/releases/latest/el10/x86_64/bluebanquise/
-      enabled: 1
-      state: present
+      baseurl: https://bluebanquise.com/repository/releases/latest/el10/x86_64/bluebanquise/
 
-This gives every RHEL 10 host access to BlueBanquise's own package repository, needed in
-particular by the ``pxe_stack`` role on mgt1. See the
-:doc:`repositories <../../configuration/system/repositories>` role section of this
-documentation for the simple vs. advanced formats, and for adding your OS's own repositories.
+GPU workers are arm64 hosts, and also need the Nvidia CUDA repository and EPEL. Their hardware
+group is the right place to say so, as it overrides ``group_vars/all``.
+``group_vars/hw_gpu_worker/repositories.yml``:
+
+.. code-block:: yaml
+
+  bb_repositories:
+    - name: bluebanquise
+      # Check the folder of your architecture on https://bluebanquise.com/repository/releases/latest/el10/
+      baseurl: https://bluebanquise.com/repository/releases/latest/el10/arm64/bluebanquise/
+    - name: cuda
+      baseurl: https://developer.download.nvidia.com/compute/cuda/repos/rhel10/sbsa
+      gpgcheck: true
+      gpgkey: https://developer.download.nvidia.com/compute/cuda/repos/rhel10/sbsa/CDF6BA43.pub
+    - name: epel
+      baseurl: https://dl.fedoraproject.org/pub/epel/10/Everything/aarch64
+
+See the :doc:`repositories <../../configuration/system/repositories>` role documentation for all
+formats, and :doc:`../../deployment/provision_os` for the repository of each distribution.
 
 Firewall
 ========
 
-Firewall zones are already wired up through the ``firewall_zone`` key on each network above
-(``internal`` for net-admin/net-bmc, ``external`` for datacenter) plus ``os_firewall: true`` in
-the OS settings. Two hosts need more than that:
+``os_firewall: true`` enables firewalld on all hosts, and the ``firewall_zone`` of each network
+binds its subnet to a zone: ``internal`` for ``net-admin`` and ``net-bmc``, ``external`` for
+``datacenter``. As set in the global settings, roles open the ports of their services in the
+``internal`` zone.
 
-``host_vars/login/firewall.yml`` - enable masquerading on the external zone, so that traffic
-from ``net-admin`` routed through login reaches the internet via ``datacenter``:
+One service is an exception: DHCP. A host asks for its address before having one, so its request
+comes from ``0.0.0.0``, which is not part of the ``net-admin`` subnet: it lands in the default zone,
+``public``. So the DHCP port must be opened there. ``host_vars/mgt1/firewall.yml``:
 
 .. code-block:: yaml
 
-  firewall_zones:
-    - zone: external
+  dhcp_server_firewall_zone: public
+
+login is our gateway: it forwards traffic from ``net-admin`` to the internet. Firewalld only forwards
+traffic between two different zones when a *policy* allows it, and the address translation
+(masquerade) must be set on this policy. The kernel must also be allowed to forward packets.
+``host_vars/login/firewall.yml``:
+
+.. code-block:: yaml
+
+  firewall_policies:
+    - name: internal-to-external
+      ingress_zones:
+        - internal
+      egress_zones:
+        - external
+      target: ACCEPT
       masquerade: true
 
-``host_vars/storage/firewall.yml`` - storage only accepts SSH from mgt1. Rather than opening the
-``ssh`` service to the whole ``internal`` zone, the default ``ssh`` service is disabled and
-replaced with a rich rule scoped to mgt1's ``net-admin`` address:
+  local_configuration_system:
+    sysctl:
+      net.ipv4.ip_forward: 1
+
+This is why login's ``datacenter`` interface is placed in the ``external`` zone: traffic going to the
+internet leaves through it, so firewalld knows it is egressing the ``external`` zone.
+
+Finally, storage only accepts SSH connections from mgt1. Instead of the ``ssh`` service open to the
+whole ``internal`` zone, a rich rule allows only mgt1 address. ``host_vars/storage/firewall.yml``:
 
 .. code-block:: yaml
 
@@ -496,25 +531,34 @@ replaced with a rich rule scoped to mgt1's ``net-admin`` address:
         - 'rule family="ipv4" source address="10.10.0.1/32" port port="22" protocol="tcp" accept'
 
 ``[SCHEMA: example-cluster-firewall-zones]``
-  *Same topology as the overview schema, recolored by firewall zone (internal vs external),
-  with a masquerade arrow badge on login's external-zone interface and a small padlock/rule
-  badge on storage showing the ssh-from-mgt1-only rich rule.*
+  *Same topology as the overview schema, colored by firewall zone (internal for net-admin/net-bmc,
+  external for datacenter, public for the DHCP requests coming from 0.0.0.0), with an
+  "internal-to-external policy + masquerade" badge on login, and a small padlock badge on storage
+  showing the ssh-from-mgt1-only rich rule.*
 
-See the :doc:`firewall <../../configuration/system/firewall>` role section of this
-documentation for the full ``firewall_zones`` vocabulary (services, ports, rich rules, ICMP
-blocks, masquerade).
+See the :doc:`firewall <../../configuration/system/firewall>` role documentation for all the
+possibilities (services, ports, rich rules, ICMP, masquerade, policies).
 
-Validate the inventory
-=======================
+Check the inventory
+===================
 
-Before deploying anything, sanity check the inventory:
+Before deploying anything, let's ask Ansible how it understands our inventory:
 
 .. code-block:: bash
 
-  ansible-inventory -i /var/lib/bluebanquise/inventories/example_cluster/ --graph
-  ansible-inventory -i /var/lib/bluebanquise/inventories/example_cluster/ --host c001
+  cd /var/lib/bluebanquise
+  ansible-inventory -i inventories/example_cluster --graph
+  ansible-inventory -i inventories/example_cluster --host g001
 
-The ``--graph`` output should show the 5 function groups, 3 hardware groups and single OS group,
-each with the right hosts. The ``--host`` output lets you check that a given host's merged
-variables (networks, hw_specs, os_operating_system, ...) look as expected before moving on to
-:doc:`deployment`.
+``--graph`` should show our 5 function groups, 3 hardware groups and single OS group, each with the
+right hosts. ``--host`` shows all the variables a host inherits: networks, ``hw_specs``,
+``bb_repositories``... Take a minute to read them, it is the best way to catch a typo now rather than
+during the deployment.
+
+We can also commit this first version of the inventory, if we keep it in git (we warmly recommend it):
+
+.. code-block:: bash
+
+  cd inventories/example_cluster && git init && git add . && git commit -m "Core cluster inventory"
+
+Everything is in place: let's deploy, in :doc:`deployment`!

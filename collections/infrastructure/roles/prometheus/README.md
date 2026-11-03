@@ -4,7 +4,7 @@
 - [Prometheus](#prometheus)
   * [1. Description](#1-description)
   * [2. General instructions](#2-general-instructions)
-    + [Server or/and client](#server-or-and-client)
+    + [Server or/and client](#server-orand-client)
     + [Default ports](#default-ports)
   * [3. Basic Server configuration](#3-basic-server-configuration)
     + [Prometheus configuration](#prometheus-configuration)

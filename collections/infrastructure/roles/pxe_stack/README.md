@@ -31,7 +31,7 @@ Files installed by these settings are:
 * PXE HTTP files are located in `{{ pxe_stack_htdocs_path }}/pxe/` (typically `/var/www/html/pxe/` on RHEL/Debian/Ubuntu, `/srv/www/htdocs/pxe/` on Suse).
 * PXE TFTP files are located in `/var/lib/tftpboot/`.
    * `bin/` directory contains some needed bin files, typically grub2 files for EFI boot.
-   * `equipments/` directory contains equipments related files, i.e. ipxe file with group variables, and os configuration files (kickstart, preseed, autoyast).
+   * `equipment_profiles/` directory contains equipment profiles related files, i.e. ipxe file with group variables, and os configuration files (kickstart, preseed, autoyast).
    * `nodes/` directory contains hosts dedicated files, i.e. ipxe file with hosts dedicated variables (and current boot state). See "Host iPXE files and PXE Stack Daemon" below.
    * `osdeploy/` directory contains static files, with patterns to boot each kind of supported distributions.
 * Basic configuration files are located in /etc/bluebanquise/bootset.
@@ -643,8 +643,8 @@ To be macroscopic:
 * The remote host boot over PXE, in EFI/legacy-bios, using its own PXE/iPXE rom.
 * The dhcp deployed by BlueBanquise (or your own) will provide the host with the **BlueBanquise** iPXE rom. This iPXE rom contains an EMBED script that will display the logo, get an ip from the dhcp server, show some information, and chain to file *convergence.ipxe*.
 * *convergence.ipxe* will simply get the current architecture. This operation cannot be done into the EMBED script has it needs some logic, that could bug. Sys admin need to easily debug this without the need to rebuild iPXE roms. Then iPXE chain to *nodes/${hostname}.ipxe*, with *hostname* the hostname provided by the dhcp server.
-* *nodes/${hostname}.ipxe* defines all host dedicated parameters and what host should do: boot on disk, deploy os, or boot in diskless (see "Host iPXE files and PXE Stack Daemon" above). Then iPXE chain to *equipments/${equipment-profile}.ipxe*.
-* *equipments/${equipment-profile}.ipxe* contains the host equipment profile group parameters, like operating system, console, kernel parameters, etc. Then iPXE chain to *menu.ipxe*.
+* *nodes/${hostname}.ipxe* defines all host dedicated parameters and what host should do: boot on disk, deploy os, or boot in diskless (see "Host iPXE files and PXE Stack Daemon" above). Then iPXE chain to *equipment_profiles/${equipment-profile}.ipxe*.
+* *equipment_profiles/${equipment-profile}.ipxe* contains the host equipment profile group parameters, like operating system, console, kernel parameters, etc. Then iPXE chain to *menu.ipxe*.
 * *menu.ipxe* will display a basic menu on screen, with default set to what host is expected to do (`menu-default`, from host file). Timeout is 10s by default before host execute the expected action. Each actionable entry first notifies the daemon (fire-and-forget `imgfetch`, does not block booting if the daemon is unreachable), then iPXE chain to:
    * *osdeploy/${eq-distribution}_${eq-distribution-major-version}.ipxe* if host needs to deploy/redeploy its operating system. These osdeploy files are dynamic, and adapt to parameters gathered in host dedicated file and host equipment file.
    * *diskless/images/${diskless-image}/boot.ipxe* if host needs to boot in diskless.
