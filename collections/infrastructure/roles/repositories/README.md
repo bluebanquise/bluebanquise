@@ -57,7 +57,7 @@ Or
 networks:
   net-my-network:
     services:
-      repositories:
+      repositories4:
         - ip4: 10.10.0.1
           hostname: my-repository-server
 ```

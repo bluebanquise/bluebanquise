@@ -2,162 +2,119 @@
 Provision OS
 ============
 
+This is the moment many of us enjoy the most: watching bare hosts boot from the network, install
+their operating system on their own, and come back ready to be configured. Let's go through it
+together.
 
+We assume here that your inventory is ready (see the General configuration section), and that the
+management host already runs its own operating system. If you are not sure in which order to do
+things, :doc:`strategy` gives the big picture.
 
-Pull os images
-==============
+Prepare the management host
+===========================
 
-If you plan to use PXE on your cluster to deploy OS on servers through the network, you will need to obtain desired OS isos.
+Bootstrap BlueBanquise
+----------------------
 
-A small tool is available to ease this task.
-
-
-
-==============
-Deploy Cluster
-==============
-
-At this point, **BlueBanquise** configuration is done. We are ready to deploy
-the cluster.
-
-We are going to proceed in the following order:
-
-#. Deploy configuration on management1 host
-#. Deploy fresh OS on the other hosts, from management1
-#. Deploy configuration on the other hosts.
-
-It is assumed that you already have deployed a fresh operating system on the management host management1.
-
-Install vital dependencies
-==========================
-
-Use the provided bootstrap tool to install needed dependencies for your current system (recent python) and setup bluebanquise user.
-Note that you need the ``sudo`` command to be installed on the system.
-
-Using root user (or a sudo user), launch the bootstrap script.
-
-The script will install needed packages (mostly python), create the ``bluebanquise`` user with home at ``/var/lib/bluebanquise``,
-set this user sudoer, install Ansible in a virtual environment in this user's home, and generate an ssh keys pair for this user.
-
-Script is verbose to help you debug in case of issues.
+The bootstrap script installs a few dependencies, creates the ``bluebanquise`` user (home
+``/var/lib/bluebanquise``, sudoer), installs Ansible and the BlueBanquise collection in a virtual
+environment, clones the BlueBanquise repository in ``/var/lib/bluebanquise/bluebanquise`` (for its
+``ansible.cfg`` and reference files), and generates an SSH key pair for this user. The ``sudo``
+command must be available. As root, or with a sudoer user:
 
 .. code-block:: bash
 
   curl -o online_bootstrap.sh https://raw.githubusercontent.com/bluebanquise/bluebanquise/master/bootstrap/online_bootstrap.sh
-  chmod +x online_bootstrap.sh 
-  ./online_bootstrap.sh
+  chmod +x online_bootstrap.sh
+  sudo ./online_bootstrap.sh
 
-Now, login as bluebanquise user. Remaining documentation assumes you are using the bluebanquise user.
+The script is verbose on purpose, so you can follow what it does, and quickly spot what went wrong
+if something does. Once done, let's switch to the ``bluebanquise`` user, which we will use for all
+the rest of this documentation:
 
 .. code-block:: bash
 
   sudo su - bluebanquise
 
-Management deployment
-=====================
+If you created your inventory somewhere else, copy it now under ``/var/lib/bluebanquise/inventories/``.
 
-Import inventory
-----------------
+Add the BlueBanquise repository
+-------------------------------
 
-Import the inventory previsouly created in this documentation into ``/var/lib/bluebanquise/inventory``.
+Some roles, like ``pxe_stack``, install packages built by the BlueBanquise project (iPXE roms,
+tools, Python environment). Let's make the BlueBanquise repository known to the management host, by
+adding it to ``bb_repositories``, for example in ``group_vars/all/repositories.yml`` (or in the
+operating system group of the management host if your cluster mixes distributions).
 
-Set BlueBanquise repository
----------------------------
+Pick the entry matching the distribution of the management host:
 
-In order to be able to download BlueBanquise packages (mostly for pex_stack role), you need to add BlueBanquise repository into the inventory.
-Repository is differend depending of OS.
-Create file ``/var/lib/bluebanquise/inventory/group_vars/all/repositories.yml`` with the following content:
+* RHEL 9 (and compatible: AlmaLinux, Rocky Linux...):
 
-* RHEL like system:
+  .. code-block:: yaml
 
-.. raw:: html
+    bb_repositories:
+      - name: bluebanquise
+        baseurl: https://bluebanquise.com/repository/releases/latest/el9/x86_64/bluebanquise/
 
-  <div style="padding: 6px;">
-  <b>RHEL</b> <img src="_static/logo_rhel.png">, <b>CentOS</b> <img src="_static/logo_centos.png">, <b>RockyLinux</b> <img src="_static/logo_rocky.png">, <b>OracleLinux</b> <img src="_static/logo_oraclelinux.png"><br> <b>CloudLinux</b> <img src="_static/logo_cloudlinux.png">, <b>AlmaLinux</b> <img src="_static/logo_almalinux.png">
-  </div><br><br>
+* RHEL 10 (and compatible):
 
-* EL9:
+  .. code-block:: yaml
 
-.. code-block:: yaml
-
-  bb_repositories:
-    - name: bluebanquise
-      baseurl: http://bluebanquise.com/repository/releases/latest/el9/x86_64/bluebanquise/
-      enabled: 1
-      state: present
-
-* EL10:
-
-.. code-block:: yaml
-
-  bb_repositories:
-    - name: bluebanquise
-      baseurl: http://bluebanquise.com/repository/releases/latest/el10/x86_64/bluebanquise/
-      enabled: 1
-      state: present
-
-* Ubuntu or Debian like systems:
-
-.. raw:: html
-
-  <div style="padding: 6px;">
-  <b>Ubuntu</b> <img src="_static/logo_ubuntu.png">, <b>Debian</b> <img src="_static/logo_debian.png">
-  </div><br><br>
+    bb_repositories:
+      - name: bluebanquise
+        baseurl: https://bluebanquise.com/repository/releases/latest/el10/x86_64/bluebanquise/
 
 * Ubuntu 24.04:
 
-.. code-block:: yaml
+  .. code-block:: yaml
 
-  bb_repositories:
-    - repo: deb [trusted=yes] http://bluebanquise.com/repository/releases/latest/u24/x86_64/bluebanquise/ noble main
-      state: present
+    bb_repositories:
+      - repo: deb [trusted=yes] https://bluebanquise.com/repository/releases/latest/u24/x86_64/bluebanquise/ noble main
 
 * Ubuntu 26.04:
 
-.. code-block:: yaml
+  .. code-block:: yaml
 
-  bb_repositories:
-    - repo: deb [trusted=yes] http://bluebanquise.com/repository/releases/latest/u26/x86_64/bluebanquise/ resolute main
-      state: present
+    bb_repositories:
+      - repo: deb [trusted=yes] https://bluebanquise.com/repository/releases/latest/u26/x86_64/bluebanquise/ resolute main
 
 * Debian 13:
 
-.. code-block:: yaml
+  .. code-block:: yaml
 
-  bb_repositories:
-    - repo: deb [trusted=yes] http://bluebanquise.com/repository/releases/latest/deb13/x86_64/bluebanquise/ trixie main
-      state: present
+    bb_repositories:
+      - name: bluebanquise
+        trusted: true
+        uris: https://bluebanquise.com/repository/releases/latest/deb13/x86_64/bluebanquise/
+        suites: trixie
+        components: main
 
-* Suse like system:
+* OpenSuse Leap 16:
 
-.. raw:: html
+  .. code-block:: yaml
 
-  <div style="padding: 6px;">
-  <b>Suse</b> <img src="_static/logo_suse.png">
-  </div><br><br>
+    bb_repositories:
+      - name: bluebanquise
+        disable_gpg_check: true
+        repo: https://bluebanquise.com/repository/releases/latest/osl16/x86_64/bluebanquise/
 
-.. code-block:: yaml
+.. note::
 
-  bb_repositories:
-    - name: bluebanquise
-      disable_gpg_check: true
-      baseurl: https://bluebanquise.com/repository/releases/latest/lp16/x86_64/bluebanquise/
+  On RHEL and compatible distributions, some packages also need the CodeReady Builder repository
+  (``crb``), and EPEL. The **repositories** role documentation explains all available formats.
 
-Create management playbook
---------------------------
+Configure the management host
+-----------------------------
 
-Create ``/var/lib/bluebanquise/playbooks`` folder and add a file called ``management1.yml`` playbook into this folder,
-with the following content:
+Now let's apply the configuration on the management host. A playbook lists the roles to run; for a
+first, basic cluster, create ``/var/lib/bluebanquise/playbooks/management.yml``:
 
 .. code-block:: yaml
 
   ---
   - name: management playbook
-    hosts: "management1"
+    hosts: "fn_management"
     roles:
-
-      # Infrastructure
-
       - role: bluebanquise.infrastructure.hosts_file
         tags: hosts_file
       - role: bluebanquise.infrastructure.local_configuration
@@ -166,6 +123,8 @@ with the following content:
         tags: repositories
       - role: bluebanquise.infrastructure.nic
         tags: nic
+      - role: bluebanquise.infrastructure.firewall
+        tags: firewall
       - role: bluebanquise.infrastructure.dhcp_server
         tags: dhcp_server
       - role: bluebanquise.infrastructure.dns_client
@@ -183,144 +142,105 @@ with the following content:
         vars:
           time_profile: server
 
-Note that this is a basic example to have a working basic cluster. More roles are available in the infrastructure collection.
+The ``firewall`` role comes before the roles providing services: each of them opens its own ports in
+firewalld, which must therefore already be running (see :doc:`../configuration/services`).
 
-Then, we will ask Ansible to read this playbook, and execute all roles listed
-inside on management1 host (check hosts at top of the file).
+We first bring network interfaces and repositories up, so the rest of the run can install packages.
+If you are connected remotely, double check the ``network_interfaces`` of the management host
+before running this, so you do not cut the branch you are sitting on!
 
-To do so, we are going to use the ``ansible-playbook`` command.
+.. code-block:: bash
 
-Ansible-playbook
-----------------
+  cd /var/lib/bluebanquise
+  ansible-playbook playbooks/management.yml -i inventories/new_cluster -b --limit mgt1 --tags nic,repositories
 
-``ansible-playbook`` is the command used to ask Ansible to execute a playbook.
+Check with ``ip a`` that interfaces are up as expected, then run the whole playbook:
 
-We are going to use 2 parameters frequently:
+.. code-block:: bash
 
-Tags / Skip tags
-^^^^^^^^^^^^^^^^
+  ansible-playbook playbooks/management.yml -i inventories/new_cluster -b --limit mgt1
 
-As you can notice, some tags are set inside the playbook, or even in some roles
-for specific tasks. The idea of tags is simple: you can tag a role/task, and
-then when using ansible-playbook, only play related tags role/task. Or do the
-opposite: play all, and skip a role/task.
+And let it work for a few minutes. You can replay this command as many times as you like: Ansible
+only changes what is not already in the expected state. :doc:`apply_configuration` explains all the
+options of the ``ansible-playbook`` command.
 
-To so, use with Ansible playbook:
+Provide operating system images
+===============================
 
-* **--tags** with tags listed with comma separator: mytag1,mytag2,mytag3
-* **--skip-tags** with same pattern
+To install hosts through the network, the management host needs the installation media of each
+distribution (and architecture) you plan to deploy. They live under
+``/var/www/html/pxe/netboots/<distribution>/<version>/<architecture>/`` (``/srv/www/htdocs/pxe/...``
+on OpenSuse), following the ``os_operating_system`` and ``hw_architecture`` values of your
+inventory.
 
-Additional documentation about tags usage in playbooks is available
-`here <https://docs.ansible.com/ansible/latest/user_guide/playbooks_tags.html>`_.
+The ``bluebanquise-netboots-installer`` tool, installed by the ``pxe_stack`` role, does all the work
+for you: it downloads the ISO, checks it, and extracts it at the right place.
 
-Extra vars
-^^^^^^^^^^
+.. code-block:: bash
 
-Extra-vars allows to pass variables with maximum precedence at execution time,
-for any purpose (debug, test, or simply need).
+  sudo bluebanquise-netboots-installer list
+  sudo bluebanquise-netboots-installer install rhel_10 x86_64
+  sudo bluebanquise-netboots-installer install rhel_10 arm64
 
-To do so, use:
+On an air-gapped cluster, download the ISO from another host, copy it on the management host, and
+give it to the tool:
 
-* **--extra-vars** with " " and space separated variables: --extra-vars "myvar1=true myvar2=77 myvar3=hello"
+.. code-block:: bash
 
-Note: you need to use json syntax to pass dicts or list to extra vars.
+  sudo bluebanquise-netboots-installer install ubuntu_24.04 x86_64 --netboot /var/lib/bluebanquise/ubuntu-24.04-live-server-amd64.iso
 
-Apply management1 configuration
--------------------------------
-
-Lets apply now the whole configuration on management1. It can take some time
-depending on your CPU and your hard drive, and your network connection when using external repositories.
-
-We first ensure our NICs are up, so the repositories part is working.
-Ensure not to cut your connection if working remotely.
-
-.. code-block:: text
-
-  ansible-playbook playbooks/managements.yml -b -i inventory --limit management1 --tags local_configuration,nic
-
-Check interfaces are up (check using ``ip a`` command), and then setp repositories:
-
-.. code-block:: text
-
-  ansible-playbook playbooks/managements.yml -b -i inventory --limit management1 --tags repositories
-
-Then play the whole playbook:
-
-.. code-block:: text
-
-  ansible-playbook playbooks/managements.yml -b -i inventory --limit management1
-
-And wait...
-
-If all went well, you can check that all services are up and running.
+The catalog of known images, ``/etc/bluebanquise/bootset/netboots_installer.yml``, is never
+overwritten by the role: feel free to point it to your local mirrors, or to add new entries. The
+**pxe_stack** role documentation also details how to do it manually, for each distribution.
 
 .. note::
-  You can replay the same ansible-playbook command over and over, Ansible will
-  just update/correct what is needed, and do nothing for all that is at an
-  expected state.
 
-Now that management1 is up and running, it is time to deploy the other hosts.
+  At least 20 GB of free space is needed: the tool checks it before starting.
 
-Deploy OS on other hosts: PXE
-=============================
+How hosts boot from the network
+===============================
 
-Next step is to deploy the other hosts using PXE process.
-
-NOTE: it is assumed here you know how to have your other hosts / VM / servers /
-workstation to boot on LAN.
-
-If your device cannot boot on LAN, use iso or usb image provided on management1
-in /var/www/html/pxe/bin/[x86_64|arm64]. These images
-will start a LAN boot automatically, even if your computer is not PXE able
-natively.
-
-In **BlueBanquise**, PXE process has been made so that any kind of hardware able
-to boot PXE, USB or CDrom can start deployment.
-
-PXE process overview
---------------------
-
-You can get more information and a detailed schema in the pxe_stack role section
-of this documentation. Simply explained, the PXE chain is the following (files
-are in /var/www/html/pxe):
+Before powering anything on, let's take a minute to understand what is going to happen. The
+**pxe_stack** role documentation has all the details; here is the short story (files are under
+``/var/www/html/pxe``):
 
 .. code-block:: text
 
   DHCP request
     |
-  IP obtained, next-server obtained
+  IP and next-server obtained
     |
-  Download (tftp) and load bluebanquise iPXE ROM
+  Download (tftp) and load the BlueBanquise iPXE rom
     |
-  DHCP request again with new ROM
+  DHCP request again, from the iPXE rom
     |
-  iPXE chain to convergence.ipxe (using http)
+  iPXE chains to convergence.ipxe (http)
     |
-  iPXE chain to nodes/myhostname.ipxe (get dedicated values)
+  iPXE chains to nodes/<hostname>.ipxe (host values: what to do next)
     |
-  iPXE chain to equipment_profiles/my_equipment_profile.ipxe (get group dedicated values)
+  iPXE chains to equipment_profiles/<equipment_profile>.ipxe (group values)
     |
-  iPXE chain to menu.ipxe
+  iPXE chains to menu.ipxe
     |
-  iPXE chain to task specified in myhostname.ipxe (deploy os, boot on disk, etc)
+  iPXE chains to the selected entry (deploy OS, boot on disk, diskless, tools, ...)
 
-Whatever the boot source, and whatever Legacy BIOS or UEFI, all converge to
-``http://${next-server}/pxe/convergence.ipxe``. Then this
-file chain to host specific file in hosts (this file is generated using *bluebanquise-bootset*
-command). The host specific file contains the default entry for the iPXE menu,
-then host chain to its equipment_profile file, to gather group values, and chain
-again to menu file. The menu file display a simple menu, and wait 10s for user
-before starting the default entry (which can be os deployment, or boot to disk,
-or boot diskless).
+Whatever the boot source (PXE, USB, CD) and firmware (legacy BIOS or UEFI), all paths converge to
+``http://${next-server}/pxe/convergence.ipxe``. If a host cannot boot over the network on its own,
+boot it on the iPXE ISO or USB images available in ``/var/www/html/pxe/bin/``: they start the very
+same chain.
 
-The following slides explain the whole PXE process of the BlueBanquise stack:
+The menu waits 10 seconds, then starts the entry chosen for the host, its ``menu-default``.
+Installers (kickstart for RHEL, autoinstall for Ubuntu, preseed for Debian, Agama for OpenSuse Leap
+16, AutoYaST for Leap 15) get all their settings from the inventory: partitioning, admin password
+and SSH keys, packages, kernel parameters, and more (see :doc:`../configuration/os_settings`).
+
+These slides walk through the whole process:
 
 .. raw:: html
 
   <!-- from https://www.w3schools.com/howto/howto_js_slideshow.asp -->
   <script>
   var slideIndex = 1;
-  showSlides(slideIndex);
   // Next/previous controls
   function plusSlides(n) {
     showSlides(slideIndex += n);
@@ -350,75 +270,75 @@ The following slides explain the whole PXE process of the BlueBanquise stack:
      <!-- Full-width images with number and caption text -->
      <div class="mySlides">
        <div class="numbertext">1 / 18</div>
-       <img src="_static/deploy_bluebanquise_pxe_slides/Slide1.PNG" style="width:100%">
+       <img src="../_static/deploy_bluebanquise_pxe_slides/Slide1.PNG" style="width:100%">
      </div>
      <div class="mySlides">
        <div class="numbertext">2 / 18</div>
-       <img src="_static/deploy_bluebanquise_pxe_slides/Slide2.PNG" style="width:100%">
+       <img src="../_static/deploy_bluebanquise_pxe_slides/Slide2.PNG" style="width:100%">
      </div>
      <div class="mySlides">
        <div class="numbertext">3 / 18</div>
-       <img src="_static/deploy_bluebanquise_pxe_slides/Slide3.PNG" style="width:100%">
+       <img src="../_static/deploy_bluebanquise_pxe_slides/Slide3.PNG" style="width:100%">
      </div>
      <div class="mySlides">
        <div class="numbertext">4 / 18</div>
-       <img src="_static/deploy_bluebanquise_pxe_slides/Slide4.PNG" style="width:100%">
+       <img src="../_static/deploy_bluebanquise_pxe_slides/Slide4.PNG" style="width:100%">
      </div>
      <div class="mySlides">
        <div class="numbertext">5 / 18</div>
-       <img src="_static/deploy_bluebanquise_pxe_slides/Slide5.PNG" style="width:100%">
+       <img src="../_static/deploy_bluebanquise_pxe_slides/Slide5.PNG" style="width:100%">
      </div>
      <div class="mySlides">
        <div class="numbertext">6 / 18</div>
-       <img src="_static/deploy_bluebanquise_pxe_slides/Slide6.PNG" style="width:100%">
+       <img src="../_static/deploy_bluebanquise_pxe_slides/Slide6.PNG" style="width:100%">
      </div>
      <div class="mySlides">
        <div class="numbertext">7 / 18</div>
-       <img src="_static/deploy_bluebanquise_pxe_slides/Slide7.PNG" style="width:100%">
+       <img src="../_static/deploy_bluebanquise_pxe_slides/Slide7.PNG" style="width:100%">
      </div>
      <div class="mySlides">
        <div class="numbertext">8 / 18</div>
-       <img src="_static/deploy_bluebanquise_pxe_slides/Slide8.PNG" style="width:100%">
+       <img src="../_static/deploy_bluebanquise_pxe_slides/Slide8.PNG" style="width:100%">
      </div>
      <div class="mySlides">
        <div class="numbertext">9 / 18</div>
-       <img src="_static/deploy_bluebanquise_pxe_slides/Slide9.PNG" style="width:100%">
+       <img src="../_static/deploy_bluebanquise_pxe_slides/Slide9.PNG" style="width:100%">
      </div>
      <div class="mySlides">
        <div class="numbertext">10 / 18</div>
-       <img src="_static/deploy_bluebanquise_pxe_slides/Slide10.PNG" style="width:100%">
+       <img src="../_static/deploy_bluebanquise_pxe_slides/Slide10.PNG" style="width:100%">
      </div>
      <div class="mySlides">
        <div class="numbertext">11 / 18</div>
-       <img src="_static/deploy_bluebanquise_pxe_slides/Slide11.PNG" style="width:100%">
+       <img src="../_static/deploy_bluebanquise_pxe_slides/Slide11.PNG" style="width:100%">
      </div>
      <div class="mySlides">
        <div class="numbertext">12 / 18</div>
-       <img src="_static/deploy_bluebanquise_pxe_slides/Slide12.PNG" style="width:100%">
+       <img src="../_static/deploy_bluebanquise_pxe_slides/Slide12.PNG" style="width:100%">
      </div>
      <div class="mySlides">
        <div class="numbertext">13 / 18</div>
-       <img src="_static/deploy_bluebanquise_pxe_slides/Slide13.PNG" style="width:100%">
+       <img src="../_static/deploy_bluebanquise_pxe_slides/Slide13.PNG" style="width:100%">
      </div>
      <div class="mySlides">
        <div class="numbertext">14 / 18</div>
-       <img src="_static/deploy_bluebanquise_pxe_slides/Slide14.PNG" style="width:100%">
+       <img src="../_static/deploy_bluebanquise_pxe_slides/Slide14.PNG" style="width:100%">
      </div>
      <div class="mySlides">
        <div class="numbertext">15 / 18</div>
-       <img src="_static/deploy_bluebanquise_pxe_slides/Slide15.PNG" style="width:100%">
+       <img src="../_static/deploy_bluebanquise_pxe_slides/Slide15.PNG" style="width:100%">
      </div>
      <div class="mySlides">
        <div class="numbertext">16 / 18</div>
-       <img src="_static/deploy_bluebanquise_pxe_slides/Slide16.PNG" style="width:100%">
+       <img src="../_static/deploy_bluebanquise_pxe_slides/Slide16.PNG" style="width:100%">
      </div>
      <div class="mySlides">
        <div class="numbertext">17 / 18</div>
-       <img src="_static/deploy_bluebanquise_pxe_slides/Slide17.PNG" style="width:100%">
+       <img src="../_static/deploy_bluebanquise_pxe_slides/Slide17.PNG" style="width:100%">
      </div>
      <div class="mySlides">
        <div class="numbertext">18 / 18</div>
-       <img src="_static/deploy_bluebanquise_pxe_slides/Slide18.PNG" style="width:100%">
+       <img src="../_static/deploy_bluebanquise_pxe_slides/Slide18.PNG" style="width:100%">
      </div>
      <!-- Next and previous buttons -->
      <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
@@ -451,128 +371,89 @@ The following slides explain the whole PXE process of the BlueBanquise stack:
     currentSlide(1)
   </script>
 
-bluebanquise-bootset
---------------------
+``[SCHEMA: pxe-boot-chain]``
+  *A vertical flow of the iPXE chain above: a host on the left, the management host on the right,
+  with arrows labelled DHCP, TFTP and HTTP, and one box per chained file (convergence.ipxe,
+  nodes/<hostname>.ipxe, equipment profile file, menu.ipxe, osdeploy/<distribution>.ipxe). A last
+  arrow from the installed host back to the PXE stack daemon, labelled "stage_report osdeploy
+  completed", switching the host file to "disk".*
 
-Before booting remote hosts in PXE, we need to ask management1 to activate
-remote hosts deployment. If not, remote hosts will not be able to grab their
-dedicated configuration from management host at boot.
+Choose what hosts do at next boot
+=================================
 
-To manipulate hosts PXE boot on management1 (aka set PXE chain configuration), a command, ``bluebanquise-bootset``, is available.
-
-We are going to deploy login1, storage1 and compute1, compute2, compute3 and compute4.
-
-Let's use bluebanquise-bootset to set them to deploy OS at next PXE boot (bluebanquise-bootset must be launched using sudo if not root):
+Each host gets its own file, ``pxe/nodes/<hostname>.ipxe``, telling it what to do at next network
+boot. We change it with the ``bluebanquise-bootset`` command (as root, or with sudo). Let's ask our
+hosts to deploy their operating system:
 
 .. code-block:: bash
 
   sudo bluebanquise-bootset -n login1,storage1,c[001-004] -b osdeploy
 
-You can check the result using:
+And check the result:
 
 .. code-block:: bash
 
   sudo bluebanquise-bootset -n login1,storage1,c[001-004] -s
 
-Which should return:
+Hosts are grouped by their next boot target (``menu-default``), with their last reported status and
+what remains in their boot queue:
 
 .. code-block:: text
 
-  [INFO] Loading /etc/bluebanquise-bootset/nodes_parameters.yml
-  [INFO] Loading /etc/bluebanquise-bootset/pxe_parameters.yml
-  Next boot deployment: c[001-004],login1,storage1
+  menu-default=osdeploy :
+    c001: [status: NA] [queue: osdeploy]
+    c002: [status: NA] [queue: osdeploy]
+    ...
 
-Note that this osdeploy state will be automatically updated once OS is deployed
-on remote hosts, and set to disk.
+During the installation, the status becomes ``osdeploy running``, then ``osdeploy completed``, with
+its date. Once the installation succeeds, the host reports it to the PXE stack daemon, which
+switches it to ``disk``: the host will not reinstall itself in a loop at next reboot.
 
-You can also force hosts that boot on PXE to boot on disk using ``-b disk``
-instead of ``-b osdeploy``.
+``bluebanquise-bootset`` has a few more tricks:
 
-Please refer to the pxe_stack role dedicated section in this documentation for
-more information on the bluebanquise-bootset usage.
+* ``-b disk``: boot on the local disk.
+* ``-b memtest,osdeploy``: a boot sequence, run in order. Here, a memory test first, then an OS
+  deployment.
+* ``-e "<kernel parameters>"``: additional kernel parameters for the next deployment.
+* ``-b diskless -i <image>``: boot a diskless image.
 
-SSH public key
---------------
+The **pxe_stack** role documentation describes all of them.
 
-In order to log into the remote hosts without giving the password, check that
-the ssh public key defined in your os groups inventory (``os_admin_ssh_keys key``) matches your
-management1 public key (the one generated in /var/lib/bluebanquise/.ssh/). If not, update the
-inventory and remember to re-run the pxe_stack role (to update
-PXE related files that contains the ssh public key of the management host to be
-set on hosts during deployment).
+Check SSH keys
+==============
+
+Once installed, hosts must accept SSH connections from the ``bluebanquise`` user of the management
+host, without password, so Ansible can configure them. The keys allowed on deployed hosts come from
+``os_admin_ssh_keys`` in your operating system groups: check the public key of the ``bluebanquise``
+user (``/var/lib/bluebanquise/.ssh/id_ed25519.pub``) is part of it. If you add it now, re-run the
+``pxe_stack`` role, so installation files include it:
 
 .. code-block:: bash
 
-  ansible-playbook playbooks/managements.yml -b -i inventory --limit management1 --tags pxe_stack
+  ansible-playbook playbooks/management.yml -i inventories/new_cluster -b --limit mgt1 --tags pxe_stack
 
-OS deployment
--------------
+Deploy
+======
 
-Power on now the remote hosts, have them boot over LAN, and watch the automatic
-installation procedure. It should take around 5-20 minutes depending on your
-hardware.
+Everything is ready: power on the hosts (or use their BMC, see :doc:`../operations/operations`), let
+them boot over the network, and watch the installation run. It usually takes 5 to 20 minutes,
+depending on your hardware.
 
-Once done, proceed to next part.
+To follow what is going on from the management host:
 
-Apply other hosts configuration
-===============================
+* ``sudo bluebanquise-bootset -n <hosts> -s`` shows the progress of each host.
+* The http server logs (``/var/log/httpd/access_log`` on RHEL, ``/var/log/apache2/access.log`` on
+  Ubuntu and Debian) show each file of the chain being downloaded.
+* ``journalctl -u bluebanquise-pxe-stack-daemon -f`` shows the stage reports the daemon receives.
 
-Now that all the hosts have an operating system installed and running, applying
-configuration on these hosts is simple.
-
-Ensure first you can ssh passwordless on each of the freshly deployed hosts.
+If a host stops on an iPXE shell, read the message on its screen: it explains why (unknown host,
+missing host file, missing image...). Most of the time, the host is missing from the inventory, or
+the ``pxe_stack`` role must be re-run after an inventory change.
 
 .. note::
-  On some Linux distributions, if DHCP leases are short, you may loose
-  ip shortly after system is booted. If that happen, reboot system to get an ip
-  again. This issue is solved once the nic role has been applied on hosts,
-  as it sets ip statically.
 
-We will deploy configuration on compute1 host as an example.
+  Some distributions use short DHCP leases at first boot. If a freshly installed host loses its IP
+  address, simply reboot it: once the ``nic`` role is applied, addresses are static.
 
-Create file ``playbooks/computes.yml`` with the following content:
-
-.. code-block:: yaml
-
-  ---
-  - name: computes playbook
-    hosts: "fn_compute" # This is a group
-    roles:
-
-      # Infrastructure
-
-      - role: bluebanquise.infrastructure.hosts_file
-        tags: hosts_file
-      - role: bluebanquise.infrastructure.local_configuration
-        tags: local_configuration
-      - role: bluebanquise.infrastructure.repositories
-        tags: repositories
-      - role: bluebanquise.infrastructure.nic
-        tags: nic
-      - role: bluebanquise.infrastructure.ssh_remote_keys
-        tags: ssh_remote_keys
-      - role: bluebanquise.infrastructure.time
-        tags: time
-        vars:
-          time_profile: client
-
-And execute it while targeting compute1 (if you do not limit it, it will deploy configuration in parallel on all the members of the fn_compute group):
-
-.. code-block:: bash
-
-  ansible-playbook playbooks/computes.yml -b -i inventory --limit compute1
-
-If you do not set the limite, and have multiple compute hosts up and running,
-you will see that Ansible will work on computes hosts in parallel, using more CPU
-on the management1 host (by spawning multiple forks).
-
--------------
-
-Your cluster should now be fully deployed the generic way: operating systems are
-deployed on each hosts, and basic services (DNS, repositories, time
-synchronization, etc.) are up and running.
-
-You can now use the other sections to go futher and specialize your cluster.
-
-Thank your for following this training. I really hope you will enjoy the stack.
-Please report me any bad or good feedback.
+When hosts are up and reachable with SSH, the last step is to configure them: let's continue with
+:doc:`apply_configuration`.

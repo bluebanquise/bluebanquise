@@ -2,41 +2,42 @@
 Overview
 ========
 
-This walkthrough builds one complete, realistic cluster from nothing to a working Slurm job,
-referencing back to the relevant sections of this documentation at each step instead of
-re-explaining every variable from scratch.
+Before typing anything, let's meet the cluster we are going to build.
 
 Cluster description
-====================
+===================
 
 The example cluster is made of 9 hosts and 3 networks:
 
-* **mgt1**: the management server. 3 NICs: one on ``datacenter`` (used for maintenance access
-  to the cluster), one on ``net-admin`` (provisions the rest of the cluster), one on ``net-bmc``
-  (BMC management).
-* **login**: the login/submission node. 2 NICs: one on ``datacenter``, one on ``net-admin``. It
-  also acts as the router between the two, masquerading ``net-admin`` traffic out to the internet
-  reachable from ``datacenter``.
-* **storage**: the NFS server. 1 NIC, on ``net-admin``.
-* **c001** to **c004**: CPU compute workers. 1 NIC on ``net-admin``, plus a BMC (IPMI) on
-  ``net-bmc``.
-* **g001** to **g004**: GPU compute workers. 1 NIC on ``net-admin``, plus a BMC (Redfish) on
-  ``net-bmc``.
+* **mgt1**: the management server. 3 network interfaces: one on ``datacenter`` (to reach it from
+  the outside, and its own way to the internet), one on ``net-admin`` (to deploy and manage the rest
+  of the cluster), and one on ``net-bmc`` (to talk to the BMCs of the workers).
+* **login**: the login node, where users connect and submit their jobs. 2 network interfaces: one on
+  ``datacenter``, one on ``net-admin``. It is also the gateway of the cluster: hosts of
+  ``net-admin`` reach the internet through it.
+* **storage**: the NFS server. 1 network interface, on ``net-admin``.
+* **c001** to **c004**: CPU compute workers (x86_64). 1 network interface on ``net-admin``, and a
+  BMC (IPMI) on ``net-bmc``.
+* **g001** to **g004**: GPU compute workers (arm64, with 4 Nvidia GPUs each). 1 network interface on
+  ``net-admin``, and a BMC (Redfish) on ``net-bmc``.
 
-Networks:
+And the networks:
 
-* ``net-admin`` (``10.10.0.0/16``): the cluster's management network. Carries DHCP, DNS, NTP,
-  PXE, and is the network Ansible uses to reach every host.
-* ``net-bmc`` (``10.11.0.0/16``): dedicated network for BMC (IPMI/Redfish) access.
-* ``datacenter`` (``192.168.0.0/24``): externally managed network, used for maintenance access
-  to mgt1 and login, and as login's route to the internet (gateway ``192.168.0.200``).
+* ``net-admin`` (``10.10.0.0/16``): the management network of the cluster. It carries DHCP, DNS,
+  time, PXE, and it is the network Ansible uses to reach every host.
+* ``net-bmc`` (``10.11.0.0/16``): a dedicated network for BMCs (IPMI and Redfish).
+* ``datacenter`` (``192.168.0.0/24``): the existing network of the datacenter, managed by someone
+  else. It gives access to mgt1 and login from the outside, and leads to the internet through the
+  datacenter router, ``192.168.0.200``.
+
+All hosts run RHEL 10 (or a compatible distribution, like Rocky Linux or AlmaLinux).
 
 ``[SCHEMA: example-cluster-topology]``
-  *Three network clouds (net-admin 10.10.0.0/16, net-bmc 10.11.0.0/16, datacenter
-  192.168.0.0/24 external), with the 9 hosts placed on the network(s) they belong to. An arrow
-  through login shows masquerade from net-admin out through datacenter's gateway
-  (192.168.0.200). BMC leaf nodes hang off net-bmc for the 8 compute workers only (mgt1, login
-  and storage have no BMC in this example).*
+  *Three network clouds (net-admin 10.10.0.0/16, net-bmc 10.11.0.0/16, datacenter 192.168.0.0/24
+  external), with the 9 hosts placed on the network(s) they belong to. An arrow through login shows
+  net-admin traffic going out through datacenter's router (192.168.0.200), and a second, direct
+  arrow from mgt1 to the same router. BMC leaf nodes hang off net-bmc for the 8 compute workers
+  only (mgt1, login and storage have no BMC in this example).*
 
 Hosts summary
 =============
@@ -83,7 +84,7 @@ Hosts summary
      - 10.10.3.1 .. 10.10.3.4
      - --
      - --
-     - bmc-c001 .. bmc-c004 @ 10.11.3.1 .. 10.11.3.4 (IPMI)
+     - bmc-c001 .. bmc-c004, 10.11.3.1 .. 10.11.3.4 (IPMI)
    * - g001 .. g004
      - fn_compute_gpu
      - hw_gpu_worker
@@ -91,25 +92,28 @@ Hosts summary
      - 10.10.3.101 .. 10.10.3.104
      - --
      - --
-     - bmc-g001 .. bmc-g004 @ 10.11.3.101 .. 10.11.3.104 (Redfish)
+     - bmc-g001 .. bmc-g004, 10.11.3.101 .. 10.11.3.104 (Redfish)
 
 .. note::
 
-  Every host also carries the 3 mandatory group types described in the data model: a function
-  group (``fn_*``), a hardware group (``hw_*``), and an OS group (``os_*``). See the
-  :doc:`groups <../../configuration/groups>` and :doc:`hosts <../../configuration/hosts>`
-  sections of this documentation for the underlying rules.
+  Every host belongs to the 3 mandatory group types of the data model: a function group (``fn_*``),
+  a hardware group (``hw_*``), and an OS group (``os_*``). See :doc:`../../configuration/groups`
+  and :doc:`../../configuration/hosts` for the rules behind them.
 
 Prerequisites
 =============
 
-* mgt1 already has an operating system installed (RHEL 10) and is reachable over SSH from your
-  workstation on the ``datacenter`` network, with a sudo-capable user.
-* mgt1 has internet access (directly, or through a proxy) to reach BlueBanquise's public
-  repository and download the ``curl`` bootstrap script. If your cluster is air-gapped, see the
-  ``pxe_stack`` role documentation for offline alternatives.
-* The other 8 hosts (login, storage, c001-004, g001-004) are racked, cabled to ``net-admin`` and
-  ``net-bmc``, and configured to PXE boot first in their boot order. They do not need an
-  operating system yet - that is what this walkthrough deploys for them.
-* You know (or will fill in once known) the MAC addresses of the ``net-admin`` and BMC
-  interfaces of every host - the inventory examples below use placeholder MAC addresses.
+Here is what we need before starting:
+
+* mgt1 already runs RHEL 10, installed by hand, and we can reach it with SSH on the ``datacenter``
+  network, with a user able to use sudo.
+* mgt1 has internet access, through the datacenter router, to download BlueBanquise, the
+  installation ISOs, and packages. If your cluster has no internet access at all, you can provide
+  ISOs and repositories mirrors by hand instead: see :doc:`../../deployment/provision_os`.
+* The other 8 hosts are racked, cabled to ``net-admin`` and ``net-bmc`` (and ``datacenter`` for
+  login), and set to boot from the network first. They do not need an operating system yet: that is
+  what we are going to give them.
+* We know the MAC addresses of the ``net-admin`` interfaces and BMCs of all hosts. The examples use
+  placeholder MAC addresses: replace them with yours.
+
+Ready? Let's go!

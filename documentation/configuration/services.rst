@@ -2,14 +2,20 @@
 Services
 ========
 
-Services are daemons that run on management hosts and provide key services to other hosts, like DHCP server, DNS server, NTP server, HTTP server, etc.
-These services can be either listening entities (a DNS server is listening on the network), either active pull/push entities (Prometheus is pulling data from hosts to monitor them).
+Services are the daemons that make a cluster work as a whole: DHCP and DNS so that hosts find their
+address and each other, an HTTP server and a PXE stack so that they can be installed through the
+network, a time server so that they all agree on the clock, a log server, a monitoring stack, and
+more.
 
-Some of these services need to be deployed on the management hosts, and also have a client part that needs to be deployed on other hosts.
+These services usually run on management hosts. Some of them listening for clients (a DNS server
+waits for requests), others actively reaching hosts (Prometheus collects metrics from them). Many
+also have a client side, configured on the other hosts by the same role or by a companion role.
 
-When a service needs to listen on a ip (endpoint), this ip or hostname is set in the networks settings, so that both server and clients can bind to the same configuration.
+To keep servers and clients consistent, the address a service listens on (its *endpoint*) is
+declared once, in the networks definition, and read by both sides. The second part of this page
+explains how.
 
-You will find bellow the detailed configuration available for each service of the stack, and global details on how to configure endpoints.
+Here is the detailed configuration available for each service of the stack.
 
 .. toctree::
    :maxdepth: 1
@@ -26,6 +32,7 @@ You will find bellow the detailed configuration available for each service of th
    services/keepalived
    services/loki
    services/mariadb
+   services/podman
    services/prometheus
    services/pxe_stack
    services/rsyslog
@@ -34,19 +41,18 @@ You will find bellow the detailed configuration available for each service of th
 Services endpoints
 ==================
 
-The service endpoint is the ip or hostname both server and clients will refer to in their configuration.
+A service endpoint is the IP address (or hostname) that both the server and its clients refer to.
+If, for example, the NTP endpoint is ``10.10.0.7``, the NTP server listens on this address, and every
+NTP client is configured to reach its server there. Declaring it once, in the networks definition,
+guarantees both sides always agree.
 
-For example, if the NTP server endpoint is 10.10.0.7, then NTP server will be configured to listen on this specific ip, while NTP clients will try to reach the NTP server on 10.10.0.7.
-
-There are 2 ways to define endpoints for services in the stack.
-Either all services share the same ip, either services are split over multiple ips (multiple management hosts or using virtual ip).
-Or both can be shared, like most services using a shared enpoint, and some specific one is using a different ip.
+There are three ways to declare endpoints, from the simplest to the most flexible.
 
 Single endpoint
 ---------------
 
-If all services are using the same ip, which is often the case for small clusters with a single management server,
-then the ``services_ip`` key can be used under the admininstration network:
+On a small cluster with a single management host, all services usually share the same address.
+In that case, simply set the ``services_ip`` key on the management network:
 
 .. code-block:: yaml
 
@@ -56,18 +62,40 @@ then the ``services_ip`` key can be used under the admininstration network:
       prefix: 16
       services_ip: 10.10.0.1
 
-In that case, all services will bind to this ip, and all clients will look for services on this ip.
+All services listen on ``10.10.0.1``, and all clients look for them there. This is all most clusters need.
 
 Multiple endpoints
 ------------------
 
-If you need to split services over multiple ips or hostnames, it is possible to define them under the ``services`` key.
-You will need to refer to each service dedicated documentation to know the exact variables names to use.
+On larger clusters, services are often spread over several management hosts, or published on
+virtual IPs for high availability. Each service then gets its own entry under the ``services`` key
+of the network.
 
-Service keys end with ``4`` for IPv4 endpoints (``dns4``, ``pxe4``, ``ntp4``, ``log4``, ``repositories4``...), to leave room
-for IPv6 endpoints later. Keys without suffix (``dns``, ``ntp``...) are deprecated, but still accepted by roles.
+Service keys end with ``4`` for IPv4 endpoints, to leave room for IPv6 ones later:
 
-For example, for the NTP server, if you need server so listen on 10.10.0.6 and clients to try to reach server on this ip, define it this way:
+.. list-table::
+   :header-rows: 1
+
+   * - Key
+     - Service
+   * - ``dns4``
+     - DNS server (``dns_server``, ``dns_client``)
+   * - ``ntp4``
+     - Time server (``time``)
+   * - ``pxe4``
+     - PXE and HTTP deployment server (``dhcp_server``, ``pxe_stack``)
+   * - ``log4``
+     - Log server (``rsyslog``)
+   * - ``repositories4``
+     - Packages repositories server (``repositories``)
+
+.. note::
+
+  Keys without the ``4`` suffix (``dns``, ``ntp``, ``pxe``, ``log``, ``repositories``) are the former
+  names. They are deprecated, but roles still accept them, so existing inventories keep working.
+
+Each entry is a list, so a service can have several endpoints (two DNS servers, for example). For
+instance, to make the NTP server listen on ``10.10.0.6``, and NTP clients reach it there:
 
 .. code-block:: yaml
 
@@ -79,7 +107,7 @@ For example, for the NTP server, if you need server so listen on 10.10.0.6 and c
         ntp4:
           - ip4: 10.10.0.6
 
-You can also define an hostname instead of an ipv4:
+An endpoint can also carry a hostname:
 
 .. code-block:: yaml
 
@@ -92,19 +120,20 @@ You can also define an hostname instead of an ipv4:
           - hostname: my-ntp-server
             ip4: 10.10.0.6
 
-In that case, the hostname will be used by clients to reach the server, but server will still have the ip4 in case it is needed for its configuration.
+Clients then use the hostname to reach the server, while the server keeps using the IP address for
+its own configuration.
 
 .. warning::
 
-  The DNS service is an exception, as it will ignore hostname and always use the ip4.
+  The DNS service is an exception: clients need an IP address to reach their DNS server (they
+  cannot resolve a name before having one!), so ``hostname`` is ignored for ``dns4`` and the
+  ``ip4`` value is always used.
 
 Mixed endpoints
 ---------------
 
-If you wish to have all services bind to the same ip4, but also wish to have some specific service(s) bind to a dedicated endpoint, you can define both
-``services`` and ``services_ip``. In that case, ``services`` will precedence ``services_ip`` when defined.
-
-Example:
+Both keys can be combined: ``services_ip`` gives a default address to all services, and
+``services`` overrides it for the services listed there.
 
 .. code-block:: yaml
 
@@ -117,45 +146,49 @@ Example:
         ntp4:
           - hostname: my-ntp-server
             ip4: 10.10.0.6
-          - hostname: google-public-dns
-            ip4: 8.8.8.8
-            
-In this example, all services will bind to 10.10.0.1, except the ntp server that will bind to 10.10.0.6,
-and clients will use the DNS from google (this assume that in this configuration we do not deployed an internal DNS).
+        dns4:
+          - ip4: 8.8.8.8
+
+Here, all services use ``10.10.0.1``, except the NTP service, served from ``10.10.0.6``, and DNS:
+clients use an external DNS server, ``8.8.8.8`` (in this example, we chose not to deploy an internal
+DNS server).
 
 Services configuration
 ======================
 
-Some variables can be set and are common to all services.
+A few settings are shared by all roles managing a service.
 
-Start service
--------------
+Start and enable services
+-------------------------
 
-As detailed in general settings, a global variable ``bb_start_services`` can be defined as a boolean to ensure services are started or not when applying configuration.
+As seen in :doc:`general_settings`, two global variables, ``bb_start_services`` and
+``bb_enable_services``, tell roles whether to start services, and whether to enable them at boot.
+Both default to ``true``.
 
-Each service however posses a variable ``<service_name>_start_services`` that precedence ``bb_start_services`` and that allows to manipulate this setting at role level.
-
-For example, for the dhcp server service:
+Each role also has its own ``<role>_start_services`` and ``<role>_enable_services`` variables, which
+take precedence over the global ones. For example, to start the DHCP server even though other
+services are kept stopped:
 
 .. code-block:: yaml
 
-  dhcp_server_start_services: true
   bb_start_services: false
+  dhcp_server_start_services: true
 
-Will make the dhcp server service start even if all other services are not.
+This is mostly useful for high availability clusters, where a cluster manager, not systemd, decides
+where services run (see :doc:`../scalability/high_availability`).
 
-Enable service at start
------------------------
+.. note::
 
-Same for start services above, in general settings, a global variable ``bb_enable_services`` can be defined as a boolean to ensure services are enabled at system startup (or not) when applying configuration.
+  All service related tasks carry the ``service`` tag. Running a playbook with
+  ``--skip-tags service`` configures everything without touching any running daemon, which is handy
+  to prepare a host, or when working in containers.
 
-Each service however posses a variable ``<service_name>_enable_services`` that precedence ``bb_enable_services`` and that allows to manipulate this setting at role level.
+Firewall
+--------
 
-For example, for the dhcp server service:
+When ``os_firewall`` is ``true`` (the default), each role opens the ports or firewalld services it
+needs, in the zone defined by ``<role>_firewall_zone``, else ``bb_services_firewall_zone``, else
+``public``. These tasks carry the ``firewall`` tag.
 
-.. code-block:: yaml
-
-  dhcp_server_enable_services: true
-  bb_enable_services: false
-
-Will make the dhcp server service enable at system startup even if all other services are not.
+If firewalld is not installed or not running yet, roles stop with a message explaining what to do:
+install firewalld (the ``firewall`` role does it), or set ``os_firewall: false``.

@@ -2,17 +2,17 @@
 Extensions
 ==========
 
-The core cluster from :doc:`deployment` is installed, networked and reachable, but has no
-shared storage, no non-admin user, and no job scheduler. Each of the three sections below adds
-one optional capability, the same way every time: extend the inventory, add the relevant role to
-the relevant playbook(s), re-run, verify. Do them in order - Slurm's compute nodes and login node
-both expect ``keats`` to exist, and ``keats``'s home directory is meant to live on the NFS share.
+Our core cluster is installed and reachable, but it has no shared storage, no user, and no job
+scheduler yet. Let's add them, one at a time, always with the same recipe: extend the inventory,
+add the role to the playbooks, run, and check.
+
+Let's follow this order: users' homes live on the NFS share, and Slurm needs users to run jobs.
 
 Add NFS storage
-================
+===============
 
 Update the inventory
----------------------
+--------------------
 
 ``group_vars/all/nfs.yml``:
 
@@ -40,14 +40,13 @@ Update the inventory
       export_options: ro,sync
       mount_options: ro,nfsvers=4.2,bg
 
-``/home`` is read-write for login and every compute worker; ``/software`` is read-only. See the
-:doc:`nfs <../../configuration/storage/nfs>` role section of this documentation for the full
-parameter list.
+``/home`` is writable by login and all compute workers, ``/software`` is read only. See the
+:doc:`nfs <../../configuration/storage/nfs>` role documentation for all parameters.
 
 Update the playbooks
----------------------
+--------------------
 
-Add the ``nfs`` role to ``playbooks/storage.yml``, as a server:
+In ``playbooks/storage.yml``, the ``nfs`` role, as a server:
 
 .. code-block:: yaml
 
@@ -57,10 +56,8 @@ Add the ``nfs`` role to ``playbooks/storage.yml``, as a server:
           nfs_profile:
             - server
 
-And to ``playbooks/login.yml``, ``playbooks/computes.yml`` and ``playbooks/computes_gpu.yml``,
-as a client - add it **before** the ``ssh_remote_keys``/``time`` roles already there is fine,
-but it must come before the ``users`` role you will add in the next section, so that ``/home``
-is already mounted before any home directory gets created on it:
+In ``playbooks/login.yml``, ``playbooks/computes.yml`` and ``playbooks/computes_gpu.yml``, as a
+client:
 
 .. code-block:: yaml
 
@@ -70,29 +67,31 @@ is already mounted before any home directory gets created on it:
           nfs_profile:
             - client
 
-Re-run and verify
-------------------
+Run and check
+-------------
+
+The server first, then its clients:
 
 .. code-block:: bash
 
-  ansible-playbook playbooks/storage.yml -i inventory --become --tags nfs
-  ansible-playbook playbooks/login.yml -i inventory --become --tags nfs
-  ansible-playbook playbooks/computes.yml -i inventory --become --tags nfs
-  ansible-playbook playbooks/computes_gpu.yml -i inventory --become --tags nfs
+  ansible-playbook playbooks/storage.yml -i inventories/example_cluster -b --tags nfs
+  ansible-playbook playbooks/login.yml -i inventories/example_cluster -b --tags nfs
+  ansible-playbook playbooks/computes.yml -i inventories/example_cluster -b --tags nfs
+  ansible-playbook playbooks/computes_gpu.yml -i inventories/example_cluster -b --tags nfs
 
 .. code-block:: bash
 
   ssh login df -h /home /software
 
-should show both mounted from ``storage``.
+Both should be mounted from ``storage``.
 
-Add standard users
-====================
+Add a user
+==========
 
 Update the inventory
----------------------
+--------------------
 
-``group_vars/all/users.yml``:
+Let's create our first user, keats. ``group_vars/all/users.yml``:
 
 .. code-block:: yaml
 
@@ -109,57 +108,72 @@ Update the inventory
 
 .. warning::
 
-  Replace both the password hash and the SSH key with real ones of your own - these are
-  placeholders. See the :doc:`users <../../configuration/system/users>` role section of this
-  documentation for the full list of per-user options, and how to generate a password hash.
+  Replace the password hash and the SSH key with real ones: these are placeholders. See the
+  :doc:`users <../../configuration/system/users>` role documentation for all options.
 
 Update the playbooks
----------------------
+--------------------
 
-Add the ``users`` role to ``playbooks/login.yml``, ``playbooks/computes.yml`` and
-``playbooks/computes_gpu.yml`` - not ``storage.yml`` or ``management.yml``, since ``keats`` only
-needs to log in on login and run jobs on the compute workers:
+keats' home lives on the NFS share. NFS exports protect files from the root user of clients
+(``root_squash``, the default): root on login cannot write in keats' home, and so cannot create it
+nor write its SSH keys. So we create the user on storage first, where ``/home`` is a local folder,
+and on clients we only declare the user, without touching its home.
+
+In ``playbooks/storage.yml``:
 
 .. code-block:: yaml
 
       - role: bluebanquise.infrastructure.users
         tags: users
 
-Re-run and verify
-------------------
+In ``playbooks/login.yml``, ``playbooks/computes.yml`` and ``playbooks/computes_gpu.yml``, after
+the ``nfs`` role:
+
+.. code-block:: yaml
+
+      - role: bluebanquise.infrastructure.users
+        tags: users
+        vars:
+          users_enable_ssh_authorized_keys: false
+
+Run and check
+-------------
 
 .. code-block:: bash
 
-  ansible-playbook playbooks/login.yml -i inventory --become --tags users
-  ansible-playbook playbooks/computes.yml -i inventory --become --tags users
-  ansible-playbook playbooks/computes_gpu.yml -i inventory --become --tags users
+  ansible-playbook playbooks/storage.yml -i inventories/example_cluster -b --tags users
+  ansible-playbook playbooks/login.yml -i inventories/example_cluster -b --tags users
+  ansible-playbook playbooks/computes.yml -i inventories/example_cluster -b --tags users
+  ansible-playbook playbooks/computes_gpu.yml -i inventories/example_cluster -b --tags users
 
 .. code-block:: bash
 
   ssh login id keats
+  ssh login ls -la /home/keats
 
-should resolve, and ``/home/keats`` should exist on the NFS share added above.
+keats exists, with the same uid everywhere, and its home is on the share.
 
 Add Slurm
-==========
+=========
 
 Generate a munge key
-----------------------
+--------------------
 
-Slurm requires a shared munge key across the whole cluster. Generate one on mgt1 (needs the
-``munge`` package installed) and base64-encode it:
+All Slurm hosts share a secret key, used by munge to authenticate each other: 1024 random bytes.
+Let's generate one on mgt1, and encode it in base64:
 
 .. code-block:: bash
 
-  mungekey -c -k munge.key
+  dd if=/dev/urandom of=munge.key bs=1 count=1024
   base64 -w 0 munge.key
+  rm munge.key
 
-Copy the resulting string - you will paste it into the inventory below. If ``inventory`` or
-``playbooks/`` are stored in a version-controlled repository, consider encrypting this value
-with `Ansible Vault <https://docs.ansible.com/ansible/latest/vault_guide/index.html>`_.
+Copy the resulting string, we paste it in the inventory just below. As it is a secret, consider
+encrypting it with `Ansible Vault <https://docs.ansible.com/ansible/latest/vault_guide/index.html>`_
+if the inventory is stored in git.
 
 Update the inventory
----------------------
+--------------------
 
 ``group_vars/all/slurm.yml``:
 
@@ -168,6 +182,8 @@ Update the inventory
   slurm_cluster_name: example_cluster
   slurm_controller_hostname: mgt1
   slurm_munge_key_b64: <paste-your-base64-encoded-munge-key-here>
+  slurm_selecttype: "select/cons_tres"
+  slurm_grestypes: gpu
   slurm_partitions_list:
     - computes_groups:
         - fn_compute
@@ -182,15 +198,26 @@ Update the inventory
         State: UP
         Default: "NO"
 
-Two partitions, ``cpu`` (the 4 ``fn_compute`` workers, default) and ``gpu`` (the 4
-``fn_compute_gpu`` workers). See the :doc:`slurm <../../specialisation/hpc_cluster/slurm>` role
-section of this documentation for accounting, GPU Gres, and pam_slurm_adoption, none of which
-this walkthrough enables.
+Two partitions: ``cpu``, with the 4 CPU workers (the default one), and ``gpu``, with the 4 GPU
+workers. ``slurm_selecttype`` and ``slurm_grestypes`` let jobs request GPUs.
+
+Slurm also needs to know how many GPUs each GPU worker offers. Let's add one line to the
+``hw_specs`` of ``group_vars/hw_gpu_worker/settings.yml``:
+
+.. code-block:: yaml
+
+  hw_specs:
+    slurm_extra_nodes_parameters: "Gres=gpu:4"
+    cpu:
+      ...
+
+See the :doc:`slurm <../../specialisation/hpc_cluster/slurm>` role documentation for accounting and
+other features, and :doc:`../../resources/nvidia` for GPUs.
 
 Update the playbooks
----------------------
+--------------------
 
-Add the ``slurm`` role to ``playbooks/management.yml``, as the controller:
+In ``playbooks/management.yml``, the controller:
 
 .. code-block:: yaml
 
@@ -199,7 +226,7 @@ Add the ``slurm`` role to ``playbooks/management.yml``, as the controller:
         vars:
           slurm_profile: controller
 
-To ``playbooks/login.yml``, as a submitter:
+In ``playbooks/login.yml``, the submitter (users submit jobs from there):
 
 .. code-block:: yaml
 
@@ -208,7 +235,7 @@ To ``playbooks/login.yml``, as a submitter:
         vars:
           slurm_profile: submitter
 
-And to ``playbooks/computes.yml`` and ``playbooks/computes_gpu.yml``, as compute nodes:
+In ``playbooks/computes.yml`` and ``playbooks/computes_gpu.yml``, compute nodes:
 
 .. code-block:: yaml
 
@@ -217,27 +244,27 @@ And to ``playbooks/computes.yml`` and ``playbooks/computes_gpu.yml``, as compute
         vars:
           slurm_profile: compute
 
-Re-run and verify
-------------------
+Run and check
+-------------
 
-Controller first, so ``slurmctld`` is up before the computes try to register against it:
-
-.. code-block:: bash
-
-  ansible-playbook playbooks/management.yml -i inventory --become --tags slurm
-  ansible-playbook playbooks/login.yml -i inventory --become --tags slurm
-  ansible-playbook playbooks/computes.yml -i inventory --become --tags slurm
-  ansible-playbook playbooks/computes_gpu.yml -i inventory --become --tags slurm
+The controller first, so it is ready when compute nodes register:
 
 .. code-block:: bash
 
-  ssh mgt1 sinfo
+  ansible-playbook playbooks/management.yml -i inventories/example_cluster -b --tags slurm
+  ansible-playbook playbooks/login.yml -i inventories/example_cluster -b --tags slurm
+  ansible-playbook playbooks/computes.yml -i inventories/example_cluster -b --tags slurm
+  ansible-playbook playbooks/computes_gpu.yml -i inventories/example_cluster -b --tags slurm
 
-should list both the ``cpu`` and ``gpu`` partitions, each with its 4 nodes in ``idle`` state.
-If a node shows ``down`` or ``unk``, give ``slurmd`` a minute to register, or check
-``systemctl status slurmd`` on that node and ``systemctl status slurmctld`` on mgt1.
+.. code-block:: bash
+
+  sinfo
+
+Both partitions, ``cpu`` and ``gpu``, should be listed, each with its 4 nodes ``idle``. If a node is
+``down`` or ``unk``, give ``slurmd`` a minute to register, then check ``systemctl status slurmd`` on
+that node, and ``systemctl status slurmctld`` on mgt1.
 
 -----
 
-The cluster now has shared storage, a standard user, and a job scheduler. Continue to
-:doc:`slurm_job` to submit an actual job as ``keats``.
+Our cluster now has shared storage, a user, and a job scheduler. Time to run a first job, in
+:doc:`slurm_job`!
