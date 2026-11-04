@@ -51,6 +51,7 @@
     owner: ipmi_exporter
     group: ipmi_exporter
     mode: 0640
+  diff: false
   notify: service <|> Restart ipmi_exporter service
   tags:
     - template

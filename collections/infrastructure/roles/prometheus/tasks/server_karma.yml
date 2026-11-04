@@ -51,6 +51,7 @@
     owner: karma
     group: karma
     mode: 0640
+  diff: false
   notify: service <|> Restart karma service
   tags:
     - template

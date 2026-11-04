@@ -65,6 +65,7 @@
     owner: conman
     group: conman
     mode: 0600
+  diff: false
   notify: service <|> Restart conman
   tags:
     - template

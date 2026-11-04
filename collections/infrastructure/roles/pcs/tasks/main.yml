@@ -92,9 +92,12 @@
   block:
 
     - name: command <|> Register nodes
-      ansible.builtin.command: "pcs host auth {{ item.name }} -u hacluster -p {{ pcs_ha_cluster_password }}"
+      ansible.builtin.command:
+        cmd: "pcs host auth {{ item.name }} -u hacluster"
+        stdin: "{{ pcs_ha_cluster_password }}"
       loop: "{{ pcs_cluster_nodes }}"
       when: ( pcs_known_hosts.stdout_lines | select("match", ".*"+item.name+".*") | list | length ) < 1
+      no_log: true
 
     - name: command <|> Check cluster exist
       ansible.builtin.command: "cat /etc/corosync/corosync.conf"
@@ -233,6 +236,7 @@
         - cmd.rc != 0
         - "'already exists' not in cmd.stderr"
       when: pcs_stonith is defined and pcs_stonith
+      no_log: true
       notify: command <|> Push HA configuration
 
     - name: command <|> Set stonith prefers constraint
