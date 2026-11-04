@@ -39,4 +39,5 @@
     mode: 0644
   when: item['json'] is defined
   with_items: "{{ new_api_keys['results'] }}"
+  no_log: true
   delegate_to: localhost
