@@ -1,0 +1,20 @@
+---
+bluebanquise_supervision_checks:
+  fn_compute:
+    drift_check: true
+    probes:
+      ssh_check_fs_usage: "/ 95"
+      ssh_check_services: "sshd"
+    actions:
+      on_fail: 'logger "bluebanquise-supervision: $SUPERVISION_HOST failed $SUPERVISION_PROBES"'
+  hw_supermicro_X1:
+    probes:
+      check_bmc:
+  os_rhel9:
+    ssh:
+      username: rhcos
+
+bluebanquise_supervision_webui_users:
+  - name: admin
+    # password: admin (CI only)
+    password_hash: "scrypt:32768:8:1$wONFvaE1rLrYM7u5$c550c03e110b313603b2c87d834a88f7ebd81675b9520b0b90d1d52f1eba4086402f7eda025dbf3efb820f94dd8a2056fc4a6101b4a0e820eccf3d1f5c2ef337"

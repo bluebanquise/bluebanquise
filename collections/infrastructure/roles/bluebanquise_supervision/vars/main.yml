@@ -1,0 +1,21 @@
+---
+bluebanquise_supervision_role_version: 1.0.0
+
+bluebanquise_supervision_packages_to_install:
+  - ipmitool
+  - bluebanquise-venv
+
+# Fixed paths and names, shared by the role, the CLI and the daemons. The tool reads only one
+# hardcoded path, the settings file, which gives all the others.
+bluebanquise_supervision_user: bluebanquise-supervision
+bluebanquise_supervision_home: /var/lib/bluebanquise-supervision
+bluebanquise_supervision_hosts_data_path: /var/lib/bluebanquise-supervision/cluster/hosts
+bluebanquise_supervision_requests_path: /var/lib/bluebanquise-supervision/requests
+bluebanquise_supervision_ssh_key_path: /var/lib/bluebanquise-supervision/.ssh/id_ed25519
+bluebanquise_supervision_conf_path: /etc/bluebanquise/bluebanquise-supervision
+bluebanquise_supervision_lib_path: /usr/lib/bluebanquise/bluebanquise-supervision
+
+bluebanquise_supervision_services:
+  - bluebanquise-supervision-probe
+  - bluebanquise-supervision-api
+  - bluebanquise-supervision-exporter

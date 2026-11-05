@@ -1,0 +1,7 @@
+---
+- name: bluebanquise supervision
+  hosts: "fn_management"
+  roles:
+
+    - role: bluebanquise.infrastructure.bluebanquise_supervision
+      tags: bluebanquise_supervision

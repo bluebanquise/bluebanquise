@@ -1,0 +1,8 @@
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+# WebUI and REST API users (HTTP basic authentication), name: password hash.
+
+users:
+{% for user in bluebanquise_supervision_webui_users %}
+  {{ user['name'] | to_json }}: {{ user['password_hash'] | to_json }}
+{% endfor %}

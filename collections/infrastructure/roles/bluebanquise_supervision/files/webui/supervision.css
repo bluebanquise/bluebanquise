@@ -1,0 +1,48 @@
+/* Only what Bulma does not provide: the cluster map tiles */
+
+.tile-host {
+  display: inline-block;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin: 0.1rem;
+  border-radius: 2px;
+  vertical-align: middle;
+}
+
+a.tile-host:hover {
+  outline: 2px solid var(--bulma-text-strong);
+}
+
+.state-ok {
+  background-color: hsl(153, 53%, 53%);
+}
+
+.state-error {
+  background-color: hsl(348, 86%, 61%);
+}
+
+.state-maintenance {
+  background-color: hsl(229, 53%, 53%);
+}
+
+.state-unknown {
+  background-color: hsl(0, 0%, 71%);
+}
+
+/* Hosts list: rows colored like map tiles, text readable on each color */
+tr.row-host td,
+tr.row-host a {
+  color: #fff;
+}
+
+tr.row-host.state-ok td,
+tr.row-host.state-ok a,
+tr.row-host.state-unknown td,
+tr.row-host.state-unknown a {
+  color: #14161a;
+}
+
+pre.probe-output {
+  white-space: pre-wrap;
+  font-size: 0.8rem;
+}

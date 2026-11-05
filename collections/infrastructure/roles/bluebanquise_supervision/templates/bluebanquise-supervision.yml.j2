@@ -1,0 +1,26 @@
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+# Settings shared by bluebanquise-supervision CLI and daemons.
+
+user: {{ bluebanquise_supervision_user }}
+hosts_file: {{ bluebanquise_supervision_conf_path }}/hosts.yml
+webui_users_file: {{ bluebanquise_supervision_conf_path }}/webui_users.yml
+hosts_data_path: {{ bluebanquise_supervision_hosts_data_path }}
+requests_path: {{ bluebanquise_supervision_requests_path }}
+probes_path: {{ bluebanquise_supervision_lib_path }}/probes
+webui_path: {{ bluebanquise_supervision_lib_path }}/webui
+ssh_key_path: {{ bluebanquise_supervision_ssh_key_path }}
+
+loop_interval: {{ bluebanquise_supervision_loop_interval }}
+thread_pool_size: {{ bluebanquise_supervision_thread_pool_size }}
+ssh_gate_timeout: {{ bluebanquise_supervision_ssh_gate_timeout }}
+ssh_probe_timeout: {{ bluebanquise_supervision_ssh_probe_timeout }}
+local_probe_timeout: {{ bluebanquise_supervision_local_probe_timeout }}
+action_timeout: {{ bluebanquise_supervision_action_timeout }}
+
+api_bind: {{ bluebanquise_supervision_api_bind }}
+api_port: {{ bluebanquise_supervision_api_port }}
+exporter_bind: {{ bluebanquise_supervision_exporter_bind }}
+exporter_port: {{ bluebanquise_supervision_exporter_port }}
+
+log_level: {{ bluebanquise_supervision_log_level }}

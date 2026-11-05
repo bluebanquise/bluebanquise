@@ -847,6 +847,93 @@ we add/change reference inventory"). First applied to `network.yml`/`network_int
 added — see "PCIe and InfiniBand rate tracking" above. Add the skeleton-file task up front when
 planning this kind of change, not after review surfaces it missing.
 
+## Supervision tool: bluebanquise_supervision (added 2026-11)
+
+Standalone replacement for the supervision/events/maintenance part of `cluster_management` (to be
+deprecated: users prefer small modular tools over one big tool). **No shared code with
+`cluster_management`**, nothing migrated (it was never released). Full user doc in the role README.
+
+- **Parts**: `bluebanquise-supervision-probe` (loop + on-demand + actions), `-api` (Flask/waitress
+  REST + WebUI, Bulma only + plain JS), `-exporter` (stdlib `http.server`, hand-written metrics),
+  CLI `bluebanquise-supervision`. Shared code in `files/lib/common.py` (files, lock, events, latch,
+  maintenance, `host_summary()` = the ONE place deciding a host state) and `files/lib/drift.py`,
+  imported with `sys.path.insert` + plain `import`. Shebang = bluebanquise-venv interpreter.
+- **User**: everything runs as `bluebanquise-supervision` (never root, the `bluebanquise` user is
+  root-like). CLI and daemons started as root drop privileges themselves (`common.drop_privileges`,
+  same pattern as pxe_stack), CLI reads the admin name from `SUDO_USER` first. Remote probes SSH as
+  `bluebanquise` (or per-group `ssh.username`) with the user's own key, `StrictHostKeyChecking=no` +
+  `UserKnownHostsFile=/dev/null` on purpose (reinstalls change host keys).
+- **Data**: `/var/lib/bluebanquise-supervision/cluster/hosts/<host>/{probes,gathered,maintenance,events}.yml`.
+  No status file: latched = an `Error` event after the last `Acknowledge` (`common.is_latched`).
+  Atomic writes (tmp in same dir + `os.replace`), per-host `flock` for read-modify-write. YAML uses
+  libyaml `CSafeLoader/CSafeDumper` when available: pure-Python PyYAML made a 1000-event file
+  take minutes (each append rewrites the file).
+- **On-demand probe** = file `requests/<host>` holding a request id; only the probe daemon runs
+  probes (single SSH executor, never two probes of one host at once); it stores the id in
+  `probes.yml` (`request_id`), which is how CLI `probe` and the WebUI know their result arrived.
+- **Config reload**: none in code (Oxedions' choice for simplicity) - handlers restart all 3
+  services on any config/code change.
+- **Inventory**: `bluebanquise_supervision_checks: {group: {ssh: {username}, drift_check, probes: {},
+  actions: {on_fail}}}`, merged per host in `templates/hosts.yml.j2` using `hostvars[h].group_names`
+  (not `host in groups[g]`, quadratic). A host with no probe and no drift check is not supervised
+  (it was shown always-green before that fix). `skip: true` interfaces are not expected.
+- **Actions**: `/bin/sh -c` with `SUPERVISION_HOST`/`SUPERVISION_PROBES` env vars, never text
+  substitution (probe output comes from possibly compromised hosts). Fired only on a new latch.
+  The probe service has no `NoNewPrivileges`/`ProtectSystem` because actions may need sudo
+  (`bluebanquise_supervision_sudoers_commands`); api/exporter are hardened.
+- **API CSRF guard**: POST/DELETE must be `application/json` (a cross-site form can not send it
+  without a CORS preflight the API never allows). WebUI inserts host data with `textContent` only.
+- **Drift gotchas handled in drift.py** (all were permanent false drifts in `cluster_management`):
+  os-release ID `rhel` vs inventory `redhat` (`OS_RELEASE_IDS` map); `distribution_version` "9"
+  vs VERSION_ID "9.4" (prefix match); `os_access_control` is a SELinux *mode*
+  (enforcing/permissive/disabled), compared with lowercased `getenforce`; GPUs compared by
+  `nvidia-smi` names (what `hw_specs.gpu` documents), not `lspci` VGA lines (BMC framebuffers).
+- **Probe script bugs fixed when copied from cluster_management** (still present there):
+  `dmesg` without sudo -> empty output under `kernel.dmesg_restrict=1` -> silent OK (5 scripts,
+  now `sudo -n dmesg` and a read failure is CRITICAL); `ssh_check_disk_smart` always CRITICAL
+  (only matched the SAS line, then looked for PASSED where SAS says OK); `ssh_check_ib_errors`
+  always OK (`perfquery -x` has no error counters, and `Name:....0` has no space for awk `$2`).
+- **Log pattern false positives found on real VMs (2026-11-05), fixed in the new probes**:
+  `ssh_check_pcie_aer_errors` matched `aer` -> every boot line `AER: enabled with IRQ` / `_OSC: OS
+  now controls [... AER ...]` latched every host; `ssh_check_mce_errors` matched `mce` and
+  `ssh_check_ram_ecc_errors` matched `mce:`/`Machine check`/`Corrected error` -> boot line
+  `mce: CPU supports N MCE banks` on bare metal (VMs do not print it, so lab VMs passed with the
+  old patterns too). Now: AER `PCIe Bus Error|AER: (Multiple )?(Corrected|Correctable|Uncorrected|
+  Uncorrectable)`, MCE `[Hardware Error]|Machine check events logged`, ECC `EDAC .. N CE/UE|
+  [Hardware Error].*memory|Memory failure`. Error line samples are from kernel source formats,
+  not captured from failing hardware.
+- **Published `bluebanquise-venv` for deb13 is still 1.2.1 (no `requests`)**: `check_bmc` Redfish
+  fails on a real install (also in cluster_management). check_bmc now prints a clear CRITICAL.
+  1.2.2 must be published.
+- **WebUI fetch**: `fetch(window.location.origin + path)`, never a relative path - a page opened
+  as `http://user:pass@host/` can not fetch relative URLs (Chrome TypeError).
+- **WebUI conventions**: Bulma 1.0.4 only (served locally from `files/webui/`, clusters are often
+  offline) + plain JS + one small `supervision.css` (map tiles, list row colors). Dark mode is
+  Bulma's own `data-theme` on `<html>`: no attribute = follow the system, the moon/sun button
+  forces the other theme; an inline `<head>` script applies the saved theme before drawing (no
+  flash). Per-viewer preferences (`theme`, `view` map/list) in `localStorage`, always wrapped in
+  try/catch. Map tile hover text and list status column come from the same `hostMessage()`.
+- **Browser testing pattern (real clicks, no Playwright)**: headless Chromium with
+  `--remote-debugging-port`, driven from Python by the DevTools protocol over `websocket-client`
+  (`Page.navigate`, `Runtime.evaluate("...click()")`, `Page.captureScreenshot`), then read the
+  PNGs. Use a fresh `--user-data-dir` per run so localStorage starts empty. A throwaway second API
+  instance (`--settings` pointing to a demo hosts file + demo data dir, other port) with a few
+  hundred synthetic hosts shows how the map/list behave at cluster scale. Plain `--screenshot`
+  only shows the initial state; `--dump-dom` is enough to check that host data is escaped.
+- **Hypervisor lab (gabriel, 2026-11-05)**: Debian 13 / Rocky 9 / Alma 9 cloud images reboot-loop
+  under SeaBIOS there (no kernel output); Debian 13 boots with `--boot uefi`, RHEL 9 family cloud
+  images do not boot either way (also off skd0, so not the skd driver). Ubuntu 24.04 boots in BIOS.
+  BMC emulation inside the mgmt VM: OpenIPMI `ipmi_sim` (SEL verified; could not get a sensor
+  reading, persistence in `/var/ipmi_sim/<name>`), `sushy-tools` fake driver over TLS (health
+  path verified by editing its `system.json` template; it spells `HealthRollUp`, DMTF says
+  `HealthRollup`; no LogServices). Never stop emulators with `pgrep -f | kill` either: same
+  self-match as `pkill -f` when the pattern is in the calling command line.
+- **Sandbox smoketest pattern**: throwaway `sshd` on 127.0.0.11:2222, `/etc/hosts` aliases for
+  supervised hosts, `Host *\n Port 2222` in the service user's `~/.ssh/config`, smoke settings and
+  hosts files next to the real ones in `/etc/bluebanquise/bluebanquise-supervision/` (the scratchpad
+  is not readable by the service user), daemons started by hand with `--settings`. Stop them by
+  PID, **never `pkill -f`** (it matches and kills the calling shell).
+
 ## CI / Testing
 
 CI runs via GitHub Actions (`.github/workflows/`, `old_workflows/` is dead/ignored). One workflow per OS family (`el9`, `el10`, `u24`, `deb13`, `lp16`) plus `static_analysis.yml`. Each OS workflow has two jobs, `roles_core` (infra playbook only) and `roles_addons` (everything else — `high_availability`, `hpc`, `file_systems`, `logging`, `containers`, `hardware`, `monitoring`, `cluster_management`, `cluster_playbooks`, `databases`), each independently:

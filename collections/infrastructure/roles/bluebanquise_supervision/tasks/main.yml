@@ -1,0 +1,245 @@
+---
+- name: "package <|> Install packages"
+  ansible.builtin.package:
+    name: "{{ bluebanquise_supervision_packages_to_install }}"
+    state: present
+  tags:
+    - package
+
+
+################################################################################################
+######################## USER
+
+- name: "group <|> Create {{ bluebanquise_supervision_user }} group"
+  ansible.builtin.group:
+    name: "{{ bluebanquise_supervision_user }}"
+    system: true
+
+# Dedicated unprivileged user running all the daemons, no login. It is only a sudoer for the
+# commands listed in bluebanquise_supervision_sudoers_commands.
+- name: "user <|> Create {{ bluebanquise_supervision_user }} user"
+  ansible.builtin.user:
+    name: "{{ bluebanquise_supervision_user }}"
+    group: "{{ bluebanquise_supervision_user }}"
+    system: true
+    shell: /usr/sbin/nologin
+    home: "{{ bluebanquise_supervision_home }}"
+    create_home: false
+
+
+################################################################################################
+######################## DIRECTORIES
+
+# Data: owned by the daemons user, nobody else can read it.
+- name: "file <|> Create data directories"
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ bluebanquise_supervision_user }}"
+    group: "{{ bluebanquise_supervision_user }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ bluebanquise_supervision_home }}"
+      mode: '0750'
+    - path: "{{ bluebanquise_supervision_home }}/.ssh"
+      mode: '0700'
+    - path: "{{ bluebanquise_supervision_home }}/cluster"
+      mode: '0750'
+    - path: "{{ bluebanquise_supervision_hosts_data_path }}"
+      mode: '0750'
+    - path: "{{ bluebanquise_supervision_requests_path }}"
+      mode: '0750'
+
+# Code: owned by root, executed by the daemons user, so not writable by it. /etc/bluebanquise and
+# /usr/lib/bluebanquise are shared with other roles, same settings as them.
+- name: "file <|> Create code directories"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  loop:
+    - /etc/bluebanquise
+    - /usr/lib/bluebanquise
+    - "{{ bluebanquise_supervision_lib_path }}"
+    - "{{ bluebanquise_supervision_lib_path }}/lib"
+
+# Configuration: written by root only, readable by the daemons user (BMC credentials inside).
+- name: "file <|> Create configuration directory"
+  ansible.builtin.file:
+    path: "{{ bluebanquise_supervision_conf_path }}"
+    state: directory
+    owner: root
+    group: "{{ bluebanquise_supervision_user }}"
+    mode: '0750'
+
+
+################################################################################################
+######################## SSH KEY
+
+- name: "command <|> Generate SSH key of {{ bluebanquise_supervision_user }}"
+  ansible.builtin.command:
+    argv:
+      - ssh-keygen
+      - -q
+      - -t
+      - ed25519
+      - -N
+      - ""
+      - -C
+      - "{{ bluebanquise_supervision_user }}@{{ inventory_hostname }}"
+      - -f
+      - "{{ bluebanquise_supervision_ssh_key_path }}"
+    creates: "{{ bluebanquise_supervision_ssh_key_path }}"
+
+- name: "file <|> Set SSH key ownership"
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    owner: "{{ bluebanquise_supervision_user }}"
+    group: "{{ bluebanquise_supervision_user }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ bluebanquise_supervision_ssh_key_path }}"
+      mode: '0600'
+    - path: "{{ bluebanquise_supervision_ssh_key_path }}.pub"
+      mode: '0644'
+
+- name: "slurp <|> Read SSH public key"
+  ansible.builtin.slurp:
+    src: "{{ bluebanquise_supervision_ssh_key_path }}.pub"
+  register: bluebanquise_supervision_public_key
+
+# Probes connect to hosts with this key: it must be in the authorized_keys of the remote user
+# (bluebanquise by default) of every supervised host, for example through os_admin_ssh_keys.
+- name: "debug <|> Display SSH public key"
+  ansible.builtin.debug:
+    msg: "Add this key to os_admin_ssh_keys: {{ bluebanquise_supervision_public_key['content'] | b64decode | trim }}"
+
+
+################################################################################################
+######################## CONFIGURATION
+
+- name: "template <|> Render configuration files"
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "{{ bluebanquise_supervision_conf_path }}/{{ item }}"
+    owner: root
+    group: "{{ bluebanquise_supervision_user }}"
+    mode: '0640'
+  loop:
+    - bluebanquise-supervision.yml
+    - hosts.yml
+    - webui_users.yml
+  notify: service <|> Restart bluebanquise-supervision services
+  tags:
+    - template
+
+- name: "template <|> Render sudoers file"
+  ansible.builtin.template:
+    src: sudoers.j2
+    dest: /etc/sudoers.d/bluebanquise-supervision
+    owner: root
+    group: root
+    mode: '0440'
+    validate: /usr/sbin/visudo -cf %s
+  when: bluebanquise_supervision_sudoers_commands | length > 0
+  tags:
+    - template
+
+- name: "file <|> Remove sudoers file when no command is allowed"
+  ansible.builtin.file:
+    path: /etc/sudoers.d/bluebanquise-supervision
+    state: absent
+  when: bluebanquise_supervision_sudoers_commands | length == 0
+
+
+################################################################################################
+######################## CODE
+
+- name: "copy <|> Copy shared library"
+  ansible.builtin.copy:
+    src: lib/
+    dest: "{{ bluebanquise_supervision_lib_path }}/lib/"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: service <|> Restart bluebanquise-supervision services
+
+- name: "file <|> Create probes directory"
+  ansible.builtin.file:
+    path: "{{ bluebanquise_supervision_lib_path }}/probes"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+# All files of the probes folder are copied, so a new probe only needs to be added there
+- name: "copy <|> Copy probe scripts"
+  ansible.builtin.copy:
+    src: probes/
+    dest: "{{ bluebanquise_supervision_lib_path }}/probes/"
+    owner: root
+    group: root
+    mode: '0755'
+  notify: service <|> Restart bluebanquise-supervision services
+
+- name: "copy <|> Copy WebUI files"
+  ansible.builtin.copy:
+    src: webui/
+    dest: "{{ bluebanquise_supervision_lib_path }}/webui/"
+    owner: root
+    group: root
+    mode: '0644'
+    directory_mode: '0755'
+  notify: service <|> Restart bluebanquise-supervision services
+
+- name: "copy <|> Copy command line tool"
+  ansible.builtin.copy:
+    src: bluebanquise-supervision
+    dest: /usr/bin/bluebanquise-supervision
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: "copy <|> Copy daemons"
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/usr/sbin/{{ item }}"
+    owner: root
+    group: root
+    mode: '0755'
+  loop: "{{ bluebanquise_supervision_services }}"
+  notify: service <|> Restart bluebanquise-supervision services
+
+
+################################################################################################
+######################## SERVICES
+
+- name: "template <|> Install systemd services"
+  ansible.builtin.template:
+    src: "{{ item }}.service.j2"
+    dest: "/etc/systemd/system/{{ item }}.service"
+    owner: root
+    group: root
+    mode: '0644'
+  loop: "{{ bluebanquise_supervision_services }}"
+  notify: service <|> Restart bluebanquise-supervision services
+
+- name: "systemd <|> Reload systemd configuration"
+  ansible.builtin.systemd:
+    daemon_reload: true
+  tags:
+    - service
+
+- name: "meta <|> Run handler tasks to restart services"
+  ansible.builtin.meta: flush_handlers
+
+- name: "service <|> Manage bluebanquise-supervision services state"
+  ansible.builtin.service:
+    name: "{{ item }}"
+    enabled: "{{ (bluebanquise_supervision_enable_services | default(bb_enable_services) | default(true) | bool) | ternary(true, false) }}"
+    state: "{{ (bluebanquise_supervision_start_services | default(bb_start_services) | default(true) | bool) | ternary('started', omit) }}"
+  loop: "{{ bluebanquise_supervision_services }}"
+  tags:
+    - service

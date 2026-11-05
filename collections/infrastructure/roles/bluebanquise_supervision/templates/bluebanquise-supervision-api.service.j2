@@ -1,0 +1,26 @@
+#### Blue Banquise file ####
+## {{ ansible_managed }}
+
+[Unit]
+Description=bluebanquise-supervision REST API and WebUI daemon
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User={{ bluebanquise_supervision_user }}
+Group={{ bluebanquise_supervision_user }}
+ExecStart=/usr/sbin/bluebanquise-supervision-api
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+# Hardening: this daemon can only write into the supervision data folder
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths={{ bluebanquise_supervision_home }}
+
+[Install]
+WantedBy=multi-user.target

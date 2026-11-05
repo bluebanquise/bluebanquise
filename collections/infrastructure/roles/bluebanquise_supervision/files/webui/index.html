@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Inquisitor - bluebanquise-supervision</title>
+  <link rel="stylesheet" href="/static/bulma.min.css">
+  <link rel="stylesheet" href="/static/supervision.css">
+  <script>
+    // Apply the theme chosen with the moon/sun button before the page is drawn
+    try {
+      if (localStorage.getItem('theme')) {
+        document.documentElement.setAttribute('data-theme', localStorage.getItem('theme'));
+      }
+    } catch (error) {
+    }
+  </script>
+</head>
+<body>
+  <nav class="navbar is-dark">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="/"><strong>Inquisitor</strong>&nbsp;- bluebanquise-supervision</a>
+    </div>
+    <div class="navbar-end">
+      <div class="navbar-item">
+        <button class="button is-dark" id="theme-toggle" title="Switch dark / light mode" aria-label="Switch dark / light mode">
+          <svg id="icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg id="icon-sun" class="is-hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <section class="section">
+    <div class="container">
+
+      <!-- Global report -->
+      <div class="columns is-mobile is-multiline">
+        <div class="column">
+          <div class="box has-text-centered">
+            <p class="heading">OK</p>
+            <p class="title has-text-success" id="count-ok">-</p>
+          </div>
+        </div>
+        <div class="column">
+          <div class="box has-text-centered">
+            <p class="heading">Error</p>
+            <p class="title has-text-danger" id="count-error">-</p>
+          </div>
+        </div>
+        <div class="column">
+          <div class="box has-text-centered">
+            <p class="heading">Maintenance</p>
+            <p class="title has-text-link" id="count-maintenance">-</p>
+          </div>
+        </div>
+        <div class="column">
+          <div class="box has-text-centered">
+            <p class="heading">Never probed</p>
+            <p class="title has-text-grey" id="count-unknown">-</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter and legend -->
+      <div class="level">
+        <div class="level-left">
+          <div class="level-item">
+            <div class="buttons has-addons mb-0">
+              <button class="button is-small" id="view-map">Map</button>
+              <button class="button is-small" id="view-list">List</button>
+            </div>
+          </div>
+          <div class="level-item">
+            <label class="checkbox mr-4"><input type="checkbox" id="filter-error"> Only hosts in error</label>
+            <label class="checkbox"><input type="checkbox" id="filter-maintenance"> Only hosts in maintenance</label>
+          </div>
+        </div>
+        <div class="level-right">
+          <div class="level-item">
+            <span class="tile-host state-ok"></span>&nbsp;ok&nbsp;&nbsp;
+            <span class="tile-host state-error"></span>&nbsp;error&nbsp;&nbsp;
+            <span class="tile-host state-maintenance"></span>&nbsp;maintenance&nbsp;&nbsp;
+            <span class="tile-host state-unknown"></span>&nbsp;never probed
+          </div>
+        </div>
+      </div>
+
+      <!-- Cluster map (one box per function group, one tile per host) or hosts list -->
+      <div id="hosts"></div>
+      <p class="has-text-grey is-size-7" id="updated"></p>
+
+    </div>
+  </section>
+
+  <script src="/static/supervision.js"></script>
+  <script>indexPage();</script>
+</body>
+</html>

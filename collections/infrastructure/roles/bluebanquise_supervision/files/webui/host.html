@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Inquisitor - host</title>
+  <link rel="stylesheet" href="/static/bulma.min.css">
+  <link rel="stylesheet" href="/static/supervision.css">
+  <script>
+    // Apply the theme chosen with the moon/sun button before the page is drawn
+    try {
+      if (localStorage.getItem('theme')) {
+        document.documentElement.setAttribute('data-theme', localStorage.getItem('theme'));
+      }
+    } catch (error) {
+    }
+  </script>
+</head>
+<body>
+  <nav class="navbar is-dark">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="/"><strong>Inquisitor</strong>&nbsp;- bluebanquise-supervision</a>
+    </div>
+    <div class="navbar-end">
+      <div class="navbar-item">
+        <button class="button is-dark" id="theme-toggle" title="Switch dark / light mode" aria-label="Switch dark / light mode">
+          <svg id="icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg id="icon-sun" class="is-hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <section class="section">
+    <div class="container">
+
+      <h1 class="title"><span id="hostname"></span> <span class="tag is-medium" id="state"></span></h1>
+      <p class="subtitle is-6" id="host-info"></p>
+
+      <div class="notification is-link is-light is-hidden" id="maintenance-info"></div>
+      <div class="notification is-danger is-light is-hidden" id="latched-info"></div>
+      <div class="notification is-hidden" id="message"></div>
+
+      <!-- Actions: one text field, used as reason or note text -->
+      <div class="box">
+        <div class="field">
+          <label class="label" for="text">Reason or note</label>
+          <div class="control">
+            <input class="input" type="text" id="text" placeholder="Why (acknowledge, maintenance) or note text">
+          </div>
+        </div>
+        <div class="buttons">
+          <button class="button is-primary" id="button-probe">Probe now</button>
+          <button class="button is-danger" id="button-acknowledge">Acknowledge error</button>
+          <button class="button is-link" id="button-maintenance-start">Start maintenance</button>
+          <button class="button is-link is-light" id="button-maintenance-stop">Stop maintenance</button>
+          <button class="button" id="button-note">Add note</button>
+        </div>
+      </div>
+
+      <h2 class="title is-4">Last probe</h2>
+      <p class="mb-3" id="probe-info"></p>
+      <div id="probes"></div>
+
+      <h2 class="title is-4 mt-5">Events</h2>
+      <table class="table is-fullwidth is-striped is-narrow">
+        <thead>
+          <tr><th>#</th><th>Time</th><th>Kind</th><th>By</th><th>Message</th></tr>
+        </thead>
+        <tbody id="events"></tbody>
+      </table>
+
+    </div>
+  </section>
+
+  <script src="/static/supervision.js"></script>
+  <script>hostPage();</script>
+</body>
+</html>

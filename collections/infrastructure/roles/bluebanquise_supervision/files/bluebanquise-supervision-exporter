@@ -1,0 +1,136 @@
+#!/usr/lib/bluebanquise/venv/bin/python3
+"""
+bluebanquise-supervision-exporter: Prometheus exporter of bluebanquise-supervision.
+
+GET /metrics returns, for every supervised host, values read from the files of the probe daemon
+at each scrape (Prometheus text format, written by hand, no library needed):
+
+  bluebanquise_supervision_host_state{host,group,state}        1 for the current state, 0 for others
+  bluebanquise_supervision_host_latched{host,group}            1 if an error is not acknowledged yet
+  bluebanquise_supervision_host_maintenance{host,group}        1 if in maintenance
+  bluebanquise_supervision_host_last_probe_timestamp_seconds{host,group}   end of the last probe pass
+  bluebanquise_supervision_probe_ok{host,group,probe}          1 if the probe passed at last pass
+
+The drift check is reported as probe="drift", the SSH connection as probe="ssh".
+No authentication: same as every Prometheus exporter, restrict access with exporter_bind.
+"""
+
+import argparse
+import http.server
+import logging
+import sys
+from datetime import datetime
+
+sys.path.insert(0, '/usr/lib/bluebanquise/bluebanquise-supervision/lib')
+import common  # noqa: E402
+
+STATES = ['ok', 'error', 'maintenance', 'unknown']
+
+# Loaded once at startup in main(), the role restarts the service when they change
+settings = None
+hosts = None
+
+
+def label_value(value):
+    """Escape a Prometheus label value."""
+    return str(value).replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n')
+
+
+def build_metrics():
+    lines = []
+    lines.append('# HELP bluebanquise_supervision_host_state Current state of the host (1 for the current state).')
+    lines.append('# TYPE bluebanquise_supervision_host_state gauge')
+    latched_lines = []
+    maintenance_lines = []
+    timestamp_lines = []
+    probe_lines = []
+
+    for hostname in sorted(hosts):
+        summary = common.host_summary(settings, hostname, hosts[hostname])
+        labels = 'host="{}",group="{}"'.format(label_value(hostname), label_value(summary['group']))
+
+        for state in STATES:
+            value = 1 if summary['state'] == state else 0
+            lines.append('bluebanquise_supervision_host_state{{{},state="{}"}} {}'.format(labels, state, value))
+        latched_lines.append('bluebanquise_supervision_host_latched{{{}}} {}'.format(labels, 1 if summary['latched'] else 0))
+        maintenance_lines.append('bluebanquise_supervision_host_maintenance{{{}}} {}'.format(labels, 1 if summary['maintenance'] else 0))
+
+        data = common.read_probes(settings, hostname)
+        if data is None:
+            continue
+        finished = datetime.fromisoformat(data['finished']).timestamp()
+        timestamp_lines.append('bluebanquise_supervision_host_last_probe_timestamp_seconds{{{}}} {}'.format(labels, int(finished)))
+        if data['ssh'] is not None:
+            probe_lines.append('bluebanquise_supervision_probe_ok{{{},probe="ssh"}} {}'.format(labels, 1 if data['ssh'] else 0))
+        for probe_name in data['probes']:
+            value = 0 if data['probes'][probe_name]['error'] else 1
+            probe_lines.append('bluebanquise_supervision_probe_ok{{{},probe="{}"}} {}'.format(labels, label_value(probe_name), value))
+        if 'drift' in data:
+            value = 0 if data['drift']['error'] else 1
+            probe_lines.append('bluebanquise_supervision_probe_ok{{{},probe="drift"}} {}'.format(labels, value))
+
+    lines.append('# HELP bluebanquise_supervision_host_latched 1 if the host has an error not acknowledged yet.')
+    lines.append('# TYPE bluebanquise_supervision_host_latched gauge')
+    lines.extend(latched_lines)
+    lines.append('# HELP bluebanquise_supervision_host_maintenance 1 if the host is in maintenance.')
+    lines.append('# TYPE bluebanquise_supervision_host_maintenance gauge')
+    lines.extend(maintenance_lines)
+    lines.append('# HELP bluebanquise_supervision_host_last_probe_timestamp_seconds End of the last probe pass of the host.')
+    lines.append('# TYPE bluebanquise_supervision_host_last_probe_timestamp_seconds gauge')
+    lines.extend(timestamp_lines)
+    lines.append('# HELP bluebanquise_supervision_probe_ok 1 if the probe passed at the last probe pass.')
+    lines.append('# TYPE bluebanquise_supervision_probe_ok gauge')
+    lines.extend(probe_lines)
+    return '\n'.join(lines) + '\n'
+
+
+class MetricsHandler(http.server.BaseHTTPRequestHandler):
+
+    def do_GET(self):
+        if self.path != '/metrics':
+            self.send_response(404)
+            self.send_header('Content-Type', 'text/plain')
+            self.end_headers()
+            self.wfile.write(b'Not found, see /metrics\n')
+            return
+        try:
+            body = build_metrics().encode('utf-8')
+        except Exception as e:
+            logging.error('Could not build metrics: %r', e)
+            self.send_response(500)
+            self.send_header('Content-Type', 'text/plain')
+            self.end_headers()
+            self.wfile.write(b'Could not build metrics, see the exporter logs\n')
+            return
+        self.send_response(200)
+        self.send_header('Content-Type', 'text/plain; version=0.0.4; charset=utf-8')
+        self.send_header('Content-Length', str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def log_message(self, format, *args):
+        # One debug line per scrape instead of an access log on stderr
+        logging.debug('%s %s', self.client_address[0], format % args)
+
+
+def main():
+    global settings, hosts
+    parser = argparse.ArgumentParser(description='bluebanquise-supervision Prometheus exporter')
+    parser.add_argument('--settings', default=common.SETTINGS_FILE, help='Settings file')
+    parser.add_argument('--log-level', default=None, help='DEBUG, INFO, WARNING, ERROR')
+    args = parser.parse_args()
+
+    common.setup_logging(args.log_level or 'INFO')
+    settings = common.load_settings(args.settings)
+    common.setup_logging(args.log_level or settings['log_level'])
+    common.drop_privileges(settings['user'])
+    hosts = common.load_hosts(settings)
+
+    logging.info('bluebanquise-supervision-exporter starting: %d host(s)', len(hosts))
+    logging.info('Listening on %s:%d', settings['exporter_bind'], settings['exporter_port'])
+    server = http.server.ThreadingHTTPServer((settings['exporter_bind'], settings['exporter_port']), MetricsHandler)
+    server.serve_forever()
+
+
+if __name__ == '__main__':
+    main()

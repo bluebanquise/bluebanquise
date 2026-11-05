@@ -1,0 +1,10 @@
+---
+# Daemons read their configuration only at startup: any change restarts them all.
+- name: service <|> Restart bluebanquise-supervision services
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: restarted
+  loop: "{{ bluebanquise_supervision_services }}"
+  when:
+    - "'service' not in ansible_skip_tags"
+    - bluebanquise_supervision_start_services | default(bb_start_services) | default(true) | bool

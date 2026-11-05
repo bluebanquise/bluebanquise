@@ -1,0 +1,51 @@
+---
+# What to check, per Ansible group (any group name). A host member of several of these groups
+# accumulates them: probes and actions are merged (later group wins for the same name), ssh
+# username and drift_check are taken from the last group defining them. See README for details.
+#
+# bluebanquise_supervision_checks:
+#   hw_server_A:
+#     ssh:
+#       username: bluebanquise
+#     drift_check: true
+#     probes:
+#       check_bmc:
+#       ssh_check_disk_smart: /dev/sda
+#     actions:
+#       on_fail: 'sudo scontrol update nodename=$SUPERVISION_HOST state=drain reason="supervision: $SUPERVISION_PROBES"'
+bluebanquise_supervision_checks: {}
+
+# Remote user the probes connect as, when no group of the host sets ssh.username.
+bluebanquise_supervision_ssh_username: bluebanquise
+
+# Probe daemon
+bluebanquise_supervision_loop_interval: 1800
+bluebanquise_supervision_thread_pool_size: 100
+bluebanquise_supervision_ssh_gate_timeout: 10
+bluebanquise_supervision_ssh_probe_timeout: 60
+bluebanquise_supervision_local_probe_timeout: 60
+bluebanquise_supervision_action_timeout: 60
+
+# REST API + WebUI daemon. Listens on localhost only by default: set the management network IP
+# (or 0.0.0.0) to reach it from other hosts.
+bluebanquise_supervision_api_bind: 127.0.0.1
+bluebanquise_supervision_api_port: 8091
+
+# WebUI/API users, for HTTP basic authentication. Generate a password hash with:
+#   bluebanquise-supervision hash-password
+# bluebanquise_supervision_webui_users:
+#   - name: admin
+#     password_hash: "scrypt:32768:8:1$..."
+bluebanquise_supervision_webui_users: []
+
+# Prometheus exporter daemon
+bluebanquise_supervision_exporter_bind: 127.0.0.1
+bluebanquise_supervision_exporter_port: 9810
+
+# Commands the daemons user may run with sudo, without password (full paths). For example, to let
+# an on_fail action drain a node in Slurm:
+# bluebanquise_supervision_sudoers_commands:
+#   - /usr/bin/scontrol
+bluebanquise_supervision_sudoers_commands: []
+
+bluebanquise_supervision_log_level: INFO

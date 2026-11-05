@@ -1,0 +1,47 @@
+#!/bin/bash
+# Check SMART health of local disks.
+# Usage: ssh_check_disk_smart            -> checks all disks listed by lsblk
+#        ssh_check_disk_smart /dev/sda   -> checks only /dev/sda
+#
+# smartctl -H prints, depending on the disk type:
+#   ATA and NVMe: "SMART overall-health self-assessment test result: PASSED"
+#   SCSI and SAS: "SMART Health Status: OK"
+
+DISK="$1"
+
+echo "Checking SMART health..."
+
+# If no disk provided, auto-detect disk devices
+if [[ -z "$DISK" ]]; then
+    DISKS=$(lsblk -ndo NAME,TYPE | awk '$2=="disk"{print "/dev/"$1}')
+else
+    DISKS="$DISK"
+fi
+
+ERROR_FOUND=0
+
+for d in $DISKS; do
+    echo "Checking disk: $d"
+
+    OUTPUT=$(sudo -n smartctl -H "$d" 2>&1)
+    HEALTH=$(echo "$OUTPUT" | awk -F': *' '/SMART overall-health self-assessment test result|SMART Health Status/ {print $2}')
+
+    if [[ "$HEALTH" == "PASSED" || "$HEALTH" == "OK" ]]; then
+        echo "OK: $d SMART health $HEALTH"
+    elif [[ -z "$HEALTH" ]]; then
+        echo "CRITICAL: cannot read SMART health of $d:"
+        echo "$OUTPUT" | tail -n 5
+        ERROR_FOUND=1
+    else
+        echo "CRITICAL: $d SMART health is $HEALTH"
+        ERROR_FOUND=1
+    fi
+done
+
+if [[ "$ERROR_FOUND" -eq 0 ]]; then
+    echo "OK: All disks healthy"
+    exit 0
+else
+    echo "CRITICAL: One or more disks have SMART issues"
+    exit 2
+fi

@@ -1,0 +1,44 @@
+#!/bin/bash
+# Check InfiniBand error counters on the local HCA using perfquery.
+# Usage: ssh_check_ib_errors
+#
+# perfquery (without -x, which only gives data/packets counters) prints lines like:
+#   SymbolErrorCounter:..............0
+
+echo "Checking InfiniBand error counters"
+
+if ! OUTPUT=$(sudo -n perfquery 2>&1); then
+    echo "CRITICAL: Could not query IB interface:"
+    echo "$OUTPUT"
+    exit 2
+fi
+
+ERROR_FOUND=0
+COUNTERS_FOUND=0
+for COUNTER in SymbolErrorCounter LinkDownedCounter PortRcvErrors PortXmitDiscards; do
+    VALUE=$(echo "$OUTPUT" | grep "^${COUNTER}:" | sed 's/^[^:]*:\.*//')
+    if [[ -z "$VALUE" ]]; then
+        continue
+    fi
+    COUNTERS_FOUND=$((COUNTERS_FOUND + 1))
+    if [[ "$VALUE" -ne 0 ]]; then
+        echo "CRITICAL: $COUNTER = $VALUE"
+        ERROR_FOUND=1
+    else
+        echo "OK: $COUNTER = 0"
+    fi
+done
+
+if [[ "$COUNTERS_FOUND" -eq 0 ]]; then
+    echo "CRITICAL: no error counter found in perfquery output:"
+    echo "$OUTPUT"
+    exit 2
+fi
+
+if [[ "$ERROR_FOUND" -eq 0 ]]; then
+    echo "OK: No IB errors detected"
+    exit 0
+else
+    echo "CRITICAL: IB errors detected"
+    exit 2
+fi

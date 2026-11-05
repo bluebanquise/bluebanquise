@@ -1,0 +1,205 @@
+#!/usr/lib/bluebanquise/venv/bin/python3
+"""
+bluebanquise-supervision-api: REST API and WebUI daemon of bluebanquise-supervision.
+
+Served by waitress (production WSGI server). Every request needs HTTP basic authentication,
+users and password hashes come from webui_users.yml (bluebanquise_supervision_webui_users).
+
+REST API (JSON):
+  GET    /api/hosts                       state of all hosts, and counts per state
+  GET    /api/hosts/<host>                state, maintenance and last probe results of a host
+  GET    /api/hosts/<host>/events         events log of a host
+  POST   /api/hosts/<host>/probe          probe a host now
+  POST   /api/hosts/<host>/acknowledge    {"reason": "..."}
+  POST   /api/hosts/<host>/maintenance    {"reason": "..."}  start maintenance
+  DELETE /api/hosts/<host>/maintenance    {"reason": "..."}  stop maintenance
+  POST   /api/hosts/<host>/notes          {"text": "..."}
+POST and DELETE requests must be sent as JSON (Content-Type: application/json): a browser can
+not send such a request from another web site, which protects the API against cross-site
+requests made with the cached credentials of an admin.
+
+WebUI (Bulma, plain JavaScript using the REST API):
+  GET /            summary and cluster map
+  GET /<host>      host page
+  GET /static/...  CSS and JavaScript files
+
+The daemon never runs probes itself: a probe request is a file read by the probe daemon.
+"""
+
+import argparse
+import logging
+import os
+import sys
+import uuid
+
+from flask import Flask, Response, jsonify, request, send_from_directory
+from waitress import serve
+from werkzeug.security import check_password_hash
+
+sys.path.insert(0, '/usr/lib/bluebanquise/bluebanquise-supervision/lib')
+import common  # noqa: E402
+
+app = Flask(__name__, static_folder=None)
+
+# Loaded once at startup in main(), the role restarts the service when they change
+settings = None
+hosts = None
+users = None
+
+
+def error(message, code):
+    logging.info('%s %s -> %d %s', request.method, request.path, code, message)
+    return jsonify({'error': message}), code
+
+
+def result(ok, message):
+    """Answer for actions of common.py, which return (ok, message)."""
+    if not ok:
+        return error(message, 409)
+    logging.info('%s %s by %s: %s', request.method, request.path, request.authorization.username, message)
+    return jsonify({'message': message})
+
+
+def json_field(name):
+    """Mandatory non-empty text field of the JSON body, or None."""
+    data = request.get_json(silent=True) or {}
+    value = str(data.get(name, '')).strip()
+    if value == '':
+        return None
+    return value
+
+
+@app.before_request
+def authenticate():
+    auth = request.authorization
+    if auth is None or auth.username not in users or not check_password_hash(users[auth.username], auth.password or ''):
+        if auth is not None:
+            logging.warning('Authentication failed for user %r from %s', auth.username, request.remote_addr)
+        return Response('Authentication required\n', 401,
+                        {'WWW-Authenticate': 'Basic realm="bluebanquise-supervision"'})
+    if request.method in ('POST', 'DELETE') and not request.is_json:
+        return error('POST and DELETE requests must be sent as JSON (Content-Type: application/json)', 415)
+
+
+# ─── REST API ───────────────────────────────────────────────────────────────────
+
+@app.route('/api/hosts', methods=['GET'])
+def get_hosts():
+    summaries = []
+    counts = {'ok': 0, 'error': 0, 'maintenance': 0, 'unknown': 0}
+    for hostname in sorted(hosts):
+        summary = common.host_summary(settings, hostname, hosts[hostname])
+        counts[summary['state']] = counts[summary['state']] + 1
+        summaries.append(summary)
+    return jsonify({'hosts': summaries, 'counts': counts})
+
+
+@app.route('/api/hosts/<hostname>', methods=['GET'])
+def get_host(hostname):
+    if hostname not in hosts:
+        return error('{} is not a supervised host'.format(hostname), 404)
+    return jsonify({
+        'summary': common.host_summary(settings, hostname, hosts[hostname]),
+        'maintenance': common.read_maintenance(settings, hostname),
+        'probes': common.read_probes(settings, hostname),
+    })
+
+
+@app.route('/api/hosts/<hostname>/events', methods=['GET'])
+def get_host_events(hostname):
+    if hostname not in hosts:
+        return error('{} is not a supervised host'.format(hostname), 404)
+    return jsonify({'events': common.read_events(settings, hostname)})
+
+
+@app.route('/api/hosts/<hostname>/probe', methods=['POST'])
+def post_host_probe(hostname):
+    if hostname not in hosts:
+        return error('{} is not a supervised host'.format(hostname), 404)
+    request_id = str(uuid.uuid4())
+    with open(os.path.join(settings['requests_path'], hostname), 'w') as f:
+        f.write(request_id)
+    logging.info('Probe of %s requested by %s', hostname, request.authorization.username)
+    return jsonify({'message': 'Probe of {} requested'.format(hostname), 'request_id': request_id})
+
+
+@app.route('/api/hosts/<hostname>/acknowledge', methods=['POST'])
+def post_host_acknowledge(hostname):
+    if hostname not in hosts:
+        return error('{} is not a supervised host'.format(hostname), 404)
+    reason = json_field('reason')
+    if reason is None:
+        return error('A reason is needed', 400)
+    ok, message = common.acknowledge(settings, hostname, request.authorization.username, reason)
+    return result(ok, message)
+
+
+@app.route('/api/hosts/<hostname>/maintenance', methods=['POST', 'DELETE'])
+def host_maintenance(hostname):
+    if hostname not in hosts:
+        return error('{} is not a supervised host'.format(hostname), 404)
+    reason = json_field('reason')
+    if reason is None:
+        return error('A reason is needed', 400)
+    if request.method == 'POST':
+        ok, message = common.start_maintenance(settings, hostname, request.authorization.username, reason)
+    else:
+        ok, message = common.stop_maintenance(settings, hostname, request.authorization.username, reason)
+    return result(ok, message)
+
+
+@app.route('/api/hosts/<hostname>/notes', methods=['POST'])
+def post_host_note(hostname):
+    if hostname not in hosts:
+        return error('{} is not a supervised host'.format(hostname), 404)
+    text = json_field('text')
+    if text is None:
+        return error('A text is needed', 400)
+    ok, message = common.add_note(settings, hostname, request.authorization.username, text)
+    return result(ok, message)
+
+
+# ─── WebUI ──────────────────────────────────────────────────────────────────────
+
+@app.route('/', methods=['GET'])
+def index_page():
+    return send_from_directory(settings['webui_path'], 'index.html')
+
+
+@app.route('/static/<path:filename>', methods=['GET'])
+def static_file(filename):
+    return send_from_directory(settings['webui_path'], filename)
+
+
+@app.route('/<hostname>', methods=['GET'])
+def host_page(hostname):
+    if hostname not in hosts:
+        return error('{} is not a supervised host'.format(hostname), 404)
+    return send_from_directory(settings['webui_path'], 'host.html')
+
+
+def main():
+    global settings, hosts, users
+    parser = argparse.ArgumentParser(description='bluebanquise-supervision REST API and WebUI daemon')
+    parser.add_argument('--settings', default=common.SETTINGS_FILE, help='Settings file')
+    parser.add_argument('--log-level', default=None, help='DEBUG, INFO, WARNING, ERROR')
+    args = parser.parse_args()
+
+    common.setup_logging(args.log_level or 'INFO')
+    settings = common.load_settings(args.settings)
+    common.setup_logging(args.log_level or settings['log_level'])
+    common.drop_privileges(settings['user'])
+    hosts = common.load_hosts(settings)
+    users = (common.read_yaml(settings['webui_users_file'], {}) or {}).get('users') or {}
+
+    logging.info('bluebanquise-supervision-api starting: %d host(s), %d user(s)', len(hosts), len(users))
+    if len(users) == 0:
+        logging.warning('No user in %s: nobody can log in (see bluebanquise_supervision_webui_users)',
+                        settings['webui_users_file'])
+    logging.info('Listening on %s:%d', settings['api_bind'], settings['api_port'])
+    # waitress writes no access log, every write route logs its own requests
+    serve(app, host=settings['api_bind'], port=settings['api_port'])
+
+
+if __name__ == '__main__':
+    main()

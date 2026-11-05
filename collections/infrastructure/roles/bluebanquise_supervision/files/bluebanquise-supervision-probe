@@ -1,0 +1,303 @@
+#!/usr/lib/bluebanquise/venv/bin/python3
+"""
+bluebanquise-supervision-probe: probe daemon of bluebanquise-supervision.
+
+Probes every supervised host regularly (loop_interval), and on demand: the CLI or the API write
+an empty file named after the host in requests_path, picked up within a second.
+
+For each host:
+  1. SSH gate: a cheap "ssh host true", only if the host has ssh_* probes or the drift check.
+     If it fails, ssh_* probes and the drift check are skipped (and counted as failed), local
+     probes (check_bmc) still run: it is exactly when the OS is down that the BMC matters.
+  2. Probes, in name order. ssh_* probes: the script is piped to "ssh host bash -s -- args",
+     nothing is installed on the host. Other probes run locally: "script hostname args".
+  3. Drift check (drift_check: true): the ssh_gather script is piped the same way, its output
+     is compared with the values expected by the inventory (drift.py).
+  4. Results are written to probes.yml (and gathered.yml for the drift check).
+  5. If anything failed and the host is not in maintenance: an Error event is written, only if
+     the host is not already latched (error not acknowledged yet). On a new Error event, the
+     on_fail action of the host runs, and its result is written as an Action event.
+
+Hosts in maintenance are skipped by the loop. An on-demand probe of a host in maintenance still
+runs and writes probe results, but never writes an event nor runs an action.
+
+Configuration is read at startup only: the role restarts the service when it changes.
+"""
+
+import argparse
+import concurrent.futures
+import logging
+import os
+import shlex
+import subprocess
+import sys
+import time
+
+sys.path.insert(0, '/usr/lib/bluebanquise/bluebanquise-supervision/lib')
+import common  # noqa: E402
+import drift  # noqa: E402
+
+
+def ssh_command(settings, host_conf, hostname, timeout):
+    """ssh command line to reach a host. Host keys are not checked nor stored: hosts are
+    reinstalled often, and a changed key must not stop the supervision."""
+    return [
+        'ssh',
+        '-i', settings['ssh_key_path'],
+        '-l', host_conf['ssh_username'],
+        '-o', 'BatchMode=yes',
+        '-o', 'ConnectTimeout={}'.format(timeout),
+        '-o', 'StrictHostKeyChecking=no',
+        '-o', 'UserKnownHostsFile=/dev/null',
+        '-o', 'LogLevel=ERROR',
+        hostname,
+    ]
+
+
+def run_command(hostname, command, timeout, input_data=None):
+    """Run a command, return (exit_code, stdout, stderr). exit_code is None if it could not run
+    or timed out."""
+    logging.debug('[%s] Running: %s', hostname, ' '.join(command))
+    try:
+        result = subprocess.run(command, input=input_data, capture_output=True, timeout=timeout)
+    except subprocess.TimeoutExpired:
+        logging.warning('[%s] Timed out after %ds: %s', hostname, timeout, command[0])
+        return None, '', 'Timed out after {}s'.format(timeout)
+    except OSError as e:
+        logging.error('[%s] Could not run %s: %s', hostname, command[0], e)
+        return None, '', 'Could not run {}: {}'.format(command[0], e)
+    stdout = result.stdout.decode('utf-8', errors='replace')
+    stderr = result.stderr.decode('utf-8', errors='replace')
+    return result.returncode, stdout, stderr
+
+
+def run_probe(settings, host_conf, hostname, probe_name, probe_args, ssh_ok):
+    started = time.monotonic()
+    args = []
+    if probe_args is not None:
+        args = shlex.split(str(probe_args))
+    script_path = os.path.join(settings['probes_path'], probe_name)
+
+    if not os.path.isfile(script_path):
+        exit_code, stdout, stderr = None, '', 'No probe script {}'.format(script_path)
+    elif probe_name.startswith('ssh_'):
+        if not ssh_ok:
+            exit_code, stdout, stderr = None, '', 'Skipped: SSH connection to the host failed'
+        else:
+            with open(script_path, 'rb') as f:
+                script = f.read()
+            command = ssh_command(settings, host_conf, hostname, settings['ssh_gate_timeout']) + ['bash', '-s', '--'] + args
+            exit_code, stdout, stderr = run_command(hostname, command, settings['ssh_probe_timeout'], script)
+    else:
+        command = [script_path, hostname] + args
+        exit_code, stdout, stderr = run_command(hostname, command, settings['local_probe_timeout'])
+
+    result = {
+        'args': probe_args,
+        'exit_code': exit_code,
+        'error': exit_code != 0,
+        'duration': round(time.monotonic() - started, 1),
+        'stdout': stdout,
+        'stderr': stderr,
+    }
+    logging.info('[%s] Probe %s: %s (exit code %s)', hostname, probe_name,
+                 'ERROR' if result['error'] else 'OK', exit_code)
+    return result
+
+
+def run_drift_check(settings, host_conf, hostname, ssh_ok):
+    started = time.monotonic()
+    result = {'error': True, 'duration': 0, 'findings': [], 'stderr': ''}
+
+    if not ssh_ok:
+        result['stderr'] = 'Skipped: SSH connection to the host failed'
+        return result
+
+    with open(os.path.join(settings['probes_path'], 'ssh_gather'), 'rb') as f:
+        script = f.read()
+    command = ssh_command(settings, host_conf, hostname, settings['ssh_gate_timeout']) + ['bash', '-s']
+    exit_code, stdout, stderr = run_command(hostname, command, settings['ssh_probe_timeout'], script)
+    result['duration'] = round(time.monotonic() - started, 1)
+    if exit_code is None:
+        result['stderr'] = stderr
+        return result
+
+    try:
+        gathered = drift.parse_gathered(stdout)
+    except Exception as e:
+        logging.error('[%s] Could not parse gathered data: %s', hostname, e)
+        result['stderr'] = 'Could not parse gathered data: {}\n{}'.format(e, stderr)
+        return result
+    gathered['time'] = common.now()
+    common.write_yaml(common.host_file(settings, hostname, 'gathered.yml'), gathered)
+
+    result['findings'] = drift.compare(host_conf.get('expected') or {}, gathered)
+    result['error'] = len(result['findings']) > 0
+    logging.info('[%s] Drift check: %s', hostname,
+                 '{} finding(s)'.format(len(result['findings'])) if result['error'] else 'OK')
+    for finding in result['findings']:
+        logging.info('[%s]   %s', hostname, finding)
+    return result
+
+
+def run_action(settings, hostname, action_name, command, failed):
+    """Run an action command with /bin/sh. Host and failed probes are given as environment
+    variables, never inserted in the command text: probe output can not inject anything."""
+    environment = dict(os.environ)
+    environment['SUPERVISION_HOST'] = hostname
+    environment['SUPERVISION_PROBES'] = ','.join(failed)
+    logging.info('[%s] Running %s action: %s', hostname, action_name, command)
+    try:
+        result = subprocess.run(['/bin/sh', '-c', command], env=environment, capture_output=True,
+                                text=True, timeout=settings['action_timeout'])
+        exit_code = result.returncode
+        output = (result.stdout + result.stderr).strip()
+    except subprocess.TimeoutExpired:
+        exit_code = None
+        output = 'Timed out after {}s'.format(settings['action_timeout'])
+    logging.info('[%s] Action %s exit code %s: %s', hostname, action_name, exit_code, output)
+    first_line = ''
+    if output != '':
+        first_line = output.splitlines()[0]
+    message = '{} exited with code {}'.format(action_name, exit_code)
+    if first_line != '':
+        message = message + ': ' + first_line
+    common.append_event(settings, hostname, 'Action', message)
+
+
+def probe_host(settings, host_conf, hostname, request_id):
+    logging.info('[%s] Probing%s', hostname, ' (on demand)' if request_id is not None else '')
+    started = common.now()
+    probes = host_conf.get('probes') or {}
+    drift_check = host_conf.get('drift_check', False)
+
+    # SSH gate, only if SSH is needed
+    needs_ssh = drift_check
+    for probe_name in probes:
+        if probe_name.startswith('ssh_'):
+            needs_ssh = True
+    ssh_ok = None
+    if needs_ssh:
+        exit_code, stdout, stderr = run_command(
+            hostname, ssh_command(settings, host_conf, hostname, settings['ssh_gate_timeout']) + ['true'],
+            settings['ssh_gate_timeout'] + 5)
+        ssh_ok = exit_code == 0
+        logging.info('[%s] SSH gate: %s', hostname, 'OK' if ssh_ok else 'FAILED ' + stderr.strip())
+
+    failed = []
+    if ssh_ok is False:
+        failed.append('ssh')
+
+    results = {}
+    for probe_name in sorted(probes):
+        results[probe_name] = run_probe(settings, host_conf, hostname, probe_name, probes[probe_name], ssh_ok)
+        if results[probe_name]['error']:
+            failed.append(probe_name)
+
+    drift_result = None
+    if drift_check:
+        drift_result = run_drift_check(settings, host_conf, hostname, ssh_ok)
+        if drift_result['error']:
+            failed.append('drift')
+
+    data = {
+        'host': hostname,
+        'started': started,
+        'finished': common.now(),
+        'request_id': request_id,
+        'ssh': ssh_ok,
+        'failed': failed,
+        'probes': results,
+    }
+    if drift_result is not None:
+        data['drift'] = drift_result
+    common.write_yaml(common.host_file(settings, hostname, 'probes.yml'), data)
+    logging.info('[%s] Done: %s', hostname, 'failed: ' + ', '.join(failed) if failed else 'OK')
+
+    if len(failed) == 0:
+        return
+    if common.read_maintenance(settings, hostname)['active']:
+        logging.info('[%s] In maintenance: no event, no action', hostname)
+        return
+    is_new_error = common.latch_error(settings, hostname, 'Failed: {}'.format(', '.join(failed)))
+    on_fail = (host_conf.get('actions') or {}).get('on_fail')
+    if is_new_error and on_fail:
+        run_action(settings, hostname, 'on_fail', on_fail, failed)
+
+
+def read_request(settings, hosts, filename):
+    """Read and remove a request file. Returns the request id (file content), or None if the
+    file is not a valid request."""
+    path = os.path.join(settings['requests_path'], filename)
+    try:
+        with open(path, 'r') as f:
+            request_id = f.read().strip()
+        os.remove(path)
+    except OSError as e:
+        logging.error('Could not read request %s: %s', path, e)
+        return None
+    if filename not in hosts:
+        logging.warning('Ignoring probe request for unknown host %s', filename)
+        return None
+    if request_id == '':
+        request_id = 'none'
+    return request_id
+
+
+def main():
+    parser = argparse.ArgumentParser(description='bluebanquise-supervision probe daemon')
+    parser.add_argument('--settings', default=common.SETTINGS_FILE, help='Settings file')
+    parser.add_argument('--log-level', default=None, help='DEBUG, INFO, WARNING, ERROR')
+    args = parser.parse_args()
+
+    common.setup_logging(args.log_level or 'INFO')
+    settings = common.load_settings(args.settings)
+    common.setup_logging(args.log_level or settings['log_level'])
+    common.drop_privileges(settings['user'])
+    hosts = common.load_hosts(settings)
+
+    logging.info('bluebanquise-supervision-probe starting')
+    logging.info('Hosts: %d, loop interval: %ds, threads: %d',
+                 len(hosts), settings['loop_interval'], settings['thread_pool_size'])
+
+    executor = concurrent.futures.ThreadPoolExecutor(max_workers=settings['thread_pool_size'])
+    # Host currently being probed -> its future. Only this main thread uses it, no lock needed.
+    running = {}
+    next_cycle = time.monotonic()
+
+    while True:
+        # 1. Forget finished probes
+        for hostname in list(running):
+            future = running[hostname]
+            if future.done():
+                if future.exception() is not None:
+                    logging.error('[%s] Probe crashed: %r', hostname, future.exception())
+                del running[hostname]
+
+        # 2. On-demand requests. A request for a host being probed waits for the next tick.
+        for filename in sorted(os.listdir(settings['requests_path'])):
+            if filename in running:
+                continue
+            request_id = read_request(settings, hosts, filename)
+            if request_id is None:
+                continue
+            running[filename] = executor.submit(probe_host, settings, hosts[filename], filename, request_id)
+
+        # 3. Regular loop over all hosts not in maintenance
+        if time.monotonic() >= next_cycle:
+            logging.info('Starting probe cycle')
+            for hostname in sorted(hosts):
+                if hostname in running:
+                    logging.info('[%s] Still being probed, skipped this cycle', hostname)
+                    continue
+                if common.read_maintenance(settings, hostname)['active']:
+                    logging.info('[%s] In maintenance, skipped', hostname)
+                    continue
+                running[hostname] = executor.submit(probe_host, settings, hosts[hostname], hostname, None)
+            next_cycle = time.monotonic() + settings['loop_interval']
+
+        time.sleep(1)
+
+
+if __name__ == '__main__':
+    main()
