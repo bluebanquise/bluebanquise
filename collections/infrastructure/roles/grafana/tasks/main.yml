@@ -118,7 +118,9 @@
     - plugins
 
 - name: grafana <|> Ensure password is set to the one in the role variables
-  ansible.builtin.command: "grafana-cli --homepath {{ grafana_homepath }} admin reset-admin-password {{ grafana_security.admin_password }}"
+  ansible.builtin.command:
+    cmd: "grafana-cli --homepath {{ grafana_homepath }} admin reset-admin-password --password-from-stdin"
+    stdin: "{{ grafana_security.admin_password }}"
   environment:
     GF_DATABASE_PASSWORD: "{{ grafana_database.password | default('') }}"
   changed_when: false

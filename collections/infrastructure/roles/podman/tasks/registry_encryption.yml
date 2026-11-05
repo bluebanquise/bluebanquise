@@ -22,6 +22,7 @@
   ansible.builtin.slurp:
     src: "{{ podman_registry_key_path }}"
   register: podman_registry_key
+  no_log: true
 
 - name: podman_secret <|> Create secret for registry private key
   containers.podman.podman_secret:

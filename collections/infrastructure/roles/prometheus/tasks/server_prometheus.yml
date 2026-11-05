@@ -68,6 +68,7 @@
     owner: prometheus
     group: prometheus
     mode: 0640
+  diff: false
   notify: service <|> Restart prometheus service
   tags:
     - template
