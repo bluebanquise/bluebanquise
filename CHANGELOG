@@ -71,6 +71,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 * 2026-10-27 - oxedions, Claude - [auditd] Fix boolean enabled value, make auditd_forward_audit_logs and auditd_config_root_log reversible, remove the unrelated rsyslog restart handler, document all variables.
 * 2026-10-27 - oxedions, Claude - [data_model] Remove deprecated j2_ notes, list all bb_ global variables, add a roles dedicated variables section, fix typos.
 * 2026-10-27 - oxedions, Claude - [bluebanquise_power, conman, dhcp_server, dns_server, hosts_file, pxe_stack, ssh_client] BREAKING: rename bb_retrict_to_group and <role>_retrict_to_group variables to bb_restrict_to_group and <role>_restrict_to_group.
+* 2026-10-21 - santos-lucas - [prometheus] add possibility to use ansible group patterns (#1303)
 * 2026-10-16 - sc-alex - [prometheus] Fix modbus_exporter conditional on importing files to be boolean; Fix variable name in documentation
 * 2026-10-16 - sc-alex - [hosts_file] Fix default filters to replace empty string for domain name
 * 08/10/2026 - gustavo4passos - [dhcp_server] Verifies if network has dhcp enabled before including it into the main configuration file
