@@ -43,6 +43,31 @@ netboots:
         cp -a /mnt/. ${NETBOOT_BASE_DIR}/iso/
         umount /mnt
 
+  ubuntu_26.04:
+    os: ubuntu
+    version: "26.04"
+    description: "Ubuntu 26.04 LTS (Resolute Raccoon) live-server"
+    x86_64:
+      url: "https://releases.ubuntu.com/26.04.1/ubuntu-26.04.1-live-server-amd64.iso"
+      sha256: null
+      install_script: |
+        set -e
+        mkdir -p ${NETBOOT_BASE_DIR}/iso
+        ln -sf ${NETBOOT_ISO_FILENAME} ${NETBOOT_BASE_DIR}/ubuntu-26.04-live-server-amd64.iso
+        mount -o loop,ro ${NETBOOT_ISO_FILE} /mnt
+        cp -a /mnt/. ${NETBOOT_BASE_DIR}/iso/
+        umount /mnt
+    arm64:
+      url: "https://cdimage.ubuntu.com/releases/26.04.1/release/ubuntu-26.04.1-live-server-arm64.iso"
+      sha256: null
+      install_script: |
+        set -e
+        mkdir -p ${NETBOOT_BASE_DIR}/iso
+        ln -sf ${NETBOOT_ISO_FILENAME} ${NETBOOT_BASE_DIR}/ubuntu-26.04-live-server-arm64.iso
+        mount -o loop,ro ${NETBOOT_ISO_FILE} /mnt
+        cp -a /mnt/. ${NETBOOT_BASE_DIR}/iso/
+        umount /mnt
+
   debian_13:
     os: debian
     version: "13"

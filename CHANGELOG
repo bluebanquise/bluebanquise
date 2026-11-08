@@ -4,6 +4,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.4
 
+* 2026-11-08 - oxedions, Ummon - [pxe_stack] bluebanquise-netboots-installer: add ubuntu_26.04 (x86_64 and arm64) to the netboots catalog, osdeploy/ubuntu_26.ipxe already expected it.
 * 2026-10-30 - oxedions, Claude - [documentation] Documentation pass: coherency fixes, friendlier tone, new pages (deployment strategy, apply configuration, operations, Nvidia GPUs, scalability with icebergs and herds, high availability), walkthrough updated (firewall gateway policy, DHCP zone, repositories, GPU and Slurm gres, NFS homes), missing role pages added (clustershell, logrotate, powerman, ssh_client, podman, lustre_client, singularity, pcs), schemas to draw listed in index.rst.
 * 2026-10-30 - oxedions, Claude - [repositories, pxe_stack, prometheus] README fixes: repositories4 service key, equipment_profiles PXE folder name, broken table of content anchor.
 * 2026-10-30 - oxedions, Claude - [local_configuration] Fix kernel parameters tasks failing when running with tags (effective parameters fact was not computed).
