@@ -4,6 +4,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.4
 
+* 2026-11-02 - santos-lucas - [prometheus] add manage_service option. 
 * 2026-11-01 - santos-lucas - [slurm] Configless slurmd bugfix when chaging controller. (#1304) 
 * 2026-10-30 - oxedions, Claude - [local_configuration] Fix kernel parameters tasks failing when running with tags (effective parameters fact was not computed).
 * 2026-10-30 - oxedions, Claude - [nfs] Fix server failing when all_ipv4_addresses fact is not gathered.
