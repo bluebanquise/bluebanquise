@@ -48,14 +48,17 @@ fi
 
 deactivate
 
-# Set pip bins in PATH
-grep -q -E "^source ansible_venv/bin/activate" "${HOME}"/.bashrc ||\
-echo "source ansible_venv/bin/activate" |\
-tee -a "${HOME}"/.bashrc
-
-# Expand PYTHONPATH, need to make it dynamic
-grep -q PYTHONPATH "${HOME}"/.bashrc ||\
-echo "export PYTHONPATH=\$(pip3 show Ansible | grep Location | awk -F ' ' '{print \$2}')" >> "${HOME}"/.bashrc
+# Set pip bins in PATH, and expand PYTHONPATH, in interactive shells only. Non-interactive shells
+# (ssh commands, like Ansible connecting to the management host itself) must keep the system python:
+# with the virtual environment active, Ansible would run its modules with the virtual environment
+# python, which lacks system bindings (selinux, apt, firewall...).
+grep -q "ansible_venv/bin/activate" "${HOME}"/.bashrc ||\
+cat >> "${HOME}"/.bashrc << 'EOF'
+if [[ $- == *i* ]]; then
+  source $HOME/ansible_venv/bin/activate
+  export PYTHONPATH=$(pip3 show Ansible | grep Location | awk -F ' ' '{print $2}')
+fi
+EOF
 
 # Bind to bluebanquise default ansible.cfg
 mkdir -p $HOME/bluebanquise/

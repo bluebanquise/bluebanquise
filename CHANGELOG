@@ -4,6 +4,12 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.4
 
+* 2026-11-10 - oxedions, Ummon - [bootstrap] configure_environment.sh activates the Ansible virtual environment (and PYTHONPATH) in interactive shells only: in ssh commands, Ansible picked the virtual environment python when the management host managed itself (RHEL 10), without system bindings (selinux).
+* 2026-11-10 - oxedions, Ummon - [bootstrap] online_bootstrap.sh: support Ubuntu 26.04 (python3-venv was not installed).
+* 2026-11-10 - oxedions, Ummon - [pxe_stack] Agama profile (OpenSuSE Leap 16): product id is openSUSE_Leap, Leap_16.0 is unknown to the installer.
+* 2026-11-10 - oxedions, Ummon - [pxe_stack] bluebanquise-netboots-installer: debian_13 uses the netboot installer from the mirror (the ISO one only installs from a CD-ROM), and no major-version symlink over a real directory (crashed for rhel_9, rhel_10, debian_13).
+* 2026-11-10 - oxedions, Ummon - [nic] Debian installed with its installer (ifupdown, no netplan): netplan tasks only when netplan is used, interfaces handed over from ifupdown to NetworkManager (they were read only), OS dedicated tasks run before nmcli configuration.
+* 2026-11-10 - oxedions, Ummon - [dhcp_server] Validate kea-dhcp4.conf through a pipe: on Ubuntu, AppArmor kept kea from reading Ansible temporary file when Ansible does not connect as root.
 * 2026-11-08 - oxedions, Ummon - [pxe_stack] bluebanquise-netboots-installer: add ubuntu_26.04 (x86_64 and arm64) to the netboots catalog, osdeploy/ubuntu_26.ipxe already expected it.
 * 2026-10-30 - oxedions, Claude - [documentation] Documentation pass: coherency fixes, friendlier tone, new pages (deployment strategy, apply configuration, operations, Nvidia GPUs, scalability with icebergs and herds, high availability), walkthrough updated (firewall gateway policy, DHCP zone, repositories, GPU and Slurm gres, NFS homes), missing role pages added (clustershell, logrotate, powerman, ssh_client, podman, lustre_client, singularity, pcs), schemas to draw listed in index.rst.
 * 2026-10-30 - oxedions, Claude - [repositories, pxe_stack, prometheus] README fixes: repositories4 service key, equipment_profiles PXE folder name, broken table of content anchor.

@@ -75,14 +75,16 @@ netboots:
     x86_64:
       url: "https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-13.0.0-amd64-netinst.iso"
       sha256: null
+      # The ISO installer (install.amd) only installs from a CD-ROM: network boot needs the netboot
+      # installer, which installs from the mirror and must match its current kernel modules.
       install_script: |
         set -e
         mkdir -p ${NETBOOT_BASE_DIR}/iso
         mount -o loop,ro ${NETBOOT_ISO_FILE} /mnt
         cp -a /mnt/. ${NETBOOT_BASE_DIR}/iso/
         umount /mnt
-        cp ${NETBOOT_BASE_DIR}/iso/install.amd/vmlinuz ${NETBOOT_BASE_DIR}/iso/linux
-        cp ${NETBOOT_BASE_DIR}/iso/install.amd/initrd.gz ${NETBOOT_BASE_DIR}/iso/initrd.gz
+        curl -fsSL -o ${NETBOOT_BASE_DIR}/iso/linux https://deb.debian.org/debian/dists/trixie/main/installer-amd64/current/images/netboot/debian-installer/amd64/linux
+        curl -fsSL -o ${NETBOOT_BASE_DIR}/iso/initrd.gz https://deb.debian.org/debian/dists/trixie/main/installer-amd64/current/images/netboot/debian-installer/amd64/initrd.gz
     arm64:
       url: "https://cdimage.debian.org/debian-cd/current/arm64/iso-cd/debian-13.0.0-arm64-netinst.iso"
       sha256: null
@@ -92,8 +94,8 @@ netboots:
         mount -o loop,ro ${NETBOOT_ISO_FILE} /mnt
         cp -a /mnt/. ${NETBOOT_BASE_DIR}/iso/
         umount /mnt
-        cp ${NETBOOT_BASE_DIR}/iso/install.arm64/vmlinuz ${NETBOOT_BASE_DIR}/iso/linux
-        cp ${NETBOOT_BASE_DIR}/iso/install.arm64/initrd.gz ${NETBOOT_BASE_DIR}/iso/initrd.gz
+        curl -fsSL -o ${NETBOOT_BASE_DIR}/iso/linux https://deb.debian.org/debian/dists/trixie/main/installer-arm64/current/images/netboot/debian-installer/arm64/linux
+        curl -fsSL -o ${NETBOOT_BASE_DIR}/iso/initrd.gz https://deb.debian.org/debian/dists/trixie/main/installer-arm64/current/images/netboot/debian-installer/arm64/initrd.gz
 
   rhel_9:
     os: redhat

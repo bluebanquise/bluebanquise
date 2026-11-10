@@ -94,7 +94,7 @@ echo -n " Installing needed dependencies, could take some time..."
   set -x
   # UBUNTU
   if [ "$NAME" == "Ubuntu" ]; then
-    if [ "$VERSION_ID" == "24.04" ]; then
+    if [ "$VERSION_ID" == "24.04" ] || [ "$VERSION_ID" == "26.04" ]; then
       apt-get update
       DEBIAN_FRONTEND=noninteractive apt-get install python3 python3-pip python3-venv ssh curl git -y
     fi

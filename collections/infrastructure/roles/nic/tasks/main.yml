@@ -53,11 +53,8 @@
 - name: meta <|> Run handler tasks
   ansible.builtin.meta: flush_handlers
 
-- name: include_tasks <|> Configure network interfaces via nmcli
-  ansible.builtin.include_tasks: nmcli.yml
-  tags:
-    - always
-
+# Before nmcli: OS dedicated tasks make NetworkManager the owner of the interfaces (netplan renderer,
+# ifupdown hand over, wicked disabled), nmcli cannot configure interfaces owned by something else.
 - name: include_tasks <|> Use OS dedicated task
   ansible.builtin.include_tasks: "{{ item }}"
   with_first_found:
@@ -68,4 +65,12 @@
     - always
 
 - name: meta <|> Run handler tasks to apply OS dedicated events
+  ansible.builtin.meta: flush_handlers
+
+- name: include_tasks <|> Configure network interfaces via nmcli
+  ansible.builtin.include_tasks: nmcli.yml
+  tags:
+    - always
+
+- name: meta <|> Run handler tasks to apply nmcli events
   ansible.builtin.meta: flush_handlers

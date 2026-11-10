@@ -469,7 +469,7 @@ os_operating_system:
 The node boots the installer with `root=live:<iso>/LiveOS/squashfs.img inst.install_url=<iso>/install
 inst.auto=<profile>` (see `osdeploy/opensuse_16.ipxe`), installs, and reboots. The profile sets:
 
-* the product (`Leap_16.0`), language, keyboard and time zone,
+* the product (`openSUSE_Leap`), language, keyboard and time zone,
 * the root password and ssh keys (`pxe_stack_enable_root: true`), or the sudo user (first user of the installer, its
   uid, gid and home are then set by a post installation script) with its ssh keys and sudoers rule,
 * packages (`openssh-server`, `sudo`, `curl`, plus `os_autoinstall_packages`) and `os_autoinstall_custom_repositories`,

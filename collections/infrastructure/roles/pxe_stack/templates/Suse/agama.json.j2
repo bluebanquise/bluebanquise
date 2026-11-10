@@ -95,7 +95,7 @@ done
 {% endfor %}
 
 {% set profile = {
-  'product': {'id': 'Leap_16.0'},
+  'product': {'id': 'openSUSE_Leap'},
   'localization': {
     'language': equipment['os']['os_system_language'] | default(pxe_stack_os_system_language),
     'keyboard': (equipment['os']['os_keyboard_layout'] | default(pxe_stack_os_keyboard_layout)) | lower,

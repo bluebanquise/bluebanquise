@@ -298,12 +298,16 @@ elif passed_arguments.action == 'install':
         sys.exit(1)
     logging.info(bcolors.OKGREEN + '[OK] Install script completed successfully.' + bcolors.ENDC)
 
-    # Create or update major-version symlink (last-installed wins, relative symlink)
-    logging.info('Creating major-version symlink: ' + symlink_path + ' -> ' + version)
+    # Create or update major-version symlink (last-installed wins, relative symlink).
+    # Not when a real directory already has the major version name: rhel_9 is installed in redhat/9/.
     if os.path.islink(symlink_path):
         os.remove(symlink_path)
-    os.symlink(version, symlink_path)
-    logging.info(bcolors.OKGREEN + '[OK] Symlink: ' + symlink_path + ' -> ' + version + bcolors.ENDC)
+    if os.path.exists(symlink_path):
+        logging.info('No major-version symlink: ' + symlink_path + ' is a directory.')
+    else:
+        logging.info('Creating major-version symlink: ' + symlink_path + ' -> ' + version)
+        os.symlink(version, symlink_path)
+        logging.info(bcolors.OKGREEN + '[OK] Symlink: ' + symlink_path + ' -> ' + version + bcolors.ENDC)
 
     print('')
     logging.info(bcolors.OKGREEN + '[OK] Netboot ' + netboot_id + ' (' + arch + ') installed successfully.' + bcolors.ENDC)
@@ -360,7 +364,7 @@ elif passed_arguments.action == 'uninstall':
             new_version = remaining_versions[0]
             new_major = new_version.split('.')[0]
             new_symlink = os.path.join(os_dir, new_major)
-            if not os.path.islink(new_symlink):
+            if not os.path.lexists(new_symlink):
                 os.symlink(new_version, new_symlink)
                 logging.info(bcolors.OKGREEN + '[OK] Updated symlink: ' + new_symlink + ' -> ' + new_version + bcolors.ENDC)
 
