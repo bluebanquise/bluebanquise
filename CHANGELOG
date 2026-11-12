@@ -2,10 +2,9 @@
 
 Format: <date> - <author (username or mail or both)> - [role] <change description>
 
-# 3.2.9
-* 29/09/2026 - thiagocardozo [prometheus] Task to add firewall ports to zone (#1287)
-
 # 3.2.8
+* 13/11/2026 - bouzonnl, teo-blachere, thiagocardozo [ha_engine] New role to register role-owned HA resources in Pacemaker, with a generic service restart handler
+* 29/09/2026 - thiagocardozo [prometheus] Task to add firewall ports to zone (#1287)
 * 04/11/2026 - bouzonnl [pcs,grafana] Pass passwords through stdin instead of command line to keep them out of system logs
 * 04/11/2026 - bouzonnl [pcs,podman,conman,powerman,prometheus] Hide passwords and private keys from Ansible logs and diffs
 * 03/11/2026 - bouzonnl [grafana] Hide Ansible logs displaying password fields

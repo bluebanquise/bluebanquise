@@ -1,0 +1,142 @@
+---
+- name: "HA | {{ ha_engine_owner }} | Register '{{ ha_entry.group | default('(ungrouped)') }}'"  # noqa: name[template]
+  become: true
+  block:
+
+    - name: HA | {{ ha_engine_owner }} | Reset per-entry state  # noqa: name[template]
+      ansible.builtin.set_fact:
+        ha_engine_group: "{{ ha_entry.group | default('') }}"
+        ha_engine_after: "{{ ha_entry.after | default([]) }}"
+        ha_engine_members: []
+        ha_engine_diff: {}
+
+    # Joiner only: prove the declared join points are already in the group.
+    - name: HA | {{ ha_engine_owner }} | Probe group members  # noqa: name[template]
+      ansible.builtin.command:
+        cmd: pcs resource group list
+      register: ha_engine_grp_raw
+      changed_when: false
+      failed_when: ha_engine_grp_raw.rc not in [0, 1]
+      when: ha_engine_after | length > 0
+
+    - name: HA | {{ ha_engine_owner }} | Extract this group's members  # noqa: name[template]
+      ansible.builtin.set_fact:
+        ha_engine_present: >-
+          {{ (ha_engine_grp_raw.stdout_lines | default([])
+              | select('search', '^\s*' ~ ha_engine_group ~ ':')
+              | map('regex_replace', '^[^:]*:\s*', '')
+              | list | first | default('')).split() }}
+      when: ha_engine_after | length > 0
+
+    - name: HA | {{ ha_engine_owner }} | Require declared join points to already be in HA  # noqa: name[template]
+      ansible.builtin.assert:
+        that:
+          - ha_engine_after | length == 0 or ha_engine_grp_raw.rc == 0
+          - ha_engine_after | length == 0 or (ha_engine_after | difference(ha_engine_present | default([])) | length == 0)
+        fail_msg: >-
+          ha module {{ ha_engine_owner }} requires
+          {{ (ha_engine_after | difference(ha_engine_present | default([]))) | join(', ') }}
+          registered in group '{{ ha_engine_group }}' before it can deploy
+          (probe_rc={{ ha_engine_grp_raw.rc | default('n/a') }},
+          members_seen={{ ha_engine_present | default([]) | join(' ') | default('none', true) }}).
+          Run the owner role first.
+      when: ha_engine_after | length > 0
+
+    - name: "HA | {{ ha_engine_owner }} | Build members (ha_resources.yml-style: id/type/arguments[/append])"  # noqa: name[template]
+      ansible.builtin.set_fact:
+        ha_engine_members: >-
+          {{ ha_engine_members
+             + [ { 'id': item.id,
+                   'agent': item.type if ':' in item.type else 'ocf:heartbeat:' ~ item.type,
+                   'options': (item.arguments | default(''))
+                              | regex_findall('[A-Za-z_][A-Za-z0-9_]*=[^ ]+')
+                              | map('replace', "'", '')
+                              | map('replace', '"', '')
+                              | unique | list,
+                   'append': item.append | default('') } ] }}
+      loop: "{{ ha_entry.resources }}"
+      loop_control:
+        label: "{{ item.id | default('?') }}"
+
+    - name: HA | {{ ha_engine_owner }} | Probe declared members  # noqa: name[template]
+      ansible.builtin.command:
+        cmd: pcs resource config {{ item.id }} --output-format json
+      loop: "{{ ha_engine_members }}"
+      loop_control:
+        label: "{{ item.id }}"
+      register: ha_engine_probe
+      changed_when: false
+      failed_when: ha_engine_probe.rc not in [0, 1]        # rc=1 => create it
+
+    - name: HA | {{ ha_engine_owner }} | Create missing members, each positioned after its predecessor  # noqa: name[template]
+      vars:
+        _anchor: >-
+          {{ (ha_engine_after | last) if (loop_index0 | int) == 0 and ha_engine_after | length > 0
+             else (ha_engine_members[(loop_index0 | int) - 1].id if (loop_index0 | int) > 0 else '') }}
+      ansible.builtin.command:
+        cmd: >-
+          pcs resource create {{ item.id }} {{ item.agent }} {{ item.options | join(' ') }}
+          {{ item.append | default('') }}
+          {{ '--group ' ~ ha_engine_group if ha_engine_group | length > 0 else '' }}
+          {{ ' --after ' ~ _anchor
+             if ha_engine_group | length > 0 and _anchor | length > 0 else '' }}
+      loop: "{{ ha_engine_members }}"
+      loop_control:
+        index_var: loop_index0
+        label: "{{ item.id }}"
+      when: (ha_engine_probe.results | zip(ha_engine_members) | selectattr('1.id', 'equalto', item.id)
+             | map(attribute='0.rc') | first) == 1
+      changed_when: true
+      # predecessor always exists here: the join-point assert guaranteed the
+      # anchor, earlier members were created earlier in this sequential loop
+
+    - name: HA | {{ ha_engine_owner }} | Diff declared vs live options (from pcs JSON config)  # noqa: name[template]
+      vars:
+        _np: >-
+          {{ ((item.1.stdout | from_json).primitives | first | default({})).instance_attributes
+             | default([]) | map(attribute='nvpairs') | flatten }}
+        _live: >-
+          {{ _np | map(attribute='name') | zip(_np | map(attribute='value'))
+             | map('join', '=') | list }}
+      ansible.builtin.set_fact:
+        ha_engine_diff: >-
+          {{ ha_engine_diff | combine({
+            item.0.id: {
+              'missing': item.0.options | difference(_live),
+              'extra': _live | difference(item.0.options) } }) }}
+      loop: "{{ ha_engine_members | zip(ha_engine_probe.results) | list }}"
+      loop_control:
+        label: "{{ item.0.id }}"
+      when: item.1.rc == 0 and (item.0.options | count > 0)
+
+    - name: HA | {{ ha_engine_owner }} | Report drift (missing = to apply, extra = operator-managed, left alone)  # noqa: name[template]
+      ansible.builtin.debug:
+        msg: >-
+          drift on {{ item.key }}:
+          will-set [{{ item.value.missing | join(' ') }}]
+          {{ '| live-extra (not removed): ' ~ (item.value.extra | join(' '))
+             if item.value.extra | length > 0 else '' }}
+      loop: "{{ ha_engine_diff | default({}) | dict2items
+               | selectattr('value.missing.0', 'defined') | list }}"
+
+    - name: HA | {{ ha_engine_owner }} | Apply drifted options  # noqa: name[template]
+      ansible.builtin.command:
+        cmd: >-
+          pcs resource update {{ item.key }}
+          {{ item.value.missing | map('quote') | join(' ') }}
+      loop: "{{ ha_engine_diff | default({}) | dict2items
+               | selectattr('value.missing.0', 'defined') | list }}"
+      changed_when: true
+      notify: "{{ ha_engine_restart_handler }}"
+
+    - name: HA | {{ ha_engine_owner }} | Wait for declared members to start  # noqa: name[template]
+      ansible.builtin.command:
+        cmd: pcs resource status {{ item.id }}
+      loop: "{{ ha_engine_members }}"
+      loop_control:
+        label: "{{ item.id }}"
+      register: ha_engine_started
+      changed_when: false
+      until: "'Started' in ha_engine_started.stdout or 'Online' in ha_engine_started.stdout"
+      retries: 30
+      delay: 10
