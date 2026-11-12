@@ -4,5 +4,5 @@ nfs_client_packages_to_install:
 nfs_server_packages_to_install:
   - nfs-utils
 nfs_server_services_to_start:
-  - nfsserver
+  - nfs-server
   - rpcbind

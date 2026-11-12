@@ -4,6 +4,11 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.4
 
+* 2026-11-12 - oxedions, Ummon - [pxe_stack] Agama profile (OpenSuSE Leap 16): fix sudo user keeping the installer uid/gid and home (Agama creates a group named after the user, so groupadd and then usermod failed): no ssh access to deployed nodes. The group is now renumbered, home files chowned.
+* 2026-11-12 - oxedions, Ummon - [slurm] Suse: install slurm-slurmctld and slurm-slurmd, BlueBanquise packages ship the daemons (and their services) apart from slurm.
+* 2026-11-12 - oxedions, Ummon - [nfs, pxe_stack] Suse: NFS server service is nfs-server, nfsserver does not exist anymore on OpenSuse Leap 16 (nfs-server also exists on Leap 15).
+* 2026-11-12 - oxedions, Ummon - [http_server] Restore of the distribution default Listen 80 only uncomments the line the role disabled: on Suse it uncommented the commented example, Apache failed with duplicate Listen 80.
+* 2026-11-12 - oxedions, Ummon - [bootstrap] online_bootstrap.sh: OpenSuse Leap 16 uses its python3 (3.13), python311 does not exist and the bootstrap stopped before installing git.
 * 2026-11-10 - oxedions, Ummon - [bootstrap] configure_environment.sh activates the Ansible virtual environment (and PYTHONPATH) in interactive shells only: in ssh commands, Ansible picked the virtual environment python when the management host managed itself (RHEL 10), without system bindings (selinux).
 * 2026-11-10 - oxedions, Ummon - [bootstrap] online_bootstrap.sh: support Ubuntu 26.04 (python3-venv was not installed).
 * 2026-11-10 - oxedions, Ummon - [pxe_stack] Agama profile (OpenSuSE Leap 16): product id is openSUSE_Leap, Leap_16.0 is unknown to the installer.

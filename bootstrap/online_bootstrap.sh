@@ -148,14 +148,18 @@ echo -n " Installing needed dependencies, could take some time..."
   fi
   # OPENSUSE LEAP
   if [ "$ID" == "opensuse-leap" ]; then
-    zypper -n install python3 python3-pip
-    zypper -n install python311 python311-pip git openssh curl
-    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 3
-    update-alternatives --install /usr/bin/python python /usr/bin/python3.11 3
-    update-alternatives --install /usr/bin/pip pip /usr/bin/pip3.11 3
-    update-alternatives --install /usr/bin/pip3 pip3 /usr/bin/pip3.11 3
-    # ln -s /usr/bin/python3.9 /usr/bin/python3
-    # ln -s /usr/bin/pip3.9 /usr/bin/pip3
+    if [[ "$VERSION_ID" == 15.* ]]; then
+      # Leap 15 default python3 is too old for Ansible: use python 3.11
+      zypper -n install python3 python3-pip
+      zypper -n install python311 python311-pip git openssh curl
+      update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 3
+      update-alternatives --install /usr/bin/python python /usr/bin/python3.11 3
+      update-alternatives --install /usr/bin/pip pip /usr/bin/pip3.11 3
+      update-alternatives --install /usr/bin/pip3 pip3 /usr/bin/pip3.11 3
+    else
+      # Leap 16 default python3 (3.13) is recent enough, and has no python311
+      zypper -n install python3 python3-pip git openssh curl
+    fi
   fi
   # DEBIAN
   if [ "$VERSION_ID" == "11" ] || [ "$VERSION_ID" == "12" ] || [ "$VERSION_ID" == "13" ]; then

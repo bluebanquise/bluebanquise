@@ -48,10 +48,16 @@ xxEOFxx
 chmod 700 /root/.ssh
 chmod 600 /root/.ssh/authorized_keys
 {% else %}
-# The sudo user is created by the installer (first user), set its ids and home
-getent group {{ pxe_stack_sudo_user_gid }} > /dev/null || groupadd -g {{ pxe_stack_sudo_user_gid }} {{ pxe_stack_sudo_user }}
+# The sudo user is created by the installer (first user), with a group of
+# the same name: set their ids and home
+if getent group {{ pxe_stack_sudo_user }} > /dev/null; then
+  groupmod -g {{ pxe_stack_sudo_user_gid }} {{ pxe_stack_sudo_user }}
+elif ! getent group {{ pxe_stack_sudo_user_gid }} > /dev/null; then
+  groupadd -g {{ pxe_stack_sudo_user_gid }} {{ pxe_stack_sudo_user }}
+fi
 mkdir -p $(dirname {{ pxe_stack_sudo_user_home }})
 usermod -u {{ pxe_stack_sudo_user_uid }} -g {{ pxe_stack_sudo_user_gid }} -d {{ pxe_stack_sudo_user_home }} -m {{ pxe_stack_sudo_user }}
+chown -R {{ pxe_stack_sudo_user_uid }}:{{ pxe_stack_sudo_user_gid }} {{ pxe_stack_sudo_user_home }}
 mkdir -p {{ pxe_stack_sudo_user_home }}/.ssh
 cat > {{ pxe_stack_sudo_user_home }}/.ssh/authorized_keys << 'xxEOFxx'
 {% for ssh_key in admin_ssh_keys %}
