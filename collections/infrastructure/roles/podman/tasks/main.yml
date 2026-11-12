@@ -14,6 +14,14 @@
   loop_control:
     loop_var: vars_file
 
+- name: Register registry in HA
+  ansible.builtin.include_role:
+    name: bluebanquise.infrastructure.ha_engine
+  vars:
+    ha_engine_declaration: "{{ podman_registry_ha }}"
+    ha_engine_owner: podman
+    ha_engine_start_services: "{{ podman_start_services | default(bb_start_services) | default(true) | bool }}"
+
 - name: podman <|> Include tasks for installing podman
   ansible.builtin.include_tasks: setup.yml
 

@@ -1,4 +1,15 @@
 ---
+# Generic "Restart service registry" handler: restarts the unit with systemd
+# (podman_start_services) or through Pacemaker (bb_ha_start_services).
+# Must stay unconditional and before any task that notifies it.
+- name: registry <|> Load the HA-aware restart handler
+  ansible.builtin.import_role:
+    name: bluebanquise.infrastructure.ha_engine
+    tasks_from: handlers
+  vars:
+    ha_engine_restart_services: [registry]
+    ha_engine_start_services: "{{ podman_start_services | default(bb_start_services) | default(true) | bool }}"
+
 - name: registry <|> Create local directory
   ansible.builtin.file:
     path: "{{ podman_local_registry_dir }}"
@@ -36,7 +47,7 @@
     mode: 0655
   notify:
     - systemd ¦ Reload systemd configuration
-    - service ¦ Restart registry container service
+    - Restart service registry
   tags:
     - service
 

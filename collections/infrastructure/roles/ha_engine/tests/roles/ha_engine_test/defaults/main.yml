@@ -1,0 +1,15 @@
+---
+# create  : register the test groups and their constraints
+# modify  : change kinds, symmetrical, scores and an option (fake=) to test
+#           the delete-and-recreate of constraints and the option drift
+# cleanup : delete the test groups (pacemaker removes their constraints)
+ha_engine_test_phase: create
+
+# Pacemaker node names used by the location constraints (at least 2).
+ha_engine_test_nodes: "{{ groups['ha_management'] | default([]) }}"
+
+# Prefix of every test group and resource: nothing else is touched.
+ha_engine_test_prefix: test-hae
+
+# Run the engine a second time and check the CIB epoch did not change.
+ha_engine_test_check_idempotence: true

@@ -1,0 +1,52 @@
+---
+- name: Service █ Systemd restart of {{ ha_engine_restart_service }}
+  ansible.builtin.service:
+    name: "{{ ha_engine_restart_service }}"
+    state: restarted
+  timeout: "{{ ha_engine_restart_timeout | int }}"
+  register: ha_engine_systemd_restart
+  until: ha_engine_systemd_restart is succeeded
+  retries: "{{ ha_engine_restart_retries | int }}"
+  delay: "{{ ha_engine_restart_delay | int }}"
+  when:
+    - "'service' not in ansible_skip_tags"
+    - ha_engine_start_services | bool
+
+- name: Block █ Pacemaker restart of {{ ha_engine_restart_service }}
+  when:
+    - "'service' not in ansible_skip_tags"
+    - ha_engine_ha_start_services | bool
+  block:
+    - name: Command █ Get Pacemaker resources configuration
+      ansible.builtin.command: pcs resource config --output-format=json
+      register: ha_engine_pcs_config
+      changed_when: false
+      run_once: true
+
+    - name: Set_fact █ Find Pacemaker primitives managing {{ ha_engine_restart_service }}
+      ansible.builtin.set_fact:
+        ha_engine_pcs_resources: >-
+          {{
+            (ha_engine_pcs_config.stdout | default('{}', true) | from_json).primitives | default([]) |
+            selectattr('agent_name', 'defined') |
+            selectattr('agent_name.type', 'defined') |
+            selectattr('agent_name.type', 'match', '^' ~ (ha_engine_restart_service | regex_replace('\.service$', '')) ~ '(?:\.service)?$') |
+            map(attribute='id') | list
+          }}
+      run_once: true
+
+    - name: Fail █ Ensure Pacemaker manages {{ ha_engine_restart_service }}
+      ansible.builtin.fail:
+        msg: Unit {{ ha_engine_restart_service }} is not managed by Pacemaker (no matching primitive found).
+      run_once: true
+      when: ha_engine_pcs_resources | length == 0
+
+    - name: Command █ Restart Pacemaker resource
+      ansible.builtin.command: pcs resource restart {{ item }} --wait={{ ha_engine_restart_timeout | int }}
+      register: ha_engine_pcs_restart
+      until: ha_engine_pcs_restart is succeeded
+      retries: "{{ ha_engine_restart_retries | int }}"
+      delay: "{{ ha_engine_restart_delay | int }}"
+      run_once: true
+      changed_when: true
+      loop: "{{ ha_engine_pcs_resources }}"
