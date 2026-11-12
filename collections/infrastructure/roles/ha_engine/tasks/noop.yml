@@ -1,0 +1,3 @@
+---
+# Empty task file: internal target of tasks/handlers.yml, which includes the
+# role only to load one copy of the generic restart handler per unit.
