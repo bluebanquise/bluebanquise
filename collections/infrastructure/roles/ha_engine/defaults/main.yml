@@ -1,0 +1,29 @@
+---
+# Label used in validation messages and task output (use the role name).
+ha_engine_owner: ha_engine
+
+# Systemd unit to restart (with or without the ".service" suffix).
+# Mandatory, passed as a role parameter in the dependencies of the calling role.
+ha_engine_restart_service: ""
+
+# Restart the unit directly with systemd (non-HA or HA bootstrap).
+ha_engine_start_services: "{{ bb_start_services | default(true) | bool }}"
+
+# Restart the unit through Pacemaker (HA cluster, after bootstrap).
+# The unit must be managed by a Pacemaker primitive, otherwise the handler fails.
+ha_engine_ha_start_services: "{{ bb_ha_start_services | default(false) | bool }}"
+
+# Maximum time (seconds) to wait for the restart to complete, for both
+# systemd (task timeout) and Pacemaker (pcs resource restart --wait).
+ha_engine_restart_timeout: 300
+
+# Number of extra restart attempts after a failure (0 = no retry), and
+# delay (seconds) between two attempts. Each attempt has its own timeout.
+# A systemd restart that hits the timeout is not retried (Ansible task
+# timeout); a Pacemaker restart that hits it is retried.
+ha_engine_restart_retries: 0
+ha_engine_restart_delay: 10
+
+# Name of the caller's handler notified after drifted options are applied;
+# required (validated), the engine never restarts anything by itself.
+ha_engine_restart_handler: "Restart service {{ ha_engine_restart_service }}"

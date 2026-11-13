@@ -1,0 +1,34 @@
+---
+- name: HA | {{ ha_engine_owner }} | Validate declaration  # noqa: name[template]
+  vars:
+    _decl: "{{ ha_engine_declaration | default([]) }}"
+    _res: >-
+      {{ ha_engine_declaration | default([])
+         | map(attribute='resources', default=[]) | flatten }}
+  ansible.builtin.assert:
+    that:
+      - _decl | type_debug == 'list'
+      - _decl | length > 0
+      - ha_engine_restart_handler | default('') | length > 0
+      - _decl | rejectattr('group', 'defined') | list | length == 0
+      - _decl | map(attribute='group', default='') | reject('string') | list | length == 0
+      - _decl | rejectattr('resources', 'defined') | list | length == 0
+      - _res | length > 0
+      - _res | rejectattr('id', 'defined') | list | length == 0
+      - _res | rejectattr('type', 'defined') | list | length == 0
+      - _decl | selectattr('after', 'defined') | map(attribute='after')
+              | reject('sequence') | list | length == 0
+      - _res | map(attribute='id') | unique | list | length == (_res | length)
+    fail_msg: >-
+      [{{ ha_engine_owner }}] ha_engine_declaration must be a non-empty list of
+      {group, resources[, after]} entries (legacy ha_resources.yml shape):
+      group is a string ('' = ungrouped), every resource needs id and type,
+      ids must be unique, and ha_engine_restart_handler is required (got:
+      {{ _decl | map('to_json') | join(', ') }})
+
+- name: HA | {{ ha_engine_owner }} | Register each declared group  # noqa: name[template]
+  ansible.builtin.include_tasks: entry.yml
+  loop: "{{ ha_engine_declaration }}"
+  loop_control:
+    loop_var: ha_entry
+    label: "{{ ha_engine_owner }} -> {{ ha_entry.group | default('(ungrouped)') }}"
