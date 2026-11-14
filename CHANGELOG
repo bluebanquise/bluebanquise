@@ -4,7 +4,7 @@ Format: <date> - <author (username or mail or both)> - [role] <change descriptio
 
 # To 3.4
 
-* 2026-11-14 - oxedions, Ummon - [management] New collection bluebanquise.management (collections/management), for the tools used to run a deployed cluster, each with a small WebUI. First role: bluebanquise_supervision (health probes, drift check, events, maintenance, WebUI, REST API, command line tool, Prometheus exporter), served by the Apache of the http_server role under /webui/supervision/.
+* 2026-11-14 - oxedions, Ummon - [management] New collection bluebanquise.management (collections/management), for the tools used to run a deployed cluster, each with a small WebUI. First role: bluebanquise_supervision (health probes, drift check, events, maintenance, WebUI, REST API, command line tool, Prometheus exporter), served by the Apache of the http_server role under /webui/supervision/. One login for all WebUI packs: users with viewer, operator and admin levels (bluebanquise_webui_users), and an AUDIT line in the journal for every write action.
 * 2026-11-12 - oxedions, Ummon - [pxe_stack] Agama profile (OpenSuSE Leap 16): fix sudo user keeping the installer uid/gid and home (Agama creates a group named after the user, so groupadd and then usermod failed): no ssh access to deployed nodes. The group is now renumbered, home files chowned.
 * 2026-11-12 - oxedions, Ummon - [slurm] Suse: install slurm-slurmctld and slurm-slurmd, BlueBanquise packages ship the daemons (and their services) apart from slurm.
 * 2026-11-12 - oxedions, Ummon - [nfs, pxe_stack] Suse: NFS server service is nfs-server, nfsserver does not exist anymore on OpenSuse Leap 16 (nfs-server also exists on Leap 15).

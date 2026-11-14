@@ -18,7 +18,6 @@ on the files directly: only "probe" needs the probe daemon to be running.
 """
 
 import argparse
-import getpass
 import os
 import pwd
 import sys
@@ -198,13 +197,9 @@ def command_note(settings, hosts, args):
 
 
 def command_hash_password():
-    # Imported here: only this command needs werkzeug
-    from werkzeug.security import generate_password_hash
-    password = getpass.getpass('Password: ')
-    if password != getpass.getpass('Password again: '):
-        print('Error: passwords do not match')
-        sys.exit(1)
-    print(generate_password_hash(password))
+    # Imported here: only this command needs webui_auth (and Flask)
+    import webui_auth
+    webui_auth.hash_password()
 
 
 # ─── main ───────────────────────────────────────────────────────────────────────
@@ -240,7 +235,7 @@ def main():
     sub.add_argument('host')
     sub.add_argument('text', nargs='+')
 
-    subparsers.add_parser('hash-password', help='Hash a password for bluebanquise_supervision_webui_users')
+    subparsers.add_parser('hash-password', help='Hash a password for bluebanquise_webui_users')
 
     args = parser.parse_args()
 

@@ -2,8 +2,9 @@
 """
 bluebanquise-supervision-api: REST API and WebUI daemon of bluebanquise-supervision.
 
-Served by waitress (production WSGI server). Every request needs HTTP basic authentication,
-users and password hashes come from webui_users.yml (bluebanquise_supervision_webui_users).
+Served by waitress (production WSGI server). Every request needs HTTP basic authentication, and
+the level given to each route in ROUTE_LEVELS (webui_auth.py, users of bluebanquise_webui_users).
+Every write action writes an AUDIT line in the journal.
 
 REST API (JSON):
   GET    /api/hosts                       state of all hosts, and counts per state
@@ -16,7 +17,7 @@ REST API (JSON):
   POST   /api/hosts/<host>/notes          {"text": "..."}
 POST and DELETE requests must be sent as JSON (Content-Type: application/json): a browser can
 not send such a request from another web site, which protects the API against cross-site
-requests made with the cached credentials of an admin.
+requests made with the cached credentials of an admin (checked by webui_auth.py).
 
 WebUI (Jinja pages, Bulma, plain JavaScript using the REST API):
   GET /              summary and cluster map
@@ -34,21 +35,42 @@ import argparse
 import logging
 import os
 import sys
+import unicodedata
 import uuid
 
-from flask import Flask, Response, jsonify, render_template, request, send_from_directory
+from flask import Flask, g, jsonify, render_template, request, send_from_directory
 from waitress import serve
-from werkzeug.security import check_password_hash
 
 sys.path.insert(0, '/usr/lib/bluebanquise/bluebanquise-supervision/lib')
 import common  # noqa: E402
+import webui_auth  # noqa: E402
 
 app = Flask(__name__, static_folder=None)
 
-# Loaded once at startup in main(), the role restarts the service when they change
+# Loaded once at startup in main(), the role restarts the service when they change.
+# Users are not loaded here: webui_auth.py reads them at every request.
 settings = None
 hosts = None
-users = None
+
+# Reasons and notes: at most this number of characters
+MAX_TEXT = 1000
+
+# Who can do what: minimum level (viewer, operator, admin) of each route below, by the name of
+# its function. A route missing here is refused to everyone.
+ROUTE_LEVELS = {
+    # REST API
+    'get_hosts': 'operator',
+    'get_host': 'operator',
+    'get_host_events': 'operator',
+    'post_host_probe': 'operator',
+    'post_host_acknowledge': 'operator',
+    'host_maintenance': 'operator',
+    'post_host_note': 'operator',
+    # WebUI
+    'index_page': 'operator',
+    'host_page': 'operator',
+    'static_file': 'viewer',
+}
 
 
 def error(message, code):
@@ -56,33 +78,35 @@ def error(message, code):
     return jsonify({'error': message}), code
 
 
-def result(ok, message):
-    """Answer for actions of common.py, which return (ok, message)."""
-    if not ok:
-        return error(message, 409)
-    logging.info('%s %s by %s: %s', request.method, request.path, request.authorization.username, message)
-    return jsonify({'message': message})
+def result(action, hostname, ok, message, reason):
+    """Audit line, then answer, for actions of common.py, which return (ok, message)."""
+    if ok:
+        webui_auth.audit(action, hostname, 'ok', message + ' (' + reason + ')')
+        return jsonify({'message': message})
+    webui_auth.audit(action, hostname, 'failed', message + ' (' + reason + ')')
+    return error(message, 409)
 
 
 def json_field(name):
-    """Mandatory non-empty text field of the JSON body, or None."""
-    data = request.get_json(silent=True) or {}
-    value = str(data.get(name, '')).strip()
-    if value == '':
+    """Mandatory text field of the JSON body, or None: a string of at most MAX_TEXT characters, on
+    one line. Control characters (new line, tab, escape...) and line separators are refused: the
+    text goes to events and logs, as one line."""
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict) or not isinstance(data.get(name), str):
         return None
+    value = data[name].strip()
+    if value == '' or len(value) > MAX_TEXT:
+        return None
+    for character in value:
+        if unicodedata.category(character) in ('Cc', 'Zl', 'Zp'):
+            return None
     return value
 
 
 @app.before_request
-def authenticate():
-    auth = request.authorization
-    if auth is None or auth.username not in users or not check_password_hash(users[auth.username], auth.password or ''):
-        if auth is not None:
-            logging.warning('Authentication failed for user %r from %s', auth.username, request.remote_addr)
-        return Response('Authentication required\n', 401,
-                        {'WWW-Authenticate': 'Basic realm="bluebanquise-supervision"'})
-    if request.method in ('POST', 'DELETE') and not request.is_json:
-        return error('POST and DELETE requests must be sent as JSON (Content-Type: application/json)', 415)
+def check_user():
+    """User, password and level of every request (webui_auth.py)."""
+    return webui_auth.check_request(ROUTE_LEVELS)
 
 
 # ─── REST API ───────────────────────────────────────────────────────────────────
@@ -123,7 +147,7 @@ def post_host_probe(hostname):
     request_id = str(uuid.uuid4())
     with open(os.path.join(settings['requests_path'], hostname), 'w') as f:
         f.write(request_id)
-    logging.info('Probe of %s requested by %s', hostname, request.authorization.username)
+    webui_auth.audit('probe', hostname, 'ok', 'Probe requested, request id ' + request_id)
     return jsonify({'message': 'Probe of {} requested'.format(hostname), 'request_id': request_id})
 
 
@@ -133,9 +157,9 @@ def post_host_acknowledge(hostname):
         return error('{} is not a supervised host'.format(hostname), 404)
     reason = json_field('reason')
     if reason is None:
-        return error('A reason is needed', 400)
-    ok, message = common.acknowledge(settings, hostname, request.authorization.username, reason)
-    return result(ok, message)
+        return error('A reason is needed (one line of text, at most {} characters)'.format(MAX_TEXT), 400)
+    ok, message = common.acknowledge(settings, hostname, g.user['name'], reason)
+    return result('acknowledge', hostname, ok, message, reason)
 
 
 @app.route('/api/hosts/<hostname>/maintenance', methods=['POST', 'DELETE'])
@@ -144,12 +168,13 @@ def host_maintenance(hostname):
         return error('{} is not a supervised host'.format(hostname), 404)
     reason = json_field('reason')
     if reason is None:
-        return error('A reason is needed', 400)
+        return error('A reason is needed (one line of text, at most {} characters)'.format(MAX_TEXT), 400)
     if request.method == 'POST':
-        ok, message = common.start_maintenance(settings, hostname, request.authorization.username, reason)
+        ok, message = common.start_maintenance(settings, hostname, g.user['name'], reason)
+        return result('maintenance.start', hostname, ok, message, reason)
     else:
-        ok, message = common.stop_maintenance(settings, hostname, request.authorization.username, reason)
-    return result(ok, message)
+        ok, message = common.stop_maintenance(settings, hostname, g.user['name'], reason)
+        return result('maintenance.stop', hostname, ok, message, reason)
 
 
 @app.route('/api/hosts/<hostname>/notes', methods=['POST'])
@@ -158,9 +183,9 @@ def post_host_note(hostname):
         return error('{} is not a supervised host'.format(hostname), 404)
     text = json_field('text')
     if text is None:
-        return error('A text is needed', 400)
-    ok, message = common.add_note(settings, hostname, request.authorization.username, text)
-    return result(ok, message)
+        return error('A text is needed (one line of text, at most {} characters)'.format(MAX_TEXT), 400)
+    ok, message = common.add_note(settings, hostname, g.user['name'], text)
+    return result('note', hostname, ok, message, text)
 
 
 # ─── WebUI ──────────────────────────────────────────────────────────────────────
@@ -173,7 +198,8 @@ def page(template, **values):
         version=settings['version'],
         packs=settings['webui_packs'],
         pack_menu=[],
-        user=request.authorization.username,
+        user=g.user['name'],
+        level=g.user['role'],
         **values,
     )
 
@@ -196,7 +222,7 @@ def static_file(filename):
 
 
 def main():
-    global settings, hosts, users
+    global settings, hosts
     parser = argparse.ArgumentParser(description='bluebanquise-supervision REST API and WebUI daemon')
     parser.add_argument('--settings', default=common.SETTINGS_FILE, help='Settings file')
     parser.add_argument('--log-level', default=None, help='DEBUG, INFO, WARNING, ERROR')
@@ -207,13 +233,10 @@ def main():
     common.setup_logging(args.log_level or settings['log_level'])
     common.drop_privileges(settings['user'])
     hosts = common.load_hosts(settings)
-    users = (common.read_yaml(settings['webui_users_file'], {}) or {}).get('users') or {}
     app.template_folder = os.path.join(settings['webui_path'], 'templates')
 
-    logging.info('bluebanquise-supervision-api starting: %d host(s), %d user(s)', len(hosts), len(users))
-    if len(users) == 0:
-        logging.warning('No user in %s: nobody can log in (see bluebanquise_supervision_webui_users)',
-                        settings['webui_users_file'])
+    logging.info('bluebanquise-supervision-api starting: %d host(s)', len(hosts))
+    webui_auth.start('supervision')
     logging.info('Listening on %s:%d, under %s', settings['api_bind'], settings['api_port'], settings['url_prefix'])
     # waitress writes no access log, every write route logs its own requests
     serve(app, host=settings['api_bind'], port=settings['api_port'], url_prefix=settings['url_prefix'])

@@ -24,6 +24,7 @@ import grp
 import logging
 import os
 import pwd
+import re
 import sys
 import threading
 import yaml
@@ -45,13 +46,40 @@ else:
 
 # ─── settings, logging, privileges ─────────────────────────────────────────────
 
+# Control characters, written as \xNN in logs (new line and carriage return as \n and \r)
+CONTROL_CHARACTERS = re.compile(r'[\x00-\x1f\x7f-\x9f]')
+
+# A log line longer than this is cut: journald splits longer lines (48K bytes by default, and a
+# character takes up to 4 bytes), and the second part would be a line of its own.
+MAX_LOG_LINE = 8000
+
+
+def escape_control_character(match):
+    return '\\x{:02x}'.format(ord(match.group()))
+
+
+class OneLineFormatter(logging.Formatter):
+    """One journal line per log call. Text coming from a host or a user (probe output, drift
+    findings, reasons, URLs...) can never start a line of its own, so it can never forge a line
+    (an AUDIT line of the API for example): control characters are escaped (journald also starts
+    a new line at a NUL character), and long lines are cut."""
+
+    def format(self, record):
+        line = super().format(record)
+        line = line.replace('\n', '\\n').replace('\r', '\\r')
+        line = CONTROL_CHARACTERS.sub(escape_control_character, line)
+        if len(line) > MAX_LOG_LINE:
+            line = line[:MAX_LOG_LINE] + '... (cut)'
+        return line
+
+
 def setup_logging(log_level):
     level = getattr(logging, str(log_level).upper(), logging.INFO)
     root = logging.getLogger()
     root.setLevel(level)
     if not root.handlers:
         handler = logging.StreamHandler(sys.stdout)
-        handler.setFormatter(logging.Formatter(LOG_FORMAT))
+        handler.setFormatter(OneLineFormatter(LOG_FORMAT))
         root.addHandler(handler)
 
 
@@ -79,7 +107,9 @@ def drop_privileges(user):
     if os.getuid() != 0:
         return
     pw = pwd.getpwnam(user)
-    os.setgroups([])
+    # Groups of the user, as systemd gives them to the services: bluebanquise-webui is needed to
+    # read the WebUI users file
+    os.initgroups(user, pw.pw_gid)
     os.setgid(pw.pw_gid)
     os.setuid(pw.pw_uid)
     # ssh reads HOME to find known_hosts, keep it consistent with the new user

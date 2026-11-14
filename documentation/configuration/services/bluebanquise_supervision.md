@@ -93,20 +93,34 @@ Only hosts with at least one probe, or the drift check, are supervised.
 
 ### 3. Create WebUI users
 
-The WebUI and the REST API need HTTP basic authentication. Generate a password hash on a host where
-the role is already installed:
+The WebUI and the REST API need HTTP basic authentication. Users are shared by all the WebUI packs
+of the `bluebanquise.management` collection: one login (the browser asks once), one list of users
+in the inventory. Generate a password hash on a host where the role is already installed:
 
 ```
 bluebanquise-supervision hash-password
 ```
 
-And add users to the inventory (preferably in an Ansible vault):
+And add users to the inventory, once for all packs, for example in `group_vars/all` (preferably in
+an Ansible vault):
 
 ```yaml
-bluebanquise_supervision_webui_users:
-  - name: admin
+bluebanquise_webui_users:
+  - name: jdoe
     password_hash: "scrypt:32768:8:1$..."
+    role: operator
 ```
+
+Each user has a level (`role`), each level can do everything the previous one can:
+
+| Level | Can |
+|-------|-----|
+| `viewer` | Cluster overview, and the summary of every pack. Nothing per host: no Supervision page. |
+| `operator` | Everything about hosts: Supervision pages, probe, acknowledge, maintenance, notes. |
+| `admin` | Everything an operator can, plus inventory editing (later packs). |
+
+The role writes the users to `/etc/bluebanquise/webui/users.yml`, read at every request: a new user
+or a new password works at once, without restarting anything.
 
 ### 4. Serve the WebUI with Apache
 
@@ -296,9 +310,26 @@ All pages are under `http://<management host>/webui/supervision/`, with the pack
 
 Routes below are relative to `http://<management host>/webui/supervision/` (Apache), or to
 `http://127.0.0.1:8091/webui/supervision/` (the daemon itself, from the management host only).
-All routes need HTTP basic authentication. POST and DELETE requests must be sent as JSON
-(`Content-Type: application/json`): browsers can not send such requests from another web site,
-which protects the API from cross-site requests using the cached credentials of an admin.
+All routes need HTTP basic authentication, and the `operator` level (see
+[Create WebUI users](#3-create-webui-users)): a `viewer` gets `403`. POST and DELETE requests must
+be sent as JSON (`Content-Type: application/json`): browsers can not send such requests from
+another web site, which protects the API from cross-site requests using the cached credentials of
+an admin. Texts (reasons, notes) must be one line of at most 1000 characters (no control
+character: new line, tab...).
+
+Each write request writes one `AUDIT` line in the journal of the API daemon:
+
+```
+AUDIT user="jdoe" pack="supervision" action="maintenance.start" hosts="c001" result="ok" job="" message="c001 is now in maintenance (DIMM swap)"
+```
+
+`result` is `ok` (done), `failed` (refused by Supervision, for example stopping a maintenance that
+is not running), or `refused` (level too low, or not sent as JSON: `action` is then the method and
+path of the request). A request refused for a wrong password, a missing reason or an unknown host
+did nothing and has no `AUDIT` line (the first one is logged as a warning).
+
+To read them: `journalctl -u bluebanquise-supervision-api -o cat | grep '^AUDIT'`. Apache's access
+log has, for every request, the address of the browser, the user and the answer code.
 
 | Method | Route | Body | Description |
 |--------|-------|------|-------------|
@@ -337,7 +368,8 @@ For example, to alert on hosts in error: `bluebanquise_supervision_host_state{st
 |------|---------|
 | `/etc/bluebanquise/bluebanquise-supervision/bluebanquise-supervision.yml` | Settings (paths, intervals, timeouts, ports) |
 | `/etc/bluebanquise/bluebanquise-supervision/hosts.yml` | Supervised hosts: probes, actions, BMC credentials, expected values |
-| `/etc/bluebanquise/bluebanquise-supervision/webui_users.yml` | WebUI users and password hashes |
+| `/etc/bluebanquise/webui/users.yml` | WebUI users, levels and password hashes, shared by all WebUI packs |
+| `/etc/bluebanquise/webui/users.d/*.yml` | Service accounts (same format), dropped by the roles owning them |
 | `/usr/lib/bluebanquise/bluebanquise-supervision/` | Shared Python code (`lib/`), probes, WebUI files (`webui/templates/` pages, `webui/static/` CSS and JavaScript) |
 | `<Apache configuration folder>/bluebanquise-webui-supervision.conf` | Apache proxy to the API daemon, under `/webui/supervision/` |
 | `/var/lib/bluebanquise-supervision/cluster/hosts/<host>/probes.yml` | Last probe pass results |
@@ -362,6 +394,13 @@ are done under a per-host lock, so the daemons and the command line tool can wor
 * SSH host keys are not checked nor stored (hosts are reinstalled often, and a changed key must not
   stop the supervision): keep supervision on a trusted management network.
 * `hosts.yml` holds BMC credentials: readable by root and the `bluebanquise-supervision` group only.
+* `/etc/bluebanquise/webui/users.yml` holds the password hashes of WebUI users: readable by root
+  and the `bluebanquise-webui` group only, whose members are the daemon users of the WebUI packs.
+* Each log call of the daemons is one line in the journal: new lines and other control characters
+  are escaped (`\n`, `\x00`...) and lines are cut at 8000 characters, so text coming from a host
+  or from a user can not forge a line, such as an `AUDIT` line.
+* An unknown user name gets its answer as slowly as a wrong password: the response time does not
+  tell which user names exist.
 
 ## Variables
 
@@ -378,7 +417,7 @@ are done under a per-host lock, so the daemons and the command line tool can wor
 | `bluebanquise_supervision_api_port` | `8091` | REST API and WebUI port, on `127.0.0.1` |
 | `bluebanquise_webui_packs` | this pack only | Packs of the WebUI left menu: `name`, `label`. Shared by all packs |
 | `bluebanquise_supervision_exporter_bind` / `_exporter_port` | `127.0.0.1` / `9810` | Prometheus exporter address |
-| `bluebanquise_supervision_webui_users` | `[]` | WebUI users: `name`, `password_hash` |
+| `bluebanquise_webui_users` | `[]` | WebUI users: `name`, `password_hash`, `role` (`viewer`, `operator`, `admin`). Shared by all packs |
 | `bluebanquise_supervision_sudoers_commands` | `[]` | Commands the daemons user may run with sudo |
 | `bluebanquise_supervision_log_level` | `INFO` | Daemons log level |
 | `bluebanquise_supervision_enable_services` | `bb_enable_services`, else `true` | Enable services at boot |

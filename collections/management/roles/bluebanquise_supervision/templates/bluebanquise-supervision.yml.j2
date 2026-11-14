@@ -4,7 +4,6 @@
 
 user: {{ bluebanquise_supervision_user }}
 hosts_file: {{ bluebanquise_supervision_conf_path }}/hosts.yml
-webui_users_file: {{ bluebanquise_supervision_conf_path }}/webui_users.yml
 hosts_data_path: {{ bluebanquise_supervision_hosts_data_path }}
 requests_path: {{ bluebanquise_supervision_requests_path }}
 probes_path: {{ bluebanquise_supervision_lib_path }}/probes
@@ -24,7 +23,7 @@ url_prefix: {{ bluebanquise_supervision_url_prefix }}
 version: {{ bluebanquise_supervision_role_version }}
 # Left menu of the WebUI (bluebanquise_webui_packs)
 webui_packs:
-{% for pack in bluebanquise_webui_packs | default([{'name': 'supervision', 'label': 'Supervision'}]) %}
+{% for pack in bluebanquise_webui_packs | default([{'name': 'supervision', 'label': 'Supervision'}], true) %}
   - name: {{ pack['name'] | to_json }}
     label: {{ pack['label'] | to_json }}
 {% endfor %}

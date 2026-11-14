@@ -1,8 +1,17 @@
+{#
+DUPLICATED FILE: any change made to this file must be made identically in every copy below.
+Copies:
+  collections/management/roles/bluebanquise_supervision/templates/webui_users.yml.j2
+
+Users of every WebUI pack, rendered to /etc/bluebanquise/webui/users.yml by every pack role from
+the same variable, so the file is the same whichever role writes it last.
+#}
 #### Blue Banquise file ####
 ## {{ ansible_managed }}
-# WebUI and REST API users (HTTP basic authentication), name: password hash.
+# Users of every BlueBanquise WebUI pack (bluebanquise_webui_users), read by webui_auth.py at
+# every request. Levels: viewer, operator, admin.
 
 users:
-{% for user in bluebanquise_supervision_webui_users %}
-  {{ user['name'] | to_json }}: {{ user['password_hash'] | to_json }}
+{% for user in bluebanquise_webui_users | default([], true) %}
+  {{ user['name'] | to_json }}: {"password_hash": {{ user['password_hash'] | to_json }}, "role": {{ user['role'] | to_json }}}
 {% endfor %}

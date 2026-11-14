@@ -897,6 +897,42 @@ deprecated: users prefer small modular tools over one big tool). **No shared cod
   (`bluebanquise_supervision_sudoers_commands`); api/exporter are hardened.
 - **API CSRF guard**: POST/DELETE must be `application/json` (a cross-site form can not send it
   without a CORS preflight the API never allows). WebUI inserts host data with `textContent` only.
+- **Users, levels, audit (2026-11-14, `files/lib/webui_auth.py`, DUPLICATED in every pack)**:
+  users from `/etc/bluebanquise/webui/users.yml` (inventory `bluebanquise_webui_users`:
+  name/password_hash/role, every pack role templates the same `templates/webui_users.yml.j2`,
+  also duplicated) then `users.d/*.yml` (service accounts; a users.d user can NOT replace a
+  users.yml one, logged). Checked at EVERY request, on purpose: the file is shared, pack A's role
+  may rewrite it without restarting pack B (no restart handler on it). Parsed again only when
+  a file's (mtime_ns, size) changes (`users_cache`, one tuple assignment for thread safety):
+  without it, one bad entry re-logged its error on every request (static files, 1 s probe poll). Levels viewer < operator
+  < admin; realm `BlueBanquise`. Access is a per-pack table `ROUTE_LEVELS` {route function name:
+  minimum level} checked by `webui_auth.check_request()` in the pack's single `before_request`:
+  401 (user/password) -> 415 (write not JSON) -> 403 (level); a route missing from the table, or
+  with a level not in LEVELS (typo), is refused to EVERYONE (fail closed) - chosen over the design's decorator, which fails open when
+  forgotten or written above `@app.route`. `request.endpoint is None` (404/405) passes through
+  after authentication. `g.user = {'name', 'role'}` for routes and pages. Group
+  `bluebanquise-webui` (root:bluebanquise-webui 0750 dir, 0640 file) holds every pack daemon
+  user; systemd `User=` gives supplementary groups (verified in `/proc/<pid>/status`), and
+  `common.drop_privileges` now uses `os.initgroups` instead of `setgroups([])` so a daemon started
+  by hand as root (debugging) can still read the users file. `audit(action, hosts, result, message)`
+  prints (never logs: log level must not hide it) `AUDIT user="" pack="" action="" hosts=""
+  result="ok|failed|refused" job="" message=""`, every value `json.dumps`-quoted, line cut at
+  8000 chars. `refused` = written by `check_request` itself for writes refused with 403/415
+  (action = method + path). Unknown user names are checked against `UNKNOWN_USER_HASH` (measured
+  before: 6 ms unknown vs 82 ms known, user name enumeration). scrypt costs ~80-110 ms per
+  request on the lab: no cache of successful checks yet (security trade-off, deferred).
+- **Log line forging, found live 2026-11-14**: the audit line itself was escaped, but
+  `common.append_event` logged the user's note raw at INFO; journald split its `\n` into a second
+  entry starting `AUDIT user="oxedions" ... power.off`. journald ALSO starts a new record at a NUL
+  byte and past `LineMax` (48K bytes): both verified live on Debian 13 (code review found them,
+  a `%00` in a URL path reached the 403 warning raw). Fixed at the cause:
+  `common.OneLineFormatter` escapes `\n`/`\r` and every C0/C1 control character (`\xNN`) and
+  cuts lines at 8000 chars, so one log call = one journal line for every daemon (the probe
+  daemon also logs host-originated text: drift findings, action output). Plus the API
+  boundary: reasons/notes must be a JSON string (`null` was stored as "None"), at most 1000
+  chars, without Unicode categories Cc/Zl/Zp (`str.isprintable()` was too strict: it refused
+  the narrow no-break space French typing inserts), and a JSON body that is not an object gets
+  400 (was a 500). Rule for every pack: this formatter, this text rule. Read audits with `journalctl -u <unit> -o cat | grep '^AUDIT'`.
 - **Drift gotchas handled in drift.py** (all were permanent false drifts in `cluster_management`):
   os-release ID `rhel` vs inventory `redhat` (`OS_RELEASE_IDS` map); `distribution_version` "9"
   vs VERSION_ID "9.4" (prefix match); `os_access_control` is a SELinux *mode*

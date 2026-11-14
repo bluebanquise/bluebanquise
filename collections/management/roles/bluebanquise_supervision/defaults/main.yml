@@ -37,12 +37,14 @@ bluebanquise_supervision_api_port: 8091
 #   - name: supervision         # URL is /webui/<name>/
 #     label: Supervision
 
-# WebUI/API users, for HTTP basic authentication. Generate a password hash with:
+# WebUI and REST API users, shared by all WebUI packs: set them once in the inventory, for example
+# in group_vars/all (preferably in an Ansible vault). Levels: viewer (cluster overview and packs
+# summaries only), operator (everything about hosts), admin. Generate a password hash with:
 #   bluebanquise-supervision hash-password
-# bluebanquise_supervision_webui_users:
-#   - name: admin
+# bluebanquise_webui_users:
+#   - name: jdoe
 #     password_hash: "scrypt:32768:8:1$..."
-bluebanquise_supervision_webui_users: []
+#     role: operator
 
 # Prometheus exporter daemon
 bluebanquise_supervision_exporter_bind: 127.0.0.1
